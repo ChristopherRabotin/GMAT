@@ -101,11 +101,17 @@ public:
     virtual std::string GetParameterTypeString(const Integer id) const;
 
     virtual std::string GetStringParameter(const Integer id) const;
-    virtual bool        SetStringParameter(const Integer id, 
+    virtual std::string GetStringParameter(const std::string &value) const;
+    virtual bool        SetStringParameter(const Integer id,
                                            const std::string &value);
+    virtual bool        SetStringParameter(const std::string &label,
+                                           const std::string &value);
+    
+    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
+    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
 
 protected:
-    
+
     DerivativeList * derivatives;
     Integer          forceCount;
     Integer          numForces;
@@ -116,6 +122,18 @@ protected:
     StringArray forceTypeNames;
     std::vector<PhysicalModel *> forceList; //loj: 2/11/04 added
     
+    enum
+    {
+        POINT_MASS = PhysicalModelParamCount,
+        FULL_FIELD,
+        DRAG,
+        MAG_FIELD,
+        FORCE_LIST,
+        ForceModelParamCount,
+    };
+    
+    static const std::string PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount];
+    static const Gmat::ParameterType PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount];
 };
 
 #endif  // ForceModel_hpp

@@ -41,48 +41,48 @@
 //                             absolute error calculations
 //
 //                           : 09/24/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - Updated style using GMAT cpp style guide//
+//                              Changes:
+//                                - Updated style using GMAT cpp style guide//
 //
 //                           : 10/15/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - All double types to Real types
-//				  - All primitive int types to Integer types
-//				  - virtual char* GetParameterName(const int parm) const to
-//				    virtual std::string GetParameterName(const int parm) const
-//				  - Changed GetParameterName() from if statements to switch statements
-//				Removals:
-//				  - static Real parameterUndefined
-//				  - SetUndefinedValue()
-//				  - ParameterCount()
-//				  - GetParameter()
-//				  - SetParameter()
-//				Additions:
-//				  - PARAMTER_TEXT[]
-//				  - PARAMETER_TYPE[]
-//				  - GetParameterText()
-//				  - GetParameterID()
-//				  - GetParameterType()
-//				  - GetParameterTypeString()
-//				  - GetRealParameter()
-//				  - SetRealParameter()
+//                              Changes:
+//                                - All double types to Real types
+//                                - All primitive int types to Integer types
+//                                - virtual char* GetParameterName(const int parm) const to
+//                                  virtual std::string GetParameterName(const int parm) const
+//                                - Changed GetParameterName() from if statements to switch statements
+//                              Removals:
+//                                - static Real parameterUndefined
+//                                - SetUndefinedValue()
+//                                - ParameterCount()
+//                                - GetParameter()
+//                                - SetParameter()
+//                              Additions:
+//                                - PARAMTER_TEXT[]
+//                                - PARAMETER_TYPE[]
+//                                - GetParameterText()
+//                                - GetParameterID()
+//                                - GetParameterType()
+//                                - GetParameterTypeString()
+//                                - GetRealParameter()
+//                                - SetRealParameter()
 //
 //                           : 10/20/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - Fixed format.
-//				  - parameterCount to PhysicalModelParamCount.
-//				Removals:
-//				  - GetParameterName()
+//                              Changes:
+//                                - Fixed format.
+//                                - parameterCount to PhysicalModelParamCount.
+//                              Removals:
+//                                - GetParameterName()
 //
 //                           : 10/23/2003 - D. Conway, Thinking Systems, Inc. &
-//				            W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - Changed constructor from PhysicalModel::PhysicalModel(void) to
-//				    PhysicalModel(Gmat::ObjectType typeId, const std::string &typeStr,
-//				    const std::string &nomme = "")
-//				  - Added parameterCount = 1 in constructors
-//				  - In SetErrorThreshold(), changed statement from relativeErrorThreshold = fabs(thold);
-//				    to relativeErrorThreshold = (thold >= 0.0 ? thold : -thold);
+//                                          W. Waktola, Missions Applications Branch
+//                              Changes:
+//                                - Changed constructor from PhysicalModel::PhysicalModel(void) to
+//                                  PhysicalModel(Gmat::ObjectType typeId, const std::string &typeStr,
+//                                  const std::string &nomme = "")
+//                                - Added parameterCount = 1 in constructors
+//                                - In SetErrorThreshold(), changed statement from relativeErrorThreshold = fabs(thold);
+//                                  to relativeErrorThreshold = (thold >= 0.0 ? thold : -thold);
 //
 // **************************************************************************
 
@@ -137,9 +137,10 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
     relativeErrorThreshold      (0.10),
     solarSystem                 (NULL)
 {
-    parameterCount = 1;
+    //loj: 3/19/04 parameterCount = 1;
+    parameterCount = PhysicalModelParamCount;
 }
-	     
+             
 //------------------------------------------------------------------------------
 // PhysicalModel::~PhysicalModel(void)
 //------------------------------------------------------------------------------
@@ -174,7 +175,7 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
     relativeErrorThreshold      (pm.relativeErrorThreshold),
     solarSystem                 (pm.solarSystem)
 {
-     if (pm.modelState != NULL) 
+    if (pm.modelState != NULL) 
     {
         modelState = new Real[dimension];
         if (modelState != NULL) 
@@ -196,7 +197,8 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
     else
         deriv = NULL;
 
-    parameterCount = 1;
+    //loj: 3/19/04 parameterCount = 1;
+    parameterCount = PhysicalModelParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -258,14 +260,20 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
 //------------------------------------------------------------------------------
 std::string PhysicalModel::GetParameterText(const Integer id) const
 {
-    switch (id)
-    {
-        case epochParameter:        // Intentional fall-through
-        case elapsedTimeParameter:
-            return PhysicalModel::PARAMETER_TEXT[id];
-        default:
-            return GmatBase::GetParameterText(id);
-    }
+    if (id >= EPOCH && id < PhysicalModelParamCount)
+        return PARAMETER_TEXT[id];
+    else
+        return GmatBase::GetParameterText(id);
+
+    //loj: 3/18/04
+//      switch (id)
+//      {
+//          case EPOCH:        // Intentional fall-through
+//          case ELAPSED_SECS:
+//              return PhysicalModel::PARAMETER_TEXT[id];
+//          default:
+//              return GmatBase::GetParameterText(id);
+//      }
 }
 
 //------------------------------------------------------------------------------
@@ -277,7 +285,7 @@ std::string PhysicalModel::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer PhysicalModel::GetParameterID(const std::string &str) const
 {
-    for (int i = 0; i < PhysicalModelParamCount; i++)
+    for (int i = EPOCH; i < PhysicalModelParamCount; i++)
     {
         if (str == PhysicalModel::PARAMETER_TEXT[i])
             return i;
@@ -294,14 +302,20 @@ Integer PhysicalModel::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType PhysicalModel::GetParameterType(const Integer id) const
 {
-    switch (id)
-    {
-        case epochParameter:
-        case elapsedTimeParameter:
-            return PhysicalModel::PARAMETER_TYPE[id];
-        default:
-            return GmatBase::GetParameterType(id);
-    }
+    if (id >= EPOCH && id < PhysicalModelParamCount)
+        return PARAMETER_TYPE[id];
+    else
+        return GmatBase::GetParameterType(id);
+
+    //loj: 3/18/04
+//      switch (id)
+//      {
+//          case EPOCH:
+//          case ELAPSED_SECS:
+//              return PhysicalModel::PARAMETER_TYPE[id];
+//          default:
+//              return GmatBase::GetParameterType(id);
+//      }
 }
 
 //------------------------------------------------------------------------------
@@ -313,14 +327,20 @@ Gmat::ParameterType PhysicalModel::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string PhysicalModel::GetParameterTypeString(const Integer id) const
 {
-    switch (id)
-    {
-        case epochParameter:
-        case elapsedTimeParameter:
-            return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
-        default:
-            return GmatBase::GetParameterTypeString(id);
-    }
+    if (id >= EPOCH && id < PhysicalModelParamCount)
+        return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+    else
+        return GmatBase::GetParameterTypeString(id);
+
+    //loj: 3/18/04
+//      switch (id)
+//      {
+//          case EPOCH:
+//          case ELAPSED_SECS:
+//              return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+//          default:
+//              return GmatBase::GetParameterTypeString(id);
+//      }
 }
 
 //------------------------------------------------------------------------------
@@ -332,9 +352,9 @@ std::string PhysicalModel::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 Real PhysicalModel::GetRealParameter(const Integer id) const
 {
-    if (id == epochParameter)
+    if (id == EPOCH)
         return epoch + elapsedTime / 86400.0;
-    if (id == elapsedTimeParameter)
+    if (id == ELAPSED_SECS)
         return elapsedTime;
 
     return GmatBase::GetRealParameter(id);
@@ -349,12 +369,12 @@ Real PhysicalModel::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real PhysicalModel::SetRealParameter(const Integer id, const Real value)
 {
-    if (id == elapsedTimeParameter) 
+    if (id == ELAPSED_SECS) 
     {
         elapsedTime = value;
         return elapsedTime;
     }
-    if (id == epochParameter) 
+    if (id == EPOCH) 
     {
         epoch = value;
         elapsedTime = 0.0;
@@ -412,7 +432,7 @@ bool PhysicalModel::Initialize(void)
 Real PhysicalModel::GetErrorThreshold(void) const
 {
     return relativeErrorThreshold;
-	// DJC: Should relativeErrorThreshold be added to the list of parameters? :
+        // DJC: Should relativeErrorThreshold be added to the list of parameters? :
 }
 
 //------------------------------------------------------------------------------
@@ -421,7 +441,7 @@ Real PhysicalModel::GetErrorThreshold(void) const
 /**
  * Sets the threshold for switching between relative and absolute error
  *
- * @param thold		The new threshold value
+ * @param thold         The new threshold value
  */
 //------------------------------------------------------------------------------
 bool PhysicalModel::SetErrorThreshold(const Real thold)
@@ -484,7 +504,7 @@ Real * PhysicalModel::GetState(void)
 /**
  * Used to set the elements of the state array
  *
- * @param st	Array of data containing the desired values for the state elements
+ * @param st    Array of data containing the desired values for the state elements
  */
 //------------------------------------------------------------------------------
 void PhysicalModel::SetState(const Real * st)
@@ -514,7 +534,7 @@ const Real* PhysicalModel::GetDerivativeArray(void)
 /**
  * Used to increment the internal time counter
  *
- * @param dt	Amount of time to increment by (usually in seconds)
+ * @param dt    Amount of time to increment by (usually in seconds)
  */
 //------------------------------------------------------------------------------
 void PhysicalModel::IncrementTime(Real dt)
@@ -562,18 +582,18 @@ void PhysicalModel::SetTime(Real t)
  * parameters, along with the time interval dt passed in as a parameter, to 
  * calculate the derivative information at time \f$t=t_0+t_{elapsed}+dt\f$.
  *
- * @param dt      	Additional time increment for the derivatitive 
- *           		calculation; defaults to 0.
- * @param state 	Pointer to the current state data.  This can differ
- *           		from the PhysicalModel state if the subscribing
- *      			integrator samples other state values during 
- *     				propagation.  (For example, the Runge-Kutta integrators 
- *           		do this during the stage calculations.)
- * @param order   	The order of the derivative to be taken (first 
- *  				derivative, second derivative, etc)
+ * @param dt            Additional time increment for the derivatitive 
+ *                      calculation; defaults to 0.
+ * @param state         Pointer to the current state data.  This can differ
+ *                      from the PhysicalModel state if the subscribing
+ *                              integrator samples other state values during 
+ *                              propagation.  (For example, the Runge-Kutta integrators 
+ *                      do this during the stage calculations.)
+ * @param order         The order of the derivative to be taken (first 
+ *                              derivative, second derivative, etc)
  *
- * @return			true if the call succeeds, false on failure.  This default 
- *            		implementation always returns false.
+ * @return                      true if the call succeeds, false on failure.  This default 
+ *                      implementation always returns false.
  */
 //------------------------------------------------------------------------------
 bool PhysicalModel::GetDerivatives(Real * state, Real dt, Integer order)
@@ -623,11 +643,11 @@ bool PhysicalModel::GetDerivatives(Real * state, Real dt, Integer order)
  * discontinuities (for example, shadow crossings for spacecraft orbital models) 
  * without hanging.
  *    
- * @param diffs  	Array of differences calculated by the integrator.  This array 
- *               	must be the same size as the state vector
- * @param answer 	Candidate new state from the integrator
+ * @param diffs         Array of differences calculated by the integrator.  This array 
+ *                      must be the same size as the state vector
+ * @param answer        Candidate new state from the integrator
  *
- * @returns 		The maximum calculated error
+ * @returns             The maximum calculated error
  */
 //------------------------------------------------------------------------------
 Real PhysicalModel::EstimateError(Real * diffs, Real * answer) const
@@ -673,14 +693,14 @@ Real PhysicalModel::EstimateError(Real * diffs, Real * answer) const
  * GetComponentMap(map, 1).  The array, map, that is returned will contain these
  * data: (3, 4, 5, -1, -1, -1).
  *
- *  @param map		Array that will contain the mapping of the elements
- *  @param order	The order for the mapping (1 maps 1st derivatives to their base 
- *                	components, 2 maps 2nd derivatives, and so on)
+ *  @param map          Array that will contain the mapping of the elements
+ *  @param order        The order for the mapping (1 maps 1st derivatives to their base 
+ *                      components, 2 maps 2nd derivatives, and so on)
  *
- *  @return 		Returns true if a mapping was made, false otherwise.  A false return 
- *          		value can be used to indicate that the requested map is not 
- *          		available, and verefore that the model may not be appropriate for the
- *          		requested operations.
+ *  @return             Returns true if a mapping was made, false otherwise.  A false return 
+ *                      value can be used to indicate that the requested map is not 
+ *                      available, and verefore that the model may not be appropriate for the
+ *                      requested operations.
  */
 //------------------------------------------------------------------------------
 bool PhysicalModel::GetComponentMap(Integer * map, Integer order) const

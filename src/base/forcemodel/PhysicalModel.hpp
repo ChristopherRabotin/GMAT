@@ -41,45 +41,45 @@
 //                             absolute erro
 //
 //                           : 09/24/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - Updated style using GMAT cpp style guide
+//                              Changes:
+//                                - Updated style using GMAT cpp style guide
 //
 //                           : 10/15/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - All double types to Real types
-//				  - All primitive int types to Integer types
-//				  - virtual char* GetParameterName(const int parm) const to
-//				    virtual std::string GetParameterName(const int parm) const
-//				Removals:
-//				  - static Real parameterUndefined
-//				  - SetUndefinedValue()
-//				  - ParameterCount()
-//				  - GetParameter()
-//				  - SetParameter()
-//				Additions:
-//				  - PARAMTER_TEXT[]
-//				  - PARAMETER_TYPE[]
-//				  - GetParameterText()
-//				  - GetParameterID()
-//				  - GetParameterType()
-//				  - GetParameterTypeString()
-//				  - GetRealParameter()
-//				  - SetRealParameter()
+//                              Changes:
+//                                - All double types to Real types
+//                                - All primitive int types to Integer types
+//                                - virtual char* GetParameterName(const int parm) const to
+//                                  virtual std::string GetParameterName(const int parm) const
+//                              Removals:
+//                                - static Real parameterUndefined
+//                                - SetUndefinedValue()
+//                                - ParameterCount()
+//                                - GetParameter()
+//                                - SetParameter()
+//                              Additions:
+//                                - PARAMTER_TEXT[]
+//                                - PARAMETER_TYPE[]
+//                                - GetParameterText()
+//                                - GetParameterID()
+//                                - GetParameterType()
+//                                - GetParameterTypeString()
+//                                - GetRealParameter()
+//                                - SetRealParameter()
 //
 //                           : 10/20/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - Fixed format.
-//				  - parameterCount to PhysicalModelParamCount.
-//				Removals:
-//				  - GetParameterName()
+//                              Changes:
+//                                - Fixed format.
+//                                - parameterCount to PhysicalModelParamCount.
+//                              Removals:
+//                                - GetParameterName()
 //
 //                           : 10/23/2003 - D. Conway, Thinking Systems, Inc. &
-//				            W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - Changed constructor from PhysicalModel::PhysicalModel(void) to
-//				    PhysicalModel(Gmat::ObjectType typeId, const std::string &typeStr,
-//				    const std::string &nomme = "")
-//				  - Added parameterCount = 1 in constructors
+//                                          W. Waktola, Missions Applications Branch
+//                              Changes:
+//                                - Changed constructor from PhysicalModel::PhysicalModel(void) to
+//                                  PhysicalModel(Gmat::ObjectType typeId, const std::string &typeStr,
+//                                  const std::string &nomme = "")
+//                                - Added parameterCount = 1 in constructors
 //
 // **************************************************************************
 /** 
@@ -175,8 +175,8 @@ protected:
     /// Parameter IDs
     enum
     {
-        epochParameter = 0,
-        elapsedTimeParameter,
+        EPOCH = 0,
+        ELAPSED_SECS,
         PhysicalModelParamCount  // Count of the parameters for this class (including all of its ancestors)
     };
 

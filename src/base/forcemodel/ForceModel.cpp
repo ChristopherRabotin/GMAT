@@ -47,8 +47,34 @@
 // **************************************************************************
 
 #include "ForceModel.hpp"
+#include "PointMassForce.hpp"
+#include "MessageInterface.hpp"
 
 #define normType -2
+
+//---------------------------------
+// static data
+//---------------------------------
+
+const std::string
+ForceModel::PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount] =
+{
+    "PointMass",
+    "FullField",
+    "Drag",        //loj: 3/19/04 This is also in PropSetup. Where do we want to handle?
+    "MagField",
+    "ForceList",
+};
+
+const Gmat::ParameterType
+ForceModel::PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount] =
+{
+    Gmat::STRING_TYPE,
+    Gmat::STRING_TYPE,
+    Gmat::STRING_TYPE,
+    Gmat::STRING_TYPE,
+    Gmat::STRINGARRAY_TYPE,
+};
 
 //---------------------------------
 // public
@@ -85,6 +111,7 @@ ForceModel::ForceModel(const std::string &nomme) :
 {
     numForces = 0;
     dimension = 6;
+    parameterCount = ForceModelParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -213,6 +240,8 @@ PhysicalModel* ForceModel::GetForce(Integer index)
 //------------------------------------------------------------------------------
 void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
 {
+    MessageInterface::ShowMessage("ForceModel::AddForce() entered\n");
+    
     if (pPhysicalModel == NULL)
         return;
 
@@ -611,100 +640,237 @@ Real ForceModel::EstimateError(Real *diffs, Real *answer) const
 }
 
 
+//------------------------------------------------------------------------------
+// Integer GetParameterCount(void) const
+//------------------------------------------------------------------------------
 Integer ForceModel::GetParameterCount(void) const
 {
-    Integer count = parameterCount;
+    return parameterCount;
+
+    //loj: 3/19/04 commented out
+//      Integer count = parameterCount;
     
-    DerivativeList *current = derivatives;
-    while (current) 
-    {
-//        count += current->GetDerivative()->GetParameterCount() + 1;
-        ++count;
-        current = current->Next();
-    }
+//      DerivativeList *current = derivatives;
+//      while (current) 
+//      {
+//  //        count += current->GetDerivative()->GetParameterCount() + 1;
+//          ++count;
+//          current = current->Next();
+//      }
     
-    return count;
+//      return count;
 }
 
 
 // Access methods 
+//------------------------------------------------------------------------------
+// std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
 std::string ForceModel::GetParameterText(const Integer id) const
 {
-    Integer count = parameterCount + forceCount, i;
+    if (id >= PhysicalModelParamCount && id < ForceModelParamCount)
+        return PARAMETER_TEXT[id - PhysicalModelParamCount];
+    else
+        return PhysicalModel::GetParameterText(id);
+
+    //loj: 3/19/04 commented out
+//      Integer count = parameterCount + forceCount, i;
       
-    if ((id < count) && (id > 0)) {
-        if (id >= parameterCount) {
-            DerivativeList *current = derivatives;
-            for (i = parameterCount; i < id; ++i)
-                current = current->Next();
-            return current->GetDerivative()->GetTypeName();
-        }
-    }
+//      if ((id < count) && (id > 0)) {
+//          if (id >= parameterCount) {
+//              DerivativeList *current = derivatives;
+//              for (i = parameterCount; i < id; ++i)
+//                  current = current->Next();
+//              return current->GetDerivative()->GetTypeName();
+//          }
+//      }
     
-    return PhysicalModel::GetParameterText(id);
+//      return PhysicalModel::GetParameterText(id);
 }
 
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
 Integer ForceModel::GetParameterID(const std::string &str) const
 {
-    Integer i;
-    Integer retval = PhysicalModel::GetParameterID(str);
-    if (retval == -1) {
-        // could be a member force
-        i = parameterCount;
-        DerivativeList *current = derivatives;
-        while (current) {
-            if (current->GetDerivative()->GetTypeName() == str) {
-                retval = i;
-                break;
-            }
-            current = current->Next();
-            ++i;
-        }
+    for (int i = PhysicalModelParamCount; i < ForceModelParamCount; i++)
+    {
+        if (str == PARAMETER_TEXT[i - PhysicalModelParamCount])
+            return i;
     }
-    return retval;
+
+    return PhysicalModel::GetParameterID(str);
+    
+    //loj: 3/19/04 commented out
+//      Integer i;
+//      Integer retval = PhysicalModel::GetParameterID(str);
+//      if (retval == -1) {
+//          // could be a member force
+//          i = parameterCount;
+//          DerivativeList *current = derivatives;
+//          while (current) {
+//              if (current->GetDerivative()->GetTypeName() == str) {
+//                  retval = i;
+//                  break;
+//              }
+//              current = current->Next();
+//              ++i;
+//          }
+//      }
+//      return retval;
 }
 
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
 Gmat::ParameterType ForceModel::GetParameterType(const Integer id) const
 {
-    if ((id >= parameterCount) && (id < parameterCount + forceCount)) 
-        return Gmat::OBJECT_TYPE;
-    return PhysicalModel::GetParameterType(id);
+    if (id >= PhysicalModelParamCount && id < ForceModelParamCount)
+        return PARAMETER_TYPE[id - PhysicalModelParamCount];
+    else
+        return PhysicalModel::GetParameterType(id);
+
+    //loj: 3/19/04 commented out
+//      if ((id >= parameterCount) && (id < parameterCount + forceCount)) 
+//          return Gmat::OBJECT_TYPE;
+//      return PhysicalModel::GetParameterType(id);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
 std::string ForceModel::GetParameterTypeString(const Integer id) const
 {
-    if ((id > parameterCount) && (id < parameterCount + forceCount)) 
-        return PARAM_TYPE_STRING[Gmat::OBJECT_TYPE];
-    return PhysicalModel::GetParameterTypeString(id);
+
+    if (id >= PhysicalModelParamCount && id < ForceModelParamCount)
+        return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - PhysicalModelParamCount)];
+    else
+        return PhysicalModel::GetParameterTypeString(id);
+
+    //loj: 3/19/04 commented out
+//      if ((id > parameterCount) && (id < parameterCount + forceCount)) 
+//          return PARAM_TYPE_STRING[Gmat::OBJECT_TYPE];
+//      return PhysicalModel::GetParameterTypeString(id);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
 std::string ForceModel::GetStringParameter(const Integer id) const
 {
-    Integer count = parameterCount + forceCount, i;
-      
-    if ((id < count) && (id > 0)) {
-        if (id >= parameterCount) {
-            DerivativeList *current = derivatives;
-            for (i = parameterCount; i < id; ++i)
-                current = current->Next();
-            return current->GetDerivative()->GetTypeName();
-        }
+    switch (id)
+    {
+    case POINT_MASS:
+        //loj: what should we return here?
+        return "PointMassForce";
+    case FULL_FIELD:
+        return "TBD-FullFieldForce";
+    case DRAG:
+        return "TBD-DragForce";
+    case MAG_FIELD:
+        return "TBD-MagFieldForce";
+    default:
+        return PhysicalModel::GetStringParameter(id);
     }
+
+    //loj: 3/19/04 commented out
+//      Integer count = parameterCount + forceCount, i;
+      
+//      if ((id < count) && (id > 0)) {
+//          if (id >= parameterCount) {
+//              DerivativeList *current = derivatives;
+//              for (i = parameterCount; i < id; ++i)
+//                  current = current->Next();
+//              return current->GetDerivative()->GetTypeName();
+//          }
+//      }
     
-    return PhysicalModel::GetStringParameter(id);
+//      return PhysicalModel::GetStringParameter(id);
 
 }
 
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string ForceModel::GetStringParameter(const std::string &label) const
+{
+    return GetStringParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
 bool ForceModel::SetStringParameter(const Integer id, const std::string &value)
 {
-    Integer count = parameterCount + forceCount;
-      
-    if ((id < count) && (id > 0)) {
-        if (id >= parameterCount) {     // Cannot set these yet
+    MessageInterface::ShowMessage("ForceModel::SetStringParameter() id = %d, value = %s\n",
+                                  id, value.c_str());
+    switch (id)
+    {
+    case POINT_MASS:
+        {
+            PhysicalModel *pmf = new PointMassForce();
+            if (pmf != NULL)
+            {
+                if (pmf->SetStringParameter("Body", value))
+                {
+                    AddForce(pmf);
+                    return true;
+                }
+            }
             return false;
         }
+    case FULL_FIELD:
+        // build 3
+        return false;
+    case DRAG:
+        // build 3
+        return false;
+    case MAG_FIELD:
+        // build 3
+        return false;
+    default:
+        return PhysicalModel::SetStringParameter(id, value);
     }
+
+    //loj: 3/19/04 commented out
+//      Integer count = parameterCount + forceCount;
+      
+//      if ((id < count) && (id > 0)) {
+//          if (id >= parameterCount) {     // Cannot set these yet
+//              return false;
+//          }
+//      }
     
-    return PhysicalModel::SetStringParameter(id, value);
+//      return PhysicalModel::SetStringParameter(id, value);
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label,const std::string &value)
+//------------------------------------------------------------------------------
+bool ForceModel::SetStringParameter(const std::string &label,
+                                    const std::string &value)
+{
+    return SetStringParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const Integer id) const
+//------------------------------------------------------------------------------
+const StringArray& ForceModel::GetStringArrayParameter(const Integer id) const
+{
+    switch (id)
+    {
+    case FORCE_LIST:
+        return forceTypeNames;
+    default:
+        return PhysicalModel::GetStringArrayParameter(id);
+    }
+}
+
+//------------------------------------------------------------------------------
+// StringArray& GetStringArrayParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+const StringArray& ForceModel::GetStringArrayParameter(const std::string &label) const
+{
+    return GetStringArrayParameter(GetParameterID(label));
+}

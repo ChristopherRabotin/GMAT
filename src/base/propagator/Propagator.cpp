@@ -34,37 +34,37 @@
 //                             Updates for changes in parm strings
 //
 //                           : 09/23/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - Updated style using GMAT cpp style guide
+//                              Changes:
+//                                - Updated style using GMAT cpp style guide
 //
 //                           : 10/09/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - virtual char* GetParameterName(const int parm) const to
-//				    virtual std::string GetParameterName(const int parm) const
-//				  - GetParameterName() from if statements to switch statements
-//				Additions:
-//				  - GetParameterType()
-//				  - GetParameterText()
-//				  - GetParameterTypeString()
-//				  - GetRealParameter()
-//				  - SetRealParameter()
-//				Removals:
-//				  - GetParameter()
-//				  - SetParameter()
-//				  - ParameterCount()
+//                              Changes:
+//                                - virtual char* GetParameterName(const int parm) const to
+//                                  virtual std::string GetParameterName(const int parm) const
+//                                - GetParameterName() from if statements to switch statements
+//                              Additions:
+//                                - GetParameterType()
+//                                - GetParameterText()
+//                                - GetParameterTypeString()
+//                                - GetRealParameter()
+//                                - SetRealParameter()
+//                              Removals:
+//                                - GetParameter()
+//                                - SetParameter()
+//                                - ParameterCount()
 //
 //                           : 10/15/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - All double types to Real types
-//				  - All primitive int types to Integer types
+//                              Changes:
+//                                - All double types to Real types
+//                                - All primitive int types to Integer types
 //                - STEP_SIZE_PARAMETER to stepSizeParameter
-//				Removals:
-//				  - static Real parameterUndefined
-//				  - SetUndefinedValue()
-//				  - GetParameterName(), replaced by GetParameterText()
-//				Additions:
-//				  - PARAMTER_TEXT[]
-//				  - PARAMETER_TYPE[]
+//                              Removals:
+//                                - static Real parameterUndefined
+//                                - SetUndefinedValue()
+//                                - GetParameterName(), replaced by GetParameterText()
+//                              Additions:
+//                                - PARAMTER_TEXT[]
+//                                - PARAMETER_TYPE[]
 //
 // **************************************************************************
 
@@ -72,6 +72,7 @@
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "PhysicalModel.hpp"
+#include "MessageInterface.hpp"
 
 //---------------------------------
 // static data
@@ -79,7 +80,9 @@
 const std::string
 Propagator::PARAMETER_TEXT[PropagatorParamCount] =
 {
-    "Step Size (sec)"
+    //loj: 3/18/04 field name should not have blank spaces
+    //"Step Size (sec)"
+    "StepSize"
 };
 
 const Gmat::ParameterType
@@ -103,14 +106,14 @@ Propagator::PARAMETER_TYPE[PropagatorParamCount] =
  */
 //------------------------------------------------------------------------------
 Propagator::Propagator(const std::string &typeStr,
-					   const std::string &nomme) :
-GmatBase            (Gmat::PROPAGATOR, typeStr, nomme),
-stepSize            (60.0),
-initialized         (false),
-inState             (NULL),
-outState            (NULL),
-dimension           (0),
-physicalModel       (NULL)
+                       const std::string &nomme)
+    : GmatBase(Gmat::PROPAGATOR, typeStr, nomme),
+      stepSize            (60.0),
+      initialized         (false),
+      inState             (NULL),
+      outState            (NULL),
+      dimension           (0),
+      physicalModel       (NULL)
 {
     // GmatBase data
     parameterCount = PropagatorParamCount;
@@ -135,14 +138,14 @@ Propagator::~Propagator(void)
  * The copy constructor
  */
 //------------------------------------------------------------------------------
-Propagator::Propagator(const Propagator& p) :
-GmatBase            (p),
-stepSize            (p.stepSize),
-initialized         (false),
-inState             (NULL),
-outState            (NULL),
-dimension           (p.dimension),
-physicalModel       (NULL)
+Propagator::Propagator(const Propagator& p)
+    : GmatBase            (p),
+      stepSize            (p.stepSize),
+      initialized         (false),
+      inState             (NULL),
+      outState            (NULL),
+      dimension           (p.dimension),
+      physicalModel       (NULL)
 {
     // GmatBase data
     parameterCount = PropagatorParamCount;
@@ -172,38 +175,44 @@ Propagator& Propagator::operator=(const Propagator& p)
 }
 
 //------------------------------------------------------------------------------
-// std::string Propagator::GetParameterText(const Integer id)
+// std::string Propagator::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-std::string Propagator::GetParameterText(const Integer id)
+std::string Propagator::GetParameterText(const Integer id) const
 {
-    switch (id)
-    {
-        case stepSizeParameter:
-            return Propagator::PARAMETER_TEXT[id];
-        default:
-            return GmatBase::GetParameterText(id);
-    }
+    if (id >= STEP_SIZE && id < PropagatorParamCount)
+        return PARAMETER_TEXT[id];
+    else
+        return GmatBase::GetParameterText(id);
+    
+    //loj: 3/18/04
+//      switch (id)
+//      {
+//          case STEP_SIZE:
+//              return Propagator::PARAMETER_TEXT[id];
+//          default:
+//              return GmatBase::GetParameterText(id);
+//      }
 }
 
 //------------------------------------------------------------------------------
-// Integer Propagator::GetParameterID(const std::string str)
+// Integer Propagator::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-Integer Propagator::GetParameterID(const std::string str)
+Integer Propagator::GetParameterID(const std::string &str) const
 {
-    for (Integer i = 0; i < PropagatorParamCount; i++)
+    for (Integer i = STEP_SIZE; i < PropagatorParamCount; i++)
     {
-        if (str == Propagator::PARAMETER_TEXT[i])
+        if (str == PARAMETER_TEXT[i])
             return i;
     }
-	
+        
     return GmatBase::GetParameterID(str);
 }
 
@@ -216,13 +225,19 @@ Integer Propagator::GetParameterID(const std::string str)
 //------------------------------------------------------------------------------
 Gmat::ParameterType Propagator::GetParameterType(const Integer id) const
 {
-    switch (id)
-    {
-        case stepSizeParameter:
-            return Propagator::PARAMETER_TYPE[id];
-        default:
-            return GmatBase::GetParameterType(id);
-    }
+    if (id >= STEP_SIZE && id < PropagatorParamCount)
+        return PARAMETER_TYPE[id];
+    else
+        return GmatBase::GetParameterType(id);
+
+    //loj: 3/18/04
+//      switch (id)
+//      {
+//          case STEP_SIZE:
+//              return Propagator::PARAMETER_TYPE[id];
+//          default:
+//              return GmatBase::GetParameterType(id);
+//      }
 }
 
 //------------------------------------------------------------------------------
@@ -234,28 +249,44 @@ Gmat::ParameterType Propagator::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Propagator::GetParameterTypeString(const Integer id) const
 {
-    switch (id)
-    {
-        case stepSizeParameter:
-            return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
-        default:
-            return GmatBase::GetParameterTypeString(id);
-    }
+    if (id >= STEP_SIZE && id < PropagatorParamCount)
+        return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+    else
+        return GmatBase::GetParameterTypeString(id);
+
+    //loj: 3/18/04
+//      switch (id)
+//      {
+//          case STEP_SIZE:
+//              return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+//          default:
+//              return GmatBase::GetParameterTypeString(id);
+//      }
 }
 
 //------------------------------------------------------------------------------
-// Real Propagator::GetRealParameter(const Integer id)
+// Real Propagator::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-Real Propagator::GetRealParameter(const Integer id)
+Real Propagator::GetRealParameter(const Integer id) const
 {
-    if (id == stepSizeParameter)
+    if (id == STEP_SIZE)
         return stepSize;
-	
+        
     return GmatBase::GetRealParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+Real Propagator::GetRealParameter(const std::string &label) const
+{
+    Integer id = GetParameterID(label);
+    
+    return GetRealParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -267,12 +298,20 @@ Real Propagator::GetRealParameter(const Integer id)
 //------------------------------------------------------------------------------
 Real Propagator::SetRealParameter(const Integer id, const Real value)
 {
-    if (id == stepSizeParameter)
+    if (id == STEP_SIZE)
     {
         stepSize = value;
         return stepSize;
     }
     return GmatBase::SetRealParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const std::string &label, const Real value)
+//------------------------------------------------------------------------------
+Real Propagator::SetRealParameter(const std::string &label, const Real value)
+{
+    return SetRealParameter(GetParameterID(label), value);
 }
 
 //------------------------------------------------------------------------------
@@ -288,11 +327,15 @@ Real Propagator::SetRealParameter(const Integer id, const Real value)
  */
 //------------------------------------------------------------------------------
 void Propagator::Initialize(void)
-{
+{    
     if (physicalModel != NULL) 
     {
+        //MessageInterface::ShowMessage("Propagator::Initialize() calling physicalModel->Initialize() \n");
         if ( physicalModel->Initialize() )
             initialized = true;
+
+        //MessageInterface::ShowMessage("Propagator::Initialize() initialized = %d\n",
+        //                              initialized);
 
         inState  = physicalModel->GetState();
         outState = physicalModel->GetState();
@@ -359,7 +402,7 @@ Integer Propagator::GetPropagatorOrder(void) const
  * If the step is taken successfully, the method returns true; otherwise, it 
  * returns false.
  *
- * @param dt	The timestep to take
+ * @param dt    The timestep to take
  */
 //------------------------------------------------------------------------------
 bool Propagator::Step(Real dt)

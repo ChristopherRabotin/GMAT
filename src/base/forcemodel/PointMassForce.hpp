@@ -68,6 +68,7 @@
 
 #include "gmatdefs.hpp"
 #include "PhysicalModel.hpp"
+#include "CelestialBody.hpp"
 
 class GMAT_API PointMassForce : public PhysicalModel
 {
@@ -85,25 +86,39 @@ public:
     virtual Real EstimateError(Real * diffs, Real * answer) const;
 
     // Parameter accessor methods -- overridden from GmatBase
-    std::string PointMassForce::GetParameterText(const Integer id);
-    Integer PointMassForce::GetParameterID(const std::string str);
-    Gmat::ParameterType PointMassForce::GetParameterType(const Integer id) const;
-    std::string PointMassForce::GetParameterTypeString(const Integer id) const;
+    //loj: 3/19/04 why overridden?
+    //std::string PointMassForce::GetParameterText(const Integer id);
+    //Integer PointMassForce::GetParameterID(const std::string str);
+    //Gmat::ParameterType PointMassForce::GetParameterType(const Integer id) const;
+    //std::string PointMassForce::GetParameterTypeString(const Integer id) const;
+
+    virtual std::string GetParameterText(const Integer id) const;
+    virtual Integer     GetParameterID(const std::string &str) const;
+    virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+    virtual std::string GetParameterTypeString(const Integer id) const;
     virtual Real GetRealParameter(const Integer id) const;
     virtual Real SetRealParameter(const Integer id, const Real value);    
 
+    virtual std::string GetStringParameter(const Integer id) const;
+    virtual std::string GetStringParameter(const std::string &value) const;
+    virtual bool        SetStringParameter(const Integer id,
+                                           const std::string &value);
+    virtual bool        SetStringParameter(const std::string &label,
+                                           const std::string &value);
 protected:
     // Start with the parameter IDs and associates strings
 
     // Parameter IDs
     enum
     {
-        epochParameter = PhysicalModelParamCount,  /// ID for the epoch, used by PointMass and PointMassForce instances
-        muParameter,  /// ID for the gravity constant, used by PointMass and PointMassForce instances
-        radiusParameter,  /// ID for the radius, used by PointMass and PointMassForce instances
-        flatteningParameter,  /// Flattening factor ID, used by PointMass and PointMassForce instances
-        poleRadiusParameter,  /// Polar radius ID (read only), used by PointMass and PointMassForce instances
-        estimateMethodParameter,  /// Error estimate type: 1.0 for component estimate, 2.0 for vector
+        EPOCH = PhysicalModelParamCount,  /// ID for the epoch, used by PointMass and PointMassForce instances
+        MU,
+        RADIUS,  /// ID for the radius, used by PointMass and PointMassForce instances
+        //flatteningParameter,  /// Flattening factor ID, used by PointMass and PointMassForce instances
+        //poleRadiusParameter,  /// Polar radius ID (read only), used by PointMass and PointMassForce instances
+        ESTIMATE_METHOD,  /// Error estimate type: 1.0 for component estimate, 2.0 for vector
+        BODY,    /// ID for the body, used by PointMass and PointMassForce instances
         PointMassParamCount  /// Count of the parameters for this class 
     };
 
@@ -116,6 +131,8 @@ protected:
     Real epoch;
     /// Type of error estimate to perform
     Real estimationMethod;
+
+    CelestialBody *body;
 };
 
 #endif  // PointMassForce_hpp

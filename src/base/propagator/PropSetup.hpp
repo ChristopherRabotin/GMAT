@@ -57,7 +57,9 @@ public:
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer GetParameterID(const std::string &str) const;
    virtual std::string GetStringParameter(const Integer id) const;
+   virtual std::string GetStringParameter(const std::string &label) const;
    virtual bool SetStringParameter(const Integer id, const std::string &value);
+   virtual bool SetStringParameter(const std::string &label, const std::string &value);
 
 private:
 

@@ -38,63 +38,72 @@
 //                             granularity into this class
 //
 //                           : 09/26/2003 - W. Waktola, Mission Applications Branch
-//				Changes:
-//				  - Updated style using GMAT cpp style guide
+//                              Changes:
+//                                - Updated style using GMAT cpp style guide
 //
 //                           : 10/10/2003 - W. Waktola, Mission Applications Branch
-//				Changes:
-//				  - SetParameter() to SetRealParameter()
-//				  - GetParameter() to GetRealParameter()
-//				  - virtual char* GetParameterName(const int parm) const to
-//				    virtual std::string GetParameterName(const int parm) const
-//				  - GetParameterName() from if statements to switch statements
+//                              Changes:
+//                                - SetParameter() to SetRealParameter()
+//                                - GetParameter() to GetRealParameter()
+//                                - virtual char* GetParameterName(const int parm) const to
+//                                  virtual std::string GetParameterName(const int parm) const
+//                                - GetParameterName() from if statements to switch statements
 //
 //                           : 10/16/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - All double types to Real types
-//				  - All primitive int types to Integer types
-//				Removals:
-//				  - GetParameterName(), replaced by GetParameterText()
-//				Additions:
-//				  - IntegratorParamCount
-//				  - PARAMTER_TEXT[]
-//				  - PARAMETER_TYPE[]
-//				  - GetIntegerParameter()
-//				  - SetIntegerParameter()
-//				  - GetParameterText()
-//				  - GetParameterID()
-//				  - GetParameterType()
-//				  - GetParameterTypeString()
+//                              Changes:
+//                                - All double types to Real types
+//                                - All primitive int types to Integer types
+//                              Removals:
+//                                - GetParameterName(), replaced by GetParameterText()
+//                              Additions:
+//                                - IntegratorParamCount
+//                                - PARAMTER_TEXT[]
+//                                - PARAMETER_TYPE[]
+//                                - GetIntegerParameter()
+//                                - SetIntegerParameter()
+//                                - GetParameterText()
+//                                - GetParameterID()
+//                                - GetParameterType()
+//                                - GetParameterTypeString()
 //
 // **************************************************************************
 
 #include "Integrator.hpp"
 #include "gmatdefs.hpp"
 #include "Propagator.hpp"
+#include "MessageInterface.hpp"
 
 //---------------------------------
 // static data
 //---------------------------------
 const std::string
-Integrator::PARAMETER_TEXT[IntegratorParamCount] =
+Integrator::PARAMETER_TEXT[IntegratorParamCount - PropagatorParamCount] =
 {
-	"Maximum Estimated Integration Error",
-	"Relative Error Control Threshold",
-	"Stepsize Granularity (sec)",
-	"Minimum Step Size (sec)",
-	"Maximum Step Size (sec)",
-	"Maximum number of failed steps allowed"
+    //loj: 3/18/04 field name cannot have blank spaces. The ScriptInterpreter parses
+    // this these field names
+//      "Maximum Estimated Integration Error",
+//      "Relative Error Control Threshold",
+//      "Stepsize Granularity (sec)",
+//      "Minimum Step Size (sec)",
+//      "Maximum Step Size (sec)",
+//      "Maximum number of failed steps allowed"
+    "Accuracy",
+    "ErrorThreshold",
+    "SmallestInterval",
+    "MinStep",
+    "MaxStep",
+    "MaxStepAttempts",
 };
 
 const Gmat::ParameterType
-Integrator::PARAMETER_TYPE[IntegratorParamCount] =
+Integrator::PARAMETER_TYPE[IntegratorParamCount - PropagatorParamCount] =
 {
     Gmat::REAL_TYPE,
     Gmat::REAL_TYPE,
-	Gmat::REAL_TYPE,
-	Gmat::REAL_TYPE,
-	Gmat::REAL_TYPE,
-	Gmat::INTEGER_TYPE
+    Gmat::REAL_TYPE,
+    Gmat::REAL_TYPE,
+    Gmat::REAL_TYPE,
+    Gmat::INTEGER_TYPE
 };
 
 //---------------------------------
@@ -108,24 +117,23 @@ Integrator::PARAMETER_TYPE[IntegratorParamCount] =
  * Default constructor for the Integrator
  */
 //------------------------------------------------------------------------------
-Integrator::Integrator(const std::string &typeStr,
-					   const std::string &nomme) :
-    Propagator              (typeStr, nomme),
-    tolerance               (1.0e-11),
-    fixedStep               (false),
-    fixedStepsize           (300.0),
-    minimumStep             (0.001),                // 1 msec
-    maximumStep             (2700.0),               // 45 minutes
-    smallestTime            (1.0e-6),
-    stepAttempts            (0),
-    maxStepAttempts         (50),
-    stepTaken               (0.0),
-    timeleft                (stepSize),    
-    ddt                     (NULL),
-    errorEstimates          (NULL),
-    errorThreshold          (0.10)
+Integrator::Integrator(const std::string &typeStr, const std::string &nomme)
+    : Propagator              (typeStr, nomme),
+      tolerance               (1.0e-11),
+      fixedStep               (false),
+      fixedStepsize           (300.0),
+      minimumStep             (0.001),                // 1 msec
+      maximumStep             (2700.0),               // 45 minutes
+      smallestTime            (1.0e-6),
+      stepAttempts            (0),
+      maxStepAttempts         (50),
+      stepTaken               (0.0),
+      timeleft                (stepSize),    
+      ddt                     (NULL),
+      errorEstimates          (NULL),
+      errorThreshold          (0.10)
 {
-    parameterCount = numStepAttempts;
+    parameterCount = IntegratorParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -164,7 +172,7 @@ Integrator::Integrator(const Integrator& i) :
     errorEstimates          (NULL),
     errorThreshold          (i.errorThreshold)
 {
-    parameterCount = numStepAttempts;
+    parameterCount = IntegratorParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -195,49 +203,56 @@ Integrator& Integrator::operator=(const Integrator& i)
 }
 
 //------------------------------------------------------------------------------
-// std::string Integrator::GetParameterText(const Integer id)
+// std::string Integrator::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 /**
 * @see GmatBase
  */
 //------------------------------------------------------------------------------
-std::string Integrator::GetParameterText(const Integer id)
+std::string Integrator::GetParameterText(const Integer id) const
 {
-	switch (id)
-	{
-		case integrationAccuracy:
-			return Integrator::PARAMETER_TEXT[id];
-		case errorControlHold:
-			return Integrator::PARAMETER_TEXT[id];
-		case smallestTimeInterval:
-			return Integrator::PARAMETER_TEXT[id];
-		case minimumStepSize:
-			return Integrator::PARAMETER_TEXT[id];
-		case maximumStepSize:
-			return Integrator::PARAMETER_TEXT[id];
-		case numStepAttempts:
-			return Integrator::PARAMETER_TEXT[id];
-		default:
-			return GmatBase::GetParameterText(id);
-	}
+    if (id >= PropagatorParamCount && id < IntegratorParamCount)
+        return PARAMETER_TEXT[id - PropagatorParamCount];
+    else
+        return Propagator::GetParameterText(id);
+
+    //loj: 3/18/04
+//      switch (id)
+//      {
+//      case ACCURACY:
+//          return Integrator::PARAMETER_TEXT[id];
+//      case ERROR_THRESHOLD:
+//          return Integrator::PARAMETER_TEXT[id];
+//      case SMALLEST_INTERVAL:
+//          return Integrator::PARAMETER_TEXT[id];
+//      case MIN_STEP:
+//          return Integrator::PARAMETER_TEXT[id];
+//      case MAX_STEP:
+//          return Integrator::PARAMETER_TEXT[id];
+//      case MAX_STEP_ATTEMPTS:
+//          return Integrator::PARAMETER_TEXT[id];
+//      default:
+//          return GmatBase::GetParameterText(id);
+//      }
 }
 
 //------------------------------------------------------------------------------
-// Integer Integrator::GetParameterID(const std::string str)
+// Integer Integrator::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 /**
 * @see GmatBase
  */
 //------------------------------------------------------------------------------
-Integer Integrator::GetParameterID(const std::string str)
+Integer Integrator::GetParameterID(const std::string &str) const
 {
-	for (int i = 0; i < IntegratorParamCount; i++)
-	{
-		if (str == Integrator::PARAMETER_TEXT[i])
-			return i;
-	}
+    for (int i = PropagatorParamCount; i < IntegratorParamCount; i++)
+    {
+        if (str == PARAMETER_TEXT[i - PropagatorParamCount])
+            return i;
+    }
 
-	return GmatBase::GetParameterID(str);
+    //loj: 3/18/04 return GmatBase::GetParameterID(str);
+    return Propagator::GetParameterID(str);
 }
 
 //------------------------------------------------------------------------------
@@ -249,23 +264,28 @@ Integer Integrator::GetParameterID(const std::string str)
 //------------------------------------------------------------------------------
 Gmat::ParameterType Integrator::GetParameterType(const Integer id) const
 {
-	switch (id)
-	{
-		case integrationAccuracy:
-			return Integrator::PARAMETER_TYPE[id];
-		case errorControlHold:
-			return Integrator::PARAMETER_TYPE[id];
-		case smallestTimeInterval:
-			return Integrator::PARAMETER_TYPE[id];
-		case minimumStepSize:
-			return Integrator::PARAMETER_TYPE[id];
-		case maximumStepSize:
-			return Integrator::PARAMETER_TYPE[id];
-		case numStepAttempts:
-			return Integrator::PARAMETER_TYPE[id];
-		default:
-			return GmatBase::GetParameterType(id);
-	}
+    if (id >= PropagatorParamCount && id < IntegratorParamCount)
+        return PARAMETER_TYPE[id - PropagatorParamCount];
+    else
+        return Propagator::GetParameterType(id);
+    
+//      switch (id)
+//      {
+//      case ACCURACY:
+//          return Integrator::PARAMETER_TYPE[id];
+//      case ERROR_THRESHOLD:
+//          return Integrator::PARAMETER_TYPE[id];
+//      case SMALLEST_INTERVAL:
+//          return Integrator::PARAMETER_TYPE[id];
+//      case MIN_STEP:
+//          return Integrator::PARAMETER_TYPE[id];
+//      case MAX_STEP:
+//          return Integrator::PARAMETER_TYPE[id];
+//      case MAX_STEP_ATTEMPTS:
+//          return Integrator::PARAMETER_TYPE[id];
+//      default:
+//          return GmatBase::GetParameterType(id);
+//      }
 }
 
 //------------------------------------------------------------------------------
@@ -277,13 +297,19 @@ Gmat::ParameterType Integrator::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Integrator::GetParameterTypeString(const Integer id) const
 {
-	switch (id)
-	{
-		case stepSizeParameter:
-			return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
-		default:
-			return GmatBase::GetParameterTypeString(id);
-	}
+    if (id >= PropagatorParamCount && id < IntegratorParamCount)
+        return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - PropagatorParamCount)];
+    else
+        return Propagator::GetParameterTypeString(id);
+
+    //loj: 3/18/04
+//      switch (id)
+//      {
+//      case stepSizeParameter:
+//          return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+//      default:
+//          return GmatBase::GetParameterTypeString(id);
+//      }
 }
 
 //------------------------------------------------------------------------------
@@ -293,36 +319,45 @@ std::string Integrator::GetParameterTypeString(const Integer id) const
 * Accessor method used to obtain a parameter value
  *
  *  For integrators, the user can use this function to get the integration
- *  accuracy (id == integrationAccuracy), toggle the fixed step propagation mode
+ *  accuracy (id == ACCURACY), toggle the fixed step propagation mode
  *  (RUN_FIXEDSTEP), and set the stepSize for fixed step mode (FIXED_STEPSIZE).
  *  If the RUN_FIXEDSTEP id is passed into the method, 1.0 is returned if running
  *  in fixed step mode, and 0.0 if in variable step mode.
  *
- *  @param id	integer id of the parameter being retrieved
+ *  @param id   integer id of the parameter being retrieved
  */
 //------------------------------------------------------------------------------
-Real Integrator::GetRealParameter(const Integer id)
+Real Integrator::GetRealParameter(const Integer id) const
 {
-    if (id == integrationAccuracy)
+    if (id == ACCURACY)
         return tolerance;
 
-    else if (id == errorControlHold)
-	{
+    else if (id == ERROR_THRESHOLD)
+    {
         if (physicalModel)
             return physicalModel->GetErrorThreshold();
         return errorThreshold;
     }
 
-    else if (id == smallestTimeInterval)
+    else if (id == SMALLEST_INTERVAL)
         return smallestTime;
 
-    else if (id == minimumStepSize)
+    else if (id == MIN_STEP)
         return minimumStep;
 
-    else if (id == maximumStepSize)
+    else if (id == MAX_STEP)
         return maximumStep;
 
-    else return GmatBase::GetRealParameter(id);
+    //loj: 3/1/04 else return GmatBase::GetRealParameter(id);
+    else return Propagator::GetRealParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+Real Integrator::GetRealParameter(const std::string &label) const
+{
+    return GetRealParameter(GetParameterID(label));
 }
 
 //------------------------------------------------------------------------------
@@ -332,62 +367,84 @@ Real Integrator::GetRealParameter(const Integer id)
 * Accessor method used to set a parameter value
  *
  * For integrators, the user can use this function to set the integration
- * accuracy (id == integrationAccuracy), toggle the fixed step propagation mode
+ * accuracy (id == ACCURACY), toggle the fixed step propagation mode
  * (RUN_FIXEDSTEP), and set the stepSize for fixed step mode (FIXED_STEPSIZE).
  *
- * @param id	integer id of the parameter being set
- * @param value	The new value for the parameter
+ * @param id    integer id of the parameter being set
+ * @param value The new value for the parameter
  */
 //------------------------------------------------------------------------------
 Real Integrator::SetRealParameter(const Integer id, const Real value)
 {
-    if (id == integrationAccuracy)
-	{
+    if (id == ACCURACY)
+    {
         if (value <= 0.0)
             return false;
         tolerance = value;
     }
 
-    else if (id == minimumStepSize)
-	{
+    else if (id == MIN_STEP)
+    {
         if (value == 0.0)
             return false;
         minimumStep = fabs(value);
     }
 
-    else if (id == maximumStepSize)
-	{
+    else if (id == MAX_STEP)
+    {
         if (fabs(value) < minimumStep)
             return false;
         maximumStep = fabs(value);
     }
 
-    else if (id == errorControlHold)
-	{
+    else if (id == ERROR_THRESHOLD)
+    {
         errorThreshold = fabs(value);
         if (physicalModel)
             physicalModel->SetErrorThreshold(errorThreshold);
     }
 
-    else if (id == smallestTimeInterval)
+    else if (id == SMALLEST_INTERVAL)
         smallestTime = fabs(value);
 
-    return GmatBase::SetRealParameter(id, value);
+    //loj: 3/18/04 return GmatBase::SetRealParameter(id, value);
+    return Propagator::SetRealParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
-// Integer Integrator::GetIntegerParameter(const Integer id)
+// Real SetRealParameter(const std::string &label, const Real value)
+//------------------------------------------------------------------------------
+Real Integrator::SetRealParameter(const std::string &label, const Real value)
+{
+    return SetRealParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+// Integer Integrator::GetIntegerParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-Integer Integrator::GetIntegerParameter(const Integer id)
+Integer Integrator::GetIntegerParameter(const Integer id) const
 {
-	if (id == numStepAttempts)
+    if (id == MAX_STEP_ATTEMPTS)
         return maxStepAttempts;
-	else
-		return GmatBase::GetIntegerParameter(id);
+    else
+        //loj: 3/18/04 return GmatBase::GetIntegerParameter(id);
+        return Propagator::GetIntegerParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// Integer Integrator::GetIntegerParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Integer Integrator::GetIntegerParameter(const std::string &label) const
+{
+    return GetIntegerParameter(GetParameterID(label));
 }
 
 //------------------------------------------------------------------------------
@@ -399,14 +456,28 @@ Integer Integrator::GetIntegerParameter(const Integer id)
 //------------------------------------------------------------------------------
 Integer Integrator::SetIntegerParameter(const Integer id, const Integer value)
 {
-	if (id == numStepAttempts)
-	{
-        if (value < 1.0)
-            return GmatBase::SetIntegerParameter(id, value);;
+    if (id == MAX_STEP_ATTEMPTS)
+    {
+        if (value < 1)
+            //loj: 3/18/04 return GmatBase::SetIntegerParameter(id, value);;
+            return GmatBase::INTEGER_PARAMETER_UNDEFINED;
         maxStepAttempts = (Integer)value;
     }
     
-    return GmatBase::SetIntegerParameter(id, value);
+    //loj: 3/18/04 return GmatBase::SetIntegerParameter(id, value);
+    return Propagator::SetIntegerParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+// Integer Integrator::SetIntegerParameter(const std::string &label, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Integer Integrator::SetIntegerParameter(const std::string &label, const Integer value)
+{
+    return SetIntegerParameter(GetParameterID(label), value);
 }
 
 //------------------------------------------------------------------------------

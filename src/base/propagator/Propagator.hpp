@@ -75,19 +75,21 @@ class GMAT_API Propagator : public GmatBase
 {
 public:
     Propagator(const std::string &typeStr,
-                           const std::string &nomme = "");
+               const std::string &nomme = "");
     virtual ~Propagator(void);
 
     Propagator(const Propagator&);
     Propagator& operator=(const Propagator&);
 
     // Parameter accessor methods -- overridden from GmatBase   
-    virtual std::string GetParameterText(const Integer id);
-    virtual Integer GetParameterID(const std::string str);
+    virtual std::string GetParameterText(const Integer id) const;
+    virtual Integer GetParameterID(const std::string &str) const;
     virtual Gmat::ParameterType GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;
-    virtual Real GetRealParameter(const Integer id);
+    virtual Real GetRealParameter(const Integer id) const;
+    virtual Real GetRealParameter(const std::string &label) const;
     virtual Real SetRealParameter(const Integer id, const Real value);
+    virtual Real SetRealParameter(const std::string &label, const Real value);
         
     virtual void Initialize(void);
     virtual void SetPhysicalModel(PhysicalModel *pPhysicalModel);
@@ -134,18 +136,15 @@ public:
 
     virtual bool RawStep(Real dt);
 
-    //loj: moved from protected, so that PropagationConfigPanel can be compiled
-    // Parameter IDs
+protected:
+
     enum
     {
-        stepSizeParameter = 0,  /// Stepsize for the propagation
+        STEP_SIZE = 0,        /// Stepsize for the propagation
         PropagatorParamCount  /// Count of the parameters for this class
     };
     
-protected:
     // Start with the parameter IDs and associated strings
-
-
     static const std::string PARAMETER_TEXT[PropagatorParamCount];
     static const Gmat::ParameterType PARAMETER_TYPE[PropagatorParamCount];
         

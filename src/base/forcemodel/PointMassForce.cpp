@@ -65,6 +65,8 @@
 // **************************************************************************
 
 #include "PointMassForce.hpp"
+#include "MessageInterface.hpp"
+#include "Planet.hpp"
 
 //---------------------------------
 // static data
@@ -72,12 +74,19 @@
 const std::string
 PointMassForce::PARAMETER_TEXT[PointMassParamCount - PhysicalModelParamCount] =
 {
-    "Base Epoch (A.1 Modified Julian)",
-    "Gravitational Constant (mu, km^3/s^2)",
-    "Equatorial Radius (km)",
-    "Flattening Factor",
-    "Polar Radius (km)",
-    "Error Estimation Method"
+    "Epoch",
+    "GravConst",
+    "Radius",
+    "EstimateMethod",
+    "Body",
+    
+    //loj: 3/18/04 field name cannot have blank space
+//      "Base Epoch (A.1 Modified Julian)",
+//      "Gravitational Constant (mu, km^3/s^2)",
+//      "Equatorial Radius (km)",
+//      "Flattening Factor",
+//      "Polar Radius (km)",
+//      "Error Estimation Method"
 };
 
 const Gmat::ParameterType
@@ -87,8 +96,13 @@ PointMassForce::PARAMETER_TYPE[PointMassParamCount - PhysicalModelParamCount] =
     Gmat::REAL_TYPE,
     Gmat::REAL_TYPE,
     Gmat::REAL_TYPE,
-    Gmat::REAL_TYPE,
-    Gmat::REAL_TYPE
+    Gmat::STRING_TYPE,
+//      Gmat::REAL_TYPE,
+//      Gmat::REAL_TYPE,
+//      Gmat::REAL_TYPE,
+//      Gmat::REAL_TYPE,
+//      Gmat::REAL_TYPE,
+//      Gmat::REAL_TYPE
 };
 
 //---------------------------------
@@ -109,8 +123,9 @@ PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
     epoch                  (21545.0),
     estimationMethod       (1.0)
 {
-    parameterCount = estimateMethodParameter;
+    parameterCount = ESTIMATE_METHOD;
     dimension = 6 * satcount;
+    body = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -140,7 +155,7 @@ PointMassForce::PointMassForce(const PointMassForce& pmf) :
     epoch                  (pmf.epoch),
     estimationMethod       (pmf.estimationMethod)
 {
-    parameterCount = estimateMethodParameter;
+    parameterCount = ESTIMATE_METHOD;
     dimension = pmf.dimension;
     initialized = false;
 }
@@ -170,143 +185,6 @@ PointMassForce& PointMassForce::operator= (const PointMassForce& pmf)
     return *this;
 }
 
-//------------------------------------------------------------------------------
-// std::string PointMassForce::GetParameterText(const Integer id)
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-std::string PointMassForce::GetParameterText(const Integer id)
-{
-    if ((id >= PhysicalModelParamCount) && (id < PointMassParamCount))
-        return PointMassForce::PARAMETER_TEXT[id - PhysicalModelParamCount];
-    return PhysicalModel::GetParameterText(id);
-}
-
-//------------------------------------------------------------------------------
-// Integer PointMassForce::GetParameterID(const std::string str)
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-Integer PointMassForce::GetParameterID(const std::string str)
-{
-    for (Integer i = PhysicalModelParamCount; i < PointMassParamCount; i++)
-    {
-        if (str == PointMassForce::PARAMETER_TEXT[i - PhysicalModelParamCount])
-            return i + PhysicalModelParamCount;
-    }
-    return PhysicalModel::GetParameterID(str);
-}
-
-//------------------------------------------------------------------------------
-// Gmat::ParameterType PointMassForce::GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-Gmat::ParameterType PointMassForce::GetParameterType(const Integer id) const
-{
-    if ((id >= PhysicalModelParamCount) && (id < PointMassParamCount))
-        return PointMassForce::PARAMETER_TYPE[id - PhysicalModelParamCount];
-    return PhysicalModel::GetParameterType(id);
-}
-
-//------------------------------------------------------------------------------
-// std::string PointMassForce::GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-std::string PointMassForce::GetParameterTypeString(const Integer id) const
-{
-    if ((id >= PhysicalModelParamCount) && (id < PointMassParamCount))
-        return PointMassForce::PARAMETER_TEXT[id - PhysicalModelParamCount];
-    return PhysicalModel::GetParameterTypeString(id);
-}
-
-//------------------------------------------------------------------------------
-// Real PointMassForce::GetRealParameter(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * Accessor method used to obtain a parameter value 
- *
- * @param id    Integer ID for the requested parameter
- */
-//------------------------------------------------------------------------------
-Real PointMassForce::GetRealParameter(const Integer id) const
-{
-    if (id == epochParameter)
-        return epoch + elapsedTime / 86400.0;
-
-    if (id == muParameter)
-        return mu;
-    
-    if (id == radiusParameter)
-        return 0.0;     // Not used in this implementation
-
-    if (id == flatteningParameter)
-        return 0.0;     // Not used in this implementation
-
-    if (id == poleRadiusParameter)
-        return 0.0;     // Not used in this implementation
-
-    if (id == estimateMethodParameter)
-        return estimationMethod;
-
-    return PhysicalModel::GetRealParameter(id);
-}
-
-//------------------------------------------------------------------------------
-// Real PointMassForce::SetRealParameter(const Integer id, const Real value)
-//------------------------------------------------------------------------------
-/**
- * Accessor method used to set a parameter value 
- * 
- * @param    id  Integer ID for the parameter
- * @param    val The new value for the parameter
- */
-//------------------------------------------------------------------------------
-Real PointMassForce::SetRealParameter(const Integer id, const Real value)
-{
-    if (id == epochParameter) 
-    {
-        epoch = value;
-        elapsedTime = 0.0;
-        return true;
-    }
-
-    if (id == muParameter) 
-    {
-        mu = value;
-        return true;
-    }
-
-    if (id == radiusParameter)
-        return false;   // Not used in this implementation
-
-    if (id == flatteningParameter)
-        return false;   // Not used in this implementation
-
-    if (id == poleRadiusParameter)
-        return false;   // Not used in this implementation
-
-    if (id == estimateMethodParameter) 
-    {
-        if ((value == 1.0) || (value == 2.0)) 
-        {
-            estimationMethod = value;
-            return true;
-        }
-        return false;
-    }
-
-    return GmatBase::SetRealParameter(id, value);
-}
 
 //------------------------------------------------------------------------------
 // bool PointMassForce::Initialize(void)
@@ -441,6 +319,8 @@ bool PointMassForce::GetComponentMap(Integer * map, Integer order) const
 {
     Integer i6;
 
+    MessageInterface::ShowMessage("PointMassForce::GetComponentMap() order = %d\n", order);
+    
     if (order != 1)
         return false;
 
@@ -515,4 +395,211 @@ Real PointMassForce::EstimateError(Real * diffs, Real * answer) const
     }
 
     return retval;
+}
+
+
+//---------------------------------
+// inherited methods from GmatBase
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// std::string PointMassForce::GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+std::string PointMassForce::GetParameterText(const Integer id) const
+{
+    if ((id >= PhysicalModelParamCount) && (id < PointMassParamCount))
+        return PARAMETER_TEXT[id - PhysicalModelParamCount];
+    return PhysicalModel::GetParameterText(id);
+}
+
+//------------------------------------------------------------------------------
+// Integer PointMassForce::GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Integer PointMassForce::GetParameterID(const std::string &str) const
+{
+    for (Integer i = PhysicalModelParamCount; i < PointMassParamCount; i++)
+    {
+        if (str == PARAMETER_TEXT[i - PhysicalModelParamCount])
+            return i;
+            //loj: 3/19/04 return i + PhysicalModelParamCount;
+    }
+    return PhysicalModel::GetParameterID(str);
+}
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType PointMassForce::GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType PointMassForce::GetParameterType(const Integer id) const
+{
+    if ((id >= PhysicalModelParamCount) && (id < PointMassParamCount))
+        return PARAMETER_TYPE[id - PhysicalModelParamCount];
+    return PhysicalModel::GetParameterType(id);
+}
+
+//------------------------------------------------------------------------------
+// std::string PointMassForce::GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+std::string PointMassForce::GetParameterTypeString(const Integer id) const
+{
+    if ((id >= PhysicalModelParamCount) && (id < PointMassParamCount))
+        return PARAMETER_TEXT[id - PhysicalModelParamCount];
+    return PhysicalModel::GetParameterTypeString(id);
+}
+
+//------------------------------------------------------------------------------
+// Real PointMassForce::GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Accessor method used to obtain a parameter value 
+ *
+ * @param id    Integer ID for the requested parameter
+ */
+//------------------------------------------------------------------------------
+Real PointMassForce::GetRealParameter(const Integer id) const
+{
+    if (id == EPOCH)
+        return epoch + elapsedTime / 86400.0;
+
+    if (id == MU)
+        return mu;
+    
+    if (id == RADIUS)
+        return 0.0;     // Not used in this implementation
+
+    //if (id == flatteningParameter)
+    //    return 0.0;     // Not used in this implementation
+
+    //if (id == poleRadiusParameter)
+    //    return 0.0;     // Not used in this implementation
+
+    if (id == ESTIMATE_METHOD)
+        return estimationMethod;
+
+    return PhysicalModel::GetRealParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// Real PointMassForce::SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * Accessor method used to set a parameter value 
+ * 
+ * @param    id  Integer ID for the parameter
+ * @param    val The new value for the parameter
+ */
+//------------------------------------------------------------------------------
+Real PointMassForce::SetRealParameter(const Integer id, const Real value)
+{
+    if (id == EPOCH) 
+    {
+        epoch = value;
+        elapsedTime = 0.0;
+        return true;
+    }
+
+    if (id == MU) 
+    {
+        mu = value;
+        return true;
+    }
+
+    if (id == RADIUS)
+        return false;   // Not used in this implementation
+
+    //if (id == flatteningParameter)
+    //    return false;   // Not used in this implementation
+
+    //if (id == poleRadiusParameter)
+    //    return false;   // Not used in this implementation
+
+    if (id == ESTIMATE_METHOD) 
+    {
+        if ((value == 1.0) || (value == 2.0)) 
+        {
+            estimationMethod = value;
+            return true;
+        }
+        return false;
+    }
+
+    return GmatBase::SetRealParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+std::string PointMassForce::GetStringParameter(const Integer id) const
+{
+    switch (id)
+    {
+    case BODY:
+        return body->GetName();
+    default:
+        return PhysicalModel::GetStringParameter(id);
+    }
+}
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string PointMassForce::GetStringParameter(const std::string &label) const
+{
+    return GetStringParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+bool PointMassForce::SetStringParameter(const Integer id, const std::string &value)
+{
+    MessageInterface::ShowMessage("PointMassForce::SetStringParameter() id = %d, value = %s\n",
+                                  id, value.c_str());
+
+    switch (id)
+    {
+    case BODY:
+        {
+            MessageInterface::ShowMessage("PointMassForce::SetStringParameter() value = %s\n",
+                                          value.c_str());
+            
+            CelestialBody *body = (CelestialBody*)(new Planet(value));
+            if (body != NULL)
+            {
+                MessageInterface::ShowMessage("PointMassForce::SetStringParameter() body = %s\n",
+                                              body->GetTypeName().c_str());
+                
+                mu = body->GetGravitationalConstant();
+                return true;
+            }
+            return false;
+        }
+    default:
+        return PhysicalModel::SetStringParameter(id, value);
+    }
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label,
+//                         const std::string &value)
+//------------------------------------------------------------------------------
+bool PointMassForce::SetStringParameter(const std::string &label,
+                                        const std::string &value)
+{
+    return SetStringParameter(GetParameterID(label), value);
 }

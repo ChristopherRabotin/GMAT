@@ -111,8 +111,7 @@
 class GMAT_API Integrator : public Propagator
 {
 public:
-    Integrator(const std::string &typeStr,
-                           const std::string &nomme = "");
+    Integrator(const std::string &typeStr, const std::string &nomme = "");
     virtual ~Integrator(void);
 
     Integrator(const Integrator&);
@@ -122,14 +121,18 @@ public:
     virtual void SetPhysicalModel(PhysicalModel *pPhysicalModel);
         
     // Parameter accessor methods -- overridden from GmatBase
-    virtual std::string GetParameterText(const Integer id);
-    virtual Integer GetParameterID(const std::string str);
+    virtual std::string GetParameterText(const Integer id) const;
+    virtual Integer GetParameterID(const std::string &str) const;
     virtual Gmat::ParameterType GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;
-    virtual Real GetRealParameter(const Integer id);
+    virtual Real GetRealParameter(const Integer id) const;
+    virtual Real GetRealParameter(const std::string &label) const;
     virtual Real SetRealParameter(const Integer id, const Real value);
-    virtual Integer GetIntegerParameter(const Integer id);
+    virtual Real SetRealParameter(const std::string &label, const Real value);
+    virtual Integer GetIntegerParameter(const Integer id) const;
+    virtual Integer GetIntegerParameter(const std::string &label) const;
     virtual Integer SetIntegerParameter(const Integer id, const Integer value);
+    virtual Integer SetIntegerParameter(const std::string &label, const Integer value);
 
     //------------------------------------------------------------------------------
     // virtual void Initialize(void)
@@ -144,27 +147,25 @@ public:
      */
     //------------------------------------------------------------------------------
     virtual void Initialize(void) = 0;
-
+    
     virtual bool RawStep(void) = 0;
 
-    //loj: moved from protected, so that PropagationConfigPanel can be compiled
-    // Parameter IDs
+protected:
+
     enum
     {
-        integrationAccuracy = 0,  // Accuracy parameter for Integrators
-        errorControlHold,         // Accuracy parameter for Integrators
-        smallestTimeInterval,     // Smallest time interval -- used to hedge fixed step mode
-        minimumStepSize,          // Minimum stepsize for the Integrator -- smaller steps fail
-        maximumStepSize,          // Maximum stepsize for the Integrator -- larger steps get truncated
-        numStepAttempts,          // Number of attempts to take before giving up
+        ACCURACY = PropagatorParamCount,  // Accuracy parameter for Integrators
+        ERROR_THRESHOLD,                  // Accuracy parameter for Integrators
+        SMALLEST_INTERVAL,                // Smallest time interval -- used to hedge fixed step mode
+        MIN_STEP,                         // Minimum stepsize for the Integrator -- smaller steps fail
+        MAX_STEP,                         // Maximum stepsize for the Integrator -- larger steps get truncated
+        MAX_STEP_ATTEMPTS,                // Number of attempts to take before giving up
         IntegratorParamCount
     };
-
-protected:
+    
     // Start with the parameter IDs and associates strings
-
-    static const std::string PARAMETER_TEXT[IntegratorParamCount];
-    static const Gmat::ParameterType PARAMETER_TYPE[IntegratorParamCount];
+    static const std::string PARAMETER_TEXT[IntegratorParamCount - PropagatorParamCount];
+    static const Gmat::ParameterType PARAMETER_TYPE[IntegratorParamCount - PropagatorParamCount];
         
     // The level of "acceptable" relative error for the integrator
     Real tolerance;
