@@ -40,13 +40,43 @@ public:
    ~PropagationConfigPanel();  
 
 private:
-
-   enum
+   
+   enum IntegratorType
    {
-      RKV89_ID = 0,
-      RKN68_ID,
-      RKF56_ID,
+      RKV89 = 0,
+      RKN68,
+      RKF56,
       IntegratorCount,
+   };
+   
+   enum GravModelType
+   {
+      NONE_GM = 0,
+      POINT_MASS,
+      JGM2,
+      JGM3,
+      GravModelTypeCount,
+   };
+   
+   enum DragModelType
+   {
+      NONE_DM = 0,
+      EXPONENTIAL,
+      MSISE90,
+      JR,
+      DragModelTypeCount,
+   };
+   
+   struct ForceType
+   {
+      std::string bodyName;
+      std::string gravType;
+      std::string dragType;
+      std::string magnType;
+      ForceType(const std::string &body, const std::string grav, const std::string drag,
+                const std::string &mag)
+         {bodyName = body; gravType = grav; dragType = drag; magnType = mag;}
+         
    };
     
    wxStaticText *integratorStaticText;
@@ -97,7 +127,12 @@ private:
 
    std::string propSetupName;
    std::string newPropName;
-    
+   std::string currentBodyName;
+   std::string gravTypeName;
+   std::string dragTypeName;
+   StringArray gravModelArray;
+   StringArray dragModelArray;
+
    wxArrayString primaryBodiesArray;
    wxArrayString savedBodiesArray;
    wxArrayString pointmassBodiesArray;    
@@ -109,7 +144,8 @@ private:
    Integer numOfForces;
    Integer numOfMagFields;
    Integer numOfGraFields;
-    
+   Integer currentBodyId;
+      
    bool useSRP;
    bool useDragForce;
    bool isForceModelChanged;
@@ -125,6 +161,7 @@ private:
    SolarSystem                    *theSolarSystem;
    std::vector<PointMassForce *>  thePMForces;
    std::vector<CelestialBody *>   theBodies;
+   std::vector<ForceType*> forceList;
 
    // methods inherited from GmatPanel
    virtual void Create();
@@ -135,6 +172,10 @@ private:
    //virtual void OnScript();
       
    // Layout & data handling methods
+   Integer FindBody(const std::string &bodyName,
+                    const std::string &gravType = "Point Mass",
+                    const std::string &dragType = "None",
+                    const std::string &magnType = "None");
    void Initialize();
    void Setup(wxWindow *parent);
    void DisplayIntegratorData(bool integratorChanged);
@@ -160,13 +201,17 @@ private:
    void OnAtmosphereSelection();
     
    // Button event methods
-   void OnAddButton();
+   void OnAddBodyButton();
    void OnGravSearchButton();
    void OnSetupButton();
    void OnMagSearchButton();
    void OnPMEditButton();
    void OnSRPEditButton();
 
+   // for Debug
+   void ShowPropData();
+   void ShowForceList();
+   
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
     
@@ -184,11 +229,11 @@ private:
       ID_CB_GRAV,
       ID_CB_ATMOS,
       ID_CB_MAG,
-      ID_BUTTON_SCRIPT,
-      ID_BUTTON_OK,
-      ID_BUTTON_APPLY,
-      ID_BUTTON_CANCEL,
-      ID_BUTTON_HELP,
+//        ID_BUTTON_SCRIPT,
+//        ID_BUTTON_OK,
+//        ID_BUTTON_APPLY,
+//        ID_BUTTON_CANCEL,
+//        ID_BUTTON_HELP,
       ID_BUTTON_ADD_BODY,
       ID_BUTTON_GRAV_SEARCH,
       ID_BUTTON_SETUP,
