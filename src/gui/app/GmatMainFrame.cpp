@@ -655,6 +655,25 @@ void GmatMainFrame::CloseCurrentProject()
    GmatAppData::GetMissionTree()->UpdateMission(true);
 }
 
+//loj: 9/24/04 added
+//------------------------------------------------------------------------------
+// void RunCurrentMission()
+//------------------------------------------------------------------------------
+void GmatMainFrame::RunCurrentMission()
+{
+   //loj: 8/16/04 added toolBar enable/disable
+   wxToolBar* toolBar = GetToolBar();
+   toolBar->EnableTool(TOOL_RUN, FALSE);
+   toolBar->EnableTool(TOOL_STOP, TRUE);
+   wxYield();
+   SetFocus();
+   
+   theGuiInterpreter->RunMission();
+   
+   toolBar->EnableTool(TOOL_RUN, TRUE);
+   toolBar->EnableTool(TOOL_STOP, FALSE);
+}
+
 //------------------------------------------------------------------------------
 // void GmatMainFrame::StartServer()
 //------------------------------------------------------------------------------

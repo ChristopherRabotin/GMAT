@@ -55,6 +55,7 @@ public:
    void CloseActiveChild();
    void CloseAllChildren();
    void CloseCurrentProject(); //loj: 9/8/04 added
+   void RunCurrentMission(); //loj: 9/24/04 added
    void StartServer();
    void StopServer();
    wxToolBar* GetMainFrameToolBar();
