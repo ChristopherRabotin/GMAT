@@ -1774,10 +1774,12 @@ bool Interpreter::ConstructRHS(GmatBase *lhsObject, const std::string& rhs,
             #endif
             Parameter *parm = CreateParameter(name, sar[1]);
             if (parm != NULL) {
-               GmatBase *parmObj = FindObject(sar[0]);
+               //GmatBase *parmObj = FindObject(sar[0]);
                std::string parmtype = "Object";
-               if (parmObj->GetType() == Gmat::SPACECRAFT)
-                  parmtype = "Spacecraft";
+               //loj: 12/10/04
+               // Parameter no longer has Spacecraft. Object will handle all the objects
+               //if (parmObj->GetType() == Gmat::SPACECRAFT)
+               //   parmtype = "Spacecraft";
                #ifdef DEBUG_RHS_PARSING
                   MessageInterface::ShowMessage("%s%s%s%s%s%s\"\n",
                                                 "Assigning \"",
