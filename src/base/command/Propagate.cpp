@@ -803,7 +803,7 @@ bool Propagate::TakeAction(const std::string &action,
    return GmatCommand::TakeAction(action, actionData);
 }
 
-//loj: 11/16/04 added
+
 //---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
@@ -812,58 +812,38 @@ bool Propagate::RenameRefObject(const Gmat::ObjectType type,
                                 const std::string &oldName,
                                 const std::string &newName)
 {
-#if DEBUG_RENAME
+   #if DEBUG_RENAME
    MessageInterface::ShowMessage
-      ("Propagate::RenameConfiguredItem() type=%s, oldName=%s, newName=%s\n",
+      ("Propagate::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
-#endif
+   #endif
    
-   bool satNameChanged = false;
-   bool stopSatNameChanged = false;
 
    // Propagate needs to know about spacecraft or formation only
    if (type != Gmat::SPACECRAFT && type != Gmat::FORMATION )
       return true;
 
    StringArray::iterator sat;
-   
+
+   // rename space object name used in prop setup
    for (unsigned int prop = 0; prop < propName.size(); ++prop)
-   {
       for (sat = satName[prop]->begin(); sat != satName[prop]->end(); ++sat)
-      {
          if (*sat == oldName)
-         {
             *sat = newName;
-            satNameChanged = true;
-         }
-      }
-   }
    
-   if (satNameChanged)
-   {
-      for (unsigned int i = 0; i < stopSatNames.size(); ++i)
-      {
-         if (stopSatNames[i] == oldName)
-         {
-            stopSatNames[i] = newName;
-            stopSatNameChanged = true;
-         }
-      }
-   }
+   // rename space object name used in stopping condition
+   for (unsigned int i = 0; i < stopSatNames.size(); ++i)
+      if (stopSatNames[i] == oldName)
+         stopSatNames[i] = newName;
    
-#if DEBUG_RENAME
+   #if DEBUG_RENAME
    MessageInterface::ShowMessage
       ("Propagate::RenameConfiguredItem() Rename StopCondtion Ref. Object\n");
-#endif
+   #endif
    
-   if (satNameChanged && stopSatNameChanged)
-   {
-      // rename stop condition parameter
-      for (unsigned int i=0; i<stopWhen.size(); i++)
-      {
-         stopWhen[i]->RenameRefObject(type, oldName, newName);
-      }
-   }
+   // rename stop condition parameter
+   for (unsigned int i=0; i<stopWhen.size(); i++)
+      stopWhen[i]->RenameRefObject(type, oldName, newName);
    
    return true;
 }
