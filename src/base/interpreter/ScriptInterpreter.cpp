@@ -212,8 +212,18 @@ bool ScriptInterpreter::Parse(void)
         else if (find(cmdmap.begin(), cmdmap.end(), **phrase) != cmdmap.end()) {
             GmatCommand *cmd = moderator->AppendCommand(**phrase, "");
             cmd->SetGeneratingString(line);
-            cmd->InterpretAction();
-            sequenceStarted = true;
+            
+            //loj: 3/24/04 added try block
+            try
+            {
+                cmd->InterpretAction();
+                sequenceStarted = true;
+            }
+            catch (BaseException &e)
+            {
+                chunks.clear();
+                throw;
+            }
         }
 
         // Clear the array of words found in the line
