@@ -29,16 +29,18 @@ BranchCommand::BranchCommand(const std::string &typeStr) :
     commandExecuting(false),
     branchToFill    (0)
 {
+   parameterCount = BranchCommandParamCount;
 }
 
 
 BranchCommand::~BranchCommand()
 {
-    std::vector<GmatCommand*>::iterator node;
-    for (node = branch.begin(); node != branch.end(); ++node) {
-        if (*node)
-            delete *node;
-    }
+   std::vector<GmatCommand*>::iterator node;
+   for (node = branch.begin(); node != branch.end(); ++node)
+   {
+      if (*node)
+         delete *node;
+   }
 }
 
 
@@ -49,26 +51,28 @@ BranchCommand::BranchCommand(const BranchCommand& bc) :
     commandExecuting(false),
     branchToFill    (0)
 {
+   parameterCount = BranchCommandParamCount;
 }
 
 
 BranchCommand& BranchCommand::operator=(const BranchCommand& bc)
 {
-    if (this == &bc)
-        return *this;
-        
-    return *this;
+   if (this == &bc)
+      return *this;
+
+   GmatCommand::operator=(bc);
+   return *this;
 }
 
 
 GmatCommand* BranchCommand::GetNext(void)
 {
-    // Return the next pointer in the command sequence if this command -- 
-    // includng its branches -- has finished executing.
-    if ((commandExecuting) && (!commandComplete))
-        return this;
-    
-    return next;
+   // Return the next pointer in the command sequence if this command -- 
+   // includng its branches -- has finished executing.
+   if ((commandExecuting) && (!commandComplete))
+      return this;
+   
+   return next;
 }
 
 
@@ -82,104 +86,112 @@ GmatCommand* BranchCommand::GetChildCommand(Integer whichOne)
 
 bool BranchCommand::Initialize(void)
 {
-    std::vector<GmatCommand*>::iterator node;
-    GmatCommand *current;
-    bool retval = true;
-
-    for (node = branch.begin(); node != branch.end(); ++node) {
-        current = *node;
-        while ((current != NULL) && (current != this)) {
-            if (!current->Initialize())
-                retval = false;
-            current = current->GetNext();
-        }
-    }
-    
-    commandExecuting = false;
-    return retval;
+   std::vector<GmatCommand*>::iterator node;
+   GmatCommand *current;
+   bool retval = true;
+   
+   for (node = branch.begin(); node != branch.end(); ++node)
+   {
+      current = *node;
+      while ((current != NULL) && (current != this))
+      {
+         if (!current->Initialize())
+               retval = false;
+         current = current->GetNext();
+      }
+   }
+   
+   commandExecuting = false;
+   return retval;
 }
 
 
 void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
 {
-    // Increase the size of the vector if it's not big enough
-    if (which >= (Integer)branch.capacity())
-        branch.reserve(which+1);
-    
-    if (branch[which] == NULL)
-        branch[which] = cmd;
-    else
-        branch[which]->Append(cmd);
+   // Increase the size of the vector if it's not big enough
+   if (which >= (Integer)branch.capacity())
+      branch.reserve(which+1);
+   
+   if (branch[which] == NULL)
+      branch[which] = cmd;
+   else
+      branch[which]->Append(cmd);
 }
 
 
 bool BranchCommand::Append(GmatCommand *cmd)
 {
-    // If we are still filling in a branch, append on that branch
-    if (branchToFill >= 0) {
-        AddBranch(cmd, branchToFill);
-        return true;
-    }
-    
-    // Otherwise, just call the base class method
-    return GmatCommand::Append(cmd);
+   // If we are still filling in a branch, append on that branch
+   if (branchToFill >= 0)
+   {
+      AddBranch(cmd, branchToFill);
+      return true;
+   }
+   
+   // Otherwise, just call the base class method
+   return GmatCommand::Append(cmd);
 }
 
 
 bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
-    GmatCommand *current = NULL;
-    
-    // If we have branches, try to insert there first
-    for (Integer which = 0; which < (Integer)branch.size(); ++which) {
-        current = branch[which];
-        if (current != NULL)
-            if (current->Insert(cmd, prev))
-                return true;
-    }
-    
-    // Otherwise, just call the base class method
-    return GmatCommand::Insert(cmd, prev);
+   GmatCommand *current = NULL;
+   
+   // If we have branches, try to insert there first
+   for (Integer which = 0; which < (Integer)branch.size(); ++which)
+   {
+      current = branch[which];
+      if (current != NULL)
+         if (current->Insert(cmd, prev))
+               return true;
+   }
+   
+   // Otherwise, just call the base class method
+   return GmatCommand::Insert(cmd, prev);
 }
 
 
 GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
 {
-    if (cmd == this)
-        return GmatCommand::Remove(cmd);    // Use base method to remove cmd
-
-    GmatCommand *fromBranch = NULL;
-    GmatCommand *current = NULL;
-    
-    // If we have branches, try to insert there first
-    for (Integer which = 0; which < (Integer)branch.size(); ++which) {
-        current = branch[which];
-        if (current != NULL) {
-            fromBranch = current->Remove(cmd);
-            if (fromBranch != NULL)
-                return fromBranch;
-        }
-    }
-    
-    // Not in the branches, so continue with the sequence
-    return GmatCommand::Remove(cmd);
+   if (cmd == this)
+      return GmatCommand::Remove(cmd);    // Use base method to remove cmd
+   
+   GmatCommand *fromBranch = NULL;
+   GmatCommand *current = NULL;
+   
+   // If we have branches, try to insert there first
+   for (Integer which = 0; which < (Integer)branch.size(); ++which)
+   {
+      current = branch[which];
+      if (current != NULL)
+      {
+         fromBranch = current->Remove(cmd);
+         if (fromBranch != NULL)
+               return fromBranch;
+      }
+   }
+   
+   // Not in the branches, so continue with the sequence
+   return GmatCommand::Remove(cmd);
 }
 
 
 void BranchCommand::SetSolarSystem(SolarSystem *ss)
 {
-    GmatCommand::SetSolarSystem(ss);
-    GmatCommand *current = NULL;
-    
-    // Set it for all of the branch nodes
-    // If we have branches, try to insert there first
-    for (Integer which = 0; which < (Integer)branch.size(); ++which) {
-        current = branch[which];
-        while ((current != NULL) && (current != this)) {
-            current->SetSolarSystem(ss);;
-            current = current->GetNext();
-        }
-    }
+   GmatCommand::SetSolarSystem(ss);
+   GmatCommand *current = NULL;
+   
+   // Set it for all of the branch nodes
+   // If we have branches, try to insert there first
+   for (Integer which = 0; which < (Integer)branch.size(); ++which)
+   {
+      current = branch[which];
+      while ((current != NULL) && (current != this))
+      {
+         current->SetSolarSystem(ss);;
+         current = current->GetNext();
+      }
+   }
 }
 
 
@@ -196,60 +208,66 @@ void BranchCommand::SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 void BranchCommand::SetObjectMap(std::map<std::string, GmatBase *> *map)
 {
-    GmatCommand::SetObjectMap(map);
-    GmatCommand *current = NULL;
-    
-    // Set it for all of the branch nodes
-    // If we have branches, try to insert there first
-    for (Integer which = 0; which < (Integer)branch.size(); ++which) {
-        current = branch[which];
-        while ((current != NULL) && (current != this)) {
-            current->SetObjectMap(map);
-            current = current->GetNext();
-        }
-    }
+   GmatCommand::SetObjectMap(map);
+   GmatCommand *current = NULL;
+   
+   // Set it for all of the branch nodes
+   // If we have branches, try to insert there first
+   for (Integer which = 0; which < (Integer)branch.size(); ++which)
+   {
+      current = branch[which];
+      while ((current != NULL) && (current != this))
+      {
+         current->SetObjectMap(map);
+         current = current->GetNext();
+      }
+   }
 }
 
 
 const std::string& BranchCommand::GetGeneratingString(void)
 {
-    fullString = generatingString;
-    GmatCommand *current;
-    
-    // Loop through the branches, appending the strings from commands in each
-    for (Integer which = 0; which < (Integer)branch.size(); ++which) {
-        current = branch[which];
-        while ((current != NULL) && (current != this)) {
-            fullString += "\n";
-            fullString += current->GetGeneratingString();
-            current = current->GetNext();
-        }
-    }
-    
-    return fullString;
+   fullString = generatingString;
+   GmatCommand *current;
+   
+   // Loop through the branches, appending the strings from commands in each
+   for (Integer which = 0; which < (Integer)branch.size(); ++which)
+   {
+      current = branch[which];
+      while ((current != NULL) && (current != this))
+      {
+         fullString += "\n";
+         fullString += current->GetGeneratingString();
+         current = current->GetNext();
+      }
+   }
+   
+   return fullString;
 }
 
 
 bool BranchCommand::Execute(void)
 {
-    commandExecuting = true;
-    return true;
+   commandExecuting = true;
+   return true;
 }
 
 
 bool BranchCommand::ExecuteBranch(Integer which)
 {
-    bool retval = true;
-    
-    GmatCommand *current = branch[which];
-    while ((current != NULL) && (current != this)) {
-        if (current->Execute() == false) {
-            retval = false;
-            break;
-        }
-        // May need to add a test for user interruption here
-        current = current->GetNext();
-    }
-
-    return retval;
+   bool retval = true;
+   
+   GmatCommand *current = branch[which];
+   while ((current != NULL) && (current != this))
+   {
+      if (current->Execute() == false)
+      {
+         retval = false;
+         break;
+      }
+      // May need to add a test for user interruption here
+      current = current->GetNext();
+   }
+   
+   return retval;
 }

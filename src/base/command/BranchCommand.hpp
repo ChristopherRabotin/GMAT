@@ -18,8 +18,8 @@
 //------------------------------------------------------------------------------
 
 
-#ifndef BRANCHCOMMAND_H
-#define BRANCHCOMMAND_H
+#ifndef BranchCommand_hpp
+#define BranchCommand_hpp
 
 
 #include "Command.hpp"
@@ -29,41 +29,48 @@
 class BranchCommand : public GmatCommand
 {
 public:
-    BranchCommand(const std::string &typeStr);
-    virtual ~BranchCommand();
-    BranchCommand(const BranchCommand& bc);
-    BranchCommand&          operator=(const BranchCommand& bc);
-    
-    void                    AddBranch(GmatCommand *cmd, Integer which = 0);
-    bool                    ExecuteBranch(Integer which = 0);
-    
-    // Inherited methods that need refinements to handle the branching
-    virtual bool            Append(GmatCommand *cmd);
-    virtual bool            Insert(GmatCommand *cmd, GmatCommand *prev);
-    virtual GmatCommand*        Remove(GmatCommand *cmd);
-    
-    virtual void            SetSolarSystem(SolarSystem *ss);
-    virtual void            SetObjectMap(std::map<std::string, GmatBase*> *map);
-    
-    virtual const std::string&  
-                            GetGeneratingString();
-    
-    virtual GmatCommand*    GetNext();
-    virtual GmatCommand*    GetChildCommand(Integer whichOne = 0);
-    virtual bool            Initialize();
-    virtual bool            Execute();
+   BranchCommand(const std::string &typeStr);
+   virtual ~BranchCommand();
+   BranchCommand(const BranchCommand& bc);
+   BranchCommand&          operator=(const BranchCommand& bc);
+   
+   void                    AddBranch(GmatCommand *cmd, Integer which = 0);
+   bool                    ExecuteBranch(Integer which = 0);
+   
+   // Inherited methods that need refinements to handle the branching
+   virtual bool            Append(GmatCommand *cmd);
+   virtual bool            Insert(GmatCommand *cmd, GmatCommand *prev);
+   virtual GmatCommand*        Remove(GmatCommand *cmd);
+   
+   virtual void            SetSolarSystem(SolarSystem *ss);
+   virtual void            SetObjectMap(std::map<std::string, GmatBase*> *map);
+   
+   virtual const std::string&  
+                           GetGeneratingString();
+   
+   virtual GmatCommand*    GetNext();
+   virtual GmatCommand*    GetChildCommand(Integer whichOne = 0);
+   virtual bool            Initialize();
+   virtual bool            Execute();
     
 protected:
-    /// The managed branch(es).  A vector so Case can use it unchanged in build 3.
-    std::vector <GmatCommand *> branch;
-    /// Flag used to indicate if the command is finished executing
-    bool                    commandComplete;
-    /// Flag used to indicate a run is being executed
-    bool                    commandExecuting;
-    /// The branch that is being filled while the command sequence is being built
-    Integer                 branchToFill;
-    /// Local container used to return the full sequence from the branches
-    std::string             fullString;
+
+   // no additional parameters to add at this time
+   enum
+   {
+      BranchCommandParamCount = GmatCommandParamCount,
+   };
+   
+   /// The managed branch(es).  A vector so Case can use it unchanged in build 3.
+   std::vector <GmatCommand *> branch;
+   /// Flag used to indicate if the command is finished executing
+   bool                    commandComplete;
+   /// Flag used to indicate a run is being executed
+   bool                    commandExecuting;
+   /// The branch that is being filled while the command sequence is being built
+   Integer                 branchToFill;
+   /// Local container used to return the full sequence from the branches
+   std::string             fullString;
 };
 
-#endif // BRANCHCOMMAND_H
+#endif // BranchCommand_hpp
