@@ -80,6 +80,7 @@ public:
 protected:
    /// Name of the report file
    std::string         filename;
+
    /// Precision for output of real data
    Integer             precision;
    
@@ -89,11 +90,16 @@ protected:
    /// Write the headers on the top of the column
    bool                  writeHeaders;
    
+   /// Write the headers on the top of the column
+   bool                  writeStateFile;
+
+   
    /// ID for the file name
 //   Integer             filenameID;
    /// ID for the precision information
 //   Integer             precisionID;
    std::ofstream       dstream;  // output data stream
+   std::ofstream       stateStream;  //output data for state
 
    std::vector<Parameter*> mVarParams; //loj: 6/4/04 remove this later
    std::map<std::string, Parameter*> mVarParamMap;
@@ -113,8 +119,7 @@ private:
     void ClearVarParameters();
     void WriteHeaders();
     bool initial;
-    bool mOpenFile;
-    
+
     enum
     {
 		FILENAME = SubscriberParamCount,
@@ -124,6 +129,7 @@ private:
       CLEAR,
       WRITE_HEADERS,
       COL_WIDTH,
+      WRITE_STATE_FILE,
       ReportFileParamCount  /// Count of the parameters for this class
     };
 
