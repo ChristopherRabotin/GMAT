@@ -67,9 +67,9 @@
  * @param order	Order of the expansion used for the integrator
  */
 //------------------------------------------------------------------------------
-RungeKutta::RungeKutta(Integer st, Integer order, Gmat::ObjectType id, const std::string &typeStr,
+RungeKutta::RungeKutta(Integer st, Integer order, const std::string &typeStr,
 					   const std::string &nomme) :
-    Integrator      (id, typeStr, nomme),
+    Integrator      (typeStr, nomme),
     stages          (st),
     ki              (NULL),
     ai              (NULL),

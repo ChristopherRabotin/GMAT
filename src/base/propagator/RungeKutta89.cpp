@@ -53,10 +53,10 @@
  * The default constructor
  */
 //------------------------------------------------------------------------------
-RungeKutta89::RungeKutta89(void) :
-RungeKutta (16, 9, NULL, NULL, NULL)
-{
-}
+//RungeKutta89::RungeKutta89(void) :
+//RungeKutta (16, 9, NULL, NULL, NULL)
+//{
+//}
 
 //------------------------------------------------------------------------------
 // RungeKutta89::RungeKutta89(Gmat::ObjectType id, const std::string &typeStr,
@@ -66,9 +66,8 @@ RungeKutta (16, 9, NULL, NULL, NULL)
  * The constructor
  */
 //------------------------------------------------------------------------------
-RungeKutta89::RungeKutta89(Gmat::ObjectType id, const std::string &typeStr,
-						   const std::string &nomme) :
-    RungeKutta (16, 9, id, typeStr, nomme)
+RungeKutta89::RungeKutta89(const std::string &nomme) :
+    RungeKutta (16, 9, "RungeKutta89", nomme)
 {
 }
 

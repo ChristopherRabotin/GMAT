@@ -140,7 +140,7 @@
 class GMAT_API RungeKutta : public Integrator
 {
 public:
-    RungeKutta(Integer st, Integer order, Gmat::ObjectType typeId, const std::string &typeStr,
+    RungeKutta(Integer st, Integer order, const std::string &typeStr,
 			   const std::string &nomme = "");
     virtual ~RungeKutta(void);
     RungeKutta(const RungeKutta&);

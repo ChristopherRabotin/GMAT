@@ -66,6 +66,11 @@ Command* CommandFactory::CreateCommand(std::string ofType,
 CommandFactory::CommandFactory() :
 Factory(Gmat::COMMAND)
 {
+   if (creatables.empty())
+   {
+      creatables.push_back("Toggle");  // default type for this factory
+      creatables.push_back("Propagate");  // default type for this factory
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -96,7 +101,11 @@ Factory(createList,Gmat::COMMAND)
 CommandFactory::CommandFactory(const CommandFactory& fact) :
 Factory(fact)
 {
-
+   if (creatables.empty())
+   {
+      creatables.push_back("Toggle");  // default type for this factory
+      creatables.push_back("Propagate");  // default type for this factory
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -137,9 +146,3 @@ CommandFactory::~CommandFactory()
 //  private methods
 //---------------------------------
 
-
-
-
-
-
-   

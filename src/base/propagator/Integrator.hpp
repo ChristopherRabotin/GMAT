@@ -111,7 +111,7 @@
 class GMAT_API Integrator : public Propagator
 {
 public:
-    Integrator(Gmat::ObjectType typeId, const std::string &typeStr,
+    Integrator(const std::string &typeStr,
 			   const std::string &nomme = "");
     virtual ~Integrator(void);
 

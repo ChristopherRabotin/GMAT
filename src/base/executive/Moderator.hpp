@@ -107,8 +107,8 @@ public:
 
    // PropSetup
    PropSetup* CreatePropSetup(const std::string &name,
-                              std::string propagatorName,
-                              std::string forceModelName);
+                              std::string propagatorName = "",
+                              std::string forceModelName = "");
    PropSetup* GetPropSetup(const std::string &name);
 
    // CelestialBody

@@ -49,8 +49,8 @@ Interpreter::Interpreter() :
 //        typemap["PropagatorSetup"] = Gmat::PROP_SETUP;
         
         // Build a similar mapping for all of the defined commands
-        StringArray cmds = moderator->GetListOfFactoryItem(Gmat::COMMAND);
-        copy(cmds.begin(), cmds.end(), back_inserter(cmdmap));
+//        StringArray cmds = moderator->GetListOfFactoryItems(Gmat::COMMAND);
+//        copy(cmds.begin(), cmds.end(), back_inserter(cmdmap));
     } 
 }
 

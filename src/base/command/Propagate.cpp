@@ -127,7 +127,7 @@ bool Propagate::SetObject(GmatBase *obj, const Gmat::ObjectType type)
 {
     switch (type) {
         case Gmat::STOP_CONDITION:
-            stopWhen.push_back((StoppingCondition *)obj);
+            stopWhen.push_back((StopCondition *)obj);
             return true;
             
         // Keep the compiler from whining

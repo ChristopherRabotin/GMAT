@@ -23,6 +23,8 @@
 #ifndef BaseException_hpp
 #define BaseException_hpp
 
+#include <string>
+
 class BaseException
 {
 public:

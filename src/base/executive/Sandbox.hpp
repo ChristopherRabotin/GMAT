@@ -30,6 +30,12 @@
 #include "Command.hpp"
 
 
+#include "Spacecraft.hpp"
+#include "PropSetup.hpp"
+#include "Subscriber.hpp"
+#include "SolarSystem.hpp"
+
+
 class GMAT_API Sandbox
 {
 public:
@@ -38,14 +44,18 @@ public:
 
     // Setup methods
     bool				AddObject(GmatBase *obj);
+    bool				AddSpacecraft(Spacecraft *obj);
+    bool                AddPropSetup(PropSetup *propSetup);
     bool				AddCommand(Command *cmd);
-    bool				SetSolarSystem(SolarSystem *ss);
+    bool				AddSolarSystem(SolarSystem *ss);
+    bool                AddSubscriber(Subscriber *sub);
     bool				SetPublisher(Publisher *pub = NULL);
     
     // Execution methods
     bool                Initialize(void);
     bool                Execute(void);
     bool                Interrupt(void);
+    void                Clear(void);
 
 protected:
     

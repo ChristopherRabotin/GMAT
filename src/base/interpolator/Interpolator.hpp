@@ -37,6 +37,7 @@ public:
     virtual bool            AddPoint(const Real ind, const Real *data);
     virtual bool	        Interpolate(const Real ind, Real *results) = 0;
     virtual void            Clear(void);
+    virtual Integer         GetBufferSize(void) = 0;
 
 protected:
     /// Data array used for the independent variable

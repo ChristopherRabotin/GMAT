@@ -108,9 +108,9 @@ Integrator::PARAMETER_TYPE[IntegratorParamCount] =
  * Default constructor for the Integrator
  */
 //------------------------------------------------------------------------------
-Integrator::Integrator(Gmat::ObjectType id, const std::string &typeStr,
+Integrator::Integrator(const std::string &typeStr,
 					   const std::string &nomme) :
-    Propagator              (id, typeStr, nomme),
+    Propagator              (typeStr, nomme),
     tolerance               (1.0e-11),
     fixedStep               (false),
     fixedStepsize           (300.0),
@@ -438,3 +438,4 @@ void Integrator::SetPhysicalModel(PhysicalModel *pPhyscialModel)
     if (physicalModel) 
         physicalModel->SetErrorThreshold(errorThreshold);
 }
+

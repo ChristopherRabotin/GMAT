@@ -74,7 +74,7 @@
 class GMAT_API Propagator : public GmatBase
 {
 public:
-    Propagator(Gmat::ObjectType typeId, const std::string &typeStr,
+    Propagator(const std::string &typeStr,
 			   const std::string &nomme = "");
     virtual ~Propagator(void);
 

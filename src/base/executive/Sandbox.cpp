@@ -77,7 +77,7 @@ bool Sandbox::AddCommand(Command *cmd)
 }
 
 
-bool Sandbox::SetSolarSystem(SolarSystem *ss)
+bool Sandbox::AddSolarSystem(SolarSystem *ss)
 {
     if (state == INITIALIZED)
         state = IDLE;
@@ -177,6 +177,30 @@ bool Sandbox::Interrupt(void)
     //
     // }
     
+    return false;
+}
+
+
+void Sandbox::Clear(void)
+{
+}
+
+
+bool Sandbox::AddSpacecraft(Spacecraft *obj)
+{
+    return AddObject(obj);
+}
+
+
+bool Sandbox::AddPropSetup(PropSetup *propSetup)
+
+{
+    return AddObject(propSetup);
+}
+
+
+bool Sandbox::AddSubscriber(Subscriber *sub)
+{
     return false;
 }
 

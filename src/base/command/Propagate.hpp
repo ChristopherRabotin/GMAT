@@ -24,15 +24,11 @@
 #include "Command.hpp"
 #include <list>
 
-// Forward references for classes used to propagate
-class Spacecraft;
-class PropagatorSetup;
-class StoppingCondition;
 
 // Headers for the referenced classes
-//#include "Spacecraft.hpp"
-//#include "PropSetup.hpp"
-//#include "StopCond.hpp"
+#include "Spacecraft.hpp"
+#include "PropSetup.hpp"
+#include "StopCondition.hpp"
 
 
 class GMAT_API Propagate : public Command
@@ -92,14 +88,14 @@ protected:
     //    std::vector<Propagator>  prop;
     
     /// The propagator used by this command
-    PropagatorSetup         *prop;		// Likely to change when the propagator
+    PropSetup               *prop;      // Likely to change when the propagator
                                         // infrastructure is coded -- might
                                         // just be a Propagator *
     /// The spacecraft that are propagated
     std::vector<Spacecraft*>
                             sats;
     /// The stopping conditions
-    std::vector<StoppingCondition *>
+    std::vector<StopCondition *>
                             stopWhen;
 
     // For convenience, set variables for the parameter IDs

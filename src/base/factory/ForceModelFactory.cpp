@@ -45,7 +45,7 @@
 ForceModel* ForceModelFactory::CreateForceModel(std::string ofType,
                                                 std::string withName)
 {
-   return new ForceModel();
+   return new ForceModel(withName);
 }
 
 

@@ -72,7 +72,8 @@ Moderator::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1] =
 //------------------------------------------------------------------------------
 Moderator* Moderator::Instance()
 {
-   if (instance = NULL)
+//   if (instance = NULL)       // DJC: Changed to ==
+   if (instance == NULL)
       instance = new Moderator;
    return instance;
 }
@@ -100,7 +101,7 @@ bool Moderator::Initialize()
    theSpacecraftFactory = new SpacecraftFactory();
    theStopConditionFactory = new StopConditionFactory();
    theSubscriberFactory = new SubscriberFactory();
-   
+
    // Register factories
    theFactoryManager->RegisterFactory(theCommandFactory);
    theFactoryManager->RegisterFactory(theForceModelFactory);
@@ -219,7 +220,7 @@ Spacecraft* Moderator::GetSpacecraft(const std::string &name)
 Propagator* Moderator::CreatePropagator(const std::string type, const std::string &name)
 {
    Propagator *prop = theFactoryManager->CreatePropagator(type, name);
-   theConfigManager->AddPropagator(prop);
+//   theConfigManager->AddPropagator(prop);
    return prop;
 }
 
@@ -239,7 +240,7 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string type,
                                               const std::string &name)
 {
    PhysicalModel *physicalModel = theFactoryManager->CreatePhysicalModel(type, name);
-   theConfigManager->AddPhysicalModel(physicalModel);
+//   theConfigManager->AddPhysicalModel(physicalModel);
    return physicalModel;
 }
 
@@ -430,7 +431,7 @@ Subscriber* Moderator::GetSubscriber(const std::string &name)
 Command* Moderator::CreateCommand(const std::string type, const std::string &name)
 {
    Command *cmd = theFactoryManager->CreateCommand(type, name);
-   theConfigManager->AddCommand(cmd);
+//   theConfigManager->AddCommand(cmd);
    return cmd;
 }
 
@@ -656,16 +657,16 @@ Moderator::Moderator()
 //------------------------------------------------------------------------------
 Moderator::~Moderator()
 {
-   if (instance != NULL)
-      delete instance;
-   if (theConfigManager != NULL)
-      delete theConfigManager;
+/*   if (instance != NULL)
+//      delete instance;
+//   if (theConfigManager != NULL)
+//      delete theConfigManager;
    if (theFactoryManager != NULL)
       delete theFactoryManager;
    if (theGuiInterpreter != NULL)
       delete theGuiInterpreter;
-   if (theScriptInterpreter != NULL)
-      delete theScriptInterpreter;
+//   if (theScriptInterpreter != NULL)
+//      delete theScriptInterpreter;
    
    if (thePublisher != NULL)
       delete thePublisher;
@@ -685,7 +686,7 @@ Moderator::~Moderator()
       delete theStopConditionFactory;
    if (theSubscriberFactory != NULL)
       delete theSubscriberFactory;
-   
+*/
 }
 
 

@@ -94,3 +94,8 @@ bool LinearInterpolator::Interpolate(const Real ind, Real *results)
     return false;
 }
 
+
+Integer LinearInterpolator::GetBufferSize(void)
+{
+    return bufferSize;
+}

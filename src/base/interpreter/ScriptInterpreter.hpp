@@ -39,20 +39,23 @@ class ScriptInterpreter : public Interpreter
 {
 	public:
         // class constructor
-        ScriptInterpreter();
-        // class destructor
-        virtual ~ScriptInterpreter();
+        static ScriptInterpreter*   Instance();
 
         virtual bool                Interpret(void);
         virtual bool                Build(void);
         
     protected:
+        static ScriptInterpreter    *instance;
+
         bool                        ReadScript(void);
-        bool/*linetype*/                    ReadLine(void);
+        bool                        ReadLine(void);
         bool                        Parse(void);
         
         bool                        ConfigureCommand(Command *);
         bool                        ConfigureMathematics(void);
+        
+        ScriptInterpreter();
+        virtual ~ScriptInterpreter();
 };
 
 #endif // SCRIPTINTERPRETER_HPP

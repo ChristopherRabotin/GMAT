@@ -48,6 +48,8 @@ public:
     virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;
+    virtual Real* GetState(void)
+    { return state; }
 
     
     // Default values for spacecraft 

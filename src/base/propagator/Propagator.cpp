@@ -102,9 +102,9 @@ Propagator::PARAMETER_TYPE[PropagatorParamCount] =
  * initialized flag to false.
  */
 //------------------------------------------------------------------------------
-Propagator::Propagator(Gmat::ObjectType id, const std::string &typeStr,
+Propagator::Propagator(const std::string &typeStr,
 					   const std::string &nomme) :
-GmatBase            (id, typeStr, nomme),
+GmatBase            (Gmat::PROPAGATOR, typeStr, nomme),
 stepSize            (60.0),
 initialized         (false),
 inState             (NULL),
@@ -391,3 +391,4 @@ bool Propagator::RawStep(Real dt)
     stepSize = ctlstepsize;
     return retval;
 }
+

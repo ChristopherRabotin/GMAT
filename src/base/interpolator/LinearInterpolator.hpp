@@ -39,6 +39,7 @@ class LinearInterpolator : public Interpolator
 		LinearInterpolator&        operator=(const LinearInterpolator &li);
 
         virtual bool               Interpolate(const Real ind, Real *results);
+        virtual Integer            GetBufferSize(void);
 };
 
 #endif // LINEARINTERPOLATOR_HPP
