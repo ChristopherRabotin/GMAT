@@ -463,6 +463,34 @@ SolarSystem* GuiInterpreter::GetDefaultSolarSystem()
 }
 
 //------------------------------------------------------------------------------
+// StringArray& GetSolarSystemSourceList()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves solar system source list
+ *
+ * @return a solar system source list
+ */
+//------------------------------------------------------------------------------
+StringArray& GuiInterpreter::GetSolarSystemSourceList()
+{
+    return theModerator->GetSolarSystemSourceList();
+}
+
+//------------------------------------------------------------------------------
+// StringArray& GetSolarSystemSourceFileList()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves solar system source file list
+ *
+ * @return a solar system source file list
+ */
+//------------------------------------------------------------------------------
+StringArray& GuiInterpreter::GetSolarSystemSourceFileList()
+{
+    return theModerator->GetSolarSystemSourceFileList();
+}
+
+//------------------------------------------------------------------------------
 // bool SetSlpFileToUse(const std::string &filename)
 //------------------------------------------------------------------------------
 /**

@@ -800,6 +800,34 @@ bool Moderator::SetSolarSystemInUse(const std::string &name)
 }
 
 //------------------------------------------------------------------------------
+// StringArray& GetSolarSystemSourceList()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves solar system source list
+ *
+ * @return a solar system source list
+ */
+//------------------------------------------------------------------------------
+StringArray& Moderator::GetSolarSystemSourceList()
+{
+    return theSolarSystemSourceList;
+}
+
+//------------------------------------------------------------------------------
+// StringArray& GetSolarSystemSourceFileList()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves solar system source file list
+ *
+ * @return a solar system source file list
+ */
+//------------------------------------------------------------------------------
+StringArray& Moderator::GetSolarSystemSourceFileList()
+{
+    return theSolarSystemSourceFileList;
+}
+
+//------------------------------------------------------------------------------
 // bool SetSlpFileToUse(const std::string &filename)
 //------------------------------------------------------------------------------
 bool Moderator::SetSlpFileToUse(const std::string &filename)
@@ -819,6 +847,8 @@ bool Moderator::SetSlpFileToUse(const std::string &filename)
         {
             if (theDefaultSolarSystem->SetSourceFile(theDefaultSlpFile))
             {
+                theSolarSystemSourceList.push_back("SLP");
+                theSolarSystemSourceFileList.push_back(filename);
                 IsSlpAlreadyInUse = true;
                 status = true;
             }
@@ -1220,8 +1250,7 @@ void Moderator::CreateDefaultMission()
     // Propagate Command
     GmatCommand *propCommand = CreateCommand("Propagate");
     propCommand->SetObject("DefaultSC", Gmat::SPACECRAFT);
-    propCommand->SetObject("DefaultProp", Gmat::PROP_SETUP);
-    propCommand->SetObject("Duration", Gmat::STOP_CONDITION);
+    propCommand->SetObject("DefaultProp", Gmat::PROP_SETUP);    
     propCommand->SetObject(stopCond, Gmat::STOP_CONDITION);
     propCommand->SetSolarSystem(theDefaultSolarSystem);
 
@@ -1237,13 +1266,14 @@ void Moderator::SetupRun(Integer sandboxNum)
 {
     MessageInterface::ShowMessage("Moderator setting up for run...\n");
     std::string name;
-    Spacecraft *sc;
     GmatBase *obj;
-    Parameter *param;
     StringArray objList;
     
     // for configured parameters use internal copy of Spacecraft
     StringArray &params = GetListOfConfiguredItems(Gmat::PARAMETER);
+    Parameter *param;
+    Spacecraft *sc;
+    
     for (int i=0; i<params.size(); i++)
     {
         param = GetParameter(params[i]);
@@ -1257,6 +1287,18 @@ void Moderator::SetupRun(Integer sandboxNum)
         }
     }
     
+    StringArray &stopconds = GetListOfConfiguredItems(Gmat::STOP_CONDITION);
+    StopCondition *stopCond;
+    std::string objName;
+    
+    for (int i=0; i<stopconds.size(); i++)
+    {
+        stopCond = GetStopCondition(stopconds[i]);
+        objName = stopCond->GetName();
+        MessageInterface::ShowMessage("Moderator::SetupRun() %s:goal = %f\n",
+                                      objName.c_str(), stopCond->GetGoal());
+    }    
+   
     //loj:@todo: create plot window
 }
 

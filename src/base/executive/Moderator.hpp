@@ -138,6 +138,8 @@ public:
     SolarSystem* GetDefaultSolarSystem();
     SolarSystem* CreateSolarSystem(const std::string &name);
     SolarSystem* GetSolarSystemInUse();
+    StringArray& GetSolarSystemSourceList();
+    StringArray& GetSolarSystemSourceFileList();
     bool SetSolarSystemInUse(const std::string &name);
     bool SetSlpFileToUse(const std::string &filename);
 
@@ -226,7 +228,8 @@ private:
 
     SolarSystem *theDefaultSolarSystem;
     SlpFile *theDefaultSlpFile;
-    
+    StringArray theSolarSystemSourceList;
+    StringArray theSolarSystemSourceFileList;
     static const std::string OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1];
 
 };
