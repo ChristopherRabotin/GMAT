@@ -1079,6 +1079,54 @@ bool Spacecraft::TakeAction(const std::string &action,
       return true;
    }
    
+   if ((action == "RemoveHardware") || (action == "RemoveTank") ||
+       (action == "RemoveThruster")) {
+
+      bool removeTank = true, removeThruster = true, removeAll = false;
+      if (action == "RemoveTank")
+         removeThruster = false;
+      if (action == "RemoveThruster")
+         removeTank = false;
+      if (actionData == "")
+         removeAll = true;
+         
+      if (removeThruster) {
+         if (removeAll) {
+            thrusters.clear();
+            thrusterNames.clear();
+         }
+         else {
+            for (StringArray::iterator i = thrusterNames.begin();
+                 i != thrusterNames.end(); ++i)
+               if (*i == actionData)
+                  thrusterNames.erase(i);
+            for (ObjectArray::iterator i = thrusters.begin();
+                 i != thrusters.end(); ++i)
+               if ((*i)->GetName() == actionData)
+                  thrusters.erase(i);
+         }
+      }
+
+      if (removeTank) {
+         if (removeAll) {
+            tanks.clear();
+            tankNames.clear();
+         }
+         else {
+            for (StringArray::iterator i = tankNames.begin();
+                 i != tankNames.end(); ++i)
+               if (*i == actionData)
+                  tankNames.erase(i);
+            for (ObjectArray::iterator i = tanks.begin();
+                 i != tanks.end(); ++i)
+               if ((*i)->GetName() == actionData)
+                  tanks.erase(i);
+         }
+      }
+
+      return true;
+   }
+   
    return SpaceObject::TakeAction(action, actionData);
 }
 
