@@ -49,14 +49,15 @@
 
 #include <iostream>
 #include <fstream>
-#include <strstream>
+//#include <strstream>
+#include <sstream>
 #include <iomanip>
 #include "GravityField.hpp"
 #include "ForceModelException.hpp"
 #include "CelestialBody.hpp"
 #include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
-#include "SolarSystemException.hpp"
+//#include "SolarSystemException.hpp"
 
 using namespace GmatMathUtil;
 
@@ -761,8 +762,6 @@ bool GravityField::ReadCofFile(Integer& fileDeg, Integer& fileOrd)
    Integer       n, m;
    Integer       fileOrder, fileDegree;
    Real          Cnm=0.0, Snm=0.0; // , dCnm=0.0, dSnm=0.0;
-   char          buf[CelestialBody::BUFSIZE];
-   char          firstToken[CelestialBody::BUFSIZE];
    Integer       noIdea;
    Real          noClue;
    Real          tmpMu;
@@ -776,32 +775,36 @@ bool GravityField::ReadCofFile(Integer& fileDeg, Integer& fileOrd)
       Sbar[n][m] = 0.0;
    }
 
-   std::ifstream inFile(filename.c_str(),std::ios::in);
+   std::ifstream inFile;
+   inFile.open(filename.c_str());
    if (!inFile)
-      throw SolarSystemException("Cannot open file " + filename);
-   
+      throw ForceModelException("Cannot open file " + filename);
+
+   std::string s;
+   std::string firstStr;
    while (!inFile.eof())
    {
-      inFile.getline(buf,CelestialBody::BUFSIZE);
-      std::istrstream  lineStr(buf,CelestialBody::BUFSIZE);
+      getline(inFile,s);
+      std::istringstream lineStr;
+      lineStr.str(s);
       // ignore comment lines
-      if (buf[0] != 'C')
+      if (s[0] != 'C')
       {
-         lineStr >> firstToken;
-         if (strcmp(firstToken, "END") == 0) break;
-         if (strcmp(firstToken,"POTFIELD") == 0)
+         lineStr >> firstStr;
+         if (firstStr == "END") break;
+         if (firstStr == "POTFIELD")
          {
             lineStr >> fileDegree >> fileOrder >> noIdea >> tmpMu >> tmpA >> noClue;
             if (tmpMu == 0.0)
                mu = defaultMu;
             else
-               mu = tmpMu;
+               mu = tmpMu / 1.0e09;  // -> Km^3/sec^2
             if (tmpA  == 0.0)
                a  = defaultA;
             else
-               a = tmpA;
+               a = tmpA / 1000.0;  // -> km
          }
-         else if (strcmp(firstToken,"RECOEF") == 0)
+         else if (firstStr == "RECOEF")
          {
             lineStr >> n >> m >> Cnm >> Snm; 
                if ( n <= HF_MAX_DEGREE && m <= HF_MAX_ORDER )
@@ -816,8 +819,6 @@ bool GravityField::ReadCofFile(Integer& fileDeg, Integer& fileOrd)
    fileDeg = fileDegree;
    fileOrd = fileOrder;
    // make sure mu and a are in KM and Km^3/sec^2 (they are in meters on the files)
-   a  = a / 1000.0;
-   mu = mu / 1.0e09;
    return true;  
 }
 
@@ -835,15 +836,14 @@ bool GravityField::ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
    Integer       n, m;
    Integer       fileOrder, fileDegree;
    Real          Cnm=0.0, Snm=0.0; // , dCnm=0.0, dSnm=0.0;
-   char          buf[CelestialBody::BUFSIZE];
-   char          firstToken[CelestialBody::BUFSIZE];
    Real          tmpMu = 0.0;
    Real          tmpA  = 0.0;
    std::string   isNormalized;
 
-   std::ifstream inFile(filename.c_str(),std::ios::in);
+   std::ifstream inFile;
+   inFile.open(filename.c_str());
    if (!inFile)
-      throw SolarSystemException("Cannot open file " + filename);
+      throw ForceModelException("Cannot open file " + filename);
 
    for ( n=0,m=0; n <= HF_MAX_DEGREE && m <= HF_MAX_ORDER;n++,m++ )
    {
@@ -851,75 +851,72 @@ bool GravityField::ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
       Sbar[n][m] = 0.0;
    }
 
+   std::string s;
+   std::string firstStr;
    while (!inFile.eof())
    {
-      inFile.getline(buf,CelestialBody::BUFSIZE);
-      std::istrstream  lineStr(buf,CelestialBody::BUFSIZE);
+      getline(inFile,s);
+      std::istringstream lineStr;
+      lineStr.str(s);
       // ignore comment lines
-      if (buf[0] != '#')
+      if (s[0] != '#')
       {
-         lineStr >> firstToken;
-         if (strcmp(firstToken, "END") == 0) break;
-         
-         // ignore the stk version and blank lines
-         if ((!IsBlank(buf)) && (strncmp(firstToken,"stk",3) != 0))
-         {
-            if ((strcasecmp(firstToken,"Model") == 0) ||
-                 (strcasecmp(firstToken,"BEGIN") == 0))
-            {
-               // do nothing - we don't need to know this
-            }
-            else if (strcasecmp(firstToken,"Degree") == 0)
-            {
-               lineStr >> fileDegree;
-            }
-            else if (strcasecmp(firstToken,"Order") == 0)
-            {
-               lineStr >> fileOrder;
-            }
-            else if (strcasecmp(firstToken,"Gm") == 0)
-            {
-               lineStr >> tmpMu;
-               if (tmpMu == 0.0)
-                  mu = defaultMu;
-               else
-                  mu = tmpMu;
-            }
-            else if (strcasecmp(firstToken,"RefDistance") == 0)
-            {
-               lineStr >> tmpA;
-               if (tmpA == 0.0)
-                  a = defaultA;
-               else
-                  a = tmpA;
-            }
-            else if (strcasecmp(firstToken,"Normalized") == 0)
-            {
-               lineStr >> isNormalized;
-               if (isNormalized == "No")
-                  throw SolarSystemException(
-                        "File " + filename + " is not normalized.");
-             }
-            else
-            {
-               n = (Integer) atoi(firstToken);
-               lineStr >> m >> Cnm >> Snm;
-               if ( n <= HF_MAX_DEGREE && m <= HF_MAX_ORDER )
-               {
-                  Cbar[n][m] = (Real)Cnm;
-                  Sbar[n][m] = (Real)Snm;
-               }
-            }
+         lineStr >> firstStr;
+         if (firstStr == "END") break;
 
+         // ignore the stk version and blank lines
+         if ((strcasecmp(firstStr.c_str(),"Model") == 0) ||
+               (strcasecmp(firstStr.c_str(),"BEGIN") == 0))
+         {
+            // do nothing - we don't need to know this
          }
+         else if (strcasecmp(firstStr.c_str(),"Degree") == 0)
+         {
+            lineStr >> fileDegree;
+         }
+         else if (strcasecmp(firstStr.c_str(),"Order") == 0)
+         {
+            lineStr >> fileOrder;
+         }
+         else if (strcasecmp(firstStr.c_str(),"Gm") == 0)
+         {
+            lineStr >> tmpMu;
+            if (tmpMu == 0.0)
+               mu = defaultMu;
+            else
+               mu = tmpMu / 1.0e09;     // -> Km^3/sec^2
+         }
+         else if (strcasecmp(firstStr.c_str(),"RefDistance") == 0)
+         {
+            lineStr >> tmpA;
+            if (tmpA == 0.0)
+               a = defaultA;
+            else
+               a = tmpA / 1000.0;  // -> Km
+         }
+         else if (strcasecmp(firstStr.c_str(),"Normalized") == 0)
+         {
+            lineStr >> isNormalized;
+            if (isNormalized == "No")
+               throw ForceModelException(
+                     "File " + filename + " is not normalized.");
+            }
+         else
+         {
+            n = (Integer) atoi(firstStr.c_str());
+            lineStr >> m >> Cnm >> Snm;
+            if ( n <= HF_MAX_DEGREE && m <= HF_MAX_ORDER )
+            {
+               Cbar[n][m] = (Real)Cnm;
+               Sbar[n][m] = (Real)Snm;
+            }
+         }
+
       }
    }
 
    fileDeg = fileDegree;
    fileOrd = fileOrder;
-   // make sure mu and a are in KM and Km^3/sec^2 (they are in meters on the files)
-   a  = a / 1000.0;
-   mu                = mu / 1.0e09;
    return true;  
 }
 
@@ -973,8 +970,8 @@ bool GravityField::ReadDatFile(Integer& fileDeg, Integer& fileOrd)
       }
    }
 
-   fscanf(fp, "%lg\n", &mu ); mu = (Real)mu;
-   fscanf(fp, "%lg\n", &a ); a = (Real)a;
+   fscanf(fp, "%lg\n", &mu ); mu = (Real)mu / 1.0e09;      // -> Km^3/sec^2
+   fscanf(fp, "%lg\n", &a ); a = (Real)a / 1000.0;         // -> Km
    fgets( buf, CelestialBody::BUFSIZE, fp );
    while ( ( (char)(rtn=fgetc(fp)) != '#' ) && (rtn != EOF) )
    {
@@ -1007,9 +1004,6 @@ bool GravityField::ReadDatFile(Integer& fileDeg, Integer& fileOrd)
 
    fileDeg = fileDegree;
    fileOrd = fileOrder;
-   // make sure mu and a are in KM and Km^3/sec^2 (they are in meters on the files)
-   a  = a / 1000.0;
-   mu                = mu / 1.0e09;
    return true;
 }
 
