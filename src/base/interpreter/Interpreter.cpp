@@ -846,6 +846,8 @@ bool Interpreter::InterpretFunctionCall()
    if (cmd == NULL)
       throw InterpreterException("Unable to assemble function command for \"" +
                line + "\"");
+
+   cmd->SetGeneratingString(line);
                
    StringArray inputs, outputs;
    std::string funct;
@@ -866,12 +868,16 @@ bool Interpreter::InterpretFunctionCall()
    cmd->SetStringParameter("FunctionName", funct);
    
    for (StringArray::iterator str = inputs.begin(); str != inputs.end(); ++str) {
-      MessageInterface::ShowMessage("   Adding input %s\n", str->c_str());
+      #ifdef DEBUG_TOKEN_PARSING
+         MessageInterface::ShowMessage("   Adding input %s\n", str->c_str());
+      #endif
       cmd->SetStringParameter("AddInput", *str);
    }
       
    for (StringArray::iterator str = outputs.begin(); str != outputs.end(); ++str) {
-      MessageInterface::ShowMessage("   Adding output %s\n", str->c_str());
+      #ifdef DEBUG_TOKEN_PARSING
+         MessageInterface::ShowMessage("   Adding output %s\n", str->c_str());
+      #endif
       cmd->SetStringParameter("AddOutput", *str);
    }
       
