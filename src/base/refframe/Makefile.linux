@@ -1,0 +1,18 @@
+# Makefile for GMAT RefFrame library
+# Initial Version - D. Conway - 2003/11/19
+
+HEADERS = -I../include -I../foundation -I../solarsys -I../util
+OBJECTS = MeanJ2000Equatorial.o RefFrame.o
+
+all: libRefFrame
+	mkdir -p ../lib
+	mv libRefFrame.a ../lib
+
+libRefFrame : ../lib/libRefFrame.a
+
+.cpp.o:
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c $<
+
+../lib/libRefFrame.a : $(OBJECTS)
+	ar rs libRefFrame.a $(OBJECTS)
+	ranlib libRefFrame.a

@@ -1,0 +1,19 @@
+# Makefile for GMAT Parameter library
+# Initial Version - D. Conway - 2003/11/19
+
+HEADERS = -I../include -I../foundation -I../util
+OBJECTS = CurrentTimeParam.o ElapsedTimeParam.o Parameter.o \
+          ParameterDatabase.o SpacecraftStateParam.o
+
+all: libParameter 
+	mkdir -p ../lib
+	mv libParameter.a ../lib
+
+libParameter : ../lib/libParameter.a
+
+.cpp.o:
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c $<
+
+../lib/libParameter.a : $(OBJECTS)
+	ar rs libParameter.a $(OBJECTS)
+	ranlib libParameter.a

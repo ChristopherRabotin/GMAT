@@ -1,0 +1,18 @@
+# Makefile for GMAT Force Model library
+# Initial Version - D. Conway - 2003/11/19
+
+HEADERS = -I../include -I../foundation -I../spacecraft
+OBJECTS = DerivativeList.o ForceModel.o PhysicalModel.o PointMassForce.o
+
+all: libForceModel
+	mkdir -p ../lib
+	mv libForceModel.a ../lib
+
+libForceModel : ../lib/libForceModel.a
+
+.cpp.o:
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c $<
+
+../lib/libForceModel.a : $(OBJECTS)
+	ar rs libForceModel.a $(OBJECTS)
+	ranlib libForceModel.a

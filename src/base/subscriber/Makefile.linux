@@ -1,0 +1,22 @@
+# Makefile for GMAT Subscriber library
+# Initial Version - D. Conway - 2003/11/19
+
+# Note that this Makefile introduces a small circular dependency. 
+# MessageWindow uses MessageInterface, part of the executive library.  But
+# the factory for MessageWindow gets built before executive.
+
+HEADERS = -I../include -I../foundation -I../executive
+OBJECTS = Subscriber.o ReportFile.o MessageWindow.o
+
+all: libSubscriber
+	mkdir -p ../lib
+	mv libSubscriber.a ../lib
+
+libSubscriber : ../lib/libSubscriber.a
+
+.cpp.o:
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c $<
+
+../lib/libSubscriber.a : $(OBJECTS)
+	ar rs libSubscriber.a $(OBJECTS)
+	ranlib libSubscriber.a

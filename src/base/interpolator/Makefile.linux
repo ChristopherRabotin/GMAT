@@ -1,0 +1,18 @@
+# Makefile for GMAT Interpolator library
+# Initial Version - D. Conway - 2003/11/19
+
+HEADERS = -I../include -I../foundation
+OBJECTS = Interpolator.o LinearInterpolator.o
+
+all: libInterpolator
+	mkdir -p ../lib
+	mv libInterpolator.a ../lib
+
+libInterpolator : ../lib/libInterpolator.a
+
+.cpp.o:
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c $<
+
+../lib/libInterpolator.a : $(OBJECTS)
+	ar rs libInterpolator.a $(OBJECTS)
+	ranlib libInterpolator.a

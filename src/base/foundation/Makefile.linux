@@ -1,0 +1,18 @@
+# Makefile for GMAT Foundation library
+# Initial Version - D. Conway - 2003/11/19
+
+HEADERS = -I../include
+OBJECTS = GmatBase.o
+
+all: libFoundation 
+	mkdir -p ../lib
+	mv libFoundation.a ../lib
+
+libFoundation : ../lib/libFoundation.a
+
+.cpp.o:
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c $<
+
+../lib/libFoundation.a : $(OBJECTS)
+	ar rs libFoundation.a $(OBJECTS)
+	ranlib libFoundation.a

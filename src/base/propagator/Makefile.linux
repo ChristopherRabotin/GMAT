@@ -1,0 +1,22 @@
+# Makefile for GMAT Propagator library
+# Initial Version - D. Conway - 2003/11/19
+
+TARGET = ../lib/libPropagator.a
+
+HEADERS = -I../include -I../foundation -I../forcemodel -I../spacecraft
+OBJECTS = PropSetup.o Propagator.o Integrator.o RungeKutta.o RungeKutta89.o
+
+all: $(TARGET)
+	mkdir -p ../lib
+	mv libPropagator.a ../lib
+
+clean:
+	rm $(OBJECTS)
+	rm $(TARGET)
+
+.cpp.o:
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c $<
+
+$(TARGET) : $(OBJECTS)
+	ar rs libPropagator.a $(OBJECTS)
+	ranlib libPropagator.a

@@ -1,0 +1,18 @@
+# Makefile for GMAT Spacecraft library
+# Initial Version - D. Conway - 2003/11/19
+
+HEADERS = -I../include -I../foundation
+OBJECTS = Spacecraft.o
+
+all: libSpacecraft 
+	mkdir -p ../lib
+	mv libSpacecraft.a ../lib
+
+libSpacecraft : ../lib/libSpacecraft.a
+
+.cpp.o:
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c $<
+
+../lib/libSpacecraft.a : $(OBJECTS)
+	ar rs libSpacecraft.a $(OBJECTS)
+	ranlib libSpacecraft.a

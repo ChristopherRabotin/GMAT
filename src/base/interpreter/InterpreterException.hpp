@@ -23,7 +23,7 @@
 #ifndef INTERPRETEREXCEPTION_HPP
 #define INTERPRETEREXCEPTION_HPP
 
-#include "baseexception.hpp" // inheriting class's header file
+#include "BaseException.hpp" // inheriting class's header file
 
 /**
  * Exceptions thrown by the interpereters

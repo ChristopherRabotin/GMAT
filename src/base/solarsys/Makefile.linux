@@ -1,0 +1,18 @@
+# Makefile for GMAT Solar System library
+# Initial Version - D. Conway - 2003/11/19
+
+HEADERS = -I../include -I../foundation
+OBJECTS = CelestialBody.o SolarSystem.o
+
+all: libSolarSystem 
+	mkdir -p ../lib
+	mv libSolarSystem.a ../lib
+
+libSolarSystem : ../lib/libSolarSystem.a
+
+.cpp.o:
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c $<
+
+../lib/libSolarSystem.a : $(OBJECTS)
+	ar rs libSolarSystem.a $(OBJECTS)
+	ranlib libSolarSystem.a

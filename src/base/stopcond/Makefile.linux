@@ -1,0 +1,20 @@
+# Makefile for GMAT Stopping Condition library
+# Initial Version - D. Conway - 2003/11/19
+
+HEADERS = -I../include -I../foundation -I../parameter -I../interpolator \
+          -I../refframe -I../util -I../solarsys
+
+OBJECTS = StopCondition.o SingleValueStop.o
+
+all: libStopCondition
+	mkdir -p ../lib
+	mv libStopCondition.a ../lib
+
+libStopCondition : ../lib/libStopCondition.a
+
+.cpp.o:
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c $<
+
+../lib/libStopCondition.a : $(OBJECTS)
+	ar rs libStopCondition.a $(OBJECTS)
+	ranlib libStopCondition.a

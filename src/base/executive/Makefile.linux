@@ -1,0 +1,46 @@
+# Makefile for GMAT Executive library
+# Initial Version - D. Conway - 2003/11/19
+
+# This makefile creates both console and wx versions of the executive library
+ 
+HEADERS = -I../include -I../foundation -I../executive -I../spacecraft \
+          -I../forcemodel -I../propagator -I../subscriber -I../command \
+          -I../solarsys -I../factory -I../stopcond -I../interpreter \
+          -I../util -I../interpolator -I../parameter -I../configs \
+          -I../refframe 
+
+OBJECTS = Moderator.o Sandbox.o SandboxException.o Publisher.o
+
+CONSOLE_INTERFACE_OBJECTS = MessageInterfaceConsole.o
+GUI_INTERFACE_OBJECTS = MessageInterfaceGUI.o
+
+all: libExecutive libExecutiveConsole
+	mkdir -p ../lib
+	mv libExecutive.a ../lib
+	mv libExecutiveConsole.a ../lib
+
+libExecutive : ../lib/libExecutive.a
+	
+libExecutiveConsole : ../lib/libExecutiveConsole.a
+
+.cpp.o:
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c $<
+
+MessageInterfaceConsole.o : MessageInterface.cpp MessageInterface.hpp
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c -D__CONSOLE_APP__ \
+        -o MessageInterfaceConsole.o MessageInterface.cpp
+
+MessageInterfaceGUI.o : MessageInterface.cpp MessageInterface.hpp
+	$(CPP) $(CPPFLAGS) $(HEADERS) -I../../gui/include \
+        -I../../gui/app -I../../gui/view \
+        -c -I/usr/local/lib/wx/include/gtk-2.4 -DGTK_NO_CHECK_CASTS \
+        -D__WXGTK__ -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES \
+        -o MessageInterfaceGUI.o MessageInterface.cpp
+
+../lib/libExecutive.a : $(OBJECTS) $(GUI_INTERFACE_OBJECTS)
+	ar rs libExecutive.a $(OBJECTS) $(GUI_INTERFACE_OBJECTS)
+	ranlib libExecutive.a
+
+../lib/libExecutiveConsole.a : $(OBJECTS) $(CONSOLE_INTERFACE_OBJECTS)
+	ar rs libExecutiveConsole.a $(OBJECTS) $(CONSOLE_INTERFACE_OBJECTS)
+	ranlib libExecutiveConsole.a
