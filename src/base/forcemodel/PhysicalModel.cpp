@@ -136,14 +136,14 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
    dimension                   (1),
    initialized                 (false),
    stateChanged                (false),
+   isPrimaryBody               (true),
    modelState                  (NULL),
    epoch                       (21545.0),
    elapsedTime                 (0.0),
    prevElapsedTime             (0.0),
    deriv                       (NULL),
    relativeErrorThreshold      (0.10),
-   solarSystem                 (NULL),
-   isPrimaryBody               (true)
+   solarSystem                 (NULL)
 {
    parameterCount = PhysicalModelParamCount;
 }
