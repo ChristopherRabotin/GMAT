@@ -409,7 +409,6 @@ Propagator* Moderator::CreatePropagator(const std::string &type, const std::stri
                                     "%s.  Check PropagatorFactory. \n", type.c_str());
 
       throw GmatBaseException("Error Creating Propagator");
-      //return NULL;
    }
     
    // Manage it if it is a named Propagator
@@ -783,45 +782,9 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
    //MessageInterface::ShowMessage("Moderator::CreateDefaultPropSetup() name=%s\n",
    //                              name.c_str());
     
-   // assumes "RungeKutta89" is the default propagator
-   std::string propName = name + "RKV89";
-   Propagator *prop = CreatePropagator("RungeKutta89", propName);
-    
-   // creates empty ForceModel
-   std::string fmName = propName + "ForceModel"; //loj: 3/19/04 changed name to propName
-   ForceModel *fm = CreateForceModel(fmName);
-
-   // create PointMass force and add to Force
-   //loj: 3/15/04 do not configure force, force model has linked list of force
-   //loj: 3/25/04 PointMassForce will create default body of Earth
-   PhysicalModel *earthGrav = CreatePhysicalModel("PointMassForce", "");
-
-   // set SolarSystem and Earth as default body
-   //loj: 4/28/08 - Uncomment the following when PointMassForce is ready to CelestialBody
-   //earthGrav->SetSolarSystem(theDefaultSolarSystem);
-   //earthGrav->SetBody(theDefaultSolarSystem->GetBody("Earth"));
-   
-   //loj: 3/15/04 always add to force model before propSetup::SetForceModel()
-   // because PropSetup::Initialize() needs at least 1 force
-   fm->AddForce(earthGrav);
-    
-   // create PropSetup
-   // PropSetup creates default Integrator, ForceModel with PointMassForce
-   PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
-
-   if (prop)
-   {
-      propSetup->SetUseDrag(false);   // turn off internal drag
-      propSetup->SetPropagator(prop);
-   }
-    
-   if (fm)
-   {
-      propSetup->SetForceModel(fm); //loj: 3/12/04 added
-   }
-    
-   theConfigManager->AddPropSetup(propSetup);
-    
+   //loj: 5/11/04 since PropSetup creates default Integrator(RungeKutta89)
+   // and default force (PointMassForce body=Eargh)
+   PropSetup *propSetup = CreatePropSetup(name);    
    return propSetup;
 }
 
@@ -1473,6 +1436,23 @@ bool Moderator::ClearResource()
    MessageInterface::ShowMessage("Moderator::ClearResource() entered\n");
 
    theConfigManager->RemoveAllItems();
+
+   //loj: 5/3/04 debug
+   StringArray &subs = GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+   Subscriber *sub;
+   std::string objTypeName;
+   std::string objName;
+
+   for (unsigned int i=0; i<subs.size(); i++)
+   {
+      sub = GetSubscriber(subs[i]);
+      objTypeName = sub->GetTypeName();
+      objName = sub->GetName();
+      MessageInterface::ShowMessage
+         ("Moderator::ClearResource() objTypeName = %s, objName = %s\n",
+          objTypeName.c_str(), objName.c_str());
+   }
+
    return true;
 }
 
@@ -1593,6 +1573,7 @@ void Moderator::ClearAllSandboxes()
 //------------------------------------------------------------------------------
 Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
 {
+   MessageInterface::ShowMessage("Moderator::RunMission() entered\n");
    Integer status = 0;
 
    if (isRunReady)
@@ -1619,16 +1600,16 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
          AddSolverToSandbox(sandboxNum-1);        
          AddSubscriberToSandbox(sandboxNum-1);
          AddCommandToSandbox(sandboxNum-1);
+         //MessageInterface::ShowMessage("Moderator::RunMission() after AddCommandToSandbox() \n");
         
          InitializeSandbox(sandboxNum-1);
+         //MessageInterface::ShowMessage("Moderator::RunMission() after InitializeSanbox() \n");
 
          SetupRun(sandboxNum, isFromGui);
          //MessageInterface::ShowMessage("Moderator::RunMission() after SetupRun() \n");
 
          ExecuteSandbox(sandboxNum-1);
          //MessageInterface::ShowMessage("Moderator::RunMission() after ExecuteSandbox() \n");
-         
-         MessageInterface::ShowMessage("Moderator successfully ran mission\n");
       }
       catch (BaseException &e)
       {
@@ -1680,7 +1661,11 @@ bool Moderator::InterpretScript(const std::string &scriptFilename)
    {
       status = theScriptInterpreter->Interpret(scriptFilename);
       if (status)
+      {
+         MessageInterface::ShowMessage
+            ("Moderator::InterpretScript() successfully interpreted the script\n");
          isRunReady = true;
+      }
    }
    catch (BaseException &e)
    {
@@ -1718,7 +1703,6 @@ bool Moderator::SaveScript(const std::string &scriptFilename)
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
       return false;
    }
-    
 }
 
 //------------------------------------------------------------------------------
@@ -1804,22 +1788,22 @@ void Moderator::CreateDefaultMission()
       CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");
 
       // Cartesian parameters
-      CreateParameter("CartX", "DefaultSC.X");
-      CreateParameter("CartY", "DefaultSC.Y");
-      CreateParameter("CartZ", "DefaultSC.Z");
-      CreateParameter("CartVx", "DefaultSC.Vx");
-      CreateParameter("CartVy", "DefaultSC.Vy");
-      CreateParameter("CartVz", "DefaultSC.Vz");
+      CreateParameter("X", "DefaultSC.X");
+      CreateParameter("Y", "DefaultSC.Y");
+      CreateParameter("Z", "DefaultSC.Z");
+      CreateParameter("VX", "DefaultSC.Vx");
+      CreateParameter("VY", "DefaultSC.Vy");
+      CreateParameter("VZ", "DefaultSC.Vz");
 
       // Keplerian parameters
-      CreateParameter("KepSMA", "DefaultSC.SMA");
-      CreateParameter("KepEcc", "DefaultSC.Ecc");
-      CreateParameter("KepInc", "DefaultSC.Inc");
-      CreateParameter("KepRAAN", "DefaultSC.RAAN");
-      CreateParameter("KepAOP", "DefaultSC.AOP");
-      CreateParameter("KepTA", "DefaultSC.TA");
-      CreateParameter("KepMA", "DefaultSC.MA");
-      CreateParameter("KepMM", "DefaultSC.MM");
+      CreateParameter("SMA", "DefaultSC.SMA");
+      CreateParameter("ECC", "DefaultSC.Ecc");
+      CreateParameter("INC", "DefaultSC.Inc");
+      CreateParameter("RAAN", "DefaultSC.RAAN");
+      CreateParameter("AOP", "DefaultSC.AOP");
+      CreateParameter("TA", "DefaultSC.TA");
+      CreateParameter("MA", "DefaultSC.MA");
+      CreateParameter("MM", "DefaultSC.MM");
 
       // Orbital parameters
       CreateParameter("VelApoapsis", "DefaultSC.VelApoapsis");
@@ -1828,8 +1812,12 @@ void Moderator::CreateDefaultMission()
       CreateParameter("Periapsis", "DefaultSC.Periapsis");
 
       // Spherical parameters
-      CreateParameter("SphRA", "DefaultSC.RA");
-      CreateParameter("SphDec", "DefaultSC.Dec");
+      CreateParameter("RMAG", "DefaultSC.RMAG");
+      CreateParameter("RA", "DefaultSC.RA");
+      CreateParameter("DEC", "DefaultSC.DEC");
+      CreateParameter("VMAG", "DefaultSC.VMAG");
+      CreateParameter("RAV", "DefaultSC.RAV");
+      CreateParameter("DECV", "DefaultSC.DECV");
 
       // Angular parameters
       CreateParameter("SemilatusRectum", "DefaultSC.SLR");
@@ -1844,11 +1832,6 @@ void Moderator::CreateDefaultMission()
          param = GetParameter(params[i]);
          param->SetDesc(param->GetName());
          param->SetStringParameter("Object", "DefaultSC");
-
-         //loj: SolarSystem is set in the SetupRun(), due to Script doesn't have SolarSystem field
-         //if (!param->IsTimeParameter())
-            //param->SetStringParameter("Object", "DefaultSolarSystem");
-            //param->AddObject(theDefaultSolarSystem); //loj: until CreateSolarSystem works
       }
     
       // StopCondition
@@ -1951,7 +1934,7 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
             //                              "ObjName = %s\n", param->GetName().c_str(),
             //                              objName.c_str());
          }
-         
+
          param->Initialize();
 
       }
@@ -1968,7 +1951,7 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
    StringArray &stopconds = GetListOfConfiguredItems(Gmat::STOP_CONDITION);
    StopCondition *stopCond;
     
-   MessageInterface::ShowMessage("Moderator::SetupRun() initialize stopping condition\n");
+   //MessageInterface::ShowMessage("Moderator::SetupRun() initialize stopping condition\n");
    for (unsigned int i=0; i<stopconds.size(); i++)
    {
       try
