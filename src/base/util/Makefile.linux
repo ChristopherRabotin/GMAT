@@ -19,6 +19,7 @@ OBJECTS = A1Date.o \
           Keplerian.o \
           LeapSecsFileReader.o \
           Linear.o \
+          ModKeplerian.o \
           RealUtilities.o \
           RgbColor.o \
           Rmatrix33.o \
