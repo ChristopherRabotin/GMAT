@@ -35,7 +35,8 @@ END_EVENT_TABLE()
 // ParameterMultiSelectDialog(wxWindow *parent)
 //------------------------------------------------------------------------------
 ParameterMultiSelectDialog::ParameterMultiSelectDialog(wxWindow *parent,
-                                 wxArrayString &paramNames, bool showArray)
+                                 wxArrayString &paramNames, bool showArray,
+                                 bool showSysVars)
    : GmatDialog(parent, -1, wxString(_T("ParameterMultiSelectDialog")))
 {
    mParamNames = paramNames;
@@ -44,6 +45,7 @@ ParameterMultiSelectDialog::ParameterMultiSelectDialog(wxWindow *parent,
    mCanClose = true;
    mUseUserParam = false;
    mShowArray = showArray;
+   mShowSysVars = showSysVars;
 
    Create();
    ShowData();
@@ -71,22 +73,27 @@ void ParameterMultiSelectDialog::Create()
 
    //wxStaticBox
    wxStaticBox *userParamStaticBox = new wxStaticBox( this, -1, wxT("") );
-   wxStaticBox *systemParamStaticBox = new wxStaticBox( this, -1, wxT("") );
-   wxStaticBox *selParamStaticBox = new wxStaticBox( this, -1, wxT("") );
    
+   if (mShowSysVars)
+     systemParamStaticBox = new wxStaticBox( this, -1, wxT("") );
+   wxStaticBox *selParamStaticBox = new wxStaticBox( this, -1, wxT("") );
+  
    //wxStaticText
    wxStaticText *userVarStaticText =
       new wxStaticText( this, ID_TEXT, wxT("Variables"),
                         wxDefaultPosition, wxDefaultSize, 0 );
-   
-   wxStaticText *objectStaticText =
+
+   if (mShowSysVars)
+   {
+   objectStaticText =
       new wxStaticText( this, ID_TEXT, wxT("Object"),
                         wxDefaultPosition, wxDefaultSize, 0 );
    
-   wxStaticText *propertyStaticText =
+   propertyStaticText =
       new wxStaticText( this, ID_TEXT, wxT("Property"),
                         wxDefaultPosition, wxDefaultSize, 0 );
-   
+   }
+                     
    wxStaticText *paramSelectedStaticText =
       new wxStaticText( this, ID_TEXT, wxT("Variables Selected"),
                         wxDefaultPosition, wxDefaultSize, 0 );
@@ -107,9 +114,12 @@ void ParameterMultiSelectDialog::Create()
                                       wxDefaultPosition, wxSize(-1,-1), 0 );
 
    // wxComboBox
+   if (mShowSysVars)
+   {
    mObjectComboBox =
       theGuiManager->GetSpacecraftComboBox(this, ID_COMBOBOX, wxSize(150, 20));
-   
+   }
+
    // wxListBox
    if (mShowArray)
    {
@@ -123,9 +133,12 @@ void ParameterMultiSelectDialog::Create()
    }
 
    //loj: 10/1/04 changed GetParameterListBox() to GetPropertyListBox()
+   if (mShowSysVars)
+   {
    mPropertyListBox = theGuiManager->
       GetPropertyListBox(this, ID_LISTBOX, wxSize(150, 100), "Spacecraft");
-   
+   }
+
    mParamSelectedListBox = new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
                                          wxSize(150, 250), numParams, tempList, wxLB_SINGLE);
    
@@ -134,8 +147,11 @@ void ParameterMultiSelectDialog::Create()
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    wxStaticBoxSizer *userParamBoxSizer =
       new wxStaticBoxSizer(userParamStaticBox, wxVERTICAL);
-   wxStaticBoxSizer *systemParamBoxSizer =
+   if (mShowSysVars)
+   {
+   systemParamBoxSizer =
       new wxStaticBoxSizer(systemParamStaticBox, wxVERTICAL);
+   }
    wxStaticBoxSizer *selParamBoxSizer =
       new wxStaticBoxSizer(selParamStaticBox, wxVERTICAL);
    wxBoxSizer *availParamBoxSizer = new wxBoxSizer(wxVERTICAL);
@@ -148,7 +164,9 @@ void ParameterMultiSelectDialog::Create()
       (mUserParamListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
    userParamBoxSizer->Add
       (mCreateParamButton, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-   
+
+   if (mShowSysVars)
+   {   
    systemParamBoxSizer->Add
       (objectStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
    systemParamBoxSizer->Add
@@ -157,9 +175,13 @@ void ParameterMultiSelectDialog::Create()
       (propertyStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
    systemParamBoxSizer->Add
       (mPropertyListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
+   }
    
    availParamBoxSizer->Add(userParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   if (mShowSysVars)
+   {
    availParamBoxSizer->Add(systemParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   }
 
    selParamBoxSizer->Add(paramSelectedStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
    selParamBoxSizer->Add(mParamSelectedListBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
@@ -187,9 +209,13 @@ void ParameterMultiSelectDialog::Create()
 //------------------------------------------------------------------------------
 void ParameterMultiSelectDialog::LoadData()
 {
+  if (mShowSysVars)
+  {
    mObjectComboBox->SetSelection(0);
    mPropertyListBox->SetSelection(0);
-   mUserParamListBox->SetSelection(0);
+  }
+  else
+     mUserParamListBox->SetSelection(0);
 }
 
 //------------------------------------------------------------------------------
@@ -323,7 +349,8 @@ void ParameterMultiSelectDialog::OnListSelect(wxCommandEvent& event)
    }
    else if (event.GetEventObject() == mUserParamListBox)  
    {
-      mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
+      if (mShowSysVars)  
+         mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
       mAddParamButton->Enable();
       mUseUserParam = true;
    }
@@ -371,18 +398,29 @@ wxString ParameterMultiSelectDialog::GetNewParam()
 //------------------------------------------------------------------------------
 Parameter* ParameterMultiSelectDialog::CreateParameter(const wxString &name)
 {
-   std::string paramName(name.c_str());
-   std::string objName(mObjectComboBox->GetStringSelection().c_str());
-   std::string propName(mPropertyListBox->GetStringSelection().c_str());
-
-   Parameter *param = theGuiInterpreter->GetParameter(paramName);
-
-   // create a parameter if it does not exist
-   if (param == NULL)
-   {
-      param = theGuiInterpreter->CreateParameter(propName, paramName);
-      param->SetRefObjectName(Gmat::SPACECRAFT, objName);
+   Parameter *param;
+   
+   if (mShowSysVars)
+   {               
+       std::string paramName(name.c_str());
+       std::string objName(mObjectComboBox->GetStringSelection().c_str());
+       std::string propName(mPropertyListBox->GetStringSelection().c_str());
+    
+       param = theGuiInterpreter->GetParameter(paramName);
+    
+       // create a parameter if it does not exist
+       if (param == NULL)
+       {
+          param = theGuiInterpreter->CreateParameter(propName, paramName);
+          param->SetRefObjectName(Gmat::SPACECRAFT, objName);
+       }
    }
-
+   else
+   {
+       std::string paramName(name.c_str());
+       param = theGuiInterpreter->GetParameter(paramName);
+   }
+   
    return param;
+
 }
