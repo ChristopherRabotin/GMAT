@@ -97,7 +97,8 @@ public:
 
    // method to return the state (position and velocity) of the body at
    // the specified time, using the specified method
-   virtual const Rvector6&      GetState(A1Mjd atTime); 
+   virtual const Rvector6&      GetState(A1Mjd atTime);
+   virtual const Rvector6&      GetState(Real atTime); 
    
    // methods to return the body type, central body, gravitational constant,
    // radius, mass, posvel source, and analytic method 

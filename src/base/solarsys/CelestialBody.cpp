@@ -357,7 +357,29 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
    return state;
 }
 
-
+//------------------------------------------------------------------------------
+//  const Rvector6& GetState(Real atTime)
+//------------------------------------------------------------------------------
+ /**
+ * This method returns the state (position and velocity) of the body at the
+ * requested time.
+ *
+ * @param <atTime>  time for which state of the body is requested.
+ *
+ * @return state of the body at the requested time.
+ *
+ * @exception <PlanetaryEphemException> thrown when the requested Pos/Vel
+ *            source is set to SLP or DE***, but the source file has not
+ *            been set.
+ *
+ */
+//------------------------------------------------------------------------------
+const Rvector6&  CelestialBody::GetState(Real atTime)
+{
+   A1Mjd forTime(atTime);
+   return GetState(forTime);
+}
+   
 //------------------------------------------------------------------------------
 //  Gmat::BodyType GetBodyType() const
 //------------------------------------------------------------------------------
