@@ -39,16 +39,24 @@ public:
                                             const bool value);
 
 protected:
-    /// Precision for output of real data
-    bool drawAxis;
-    bool drawEquatorialPlane;
-    bool drawWireFrame;
+
+    bool mDrawAxis;
+    bool mDrawEquatorialPlane;
+    bool mDrawWireFrame;
+    
+    Integer mDataCollectFrequency;
+    Integer mUpdatePlotFrequency;
+
+    Integer mNumData;
+    Integer mNumCollected;
     
     enum
     {
         DRAW_AXIS = 0,
         DRAW_EQUATORIAL_PLANE,
         DRAW_WIRE_FRAME,
+        DATA_COLLECT_FREQUENCY,
+        UPDATE_PLOT_FREQUENCY,
         OpenGlPlotParamCount
     };
     

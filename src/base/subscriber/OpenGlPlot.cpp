@@ -28,7 +28,9 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount] =
 {
     "DrawAxis",
     "DrawEquatorialPlane",
-    "DrawWireFrame"
+    "DrawWireFrame",
+    "DataCollectFrequency",
+    "UpdatePlotFrequency"
 }; 
 
 const Gmat::ParameterType
@@ -36,7 +38,9 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount] =
 {
    Gmat::BOOLEAN_TYPE,
    Gmat::BOOLEAN_TYPE,
-   Gmat::BOOLEAN_TYPE
+   Gmat::BOOLEAN_TYPE,
+   Gmat::INTEGER_TYPE,
+   Gmat::INTEGER_TYPE
 };
 
 //------------------------------------------------------------------------------
@@ -48,9 +52,13 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
     // GmatBase data
     parameterCount = OpenGlPlotParamCount;
 
-    drawAxis = false;
-    drawEquatorialPlane = true;
-    drawWireFrame = false;
+    mDrawAxis = false;
+    mDrawEquatorialPlane = true;
+    mDrawWireFrame = false;
+    mDataCollectFrequency = 1;
+    mUpdatePlotFrequency = 10;
+    mNumData = 0;
+    mNumCollected = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -74,11 +82,23 @@ bool OpenGlPlot::Distribute(int len)
 //------------------------------------------------------------------------------
 bool OpenGlPlot::Distribute(const Real * dat, Integer len)
 {
-    if (len == 0)
-        return false;
-    else
-        //loj: assumes data in time, x, y, z order
-        return PlotInterface::UpdateSpacecraft(dat[0], dat[1], dat[2], dat[3]);
+    bool status = false;
+    if (len > 0)
+    {
+        mNumData++;
+    
+        if ((mNumData % mDataCollectFrequency) == 0)
+        {
+            mNumCollected++;
+            bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
+            
+            //loj: assumes data in time, x, y, z order
+            return PlotInterface::UpdateGlSpacecraft(dat[0], dat[1], dat[2], dat[3],
+                                                     update);
+        }
+    }
+    
+    return status;
 }
 
 //------------------------------------------------------------------------------
@@ -86,7 +106,7 @@ bool OpenGlPlot::Distribute(const Real * dat, Integer len)
 //------------------------------------------------------------------------------
 std::string OpenGlPlot::GetParameterText(const Integer id) const
 {
-    if (id >= DRAW_AXIS && id <= DRAW_WIRE_FRAME)
+    if (id >= DRAW_AXIS && id < OpenGlPlotParamCount)
         return PARAMETER_TEXT[id];
     else
         return Subscriber::GetParameterText(id);
@@ -98,7 +118,7 @@ std::string OpenGlPlot::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer OpenGlPlot::GetParameterID(const std::string &str) const
 {
-   for (int i=0; i<OpenGlPlotParamCount; i++)
+   for (int i=0; i<OpenGlPlotParamCount-1; i++)
    {
       if (str == PARAMETER_TEXT[i])
           return i;
@@ -112,7 +132,7 @@ Integer OpenGlPlot::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType OpenGlPlot::GetParameterType(const Integer id) const
 {
-    if (id >= DRAW_AXIS && id <= DRAW_WIRE_FRAME)
+    if (id >= DRAW_AXIS && id < OpenGlPlotParamCount)
         return PARAMETER_TYPE[id];
     else
         return Subscriber::GetParameterType(id);
@@ -123,7 +143,7 @@ Gmat::ParameterType OpenGlPlot::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string OpenGlPlot::GetParameterTypeString(const Integer id) const
 {
-    if (id >= DRAW_AXIS && id <= DRAW_WIRE_FRAME)
+    if (id >= DRAW_AXIS && id <= OpenGlPlotParamCount)
         return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
     else
        return Subscriber::GetParameterTypeString(id);
@@ -138,11 +158,11 @@ bool OpenGlPlot::GetBooleanParameter(const Integer id) const
     switch (id)
     {
     case DRAW_AXIS:
-        return drawAxis;
+        return mDrawAxis;
     case DRAW_EQUATORIAL_PLANE:
-        return drawEquatorialPlane;
+        return mDrawEquatorialPlane;
     case DRAW_WIRE_FRAME:
-        return drawWireFrame;
+        return mDrawWireFrame;
     default:
         return Subscriber::GetBooleanParameter(id);
     }
@@ -156,14 +176,14 @@ bool OpenGlPlot::SetBooleanParameter(const Integer id, const bool value)
     switch (id)
     {
     case DRAW_AXIS:
-        drawAxis = value;
-        return drawAxis;
+        mDrawAxis = value;
+        return mDrawAxis;
     case DRAW_EQUATORIAL_PLANE:
-        drawEquatorialPlane = value;
-        return drawEquatorialPlane;
+        mDrawEquatorialPlane = value;
+        return mDrawEquatorialPlane;
     case DRAW_WIRE_FRAME:
-        drawWireFrame = value;
-        return drawWireFrame;
+        mDrawWireFrame = value;
+        return mDrawWireFrame;
     default:
         return Subscriber::SetBooleanParameter(id, value);
     }
