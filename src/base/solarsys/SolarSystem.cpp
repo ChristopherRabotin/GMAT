@@ -64,16 +64,16 @@ SolarSystem::SolarSystem(std::string withName)
    
    // create and add the default bodies
    Star* theSun     = new Star(SUN_NAME);
-   Planet* theEarth = new Planet(EARTH_NAME,   theSun);
-   Moon* theMoon    = new Moon(MOON_NAME,      theEarth);
-   Planet* mercury  = new Planet(MERCURY_NAME, theSun);
-   Planet* venus    = new Planet(VENUS_NAME,   theSun);
-   Planet* mars     = new Planet(MARS_NAME,    theSun);
-   Planet* jupiter  = new Planet(JUPITER_NAME, theSun);
-   Planet* saturn   = new Planet(SATURN_NAME,  theSun);
-   Planet* uranus   = new Planet(URANUS_NAME,  theSun);
-   Planet* neptune  = new Planet(NEPTUNE_NAME, theSun);
-   Planet* pluto    = new Planet(PLUTO_NAME,   theSun);
+   Planet* theEarth = new Planet(EARTH_NAME,   SUN_NAME);
+   Moon* theMoon    = new Moon(MOON_NAME,      EARTH_NAME);
+   Planet* mercury  = new Planet(MERCURY_NAME, SUN_NAME);
+   Planet* venus    = new Planet(VENUS_NAME,   SUN_NAME);
+   Planet* mars     = new Planet(MARS_NAME,    SUN_NAME);
+   Planet* jupiter  = new Planet(JUPITER_NAME, SUN_NAME);
+   Planet* saturn   = new Planet(SATURN_NAME,  SUN_NAME);
+   Planet* uranus   = new Planet(URANUS_NAME,  SUN_NAME);
+   Planet* neptune  = new Planet(NEPTUNE_NAME, SUN_NAME);
+   Planet* pluto    = new Planet(PLUTO_NAME,   SUN_NAME);
 
    AddBody(theSun);
    AddBody(theEarth);
