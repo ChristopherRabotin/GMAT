@@ -32,8 +32,6 @@
 #include "TextEditView.hpp"
 #include "MdiDocViewFrame.hpp"
 #include "MdiTextEditView.hpp"
-#include "PlotInterface.hpp"
-#include "MdiGlPlotData.hpp"
 
 #include "wx/mdi.h"
 #include "wx/docview.h"
@@ -61,9 +59,6 @@ IMPLEMENT_APP(GmatApp)
 GmatApp::GmatApp(void)
 {
     theModerator = (Moderator *)NULL;
-
-    //loj: added
-    //m_docManager = (wxDocManager *) NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -83,10 +78,6 @@ bool GmatApp::OnInit()
                           20, 20, 600, 350, "Permanent");
     GmatAppData::theMessageWindow->SetMaxLength(6000000);
     GmatAppData::theMessageWindow->Show(false);
-
-    // create Plot window
-    PlotInterface::CreatePlotWindow(false);
-    MdiPlot::mdiParentGlFrame->Show(FALSE);
 
     // create the Moderator - GMAT executive
     theModerator = Moderator::Instance();
