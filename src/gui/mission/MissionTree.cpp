@@ -130,7 +130,8 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
                          const wxPoint &pos, const wxSize &size, long style)
-   : DecoratedTree(parent, id, pos, size, style)
+   : DecoratedTree(parent, id, pos, size, style),
+     inScriptEvent(false)
 {
    parent = parent;
 
@@ -196,7 +197,6 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    //    SetNodes();
    //    ExpandAll();
    
-   inScriptEvent = false;
 }
 
 //loj: 6/29/04 added resetCounter
