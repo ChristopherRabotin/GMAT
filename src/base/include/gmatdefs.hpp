@@ -82,6 +82,7 @@ namespace Gmat
       SOLVER,
       SUBSCRIBER,
       PROP_SETUP,
+      REF_FRAME,        //loj: 3/22/04 added
       UNKNOWN_OBJECT
    };
 
