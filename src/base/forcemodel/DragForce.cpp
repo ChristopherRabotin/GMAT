@@ -775,6 +775,7 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
    if (id == fluxFileID) {
       fluxFile = value;
       atmos->SetSolarFluxFile(fluxFile);  // waw: Added 06/29/04
+      atmos->SetFileFlag(true);           // waw: Added 07/20/04
       return true;
    }
     
