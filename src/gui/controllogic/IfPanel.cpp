@@ -133,8 +133,7 @@ void IfPanel::LoadData()
 //------------------------------------------------------------------------------
 void IfPanel::SaveData()
 {
-MessageInterface::ShowMessage("Entering SaveData()\n");
-   Integer paramId;
+//MessageInterface::ShowMessage("Entering SaveData()\n");
    Integer index = 0;
    
    wxString s1 = conditionGrid->GetCellValue(index,LHS_COL);
@@ -147,8 +146,7 @@ MessageInterface::ShowMessage("Entering SaveData()\n");
 
    theParameter = theGuiInterpreter->GetParameter(mLhsList[index]);
 
-   theIfCommand->SetCondition(mLhsList[index], mOpStrings[index],mRhsList[index],
-                              index);     
+   theIfCommand->SetCondition(mLhsList[index], mOpStrings[index],mRhsList[index],index);     
    theIfCommand->SetRefObject(theParameter, Gmat::PARAMETER, mLhsList[index], index);
           
 // Build 4

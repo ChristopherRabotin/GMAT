@@ -129,8 +129,7 @@ void WhilePanel::LoadData()
 //------------------------------------------------------------------------------
 void WhilePanel::SaveData()
 {
-MessageInterface::ShowMessage("Entering SaveData()\n");
-   Integer paramId;
+//MessageInterface::ShowMessage("Entering SaveData()\n");
    Integer index = 0;
    
    wxString s1 = conditionGrid->GetCellValue(index,LHS_COL);
@@ -143,8 +142,7 @@ MessageInterface::ShowMessage("Entering SaveData()\n");
 
    theParameter = theGuiInterpreter->GetParameter(mLhsList[index]);
 
-   theWhileCommand->SetCondition(mLhsList[index], mOpStrings[index],mRhsList[index],
-                                 index);     
+   theWhileCommand->SetCondition(mLhsList[index], mOpStrings[index],mRhsList[index],index);     
    theWhileCommand->SetRefObject(theParameter, Gmat::PARAMETER, mLhsList[index], index);
           
 // Build 4
