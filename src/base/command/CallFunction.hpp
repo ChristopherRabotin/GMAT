@@ -86,7 +86,7 @@ public:
 
    Integer GetNumInputParams();
    Integer GetNumOutputParams();
-
+   std::string FormEvalString();
 
 protected:
 
@@ -102,7 +102,6 @@ private:
    std::string mFunctionName;
 
    bool ExecuteMatlabFunction();
-   std::string FormEvalString();
 
    enum
    {

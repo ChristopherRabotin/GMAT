@@ -25,7 +25,7 @@
 
 //#define DEBUG_CALL_FUNCTION 1
 //#define DEBUG_UPDATE_VAR 1
-#define DEBUG_USE_ARRAY 1
+//#define DEBUG_USE_ARRAY 1
 //---------------------------------
 // static data
 //---------------------------------
@@ -547,6 +547,10 @@ bool CallFunction::Execute()
 //------------------------------------------------------------------------------
 bool CallFunction::ExecuteMatlabFunction()
 {
+#if DEBUG_CALL_FUNCTION
+   MessageInterface::ShowMessage("CallFunction::ExecuteMatlabFunction()\n");
+#endif
+
    bool status = false;
 
 #if defined __USE_MATLAB__
@@ -561,31 +565,27 @@ bool CallFunction::ExecuteMatlabFunction()
    // for input params
    for (unsigned int i=0; i<mInputList.size(); i++)
    {
+#if DEBUG_CALL_FUNCTION
+   MessageInterface::ShowMessage("Adding input param # %d\n", i);
+#endif
+
       Parameter *param = (Parameter *)mInputList[i];
 
-      if (param->GetTypeName() == "Variable")
-      {
-//         MessageInterface::ShowMessage("Parameter is variable\n");
-         // ag: Send string to add variable to workspace rather than using "PutVariable"
-         //     so that there is no problem parsing variables with a "." in the name
-         //     like "DefaultSC.X"
-         // status = MatlabInterface::PutVariable(varName, 1, arrayToSend);
-         std::ostringstream os;
-         os << param->EvaluateReal();
-         std::string inParamString = param->GetName() +" = " + os.str() +";";
-         status =  MatlabInterface::EvalString(inParamString);
-      }
-      else if (param->GetTypeName() == "Array")
+#if DEBUG_CALL_FUNCTION
+   MessageInterface::ShowMessage("After getting param  ");
+   MessageInterface::ShowMessage("Got param %s\n", param->GetName().c_str());
+#endif
+
+      if (param->GetTypeName() == "Array")
       {
 #if DEBUG_USE_ARRAY
          MessageInterface::ShowMessage("Parameter is an array\n");
 #endif
          Array *array = (Array *)param;
-#if DEBUG_USE_ARRAY
          int numRows = array->GetIntegerParameter("NumRows");
          int numCols = array->GetIntegerParameter("NumCols");
-#endif
          std::ostringstream os;
+
 #if DEBUG_USE_ARRAY
          MessageInterface::ShowMessage("Number of rows = %d, number of columns %d\n",
                         numRows, numCols);
@@ -617,14 +617,46 @@ bool CallFunction::ExecuteMatlabFunction()
          status =  MatlabInterface::EvalString(inParamString);
       }
       else
-         MessageInterface::ShowMessage("not sure what param is \n");
+      {
+#if DEBUG_CALL_FUNCTION
+         MessageInterface::ShowMessage("Parameter type is not array: %s\n",
+               param->GetTypeName().c_str());
+#endif
+//      if (param->GetTypeName() == "Variable")
+//         MessageInterface::ShowMessage("Parameter is variable\n");
+         // ag: Send string to add variable to workspace rather than using "PutVariable"
+         //     so that there is no problem parsing variables with a "." in the name
+         //     like "DefaultSC.X"
+         // status = MatlabInterface::PutVariable(varName, 1, arrayToSend);
+         try
+         {
+            std::ostringstream os;
+            os << param->EvaluateReal();
+//            os << param->GetReal();
 
-
+#if DEBUG_CALL_FUNCTION
+         MessageInterface::ShowMessage("Got param real\n");
+#endif
+            std::string inParamString = param->GetName() +" = " + os.str() +";";
+            status =  MatlabInterface::EvalString(inParamString);
 
 #if DEBUG_UPDATE_VAR
       MessageInterface::ShowMessage("Sent string %s to matlab\n",
                         inParamString.c_str());
 #endif
+         }
+         catch (BaseException &ex)
+         {
+            throw CommandException("Unknown parameter type\n");
+         }
+      }
+//      else
+//      {
+//         MessageInterface::ShowMessage("Unknown paramater type = %s\n",
+//               param->GetTypeName().c_str());
+//         throw CommandException("Unknown parameter type\n");
+//      }
+
    }
 
    //  Eval String
@@ -640,23 +672,8 @@ bool CallFunction::ExecuteMatlabFunction()
    {
       Parameter *param = (Parameter *)mOutputList[i];
 
-      if (param->GetTypeName() == "Variable")
-      {
-         std::string varName = param->GetName();
-         double outArray[500];   // array size???
-#if DEBUG_UPDATE_VAR
-         MessageInterface::ShowMessage("Returning param %s\n", varName.c_str());
-#endif
-         status = MatlabInterface::GetVariable(varName, 1, outArray);
-#if DEBUG_UPDATE_VAR
-         MessageInterface::ShowMessage("The value is %f\n", outArray[0]);
-#endif
-         param->SetRealParameter("Param1", outArray[0]);
-#if DEBUG_UPDATE_VAR
-         MessageInterface::ShowMessage("The EvaluateReal is %f\n", param->EvaluateReal());
-#endif
-      }
-      else if (param->GetTypeName() == "Array")
+
+      if (param->GetTypeName() == "Array")
       {
          std::string varName = param->GetName();
          Array *array = (Array *)param;
@@ -668,15 +685,50 @@ bool CallFunction::ExecuteMatlabFunction()
          status = MatlabInterface::GetVariable(varName, totalCells, outArray);
 
          // create rmatrix
-// ag: HERE!!!         Rmatrix *rmatrix;
+         Rmatrix rmatrix = Rmatrix (numRows, numCols);
+
+         for (int j=0; j<numCols; j++)
+            for (int k=0; k<numRows; k++)
+               rmatrix(k, j) = outArray[(j*numRows) + k];
+
+#if DEBUG_USE_ARRAY
+         for (int j=0; j<numRows; j++)
+         {
+           for (int k=0; k<numCols; k++)
+             MessageInterface::ShowMessage("%f\t", rmatrix(j, k));
+           MessageInterface::ShowMessage("\n");
+         }
+#endif
 
          // assign rmatrix to array
-//         array->SetRmatrixParameter("RmatValue", rmatrix);
+         array->SetRmatrixParameter("RmatValue", rmatrix);
       }
       else
+//      if (param->GetTypeName() == "Variable")
       {
-         MessageInterface::ShowMessage("not sure what param is \n");
+         try
+         {
+            std::string varName = param->GetName();
+            double outArray[500];   // array size???
+            status = MatlabInterface::GetVariable(varName, 1, outArray);
+            param->SetRealParameter("Param1", outArray[0]);
+            std::ostringstream ss;
+            ss << param->EvaluateReal();
+            param->SetStringParameter("Expression", ss.str());
+#if DEBUG_UPDATE_VAR
+            MessageInterface::ShowMessage("The EvaluateReal is %f\n", param->EvaluateReal());
+#endif
+         }
+         catch (BaseException &ex)
+         {
+            throw CommandException("Unknown parameter type\n");
+         }
+
       }
+//      else
+//      {
+//         throw CommandException("Unknown parameter type\n");
+//      }
    }
 
 #endif
