@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                              SolarSystem
+//                              SolarSystemWindow
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -15,21 +15,21 @@
 #include "SolarSystemWindow.hpp"
 
 
-BEGIN_EVENT_TABLE(SolarSystem, wxScrolledWindow)
-   EVT_BUTTON(ID_BUTTON_POS,          SolarSystem::OnPositionButton)
-   EVT_BUTTON(ID_BUTTON_BODYROTATION, SolarSystem::OnBodyRotationButton)
-   EVT_BUTTON(ID_BUTTON_BROWSE,       SolarSystem::OnBrowseButton)
-   EVT_BUTTON(ID_BUTTON_FIXEDCOORD,   SolarSystem::OnFixedCoordinatesButton)
-   EVT_BUTTON(ID_BUTTON_CREATE,       SolarSystem::OnCreateButton)
-   EVT_BUTTON(ID_BUTTON_CANCEL,       SolarSystem::OnCancelButton)
+BEGIN_EVENT_TABLE(SolarSystemWindow, wxScrolledWindow)
+   EVT_BUTTON(ID_BUTTON_POS,          SolarSystemWindow::OnPositionButton)
+   EVT_BUTTON(ID_BUTTON_BODYROTATION, SolarSystemWindow::OnBodyRotationButton)
+   EVT_BUTTON(ID_BUTTON_BROWSE,       SolarSystemWindow::OnBrowseButton)
+   EVT_BUTTON(ID_BUTTON_FIXEDCOORD,   SolarSystemWindow::OnFixedCoordinatesButton)
+   EVT_BUTTON(ID_BUTTON_CREATE,       SolarSystemWindow::OnCreateButton)
+   EVT_BUTTON(ID_BUTTON_CANCEL,       SolarSystemWindow::OnCancelButton)
 END_EVENT_TABLE()
 
-SolarSystem::SolarSystem(wxWindow *parent):wxScrolledWindow(parent)
+SolarSystemWindow::SolarSystemWindow(wxWindow *parent):wxScrolledWindow(parent)
 {
     SolarSystemSetup(this);
 }
 
-void SolarSystem::SolarSystemSetup(wxWindow *parent)
+void SolarSystemWindow::SolarSystemSetup(wxWindow *parent)
 {
 
      item0 = new wxBoxSizer( wxVERTICAL );
@@ -195,20 +195,20 @@ void SolarSystem::SolarSystemSetup(wxWindow *parent)
    
 }
 
-void SolarSystem::OnPositionButton(wxCommandEvent& WXUNUSED (event))
+void SolarSystemWindow::OnPositionButton(wxCommandEvent& WXUNUSED (event))
 {
    //Don't know what event to attach to this.  In Argosy pops up different file
    //names like DE-405, DE-200, SLP.........
 }
 
-void SolarSystem::OnBodyRotationButton(wxCommandEvent& WXUNUSED (event))
+void SolarSystemWindow::OnBodyRotationButton(wxCommandEvent& WXUNUSED (event))
 {
   // wxDialog *popup = new wxDialog();
   
    //CreateRadiobox();
 }
 
-void SolarSystem::OnBrowseButton(wxCommandEvent& WXUNUSED (event))
+void SolarSystemWindow::OnBrowseButton(wxCommandEvent& WXUNUSED (event))
 {
     wxFileDialog dialog
                  (
@@ -237,22 +237,22 @@ void SolarSystem::OnBrowseButton(wxCommandEvent& WXUNUSED (event))
     }
 }
 
-void SolarSystem::OnFixedCoordinatesButton(wxCommandEvent& WXUNUSED (event))
+void SolarSystemWindow::OnFixedCoordinatesButton(wxCommandEvent& WXUNUSED (event))
 {
     
 }
 
-void SolarSystem::OnCreateButton(wxCommandEvent& WXUNUSED (event))
+void SolarSystemWindow::OnCreateButton(wxCommandEvent& WXUNUSED (event))
 {
    Close();  //Edit this later
 }
 
-void SolarSystem::OnCancelButton(wxCommandEvent& WXUNUSED (event))
+void SolarSystemWindow::OnCancelButton(wxCommandEvent& WXUNUSED (event))
 {
      Close();
 }
 
-/*wxDialog *SolarSystem::CreateRadiobox()
+/*wxDialog *SolarSystemWindow::CreateRadiobox()
 {
   
 }*/
