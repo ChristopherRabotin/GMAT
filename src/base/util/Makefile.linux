@@ -13,6 +13,7 @@ OBJECTS = A1Date.o \
           Date.o \
           DateUtil.o \
           ElapsedTime.o \
+          EopFile.o \
           EphemerisUtil.o \
           GregorianDate.o \
           Keplerian.o \
