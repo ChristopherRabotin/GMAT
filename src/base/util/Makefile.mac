@@ -5,6 +5,7 @@
 # Modified:   2004/01/14 - Added Spherical.cpp, SphericalOne.cpp, and
 #                          SphericalTwo.cpp.
 #             2004/05/04 - Added AngleUtil.cpp and CoordUtil.cpp.
+#             2004/05/16 - Added StringTokenizer.cpp
 #
 #
 # Define the marco for the top-level directories
@@ -15,7 +16,7 @@ SRC = A1Date.cpp A1Mjd.cpp AngleUtil.cpp Cartesian.cpp CoordUtil.cpp Date.cpp \
 	DateUtil.cpp ElapsedTime.cpp EphemerisUtil.cpp Keplerian.cpp \
 	Linear.cpp RealUtilities.cpp Rmatrix.cpp Rmatrix33.cpp Rvector.cpp \
 	Rvector3.cpp Rvector6.cpp Spherical.cpp SphericalOne.cpp \
-	SphericalTwo.cpp UtcDate.cpp
+	SphericalTwo.cpp StringTokenizer.cpp UtcDate.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
