@@ -206,6 +206,7 @@ GmatBase* DragForce::Clone(void) const
    return (new DragForce(*this));
 }
 
+
 //------------------------------------------------------------------------------
 // bool GetComponentMap(Integer * map, Integer order) const
 //------------------------------------------------------------------------------
@@ -353,8 +354,6 @@ bool DragForce::Initialize(void)
                throw ForceModelException("Central body (for Drag) not in solar system");
            if (useExternalAtmosphere) {
                atmos = centralBody->GetAtmosphereModel();
-//<<<<<<< DragForce.cpp
-//=======
            }
            else {
                if (atmosphereType == "BodyDefault")
@@ -364,15 +363,6 @@ bool DragForce::Initialize(void)
                   //atmos = centralBody->GetAtmosphereModel(atmosphereType);
                if (!atmos)
                   throw ForceModelException("Atmosphere model not defined");
-////>>>>>>> 1.24
-//           }
-//           else {
-//               if (atmosphereType == "BodyDefault")
-//                  atmos = centralBody->GetAtmosphereModel();
-//               else
-//                  atmos = centralBody->GetAtmosphereModel(atmosphereType);
-//               if (!atmos)
-//                  throw ForceModelException("Atmosphere model not defined");
            }
                
            if (atmos)  {
@@ -826,7 +816,6 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
 }
 
 
-//<<<<<<< DragForce.cpp
 //------------------------------------------------------------------------------
 // void SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //                              const std::string &name)
