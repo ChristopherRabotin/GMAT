@@ -33,9 +33,14 @@
 class GuiItemManager
 {
 public:
-   static const int MAX_OBJECT_SIZE = 30;
+   static const int MAX_OBJECT_SIZE = 20;
+   static const int MAX_FORMATION_SIZE = 10;
+   static const int MAX_SPACECRAFT_SIZE = 30;
    static const int MAX_PROPERTY_SIZE = 100;
-   static const int MAX_PARAM_SIZE = 100;
+   static const int MAX_USER_VAR_SIZE = 20;
+   static const int MAX_USER_ARRAY_SIZE = 20;
+   static const int MAX_USER_PARAM_SIZE = 40;
+   static const int MAX_PLOT_PARAM_SIZE = 140;
    
    static GuiItemManager* GetInstance();
    
@@ -45,9 +50,13 @@ public:
    void UpdateSpacecraft();
    void UpdateParameter();
    void UpdateSolarSystem();
+   void UpdateCoordSystem();
    
    int GetNumSpacecraft()
       { return theNumSpacecraft; }
+   
+   int GetNumCoordSystem()
+      { return theNumCoordSys; }
    
    int GetNumPlottableParameter()
       { return theNumPlottableParam; }
@@ -84,6 +93,9 @@ public:
    
    wxComboBox* GetSpacecraftComboBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size);
+   
+   wxComboBox* GetCoordSysComboBox(wxWindow *parent, wxWindowID id,
+                                   const wxSize &size);
    
    wxListBox* GetSpaceObjectListBox(wxWindow *parent, wxWindowID id,
                                     const wxSize &size,
@@ -131,7 +143,10 @@ public:
                                     wxListBox **userParamListBox,
                                     wxWindowID userParamListBoxId,
                                     wxListBox **propertyListBox,
-                                    wxWindowID propertyListBoxId);
+                                    wxWindowID propertyListBoxId,
+                                    wxComboBox **coordSysComboBox,
+                                    wxWindowID coordSysComboBoxId,
+                                    wxStaticText **coordSysLabel);
    
 private:
    
@@ -147,7 +162,8 @@ private:
    void UpdateSpacecraftList();
    void UpdateParameterList();
    void UpdateConfigBodyList();
-      
+   void UpdateCoordSystemList();
+   
    static GuiItemManager *theInstance;
    GuiInterpreter *theGuiInterpreter;
    SolarSystem *theSolarSystem;
@@ -156,6 +172,7 @@ private:
    int theNumSpaceObject;
    int theNumFormation;
    int theNumSpacecraft;
+   int theNumCoordSys;
    int theNumPlottableParam;
    int theNumSystemParam;
    int theNumUserVariable;
@@ -164,18 +181,21 @@ private:
    int theNumConfigBody;
    
    wxString theSpaceObjectList[MAX_OBJECT_SIZE];
-   wxString theFormationList[MAX_OBJECT_SIZE];
+   wxString theFormationList[MAX_FORMATION_SIZE];
    wxString theSpacecraftList[MAX_OBJECT_SIZE];
-   wxString theScPropertyList[MAX_PROPERTY_SIZE];
-   wxString thePlottableParamList[MAX_PARAM_SIZE];
-   wxString theSystemParamList[MAX_PARAM_SIZE];
-   wxString theUserVarList[MAX_PARAM_SIZE];
-   wxString theUserArrayList[MAX_PARAM_SIZE];
-   wxString theUserParamList[MAX_PARAM_SIZE];   
    wxString theConfigBodyList[MAX_OBJECT_SIZE];
+   wxString theCoordSysList[MAX_OBJECT_SIZE];
+   
+   wxString theScPropertyList[MAX_PROPERTY_SIZE];
+   wxString thePlottableParamList[MAX_PLOT_PARAM_SIZE];
+   wxString theSystemParamList[MAX_PROPERTY_SIZE];
+   wxString theUserVarList[MAX_USER_VAR_SIZE];
+   wxString theUserArrayList[MAX_USER_ARRAY_SIZE];
+   wxString theUserParamList[MAX_USER_PARAM_SIZE];
    
    wxComboBox *theSpacecraftComboBox;
    wxComboBox *theUserParamComboBox;
+   wxComboBox *theCoordSysComboBox;
    wxListBox  *theSpaceObjectListBox;
    wxListBox  *theFormationListBox;
    wxListBox  *theSpacecraftListBox;

@@ -42,10 +42,13 @@ protected:
    
    std::string mSelYName;
    std::map<std::string, RgbColor> mColorMap;
-
+   
+   wxStaticText *mCoordSysLabel;
+   
    wxColour mLineColor;
    
    wxComboBox *mObjectComboBox;
+   wxComboBox *mCoordSysComboBox;
    
    wxListBox *mUserParamListBox;
    wxListBox *mPropertyListBox;
@@ -104,6 +107,7 @@ protected:
    
 private:
    void ShowParameterOption(const wxString &scName, bool show = true);
+   void ShowCoordSystem();
    wxString GetNewParam();
    Parameter* CreateParameter(const wxString &name);
 };

@@ -128,6 +128,18 @@ void GuiItemManager::UpdateSolarSystem()
 }
 
 //------------------------------------------------------------------------------
+//  void UpdateCoordSystem()
+//------------------------------------------------------------------------------
+/**
+ * Updates coordinate system related gui components.
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateCoordSystem()
+{
+   UpdateCoordSystemList();
+}
+
+//------------------------------------------------------------------------------
 // int GetNumProperty(const wxString &objName)
 //------------------------------------------------------------------------------
 /*
@@ -183,6 +195,33 @@ wxComboBox* GuiItemManager::GetSpacecraftComboBox(wxWindow *parent, wxWindowID i
    theSpacecraftComboBox->SetSelection(0);
     
    return theSpacecraftComboBox;
+}
+
+//------------------------------------------------------------------------------
+//  wxComboBox* GetCoordSysComboBox(wxWindow *parent, const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return coordinate system combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox* GuiItemManager::GetCoordSysComboBox(wxWindow *parent, wxWindowID id,
+                                                const wxSize &size)
+{
+   // combo box for avaliable coordinate system
+   
+   int numCs = theNumCoordSys;
+   
+   if (theNumCoordSys == 0)
+      numCs = 1;
+   
+   theCoordSysComboBox =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                     numCs, theCoordSysList, wxCB_DROPDOWN);
+   
+   // show first spacecraft
+   theCoordSysComboBox->SetSelection(0);
+   
+   return theCoordSysComboBox;
 }
 
 //------------------------------------------------------------------------------
@@ -686,27 +725,26 @@ wxListBox* GuiItemManager::GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
 }
 
 //------------------------------------------------------------------------------
-// wxBoxSizer* CreateParameterSizer()
+// wxBoxSizer* CreateParameterSizer(...)
 //------------------------------------------------------------------------------
 /**
  * Creates parameter sizer.
  */
 //------------------------------------------------------------------------------
-wxBoxSizer* GuiItemManager::CreateParameterSizer(wxWindow *parent,
-                                                 wxButton **createVarButton,
-                                                 wxWindowID createVarButtonId,
-                                                 wxComboBox **objectComboBox,
-                                                 wxWindowID objectComboBoxId,
-                                                 wxListBox **userParamListBox,
-                                                 wxWindowID userParamListBoxId,
-                                                 wxListBox **propertyListBox,
-                                                 wxWindowID propertyListBoxId)
+wxBoxSizer* GuiItemManager::
+CreateParameterSizer(wxWindow *parent,
+                     wxButton **createVarButton, wxWindowID createVarButtonId,
+                     wxComboBox **objectComboBox, wxWindowID objectComboBoxId,
+                     wxListBox **userParamListBox, wxWindowID userParamListBoxId,
+                     wxListBox **propertyListBox, wxWindowID propertyListBoxId,
+                     wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
+                     wxStaticText **coordSysLabel)
 {
 #if DEBUG_GUI_ITEM
    MessageInterface::ShowMessage("GuiItemManager::CreateParameterSizer() entered\n");
 #endif
    
-   Integer borderSize = 2;
+   Integer borderSize = 1;
    
    //wxStaticBox
    wxStaticBox *userParamStaticBox = new wxStaticBox(parent, -1, wxT(""));
@@ -725,15 +763,21 @@ wxBoxSizer* GuiItemManager::CreateParameterSizer(wxWindow *parent,
       new wxStaticText(parent, -1, wxT("Property"),
                        wxDefaultPosition, wxDefaultSize, 0);   
      
+   *coordSysLabel =
+      new wxStaticText(parent, -1, wxT("Coordinate System"),
+                       wxDefaultPosition, wxDefaultSize, 0);   
+   
    // wxButton
    *createVarButton =
       new wxButton(parent, createVarButtonId, wxT("Create"),
                    wxDefaultPosition, wxSize(-1,-1), 0 );
-     
+   
    // wxComboBox
    *objectComboBox =
       GetSpacecraftComboBox(parent, objectComboBoxId, wxSize(150, 20));
-      
+   *coordSysComboBox =
+      GetCoordSysComboBox(parent, coordSysComboBoxId, wxSize(150, 20));
+   
    // wxListBox
    wxArrayString emptyArray;
    *userParamListBox =
@@ -741,32 +785,38 @@ wxBoxSizer* GuiItemManager::CreateParameterSizer(wxWindow *parent,
    
    *propertyListBox = 
       GetPropertyListBox(parent, propertyListBoxId, wxSize(150, 100), "Spacecraft");
-     
+   
    // wx*Sizer
    wxStaticBoxSizer *userParamBoxSizer =
       new wxStaticBoxSizer(userParamStaticBox, wxVERTICAL);
    wxStaticBoxSizer *systemParamBoxSizer =
       new wxStaticBoxSizer(systemParamStaticBox, wxVERTICAL);
    wxBoxSizer *paramBoxSizer = new wxBoxSizer(wxVERTICAL);
-      
-   userParamBoxSizer->Add
-      (userVarStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-   userParamBoxSizer->Add
-      (*userParamListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-   userParamBoxSizer->Add
-      (*createVarButton, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-      
-   systemParamBoxSizer->Add
-      (objectStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-   systemParamBoxSizer->Add
-      (*objectComboBox, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-   systemParamBoxSizer->Add
-      (propertyStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-   systemParamBoxSizer->Add
-      (*propertyListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
    
-   paramBoxSizer->Add(userParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   paramBoxSizer->Add(systemParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   userParamBoxSizer->Add
+      (userVarStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   userParamBoxSizer->Add
+      (*userParamListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   userParamBoxSizer->Add
+      (*createVarButton, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   
+   systemParamBoxSizer->Add
+      (objectStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   systemParamBoxSizer->Add
+      (*objectComboBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   systemParamBoxSizer->Add
+      (propertyStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   systemParamBoxSizer->Add
+      (*propertyListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   systemParamBoxSizer->Add
+      (*coordSysLabel, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   systemParamBoxSizer->Add
+      (*coordSysComboBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   
+   paramBoxSizer->Add(userParamBoxSizer, 0,
+                      wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   paramBoxSizer->Add(systemParamBoxSizer, 0,
+                      wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
 
    return paramBoxSizer;
 }
@@ -843,13 +893,16 @@ void GuiItemManager::UpdateSpaceObjectList()
          {
             for (int i=0; i<numObj; i++)
             {
-               theSpaceObjectList[soCount] = wxString(result[i].c_str());
-               soCount++;
+               if (soCount < MAX_SPACECRAFT_SIZE)
+               {
+                  theSpaceObjectList[soCount] = wxString(result[i].c_str());
+                  soCount++;
 #if DEBUG_GUI_ITEM
-               MessageInterface::ShowMessage
-                  ("theSpaceObjectList[%d]=%s\n", soCount-1,
-                   theSpaceObjectList[soCount-1].c_str());
+                  MessageInterface::ShowMessage
+                     ("theSpaceObjectList[%d]=%s\n", soCount-1,
+                      theSpaceObjectList[soCount-1].c_str());
 #endif
+               }
             }
          }
          
@@ -858,13 +911,16 @@ void GuiItemManager::UpdateSpaceObjectList()
          //------------------------------------------
          for (int i=0; i<numFm; i++)
          {
-            theSpaceObjectList[soCount] = wxString(fmList[i].c_str());
-            soCount++;
+            if (soCount < MAX_SPACECRAFT_SIZE)
+            {
+               theSpaceObjectList[soCount] = wxString(fmList[i].c_str());
+               soCount++;
 #if DEBUG_GUI_ITEM
-            MessageInterface::ShowMessage
-               ("theSpaceObjectList[%d]=%s\n", soCount-1,
-                theSpaceObjectList[soCount-1].c_str());
+               MessageInterface::ShowMessage
+                  ("theSpaceObjectList[%d]=%s\n", soCount-1,
+                   theSpaceObjectList[soCount-1].c_str());
 #endif
+            }
          }
       }
       // no formation, Save scList to theSpaceObjectList
@@ -911,6 +967,14 @@ void GuiItemManager::UpdateFormationList()
    StringArray listForm = theGuiInterpreter->GetListOfConfiguredItems(Gmat::FORMATION);
    int numForm = listForm.size();
 
+   if (numForm > MAX_FORMATION_SIZE)
+   {
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdateFormationList() GUI can handle up to %d formations."
+          "The number of formation configured: %d\n", MAX_FORMATION_SIZE, numForm);
+      numForm = MAX_FORMATION_SIZE;
+   }
+   
    if (numForm > 0)  // check to see if any spacecrafts exist
    {
       for (int i=0; i<numForm; i++)
@@ -943,6 +1007,14 @@ void GuiItemManager::UpdateSpacecraftList()
    StringArray scList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
    int numSc = scList.size();
 
+   if (numSc > MAX_SPACECRAFT_SIZE)
+   {
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdateSpacecraftList() GUI can handle up to %d spacecraft."
+          "The number of spacecraft configured: %d\n", MAX_SPACECRAFT_SIZE, numSc);
+      numSc = MAX_SPACECRAFT_SIZE;
+   }
+   
    if (numSc > 0)  // check to see if any spacecrafts exist
    {
       for (int i=0; i<numSc; i++)
@@ -1002,7 +1074,7 @@ void GuiItemManager::UpdatePropertyList(const wxString &objName)
    
    for (int i=0; i<numParams; i++)
    {
-      if (theNumScProperty < MAX_PARAM_SIZE)
+      if (theNumScProperty < MAX_PROPERTY_SIZE)
       {
          // add to list only system parameters returning single value (loj: 9/22/04)
          if (items[i].find("CartState") == std::string::npos &&
@@ -1018,8 +1090,8 @@ void GuiItemManager::UpdatePropertyList(const wxString &objName)
       else
       {
          MessageInterface::PopupMessage
-            (Gmat::WARNING_, "The number of parameters exceeds the maximum: %d",
-             MAX_PARAM_SIZE);
+            (Gmat::WARNING_, "The number of spacecraft properties exceeds "
+             "the maximum: %d", MAX_PROPERTY_SIZE);
       }
    }
    
@@ -1047,7 +1119,7 @@ void GuiItemManager::UpdateParameterList()
    StringArray items =
       theGuiInterpreter->GetListOfConfiguredItems(Gmat::PARAMETER);
    int numParamCount = items.size();
-
+   
    Parameter *param;
 
    int plottableParamCount = 0;
@@ -1069,25 +1141,41 @@ void GuiItemManager::UpdateParameterList()
       // add if parameter plottable (returning single value)
       if (param->IsPlottable())
       {
-         thePlottableParamList[systemParamCount] = items[i].c_str();
-         plottableParamCount++;
+         if (plottableParamCount < MAX_PLOT_PARAM_SIZE)
+         {
+            thePlottableParamList[plottableParamCount] = items[i].c_str();
+            plottableParamCount++;
+         }
          
          // system Parameter (object property)
-         if (param->GetKey() == GmatParam::SYSTEM_PARAM) //loj: 12/10/04 Changed from Parameter::
+         if (param->GetKey() == GmatParam::SYSTEM_PARAM)
          {
-            theSystemParamList[systemParamCount] = items[i].c_str();
-            systemParamCount++;
+            if (systemParamCount < MAX_PROPERTY_SIZE)
+            {
+               theSystemParamList[systemParamCount] = items[i].c_str();
+               systemParamCount++;
+            }
          }
          else
          {
             // user Variable
             if (param->GetTypeName() == "Variable")
             {
-               theUserVarList[userVarCount] = items[i].c_str();
-               userVarCount++;
+               if (userArrayCount < MAX_USER_ARRAY_SIZE &&
+                   userParamCount < MAX_USER_PARAM_SIZE)
+               {
+                  theUserVarList[userVarCount] = items[i].c_str();
+                  userVarCount++;
                
-               theUserParamList[userParamCount] = items[i].c_str();
-               userParamCount++;
+                  theUserParamList[userParamCount] = items[i].c_str();
+                  userParamCount++;
+               }
+               else
+               {
+                  MessageInterface::ShowMessage
+                     ("GuiItemManager::UpdateParameterList() % is ignored. GUI can "
+                      "handle up to %d user parameters.\n", MAX_USER_VAR_SIZE);
+               }
             }
          }
       }
@@ -1096,11 +1184,21 @@ void GuiItemManager::UpdateParameterList()
          // user Array
          if (param->GetTypeName() == "Array")
          {
-            theUserArrayList[userArrayCount] = items[i].c_str();
-            userArrayCount++;
-            
-            theUserParamList[userParamCount] = items[i].c_str();
-            userParamCount++;
+            if (userArrayCount < MAX_USER_ARRAY_SIZE &&
+                userParamCount < MAX_USER_PARAM_SIZE)
+            {
+               theUserArrayList[userArrayCount] = items[i].c_str();
+               userArrayCount++;
+               
+               theUserParamList[userParamCount] = items[i].c_str();
+               userParamCount++;
+            }
+            else
+            {
+               MessageInterface::ShowMessage
+                  ("GuiItemManager::UpdateParameterList() % is ignored. GUI can "
+                   "handle up to %d user parameters.\n", MAX_USER_ARRAY_SIZE);
+            }
          }
       }
       //MessageInterface::ShowMessage("GuiItemManager::UpdateParameterList() " +
@@ -1127,13 +1225,54 @@ void GuiItemManager::UpdateConfigBodyList()
         
    StringArray items = theSolarSystem->GetBodiesInUse();
    theNumConfigBody = items.size();
-
+   
+   if (theNumConfigBody > MAX_OBJECT_SIZE)
+   {
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdateConfigBodyList() GUI will handle up to %d bodies."
+          "The number of bodies configured: %d\n", MAX_OBJECT_SIZE, theNumConfigBody);
+      theNumConfigBody = MAX_OBJECT_SIZE;
+   }
+   
    for (int i=0; i<theNumConfigBody; i++)
    {
       theConfigBodyList[i] = items[i].c_str();
         
       //MessageInterface::ShowMessage("GuiItemManager::UpdateConfigBodyList() " +
       //                              std::string(theConfigBodyList[i].c_str()) + "\n");
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateCoordSystemList()
+//------------------------------------------------------------------------------
+/**
+ * Updates confugured celestial body list
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateCoordSystemList()
+{
+   //MessageInterface::ShowMessage("GuiItemManager::UpdateCoordSystemList() entered\n");
+        
+   StringArray items =
+      theGuiInterpreter->GetListOfConfiguredItems(Gmat::COORDINATE_SYSTEM);
+   theNumCoordSys = items.size();
+   
+   if (theNumCoordSys > MAX_OBJECT_SIZE)
+   {
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdateCoordSystemList() GUI will handle up to %d coord. sys."
+          "The number of coord. sys. configured: %d\n", MAX_OBJECT_SIZE, theNumCoordSys);
+      theNumCoordSys = MAX_OBJECT_SIZE;
+   }
+
+   for (int i=0; i<theNumCoordSys; i++)
+   {
+      theCoordSysList[i] = items[i].c_str();
+        
+      //MessageInterface::ShowMessage("GuiItemManager::UpdateCoordSystemList() " +
+      //                              std::string(theCoordSysList[i].c_str()) + "\n");
    }
 }
 
@@ -1152,9 +1291,12 @@ GuiItemManager::GuiItemManager()
    theNumScProperty = 0;
    theNumPlottableParam = 0;
    theNumConfigBody = 0;
-
+   theNumCoordSys = 0;
+   
    theSpacecraftComboBox = NULL;
    theUserParamComboBox = NULL;
+   theCoordSysComboBox = NULL;
+   
    theSpacecraftListBox = NULL;
    theSpaceObjectListBox = NULL;
    theFormationListBox = NULL;

@@ -111,7 +111,7 @@ void XyPlotSetupPanel::OnAddX(wxCommandEvent& event)
 {
    wxString oldParam = mXSelectedListBox->GetStringSelection();
    wxString newParam = GetNewParam();
-      
+   
    if (!oldParam.IsSameAs(newParam))
    {
       // Create a paramete if it does not exist
@@ -238,6 +238,9 @@ void XyPlotSetupPanel::OnSelectProperty(wxCommandEvent& event)
    
    // deselect user param
    mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
+
+   // show coordinate system or central body
+   ShowCoordSystem();
    
    mUseUserParam = false;
 }
@@ -324,7 +327,7 @@ void XyPlotSetupPanel::OnLineColorClick(wxCommandEvent& event)
 void XyPlotSetupPanel::Create()
 {
    wxString emptyList[] = {};
-   Integer borderSize = 2; // border size
+   Integer borderSize = 1; // border size
    
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    mFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
@@ -364,13 +367,13 @@ void XyPlotSetupPanel::Create()
    //wxStaticText
    wxStaticText *titleXText =
       new wxStaticText(this, -1, wxT("Selected X"),
-                       wxDefaultPosition, wxSize(80,-1), 0);
+                       wxDefaultPosition, wxSize(-1,-1), 0);
    
    mXSelectedListBox =
       new wxListBox(this, X_SEL_LISTBOX, wxDefaultPosition,
                     wxSize(150,250), 0, emptyList, wxLB_SINGLE);
    
-   //wxBoxSizer *xSelelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
+   //wxSizer
    wxStaticBoxSizer *xSelectedBoxSizer =
       new wxStaticBoxSizer(xSelectedStaticBox, wxVERTICAL);
    
@@ -402,7 +405,9 @@ void XyPlotSetupPanel::Create()
       theGuiManager->CreateParameterSizer(this, &createVarButton, CREATE_VARIABLE,
                                           &mObjectComboBox, ID_COMBOBOX,
                                           &mUserParamListBox, USER_PARAM_LISTBOX,
-                                          &mPropertyListBox, PROPERTY_LISTBOX);
+                                          &mPropertyListBox, PROPERTY_LISTBOX,
+                                          &mCoordSysComboBox, ID_COMBOBOX,
+                                          &mCoordSysLabel);
 
 #if DEBUG_XYPLOT_PANEL
    MessageInterface::ShowMessage
@@ -412,72 +417,7 @@ void XyPlotSetupPanel::Create()
        mPropertyListBox);
 #endif
    
-   
-//     //===========================================================================
-//     //wxStaticBox
-//     wxStaticBox *userParamStaticBox = new wxStaticBox(this, -1, wxT(""));
-//     wxStaticBox *systemParamStaticBox = new wxStaticBox(this, -1, wxT(""));
-   
-//     //wxStaticText
-//     wxStaticText *userVarStaticText =
-//        new wxStaticText(this, -1, wxT("Variables"),
-//                         wxDefaultPosition, wxDefaultSize, 0);
-
-//     wxStaticText *objectStaticText =
-//        new wxStaticText(this, -1, wxT("Object"),
-//                         wxDefaultPosition, wxDefaultSize, 0);
-   
-//     wxStaticText *propertyStaticText =
-//        new wxStaticText(this, -1, wxT("Property"),
-//                         wxDefaultPosition, wxDefaultSize, 0);   
-   
-//     // wxButton
-//     createVarButton =
-//        new wxButton( this, CREATE_VARIABLE, wxT("Create"),
-//                      wxDefaultPosition, wxSize(-1,-1), 0 );
-
-//     // wxComboBox
-//     mObjectComboBox =
-//        theGuiManager->GetSpacecraftComboBox(this, ID_COMBOBOX, wxSize(150, 20));
-   
-//     // wxListBox
-//     wxArrayString emptyArray;
-//     mUserParamListBox =
-//        theGuiManager->GetUserVariableListBox(this, USER_PARAM_LISTBOX,
-//                                              wxSize(150, 50), "");
-
-//     //loj: 10/1/04 changed GetParameterListBox() to GetPropertyListBox()
-//     mPropertyListBox = 
-//        theGuiManager->GetPropertyListBox(this, PROPERTY_LISTBOX, wxSize(150, 100),
-//                                          "Spacecraft");
       
-//     // wx*Sizer
-//     wxStaticBoxSizer *userParamBoxSizer =
-//        new wxStaticBoxSizer(userParamStaticBox, wxVERTICAL);
-//     wxStaticBoxSizer *systemParamBoxSizer =
-//        new wxStaticBoxSizer(systemParamStaticBox, wxVERTICAL);
-//     wxBoxSizer *paramBoxSizer = new wxBoxSizer(wxVERTICAL);
-   
-//     userParamBoxSizer->Add
-//        (userVarStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-//     userParamBoxSizer->Add
-//        (mUserParamListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-//     userParamBoxSizer->Add
-//        (createVarButton, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-   
-//     systemParamBoxSizer->Add
-//        (objectStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-//     systemParamBoxSizer->Add
-//        (mObjectComboBox, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-//     systemParamBoxSizer->Add
-//        (propertyStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-//     systemParamBoxSizer->Add
-//        (mPropertyListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-
-//     paramBoxSizer->Add(userParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-//     paramBoxSizer->Add(systemParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-//     //===========================================================================
-   
    //------------------------------------------------------
    // add, remove, clear Y buttons (4th column)
    //------------------------------------------------------
@@ -504,7 +444,7 @@ void XyPlotSetupPanel::Create()
    //wxStaticText
    wxStaticText *titleYText =
       new wxStaticText(this, -1, wxT("Selected Y"),
-                       wxDefaultPosition, wxSize(80,-1), 0);
+                       wxDefaultPosition, wxSize(-1,-1), 0);
    
    mYSelectedListBox = new wxListBox(this, Y_SEL_LISTBOX, wxDefaultPosition,
                                      wxSize(150,250), 0, emptyList, wxLB_SINGLE);
@@ -621,6 +561,9 @@ void XyPlotSetupPanel::LoadData()
          mYSelectedListBox->SetSelection(0);
          delete yParamNames;
 
+         // show coordinate system or central body
+         ShowCoordSystem();
+         
          // show parameter option
          ShowParameterOption(mYSelectedListBox->GetStringSelection(), true);
       }
@@ -794,6 +737,32 @@ void XyPlotSetupPanel::ShowParameterOption(const wxString &name, bool show)
    }
    
    mFlexGridSizer->Layout();
+}
+
+//------------------------------------------------------------------------------
+// void ShowCoordSystem()
+//------------------------------------------------------------------------------
+void XyPlotSetupPanel::ShowCoordSystem()
+{
+   // get parameter pointer
+   wxString newParam = GetNewParam();
+   Parameter *param = CreateParameter(newParam);
+   
+   if (param->IsCoordSysDependent())
+   {
+      mCoordSysLabel->Show();
+      mCoordSysLabel->SetLabel("Coordinate System");
+   }
+   else if (param->IsOriginDependent())
+   {
+      mCoordSysLabel->Show();
+      mCoordSysLabel->SetLabel("Central Body");
+   }
+   else
+   {
+      mCoordSysLabel->Hide();
+   }
+   
 }
 
 //------------------------------------------------------------------------------

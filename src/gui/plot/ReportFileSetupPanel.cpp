@@ -165,7 +165,9 @@ void ReportFileSetupPanel::Create()
       theGuiManager->CreateParameterSizer(this, &createVarButton, CREATE_VARIABLE,
                                           &mObjectComboBox, ID_COMBOBOX,
                                           &mUserParamListBox, USER_PARAM_LISTBOX,
-                                          &mPropertyListBox, PROPERTY_LISTBOX);
+                                          &mPropertyListBox, PROPERTY_LISTBOX,
+                                          &mCoordSysComboBox, ID_COMBOBOX,
+                                          &mCoordSysLabel);
 
 //   mVarBoxSizer->Add(titleAvailable, 0, wxALIGN_CENTRE|wxALL, bsize);
 //   mVarBoxSizer->Add(mVarListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
