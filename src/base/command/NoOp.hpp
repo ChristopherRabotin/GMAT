@@ -25,7 +25,7 @@
 #ifndef NOOP_HPP
 #define NOOP_HPP
 
-#include "command.hpp" // inheriting class's header file
+#include "Command.hpp" // inheriting class's header file
 
 /**
  * Default command used to initialize the command sequence lists in the Moderator
