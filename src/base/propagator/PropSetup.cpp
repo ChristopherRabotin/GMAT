@@ -471,8 +471,12 @@ std::string PropSetup::GetStringParameter(const Integer id) const
          return mPropagator->GetTypeName();
       return "UndefinedPropagator";
    case FORCE_MODEL_NAME:
-      if (mForceModel)
-         return mForceModel->GetName();
+      if (mForceModel) {
+         std::string nomme = mForceModel->GetName();
+         if (nomme == "")
+            nomme = instanceName + "_ForceModel";
+         return nomme;
+      }
       return "InternalForceModel";
 // DJC 8/13/04: These are now part of the ForceModel
 //   case USE_DRAG:
@@ -584,10 +588,6 @@ bool PropSetup::SetStringParameter(const std::string &label, const std::string &
    return SetStringParameter(GetParameterID(label), value);
 }
 
-//---------------------------------
-// private methods
-//---------------------------------
-
 //------------------------------------------------------------------------------
 // void Initialize()
 //------------------------------------------------------------------------------
@@ -647,3 +647,49 @@ void PropSetup::Initialize()
    }
 }
 
+
+//------------------------------------------------------------------------------
+// const std::string& GetGeneratingString(Gmat::WriteMode mode,
+//            const std::string &prefix, const std::string &useName)
+//------------------------------------------------------------------------------
+/**
+ * Provides special handling for the scripting for PropSetups.
+ *
+ * @param mode Specifies the type of serialization requested.
+ * @param prefix Optional prefix appended to the object's name
+ * @param useName Name that replaces the object's name.
+ *
+ * @return A string containing the scrit used to construct the PropSetup.
+ */
+//------------------------------------------------------------------------------
+const std::string& PropSetup::GetGeneratingString(Gmat::WriteMode mode,
+            const std::string &prefix, const std::string &useName)
+{
+   std::string gen, fMName = "", temp;
+
+   if (mForceModel != NULL)
+   {
+      temp = mForceModel->GetName();
+      if (temp == "") {
+         fMName = instanceName + "_ForceModel";
+         gen = mForceModel->GetGeneratingString(mode, prefix, fMName) + "\n";
+      }
+      else
+         fMName = temp;
+   }
+
+   gen += GmatBase::GetGeneratingString(mode, prefix, useName);
+
+   if (mPropagator != NULL)
+   {
+      temp = mPropagator->GetGeneratingString(mode, prefix, instanceName);
+      unsigned loc = 0;
+      if (temp.find("Create") != std::string::npos) // Skip the Create line
+         loc = temp.find("\n");
+      gen += temp.substr(loc+1);
+   }
+   
+   generatingString = gen;
+      
+   return generatingString;
+}
