@@ -17,7 +17,6 @@
  */
 //------------------------------------------------------------------------------
 
-#include "gmatdefs.hpp"
 #include "RealVar.hpp"
 #include "ParameterException.hpp"
 #include "MessageInterface.hpp"
@@ -44,8 +43,8 @@
  * @param <obj>  reference object pointer
  * @param <desc> parameter description
  * @param <unit> parameter unit
- * @param <ownerType> object type who owns this parameter as property
  * @param <depObj> object which parameter is dependent on (COORD_SYS, ORIGIN, NONE)
+ * @param <ownerType> object type who owns this parameter as property
  * @param <isTimeParam> true if parameter is time related, false otherwise
  */
 //------------------------------------------------------------------------------
@@ -110,6 +109,8 @@ RealVar::~RealVar()
 // bool operator==(const RealVar &right) const
 //------------------------------------------------------------------------------
 /**
+ * Equal operator.
+ *
  * @return true if input object's type and name are the same as this object.
  */
 //------------------------------------------------------------------------------
@@ -122,6 +123,8 @@ bool RealVar::operator==(const RealVar &right) const
 // bool operator!=(const RealVar &right) const
 //------------------------------------------------------------------------------
 /**
+ * Not equal operator.
+ *
  * @return true if input object's type and name are not the same as this object.
  */
 //------------------------------------------------------------------------------
@@ -138,9 +141,9 @@ bool RealVar::operator!=(const RealVar &right) const
 // std::string ToString()
 //------------------------------------------------------------------------------
 /**
- * @return parameter value converted to std::string.
+ * Converts parameter real value to string.
  *
- * @exception <ParameterException> thrown if this method is called.
+ * @return parameter value converted to std::string.
  */
 //------------------------------------------------------------------------------
 std::string RealVar::ToString()
@@ -155,6 +158,8 @@ std::string RealVar::ToString()
 // Real GetReal() const
 //------------------------------------------------------------------------------
 /**
+ * Retrives real value of parameter.
+ *
  * @return Real value of parameter without evaluating.
  */
 //------------------------------------------------------------------------------
@@ -183,6 +188,15 @@ void RealVar::SetReal(Real val)
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored, throw if the parameter is not stored.
+ */
+//------------------------------------------------------------------------------
 bool RealVar::SetStringParameter(const Integer id, const std::string &value)
 {
 #if DEBUG_REALVAR
@@ -207,6 +221,15 @@ bool RealVar::SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const std::string &label,
 //                         const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored, false if not.
+ */
 //------------------------------------------------------------------------------
 bool RealVar::SetStringParameter(const std::string &label,
                                  const std::string &value)

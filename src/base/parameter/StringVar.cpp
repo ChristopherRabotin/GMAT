@@ -18,7 +18,6 @@
  */
 //------------------------------------------------------------------------------
 
-#include "gmatdefs.hpp"
 #include "StringVar.hpp"
 #include "MessageInterface.hpp"
 
@@ -45,9 +44,8 @@ StringVar::StringVar(const std::string &name, const std::string &desc)
 {   
    // Parameter data
    mIsPlottable = false;
-   
-   // GmatBase data
 }
+
 
 //------------------------------------------------------------------------------
 // StringVar(const StringVar &copy)
@@ -62,6 +60,7 @@ StringVar::StringVar(const StringVar &copy)
    : Parameter(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // StringVar& operator= (const StringVar& right)
@@ -84,6 +83,7 @@ StringVar& StringVar::operator= (const StringVar& right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~StringVar()
 //------------------------------------------------------------------------------
@@ -95,10 +95,17 @@ StringVar::~StringVar()
 {
 }
 
+
+//------------------------------------
+// methods inherited from Parameter
+//------------------------------------
+
 //------------------------------------------------------------------------------
 // bool operator==(const StringVar &right) const
 //------------------------------------------------------------------------------
 /**
+ * Equal operator.
+ *
  * @return true if input object's type and name are the same as this object.
  */
 //------------------------------------------------------------------------------
@@ -107,10 +114,13 @@ bool StringVar::operator==(const StringVar &right) const
    return Parameter::operator==(right);
 }
 
+
 //------------------------------------------------------------------------------
 // bool operator!=(const StringVar &right) const
 //------------------------------------------------------------------------------
 /**
+ * Not equal operator.
+ *
  * @return true if input object's type and name are not the same as this object.
  */
 //------------------------------------------------------------------------------
@@ -120,15 +130,13 @@ bool StringVar::operator!=(const StringVar &right) const
 }
 
 
-//------------------------------------
-// methods inherited from Parameter
-//------------------------------------
-
 //------------------------------------------------------------------------------
 // std::string ToString()
 //------------------------------------------------------------------------------
 /**
- * @return parameter value converted to std::string.
+ * Retrieves string value of parameter.
+ *
+ * @return string value of parameter.
  */
 //------------------------------------------------------------------------------
 std::string StringVar::ToString()
@@ -136,17 +144,21 @@ std::string StringVar::ToString()
    return mExpr;
 }
 
+
 //------------------------------------------------------------------------------
 // const std::string& GetString() const
 //------------------------------------------------------------------------------
 /**
- * Retrieves string value of parameter without evaluating.
+ * Retrieves string value of parameter.
+ *
+ * @return string value.
  */
 //------------------------------------------------------------------------------
 const std::string& StringVar::GetString() const
 {
    return mExpr;
 }
+
 
 //------------------------------------
 // methods inherited from GmatBase
@@ -156,7 +168,9 @@ const std::string& StringVar::GetString() const
 // virtual GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
- * Method used to create a copy of the object
+ * Method used to create a copy of the object.
+ *
+ * @return cloned object pointer.
  */
 //------------------------------------------------------------------------------
 GmatBase* StringVar::Clone() const
