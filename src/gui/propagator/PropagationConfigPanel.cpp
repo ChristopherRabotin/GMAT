@@ -24,14 +24,6 @@
 #include "PropagationConfigPanel.hpp"
 
 // base includes
-//#include "gmatdefs.hpp"
-//#include "GuiInterpreter.hpp"
-//#include "Propagator.hpp"
-//#include "PropSetup.hpp"
-//#include "ForceModel.hpp"
-//#include "CelestialBody.hpp"
-//#include "SolarSystem.hpp"
-//#include "GravityField.hpp"
 #include "MessageInterface.hpp"
 
 #define DEBUG_PROP_PANEL 0
@@ -68,11 +60,17 @@ END_EVENT_TABLE()
  * A constructor.
  */
 //------------------------------------------------------------------------------
-PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent, const wxString &propName)
+PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
+                                               const wxString &propName)
    : GmatPanel(parent)
 {
    propSetupName = std::string(propName.c_str());
-   forceList.clear();
+   
+#if DEBUG_PROP_PANEL
+   MessageInterface::ShowMessage
+      ("PropagationConfigPanel() entered propSetupName=%s\n",
+       propSetupName.c_str());
+#endif
    
    // Default integrator values
    newPropName      = "";
@@ -81,6 +79,11 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent, const wxString 
    newProp          = NULL;
    integratorString = "RKV 8(9)";
     
+   forceList.clear();
+   gravModelArray.clear();
+   dragModelArray.clear();
+   magfModelArray.clear();
+   
    // Default force model values
    useSRP              = false;
    useDragForce        = false;
@@ -112,6 +115,16 @@ PropagationConfigPanel::~PropagationConfigPanel()
 {
    for (unsigned int i=0; i<forceList.size(); i++)
       delete forceList[i];
+   
+   gravModelArray.clear();
+   dragModelArray.clear();
+   magfModelArray.clear();
+
+   primaryBodiesArray.Clear();
+   savedBodiesArray.Clear();
+   pointmassBodiesArray.Clear();    
+   primaryBodiesGravityArray.Clear();
+   integratorArray.Clear();
 }
 
 //------------------------------------------
@@ -135,9 +148,16 @@ void PropagationConfigPanel::Create()
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::LoadData()
 {
-   //MessageInterface::ShowMessage("LoadData() entered\n");
+#if DEBUG_PROP_PANEL
+   MessageInterface::ShowMessage("LoadData() entered\n");
+#endif
+   
    std::string propType = newProp->GetTypeName();
-   //MessageInterface::ShowMessage("std::string propType = newProp->GetTypeName();\n");
+   
+#if DEBUG_PROP_PANEL
+   MessageInterface::ShowMessage("propType=%s\n", propType.c_str());
+#endif
+
    Integer typeId = 0;
     
    if (propType == "RungeKutta89")
@@ -169,13 +189,37 @@ void PropagationConfigPanel::LoadData()
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::SaveData()
 {
-   //-----------------------------------
+   //-------------------------------------------------------
+   // check for integrator and forcemodel, some RKN cannot
+   // handle DragForce
+   //-------------------------------------------------------
+#if DEBUG_PROP_PANEL
+   MessageInterface::ShowMessage
+      ("SaveData() newPropName=%s\n", newProp->GetTypeName().c_str());
+#endif
+
+   //loj: 6/17/04 give user a warning?
+//     if (newProp->GetTypeName() == "DormandElMikkawyPrince68")
+//     {
+//        for (unsigned int i=0; i<forceList.size(); i++)
+//        {
+//           if (forceList[i]->dragType != dragModelArray[NONE_DM])
+//           {
+//              MessageInterface::PopupMessage
+//                 (Gmat::WARNING_, "DormandElMikkawyPrince68 Integrator cannot "
+//                  "handle Drag force. Please make appropriate selection\n");
+//              break;
+//           }
+//        }
+//     }
+   
+   //-------------------------------------------------------
    // Saving the Integrator
-   //-----------------------------------
+   //-------------------------------------------------------
    if (isIntegratorChanged)
    {
 #if DEBUG_PROP_PANEL
-   ShowPropData("SaveData() BEFORE saving Integrator");
+      ShowPropData("SaveData() BEFORE saving Integrator");
 #endif
       isIntegratorChanged = false;
         
@@ -191,9 +235,9 @@ void PropagationConfigPanel::SaveData()
 #endif
    }
    
-   //-----------------------------------
+   //-------------------------------------------------------
    // Saving the force model
-   //-----------------------------------
+   //-------------------------------------------------------
    if (isForceModelChanged)
    {
       isForceModelChanged = false;
@@ -472,6 +516,10 @@ Integer PropagationConfigPanel::FindBody(const std::string &bodyName,
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::Initialize()
 {  
+#if DEBUG_PROP_PANEL
+   MessageInterface::ShowMessage("PropagationConfigPanel::Initialize() entered\n");
+#endif
+   
    theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
    thePropSetup = theGuiInterpreter->GetPropSetup(propSetupName);
 
@@ -503,9 +551,6 @@ void PropagationConfigPanel::Initialize()
       theForceModel = thePropSetup->GetForceModel();
       numOfForces   = thePropSetup->GetNumForces();
          
-#if DEBUG_PROP_PANEL
-      ShowPropData("Initialize() entering");
-#endif
       Integer paramId;
       PhysicalModel *force;
       //CelestialBody *body;
@@ -616,13 +661,16 @@ void PropagationConfigPanel::Initialize()
       currentBodyName = std::string(primaryBodyString.c_str());
       currentBodyId = FindBody(currentBodyName);
       savedBodiesArray = primaryBodiesArray;
-         
-      //MessageInterface::ShowMessage("primaryBodyString=%s\n", primaryBodyString.c_str());
-                
-      if (primaryBodiesGravityArray[0].CmpNoCase("PointMassForce") == 0)
-         gravityFieldString  = wxT("Point Mass");
-      else
-         gravityFieldString  = wxT("None");
+
+#if DEBUG_PROP_PANEL
+      MessageInterface::ShowMessage("primaryBodyString=%s\n", primaryBodyString.c_str());
+#endif
+
+      //loj: 6/17/04
+//        if (primaryBodiesGravityArray[0].CmpNoCase("PointMassForce") == 0)
+//           gravityFieldString  = wxT("Point Mass");
+//        else
+//           gravityFieldString  = wxT("None");
                 
       numOfBodies = (Integer)primaryBodiesArray.GetCount();
          
@@ -641,11 +689,18 @@ void PropagationConfigPanel::Initialize()
 // void Setup(wxWindow *parent)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::Setup(wxWindow *parent)
-{              
-   //MessageInterface::ShowMessage("Setup() entered\n");
+{
+#if DEBUG_PROP_PANEL
+   MessageInterface::ShowMessage("PropagationConfigPanel::Setup() entered\n");
+#endif
    
    // wxStaticText
    //loj: 5/19/04 changed wxSize(250,30) to wxSize(80,20)
+#if DEBUG_PROP_PANEL
+   MessageInterface::ShowMessage
+      ("PropagationConfigPanel::Setup() create wxStaticText\n");
+#endif
+   
    integratorStaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Integrator Type"),
                         wxDefaultPosition, wxSize(80,20),
@@ -696,6 +751,10 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxStaticText( parent, ID_TEXT, wxT("Other Potential Field File:"),
                         wxDefaultPosition, wxDefaultSize, 0 );
    
+#if DEBUG_PROP_PANEL
+   MessageInterface::ShowMessage
+      ("PropagationConfigPanel::Setup() create wxTextCtrl\n");
+#endif
     // wxTextCtrl
    setting1TextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
@@ -734,6 +793,11 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxTextCtrl( parent, ID_TEXTCTRL_MAGF, wxT(""), wxDefaultPosition,
                       wxSize(40,-1), 0 );
 
+#if DEBUG_PROP_PANEL
+   MessageInterface::ShowMessage
+      ("PropagationConfigPanel::Setup() create wxButton\n");
+#endif
+   
    // wxButton
    bodyButton =
       new wxButton( parent, ID_BUTTON_ADD_BODY, wxT("Add Body"),
@@ -754,67 +818,76 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxButton( parent, ID_BUTTON_SRP_EDIT, wxT("Edit"),
                     wxDefaultPosition, wxDefaultSize, 0 );
    
+#if DEBUG_PROP_PANEL
+   MessageInterface::ShowMessage
+      ("PropagationConfigPanel::Setup() create strArray*\n");
+#endif
+   
    // wxString
-   wxString strArray1[] = 
+   wxString *intgArray = new wxString[IntegratorCount];
+   for (int i=0; i<IntegratorCount; i++)
+      intgArray[i] = integratorArray[i];
+   
+   wxString bodyArray[] =
    {
-      integratorArray[0],
-      integratorArray[1],
-      integratorArray[2],
-      integratorArray[3]
    };
 
-   wxString strArray2[] =
-   {
-   };
+   wxString *gravArray = new wxString[GravModelCount];
+   for (int i=0; i<GravModelCount; i++)
+      gravArray[i] = gravModelArray[i].c_str();
+
+   wxString *dragArray = new wxString[DragModelCount];
+   for (int i=0; i<DragModelCount; i++)
+      dragArray[i] = dragModelArray[i].c_str();
    
-   wxString strArray3[] = 
-   {
-      wxT(gravModelArray[0].c_str()),
-      wxT(gravModelArray[1].c_str()),
-      wxT(gravModelArray[2].c_str()),
-      wxT(gravModelArray[3].c_str()),
-      wxT(gravModelArray[4].c_str())
-   };
+   wxString *magfArray = new wxString[MagfModelCount];
+   for (int i=0; i<MagfModelCount; i++)
+      magfArray[i] = magfModelArray[i].c_str();
+
+#if DEBUG_PROP_PANEL
+   MessageInterface::ShowMessage
+      ("PropagationConfigPanel::Setup() create wxComboBox\n"
+       "IntegratorCount=%d, GravModelCount=%d, DragModelCount=%d, "
+       "MagfModelCount=%d\n", IntegratorCount, GravModelCount, DragModelCount,
+       MagfModelCount);
+#endif
    
-   wxString strArray4[] = 
-   {
-      wxT(dragModelArray[0].c_str()),
-      wxT(dragModelArray[1].c_str()),
-      wxT(dragModelArray[2].c_str()),
-      wxT(dragModelArray[3].c_str())
-   };
-   
-   wxString strArray5[] = 
-   {
-      wxT(magfModelArray[0].c_str())
-   };
-    
    // wxComboBox
    integratorComboBox =
       new wxComboBox( parent, ID_CB_INTGR, wxT(integratorString),
                       wxDefaultPosition, wxSize(80,-1), IntegratorCount,
-                      strArray1, wxCB_DROPDOWN|wxCB_READONLY );
+                      intgArray, wxCB_DROPDOWN|wxCB_READONLY );
    bodyComboBox =
       new wxComboBox( parent, ID_CB_BODY, wxT(primaryBodyString),
-                      //wxDefaultPosition,  wxSize(100,-1), numOfBodies,
                       wxDefaultPosition,  wxSize(100,-1), 0,
-                      strArray2, wxCB_DROPDOWN|wxCB_READONLY );
+                      bodyArray, wxCB_DROPDOWN|wxCB_READONLY );
+   
    gravComboBox =
-      new wxComboBox( parent, ID_CB_GRAV, wxT(gravityFieldString),
+      new wxComboBox( parent, ID_CB_GRAV, wxT(gravArray[0]),
                       wxDefaultPosition, wxSize(100,-1), GravModelCount,
-                      strArray3, wxCB_DROPDOWN|wxCB_READONLY );
+                      gravArray, wxCB_DROPDOWN|wxCB_READONLY );
    atmosComboBox =
-      new wxComboBox( parent, ID_CB_ATMOS, wxT(strArray4[0]),
-                      wxDefaultPosition, wxSize(130,-1), DragModelCount,
-                      strArray4, wxCB_DROPDOWN|wxCB_READONLY );
+      new wxComboBox( parent, ID_CB_ATMOS, wxT(dragArray[0]),
+                      wxDefaultPosition, wxSize(100,-1), DragModelCount,
+                      dragArray, wxCB_DROPDOWN|wxCB_READONLY );
    magfComboBox =
-      new wxComboBox( parent, ID_CB_MAG, wxT(strArray5[0]),
+      new wxComboBox( parent, ID_CB_MAG, wxT(magfArray[0]),
                       wxDefaultPosition, wxSize(100,-1), MagfModelCount,
-                      strArray5, wxCB_DROPDOWN|wxCB_READONLY );
+                      magfArray, wxCB_DROPDOWN|wxCB_READONLY );
       
+#if DEBUG_PROP_PANEL
+   MessageInterface::ShowMessage
+      ("PropagationConfigPanel::Setup() ComboBoxes created\n");
+#endif
+   
    // wxCheckBox
    srpCheckBox = new wxCheckBox( parent, ID_CHECKBOX, wxT("Use"),
                                  wxDefaultPosition, wxDefaultSize, 0 );
+   
+#if DEBUG_PROP_PANEL
+   MessageInterface::ShowMessage
+      ("PropagationConfigPanel::Setup() create wxSizer\n");
+#endif
    
    // wx*Sizers      
    wxBoxSizer *boxSizer1 = new wxBoxSizer( wxVERTICAL );
@@ -936,6 +1009,10 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    bodyButton->Enable(true);
    srpCheckBox->Enable(true);
    dragSetupButton->Enable(false);
+   
+#if DEBUG_PROP_PANEL
+   MessageInterface::ShowMessage("PropagationConfigPanel::Setup() exiting\n");
+#endif
 }
 
 //------------------------------------------------------------------------------
