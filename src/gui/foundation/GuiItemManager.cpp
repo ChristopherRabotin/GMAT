@@ -656,6 +656,92 @@ wxListBox* GuiItemManager::GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
    return theConfigBodyListBox;
 }
 
+//------------------------------------------------------------------------------
+// wxBoxSizer* CreateParameterSizer()
+//------------------------------------------------------------------------------
+/**
+ * Creates parameter sizer.
+ */
+//------------------------------------------------------------------------------
+wxBoxSizer* GuiItemManager::CreateParameterSizer(wxWindow *parent,
+                                                 wxButton **createVarButton,
+                                                 wxWindowID createVarButtonId,
+                                                 wxComboBox **objectComboBox,
+                                                 wxWindowID objectComboBoxId,
+                                                 wxListBox **userParamListBox,
+                                                 wxWindowID userParamListBoxId,
+                                                 wxListBox **propertyListBox,
+                                                 wxWindowID propertyListBoxId)
+{
+#if DEBUG_GUI_ITEM
+   MessageInterface::ShowMessage("GuiItemManager::CreateParameterSizer() entered\n");
+#endif
+   
+   Integer borderSize = 2;
+   
+   //wxStaticBox
+   wxStaticBox *userParamStaticBox = new wxStaticBox(parent, -1, wxT(""));
+   wxStaticBox *systemParamStaticBox = new wxStaticBox(parent, -1, wxT(""));
+   
+   //wxStaticText
+   wxStaticText *userVarStaticText =
+      new wxStaticText(parent, -1, wxT("Variables"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
+   wxStaticText *objectStaticText =
+      new wxStaticText(parent, -1, wxT("Object"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
+   wxStaticText *propertyStaticText =
+      new wxStaticText(parent, -1, wxT("Property"),
+                       wxDefaultPosition, wxDefaultSize, 0);   
+     
+   // wxButton
+   *createVarButton =
+      new wxButton(parent, createVarButtonId, wxT("Create"),
+                   wxDefaultPosition, wxSize(-1,-1), 0 );
+     
+   // wxComboBox
+   *objectComboBox =
+      GetSpacecraftComboBox(parent, objectComboBoxId, wxSize(150, 20));
+      
+   // wxListBox
+   wxArrayString emptyArray;
+   *userParamListBox =
+      GetUserVariableListBox(parent, userParamListBoxId, wxSize(150, 50), "");
+   
+   *propertyListBox = 
+      GetPropertyListBox(parent, propertyListBoxId, wxSize(150, 100), "Spacecraft");
+     
+   // wx*Sizer
+   wxStaticBoxSizer *userParamBoxSizer =
+      new wxStaticBoxSizer(userParamStaticBox, wxVERTICAL);
+   wxStaticBoxSizer *systemParamBoxSizer =
+      new wxStaticBoxSizer(systemParamStaticBox, wxVERTICAL);
+   wxBoxSizer *paramBoxSizer = new wxBoxSizer(wxVERTICAL);
+      
+   userParamBoxSizer->Add
+      (userVarStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
+   userParamBoxSizer->Add
+      (*userParamListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
+   userParamBoxSizer->Add
+      (*createVarButton, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
+      
+   systemParamBoxSizer->Add
+      (objectStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
+   systemParamBoxSizer->Add
+      (*objectComboBox, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
+   systemParamBoxSizer->Add
+      (propertyStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
+   systemParamBoxSizer->Add
+      (*propertyListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
+   
+   paramBoxSizer->Add(userParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   paramBoxSizer->Add(systemParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+
+   return paramBoxSizer;
+}
+
 //-------------------------------
 // priavate methods
 //-------------------------------
@@ -915,7 +1001,7 @@ void GuiItemManager::UpdatePropertyList(const wxString &objName)
 }
 
 //------------------------------------------------------------------------------
-//  void UpdateParameterList()
+// void UpdateParameterList()
 //------------------------------------------------------------------------------
 /**
  * Updates confugured parameter list (thePlottableParamList, theSystemParamList,
@@ -981,7 +1067,7 @@ void GuiItemManager::UpdateParameterList()
 }
 
 //------------------------------------------------------------------------------
-//  void UpdateConfigBodyList()
+// void UpdateConfigBodyList()
 //------------------------------------------------------------------------------
 /**
  * Updates confugured celestial body list
@@ -1011,7 +1097,7 @@ GuiItemManager::GuiItemManager()
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
    UpdatePropertyList("Spacecraft");
-
+   
    theNumSpaceObject = 0;
    theNumFormation = 0;
    theNumSpacecraft = 0;

@@ -114,6 +114,15 @@ public:
                                    const wxSize &size,
                                    wxArrayString &bodiesToExclude);
    
+   wxBoxSizer* CreateParameterSizer(wxWindow *parent,
+                                    wxButton **createVarButton,
+                                    wxWindowID createVarButtonId,
+                                    wxComboBox **objectComboBox,
+                                    wxWindowID objectComboBoxId,
+                                    wxListBox **userParamListBox,
+                                    wxWindowID userParamListBoxId,
+                                    wxListBox **propertyListBox,
+                                    wxWindowID propertyListBoxId);
    
 private:
    
@@ -129,7 +138,7 @@ private:
    void UpdateSpacecraftList();
    void UpdateParameterList();
    void UpdateConfigBodyList();
-   
+      
    static GuiItemManager *theInstance;
    GuiInterpreter *theGuiInterpreter;
    SolarSystem *theSolarSystem;
@@ -165,7 +174,8 @@ private:
    wxListBox  *theUserVarListBox;
    wxListBox  *theUserArrayListBox;
    wxListBox  *theConfigBodyListBox;
-   
+
+   wxBoxSizer *theParamBoxSizer;
 };
 
 #endif // GuiItemManager_hpp
