@@ -1074,18 +1074,49 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
 #if DEBUG_PROP_PANEL
    ShowPropData("DisplayIntegratorData() exiting...");
 #endif
-         
-   // fill in data   
-   setting1TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("StepSize")));
-   setting2TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("Accuracy")));
-   setting3TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("MinStep")));
-   setting4TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("MaxStep")));
-   setting5TextCtrl->SetValue(wxVariant((long)newProp->GetIntegerParameter("MaxStepAttempts")));
+    // fill in data     
+    // waw: Changed to show all digits
+    wxString s1, s2, s3, s4, s5;
+    
+    Real i1 = newProp->GetRealParameter("StepSize");
+    Real i2 = newProp->GetRealParameter("Accuracy");
+    Real i3 = newProp->GetRealParameter("MinStep");
+    Real i4 = newProp->GetRealParameter("MaxStep");
+    Integer i5 = (long)newProp->GetIntegerParameter("MaxStepAttempts");
+
+    s1.Printf("%.10f", i1);
+    s2.Printf("%.10f", i2);
+    s3.Printf("%.10f", i3);
+    s4.Printf("%.10f", i4);
+    s5.Printf("%d", i5);
+
+   setting1TextCtrl->SetValue(s1);
+   setting2TextCtrl->SetValue(s2);
+   setting3TextCtrl->SetValue(s3);
+   setting4TextCtrl->SetValue(s4);
+   setting5TextCtrl->SetValue(s5);
+ 
+//   setting1TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("StepSize")));
+//   setting2TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("Accuracy")));
+//   setting3TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("MinStep")));
+//   setting4TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("MaxStep")));
+//   setting5TextCtrl->SetValue(wxVariant((long)newProp->GetIntegerParameter("MaxStepAttempts")));
    
    if (integratorString.IsSameAs(integratorArray[ABM]))
    {
-      setting6TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("LowerError")));
-      setting7TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("TargetError")));
+      wxString s6, s7;
+      
+      Real i6 = newProp->GetRealParameter("LowerError");
+      Real i7 = newProp->GetRealParameter("TargetError");
+      
+      s6.Printf("%.10f", i6);
+      s7.Printf("%.10f", i7);
+      
+      setting6TextCtrl->SetValue(s6);
+      setting7TextCtrl->SetValue(s7);
+      
+//      setting6TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("LowerError")));
+//      setting7TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("TargetError")));
    } 
 }
 
