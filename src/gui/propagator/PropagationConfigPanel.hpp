@@ -172,7 +172,6 @@ private:
    //    wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
     
    // Text control event method
-   void OnTextChange(wxCommandEvent &event); //loj: 5/14/04 added
    void OnIntegratorTextUpdate();
    void OnGravityTextUpdate();
    void OnMagneticTextUpdate();

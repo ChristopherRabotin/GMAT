@@ -55,7 +55,6 @@ BEGIN_EVENT_TABLE(PropagationConfigPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_MAG_SEARCH, PropagationConfigPanel::OnMagSearchButton)
    EVT_BUTTON(ID_BUTTON_PM_EDIT, PropagationConfigPanel::OnPMEditButton)
    EVT_BUTTON(ID_BUTTON_SRP_EDIT, PropagationConfigPanel::OnSRPEditButton)
-   EVT_TEXT(ID_TEXTCTRL, PropagationConfigPanel::OnTextChange) //loj: 5/14/04 added
    EVT_TEXT(ID_TEXTCTRL_PROP, PropagationConfigPanel::OnIntegratorTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_GRAV1, PropagationConfigPanel::OnGravityTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_GRAV2, PropagationConfigPanel::OnGravityTextUpdate)
@@ -291,11 +290,8 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    setting4TextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
    setting5TextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
    bodyTextCtrl = new wxTextCtrl( parent, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), wxTE_READONLY );
-   //loj: 5/14/04
-   //gravityDegreeTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL_GRAV1, wxT(""), wxDefaultPosition, wxSize(50,-1), 0 );
-   //gravityOrderTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL_GRAV2, wxT(""), wxDefaultPosition, wxSize(50,-1), 0 );
-   gravityDegreeTextCtrl = new wxTextCtrl( parent, -1, wxT(""), wxDefaultPosition, wxSize(50,-1), 0 );
-   gravityOrderTextCtrl = new wxTextCtrl( parent, -1, wxT(""), wxDefaultPosition, wxSize(50,-1), 0 );
+   gravityDegreeTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL_GRAV1, wxT(""), wxDefaultPosition, wxSize(50,-1), 0 );
+   gravityOrderTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL_GRAV2, wxT(""), wxDefaultPosition, wxSize(50,-1), 0 );
    pmEditTextCtrl = new wxTextCtrl( parent, -1, wxT(""), wxDefaultPosition, wxSize(550,-1), wxTE_READONLY );
    magneticDegreeTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL_MAGN1, wxT(""), wxDefaultPosition, wxSize(50,-1), 0 );
    magneticOrderTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL_MAGN2, wxT(""), wxDefaultPosition, wxSize(50,-1), 0 );
@@ -743,9 +739,8 @@ void PropagationConfigPanel::DisplayGravityFieldData()
          {
             gravityTypeComboBox->SetValue("Point Mass");
             //loj: 5/11/04 why problem setting value?
-            //loj: 5/14/04 it works after gravityDegreeTextCtrl uses default window id
-            gravityDegreeTextCtrl->SetValue("0");
-            gravityOrderTextCtrl->SetValue("0");
+            //gravityDegreeTextCtrl->SetValue("0");
+            //gravityOrderTextCtrl->SetValue("0");
             gravityDegreeTextCtrl->Enable(false);
             gravityOrderTextCtrl->Enable(false);
          }
@@ -1140,16 +1135,6 @@ void PropagationConfigPanel::OnPMEditButton()
 void PropagationConfigPanel::OnSRPEditButton()
 {
    theApplyButton->Enable(true);
-}
-
-// wxTextCtrl Events
-void PropagationConfigPanel::OnTextChange(wxCommandEvent &event)
-{
-   if (event.GetEventObject() == gravityDegreeTextCtrl ||
-       event.GetEventObject() == gravityOrderTextCtrl)
-   {
-      OnGravityTextUpdate();
-   }
 }
 
 void PropagationConfigPanel::OnIntegratorTextUpdate()
