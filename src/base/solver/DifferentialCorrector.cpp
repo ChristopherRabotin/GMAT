@@ -22,6 +22,7 @@
 
 #include "DifferentialCorrector.hpp"
 #include "Rmatrix.hpp"
+#include "RealUtilities.hpp"     // for GmatMathUtil::Abs()
 #include "MessageInterface.hpp"
 
 
@@ -799,7 +800,9 @@ void DifferentialCorrector::CheckCompletion()
    // check for lack of convergence
    for (Integer i = 0; i < goalCount; ++i)
    {
-      if (fabs(nominal[i] - goal[i]) > tolerance[i])
+      //if (fabs(nominal[i] - goal[i]) > tolerance[i])
+      //loj: 4/4/05 Changed to use GmatMathUtil::Abs()
+      if (GmatMathUtil::Abs(nominal[i] - goal[i]) > tolerance[i])
          converged = false;
    }
 

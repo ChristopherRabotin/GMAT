@@ -649,7 +649,9 @@ CalDate A1Mjd::UtcMjdToCalDate(const UtcMjd &utcmjd)
    seconds -= timeArray[3] * 3600.0;
 
    // divide minutes out of remaining seconds
-   timeArray[4] = floor(seconds / SECS_PER_MINUTE);
+   //timeArray[4] = floor(seconds / SECS_PER_MINUTE);
+   //loj: 4/1/05 Changed to use Floor()
+   timeArray[4] = Floor(seconds / SECS_PER_MINUTE);
 
    // subtract out minutes to leave seconds
    seconds -= timeArray[4] * 60.0;

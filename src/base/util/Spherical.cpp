@@ -198,7 +198,9 @@ bool Spherical::CartesianToSpherical(const Rvector6& cartesian,
     Real r_mag = position.GetMagnitude();
 
     // Check if input of position magnitude is not valid then return false
-    if (fabs(r_mag) <= ORBIT_TOLERANCE)
+    //if (fabs(r_mag) <= ORBIT_TOLERANCE)
+    //loj: 4/1/05 Changed to use GmatMathUtil::Abs()
+    if (GmatMathUtil::Abs(r_mag) <= ORBIT_TOLERANCE)
     {
        return false;
     }
@@ -240,7 +242,9 @@ Rvector3 Spherical::GetPosition()
 {
     
     // Check if input of position magnitude is not valid then return false
-    if (fabs(GetPositionMagnitude()) <= ORBIT_TOLERANCE)
+    //if (fabs(GetPositionMagnitude()) <= ORBIT_TOLERANCE)
+    //loj: Changed to use GmatMathUtil::Abs()
+    if (GmatMathUtil::Abs(GetPositionMagnitude()) <= ORBIT_TOLERANCE)
     {
        return Rvector3(0,0,0);
     }
@@ -266,7 +270,9 @@ Rvector3 Spherical::GetPosition()
 Real Spherical::GetDegree(const Real angle, const Real minAngle, 
                           const Real maxAngle) 
 {
-   Real angleInRange = fmod(angle,GmatMathUtil::TWO_PI);
+   //loj: 4/1/05 Changed to use GmatMathUtil::Mod()
+   //Real angleInRange = fmod(angle,GmatMathUtil::TWO_PI);
+   Real angleInRange = GmatMathUtil::Mod(angle,GmatMathUtil::TWO_PI);
    
    if (angleInRange < minAngle)
       angleInRange += GmatMathUtil::TWO_PI;

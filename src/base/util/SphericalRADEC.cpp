@@ -23,8 +23,6 @@
 #include "SphericalRADEC.hpp"
 #include "UtilityException.hpp"
 
-using namespace GmatMathUtil;
-
 //---------------------------------
 //  static data
 //---------------------------------
@@ -179,7 +177,7 @@ Rvector6 SphericalRADEC::GetCartesian()
                            "position magnitude is less than orbit tolerance");
    }
 
-    // Get the position after converting to part of cartesian 
+   // Get the position after converting to part of cartesian 
    Rvector3 position = GetPosition();
 
    // Convert right ascension of velocity and declination of velocity from
@@ -191,17 +189,19 @@ Rvector6 SphericalRADEC::GetCartesian()
    Real vX = GetVelocityMagnitude() * GmatMathUtil::Cos(decV) * 
       GmatMathUtil::Cos(raV);
 
-   Real vY = vX * tan(raV);
-//   @todo:  below looks like the problem... should use Tan() or tan()? 
-//   Real vY = vX * GmatMathUtil::Tan(raV);
+   //Real vY = vX * tan(raV);
+   //@todo:  below looks like the problem... should use Tan() or tan()?
+   //loj: 4/1/05 Changed to use GmatMathUtil::Tan()
+   //GmatMathUtil::Tan() has been changed not to throw exception when angle is 0.0
+   Real vY = vX * GmatMathUtil::Tan(raV);
 
    Real vZ = GetVelocityMagnitude() * GmatMathUtil::Sin(decV);
 
-    // Set up the Cartesian's new velocity
+   // Set up the Cartesian's new velocity
    Rvector3 velocity; 
    velocity.Set(vX,vY,vZ);
 
-    // Return the cartesian conversion
+   // Return the cartesian conversion
    return Rvector6(position,velocity);
 }
 
