@@ -134,6 +134,9 @@ namespace GmatTree
         DEFAULT_IMPULSIVE_BURN,
         CREATED_IMPULSIVE_BURN,
 
+        DEFAULT_FINITE_BURN,
+        CREATED_FINITE_BURN,
+
         DEFAULT_BODY,
         CREATED_BODY,
 
