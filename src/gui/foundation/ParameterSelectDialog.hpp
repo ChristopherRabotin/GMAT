@@ -25,7 +25,8 @@ public:
     
    ParameterSelectDialog(wxWindow *parent, bool showArrayAndString = false,
                          bool showSysParams = true,
-                         bool canSelectMultiVars = false);
+                         bool canSelectMultiVars = false,
+                         bool canSelectWholeObject = false);
 
    bool IsParamSelected()
       { return mIsParamSelected; }
@@ -48,6 +49,7 @@ protected:
    bool mShowArrayAndString;
    bool mShowSysVars;
    bool mCanSelectMultiVars;
+   bool mCanSelectWholeObject;
    
    wxStaticText *mCoordSysLabel;
    

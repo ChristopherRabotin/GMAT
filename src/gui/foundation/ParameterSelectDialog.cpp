@@ -42,7 +42,8 @@ END_EVENT_TABLE()
 ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent,
                                              bool showArrayAndString,
                                              bool showSysVars,
-                                             bool canSelectMultiVars)
+                                             bool canSelectMultiVars,
+                                             bool canSelectWholeObject)
    : GmatDialog(parent, -1, wxString(_T("ParameterSelectDialog")))
 {
    mIsParamSelected = false;
@@ -51,6 +52,7 @@ ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent,
    mShowArrayAndString = showArrayAndString;
    mShowSysVars = showSysVars;
    mCanSelectMultiVars = canSelectMultiVars;
+   mCanSelectWholeObject = canSelectWholeObject;
    mParamNameArray.Clear();
 
    Create();
@@ -256,6 +258,25 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
       if (!mCanSelectMultiVars)
          mVarSelectedListBox->Clear();
 
+      // if whole object is selected and not property or user param
+      if ((mCanSelectWholeObject) &&  (mShowSysVars) &&
+          (mPropertyListBox->GetSelection() == -1) &&
+          (mUserParamListBox->GetSelection() == -1))
+      {
+         wxString newParam = mObjectComboBox->GetStringSelection();
+         int found = mVarSelectedListBox->FindString(newParam);
+
+         // if the string wasn't found in the second list, insert it
+         if (found == wxNOT_FOUND)
+         {
+            mVarSelectedListBox->Append(newParam);
+            mVarSelectedListBox->SetStringSelection(newParam);
+            theOkButton->Enable();
+         }
+
+         return;
+      }
+
       // get string in first list
       wxString newParam = FormParamName();
       
@@ -372,6 +393,12 @@ wxString ParameterSelectDialog::FormParamName()
          depObj = mCoordSysComboBox->GetStringSelection();
       else if (mCentralBodyComboBox->IsShown())
          depObj = mCentralBodyComboBox->GetStringSelection();
+
+      // error checking
+//      if (mPropertyListBox->GetSelection == -1)
+//      {
+//         throw
+//      }
 
       if (depObj == "")
          return mObjectComboBox->GetStringSelection() + "." + 
