@@ -382,10 +382,10 @@ void Propagate::InterpretAction(void)
     //loj: 3/24/04 for b3 "," also valid for multiple spacecraft
     end = generatingString.find("{", loc);
     if (end == (Integer)std::string::npos)
-        throw CommandException("Propagate does not identify stopping condition");
+        throw CommandException("Propagate does not identify stopping condition: looking for {");
 
 //      //--------------------------------------
-//      //loj: 3/22/04 actual code
+//      //loj: 3/22/04 old code
 //      //--------------------------------------
 //      end = generatingString.find("Duration", loc);
 //      if (end == (Integer)std::string::npos)
@@ -408,20 +408,30 @@ void Propagate::InterpretAction(void)
     loc = end + 1;
     end = generatingString.find(".", loc);
     if (end == (Integer)std::string::npos)
-        throw CommandException("Propagate does not identify stopping condition");
+        throw CommandException("Propagate does not identify stopping condition: looking for .");
     
     std::string paramObj = generatingString.substr(loc, end-loc);
-    //MessageInterface::ShowMessage("Propagate::InterpretAction() component=%s, loc=%d, end=%d\n",
-    //                              paramObj.c_str(), loc, end);
+    MessageInterface::ShowMessage("Propagate::InterpretAction() component=%s, loc=%d, end=%d\n",
+                                  paramObj.c_str(), loc, end);
     
     loc = end + 1;
     end = generatingString.find("=", loc);
     if (end == (Integer)std::string::npos)
-        throw CommandException("Propagate does not identify stopping condition");
+    {
+        MessageInterface::ShowMessage("Propagate::InterpretAction() ParamType is Apoapsis or Periapsis\n");
+        
+        end = generatingString.find(",", loc);
+        if (end != (Integer)std::string::npos)
+            throw CommandException("Propagate does not yet support multiple stopping condition");
+        
+        end = generatingString.find("}", loc);
+        if (end == (Integer)std::string::npos)
+            throw CommandException("Propagate does not identify stopping condition: looking for }");
+    }
     
     std::string paramType = generatingString.substr(loc, end-loc);
-    //MessageInterface::ShowMessage("Propagate::InterpretAction() paramType=%s, loc=%d, end=%d\n",
-    //                              paramType.c_str(), loc, end);
+    MessageInterface::ShowMessage("Propagate::InterpretAction() paramType=%s, loc=%d, end=%d\n",
+                                  paramType.c_str(), loc, end);
     
     // remove blank spaces
     unsigned int start = 0;
@@ -434,8 +444,8 @@ void Propagate::InterpretAction(void)
         }
     }
     
-    //MessageInterface::ShowMessage("Propagate::InterpretAction() after remove blanks paramType=%s\n",
-    //                              paramType.c_str());
+    MessageInterface::ShowMessage("Propagate::InterpretAction() after remove blanks paramType=%s\n",
+                                  paramType.c_str());
     
     Moderator *theModerator = Moderator::Instance();
     
@@ -449,16 +459,33 @@ void Propagate::InterpretAction(void)
     stopCond->SetStringParameter("StopVar", paramName);
     SetObject(stopCond, Gmat::STOP_CONDITION);
 
-    loc = end + 1;
-    Real propStopVal = atof(&str[loc]);
-    stopCond->SetRealParameter("Goal", propStopVal);
-    //MessageInterface::ShowMessage("Propagate::InterpretAction() propStopVal = %f\n",
-    //                              propStopVal);
+    if (paramType != "Apoapsis" && paramType != "Periapsis")
+    {
+        loc = end + 1;
+        Real propStopVal = atof(&str[loc]);
+        stopCond->SetRealParameter("Goal", propStopVal);
+        //MessageInterface::ShowMessage("Propagate::InterpretAction() propStopVal = %f\n",
+        //                              propStopVal);
 
-    //loj: 3/24/04 for b3 "," also valid for multiple stopping conditions
-    end = generatingString.find("}", loc);
+        loc = end + 1;
+        end = generatingString.find(",", loc);
+        if (end != (Integer)std::string::npos)
+            throw CommandException("Propagate does not yet support multiple stopping condition");
+    
+        loc = end + 1;
+        end = generatingString.find("}", loc);
+        
+        if (end == (Integer)std::string::npos)
+            throw CommandException("Propagate does not identify stopping condition: looking for }");
+    }
+    
+    loc = end + 1;
+    end = generatingString.find(")", loc);
+    MessageInterface::ShowMessage("Propagate::InterpretAction() looking for ) loc=%d, end=%d\n",
+                                  loc, end);
+    
     if (end == (Integer)std::string::npos)
-        throw CommandException("Propagate does not identify stopping condition");
+        throw CommandException("Propagate does not identify stopping condition: looking for )");
     
     //---------------------------------------
 }
@@ -572,7 +599,7 @@ bool Propagate::Execute(void)
     }
     
 //      //---------------------------------------
-//      //loj: 3/22/04 actual code
+//      //loj: 3/22/04 old code
 //      //---------------------------------------
 //      while (elapsedTime < secondsToProp) {
 //          if (!p->Step())
