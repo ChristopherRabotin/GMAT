@@ -46,6 +46,7 @@
 #include "ForceModel.hpp"
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
+#include "Planet.hpp"
 
 class PropagationConfigPanel : public wxPanel
 {
@@ -108,6 +109,8 @@ private:
     wxButton *helpButton;
     wxButton *scriptButton;
     
+    wxArrayString  thePointMassBodies;
+    
     wxString integratorString;
     wxString primaryBodyString;
     wxString propNameString;
@@ -140,12 +143,7 @@ private:
     PhysicalModel  *thePhysicalModel;
     ForceModel     *theForceModel;
     SolarSystem    *theSolarSystem;
-    CelestialBody  *theCelestialBody;
-    wxArrayString  thePointMassBodies;
-    
-    //CelestialBody  *theEarth;
-    //CelestialBody  *theSun;
-    //CelestialBody  *theMoon;
+    CelestialBody  *theCelestialBody;    
    
     // Layout & data handling methods
     void Initialize();
