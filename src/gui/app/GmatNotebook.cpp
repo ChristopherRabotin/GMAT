@@ -50,36 +50,6 @@ GmatNotebook::GmatNotebook(wxWindow *parent, wxWindowID id,
   AddPage( panel, wxT("Output") );
 
 }
-// ag: Removed because GmatMainNotebook is added to GmatAppData
-////------------------------------------------------------------------------------
-//// void SetMainNotebook (GmatMainNotebook *gmatMainNotebook)
-////------------------------------------------------------------------------------
-///**
-// * Sets the main notebook for GmatNotebook, ResourceTree, and MissionTree
-// *
-// * @param <gmatMainNotebook> input GmatMainNotebook.
-// */
-////------------------------------------------------------------------------------
-//void GmatNotebook::SetMainNotebook (GmatMainNotebook *gmatMainNotebook)
-//{
-//   this->mainNotebook = gmatMainNotebook;
-//   resourceTree->SetMainNotebook(this->mainNotebook);
-//   missionTree->SetMainNotebook(this->mainNotebook);
-//}
-//
-////------------------------------------------------------------------------------
-//// GmatMainNotebook *GetMainNotebook()
-////------------------------------------------------------------------------------
-///**
-// * Gets current instance of GmatMainNotebook.
-// *
-// * @return GmatMainNotebook object.
-// */
-////------------------------------------------------------------------------------
-//GmatMainNotebook *GmatNotebook::GetMainNotebook()
-//{
-//   return this->mainNotebook;
-//}
 
 //-------------------------------
 // private methods

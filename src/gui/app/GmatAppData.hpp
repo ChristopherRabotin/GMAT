@@ -24,6 +24,7 @@
 #include "ResourceTree.hpp"
 #include "MissionTree.hpp"
 #include "GmatMainNotebook.hpp"
+#include "GmatMainFrame.hpp"
 #endif
 
 #include "GuiInterpreter.hpp"
@@ -56,6 +57,11 @@ public:
     static void SetMainNotebook(GmatMainNotebook *mainNotebook)
         { theMainNotebook = mainNotebook;};
 
+    static GmatMainFrame* GetMainFrame()
+        { return theMainFrame;};
+    static void SetMainFrame(GmatMainFrame *mainFrame)
+        { theMainFrame = mainFrame;};
+
     static ViewTextFrame *theMessageWindow;
 #endif
     
@@ -65,6 +71,7 @@ private:
     static ResourceTree *theResourceTree;
     static MissionTree *theMissionTree;
     static GmatMainNotebook *theMainNotebook;
+    static GmatMainFrame *theMainFrame;
 #endif
     
 };

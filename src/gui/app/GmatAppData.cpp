@@ -26,4 +26,5 @@ ViewTextFrame* GmatAppData::theMessageWindow = NULL;
 ResourceTree* GmatAppData::theResourceTree = NULL;
 MissionTree* GmatAppData::theMissionTree = NULL;
 GmatMainNotebook *GmatAppData::theMainNotebook = NULL;
+GmatMainFrame *GmatAppData::theMainFrame = NULL;
 #endif
