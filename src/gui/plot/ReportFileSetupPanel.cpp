@@ -119,15 +119,16 @@ void ReportFileSetupPanel::Create()
     
    wxButton *createVarButton;
 
-   mParamBoxSizer =
-      theGuiManager->CreateParameterSizer(this, &createVarButton, CREATE_VARIABLE,
-                                          &mObjectComboBox, ID_COMBOBOX,
-                                          &mUserParamListBox, USER_PARAM_LISTBOX,
-                                          &mPropertyListBox, PROPERTY_LISTBOX,
-                                          &mCoordSysComboBox, ID_COMBOBOX,
-                                          &mCentralBodyComboBox, ID_COMBOBOX,
-                                          &mCoordSysLabel, &mCoordSysSizer);
-
+   //loj: 2/8/05 CreateParameterSizer() calling sequence changed
+   mParamBoxSizer = theGuiManager->
+      CreateParameterSizer(this, &mUserParamListBox, USER_PARAM_LISTBOX,
+                           &createVarButton, CREATE_VARIABLE,
+                           &mObjectComboBox, ID_COMBOBOX,
+                           &mPropertyListBox, PROPERTY_LISTBOX,
+                           &mCoordSysComboBox, ID_COMBOBOX,
+                           &mCentralBodyComboBox, ID_COMBOBOX,
+                           &mCoordSysLabel, &mCoordSysSizer);
+   
    //-------------------------------------------------------
    // add, remove, clear parameter buttons (2nd column)
    //-------------------------------------------------------
