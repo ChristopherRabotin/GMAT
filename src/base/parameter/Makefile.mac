@@ -22,17 +22,13 @@
 #             2004/03/29 - Removed/added .cpp files, according to new groupings 
 #                          of parameters (e.g. removed CartYParm, added 
 #                          CartesianParmeters)
-#
+#             2004/05/04 - Replaced *.cpp with wildcard *.cpp
 #
 # Define the macro for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = AngularParameters.cpp CartesianParameters.cpp Ecc.cpp Inc.cpp \
-   KeplerianParameters.cpp OrbitData.cpp OrbitReal.cpp OrbitalParameters.cpp \
-   Parameter.cpp ParameterDatabase.cpp \
-	RealVar.cpp RefData.cpp Rvec6Var.cpp \
-	SMA.cpp SphericalParameters.cpp TimeData.cpp TimeParameters.cpp
+SRC := $(wildcard *.cpp) 
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
