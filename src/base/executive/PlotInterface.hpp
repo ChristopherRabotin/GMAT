@@ -33,6 +33,8 @@ public:
    //loj: 5/6/04 added drawWireFrame
    static bool UpdateGlSpacecraft(const Real &time, const Real &posX,
                                   const Real &posY, const Real &posZ,
+                                  const UnsignedInt orbitColor,
+                                  const UnsignedInt targetColor,
                                   bool updateCanvas, bool drawWireFrame);
 
    // for XY plot

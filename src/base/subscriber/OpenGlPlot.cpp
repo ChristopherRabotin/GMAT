@@ -143,12 +143,22 @@ bool OpenGlPlot::Distribute(const Real * dat, Integer len)
     
       if ((mNumData % mDataCollectFrequency) == 0)
       {
+         mNumData = 0;
          mNumCollected++;
          bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
 
          //loj: assumes data in time, x, y, z order
-         return PlotInterface::UpdateGlSpacecraft(dat[0], dat[1], dat[2], dat[3],
-                                                  update, mDrawWireFrame);
+         //loj: 6/8/04 try color
+         
+         return PlotInterface::
+            UpdateGlSpacecraft(dat[0], dat[1], dat[2], dat[3],
+                               mOrbitColorMap[mScList[0]],
+                               mTargetColorMap[mScList[0]],
+                               update, mDrawWireFrame);
+//           return PlotInterface::UpdateGlSpacecraft(dat[0], dat[1], dat[2], dat[3],
+//                                                    update, mDrawWireFrame);
+         if (update)
+            mNumCollected = 0;
       }
    }
     

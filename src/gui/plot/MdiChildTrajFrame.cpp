@@ -309,6 +309,8 @@ void MdiChildTrajFrame::OnClose(wxCloseEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::UpdateSpacecraft(const Real &time, const Real &posX,
                                          const Real &posY, const Real &posZ,
+                                         const UnsignedInt orbitColor,
+                                         const UnsignedInt targetColor,
                                          bool updateCanvas, bool drawWireFrame)
 {
    //loj: 5/6/04 added drawWireFrame
@@ -316,7 +318,8 @@ void MdiChildTrajFrame::UpdateSpacecraft(const Real &time, const Real &posX,
    {
       mCanvas->SetFocus();
       mCanvas->ShowWireFrame(drawWireFrame);
-      mCanvas->UpdateSpacecraft(time, posX, posY, posZ, updateCanvas);
+      mCanvas->UpdateSpacecraft(time, posX, posY, posZ, orbitColor,
+                                targetColor, updateCanvas);
       if (updateCanvas)
          Update();
    }

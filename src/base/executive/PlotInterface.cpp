@@ -22,6 +22,7 @@
 #include "gmatwxdefs.hpp"
 #include "gmatwxrcs.hpp"
 #include "GmatAppData.hpp"
+#include <wx/settings.h>    // for wxSYS_SCREEN_Y
 // for OpenGL plot
 #include "MdiParentGlFrame.hpp"
 #include "MdiGlPlotData.hpp"
@@ -80,10 +81,14 @@ bool PlotInterface::CreateGlPlotWindow()
    {
       //MessageInterface::ShowMessage("PlotInterface::CreateGlPlotWindow() "
       //                              "Creating MdiGlPlot::mdiParentGlFrame\n");
+
+      int screenX = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
+      int screenY = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
+      
       MdiGlPlot::mdiParentGlFrame =
          new MdiParentGlFrame((wxFrame *)NULL, -1, _T("MDI OpenGL Window"),
-                              //wxPoint(300, 200), wxSize(600, 500),
-                              wxPoint(600, 515), wxSize(600, 500),
+                              //wxPoint(600, 515), wxSize(600, 500),
+                              wxPoint(screenX-560, screenY-515), wxSize(550, 480),
                               wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
       // Give it an icon
 #ifdef __WXMSW__
@@ -158,6 +163,7 @@ bool PlotInterface::DeleteGlPlot()
 }
 
 //loj: 5/6/04 added drawWireFrame
+//loj: 6/8/04 added orbitColor, targetColor
 //------------------------------------------------------------------------------
 //  bool UpdateGlSpacecraft(const Real &time, const Real &posX, const Real &posY,
 //                          const Real &posZ, bool updateCanvas, bool drawWireFrame)
@@ -168,6 +174,8 @@ bool PlotInterface::DeleteGlPlot()
 //------------------------------------------------------------------------------
 bool PlotInterface::UpdateGlSpacecraft(const Real &time, const Real &posX,
                                        const Real &posY, const Real &posZ,
+                                       const UnsignedInt orbitColor,
+                                       const UnsignedInt targetColor,
                                        bool updateCanvas, bool drawWireFrame)
 {   
 #if defined __CONSOLE_APP__
@@ -183,7 +191,8 @@ bool PlotInterface::UpdateGlSpacecraft(const Real &time, const Real &posX,
          //MessageInterface::ShowMessage("PlotInterface::UpdateGlSpacecraft()\n");
          //MdiGlPlot::mdiParentGlFrame->mainSubframe->SetFocus();
          MdiGlPlot::mdiParentGlFrame->mainSubframe->
-            UpdateSpacecraft(time, posX, posY, posZ, updateCanvas, drawWireFrame);
+            UpdateSpacecraft(time, posX, posY, posZ, orbitColor, targetColor,
+                             updateCanvas, drawWireFrame);
       }
       else
       {
@@ -192,7 +201,8 @@ bool PlotInterface::UpdateGlSpacecraft(const Real &time, const Real &posX,
             
          //MdiGlPlot::mdiParentGlFrame->mainSubframe->SetFocus();
          MdiGlPlot::mdiParentGlFrame->mainSubframe->
-            UpdateSpacecraft(time, posX, posY, posZ, updateCanvas, drawWireFrame);
+            UpdateSpacecraft(time, posX, posY, posZ, orbitColor, targetColor,
+                             updateCanvas, drawWireFrame);
       }
         
       return true;
@@ -210,7 +220,8 @@ bool PlotInterface::UpdateGlSpacecraft(const Real &time, const Real &posX,
       // Update spacecraft trajectory (for now just one spacecraft)
       // later there will be UpdateUniverse()
       MdiGlPlot::mdiParentGlFrame->mainSubframe->
-         UpdateSpacecraft(time, posX, posY, posZ, updateCanvas, drawWireFrame);
+         UpdateSpacecraft(time, posX, posY, posZ, orbitColor, targetColor,
+                          updateCanvas, drawWireFrame);
        
       return true;
    }
@@ -245,10 +256,13 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
    {
       //MessageInterface::ShowMessage("PlotInterface::CreateXyPlotWindow() "
       //                              "Creating MdiXyPlot::mdiParentXyFrame\n");
+      
+      int screenX = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
+      
       MdiXyPlot::mdiParentXyFrame =
          new MdiParentXyFrame((wxFrame *)NULL, -1, _T("MDI XY Plot Window"),
-                              wxPoint(600, 10), wxSize(600, 500),
-                              //wxPoint(300, 200), wxSize(600, 500),
+                              //wxPoint(600, 10), wxSize(600, 500),
+                              wxPoint(screenX-560, 15), wxSize(550, 480),
                               wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
       // Give it an icon
 #ifdef __WXMSW__
@@ -298,6 +312,7 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
    }
     
    MdiXyPlot::mdiParentXyFrame->Show(true);
+   MdiXyPlot::mdiParentXyFrame->Raise(); //loj: 6/8/04 added
     
    return true;
 #endif

@@ -55,9 +55,12 @@ public:
    int  ReadTextTrajectory(const wxString &filename);
    void UpdateSpacecraft(const Real &time, const Real &posX,
                          const Real &posY, const Real &posZ,
+                         const UnsignedInt orbitColor,
+                         const UnsignedInt targetColor,
                          bool updateCanvas);
     
 private:
+   
    TextTrajectoryFile *mTextTrajFile;
    TrajectoryArray mTrajectoryData;
 
@@ -109,8 +112,9 @@ private:
    double mTime[MAX_DATA];
 
    // spacecraft
-   float mTempScPos[MAX_DATA][3];
-   int   mScTrajColor[MAX_DATA];
+   int   mScCount;
+   float mTempScPos[MAX_SCS][MAX_DATA][3];
+   unsigned int mScTrajColor[MAX_SCS][MAX_DATA];
    float mScRadius;
    GLuint mGlList;
 

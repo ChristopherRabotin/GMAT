@@ -60,9 +60,12 @@ public:
    //loj: 5/6/04 added drawWireFrame
    void UpdateSpacecraft(const Real &time, const Real &posX,
                          const Real &posY, const Real &posZ,
+                         const UnsignedInt orbitColor,
+                         const UnsignedInt targetColor,
                          bool updateCanvas, bool drawWireFrame = false);
+   
 protected:
 
-   DECLARE_EVENT_TABLE()
-      };
+   DECLARE_EVENT_TABLE();
+};
 #endif

@@ -159,10 +159,13 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mShowEquatorialPlane = true;
    mUseTexture = true;
    mEquatorialPlaneColor = GRAY32;
-    
+
+   // Planets
    for (int i=0; i<MAX_BODIES; i++)
       mBodyTextureIndex[i] = 999;
-    
+
+   // Spacecraft
+   mScCount = 1; //loj: set to 1 for now
    for (int i=0; i<MAX_SCS; i++)
       mScTextureIndex[i] = 999;
 
@@ -962,19 +965,24 @@ void TrajPlotCanvas::DrawSpacecraftTrajectory()
    glPushMatrix();
    glLoadIdentity();
    glBegin(GL_LINES);
-   
-   // Draw spacecraft trajectory line based on points
-   for (int i=1; i<mNumData; i++)
+
+   // assume same data points for all spacecrafts
+   for (int sc=0; sc<mScCount; sc++)
    {
-      if (mTime[i] >= mTime[i-1])
+      // Draw spacecraft trajectory line based on points
+      for (int i=1; i<mNumData; i++)
       {
-         *sIntColor = mScTrajColor[i];
-         glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
+         if (mTime[i] >= mTime[i-1])
+         {
+            *sIntColor = mScTrajColor[sc][i];
+            glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
             
-         glVertex3fv(mTempScPos[i-1]);
-         glVertex3fv(mTempScPos[i]);
+            glVertex3fv(mTempScPos[sc][i-1]);
+            glVertex3fv(mTempScPos[sc][i]);
+         }
       }
    }
+
    glEnd();
    glPopMatrix();
 
@@ -989,12 +997,15 @@ void TrajPlotCanvas::DrawSpacecraftTrajectory()
       {
          glPushMatrix();
          glLoadIdentity();
-       
-         // put spacecraft at final position
-         glTranslatef(mTempScPos[mNumData-1][0],
-                      mTempScPos[mNumData-1][1],
-                      mTempScPos[mNumData-1][2]);
-       
+
+         for (int sc=0; sc<mScCount; sc++)
+         {
+            // put spacecraft at final position
+            glTranslatef(mTempScPos[sc][mNumData-1][0],
+                         mTempScPos[sc][mNumData-1][1],
+                         mTempScPos[sc][mNumData-1][2]);
+         }
+         
          DrawSpacecraft();
          glPopMatrix();
       }
@@ -1101,13 +1112,14 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
         
       numDataPoints = mTrajectoryData.size();
 
+      int sc = 0;
       for(int i=0; i<numDataPoints && i < MAX_DATA; i++)
       {
-         mScTrajColor[mNumData] = RED32;
+         mScTrajColor[sc][mNumData] = RED32;
          mTime[mNumData] = mTrajectoryData[i].time;
-         mTempScPos[mNumData][0] = mTrajectoryData[i].x;
-         mTempScPos[mNumData][1] = mTrajectoryData[i].y;
-         mTempScPos[mNumData][2] = mTrajectoryData[i].z;
+         mTempScPos[sc][mNumData][0] = mTrajectoryData[i].x;
+         mTempScPos[sc][mNumData][1] = mTrajectoryData[i].y;
+         mTempScPos[sc][mNumData][2] = mTrajectoryData[i].z;
          mTempEarthPos[mNumData][0] = 0.0;
          mTempEarthPos[mNumData][1] = 0.0;
          mTempEarthPos[mNumData][2] = 0.0;
@@ -1164,15 +1176,19 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const Real &posX,
                                       const Real &posY, const Real &posZ,
+                                      const UnsignedInt orbitColor,
+                                      const UnsignedInt targetColor,
                                       bool updateCanvas)
 {
+   int sc = 0;
    if (mNumData < MAX_DATA)
    {
-      mScTrajColor[mNumData] = RED32;
+      //mScTrajColor[sc][mNumData] = RED32;
+      mScTrajColor[sc][mNumData] = orbitColor;
       mTime[mNumData] = time;
-      mTempScPos[mNumData][0] = posX;
-      mTempScPos[mNumData][1] = posY;
-      mTempScPos[mNumData][2] = posZ;
+      mTempScPos[sc][mNumData][0] = posX;
+      mTempScPos[sc][mNumData][1] = posY;
+      mTempScPos[sc][mNumData][2] = posZ;
       mTempEarthPos[mNumData][0] = 0.0;
       mTempEarthPos[mNumData][1] = 0.0;
       mTempEarthPos[mNumData][2] = 0.0;
