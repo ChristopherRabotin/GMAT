@@ -37,11 +37,12 @@
 #include "bitmaps/moon.xpm"
 
 #include "GuiInterpreter.hpp"
-#include "GmatAppData.hpp"
 #include "ResourceTree.hpp"
+#include "GmatAppData.hpp"
 #include "MessageInterface.hpp"
 #include "GmatTreeItemData.hpp"
 #include "ParameterCreateDialog.hpp"
+#include "GmatMainFrame.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -89,13 +90,13 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
                            const wxPoint &pos, const wxSize &size, long style)
     : wxTreeCtrl(parent, id, pos, size, style)
 {
-    mainNotebook = GmatAppData::GetMainNotebook();
-    mainFrame = GmatAppData::GetMainFrame();
+//    mainNotebook = GmatAppData::GetMainNotebook();
+ //   mainFrame = GmatAppData::GetMainFrame();
 //    MessageInterface::ShowMessage("got main notebook\n");
   
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
     theGuiManager = GuiItemManager::GetInstance();
-    
+ 
     AddIcons();
     AddDefaultResources();
 
@@ -710,8 +711,8 @@ void ResourceTree::OnItemActivated(wxTreeEvent &event)
     wxTreeItemId itemId = event.GetItem();
     GmatTreeItemData *item = (GmatTreeItemData *)GetItemData(itemId);
 
-    mainNotebook->CreatePage(item);
-    mainFrame->CreateChild(item);
+//    mainNotebook->CreatePage(item);
+    GmatAppData::GetMainFrame()->CreateChild(item);
 }
 
 //------------------------------------------------------------------------------
@@ -727,8 +728,8 @@ void ResourceTree::OnOpen(wxCommandEvent &event)
 {
     // Get info from selected item
     GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
-    mainNotebook->CreatePage(item);
-    mainFrame->CreateChild(item);
+//    mainNotebook->CreatePage(item);
+    GmatAppData::GetMainFrame()->CreateChild(item);
 }
 
 //------------------------------------------------------------------------------
@@ -743,9 +744,9 @@ void ResourceTree::OnOpen(wxCommandEvent &event)
 void ResourceTree::OnClose(wxCommandEvent &event)
 {
     // make item most current, then close it
-    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
-    mainNotebook->CreatePage(item);
-    mainNotebook->ClosePage(); //need to add for frame
+//    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
+//    mainNotebook->CreatePage(item);
+//    mainNotebook->ClosePage(); //need to add for frame
 }
 
 //------------------------------------------------------------------------------
@@ -888,12 +889,12 @@ void ResourceTree::OnBeginLabelEdit(wxTreeEvent &event)
 
     //kind of redundant because OpenPage returns false for some
     //of the default folders
-    if ( (!mainNotebook->OpenPage(selItem)) ||
-         (isDefaultFolder)                  ||
-         (isDefaultItem))
-    {
+//    if ( (!mainNotebook->OpenPage(selItem)) ||
+//         (isDefaultFolder)                  ||
+//         (isDefaultItem))
+//    {
         event.Veto();
-    }
+//    }
 }
 
 //------------------------------------------------------------------------------

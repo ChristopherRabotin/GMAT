@@ -28,9 +28,9 @@
 #include "gmatwxdefs.hpp"
 
 #include "ViewTextFrame.hpp"
-#include "GmatSplitterWindow.hpp"
 #include "GuiInterpreter.hpp"
-#include "GmatMainNotebook.hpp"
+//#include "GmatMainNotebook.hpp"
+#include "GmatTreeItemData.hpp"
 
 #include "wx/notebook.h"
 #include "wx/toolbar.h"
@@ -61,17 +61,21 @@ public:
     ~GmatMainFrame();
     void CreateChild(GmatTreeItemData *item);
     bool IsChildOpen(GmatTreeItemData *item);
-
+    void RemoveChild(wxString item);
+    void CloseActiveChild();
+    
 protected:
 private:
     GuiInterpreter *theGuiInterpreter;
-
+    
     wxSashLayoutWindow* win;
+    wxScrolledWindow *panel;
+    wxList *mdiChildren;
 
     wxDocManager *mDocManager;
     wxDocTemplate *mDocTemplate;
     ViewTextFrame *mTextFrame;
-    GmatMainNotebook *rightTabs;
+//    GmatMainNotebook *rightTabs;
     
     void InitToolBar(wxToolBar* toolBar);
     wxMenuBar* CreateMainMenu();

@@ -20,8 +20,6 @@
 #include "wx/image.h"
 #include "wx/imaglist.h"
 
-#include "GmatMainNotebook.hpp"
-#include "GmatMainFrame.hpp"
 #include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
 
@@ -39,8 +37,8 @@ private:
     GuiInterpreter *theGuiInterpreter;
     GuiItemManager *theGuiManager;
 
-    GmatMainNotebook *mainNotebook;
-    GmatMainFrame *mainFrame;
+//    GmatMainNotebook *mainNotebook;
+//    GmatMainFrame *mainFrame;
 
 //    wxWindow *parent;
     wxTreeItemId mSpacecraftItem;
