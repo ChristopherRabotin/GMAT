@@ -90,27 +90,27 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
           (dataType == DEFAULT_CONSTELLATION_FOLDER)||
           (dataType == CREATED_CONSTELLATION_FOLDER))
       {
-        sizer->Add( new Universe(panel), 0, wxGROW|wxALL, 0 );
+        sizer->Add( new UniversePanel(panel), 0, wxGROW|wxALL, 0 );
       }
       else if ((dataType == DEFAULT_BODY)   ||
                (dataType == CREATED_BODY))
       {
-        sizer->Add( new SolarSystem(panel), 0, wxGROW|wxALL, 0 );
+        sizer->Add( new SolarSystemWindow(panel), 0, wxGROW|wxALL, 0 );
       }
       else if ((dataType == DEFAULT_SPACECRAFT )  ||
                (dataType == CREATED_SPACECRAFT ))
       {
-        sizer->Add( new Spacecraft(panel), 0, wxGROW|wxALL, 0 );
+        sizer->Add( new SpacecraftPanel(panel), 0, wxGROW|wxALL, 0 );
       }
       else if ((dataType == DEFAULT_PROPAGATOR)   ||
                (dataType == CREATED_PROPAGATOR))
       {
-        sizer->Add( new PropagationConfig(panel), 0,
+        sizer->Add( new PropagationConfigPanel(panel), 0,
                     wxGROW|wxALL, 0 );
       }
       else if (dataType == DEFAULT_PROPAGATE_COMMAND)
       {
-        sizer->Add( new PropagatorSetup(panel),
+        sizer->Add( new PropagatorSetupPanel(panel),
                     0, wxGROW|wxALL, 0 );
       }
 
