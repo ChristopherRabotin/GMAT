@@ -48,7 +48,7 @@ public:
    
    //---------------------------------------------------------------------------
    //  bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-   //                        Rvector &outState, SpacePoint *j2000Body)
+   //                        Rvector &outState//, SpacePoint *j2000Body)
    //---------------------------------------------------------------------------
    /**
     * This method will rotate the input inState into the MJ2000Eq frame.
@@ -63,11 +63,11 @@ public:
     */
    //---------------------------------------------------------------------------
    virtual bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-                                 Rvector &outState, SpacePoint *j2000Body) = 0;
+                                 Rvector &outState) = 0; //, SpacePoint *j2000Body) = 0;
 
    //---------------------------------------------------------------------------
    //  bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-   //                          Rvector &outState, SpacePoint *j2000Body)
+   //                          Rvector &outState//, SpacePoint *j2000Body)
    //---------------------------------------------------------------------------
    /**
     * This method will rotate the input inState from the MJ2000Eq frame into
@@ -83,7 +83,7 @@ public:
     */
    //---------------------------------------------------------------------------
    virtual bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-                                   Rvector &outState, SpacePoint *j2000Body) = 0;
+                                   Rvector &outState) = 0; //, SpacePoint *j2000Body) = 0;
    
    
    // all classes derived from GmatBase must supply this Clone method;
