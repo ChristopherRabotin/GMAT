@@ -38,7 +38,6 @@
 #include "GmatAppData.hpp"
 #include "GuiInterpreter.hpp"
 #include "Command.hpp"
-#include "Propagate.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -62,16 +61,15 @@ END_EVENT_TABLE()
  * A constructor.
  */
 //------------------------------------------------------------------------------
-PropagateCommandPanel::PropagateCommandPanel( wxWindow *parent, const wxString &propName )
+//loj: 2/9/04 PropagateCommandPanel::PropagateCommandPanel( wxWindow *parent, const wxString &propName )
+PropagateCommandPanel::PropagateCommandPanel( wxWindow *parent, const wxString &propName,
+                                              Command *cmd )
     : wxPanel(parent)
 {
     propNameString = propName;
+    theCommand = cmd;
 
-    //loj: moved from Initialize()
-    // For testing
     GuiInterpreter *theGuiInterpreter = GmatAppData::GetGuiInterpreter(); 
-    Command *theCommand = theGuiInterpreter->GetCommand(propName.c_str());
-    //thePropagateCommand = theCommand->GetObject(Gmat::COMMAND, "Propagate");
     
     Initialize();
     Setup(this);
