@@ -28,8 +28,8 @@ OBJECTS = A1Date.o \
           Rvector.o \
           UtcDate.o \
           Spherical.o \
-          SphericalOne.o \
-          SphericalTwo.o \
+          SphericalAZFPA.o \
+          SphericalRADEC.o \
           StringTokenizer.o
 
 all: libUtilities 
