@@ -14,11 +14,11 @@
 //------------------------------------------------------------------------------
 #include "GmatMainNotebook.hpp"
 #include "GmatTreeItemData.hpp"
-#include "SolarSystem.hpp"
-#include "Spacecraft.hpp"
-#include "Universe.hpp"
-#include "PropagationConfig.hpp"
-#include "PropagatorSetup.hpp"
+#include "SolarSystemWindow.hpp"
+#include "SpacecraftPanel.hpp"
+#include "UniversePanel.hpp"
+#include "PropagationConfigPanel.hpp"
+#include "PropagatorSetupPanel.hpp"
 
 //------------------------------
 // event tables for wxWindows
