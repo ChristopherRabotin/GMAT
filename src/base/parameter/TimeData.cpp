@@ -135,9 +135,9 @@ Real TimeData::GetCurrentTimeReal(const std::string &str)
         Real a1mjd = obj->GetRealParameter("Epoch");
         //MessageInterface::ShowMessage("TimeData::GetCurrentTimeReal() time = %f\n",
         //                              a1mjd);
-        if (str == "A1Mjd")
+        if (str == "A1MJD")
             return a1mjd;
-        if (str == "Jd")
+        if (str == "JD")
             return a1mjd + MJD_OFFSET;
     }
     return TIME_REAL_UNDEFINED;
@@ -152,7 +152,7 @@ Real TimeData::GetCurrentTimeReal(const std::string &str)
 //------------------------------------------------------------------------------
 Real TimeData::GetElapsedTimeReal(const std::string &str)
 {
-    Real a1mjd = GetCurrentTimeReal("A1Mjd");
+    Real a1mjd = GetCurrentTimeReal("A1MJD");
     
     //loj: future build
     //if (str == "Years")
@@ -191,8 +191,8 @@ bool TimeData::ValidateRefObjects(GmatBase *param)
 {
     std::string paramType = param->GetTypeName();
     
-    if (paramType == "ElapsedDaysParam" ||
-        paramType == "CurrentA1MjdParam")
+    if (paramType == "ElapsedDays" ||
+        paramType == "CurrA1MJD")
     {
         if (HasObject(VALID_OBJECT_LIST[SPACECRAFT]))
             return true;
