@@ -158,7 +158,8 @@ Real Date::ToPackedCalendarReal() const
    
    ToYearMonDayHourMinSec(ymd, hms);
     
-   return ymd + (hms * 1e-9);
+	return ymd + hms;
+   // return ymd + (hms * 1e-9);
 }
 
 //------------------------------------------------------------------------------
@@ -167,15 +168,15 @@ Real Date::ToPackedCalendarReal() const
 std::string& Date::ToPackedCalendarString()
 {
    std::stringstream ss("");
-   ss.precision(0);
+   ss.precision(9);
    ss.setf(std::ios::fixed);
    
    Real ymd;
    Real hms;
    
    ToYearMonDayHourMinSec(ymd, hms);
- 
-   ss << ymd << "." << hms;
+   
+   ss << (ymd + hms);
    mPackedString = ss.str();
    
    return mPackedString;
@@ -218,6 +219,9 @@ void Date::ToYearMonDayHourMinSec(Real& ymd, Real& hms) const
    ToHMSFromSecondsOfDay(secondsOfDayD, h, m, s);
    ymd = (Real) (yearD * 10000.0 + monthD * 100.0 + dayD);
    hms = (Real) (h * 1.0e+07 + m * 100000.0) +  s * 1000.0;
+
+   hms = hms/1.0e+09;
+   
 }
 
 //------------------------------------------------------------------------------
@@ -282,7 +286,7 @@ std::string* Date::ToValueStrings()
 //  Date()
 //------------------------------------------------------------------------------
 Date::Date()
-   : yearD(1941), monthD(1), dayD(1), secondsOfDayD(43167.85)
+   : yearD(1941), monthD(1), dayD(5), secondsOfDayD(43167.85)
 {
 }
 
@@ -373,6 +377,7 @@ Date::Date(const std::string& time)
    
    datePart = atoi(tempTime);
    tempTime = strstr(tempTime, ".");
+
    timePart = atoi(tempTime + 1);
    
    try
