@@ -70,7 +70,7 @@ public:
     *       'leaf' (non-abstract derived) classes.
     */
    //---------------------------------------------------------------------------
-   virtual const Rvector6& GetMJ2000State(const A1Mjd &atTime)    = 0;
+   virtual const Rvector6 GetMJ2000State(const A1Mjd &atTime)    = 0;
 
    //---------------------------------------------------------------------------
    //  Rvector3& GetMJ2000Position(const A1Mjd &atTime)
@@ -87,7 +87,7 @@ public:
     *       'leaf' (non-abstract derived) classes.
     */
    //---------------------------------------------------------------------------
-   virtual const Rvector3& GetMJ2000Position(const A1Mjd &atTime) = 0;
+   virtual const Rvector3 GetMJ2000Position(const A1Mjd &atTime) = 0;
 
    //---------------------------------------------------------------------------
    //  Rvector3& GetMJ2000Velocity(const A1Mjd &atTime)
@@ -104,7 +104,7 @@ public:
     *       'leaf' (non-abstract derived) classes.
     */
    //---------------------------------------------------------------------------
-   virtual const Rvector3& GetMJ2000Velocity(const A1Mjd &atTime) = 0;
+   virtual const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime) = 0;
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
