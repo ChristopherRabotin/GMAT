@@ -28,6 +28,7 @@
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "A1Mjd.hpp"
+#include "PlanetaryEphem.hpp"
 #include "ForceModel.hpp"  // what about Drag? 
 
 // Add needed things to Gmat namespace
@@ -105,6 +106,7 @@ public:
    virtual bool           SetBodyType(Gmat::BodyType bType);
    virtual bool           SetCentralBody(CelestialBody* cBody);
    virtual bool           SetSource(Gmat::PosVelSource pvSrc);
+   virtual bool           SetSourceFile(PlanetaryEphem *src);
    virtual bool           SetAnalyticMethod(Gmat::AnalyticMethod aM);
 
    
@@ -166,6 +168,8 @@ protected:
    RealArray              zonals;
    /// state of the body 0-2 position 3-5 velocity
    RealArray              state;
+   // time of the state
+   A1Mjd                  stateTime;
    /// maximum distance from the body at which oblateness effects matter
    Real                   effectiveRange;
    /// central body around which this body revolves
@@ -192,6 +196,8 @@ protected:
    A1Mjd                  sourceStart;
    /// date and time of end of sourcce file
    A1Mjd                  sourceEnd;
+   // the source file
+   PlanetaryEphem*        theSourceFile;
 
    /// IDs for the parameters
    Integer                bodyTypeID;
@@ -214,6 +220,7 @@ protected:
    Integer                state4ID;
    Integer                state5ID;
    Integer                state6ID;
+   Integer                stateTimeID;
    Integer                effRangeID;
    Integer                centralBodyID;    // ID for pointer? is this even needed?
    Integer                potentialModelID; // ???

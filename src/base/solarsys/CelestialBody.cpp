@@ -19,6 +19,7 @@
 
 #include "gmatdefs.hpp"
 #include "CelestialBody.hpp"
+#include "PlanetaryEphem.hpp"
 
 const std::string CelestialBody::BODY_TYPE_STRINGS[Gmat::BodyTypeCount] =
 {
@@ -61,20 +62,21 @@ state3ID          (parameterCount +16),
 state4ID          (parameterCount +17),
 state5ID          (parameterCount +18),
 state6ID          (parameterCount +19),
-effRangeID        (parameterCount +20),
-centralBodyID     (parameterCount +21),
-potentialModelID  (parameterCount +22),
-dragModelID       (parameterCount +23),
-orderID           (parameterCount +24),
-degreeID          (parameterCount +25),
-isInitializedID   (parameterCount +26),
-bodyNumberID      (parameterCount +27),
-refBodyNumberID   (parameterCount +28),
-sourceFilenameID  (parameterCount +29),
-sourceStartID     (parameterCount +30),
-sourceEndID       (parameterCount +31)
+stateTimeID       (parameterCount +20),
+effRangeID        (parameterCount +21),
+centralBodyID     (parameterCount +22),
+potentialModelID  (parameterCount +23),
+dragModelID       (parameterCount +24),
+orderID           (parameterCount +25),
+degreeID          (parameterCount +26),
+isInitializedID   (parameterCount +27),
+bodyNumberID      (parameterCount +28),
+refBodyNumberID   (parameterCount +29),
+sourceFilenameID  (parameterCount +30),
+sourceStartID     (parameterCount +31),
+sourceEndID       (parameterCount +32)
 {
-   parameterCount += 32;
+   parameterCount += 33;
    Initialize("Planet");  // should this be the default?
 }
 
@@ -111,20 +113,21 @@ state3ID          (parameterCount +16),
 state4ID          (parameterCount +17),
 state5ID          (parameterCount +18),
 state6ID          (parameterCount +19),
-effRangeID        (parameterCount +20),
-centralBodyID     (parameterCount +21),
-potentialModelID  (parameterCount +22),
-dragModelID       (parameterCount +23),
-orderID           (parameterCount +24),
-degreeID          (parameterCount +25),
-isInitializedID   (parameterCount +26),
-bodyNumberID      (parameterCount +27),
-refBodyNumberID   (parameterCount +28),
-sourceFilenameID  (parameterCount +29),
-sourceStartID     (parameterCount +30),
-sourceEndID       (parameterCount +31)
+stateTimeID       (parameterCount +20),
+effRangeID        (parameterCount +21),
+centralBodyID     (parameterCount +22),
+potentialModelID  (parameterCount +23),
+dragModelID       (parameterCount +24),
+orderID           (parameterCount +25),
+degreeID          (parameterCount +26),
+isInitializedID   (parameterCount +27),
+bodyNumberID      (parameterCount +28),
+refBodyNumberID   (parameterCount +29),
+sourceFilenameID  (parameterCount +30),
+sourceStartID     (parameterCount +31),
+sourceEndID       (parameterCount +32)
 {
-   parameterCount += 32;
+   parameterCount += 33;
    Initialize(itsBodyType);
 }
 
@@ -162,20 +165,21 @@ state3ID          (parameterCount +16),
 state4ID          (parameterCount +17),
 state5ID          (parameterCount +18),
 state6ID          (parameterCount +19),
-effRangeID        (parameterCount +20),
-centralBodyID     (parameterCount +21),
-potentialModelID  (parameterCount +22),
-dragModelID       (parameterCount +23),
-orderID           (parameterCount +24),
-degreeID          (parameterCount +25),
-isInitializedID   (parameterCount +26),
-bodyNumberID      (parameterCount +27),
-refBodyNumberID   (parameterCount +28),
-sourceFilenameID  (parameterCount +29),
-sourceStartID     (parameterCount +30),
-sourceEndID       (parameterCount +31)
+stateTimeID       (parameterCount +20),
+effRangeID        (parameterCount +21),
+centralBodyID     (parameterCount +22),
+potentialModelID  (parameterCount +23),
+dragModelID       (parameterCount +24),
+orderID           (parameterCount +25),
+degreeID          (parameterCount +26),
+isInitializedID   (parameterCount +27),
+bodyNumberID      (parameterCount +28),
+refBodyNumberID   (parameterCount +29),
+sourceFilenameID  (parameterCount +30),
+sourceStartID     (parameterCount +31),
+sourceEndID       (parameterCount +32)
 {
-   parameterCount += 32;
+   parameterCount += 33;
    Initialize(CelestialBody::BODY_TYPE_STRINGS[itsBodyType]);
 }
 
@@ -221,8 +225,9 @@ sourceEnd           (cb.sourceEnd)
    //{
    //   state[i] = cb.state[i];
    //}
-      zonals = cb.zonals;
-      state  = cb.state;
+      zonals    = cb.zonals;
+      state     = cb.state;
+      stateTime = cb.stateTime;
 }
 
 //------------------------------------------------------------------------------
@@ -274,9 +279,10 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
    //{
    //   state[i] = cb.state[i];
    //}
-      zonals = cb.zonals;
-      state  = cb.state;
-   
+      zonals    = cb.zonals;
+      state     = cb.state;
+      stateTime = cb.stateTime;
+      
    return *this;
 }
 
@@ -309,7 +315,29 @@ CelestialBody::~CelestialBody()
 //------------------------------------------------------------------------------
 RealArray  CelestialBody::GetState(A1Mjd atTime)
 {
-   return state; // put in the real stuff based on the PosVelSource flag, etc.****************
+
+   Real*     posVel;
+   RealArray rArray(6,0.0);
+   switch (posVelSrc) {
+      case Gmat::SLP :
+      case Gmat::DE :
+         // if SLP file not set , throw an exception here <<<<<<<<<
+         posVel = theSourceFile->GetPosVel(bodyNumber,atTime);
+         break;
+      case Gmat::ANALYTIC :
+      case Gmat::EPHEMERIS :
+         break; // other cases later <<<<<<<<<<<<<<<<
+   }
+   stateTime  = atTime;
+   rArray[0]  = posVel[0];
+   rArray[1]  = posVel[1];
+   rArray[2]  = posVel[2];
+   rArray[3]  = posVel[3];
+   rArray[4]  = posVel[4];
+   rArray[5]  = posVel[5];
+   state      = rArray;
+
+   return rArray;
 }
 
 
@@ -392,7 +420,7 @@ Real CelestialBody::GetEquatorialRadius() const
 //  Gmat::PosVelSource GetPosVelSource() const
 //------------------------------------------------------------------------------
 /**
- * This method returns the source of position and velocity for the body.
+* This method returns the source of position and velocity for the body.
  *
  * @return position/velocity source for the body.
  *
@@ -457,7 +485,7 @@ bool CelestialBody::SetCentralBody(CelestialBody* cBody)
 //  bool SetSource(Gmat::PosVelSource pvSrc)
 //------------------------------------------------------------------------------
 /**
- * This method sets the position/velocity source for the body.
+* This method sets the position/velocity source for the body.
  *
  * @param <pcSrc> position/velocity source for the body.
  *
@@ -468,6 +496,25 @@ bool CelestialBody::SetCentralBody(CelestialBody* cBody)
 bool CelestialBody::SetSource(Gmat::PosVelSource pvSrc)
 {
    return (posVelSrc = pvSrc);
+}
+
+//------------------------------------------------------------------------------
+//  bool SetSourceFile(PlanetaryEphem *src)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the position/velocity source file for the body.
+ *
+ * @param <src> position/velocity source file for the body.
+ *
+ * @return flag indicating success of the method.
+ *
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::SetSourceFile(PlanetaryEphem *src)
+{
+   theSourceFile = src;
+   sourceFilename = theSourceFile->GetName();
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -521,6 +568,7 @@ std::string CelestialBody::GetParameterText(const Integer id) const
    if (id == state4ID)          return "VelocityX";
    if (id == state5ID)          return "VelocityY";
    if (id == state6ID)          return "VelocityZ";
+   if (id == stateTimeID)       return "StateTime";
    if (id == effRangeID)        return "EffectiveRange";
    if (id == centralBodyID)     return "CentralBody";
    if (id == potentialModelID)  return "PotentialModel";
@@ -571,6 +619,7 @@ Integer     CelestialBody::GetParameterID(const std::string &str) const
    if (str == "VelocityX")              return state4ID;
    if (str == "VelocityY")              return state5ID;
    if (str == "VelocityZ")              return state6ID;
+   if (str == "StateTime")              return stateTimeID;
    if (str == "EffectiveRange")         return effRangeID;
    if (str == "CentralBody")            return centralBodyID;
    if (str == "PotentialModel")         return potentialModelID;
@@ -621,6 +670,7 @@ Gmat::ParameterType CelestialBody::GetParameterType(const Integer id) const
    if (id == state4ID)          return Gmat::REAL_TYPE;
    if (id == state5ID)          return Gmat::REAL_TYPE;
    if (id == state6ID)          return Gmat::REAL_TYPE;
+   if (id == stateTimeID)       return Gmat::A1MJD_TYPE;
    if (id == effRangeID)        return Gmat::REAL_TYPE;
    if (id == centralBodyID)     return Gmat::OBJECT_TYPE;  // what is right?
    if (id == potentialModelID)  return Gmat::OBJECT_TYPE;  // ???
@@ -879,6 +929,8 @@ void CelestialBody::Initialize(std::string withBodyType)
 {
    // fill in with default values, based on the body type?  Or let derived classes
    // do that?
+   stateTime = 0.0;
+   state.reserve(6);
 }
 
 //------------------------------------------------------------------------------
