@@ -1722,12 +1722,12 @@ void PropagationConfigPanel::OnGravityTextUpdate(wxCommandEvent& event)
        event.GetEventObject() == gravityOrderTextCtrl)
    {
       isGravTextChanged = true;
-      isPotFileChanged = false;
+      isForceModelChanged = true;
    }
    else if (event.GetEventObject() == potFileTextCtrl)
    {
-      isGravTextChanged = false;
       isPotFileChanged = true;
+      isForceModelChanged = true;
    }
 }
 
