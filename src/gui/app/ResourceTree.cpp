@@ -99,11 +99,11 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
 }
 
 //------------------------------------------------------------------------------
-// void UpdateResources()
+// void UpdateResource()
 //------------------------------------------------------------------------------
-void ResourceTree::UpdateResources()
+void ResourceTree::UpdateResource()
 {
-    MessageInterface::ShowMessage("ResourceTree::UpdateResources() entered\n");
+    MessageInterface::ShowMessage("ResourceTree::UpdateResource() entered\n");
 
     this->DeleteChildren(mSpacecraftItem);
     this->DeleteChildren(mPropagatorItem);
@@ -116,113 +116,7 @@ void ResourceTree::UpdateResources()
     AddDefaultBurns(mBurnItem);
     AddDefaultSolvers(mSolverItem);
     AddDefaultSubscribers(mSubscriberItem);
-
-    //loj: 2/12/04 commented out
-//      //------------------------------------------------------
-//      // update spacecraft
-//      //------------------------------------------------------
-//      StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
-//      int size = itemNames.size();
-
-//      this->DeleteChildren(mSpacecraftItem);
-    
-//      for (int i = 0; i<size; i++)
-//      {
-//          objName = wxString(itemNames[i].c_str());
-//          this->AppendItem(mSpacecraftItem, wxT(objName), GmatTree::ICON_SPACECRAFT, -1,
-//                           new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_SPACECRAFT));
-//      };
-
-//      if (size !=0)
-//          Expand(mSpacecraftItem);
-    
-//      //------------------------------------------------------
-//      // update propagator
-//      //------------------------------------------------------
-//      itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
-//      size = itemNames.size();
-
-//      this->DeleteChildren(mPropagatorItem);
-    
-//      for (int i = 0; i<size; i++)
-//      {
-//          objName = wxString(itemNames[i].c_str());
-//          this->AppendItem(mPropagatorItem, wxT(objName), GmatTree::ICON_FILE, -1,
-//                           new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_PROPAGATOR));
-//      };
-
-//      if (size !=0)
-//          Expand(mPropagatorItem);
-    
-//      //------------------------------------------------------
-//      // update burns
-//      //------------------------------------------------------
-//      itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::BURN);
-//      size = itemNames.size();
-
-//      this->DeleteChildren(mBurnItem);
-    
-//      for (int i = 0; i<size; i++)
-//      {
-//          objName = wxString(itemNames[i].c_str());
-//          objType = (theGuiInterpreter->GetConfiguredItem(itemNames[i]))->GetTypeName();
-//          if (objType == "ImpulsiveBurn")
-//              this->AppendItem(mBurnItem, wxT(objName), GmatTree::ICON_BURN,
-//                               -1, new GmatTreeItemData(wxT(objName),
-//                               GmatTree::DEFAULT_IMPULSIVE_BURN));
-//      };
-
-//      if (size !=0)
-//          Expand(mBurnItem);
-
-//      //------------------------------------------------------
-//      // update solver
-//      //------------------------------------------------------
-//      itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SOLVER);
-//      size = itemNames.size();
-
-//      this->DeleteChildren(mSolverItem);
-    
-//      for (int i = 0; i<size; i++)
-//      {
-//          objName = wxString(itemNames[i].c_str());
-//          objType = (theGuiInterpreter->GetConfiguredItem(itemNames[i]))->GetTypeName();
-//          if (objType == "DifferentialCorrector")
-//              this->AppendItem(mBurnItem, wxT(objName), GmatTree::ICON_REPORT,
-//                               -1, new GmatTreeItemData(wxT(objName),
-//                               GmatTree::DEFAULT_DIFF_CORR));
-//      };
-
-//      if (size !=0)
-//          Expand(mSolverItem);
-
-//      //------------------------------------------------------
-//      // update plots/reports
-//      //------------------------------------------------------
-//      itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
-//      size = itemNames.size();
-
-//      this->DeleteChildren(mSubscriberItem);
-    
-//      for (int i = 0; i<size; i++)
-//      {
-//          objName = wxString(itemNames[i].c_str());
-//          objType = (theGuiInterpreter->GetConfiguredItem(itemNames[i]))->GetTypeName();
-//          if (objType == "ReportFile")
-//              this->AppendItem(mSubscriberItem, wxT(objName), GmatTree::ICON_REPORT, -1,
-//                               new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_REPORT_FILE));
-//          else if (objName == "XyPlot")
-//              this->AppendItem(mSubscriberItem, wxT(objName), GmatTree::ICON_REPORT, -1,
-//                               new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_XY_PLOT));
-//          else if (objName == "OpenGlPlot")
-//              this->AppendItem(mSubscriberItem, wxT(objName), GmatTree::ICON_REPORT, -1,
-//                               new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_OPENGL_PLOT));
-
-//      };
-
-//      if (size !=0)
-//          Expand(mSubscriberItem);
-    
+   
     // update other tree items
 
 }
@@ -569,11 +463,11 @@ void ResourceTree::OnItemRightClick(wxTreeEvent& event)
 }
 
 //------------------------------------------------------------------------------
-// void ShowMenu(wxTreeItemId id, const wxPoint& pt)
+// void ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 //------------------------------------------------------------------------------
-void ResourceTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
+void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 {
-    GmatTreeItemData *treeItem = (GmatTreeItemData *)GetItemData(id);
+    GmatTreeItemData *treeItem = (GmatTreeItemData *)GetItemData(itemId);
     wxString title = treeItem->GetDesc();
     int dataType = treeItem->GetDataType();
     
@@ -625,6 +519,24 @@ void ResourceTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
         menu.Append(POPUP_DELETE, wxT("Delete"));
     }
 
+    //loj: 2/13/04 I just thought about for later build
+//      switch (dataType)
+//      {
+//      case GmatTree::SPACECRAFT_FOLDER:
+//          menu.Append(POPUP_CLEAR_SC, wxT("Clear"));
+//      case GmatTree::BURNS_FOLDER:
+//          menu.Append(POPUP_CLEAR_BURN, wxT("Clear"));
+//      case GmatTree::PROPAGATORS_FOLDER:
+//           menu.Append(POPUP_CLEAR_PROPAGATOR, wxT("Clear"));
+//      case GmatTree::SOLVERS_FOLDER:
+//          menu.Append(POPUP_CLEAR_SOLVER, wxT("Clear"));
+//      case GmatTree::SUBSCRIBERS_FOLDER:
+//          menu.Append(POPUP_CLEAR_SUBSCRIBER, wxT("Clear"));
+//          break;
+//      default:
+//          break;
+//      }
+    
     PopupMenu(&menu, pt);
 #endif // wxUSE_MENUS
 }

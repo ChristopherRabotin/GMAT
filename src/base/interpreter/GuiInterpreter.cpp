@@ -519,7 +519,33 @@ GmatCommand* GuiInterpreter::CreateCommand(const std::string &type,
     return theModerator->CreateCommand(type, name);
 }
 
-// command sequence
+// Mission
+//------------------------------------------------------------------------------
+// bool LoadDefaultMission()
+//------------------------------------------------------------------------------
+bool GuiInterpreter::LoadDefaultMission()
+{
+    return theModerator->LoadDefaultMission();
+}
+
+// Resource
+//------------------------------------------------------------------------------
+// bool ClearResource()
+//------------------------------------------------------------------------------
+bool GuiInterpreter::ClearResource()
+{
+    return theModerator->ClearResource();
+}
+
+// Command Sequence
+//------------------------------------------------------------------------------
+// bool ClearCommandSeq(Integer sandboxNum = 1)
+//------------------------------------------------------------------------------
+bool GuiInterpreter::ClearCommandSeq(Integer sandboxNum)
+{
+    return theModerator->ClearCommandSeq(sandboxNum);
+}
+
 //------------------------------------------------------------------------------
 // bool AppendCommand(GmatCommand *cmd, Integer sandboxNum)
 //------------------------------------------------------------------------------

@@ -59,13 +59,17 @@ public:
     void                AddSolver(Solver *solver);
     
     bool                SetSolarSystemInUse(const std::string &name);
+    
+    StringArray&        GetListOfAllItems();
     StringArray&        GetListOfItems(Gmat::ObjectType itemType);// const;
     GmatBase*           GetItem(const std::string &name);
+    
     bool                RenameItem(Gmat::ObjectType itemType,
                                    const std::string &oldName,
                                    const std::string &newName);
-    bool                RemoveItem(Gmat::ObjectType type,
-                                   const std::string &name);
+    
+    bool                RemoveAllItems();
+    bool                RemoveItem(Gmat::ObjectType type, const std::string &name);
         
     ForceModel*         GetForceModel(const std::string &name);
     Spacecraft*         GetSpacecraft(const std::string &name);

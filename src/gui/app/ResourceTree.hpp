@@ -35,7 +35,7 @@ public:
 //    void SetMainNotebook (GmatMainNotebook *mainNotebook);
 //    GmatMainNotebook *GetMainNotebook();
 
-    void UpdateResources();
+    void UpdateResource();
     
 private:
     GuiInterpreter *theGuiInterpreter;

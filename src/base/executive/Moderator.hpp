@@ -147,7 +147,14 @@ public:
     // GmatCommand
     GmatCommand* CreateCommand(const std::string &type, const std::string &name = "");
 
-    // Command sequence
+    // Mission
+    bool LoadDefaultMission();
+    
+    // Resource
+    bool ClearResource();
+    
+    // Mission sequence
+    bool ClearCommandSeq(Integer sandboxNum = 1);
     bool AppendCommand(GmatCommand *cmd, Integer sandboxNum = 1);
     GmatCommand* AppendCommand(const std::string &type, const std::string &name,
                            Integer sandboxNum = 1);

@@ -774,7 +774,46 @@ GmatCommand* Moderator::CreateCommand(const std::string &type, const std::string
     return cmd;
 }
 
-// GmatCommand sequence
+// Mission
+//------------------------------------------------------------------------------
+// bool LoadDefaultMission()
+//------------------------------------------------------------------------------
+bool Moderator::LoadDefaultMission()
+{
+    CreateDefaultMission();
+}
+
+// Resource
+//------------------------------------------------------------------------------
+// bool ClearResource()
+//------------------------------------------------------------------------------
+bool Moderator::ClearResource()
+{
+    theConfigManager->RemoveAllItems();
+}
+
+// Command Sequence
+//------------------------------------------------------------------------------
+// bool ClearCommandSeq(Integer sandboxNum = 1)
+//------------------------------------------------------------------------------
+bool Moderator::ClearCommandSeq(Integer sandboxNum)
+{
+    MessageInterface::ShowMessage("Moderator::ClearCommandSeq() entered\n");
+    
+    GmatCommand *cmd = commands[sandboxNum-1];
+    delete cmd;
+    
+    //djc: Maybe set to NULL if you plan to do something completely different from
+    // the way GMAT acts from a script?  I think you want to do this, though:
+    // commands[sandboxNum-1] = NULL;
+                                    
+    //djc: if you plan on adding the gui commands to the sandbox next, using 
+    // the same approach used when running a script.
+    commands[sandboxNum-1] = new NoOp; 
+    
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // bool AppendCommand(GmatCommand *cmd, Integer sandboxNum)
 //------------------------------------------------------------------------------
@@ -818,7 +857,7 @@ bool Moderator::InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
 //                        const std::string &prevName, Integer sandboxNum)
 //------------------------------------------------------------------------------
 GmatCommand* Moderator::InsertCommand(const std::string &type, const std::string &currName,
-                                  const std::string &prevName, Integer sandboxNum)
+                                      const std::string &prevName, Integer sandboxNum)
 {
 //      bool status = false;
 //      GmatCommand *currCmd = theFactoryManager->CreateCommand(type, currName);
@@ -927,6 +966,11 @@ bool Moderator::InterpretScript(const std::string &scriptFilename)
 {
     MessageInterface::ShowMessage("Moderator::InterpretScript() entered\n"
                                   "file: " + scriptFilename + "\n");
+
+    //loj: clear both resource and command sequence for B2
+    ClearResource();
+    ClearCommandSeq();
+    
     try
     {
         return theScriptInterpreter->Interpret(scriptFilename);

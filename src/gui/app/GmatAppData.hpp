@@ -68,4 +68,15 @@ private:
 #endif
     
 };
+
+namespace GmatScript
+{
+    enum MenuType
+    {
+        MENU_SCRIPT_BUILD_OBJECT = 100,
+        MENU_SCRIPT_RUN,
+        MENU_SCRIPT_BUILD_AND_RUN
+    };
+}
+
 #endif // GmatAppData_hpp

@@ -50,6 +50,7 @@
  */
 //------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(GmatMainFrame, wxFrame)
+    EVT_MENU(MENU_PROJECT_NEW, GmatMainFrame::OnProjectNew)
     EVT_MENU(MENU_PROJECT_EXIT, GmatMainFrame::OnProjectExit)
     EVT_MENU(TOOL_RUN, GmatMainFrame::OnRun)
     EVT_MENU(MENU_HELP_ABOUT, GmatMainFrame::OnHelpAbout)
@@ -145,6 +146,25 @@ GmatMainFrame::~GmatMainFrame()
 //-------------------------------
 
 //------------------------------------------------------------------------------
+// void OnProjectNew(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles New command from the menu bar.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnProjectNew(wxCommandEvent& WXUNUSED(event))
+{
+    theGuiInterpreter->ClearResource();
+    theGuiInterpreter->ClearCommandSeq();
+    theGuiInterpreter->LoadDefaultMission();
+
+    GmatAppData::GetResourceTree()->UpdateResource();
+    GmatAppData::GetMissionTree()->UpdateMission();    
+}
+
+//------------------------------------------------------------------------------
 // void OnProjectExit(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 /**
@@ -236,7 +256,10 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
     int width = 24;
     int currentX = 5;
 
-    toolBar->AddTool( 0, *(bitmaps[0]), wxNullBitmap, FALSE, currentX, -1,
+    //loj: 2/13/04
+    //toolBar->AddTool( 0, *(bitmaps[0]), wxNullBitmap, FALSE, currentX, -1,
+    //                (wxObject *) NULL, _T("New file"));
+    toolBar->AddTool( MENU_PROJECT_NEW, *(bitmaps[0]), wxNullBitmap, FALSE, currentX, -1,
                     (wxObject *) NULL, _T("New file"));
     currentX += width + 5;
     toolBar->AddTool(1, *bitmaps[1], wxNullBitmap, FALSE, currentX, -1,

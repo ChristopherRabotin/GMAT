@@ -73,6 +73,7 @@ private:
     
     // event handling
     DECLARE_EVENT_TABLE();
+    void OnProjectNew(wxCommandEvent& WXUNUSED(event));
     void OnProjectExit(wxCommandEvent& WXUNUSED(event));
     void OnRun(wxCommandEvent& WXUNUSED(event));
     void OnHelpAbout(wxCommandEvent& WXUNUSED(event));

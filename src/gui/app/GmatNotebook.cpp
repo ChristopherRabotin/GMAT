@@ -98,10 +98,15 @@ wxPanel *GmatNotebook::CreateResourcePage()
 {
     wxGridSizer *sizer = new wxGridSizer( 1, 0, 0 );
     wxPanel *panel = new wxPanel(this);
-    
+
+    //loj: 2/14/04 commented out
+    //long style = wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_LINES_AT_ROOT|
+    //            wxSUNKEN_BORDER|wxTR_SINGLE|wxTR_FULL_ROW_HIGHLIGHT|
+    //            wxTR_EDIT_LABELS;
+
+    //loj: 2/14/04 we don't want to edit labels
     long style = wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_LINES_AT_ROOT|
-                wxSUNKEN_BORDER|wxTR_SINGLE|wxTR_FULL_ROW_HIGHLIGHT|
-                wxTR_EDIT_LABELS;
+                 wxSUNKEN_BORDER|wxTR_SINGLE|wxTR_FULL_ROW_HIGHLIGHT;
 
     resourceTree = new ResourceTree(panel, -1, wxDefaultPosition,
                    wxDefaultSize, style);

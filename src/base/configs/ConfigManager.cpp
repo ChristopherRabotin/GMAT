@@ -226,6 +226,22 @@ bool ConfigManager::SetSolarSystemInUse(const std::string &name)
     return false;
 }
 
+//loj: 2/13/04 added
+//------------------------------------------------------------------------------
+// StringArray& GetListOfAllItems()
+//------------------------------------------------------------------------------
+StringArray& ConfigManager::GetListOfAllItems()
+{
+    listOfItems.erase(listOfItems.begin(), listOfItems.end());
+    
+    std::vector<GmatBase*>::iterator current = (std::vector<GmatBase*>::iterator)(objects.begin());
+    while (current != (std::vector<GmatBase*>::iterator)(objects.end())) {
+        listOfItems.push_back((*current)->GetName());
+        ++current;
+    }
+    return listOfItems;
+}
+
 
 //------------------------------------------------------------------------------
 // StringArray& GetListOfItems(Gmat::ObjectType itemType)
@@ -289,12 +305,53 @@ bool ConfigManager::RenameItem(Gmat::ObjectType itemType,
 
 
 //------------------------------------------------------------------------------
+// bool RemoveAllItems()
+//------------------------------------------------------------------------------
+bool ConfigManager::RemoveAllItems()
+{
+    objects.clear();
+    mapping.clear();
+
+    return true;
+}
+
+//loj: 2/13/04 added
+//------------------------------------------------------------------------------
 // bool RemoveItem(Gmat::ObjectType type, const std::string &name)
 //------------------------------------------------------------------------------
-bool ConfigManager::RemoveItem(Gmat::ObjectType type,
-                               const std::string &name)
+bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name)
 {
-    return false;
+    bool status = false;
+
+    // remove from objects
+    std::vector<GmatBase*>::iterator currentIter =
+        (std::vector<GmatBase*>::iterator)(objects.begin());
+    
+    while (currentIter != (std::vector<GmatBase*>::iterator)(objects.end()))
+    {
+        if ((*currentIter)->GetType() == type)
+        {
+            if ((*currentIter)->GetName() == name)
+            {
+                objects.erase(currentIter);
+                break;
+            }
+        }
+        ++currentIter;
+    }
+    
+    // remove from mapping
+    if (mapping.find(name) != mapping.end())
+    {
+        GmatBase *obj = mapping[name];
+        if (obj->GetType() == type)
+        {
+            mapping.erase(name);
+            status = true;
+        }
+    }
+    
+    return status;
 }
 
 
@@ -420,9 +477,23 @@ void ConfigManager::AddPhysicalModel(PhysicalModel *pm)
 {
 }
 
-
+//loj: 2/13/04 added
+//------------------------------------------------------------------------------
+// void ConfigManager::AddPropagator(Propagator *prop)
+//------------------------------------------------------------------------------
 void ConfigManager::AddPropagator(Propagator *prop)
 {
+    std::string name = prop->GetName();
+    if (name == "")
+        throw ConfigManagerException("Unnamed objects cannot be managed");
+    if (mapping.find(name) != mapping.end()) {
+        name += " is already in the configuration table";
+        throw ConfigManagerException(name);
+    }
+    else {
+        objects.push_back(prop);
+        mapping[name] = prop;
+    }
 }
 
 
