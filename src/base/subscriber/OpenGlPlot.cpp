@@ -22,9 +22,9 @@
 #include "ColorTypes.hpp"        // for namespace GmatColor::
 #include "MessageInterface.hpp"  // for ShowMessage()
 
-#define DEBUG_OPENGL_INIT 1
-#define DEBUG_OPENGL_PARAM 0
-#define DEBUG_OPENGL_DATA 0
+#define DEBUG_OPENGL_INIT   0
+#define DEBUG_OPENGL_PARAM  0
+#define DEBUG_OPENGL_UPDATE 0
 
 //---------------------------------
 // static data
@@ -114,6 +114,8 @@ OpenGlPlot::~OpenGlPlot(void)
 //------------------------------------------------------------------------------
 bool OpenGlPlot::Initialize()
 {
+   Subscriber::Initialize();
+   
 #if DEBUG_OPENGL_INIT
    MessageInterface::ShowMessage("OpenGlPlot::Initialize() entered mScCount = %d\n",
                                  mScCount);
@@ -143,59 +145,6 @@ bool OpenGlPlot::Initialize()
                                      "has been added to OpenGlPlot");
       return false;
    }
-}
-
-//------------------------------------------------------------------------------
-// bool Distribute(int len)
-//------------------------------------------------------------------------------
-bool OpenGlPlot::Distribute(int len)
-{
-   //loj: How do I convert data to Real data?
-   return false;
-}
-
-//------------------------------------------------------------------------------
-// bool Distribute(const Real * dat, Integer len)
-//------------------------------------------------------------------------------
-bool OpenGlPlot::Distribute(const Real * dat, Integer len)
-{
-   if (mScCount > 0)
-   {
-      if (len > 0)
-      {
-         mNumData++;
-    
-         if ((mNumData % mDataCollectFrequency) == 0)
-         {
-            mNumData = 0;
-            mNumCollected++;
-            bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
-
-            //loj: assumes data in time, x, y, z order
-            //loj: 6/8/04 try color
-
-#if DEBUG_OPENGL_DATA
-            MessageInterface::
-               ShowMessage("OpenGlPlot::Distribute() time=%f pos = %f %f %f\n",
-                           dat[0], dat[1], dat[2], dat[3]);
-#endif
-            
-            return PlotInterface::
-               UpdateGlSpacecraft(instanceName,
-                                  dat[0], dat[1], dat[2], dat[3],
-                                  mOrbitColorMap[mScList[0]],
-                                  mTargetColorMap[mScList[0]],
-                                  update, mDrawWireFrame);
-            //return PlotInterface::UpdateGlSpacecraft(dat[0], dat[1], dat[2], dat[3],
-            //                                         update, mDrawWireFrame);
-            if (update)
-               mNumCollected = 0;
-         }
-      }
-   }
-   //loj: always return true otherwise next subscriber will not call ReceiveData()
-   //     in Publisher::Publish()
-   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -510,3 +459,67 @@ void OpenGlPlot::ClearSpacecraftList()
    mTargetColorMap.clear();
    mScCount = 0;
 }
+
+//--------------------------------------
+// methods inherited from Subscriber
+//--------------------------------------
+
+//------------------------------------------------------------------------------
+// bool Distribute(int len)
+//------------------------------------------------------------------------------
+bool OpenGlPlot::Distribute(int len)
+{
+   //loj: How do I convert data to Real data?
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// bool Distribute(const Real *dat, Integer len)
+//------------------------------------------------------------------------------
+bool OpenGlPlot::Distribute(const Real *dat, Integer len)
+{
+   //loj: 6/22/04 added if (isEndOfReceive)
+   if (isEndOfReceive)
+   {
+      return PlotInterface::RefreshGlPlot(instanceName);
+   }
+
+   if (mScCount > 0)
+   {
+      if (len > 0)
+      {
+         mNumData++;
+
+         if ((mNumData % mDataCollectFrequency) == 0)
+         {
+            mNumData = 0;
+            mNumCollected++;
+            bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
+
+            //loj: assumes data in time, x, y, z order
+            //loj: 6/8/04 try color
+
+#if DEBUG_OPENGL_UPDATE
+            MessageInterface::ShowMessage
+               ("OpenGlPlot::Distribute() time=%f pos=%f %f %f update=%d\n",
+                dat[0], dat[1], dat[2], dat[3], update);
+#endif
+            
+            return PlotInterface::
+               UpdateGlSpacecraft(instanceName,
+                                  dat[0], dat[1], dat[2], dat[3],
+                                  mOrbitColorMap[mScList[0]],
+                                  mTargetColorMap[mScList[0]],
+                                  update, mDrawWireFrame);
+
+            if (update)
+               mNumCollected = 0;
+         }
+      }
+   }
+
+   //loj: always return true otherwise next subscriber will not call ReceiveData()
+   //     in Publisher::Publish()
+   return true;
+}
+
