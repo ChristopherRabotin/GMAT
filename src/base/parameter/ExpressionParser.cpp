@@ -37,7 +37,7 @@
 #include <iostream>
 using namespace std;
 
-#define DEBUG_EXP_PARSER 1
+//#define DEBUG_EXP_PARSER 1
 
 //---------------------------------
 // static varible
