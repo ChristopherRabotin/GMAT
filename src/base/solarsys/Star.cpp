@@ -19,6 +19,7 @@
 #include "Star.hpp"
 #include "PhysicalConstants.hpp"
 #include "MessageInterface.hpp"
+#include "A1Mjd.hpp"
 
 // initialize static default values
 // default values for CelesitalBody data
@@ -190,6 +191,31 @@ bool Star::SetRadiantPower(Real radPower, Real refDistance)
    radiantPower      = radPower;
    referenceDistance = refDistance;
    return true;
+}
+
+//------------------------------------------------------------------------------
+//  Rvector3 GetBodyCartographicCoordinates(const A1Mjd &forTime) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the cartographic coordinates for the star.
+ *
+ * @return vector containing alpha, delta, W.
+ *
+ * @note currently only implemented for our Star.
+ *       See "Report of the IAU/IAG Working Group on
+ *       Cartographic Coordinates and Rotational Elements of the Planets
+ *       and Satellites: 2000"
+ *
+ */
+//------------------------------------------------------------------------------
+Rvector3 Star::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
+{
+   if (instanceName == SolarSystem::SUN_NAME)
+   {
+      Real W = Star::w1 + Star::w2 * forTime.JulianDaysFromTCBEpoch();
+      return Rvector3(Star::alpha, Star::delta, W);
+   }
+   return CelestialBody::GetBodyCartographicCoordinates(forTime);
 }
 
 

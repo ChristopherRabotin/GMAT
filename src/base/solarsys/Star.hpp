@@ -51,6 +51,8 @@ public:
 
    bool SetRadiantPower(Real radPower, Real refDistance);
 
+   virtual Rvector3       GetBodyCartographicCoordinates(const A1Mjd &forTime) const;
+
    // overridden access methods from CelestialBody
    virtual std::string    GetParameterText(const Integer id) const;     // const?
    virtual Integer        GetParameterID(const std::string &str) const; // const?
@@ -102,8 +104,14 @@ protected:
 
    static const Gmat::ParameterType PARAMETER_TYPE[
       StarParamCount - CelestialBodyParamCount];
-   
-   // radiant power and reference distance
+
+   // constants for cartographic coordinates
+   static const Real alpha = 286.13;      // deg
+   static const Real delta = 63.87;       // deg
+   static const Real w1    = 84.10;       // deg (/day?)
+   static const Real w2    = 14.1844000;  // * d
+
+      // radiant power and reference distance
    Real      radiantPower;
    Real      referenceDistance;
    Real      photosphereRadius;  // m
