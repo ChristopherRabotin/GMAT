@@ -417,6 +417,10 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
 #endif
          return true;
       }
+      else
+      {
+         return false;
+      }
    case TARGET_STATUS:
       if (value == "On" || value == "Off")
       {
@@ -497,12 +501,12 @@ bool OpenGlPlot::AddSpacecraft(const std::string &name)
       if (mScCount < MAX_SC_COLOR)
       {
          mOrbitColorMap[name] = DEFAULT_ORBIT_COLOR[mScCount-1];
-         mTargetColorMap[name] = GmatColor::ORANGE32;
+         mTargetColorMap[name] = GmatColor::TEAL32; //loj: 8/6/04 changed to teal
       }
       else
       {
          mOrbitColorMap[name] = GmatColor::RED32;
-         mTargetColorMap[name] = GmatColor::ORANGE32;
+         mTargetColorMap[name] = GmatColor::TEAL32;
       }
       
       status = true;
