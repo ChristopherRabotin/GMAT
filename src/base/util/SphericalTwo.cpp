@@ -247,6 +247,26 @@ std::string* SphericalTwo::ToValueStrings(void)
    return stringValues;
 }
 
+//------------------------------------------------------------------------------
+//  std::string ToString()
+//------------------------------------------------------------------------------
+/**
+ * @return data value string
+ */
+//------------------------------------------------------------------------------
+std::string SphericalTwo::ToString()
+{
+   std::string s;
+   std::string *val;
+
+   val = ToValueStrings();
+   
+   for (int i=0; i<NUM_DATA; i++)
+      s = s + val[i] + " ";
+   
+   return s;
+}
+
 //---------------------------------
 // friend functions
 //---------------------------------

@@ -55,6 +55,7 @@ public:
    Integer GetNumData() const;
    const std::string* GetDataDescriptions() const;
    std::string* ToValueStrings();
+   std::string ToString(); //loj: 6/16/04 added
 
    //  Friend functions
    friend SphericalTwo ToSphericalTwo(const Cartesian &c); //loj: 4/19/04 added
