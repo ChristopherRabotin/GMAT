@@ -112,7 +112,8 @@ public:
    virtual Rmatrix              GetHarmonicCoefficientsSij(); // const??
    virtual Rmatrix              GetHarmonicCoefficientsCij(); // const??
    virtual const StringArray&   GetSupportedAtmospheres() const;
-   virtual std::string          GetCurrentAtmosphereModel();
+   virtual std::string          GetAtmosphereModelType();
+   virtual AtmosphereModel*     GetAtmosphereModel(void);
    
 
    // methods to return the body type, central body,

@@ -22,7 +22,7 @@
 #include "PlanetaryEphem.hpp"
 #include "Rvector6.hpp"
 #include "AtmosphereManager.hpp"
-//#include "AtmosphereModel.hpp"
+#include "AtmosphereModel.hpp"
 
 const std::string CelestialBody::BODY_TYPE_STRINGS[Gmat::BodyTypeCount] =
 {
@@ -362,9 +362,8 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
 //------------------------------------------------------------------------------
 CelestialBody::~CelestialBody()
 {
-   delete atmManager;
-   delete atmModel;
-   //delete centralBody;  // ?????????
+   if (atmModel != NULL)   atmModel = NULL; 
+   if (atmManager != NULL) delete atmManager;
 }
 
 //------------------------------------------------------------------------------
@@ -660,9 +659,24 @@ const StringArray&   CelestialBody::GetSupportedAtmospheres() const
  *
  */
 //------------------------------------------------------------------------------
-std::string  CelestialBody::GetCurrentAtmosphereModel()
+std::string  CelestialBody::GetAtmosphereModelType()
 {
    return atmModel->GetTypeName();  // or should I go through the AtmManager?
+}
+
+//------------------------------------------------------------------------------
+//  AtmosphereModel* GetAtmosphereModel()
+//------------------------------------------------------------------------------
+/**
+ * This method returns a pointer to the current atmosphere model for the body.
+ *
+ * @return a pointer to the current atmosphere model for the body.
+ *
+ */
+//------------------------------------------------------------------------------
+AtmosphereModel* CelestialBody::GetAtmosphereModel(void)
+{
+   return atmModel;
 }
 
 //------------------------------------------------------------------------------
@@ -797,18 +811,18 @@ bool CelestialBody::SetUsePotentialFile(bool useIt)
 //------------------------------------------------------------------------------
 bool CelestialBody::SetAtmosphereModel(std::string toAtmModel)
 {
-   if (atmModel != NULL)
-   {
-      std::string currentModel = atmModel->GetTypeName();
-      if (currentModel != toAtmModel)
-      {
-          delete atmModel;
-      }
-      else
-      {
-         return true;  // already the right kind of atmosphere model
-      }
-   }
+   //if (atmModel != NULL)
+   //{
+   //   std::string currentModel = atmModel->GetTypeName();
+   //   if (currentModel != toAtmModel)
+   //   {
+   //       delete atmModel;
+   //   }
+   //   else
+   //   {
+   //      return true;  // already the right kind of atmosphere model
+   //   }
+   //}
    atmModel = atmManager->GetAtmosphere(toAtmModel);
    if (atmModel == NULL) return false;  // error creating a new atmosphere model
    return true;
