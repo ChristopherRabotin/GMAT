@@ -18,6 +18,7 @@
 #                          KepSmaParam, KepTaParam, SemilatRecParam, 
 #                          SphDecParam, SphElemParam, SphRaParam, 
 #                          VelApoapsisParam, and VelPeriapsisParam
+#             2004/03/01 - Added Ecc.cpp, Inc.cpp, and SMA.cpp
 #
 #
 # Define the marco for the top-level directories
@@ -26,13 +27,13 @@ PROJECT_ROOT    = ../..
 # Source file for creating new library
 SRC = CartStateParam.cpp CartVxParam.cpp CartVyParam.cpp CartVzParam.cpp \
 	CartXParam.cpp CartYParam.cpp CartZParam.cpp CurrentA1MjdParam.cpp \
-	ElapsedDaysParam.cpp ElapsedSecsParam.cpp KepAopParam.cpp \
+	Ecc.cpp ElapsedDaysParam.cpp ElapsedSecsParam.cpp KepAopParam.cpp \
 	KepEccParam.cpp KepElemParam.cpp KepIncParam.cpp KepMaParam.cpp \
 	KepMmParam.cpp KepRaanParam.cpp KepSmaParam.cpp KepTaParam.cpp \
-	OrbitData.cpp Parameter.cpp ParameterDatabase.cpp RealParameter.cpp \
-	RefData.cpp Rvector6Parameter.cpp SemilatRecParam.cpp SphDecParam.cpp \
-	SphElemParam.cpp SphRaParam.cpp VelApoapsisParam.cpp \
-	VelPeriapsisParam.cpp TimeData.cpp
+	Inc.cpp OrbitData.cpp Parameter.cpp ParameterDatabase.cpp \
+	RealParameter.cpp RefData.cpp Rvector6Parameter.cpp \
+	SemilatRecParam.cpp SphDecParam.cpp SphElemParam.cpp SphRaParam.cpp \
+	SMA.cpp VelApoapsisParam.cpp VelPeriapsisParam.cpp TimeData.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
