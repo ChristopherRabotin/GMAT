@@ -257,7 +257,21 @@ bool Interpreter::InterpretObject(std::string objecttype, std::string objectname
     if (find(parametermap.begin(), parametermap.end(), objecttype) != 
         parametermap.end())
     {
-        moderator->CreateParameter(objecttype, objectname);
+        Parameter *parm = moderator->CreateParameter(objecttype, objectname);
+
+        if (parm) {
+           /// @todo: "Raw" objects are set to default body or C.S.; update?
+           if (parm->IsCoordSysDependent()) {
+              parm->SetStringParameter("DepObject", "EarthMJ2000Eq");
+              parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+           }
+            
+           if (parm->IsOriginDependent()) {
+              parm->SetStringParameter("DepObject", "Earth");
+              if (parm->NeedCoordSystem())
+                 parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+           }
+        }        
         return true;
     }
     
@@ -736,21 +750,55 @@ GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
    // Not an object reference -- check the other options
    else {
       // Is it a Parameter?
-      if (phrase.size() == 2) {
-         ref = moderator->GetParameter(phrase[1]);
+      if ((phrase.size() == 2) || (phrase.size() == 3)) {
+         std::string parmObj = phrase[0], parmType, parmSystem = "";
+         
+         if (phrase.size() == 2)
+            parmType = phrase[1];
+         else {
+            parmSystem = phrase[1];
+            parmType = phrase[2];
+         }
+            
+         ref = moderator->GetParameter(parmType);
          if (ref == NULL) {
-            std::string name = phrase[0];
+            std::string name = parmObj;
+            if (phrase.size() == 3) {
+               name += ".";
+               name += parmSystem;
+            }
             name += ".";
-            name += phrase[1];
-            ref = moderator->CreateParameter(phrase[1], name);
+            name += parmType;
+            ref = moderator->CreateParameter(parmType, name);
             if (ref) {
+               Parameter *parm = (Parameter*)ref;
+
                #ifdef DEBUG_TOKEN_PARSING
-                  std::cout << "Parameter configuration:\n   Parm = " << phrase[1]
-                            << "\n   obj  = " << phrase[0] << std::endl; 
+                  std::cout << "Parameter configuration:\n   Parm = " 
+                            << parmType << "\n   obj  = " 
+                            << parmObj << std::endl; 
                #endif
-               GmatBase *refobj = moderator->GetConfiguredItem(phrase[0]);
+               GmatBase *refobj = moderator->GetConfiguredItem(parmObj);
                Gmat::ObjectType ot = refobj->GetType();
-               ref->SetRefObjectName(ot, phrase[0]);
+               parm->SetRefObjectName(ot, parmObj);
+               
+               // Set body and/or cs on it
+               if (parm->IsCoordSysDependent()) {
+                  if (parmSystem == "")
+                     parmSystem = "EarthMJ2000Eq";
+                  parm->SetStringParameter("DepObject", parmSystem);
+                  parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
+               }
+            
+               if (parm->IsOriginDependent()) {
+                  if (parmSystem == "")
+                     parmSystem = "Earth";
+                  parm->SetStringParameter("DepObject", parmSystem);
+                  /// @todo Set a better CS choice when appropriate
+                  if (parm->NeedCoordSystem())
+                     parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, 
+                                           "EarthMJ2000Eq");
+               }
             }
          }
          else // NOT a Parameter
