@@ -289,7 +289,9 @@ bool BeginFiniteBurn::Initialize()
       // If all is okay, create the FiniteThrust object and configure it.
       std::string thrustName = burnName + "_FiniteThrust";
       burnForce = new FiniteThrust(thrustName);
-      
+
+      burnForce->SetRefObject(maneuver, maneuver->GetType(), 
+                              maneuver->GetName());
       Gmat::ObjectType type = Gmat::SPACECRAFT;
       StringArray::iterator iter;
       

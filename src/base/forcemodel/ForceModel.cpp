@@ -53,23 +53,15 @@
 
 #include "Formation.hpp"      // for BuildState()
 
-//#define DEBUG_FORCEMODEL 1 //loj: 1/14/05 commented out
+//#define DEBUG_FORCEMODEL_INIT 1
+//#define DEBUG_FORCEMODEL_EXE 1
+
 #define normType -2
 
 //---------------------------------
 // static data
 //---------------------------------
 
-// DJC: 06/16/04 Updated for scripting
-//const std::string
-//ForceModel::PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount] =
-//{
-//    "PointMass",
-//    "FullField",
-//    "Drag",        //loj: 3/19/04 This is also in PropSetup. Where do we want to handle?
-//    "MagField",
-//    "ForceList",
-//};
 const std::string
 ForceModel::PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount] =
 {
@@ -81,16 +73,6 @@ ForceModel::PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount] =
 };
 
 
-// DJC: 06/16/04 Updated for scripting
-//const Gmat::ParameterType
-//ForceModel::PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount] =
-//{
-//    Gmat::STRING_TYPE,
-//    Gmat::STRING_TYPE,
-//    Gmat::STRING_TYPE,
-//    Gmat::STRING_TYPE,
-//    Gmat::STRINGARRAY_TYPE,
-//};
 const Gmat::ParameterType
 ForceModel::PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount] =
 {
@@ -104,24 +86,11 @@ ForceModel::PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount] =
 
 std::map<std::string, std::string> ForceModel::scriptAliases;
 
+
 //---------------------------------
 // public
 //---------------------------------
 
-//------------------------------------------------------------------------------
-// ForceModel::ForceModel(void)
-//------------------------------------------------------------------------------
-/**
- * The constructor
- */
-//------------------------------------------------------------------------------
-//ForceModel::ForceModel(void) :
-//PhysicalModel     (NULL, NULL, NULL),
-//derivatives       (NULL),
-//estimationMethod  (2.0)
-//{
-//    dimension = 6;
-//}
 
 //------------------------------------------------------------------------------
 // ForceModel::ForceModel(Gmat::ObjectType id, const std::string &typeStr,
@@ -132,16 +101,14 @@ std::map<std::string, std::string> ForceModel::scriptAliases;
  */
 //------------------------------------------------------------------------------
 ForceModel::ForceModel(const std::string &nomme) :
-PhysicalModel     (Gmat::FORCE_MODEL, "ForceModel", nomme),
-//    derivatives       (NULL),  waw:  06/03/04
-//    forceCount        (0),  waw: 05/06/04
-previousState     (NULL),
-estimationMethod  (2.0)
+   PhysicalModel     (Gmat::FORCE_MODEL, "ForceModel", nomme),
+   previousState     (NULL),
+   estimationMethod  (2.0)
 {
     numForces = 0;
     stateSize = 6;
     dimension = 6;
-    currentForce = 0;  // waw: added 06/04/04
+    currentForce = 0;
     parameterCount = ForceModelParamCount;
 }
 
@@ -155,11 +122,20 @@ estimationMethod  (2.0)
 //------------------------------------------------------------------------------
 ForceModel::~ForceModel(void)
 {
-//  waw: 06/03/04
-//    if (derivatives)
-//        delete derivatives;
-    if (previousState)
-        delete [] previousState;
+   if (previousState)
+      delete [] previousState;
+        
+   // Delete the owned forces
+   std::vector<PhysicalModel *>::iterator ppm = forceList.begin();
+   PhysicalModel *pm;
+   while (ppm != forceList.end()) {
+      pm = *ppm;
+      forceList.erase(ppm);
+      // Transient forces are managed in the Sandbox.
+      if (!pm->IsTransient())
+         delete pm;
+      ppm = forceList.begin();
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -172,6 +148,8 @@ ForceModel::~ForceModel(void)
  * method should be completed before the class is used in external code.
  *
  * @param fdf   The original of the ForceModel that are copied
+ * 
+ * @todo Check the PhysicalModel copy constructors and assignment operators.
  */
 //------------------------------------------------------------------------------
 ForceModel::ForceModel(const ForceModel& fdf) :
@@ -179,21 +157,26 @@ ForceModel::ForceModel(const ForceModel& fdf) :
     previousState    (fdf.previousState),
     estimationMethod (fdf.estimationMethod)
 {
-    numForces = fdf.numForces;
-    stateSize = fdf.stateSize;
-    dimension = fdf.dimension;
-    currentForce = fdf.currentForce;
-    parameterCount = ForceModelParamCount;
+   numForces = fdf.numForces;
+   stateSize = fdf.stateSize;
+   dimension = fdf.dimension;
+   currentForce = fdf.currentForce;
+   parameterCount = ForceModelParamCount;
+
+   // Copy the forces.  May not work -- the copy constructors need to be checked
+   for (std::vector<PhysicalModel *>::const_iterator pm = fdf.forceList.begin();
+        pm != fdf.forceList.end(); ++pm)
+      forceList.push_back((PhysicalModel*)(*pm)->Clone());
 }
 
 //------------------------------------------------------------------------------
 // ForceModel& ForceModel::operator=(const ForceModel& fdf)
 //------------------------------------------------------------------------------
 /**
- * The assignment operator
+ * The assignment operator.
  * 
- * NOTE: The ForceModel assignment operator is not yet implemented.  
- * This method should be completed before the class is used in external code.
+ * NOTE: The ForceModel assignment operator is not yet tested.  This method 
+ *       should be validated before the class is used in external code.
  * 
  * @param fdf   The original of the ForceModel that are copied
  */
@@ -203,8 +186,17 @@ ForceModel& ForceModel::operator=(const ForceModel& fdf)
    if (&fdf == this)
         return *this;
 
+   numForces = fdf.numForces;
    stateSize = fdf.stateSize;
-   /// @todo Implement the assignment operator
+   dimension = fdf.dimension;
+   currentForce = fdf.currentForce;
+   parameterCount = ForceModelParamCount;
+   
+   // Copy the forces.  May not work -- the copy constructors need to be checked
+   for (std::vector<PhysicalModel *>::const_iterator pm = fdf.forceList.begin();
+        pm != fdf.forceList.end(); ++pm)
+      forceList.push_back((PhysicalModel*)(*pm)->Clone());
+
    return *this;
 }
 
@@ -215,67 +207,89 @@ ForceModel& ForceModel::operator=(const ForceModel& fdf)
  * Method used to add a new force to the force model
  *
  * This method takes the pointer to the new force and adds it to the force model
- * list for later use.  Each force should supply first derivative information 
- * for elements 4 through 6 of a state vector, and zeros for the first three 
- * elements.  The forces should have the ability to act on state vectors for 
- * formations as well, by filling in elements (6*n+4) through (6*n+6) for larger
- * state vectors.
+ * list for later use.  Each force should supply either first derivative 
+ * information for elements 4 through 6 of a state vector and zeros for the 
+ * first three elements, or second derivative information in elements 1 through 
+ * 3 and zeroes in 4 through 6 for second order integrators.  The forces should 
+ * have the ability to act on state vectors for formations as well, by filling 
+ * in elements (6*n+4) through (6*n+6) for larger state vectors.  Some forces 
+ * also affect the mass properties of the spacecraft; these elements are updated 
+ * using a TBD data structure.
  * 
- * The force that is passed in is owned by this class (actually, by the member 
- * DerivativeList), and should not be destructed externally.  In addition, every 
- * force that is passed to this class needs to have a copy constructor and an 
- * assignment operator so that it can be cloned for distribution to multiple
- * satellites.
+ * The force that is passed in is owned by this class, and should not be 
+ * destructed externally.  In addition, every force that is passed to this class 
+ * needs to have a copy constructor and an assignment operator so that it can be 
+ * cloned for distribution to multiple sandboxes.
  * 
  * @param pPhysicalModel        The force that is being added to the force model
+ * 
+ * @todo Document the mass depletion approach.
  */
 //------------------------------------------------------------------------------
 void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
 {
-    //MessageInterface::ShowMessage("ForceModel::AddForce() entered\n");
-    
     if (pPhysicalModel == NULL)
-        return;
-// waw: 06/03/04
-//    if (derivatives == NULL)
-//        derivatives = new DerivativeList;
+       throw ForceModelException("Attempting to add a NULL force to " +
+                instanceName);
 
+    #ifdef DEBUG_FORCEMODEL_INIT
+       MessageInterface::ShowMessage(
+          "ForceModel::AddForce() entered for a %s force\n", 
+          pPhysicalModel->GetTypeName().c_str());
+    #endif       
+    
     pPhysicalModel->SetDimension(dimension);
-// waw: 06/03/04
-//    derivatives->AddForce(pPhysicalModel);
     initialized = false;
 
     forceList.push_back(pPhysicalModel);
     numForces = forceList.size();
-    
-    //++forceCount;  waw: 05/06/04
 }
 
 //------------------------------------------------------------------------------
 // void DeleteForce(const std::string &name)
 //------------------------------------------------------------------------------
 /**
- * Deletes force from the force model.
- * @param    name   The force name to delete
+ * Deletes named force from the force model.
+ * 
+ * @param name The name of the force to delete
  */
 //------------------------------------------------------------------------------
 void ForceModel::DeleteForce(const std::string &name)
 {
-    std::vector<PhysicalModel *>::iterator force;
-    Integer i = 0;
-    for (force = forceList.begin(); force != forceList.end(); force++) 
+    for (std::vector<PhysicalModel *>::iterator force = forceList.begin(); 
+         force != forceList.end(); ++force) 
     {
-        PhysicalModel *pm = forceList[i];
-        std::string pmName = pm->GetName().c_str();
-        
-        if ( strcmp(name.c_str(), pmName.c_str()) == 0 )
+        std::string pmName = (*force)->GetName();
+        if (name == pmName)
         {
             forceList.erase(force);
-            //delete pm;
             numForces = forceList.size();
             return;
         }
-        i++;
+    }
+}
+
+
+//------------------------------------------------------------------------------
+// void DeleteForce(PhysicalModel *pPhyscialModel)
+//------------------------------------------------------------------------------
+/**
+ * Deletes force from the force model.
+ * 
+ * @param pPhyscialModel The force name to delete
+ */
+//------------------------------------------------------------------------------
+void ForceModel::DeleteForce(PhysicalModel *pPhysicalModel)
+{
+    for (std::vector<PhysicalModel *>::iterator force = forceList.begin();
+         force != forceList.end(); ++force) 
+    {
+        if (*force == pPhysicalModel)
+        {
+            forceList.erase(force);
+            numForces = forceList.size();
+            return;
+        }
     }
 }
 
@@ -285,27 +299,22 @@ void ForceModel::DeleteForce(const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Search force in the force model.
+ * 
  * @param  name The force name to look up
  * @return true if force exists, else false
  */
 //------------------------------------------------------------------------------
 bool ForceModel::HasForce(const std::string &name)
 {
-    std::vector<PhysicalModel *>::iterator force;
-    Integer i = 0;
-    for (force = forceList.begin(); force != forceList.end(); force++) 
-    {
-        PhysicalModel *pm = forceList[i];
-        std::string pmName = pm->GetName().c_str();
-        
-        if ( strcmp(name.c_str(), pmName.c_str()) == 0 )
-        {
-            return true;
-        }
-        i++;
-    }
-    return false; 
+   for (std::vector<PhysicalModel *>::iterator force = forceList.begin(); 
+       force != forceList.end(); force++) 
+   {
+      if (name == (*force)->GetName())
+         return true;
+   }
+   return false; 
 }
+
 
 //------------------------------------------------------------------------------
 // Integer GetNumForces()
@@ -315,6 +324,7 @@ Integer ForceModel::GetNumForces()
     return numForces;
 }
 
+
 //------------------------------------------------------------------------------
 // StringArray& GetForceTypeNames()
 //------------------------------------------------------------------------------
@@ -323,9 +333,7 @@ StringArray& ForceModel::GetForceTypeNames()
     forceTypeNames.clear();
 
     for (int i=0; i<numForces; i++)
-    {
         forceTypeNames.push_back(forceList[i]->GetTypeName());
-    }
         
     return forceTypeNames;
 }
@@ -338,12 +346,11 @@ std::string ForceModel::GetForceTypeName(Integer index)
     StringArray typeList = GetForceTypeNames();
     
     if (index >= 0 && index < numForces)
-    {
         return typeList[index];
-    }
 
     return "UNDEFINED_FORCE_TYPE";
 }
+
 
 //------------------------------------------------------------------------------
 // void ClearSpacecraft()
@@ -353,15 +360,14 @@ void ForceModel::ClearSpacecraft()
     spacecraft.clear();
 }
 
+
 //------------------------------------------------------------------------------
 // PhysicalModel* GetForce(Integer index)
 //------------------------------------------------------------------------------
 PhysicalModel* ForceModel::GetForce(Integer index)
 {
     if (index >= 0 && index < numForces)
-    {
         return forceList[index];
-    }
     
     return NULL;
 }
@@ -378,15 +384,15 @@ PhysicalModel* ForceModel::GetForce(Integer index)
  * @return The pointer to that force instance.
  */
 //------------------------------------------------------------------------------
-const PhysicalModel* ForceModel::GetForce(std::string forcetype, Integer whichOne) const
+const PhysicalModel* ForceModel::GetForce(std::string forcetype, 
+                                          Integer whichOne) const
 {
-    std::vector<PhysicalModel *>::const_iterator force;
     Integer i = 0;
 
-    for (force = forceList.begin(); force != forceList.end(); force++) 
+    for (std::vector<PhysicalModel *>::const_iterator force = forceList.begin(); 
+         force != forceList.end(); ++force) 
     {
         std::string pmName = (*force)->GetTypeName();
-        
         if (pmName == forcetype) {
            if (whichOne <= i)
               return *force;
@@ -463,11 +469,12 @@ void ForceModel::UpdateSpaceObject(Real newEpoch)
             newepoch = newEpoch;
          
          (*sat)->SetRealParameter((*sat)->GetParameterID("Epoch"), newepoch);
-#if DEBUG_FORCEMODEL
-         MessageInterface::ShowMessage
-            ("ForceModel::UpdateSpacecraft() on \"%s\" prevElapsedTime=%f elapsedTime=%f "
-             "newepoch=%f\n", (*sat)->GetName().c_str(), prevElapsedTime, elapsedTime, newepoch);
-#endif
+         #ifdef DEBUG_FORCEMODEL_EXE
+             MessageInterface::ShowMessage
+                ("ForceModel::UpdateSpacecraft() on \"%s\" prevElapsedTime=%f "
+                 "elapsedTime=%f newepoch=%f\n", (*sat)->GetName().c_str(), 
+                 prevElapsedTime, elapsedTime, newepoch);
+         #endif
          if ((*sat)->GetType() == Gmat::FORMATION)
             ((Formation*)(*sat))->UpdateElements();
       }
@@ -516,11 +523,11 @@ void ForceModel::UpdateFromSpaceObject(void)
 //------------------------------------------------------------------------------
 void ForceModel::RevertSpaceObject(void)
 {
-#if DEBUG_FORCEMODEL
-   MessageInterface::ShowMessage
-      ("ForceModel::RevertSpacecraft() prevElapsedTime=%f elapsedTime=%f\n",
-       prevElapsedTime, elapsedTime);
-#endif
+   #ifdef DEBUG_FORCEMODEL_EXE
+      MessageInterface::ShowMessage
+         ("ForceModel::RevertSpacecraft() prevElapsedTime=%f elapsedTime=%f\n",
+          prevElapsedTime, elapsedTime);
+   #endif
    //loj: 7/1/04 elapsedTime = previousTime;
    elapsedTime = prevElapsedTime;
    memcpy(modelState, previousState, dimension*sizeof(Real)); 
@@ -536,108 +543,109 @@ void ForceModel::RevertSpaceObject(void)
 //------------------------------------------------------------------------------
 bool ForceModel::Initialize(void)
 {
-    Integer stateSize = 6;      // Will change if we integrate more variables
-    Integer satCount = 1;
-    std::vector<SpaceObject *>::iterator sat;
+   Integer stateSize = 6;      // Will change if we integrate more variables
+   Integer satCount = 1;
+   std::vector<SpaceObject *>::iterator sat;
 
-    if (spacecraft.size() > 0)
-        satCount = spacecraft.size();
+   if (spacecraft.size() > 0)
+      satCount = spacecraft.size();
     
-    PropState *state;
+   PropState *state;
+   StringArray finiteSats;
     
-    // Calculate the dimension of the state
-    dimension = 0;
-    for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
-    {
-       state = &((*sat)->GetState());
-       if ((*sat)->GetType() == Gmat::FORMATION)
-          ((Formation*)(*sat))->BuildState();
-       stateSize = state->GetDimension();
-       dimension += stateSize;
-    }
+   // Calculate the dimension of the state
+   dimension = 0;
+   for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
+   {
+      state = &((*sat)->GetState());
+      // Determine if there are any spacecraft that have thrusters turned on
+      if ((*sat)->IsManeuvering())
+         finiteSats.push_back((*sat)->GetName());
+      if ((*sat)->GetType() == Gmat::FORMATION)
+         ((Formation*)(*sat))->BuildState();
+      stateSize = state->GetDimension();
+      dimension += stateSize;  }
     
-    if (!PhysicalModel::Initialize())
-        return false;
+   if (!PhysicalModel::Initialize())
+      return false;
 
-    if (spacecraft.size() == 0) 
-    {
-        modelState[0] = 7000.0;
-        modelState[1] =    0.0;
-        modelState[2] = 1000.0;
-        modelState[3] =    0.0;
-        modelState[4] =    7.4;
-        modelState[5] =    0.0;
-    }
-    else 
-    {
-        Integer j = 0;
-        for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
-        {
-            state = &((*sat)->GetState());
-            stateSize = state->GetDimension();
-            memcpy(&modelState[j], state->GetState(), stateSize * sizeof(Real));
-            j += stateSize;
-        }
-    }
+   if (spacecraft.size() == 0) 
+   {
+      modelState[0] = 7000.0;
+      modelState[1] =    0.0;
+      modelState[2] = 1000.0;
+      modelState[3] =    0.0;
+      modelState[4] =    7.4;
+      modelState[5] =    0.0;
+   }
+   else 
+   {
+      Integer j = 0;
+      for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
+      {
+         state = &((*sat)->GetState());
+         stateSize = state->GetDimension();
+         memcpy(&modelState[j], state->GetState(), stateSize * sizeof(Real));
+         j += stateSize;
+      }
+   }
     
-    previousTime = 0.0;
-    previousState = new Real[dimension];
-    memcpy(previousState, modelState, dimension*sizeof(Real));
+   previousTime = 0.0;
+   if (previousState)
+      delete [] previousState;
+   previousState = new Real[dimension];
+   memcpy(previousState, modelState, dimension*sizeof(Real));
 
-//    DerivativeList *current = derivatives;  waw: 06/03/04
-    Integer cf = currentForce;
-    PhysicalModel *current = GetForce(cf);  // waw: added 06/04/04
-    PhysicalModel *currentPm;
+   UpdateTransientForces();
 
-    // Variables used to set spacecraft parameters
-    std::string parmName, stringParm;
-//    Real parm;
-    Integer i;
+   Integer cf = currentForce;
+   PhysicalModel *current = GetForce(cf);  // waw: added 06/04/04
+   PhysicalModel *currentPm;
 
-    while (current) 
-    {
-#if DEBUG_FORCEMODEL
-        std::string name, type;
-        name = current->GetName();
-        if (name == "")
-           name = "unnamed";
-        type = current->GetTypeName();
-        MessageInterface::ShowMessage
-           ("ForceModel::Initialize() initializing object %s of type %s\n",
-            name.c_str(), type.c_str());
-#endif
-//        currentPm = current->GetDerivative();  waw: 06/03/04
-        currentPm = current;  // waw: added 06/04/04 
-        currentPm->SetDimension(dimension);
-        currentPm->SetSolarSystem(solarSystem);
+   // Variables used to set spacecraft parameters
+   std::string parmName, stringParm;
+   Integer i;
 
-        // Initialize the forces
-        if (!currentPm->Initialize()) 
-        {
-           std::string msg = "Component force ";
-           msg += currentPm->GetTypeName();
-           msg += " failed to initialize";
-           throw ForceModelException(msg.c_str());
-        }
-        currentPm->SetState(modelState);
+   while (current) 
+   {
+      #ifdef DEBUG_FORCEMODEL_INIT
+         std::string name, type;
+         name = current->GetName();
+         if (name == "")
+            name = "unnamed";
+         type = current->GetTypeName();
+         MessageInterface::ShowMessage
+            ("ForceModel::Initialize() initializing object %s of type %s\n",
+             name.c_str(), type.c_str());
+      #endif
+      currentPm = current;  // waw: added 06/04/04 
+      currentPm->SetDimension(dimension);
+      currentPm->SetSolarSystem(solarSystem);
 
-        // Set spacecraft parameters for forces that need them
-        i = 0;
-        for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
-        {
-           i = SetupSpacecraftData(*sat, currentPm, i);
-           ++i;
-        }
+      // Initialize the forces
+      if (!currentPm->Initialize()) 
+      {
+         std::string msg = "Component force ";
+         msg += currentPm->GetTypeName();
+         msg += " failed to initialize";
+         throw ForceModelException(msg);
+      }
+      currentPm->SetState(modelState);
+
+      // Set spacecraft parameters for forces that need them
+      i = 0;
+      for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
+      {
+         i = SetupSpacecraftData(*sat, currentPm, i);
+         ++i;
+      }
         
-        // current = current->Next(); waw: 06/04/04
-        // waw: added 06/04/04
-        cf++;
-        current = GetForce(cf);
-    }
+      cf++;
+      current = GetForce(cf);
+   }
 
-    return true;
+   return true;
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -668,6 +676,33 @@ void ForceModel::UpdateInitialData()
       }
       cf++;
       current = GetForce(cf);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateTransientForces()
+//------------------------------------------------------------------------------
+/**
+ * Tells the transient forces in the model about the propagated SpaceObjects.
+ * 
+ * In GMAT, a "transient force" is a force that is applied based on state 
+ * changes made to the elements that are propagated during a run.  In otehr 
+ * words, a transient force is a force that gets applied when needed, but not
+ * typically throughout the mission.  An example is a finite burn: the 
+ * acceleration for a finite burn is calculated and applied only when a 
+ * spacecraft has a thruster that has been turned on.
+ * 
+ * @param transientSats The list of spacecraft that report active transient forces. 
+ */
+//------------------------------------------------------------------------------
+void ForceModel::UpdateTransientForces()
+{
+   for (std::vector<PhysicalModel *>::iterator tf = forceList.begin(); 
+        tf != forceList.end(); ++tf) {
+      if ((*tf)->IsTransient())
+         (*tf)->SetPropList(&spacecraft);
+         
    }
 }
 
@@ -781,13 +816,6 @@ Integer ForceModel::SetupSpacecraftData(GmatBase *sat, PhysicalModel *pm,
 void ForceModel::IncrementTime(Real dt)
 {
     PhysicalModel::IncrementTime(dt);
-// waw: 06/03/04
-//    DerivativeList *current = derivatives;
-//    while (current) 
-//    {
-//        current->GetDerivative()->IncrementTime(dt);
-//        current = current->Next();
-//    }
 }
 
 //------------------------------------------------------------------------------
@@ -796,14 +824,6 @@ void ForceModel::IncrementTime(Real dt)
 void ForceModel::SetTime(Real t)
 {
     PhysicalModel::SetTime(t);
-// waw: 06/03/04
-//    DerivativeList *current = derivatives;
-//
-//    while (current) 
-//    {
-//        current->GetDerivative()->SetTime(t);
-//        current = current->Next();
-//    }
 }
 
 //------------------------------------------------------------------------------
@@ -814,8 +834,6 @@ void ForceModel::SetTime(Real t)
  * 
  * This method applies superposition of forces in order to calculate the total
  * acceleration applied to the state vector.
- * 
- * NOTE: GetDerivatives is not yet implemented.
  * 
  * @param    state   The current state vector
  * @param    dt      The current time interval from epoch
@@ -831,10 +849,11 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
       
    Integer satCount = dimension / stateSize, i, iOffset;
 
-#if DEBUG_FORCEMODEL
-         MessageInterface::ShowMessage("  Input state = %le %le %le %le %le %le\n",
-            state[0], state[1], state[2], state[3], state[4], state[5]);
-#endif
+   #ifdef DEBUG_FORCEMODEL_EXE
+       MessageInterface::ShowMessage(
+          "  Input state = %le %le %le %le %le %le\n", state[0], state[1], 
+          state[2], state[3], state[4], state[5]);
+   #endif
     
    // Initialize the derivative array
    for (i = 0; i < satCount; ++i) {
@@ -853,29 +872,23 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
       }
    }
    
-   // waw: 06/03/04
-   //    DerivativeList *current = derivatives;
-   // waw: added 06/04/04
    Integer cf = currentForce;
    PhysicalModel *current = GetForce(cf);  
 
    const Real * ddt;
    while (current) 
    {
-      // waw: 06/04/04
-      //ddt = current->GetDerivative()->GetDerivativeArray();
-//      ddt = GetForce(cf)->GetDerivativeArray();
       ddt = current->GetDerivativeArray();
-      //if (!current->GetDerivative()->GetDerivatives(state, dt, order)) 
       if (!current->GetDerivatives(state, dt, order))
          return false;
 
-#if DEBUG_FORCEMODEL
+      #ifdef DEBUG_FORCEMODEL_EXE
          MessageInterface::ShowMessage("  ddt(%s[%s]) = %le %le %le\n",
             (current->GetTypeName().c_str()), 
-            (current->GetStringParameter(current->GetParameterID("BodyName"))).c_str(), 
+            (current->GetStringParameter(
+               current->GetParameterID("BodyName"))).c_str(), 
             ddt[3], ddt[4], ddt[5]);
-#endif
+      #endif
 
       for (i = 0; i < satCount; ++i) {
          iOffset = i*stateSize;
@@ -891,19 +904,17 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
             deriv[iOffset+1] += ddt[iOffset+1];
             deriv[iOffset+2] += ddt[iOffset+2];
          }
-         //current = current->Next(); waw: 06/04/04
-         // waw: added 06/04/04
-#if DEBUG_FORCEMODEL
-         MessageInterface::ShowMessage("  deriv = %le %le %le\n", deriv[3], 
-                                       deriv[4], deriv[5]);
-#endif
+         #ifdef DEBUG_FORCEMODEL_EXE
+            MessageInterface::ShowMessage("  deriv = %le %le %le\n", deriv[3], 
+                                          deriv[4], deriv[5]);
+         #endif
       }
       cf++;
       current = GetForce(cf);
    }
-#if DEBUG_FORCEMODEL
-   MessageInterface::ShowMessage("  ===============================\n");
-#endif
+   #ifdef DEBUG_FORCEMODEL_EXE
+      MessageInterface::ShowMessage("  ===============================\n");
+   #endif
 
    return true;
 }
@@ -1102,16 +1113,6 @@ std::string ForceModel::GetStringParameter(const Integer id) const
 {
     switch (id)
     {
-//    case POINT_MASS:
-//        //loj: what should we return here?
-//        return "PointMassForce";
-//    case FULL_FIELD:
-//        return "TBD-FullFieldForce";
-//    case DRAG:
-//        return "TBD-DragForce";
-//    case MAG_FIELD:
-//        return "TBD-MagFieldForce";
-    // DJC: 06/16/04 Updated for scripting
     case CENTRAL_BODY:
        return "Earth";
     case  DRAG:
@@ -1153,30 +1154,6 @@ bool ForceModel::SetStringParameter(const Integer id, const std::string &value)
 {
     switch (id)
     {
-//    case POINT_MASS:
-//        {
-//            PhysicalModel *pmf = new PointMassForce();
-//            if (pmf != NULL)
-//            {
-//                if (pmf->SetStringParameter("Body", value))
-//                {
-//                    AddForce(pmf);
-//                    return true;
-//                }
-//            }
-//            return false;
-//        }
-//    case FULL_FIELD:
-//        // build 3
-//        return false;
-//    case DRAG:
-//        // build 3
-//        return false;
-//    case MAG_FIELD:
-//        // build 3
-//        return false;
-
-    // DJC: 06/16/04 Updated for scripting
     case CENTRAL_BODY:
        centralBodyName = value;
        bodyName = centralBodyName;
@@ -1210,15 +1187,9 @@ const StringArray& ForceModel::GetStringArrayParameter(const Integer id) const
 {
     switch (id)
     {
-//    case FORCE_LIST:
-//        return forceTypeNames;
     case PRIMARY_BODIES:
        return BuildBodyList("GravityField");
     case POINT_MASSES:
-//       sar.clear();
-//       sar.push_back("Sun");
-//       sar.push_back("Moon");
-//       return sar;
        return BuildBodyList("PointMassForce");
     default:
         return PhysicalModel::GetStringArrayParameter(id);
@@ -1329,7 +1300,8 @@ GmatBase* ForceModel::GetRefObject(const Gmat::ObjectType type,
                                    const std::string &name)
 {
    if (type != Gmat::PHYSICAL_MODEL)
-       throw ForceModelException("Only forces are accessed in ForceModel::GetRefObject");
+       throw ForceModelException(
+          "Only forces are accessed in ForceModel::GetRefObject");
    
    // Run through list of forces, adding body names for GravityField instances
    std::vector<PhysicalModel*>::const_iterator i;
@@ -1370,7 +1342,8 @@ GmatBase* ForceModel::GetRefObject(const Gmat::ObjectType type,
                                    const std::string &name, const Integer index)
 {
    if (type != Gmat::PHYSICAL_MODEL)
-       throw ForceModelException("Only forces are accessed in ForceModel::GetRefObject");
+       throw ForceModelException(
+          "Only forces are accessed in ForceModel::GetRefObject");
    
    // Run through list of forces, adding body names for GravityField instances
    std::vector<PhysicalModel*>::const_iterator i;

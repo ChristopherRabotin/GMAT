@@ -57,7 +57,6 @@
 
 #include "PhysicalModel.hpp"
 //#include "DerivativeList.hpp"
-#include "Spacecraft.hpp"
 #include "MessageInterface.hpp"
 #include "gmatdefs.hpp"
 
@@ -76,6 +75,7 @@ public:
 
     void AddForce(PhysicalModel *pPhyscialModel);
     void DeleteForce(const std::string &name);
+    void DeleteForce(PhysicalModel *pPhyscialModel);
     bool HasForce(const std::string &name);
     Integer GetNumForces();
     StringArray& GetForceTypeNames(); //loj: 3/4/04 added
@@ -139,6 +139,7 @@ protected:
     
     /// List of spacecraft and formations that get propagated
     std::vector<SpaceObject *> spacecraft;
+
     StringArray forceTypeNames;
     std::vector<PhysicalModel *> forceList; //loj: 2/11/04 added
     
@@ -146,7 +147,10 @@ protected:
     Real previousTime;
     /// Buffer that allows quick reversion to the previous state
     Real *previousState;
+    /// ???
     Real estimationMethod;
+    /// List of transient forces that need removal before reusing this instance 
+    StringArray               transientForceNames;
     
     std::string centralBodyName;
     /// Mapping between script descriptions and force names.
@@ -155,6 +159,7 @@ protected:
     const StringArray&        BuildBodyList(std::string type) const;
     virtual Integer           SetupSpacecraftData(GmatBase *sat, 
                                                   PhysicalModel *pm, Integer i);
+    void                      UpdateTransientForces();
 
     enum
     {
