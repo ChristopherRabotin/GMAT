@@ -25,6 +25,7 @@
 #ifndef CelestialBody_hpp
 #define CelestialBody_hpp
 
+#include <math.h>
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "A1Mjd.hpp"
@@ -55,7 +56,7 @@ namespace Gmat  // do all of these things exist somewhere else already?
    // if using an analytical method, which one?
    enum AnalyticMethod
    {
-      NONE = 0,
+      NO_ANALYTIC_METHOD = 0,
       TWO_BODY,
       EARTH_ANALYTIC,
       MOON_ANALYTIC,
@@ -112,8 +113,8 @@ public:
    virtual Gmat::PosVelSource   GetPosVelSource() const;
    virtual Gmat::AnalyticMethod GetAnalyticMethod() const;
    virtual bool                 GetUsePotentialFile() const;
-   virtual Real*                GetAngularVelocity();
-   virtual Real                 GetHourAngle() const;            // const??  -> do I need a time here?
+   virtual Real*                GetAngularVelocity();             // rad/sec
+   virtual Real                 GetHourAngle(Real offset);        // radians
    virtual Rmatrix              GetHarmonicCoefficientsSij(); // const??
    virtual Rmatrix              GetHarmonicCoefficientsCij(); // const??
    virtual const StringArray&   GetSupportedAtmospheres() const;

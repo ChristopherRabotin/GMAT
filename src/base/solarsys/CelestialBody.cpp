@@ -11,6 +11,8 @@
  * Implementation of the CelestialBody class.
  *
  * @note This is an abstract class.
+ *
+ * @note GetHourAngle currently only handles Earth data.
  */
 //------------------------------------------------------------------------------
 
@@ -20,6 +22,7 @@
 #include "gmatdefs.hpp"
 #include "CelestialBody.hpp"
 #include "PlanetaryEphem.hpp"
+#include "SolarSystemException.hpp"
 #include "PlanetaryEphemException.hpp"
 #include "Rvector6.hpp"
 #include "AtmosphereManager.hpp"
@@ -387,8 +390,9 @@ CelestialBody::~CelestialBody()
 const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
 {
    Real*     posVel;
-  // RealArray rArray(6,0.0);
-   switch (posVelSrc) {
+   Integer   itsBodyNumber;
+   switch (posVelSrc)
+   {
       case Gmat::SLP :
       case Gmat::DE_102 :
       case Gmat::DE_200 :
@@ -399,12 +403,32 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
          if (!theSourceFile)
          {
             throw PlanetaryEphemException(
-                           "SLP or DE file requested, but no file specified");
+                  "SLP or DE file requested, but no file specified");
          }
-         posVel = theSourceFile->GetPosVel(bodyNumber,atTime);
+         // figure out the ID of the body
+         itsBodyNumber = theSourceFile->GetBodyID(instanceName);
+         posVel        = theSourceFile->GetPosVel(itsBodyNumber,atTime);
          break;
       case Gmat::ANALYTIC :
-      case Gmat::EPHEMERIS :
+         switch (analyticMethod)
+         {
+            case Gmat::NO_ANALYTIC_METHOD :
+               throw SolarSystemException("No analytic method specified for body " +
+                                          instanceName);
+            case Gmat::TWO_BODY :
+               // call the two body stuff here ...........
+               break;
+            case Gmat::EARTH_ANALYTIC :
+               // call the earth analytic stuff here ....... but what is it?
+               break;
+            case Gmat::MOON_ANALYTIC :
+               // call the moon analytic stuff here ........ but what is it?
+               break;
+            case Gmat::NUM_ANALYTIC :
+               // call the num analytic stuff here ......... but what is it?
+               break;
+         }
+      case Gmat::EPHEMERIS :  // what is this anyway?????
          break; // other cases later <<<<<<<<<<<<<<<<
    }
    stateTime  = atTime;
@@ -414,15 +438,6 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
    state.SetElement(3,posVel[3]);
    state.SetElement(4,posVel[4]);
    state.SetElement(5,posVel[5]);
-   //rArray[0]  = posVel[0];
-   //rArray[1]  = posVel[1];
-   //rArray[2]  = posVel[2];
-   //rArray[3]  = posVel[3];
-   //rArray[4]  = posVel[4];
-   //rArray[5]  = posVel[5];
-   //state      = rArray;
-
-   //return rArray;
    return state;
 }
 
@@ -586,11 +601,14 @@ bool CelestialBody::GetUsePotentialFile() const
 //------------------------------------------------------------------------------
 Real* CelestialBody::GetAngularVelocity() 
 {
-   return angularVelocity;  // but how do I compute it???????
+   angularVelocity[0] = 0.0;
+   angularVelocity[1] = 0.0;
+   angularVelocity[2] = 7.29211585530e-5;
+   return angularVelocity; 
 }
 
 //------------------------------------------------------------------------------
-//  Real CelestialBody::GetHourAngle() const
+//  Real CelestialBody::GetHourAngle()
 //------------------------------------------------------------------------------
 /**
  * This method returns the hour angle for the body.
@@ -599,9 +617,34 @@ Real* CelestialBody::GetAngularVelocity()
  *
  */
 //------------------------------------------------------------------------------
-Real  CelestialBody:: GetHourAngle() const            // const??
+// *** File Name : utilityfuncts.cpp
+// *** Created   : February 7, 2003
+// **************************************************************************
+// ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)     ***
+// ***  For:  Flight Dynamics Analysis Branch (Code 572)                  ***
+// ***  Under Contract:  P.O.  GSFC S-67521-G                             ***
+// ***  Copyright U.S. Government 2003                                    ***
+// ***                                                                    ***
+// ***  Header Version: July 12, 2002                                     ***
+// **************************************************************************
+// Module Type               : ANSI C/C++ Source
+// Development Environment   : Borland C++ 5.02
+// Modification History      : 2/7/2003 - D. Conway, Thinking Systems, Inc.
+//                             Original delivery
+// **************************************************************************
+Real  CelestialBody:: GetHourAngle(Real offset) 
 {
-   return hourAngle;       // but how do I compute it?????????
+   Real ghaEpoch = (/*epoch +*/ offset - 21545.5) / 100.0, gha;
+
+   gha = fmod(100.4606184 + ghaEpoch * (36000.770053610 +
+                                        ghaEpoch * (0.000387930 + ghaEpoch * -0.000000026)), 360.0);
+
+   if (gha < 0.0)
+      gha += 360.0;
+
+   //return gha;
+   hourAngle = gha  * M_PI / 180.0;       // wcs - convert to radians
+   return hourAngle; 
 }
 
 //------------------------------------------------------------------------------
