@@ -126,8 +126,8 @@ public:
     virtual bool Initialize(void);
 
     virtual Integer GetDimension(void);
-    virtual Real * GetState(void);
-    const Real * GetDerivativeArray(void);
+    virtual Real *  GetState(void);
+    const Real *    GetDerivativeArray(void);
 
     virtual void SetDimension(Integer);
     virtual void SetState(const Real * st);
