@@ -11,7 +11,10 @@
 #ifndef h_MatlabInterface_h
 #define h_MatlabInterface_h
 
+#if defined __USE_MATLAB__
 #include "engine.h"      // for Matlab Engine
+#endif
+
 #include <string>
 
 class MatlabInterface
@@ -32,9 +35,11 @@ private:
 MatlabInterface();
 ~MatlabInterface();
 
+#if defined __USE_MATLAB__
 static Engine *enginePtrD;
 static mxArray *mxArrayInputPtrD;
 static mxArray *mxArrayOutputPtrD;
+#endif
 
 };
 

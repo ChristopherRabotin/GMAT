@@ -10,15 +10,20 @@
 //------------------------------------------------------------------------------
 #include <stdlib.h>         // for NULL
 #include <string.h>         // for memcpy()
+#if defined __USE_MATLAB__
 #include "engine.h"         // for Engine
+#endif
+
 #include "MatlabInterface.hpp" // for MatlabInterface methods
 
 //--------------------------------------
 //  initialize static variables
 //--------------------------------------
+#if defined __USE_MATLAB__
 Engine* MatlabInterface::enginePtrD = 0;
 mxArray* MatlabInterface::mxArrayInputPtrD = 0;
 mxArray* MatlabInterface::mxArrayOutputPtrD = 0;
+#endif
 
 //--------------------------------------
 //  public functions
@@ -35,11 +40,15 @@ mxArray* MatlabInterface::mxArrayOutputPtrD = 0;
 //------------------------------------------------------------------------------
 int MatlabInterface::Open()
 {
+#if defined __USE_MATLAB__
+
    if ((enginePtrD = engOpen(NULL)))
       return 1;
    else
       return 0;
-   
+#endif
+
+   return 0;
 } // end Open()
 
 //------------------------------------------------------------------------------
@@ -53,11 +62,13 @@ int MatlabInterface::Open()
 //------------------------------------------------------------------------------
 int MatlabInterface::IsOpen()
 {
+#if defined __USE_MATLAB__
    if (enginePtrD != NULL)
       return 1;
    else
       return 0;
-
+#endif
+   return 0;
 } // end Open()
 
 //------------------------------------------------------------------------------
@@ -71,9 +82,11 @@ int MatlabInterface::IsOpen()
 //------------------------------------------------------------------------------
 int MatlabInterface::Close()
 {
+#if defined __USE_MATLAB__
    engClose(enginePtrD);
+#endif
    return 1;
-   
+
 } // end Close()
 
 
@@ -89,6 +102,8 @@ int MatlabInterface::Close()
 int MatlabInterface::PutVariable(const std::string &matlabVarName, int numElements,
                         double inArray[])
 {
+#if defined __USE_MATLAB__
+
    // create a matlab variable
    mxArrayInputPtrD = mxCreateDoubleMatrix(1, numElements, mxREAL);
 
@@ -97,6 +112,7 @@ int MatlabInterface::PutVariable(const std::string &matlabVarName, int numElemen
    // place the variable mxArrayInputPtrD into the MATLAB workspace
    engPutVariable(enginePtrD, matlabVarName.c_str(), mxArrayInputPtrD);
 //   engPutArray(enginePtrD, mxArrayInputPtrD);
+#endif
 
    return 1;
    
@@ -115,6 +131,7 @@ int MatlabInterface::PutVariable(const std::string &matlabVarName, int numElemen
 int MatlabInterface::GetVariable(const std::string &matlabVarName, int numElements,
                            double outArray[])
 {
+#if defined __USE_MATLAB__
 //   int i;
    mxArrayOutputPtrD = NULL;
    
@@ -135,6 +152,9 @@ int MatlabInterface::GetVariable(const std::string &matlabVarName, int numElemen
       mxDestroyArray(mxArrayOutputPtrD);
       return 1;
    }
+#endif
+
+   return 0;
 } // end GetVariable()
 
 
@@ -149,9 +169,12 @@ int MatlabInterface::GetVariable(const std::string &matlabVarName, int numElemen
 //------------------------------------------------------------------------------
 int MatlabInterface::EvalString(const std::string &evalString)
 {
+#if defined __USE_MATLAB__
 //   printf("MatlabInterface::EvalString() evalString = %s\n", evalString.c_str());
    engEvalString(enginePtrD, evalString.c_str());
    return 1;
+#endif
+   return 0;
 }
 
 
@@ -166,6 +189,7 @@ int MatlabInterface::EvalString(const std::string &evalString)
 //------------------------------------------------------------------------------
 int MatlabInterface::OutputBuffer(char *buffer, int size)
 {
+#if defined __USE_MATLAB__
    if (buffer == NULL)
    {
       printf("MatlabInterface::OutputBuffer(): buffer is NULL\n");
@@ -176,6 +200,8 @@ int MatlabInterface::OutputBuffer(char *buffer, int size)
       engOutputBuffer(enginePtrD, buffer, size);
       return 1;
    }
+#endif
+   return 0;
 }
 
 

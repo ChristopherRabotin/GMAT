@@ -795,7 +795,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    else if (dataType == GmatTree::MATLAB_FUNCT_FOLDER)
    {
       menu.Append(POPUP_ADD_MATLAB_FUNCT, wxT("Add MATLAB Function"));
-#if __USE_MATLAB__
+#if defined __USE_MATLAB__
       menu.Enable(POPUP_ADD_MATLAB_FUNCT, TRUE);
 #else
       menu.Enable(POPUP_ADD_MATLAB_FUNCT, FALSE);
