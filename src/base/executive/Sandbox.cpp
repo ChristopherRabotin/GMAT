@@ -25,12 +25,15 @@
 #include "FiniteThrust.hpp"
 #include "MessageInterface.hpp"
 
+#include <algorithm>       // for find
+
 //#define DEBUG_SANDBOX_OBJ 1
 //#define DEBUG_SANDBOX_INIT 2
 //#define DEBUG_SANDBOX_RUN 1
+//#define DEBUG_SANDBOX_OBJECT_MAPS
 
 //------------------------------------------------------------------------------
-// Sandbox::Sandbox(void)
+// Sandbox::Sandbox()
 //------------------------------------------------------------------------------
 Sandbox::Sandbox() :
    solarSys        (NULL),
@@ -41,11 +44,41 @@ Sandbox::Sandbox() :
    moderator       (NULL),
    state           (IDLE)
 {
+   clonable.push_back(Gmat::SPACECRAFT);
+   clonable.push_back(Gmat::FORMATION);
+//   clonable.push_back(Gmat::SPACEOBJECT);
+//   clonable.push_back(Gmat::GROUND_STATION);
+//   clonable.push_back(Gmat::BURN);
+//   clonable.push_back(Gmat::COMMAND);
+//   clonable.push_back(Gmat::PROPAGATOR);
+//   clonable.push_back(Gmat::FORCE_MODEL);
+//   clonable.push_back(Gmat::PHYSICAL_MODEL);
+//   clonable.push_back(Gmat::TRANSIENT_FORCE);
+//   clonable.push_back(Gmat::INTERPOLATOR);
+//   clonable.push_back(Gmat::SOLAR_SYSTEM);
+//   clonable.push_back(Gmat::SPACE_POINT);
+//   clonable.push_back(Gmat::CELESTIAL_BODY);
+//   clonable.push_back(Gmat::CALCULATED_POINT);
+//   clonable.push_back(Gmat::LIBRATION_POINT);
+//   clonable.push_back(Gmat::BARYCENTER);
+//   clonable.push_back(Gmat::ATMOSPHERE);
+//   clonable.push_back(Gmat::PARAMETER);
+//   clonable.push_back(Gmat::STOP_CONDITION);
+//   clonable.push_back(Gmat::SOLVER);
+//   clonable.push_back(Gmat::SUBSCRIBER);
+//   clonable.push_back(Gmat::PROP_SETUP);
+//   clonable.push_back(Gmat::REF_FRAME);
+//   clonable.push_back(Gmat::FUNCTION);
+//   clonable.push_back(Gmat::FUEL_TANK);
+//   clonable.push_back(Gmat::THRUSTER);
+//   clonable.push_back(Gmat::HARDWARE);
+//   clonable.push_back(Gmat::COORDINATE_SYSTEM);
+//   clonable.push_back(Gmat::AXIS_SYSTEM);
 }
 
 
 //------------------------------------------------------------------------------
-// ~Sandbox(void)
+// ~Sandbox()
 //------------------------------------------------------------------------------
 Sandbox::~Sandbox()
 {
@@ -64,11 +97,11 @@ Sandbox::~Sandbox()
 //------------------------------------------------------------------------------
 bool Sandbox::AddObject(GmatBase *obj)
 {
-#if DEBUG_SANDBOX_OBJ
-   MessageInterface::ShowMessage
-      ("Sandbox::AddObject() objTypeName=%s, objName=%s\n",
-       obj->GetTypeName().c_str(), obj->GetName().c_str());
-#endif
+   #if DEBUG_SANDBOX_OBJ
+      MessageInterface::ShowMessage
+         ("Sandbox::AddObject() objTypeName=%s, objName=%s\n",
+          obj->GetTypeName().c_str(), obj->GetName().c_str());
+   #endif
    
    if (state == INITIALIZED)
       state = IDLE;
@@ -81,13 +114,18 @@ bool Sandbox::AddObject(GmatBase *obj)
    if (objectMap.find(name) == objectMap.end())
    {
       // If not, store the new object pointer
-      /// @todo Replace copy c'tor call with Clone() -- Build 3 issue
-      if ((obj->GetType() == Gmat::SPACECRAFT) ||
-          (obj->GetType() == Gmat::FORMATION))
+      if (find(clonable.begin(), clonable.end(), obj->GetType()) !=
+             clonable.end())
       {
+         #ifdef DEBUG_SANDBOX_OBJECT_MAPS
+            MessageInterface::ShowMessage(
+               "Cloning object %s of type %s\n", obj->GetName().c_str(),
+               obj->GetTypeName().c_str());
+         #endif
+         
          objectMap[name] = obj->Clone();
          
-         if(obj->GetType() == Gmat::SPACECRAFT)
+         if (obj->GetType() == Gmat::SPACECRAFT)
          {
             if (solarSys)
                ((Spacecraft*)(obj))->SetSolarSystem(solarSys);
@@ -140,8 +178,9 @@ bool Sandbox::AddSolarSystem(SolarSystem *ss)
       state = IDLE;
    if (!ss)
       return false;
-//   solarSys = (SolarSystem*)(ss->Clone());
-   solarSys = ss;
+
+   solarSys = (SolarSystem*)(ss->Clone());
+//   solarSys = ss;
    return true;
 }
 
@@ -449,7 +488,7 @@ bool Sandbox::Initialize()
 
 
 //------------------------------------------------------------------------------
-// bool Execute(void)
+// bool Execute()
 //------------------------------------------------------------------------------
 bool Sandbox::Execute()
 {
@@ -511,7 +550,7 @@ bool Sandbox::Execute()
 
 
 //------------------------------------------------------------------------------
-// bool Interrupt(void)
+// bool Interrupt()
 //------------------------------------------------------------------------------
 bool Sandbox::Interrupt()
 {
@@ -543,7 +582,7 @@ bool Sandbox::Interrupt()
 
 
 //------------------------------------------------------------------------------
-// void Clear(void)
+// void Clear()
 //------------------------------------------------------------------------------
 void Sandbox::Clear()
 {
@@ -557,16 +596,35 @@ void Sandbox::Clear()
     
    // Delete the clones (currently only Spacecraft and Formations get cloned)
    std::map<std::string, GmatBase *>::iterator omi;
+   
+   #ifdef DEBUG_SANDBOX_OBJECT_MAPS
+      MessageInterface::ShowMessage("Sandbox OMI List\n");
+      for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
+      {
+         MessageInterface::ShowMessage("   %s", (omi->first).c_str());
+         MessageInterface::ShowMessage(" of type %s\n",
+            (omi->second)->GetTypeName().c_str());
+      }
+   #endif
+
    for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
    {
 //      if ((omi->second)->GetType() == Gmat::SUBSCRIBER)
 //         publisher->Unsubscribe((Subscriber*)(omi->second));
-      if (   ((omi->second)->GetType() == Gmat::SPACECRAFT)
-          || ((omi->second)->GetType() == Gmat::FORMATION)
-//          || ((omi->second)->GetType() == Gmat::SUBSCRIBER)
-         )
+      #ifdef DEBUG_SANDBOX_OBJECT_MAPS
+         MessageInterface::ShowMessage("Sandbox clearing %s\n",
+            (omi->first).c_str());
+      #endif
+      
+      if (find(clonable.begin(), clonable.end(),
+          (omi->second)->GetType()) != clonable.end())
+      {
          delete omi->second;
+      }
    }
+   
+   if (solarSys != NULL)
+      delete solarSys;
    
    objectMap.clear();
    

@@ -101,6 +101,9 @@ private:
    Sandbox& operator=(const Sandbox&);
    
    void                                BuildAssociations(GmatBase * obj);
+   
+   /// Temporary construct used until cloning is correct for all objects
+   std::vector<Gmat::ObjectType>       clonable;
 };
 
 #endif
