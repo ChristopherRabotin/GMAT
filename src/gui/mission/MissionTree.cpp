@@ -12,8 +12,14 @@
  * This class provides the tree for missions.
  */
 //------------------------------------------------------------------------------
-#include "MissionTree.hpp"
+#include "gmatwxdefs.hpp"
 #include "bitmaps/file.xpm"
+
+#include "GuiInterpreter.hpp"
+#include "GmatAppData.hpp"
+#include "MissionTree.hpp"
+#include "MessageInterface.hpp"
+#include "Command.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -69,6 +75,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
               const wxPoint &pos, const wxSize &size, long style)
               :DecoratedTree(parent, id, pos, size, style)
 {
+    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
     this->parent = parent;
 //    this->SetNodes();
     this->SetParameter(BOXCOUNT, 2);
@@ -212,15 +219,15 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
 
     wxMenu *menuAddBefore = new wxMenu;;
     
-    menuAddBefore->Append(POPUP_ADD_BEFORE_MANEUVER, wxT("Maneuver"), wxT(""), FALSE);
-    menuAddBefore->Append(POPUP_ADD_BEFORE_PROPAGATE, wxT("Propagate"), wxT(""), FALSE);
-    menuAddBefore->Append(POPUP_ADD_BEFORE_TARGET, wxT("Target"), wxT(""), FALSE);
+    menuAddBefore->Append(POPUP_ADD_MANEUVER_BEFORE, wxT("Maneuver"), wxT(""), FALSE);
+    menuAddBefore->Append(POPUP_ADD_PROPAGATE_BEFORE, wxT("Propagate"), wxT(""), FALSE);
+    menuAddBefore->Append(POPUP_ADD_TARGET_BEFORE, wxT("Target"), wxT(""), FALSE);
 
     wxMenu *menuAddAfter = new wxMenu;;
     
-    menuAddAfter->Append(POPUP_ADD_AFTER_MANEUVER, wxT("Maneuver"), wxT(""), FALSE);
-    menuAddAfter->Append(POPUP_ADD_AFTER_PROPAGATE, wxT("Propagate"), wxT(""), FALSE);
-    menuAddAfter->Append(POPUP_ADD_AFTER_TARGET, wxT("Target"), wxT(""), FALSE);
+    menuAddAfter->Append(POPUP_ADD_MANEUVER_AFTER, wxT("Maneuver"), wxT(""), FALSE);
+    menuAddAfter->Append(POPUP_ADD_PROPAGATE_AFTER, wxT("Propagate"), wxT(""), FALSE);
+    menuAddAfter->Append(POPUP_ADD_TARGET_AFTER, wxT("Target"), wxT(""), FALSE);
 
     menu->Append(POPUP_ADD_BEFORE, wxT("Insert Before"), menuAddBefore, wxT(""));
     menu->Append(POPUP_ADD_AFTER, wxT("Insert After"), menuAddAfter, wxT(""));
@@ -313,20 +320,21 @@ void MissionTree::OnAddTargetAfter(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void AddManeuver(wxCommandEvent &event)
 //------------------------------------------------------------------------------
-void MissionTree::AddManeuver(wxCommandEvent &event)
+void MissionTree::AddManeuver()
 {
   wxTreeItemId item = GetSelection();
   
   wxString withName;
   withName.Printf("Maneuver%d", numManeuver++);
   
-  Burn *theBurn = theGuiInterpreter->CreateBurn("ImpulsiveBurn", (const std::string) withName);
+/*  Command *theManeuver = theGuiInterpreter->
+                  CreateCommand((const std::string) withName);
 
-  wxString newName = wxT(theBurn->GetName().c_str());
+  wxString newName = wxT(theManeuver->GetName().c_str());
   
   this->AppendItem(item, newName, -1, -1,
               new GmatTreeItemData(newName, MANEUVER_COMMAND));
-
+*/
 }
 
 

@@ -22,6 +22,7 @@
 #include "wx/imaglist.h"
 
 #include "DecoratedTree.hpp"
+#include "GuiInterpreter.hpp"
 #include "GmatMainNotebook.hpp"
 
 class MissionTree : public DecoratedTree
@@ -37,6 +38,7 @@ public:
 protected:
 
 private:
+   GuiInterpreter *theGuiInterpreter;
    GmatMainNotebook *mainNotebook;
    wxWindow *parent;
    bool before;
