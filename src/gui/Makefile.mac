@@ -1,0 +1,15 @@
+# Project:    GMAT
+# Module:     Makefile.mac for gui directory 
+# Created:    Joey Gurgnaus 
+# Date:       2004/02/13
+#
+#
+SUBS = app burn foundation forcemodel maneuver mission plot propagator \
+	solarsys solver spacecraft view
+
+# Holding 'resource' directory for later
+
+all clean bare:
+	-X=`pwd`; \
+	for i in $(SUBS); \
+	do echo '<<<' $$i '>>>'; cd $$X/$$i; ${MAKE} -f Makefile.mac $@; done

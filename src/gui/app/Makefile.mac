@@ -1,0 +1,18 @@
+# Project:    GMAT
+# Module:     Makefile.mac for app directory 
+# Created:    Joey Gurgnaus 
+# Date:       2004/02/13
+#
+#
+# Define the marco for the top-level directories
+PROJECT_ROOT    = ../..
+#
+# Source file for creating new library 
+SRC = GmatApp.cpp GmatMainNotebook.cpp GmatAppData.cpp GmatMainFrame.cpp \
+	GmatNotebook.cpp GmatSplitterWindow.cpp GmatTreeItemData.cpp \
+	MissionTreeItemData.cpp ResourceTree.cpp
+#
+# Define macro for using the included file 
+INCMK = $(PROJECT_ROOT)/gui/inc.mac
+include ${INCMK}
+#

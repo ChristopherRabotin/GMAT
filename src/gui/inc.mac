@@ -1,0 +1,90 @@
+# Project:    GMAT
+# Module:     inc.mac for gui directory 
+# Created:    Joey Gurgnaus 
+# Date:       2004/02/13
+
+# Program to make (library)
+LIBDIR = $(PROJECT_ROOT)/lib
+LIB = $(LIBDIR)/libgmatgui.a
+WXBASE = ${WX_HOME}
+
+# Define macros for the base directory
+B_BURN       = $(PROJECT_ROOT)/base/burn
+B_COMMAND    = $(PROJECT_ROOT)/base/command
+B_CONFIGS    = $(PROJECT_ROOT)/base/configs
+B_INCLUDE    = $(PROJECT_ROOT)/base/include
+B_EXECUTIVE  = $(PROJECT_ROOT)/base/executive
+B_FACTORY    = $(PROJECT_ROOT)/base/factory
+B_FOUNDATION = $(PROJECT_ROOT)/base/foundation
+B_FORCEMODEL = $(PROJECT_ROOT)/base/forcemodel
+B_INTERPOL   = $(PROJECT_ROOT)/base/interpolator
+B_INTERPRET  = $(PROJECT_ROOT)/base/interpreter
+B_PARAM      = $(PROJECT_ROOT)/base/parameter
+B_PROPAG     = $(PROJECT_ROOT)/base/propagator
+B_REFFRAME   = $(PROJECT_ROOT)/base/refframe
+B_SOLARSYS   = $(PROJECT_ROOT)/base/solarsys
+B_SOLVER     = $(PROJECT_ROOT)/base/solver
+B_SPACECRAFT = $(PROJECT_ROOT)/base/spacecraft
+B_STOPCOND   = $(PROJECT_ROOT)/base/stopcond
+B_SUBSCRIBER = $(PROJECT_ROOT)/base/subscriber
+B_UTIL       = $(PROJECT_ROOT)/base/util
+
+# Define macros for the gui directory
+APP        = $(PROJECT_ROOT)/gui/app
+BURN       = $(PROJECT_ROOT)/gui/burn
+FORCEMODEL = $(PROJECT_ROOT)/gui/forcemodel
+FOUNDATION = $(PROJECT_ROOT)/gui/foundation
+INCLUDE    = $(PROJECT_ROOT)/gui/include
+XPM        = $(PROJECT_ROOT)/gui/include/bitmaps
+INC_IL     = $(PROJECT_ROOT)/gui/include/il
+#INC_PLOT   = $(PROJECT_ROOT)/gui/include/plot
+INC_PLOT   = $(WXBASE)/contrib/include
+MANEUVER   = $(PROJECT_ROOT)/gui/maneuver
+MISSION    = $(PROJECT_ROOT)/gui/mission
+PLOT       = $(PROJECT_ROOT)/gui/plot
+PROPAGATOR = $(PROJECT_ROOT)/gui/propagator
+RESOURCE   = $(PROJECT_ROOT)/gui/resource
+SOLARSYS   = $(PROJECT_ROOT)/gui/solarsys
+SOLVER     = $(PROJECT_ROOT)/gui/solver
+SPACECRAFT = $(PROJECT_ROOT)/gui/spacecraft
+VIEW       = $(PROJECT_ROOT)/gui/view
+
+BASE_INCS = -I$(B_BURN) -I$(B_COMMAND) -I$(B_CONFIGS) -I$(B_EXECUTIVE) \
+	-I$(B_FACTORY) -I$(B_FORCEMODEL) -I$(B_FOUNDATION) -I$(B_INCLUDE) \
+	-I$(B_INTERPOL) -I$(B_INTERPRET) -I$(B_PARAM) -I$(B_PROPAG) \
+	-I$(B_REFFRAME) -I$(B_SOLARSYS) -I$(B_SOLVER) -I$(B_SPACECRAFT) \
+	-I$(B_STOPCOND) -I$(B_SUBSCRIBER) -I$(B_UTIL)
+
+GUI_INCS = -I$(APP) -I$(BURN) -I$(FORCEMODEL) -I$(FOUNDATION) -I$(INCLUDE) \
+	-I$(XPM) -I$(INC_IL) -I$(INC_PLOT) -I$(MANEUVER) -I$(MISSION) \
+	-I$(PLOT) -I$(PROPAGATOR) -I$(RESOURCE) -I$(SOLVER) -I$(SOLARSYS) \
+	-I$(SPACECRAFT) -I$(VIEW) -I.
+
+# Object modules for library
+OBJ = $(SRC:.cpp=.o)
+#
+CXXFLAGS = $(BASE_INCS) $(GUI_INCS) $(WXFLAGS) `wx-config --cxxflags` -Wall
+CPP = g++ $(CXXFLAGS)
+#
+# Default suffix rule
+.SUFFIXES: .o .cpp
+#
+###############################################################################
+# Target definitions
+#
+all: $(LIB)
+
+$(LIB): $(OBJ) 
+	@if [ ! -x $(LIBDIR) ]; then mkdir $(LIBDIR); echo 'Creating $(LIBDIR)'; fi
+	ar cr $@ $(OBJ)
+	@ranlib $@
+	@chmod -R 755 $(LIBDIR)
+
+.cpp.o:
+	$(CPP) -c $<
+
+clean:
+	rm -f $(OBJ) core
+
+bare: clean
+	rm -f $(LIB)

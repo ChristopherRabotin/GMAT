@@ -1,0 +1,21 @@
+# Project:    GMAT
+# Module:     Makefile.mac for plot directory 
+# Created:    Joey Gurgnaus 
+# Date:       2004/02/18
+#
+#
+# Define the marco for the top-level directories
+PROJECT_ROOT    = ../..
+#
+# Source file for creating new library
+SRC = MdiChildTrajFrame.cpp MdiChildXyFrame.cpp MdiGlPlotData.cpp \
+	MdiParentGlFrame.cpp MdiParentXyFrame.cpp MdiXyPlotData.cpp \
+	OpenGlPlotSetupPanel.cpp ReportFileSetupPanel.cpp TrajPlotCanvas.cpp \
+	XyPlotCurve.cpp XyPlotSetupPanel.cpp XyPlotWindow.cpp 
+# 
+# save glcanvas.cpp for tempoary
+#
+# Define macro for using the included file 
+INCMK = $(PROJECT_ROOT)/gui/inc.mac
+include ${INCMK}
+#

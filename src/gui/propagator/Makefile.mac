@@ -1,0 +1,17 @@
+# Project:    GMAT
+# Module:     Makefile.mac for propagator directory 
+# Created:    Joey Gurgnaus 
+# Date:       2004/02/18
+#
+#
+# Define the marco for the top-level directories
+PROJECT_ROOT    = ../..
+#
+# Source file for creating new library
+SRC = PropagateCommandPanel.cpp PropagatorSetupPanel.cpp \
+	PropagationConfigPanel.cpp
+#
+# Define macro for using the included file 
+INCMK = $(PROJECT_ROOT)/gui/inc.mac
+include ${INCMK}
+#

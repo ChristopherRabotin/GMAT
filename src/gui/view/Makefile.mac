@@ -1,0 +1,18 @@
+# Project:    GMAT
+# Module:     Makefile.mac for view directory 
+# Created:    Joey Gurgnaus 
+# Date:       2004/02/18
+#
+#
+# Define the marco for the top-level directories
+PROJECT_ROOT    = ../..
+#
+# Source file for creating new library
+SRC = DocViewFrame.cpp MdiDocViewFrame.cpp MdiTextDocument.cpp \
+	MdiTextEditView.cpp MdiTextSubFrame.cpp TextDocument.cpp \
+	TextEditView.cpp TextSubFrame.cpp ViewTextFrame.cpp
+#
+# Define macro for using the included file 
+INCMK = $(PROJECT_ROOT)/gui/inc.mac
+include ${INCMK}
+#
