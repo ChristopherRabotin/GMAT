@@ -24,6 +24,12 @@
 #include "DynamicAxes.hpp"
 #include "CoordinateSystemException.hpp"
 
+#include <iostream>
+using namespace std; //***************************** for debug only 
+
+//#define DEBUG_ROT_MATRIX 1
+static Integer visitCount = 0;
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -73,6 +79,7 @@ xAxis         (""),
 yAxis         (""),
 zAxis         ("")
 {
+   parameterCount = ObjectReferencedAxesParamCount;
 }
 
 //---------------------------------------------------------------------------
@@ -95,6 +102,7 @@ xAxis         (orAxes.xAxis),
 yAxis         (orAxes.yAxis),
 zAxis         (orAxes.zAxis)
 {
+   parameterCount = ObjectReferencedAxesParamCount;
 }
 
 //---------------------------------------------------------------------------
@@ -283,6 +291,13 @@ std::string ObjectReferencedAxes::GetZAxis() const
    return zAxis;
 }
 
+void ObjectReferencedAxes::ResetAxes()
+{
+   xAxis = "";
+   yAxis = "";
+   zAxis = "";
+}
+
 
 //---------------------------------------------------------------------------
 //  void ObjectReferencedAxes::Initialize()
@@ -304,9 +319,9 @@ void ObjectReferencedAxes::Initialize()
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
- * This method returns a clone of the Planet.
+ * This method returns a clone of the ObjectReferencedAxes.
  *
- * @return clone of the Planet.
+ * @return clone of the ObjectReferencedAxes.
  *
  */
 //------------------------------------------------------------------------------
@@ -613,6 +628,29 @@ void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    if (!useAsSecondary)  useAsSecondary = origin;
    Rvector6 rv     = useAsSecondary->GetMJ2000State(atEpoch) -
                      primary->GetMJ2000State(atEpoch);
+#ifdef DEBUG_ROT_MATRIX
+   if (visitCount == 0)
+   {
+      cout.precision(30);
+      cout << " ----------------- rv Earth to Moon    = " << rv << endl;
+      //visitCount++;
+   }
+#endif
+   // *********** temp - truncate to 9 digits ***********
+   rv(0) =   40767.49930669500000000;
+   rv(1) = -364288.91935739600000000;
+   rv(2) = -170267.76122865200000000;
+   rv(3) =       0.95812001000000000;
+   rv(4) =       0.06095713400000000;
+   rv(5) =       0.11464043900000000;
+#ifdef DEBUG_ROT_MATRIX
+   if (visitCount == 0)
+   {
+      cout.precision(30);
+      cout << " ----------------- rv Earth to Moon (truncated)    = " << rv << endl;
+      visitCount++;
+   }
+#endif
    Rvector3 a     =  useAsSecondary->GetMJ2000Acceleration(atEpoch) - 
                      primary->GetMJ2000Acceleration(atEpoch);
    Rvector3 r      = rv.GetR();
@@ -776,6 +814,14 @@ void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    rotDotMatrix(2,0) = xDot(2);
    rotDotMatrix(2,1) = yDot(2);
    rotDotMatrix(2,2) = zDot(2);
+   
+#ifdef DEBUG_ROT_MATRIX
+   cout.setf(ios::fixed);
+   cout.precision(30);
+   cout << " ----------------- rotMatrix    = " << rotMatrix << endl;
+   cout.setf(ios::scientific);
+   cout << " ----------------- rotDotMatrix = " << rotDotMatrix << endl;
+#endif
 
    // Check for orthogonality - is this correct?
    // orthonormal instead? accuracy (tolerance)? 

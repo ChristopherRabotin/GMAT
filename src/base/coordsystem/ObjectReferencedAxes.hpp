@@ -51,6 +51,7 @@ public:
    virtual std::string GetXAxis() const;
    virtual std::string GetYAxis() const;
    virtual std::string GetZAxis() const;
+   virtual void        ResetAxes();
    
    virtual GmatCoordinate::ParameterUsage UsesPrimary() const;
    virtual GmatCoordinate::ParameterUsage UsesSecondary() const;
@@ -63,7 +64,7 @@ public:
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
-   virtual GmatBase*       Clone(void) const;
+   virtual GmatBase*       Clone() const;
 
    // Parameter access methods - overridden from GmatBase
    virtual std::string     GetParameterText(const Integer id) const;     
