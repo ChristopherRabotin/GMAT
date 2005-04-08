@@ -754,7 +754,7 @@ void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
       }
    };
 
-   theGuiManager->UpdateParameter();
+   //theGuiManager->UpdateParameter(); //loj: 4/8/05 Not needed here
     
    //    if (size > 0)
    //        Expand(itemId);
@@ -1088,7 +1088,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          selItem->SetDesc(newName);
          theGuiManager->UpdateAll();
 
-         // update formation which may use new spacecraft name (loj: 2/22/05)
+         // update formation which may use new spacecraft name
          if (objType == Gmat::SPACECRAFT)
          {
             Collapse(mSpacecraftItem);
@@ -1418,7 +1418,7 @@ void ResourceTree::OnAddThruster(wxCommandEvent &event)
       AppendItem(item, newName, GmatTree::ICON_THRUSTER, -1,
                  new GmatTreeItemData(newName, GmatTree::THRUSTER));
 
-      //loj: 2/9/05 todo
+      ///@todo loj: 2/9/05 - UpdateHardware()
       //theGuiManager->UpdateHardware();
   
       Expand(item);
@@ -1708,6 +1708,7 @@ void ResourceTree::OnAddVariable(wxCommandEvent &event)
                     new GmatTreeItemData(names[i], GmatTree::VARIABLE));
       }
       
+      theGuiManager->UpdateParameter(); //loj: 4/8/05 Added
       Expand(item);
    }
 }
@@ -1817,6 +1818,8 @@ void ResourceTree::OnAddCoordSys(wxCommandEvent &event)
                     new GmatTreeItemData(name, GmatTree::COORD_SYSTEM));
 
       Expand(item);
+
+      theGuiManager->UpdateCoordSystem(); //loj: 4/8/05 Added
    }
 }
 
