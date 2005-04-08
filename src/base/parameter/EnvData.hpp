@@ -52,11 +52,13 @@ protected:
    Spacecraft *mSpacecraft;
    SolarSystem *mSolarSystem;
    CelestialBody *mCentralBody;
+   CelestialBody *mOrigin;
    
    enum
    {
       SPACECRAFT = 0,
       SOLAR_SYSTEM,
+      CELESTIAL_BODY, //loj: 4/7/05 Added
       EnvDataObjectCount
    };
    

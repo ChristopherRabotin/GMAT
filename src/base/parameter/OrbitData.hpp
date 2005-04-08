@@ -39,15 +39,15 @@ public:
    
    Rvector6 GetCartState();
    Rvector6 GetKepState();
-   Rvector6 GetModKepState();   //loj: 2/16/05 Added
-   Rvector6 GetSphRaDecState(); //loj: 2/16/05 Changed from GetSphState()
-   Rvector6 GetSphAzFpaState(); //loj: 2/16/05 Added
+   Rvector6 GetModKepState();
+   Rvector6 GetSphRaDecState();
+   Rvector6 GetSphAzFpaState();
    
    Real GetCartReal(const std::string &str);
    Real GetKepReal(const std::string &str);
    Real GetOtherKepReal(const std::string &str);
-   Real GetSphRaDecReal(const std::string &str); //loj: 2/16/05 Changed from GetSphReal()
-   Real GetSphAzFpaReal(const std::string &str); //loj: 2/16/05 Added
+   Real GetSphRaDecReal(const std::string &str);
+   Real GetSphAzFpaReal(const std::string &str);
    Real GetAngularReal(const std::string &str);
    
    // The inherited methods from RefData
@@ -59,14 +59,16 @@ public:
 
 protected:
 
+   // The inherited methods from RefData
+   virtual void InitializeRefObjects();
+   virtual bool IsValidObjectType(Gmat::ObjectType type);
+   
    SolarSystem* GetSolarSystem();
    CoordinateSystem* GetInternalCoordSys();
    
    void SetInternalCoordSys(CoordinateSystem *cs);
-   
-   // The inherited methods from RefData
-   virtual void InitializeRefObjects();
-   virtual bool IsValidObjectType(Gmat::ObjectType type);
+   Rvector6 GetRelativeCartState(CelestialBody *origin);
+   Real GetPositionMagnitude(CelestialBody *origin);
    
    Rvector6 mCartState;
    Rvector6 mKepState;
@@ -81,6 +83,7 @@ protected:
    Spacecraft *mSpacecraft;
    SolarSystem *mSolarSystem;
    CelestialBody *mCentralBody;
+   CelestialBody *mOrigin; //loj: 4/7/05 Added
    CoordinateSystem *mInternalCoordSystem;
    CoordinateSystem *mOutCoordSystem;
    
@@ -96,6 +99,7 @@ protected:
       SPACECRAFT = 0,
       SOLAR_SYSTEM,
       COORD_SYSTEM,
+      CELESTIAL_BODY, //loj: 4/7/05 Added
       OrbitDataObjectCount
    };
    

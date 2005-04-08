@@ -44,6 +44,7 @@ SphRMag::SphRMag(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "RMAG", obj, "Spherical R mag", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 

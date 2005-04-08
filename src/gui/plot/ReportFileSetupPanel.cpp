@@ -119,7 +119,6 @@ void ReportFileSetupPanel::Create()
     
    wxButton *createVarButton;
 
-   //loj: 2/8/05 CreateParameterSizer() calling sequence changed
    mParamBoxSizer = theGuiManager->
       CreateParameterSizer(this, &mUserParamListBox, USER_PARAM_LISTBOX,
                            &createVarButton, CREATE_VARIABLE,
@@ -155,7 +154,6 @@ void ReportFileSetupPanel::Create()
       new wxStaticText(this, -1, wxT("Selected"),
                        wxDefaultPosition, wxSize(80,-1), 0);
    
-   //loj: 1/19/05 Changed 150,250 to 170,260
    mVarSelectedListBox =
       new wxListBox(this, VAR_SEL_LISTBOX, wxDefaultPosition,
                     wxSize(170,260), 0, emptyList, wxLB_SINGLE);
@@ -185,7 +183,6 @@ void ReportFileSetupPanel::Create()
    // options
    //-------------------------------------------------------
 
-   //loj: 1/19/05 put report option in Horizontal order to save space
    writeCheckBox = new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Write Report"),
                                   wxDefaultPosition, wxSize(100, -1), 0);
    
@@ -228,6 +225,7 @@ void ReportFileSetupPanel::Create()
    theMiddleSizer->Add(variablesBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    theMiddleSizer->Add(optionBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 }
+
 
 //------------------------------------------------------------------------------
 // virtual void LoadData()
@@ -285,6 +283,7 @@ void ReportFileSetupPanel::LoadData()
 
 }
 
+
 //------------------------------------------------------------------------------
 // virtual void SaveData()
 //------------------------------------------------------------------------------
@@ -328,6 +327,7 @@ void ReportFileSetupPanel::SaveData()
 
 }
 
+
 //------------------------------------------------------------------------------
 // void OnBrowseButton()
 //------------------------------------------------------------------------------
@@ -344,6 +344,7 @@ void ReportFileSetupPanel::OnBrowseButton(wxCommandEvent& event)
     }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnTextChange()
 //------------------------------------------------------------------------------
@@ -355,6 +356,7 @@ void ReportFileSetupPanel::OnTextChange()
 {
     theApplyButton->Enable();
 }
+
 
 //------------------------------------------------------------------------------
 // void OnAddSpacecraft(wxCommandEvent& event)
@@ -385,6 +387,7 @@ void ReportFileSetupPanel::OnAddVariable(wxCommandEvent& event)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnRemoveSpacecraft(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -404,6 +407,7 @@ void ReportFileSetupPanel::OnRemoveVariable(wxCommandEvent& event)
    
    theApplyButton->Enable();
 }
+
 
 //------------------------------------------------------------------------------
 // void OnClearSpacecraft(wxCommandEvent& event)
@@ -429,6 +433,7 @@ void ReportFileSetupPanel::OnCreateVariable(wxCommandEvent& event)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnSelectUserParam(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -439,6 +444,7 @@ void ReportFileSetupPanel::OnSelectUserParam(wxCommandEvent& event)
 
    mUseUserParam = true;
 }
+
 
 //------------------------------------------------------------------------------
 // void OnSelectProperty(wxCommandEvent& event)
@@ -454,6 +460,7 @@ void ReportFileSetupPanel::OnSelectProperty(wxCommandEvent& event)
    mUseUserParam = false;
 }
 
+
 //------------------------------------------------------------------------------
 // void OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -468,78 +475,11 @@ void ReportFileSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 
 
 //------------------------------------------------------------------------------
-// wxString GetParamName()
-//------------------------------------------------------------------------------
-wxString ReportFileSetupPanel::GetParamName()
-{
-   if (mUseUserParam)
-   {
-      return mUserParamListBox->GetStringSelection();
-   }
-   else
-   {
-      wxString depObj = "";
-      
-      if (mCoordSysComboBox->IsShown())
-         depObj = mCoordSysComboBox->GetStringSelection();
-      else if (mCentralBodyComboBox->IsShown())
-         depObj = mCentralBodyComboBox->GetStringSelection();
-
-      if (depObj == "")
-         return mObjectComboBox->GetStringSelection() + "." + 
-            mPropertyListBox->GetStringSelection();
-      else
-         return mObjectComboBox->GetStringSelection() + "." + depObj + "." +
-            mPropertyListBox->GetStringSelection();
-   }
-}
-
-//------------------------------------------------------------------------------
-// Parameter* GetParameter(const wxString &name)
-//------------------------------------------------------------------------------
-/*
- * @return existing parameter pointer, return newly created parameter pointer
- *         if it does not exist.
- */
-//------------------------------------------------------------------------------
-Parameter* ReportFileSetupPanel::GetParameter(const wxString &name)
-{
-   Parameter *param = theGuiInterpreter->GetParameter(std::string(name.c_str()));
-
-   // create a parameter if it does not exist
-   if (param == NULL)
-   {
-      std::string paramName(name.c_str());
-      std::string objName(mObjectComboBox->GetStringSelection().c_str());
-      std::string propName(mPropertyListBox->GetStringSelection().c_str());
-      std::string depObjName = "";
-            
-      if (mCoordSysComboBox->IsShown())
-         depObjName = std::string(mCoordSysComboBox->GetStringSelection().c_str());
-      else if (mCentralBodyComboBox->IsShown())
-         depObjName = std::string(mCentralBodyComboBox->GetStringSelection().c_str());
-
-      param = theGuiInterpreter->CreateParameter(propName, paramName);
-      param->SetRefObjectName(Gmat::SPACECRAFT, objName);
-      
-      if (depObjName != "")
-         param->SetStringParameter("DepObject", depObjName);
-      
-      //loj: 3/3/05 Changed to if (mCoordSysComboBox->IsShown())
-      //if (param->NeedCoordSystem())
-      if (mCoordSysComboBox->IsShown())
-         param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
-   }
-   
-   return param;
-}
-
-//------------------------------------------------------------------------------
 // void ShowCoordSystem()
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::ShowCoordSystem()
 {
-   //loj: 1/24/05 use ParameterInfo for dependent object type
+   // use ParameterInfo for dependent object type
    std::string property = std::string(mPropertyListBox->GetStringSelection().c_str());
    GmatParam::DepObject depObj = ParameterInfo::Instance()->GetDepObjectType(property);
 
@@ -582,3 +522,73 @@ void ReportFileSetupPanel::ShowCoordSystem()
    }
 
 }
+
+
+//------------------------------------------------------------------------------
+// wxString GetParamName()
+//------------------------------------------------------------------------------
+wxString ReportFileSetupPanel::GetParamName()
+{
+   if (mUseUserParam)
+   {
+      return mUserParamListBox->GetStringSelection();
+   }
+   else
+   {
+      wxString depObj = "";
+      
+      if (mCoordSysComboBox->IsShown())
+         depObj = mCoordSysComboBox->GetStringSelection();
+      else if (mCentralBodyComboBox->IsShown())
+         depObj = mCentralBodyComboBox->GetStringSelection();
+
+      if (depObj == "")
+         return mObjectComboBox->GetStringSelection() + "." + 
+            mPropertyListBox->GetStringSelection();
+      else
+         return mObjectComboBox->GetStringSelection() + "." + depObj + "." +
+            mPropertyListBox->GetStringSelection();
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Parameter* GetParameter(const wxString &name)
+//------------------------------------------------------------------------------
+/*
+ * @return existing parameter pointer, return newly created parameter pointer
+ *         if it does not exist.
+ */
+//------------------------------------------------------------------------------
+Parameter* ReportFileSetupPanel::GetParameter(const wxString &name)
+{
+   Parameter *param = theGuiInterpreter->GetParameter(std::string(name.c_str()));
+
+   // create a parameter if it does not exist
+   if (param == NULL)
+   {
+      std::string paramName(name.c_str());
+      std::string objName(mObjectComboBox->GetStringSelection().c_str());
+      std::string propName(mPropertyListBox->GetStringSelection().c_str());
+      std::string depObjName = "";
+            
+      if (mCoordSysComboBox->IsShown())
+         depObjName = std::string(mCoordSysComboBox->GetStringSelection().c_str());
+      else if (mCentralBodyComboBox->IsShown())
+         depObjName = std::string(mCentralBodyComboBox->GetStringSelection().c_str());
+
+      param = theGuiInterpreter->CreateParameter(propName, paramName);
+      param->SetRefObjectName(Gmat::SPACECRAFT, objName);
+      
+      if (depObjName != "")
+         param->SetStringParameter("DepObject", depObjName);
+      
+      if (mCoordSysComboBox->IsShown())
+         param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
+      else
+         param->SetRefObjectName(Gmat::CELESTIAL_BODY, depObjName); //loj: 4/7/05 Added
+   }
+   
+   return param;
+}
+

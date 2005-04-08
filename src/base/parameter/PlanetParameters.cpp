@@ -45,8 +45,10 @@ GHA::GHA(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "Earth";
    PlanetData::mCentralBodyName = "Earth";
+   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::PARAMETER, "CurrA1MJD"); //if parameter, use type name
 }
+
 
 //------------------------------------------------------------------------------
 // GHA(const GHA &copy)
@@ -61,6 +63,7 @@ GHA::GHA(const GHA &copy)
    : PlanetReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const GHA& operator=(const GHA &right)
@@ -80,6 +83,7 @@ GHA::operator=(const GHA &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~GHA()
 //------------------------------------------------------------------------------
@@ -90,6 +94,7 @@ GHA::operator=(const GHA &right)
 GHA::~GHA()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -113,6 +118,7 @@ bool GHA::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -154,8 +160,10 @@ Longitude::Longitude(const std::string &name, GmatBase *obj)
                 Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
    PlanetData::mCentralBodyName = "Earth";
 }
+
 
 //------------------------------------------------------------------------------
 // Longitude(const Longitude &copy)
@@ -170,6 +178,7 @@ Longitude::Longitude(const Longitude &copy)
    : PlanetReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const Longitude& operator=(const Longitude &right)
@@ -189,6 +198,7 @@ Longitude::operator=(const Longitude &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~Longitude()
 //------------------------------------------------------------------------------
@@ -199,6 +209,7 @@ Longitude::operator=(const Longitude &right)
 Longitude::~Longitude()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -222,6 +233,7 @@ bool Longitude::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -263,8 +275,10 @@ Latitude::Latitude(const std::string &name, GmatBase *obj)
                 Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
    PlanetData::mCentralBodyName = "Earth";
 }
+
 
 //------------------------------------------------------------------------------
 // Latitude(const Latitude &copy)
@@ -279,6 +293,7 @@ Latitude::Latitude(const Latitude &copy)
    : PlanetReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const Latitude& operator=(const Latitude &right)
@@ -298,6 +313,7 @@ Latitude::operator=(const Latitude &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~Latitude()
 //------------------------------------------------------------------------------
@@ -308,6 +324,7 @@ Latitude::operator=(const Latitude &right)
 Latitude::~Latitude()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -331,6 +348,7 @@ bool Latitude::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -372,8 +390,10 @@ LST::LST(const std::string &name, GmatBase *obj)
                 Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
    PlanetData::mCentralBodyName = "Earth";
 }
+
 
 //------------------------------------------------------------------------------
 // LST(const LST &copy)
@@ -388,6 +408,7 @@ LST::LST(const LST &copy)
    : PlanetReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const LST& operator=(const LST &right)
@@ -407,6 +428,7 @@ LST::operator=(const LST &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~LST()
 //------------------------------------------------------------------------------
@@ -417,6 +439,7 @@ LST::operator=(const LST &right)
 LST::~LST()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -440,6 +463,7 @@ bool LST::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -482,8 +506,10 @@ BetaAngle::BetaAngle(const std::string &name, GmatBase *obj)
                 Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
    PlanetData::mCentralBodyName = "Earth";
 }
+
 
 //------------------------------------------------------------------------------
 // BetaAngle(const BetaAngle &copy)
@@ -498,6 +524,7 @@ BetaAngle::BetaAngle(const BetaAngle &copy)
    : PlanetReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const BetaAngle& operator=(const BetaAngle &right)
@@ -516,6 +543,7 @@ BetaAngle::operator=(const BetaAngle &right)
 
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~BetaAngle()
@@ -550,6 +578,7 @@ bool BetaAngle::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase

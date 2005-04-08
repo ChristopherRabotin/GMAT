@@ -43,7 +43,9 @@ AtmosDensity::AtmosDensity(const std::string &name, GmatBase *obj)
              Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
 }
+
 
 //------------------------------------------------------------------------------
 // AtmosDensity(const AtmosDensity &copy)
@@ -58,6 +60,7 @@ AtmosDensity::AtmosDensity(const AtmosDensity &copy)
    : EnvReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const AtmosDensity& operator=(const AtmosDensity &right)
@@ -77,6 +80,7 @@ AtmosDensity::operator=(const AtmosDensity &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~AtmosDensity()
 //------------------------------------------------------------------------------
@@ -87,6 +91,7 @@ AtmosDensity::operator=(const AtmosDensity &right)
 AtmosDensity::~AtmosDensity()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter

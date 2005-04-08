@@ -23,7 +23,8 @@
 #include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_ENVDATA 1
+//#define DEBUG_ENVDATA_INIT 1
+//#define DEBUG_ENVDATA_RUN 1
 
 using namespace GmatMathUtil;
 
@@ -35,7 +36,8 @@ const std::string
 EnvData::VALID_OBJECT_TYPE_LIST[EnvDataObjectCount] =
 {
    "Spacecraft",
-   "SolarSystem"
+   "SolarSystem",
+   "CelestialBody"
 }; 
 
 //---------------------------------
@@ -54,7 +56,10 @@ EnvData::EnvData()
 {
    mSpacecraft = NULL;
    mSolarSystem = NULL;
+   mCentralBody = NULL;
+   mOrigin = NULL;
 }
+
 
 //------------------------------------------------------------------------------
 // EnvData(const EnvData &data)
@@ -69,6 +74,7 @@ EnvData::EnvData(const EnvData &data)
    : RefData(data)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // EnvData& operator= (const EnvData& right)
@@ -89,6 +95,7 @@ EnvData& EnvData::operator= (const EnvData& right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~EnvData()
 //------------------------------------------------------------------------------
@@ -99,6 +106,7 @@ EnvData& EnvData::operator= (const EnvData& right)
 EnvData::~EnvData()
 {
 }
+
 
 //------------------------------------------------------------------------------
 // Real GetEnvReal(const std::string &str)
@@ -130,11 +138,15 @@ Real EnvData::GetEnvReal(const std::string &str)
       Real density = 0.0;
       
       // Call GetDensity() on central body
-      mCentralBody->GetDensity(state, &density, a1mjd, 1);
+      //mCentralBody->GetDensity(state, &density, a1mjd, 1);
+      
+      // Call GetDensity() on origin (loj: 4/7/05)
+      mOrigin->GetDensity(state, &density, a1mjd, 1);
 
-#ifdef DEBUG_ENVDATA
-      MessageInterface::ShowMessage("EnvData::GetEnvReal() density=%g\n", density);
-#endif
+      #ifdef DEBUG_ENVDATA_RUN
+         MessageInterface::ShowMessage
+            ("EnvData::GetEnvReal() density=%g\n", density);
+      #endif
       
       return density;
    }
@@ -144,6 +156,7 @@ Real EnvData::GetEnvReal(const std::string &str)
                                str);
    }
 }
+
 
 //-------------------------------------
 // Inherited methods from RefData
@@ -156,6 +169,7 @@ const std::string* EnvData::GetValidObjectList() const
 {
    return VALID_OBJECT_TYPE_LIST;
 }
+
 
 //------------------------------------------------------------------------------
 // bool ValidateRefObjects(GmatBase *param)
@@ -178,6 +192,7 @@ bool EnvData::ValidateRefObjects(GmatBase *param)
    else
       return false;
 }
+
 
 //------------------------------------------------------------------------------
 // virtual void InitializeRefObjects()
@@ -204,7 +219,30 @@ void EnvData::InitializeRefObjects()
       throw ParameterException("EnvData::GetCartState() Body not found in the "
                                "SolarSystem: " + bodyName + "\n");
 
+   //loj: 4/7/05 Added
+   // if dependent body name exist, get dependent body pointer from SolarSystem
+   // since individual CelelestialBody object is not set from the Sandbox
+   
+   std::string originName =
+      FindFirstObjectName(GmatBase::GetObjectType(VALID_OBJECT_TYPE_LIST[CELESTIAL_BODY]));
+
+   if (originName != "")
+   {
+      #if DEBUG_ENVDATA_INIT
+         MessageInterface::ShowMessage
+            ("EnvData::InitializeRefObjects() getting originName:%s pointer.\n",
+             originName.c_str());
+      #endif
+         
+      mOrigin = mSolarSystem->GetBody(originName);
+      if (!mOrigin)
+         throw ParameterException
+            ("EnvData::InitializeRefObjects() parameter dependent body not "
+             "found in the SolarSystem: " + originName + "\n");
+
+   }
 }
+
 
 //------------------------------------------------------------------------------
 // virtual bool IsValidObjectType(Gmat::ObjectType type)

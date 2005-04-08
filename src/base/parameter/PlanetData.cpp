@@ -23,7 +23,8 @@
 #include "AngleUtil.hpp"          //for PutAngleInDegRange()
 #include "MessageInterface.hpp"
 
-//#define DEBUG_PLANET_DATA 1
+//#define DEBUG_PLANETDATA_INIT 1
+//#define DEBUG_PLANETDATA_RUN 1
 
 using namespace GmatMathUtil;
 
@@ -35,7 +36,8 @@ const std::string
 PlanetData::VALID_OBJECT_TYPE_LIST[PlanetDataObjectCount] =
 {
    "Spacecraft",
-   "SolarSystem"
+   "SolarSystem",
+   "CelestialBody"
 }; 
 
 //---------------------------------
@@ -54,7 +56,10 @@ PlanetData::PlanetData()
 {
    mSpacecraft = NULL;
    mSolarSystem = NULL;
+   mCentralBody = NULL;
+   mOrigin = NULL;
 }
+
 
 //------------------------------------------------------------------------------
 // PlanetData(const PlanetData &data)
@@ -69,6 +74,7 @@ PlanetData::PlanetData(const PlanetData &data)
    : RefData(data)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // PlanetData& operator= (const PlanetData& right)
@@ -89,6 +95,7 @@ PlanetData& PlanetData::operator= (const PlanetData& right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~PlanetData()
 //------------------------------------------------------------------------------
@@ -100,6 +107,7 @@ PlanetData::~PlanetData()
 {
 }
 
+
 //------------------------------------------------------------------------------
 // Real GetReal(const std::string &dataType)
 //------------------------------------------------------------------------------
@@ -109,10 +117,10 @@ PlanetData::~PlanetData()
 //------------------------------------------------------------------------------
 Real PlanetData::GetReal(const std::string &dataType)
 {
-#ifdef DEBUG_PLANET_DATA
+   #ifdef DEBUG_PLANETDATA_RUN
       MessageInterface::ShowMessage("PlanetData::GetReal() dataType=%s\n",
                                     dataType.c_str());
-#endif
+   #endif
       
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
@@ -126,12 +134,15 @@ Real PlanetData::GetReal(const std::string &dataType)
       Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
       
       // Call GetHourAngle() on central body
-      Real gha = mCentralBody->GetHourAngle(a1mjd);
-
-#ifdef DEBUG_PLANET_DATA
-      MessageInterface::ShowMessage
-         ("PlanetData::GetReal() a1mdj=%f, gha=%f\n", a1mjd, gha);
-#endif
+      //Real gha = mCentralBody->GetHourAngle(a1mjd);
+      
+      // Call GetHourAngle() on origin (loj: 4/7/05)
+      Real gha = mOrigin->GetHourAngle(a1mjd);
+      
+      #ifdef DEBUG_PLANETDATA_RUN
+         MessageInterface::ShowMessage
+            ("PlanetData::GetReal() a1mdj=%f, gha=%f\n", a1mjd, gha);
+      #endif
       
       return gha;
    }
@@ -152,10 +163,10 @@ Real PlanetData::GetReal(const std::string &dataType)
       Real longitude = raDeg - gha;
       longitude = AngleUtil::PutAngleInDegRange(longitude, 0.0, 360.0);
 
-#ifdef DEBUG_PLANET_DATA
-      MessageInterface::ShowMessage
-         ("PlanetData::GetReal() longitude=%f\n", longitude);
-#endif
+      #ifdef DEBUG_PLANETDATA_RUN
+         MessageInterface::ShowMessage
+            ("PlanetData::GetReal() longitude=%f\n", longitude);
+      #endif
       
       return longitude;
    }
@@ -169,14 +180,13 @@ Real PlanetData::GetReal(const std::string &dataType)
       Real decRad = ATan(state[2], Sqrt(state[0]*state[0] +
                                         state[1]*state[1]));
       Real decDeg = GmatMathUtil::RadToDeg(decRad, true);
-      //loj: 1/5/04 Latitude shoule be between -90 and 90
-      //Real latitude = AngleUtil::PutAngleInDegRange(decDeg, 0.0, 360.0);
+      // Latitude shoule be between -90 and 90
       Real latitude = AngleUtil::PutAngleInDegRange(decDeg, -90.0, 90.0);
 
-#ifdef DEBUG_PLANET_DATA
-      MessageInterface::ShowMessage
-         ("PlanetData::GetReal() latitude=%f\n", latitude);
-#endif
+      #ifdef DEBUG_PLANETDATA_RUN
+         MessageInterface::ShowMessage
+            ("PlanetData::GetReal() latitude=%f\n", latitude);
+      #endif
       
       return latitude;
    }
@@ -191,14 +201,13 @@ Real PlanetData::GetReal(const std::string &dataType)
       Real lst = gmst + GetReal("Longitude");
       lst = AngleUtil::PutAngleInDegRange(lst, 0.0, 360.0);
 
-      //loj: 1/5/04
       // convert it to hours (1h = 15 deg according to Vallado 3.5)
       lst = lst / 15.0;
       
-#ifdef DEBUG_PLANET_DATA
-      MessageInterface::ShowMessage
-         ("PlanetData::GetReal() lst=%f\n", lst);
-#endif
+      #ifdef DEBUG_PLANETDATA_RUN
+         MessageInterface::ShowMessage
+            ("PlanetData::GetReal() lst=%f\n", lst);
+      #endif
       
       return lst;
    }
@@ -233,11 +242,11 @@ Real PlanetData::GetReal(const std::string &dataType)
       Real incRad = kepState[2] * RAD_PER_DEG;
       Real raanRad = kepState[3] * RAD_PER_DEG;
       
-#ifdef DEBUG_PLANET_DATA
-      MessageInterface::ShowMessage
-         ("PlanetData::GetReal() sunDecRad=%f, incRad=%f, raanRad=%f\n",
-          sunDecRad, incRad, raanRad);
-#endif
+      #ifdef DEBUG_PLANETDATA_RUN
+         MessageInterface::ShowMessage
+            ("PlanetData::GetReal() sunDecRad=%f, incRad=%f, raanRad=%f\n",
+             sunDecRad, incRad, raanRad);
+      #endif
       
       Real sinBetaAngle = Sin(epsilonRad) * Cos(incRad) * Sin(sunDecRad) -
          Cos(epsilonRad) * Sin(incRad) * Cos(raanRad) * Sin(sunDecRad) +
@@ -246,10 +255,10 @@ Real PlanetData::GetReal(const std::string &dataType)
       Real betaAngleDeg = ASin(sinBetaAngle) * DEG_PER_RAD;
       betaAngleDeg = AngleUtil::PutAngleInDegRange(betaAngleDeg, 0.0, 360.0);
 
-#ifdef DEBUG_PLANET_DATA
-      MessageInterface::ShowMessage
-         ("PlanetData::GetReal() betaAngle=%f\n", betaAngleDeg);
-#endif
+      #ifdef DEBUG_PLANETDATA_RUN
+         MessageInterface::ShowMessage
+            ("PlanetData::GetReal() betaAngle=%f\n", betaAngleDeg);
+      #endif
       
       return betaAngleDeg;
    }
@@ -271,6 +280,7 @@ const std::string* PlanetData::GetValidObjectList() const
 {
    return VALID_OBJECT_TYPE_LIST;
 }
+
 
 //------------------------------------------------------------------------------
 // bool ValidateRefObjects(GmatBase *param)
@@ -294,6 +304,7 @@ bool PlanetData::ValidateRefObjects(GmatBase *param)
       return false;
 }
 
+
 //------------------------------------------------------------------------------
 // virtual void InitializeRefObjects()
 //------------------------------------------------------------------------------
@@ -316,8 +327,31 @@ void PlanetData::InitializeRefObjects()
    if (!mCentralBody)
       throw ParameterException("PlanetData::GetCartState() Body not found in the "
                                "SolarSystem: " + mCentralBodyName + "\n");
+   
+   //loj: 4/7/05 Added
+   // if dependent body name exist, get dependent body pointer from SolarSystem
+   // since individual CelelestialBody object is not set from the Sandbox
+   
+   std::string originName =
+      FindFirstObjectName(GmatBase::GetObjectType(VALID_OBJECT_TYPE_LIST[CELESTIAL_BODY]));
 
+   if (originName != "")
+   {
+      #if DEBUG_PLANETDATA_INIT
+         MessageInterface::ShowMessage
+            ("PlanetData::InitializeRefObjects() getting originName:%s pointer.\n",
+             originName.c_str());
+      #endif
+         
+      mOrigin = mSolarSystem->GetBody(originName);
+      if (!mOrigin)
+         throw ParameterException
+            ("PlanetData::InitializeRefObjects() parameter dependent body not "
+             "found in the SolarSystem: " + originName + "\n");
+
+   }
 }
+
 
 //------------------------------------------------------------------------------
 // virtual bool IsValidObjectType(Gmat::ObjectType type)
@@ -337,6 +371,5 @@ bool PlanetData::IsValidObjectType(Gmat::ObjectType type)
    }
    
    return false;
-
 }
 

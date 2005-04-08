@@ -26,7 +26,7 @@
 
 #include "wx/colordlg.h"                // for wxColourDialog
 
-//#define DEBUG_XYPLOT_PANEL 1
+#define DEBUG_XYPLOT_PANEL 1
 
 //------------------------------
 // event tables for wxWindows
@@ -86,7 +86,7 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
    mNumXParams = 0;
    mNumYParams = 0;
    
-   mLineColor.Set(0,0,0); //loj: 6/2/04 set to Black for now
+   mLineColor.Set(0,0,0); //black for now
    mColorMap.clear();
    
    Create();
@@ -136,6 +136,7 @@ void XyPlotSetupPanel::OnAddX(wxCommandEvent& event)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnAddY(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -167,6 +168,7 @@ void XyPlotSetupPanel::OnAddY(wxCommandEvent& event)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnRemoveX(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -177,6 +179,7 @@ void XyPlotSetupPanel::OnRemoveX(wxCommandEvent& event)
    mXParamChanged = true;
    theApplyButton->Enable();
 }
+
 
 //------------------------------------------------------------------------------
 // void OnRemoveY(wxCommandEvent& event)
@@ -204,6 +207,7 @@ void XyPlotSetupPanel::OnRemoveY(wxCommandEvent& event)
    theApplyButton->Enable();
 }
 
+
 //------------------------------------------------------------------------------
 // void OnClearY(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -214,6 +218,7 @@ void XyPlotSetupPanel::OnClearY(wxCommandEvent& event)
    mYParamChanged = true;
    theApplyButton->Enable();
 }
+
 
 //------------------------------------------------------------------------------
 // void OnSelectUserParam(wxCommandEvent& event)
@@ -228,6 +233,7 @@ void XyPlotSetupPanel::OnSelectUserParam(wxCommandEvent& event)
    
    mUseUserParam = true;
 }
+
 
 //------------------------------------------------------------------------------
 // void OnSelectProperty(wxCommandEvent& event)
@@ -246,6 +252,7 @@ void XyPlotSetupPanel::OnSelectProperty(wxCommandEvent& event)
    mUseUserParam = false;
 }
 
+
 //------------------------------------------------------------------------------
 // void OnSelectY(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -253,6 +260,7 @@ void XyPlotSetupPanel::OnSelectY(wxCommandEvent& event)
 {
    ShowParameterOption(mYSelectedListBox->GetStringSelection(), true);
 }
+
 
 //------------------------------------------------------------------------------
 // void OnComboBoxChange(wxCommandEvent& event)
@@ -265,6 +273,7 @@ void XyPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
       mUseUserParam = false;
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnCreateVariable(wxCommandEvent& event)
@@ -283,6 +292,7 @@ void XyPlotSetupPanel::OnCreateVariable(wxCommandEvent& event)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnCheckBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -290,6 +300,7 @@ void XyPlotSetupPanel::OnCheckBoxChange(wxCommandEvent& event)
 {
    theApplyButton->Enable();
 }
+
 
 //------------------------------------------------------------------------------
 // void OnLineColorClick(wxCommandEvent& event)
@@ -347,7 +358,6 @@ void XyPlotSetupPanel::Create()
       new wxStaticText(this, -1, wxT("Selected X"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
 
-   //loj: 1/19/05 Changed 150,250 to 170,260
    mXSelectedListBox =
       new wxListBox(this, X_SEL_LISTBOX, wxDefaultPosition,
                     wxSize(170,260), 0, emptyList, wxLB_SINGLE);
@@ -378,7 +388,6 @@ void XyPlotSetupPanel::Create()
    //------------------------------------------------------
    wxButton *createVarButton;
    
-   //loj: 2/8/05 CreateParameterSizer() calling sequence changed
    mParamBoxSizer = theGuiManager->
       CreateParameterSizer(this, &mUserParamListBox, USER_PARAM_LISTBOX,
                            &createVarButton, CREATE_VARIABLE,
@@ -388,13 +397,13 @@ void XyPlotSetupPanel::Create()
                            &mCentralBodyComboBox, ID_COMBOBOX,
                            &mCoordSysLabel, &mCoordSysSizer);
 
-#if DEBUG_XYPLOT_PANEL
-   MessageInterface::ShowMessage
-      ("XyPlotSetupPanel::Create() got mParamBoxSizer from theGuiManager\n"
-       "createVarButton=%d, mObjectComboBox=%d\nmUserParamListBox=%d, "
-       "mPropertyListBox=%d\n", createVarButton, mObjectComboBox, mUserParamListBox,
-       mPropertyListBox);
-#endif
+   #if DEBUG_XYPLOT_PANEL
+      MessageInterface::ShowMessage
+         ("XyPlotSetupPanel::Create() got mParamBoxSizer from theGuiManager\n"
+          "createVarButton=%d, mObjectComboBox=%d\nmUserParamListBox=%d, "
+          "mPropertyListBox=%d\n", createVarButton, mObjectComboBox, mUserParamListBox,
+          mPropertyListBox);
+   #endif
 
 
    //------------------------------------------------------
@@ -423,7 +432,6 @@ void XyPlotSetupPanel::Create()
       new wxStaticText(this, -1, wxT("Selected Y"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
 
-   //loj: 1/19/05 Changed 150,250 to 170,260
    mYSelectedListBox = new wxListBox(this, Y_SEL_LISTBOX, wxDefaultPosition,
                                      wxSize(170,260), 0, emptyList, wxLB_SINGLE);
    
@@ -495,6 +503,7 @@ void XyPlotSetupPanel::Create()
    
 }
 
+
 //------------------------------------------------------------------------------
 // virtual void LoadData()
 //------------------------------------------------------------------------------
@@ -539,10 +548,11 @@ void XyPlotSetupPanel::LoadData()
          
          for (int i=0; i<mNumYParams; i++)
          {
-#if DEBUG_XYPLOT_PANEL
-            MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() y param = %s\n",
-                                          yParamList[i].c_str());
-#endif
+            #if DEBUG_XYPLOT_PANEL
+               MessageInterface::ShowMessage
+                  ("XyPlotSetupPanel::LoadData() y param = %s\n",
+                   yParamList[i].c_str());
+            #endif
             yParamNames[i] = yParamList[i].c_str();
 
             // get parameter color
@@ -584,6 +594,7 @@ void XyPlotSetupPanel::LoadData()
          
 }
 
+
 //------------------------------------------------------------------------------
 // virtual void SaveData()
 //------------------------------------------------------------------------------
@@ -593,7 +604,6 @@ void XyPlotSetupPanel::SaveData()
     
    mXyPlot->Activate(showPlotCheckBox->IsChecked());
 
-   //loj: 8/6/04 changed "Grid" to string parameter
    if (showGridCheckBox->IsChecked())
       mXyPlot->SetStringParameter("Grid", "On");
    else
@@ -636,7 +646,6 @@ void XyPlotSetupPanel::SaveData()
          mXyPlot->Activate(false);
       }
       else if (numYParams > GmatPlot::MAX_XY_CURVE)
-         //loj: 7/14/04 changed to use GmatPlot::MAX_XY_CURVE instead of 6
       {
          wxLogMessage("Selected Y parameter count is greater than %d.\n"
                       "First %d parameters will be plotted", GmatPlot::MAX_XY_CURVE,
@@ -646,21 +655,22 @@ void XyPlotSetupPanel::SaveData()
       }
       else
       {
-         mNumYParams = numYParams; //loj: 11/17/04 - changed from numYParams = numYParams;
+         mNumYParams = numYParams;
       }
       
       if (mNumYParams >= 0) // >=0 because the list needs to be cleared
       {
          //mXyPlot->SetBooleanParameter("ClearDepVarList", true);
-         mXyPlot->TakeAction("Clear"); //loj: 9/29/04 added
+         mXyPlot->TakeAction("Clear");
          for (int i=0; i<mNumYParams; i++)
          {
-#if DEBUG_XYPLOT_PANEL
-            MessageInterface::ShowMessage("XyPlotSetupPanel::SaveData() DepVar = %s\n",
-                                          mYSelectedListBox->GetString(i).c_str());
-#endif
+            #if DEBUG_XYPLOT_PANEL
+               MessageInterface::ShowMessage
+                  ("XyPlotSetupPanel::SaveData() DepVar = %s\n",
+                   mYSelectedListBox->GetString(i).c_str());
+            #endif
             std::string selYName = std::string(mYSelectedListBox->GetString(i).c_str());
-            mXyPlot->SetStringParameter("Add", selYName, i); //loj: 9/29/04 added index
+            mXyPlot->SetStringParameter("Add", selYName, i);
          }
       }
    }
@@ -695,10 +705,10 @@ void XyPlotSetupPanel::SaveData()
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::ShowParameterOption(const wxString &name, bool show)
 {
-#if DEBUG_XYPLOT_PANEL
-   MessageInterface::ShowMessage
-      ("XyPlotSetupPanel::ShowParameterOption() name=%s\n", name.c_str());
-#endif
+   #if DEBUG_XYPLOT_PANEL
+      MessageInterface::ShowMessage
+         ("XyPlotSetupPanel::ShowParameterOption() name=%s\n", name.c_str());
+   #endif
 
    if (!name.IsSameAs(""))
    {
@@ -723,10 +733,10 @@ void XyPlotSetupPanel::ShowParameterOption(const wxString &name, bool show)
          color = mColorMap[mSelYName];
       }
       
-#if DEBUG_XYPLOT_PANEL
-      MessageInterface::ShowMessage("ShowParameterOption() intColor=%d\n",
-                                    mColorMap[mSelYName].GetIntColor());
-#endif
+      #if DEBUG_XYPLOT_PANEL
+         MessageInterface::ShowMessage("ShowParameterOption() intColor=%d\n",
+                                       mColorMap[mSelYName].GetIntColor());
+      #endif
       mLineColor.Set(color.Red(), color.Green(), color.Blue());
       mLineColorButton->SetBackgroundColour(mLineColor);
       
@@ -740,12 +750,13 @@ void XyPlotSetupPanel::ShowParameterOption(const wxString &name, bool show)
    mFlexGridSizer->Layout();
 }
 
+
 //------------------------------------------------------------------------------
 // void ShowCoordSystem()
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::ShowCoordSystem()
 {
-   //loj: 1/24/05 use ParameterInfo for dependent object type
+   // use ParameterInfo for dependent object type
    std::string property = std::string(mPropertyListBox->GetStringSelection().c_str());
    GmatParam::DepObject depObj = ParameterInfo::Instance()->GetDepObjectType(property);
 
@@ -788,6 +799,7 @@ void XyPlotSetupPanel::ShowCoordSystem()
    }
 }
 
+
 //------------------------------------------------------------------------------
 // wxString GetParamName()
 //------------------------------------------------------------------------------
@@ -817,6 +829,7 @@ wxString XyPlotSetupPanel::GetParamName()
    }
 }
 
+
 //------------------------------------------------------------------------------
 // Parameter* GetParameter(const wxString &name)
 //------------------------------------------------------------------------------
@@ -842,24 +855,24 @@ Parameter* XyPlotSetupPanel::GetParameter(const wxString &name)
          depObjName = std::string(mCoordSysComboBox->GetStringSelection().c_str());
       else if (mCentralBodyComboBox->IsShown())
          depObjName = std::string(mCentralBodyComboBox->GetStringSelection().c_str());
-         
-
-#ifdef DEBUG_XYPLOT_PANEL
-      MessageInterface::ShowMessage
-         ("XyPlotSetupPanel::CreateParameter() paramName : %s does not exist. So create.\n",
-          paramName.c_str());
-#endif
+      
+      #ifdef DEBUG_XYPLOT_PANEL
+         MessageInterface::ShowMessage
+            ("XyPlotSetupPanel::CreateParameter() paramName : %s does not exist. "
+             "So creating.\n", paramName.c_str());
+      #endif
       
       param = theGuiInterpreter->CreateParameter(propName, paramName);
       param->SetRefObjectName(Gmat::SPACECRAFT, ownerName);
       
       if (depObjName != "")
          param->SetStringParameter("DepObject", depObjName);
-
-      //loj: 3/3/05 Changed to if (mCoordSysComboBox->IsShown())
-      //if (param->NeedCoordSystem())
+      
       if (mCoordSysComboBox->IsShown())
          param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
+      else
+         param->SetRefObjectName(Gmat::CELESTIAL_BODY, depObjName); //loj: 4/7/05 Added
+         
    }
    
    return param;
