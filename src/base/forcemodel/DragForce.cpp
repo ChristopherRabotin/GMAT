@@ -528,6 +528,7 @@ void DragForce::BuildPrefactors()
  *
  * @return              true if the call succeeds, false on failure.
  */
+//------------------------------------------------------------------------------
 bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
 {
    #ifdef DEBUG_DRAGFORCE_DENSITY
@@ -632,18 +633,21 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
                         << deriv[i6] << "  "
                         << deriv[1+i6] << "  "
                         << deriv[2+i6] << "\n";
+            for (Integer m = 0; m < satCount; ++m)
+            {
+               MessageInterface::ShowMessage(
+                  "   Position:   %16.9le  %16.9le  %16.9le\n",
+                  state[i6], state[i6+1], state[i6+2]);
+               MessageInterface::ShowMessage(
+                  "    Velocity:   %16.9le  %16.9le  %16.9le\n",
+                  state[i6+3], state[i6+4], state[i6+5]);
+               MessageInterface::ShowMessage(
+                  "   Drag Accel: %16.9le  %16.9le  %16.9le\n",
+                  deriv[i6], deriv[1+i6], deriv[2+i6]);
+               MessageInterface::ShowMessage("   Density:    %16.9le\n",
+                  density[i]);
+            }
          #endif
-for (Integer m = 0; m < satCount; ++m)
-{
-   MessageInterface::ShowMessage("   Position:   %16.9le  %16.9le  %16.9le\n",
-      state[i6], state[i6+1], state[i6+2]);
-   MessageInterface::ShowMessage("   Velocity:   %16.9le  %16.9le  %16.9le\n",
-      state[i6+3], state[i6+4], state[i6+5]);
-   MessageInterface::ShowMessage("   Drag Accel: %16.9le  %16.9le  %16.9le\n",
-      deriv[i6], deriv[1+i6], deriv[2+i6]);
-   MessageInterface::ShowMessage("   Density:    %16.9le\n",
-      density[i]);
-}
       }
    }
     
@@ -661,6 +665,7 @@ for (Integer m = 0; m < satCount; ++m)
  * 
  * @return     text identifier for the parameter.
  */
+//------------------------------------------------------------------------------
 std::string DragForce::GetParameterText(const Integer id) const
 {
    if (id == atmosphereModelID)
@@ -698,7 +703,7 @@ std::string DragForce::GetParameterText(const Integer id) const
  * 
  * @return     ID for the parameter of interest.
  */
-#include <iostream>
+//------------------------------------------------------------------------------
 Integer DragForce::GetParameterID(const std::string &str) const
 {
    if (str == "AtmosphereModel")
@@ -736,6 +741,7 @@ Integer DragForce::GetParameterID(const std::string &str) const
  * 
  * @return     data type for the parameter of interest.
  */
+//------------------------------------------------------------------------------
 Gmat::ParameterType DragForce::GetParameterType(const Integer id) const
 {
    if (id == atmosphereModelID)
@@ -773,6 +779,7 @@ Gmat::ParameterType DragForce::GetParameterType(const Integer id) const
  * 
  * @return     string describing the data type for the parameter of interest.
  */
+//------------------------------------------------------------------------------
 std::string DragForce::GetParameterTypeString(const Integer id) const
 {
    if ( (id == atmosphereModelID) ||
@@ -798,6 +805,7 @@ std::string DragForce::GetParameterTypeString(const Integer id) const
  * 
  * @return     current value for the parameter.
  */
+//------------------------------------------------------------------------------
 Real DragForce::GetRealParameter(const Integer id) const
 {
    if (id == fluxID)
@@ -824,30 +832,49 @@ Real DragForce::GetRealParameter(const Integer id) const
  * 
  * @return     current (new) value for the parameter.
  */
+//------------------------------------------------------------------------------
 Real DragForce::SetRealParameter(const Integer id, const Real value)
 {
    if (id == fluxID)
    {
-      if (value >= 0.0)
-         fluxF107 = value;
+      if ((value < 0.0) || (value > 500.0))
+         throw ForceModelException(
+            "The solar flux (F10.7) must be between 0 and 500, and is usually "
+            "between 50 and 400");
+      if ((value < 50.0) || (value > 400.0))
+         MessageInterface::ShowMessage(
+            "Warning: The solar flux (F10.7) usually falls "
+            "between 50 and 400\n");
+
+      fluxF107 = value;
       return fluxF107;
    }
     
    if (id == averageFluxID)
    {
-      if (value >= 0.0)
-         fluxF107A = value;
+      if ((value < 0.0) || (value > 500.0))
+         throw ForceModelException(
+            "The average solar flux (F10.7A) must be between 0 and 500, and is "
+            "usually between 50 and 400");
+      if ((value < 50.0) || (value > 400.0))
+         MessageInterface::ShowMessage(
+            "Warning: The average solar flux (F10.7A) usually falls "
+            "between 50 and 400\n");
+
+      fluxF107A = value;
       return fluxF107A;
    }
     
    if (id == magneticIndexID)
    {
-      if (value >= 0.0)
-      {
-         kp = value;
-         ap = CalculateAp(kp);
-      }
-      return ap;
+      if ((value < 0.0) || (value > 9.0))
+         throw ForceModelException(
+            "The magnetic index (Kp) must be between 0 and 9");
+
+      kp = value;
+      ap = CalculateAp(kp);
+
+      return kp;
    }
 
    return PhysicalModel::SetRealParameter(id, value);
@@ -864,6 +891,7 @@ Real DragForce::SetRealParameter(const Integer id, const Real value)
  * 
  * @return     current value for the parameter.
  */
+//------------------------------------------------------------------------------
 std::string DragForce::GetStringParameter(const Integer id) const
 {
    if (id == atmosphereModelID) 
