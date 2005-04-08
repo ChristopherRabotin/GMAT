@@ -428,6 +428,27 @@ std::string XyPlot::GetParameterTypeString(const Integer id) const
       return Subscriber::GetParameterTypeString(id);
 }
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool XyPlot::IsParameterReadOnly(const Integer id) const
+{
+   if ((id == PLOT_TITLE) || (id == X_AXIS_TITLE) || (id == Y_AXIS_TITLE) ||
+       (id == DATA_COLLECT_FREQUENCY) || (id == UPDATE_PLOT_FREQUENCY))
+      return true;
+
+   return Subscriber::IsParameterReadOnly(id);
+}
+
 //------------------------------------------------------------------------------
 // virtual Integer GetIntegerParameter(const Integer id) const
 //------------------------------------------------------------------------------

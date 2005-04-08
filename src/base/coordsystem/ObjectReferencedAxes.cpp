@@ -24,6 +24,8 @@
 #include "DynamicAxes.hpp"
 #include "CoordinateSystemException.hpp"
 
+#include "MessageInterface.hpp"
+
 #include <iostream>
 using namespace std; //***************************** for debug only 
 
@@ -79,6 +81,7 @@ xAxis         (""),
 yAxis         (""),
 zAxis         ("")
 {
+MessageInterface::ShowMessage("Creating OR CS\n");
    parameterCount = ObjectReferencedAxesParamCount;
 }
 
@@ -424,6 +427,7 @@ std::string ObjectReferencedAxes::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ObjectReferencedAxes::GetStringParameter(const Integer id) const
 {
+MessageInterface::ShowMessage("Getting parameter %d\n", id);
    if (id == X_AXIS)                return xAxis;
    if (id == Y_AXIS)                return yAxis;
    if (id == Z_AXIS)                return zAxis;
@@ -451,6 +455,7 @@ std::string ObjectReferencedAxes::GetStringParameter(const Integer id) const
 bool ObjectReferencedAxes::SetStringParameter(const Integer id,
                                               const std::string &value)
 {
+MessageInterface::ShowMessage("Setting parameter %d to %s\n", id, value.c_str());
    bool OK = false;
    if (id == X_AXIS)
    {

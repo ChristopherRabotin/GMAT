@@ -878,6 +878,26 @@ std::string PhysicalModel::GetParameterTypeString(const Integer id) const
       return GmatBase::GetParameterTypeString(id);
 }
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool PhysicalModel::IsParameterReadOnly(const Integer id) const
+{
+   if ((id == EPOCH) || (id == ELAPSED_SECS) || (id == BODY_NAME))
+      return true;
+
+   return GmatBase::IsParameterReadOnly(id);
+}
+
 //------------------------------------------------------------------------------
 // Real PhysicalModel::GetRealParameter(const Integer id)
 //------------------------------------------------------------------------------

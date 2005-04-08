@@ -361,6 +361,27 @@ std::string Thruster::GetParameterTypeString(const Integer id) const
 }
 
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool Thruster::IsParameterReadOnly(const Integer id) const
+{
+   if ((id == THRUSTER_FIRING) || (id == TANK))
+      return true;
+
+   return Hardware::IsParameterReadOnly(id);
+}
+
+
 //------------------------------------------------------------------------------
 //  Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------

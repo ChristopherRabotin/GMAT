@@ -205,6 +205,28 @@ std::string FiniteBurn::GetParameterTypeString(const Integer id) const
 }
 
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool FiniteBurn::IsParameterReadOnly(const Integer id) const
+{
+   if ((id == COORDFRAME) || (id == COORDSYSTEM) || (id == DELTAV1) ||
+       (id == DELTAV2) || (id == DELTAV3))
+      return true;
+
+   return Burn::IsParameterReadOnly(id);
+}
+
+
 //------------------------------------------------------------------------------
 //  Real SetStringParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------

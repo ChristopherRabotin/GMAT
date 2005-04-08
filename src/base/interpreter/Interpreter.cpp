@@ -2649,8 +2649,6 @@ bool Interpreter::ValidateBlock(GmatCommand *cmdStart, GmatCommand *cmdEnd)
    // First check to be sure the command nesting is consistent
 //   GmatCommand *current = cmdStart, *child;
 
-
-
    return false;
 }
 

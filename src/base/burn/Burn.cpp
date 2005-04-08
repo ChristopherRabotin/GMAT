@@ -258,6 +258,28 @@ std::string Burn::GetParameterTypeString(const Integer id) const
 }
 
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool Burn::IsParameterReadOnly(const Integer id) const
+{
+   if ((id == DELTAV1LABEL) || (id == DELTAV2LABEL) ||
+       (id == DELTAV3LABEL) || (id == SATNAME))
+      return true;
+
+   return GmatBase::IsParameterReadOnly(id);
+}
+
+
 //------------------------------------------------------------------------------
 //  Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------

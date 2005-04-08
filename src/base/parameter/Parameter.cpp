@@ -608,6 +608,28 @@ std::string Parameter::GetParameterTypeString(const Integer id) const
     
 }
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool Parameter::IsParameterReadOnly(const Integer id) const
+{
+   if ((id == DESCRIPTION) || (id == UNIT) ||
+       (id == DEP_OBJECT) || (id == COLOR))
+      return true;
+
+   return GmatBase::IsParameterReadOnly(id);
+}
+
+
 //----- UnsignedInt parameters
 
 //------------------------------------------------------------------------------

@@ -41,6 +41,7 @@ public:
    virtual Gmat::ParameterType
                            GetParameterType(const Integer id) const;
    virtual std::string     GetParameterTypeString(const Integer id) const;
+   virtual bool            IsParameterReadOnly(const Integer id) const;
 
    virtual bool            SetStringParameter(const Integer id, 
                                               const std::string &value);

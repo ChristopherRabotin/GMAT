@@ -210,21 +210,42 @@ Gmat::ParameterType FuelTank::GetParameterType(const Integer id) const
 }
 
 
-//------------------------------------------------------------------------------
-//  std::string  GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+//  std::string GetParameterTypeString(const Integer id) const
+//---------------------------------------------------------------------------
 /**
- * This method returns the parameter type string, given the input parameter ID.
+ * Retrieve the string associated with a parameter.
  *
- * @param <id> ID for the requested parameter.
+ * @param <id> The integer ID for the parameter.
  *
- * @return parameter type string of the requested parameter.
- *
+ * @return Text description for the type of the parameter, or the empty
+ *         string ("").
  */
-//------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 std::string FuelTank::GetParameterTypeString(const Integer id) const
 {
    return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool FuelTank::IsParameterReadOnly(const Integer id) const
+{
+   if ((id == DIRECTION_X) || (id == DIRECTION_Y) || (id == DIRECTION_Z))
+      return true;
+      
+   return Hardware::IsParameterReadOnly(id);
 }
 
 

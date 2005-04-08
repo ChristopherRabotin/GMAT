@@ -671,16 +671,24 @@ const std::string& PropSetup::GetGeneratingString(Gmat::WriteMode mode,
             const std::string &prefix, const std::string &useName)
 {
    std::string gen, fMName = "", temp;
+   bool showForceModel = false;
 
    if (mForceModel != NULL)
    {
       temp = mForceModel->GetName();
-      if (temp == "") {
+      if (temp == "")
+      {
          fMName = instanceName + "_ForceModel";
-         gen = mForceModel->GetGeneratingString(mode, prefix, fMName) + "\n";
+         showForceModel = true;
       }
       else
          fMName = temp;
+         
+      if (mode == Gmat::SHOW_SCRIPT)
+         showForceModel = true;
+         
+      if (showForceModel)
+         gen = mForceModel->GetGeneratingString(mode, prefix, fMName) + "\n";
    }
 
    gen += GmatBase::GetGeneratingString(mode, prefix, useName);

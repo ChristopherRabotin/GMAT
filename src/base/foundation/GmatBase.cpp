@@ -37,6 +37,9 @@
 #include "GmatBase.hpp"
 #include <sstream>         // for StringStream
 
+#include "MessageInterface.hpp"
+
+
 /// Set the static "undefined" parameters
 const Real        GmatBase::REAL_PARAMETER_UNDEFINED = -987654321.0123e-45;
 const Integer     GmatBase::INTEGER_PARAMETER_UNDEFINED = -987654321;
@@ -638,6 +641,7 @@ std::string GmatBase::GetParameterText(const Integer id) const
  *
  * @return the parameter ID, or -1 if there is no associated ID.
  */
+//---------------------------------------------------------------------------
 Integer GmatBase::GetParameterID(const std::string &str) const
 {
    std::string desc = instanceName;
@@ -645,6 +649,48 @@ Integer GmatBase::GetParameterID(const std::string &str) const
       desc = typeName;
    throw GmatBaseException("No parameter defined with description \"" + str + 
                            "\" on " + desc);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::IsParameterReadOnly(const Integer id) const
+{
+   if ((id < 0) || (id >= parameterCount))
+   {
+      std::stringstream errmsg;
+      errmsg << "No parameter defined with id " << id <<" on " << typeName
+             << " named \"" << instanceName <<"\"";
+      throw GmatBaseException(errmsg.str());
+   }
+   return false;
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <label> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not.
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::IsParameterReadOnly(const std::string &label) const
+{
+   return false;
 }
 
 
@@ -1946,7 +1992,7 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
    data.precision(18);   // Crank up the data precision so we don't use anything
    std::string preface = "", nomme;
    
-   if (mode == Gmat::SCRIPTING)
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT))
       inMatlabMode = false;
    if (mode == Gmat::MATLAB_STRUCT)
       inMatlabMode = true;
@@ -1956,7 +2002,8 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
    else
       nomme = instanceName;
    
-   if (mode == Gmat::SCRIPTING) {
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT))
+   {
       std::string tname = typeName;
       if (tname == "PropSetup")
          tname = "Propagator";
@@ -2020,6 +2067,7 @@ StringArray GmatBase::GetGeneratingStringArray(Gmat::WriteMode mode,
    return sar;
 }
 
+
 //------------------------------------------------------------------------------
 // void WriteParameters(std::string &prefix, GmatBase *obj)
 //------------------------------------------------------------------------------
@@ -2033,63 +2081,65 @@ StringArray GmatBase::GetGeneratingStringArray(Gmat::WriteMode mode,
 void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix, 
                                std::stringstream &stream)
 {
-    Integer i;
-    Gmat::ParameterType parmType;
+   Integer i;
+   Gmat::ParameterType parmType;
     
-    for (i = 0; i < parameterCount; ++i) 
-    {
-        parmType = GetParameterType(i);
-        // Handle StringArray parameters separately
-        if (parmType != Gmat::STRINGARRAY_TYPE) {
-           // Skip unhandled types
-           if (
-               (parmType != Gmat::UNSIGNED_INTARRAY_TYPE) &&
-               (parmType != Gmat::RVECTOR_TYPE) &&
-//               (parmType != Gmat::RVECTOR3_TYPE) &&
-//               (parmType != Gmat::RVECTOR6_TYPE) &&
-               (parmType != Gmat::RMATRIX_TYPE) &&
-//               (parmType != Gmat::RMATRIX33_TYPE) &&
-//               (parmType != Gmat::CARTESIAN_TYPE) &&
-//               (parmType != Gmat::KEPLERIAN_TYPE) &&
-//               (parmType != Gmat::A1MJD_TYPE) &&
-//               (parmType != Gmat::UTCDATE_TYPE) &&
-               (parmType != Gmat::OBJECT_TYPE) &&
-               (parmType != Gmat::UNKNOWN_PARAMETER_TYPE)               
-              ) {
-              // Fill in the l.h.s.
-              stream << prefix << GetParameterText(i) << " = ";
-              WriteParameterValue(i, stream);
-              stream << ";\n";
-           }
-        }
-        else {
-           stream << prefix << GetParameterText(i) << " = {";
-           StringArray sar = GetStringArrayParameter(i);
-           for (StringArray::iterator n = sar.begin(); n != sar.end(); ++n) {
-              if (n != sar.begin())
-                 stream << ", ";
-              if (inMatlabMode)
-                 stream << "'";
-              stream << (*n);
-              if (inMatlabMode)
-                 stream << "'";
-           }
-           stream << "};\n";
-        }
-    }
+   for (i = 0; i < parameterCount; ++i)
+   {
+      if (IsParameterReadOnly(i) == false)
+      {
+         parmType = GetParameterType(i);
+         // Handle StringArray parameters separately
+         if (parmType != Gmat::STRINGARRAY_TYPE)
+         {
+            // Skip unhandled types
+            if (
+                (parmType != Gmat::UNSIGNED_INTARRAY_TYPE) &&
+                (parmType != Gmat::RVECTOR_TYPE) &&
+                (parmType != Gmat::RMATRIX_TYPE) &&
+                (parmType != Gmat::OBJECT_TYPE) &&
+                (parmType != Gmat::UNKNOWN_PARAMETER_TYPE)
+               )
+            {
+               // Fill in the l.h.s.
+               stream << prefix << GetParameterText(i) << " = ";
+               WriteParameterValue(i, stream);
+               stream << ";\n";
+            }
+         }
+         else
+         {
+            // Handle StringArrays
+            stream << prefix << GetParameterText(i) << " = {";
+            StringArray sar = GetStringArrayParameter(i);
+            for (StringArray::iterator n = sar.begin(); n != sar.end(); ++n)
+            {
+               if (n != sar.begin())
+                  stream << ", ";
+               if (inMatlabMode)
+                  stream << "'";
+               stream << (*n);
+               if (inMatlabMode)
+                  stream << "'";
+            }
+            stream << "};\n";
+         }
+      }
+   }
 
-    GmatBase *ownedObject;
-    std::string nomme, newprefix;
-    for (i = 0; i < GetOwnedObjectCount(); ++i) {
-       newprefix = prefix + ".";
-       ownedObject = GetOwnedObject(i);
-       nomme = ownedObject->GetName();
-       if (nomme != "")
-          newprefix += nomme;
-       else
-          newprefix += ownedObject->GetTypeName();
-       ownedObject->GetGeneratingString(Gmat::OWNED_OBJECT, newprefix);
-    }
+   GmatBase *ownedObject;
+   std::string nomme, newprefix;
+   for (i = 0; i < GetOwnedObjectCount(); ++i)
+   {
+      newprefix = prefix + ".";
+      ownedObject = GetOwnedObject(i);
+      nomme = ownedObject->GetName();
+      if (nomme != "")
+         newprefix += nomme;
+      else
+         newprefix += ownedObject->GetTypeName();
+      ownedObject->GetGeneratingString(Gmat::OWNED_OBJECT, newprefix);
+   }
 }
 
 

@@ -276,6 +276,26 @@ std::string Integrator::GetParameterTypeString(const Integer id) const
         return Propagator::GetParameterTypeString(id);
 }
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool Integrator::IsParameterReadOnly(const Integer id) const
+{
+   if ((id == ERROR_THRESHOLD) || (id == SMALLEST_INTERVAL))
+      return true;
+
+   return Propagator::IsParameterReadOnly(id);
+}
+
 //------------------------------------------------------------------------------
 // Real Integrator::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------

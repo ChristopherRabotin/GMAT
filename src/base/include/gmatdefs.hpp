@@ -157,6 +157,7 @@ namespace Gmat
    enum WriteMode 
    {
       SCRIPTING,
+      SHOW_SCRIPT,
       OWNED_OBJECT,
       MATLAB_STRUCT,
    };
