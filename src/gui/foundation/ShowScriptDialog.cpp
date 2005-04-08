@@ -58,8 +58,8 @@ void ShowScriptDialog::Create()
    wxString text = "Script not yet available for this panel";
    wxSize scriptPanelSize(500, 32);
    if (theObject != NULL) {
-      text = theObject->GetGeneratingString().c_str();
-      StringArray sar = theObject->GetGeneratingStringArray();
+      text = theObject->GetGeneratingString(Gmat::SHOW_SCRIPT).c_str();
+      StringArray sar = theObject->GetGeneratingStringArray(Gmat::SHOW_SCRIPT);
       Integer size = sar.size();
       scriptPanelSize.Set(500, 32 + size * 14);
    }
