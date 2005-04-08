@@ -397,3 +397,24 @@ std::string* Rvector3::ToValueStrings()
    return stringValues;
 }
 
+//loj: 4/7/05 Added
+//------------------------------------------------------------------------------
+//  std::string ToString()
+//------------------------------------------------------------------------------
+/**
+ * @return data value string
+ */
+//------------------------------------------------------------------------------
+std::string Rvector3::ToString()
+{
+   std::string s;
+   std::string *val;
+
+   val = ToValueStrings();
+   
+   for (int i=0; i<NUM_DATA; i++)
+      s = s + val[i] + " ";
+   
+   return s;
+}
+
