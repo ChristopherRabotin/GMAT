@@ -45,7 +45,7 @@ OrbitData::VALID_OBJECT_TYPE_LIST[OrbitDataObjectCount] =
    "Spacecraft",
    "SolarSystem",
    "CoordinateSystem",
-   "CelestialBody"
+   "SpacePoint"
 }; 
 
 
@@ -148,10 +148,10 @@ Rvector6 OrbitData::GetCartState()
    
    if (elemType == "Cartesian")
    {
-      PropState statePtr = mSpacecraft->GetState(); // should be cartesian state
+      PropState ps = mSpacecraft->GetState(); // should be cartesian state
       for (int i=0; i<6; i++)
-         mCartState[i] = statePtr[i];
-
+         mCartState[i] = ps[i];
+      
       if (mInternalCoordSystem == NULL || mOutCoordSystem == NULL)
       {
          MessageInterface::ShowMessage
@@ -174,24 +174,29 @@ Rvector6 OrbitData::GetCartState()
              mCartEpoch, mCartState.ToString().c_str());
          #endif
 
-         mCoordConverter.Convert(A1Mjd(mCartEpoch), mCartState, mInternalCoordSystem,
-                                 mCartState, mOutCoordSystem);
-         
-         #if DEBUG_ORBITDATA_CONVERT
-         MessageInterface::ShowMessage
-            ("OrbitData::GetCartState() --After convert: mCartEpoch=%f\n"
-             "state = %s\n", mCartEpoch, mCartState.ToString().c_str());
-         #endif
-         
+         try
+         {
+            mCoordConverter.Convert(A1Mjd(mCartEpoch), mCartState, mInternalCoordSystem,
+                                    mCartState, mOutCoordSystem);
+            #if DEBUG_ORBITDATA_CONVERT
+               MessageInterface::ShowMessage
+                  ("OrbitData::GetCartState() --After convert: mCartEpoch=%f\n"
+                   "state = %s\n", mCartEpoch, mCartState.ToString().c_str());
+             #endif
+         }
+         catch (BaseException &e)
+         {
+            MessageInterface::ShowMessage(e.GetMessage());
+         }
       }
    }
    else if (elemType == "Keplerian")
    {
       Real grav = mGravConst;
       
-      PropState statePtr = mSpacecraft->GetState(); // should be keplerian state
+      PropState ps = mSpacecraft->GetState(); // should be keplerian state
       Real kepl[6];
-      memcpy(kepl, statePtr.GetState(), 6*sizeof(Real));
+      memcpy(kepl, ps.GetState(), 6*sizeof(Real));
 
       Rvector6 keplState = Rvector6(kepl);
 
@@ -225,25 +230,25 @@ Rvector6 OrbitData::GetKepState()
    std::string elemType = mSpacecraft->GetStringParameter(id);
       
    #ifdef DEBUG_ORBITDATA_RUN
-   PropState statePtr = mSpacecraft->GetState(); // should be cartesian state
+   PropState ps = mSpacecraft->GetState(); // should be cartesian state
    std::cout << "OrbitData::GetKepState for spacecraft " << mSpacecraft->GetName() <<"\n";
    std::cout << "   elemType == " << elemType <<"\n";
    for (int i=0; i<6; i++)
    {
-      std::cout << "  el[" << i << "] = " << statePtr[i] << "\n";
+      std::cout << "  el[" << i << "] = " << ps[i] << "\n";
    }            
    #endif
 
    if (elemType == "Keplerian")
    {
-      PropState statePtr = mSpacecraft->GetState(); // should be keplerian state
+      PropState ps = mSpacecraft->GetState(); // should be keplerian state
             
       for (int i=0; i<6; i++)
       {
          #ifdef DEBUG_ORBITDATA_RUN
-         std::cout << "  el[" << i << "] = " << statePtr[i] << "\n";
+         std::cout << "  el[" << i << "] = " << ps[i] << "\n";
          #endif
-         mKepState[i] = statePtr[i];
+         mKepState[i] = ps[i];
       }            
    }
    else if (elemType == "Cartesian")
@@ -285,25 +290,25 @@ Rvector6 OrbitData::GetModKepState()
    std::string elemType = mSpacecraft->GetStringParameter(id);
    
    #ifdef DEBUG_ORBITDATA_RUN
-   PropState statePtr = mSpacecraft->GetState(); // should be cartesian state
+   PropState ps = mSpacecraft->GetState(); // should be cartesian state
    std::cout << "OrbitData::GetModKepState for spacecraft " << mSpacecraft->GetName() <<"\n";
    std::cout << "   elemType == " << elemType <<"\n";
    for (int i=0; i<6; i++)
    {
-      std::cout << "  el[" << i << "] = " << statePtr[i] << "\n";
+      std::cout << "  el[" << i << "] = " << ps[i] << "\n";
    }            
    #endif
    
    if (elemType == "Keplerian")
    {
-      PropState statePtr = mSpacecraft->GetState(); // should be keplerian state
+      PropState ps = mSpacecraft->GetState(); // should be keplerian state
       
       for (int i=0; i<6; i++)
       {
          #ifdef DEBUG_ORBITDATA_RUN
-         std::cout << "  el[" << i << "] = " << statePtr[i] << "\n";
+         std::cout << "  el[" << i << "] = " << ps[i] << "\n";
          #endif
-         mKepState[i] = statePtr[i];
+         mKepState[i] = ps[i];
       }
 
       mModKepState = KeplerianToModKeplerian(mKepState);
@@ -612,7 +617,7 @@ Real OrbitData::GetSphRaDecReal(const std::string &str)
       else
       {
          Real rmag = GetPositionMagnitude(mOrigin);
-         return rmag - mOrigin->GetEquatorialRadius();
+         return rmag - ((CelestialBody*)mOrigin)->GetEquatorialRadius();
       }
    }
    else
@@ -804,12 +809,11 @@ void OrbitData::InitializeRefObjects()
    // get gravity constant of the central body
    mGravConst = mCentralBody->GetGravitationalConstant();
    
-   //loj: 4/7/05 Added
-   // if dependent body name exist, get dependent body pointer from SolarSystem
-   // since individual CelelestialBody object is not set from the Sandbox
+   //loj: 4/11/05 Added
+   // if dependent body name exist and it is a CelestialBody, set gravity constant
    
    std::string originName =
-      FindFirstObjectName(GmatBase::GetObjectType(VALID_OBJECT_TYPE_LIST[CELESTIAL_BODY]));
+      FindFirstObjectName(GmatBase::GetObjectType(VALID_OBJECT_TYPE_LIST[SPACE_POINT]));
 
    if (originName != "")
    {
@@ -819,14 +823,17 @@ void OrbitData::InitializeRefObjects()
              originName.c_str());
       #endif
          
-      mOrigin = mSolarSystem->GetBody(originName);
+      mOrigin =
+         (SpacePoint*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACE_POINT]);
+
       if (!mOrigin)
          throw ParameterException
-            ("OrbitData::InitializeRefObjects() parameter dependent body not "
-             "found in the SolarSystem: " + originName + "\n");
-
-      // override gravity constant to use origin
-      mGravConst = mOrigin->GetGravitationalConstant();
+            ("OrbitData::InitializeRefObjects() Cannot find Origin object: " +
+             originName + "\n");
+      
+      // override gravity constant if origin is CelestialBody
+      if (mOrigin->GetType() == Gmat::CELESTIAL_BODY)
+         mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
    }
    
 }
@@ -887,7 +894,7 @@ void OrbitData::SetInternalCoordSys(CoordinateSystem *cs)
 
 //loj: 4/7/05 Added
 //------------------------------------------------------------------------------
-// Rvector6 OrbitData::GetRelativeCartState(CelestialBody *origin)
+// Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
 //------------------------------------------------------------------------------
 /**
  * Computes spacecraft cartesian state from the given origin.
@@ -897,13 +904,13 @@ void OrbitData::SetInternalCoordSys(CoordinateSystem *cs)
  * @return spacecraft state from the given origin.
  */
 //------------------------------------------------------------------------------
-Rvector6 OrbitData::GetRelativeCartState(CelestialBody *origin)
+Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
 {
    // get spacecraft state
    Rvector6 scState = GetCartState();
 
    // get origin state
-   Rvector6 originState = origin->GetState(mCartEpoch);
+   Rvector6 originState = origin->GetMJ2000State(mCartEpoch);
 
    // return relative state
    return scState - originState;
@@ -911,7 +918,7 @@ Rvector6 OrbitData::GetRelativeCartState(CelestialBody *origin)
 
 
 //------------------------------------------------------------------------------
-// Real OrbitData::GetPositionMagnitude(CelestialBody *origin)
+// Real OrbitData::GetPositionMagnitude(SpacePoint *origin)
 //------------------------------------------------------------------------------
 /**
  * Computes position magnitude from the given origin.
@@ -921,14 +928,15 @@ Rvector6 OrbitData::GetRelativeCartState(CelestialBody *origin)
  * @return position magnitude from the given origin.
  */
 //------------------------------------------------------------------------------
-Real OrbitData::GetPositionMagnitude(CelestialBody *origin)
+Real OrbitData::GetPositionMagnitude(SpacePoint *origin)
 {
    // get spacecraft position
    Rvector6 scState = GetCartState();
    Rvector3 scPos = Rvector3(scState[0], scState[1], scState[2]);
 
    // get origin position
-   Rvector6 originState = origin->GetState(mCartEpoch);
+   //Rvector6 originState = origin->GetState(mCartEpoch);
+   Rvector6 originState = origin->GetMJ2000State(mCartEpoch);
    Rvector3 originPos = Rvector3(originState[0], originState[1], originState[2]);
 
    // get relative position magnitude

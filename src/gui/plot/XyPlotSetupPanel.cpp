@@ -26,7 +26,7 @@
 
 #include "wx/colordlg.h"                // for wxColourDialog
 
-#define DEBUG_XYPLOT_PANEL 1
+//#define DEBUG_XYPLOT_PANEL 1
 
 //------------------------------
 // event tables for wxWindows
@@ -858,21 +858,29 @@ Parameter* XyPlotSetupPanel::GetParameter(const wxString &name)
       
       #ifdef DEBUG_XYPLOT_PANEL
          MessageInterface::ShowMessage
-            ("XyPlotSetupPanel::CreateParameter() paramName : %s does not exist. "
+            ("XyPlotSetupPanel::GetParameter() paramName : %s does not exist. "
              "So creating.\n", paramName.c_str());
       #endif
+
+      try
+      {
+         param = theGuiInterpreter->CreateParameter(propName, paramName);
+         param->SetRefObjectName(Gmat::SPACECRAFT, ownerName);
       
-      param = theGuiInterpreter->CreateParameter(propName, paramName);
-      param->SetRefObjectName(Gmat::SPACECRAFT, ownerName);
+         if (depObjName != "")
+            param->SetStringParameter("DepObject", depObjName);
       
-      if (depObjName != "")
-         param->SetStringParameter("DepObject", depObjName);
-      
-      if (mCoordSysComboBox->IsShown())
-         param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
-      else
-         param->SetRefObjectName(Gmat::CELESTIAL_BODY, depObjName); //loj: 4/7/05 Added
-         
+         if (param->IsCoordSysDependent())
+            param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
+         else if (param->IsOriginDependent())
+            param->SetRefObjectName(Gmat::SPACE_POINT, depObjName); //loj: 4/11/05 Added
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::ShowMessage
+            ("XyPlotSetupPanel:GetParameter() error occurred!\n%s\n",
+             e.GetMessage().c_str());
+      }
    }
    
    return param;

@@ -43,7 +43,7 @@ SemilatusRectum::SemilatusRectum(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "SemilatusRectum", obj, "Semilatus Rectum", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -157,7 +157,7 @@ AngularMomentumMag::AngularMomentumMag(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "HMAG", obj, "Angular Momentum Mag", "Km^2/s", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 

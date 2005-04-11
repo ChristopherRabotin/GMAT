@@ -67,8 +67,8 @@ protected:
    CoordinateSystem* GetInternalCoordSys();
    
    void SetInternalCoordSys(CoordinateSystem *cs);
-   Rvector6 GetRelativeCartState(CelestialBody *origin);
-   Real GetPositionMagnitude(CelestialBody *origin);
+   Rvector6 GetRelativeCartState(SpacePoint *origin);
+   Real GetPositionMagnitude(SpacePoint *origin);
    
    Rvector6 mCartState;
    Rvector6 mKepState;
@@ -83,7 +83,7 @@ protected:
    Spacecraft *mSpacecraft;
    SolarSystem *mSolarSystem;
    CelestialBody *mCentralBody;
-   CelestialBody *mOrigin; //loj: 4/7/05 Added
+   SpacePoint *mOrigin; //loj: 4/11/05 Added
    CoordinateSystem *mInternalCoordSystem;
    CoordinateSystem *mOutCoordSystem;
    
@@ -99,7 +99,7 @@ protected:
       SPACECRAFT = 0,
       SOLAR_SYSTEM,
       COORD_SYSTEM,
-      CELESTIAL_BODY, //loj: 4/7/05 Added
+      SPACE_POINT, //loj: 4/11/05 Changed CELESTIAL_BODY to SPACE_POINT
       OrbitDataObjectCount
    };
    

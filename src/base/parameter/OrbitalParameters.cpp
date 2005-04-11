@@ -48,7 +48,7 @@ VelApoapsis::VelApoapsis(const std::string &name, GmatBase *obj)
                GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -166,7 +166,7 @@ VelPeriapsis::VelPeriapsis(const std::string &name, GmatBase *obj)
                GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -284,7 +284,7 @@ Apoapsis::Apoapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Apoapsis", obj, "Apoapsis", " ", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -413,7 +413,7 @@ Periapsis::Periapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Periapsis", obj, "Periapsis", " ", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -539,7 +539,7 @@ OrbitPeriod::OrbitPeriod(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "OrbitPeriod", obj, "Orbit Period", "s", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -653,7 +653,7 @@ RadApoapsis::RadApoapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "RadApo", obj, "Radius at Apoapsis", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -767,7 +767,7 @@ RadPeriapsis::RadPeriapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "RadPer", obj, "Radius at Periapsis", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -881,7 +881,7 @@ C3Energy::C3Energy(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "C3Energy", obj, "C-3 Energy", "Km^2/s^2", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -995,7 +995,7 @@ Energy::Energy(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Energy", obj, "Energy", "Km^2/s^2", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -1109,7 +1109,7 @@ Altitude::Altitude(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Altitude", obj, "Altitude", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 

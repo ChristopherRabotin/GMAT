@@ -43,7 +43,7 @@ KepSMA::KepSMA(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "SMA", obj, "Semi-Major Axis", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -156,7 +156,7 @@ KepEcc::KepEcc(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "ECC", obj, "Eccentricity", " ", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -718,7 +718,7 @@ KepTA::KepTA(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "TA", obj, "True Anomaly", "Deg", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -831,7 +831,7 @@ KepMA::KepMA(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "MA", obj, "Mean Anomaly", "Deg", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -944,7 +944,7 @@ KepMM::KepMM(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "MM", obj, "Mean Motion", "Deg", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 

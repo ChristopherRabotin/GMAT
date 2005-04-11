@@ -62,22 +62,22 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
-                                   const wxString &subscriberName)
-    : GmatPanel(parent)
+                                           const wxString &subscriberName)
+   : GmatPanel(parent)
 {
-    //MessageInterface::ShowMessage("ReportFileSetupPanel() entering...\n");
-    //MessageInterface::ShowMessage("ReportFileSetupPanel() subscriberName = " +
-    //                              std::string(subscriberName.c_str()) + "\n");
+   //MessageInterface::ShowMessage("ReportFileSetupPanel() entering...\n");
+   //MessageInterface::ShowMessage("ReportFileSetupPanel() subscriberName = " +
+   //                              std::string(subscriberName.c_str()) + "\n");
     
-    Subscriber *subscriber =
-        theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
+   Subscriber *subscriber =
+      theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
 
-    reportFile = (ReportFile*)subscriber;
+   reportFile = (ReportFile*)subscriber;
 
-    Create();
-    Show();
-    mUseUserParam = false;
-    theApplyButton->Disable();
+   Create();
+   Show();
+   mUseUserParam = false;
+   theApplyButton->Disable();
 }
 
 //-------------------------------
@@ -89,7 +89,7 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::OnWriteCheckBoxChange(wxCommandEvent& event)
 {
-    theApplyButton->Enable();
+   theApplyButton->Enable();
 }
 
 //----------------------------------
@@ -107,10 +107,10 @@ void ReportFileSetupPanel::OnWriteCheckBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::Create()
 {
-    //MessageInterface::ShowMessage("ReportFileSetupPanel::Create() entering...\n");
+   //MessageInterface::ShowMessage("ReportFileSetupPanel::Create() entering...\n");
    
-    Integer bsize = 2; // border size
-    wxString emptyList[] = {};
+   Integer bsize = 2; // border size
+   wxString emptyList[] = {};
 
    //------------------------------------------------------
    // available variables list (1st column)
@@ -232,54 +232,54 @@ void ReportFileSetupPanel::Create()
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::LoadData()
 {
-    // Set the pointer for the "Show Script" button
-    mObject = reportFile;
+   // Set the pointer for the "Show Script" button
+   mObject = reportFile;
     
-    // load data from the core engine
-    writeCheckBox->SetValue(reportFile->IsActive());
+   // load data from the core engine
+   writeCheckBox->SetValue(reportFile->IsActive());
 
-    // load file name data from core engine
-    int filenameId = reportFile->GetParameterID("Filename");
-    std::string filename = reportFile->GetStringParameter(filenameId);
-    fileTextCtrl->SetValue(wxT(filename.c_str()));
+   // load file name data from core engine
+   int filenameId = reportFile->GetParameterID("Filename");
+   std::string filename = reportFile->GetStringParameter(filenameId);
+   fileTextCtrl->SetValue(wxT(filename.c_str()));
     
-    int writeHeadersId = reportFile->GetParameterID("WriteHeaders");
-    if (strcmp(reportFile->GetStringParameter(writeHeadersId).c_str(), "On") == 0)
+   int writeHeadersId = reportFile->GetParameterID("WriteHeaders");
+   if (strcmp(reportFile->GetStringParameter(writeHeadersId).c_str(), "On") == 0)
       showHeaderCheckBox->SetValue(true);
-    else
+   else
       showHeaderCheckBox->SetValue(false);                     
     
-    int spacesId = reportFile->GetParameterID("ColumnWidth");
-    wxString numSpacesValue;
-    numSpacesValue.Printf("%d", reportFile->GetIntegerParameter(spacesId));
-    colWidthTextCtrl->SetValue(numSpacesValue);
+   int spacesId = reportFile->GetParameterID("ColumnWidth");
+   wxString numSpacesValue;
+   numSpacesValue.Printf("%d", reportFile->GetIntegerParameter(spacesId));
+   colWidthTextCtrl->SetValue(numSpacesValue);
     
-    StringArray varParamList = reportFile->GetStringArrayParameter("Add");
-    mNumVarParams = varParamList.size();
+   StringArray varParamList = reportFile->GetStringArrayParameter("Add");
+   mNumVarParams = varParamList.size();
 
-    if (mNumVarParams > 0)
-    {
+   if (mNumVarParams > 0)
+   {
 
-       wxString *varParamNames = new wxString[mNumVarParams];
-       Parameter *param;
+      wxString *varParamNames = new wxString[mNumVarParams];
+      Parameter *param;
          
-       for (int i=0; i<mNumVarParams; i++)
-       {
-          varParamNames[i] = varParamList[i].c_str();
-          param = theGuiInterpreter->GetParameter(varParamList[i]);
-       }
+      for (int i=0; i<mNumVarParams; i++)
+      {
+         varParamNames[i] = varParamList[i].c_str();
+         param = theGuiInterpreter->GetParameter(varParamList[i]);
+      }
     
-       mVarSelectedListBox->Set(mNumVarParams, varParamNames);
-       mVarSelectedListBox->SetSelection(0);
-       delete varParamNames;
-    }
+      mVarSelectedListBox->Set(mNumVarParams, varParamNames);
+      mVarSelectedListBox->SetSelection(0);
+      delete varParamNames;
+   }
     
-    mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
-    mObjectComboBox->SetSelection(0);
-    mPropertyListBox->SetSelection(0);
+   mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
+   mObjectComboBox->SetSelection(0);
+   mPropertyListBox->SetSelection(0);
     
-    // show coordinate system or central body
-    ShowCoordSystem();
+   // show coordinate system or central body
+   ShowCoordSystem();
 
 }
 
@@ -577,16 +577,25 @@ Parameter* ReportFileSetupPanel::GetParameter(const wxString &name)
       else if (mCentralBodyComboBox->IsShown())
          depObjName = std::string(mCentralBodyComboBox->GetStringSelection().c_str());
 
-      param = theGuiInterpreter->CreateParameter(propName, paramName);
-      param->SetRefObjectName(Gmat::SPACECRAFT, objName);
+      try
+      {
+         param = theGuiInterpreter->CreateParameter(propName, paramName);
+         param->SetRefObjectName(Gmat::SPACECRAFT, objName);
       
-      if (depObjName != "")
-         param->SetStringParameter("DepObject", depObjName);
+         if (depObjName != "")
+            param->SetStringParameter("DepObject", depObjName);
       
-      if (mCoordSysComboBox->IsShown())
-         param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
-      else
-         param->SetRefObjectName(Gmat::CELESTIAL_BODY, depObjName); //loj: 4/7/05 Added
+         if (param->IsCoordSysDependent())
+            param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
+         else if (param->IsOriginDependent())
+            param->SetRefObjectName(Gmat::SPACE_POINT, depObjName); //loj: 4/11/05 Added
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::ShowMessage
+            ("ReportFileSetupPanel:GetParameter() error occurred!\n%s\n",
+             e.GetMessage().c_str());
+      }
    }
    
    return param;

@@ -37,7 +37,7 @@ EnvData::VALID_OBJECT_TYPE_LIST[EnvDataObjectCount] =
 {
    "Spacecraft",
    "SolarSystem",
-   "CelestialBody"
+   "SpacePoint"
 }; 
 
 //---------------------------------
@@ -219,12 +219,11 @@ void EnvData::InitializeRefObjects()
       throw ParameterException("EnvData::GetCartState() Body not found in the "
                                "SolarSystem: " + bodyName + "\n");
 
-   //loj: 4/7/05 Added
-   // if dependent body name exist, get dependent body pointer from SolarSystem
-   // since individual CelelestialBody object is not set from the Sandbox
+   //loj: 4/11/05 Added
+   // if dependent body name exist and it is a CelestialBody, set gravity constant
    
    std::string originName =
-      FindFirstObjectName(GmatBase::GetObjectType(VALID_OBJECT_TYPE_LIST[CELESTIAL_BODY]));
+      FindFirstObjectName(GmatBase::GetObjectType(VALID_OBJECT_TYPE_LIST[SPACE_POINT]));
 
    if (originName != "")
    {
@@ -234,7 +233,9 @@ void EnvData::InitializeRefObjects()
              originName.c_str());
       #endif
          
-      mOrigin = mSolarSystem->GetBody(originName);
+      mOrigin =
+         (CelestialBody*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACE_POINT]);
+      
       if (!mOrigin)
          throw ParameterException
             ("EnvData::InitializeRefObjects() parameter dependent body not "

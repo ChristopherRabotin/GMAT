@@ -45,7 +45,7 @@ GHA::GHA(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "Earth";
    PlanetData::mCentralBodyName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    SetRefObjectName(Gmat::PARAMETER, "CurrA1MJD"); //if parameter, use type name
 }
 
@@ -160,7 +160,7 @@ Longitude::Longitude(const std::string &name, GmatBase *obj)
                 Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    PlanetData::mCentralBodyName = "Earth";
 }
 
@@ -275,7 +275,7 @@ Latitude::Latitude(const std::string &name, GmatBase *obj)
                 Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    PlanetData::mCentralBodyName = "Earth";
 }
 
@@ -390,7 +390,7 @@ LST::LST(const std::string &name, GmatBase *obj)
                 Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    PlanetData::mCentralBodyName = "Earth";
 }
 
@@ -506,7 +506,7 @@ BetaAngle::BetaAngle(const std::string &name, GmatBase *obj)
                 Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::CELESTIAL_BODY, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
    PlanetData::mCentralBodyName = "Earth";
 }
 

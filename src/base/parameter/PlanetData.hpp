@@ -59,7 +59,7 @@ protected:
    {
       SPACECRAFT = 0,
       SOLAR_SYSTEM,
-      CELESTIAL_BODY, //loj: 4/7/05 Added
+      SPACE_POINT, //loj: 4/11/05 Changed CELESTIAL_BODY to SPACE_POINT
       PlanetDataObjectCount
    };
    
