@@ -296,16 +296,16 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
                                                   const std::string &prefix,
                                                   const std::string &useName)
 {
-   std::string gen = "Propagate ";
+   std::string gen = "Propagate";
    
    // Construct the generating string
    Integer index = 0;
    
    if (currentPropMode != "")
-      gen += (currentPropMode + " ");
+      gen += (" " + currentPropMode);
    for (StringArray::iterator prop = propName.begin(); prop != propName.end();
         ++prop) {
-      gen += (*prop) + "(";
+      gen += " " + (*prop) + "(";
       // Spaceobjects that are propagated by this PropSetup
       StringArray *sats = satName[index];
       for (StringArray::iterator sc = sats->begin(); sc != sats->end(); ++sc) {
@@ -319,9 +319,9 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
       if (stopWhen.size() > 0) {
          gen += ", {";
          
-         std::stringstream stopCondDesc;
          for (std::vector<StopCondition*>::iterator stp = stopWhen.begin();
               stp != stopWhen.end(); ++stp) {
+            std::stringstream stopCondDesc;
             if (stp != stopWhen.begin())
                gen += ", ";
             

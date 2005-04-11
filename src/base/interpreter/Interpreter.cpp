@@ -1753,6 +1753,14 @@ StringArray& Interpreter::Decompose(const std::string &chunk)
       elements = SeparateSpaces(chunk);
    }
    
+   #ifdef DEBUG_TOKEN_PARSING_DETAILS
+      MessageInterface::ShowMessage("In Decompose: string = \"%s\"\n"
+         "   Pieces are\n",
+         chunk.c_str());
+
+      for (StringArray::iterator i = elements.begin(); i != elements.end(); ++i)
+         MessageInterface::ShowMessage("      \"%s\"\n", i->c_str());
+   #endif
    return elements;
 }
 
@@ -2347,62 +2355,103 @@ bool Interpreter::ConstructRHS(GmatBase *lhsObject, const std::string& rhs,
          "\" registered using \"", label.c_str(), "\" for object \"",
          lhsObject->GetName().c_str());
    #endif
+
+   bool retval = false;
    
-   StringArray sar = Decompose(rhs);
-   if ((sar.size() > 1) && isalpha(sar[1][0])) {
-      if (!IsGroup(rhs.c_str())) {
-         std::string name = rhs;
+   StringArray sar, temp, elements;
+   if (IsGroup(rhs.c_str()))
+   {
+      #ifdef DEBUG_RHS_PARSING
+         MessageInterface::ShowMessage("RHS is a group");
+      #endif
+      sar = Decompose(rhs);
+   }
+   else
+   {
+      #ifdef DEBUG_RHS_PARSING
+         MessageInterface::ShowMessage("RHS is not a group\n");
+      #endif
+      sar.push_back(rhs);
+   }
+   
+   for (StringArray::iterator i = sar.begin(); i != sar.end(); ++i)
+   {
+      temp = Decompose(*i);
+      if ((temp.size() > 1) && isalpha(sar[0][0]))
+      {
+         #ifdef DEBUG_RHS_PARSING_DETAILS
+            MessageInterface::ShowMessage("   Working with %s\n", i->c_str());
+         #endif
+         std::string name = *i; //rhs;
          std::string paramType, paramObj, parmSystem;
-         InterpretParameter(name, paramType, paramObj, parmSystem);
-         if (moderator->IsParameter(paramType))
+         #ifdef DEBUG_RHS_PARSING_DETAILS
+            MessageInterface::ShowMessage("   Calling InterpretParameter\n");
+         #endif
+         if (InterpretParameter(name, paramType, paramObj, parmSystem))
          {
-            #ifdef DEBUG_RHS_PARSING
-               MessageInterface::ShowMessage("%s%s\" named \"%s\"\n",
-                                             "Attempting to build parameter \"",
-                                             paramType.c_str(), name.c_str());
+            #ifdef DEBUG_RHS_PARSING_DETAILS
+               MessageInterface::ShowMessage("   Calling IsParameter(%s)\n",
+                  paramType.c_str());
             #endif
-            Parameter *parm = CreateParameter(name, paramType);
-            if (parm != NULL) {
-               //GmatBase *parmObj = FindObject(sar[0]);
-               std::string parmtype = "Object";
+            if (moderator->IsParameter(paramType))
+            {
                #ifdef DEBUG_RHS_PARSING
-                  MessageInterface::ShowMessage("%s%s%s%s%s%s\"\n",
-                                                "Assigning \"",
-                                                paramObj.c_str(),
-                                                "\" to parameter \"", 
-                                                parm->GetName().c_str(),
-                                                "\" with descriptor \"",
-                                                parmtype.c_str());
+                  MessageInterface::ShowMessage("%s%s\" named \"%s\"\n",
+                                                "Attempting to build parameter \"",
+                                                paramType.c_str(), name.c_str());
                #endif
-               parm->SetStringParameter(parmtype, paramObj);
+               Parameter *parm = CreateParameter(name, paramType);
+               if (parm != NULL)
+               {
+                  //GmatBase *parmObj = FindObject(sar[0]);
+                  std::string parmtype = "Object";
+                  #ifdef DEBUG_RHS_PARSING
+                     MessageInterface::ShowMessage("%s%s%s%s%s%s\"\n",
+                                                   "Assigning \"",
+                                                   paramObj.c_str(),
+                                                   "\" to parameter \"",
+                                                   parm->GetName().c_str(),
+                                                   "\" with descriptor \"",
+                                                   parmtype.c_str());
+                  #endif
+                  parm->SetStringParameter(parmtype, paramObj);
 
-               if (parm->IsCoordSysDependent()) {
-                  if (parmSystem == "")
-                     parmSystem = "EarthMJ2000Eq";
-                  // Which is correct here???
-                  parm->SetStringParameter("DepObject", parmSystem);
-                  parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
+                  if (parm->IsCoordSysDependent())
+                  {
+                     if (parmSystem == "")
+                        parmSystem = "EarthMJ2000Eq";
+                     // Which is correct here???
+                     parm->SetStringParameter("DepObject", parmSystem);
+                     parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
 
+                  }
+
+                  if (parm->IsOriginDependent())
+                  {
+                     if (parmSystem == "")
+                        parmSystem = "Earth";
+                     parm->SetStringParameter("DepObject", parmSystem);
+                     if (parm->NeedCoordSystem())
+                        /// @todo Update coordinate system to better body parms
+                        parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
+                           "EarthMJ2000Eq");
+                  }
+
+                  lhsObject->SetStringParameter(label, name);
+                  retval = true;
                }
-
-               if (parm->IsOriginDependent()) {
-                  if (parmSystem == "")
-                     parmSystem = "Earth";
-                  parm->SetStringParameter("DepObject", parmSystem);
-                  if (parm->NeedCoordSystem())
-                     /// @todo Update coordinate system to better body parms
-                     parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
-                        "EarthMJ2000Eq");
-               }
-
-               lhsObject->SetStringParameter(label, name);
-               return true;
             }
-         }         
+         }
+         else
+         {
+            // InterpretParameter failed; store the string for later use
+            elements.push_back(name);
+            ///@todo Figure out how to handle combos of parameters & other stuff
+         }
       }
    }
    
-   return false;
+   return retval;
 }
 
 //------------------------------------------------------------------------------
@@ -2429,9 +2478,10 @@ bool Interpreter::InterpretParameter(const std::string text,
 {
    Integer start = 0, dotLoc = text.find(".", 0);
    if (dotLoc == (Integer)std::string::npos)
-      throw CommandException("Propagate::InterpretParameter: Unable to "
-               "interpret parameter object in the string " +
-               text);
+//      throw CommandException("Propagate::InterpretParameter: Unable to "
+//               "interpret parameter object in the string " +
+//               text);
+      return false;
 
    paramObj = text.substr(start, dotLoc - start);
    start = dotLoc + 1;
