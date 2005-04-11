@@ -37,7 +37,7 @@ PlanetData::VALID_OBJECT_TYPE_LIST[PlanetDataObjectCount] =
 {
    "Spacecraft",
    "SolarSystem",
-   "CelestialBody"
+   "SpacePoint" //loj: 4/11/05
 }; 
 
 //---------------------------------
