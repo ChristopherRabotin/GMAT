@@ -96,7 +96,7 @@ protected:
    
    // events
    void OnPaint(wxPaintEvent &event);
-   void OnSize(wxSizeEvent &event);
+   void OnTrajSize(wxSizeEvent &event);
    void OnMouse(wxMouseEvent &event);
    
    DECLARE_EVENT_TABLE();

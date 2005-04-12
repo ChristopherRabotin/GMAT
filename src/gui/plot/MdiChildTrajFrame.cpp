@@ -45,7 +45,7 @@ BEGIN_EVENT_TABLE(MdiChildTrajFrame, wxMDIChildFrame)
    EVT_MENU(GmatPlot::MDI_GL_HELP_VIEW, MdiChildTrajFrame::OnHelpView)
 
    EVT_ACTIVATE(MdiChildTrajFrame::OnActivate)
-   EVT_SIZE(MdiChildTrajFrame::OnSize)
+   EVT_SIZE(MdiChildTrajFrame::OnTrajSize)
    EVT_MOVE(MdiChildTrajFrame::OnMove)
    EVT_CLOSE(MdiChildTrajFrame::OnClose)
 END_EVENT_TABLE()
@@ -92,13 +92,13 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
    wxMenu *fileMenu = new wxMenu;
 
    fileMenu->Append(GmatPlot::MDI_GL_OPEN_TRAJECTORY_FILE, _T("&Open Trajectory File"));
-   fileMenu->Append(GmatPlot::MDI_GL_QUIT, _T("&Exit"));
+   fileMenu->Append(GmatPlot::MDI_GL_CHILD_QUIT, _T("&Close"), _T("Close this window"));
 
    // Plot menu
    wxMenu *plotMenu = new wxMenu;
 
    plotMenu->Append(GmatPlot::MDI_GL_CLEAR_PLOT, _T("Clear Plot"));
-   plotMenu->Append(GmatPlot::MDI_GL_CHILD_QUIT, _T("&Close"), _T("Close this window"));
+//   plotMenu->Append(GmatPlot::MDI_GL_CHILD_QUIT, _T("&Close"), _T("Close this window"));
    plotMenu->AppendSeparator();
    plotMenu->Append(GmatPlot::MDI_GL_CHANGE_TITLE, _T("Change &title..."));
 
@@ -625,10 +625,10 @@ void MdiChildTrajFrame::OnShowOptionDialog(wxCommandEvent& event)
          mOptionDialog = new OpenGlOptionDialog(this, mPlotName, mBodyNames,
                                                 mBodyColors);
       
-      int x, y, w, h;
-      MdiGlPlot::mdiParentGlFrame->GetPosition(&x, &y);
-      mOptionDialog->GetSize(&w, &h);
-      mOptionDialog->Move(x-w, y);
+//      int x, y, w, h;
+//      MdiGlPlot::mdiParentGlFrame->GetPosition(&x, &y);
+//      mOptionDialog->GetSize(&w, &h);
+//      mOptionDialog->Move(x-w, y);
       mOptionDialog->Show(true); //modeless dialog
    }
    else
@@ -806,7 +806,7 @@ void MdiChildTrajFrame::OnMove(wxMoveEvent& event)
    //     to be the width of the MDI canvas border)
    wxPoint pos1 = event.GetPosition(),
       pos2 = GetPosition();
-   wxLogStatus(MdiGlPlot::mdiParentGlFrame,
+   wxLogStatus(GmatAppData::GetMainFrame(),
                wxT("position from event: (%d, %d), from frame (%d, %d)"),
                pos1.x, pos1.y, pos2.x, pos2.y);
 
@@ -814,9 +814,9 @@ void MdiChildTrajFrame::OnMove(wxMoveEvent& event)
 }
 
 //------------------------------------------------------------------------------
-// void OnSize(wxSizeEvent& event)
+// void OnTrajSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::OnSize(wxSizeEvent& event)
+void MdiChildTrajFrame::OnTrajSize(wxSizeEvent& event)
 {
    // VZ: under MSW the size event carries the client size (quite
    //     unexpectedly) *except* for the very first one which has the full
@@ -824,10 +824,10 @@ void MdiChildTrajFrame::OnSize(wxSizeEvent& event)
    wxSize size1 = event.GetSize(),
       size2 = GetSize(),
       size3 = GetClientSize();
-   wxLogStatus(MdiGlPlot::mdiParentGlFrame,
+   wxLogStatus(GmatAppData::GetMainFrame(),
                wxT("size from event: %dx%d, from frame %dx%d, client %dx%d"),
                size1.x, size1.y, size2.x, size2.y, size3.x, size3.y);
-    
+
    event.Skip();
 }
 
@@ -835,16 +835,16 @@ void MdiChildTrajFrame::OnSize(wxSizeEvent& event)
 // void OnClose(wxCloseEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::OnClose(wxCloseEvent& event)
-{    
+{
    MdiGlPlot::numChildren--;
-   
+
    if (mIsMainFrame)
-      MdiGlPlot::mdiParentGlFrame->mainSubframe = NULL;
-   
+      GmatAppData::GetMainFrame()->trajMainSubframe = NULL;
+
    if (MdiGlPlot::numChildren == 0)
-      MdiGlPlot::mdiParentGlFrame->subframe = NULL;
-   
-   MdiGlPlot::mdiParentGlFrame->UpdateUI();
+      GmatAppData::GetMainFrame()->trajSubframe = NULL;
+
+//   MdiGlPlot::mdiParentGlFrame->UpdateUI();
    event.Skip();
 }
 
@@ -891,7 +891,7 @@ void MdiChildTrajFrame::DeletePlot()
 {
    // This will call OnClose()
    if (mIsMainFrame)
-      MdiGlPlot::mdiParentGlFrame->mainSubframe->Close();
+      GmatAppData::GetMainFrame()->trajMainSubframe->Close();
 }
 //------------------------------------------------------------------------------
 // wxMenu* CreateGotoBodyMenu()

@@ -46,7 +46,7 @@
 //#define DEBUG_TRAJCANVAS_BODY 1
 
 BEGIN_EVENT_TABLE(TrajPlotCanvas, wxGLCanvas)
-   EVT_SIZE(TrajPlotCanvas::OnSize)
+   EVT_SIZE(TrajPlotCanvas::OnTrajSize)
    EVT_PAINT(TrajPlotCanvas::OnPaint)
    EVT_MOUSE_EVENTS(TrajPlotCanvas::OnMouse)
 END_EVENT_TABLE()
@@ -685,7 +685,7 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
       }
 
       mTextTrajFile->Close();
-      wxLogStatus(MdiGlPlot::mdiParentGlFrame,
+      wxLogStatus(GmatAppData::GetMainFrame(),
                   wxT("Number of data points: %d"), numDataPoints);
    }
    else
@@ -898,13 +898,13 @@ void TrajPlotCanvas::OnPaint(wxPaintEvent& event)
 
 
 //------------------------------------------------------------------------------
-// void OnSize(wxSizeEvent& event)
+// void OnTrajSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 /**
  * Processes wxSizeEvent.
  */
 //------------------------------------------------------------------------------
-void TrajPlotCanvas::OnSize(wxSizeEvent& event)
+void TrajPlotCanvas::OnTrajSize(wxSizeEvent& event)
 {
    // this is also necessary to update the context on some platforms
    wxGLCanvas::OnSize(event);
@@ -1026,9 +1026,9 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
    //wxLogStatus(MdiGlPlot::mdiParentGlFrame,
    //            wxT("distance=%f"), mAxisLength);
 
-   wxLogStatus(MdiGlPlot::mdiParentGlFrame,
+   wxLogStatus(GmatAppData::GetMainFrame(),
                wxT("X = %g Y = %g"), fEndX, fEndY);
-   
+
    //wxLogStatus(MdiGlPlot::mdiParentGlFrame,
    //            wxT("X = %d Y = %d lastX = %f lastY = %f Zoom amount = %f Distance = %f"),
    //            event.GetX(), event.GetY(), m_fStartX, m_fStartY, mZoomAmount, mAxisLength);

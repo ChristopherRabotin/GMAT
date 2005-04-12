@@ -27,25 +27,25 @@ class MdiChildTrajFrame;
 class MdiParentGlFrame : public wxMDIParentFrame
 {
 public:
-    wxTextCtrl *textWindow;
-    MdiChildTrajFrame *subframe;
-    MdiChildTrajFrame *mainSubframe;
+//    wxTextCtrl *textWindow;
+//    MdiChildTrajFrame *trajSubframe;
+//    MdiChildTrajFrame *trajMainSubframe;
 
     MdiParentGlFrame(wxWindow *parent, const wxWindowID id,
                      const wxString& title, const wxPoint& pos,
                      const wxSize& size, const long style);
     ~MdiParentGlFrame();
 
-    void UpdateUI();
-    void OnSize(wxSizeEvent& event);
-    void OnClose(wxCloseEvent& event);
-    void OnQuit(wxCommandEvent& event);
-    void OnOpenTrajectoryFile(wxCommandEvent& event);
-    void OnZoomIn(wxCommandEvent& event);
-    void OnZoomOut(wxCommandEvent& event);
+//    void UpdateUI();
+//    void OnSize(wxSizeEvent& event);
+//    void OnClose(wxCloseEvent& event);
+//    void OnQuit(wxCommandEvent& event);
+//    void OnOpenTrajectoryFile(wxCommandEvent& event);
+//    void OnZoomIn(wxCommandEvent& event);
+//    void OnZoomOut(wxCommandEvent& event);
 
 protected:
-    void InitToolBar(wxToolBar* toolBar);
+//    void InitToolBar(wxToolBar* toolBar);
     
     DECLARE_EVENT_TABLE()
 };

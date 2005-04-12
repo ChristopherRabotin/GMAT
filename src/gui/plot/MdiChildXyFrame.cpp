@@ -16,6 +16,7 @@
 #include "MdiChildXyFrame.hpp"
 #include "MdiXyPlotData.hpp"
 #include "XyPlotCurve.hpp"
+#include "GmatAppData.hpp"
 #include "RealUtilities.hpp" // for Abs(), Min(), Max()
 #include <fstream>           // for ifstream (plot input file)
 
@@ -277,7 +278,7 @@ int MdiChildXyFrame::ReadXyPlotFile(const wxString &filename)
 bool MdiChildXyFrame::DeletePlot()
 {
    if (mIsMainFrame)
-      MdiXyPlot::mdiParentXyFrame->mainSubframe->Close();
+      GmatAppData::GetMainFrame()->xyMainSubframe->Close();
 
    return true;
 }
@@ -646,7 +647,7 @@ void MdiChildXyFrame::OnPlotClick(wxPlotEvent &event)
                   curve->GetCurveTitle().c_str(), y);
         
       //loj: 2/26/04 changed to wxLogStatus
-      wxLogStatus(MdiXyPlot::mdiParentXyFrame, info);
+      wxLogStatus(GmatAppData::GetMainFrame(), info);
         
       //mLogTextCtrl->AppendText(info);
         
@@ -711,10 +712,10 @@ void MdiChildXyFrame::OnClose(wxCloseEvent& event)
    MdiXyPlot::numChildren--;
         
    if (mIsMainFrame)
-      MdiXyPlot::mdiParentXyFrame->mainSubframe = NULL;
+      GmatAppData::GetMainFrame()->xyMainSubframe = NULL;
     
    if (MdiXyPlot::numChildren == 0)
-      MdiXyPlot::mdiParentXyFrame->subframe = NULL;
+      GmatAppData::GetMainFrame()->xySubframe = NULL;
     
    event.Skip();
 }

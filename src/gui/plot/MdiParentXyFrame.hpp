@@ -27,22 +27,22 @@ class MdiChildXyFrame;
 class MdiParentXyFrame : public wxMDIParentFrame
 {
 public:
-    wxTextCtrl *textWindow;
-    MdiChildXyFrame *subframe;
-    MdiChildXyFrame *mainSubframe;
+//    wxTextCtrl *textWindow;
+//    MdiChildXyFrame *subframe;
+//    MdiChildXyFrame *mainSubframe;
 
     MdiParentXyFrame(wxWindow *parent, const wxWindowID id,
                      const wxString& title, const wxPoint& pos,
                      const wxSize& size, const long style);
     ~MdiParentXyFrame();
     
-    void OnSize(wxSizeEvent& event);
-    void OnClose(wxCloseEvent& event);
-    void OnQuit(wxCommandEvent& event);
-    void OnOpenXyPlotFile(wxCommandEvent& event);
+//    void OnSize(wxSizeEvent& event);
+//    void OnClose(wxCloseEvent& event);
+//    void OnQuit(wxCommandEvent& event);
+//    void OnOpenXyPlotFile(wxCommandEvent& event);
 
 protected:
-    void InitToolBar(wxToolBar* toolBar);
+//    void InitToolBar(wxToolBar* toolBar);
     
     DECLARE_EVENT_TABLE()
 };

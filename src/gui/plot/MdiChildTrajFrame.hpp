@@ -104,7 +104,7 @@ public:
    void OnQuit(wxCommandEvent& event);
    
    void OnActivate(wxActivateEvent& event);
-   void OnSize(wxSizeEvent& event);
+   void OnTrajSize(wxSizeEvent& event);
    void OnMove(wxMoveEvent& event);
    void OnClose(wxCloseEvent& event);
    
