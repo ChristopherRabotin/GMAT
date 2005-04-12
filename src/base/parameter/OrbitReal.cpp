@@ -54,6 +54,7 @@ OrbitReal::OrbitReal(const std::string &name, const std::string &typeStr,
    AddRefObject(obj);
 }
 
+
 //------------------------------------------------------------------------------
 // OrbitReal(const OrbitReal &copy)
 //------------------------------------------------------------------------------
@@ -67,6 +68,7 @@ OrbitReal::OrbitReal(const OrbitReal &copy)
    : RealVar(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // OrbitReal& operator=(const OrbitReal &right)
@@ -85,6 +87,7 @@ OrbitReal& OrbitReal::operator=(const OrbitReal &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~OrbitReal()
 //------------------------------------------------------------------------------
@@ -95,6 +98,7 @@ OrbitReal& OrbitReal::operator=(const OrbitReal &right)
 OrbitReal::~OrbitReal()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -113,6 +117,7 @@ Real OrbitReal::EvaluateReal()
    return mRealValue;
 }
 
+
 //------------------------------------------------------------------------------
 // virtual CoordinateSystem* GetInternalCoordSystem()
 //------------------------------------------------------------------------------
@@ -120,6 +125,7 @@ CoordinateSystem* OrbitReal::GetInternalCoordSystem()
 {
    return OrbitData::GetInternalCoordSys();
 }
+
 
 //------------------------------------------------------------------------------
 // virtual void SetSolarSystem(SolarSystem *ss)
@@ -130,11 +136,11 @@ CoordinateSystem* OrbitReal::GetInternalCoordSystem()
 //------------------------------------------------------------------------------
 void OrbitReal::SetSolarSystem(SolarSystem *ss)
 {
-#if DEBUG_ORBITREAL
-   MessageInterface::ShowMessage
-      ("OrbitReal::SetSolarSystem() ss=%s to %s\n", ss->GetTypeName().c_str(),
-       this->GetName().c_str());
-#endif
+   #if DEBUG_ORBITREAL
+      MessageInterface::ShowMessage
+         ("OrbitReal::SetSolarSystem() ss=%s to %s\n", ss->GetTypeName().c_str(),
+          this->GetName().c_str());
+   #endif
    
    if (OrbitData::GetRefObject(Gmat::SOLAR_SYSTEM, ss->GetName()) == NULL)
       OrbitData::AddRefObject(ss->GetType(), ss->GetName(), ss);
@@ -154,14 +160,15 @@ void OrbitReal::SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 void OrbitReal::SetInternalCoordSystem(CoordinateSystem *cs)
 {
-#if DEBUG_ORBITREAL
-   MessageInterface::ShowMessage
-      ("OrbitReal::SetInternalCoordSystem() cs=%s to %s\n", cs->GetTypeName().c_str(),
-       this->GetName().c_str());
-#endif
+   #if DEBUG_ORBITREAL
+      MessageInterface::ShowMessage
+         ("OrbitReal::SetInternalCoordSystem() cs=%s to %s\n", cs->GetTypeName().c_str(),
+          this->GetName().c_str());
+   #endif
    
    OrbitData::SetInternalCoordSys(cs);
 }
+
 
 //------------------------------------------------------------------------------
 // virtual Integer GetNumRefObjects() const
@@ -174,6 +181,7 @@ Integer OrbitReal::GetNumRefObjects() const
 {
    return OrbitData::GetNumRefObjects();
 }
+
 
 //------------------------------------------------------------------------------
 // virtual bool AddRefObject(GmatBase *obj)
@@ -189,10 +197,20 @@ Integer OrbitReal::GetNumRefObjects() const
 bool OrbitReal::AddRefObject(GmatBase *obj)
 {
    if (obj != NULL)
-      return OrbitData::AddRefObject(obj->GetType(), obj->GetName(), obj);
-   else
-      return false;
+   {
+      //loj: 4/12/05 if obj->GetType() is CELESTIAL_BODY, set as SPACE_POINT
+      // since CelestialBody subtypes are not set as SPACE_POINT
+      ///@todo Use IsOfType(Gmat::SPACE_POINT) when GmatBase provides this method.
+
+      if (obj->GetType() == Gmat::CELESTIAL_BODY)
+         return OrbitData::AddRefObject(Gmat::SPACE_POINT, obj->GetName(), obj);
+      else
+         return OrbitData::AddRefObject(obj->GetType(), obj->GetName(), obj);
+   }
+   
+   return false;
 }
+
 
 //------------------------------------------------------------------------------
 // virtual bool Validate()
@@ -208,6 +226,7 @@ bool OrbitReal::Validate()
    return ValidateRefObjects(this);
 }
 
+
 //------------------------------------------------------------------------------
 // virtual void Initialize()
 //------------------------------------------------------------------------------
@@ -219,8 +238,20 @@ bool OrbitReal::Validate()
 //------------------------------------------------------------------------------
 void OrbitReal::Initialize()
 {
-   InitializeRefObjects();
+   //loj: 4/12/05 Added try block
+   try
+   {
+      InitializeRefObjects();
+   }
+   catch(BaseException &e)
+   {
+      throw ParameterException
+         ("OrbitReal::GetRefObjectName() Fail to initialize Parameter:" +
+          this->GetTypeName() + "\n" + e.GetMessage() + "This parameter could be "
+          "an internal parameter of Periapsis.\n");
+   }
 }
+
 
 //-------------------------------------
 // Methods inherited from GmatBase
@@ -237,6 +268,7 @@ bool OrbitReal::RenameRefObject(const Gmat::ObjectType type,
 {
    return OrbitData::RenameRefObject(type, oldName, newName);
 }
+
 
 //------------------------------------------------------------------------------
 // virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
@@ -261,6 +293,7 @@ std::string OrbitReal::GetRefObjectName(const Gmat::ObjectType type) const
    return objName;
 }
 
+
 //------------------------------------------------------------------------------
 // virtual bool SetRefObjectName(const Gmat::ObjectType type,
 //                               const std::string &name)
@@ -278,6 +311,7 @@ bool OrbitReal::SetRefObjectName(const Gmat::ObjectType type,
 {
    return OrbitData::SetRefObjectName(type, name);
 }
+
 
 //------------------------------------------------------------------------------
 // virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
@@ -307,6 +341,7 @@ GmatBase* OrbitReal::GetRefObject(const Gmat::ObjectType type,
    
    return obj;
 }
+
 
 //------------------------------------------------------------------------------
 // virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
