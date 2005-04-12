@@ -16,7 +16,7 @@
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = 	AtmosphereModel.cpp \
+SRC = 	AtmosphereModel.cpp Barycenter.cpp CalculatedPoint.cpp \
 	CelestialBody.cpp DeFile.cpp ExponentialAtmosphere.cpp \
 	JacchiaRobertsAtmosphere.cpp Moon.cpp \
 	Msise90Atmosphere.cpp msise90.cpp Planet.cpp \
