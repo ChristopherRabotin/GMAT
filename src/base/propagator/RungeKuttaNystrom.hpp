@@ -89,14 +89,13 @@ public:
     RungeKuttaNystrom(const RungeKuttaNystrom& rkn);
     RungeKuttaNystrom&      operator=(const RungeKuttaNystrom& rkn);
 
-    virtual void            Initialize(void);
-    virtual bool            Step(void);
+    virtual void            Initialize();
+    virtual bool            Step();
     virtual bool            Step(double dt);
-    virtual bool            RawStep(void);
+    virtual bool            RawStep();
 
-    virtual char* GetType(void) const;
-//    virtual Propagator* Clone(void) const;
-    virtual Integer         GetPropagatorOrder(void) const;
+//    virtual Propagator* Clone() const;
+    virtual Integer         GetPropagatorOrder() const;
 
 protected:
     /// Array of coefficients for advancing 1st derivatives (e.g. velocities)

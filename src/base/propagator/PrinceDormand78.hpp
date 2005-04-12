@@ -41,17 +41,16 @@ class GMAT_API PrinceDormand78 :
     public RungeKutta
 {
 public:
-//    PrinceDormand78(void);
+//    PrinceDormand78();
     PrinceDormand78(const std::string &nomme = "");
-    virtual ~PrinceDormand78(void);
+    virtual ~PrinceDormand78();
 
     PrinceDormand78(const PrinceDormand78&);
     PrinceDormand78 & operator=(const PrinceDormand78&);
 
-    virtual std::string GetType(void) const;
-    virtual Propagator* Clone(void) const;
+    virtual Propagator* Clone() const;
 protected:
-    void                        SetCoefficients(void);
+    void                        SetCoefficients();
 
 };
 

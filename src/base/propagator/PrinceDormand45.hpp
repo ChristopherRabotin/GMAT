@@ -52,14 +52,13 @@ class GMAT_API PrinceDormand45 :
     public RungeKutta
 {
 public:
-//    PrinceDormand45(void);
+//    PrinceDormand45();
     PrinceDormand45(const std::string &nomme = "");
     virtual ~PrinceDormand45();
 
     PrinceDormand45(const PrinceDormand45&);
     PrinceDormand45 &       operator=(const PrinceDormand45&);
 
-    virtual std::string     GetType() const;
     virtual Propagator*     Clone() const;
 
 protected:

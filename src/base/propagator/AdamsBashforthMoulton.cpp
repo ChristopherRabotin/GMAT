@@ -46,7 +46,7 @@
  * The constructor for the ABM integrator
  */
 //------------------------------------------------------------------------------
-//AdamsBashforthMoulton::AdamsBashforthMoulton(void) :
+//AdamsBashforthMoulton::AdamsBashforthMoulton() :
 //    PredictorCorrector      (4, 4),
 AdamsBashforthMoulton::AdamsBashforthMoulton(const std::string &nomme) :
     PredictorCorrector      (4, 4, "AdamsBashforthMoulton", nomme),
@@ -56,13 +56,13 @@ AdamsBashforthMoulton::AdamsBashforthMoulton(const std::string &nomme) :
 }
 
 //------------------------------------------------------------------------------
-// AdamsBashforthMoulton::~AdamsBashforthMoulton(void)
+// AdamsBashforthMoulton::~AdamsBashforthMoulton()
 //------------------------------------------------------------------------------
 /**
  * The destructor
  */
 //------------------------------------------------------------------------------
-AdamsBashforthMoulton::~AdamsBashforthMoulton(void)
+AdamsBashforthMoulton::~AdamsBashforthMoulton()
 {
 }
 
@@ -104,39 +104,25 @@ AdamsBashforthMoulton
 
 
 //------------------------------------------------------------------------------
-// std::string AdamsBashforthMoulton::GetType(void) const
-//------------------------------------------------------------------------------
-/**
- * Method used to return the name of the object
- */
-//------------------------------------------------------------------------------
-std::string AdamsBashforthMoulton::GetType(void) const
-{
-//    return "Adams-Bashford-Moulton 4";
-   return "Adams-Bashford-Moulton 4";
-}
-
-
-//------------------------------------------------------------------------------
-// Propagator* AdamsBashforthMoulton::Clone(void) const
+// Propagator* AdamsBashforthMoulton::Clone() const
 //------------------------------------------------------------------------------
 /**
  * Method used to create a copy of the object
  */
 //------------------------------------------------------------------------------
-Propagator* AdamsBashforthMoulton::Clone(void) const
+Propagator* AdamsBashforthMoulton::Clone() const
 {
     return new AdamsBashforthMoulton(*this);
 }
   
 //------------------------------------------------------------------------------
-// bool AdamsBashforthMoulton::SetWeights(void)
+// bool AdamsBashforthMoulton::SetWeights()
 //------------------------------------------------------------------------------
 /**
  * Method used to set the ABM weights
  */
 //------------------------------------------------------------------------------
-bool AdamsBashforthMoulton::SetWeights(void)
+bool AdamsBashforthMoulton::SetWeights()
 {
     if ((pweights == NULL) || (cweights == NULL))
         return false;
@@ -155,13 +141,13 @@ bool AdamsBashforthMoulton::SetWeights(void)
 }
 
 //------------------------------------------------------------------------------
-// bool AdamsBashforthMoulton::FireStartupStep(void)
+// bool AdamsBashforthMoulton::FireStartupStep()
 //------------------------------------------------------------------------------
 /**
  * Method used to start the integrator by filling initial states
  */
 //------------------------------------------------------------------------------
-bool AdamsBashforthMoulton::FireStartupStep(void)
+bool AdamsBashforthMoulton::FireStartupStep()
 {
     if (starter == NULL)
         return false;
@@ -178,13 +164,13 @@ bool AdamsBashforthMoulton::FireStartupStep(void)
 }
 
 //------------------------------------------------------------------------------
-// bool AdamsBashforthMoulton::Predict(void)
+// bool AdamsBashforthMoulton::Predict()
 //------------------------------------------------------------------------------
 /**
  * Method used to fire the step extrapolation (the predictor phase)
  */
 //------------------------------------------------------------------------------
-bool AdamsBashforthMoulton::Predict(void)
+bool AdamsBashforthMoulton::Predict()
 {
     int i, j;
 
@@ -205,13 +191,13 @@ bool AdamsBashforthMoulton::Predict(void)
 }
 
 //------------------------------------------------------------------------------
-// bool AdamsBashforthMoulton::Correct(void)
+// bool AdamsBashforthMoulton::Correct()
 //------------------------------------------------------------------------------
 /**
  * Method used to fire the step refinement (the corrector phase)
  */
 //------------------------------------------------------------------------------
-bool AdamsBashforthMoulton::Correct(void)
+bool AdamsBashforthMoulton::Correct()
 {
     int i, j;
 
@@ -227,7 +213,7 @@ bool AdamsBashforthMoulton::Correct(void)
 }
 
 //------------------------------------------------------------------------------
-// Propagator* PrinceDormand78::Clone(void) const
+// Propagator* PrinceDormand78::Clone() const
 //------------------------------------------------------------------------------
 /**
  * Method used to determine the error in the step
@@ -245,7 +231,7 @@ bool AdamsBashforthMoulton::Correct(void)
  * and processed to determine the maximum error in the system.
  */
 //------------------------------------------------------------------------------
-Real AdamsBashforthMoulton::EstimateError(void)
+Real AdamsBashforthMoulton::EstimateError()
 {
     int i;
 
@@ -258,7 +244,7 @@ Real AdamsBashforthMoulton::EstimateError(void)
 }
 
 //------------------------------------------------------------------------------
-// Propagator* PrinceDormand78::Clone(void) const
+// Propagator* PrinceDormand78::Clone() const
 //------------------------------------------------------------------------------
 /**
  * Method used to restart the integrator, when appropriate
@@ -268,7 +254,7 @@ Real AdamsBashforthMoulton::EstimateError(void)
  * internal buffers can be filled with the data for the new stepsize.
  */
 //------------------------------------------------------------------------------
-bool AdamsBashforthMoulton::Reset(void)
+bool AdamsBashforthMoulton::Reset()
 {
     startupCount = 0;
     startupComplete = false;

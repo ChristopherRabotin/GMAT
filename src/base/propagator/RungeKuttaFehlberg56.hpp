@@ -52,18 +52,17 @@ class GMAT_API RungeKuttaFehlberg56 :
     public RungeKutta
 {
 public:
-//    RungeKuttaFehlberg56(void);
+//    RungeKuttaFehlberg56();
     RungeKuttaFehlberg56(const std::string &nomme = "");
-    virtual ~RungeKuttaFehlberg56(void);
+    virtual ~RungeKuttaFehlberg56();
 
     RungeKuttaFehlberg56(const RungeKuttaFehlberg56&);
     RungeKuttaFehlberg56 &  operator=(const RungeKuttaFehlberg56&);
 
-    virtual char*           GetType(void) const;
-    virtual GmatBase*       Clone(void) const; // wcs 2004.06.04 
+    virtual GmatBase*       Clone() const; // wcs 2004.06.04 
 
 protected:
-    void                    SetCoefficients(void);
+    void                    SetCoefficients();
 
 };
 

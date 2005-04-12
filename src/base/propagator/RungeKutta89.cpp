@@ -47,13 +47,13 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// RungeKutta89::RungeKutta89(void)
+// RungeKutta89::RungeKutta89()
 //------------------------------------------------------------------------------
 /**
  * The default constructor
  */
 //------------------------------------------------------------------------------
-//RungeKutta89::RungeKutta89(void) :
+//RungeKutta89::RungeKutta89() :
 //RungeKutta (16, 9, NULL, NULL, NULL)
 //{
 //}
@@ -72,13 +72,13 @@ RungeKutta89::RungeKutta89(const std::string &nomme) :
 }
 
 //------------------------------------------------------------------------------
-// RungeKutta89::~RungeKutta89(void)
+// RungeKutta89::~RungeKutta89()
 //------------------------------------------------------------------------------
 /**
  * The destructor
  */
 //------------------------------------------------------------------------------
-RungeKutta89::~RungeKutta89(void)
+RungeKutta89::~RungeKutta89()
 {
 }
 
@@ -112,25 +112,13 @@ RungeKutta89 & RungeKutta89::operator=(const RungeKutta89& rk)
 }
 
 //------------------------------------------------------------------------------
-// char * RungeKutta89::GetType(void) const
-//------------------------------------------------------------------------------
-/**
- * Method used to return the name of the object
- */
-//------------------------------------------------------------------------------
-char * RungeKutta89::GetType(void) const
-{
-    return "Runge-Kutta-Verner 8(9)";
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* RungeKutta89::Clone(void) const
+// GmatBase* RungeKutta89::Clone() const
 //------------------------------------------------------------------------------
 /**
  * Method used to create a copy of the object
  */
 //------------------------------------------------------------------------------
-GmatBase* RungeKutta89::Clone(void) const
+GmatBase* RungeKutta89::Clone() const
 {
     return new RungeKutta89(*this);
 }
@@ -140,7 +128,7 @@ GmatBase* RungeKutta89::Clone(void) const
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// void RungeKutta89::SetCoefficients(void)
+// void RungeKutta89::SetCoefficients()
 //------------------------------------------------------------------------------
 /**
  * The function to set the coefficients for the RK 8(9) integrator
@@ -151,7 +139,7 @@ GmatBase* RungeKutta89::Clone(void) const
  * found in Verner's 1978 (Siam J. Numer. Anal., 15(4)) paper.
  */
 //------------------------------------------------------------------------------
-void RungeKutta89::SetCoefficients(void)
+void RungeKutta89::SetCoefficients()
 {
     if ((ai == NULL) || (bij == NULL) || (cj == NULL) || (ee == NULL)) {
         initialized = false;

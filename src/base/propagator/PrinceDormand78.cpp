@@ -34,13 +34,13 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// PrinceDormand78::PrinceDormand78(void)
+// PrinceDormand78::PrinceDormand78()
 //------------------------------------------------------------------------------
 /**
  * The constructor
  */
 //------------------------------------------------------------------------------
-//PrinceDormand78::PrinceDormand78(void) :
+//PrinceDormand78::PrinceDormand78() :
 //    RungeKutta      (13, 8)
 //{
 //}
@@ -50,13 +50,13 @@ PrinceDormand78::PrinceDormand78(const std::string &nomme) :
 }
 
 //------------------------------------------------------------------------------
-// PrinceDormand78::~PrinceDormand78(void)
+// PrinceDormand78::~PrinceDormand78()
 //------------------------------------------------------------------------------
 /**
  * The destructor
  */
 //------------------------------------------------------------------------------
-PrinceDormand78::~PrinceDormand78(void)
+PrinceDormand78::~PrinceDormand78()
 {
 }
 
@@ -93,26 +93,13 @@ PrinceDormand78 & PrinceDormand78::operator=(const PrinceDormand78& rk)
 
 
 //------------------------------------------------------------------------------
-// std::string PrinceDormand78::GetType(void) const
-//------------------------------------------------------------------------------
-/**
- * Method used to return the name of the object
- */
-//------------------------------------------------------------------------------
-std::string PrinceDormand78::GetType(void) const
-{
-    return "Prince-Dormand 7(8)";
-}
-
-
-//------------------------------------------------------------------------------
-// Propagator* PrinceDormand78::Clone(void) const
+// Propagator* PrinceDormand78::Clone() const
 //------------------------------------------------------------------------------
 /**
  * Method used to create a copy of the object
  */
 //------------------------------------------------------------------------------
-Propagator* PrinceDormand78::Clone(void) const
+Propagator* PrinceDormand78::Clone() const
 {
     return new PrinceDormand78(*this);
 }
@@ -122,7 +109,7 @@ Propagator* PrinceDormand78::Clone(void) const
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// void PrinceDormand78::SetCoefficients(void)
+// void PrinceDormand78::SetCoefficients()
 //------------------------------------------------------------------------------
 /**
  * The function sets the coefficients for the Prince-Dormand 7(8) integrator.
@@ -136,7 +123,7 @@ Propagator* PrinceDormand78::Clone(void) const
  * of coefficients during a visit September 2002.
  */
 //------------------------------------------------------------------------------
-void PrinceDormand78::SetCoefficients(void)
+void PrinceDormand78::SetCoefficients()
 {
     if ((ai == NULL) || (bij == NULL) || (cj == NULL) || (ee == NULL)) {
         initialized = false;

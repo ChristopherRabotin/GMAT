@@ -42,7 +42,7 @@ DormandElMikkawyPrince68::DormandElMikkawyPrince68(const std::string &nomme) :
 
 
 /** \brief The destructor */
-DormandElMikkawyPrince68::~DormandElMikkawyPrince68(void)
+DormandElMikkawyPrince68::~DormandElMikkawyPrince68()
 {
 }
 
@@ -67,26 +67,19 @@ DormandElMikkawyPrince68& DormandElMikkawyPrince68::operator=
 }
 
 
-/** \brief Method used to return the name of the object */
-char* DormandElMikkawyPrince68::GetType(void) const
-{
-    return "Dormand-El-Mikkawy-Prince Nystrom 6(8)";
-}
-
-
 /** \brief Method used to create a copy of the object
 
   Each class that can be instantiated provides an implementation of this
   method so that copies can be made from a base class pointer. 
  */
-GmatBase* DormandElMikkawyPrince68::Clone(void) const
+GmatBase* DormandElMikkawyPrince68::Clone() const
 {
     return new DormandElMikkawyPrince68(*this);
 }
 
 
 /** \brief Sets coefficients for Dormand-ElMikkawy-Prince 6(8) Integrator */
-void DormandElMikkawyPrince68::SetCoefficients(void)
+void DormandElMikkawyPrince68::SetCoefficients()
 {
     if (!initialized || (ai == NULL) || (bij == NULL) || (cj == NULL) ||
         (ee == NULL) || (eeDeriv == NULL) || (cdotj == NULL) || (ki == NULL)) {

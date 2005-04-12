@@ -72,27 +72,26 @@ class GMAT_API AdamsBashforthMoulton :
     public PredictorCorrector
 {
 public:
-//    AdamsBashforthMoulton(void);
+//    AdamsBashforthMoulton();
     AdamsBashforthMoulton(const std::string &nomme);
 
-    virtual ~AdamsBashforthMoulton(void);
+    virtual ~AdamsBashforthMoulton();
 
     AdamsBashforthMoulton(const AdamsBashforthMoulton& abm);
     AdamsBashforthMoulton    operator=(const AdamsBashforthMoulton& abm);
 
-    virtual std::string     GetType(void) const;
-    virtual Propagator*     Clone(void) const;
+    virtual Propagator*     Clone() const;
 
 protected:
     /// The error estimate prefactor
     Real                    eeFactor;
 
-    bool                    SetWeights(void);
-    bool                    FireStartupStep(void);
-    bool                    Predict(void);
-    bool                    Correct(void);
-    Real                    EstimateError(void);
-    bool                    Reset(void);
+    bool                    SetWeights();
+    bool                    FireStartupStep();
+    bool                    Predict();
+    bool                    Correct();
+    Real                    EstimateError();
+    bool                    Reset();
 };
 
 #endif  //AdamsBashformMoulton_hpp

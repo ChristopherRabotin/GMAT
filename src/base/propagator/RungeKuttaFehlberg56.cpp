@@ -46,7 +46,7 @@ RungeKuttaFehlberg56::RungeKuttaFehlberg56(const std::string &nomme) :
 
 
 /** \brief Destructor for the Fehlberg's 4(5) Runge-Kutta integrator */
-RungeKuttaFehlberg56::~RungeKuttaFehlberg56(void)
+RungeKuttaFehlberg56::~RungeKuttaFehlberg56()
 {
 }
 
@@ -70,15 +70,8 @@ RungeKuttaFehlberg56 &
 }
 
 
-/** \brief Method used to return the name of the object */
-char * RungeKuttaFehlberg56::GetType(void) const
-{
-    return "Runge-Kutta-Fehlberg 5(6)";
-}
-
-
 /** \brief Method used to create a copy of the object */
-GmatBase* RungeKuttaFehlberg56::Clone(void) const
+GmatBase* RungeKuttaFehlberg56::Clone() const
 {
     return new RungeKuttaFehlberg56(*this);
 }
@@ -93,7 +86,7 @@ GmatBase* RungeKuttaFehlberg56::Clone(void) const
   Algorithms with C</B>, 1996.
  */
 
-void RungeKuttaFehlberg56::SetCoefficients(void)
+void RungeKuttaFehlberg56::SetCoefficients()
 {
     if ((ai == NULL) || (bij == NULL) || (cj == NULL) || (ee == NULL)) {
         initialized = false;

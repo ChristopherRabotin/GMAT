@@ -48,17 +48,16 @@
 class GMAT_API RungeKutta89 : public RungeKutta
 {
 public:
-//	RungeKutta89(void);
+//	RungeKutta89();
     RungeKutta89(const std::string &nomme = "");
-    virtual ~RungeKutta89(void);
+    virtual ~RungeKutta89();
 
     RungeKutta89(const RungeKutta89&);
     RungeKutta89 & operator=(const RungeKutta89&);
 
-    virtual char* GetType(void) const;
-    virtual GmatBase* Clone(void) const; // wcs 2004.06.04 return GmatBase*
+    virtual GmatBase* Clone() const; // wcs 2004.06.04 return GmatBase*
 protected:
-    void SetCoefficients(void);
+    void SetCoefficients();
 };
 
 #endif // RungeKutta89_hpp

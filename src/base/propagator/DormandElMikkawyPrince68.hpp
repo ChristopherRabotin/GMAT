@@ -47,20 +47,17 @@
 class GMAT_API DormandElMikkawyPrince68 :  public RungeKuttaNystrom
 {
 public:
-//    DormandElMikkawyPrince68(void);
-    DormandElMikkawyPrince68(const std::string &nomme = "");
-    virtual ~DormandElMikkawyPrince68(void);
+//    DormandElMikkawyPrince68();
+   DormandElMikkawyPrince68(const std::string &nomme = "");
+   virtual ~DormandElMikkawyPrince68();
 
+   DormandElMikkawyPrince68(const DormandElMikkawyPrince68& dpn);
+   DormandElMikkawyPrince68&   operator=(const DormandElMikkawyPrince68& dpn);
 
-    DormandElMikkawyPrince68(const DormandElMikkawyPrince68& dpn);
-    DormandElMikkawyPrince68&   operator=(const DormandElMikkawyPrince68& dpn);
-
-    virtual char*               GetType(void) const;
-    // wcs 2004.06.04 return GmatBase*
-    virtual GmatBase*           Clone(void) const;
+   virtual GmatBase*           Clone() const;
 
 protected:
-    virtual void                SetCoefficients(void);
+   virtual void                SetCoefficients();
    
 };
 

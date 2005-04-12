@@ -40,13 +40,13 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// RungeKuttaNystrom::RungeKuttaNystrom(void)
+// RungeKuttaNystrom::RungeKuttaNystrom()
 //------------------------------------------------------------------------------
 /**
  * The default constructor
  */
 //------------------------------------------------------------------------------
-//RungeKuttaNystrom::RungeKuttaNystrom(void) :
+//RungeKuttaNystrom::RungeKuttaNystrom() :
 //RungeKutta (16, 9, NULL, NULL, NULL)
 //{
 //}
@@ -74,13 +74,13 @@ RungeKuttaNystrom::RungeKuttaNystrom(Integer st, Integer order, const std::strin
 }
 
 //------------------------------------------------------------------------------
-// RungeKuttaNystrom::~RungeKuttaNystrom(void)
+// RungeKuttaNystrom::~RungeKuttaNystrom()
 //------------------------------------------------------------------------------
 /**
  * The destructor
  */
 //------------------------------------------------------------------------------
-RungeKuttaNystrom::~RungeKuttaNystrom(void)
+RungeKuttaNystrom::~RungeKuttaNystrom()
 {
     if (cdotj)
         delete [] cdotj;
@@ -130,25 +130,13 @@ RungeKuttaNystrom & RungeKuttaNystrom::operator=(const RungeKuttaNystrom& rk)
 }
 
 //------------------------------------------------------------------------------
-// char * RungeKuttaNystrom::GetType(void) const
-//------------------------------------------------------------------------------
-/**
- * Method used to return the name of the object
- */
-//------------------------------------------------------------------------------
-char * RungeKuttaNystrom::GetType(void) const
-{
-    return "Runge-Kutta-Nystrom 6(8)";
-}
-
-//------------------------------------------------------------------------------
-// Propagator* RungeKuttaNystrom::Clone(void) const
+// Propagator* RungeKuttaNystrom::Clone() const
 //------------------------------------------------------------------------------
 /**
  * Method used to create a copy of the object
  */
 //------------------------------------------------------------------------------
-//Propagator* RungeKuttaNystrom::Clone(void) const
+//Propagator* RungeKuttaNystrom::Clone() const
 //{
 //    return new RungeKuttaNystrom(*this);
 //}
@@ -158,7 +146,7 @@ char * RungeKuttaNystrom::GetType(void) const
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// void RungeKuttaNystrom::Initialize(void)
+// void RungeKuttaNystrom::Initialize()
 //------------------------------------------------------------------------------
 /**
  * This method allocates the data arrays for the Runge-Kutta-Nystrom integrators
@@ -166,7 +154,7 @@ char * RungeKuttaNystrom::GetType(void) const
  * and then initializing the Nystrom specific data.
  */
 //------------------------------------------------------------------------------
-void RungeKuttaNystrom::Initialize(void)
+void RungeKuttaNystrom::Initialize()
 {
     RungeKutta::Initialize();
     initialized = true;
@@ -267,7 +255,7 @@ void RungeKuttaNystrom::Initialize(void)
 }
 
 
-bool RungeKuttaNystrom::Step(void)
+bool RungeKuttaNystrom::Step()
 {
     if (!initialized) {
         Initialize();
@@ -318,7 +306,7 @@ bool RungeKuttaNystrom::Step(double dt)
 }
 
 
-bool RungeKuttaNystrom::RawStep(void)
+bool RungeKuttaNystrom::RawStep()
 {
     int i, j, k;
     double accum, h2 = stepSize * stepSize;
@@ -385,7 +373,7 @@ bool RungeKuttaNystrom::RawStep(void)
 }
 
 //------------------------------------------------------------------------------
-// void RungeKuttaNystrom::EstimateError(void)
+// void RungeKuttaNystrom::EstimateError()
 //------------------------------------------------------------------------------
 /**
  * This method takes the state vector and calculates the error in each 
@@ -397,7 +385,7 @@ bool RungeKuttaNystrom::RawStep(void)
  * coefficients when error estimates are available for those terms.
  */
 //------------------------------------------------------------------------------
-Real RungeKuttaNystrom::EstimateError(void)
+Real RungeKuttaNystrom::EstimateError()
 {
     int i, j;
 
@@ -419,7 +407,7 @@ Real RungeKuttaNystrom::EstimateError(void)
     return physicalModel->EstimateError(errorEstimates, candidateState);
 }
 
-Integer RungeKuttaNystrom::GetPropagatorOrder(void) const
+Integer RungeKuttaNystrom::GetPropagatorOrder() const
 {
     return 2;
 }
