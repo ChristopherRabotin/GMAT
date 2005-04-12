@@ -589,13 +589,10 @@ Real OrbitData::GetSphRaDecReal(const std::string &str)
    {
       // if orgin is the same as central body, just return default
       if (mOrigin->GetName() == mCentralBody->GetName())
-      {
          return mSphRaDecState[RD_RMAG];
-      }
       else
-      {
          return GetPositionMagnitude(mOrigin);
-      }
+
    }
    else if (str == "SphRA")
       return mSphRaDecState[RD_RRA];
@@ -674,14 +671,16 @@ Real OrbitData::GetSphAzFpaReal(const std::string &str)
 //------------------------------------------------------------------------------
 Real OrbitData::GetAngularReal(const std::string &str)
 {
-   Rvector6 state;
+   Rvector6 state = GetCartState();
+
+   #if DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage
+      ("OrbitData::GetAngularReal() str=%s state=%s\n",
+       str.c_str(), state.ToString().c_str());
+   #endif
+   
    Rvector3 pos;
    Rvector3 vel;
-   
-   if (mOrigin->GetName() == mCentralBody->GetName())
-      state = GetCartState();
-   else
-      state = GetRelativeCartState(mOrigin);
 
    pos = Rvector3(state[0], state[1], state[2]);
    vel = Rvector3(state[3], state[4], state[5]);
@@ -693,6 +692,15 @@ Real OrbitData::GetAngularReal(const std::string &str)
    
    if (str == "SemilatusRectum")
    {
+      if (mOrigin->GetName() != mCentralBody->GetName())
+      {
+         state = GetRelativeCartState(mOrigin);
+         pos = Rvector3(state[0], state[1], state[2]);
+         vel = Rvector3(state[3], state[4], state[5]);
+         hVec3 = Cross(pos, vel);
+         h = Sqrt(hVec3 * hVec3);
+      }
+      
       if (h < ORBIT_TOL)
          return 0.0;
       else
@@ -700,6 +708,15 @@ Real OrbitData::GetAngularReal(const std::string &str)
    }
    else if (str == "HMAG")
    {
+      if (mOrigin->GetName() != mCentralBody->GetName())
+      {
+         state = GetRelativeCartState(mOrigin);
+         pos = Rvector3(state[0], state[1], state[2]);
+         vel = Rvector3(state[3], state[4], state[5]);
+         hVec3 = Cross(pos, vel);
+         h = Sqrt(hVec3 * hVec3);
+      }
+      
       return h; 
    }
    else if (str == "HX")
@@ -912,6 +929,12 @@ Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
    // get origin state
    Rvector6 originState = origin->GetMJ2000State(mCartEpoch);
 
+   #if DEBUG_ORBITDATA_RUN
+      MessageInterface::ShowMessage
+         ("OrbitData::GetRelativeCartState() origin=%s, state=%s\n",
+          origin->GetName().c_str(), originState.ToString().c_str());
+   #endif
+      
    // return relative state
    return scState - originState;
 }
