@@ -1153,6 +1153,9 @@ bool CelestialBody::SetPotentialFilename(const std::string &fn)
 
 const Rvector6 CelestialBody::GetMJ2000State(const A1Mjd &atTime)
 {
+   if (j2000Body == NULL)
+      throw SolarSystemException("j2000Body is NULL for " + instanceName);
+      
    // If j2000Body is this body, return the zero state vector
    if(j2000Body->GetName() == instanceName) 
       return Rvector6(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);

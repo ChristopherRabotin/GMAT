@@ -27,6 +27,7 @@
 //#define DEBUG_TOKEN_PARSING 1
 //#define DEBUG_TOKEN_PARSING_DETAILS 1
 //#define DEBUG_RHS_PARSING 1
+//#define DEBUG_RHS_PARSING_DETAILS 1
 //#define DEBUG_ARRAY_INTERPRETING 1
 //#define DEBUG_INTERPRET_OBJECTEQUATES 1
 
@@ -2431,6 +2432,7 @@ bool Interpreter::ConstructRHS(GmatBase *lhsObject, const std::string& rhs,
                      if (parmSystem == "")
                         parmSystem = "Earth";
                      parm->SetStringParameter("DepObject", parmSystem);
+                     parm->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
                      if (parm->NeedCoordSystem())
                         /// @todo Update coordinate system to better body parms
                         parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,

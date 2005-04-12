@@ -35,15 +35,21 @@
 //------------------------------------------------------------------------------
 // Sandbox::Sandbox()
 //------------------------------------------------------------------------------
+/**
+ *  Default constructor.
+ */
+//------------------------------------------------------------------------------
 Sandbox::Sandbox() :
-   solarSys        (NULL),
-   internalCoordSys(NULL),
-   publisher       (NULL),
-   sequence        (NULL),
-   current         (NULL),
-   moderator       (NULL),
-   state           (IDLE)
+   solarSys          (NULL),
+   internalCoordSys  (NULL),
+   publisher         (NULL),
+   sequence          (NULL),
+   current           (NULL),
+   moderator         (NULL),
+   state             (IDLE)
 {
+   // List of the objects that can safely be cloned.  This list will be removed
+   // when the cloning has been tested for all of GMAT's classes.
    clonable.push_back(Gmat::SPACECRAFT);
    clonable.push_back(Gmat::FORMATION);
 //   clonable.push_back(Gmat::SPACEOBJECT);
@@ -55,7 +61,6 @@ Sandbox::Sandbox() :
 //   clonable.push_back(Gmat::PHYSICAL_MODEL);
 //   clonable.push_back(Gmat::TRANSIENT_FORCE);
 //   clonable.push_back(Gmat::INTERPOLATOR);
-//   clonable.push_back(Gmat::SOLAR_SYSTEM);
 //   clonable.push_back(Gmat::SPACE_POINT);
 //   clonable.push_back(Gmat::CELESTIAL_BODY);
 //   clonable.push_back(Gmat::CALCULATED_POINT);
@@ -74,11 +79,18 @@ Sandbox::Sandbox() :
 //   clonable.push_back(Gmat::HARDWARE);
 //   clonable.push_back(Gmat::COORDINATE_SYSTEM);
 //   clonable.push_back(Gmat::AXIS_SYSTEM);
+
+   // SolarSystem instances are handled separately from the other objects
+   // clonable.push_back(Gmat::SOLAR_SYSTEM);
 }
 
 
 //------------------------------------------------------------------------------
 // ~Sandbox()
+//------------------------------------------------------------------------------
+/**
+ *  Destructor.
+ */
 //------------------------------------------------------------------------------
 Sandbox::~Sandbox()
 {
@@ -91,9 +103,30 @@ Sandbox::~Sandbox()
    Clear();
 }
     
+
+//------------------------------------------------------------------------------
 // Setup methods
 //------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 // bool AddObject(GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ *  Adds an object to the Sandbox's object container.
+ *
+ *  Objects are added to the Sandbox by cloning the objects.  That way local
+ *  copies can be manipulated without affecting the objects managed by the
+ *  ConfigurationManager.
+ *
+ *  @note Cloning is not yet fully functional in GMAT.  Oncew cloning is
+ *        completed, this method will be simplified to clone every object added
+ *        to the Sandbox.
+ *
+ *  @param <obj> The object that needs to be included in the Sandbox.
+ *
+ *  @return true if the object was added to the Sandbox's container, false if
+ *          it was not.
+ */
 //------------------------------------------------------------------------------
 bool Sandbox::AddObject(GmatBase *obj)
 {
@@ -149,6 +182,17 @@ bool Sandbox::AddObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 // bool AddCommand(GmatCommand *cmd)
 //------------------------------------------------------------------------------
+/**
+ *  Adds a command to the Sandbox's command sequence.
+ *
+ *  Command are added to the command srquence by appending them ti the command
+ *  list, using the GmatCommand::Append() method.
+ *
+ *  @param <cmd> The command that needs to be added to this Sandbox's sequence.
+ *
+ *  @return true if the command was added to the sequence, false if not.
+ */
+//------------------------------------------------------------------------------
 bool Sandbox::AddCommand(GmatCommand *cmd)
 {
    if (state == INITIALIZED)
@@ -159,7 +203,6 @@ bool Sandbox::AddCommand(GmatCommand *cmd)
         
    if (cmd == sequence)
       return true;
-   // throw SandboxException("Adding command that is already in the Sandbox");
     
    if (sequence)
       return sequence->Append(cmd);
@@ -172,6 +215,14 @@ bool Sandbox::AddCommand(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 // bool AddSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
+/**
+ *  Sets the SolarSystem for this Sandbox by cloning the input solar system.
+ *
+ *  @param <ss> The SolarSystem this Sandbox's will use.
+ *
+ *  @return true if the solar system was added to the Sandbox, false if not.
+ */
+//------------------------------------------------------------------------------
 bool Sandbox::AddSolarSystem(SolarSystem *ss)
 {
    if (state == INITIALIZED)
@@ -180,13 +231,20 @@ bool Sandbox::AddSolarSystem(SolarSystem *ss)
       return false;
 
    solarSys = (SolarSystem*)(ss->Clone());
-//   solarSys = ss;
    return true;
 }
 
 
 //------------------------------------------------------------------------------
 // bool SetInternalCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+/**
+ *  Sets the internal coordinate system used by the Sandbox.
+ *
+ *  @param <cs> The internal coordinate system.
+ *
+ *  @return true if the command was added to the sequence, false if not.
+ */
 //------------------------------------------------------------------------------
 bool Sandbox::SetInternalCoordSystem(CoordinateSystem *cs)
 {
@@ -196,6 +254,7 @@ bool Sandbox::SetInternalCoordSystem(CoordinateSystem *cs)
    if (!cs)
       return false;
    
+   /// @todo Check initialization and cloning for the internal CoordinateSystem.
    //internalCoordSys = (CoordinateSystem*)(cs->Clone());
    internalCoordSys = cs;
    return true;
@@ -204,6 +263,14 @@ bool Sandbox::SetInternalCoordSystem(CoordinateSystem *cs)
 
 //------------------------------------------------------------------------------
 // bool SetPublisher(Publisher *pub)
+//------------------------------------------------------------------------------
+/**
+ *  Sets the Publisher so the Sandbox can pipe data to the rest of GMAT.
+ *
+ *  @param <pub> The GMAT Publisher.
+ *
+ *  @return true if the command was added to the sequence, false if not.
+ */
 //------------------------------------------------------------------------------
 bool Sandbox::SetPublisher(Publisher *pub)
 {
@@ -215,21 +282,26 @@ bool Sandbox::SetPublisher(Publisher *pub)
       return true;
    }
 
-   // Initialize off of the singleton
-   //publisher = Publisher::Instance();
    if (!publisher)
       return false;
+
    return true;
 }
 
 
-//loj: 3/2/05 Added default ObjectType
 //------------------------------------------------------------------------------
-// GmatBase* GetInternalObject(std::string name,
-//                             Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT)
+// GmatBase* GetInternalObject(std::string name, Gmat::ObjectType type)
 //------------------------------------------------------------------------------
-GmatBase* Sandbox::GetInternalObject(std::string name,
-                                     Gmat::ObjectType type)
+/**
+ *  Accesses objects managed by this Sandbox.
+ *
+ *  @param <name> The name of the object.
+ *  @param <name> type of object requested.
+ *
+ *  @return The pointer to the object.
+ */
+//------------------------------------------------------------------------------
+GmatBase* Sandbox::GetInternalObject(std::string name, Gmat::ObjectType type)
 {
    GmatBase* obj = NULL;
     
@@ -258,6 +330,14 @@ GmatBase* Sandbox::GetInternalObject(std::string name,
 //------------------------------------------------------------------------------
 // Spacecraft* GetSpacecraft(std::string name)
 //------------------------------------------------------------------------------
+/**
+ *  Accesses the local copy of a Spacecraft managed by this Sandbox.
+ *
+ *  @param <name> The name of the Spacecraft.
+ *
+ *  @return The pointer to the Spacecraft.
+ */
+//------------------------------------------------------------------------------
 Spacecraft* Sandbox::GetSpacecraft(std::string name)
 {
    Spacecraft *sc = NULL;
@@ -270,9 +350,19 @@ Spacecraft* Sandbox::GetSpacecraft(std::string name)
 }
 
 
+//------------------------------------------------------------------------------
 // Execution methods
 //------------------------------------------------------------------------------
-// bool Initialize(void)
+
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ *  Established the internal linkages between objects needed prior to running a
+ *  mission sequence.
+ *
+ *  @return true if everything was connected properly, false if not.
+ */
 //------------------------------------------------------------------------------
 bool Sandbox::Initialize()
 {
@@ -289,20 +379,51 @@ bool Sandbox::Initialize()
 
    current = sequence;
    if (!current)
-      return false;
-        
+      throw SandboxException("No mission sequence defined in the Sandbox!");
+
+   if (!internalCoordSys)
+      throw SandboxException(
+         "No reference (internal) coordinate system defined in the Sandbox!");
+
    std::map<std::string, GmatBase *>::iterator omi;
+
    // Set the solar system on each force model, spacecraft, parameter
    if (solarSys)
    {
       std::string objName;
+      SpacePoint *sp, *j2kBod;
+      std::string j2kName;
+      
+      // Set J2000 bodies for solar system objects -- should this happen here?
+      const StringArray biu = solarSys->GetBodiesInUse();
+      for (StringArray::const_iterator i = biu.begin(); i != biu.end(); ++i)
+      {
+         sp = solarSys->GetBody(*i);
+         j2kName = sp->GetStringParameter("J2000BodyName");
+         j2kBod = FindSpacePoint(j2kName);
+         sp->SetJ2000Body(j2kBod);
+      }
+         
 
-      // set ref objct for internal coordinate system (loj: 3/8/05 Added)
+      // set ref object for internal coordinate system
       internalCoordSys->SetSolarSystem(solarSys);
+
+      // Set refence origin for internal coordinate system.
       objName = internalCoordSys->GetStringParameter("OriginName");
-      internalCoordSys->SetRefObject(solarSys->GetBody(objName), Gmat::SPACE_POINT, objName);
+      sp = FindSpacePoint(objName);
+      if (sp == NULL)
+         throw SandboxException("Cannot find SpacePoint named \"" +
+            objName + "\" used for the internal coordinate system origin");
+      internalCoordSys->SetRefObject(sp, Gmat::SPACE_POINT, objName);
+
+      // Set J2000 body for internal coordinate system
       objName = internalCoordSys->GetStringParameter("J2000BodyName");
-      internalCoordSys->SetRefObject(solarSys->GetBody(objName), Gmat::SPACE_POINT, objName);
+      sp = FindSpacePoint(objName);
+      if (sp == NULL)
+         throw SandboxException("Cannot find SpacePoint named \"" +
+            objName + "\" used for the internal coordinate system J2000 body");
+      internalCoordSys->SetRefObject(sp, Gmat::SPACE_POINT, objName);
+      
       internalCoordSys->Initialize();
       
       for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
@@ -317,12 +438,24 @@ bool Sandbox::Initialize()
          {
             CoordinateSystem *cs = (CoordinateSystem*)(omi->second);
             cs->SetSolarSystem(solarSys);
-            //cs->SetOrigin(solarSys->GetBody(cs->GetStringParameter("OriginName")));
-            //cs->SetJ2000Body(solarSys->GetBody(cs->GetStringParameter("J2000BodyName")));
+
+            // Set the reference objects for the coordinate system
             objName = cs->GetStringParameter("OriginName");
-            cs->SetRefObject(solarSys->GetBody(objName), Gmat::SPACE_POINT, objName);
+            sp = FindSpacePoint(objName);
+            if (sp == NULL)
+               throw SandboxException("Cannot find SpacePoint named \"" +
+                  objName + "\" used for the coordinate system " +
+                  cs->GetName() + " origin");
+            cs->SetRefObject(sp, Gmat::SPACE_POINT, objName);
+            
             objName = cs->GetStringParameter("J2000BodyName");
-            cs->SetRefObject(solarSys->GetBody(objName), Gmat::SPACE_POINT, objName);
+            sp = FindSpacePoint(objName);
+            if (sp == NULL)
+               throw SandboxException("Cannot find SpacePoint named \"" +
+                  objName + "\" used for the coordinate system " +
+                  cs->GetName() + " J2000 body");
+            cs->SetRefObject(sp, Gmat::SPACE_POINT, objName);
+
             cs->Initialize();
          }
          else if ((omi->second)->GetType() == Gmat::PROP_SETUP)
@@ -350,13 +483,13 @@ bool Sandbox::Initialize()
                // set Spacecraft
                std::string scName = param->GetRefObjectName(Gmat::SPACECRAFT);         
                #if DEBUG_SANDBOX_INIT > 1
-               MessageInterface::ShowMessage
-                  ("Sandbox::Initialize() Set SC <%s> pointer on parameter: \"%s\"\n",
-                   scName.c_str(), param->GetName().c_str());
+                  MessageInterface::ShowMessage
+                     ("Sandbox::Initialize() Set SC <%s> pointer on parameter: "
+                      "\"%s\"\n", scName.c_str(), param->GetName().c_str());
                #endif
-               param->SetRefObject(GetSpacecraft(scName), Gmat::SPACECRAFT, scName);
+               param->SetRefObject(GetSpacecraft(scName), Gmat::SPACECRAFT,
+                                   scName);
 
-                              
                // set Internal and Output CoordinateSystem
                if (param->NeedCoordSystem())
                {                  
@@ -374,6 +507,24 @@ bool Sandbox::Initialize()
                                       Gmat::COORDINATE_SYSTEM, csName);
                }
                
+               // set reference body
+               if (param->IsOriginDependent())
+               {
+                  std::string origName;
+
+                  origName = param->GetRefObjectName(Gmat::SPACE_POINT);
+
+                  #if DEBUG_SANDBOX_INIT > 1
+                     MessageInterface::ShowMessage
+                        ("Sandbox::Initialize() Set SpacePoint <%s> pointer on "
+                        "parameter: \"%s\"\n", origName.c_str(),
+                        param->GetName().c_str());
+                  #endif
+                  
+                  SpacePoint *sp = FindSpacePoint(origName);
+                  param->SetRefObject(sp, Gmat::SPACE_POINT, origName);
+               }
+
                param->SetSolarSystem(solarSys);
                param->Initialize();
             }
@@ -683,4 +834,21 @@ void Sandbox::BuildAssociations(GmatBase * obj)
       
       obj->TakeAction("SetupHardware");
    }
+}
+
+
+//------------------------------------------------------------------------------
+// SpacePoint* FindSpacePoint(const std::string &spname)
+//------------------------------------------------------------------------------
+SpacePoint * Sandbox::FindSpacePoint(const std::string &spName)
+{
+   SpacePoint *sp = solarSys->GetBody(spName);
+
+   if (sp == NULL)
+   {
+      /// @todo If sp is not solar system object, look for a configured point
+      ;
+   }
+
+   return sp;
 }
