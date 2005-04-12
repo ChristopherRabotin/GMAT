@@ -659,7 +659,8 @@ bool BaseStopCondition::Validate()
          }
       }
    }
-   
+
+   //loj: 4/12/05 Added to set SpacePoint object for internal parameters.
    // Apoapsis and Periapsis need additional parameters
    if (valid)
    {
@@ -675,17 +676,20 @@ bool BaseStopCondition::Validate()
             #endif
             
             mEccParam = new KepEcc("");
-         
+            
             mEccParam->AddRefObject
                (mStopParam->GetRefObject(Gmat::SPACECRAFT, 
                                          mStopParam->GetRefObjectName(Gmat::SPACECRAFT)));
             mEccParam->AddRefObject
                (mStopParam->GetRefObject(Gmat::COORDINATE_SYSTEM, 
                                          mStopParam->GetRefObjectName(Gmat::COORDINATE_SYSTEM)));
-         
-            mEccParam->SetInternalCoordSystem(mStopParam->GetInternalCoordSystem());
+            mEccParam->AddRefObject
+               (mStopParam->GetRefObject(Gmat::SPACE_POINT, 
+                                         mStopParam->GetRefObjectName(Gmat::SPACE_POINT)));
             
+            mEccParam->SetInternalCoordSystem(mStopParam->GetInternalCoordSystem());            
             mEccParam->AddRefObject(mSolarSystem);
+            mEccParam->Initialize();
          }
          
          // check on SphRMag parameter if "Periapsis"
@@ -706,10 +710,13 @@ bool BaseStopCondition::Validate()
                mRmagParam->AddRefObject
                   (mStopParam->GetRefObject(Gmat::COORDINATE_SYSTEM,
                                             mStopParam->GetRefObjectName(Gmat::COORDINATE_SYSTEM)));
+               mRmagParam->AddRefObject
+                  (mStopParam->GetRefObject(Gmat::SPACE_POINT,
+                                            mStopParam->GetRefObjectName(Gmat::SPACE_POINT)));
             
                mRmagParam->SetInternalCoordSystem(mStopParam->GetInternalCoordSystem());
-            
                mRmagParam->AddRefObject(mSolarSystem);
+               mRmagParam->Initialize();
             }
          }
       }
