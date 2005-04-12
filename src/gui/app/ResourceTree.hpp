@@ -22,6 +22,7 @@
 
 #include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
+#include "GmatTreeItemData.hpp"
 
 class ResourceTree : public wxTreeCtrl
 {
@@ -32,6 +33,9 @@ public:
                 const wxPoint& pos, const wxSize& size,
                 long style);
    void UpdateResource(bool resetCounter);
+   void OnAddScript();
+   void OnNewScript();
+   void AddScriptItem(wxString path);
     
 private:
    GuiInterpreter *theGuiInterpreter;
@@ -123,9 +127,10 @@ private:
    void OnAddGmatFunction(wxCommandEvent &event);
    void OnAddCoordSys(wxCommandEvent &event);
 
-   void OnOpenScript(wxCommandEvent &event);
-   void OnNewScript(wxCommandEvent &event);
+//   void OnAddScript(wxCommandEvent &event);
+//   void OnNewScript(wxCommandEvent &event);
    void OnRemoveAllScripts(wxCommandEvent &event);
+   void OnRemoveScript(wxCommandEvent &event);
 
    wxMenu* CreatePopupMenu(Gmat::ObjectType type);
     
@@ -138,6 +143,7 @@ private:
       POPUP_ADD_FORMATION,
       POPUP_ADD_CONSTELLATION,
       
+      POPUP_ADD_HARDWARE,
       POPUP_ADD_THRUSTER,
       POPUP_ADD_FUELTANK,
       
@@ -166,9 +172,10 @@ private:
       POPUP_ADD_COORD_SYS,
       POPUP_ADD_GMAT_FUNCT,
 
-      POPUP_OPEN_SCRIPT,
-      POPUP_NEW_SCRIPT,
+      POPUP_ADD_SCRIPT,
+//      POPUP_NEW_SCRIPT,
       POPUP_REMOVE_ALL_SCRIPTS,
+      POPUP_REMOVE_SCRIPT,
    };
 };
 

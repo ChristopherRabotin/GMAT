@@ -19,6 +19,7 @@
 
 #include "ResourceTree.hpp"
 #include "MissionTree.hpp"
+#include "OutputTree.hpp"
 
 #include "wx/notebook.h"
 
@@ -38,6 +39,7 @@ private:
    //GmatMainNotebook *mainNotebook;
    ResourceTree *resourceTree;
    MissionTree *missionTree;
+   OutputTree *outputTree;
 
    wxPanel *CreateResourcePage();
    wxPanel *CreateMissionPage();

@@ -20,12 +20,11 @@
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(ScriptPanel, GmatPanel)
-   EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
-   EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
-   EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
-   EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
-   
+BEGIN_EVENT_TABLE(ScriptPanel, GmatSavePanel)
+   EVT_BUTTON(ID_BUTTON_SAVE, GmatSavePanel::OnSave)
+   EVT_BUTTON(ID_BUTTON_SAVE_AS, GmatSavePanel::OnSaveAs)
+   EVT_BUTTON(ID_BUTTON_CLOSE, GmatSavePanel::OnClose)
+
    EVT_TEXT(ID_TEXTCTRL, ScriptPanel::OnTextUpdate)
 END_EVENT_TABLE()
 
@@ -37,11 +36,9 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 ScriptPanel::ScriptPanel(wxWindow *parent, const wxString &name)
-   : GmatPanel(parent, false)
+   : GmatSavePanel(parent, false, name)
 {
-   mFilename = name;
-   mFileExists = false;
-   mEnableSave = false;
+   mScriptFilename = name;
 
    Create();
    Show();
@@ -83,14 +80,15 @@ void ScriptPanel::Create()
 void ScriptPanel::LoadData()
 {
    wxFile *file = new wxFile();
-   mFileExists = file->Exists(mFilename);
+   bool mFileExists = file->Exists(mScriptFilename);
 
    if (mFileExists)
-      mFileContentsTextCtrl->LoadFile(mFilename);
+      mFileContentsTextCtrl->LoadFile(mScriptFilename);
    else
       mFileContentsTextCtrl->SetValue("");
 
-   theApplyButton->Enable(false);
+   theSaveAsButton->Enable(true);
+   theSaveButton->Enable(false);
 }
 
 //------------------------------------------------------------------------------
@@ -98,15 +96,17 @@ void ScriptPanel::LoadData()
 //------------------------------------------------------------------------------
 void ScriptPanel::SaveData()
 {
-   if (mEnableSave)
+   if (mScriptFilename != mFilename)
    {
-//      if (mFileExists)
-//      {
-      mFileContentsTextCtrl->SaveFile(mFilename);
-      mEnableSave = false;
-      mFileExists = true;
-//      }
+      // add new script to tree
+      GmatAppData::GetResourceTree()->AddScriptItem(mFilename);
+      // rename this child window
+      GmatAppData::GetMainFrame()->RenameChild(mScriptFilename, mFilename);
+      mScriptFilename = mFilename;
    }
+
+   mFileContentsTextCtrl->SaveFile(mScriptFilename);
+   theSaveButton->Enable(false);
 }
 
 //------------------------------------------------------------------------------
@@ -114,6 +114,65 @@ void ScriptPanel::SaveData()
 //------------------------------------------------------------------------------
 void ScriptPanel::OnTextUpdate(wxCommandEvent& event)
 {
-   theApplyButton->Enable(true);
-   mEnableSave = true;
+   theSaveButton->Enable(true);
 }
+
+//------------------------------------------------------------------------------
+// wxMenuBar *CreateScriptMenu()
+//------------------------------------------------------------------------------
+/**
+ * Adds items to the script menu.
+ *
+ * @return script Menu bar.
+ */
+//------------------------------------------------------------------------------
+wxMenuBar *ScriptPanel::CreateScriptMenu()
+{
+    // Make a menubar
+    wxMenu *file_menu = new wxMenu;
+
+    file_menu->Append(wxID_NEW, _T("&New"));
+    file_menu->Enable(wxID_NEW, false);
+    file_menu->Append(wxID_OPEN, _T("&Open"));
+    file_menu->Enable(wxID_OPEN, false);
+//    file_menu->Append(MENU_FILE_NEW_SCRIPT, _T("&New"));
+//    file_menu->Append(MENU_FILE_OPEN_SCRIPT, _T("&Open"));
+    file_menu->Append(ID_BUTTON_CLOSE, _T("&Close"));
+    file_menu->Enable(ID_BUTTON_CLOSE, false);
+    file_menu->Append(ID_BUTTON_SAVE, _T("&Save"));
+    file_menu->Enable(ID_BUTTON_SAVE, false);
+    file_menu->Append(ID_BUTTON_SAVE_AS, _T("Save &As"));
+    file_menu->Enable(ID_BUTTON_SAVE_AS, false);
+
+    wxMenu *editMenu = new wxMenu;
+    editMenu->Append(wxID_UNDO, _T("&Undo"));
+    editMenu->Enable(wxID_UNDO, false);
+    editMenu->Append(wxID_REDO, _T("&Redo"));
+    editMenu->Enable(wxID_REDO, false);
+    editMenu->AppendSeparator();
+    editMenu->Append(wxID_CUT, _T("Cu&t"));
+    editMenu->Enable(wxID_CUT, false);
+    editMenu->Append(wxID_COPY, _T("&Copy"));
+    editMenu->Enable(wxID_COPY, false);
+    editMenu->Append(wxID_PASTE, _T("&Paste"));
+    editMenu->Enable(wxID_PASTE, false);
+
+    wxMenu *scriptMenu = (wxMenu *) NULL;
+
+    scriptMenu = new wxMenu;
+    scriptMenu->Append(GmatScript::MENU_SCRIPT_BUILD_OBJECT,
+          _T("&Build Object"));
+    scriptMenu->Append(GmatScript::MENU_SCRIPT_BUILD_AND_RUN,
+          _T("&Build and Run"));
+    scriptMenu->Append(GmatScript::MENU_SCRIPT_RUN, _T("&Run"));
+
+    wxMenuBar *menu_bar = new wxMenuBar;
+
+    menu_bar->Append(file_menu, _T("&File"));
+    menu_bar->Append(editMenu, _T("&Edit"));
+    menu_bar->Append(scriptMenu, _T("&Script"));
+
+    return menu_bar;
+}
+
+

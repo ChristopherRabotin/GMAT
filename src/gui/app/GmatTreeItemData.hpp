@@ -69,6 +69,7 @@ namespace GmatTree
         ICON_MOON,
 
         ICON_MATLAB_FUNCTION,
+        ICON_FUNCTION,
         ICON_ARRAY,
         ICON_COORDINATE_SYSTEM,
         ICON_OPEN_GL_PLOT,

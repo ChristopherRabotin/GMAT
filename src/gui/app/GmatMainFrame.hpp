@@ -29,10 +29,11 @@
 
 #include "ViewTextFrame.hpp"
 #include "GuiInterpreter.hpp"
-//#include "GmatMainNotebook.hpp"
 #include "GmatTreeItemData.hpp"
 #include "GmatServer.hpp"
 #include "MatlabInterface.hpp"
+#include "MdiChildTrajFrame.hpp"
+#include "MdiChildXyFrame.hpp"
 
 #include "wx/notebook.h"
 #include "wx/toolbar.h"
@@ -52,10 +53,10 @@ public:
    void CreateChild(GmatTreeItemData *item);
    bool IsChildOpen(GmatTreeItemData *item);
    bool RenameChild(GmatTreeItemData *item, wxString newName);
+   bool RenameChild(wxString oldName, wxString newName);
    void RemoveChild(wxString item);
    void CloseActiveChild();
-   void CloseAllChildren();
-   void MinimizeChildren(int selection);
+   void CloseAllChildren(bool closeScriptWindow = true, wxString title = "");
    void CloseCurrentProject();
    void RunCurrentMission();
    void NotifyRunCompleted(); //loj: 10/28/04 added
@@ -63,9 +64,20 @@ public:
    void StopServer();
    wxToolBar* GetMainFrameToolBar();
 
-   // public data
-   bool scriptMdiShown;
-    
+   MdiChildTrajFrame *trajSubframe;
+   MdiChildTrajFrame *trajMainSubframe;
+
+   MdiChildXyFrame *xySubframe;
+   MdiChildXyFrame *xyMainSubframe;
+
+   void UpdateUI();
+   void OnSize(wxSizeEvent& event);
+   void OnClose(wxCloseEvent& event);
+   void OnQuit(wxCommandEvent& event);
+   void OnOpenTrajectoryFile(wxCommandEvent& event);
+   void OnZoomIn(wxCommandEvent& event);
+   void OnZoomOut(wxCommandEvent& event);
+
 protected:
 private:
    
@@ -81,14 +93,13 @@ private:
    wxScrolledWindow *panel;
    wxList *mdiChildren;
    
-   wxDocManager *mDocManager;
-   wxDocTemplate *mDocTemplate;
+//   wxDocManager *mDocManager;
+//   wxDocTemplate *mDocTemplate;
    ViewTextFrame *mTextFrame;
    //GmatMainNotebook *rightTabs;
    
    void InitToolBar(wxToolBar* toolBar);
    wxMenuBar* CreateMainMenu();
-   wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
    wxMenu *mServerMenu;
    
    // event handling
@@ -101,13 +112,11 @@ private:
    void OnRun(wxCommandEvent &event);
    void OnStop(wxCommandEvent &event);
    void OnHelpAbout(wxCommandEvent &event);
-   void OnCloseTabs(wxCommandEvent &event);
-   
-   void OnScriptOpenEditor(wxCommandEvent &event);
+
+   void OnNewScript(wxCommandEvent &event);
+   void OnOpenScript(wxCommandEvent &event);
+
    void OnScriptBuild(wxCommandEvent &event);
-   
-   void OnScriptOpenNewEditor(wxCommandEvent &event);
-   void OnScriptOpenFileEditor(wxCommandEvent &event);
    
    void OnGlPlotTrajectoryFile(wxCommandEvent &event);
    void OnXyPlotTrajectoryFile(wxCommandEvent &event);
@@ -123,7 +132,7 @@ private:
    
    void OnSashDrag(wxSashEvent &event);
    void OnMsgSashDrag(wxSashEvent &event);
-   void OnSize(wxSizeEvent &event);
+   void OnMainFrameSize(wxSizeEvent &event);
    void OnFocus(wxFocusEvent &event);
 
    bool OnScriptBuildObject(wxCommandEvent& WXUNUSED(event));

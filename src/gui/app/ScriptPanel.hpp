@@ -15,25 +15,23 @@
 #ifndef ScriptPanel_hpp
 #define ScriptPanel_hpp
 
-#include "GmatPanel.hpp"
+#include "GmatSavePanel.hpp"
 
-class ScriptPanel: public GmatPanel
+class ScriptPanel: public GmatSavePanel
 {
 public:
    // constructors
    ScriptPanel(wxWindow *parent, const wxString &name);
-    
-private:
-   bool mFileExists;
-   bool mEnableSave;
+   wxMenuBar *CreateScriptMenu();
 
-   wxString mFilename;
+private:
+   wxString mScriptFilename;
    wxGridSizer *mBottomSizer;
    wxBoxSizer *mPageSizer;
 
    wxTextCtrl *mFileContentsTextCtrl;
 
-   // methods inherited from GmatPanel
+   // methods inherited from GmatSavePanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();

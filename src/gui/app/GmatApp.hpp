@@ -40,11 +40,7 @@ public:
 
     //loj: added
     int OnExit(void);
-    wxFrame *CreateSdiChildFrame(wxDocument *doc, wxView *view, bool isCanvas,
-                                 bool isScript);
-    wxMDIChildFrame *CreateMdiChildFrame(wxDocument *doc, wxView *view, bool isCanvas,
-                                         bool isScript);
-    
+
 protected:
 
 private:

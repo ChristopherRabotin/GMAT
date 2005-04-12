@@ -205,6 +205,24 @@ wxPanel *GmatNotebook::CreateMissionPage()
 //------------------------------------------------------------------------------
 wxPanel *GmatNotebook::CreateOutputPage()
 {
+   wxGridSizer *sizer = new wxGridSizer( 1, 0, 0 );
    wxPanel *panel = new wxPanel(this);
+
+   long style = wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_LINES_AT_ROOT|
+      wxSUNKEN_BORDER|wxTR_SINGLE|wxTR_FULL_ROW_HIGHLIGHT;
+
+   outputTree = new OutputTree(panel, -1, wxDefaultPosition,
+                                   wxDefaultSize, style);
+
+   // set to GmatAppData
+   GmatAppData::SetOutputTree(outputTree);
+
+   sizer->Add( outputTree, 0, wxGROW|wxALL, 0 );
+
+   panel->SetAutoLayout( TRUE );
+   panel->SetSizer( sizer );
+   sizer->Fit( panel );
+   sizer->SetSizeHints( panel );
+
    return panel;
 }

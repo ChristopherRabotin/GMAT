@@ -23,6 +23,7 @@
 #include "ViewTextFrame.hpp"
 #include "ResourceTree.hpp"
 #include "MissionTree.hpp"
+#include "OutputTree.hpp"
 //#include "GmatMainNotebook.hpp"
 #include "GmatMainFrame.hpp"
 #endif
@@ -58,6 +59,11 @@ public:
     static void SetMissionTree(MissionTree *missionTree)
         { theMissionTree = missionTree;};
         
+    static OutputTree* GetOutputTree()
+        { return theOutputTree;};
+    static void SetOutputTree(OutputTree *outputTree)
+        { theOutputTree = outputTree;};
+
 //    static GmatMainNotebook* GetMainNotebook()
 //        { return theMainNotebook;};
 //    static void SetMainNotebook(GmatMainNotebook *mainNotebook)
@@ -77,6 +83,7 @@ private:
     static wxTextCtrl *theMessageTextCtrl;
     static ResourceTree *theResourceTree;
     static MissionTree *theMissionTree;
+    static OutputTree *theOutputTree;
 //    static GmatMainNotebook *theMainNotebook;
     static GmatMainFrame *theMainFrame;
 #endif
