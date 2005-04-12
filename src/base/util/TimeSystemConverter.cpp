@@ -38,7 +38,7 @@ Real TimeConverterUtil::Convert(const Real origValue,
                         const std::string &fromType,
                         const std::string &toType,
                         Real refJd)
-{
+{      
    Real newTime =
       TimeConverterUtil::ConvertToTaiMjd(fromType, origValue, refJd);
    Real returnTime =
@@ -46,8 +46,12 @@ Real TimeConverterUtil::Convert(const Real origValue,
    return returnTime;
 }
 
+
+//---------------------------------------------------------------------------
+// Real ConvertToTaiMjd(std::string fromType, Real origValue, Real refJd)
+//---------------------------------------------------------------------------
 Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
-      Real refJd)
+                                        Real refJd)
 {
    // a1mjd
    if (fromType == TIME_SYSTEM_TEXT[0])
@@ -65,6 +69,11 @@ Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
          offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
       }
 
+      //loj: 4/12/05 Added
+      if (theLeapSecsFileReader == NULL)
+         throw TimeSystemConverterExceptions::FileException
+            ("theLeapSecsFileReader is unknown\n");
+      
       // look up leap secs from file
       Real numLeapSecs =
          theLeapSecsFileReader->NumberOfLeapSecondsFrom(origValue + offsetValue);
@@ -76,7 +85,7 @@ Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
    {
       if (theEopFile == NULL)
          throw TimeSystemConverterExceptions::FileException(
-               "EopFile is unknown");
+               "EopFile is unknown\n");
 
       Real offsetValue = 0;
 
@@ -121,8 +130,11 @@ Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
 }
 
 
+//---------------------------------------------------------------------------
+// Real ConvertFromTaiMjd(std::string toType, Real origValue, Real refJd)
+//---------------------------------------------------------------------------
 Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
-      Real refJd)
+                                          Real refJd)
 {
    // a1
    if (toType == TIME_SYSTEM_TEXT[0])
@@ -140,12 +152,19 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
          //offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
          offsetValue = refJd - GmatTimeUtil::JD_NOV_17_1858;
       }
+
+      //loj: 4/12/05 Added
+      if (theLeapSecsFileReader == NULL)
+         throw TimeSystemConverterExceptions::FileException
+            ("theLeapSecsFileReader is unknown\n");
+      
       Real taiLeapSecs =
          theLeapSecsFileReader->NumberOfLeapSecondsFrom(origValue + offsetValue);
-
+      
       Real utcLeapSecs =
-         theLeapSecsFileReader->NumberOfLeapSecondsFrom((origValue + offsetValue)
-         - (taiLeapSecs/GmatTimeUtil::SECS_PER_DAY));
+         theLeapSecsFileReader->
+         NumberOfLeapSecondsFrom((origValue + offsetValue)
+                                 - (taiLeapSecs/GmatTimeUtil::SECS_PER_DAY));
 
       if (utcLeapSecs == taiLeapSecs)
          return (origValue - (taiLeapSecs/GmatTimeUtil::SECS_PER_DAY));
@@ -218,11 +237,19 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
    return 0;
 }
 
+
+//---------------------------------------------------------------------------
+// void SetEopFile(EopFile *eopFile)
+//---------------------------------------------------------------------------
 void TimeConverterUtil::SetEopFile(EopFile *eopFile)
 {
    theEopFile = eopFile;
 }
 
+
+//---------------------------------------------------------------------------
+// void SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileReader)
+//---------------------------------------------------------------------------
 void TimeConverterUtil::SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileReader)
 {
    theLeapSecsFileReader = leapSecsFileReader;
