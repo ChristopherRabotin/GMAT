@@ -90,28 +90,30 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    //-------------------------------------------------------
    // create MDI parent frame if NULL
    //-------------------------------------------------------
-   if (MdiGlPlot::mdiParentGlFrame == NULL)
-   {
-      #if DEBUG_PLOTIF_GL
-      MessageInterface::ShowMessage("PlotInterface::CreateGlPlotWindow() "
-                                    "Creating MdiGlPlot::mdiParentGlFrame\n");
-      #endif
-      
-      int screenX = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
-      int screenY = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
-      
-      MdiGlPlot::mdiParentGlFrame =
-         new MdiParentGlFrame((wxFrame *)NULL, -1, _T("MDI OpenGL Window"),
-                              wxPoint(screenX-560, screenY-515), wxSize(550, 480),
-                              wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
-      // Give it an icon
-      #ifdef __WXMSW__
-         MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon(_T("mdi_icn")));
-      #else
-         MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon( mondrian_xpm ));
-      #endif
-   }
-   
+//   if (MdiGlPlot::mdiParentGlFrame == NULL)
+//   {
+//      #if DEBUG_PLOTIF_GL
+//      MessageInterface::ShowMessage("PlotInterface::CreateGlPlotWindow() "
+//                                    "Creating MdiGlPlot::mdiParentGlFrame\n");
+//      #endif
+//
+//      int screenX = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
+//      int screenY = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
+//
+//      MdiGlPlot::mdiParentGlFrame =
+//         new MdiParentGlFrame((wxFrame *)NULL, -1, _T("MDI OpenGL Window"),
+//                              wxPoint(screenX-560, screenY-515), wxSize(550, 480),
+//                              wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
+
+//      MdiGlPlot::mdiParentGlFrame->Hide();
+//      // Give it an icon
+//      #ifdef __WXMSW__
+//         MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon(_T("mdi_icn")));
+//      #else
+//         MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon( mondrian_xpm ));
+//      #endif
+//   }
+
    //-------------------------------------------------------
    // check if new MDI child frame is needed
    //-------------------------------------------------------
@@ -146,35 +148,43 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                     "Creating MdiChildTrajFrame\n");
       #endif
       
-      MdiGlPlot::mdiParentGlFrame->mainSubframe =
-         new MdiChildTrajFrame(MdiGlPlot::mdiParentGlFrame, true,
+      GmatAppData::GetMainFrame()->trajMainSubframe =
+         new MdiChildTrajFrame(GmatAppData::GetMainFrame(), true,
                                wxString(plotName.c_str()),
                                wxString(plotName.c_str()),
                                wxPoint(-1, -1), wxSize(-1, -1),
                                wxDEFAULT_FRAME_STYLE, wxString(csName.c_str()),
                                solarSystem);
-      
+      // 04/08/2005 - arg : changed the parent frame to the main frame
+//      MdiGlPlot::mdiParentGlFrame->trajMainSubframe =
+//         new MdiChildTrajFrame(MdiGlPlot::mdiParentGlFrame, true,
+//                               wxString(plotName.c_str()),
+//                               wxString(plotName.c_str()),
+//                               wxPoint(-1, -1), wxSize(-1, -1),
+//                               wxDEFAULT_FRAME_STYLE, wxString(csName.c_str()),
+//                               solarSystem);
+
       ++MdiGlPlot::numChildren;
 
       //----------------------------------------------------
       // initialize GL
       //----------------------------------------------------
-      if (!MdiGlPlot::mdiParentGlFrame->mainSubframe->mCanvas->InitGL())
+      if (!GmatAppData::GetMainFrame()->trajMainSubframe->mCanvas->InitGL())
       {
-         wxMessageDialog msgDialog(MdiGlPlot::mdiParentGlFrame,
+         wxMessageDialog msgDialog(GmatAppData::GetMainFrame(),
                                    _T("InitGL() failed"), _T("CreateGlPlotWindow"));
          msgDialog.ShowModal();
          return false;
       }
    }
    
-   MdiGlPlot::mdiParentGlFrame->mainSubframe->SetDrawWireFrame(drawWireFrame);
-   MdiGlPlot::mdiParentGlFrame->mainSubframe->SetOverlapPlot(overlapPlot);
-   MdiGlPlot::mdiParentGlFrame->mainSubframe->
+   GmatAppData::GetMainFrame()->trajMainSubframe->SetDrawWireFrame(drawWireFrame);
+   GmatAppData::GetMainFrame()->trajMainSubframe->SetOverlapPlot(overlapPlot);
+   GmatAppData::GetMainFrame()->trajMainSubframe->
       SetDesiredCoordSystem(wxString(csName.c_str()));
    
-   MdiGlPlot::mdiParentGlFrame->Show(true);
-   MdiGlPlot::mdiParentGlFrame->UpdateUI();
+//   MdiGlPlot::mdiParentGlFrame->Show(true);
+//   MdiGlPlot::mdiParentGlFrame->UpdateUI();
 
    return true;
 #endif
@@ -193,7 +203,7 @@ bool PlotInterface::DeleteGlPlot()
    return true;
 #else
 
-   if (MdiGlPlot::mdiParentGlFrame != NULL)
+   if (GmatAppData::GetMainFrame() != NULL)
    {
 #if DEBUG_PLOTIF_GL
       MessageInterface::ShowMessage("PlotInterface::DeleteGlPlot() "
@@ -204,7 +214,7 @@ bool PlotInterface::DeleteGlPlot()
          ((MdiChildTrajFrame*)MdiGlPlot::mdiChildren[i])->DeletePlot();
       }
 
-      MdiGlPlot::mdiParentGlFrame->Hide();
+//      MdiGlPlot::mdiParentGlFrame->Hide();
    }
 
    return true;
@@ -224,7 +234,7 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
    return true;
 #else
 
-   if (MdiGlPlot::mdiParentGlFrame != NULL)
+   if (GmatAppData::GetMainFrame() != NULL)
    {
 #if DEBUG_PLOTIF_GL
       MessageInterface::ShowMessage
@@ -277,7 +287,7 @@ bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
    bool updated = false;
    wxString owner = wxString(plotName.c_str());
 
-   if (MdiGlPlot::mdiParentGlFrame == NULL)
+   if (GmatAppData::GetMainFrame() == NULL)
    {
       if (!CreateGlPlotWindow(plotName, oldName, csName, drawWireFrame))
          return false;
@@ -328,26 +338,26 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
    //-------------------------------------------------------
    // create MDI parent XY frame
    //-------------------------------------------------------
-   if (MdiXyPlot::mdiParentXyFrame == NULL)
-   {
-#if DEBUG_PLOTIF_XY
-      MessageInterface::ShowMessage("PlotInterface::CreateXyPlotWindow() "
-                                    "Creating MdiXyPlot::mdiParentXyFrame\n");
-#endif
-      int screenX = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
-      
-      MdiXyPlot::mdiParentXyFrame =
-         new MdiParentXyFrame((wxFrame *)NULL, -1, _T("MDI XY Plot Window"),
-                              //wxPoint(600, 10), wxSize(600, 500),
-                              wxPoint(screenX-560, 15), wxSize(550, 480),
-                              wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
-      // Give it an icon
-#ifdef __WXMSW__
-      MdiXyPlot::mdiParentXyFrame->SetIcon(wxIcon(_T("mdi_icn")));
-#else
-      MdiXyPlot::mdiParentXyFrame->SetIcon(wxIcon( mondrian_xpm ));
-#endif
-   }
+//   if (MdiXyPlot::mdiParentXyFrame == NULL)
+//   {
+//#if DEBUG_PLOTIF_XY
+//      MessageInterface::ShowMessage("PlotInterface::CreateXyPlotWindow() "
+//                                    "Creating MdiXyPlot::mdiParentXyFrame\n");
+//#endif
+//      int screenX = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
+//
+//      MdiXyPlot::mdiParentXyFrame =
+//         new MdiParentXyFrame(GmatAppData::GetMainFrame(), -1, _T("MDI XY Plot Window"),
+//                              //wxPoint(600, 10), wxSize(600, 500),
+//                              wxPoint(screenX-560, 15), wxSize(550, 480),
+//                              wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
+//      // Give it an icon
+////#ifdef __WXMSW__
+////      MdiXyPlot::mdiParentXyFrame->SetIcon(wxIcon(_T("mdi_icn")));
+////#else
+////      MdiXyPlot::mdiParentXyFrame->SetIcon(wxIcon( mondrian_xpm ));
+////#endif
+//   }
 
    //-------------------------------------------------------
    // check if new MDI child frame needed
@@ -387,30 +397,40 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
 #if DEBUG_PLOTIF_XY
       MessageInterface::ShowMessage
          ("PlotInterface::CreateXyPlotWindow() Creating"
-          "MdiXyPlot::mdiParentXyFrame->mainSubframe\n"
+          "GmatAppData::GetMainFrame()->xyMainSubframe\n"
           "X Axis Title = %s  Y Axis Title = %s\n",
           xAxisTitle.c_str(), yAxisTitle.c_str());
 #endif
       
       // create a frame, containing a XY plot canvas
-      MdiXyPlot::mdiParentXyFrame->mainSubframe =
-         new MdiChildXyFrame(MdiXyPlot::mdiParentXyFrame, true,
+      GmatAppData::GetMainFrame()->xyMainSubframe =
+         new MdiChildXyFrame(GmatAppData::GetMainFrame(), true,
                              wxString(plotName.c_str()),
                              wxString(plotTitle.c_str()),
                              wxString(xAxisTitle.c_str()),
                              wxString(yAxisTitle.c_str()),
                              wxPoint(-1, -1), wxSize(500, 350), //loj: 2/27/04 wxSize(-1, -1),
                              wxDEFAULT_FRAME_STYLE);
-    
+
+      // 04/08/2005 - arg: changed the parent window
+//      MdiXyPlot::mdiParentXyFrame->mainSubframe =
+//         new MdiChildXyFrame(MdiXyPlot::mdiParentXyFrame, true,
+//                             wxString(plotName.c_str()),
+//                             wxString(plotTitle.c_str()),
+//                             wxString(xAxisTitle.c_str()),
+//                             wxString(yAxisTitle.c_str()),
+//                             wxPoint(-1, -1), wxSize(500, 350), //loj: 2/27/04 wxSize(-1, -1),
+//                             wxDEFAULT_FRAME_STYLE);
+
       ++MdiXyPlot::numChildren;
 
-      MdiXyPlot::mdiParentXyFrame->mainSubframe->RedrawCurve();
+      GmatAppData::GetMainFrame()->xyMainSubframe->RedrawCurve();
    }
 
-   MdiXyPlot::mdiParentXyFrame->mainSubframe->SetShowGrid(drawGrid); //loj: 7/20/04 added
-   MdiXyPlot::mdiParentXyFrame->mainSubframe->ResetZoom(); //loj: 7/27/04 added
-   MdiXyPlot::mdiParentXyFrame->Show(true);
-   MdiXyPlot::mdiParentXyFrame->Raise();
+   GmatAppData::GetMainFrame()->xyMainSubframe->SetShowGrid(drawGrid); //loj: 7/20/04 added
+   GmatAppData::GetMainFrame()->xyMainSubframe->ResetZoom(); //loj: 7/27/04 added
+//   MdiXyPlot::mdiParentXyFrame->Show(true);
+//   MdiXyPlot::mdiParentXyFrame->Raise();
    
    return true;
 #endif
@@ -430,7 +450,7 @@ bool PlotInterface::DeleteXyPlot(bool hideFrame)
    return true;
 #else
 
-   if (MdiXyPlot::mdiParentXyFrame != NULL)
+   if (GmatAppData::GetMainFrame() != NULL)
    {
 #if DEBUG_PLOTIF_XY
       MessageInterface::ShowMessage("PlotInterface::DeleteXyPlot()\n");
@@ -441,8 +461,8 @@ bool PlotInterface::DeleteXyPlot(bool hideFrame)
          ((MdiChildXyFrame*)MdiXyPlot::mdiChildren[i])->DeletePlot();
       }
 
-      if (hideFrame)
-         MdiXyPlot::mdiParentXyFrame->Hide();
+//      if (hideFrame)
+//         MdiXyPlot::mdiParentXyFrame->Hide();
    }
     
    return true;
@@ -665,7 +685,7 @@ bool PlotInterface::RefreshXyPlot(const std::string &plotName)
    return true;
 #else
 
-   if (MdiXyPlot::mdiParentXyFrame != NULL)
+   if (GmatAppData::GetMainFrame() != NULL)
    {        
 #if DEBUG_PLOTIF_XY_UPDATE
       MessageInterface::ShowMessage
@@ -725,7 +745,7 @@ bool PlotInterface::UpdateXyPlot(const std::string &plotName,
    bool updated = false;
    wxString owner = wxString(plotName.c_str());
     
-   if (MdiXyPlot::mdiParentXyFrame == NULL)
+   if (GmatAppData::GetMainFrame() == NULL)
    {        
       //wxLogWarning("MdiParentXyFrame was not created. "
       //             "Creating a new MDI parent/child frame...");
