@@ -22,7 +22,7 @@
 #include "bitmaps/varyevent.xpm"
 #include "bitmaps/achieveevent.xpm"
 #include "bitmaps/deltav.xpm"
-#include "bitmaps/function.xpm"
+#include "bitmaps/callfunction.xpm"
 #include "bitmaps/nestreturn.xpm"
 
 #include "MissionTree.hpp"
@@ -821,7 +821,7 @@ void MissionTree::AddIcons()
    icons[7] = wxIcon ( varyevent_xpm );
    icons[8] = wxIcon ( achieveevent_xpm );
    icons[9] = wxIcon ( deltav_xpm );
-   icons[10]= wxIcon ( function_xpm );
+   icons[10]= wxIcon ( callfunction_xpm );
    icons[11]= wxIcon ( nestreturn_xpm );
 
    int sizeOrig = icons[0].GetWidth();
