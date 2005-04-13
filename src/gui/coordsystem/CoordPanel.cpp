@@ -179,6 +179,7 @@ void CoordPanel::LoadData()
 
       wxString xyzStrs[] =
       {
+         wxT(" "),
          wxT("R"),
          wxT("-R"),
          wxT("V"),
@@ -187,7 +188,7 @@ void CoordPanel::LoadData()
          wxT("-N"),
       };
 
-      for (unsigned int i=0; i<6; i++)
+      for (unsigned int i=0; i<7; i++)
       {
          xComboBox->Append(wxString(xyzStrs[i].c_str()));
          yComboBox->Append(wxString(xyzStrs[i].c_str()));
