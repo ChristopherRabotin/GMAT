@@ -30,7 +30,7 @@
 using namespace std; //***************************** for debug only 
 
 //#define DEBUG_ROT_MATRIX 1
-static Integer visitCount = 0;
+//static Integer visitCount = 0;
 
 //---------------------------------
 // static data
@@ -218,7 +218,7 @@ void ObjectReferencedAxes::SetXAxis(const std::string &toValue)
    if ((toValue !=  "R") && (toValue !=  "V") && (toValue !=  "N") &&
        (toValue != "-R") && (toValue != "-V") && (toValue != "-N") &&
        (toValue !=  "r") && (toValue !=  "v") && (toValue !=  "n") &&
-       (toValue != "-r") && (toValue != "-v") && (toValue != "-n"))
+       (toValue != "-r") && (toValue != "-v") && (toValue != "-n") && (toValue !=  "") )
       throw CoordinateSystemException(
             "ObjectReferencedAxes - Invalid value for X-Axis");
    xAxis = toValue;
@@ -240,7 +240,7 @@ void ObjectReferencedAxes::SetYAxis(const std::string &toValue)
    if ((toValue !=  "R") && (toValue !=  "V") && (toValue !=  "N") &&
        (toValue != "-R") && (toValue != "-V") && (toValue != "-N") &&
        (toValue !=  "r") && (toValue !=  "v") && (toValue !=  "n") &&
-       (toValue != "-r") && (toValue != "-v") && (toValue != "-n"))
+       (toValue != "-r") && (toValue != "-v") && (toValue != "-n") && (toValue !=  "") )
       throw CoordinateSystemException(
             "ObjectReferencedAxes - Invalid value for Y-Axis");
    yAxis = toValue;
@@ -262,7 +262,7 @@ void ObjectReferencedAxes::SetZAxis(const std::string &toValue)
    if ((toValue !=  "R") && (toValue !=  "V") && (toValue !=  "N") &&
        (toValue != "-R") && (toValue != "-V") && (toValue != "-N") &&
        (toValue !=  "r") && (toValue !=  "v") && (toValue !=  "n") &&
-       (toValue != "-r") && (toValue != "-v") && (toValue != "-n"))
+       (toValue != "-r") && (toValue != "-v") && (toValue != "-n") && (toValue !=  "") )
       throw CoordinateSystemException(
             "ObjectReferencedAxes - Invalid value for Z-Axis");
    zAxis = toValue;
