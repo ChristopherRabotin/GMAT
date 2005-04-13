@@ -193,8 +193,9 @@ private:
       TOOL_PAUSE,
       TOOL_RESUME,
       TOOL_STOP,
+      TOOL_BUILD,
         
-      TOOL_CLOSE_TABS,
+      TOOL_CLOSE_CHILDREN,
       TOOL_SCRIPT,
         
       MENU_START_SERVER,

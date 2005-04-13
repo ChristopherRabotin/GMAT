@@ -189,6 +189,15 @@ namespace GmatTree
         END_DO_CONTROL,
         SWITCH_CONTROL,
         END_SWITCH_CONTROL,
+
+        // for the output tree
+        OUTPUT_FOLDER,
+        REPORTS_FOLDER,
+        OPENGL_PLOTS_FOLDER,
+        XY_PLOTS_FOLDER,
+        OUTPUT_REPORT,
+        OUTPUT_OPENGL_PLOT,
+        OUTPUT_XY_PLOT,
     };
 }
 #endif // GmatTreeItemData_hpp

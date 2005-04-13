@@ -95,6 +95,7 @@
 #include "bitmaps/stop.xpm"
 #include "bitmaps/close.xpm"
 #include "bitmaps/script.xpm"
+#include "bitmaps/build.xpm"
 
 //#define DEBUG_MAINFRAME 1
 
@@ -1053,10 +1054,14 @@ void GmatMainFrame::OnRun(wxCommandEvent& WXUNUSED(event))
 //   SetSize(mReducedSize);
 //   SetFocus();
 
+   Tile();
    theGuiInterpreter->RunMission();
    
    toolBar->EnableTool(TOOL_RUN, TRUE);
    toolBar->EnableTool(TOOL_STOP, FALSE);
+
+   // put items in output tab
+   GmatAppData::GetOutputTree()->UpdateOutput();
 }
 
 //------------------------------------------------------------------------------
@@ -1113,7 +1118,7 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
 #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::InitToolBar() entered\n");
 #endif
-   wxBitmap* bitmaps[13];
+   wxBitmap* bitmaps[14];
 
    bitmaps[0] = new wxBitmap(new_xpm);
    bitmaps[1] = new wxBitmap(open_xpm);
@@ -1128,6 +1133,7 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    bitmaps[10] = new wxBitmap(stop_xpm);
    bitmaps[11] = new wxBitmap(close_xpm);
    bitmaps[12] = new wxBitmap(script_xpm);
+   bitmaps[13] = new wxBitmap(build_xpm);
 
    int width = 24;
    int currentX = 5;
@@ -1169,7 +1175,9 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
                     (wxObject *) NULL, _T("Print"));
    currentX += width + 5;
    toolBar->AddSeparator();
-
+//   toolBar->AddTool(TOOL_BUILD, *bitmaps[13], wxNullBitmap, FALSE, currentX, -1,
+//                    (wxObject *) NULL, _T("Build"));
+//   toolBar->AddSeparator();
    toolBar->AddTool(TOOL_RUN, *bitmaps[8], wxNullBitmap, FALSE, currentX, -1,
                     (wxObject *) NULL, _T("Run"));
    toolBar->AddTool(TOOL_PAUSE, *bitmaps[9], wxNullBitmap, FALSE, currentX, -1,
@@ -1178,8 +1186,8 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
                     (wxObject *) NULL, _T("Stop"));
 
 //   toolBar->AddSeparator();
-//   toolBar->AddTool(TOOL_CLOSE_TABS, *bitmaps[11], wxNullBitmap, FALSE,
-//                    currentX, -1, (wxObject *) NULL, _T("Close Current Tab"));
+//   toolBar->AddTool(TOOL_CLOSE_CHILDREN, *bitmaps[11], wxNullBitmap, FALSE,
+//                    currentX, -1, (wxObject *) NULL, _T("Close All"));
    toolBar->AddSeparator();
    toolBar->AddTool(MENU_HELP_ABOUT, *bitmaps[7], wxNullBitmap, FALSE,
                     currentX, -1, (wxObject *) NULL, _T("Help"));
