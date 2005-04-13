@@ -20,22 +20,6 @@
 //   count for the member ForceModel, Forces, and Propagator.
 /**
  * Definition for the base class for all GMAT extensible objects
- *
- * The following class hierarchy trees use this class as their basis:
- *
- *     Asset (hence Spacecraft and GroundStation)
- *     CelestialBody
- *     Propagator
- *     PhysicalModel (hence Force and ForceModel)
- *     PropConfig
- *     Parameter
- *     Command
- *
- * Every class that users can use to derive new classes, or that need to be
- * accessed through generic pointers, should be derived from this class to
- * ensure consistent interfaces accessed by the GMAT control systems (i.e. the
- * Moderator, FactoryManager, Configuration, Interpreter, and Sandbox, along
- * with the GUIInterpreter).
  */
 //------------------------------------------------------------------------------
 
@@ -49,22 +33,47 @@
 #include "Rmatrix.hpp"
 
 
+//------------------------------------------------------------------------------
+/**
+ * Definition for the base class for all GMAT extensible objects
+ *
+ * The following class hierarchy trees use this class as their basis:
+ *
+ *     SpacePoint (hence Spacecraft and Formation, and all CelestialBody's)
+ *     Propagator
+ *     PhysicalModel (hence Force and ForceModel)
+ *     PropConfig
+ *     Parameter
+ *     GmatCommand
+ *
+ * Every class that users can use to derive new classes, or that need to be
+ * accessed through generic pointers, should be derived from this class to
+ * ensure consistent interfaces accessed by the GMAT control systems (i.e. the
+ * Moderator, FactoryManager, Configuration, Interpreter, and Sandbox, along
+ * with the GUIInterpreter).
+ */
+//------------------------------------------------------------------------------
 class GMAT_API GmatBase
 {
 public:
    // The usual suspects
    GmatBase(Gmat::ObjectType typeId, const std::string &typeStr, 
             const std::string &nomme = "");
-   virtual ~GmatBase(void) = 0;
+   virtual ~GmatBase() = 0;
    GmatBase(const GmatBase &a);
    GmatBase&           operator=(const GmatBase &a);
    
    // Access methods called on the base class
-   Gmat::ObjectType    GetType(void) const;
-   std::string         GetTypeName(void) const;
-   std::string         GetName(void) const;
+   virtual Gmat::ObjectType
+                       GetType() const;
+   std::string         GetTypeName() const;
+   std::string         GetName() const;
    virtual bool        SetName(const std::string &who);
-   virtual Integer     GetParameterCount(void) const;
+   virtual Integer     GetParameterCount() const;
+
+   bool                IsOfType(Gmat::ObjectType ofType);
+   bool                IsOfType(std::string typeDescription);
+
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
    virtual const StringArray&
                        GetRefObjectNameArray(const Gmat::ObjectType type);
@@ -91,13 +100,15 @@ public:
    
    // Method to return the current number of instantaited objects
    static Integer      GetInstanceCount();
-   
+
    // required method for all subclasses
    virtual GmatBase*   Clone() const = 0;
    
    // required method for all subclasses that can be copied in a script
    virtual void        Copy(const GmatBase*);
-   
+
+   virtual bool        RequiresJ2000Body();
+
    // Access methods derived classes can override
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;
@@ -289,7 +300,12 @@ protected:
    /// Number of owned objects that belong to this instance
    Integer             ownedObjectCount;
    /// Script string used to build the object
-   std::string          generatingString;
+   std::string         generatingString;
+   /// The list of generic types that this class extends.
+   std::vector<Gmat::ObjectType>
+                       objectTypes;
+   /// The list types that this class extends, by name
+   StringArray         objectTypeNames;
    
    // Scripting interfaces
    /// flag used to deterine if the current write is in Matlab mode

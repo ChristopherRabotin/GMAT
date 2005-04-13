@@ -68,6 +68,9 @@ Formation::Formation(Gmat::ObjectType typeId, const std::string &typeStr,
    SpaceObject    (typeId, typeStr, instName),
    dimension      (0)
 {
+   objectTypes.push_back(Gmat::FORMATION);
+   objectTypeNames.push_back("Formation");
+
    parameterCount = FormationParamCount;
 }
 

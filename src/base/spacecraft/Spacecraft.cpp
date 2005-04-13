@@ -54,6 +54,9 @@ Spacecraft::Spacecraft() :
     SpaceObject    (Gmat::SPACECRAFT,"Spacecraft",""),
     solarSystem    (NULL)
 {
+    objectTypes.push_back(Gmat::SPACECRAFT);
+    objectTypeNames.push_back("Spacecraft");
+
     parameterCount = SC_ParamCount;
     InitializeValues();
 }
@@ -71,6 +74,9 @@ Spacecraft::Spacecraft(const std::string &name) :
     SpaceObject    (Gmat::SPACECRAFT, "Spacecraft", name),
     solarSystem    (NULL)
 {
+    objectTypes.push_back(Gmat::SPACECRAFT);
+    objectTypeNames.push_back("Spacecraft");
+    
     parameterCount = SC_ParamCount;
     InitializeValues();
 }
@@ -89,6 +95,9 @@ Spacecraft::Spacecraft(const std::string &typeStr, const std::string &name) :
     SpaceObject    (Gmat::SPACECRAFT, typeStr, name),
     solarSystem    (NULL)
 {
+    objectTypes.push_back(Gmat::SPACECRAFT);
+    objectTypeNames.push_back("Spacecraft");
+
     parameterCount = SC_ParamCount;
     InitializeValues();
 }

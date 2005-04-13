@@ -72,6 +72,8 @@ GmatBase(ofType,itsType,itsName),
 j2000Body      (NULL),
 j2000BodyName  ("Earth")
 {
+   objectTypes.push_back(Gmat::SPACE_POINT);
+   objectTypeNames.push_back("SpacePoint");
 }
 
 //---------------------------------------------------------------------------
@@ -108,11 +110,11 @@ const SpacePoint& SpacePoint::operator=(const SpacePoint &sp)
       return *this;
    j2000Body     = sp.j2000Body;
    j2000BodyName = sp.j2000BodyName;
-   
+
    return *this;
 }
 //---------------------------------------------------------------------------
-//  ~GmatBase(void)
+//  ~SpacePoint(void)
 //---------------------------------------------------------------------------
 /**
  * Destructor.
@@ -121,6 +123,21 @@ const SpacePoint& SpacePoint::operator=(const SpacePoint &sp)
 SpacePoint::~SpacePoint()
 {
 }
+
+//------------------------------------------------------------------------------
+//  bool RequiresJ2000Body()
+//------------------------------------------------------------------------------
+/**
+ * Identifies objects that need to have the J2000 body set in the Sandbox.
+ *
+ * @return true for all SpacePoint objects.
+ */
+//------------------------------------------------------------------------------
+bool SpacePoint::RequiresJ2000Body()
+{
+   return true;
+}
+
 
 // methods for accessing the bodyName or body pointer
 //------------------------------------------------------------------------------

@@ -182,7 +182,9 @@ GmatBase::GmatBase(const GmatBase &a) :
 //    instanceName    ("CopyOf"+a.instanceName),
     instanceName    (a.instanceName),
     type            (a.type),
-    ownedObjectCount(a.ownedObjectCount)
+    ownedObjectCount(a.ownedObjectCount),
+    objectTypes     (a.objectTypes),
+    objectTypeNames (a.objectTypeNames)
 {
    // one more instance - add to the instanceCount
    ++instanceCount;
@@ -205,7 +207,7 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    if (&a == this)
       return *this;
    
-   // Currently nothing to do from the base class; this may change in a later 
+   // Currently nothing to do from the base class; this may change in a later
    // build
 
    return *this;
@@ -285,6 +287,49 @@ Integer GmatBase::GetParameterCount(void) const
 {
    return parameterCount;
 }
+
+
+//---------------------------------------------------------------------------
+//  bool IsOfType(Gmat::ObjectType ofType)
+//---------------------------------------------------------------------------
+/**
+ * Detects if the object is a specified type.
+ *
+ * @param <ofType> The type that is being checked.
+ *
+ * @return true is the class was derived from the type, false if not.
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::IsOfType(Gmat::ObjectType ofType)
+{
+   if (std::find(objectTypes.begin(), objectTypes.end(), ofType) !=
+                                                             objectTypes.end())
+      return true;
+   
+   return false;
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsOfType(std::string typeDescription)
+//---------------------------------------------------------------------------
+/**
+ * Detects if the object is a specified type.
+ *
+ * @param <typeDescription> The string describing the type.
+ *
+ * @return true is the class was derived from the type, false if not.
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::IsOfType(std::string typeDescription)
+{
+   if (std::find(objectTypeNames.begin(), objectTypeNames.end(),
+                 typeDescription) != objectTypeNames.end())
+      return true;
+
+   return false;
+}
+
 
 //---------------------------------------------------------------------------
 //  std::string GetRefObjectName(const Gmat::ObjectType type) const
@@ -568,6 +613,21 @@ Integer GmatBase::GetInstanceCount()
 void GmatBase::Copy(const GmatBase*)
 {
    throw GmatBaseException("Cannot copy objects of type " + typeName);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool RequiresJ2000Body()
+//------------------------------------------------------------------------------
+/**
+ * Identifies objects that need to have the J2000 body set in the Sandbox.
+ *
+ * @return true if the J2000 body needs to be set, false if not.
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::RequiresJ2000Body()
+{
+   return false;
 }
 
 

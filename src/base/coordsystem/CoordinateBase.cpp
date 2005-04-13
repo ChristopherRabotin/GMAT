@@ -173,6 +173,20 @@ void CoordinateBase::SetOrigin(SpacePoint *originPtr)
 }
 
 //------------------------------------------------------------------------------
+//  bool RequiresJ2000Body()
+//------------------------------------------------------------------------------
+/**
+ * Identifies objects that need to have the J2000 body set in the Sandbox.
+ *
+ * @return true for all CoordinateBase objects.
+ */
+//------------------------------------------------------------------------------
+bool CoordinateBase::RequiresJ2000Body()
+{
+   return true;
+}
+
+//------------------------------------------------------------------------------
 //  void  SetJ2000BodyName(const std::string &toName)
 //------------------------------------------------------------------------------
 /**

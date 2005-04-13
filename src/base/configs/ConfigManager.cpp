@@ -761,10 +761,19 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
 bool ConfigManager::RemoveAllItems()
 {
    // delete objects
-
+   #ifdef DEBUG_CONFIG_MEMORY
+      MessageInterface::ShowMessage("Deleting %d objects\n", objects.size());
+   #endif
+   
    for (unsigned int i=0; i<objects.size(); i++)
    {
-      delete objects[i];
+      std::string objName = objects[i]->GetName();
+
+      #ifdef DEBUG_CONFIG_MEMORY
+         MessageInterface::ShowMessage("  Deleting %s\n", objects[i]->GetName().c_str());
+      #endif
+
+      // delete objects[i];
       objects[i] = NULL;
    }
     

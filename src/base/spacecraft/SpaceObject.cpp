@@ -60,6 +60,8 @@ SpaceObject::SpaceObject(Gmat::ObjectType typeId, const std::string &typeStr,
    SpacePoint       (typeId, typeStr, instName),
    isManeuvering    (false)
 {
+   objectTypes.push_back(Gmat::SPACEOBJECT);
+   objectTypeNames.push_back("SpaceObject");
 }
 
 

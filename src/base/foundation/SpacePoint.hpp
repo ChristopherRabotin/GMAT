@@ -50,6 +50,7 @@ public:
    virtual ~SpacePoint();
    
    // methods for accessing the bodyName or body pointer
+   virtual bool       RequiresJ2000Body();
    const std::string  GetJ2000BodyName() const;
    SpacePoint*        GetJ2000Body() const;
    bool               SetJ2000BodyName(const std::string &toName);
@@ -103,10 +104,8 @@ public:
    //---------------------------------------------------------------------------
    virtual const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime) = 0;
    
-
    virtual const Rvector3 GetMJ2000Acceleration(const A1Mjd &atTime);
 
-   
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
    //virtual GmatBase*       Clone(void) const;

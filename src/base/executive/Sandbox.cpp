@@ -70,7 +70,6 @@ Sandbox::Sandbox() :
 //   clonable.push_back(Gmat::PARAMETER);
 //   clonable.push_back(Gmat::STOP_CONDITION);
 //   clonable.push_back(Gmat::SOLVER);
-//   clonable.push_back(Gmat::SUBSCRIBER);
 //   clonable.push_back(Gmat::PROP_SETUP);
 //   clonable.push_back(Gmat::REF_FRAME);
 //   clonable.push_back(Gmat::FUNCTION);
@@ -156,7 +155,9 @@ bool Sandbox::AddObject(GmatBase *obj)
                obj->GetTypeName().c_str());
          #endif
          
-         objectMap[name] = obj->Clone();
+         // Subscribers are already cloned in AddSubscriber()
+         if (obj->GetType() != Gmat::SUBSCRIBER)
+            objectMap[name] = obj->Clone();
          
          if (obj->GetType() == Gmat::SPACECRAFT)
          {
@@ -520,9 +521,23 @@ bool Sandbox::Initialize()
                         "parameter: \"%s\"\n", origName.c_str(),
                         param->GetName().c_str());
                   #endif
-                  
+
                   SpacePoint *sp = FindSpacePoint(origName);
-                  param->SetRefObject(sp, Gmat::SPACE_POINT, origName);
+                  if (sp != NULL)
+                     param->SetRefObject(sp, Gmat::SPACE_POINT, origName);
+
+                  origName = param->GetRefObjectName(Gmat::CELESTIAL_BODY);
+
+                  #if DEBUG_SANDBOX_INIT > 1
+                     MessageInterface::ShowMessage
+                        ("Sandbox::Initialize() Set SpacePoint <%s> pointer on "
+                        "parameter: \"%s\"\n", origName.c_str(),
+                        param->GetName().c_str());
+                  #endif
+
+                  sp = FindSpacePoint(origName);
+                  if (sp != NULL)
+                     param->SetRefObject(sp, Gmat::CELESTIAL_BODY, origName);
                }
 
                param->SetSolarSystem(solarSys);
@@ -641,6 +656,17 @@ bool Sandbox::Initialize()
 //------------------------------------------------------------------------------
 // bool Execute()
 //------------------------------------------------------------------------------
+/**
+ *  Runs the mission sequence.
+ *
+ *  This method walks through the command linked list, firing each GmatCommand
+ *  as it is encountered by calling Execute() on the commands.  Between command
+ *  executions, the method check with the Moderator to see if the user has
+ *  requested that the sequence be paused or halted.
+ *
+ *  @return true if the mission sequence was executed, false if not.
+ */
+//------------------------------------------------------------------------------
 bool Sandbox::Execute()
 {
    
@@ -653,9 +679,11 @@ bool Sandbox::Execute()
    if (!current)
       return false;
 
-   while (current) {
+   while (current)
+   {
       // First check to see if the run should be interrupted
-      if (Interrupt()) {
+      if (Interrupt())
+      {
          MessageInterface::ShowMessage("Sandbox::Execution interrupted by Moderator\n");
          return rv;
       }
@@ -665,14 +693,16 @@ bool Sandbox::Execute()
                                        current->GetTypeName().c_str());
       #endif
 
-      if (current->GetTypeName() == "Target") {
+      if (current->GetTypeName() == "Target")
+      {
          if (current->GetBooleanParameter(current->GetParameterID("TargeterConverged")))
             currentState = Gmat::RUNNING;
          else
             currentState = Gmat::TARGETING;
       }
       
-      if (currentState != runState) {
+      if (currentState != runState)
+      {
          publisher->SetRunState(currentState);
          runState = currentState;
       }
@@ -680,14 +710,16 @@ bool Sandbox::Execute()
       rv = current->Execute();
       
       // Possible fix for displaying the last iteration...
-      if (current->GetTypeName() == "Target") {
+      if (current->GetTypeName() == "Target")
+      {
          if (current->GetBooleanParameter(current->GetParameterID("TargeterConverged")))
             currentState = Gmat::RUNNING;
          else
             currentState = Gmat::TARGETING;
       }
       
-      if (!rv) {
+      if (!rv)
+      {
          std::string str = "\"" + current->GetTypeName() +
             "\" Command failed to run to completion\nCommand Text is \"" +
             current->GetGeneratingString() + "\"";
@@ -703,12 +735,19 @@ bool Sandbox::Execute()
 //------------------------------------------------------------------------------
 // bool Interrupt()
 //------------------------------------------------------------------------------
+/**
+ *  Tests to see if the mission sequence should be interrupted.
+ *
+ *  @return true if the Moderator wants to interrupt execution, false if not.
+ */
+//------------------------------------------------------------------------------
 bool Sandbox::Interrupt()
 {
    // Ask the moderator for the current RunState:
    Gmat::RunState interruptType =  moderator->GetUserInterrupt();
     
-   switch (interruptType) {
+   switch (interruptType)
+   {
       case Gmat::PAUSED:   // Pause
          state = PAUSED;
          break;
@@ -735,17 +774,19 @@ bool Sandbox::Interrupt()
 //------------------------------------------------------------------------------
 // void Clear()
 //------------------------------------------------------------------------------
+/**
+ *  Cleans up the local object store.
+ */
+//------------------------------------------------------------------------------
 void Sandbox::Clear()
 {
-//   if (solarSys)
-//      delete solarSys;
    solarSys  = NULL;
    publisher = NULL;
    sequence  = NULL;
    current   = NULL;
    state     = IDLE;
     
-   // Delete the clones (currently only Spacecraft and Formations get cloned)
+   // Delete the all cloned objects
    std::map<std::string, GmatBase *>::iterator omi;
    
    #ifdef DEBUG_SANDBOX_OBJECT_MAPS
@@ -772,6 +813,7 @@ void Sandbox::Clear()
       {
          delete omi->second;
       }
+      /// @todo Subscribers are cloned; where are they deleted?
    }
    
    if (solarSys != NULL)
@@ -786,21 +828,47 @@ void Sandbox::Clear()
 //------------------------------------------------------------------------------
 // bool AddSubscriber(Subscriber *sub)
 //------------------------------------------------------------------------------
+/**
+ *  Add Subcribers to the Sandbox and registers them with the Publisher.
+ *
+ *  @param <subsc> The subscriber.
+ *
+ *  @return true if the Subscriber was registered.
+ */
+//------------------------------------------------------------------------------
 bool Sandbox::AddSubscriber(Subscriber *subsc)
 {
    Subscriber *sub = (Subscriber *)(subsc->Clone());
-#if DEBUG_SANDBOX_OBJ
-   MessageInterface::ShowMessage
-      ("Sandbox::AddSubscriber() name = %s\n",
-       sub->GetName().c_str());
-#endif
+   #if DEBUG_SANDBOX_OBJ
+      MessageInterface::ShowMessage
+         ("Sandbox::AddSubscriber() name = %s\n",
+          sub->GetName().c_str());
+   #endif
+   
    publisher->Subscribe(sub);
    return  AddObject(sub);
 }
 
 
 //------------------------------------------------------------------------------
-// void BuildAssociations()
+// void BuildAssociations(GmatBase * obj)
+//------------------------------------------------------------------------------
+/**
+ *  Assigns clones of objects to their owners.
+ *
+ *  This method finds referenced objects that need to be associated with the
+ *  input object through cloning, creates the clones, and hands the cloned
+ *  object to the owner.
+ *
+ *  An example of the associations that are made here are hardware elements that
+ *  get associated with spacecraft.  Users configure a single element -- for
+ *  example, a tank, and then can assign that element to many different
+ *  spacecraft.  In order to avoid multiple objects using the same instance of
+ *  the tank, clones are made for each spacecraft that has the tank associated
+ *  with it.
+ *
+ *  @param <obj> The owner of the clones.
+ */
 //------------------------------------------------------------------------------
 void Sandbox::BuildAssociations(GmatBase * obj)
 {
@@ -840,14 +908,26 @@ void Sandbox::BuildAssociations(GmatBase * obj)
 //------------------------------------------------------------------------------
 // SpacePoint* FindSpacePoint(const std::string &spname)
 //------------------------------------------------------------------------------
+/**
+ *  Finds a SpacePoint by name.
+ *
+ *  @param <spname> The name of the SpacePoint.
+ *
+ *  @return A pointer to the SpacePoint, or NULL if it does not exist in the
+ *          Sandbox.
+ */
+//------------------------------------------------------------------------------
 SpacePoint * Sandbox::FindSpacePoint(const std::string &spName)
 {
    SpacePoint *sp = solarSys->GetBody(spName);
 
    if (sp == NULL)
    {
-      /// @todo If sp is not solar system object, look for a configured point
-      ;
+      if (objectMap.find(spName) != objectMap.end())
+      {
+         if (objectMap[spName]->IsOfType(Gmat::SPACE_POINT))
+            sp = (SpacePoint*)(objectMap[spName]);
+      }
    }
 
    return sp;
