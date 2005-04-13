@@ -32,7 +32,7 @@ public:
    OutputTree(wxWindow *parent, const wxWindowID id,
                 const wxPoint& pos, const wxSize& size,
                 long style);
-   void UpdateResource(bool resetCounter);
+   void UpdateOutput();
 
 private:
    GuiInterpreter *theGuiInterpreter;

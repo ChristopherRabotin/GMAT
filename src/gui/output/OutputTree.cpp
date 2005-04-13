@@ -33,6 +33,8 @@
 #include "GmatTreeItemData.hpp"
 #include "GmatMainFrame.hpp"
 
+#include "Subscriber.hpp"
+
 //#define DEBUG_RESOURCE_TREE 1
 
 //------------------------------------------------------------------------------
@@ -82,24 +84,34 @@ OutputTree::OutputTree(wxWindow *parent, const wxWindowID id,
 }
 
 //------------------------------------------------------------------------------
-// void UpdateResource(bool resetCounter = true)
+// void UpdateOutput()
 //------------------------------------------------------------------------------
 /**
- * Reset counters, delete all nodes that are not folders, add default nodes
  */
 //------------------------------------------------------------------------------
-void OutputTree::UpdateResource(bool resetCounter)
+void OutputTree::UpdateOutput()
 {
-#if DEBUG_RESOURCE_TREE
-   MessageInterface::ShowMessage("OutputTree::UpdateResource() entered\n");
-#endif
+   // get list of report files, opengl plots, and xy plots
+   StringArray listOfSubs = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
 
-   if (resetCounter)
+   // put each subscriber in the proper folder
+   for (unsigned int i=0; i<listOfSubs.size(); i++)
    {
+      Subscriber *sub = theGuiInterpreter->GetSubscriber(listOfSubs[i]);
+      wxString objName = wxString(listOfSubs[i].c_str());
+      wxString objTypeName = wxString(sub->GetTypeName().c_str());
 
+      if (objTypeName.Trim() == "ReportFile")
+         AppendItem(mReportItem, objName, GmatTree::ICON_FILE, -1,
+                 new GmatTreeItemData(objName, GmatTree::OUTPUT_REPORT));
+      else if (objTypeName.Trim() == "OpenGLPlot")
+         AppendItem(mOpenGlItem, objName, GmatTree::ICON_FILE, -1,
+                 new GmatTreeItemData(objName, GmatTree::OUTPUT_OPENGL_PLOT));
+      else if (objTypeName.Trim() == "XYPlot")
+         AppendItem(mXyPlotItem, objName, GmatTree::ICON_FILE, -1,
+                 new GmatTreeItemData(objName, GmatTree::OUTPUT_XY_PLOT));
    }
 
-   theGuiManager->UpdateAll();
 }
 
 //------------------------------------------------------------------------------
@@ -113,13 +125,13 @@ void OutputTree::AddDefaultResources()
 {
    wxTreeItemId output =
       AddRoot(wxT("Output"), -1, -1,
-              new GmatTreeItemData(wxT("Output"), GmatTree::RESOURCES_FOLDER));
+              new GmatTreeItemData(wxT("Output"), GmatTree::OUTPUT_FOLDER));
 
    //----- Reports
    mReportItem =
       AppendItem(output, wxT("Reports"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Reports"),
-                                      GmatTree::SPACECRAFT_FOLDER));
+                                      GmatTree::REPORTS_FOLDER));
     
    SetItemImage(mReportItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
@@ -128,17 +140,16 @@ void OutputTree::AddDefaultResources()
     mOpenGlItem =
       AppendItem(output, wxT("OpenGL Plots"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("OpenGL PLOTS"),
-                                      GmatTree::FORMATIONS_FOLDER));
+                                      GmatTree::OPENGL_PLOTS_FOLDER));
     
    SetItemImage(mOpenGlItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
 
    //----- XY Plots
-   wxTreeItemId mXyPlotItem =
-      AppendItem(output,
-                 wxT("XY Plots"), GmatTree::ICON_FOLDER, -1,
+   mXyPlotItem =
+      AppendItem(output, wxT("XY Plots"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("XY Plots"),
-                                      GmatTree::CONSTELLATIONS_FOLDER));
+                                      GmatTree::XY_PLOTS_FOLDER));
     
    SetItemImage(mXyPlotItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
