@@ -37,6 +37,7 @@
 ImpulsiveBurn::ImpulsiveBurn(const std::string &nomme) :
     Burn            ("ImpulsiveBurn", nomme)
 {
+   objectTypeNames.push_back("ImpulsiveBurn");
 }
 
 

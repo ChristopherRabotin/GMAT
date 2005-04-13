@@ -146,18 +146,20 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
    relativeErrorThreshold      (0.10),
    solarSystem                 (NULL)
 {
+   objectTypes.push_back(Gmat::PHYSICAL_MODEL);
+   objectTypeNames.push_back("PhysicalModel");
    parameterCount = PhysicalModelParamCount;
 }
              
 //------------------------------------------------------------------------------
-// PhysicalModel::~PhysicalModel(void)
+// PhysicalModel::~PhysicalModel()
 //------------------------------------------------------------------------------
 /**
  * Destructor for the model
  * If the state array has been allocated, this destructor destroys it.
  */
 //------------------------------------------------------------------------------
-PhysicalModel::~PhysicalModel(void)
+PhysicalModel::~PhysicalModel()
 {
    if (modelState)
       delete [] modelState;

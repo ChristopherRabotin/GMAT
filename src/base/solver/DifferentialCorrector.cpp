@@ -81,6 +81,7 @@ DifferentialCorrector::DifferentialCorrector(std::string name) :
    initialized             (false),
    instanceNumber          (0)       // 0 indicates 1st instance w/ this name
 {
+   objectTypeNames.push_back("DifferentialCorrector");
    parameterCount = DifferentialCorrectorParamCount;
    // textFileMode = "Verbose";
    solverTextFile = "targeter_";

@@ -86,8 +86,10 @@ Thruster::Thruster(std::string nomme) :
    simpleExpressions    (true),
    mDot                 (0.0)
 {
+   objectTypes.push_back(Gmat::THRUSTER);
+   objectTypeNames.push_back("Thruster");
    parameterCount = ThrusterParamCount;
-   
+
    cCoefficients[0]  = 500.0;
    cCoefficients[10] = 1.0;
    cCoefficients[1]  = cCoefficients[2] =  cCoefficients[3] = 

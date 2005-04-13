@@ -77,6 +77,9 @@ Burn::Burn(const std::string &typeStr, const std::string &nomme) :
    satName         (""),
    sc              (NULL)
 {
+   objectTypes.push_back(Gmat::BURN);
+   objectTypeNames.push_back("Burn");
+
    parameterCount = BurnParamCount;
     
    deltaV[0] = deltaV[1] = deltaV[2] = 0.0;

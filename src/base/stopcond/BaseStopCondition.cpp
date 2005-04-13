@@ -90,6 +90,9 @@ BaseStopCondition::BaseStopCondition(const std::string &name, const std::string 
                                      Interpolator *interp)
    : GmatBase(Gmat::STOP_CONDITION, "StopCondition", name)
 {
+   objectTypes.push_back(Gmat::STOP_CONDITION);
+   objectTypeNames.push_back("BaseStopCondition");
+
    mBaseEpoch = 0.0;
    mEpoch = 0.0;
    mGoal = goal;

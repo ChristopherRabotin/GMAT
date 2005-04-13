@@ -105,11 +105,14 @@ ForceModel::ForceModel(const std::string &nomme) :
    previousState     (NULL),
    estimationMethod  (2.0)
 {
-    numForces = 0;
-    stateSize = 6;
-    dimension = 6;
-    currentForce = 0;
-    parameterCount = ForceModelParamCount;
+   objectTypes.push_back(Gmat::FORCE_MODEL);
+   objectTypeNames.push_back("ForceModel");
+
+   numForces = 0;
+   stateSize = 6;
+   dimension = 6;
+   currentForce = 0;
+   parameterCount = ForceModelParamCount;
 }
 
 //------------------------------------------------------------------------------

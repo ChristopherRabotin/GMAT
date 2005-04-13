@@ -73,6 +73,8 @@ CoordinateSystem::CoordinateSystem(const std::string &itsType,
 CoordinateBase(Gmat::COORDINATE_SYSTEM,itsType,itsName),
 axes               (NULL)
 {
+   objectTypes.push_back(Gmat::COORDINATE_SYSTEM);
+   objectTypeNames.push_back("CoordinateSystem");
 }
 
 //---------------------------------------------------------------------------
@@ -86,8 +88,8 @@ axes               (NULL)
  */
 //---------------------------------------------------------------------------
 CoordinateSystem::CoordinateSystem(const CoordinateSystem &coordSys) :
-CoordinateBase(coordSys),
-axes          (coordSys.axes)
+CoordinateBase (coordSys),
+axes           (coordSys.axes)
 {
 }
 

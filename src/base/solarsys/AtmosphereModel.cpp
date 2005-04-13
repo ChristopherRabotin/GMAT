@@ -66,6 +66,9 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr) :
    nominalF107a        (150.0),
    nominalKp           (3.0)
 {
+   objectTypes.push_back(Gmat::ATMOSPHERE);
+   objectTypeNames.push_back("AtmosphereModel");
+
    fileName = "";
    parameterCount = AtmosphereModelParamCount;
    nominalAp = exp((nominalKp + 1.6) / 1.75);      // Vallado, 8-31

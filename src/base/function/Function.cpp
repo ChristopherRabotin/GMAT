@@ -50,6 +50,8 @@ Function::Function(const std::string &typeStr, const std::string &nomme) :
     GmatBase        (Gmat::FUNCTION, typeStr, nomme),
     functionPath      ("")
 {
+   objectTypes.push_back(Gmat::FUNCTION);
+   objectTypeNames.push_back("Function");
    parameterCount = FunctionParamCount;
 }
 

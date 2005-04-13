@@ -89,6 +89,9 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
                      bool isTimeParam)
    : GmatBase(Gmat::PARAMETER, typeStr, name)
 {  
+   objectTypes.push_back(Gmat::PARAMETER);
+   objectTypeNames.push_back("Parameter");
+
    mKey = key;
    
    //if ((name != "" && name != " "))

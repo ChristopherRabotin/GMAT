@@ -101,11 +101,12 @@ public:
    GmatCommand*        GetCommand(const std::string name);
    
 private:
-   
    /// The singleton instance
    static ConfigManager*               theConfigManager;
    ConfigManager();
    ~ConfigManager();
+   
+   void                                AddObject(GmatBase* obj);
    
    /// The managed objects
    std::vector<GmatBase*>              objects;

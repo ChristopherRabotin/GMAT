@@ -52,6 +52,8 @@ Subscriber::Subscriber(std::string typeStr, std::string nomme) :
    isEndOfReceive(false),
    currentProvider(0)
 {
+   objectTypes.push_back(Gmat::SUBSCRIBER);
+   objectTypeNames.push_back("Subscriber");
 }
 
 //------------------------------------------------------------------------------

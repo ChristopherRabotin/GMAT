@@ -60,6 +60,9 @@ Hardware::Hardware(Gmat::ObjectType typeId, const std::string &typeStr,
                    const std::string &nomme) :
    GmatBase(typeId, typeStr, nomme)
 {
+   objectTypes.push_back(Gmat::HARDWARE);
+   objectTypeNames.push_back("Hardware");
+
    direction[0] = 1.0;
    direction[1] = 0.0;
    direction[2] = 0.0;

@@ -75,6 +75,9 @@ PropSetup::PropSetup(const std::string &name, Propagator *propagator,
 //     useSRP       (false)
 {
    // GmatBase data
+   objectTypes.push_back(Gmat::PROP_SETUP);
+   objectTypeNames.push_back("PropSetup");
+
    parameterCount = PropSetupParamCount;
    ownedObjectCount += 1;
 

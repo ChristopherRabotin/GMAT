@@ -49,6 +49,7 @@ StopCondition::StopCondition(const std::string &name, const std::string &desc,
    : BaseStopCondition(name, desc, epochParam, stopParam, goal, tol,
                        repeatCount, refFrame, interp)
 {
+   objectTypeNames.push_back("StopCondition");
 }
 
 //------------------------------------------------------------------------------

@@ -39,6 +39,8 @@
 
 #include "MessageInterface.hpp"
 
+//#define DEBUG_OBJECT_TYPE_CHECKING
+
 
 /// Set the static "undefined" parameters
 const Real        GmatBase::REAL_PARAMETER_UNDEFINED = -987654321.0123e-45;
@@ -302,9 +304,34 @@ Integer GmatBase::GetParameterCount(void) const
 //---------------------------------------------------------------------------
 bool GmatBase::IsOfType(Gmat::ObjectType ofType)
 {
+   #ifdef DEBUG_OBJECT_TYPE_CHECKING
+      MessageInterface::ShowMessage(
+         "Checking to see if %s is of type %d (Actual type is %d)\n",
+         instanceName.c_str(), ofType, type);
+   #endif
+
    if (std::find(objectTypes.begin(), objectTypes.end(), ofType) !=
                                                              objectTypes.end())
+   {
+      #ifdef DEBUG_OBJECT_TYPE_CHECKING
+         MessageInterface::ShowMessage("   Object %s is the requested type\n",
+            instanceName.c_str());
+      #endif
       return true;
+   }
+   
+   #ifdef DEBUG_OBJECT_TYPE_CHECKING
+      MessageInterface::ShowMessage(
+         "   Not the requested type; current types are [");
+      for (std::vector<Gmat::ObjectType>::iterator i = objectTypes.begin();
+           i != objectTypes.end(); ++i)
+      {
+         if (i != objectTypes.begin())
+            MessageInterface::ShowMessage(", ");
+         MessageInterface::ShowMessage("%d", *i);
+      }
+      MessageInterface::ShowMessage("]\n");
+   #endif
    
    return false;
 }
@@ -323,9 +350,34 @@ bool GmatBase::IsOfType(Gmat::ObjectType ofType)
 //---------------------------------------------------------------------------
 bool GmatBase::IsOfType(std::string typeDescription)
 {
+   #ifdef DEBUG_OBJECT_TYPE_CHECKING
+      MessageInterface::ShowMessage(
+         "Checking to see if %s is of type %s (Actual type is %s)\n",
+         instanceName.c_str(), typeDescription.c_str(), typeName.c_str());
+   #endif
+   
    if (std::find(objectTypeNames.begin(), objectTypeNames.end(),
                  typeDescription) != objectTypeNames.end())
+   {
+      #ifdef DEBUG_OBJECT_TYPE_CHECKING
+         MessageInterface::ShowMessage("   Object %s is the requested type\n",
+            instanceName.c_str());
+      #endif
       return true;
+   }
+
+   #ifdef DEBUG_OBJECT_TYPE_CHECKING
+      MessageInterface::ShowMessage(
+         "   Not the requested type; current types are [");
+      for (StringArray::iterator i = objectTypeNames.begin();
+           i != objectTypeNames.end(); ++i)
+      {
+         if (i != objectTypeNames.begin())
+            MessageInterface::ShowMessage(", ");
+         MessageInterface::ShowMessage("%s", i->c_str());
+      }
+      MessageInterface::ShowMessage("]\n");
+   #endif
 
    return false;
 }

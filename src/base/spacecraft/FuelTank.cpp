@@ -72,6 +72,9 @@ FuelTank::FuelTank(std::string nomme) :
    pressureRegulated    (true),
    initialized          (false)
 {
+   objectTypes.push_back(Gmat::FUEL_TANK);
+   objectTypeNames.push_back("FuelTank");
+   
    parameterCount = FuelTankParamCount;
 }
 

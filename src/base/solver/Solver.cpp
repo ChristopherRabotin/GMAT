@@ -37,6 +37,8 @@ Solver::Solver(const std::string &type, const std::string &name) :
    currentState    (INITIALIZING),
    textFileMode    ("Normal")
 {
+   objectTypes.push_back(Gmat::SOLVER);
+   objectTypeNames.push_back("Solver");
 }
 
 

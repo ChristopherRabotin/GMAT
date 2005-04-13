@@ -116,7 +116,9 @@ Propagator::Propagator(const std::string &typeStr,
       physicalModel       (NULL)
 {
     // GmatBase data
-    parameterCount = PropagatorParamCount;
+   objectTypes.push_back(Gmat::PROPAGATOR);
+   objectTypeNames.push_back("Propagator");
+   parameterCount = PropagatorParamCount;
 }
 
 //------------------------------------------------------------------------------

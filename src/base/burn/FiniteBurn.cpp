@@ -62,6 +62,7 @@ FiniteBurn::FiniteBurn(const std::string &nomme) :
    burnScaleFactor   (1.0),
    initialized       (false)
 {
+   objectTypeNames.push_back("FiniteBurn");
    parameterCount = FiniteBurnParamCount;
 }
 
