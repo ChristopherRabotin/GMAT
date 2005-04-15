@@ -77,6 +77,7 @@ OpenGlOptionDialog::OpenGlOptionDialog(wxWindow *parent, const wxString &title,
    mHasDrawEqPlaneChanged = false;
    mHasDrawEcPlaneChanged = false;
    mHasDrawEcLineChanged = false;
+   mHasDrawAxesChanged = false;
    mHasDrawWireFrameChanged = false;
    mHasEqPlaneColorChanged = false;
    mHasEcPlaneColorChanged = false;
