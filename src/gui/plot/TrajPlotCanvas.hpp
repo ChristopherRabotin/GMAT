@@ -75,7 +75,6 @@ public:
    void DrawWireFrame(bool flag);
    void DrawEqPlane(bool flag);
    void DrawEcPlane(bool flag);
-   //void DrawEcLine(bool flag);
    void OnDrawAxes(bool flag);
    void DrawInOtherCoordSystem(const wxString &csName);
    void DrawInOtherCoordSystem(CoordinateSystem *cs);
@@ -182,22 +181,6 @@ private:
    // solar system
    SolarSystem *mSolarSystem;
    
-   // coordinate system
-   wxString mDesiredCoordSysName;
-   wxString mInternalCoordSysName;
-   CoordinateSystem *mInternalCoordSystem;
-   CoordinateSystem *mDesiredCoordSystem;
-   
-   // coordinate sytem conversion
-   bool mNeedSpacecraftConversion;
-   bool mNeedEarthConversion;
-   bool mNeedConversion;
-   CoordinateConverter mCoordConverter;
-   
-   short mCurrViewFrame;
-   short mCurrBody;
-   int   mCenterViewBody;
-   
    // earth
    float mEarthRadius;
    float mEarthGciPos[MAX_DATA][3];
@@ -209,9 +192,27 @@ private:
    bool  mBodyHasData[GmatPlot::MAX_BODIES];
    float mBodyRadius[GmatPlot::MAX_BODIES];
    float mBodyGciPos[GmatPlot::MAX_BODIES][MAX_DATA][3];
-   float mTempBodyPos[GmatPlot::MAX_BODIES][MAX_DATA][3];
+   float mBodyTempPos[GmatPlot::MAX_BODIES][MAX_DATA][3];
    short mPivotBodyIndex[GmatPlot::MAX_BODIES];
    int   mOtherBodyCount;
+   
+   // coordinate system
+   wxString mDesiredCoordSysName;
+   wxString mInternalCoordSysName;
+   CoordinateSystem *mInternalCoordSystem;
+   CoordinateSystem *mDesiredCoordSystem;
+   
+   // coordinate sytem conversion
+   bool mIsInternalCoordSystem;
+   bool mNeedSpacecraftConversion;
+   bool mNeedEarthConversion;
+   bool mNeedOtherBodyConversion;
+   bool mNeedConversion;
+   CoordinateConverter mCoordConverter;
+   
+   short mCurrViewFrame;
+   short mCurrBody;
+   int   mCenterViewBody;
    
    // view
    wxSize mCanvasSize;
@@ -255,7 +256,7 @@ private:
    void DrawEquatorialPlane(UnsignedInt color);
    void DrawEclipticPlane();
    void DrawEarthSunLine();
-   void DrawAxes();  //loj: 3/8/05 Added
+   void DrawAxes(bool gci = false);  //loj: 4/15/05 Added earthZaxis
    void DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z);
 
    // for body
@@ -264,6 +265,7 @@ private:
    // for coordinate sytem
    bool TiltEarthZAxis();
    bool ConvertSpacecraftData();
+   bool ConvertOtherBodyData();
    
    // for copy
    void CopyVector3(float to[3], double from[3]);
