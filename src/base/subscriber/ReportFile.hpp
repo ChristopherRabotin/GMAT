@@ -36,8 +36,6 @@ class ReportFile :
     public Subscriber
 {
 public:
-//    ReportFile(char * filename = NULL);
-//   ReportFile(const std::string &name, const std::string &fileName = "");
    ReportFile(const std::string &name, const std::string &fileName = "", 
                Parameter *firstVarParam = NULL);
 
@@ -60,17 +58,17 @@ public:
                                 const std::string &newName);
    
     virtual std::string GetParameterText(const Integer id) const;
-   virtual Integer     GetParameterID(const std::string &str) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
-                     GetParameterType(const Integer id) const;
-   virtual std::string GetParameterTypeString(const Integer id) const;
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
    
-   virtual Integer     GetIntegerParameter(const Integer id) const;
-   virtual Integer     SetIntegerParameter(const Integer id,
+   virtual Integer      GetIntegerParameter(const Integer id) const;
+   virtual Integer      SetIntegerParameter(const Integer id,
                                           const Integer value);
 
-   virtual std::string GetStringParameter(const Integer id) const;
-   virtual std::string GetStringParameter(const std::string &label) const;
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool SetStringParameter(const Integer id, const std::string &value);
    virtual bool SetStringParameter(const std::string &label,
                                    const std::string &value);
@@ -84,7 +82,6 @@ public:
    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
    
 
-   //arg: 11/16/04 added
    virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
                                   const std::string &name);
    virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
@@ -97,35 +94,20 @@ public:
    
 protected:
    /// Name of the report file
-   std::string         filename;
-
+   std::string    filename;
    /// Precision for output of real data
-   Integer             precision;
-   
+   Integer        precision;  
    /// Width of column
-   Integer              columnWidth;
-   
+   Integer        columnWidth;   
    /// Write the headers on the top of the column
-   bool                  writeHeaders;
+   bool           writeHeaders;
    
-   /// Write the headers on the top of the column
-//   bool                  writeStateFile;
-
-   
-   /// ID for the file name
-//   Integer             filenameID;
-   /// ID for the precision information
-//   Integer             precisionID;
-   std::ofstream       dstream;  // output data stream
-//   std::ofstream       stateStream;  //output data for state
-
-   std::vector<Parameter*> mVarParams; //loj: 6/4/04 remove this later
+   /// output data stream
+   std::ofstream       dstream;
+   std::vector<Parameter*> mVarParams;
 
    Integer mNumVarParams;
-
    StringArray mVarParamNames;
-   
-   // DJC added 07/19/04 for labeling data
    Integer lastUsedProvider;
    
    virtual bool        Distribute(Integer len);
@@ -144,7 +126,6 @@ private:
       ADD,
       WRITE_HEADERS,
       COL_WIDTH,
-//      WRITE_STATE_FILE,
       ReportFileParamCount  /// Count of the parameters for this class
     };
 
