@@ -10,18 +10,17 @@
 // number S-67573-G
 //
 // Author: Linda Jun
-// Created: 2004/04/19
-// Modified:
-//   2004/04/19 Linda Jun - Modified Swnigby code to reuse for GMAT project
+// Created: 2003/09/16
 //
 /**
- * Declares conversion functions between Cartesian and Keplerian elements.
+ * Declares AngleUtil which provides various angle computation.
  */
 //------------------------------------------------------------------------------
 #ifndef AngleUtil_hpp
 #define AngleUtil_hpp
 
 #include "gmatdefs.hpp"
+#include "Rvector3.hpp"
 
 class AngleUtil
 {
@@ -37,7 +36,8 @@ public:
                                   Real maxAngleInRad);
    static Real ComputePhaseAngleInDeg(Real axis1, Real axis2);
    static Real ComputePhaseAngleInRad(Real axis1, Real axis2);
-   
+   static Real ComputeAngleInDeg(const Rvector3 &vecA, const Rvector3 &vecB,
+                                 Real tol = 0.99);
 };
 
 #endif // AngleUtil_hpp
