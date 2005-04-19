@@ -32,6 +32,10 @@ public:
    Formation(const Formation& orig);
    Formation&           operator=(const Formation& orig);
    
+   virtual const Rvector6 GetMJ2000State(const A1Mjd &atTime);
+//   virtual const Rvector3 GetMJ2000Position(const A1Mjd &atTime);
+//   virtual const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime);
+
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
@@ -87,6 +91,8 @@ protected:
    std::vector <SpaceObject *>      components;
    /// Size of the state vector used in propagation
    Integer                          dimension;
+   /// Number of spacecraft in the state
+   UnsignedInt                      satCount;
 
    /// Enumerated parameter IDs   
    enum

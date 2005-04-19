@@ -46,12 +46,15 @@ public:
    virtual Real GetRealParameter(const std::string &label) const;
    virtual Real SetRealParameter(const Integer id, const Real value);
    virtual Real SetRealParameter(const std::string &label, const Real value);
+
+   /// @todo Waiting for CoordinateSystems in Spacecraft, then see if needed
+   virtual void SetOriginName(std::string cbName);
+   virtual const std::string GetOriginName();
+   virtual void SetOrigin(SpacePoint *cb);
    
-   // temporarily here *************************************************
    virtual const Rvector6 GetMJ2000State(const A1Mjd &atTime);
    virtual const Rvector3 GetMJ2000Position(const A1Mjd &atTime);
    virtual const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime);
-   // temporarily here *************************************************
    
    virtual std::string GetParameterText(const Integer id) const;
    virtual Gmat::ParameterType
@@ -63,7 +66,11 @@ protected:
    PropState            state;
    /// true when a finite burn needs to be applied to this SpaceObject
    bool                 isManeuvering;
-   
+   /// Reference SpacePoint for the data
+   std::string       originName;
+   /// Reference SpacePoint for the data
+   SpacePoint        *origin;
+
    /// Enumerated parameter IDs   
    enum
    {

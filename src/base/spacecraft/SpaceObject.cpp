@@ -19,6 +19,9 @@
 
 
 #include "SpaceObject.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_J2000_STATE 1
 
 
 //---------------------------------
@@ -58,7 +61,9 @@ const Gmat::ParameterType SpaceObject::PARAMETER_TYPE[SpaceObjectParamCount -
 SpaceObject::SpaceObject(Gmat::ObjectType typeId, const std::string &typeStr,
                          const std::string &instName) :
    SpacePoint       (typeId, typeStr, instName),
-   isManeuvering    (false)
+   isManeuvering    (false),
+   originName       ("Earth"),
+   origin           (NULL)
 {
    objectTypes.push_back(Gmat::SPACEOBJECT);
    objectTypeNames.push_back("SpaceObject");
@@ -89,7 +94,9 @@ SpaceObject::~SpaceObject()
 SpaceObject::SpaceObject(const SpaceObject& so) :
    SpacePoint     (so),
    state          (so.state),
-   isManeuvering  (so.isManeuvering)
+   isManeuvering  (so.isManeuvering),
+   originName     (so.originName),
+   origin         (so.origin)
 {
 }
 
@@ -111,8 +118,10 @@ SpaceObject& SpaceObject::operator=(const SpaceObject& so)
       return *this;
       
    SpacePoint::operator=(so);
-   state = so.state;
+   state         = so.state;
    isManeuvering = so.isManeuvering;
+   originName    = so.originName;
+   origin        = so.origin;
 
    return *this;
 }
@@ -203,7 +212,24 @@ void SpaceObject::IsManeuvering(bool mnvrFlag)
 }
 
 
-// temporarily here *************************************************
+/// @todo Waiting for CoordinateSystems in Spacecraft, then see if needed
+void SpaceObject::SetOriginName(std::string cbName)
+{
+   originName = cbName;
+}
+
+const std::string SpaceObject::GetOriginName()
+{
+   return originName;
+}
+
+
+void SpaceObject::SetOrigin(SpacePoint *cb)
+{
+   origin = cb;
+}
+
+
 
 //------------------------------------------------------------------------------
 // const Rvector6 GetMJ2000State(const A1Mjd &atTime)
@@ -215,15 +241,71 @@ void SpaceObject::IsManeuvering(bool mnvrFlag)
  *
  * @return The Cartesian MJ2000 state.
  *
- * @todo Implement GetMJ2000State in the derived classes, and remove this
- *       implementation.
+ * @todo Determine if this calculation should ber moved into the derived
+ *       classes.
  */
 //------------------------------------------------------------------------------
 const Rvector6 SpaceObject::GetMJ2000State(const A1Mjd &atTime)
 {
+   #ifdef DEBUG_J2000_STATE
+      MessageInterface::ShowMessage(
+         "SpaceObject::GetMJ2000State entered; epoch is %lf\n", atTime.Get());
+   #endif
+   if (j2000Body == NULL)
+      throw SpaceObjectException("MJ2000 body not yet set for " +
+         instanceName);
+         
    PropState ps = GetState();
-  // Rvector6& itsState(ps.GetState());
-   return Rvector6(ps.GetState()); // temporary
+   
+   Real *st = ps.GetState();
+
+   #ifdef DEBUG_J2000_STATE
+      MessageInterface::ShowMessage("   Accessing J2000 body state for %s\n",
+         j2000Body->GetName().c_str());
+   #endif
+   Rvector6 bodyState = j2000Body->GetMJ2000State(atTime);
+
+   #ifdef DEBUG_J2000_STATE
+      MessageInterface::ShowMessage("   MJ2000: [%lf %lf %lf %lf %lf %lf]\n",
+         bodyState[0], bodyState[1], bodyState[2], bodyState[3], bodyState[4], 
+         bodyState[5]);
+   #endif
+
+   // If origin is NULL, assume it is set at the J2000 origin.
+   if (origin)
+   {
+      #ifdef DEBUG_J2000_STATE
+         MessageInterface::ShowMessage("   Accessing origin state for %s\n",
+            origin->GetName().c_str());
+      #endif
+      
+      Rvector6 offset = origin->GetMJ2000State(atTime);
+      
+      #ifdef DEBUG_J2000_STATE
+         MessageInterface::ShowMessage("   origin: [%lf %lf %lf %lf %lf %lf]\n",
+            offset[0], offset[1], offset[2], offset[3], offset[4], offset[5]);
+      #endif
+      
+      bodyState -= offset;
+      
+      #ifdef DEBUG_J2000_STATE
+         MessageInterface::ShowMessage("   Diff: [%lf %lf %lf %lf %lf %lf]\n",
+            bodyState[0], bodyState[1], bodyState[2], bodyState[3], bodyState[4], 
+            bodyState[5]);
+      #endif
+   }
+   
+   Rvector6 j2kState;
+   
+   j2kState[0] = st[0] - bodyState[0];
+   j2kState[1] = st[1] - bodyState[1];
+   j2kState[2] = st[2] - bodyState[2];
+
+   j2kState[3] = st[3] - bodyState[3];
+   j2kState[4] = st[4] - bodyState[4];
+   j2kState[5] = st[5] - bodyState[5];
+
+   return j2kState;
 }
 
 
@@ -243,11 +325,10 @@ const Rvector6 SpaceObject::GetMJ2000State(const A1Mjd &atTime)
 //------------------------------------------------------------------------------
 const Rvector3 SpaceObject::GetMJ2000Position(const A1Mjd &atTime)
 {
-   PropState ps    = GetState();
-   Real      *st = ps.GetState();
-   Rvector6 itsState(st);
-   return (itsState.GetR());  // temporary
+   const Rvector6 rv6 = GetMJ2000State(atTime);
+   return (rv6.GetR()); 
 }
+
 
 //------------------------------------------------------------------------------
 // const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime)
@@ -265,12 +346,9 @@ const Rvector3 SpaceObject::GetMJ2000Position(const A1Mjd &atTime)
 //------------------------------------------------------------------------------
 const Rvector3 SpaceObject::GetMJ2000Velocity(const A1Mjd &atTime)
 {
-   PropState ps = GetState();
-   Real      *st = ps.GetState();
-   Rvector6 itsState(st);
-   return (itsState.GetV());  // temporary
+   const Rvector6 rv6 = GetMJ2000State(atTime);
+   return (rv6.GetV());
 }
-// temporarily here *************************************************
 
 
 //------------------------------------------------------------------------------

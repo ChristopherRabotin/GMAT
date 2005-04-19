@@ -66,7 +66,8 @@ Formation::PARAMETER_TYPE[FormationParamCount - SpaceObjectParamCount] =
 Formation::Formation(Gmat::ObjectType typeId, const std::string &typeStr,
                      const std::string &instName) :
    SpaceObject    (typeId, typeStr, instName),
-   dimension      (0)
+   dimension      (0),
+   satCount       (0)
 {
    objectTypes.push_back(Gmat::FORMATION);
    objectTypeNames.push_back("Formation");
@@ -99,7 +100,8 @@ Formation::~Formation()
 Formation::Formation(const Formation& orig) :
    SpaceObject    (orig),
    componentNames (orig.componentNames),
-   dimension      (orig.dimension)
+   dimension      (orig.dimension),
+   satCount       (orig.satCount)
 {
    parameterCount = FormationParamCount;
 }
@@ -118,17 +120,85 @@ Formation::Formation(const Formation& orig) :
 //------------------------------------------------------------------------------
 Formation& Formation::operator=(const Formation& orig)
 {
-   if (&orig == this)
-      return *this;
-   
-   SpaceObject::operator=(orig);
-   dimension = orig.dimension;
-   componentNames = orig.componentNames;
-   components.clear();
-   
+   if (this != &orig)
+   {
+      SpaceObject::operator=(orig);
+      
+      componentNames = orig.componentNames;
+      dimension      = orig.dimension;
+      satCount       = orig.satCount;
+   }
+
    return *this;
 }
 
+
+//------------------------------------------------------------------------------
+// Utility methods used by the CoordinateSystem code
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// const Rvector6 GetMJ2000State(const A1Mjd &atTime)
+//------------------------------------------------------------------------------
+/**
+ * Access the MJ2000 state for this SpaceObject.
+ *
+ * @param <atTime> Epoch for the state data.
+ *
+ * @return The Cartesian MJ2000 state.
+ *
+ * @todo Implement GetMJ2000State in the derived classes, and remove this
+ *       implementation.
+ */
+//------------------------------------------------------------------------------
+const Rvector6 Formation::GetMJ2000State(const A1Mjd &atTime)
+{
+   satCount = components.size();
+   
+   if (j2000Body == NULL)
+      throw SpaceObjectException("MJ2000 body not yet set for " +
+         instanceName);
+
+   // First calculate the geometric center of the formation
+   Rvector6 centerState;
+
+   PropState ps = GetState();
+   Real *st = ps.GetState();
+   
+   if (satCount == 0)
+   {
+      MessageInterface::ShowMessage(
+         "Warning: Attempting to find MJ2000 state for an empty formation\n");
+      return centerState;
+   }
+   
+   // The Formation PropState contains state data for the spacecraft, tanks, and
+   // (eventually) attitude.  The first 6*satcount elements are the spacecraft
+   // position and velocity data.
+   for (UnsignedInt i = 0; i < satCount; ++i)
+   {
+      for (Integer j = 0; j < 6; ++j)
+         centerState[j] += st[i*6+j];
+   }
+   centerState /= satCount;
+
+   // Then calculate the J2000 data based on that state
+   Rvector6 bodyState = j2000Body->GetMJ2000State(atTime);
+
+   // If origin is NULL, assume it is set at the J2000 origin.
+   if (origin)
+   {
+      Rvector6 offset = origin->GetMJ2000State(atTime);
+      bodyState -= offset;
+   }
+
+   return centerState - bodyState;
+}
+
+
+//------------------------------------------------------------------------------
+// Accessor methods
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
