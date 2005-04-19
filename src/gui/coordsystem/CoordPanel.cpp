@@ -179,7 +179,7 @@ void CoordPanel::LoadData()
 
       wxString xyzStrs[] =
       {
-         wxT(" "),
+         wxT(""),
          wxT("R"),
          wxT("-R"),
          wxT("V"),

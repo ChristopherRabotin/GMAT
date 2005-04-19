@@ -101,7 +101,7 @@ void CoordSysCreateDialog::LoadData()
          epochTextCtrl->SetValue("21545");
          xComboBox->SetValue("R");
          yComboBox->SetValue("V");;
-         zComboBox->SetValue(" ");
+         zComboBox->SetValue("");
       }
 
       mCoordPanel->EnableOptions();
@@ -177,20 +177,9 @@ void CoordSysCreateDialog::SaveData()
             }
 
             // set the x, y, and z
-            if (wxXString == " ")
-               axis->SetXAxis("");
-            else
-               axis->SetXAxis(std::string(wxXString));
-
-            if (wxYString == " ")
-               axis->SetYAxis("");
-            else
-               axis->SetYAxis(std::string(wxYString));
-
-            if (wxZString == " ")
-               axis->SetZAxis("");
-            else
-               axis->SetZAxis(std::string(wxZString));
+            axis->SetXAxis(std::string(wxXString));
+            axis->SetYAxis(std::string(wxYString));
+            axis->SetZAxis(std::string(wxZString));
 
             axis->SetEpoch(epoch);
             mIsCoordCreated = true;
@@ -293,8 +282,8 @@ bool CoordSysCreateDialog::CheckXYZ()
          "The x, y, and z axis must be orthognal.");
       return false;
    }
-   else if (wxXString.Contains(" ") &&
-           (wxYString.Contains(" ") || wxZString.Contains(" ")))
+   else if (wxXString.IsSameAs("") &&
+           (wxYString.IsSameAs("") || wxZString.IsSameAs("")))
    {
       MessageInterface::PopupMessage
          (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
@@ -323,7 +312,7 @@ bool CoordSysCreateDialog::CheckXYZ()
          "The x, y, and z axis must be orthognal.");
       return false;
    }
-   else if (wxYString.Contains(" ") && wxZString.Contains(" "))
+   else if (wxYString.IsSameAs("") && wxZString.IsSameAs(""))
    {
       MessageInterface::PopupMessage
          (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
@@ -332,8 +321,8 @@ bool CoordSysCreateDialog::CheckXYZ()
    }
 
    // Check to make sure at least one is blank
-   if (wxXString.Contains(" ") || wxYString.Contains(" ") ||
-       wxZString.Contains(" "))
+   if (wxXString.IsSameAs("") || wxYString.IsSameAs("") ||
+       wxZString.IsSameAs(""))
       return true;
    else
    {
