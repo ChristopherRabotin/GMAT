@@ -155,6 +155,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                wxPoint(-1, -1), wxSize(-1, -1),
                                wxDEFAULT_FRAME_STYLE, wxString(csName.c_str()),
                                solarSystem);
+      GmatAppData::GetMainFrame()->Tile();
       // 04/08/2005 - arg : changed the parent frame to the main frame
 //      MdiGlPlot::mdiParentGlFrame->trajMainSubframe =
 //         new MdiChildTrajFrame(MdiGlPlot::mdiParentGlFrame, true,
@@ -411,6 +412,7 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
                              wxString(yAxisTitle.c_str()),
                              wxPoint(-1, -1), wxSize(500, 350), //loj: 2/27/04 wxSize(-1, -1),
                              wxDEFAULT_FRAME_STYLE);
+      GmatAppData::GetMainFrame()->Tile();
 
       // 04/08/2005 - arg: changed the parent window
 //      MdiXyPlot::mdiParentXyFrame->mainSubframe =
