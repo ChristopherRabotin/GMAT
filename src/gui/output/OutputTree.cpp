@@ -91,6 +91,11 @@ OutputTree::OutputTree(wxWindow *parent, const wxWindowID id,
 //------------------------------------------------------------------------------
 void OutputTree::UpdateOutput()
 {
+   // delete all old children
+   DeleteChildren(mReportItem);
+   DeleteChildren(mOpenGlItem);
+   DeleteChildren(mXyPlotItem);
+
    // get list of report files, opengl plots, and xy plots
    StringArray listOfSubs = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
 
