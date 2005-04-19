@@ -57,6 +57,7 @@ public:
    void RemoveChild(wxString item);
    void CloseActiveChild();
    void CloseAllChildren(bool closeScriptWindow = true, wxString title = "");
+   void MinimizeChildren();
    void CloseCurrentProject();
    void RunCurrentMission();
    void NotifyRunCompleted(); //loj: 10/28/04 added
@@ -78,7 +79,14 @@ public:
    void OnZoomIn(wxCommandEvent& event);
    void OnZoomOut(wxCommandEvent& event);
 
+   bool OnScriptBuildObject(wxCommandEvent& WXUNUSED(event));
+   bool OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event));
+   bool OnScriptRun(wxCommandEvent& WXUNUSED(event));
+
+   wxList *mdiChildren;
+
 protected:
+
 private:
    
    GmatServer *mServer;
@@ -91,7 +99,6 @@ private:
    wxSashLayoutWindow* win;
    wxSashLayoutWindow* msgWin;
    wxScrolledWindow *panel;
-   wxList *mdiChildren;
    
 //   wxDocManager *mDocManager;
 //   wxDocTemplate *mDocTemplate;
@@ -111,6 +118,7 @@ private:
    void OnProjectExit(wxCommandEvent &event);
    void OnRun(wxCommandEvent &event);
    void OnStop(wxCommandEvent &event);
+   void OnCloseChildren(wxCommandEvent &event);
    void OnHelpAbout(wxCommandEvent &event);
 
    void OnNewScript(wxCommandEvent &event);
@@ -134,10 +142,6 @@ private:
    void OnMsgSashDrag(wxSashEvent &event);
    void OnMainFrameSize(wxSizeEvent &event);
    void OnFocus(wxFocusEvent &event);
-
-   bool OnScriptBuildObject(wxCommandEvent& WXUNUSED(event));
-   bool OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event));
-   bool OnScriptRun(wxCommandEvent& WXUNUSED(event));
 
    // IDs for the controls and the menu commands
    enum

@@ -26,6 +26,7 @@ BEGIN_EVENT_TABLE(ScriptPanel, GmatSavePanel)
    EVT_BUTTON(ID_BUTTON_CLOSE, GmatSavePanel::OnClose)
 
    EVT_TEXT(ID_TEXTCTRL, ScriptPanel::OnTextUpdate)
+   EVT_BUTTON(ID_BUTTON, ScriptPanel::OnButton)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -52,6 +53,8 @@ void ScriptPanel::Create()
    int bsize = 3; // border size
 
     // create sizers
+   wxStaticBox *topStaticBox = new wxStaticBox( this, -1, wxT("") );
+   mTopSizer = new wxStaticBoxSizer( topStaticBox, wxHORIZONTAL );
    mBottomSizer = new wxGridSizer( 1, 0, 0 );
 //   mPageSizer = new wxFlexGridSizer( 0, 3, 0, 0 );
    mPageSizer = new wxBoxSizer(wxVERTICAL);
@@ -61,15 +64,26 @@ void ScriptPanel::Create()
                             wxDefaultPosition, wxDefaultSize,
                             wxTE_MULTILINE | wxGROW);
 
+   // wxButton
+   mBuildButton =
+      new wxButton(this, ID_BUTTON, "Build", wxDefaultPosition, wxDefaultSize, 0);
+   mBuildRunButton =
+      new wxButton(this, ID_BUTTON, "Build and Run", wxDefaultPosition, wxDefaultSize, 0);
+
+
    //------------------------------------------------------
    // add to sizer
    //------------------------------------------------------
+   mTopSizer->Add(mBuildButton, 0, wxALIGN_RIGHT | wxALL, bsize);
+   mTopSizer->Add(mBuildRunButton, 0, wxALIGN_RIGHT | wxALL, bsize);
+
    mBottomSizer->Add(mFileContentsTextCtrl, 0, wxGROW | wxALIGN_CENTER | wxALL,
                      bsize);
 
    //------------------------------------------------------
    // add to parent sizer
    //------------------------------------------------------
+   mPageSizer->Add(mTopSizer, 0, wxALIGN_CENTER | wxALL, bsize);
    mPageSizer->Add(mBottomSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
    theMiddleSizer->Add(mPageSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
 }
@@ -115,6 +129,47 @@ void ScriptPanel::SaveData()
 void ScriptPanel::OnTextUpdate(wxCommandEvent& event)
 {
    theSaveButton->Enable(true);
+}
+
+//------------------------------------------------------------------------------
+// void OnButton(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ScriptPanel::OnButton(wxCommandEvent& event)
+{
+   if (event.GetEventObject() == mBuildButton)
+   {
+      if (theSaveButton->IsEnabled())
+      {
+         // prompt user to save
+         wxMessageDialog *msgDlg = new wxMessageDialog(this,
+            "Would you like to save changes?", "Save...", wxYES_NO | wxICON_QUESTION ,
+            wxDefaultPosition);
+         int result = msgDlg->ShowModal();
+
+         if (result == wxID_YES)
+         {
+            SaveData();
+         }
+      }
+      GmatAppData::GetMainFrame()->OnScriptBuildObject(event);
+   }
+   else if (event.GetEventObject() == mBuildRunButton)
+   {
+      if (theSaveButton->IsEnabled())
+      {
+         // prompt user to save
+         wxMessageDialog *msgDlg = new wxMessageDialog(this,
+            "Would you like to save changes?", "Save...", wxYES_NO | wxICON_QUESTION ,
+            wxDefaultPosition);
+         int result = msgDlg->ShowModal();
+
+         if (result == wxID_YES)
+         {
+            SaveData();
+         }
+      }
+      GmatAppData::GetMainFrame()->OnScriptBuildAndRun(event);
+   }
 }
 
 //------------------------------------------------------------------------------

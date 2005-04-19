@@ -78,6 +78,7 @@
 #include "AssignmentPanel.hpp"
 #include "ScriptEventPanel.hpp"
 #include "ScriptPanel.hpp"
+#include "ReportFilePanel.hpp"
 
 #include <wx/gdicmn.h>
 #include "ddesetup.hpp"   // for IPC_SERVICE, IPC_TOPIC
@@ -120,6 +121,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(MENU_PROJECT_EXIT, GmatMainFrame::OnProjectExit)
    EVT_MENU(TOOL_RUN, GmatMainFrame::OnRun)
    EVT_MENU(TOOL_STOP, GmatMainFrame::OnStop)
+   EVT_MENU(TOOL_CLOSE_CHILDREN, GmatMainFrame::OnCloseChildren)
    EVT_MENU(MENU_HELP_ABOUT, GmatMainFrame::OnHelpAbout)
    EVT_MENU(MENU_SCRIPT_BUILD, GmatMainFrame::OnScriptBuild)    
 //   EVT_MENU(MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE, GmatMainFrame::OnGlPlotTrajectoryFile)
@@ -612,6 +614,15 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
          sizer->Add(new CoordSystemConfigPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
       }
+      else if (dataType == GmatTree::OUTPUT_REPORT)
+      {
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                          wxPoint(-1,-1), wxSize(-1,-1),
+                                          style);
+         panel = new wxScrolledWindow(newChild);
+         sizer->Add(new ReportFilePanel(panel, item->GetDesc()),
+                    0, wxGROW|wxALL, 0);
+      }
       else
       {
          // if no panel set up then just exit function
@@ -824,7 +835,39 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, wxString title)
          node = node->GetNext();
       }
    }
+
+   // close xy plots
+   for (int i=0; i<MdiXyPlot::numChildren; i++)
+   {
+      MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
+      frame->Close(TRUE);
+   }
+
+   // close gl plots
+   for (int i=0; i<MdiGlPlot::numChildren; i++)
+   {
+      MdiChildTrajFrame *frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
+      frame->Close(TRUE);
+   }
+
 }
+
+//------------------------------------------------------------------------------
+// void GmatMainFrame::MinimizeChildren()
+//------------------------------------------------------------------------------
+void GmatMainFrame::MinimizeChildren()
+{
+   // do not need to check if script window is open
+   wxNode *node = mdiChildren->GetFirst();
+   while (node)
+   {
+      GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+      theChild->Iconize(TRUE);
+      node = node->GetNext();
+   }
+
+}
+
 
 //------------------------------------------------------------------------------
 // void CloseCurrentProject()
@@ -1054,7 +1097,7 @@ void GmatMainFrame::OnRun(wxCommandEvent& WXUNUSED(event))
 //   SetSize(mReducedSize);
 //   SetFocus();
 
-   Tile();
+   MinimizeChildren();
    theGuiInterpreter->RunMission();
    
    toolBar->EnableTool(TOOL_RUN, TRUE);
@@ -1083,6 +1126,20 @@ void GmatMainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
    theGuiInterpreter->ChangeRunState("Stop");
    
    toolBar->EnableTool(TOOL_RUN, TRUE);
+}
+
+//------------------------------------------------------------------------------
+// void OnCloseChildren(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles closing all open children.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnCloseChildren(wxCommandEvent& WXUNUSED(event))
+{
+   CloseAllChildren();
 }
 
 //------------------------------------------------------------------------------
@@ -1185,9 +1242,9 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    toolBar->AddTool(TOOL_STOP, *bitmaps[10], wxNullBitmap, FALSE, currentX, -1,
                     (wxObject *) NULL, _T("Stop"));
 
-//   toolBar->AddSeparator();
-//   toolBar->AddTool(TOOL_CLOSE_CHILDREN, *bitmaps[11], wxNullBitmap, FALSE,
-//                    currentX, -1, (wxObject *) NULL, _T("Close All"));
+   toolBar->AddSeparator();
+   toolBar->AddTool(TOOL_CLOSE_CHILDREN, *bitmaps[11], wxNullBitmap, FALSE,
+                    currentX, -1, (wxObject *) NULL, _T("Close All"));
    toolBar->AddSeparator();
    toolBar->AddTool(MENU_HELP_ABOUT, *bitmaps[7], wxNullBitmap, FALSE,
                     currentX, -1, (wxObject *) NULL, _T("Help"));
@@ -1238,7 +1295,11 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    fileMenu->Append(MENU_FILE_SAVE_SCRIPT, wxT("Save to Script"), wxT(""), FALSE);
    fileMenu->Append(MENU_FILE_SAVE_AS_SCRIPT, wxT("Save to Script As"),
                      wxT(""), FALSE);  
-   
+
+   fileMenu->AppendSeparator();
+   fileMenu->Append(TOOL_CLOSE_CHILDREN, wxT("Close All"),
+                     wxT(""), FALSE);
+
    fileMenu->AppendSeparator();
    fileMenu->Append(MENU_PROJECT_LOAD_DEFAULT_MISSION, wxT("Default Project"), 
                      wxT(""), FALSE);   

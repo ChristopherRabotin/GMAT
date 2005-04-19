@@ -26,10 +26,15 @@ public:
 
 private:
    wxString mScriptFilename;
+   wxStaticBoxSizer *mTopSizer;
    wxGridSizer *mBottomSizer;
    wxBoxSizer *mPageSizer;
 
    wxTextCtrl *mFileContentsTextCtrl;
+
+   wxButton *mBuildButton;
+   wxButton *mBuildRunButton;
+
 
    // methods inherited from GmatSavePanel
    virtual void Create();
@@ -38,6 +43,7 @@ private:
     
    // event handling
    void OnTextUpdate(wxCommandEvent& event);
+   void OnButton(wxCommandEvent& event);
 
    DECLARE_EVENT_TABLE();
 
