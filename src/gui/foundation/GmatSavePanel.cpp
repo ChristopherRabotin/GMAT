@@ -121,7 +121,7 @@ void GmatSavePanel::Show()
     thePanelSizer->Show(theTopSizer, mShowScriptButton);
     theScriptButton->Show(mShowScriptButton);
     thePanelSizer->Layout();
-    
+
     // tells the enclosing window to adjust to the size of the sizer
     SetAutoLayout( TRUE );
     SetSizer(thePanelSizer); //use the sizer for layout

@@ -91,13 +91,14 @@ MdiChildXyFrame::MdiChildXyFrame(wxMDIParentFrame *parent, bool isMainFrame,
    wxMenu *fileMenu = new wxMenu;
 
    fileMenu->Append(GmatPlot::MDI_XY_OPEN_PLOT_FILE, _T("&Open XY Plot File"));
-   fileMenu->Append(GmatPlot::MDI_XY_QUIT, _T("&Exit"));
+//   fileMenu->Append(GmatPlot::MDI_XY_QUIT, _T("&Exit"));
+   fileMenu->Append(GmatPlot::MDI_XY_CHILD_QUIT, _T("&Close"),
+         _T("Close this window"));
 
    // Plot menu
    wxMenu *plotMenu = new wxMenu;
 
    plotMenu->Append(GmatPlot::MDI_XY_CLEAR_PLOT, _T("Clear Plot"));
-   plotMenu->Append(GmatPlot::MDI_XY_CHILD_QUIT, _T("&Close"), _T("Close this window"));
    plotMenu->AppendSeparator();
    plotMenu->Append(GmatPlot::MDI_XY_CHANGE_TITLE, _T("Change &title..."));
 
