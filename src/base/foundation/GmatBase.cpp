@@ -901,6 +901,33 @@ Real GmatBase::GetRealParameter(const Integer id, const Integer row,
 /**
  * Set the value for a Real parameter.
  *
+ * @param <id>    The integer ID for the parameter.
+ * @param <value> The new parameter value.
+ * @param <row>   The row in which the data is set.
+ * @param <col>   The column in which the data is set.
+ *
+ * @return the parameter value at the end of this call, or throw an exception
+ *         if the parameter id is invalid or the parameter type is not Real, or
+ *         the parameter is not in an array.
+ */
+//---------------------------------------------------------------------------
+Real GmatBase::SetRealParameter(const Integer id, const Real value,
+                                const Integer row, const Integer col)
+{
+   std::stringstream idString;
+   idString << id << " and label " << GetParameterText(id);
+   throw GmatBaseException("Cannot set real parameter with ID " +
+                           idString.str() + " using array indices on " +
+                           typeName + " named " + instanceName);
+}
+
+
+//---------------------------------------------------------------------------
+//  Real SetRealParameter(const Integer id, const Real value, Integer index)
+//---------------------------------------------------------------------------
+/**
+ * Set the value for a Real parameter.
+ *
  * @param id The integer ID for the parameter.
  * @param value The new parameter value.
  * @param index Index for parameters in arrays.  Use -1 or the index free 
@@ -1552,6 +1579,29 @@ Real GmatBase::SetRealParameter(const std::string &label, const Real value,
 {
    Integer id = GetParameterID(label);
    return SetRealParameter(id, value, index);
+}
+
+
+//---------------------------------------------------------------------------
+//  Real SetRealParameter(const std::string &label, const Real value,
+//                        const Integer row, const Integer col)
+//---------------------------------------------------------------------------
+/**
+ * Set the value for a Real parameter in an array.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param <value> The new parameter value.
+ * @param <row>   The row that receives the value.
+ * @param <col>   The column that receives the value value.
+ *
+ * @return the parameter value at the end of this call.
+ */
+//---------------------------------------------------------------------------
+Real GmatBase::SetRealParameter(const std::string &label, const Real value,
+                      const Integer row, const Integer col)
+{
+   Integer id = GetParameterID(label);
+   return SetRealParameter(id, value, row, col);
 }
 
 

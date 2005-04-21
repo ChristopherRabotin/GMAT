@@ -129,6 +129,8 @@ public:
    virtual Real        SetRealParameter(const Integer id,
                                         const Real value,
                                         const Integer index);
+   virtual Real        SetRealParameter(const Integer id, const Real value,
+                                        const Integer row, const Integer col);
 
    virtual Integer     GetIntegerParameter(const Integer id) const;
    virtual Integer     SetIntegerParameter(const Integer id,
@@ -193,7 +195,10 @@ public:
    virtual Real        GetRealParameter(const std::string &label, 
                                         const Integer row, 
                                         const Integer col) const;
-                                        
+   virtual Real        SetRealParameter(const std::string &label,
+                                        const Real value, const Integer row,
+                                        const Integer col);
+
    virtual Integer     GetIntegerParameter(const std::string &label) const;
    virtual Integer     SetIntegerParameter(const std::string &label,
                                            const Integer value);
