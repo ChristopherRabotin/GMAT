@@ -181,6 +181,30 @@ MdiChildTrajFrame::~MdiChildTrajFrame()
 
 
 //------------------------------------------------------------------------------
+// bool GetUseViewPointInfo()
+//------------------------------------------------------------------------------
+bool MdiChildTrajFrame::GetUseViewPointInfo()
+{
+   if (mCanvas)
+      return mCanvas->GetUseViewPointInfo();
+
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool GetUsePerspectiveMode()
+//------------------------------------------------------------------------------
+bool MdiChildTrajFrame::GetUsePerspectiveMode()
+{
+   if (mCanvas)
+      return mCanvas->GetUsePerspectiveMode();
+
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 // bool GetDrawWireFrame()
 //------------------------------------------------------------------------------
 bool MdiChildTrajFrame::GetDrawWireFrame()
@@ -332,10 +356,10 @@ CoordinateSystem* MdiChildTrajFrame::GetDesiredCoordSystem()
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::SetPlotName(const wxString &name)
 {
-#if DEBUG_CHILDTRAJ_FRAME
-   MessageInterface::ShowMessage("MdiChildTrajFrame::SetPlotName() name=%s\n",
-                                 name.c_str());
-#endif
+   #if DEBUG_CHILDTRAJ_FRAME
+      MessageInterface::ShowMessage
+         ("MdiChildTrajFrame::SetPlotName() name=%s\n", name.c_str());
+   #endif
    
    mPlotName = name;
    mPlotTitle = name;
@@ -355,6 +379,30 @@ void MdiChildTrajFrame::SetOverlapPlot(bool overlap)
          mCanvas->ClearPlot();
    }
 }
+
+//------------------------------------------------------------------------------
+// void SetUseViewPointInfo(bool flag)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetUseViewPointInfo(bool flag)
+{
+   if (mCanvas)
+   {
+      mCanvas->SetUseViewPointInfo(flag);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetUsePerspectiveMode(bool flag)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetUsePerspectiveMode(bool flag)
+{
+   if (mCanvas)
+   {
+      mCanvas->SetUsePerspectiveMode(flag);
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // void SetDrawWireFrame(bool flag)
@@ -538,9 +586,9 @@ void MdiChildTrajFrame::DrawInOtherCoordSystem(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::UpdatePlot()
 {
-#ifdef DEBUG_CHILDTRAJ_FRAME
-   MessageInterface::ShowMessage("MdiChildTrajFrame::UpdatePlot() entered.\n");
-#endif
+   #ifdef DEBUG_CHILDTRAJ_FRAME
+      MessageInterface::ShowMessage("MdiChildTrajFrame::UpdatePlot() entered.\n");
+   #endif
 
    if (mCanvas)
       mCanvas->UpdatePlot();
@@ -691,14 +739,14 @@ void MdiChildTrajFrame::OnAddBody(wxCommandEvent& event)
          mBodyColors.push_back(colors[i]);
       }
 
-#if DEBUG_CHILDTRAJ_FRAME
-      MessageInterface::ShowMessage("MdiChildTrajFrame::OnAddOtherBody()\n");
-      for (unsigned int i=0; i<mBodyNames.GetCount(); i++)
-      {
-         MessageInterface::ShowMessage("body name=%s, color=%d\n",
-                                       mBodyNames[i].c_str(), mBodyColors[i]);
-      }
-#endif
+      #if DEBUG_CHILDTRAJ_FRAME
+         MessageInterface::ShowMessage("MdiChildTrajFrame::OnAddOtherBody()\n");
+         for (unsigned int i=0; i<mBodyNames.GetCount(); i++)
+         {
+            MessageInterface::ShowMessage("body name=%s, color=%d\n",
+                                          mBodyNames[i].c_str(), mBodyColors[i]);
+         }
+      #endif
 
       //--------------------------------------------------
       // update ViewGotoBody menu item
@@ -848,6 +896,33 @@ void MdiChildTrajFrame::OnClose(wxCloseEvent& event)
    event.Skip();
 }
 
+
+//------------------------------------------------------------------------------
+// void SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
+//                      SpacePoint *vdObj, Real vsFactor,
+//                      const Rvector3 &vpRefVec, const Rvector3 &vpVec,
+//                      const Rvector3 &vdVec, bool usevpRefVec,
+//                      bool usevpVec, bool useVdVec)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
+                                        SpacePoint *vdObj, Real vsFactor,
+                                        const Rvector3 &vpRefVec, const Rvector3 &vpVec,
+                                        const Rvector3 &vdVec, bool usevpRefVec,
+                                        bool usevpVec, bool usevdVec)
+{
+   if (mCanvas)
+   {
+      #if DEBUG_CHILDTRAJ_FRAME
+         MessageInterface::ShowMessage
+            ("MdiChildTrajFrame::SetGlViewOption() vsFactor=%f\n", vsFactor);
+      #endif
+         
+      mCanvas->SetGlViewOption(vpRefObj, vpVecObj, vdObj, vsFactor, vpRefVec, vpVec,
+                               vdVec, usevpRefVec, usevpVec, usevdVec);
+   }
+}
+
+
 //------------------------------------------------------------------------------
 // void UpdateSpacecraft(const Real &time, const RealArray &posX,
 //                       const RealArray &posY, const RealArray &posZ,
@@ -872,6 +947,7 @@ void MdiChildTrajFrame::UpdateSpacecraft(const Real &time, const RealArray &posX
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void RefreshPlot()
 //------------------------------------------------------------------------------
@@ -884,6 +960,7 @@ void MdiChildTrajFrame::RefreshPlot()
    Update();
 }
 
+
 //------------------------------------------------------------------------------
 // void DeletePlot()
 //------------------------------------------------------------------------------
@@ -893,6 +970,8 @@ void MdiChildTrajFrame::DeletePlot()
    if (mIsMainFrame)
       GmatAppData::GetMainFrame()->trajMainSubframe->Close();
 }
+
+
 //------------------------------------------------------------------------------
 // wxMenu* CreateGotoBodyMenu()
 //------------------------------------------------------------------------------

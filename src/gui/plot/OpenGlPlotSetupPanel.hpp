@@ -31,12 +31,12 @@ public:
    OpenGlPlotSetupPanel(wxWindow *parent, const wxString &subscriberName);
    
 protected:
-   //Subscriber *mSubscriber; //loj: 9/28/04 commented out
    OpenGlPlot *mOpenGlPlot;
    
-   bool mIsScChanged;
-   bool mIsColorChanged;
-   bool mIsCoordSysChanged;
+   bool mHasScChanged;
+   bool mHasColorChanged;
+   bool mHasCoordSysChanged;
+   bool mHasViewInfoChanged;
    int mScCount;
    
    std::string mSelScName;
@@ -62,18 +62,23 @@ protected:
    wxCheckBox *mEclipticPlaneCheckBox;
    wxCheckBox *mEquatorialPlaneCheckBox;
    wxCheckBox *mOverlapCheckBox;
+   wxCheckBox *mUseViewPointInfoCheckBox;
+   wxCheckBox *mPerspectiveModeCheckBox;
    
    wxComboBox *mCoordSysComboBox;
    wxComboBox *mViewPointRefComboBox;
-   wxComboBox *mViewPointVecComboBox;
+   wxComboBox *mViewPointVectorComboBox;
    wxComboBox *mViewDirectionComboBox;
 
    wxStaticText *mTargetColorLabel;
    
    wxTextCtrl *mViewScaleFactorTextCtrl;
-   wxTextCtrl *mViewPoint1TextCtrl;
-   wxTextCtrl *mViewPoint2TextCtrl;
-   wxTextCtrl *mViewPoint3TextCtrl;
+   wxTextCtrl *mViewPointRef1TextCtrl;
+   wxTextCtrl *mViewPointRef2TextCtrl;
+   wxTextCtrl *mViewPointRef3TextCtrl;
+   wxTextCtrl *mViewPointVec1TextCtrl;
+   wxTextCtrl *mViewPointVec2TextCtrl;
+   wxTextCtrl *mViewPointVec3TextCtrl;
    wxTextCtrl *mViewDir1TextCtrl;
    wxTextCtrl *mViewDir2TextCtrl;
    wxTextCtrl *mViewDir3TextCtrl;
@@ -81,8 +86,9 @@ protected:
    wxFlexGridSizer *mFlexGridSizer;
    wxFlexGridSizer *mPlotOptionSizer;
    wxBoxSizer *mScOptionBoxSizer;
-   wxBoxSizer *mViewPointVecSizer;
-   wxBoxSizer *mViewDirVecSizer;
+   wxBoxSizer *mViewPointRefSizer;
+   wxBoxSizer *mViewPointVectorSizer;
+   wxBoxSizer *mViewDirVectorSizer;
    
    // methods inherited from GmatPanel
    virtual void Create();
@@ -98,7 +104,8 @@ protected:
    void OnCheckBoxChange(wxCommandEvent& event);
    void OnOrbitColorClick(wxCommandEvent& event);
    void OnTargetColorClick(wxCommandEvent& event);
-   void OnComboBoxChange(wxCommandEvent& event); //loj: 1/27/05 Added
+   void OnComboBoxChange(wxCommandEvent& event);
+   void OnTextChange(wxCommandEvent& event);
    
    DECLARE_EVENT_TABLE();
    

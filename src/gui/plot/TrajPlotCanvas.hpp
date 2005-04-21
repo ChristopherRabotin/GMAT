@@ -39,6 +39,8 @@ public:
 
    // getters
    float GetDistance() {return mAxisLength;}
+   bool  GetUseViewPointInfo() {return mUseViewPointInfo;}
+   bool  GetUsePerspectiveMode() {return mUsePerspectiveMode;}
    bool  GetDrawWireFrame() {return mDrawWireFrame;}
    bool  GetDrawEqPlane() {return mDrawEqPlane;}
    bool  GetDrawEcPlane() {return mDrawEcPlane;}
@@ -54,6 +56,8 @@ public:
    
    // setters
    void SetDistance(float dist) {mAxisLength = dist;}
+   void SetUseViewPointInfo(bool flag) {mUseViewPointInfo = flag;}
+   void SetUsePerspectiveMode(bool flag) {mUsePerspectiveMode = flag;}
    void SetDrawWireFrame(bool flag) {mDrawWireFrame = flag;}
    void SetDrawEqPlane(bool flag) {mDrawEqPlane = flag;}
    void SetDrawEcPlane(bool flag) {mDrawEcPlane = flag;}
@@ -80,6 +84,13 @@ public:
    void DrawInOtherCoordSystem(CoordinateSystem *cs);
    void GotoStdBody(int bodyId);
    void GotoOtherBody(const wxString &bodyName);
+
+   // viewpoint (loj: 4/20/05 Added)
+   void SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
+                        SpacePoint *vdObj, Real vscaleFactor,
+                        const Rvector3 &vpRefVec, const Rvector3 &vpVec,
+                        const Rvector3 &vdVec, bool usevpRefVec,
+                        bool usevpVec, bool usevdVec);
    
    // data
    int  ReadTextTrajectory(const wxString &filename);
@@ -116,16 +127,18 @@ private:
    TrajectoryArray mTrajectoryData;
 
    // Data members used by the mouse
-   GLfloat m_fStartX, m_fStartY;
+   GLfloat mfStartX, mfStartY;
    
    // Actual params of the window
-   GLfloat m_fLeftPos, m_fRightPos, m_fBottomPos, m_fTopPos;
+   GLfloat mfLeftPos, mfRightPos, mfBottomPos, mfTopPos;
    
    // Camera rotations
-   GLfloat m_fCamRotationX, m_fCamRotationY, m_fCamRotationZ;
+   GLfloat mfCamRotXAngle, mfCamRotYAngle, mfCamRotZAngle;
+   GLfloat mfCamSingleRotAngle, mfCamRotXAxis, mfCamRotYAxis, mfCamRotZAxis;
+   bool mUseSingleRotAngle;
    
    // Camera translations
-   GLfloat m_fCamTransX, m_fCamTransY, m_fCamTransZ;
+   GLfloat mfCamTransX, mfCamTransY, mfCamTransZ;
    
    // draw option
    float mAxisLength;
@@ -167,6 +180,22 @@ private:
    bool mDdataCountOverLimit;
    int  mNumData;
 
+   // projection
+   bool mUsePerspectiveMode;
+   
+   // viewpoint
+   SpacePoint *mViewPointRefObj;
+   SpacePoint *mViewPointVectorObj;
+   SpacePoint *mViewDirectionObj;
+   Rvector3 mViewPointRefVector;
+   Rvector3 mViewPointVector;
+   Rvector3 mViewDirectionVector;
+   Real mViewScaleFactor;
+   bool mUseViewPointInfo;
+   bool mUseViewPointRefVector;
+   bool mUseViewPointVector;
+   bool mUseViewDirectionVector;
+   
    // time
    double mTime[MAX_DATA];
 
@@ -216,19 +245,19 @@ private:
    
    // view
    wxSize mCanvasSize;
-   GLfloat m_fViewLeft;
-   GLfloat m_fViewRight;
-   GLfloat m_fViewTop;
-   GLfloat m_fViewBottom;
-   GLfloat m_fViewNear;
-   GLfloat m_fViewFar;
-   float mDefaultViewX;
-   float mDefaultViewY;
-   float mDefaultViewZ;
+   GLfloat mfViewLeft;
+   GLfloat mfViewRight;
+   GLfloat mfViewTop;
+   GLfloat mfViewBottom;
+   GLfloat mfViewNear;
+   GLfloat mfViewFar;
+   float mDefaultRotXAngle;
+   float mDefaultRotYAngle;
+   float mDefaultRotZAngle;
    float mDefaultViewDist;
-   float mCurrViewX;
-   float mCurrViewY;
-   float mCurrViewZ;
+   float mCurrRotXAngle;
+   float mCurrRotYAngle;
+   float mCurrRotZAngle;
    float mCurrViewDist;
 
    // windows specific functions
@@ -244,6 +273,7 @@ private:
    void ComputeView(GLfloat fEndX, GLfloat fEndY);
    void ChangeView(float viewX, float viewY, float viewZ);
    void ChangeProjection(int width, int height, float axisLength);
+   void ComputeProjection(); //loj: 4/20/05 Added
    
    // drawing objects
    void DrawPicture();

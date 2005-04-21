@@ -20,9 +20,9 @@
 #define OpenGlPlot_hpp
 
 #include "Subscriber.hpp"
+#include "SpacePoint.hpp"
 #include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
-//#include "CoordinateConverter.hpp"
 #include <map>
 
 class OpenGlPlot : public Subscriber
@@ -73,6 +73,18 @@ public:
    virtual const UnsignedIntArray& 
            GetUnsignedIntArrayParameter(const std::string &label) const;
    
+   virtual Real GetRealParameter(const Integer id) const;
+   virtual Real GetRealParameter(const std::string &label) const;
+   virtual Real SetRealParameter(const Integer id, const Real value);
+   virtual Real SetRealParameter(const std::string &label, const Real value);
+   
+   virtual const Rvector& GetRvectorParameter(const Integer id) const;
+   virtual const Rvector& GetRvectorParameter(const std::string &label) const;
+   virtual const Rvector& SetRvectorParameter(const Integer id,
+                                              const Rvector &value);
+   virtual const Rvector& SetRvectorParameter(const std::string &label,
+                                              const Rvector &value);
+   
    virtual std::string GetStringParameter(const Integer id) const;
    virtual std::string GetStringParameter(const std::string &label) const;
    virtual bool SetStringParameter(const Integer id, const std::string &value);
@@ -106,16 +118,29 @@ protected:
 
    SolarSystem *mSolarSystem;
    CoordinateSystem *mOutCoordSystem;
-//     CoordinateConverter mCoordConverter;
-   
-   bool mDrawEquatorialPlane;
-   bool mDrawWireFrame;
-   bool mDrawTarget;
-   bool mOverlapPlot;
-   bool mNeedCoordSysConversion;
+   SpacePoint *mViewPointRefObj;
+   SpacePoint *mViewPointVectorObj;
+   SpacePoint *mViewDirectionObj;
+
+   std::string mEclipticPlane;
+   std::string mEquatorialPlane;
+   std::string mWireFrame;
+   std::string mTargetStatus;
+   std::string mOverlapPlot;
+   std::string mUseViewPointInfo;
+   std::string mPerspectiveMode;
    
    std::string mOldName;
-   std::string mCoordSysName; //loj: 1/27/05 Added
+   std::string mCoordSysName;
+   std::string mViewPointRefName;
+   std::string mViewPointVectorName;
+   std::string mViewDirectionName;
+
+   Rvector3 mViewPointRefVector;
+   Rvector3 mViewPointVector;
+   Rvector3 mViewDirectionVector;
+   
+   Real mViewScaleFactor;
    
    Integer mDataCollectFrequency;
    Integer mUpdatePlotFrequency;
@@ -139,13 +164,23 @@ protected:
    enum
    {
       ADD = SubscriberParamCount,
-      ORBIT_COLOR,
-      TARGET_COLOR,
+      COORD_SYSTEM,
+      VIEWPOINT_REF,
+      VIEWPOINT_REF_VECTOR,
+      VIEWPOINT_VECTOR,
+      VIEWPOINT_VECTOR_VECTOR,
+      VIEW_DIRECTION,
+      VIEW_DIRECTION_VECTOR,
+      VIEW_SCALE_FACTOR,
+      CELESTIAL_PLANE,
       EQUATORIAL_PLANE,
       WIRE_FRAME,
       TARGET_STATUS,
-      COORD_SYSTEM,
       OVERLAP_PLOT,
+      USE_VIEWPOINT_INFO,
+      PERSPECTIVE_MODE,
+      ORBIT_COLOR,
+      TARGET_COLOR,
       DATA_COLLECT_FREQUENCY,
       UPDATE_PLOT_FREQUENCY,
       OpenGlPlotParamCount

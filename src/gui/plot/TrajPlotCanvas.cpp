@@ -41,6 +41,7 @@
 
 //#define DEBUG_TRAJCANVAS_INIT 1
 //#define DEBUG_TRAJCANVAS_UPDATE 1
+//#define DEBUG_TRAJCANVAS_PROJ 1
 //#define DEBUG_TRAJCANVAS_ACTION 1
 //#define DEBUG_TRAJCANVAS_CONVERT 2
 //#define DEBUG_TRAJCANVAS_DRAW 1
@@ -113,22 +114,37 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mGlList = 0;
    mInitialized = false;
    mNumData = 0;
+
+   // projection
+   mUsePerspectiveMode = false;
+   
+   // viewpoint
+   mViewPointRefObj = NULL;
+   mViewPointVectorObj = NULL;
+   mViewDirectionObj = NULL;
+   mViewPointVector.Set(0.0, 0.0, 30000);
+   mViewDirectionVector.Set(0.0, 0.0, -1.0);
+   mViewScaleFactor = 1.0;
+   mUseViewPointInfo = true;
+   mUseViewPointRefVector = true;
+   mUseViewPointVector = true;
+   mUseViewDirectionVector = true;
    
    // view
    mCanvasSize = size;
-   mDefaultViewX = 90.0;
-   mDefaultViewY = 0.0;
-   mDefaultViewZ = 0.0;
+   mDefaultRotXAngle = 90.0;
+   mDefaultRotYAngle = 0.0;
+   mDefaultRotZAngle = 0.0;
    mDefaultViewDist = DEFAULT_DIST;
    
-   mCurrViewX = mDefaultViewX;
-   mCurrViewY = mDefaultViewY;
-   mCurrViewZ = mDefaultViewZ;
+   mCurrRotXAngle = mDefaultRotXAngle;
+   mCurrRotYAngle = mDefaultRotYAngle;
+   mCurrRotZAngle = mDefaultRotZAngle;
    mCurrViewDist = mDefaultViewDist;
    
-   m_fCamTransX = 0;
-   m_fCamTransY = 0;
-   m_fCamTransZ = 0;
+   mfCamTransX = 0;
+   mfCamTransY = 0;
+   mfCamTransZ = 0;
    
    mAxisLength = mCurrViewDist;
    mCurrViewFrame = GCI_FRAME;
@@ -150,7 +166,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    // view options
    mDrawSpacecraft = true;
    mDrawWireFrame = false;
-   mDrawEqPlane = true;
+   mDrawEqPlane = false;
    mDrawEcPlane = false;
    mUseTexture = true;
    mDrawAxes = false;
@@ -396,17 +412,17 @@ void TrajPlotCanvas::ShowDefaultView()
    int clientWidth, clientHeight;
    GetClientSize(&clientWidth, &clientHeight);
 
-   mCurrViewX = mDefaultViewX;
-   mCurrViewY = mDefaultViewY;
-   mCurrViewZ = mDefaultViewZ;
+   mCurrRotXAngle = mDefaultRotXAngle;
+   mCurrRotYAngle = mDefaultRotYAngle;
+   mCurrRotZAngle = mDefaultRotZAngle;
    mCurrViewDist = mDefaultViewDist;
    mAxisLength = mCurrViewDist;
-   m_fCamTransX = 0;
-   m_fCamTransY = 0;
-   m_fCamTransZ = 0;
+   mfCamTransX = 0;
+   mfCamTransY = 0;
+   mfCamTransZ = 0;
 
    mCenterViewBody = EARTH;
-   ChangeView(mCurrViewX, mCurrViewY, mCurrViewZ);
+   ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
    ChangeProjection(clientWidth, clientHeight, mAxisLength);
    Refresh(false);
 }
@@ -602,7 +618,7 @@ void TrajPlotCanvas::GotoStdBody(int bodyId)
       MessageInterface::ShowMessage("TrajPlotCanvas::GotoStdBody() bodyId=%d\n",
                                     bodyId);
    #endif
-
+   
    if (!mBodyHasData[bodyId])
    {
       mBodyHasData[bodyId] = true;
@@ -668,6 +684,60 @@ int TrajPlotCanvas::GetStdBodyId(const std::string &name)
        "in the default list\n", name.c_str());
 
    return -1;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
+//                      SpacePoint *vdObj, Real vsFactor,
+//                      const Rvector3 &vpRefVec, const Rvector3 &vpVec,
+//                      const Rvector3 &vdVec, bool usevpRefVec,
+//                      bool usevpVec, bool usevdVec)
+//------------------------------------------------------------------------------
+/*
+ * Sets OpenGL view options
+ *
+ * @param <vpRefObj> Viewpoint reference object pointer
+ * @param <vpVecObj> Viewpoint vector object pointer
+ * @param <vdObj>  View direction object pointer
+ * @param <vsFactor> Viewpoint scale factor
+ * @param <vpRefVec> 3 element vector for viewpoint ref. vector (use if usevpVec is true)
+ * @param <vpVec> 3 element vector for viewpoint vector (use if usevpVec is true)
+ * @param <vdVec> 3 element vector for view direction (use if usevdVec is true)
+ * @param <usevpRefVec> true if use vector for viewpoint reference vector
+ * @param <usevpVec> true if use vector for viewpoint vector
+ * @param <usevdVec> true if use vector for view direction
+ */
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
+                                     SpacePoint *vdObj, Real vsFactor,
+                                     const Rvector3 &vpRefVec, const Rvector3 &vpVec,
+                                     const Rvector3 &vdVec, bool usevpRefVec,
+                                     bool usevpVec, bool usevdVec)
+{
+   mViewPointRefObj = vpRefObj;
+   mViewPointVectorObj = vpVecObj;
+   mViewDirectionObj = vdObj;
+   mViewScaleFactor = vsFactor;
+   mViewPointRefVector = vpRefVec;
+   mViewPointVector = vpVec;
+   mViewDirectionVector = vdVec;
+   mUseViewPointRefVector = usevpRefVec;
+   mUseViewPointVector = usevpVec;
+   mUseViewDirectionVector = usevdVec;
+
+   Rvector3 lvpRefVec(vpRefVec);
+   Rvector3 lvpVec(vpVec);
+   Rvector3 lvdVec(vdVec);
+   
+   #if DEBUG_TRAJCANVAS_INIT
+      MessageInterface::ShowMessage
+         ("TrajPlotCanvas::SetGlViewOption() vpRefObj=%d, vpVecObj=%d, "
+          "vdObj=%d, vsFactor=%f, vpRefVec=%s, vpVec=%s, vdVec=%s, usevpRefVec=%d, "
+          "usevpVec=%d, usevdVec=%d\n",  vpRefObj, vpVecObj, vdObj, vsFactor,
+          lvpRefVec.ToString().c_str(), lvpVec.ToString().c_str(),
+          lvdVec.ToString().c_str(), usevpRefVec, usevpVec, usevdVec);
+   #endif
 }
 
 
@@ -842,6 +912,11 @@ void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const RealArray &posX,
       mNumData++;
    }
 
+   if (mUseViewPointInfo)
+   {
+      ComputeProjection();
+      ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
+   }
    
    Refresh(false);
 }
@@ -964,7 +1039,17 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
    int flippedY;
    int clientWidth, clientHeight;
    int mouseX, mouseY;
-    
+
+   if (mUseSingleRotAngle)
+   {
+      mUseSingleRotAngle = false;
+      
+      // need to compute mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle
+      // How?
+      
+      ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
+   }
+   
    GetClientSize(&clientWidth, &clientHeight);
    ChangeProjection(clientWidth, clientHeight, mAxisLength);
     
@@ -974,10 +1059,10 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
    // First, flip the mouseY value so it is oriented right (bottom left is 0,0)
    flippedY = clientHeight - mouseY;
    
-   GLfloat fEndX = m_fLeftPos + ((GLfloat)mouseX /(GLfloat)clientWidth) *
-      (m_fRightPos - m_fLeftPos);
-   GLfloat fEndY = m_fBottomPos + ((GLfloat)flippedY /(GLfloat)clientHeight)*
-      (m_fTopPos - m_fBottomPos);
+   GLfloat fEndX = mfLeftPos + ((GLfloat)mouseX /(GLfloat)clientWidth) *
+      (mfRightPos - mfLeftPos);
+   GLfloat fEndY = mfBottomPos + ((GLfloat)flippedY /(GLfloat)clientHeight)*
+      (mfTopPos - mfBottomPos);
    
    //if mouse dragging
    if (event.Dragging())
@@ -988,9 +1073,9 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
       if (event.ShiftDown() && event.LeftIsDown())
       {
          // Do a X/Y Translate of the camera
-         m_fCamTransX += (fEndX - m_fStartX);
-         m_fCamTransY += (fEndY - m_fStartY);
-
+         mfCamTransX += (fEndX - mfStartX);
+         mfCamTransY += (fEndY - mfStartY);
+         
          // repaint
          Refresh(false);
       }
@@ -1000,8 +1085,8 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
       else if (event.LeftIsDown())
       {        
          ComputeView(fEndX, fEndY);
-         ChangeView(mCurrViewX, mCurrViewY, mCurrViewZ);
-            
+         ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
+         
          // repaint
          Refresh(false);
       }
@@ -1040,9 +1125,9 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
    // save last position
    mLastMouseX = mouseX;
    mLastMouseY = mouseY;
-      
-   m_fStartX = fEndX;
-   m_fStartY = fEndY;
+   
+   mfStartX = fEndX;
+   mfStartY = fEndY;
    
    //wxLogStatus(MdiGlPlot::mdiParentGlFrame,
    //            wxT("X = %d Y = %d"), event.GetX(), event.GetY());
@@ -1055,7 +1140,7 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
 
    //wxLogStatus(MdiGlPlot::mdiParentGlFrame,
    //            wxT("X = %d Y = %d lastX = %f lastY = %f Zoom amount = %f Distance = %f"),
-   //            event.GetX(), event.GetY(), m_fStartX, m_fStartY, mZoomAmount, mAxisLength);
+   //            event.GetX(), event.GetY(), mfStartX, mfStartY, mZoomAmount, mAxisLength);
    event.Skip();
 }
 
@@ -1295,30 +1380,37 @@ void TrajPlotCanvas::SetupWorld()
 {
 
    // Setup how we view the world
-   glOrtho(m_fLeftPos, m_fRightPos, m_fBottomPos, m_fTopPos, m_fViewNear,
-           m_fViewFar);
+   glOrtho(mfLeftPos, mfRightPos, mfBottomPos, mfTopPos, mfViewNear,
+           mfViewFar);
 
    //Translate Camera
-   glTranslatef(m_fCamTransX, m_fCamTransY, m_fCamTransZ);
+   glTranslatef(mfCamTransX, mfCamTransY, mfCamTransZ);
 
    //put camera transformations here.
-   if (mRotateAboutXaxis)
+   if (mUseSingleRotAngle)
    {
-      glRotatef(m_fCamRotationY, 0.0, 1.0, 0.0);
-      glRotatef(m_fCamRotationZ, 0.0, 0.0, 1.0);
-      glRotatef(m_fCamRotationX, 1.0, 0.0, 0.0);
-   }
-   else if (mRotateAboutYaxis)
-   {
-      glRotatef(m_fCamRotationZ, 0.0, 0.0, 1.0);
-      glRotatef(m_fCamRotationX, 1.0, 0.0, 0.0);
-      glRotatef(m_fCamRotationY, 0.0, 1.0, 0.0);
+      glRotatef(mfCamSingleRotAngle, mfCamRotXAxis, mfCamRotYAxis, mfCamRotZAxis);
    }
    else
    {
-      glRotatef(m_fCamRotationX, 1.0, 0.0, 0.0);
-      glRotatef(m_fCamRotationY, 0.0, 1.0, 0.0);
-      glRotatef(m_fCamRotationZ, 0.0, 0.0, 1.0);
+      if (mRotateAboutXaxis)
+      {
+         glRotatef(mfCamRotYAngle, 0.0, 1.0, 0.0);
+         glRotatef(mfCamRotZAngle, 0.0, 0.0, 1.0);
+         glRotatef(mfCamRotXAngle, 1.0, 0.0, 0.0);
+      }
+      else if (mRotateAboutYaxis)
+      {
+         glRotatef(mfCamRotZAngle, 0.0, 0.0, 1.0);
+         glRotatef(mfCamRotXAngle, 1.0, 0.0, 0.0);
+         glRotatef(mfCamRotYAngle, 0.0, 1.0, 0.0);
+      }
+      else
+      {
+         glRotatef(mfCamRotXAngle, 1.0, 0.0, 0.0);
+         glRotatef(mfCamRotYAngle, 0.0, 1.0, 0.0);
+         glRotatef(mfCamRotZAngle, 0.0, 0.0, 1.0);
+      }
    }
    
    //camera moves opposite direction to center on object
@@ -1350,23 +1442,23 @@ void TrajPlotCanvas::SetupWorld()
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::ComputeView(GLfloat fEndX, GLfloat fEndY)
 {
-   float fYAmnt = 360*(fEndX - m_fStartX)/(m_fRightPos - m_fLeftPos);
-   float fXAmnt = 360*(fEndY - m_fStartY)/(m_fBottomPos - m_fTopPos);
+   float fYAmnt = 360*(fEndX - mfStartX)/(mfRightPos - mfLeftPos);
+   float fXAmnt = 360*(fEndY - mfStartY)/(mfBottomPos - mfTopPos);
 
    
    // always rotate the y axis
-   mCurrViewY = m_fCamRotationY + fYAmnt;
+   mCurrRotYAngle = mfCamRotYAngle + fYAmnt;
 
    // Are we rotating the x or the z in this case?
    if (mRotateXy)
    {
       // x axis
-      mCurrViewX = m_fCamRotationX + fXAmnt - 270;
+      mCurrRotXAngle = mfCamRotXAngle + fXAmnt - 270;
    }
    else
    {
       // z axis
-      mCurrViewZ = m_fCamRotationZ + fXAmnt;
+      mCurrRotZAngle = mfCamRotZAngle + fXAmnt;
    }
 }
 
@@ -1385,27 +1477,30 @@ void TrajPlotCanvas::ComputeView(GLfloat fEndX, GLfloat fEndY)
 void TrajPlotCanvas::ChangeView(float viewX, float viewY, float viewZ)
 {
 
-   m_fCamRotationX = (int)(viewX) % 360 + 270;
-   m_fCamRotationY = (int)(viewY) % 360;
-   m_fCamRotationZ = (int)(viewZ) % 360;
+   mfCamRotXAngle = (int)(viewX) % 360 + 270;
+   mfCamRotYAngle = (int)(viewY) % 360;
+   mfCamRotZAngle = (int)(viewZ) % 360;
 
-   // don't let the rotation angles build up to some insane size
-   if (m_fCamRotationY > 360)
-      m_fCamRotationY -= 360;
-   else if (m_fCamRotationY < 0)
-      m_fCamRotationY += 360;
-
-   // don't let the rotation angles build up to some insane size
-   if (m_fCamRotationX > 450)
-      m_fCamRotationX -= 360;
-   else if (m_fCamRotationX < 90)
-      m_fCamRotationX += 360;
+   //MessageInterface::ShowMessage
+   //   ("%f %f %f\n", mfCamRotXAngle, mfCamRotYAngle, mfCamRotZAngle);
    
    // don't let the rotation angles build up to some insane size
-   if (m_fCamRotationZ > 360)
-      m_fCamRotationZ -= 360;
-   else if (m_fCamRotationZ < 0)
-      m_fCamRotationZ += 360;
+   if (mfCamRotYAngle > 360)
+      mfCamRotYAngle -= 360;
+   else if (mfCamRotYAngle < 0)
+      mfCamRotYAngle += 360;
+
+   // don't let the rotation angles build up to some insane size
+   if (mfCamRotXAngle > 450)
+      mfCamRotXAngle -= 360;
+   else if (mfCamRotXAngle < 90)
+      mfCamRotXAngle += 360;
+   
+   // don't let the rotation angles build up to some insane size
+   if (mfCamRotZAngle > 360)
+      mfCamRotZAngle -= 360;
+   else if (mfCamRotZAngle < 0)
+      mfCamRotZAngle += 360;
   
 } // end ChangeView()
 
@@ -1422,28 +1517,114 @@ void TrajPlotCanvas::ChangeProjection(int width, int height, float axisLength)
 {    
    GLfloat fAspect = (GLfloat) height / (GLfloat) width;
    
-   m_fViewLeft   = -axisLength/2;
-   m_fViewRight  =  axisLength/2;
-   m_fViewTop    =  axisLength/2;
-   m_fViewBottom = -axisLength/2;
-   m_fViewNear   = -axisLength/2;
-   m_fViewFar    =  axisLength/2;
+   mfViewLeft   = -axisLength/2;
+   mfViewRight  =  axisLength/2;
+   mfViewTop    =  axisLength/2;
+   mfViewBottom = -axisLength/2;
+   mfViewNear   = -axisLength/2;
+   mfViewFar    =  axisLength/2;
    
    // save the size we are setting the projection for later use
    if (width <= height)
    {
-      m_fLeftPos = m_fViewLeft;
-      m_fRightPos = m_fViewRight;
-      m_fBottomPos = m_fViewBottom*fAspect;
-      m_fTopPos = m_fViewTop*fAspect;
+      mfLeftPos = mfViewLeft;
+      mfRightPos = mfViewRight;
+      mfBottomPos = mfViewBottom*fAspect;
+      mfTopPos = mfViewTop*fAspect;
    }
    else
    {
-      m_fLeftPos = m_fViewLeft / fAspect;
-      m_fRightPos = m_fViewRight / fAspect;
-      m_fBottomPos = m_fViewBottom;
-      m_fTopPos = m_fViewTop;
+      mfLeftPos = mfViewLeft / fAspect;
+      mfRightPos = mfViewRight / fAspect;
+      mfBottomPos = mfViewBottom;
+      mfTopPos = mfViewTop;
    }
+}
+
+
+//------------------------------------------------------------------------------
+//  void ComputeProjection()
+//------------------------------------------------------------------------------
+/**
+ * Computes view projection using viewing options.
+ */
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::ComputeProjection()
+{
+   // get viewpoint reference vector
+   Rvector3 vpRefVec(0.0, 0.0, 0.0);
+
+   if (!mUseViewPointRefVector && mViewPointRefObj != NULL)
+   {
+      #if DEBUG_TRAJCANVAS_PROJ
+      MessageInterface::ShowMessage
+         ("ComputeProjection() mViewPointRefObj=%d, getting state\n",
+          mViewPointRefObj);
+      #endif
+      
+      Rvector6 vpRefState = mViewPointRefObj->GetMJ2000State(mTime[mNumData]);
+      vpRefVec.Set(vpRefState[0], vpRefState[1], vpRefState[2]);
+   }
+   
+   // get viewpoint vector
+   Rvector3 vpVec(mViewPointVector);
+   
+   if (!mUseViewPointVector && mViewPointVectorObj != NULL)
+   {
+      #if DEBUG_TRAJCANVAS_PROJ
+      MessageInterface::ShowMessage
+         ("ComputeProjection() mViewPointVectorObj=%d, getting state\n",
+          mViewPointVectorObj);
+      #endif
+      
+      Rvector6 vpVecState = mViewPointVectorObj->GetMJ2000State(mTime[mNumData]);
+      vpVec.Set(vpVecState[0], vpVecState[1], vpVecState[2]);
+   }
+
+   // get viewpoint location
+   Rvector3 vpLocVec = vpRefVec + (mViewScaleFactor * vpVec);
+
+   // get view direction
+   Rvector3 vdVec(mViewDirectionVector);
+   
+   if (!mUseViewDirectionVector && mViewDirectionObj != NULL)
+   {
+      #if DEBUG_TRAJCANVAS_PROJ
+      MessageInterface::ShowMessage
+         ("ComputeProjection() mViewDirectionObj=%d, getting state\n",
+          mViewDirectionObj);
+      #endif
+      
+      Rvector6 vdVecState = mViewDirectionObj->GetMJ2000State(mTime[mNumData]);
+      vdVec.Set(vdVecState[0], vdVecState[1], vdVecState[2]);
+   }
+
+   // compute axis length (this tells how far zoom out is)
+   mAxisLength = vpLocVec.GetMagnitude();
+   
+   // set camera location
+//    mfCamTransX = -vpLocVec[0];
+//    mfCamTransY = -vpLocVec[1];
+//    mfCamTransZ = -vpLocVec[2];
+
+   // compute camera rotation angle
+   Real vdMag = vdVec.GetMagnitude();
+   
+   mfCamSingleRotAngle = 
+      GmatMathUtil::ACos(-(vdVec[2]/vdMag)) * GmatMathUtil::DEG_PER_RAD;
+   
+   // compute axis of rotation
+   mfCamRotXAxis =  vdVec[1];
+   mfCamRotYAxis = -vdVec[0];
+   mfCamRotZAxis = 0.0;
+   mUseSingleRotAngle = true;
+   
+   #if DEBUG_TRAJCANVAS_PROJ
+      MessageInterface::ShowMessage
+         ("ComputeProjection() mfCamTransXYZ=%f, %f, %f, mfCamSingleRotAngle=%f "
+          "mfCamRotXYZ=%f, %f, %f mAxisLength=%f\n", mfCamTransX, mfCamTransY, mfCamTransZ,
+          mfCamSingleRotAngle, mfCamRotXAxis, mfCamRotYAxis, mfCamRotZAxis, mAxisLength);
+   #endif
 }
 
 
@@ -1463,12 +1644,12 @@ void TrajPlotCanvas::DrawPicture()
    
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-   m_fViewLeft = -mAxisLength/2;
-   m_fViewRight = mAxisLength/2;
-   m_fViewTop = mAxisLength/2;
-   m_fViewBottom = -mAxisLength/2;
-   m_fViewNear = -mAxisLength/2;
-   m_fViewFar = mAxisLength/2;
+   mfViewLeft = -mAxisLength/2;
+   mfViewRight = mAxisLength/2;
+   mfViewTop = mAxisLength/2;
+   mfViewBottom = -mAxisLength/2;
+   mfViewNear = -mAxisLength/2;
+   mfViewFar = mAxisLength/2;
 
    // tilt Earth rotation axis if needed
    if (mNeedEarthConversion)

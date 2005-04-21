@@ -44,6 +44,7 @@ BEGIN_EVENT_TABLE(OpenGlPlotSetupPanel, GmatPanel)
    EVT_LISTBOX(SC_SEL_LISTBOX, OpenGlPlotSetupPanel::OnSelectSpacecraft)
    EVT_CHECKBOX(CHECKBOX, OpenGlPlotSetupPanel::OnCheckBoxChange)
    EVT_COMBOBOX(ID_COMBOBOX, OpenGlPlotSetupPanel::OnComboBoxChange)
+   EVT_TEXT(ID_TEXTCTRL, OpenGlPlotSetupPanel::OnTextChange)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -76,9 +77,10 @@ OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
    // Set the pointer for the "Show Script" button
    mObject = mOpenGlPlot;
 
-   mIsScChanged = false;
-   mIsColorChanged = false;
-   mIsCoordSysChanged = false;
+   mHasScChanged = false;
+   mHasColorChanged = false;
+   mHasCoordSysChanged = false;
+   mHasViewInfoChanged = false;
    mScCount = 0;
    
    mOrbitColorMap.clear();
@@ -98,7 +100,7 @@ OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
 void OpenGlPlotSetupPanel::Create()
 {
    #if DEBUG_OPENGL_PANEL
-   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() entering...\n");
+      MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() entering...\n");
    #endif
 
    // empty StaticText
@@ -132,9 +134,10 @@ void OpenGlPlotSetupPanel::Create()
    availObjBoxSizer->Add(mCelesObjectListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    #if DEBUG_OPENGL_PANEL
-   MessageInterface::ShowMessage
-      ("OpenGlPlotSetupPanel::Create() add, remove, clear...\n");
+      MessageInterface::ShowMessage
+         ("OpenGlPlotSetupPanel::Create() add, remove, clear...\n");
    #endif
+      
    //------------------------------------------------------
    // add, remove, clear Y buttons (2nd column)
    //------------------------------------------------------
@@ -153,9 +156,10 @@ void OpenGlPlotSetupPanel::Create()
    arrowButtonsBoxSizer->Add(clearScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
     
    #if DEBUG_OPENGL_PANEL
-   MessageInterface::ShowMessage
-      ("OpenGlPlotSetupPanel::Create() selected spacecraft list...\n");
+      MessageInterface::ShowMessage
+         ("OpenGlPlotSetupPanel::Create() selected spacecraft list...\n");
    #endif
+   
    //------------------------------------------------------
    // selected spacecraft list (3rd column)
    //------------------------------------------------------
@@ -200,6 +204,7 @@ void OpenGlPlotSetupPanel::Create()
    MessageInterface::ShowMessage
       ("OpenGlPlotSetupPanel::Create() plot option...\n");
    #endif
+   
    //------------------------------------------------------
    // plot option
    //------------------------------------------------------
@@ -227,13 +232,21 @@ void OpenGlPlotSetupPanel::Create()
       new wxCheckBox(this, CHECKBOX, wxT("Overlap Plot"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
 
+   mUseViewPointInfoCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Use ViewPoint Info"),
+                     wxDefaultPosition, wxSize(-1, -1), 0);
+   
+   mPerspectiveModeCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Use Perspective Mode"),
+                     wxDefaultPosition, wxSize(-1, -1), 0);
+   
    wxStaticText *coordSysLabel =
       new wxStaticText(this, -1, wxT("Coordinate System"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    wxStaticText *viewPointRefLabel =
       new wxStaticText(this, -1, wxT("View Point Reference"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *viewPointVecLabel =
+   wxStaticText *viewPointVectorLabel =
       new wxStaticText(this, -1, wxT("View Point Vector"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    wxStaticText *viewDirectionLabel =
@@ -246,8 +259,8 @@ void OpenGlPlotSetupPanel::Create()
    mCoordSysComboBox =
       theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(120,-1));
    mViewPointRefComboBox =
-      theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX, wxSize(120,-1), false);
-   mViewPointVecComboBox =
+      theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX, wxSize(120,-1), true);
+   mViewPointVectorComboBox =
       theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX, wxSize(120,-1), true);
    mViewDirectionComboBox =
       theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX, wxSize(120,-1), true);
@@ -255,18 +268,31 @@ void OpenGlPlotSetupPanel::Create()
    mViewScaleFactorTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(120,-1), 0);
 
-   // vector for ViewPoint
-   mViewPoint1TextCtrl =
+   // vector for ViewPointRef
+   mViewPointRef1TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(50,-1), 0);
-   mViewPoint2TextCtrl =
+   mViewPointRef2TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(50,-1), 0);
-   mViewPoint3TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("10000"), wxDefaultPosition, wxSize(50,-1), 0);
+   mViewPointRef3TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(50,-1), 0);
    
-   mViewPointVecSizer = new wxBoxSizer(wxHORIZONTAL);
-   mViewPointVecSizer->Add(mViewPoint1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointVecSizer->Add(mViewPoint2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointVecSizer->Add(mViewPoint3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewPointRefSizer = new wxBoxSizer(wxHORIZONTAL);
+   mViewPointRefSizer->Add(mViewPointRef1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewPointRefSizer->Add(mViewPointRef2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewPointRefSizer->Add(mViewPointRef3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+
+   // vector for ViewPointVector
+   mViewPointVec1TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(50,-1), 0);
+   mViewPointVec2TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(50,-1), 0);
+   mViewPointVec3TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("30000"), wxDefaultPosition, wxSize(50,-1), 0);
+   
+   mViewPointVectorSizer = new wxBoxSizer(wxHORIZONTAL);
+   mViewPointVectorSizer->Add(mViewPointVec1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewPointVectorSizer->Add(mViewPointVec2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewPointVectorSizer->Add(mViewPointVec3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
 
    // vector for ViewDirection
    mViewDir1TextCtrl =
@@ -274,12 +300,12 @@ void OpenGlPlotSetupPanel::Create()
    mViewDir2TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(50,-1), 0);
    mViewDir3TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("10000"), wxDefaultPosition, wxSize(50,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("-1"), wxDefaultPosition, wxSize(50,-1), 0);
    
-   mViewDirVecSizer = new wxBoxSizer(wxHORIZONTAL);
-   mViewDirVecSizer->Add(mViewDir1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDirVecSizer->Add(mViewDir2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDirVecSizer->Add(mViewDir3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDirVectorSizer = new wxBoxSizer(wxHORIZONTAL);
+   mViewDirVectorSizer->Add(mViewDir1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDirVectorSizer->Add(mViewDir2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDirVectorSizer->Add(mViewDir3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
 
    
    // plot option sizer
@@ -293,17 +319,17 @@ void OpenGlPlotSetupPanel::Create()
    mPlotOptionSizer->Add(mWireFrameCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    mPlotOptionSizer->Add(viewPointRefLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
    mPlotOptionSizer->Add(mViewPointRefComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mPlotOptionSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   mPlotOptionSizer->Add(mViewPointRefSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
    mPlotOptionSizer->Add(mTargetStatusCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mPlotOptionSizer->Add(viewPointVecLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mPlotOptionSizer->Add(mViewPointVecComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mPlotOptionSizer->Add(mViewPointVecSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   mPlotOptionSizer->Add(viewPointVectorLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
+   mPlotOptionSizer->Add(mViewPointVectorComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   mPlotOptionSizer->Add(mViewPointVectorSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
    mPlotOptionSizer->Add(mEclipticPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    mPlotOptionSizer->Add(viewDirectionLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
    mPlotOptionSizer->Add(mViewDirectionComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mPlotOptionSizer->Add(mViewDirVecSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   mPlotOptionSizer->Add(mViewDirVectorSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
    mPlotOptionSizer->Add(mEquatorialPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    mPlotOptionSizer->Add(viewScaleFactorLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
@@ -311,14 +337,15 @@ void OpenGlPlotSetupPanel::Create()
    mPlotOptionSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    
    mPlotOptionSizer->Add(mOverlapCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mPlotOptionSizer->Add(emptyStaticText, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mPlotOptionSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   mPlotOptionSizer->Add(mUseViewPointInfoCheckBox, 0, wxALIGN_RIGHT|wxALL, bsize);
+   mPlotOptionSizer->Add(mPerspectiveModeCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    mPlotOptionSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    
    #if DEBUG_OPENGL_PANEL
-   MessageInterface::ShowMessage
-      ("OpenGlPlotSetupPanel::Create() put in the order...\n");
+      MessageInterface::ShowMessage
+         ("OpenGlPlotSetupPanel::Create() put in the order...\n");
    #endif
+   
    //------------------------------------------------------
    // put in the order
    //------------------------------------------------------    
@@ -338,9 +365,9 @@ void OpenGlPlotSetupPanel::Create()
    //------------------------------------------------------
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-#if DEBUG_OPENGL_PANEL
-   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() exiting...\n");
-#endif
+   #if DEBUG_OPENGL_PANEL
+      MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() exiting...\n");
+   #endif
 
 }
 
@@ -349,30 +376,107 @@ void OpenGlPlotSetupPanel::Create()
 //------------------------------------------------------------------------------
 void OpenGlPlotSetupPanel::LoadData()
 {
-#if DEBUG_OPENGL_PANEL
-   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::LoadData() entering...\n");
-#endif
+   #if DEBUG_OPENGL_PANEL
+      MessageInterface::ShowMessage("OpenGlPlotSetupPanel::LoadData() entering...\n");
+   #endif
 
    try
    {
       // load data from the core engine
       mPlotCheckBox->SetValue(mOpenGlPlot->IsActive());
+      mEquatorialPlaneCheckBox->SetValue(mOpenGlPlot->GetStringParameter("EquatorialPlane") == "On");
+      mEclipticPlaneCheckBox->SetValue(mOpenGlPlot->GetStringParameter("CelestialPlane") == "On");
       mWireFrameCheckBox->SetValue(mOpenGlPlot->GetStringParameter("WireFrame") == "On");
       mTargetStatusCheckBox->SetValue(mOpenGlPlot->GetStringParameter("TargetStatus") == "On");
       mOverlapCheckBox->SetValue(mOpenGlPlot->GetStringParameter("Overlap") == "On");
+      mUseViewPointInfoCheckBox->SetValue(mOpenGlPlot->GetStringParameter("UseViewPointInfo") == "On");
+      mPerspectiveModeCheckBox->SetValue(mOpenGlPlot->GetStringParameter("PerspectiveMode") == "On");
       
       mCoordSysComboBox->SetStringSelection
          (mOpenGlPlot->GetStringParameter("CoordinateSystem").c_str());
 
-      // temp code: the following values should be from mOpenGlPlot
-      mViewPointRefComboBox->SetStringSelection("Earth");
-      mViewPointVecComboBox->SetStringSelection("Vector");
-      mViewDirectionComboBox->SetStringSelection("Earth");
-      mPlotOptionSizer->Show(mViewDirVecSizer, false);
+      // load ViewPoint info
+      mViewPointRefComboBox->
+         SetStringSelection(mOpenGlPlot->GetStringParameter("ViewPointRef").c_str());
+      mViewPointVectorComboBox->
+         SetStringSelection(mOpenGlPlot->GetStringParameter("ViewPointVector").c_str());
+      mViewDirectionComboBox->
+         SetStringSelection(mOpenGlPlot->GetStringParameter("ViewDirection").c_str());
+
+      wxString str;
+      str.Printf("%g", mOpenGlPlot->GetRealParameter("ViewScaleFactor"));
+      mViewScaleFactorTextCtrl->SetValue(str);
+      
+      // show vector if viewpoint vector name is Vector
+      if (mViewPointRefComboBox->GetStringSelection() == "Vector")
+      {
+         Rvector vec = mOpenGlPlot->GetRvectorParameter("ViewPointRefVector");
+         MessageInterface::ShowMessage
+            ("OpenGlPlotSetupPanel::LoadData() ViewPointRefVector = %s\n",
+             vec.ToString().c_str());
+         wxString str;
+         str.Printf("%g", vec[0]);
+         mViewPointRef1TextCtrl->SetValue(str);
+         str.Printf("%g", vec[1]);
+         mViewPointRef2TextCtrl->SetValue(str);
+         str.Printf("%g", vec[2]);
+         mViewPointRef3TextCtrl->SetValue(str);
+
+         mPlotOptionSizer->Show(mViewPointRefSizer, true);
+      }
+      else
+      {
+         mPlotOptionSizer->Show(mViewPointRefSizer, false);
+      }
+      
+      // show vector if viewpoint vector name is Vector
+      if (mViewPointVectorComboBox->GetStringSelection() == "Vector")
+      {
+         Rvector vec = mOpenGlPlot->GetRvectorParameter("ViewPointVectorVector");
+         
+         #if DEBUG_OPENGL_PANEL
+         MessageInterface::ShowMessage
+            ("OpenGlPlotSetupPanel::LoadData() ViewPointVectorVector = %s\n",
+             vec.ToString().c_str());
+         #endif
+         
+         wxString str;
+         str.Printf("%g", vec[0]);
+         mViewPointVec1TextCtrl->SetValue(str);
+         str.Printf("%g", vec[1]);
+         mViewPointVec2TextCtrl->SetValue(str);
+         str.Printf("%g", vec[2]);
+         mViewPointVec3TextCtrl->SetValue(str);
+
+         mPlotOptionSizer->Show(mViewPointVectorSizer, true);
+      }
+      else
+      {
+         mPlotOptionSizer->Show(mViewPointVectorSizer, false);
+      }
+            
+      // show vector if view direction name is Vector
+      if (mViewDirectionComboBox->GetStringSelection() == "Vector")
+      {
+         Rvector vec = mOpenGlPlot->GetRvectorParameter("ViewDirectionVector");
+         wxString str;
+         str.Printf("%g", vec[0]);
+         mViewDir1TextCtrl->SetValue(str);
+         str.Printf("%g", vec[1]);
+         mViewDir2TextCtrl->SetValue(str);
+         str.Printf("%g", vec[2]);
+         mViewDir3TextCtrl->SetValue(str);
+         
+         mPlotOptionSizer->Show(mViewDirVectorSizer, true);
+      }
+      else
+      {
+         mPlotOptionSizer->Show(mViewDirVectorSizer, false);
+      }
+
+      // set layout
       mPlotOptionSizer->Layout();
-
-      mViewScaleFactorTextCtrl->SetValue("1.0");
-
+      
       // get spacecraft list to plot
       StringArray scNameList = mOpenGlPlot->GetStringArrayParameter("Add");
       mScCount = scNameList.size();
@@ -408,87 +512,182 @@ void OpenGlPlotSetupPanel::LoadData()
          ("OpenGlPlotSetupPanel:LoadData() error occurred!\n%s\n", e.GetMessage().c_str());
    }
    
-#if DEBUG_OPENGL_PANEL
+   mPerspectiveModeCheckBox->Disable();
+   theApplyButton->Disable();
+   
+   #if DEBUG_OPENGL_PANEL
    MessageInterface::ShowMessage("OpenGlPlotSetupPanel::LoadData() exiting...\n");
-#endif
+   #endif
 }
+
 
 //------------------------------------------------------------------------------
 // virtual void SaveData()
 //------------------------------------------------------------------------------
 void OpenGlPlotSetupPanel::SaveData()
 {
-   
-   // save data to core engine
-   mOpenGlPlot->Activate(mPlotCheckBox->IsChecked());
-   if (mWireFrameCheckBox->IsChecked())
-      mOpenGlPlot->SetStringParameter("WireFrame", "On");
-   else
-      mOpenGlPlot->SetStringParameter("WireFrame", "Off");
-   
-   if (mTargetStatusCheckBox->IsChecked())
-      mOpenGlPlot->SetStringParameter("TargetStatus", "On");
-   else
-      mOpenGlPlot->SetStringParameter("TargetStatus", "Off");
 
-   if (mOverlapCheckBox->IsChecked())
-      mOpenGlPlot->SetStringParameter("Overlap", "On");
-   else
-      mOpenGlPlot->SetStringParameter("Overlap", "Off");
-
-   // save spacecraft list
-   if (mIsScChanged)
+   try
    {
-      mIsScChanged = false;
-      mIsColorChanged = true;
+      // save data to core engine
+      mOpenGlPlot->Activate(mPlotCheckBox->IsChecked());
       
-      mScCount = mSelectedObjListBox->GetCount();
-      
-      if (mScCount == 0 && mPlotCheckBox->IsChecked())
-      {
-         wxLogMessage(wxT("Spacecraft not selected. The plot will not be activated."));
-         mOpenGlPlot->Activate(false);
-      }
+      if (mEquatorialPlaneCheckBox->IsChecked())
+         mOpenGlPlot->SetStringParameter("EquatorialPlane", "On");
+      else
+         mOpenGlPlot->SetStringParameter("EquatorialPlane", "Off");
+   
+      if (mEclipticPlaneCheckBox->IsChecked())
+         mOpenGlPlot->SetStringParameter("CelestialPlane", "On");
+      else
+         mOpenGlPlot->SetStringParameter("CelestialPlane", "Off");
+   
+      if (mWireFrameCheckBox->IsChecked())
+         mOpenGlPlot->SetStringParameter("WireFrame", "On");
+      else
+         mOpenGlPlot->SetStringParameter("WireFrame", "Off");
+   
+      if (mTargetStatusCheckBox->IsChecked())
+         mOpenGlPlot->SetStringParameter("TargetStatus", "On");
+      else
+         mOpenGlPlot->SetStringParameter("TargetStatus", "Off");
 
-      if (mScCount >= 0) // >=0 because the list needs to be cleared
+      if (mOverlapCheckBox->IsChecked())
+         mOpenGlPlot->SetStringParameter("Overlap", "On");
+      else
+         mOpenGlPlot->SetStringParameter("Overlap", "Off");
+
+      if (mUseViewPointInfoCheckBox->IsChecked())
+         mOpenGlPlot->SetStringParameter("UseViewPointInfo", "On");
+      else
+         mOpenGlPlot->SetStringParameter("UseViewPointInfo", "Off");
+
+      if (mPerspectiveModeCheckBox->IsChecked())
+         mOpenGlPlot->SetStringParameter("PerspectiveMode", "On");
+      else
+         mOpenGlPlot->SetStringParameter("PerspectiveMode", "Off");
+
+      // save spacecraft list
+      if (mHasScChanged)
       {
-         mOpenGlPlot->TakeAction("Clear");
+         mHasScChanged = false;
+         mHasColorChanged = true;
+      
+         mScCount = mSelectedObjListBox->GetCount();
+      
+         if (mScCount == 0 && mPlotCheckBox->IsChecked())
+         {
+            wxLogMessage(wxT("Spacecraft not selected. The plot will not be activated."));
+            mOpenGlPlot->Activate(false);
+         }
+
+         if (mScCount >= 0) // >=0 because the list needs to be cleared
+         {
+            mOpenGlPlot->TakeAction("Clear");
          
+            for (int i=0; i<mScCount; i++)
+            {
+               mSelScName = std::string(mSelectedObjListBox->GetString(i).c_str());
+               //MessageInterface::ShowMessage("OpenGlPlotSetupPanel::SaveData() SC = %s\n",
+               //                              mSelScName.c_str());
+               mOpenGlPlot->
+                  SetStringParameter("Add", mSelScName, i);
+            }
+         }
+      }
+   
+      // save color
+      if (mHasColorChanged)
+      {
+         mHasColorChanged = false;
+      
          for (int i=0; i<mScCount; i++)
          {
             mSelScName = std::string(mSelectedObjListBox->GetString(i).c_str());
-            //MessageInterface::ShowMessage("OpenGlPlotSetupPanel::SaveData() SC = %s\n",
-            //                              mSelScName.c_str());
+         
             mOpenGlPlot->
-               SetStringParameter("Add", mSelScName, i);
+               SetColor("Orbit", mSelScName,
+                        mOrbitColorMap[mSelScName].GetIntColor());
+            mOpenGlPlot->
+               SetColor("Target", mSelScName,
+                        mTargetColorMap[mSelScName].GetIntColor());
+         }
+      }
+   
+      // save coordinate system
+      if (mHasCoordSysChanged)
+      {
+         mHasCoordSysChanged = false;
+         mOpenGlPlot->SetStringParameter
+            ("CoordinateSystem",
+             std::string(mCoordSysComboBox->GetStringSelection().c_str()));
+      }
+
+      // save ViewPoint info
+      if (mHasViewInfoChanged)
+      {
+         mHasViewInfoChanged = false;
+         mOpenGlPlot->SetStringParameter
+            ("ViewPointRef",
+             std::string(mViewPointRefComboBox->GetStringSelection().c_str()));
+         mOpenGlPlot->SetStringParameter
+            ("ViewPointVector",
+             std::string(mViewPointVectorComboBox->GetStringSelection().c_str()));
+         mOpenGlPlot->SetStringParameter
+            ("ViewDirection",
+             std::string(mViewDirectionComboBox->GetStringSelection().c_str()));
+         
+         Real realVal;
+         mViewScaleFactorTextCtrl->GetValue().ToDouble(&realVal);
+         mOpenGlPlot->SetRealParameter("ViewScaleFactor", realVal);
+
+         // save ViewPoint ref. vector
+         if (mViewPointRefComboBox->GetStringSelection() == "Vector")
+         {
+            Rvector vec(3);
+            Real val1, val2, val3;
+            mViewPointRef1TextCtrl->GetValue().ToDouble(&val1);
+            mViewPointRef2TextCtrl->GetValue().ToDouble(&val2);
+            mViewPointRef3TextCtrl->GetValue().ToDouble(&val3);
+            vec(0) = val1;
+            vec(1) = val2;
+            vec(2) = val3;
+            mOpenGlPlot->SetRvectorParameter("ViewPointRefVector", vec);
+         }
+         
+         // save ViewPoint vector
+         if (mViewPointVectorComboBox->GetStringSelection() == "Vector")
+         {
+            Rvector vec(3);
+            Real val1, val2, val3;
+            mViewPointVec1TextCtrl->GetValue().ToDouble(&val1);
+            mViewPointVec2TextCtrl->GetValue().ToDouble(&val2);
+            mViewPointVec3TextCtrl->GetValue().ToDouble(&val3);
+            vec(0) = val1;
+            vec(1) = val2;
+            vec(2) = val3;
+            mOpenGlPlot->SetRvectorParameter("ViewPointVectorVector", vec);
+         }
+
+         // save View direction
+         if (mViewDirectionComboBox->GetStringSelection() == "Vector")
+         {
+            Rvector vec(3);
+            Real val1, val2, val3;
+            mViewDir1TextCtrl->GetValue().ToDouble(&val1);
+            mViewDir2TextCtrl->GetValue().ToDouble(&val2);
+            mViewDir3TextCtrl->GetValue().ToDouble(&val3);
+            vec(0) = val1;
+            vec(1) = val2;
+            vec(2) = val3;
+            mOpenGlPlot->SetRvectorParameter("ViewDirectionVector", vec);
          }
       }
    }
-   
-   // save color
-   if (mIsColorChanged)
+   catch (BaseException &e)
    {
-      mIsColorChanged = false;
-      
-      for (int i=0; i<mScCount; i++)
-      {
-         mSelScName = std::string(mSelectedObjListBox->GetString(i).c_str());
-         
-         mOpenGlPlot->
-            SetColor("Orbit", mSelScName,
-                     mOrbitColorMap[mSelScName].GetIntColor());
-         mOpenGlPlot->
-            SetColor("Target", mSelScName,
-                     mTargetColorMap[mSelScName].GetIntColor());
-      }
-   }
-   
-   // save coordinate system
-   if (mIsCoordSysChanged)
-   {
-      mIsCoordSysChanged = false;
-      mOpenGlPlot->SetStringParameter("CoordinateSystem",
-         std::string(mCoordSysComboBox->GetStringSelection().c_str()));
+      MessageInterface::ShowMessage
+         ("OpenGlPlotSetupPanel:SaveData() error occurred!\n%s\n", e.GetMessage().c_str());
    }
 }
 
@@ -516,7 +715,7 @@ void OpenGlPlotSetupPanel::OnAddSpacecraft(wxCommandEvent& event)
             SetSelection(mSpacecraftListBox->GetSelection()+1);
 
          ShowSpacecraftOption(s, true);
-         mIsScChanged = true;
+         mHasScChanged = true;
          theApplyButton->Enable();
       }
    }
@@ -536,7 +735,7 @@ void OpenGlPlotSetupPanel::OnAddSpacecraft(wxCommandEvent& event)
             SetSelection(mCelesObjectListBox->GetSelection()+1);
 
          ShowSpacecraftOption(s, true);
-         mIsScChanged = true;
+         mHasScChanged = true;
          theApplyButton->Enable();
       }
    }
@@ -565,7 +764,7 @@ void OpenGlPlotSetupPanel::OnRemoveSpacecraft(wxCommandEvent& event)
       ShowSpacecraftOption(mSelectedObjListBox->GetStringSelection(), true);
    }
    
-   mIsScChanged = true;
+   mHasScChanged = true;
    theApplyButton->Enable();
 }
 
@@ -576,7 +775,7 @@ void OpenGlPlotSetupPanel::OnClearSpacecraft(wxCommandEvent& event)
 {
    mSelectedObjListBox->Clear();
    ShowSpacecraftOption("", false);
-   mIsScChanged = true;
+   mHasScChanged = true;
    theApplyButton->Enable();
 }
 
@@ -643,7 +842,7 @@ void OpenGlPlotSetupPanel::OnOrbitColorClick(wxCommandEvent& event)
       #endif
       
       theApplyButton->Enable();
-      mIsColorChanged = true;
+      mHasColorChanged = true;
    }
 }
 
@@ -670,9 +869,10 @@ void OpenGlPlotSetupPanel::OnTargetColorClick(wxCommandEvent& event)
                                       mScTargetColor.Blue());
       
       theApplyButton->Enable();
-      mIsColorChanged = true;
+      mHasColorChanged = true;
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnComboBoxChange(wxCommandEvent& event)
@@ -681,28 +881,55 @@ void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 {    
    if (event.GetEventObject() == mCoordSysComboBox)
    {
-      mIsCoordSysChanged = true;
-      theApplyButton->Enable();
+      mHasCoordSysChanged = true;
    }
-   else if (event.GetEventObject() == mViewPointVecComboBox)
+   else if (event.GetEventObject() == mViewPointRefComboBox)
    {
-      if (mViewPointVecComboBox->GetStringSelection() == "Vector")
-         mPlotOptionSizer->Show(mViewPointVecSizer, true);
+      mHasViewInfoChanged = true;
+      
+      if (mViewPointRefComboBox->GetStringSelection() == "Vector")
+         mPlotOptionSizer->Show(mViewPointRefSizer, true);
       else
-         mPlotOptionSizer->Show(mViewPointVecSizer, false);
+         mPlotOptionSizer->Show(mViewPointRefSizer, false);
+
+      mPlotOptionSizer->Layout();
+        
+   }
+   else if (event.GetEventObject() == mViewPointVectorComboBox)
+   {
+      mHasViewInfoChanged = true;
+      
+      if (mViewPointVectorComboBox->GetStringSelection() == "Vector")
+         mPlotOptionSizer->Show(mViewPointVectorSizer, true);
+      else
+         mPlotOptionSizer->Show(mViewPointVectorSizer, false);
 
       mPlotOptionSizer->Layout();
         
    }
    else if (event.GetEventObject() == mViewDirectionComboBox)
    {
+      mHasViewInfoChanged = true;
+      
       if (mViewDirectionComboBox->GetStringSelection() == "Vector")
-         mPlotOptionSizer->Show(mViewDirVecSizer, true);
+         mPlotOptionSizer->Show(mViewDirVectorSizer, true);
       else
-         mPlotOptionSizer->Show(mViewDirVecSizer, false);
+         mPlotOptionSizer->Show(mViewDirVectorSizer, false);
         
       mPlotOptionSizer->Layout();
    }
+   
+   theApplyButton->Enable();
+}
+
+
+//------------------------------------------------------------------------------
+// void OnTextChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void OpenGlPlotSetupPanel::OnTextChange(wxCommandEvent& event)
+{
+   mHasViewInfoChanged = true;
+   theApplyButton->Enable();
 }
 
 

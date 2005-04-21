@@ -50,6 +50,8 @@ public:
    // getters
    wxString GetPlotName() {return mPlotName;}
    bool GetOverlapPlot() {return mOverlapPlot;}
+   bool GetUseViewPointInfo();
+   bool GetUsePerspectiveMode();
    bool GetDrawWireFrame();
    bool GetDrawEqPlane();
    bool GetDrawEcPlane();
@@ -67,6 +69,8 @@ public:
    // setters
    void SetPlotName(const wxString &name);
    void SetOverlapPlot(bool overlap);
+   void SetUseViewPointInfo(bool flag);
+   void SetUsePerspectiveMode(bool flag);
    void SetDrawWireFrame(bool flag);
    void SetDrawEqPlane(bool flag);
    void SetDrawEcPlane(bool flag);
@@ -79,7 +83,7 @@ public:
    void SetDistance(float dist);
    void SetGotoBodyName(const wxString &bodyName);
    void SetDesiredCoordSystem(const wxString &csName);
-   void SetDesiredCoordSystem(CoordinateSystem *cs); //loj: 1/28/05 Added
+   void SetDesiredCoordSystem(CoordinateSystem *cs);
 
    // actions
    void DrawInOtherCoordSystem(const wxString &csName);
@@ -107,6 +111,12 @@ public:
    void OnTrajSize(wxSizeEvent& event);
    void OnMove(wxMoveEvent& event);
    void OnClose(wxCloseEvent& event);
+   
+   void SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
+                        SpacePoint *vdObj, Real vsFactor,
+                        const Rvector3 &vpRefVec, const Rvector3 &vpVec,
+                        const Rvector3 &vdVec, bool usevpRefVec,
+                        bool usevpVec, bool usevdVec);
    
    void UpdateSpacecraft(const Real &time, const RealArray &posX,
                          const RealArray &posY, const RealArray &posZ,

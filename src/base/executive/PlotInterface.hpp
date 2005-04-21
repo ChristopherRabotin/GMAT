@@ -22,7 +22,6 @@
 #include "gmatdefs.hpp"
 #include "Rvector.hpp"
 #include "SolarSystem.hpp"
-//#include "CoordinateSystem.hpp"
 
 class PlotInterface
 {
@@ -31,22 +30,31 @@ public:
    // for OpenGL Plot
    static bool CreateGlPlotWindow(const std::string &plotName,
                                   const std::string &oldName,
-                                  const std::string &csName, //loj: 2/2/05 Added
-                                  bool drawWireFrame = false,
-                                  bool overlapPlot = false,
-                                  SolarSystem *ss = NULL);
+                                  const std::string &csName,
+                                  SolarSystem *ssPtr,
+                                  bool drawEcPlane, bool drawEqPlane,
+                                  bool drawWireFrame, bool overlapPlot,
+                                  bool usevpInfo, bool usepm);
 
+   static void SetGlViewOption(const std::string &plotName,
+                               SpacePoint *vpRefObj, SpacePoint *vpVecObj,
+                               SpacePoint *vdObj, Real vsFactor,
+                               const Rvector3 &vpRefVec, const Rvector3 &vpVec,
+                               const Rvector3 &vdVec, bool usevpRefVec,
+                               bool usevpVec, bool usevdVec);
+
+   static bool IsThere(const std::string &plotName);
+   
    static bool DeleteGlPlot();
    static bool RefreshGlPlot(const std::string &plotName);
    
-   //loj: 7/13/04 handles multiple spacecraft postion and color
    static bool UpdateGlSpacecraft(const std::string &plotName,
                                   const std::string &oldName,
-                                  const std::string &csName, //loj: 2/2/05 Added
+                                  const std::string &csName,
                                   const Real &time, const RealArray &posX,
                                   const RealArray &posY, const RealArray &posZ,
                                   const UnsignedIntArray &color,
-                                  bool updateCanvas, bool drawWireFrame = false);
+                                  bool updateCanvas);
 
    // for XY plot
    static bool CreateXyPlotWindow(const std::string &plotName,
@@ -75,10 +83,10 @@ public:
                             const std::string &xAxisTitle,
                             const std::string &yAxisTitle,
                             bool updateCanvas, bool drawGrid);
-                             
-    
+   
+   
 private:
-    
+
    PlotInterface();
    ~PlotInterface();
 

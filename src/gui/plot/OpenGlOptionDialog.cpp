@@ -680,32 +680,6 @@ void OpenGlOptionDialog::OnColorButtonClick(wxCommandEvent& event)
    if (event.GetEventObject() == mEqPlaneColorButton)
    {
       mHasEqPlaneColorChanged = ShowColorDialog(mEqPlaneColor, mEqPlaneColorButton);
-      
-//        #ifdef DEBUG_GL_OPTION_DIALOG
-//        MessageInterface::ShowMessage
-//           ("mEqPlaneColorButton old color: R=%d G=%d B=%d\n",
-//            mEqPlaneColor.Red(), mEqPlaneColor.Green(), mEqPlaneColor.Blue());
-//        #endif
-      
-//        wxColourData data;
-//        data.SetColour(mEqPlaneColor);
-
-//        wxColourDialog dlg(this, &data);
-//        dlg.Center();
-   
-//        if (dlg.ShowModal() == wxID_OK)
-//        {
-//           mEqPlaneColor = dlg.GetColourData().GetColour();
-//           mEqPlaneColorButton->SetBackgroundColour(mEqPlaneColor);
-//           theApplyButton->Enable();
-//           mHasEqPlaneColorChanged = true;
-         
-//           #ifdef DEBUG_GL_OPTION_DIALOG
-//           MessageInterface::ShowMessage
-//              ("mEqPlaneColorButton new color: R=%d G=%d B=%d\n",
-//               mEqPlaneColor.Red(), mEqPlaneColor.Green(), mEqPlaneColor.Blue());
-//           #endif
-//        }
    }
    else if (event.GetEventObject() == mEcPlaneColorButton)
    {
@@ -713,33 +687,10 @@ void OpenGlOptionDialog::OnColorButtonClick(wxCommandEvent& event)
    }
    else if (event.GetEventObject() == mEcLineColorButton)
    {
-      #ifdef DEBUG_GL_OPTION_DIALOG
-      MessageInterface::ShowMessage
-         ("mEcLineColorButton old color: R=%d G=%d B=%d\n",
-          mEcLineColor.Red(), mEcLineColor.Green(), mEcLineColor.Blue());
-      #endif
-      
-      wxColourData data;
-      data.SetColour(mEcLineColor);
-
-      wxColourDialog dlg(this, &data);
-      dlg.Center();
-   
-      if (dlg.ShowModal() == wxID_OK)
-      {
-         mEcLineColor = dlg.GetColourData().GetColour();
-         mEcLineColorButton->SetBackgroundColour(mEcLineColor);
-         mEcLineColorButton->Clear();
-         theApplyButton->Enable();
-         
-         #ifdef DEBUG_GL_OPTION_DIALOG
-         MessageInterface::ShowMessage
-            ("mEcLineColorButton new color: R=%d G=%d B=%d\n",
-             mEcLineColor.Red(), mEcLineColor.Green(), mEcLineColor.Blue());
-         #endif
-      }
+      mHasEcLineColorChanged = ShowColorDialog(mEcLineColor, mEcLineColorButton);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnBodyColorButtonClick(wxCommandEvent& event)
