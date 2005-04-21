@@ -351,6 +351,7 @@ CoordinateSystem* MdiChildTrajFrame::GetDesiredCoordSystem()
    return NULL;
 }
 
+
 //------------------------------------------------------------------------------
 // void SetPlotName(const wxString &name)
 //------------------------------------------------------------------------------
@@ -365,6 +366,21 @@ void MdiChildTrajFrame::SetPlotName(const wxString &name)
    mPlotTitle = name;
    SetTitle(mPlotTitle);
 }
+
+
+//------------------------------------------------------------------------------
+// void ResetShowViewOption()
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::ResetShowViewOption()
+{
+   #if DEBUG_CHILDTRAJ_FRAME
+   MessageInterface::ShowMessage
+      ("MdiChildTrajFrame::ResetShowViewOption()\n");
+   #endif
+
+   mViewMenu->Check(GmatPlot::MDI_GL_SHOW_OPTION_PANEL, false);
+}
+
 
 //------------------------------------------------------------------------------
 // void SetOverlapPlot(bool overlap)

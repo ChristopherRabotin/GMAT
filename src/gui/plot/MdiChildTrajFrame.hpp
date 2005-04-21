@@ -68,6 +68,7 @@ public:
    
    // setters
    void SetPlotName(const wxString &name);
+   void ResetShowViewOption();
    void SetOverlapPlot(bool overlap);
    void SetUseViewPointInfo(bool flag);
    void SetUsePerspectiveMode(bool flag);
@@ -84,7 +85,7 @@ public:
    void SetGotoBodyName(const wxString &bodyName);
    void SetDesiredCoordSystem(const wxString &csName);
    void SetDesiredCoordSystem(CoordinateSystem *cs);
-
+   
    // actions
    void DrawInOtherCoordSystem(const wxString &csName);
    void DrawInOtherCoordSystem(CoordinateSystem *cs);

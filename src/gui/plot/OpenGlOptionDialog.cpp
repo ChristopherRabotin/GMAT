@@ -767,13 +767,17 @@ void OpenGlOptionDialog::OnButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::OnClose(wxCloseEvent& event)
 {
-   if ( event.CanVeto() )
-   {
-      wxMessageBox(_T("Use the menu item to close this dialog"),
-                   _T("Modeless dialog"),
-                   wxOK | wxICON_INFORMATION, this);
+   Hide();
+   mTrajFrame->ResetShowViewOption();
+
+   //loj: 4/21/05 allow to hdie this dialog
+//    if ( event.CanVeto() )
+//    {
+//       wxMessageBox(_T("Use the menu item to close this dialog"),
+//                    _T("Modeless dialog"),
+//                    wxOK | wxICON_INFORMATION, this);
       
-      event.Veto();
-   }
+//       event.Veto();
+//    }
 }
 
