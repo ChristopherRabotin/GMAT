@@ -17,6 +17,7 @@
 
 
 #include "Save.hpp"
+#include "MessageInterface.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -314,6 +315,32 @@ void Save::WriteParameterValue(GmatBase *o, std::ofstream &file, Integer id)
          file << o->GetStringParameter(id);
          break;
             
+     case Gmat::RMATRIX_TYPE:
+         if (o->GetTypeName() == "Array")
+         {
+            file << "[";
+            Integer rows = o->GetIntegerParameter("NumRows");
+            Integer cols = o->GetIntegerParameter("NumCols");
+            for (Integer r = 0; r < rows; ++r)
+            {
+               for (Integer c = 0; c < cols; ++c)
+               {
+                  file << o->GetRealParameter("SingleValue", r, c);
+                  if (c < cols-1)
+                     file << " ";
+               }
+               if (r < rows - 1)
+                  file << "; ";
+            }
+            file << "]";
+         }
+         else
+            MessageInterface::ShowMessage("Unable to write RMatrix for "
+               "parameter %s on object %s\n",
+               o->GetParameterText(id).c_str(), o->GetName().c_str());
+
+         break;
+
       default:
          break;
    }

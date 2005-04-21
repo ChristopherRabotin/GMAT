@@ -78,7 +78,7 @@ protected:
    /// The value that is assigned, or the name of the object providing the data
    std::string          value;
    
-   // Array handlers
+   // Array handlers for RHS
    /// Index into the array's row
    Integer              row;
    /// Index into the array's column
@@ -87,7 +87,23 @@ protected:
    GmatBase             *rowObj;
    /// Object used to calculate index into the array's column
    GmatBase             *colObj;
-   
+
+   // Array handlers for LHS
+   /// Index into the array's row
+   std::string          lrow;
+   /// Index into the array's column
+   std::string          lcol;
+   /// Object used to calculate index into the array's row
+   GmatBase             *lrowObj;
+   /// Object used to calculate index into the array's column
+   GmatBase             *lcolObj;
+   /// Row index used to set array element (-1 indicates entire row)
+   Integer              rowIndex;
+   /// Column index used to set array element (-1 indicates entire column)
+   Integer              colIndex;
+   /// Flag to indicate that left side is an array, setting elements
+   bool                 isLhsArray;
+
    bool                 InitializeRHS(const std::string &rhs);
    Real                 EvaluateRHS();
    

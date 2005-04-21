@@ -31,7 +31,7 @@
 
 //#define DEBUG_RENAME 1
 //#define DEBUG_PARM_ASSIGNMENT
-
+//#define DEBUG_ARRAY_INTERPRETING
 //------------------------------------------------------------------------------
 //  Assignment()
 //------------------------------------------------------------------------------
@@ -54,7 +54,12 @@ Assignment::Assignment  () :
    row                  (0),
    col                  (0),
    rowObj               (NULL),
-   colObj               (NULL)
+   colObj               (NULL),
+   lrowObj              (NULL),
+   lcolObj              (NULL),
+   rowIndex             (0),
+   colIndex             (0),
+   isLhsArray           (false)
 {
 }
 
@@ -94,7 +99,14 @@ Assignment::Assignment  (const Assignment& a) :
    row                  (a.row),
    col                  (a.col),
    rowObj               (NULL),
-   colObj               (NULL)
+   colObj               (NULL),
+   lrow                 (a.lrow),
+   lcol                 (a.lcol),
+   lrowObj              (NULL),
+   lcolObj              (NULL),
+   rowIndex             (a.rowIndex),
+   colIndex             (a.colIndex),
+   isLhsArray           (a.isLhsArray)
 {
 }
 
@@ -129,6 +141,13 @@ Assignment& Assignment::operator=(const Assignment& a)
    col         = a.col;
    rowObj      = NULL;
    colObj      = NULL;
+   lrow        = a.lrow;
+   lcol        = a.lcol;
+   lrowObj     = NULL;
+   lcolObj     = NULL;
+   rowIndex    = a.rowIndex;
+   colIndex     =a.colIndex;
+   isLhsArray  = a.isLhsArray;
 
    return *this;
 }
@@ -158,70 +177,154 @@ Assignment& Assignment::operator=(const Assignment& a)
 //------------------------------------------------------------------------------
 bool Assignment::InterpretAction()
 {
-   Integer loc = generatingString.find("GMAT", 0) + 4, end;
-   const char *str = generatingString.c_str();
+   #ifdef DEBUG_PARM_ASSIGNMENT
+      MessageInterface::ShowMessage(
+         "Assignment::InterpretAction entered\n");
+   #endif
+
+   Integer end = generatingString.find("%");
+   std::string genString = generatingString.substr(0, end);
+   
+   #ifdef DEBUG_ARRAY_INTERPRETING
+      MessageInterface::ShowMessage(
+         "Comment-free generating string is %s\n", genString.c_str());
+   #endif
+
+   Integer loc = genString.find("GMAT", 0) + 4;
+   const char *str = genString.c_str();
    while (str[loc] == ' ')
       ++loc;
-    
-   end = generatingString.find(".", loc);
-   if (end == (Integer)std::string::npos)
+
+   std::string lhs, rhs;
+   UnsignedInt eqloc = genString.find("=", loc), lend, rstart;
+
+   // Check to be sure equal sign is in place
+   if (eqloc == std::string::npos)
+      throw CommandException("Assignment string does not set value");
+      
+   lend = eqloc;
+   rstart = eqloc;
+   while ((str[lend] == '=') || (str[lend] == ' '))
+      --lend;
+   while ((str[rstart] == '=') || (str[rstart] == ' '))
+      ++rstart;
+   lhs = genString.substr(loc, lend - loc + 1);
+   rhs = genString.substr(rstart);
+   isLhsArray = false;
+
+   if (lhs.find("(", 0) != std::string::npos)
+      isLhsArray = true;
+
+   // Strip off trailing spaces and semicolon from RHS
+   end = rhs.find(";");
+   rhs = rhs.substr(0, end);
+   lend = rhs.length() - 1;
+   while (rhs[lend] == ' ')
+      --lend;
+   rhs = rhs.substr(0, lend + 1);
+
+   #ifdef DEBUG_ARRAY_INTERPRETING
+      MessageInterface::ShowMessage(
+         "Left side is \"%s\"\nRight side is \"%s\"\nLeft side %s an array\n",
+         lhs.c_str(), rhs.c_str(), (isLhsArray ? "is" : "is not"));
+   #endif
+
+   end = genString.find(".", loc);
+   if ((end == (Integer)std::string::npos) && !isLhsArray)
    {
-      // Must be object = object assignment or Variable = value assignment
-      Integer eqloc = generatingString.find("=", loc);
-      if (eqloc == (Integer)std::string::npos)
-         throw CommandException("Assignment string does not contain an '='");
-      end = eqloc;
-      while ((str[end] == ' ') || (str[end] == '='))
-         --end;
-      std::string component = generatingString.substr(loc, end-loc+1);
-      ownerName = component;
-
-      loc = eqloc;
-      while ((str[loc] == ' ') || (str[loc] == '='))
-         ++loc;
-      end = loc;
-      value     = &str[loc];
-      end = value.find(";");
-      value = value.substr(0, end);
-
+      // Script line is set to make one object the same as another, or to set a
+      // value on a variable
+      ownerName = lhs;
+      value = rhs;
       objToObj = true;
-       
+
       return true;
    }
-    
-   std::string component = generatingString.substr(loc, end-loc);
+
+   // Parse array handling elements
+   if (isLhsArray)
+   {
+      // Break apart the array text into owner, row, and column
+      UnsignedInt paren, comma, closeparen, temp;
+      paren = lhs.find("(");
+      comma = lhs.find(",");
+      closeparen = lhs.find(")");
+
+      if ((comma == std::string::npos) || (closeparen == std::string::npos))
+         throw CommandException("Syntax error in the assignment \"" +
+            generatingString +
+            "\"\nArray assignments must specify row and column, separated by" +
+            " a comma, in parentheses.");
+
+      ownerName = lhs.substr(0, paren);
+      lrow      = lhs.substr(paren + 1, comma - (paren + 1));
+      lcol      = lhs.substr(comma + 1, closeparen - (comma + 1));
+      
+      // Trim the white space
+      temp = 0;
+      while (ownerName[temp] == ' ')
+         ++temp;
+      ownerName = ownerName.substr(temp);
+      temp = ownerName.length();
+      while (ownerName[temp] == ' ')
+         --temp;
+      ownerName = ownerName.substr(0, temp);
+
+      temp = 0;
+      while (lrow[temp] == ' ')
+         ++temp;
+      lrow = lrow.substr(temp);
+      temp = lrow.length();
+      while (lrow[temp] == ' ')
+         --temp;
+      lrow = lrow.substr(0, temp+1);
+
+      temp = 0;
+      while (lcol[temp] == ' ')
+         ++temp;
+      lcol = lcol.substr(temp);
+      temp = lcol.length();
+      while (lcol[temp] == ' ')
+         --temp;
+      lcol = lcol.substr(0, temp+1);
+
+      value = rhs;
+
+      #ifdef DEBUG_ARRAY_INTERPRETING
+         MessageInterface::ShowMessage(
+            "\n   Array is \"%s\", row \"%s\", column \"%s\"\n",
+            ownerName.c_str(), lrow.c_str(), lcol.c_str());
+      #endif
+
+      return true;
+   }
+
+   end = lhs.find(".", 0);
+   std::string component = lhs.substr(0, end);
    if (component == "")
       throw CommandException("Assignment string does not identify object");
    ownerName = component;
-    
    loc = end + 1;
-   end = generatingString.find("=", loc);
-   if (end == (Integer)std::string::npos)
-      throw CommandException("Assignment string does not set value");
-    
-   Integer strend = end;
-   while ((str[strend] == ' ') /*|| (str[strend] == '=')*/)
-      --strend;
-   component = generatingString.substr(loc, strend-loc-1);
+
+   component = lhs.substr(loc);
    if (component == "")
       throw CommandException("Assignment string does not identify parameter");
    parmName = component;
-   
-   // Strip off training white space, if any
+
+   // Strip off trailing white space, if any
    unsigned n = parmName.length() - 1;
    while ((parmName[n] == ' ') || (parmName[n] == '\t'))
       --n;
    parmName = parmName.substr(0, n+1);
-   
-   loc = end + 1;
-   while (str[loc] == ' ')
-      ++loc;
 
-   value     = &str[loc];
-    
-   end = value.find(";");
-   value = value.substr(0, end);
-    
+   value = rhs;
+   
+   #ifdef DEBUG_ARRAY_INTERPRETING
+      MessageInterface::ShowMessage(
+         "\nOwner is \"%s\"\nParameter is \"%s\"\nValue is \"%s\"\n",
+         ownerName.c_str(), parmName.c_str(), value.c_str());
+   #endif
+
    return true;
 }
 
@@ -267,6 +370,56 @@ bool Assignment::Initialize()
                      value + "\" for line \n" + generatingString);
       }
    }
+   
+   if (isLhsArray)
+   {
+      if (parmOwner->GetTypeName() != "Array")
+         throw CommandException(
+            "Attemping to treat " + parmOwner->GetTypeName() + " named " +
+            parmOwner->GetName() + " like an Array object.");\
+
+      // Build row index
+      if (lrow == ":")
+         rowIndex = -1;
+      else
+      {
+         if (objectMap->find(lrow) == objectMap->end())
+         {
+            rowIndex = atoi(lrow.c_str());
+            if (rowIndex < 0)
+               throw CommandException(
+                  "Attempting to use an invalid (negative) row index for " +
+                  ownerName);
+            if (rowIndex == 0)
+               throw CommandException(
+                  "Attempting to use an invalid row index (0 -- arrays are "
+                  "indexed from 1) for " + ownerName);
+         }
+         else
+            lrowObj = (*objectMap)[lrow];
+      }
+      
+      // Build column index
+      if (lcol == ":")
+         colIndex = -1;
+      else
+      {
+         if (objectMap->find(lcol) == objectMap->end())
+         {
+            colIndex = atoi(lcol.c_str());
+            if (colIndex < 0)
+               throw CommandException(
+                  "Attempting to use an invalid (negative) column index for " +
+                  ownerName);
+            if (colIndex == 0)
+               throw CommandException(
+                  "Attempting to use an invalid column index (0 -- arrays "
+                  "are indexed from 1) for " + ownerName);
+         }
+         else
+            lcolObj = (*objectMap)[lcol];
+      }
+   }
 
    return InitializeRHS(value);
 }
@@ -287,23 +440,54 @@ bool Assignment::Initialize()
 //------------------------------------------------------------------------------
 bool Assignment::Execute()
 {
-   #ifdef DEBUG_PARM_ASSIGNMENT
-      MessageInterface::ShowMessage("Assignment::Execute entered\n");
+   #ifdef DEBUG_ARRAY_INTERPRETING
+      MessageInterface::ShowMessage("Assignment::Execute entered for " +
+         generatingString + "\n");
    #endif
    bool retval = false;
 
    // Get the parameter ID and ID type
    try
    {
+      #ifdef DEBUG_ARRAY_INTERPRETING
+         MessageInterface::ShowMessage("   In the try clause\n");
+      #endif
       if (parmOwner == NULL)
          throw CommandException("Parameter Owner Not Initialized");
        
+      if (isLhsArray)
+      {
+         #ifdef DEBUG_ARRAY_INTERPRETING
+            MessageInterface::ShowMessage("   Executing array branch\n");
+         #endif
+
+         if (lrowObj)
+            throw CommandException(
+               "Objects cannot be used to set row indexes yet.");
+         if (lcolObj)
+            throw CommandException(
+               "Objects cannot be used to set column indexes yet.");
+
+         if (rowIndex == -1)
+            throw CommandException(
+               "Multiple array row elements cannot be set yet.");
+         if (colIndex == -1)
+            throw CommandException(
+               "Multiple array column elements cannot be set yet.");
+
+         parmOwner->SetRealParameter("SingleValue", EvaluateRHS(), rowIndex-1,
+            colIndex-1);
+
+         return true;
+      }
+
       if (objToObj)
       {
-         #ifdef DEBUG_PARM_ASSIGNMENT
+         #ifdef DEBUG_ARRAY_INTERPRETING
             MessageInterface::ShowMessage(
-               "Assignment::Execute running object to object\n");
+               "   Executing object to object branch\n");
          #endif
+
          if (!rhsObject)
             throw CommandException("Assignment command cannot find object \"" +
                value + "\"");
@@ -314,6 +498,10 @@ bool Assignment::Execute()
          parmOwner->Copy(rhsObject);
          return true;
       }
+      
+      #ifdef DEBUG_ARRAY_INTERPRETING
+         MessageInterface::ShowMessage("   Executing parameter setting\n");
+      #endif
 
       parmID    = parmOwner->GetParameterID(parmName);
       parmType  = parmOwner->GetParameterType(parmID);
@@ -373,6 +561,8 @@ bool Assignment::Execute()
    }
    catch (BaseException& ex)
    {
+      MessageInterface::ShowMessage("Assignment::Execute exception checking\n");
+
       if (parmOwner == NULL)
          throw;
       // Could be an action rather than a parameter

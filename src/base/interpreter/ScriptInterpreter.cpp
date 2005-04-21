@@ -29,6 +29,7 @@
 //#define DEBUG_SCRIPT_READING_AND_WRITING
 //#define DEBUG_PARAMETER_PARSING
 //#define DEBUG_GMAT_LINE
+//#define DEBUG_ARRAY_ASSIGNMENT
 
 ScriptInterpreter *ScriptInterpreter::instance = NULL;
 
@@ -253,27 +254,41 @@ bool ScriptInterpreter::Parse(void)
         std::vector<std::string*>::iterator phrase = chunks.begin();
 
         // First try for object creation
-        if (**phrase == "Create") {
+        if (**phrase == "Create")
+        {
             // Instantiate the core object
             std::string type, name = "";
             ++phrase;
             type = **phrase;
             ++phrase;
             
-            while (phrase != chunks.end()) {
+            while (phrase != chunks.end())
+            {
                 name = **phrase;
                 
                 if ((name == ";") || (name[0] == '%'))
                    break;
 
+                if (name[0] == '(')
+                {
+                   MessageInterface::ShowMessage(
+                      "Unknown characters found in Create line; please check %s"
+                      " in the line \n   \"%s\"\n"
+                      "(Perhaps you meant square braces to size an array?)\n",
+                      name.c_str(), line.c_str());
+                   ++phrase;
+                   continue;
+                }
+
                 if (!InterpretObject(type, name))
-                    throw InterpreterException("Unable to create object " +
-                                               name + " of type " + type);
+                   throw InterpreterException("Unable to create object " +
+                                              name + " of type " + type);
                 ++phrase;
             }
         }
         // Next try for object parameter setup or assignment
-        else if ((**phrase == "GMAT") && (!sequenceStarted)) {
+        else if ((**phrase == "GMAT") && (!sequenceStarted))
+        {
 
             #ifdef DEBUG_GMAT_LINE
                MessageInterface::ShowMessage("Decomposing GMAT line\n\"%s\"\n",
@@ -288,7 +303,8 @@ bool ScriptInterpreter::Parse(void)
             
             bool hasEquals = (line.find("=") != std::string::npos ? true : false);
             // Check to see if this is a function return
-            if (((**phrase)[0] == '[') || !hasEquals) {
+            if (((**phrase)[0] == '[') || !hasEquals)
+            {
                // It's one or more return parameters, so line is a function call
                #ifdef DEBUG_GMAT_LINE
                   MessageInterface::ShowMessage(
@@ -297,7 +313,8 @@ bool ScriptInterpreter::Parse(void)
                      "This line is a function interface\n"
                      );
                #endif
-               if (InterpretFunctionCall()) {
+               if (InterpretFunctionCall())
+               {
                   sequenceStarted = true;
                   return true;
                }
@@ -307,7 +324,8 @@ bool ScriptInterpreter::Parse(void)
             StringArray sar = SeparateDots(**phrase);
             std::string objName = sar[0];
             GmatBase *obj = FindObject(objName);
-            if (obj == NULL) {
+            if (obj == NULL)
+            {
                 std::string errstr = objName;
                 errstr += ": Object was not found";
                 throw InterpreterException(errstr);
@@ -315,34 +333,66 @@ bool ScriptInterpreter::Parse(void)
             
             // PropSetup has configuration info for the member objects, so it 
             // gets special treatment
-            if ((sar.size() > 1) && (obj->GetType() == Gmat::PROP_SETUP)) {
+            if ((sar.size() > 1) && (obj->GetType() == Gmat::PROP_SETUP))
+            {
                 if (!InterpretPropSetupParameter(obj, sar, phrase))
                     throw InterpreterException(
                        "PropSetup Parameter was not recognized");
             }
             else 
             {
-               try {
+               try
+               {
                    // Handle the case of object = something
-                   if (sar.size() == 1) {
+                   if (sar.size() == 1)
+                   {
                       // Objects can be set to match other objects (copy c'tors 
                       // need to be correct)
-                      if (!EquateObjects(obj)) {
+                      if (!EquateObjects(obj))
+                      {
                          // Arrays and variables can be set directly
-                         if (obj->GetTypeName() == "Variable") {
-                            if (SetVariable(obj)) {
+                         if (obj->GetTypeName() == "Variable")
+                         {
+                            if (SetVariable(obj))
+                            {
                                // Variable set successfully
                                chunks.clear();
                                return true;
                             }
                          }
-//                         else if (obj->GetTypeName() == "Array")
-//                             ???
-//                         else
-                             throw InterpreterException(
-                                "Attempting to set an object in an unknown"
-                                " context; see the line\n   \"" +
-                                line + "\"");
+                         else if (obj->GetTypeName() == "Array")
+                         {
+                            #ifdef DEBUG_ARRAY_ASSIGNMENT
+                               MessageInterface::ShowMessage(
+                                  "Building array assignment for \"" +
+                                  line + "\"\n");
+                               MessageInterface::ShowMessage(
+                                  "Here are the substrings:\n");
+                               for (std::vector<std::string *>::iterator cstr =
+                                    chunks.begin(); cstr != chunks.end(); ++cstr)
+                                  MessageInterface::ShowMessage("   %s\n",
+                                     (*cstr)->c_str());
+                            #endif
+
+                            if (SetArray(obj))
+                            {
+                               // Array set successfully
+                               chunks.clear();
+                               return true;
+                            }
+
+                            chunks.clear();
+                            throw InterpreterException(
+                               "Failure while attempting to set an array element "
+                               " on line \"" + line + "\"");
+                         }
+                         else
+                            chunks.clear();
+                            throw InterpreterException(
+                               "Attempting to set an object, type " +
+                               obj->GetTypeName() + ", in an unknown context;" +
+                               " see the line\n   \"" +
+                               line + "\"");
                       }
                       // Objects equated
                       chunks.clear();
@@ -456,14 +506,17 @@ bool ScriptInterpreter::Parse(void)
                       }
                    }
                 }
-                catch (BaseException &ex) {
+                catch (BaseException &ex)
+                {
                    throw;
                 }
             }
         }
         // Then check to see if it's a command
-        else if (find(cmdmap.begin(), cmdmap.end(), **phrase) != cmdmap.end()) {
-           if (**phrase == "GMAT") {
+        else if (find(cmdmap.begin(), cmdmap.end(), **phrase) != cmdmap.end())
+        {
+           if (**phrase == "GMAT")
+           {
                #ifdef DEBUG_GMAT_LINE
                   MessageInterface::ShowMessage(
                       "Sequence started; Decomposing GMAT line\n\"%s\"\n",
@@ -483,7 +536,8 @@ bool ScriptInterpreter::Parse(void)
                   isSinglet = false;
                
                // Check to see if this is a function return
-               if (((**phrase)[0] == '[') || (!hasEquals && isSinglet)) {
+               if (((**phrase)[0] == '[') || (!hasEquals && isSinglet))
+               {
                   // It's one or more return parameters, so line is a function call
                   #ifdef DEBUG_GMAT_LINE
                      MessageInterface::ShowMessage("This line is a function interface\n",
@@ -493,30 +547,60 @@ bool ScriptInterpreter::Parse(void)
                   return InterpretFunctionCall();
                }
                
-               if (isSinglet) {
+               if (isSinglet)
+               {
                   // hasEquals == true, is a singlet, so a variable or object
                   GmatBase *obj = FindObject(**phrase);
 
 
-                  if (!EquateObjects(obj)) {
+                  if (!EquateObjects(obj))
+                  {
                      // Arrays and variables can be set directly
-                     if (obj->GetTypeName() == "Variable") {
+                     if (obj->GetTypeName() == "Variable")
+                     {
                         GmatCommand *cmd = moderator->AppendCommand("GMAT", "");
                         cmd->SetGeneratingString(line);
-                        if (SetVariable(obj, "", cmd)) {
+                        if (SetVariable(obj, "", cmd))
+                        {
                            // Variable set successfully
                            chunks.clear();
                            branchDepth += cmd->DepthIncrement();
                            return true;
                         }
                      }
-//                     else if (obj->GetTypeName() == "Array")
-//                        ???
-                     else {
+                     else if (obj->GetTypeName() == "Array")
+                     {
+                        #ifdef DEBUG_ARRAY_ASSIGNMENT
+                           MessageInterface::ShowMessage(
+                              "Building array assignment for \"" +
+                              line + "\"\n");
+                           MessageInterface::ShowMessage(
+                              "Here are the substrings:\n");
+                           for (std::vector<std::string *>::iterator cstr =
+                                chunks.begin(); cstr != chunks.end(); ++cstr)
+                              MessageInterface::ShowMessage("   %s\n",
+                                 (*cstr)->c_str());
+                        #endif
+                        GmatCommand *cmd = moderator->AppendCommand("GMAT", "");
+                        cmd->SetGeneratingString(line);
+                        if (SetArray(obj, cmd))
+                        {
+                           // Array set successfully
+                           chunks.clear();
+                           return true;
+                        }
+
                         chunks.clear();
                         throw InterpreterException(
-                           "Attempting to set an object in an unknown"
-                           " context; see the line\n   \"" +
+                           "Failure while attempting to set an array element "
+                           " on line \"" + line + "\"");
+                     }
+                     else
+                     {
+                        chunks.clear();
+                        throw InterpreterException(
+                           "Attempting to set an object, " + obj->GetName() +
+                           ", in an unknown context; see the line\n   \"" +
                            line + "\"");
                      }
                   }

@@ -31,6 +31,7 @@
 //#define DEBUG_ARRAY_INTERPRETING 1
 //#define DEBUG_INTERPRET_OBJECTEQUATES 1
 
+
 #include "MessageInterface.hpp"
 
 
@@ -507,7 +508,33 @@ void Interpreter::WriteParameterValue(GmatBase *obj, Integer id)
         case Gmat::BOOLEAN_TYPE:
             *outstream << ((obj->GetBooleanParameter(id)) ? "true" : "false");
             break;
-            
+
+        case Gmat::RMATRIX_TYPE:
+            if (obj->GetTypeName() == "Array")
+            {
+               *outstream << "[";
+               Integer rows = obj->GetIntegerParameter("NumRows");
+               Integer cols = obj->GetIntegerParameter("NumCols");
+               for (Integer r = 0; r < rows; ++r)
+               {
+                  for (Integer c = 0; c < cols; ++c)
+                  {
+                     *outstream << obj->GetRealParameter("SingleValue", r, c);
+                     if (r < rows-1)
+                        *outstream << " ";
+                  }
+                  if (r < rows - 1)
+                     *outstream << "; ";
+               }
+               *outstream << "]";
+            }
+            else
+               MessageInterface::ShowMessage("Unable to write RMatrix for "
+                  "parameter %s on object %s\n",
+                  obj->GetParameterText(id).c_str(), obj->GetName().c_str());
+
+            break;
+
         default:
             break;
     }
@@ -1706,7 +1733,8 @@ bool Interpreter::SetVariable(GmatBase *obj, const std::string &val,
       if (cmd->GetTypeName() != "GMAT")
          throw InterpreterException(
             "Interpreter::SetVariable attempting to set a value using a " +
-            cmd->GetTypeName() + " command, which is not supported.");
+            cmd->GetTypeName() + " command, which is not supported, on line\n" +
+            line);
       cmd->InterpretAction();
       return true;
    }
@@ -1714,6 +1742,70 @@ bool Interpreter::SetVariable(GmatBase *obj, const std::string &val,
    return obj->SetStringParameter("Expression", other);
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetArray(GmatBase *obj, GmatCommand *cmd)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value of an array element or elements equal to some input data.
+ *
+ * @param obj The object that receives the string.
+ * @param cmd Assignment command used if in the command sequence
+ *
+ * @return An array containing the pieces.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::SetArray(GmatBase *obj, GmatCommand *cmd)
+{
+   if (cmd) {
+      if (cmd->GetTypeName() != "GMAT")
+         throw InterpreterException(
+            "Interpreter::SetArray attempting to set a value using a " +
+            cmd->GetTypeName() + " command, which is not supported, on line\n" +
+            line);
+
+      return cmd->InterpretAction();
+   }
+
+   // Element descriptor is in the 3rd chunk
+   if (chunks.size() < 5)
+      throw InterpreterException(
+         "Not enough substrings in Interpreter::SetArray() for line\n   \"" +
+         line + "\"\n");
+
+   if ((*chunks[2])[0] != '(')
+      throw InterpreterException(
+         "Cannot locate element to set in Interpreter::SetArray()");
+   // Break apart the element descriptor
+   StringArray els = Decompose(*chunks[2]);
+   
+   #ifdef DEBUG_ARRAY_INTERPRETING
+      MessageInterface::ShowMessage("   Chunk 2 has these data\n");
+      for (StringArray::iterator i = els.begin(); i != els.end(); ++i)
+         MessageInterface::ShowMessage("      %s\n", i->c_str());
+   #endif
+   
+   Integer r, c;
+   
+   // Script values are 1-based; internals are 0-based
+   r = atoi(els[0].c_str()-1);
+   c = atoi(els[1].c_str()-1);
+
+   if ((*chunks[3])[0] != '=')
+      throw InterpreterException(
+         "Cannot locate '=' sign in Interpreter::SetArray()");
+
+   /// @todo Make array element assignment more generic (Needs to switch to
+   ///       command mode if the rhs is not a number.)
+   Real val = atof(chunks[4]->c_str());
+
+   #ifdef DEBUG_ARRAY_INTERPRETING
+      MessageInterface::ShowMessage("   Chunk 4 has the value %lf\n", val);
+   #endif
+
+   obj->SetRealParameter("SingleValue", val, r, c);
+   return true;
+}
 
 //------------------------------------------------------------------------------
 // StringArray& Decompose(const std::string &chunk)
