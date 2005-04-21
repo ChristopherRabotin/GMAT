@@ -63,7 +63,7 @@ Subscriber::Subscriber(const Subscriber &copy) :
    GmatBase (copy),
    data (NULL),
    next (NULL),
-   active (true),
+   active (copy.active), //loj: 4/21/05 Changed from true
    isEndOfReceive(false),
    currentProvider(copy.currentProvider)
 {
