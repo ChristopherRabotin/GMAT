@@ -20,6 +20,7 @@
  */
 //------------------------------------------------------------------------------
 #include <stdarg.h>
+#include <sstream>
 #include "ArrayTemplate.hpp"
 #include "TableTemplate.hpp"
 #include "Rmatrix.hpp"
@@ -535,6 +536,25 @@ const Rvector& Rvector::operator/=(const Rmatrix &m)
     }
     *this *= invM;
     return *this;
+}
+
+
+//loj: 4/19/05 Added
+//------------------------------------------------------------------------------
+//  std::string ToString()
+//------------------------------------------------------------------------------
+std::string Rvector::ToString()
+{
+   std::stringstream ss("");
+   ss.precision(12);
+   //ss.setf(std::ios::showpoint);
+   
+   for (Integer i=0; i<sizeD; i++) 
+   {
+      ss << elementD[i] << " ";
+   }
+
+   return ss.str();
 }
 
 //---------------------------------

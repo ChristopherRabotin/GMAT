@@ -69,8 +69,10 @@ public:
    Rvector operator/(const Rmatrix &m) const;
    const Rvector& operator/=(const Rmatrix &m);
     
+   std::string ToString(); //loj: 4/19/05 Added
+   
    friend Rvector operator*(Real s, const Rvector &v);
-   friend Rmatrix Outerproduct(const Rvector &v1, const Rvector &v2); 
+   friend Rmatrix Outerproduct(const Rvector &v1, const Rvector &v2);
    
    friend std::istream& operator>> (std::istream &input, Rvector &a);
    friend std::ostream& operator<< (std::ostream &output, const Rvector &a);
