@@ -204,12 +204,12 @@ void ConfigManager::AddPropSetup(PropSetup* propSetup)
 
 
 //------------------------------------------------------------------------------
-// void AddSpacecraft(Spacecraft *sc)
+// void AddSpacecraft(SpaceObject *sc)
 //------------------------------------------------------------------------------
 /**
- * Adds a Spacecraft to the configuration.
+ * Adds a Spacecraft and formations to the configuration.
  *
- * @param sc Pointer to the Spacecraft instance.
+ * @param sc Pointer to the Spacecraft/Formation instance.
  */
 //------------------------------------------------------------------------------
 void ConfigManager::AddSpacecraft(SpaceObject *sc)
@@ -218,8 +218,8 @@ void ConfigManager::AddSpacecraft(SpaceObject *sc)
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
 
-   if (!sc->IsOfType(Gmat::SPACECRAFT))
-      throw ConfigManagerException(name + " is not a Spacecraft");
+   if (!sc->IsOfType(Gmat::SPACEOBJECT))
+      throw ConfigManagerException(name + " is not a SpaceObject");
 
    AddObject(sc);
 }
