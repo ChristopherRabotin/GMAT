@@ -218,7 +218,7 @@ void PlotInterface::SetGlViewOption(const std::string &plotName,
                                     bool usevpVec, bool usevdVec)
 {
 #if defined __CONSOLE_APP__
-   return true;
+   return;
 #else
    
    wxString owner = wxString(plotName.c_str());
