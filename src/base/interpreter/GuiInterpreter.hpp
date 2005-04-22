@@ -38,7 +38,7 @@
 #include "Solver.hpp"
 #include "AtmosphereModel.hpp"
 #include "Function.hpp"
-
+#include "CalculatedPoint.hpp"
 
 class GMAT_API GuiInterpreter : public Interpreter
 {
@@ -53,6 +53,7 @@ public:
 
    bool IsInitialized();
    void Initialize();
+   void Finalize();
 
    //----- factory
    StringArray GetListOfFactoryItems(Gmat::ObjectType type);
@@ -64,10 +65,25 @@ public:
                              const std::string &newName);
    bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name);
 
+   // SolarSystem
+   SolarSystem* GetDefaultSolarSystem();
+
+   // CalculatedPoint (loj: 4/22/05 Added)
+   CalculatedPoint* CreateCalculatedPoint(const std::string &type,
+                                          const std::string &name);
+   CalculatedPoint* GetCalculatedPoint(const std::string &name);
+  
+   // Celestial body
+   CelestialBody* CreateCelestialBody(const std::string &type,
+                                      const std::string &name);
+   CelestialBody* GetCelestialBody(const std::string &name);
+
    // Spacecraft
    Spacecraft* CreateSpacecraft(const std::string&type,
                                 const std::string &name);
    Spacecraft* GetSpacecraft(const std::string &name);
+
+   // Formation
    Formation* GuiInterpreter::CreateFormation(const std::string &type,
                                            const std::string &name);
    Formation* GuiInterpreter::GetFormation(const std::string &name);
@@ -110,20 +126,12 @@ public:
    Parameter* CreateParameter(const std::string &type, const std::string &name);
    Parameter* GetParameter(const std::string &name);
 
-   // Celestial body
-   CelestialBody* CreateCelestialBody(const std::string &type,
-                                      const std::string &name);
-   CelestialBody* GetCelestialBody(const std::string &name);
-
-   // SolarSystem
-   SolarSystem* GetDefaultSolarSystem();
-
    // CoordinateSystem
    CoordinateSystem* CreateCoordinateSystem(const std::string &name);
    CoordinateSystem* GetCoordinateSystem(const std::string &name);
    CoordinateSystem* GetInternalCoordinateSystem();
    
-   // AxisSystem (loj: 3/07/05 Added)
+   // AxisSystem
    AxisSystem* CreateAxisSystem(const std::string &type,
                                 const std::string &name);
    // Planetary files
@@ -173,8 +181,6 @@ public:
                               Integer sandboxNum = 1);
    bool InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
                       Integer sandboxNum = 1);
-   GmatCommand* InsertCommand(const std::string &type, const std::string &currName,
-                              const std::string &prevName, Integer sandboxNum = 1);
    GmatCommand* DeleteCommand(GmatCommand *cmd, Integer sandboxNum = 1);
    GmatCommand* GetNextCommand(Integer sandboxNum = 1);
 

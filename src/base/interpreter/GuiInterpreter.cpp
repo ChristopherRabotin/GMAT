@@ -83,6 +83,15 @@ void GuiInterpreter::Initialize()
 
 
 //------------------------------------------------------------------------------
+// void Finalize()
+//------------------------------------------------------------------------------
+void GuiInterpreter::Finalize()
+{
+   moderator->Finalize();
+}
+
+
+//------------------------------------------------------------------------------
 // StringArray GetListOfFactoryItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
@@ -163,6 +172,97 @@ bool GuiInterpreter::RemoveConfiguredItem(Gmat::ObjectType type,
                                           const std::string &name)
 {
    return moderator->RemoveConfiguredItem(type, name);
+}
+
+
+//------------------------------------------------------------------------------
+// SolarSystem* GetDefaultSolarSystem()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a default solar system object pointer.
+ *
+ * @return a default solar system object pointer
+ */
+//------------------------------------------------------------------------------
+SolarSystem* GuiInterpreter::GetDefaultSolarSystem()
+{
+   return moderator->GetDefaultSolarSystem();
+}
+
+
+//loj: 4/22/05 Added
+//------------------------------------------------------------------------------
+// CalculatedPoint* CreateCalculatedPoint(const std::string &type,
+//                                        const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a calculated point object such as libration point, bary center
+ * by given type and name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return a calculated point object pointer
+ */
+//------------------------------------------------------------------------------
+CalculatedPoint* GuiInterpreter::CreateCalculatedPoint(const std::string &type,
+                                                       const std::string &name)
+{
+   return moderator->CreateCalculatedPoint(type, name);
+}
+
+
+//------------------------------------------------------------------------------
+// CalculatedPoint* GetCalculatedPoint(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a calculated point object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a calculated object pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
+CalculatedPoint* GuiInterpreter::GetCalculatedPoint(const std::string &name)
+{
+   return moderator->GetCalculatedPoint(name);
+}
+
+
+//------------------------------------------------------------------------------
+// CelestialBody* CreateCelestialBody(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a celestial body object by given type and name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return a celestial body object pointer
+ */
+//------------------------------------------------------------------------------
+CelestialBody* GuiInterpreter::CreateCelestialBody(const std::string &type,
+                                                   const std::string &name)
+{
+   return moderator->CreateCelestialBody(type, name);
+}
+
+
+//------------------------------------------------------------------------------
+// CelestialBody* GetCelestialBody(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a celestial body object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a celestial body object pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
+CelestialBody* GuiInterpreter::GetCelestialBody(const std::string &name)
+{
+   //loj: assumes body type from SolarSystem container
+   return moderator->GetCelestialBody(name);
 }
 
 
@@ -547,60 +647,6 @@ Parameter* GuiInterpreter::GetParameter(const std::string &name)
 {
     return moderator->GetParameter(name);
 }
-
-
-//------------------------------------------------------------------------------
-// CelestialBody* CreateCelestialBody(const std::string &type, const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Creates a celestial body object by given type and name.
- *
- * @param <type> object type
- * @param <name> object name
- *
- * @return a celestial body object pointer
- */
-//------------------------------------------------------------------------------
-CelestialBody* GuiInterpreter::CreateCelestialBody(const std::string &type,
-                                                   const std::string &name)
-{
-   return moderator->CreateCelestialBody(type, name);
-}
-
-
-//------------------------------------------------------------------------------
-// CelestialBody* GetCelestialBody(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a celestial body object pointer by given name.
- *
- * @param <name> object name
- *
- * @return a celestial body object pointer, return null if name not found
- */
-//------------------------------------------------------------------------------
-CelestialBody* GuiInterpreter::GetCelestialBody(const std::string &name)
-{
-   //loj: assumes body type from SolarSystem container
-   return moderator->GetCelestialBody(name);
-}
-
-
-//------------------------------------------------------------------------------
-// SolarSystem* GetDefaultSolarSystem()
-//------------------------------------------------------------------------------
-/**
- * Retrieves a default solar system object pointer.
- *
- * @return a default solar system object pointer
- */
-//------------------------------------------------------------------------------
-SolarSystem* GuiInterpreter::GetDefaultSolarSystem()
-{
-   return moderator->GetDefaultSolarSystem();
-}
-
-
 //------------------------------------------------------------------------------
 // CoordinateSystem* CreateCoordinateSystem(const std::string &name)
 //------------------------------------------------------------------------------
@@ -610,7 +656,6 @@ CoordinateSystem* GuiInterpreter::CreateCoordinateSystem(const std::string &name
 }
 
 
-// loj: 3/07/05 Added
 //------------------------------------------------------------------------------
 // AxisSystem* CreateAxisSystem(const std::string &name)
 //------------------------------------------------------------------------------
@@ -902,19 +947,6 @@ bool GuiInterpreter::InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
                                    Integer sandboxNum)
 {
    return moderator->InsertCommand(cmd, prevCmd, sandboxNum);
-}
-
-
-//------------------------------------------------------------------------------
-// GmatCommand* InsertCommand(const std::string &type, const std::string &currName,
-//                           const std::string &prevName, Integer sandboxNum)
-//------------------------------------------------------------------------------
-GmatCommand* GuiInterpreter::InsertCommand(const std::string &type,
-                                           const std::string &currName,
-                                           const std::string &prevName,
-                                           Integer sandboxNum)
-{
-   return moderator->InsertCommand(type, currName, prevName, sandboxNum);
 }
 
 
