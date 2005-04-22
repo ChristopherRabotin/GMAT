@@ -398,6 +398,28 @@ void ConfigManager::AddCoordinateSystem(CoordinateSystem *cs)
 }
 
 //------------------------------------------------------------------------------
+// void AddCalculatedPoint(CalculatedPoint *cs)
+//------------------------------------------------------------------------------
+/**
+ * Adds a CalculatedPoint to the configuration.
+ *
+ * @param cs Pointer to the CalculatedPoint instance.
+ */
+//------------------------------------------------------------------------------
+void ConfigManager::AddCalculatedPoint(CalculatedPoint *cs)
+{
+   std::string name = cs->GetName();
+
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+
+   if (!cs->IsOfType(Gmat::CALCULATED_POINT))
+      throw ConfigManagerException(name + " is not a CalculatedPoint");
+
+   AddObject(cs);
+}
+
+//------------------------------------------------------------------------------
 // void AddObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
@@ -1164,6 +1186,31 @@ CoordinateSystem* ConfigManager::GetCoordinateSystem(const std::string &name)
       if (mapping[name]->GetType() == Gmat::COORDINATE_SYSTEM)
       {
          cs = (CoordinateSystem *)mapping[name];
+      }
+   }
+   return cs;
+}
+
+//loj: 4/22/05 Added
+//------------------------------------------------------------------------------
+// CalculatedPoint* GetCalculatedPoint(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a CalculatedPoint object.
+ *
+ * @param name The name of the object.
+ *
+ * @return A pointer to the object.
+ */
+//------------------------------------------------------------------------------
+CalculatedPoint* ConfigManager::GetCalculatedPoint(const std::string &name)
+{
+   CalculatedPoint *cs = NULL;
+   if (mapping.find(name) != mapping.end())
+   {
+      if (mapping[name]->GetType() == Gmat::CALCULATED_POINT)
+      {
+         cs = (CalculatedPoint *)mapping[name];
       }
    }
    return cs;

@@ -38,6 +38,7 @@
 #include "Function.hpp"
 #include "Hardware.hpp"
 #include "CoordinateSystem.hpp"
+#include "CalculatedPoint.hpp"
 
 
 /**
@@ -63,6 +64,7 @@ public:
    void                AddAtmosphereModel(AtmosphereModel *atmosModel);
    void                AddFunction(Function *function);
    void                AddCoordinateSystem(CoordinateSystem *cs);
+   void                AddCalculatedPoint(CalculatedPoint *cp);
    
    bool                SetSolarSystemInUse(const std::string &name);
    
@@ -93,6 +95,7 @@ public:
    AtmosphereModel*    GetAtmosphereModel(const std::string &name);
    Function*           GetFunction(const std::string &name);
    CoordinateSystem*   GetCoordinateSystem(const std::string &name);
+   CalculatedPoint*    GetCalculatedPoint(const std::string &name);
    
    // Methods I'm not sure we need
    void                AddCelestialBody(CelestialBody* body);
