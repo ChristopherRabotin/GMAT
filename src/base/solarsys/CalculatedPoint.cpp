@@ -57,6 +57,8 @@ CalculatedPoint::CalculatedPoint(const std::string &ptType,
 SpacePoint(Gmat::CALCULATED_POINT, ptType, itsName),
 numberOfBodies (0)
 {
+   objectTypes.push_back(Gmat::CALCULATED_POINT);
+   objectTypeNames.push_back("CalculatedPoint");
    parameterCount = CalculatedPointParamCount;
 }
 
