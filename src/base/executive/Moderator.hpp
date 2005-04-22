@@ -50,6 +50,7 @@
 #include "PropSetup.hpp"
 #include "Subscriber.hpp"
 #include "Interpolator.hpp"
+#include "CalculatedPoint.hpp"
 // factories
 #include "AtmosphereFactory.hpp"
 #include "AxisSystemFactory.hpp"
@@ -67,6 +68,7 @@
 #include "SpacecraftFactory.hpp"
 #include "StopConditionFactory.hpp"
 #include "SubscriberFactory.hpp"
+#include "CalculatedPointFactory.hpp"
 // files
 #include "SlpFile.hpp"
 #include "DeFile.hpp"
@@ -85,6 +87,7 @@ public:
 
    static Moderator* Instance();
    bool Initialize(bool isFromGui = false);
+   void Finalize();
    void SetRunReady(bool flag = true);
 
    //----- ObjectType
@@ -106,6 +109,22 @@ public:
                              const std::string &newName);
    bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name);
     
+   // SolarSystem
+   SolarSystem* GetDefaultSolarSystem();
+   SolarSystem* CreateSolarSystem(const std::string &name);
+   SolarSystem* GetSolarSystemInUse();
+   bool SetSolarSystemInUse(const std::string &name);
+
+   // CalculatedPoint
+   CalculatedPoint* CreateCalculatedPoint(const std::string &type,
+                                          const std::string &name);
+   CalculatedPoint* GetCalculatedPoint(const std::string &name);
+
+   // CelestialBody
+   CelestialBody* CreateCelestialBody(const std::string &type,
+                                      const std::string &name);
+   CelestialBody* GetCelestialBody(const std::string &name);
+
    // Spacecraft
    SpaceObject* CreateSpacecraft(const std::string &type,
                                  const std::string &name);
@@ -168,11 +187,6 @@ public:
                               const std::string &forceModelName = "");
    PropSetup* GetPropSetup(const std::string &name);
 
-   // CelestialBody
-   CelestialBody* CreateCelestialBody(const std::string &type,
-                                      const std::string &name);
-   CelestialBody* GetCelestialBody(const std::string &name);
-
    // Interpolator
    Interpolator* CreateInterpolator(const std::string &type,
                                     const std::string &name);
@@ -210,13 +224,7 @@ public:
    GmatCommand* CreateDefaultCommand(const std::string &type,
                                      const std::string &name = "");
 
-   // SolarSystem
-   SolarSystem* GetDefaultSolarSystem();
-   SolarSystem* CreateSolarSystem(const std::string &name);
-   SolarSystem* GetSolarSystemInUse();
-   bool SetSolarSystemInUse(const std::string &name);
-
-   // CoordinateSystem (loj: 1/31/05 Added)
+   // CoordinateSystem
    CoordinateSystem* GetInternalCoordinateSystem();
    
    // Planetary files
@@ -247,10 +255,6 @@ public:
                               Integer sandboxNum = 1);
    bool InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
                       Integer sandboxNum = 1);
-   GmatCommand* InsertCommand(const std::string &type,
-                              const std::string &currName,
-                              const std::string &prevName,
-                              Integer sandboxNum = 1);
    GmatCommand* DeleteCommand(GmatCommand *cmd, Integer sandboxNum = 1);
    GmatCommand* GetNextCommand(Integer sanboxNum = 1);
 
@@ -346,6 +350,7 @@ private:
    FunctionFactory *theFunctionFactory;
    AxisSystemFactory *theAxisSystemFactory;
    CoordinateSystemFactory *theCoordinateSystemFactory;
+   CalculatedPointFactory *theCalculatedPointFactory;
    
    SolarSystem *theDefaultSolarSystem;
    CoordinateSystem *theInternalCoordSystem;
@@ -364,7 +369,6 @@ private:
    {
       SLP = 0,
       DE200,
-      //DE202, //not supported
       DE405,
       PlanetaryFileCount,
    };
