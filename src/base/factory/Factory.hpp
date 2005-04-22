@@ -29,6 +29,7 @@
 #include "PhysicalModel.hpp"
 #include "PropSetup.hpp"
 #include "StopCondition.hpp"
+#include "CalculatedPoint.hpp"
 #include "CelestialBody.hpp"
 #include "SolarSystem.hpp"
 #include "Solver.hpp"
@@ -37,8 +38,8 @@
 #include "AtmosphereModel.hpp"
 #include "Function.hpp"
 #include "Hardware.hpp"
-#include "AxisSystem.hpp"       // wcs: 2004/12/23 - added
-#include "CoordinateSystem.hpp" // loj: 2005/01/18 - added
+#include "AxisSystem.hpp" 
+#include "CoordinateSystem.hpp"
 
 class GMAT_API Factory
 {
@@ -60,6 +61,8 @@ public:
                                        const std::string &withName = "");
    virtual StopCondition*   CreateStopCondition(const std::string &ofType,
                                                 const std::string &withName = "");
+   virtual CalculatedPoint* CreateCalculatedPoint(const std::string &ofType,
+                                                  const std::string &withName = "");
    virtual CelestialBody*   CreateCelestialBody(const std::string &ofType,
                                                 const std::string &withName = "");
    virtual SolarSystem*     CreateSolarSystem(const std::string &ofType,

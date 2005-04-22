@@ -32,6 +32,7 @@
 #include "PhysicalModel.hpp"
 #include "PropSetup.hpp"
 #include "StopCondition.hpp"
+#include "CalculatedPoint.hpp"
 #include "CelestialBody.hpp"
 #include "SolarSystem.hpp"
 #include "Solver.hpp"
@@ -74,6 +75,8 @@ public:
    PropSetup*             CreatePropSetup(const std::string &withName = "");
    StopCondition*         CreateStopCondition(const std::string &ofType,
                                               const std::string &withName = "");
+   CalculatedPoint*       CreateCalculatedPoint(const std::string &ofType,
+                                                const std::string &withName = "");
    CelestialBody*         CreateCelestialBody(const std::string &ofType,
                                               const std::string &withName = "");
    SolarSystem*           CreateSolarSystem(const std::string &withName = "");
@@ -110,6 +113,7 @@ public:
    StringArray            GetListOfPhysicalModel();
    StringArray            GetListOfPropSetup();
    StringArray            GetListOfStopCondition();
+   StringArray            GetListOfCalculatedPoint();
    StringArray            GetListOfCelestialBody();
    StringArray            GetListOfSolarSystem();
    StringArray            GetListOfSolver();

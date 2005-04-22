@@ -229,6 +229,30 @@ StopCondition* FactoryManager::CreateStopCondition(const std::string &ofType,
 }
 
 //------------------------------------------------------------------------------
+//  CalculatedPoint* CreateCalculatedPoint(const std::string &ofType,
+//                                         const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Create an object of type CalculatedPoint, with the name withName,
+ * and of the type ofType.
+ *
+ * @param <ofType>   type name of the new CalculatedPoint object.
+ * @param <withName> name of the new CalculatedPoint object.
+ *
+ * @return pointer to the newly-created CalculatedPoint object
+ */
+//------------------------------------------------------------------------------
+CalculatedPoint* FactoryManager::CreateCalculatedPoint(const std::string &ofType,
+                                                       const std::string &withName)
+{
+   Factory* f = FindFactory(Gmat::CALCULATED_POINT, ofType);
+   if (f != NULL)
+      return f->CreateCalculatedPoint(ofType, withName);
+   return NULL;
+}
+
+
+//------------------------------------------------------------------------------
 //  CelestialBody* CreateCelestialBody(const std::string &ofType,
 //                                     const std::string &withName)
 //------------------------------------------------------------------------------

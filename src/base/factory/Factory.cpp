@@ -270,6 +270,32 @@ StopCondition* Factory::CreateStopCondition(const std::string &ofType,
 }
 
 //------------------------------------------------------------------------------
+//  CalculatedPoint* CreateCalculatedPoint(const std::string &ofType,
+//                                         const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Must be implemented by derived classes that create  CalculatedPoint objects -
+ * in that case, it returns a new  CalculatedPoint object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type  CalculatedPoint.
+ *
+ * @param <ofType>   specific type of  CalculatedPoint object to create.
+ * @param <withName> name to give to the newly created  CalculatedPoint object.
+ *
+ * @return pointer to a new  CalculatedPoint object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ * objects of type  CalculatedPoint.
+ */
+//------------------------------------------------------------------------------
+CalculatedPoint* Factory::CreateCalculatedPoint(const std::string &ofType,
+                                                const std::string &withName)
+{
+   throw FactoryException("requested object must be of type CalculatedPoint");
+}
+
+
+//------------------------------------------------------------------------------
 //  CelestialBody* CreateCelestialBody(const std::string &ofType,
 //                                     const std::string &withName)
 //------------------------------------------------------------------------------
