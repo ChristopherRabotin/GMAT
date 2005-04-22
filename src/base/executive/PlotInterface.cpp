@@ -217,6 +217,10 @@ void PlotInterface::SetGlViewOption(const std::string &plotName,
                                     const Rvector3 &vdVec, bool usevpRefVec,
                                     bool usevpVec, bool usevdVec)
 {
+#if defined __CONSOLE_APP__
+   return true;
+#else
+   
    wxString owner = wxString(plotName.c_str());
 
    for (int i=0; i<MdiGlPlot::numChildren; i++)
@@ -235,6 +239,7 @@ void PlotInterface::SetGlViewOption(const std::string &plotName,
                                 vpVec, vdVec, usevpRefVec,usevpVec, usevdVec);
       }
    }
+#endif
 }
 
 
