@@ -140,7 +140,7 @@ const Rvector6 Barycenter::GetMJ2000State(const A1Mjd &atTime)
 }
 
 //---------------------------------------------------------------------------
-//  const Rvector3 GetMJ2000State(const A1Mjd &atTime)
+//  const Rvector3 GetMJ2000Position(const A1Mjd &atTime)
 //---------------------------------------------------------------------------
 /**
  * Method returning the MJ2000 position of the Barycenter at the time atTime.
@@ -157,7 +157,7 @@ const Rvector3 Barycenter::GetMJ2000Position(const A1Mjd &atTime)
 }
 
 //---------------------------------------------------------------------------
-//  const Rvector3 GetMJ2000State(const A1Mjd &atTime)
+//  const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime)
 //---------------------------------------------------------------------------
 /**
  * Method returning the MJ2000 velocity of the Barycenter at the time atTime.
