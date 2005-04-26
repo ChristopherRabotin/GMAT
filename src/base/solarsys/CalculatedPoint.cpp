@@ -20,6 +20,9 @@
 #include "CalculatedPoint.hpp"
 #include "SolarSystemException.hpp"
 
+#include <iostream>
+using namespace std;
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -282,6 +285,26 @@ std::string CalculatedPoint::GetStringParameter(const Integer id,
    return SpacePoint::GetStringParameter(id, index);
 }
 
+//------------------------------------------------------------------------------
+//  std::string  GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the string parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id>    ID for the requested parameter.
+ *
+ * @return  string value of the requested parameter.
+ *
+ * @note - This should not be necessary here, but GCC is getting confused 
+ *         cbout this method.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string CalculatedPoint::GetStringParameter(const Integer id) const
+{
+   return SpacePoint::GetStringParameter(id);
+}
 
 //------------------------------------------------------------------------------
 //  std::string  GetStringParameter(const std::string &label, 
@@ -302,6 +325,53 @@ std::string CalculatedPoint::GetStringParameter(const std::string &label,
                                                 const Integer index) const
 {
    return GetStringParameter(GetParameterID(label), index);
+}
+
+//------------------------------------------------------------------------------
+//  std::string  SetStringParameter(const Integer id, const std::string value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the string parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ * @param <value> string value for the requested parameter.
+ *
+ * @return  success flag.
+ *
+ * @note - This should not be necessary here, but GCC is getting confused 
+ *         cbout this method.
+ *
+ */
+//------------------------------------------------------------------------------
+bool CalculatedPoint::SetStringParameter(const Integer id, 
+                                         const std::string &value)
+{        
+   return SpacePoint::SetStringParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+//  std::string  SetStringParameter(const std::string &label, 
+//                                  const std::string value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the string parameter value, given the input
+ * parameter label.
+ *
+ * @param <label> label for the requested parameter.
+ * @param <value> string value for the requested parameter.
+ *
+ * @return  success flag.
+ *
+ * @note - This should not be necessary here, but GCC is getting confused 
+ *         cbout this method.
+ *
+ */
+//------------------------------------------------------------------------------
+bool CalculatedPoint::SetStringParameter(const std::string &label, 
+                                         const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
 }
 
 //------------------------------------------------------------------------------
@@ -363,6 +433,7 @@ bool  CalculatedPoint::SetStringParameter(const std::string &label,
                                           const std::string &value,
                                           const Integer index) 
 {
+   cout << "In CP:Set -=-=-=-=-=-=-=-=-=-" << endl;
    return SetStringParameter(GetParameterID(label),value,index);
 }
 
