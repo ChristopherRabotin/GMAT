@@ -142,8 +142,9 @@ const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
 {
    CheckBodies();
    // Compute position and velocity from primary to secondary
+   Rvector6 primaryState = primaryBody->GetMJ2000State(atTime);
    Rvector6 pToS = (secondaryBody->GetMJ2000State(atTime)) -
-                   (primaryBody->GetMJ2000State(atTime));
+                   primaryState;
    Rvector3 r    = pToS.GetR();
    Rvector3 v    = pToS.GetV();
    Rvector3 a    = (secondaryBody->GetMJ2000Acceleration(atTime)) -
@@ -314,9 +315,7 @@ const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
    Rvector6 rvFK5(rLi(0), rLi(1), rLi(2), vLi(0), vLi(1), vLi(2));
    
    // Translate so that the origin is at the j2000Body
-   Rvector6 j2kState = (j2000Body->GetMJ2000State(atTime)) -  //???????
-                       (primaryBody->GetMJ2000State(atTime));
-   Rvector6 rvResult = rvFK5 - j2kState;
+   Rvector6 rvResult = rvFK5 + primaryState;
    return rvResult;
 }
 
