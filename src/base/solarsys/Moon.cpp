@@ -82,6 +82,7 @@ const Rmatrix               Moon::LUNA_CIJ                 = Rmatrix(5,5,
 Moon::Moon(std::string name) :
 CelestialBody     ("Moon",name)
 {
+   objectTypeNames.push_back("Moon");
    InitializeMoon(NULL);  
 }
 
@@ -100,6 +101,7 @@ CelestialBody     ("Moon",name)
 Moon::Moon(std::string name, const std::string &cBody) :
 CelestialBody     ("Moon",name)
 {
+   objectTypeNames.push_back("Moon");
    InitializeMoon(cBody); 
 }
 

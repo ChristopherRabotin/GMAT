@@ -262,6 +262,7 @@ const Rmatrix               Planet::CIJ[NumberOfPlanets]                 =
 Planet::Planet(std::string name) :
 CelestialBody     ("Planet",name)
 {   
+   objectTypeNames.push_back("Planet");
    InitializePlanet(NULL);  
 }
 
@@ -280,6 +281,7 @@ CelestialBody     ("Planet",name)
 Planet::Planet(std::string name, const std::string &cBody) :
 CelestialBody     ("Planet",name)
 {
+   objectTypeNames.push_back("Planet");
    InitializePlanet(cBody); 
 }
 

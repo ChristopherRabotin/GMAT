@@ -165,6 +165,8 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    order              (4),
    degree             (4)
 {
+   objectTypes.push_back(Gmat::CELESTIAL_BODY);
+   objectTypeNames.push_back("CelestialBody");
    parameterCount = CelestialBodyParamCount;
    Initialize(itsBodyType);
 }
@@ -209,6 +211,8 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    degree             (4)
 
 {
+   objectTypes.push_back(Gmat::CELESTIAL_BODY);
+   objectTypeNames.push_back("CelestialBody");
    parameterCount = CelestialBodyParamCount;
    Initialize(CelestialBody::BODY_TYPE_STRINGS[itsBodyType]);
 }

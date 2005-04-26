@@ -88,6 +88,7 @@ Star::PARAMETER_TYPE[StarParamCount - CelestialBodyParamCount] =
 Star::Star(std::string name) :
 CelestialBody       ("Star",name)
 {
+   objectTypeNames.push_back("Star");
    parameterCount = StarParamCount;
    InitializeStar();  // should this be the default?
 }
