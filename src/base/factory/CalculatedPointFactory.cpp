@@ -20,7 +20,7 @@
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "CalculatedPointFactory.hpp"
-//#include "LibrationPoint.hpp"
+#include "LibrationPoint.hpp"
 #include "Barycenter.hpp"
 
 //---------------------------------
@@ -46,8 +46,7 @@ CalculatedPoint* CalculatedPointFactory::CreateCalculatedPoint(
                                          const std::string &withName)
 {
    if (ofType == "LibrationPoint")
-      return NULL;   // temporary
-      //return new LibrationPoint(withName);
+      return new LibrationPoint(withName);
    else if (ofType == "Barycenter")
       return new Barycenter(withName);
    else
