@@ -119,6 +119,7 @@ GravityField::GravityField(const std::string &name, const std::string &forBodyNa
 //    dSbar           (NULL),
     gfInitialized   (false)
 {
+   objectTypeNames.push_back("GravityField");
    bodyName = forBodyName;
    parameterCount = GravityFieldParamCount;
 }
