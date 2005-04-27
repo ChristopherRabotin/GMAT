@@ -58,7 +58,7 @@ public:
     Real GetMeanAnomaly();
     Real GetEccentricAnomaly();
 
-    bool IsInvalid(const std::string &inputType);
+    bool IsInvalid(const std::string &inputType) const;
 
 protected:
     static const Real    ANOMALY_TOL = 1.0e-30;

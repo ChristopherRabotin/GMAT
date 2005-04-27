@@ -512,7 +512,7 @@ Real Anomaly::GetEccentricAnomaly()
 }
 
 //------------------------------------------------------------------------------
-// bool Anomaly::IsInvalid(const std::string &inputType)
+// bool Anomaly::IsInvalid(const std::string &inputType) const
 //------------------------------------------------------------------------------
 /** 
  * Determines if the anomlay type is invalid.
@@ -520,7 +520,7 @@ Real Anomaly::GetEccentricAnomaly()
  * @return   true if invalid, false it is valid.
  *
  */
-bool Anomaly::IsInvalid(const std::string &inputType)
+bool Anomaly::IsInvalid(const std::string &inputType) const
 {
    if (inputType != "EA" && inputType != "MA" && inputType != "TA")
       return true;
