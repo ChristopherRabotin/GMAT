@@ -20,9 +20,6 @@
 #include "CalculatedPoint.hpp"
 #include "SolarSystemException.hpp"
 
-#include <iostream>
-using namespace std;
-
 //---------------------------------
 // static data
 //---------------------------------
@@ -433,7 +430,6 @@ bool  CalculatedPoint::SetStringParameter(const std::string &label,
                                           const std::string &value,
                                           const Integer index) 
 {
-   cout << "In CP:Set -=-=-=-=-=-=-=-=-=-" << endl;
    return SetStringParameter(GetParameterID(label),value,index);
 }
 
@@ -576,6 +572,32 @@ bool CalculatedPoint::RenameRefObject(const Gmat::ObjectType type,
    }
    return SpacePoint::RenameRefObject(type, oldName, newName);
 }
+
+//------------------------------------------------------------------------------
+// bool TakeAction(const std::string &action, const std::string &actionData)
+//------------------------------------------------------------------------------
+/**
+ * Interface used to support user actions.
+ *
+ * @param <action> The string descriptor for the requested action.
+ * @param <actionData> Optional data used for the action.
+ *
+ * @return true if the action was performed, false if not.
+ */
+//------------------------------------------------------------------------------
+bool CalculatedPoint::TakeAction(const std::string &action,
+                                 const std::string &actionData)
+{
+   if (action == "ClearBodies")
+   {
+      bodyNames.clear();
+      bodyList.clear();
+      numberOfBodies = 0;
+      return true; 
+   }
+   return SpacePoint::TakeAction(action, actionData);
+}
+
 
 
 //------------------------------------------------------------------------------
