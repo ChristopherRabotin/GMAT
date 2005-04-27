@@ -133,6 +133,8 @@ const std::string SolarSystem::CHARON_NAME     = "Charon";
 SolarSystem::SolarSystem(std::string withName)
    : GmatBase(Gmat::SOLAR_SYSTEM, "SolarSystem", withName)//, //loj: 4/22/04 added "SolarSystem" as typeSt
 {
+   objectTypes.push_back(Gmat::SOLAR_SYSTEM);
+   objectTypeNames.push_back("SolarSystem");
    parameterCount   = SolarSystemParamCount;
    pvSrcForAll      = Gmat::SLP;
    anMethodForAll   = Gmat::TWO_BODY;

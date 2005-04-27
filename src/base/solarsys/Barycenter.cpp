@@ -51,6 +51,8 @@
 Barycenter::Barycenter(const std::string &itsName) :
 CalculatedPoint("Barycenter", itsName)
 {
+   objectTypes.push_back(Gmat::BARYCENTER);
+   objectTypeNames.push_back("Barycenter");
    parameterCount = BarycenterParamCount;
 }
 
