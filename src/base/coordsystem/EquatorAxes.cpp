@@ -65,6 +65,8 @@ using namespace GmatTimeUtil;      // for JD offsets, etc.
 EquatorAxes::EquatorAxes(const std::string &itsName) :
 DynamicAxes("Equator",itsName)
 {
+   objectTypeNames.push_back("EquatorAxes");
+   parameterCount = EquatorAxesParamCount;
 }
 
 //------------------------------------------------------------------------------

@@ -63,6 +63,8 @@ DynamicAxes::DynamicAxes(const std::string &itsType,
                          const std::string &itsName) :
 AxisSystem(itsType,itsName)
 {
+   objectTypeNames.push_back("DynamicAxes");
+   parameterCount = DynamicAxesParamCount;
 }
 
 //---------------------------------------------------------------------------

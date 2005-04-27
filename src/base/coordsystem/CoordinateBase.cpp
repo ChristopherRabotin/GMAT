@@ -75,6 +75,8 @@ j2000Body      (NULL),
 j2000BodyName  ("Earth"),
 solar          (NULL)
 {
+   objectTypeNames.push_back("CoordinateBase");
+   parameterCount = CoordinateBaseParamCount;
 }
 
 //---------------------------------------------------------------------------

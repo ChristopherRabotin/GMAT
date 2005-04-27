@@ -60,6 +60,8 @@ MJ2000EcAxes::PARAMETER_TYPE[MJ2000EcAxesParamCount - InertialAxesParamCount] =
 MJ2000EcAxes::MJ2000EcAxes(const std::string &itsName) :
 InertialAxes("MJ2000Ec",itsName)
 {
+   objectTypeNames.push_back("MJ2000EcAxes");
+   parameterCount = MJ2000EcAxesParamCount;
 }
 
 //---------------------------------------------------------------------------

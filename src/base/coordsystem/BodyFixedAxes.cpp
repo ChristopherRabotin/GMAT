@@ -67,6 +67,8 @@ using namespace GmatTimeUtil;      // for JD offsets, etc.
 BodyFixedAxes::BodyFixedAxes(const std::string &itsName) :
 DynamicAxes("BodyFixed",itsName)
 {
+   objectTypeNames.push_back("BodyFixedAxes");
+   parameterCount = BodyFixedAxesParamCount;
 }
 
 

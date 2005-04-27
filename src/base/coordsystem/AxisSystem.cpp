@@ -79,6 +79,9 @@ CoordinateBase(Gmat::AXIS_SYSTEM,itsType,itsName),
 eop              (NULL),
 itrf             (NULL)
 {
+   objectTypes.push_back(Gmat::AXIS_SYSTEM);
+   objectTypeNames.push_back("AxisSystem");
+   parameterCount = AxisSystemParamCount;
    rotMatrix    = Rmatrix33(false); // want zero matrix, not identity matrix
    rotDotMatrix = Rmatrix33(false); // want zero matrix, not identity matrix
 }

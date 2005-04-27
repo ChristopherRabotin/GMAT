@@ -81,6 +81,7 @@ xAxis         (""),
 yAxis         (""),
 zAxis         ("")
 {
+   objectTypeNames.push_back("ObjectReferencedAxes");
    parameterCount = ObjectReferencedAxesParamCount;
 }
 

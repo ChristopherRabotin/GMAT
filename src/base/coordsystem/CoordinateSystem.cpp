@@ -75,10 +75,11 @@ axes               (NULL)
 {
    objectTypes.push_back(Gmat::COORDINATE_SYSTEM);
    objectTypeNames.push_back("CoordinateSystem");
+   parameterCount = CoordinateSystemParamCount;
 }
 
 //---------------------------------------------------------------------------
-//  CoordinateSystem(const CoordinateSystem &axisSys);
+//  CoordinateSystem(const CoordinateSystem &coordSys);
 //---------------------------------------------------------------------------
 /**
  * Constructs base CoordinateSystem structures used in derived classes, 
