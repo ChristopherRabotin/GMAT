@@ -228,7 +228,7 @@ bool OrbitReal::Validate()
 
 
 //------------------------------------------------------------------------------
-// virtual void Initialize()
+// virtual bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Initializes reference objects.
@@ -236,7 +236,7 @@ bool OrbitReal::Validate()
  * @return true if all objects are set; false otherwise
  */
 //------------------------------------------------------------------------------
-void OrbitReal::Initialize()
+bool OrbitReal::Initialize()
 {
    //loj: 4/12/05 Added try block
    try
@@ -250,6 +250,8 @@ void OrbitReal::Initialize()
           this->GetTypeName() + "\n" + e.GetMessage() + "This parameter could be "
           "an internal parameter of Periapsis.\n");
    }
+   
+   return true;
 }
 
 

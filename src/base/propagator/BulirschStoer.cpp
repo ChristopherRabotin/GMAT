@@ -239,7 +239,7 @@ GmatBase* BulirschStoer::Clone(void) const
  * dimensional arrays can be made using calls to memcpy().
  */
 //------------------------------------------------------------------------------
-void BulirschStoer::Initialize(void)
+bool BulirschStoer::Initialize(void)
 {
     Integer i, j;
 
@@ -248,7 +248,7 @@ void BulirschStoer::Initialize(void)
     
     if (!depthInitialized)
         if (!SetMaximumDepth(depth))
-            return;
+            return initialized;
 
     if (physicalModel)
 	{
@@ -256,7 +256,7 @@ void BulirschStoer::Initialize(void)
 
         // Clear all allocated memory, in case dimension or depth has changed
         if (errorEstimates)
-		{
+		  {
             delete [] errorEstimates;
             errorEstimates = NULL;
         }
@@ -307,7 +307,7 @@ void BulirschStoer::Initialize(void)
         errorEstimates = new Real[dimension];
         if (!errorEstimates)
 		{
-            return;
+            return initialized;
         }
 
         coeffC = new Real[dimension];
@@ -315,7 +315,7 @@ void BulirschStoer::Initialize(void)
 		{
             delete [] errorEstimates;
             errorEstimates = NULL;
-            return;
+            return initialized;
         }
         
         estimatedState = new Real[dimension];
@@ -325,7 +325,7 @@ void BulirschStoer::Initialize(void)
             errorEstimates = NULL;
             delete [] coeffC;
             coeffC = NULL;
-            return;
+            return initialized;
         }
 
         mstate = new Real[dimension];
@@ -337,7 +337,7 @@ void BulirschStoer::Initialize(void)
             errorEstimates = NULL;
             delete [] coeffC;
             coeffC = NULL;
-            return;
+            return initialized;
         }
 
         nstate = new Real[dimension];
@@ -351,7 +351,7 @@ void BulirschStoer::Initialize(void)
             errorEstimates = NULL;
             delete [] coeffC;
             coeffC = NULL;
-            return;
+            return initialized;
         }
 
         // Now do the 2-dimensional arrays
@@ -376,7 +376,7 @@ void BulirschStoer::Initialize(void)
                     delete [] intermediates[j];
                 delete [] intermediates;
                 intermediates = NULL;
-                return;
+                return initialized;
             }
         }
 
@@ -407,7 +407,7 @@ void BulirschStoer::Initialize(void)
                     delete [] estimates[j];
                     estimates[j] = NULL;
                 }
-                return;
+                return initialized;
             }
         }
         ddt = physicalModel->GetDerivativeArray();
@@ -417,6 +417,8 @@ void BulirschStoer::Initialize(void)
 
     first = true;
     initialized = true;
+    
+    return initialized;
 }
 
 //------------------------------------------------------------------------------

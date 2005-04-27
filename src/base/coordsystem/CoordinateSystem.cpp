@@ -292,14 +292,14 @@ ItrfCoefficientsFile* CoordinateSystem::GetItrfCoefficientsFile()
 
 
 //---------------------------------------------------------------------------
-//  void CoordinateSystem::Initialize()
+//  bool CoordinateSystem::Initialize()
 //---------------------------------------------------------------------------
 /**
  * Initialization method for this CoordinateSystem.
  *
  */
 //---------------------------------------------------------------------------
-void CoordinateSystem::Initialize()
+bool CoordinateSystem::Initialize()
 {
    CoordinateBase::Initialize();
    if (axes)
@@ -315,6 +315,8 @@ void CoordinateSystem::Initialize()
    //if (!axes)
    //   throw CoordinateSystemException(
    //         "Axes are undefined for CoordinateSystem " + GetName());
+   
+   return true;
 }
 
 

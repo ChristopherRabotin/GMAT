@@ -73,7 +73,7 @@ public:
    virtual ItrfCoefficientsFile* GetItrfCoefficientsFile();
    
    // initializes the AxisSystem
-   virtual void Initialize();
+   virtual bool Initialize();
 
    // methods to convert to/from the MJ2000 Equatorial axis system
    virtual bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,

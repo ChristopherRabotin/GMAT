@@ -291,9 +291,10 @@ ItrfCoefficientsFile* AxisSystem::GetItrfCoefficientsFile()
  *
  */
 //---------------------------------------------------------------------------
-void AxisSystem::Initialize()
+bool AxisSystem::Initialize()
 {
    CoordinateBase::Initialize();
+   return true;
 }
 
 //------------------------------------------------------------------------------

@@ -54,7 +54,7 @@ public:
    virtual Real            GetRealParameter(const Integer id) const;
    virtual Real            SetRealParameter(const Integer id, const Real value);
 
-   void                    Initialize();
+   virtual bool            Initialize();
    virtual bool            Fire(Real *burnData);
    
    GmatBase*               Clone() const;

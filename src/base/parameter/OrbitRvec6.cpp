@@ -197,7 +197,7 @@ bool OrbitRvec6::Validate()
 }
 
 //------------------------------------------------------------------------------
-// virtual void Initialize()
+// virtual bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Initializes reference objects.
@@ -205,9 +205,10 @@ bool OrbitRvec6::Validate()
  * @return true if all objects are set; false otherwise
  */
 //------------------------------------------------------------------------------
-void OrbitRvec6::Initialize()
+bool OrbitRvec6::Initialize()
 {
    InitializeRefObjects();
+   return true;
 }
 
 //-------------------------------------

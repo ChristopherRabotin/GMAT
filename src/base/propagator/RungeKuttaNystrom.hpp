@@ -89,7 +89,7 @@ public:
     RungeKuttaNystrom(const RungeKuttaNystrom& rkn);
     RungeKuttaNystrom&      operator=(const RungeKuttaNystrom& rkn);
 
-    virtual void            Initialize();
+    virtual bool            Initialize();
     virtual bool            Step();
     virtual bool            Step(double dt);
     virtual bool            RawStep();

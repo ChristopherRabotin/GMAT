@@ -58,7 +58,7 @@ public:
     
    void SetDescription(const std::string &desc);
    bool SetInterpolator(Interpolator *interp);
-   bool SetSolarSystem(SolarSystem *solarSystem);
+   void SetSolarSystem(SolarSystem *solarSystem);
    bool SetInterpolator(const std::string &name);
    bool SetRefFrame(RefFrame *refFrame);
    bool SetRefFrame(const std::string &name);
@@ -67,7 +67,7 @@ public:
    bool SetStopParameter(Parameter *param);
    bool SetStopParameter(const std::string &name);
    
-   void Initialize();
+   bool Initialize();
     
    virtual bool SetSpacecraft(SpaceObject *sc);
 

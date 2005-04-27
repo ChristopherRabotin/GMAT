@@ -109,14 +109,14 @@ MJ2000EqAxes::~MJ2000EqAxes()
 }
 
 //---------------------------------------------------------------------------
-//  void MJ2000EqAxes::Initialize()
+//  bool MJ2000EqAxes::Initialize()
 //---------------------------------------------------------------------------
 /**
  * Initialization method for this MJ2000EqAxes.
  *
  */
 //---------------------------------------------------------------------------
-void MJ2000EqAxes::Initialize()
+bool MJ2000EqAxes::Initialize()
 {
    InertialAxes::Initialize();
    // initialize the rotation matrix to be the identity matrix
@@ -124,6 +124,8 @@ void MJ2000EqAxes::Initialize()
    rotMatrix(1,1) = 1.0;
    rotMatrix(2,2) = 1.0;
    // rotDotMatrix is still the default zero matrix
+   
+   return true;
 }
 
 //------------------------------------------------------------------------------

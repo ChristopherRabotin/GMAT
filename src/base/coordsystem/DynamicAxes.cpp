@@ -151,16 +151,16 @@ A1Mjd DynamicAxes::GetEpoch() const
 
 
 //---------------------------------------------------------------------------
-//  void Initialize()
+//  bool Initialize()
 //---------------------------------------------------------------------------
 /**
  * Initialization method for this DynamicAxes.
  *
  */
 //---------------------------------------------------------------------------
-void DynamicAxes::Initialize()
+bool DynamicAxes::Initialize()
 {
-   AxisSystem::Initialize();
+   return AxisSystem::Initialize();
 }
 
 

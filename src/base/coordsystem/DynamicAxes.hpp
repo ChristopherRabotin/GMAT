@@ -48,7 +48,7 @@ public:
    
    
    // initializes the DynamicAxes
-   virtual void Initialize(); // needed?  maybe later
+   virtual bool Initialize(); // needed?  maybe later
       
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes

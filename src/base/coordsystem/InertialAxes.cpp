@@ -112,7 +112,7 @@ InertialAxes::~InertialAxes()
 }
 
 //---------------------------------------------------------------------------
-//  void InertialAxes::Initialize()
+//  bool InertialAxes::Initialize()
 //---------------------------------------------------------------------------
 /**
  * Initialization method for the InertialAxes classes.
@@ -121,9 +121,10 @@ InertialAxes::~InertialAxes()
  *       classes (at least at the leaf level).
  */
 //---------------------------------------------------------------------------
-void InertialAxes::Initialize()
+bool InertialAxes::Initialize()
 {
    AxisSystem::Initialize();
+   return true;
 }
 
 

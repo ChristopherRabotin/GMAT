@@ -169,7 +169,7 @@ void RungeKutta::SetPhysicalModel(PhysicalModel *pPhysicalModel)
 }
 
 //------------------------------------------------------------------------------
-// void RungeKutta::Initialize(void)
+// bool RungeKutta::Initialize()
 //------------------------------------------------------------------------------
 /**
  * Initializes the internal data structures 
@@ -177,15 +177,17 @@ void RungeKutta::SetPhysicalModel(PhysicalModel *pPhysicalModel)
  * This method allocates the data arrays and calls the functions that set the
  * RK coefficients and accumulator array (ki) memory allocation.  If any of the
  * allocation fails, the internal initialized flag is set to false.
+ *
+ * @return trun upon successful initialization
  */
 //------------------------------------------------------------------------------
-void RungeKutta::Initialize(void)
+bool RungeKutta::Initialize()
 {
     Propagator::Initialize();
     if (stages <= 0) 
     {
         initialized = false;
-        return;
+        return initialized;
     }
 
     ClearArrays();
@@ -193,20 +195,20 @@ void RungeKutta::Initialize(void)
     if ((ai = new Real [stages]) == NULL) 
     {
         initialized = false;
-        return;
+        return initialized;
     }
     if ((bij = new Real*[stages]) == NULL) 
     {
         delete [] ai;
         initialized = false;
-        return;
+        return initialized;
     }
     if ((cj = new Real [stages]) == NULL) 
     {
         delete [] ai;
         delete [] bij;
         initialized = false;
-        return;
+        return initialized;
     }
     if ((ki = new Real*[stages]) == NULL) 
     {
@@ -214,7 +216,7 @@ void RungeKutta::Initialize(void)
         delete [] bij;
         delete [] cj;
         initialized = false;
-        return;
+        return initialized;
     }
     if ((ee = new Real [stages]) == NULL) 
     {
@@ -223,7 +225,7 @@ void RungeKutta::Initialize(void)
         delete [] cj;
         delete [] ki;
         initialized = false;
-        return;
+        return initialized;
     }
 
     for (int i = 0; i < stages; i++) 
@@ -238,7 +240,7 @@ void RungeKutta::Initialize(void)
             delete [] cj;
             delete [] ki;
             initialized = false;
-            return;
+            return initialized;
         }
     }
     
@@ -247,6 +249,8 @@ void RungeKutta::Initialize(void)
        SetCoefficients();
        SetupAccumulator();
     }
+    
+    return true;
 }
 
 //------------------------------------------------------------------------------

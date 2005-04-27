@@ -787,3 +787,41 @@ bool Achieve::Execute()
    targeter->SetResultValue(goalId, val);
    return retval;
 }
+
+
+//------------------------------------------------------------------------------
+//  const std::string& GetGeneratingString()
+//------------------------------------------------------------------------------
+/**
+ * Method used to retrieve the string that was parsed to build this GmatCommand.
+ *
+ * This method is used to retrieve the GmatCommand string from the script that
+ * was parsed to build the GmatCommand.  It is used to save the script line, so
+ * that the script can be written to a file without inverting the steps taken to
+ * set up the internal object data.  As a side benefit, the script line is
+ * available in the GmatCommand structure for debugging purposes.
+ *
+ * @param mode    Specifies the type of serialization requested.  (Not yet used
+ *                in commands)
+ * @param prefix  Optional prefix appended to the object's name.  (Not yet used
+ *                in commands)
+ * @param useName Name that replaces the object's name.  (Not yet used in
+ *                commands)
+ *
+ * @return The script line that, when interpreted, defines this Achieve command.
+ */
+//------------------------------------------------------------------------------
+const std::string& Achieve::GetGeneratingString(Gmat::WriteMode mode,
+                                            const std::string &prefix,
+                                            const std::string &useName)
+{
+   // Build the local string
+   std::stringstream tol;
+   tol << tolerance;
+   std::string gen = "Achieve " + targeterName + "(" + goalName + " = " +
+                     goalString + ", {Tolerance = " + tol.str();
+
+   generatingString = gen + "});";
+   // Then call the base class method
+   return GmatCommand::GetGeneratingString();
+}

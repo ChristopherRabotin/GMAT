@@ -114,16 +114,17 @@ EquatorAxes::~EquatorAxes()
 }
 
 //------------------------------------------------------------------------------
-//  void EquatorAxes::Initialize()
+//  bool EquatorAxes::Initialize()
 //------------------------------------------------------------------------------
 /**
  * Initialization method for this EquatorAxes.
  *
  */
 //------------------------------------------------------------------------------
-void EquatorAxes::Initialize()
+bool EquatorAxes::Initialize()
 {
    DynamicAxes::Initialize();
+   return true;
 }
 
 //------------------------------------------------------------------------------

@@ -597,14 +597,14 @@ bool PropSetup::SetStringParameter(const std::string &label, const std::string &
 }
 
 //------------------------------------------------------------------------------
-// void Initialize()
+// bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Sets mInitialized to true if pointers of Propagator and ForceModel are not
  * NULL and there is at least one Force in the ForceModel; false otherwise
  */
 //------------------------------------------------------------------------------
-void PropSetup::Initialize()
+bool PropSetup::Initialize()
 {
    //MessageInterface::ShowMessage("PropSetup::Initialize() entered \n");
    mInitialized = true;
@@ -653,6 +653,8 @@ void PropSetup::Initialize()
       mPropagator->Initialize();
       //MessageInterface::ShowMessage("PropSetup::Initialize() after mPropagator->Initialize() \n");
    }
+   
+   return true;
 }
 
 

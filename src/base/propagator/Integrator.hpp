@@ -142,9 +142,9 @@ public:
     
     virtual Real GetStepTaken();
     
-    //------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     // virtual void Initialize(void)
-    //------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     /**
      * Method used to initialize the integrator
      * 
@@ -152,9 +152,11 @@ public:
      * data structures and data elements.  This method is provided for that 
      * purpose.  At a minimum, be sure to call the Propagator::Initialize() 
      * method.
+     *
+     * @return true upon successful initialization.
      */
-    //------------------------------------------------------------------------------
-    virtual void Initialize() = 0;
+    //--------------------------------------------------------------------------
+    virtual bool Initialize() = 0;
     
     virtual bool RawStep() = 0;
     virtual Integer GetPropagatorOrder(void) const; 

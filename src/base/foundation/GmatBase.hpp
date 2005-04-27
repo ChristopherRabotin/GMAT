@@ -33,6 +33,10 @@
 #include "Rmatrix.hpp"
 
 
+// Forward reference for the SolarSystem pointer
+class SolarSystem;
+
+
 //------------------------------------------------------------------------------
 /**
  * Definition for the base class for all GMAT extensible objects
@@ -106,6 +110,10 @@ public:
    
    // required method for all subclasses that can be copied in a script
    virtual void        Copy(const GmatBase*);
+   
+   virtual bool        Initialize();
+   virtual void        SetSolarSystem(SolarSystem *ss);
+
 
    virtual bool        RequiresJ2000Body();
 

@@ -45,7 +45,7 @@ public:
    virtual void SetInternalCoordSystem(CoordinateSystem *ss);
    virtual bool AddRefObject(GmatBase*obj);
    virtual bool Validate();
-   virtual void Initialize();
+   virtual bool Initialize();
    
    // methods inherited from GmatBase
    virtual bool RenameRefObject(const Gmat::ObjectType type,

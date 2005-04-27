@@ -317,7 +317,7 @@ Real Propagator::SetRealParameter(const std::string &label, const Real value)
 }
 
 //------------------------------------------------------------------------------
-// void Propagator::Initialize(void)
+// bool Propagator::Initialize(void)
 //------------------------------------------------------------------------------
 /**
  * Initialize the propagation system
@@ -328,7 +328,7 @@ Real Propagator::SetRealParameter(const std::string &label, const Real value)
  * method in your derived classes.
  */
 //------------------------------------------------------------------------------
-void Propagator::Initialize(void)
+bool Propagator::Initialize(void)
 {
     if (physicalModel != NULL) 
     {
@@ -347,6 +347,8 @@ void Propagator::Initialize(void)
     
     if (!initialized)
        throw PropagatorException("Propagator failed to initialize");
+       
+    return true;
 }
 
 //------------------------------------------------------------------------------

@@ -274,14 +274,14 @@ SpacePoint* CoordinateBase::GetJ2000Body() const
 
 
 //------------------------------------------------------------------------------
-//  void  Initialize()
+//  bool  Initialize()
 //------------------------------------------------------------------------------
 /**
  * This method initializes the CoordinateBase class.
  *
  */
 //------------------------------------------------------------------------------
-void CoordinateBase::Initialize()
+bool CoordinateBase::Initialize()
 {
    if (!origin)
       throw CoordinateSystemException(
@@ -292,6 +292,7 @@ void CoordinateBase::Initialize()
    if (!solar)
       throw CoordinateSystemException(
             "Solar System has not been defined for CoordinateBase object");
+   return true;
 }
 
 //------------------------------------------------------------------------------

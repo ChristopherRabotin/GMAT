@@ -160,7 +160,7 @@ bool TimeReal::Validate()
 
 
 //------------------------------------------------------------------------------
-// virtual void Initialize()
+// virtual bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Initializes reference objects.
@@ -168,11 +168,13 @@ bool TimeReal::Validate()
  * @return true if all objects are set; false otherwise
  */
 //------------------------------------------------------------------------------
-void TimeReal::Initialize()
+bool TimeReal::Initialize()
 {
    mInitialEpoch = 0.0;
    mIsInitialEpochSet = false;
    InitializeRefObjects();
+   
+   return true;
 }
 
 

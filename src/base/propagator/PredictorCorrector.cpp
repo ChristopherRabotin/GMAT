@@ -245,13 +245,13 @@ PredictorCorrector& PredictorCorrector::operator=(const PredictorCorrector& pc)
  * Method used to setup the data structures for the algorithm 
  */
 //------------------------------------------------------------------------------
-void PredictorCorrector::Initialize(void)
+bool PredictorCorrector::Initialize()
 {
 //    Propagator::Initialize();
 
     initialized = false;
     if (stepCount <= 0)
-        return;
+        return initialized;
 
     if (physicalModel) {
         dimension = physicalModel->GetDimension();
@@ -291,14 +291,14 @@ void PredictorCorrector::Initialize(void)
 
         predictorState = new Real[dimension];
         if (!predictorState) {
-            return;
+            return initialized;
         }
 
         correctorState = new Real[dimension];
         if (!correctorState) {
             delete [] predictorState;
             predictorState = NULL;
-            return;
+            return initialized;
         }
 
         errorEstimates = new Real[dimension];
@@ -307,7 +307,7 @@ void PredictorCorrector::Initialize(void)
             predictorState = NULL;
             delete [] correctorState;
             correctorState = NULL;
-            return;
+            return initialized;
         }
 
         pweights = new Real[stepCount];
@@ -318,7 +318,7 @@ void PredictorCorrector::Initialize(void)
             correctorState = NULL;
             delete [] errorEstimates;
             errorEstimates = NULL;
-            return;
+            return initialized;
         }
 
         cweights = new Real[stepCount];
@@ -331,7 +331,7 @@ void PredictorCorrector::Initialize(void)
             correctorState = NULL;
             delete [] errorEstimates;
             errorEstimates = NULL;
-            return;
+            return initialized;
         }
 
         history = new Real*[stepCount];
@@ -354,7 +354,7 @@ void PredictorCorrector::Initialize(void)
                     correctorState = NULL;
                     delete [] errorEstimates;
                     errorEstimates = NULL;
-                    return;
+                    return initialized;
                 }
                 if (SetWeights()) {
                     ddt = physicalModel->GetDerivativeArray();
@@ -385,6 +385,8 @@ void PredictorCorrector::Initialize(void)
         inState  = physicalModel->GetState();
         outState = physicalModel->GetState();
     }
+    
+    return initialized;
 }
 
 //------------------------------------------------------------------------------

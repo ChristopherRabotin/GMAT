@@ -128,17 +128,19 @@ GmatCoordinate::ParameterUsage BodyFixedAxes::UsesItrfFile() const
 
 
 //------------------------------------------------------------------------------
-//  void Initialize()
+//  bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Initialization method for this BodyFixedAxes.
  *
  */
 //------------------------------------------------------------------------------
-void BodyFixedAxes::Initialize()
+bool BodyFixedAxes::Initialize()
 {
    DynamicAxes::Initialize();
    InitializeFK5();
+   
+   return true;
 }
 
 

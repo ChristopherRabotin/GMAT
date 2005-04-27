@@ -186,7 +186,7 @@ bool PlanetReal::Validate()
 }
 
 //------------------------------------------------------------------------------
-// virtual void Initialize()
+// virtual bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Initializes reference objects.
@@ -194,9 +194,10 @@ bool PlanetReal::Validate()
  * @return true if all objects are set; false otherwise
  */
 //------------------------------------------------------------------------------
-void PlanetReal::Initialize()
+bool PlanetReal::Initialize()
 {
    InitializeRefObjects();
+   return true;
 }
 
 //-------------------------------------

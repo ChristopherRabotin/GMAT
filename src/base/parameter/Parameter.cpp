@@ -494,9 +494,9 @@ void Parameter::SetInternalCoordSystem(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
 // virtual void Initialize()
 //------------------------------------------------------------------------------
-void Parameter::Initialize()
+bool Parameter::Initialize()
 {
-   ; // do nothing here
+   return true; // do nothing here
 }
 
 //------------------------------------------------------------------------------

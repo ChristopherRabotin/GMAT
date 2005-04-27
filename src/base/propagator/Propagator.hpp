@@ -93,7 +93,7 @@ public:
     virtual Real SetRealParameter(const Integer id, const Real value);
     virtual Real SetRealParameter(const std::string &label, const Real value);
         
-    virtual void Initialize(void);
+    virtual bool Initialize();
     virtual void SetPhysicalModel(PhysicalModel *pPhysicalModel);
     virtual bool Step(Real dt);
 

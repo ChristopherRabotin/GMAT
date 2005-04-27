@@ -75,7 +75,7 @@ public:
    
    
    // initializes the CoordinateSystem
-   virtual void Initialize();
+   virtual bool Initialize();
    
    // methods to convert between this CoordinateSystem and MJ2000Eq
    virtual Rvector ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 

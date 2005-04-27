@@ -96,7 +96,7 @@ public:
 //    virtual Real GetParameter(const int id) const;
 //    virtual bool SetParameter(const int id, const Real val);
 
-    virtual void Initialize(void);
+    virtual bool Initialize();
     virtual bool  Step(void);
     virtual bool  Step(Real dt);
     virtual bool  RawStep(void);

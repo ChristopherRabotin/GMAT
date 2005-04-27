@@ -98,7 +98,7 @@ public:
    virtual ItrfCoefficientsFile* GetItrfCoefficientsFile()               = 0;
       
    // initializes the CoordinateBase
-   virtual void Initialize();
+   virtual bool Initialize();
    
    
    // all classes derived from GmatBase must supply this Clone method;

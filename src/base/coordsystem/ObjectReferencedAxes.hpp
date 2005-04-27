@@ -60,7 +60,7 @@ public:
    virtual GmatCoordinate::ParameterUsage UsesZAxis() const;
    
    // method to initialize the data
-   virtual void Initialize();
+   virtual bool Initialize();
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes

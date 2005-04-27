@@ -40,7 +40,7 @@ public:
    
    virtual Integer GetNumRefObjects() const;
    virtual bool Validate();
-   virtual void Initialize();
+   virtual bool Initialize();
    virtual bool AddRefObject(GmatBase *obj);
       
    // methods inherited from GmatBase

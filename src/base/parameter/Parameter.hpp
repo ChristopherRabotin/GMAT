@@ -83,7 +83,7 @@ public:
    virtual void SetInternalCoordSystem(CoordinateSystem *cs);
    virtual void SetSolarSystem(SolarSystem *ss);
    
-   virtual void Initialize();
+   virtual bool Initialize();
    virtual bool Evaluate();
    
    // methods all SYSTEM_PARAM should implement

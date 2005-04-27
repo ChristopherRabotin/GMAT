@@ -44,7 +44,7 @@ public:
    virtual bool AddRefObject(GmatBase *obj);
    virtual void SetSolarSystem(SolarSystem *ss);
    virtual bool Validate();
-   virtual void Initialize();
+   virtual bool Initialize();
    
    // methods inherited from GmatBase
    virtual bool RenameRefObject(const Gmat::ObjectType type,

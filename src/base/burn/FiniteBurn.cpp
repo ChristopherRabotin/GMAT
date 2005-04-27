@@ -543,13 +543,15 @@ GmatBase* FiniteBurn::Clone() const
 
 
 //------------------------------------------------------------------------------
-// void FiniteBurn::Initialize()
+// bool FiniteBurn::Initialize()
 //------------------------------------------------------------------------------
 /**
  * This method sets up the data structures and pointers for a finite burn.
+ *
+ * @return true on success.
  */
 //------------------------------------------------------------------------------
-void FiniteBurn::Initialize()
+bool FiniteBurn::Initialize()
 {
    /// @todo Consolidate Finite & Impulsive burn initialization into base class
    if (!sc)
@@ -603,4 +605,6 @@ void FiniteBurn::Initialize()
    }
    
    initialized = true;
+   
+   return initialized;
 }

@@ -669,6 +669,34 @@ void GmatBase::Copy(const GmatBase*)
 
 
 //------------------------------------------------------------------------------
+//  bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Performs any pre-run initialization that the object needs.
+ *
+ * @return true unless initialization fails.
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::Initialize()
+{
+   return true;
+}
+
+//------------------------------------------------------------------------------
+//  void GmatBase::SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+/**
+ * Sets the internal solar system pointer for objects that have one.
+ *
+ * @note Derived classes that need the solar system must override this method.
+ */
+//------------------------------------------------------------------------------
+void GmatBase::SetSolarSystem(SolarSystem *ss)
+{
+   ;     // Do nothing by default
+}
+
+//------------------------------------------------------------------------------
 //  bool RequiresJ2000Body()
 //------------------------------------------------------------------------------
 /**

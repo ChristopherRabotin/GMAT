@@ -67,6 +67,11 @@ public:
    virtual bool        InterpretAction(void);
    virtual bool        Initialize(void);
    virtual bool        Execute(void);
+   
+   virtual const std::string&
+                       GetGeneratingString(Gmat::WriteMode mode,
+                                           const std::string &prefix,
+                                           const std::string &useName);
     
 protected:
    /// The name of the spacecraft that gets maneuvered

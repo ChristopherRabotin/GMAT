@@ -317,24 +317,22 @@ bool BaseStopCondition::SetInterpolator(Interpolator *interp)
 
 
 //------------------------------------------------------------------------------
-// bool SetSolarSystem(SolarSystem *solarSystem)
+// void SetSolarSystem(SolarSystem *solarSystem)
 //------------------------------------------------------------------------------
 /**
  * Sets SolarSystem
- *
- * @return true if SolarSystem is successfully set; false otherwise
  */
 //------------------------------------------------------------------------------
-bool BaseStopCondition::SetSolarSystem(SolarSystem *solarSystem)
+void BaseStopCondition::SetSolarSystem(SolarSystem *solarSystem)
 {
    if (solarSystem != NULL)
    {
       mSolarSystem = solarSystem;
-      return true;
    }
    else
    {
-      return false;
+      throw StopConditionException(
+         "Attempting to set solar system with NULL pointer.");
    }
 }
 
@@ -549,9 +547,9 @@ bool BaseStopCondition::SetStopParameter(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// void Initialize()
+// bool Initialize()
 //------------------------------------------------------------------------------
-void BaseStopCondition::Initialize()
+bool BaseStopCondition::Initialize()
 {
    mInitialized = false;
    
@@ -591,6 +589,8 @@ void BaseStopCondition::Initialize()
       ("BaseStopCondition::Initialize() mInitialized=%d\n",
        mInitialized);
    #endif
+   
+   return mInitialized;
 }
 
 

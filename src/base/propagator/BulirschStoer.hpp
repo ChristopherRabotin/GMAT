@@ -68,7 +68,7 @@ public:
     
    virtual GmatBase* Clone(void) const;
     
-   virtual void Initialize(void);
+   virtual bool Initialize();
    bool         SetMaximumDepth(Integer d);
    virtual bool Step(Real dt);
    virtual bool Step(void);

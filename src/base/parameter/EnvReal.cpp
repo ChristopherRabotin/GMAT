@@ -185,7 +185,7 @@ bool EnvReal::Validate()
 }
 
 //------------------------------------------------------------------------------
-// virtual void Initialize()
+// virtual bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Initializes reference objects.
@@ -193,9 +193,10 @@ bool EnvReal::Validate()
  * @return true if all objects are set; false otherwise
  */
 //------------------------------------------------------------------------------
-void EnvReal::Initialize()
+bool EnvReal::Initialize()
 {
    InitializeRefObjects();
+   return true;
 }
 
 //-------------------------------------

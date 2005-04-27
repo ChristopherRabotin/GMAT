@@ -147,7 +147,7 @@ public:
     RungeKutta & operator=(const RungeKutta&);
 
     virtual void SetPhysicalModel(PhysicalModel *pPhysicalModel);
-    virtual void Initialize(void);
+    virtual bool Initialize();
     virtual bool Step(void);
     virtual bool Step(Real dt);
     virtual bool RawStep(void);

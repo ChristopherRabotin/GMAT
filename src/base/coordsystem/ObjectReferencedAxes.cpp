@@ -303,16 +303,17 @@ void ObjectReferencedAxes::ResetAxes()
 
 
 //---------------------------------------------------------------------------
-//  void ObjectReferencedAxes::Initialize()
+//  bool ObjectReferencedAxes::Initialize()
 //---------------------------------------------------------------------------
 /**
  * Initialization method for this ObjectReferencedAxes.
  *
  */
 //---------------------------------------------------------------------------
-void ObjectReferencedAxes::Initialize()
+bool ObjectReferencedAxes::Initialize()
 {
    DynamicAxes::Initialize();
+   return true;
 }
 
 //------------------------------------------------------------------------------

@@ -146,7 +146,7 @@ RungeKuttaNystrom & RungeKuttaNystrom::operator=(const RungeKuttaNystrom& rk)
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// void RungeKuttaNystrom::Initialize()
+// bool RungeKuttaNystrom::Initialize()
 //------------------------------------------------------------------------------
 /**
  * This method allocates the data arrays for the Runge-Kutta-Nystrom integrators
@@ -154,7 +154,7 @@ RungeKuttaNystrom & RungeKuttaNystrom::operator=(const RungeKuttaNystrom& rk)
  * and then initializing the Nystrom specific data.
  */
 //------------------------------------------------------------------------------
-void RungeKuttaNystrom::Initialize()
+bool RungeKuttaNystrom::Initialize()
 {
     RungeKutta::Initialize();
     initialized = true;
@@ -252,6 +252,8 @@ void RungeKuttaNystrom::Initialize()
             
     SetCoefficients();
     SetupAccumulator();
+    
+    return initialized;
 }
 
 

@@ -184,7 +184,7 @@ void GmatCommand::SetGeneratingString(const std::string &gs)
 }
 
 //------------------------------------------------------------------------------
-//  const std::string GetGeneratingString()
+//  const std::string& GetGeneratingString()
 //------------------------------------------------------------------------------
 /**
  * Method used to retrieve the string that was parsed to build this GmatCommand.
