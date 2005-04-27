@@ -68,6 +68,8 @@ secondaryBodyName   (""),
 primaryBody         (NULL),
 secondaryBody       (NULL)
 {
+   objectTypes.push_back(Gmat::LIBRATION_POINT);
+   objectTypeNames.push_back("LibrationPoint");
    parameterCount = LibrationPointParamCount;
 }
 
