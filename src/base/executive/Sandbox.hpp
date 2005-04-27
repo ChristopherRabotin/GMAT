@@ -31,6 +31,7 @@
 #include "Spacecraft.hpp"
 #include "PropSetup.hpp"
 #include "Subscriber.hpp"
+#include "Parameter.hpp"            // Remove when temporary code satisfied
 #include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
 //  #include "Solver.hpp"
@@ -100,6 +101,17 @@ private:
    Sandbox(const Sandbox&);
    Sandbox& operator=(const Sandbox&);
    
+   void                              InitializeInternalObjects();
+   
+   //*********************  TEMPORARY  ******************************************************************
+   void  InitializeCoordinateSystem(CoordinateSystem *cs);
+   void  InitializeParameter(Parameter *param);
+   void  InitializeSubscriber(Subscriber *sub);
+   //*********************  END OF TEMPORARY  ***********************************************************
+
+   void                              BuildReferences(GmatBase *obj);
+   void                              SetRefFromName(GmatBase *obj,
+                                                    const std::string &oName);
    void                              BuildAssociations(GmatBase * obj);
    SpacePoint *                      FindSpacePoint(const std::string &spName);
    
