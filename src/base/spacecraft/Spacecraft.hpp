@@ -22,11 +22,10 @@
 
 #include <valarray>
 #include "SpaceObject.hpp"
-#include "SolarSystem.hpp"
+#include "CoordinateSystem.hpp"
 #include "Rvector6.hpp"
 #include "StateConverter.hpp"
 #include "TimeConverter.hpp"
-#include "MessageInterface.hpp"
 #include "PropState.hpp"
 #include "FuelTank.hpp"
 #include "Thruster.hpp"
@@ -51,6 +50,8 @@ public:
    virtual GmatBase* Clone(void) const;
    virtual void Copy(const GmatBase* orig);
    
+   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+
    //  Tanks and thrusters (and, eventually, other hardware) are owned objects,
    // and therefore need these methods from GmatBase
    virtual const StringArray&
@@ -61,7 +62,8 @@ public:
                                     const std::string &name);
    virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                     const std::string &name = "");
-//   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//   virtual bool        SetRefObject(GmatBase *obj, 
+//                                    const Gmat::ObjectType type,
 //                                    const std::string &name,
 //                                    const Integer index);
    virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
@@ -87,22 +89,19 @@ public:
    GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
    
+   virtual bool Initialize();
+
    virtual bool TakeAction(const std::string &action, 
                            const std::string &actionData = "");
    
 
-   //    virtual PropState& GetState(void); 
+   // virtual PropState& GetState(void) { return state;}; 
+   // @test: just test new method
+   Rvector6 GetStateVector(const std::string &elementType);
 
    void SetState(const std::string &elementType, Real *instate);
    void SetState(const Real s1, const Real s2, const Real s3, 
                  const Real s4, const Real s5, const Real s6);
-
-   Rvector6 GetCartesianState();
-   Rvector6 GetKeplerianState();
-   Rvector6 GetModifiedKeplerianState();
-   // Will add more methods below later
-   // Rvector6 GetSphericalOneState() const;
-   // Rvector6 GetSphericalTwoState() const;
 
    bool GetDisplay() const;
    void SetDisplay(const bool displayFlag);
@@ -120,16 +119,13 @@ public:
    void SetDisplayState(const Rvector6 s);
    void SaveDisplay();
 
-   virtual SolarSystem* GetSolarSystem() const;
-   virtual void SetSolarSystem(SolarSystem *ss);
-   
 protected:
    enum SC_Param_ID 
    {
       // EPOCH_ID = SpaceObjectParamCount, 
       ELEMENT1_ID = SpaceObjectParamCount, ELEMENT2_ID, ELEMENT3_ID, 
       ELEMENT4_ID, ELEMENT5_ID, ELEMENT6_ID, 
-      STATE_TYPE_ID, ANOMALY_ID, BODY_ID, FRAME_ID, PLANE_ID, 
+      STATE_TYPE_ID, ANOMALY_ID, COORD_SYS_ID,
       DRY_MASS_ID,DATE_FORMAT_ID, CD_ID, CR_ID, DRAG_AREA_ID, SRP_AREA_ID,
       FUEL_TANK_ID, THRUSTER_ID, TOTAL_MASS_ID, 
       SC_ParamCount
@@ -139,66 +135,67 @@ protected:
    static const Gmat::ParameterType 
           PARAMETER_TYPE[SC_ParamCount - SpaceObjectParamCount];
    
+   // Spacecraft's list of elements
+   static const std::string ELEMENT_LIST[]; 
+
    // Declare protetced method data of internal spacecraft information
    // Real           epoch;      // Moved to SpaceObject  
    // DJC:  7/21/04 Update for the state vector used in propagation
    // Real           state[6];
    // PropState      state;      // Moved to SpaceObject
-   Real           dryMass;
-   Real           coeffDrag;
-   Real           dragArea;
-   Real           srpArea;
-   Real           reflectCoeff;
-   std::string    dateFormat;
-   std::string    stateType;
-   Anomaly        anomaly;
-   std::string    refBody;
-   std::string    refFrame;
-   std::string    refPlane;
+   Rvector6          stateVector;
+   Real              dryMass;
+   Real              coeffDrag;
+   Real              dragArea;
+   Real              srpArea;
+   Real              reflectCoeff;
+   std::string       dateFormat;
+   std::string       stateType;
+   Anomaly           anomaly;
+   CoordinateSystem  *coordinateSystem;  
+   StringArray       coordSysNameArray;
+   std::string       coordSysName;
    
    // for non-internal spacecraft information
-   SolarSystem    *solarSystem;
-   StateConverter stateConverter;
-   TimeConverter  timeConverter;
-   Rvector6       cartesianState;
-   Rvector6       keplerianState;
-   Rvector6       modifiedKeplerianState;
-   Rvector6       sphericalOneState;
-   Rvector6       sphericalTwoState;
-   bool           isForDisplay;
-   std::string    displayEpoch;
-   Real           displayState[6];
-   std::string    displayDateFormat;
-   std::string    displayCoordType; 
-   std::string    displaySubType;
+   StateConverter    stateConverter;
+   TimeConverter     timeConverter;
+   bool              isForDisplay;
+   std::string       displayEpoch;
+   Real              displayState[6];
+   std::string       displayDateFormat;
+   std::string       displayCoordType; 
+   std::string       displaySubType;
    
    // Lists of hardware elements added 11/12/04, djc
    /// Fuel tank names
-   StringArray    tankNames;
+   StringArray       tankNames;
    /// Thruster names
-   StringArray    thrusterNames;
+   StringArray       thrusterNames;
    /// Pointers to the fuel tanks
-   ObjectArray    tanks;
+   ObjectArray       tanks;
    /// Pointers to the spacecraft thrusters
-   ObjectArray    thrusters;
+   ObjectArray       thrusters;
           
    /// Dry mass plus fuel masses, a calculated parameter
-   Real           totalMass;
+   Real              totalMass;
    
+   // protected methods
    Real           UpdateTotalMass();
    Real           UpdateTotalMass() const;
    
 private:
-   bool        initialDisplay;
-   bool        hasElements[6];
-   void        InitializeValues();
-   void        SetEpoch();
-   std::string GetElementName(const Integer id) const; 
-   std::string GetLocalCoordType() const;
-   void        SetInitialDisplay();
-   std::string ToString(const Real value);
+   bool         initialDisplay;
+   bool         hasElements[6];
       
-   void        SetInitialState(); //loj: 10/25/04 added
+   // private  methods
+   void         SetEpoch();
+   std::string  GetElementName(const Integer id) const; 
+   std::string  GetLocalCoordType() const;
+   void         SetInitialDisplay();
+   std::string  ToString(const Real value);
+   void         SetInitialState(); //loj: 10/25/04 added
+   void         InitializeDataMethod(const Spacecraft &s);
+   std::string  FindStateType(const std::string &elementLabel) const;
 };
 
 #endif // Spacecraft_hpp

@@ -33,10 +33,18 @@ const Gmat::ParameterType
    {
       Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE,
       Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::STRING_TYPE, Gmat::STRING_TYPE,
-      Gmat::STRING_TYPE, Gmat::STRING_TYPE, Gmat::STRING_TYPE, Gmat::REAL_TYPE,
-      Gmat::STRING_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE,
-      Gmat::REAL_TYPE, Gmat::STRINGARRAY_TYPE,  Gmat::STRINGARRAY_TYPE,
-      Gmat::REAL_TYPE
+      Gmat::STRING_TYPE, Gmat::REAL_TYPE, Gmat::STRING_TYPE, Gmat::REAL_TYPE, 
+      Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::STRINGARRAY_TYPE,
+      Gmat::STRINGARRAY_TYPE, Gmat::REAL_TYPE
+   };
+
+const std::string Spacecraft::ELEMENT_LIST[] =
+   {
+      "X","Y","Z","VX","VY","VZ",                     // Cartesian
+      "SMA","ECC","INC","RAAN","AOP","EA","MA","TA",  // Keplerian
+      "RadPer","RadApo",                              // Modified Keplerian
+      "RMAG","RA","DEC","VMAG","AZI","FPA",           // Sperhcail w/AZIFPA
+      "RAV","DECV"                                    // Spherical w/RADECV
    };
 
 //-------------------------------------
@@ -51,14 +59,14 @@ const Gmat::ParameterType
  *
  */
 Spacecraft::Spacecraft() : 
-    SpaceObject    (Gmat::SPACECRAFT,"Spacecraft",""),
-    solarSystem    (NULL)
+    SpaceObject    (Gmat::SPACECRAFT,"Spacecraft","")
 {
     objectTypes.push_back(Gmat::SPACECRAFT);
     objectTypeNames.push_back("Spacecraft");
 
     parameterCount = SC_ParamCount;
-    InitializeValues();
+//    Initialize();
+//    InitializeValues();
 }
 
 //---------------------------------------------------------------------------
@@ -71,14 +79,14 @@ Spacecraft::Spacecraft() :
  *
  */
 Spacecraft::Spacecraft(const std::string &name) :
-    SpaceObject    (Gmat::SPACECRAFT, "Spacecraft", name),
-    solarSystem    (NULL)
+    SpaceObject    (Gmat::SPACECRAFT, "Spacecraft", name)
 {
     objectTypes.push_back(Gmat::SPACECRAFT);
     objectTypeNames.push_back("Spacecraft");
     
     parameterCount = SC_ParamCount;
-    InitializeValues();
+//    Initialize();
+//    InitializeValues();
 }
 
 //---------------------------------------------------------------------------
@@ -92,14 +100,14 @@ Spacecraft::Spacecraft(const std::string &name) :
  *
  */
 Spacecraft::Spacecraft(const std::string &typeStr, const std::string &name) :
-    SpaceObject    (Gmat::SPACECRAFT, typeStr, name),
-    solarSystem    (NULL)
+    SpaceObject    (Gmat::SPACECRAFT, typeStr, name)
 {
     objectTypes.push_back(Gmat::SPACECRAFT);
     objectTypeNames.push_back("Spacecraft");
 
     parameterCount = SC_ParamCount;
-    InitializeValues();
+//    Initialize();
+//    InitializeValues();
 }
 
 
@@ -112,36 +120,10 @@ Spacecraft::Spacecraft(const std::string &typeStr, const std::string &name) :
  * @param <a> The original that is being copied.
  */
 Spacecraft::Spacecraft(const Spacecraft &a) :
-    SpaceObject    (a),
-//    epoch          (a.epoch),
-    dateFormat     (a.dateFormat),
-    stateType      (a.stateType),
-    anomaly        (a.anomaly),
-    refBody        (a.refBody),
-    refFrame       (a.refFrame),
-    refPlane       (a.refPlane),
-    solarSystem    (a.solarSystem)
+    SpaceObject    (a)
 {
     parameterCount = a.parameterCount;
-    for (int i = 0; i < 6; ++i)
-    { 
-       state[i] = a.state[i];
-       displayState[i] = a.displayState[i];
-    }
-    displayEpoch = a.displayEpoch;
-    displayDateFormat = a.displayDateFormat;
-    displayCoordType = a.displayCoordType;
-    initialDisplay = a.initialDisplay;
-    isForDisplay = a.isForDisplay;
-
-    dryMass = a.dryMass;
-    coeffDrag = a.coeffDrag;
-    dragArea = a.dragArea;
-    srpArea = a.srpArea;
-    reflectCoeff = a.reflectCoeff;
-    
-    tankNames = a.tankNames;
-    thrusterNames = a.thrusterNames;
+    InitializeDataMethod(a);
 }
 
 //---------------------------------------------------------------------------
@@ -179,33 +161,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
         return *this;
 
     // Duplicate the member data        
-//    epoch = a.epoch;
-    dateFormat = a.dateFormat;
-    stateType = a.stateType;
-    anomaly = a.anomaly;
-    refBody = a.refBody;
-    refFrame = a.refFrame;
-    refPlane = a.refPlane;
-
-    for (int i = 0; i < 6; ++i)
-    { 
-       state[i] = a.state[i];
-       displayState[i] = a.displayState[i];
-    }
-    displayEpoch = a.displayEpoch; 
-    displayDateFormat = a.displayDateFormat; 
-    displayCoordType = a.displayCoordType;
-    initialDisplay = a.initialDisplay;
-    isForDisplay = a.isForDisplay;
-
-    dryMass = a.dryMass;
-    coeffDrag = a.coeffDrag;
-    dragArea = a.dragArea;
-    srpArea = a.srpArea;
-    reflectCoeff = a.reflectCoeff;
-
-    tankNames = a.tankNames;
-    thrusterNames = a.thrusterNames;
+    InitializeDataMethod(a);
 
     return *this;
 }
@@ -240,6 +196,22 @@ void Spacecraft::Copy(const GmatBase* orig)
    operator=(*((Spacecraft *)(orig)));
 }
 
+//------------------------------------------------------------------------------
+// std::string GetRefObjectName(const Gmat::ObjectType type) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a name of the referenced objects.
+ *
+ * @return a name of objects of the requested type.
+ */ 
+std::string Spacecraft::GetRefObjectName(const Gmat::ObjectType type) const
+{
+   if (type == Gmat::COORDINATE_SYSTEM)
+   {
+      return coordSysName;
+   }
+   return SpaceObject::GetRefObjectName(type);
+}
 
 //------------------------------------------------------------------------------
 //  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
@@ -253,7 +225,7 @@ void Spacecraft::Copy(const GmatBase* orig)
 const StringArray& Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    static StringArray fullList;  // Maintain scope if the full list is requested
-   
+
    if (type == Gmat::FUEL_TANK)
       return tankNames;
    if (type == Gmat::THRUSTER)
@@ -262,9 +234,19 @@ const StringArray& Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type
    if (type == Gmat::HARDWARE) {
       fullList.clear();
       fullList = tankNames;
-      for (StringArray::iterator i = thrusterNames.begin(); i < thrusterNames.end(); ++i)
+      for (StringArray::iterator i = thrusterNames.begin(); 
+                                 i < thrusterNames.end(); ++i)
+      {
          fullList.push_back(*i);
+      }
       return fullList;
+   }
+
+   if (type == Gmat::COORDINATE_SYSTEM)
+   {
+      fullList.clear();
+      fullList.push_back(coordSysName);
+      return fullList; 
    }
       
    return SpaceObject::GetRefObjectNameArray(type);
@@ -322,6 +304,19 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
 }
 
 
+//---------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
+//                   const std::string &name)
+//---------------------------------------------------------------------------
+/**
+ * Sets the referenced object.
+ *
+ * @param <obj> reference object pointer.
+ * @param <type> type of the reference object.
+ * @param <name> name of the reference object.
+ *
+ * @return success of the operation.
+ */
 bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
                               const std::string &name)
 {
@@ -345,6 +340,36 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       }
       
       return false;
+   }
+   else if (type == Gmat::COORDINATE_SYSTEM)
+   {
+      coordinateSystem = (CoordinateSystem*)obj; 
+
+#if DEBUG_SPACECRAFT_TEST
+      MessageInterface::ShowMessage("\nAfter assigning to CS in SetRefObject, "
+             "is it still NULL (%d) and obj == NULL(%d)\n",
+             (coordinateSystem == NULL),(obj == NULL));
+
+      std::string body = coordinateSystem->GetOriginName();
+      MessageInterface::ShowMessage("\n...After getting body from CS, "
+                                    "body = %s\n", body.c_str());
+#endif
+
+#if 0
+      // @todo: Maybe no need this...
+      if (!stateConverter.SetMu(coordinateSystem))
+      {
+          MessageInterface::ShowMessage("\n...still error setting Mu\n");
+          return false;
+      }
+#endif
+           
+#if DEBUG_SPACECRAFT
+      MessageInterface::ShowMessage("\n...After setting Mu(%f)",
+                                    stateConverter.GetMu());
+#endif
+
+      return true; 
    }
 
    return SpaceObject::SetRefObject(obj, type, name);
@@ -441,9 +466,7 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
 
     if (str == "StateType") return STATE_TYPE_ID;
     if (str == "AnomalyType") return ANOMALY_ID; 
-    if (str == "ReferenceBody") return BODY_ID;
-    if (str == "ReferenceFrame") return FRAME_ID;
-    if (str == "PrincipalPlane") return PLANE_ID;
+    if (str == "CoordinateSystem") return COORD_SYS_ID;
 
     // Drag Coefficient  
     if (str == "Cd") return CD_ID;    
@@ -482,15 +505,13 @@ std::string Spacecraft::GetParameterText(const Integer id) const
 {
     if (id == DATE_FORMAT_ID) return "DateFormat";
   
-    if (id == ELEMENT1_ID || id == ELEMENT2_ID || id == ELEMENT3_ID 
-        || id == ELEMENT4_ID || id == ELEMENT5_ID || id == ELEMENT6_ID)
+    if (id >= ELEMENT1_ID && id <= ELEMENT6_ID)
         return GetElementName(id);
 
     if (id == STATE_TYPE_ID) return "StateType";
     if (id == ANOMALY_ID) return "AnomalyType";
-    if (id == BODY_ID) return "ReferenceBody";
-    if (id == FRAME_ID) return "ReferenceFrame";
-    if (id == PLANE_ID) return "PrincipalPlane";
+
+    if (id == COORD_SYS_ID) return "CoordinateSystem";
 
     if (id == DRY_MASS_ID) return "DryMass";
     
@@ -593,11 +614,48 @@ Real Spacecraft::GetRealParameter(const Integer id) const
  */
 Real Spacecraft::GetRealParameter(const std::string &label) const
 {
-    // First check with anomaly
-    if (label == "TA" || label == "MA" || label == "EA")
-       return anomaly.GetValue();
+   // Get the parameter ID
+   Integer id = GetParameterID(label);
+
+#if DEBUG_SPACECRAFT
+   MessageInterface::ShowMessage("\n*** Spacecraft::GetRealParameter(%s), id = "
+                                 "%d",label.c_str(), id);
+#endif
+
+   // First check with anomaly
+   if (!anomaly.IsInvalid(label))  
+      return anomaly.GetValue();
   
-    return GetRealParameter(GetParameterID(label));
+   // Check if it is within the state then get the specific element
+   if (id >= ELEMENT1_ID && id <= ELEMENT6_ID)
+   {
+      // @todo:  need to implement for determing the state type
+      std::string tempStateType = FindStateType(label);
+
+#if DEBUG_SPACECRAFT
+   MessageInterface::ShowMessage("\n.... tempStateType = %s", 
+                                 tempStateType.c_str()); 
+#endif
+      std::string errMsg = "\nSpacecraft::GetRealParameter(" + label + ") ";
+      if (tempStateType == "Invalid")
+      {
+         errMsg += "got invalid state type";
+         throw SpaceObjectException(errMsg);
+      }
+
+      // @todo: need to correct "discards qualifiers" 
+      Rvector6 tempState = GetStateVector(tempStateType);
+      Integer loc = id - SpaceObjectParamCount;
+      if (loc < 0 || loc > 5)
+      {
+         errMsg += "out of range for element number\n";
+         throw SpaceObjectException(errMsg);
+      }
+      return tempState[loc];
+
+   }
+
+   return GetRealParameter(id);
 }
 
 //---------------------------------------------------------------------------
@@ -615,6 +673,13 @@ Real Spacecraft::GetRealParameter(const std::string &label) const
  */
 Real Spacecraft::SetRealParameter(const Integer id, const Real value)
 {
+#if DEBUG_SPACECRAFT
+   MessageInterface::ShowMessage(
+       "\nSpacecraft::SetRealParameter(%d,%f) enters...\n\t"
+       "stateType = %s, displayCoordType = %s\n", id, value,
+       stateType.c_str(), displayCoordType.c_str());
+#endif
+
 //    if (id == epochID) return SetRealParameter("Epoch", value);
 
     // Check for the coordinate representation then set the value
@@ -701,12 +766,50 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
  */
 Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
 {
+#if DEBUG_SPACECRAFT
+   Integer id = GetParameterID(label);
+   std::string actualLabel = GetParameterText(id);
+
+   MessageInterface::ShowMessage(
+       "\nSpacecraft::SetRealParameter(%s,%f) enters...\n\t"
+       "stateType = %s, displayCoordType = %s\n\t"
+       "id = %d, text = %s\n", label.c_str(), value,
+       stateType.c_str(), displayCoordType.c_str(),id, actualLabel.c_str());
+
+   if (id >= ELEMENT1_ID && id <= ELEMENT6_ID)
+   {
+      Integer loc = id - SpaceObjectParamCount;
+      if (loc < 0 || loc > 5)
+         throw SpaceObjectException("Out of range for element number");
+
+      std::cout << "\n\tYes, it is Element 1-6: " << loc << std::endl;
+      if (actualLabel == label)
+      {
+         std::cout << "\n\tit is the same label so it will return.\n";
+         stateVector[loc] = value;
+         // @todo:  need to check with stateType before conversion
+         return value;
+      }
+      else
+      {
+         // @todo: need to figure out for different stateType
+         std::cout << "\n\tit is the different label so it will work on.\n";
+      }
+      // @todo: maybe will return value instead of processing thru this.
+   }
+
+   else
+      std::cout << "\n\tNo, it is not Element 1-6.\n";
+
+#endif
+
 //    if (label == "Epoch") 
 ////       return epoch = value;
 //       return state.SetEpoch(value);
     if (label == "X" || label == "SMA" || label == "RadPer" || label == "RMAG")
     {
        displayState[0] = value;
+       stateVector[0] = value;
 
        //---------------------------------------------------
        //loj: The following is a temporary fix assuming
@@ -731,6 +834,7 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
     if (label == "Y" || label == "ECC" || label == "RadApo" || label == "RA")
     {
        displayState[1] = value;
+       stateVector[1] = value;
 
        //---------------------------------------------------
        //loj: The following is a temporary fix assuming
@@ -755,6 +859,7 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
     if (label == "Z" || label == "INC" || label == "DEC")  
     {
        displayState[2] = value;
+       stateVector[2] = value;
 
        //---------------------------------------------------
        //loj: The following is a temporary fix assuming
@@ -781,6 +886,7 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
     if (label == "VX" || label == "RAAN" || label == "VMAG")  
     {
        displayState[3] = value;
+       stateVector[3] = value;
 
        //---------------------------------------------------
        //loj: The following is a temporary fix assuming
@@ -807,6 +913,7 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
     if (label == "VY" || label == "AOP" || label == "AZI" || label == "RAV")  
     {
        displayState[4] = value;
+       stateVector[4] = value;
 
        //---------------------------------------------------
        //loj: The following is a temporary fix assuming
@@ -835,6 +942,7 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
         label == "FPA" || label == "DECV")  
     {
        displayState[5] = value;
+       stateVector[5] = value;
 
        //---------------------------------------------------
        //loj: The following is a temporary fix assuming
@@ -911,14 +1019,8 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
     if (id == ANOMALY_ID)
        return anomaly.GetType(); 
     
-    if (id == BODY_ID)
-       return refBody; 
-
-    if (id == FRAME_ID)
-       return refFrame;
-
-    if (id == PLANE_ID)
-       return refPlane;
+    if (id == COORD_SYS_ID)
+       return coordSysName; 
 
     return SpaceObject::GetStringParameter(id);
 }
@@ -975,8 +1077,7 @@ const StringArray& Spacecraft::GetStringArrayParameter(const Integer id) const
 bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 {
     if (id != DATE_FORMAT_ID && id != STATE_TYPE_ID && id != ANOMALY_ID
-        && id != BODY_ID && id != FRAME_ID && id != PLANE_ID 
-        && id != FUEL_TANK_ID && id != THRUSTER_ID)
+        && id != COORD_SYS_ID && id != FUEL_TANK_ID && id != THRUSTER_ID)
        return SpaceObject::SetStringParameter(id, value);
 
     if (id == DATE_FORMAT_ID)
@@ -1028,24 +1129,9 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
            displayCoordType == "ModifiedKeplerian")
           displayState[5] = anomaly.GetValue();   // @todo: add state[5]?
     }
-    else if (id == BODY_ID)
+    else if (id == COORD_SYS_ID)  
     {
-       // Set the mu based on the reference body if no error
-       if (stateConverter.SetMu(solarSystem,value))   
-          refBody = value; 
-       else
-       {
-          MessageInterface::ShowMessage("\n*** Warning ***\n%s (%lf)\n\n",
-                "Spacecraft is not able to set mu so it uses original value:",
-                 stateConverter.GetMu());
-       }
-    }
-    else if (id == FRAME_ID)
-    {  
-       refFrame = value;
-    }
-    else if (id == PLANE_ID) {
-       refPlane = value;
+       coordSysName = value;
     }
     else if (id == FUEL_TANK_ID) {
        // Only add the tank if it is not in the list already
@@ -1228,6 +1314,36 @@ void Spacecraft::SetEpoch()
 //}
 
 //---------------------------------------------------------------------------
+//  Rvector6 GetStateVector(const std::string &elementType)
+//---------------------------------------------------------------------------
+/**
+ * Get the state in a given element type.
+ *
+ * @param <elementType>  Element type to be needed for the conversion
+ * @return state in the conversion to a given element type
+ *
+ */
+Rvector6 Spacecraft::GetStateVector(const std::string &elementType)
+{
+   Rvector6 newState;
+
+   // @todo:  need to figure out with the variable 'state' because it is the
+   // Cartesian state so need to add another new variable currentState
+   if (state.GetSize() != 6)
+   {
+      throw SpaceObjectException("Spacecraft::GetStateVector -> "
+                                 "needs 6 elements only");
+   }
+
+   Real *currentState = state.GetState();
+
+   if (stateType == elementType)
+      return Rvector6(currentState);
+
+   return (stateConverter.Convert(currentState,stateType,elementType,anomaly));
+}
+
+//---------------------------------------------------------------------------
 //  void SetState(const std::string elementType, Real *instate)
 //---------------------------------------------------------------------------
 /**
@@ -1258,8 +1374,6 @@ void Spacecraft::SetState(const std::string &elementType, Real *instate)
                                         stateType, anomaly);
    }
     
-   cartesianState = newState;
-
    SetState(newState.Get(0),newState.Get(1),newState.Get(2),
             newState.Get(3),newState.Get(4),newState.Get(5));
 }
@@ -1288,67 +1402,6 @@ void Spacecraft::SetState(const Real s1, const Real s2, const Real s3,
     state[3] = s4;
     state[4] = s5;
     state[5] = s6;
-}
-
-//---------------------------------------------------------------------------
-//  Rvector6 GetCartesianState() 
-//---------------------------------------------------------------------------
-/**
- * Get the converted Cartesian states from states in different coordinate type.
- * 
- * @return converted Cartesian states   
- *
- */
-Rvector6 Spacecraft::GetCartesianState() 
-{
-   //loj: 10/25/04 commented out
-   //cartesianState = stateConverter.Convert(state.GetState(), displayCoordType,
-   //                                        "Cartesian",anomaly);
-   
-   Real *tempState = state.GetState();
-
-   for (int i=0; i<6; i++)
-      cartesianState[i] = tempState[i];
-   
-   return cartesianState;
-}
-
-//---------------------------------------------------------------------------
-//  Rvector6 GetKeplerianState() 
-//---------------------------------------------------------------------------
-/**
- * Get the converted Keplerian states from states in different coordinate type.
- * 
- * @return converted Keplerain states   
- *
- */
-Rvector6 Spacecraft::GetKeplerianState() 
-{
-   //loj: 10/25/04 commented out
-   //keplerianState = stateConverter.Convert(state.GetState(),displayCoordType,
-   //                                        "Keplerian",anomaly);
-
-   keplerianState = stateConverter.Convert(state.GetState(), stateType,
-                                           "Keplerian",anomaly);
-
-   return keplerianState;
-}
-
-//---------------------------------------------------------------------------
-//  Rvector6 GetModifiedKeplerianState() 
-//---------------------------------------------------------------------------
-/**
- * Get the converted Modified Keplerian states from states in different 
- * coordinate type.
- * 
- * @return converted Modified Keplerain states   
- *
- */
-Rvector6 Spacecraft::GetModifiedKeplerianState() 
-{
-   modifiedKeplerianState = stateConverter.Convert(state.GetState(),stateType,
-                                                   "ModifiedKeplerian",anomaly);
-   return (modifiedKeplerianState);
 }
 
 //---------------------------------------------------------------------------
@@ -1600,43 +1653,6 @@ void Spacecraft::SaveDisplay()
 }
 
 
-//------------------------------------------------------------------------------
-// SolarSystem* GetSolarSystem()
-//------------------------------------------------------------------------------
-/**
- * Gets the solar system pointer
- *
- * @return Pointer to the solar system.
- */
-//------------------------------------------------------------------------------
-SolarSystem* Spacecraft::GetSolarSystem() const
-{
-   return solarSystem;
-}
-
-//------------------------------------------------------------------------------
-// void SetSolarSystem(SolarSystem *ss)
-//------------------------------------------------------------------------------
-/**
- * Sets the solar system pointer
- *
- * @param ss Pointer to the solar system.
- */
-//------------------------------------------------------------------------------
-void Spacecraft::SetSolarSystem(SolarSystem *ss)
-{
-    // Get new value of mu; if fails, send out message and use old value 
-    if (!stateConverter.SetMu(ss,refBody))
-    {
-       MessageInterface::ShowMessage("\n*** Warning ***\n%s (%lf)\n\n",
-              "Spacecraft is not able to set Mu so it uses original value:",
-              stateConverter.GetMu());
-    } 
-
-    solarSystem = ss;
-}
-
-
 //-------------------------------------
 // private methods
 //-------------------------------------
@@ -1684,66 +1700,67 @@ Real Spacecraft::UpdateTotalMass() const
 
 
 //---------------------------------------------------------------------------
-//  void InitializeValues()
+//  bool Initialize()
 //---------------------------------------------------------------------------
 /**
  * Initialize the default values of spacecraft information.
  *
+ * @return always success unless the coordinate system is empty
+ *
  */
-void Spacecraft::InitializeValues()
+bool Spacecraft::Initialize()
 {
-    state.SetEpoch(21545.0); 
+   // Set the mu if CelestialBody is there thru coordinate system's origin;
+   // Otherwise, discontine process and send the error message
+   if (!stateConverter.SetMu(coordinateSystem))
+   {
+      throw SpaceObjectException(
+            "\nError:  Spacecraft has empty coordinate system\n");
+   }
 
-    state[0] = 7100.0;
-    state[1] = 0.0;
-    state[2] = 1300.0;
-    state[3] = 0.0;
-    state[4] = 7.35;
-    state[5] = 1.0;
+   state.SetEpoch(21545.0); 
 
-    dateFormat = "TAIModJulian";
-    stateType = "Cartesian";
+   state[0] = 7100.0;
+   state[1] = 0.0;
+   state[2] = 1300.0;
+   state[3] = 0.0;
+   state[4] = 7.35;
+   state[5] = 1.0;
+
+   // Initialize state vector
+   stateVector.Set(state.GetState());
+
+   dateFormat = "TAIModJulian";
+   stateType = "Cartesian";
     
-    // Get the keplerian state and then initialize anomaly
-    Rvector6 tempKepl = GetKeplerianState();
-    anomaly.Set(tempKepl[0],tempKepl[1],tempKepl[5],"TA");
+   // Get the keplerian state and then initialize anomaly
+   Rvector6 tempKepl = GetStateVector("Keplerian");
+   anomaly.Set(tempKepl[0],tempKepl[1],tempKepl[5],"TA");
 
-    refBody = "Earth";
-    refFrame = "MJ2000";
-    refPlane = "Equatorial";
-   
-    dryMass = 850.0;
-    coeffDrag = 2.2;
-    dragArea = 15.0;
-    srpArea = 1.0;
-    reflectCoeff = 1.8;
+   coordSysName = "EarthMJ2000Eq"; 
 
-    // Initialize non-internal states for display purpose 
-    initialDisplay = true;
-    isForDisplay = false;
+   dryMass = 850.0;
+   coeffDrag = 2.2;
+   dragArea = 15.0;
+   srpArea = 1.0;
+   reflectCoeff = 1.8;
 
-    for (int i=0; i < 6; i++)
-    {
-        displayState[i] = state[i];
-        hasElements[i] = false; //loj: added
-    }
+   // Initialize non-internal states for display purpose 
+   initialDisplay = true;
+   isForDisplay = false;
 
-    displayEpoch = ToString(state.GetEpoch()); 
-    displayDateFormat = dateFormat; 
-    displayCoordType = stateType;
+   for (int i=0; i < 6; i++)
+   {
+       displayState[i] = state[i];
+       hasElements[i] = false; //loj: added
+   }
 
-    cartesianState.Set(state[0],state[1],state[2],state[3],state[4],state[5]); 
-    
-    keplerianState.Set(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+   displayEpoch = ToString(state.GetEpoch()); 
+   displayDateFormat = dateFormat; 
+   displayCoordType = stateType;
 
-    // Initialize mu if it has SolarSystem; otherwise, use default value
-    if (!stateConverter.SetMu(solarSystem,refBody))
-    {
-       MessageInterface::ShowMessage("\n*** Warning ***\n%s (%lf)\n\n",
-              "Spacecraft is not able to set Mu so it uses original value:", 
-              stateConverter.GetMu());
-    }
 
+   return true;
 }
 
 //---------------------------------------------------------------------------
@@ -1898,7 +1915,6 @@ void Spacecraft::SetInitialState()
       if (displayCoordType == "Cartesian")
       {
          stateType = "Cartesian";
-         cartesianState = displayState;
          
          // No conversion is needed
          for (int i=0; i<6; i++)
@@ -1912,7 +1928,7 @@ void Spacecraft::SetInitialState()
          stateType = "Cartesian";
 
          // Convert elements to Cartesian
-         cartesianState =
+         Rvector6 cartesianState =
             stateConverter.Convert(displayState, displayCoordType, 
                                    stateType, anomaly);
 
@@ -1935,4 +1951,88 @@ void Spacecraft::SetInitialState()
       MessageInterface::ShowMessage("\nSpacecraft::SetInitialState() exits\n");
 #endif
    }
+}
+
+//---------------------------------------------------------------------------
+//  void InitializeDataMethod(const Spacecraft &s)
+//---------------------------------------------------------------------------
+/**
+ * Initialize data method from the parameter for copying spacecraft structures.
+ *
+ * @param <s> The original that is being copied.
+ */
+void Spacecraft::InitializeDataMethod(const Spacecraft &s)
+{
+    // Duplicate the member data
+    dateFormat = s.dateFormat;
+    stateType = s.stateType;
+    anomaly = s.anomaly;
+
+    for (int i = 0; i < 6; ++i)
+    {
+       state[i] = s.state[i];
+       stateVector[i] = s.stateVector[i];
+       displayState[i] = s.displayState[i];
+    }
+    displayEpoch = s.displayEpoch;
+    displayDateFormat = s.displayDateFormat;
+    displayCoordType = s.displayCoordType;
+    initialDisplay = s.initialDisplay;
+    isForDisplay = s.isForDisplay;
+
+    dryMass = s.dryMass;
+    coeffDrag = s.coeffDrag;
+    dragArea = s.dragArea;
+    srpArea = s.srpArea;
+    reflectCoeff = s.reflectCoeff;
+
+    tankNames = s.tankNames;
+    thrusterNames = s.thrusterNames;
+}
+
+
+//---------------------------------------------------------------------------
+// std::string FindStateType(const std::string &elementLabel)
+//---------------------------------------------------------------------------
+/**
+ * Determine the state type from the given element.
+ *
+ * @param <elementLabel> Given specific element.
+ *
+ * @return Getting the state type from the given element.
+ */
+std::string Spacecraft::FindStateType(const std::string &elementLabel) const
+{
+#if DEBUG_SPACECRAFT
+   std::cout << "\nSpacecraft::FindStateType-> elementLabel: "
+             << elementLabel << std::endl;
+#endif
+
+   if (elementLabel == "X" || elementLabel == "Y" || elementLabel == "Z" ||
+       elementLabel == "VX" || elementLabel == "VY" || elementLabel == "VZ")
+   {
+      return "Cartesian";
+   }
+
+   if (elementLabel == "SMA" || elementLabel == "ECC" ||
+       elementLabel == "INC" || elementLabel == "RAAN" ||
+       elementLabel == "AOP" || !(anomaly.IsInvalid(elementLabel)))
+   {
+      return "Keplerian";
+   }
+
+   if (elementLabel == "RadPer" || elementLabel == "RadApo")
+      return "ModifiedKeplerian";
+
+   if (elementLabel == "RMAG" || elementLabel == "RA" ||
+       elementLabel == "DEC" || elementLabel == "VMAG" ||
+       elementLabel == "AZI" || elementLabel == "FPA")
+   {
+      return "SphericalAZFPA";
+   }
+
+   if (elementLabel == "RAV" || elementLabel == "DECV")
+      return "SphericalRADEC";
+
+   return "Invalid";
 }
