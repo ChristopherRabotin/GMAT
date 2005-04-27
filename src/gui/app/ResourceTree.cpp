@@ -1895,15 +1895,13 @@ void ResourceTree::OnAddBarycenter(wxCommandEvent &event)
    wxString name;
    name.Printf("Barycenter%d", ++mNumBarycenter);
 
-   /// todo:  waiting for the gui interpreter
-//   if (theGuiInterpreter->CreateBurn
-//       ("FiniteBurn", std::string(name.c_str())) != NULL)
-//   {
+   if (theGuiInterpreter->CreateCalculatedPoint("Barycenter", name.c_str()) != NULL)
+   {
       AppendItem(item, name, GmatTree::ICON_DEFAULT, -1,
                  new GmatTreeItemData(name, GmatTree::BARYCENTER));
 
       Expand(item);
-//   }
+   }
 }
 
 //------------------------------------------------------------------------------

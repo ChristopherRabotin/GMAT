@@ -16,58 +16,58 @@
 #include "gmatwxdefs.hpp"
 #include "GmatPanel.hpp"
 #include "GuiInterpreter.hpp"
-
+#include "Barycenter.hpp"
 
 class BarycenterPanel: public GmatPanel
 {
 public:
-    BarycenterPanel(wxWindow *parent);
+    BarycenterPanel(wxWindow *parent, const wxString &name);
     ~BarycenterPanel();
     
-   
+   wxArrayString& GetBodyNames()
+      { return mBodyNames; }
+   bool IsBodySelected()
+      { return mIsBodySelected; }
+
 private:
-    StringArray theFileTypesInUse;
-    
-  //    void CreateUniverse(wxWindow *parent);
-    void OnAddButton(wxCommandEvent& event);
-    void OnSortButton(wxCommandEvent& event);
-    void OnRemoveButton(wxCommandEvent& event);
-    void OnBrowseButton(wxCommandEvent& event);
+   Barycenter *theBarycenter;
 
-    void OnAvailableSelectionChange(wxCommandEvent& event);
+   static const int MAX_LIST_SIZE = 30;
+   wxArrayString mBodyNames;
 
-    // methods inherited from GmatPanel
-    virtual void Create();
-    virtual void LoadData();
-    virtual void SaveData();
-    //loj: 2/27/04 commented out
-    //virtual void OnHelp();
-    //virtual void OnScript();
-    
-    wxStaticText *item3;
-    wxStaticText *item10;
+   bool mIsBodySelected;
 
-    wxListBox *availableListBox;
-    wxListBox *selectedListBox;
-    
-    wxButton *addButton;
-    wxButton *removeButton;
-    
-    DECLARE_EVENT_TABLE();
-    
-    // IDs for the controls and the menu commands
-    enum
-    {     
-        ID_TEXT = 6100,
-        ID_LISTBOX,
-        ID_BUTTON,
-        ID_BUTTON_ADD,
-        ID_BUTTON_REMOVE,
+   wxString mSelBodyName;
 
-        ID_AVAILABLE_LIST,
-        ID_TEXT_CTRL,
-        ID_SELECTED_LIST,
-    };
+   wxButton *addBodyButton;
+   wxButton *removeBodyButton;
+   wxButton *clearBodyButton;
+
+   wxListBox *bodyListBox;
+   wxListBox *bodySelectedListBox;
+
+   // methods inherited from GmatPanel
+   virtual void Create();
+   virtual void LoadData();
+   virtual void SaveData();
+   //loj: 2/27/04 commented out
+   //virtual void OnHelp();
+   //virtual void OnScript();
+    
+   void OnButton(wxCommandEvent& event);
+
+   DECLARE_EVENT_TABLE();
+    
+   // IDs for the controls and the menu commands
+   enum
+   {
+      ID_TEXT = 6100,
+      ID_LISTBOX,
+      ID_BUTTON,
+      ID_BUTTON_ADD,
+      ID_BUTTON_REMOVE,
+      ID_BODY_SEL_LISTBOX,
+   };
 };
 #endif
 

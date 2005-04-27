@@ -30,10 +30,7 @@ BEGIN_EVENT_TABLE(BarycenterPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
 
-   EVT_BUTTON(ID_BUTTON_ADD,       BarycenterPanel::OnAddButton)
-   EVT_BUTTON(ID_BUTTON_REMOVE,    BarycenterPanel::OnRemoveButton)
-
-   EVT_LISTBOX(ID_AVAILABLE_LIST, BarycenterPanel::OnAvailableSelectionChange)
+   EVT_BUTTON(ID_BUTTON, BarycenterPanel::OnButton)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -50,8 +47,19 @@ END_EVENT_TABLE()
  * @note Creates the Universe GUI
  */
 //------------------------------------------------------------------------------
-BarycenterPanel::BarycenterPanel(wxWindow *parent):GmatPanel(parent)
+BarycenterPanel::BarycenterPanel(wxWindow *parent, const wxString &name)
+                :GmatPanel(parent)
 {
+   theBarycenter =
+      (Barycenter*)theGuiInterpreter->GetCalculatedPoint(std::string(name.c_str()));
+
+   mBodyNames.Clear();
+
+//   mBodiesToExclude = bodiesToExclude;
+//   mBodiesToHide = bodiesToHide;
+
+   mIsBodySelected = false;
+
    Create();
    Show();
 }
@@ -59,7 +67,6 @@ BarycenterPanel::BarycenterPanel(wxWindow *parent):GmatPanel(parent)
 BarycenterPanel::~BarycenterPanel()
 {
 }
-
 
 //-------------------------------
 // private methods
@@ -79,50 +86,65 @@ BarycenterPanel::~BarycenterPanel()
 //------------------------------------------------------------------------------
 void BarycenterPanel::Create()
 {
-   wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
-   wxFlexGridSizer *item1 = new wxFlexGridSizer( 3, 0, 0 );
-   wxBoxSizer *item2 = new wxBoxSizer( wxVERTICAL );
-    
-   item3 = new wxStaticText( this, ID_TEXT, wxT("Celestial Bodies"), wxDefaultPosition,
-                             wxSize(80,-1), 0 );
-   item2->Add( item3, 0, wxALIGN_CENTRE|wxALL, 5 );
+   int borderSize = 2;
+   wxString emptyList[] = {};
 
-   wxString availableStrs [] = 
-   {
-   };
+   //wxStaticText
+   wxStaticText *bodyStaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Available Bodies"),
+                        wxDefaultPosition, wxDefaultSize, 0 );
 
-   availableListBox = new wxListBox( this, ID_AVAILABLE_LIST, wxDefaultPosition, 
-                                     wxSize(140,125), 0,
-                                     availableStrs, wxLB_SINGLE );
-   item2->Add( availableListBox, 0, wxALIGN_CENTRE|wxALL, 5 );
-   item1->Add( item2, 0, wxALIGN_CENTRE|wxALL, 5 );
-   wxBoxSizer *item5 = new wxBoxSizer( wxVERTICAL );
-   item5->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-   addButton = new wxButton( this, ID_BUTTON_ADD, wxT("-->"), wxDefaultPosition,
-                             wxSize(20,20), 0 );
-   item5->Add( addButton, 0, wxALIGN_CENTRE|wxALL, 5 );
+   wxStaticText *bodySelectStaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Bodies Selected"),
+                        wxDefaultPosition, wxDefaultSize, 0 );
 
-   removeButton = new wxButton( this, ID_BUTTON_REMOVE, wxT("<--"),
-                                wxDefaultPosition, wxSize(20,20), 0 );
-   item5->Add( removeButton, 0, wxALIGN_CENTRE|wxALL, 5 );
-   removeButton->Enable(false);
-   item1->Add( item5, 0, wxALIGN_CENTRE|wxALL, 5 );
-   wxBoxSizer *item9 = new wxBoxSizer( wxVERTICAL );
-   item10 = new wxStaticText( this, ID_TEXT, wxT("Selected"), wxDefaultPosition, 
-                              wxSize(80,-1), 0 );
-   item9->Add( item10, 0, wxALIGN_CENTRE|wxALL, 5 );
+   wxStaticText *emptyStaticText =
+      new wxStaticText( this, ID_TEXT, wxT("  "),
+                        wxDefaultPosition, wxDefaultSize, 0 );
 
-   wxString strs11[] = 
-   {
-   };
-   selectedListBox = new wxListBox( this, ID_SELECTED_LIST, wxDefaultPosition, 
-                                    wxSize(140,125), 0, strs11, wxLB_SINGLE );
-   item9->Add( selectedListBox, 0, wxALIGN_CENTRE|wxALL, 5 );
+   // wxButton
+   addBodyButton = new wxButton( this, ID_BUTTON, wxT("->"),
+                                 wxDefaultPosition, wxSize(20,20), 0 );
+   removeBodyButton = new wxButton( this, ID_BUTTON, wxT("<-"),
+                                    wxDefaultPosition, wxSize(20,20), 0 );
+   clearBodyButton = new wxButton( this, ID_BUTTON, wxT("<="),
+                                   wxDefaultPosition, wxSize(20,20), 0 );
 
-   item1->Add( item9, 0, wxALIGN_CENTRE|wxALL, 5 );
-   item0->Add( item1, 0, wxALIGN_CENTRE|wxALL, 5 );
+   wxArrayString tmpArrayString;
 
-   theMiddleSizer->Add(item0, 0, wxALIGN_CENTER|wxALL, 5);
+   // wxListBox
+   bodyListBox =
+      theGuiManager->GetConfigBodyListBox(this, -1, wxSize(150, 200), tmpArrayString);
+
+   bodySelectedListBox = new wxListBox(this, ID_BODY_SEL_LISTBOX, wxDefaultPosition,
+                                          wxSize(150, 200), 0, emptyList, wxLB_SINGLE);
+
+   // wxSizers
+   wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
+   wxFlexGridSizer *bodyGridSizer = new wxFlexGridSizer(3, 0, 0);
+   wxBoxSizer *buttonsBoxSizer = new wxBoxSizer(wxVERTICAL);
+
+   // add buttons to sizer
+   buttonsBoxSizer->Add(addBodyButton, 0, wxALIGN_CENTER|wxALL, borderSize);
+   buttonsBoxSizer->Add(removeBodyButton, 0, wxALIGN_CENTER|wxALL, borderSize);
+   buttonsBoxSizer->Add(clearBodyButton, 0, wxALIGN_CENTER|wxALL, borderSize);
+
+   // 1st row
+   bodyGridSizer->Add(bodyStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   bodyGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   bodyGridSizer->Add(bodySelectStaticText, 0, wxALIGN_CENTER|wxALL, borderSize);
+
+   // 2nd row
+   bodyGridSizer->Add(bodyListBox, 0, wxALIGN_CENTER|wxALL, borderSize);
+   bodyGridSizer->Add(buttonsBoxSizer, 0, wxALIGN_CENTER|wxALL, borderSize);
+   bodyGridSizer->Add(bodySelectedListBox, 0, wxALIGN_CENTER|wxALL, borderSize);
+
+   pageBoxSizer->Add( bodyGridSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+
+   //------------------------------------------------------
+   // add to parent sizer
+   //------------------------------------------------------
+   theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
 }
 
 //------------------------------------------------------------------------------
@@ -130,6 +152,22 @@ void BarycenterPanel::Create()
 //------------------------------------------------------------------------------
 void BarycenterPanel::LoadData()
 {
+   try
+   {
+      StringArray selectedBodies = theBarycenter->
+            GetStringArrayParameter("BodyNames");
+
+      for (unsigned int i=0; i<selectedBodies.size(); i++)
+      {
+         bodySelectedListBox->Append(selectedBodies[i].c_str());
+      }
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("BarycenterPanel:LoadData() error occurred!\n%s\n",
+            e.GetMessage().c_str());
+   }
 }
 
 
@@ -138,81 +176,79 @@ void BarycenterPanel::LoadData()
 //------------------------------------------------------------------------------
 void BarycenterPanel::SaveData()
 {
-}
-
-//------------------------------------------------------------------------------
-// void OnAddButton(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-void BarycenterPanel::OnAddButton(wxCommandEvent& event)
-{
-   // get string in first list and then search for it
-   // in the second list
-   wxString s = availableListBox->GetStringSelection();
-   int found = selectedListBox->FindString(s);
-    
-    // if the string wasn't found in the second list, insert it
-   if ( found == wxNOT_FOUND )
+   try
    {
-      selectedListBox->Insert(s, 0);
-      selectedListBox->SetSelection(0);
-      theApplyButton->Enable();
+      Integer count = bodySelectedListBox->GetCount();
+
+      if (count == 0)
+         return;
+
+      for (Integer i = 0; i < count; i++)
+      {
+        theBarycenter->SetStringParameter
+            ("BodyNames", bodySelectedListBox->GetString(i).c_str(), i);
+      }
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("BarycenterPanel:SaveData() error occurred!\n%s\n",
+            e.GetMessage().c_str());
    }
 
-   removeButton->Enable(false);
-    
-   if (selectedListBox->GetCount() > 0)
-      removeButton->Enable(true);
-
 }
 
-// moves selected item to the top of the lsit
 //------------------------------------------------------------------------------
-// void OnSortButton(wxCommandEvent& event)
+// void OnButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void BarycenterPanel::OnSortButton(wxCommandEvent& event)
+void BarycenterPanel::OnButton(wxCommandEvent& event)
 {
-   // get string
-   wxString s = selectedListBox->GetStringSelection();
-
-   if (!s.IsEmpty())
+   if ( event.GetEventObject() == addBodyButton )
    {
-      // remove string
-      int sel = selectedListBox->GetSelection();
-      selectedListBox->Delete(sel);
-      // add string to top
-      selectedListBox->Insert(s, 0);
+      wxString s = bodyListBox->GetStringSelection();
+
+      if (s.IsEmpty())
+         return;
+
+      int strId1 = bodyListBox->FindString(s);
+      int strId2 = bodySelectedListBox->FindString(s);
+
+      // if the string wasn't found in the second list, insert it
+      if (strId2 == wxNOT_FOUND)
+      {
+         bodySelectedListBox->Append(s);
+         bodyListBox->Delete(strId1);
+         bodySelectedListBox->SetStringSelection(s);
+
+         // select first available body
+         bodyListBox->SetSelection(0);
+      }
    }
-    
-   theApplyButton->Enable(true);
-}
-
-//------------------------------------------------------------------------------
-// void OnRemoveButton(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-void BarycenterPanel::OnRemoveButton(wxCommandEvent& event)
-{
-   int sel = selectedListBox->GetSelection();
-
-   selectedListBox->Delete(sel);
-
-   removeButton->Enable(false);
-    
-   if (selectedListBox->GetCount() > 0)
-      removeButton->Enable(true);
-
-   theApplyButton->Enable(true);
-}
-
-//------------------------------------------------------------------------------
-// void OnAvailableSelectionChange(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-void BarycenterPanel::OnAvailableSelectionChange(wxCommandEvent& event)
-{
-   // get string
-   wxString s = availableListBox->GetStringSelection();
-
-   if (selectedListBox->FindString(s) == wxNOT_FOUND)
+   else if ( event.GetEventObject() == removeBodyButton )
    {
-      addButton->Enable(true);
+      wxString s = bodySelectedListBox->GetStringSelection();
+
+      if (s.IsEmpty())
+         return;
+
+      //MessageInterface::ShowMessage("Removing body: %s\n", s.c_str());
+      bodyListBox->Append(s);
+      int sel = bodySelectedListBox->GetSelection();
+      bodySelectedListBox->Delete(sel);
    }
+   else if ( event.GetEventObject() == clearBodyButton )
+   {
+      Integer count = bodySelectedListBox->GetCount();
+
+      if (count == 0)
+         return;
+
+      for (Integer i = 0; i < count; i++)
+      {
+         bodyListBox->Append(bodySelectedListBox->GetString(i));
+      }
+      bodySelectedListBox->Clear();
+   }
+
+   theApplyButton->Enable();
 }

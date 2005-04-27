@@ -621,8 +621,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           style);
          panel = new wxScrolledWindow(newChild);
-         ///@todo:  need to send name too
-         sizer->Add(new BarycenterPanel(panel),
+         sizer->Add(new BarycenterPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::OUTPUT_REPORT)
