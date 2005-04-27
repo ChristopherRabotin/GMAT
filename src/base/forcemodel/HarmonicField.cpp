@@ -114,6 +114,7 @@ filename                (""),
 fileRead                (false)
 //epoch                   (21545.0)
 {
+   objectTypeNames.push_back("HarmonicField");
    parameterCount = HarmonicFieldParamCount;
    r = s = t = u = 0.0;
 }
