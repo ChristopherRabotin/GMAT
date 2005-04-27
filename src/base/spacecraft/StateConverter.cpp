@@ -18,9 +18,10 @@
 //------------------------------------------------------------------------------
 
 #include "StateConverter.hpp"
+#include "SpacePoint.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_STATE_CONVERTER 0
+// #define DEBUG_STATE_CONVERTER 1
 
 //-------------------------------------
 // public methods
@@ -128,6 +129,55 @@ Real StateConverter::GetMu() const
 {
    return mu;
 }
+
+//---------------------------------------------------------------------------
+//  bool StateConverter::SetMu(const CoordinateSystem *cs)
+//---------------------------------------------------------------------------
+/**
+ * Set the mu from the Celestial body's gravitational constant
+ *
+ * @param <cs>  Given coordinate system
+ * @return true if successful; otherwise, return false
+ *
+ */
+bool StateConverter::SetMu(const CoordinateSystem *coordSys)
+{
+#if DEBUG_STATE_CONVERTER
+      MessageInterface::ShowMessage("\nStateConverter::SetMu(cs) enters...\n");
+#endif
+
+   // Check for empty coordinate system then stop process
+   if (coordSys == NULL)
+      return false;
+
+   // Get the coordinate system's origin
+   SpacePoint *origin = coordSys->GetOrigin();
+
+#if DEBUG_STATE_CONVERTER
+   std::string typeName = origin->GetTypeName();
+   MessageInterface::ShowMessage("\n...Type name is %s.\n ",typeName.c_str());
+
+   if (origin->IsOfType(Gmat::CELESTIAL_BODY))
+      MessageInterface::ShowMessage("\n...It is CelestialBody.\n ");
+   else
+      MessageInterface::ShowMessage("\n...It is others than CB.\n ");
+#endif
+
+   // Check if it is Celestial Body then get the mu; 
+   // Otherwise, it sets zero to mu
+   if (origin->IsOfType(Gmat::CELESTIAL_BODY))
+      mu = ((CelestialBody *)origin)->GetGravitationalConstant(); 
+   else
+      mu = 0.0;
+
+#if DEBUG_STATE_CONVERTER
+      MessageInterface::ShowMessage("\n...mu = %f before "
+        "StateConverter::SetMu() exits\n\n",mu);
+#endif
+
+   return true;
+}
+
 
 //---------------------------------------------------------------------------
 //  bool StateConverter::SetMu(const SolarSystem *solarSystem, 

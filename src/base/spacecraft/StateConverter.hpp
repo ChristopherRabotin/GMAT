@@ -23,13 +23,14 @@
 // #include "Converter.hpp"
 #include "SolarSystem.hpp" 
 #include "CelestialBody.hpp"
+#include "CoordinateSystem.hpp"
 #include "Anomaly.hpp"
 // #include "Cartesian.hpp"
 // #include "Keplerian.hpp"
 #include "CoordUtil.hpp" 
 #include "ModKeplerian.hpp"
 #include "SphericalAZFPA.hpp"
- #include "SphericalRADEC.hpp"
+#include "SphericalRADEC.hpp"
 #include "Rvector6.hpp"
 #include "UtilityException.hpp"
 
@@ -52,6 +53,7 @@ public:
 
    // public method 
    Real     GetMu() const;
+   bool     SetMu(const CoordinateSystem *cs);
    bool     SetMu(SolarSystem *solarSystem, const std::string &body);
 
    //loj: 10/21/04 added
