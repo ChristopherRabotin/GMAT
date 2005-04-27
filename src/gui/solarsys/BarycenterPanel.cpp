@@ -54,10 +54,6 @@ BarycenterPanel::BarycenterPanel(wxWindow *parent, const wxString &name)
       (Barycenter*)theGuiInterpreter->GetCalculatedPoint(std::string(name.c_str()));
 
    mBodyNames.Clear();
-
-//   mBodiesToExclude = bodiesToExclude;
-//   mBodiesToHide = bodiesToHide;
-
    mIsBodySelected = false;
 
    Create();
@@ -160,6 +156,10 @@ void BarycenterPanel::LoadData()
       for (unsigned int i=0; i<selectedBodies.size(); i++)
       {
          bodySelectedListBox->Append(selectedBodies[i].c_str());
+
+         // find string in body list and delete it, so there are no dups
+         int position = bodyListBox->FindString(selectedBodies[i].c_str());
+         bodyListBox->Delete(position);
       }
    }
    catch (BaseException &e)
@@ -178,6 +178,8 @@ void BarycenterPanel::SaveData()
 {
    try
    {
+      theBarycenter->TakeAction("ClearBodies");
+
       Integer count = bodySelectedListBox->GetCount();
 
       if (count == 0)
