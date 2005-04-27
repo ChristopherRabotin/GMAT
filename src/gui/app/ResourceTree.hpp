@@ -58,7 +58,7 @@ private:
    wxTreeItemId mFunctItem;
    wxTreeItemId mCoordSysItem;
    wxTreeItemId mPredefinedFunctItem;
-   wxTreeItemId specialPointsItem;
+   wxTreeItemId mSpecialPointsItem;
    wxTreeItemId mScriptItem;
 
    int mNumSpacecraft;
@@ -76,6 +76,8 @@ private:
    int mNumFunct;
    int mNumCoordSys;
    int mNumScripts;
+   int mNumBarycenter;
+   int mNumLibration;
 
    void AddDefaultResources();
    void AddDefaultBodies(wxTreeItemId itemId);
@@ -92,6 +94,7 @@ private:
    void AddDefaultFunctions(wxTreeItemId itemId);
    void AddDefaultCoordSys(wxTreeItemId itemId);
    void AddDefaultScripts(wxTreeItemId itemId);
+   void AddDefaultSpecialPoints(wxTreeItemId itemId);
 
    // event handlers
    void OnItemRightClick(wxTreeEvent& event);
@@ -126,6 +129,8 @@ private:
    void OnAddMatlabFunction(wxCommandEvent &event);
    void OnAddGmatFunction(wxCommandEvent &event);
    void OnAddCoordSys(wxCommandEvent &event);
+   void OnAddBarycenter(wxCommandEvent &event);
+   void OnAddLibration(wxCommandEvent &event);
 
 //   void OnAddScript(wxCommandEvent &event);
 //   void OnNewScript(wxCommandEvent &event);
@@ -176,6 +181,10 @@ private:
 //      POPUP_NEW_SCRIPT,
       POPUP_REMOVE_ALL_SCRIPTS,
       POPUP_REMOVE_SCRIPT,
+
+      POPUP_ADD_SPECIAL_POINT,
+      POPUP_ADD_BARYCENTER,
+      POPUP_ADD_LIBRATION,
    };
 };
 

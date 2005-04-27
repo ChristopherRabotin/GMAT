@@ -90,6 +90,8 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_MATLAB_FUNCT, ResourceTree::OnAddMatlabFunction)
    EVT_MENU(POPUP_ADD_GMAT_FUNCT, ResourceTree::OnAddGmatFunction)
    EVT_MENU(POPUP_ADD_COORD_SYS, ResourceTree::OnAddCoordSys)
+   EVT_MENU(POPUP_ADD_BARYCENTER, ResourceTree::OnAddBarycenter)
+   EVT_MENU(POPUP_ADD_LIBRATION, ResourceTree::OnAddLibration)
    EVT_MENU(POPUP_OPEN, ResourceTree::OnOpen)
    EVT_MENU(POPUP_CLOSE, ResourceTree::OnClose)
    EVT_MENU(POPUP_RENAME, ResourceTree::OnRename)
@@ -144,6 +146,8 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    mNumFunct = 0;
    mNumCoordSys = 0;
    mNumScripts = 0;
+   mNumBarycenter = 0;
+   mNumLibration = 0;
 
    theGuiManager->UpdateAll();
 }
@@ -177,6 +181,8 @@ void ResourceTree::UpdateResource(bool resetCounter)
       mNumVariable = 0;
       mNumFunct = 0;
       mNumCoordSys = 0;
+      mNumBarycenter = 0;
+      mNumLibration = 0;
    }
    
    // ag: collapse, so folder icon is closed
@@ -189,6 +195,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
    Collapse(mVariableItem);
    Collapse(mFunctItem);
    Collapse(mCoordSysItem);
+   Collapse(mSpecialPointsItem);
 
    DeleteChildren(mSpacecraftItem);
 
@@ -209,6 +216,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
    DeleteChildren(mVariableItem);
    DeleteChildren(mFunctItem);
    DeleteChildren(mCoordSysItem);
+   DeleteChildren(mSpecialPointsItem);
 
    AddDefaultSpacecraft(mSpacecraftItem);
    AddDefaultHardware(mHardwareItem);
@@ -220,6 +228,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
    AddDefaultVariables(mVariableItem);
    AddDefaultFunctions(mFunctItem);
    AddDefaultCoordSys(mCoordSysItem);
+   AddDefaultSpecialPoints(mSpecialPointsItem);
 
    theGuiManager->UpdateAll();
    ScrollTo(mSpacecraftItem);
@@ -380,6 +389,7 @@ void ResourceTree::AddDefaultResources()
    AddDefaultVariables(mVariableItem);
    AddDefaultFunctions(mFunctItem);
    AddDefaultCoordSys(mCoordSysItem);
+   AddDefaultSpecialPoints(mSpecialPointsItem);
 }
 
 //------------------------------------------------------------------------------
@@ -419,12 +429,12 @@ void ResourceTree::AddDefaultBodies(wxTreeItemId itemId)
               new GmatTreeItemData(wxT("Pluto"), GmatTree::CELESTIAL_BODY));
 
    //----- Space Points
-   specialPointsItem =
+   mSpecialPointsItem =
       AppendItem(itemId, wxT("Special Points"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Special Points"),
                                       GmatTree::SPECIAL_POINTS_FOLDER));
     
-   SetItemImage(specialPointsItem, GmatTree::ICON_OPENFOLDER, 
+   SetItemImage(mSpecialPointsItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
 
 
@@ -836,6 +846,35 @@ void ResourceTree::AddDefaultCoordSys(wxTreeItemId itemId)
    
 }
 
+//------------------------------------------------------------------------------
+// void AddDefaultSpecialPoints(wxTreeItemId itemId)
+//------------------------------------------------------------------------------
+/**
+ * Add the default special points
+ *
+ * @param <itemId> tree item for the special points folder
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::AddDefaultSpecialPoints(wxTreeItemId itemId)
+{
+   /// @todo:  need to wait for method in gui interpreter
+//   StringArray itemNames = GmatAppData::GetGuiInterpreter()->
+//      GetListOfConfiguredItems(Gmat::COORDINATE_SYSTEM);
+//   int size = itemNames.size();
+//   wxString objName;
+//
+//   for (int i = 0; i<size; i++)
+//   {
+//      objName = wxString(itemNames[i].c_str());
+//      AppendItem(itemId, wxT(objName), GmatTree::ICON_COORDINATE_SYSTEM, -1,
+//                 new GmatTreeItemData(wxT(objName), GmatTree::COORD_SYSTEM));
+//   };
+//
+//   if (size > 0)
+//      Expand(itemId);
+//
+}
+
 
 //==============================================================================
 //                         On Action Events
@@ -946,6 +985,13 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       menu.Append(POPUP_ADD_COORD_SYS, wxT("Add Coordinate System"));
 //      menu.Enable(POPUP_ADD_COORD_SYS, FALSE);
    }   
+   else if (strcmp(title, wxT("Special Points")) == 0)
+   {
+      wxMenu *spMenu = new wxMenu;
+      spMenu->Append(POPUP_ADD_BARYCENTER, wxT("Barycenter"));
+      spMenu->Append(POPUP_ADD_LIBRATION, wxT("Libration Point"));
+      menu.Append(POPUP_ADD_SPECIAL_POINT, _T("Add"), spMenu);
+   }
    else
    {
       menu.Append(POPUP_OPEN, wxT("Open"));
@@ -1832,6 +1878,61 @@ void ResourceTree::OnAddCoordSys(wxCommandEvent &event)
       theGuiManager->UpdateCoordSystem(); //loj: 4/8/05 Added
    }
 }
+
+//------------------------------------------------------------------------------
+// void OnAddBaryCenter(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a barycenter to special points folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddBarycenter(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+
+   wxString name;
+   name.Printf("Barycenter%d", ++mNumBarycenter);
+
+   /// todo:  waiting for the gui interpreter
+//   if (theGuiInterpreter->CreateBurn
+//       ("FiniteBurn", std::string(name.c_str())) != NULL)
+//   {
+      AppendItem(item, name, GmatTree::ICON_DEFAULT, -1,
+                 new GmatTreeItemData(name, GmatTree::BARYCENTER));
+
+      Expand(item);
+//   }
+}
+
+//------------------------------------------------------------------------------
+// void OnAddLibration(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a libration point to special points folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddLibration(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+
+   wxString name;
+   name.Printf("Libration%d", ++mNumLibration);
+
+   ///@todo: waiting for gui interpreter
+//   if (theGuiInterpreter->CreateBurn
+//       ("FiniteBurn", std::string(name.c_str())) != NULL)
+//   {
+//      AppendItem(item, name, GmatTree::ICON_BURN, -1,
+//                 new GmatTreeItemData(name, GmatTree::FINITE_BURN));
+//
+//      Expand(item);
+//   }
+}
+
 
 //------------------------------------------------------------------------------
 // void OnAddScript()

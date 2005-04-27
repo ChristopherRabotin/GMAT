@@ -79,6 +79,7 @@
 #include "ScriptEventPanel.hpp"
 #include "ScriptPanel.hpp"
 #include "ReportFilePanel.hpp"
+#include "BarycenterPanel.hpp"
 
 #include <wx/gdicmn.h>
 #include "ddesetup.hpp"   // for IPC_SERVICE, IPC_TOPIC
@@ -612,6 +613,16 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           style);
          panel = new wxScrolledWindow(newChild);
          sizer->Add(new CoordSystemConfigPanel(panel, item->GetDesc()),
+                    0, wxGROW|wxALL, 0);
+      }
+      else if (dataType == GmatTree::BARYCENTER)
+      {
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                          wxPoint(-1,-1), wxSize(-1,-1),
+                                          style);
+         panel = new wxScrolledWindow(newChild);
+         ///@todo:  need to send name too
+         sizer->Add(new BarycenterPanel(panel),
                     0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::OUTPUT_REPORT)

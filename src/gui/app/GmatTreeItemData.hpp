@@ -150,6 +150,8 @@ namespace GmatTree
         COORD_SYSTEM,
         GROUNDSTATION,
         SCRIPT_FILE,
+        BARYCENTER,
+        LIBRATION_POINT,
 
         //Mission Tree
         MISSIONS_FOLDER,
