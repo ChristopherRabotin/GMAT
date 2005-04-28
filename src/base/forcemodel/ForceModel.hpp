@@ -56,7 +56,6 @@
 #define ForceModel_hpp
 
 #include "PhysicalModel.hpp"
-//#include "DerivativeList.hpp"
 #include "MessageInterface.hpp"
 #include "gmatdefs.hpp"
 
