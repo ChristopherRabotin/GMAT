@@ -152,7 +152,8 @@ Real PlanetData::GetReal(const std::string &dataType)
    else if (dataType == "Longitude")
    {
       // Get spacecraft RightAscension
-      Rvector6 state = mSpacecraft->GetStateVector("Cartesian");
+      // Rvector6 state = mSpacecraft->GetStateVector("Cartesian");
+      Rvector6 state = mSpacecraft->GetCartesianState();
       Real raRad = GmatMathUtil::ATan(state[1], state[0]);
       Real raDeg = GmatMathUtil::RadToDeg(raRad, true);
       Real gha = GetReal("GHA");
@@ -176,7 +177,8 @@ Real PlanetData::GetReal(const std::string &dataType)
    else if (dataType == "Latitude")
    {
       // Compute geocentric latitude (spherical declination)
-      Rvector6 state = mSpacecraft->GetStateVector("Cartesian");
+      // Rvector6 state = mSpacecraft->GetStateVector("Cartesian");
+      Rvector6 state = mSpacecraft->GetCartesianState();
       Real decRad = ATan(state[2], Sqrt(state[0]*state[0] +
                                         state[1]*state[1]));
       Real decDeg = GmatMathUtil::RadToDeg(decRad, true);
@@ -238,7 +240,8 @@ Real PlanetData::GetReal(const std::string &dataType)
                                               sunState[1] * sunState[1]));
       
       // compute beta angle
-      Rvector6 kepState = mSpacecraft->GetStateVector("Keplerian");
+      // Rvector6 kepState = mSpacecraft->GetStateVector("Keplerian");
+      Rvector6 kepState = mSpacecraft->GetKeplerianState();
       Real incRad = kepState[2] * RAD_PER_DEG;
       Real raanRad = kepState[3] * RAD_PER_DEG;
       
