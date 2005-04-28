@@ -40,12 +40,6 @@ public:
    const DynamicAxes& operator=(const DynamicAxes &dyn);
    // destructor
    virtual ~DynamicAxes();
-
-   virtual GmatCoordinate::ParameterUsage UsesEpoch() const;
-
-   virtual void         SetEpoch(const A1Mjd &toEpoch);
-   virtual A1Mjd        GetEpoch() const;
-   
    
    // initializes the DynamicAxes
    virtual bool Initialize(); // needed?  maybe later
@@ -55,6 +49,7 @@ public:
    //virtual GmatBase*       Clone(void) const;
 
    // Parameter access methods - overridden from GmatBase
+   /*
    virtual std::string     GetParameterText(const Integer id) const;     
    virtual Integer         GetParameterID(const std::string &str) const; 
    virtual Gmat::ParameterType
@@ -66,23 +61,22 @@ public:
    virtual Real            GetRealParameter(const std::string &label) const;
    virtual Real            SetRealParameter(const std::string &label,
                                             const Real value);
+    */
    // need to add (and to GmatBase) GetA1MjdParameter method(s)?????????
    
 protected:
 
    enum
    {
-      EPOCH = AxisSystemParamCount,
-      DynamicAxesParamCount
+      DynamicAxesParamCount = AxisSystemParamCount
    };
    
-   static const std::string PARAMETER_TEXT[DynamicAxesParamCount - 
-                                           AxisSystemParamCount];
+   //static const std::string PARAMETER_TEXT[DynamicAxesParamCount - 
+   //                                        AxisSystemParamCount];
    
-   static const Gmat::ParameterType PARAMETER_TYPE[DynamicAxesParamCount - 
-                                                   AxisSystemParamCount];
+   //static const Gmat::ParameterType PARAMETER_TYPE[DynamicAxesParamCount - 
+   //                                                AxisSystemParamCount];
    
 
-   A1Mjd epoch;
 };
 #endif // DynamicAxes_hpp
