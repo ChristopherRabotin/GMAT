@@ -27,6 +27,8 @@
 #include "BodyFixedAxes.hpp"
 #include "EquatorAxes.hpp"
 #include "ObjectReferencedAxes.hpp"
+#include "TOEEqAxes.hpp"
+#include "MOEEqAxes.hpp"
 
 //---------------------------------
 //  public methods
@@ -59,9 +61,7 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    }
    else if (ofType == "TOEEq")
    {
-      MessageInterface::ShowMessage(                // *** temporary
-         "TOEEqAxes not yet imnplemented.\n");
-      //withAxes = new TOEEqAxes(withName);
+      withAxes = new TOEEqAxes(withName);
    }
    else if (ofType == "TOEEc")
    {
@@ -71,9 +71,7 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    }
    else if (ofType == "MOEEq")
    {
-      MessageInterface::ShowMessage(                // *** temporary
-          "MOEEqAxes not yet imnplemented.\n");
-      //withAxes = new MOEEqAxes(withName);
+      withAxes = new MOEEqAxes(withName);
    }
    else if (ofType == "MOEEc")
    {
