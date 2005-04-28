@@ -814,7 +814,7 @@ void OrbitData::InitializeRefObjects()
          ("OrbitData::InitializeRefObjects() Cannot find output "
           "CoordinateSystem object\n");
    
-   Integer id = mSpacecraft->GetParameterID("ReferenceBody");
+   Integer id = mSpacecraft->GetParameterID("CoordinateSystem");
    std::string bodyName = mSpacecraft->GetStringParameter(id);
    mCentralBody = mSolarSystem->GetBody(bodyName);
    

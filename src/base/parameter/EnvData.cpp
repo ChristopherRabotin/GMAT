@@ -212,7 +212,7 @@ void EnvData::InitializeRefObjects()
       throw ParameterException
          ("EnvData::InitializeRefObjects() Cannot find SolarSystem object\n");
    
-   Integer id = mSpacecraft->GetParameterID("ReferenceBody");
+   Integer id = mSpacecraft->GetParameterID("CoordinateSystem");
    std::string bodyName = mSpacecraft->GetStringParameter(id);
    mCentralBody = mSolarSystem->GetBody(bodyName);
    
