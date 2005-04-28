@@ -74,7 +74,7 @@ public:
    
    // initializes the AxisSystem
    virtual bool Initialize();
-
+   
    // methods to convert to/from the MJ2000 Equatorial axis system
    virtual bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
                                  Rvector &outState); 
@@ -126,11 +126,17 @@ public:
    //virtual GmatBase*       Clone(void) const;
 
    // Parameter access methods - overridden from GmatBase - may need these later??
-   //virtual std::string     GetParameterText(const Integer id) const;     
-   //virtual Integer         GetParameterID(const std::string &str) const; 
-   //virtual Gmat::ParameterType
-   //                        GetParameterType(const Integer id) const;
-   //virtual std::string     GetParameterTypeString(const Integer id) const;
+   virtual std::string     GetParameterText(const Integer id) const;     
+   virtual Integer         GetParameterID(const std::string &str) const; 
+   virtual Gmat::ParameterType
+                           GetParameterType(const Integer id) const;
+   virtual std::string     GetParameterTypeString(const Integer id) const;
+   virtual Real            GetRealParameter(const Integer id) const;
+   virtual Real            SetRealParameter(const Integer id,
+                                            const Real value);
+   virtual Real            GetRealParameter(const std::string &label) const;
+   virtual Real            SetRealParameter(const std::string &label,
+                                            const Real value);
    
    // currently, no access to RotMatrix and RotDotMatrix allowed
    
@@ -138,15 +144,13 @@ protected:
 
    enum
    {
-      AxisSystemParamCount = CoordinateBaseParamCount,
-      //ROTATION_MATRIX = CoordinateBaseParamCount,
-      //ROTATION_DOT_MATRIX,
-      //AxisSystemParamCount
+      EPOCH = CoordinateBaseParamCount,
+      AxisSystemParamCount
    };
    
-   //static const std::string PARAMETER_TEXT[AxisSystemParamCount - CoordinateBaseParamCount];
+   static const std::string PARAMETER_TEXT[AxisSystemParamCount - CoordinateBaseParamCount];
    
-   //static const Gmat::ParameterType PARAMETER_TYPE[AxisSystemParamCount - CoordinateBaseParamCount];
+   static const Gmat::ParameterType PARAMETER_TYPE[AxisSystemParamCount - CoordinateBaseParamCount];
    
    //---------------------------------------------------------------------------
    //  void CalculateRotationMatrix(const A1Mjd &atEpoch)
@@ -166,7 +170,9 @@ protected:
    /// derivative of rotation matrix - 
    /// default constructor creates a 3x3 zero-matrix
    Rmatrix33   rotDotMatrix;
-   
+   /// epoch
+   A1Mjd epoch;
+
    // data and methods for those AxisSystems that need all or part of the FK5 
    // reduction
    static const Real  JD_OF_JANUARY_1_1997  = 2450449.5;  // correct????

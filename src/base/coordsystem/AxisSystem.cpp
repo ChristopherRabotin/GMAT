@@ -39,19 +39,17 @@ using namespace GmatTimeUtil;      // for SECS_PER_DAY
 // static data
 //---------------------------------
 
-/*const std::string
+const std::string
 AxisSystem::PARAMETER_TEXT[AxisSystemParamCount - CoordinateBaseParamCount] =
 {
-   "RotationMatrix",
-   "RotationDotMatrix",
-};*/
+   "Epoch",
+};
 
-/*const Gmat::ParameterType
+const Gmat::ParameterType
 AxisSystem::PARAMETER_TYPE[AxisSystemParamCount - CoordinateBaseParamCount] =
 {
-   Gmat::RMATRIX33_TYPE,
-   Gmat::RMATRIX33_TYPE,
-};*/
+   Gmat::REAL_TYPE,
+};
 
 
 //------------------------------------------------------------------------------
@@ -192,9 +190,22 @@ void AxisSystem::SetSecondaryObject(SpacePoint *second)
    // default behavior is to ignore this
 }
 
+
+//---------------------------------------------------------------------------
+//  void SetEpoch(const A1Mjd &toEpoch)
+//---------------------------------------------------------------------------
+/**
+ * Sets the epoch for the AxisSystem class.
+ *
+ * @param <toEpoch> epoch value to use.
+ *
+ * @return true if successful; false, otherwise.
+ *
+ */
+//---------------------------------------------------------------------------
 void AxisSystem::SetEpoch(const A1Mjd &toEpoch)
 {
-   // default behavior is to ignore this
+   epoch = toEpoch;
 }
 
 void AxisSystem::SetXAxis(const std::string &toValue)
@@ -252,10 +263,21 @@ SpacePoint* AxisSystem::GetSecondaryObject() const
    return NULL;
 }
 
+//---------------------------------------------------------------------------
+//  A1Mjd GetEpoch() const
+//---------------------------------------------------------------------------
+/**
+ * Returns the epoch of the AxisSystem class.
+ *
+ * @return epoch.
+ *
+ */
+//---------------------------------------------------------------------------
 A1Mjd AxisSystem::GetEpoch() const
 {
-   return A1Mjd();  // does this make sense?
+   return epoch;
 }
+
 
 std::string AxisSystem::GetXAxis() const
 {
@@ -385,12 +407,12 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
  *
  */
 //------------------------------------------------------------------------------
-/*std::string AxisSystem::GetParameterText(const Integer id) const
+std::string AxisSystem::GetParameterText(const Integer id) const
 {
    if (id >= CoordinateBaseParamCount && id < AxisSystemParamCount)
       return PARAMETER_TEXT[id - CoordinateBaseParamCount];
    return CoordinateBase::GetParameterText(id);
-}*/
+}
 
 //------------------------------------------------------------------------------
 //  Integer  GetParameterID(const std::string &str) const
@@ -404,7 +426,7 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
  *
  */
 //------------------------------------------------------------------------------
-/*Integer AxisSystem::GetParameterID(const std::string &str) const
+Integer AxisSystem::GetParameterID(const std::string &str) const
 {
    for (Integer i = CoordinateBaseParamCount; i < AxisSystemParamCount; i++)
    {
@@ -413,7 +435,7 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
    }
    
    return CoordinateBase::GetParameterID(str);
-}*/
+}
 
 //------------------------------------------------------------------------------
 //  Gmat::ParameterType  GetParameterType(const Integer id) const
@@ -427,13 +449,13 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
  *
  */
 //------------------------------------------------------------------------------
-/*Gmat::ParameterType AxisSystem::GetParameterType(const Integer id) const
+Gmat::ParameterType AxisSystem::GetParameterType(const Integer id) const
 {
    if (id >= CoordinateBaseParamCount && id < AxisSystemParamCount)
       return PARAMETER_TYPE[id - CoordinateBaseParamCount];
    
    return CoordinateBase::GetParameterType(id);
-}*/
+}
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterTypeString(const Integer id) const
@@ -447,10 +469,88 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
  *
  */
 //------------------------------------------------------------------------------
-/*std::string AxisSystem::GetParameterTypeString(const Integer id) const
+std::string AxisSystem::GetParameterTypeString(const Integer id) const
 {
    return CoordinateBase::PARAM_TYPE_STRING[GetParameterType(id)];
-}*/
+}
+
+
+//------------------------------------------------------------------------------
+//  Real  GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the real value, given the input parameter ID.
+ *
+ * @param id ID for the requested parameter.
+ *
+ * @return real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real AxisSystem::GetRealParameter(const Integer id) const
+{
+   if (id == EPOCH) return epoch.Get();  // modify later????????????
+   return CoordinateBase::GetRealParameter(id);
+}
+
+//------------------------------------------------------------------------------
+//  Real  SetRealParameter(const Integer id, const Real value) 
+//------------------------------------------------------------------------------
+/**
+ * This method sets the real value, given the input parameter ID.
+ *
+ * @param id ID for the requested parameter.
+ * @param value to use to set the parameter.
+ *
+ * @return real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real AxisSystem::SetRealParameter(const Integer id, const Real value)
+{
+   if (id == EPOCH)
+   {
+      epoch.Set(value);
+      return true;
+   }
+   return CoordinateBase::SetRealParameter(id,value);
+}
+
+//------------------------------------------------------------------------------
+//  Real  GetRealParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the real value, given the input parameter label.
+ *
+ * @param label label for the requested parameter.
+ *
+ * @return real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real AxisSystem::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+//  Real  SetRealParameter(const std::string &label, const Real value) 
+//------------------------------------------------------------------------------
+/**
+ * This method sets the real value, given the input parameter label.
+ *
+ * @param label label for the requested parameter.
+ * @param value to use to set the parameter.
+ *
+ * @return real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real AxisSystem::SetRealParameter(const std::string &label, const Real value)
+{
+   return SetRealParameter(GetParameterID(label), value);
+}
+
 
 void AxisSystem::InitializeFK5()
 {
