@@ -32,8 +32,14 @@
 #include "CoordinateSystemException.hpp"
 #include "SolarSystem.hpp"
 
+#include <iostream>
+using namespace std; //***************************** for debug only 
+
 using namespace GmatMathUtil;      // for trig functions, etc.
 using namespace GmatTimeUtil;      // for SECS_PER_DAY
+
+//#define DEBUG_ROT_MATRIX 1
+//static Integer visitCount = 0;
 
 //---------------------------------
 // static data
@@ -82,6 +88,7 @@ itrf             (NULL)
    parameterCount = AxisSystemParamCount;
    rotMatrix    = Rmatrix33(false); // want zero matrix, not identity matrix
    rotDotMatrix = Rmatrix33(false); // want zero matrix, not identity matrix
+   epoch = GmatTimeUtil::A1MJD_OF_J2000;
 }
 
 //---------------------------------------------------------------------------
@@ -98,6 +105,7 @@ AxisSystem::AxisSystem(const AxisSystem &axisSys) :
 CoordinateBase(axisSys),
 rotMatrix         (axisSys.rotMatrix),
 rotDotMatrix      (axisSys.rotDotMatrix),
+epoch             (axisSys.epoch),
 eop               (axisSys.eop),
 itrf              (axisSys.itrf)
 {
@@ -121,6 +129,7 @@ const AxisSystem& AxisSystem::operator=(const AxisSystem &axisSys)
    CoordinateBase::operator=(axisSys);
    rotMatrix     = axisSys.rotMatrix;
    rotDotMatrix  = axisSys.rotDotMatrix;
+   epoch         = axisSys.epoch;
    eop           = axisSys.eop;
    itrf          = axisSys.itrf;
    Initialize();
@@ -554,8 +563,8 @@ Real AxisSystem::SetRealParameter(const std::string &label, const Real value)
 
 void AxisSystem::InitializeFK5()
 {
-   if (originName == SolarSystem::EARTH_NAME)
-   {
+   //if (originName == SolarSystem::EARTH_NAME)
+   //{
       if (eop == NULL)
          throw CoordinateSystemException(
                "EOP file has not been set for " + instanceName);
@@ -580,7 +589,7 @@ void AxisSystem::InitializeFK5()
       if (!OK) throw CoordinateSystemException("Error getting nutation data.");
       OK      = itrf->GetPlanetaryTerms(ap, Ap, Bp, Cp, Dp);
       if (!OK) throw CoordinateSystemException("Error getting planetary data.");
-   }
+   //}
 }   
 
 //------------------------------------------------------------------------------
@@ -598,6 +607,10 @@ void AxisSystem::InitializeFK5()
 //------------------------------------------------------------------------------
 Rmatrix33 AxisSystem::ComputePrecessionMatrix(const Real tTDB)
 {
+   
+   #ifdef DEBUG_ROT_MATRIX
+      cout << "**** tTDB = " << tTDB << endl;
+   #endif
    Real tTDB2   = tTDB  * tTDB;
    Real tTDB3   = tTDB2 * tTDB;
 
@@ -629,6 +642,9 @@ Rmatrix33 AxisSystem::ComputePrecessionMatrix(const Real tTDB)
    PREC(2,0) =  sinTheta*coszeta;
    PREC(2,1) = -sinTheta*sinzeta;
    PREC(2,2) =  cosTheta;
+   #ifdef DEBUG_ROT_MATRIX
+      cout << "PREC = " << endl << PREC << endl;
+   #endif
    return PREC;
 }
 
@@ -682,14 +698,14 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, Real &dPsi,
    // NOTE - this part is commented out for now, per Steve Hughes
    // First, compute the mean Heliocentric longitudes of the planets, and the
    // general precession in longitude
-   /*
+   
     Real longVenus   = (181.979800853  + 58517.8156748  * tTDB)* RAD_PER_DEG;
     Real longEarth   = (100.466448494  + 35999.3728521  * tTDB)* RAD_PER_DEG;
     Real longMars    = (355.433274605  + 19140.299314   * tTDB)* RAD_PER_DEG;
     Real longJupiter = ( 34.351483900  +  3034.90567464 * tTDB)* RAD_PER_DEG;
     Real longSaturn  = ( 50.0774713998 +  1222.11379404 * tTDB)* RAD_PER_DEG;
     Real genPrec     = (1.39697137214 * tTDB + 0.0003086 * tTDB2)
-    * RAD_PER_DEG;
+                       * RAD_PER_DEG;
     Real apPlan = 0.0;
     Real cosApP = 0.0;
     Real sinApP = 0.0;
@@ -708,7 +724,7 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, Real &dPsi,
        dPsi += (( Ap[i] + Bp[i]*tTDB )*sinApP) * RAD_PER_ARCSEC;
        dEps += (( Cp[i] + Dp[i]*tTDB )*cosApP) * RAD_PER_ARCSEC;
     }
-    */
+    
    // FOR NOW, SQ's code to approximate GSRF frame
    // NOTE - do we delete this when we put in the planetary stuff above?
    // offset and rate correction to approximate GCRF, Ref.[1], Eq (3-63)  - SQ
@@ -741,6 +757,9 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, Real &dPsi,
    NUT(2,1) =  sinTEoE*cosdPsi*cosEpsbar - sinEpsbar*cosTEoE;
    NUT(2,2) =  sinTEoE*sinEpsbar*cosdPsi + cosTEoE*cosEpsbar;
    
+   #ifdef DEBUG_ROT_MATRIX
+      cout << "NUT = " << endl << NUT << endl;
+   #endif
    return NUT;
 }
 
@@ -799,6 +818,10 @@ Rmatrix33 AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
    ST(2,1) =  0.0;
    ST(2,2) =  1.0;
    
+   #ifdef DEBUG_ROT_MATRIX
+      cout << "ST = " << endl << ST << endl;
+   #endif
+
    return ST;
 }
 
@@ -825,6 +848,11 @@ Rmatrix33 AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC,
    STderiv(2,1) =  0.0;
    STderiv(2,2) =  0.0;
    
+   #ifdef DEBUG_ROT_MATRIX
+      cout << "x, y, lod = " << x << " " << y << " " << lod << endl;
+      cout << "STderiv = " << endl << STderiv << endl;
+   #endif
+   
    return STderiv;
 }
 
@@ -848,7 +876,11 @@ Rmatrix33 AxisSystem::ComputePolarMotionRotation(Real x, Real y)
    PM(2,0) =  sinX;
    PM(2,1) = -cosX*sinY;
    PM(2,2) =  cosX*cosY;
-   
+
+   #ifdef DEBUG_ROT_MATRIX
+      cout << "PM = " << endl << PM << endl;
+   #endif
+
    return PM;
 }
 
