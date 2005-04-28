@@ -138,7 +138,7 @@ GmatCoordinate::ParameterUsage BodyFixedAxes::UsesItrfFile() const
 bool BodyFixedAxes::Initialize()
 {
    DynamicAxes::Initialize();
-   InitializeFK5();
+   if (originName == SolarSystem::EARTH_NAME) InitializeFK5();
    
    return true;
 }
