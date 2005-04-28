@@ -402,73 +402,99 @@ bool Sandbox::Initialize()
    // Initialize the solar system, internal coord system, etc.
    InitializeInternalObjects();
 
+   // Per Linda's request, the initialization order is:
+   // 1. CoordinateSystem
+   // 2. Spacecraft
+   // 3. PropSetup and others
+   // 4. System Parameters
+   // 5. Other Parameters
+   // 6. Subscribers.
+
    // Set reference objects
-   // Set references for other objects, saving Subscribers for last
+
+   // Coordinate Systems
    for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
    {
       obj = omi->second;
-      // save Subscribers for last
-      if (obj->GetType() != Gmat::SUBSCRIBER)
+      if (obj->GetType() == Gmat::COORDINATE_SYSTEM)
       {
-         // Treat parameters as a special case -- because system parameters have
-         // to be initialized before other parameters.
-         if (obj->GetType() == Gmat::PARAMETER)
+         obj->SetSolarSystem(solarSys);
+         InitializeCoordinateSystem((CoordinateSystem *)obj);
+         obj->Initialize();
+      }
+   }
+
+   // Spacecraft
+   for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
+   {
+      obj = omi->second;
+      if (obj->GetType() == Gmat::SPACECRAFT)
+      {
+         obj->SetSolarSystem(solarSys);
+         ((Spacecraft *)obj)->SaveDisplay();
+
+         // Setup spacecraft hardware
+         BuildAssociations(obj);
+      }
+   }
+
+   // All others except Parameters and Subscribers
+   // Spacecraft
+   for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
+   {
+      obj = omi->second;
+      if ((obj->GetType() != Gmat::COORDINATE_SYSTEM) &&
+          (obj->GetType() != Gmat::SPACECRAFT) &&
+          (obj->GetType() != Gmat::PARAMETER) &&
+          (obj->GetType() != Gmat::SUBSCRIBER))
+      {
+         #ifdef DEBUG_SANDBOX_INIT
+            MessageInterface::ShowMessage(
+               "Sandbox::Initialize objTypeName = %s, objName = %s\n",
+               obj->GetTypeName().c_str(), obj->GetName().c_str());
+         #endif
+
+         //**************************************** TEMPORARY *****************************************
+         if (obj->GetType() != Gmat::PROP_SETUP)
          {
-            Parameter *param = (Parameter *)obj;
-            // Make sure system parameters are configured before others
-            if (param->GetKey() == GmatParam::SYSTEM_PARAM)
-            {
-               #ifdef DEBUG_SANDBOX_INIT
-                  MessageInterface::ShowMessage(
-                     "Sandbox::Initialize objTypeName = %s, objName = %s\n",
-                     obj->GetTypeName().c_str(), obj->GetName().c_str());
-               #endif
-            //***************************************** TEMPORARY ******************************************
-               param->SetSolarSystem(solarSys);
-               InitializeParameter(param);
-            //************************************* END OF TEMPORARY ***************************************
-//               BuildReferences(obj);
-               obj->Initialize();
-            }
+            obj->SetSolarSystem(solarSys);
+            continue;
          }
-         else
+         //************************************* END OF TEMPORARY ***************************************
+
+         BuildReferences(obj);
+         // PropSetup initialization is handled by the commands, since the
+         // state that is propagated may change as spacecraft are added or
+         // removed.
+         if (obj->GetType() != Gmat::PROP_SETUP)
+            obj->Initialize();
+      }
+   }
+
+   // System Parameters
+   for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
+   {
+      obj = omi->second;
+
+      // Treat parameters as a special case -- because system parameters have
+      // to be initialized before other parameters.
+      if (obj->GetType() == Gmat::PARAMETER)
+      {
+         Parameter *param = (Parameter *)obj;
+         // Make sure system parameters are configured before others
+         if (param->GetKey() == GmatParam::SYSTEM_PARAM)
          {
             #ifdef DEBUG_SANDBOX_INIT
                MessageInterface::ShowMessage(
                   "Sandbox::Initialize objTypeName = %s, objName = %s\n",
                   obj->GetTypeName().c_str(), obj->GetName().c_str());
             #endif
-
-            //**************************************** TEMPORARY *****************************************
-            // These are special cases that make the new code act like the old code
-            if (obj->GetType() == Gmat::COORDINATE_SYSTEM)
-            {
-               obj->SetSolarSystem(solarSys);
-               InitializeCoordinateSystem((CoordinateSystem *)obj);
-               obj->Initialize();
-               continue;
-            }
-
-            if (obj->GetType() == Gmat::SPACECRAFT)
-            {
-               obj->SetSolarSystem(solarSys);
-               ((Spacecraft *)obj)->SaveDisplay();
-               continue;
-            }
-
-            if (obj->GetType() != Gmat::PROP_SETUP)
-            {
-               obj->SetSolarSystem(solarSys);
-               continue;
-            }
+            //***************************************** TEMPORARY ******************************************
+            param->SetSolarSystem(solarSys);
+            InitializeParameter(param);
             //************************************* END OF TEMPORARY ***************************************
-
-            BuildReferences(obj);
-            // PropSetup initialization is handled by the commands, since the
-            // state that is propagated may change as spacecraft are added or
-            // removed.
-            if (obj->GetType() != Gmat::PROP_SETUP)
-               obj->Initialize();
+//            BuildReferences(obj);
+            obj->Initialize();
          }
       }
    }
