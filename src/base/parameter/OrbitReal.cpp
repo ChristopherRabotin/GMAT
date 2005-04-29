@@ -238,17 +238,15 @@ bool OrbitReal::Validate()
 //------------------------------------------------------------------------------
 bool OrbitReal::Initialize()
 {
-   //loj: 4/12/05 Added try block
    try
    {
       InitializeRefObjects();
    }
    catch(BaseException &e)
    {
-      throw ParameterException
-         ("OrbitReal::GetRefObjectName() Fail to initialize Parameter:" +
-          this->GetTypeName() + "\n" + e.GetMessage() + "This parameter could be "
-          "an internal parameter of Periapsis.\n");
+      throw GmatBaseException
+         ("OrbitReal::Initialize() Fail to initialize Parameter:" +
+          this->GetTypeName() + "\n" + e.GetMessage());
    }
    
    return true;
@@ -293,6 +291,23 @@ std::string OrbitReal::GetRefObjectName(const Gmat::ObjectType type) const
    }
    
    return objName;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves reference object name array for given type. It will return all
+ * object names if type is Gmat::UNKNOWN_NAME.
+ *
+ * @param <type> object type
+ * @return reference object name.
+ */
+//------------------------------------------------------------------------------
+const StringArray& OrbitReal::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   return OrbitData::GetRefObjectNameArray(type);
 }
 
 

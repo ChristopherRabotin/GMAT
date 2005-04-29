@@ -696,30 +696,36 @@ GmatBase* XyPlot::GetRefObject(const Gmat::ObjectType type,
 bool XyPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                           const std::string &name)
 {
-   // if name is XParam name
-   if (name == mXParamName)
+   if (type == Gmat::PARAMETER) //loj: 4/22/04 Added
    {
-      mXParam = (Parameter*)obj;
-#if DEBUG_XYPLOT_OBJECT
-      MessageInterface::ShowMessage
-         ("XyPlot::SetRefObject() mXParam:%s successfully set\n",
-          obj->GetName().c_str());
-#endif
-      return true;
-   }
-   else
-   {
-      for (int i=0; i<mNumYParams; i++)
+      if (name == mXParamName)
       {
-         if (mYParamNames[i] == name)
+         mXParam = (Parameter*)obj;
+      
+         #if DEBUG_XYPLOT_OBJECT
+         MessageInterface::ShowMessage
+            ("XyPlot::SetRefObject() mXParam:%s successfully set\n",
+             obj->GetName().c_str());
+         #endif
+      
+         return true;
+      }
+      else
+      {
+         for (int i=0; i<mNumYParams; i++)
          {
-            mYParams[i] = (Parameter*)obj;
-#if DEBUG_XYPLOT_OBJECT
-            MessageInterface::ShowMessage
-               ("XyPlot::SetRefObject() mYParams[%s] successfully set\n",
-                obj->GetName().c_str());
-#endif
-            return true;
+            if (mYParamNames[i] == name)
+            {
+               mYParams[i] = (Parameter*)obj;
+               
+               #if DEBUG_XYPLOT_OBJECT
+               MessageInterface::ShowMessage
+                  ("XyPlot::SetRefObject() mYParams[%s] successfully set\n",
+                   obj->GetName().c_str());
+               #endif
+               
+               return true;
+            }
          }
       }
    }
@@ -734,15 +740,20 @@ const StringArray& XyPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    mAllParamNames.clear();
 
-   //loj: 12/19/04 Added type check
-   if (type == Gmat::PARAMETER)
+   //loj: 4/29/05 Added UNKNOWN_OBJECT
+   switch (type)
    {
+   case Gmat::UNKNOWN_OBJECT:
+   case Gmat::PARAMETER:
       // add x parameter
       mAllParamNames.push_back(mXParamName);
    
       // add y parameters
       for (int i=0; i<mNumYParams; i++)
          mAllParamNames.push_back(mYParamNames[i]);
+      break;
+   default:
+      break;
    }
    
    return mAllParamNames;

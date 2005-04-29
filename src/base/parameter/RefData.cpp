@@ -145,6 +145,55 @@ std::string RefData::GetRefObjectName(const Gmat::ObjectType type) const
    return "RefData::GetRefObjectName(): INVALID_OBJECT_TYPE";
 }
 
+//loj: 4/28/05 Added
+//------------------------------------------------------------------------------
+// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves reference object name array for given type. It will return all
+ * object names if type is Gmat::UNKNOWN_NAME.
+ *
+ * @param <type> object type
+ * @return reference object name.
+ */
+//------------------------------------------------------------------------------
+const StringArray& RefData::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   mAllRefObjectNames.clear();
+
+   if (type == Gmat::UNKNOWN_OBJECT)
+   {
+      for (int i=0; i<mNumRefObjects; i++)
+      {
+         #if DEBUG_REFDATA_OBJECT > 1
+         MessageInterface::ShowMessage
+            ("RefData::GetRefObjectNameArray() type=%d name: %s\n", type,
+             mRefObjList[i].objName.c_str());
+         #endif
+         
+         mAllRefObjectNames.push_back(mRefObjList[i].objName);
+      }
+   }
+   else
+   {
+      for (int i=0; i<mNumRefObjects; i++)
+      {
+         if (mRefObjList[i].objType == type)
+         {
+            #if DEBUG_REFDATA_OBJECT > 1
+            MessageInterface::ShowMessage
+               ("RefData::GetRefObjectNameArray() type=%d name: %s\n", type,
+                mRefObjList[i].objName.c_str());
+            #endif
+            
+            mAllRefObjectNames.push_back(mRefObjList[i].objName);
+         }
+      }
+   }
+   
+   return mAllRefObjectNames;
+}
+
 
 //------------------------------------------------------------------------------
 // bool SetRefObjectName(Gmat::ObjectType type, const std::string &name)

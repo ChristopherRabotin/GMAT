@@ -210,6 +210,23 @@ std::string TimeReal::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
+// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves reference object name array for given type. It will return all
+ * object names if type is Gmat::UNKNOWN_NAME.
+ *
+ * @param <type> object type
+ * @return reference object name.
+ */
+//------------------------------------------------------------------------------
+const StringArray& TimeReal::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   return TimeData::GetRefObjectNameArray(type);
+}
+
+
+//------------------------------------------------------------------------------
 // virtual bool SetRefObjectName(const Gmat::ObjectType type,
 //                               const std::string &name)
 //------------------------------------------------------------------------------

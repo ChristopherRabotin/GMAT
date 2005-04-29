@@ -56,7 +56,6 @@ EnvData::EnvData()
 {
    mSpacecraft = NULL;
    mSolarSystem = NULL;
-   mCentralBody = NULL;
    mOrigin = NULL;
 }
 
@@ -138,11 +137,9 @@ Real EnvData::GetEnvReal(const std::string &str)
       
       Real density = 0.0;
       
-      // Call GetDensity() on central body
-      //mCentralBody->GetDensity(state, &density, a1mjd, 1);
-      
-      // Call GetDensity() on origin (loj: 4/7/05)
-      mOrigin->GetDensity(state, &density, a1mjd, 1);
+      // Call GetDensity() on if origin is CelestialBody
+      if (mOrigin->IsOfType(Gmat::CELESTIAL_BODY))
+         ((CelestialBody*)mOrigin)->GetDensity(state, &density, a1mjd, 1);
 
       #ifdef DEBUG_ENVDATA_RUN
          MessageInterface::ShowMessage
@@ -211,18 +208,8 @@ void EnvData::InitializeRefObjects()
    if (mSolarSystem == NULL)
       throw ParameterException
          ("EnvData::InitializeRefObjects() Cannot find SolarSystem object\n");
-   
-   Integer id = mSpacecraft->GetParameterID("CoordinateSystem");
-   std::string bodyName = mSpacecraft->GetStringParameter(id);
-   mCentralBody = mSolarSystem->GetBody(bodyName);
-   
-   if (!mCentralBody)
-      throw ParameterException("EnvData::GetCartState() Body not found in the "
-                               "SolarSystem: " + bodyName + "\n");
 
-   //loj: 4/11/05 Added
-   // if dependent body name exist and it is a CelestialBody, set gravity constant
-   
+   // set origin
    std::string originName =
       FindFirstObjectName(GmatBase::GetObjectType(VALID_OBJECT_TYPE_LIST[SPACE_POINT]));
 

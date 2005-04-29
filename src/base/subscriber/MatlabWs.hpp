@@ -80,6 +80,7 @@ protected:
    
    std::vector<Parameter*> mParams;
    StringArray mParamNames;
+   StringArray mAllRefObjectNames;
    
    virtual bool        Distribute(Integer len);
    virtual bool        Distribute(const Real * dat, Integer len);

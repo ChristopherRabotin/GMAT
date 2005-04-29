@@ -35,6 +35,8 @@ public:
    Integer GetNumRefObjects() const;
    
    std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
+   
    bool SetRefObjectName(const Gmat::ObjectType type,
                          const std::string &name);
    GmatBase* GetRefObject(const Gmat::ObjectType type,
@@ -63,6 +65,7 @@ protected:
    RefObjType mRefObjList[MAX_OBJ_COUNT];
    
    StringArray mObjectTypeNames;
+   StringArray mAllRefObjectNames;
    Integer mNumRefObjects;
    
    bool AddRefObject(const Gmat::ObjectType type,

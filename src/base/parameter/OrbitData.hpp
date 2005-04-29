@@ -82,8 +82,8 @@ protected:
    
    Spacecraft *mSpacecraft;
    SolarSystem *mSolarSystem;
-   CelestialBody *mCentralBody;
-   SpacePoint *mOrigin; //loj: 4/11/05 Added
+   SpacePoint *mScOrigin;
+   SpacePoint *mOrigin;
    CoordinateSystem *mInternalCoordSystem;
    CoordinateSystem *mOutCoordSystem;
    
@@ -99,7 +99,7 @@ protected:
       SPACECRAFT = 0,
       SOLAR_SYSTEM,
       COORD_SYSTEM,
-      SPACE_POINT, //loj: 4/11/05 Changed CELESTIAL_BODY to SPACE_POINT
+      SPACE_POINT,
       OrbitDataObjectCount
    };
    

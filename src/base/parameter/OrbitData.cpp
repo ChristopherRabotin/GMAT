@@ -71,7 +71,7 @@ OrbitData::OrbitData()
    mMA = ORBIT_REAL_UNDEFINED;
    mSpacecraft = NULL;
    mSolarSystem = NULL;
-   mCentralBody = NULL;
+   mScOrigin = NULL;
    mOrigin = NULL; //loj: 4/7/05 Added
    mInternalCoordSystem = NULL;
    mOutCoordSystem = NULL;
@@ -588,7 +588,7 @@ Real OrbitData::GetSphRaDecReal(const std::string &str)
    if (str == "SphRMag")
    {
       // if orgin is the same as central body, just return default
-      if (mOrigin->GetName() == mCentralBody->GetName())
+      if (mOrigin->GetName() == mScOrigin->GetName())
          return mSphRaDecState[RD_RMAG];
       else
          return GetPositionMagnitude(mOrigin);
@@ -607,9 +607,10 @@ Real OrbitData::GetSphRaDecReal(const std::string &str)
    else if (str == "Altitude")
    {
       // if orgin is the same as central body, just return default
-      if (mOrigin->GetName() == mCentralBody->GetName())
+      if (mOrigin->GetName() == mScOrigin->GetName())
       {
-         return mSphRaDecState[RD_RMAG] - mCentralBody->GetEquatorialRadius();
+         return mSphRaDecState[RD_RMAG] -
+            ((CelestialBody*)mScOrigin)->GetEquatorialRadius();
       }
       else
       {
@@ -692,7 +693,7 @@ Real OrbitData::GetAngularReal(const std::string &str)
    
    if (str == "SemilatusRectum")
    {
-      if (mOrigin->GetName() != mCentralBody->GetName())
+      if (mOrigin->GetName() != mScOrigin->GetName())
       {
          state = GetRelativeCartState(mOrigin);
          pos = Rvector3(state[0], state[1], state[2]);
@@ -708,7 +709,7 @@ Real OrbitData::GetAngularReal(const std::string &str)
    }
    else if (str == "HMAG")
    {
-      if (mOrigin->GetName() != mCentralBody->GetName())
+      if (mOrigin->GetName() != mScOrigin->GetName())
       {
          state = GetRelativeCartState(mOrigin);
          pos = Rvector3(state[0], state[1], state[2]);
@@ -795,9 +796,10 @@ void OrbitData::InitializeRefObjects()
       throw ParameterException
          ("OrbitData::InitializeRefObjects() Cannot find Spacecraft object.\n"
           "Make sure Spacecraft is set to any unnamed parameters\n");
-   
+
    mSolarSystem =
       (SolarSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SOLAR_SYSTEM]);
+   
    if (mSolarSystem == NULL)
       throw ParameterException
          ("OrbitData::InitializeRefObjects() Cannot find SolarSystem object\n");
@@ -809,37 +811,53 @@ void OrbitData::InitializeRefObjects()
    
    mOutCoordSystem =
       (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
+   
    if (mOutCoordSystem == NULL)
       throw ParameterException
          ("OrbitData::InitializeRefObjects() Cannot find output "
           "CoordinateSystem object\n");
-   
-   Integer id = mSpacecraft->GetParameterID("CoordinateSystem");
-   std::string bodyName = mSpacecraft->GetStringParameter(id);
-   mCentralBody = mSolarSystem->GetBody(bodyName);
-   
-   if (!mCentralBody)
-      throw ParameterException
-         ("OrbitData::InitializeRefObjects() spacecraft central body not "
-          "found in the SolarSystem: " + bodyName + "\n");
 
-   // get gravity constant of the central body
-   mGravConst = mCentralBody->GetGravitationalConstant();
+   //loj: 4/28/05 old code
+   //Integer id = mSpacecraft->GetParameterID("CoordinateSystem");
+   //std::string bodyName = mSpacecraft->GetStringParameter(id);
+   //mScOrigin = mSolarSystem->GetBody(bodyName);
    
-   //loj: 4/11/05 Added
-   // if dependent body name exist and it is a CelestialBody, set gravity constant
+   // get spacecraft CoordinateSystem
+   std::string csName = mSpacecraft->GetRefObjectName(Gmat::COORDINATE_SYSTEM);   
+   CoordinateSystem *cs = (CoordinateSystem*)mSpacecraft->
+      GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+
+   if (!cs)
+      throw ParameterException
+         ("OrbitData::InitializeRefObjects() spacecraft CoordinateSystem not "
+          "found: " + csName + "\n");
    
+   mScOrigin = cs->GetOrigin();
+   
+   if (!mScOrigin)
+      throw ParameterException
+         ("OrbitData::InitializeRefObjects() spacecraft origin not found: " +
+          cs->GetOriginName() + "\n");
+   
+   // get gravity constant if spacecraft origin is CelestialBody
+   if (mScOrigin->IsOfType(Gmat::CELESTIAL_BODY))
+      mGravConst = ((CelestialBody*)mScOrigin)->GetGravitationalConstant();
+
+   //-----------------------------------------------------------------
+   // if dependent body name exist and it is a CelestialBody,
+   // set new gravity constant
+   //-----------------------------------------------------------------
    std::string originName =
       FindFirstObjectName(GmatBase::GetObjectType(VALID_OBJECT_TYPE_LIST[SPACE_POINT]));
 
    if (originName != "")
    {
       #if DEBUG_ORBITDATA_INIT
-         MessageInterface::ShowMessage
-            ("OrbitData::InitializeRefObjects() getting originName:%s pointer.\n",
-             originName.c_str());
+      MessageInterface::ShowMessage
+         ("OrbitData::InitializeRefObjects() getting originName:%s pointer.\n",
+          originName.c_str());
       #endif
-         
+      
       mOrigin =
          (SpacePoint*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACE_POINT]);
 
@@ -852,7 +870,16 @@ void OrbitData::InitializeRefObjects()
       if (mOrigin->GetType() == Gmat::CELESTIAL_BODY)
          mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
    }
+   else
+   {
+      mOrigin = mScOrigin;
+   }
    
+   #if DEBUG_ORBITDATA_INIT
+   MessageInterface::ShowMessage
+      ("OrbitData::InitializeRefObjects() mScOrignName=%s, mOriginName=%s\n",
+       mScOrigin->GetName().c_str(), mOrigin->GetName().c_str());
+   #endif
 }
 
 

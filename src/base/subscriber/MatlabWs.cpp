@@ -349,7 +349,19 @@ bool MatlabWs::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 const StringArray& MatlabWs::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
-   return mParamNames;
+   mAllRefObjectNames.clear();
+   
+   //loj: 4/29/05 Added UNKNOWN_OBJECT
+   switch (type)
+   {
+   case Gmat::PARAMETER:
+   case Gmat::UNKNOWN_OBJECT:
+      mAllRefObjectNames = mParamNames;
+   default:
+      break;
+   }
+
+   return mAllRefObjectNames;
 }
 
 

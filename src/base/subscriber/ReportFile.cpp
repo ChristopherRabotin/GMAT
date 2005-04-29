@@ -499,17 +499,19 @@ GmatBase* ReportFile::GetRefObject(const Gmat::ObjectType type,
 //                           const std::string &name = "")
 //------------------------------------------------------------------------------
 bool ReportFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                          const std::string &name)
+                              const std::string &name)
 {
-   for (int i=0; i<mNumVarParams; i++)
+   if (type == Gmat::PARAMETER) //loj: 4/22/04 Added
    {
-      if (mVarParamNames[i] == name)
+      for (int i=0; i<mNumVarParams; i++)
       {
-         mVarParams[i] = (Parameter*)obj;
-         return true;
+         if (mVarParamNames[i] == name)
+         {
+            mVarParams[i] = (Parameter*)obj;
+            return true;
+         }
       }
    }
-
    return false;
 }
 
@@ -519,7 +521,19 @@ bool ReportFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 const StringArray& ReportFile::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
-   return mVarParamNames;
+   mAllRefObjectNames.clear();
+   
+   //loj: 4/29/05 Added UNKNOWN_OBJECT
+   switch (type)
+   {
+   case Gmat::UNKNOWN_OBJECT:
+   case Gmat::PARAMETER:
+      mAllRefObjectNames = mVarParamNames;
+   default:
+      break;
+   }
+   
+   return mAllRefObjectNames;
 }
 
 

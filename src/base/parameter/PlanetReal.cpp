@@ -238,6 +238,24 @@ std::string PlanetReal::GetRefObjectName(const Gmat::ObjectType type) const
    return objName;
 }
 
+
+//------------------------------------------------------------------------------
+// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves reference object name array for given type. It will return all
+ * object names if type is Gmat::UNKNOWN_NAME.
+ *
+ * @param <type> object type
+ * @return reference object name.
+ */
+//------------------------------------------------------------------------------
+const StringArray& PlanetReal::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   return PlanetData::GetRefObjectNameArray(type);
+}
+
+
 //------------------------------------------------------------------------------
 // virtual bool SetRefObjectName(const Gmat::ObjectType type,
 //                               const std::string &name)

@@ -48,11 +48,10 @@ protected:
    // The inherited methods from RefData
    virtual void InitializeRefObjects();
    virtual bool IsValidObjectType(Gmat::ObjectType type);
-     
+   
    Spacecraft *mSpacecraft;
    SolarSystem *mSolarSystem;
-   CelestialBody *mCentralBody;
-   CelestialBody *mOrigin;
+   SpacePoint *mOrigin;
    
    enum
    {

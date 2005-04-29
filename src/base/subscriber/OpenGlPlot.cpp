@@ -242,8 +242,7 @@ bool OpenGlPlot::Initialize()
                (instanceName, mViewPointRefObj, mViewPointVectorObj,
                 mViewDirectionObj, mViewScaleFactor, mViewPointRefVector,
                 mViewPointVector, mViewDirectionVector,
-                (mViewPointRefName == "Vector"),
-                (mViewPointVectorName == "Vector"),
+                (mViewPointRefName == "Vector"), (mViewPointVectorName == "Vector"),
                 (mViewDirectionName == "Vector"));
             
             return true;
@@ -1037,6 +1036,17 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
       if (mViewDirectionName != "Vector")
          mAllRefObjectNames.push_back(mViewDirectionName);
    }
+   else if (type == Gmat::UNKNOWN_OBJECT) //loj: 4/26/05 Added
+   {
+      mAllRefObjectNames.push_back(mCoordSysName);
+      mAllRefObjectNames.push_back(mViewPointRefName);
+      
+      if (mViewPointVectorName != "Vector")
+         mAllRefObjectNames.push_back(mViewPointVectorName);
+
+      if (mViewDirectionName != "Vector")
+         mAllRefObjectNames.push_back(mViewDirectionName);
+   }
    
    return mAllRefObjectNames;
 }
@@ -1085,8 +1095,9 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 {
    #if DEBUG_OPENGL_INIT
    MessageInterface::ShowMessage
-      ("OpenGlPlot::SetRefObject() type:%s is set to addr=%d\n",
-       GmatBase::GetObjectTypeString(type).c_str(), obj);
+      ("OpenGlPlot::SetRefObject() type:%s name=%s set to addr=%d\n",
+       //GmatBase::GetObjectTypeString(type).c_str(), obj->GetName().c_str(), obj);
+       obj->GetTypeName().c_str(), obj->GetName().c_str(), obj);
    #endif
    
    // just check for the type
@@ -1104,8 +1115,10 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    {
       if (name == mViewPointRefName)
          mViewPointRefObj = (SpacePoint*)obj;
-      else if (name == mViewPointVectorName)
+      
+      if (name == mViewPointVectorName)
          mViewPointVectorObj = (SpacePoint*)obj;
+      
       else if (name == mViewDirectionName)
          mViewDirectionObj = (SpacePoint*)obj;
       
@@ -1340,21 +1353,22 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
                #endif
                
             }
-            
+
+            //loj: 4/25/05 Added mScNameArray
             // If targeting, use targeting color
             if (thePublisher->GetRunState() == Gmat::TARGETING)
             {
                PlotInterface::
                   UpdateGlSpacecraft(instanceName, mOldName, mCoordSysName,
-                                     dat[0], mScXArray, mScYArray, mScZArray,
-                                     mTargetColorArray, update);//, (mWireFrame == "On"));
+                                     mScNameArray, dat[0], mScXArray, mScYArray,
+                                     mScZArray, mTargetColorArray, update);
             }
             else
             {
                PlotInterface::
                   UpdateGlSpacecraft(instanceName, mOldName, mCoordSysName,
-                                     dat[0], mScXArray, mScYArray, mScZArray,
-                                     mOrbitColorArray, update);//, (mWireFrame == "On"));
+                                     mScNameArray, dat[0], mScXArray, mScYArray,
+                                     mScZArray, mOrbitColorArray, update);
             }
             
             if (update)
