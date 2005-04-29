@@ -54,7 +54,7 @@ Spacecraft::Spacecraft() :
 {
     objectTypes.push_back(Gmat::SPACECRAFT);
     objectTypeNames.push_back("Spacecraft");
-
+    DefineDefaultSpacecraft();
     parameterCount = SC_ParamCount;
 }
 
@@ -72,7 +72,7 @@ Spacecraft::Spacecraft(const std::string &name) :
 {
     objectTypes.push_back(Gmat::SPACECRAFT);
     objectTypeNames.push_back("Spacecraft");
-    
+    DefineDefaultSpacecraft();
     parameterCount = SC_ParamCount;
 }
 
@@ -91,7 +91,7 @@ Spacecraft::Spacecraft(const std::string &typeStr, const std::string &name) :
 {
     objectTypes.push_back(Gmat::SPACECRAFT);
     objectTypeNames.push_back("Spacecraft");
-
+    DefineDefaultSpacecraft();
     parameterCount = SC_ParamCount;
 }
 
@@ -213,36 +213,53 @@ const StringArray&
       Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    static StringArray fullList;  // Maintain scope if the full list is requested
-   
-   if (type == Gmat::FUEL_TANK)
-      return tankNames;
-   if (type == Gmat::THRUSTER)
-      return thrusterNames;
 
-   if (type == Gmat::HARDWARE) {
-      fullList.clear();
-      fullList = tankNames;
-      for (StringArray::iterator i = thrusterNames.begin(); i < thrusterNames.end(); ++i)
-         fullList.push_back(*i);
-      return fullList;
-   }
-      
-   if (type == Gmat::COORDINATE_SYSTEM)
+   //loj: 4/28/05 Added UNKNOWN_OBJECT
+   if (type == Gmat::UNKNOWN_OBJECT)
    {
-      fullList.clear();
+      fullList.clear();      
       fullList.push_back(coordSysName);
-      return fullList;
+      return fullList;      
    }
+   else
+   {
+      if (type == Gmat::FUEL_TANK)
+         return tankNames;
+      if (type == Gmat::THRUSTER)
+         return thrusterNames;
 
+      if (type == Gmat::HARDWARE) {
+         fullList.clear();
+         fullList = tankNames;
+         for (StringArray::iterator i = thrusterNames.begin();
+              i < thrusterNames.end(); ++i)
+            fullList.push_back(*i);
+         return fullList;
+      }
+      
+      if (type == Gmat::COORDINATE_SYSTEM)
+      {
+         fullList.clear();
+         fullList.push_back(coordSysName);
+         return fullList;
+      }
+   }
+   
    return SpaceObject::GetRefObjectNameArray(type);
 }
 
 
 // DJC: Not sure if we need this yet...
-//bool Spacecraft::SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
-//{
-//   return SpaceObject::SetRefObjectName(type, name)
-//}
+bool Spacecraft::SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+{
+   if (type == Gmat::COORDINATE_SYSTEM)
+   {
+      coordSysName = name;
+      return true;
+   }
+   
+   return SpaceObject::SetRefObjectName(type, name);
+}
 
 
 //---------------------------------------------------------------------------
@@ -261,7 +278,11 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
 {
    // This switch statement intentionally drops through without breaks, so that
    // the search in the tank and thruster name lists only need to be coded once. 
-   switch (type) {
+   switch (type)
+   {
+      case Gmat::COORDINATE_SYSTEM:
+         return coordinateSystem;
+         
       case Gmat::HARDWARE:
       case Gmat::FUEL_TANK:
          for (ObjectArray::iterator i = tanks.begin(); 
@@ -277,7 +298,7 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
                return *i;
          }
          
-      // Other Hardware cases go here...
+         // Other Hardware cases go here...
 
          return NULL;      // Hardware requested, but not in the hardware lists
          
@@ -320,7 +341,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    {
       coordinateSystem = (CoordinateSystem*)obj;
 
-#if DEBUG_SPACECRAFT_TEST
+      #if DEBUG_SPACECRAFT_TEST
       MessageInterface::ShowMessage("\nAfter assigning to CS in SetRefObject, "
              "is it still NULL (%d) and obj == NULL(%d)\n",
              (coordinateSystem == NULL),(obj == NULL));
@@ -328,7 +349,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       std::string body = coordinateSystem->GetOriginName();
       MessageInterface::ShowMessage("\n...After getting body from CS, "
                                     "body = %s\n", body.c_str());
-#endif
+      #endif
 
       return true;
    }
@@ -1013,7 +1034,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
     }
     else if (id == COORD_SYS_ID) 
     {
-        coordSysName = value;
+       coordSysName = value;
     }
     else if (id == FUEL_TANK_ID) {
        // Only add the tank if it is not in the list already
@@ -1221,7 +1242,7 @@ void Spacecraft::SetState(const std::string &elementType, Real *instate)
 
    if (elementType != "Cartesian")
    {
-      stateType = "Cartesian"; //loj: 10/25/04 added
+      stateType = "Cartesian";
       newState = stateConverter.Convert(instate, elementType, 
                                         stateType, anomaly);
    }
@@ -1268,11 +1289,7 @@ void Spacecraft::SetState(const Real s1, const Real s2, const Real s3,
  *
  */
 Rvector6 Spacecraft::GetCartesianState() 
-{
-   //loj: 10/25/04 commented out
-   //cartesianState = stateConverter.Convert(state.GetState(), displayCoordType,
-   //                                        "Cartesian",anomaly);
-   
+{   
    Real *tempState = state.GetState();
 
    for (int i=0; i<6; i++)
@@ -1292,10 +1309,6 @@ Rvector6 Spacecraft::GetCartesianState()
  */
 Rvector6 Spacecraft::GetKeplerianState() 
 {
-   //loj: 10/25/04 commented out
-   //keplerianState = stateConverter.Convert(state.GetState(),displayCoordType,
-   //                                        "Keplerian",anomaly);
-
    keplerianState = stateConverter.Convert(state.GetState(), stateType,
                                            "Keplerian",anomaly);
 
@@ -1585,48 +1598,6 @@ bool Spacecraft::Initialize()
                 "\nError:  Spacecraft has empty coordinate system\n");
    }   
 
-   state.SetEpoch(21545.0);
-
-   state[0] = 7100.0;
-   state[1] = 0.0;
-   state[2] = 1300.0;
-   state[3] = 0.0;
-   state[4] = 7.35;
-   state[5] = 1.0;
-
-   // @todo: will add it later  
-   // Initialize state vector 
-   //  stateVector.Set(state.GetState());
-
-   dateFormat = "TAIModJulian";
-   stateType = "Cartesian";
-
-   // Get the keplerian state and then initialize anomaly
-   Rvector6 tempKepl = GetKeplerianState();  // @todo: need fix this later
-   anomaly.Set(tempKepl[0],tempKepl[1],tempKepl[5],"TA");
-
-   coordSysName = "EarthMJ2000Eq";
-
-   dryMass = 850.0;
-   coeffDrag = 2.2;
-   dragArea = 15.0;
-   srpArea = 1.0;
-   reflectCoeff = 1.8;
-
-   // Initialize non-internal states for display purpose
-   initialDisplay = true;
-   isForDisplay = false;
-
-   for (int i=0; i < 6; i++)
-   {
-       displayState[i] = state[i];
-       hasElements[i] = false; //loj: added
-   }
-
-   displayEpoch = ToString(state.GetEpoch());
-   displayDateFormat = dateFormat;
-   displayCoordType = stateType;
-
    return true;
 }
 
@@ -1811,7 +1782,6 @@ std::string Spacecraft::ToString(const Real value)
     return valueBuffer.str();
 }
 
-//loj: 10/24/04 added
 //---------------------------------------------------------------------------
 // void SetInitialState()
 //---------------------------------------------------------------------------
@@ -1868,6 +1838,54 @@ void Spacecraft::SetInitialState()
    }
 }
 
+//loj: 4/28/05 Added
+//------------------------------------------------------------------------------
+// void DefineDefaultSpacecraft()
+//------------------------------------------------------------------------------
+void Spacecraft::DefineDefaultSpacecraft()
+{
+   state.SetEpoch(21545.0);
+   
+   state[0] = 7100.0;
+   state[1] = 0.0;
+   state[2] = 1300.0;
+   state[3] = 0.0;
+   state[4] = 7.35;
+   state[5] = 1.0;
+
+   // @todo: will add it later  
+   // Initialize state vector 
+   //  stateVector.Set(state.GetState());
+
+   dateFormat = "TAIModJulian";
+   stateType = "Cartesian";
+
+   // Get the keplerian state and then initialize anomaly
+   Rvector6 tempKepl = GetKeplerianState();  // @todo: need fix this later
+   anomaly.Set(tempKepl[0],tempKepl[1],tempKepl[5],"TA");
+
+   coordSysName = "EarthMJ2000Eq";
+
+   dryMass = 850.0;
+   coeffDrag = 2.2;
+   dragArea = 15.0;
+   srpArea = 1.0;
+   reflectCoeff = 1.8;
+
+   // Initialize non-internal states for display purpose
+   initialDisplay = true;
+   isForDisplay = false;
+
+   for (int i=0; i < 6; i++)
+   {
+       displayState[i] = state[i];
+       hasElements[i] = false;
+   }
+
+   displayEpoch = ToString(state.GetEpoch());
+   displayDateFormat = dateFormat;
+   displayCoordType = stateType;
+}
 
 //---------------------------------------------------------------------------
 //  void InitializeDataMethod(const Spacecraft &s)
@@ -1883,6 +1901,7 @@ void Spacecraft::InitializeDataMethod(const Spacecraft &s)
     dateFormat = s.dateFormat;
     stateType = s.stateType;
     anomaly = s.anomaly;
+    coordSysName = s.coordSysName; //loj: 4/28/05 Added
 
     for (int i = 0; i < 6; ++i)
     {

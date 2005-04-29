@@ -56,8 +56,8 @@ public:
    // and therefore need these methods from GmatBase
    virtual const StringArray&
                        GetRefObjectNameArray(const Gmat::ObjectType type);
-//   virtual bool        SetRefObjectName(const Gmat::ObjectType type,
-//                                        const std::string &name);
+  virtual bool        SetRefObjectName(const Gmat::ObjectType type,
+                                       const std::string &name);
    virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
                                     const std::string &name);
    virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
@@ -200,7 +200,8 @@ private:
    void        SetInitialDisplay();
    std::string ToString(const Real value);
        
-   void        SetInitialState(); //loj: 10/25/04 added
+   void        SetInitialState();
+   void        DefineDefaultSpacecraft(); //loj: 4/28/05 Added
    void        InitializeDataMethod(const Spacecraft &s);
 };
 
