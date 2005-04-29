@@ -706,7 +706,10 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type, const std::str
          
          throw GmatBaseException("Error Creating Spacecraft");
       }
-    
+
+      // Set default CoordinateSystem
+      sc->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+      
       // Manage it if it is a named Spacecraft
       try
       {
