@@ -59,6 +59,7 @@ namespace GmatPlot
       MDI_GL_ZOOM_OUT,
       MDI_GL_VIEW_ADD_BODY,
       MDI_GL_VIEW_GOTO_BODY,
+      MDI_GL_VIEW_ANIMATION,
 
       MDI_GL_VIEW_GOTO_SUN,
       MDI_GL_VIEW_GOTO_MERCURY,

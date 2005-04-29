@@ -44,8 +44,6 @@ public:
       { return mBodyNames; }
    UnsignedIntArray& GetBodyColors()
       { return mBodyIntColors; }
-   bool HasChangeMade()
-      { return mHasChangeMade; }
 
    void SetDistance(float dist);
    void SetDrawEqPlane(bool flag);
@@ -75,7 +73,8 @@ protected:
    GuiItemManager *theGuiManager;
    MdiChildTrajFrame *mTrajFrame;
    
-   bool mHasChangeMade;
+   bool mHasUseViewPointSpecChanged;
+   bool mHasUsePerspModeChanged;
    bool mHasDistanceChanged;
    bool mHasGotoBodyChanged;
    bool mHasCoordSysChanged;
@@ -88,14 +87,10 @@ protected:
    bool mHasEcPlaneColorChanged;
    bool mHasEcLineColorChanged;
    bool mHasRotateAboutXYChanged;
-   
-   bool mDrawEqPlane;
-   bool mDrawEcPlane;
-   bool mDrawEcLine;
-   bool mDrawWireFrame;
-   bool mDrawAxes;
-   
+
+   int   mAnimationUpdInt;
    float mDistance;
+   
    wxString mGotoBodyName;
    wxString mCoordSysName;
    
@@ -105,9 +100,13 @@ protected:
    int mBodyCount;
    
    wxTextCtrl *mDistanceTextCtrl;
+   wxTextCtrl *mAnimationUpdIntTextCtrl;
    
    wxComboBox *mGotoBodyComboBox;
    wxComboBox *mCoordSysComboBox;
+   
+   wxCheckBox *mUseInitialViewPointCheckBox;
+   wxCheckBox *mUsePerspModeCheckBox;
    
    wxCheckBox *mWireFrameCheckBox;
    wxCheckBox *mEqPlaneCheckBox;
@@ -116,6 +115,7 @@ protected:
    wxCheckBox *mDrawAxesCheckBox;
    wxCheckBox *mRotateAboutXYCheckBox;
 
+   wxButton *mViewAnimationButton;
    wxButton *mCreateCoordSysButton;
    wxButton *mEqPlaneColorButton;
    wxButton *mEcPlaneColorButton;

@@ -70,7 +70,7 @@ PlotInterface::~PlotInterface()
 
 //------------------------------------------------------------------------------
 //  bool CreateGlPlotWindow(const std::string &plotName, const std::string &oldName,
-//                          const std::string &csName, , SolarSystem *ssPtr,
+//                          const std::string &csName, SolarSystem *ssPtr,
 //                          bool drawEcPlane, bool drawEqPlane, bool drawWireFrame,
 //                          bool overlapPlot, bool usevpInfo, bool usepm)
 //------------------------------------------------------------------------------
@@ -78,6 +78,15 @@ PlotInterface::~PlotInterface()
  * Creates OpenGlPlot window
  *
  * @param <plotName> plot name
+ * @param <oldName>  old plot name
+ * @param <csName>  coordinate system name
+ * @param <ssPtr>  solar system pionter
+ * @param <drawEcPlane>  true if draw ecliptic plane
+ * @param <drawEqPlane>  true if draw equatorial plane
+ * @param <drawWirePlane>  true if draw wire frame
+ * @param <overlapPlot>  true if overlap plot without clearing the plot
+ * @param <usevpInfo>  true if use viewpoint info to draw plot
+ * @param <usepm>  true if use perspective projection mode
  */
 //------------------------------------------------------------------------------
 bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
@@ -203,12 +212,12 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
 
 
 //------------------------------------------------------------------------------
-// void SetGlViewOption(const std::string &plotName,
+// void SetGlViewOption(const std::string &plotName, 
 //                      SpacePoint *vpRefObj, SpacePoint *vpVecObj,
 //                      SpacePoint *vdObj, Real vsFactor,
 //                      const Rvector3 &vpRefVec, const Rvector3 &vpVec,
 //                      const Rvector3 &vdVec, bool usevpRefVec,
-//                      bool usevpVec, bool usevdVec);
+//                      bool usevpVec, bool usevdVec)
 //------------------------------------------------------------------------------
 void PlotInterface::SetGlViewOption(const std::string &plotName,
                                     SpacePoint *vpRefObj, SpacePoint *vpVecObj,
@@ -351,6 +360,7 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
 //  bool UpdateGlSpacecraft(const std::string &plotName,
 //                          const std::string &oldName,
 //                          const std::string &csName,
+//                          StringArray scNameArray,
 //                          const Real &time, const RealArray &posX,
 //                          const RealArray &posY, const RealArray &posZ,
 //                          const UnsignedIntArray &orbitColor,
@@ -364,6 +374,7 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
 bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
                                        const std::string &oldName,
                                        const std::string &csName,
+                                       const StringArray &scNameArray,
                                        const Real &time, const RealArray &posX,
                                        const RealArray &posY, const RealArray &posZ,
                                        const UnsignedIntArray &color,
@@ -389,7 +400,8 @@ bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
             
       if (frame->GetPlotName().IsSameAs(owner.c_str()))
       {
-         frame->UpdateSpacecraft(time, posX, posY, posZ, color, updateCanvas);
+         frame->UpdateSpacecraft(scNameArray, time, posX, posY, posZ, color,
+                                 updateCanvas);
          updated = true;
       }
    }

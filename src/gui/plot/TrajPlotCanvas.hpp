@@ -38,7 +38,6 @@ public:
    bool IsInitialized();
 
    // getters
-   float GetDistance() {return mAxisLength;}
    bool  GetUseViewPointInfo() {return mUseViewPointInfo;}
    bool  GetUsePerspectiveMode() {return mUsePerspectiveMode;}
    bool  GetDrawWireFrame() {return mDrawWireFrame;}
@@ -50,6 +49,8 @@ public:
    unsigned int GetEqPlaneColor() {return mEqPlaneColor;}
    unsigned int GetEcPlaneColor() {return mEcPlaneColor;}
    unsigned int GetEcLineColor() {return mEcLineColor;}
+   float GetDistance() {return mAxisLength;}
+   int GetAnimationUpdateInterval() {return mUpdateInterval;}
    int GetGotoBodyId() {return mCenterViewBody;}
    wxString GetDesiredCoordSysName() {return mDesiredCoordSysName;}
    CoordinateSystem* GetDesiredCoordSystem() { return mDesiredCoordSystem;}
@@ -57,7 +58,7 @@ public:
    // setters
    void SetDistance(float dist) {mAxisLength = dist;}
    void SetUseViewPointInfo(bool flag) {mUseViewPointInfo = flag;}
-   void SetUsePerspectiveMode(bool flag) {mUsePerspectiveMode = flag;}
+   void SetAnimationUpdateInterval(int interval) {mUpdateInterval = interval;}
    void SetDrawWireFrame(bool flag) {mDrawWireFrame = flag;}
    void SetDrawEqPlane(bool flag) {mDrawEqPlane = flag;}
    void SetDrawEcPlane(bool flag) {mDrawEcPlane = flag;}
@@ -69,10 +70,11 @@ public:
    void SetEcLineColor(unsigned int color) {mEcLineColor = color;}
    void SetDesiredCoordSystem(CoordinateSystem* cs) {mDesiredCoordSystem = cs;}
    void SetDesiredCoordSystem(const wxString &csName);
+   void SetUsePerspectiveMode(bool perspMode);
    
    // actions
    void ClearPlot();
-   void UpdatePlot();
+   void UpdatePlot(bool viewAnimation);
    void ShowDefaultView();
    void ZoomIn();
    void ZoomOut();
@@ -84,6 +86,7 @@ public:
    void DrawInOtherCoordSystem(CoordinateSystem *cs);
    void GotoStdBody(int bodyId);
    void GotoOtherBody(const wxString &bodyName);
+   void ViewAnimation(int interval);
 
    // viewpoint (loj: 4/20/05 Added)
    void SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
@@ -94,7 +97,8 @@ public:
    
    // data
    int  ReadTextTrajectory(const wxString &filename);
-   void UpdateSpacecraft(const Real &time, const RealArray &posX,
+   void UpdateSpacecraft(const StringArray &scNameArray,
+                         const Real &time, const RealArray &posX,
                          const RealArray &posY, const RealArray &posZ,
                          const UnsignedIntArray &olor);
    
@@ -108,6 +112,7 @@ protected:
    void OnPaint(wxPaintEvent &event);
    void OnTrajSize(wxSizeEvent &event);
    void OnMouse(wxMouseEvent &event);
+   void OnKeyDown(wxKeyEvent &event);
    
    DECLARE_EVENT_TABLE();
 
@@ -184,17 +189,25 @@ private:
    bool mUsePerspectiveMode;
    
    // viewpoint
+   StringArray mScNameArray;
    SpacePoint *mViewPointRefObj;
    SpacePoint *mViewPointVectorObj;
    SpacePoint *mViewDirectionObj;
    Rvector3 mViewPointRefVector;
    Rvector3 mViewPointVector;
    Rvector3 mViewDirectionVector;
+   Rvector3 mViewPointLocVector;
    Real mViewScaleFactor;
    bool mUseViewPointInfo;
    bool mUseViewPointRefVector;
    bool mUseViewPointVector;
    bool mUseViewDirectionVector;
+   int mVptRefScId;
+   int mVptVecScId;
+   int mVdirScId;
+   int mVptRefBodyId;
+   int mVptVecBodyId;
+   int mVdirBodyId;
    
    // time
    double mTime[MAX_DATA];
@@ -260,6 +273,11 @@ private:
    float mCurrRotZAngle;
    float mCurrViewDist;
 
+   // animation
+   bool mViewAnimation;
+   bool mHasUserInterrupted;
+   int mUpdateInterval;
+   
    // windows specific functions
    bool SetPixelFormatDescriptor();
    void SetDefaultGLFont();
@@ -273,16 +291,19 @@ private:
    void ComputeView(GLfloat fEndX, GLfloat fEndY);
    void ChangeView(float viewX, float viewY, float viewZ);
    void ChangeProjection(int width, int height, float axisLength);
-   void ComputeProjection(); //loj: 4/20/05 Added
+   void ComputeProjection(int frame); //loj: 4/25/05 Added frame
    
    // drawing objects
+   void DrawFrame();
    void DrawPicture();
    void DrawEarth();
    void DrawEarthOrbit();
+   void DrawEarthOrbit(int frame);
    void DrawOtherBody(int bodyIndex);
    void DrawOtherBodyOrbit(int bodyIndex);
    void DrawSpacecraft(UnsignedInt scColor);
    void DrawSpacecraftOrbit();
+   void DrawSpacecraftOrbit(int frame);
    void DrawEquatorialPlane(UnsignedInt color);
    void DrawEclipticPlane();
    void DrawEarthSunLine();
@@ -295,6 +316,7 @@ private:
    // for coordinate sytem
    bool TiltEarthZAxis();
    bool ConvertSpacecraftData();
+   bool ConvertSpacecraftData(int frame);
    bool ConvertOtherBodyData();
    
    // for copy

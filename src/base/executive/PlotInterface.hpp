@@ -51,6 +51,7 @@ public:
    static bool UpdateGlSpacecraft(const std::string &plotName,
                                   const std::string &oldName,
                                   const std::string &csName,
+                                  const StringArray &scNameArray,
                                   const Real &time, const RealArray &posX,
                                   const RealArray &posY, const RealArray &posZ,
                                   const UnsignedIntArray &color,

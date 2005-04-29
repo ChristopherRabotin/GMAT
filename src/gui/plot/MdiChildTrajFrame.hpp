@@ -63,6 +63,7 @@ public:
    unsigned int GetEcLineColor();
    float GetDistance();
    int   GetGotoBodyId();
+   int   GetAnimationUpdateInterval();
    wxString GetDesiredCoordSysName();
    CoordinateSystem* GetDesiredCoordSystem();
    
@@ -72,6 +73,7 @@ public:
    void SetOverlapPlot(bool overlap);
    void SetUseViewPointInfo(bool flag);
    void SetUsePerspectiveMode(bool flag);
+   void SetAnimationUpdateInterval(int interval);
    void SetDrawWireFrame(bool flag);
    void SetDrawEqPlane(bool flag);
    void SetDrawEcPlane(bool flag);
@@ -89,7 +91,7 @@ public:
    // actions
    void DrawInOtherCoordSystem(const wxString &csName);
    void DrawInOtherCoordSystem(CoordinateSystem *cs);
-   void UpdatePlot();
+   void UpdatePlot(bool viewAnimation);
    
    void OnClearPlot(wxCommandEvent& event);
    void OnChangeTitle(wxCommandEvent& event);
@@ -104,6 +106,7 @@ public:
    void OnAddBody(wxCommandEvent& event);
    void OnGotoStdBody(wxCommandEvent& event);
    void OnGotoOtherBody(wxCommandEvent& event);
+   void OnViewAnimation(wxCommandEvent& event);
    
    void OnHelpView(wxCommandEvent& event);
    void OnQuit(wxCommandEvent& event);
@@ -119,10 +122,10 @@ public:
                         const Rvector3 &vdVec, bool usevpRefVec,
                         bool usevpVec, bool usevdVec);
    
-   void UpdateSpacecraft(const Real &time, const RealArray &posX,
+   void UpdateSpacecraft(const StringArray scNameArray,
+                         const Real &time, const RealArray &posX,
                          const RealArray &posY, const RealArray &posZ,
-                         const UnsignedIntArray &color,
-                         bool updateCanvas);
+                         const UnsignedIntArray &color, bool updateCanvas);
    void RefreshPlot();
    void DeletePlot();
 

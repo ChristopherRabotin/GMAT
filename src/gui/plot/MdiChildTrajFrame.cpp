@@ -42,6 +42,9 @@ BEGIN_EVENT_TABLE(MdiChildTrajFrame, wxMDIChildFrame)
                   MdiChildTrajFrame::OnGotoStdBody)
    
    EVT_MENU(GmatPlot::MDI_GL_VIEW_GOTO_OTHER_BODY, MdiChildTrajFrame::OnGotoOtherBody)
+   
+   EVT_MENU(GmatPlot::MDI_GL_VIEW_ANIMATION, MdiChildTrajFrame::OnViewAnimation)
+   
    EVT_MENU(GmatPlot::MDI_GL_HELP_VIEW, MdiChildTrajFrame::OnHelpView)
 
    EVT_ACTIVATE(MdiChildTrajFrame::OnActivate)
@@ -136,6 +139,10 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
    
    // View Goto Body menu
    mViewMenu->Append(GmatPlot::MDI_GL_VIEW_GOTO_BODY, _T("Go to Body"), CreateGotoBodyMenu());
+   
+   // Animation menu
+   mViewMenu->AppendSeparator();
+   mViewMenu->Append(GmatPlot::MDI_GL_VIEW_ANIMATION, _T("Animation"));
    
    // Help menu
    wxMenu *helpMenu = new wxMenu;
@@ -329,6 +336,19 @@ int MdiChildTrajFrame::GetGotoBodyId()
    return GmatPlot::UNKNOWN_BODY;
 }
 
+
+//------------------------------------------------------------------------------
+// int GetAnimationUpdateInterval()
+//------------------------------------------------------------------------------
+int MdiChildTrajFrame::GetAnimationUpdateInterval()
+{
+   if (mCanvas)
+      return mCanvas->GetAnimationUpdateInterval();
+
+   return 0;
+}
+
+
 //------------------------------------------------------------------------------
 // wxString GetDesiredCoordSysName()
 //------------------------------------------------------------------------------
@@ -339,6 +359,7 @@ wxString MdiChildTrajFrame::GetDesiredCoordSysName()
 
    return "Unknown";
 }
+
 
 //------------------------------------------------------------------------------
 // CoordinateSystem* GetDesiredCoordSystem()
@@ -416,6 +437,18 @@ void MdiChildTrajFrame::SetUsePerspectiveMode(bool flag)
    if (mCanvas)
    {
       mCanvas->SetUsePerspectiveMode(flag);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetAnimationUpdateInterval(nt interval)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetAnimationUpdateInterval(int interval)
+{
+   if (mCanvas)
+   {
+      mCanvas->SetAnimationUpdateInterval(interval);
    }
 }
 
@@ -511,6 +544,7 @@ void MdiChildTrajFrame::SetEqPlaneColor(UnsignedInt color)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void SetEcPlaneColor(UnsignedInt color)
 //------------------------------------------------------------------------------
@@ -521,6 +555,7 @@ void MdiChildTrajFrame::SetEcPlaneColor(UnsignedInt color)
       mCanvas->SetEcPlaneColor(color);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void SetEcLineColor(UnsignedInt color)
@@ -533,6 +568,7 @@ void MdiChildTrajFrame::SetEcLineColor(UnsignedInt color)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void SetDistance(float dist)
 //------------------------------------------------------------------------------
@@ -541,6 +577,7 @@ void MdiChildTrajFrame::SetDistance(float dist)
    if (mCanvas)
       return mCanvas->SetDistance(dist);
 }
+
 
 //------------------------------------------------------------------------------
 // void SetGotoBodyName(const wxString &bodyName)
@@ -553,6 +590,7 @@ void MdiChildTrajFrame::SetGotoBodyName(const wxString &bodyName)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void SetDesiredCoordSystem(const wxString &csName)
 //------------------------------------------------------------------------------
@@ -563,6 +601,7 @@ void MdiChildTrajFrame::SetDesiredCoordSystem(const wxString &csName)
       mCanvas->SetDesiredCoordSystem(csName);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void SetDesiredCoordSystem(CoordinateSystem *cs)
@@ -575,6 +614,7 @@ void MdiChildTrajFrame::SetDesiredCoordSystem(CoordinateSystem *cs)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void DrawInOtherCoordSystem(const wxString &csName)
 //------------------------------------------------------------------------------
@@ -585,6 +625,7 @@ void MdiChildTrajFrame::DrawInOtherCoordSystem(const wxString &csName)
       mCanvas->DrawInOtherCoordSystem(csName);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void DrawInOtherCoordSystem(CoordinateSystem *cs)
@@ -597,17 +638,18 @@ void MdiChildTrajFrame::DrawInOtherCoordSystem(CoordinateSystem *cs)
    }
 }
 
+
 //------------------------------------------------------------------------------
-// void UpdatePlot()
+// void UpdatePlot(bool viewAnimation)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::UpdatePlot()
+void MdiChildTrajFrame::UpdatePlot(bool viewAnimation)
 {
    #ifdef DEBUG_CHILDTRAJ_FRAME
       MessageInterface::ShowMessage("MdiChildTrajFrame::UpdatePlot() entered.\n");
    #endif
 
    if (mCanvas)
-      mCanvas->UpdatePlot();
+      mCanvas->UpdatePlot(viewAnimation);
 
    mOptionDialog->SetDistance(mCanvas->GetDistance());
 }
@@ -689,11 +731,13 @@ void MdiChildTrajFrame::OnShowOptionDialog(wxCommandEvent& event)
          mOptionDialog = new OpenGlOptionDialog(this, mPlotName, mBodyNames,
                                                 mBodyColors);
       
-//      int x, y, w, h;
-//      MdiGlPlot::mdiParentGlFrame->GetPosition(&x, &y);
-//      mOptionDialog->GetSize(&w, &h);
-//      mOptionDialog->Move(x-w, y);
-      mOptionDialog->Show(true); //modeless dialog
+     int x, y;
+     //int w, h;
+     //MdiGlPlot::mdiParentGlFrame->GetPosition(&x, &y);
+     GmatAppData::GetMainFrame()->GetPosition(&x, &y);
+     //mOptionDialog->GetSize(&w, &h);
+     mOptionDialog->Move(x-20, y+100);
+     mOptionDialog->Show(true); //modeless dialog
    }
    else
    {
@@ -837,6 +881,32 @@ void MdiChildTrajFrame::OnGotoOtherBody(wxCommandEvent& event)
    }
 }
 
+
+//------------------------------------------------------------------------------
+// void OnViewAnimation(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::OnViewAnimation(wxCommandEvent& event)
+{
+   //loj: How do I know the body name from the event?
+   if (mCanvas)
+   {
+      wxString strInterval = "10";
+      strInterval = wxGetTextFromUser(wxT("Enter Interval (milli-secs): "
+                                          "<Press ESC for interrupt>"),
+                                      wxT("Update Interval"),
+                                      strInterval, this);
+      long interval;
+      strInterval.ToLong(&interval);
+
+      // set maximum interval to 100 milli seconds
+      if (interval > 100)
+         interval = 100;
+      
+      mCanvas->ViewAnimation(interval);
+   }
+}
+
+
 //------------------------------------------------------------------------------
 // void OnHelpView(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
@@ -933,19 +1003,21 @@ void MdiChildTrajFrame::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
             ("MdiChildTrajFrame::SetGlViewOption() vsFactor=%f\n", vsFactor);
       #endif
          
-      mCanvas->SetGlViewOption(vpRefObj, vpVecObj, vdObj, vsFactor, vpRefVec, vpVec,
-                               vdVec, usevpRefVec, usevpVec, usevdVec);
+      mCanvas->SetGlViewOption(vpRefObj, vpVecObj, vdObj, vsFactor,
+                               vpRefVec, vpVec, vdVec, usevpRefVec, usevpVec,
+                               usevdVec);
    }
 }
 
 
 //------------------------------------------------------------------------------
-// void UpdateSpacecraft(const Real &time, const RealArray &posX,
+// void UpdateSpacecraft(const StringArray scNameArray,
+//                       const Real &time, const RealArray &posX,
 //                       const RealArray &posY, const RealArray &posZ,
-//                       const UnsignedIntArray &color,
-//                       bool updateCanvas)
+//                       const UnsignedIntArray &color, bool updateCanvas)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::UpdateSpacecraft(const Real &time, const RealArray &posX,
+void MdiChildTrajFrame::UpdateSpacecraft(const StringArray scNameArray,
+                                         const Real &time, const RealArray &posX,
                                          const RealArray &posY, const RealArray &posZ,
                                          const UnsignedIntArray &color,
                                          bool updateCanvas)
@@ -956,7 +1028,7 @@ void MdiChildTrajFrame::UpdateSpacecraft(const Real &time, const RealArray &posX
       // the run
       //mCanvas->SetFocus();
       
-      mCanvas->UpdateSpacecraft(time, posX, posY, posZ, color);
+      mCanvas->UpdateSpacecraft(scNameArray, time, posX, posY, posZ, color);
 
       if (updateCanvas)
          Update();
