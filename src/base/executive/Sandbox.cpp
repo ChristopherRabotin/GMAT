@@ -433,6 +433,8 @@ bool Sandbox::Initialize()
          obj->SetSolarSystem(solarSys);
          ((Spacecraft *)obj)->SaveDisplay();
 
+         BuildReferences(obj); //loj: 4/28/05 Added
+
          // Setup spacecraft hardware
          BuildAssociations(obj);
       }
@@ -805,7 +807,7 @@ void Sandbox::InitializeParameter(Parameter *param)
          if (sp != NULL)
             param->SetRefObject(sp, Gmat::SPACE_POINT, origName);
 
-         origName = param->GetRefObjectName(Gmat::CELESTIAL_BODY);
+         origName = param->GetRefObjectName(Gmat::SPACE_POINT);
 
          #if DEBUG_SANDBOX_INIT > 1
             MessageInterface::ShowMessage
@@ -816,7 +818,7 @@ void Sandbox::InitializeParameter(Parameter *param)
 
          sp = FindSpacePoint(origName);
          if (sp != NULL)
-            param->SetRefObject(sp, Gmat::CELESTIAL_BODY, origName);
+            param->SetRefObject(sp, Gmat::SPACE_POINT, origName);
       }
       
       //return;
@@ -855,10 +857,29 @@ void Sandbox::InitializeSubscriber(Subscriber *sub)
    StringArray refParamNames = sub->GetRefObjectNameArray(Gmat::PARAMETER);
    for (unsigned int i=0; i<refParamNames.size(); i++)
    {
+      #if DEBUG_SANDBOX_INIT > 1
+      MessageInterface::ShowMessage
+         ("Sandbox::Initialize() refParamNames[%d]=%s\n", i,
+          refParamNames[i].c_str());
+      #endif
       refParam = GetInternalObject(refParamNames[i], Gmat::PARAMETER);
       sub->SetRefObject(refParam, Gmat::PARAMETER, refParamNames[i]);
    }
 
+   //loj: 4/29/05 Added to set SpacePoint
+   StringArray refSpNames = sub->GetRefObjectNameArray(Gmat::SPACE_POINT);
+   GmatBase *refSp;
+   for (unsigned int i=0; i<refSpNames.size(); i++)
+   {
+      #if DEBUG_SANDBOX_INIT > 1
+         MessageInterface::ShowMessage
+            ("Sandbox::Initialize() refSpNames[%d]=%s\n", i,
+             refSpNames[i].c_str());
+      #endif
+      refSp = FindSpacePoint(refSpNames[i]);
+      sub->SetRefObject(refSp, Gmat::SPACE_POINT, refSpNames[i]);
+   }
+   
    if (sub->GetTypeName() == "OpenGLPlot")
    {
       // set SolarSystem and InternalCoordSystem first
