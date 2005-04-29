@@ -733,15 +733,26 @@ Integer ForceModel::SetupSpacecraftData(GmatBase *sat, PhysicalModel *pm,
       if (id < 0)
          throw ForceModelException("Epoch parameter undefined on PhysicalModel");
       pm->SetRealParameter(id, parm);
-        
-      parmName = "ReferenceBody";
+
+      //loj: 4/28/05 Replaced "ReferenceBody" with "CoordinateSystem"
+      //parmName = "ReferenceBody";
+      //id = sat->GetParameterID(parmName);
+      //if (id < 0)
+      //   throw ForceModelException("Reference body parameter undefined on object " +
+      //                                   sat->GetName());
+      
+      //stringParm = sat->GetStringParameter(id);
+      //pm->SetSatelliteParameter(i, parmName, stringParm);
+
+      parmName = "CoordinateSystem";
       id = sat->GetParameterID(parmName);
       if (id < 0)
-         throw ForceModelException("Reference body parameter undefined on object " +
-                                         sat->GetName());
+         throw ForceModelException(parmName + " parameter undefined on object " +
+                                   sat->GetName());
+      
       stringParm = sat->GetStringParameter(id);
       pm->SetSatelliteParameter(i, parmName, stringParm);
-        
+      
       parmName = "DryMass";
       id = sat->GetParameterID(parmName);
       if (id < 0)
