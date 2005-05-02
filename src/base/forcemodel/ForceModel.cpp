@@ -751,7 +751,13 @@ Integer ForceModel::SetupSpacecraftData(GmatBase *sat, PhysicalModel *pm,
                                    sat->GetName());
       
       stringParm = sat->GetStringParameter(id);
-      pm->SetSatelliteParameter(i, parmName, stringParm);
+      
+      CoordinateSystem *cs =
+         (CoordinateSystem*)(sat->GetRefObject(Gmat::COORDINATE_SYSTEM, stringParm));
+      if (!cs)
+         throw ForceModelException("CoordinateSystem is NULL\n");
+
+      pm->SetSatelliteParameter(i, "ReferenceBody", cs->GetOriginName());
       
       parmName = "DryMass";
       id = sat->GetParameterID(parmName);
