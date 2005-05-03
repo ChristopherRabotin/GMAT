@@ -1920,15 +1920,13 @@ void ResourceTree::OnAddLibration(wxCommandEvent &event)
    wxString name;
    name.Printf("Libration%d", ++mNumLibration);
 
-   ///@todo: waiting for gui interpreter
-//   if (theGuiInterpreter->CreateBurn
-//       ("FiniteBurn", std::string(name.c_str())) != NULL)
-//   {
-//      AppendItem(item, name, GmatTree::ICON_BURN, -1,
-//                 new GmatTreeItemData(name, GmatTree::FINITE_BURN));
-//
-//      Expand(item);
-//   }
+   if (theGuiInterpreter->CreateCalculatedPoint("LibrationPoint", name.c_str()) != NULL)
+   {
+      AppendItem(item, name, GmatTree::ICON_DEFAULT, -1,
+                 new GmatTreeItemData(name, GmatTree::LIBRATION_POINT));
+
+      Expand(item);
+   }
 }
 
 
