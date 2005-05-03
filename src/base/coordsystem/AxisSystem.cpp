@@ -81,7 +81,8 @@ AxisSystem::AxisSystem(const std::string &itsType,
                        const std::string &itsName) :
 CoordinateBase(Gmat::AXIS_SYSTEM,itsType,itsName),
 eop              (NULL),
-itrf             (NULL)
+itrf             (NULL),
+epochFormat      ("")
 {
    objectTypes.push_back(Gmat::AXIS_SYSTEM);
    objectTypeNames.push_back("AxisSystem");
@@ -107,7 +108,8 @@ rotMatrix         (axisSys.rotMatrix),
 rotDotMatrix      (axisSys.rotDotMatrix),
 epoch             (axisSys.epoch),
 eop               (axisSys.eop),
-itrf              (axisSys.itrf)
+itrf              (axisSys.itrf),
+epochFormat       (axisSys.epochFormat)
 {
 }
 
@@ -132,6 +134,7 @@ const AxisSystem& AxisSystem::operator=(const AxisSystem &axisSys)
    epoch         = axisSys.epoch;
    eop           = axisSys.eop;
    itrf          = axisSys.itrf;
+   epochFormat   = axisSys.epochFormat;
    Initialize();
    
    return *this;
@@ -262,6 +265,11 @@ void AxisSystem::SetCoefficientsFile(ItrfCoefficientsFile *itrfF)
    itrf = itrfF;
 }
 
+void AxisSystem::SetEpochFormat(const std::string &fmt)
+{
+   epochFormat = fmt;
+}
+
 SpacePoint* AxisSystem::GetPrimaryObject() const
 {
    return NULL;
@@ -311,6 +319,11 @@ EopFile* AxisSystem::GetEopFile() const
 ItrfCoefficientsFile* AxisSystem::GetItrfCoefficientsFile()
 {
    return itrf;
+}
+
+std::string AxisSystem::GetEpochFormat() const
+{
+   return epochFormat;
 }
 
 

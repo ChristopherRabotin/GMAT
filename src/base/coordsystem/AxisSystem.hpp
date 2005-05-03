@@ -63,6 +63,7 @@ public:
    // need all or part of the FK5 reduction
    virtual void                  SetEopFile(EopFile *eopF);
    virtual void                  SetCoefficientsFile(ItrfCoefficientsFile *itrfF);
+   virtual void                  SetEpochFormat(const std::string &fmt);  // for GUI
    virtual SpacePoint*           GetPrimaryObject() const;
    virtual SpacePoint*           GetSecondaryObject() const;
    virtual A1Mjd                 GetEpoch() const;
@@ -71,6 +72,7 @@ public:
    virtual std::string           GetZAxis() const;
    virtual EopFile*              GetEopFile() const;
    virtual ItrfCoefficientsFile* GetItrfCoefficientsFile();
+   virtual std::string           GetEpochFormat() const; // for GUI
    
    // initializes the AxisSystem
    virtual bool Initialize();
@@ -180,6 +182,8 @@ protected:
 
    EopFile                   *eop;
    ItrfCoefficientsFile      *itrf;
+   
+   std::string               epochFormat;
    
    std::vector<IntegerArray> a, ap;
    Rvector                   A, B, C, D, E, F, Ap, Bp, Cp, Dp;
