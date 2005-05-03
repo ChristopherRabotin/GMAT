@@ -80,7 +80,7 @@ public:
    void OnZoomOut(wxCommandEvent& event);
 
    bool OnScriptBuildObject(wxCommandEvent& WXUNUSED(event));
-   bool OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event));
+   bool OnScriptBuildAndRun(wxCommandEvent& event);
    bool OnScriptRun(wxCommandEvent& WXUNUSED(event));
 
    wxList *mdiChildren;
