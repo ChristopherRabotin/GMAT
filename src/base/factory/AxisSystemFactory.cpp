@@ -29,6 +29,8 @@
 #include "ObjectReferencedAxes.hpp"
 #include "TOEEqAxes.hpp"
 #include "MOEEqAxes.hpp"
+#include "TODEqAxes.hpp"
+#include "MODEqAxes.hpp"
 
 //---------------------------------
 //  public methods
@@ -81,9 +83,7 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    }
    else if (ofType == "TODEq")
    {
-      MessageInterface::ShowMessage(                // *** temporary
-         "TODEqAxes not yet imnplemented.\n");
-      //withAxes = new TODEqAxes(withName);
+      withAxes = new TODEqAxes(withName);
    }
    else if (ofType == "TODEc")
    {
@@ -93,9 +93,7 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    }
    else if (ofType == "MODEq")
    {
-      MessageInterface::ShowMessage(                // *** temporary
-         "MODEqAxes not yet imnplemented.\n");
-      //withAxes = new MODEqAxes(withName);
+      withAxes = new MODEqAxes(withName);
    }
    else if (ofType == "MODEc")
    {
