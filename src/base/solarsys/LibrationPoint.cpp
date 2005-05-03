@@ -656,6 +656,9 @@ void LibrationPoint::CheckBodies()
    if (!foundSecondary)
       throw SolarSystemException(
             "Secondary body not found for LibrationPoint");
+   if (primaryBody == secondaryBody)
+      throw SolarSystemException(
+            "Primary and Secondary bodies cannot be the same for LibrationPoint");
 }
 
 
