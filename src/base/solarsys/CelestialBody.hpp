@@ -257,8 +257,8 @@ protected:
       HOUR_ANGLE,
       ATMOS_MODEL_NAME,
       //SUPPORTED_ATMOS_MODELS,
-      //ORDER,  // may need to access these through general methods at some point
-      //DEGREE,
+      ORDER,  // may need to access these through general methods at some point
+      DEGREE,
       //SIJ,
       //CIJ,
       CelestialBodyParamCount

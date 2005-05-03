@@ -59,8 +59,6 @@ CelestialBody::PARAMETER_TEXT[CelestialBodyParamCount - SpacePointParamCount] =
    "AnalyticMethod",
    "State",
    "StateTime",
-   //"Order",
-   //"Degree",
    "CentralBody",
    "BodyNumber",
    "RefBodyNumber",
@@ -74,6 +72,8 @@ CelestialBody::PARAMETER_TEXT[CelestialBodyParamCount - SpacePointParamCount] =
    //"Cij",
    "HourAngle",
    "AtmosphereModelName",
+   "Order",
+   "Degree",
    //"SupportedAtmosModels",
 };
 
@@ -90,8 +90,6 @@ Gmat::STRING_TYPE,
 Gmat::STRING_TYPE,
 Gmat::RVECTOR_TYPE,
 Gmat::TIME_TYPE,
-//Gmat::INTEGER_TYPE,
-//Gmat::INTEGER_TYPE,
 Gmat::STRING_TYPE,
 Gmat::INTEGER_TYPE,
 Gmat::INTEGER_TYPE,
@@ -106,6 +104,8 @@ Gmat::RVECTOR_TYPE,
 Gmat::REAL_TYPE,
 Gmat::STRING_TYPE,
 //Gmat::STRINGARRAY_TYPE,
+Gmat::INTEGER_TYPE,
+Gmat::INTEGER_TYPE,
 };
 
 
@@ -207,8 +207,8 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    potentialFileRead  (false),
    defaultMu          (398600.4415),
    defaultEqRadius    (6378.14),
-   order              (4),
-   degree             (4)
+   order              (0),
+   degree             (0)
 
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
@@ -1455,8 +1455,8 @@ Integer     CelestialBody::GetIntegerParameter(const Integer id) const
 Integer     CelestialBody::SetIntegerParameter(const Integer id,
                                         const Integer value) // const?
 {
-   //if (id == ORDER)                return (order               = value);
-   //if (id == DEGREE)               return (degree              = value);
+   if (id == ORDER)                return (order               = value);
+   if (id == DEGREE)               return (degree              = value);
    if (id == BODY_NUMBER)          return (bodyNumber          = value);
    if (id == REF_BODY_NUMBER)      return (referenceBodyNumber = value);
    //if (id == COEFFICIENT_SIZE)     return (coefficientSize     = value);
