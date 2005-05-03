@@ -707,8 +707,9 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type, const std::str
          throw GmatBaseException("Error Creating Spacecraft");
       }
 
-      // Set default CoordinateSystem
-      sc->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+      if (type == "Spacecraft") //loj: 5/4/05 Added
+         // Set default CoordinateSystem
+         sc->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
       
       // Manage it if it is a named Spacecraft
       try
@@ -3080,20 +3081,8 @@ void Moderator::CreateDefaultMission()
       // ReportFile
       GetDefaultSubscriber();
       
-      // XYPlot
-      Subscriber *sub = CreateSubscriber("XYPlot", "DefaultXYPlot");
-      sub->SetStringParameter("IndVar", "DefaultSC.CurrA1MJD");
-      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.X", 0);
-      
-      #if DEBUG_ACTION_REMOVE
-      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Y", 1);
-      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Z", 2);
-      sub->TakeAction("Remove", "DefaultSC.EarthMJ2000Eq.Y");
-      #endif
-      
-      sub->Activate(true);
-      
       // OpenGLPlot
+      Subscriber *sub;
       sub = CreateSubscriber("OpenGLPlot", "DefaultOpenGl");
       sub->SetStringParameter("Add", "DefaultSC", 0);
       sub->SetStringParameter("CoordinateSystem", "EarthMJ2000Eq");
@@ -3103,6 +3092,19 @@ void Moderator::CreateDefaultMission()
          sub->TakeAction("Remove", "Spacecraft1");
       #endif
          
+      sub->Activate(true);
+      
+      // XYPlot
+      sub = CreateSubscriber("XYPlot", "DefaultXYPlot");
+      sub->SetStringParameter("IndVar", "DefaultSC.CurrA1MJD");
+      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.X", 0);
+      
+      #if DEBUG_ACTION_REMOVE
+      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Y", 1);
+      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Z", 2);
+      sub->TakeAction("Remove", "DefaultSC.EarthMJ2000Eq.Y");
+      #endif
+      
       sub->Activate(true);
       
       #if DEBUG_DEFAULT_MISSION
