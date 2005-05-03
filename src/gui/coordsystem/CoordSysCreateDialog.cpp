@@ -155,27 +155,40 @@ void CoordSysCreateDialog::SaveData()
          {
             mCoordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
 
-            SpacePoint *primary = (SpacePoint *)theGuiInterpreter->
+            if (wxPrimName != "")
+            {
+               SpacePoint *primary = (SpacePoint *)theGuiInterpreter->
                      GetConfiguredItem(wxPrimName);
-            SpacePoint *secondary = (SpacePoint *)theGuiInterpreter->
+               if (primary != NULL)
+                  axis->SetPrimaryObject(primary);
+               else
+               {
+                  SolarSystem *ss = theGuiInterpreter->GetDefaultSolarSystem();
+                  axis->SetPrimaryObject((SpacePoint *)ss->GetBody(wxPrimName));
+               }
+            }
+            else if (wxTypeName == "ObjectReferenced")
+            {
+               MessageInterface::PopupMessage
+                  (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
+                  "ObjectReferenced must have a primary body.");
+               mIsCoordCreated = false;
+               return;
+            }
+            
+            if (wxSecName != "")
+            {
+               SpacePoint *secondary = (SpacePoint *)theGuiInterpreter->
                      GetConfiguredItem(wxSecName);
-
-            if (primary != NULL)
-               axis->SetPrimaryObject(primary);
-            else
-            {
-               SolarSystem *ss = theGuiInterpreter->GetDefaultSolarSystem();
-               axis->SetPrimaryObject((SpacePoint *)ss->GetBody(wxPrimName));
+               if (secondary != NULL)
+                  axis->SetSecondaryObject(secondary);
+               else
+               {
+                  SolarSystem *ss = theGuiInterpreter->GetDefaultSolarSystem();
+                  axis->SetSecondaryObject((SpacePoint *)ss->GetBody(wxSecName));
+               }
             }
-
-            if (secondary != NULL)
-               axis->SetSecondaryObject(secondary);
-            else
-            {
-               SolarSystem *ss = theGuiInterpreter->GetDefaultSolarSystem();
-               axis->SetSecondaryObject((SpacePoint *)ss->GetBody(wxSecName));
-            }
-
+         
             // set the x, y, and z
             axis->SetXAxis(std::string(wxXString));
             axis->SetYAxis(std::string(wxYString));
