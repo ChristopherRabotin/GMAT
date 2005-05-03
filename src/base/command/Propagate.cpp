@@ -282,10 +282,9 @@ GmatBase* Propagate::GetObject(const Gmat::ObjectType type,
  * set up the internal object data.  As a side benefit, the script line is
  * available in the GmatCommand structure for debugging purposes.
  *
- * @param <mode>    Specifies the type of serialization requested (Not yet used
- *                  in commands).
- * @param <prefix>  Optional prefix appended to the object's name (Not yet used
- *                  in commands).
+ * @param <mode>    Specifies the type of serialization requested.
+ * @param <prefix>  Optional prefix appended to the object's name. (Used for
+ *                  indentation)
  * @param <useName> Name that replaces the object's name (Not yet used
  *                  in commands).
  *
@@ -296,7 +295,7 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
                                                   const std::string &prefix,
                                                   const std::string &useName)
 {
-   std::string gen = "Propagate";
+   std::string gen = prefix + "Propagate";
    
    // Construct the generating string
    Integer index = 0;

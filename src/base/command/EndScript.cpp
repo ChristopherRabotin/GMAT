@@ -30,7 +30,7 @@
 EndScript::EndScript() :
    GmatCommand("EndScript")
 {
-   generatingString = "EndScript";
+   generatingString = "EndScript;";
 }
 
 

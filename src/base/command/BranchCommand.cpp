@@ -493,9 +493,11 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
                                                   const std::string &prefix,
                                                   const std::string &useName)
 {
-   fullString = generatingString;
+   fullString = prefix + generatingString;
    GmatCommand *current;
-   
+
+   std::string newPrefix = "   " + prefix;
+
    // Loop through the branches, appending the strings from commands in each
    for (Integer which = 0; which < (Integer)branch.size(); ++which)
    {
@@ -503,7 +505,10 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
       while ((current != NULL) && (current != this))
       {
          fullString += "\n";
-         fullString += current->GetGeneratingString(mode, prefix, useName);
+         if (current->GetNext() != this)
+            fullString += current->GetGeneratingString(mode, newPrefix, useName);
+         else // current is the End command for this branch command
+            fullString += current->GetGeneratingString(mode, prefix, useName);
          current = current->GetNext();
       }
    }

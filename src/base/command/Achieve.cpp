@@ -818,8 +818,8 @@ const std::string& Achieve::GetGeneratingString(Gmat::WriteMode mode,
    // Build the local string
    std::stringstream tol;
    tol << tolerance;
-   std::string gen = "Achieve " + targeterName + "(" + goalName + " = " +
-                     goalString + ", {Tolerance = " + tol.str();
+   std::string gen = prefix + "Achieve " + targeterName + "(" + goalName +
+                     " = " + goalString + ", {Tolerance = " + tol.str();
 
    generatingString = gen + "});";
    // Then call the base class method

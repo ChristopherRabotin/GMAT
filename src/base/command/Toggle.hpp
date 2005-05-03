@@ -40,7 +40,10 @@ public:
    Toggle& operator=(const Toggle& t);
    
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase*   Clone(void) const;
+   const std::string&  GetGeneratingString(Gmat::WriteMode mode,
+                                           const std::string &prefix,
+                                           const std::string &useName);
 
    virtual bool RenameRefObject(const Gmat::ObjectType type,
                                 const std::string &oldName,

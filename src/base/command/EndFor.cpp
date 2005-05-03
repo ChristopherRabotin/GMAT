@@ -94,3 +94,34 @@ GmatBase* EndFor::Clone(void) const
    return (new EndFor(*this));
 }
 
+
+//------------------------------------------------------------------------------
+//  const std::string GetGeneratingString()
+//------------------------------------------------------------------------------
+/**
+ * Method used to retrieve the string that was parsed to build this GmatCommand.
+ *
+ * This method is used to retrieve the GmatCommand string from the script that
+ * was parsed to build the GmatCommand.  It is used to save the script line, so
+ * that the script can be written to a file without inverting the steps taken to
+ * set up the internal object data.  As a side benefit, the script line is
+ * available in the GmatCommand structure for debugging purposes.
+ *
+ * @param <mode>    Specifies the type of serialization requested.
+ * @param <prefix>  Optional prefix appended to the object's name. (Used for
+ *                  indentation)
+ * @param <useName> Name that replaces the object's name (Not yet used
+ *                  in commands).
+ *
+ * @return The script line that defines this GmatCommand.
+ */
+//------------------------------------------------------------------------------
+const std::string& EndFor::GetGeneratingString(Gmat::WriteMode mode,
+                                               const std::string &prefix,
+                                               const std::string &useName)
+{
+   generatingString = prefix + "EndFor;";
+   return generatingString;
+}
+
+

@@ -350,7 +350,10 @@ const StringArray& FiniteBurn::GetStringArrayParameter(const Integer id) const
       return thrusters;
       
    if (id == FUEL_TANK)
+   {
+      // MessageInterface::ShowMessage("Retrieving %d tanks\n", tanks.size());
       return tanks;
+   }
 
    return Burn::GetStringArrayParameter(id);
 }

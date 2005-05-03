@@ -40,8 +40,10 @@ public:
     virtual bool            Insert(GmatCommand *cmd, GmatCommand *prev);
 
        // inherited from GmatBase
-    virtual GmatBase* Clone() const;
-
+    virtual GmatBase*       Clone() const;
+    const std::string&      GetGeneratingString(Gmat::WriteMode mode,
+                                            const std::string &prefix,
+                                            const std::string &useName);
 };
 
 
