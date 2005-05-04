@@ -684,16 +684,16 @@ bool Vary::Execute(void)
     
     Real var = targeter->GetSolverVariable(variableId[0]);
     
-    // Just a check here
-    if (variableMinimum[0] >= variableMaximum[0])
-       throw CommandException("Invalid variable minimum and maximum for " +
-          variableName[0]);
-    
-    if (var > variableMaximum[0])
-       var = variableMaximum[0];
-    if (var < variableMinimum[0])
-       var = variableMinimum[0];
-       
+//    // Just a check here -- the targeter handles all of these now
+//    if (variableMinimum[0] >= variableMaximum[0])
+//       throw CommandException("Invalid variable minimum and maximum for " +
+//          variableName[0]);
+//
+//    if (var > variableMaximum[0])
+//       var = variableMaximum[0];
+//    if (var < variableMinimum[0])
+//       var = variableMinimum[0];
+
     #ifdef DEBUG_VARIABLE_RANGES
        MessageInterface::ShowMessage(
           "Setting %s to %lf; allowed range is [%lf, %lf]\n",
