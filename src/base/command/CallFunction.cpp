@@ -135,6 +135,67 @@ std::string CallFunction::GetParameterText(const Integer id) const
 
 
 //------------------------------------------------------------------------------
+//  const std::string& GetGeneratingString()
+//------------------------------------------------------------------------------
+/**
+ * Method used to retrieve the string that was parsed to build this GmatCommand.
+ *
+ * This method is used to retrieve the GmatCommand string from the script that
+ * was parsed to build the GmatCommand.  It is used to save the script line, so
+ * that the script can be written to a file without inverting the steps taken to
+ * set up the internal object data.  As a side benefit, the script line is
+ * available in the GmatCommand structure for debugging purposes.
+ *
+ * @param mode    Specifies the type of serialization requested.
+ * @param prefix  Optional prefix appended to the object's name.  (Used to
+ *                indent commands)
+ * @param useName Name that replaces the object's name.  (Not used in
+ *                commands)
+ *
+ * @return The script line that, when interpreted, defines this CallFunction.
+ */
+//------------------------------------------------------------------------------
+const std::string& CallFunction::GetGeneratingString(Gmat::WriteMode mode,
+                                                     const std::string &prefix,
+                                                     const std::string &useName)
+{
+   // Build the local string
+   std::string gen = prefix + "GMAT ";
+   
+   if (mOutputListNames.size() > 0)
+   {
+      gen += "[";
+      for (StringArray::iterator i = mOutputListNames.begin();
+           i != mOutputListNames.end(); ++i)
+      {
+         if (i != mOutputListNames.begin())
+            gen += ", ";
+         gen += *i;
+      }
+      gen += "] = ";
+   }
+
+   gen += mFunctionName;
+
+   if (mInputListNames.size() > 0)
+   {
+      gen += "(";
+      for (StringArray::iterator i = mInputListNames.begin();
+           i != mInputListNames.end(); ++i)
+      {
+         if (i != mInputListNames.begin())
+            gen += ", ";
+         gen += *i;
+      }
+      gen += ")";
+   }
+   generatingString = gen + ";";
+   // Then call the base class method
+   return GmatCommand::GetGeneratingString(mode, prefix, useName);
+}
+
+
+//------------------------------------------------------------------------------
 // Integer GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Integer CallFunction::GetParameterID(const std::string &str) const

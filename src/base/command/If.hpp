@@ -62,8 +62,12 @@ public:
    virtual Integer      SetIntegerParameter(const std::string &label,
                                             const Integer value);
 
-virtual GmatBase*    Clone() const;
-    
+   virtual GmatBase*    Clone() const;
+   virtual const std::string&
+                        GetGeneratingString(Gmat::WriteMode mode,
+                                            const std::string &prefix,
+                                            const std::string &useName);
+
 protected:
    enum
    {

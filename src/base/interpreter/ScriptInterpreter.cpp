@@ -22,7 +22,7 @@
 #include <fstream>
 
 // Maybe put something like this in the Gmat namespace?
-#define REV_STRING "Build 4, February 2005"
+#define REV_STRING "Build 4.1, May 2005"
 
 
 //#define DEBUG_SCRIPTINTERPRETER
@@ -740,6 +740,27 @@ bool ScriptInterpreter::WriteScript(void)
    for (current = objs.begin(); current != objs.end(); ++current)
       if (!BuildObject(*current))
          return false;
+
+   // Arrays and Variables setups
+   objs = moderator->GetListOfConfiguredItems(Gmat::PARAMETER);
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+      std::cout << "Found " << objs.size() << " Subscribers\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      if (!BuildUserObject(*current))
+         return false;
+   }
+
+   // Function setups
+   objs = moderator->GetListOfConfiguredItems(Gmat::FUNCTION);
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+      std::cout << "Found " << objs.size() << " Subscribers\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+      if (!BuildObject(*current))
+         return false;
+
 
    // Command sequence
    GmatCommand *cmd = moderator->GetNextCommand();

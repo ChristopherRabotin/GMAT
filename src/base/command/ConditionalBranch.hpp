@@ -107,6 +107,8 @@ protected:
    virtual bool         SetStringArrayValue(Integer forArray, 
                                             const std::string &toValue,
                                             Integer forIndex);
+                                            
+   std::string          GetConditionalString();
    
    enum
    {

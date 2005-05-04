@@ -75,7 +75,8 @@ public:
    // The "Build" methods take GMAT objects and write out scripts or subscripts
    virtual bool                    Build(void) = 0;
    bool                            BuildObject(std::string &objectname);
-
+   bool                            BuildUserObject(std::string &objectname);
+   
 protected:
    /// The input stream processed by the interpreter
    std::istream                    *instream;

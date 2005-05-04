@@ -47,14 +47,18 @@
 class Vary : public GmatCommand
 {
 public:
-   Vary(void);
-   virtual ~Vary(void);
+   Vary();
+   virtual ~Vary();
     
    Vary(const Vary& t);
    Vary&             operator=(const Vary& t);
 
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
+   virtual const std::string&
+                        GetGeneratingString(Gmat::WriteMode mode,
+                                            const std::string &prefix,
+                                            const std::string &useName);
 
    virtual bool RenameRefObject(const Gmat::ObjectType type,
                                 const std::string &oldName,
@@ -82,9 +86,9 @@ public:
                                     const std::string &name = "");
 
    // Inherited methods overridden from the base class
-   virtual bool        InterpretAction(void);
-   virtual bool        Initialize(void);
-   virtual bool        Execute(void);
+   virtual bool        InterpretAction();
+   virtual bool        Initialize();
+   virtual bool        Execute();
     
 protected:
    /// The name of the spacecraft that gets maneuvered

@@ -20,7 +20,11 @@
 
 #include "Vary.hpp"
 #include "DifferentialCorrector.hpp"
+#include "MessageInterface.hpp"
+#include <sstream>         // for std::stringstream
 
+
+//#define DEBUG_VARIABLE_RANGES
 
 //------------------------------------------------------------------------------
 //  Vary(void)
@@ -29,7 +33,7 @@
  * Creates a Vary command.  (default constructor)
  */
 //------------------------------------------------------------------------------
-Vary::Vary(void) :
+Vary::Vary() :
     GmatCommand             ("Vary"),
     targeterName            (""),
     targeter                (NULL),
@@ -53,7 +57,7 @@ Vary::Vary(void) :
  * Destroys the Vary command.  (destructor)
  */
 //------------------------------------------------------------------------------
-Vary::~Vary(void)
+Vary::~Vary()
 {}
 
     
@@ -113,10 +117,81 @@ Vary& Vary::operator=(const Vary& t)
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* Vary::Clone(void) const
+GmatBase* Vary::Clone() const
 {
    return (new Vary(*this));
 }
+
+
+//------------------------------------------------------------------------------
+//  const std::string& GetGeneratingString()
+//------------------------------------------------------------------------------
+/**
+ * Method used to retrieve the string that was parsed to build this GmatCommand.
+ *
+ * This method is used to retrieve the GmatCommand string from the script that
+ * was parsed to build the GmatCommand.  It is used to save the script line, so
+ * that the script can be written to a file without inverting the steps taken to
+ * set up the internal object data.  As a side benefit, the script line is
+ * available in the GmatCommand structure for debugging purposes.
+ *
+ * @param mode    Specifies the type of serialization requested.
+ * @param prefix  Optional prefix appended to the object's name.  (Used to
+ *                indent commands)
+ * @param useName Name that replaces the object's name.  (Not used in
+ *                commands)
+ *
+ * @return The script line that, when interpreted, defines this Vary command.
+ */
+//------------------------------------------------------------------------------
+const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
+                                             const std::string &prefix,
+                                             const std::string &useName)
+{
+   // Build the local string
+   std::stringstream details;
+   std::string gen = prefix + "Vary " + targeterName + "(";
+
+   // Iterate through the variables
+   for (UnsignedInt i = 0; i < variableName.size(); ++i)
+   {
+      details << variableName[i] << " = " << initialValue[i] <<  ", ";
+   }
+
+   details << "{Pert =";
+   // Toss in the perturbations
+   for (UnsignedInt i = 0; i < perturbation.size(); ++i)
+   {
+      details << " " << perturbation[i];
+   }
+   
+   details << ", MaxStep =";
+   for (UnsignedInt i = 0; i < variableMaximumStep.size(); ++i)
+   {
+      details << " ";
+      details << variableMaximumStep[i];
+   }
+
+   details << ", Lower =";
+   for (UnsignedInt i = 0; i < variableMinimum.size(); ++i)
+   {
+      details << " ";
+      details << variableMinimum[i];
+   }
+
+   details << ", Upper =";
+   for (UnsignedInt i = 0; i < variableMaximum.size(); ++i)
+   {
+      details << " ";
+      details << variableMaximum[i];
+   }
+
+   gen += details.str();
+   generatingString = gen + "});";
+   // Then call the base class method
+   return GmatCommand::GetGeneratingString();
+}
+
 
 //loj: 11/22/04 added
 //---------------------------------------------------------------------------
@@ -396,7 +471,7 @@ bool Vary::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-//  void Vary::InterpretAction(void)
+//  void Vary::InterpretAction()
 //------------------------------------------------------------------------------
 /**
  * Parses the command string and builds the corresponding command structures.
@@ -411,7 +486,7 @@ bool Vary::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * point to the correct object during initialization.
  */
 //------------------------------------------------------------------------------
-bool Vary::InterpretAction(void)
+bool Vary::InterpretAction()
 {
     /// @todo: Clean up this hack for the Vary::InterpretAction method
     // Sample string:  "Vary myDC(Burn1.V = 0.5, {Pert = 0.0001, MaxStep = 0.05, 
@@ -466,13 +541,37 @@ bool Vary::InterpretAction(void)
     SetRealParameter(variableMinimumID, -value);
     SetRealParameter(variableMaximumID, value);
     SetRealParameter(variableMaximumStepID, value);
-    
+
+    loc = generatingString.find("MaxStep", strend);
+    if ((UnsignedInt)strend != std::string::npos)
+    {
+       end = generatingString.find("=", loc);
+       value = atof(&str[end+1]);
+       SetRealParameter(variableMaximumStepID, value);
+    }
+
+    loc = generatingString.find("Lower", strend);
+    if ((UnsignedInt)strend != std::string::npos)
+    {
+       end = generatingString.find("=", loc);
+       value = atof(&str[end+1]);
+       SetRealParameter(variableMinimumID, value);
+    }
+
+    loc = generatingString.find("Upper", strend);
+    if ((UnsignedInt)strend != std::string::npos)
+    {
+       end = generatingString.find("=", loc);
+       value = atof(&str[end+1]);
+       SetRealParameter(variableMaximumID, value);
+    }
+
     return true;
 }
 
 
 //------------------------------------------------------------------------------
-//  bool Initialize(void)
+//  bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Performs the initialization needed to run the Varyer.
@@ -480,7 +579,7 @@ bool Vary::InterpretAction(void)
  * @return true if the Command is initialized, false if an error occurs.
  */
 //------------------------------------------------------------------------------
-bool Vary::Initialize(void)
+bool Vary::Initialize()
 {
     bool retval = GmatCommand::Initialize();
 
@@ -579,6 +678,23 @@ bool Vary::Execute(void)
     }
     
     Real var = targeter->GetSolverVariable(variableId[0]);
+    
+    // Just a check here
+    if (variableMinimum[0] >= variableMaximum[0])
+       throw CommandException("Invalid variable minimum and maximum for " +
+          variableName[0]);
+    
+    if (var > variableMaximum[0])
+       var = variableMaximum[0];
+    if (var < variableMinimum[0])
+       var = variableMinimum[0];
+       
+    #ifdef DEBUG_VARIABLE_RANGES
+       MessageInterface::ShowMessage(
+          "Setting %s to %lf; allowed range is [%lf, %lf]\n",
+          variableName[0].c_str(), var, variableMinimum[0], variableMaximum[0]);
+    #endif
+
     pobject[0]->SetRealParameter(parmId[0], var);
 
     return retval;

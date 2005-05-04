@@ -988,3 +988,30 @@ bool ConditionalBranch::SetStringArrayValue(Integer forArray,
 }
 
 
+//------------------------------------------------------------------------------
+//  std::string GetConditionalString()
+//------------------------------------------------------------------------------
+/**
+ * This method builds the string that generates the condition list.
+ *
+ * @return The string description of the conditions.
+ */
+//------------------------------------------------------------------------------
+std::string ConditionalBranch::GetConditionalString()
+{
+   std::string cond;
+   
+   if ((lhsList.size() == 0) || (rhsList.size() == 0))
+      throw CommandException("Conditional command is missing its conditions!");
+   
+   // The first condition
+   cond = lhsList[0] + " " + opStrings[0] + " " + rhsList[0];
+
+   for (Integer i = 1; i < numberOfConditions; i++)
+   {
+      cond += " " + logicalOpStrings[i-1] + " ";
+      cond = lhsList[0] + " " + opStrings[0] + " " + rhsList[0];
+   }
+
+   return cond;
+}

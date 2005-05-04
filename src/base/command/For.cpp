@@ -23,6 +23,8 @@
 #include "BranchCommand.hpp"
 #include "CommandException.hpp"
 
+#include <sstream>      // for std::stringstream, used to make generating string
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -282,6 +284,67 @@ bool For::Execute(void)
 GmatBase* For::Clone(void) const
 {
    return (new For(*this));
+}
+
+//------------------------------------------------------------------------------
+//  const std::string& GetGeneratingString()
+//------------------------------------------------------------------------------
+/**
+ * Method used to retrieve the string that was parsed to build this GmatCommand.
+ *
+ * This method is used to retrieve the GmatCommand string from the script that
+ * was parsed to build the GmatCommand.  It is used to save the script line, so
+ * that the script can be written to a file without inverting the steps taken to
+ * set up the internal object data.  As a side benefit, the script line is
+ * available in the GmatCommand structure for debugging purposes.
+ *
+ * @param mode    Specifies the type of serialization requested.
+ * @param prefix  Optional prefix appended to the object's name.  (Used to set
+ *                indentation for GmatCommands.)
+ * @param useName Name that replaces the object's name.  (Not used in
+ *                commands.)
+ *
+ * @return The script line that, when interpreted, defines this For command.
+ */
+//------------------------------------------------------------------------------
+const std::string& For::GetGeneratingString(Gmat::WriteMode mode,
+                                            const std::string &prefix,
+                                            const std::string &useName)
+{
+   std::stringstream gen;
+
+   if (indexName != "")
+      gen << indexName;
+   else
+      gen << forName;
+   gen << " = ";
+   
+   if (startName != "")
+      gen << startName;
+   else
+      gen << startValue;
+   gen << ":";
+
+   if (incrName != "")
+   {
+      gen << incrName;
+      gen << ":";
+   }
+   else if (stepSize != 1.0)
+   {
+      gen << stepSize;
+      gen << ":";
+   }
+
+   if (endName != "")
+      gen << endName;
+   else
+      gen << endValue;
+
+   generatingString = prefix + "For " + gen.str() + ";";
+
+   // Then call the base class method
+   return BranchCommand::GetGeneratingString(mode, prefix, useName);
 }
 
 //------------------------------------------------------------------------------
@@ -562,7 +625,6 @@ std::string For::GetStringParameter(const Integer id) const
  *
  */
 //------------------------------------------------------------------------------
-
 bool For::SetStringParameter(const Integer id, 
                              const std::string &value)
 {

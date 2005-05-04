@@ -379,30 +379,30 @@ bool Interpreter::Interpret(GmatBase *obj, const std::string generator)
 //------------------------------------------------------------------------------
 /**
  * Calls the Moderator to build core objects and place them in the ConfigManager.
- * 
+ *
  * @param objectname Name of the object that gets serialized.
- * 
+ *
  * @return true on success, false on failure.
  */
 //------------------------------------------------------------------------------
 bool Interpreter::BuildObject(std::string &objectname)
 {
     GmatBase *obj = FindObject(objectname);
-    
+
     if (obj == NULL) {
         return true; //false;
     }
-    
+
     (*outstream).precision(18);        /// @todo Make output precision generic
-    
-//    // For now, "Create Propagator" creates a PropSetup.  This kludge handles 
+
+//    // For now, "Create Propagator" creates a PropSetup.  This kludge handles
 //    // that special case.
 //    std::string tname = obj->GetTypeName();
 //    if (tname == "PropSetup")
 //        tname = "Propagator";
-//    *outstream << "Create " << tname << " " 
+//    *outstream << "Create " << tname << " "
 //               << obj->GetName() << "\n";
-//               
+//
 //    std::string prefix = "GMAT ";
 //    prefix += objectname;
 //    prefix += ".";
@@ -416,6 +416,32 @@ bool Interpreter::BuildObject(std::string &objectname)
 //    *outstream << genstring << "\n***\n\n";
 
     *outstream << "\n";
+    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool BuildObject(std::string &objectname)
+//------------------------------------------------------------------------------
+/**
+ * Pulls the variables and arrays out of the collection of paramters, and
+ * serializes them.
+ *
+ * @param objectname Name of the object that gets serialized.
+ *
+ * @return true on success, false on failure.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::BuildUserObject(std::string &objectname)
+{
+    GmatBase *obj = FindObject(objectname);
+
+    if (obj == NULL)
+        return true;
+    
+    if ((obj->GetTypeName() == "Array") || (obj->GetTypeName() == "Variable"))
+       return BuildObject(objectname);
+       
     return true;
 }
 
@@ -895,6 +921,7 @@ bool Interpreter::AssembleForCommand(const StringArray topLevel,
       std::cout << "Loop index is \"" << *w << "\"\n";
    #endif
    GmatBase *parm = moderator->GetConfiguredItem(*w);
+   cmd->SetStringParameter("IndexName", *w);
    if (parm)
       cmd->SetRefObject(parm, parm->GetType(), parm->GetName());    // Should be SetRefObjectName
 

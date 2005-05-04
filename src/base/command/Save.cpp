@@ -95,7 +95,7 @@ Save& Save::operator=(const Save& sv)
     
    return *this;
 }
-     
+
 
 //------------------------------------------------------------------------------
 // bool GetRefObjectName(const Gmat::ObjectType type)
@@ -126,7 +126,8 @@ std::string Save::GetRefObjectName(const Gmat::ObjectType type) const
  * @return true on success, false on failure.
  */
 //------------------------------------------------------------------------------
-bool Save::SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+bool Save::SetRefObjectName(const Gmat::ObjectType type,
+                            const std::string &name)
 {
    if (name == "")
       return false;
@@ -152,7 +153,14 @@ bool Save::Initialize()
    bool retval = GmatCommand::Initialize();
 
    // Save specific initialization goes here:
-   for (StringArray::iterator i = objName.begin(); i != objName.end(); ++i)
+   StringArray::iterator i = objName.begin();
+   if (objName.size() > 1)
+   {
+      filename = *i;
+      ++i;
+   }
+
+   for (/* i initialized above */; i != objName.end(); ++i)
    {
       if (objectMap->find(*i) == objectMap->end())
       {
@@ -183,10 +191,13 @@ bool Save::Execute()
 {
    if (!obj[0])
       throw CommandException("Object not set for Save command");
-   std::string objectname = obj[0]->GetName();
-   filename = objectname;
-   filename += ".";
-   filename += obj[0]->GetTypeName();
+   if (filename == "")
+   {
+      std::string objectname = obj[0]->GetName();
+      filename = objectname;
+      filename += ".";
+      filename += obj[0]->GetTypeName();
+   }
 
    if (appendData && wasWritten)
       file.open(filename.c_str(), std::ios::app);
@@ -195,8 +206,9 @@ bool Save::Execute()
     
    file.precision(18);        /// @todo Make output precision generic
 
-   WriteObject(obj[0]);
-   
+   for (ObjectArray::iterator i = obj.begin(); i != obj.end(); ++i)
+      WriteObject(*i);
+      
    wasWritten = true;
    file.close();
    
@@ -362,10 +374,47 @@ GmatBase* Save::Clone() const
 }
 
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//  const std::string& GetGeneratingString()
+//------------------------------------------------------------------------------
+/**
+ * Method used to retrieve the string that was parsed to build this GmatCommand.
+ *
+ * This method is used to retrieve the GmatCommand string from the script that
+ * was parsed to build the GmatCommand.  It is used to save the script line, so
+ * that the script can be written to a file without inverting the steps taken to
+ * set up the internal object data.  As a side benefit, the script line is
+ * available in the GmatCommand structure for debugging purposes.
+ *
+ * @param mode    Specifies the type of serialization requested.  (Not yet used
+ *                in commands)
+ * @param prefix  Optional prefix appended to the object's name.  (Not yet used
+ *                in commands)
+ * @param useName Name that replaces the object's name.  (Not yet used in
+ *                commands)
+ *
+ * @return The script line that, when interpreted, defines this Save command.
+ */
+//------------------------------------------------------------------------------
+const std::string& Save::GetGeneratingString(Gmat::WriteMode mode,
+                                            const std::string &prefix,
+                                            const std::string &useName)
+{
+   // Build the local string
+   generatingString = prefix + "Save";
+   for (StringArray::iterator i = objName.begin(); i != objName.end(); ++i)
+      generatingString += " " + *i;
+   generatingString += ";";
+
+   // Then call the base class method
+   return GmatCommand::GetGeneratingString();
+}
+
+
+//------------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * This method updates object names when the user changes them.
  *

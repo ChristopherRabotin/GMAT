@@ -46,8 +46,11 @@ public:
 
     // inherited from GmatBase
     virtual GmatBase* Clone() const;
+    virtual const std::string&
+                        GetGeneratingString(Gmat::WriteMode mode,
+                                            const std::string &prefix,
+                                            const std::string &useName);
 
-    
 protected:
     
 };
