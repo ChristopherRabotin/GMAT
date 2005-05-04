@@ -561,8 +561,6 @@ bool Assignment::Execute()
    }
    catch (BaseException& ex)
    {
-      MessageInterface::ShowMessage("Assignment::Execute exception checking\n");
-
       if (parmOwner == NULL)
          throw;
       // Could be an action rather than a parameter

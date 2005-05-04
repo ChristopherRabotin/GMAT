@@ -25,6 +25,8 @@
 #include "RealUtilities.hpp"     // for GmatMathUtil::Abs()
 #include "MessageInterface.hpp"
 
+#include <cmath>
+#include <sstream>
 
 //---------------------------------
 // static data
@@ -479,6 +481,22 @@ Integer DifferentialCorrector::SetSolverVariables(Real *data,
 
    variable[variableCount] = data[0];
    perturbation[variableCount] = data[1];
+   // Sanity check min and max
+   if (data[2] >= data[3])
+   {
+      std::stringstream errMsg;
+      errMsg << "Minimum allowed variable value (received " << data[2]
+             << ") must be less than maximum (received " << data[3] << ")";
+      throw SolverException(errMsg.str());
+   }
+   if (data[4] <= 0.0)
+   {
+      std::stringstream errMsg;
+      errMsg << "Largest allowed step must be positive! (received "
+             << data[4] << ")";
+      throw SolverException(errMsg.str());
+   }
+
    variableMinimum[variableCount] = data[2];
    variableMaximum[variableCount] = data[3];
    variableMaximumStep[variableCount] = data[4];
@@ -778,7 +796,21 @@ void DifferentialCorrector::CalculateParameters()
         delta = 0.0;
         for (Integer j = 0; j < goalCount; j++)
             delta += inverseJacobian[j][i] * (goal[j] - nominal[j]);
+
+// New -- DJC, 05/03/2005
+        // Ensure that delta is not larger than the max allowed step
+        if (fabs(delta) > variableMaximumStep[i])
+           delta = ((delta > 0.0) ? variableMaximumStep[i] :
+                                   -variableMaximumStep[i]);
+// Old -- Better not delete this line if this doesn't work!
         variable[i] += delta;
+// New -- DJC, 05/03/2005
+        // Ensure that variable[i] is in the allowed range
+        if (variable[i] < variableMinimum[i])
+           variable[i] = variableMinimum[i];
+        if (variable[i] > variableMaximum[i])
+           variable[i] = variableMaximum[i];
+// Old code continues here
     }
     
     WriteToTextFile();
