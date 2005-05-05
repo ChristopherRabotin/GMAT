@@ -579,7 +579,9 @@ bool CallFunction::Initialize()
    for (StringArray::iterator i = mInputListNames.begin(); i != mInputListNames.end(); ++i)
    {
       if (objectMap->find(*i)  == objectMap->end())
-        throw CommandException("CallFunction command cannot find Parameter");
+        throw CommandException("CallFunction command cannot find Parameter " +
+           *i + " in script line\n   \"" +
+           GetGeneratingString(Gmat::SCRIPTING) + "\"");
 
          #if DEBUG_CALL_FUNCTION
             MessageInterface::ShowMessage("Adding input parameter %s\n", i->c_str());
