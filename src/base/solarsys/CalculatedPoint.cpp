@@ -344,6 +344,17 @@ std::string CalculatedPoint::GetStringParameter(const std::string &label,
 bool CalculatedPoint::SetStringParameter(const Integer id, 
                                          const std::string &value)
 {        
+   if (id == BODY_NAMES)
+   {
+      if (find(bodyNames.begin(), bodyNames.end(), value) == bodyNames.end())
+      {
+         bodyNames.push_back(value);
+         return true;
+      }
+      
+      return false;     // Name was already in the list
+   }
+
    return SpacePoint::SetStringParameter(id, value);
 }
 
