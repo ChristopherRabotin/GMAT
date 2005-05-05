@@ -65,7 +65,8 @@ Interpreter::Interpreter() :
         typemap["Subscriber"] = Gmat::SUBSCRIBER;
         typemap["Propagator"] = Gmat::PROP_SETUP;
         typemap["Burn"] = Gmat::BURN;
-        
+        typemap["CoordinateSystem"] = Gmat::COORDINATE_SYSTEM;
+        typemap["AxisSystem"] = Gmat::AXIS_SYSTEM;
     }
     RegisterAliases();
 }
@@ -262,7 +263,18 @@ bool Interpreter::InterpretObject(std::string objecttype,
         return true;
     }
 
-    // Array definitions may include the row and column counts, so they are 
+    if ((objecttype == "Barycenter") || (objecttype == "LibrationPoint"))
+    {
+       moderator->CreateCalculatedPoint(objecttype, objectname);
+       return true;
+    }
+
+    if (objecttype == "CoordinateSystem") {
+        CreateCoordinateSystem(objectname);
+        return true;
+    }
+
+    // Array definitions may include the row and column counts, so they are
     // given special treatment.
     if (objecttype == "Array") {
         return CreateArray(objectname, objecttype);
@@ -676,6 +688,29 @@ Parameter* Interpreter::CreateArray(std::string arrname, std::string type)
    arr->SetIntegerParameter("NumRows", rows);
    arr->SetIntegerParameter("NumCols", columns);
    return arr;
+}
+
+
+CoordinateSystem* Interpreter::CreateCoordinateSystem(std::string csName)
+{
+    return (CoordinateSystem *)(moderator->CreateCoordinateSystem(csName));
+}
+
+
+AxisSystem* Interpreter::CreateAxisSystem(std::string type, GmatBase *owner)
+{
+   if (owner == NULL)
+      throw InterpreterException("Interpreter::CreateAxisSystem needs a "
+         "CoordinateSystem object that acts as its owner; received a NULL "
+         "pointer instead.");
+   if (owner->GetType() != Gmat::COORDINATE_SYSTEM)
+      throw InterpreterException("Interpreter::CreateAxisSystem needs a "
+         "CoordinateSystem object that acts as its owner; received a pointer "
+         "to " + owner->GetName() + "instead.");
+            
+    AxisSystem* axes = (AxisSystem *)(moderator->CreateAxisSystem(type, ""));
+    owner->SetRefObject(axes, axes->GetType(), axes->GetName());
+    return axes;
 }
 
 
@@ -1358,22 +1393,22 @@ Burn* Interpreter::CreateBurn(std::string name, bool isImpulsive)
 
 
 //------------------------------------------------------------------------------
-// bool InterpretPropSetupParameter(GmatBase *obj, 
+// bool InterpretPropSetupParameter(GmatBase *obj,
 //                                 StringArray::iterator& phrase, Integer index)
 //------------------------------------------------------------------------------
 /**
  * Sets PropSetup parameters.
- * 
+ *
  * @param obj Object that is being configured.
  * @param phrase Phrase containing the configuration information.
- * 
+ *
  * @return true if the parameter is set, false otherwise.
- * 
- * @note This method is deprecated and remains in the code until it can be 
+ *
+ * @note This method is deprecated and remains in the code until it can be
  *       safely removed.
  */
 //------------------------------------------------------------------------------
-bool Interpreter::InterpretPropSetupParameter(GmatBase *obj, 
+bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
                                   StringArray& items,
                                   std::vector<std::string*>::iterator& phrase,
                                   Integer index)
@@ -1384,14 +1419,14 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
 
    try {
        Integer id = obj->GetParameterID(objParm);
-       
+
        Gmat::ParameterType parmType = obj->GetParameterType(id);
        if ((parmType != Gmat::UNKNOWN_PARAMETER_TYPE) &&
            (parmType != Gmat::OBJECT_TYPE))
        {
            // Set parameter data
            ++phrase;
-   
+
            if (**phrase == "=")
                ++phrase;
            SetParameter(obj, id, **phrase);
@@ -1400,7 +1435,7 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
        {
            if (objParm == "Type") {
                ++phrase;
-       
+
                if (**phrase == "=")
                    ++phrase;
                else
@@ -1415,7 +1450,7 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
            }
            else if (objParm == "ForceModelName") {
                ++phrase;
-       
+
                if (**phrase == "=")
                    ++phrase;
                else
@@ -1426,7 +1461,7 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
                    ((PropSetup*)obj)->SetForceModel(fm);
                else
                    throw InterpreterException("Force model does not exist");
-           }    
+           }
            else {
                // Could be a subitem -- Drag.Earth = Exponential, for example
                std::string subparm = GetToken();
@@ -1439,7 +1474,7 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
                        throw InterpreterException(
                           "Only Earth drag is supported in build 2");
                }
-                   
+
                // Set the parm on the owned object
                throw InterpreterException("Assignment string does not parse");
            }
@@ -1451,12 +1486,12 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
       if (prop == NULL)
          throw;
       ++phrase;
-       
+
       if (**phrase == "=")
          ++phrase;
       else
          throw InterpreterException("Syntax error creating Propagator");
-         
+
       Integer id = prop->GetParameterID(objParm);
 #ifdef DEBUG_INTERPRETER
       std::cout << "Setting " << objParm << " on " << prop->GetTypeName()
@@ -1465,7 +1500,113 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
       if (!SetParameter(prop, id, **phrase))
          throw;
    }
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool InterpretCoordinateSystemParameter(GmatBase *obj,
+//                                 StringArray::iterator& phrase, Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets PropSetup parameters.
+ *
+ * @param obj Object that is being configured.
+ * @param phrase Phrase containing the configuration information.
+ *
+ * @return true if the parameter is set, false otherwise.
+ *
+ * @note This method is deprecated and remains in the code until it can be
+ *       safely removed.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::InterpretCoordinateSystemParameter(GmatBase *obj,
+                                  StringArray& items,
+                                  std::vector<std::string*>::iterator& phrase,
+                                  Integer index)
+{
+   bool retval = true;
+   // Set object associations
+   std::string objParm = items[index];
+
+   try {
+      Integer id = obj->GetParameterID(objParm);
+
+      Gmat::ParameterType parmType = obj->GetParameterType(id);
+      if ((parmType != Gmat::UNKNOWN_PARAMETER_TYPE) &&
+          (parmType != Gmat::OBJECT_TYPE))
+      {
+         // Set parameter data
+         ++phrase;
+
+         if (**phrase == "=")
+            ++phrase;
+         SetParameter(obj, id, **phrase);
+      }
+      else
+      {
+         if (objParm == "Axes")
+         {
+            ++phrase;
+
+            if (**phrase == "=")
+               ++phrase;
+            else
+               throw InterpreterException(
+                  "Syntax error creating coordinate system axes for " +
+                  obj->GetName());
+
+            AxisSystem *axes = moderator->CreateAxisSystem(**phrase, "");
+            axes->SetName(**phrase);
+            obj->SetRefObject(axes, axes->GetType(), axes->GetName());
+         }
+         else
+            throw InterpreterException("Preparing to handle " + objParm);
+      }
+   }
+   catch (BaseException &ex)
+   {
+      // Check to see if it is an AxisSystem parameter; otherwise throw
+      #ifdef DEBUG_INTERPRETER
+         MessageInterface::ShowMessage("Setting %s on %s named %s to %s\n",
+            objParm.c_str(), obj->GetTypeName().c_str(), obj->GetName().c_str(),
+            (*phrase)->c_str());
+      #endif
     
+      // Get the axis system
+      GmatBase *axes = obj->GetRefObject(Gmat::AXIS_SYSTEM, "");
+      if (!axes)
+      {
+         MessageInterface::ShowMessage("Axis system not yet set on %s\n",
+            obj->GetName().c_str());
+         throw;
+      }
+
+      Integer id = axes->GetParameterID(objParm);
+      Gmat::ParameterType type = axes->GetParameterType(id);
+
+      // Set parameter data
+      ++phrase;
+      if (**phrase != "=")
+         throw InterpreterException(
+            "Syntax error setting " + objParm +
+            " on coordinate system axes for " + obj->GetName());
+
+      ++phrase;
+
+      switch (type)
+      {
+         case Gmat::STRING_TYPE:
+            axes->SetStringParameter(id, **phrase);
+            retval = true;
+            break;
+
+         default:
+            throw;
+      }
+   }
+
    return retval;
 }
 

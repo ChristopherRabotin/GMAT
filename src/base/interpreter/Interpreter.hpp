@@ -39,6 +39,8 @@ class SolarSystem;
 class CelestialBody;
 class Parameter;
 class GmatCommand;
+class CoordinateSystem;
+class AxisSystem;
 class Publisher;
 class Subscriber;
 class Burn;
@@ -135,6 +137,9 @@ protected:
    Hardware*                     CreateHardware(std::string hwname, 
                                                 std::string type);
    GmatCommand*                  CreateCommand(std::string commandtype);
+   CoordinateSystem*             CreateCoordinateSystem(std::string csName);
+   AxisSystem*                   CreateAxisSystem(std::string type,
+                                                  GmatBase *owner);
    Propagator*                   CreatePropagator(std::string proptype);
    ForceModel*                   CreateForceModel(std::string modelname);
    PhysicalModel*                CreatePhysicalModel(std::string forcetype);
@@ -165,7 +170,11 @@ protected:
                                                 StringArray& items,
                                                 std::vector<std::string*>::iterator& phrase, 
                                                 Integer index = 1);
-                                                
+   bool                          InterpretCoordinateSystemParameter(GmatBase *obj,
+                                                StringArray& items,
+                                                std::vector<std::string*>::iterator& phrase,
+                                                Integer index = 1);
+
    // Methods used to break apart lines of script
    void                          ChunkLine(void);
    bool                          IsGroup(const char *text);

@@ -339,7 +339,15 @@ bool ScriptInterpreter::Parse(void)
                     throw InterpreterException(
                        "PropSetup Parameter was not recognized");
             }
-            else 
+            else if ((sar.size() > 1) &&
+                     (obj->GetType() == Gmat::COORDINATE_SYSTEM))
+            {
+                if (!InterpretCoordinateSystemParameter(obj, sar, phrase))
+                    throw InterpreterException(
+                       "Coordinate system parameter was not recognized in \"" +
+                       line + "\"");
+            }
+            else
             {
                try
                {
