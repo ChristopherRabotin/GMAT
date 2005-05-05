@@ -33,8 +33,10 @@
 const std::string
 CoordinateBase::PARAMETER_TEXT[CoordinateBaseParamCount - GmatBaseParamCount] =
 {
-   "OriginName",
-   "J2000BodyName",
+   "Origin",
+   "J2000Body",
+//   "OriginName",
+//   "J2000BodyName",
 };
 
 const Gmat::ParameterType
@@ -336,7 +338,7 @@ Integer CoordinateBase::GetParameterID(const std::string &str) const
       if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
          return i;
    }
-   
+
    return GmatBase::GetParameterID(str);
 }
 

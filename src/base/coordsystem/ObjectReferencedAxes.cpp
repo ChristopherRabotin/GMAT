@@ -42,8 +42,10 @@ ObjectReferencedAxes::PARAMETER_TEXT[ObjectReferencedAxesParamCount - DynamicAxe
    "XAxis",
    "YAxis",
    "ZAxis",
-   "PrimaryObjectName",
-   "SecondaryObjectName",
+   "Primary",
+   "Secondary",
+//   "PrimaryObjectName",
+//   "SecondaryObjectName",
 };
 
 const Gmat::ParameterType

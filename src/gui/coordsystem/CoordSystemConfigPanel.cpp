@@ -89,7 +89,7 @@ void CoordSystemConfigPanel::LoadData()
       zComboBox = mCoordPanel->GetZComboBox();
 
       // get the data from the base
-      wxString origin = theCoordSys->GetStringParameter("OriginName").c_str();
+      wxString origin = theCoordSys->GetStringParameter("Origin").c_str();
       originComboBox->SetValue(origin);
 
       AxisSystem *axes = (AxisSystem *)theCoordSys->GetRefObject(
@@ -103,12 +103,14 @@ void CoordSystemConfigPanel::LoadData()
 
          if (mCoordPanel->GetShowPrimaryBody())
          {
+            // Primary/Secondary edits to just get the names  05/05/05, DJC
             SpacePoint *primaryObj = axes->GetPrimaryObject();
             if (primaryObj != NULL)
                primaryComboBox->SetValue(primaryObj->GetName().c_str());
             else
-               MessageInterface::ShowMessage("Primary object was null - may not" \
-                  " be implemented yet\n");
+//               MessageInterface::ShowMessage("Primary object was null - may not"
+//                  " be implemented yet\n");
+               primaryComboBox->SetValue(axes->GetStringParameter("Primary").c_str());
          }
 
          if (mCoordPanel->GetShowSecondaryBody())
@@ -117,8 +119,9 @@ void CoordSystemConfigPanel::LoadData()
             if (secondObj != NULL)
                secondaryComboBox->SetValue(secondObj->GetName().c_str());
             else
-               MessageInterface::ShowMessage("Secondary object was null - may "\
-                  "not be implemented yet\n");
+//               MessageInterface::ShowMessage("Secondary object was null - may "
+//                  "not be implemented yet\n");
+               secondaryComboBox->SetValue(axes->GetStringParameter("Secondary").c_str());
          }
 
          if (mCoordPanel->GetShowEpoch())

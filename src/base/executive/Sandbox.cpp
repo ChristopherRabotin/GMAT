@@ -712,8 +712,8 @@ void Sandbox::InitializeInternalObjects()
    // set ref object for internal coordinate system
    internalCoordSys->SetSolarSystem(solarSys);
 
-   // Set refence origin for internal coordinate system.
-   oName = internalCoordSys->GetStringParameter("OriginName");
+   // Set reference origin for internal coordinate system.
+   oName = internalCoordSys->GetStringParameter("Origin");
    sp = FindSpacePoint(oName);
    if (sp == NULL)
       throw SandboxException("Cannot find SpacePoint named \"" +
@@ -721,7 +721,7 @@ void Sandbox::InitializeInternalObjects()
    internalCoordSys->SetRefObject(sp, Gmat::SPACE_POINT, oName);
 
    // Set J2000 body for internal coordinate system
-   oName = internalCoordSys->GetStringParameter("J2000BodyName");
+   oName = internalCoordSys->GetStringParameter("J2000Body");
    sp = FindSpacePoint(oName);
    if (sp == NULL)
       throw SandboxException("Cannot find SpacePoint named \"" +
@@ -738,7 +738,7 @@ void Sandbox::InitializeCoordinateSystem(CoordinateSystem *cs)
    std::string oName;
 
    // Set the reference objects for the coordinate system
-   oName = cs->GetStringParameter("OriginName");
+   oName = cs->GetStringParameter("Origin");
    sp = FindSpacePoint(oName);
    if (sp == NULL)
       throw SandboxException("Cannot find SpacePoint named \"" +
@@ -746,7 +746,7 @@ void Sandbox::InitializeCoordinateSystem(CoordinateSystem *cs)
          cs->GetName() + " origin");
    cs->SetRefObject(sp, Gmat::SPACE_POINT, oName);
 
-   oName = cs->GetStringParameter("J2000BodyName");
+   oName = cs->GetStringParameter("J2000Body");
    sp = FindSpacePoint(oName);
    if (sp == NULL)
       throw SandboxException("Cannot find SpacePoint named \"" +

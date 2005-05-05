@@ -146,7 +146,7 @@ void CoordSysCreateDialog::SaveData()
          mCoordSys = theGuiInterpreter->CreateCoordinateSystem(wxCoordName);
          mCoordName = wxCoordName.c_str();
 
-         mCoordSys->SetStringParameter("OriginName", wxOriginName);
+         mCoordSys->SetStringParameter("Origin", wxOriginName);
 
          AxisSystem *axis = (AxisSystem *)theGuiInterpreter->
                   CreateAxisSystem(wxTypeName, wxTypeName);

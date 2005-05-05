@@ -1636,8 +1636,8 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
       {
          // create MJ2000Eq AxisSystem with Earth as origin
          AxisSystem *axis = CreateAxisSystem("MJ2000Eq", "");
-         cs->SetStringParameter("OriginName", "Earth");
-         cs->SetStringParameter("J2000BodyName", "Earth");
+         cs->SetStringParameter("Origin", "Earth");
+         cs->SetStringParameter("J2000Body", "Earth");
          cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
       }
    }
@@ -2668,7 +2668,7 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
       {
          StringArray csNames =
             theConfigManager->GetListOfItems(Gmat::COORDINATE_SYSTEM);
-   
+
          if (csNames.size() == 0)
          {
             #if DEBUG_RUN
@@ -2676,10 +2676,10 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
                ("Moderator::InterpretScript() creating Default Coordinate "
                 "System...\n");
             #endif
-            
+
             CreateDefaultCoordSystems();
          }
-         
+
          MessageInterface::ShowMessage
             ("Moderator::InterpretScript() successfully interpreted the script\n");
          isRunReady = true;
@@ -2730,7 +2730,7 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
       {
          StringArray csNames =
             theConfigManager->GetListOfItems(Gmat::COORDINATE_SYSTEM);
-         
+
          if (csNames.size() == 0)
          {
             #if DEBUG_RUN
@@ -2738,10 +2738,10 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
                ("Moderator::InterpretScript(ss) creating Default Coordinate "
                 "System...\n");
             #endif
-            
+
             CreateDefaultCoordSystems();
          }
-         
+
          MessageInterface::ShowMessage
             ("Moderator::InterpretScript() successfully interpreted the script\n");
          isRunReady = true;
@@ -2905,8 +2905,8 @@ void Moderator::CreateDefaultCoordSystems()
       // EarthMJ2000Ec
       CoordinateSystem *eccs = CreateCoordinateSystem("EarthMJ2000Ec", false);
       AxisSystem *ecAxis = CreateAxisSystem("MJ2000Ec", "EarthMJ2000Ec");
-      eccs->SetStringParameter("OriginName", "Earth");
-      eccs->SetStringParameter("J2000BodyName", "Earth");
+      eccs->SetStringParameter("Origin", "Earth");
+      eccs->SetStringParameter("J2000Body", "Earth");
       eccs->SetRefObject(ecAxis, Gmat::AXIS_SYSTEM, ecAxis->GetName());
 
       // EarthFixed
@@ -2915,8 +2915,8 @@ void Moderator::CreateDefaultCoordSystems()
          (BodyFixedAxes*)CreateAxisSystem("BodyFixed", "EarthFixed");
       bfecAxis->SetEopFile(theEopFile);
       bfecAxis->SetCoefficientsFile(theItrfFile);
-      bfcs->SetStringParameter("OriginName", "Earth");
-      bfcs->SetStringParameter("J2000BodyName", "Earth");
+      bfcs->SetStringParameter("Origin", "Earth");
+      bfcs->SetStringParameter("J2000Body", "Earth");
       bfcs->SetRefObject(bfecAxis, Gmat::AXIS_SYSTEM, bfecAxis->GetName());
    }
    catch (BaseException &e)
@@ -3028,7 +3028,7 @@ void Moderator::CreateDefaultMission()
       CreateParameter("BetaAngle", "DefaultSC.BetaAngle");
       
       // User variable
-      Parameter *var = CreateParameter("Variable", "DefaultSC.EarthMJ2000Eq.Xx2");
+      Parameter *var = CreateParameter("Variable", "DefaultSC_EarthMJ2000Eq_Xx2");
       var->SetStringParameter("Expression", "DefaultSC.EarthMJ2000Eq.X * 2.0");
       var->SetRefObjectName(Gmat::PARAMETER, "DefaultSC.EarthMJ2000Eq.X");
       
