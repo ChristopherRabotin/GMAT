@@ -282,8 +282,7 @@ void PropagationConfigPanel::SaveData()
             else
             {
                potFilename = std::string(potFileTextCtrl->GetValue().c_str());
-               MessageInterface::ShowMessage
-               ("Saving potential file name = %s\n", potFilename.c_str());
+               
                if (isPotFileChanged)
                   isPotFileChanged = false;
             }
@@ -296,11 +295,11 @@ void PropagationConfigPanel::SaveData()
                Integer deg = atoi(gravityDegreeTextCtrl->GetValue());
                Integer ord = atoi(gravityOrderTextCtrl->GetValue());
                
-               if ( (deg > 4) || (ord > 4) )
+               if (deg < ord)
                {
                   MessageInterface::PopupMessage
-                  (Gmat::WARNING_, "Gravity field degree and order "
-                                   "should not be greater than 4.");
+                  (Gmat::WARNING_, "Gravity field degree should be greater than "
+                                   "or equal to the order.");
                   gravityDegreeTextCtrl->SetValue(forceList[currentBodyId]->gravDegree);
                   gravityOrderTextCtrl->SetValue(forceList[currentBodyId]->gravOrder);
                   return;
@@ -310,6 +309,8 @@ void PropagationConfigPanel::SaveData()
                   ("Degree", atoi(gravityDegreeTextCtrl->GetValue()));
                theGravForce->SetIntegerParameter
                   ("Order",  atoi(gravityOrderTextCtrl->GetValue()));
+               MessageInterface::ShowMessage("Degree=%s\n", gravityDegreeTextCtrl->GetValue().c_str());
+               MessageInterface::ShowMessage("Order=%s\n", gravityOrderTextCtrl->GetValue().c_str());
             }                
             theGravForce->SetStringParameter("Filename", potFilename);
 
@@ -330,9 +331,6 @@ void PropagationConfigPanel::SaveData()
 #endif 
             theDragForce = new DragForce(forceList[i]->dragType);
 
-            //theCelestialBody = theDragForce->GetBody();
-            
-            //if (theCelestialBody == NULL)
             theCelestialBody = theSolarSystem->GetBody(forceList[i]->bodyName); 
                              
             theAtmosphereModel = theCelestialBody->GetAtmosphereModel();
@@ -477,7 +475,8 @@ void PropagationConfigPanel::Initialize()
       
       paramId = theForceModel->GetParameterID("SRP");
       useSRP = theForceModel->GetStringParameter(paramId).c_str();
-      //waw: Earth only for Build 3
+      
+      //@todo: Earth only implemented for Build 3
       if (useSRP.CmpNoCase("On") == 0)
       {                                   
          currentBodyId = FindBody(SolarSystem::EARTH_NAME);
@@ -499,69 +498,41 @@ void PropagationConfigPanel::Initialize()
                dragModelArray[NONE_DM], magfModelArray[NONE_MM])); 
          }
          else if (force->GetTypeName() == "GravityField")
-         {
-            //MessageInterface::ShowMessage("Getting potfilename.\n");
-            
+         {            
             theGravForce = (GravityField*)force;
             bodyName = theGravForce->GetStringParameter("BodyName");
             potFilename = theGravForce->GetStringParameter("Filename");                 
             
             GravModelType gravModelType;
             if (potFilename.find("JGM2") != std::string::npos)
-            {
-               gravModelType = JGM2;
-               //MessageInterface::ShowMessage("1\n");               
-            }    
+               gravModelType = JGM2;    
             else if (potFilename.find("JGM3") != std::string::npos)
-            {
-               gravModelType = JGM3;
-               //MessageInterface::ShowMessage("2\n");
-            }    
+               gravModelType = JGM3;    
             else 
-            {
-                gravModelType = OTHER;
-                //MessageInterface::ShowMessage("3\n");
-            }
-            //MessageInterface::ShowMessage("Finished getting potfilename.\n");
+               gravModelType = OTHER;
             
             currentBodyId = FindBody(bodyName);
-            //MessageInterface::ShowMessage("4\n");
             forceList[currentBodyId]->bodyName = bodyName;
-            //MessageInterface::ShowMessage("5\n");
             forceList[currentBodyId]->gravType = gravModelArray[gravModelType];
-            //MessageInterface::ShowMessage("6\n");
             forceList[currentBodyId]->gravf = theGravForce;
-            //MessageInterface::ShowMessage("7\n");
             
             tempStr = "";
-            //MessageInterface::ShowMessage("8\n");
             tempStr << theGravForce->GetIntegerParameter("Degree");
-            //MessageInterface::ShowMessage("9\n");
+
             forceList[currentBodyId]->gravDegree = tempStr;
-            //MessageInterface::ShowMessage("10\n");
+
             tempStr = "";
-            //MessageInterface::ShowMessage("11\n");
             tempStr << theGravForce->GetIntegerParameter("Order");
-            //MessageInterface::ShowMessage("12\n");
+
             forceList[currentBodyId]->gravOrder = tempStr;
-            //MessageInterface::ShowMessage("13\n");
+
             if (gravModelType == OTHER)
             {
-               //MessageInterface::ShowMessage("14\n");
-               forceList[currentBodyId]->potFilename = potFilename;
-               //MessageInterface::ShowMessage("15\n");
-               if (potFilename.empty())
-               {
-                  //MessageInterface::ShowMessage("16\n");
+               if (potFilename == "")
                   MessageInterface::PopupMessage
                   (Gmat::WARNING_, "Potential Filename Not Found");
-                  //MessageInterface::ShowMessage("17\n");
-               }   
                else
-               { 
-                  potFileTextCtrl->SetValue(potFilename.c_str()); 
-                  //MessageInterface::ShowMessage("18\n");
-               }    
+                  forceList[currentBodyId]->potFilename = potFilename;
             }  
 
             bool found = false;
@@ -580,8 +551,6 @@ void PropagationConfigPanel::Initialize()
             paramId = theDragForce->GetParameterID("AtmosphereModel");
             atmosModelString = theDragForce->GetStringParameter(paramId).c_str();
             
-            //paramId = theDragForce->GetParameterID("AtmosphereBody");
-            //paramId = theDragForce->GetParameterID("BodyName"); //loj: 10/25/04
             bodyName = theDragForce->GetStringParameter("BodyName");
                         
             currentBodyId = FindBody(bodyName);
@@ -1444,6 +1413,9 @@ void PropagationConfigPanel::OnAddBodyButton()
       DragForce *dragf = NULL;
       SolarRadiationPressure *srpf = NULL;
       bool useSrp = false;
+      
+      wxString degreeString;
+      wxString orderString;
          
       fl = forceList;
       forceList.clear();
@@ -1457,6 +1429,10 @@ void PropagationConfigPanel::OnAddBodyButton()
          for (Integer i = 0; i < (Integer)names.GetCount(); i++)
          {
             bodyName = names[i].c_str();
+            theCelestialBody = theSolarSystem->GetBody(bodyName.c_str());
+            
+            degreeString.Printf("%d", theCelestialBody->GetDegree());
+            orderString.Printf("%d", theCelestialBody->GetOrder());
             
             // If no previous body selection was made
             if (fl.empty())
@@ -1464,8 +1440,8 @@ void PropagationConfigPanel::OnAddBodyButton()
                gravType = gravModelArray[JGM2];
                dragType = dragModelArray[NONE_DM];
                magfType = magfModelArray[NONE_MM];   
-               gravDegree = "4";
-               gravOrder = "4";
+               gravDegree = degreeString.c_str();
+               gravOrder = orderString.c_str();
                magfDegree = "0";
                magfOrder = "0";
                potFilename = "";
@@ -1499,8 +1475,8 @@ void PropagationConfigPanel::OnAddBodyButton()
                      gravType = gravModelArray[JGM2];
                      dragType = dragModelArray[NONE_DM];
                      magfType = magfModelArray[NONE_MM];   
-                     gravDegree = "4";
-                     gravOrder = "4";
+                     gravDegree = degreeString.c_str();
+                     gravOrder = orderString.c_str();
                      magfDegree = "0";
                      magfOrder = "0";
                      potFilename = "";
@@ -1609,16 +1585,13 @@ void PropagationConfigPanel::OnGravSearchButton()
         
       potFileTextCtrl->SetValue(filename);
       potFilename = std::string(filename.c_str());
-      
-//      gravityDegreeTextCtrl->SetValue("4");
-//      gravityOrderTextCtrl->SetValue("4");
 
       gravityDegreeTextCtrl->SetValue(forceList[currentBodyId]->gravDegree);
       gravityOrderTextCtrl->SetValue(forceList[currentBodyId]->gravOrder);
       
       gravityDegreeTextCtrl->Enable(true);
       gravityOrderTextCtrl->Enable(true);
-      //isForceModelChanged = true;
+      
       theApplyButton->Enable(true);
    }
 }
@@ -1804,6 +1777,7 @@ void PropagationConfigPanel::OnGravityTextUpdate(wxCommandEvent& event)
    {
       isGravTextChanged = true;
       isForceModelChanged = true;
+      //MessageInterface::ShowMessage("OnGravityTextUpdate()\n");
    }
    else if (event.GetEventObject() == potFileTextCtrl)
    {
