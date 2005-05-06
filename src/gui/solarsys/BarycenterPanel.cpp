@@ -168,6 +168,9 @@ void BarycenterPanel::LoadData()
          ("BarycenterPanel:LoadData() error occurred!\n%s\n",
             e.GetMessage().c_str());
    }
+
+   // Activate "ShowScript"
+   mObject = theBarycenter;
 }
 
 
