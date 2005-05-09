@@ -21,6 +21,8 @@
 
 //#define DEBUG_GUI_ITEM 1
 //#define DEBUG_GUI_ITEM_PROPERTY 1
+//#define DEBUG_GUI_ITEM_SP 1
+//#define DEBUG_GUI_ITEM_CS 1
 
 //------------------------------
 // static data
@@ -59,25 +61,28 @@ void GuiItemManager::UpdateAll()
    if (theNumScProperty == 0)
       UpdatePropertyList("Spacecraft");
 
-   UpdateSpaceObject(); //loj: 1/19/05 Added
+   UpdateCelestialPoint(); // All CelestialBodis and CalculatedPoints
    UpdateFormation();
    UpdateSpacecraft();
    UpdateParameter();
    UpdateSolarSystem();
-   UpdateCoordSystem(); //loj: 1/19/05 Added
+   UpdateCoordSystem();
 }
 
+
 //------------------------------------------------------------------------------
-//  void UpdateSpaceObject()
+//  void UpdateCelestialPoint()
 //------------------------------------------------------------------------------
 /**
- * Updates general object gui components.
+ * Updates CelestialBody and CalculatedPoint objects.
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateSpaceObject()
+void GuiItemManager::UpdateCelestialPoint()
 {
-   UpdateSpaceObjectList();
+   UpdateCelestialPointList();
+   UpdateSpacePointList();
 }
+
 
 //------------------------------------------------------------------------------
 //  void UpdateFormation()
@@ -90,7 +95,9 @@ void GuiItemManager::UpdateFormation()
 {
    UpdateFormationList();
    UpdateSpaceObjectList();
+   UpdateSpacePointList();
 }
+
 
 //------------------------------------------------------------------------------
 //  void UpdateSpacecraft()
@@ -105,6 +112,7 @@ void GuiItemManager::UpdateSpacecraft()
    UpdateSpaceObjectList();
    UpdateSpacePointList();
 }
+
 
 //------------------------------------------------------------------------------
 //  void UpdateParameter()
@@ -127,9 +135,10 @@ void GuiItemManager::UpdateParameter()
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateSolarSystem()
 {
-   UpdateConfigBodyList();
-   UpdateSpacePointList();
+   UpdateCelestialBodyList();
+   UpdateCelestialPointList();
 }
+
 
 //------------------------------------------------------------------------------
 //  void UpdateCoordSystem()
@@ -174,6 +183,7 @@ wxString* GuiItemManager::GetPropertyList(const wxString &objName)
    return theScPropertyList;
 }
 
+
 //------------------------------------------------------------------------------
 //  wxComboBox* GetSpacecraftComboBox(wxWindow *parent, const wxSize &size)
 //------------------------------------------------------------------------------
@@ -200,6 +210,7 @@ wxComboBox* GuiItemManager::GetSpacecraftComboBox(wxWindow *parent, wxWindowID i
     
    return theSpacecraftComboBox;
 }
+
 
 //------------------------------------------------------------------------------
 //  wxComboBox* GetCoordSysComboBox(wxWindow *parent, const wxSize &size)
@@ -232,25 +243,25 @@ wxComboBox* GuiItemManager::GetCoordSysComboBox(wxWindow *parent, wxWindowID id,
 //  wxComboBox* GetConfigBodyComboBox(wxWindow *parent, const wxSize &size)
 //------------------------------------------------------------------------------
 /**
- * @return celestial body combo box pointer
+ * @return CelestialBody ComboBox pointer
  */
 //------------------------------------------------------------------------------
 wxComboBox* GuiItemManager::GetConfigBodyComboBox(wxWindow *parent, wxWindowID id,
                                                   const wxSize &size)
 {
-   int numBody = theNumConfigBody;
+   int numBody = theNumCelesBody;
    
-   if (theNumConfigBody == 0)
+   if (theNumCelesBody == 0)
       numBody = 1;
    
-   theConfigBodyComboBox =
+   theCelesBodyComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
-                     numBody, theConfigBodyList, wxCB_READONLY);
+                     numBody, theCelesBodyList, wxCB_READONLY);
    
    // show Earth as a default body
-   theConfigBodyComboBox->SetStringSelection("Earth");
+   theCelesBodyComboBox->SetStringSelection("Earth");
    
-   return theConfigBodyComboBox;
+   return theCelesBodyComboBox;
 }
 
 
@@ -259,14 +270,17 @@ wxComboBox* GuiItemManager::GetConfigBodyComboBox(wxWindow *parent, wxWindowID i
 //                                   const wxSize &size, bool addVector = false)
 //------------------------------------------------------------------------------
 /**
- * @return Configured ConfigBodyListBox pointer
+ * @return configured SpacePoint object ComboBox pointer
  */
 //------------------------------------------------------------------------------
-wxComboBox* GuiItemManager::GetSpacePointComboBox(wxWindow *parent, wxWindowID id,
-                                                  const wxSize &size, bool addVector)
+wxComboBox*
+GuiItemManager::GetSpacePointComboBox(wxWindow *parent, wxWindowID id,
+                                      const wxSize &size, bool addVector)
 {
-   #if DEBUG_GUI_ITEM
-   MessageInterface::ShowMessage("GuiItemManager::GetSpacePointComboBox() entered\n");
+   #if DEBUG_GUI_ITEM_SP
+   MessageInterface::ShowMessage
+      ("GuiItemManager::GetSpacePointComboBox() theNumSpacePoint=%d\n",
+      theNumSpacePoint);
    #endif
    
    int numSpacePoint = theNumSpacePoint;
@@ -310,11 +324,237 @@ wxComboBox* GuiItemManager::GetSpacePointComboBox(wxWindow *parent, wxWindowID i
 
 
 //------------------------------------------------------------------------------
+// wxComboBox* GetCelestialPointComboBox(wxWindow *parent, wxWindowID id,
+//                                   const wxSize &size, bool addVector = false)
+//------------------------------------------------------------------------------
+/**
+ * @return configured CelestialBody and CalculatedPoint object ComboBox pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox*
+GuiItemManager::GetCelestialPointComboBox(wxWindow *parent, wxWindowID id,
+                                          const wxSize &size, bool addVector)
+{
+   #if DEBUG_GUI_ITEM
+   MessageInterface::ShowMessage
+      ("GuiItemManager::GetCelestialPointComboBox() theNumCelesPoint=%d\n",
+      theNumCelesPoint);
+   #endif
+   
+   int numCelesPoint = theNumCelesPoint;
+   
+   if (theNumCelesPoint == 0)
+      numCelesPoint = 1;
+
+   if (addVector)
+   {
+      if (theNumCelesPoint == 0)
+         numCelesPoint = 1;
+      else
+         numCelesPoint = theNumCelesPoint + 1;
+
+      wxString *newCelestialPointList = new wxString[numCelesPoint];
+
+      // add "Vector" first
+      newCelestialPointList[0] = "Vector";
+      
+      for (int i=0; i<theNumCelesPoint; i++)
+         newCelestialPointList[i+1] = theCelesPointList[i];
+
+      theCelestialPointComboBox =
+         new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                        numCelesPoint, newCelestialPointList, wxCB_READONLY);
+
+      delete newCelestialPointList;
+   }
+   else
+   {
+      theCelestialPointComboBox =
+         new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                        numCelesPoint, theCelesPointList, wxCB_READONLY);
+   }
+   
+   // select first item
+   theCelestialPointComboBox->SetSelection(0);
+   
+   return theCelestialPointComboBox;
+}
+
+
+//------------------------------------------------------------------------------
+//  wxComboBox* GetUserVariableComboBox(wxWindow *parent, const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return configured user parameter combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox*
+GuiItemManager::GetUserVariableComboBox(wxWindow *parent, wxWindowID id,
+                                        const wxSize &size)
+{
+   // combo box for configured user parameters
+
+   int numUserVar = theNumUserVariable;
+    
+   if (theNumUserVariable == 0)
+      numUserVar = 1;
+    
+   theUserParamComboBox =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                     numUserVar, theUserVariableList, wxCB_READONLY);
+   
+   // show first spacecraft
+   theUserParamComboBox->SetSelection(0);
+   
+   return theUserParamComboBox;
+}
+
+
+// ListBox
+//------------------------------------------------------------------------------
+// wxListBox* GetSpacePointListBox(wxWindow *parent, wxWindowID id,
+//                                 const wxSize &size, bool addVector = false)
+//------------------------------------------------------------------------------
+/**
+ * @return configured CelestialBody and CalculatedPoint object ListBox pointer
+ */
+//------------------------------------------------------------------------------
+wxListBox* GuiItemManager::GetSpacePointListBox(wxWindow *parent, wxWindowID id,
+                                                const wxSize &size, bool addVector)
+{
+   #if DEBUG_GUI_ITEM
+   MessageInterface::ShowMessage("GuiItemManager::GetSpacePointListBox() entered\n");
+   #endif
+   
+   int numSpacePoint = theNumSpacePoint;
+   
+   if (theNumSpacePoint == 0)
+      numSpacePoint = 1;
+
+   if (addVector)
+   {
+      if (theNumSpacePoint == 0)
+         numSpacePoint = 1;
+      else
+         numSpacePoint = theNumSpacePoint + 1;
+
+      wxString *newSpacePointList = new wxString[numSpacePoint];
+
+      // add "Vector" first
+      newSpacePointList[0] = "Vector";
+      
+      for (int i=0; i<theNumSpacePoint; i++)
+         newSpacePointList[i+1] = theSpacePointList[i];
+
+      theSpacePointListBox =
+         new wxListBox(parent, id, wxDefaultPosition, size, numSpacePoint,
+                       newSpacePointList, wxLB_SINGLE|wxLB_SORT);
+
+      delete newSpacePointList;
+   }
+   else
+   {
+      theSpacePointListBox =
+         new wxListBox(parent, id, wxDefaultPosition, size, numSpacePoint,
+                       theSpacePointList, wxCB_READONLY);
+   }
+   
+   // select first item
+   theSpacePointListBox->SetSelection(0);
+   
+   return theSpacePointListBox;
+}
+
+
+//------------------------------------------------------------------------------
+// wxListBox* GetCelestialPointListBox(wxWindow *parent, wxWindowID id,
+//                                     const wxSize &size, wxArrayString &namesToExclude)
+//------------------------------------------------------------------------------
+/**
+ * @return configured CelestialBody and CalculatedPoint object ListBox pointer
+ * excluding names in the namesToExclude array.
+ */
+//------------------------------------------------------------------------------
+wxListBox* GuiItemManager::GetCelestialPointListBox(wxWindow *parent, wxWindowID id,
+                                                    const wxSize &size,
+                                                    wxArrayString &namesToExclude)
+{
+   #if DEBUG_GUI_ITEM
+   MessageInterface::ShowMessage
+      ("GuiItemManager::GetCelestialPointListBox() theNumCelesPoint=%d\n",
+       theNumCelesPoint);
+   #endif
+   
+   wxString emptyList[] = {};
+
+   if (namesToExclude.IsEmpty())
+   {
+      if (theNumCelesPoint > 0)
+      {       
+         theCelesPointListBox =
+            new wxListBox(parent, id, wxDefaultPosition, size, theNumCelesPoint,
+                          theCelesPointList, wxLB_SINGLE|wxLB_SORT);
+      }
+      else
+      {       
+         theCelesPointListBox =
+            new wxListBox(parent, id, wxDefaultPosition, size, 0,
+                          emptyList, wxLB_SINGLE|wxLB_SORT);
+      }
+   }
+   else
+   {
+      int exclCount = namesToExclude.GetCount();
+      int newCelestialPointCount = theNumCelesPoint - exclCount;
+      
+      if (newCelestialPointCount > 0)
+      {
+         wxString *newCelestialPointList = new wxString[newCelestialPointCount];
+         bool excludeName;
+         int numSpaceObj = 0;
+        
+         for (int i=0; i<theNumCelesPoint; i++)
+         {
+            excludeName = false;
+            for (int j=0; j<exclCount; j++)
+            {
+               if (theCelesPointList[i].IsSameAs(namesToExclude[j]))
+               {
+                  excludeName = true;
+                  break;
+               }
+            }
+            
+            if (!excludeName)
+            {
+               newCelestialPointList[numSpaceObj++] = theCelesPointList[i];
+            }
+         }
+
+         theCelesPointListBox =
+            new wxListBox(parent, id, wxDefaultPosition, size, newCelestialPointCount,
+                          newCelestialPointList, wxLB_SINGLE|wxLB_SORT);
+         
+         delete newCelestialPointList;
+      }
+      else
+      {
+         theCelesPointListBox =
+            new wxListBox(parent, id, wxDefaultPosition, size, 0,
+                          emptyList, wxLB_SINGLE|wxLB_SORT);
+      }
+   }
+
+   return theCelesPointListBox;
+}
+
+
+//------------------------------------------------------------------------------
 // wxListBox* GetSpaceObjectListBox(wxWindow *parent, wxWindowID id,
 //                                  const wxSize &size, wxArrayString &namesToExclude)
 //------------------------------------------------------------------------------
 /**
- * @return Available Spacecraft ListBox pointer
+ * @return configured Spacecraft anf Formation object ListBox pointer
  */
 //------------------------------------------------------------------------------
 wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id,
@@ -377,7 +617,6 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
             excludeName = false;
             for (int j=0; j<exclCount; j++)
             {
-               //if (theSpaceObjectList[i] == namesToExclude[j])
                if (theSpaceObjectList[i].IsSameAs(namesToExclude[j]))
                {
                   excludeName = true;
@@ -406,10 +645,11 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
       }
       else
       {
-#if DEBUG_GUI_ITEM
+         #if DEBUG_GUI_ITEM
          MessageInterface::ShowMessage
             ("GuiItemManager::GetSpaceObjectListBox() emptyList\n");
-#endif
+         #endif
+         
          theSpaceObjectListBox =
             new wxListBox(parent, id, wxDefaultPosition, size, 0,
                           emptyList, wxLB_SINGLE|wxLB_SORT);
@@ -418,6 +658,7 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
 
    return theSpaceObjectListBox;
 }
+
 
 //------------------------------------------------------------------------------
 // wxListBox* GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
@@ -583,34 +824,6 @@ wxListBox* GuiItemManager::GetPlottableParameterListBox(wxWindow *parent,
    }
    
    return thePlottableParamListBox;
-}
-
-//------------------------------------------------------------------------------
-//  wxComboBox* GetUserVariableComboBox(wxWindow *parent, const wxSize &size)
-//------------------------------------------------------------------------------
-/**
- * @return configured user parameter combo box pointer
- */
-//------------------------------------------------------------------------------
-wxComboBox*
-GuiItemManager::GetUserVariableComboBox(wxWindow *parent, wxWindowID id,
-                                        const wxSize &size)
-{
-   // combo box for configured user parameters
-
-   int numUserVar = theNumUserVariable;
-    
-   if (theNumUserVariable == 0)
-      numUserVar = 1;
-    
-   theUserParamComboBox =
-      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
-                     numUserVar, theUserVariableList, wxCB_READONLY);
-   
-   // show first spacecraft
-   theUserParamComboBox->SetSelection(0);
-   
-   return theUserParamComboBox;
 }
 
 //------------------------------------------------------------------------------
@@ -864,15 +1077,15 @@ wxListBox* GuiItemManager::GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
    if (bodiesToExclude.IsEmpty())
    {
       //MessageInterface::ShowMessage("GuiItemManager::GetConfigBodyListBox() bodiesToExclude=0\n");
-      if (theNumConfigBody > 0)
+      if (theNumCelesBody > 0)
       {       
-         theConfigBodyListBox =
-            new wxListBox(parent, id, wxDefaultPosition, size, theNumConfigBody,
-                          theConfigBodyList, wxLB_SINGLE);
+         theCelesBodyListBox =
+            new wxListBox(parent, id, wxDefaultPosition, size, theNumCelesBody,
+                          theCelesBodyList, wxLB_SINGLE);
       }
       else
       {       
-         theConfigBodyListBox =
+         theCelesBodyListBox =
             new wxListBox(parent, id, wxDefaultPosition, size, 0,
                           emptyList, wxLB_SINGLE);
       }
@@ -880,7 +1093,7 @@ wxListBox* GuiItemManager::GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
    else
    {
       int exclCount = bodiesToExclude.GetCount();
-      int newBodyCount = theNumConfigBody - exclCount;
+      int newBodyCount = theNumCelesBody - exclCount;
       //MessageInterface::ShowMessage("GuiItemManager::GetConfigBodyListBox() newBodyCount = %d\n",
       //                              newBodyCount);
 
@@ -890,12 +1103,12 @@ wxListBox* GuiItemManager::GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
          bool excludeBody;
          int numBodies = 0;
         
-         for (int i=0; i<theNumConfigBody; i++)
+         for (int i=0; i<theNumCelesBody; i++)
          {
             excludeBody = false;
             for (int j=0; j<exclCount; j++)
             {
-               if (theConfigBodyList[i] == bodiesToExclude[j])
+               if (theCelesBodyList[i] == bodiesToExclude[j])
                {
                   excludeBody = true;
                   break;
@@ -903,10 +1116,10 @@ wxListBox* GuiItemManager::GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
             }
             
             if (!excludeBody)
-               newBodyList[numBodies++] = theConfigBodyList[i];
+               newBodyList[numBodies++] = theCelesBodyList[i];
          }
 
-         theConfigBodyListBox =
+         theCelesBodyListBox =
             new wxListBox(parent, id, wxDefaultPosition, size, newBodyCount,
                           newBodyList, wxLB_SINGLE);
          delete newBodyList;
@@ -914,13 +1127,13 @@ wxListBox* GuiItemManager::GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
       else
       {
          //MessageInterface::ShowMessage("GuiItemManager::GetConfigBodyListBox() emptyList\n");
-         theConfigBodyListBox =
+         theCelesBodyListBox =
             new wxListBox(parent, id, wxDefaultPosition, size, 0,
                           emptyList, wxLB_SINGLE);
       }
    }
 
-   return theConfigBodyListBox;
+   return theCelesBodyListBox;
 }
 
 
@@ -1105,217 +1318,6 @@ CreateUserVarSizer(wxWindow *parent,
 //-------------------------------
 
 //------------------------------------------------------------------------------
-//  void UpdateSpaceObjectList()
-//------------------------------------------------------------------------------
-/**
- * updates spacecraft list
- */
-//------------------------------------------------------------------------------
-void GuiItemManager::UpdateSpaceObjectList()
-{
-   StringArray scList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
-   StringArray fmList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::FORMATION);
-
-   int numSc = scList.size();
-   int numFm = fmList.size();
-   int numObj = 0;
-   int soCount = 0;
-   
-   #if DEBUG_GUI_ITEM
-   MessageInterface::ShowMessage
-      ("GuiItemManager::UpdateSpaceObjectList() entered==========>\n");
-   MessageInterface::ShowMessage("numSc=%d, scList=", numSc);
-   for (int i=0; i<numSc; i++)
-      MessageInterface::ShowMessage("%s ", scList[i].c_str());
-   MessageInterface::ShowMessage("\nnumFm=%d, fmList=", numFm);
-   for (int i=0; i<numFm; i++)
-      MessageInterface::ShowMessage("%s ", fmList[i].c_str());
-   MessageInterface::ShowMessage("\n");   
-   #endif
-
-   //--------------------------------------
-   // if any space objects are configured
-   //--------------------------------------
-   if ((numSc + numFm) > 0)
-   {
-      // if formation exists
-      if (numFm > 0)
-      {
-         StringArray fmscListAll;
-         
-         //------------------------------------------
-         // Merge spacecrafts in Formation
-         //------------------------------------------
-         for (int i=0; i<numFm; i++)
-         {
-            Formation *fm = (Formation*)(theGuiInterpreter->GetSpacecraft(fmList[i]));
-            StringArray fmscList = fm->GetStringArrayParameter(fm->GetParameterID("Add"));
-            fmscListAll.insert(fmscListAll.begin(), fmscList.begin(), fmscList.end());
-         }
-         
-         sort(scList.begin(), scList.end());
-         sort(fmscListAll.begin(), fmscListAll.end());
-         
-         //------------------------------------------
-         // Make list of spacecrafts not in Formation
-         //------------------------------------------
-         StringArray result;
-         set_difference(scList.begin(), scList.end(), fmscListAll.begin(),
-                        fmscListAll.end(), back_inserter(result));
-         
-         numObj = result.size();
-         
-         //------------------------------------------
-         // Add new list to theSpaceObjectList
-         //------------------------------------------
-         if (numObj > 0)  // check to see if any objects exist
-         {
-            for (int i=0; i<numObj; i++)
-            {
-               if (soCount < MAX_SPACECRAFT_SIZE)
-               {
-                  theSpaceObjectList[soCount] = wxString(result[i].c_str());
-                  soCount++;
-                  
-                  #if DEBUG_GUI_ITEM
-                  MessageInterface::ShowMessage
-                     ("theSpaceObjectList[%d]=%s\n", soCount-1,
-                      theSpaceObjectList[soCount-1].c_str());
-                  #endif
-               }
-            }
-         }
-         
-         //------------------------------------------
-         // Add formation to theSpaceObjectList
-         //------------------------------------------
-         for (int i=0; i<numFm; i++)
-         {
-            if (soCount < MAX_SPACECRAFT_SIZE)
-            {
-               theSpaceObjectList[soCount] = wxString(fmList[i].c_str());
-               soCount++;
-#if DEBUG_GUI_ITEM
-               MessageInterface::ShowMessage
-                  ("theSpaceObjectList[%d]=%s\n", soCount-1,
-                   theSpaceObjectList[soCount-1].c_str());
-#endif
-            }
-         }
-      }
-      // no formation, Save scList to theSpaceObjectList
-      else
-      {
-         soCount = numSc;
-         for (int i=0; i<soCount; i++)
-         {
-            theSpaceObjectList[i] = wxString(scList[i].c_str());
-#if DEBUG_GUI_ITEM
-            MessageInterface::ShowMessage
-               ("theSpaceObjectList[%d]=%s\n", i, theSpaceObjectList[i].c_str());
-#endif
-         }
-      }
-   }
-   //--------------------------------------
-   // else no space objects are configured
-   //--------------------------------------
-   else
-   {
-      theSpaceObjectList[0] = wxString("-- None --");
-   }
-   
-   theNumSpaceObject = soCount;
-   
-#if DEBUG_GUI_ITEM
-   MessageInterface::ShowMessage
-      ("theNumSpaceObject=%d\n"
-       "<==========GuiItemManager::UpdateSpaceObjectList() exiting\n",
-       theNumSpaceObject);
-#endif
-}
-
-//------------------------------------------------------------------------------
-//  void UpdateFormationList()
-//------------------------------------------------------------------------------
-/**
- * updates spacecraft list
- */
-//------------------------------------------------------------------------------
-void GuiItemManager::UpdateFormationList()
-{
-   StringArray listForm = theGuiInterpreter->GetListOfConfiguredItems(Gmat::FORMATION);
-   int numForm = listForm.size();
-
-   if (numForm > MAX_FORMATION_SIZE)
-   {
-      MessageInterface::ShowMessage
-         ("GuiItemManager::UpdateFormationList() GUI can handle up to %d formations."
-          "The number of formation configured: %d\n", MAX_FORMATION_SIZE, numForm);
-      numForm = MAX_FORMATION_SIZE;
-   }
-   
-   if (numForm > 0)  // check to see if any spacecrafts exist
-   {
-      for (int i=0; i<numForm; i++)
-      {
-         theFormationList[i] = wxString(listForm[i].c_str());
-#if DEBUG_GUI_ITEM
-         MessageInterface::ShowMessage
-            ("GuiItemManager::UpdateFormationList() theFormationtList[%d]=%s\n",
-             i, theFormationList[i].c_str());
-#endif
-      }
-   }
-   else
-   {
-      theFormationList[0] = wxString("-- None --");
-   }
-   
-   theNumFormation = numForm;
-}
-
-//------------------------------------------------------------------------------
-//  void UpdateSpacecraftList()
-//------------------------------------------------------------------------------
-/**
- * updates spacecraft list
- */
-//------------------------------------------------------------------------------
-void GuiItemManager::UpdateSpacecraftList()
-{
-   StringArray scList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
-   int numSc = scList.size();
-
-   if (numSc > MAX_SPACECRAFT_SIZE)
-   {
-      MessageInterface::ShowMessage
-         ("GuiItemManager::UpdateSpacecraftList() GUI can handle up to %d spacecraft."
-          "The number of spacecraft configured: %d\n", MAX_SPACECRAFT_SIZE, numSc);
-      numSc = MAX_SPACECRAFT_SIZE;
-   }
-   
-   if (numSc > 0)  // check to see if any spacecrafts exist
-   {
-      for (int i=0; i<numSc; i++)
-      {
-         theSpacecraftList[i] = wxString(scList[i].c_str());
-#if DEBUG_GUI_ITEM
-         MessageInterface::ShowMessage
-            ("GuiItemManager::UpdateSpacecraftList() theSpacecraftList[%d]=%s\n",
-             i, theSpacecraftList[i].c_str());
-#endif
-      }
-   }
-   else
-   {
-      theSpacecraftList[0] = wxString("-- None --");
-   }
-   
-   theNumSpacecraft = numSc;
-}
-
-//------------------------------------------------------------------------------
 //  void UpdatePropertyList(const wxString &objName)
 //------------------------------------------------------------------------------
 /**
@@ -1332,10 +1334,10 @@ void GuiItemManager::UpdatePropertyList(const wxString &objName)
    //      Currently all paramters are associated with spacecraft.
    //-----------------------------------------------------------------
    
-#if DEBUG_GUI_ITEM_PROPERTY
+   #if DEBUG_GUI_ITEM_PROPERTY
    MessageInterface::ShowMessage("GuiItemManager::UpdatePropertyList() " +
                                  std::string(objName.c_str()) + "\n");
-#endif
+   #endif
    
    if (objName != "Spacecraft")
       throw GmatBaseException("There are no properties associated with " +
@@ -1345,10 +1347,10 @@ void GuiItemManager::UpdatePropertyList(const wxString &objName)
       theGuiInterpreter->GetListOfFactoryItems(Gmat::PARAMETER);
    int numParams = items.size();
    
-#if DEBUG_GUI_ITEM_PROPERTY
+   #if DEBUG_GUI_ITEM_PROPERTY
    MessageInterface::ShowMessage
       ("GuiItemManager::UpdatePropertyList() numParams=%d\n", numParams);
-#endif
+   #endif
 
    theNumScProperty = 0;
    
@@ -1376,10 +1378,10 @@ void GuiItemManager::UpdatePropertyList(const wxString &objName)
       }
    }
    
-#if DEBUG_GUI_ITEM_PROPERTY
+   #if DEBUG_GUI_ITEM_PROPERTY
    MessageInterface::ShowMessage
       ("GuiItemManager::UpdatePropertyList() theNumScProperty=%d\n", theNumScProperty);
-#endif
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -1392,10 +1394,10 @@ void GuiItemManager::UpdatePropertyList(const wxString &objName)
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateParameterList()
 {    
-#if DEBUG_GUI_ITEM
+   #if DEBUG_GUI_ITEM
    MessageInterface::ShowMessage
       ("GuiItemManager::UpdateParameterList() entered.\n");
-#endif
+   #endif
       
    StringArray items =
       theGuiInterpreter->GetListOfConfiguredItems(Gmat::PARAMETER);
@@ -1412,11 +1414,10 @@ void GuiItemManager::UpdateParameterList()
    
    for (int i=0; i<numParamCount; i++)
    {
-#if DEBUG_GUI_ITEM
-      //11/16/04 loj: added
+      #if DEBUG_GUI_ITEM
       MessageInterface::ShowMessage
          ("GuiItemManager::UpdateParameterList() name=%s\n", items[i].c_str());
-#endif
+      #endif
       
       param = theGuiInterpreter->GetParameter(items[i]);
 
@@ -1516,34 +1517,322 @@ void GuiItemManager::UpdateParameterList()
 
 
 //------------------------------------------------------------------------------
-// void UpdateConfigBodyList()
+//  void UpdateSpacecraftList()
 //------------------------------------------------------------------------------
 /**
- * Updates confugured celestial body list
+ * updates Spacecraft list
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateConfigBodyList()
+void GuiItemManager::UpdateSpacecraftList()
 {
-   //MessageInterface::ShowMessage("GuiItemManager::UpdateConfigBodyList() entered\n");
-        
-   StringArray items = theSolarSystem->GetBodiesInUse();
-   theNumConfigBody = items.size();
+   #if DEBUG_GUI_ITEM_SP
+   MessageInterface::ShowMessage("GuiItemManager::UpdateSpacecraftList() entered\n");
+   #endif
    
-   if (theNumConfigBody > MAX_OBJECT_SIZE)
+   StringArray scList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+   int numSc = scList.size();
+
+   if (numSc > MAX_SPACECRAFT_SIZE)
    {
       MessageInterface::ShowMessage
-         ("GuiItemManager::UpdateConfigBodyList() GUI will handle up to %d bodies."
-          "The number of bodies configured: %d\n", MAX_OBJECT_SIZE, theNumConfigBody);
-      theNumConfigBody = MAX_OBJECT_SIZE;
+         ("GuiItemManager::UpdateSpacecraftList() GUI can handle up to %d spacecraft."
+          "The number of spacecraft configured: %d\n", MAX_SPACECRAFT_SIZE, numSc);
+      numSc = MAX_SPACECRAFT_SIZE;
    }
    
-   for (int i=0; i<theNumConfigBody; i++)
+   if (numSc > 0)  // check to see if any spacecrafts exist
    {
-      theConfigBodyList[i] = items[i].c_str();
-        
-      //MessageInterface::ShowMessage("GuiItemManager::UpdateConfigBodyList() " +
-      //                              std::string(theConfigBodyList[i].c_str()) + "\n");
+      for (int i=0; i<numSc; i++)
+      {
+         theSpacecraftList[i] = wxString(scList[i].c_str());
+         
+         #if DEBUG_GUI_ITEM_SP
+         MessageInterface::ShowMessage
+            ("GuiItemManager::UpdateSpacecraftList() theSpacecraftList[%d]=%s\n",
+             i, theSpacecraftList[i].c_str());
+         #endif
+      }
    }
+   else
+   {
+      theSpacecraftList[0] = wxString("-- None --");
+   }
+   
+   theNumSpacecraft = numSc;
+}
+
+
+//------------------------------------------------------------------------------
+//  void UpdateFormationList()
+//------------------------------------------------------------------------------
+/**
+ * updates Formation list
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateFormationList()
+{
+   #if DEBUG_GUI_ITEM_SP
+   MessageInterface::ShowMessage("GuiItemManager::UpdateFormationList() entered\n");
+   #endif
+   
+   StringArray listForm = theGuiInterpreter->GetListOfConfiguredItems(Gmat::FORMATION);
+   int numForm = listForm.size();
+
+   if (numForm > MAX_FORMATION_SIZE)
+   {
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdateFormationList() GUI can handle up to %d formations."
+          "The number of formation configured: %d\n", MAX_FORMATION_SIZE, numForm);
+      numForm = MAX_FORMATION_SIZE;
+   }
+   
+   if (numForm > 0)  // check to see if any spacecrafts exist
+   {
+      for (int i=0; i<numForm; i++)
+      {
+         theFormationList[i] = wxString(listForm[i].c_str());
+         #if DEBUG_GUI_ITEM
+         MessageInterface::ShowMessage
+            ("GuiItemManager::UpdateFormationList() theFormationtList[%d]=%s\n",
+             i, theFormationList[i].c_str());
+         #endif
+      }
+   }
+   else
+   {
+      theFormationList[0] = wxString("-- None --");
+   }
+   
+   theNumFormation = numForm;
+}
+
+
+//------------------------------------------------------------------------------
+//  void UpdateSpaceObjectList()
+//------------------------------------------------------------------------------
+/**
+ * updates Spacecraft and Formation list
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateSpaceObjectList()
+{
+   #if DEBUG_GUI_ITEM_SP
+   MessageInterface::ShowMessage("GuiItemManager::UpdateSpaceObjectList() entered\n");
+   #endif
+   
+   StringArray scList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+   StringArray fmList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::FORMATION);
+
+   int numSc = scList.size();
+   int numFm = fmList.size();
+   int numObj = 0;
+   int soCount = 0;
+   
+   #if DEBUG_GUI_ITEM_SP > 1
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdateSpaceObjectList() ==========>\n");
+   MessageInterface::ShowMessage("numSc=%d, scList=", numSc);
+   for (int i=0; i<numSc; i++)
+      MessageInterface::ShowMessage("%s ", scList[i].c_str());
+   MessageInterface::ShowMessage("\nnumFm=%d, fmList=", numFm);
+   for (int i=0; i<numFm; i++)
+      MessageInterface::ShowMessage("%s ", fmList[i].c_str());
+   MessageInterface::ShowMessage("\n");   
+   #endif
+
+   //--------------------------------------
+   // if any space objects are configured
+   //--------------------------------------
+   if ((numSc + numFm) > 0)
+   {
+      // if formation exists
+      if (numFm > 0)
+      {
+         StringArray fmscListAll;
+         
+         //------------------------------------------
+         // Merge spacecrafts in Formation
+         //------------------------------------------
+         for (int i=0; i<numFm; i++)
+         {
+            Formation *fm = (Formation*)(theGuiInterpreter->GetSpacecraft(fmList[i]));
+            StringArray fmscList = fm->GetStringArrayParameter(fm->GetParameterID("Add"));
+            fmscListAll.insert(fmscListAll.begin(), fmscList.begin(), fmscList.end());
+         }
+         
+         sort(scList.begin(), scList.end());
+         sort(fmscListAll.begin(), fmscListAll.end());
+         
+         //------------------------------------------
+         // Make list of spacecrafts not in Formation
+         //------------------------------------------
+         StringArray result;
+         set_difference(scList.begin(), scList.end(), fmscListAll.begin(),
+                        fmscListAll.end(), back_inserter(result));
+         
+         numObj = result.size();
+         
+         //------------------------------------------
+         // Add new list to theSpaceObjectList
+         //------------------------------------------
+         if (numObj > 0)  // check to see if any objects exist
+         {
+            for (int i=0; i<numObj; i++)
+            {
+               if (soCount < MAX_SPACECRAFT_SIZE)
+               {
+                  theSpaceObjectList[soCount] = wxString(result[i].c_str());
+                  soCount++;
+                  
+                  #if DEBUG_GUI_ITEM_SP > 1
+                  MessageInterface::ShowMessage
+                     ("theSpaceObjectList[%d]=%s\n", soCount-1,
+                      theSpaceObjectList[soCount-1].c_str());
+                  #endif
+               }
+            }
+         }
+         
+         //------------------------------------------
+         // Add formation to theSpaceObjectList
+         //------------------------------------------
+         for (int i=0; i<numFm; i++)
+         {
+            if (soCount < MAX_SPACECRAFT_SIZE)
+            {
+               theSpaceObjectList[soCount] = wxString(fmList[i].c_str());
+               soCount++;
+               
+               #if DEBUG_GUI_ITEM_SP > 1
+               MessageInterface::ShowMessage
+                  ("theSpaceObjectList[%d]=%s\n", soCount-1,
+                   theSpaceObjectList[soCount-1].c_str());
+               #endif
+            }
+         }
+      }
+      // no formation, Save scList to theSpaceObjectList
+      else
+      {
+         soCount = numSc;
+         for (int i=0; i<soCount; i++)
+         {
+            theSpaceObjectList[i] = wxString(scList[i].c_str());
+            
+            #if DEBUG_GUI_ITEM_SP > 1
+            MessageInterface::ShowMessage
+               ("theSpaceObjectList[%d]=%s\n", i, theSpaceObjectList[i].c_str());
+            #endif
+         }
+      }
+   }
+   //--------------------------------------
+   // else no space objects are configured
+   //--------------------------------------
+   else
+   {
+      theSpaceObjectList[0] = wxString("-- None --");
+   }
+   
+   theNumSpaceObject = soCount;
+   
+   #if DEBUG_GUI_ITEM_SP > 1
+   MessageInterface::ShowMessage
+      ("theNumSpaceObject=%d\n"
+       "<==========GuiItemManager::UpdateSpaceObjectList() exiting\n",
+       theNumSpaceObject);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateCelestialBodyList()
+//------------------------------------------------------------------------------
+/**
+ * Updates confugured CelestialBody list
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateCelestialBodyList()
+{
+   #if DEBUG_GUI_ITEM_SP
+   MessageInterface::ShowMessage("GuiItemManager::UpdateCelestialBodyList() entered\n");
+   #endif
+   
+   //StringArray items = theSolarSystem->GetBodiesInUse();
+   StringArray items = theGuiInterpreter->GetListOfConfiguredItems(Gmat::CELESTIAL_BODY);
+   theNumCelesBody = items.size();
+   
+   if (theNumCelesBody > MAX_CELES_BODY_SIZE)
+   {
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdateCelestialBodyList() GUI will handle up to %d bodies."
+          "The number of bodies configured: %d\n", MAX_CELES_BODY_SIZE, theNumCelesBody);
+      theNumCelesBody = MAX_CELES_BODY_SIZE;
+   }
+   
+   for (int i=0; i<theNumCelesBody; i++)
+   {
+      theCelesBodyList[i] = items[i].c_str();
+        
+      #if DEBUG_GUI_ITEM > 1
+      MessageInterface::ShowMessage("GuiItemManager::UpdateCelestialBodyList() " +
+                                    std::string(theCelesBodyList[i].c_str()) + "\n");
+      #endif
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateCelestialPointList()
+//------------------------------------------------------------------------------
+/**
+ * Updates confugured CelestialBody and CalculatedPoint list
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateCelestialPointList()
+{
+   StringArray celesBodyList =
+      theGuiInterpreter->GetListOfConfiguredItems(Gmat::CELESTIAL_BODY);
+   //StringArray celesBodyList = theSolarSystem->GetBodiesInUse();
+   StringArray calPointList =
+      theGuiInterpreter->GetListOfConfiguredItems(Gmat::CALCULATED_POINT);
+   
+   theNumCelesBody = celesBodyList.size();
+   theNumCalPoint = calPointList.size();
+   theNumCelesPoint = theNumCelesBody + theNumCalPoint;
+   
+   #if DEBUG_GUI_ITEM_SP
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdateCelestialPointList() theNumCelesBody=%d, "
+       "theNumCalPoint=%d, theNumCelesPoint=%d\n", theNumCelesBody, theNumCalPoint,
+       theNumCelesPoint);
+   #endif
+   
+   if (theNumCelesPoint > MAX_CELES_POINT_SIZE)
+   {
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdateCelestialPointList() GUI will handle up to %d bodies."
+          "The number of bodies configured: %d\n", MAX_CELES_POINT_SIZE,
+          theNumCelesPoint);
+      theNumCelesPoint = MAX_CELES_POINT_SIZE;
+   }
+
+   // update CelestialBody list
+   for (int i=0; i<theNumCelesBody; i++)
+      theCelesBodyList[i] = celesBodyList[i].c_str();
+   
+   // update CalculatedPoint list
+   for (int i=0; i<theNumCalPoint; i++)
+      theCalPointList[i] = calPointList[i].c_str();
+   
+   // add CelestialBody to list
+   for (int i=0; i<theNumCelesBody; i++)
+      theCelesPointList[i] = theCelesBodyList[i];
+   
+   // add CalculatedPoint to list
+   for (int i=0; i<theNumCalPoint; i++)
+      theCelesPointList[theNumCelesBody+i] = theCalPointList[i];
+   
 }
 
 
@@ -1551,35 +1840,37 @@ void GuiItemManager::UpdateConfigBodyList()
 // void UpdateSpacePointList()
 //------------------------------------------------------------------------------
 /**
- * Updates confugured celestial body list
+ * Updates configured SpacePoint list (Spacecraft, CelestialBody, CalculatedPoint)
  */
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateSpacePointList()
 {
-   //MessageInterface::ShowMessage("GuiItemManager::UpdateSpacePointList() entered\n");
+   #if DEBUG_GUI_ITEM_SP
+   MessageInterface::ShowMessage("GuiItemManager::UpdateSpacePointList() entered\n");
+   #endif
    
-   StringArray scList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
-   StringArray bodyList = theSolarSystem->GetBodiesInUse();
-   int numScs = scList.size();
-   int numBodies = bodyList.size();
-   theNumSpacePoint = numBodies + numScs; // 1 for Vector
+   StringArray spList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACE_POINT);
+   theNumSpacePoint = spList.size();
 
-   //loj: 3/2/05 Changed MAX_OBJECT_SIZE to MAX_OBJECT_SIZE + MAX_SPACECRAFT_SIZE
-   if (theNumSpacePoint > MAX_OBJECT_SIZE + MAX_SPACECRAFT_SIZE)
+   if (theNumSpacePoint > MAX_SPACE_POINT_SIZE)
    {
       MessageInterface::ShowMessage
-         ("GuiItemManager::UpdateSpacePointList() GUI will handle up to %d bodies."
-          "The number of bodies configured: %d\n", MAX_OBJECT_SIZE + MAX_SPACECRAFT_SIZE,
+         ("GuiItemManager::UpdateSpacePointList() GUI will handle up to %d SpacePoints."
+          "The number of SpacePoints configured: %d\n", MAX_SPACE_POINT_SIZE,
           theNumSpacePoint);
-      theNumSpacePoint = MAX_OBJECT_SIZE;
+      theNumSpacePoint = MAX_SPACE_POINT_SIZE;
    }
-
-   for (int i=0; i<numScs; i++)
-      theSpacePointList[i] = scList[i].c_str();
    
-   for (int i=0; i<numBodies; i++)
-      theSpacePointList[i+numScs] = bodyList[i].c_str();
-   
+   for (int i=0; i<theNumSpacePoint; i++)
+   {
+      theSpacePointList[i] = spList[i].c_str();
+      
+      #if DEBUG_GUI_ITEM_SP > 1
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdateSpacePointList() theSpacePointList[%d]=%s\n",
+          i, theSpacePointList[i].c_str());
+      #endif
+   }
 }
 
 
@@ -1592,26 +1883,30 @@ void GuiItemManager::UpdateSpacePointList()
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateCoordSystemList()
 {
-   //MessageInterface::ShowMessage("GuiItemManager::UpdateCoordSystemList() entered\n");
-        
+   #if DEBUG_GUI_ITEM_CS
+   MessageInterface::ShowMessage("GuiItemManager::UpdateCoordSystemList() entered\n");
+   #endif
+   
    StringArray items =
       theGuiInterpreter->GetListOfConfiguredItems(Gmat::COORDINATE_SYSTEM);
    theNumCoordSys = items.size();
    
-   if (theNumCoordSys > MAX_OBJECT_SIZE)
+   if (theNumCoordSys > MAX_COORD_SYS_SIZE)
    {
       MessageInterface::ShowMessage
          ("GuiItemManager::UpdateCoordSystemList() GUI will handle up to %d coord. sys."
-          "The number of coord. sys. configured: %d\n", MAX_OBJECT_SIZE, theNumCoordSys);
-      theNumCoordSys = MAX_OBJECT_SIZE;
+          "The number of coord. sys. configured: %d\n", MAX_COORD_SYS_SIZE, theNumCoordSys);
+      theNumCoordSys = MAX_COORD_SYS_SIZE;
    }
 
    for (int i=0; i<theNumCoordSys; i++)
    {
       theCoordSysList[i] = items[i].c_str();
-        
-      //MessageInterface::ShowMessage("GuiItemManager::UpdateCoordSystemList() " +
-      //                              std::string(theCoordSysList[i].c_str()) + "\n");
+
+      #if DEBUG_GUI_ITEM_CS > 1
+      MessageInterface::ShowMessage("GuiItemManager::UpdateCoordSystemList() " +
+                                    std::string(theCoordSysList[i].c_str()) + "\n");
+      #endif
    }
 }
 
@@ -1620,6 +1915,10 @@ void GuiItemManager::UpdateCoordSystemList()
 //------------------------------------------------------------------------------
 GuiItemManager::GuiItemManager()
 {
+   #if DEBUG_GUI_ITEM
+   MessageInterface::ShowMessage("GuiItemManager::GuiItemManager() entered\n");
+   #endif
+   
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
    UpdatePropertyList("Spacecraft");
@@ -1635,7 +1934,9 @@ GuiItemManager::GuiItemManager()
    theNumUserString = 0;
    theNumUserArray = 0;
    theNumUserParam = 0;
-   theNumConfigBody = 0;
+   theNumCelesBody = 0;
+   theNumCelesPoint = 0;
+   theNumCalPoint = 0;
    theNumSpacePoint = 0;
    
    theSpacecraftComboBox = NULL;
@@ -1653,7 +1954,7 @@ GuiItemManager::GuiItemManager()
    theUserStringListBox = NULL;
    theUserArrayListBox = NULL;
    theUserParamListBox = NULL;
-   theConfigBodyListBox = NULL;
+   theCelesBodyListBox = NULL;
    theSpacePointComboBox = NULL;
 }
 

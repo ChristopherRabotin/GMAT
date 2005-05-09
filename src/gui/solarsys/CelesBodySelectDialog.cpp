@@ -35,11 +35,12 @@ BEGIN_EVENT_TABLE(CelesBodySelectDialog, GmatDialog)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
-// CelesBodySelectDialog(wxWindow *parent, wxArrayString &bodiesToExclude)
+// CelesBodySelectDialog(wxWindow *parent, wxArrayString &bodiesToExclude, ...
 //------------------------------------------------------------------------------
 CelesBodySelectDialog::CelesBodySelectDialog(wxWindow *parent,
                                              wxArrayString &bodiesToExclude,
-                                             wxArrayString &bodiesToHide)
+                                             wxArrayString &bodiesToHide,
+                                             bool showCalPoints)
    : GmatDialog(parent, -1, wxString(_T("CelesBodySelectDialog")))
 {
    mBodyNames.Clear();
@@ -49,6 +50,7 @@ CelesBodySelectDialog::CelesBodySelectDialog(wxWindow *parent,
    mBodiesToHide = bodiesToHide;
    
    mIsBodySelected = false;
+   mShowCalPoints = showCalPoints;
    
    Create();
    ShowData();
@@ -110,9 +112,19 @@ void CelesBodySelectDialog::Create()
                                    wxDefaultPosition, wxSize(20,20), 0 );
    
    // wxListBox
-   bodyListBox =
-      theGuiManager->GetConfigBodyListBox(this, -1, wxSize(150, 200), mBodiesToExclude);
-
+   if (mShowCalPoints)
+   {
+      bodyListBox =
+         theGuiManager->GetCelestialPointListBox(this, -1, wxSize(150, 200),
+                                                 mBodiesToExclude);
+   }
+   else
+   {
+      bodyListBox =
+         theGuiManager->GetConfigBodyListBox(this, -1, wxSize(150, 200),
+                                             mBodiesToExclude);
+   }
+   
    if (! mBodiesToExclude.IsEmpty())
    {
       Integer count = mBodiesToExclude.GetCount();

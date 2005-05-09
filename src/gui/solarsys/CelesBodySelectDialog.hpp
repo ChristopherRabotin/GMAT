@@ -27,7 +27,7 @@ class CelesBodySelectDialog : public GmatDialog
 public:
     
    CelesBodySelectDialog(wxWindow *parent, wxArrayString &bodiesToExclude,
-                         wxArrayString &bodiesToHide);
+                         wxArrayString &bodiesToHide, bool showCalPoints = false);
 
    wxArrayString& GetBodyNames()
       { return mBodyNames; }
@@ -48,6 +48,7 @@ private:
    UnsignedIntArray mBodyColors; //loj: 12/15/04 Added
    
    bool mIsBodySelected;
+   bool mShowCalPoints;
    
    wxString mSelBodyName;
    std::map<wxString, RgbColor> mBodyColorMap;
