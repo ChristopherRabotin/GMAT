@@ -60,6 +60,7 @@ private:
    wxTreeItemId mPredefinedFunctItem;
    wxTreeItemId mSpecialPointsItem;
    wxTreeItemId mScriptItem;
+   wxTreeItemId mUniverseItem;
 
    int mNumSpacecraft;
    int mNumFuelTank;

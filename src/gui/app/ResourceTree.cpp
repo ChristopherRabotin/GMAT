@@ -198,6 +198,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
    Collapse(mSpecialPointsItem);
 
    DeleteChildren(mSpacecraftItem);
+   DeleteChildren(mUniverseItem);
 
    //----- Hardware is child of spacecraft
    mHardwareItem =
@@ -208,6 +209,15 @@ void ResourceTree::UpdateResource(bool resetCounter)
    SetItemImage(mHardwareItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
 
+   //----- SpecialPoint is child of Universe (loj: 5/6/05 Added)
+   mSpecialPointsItem =
+      AppendItem(mUniverseItem, wxT("Special Points"), GmatTree::ICON_FOLDER, -1,
+                 new GmatTreeItemData(wxT("Special Points"),
+                                      GmatTree::SPECIAL_POINTS_FOLDER));
+
+   SetItemImage(mSpecialPointsItem, GmatTree::ICON_OPENFOLDER,
+                wxTreeItemIcon_Expanded);
+
    DeleteChildren(mFormationItem);
    DeleteChildren(mPropagatorItem);
    DeleteChildren(mBurnItem);
@@ -216,8 +226,9 @@ void ResourceTree::UpdateResource(bool resetCounter)
    DeleteChildren(mVariableItem);
    DeleteChildren(mFunctItem);
    DeleteChildren(mCoordSysItem);
-   DeleteChildren(mSpecialPointsItem);
 
+   AddDefaultBodies(mUniverseItem);
+   AddDefaultSpecialPoints(mSpecialPointsItem);
    AddDefaultSpacecraft(mSpacecraftItem);
    AddDefaultHardware(mHardwareItem);
    AddDefaultFormations(mFormationItem);
@@ -228,7 +239,6 @@ void ResourceTree::UpdateResource(bool resetCounter)
    AddDefaultVariables(mVariableItem);
    AddDefaultFunctions(mFunctItem);
    AddDefaultCoordSys(mCoordSysItem);
-   AddDefaultSpecialPoints(mSpecialPointsItem);
 
    theGuiManager->UpdateAll();
    ScrollTo(mSpacecraftItem);
@@ -294,13 +304,13 @@ void ResourceTree::AddDefaultResources()
    SetItemImage(mPropagatorItem, GmatTree::ICON_OPENFOLDER, 
                 wxTreeItemIcon_Expanded);
     
-   //----- Universe
-   wxTreeItemId universeItem =
+   //----- Universe (loj: 5/6/05 made mUniverseItem member data)
+   mUniverseItem =
       AppendItem(resource, wxT("Universe"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Universe"),
                                       GmatTree::UNIVERSE_FOLDER));
     
-   SetItemImage(universeItem, GmatTree::ICON_OPENFOLDER, 
+   SetItemImage(mUniverseItem, GmatTree::ICON_OPENFOLDER, 
                 wxTreeItemIcon_Expanded);
                 
    //----- Solver
@@ -361,7 +371,8 @@ void ResourceTree::AddDefaultResources()
    //----- Coordinate System
    mCoordSysItem =
    AppendItem(resource, wxT("Coordinate Systems"), GmatTree::ICON_FOLDER,
-              -1, new GmatTreeItemData(wxT("Coordinate Systems"), GmatTree::COORD_SYS_FOLDER));
+              -1, new GmatTreeItemData(wxT("Coordinate Systems"),
+                                       GmatTree::COORD_SYS_FOLDER));
    SetItemImage(mCoordSysItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
 
@@ -377,7 +388,8 @@ void ResourceTree::AddDefaultResources()
               -1, new GmatTreeItemData(wxT("Ground Stations"),
                                        GmatTree::GROUNDSTATIONS_FOLDER));
 
-   AddDefaultBodies(universeItem);
+   AddDefaultBodies(mUniverseItem);
+   AddDefaultSpecialPoints(mSpecialPointsItem);
    AddDefaultSpacecraft(mSpacecraftItem);
    AddDefaultHardware(mHardwareItem);
    AddDefaultFormations(mFormationItem);
@@ -389,7 +401,6 @@ void ResourceTree::AddDefaultResources()
    AddDefaultVariables(mVariableItem);
    AddDefaultFunctions(mFunctItem);
    AddDefaultCoordSys(mCoordSysItem);
-   AddDefaultSpecialPoints(mSpecialPointsItem);
 }
 
 //------------------------------------------------------------------------------
@@ -428,14 +439,15 @@ void ResourceTree::AddDefaultBodies(wxTreeItemId itemId)
    AppendItem(itemId, wxT("Pluto"), GmatTree::ICON_PLUTO, -1,
               new GmatTreeItemData(wxT("Pluto"), GmatTree::CELESTIAL_BODY));
 
+   //loj: 5/6/05 Commented out
    //----- Space Points
-   mSpecialPointsItem =
-      AppendItem(itemId, wxT("Special Points"), GmatTree::ICON_FOLDER, -1,
-                 new GmatTreeItemData(wxT("Special Points"),
-                                      GmatTree::SPECIAL_POINTS_FOLDER));
+//    mSpecialPointsItem =
+//       AppendItem(itemId, wxT("Special Points"), GmatTree::ICON_FOLDER, -1,
+//                  new GmatTreeItemData(wxT("Special Points"),
+//                                       GmatTree::SPECIAL_POINTS_FOLDER));
     
-   SetItemImage(mSpecialPointsItem, GmatTree::ICON_OPENFOLDER,
-                wxTreeItemIcon_Expanded);
+//    SetItemImage(mSpecialPointsItem, GmatTree::ICON_OPENFOLDER,
+//                 wxTreeItemIcon_Expanded);
 
 
 
@@ -858,21 +870,31 @@ void ResourceTree::AddDefaultCoordSys(wxTreeItemId itemId)
 void ResourceTree::AddDefaultSpecialPoints(wxTreeItemId itemId)
 {
    /// @todo:  need to wait for method in gui interpreter
-//   StringArray itemNames = GmatAppData::GetGuiInterpreter()->
-//      GetListOfConfiguredItems(Gmat::COORDINATE_SYSTEM);
-//   int size = itemNames.size();
-//   wxString objName;
-//
-//   for (int i = 0; i<size; i++)
-//   {
-//      objName = wxString(itemNames[i].c_str());
-//      AppendItem(itemId, wxT(objName), GmatTree::ICON_COORDINATE_SYSTEM, -1,
-//                 new GmatTreeItemData(wxT(objName), GmatTree::COORD_SYSTEM));
-//   };
-//
-//   if (size > 0)
-//      Expand(itemId);
-//
+   //loj: 5/6/05 uncommented 
+   StringArray itemNames = GmatAppData::GetGuiInterpreter()->
+      GetListOfConfiguredItems(Gmat::CALCULATED_POINT);
+   int size = itemNames.size();
+   wxString objName;
+   wxString objTypeName;
+
+   for (int i = 0; i<size; i++)
+   {
+      CalculatedPoint *cp = theGuiInterpreter->GetCalculatedPoint(itemNames[i]);
+      objName = wxString(itemNames[i].c_str());
+      objTypeName = wxString(cp->GetTypeName().c_str());
+
+      if (objTypeName == "Barycenter")
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_DEFAULT, -1,
+                    new GmatTreeItemData(wxT(objName), GmatTree::BARYCENTER));
+      else if (objTypeName == "LibrationPoint")
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_DEFAULT, -1,
+                    new GmatTreeItemData(wxT(objName),
+                                         GmatTree::LIBRATION_POINT));
+   };
+   
+   if (size > 0)
+      Expand(itemId);
+
 }
 
 
@@ -1875,7 +1897,7 @@ void ResourceTree::OnAddCoordSys(wxCommandEvent &event)
 
       Expand(item);
 
-      theGuiManager->UpdateCoordSystem(); //loj: 4/8/05 Added
+      theGuiManager->UpdateCoordSystem();
    }
 }
 
@@ -1901,6 +1923,8 @@ void ResourceTree::OnAddBarycenter(wxCommandEvent &event)
                  new GmatTreeItemData(name, GmatTree::BARYCENTER));
 
       Expand(item);
+      
+      theGuiManager->UpdateCelestialPoint(); //loj: 5/6/05 Added
    }
 }
 
@@ -1926,6 +1950,8 @@ void ResourceTree::OnAddLibration(wxCommandEvent &event)
                  new GmatTreeItemData(name, GmatTree::LIBRATION_POINT));
 
       Expand(item);
+      
+      theGuiManager->UpdateCelestialPoint(); //loj: 5/6/05 Added
    }
 }
 
