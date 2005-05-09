@@ -106,7 +106,6 @@ private:
    //*********************  TEMPORARY  ******************************************************************
    void  InitializeCoordinateSystem(CoordinateSystem *cs);
    void  InitializeParameter(Parameter *param);
-   void  InitializeSubscriber(Subscriber *sub);
    //*********************  END OF TEMPORARY  ***********************************************************
 
    void                              BuildReferences(GmatBase *obj);

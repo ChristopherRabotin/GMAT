@@ -514,11 +514,8 @@ bool Sandbox::Initialize()
                "Sandbox::Initialize objTypeName = %s, objName = %s\n",
                obj->GetTypeName().c_str(), obj->GetName().c_str());
          #endif
-         //***************************************** TEMPORARY ******************************************
-         param->SetSolarSystem(solarSys);
-         InitializeParameter(param);
-         //************************************* END OF TEMPORARY ***************************************
-//         BuildReferences(obj);
+            
+         BuildReferences(obj);
          param->Initialize();
       }
    }
@@ -535,10 +532,8 @@ bool Sandbox::Initialize()
                "Sandbox::Initialize objTypeName = %s, objName = %s\n",
                obj->GetTypeName().c_str(), obj->GetName().c_str());
          #endif
-         //***************************************** TEMPORARY ******************************************
-         InitializeSubscriber((Subscriber *)obj);
-         //************************************* END OF TEMPORARY ***************************************
-//         BuildReferences(obj);
+            
+         BuildReferences(obj);
          obj->Initialize();
       }
    }
@@ -677,9 +672,6 @@ void Sandbox::BuildReferences(GmatBase *obj)
 
 //   if (obj->GetType() == Gmat::PARAMETER)
 //      InitializeParameter((Parameter *)obj);
-
-//   if (obj->GetType() == Gmat::SUBSCRIBER)
-//      InitializeSubscriber((Subscriber *)obj);
 
 //   // Not sure if needed...
 //   if (obj->GetType() == Gmat::SPACECRAFT)
@@ -843,61 +835,6 @@ void Sandbox::InitializeParameter(Parameter *param)
 }
 
 
-//*********************  TEMPORARY  ******************************************************************
-void Sandbox::InitializeSubscriber(Subscriber *sub)
-{
-   GmatBase *refParam;
-
-   #if DEBUG_SANDBOX_INIT > 1
-      MessageInterface::ShowMessage
-         ("Sandbox::Initialize() subType=%s, subName=%s\n",
-          sub->GetTypeName().c_str(), sub->GetName().c_str());
-   #endif
-
-   StringArray refParamNames = sub->GetRefObjectNameArray(Gmat::PARAMETER);
-   for (unsigned int i=0; i<refParamNames.size(); i++)
-   {
-      #if DEBUG_SANDBOX_INIT > 1
-      MessageInterface::ShowMessage
-         ("Sandbox::Initialize() refParamNames[%d]=%s\n", i,
-          refParamNames[i].c_str());
-      #endif
-      refParam = GetInternalObject(refParamNames[i], Gmat::PARAMETER);
-      sub->SetRefObject(refParam, Gmat::PARAMETER, refParamNames[i]);
-   }
-
-   //loj: 4/29/05 Added to set SpacePoint
-   StringArray refSpNames = sub->GetRefObjectNameArray(Gmat::SPACE_POINT);
-   GmatBase *refSp;
-   for (unsigned int i=0; i<refSpNames.size(); i++)
-   {
-      #if DEBUG_SANDBOX_INIT > 1
-         MessageInterface::ShowMessage
-            ("Sandbox::Initialize() refSpNames[%d]=%s\n", i,
-             refSpNames[i].c_str());
-      #endif
-      refSp = FindSpacePoint(refSpNames[i]);
-      sub->SetRefObject(refSp, Gmat::SPACE_POINT, refSpNames[i]);
-   }
-   
-   if (sub->GetTypeName() == "OpenGLPlot")
-   {
-      // set SolarSystem and InternalCoordSystem first
-      sub->SetRefObject(solarSys, Gmat::SOLAR_SYSTEM, "");
-      sub->SetInternalCoordSystem(internalCoordSys);
-
-      std::string csName = sub->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
-      #if DEBUG_SANDBOX_INIT > 1
-         MessageInterface::ShowMessage
-            ("Sandbox::Initialize() csName=%s\n", csName.c_str());
-      #endif
-      sub->SetRefObject(GetInternalObject(csName, Gmat::COORDINATE_SYSTEM),
-                        Gmat::COORDINATE_SYSTEM, csName);
-   }
-}
-//*********************  END OF TEMPORARY  ***********************************************************
-
-
 //------------------------------------------------------------------------------
 // void SetRefFromName(GmatBase *obj, const std::string &oName)
 //------------------------------------------------------------------------------
@@ -916,8 +853,16 @@ void Sandbox::SetRefFromName(GmatBase *obj, const std::string &oName)
       obj->SetRefObject(refObj, refObj->GetType(), refObj->GetName());
    }
    else
-      throw SandboxException("Unknown object " + oName + " requested by " +
-         obj->GetName());
+   {
+      // look SolarSystem (loj: 5/9/05 Added)
+      GmatBase *refObj = FindSpacePoint(oName);
+      
+      if (refObj == NULL)
+         throw SandboxException("Unknown object " + oName + " requested by " +
+                                obj->GetName());
+      
+      obj->SetRefObject(refObj, refObj->GetType(), refObj->GetName());
+   }
 }
 
 
