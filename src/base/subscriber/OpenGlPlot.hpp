@@ -32,11 +32,15 @@ public:
    OpenGlPlot(const OpenGlPlot &ogl);
    virtual ~OpenGlPlot(void);
 
+   const StringArray& GetSpacePointList();
+   const StringArray& GetSpacecraftList();
+   const StringArray& GetNonSpacecraftList();
+
    // methods inherited from Subscriber
    virtual bool Initialize();
    
    UnsignedInt GetColor(const std::string &item, const std::string &scName);
-   bool SetColor(const std::string &item, const std::string &scName,
+   bool SetColor(const std::string &item, const std::string &name,
                  const UnsignedInt value);
    
    // methods inherited from GmatBase
@@ -62,16 +66,16 @@ public:
    virtual Integer SetIntegerParameter(const std::string &label,
                                        const Integer value);
    
-   virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
-                                               const UnsignedInt value,
-                                               const Integer index);
-   virtual UnsignedInt SetUnsignedIntParameter(const std::string &label,
-                                               const UnsignedInt value,
-                                               const Integer index);
-   virtual const UnsignedIntArray&
-           GetUnsignedIntArrayParameter(const Integer id) const; 
-   virtual const UnsignedIntArray& 
-           GetUnsignedIntArrayParameter(const std::string &label) const;
+//    virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
+//                                                const UnsignedInt value,
+//                                                const Integer index);
+//    virtual UnsignedInt SetUnsignedIntParameter(const std::string &label,
+//                                                const UnsignedInt value,
+//                                                const Integer index);
+//    virtual const UnsignedIntArray&
+//            GetUnsignedIntArrayParameter(const Integer id) const; 
+//    virtual const UnsignedIntArray& 
+//            GetUnsignedIntArrayParameter(const std::string &label) const;
    
    virtual Real GetRealParameter(const Integer id) const;
    virtual Real GetRealParameter(const std::string &label) const;
@@ -110,18 +114,23 @@ public:
 
 protected:
    
-   bool AddSpacecraft(const std::string &name, Integer index);
-   bool ClearSpacecraftList();
-   bool RemoveSpacecraft(const std::string &name);
+   bool AddSpacePoint(const std::string &name, Integer index);
+   bool ClearSpacePointList();
+   bool RemoveSpacePoint(const std::string &name);
    Integer FindIndexOfElement(StringArray &labelArray,
                               const std::string &label);
-
+//    bool IsNonSpacecraft(const std::string &name);
+   void ClearDynamicArrays();
+   void UpdateNonSpacecraftList(SpacePoint *sp);
+   
    SolarSystem *mSolarSystem;
    CoordinateSystem *mOutCoordSystem;
    SpacePoint *mViewPointRefObj;
    SpacePoint *mViewPointVectorObj;
    SpacePoint *mViewDirectionObj;
-
+   std::vector<SpacePoint*> mNonScArray;
+   std::vector<SpacePoint*> mAllSpArray;
+   
    std::string mEclipticPlane;
    std::string mEquatorialPlane;
    std::string mWireFrame;
@@ -148,15 +157,22 @@ protected:
    Integer mNumData;
    Integer mNumCollected;
    
+   Integer mAllSpCount;
    Integer mScCount;
+   Integer mNonScCount;
    StringArray mScNameArray;
+   StringArray mNonScNameArray;
+   StringArray mAllSpNameArray;
    StringArray mAllRefObjectNames;
    
    RealArray mScXArray;
    RealArray mScYArray;
    RealArray mScZArray;
-   UnsignedIntArray mOrbitColorArray;
-   UnsignedIntArray mTargetColorArray;
+   UnsignedIntArray mScOrbitColorArray;
+   UnsignedIntArray mScTargetColorArray;
+//    UnsignedIntArray mOrbitColorArray;
+//    UnsignedIntArray mTargetColorArray;
+   UnsignedIntArray mNonScColorArray;
    
    std::map<std::string, UnsignedInt> mOrbitColorMap;
    std::map<std::string, UnsignedInt> mTargetColorMap;
@@ -179,8 +195,8 @@ protected:
       OVERLAP_PLOT,
       USE_VIEWPOINT_INFO,
       PERSPECTIVE_MODE,
-      ORBIT_COLOR,
-      TARGET_COLOR,
+      //ORBIT_COLOR,
+      //TARGET_COLOR,
       DATA_COLLECT_FREQUENCY,
       UPDATE_PLOT_FREQUENCY,
       OpenGlPlotParamCount
@@ -194,8 +210,8 @@ protected:
    virtual bool Distribute(Integer len);
    virtual bool Distribute(const Real * dat, Integer len);
    
-   const static int MAX_SC_COLOR = 15;
-   static const UnsignedInt DEFAULT_ORBIT_COLOR[MAX_SC_COLOR];
+   const static int MAX_SP_COLOR = 15;
+   static const UnsignedInt DEFAULT_ORBIT_COLOR[MAX_SP_COLOR];
    
 };
 
