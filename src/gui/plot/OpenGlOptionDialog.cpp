@@ -15,6 +15,7 @@
 
 #include "OpenGlOptionDialog.hpp"
 #include "MdiChildTrajFrame.hpp"
+#include "CelesBodySelectDialog.hpp"
 
 #include "ColorTypes.hpp"           // for GmatColor::
 #include "RgbColor.hpp"
@@ -23,7 +24,10 @@
 
 #include "wx/colordlg.h"            // for wxColourDialog
 
-//#define DEBUG_GL_OPTION_DIALOG 2
+//#define DEBUG_GLOPTION_CREATE 1
+//#define DEBUG_GLOPTION_LOAD 1
+//#define DEBUG_GLOPTION 2
+//#define DEBUG_GLOPTION_OBJECT 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -33,15 +37,14 @@ BEGIN_EVENT_TABLE(OpenGlOptionDialog, wxDialog)
    EVT_TEXT(ID_TEXTCTRL, OpenGlOptionDialog::OnTextChange)
    EVT_CHECKBOX(ID_CHECKBOX, OpenGlOptionDialog::OnCheckBoxChange)
    EVT_COMBOBOX(ID_COMBOBOX, OpenGlOptionDialog::OnComboBoxChange)
+   EVT_LISTBOX(ID_LISTBOX, OpenGlOptionDialog::OnSelectObject)
    EVT_BUTTON(ID_BUTTON, OpenGlOptionDialog::OnButtonClick)
    EVT_BUTTON(ID_BUTTON_APPLY, OpenGlOptionDialog::OnApplyButtonClick)
    EVT_BUTTON(ID_EQPLANE_COLOR_BUTTON, OpenGlOptionDialog::OnColorButtonClick)
    EVT_BUTTON(ID_ECPLANE_COLOR_BUTTON, OpenGlOptionDialog::OnColorButtonClick)
    EVT_BUTTON(ID_SUNLINE_COLOR_BUTTON, OpenGlOptionDialog::OnColorButtonClick)
-   EVT_BUTTON(ID_BODY_COLOR_BUTTON, OpenGlOptionDialog::OnBodyColorButtonClick)
-   EVT_BUTTON(ID_BODY_COLOR_BUTTON1, OpenGlOptionDialog::OnBodyColorButtonClick)
-   EVT_BUTTON(ID_BODY_COLOR_BUTTON2, OpenGlOptionDialog::OnBodyColorButtonClick)
-   EVT_BUTTON(ID_ADD_BODY_BUTTON, OpenGlOptionDialog::OnAddBodyButtonClick)
+   EVT_BUTTON(ID_OBJECT_COLOR_BUTTON, OpenGlOptionDialog::OnObjectColorButtonClick)
+//    EVT_BUTTON(ID_ADD_BODY_BUTTON, OpenGlOptionDialog::OnAddBodyButtonClick)
    
    EVT_CLOSE(OpenGlOptionDialog::OnClose)
 END_EVENT_TABLE()
@@ -63,8 +66,8 @@ using namespace GmatPlot;
  */
 //------------------------------------------------------------------------------
 OpenGlOptionDialog::OpenGlOptionDialog(wxWindow *parent, const wxString &title,
-                                       const wxArrayString &bodyNames,
-                                       const UnsignedIntArray &bodyColors)
+                                       const wxArrayString &objectNames,
+                                       const UnsignedIntArray &objectColors)
    : wxDialog(parent, -1, title)
 {
    theGuiManager = GuiItemManager::GetInstance();
@@ -73,7 +76,7 @@ OpenGlOptionDialog::OpenGlOptionDialog(wxWindow *parent, const wxString &title,
    mHasUseViewPointSpecChanged = false;
    mHasUsePerspModeChanged = false;
    mHasDistanceChanged = false;
-   mHasGotoBodyChanged = false;
+   mHasGotoObjectChanged = false;
    mHasCoordSysChanged = false;
    mHasDrawEqPlaneChanged = false;
    mHasDrawEcPlaneChanged = false;
@@ -84,21 +87,29 @@ OpenGlOptionDialog::OpenGlOptionDialog(wxWindow *parent, const wxString &title,
    mHasEcPlaneColorChanged = false;
    mHasEcLineColorChanged = false;
    mHasRotateAboutXYChanged = false;
+   mHasObjectColorChanged = false;
+   mHasShowObjectChanged = false;
    
    mDistance = 30000;
-   mGotoBodyName = "";
+   mGotoObjectName = "";
    
-   mBodyCount = bodyNames.GetCount();
+   mObjectCount = objectNames.GetCount();
    
-   for (int i=0; i<mBodyCount; i++)
+   mObjectColorMap.clear();
+   mShowObjectMap.clear();
+   
+   for (int i=0; i<mObjectCount; i++)
    {
-      mBodyNames.Add(bodyNames[i]);
-      mBodyIntColors.push_back(bodyColors[i]);
+      mObjectNames.Add(objectNames[i]);
+      mObjectIntColors.push_back(objectColors[i]);
+
+      mObjectColorMap[objectNames[i]] = RgbColor(objectColors[i]);
+      mShowObjectMap[objectNames[i]] = true;
       
-      #ifdef DEBUG_GL_OPTION_DIALOG
+      #ifdef DEBUG_GLOPTION
       MessageInterface::ShowMessage
-         ("OpenGlOptionDialog() body=%s, color=%d\n",
-          mBodyNames[i].c_str(), mBodyIntColors[i]);
+         ("OpenGlOptionDialog() object=%s, color=%d\n",
+          mObjectNames[i].c_str(), mObjectIntColors[i]);
       #endif
    }
    
@@ -140,14 +151,84 @@ void OpenGlOptionDialog::SetDrawWireFrame(bool flag)
    mWireFrameCheckBox->SetValue(flag);
 }
 
+
 //------------------------------------------------------------------------------
-// void SetGotoStdBody(int bodyId)
+// void SetGotoObjectName(const wxString &objName)
 //------------------------------------------------------------------------------
-void OpenGlOptionDialog::SetGotoStdBody(int bodyId)
+void OpenGlOptionDialog::SetGotoObjectName(const wxString &objName)
 {
-   mGotoBodyComboBox->SetStringSelection(wxString(BodyInfo::BODY_NAME[bodyId].c_str()));
+   mGotoObjectComboBox->SetStringSelection(objName);
+
+   // We don't want to enable this
+   theApplyButton->Disable();
 }
 
+
+//------------------------------------------------------------------------------
+// void UpdateObject(const wxArrayString &objectNames,
+//                 const UnsignedIntArray &objectColors)
+//------------------------------------------------------------------------------
+void OpenGlOptionDialog::UpdateObject(const wxArrayString &objectNames,
+                                      const UnsignedIntArray &objectColors)
+{
+   
+   mObjectCount = objectNames.GetCount();
+   mObjectNames.Empty();
+   
+   for (int i=0; i<mObjectCount; i++)
+   {
+      mObjectNames.Add(objectNames[i]);
+      mObjectIntColors.push_back(objectColors[i]);
+      
+      mObjectColorMap[objectNames[i]] = RgbColor(objectColors[i]);
+      mShowObjectMap[objectNames[i]] = true;
+      
+      #ifdef DEBUG_GLOPTION_OBJECT
+      MessageInterface::ShowMessage
+         ("OpenGlOptionDialog::UpdateObject() object=%s, color=%d\n",
+          mObjectNames[i].c_str(), mObjectIntColors[i]);
+      #endif
+   }
+   
+   UpdateObjectComboBox();
+   UpdateObjectListBox();
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateObjectList(const wxArrayString &objNames, ...
+//------------------------------------------------------------------------------
+void OpenGlOptionDialog::UpdateObjectList(const wxArrayString &objNames,
+                                          const wxStringColorMap &objColors)
+{
+   #ifdef DEBUG_GLOPTION_UPDATE
+   MessageInterface::ShowMessage
+      ("OpenGlOptionDialog::UpdateObjectList() mObjectNames.size=%d, "
+       "mObjectIntColors.size=%d\n", mObjectNames.size(), mObjectIntColors.size());
+   #endif
+   
+   mObjectCount = objNames.GetCount();
+   mObjectNames = objNames;
+   mObjectColorMap = objColors;
+   mObjectIntColors.clear();
+   int intColor;
+   
+   for (int i=0; i<mObjectCount; i++)
+   {
+      intColor = mObjectColorMap[mObjectNames[i]].GetIntColor();
+      mObjectIntColors.push_back(intColor);
+      mShowObjectMap[mObjectNames[i]] = true;
+      
+      #ifdef DEBUG_GLOPTION_UPDATE
+      MessageInterface::ShowMessage
+         ("OpenGlOptionDialog::UpdateObjectList() object=%s, color=%d\n",
+          mObjectNames[i].c_str(), mObjectIntColors[i]);
+      #endif
+   }
+   
+   UpdateObjectComboBox();
+   UpdateObjectListBox();
+}
 
 //-------------------------------
 // protected methods
@@ -162,14 +243,11 @@ void OpenGlOptionDialog::SetGotoStdBody(int bodyId)
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::Create()
 {
-   #if DEBUG_GL_OPTION_DIALOG
+   #if DEBUG_GLOPTION_CREATE
    MessageInterface::ShowMessage("OpenGlOptionDialog::Create() entered.\n");
    #endif
    int borderSize = 2;
    
-   // wxString
-   wxString strBodyArray[] = { wxT("Sun"), wxT("Earth"), wxT("Luna") };
-
    // emptyStaticText
    wxStaticText *emptyStaticText =
       new wxStaticText( this, -1, wxT("  "), wxDefaultPosition, wxDefaultSize, 0 );
@@ -191,7 +269,8 @@ void OpenGlOptionDialog::Create()
                      wxDefaultPosition, wxSize(60, -1), 0);
    
    mViewAnimationButton =
-      new wxButton(this, ID_BUTTON, "View Animation", wxDefaultPosition, wxSize(-1, -1), 0);
+      new wxButton(this, ID_BUTTON, "View Animation", wxDefaultPosition,
+                   wxSize(-1, -1), 0);
    
    wxBoxSizer *updateSizer = new wxBoxSizer(wxHORIZONTAL);
    updateSizer->Add(animationStaticText, 0, wxALIGN_LEFT|wxALL, borderSize);
@@ -210,8 +289,9 @@ void OpenGlOptionDialog::Create()
    
    animationSizer->Add(animationBoxSizer, 0, wxALIGN_LEFT|wxALL, borderSize);
    
-   #if DEBUG_GL_OPTION_DIALOG > 1
-   MessageInterface::ShowMessage("OpenGlOptionDialog::Create() animationSizer created.\n");
+   #if DEBUG_GLOPTION_CREATE
+   MessageInterface::ShowMessage
+      ("OpenGlOptionDialog::Create() animationSizer created.\n");
    #endif
    
    //-----------------------------------------------------------------
@@ -220,7 +300,7 @@ void OpenGlOptionDialog::Create()
    mUsePerspModeCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT("Perspective Mode"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
-      
+   
    //-----------------------------------------------------------------
    // view option
    //-----------------------------------------------------------------
@@ -233,10 +313,16 @@ void OpenGlOptionDialog::Create()
    wxStaticText *centerOfViewStaticText =
       new wxStaticText(this, -1, wxT("Go To"),
                        wxDefaultPosition, wxSize(-1, -1), 0);
-   mGotoBodyComboBox =
+
+   //wxString strObjectArray[] = { wxT("Sun"), wxT("Earth"), wxT("Luna") };
+   wxString strObjectArray[mObjectCount];
+   for (int i=0; i<mObjectCount; i++)
+      strObjectArray[i] = mObjectNames[i];
+   
+   mGotoObjectComboBox =
       new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition,
-                     wxSize(105,-1), 3, strBodyArray, wxCB_DROPDOWN);
-   mGotoBodyComboBox->SetStringSelection("Earth");
+                     wxSize(105,-1), mObjectCount, strObjectArray, wxCB_DROPDOWN);
+   mGotoObjectComboBox->SetStringSelection("Earth");
    
    wxStaticText *coordSysStaticText =
       new wxStaticText(this, -1, wxT("Coord System"),
@@ -251,11 +337,11 @@ void OpenGlOptionDialog::Create()
    viewGridSizer->Add(distanceStaticText, 0, wxALIGN_LEFT|wxALL, borderSize);
    viewGridSizer->Add(mDistanceTextCtrl, 0, wxALIGN_LEFT|wxALL, borderSize);
    viewGridSizer->Add(centerOfViewStaticText, 0, wxALIGN_LEFT|wxALL, borderSize);
-   viewGridSizer->Add(mGotoBodyComboBox, 0, wxALIGN_LEFT|wxALL, borderSize);
+   viewGridSizer->Add(mGotoObjectComboBox, 0, wxALIGN_LEFT|wxALL, borderSize);
    viewGridSizer->Add(coordSysStaticText, 0, wxALIGN_LEFT|wxALL, borderSize);
    viewGridSizer->Add(mCoordSysComboBox, 0, wxALIGN_LEFT|wxALL, borderSize);
    
-   #if DEBUG_GL_OPTION_DIALOG > 1
+   #if DEBUG_GLOPTION_CREATE
    MessageInterface::ShowMessage("OpenGlOptionDialog::Create() viewGridSizer created.\n");
    #endif
    
@@ -269,8 +355,9 @@ void OpenGlOptionDialog::Create()
    viewOptionSizer->Add(viewGridSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
    viewOptionSizer->Add(mCreateCoordSysButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
    
-   #if DEBUG_GL_OPTION_DIALOG > 1
-   MessageInterface::ShowMessage("OpenGlOptionDialog::Create() viewOptionSizer created.\n");
+   #if DEBUG_GLOPTION_CREATE
+   MessageInterface::ShowMessage
+      ("OpenGlOptionDialog::Create() viewOptionSizer created.\n");
    #endif
    
    //-----------------------------------------------------------------
@@ -339,8 +426,9 @@ void OpenGlOptionDialog::Create()
    drawGridSizer->Add(mEcLineCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mEcLineColorButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
    
-   #if DEBUG_GL_OPTION_DIALOG > 1
-   MessageInterface::ShowMessage("OpenGlOptionDialog::Create() drawGridSizer created.\n");
+   #if DEBUG_GLOPTION_CREATE
+   MessageInterface::ShowMessage
+      ("OpenGlOptionDialog::Create() drawGridSizer created.\n");
    #endif
    
    drawingOptionSizer->Add(drawGridSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
@@ -349,77 +437,62 @@ void OpenGlOptionDialog::Create()
    // view bodies options
    //-----------------------------------------------------------------
 
+   wxString emptyList[] = {};
+   mObjectListBox =
+      new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
+                    wxSize(102,60), 0, emptyList, wxLB_SINGLE);
+   
+   mObjectColorButton = new wxButton(this, ID_OBJECT_COLOR_BUTTON, "",
+                                    wxDefaultPosition, wxSize(20,15), 0);
+   mShowObjectCheckBox =
+      new wxCheckBox(this, ID_CHECKBOX, wxT("Show"),
+                     wxDefaultPosition, wxSize(60, -1), 0);
+   
+   wxBoxSizer *colorSizer = new wxBoxSizer(wxVERTICAL);
+   colorSizer->Add(mObjectColorButton, 0, wxALIGN_LEFT|wxALL, borderSize);
+   colorSizer->Add(mShowObjectCheckBox, 0, wxALIGN_LEFT|wxALL, borderSize);
+   
    RgbColor rgbcolor;
    
-   for (int i=0; i<mBodyCount; i++)
+   for (int i=0; i<mObjectCount; i++)
    {
-      rgbcolor.Set(mBodyIntColors[i]);
-      wxColour wxcolor(rgbcolor.Red(), rgbcolor.Green(), rgbcolor.Blue());
-      
-      mViewBodies[i].name = mBodyNames[i];
-      mViewBodies[i].color = wxcolor;
-      
-      mViewBodies[i].checkBox =
-         new wxCheckBox(this, ID_CHECKBOX, mBodyNames[i], wxDefaultPosition,
-                        wxSize(150, -1), 0);
-      
-      mViewBodies[i].checkBox->SetValue(true);
-      mViewBodies[i].checkBox->Disable(); // for now
-      
-      mViewBodies[i].colorButton =
-         new wxButton(this, ID_BODY_COLOR_BUTTON + i, "", wxDefaultPosition,
-                      wxSize(20, 15), 0);
-      
-      mViewBodies[i].colorButton->SetBackgroundColour(wxcolor);
-      mViewBodies[i].colorButton->Disable(); // for now
-      
-      #if DEBUG_GL_OPTION_DIALOG > 1
-      MessageInterface::ShowMessage
-         ("OpenGlOptionDialog()::Create() body=%s, color=%d,%d,%d\n",
-          mViewBodies[i].name.c_str(), wxcolor.Red(), wxcolor.Green(), wxcolor.Blue());
-      #endif
+      mObjectListBox->Append(mObjectNames[i]);
    }
 
+   wxBoxSizer *objectSizer = new wxBoxSizer(wxHORIZONTAL);
+   objectSizer->Add(mObjectListBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   objectSizer->Add(colorSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+
+   //Note: only standared bodies can be added since CalculatedPoint objects
+   // are not contained in the SolarSystem
+//    mAddObjectButton = 
+//       new wxButton(this, ID_ADD_OBJECT_BUTTON, "Add/Remove Object", wxDefaultPosition,
+//                    wxSize(130, -1), 0);
    
-   mAddBodyButton = 
-      new wxButton(this, ID_ADD_BODY_BUTTON, "Add/Remove Body", wxDefaultPosition,
-                   wxSize(130, -1), 0);
-   
-   wxStaticBox *viewBodyStaticBox =
-      new wxStaticBox(this, -1, wxT("View Body"));
+   wxStaticBox *viewObjectStaticBox =
+      new wxStaticBox(this, -1, wxT("View Object"));
 
    //-----------------------------------------------------------------
-   // create body sizers
+   // create object sizers
    //-----------------------------------------------------------------
-   wxStaticBoxSizer *viewBodySizer
-      = new wxStaticBoxSizer(viewBodyStaticBox, wxVERTICAL);
+   mViewObjectSizer = new wxStaticBoxSizer(viewObjectStaticBox, wxVERTICAL);
 
-   wxFlexGridSizer *bodyGridSizer = new wxFlexGridSizer(2, 0, 0);
-
-   for (int i=0; i<mBodyCount; i++)
-   {
-      bodyGridSizer->Add(mViewBodies[i].checkBox, 0, wxALIGN_CENTRE|wxALL,
-                         borderSize);
-      bodyGridSizer->Add(mViewBodies[i].colorButton, 0, wxALIGN_CENTRE|wxALL,
-                         borderSize);
-   }
-   
-   viewBodySizer->Add(bodyGridSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   viewBodySizer->Add(mAddBodyButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   mViewObjectSizer->Add(objectSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+//    mViewObjectSizer->Add(mAddObjectButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
    
    
    //-----------------------------------------------------------------
    // create page sizers
    //-----------------------------------------------------------------
-   wxBoxSizer *leftColSizer = new wxBoxSizer(wxVERTICAL);
-   leftColSizer->Add(animationSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   leftColSizer->Add(viewOptionSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   leftColSizer->Add(drawingOptionSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   wxBoxSizer *topViewSizer = new wxBoxSizer(wxVERTICAL);
+   topViewSizer->Add(animationSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   topViewSizer->Add(viewOptionSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   topViewSizer->Add(drawingOptionSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
 
    wxFlexGridSizer *pageSizer = new wxFlexGridSizer(1, 0, 0);
 
-   pageSizer->Add(leftColSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   pageSizer->Add(viewBodySizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   pageSizer->Add(topViewSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   pageSizer->Add(mViewObjectSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
    
    //------------------------------------------------------
    // create dialog sizer
@@ -432,7 +505,7 @@ void OpenGlOptionDialog::Create()
    theDialogSizer->Add(pageSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
    theDialogSizer->Add(theApplyButton, 0, wxALIGN_CENTRE|wxALL, 5);
    
-   #if DEBUG_GL_OPTION_DIALOG
+   #if DEBUG_GLOPTION_CREATE
    MessageInterface::ShowMessage("OpenGlOptionDialog::Create() exiting.\n");
    #endif
 }
@@ -447,7 +520,7 @@ void OpenGlOptionDialog::Create()
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::LoadData()
 {
-   #if DEBUG_GL_OPTION_DIALOG
+   #if DEBUG_GLOPTION_LOAD
    MessageInterface::ShowMessage("OpenGlOptionDialog::LoadData() entered.\n");
    #endif
 
@@ -457,19 +530,39 @@ void OpenGlOptionDialog::LoadData()
    mUseInitialViewPointCheckBox->SetValue(mTrajFrame->GetUseViewPointInfo());
    mUsePerspModeCheckBox->SetValue(mTrajFrame->GetUsePerspectiveMode());
 
+   #if DEBUG_GLOPTION_LOAD
+   MessageInterface::ShowMessage
+      ("OpenGlOptionDialog::LoadData() setting mAnimationUpdIntTextCtrl.\n");
+   #endif
+   
    // animiation
    strVal.Printf("%d", mTrajFrame->GetAnimationUpdateInterval());
    mAnimationUpdIntTextCtrl->SetValue(strVal);
+   
+   #if DEBUG_GLOPTION_LOAD
+   MessageInterface::ShowMessage
+      ("OpenGlOptionDialog::LoadData() setting mDistanceTextCtrl.\n");
+   #endif
    
    // distance
    mDistance = mTrajFrame->GetDistance();
    strVal.Printf("%g", mDistance);
    mDistanceTextCtrl->SetValue(strVal);
    
-   // goto body
-   mGotoBodyComboBox->
-      SetStringSelection(BodyInfo::BODY_NAME[mTrajFrame->GetGotoBodyId()].c_str());
-
+   #if DEBUG_GLOPTION_LOAD
+   MessageInterface::ShowMessage
+      ("OpenGlOptionDialog::LoadData() setting mGotoObjectComboBox.\n");
+   #endif
+   
+   // goto object
+   mGotoObjectComboBox->
+      SetStringSelection(mTrajFrame->GetGotoObjectName());
+      
+   #if DEBUG_GLOPTION_LOAD
+   MessageInterface::ShowMessage
+      ("OpenGlOptionDialog::LoadData() setting mCoordSysComboBox.\n");
+   #endif
+   
    // coordinate system
    mCoordSysComboBox->SetStringSelection(mTrajFrame->GetDesiredCoordSysName());
    
@@ -492,12 +585,20 @@ void OpenGlOptionDialog::LoadData()
    // wire frame
    mWireFrameCheckBox->SetValue(mTrajFrame->GetDrawWireFrame());
    mRotateAboutXYCheckBox->SetValue(mTrajFrame->GetRotateAboutXY());
-   
+
+   // view object
+   mObjectListBox->SetSelection(0);
+   ShowSpacePointOption(mObjectListBox->GetStringSelection(), true);
+
    mCreateCoordSysButton->Disable();
-   mAddBodyButton->Disable();
+//    mAddObjectButton->Enable();
    mEcPlaneCheckBox->Enable();
    mEcPlaneColorButton->Enable();
-   mUsePerspModeCheckBox->Disable();
+   mUsePerspModeCheckBox->Enable();
+   
+   #if DEBUG_GLOPTION_LOAD
+   MessageInterface::ShowMessage("OpenGlOptionDialog::LoadData() exiting.\n");
+   #endif
 }
 
 
@@ -552,10 +653,10 @@ void OpenGlOptionDialog::SaveData()
       mTrajFrame->SetDistance(mDistance);
    }
    
-   if (mHasGotoBodyChanged)
+   if (mHasGotoObjectChanged)
    {
-      mHasGotoBodyChanged = false;
-      mTrajFrame->SetGotoBodyName(mGotoBodyName);
+      mHasGotoObjectChanged = false;
+      mTrajFrame->SetGotoObjectName(mGotoObjectName);
    }
    
    if (mHasCoordSysChanged)
@@ -624,8 +725,22 @@ void OpenGlOptionDialog::SaveData()
       mTrajFrame->SetEcLineColor(rgb.GetIntColor());      
    }
    
-   mTrajFrame->UpdatePlot(false);
+   if (mHasShowObjectChanged)
+   {
+      mHasShowObjectChanged = false;
+      mTrajFrame->SetShowObjects(mShowObjectMap);    
+   }
+   
+   if (mHasObjectColorChanged)
+   {
+      mHasObjectColorChanged = false;
+      RgbColor rgb(mEcLineColor.Red(), mEcLineColor.Green(), mEcLineColor.Blue());
+      mTrajFrame->SetObjectColors(mObjectColorMap);      
+   }
+   
+   mTrajFrame->RedrawPlot(false);
 
+   theApplyButton->Disable();
 }
 
 
@@ -640,6 +755,51 @@ void OpenGlOptionDialog::ResetData()
 {
 }
 
+
+//------------------------------------------------------------------------------
+// void UpdateObjectComboBox()
+//------------------------------------------------------------------------------
+void OpenGlOptionDialog::UpdateObjectComboBox()
+{
+   #ifdef DEBUG_GLOPTION_UPDATE
+   MessageInterface::ShowMessage
+      ("OpenGlOptionDialog::UpdateObjectComboBox() mObjectCount=%d\n", mObjectCount);
+   #endif
+   
+   wxString objectSel = mGotoObjectComboBox->GetStringSelection();
+   
+   mGotoObjectComboBox->Clear();
+   
+   for (int i=0; i<mObjectCount; i++)
+      mGotoObjectComboBox->Append(mObjectNames[i]);
+
+   mGotoObjectComboBox->SetStringSelection(objectSel);
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateObjectListBox()
+//------------------------------------------------------------------------------
+void OpenGlOptionDialog::UpdateObjectListBox()
+{
+   #ifdef DEBUG_GLOPTION_UPDATE
+   MessageInterface::ShowMessage
+      ("OpenGlOptionDialog::UpdateObjectListBox() mObjectCount=%d\n", mObjectCount);
+   #endif
+   
+//    wxString objSel = mObjectListBox->GetStringSelection();
+   
+   mObjectListBox->Clear();
+   
+   for (int i=0; i<mObjectCount; i++)
+      mObjectListBox->Append(mObjectNames[i]);
+
+   mObjectListBox->SetStringSelection(mGotoObjectComboBox->GetStringSelection());
+   ShowSpacePointOption(mObjectListBox->GetStringSelection(), true);
+
+}
+
+
 //------------------------------------------------------------------------------
 // bool ShowColorDialog(wxColor &oldColor, wxButton *button)
 //------------------------------------------------------------------------------
@@ -649,7 +809,7 @@ void OpenGlOptionDialog::ResetData()
 //------------------------------------------------------------------------------
 bool OpenGlOptionDialog::ShowColorDialog(wxColor &oldColor, wxButton *button)
 {
-   #ifdef DEBUG_GL_OPTION_DIALOG
+   #ifdef DEBUG_GLOPTION
    MessageInterface::ShowMessage
       ("ShowColorDialog() old color: R=%d G=%d B=%d\n",
        oldColor.Red(), oldColor.Green(), oldColor.Blue());
@@ -667,7 +827,7 @@ bool OpenGlOptionDialog::ShowColorDialog(wxColor &oldColor, wxButton *button)
       button->SetBackgroundColour(oldColor);
       theApplyButton->Enable();
       
-      #ifdef DEBUG_GL_OPTION_DIALOG
+      #ifdef DEBUG_GLOPTION
       MessageInterface::ShowMessage
          ("ShowColorDialog() new color: R=%d G=%d B=%d\n",
           oldColor.Red(), oldColor.Green(), oldColor.Blue());
@@ -695,9 +855,9 @@ void OpenGlOptionDialog::OnTextChange(wxCommandEvent& event)
          mHasDistanceChanged = true;
          mDistance = atof(mDistanceTextCtrl->GetValue());
       }
-   }
    
-   theApplyButton->Enable();
+      theApplyButton->Enable();
+   }
 }
 
 
@@ -726,6 +886,12 @@ void OpenGlOptionDialog::OnCheckBoxChange(wxCommandEvent& event)
       mHasDrawAxesChanged = true;
    else if (event.GetEventObject() == mRotateAboutXYCheckBox)
       mHasRotateAboutXYChanged = true;
+   else if (event.GetEventObject() == mShowObjectCheckBox)
+   {
+      mShowObjectMap[mObjectListBox->GetStringSelection()] =
+         mShowObjectCheckBox->GetValue();
+      mHasShowObjectChanged = true;
+   }
    
    theApplyButton->Enable();
 }
@@ -740,10 +906,10 @@ void OpenGlOptionDialog::OnCheckBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::OnComboBoxChange(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == mGotoBodyComboBox)
+   if (event.GetEventObject() == mGotoObjectComboBox)
    {
-      mHasGotoBodyChanged = true;
-      mGotoBodyName = mGotoBodyComboBox->GetStringSelection();
+      mHasGotoObjectChanged = true;
+      mGotoObjectName = mGotoObjectComboBox->GetStringSelection();
       theApplyButton->Enable();
    }
    else if (event.GetEventObject() == mCoordSysComboBox)
@@ -783,46 +949,68 @@ void OpenGlOptionDialog::OnColorButtonClick(wxCommandEvent& event)
 
 
 //------------------------------------------------------------------------------
-// void OnBodyColorButtonClick(wxCommandEvent& event)
+// void OnObjectColorButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 /**
  * Handles button click event.
  */
 //------------------------------------------------------------------------------
-void OpenGlOptionDialog::OnBodyColorButtonClick(wxCommandEvent& event)
+void OpenGlOptionDialog::OnObjectColorButtonClick(wxCommandEvent& event)
 {
-   for (int i=0; i<mBodyCount; i++)
+   wxColourData data;
+   data.SetColour(mObjectColor);
+         
+   wxColourDialog dlg(this, &data);
+   dlg.Center();
+   
+   if (dlg.ShowModal() == wxID_OK)
    {
-      if (event.GetEventObject() == mViewBodies[i].colorButton)
-      {
-         wxColourData data;
-         data.SetColour(mViewBodies[i].color);
-         
-         wxColourDialog dlg(this, &data);
-         dlg.Center();
-         
-         if (dlg.ShowModal() == wxID_OK)
-         {
-            wxColour wxcolor = dlg.GetColourData().GetColour();
-            mViewBodies[i].color = wxcolor;
-            mViewBodies[i].colorButton->SetBackgroundColour(wxcolor);
-         }
-
-         break;
-      }
+      mHasObjectColorChanged = true;
+      wxString name = mObjectListBox->GetStringSelection();
+      mObjectColor = dlg.GetColourData().GetColour();
+      mObjectColorButton->SetBackgroundColour(mObjectColor);
+      
+      mObjectColorMap[name].Set(mObjectColor.Red(),
+                                mObjectColor.Green(),
+                                mObjectColor.Blue());
+      
+      theApplyButton->Enable();
    }
 }
 
-//------------------------------------------------------------------------------
-// void OnAddBodyButtonClick(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-/**
- * Handles button click event.
- */
-//------------------------------------------------------------------------------
-void OpenGlOptionDialog::OnAddBodyButtonClick(wxCommandEvent& event)
-{
-}
+
+// //------------------------------------------------------------------------------
+// // void OnAddObjectButtonClick(wxCommandEvent& event)
+// //------------------------------------------------------------------------------
+// /**
+//  * Handles button click event.
+//  */
+// //------------------------------------------------------------------------------
+// void OpenGlOptionDialog::OnAddObjectButtonClick(wxCommandEvent& event)
+// {
+//    wxArrayString emptyBodies;
+   
+//    CelesObjectSelectDialog objectDlg(this, mObjectNames, emptyBodies, false);
+//    objectDlg.SetObjectColors(mObjectNames, mObjectIntColors);
+//    objectDlg.ShowModal();
+   
+//    //--------------------------------------------------
+//    // update object list
+//    //--------------------------------------------------
+//    if (objectDlg.IsObjectSelected())
+//    {
+//       wxArrayString bodies = objectDlg.GetObjectNames();
+//       UnsignedIntArray colors = objectDlg.GetObjectColors();
+
+//       UpdateObject(bodies, colors);
+
+//       mHasShowObjectChanged = true;
+//       mHasObjectColorChanged = true;
+
+//       theApplyButton->Enable();
+//    }
+// }
+
 
 //------------------------------------------------------------------------------
 // void OnApplyButtonClick(wxCommandEvent& event)
@@ -832,6 +1020,7 @@ void OpenGlOptionDialog::OnApplyButtonClick(wxCommandEvent& event)
    theApplyButton->Disable();
    SaveData();
 }
+
 
 //------------------------------------------------------------------------------
 // void OnButtonClick(wxCommandEvent& event)
@@ -850,8 +1039,17 @@ void OpenGlOptionDialog::OnButtonClick(wxCommandEvent& event)
       mTrajFrame->SetUseViewPointInfo(mUseInitialViewPointCheckBox->GetValue());
       mAnimationUpdInt = atoi(mAnimationUpdIntTextCtrl->GetValue());
       mTrajFrame->SetAnimationUpdateInterval(mAnimationUpdInt);
-      mTrajFrame->UpdatePlot(true);
+      mTrajFrame->RedrawPlot(true);
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void OnSelectObject(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void OpenGlOptionDialog::OnSelectObject(wxCommandEvent& event)
+{
+   ShowSpacePointOption(mObjectListBox->GetStringSelection(), true);
 }
 
 
@@ -877,5 +1075,31 @@ void OpenGlOptionDialog::OnClose(wxCloseEvent& event)
       
 //       event.Veto();
 //    }
+}
+
+
+//------------------------------------------------------------------------------
+// void ShowSpacePointOption(const wxString &name, bool show = true)
+//------------------------------------------------------------------------------
+void OpenGlOptionDialog::ShowSpacePointOption(const wxString &name, bool show)
+{
+   
+   // if object name not found, insert
+   if (mObjectColorMap.find(name) == mObjectColorMap.end())
+   {
+      mObjectColorMap[name] = RgbColor(GmatColor::L_BROWN32);
+   }
+   
+   RgbColor orbColor = mObjectColorMap[name];
+   
+   #if DEBUG_GLOPTION
+   MessageInterface::ShowMessage
+      ("OpenGlOptionDialog::ShowSpacePointOption() name=%s, orbColor=%08x\n",
+       name.c_str(), orbColor.GetIntColor());
+   #endif
+   
+   mObjectColor.Set(orbColor.Red(), orbColor.Green(), orbColor.Blue());
+   mObjectColorButton->SetBackgroundColour(mObjectColor);
+   mShowObjectCheckBox->SetValue(mShowObjectMap[name]);
 }
 

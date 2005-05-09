@@ -24,6 +24,9 @@
 #include "wx/colordlg.h"            // for wxColourDialog
 
 //#define DEBUG_OPENGL_PANEL 1
+//#define DEBUG_OPENGL_PANEL_CREATE 1
+//#define DEBUG_OPENGL_PANEL_LOAD 1
+//#define DEBUG_OPENGL_PANEL_SAVE 1
 
 //------------------------------
 // event tables for wxWindows
@@ -35,13 +38,14 @@ BEGIN_EVENT_TABLE(OpenGlPlotSetupPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
 
-   EVT_BUTTON(ADD_SC_BUTTON, OpenGlPlotSetupPanel::OnAddSpacecraft)
-   EVT_BUTTON(REMOVE_SC_BUTTON, OpenGlPlotSetupPanel::OnRemoveSpacecraft)
-   EVT_BUTTON(CLEAR_SC_BUTTON, OpenGlPlotSetupPanel::OnClearSpacecraft)
-   EVT_BUTTON(SC_ORBIT_COLOR_BUTTON, OpenGlPlotSetupPanel::OnOrbitColorClick)
-   EVT_BUTTON(SC_TARGET_COLOR_BUTTON, OpenGlPlotSetupPanel::OnTargetColorClick)
+   EVT_BUTTON(ADD_SP_BUTTON, OpenGlPlotSetupPanel::OnAddSpacePoint)
+   EVT_BUTTON(REMOVE_SP_BUTTON, OpenGlPlotSetupPanel::OnRemoveSpacePoint)
+   EVT_BUTTON(CLEAR_SP_BUTTON, OpenGlPlotSetupPanel::OnClearSpacePoint)
+   EVT_BUTTON(ORBIT_COLOR_BUTTON, OpenGlPlotSetupPanel::OnOrbitColorClick)
+   EVT_BUTTON(TARGET_COLOR_BUTTON, OpenGlPlotSetupPanel::OnTargetColorClick)
    EVT_LISTBOX(ID_LISTBOX, OpenGlPlotSetupPanel::OnSelectAvailObject)
    EVT_LISTBOX(SC_SEL_LISTBOX, OpenGlPlotSetupPanel::OnSelectSpacecraft)
+   EVT_LISTBOX(OBJ_SEL_LISTBOX, OpenGlPlotSetupPanel::OnSelectOtherObject)
    EVT_CHECKBOX(CHECKBOX, OpenGlPlotSetupPanel::OnCheckBoxChange)
    EVT_COMBOBOX(ID_COMBOBOX, OpenGlPlotSetupPanel::OnComboBoxChange)
    EVT_TEXT(ID_TEXTCTRL, OpenGlPlotSetupPanel::OnTextChange)
@@ -76,12 +80,13 @@ OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
 
    // Set the pointer for the "Show Script" button
    mObject = mOpenGlPlot;
-
-   mHasScChanged = false;
+   
+   mHasSpChanged = false;
    mHasColorChanged = false;
    mHasCoordSysChanged = false;
    mHasViewInfoChanged = false;
    mScCount = 0;
+   mNonScCount = 0;
    
    mOrbitColorMap.clear();
    mTargetColorMap.clear();
@@ -99,7 +104,7 @@ OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
 //------------------------------------------------------------------------------
 void OpenGlPlotSetupPanel::Create()
 {
-   #if DEBUG_OPENGL_PANEL
+   #if DEBUG_OPENGL_PANEL_CREATE
       MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() entering...\n");
    #endif
 
@@ -109,101 +114,6 @@ void OpenGlPlotSetupPanel::Create()
   
    wxString emptyList[] = {};
    Integer bsize = 2; // border size
-   
-   //------------------------------------------------------
-   // available spacecraft/celestial object list (1st column)
-   //------------------------------------------------------
-   wxBoxSizer *availObjBoxSizer = new wxBoxSizer(wxVERTICAL);
-   
-   wxStaticText *scAvailableLabel =
-      new wxStaticText(this, -1, wxT("Spacecraft"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxArrayString empty;
-   mSpacecraftListBox =
-      theGuiManager->GetSpacecraftListBox(this, ID_LISTBOX, wxSize(150,88), empty);
-   
-   wxStaticText *coAvailableLabel =
-      new wxStaticText(this, -1, wxT("Celestial Object"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   mCelesObjectListBox =
-      theGuiManager->GetConfigBodyListBox(this, ID_LISTBOX, wxSize(150,88), empty);
-   
-   availObjBoxSizer->Add(scAvailableLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
-   availObjBoxSizer->Add(mSpacecraftListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   availObjBoxSizer->Add(coAvailableLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
-   availObjBoxSizer->Add(mCelesObjectListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   #if DEBUG_OPENGL_PANEL
-      MessageInterface::ShowMessage
-         ("OpenGlPlotSetupPanel::Create() add, remove, clear...\n");
-   #endif
-      
-   //------------------------------------------------------
-   // add, remove, clear Y buttons (2nd column)
-   //------------------------------------------------------
-   addScButton = new wxButton(this, ADD_SC_BUTTON, wxT("-->"),
-                              wxDefaultPosition, wxSize(20,20), 0);
-
-   removeScButton = new wxButton(this, REMOVE_SC_BUTTON, wxT("<--"),
-                                 wxDefaultPosition, wxSize(20,20), 0);
-    
-   clearScButton = new wxButton(this, CLEAR_SC_BUTTON, wxT("<="),
-                                wxDefaultPosition, wxSize(20,20), 0);
-    
-   wxBoxSizer *arrowButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
-   arrowButtonsBoxSizer->Add(addScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arrowButtonsBoxSizer->Add(removeScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arrowButtonsBoxSizer->Add(clearScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-    
-   #if DEBUG_OPENGL_PANEL
-      MessageInterface::ShowMessage
-         ("OpenGlPlotSetupPanel::Create() selected spacecraft list...\n");
-   #endif
-   
-   //------------------------------------------------------
-   // selected spacecraft list (3rd column)
-   //------------------------------------------------------
-   wxStaticText *titleSelected =
-      new wxStaticText(this, -1, wxT("Selected Object"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-
-   mSelectedObjListBox =
-      new wxListBox(this, SC_SEL_LISTBOX, wxDefaultPosition,
-                    wxSize(150,200), 0, emptyList, wxLB_SINGLE);
-        
-   wxBoxSizer *mObjSelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
-   mObjSelectedBoxSizer->Add(titleSelected, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mObjSelectedBoxSizer->Add(mSelectedObjListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   //------------------------------------------------------
-   // spacecraft color (4th column)
-   //------------------------------------------------------
-   wxStaticText *orbitColorLabel =
-      new wxStaticText(this, -1, wxT("Orbit Color"),
-                       wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
-   mTargetColorLabel =
-      new wxStaticText(this, -1, wxT("Target Color"),
-                       wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
-   
-   mScOrbitColorButton = new wxButton(this, SC_ORBIT_COLOR_BUTTON, "",
-                                      wxDefaultPosition, wxSize(25,20), 0);
-
-   mScTargetColorButton = new wxButton(this, SC_TARGET_COLOR_BUTTON, "",
-                                       wxDefaultPosition, wxSize(25,20), 0);
-   
-   wxFlexGridSizer *scOptionBoxSizer1 = new wxFlexGridSizer(2, 0, 0);
-   scOptionBoxSizer1->Add(orbitColorLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   scOptionBoxSizer1->Add(mScOrbitColorButton, 0, wxALIGN_LEFT|wxALL, bsize);
-   scOptionBoxSizer1->Add(mTargetColorLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   scOptionBoxSizer1->Add(mScTargetColorButton, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mScOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
-   mScOptionBoxSizer->Add(scOptionBoxSizer1, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   #if DEBUG_OPENGL_PANEL
-   MessageInterface::ShowMessage
-      ("OpenGlPlotSetupPanel::Create() plot option...\n");
-   #endif
    
    //------------------------------------------------------
    // plot option
@@ -240,6 +150,151 @@ void OpenGlPlotSetupPanel::Create()
       new wxCheckBox(this, CHECKBOX, wxT("Use Perspective Mode"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
    
+   mFovLabel =
+      new wxStaticText(this, -1, wxT("Field Of View(Deg)"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   mFovTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                     wxDefaultPosition, wxSize(105, -1), 0);
+   
+   wxBoxSizer *plotOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
+   plotOptionBoxSizer->Add(mPlotCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(mWireFrameCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(mTargetStatusCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(mEclipticPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(mEquatorialPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(mOverlapCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(mUseViewPointInfoCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(mPerspectiveModeCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(mFovLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(mFovTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   wxStaticBox *plotOptionStaticBox = new wxStaticBox(this, -1, wxT("Plot Option"));
+   wxStaticBoxSizer *plotOptionStaticSizer
+      = new wxStaticBoxSizer(plotOptionStaticBox, wxVERTICAL);
+   plotOptionStaticSizer->Add(plotOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   //------------------------------------------------------
+   // available spacecraft/celestial object list (1st column)
+   //------------------------------------------------------
+   wxStaticText *scAvailableLabel =
+      new wxStaticText(this, -1, wxT("Spacecraft"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   wxArrayString empty;
+   mSpacecraftListBox =
+      theGuiManager->GetSpacecraftListBox(this, ID_LISTBOX, wxSize(150,65), empty);
+   
+   wxStaticText *coAvailableLabel =
+      new wxStaticText(this, -1, wxT("Celestial Object"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   mCelesObjectListBox =
+      //theGuiManager->GetConfigBodyListBox(this, ID_LISTBOX, wxSize(150,65), empty);
+      theGuiManager->GetCelestialPointListBox(this, ID_LISTBOX, wxSize(150,65), empty);
+   
+   wxBoxSizer *availObjBoxSizer = new wxBoxSizer(wxVERTICAL);
+   
+   availObjBoxSizer->Add(scAvailableLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
+   availObjBoxSizer->Add(mSpacecraftListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   availObjBoxSizer->Add(coAvailableLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
+   availObjBoxSizer->Add(mCelesObjectListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   #if DEBUG_OPENGL_PANEL_CREATE
+      MessageInterface::ShowMessage
+         ("OpenGlPlotSetupPanel::Create() add, remove, clear...\n");
+   #endif
+      
+   //------------------------------------------------------
+   // add, remove, clear Y buttons (2nd column)
+   //------------------------------------------------------
+   addScButton = new wxButton(this, ADD_SP_BUTTON, wxT("-->"),
+                              wxDefaultPosition, wxSize(20,20), 0);
+
+   removeScButton = new wxButton(this, REMOVE_SP_BUTTON, wxT("<--"),
+                                 wxDefaultPosition, wxSize(20,20), 0);
+    
+   clearScButton = new wxButton(this, CLEAR_SP_BUTTON, wxT("<="),
+                                wxDefaultPosition, wxSize(20,20), 0);
+    
+   wxBoxSizer *arrowButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
+   arrowButtonsBoxSizer->Add(addScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arrowButtonsBoxSizer->Add(removeScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arrowButtonsBoxSizer->Add(clearScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+    
+   #if DEBUG_OPENGL_PANEL_CREATE
+      MessageInterface::ShowMessage
+         ("OpenGlPlotSetupPanel::Create() selected spacecraft list...\n");
+   #endif
+   
+   //------------------------------------------------------
+   // selected spacecraft list (3rd column)
+   //------------------------------------------------------
+   wxStaticText *titleSelectedSc =
+      new wxStaticText(this, -1, wxT("Selected Spacecraft"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   
+   wxStaticText *titleSelectedObj =
+      new wxStaticText(this, -1, wxT("Selected Celestial Object"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   
+   mSelectedScListBox =
+      new wxListBox(this, SC_SEL_LISTBOX, wxDefaultPosition,
+                    wxSize(150,65), 0, emptyList, wxLB_SINGLE);
+   
+   mSelectedObjListBox =
+      new wxListBox(this, OBJ_SEL_LISTBOX, wxDefaultPosition,
+                    wxSize(150,65), 0, emptyList, wxLB_SINGLE);
+   
+   wxBoxSizer *mObjSelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
+   mObjSelectedBoxSizer->Add(titleSelectedSc, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mObjSelectedBoxSizer->Add(mSelectedScListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mObjSelectedBoxSizer->Add(titleSelectedObj, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mObjSelectedBoxSizer->Add(mSelectedObjListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   //------------------------------------------------------
+   // spacecraft color (4th column)
+   //------------------------------------------------------
+   wxStaticText *orbitColorLabel =
+      new wxStaticText(this, -1, wxT("Orbit Color"),
+                       wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
+   mTargetColorLabel =
+      new wxStaticText(this, -1, wxT("Target Color"),
+                       wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
+   
+   mOrbitColorButton = new wxButton(this, ORBIT_COLOR_BUTTON, "",
+                                    wxDefaultPosition, wxSize(25,20), 0);
+
+   mTargetColorButton = new wxButton(this, TARGET_COLOR_BUTTON, "",
+                                     wxDefaultPosition, wxSize(25,20), 0);
+   
+   wxFlexGridSizer *scOptionBoxSizer1 = new wxFlexGridSizer(1, 0, 0);
+   scOptionBoxSizer1->Add(orbitColorLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   scOptionBoxSizer1->Add(mOrbitColorButton, 0, wxALIGN_LEFT|wxALL, bsize);
+   scOptionBoxSizer1->Add(mTargetColorLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   scOptionBoxSizer1->Add(mTargetColorButton, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   mScOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
+   mScOptionBoxSizer->Add(scOptionBoxSizer1, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   mObjectGridSizer = new wxFlexGridSizer(5, 0, 0);
+   mObjectGridSizer->Add(availObjBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mObjectGridSizer->Add(arrowButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mObjectGridSizer->Add(mObjSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mObjectGridSizer->Add(mScOptionBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mObjectGridSizer->Show(mScOptionBoxSizer, false);
+   
+   wxStaticBox *viewObjectStaticBox = new wxStaticBox(this, -1, wxT("View Object"));
+   wxStaticBoxSizer *viewObjectStaticSizer
+      = new wxStaticBoxSizer(viewObjectStaticBox, wxVERTICAL);
+   viewObjectStaticSizer->Add(mObjectGridSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+
+   #if DEBUG_OPENGL_PANEL_CREATE
+   MessageInterface::ShowMessage
+      ("OpenGlPlotSetupPanel::Create() view geometry...\n");
+   #endif
+   
+   //------------------------------------------------------
+   // view geometry
+   //------------------------------------------------------
    wxStaticText *coordSysLabel =
       new wxStaticText(this, -1, wxT("Coordinate System"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
@@ -308,40 +363,70 @@ void OpenGlPlotSetupPanel::Create()
    mViewDirVectorSizer->Add(mViewDir3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
 
    
-   // plot option sizer
-   mPlotOptionSizer = new wxFlexGridSizer(4, 0, 0);
+   // view definition sizer
+   mViewDefSizer = new wxFlexGridSizer(3, 0, 0);
 
-   mPlotOptionSizer->Add(mPlotCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mPlotOptionSizer->Add(coordSysLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mPlotOptionSizer->Add(mCoordSysComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mPlotOptionSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDefSizer->Add(coordSysLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
+   mViewDefSizer->Add(mCoordSysComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDefSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   mPlotOptionSizer->Add(mWireFrameCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mPlotOptionSizer->Add(viewPointRefLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mPlotOptionSizer->Add(mViewPointRefComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mPlotOptionSizer->Add(mViewPointRefSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDefSizer->Add(viewPointRefLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
+   mViewDefSizer->Add(mViewPointRefComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDefSizer->Add(mViewPointRefSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   mPlotOptionSizer->Add(mTargetStatusCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mPlotOptionSizer->Add(viewPointVectorLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mPlotOptionSizer->Add(mViewPointVectorComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mPlotOptionSizer->Add(mViewPointVectorSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDefSizer->Add(viewPointVectorLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
+   mViewDefSizer->Add(mViewPointVectorComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDefSizer->Add(mViewPointVectorSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   mPlotOptionSizer->Add(mEclipticPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mPlotOptionSizer->Add(viewDirectionLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mPlotOptionSizer->Add(mViewDirectionComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mPlotOptionSizer->Add(mViewDirVectorSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDefSizer->Add(viewScaleFactorLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
+   mViewDefSizer->Add(mViewScaleFactorTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDefSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+
+   mViewDefSizer->Add(viewDirectionLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
+   mViewDefSizer->Add(mViewDirectionComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDefSizer->Add(mViewDirVectorSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+
+   wxStaticBox *viewDefStaticBox = new wxStaticBox(this, -1, wxT("View Definition"));
+   wxStaticBoxSizer *viewDefStaticSizer
+      = new wxStaticBoxSizer(viewDefStaticBox, wxVERTICAL);
+   viewDefStaticSizer->Add(mViewDefSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+
+   //------------------------------------------------------
+   // view up definition
+   //------------------------------------------------------
+   wxString axisArray[] = {"X", "-X", "Y", "-Y", "Z", "-Z"};
    
-   mPlotOptionSizer->Add(mEquatorialPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mPlotOptionSizer->Add(viewScaleFactorLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mPlotOptionSizer->Add(mViewScaleFactorTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mPlotOptionSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   wxStaticText *upCsLabel =
+      new wxStaticText(this, -1, wxT("Coordinate System"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   wxStaticText *upAxisLabel =
+      new wxStaticText(this, -1, wxT("Axis"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
    
-   mPlotOptionSizer->Add(mOverlapCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mPlotOptionSizer->Add(mUseViewPointInfoCheckBox, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mPlotOptionSizer->Add(mPerspectiveModeCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mPlotOptionSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewUpCsComboBox =
+      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(120,-1));
    
-   #if DEBUG_OPENGL_PANEL
+   mViewUpAxisComboBox =
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition,
+                     wxSize(120,-1), 6, axisArray, wxCB_DROPDOWN);
+   
+   wxStaticBox *upDefStaticBox = new wxStaticBox(this, -1, wxT("View Up Definition"));
+   wxStaticBoxSizer *upDefStaticSizer
+      = new wxStaticBoxSizer(upDefStaticBox, wxVERTICAL);
+   upDefStaticSizer->Add(upCsLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   upDefStaticSizer->Add(mViewUpCsComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   upDefStaticSizer->Add(upAxisLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   upDefStaticSizer->Add(mViewUpAxisComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+
+//    // view geometry sizer
+//    wxStaticBox *viewDefStaticBox = new wxStaticBox(this, -1, wxT("View Geometry"));
+//    wxStaticBoxSizer *viewDefStaticSizer
+//       = new wxStaticBoxSizer(viewDefStaticBox, wxHORIZONTAL);
+//    viewDefStaticSizer->Add(viewDefStaticSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+//    viewDefStaticSizer->Add(upDefStaticSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+
+   
+   #if DEBUG_OPENGL_PANEL_CREATE
       MessageInterface::ShowMessage
          ("OpenGlPlotSetupPanel::Create() put in the order...\n");
    #endif
@@ -349,34 +434,41 @@ void OpenGlPlotSetupPanel::Create()
    //------------------------------------------------------
    // put in the order
    //------------------------------------------------------    
-   mFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
-   mFlexGridSizer->Add(availObjBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mFlexGridSizer->Add(arrowButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mFlexGridSizer->Add(mObjSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mFlexGridSizer->Add(mScOptionBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mFlexGridSizer->Show(mScOptionBoxSizer, false);
+   wxBoxSizer *topViewBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+   topViewBoxSizer->Add(plotOptionStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   topViewBoxSizer->Add(viewObjectStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   wxBoxSizer *bottomViewBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+   bottomViewBoxSizer->Add(viewDefStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   bottomViewBoxSizer->Add(upDefStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
-   pageBoxSizer->Add(mFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   pageBoxSizer->Add(mPlotOptionSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   pageBoxSizer->Add(topViewBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageBoxSizer->Add(bottomViewBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
    //------------------------------------------------------
    // add to parent sizer
    //------------------------------------------------------
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   #if DEBUG_OPENGL_PANEL
+   #if DEBUG_OPENGL_PANEL_CREATE
       MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() exiting...\n");
    #endif
 
 }
+
 
 //------------------------------------------------------------------------------
 // virtual void LoadData()
 //------------------------------------------------------------------------------
 void OpenGlPlotSetupPanel::LoadData()
 {
-   #if DEBUG_OPENGL_PANEL
+
+   MessageInterface::ShowMessage("=====>OpenGlPlotSetupPanel::LoadData() testing...\n");
+   MessageInterface::ShowMessage("Earth=%d\n",
+                                 theGuiInterpreter->GetConfiguredItem("Earth"));
+   
+   #if DEBUG_OPENGL_PANEL_LOAD
       MessageInterface::ShowMessage("OpenGlPlotSetupPanel::LoadData() entering...\n");
    #endif
 
@@ -384,13 +476,20 @@ void OpenGlPlotSetupPanel::LoadData()
    {
       // load data from the core engine
       mPlotCheckBox->SetValue(mOpenGlPlot->IsActive());
-      mEquatorialPlaneCheckBox->SetValue(mOpenGlPlot->GetStringParameter("EquatorialPlane") == "On");
-      mEclipticPlaneCheckBox->SetValue(mOpenGlPlot->GetStringParameter("CelestialPlane") == "On");
-      mWireFrameCheckBox->SetValue(mOpenGlPlot->GetStringParameter("WireFrame") == "On");
-      mTargetStatusCheckBox->SetValue(mOpenGlPlot->GetStringParameter("TargetStatus") == "On");
-      mOverlapCheckBox->SetValue(mOpenGlPlot->GetStringParameter("Overlap") == "On");
-      mUseViewPointInfoCheckBox->SetValue(mOpenGlPlot->GetStringParameter("UseViewPointInfo") == "On");
-      mPerspectiveModeCheckBox->SetValue(mOpenGlPlot->GetStringParameter("PerspectiveMode") == "On");
+      mEquatorialPlaneCheckBox->
+         SetValue(mOpenGlPlot->GetStringParameter("EquatorialPlane") == "On");
+      mEclipticPlaneCheckBox->
+         SetValue(mOpenGlPlot->GetStringParameter("CelestialPlane") == "On");
+      mWireFrameCheckBox->
+         SetValue(mOpenGlPlot->GetStringParameter("WireFrame") == "On");
+      mTargetStatusCheckBox->
+         SetValue(mOpenGlPlot->GetStringParameter("TargetStatus") == "On");
+      mOverlapCheckBox->
+         SetValue(mOpenGlPlot->GetStringParameter("Overlap") == "On");
+      mUseViewPointInfoCheckBox->
+         SetValue(mOpenGlPlot->GetStringParameter("UseViewPointInfo") == "On");
+      mPerspectiveModeCheckBox->
+         SetValue(mOpenGlPlot->GetStringParameter("PerspectiveMode") == "On");
       
       mCoordSysComboBox->SetStringSelection
          (mOpenGlPlot->GetStringParameter("CoordinateSystem").c_str());
@@ -422,11 +521,11 @@ void OpenGlPlotSetupPanel::LoadData()
          str.Printf("%g", vec[2]);
          mViewPointRef3TextCtrl->SetValue(str);
 
-         mPlotOptionSizer->Show(mViewPointRefSizer, true);
+         mViewDefSizer->Show(mViewPointRefSizer, true);
       }
       else
       {
-         mPlotOptionSizer->Show(mViewPointRefSizer, false);
+         mViewDefSizer->Show(mViewPointRefSizer, false);
       }
       
       // show vector if viewpoint vector name is Vector
@@ -434,7 +533,7 @@ void OpenGlPlotSetupPanel::LoadData()
       {
          Rvector vec = mOpenGlPlot->GetRvectorParameter("ViewPointVectorVector");
          
-         #if DEBUG_OPENGL_PANEL
+         #if DEBUG_OPENGL_PANEL_LOAD
          MessageInterface::ShowMessage
             ("OpenGlPlotSetupPanel::LoadData() ViewPointVectorVector = %s\n",
              vec.ToString().c_str());
@@ -448,11 +547,11 @@ void OpenGlPlotSetupPanel::LoadData()
          str.Printf("%g", vec[2]);
          mViewPointVec3TextCtrl->SetValue(str);
 
-         mPlotOptionSizer->Show(mViewPointVectorSizer, true);
+         mViewDefSizer->Show(mViewPointVectorSizer, true);
       }
       else
       {
-         mPlotOptionSizer->Show(mViewPointVectorSizer, false);
+         mViewDefSizer->Show(mViewPointVectorSizer, false);
       }
             
       // show vector if view direction name is Vector
@@ -467,55 +566,123 @@ void OpenGlPlotSetupPanel::LoadData()
          str.Printf("%g", vec[2]);
          mViewDir3TextCtrl->SetValue(str);
          
-         mPlotOptionSizer->Show(mViewDirVectorSizer, true);
+         mViewDefSizer->Show(mViewDirVectorSizer, true);
       }
       else
       {
-         mPlotOptionSizer->Show(mViewDirVectorSizer, false);
+         mViewDefSizer->Show(mViewDirVectorSizer, false);
       }
 
       // set layout
-      mPlotOptionSizer->Layout();
+      mViewDefSizer->Layout();
+
+      //--------------------------------------------------------------
+      // get SpacePoint list to plot
+      //--------------------------------------------------------------
+      StringArray spNameList = mOpenGlPlot->GetSpacePointList();
+      int spCount = spNameList.size();
       
-      // get spacecraft list to plot
-      StringArray scNameList = mOpenGlPlot->GetStringArrayParameter("Add");
-      mScCount = scNameList.size();
-   
+      #if DEBUG_OPENGL_PANEL_LOAD
+      MessageInterface::ShowMessage
+         ("OpenGlPlotSetupPanel::LoadData() spCount=%d\n", spCount);
+      
+      for (int i=0; i<spCount; i++)
+      {
+         MessageInterface::ShowMessage
+            ("OpenGlPlotSetupPanel::LoadData() spNameList[%d]=%s\n",
+             i, spNameList[i].c_str());
+      }
+      #endif
+
+      StringArray scNameArray;
+      StringArray nonScNameArray;
+      
+      // get spacecraft and non-spacecraft list
+      for (int i=0; i<spCount; i++)
+      {
+         if (mSpacecraftListBox->FindString(spNameList[i].c_str()) == wxNOT_FOUND)
+            nonScNameArray.push_back(spNameList[i]);
+         else
+            scNameArray.push_back(spNameList[i]);
+      }
+
+      mScCount = scNameArray.size();
+      mNonScCount = nonScNameArray.size();
+
+      #if DEBUG_OPENGL_PANEL_LOAD
+      MessageInterface::ShowMessage
+         ("OpenGlPlotSetupPanel::LoadData() mScCount=%d, mNonScCount=%d\n",
+          mScCount, mNonScCount);
+      #endif
+      
       if (mScCount > 0)
       {
          wxString *scNames = new wxString[mScCount];
          for (int i=0; i<mScCount; i++)
          {
-            scNames[i] = scNameList[i].c_str();
+            scNames[i] = scNameArray[i].c_str();
          
-            mOrbitColorMap[scNameList[i]]
-               = RgbColor(mOpenGlPlot->GetColor("Orbit", scNameList[i]));
-            mTargetColorMap[scNameList[i]]
-               = RgbColor(mOpenGlPlot->GetColor("Target", scNameList[i]));
+            mOrbitColorMap[scNameArray[i]]
+               = RgbColor(mOpenGlPlot->GetColor("Orbit", scNameArray[i]));
+            mTargetColorMap[scNameArray[i]]
+               = RgbColor(mOpenGlPlot->GetColor("Target", scNameArray[i]));
          }
-      
-         mSelectedObjListBox->Set(mScCount, scNames);
+         
+         mSelectedScListBox->Set(mScCount, scNames);
          delete scNames;
+
+      }
       
-         // show spacecraft option
-         mSelectedObjListBox->SetSelection(0);
-         ShowSpacecraftOption(mSelectedObjListBox->GetStringSelection(), true);
-      }
-      else
+      if (mNonScCount > 0)
       {
-         ShowSpacecraftOption("", false);
+         wxString *nonScNames = new wxString[mNonScCount];
+         for (int i=0; i<mNonScCount; i++)
+         {
+            nonScNames[i] = nonScNameArray[i].c_str();
+         
+            mOrbitColorMap[nonScNameArray[i]]
+               = RgbColor(mOpenGlPlot->GetColor("Orbit", nonScNameArray[i]));
+            mTargetColorMap[nonScNameArray[i]]
+               = RgbColor(mOpenGlPlot->GetColor("Target", nonScNameArray[i]));
+         }
+         
+         mSelectedObjListBox->Set(mNonScCount, nonScNames);
+         delete nonScNames;
+
       }
+      
+      // show spacecraft option
+      mSelectedScListBox->SetSelection(0);
+      ShowSpacePointOption(mSelectedScListBox->GetStringSelection(), true);
+
+         
    }
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
          ("OpenGlPlotSetupPanel:LoadData() error occurred!\n%s\n", e.GetMessage().c_str());
    }
+
+   // deselect available object list
+   mSpacecraftListBox->Deselect(mSpacecraftListBox->GetSelection());
+   mCelesObjectListBox->Deselect(mCelesObjectListBox->GetSelection());
    
-   mPerspectiveModeCheckBox->Disable();
+   mPerspectiveModeCheckBox->Enable();
    theApplyButton->Disable();
+
+   mFovLabel->Disable();
+   mFovTextCtrl->Disable();
    
-   #if DEBUG_OPENGL_PANEL
+   mViewUpAxisComboBox->SetSelection(0);
+   
+   // if perspective mode, enalbe fov
+   if (mPerspectiveModeCheckBox->GetValue())
+   {
+      mFovLabel->Enable();
+      mFovTextCtrl->Enable();
+   }
+   
+   #if DEBUG_OPENGL_PANEL_LOAD
    MessageInterface::ShowMessage("OpenGlPlotSetupPanel::LoadData() exiting...\n");
    #endif
 }
@@ -527,6 +694,11 @@ void OpenGlPlotSetupPanel::LoadData()
 void OpenGlPlotSetupPanel::SaveData()
 {
 
+   #if DEBUG_OPENGL_PANEL_SAVE
+   MessageInterface::ShowMessage
+      ("OpenGlPlotSetupPanel::SaveData() entered.\n");
+   #endif
+   
    try
    {
       // save data to core engine
@@ -568,52 +740,94 @@ void OpenGlPlotSetupPanel::SaveData()
          mOpenGlPlot->SetStringParameter("PerspectiveMode", "Off");
 
       // save spacecraft list
-      if (mHasScChanged)
+      if (mHasSpChanged)
       {
-         mHasScChanged = false;
+         mHasSpChanged = false;
          mHasColorChanged = true;
       
-         mScCount = mSelectedObjListBox->GetCount();
-      
+         mScCount = mSelectedScListBox->GetCount();
+         mNonScCount = mSelectedObjListBox->GetCount();
+         
+         #if DEBUG_OPENGL_PANEL_SAVE
+         MessageInterface::ShowMessage
+            ("OpenGlPlotSetupPanel::SaveData() mScCount=%d, mNonScCount=%d\n",
+             mScCount, mNonScCount);
+         #endif
+         
          if (mScCount == 0 && mPlotCheckBox->IsChecked())
          {
-            wxLogMessage(wxT("Spacecraft not selected. The plot will not be activated."));
+            wxLogMessage(wxT("Spacecraft not selected. "
+                             "The plot will not be activated."));
             mOpenGlPlot->Activate(false);
          }
 
-         if (mScCount >= 0) // >=0 because the list needs to be cleared
+         // clear the list first
+         mOpenGlPlot->TakeAction("Clear");
+
+         // add spacecraft
+         for (int i=0; i<mScCount; i++)
          {
-            mOpenGlPlot->TakeAction("Clear");
+            mSelSpName = std::string(mSelectedScListBox->GetString(i).c_str());
+            
+            #if DEBUG_OPENGL_PANEL_SAVE
+            MessageInterface::ShowMessage
+               ("OpenGlPlotSetupPanel::SaveData() Sc[%d] = %s\n", i,
+                mSelSpName.c_str());
+            #endif
+            
+            mOpenGlPlot->
+               SetStringParameter("Add", mSelSpName, i);
+         }
          
-            for (int i=0; i<mScCount; i++)
-            {
-               mSelScName = std::string(mSelectedObjListBox->GetString(i).c_str());
-               //MessageInterface::ShowMessage("OpenGlPlotSetupPanel::SaveData() SC = %s\n",
-               //                              mSelScName.c_str());
-               mOpenGlPlot->
-                  SetStringParameter("Add", mSelScName, i);
-            }
+         
+         // add non-spacecraft
+         for (int i=0; i<mNonScCount; i++)
+         {
+            mSelSpName = std::string(mSelectedObjListBox->GetString(i).c_str());
+            
+            #if DEBUG_OPENGL_PANEL_SAVE
+            MessageInterface::ShowMessage
+               ("OpenGlPlotSetupPanel::SaveData() NonSc[%d] = %s\n", i,
+                mSelSpName.c_str());
+            #endif
+            
+            mOpenGlPlot->
+               SetStringParameter("Add", mSelSpName, mScCount+i);
          }
       }
-   
+      
       // save color
       if (mHasColorChanged)
       {
          mHasColorChanged = false;
-      
+
+         // change spacecraft color
          for (int i=0; i<mScCount; i++)
          {
-            mSelScName = std::string(mSelectedObjListBox->GetString(i).c_str());
+            mSelSpName = std::string(mSelectedScListBox->GetString(i).c_str());
          
             mOpenGlPlot->
-               SetColor("Orbit", mSelScName,
-                        mOrbitColorMap[mSelScName].GetIntColor());
+               SetColor("Orbit", mSelSpName,
+                        mOrbitColorMap[mSelSpName].GetIntColor());
             mOpenGlPlot->
-               SetColor("Target", mSelScName,
-                        mTargetColorMap[mSelScName].GetIntColor());
+               SetColor("Target", mSelSpName,
+                        mTargetColorMap[mSelSpName].GetIntColor());
+         }
+         
+         // change non-spacecraft color
+         for (int i=0; i<mNonScCount; i++)
+         {
+            mSelSpName = std::string(mSelectedObjListBox->GetString(i).c_str());
+         
+            mOpenGlPlot->
+               SetColor("Orbit", mSelSpName,
+                        mOrbitColorMap[mSelSpName].GetIntColor());
+            mOpenGlPlot->
+               SetColor("Target", mSelSpName,
+                        mTargetColorMap[mSelSpName].GetIntColor());
          }
       }
-   
+      
       // save coordinate system
       if (mHasCoordSysChanged)
       {
@@ -622,7 +836,7 @@ void OpenGlPlotSetupPanel::SaveData()
             ("CoordinateSystem",
              std::string(mCoordSysComboBox->GetStringSelection().c_str()));
       }
-
+      
       // save ViewPoint info
       if (mHasViewInfoChanged)
       {
@@ -693,29 +907,32 @@ void OpenGlPlotSetupPanel::SaveData()
 
 
 //------------------------------------------------------------------------------
-// void OnAddSpacecraft(wxCommandEvent& event)
+// void OnAddSpacePoint(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void OpenGlPlotSetupPanel::OnAddSpacecraft(wxCommandEvent& event)
+void OpenGlPlotSetupPanel::OnAddSpacePoint(wxCommandEvent& event)
 {
    if (mSpacecraftListBox->GetSelection() != -1)
    {
       // get string in first list and then search for it
       // in the second list
       wxString s = mSpacecraftListBox->GetStringSelection();
-      int found = mSelectedObjListBox->FindString(s);
+      int found = mSelectedScListBox->FindString(s);
     
       // if the string wasn't found in the second list, insert it
       if (found == wxNOT_FOUND)
       {
-         mSelectedObjListBox->Append(s);
-         mSelectedObjListBox->SetStringSelection(s);
+         mSelectedScListBox->Append(s);
+         mSelectedScListBox->SetStringSelection(s);
       
          // select next available item
          mSpacecraftListBox->
             SetSelection(mSpacecraftListBox->GetSelection()+1);
 
-         ShowSpacecraftOption(s, true);
-         mHasScChanged = true;
+         // deselect selected other object
+         mSelectedObjListBox->Deselect(mSelectedObjListBox->GetSelection());
+
+         ShowSpacePointOption(s, true);
+         mHasSpChanged = true;
          theApplyButton->Enable();
       }
    }
@@ -734,8 +951,11 @@ void OpenGlPlotSetupPanel::OnAddSpacecraft(wxCommandEvent& event)
          mCelesObjectListBox->
             SetSelection(mCelesObjectListBox->GetSelection()+1);
 
-         ShowSpacecraftOption(s, true);
-         mHasScChanged = true;
+         // deselect selected spacecraft
+         mSelectedScListBox->Deselect(mSelectedScListBox->GetSelection());
+         
+         ShowSpacePointOption(s, true);
+         mHasSpChanged = true;
          theApplyButton->Enable();
       }
    }
@@ -743,39 +963,70 @@ void OpenGlPlotSetupPanel::OnAddSpacecraft(wxCommandEvent& event)
 
 
 //------------------------------------------------------------------------------
-// void OnRemoveSpacecraft(wxCommandEvent& event)
+// void OnRemoveSpacePoint(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void OpenGlPlotSetupPanel::OnRemoveSpacecraft(wxCommandEvent& event)
+void OpenGlPlotSetupPanel::OnRemoveSpacePoint(wxCommandEvent& event)
 {
-   int sel = mSelectedObjListBox->GetSelection();
-   mSelectedObjListBox->Delete(sel);
-   
-   if (sel-1 < 0)
+   if (mSelectedScListBox->GetSelection() != -1)
    {
-      mSelectedObjListBox->SetSelection(0);
-      if (mSelectedObjListBox->GetCount() == 0)
-         ShowSpacecraftOption("", false); // hide spacecraft color, etc
+      int sel = mSelectedScListBox->GetSelection();
+      mSelectedScListBox->Delete(sel);
+   
+      if (sel-1 < 0)
+      {
+         mSelectedScListBox->SetSelection(0);
+         if (mSelectedScListBox->GetCount() == 0)
+            ShowSpacePointOption("", false); // hide spacecraft color, etc
+         else
+            ShowSpacePointOption(mSelectedScListBox->GetStringSelection(), true);
+      }
       else
-         ShowSpacecraftOption(mSelectedObjListBox->GetStringSelection(), true);
+      {
+         mSelectedScListBox->SetSelection(sel-1);
+         ShowSpacePointOption(mSelectedScListBox->GetStringSelection(), true);
+      }
    }
-   else
+   else if (mSelectedObjListBox->GetSelection() != -1)
    {
-      mSelectedObjListBox->SetSelection(sel-1);
-      ShowSpacecraftOption(mSelectedObjListBox->GetStringSelection(), true);
+      int sel = mSelectedObjListBox->GetSelection();
+      mSelectedObjListBox->Delete(sel);
+   
+      if (sel-1 < 0)
+      {
+         mSelectedObjListBox->SetSelection(0);
+         if (mSelectedObjListBox->GetCount() == 0)
+            ShowSpacePointOption("", false); // hide spacecraft color, etc
+         else
+            ShowSpacePointOption(mSelectedObjListBox->GetStringSelection(), true);
+      }
+      else
+      {
+         mSelectedObjListBox->SetSelection(sel-1);
+         ShowSpacePointOption(mSelectedObjListBox->GetStringSelection(), true);
+      }
    }
    
-   mHasScChanged = true;
+   mHasSpChanged = true;
    theApplyButton->Enable();
 }
 
+
 //------------------------------------------------------------------------------
-// void OnClearSpacecraft(wxCommandEvent& event)
+// void OnClearSpacePoint(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void OpenGlPlotSetupPanel::OnClearSpacecraft(wxCommandEvent& event)
+void OpenGlPlotSetupPanel::OnClearSpacePoint(wxCommandEvent& event)
 {
-   mSelectedObjListBox->Clear();
-   ShowSpacecraftOption("", false);
-   mHasScChanged = true;
+   if (mSelectedScListBox->GetSelection() != -1)
+   {
+      mSelectedScListBox->Clear();
+   }
+   else if (mSelectedObjListBox->GetSelection() != -1)
+   {
+      mSelectedObjListBox->Clear();
+   }
+   
+   ShowSpacePointOption("", false);
+   mHasSpChanged = true;
    theApplyButton->Enable();
 }
 
@@ -797,7 +1048,18 @@ void OpenGlPlotSetupPanel::OnSelectAvailObject(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OpenGlPlotSetupPanel::OnSelectSpacecraft(wxCommandEvent& event)
 {
-   ShowSpacecraftOption(mSelectedObjListBox->GetStringSelection(), true);
+   ShowSpacePointOption(mSelectedScListBox->GetStringSelection(), true);
+   mSelectedObjListBox->Deselect(mSelectedObjListBox->GetSelection());
+}
+
+
+//------------------------------------------------------------------------------
+// void OnSelectOtherObject(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void OpenGlPlotSetupPanel::OnSelectOtherObject(wxCommandEvent& event)
+{
+   ShowSpacePointOption(mSelectedObjListBox->GetStringSelection(), true);
+   mSelectedScListBox->Deselect(mSelectedScListBox->GetSelection());
 }
 
 
@@ -815,7 +1077,7 @@ void OpenGlPlotSetupPanel::OnCheckBoxChange(wxCommandEvent& event)
 void OpenGlPlotSetupPanel::OnOrbitColorClick(wxCommandEvent& event)
 {
    wxColourData data;
-   data.SetColour(mScOrbitColor);
+   data.SetColour(mOrbitColor);
 
    wxColourDialog dialog(this, &data);
    //dialog.CenterOnParent();
@@ -823,23 +1085,47 @@ void OpenGlPlotSetupPanel::OnOrbitColorClick(wxCommandEvent& event)
    
    if (dialog.ShowModal() == wxID_OK)
    {
-      mSelScName = std::string(mSelectedObjListBox->GetStringSelection().c_str());
+      // if spacecraft is selected
+      if (mSelectedScListBox->GetSelection() != -1)
+      {
+         mSelSpName = std::string(mSelectedScListBox->GetStringSelection().c_str());
       
-      mScOrbitColor = dialog.GetColourData().GetColour();
-      mScOrbitColorButton->SetBackgroundColour(mScOrbitColor);
+         mOrbitColor = dialog.GetColourData().GetColour();
+         mOrbitColorButton->SetBackgroundColour(mOrbitColor);
       
-      mOrbitColorMap[mSelScName].Set(mScOrbitColor.Red(),
-                                     mScOrbitColor.Green(),
-                                     mScOrbitColor.Blue());
+         mOrbitColorMap[mSelSpName].Set(mOrbitColor.Red(),
+                                        mOrbitColor.Green(),
+                                        mOrbitColor.Blue());
 
-      #if DEBUG_OPENGL_PANEL
-      MessageInterface::ShowMessage("OnOrbitColorClick() r=%d g=%d b=%d\n",
-                                    mScOrbitColor.Red(), mScOrbitColor.Green(),
-                                    mScOrbitColor.Blue());
+         #if DEBUG_OPENGL_PANEL
+         MessageInterface::ShowMessage("OnOrbitColorClick() r=%d g=%d b=%d\n",
+                                       mOrbitColor.Red(), mOrbitColor.Green(),
+                                       mOrbitColor.Blue());
 
-      MessageInterface::ShowMessage("OnOrbitColorClick() UnsignedInt=%d\n",
-                                    mOrbitColorMap[mSelScName].GetIntColor());
-      #endif
+         MessageInterface::ShowMessage("OnOrbitColorClick() UnsignedInt=%d\n",
+                                       mOrbitColorMap[mSelSpName].GetIntColor());
+         #endif
+      }
+      else if (mSelectedObjListBox->GetSelection() != -1)
+      {
+         mSelSpName = std::string(mSelectedObjListBox->GetStringSelection().c_str());
+      
+         mOrbitColor = dialog.GetColourData().GetColour();
+         mOrbitColorButton->SetBackgroundColour(mOrbitColor);
+      
+         mOrbitColorMap[mSelSpName].Set(mOrbitColor.Red(),
+                                        mOrbitColor.Green(),
+                                        mOrbitColor.Blue());
+
+         #if DEBUG_OPENGL_PANEL
+         MessageInterface::ShowMessage("OnOrbitColorClick() r=%d g=%d b=%d\n",
+                                       mOrbitColor.Red(), mOrbitColor.Green(),
+                                       mOrbitColor.Blue());
+
+         MessageInterface::ShowMessage("OnOrbitColorClick() UnsignedInt=%d\n",
+                                       mOrbitColorMap[mSelSpName].GetIntColor());
+         #endif
+      }
       
       theApplyButton->Enable();
       mHasColorChanged = true;
@@ -852,7 +1138,7 @@ void OpenGlPlotSetupPanel::OnOrbitColorClick(wxCommandEvent& event)
 void OpenGlPlotSetupPanel::OnTargetColorClick(wxCommandEvent& event)
 {
    wxColourData data;
-   data.SetColour(mScTargetColor);
+   data.SetColour(mTargetColor);
 
    wxColourDialog dialog(this, &data);
    //dialog.CenterOnParent();
@@ -860,13 +1146,13 @@ void OpenGlPlotSetupPanel::OnTargetColorClick(wxCommandEvent& event)
    
    if (dialog.ShowModal() == wxID_OK)
    {
-      mSelScName = std::string(mSelectedObjListBox->GetStringSelection().c_str());
+      mSelSpName = std::string(mSelectedObjListBox->GetStringSelection().c_str());
       
-      mScTargetColor = dialog.GetColourData().GetColour();
-      mScTargetColorButton->SetBackgroundColour(mScTargetColor);
-      mTargetColorMap[mSelScName].Set(mScTargetColor.Red(),
-                                      mScTargetColor.Green(),
-                                      mScTargetColor.Blue());
+      mTargetColor = dialog.GetColourData().GetColour();
+      mTargetColorButton->SetBackgroundColour(mTargetColor);
+      mTargetColorMap[mSelSpName].Set(mTargetColor.Red(),
+                                      mTargetColor.Green(),
+                                      mTargetColor.Blue());
       
       theApplyButton->Enable();
       mHasColorChanged = true;
@@ -888,11 +1174,11 @@ void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
       mHasViewInfoChanged = true;
       
       if (mViewPointRefComboBox->GetStringSelection() == "Vector")
-         mPlotOptionSizer->Show(mViewPointRefSizer, true);
+         mViewDefSizer->Show(mViewPointRefSizer, true);
       else
-         mPlotOptionSizer->Show(mViewPointRefSizer, false);
+         mViewDefSizer->Show(mViewPointRefSizer, false);
 
-      mPlotOptionSizer->Layout();
+      mViewDefSizer->Layout();
         
    }
    else if (event.GetEventObject() == mViewPointVectorComboBox)
@@ -900,11 +1186,11 @@ void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
       mHasViewInfoChanged = true;
       
       if (mViewPointVectorComboBox->GetStringSelection() == "Vector")
-         mPlotOptionSizer->Show(mViewPointVectorSizer, true);
+         mViewDefSizer->Show(mViewPointVectorSizer, true);
       else
-         mPlotOptionSizer->Show(mViewPointVectorSizer, false);
+         mViewDefSizer->Show(mViewPointVectorSizer, false);
 
-      mPlotOptionSizer->Layout();
+      mViewDefSizer->Layout();
         
    }
    else if (event.GetEventObject() == mViewDirectionComboBox)
@@ -912,11 +1198,11 @@ void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
       mHasViewInfoChanged = true;
       
       if (mViewDirectionComboBox->GetStringSelection() == "Vector")
-         mPlotOptionSizer->Show(mViewDirVectorSizer, true);
+         mViewDefSizer->Show(mViewDirVectorSizer, true);
       else
-         mPlotOptionSizer->Show(mViewDirVectorSizer, false);
+         mViewDefSizer->Show(mViewDirVectorSizer, false);
         
-      mPlotOptionSizer->Layout();
+      mViewDefSizer->Layout();
    }
    
    theApplyButton->Enable();
@@ -938,19 +1224,19 @@ void OpenGlPlotSetupPanel::OnTextChange(wxCommandEvent& event)
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// void ShowSpacecraftOption(const wxString &name, bool show = true)
+// void ShowSpacePointOption(const wxString &name, bool show = true)
 //------------------------------------------------------------------------------
-void OpenGlPlotSetupPanel::ShowSpacecraftOption(const wxString &name, bool show)
+void OpenGlPlotSetupPanel::ShowSpacePointOption(const wxString &name, bool show)
 {
    #if DEBUG_OPENGL_PANEL
    MessageInterface::ShowMessage
-      ("OpenGlPlotSetupPanel::ShowSpacecraftOption() name=%s\n",
+      ("OpenGlPlotSetupPanel::ShowSpacePointOption() name=%s\n",
        name.c_str());
    #endif
    
    if (!name.IsSameAs(""))
    {
-      mSelScName = std::string(name.c_str());
+      mSelSpName = std::string(name.c_str());
       int found = mSpacecraftListBox->FindString(name);
 
       //------------------------------------------
@@ -959,63 +1245,63 @@ void OpenGlPlotSetupPanel::ShowSpacecraftOption(const wxString &name, bool show)
       if (found != wxNOT_FOUND)
       {
          // if spacecraft name not found, insert
-         if (mOrbitColorMap.find(mSelScName) == mOrbitColorMap.end())
+         if (mOrbitColorMap.find(mSelSpName) == mOrbitColorMap.end())
          {
-            mOrbitColorMap[mSelScName] = RgbColor(GmatColor::RED32);
-            mTargetColorMap[mSelScName] = RgbColor(GmatColor::ORANGE32);
+            mOrbitColorMap[mSelSpName] = RgbColor(GmatColor::RED32);
+            mTargetColorMap[mSelSpName] = RgbColor(GmatColor::ORANGE32);
          }
          
-         RgbColor orbColor = mOrbitColorMap[mSelScName];
-         RgbColor targColor = mTargetColorMap[mSelScName];
+         RgbColor orbColor = mOrbitColorMap[mSelSpName];
+         RgbColor targColor = mTargetColorMap[mSelSpName];
          
          #if DEBUG_OPENGL_PANEL
          MessageInterface::ShowMessage
-            ("ShowSpacecraftOption() orbColor=%08x targColor=%08x\n",
+            ("ShowSpacePointOption() orbColor=%08x targColor=%08x\n",
              orbColor.GetIntColor(), targColor.GetIntColor());
          #endif
          
-         mScOrbitColor.Set(orbColor.Red(), orbColor.Green(), orbColor.Blue());
-         mScTargetColor.Set(targColor.Red(), targColor.Green(), targColor.Blue());
+         mOrbitColor.Set(orbColor.Red(), orbColor.Green(), orbColor.Blue());
+         mTargetColor.Set(targColor.Red(), targColor.Green(), targColor.Blue());
          
-         mScOrbitColorButton->SetBackgroundColour(mScOrbitColor);
-         mScTargetColorButton->SetBackgroundColour(mScTargetColor);
+         mOrbitColorButton->SetBackgroundColour(mOrbitColor);
+         mTargetColorButton->SetBackgroundColour(mTargetColor);
          mTargetColorLabel->Enable();
-         mScTargetColorButton->Enable();
-         mFlexGridSizer->Show(mScOptionBoxSizer, show);
+         mTargetColorButton->Enable();
+         mObjectGridSizer->Show(mScOptionBoxSizer, show);
       }
       //------------------------------------------
       // else selected object is a celestial body
       //------------------------------------------
       else
       {
-         // if spacecraft name not found, insert
-         if (mOrbitColorMap.find(mSelScName) == mOrbitColorMap.end())
+         // if non-spacecraft name not found, insert
+         if (mOrbitColorMap.find(mSelSpName) == mOrbitColorMap.end())
          {
-            mOrbitColorMap[mSelScName] = RgbColor(GmatColor::RED32);
+            mOrbitColorMap[mSelSpName] = RgbColor(GmatColor::RED32);
          }
          
-         RgbColor orbColor = mOrbitColorMap[mSelScName];
+         RgbColor orbColor = mOrbitColorMap[mSelSpName];
          
          #if DEBUG_OPENGL_PANEL
-         MessageInterface::ShowMessage("ShowSpacecraftOption() mSelScName=%s\n",
-                                       mSelScName.c_str());
+         MessageInterface::ShowMessage("ShowSpacePointOption() mSelSpName=%s\n",
+                                       mSelSpName.c_str());
          MessageInterface::ShowMessage
-            ("ShowSpacecraftOption() orbColor=%08x\n", orbColor.GetIntColor());
+            ("ShowSpacePointOption() orbColor=%08x\n", orbColor.GetIntColor());
          #endif
          
-         mScOrbitColor.Set(orbColor.Red(), orbColor.Green(), orbColor.Blue());
+         mOrbitColor.Set(orbColor.Red(), orbColor.Green(), orbColor.Blue());
          
-         mScOrbitColorButton->SetBackgroundColour(mScOrbitColor);
-         mScTargetColorButton->SetBackgroundColour(*wxLIGHT_GREY);
+         mOrbitColorButton->SetBackgroundColour(mOrbitColor);
+         mTargetColorButton->SetBackgroundColour(*wxLIGHT_GREY);
          mTargetColorLabel->Disable();
-         mScTargetColorButton->Disable();
-         mFlexGridSizer->Show(mScOptionBoxSizer, show);
+         mTargetColorButton->Disable();
+         mObjectGridSizer->Show(mScOptionBoxSizer, show);
       }
    }
    else
    {
-      mFlexGridSizer->Show(mScOptionBoxSizer, false);
+      mObjectGridSizer->Show(mScOptionBoxSizer, false);
    }
    
-   mFlexGridSizer->Layout();
+   mObjectGridSizer->Layout();
 }

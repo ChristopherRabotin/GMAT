@@ -62,10 +62,11 @@ public:
    unsigned int GetEcPlaneColor();
    unsigned int GetEcLineColor();
    float GetDistance();
-   int   GetGotoBodyId();
    int   GetAnimationUpdateInterval();
+   wxString GetGotoObjectName();
    wxString GetDesiredCoordSysName();
    CoordinateSystem* GetDesiredCoordSystem();
+   const StringArray& GetBodyNamesInUse();
    
    // setters
    void SetPlotName(const wxString &name);
@@ -84,15 +85,18 @@ public:
    void SetEcPlaneColor(unsigned int color);
    void SetEcLineColor(unsigned int color);
    void SetDistance(float dist);
-   void SetGotoBodyName(const wxString &bodyName);
+   void SetGotoObjectName(const wxString &bodyName);
    void SetDesiredCoordSystem(const wxString &csName);
    void SetDesiredCoordSystem(CoordinateSystem *cs);
+   void SetObjectColors(const wxStringColorMap &objectColorMap);
+   void SetShowObjects(const wxStringBoolMap &showObjMap);
    
    // actions
    void DrawInOtherCoordSystem(const wxString &csName);
    void DrawInOtherCoordSystem(CoordinateSystem *cs);
-   void UpdatePlot(bool viewAnimation);
-   
+   void RedrawPlot(bool viewAnimation);
+
+   // menu actions
    void OnClearPlot(wxCommandEvent& event);
    void OnChangeTitle(wxCommandEvent& event);
    void OnShowDefaultView(wxCommandEvent& event);
@@ -103,9 +107,9 @@ public:
    void OnDrawWireFrame(wxCommandEvent& event);
    void OnDrawEqPlane(wxCommandEvent& event);
    
-   void OnAddBody(wxCommandEvent& event);
-   void OnGotoStdBody(wxCommandEvent& event);
-   void OnGotoOtherBody(wxCommandEvent& event);
+   //void OnAddBody(wxCommandEvent& event);
+   //void OnGotoStdBody(wxCommandEvent& event);
+   //void OnGotoOtherBody(wxCommandEvent& event);
    void OnViewAnimation(wxCommandEvent& event);
    
    void OnHelpView(wxCommandEvent& event);
@@ -115,6 +119,13 @@ public:
    void OnTrajSize(wxSizeEvent& event);
    void OnMove(wxMoveEvent& event);
    void OnClose(wxCloseEvent& event);
+
+   // drawing
+   void SetGlObject(const StringArray &nonScNames,
+                    const UnsignedIntArray &nonScColors,
+                    const std::vector<SpacePoint*> nonScArray);
+   
+   void SetGlCoordSystem(CoordinateSystem *cs);
    
    void SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
                         SpacePoint *vdObj, Real vsFactor,
@@ -122,10 +133,11 @@ public:
                         const Rvector3 &vdVec, bool usevpRefVec,
                         bool usevpVec, bool usevdVec);
    
-   void UpdateSpacecraft(const StringArray scNameArray,
-                         const Real &time, const RealArray &posX,
-                         const RealArray &posY, const RealArray &posZ,
-                         const UnsignedIntArray &color, bool updateCanvas);
+   void UpdatePlot(const StringArray &scNames,
+                   const Real &time, const RealArray &posX,
+                   const RealArray &posY, const RealArray &posZ,
+                   const UnsignedIntArray &scColors, bool updateCanvas);
+   
    void RefreshPlot();
    void DeletePlot();
 
@@ -143,8 +155,8 @@ protected:
    wxMenu *mViewOptionMenu;
    wxMenu *mViewMenu;
    
-   wxMenu* CreateGotoBodyMenu();
-   int GetMenuId(const wxString &body);
+//    wxMenu* CreateGotoBodyMenu();
+//    int GetMenuId(const wxString &body);
    
    DECLARE_EVENT_TABLE();
 };

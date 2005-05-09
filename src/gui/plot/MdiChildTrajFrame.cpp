@@ -35,14 +35,7 @@ BEGIN_EVENT_TABLE(MdiChildTrajFrame, wxMDIChildFrame)
    EVT_MENU(GmatPlot::MDI_GL_SHOW_OPTION_PANEL, MdiChildTrajFrame::OnShowOptionDialog)
    EVT_MENU(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, MdiChildTrajFrame::OnDrawWireFrame)
    EVT_MENU(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, MdiChildTrajFrame::OnDrawEqPlane)
-   
-   EVT_MENU(GmatPlot::MDI_GL_VIEW_ADD_BODY, MdiChildTrajFrame::OnAddBody)
-
-   EVT_MENU_RANGE(GmatPlot::MDI_GL_VIEW_GOTO_SUN, GmatPlot::MDI_GL_VIEW_GOTO_MOON,
-                  MdiChildTrajFrame::OnGotoStdBody)
-   
-   EVT_MENU(GmatPlot::MDI_GL_VIEW_GOTO_OTHER_BODY, MdiChildTrajFrame::OnGotoOtherBody)
-   
+      
    EVT_MENU(GmatPlot::MDI_GL_VIEW_ANIMATION, MdiChildTrajFrame::OnViewAnimation)
    
    EVT_MENU(GmatPlot::MDI_GL_HELP_VIEW, MdiChildTrajFrame::OnHelpView)
@@ -101,7 +94,6 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
    wxMenu *plotMenu = new wxMenu;
 
    plotMenu->Append(GmatPlot::MDI_GL_CLEAR_PLOT, _T("Clear Plot"));
-//   plotMenu->Append(GmatPlot::MDI_GL_CHILD_QUIT, _T("&Close"), _T("Close this window"));
    plotMenu->AppendSeparator();
    plotMenu->Append(GmatPlot::MDI_GL_CHANGE_TITLE, _T("Change &title..."));
 
@@ -132,14 +124,7 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
    mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, true);
    
    mViewMenu->Append(item);
-   mViewMenu->AppendSeparator();
 
-   // View Add Body menu
-   mViewMenu->Append(GmatPlot::MDI_GL_VIEW_ADD_BODY, _T("Add Body"), _T("Add bodies"));
-   
-   // View Goto Body menu
-   mViewMenu->Append(GmatPlot::MDI_GL_VIEW_GOTO_BODY, _T("Go to Body"), CreateGotoBodyMenu());
-   
    // Animation menu
    mViewMenu->AppendSeparator();
    mViewMenu->Append(GmatPlot::MDI_GL_VIEW_ANIMATION, _T("Animation"));
@@ -182,6 +167,11 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
 MdiChildTrajFrame::~MdiChildTrajFrame()
 {   
    mOptionDialog = (OpenGlOptionDialog*)NULL;
+   
+   #if DEBUG_CHILDTRAJ_FRAME
+   MessageInterface::ShowMessage("~MdiChildTrajFrame mPlotName=%s\n",
+                                 mPlotName.c_str());
+   #endif
    
    MdiGlPlot::mdiChildren.DeleteObject(this);
 }
@@ -326,18 +316,6 @@ float MdiChildTrajFrame::GetDistance()
 
 
 //------------------------------------------------------------------------------
-// int GetGotoBodyId()
-//------------------------------------------------------------------------------
-int MdiChildTrajFrame::GetGotoBodyId()
-{
-   if (mCanvas)
-      return mCanvas->GetGotoBodyId();
-
-   return GmatPlot::UNKNOWN_BODY;
-}
-
-
-//------------------------------------------------------------------------------
 // int GetAnimationUpdateInterval()
 //------------------------------------------------------------------------------
 int MdiChildTrajFrame::GetAnimationUpdateInterval()
@@ -346,6 +324,18 @@ int MdiChildTrajFrame::GetAnimationUpdateInterval()
       return mCanvas->GetAnimationUpdateInterval();
 
    return 0;
+}
+
+
+//------------------------------------------------------------------------------
+// wxString GetGotoObjectName()
+//------------------------------------------------------------------------------
+wxString MdiChildTrajFrame::GetGotoObjectName()
+{
+   if (mCanvas)
+      return mCanvas->GetGotoObjectName();
+
+   return "Unknown";
 }
 
 
@@ -370,6 +360,20 @@ CoordinateSystem* MdiChildTrajFrame::GetDesiredCoordSystem()
       return mCanvas->GetDesiredCoordSystem();
 
    return NULL;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetBodyNamesInUse()
+//------------------------------------------------------------------------------
+const StringArray& MdiChildTrajFrame::GetBodyNamesInUse()
+{
+   static StringArray tempArray;
+   
+   if (mCanvas)
+      return mCanvas->GetBodyNamesInUse();
+
+   return tempArray;
 }
 
 
@@ -580,13 +584,13 @@ void MdiChildTrajFrame::SetDistance(float dist)
 
 
 //------------------------------------------------------------------------------
-// void SetGotoBodyName(const wxString &bodyName)
+// void SetGotoObjectName(const wxString &bodyName)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetGotoBodyName(const wxString &bodyName)
+void MdiChildTrajFrame::SetGotoObjectName(const wxString &bodyName)
 {
    if (mCanvas)
    {
-      mCanvas->GotoStdBody(GmatPlot::GetBodyId(bodyName));
+      mCanvas->GotoObject(bodyName);
    }
 }
 
@@ -616,6 +620,27 @@ void MdiChildTrajFrame::SetDesiredCoordSystem(CoordinateSystem *cs)
 
 
 //------------------------------------------------------------------------------
+// void SetObjectColors(const wxStringColorMap &objectColorMap)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetObjectColors(const wxStringColorMap &objectColorMap)
+{
+   if (mCanvas)
+      mCanvas->SetObjectColors(objectColorMap);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetShowObjects(const wxStringBoolMap &showObjMap)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetShowObjects(const wxStringBoolMap &showObjMap)
+{
+   if (mCanvas)
+      mCanvas->SetShowObjects(showObjMap);
+}
+
+
+// actions
+//------------------------------------------------------------------------------
 // void DrawInOtherCoordSystem(const wxString &csName)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::DrawInOtherCoordSystem(const wxString &csName)
@@ -640,27 +665,31 @@ void MdiChildTrajFrame::DrawInOtherCoordSystem(CoordinateSystem *cs)
 
 
 //------------------------------------------------------------------------------
-// void UpdatePlot(bool viewAnimation)
+// void RedrawPlot(bool viewAnimation)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::UpdatePlot(bool viewAnimation)
+void MdiChildTrajFrame::RedrawPlot(bool viewAnimation)
 {
    #ifdef DEBUG_CHILDTRAJ_FRAME
-      MessageInterface::ShowMessage("MdiChildTrajFrame::UpdatePlot() entered.\n");
+      MessageInterface::ShowMessage("MdiChildTrajFrame::RedrawPlot() entered.\n");
    #endif
 
    if (mCanvas)
-      mCanvas->UpdatePlot(viewAnimation);
+      mCanvas->RedrawPlot(viewAnimation);
 
    mOptionDialog->SetDistance(mCanvas->GetDistance());
 }
 
+
+// menu actions
 //------------------------------------------------------------------------------
-// void OnQuit(wxCommandEvent& WXUNUSED(event))
+// void OnClearPlot(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
+void MdiChildTrajFrame::OnClearPlot(wxCommandEvent& WXUNUSED(event))
 {
-   Close(TRUE);
+   if (mCanvas)
+      mCanvas->ClearPlot();
 }
+
 
 //------------------------------------------------------------------------------
 // void OnChangeTitle(wxCommandEvent& WXUNUSED(event))
@@ -684,14 +713,6 @@ void MdiChildTrajFrame::OnChangeTitle(wxCommandEvent& WXUNUSED(event))
    //#endif
 }
 
-//------------------------------------------------------------------------------
-// void OnClearPlot(wxCommandEvent& WXUNUSED(event))
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::OnClearPlot(wxCommandEvent& WXUNUSED(event))
-{
-   if (mCanvas)
-      mCanvas->ClearPlot();
-}
 
 //------------------------------------------------------------------------------
 // void OnShowDefaultView(wxCommandEvent& WXUNUSED(event))
@@ -720,6 +741,7 @@ void MdiChildTrajFrame::OnZoomOut(wxCommandEvent& event)
       mCanvas->ZoomOut();
 }
 
+
 //------------------------------------------------------------------------------
 // void OnShowOptionDialog(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
@@ -730,21 +752,26 @@ void MdiChildTrajFrame::OnShowOptionDialog(wxCommandEvent& event)
       if (mOptionDialog == NULL)
          mOptionDialog = new OpenGlOptionDialog(this, mPlotName, mBodyNames,
                                                 mBodyColors);
+
+      mOptionDialog->UpdateObjectList(mCanvas->GetObjectNames(),
+                                      mCanvas->GetObjectColorMap());
       
-     int x, y;
-     //int w, h;
-     //MdiGlPlot::mdiParentGlFrame->GetPosition(&x, &y);
-     GmatAppData::GetMainFrame()->GetPosition(&x, &y);
-     //mOptionDialog->GetSize(&w, &h);
-     mOptionDialog->Move(x-20, y+100);
-     mOptionDialog->Show(true); //modeless dialog
+      int x, y, newX;
+      GmatAppData::GetMainFrame()->GetPosition(&x, &y);
+      newX = x-20;
+      
+      if (newX < 0)
+         newX = 5;
+     
+      mOptionDialog->Move(newX, y+100);
+      mOptionDialog->Show(true); // modeless dialog
    }
    else
    {
-      //mOptionDialog->Close();
-      mOptionDialog->Hide();
+      mOptionDialog->Hide(); // modeless dialog
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnDrawWireFrame(wxCommandEvent& event)
@@ -758,6 +785,7 @@ void MdiChildTrajFrame::OnDrawWireFrame(wxCommandEvent& event)
       mOptionDialog->SetDrawWireFrame(event.IsChecked());
 }
 
+
 //------------------------------------------------------------------------------
 // void OnDrawEqPlane(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
@@ -768,117 +796,6 @@ void MdiChildTrajFrame::OnDrawEqPlane(wxCommandEvent& event)
 
    if (mOptionDialog)
       mOptionDialog->SetDrawEqPlane(event.IsChecked());
-}
-
-//loj: 12/16/04 Added
-//------------------------------------------------------------------------------
-// void OnAddBody(wxCommandEvent& WXUNUSED(event))
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::OnAddBody(wxCommandEvent& event)
-{
-   wxArrayString emptyBodies;
-   
-   CelesBodySelectDialog bodyDlg(this, mBodyNames, emptyBodies);
-   bodyDlg.SetBodyColors(mBodyNames, mBodyColors);
-   bodyDlg.ShowModal();
-   
-   //--------------------------------------------------
-   // update body list
-   //--------------------------------------------------
-   if (bodyDlg.IsBodySelected())
-   {
-      wxArrayString bodies = bodyDlg.GetBodyNames();
-      UnsignedIntArray colors = bodyDlg.GetBodyColors();
-
-      mBodyNames.Clear();
-      mBodyColors.clear();
-      
-      for (unsigned int i=0; i<bodies.GetCount(); i++)
-      {
-         mBodyNames.Add(bodies[i]);
-         mBodyColors.push_back(colors[i]);
-      }
-
-      #if DEBUG_CHILDTRAJ_FRAME
-         MessageInterface::ShowMessage("MdiChildTrajFrame::OnAddOtherBody()\n");
-         for (unsigned int i=0; i<mBodyNames.GetCount(); i++)
-         {
-            MessageInterface::ShowMessage("body name=%s, color=%d\n",
-                                          mBodyNames[i].c_str(), mBodyColors[i]);
-         }
-      #endif
-
-      //--------------------------------------------------
-      // update ViewGotoBody menu item
-      //--------------------------------------------------
-      // remove GoTo menu item first
-      mViewMenu->Remove(GmatPlot::MDI_GL_VIEW_GOTO_BODY);
-   
-      // add new menu items
-      mViewMenu->Append(GmatPlot::MDI_GL_VIEW_GOTO_BODY, _T("GoTo"),
-                        CreateGotoBodyMenu());
-      
-      if (mCanvas)
-         mCanvas->AddBody(mBodyNames, mBodyColors);
-   }
-}
-
-//------------------------------------------------------------------------------
-// void OnGotoStdBody(wxCommandEvent& WXUNUSED(event))
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::OnGotoStdBody(wxCommandEvent& event)
-{
-   if (mCanvas)
-   {
-      int bodyId = GmatPlot::UNKNOWN_BODY;
-   
-      if (event.GetId() == GmatPlot::MDI_GL_VIEW_GOTO_SUN)
-         bodyId = GmatPlot::SUN;
-      else if (event.GetId() == GmatPlot::MDI_GL_VIEW_GOTO_MERCURY)
-         bodyId = GmatPlot::MERCURY;
-      else if (event.GetId() == GmatPlot::MDI_GL_VIEW_GOTO_VENUS)
-         bodyId = GmatPlot::VENUS;
-      else if (event.GetId() == GmatPlot::MDI_GL_VIEW_GOTO_EARTH)
-         bodyId = GmatPlot::EARTH;
-      else if (event.GetId() == GmatPlot::MDI_GL_VIEW_GOTO_MARS)
-         bodyId = GmatPlot::MARS;
-      else if (event.GetId() == GmatPlot::MDI_GL_VIEW_GOTO_JUPITER)
-         bodyId = GmatPlot::JUPITER;
-      else if (event.GetId() == GmatPlot::MDI_GL_VIEW_GOTO_SATURN)
-         bodyId = GmatPlot::SATURN;
-      else if (event.GetId() == GmatPlot::MDI_GL_VIEW_GOTO_URANUS)
-         bodyId = GmatPlot::URANUS;
-      else if (event.GetId() == GmatPlot::MDI_GL_VIEW_GOTO_NEPTUNE)
-         bodyId = GmatPlot::NEPTUNE;
-      else if (event.GetId() == GmatPlot::MDI_GL_VIEW_GOTO_PLUTO)
-         bodyId = GmatPlot::PLUTO;
-      else if (event.GetId() == GmatPlot::MDI_GL_VIEW_GOTO_MOON)
-         bodyId = GmatPlot::MOON;
-
-      if (bodyId != GmatPlot::UNKNOWN_BODY)
-      {
-         mCanvas->GotoStdBody(bodyId);
-      
-         // set OptionDialog gotobody ComboBox, distance
-         if (mOptionDialog)
-         {
-            mOptionDialog->SetGotoStdBody(bodyId);
-            mOptionDialog->SetDistance(mCanvas->GetDistance());
-         }
-      }
-   }
-}
-
-//------------------------------------------------------------------------------
-// void OnGotoOtherBody(wxCommandEvent& WXUNUSED(event))
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::OnGotoOtherBody(wxCommandEvent& event)
-{
-   //loj: How do I know the body name from the event?
-   if (mCanvas)
-   {
-      mCanvas->GotoOtherBody("TESTBODY");
-   }
 }
 
 
@@ -918,6 +835,16 @@ void MdiChildTrajFrame::OnHelpView(wxCommandEvent& event)
                 _T("Help View"),
                 wxOK | wxICON_INFORMATION, this);
 }
+
+
+//------------------------------------------------------------------------------
+// void OnQuit(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
+{
+   Close(TRUE);
+}
+
 
 //------------------------------------------------------------------------------
 // void OnActivate(wxActivateEvent& event)
@@ -965,6 +892,7 @@ void MdiChildTrajFrame::OnTrajSize(wxSizeEvent& event)
    event.Skip();
 }
 
+
 //------------------------------------------------------------------------------
 // void OnClose(wxCloseEvent& event)
 //------------------------------------------------------------------------------
@@ -984,11 +912,33 @@ void MdiChildTrajFrame::OnClose(wxCloseEvent& event)
 
 
 //------------------------------------------------------------------------------
-// void SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
-//                      SpacePoint *vdObj, Real vsFactor,
-//                      const Rvector3 &vpRefVec, const Rvector3 &vpVec,
-//                      const Rvector3 &vdVec, bool usevpRefVec,
-//                      bool usevpVec, bool useVdVec)
+// void SetGlObject(const StringArray &otherNames, ...
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetGlObject(const StringArray &nonScNames,
+                                    const UnsignedIntArray &nonScColors,
+                                    const std::vector<SpacePoint*> nonScArray)
+{
+   if (mCanvas)
+   {         
+      mCanvas->SetGlObject(nonScNames, nonScColors, nonScArray);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGlObject(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetGlCoordSystem(CoordinateSystem *cs)
+{
+   if (mCanvas)
+   {         
+      mCanvas->SetGlCoordSystem(cs);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj, ...
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
                                         SpacePoint *vdObj, Real vsFactor,
@@ -1011,16 +961,13 @@ void MdiChildTrajFrame::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
 
 
 //------------------------------------------------------------------------------
-// void UpdateSpacecraft(const StringArray scNameArray,
-//                       const Real &time, const RealArray &posX,
-//                       const RealArray &posY, const RealArray &posZ,
-//                       const UnsignedIntArray &color, bool updateCanvas)
+// void UpdatePlot(const StringArray &nonScNames, ...
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::UpdateSpacecraft(const StringArray scNameArray,
-                                         const Real &time, const RealArray &posX,
-                                         const RealArray &posY, const RealArray &posZ,
-                                         const UnsignedIntArray &color,
-                                         bool updateCanvas)
+void MdiChildTrajFrame::UpdatePlot( const StringArray &scNames,
+                                   const Real &time, const RealArray &posX,
+                                   const RealArray &posY, const RealArray &posZ,
+                                   const UnsignedIntArray &scColors,
+                                   bool updateCanvas)
 {
    if (mCanvas)
    {
@@ -1028,8 +975,8 @@ void MdiChildTrajFrame::UpdateSpacecraft(const StringArray scNameArray,
       // the run
       //mCanvas->SetFocus();
       
-      mCanvas->UpdateSpacecraft(scNameArray, time, posX, posY, posZ, color);
-
+      mCanvas->UpdatePlot(scNames, time, posX, posY, posZ, scColors);
+      
       if (updateCanvas)
          Update();
    }
@@ -1059,60 +1006,4 @@ void MdiChildTrajFrame::DeletePlot()
       GmatAppData::GetMainFrame()->trajMainSubframe->Close();
 }
 
-
-//------------------------------------------------------------------------------
-// wxMenu* CreateGotoBodyMenu()
-//------------------------------------------------------------------------------
-wxMenu* MdiChildTrajFrame::CreateGotoBodyMenu()
-{
-   wxMenu *menu = new wxMenu;
-
-   for (unsigned int i=0; i<mBodyNames.GetCount(); i++)
-   {
-      if (GetMenuId(mBodyNames[i]) == -1)
-         menu->Append(GmatPlot::MDI_GL_VIEW_GOTO_OTHER_BODY, mBodyNames[i]);
-      else
-         menu->Append(GetMenuId(mBodyNames[i]), mBodyNames[i]);
-   }
-   
-   return menu;
-}
-
-//------------------------------------------------------------------------------
-// int GetMenuId(const wxString &body)
-//------------------------------------------------------------------------------
-int MdiChildTrajFrame::GetMenuId(const wxString &body)
-{
-   for (unsigned int i=0; i<mBodyNames.Count(); i++)
-   {
-      if (body == "Sun")
-         return GmatPlot::MDI_GL_VIEW_GOTO_SUN;
-      else if (body == "Mercury")
-         return GmatPlot::MDI_GL_VIEW_GOTO_MERCURY;
-      else if (body == "Venus")
-         return GmatPlot::MDI_GL_VIEW_GOTO_VENUS;
-      else if (body == "Earth")
-         return GmatPlot::MDI_GL_VIEW_GOTO_EARTH;
-      else if (body == "Mars")
-         return GmatPlot::MDI_GL_VIEW_GOTO_MARS;
-      else if (body == "Jupiter")
-         return GmatPlot::MDI_GL_VIEW_GOTO_JUPITER;
-      else if (body == "Saturn")
-         return GmatPlot::MDI_GL_VIEW_GOTO_SATURN;
-      else if (body == "Uranus")
-         return GmatPlot::MDI_GL_VIEW_GOTO_URANUS;
-      else if (body == "Neptune")
-         return GmatPlot::MDI_GL_VIEW_GOTO_NEPTUNE;
-      else if (body == "Pluto")
-         return GmatPlot::MDI_GL_VIEW_GOTO_PLUTO;
-      else if (body == "Luna")
-         return GmatPlot::MDI_GL_VIEW_GOTO_MOON;
-      else
-         MessageInterface::ShowMessage
-            ("MdiChildTrajFrame::GetMenuId() menu for %s not supported yet\n",
-             body.c_str());
-   }
-
-   return -1;
-}
 

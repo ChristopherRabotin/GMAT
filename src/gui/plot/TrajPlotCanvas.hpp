@@ -22,6 +22,8 @@
 #include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
+#include "Rvector3.hpp"
+#include <map>
 
 class TrajPlotCanvas: public wxGLCanvas
 {
@@ -38,7 +40,7 @@ public:
    bool IsInitialized();
 
    // getters
-   bool  GetUseViewPointInfo() {return mUseViewPointInfo;}
+   bool  GetUseViewPointInfo() {return mUseInitialViewPoint;}
    bool  GetUsePerspectiveMode() {return mUsePerspectiveMode;}
    bool  GetDrawWireFrame() {return mDrawWireFrame;}
    bool  GetDrawEqPlane() {return mDrawEqPlane;}
@@ -51,13 +53,16 @@ public:
    unsigned int GetEcLineColor() {return mEcLineColor;}
    float GetDistance() {return mAxisLength;}
    int GetAnimationUpdateInterval() {return mUpdateInterval;}
-   int GetGotoBodyId() {return mCenterViewBody;}
    wxString GetDesiredCoordSysName() {return mDesiredCoordSysName;}
    CoordinateSystem* GetDesiredCoordSystem() { return mDesiredCoordSystem;}
+   const wxArrayString& GetObjectNames() { return mObjectNames;}
+   const wxStringColorMap& GetObjectColorMap() { return mObjectColorMap;}
+   wxString GetGotoObjectName() { return mObjectNames[mOriginId]; }
+   const StringArray& GetBodyNamesInUse();
    
    // setters
    void SetDistance(float dist) {mAxisLength = dist;}
-   void SetUseViewPointInfo(bool flag) {mUseViewPointInfo = flag;}
+   void SetUseViewPointInfo(bool flag) {mUseInitialViewPoint = flag;}
    void SetAnimationUpdateInterval(int interval) {mUpdateInterval = interval;}
    void SetDrawWireFrame(bool flag) {mDrawWireFrame = flag;}
    void SetDrawEqPlane(bool flag) {mDrawEqPlane = flag;}
@@ -71,10 +76,14 @@ public:
    void SetDesiredCoordSystem(CoordinateSystem* cs) {mDesiredCoordSystem = cs;}
    void SetDesiredCoordSystem(const wxString &csName);
    void SetUsePerspectiveMode(bool perspMode);
-   
+   void SetObjectColors(const wxStringColorMap &objectColorMap);
+   void SetShowObjects(const wxStringBoolMap &showObjMap);
+   void UpdateObjectList(const wxArrayString &bodyNames,
+                         const wxStringColorMap &bodyColors);
+
    // actions
    void ClearPlot();
-   void UpdatePlot(bool viewAnimation);
+   void RedrawPlot(bool viewAnimation);
    void ShowDefaultView();
    void ZoomIn();
    void ZoomOut();
@@ -84,10 +93,17 @@ public:
    void OnDrawAxes(bool flag);
    void DrawInOtherCoordSystem(const wxString &csName);
    void DrawInOtherCoordSystem(CoordinateSystem *cs);
-   void GotoStdBody(int bodyId);
+   void GotoObject(const wxString &objName);
    void GotoOtherBody(const wxString &bodyName);
    void ViewAnimation(int interval);
 
+   void SetGlObject(const StringArray &nonScNames,
+                    const UnsignedIntArray &nonScColors,
+                    const std::vector<SpacePoint*> nonScArray);
+   
+   // CoordinateSystem (loj: 5/9/05 Added)
+   void SetGlCoordSystem(CoordinateSystem *cs);
+   
    // viewpoint (loj: 4/20/05 Added)
    void SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
                         SpacePoint *vdObj, Real vscaleFactor,
@@ -97,14 +113,17 @@ public:
    
    // data
    int  ReadTextTrajectory(const wxString &filename);
-   void UpdateSpacecraft(const StringArray &scNameArray,
-                         const Real &time, const RealArray &posX,
-                         const RealArray &posY, const RealArray &posZ,
-                         const UnsignedIntArray &olor);
+
+   // update
+   void UpdatePlot(const StringArray &scNames,
+                   const Real &time, const RealArray &posX,
+                   const RealArray &posY, const RealArray &posZ,
+                   const UnsignedIntArray &scColors);
    
    // body
-   void AddBody(const wxArrayString &bodyNames,
-                const UnsignedIntArray &bodyColors);
+   void AddBodyList(const wxArrayString &bodyNames,
+                    const UnsignedIntArray &bodyColors,
+                    bool clearList = true);
    
 protected:
    
@@ -161,7 +180,8 @@ private:
    unsigned int mEcLineColor;
    
    // texture
-   GLuint mBodyTextureIndex[GmatPlot::MAX_BODIES];
+   GLuint mObjectTextureIndex[GmatPlot::MAX_BODIES];
+   std::map<wxString, GLuint> mObjectTextureIdMap;
    GLuint mScTextureIndex[GmatPlot::MAX_SCS];
    bool mUseTexture;
    
@@ -171,14 +191,13 @@ private:
    bool mRotateAboutYaxis;
    bool mRotateAboutZaxis;
    bool mRotateEarthToEnd;
-   double lastLongitudeD;
+   Real lastLongitudeD;
    
    // zooming
    int   mLastMouseX;
    int   mLastMouseY;
    float mZoomAmount;
    float mMaxZoomIn;
-   float mBodyMaxZoomIn[GmatPlot::MAX_BODIES];
    
    // initialization and limit
    bool mInitialized;
@@ -187,6 +206,7 @@ private:
 
    // projection
    bool mUsePerspectiveMode;
+   Real mFovDeg;
    
    // viewpoint
    StringArray mScNameArray;
@@ -198,19 +218,19 @@ private:
    Rvector3 mViewDirectionVector;
    Rvector3 mViewPointLocVector;
    Real mViewScaleFactor;
-   bool mUseViewPointInfo;
+   bool mUseInitialViewPoint;
    bool mUseViewPointRefVector;
    bool mUseViewPointVector;
    bool mUseViewDirectionVector;
-   int mVptRefScId;
-   int mVptVecScId;
+   int mVpRefScId;
+   int mVpVecScId;
    int mVdirScId;
-   int mVptRefBodyId;
-   int mVptVecBodyId;
+   int mVpRefObjId;
+   int mVpVecObjId;
    int mVdirBodyId;
    
    // time
-   double mTime[MAX_DATA];
+   Real mTime[MAX_DATA];
 
    // spacecraft
    int   mScCount;
@@ -227,20 +247,31 @@ private:
    float mEarthRadius;
    float mEarthGciPos[MAX_DATA][3];
    float mEarthTempPos[MAX_DATA][3];
-   
+
+   // objects
+   wxArrayString mObjectNames;
+   wxStringColorMap mObjectColorMap;
+   wxStringBoolMap  mShowObjectMap;
+   std::vector<SpacePoint*> mObjectArray;
+   int mObjectCount;
+   float mObjectDefaultRadius;
+   float mObjectRadius[GmatPlot::MAX_BODIES];
+   float mObjMaxZoomIn[GmatPlot::MAX_BODIES];
+
    // bodies
-   //std::string mBodyName[GmatPlot::MAX_BODIES];
-   bool  mBodyInUse[GmatPlot::MAX_BODIES];
-   bool  mBodyHasData[GmatPlot::MAX_BODIES];
-   float mBodyRadius[GmatPlot::MAX_BODIES];
-   float mBodyGciPos[GmatPlot::MAX_BODIES][MAX_DATA][3];
-   float mBodyTempPos[GmatPlot::MAX_BODIES][MAX_DATA][3];
+   bool  mDrawEarth;
+   bool  mObjectInUse[GmatPlot::MAX_BODIES];
+   bool  mObjectHasData[GmatPlot::MAX_BODIES];
+   float mObjectGciPos[GmatPlot::MAX_BODIES][MAX_DATA][3];
+   float mObjectTempPos[GmatPlot::MAX_BODIES][MAX_DATA][3];
    short mPivotBodyIndex[GmatPlot::MAX_BODIES];
    int   mOtherBodyCount;
+   StringArray mObjectNamesInUse;
    
    // coordinate system
    wxString mDesiredCoordSysName;
    wxString mInternalCoordSysName;
+   wxString mOriginName;
    CoordinateSystem *mInternalCoordSystem;
    CoordinateSystem *mDesiredCoordSystem;
    
@@ -253,8 +284,7 @@ private:
    CoordinateConverter mCoordConverter;
    
    short mCurrViewFrame;
-   short mCurrBody;
-   int   mCenterViewBody;
+   int   mOriginId;
    
    // view
    wxSize mCanvasSize;
@@ -283,7 +313,10 @@ private:
    void SetDefaultGLFont();
 
    // initialization
+   // texture
    bool LoadGLTextures();
+   GLuint BindTexture(const wxString &objName);
+   GLuint BindTexture(int bodyId);
    
    // view objects
    void SetProjection();
@@ -296,6 +329,8 @@ private:
    // drawing objects
    void DrawFrame();
    void DrawPicture();
+   void DrawObject(const wxString &objName);
+   void DrawObjectOrbit(const wxString &objName);
    void DrawEarth();
    void DrawEarthOrbit();
    void DrawEarthOrbit(int frame);
@@ -308,22 +343,29 @@ private:
    void DrawEclipticPlane();
    void DrawEarthSunLine();
    void DrawAxes(bool gci = false);  //loj: 4/15/05 Added earthZaxis
+   
+   // drawing primative objects
    void DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z);
-
+   void DrawCircle(GLUquadricObj *qobj, Real radius);
+   
    // for body
    int GetStdBodyId(const std::string &name);
-
-   // for coordinate sytem
+   void AddBody(const std::string &name);
+   
+   // for object
+   int GetObjectId(const wxString &name);
+   
+   // for coordinate system
    bool TiltEarthZAxis();
    bool ConvertSpacecraftData();
    bool ConvertSpacecraftData(int frame);
    bool ConvertOtherBodyData();
    
    // for copy
-   void CopyVector3(float to[3], double from[3]);
+   void CopyVector3(float to[3], Real from[3]);
    void CopyVector3(float to[3], float from[3]);
-   void CopyVector3(double to[3], double from[3]);
-   void CopyVector3(double to[3], float from[3]);
+   void CopyVector3(Real to[3], Real from[3]);
+   void CopyVector3(Real to[3], float from[3]);
    
 };
 

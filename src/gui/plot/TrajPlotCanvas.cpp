@@ -40,11 +40,13 @@
 #endif
 
 //#define DEBUG_TRAJCANVAS_INIT 1
-//#define DEBUG_TRAJCANVAS_UPDATE 1
+//#define DEBUG_TRAJCANVAS_SET 1
+//#define DEBUG_TRAJCANVAS_UPDATE 2
 //#define DEBUG_TRAJCANVAS_ACTION 1
 //#define DEBUG_TRAJCANVAS_CONVERT 2
 //#define DEBUG_TRAJCANVAS_DRAW 1
-//#define DEBUG_TRAJCANVAS_BODY 1
+//#define DEBUG_TRAJCANVAS_ZOOM 1
+//#define DEBUG_TRAJCANVAS_OBJECT 2
 //#define DEBUG_TRAJCANVAS_PROJ 1
 //#define DEBUG_TRAJCANVAS_ANIMATION 1
 
@@ -64,7 +66,7 @@ enum TFrameMode
    GCI_FRAME,
    SOL_ROT_FRAME,
    SELENOCENTRIC_FRAME,
-   EARTH_MOON_ROT_FRAME,
+   EARTH_LUNA_ROT_FRAME,
    HELIOCENTRIC_FRAME,
    ANY_BODY_FRAME,
    ANY_BODY_ROT_FRAME
@@ -129,15 +131,15 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mViewDirectionVector.Set(0.0, 0.0, -1.0);
    mViewPointLocVector.Set(0.0, 0.0, 30000);
    mViewScaleFactor = 1.0;
-   mUseViewPointInfo = true;
+   mUseInitialViewPoint = true;
    mUseViewPointRefVector = true;
    mUseViewPointVector = true;
    mUseViewDirectionVector = true;
-   mVptRefScId = -1;
-   mVptVecScId = -1;
+   mVpRefScId = -1;
+   mVpVecScId = -1;
    mVdirScId = -1;
-   mVptRefBodyId = -1;
-   mVptVecBodyId = -1;
+   mVpRefObjId = -1;
+   mVpVecObjId = -1;
    mVdirBodyId = -1;
 
    // view
@@ -158,11 +160,18 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    
    mAxisLength = mCurrViewDist;
    mCurrViewFrame = GCI_FRAME;
-   mCenterViewBody = GmatPlot::EARTH;
-   mCurrBody = GmatPlot::EARTH;
-   mRotateAboutXaxis = true;
+   mOriginId = 0;
+
+   //original value
+   //mRotateAboutXaxis = true;
+   //mRotateAboutYaxis = false;
+   //mRotateAboutZaxis = false;
+
+   mRotateAboutXaxis = false;
    mRotateAboutYaxis = false;
-   mRotateAboutZaxis = false;
+   mRotateAboutZaxis = true;
+
+   
    mRotateXy = true;
 
    mZoomAmount = 300.0;
@@ -172,7 +181,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    
    mEarthRadius = 6378.14; //km
    mScRadius = 200;        //km: make big enough to see
-
+   
    // view options
    mDrawSpacecraft = true;
    mDrawWireFrame = false;
@@ -194,53 +203,25 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    
    // bodies
    mOtherBodyCount = 0;
+   mDrawEarth = true;
    
    for (int i=0; i<MAX_BODIES; i++)
    {
-      mBodyTextureIndex[i] = UNINIT_TEXTURE;
-      mBodyMaxZoomIn[i] = MAX_ZOOM_IN;
-      mBodyInUse[i] = false;
-      mBodyHasData[i] = false;
+      mObjectTextureIndex[i] = UNINIT_TEXTURE;
+      mObjMaxZoomIn[i] = MAX_ZOOM_IN;
+      mObjectInUse[i] = false;
+      mObjectHasData[i] = false;
    }
-   
-   // set Sun, Earth, Moon in use as default,
-   // bodies' position is updated in UpdadateSpacecraft()
-   mBodyInUse[SUN]   = true;
-   mBodyInUse[EARTH] = true;
-   mBodyInUse[MOON]  = true;
-   mBodyHasData[SUN]   = true;
-   mBodyHasData[EARTH] = true;
-   mBodyHasData[MOON]  = true;
+
+   // objects
+   mObjectDefaultRadius = 200; //km: make big enough to see
    
    for (int body=0; body<MAX_BODIES; body++)
-      mBodyRadius[body] = 0.0;
-
-   if (mSolarSystem != NULL)
-   {
-      CelestialBody *bodyPtr;
-      for (int body=0; body<=MOON; body++)
-      {
-         if (mBodyInUse[body])
-         {
-            bodyPtr = mSolarSystem->GetBody(BodyInfo::BODY_NAME[body]);
-            if (bodyPtr != NULL)
-            {
-               mBodyRadius[body] = bodyPtr->GetEquatorialRadius();
-               mBodyMaxZoomIn[body] = mBodyRadius[body] * RADIUS_ZOOM_RATIO;
-               
-               #if DEBUG_TRAJCANVAS_INIT
-               MessageInterface::ShowMessage
-                  ("TrajPlotCanvas() %s Radius=%f maxZoomIn=%f\n",
-                   BodyInfo::BODY_NAME[body].c_str(),
-                   mBodyRadius[body], mBodyMaxZoomIn[body]);
-               #endif
-            }
-         }
-      }
-   }
+      mObjectRadius[body] = 0.0;
    
    // Zoom
-   mMaxZoomIn = mBodyMaxZoomIn[EARTH];
+   //mMaxZoomIn = mObjMaxZoomIn[EARTH];
+   mMaxZoomIn = 0;
    
    // Spacecraft
    mScCount = 0;
@@ -330,7 +311,7 @@ bool TrajPlotCanvas::InitGL()
    
    // font
    SetDefaultGLFont();
-   
+
    mInitialized = true;
    
    return true;
@@ -347,6 +328,23 @@ bool TrajPlotCanvas::InitGL()
 bool TrajPlotCanvas::IsInitialized()
 {
    return mInitialized;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetBodyNamesInUse()
+//------------------------------------------------------------------------------
+const StringArray& TrajPlotCanvas::GetBodyNamesInUse()
+{
+   mObjectNamesInUse.clear();
+
+   for (int i=0; i<MAX_BODIES; i++)
+   {
+      if (mObjectInUse[i])
+         mObjectNamesInUse.push_back(GmatPlot::GetBodyName(i));
+   }
+
+   return mObjectNamesInUse;
 }
 
 
@@ -383,8 +381,10 @@ void TrajPlotCanvas::SetUsePerspectiveMode(bool perspMode)
    MessageInterface::ShowMessage
       ("TrajPlotCanvas()::SetUsePerspectiveMode() perspMode=%d\n", perspMode);
    #endif
-
-   if (perspMode)
+   
+   mUsePerspectiveMode = perspMode;
+   
+   if (mUsePerspectiveMode)
    {
       mfCamTransX = -mViewPointLocVector[0];
       mfCamTransY = -mViewPointLocVector[1];
@@ -396,6 +396,37 @@ void TrajPlotCanvas::SetUsePerspectiveMode(bool perspMode)
       mfCamTransY = 0;
       mfCamTransZ = 0;
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetObjectColors(const wxStringColorMap &objectColorMap)
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::SetObjectColors(const wxStringColorMap &objectColorMap)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// void SetShowObjects(const wxStringColorMap &objectColorMap)
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::SetShowObjects(const wxStringBoolMap &showObjMap)
+{
+   //wxStringBoolMap tempMap = showObjMap;
+   mShowObjectMap = showObjMap;
+   
+   for (unsigned int i=0; i<showObjMap.size(); i++)
+   {
+      if (mShowObjectMap[wxString("Earth")])
+         mDrawEarth = true;
+      else
+         mDrawEarth = false;
+   }
+
+   #if DEBUG_TRAJCANVAS_OBJECT
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas()::SetShowObjects() mDrawEarth=%d.\n", mDrawEarth);
+   #endif
 }
 
 
@@ -419,21 +450,21 @@ void TrajPlotCanvas::ClearPlot()
 
 
 //------------------------------------------------------------------------------
-// void UpdatePlot(bool viewAnimation)
+// void RedrawPlot(bool viewAnimation)
 //------------------------------------------------------------------------------
 /**
- * Updates plot.
+ * Redraws plot.
  *
  * @param <viewAnimation> true if animation is viewed
  */
 //------------------------------------------------------------------------------
-void TrajPlotCanvas::UpdatePlot(bool viewAnimation)
+void TrajPlotCanvas::RedrawPlot(bool viewAnimation)
 {
    if (mAxisLength < mMaxZoomIn)
    {
       mAxisLength = mMaxZoomIn;
       MessageInterface::ShowMessage
-         ("TrajPlotCanvas::UpdatePlot() distance < max zoom in. distance set to %f\n",
+         ("TrajPlotCanvas::RedrawPlot() distance < max zoom in. distance set to %f\n",
           mAxisLength);
    }
 
@@ -467,7 +498,7 @@ void TrajPlotCanvas::ShowDefaultView()
    mfCamTransY = 0;
    mfCamTransZ = 0;
 
-   mCenterViewBody = EARTH;
+   mOriginId = GetObjectId("Earth");
    ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
    ChangeProjection(clientWidth, clientHeight, mAxisLength);
    Refresh(false);
@@ -483,13 +514,20 @@ void TrajPlotCanvas::ShowDefaultView()
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::ZoomIn()
 {
-   double realDist = (mAxisLength - mZoomAmount) / log(mAxisLength);
+   Real realDist = (mAxisLength - mZoomAmount) / log(mAxisLength);
 
 //    if (mUsePerspectiveMode)
 //    {
 //       mAxisLength = mAxisLength - realDist;
 //       ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
 //    }
+
+   #if DEBUG_TRAJCANVAS_ZOOM
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::ZoomIn() mAxisLength=%f, mMaxZoomIn=%f\n",
+       mAxisLength, mMaxZoomIn);
+   #endif
+
    if (mAxisLength > mMaxZoomIn)
    {
       mAxisLength = mAxisLength - realDist;
@@ -514,7 +552,7 @@ void TrajPlotCanvas::ZoomIn()
 void TrajPlotCanvas::ZoomOut()
 {
    // the further object is the faster zoom out
-   double realDist = (mAxisLength + mZoomAmount) / log(mAxisLength);
+   Real realDist = (mAxisLength + mZoomAmount) / log(mAxisLength);
    mAxisLength = mAxisLength + realDist;
 
    ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
@@ -620,6 +658,7 @@ void TrajPlotCanvas::DrawInOtherCoordSystem(const wxString &csName)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void DrawInOtherCoordSystem(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
@@ -660,47 +699,43 @@ void TrajPlotCanvas::DrawInOtherCoordSystem(CoordinateSystem *cs)
 
 
 //---------------------------------------------------------------------------
-// void GotoStdBody(int bodyId)
+// void GotoObject(const wxString &objName)
 //---------------------------------------------------------------------------
-void TrajPlotCanvas::GotoStdBody(int bodyId)
+void TrajPlotCanvas::GotoObject(const wxString &objName)
 {
-   
-   #ifdef DEBUG_TRAJCANVAS_BODY
-      MessageInterface::ShowMessage("TrajPlotCanvas::GotoStdBody() bodyId=%d\n",
-                                    bodyId);
-   #endif
-   
-   if (!mBodyHasData[bodyId])
-   {
-      mBodyHasData[bodyId] = true;
-      CelestialBody *bodyPtr = mSolarSystem->GetBody(BodyInfo::BODY_NAME[bodyId]);
-      mBodyRadius[bodyId] = bodyPtr->GetEquatorialRadius();
-      mBodyMaxZoomIn[bodyId] = mBodyRadius[bodyId] * RADIUS_ZOOM_RATIO;
+   int objId = GetObjectId(objName);
+     
+   mOriginId = objId;
+   mMaxZoomIn = mObjMaxZoomIn[objId];
 
-      for (int i=0; i<mNumData; i++)
-      {
-         Rvector6 bodyState = bodyPtr->GetState(mTime[i]);
-         mBodyGciPos[bodyId][i][0] = bodyState[0];
-         mBodyGciPos[bodyId][i][1] = bodyState[1];
-         mBodyGciPos[bodyId][i][2] = bodyState[2];
-         CopyVector3(mBodyTempPos[bodyId][i], mBodyGciPos[bodyId][i]);
-      }
-   }
-   
-   mCenterViewBody = bodyId;
-   mMaxZoomIn = mBodyMaxZoomIn[bodyId];
-
-   if (bodyId == EARTH)
+   // if goto Object is center(0,0,0), zoom out to see the object,
+   // otherwise, set to final position of the object
+   if (objName == mOriginName)
    {
-      mAxisLength = DEFAULT_DIST;
+      mAxisLength = mMaxZoomIn;
    }
    else
    {
-      Rvector3 pos(mBodyTempPos[bodyId][mNumData-1][0],
-                   mBodyTempPos[bodyId][mNumData-1][1],
-                   mBodyTempPos[bodyId][mNumData-1][2]);
+      Rvector3 pos(mObjectTempPos[objId][mNumData-1][0],
+                   mObjectTempPos[objId][mNumData-1][1],
+                   mObjectTempPos[objId][mNumData-1][2]);
       
       mAxisLength = pos.GetMagnitude();
+   }
+   
+   #ifdef DEBUG_TRAJCANVAS_OBJECT
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::GotoObject() objName=%s, objId=%d, mMaxZoomIn=%f\n"
+       "                             mAxisLength=%f\n", objName.c_str(),
+       objId, mMaxZoomIn, mAxisLength);
+   #endif
+
+   if (mUsePerspectiveMode)
+   {
+      // move camera position to object
+      mfCamTransX = -mObjectTempPos[objId][mNumData-1][0];
+      mfCamTransY = -mObjectTempPos[objId][mNumData-1][1];
+      mfCamTransZ = -mObjectTempPos[objId][mNumData-1][2];
    }
    
    SetProjection();
@@ -714,7 +749,7 @@ void TrajPlotCanvas::GotoStdBody(int bodyId)
 //---------------------------------------------------------------------------
 void TrajPlotCanvas::GotoOtherBody(const wxString &body)
 {
-   #ifdef DEBUG_TRAJCANVAS_BODY
+   #ifdef DEBUG_TRAJCANVAS_OBJECT
       MessageInterface::ShowMessage("TrajPlotCanvas::GotoOtherBody() body=%s\n",
                                     body.c_str());
    #endif
@@ -738,20 +773,65 @@ void TrajPlotCanvas::ViewAnimation(int interval)
 }
 
 
-//---------------------------------------------------------------------------
-// int GetStdBodyId(const std::string &name)
-//---------------------------------------------------------------------------
-int TrajPlotCanvas::GetStdBodyId(const std::string &name)
+//------------------------------------------------------------------------------
+// void SetGlObject(const StringArray &nonScNames,
+//                  const UnsignedIntArray &nonScColors,
+//                  const std::vector<SpacePoint*> nonScArray)
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::SetGlObject(const StringArray &nonScNames,
+                                 const UnsignedIntArray &nonScColors,
+                                 const std::vector<SpacePoint*> nonScArray)
 {
-   for (int i=0; i<=LAST_STD_BODY_ID; i++)
-      if (BodyInfo::BODY_NAME[i] == name)
-         return i;
+   #if DEBUG_TRAJCANVAS_SET
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::SetGlObject() objCount=%d, colorCount=%d.\n",
+       nonScNames.size(), nonScColors.size());
+   #endif
 
-   MessageInterface::PopupMessage
-      (Gmat::ERROR_, "TrajPlotCanvas::GetStdBodyId() body name: %s not found "
-       "in the default list\n", name.c_str());
+   mObjectArray = nonScArray;
+   
+   wxArrayString tempList;
 
-   return -1;
+   if (nonScNames.size() > 0 && nonScColors.size() > 0)
+   {
+      for (unsigned int i=0; i<nonScNames.size(); i++)
+         tempList.Add(nonScNames[i].c_str());
+      
+      AddBodyList(tempList, nonScColors);
+      mDrawEarth = true;
+   }
+   else
+   {
+      mDrawEarth = false;
+   }
+   
+   #if DEBUG_TRAJCANVAS_SET
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::SetGlObject() mDrawEarth=%d\n", mDrawEarth);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGlCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *cs)
+{
+   mDesiredCoordSystem = cs;
+   mDesiredCoordSysName = wxString(cs->GetName().c_str());
+   
+   // set view center object
+   mOriginName = wxString(cs->GetOriginName().c_str());
+   mOriginId = GetObjectId(mOriginName);
+   mMaxZoomIn = mObjMaxZoomIn[mOriginId];
+   
+   #if DEBUG_TRAJCANVAS_SET
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::SetGlCoordSystem() csName=%s, originName=%s, "
+       "mOriginId=%d, gotoObjectName=%s\n", mDesiredCoordSysName.c_str(),
+       mOriginName.c_str(),  mOriginId, mObjectNames[mOriginId].c_str());
+   #endif
+
 }
 
 
@@ -798,7 +878,7 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
    Rvector3 lvpVec(vpVec);
    Rvector3 lvdVec(vdVec);
    
-   #if DEBUG_TRAJCANVAS_INIT
+   #if DEBUG_TRAJCANVAS_SET
    MessageInterface::ShowMessage
       ("TrajPlotCanvas::SetGlViewOption() vpRefObj=%d, vpVecObj=%d, "
        "vdObj=%d, vsFactor=%f\nvpRefVec=%s, vpVec=%s, vdVec=%s, usevpRefVec=%d, "
@@ -812,10 +892,10 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
    {
       if (mViewPointRefObj->GetType() != Gmat::SPACECRAFT)
       {
-         mVptRefBodyId = GmatPlot::GetBodyId(mViewPointRefObj->GetName().c_str());
-         if (mVptRefBodyId == GmatPlot::UNKNOWN_BODY)
+         mVpRefObjId = GetObjectId(mViewPointRefObj->GetName().c_str());
+         
+         if (mVpRefObjId == GmatPlot::UNKNOWN_BODY)
          {
-            //@todo - Handle non celestial body later
             mUseViewPointRefVector = true;
             MessageInterface::ShowMessage
                ("TrajPlotCanvas::SetGlViewOption() ***** Cannot find "
@@ -825,8 +905,8 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
          }
          else
          {
-            mBodyInUse[mVptRefBodyId] = true;
-            mBodyHasData[mVptRefBodyId] = true;
+            mObjectInUse[mVpRefObjId] = true;
+            mObjectHasData[mVpRefObjId] = true;
          }
       }
    }
@@ -844,10 +924,10 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
    {
       if (mViewPointVectorObj->GetType() != Gmat::SPACECRAFT)
       {
-         mVptVecBodyId = GmatPlot::GetBodyId(mViewPointVectorObj->GetName().c_str());
-         if (mVptVecBodyId == GmatPlot::UNKNOWN_BODY)
+         mVpVecObjId = GetObjectId(mViewPointVectorObj->GetName().c_str());
+         
+         if (mVpVecObjId == GmatPlot::UNKNOWN_BODY)
          {
-            //@todo - Handle non celestial body later
             mUseViewPointVector = true;
             MessageInterface::ShowMessage
                ("TrajPlotCanvas::SetGlViewOption() ***** Cannot find "
@@ -857,8 +937,8 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
          }
          else
          {
-            mBodyInUse[mVptVecBodyId] = true;
-            mBodyHasData[mVptVecBodyId] = true;
+            mObjectInUse[mVpVecObjId] = true;
+            mObjectHasData[mVpVecObjId] = true;
          }
       }
    }
@@ -876,10 +956,10 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
    {
       if (mViewDirectionObj->GetType() != Gmat::SPACECRAFT)
       {
-         mVdirBodyId = GmatPlot::GetBodyId(mViewDirectionObj->GetName().c_str());
+         mVdirBodyId = GetObjectId(mViewDirectionObj->GetName().c_str());
+         
          if (mVdirBodyId == GmatPlot::UNKNOWN_BODY)
          {
-            //@todo - Handle non celestial body later
             mUseViewDirectionVector = true;
             MessageInterface::ShowMessage
                ("TrajPlotCanvas::SetGlViewOption() ***** Cannot find "
@@ -889,8 +969,8 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
          }
          else
          {
-            mBodyInUse[mVdirBodyId] = true;
-            mBodyHasData[mVdirBodyId] = true;
+            mObjectInUse[mVdirBodyId] = true;
+            mObjectHasData[mVdirBodyId] = true;
          }
       }
    }
@@ -980,31 +1060,37 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
 
 
 //------------------------------------------------------------------------------
-// void UpdateSpacecraft(const StringArray &scNameArray,
-//                       const Real &time, const RealArray &posX,
-//                       const RealArray &posY, const RealArray &posZ,
-//                       const UnsignedIntArray &color)
+// void UpdatePlot(const StringArray &scNames,
+//                 const Real &time, const RealArray &posX,
+//                 const RealArray &posY, const RealArray &posZ,
+//                 const UnsignedIntArray &scColors)
 //------------------------------------------------------------------------------
 /**
  * Updates spacecraft trajectory.
  *
+ * @param <scNames> spacecraft name array
  * @param <time> time
  * @param <posX> position x array
  * @param <posY> position y array
  * @param <posZ> position z array
- * @param <orbitColor> orbit color array
+ * @param <scColors> orbit color array
  */
 //------------------------------------------------------------------------------
-void TrajPlotCanvas::UpdateSpacecraft(const StringArray &scNameArray,
-                                      const Real &time, const RealArray &posX,
-                                      const RealArray &posY, const RealArray &posZ,
-                                      const UnsignedIntArray &color)
+void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
+                                const Real &time, const RealArray &posX,
+                                const RealArray &posY, const RealArray &posZ,
+                                const UnsignedIntArray &scColors)
 {
+   #if DEBUG_TRAJCANVAS_UPDATE
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::UpdatePlot() entered. time=%f\n", time);
+   #endif
+   
    mScCount = posX.size();
    if (mScCount > MAX_SCS)
       mScCount = MAX_SCS;
 
-   mScNameArray = scNameArray;
+   mScNameArray = scNames;
    
    //-------------------------------------------------------
    // update spacecraft position
@@ -1014,7 +1100,7 @@ void TrajPlotCanvas::UpdateSpacecraft(const StringArray &scNameArray,
       for (int sc=0; sc<mScCount; sc++)
       {
          mTime[mNumData] = time;
-         mScTrajColor[sc][mNumData]  = color[sc];
+         mScTrajColor[sc][mNumData]  = scColors[sc];
          mScGciPos[sc][mNumData][0] = posX[sc];
          mScGciPos[sc][mNumData][1] = posY[sc];
          mScGciPos[sc][mNumData][2] = posZ[sc];
@@ -1046,42 +1132,51 @@ void TrajPlotCanvas::UpdateSpacecraft(const StringArray &scNameArray,
          }
       }
       
-      
       //----------------------------------------------------
-      // update planet position
+      // update object position
       //----------------------------------------------------
       if (mNumData < MAX_DATA)
       {
-         for (int body=0; body<MAX_BODIES; body++)
+         for (int i=0; i<mObjectCount; i++)
          {
-            if (mBodyInUse[body])
+            // if object pointer is not NULL
+            if (mObjectArray[i])
             {
-               CelestialBody *bodyPtr = mSolarSystem->GetBody(BodyInfo::BODY_NAME[body]);
+               int objId = GetObjectId(mObjectNames[i]);
                
-               Rvector6 bodyState = bodyPtr->GetState(time);
-               mBodyGciPos[body][mNumData][0] = bodyState[0];
-               mBodyGciPos[body][mNumData][1] = bodyState[1];
-               mBodyGciPos[body][mNumData][2] = bodyState[2];
-               CopyVector3(mBodyTempPos[body][mNumData],
-                           mBodyGciPos[body][mNumData]);
-
                #if DEBUG_TRAJCANVAS_UPDATE
                MessageInterface::ShowMessage
-                  ("TrajPlotCanvas::UpdateSpacecraft() %s pos = %f, %f, %f\n",
-                   BodyInfo::BODY_NAME[body].c_str(), mBodyTempPos[body][mNumData][0],
-                   mBodyTempPos[body][mNumData][1], mBodyTempPos[body][mNumData][2]);
+                  ("TrajPlotCanvas::UpdatePlot() object=%s\n",
+                   mObjectNames[i].c_str(), objId);
                #endif
-
-               //do conversion later
                
+               // if object id found
+               if (objId != -1)
+               {
+                  Rvector6 bodyState = mObjectArray[i]->GetMJ2000State(time);
+                  mObjectGciPos[objId][mNumData][0] = bodyState[0];
+                  mObjectGciPos[objId][mNumData][1] = bodyState[1];
+                  mObjectGciPos[objId][mNumData][2] = bodyState[2];
+                  CopyVector3(mObjectTempPos[objId][mNumData],
+                              mObjectGciPos[objId][mNumData]);
+                  
+                  #if DEBUG_TRAJCANVAS_UPDATE > 1
+                  MessageInterface::ShowMessage
+                     ("TrajPlotCanvas::UpdatePlot() %s pos = %f, %f, %f\n",
+                      mObjectNames[i].c_str(), mObjectTempPos[objId][mNumData][0],
+                      mObjectTempPos[objId][mNumData][1], mObjectTempPos[objId][mNumData][2]);
+                  #endif
+               }
+               
+               //do conversion later
             }
          }
       }
-      
+            
       mNumData++;
    }
    
-   if (mUseViewPointInfo)
+   if (mUseInitialViewPoint)
    {
       ComputeProjection(mNumData-1);
       ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
@@ -1093,43 +1188,76 @@ void TrajPlotCanvas::UpdateSpacecraft(const StringArray &scNameArray,
 
 
 //---------------------------------------------------------------------------
-// void AddBody(wxArrayString &bodyNames, UnsignedIntArray &bodyColors)
+// void AddBodyList(wxArrayString &bodyNames, UnsignedIntArray &bodyColors,
+//                  bool clearList=true)
 //---------------------------------------------------------------------------
-void TrajPlotCanvas::AddBody(const wxArrayString &bodyNames,
-                             const UnsignedIntArray &bodyColors)
+void TrajPlotCanvas::AddBodyList(const wxArrayString &bodyNames,
+                                 const UnsignedIntArray &bodyColors,
+                                 bool clearList)
 {
+   #if DEBUG_TRAJCANVAS_OBJECT
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::AddBodyList() body count=%d, color count=%d\n",
+       bodyNames.GetCount(), bodyColors.size());
+   #endif
+   
    // clear bodies
-   for (int i=0; i<MAX_BODIES; i++)
+   if (clearList)
    {
-      mBodyInUse[i] = false;
+      mObjectNames.Empty();
+      mObjectTextureIdMap.clear();
+      
+      for (int i=0; i<MAX_BODIES; i++)
+      {
+         mObjectInUse[i] = false;
+         mObjectHasData[i] = false;
+      }
    }
    
-   int bodyId;
-   for (unsigned int i=0; i<bodyNames.GetCount(); i++)
+   RgbColor rgb;
+
+   mObjectCount = bodyNames.GetCount();
+   
+   for (int i=0; i<mObjectCount; i++)
    {
-      bodyId = GetStdBodyId(std::string(bodyNames[i].c_str()));
+      // add object names
+      mObjectNames.Add(bodyNames[i]);
+
+      // initialize object texture
+      mObjectTextureIdMap[bodyNames[i]] = UNINIT_TEXTURE;
+
+      // initialize show object
+      mShowObjectMap[bodyNames[i]] = true;
       
-      // body is not a standard body
-      if (bodyId == UNKNOWN_BODY)
+      // initialize object color
+      rgb.Set(bodyColors[i]);
+      mObjectColorMap[bodyNames[i]] = rgb;
+
+      // set real object radius, if it is CelestialBody
+      if (mObjectArray[i]->IsOfType(Gmat::CELESTIAL_BODY))
       {
-         mOtherBodyCount++;
-         bodyId = LAST_STD_BODY_ID + mOtherBodyCount;
-         BodyInfo::BODY_NAME[bodyId] = bodyNames[i];
+         mObjectRadius[i] = ((CelestialBody*)(mObjectArray[i]))->GetEquatorialRadius();
+         mObjMaxZoomIn[i] = mObjectRadius[i] * RADIUS_ZOOM_RATIO;
+      }
+      else
+      {
+         mObjectRadius[i] = mObjectDefaultRadius;
+         mObjMaxZoomIn[i] = mObjectDefaultRadius * RADIUS_ZOOM_RATIO;
       }
       
-      mBodyInUse[bodyId] = true;
-      BodyInfo::BODY_COLOR[bodyId] = bodyColors[i];
-         
-      #if DEBUG_TRAJCANVAS_BODY
+      mObjectInUse[i] = true;
+      mObjectHasData[i] = true;
+      
+      #if DEBUG_TRAJCANVAS_OBJECT > 1
       MessageInterface::ShowMessage
-         ("TrajPlotCanvas::AddBody() body=%s, bodyId=%d, color=%d\n",
-          BodyInfo::BODY_NAME[bodyId].c_str(), bodyId, BodyInfo::BODY_COLOR[bodyId]);
+         ("TrajPlotCanvas::AddBodyList() bodyNames[%d]=%s\n",
+          i, bodyNames[i].c_str());
       #endif
    }
-   
+
    LoadGLTextures();
 
-}
+} //AddBodyList()
 
 
 //------------------------------------------------------------------------------
@@ -1269,9 +1397,9 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
       else if (event.RightIsDown())
       {            
          // find the length
-         double x2 = pow(mouseX - mLastMouseX, 2);
-         double y2 = pow(mouseY - mLastMouseY, 2);
-         double length = sqrt(x2 + y2);
+         Real x2 = pow(mouseX - mLastMouseX, 2);
+         Real y2 = pow(mouseY - mLastMouseY, 2);
+         Real length = sqrt(x2 + y2);
          mZoomAmount = length * 100;
 
          if (mouseX < mLastMouseX && mouseY > mLastMouseY)
@@ -1427,103 +1555,22 @@ void TrajPlotCanvas::SetDefaultGLFont()
 //------------------------------------------------------------------------------
 bool TrajPlotCanvas::LoadGLTextures()
 {
-   //use FileManager to retrieve texture file name
-   FileManager *fm = FileManager::Instance();
-   std::string textureFile;
-   ILboolean status;
    
 #ifdef __WXMSW__
-   //--------------------------------------------------
-   // always load Earth texture
-   //--------------------------------------------------
-   if (mBodyTextureIndex[EARTH] == UNINIT_TEXTURE)
-   {
-      textureFile = fm->GetStringParameter("FULL_EARTH_TEXTURE_FILE");
-      status = ilLoadImage((char*)textureFile.c_str());
-      
-      #if DEBUG_TRAJCANVAS_BODY
-         MessageInterface::ShowMessage
-            ("TrajPlotCanvas::LoadGLTextures() status of loading %s = %d\n",
-             textureFile.c_str(), status);
-      #endif
-      
-      if (status != 1)
-         return false;
 
-      mBodyTextureIndex[EARTH] = ilutGLBindTexImage();
-   }
-   
    //--------------------------------------------------
-   // load other standard bodies texture if used
+   // load object texture if used
    //--------------------------------------------------
-   for (int body=0; body<=MOON; body++)
+   for (int i=0; i<mObjectCount; i++)
    {
-      if (body == EARTH)
-         continue;
-
-      if (mBodyInUse[body] && mBodyTextureIndex[body] == UNINIT_TEXTURE)
+      if (mObjectTextureIdMap[mObjectNames[i]] == UNINIT_TEXTURE)
       {
-         // load texture
-         switch (body)
-         {
-         case SUN:
-            textureFile = fm->GetStringParameter("FULL_SUN_TEXTURE_FILE");
-            status = ilLoadImage((char*)textureFile.c_str());
-            break;
-         case MERCURY:
-            textureFile = fm->GetStringParameter("FULL_MERCURY_TEXTURE_FILE");
-            status = ilLoadImage((char*)textureFile.c_str());
-            break;
-         case VENUS:
-            textureFile = fm->GetStringParameter("FULL_VENUS_TEXTURE_FILE");
-            status = ilLoadImage((char*)textureFile.c_str());
-            break;
-         case MARS:
-            textureFile = fm->GetStringParameter("FULL_MARS_TEXTURE_FILE");
-            status = ilLoadImage((char*)textureFile.c_str());
-            break;
-         case JUPITER:
-            textureFile = fm->GetStringParameter("FULL_JUPITER_TEXTURE_FILE");
-            status = ilLoadImage((char*)textureFile.c_str());
-            break;
-         case SATURN:
-            textureFile = fm->GetStringParameter("FULL_SATURN_TEXTURE_FILE");
-            status = ilLoadImage((char*)textureFile.c_str());
-            break;
-         case URANUS:
-            textureFile = fm->GetStringParameter("FULL_URANUS_TEXTURE_FILE");
-            status = ilLoadImage((char*)textureFile.c_str());
-            break;
-         case NEPTUNE:
-            textureFile = fm->GetStringParameter("FULL_NEPTUNE_TEXTURE_FILE");
-            status = ilLoadImage((char*)textureFile.c_str());
-            break;
-         case PLUTO:
-            textureFile = fm->GetStringParameter("FULL_PLUTO_TEXTURE_FILE");
-            status = ilLoadImage((char*)textureFile.c_str());
-            break;
-         case MOON:
-            textureFile = fm->GetStringParameter("FULL_MOON_TEXTURE_FILE");
-            status = ilLoadImage((char*)textureFile.c_str());
-            break;
-         default:
-            MessageInterface::ShowMessage
-               ("TrajPlotCanvas::LoadGLTextures() Texture file is not supported for body: %s\n",
-                BodyInfo::BODY_NAME[body].c_str());
-            status = 0;
-            break;
-         }
-                 
-         if (status != 1)
-         {
-            MessageInterface::ShowMessage
-               ("TrajPlotCanvas::LoadGLTextures() Unable to load texture file for %s\n"
-                "file name:%s\n", BodyInfo::BODY_NAME[body].c_str(), textureFile.c_str());
-         }
-         else
-         {
-            mBodyTextureIndex[body] = ilutGLBindTexImage();
-         }
+         #if DEBUG_TRAJCANVAS_OBJECT > 1
+         MessageInterface::ShowMessage
+            ("TrajPlotCanvas::LoadGLTextures() object=%s\n", mObjectNames[i].c_str());
+         #endif
+         
+         mObjectTextureIdMap[mObjectNames[i]] = BindTexture(mObjectNames[i]);
       }
    }
    
@@ -1531,6 +1578,141 @@ bool TrajPlotCanvas::LoadGLTextures()
 #else
    return false;
 #endif
+}
+
+
+//------------------------------------------------------------------------------
+// GLuint BindTexture(const wxString &objName)
+//------------------------------------------------------------------------------
+/**
+ * Loads textures and returns binding index.
+ */
+//------------------------------------------------------------------------------
+GLuint TrajPlotCanvas::BindTexture(const wxString &objName)
+{
+   GLuint ret;
+   
+   FileManager *fm = FileManager::Instance();
+   std::string textureFile;
+   ILboolean status;
+
+   //@todo - Change FileManager to have Luna
+   // special case for Luna, FileManager has Moon
+   std::string filename;
+   if (objName == "Luna")
+   {
+      filename = "FULL_MOON_TEXTURE_FILE";
+   }
+   else
+   {
+      std::string name = std::string(objName.Upper().c_str());
+      filename = "FULL_" + name + "_TEXTURE_FILE";
+   }
+   
+   textureFile = fm->GetStringParameter(filename);
+   status = ilLoadImage((char*)textureFile.c_str());
+   
+   if (status != 1)
+   {
+      MessageInterface::ShowMessage
+         ("TrajPlotCanvas::LoadGLTextures() Unable to load texture file for %s\n"
+          "file name:%s\n", objName.c_str(), textureFile.c_str());
+      
+      ret = UNINIT_TEXTURE;
+   }
+   else
+   {
+      ret = ilutGLBindTexImage();
+   }
+
+   #if DEBUG_TRAJCANVAS_OBJECT
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::BindTexture() objName=%s ret=%d\n", objName.c_str(),
+       ret);
+   #endif
+   
+   return ret;
+}
+
+
+//------------------------------------------------------------------------------
+// GLuint BindTexture(int bodyId)
+//------------------------------------------------------------------------------
+/**
+ * Loads textures and returns binding index.
+ */
+//------------------------------------------------------------------------------
+GLuint TrajPlotCanvas::BindTexture(int bodyId)
+{
+   FileManager *fm = FileManager::Instance();
+   std::string textureFile;
+   ILboolean status;
+   
+   switch (bodyId)
+   {
+   case SUN:
+      textureFile = fm->GetStringParameter("FULL_SUN_TEXTURE_FILE");
+      status = ilLoadImage((char*)textureFile.c_str());
+      break;
+   case MERCURY:
+      textureFile = fm->GetStringParameter("FULL_MERCURY_TEXTURE_FILE");
+      status = ilLoadImage((char*)textureFile.c_str());
+      break;
+   case VENUS:
+      textureFile = fm->GetStringParameter("FULL_VENUS_TEXTURE_FILE");
+      status = ilLoadImage((char*)textureFile.c_str());
+      break;
+   case EARTH:
+      textureFile = fm->GetStringParameter("FULL_EARTH_TEXTURE_FILE");
+      status = ilLoadImage((char*)textureFile.c_str());
+      break;
+   case MARS:
+      textureFile = fm->GetStringParameter("FULL_MARS_TEXTURE_FILE");
+      status = ilLoadImage((char*)textureFile.c_str());
+      break;
+   case JUPITER:
+      textureFile = fm->GetStringParameter("FULL_JUPITER_TEXTURE_FILE");
+      status = ilLoadImage((char*)textureFile.c_str());
+      break;
+   case SATURN:
+      textureFile = fm->GetStringParameter("FULL_SATURN_TEXTURE_FILE");
+      status = ilLoadImage((char*)textureFile.c_str());
+      break;
+   case URANUS:
+      textureFile = fm->GetStringParameter("FULL_URANUS_TEXTURE_FILE");
+      status = ilLoadImage((char*)textureFile.c_str());
+      break;
+   case NEPTUNE:
+      textureFile = fm->GetStringParameter("FULL_NEPTUNE_TEXTURE_FILE");
+      status = ilLoadImage((char*)textureFile.c_str());
+      break;
+   case PLUTO:
+      textureFile = fm->GetStringParameter("FULL_PLUTO_TEXTURE_FILE");
+      status = ilLoadImage((char*)textureFile.c_str());
+      break;
+   case LUNA:
+      textureFile = fm->GetStringParameter("FULL_MOON_TEXTURE_FILE");
+      status = ilLoadImage((char*)textureFile.c_str());
+      break;
+   default:
+      MessageInterface::ShowMessage
+         ("TrajPlotCanvas::LoadGLTextures() Texture file is not supported "
+          "for body: %s\n",  BodyInfo::BODY_NAME[bodyId].c_str());
+      status = 0;
+      break;
+   }
+   
+   if (status != 1)
+   {
+      MessageInterface::ShowMessage
+         ("TrajPlotCanvas::LoadGLTextures() Unable to load texture file for %s\n"
+          "file name:%s\n", BodyInfo::BODY_NAME[bodyId].c_str(), textureFile.c_str());
+      return UNINIT_TEXTURE;
+   }
+   else
+   {
+      return ilutGLBindTexImage();
+   }
 }
 
 
@@ -1567,6 +1749,12 @@ void TrajPlotCanvas::SetProjection()
 void TrajPlotCanvas::SetupWorld()
 {
 
+   #if DEBUG_TRAJCANVAS_PROJ
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::SetupWorld() mUsePerspectiveMode=%d, mUseSingleRotAngle=%d\n",
+       mUsePerspectiveMode, mUseSingleRotAngle);
+   #endif
+   
    if (mUsePerspectiveMode)
    {
       //MessageInterface::ShowMessage
@@ -1582,14 +1770,22 @@ void TrajPlotCanvas::SetupWorld()
       
       Real dist = mViewPointLocVector.GetMagnitude();
       
+//       // compute fov angle
+//       Real mFovDeg = 2.0 *
+//          GmatMathUtil::ATan(size/2.0, dist - mObjectRadius[mOriginId]) *
+//          GmatMathUtil::DEG_PER_RAD;
+      
       // compute fov angle
-      Real fovRad = 2.0 * GmatMathUtil::ATan(size/2.0, dist) *
+      mFovDeg = 2.0 *
+         GmatMathUtil::ATan(size/2.0, dist - mObjectRadius[mOriginId]) *
          GmatMathUtil::DEG_PER_RAD;
       
       //MessageInterface::ShowMessage
-      //   ("size=%f, dist=%f, fov=%f\n", size, dist, fovRad);
+      //   ("size=%f, dist=%f, mAxisLength=%f, fov=%f\n", size, dist, mAxisLength,
+      //    mFovDeg);
       
-      gluPerspective(fovRad, aspect, 1.0, mAxisLength*2);
+      //gluPerspective(mFovDeg, aspect, 1.0, mAxisLength*2);
+      gluPerspective(mFovDeg, aspect, 1.0, mAxisLength * mFovDeg);
    }
    else
    {
@@ -1598,16 +1794,33 @@ void TrajPlotCanvas::SetupWorld()
               mfViewFar);
    }
    
-   //Translate Camera
-   glTranslatef(mfCamTransX, mfCamTransY, mfCamTransZ);
-
+   
    //put camera transformations here.
    if (mUseSingleRotAngle)
    {
+      //Translate Camera
+      glTranslatef(mfCamTransX, mfCamTransY, mfCamTransZ);
       glRotatef(mfCamSingleRotAngle, mfCamRotXAxis, mfCamRotYAxis, mfCamRotZAxis);
+
+      //gluLookAt(mViewPointLocVector[0], mViewPointLocVector[1],
+      //          mViewPointLocVector[2],
+      //          0.0, 0.0, 0.0,
+      //          -mScTempPos[0][mNumData-1][0],
+      //          -mScTempPos[0][mNumData-1][1],
+      //           mScTempPos[0][mNumData-1][2]);
    }
    else
    {
+//       if (mUsePerspectiveMode)
+//       {
+//          mfCamTransX = 0.0;
+//          mfCamTransY = 0.0;
+//          mfCamTransZ = -mAxisLength/2.0; //loj: How do I compute this?
+//       }
+   
+      //Translate Camera
+      glTranslatef(mfCamTransX, mfCamTransY, mfCamTransZ);
+      
       if (mRotateAboutXaxis)
       {
          glRotatef(mfCamRotYAngle, 0.0, 1.0, 0.0);
@@ -1631,19 +1844,11 @@ void TrajPlotCanvas::SetupWorld()
    //camera moves opposite direction to center on object
    //this is the point of rotation
    //loj: 4/15/05 Added minus sign to x, y
-   switch (mCenterViewBody)
-   {
-   case EARTH:
-      glTranslatef( mEarthTempPos[mNumData-1][0],
-                    mEarthTempPos[mNumData-1][1],
-                   -mEarthTempPos[mNumData-1][2]);
-      break;
-   default:
-      glTranslatef( mBodyTempPos[mCenterViewBody][mNumData-1][0],
-                    mBodyTempPos[mCenterViewBody][mNumData-1][1],
-                   -mBodyTempPos[mCenterViewBody][mNumData-1][2]);
-      break;
-   }
+   
+   glTranslatef( mObjectTempPos[mOriginId][mNumData-1][0],
+                 mObjectTempPos[mOriginId][mNumData-1][1],
+                 -mObjectTempPos[mOriginId][mNumData-1][2]);
+   
 } // end SetupWorld()
 
 
@@ -1786,19 +1991,19 @@ void TrajPlotCanvas::ComputeProjection(int frame)
       // if viewpoint ref. object is a spacecraft, find the index
       if (mViewPointRefObj->GetType() == Gmat::SPACECRAFT)
       {
-         mVptRefScId = -1;
+         mVpRefScId = -1;
          for (int i=0; i<mScCount; i++)
          {
             if (mViewPointRefObj->GetName() == mScNameArray[i])
             {
-               mVptRefScId = i;
+               mVpRefScId = i;
                break;
             }
          }
          
          // Is this reasonable?
          // if spacecraft name not found, set to use a vector
-         if (mVptRefScId == -1)
+         if (mVpRefScId == -1)
          {
             mUseViewPointRefVector = true;
             MessageInterface::ShowMessage
@@ -1808,22 +2013,22 @@ void TrajPlotCanvas::ComputeProjection(int frame)
          }
          else
          {
-            vpRefVec.Set(mScTempPos[mVptRefScId][frame][0],
-                         mScTempPos[mVptRefScId][frame][1],
-                         mScTempPos[mVptRefScId][frame][2]);
+            vpRefVec.Set(mScTempPos[mVpRefScId][frame][0],
+                         mScTempPos[mVpRefScId][frame][1],
+                         mScTempPos[mVpRefScId][frame][2]);
          }
       }
       else
       {
          // if valid body id
-         if (mVptRefBodyId != -1)
+         if (mVpRefObjId != -1)
          {
-            // for efficiency, body data are computed in UpdateSpacecraft() once.
-            if (mBodyHasData[mVptRefBodyId])
+            // for efficiency, body data are computed in UpdatePlot() once.
+            if (mObjectHasData[mVpRefObjId])
             {
-               vpRefVec.Set(mBodyTempPos[mVptRefBodyId][frame][0],
-                            mBodyTempPos[mVptRefBodyId][frame][1],
-                            mBodyTempPos[mVptRefBodyId][frame][2]);
+               vpRefVec.Set(mObjectTempPos[mVpRefObjId][frame][0],
+                            mObjectTempPos[mVpRefObjId][frame][1],
+                            mObjectTempPos[mVpRefObjId][frame][2]);
             }
          }
          else
@@ -1851,19 +2056,19 @@ void TrajPlotCanvas::ComputeProjection(int frame)
       // if viewpoint vector object is a spacecraft, find the index
       if (mViewPointVectorObj->GetType() == Gmat::SPACECRAFT)
       {
-         mVptVecScId = -1;
+         mVpVecScId = -1;
          for (int i=0; i<mScCount; i++)
          {
             if (mViewPointVectorObj->GetName() == mScNameArray[i])
             {
-               mVptVecScId = i;
+               mVpVecScId = i;
                break;
             }
          }
          
          // Is this reasonable?
          // if spacecraft name not found, set to use a vector
-         if (mVptVecScId == -1)
+         if (mVpVecScId == -1)
          {
             mUseViewPointVector = true;
             MessageInterface::ShowMessage
@@ -1873,22 +2078,22 @@ void TrajPlotCanvas::ComputeProjection(int frame)
          }
          else
          {
-            vpVec.Set(mScTempPos[mVptVecScId][frame][0],
-                      mScTempPos[mVptVecScId][frame][1],
-                      mScTempPos[mVptVecScId][frame][2]);
+            vpVec.Set(mScTempPos[mVpVecScId][frame][0],
+                      mScTempPos[mVpVecScId][frame][1],
+                      mScTempPos[mVpVecScId][frame][2]);
          }
       }
       else
       {
          // if valid body id
-         if (mVptVecBodyId != -1)
+         if (mVpVecObjId != -1)
          {
-            // for efficiency, body data are computed in UpdateSpacecraft() once.
-            if (mBodyHasData[mVptVecBodyId])
+            // for efficiency, body data are computed in UpdatePlot() once.
+            if (mObjectHasData[mVpVecObjId])
             {
-               vpVec.Set(mBodyTempPos[mVptVecBodyId][frame][0],
-                         mBodyTempPos[mVptVecBodyId][frame][1],
-                         mBodyTempPos[mVptVecBodyId][frame][2]);
+               vpVec.Set(mObjectTempPos[mVpVecObjId][frame][0],
+                         mObjectTempPos[mVpVecObjId][frame][1],
+                         mObjectTempPos[mVpVecObjId][frame][2]);
             }
          }
          else
@@ -1957,12 +2162,12 @@ void TrajPlotCanvas::ComputeProjection(int frame)
          // if valid body id
          if (mVdirBodyId != -1)
          {
-            // for efficiency, body data are computed in UpdateSpacecraft() once.
-            if (mBodyHasData[mVdirBodyId])
+            // for efficiency, body data are computed in UpdatePlot() once.
+            if (mObjectHasData[mVdirBodyId])
             {
-               vdVec.Set(mBodyTempPos[mVdirBodyId][frame][0],
-                         mBodyTempPos[mVdirBodyId][frame][1],
-                         mBodyTempPos[mVdirBodyId][frame][2]);
+               vdVec.Set(mObjectTempPos[mVdirBodyId][frame][0],
+                         mObjectTempPos[mVdirBodyId][frame][1],
+                         mObjectTempPos[mVdirBodyId][frame][2]);
             }
          }
          else
@@ -1982,6 +2187,12 @@ void TrajPlotCanvas::ComputeProjection(int frame)
    #endif
 
    
+   //-----------------------------------------------------------------
+   // set view center object
+   //-----------------------------------------------------------------
+   mOriginId = GetObjectId(mOriginName);
+   mMaxZoomIn = mObjMaxZoomIn[mOriginId];
+   
    if (mUsePerspectiveMode)
    {
       // set camera location
@@ -1997,10 +2208,6 @@ void TrajPlotCanvas::ComputeProjection(int frame)
       // if mAxisLength is too small, set to max zoom in value
       if (mAxisLength < mMaxZoomIn)
          mAxisLength = mMaxZoomIn;
-      
-      mfCamTransX = 0.0;
-      mfCamTransY = 0.0;
-      mfCamTransZ = 0.0;
    }
    
    // compute camera rotation angle
@@ -2008,7 +2215,7 @@ void TrajPlotCanvas::ComputeProjection(int frame)
    
    mfCamSingleRotAngle = 
       GmatMathUtil::ACos(-(vdVec[2]/vdMag)) * GmatMathUtil::DEG_PER_RAD;
-   
+      
    // compute axis of rotation
    mfCamRotXAxis =  vdVec[1];
    mfCamRotYAxis = -vdVec[0];
@@ -2038,8 +2245,8 @@ void TrajPlotCanvas::DrawFrame()
       ("TrajPlotCanvas::DrawFrame() mNumData=%d\n", mNumData);
    #endif
    
-   //mUseViewPointInfo = true;
-   
+   //mUseInitialViewPoint = true;
+      
    for (int frame=1; frame<mNumData; frame++)
    {
       // Yield control to pending message KeyEvent for user interrupt.
@@ -2056,7 +2263,7 @@ void TrajPlotCanvas::DrawFrame()
       //loj: If It doesn't clear, it shows trace
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      if (mUseViewPointInfo)
+      if (mUseInitialViewPoint)
       {
          ComputeProjection(frame);
          ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
@@ -2070,9 +2277,6 @@ void TrajPlotCanvas::DrawFrame()
          TiltEarthZAxis();
       }
    
-      // draw earth
-      DrawEarthOrbit(frame);
-
       // draw equatorial plane
       if (mDrawEqPlane)
          DrawEquatorialPlane(mEqPlaneColor);
@@ -2100,16 +2304,12 @@ void TrajPlotCanvas::DrawFrame()
          mNeedOtherBodyConversion = false;
       }
    
-      // draw other bodies orbit
-      for (int body=0; body<MAX_BODIES; body++)
+      // draw object orbit
+      for (int i=0; i<mObjectCount; i++)
       {
-         if (body == EARTH)
-            continue;
-      
-         if (mBodyInUse[body])
-            DrawOtherBodyOrbit(body);
+         DrawObjectOrbit(mObjectNames[i]);
       }
-   
+      
       // draw Earth-Sun line
       if (mDrawEcLine)
          DrawEarthSunLine();
@@ -2140,8 +2340,24 @@ void TrajPlotCanvas::DrawPicture()
       ("TrajPlotCanvas::DrawPicture() mNumData=%d\n", mNumData);
    #endif
    
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   if (mUseSingleRotAngle)
+   {
+      //Translate Camera
+      //glTranslatef(mfCamTransX, mfCamTransY, mfCamTransZ);
+      //glRotatef(mfCamSingleRotAngle, mfCamRotXAxis, mfCamRotYAxis, mfCamRotZAxis);
 
+//       gluLookAt(mViewPointLocVector[0], mViewPointLocVector[1],
+//                 mViewPointLocVector[2],
+//                 0.0, 0.0, 0.0,
+//                 -mScTempPos[0][mNumData-1][0],
+//                 -mScTempPos[0][mNumData-1][1],
+//                  mScTempPos[0][mNumData-1][2]);
+      
+   }
+
+   
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   
    mfViewLeft = -mAxisLength/2;
    mfViewRight = mAxisLength/2;
    mfViewTop = mAxisLength/2;
@@ -2156,9 +2372,6 @@ void TrajPlotCanvas::DrawPicture()
       TiltEarthZAxis();
    }
    
-   // draw earth
-   DrawEarthOrbit();
-
    // draw equatorial plane
    if (mDrawEqPlane)
       DrawEquatorialPlane(mEqPlaneColor);
@@ -2186,16 +2399,12 @@ void TrajPlotCanvas::DrawPicture()
       mNeedOtherBodyConversion = false;
    }
    
-   // draw other bodies orbit
-   for (int body=0; body<MAX_BODIES; body++)
+   // draw object orbit
+   for (int i=0; i<mObjectCount; i++)
    {
-      if (body == EARTH)
-         continue;
-      
-      if (mBodyInUse[body])
-          DrawOtherBodyOrbit(body);
+      DrawObjectOrbit(mObjectNames[i]);
    }
-   
+      
    // draw Earth-Sun line
    if (mDrawEcLine)
       DrawEarthSunLine();
@@ -2210,6 +2419,120 @@ void TrajPlotCanvas::DrawPicture()
 
 
 //------------------------------------------------------------------------------
+//  void DrawObject(const wxString &objName)
+//------------------------------------------------------------------------------
+/**
+ * Draws object shpere and maps texture image.
+ */
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::DrawObject(const wxString &objName)
+{
+   int objId = GetObjectId(objName);
+   
+   #if DEBUG_TRAJCANVAS_DRAW
+   MessageInterface::ShowMessage
+         ("TrajPlotCanvas::DrawObject() drawing:%s, objId:%d\n",
+          objName.c_str(), objId);
+   #endif
+   
+   //-------------------------------------------------------
+   // draw object with texture on option
+   //-------------------------------------------------------
+   if (mNumData > 1)
+   {
+      if (mObjectTextureIdMap[objName] != UNINIT_TEXTURE)
+      {
+         glPushMatrix();
+         glColor4f(1.0, 1.0, 1.0, 1.0);
+
+         // put object at final position
+         glTranslatef(-mObjectTempPos[objId][mNumData-1][0],
+                      -mObjectTempPos[objId][mNumData-1][1],
+                       mObjectTempPos[objId][mNumData-1][2]);
+         
+         glBindTexture(GL_TEXTURE_2D, mObjectTextureIdMap[objName]);
+         glEnable(GL_TEXTURE_2D);
+         GLUquadricObj* qobj = gluNewQuadric();
+         gluQuadricDrawStyle(qobj, GLU_FILL  );
+         gluQuadricNormals  (qobj, GLU_SMOOTH);
+         gluQuadricTexture  (qobj, GL_TRUE   );
+         gluSphere(qobj, mObjectRadius[objId], 50, 50);
+         gluDeleteQuadric(qobj);
+      }
+      else
+      {
+         // just draw small sphere
+      }
+   }
+   
+   glPopMatrix();
+   glDisable(GL_TEXTURE_2D);
+
+} // end DrawObject(const wxString &objName)
+
+
+//------------------------------------------------------------------------------
+//  void DrawObjectOrbit(const wxString &objName)
+//------------------------------------------------------------------------------
+/**
+ * Draws object orbit and draws body at the last point.
+ */
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::DrawObjectOrbit(const wxString &objName)
+{
+   int objId = GetObjectId(objName);
+
+   #if DEBUG_TRAJCANVAS_DRAW
+   MessageInterface::ShowMessage
+         ("TrajPlotCanvas::DrawObjectOrbit() drawing obbit:%s, objId:%d\n",
+          objName.c_str(), objId);
+   #endif
+   
+   // Draw object trajectory line based on points
+   glPushMatrix();
+   glBegin(GL_LINES);
+
+   // set color
+   *sIntColor = mObjectColorMap[objName].GetIntColor();
+   glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
+
+   //loj: 4/15/05 Added minus sign to x, y
+   for (int i=1; i<mNumData; i++)
+   {      
+      if (mTime[i] >= mTime[i-1])
+      {
+         glVertex3f((-mObjectTempPos[objId][i-1][0]),
+                    (-mObjectTempPos[objId][i-1][1]),
+                    ( mObjectTempPos[objId][i-1][2]));
+         
+         glVertex3f((-mObjectTempPos[objId][i][0]),
+                    (-mObjectTempPos[objId][i][1]),
+                    ( mObjectTempPos[objId][i][2]));
+      }
+   }
+
+   glEnd();
+   glPopMatrix();
+
+   //-------------------------------------------------------
+   // draw object with texture on option
+   //-------------------------------------------------------
+   if (mShowObjectMap[objName])
+   {
+      
+      #if DEBUG_TRAJCANVAS_DRAW
+      MessageInterface::ShowMessage
+         ("TrajPlotCanvas::DrawObjectOrbit() mShowObjectMap=%d\n",
+          mShowObjectMap[objName]);
+      #endif
+      
+      DrawObject(objName);
+   }
+   
+} // end DrawObjectOrbit(const wxString &objName)
+
+
+//------------------------------------------------------------------------------
 //  void DrawEarth()
 //------------------------------------------------------------------------------
 /**
@@ -2218,16 +2541,18 @@ void TrajPlotCanvas::DrawPicture()
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::DrawEarth()
 {
-   if (mCenterViewBody == EARTH)
+   if (mOriginId == EARTH)
    {
            
       glColor3f(1.0, 1.0, 1.0);
 
       if (mUseTexture)
       {
-         if (mBodyTextureIndex[EARTH] != UNINIT_TEXTURE)
+         if (mObjectTextureIdMap["Earth"] != UNINIT_TEXTURE)
+            //if (mObjectTextureIndex[EARTH] != UNINIT_TEXTURE)
          {
-            glBindTexture(GL_TEXTURE_2D, mBodyTextureIndex[EARTH]);
+            //glBindTexture(GL_TEXTURE_2D, mObjectTextureIndex[EARTH]);
+            glBindTexture(GL_TEXTURE_2D, mObjectTextureIdMap["Earth"]);
             glEnable(GL_TEXTURE_2D);
          }
       }
@@ -2240,7 +2565,6 @@ void TrajPlotCanvas::DrawEarth()
       gluDeleteQuadric(qobj);
       
       glDisable(GL_TEXTURE_2D);
-      glMatrixMode(GL_MODELVIEW);
    }
 } // end DrawEarth()
 
@@ -2280,20 +2604,22 @@ void TrajPlotCanvas::DrawEarthOrbit()
    //-------------------------------------------------------
    //draw earth with texture
    //-------------------------------------------------------
-   if (mNumData > 0)
+   if (mDrawEarth)
    {
-      glPushMatrix();
+      if (mNumData > 0)
+      {
+         glPushMatrix();
        
-      // put earth at final position
-      //loj: 4/15/05 Added minus sign to x, y
-      glTranslatef(-mEarthTempPos[mNumData-1][0],
-                   -mEarthTempPos[mNumData-1][1],
-                   mEarthTempPos[mNumData-1][2]);
+         // put earth at final position
+         //loj: 4/15/05 Added minus sign to x, y
+         glTranslatef(-mEarthTempPos[mNumData-1][0],
+                      -mEarthTempPos[mNumData-1][1],
+                      mEarthTempPos[mNumData-1][2]);
 
-      DrawEarth();
-      glPopMatrix();
+         DrawEarth();
+         glPopMatrix();
+      }
    }
-   
 } // end DrawEarthOrbit()
 
 
@@ -2330,19 +2656,21 @@ void TrajPlotCanvas::DrawEarthOrbit(int frame)
    //-------------------------------------------------------
    //draw earth with texture
    //-------------------------------------------------------
-   if (mNumData > 0)
+   if (mDrawEarth)
    {
-      glPushMatrix();
+      if (mNumData > 0)
+      {
+         glPushMatrix();
        
-      // put earth at current position
-      glTranslatef(-mEarthTempPos[frame-1][0],
-                   -mEarthTempPos[frame-1][1],
-                   mEarthTempPos[frame-1][2]);
-      DrawEarth();
-      glPopMatrix();
+         // put earth at current position
+         glTranslatef(-mEarthTempPos[frame-1][0],
+                      -mEarthTempPos[frame-1][1],
+                       mEarthTempPos[frame-1][2]);
+         DrawEarth();
+         glPopMatrix();
+      }
    }
-   
-} // end DrawEarthOrbit()
+} // end DrawEarthOrbit(int frame)
 
 
 //------------------------------------------------------------------------------
@@ -2354,10 +2682,13 @@ void TrajPlotCanvas::DrawEarthOrbit(int frame)
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::DrawOtherBody(int bodyIndex)
 {
+   
    //-------------------------------------------------------
    // draw anybody with texture on option
    //-------------------------------------------------------
-   if (mNumData > 1 && mBodyTextureIndex[bodyIndex] != UNINIT_TEXTURE)
+   //if (mNumData > 1 && mObjectTextureIndex[bodyIndex] != UNINIT_TEXTURE)
+   if (mNumData > 1 && mObjectTextureIdMap[BodyInfo::WX_BODY_NAME[bodyIndex]] !=
+       UNINIT_TEXTURE)
    {
       glPushMatrix();
       glColor4f(1.0, 1.0, 1.0, 1.0);
@@ -2365,17 +2696,18 @@ void TrajPlotCanvas::DrawOtherBody(int bodyIndex)
 
       // put anybody at final position
       //loj: 4/15/05 Added minus sign to x, y
-      glTranslatef(-mBodyTempPos[bodyIndex][mNumData-1][0],
-                   -mBodyTempPos[bodyIndex][mNumData-1][1],
-                    mBodyTempPos[bodyIndex][mNumData-1][2]);
+      glTranslatef(-mObjectTempPos[bodyIndex][mNumData-1][0],
+                   -mObjectTempPos[bodyIndex][mNumData-1][1],
+                    mObjectTempPos[bodyIndex][mNumData-1][2]);
 
-      glBindTexture(GL_TEXTURE_2D, mBodyTextureIndex[bodyIndex]);
+      //glBindTexture(GL_TEXTURE_2D, mObjectTextureIndex[bodyIndex]);
+      glBindTexture(GL_TEXTURE_2D, mObjectTextureIdMap[BodyInfo::WX_BODY_NAME[bodyIndex]]);
       glEnable(GL_TEXTURE_2D);
       GLUquadricObj* qobj = gluNewQuadric();
       gluQuadricDrawStyle(qobj, GLU_FILL  );
       gluQuadricNormals  (qobj, GLU_SMOOTH);
       gluQuadricTexture  (qobj, GL_TRUE   );
-      gluSphere(qobj, mBodyRadius[bodyIndex], 50, 50);
+      gluSphere(qobj, mObjectRadius[bodyIndex], 50, 50);
       gluDeleteQuadric(qobj);
    }
    
@@ -2413,13 +2745,13 @@ void TrajPlotCanvas::DrawOtherBodyOrbit(int bodyIndex)
    {      
       if (mTime[i] >= mTime[i-1])
       {
-         glVertex3f((-mBodyTempPos[bodyIndex][i-1][0]),
-                    (-mBodyTempPos[bodyIndex][i-1][1]),
-                    ( mBodyTempPos[bodyIndex][i-1][2]));
+         glVertex3f((-mObjectTempPos[bodyIndex][i-1][0]),
+                    (-mObjectTempPos[bodyIndex][i-1][1]),
+                    ( mObjectTempPos[bodyIndex][i-1][2]));
          
-         glVertex3f((-mBodyTempPos[bodyIndex][i][0]),
-                    (-mBodyTempPos[bodyIndex][i][1]),
-                    ( mBodyTempPos[bodyIndex][i][2]));
+         glVertex3f((-mObjectTempPos[bodyIndex][i][0]),
+                    (-mObjectTempPos[bodyIndex][i][1]),
+                    ( mObjectTempPos[bodyIndex][i][2]));
       }
    }
 
@@ -2429,7 +2761,8 @@ void TrajPlotCanvas::DrawOtherBodyOrbit(int bodyIndex)
    //-------------------------------------------------------
    // draw anybody with texture on option
    //-------------------------------------------------------
-   DrawOtherBody(bodyIndex);
+   if (mShowObjectMap[wxString(BodyInfo::BODY_NAME[bodyIndex].c_str())])
+       DrawOtherBody(bodyIndex);
    
 } // end DrawOtherBodyOrbit()
 
@@ -2539,7 +2872,6 @@ void TrajPlotCanvas::DrawSpacecraft(UnsignedInt scColor)
       glCallList( mGlList );
    }
 
-   glMatrixMode(GL_MODELVIEW);
 } // end DrawSpacecraft()
 
 
@@ -2698,20 +3030,18 @@ void TrajPlotCanvas::DrawEquatorialPlane(UnsignedInt color)
    int i;
    float endPos[3];
    float distance;
-   double angle;
+   Real angle;
    
    static const Real RAD_PER_DEG =
       3.14159265358979323846264338327950288419716939937511 / 180.0;
    
-   distance = (double)mAxisLength * 5.0;
+   distance = (Real)mAxisLength;
 
    glPushMatrix();
-   //glLoadIdentity();
    glBegin(GL_LINES);
    
    // set color
    *sIntColor = color;
-   //*sIntColor = mEqPlaneColor;
    glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
 
    //-----------------------------------
@@ -2719,7 +3049,7 @@ void TrajPlotCanvas::DrawEquatorialPlane(UnsignedInt color)
    //-----------------------------------
    for (i=0; i<360; i+=15)
    {
-      angle = RAD_PER_DEG * ((double)i);
+      angle = RAD_PER_DEG * ((Real)i);
       
       endPos[0] = distance * cos(angle);
       endPos[1] = distance * sin(angle);
@@ -2736,72 +3066,67 @@ void TrajPlotCanvas::DrawEquatorialPlane(UnsignedInt color)
    // draw circles
    //-----------------------------------
    glPushMatrix();
-   //glLoadIdentity();
    
    GLUquadricObj *qobj = gluNewQuadric();
 
 
-   //=================================================================
-   // Argosy code
-//    double orthoDepth = 10;
-//    double ort = OrthoDepth * 8;
-//    //int pwr = gile(log10 (ort));
-//    int pwr = GmatMathUtil::Floor(GmatMathUtil::Log(ort));
-//    //double size = exp10(pwr)/100;
-//    double size = GmatMathUtil::Pow(10.0, pwr)/100;
-//    int imax = orthoDepth/size;
-
-//    // Draw MAJOR circles
-//    SetCelestialColor (GlOptions.EquatorialPlaneColor);
-//    for (integer i=1;  i<=imax;  ++i)
-//       if (i%10==0)
-//          DrawOpenCircle(Vector(0,0,0),Vector(0,0,1),i*size);
-
-//    // Draw minor circles
-//    imax = minimum (imax,100);
-//    ZColor color = GlOptions.EquatorialPlaneColor;
-//    real factor = (size*100)/(ort);
-//    color.Red *=factor;
-//    color.Green *=factor;
-//    color.Blue *=factor;
-//    SetCelestialColor (color);
-//    for (integer i=1;  i<=imax;  ++i)
-//       if (i%10!=0 && (GlOptions.DrawDarkLines || factor > 0.5))
-//          DrawOpenCircle(Vector(0,0,0),Vector(0,0,1),i*size);
-   //=================================================================
-
-   int maxCircle = (int)(mAxisLength/2000);
-   if (maxCircle > 50)
-      maxCircle = 50;
+   Real orthoDepth = distance;
    
-//    if (mUsePerspectiveMode)
-//    {
+   if (mUsePerspectiveMode)
+      orthoDepth = (mAxisLength*60) / (mFovDeg/2.0);
+   
+      //=================================================================
+      // Argosy code
+      //=================================================================
+      //orthoDepth = (half-size-of-image)*60/(half-FOV-degrees)
+
+      Real ort = orthoDepth * 8;
+      //int pwr = gile(log10 (ort));
+      Real pwr = GmatMathUtil::Floor(GmatMathUtil::Log(ort));
+      //Real size = exp10(pwr)/100;
+      Real size = GmatMathUtil::Pow(10.0, pwr)/100;
+      Real imax = orthoDepth/size;
+
+      //------------------------------------------
+      // Draw MAJOR circles
+      //------------------------------------------
+      //SetCelestialColor (GlOptions.EquatorialPlaneColor);
+      for (int i=1; i<=(int)imax; ++i)
+         if (i%10==0)
+            DrawCircle(qobj, i*size);
+
+      //------------------------------------------
+      // Draw MINOR circles
+      //------------------------------------------
+      //imax = minimum (imax, 100);
+      imax = GmatMathUtil::Min(imax, 100);
+      //ZColor color = GlOptions.EquatorialPlaneColor;
+      Real factor = (size*100)/(ort);
+      //color.Red *=factor;
+      //color.Green *=factor;
+      //color.Blue *=factor;
+      //SetCelestialColor (color);
+      for (int i=1; i<=(int)imax; ++i)
+         //if (i%10!=0 && (GlOptions.DrawDarkLines || factor > 0.5))
+         if (i%10!=0 && (factor > 0.5))
+            DrawCircle(qobj, i*size);
+
+      
+//       //=================================================================
+//       // GMAT code
+//       //=================================================================
+//       int maxCircle = (int)(distance/5000);
+//       Real radius;
+   
+//       if (maxCircle > 50)
+//          maxCircle = 50;
+      
 //       for(i=1; i<maxCircle; i++)
 //       {
-//          gluQuadricDrawStyle(qobj, GLU_LINE  );
-//          gluQuadricNormals  (qobj, GLU_SMOOTH);
-//          gluQuadricTexture  (qobj, GL_FALSE  );
-      
-//          gluDisk(qobj, i*distance/maxCircle, i*distance/maxCircle, 50, 1); // equal distance
+//          radius = i*distance/maxCircle; // equal distance
+//          //radius = radius + (radius /100.0 / log10(radius) * exp(Real(i)));
+//          DrawCircle(qobj, radius);
 //       }
-//    }
-//    else
-//    {
-      double radius;
-      double distAdd;
-      
-      for(i=1; i<maxCircle; i++)
-      {
-         gluQuadricDrawStyle(qobj, GLU_LINE  );
-         gluQuadricNormals  (qobj, GLU_SMOOTH);
-         gluQuadricTexture  (qobj, GL_FALSE  );
-         //distAdd = i*distance/10;
-         //distAdd = i*distance/50;
-         distAdd = i*distance/maxCircle;
-         
-         radius = distAdd + (distAdd /100.0 / log10(distAdd) * exp(double(i)));
-         gluDisk(qobj, radius, radius, 50, 1);
-      }
 //    }
    
    gluDeleteQuadric(qobj);
@@ -2840,9 +3165,9 @@ void TrajPlotCanvas::DrawEclipticPlane()
 void TrajPlotCanvas::DrawEarthSunLine()
 {
    int numSkip;
-   double sunPos[3], endPos[3];
-   double distance = (double)mAxisLength;
-   double norm;
+   Real sunPos[3], endPos[3];
+   Real distance = (Real)mAxisLength;
+   Real norm;
    
    glPushMatrix();
    glBegin(GL_LINES);
@@ -2851,9 +3176,9 @@ void TrajPlotCanvas::DrawEarthSunLine()
    *sIntColor = mEcLineColor;
    glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
    
-   sunPos[0] = mBodyTempPos[SUN][mNumData-1][0];
-   sunPos[1] = mBodyTempPos[SUN][mNumData-1][1];
-   sunPos[2] = mBodyTempPos[SUN][mNumData-1][2];
+   sunPos[0] = mObjectTempPos[SUN][mNumData-1][0];
+   sunPos[1] = mObjectTempPos[SUN][mNumData-1][1];
+   sunPos[2] = mObjectTempPos[SUN][mNumData-1][2];
    
    //--------------------------------
    // draw sun lines
@@ -2863,9 +3188,9 @@ void TrajPlotCanvas::DrawEarthSunLine()
    for (int i=0; i<mNumData; i+=numSkip)
    {      
       //loj: 4/15/05 Added minus sign to x, y
-      sunPos[0] = -mBodyTempPos[SUN][i][0];
-      sunPos[1] = -mBodyTempPos[SUN][i][1];
-      sunPos[2] =  mBodyTempPos[SUN][i][2];
+      sunPos[0] = -mObjectTempPos[SUN][i][0];
+      sunPos[1] = -mObjectTempPos[SUN][i][1];
+      sunPos[2] =  mObjectTempPos[SUN][i][2];
       
       // get sun unit vector and multiply by distance
       norm = sqrt(sunPos[0]*sunPos[0] + sunPos[1]*sunPos[1] + sunPos[2]*sunPos[2]);
@@ -2953,6 +3278,68 @@ void TrajPlotCanvas::DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z)
 {
    glRasterPos3f(x, y, z);
    glCallLists(strlen(inMsg), GL_BYTE, (GLubyte*)inMsg);
+}
+
+
+//---------------------------------------------------------------------------
+// void DrawCircle(GLUquadricObj *qobj, Real radius)
+//---------------------------------------------------------------------------
+void TrajPlotCanvas::DrawCircle(GLUquadricObj *qobj, Real radius)
+{
+   gluQuadricDrawStyle(qobj, GLU_LINE  );
+   gluQuadricNormals  (qobj, GLU_SMOOTH);
+   gluQuadricTexture  (qobj, GL_FALSE  );
+   gluDisk(qobj, radius, radius, 50, 1);
+}
+
+
+//---------------------------------------------------------------------------
+// int GetStdBodyId(const std::string &name)
+//---------------------------------------------------------------------------
+int TrajPlotCanvas::GetStdBodyId(const std::string &name)
+{
+   for (int i=0; i<=LAST_STD_BODY_ID; i++)
+      if (BodyInfo::BODY_NAME[i] == name)
+         return i;
+
+   MessageInterface::PopupMessage
+      (Gmat::ERROR_, "TrajPlotCanvas::GetStdBodyId() body name: " + name +
+       " not found in the default body list\n");
+
+   return -1;
+}
+
+
+//---------------------------------------------------------------------------
+// void AddBody(const std::string &name)
+//---------------------------------------------------------------------------
+void TrajPlotCanvas::AddBody(const std::string &name)
+{
+   wxArrayString bodyNames;
+   UnsignedIntArray bodyColors;
+
+   bodyNames.Add(wxString(name.c_str()));
+   bodyColors.push_back(GmatPlot::GetBodyColor(name.c_str()));
+
+   AddBodyList(bodyNames, bodyColors, false);
+   
+}
+
+
+//---------------------------------------------------------------------------
+// int GetObjectId(const wxString &name)
+//---------------------------------------------------------------------------
+int TrajPlotCanvas::GetObjectId(const wxString &name)
+{
+   for (int i=0; i<mObjectCount; i++)
+      if (mObjectNames[i] == name)
+         return i;
+
+   MessageInterface::PopupMessage
+      (Gmat::ERROR_, "TrajPlotCanvas::GetObjectId() obj name: " + name +
+       " not found in the object list\n");
+
+   return -1;
 }
 
 
@@ -3128,9 +3515,9 @@ bool TrajPlotCanvas::ConvertOtherBodyData()
    //if (mDesiredCoordSystem->GetName() == mInternalCoordSystem->GetName())
    if (mIsInternalCoordSystem)
    {
-      for (int body=0; body<=MOON; body++)
+      for (int body=0; body<=LUNA; body++)
       {
-         if (mBodyHasData[body])
+         if (mObjectHasData[body])
          {
             
             if (body == EARTH)
@@ -3138,16 +3525,16 @@ bool TrajPlotCanvas::ConvertOtherBodyData()
             
             for (int i=0; i<mNumData; i++)
             {
-               CopyVector3(mBodyTempPos[body][i], mBodyGciPos[body][i]);
+               CopyVector3(mObjectTempPos[body][i], mObjectGciPos[body][i]);
             }
          }
       }
    }
    else
    {
-      for (int body=0; body<=MOON; body++)
+      for (int body=0; body<=LUNA; body++)
       {
-         if (mBodyHasData[body])
+         if (mObjectHasData[body])
          {
             #if DEBUG_TRAJCANVAS_CONVERT
                MessageInterface::ShowMessage
@@ -3159,15 +3546,15 @@ bool TrajPlotCanvas::ConvertOtherBodyData()
             
             for (int i=0; i<mNumData; i++)
             {
-               inState.Set(mBodyGciPos[body][i][0], mBodyGciPos[body][i][1],
-                           mBodyGciPos[body][i][2], 0.0, 0.0, 0.0);
+               inState.Set(mObjectGciPos[body][i][0], mObjectGciPos[body][i][1],
+                           mObjectGciPos[body][i][2], 0.0, 0.0, 0.0);
             
                mCoordConverter.Convert(mTime[i], inState, mInternalCoordSystem,
                                        outState, mDesiredCoordSystem);
             
-               mBodyTempPos[body][i][0] = outState[0];
-               mBodyTempPos[body][i][1] = outState[1];
-               mBodyTempPos[body][i][2] = outState[2];
+               mObjectTempPos[body][i][0] = outState[0];
+               mObjectTempPos[body][i][1] = outState[1];
+               mObjectTempPos[body][i][2] = outState[2];
             
                #if DEBUG_TRAJCANVAS_CONVERT > 1
                   MessageInterface::ShowMessage
@@ -3185,9 +3572,9 @@ bool TrajPlotCanvas::ConvertOtherBodyData()
 
 
 //---------------------------------------------------------------------------
-//  void CopyVector3(float to[3], double from[3])
+//  void CopyVector3(float to[3], Real from[3])
 //---------------------------------------------------------------------------
-void TrajPlotCanvas::CopyVector3(float to[3], double from[3])
+void TrajPlotCanvas::CopyVector3(float to[3], Real from[3])
 {
    to[0] = from[0];
    to[1] = from[1];
@@ -3207,9 +3594,9 @@ void TrajPlotCanvas::CopyVector3(float to[3], float from[3])
 
 
 //---------------------------------------------------------------------------
-//  void CopyVector3(double to[3], double from[3])
+//  void CopyVector3(Real to[3], Real from[3])
 //---------------------------------------------------------------------------
-void TrajPlotCanvas::CopyVector3(double to[3], double from[3])
+void TrajPlotCanvas::CopyVector3(Real to[3], Real from[3])
 {
    to[0] = from[0];
    to[1] = from[1];
@@ -3218,9 +3605,9 @@ void TrajPlotCanvas::CopyVector3(double to[3], double from[3])
 
 
 //---------------------------------------------------------------------------
-//  void CopyVector3(double to[3], float from[3])
+//  void CopyVector3(Real to[3], float from[3])
 //---------------------------------------------------------------------------
-void TrajPlotCanvas::CopyVector3(double to[3], float from[3])
+void TrajPlotCanvas::CopyVector3(Real to[3], float from[3])
 {
    to[0] = from[0];
    to[1] = from[1];

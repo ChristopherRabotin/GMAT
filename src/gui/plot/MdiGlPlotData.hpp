@@ -17,7 +17,12 @@
 
 #include "MdiParentGlFrame.hpp"
 #include "ColorTypes.hpp"       // for GmatColor::
+#include "RgbColor.hpp"
 #include <string>
+#include <map>
+
+typedef std::map<wxString, RgbColor> wxStringColorMap;
+typedef std::map<wxString, bool> wxStringBoolMap;
 
 namespace GmatPlot
 {
@@ -30,13 +35,14 @@ namespace GmatPlot
    {
       SUN = 0,  MERCURY,  VENUS,   EARTH,
       MARS,     JUPITER,  SATURN,  URANUS,
-      NEPTUNE,  PLUTO,    MOON,    BODY1,
+      NEPTUNE,  PLUTO,    LUNA,    BODY1,
       BODY2,    BODY3,    BODY4,   BODY5,
       BODY6,    BODY7,    BODY8,   BODY9,
    };
    
    struct BodyInfo
    {
+      static wxString WX_BODY_NAME[MAX_BODIES];
       static std::string BODY_NAME[MAX_BODIES];
       static unsigned int BODY_COLOR[MAX_BODIES];
    };
@@ -57,22 +63,7 @@ namespace GmatPlot
       MDI_GL_SHOW_DEFAULT_VIEW,
       MDI_GL_ZOOM_IN,
       MDI_GL_ZOOM_OUT,
-      MDI_GL_VIEW_ADD_BODY,
-      MDI_GL_VIEW_GOTO_BODY,
       MDI_GL_VIEW_ANIMATION,
-
-      MDI_GL_VIEW_GOTO_SUN,
-      MDI_GL_VIEW_GOTO_MERCURY,
-      MDI_GL_VIEW_GOTO_VENUS,
-      MDI_GL_VIEW_GOTO_EARTH,
-      MDI_GL_VIEW_GOTO_MARS,
-      MDI_GL_VIEW_GOTO_JUPITER,
-      MDI_GL_VIEW_GOTO_SATURN,
-      MDI_GL_VIEW_GOTO_URANUS,
-      MDI_GL_VIEW_GOTO_NEPTUNE,
-      MDI_GL_VIEW_GOTO_PLUTO,
-      MDI_GL_VIEW_GOTO_MOON,
-      MDI_GL_VIEW_GOTO_OTHER_BODY,
       
       MDI_GL_VIEW_OPTION,
       MDI_GL_SHOW_OPTION_PANEL,

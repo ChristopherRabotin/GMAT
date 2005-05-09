@@ -40,6 +40,7 @@
 #include "MessageInterface.hpp"    // for ShowMessage()
 
 //#define DEBUG_PLOTIF_GL 1
+//#define DEBUG_PLOTIF_GL_UPDATE 1
 //#define DEBUG_PLOTIF_XY 1
 //#define DEBUG_PLOTIF_XY_UPDATE 1
 //#define DEBUG_RENAME 1
@@ -78,7 +79,7 @@ PlotInterface::~PlotInterface()
  * Creates OpenGlPlot window
  *
  * @param <plotName> plot name
- * @param <oldName>  old plot name
+ * @param <oldName>  old plot name, this is needed for renaming plot
  * @param <csName>  coordinate system name
  * @param <ssPtr>  solar system pionter
  * @param <drawEcPlane>  true if draw ecliptic plane
@@ -136,7 +137,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    {
       wxString currPlotName =
          ((MdiChildTrajFrame*)MdiGlPlot::mdiChildren[i])->GetPlotName();
-
+            
       if (currPlotName.IsSameAs(plotName.c_str()))
       {
          createNewFrame = false;
@@ -158,18 +159,27 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    if (createNewFrame)
    {
       #if DEBUG_PLOTIF_GL
-         MessageInterface::ShowMessage("PlotInterface::CreateGlPlotWindow() "
-                                       "Creating MdiChildTrajFrame\n");
+         MessageInterface::ShowMessage
+            ("PlotInterface::CreateGlPlotWindow() Creating MdiChildTrajFrame "
+             "%s\n", plotName.c_str());
       #endif
       
       GmatAppData::GetMainFrame()->trajMainSubframe =
          new MdiChildTrajFrame(GmatAppData::GetMainFrame(), true,
                                wxString(plotName.c_str()),
                                wxString(plotName.c_str()),
-                               wxPoint(-1, -1), wxSize(-1, -1),
+                               wxPoint(-1, -1), wxSize(500, 350), //wxSize(-1, -1),
                                wxDEFAULT_FRAME_STYLE, wxString(csName.c_str()),
                                ssPtr);
+
+      #if DEBUG_PLOTIF_GL
+      MessageInterface::ShowMessage
+         ("frame->GetPlotName()=%s\n",
+          GmatAppData::GetMainFrame()->trajMainSubframe->GetPlotName().c_str());
+      #endif
+      
       //loj:4/21/05 GmatAppData::GetMainFrame()->Tile();
+      
       // 04/08/2005 - arg : changed the parent frame to the main frame
 //      MdiGlPlot::mdiParentGlFrame->trajMainSubframe =
 //         new MdiChildTrajFrame(MdiGlPlot::mdiParentGlFrame, true,
@@ -181,6 +191,17 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
 
       ++MdiGlPlot::numChildren;
 
+//       for (int i=0; i<MdiGlPlot::numChildren; i++)
+//       {
+//          MdiChildTrajFrame *frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
+//          MessageInterface::ShowMessage
+//             ("frame->GetPlotName()=%s\n", frame->GetPlotName().c_str());
+//       }
+      
+//       MdiChildTrajFrame *frame = (MdiChildTrajFrame*)
+//          (MdiGlPlot::mdiChildren[MdiGlPlot::numChildren-1]);
+//       frame->SetPlotName(plotName.c_str());
+      
       //----------------------------------------------------
       // initialize GL
       //----------------------------------------------------
@@ -202,22 +223,71 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    
    GmatAppData::GetMainFrame()->trajMainSubframe->
       SetDesiredCoordSystem(wxString(csName.c_str()));
+
    
 //   MdiGlPlot::mdiParentGlFrame->Show(true);
 //   MdiGlPlot::mdiParentGlFrame->UpdateUI();
 
    return true;
 #endif
+} //CreateGlPlotWindow()
+
+
+//------------------------------------------------------------------------------
+// void SetGlObject(const std::string &plotName,  ...
+//------------------------------------------------------------------------------
+void PlotInterface::SetGlObject(const std::string &plotName,
+                                const StringArray &nonScNames,
+                                const UnsignedIntArray &nonScColors,
+                                const std::vector<SpacePoint*> nonScArray)
+{
+#if defined __CONSOLE_APP__
+   return;
+#else
+   
+   wxString owner = wxString(plotName.c_str());
+
+   for (int i=0; i<MdiGlPlot::numChildren; i++)
+   {
+      MdiChildTrajFrame *frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
+            
+      if (frame->GetPlotName().IsSameAs(owner.c_str()))
+      {            
+         frame->SetGlObject(nonScNames, nonScColors, nonScArray);
+      }
+   }
+#endif
 }
 
 
 //------------------------------------------------------------------------------
-// void SetGlViewOption(const std::string &plotName, 
-//                      SpacePoint *vpRefObj, SpacePoint *vpVecObj,
-//                      SpacePoint *vdObj, Real vsFactor,
-//                      const Rvector3 &vpRefVec, const Rvector3 &vpVec,
-//                      const Rvector3 &vdVec, bool usevpRefVec,
-//                      bool usevpVec, bool usevdVec)
+// static void SetGlCoordSystem(const std::string &plotName, CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+void PlotInterface::SetGlCoordSystem(const std::string &plotName,
+                                     CoordinateSystem *cs)
+{
+#if defined __CONSOLE_APP__
+   return;
+#else
+
+   wxString owner = wxString(plotName.c_str());
+
+   for (int i=0; i<MdiGlPlot::numChildren; i++)
+   {
+      MdiChildTrajFrame *frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
+            
+      if (frame->GetPlotName().IsSameAs(owner.c_str()))
+      {
+         frame->SetGlCoordSystem(cs);
+      }
+   }
+#endif
+   
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGlViewOption(const std::string &plotName, SpacePoint *vpRefObj, ...
 //------------------------------------------------------------------------------
 void PlotInterface::SetGlViewOption(const std::string &plotName,
                                     SpacePoint *vpRefObj, SpacePoint *vpVecObj,
@@ -357,33 +427,30 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
 
 
 //------------------------------------------------------------------------------
-//  bool UpdateGlSpacecraft(const std::string &plotName,
-//                          const std::string &oldName,
-//                          const std::string &csName,
-//                          StringArray scNameArray,
-//                          const Real &time, const RealArray &posX,
-//                          const RealArray &posY, const RealArray &posZ,
-//                          const UnsignedIntArray &orbitColor,
-//                          const UnsignedIntArray &targetColor)
-//                          bool updateCanvas)
+//  bool UpdateGlPlot(const std::string &plotName, ...
 //------------------------------------------------------------------------------
 /*
  * Buffers data and updates OpenGL plow window if updateCanvas is true
  */
 //------------------------------------------------------------------------------
-bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
-                                       const std::string &oldName,
-                                       const std::string &csName,
-                                       const StringArray &scNameArray,
-                                       const Real &time, const RealArray &posX,
-                                       const RealArray &posY, const RealArray &posZ,
-                                       const UnsignedIntArray &color,
-                                       bool updateCanvas)
+bool PlotInterface::UpdateGlPlot(const std::string &plotName,
+                                 const std::string &oldName,
+                                 const std::string &csName,
+                                 const StringArray &scNames,
+                                 const Real &time, const RealArray &posX,
+                                 const RealArray &posY, const RealArray &posZ,
+                                 const UnsignedIntArray &scColors,
+                                 bool updateCanvas)
 {   
 #if defined __CONSOLE_APP__
    return true;
 #else
 
+   #if DEBUG_PLOTIF_GL_UPDATE
+   MessageInterface::ShowMessage
+      ("PlotInterface::UpdateGlPlot() entered. time = %f\n", time);
+   #endif
+   
    bool updated = false;
    wxString owner = wxString(plotName.c_str());
 
@@ -397,11 +464,22 @@ bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
    for (int i=0; i<MdiGlPlot::numChildren; i++)
    {
       MdiChildTrajFrame *frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
-            
+      
+      #if DEBUG_PLOTIF_GL_UPDATE
+      MessageInterface::ShowMessage
+         ("PlotInterface::UpdateGlPlot() frame[%d]->GetPlotName()=%s "
+          "owner=%s\n", i, frame->GetPlotName().c_str(), owner.c_str());
+      #endif
+      
       if (frame->GetPlotName().IsSameAs(owner.c_str()))
       {
-         frame->UpdateSpacecraft(scNameArray, time, posX, posY, posZ, color,
-                                 updateCanvas);
+         
+         //MessageInterface::ShowMessage
+         //   ("PlotInterface::UpdateGlPlot() now updating GL plot...\n");
+         
+         frame->UpdatePlot(scNames, time, posX, posY, posZ, scColors,
+                           updateCanvas);
+
          updated = true;
       }
    }
@@ -409,7 +487,7 @@ bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
    return updated;
    
 #endif
-} // end UpdateGlSpacecraft()
+} // end UpdateGlPlot()
 
 
 //------------------------------------------------------------------------------
@@ -514,6 +592,7 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
                              wxString(yAxisTitle.c_str()),
                              wxPoint(-1, -1), wxSize(500, 350),
                              wxDEFAULT_FRAME_STYLE);
+      
       //loj:4/21/05 GmatAppData::GetMainFrame()->Tile();
 
       // 04/08/2005 - arg: changed the parent window

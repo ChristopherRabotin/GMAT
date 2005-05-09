@@ -36,6 +36,14 @@ public:
                                   bool drawWireFrame, bool overlapPlot,
                                   bool usevpInfo, bool usepm);
 
+   static void SetGlObject(const std::string &plotName,
+                           const StringArray &nonScNames,
+                           const UnsignedIntArray &nonScColors,
+                           const std::vector<SpacePoint*> nonScArray);
+   
+   static void SetGlCoordSystem(const std::string &plotName,
+                                CoordinateSystem *cs);
+
    static void SetGlViewOption(const std::string &plotName,
                                SpacePoint *vpRefObj, SpacePoint *vpVecObj,
                                SpacePoint *vdObj, Real vsFactor,
@@ -48,14 +56,14 @@ public:
    static bool DeleteGlPlot();
    static bool RefreshGlPlot(const std::string &plotName);
    
-   static bool UpdateGlSpacecraft(const std::string &plotName,
-                                  const std::string &oldName,
-                                  const std::string &csName,
-                                  const StringArray &scNameArray,
-                                  const Real &time, const RealArray &posX,
-                                  const RealArray &posY, const RealArray &posZ,
-                                  const UnsignedIntArray &color,
-                                  bool updateCanvas);
+   static bool UpdateGlPlot(const std::string &plotName,
+                            const std::string &oldName,
+                            const std::string &csName,
+                            const StringArray &scNames,
+                            const Real &time, const RealArray &posX,
+                            const RealArray &posY, const RealArray &posZ,
+                            const UnsignedIntArray &scColors,
+                            bool updateCanvas);
 
    // for XY plot
    static bool CreateXyPlotWindow(const std::string &plotName,

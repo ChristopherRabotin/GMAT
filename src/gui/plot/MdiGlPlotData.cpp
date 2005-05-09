@@ -17,8 +17,17 @@
 wxList MdiGlPlot::mdiChildren = 0;
 int MdiGlPlot::numChildren = 0;
 
-//loj: 1/14/05 Added
+
 std::string GmatPlot::BodyInfo::BODY_NAME[GmatPlot::MAX_BODIES] =
+{
+   "Sun",      "Mercury",  "Venus",   "Earth",
+   "Mars",     "Jupiter",  "Saturn",  "Uranus",
+   "Neptune",  "Pluto",    "Luna",    "Body1",
+   "Body2",    "Body3",    "Body4",   "Body5",
+   "Body6",    "Body7",    "Body8",   "Body9"
+};
+
+wxString GmatPlot::BodyInfo::WX_BODY_NAME[GmatPlot::MAX_BODIES] =
 {
    "Sun",      "Mercury",  "Venus",   "Earth",
    "Mars",     "Jupiter",  "Saturn",  "Uranus",

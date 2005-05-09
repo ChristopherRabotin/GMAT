@@ -33,28 +33,30 @@ public:
 protected:
    OpenGlPlot *mOpenGlPlot;
    
-   bool mHasScChanged;
+   bool mHasSpChanged;
    bool mHasColorChanged;
    bool mHasCoordSysChanged;
    bool mHasViewInfoChanged;
-   int mScCount;
+   int  mScCount;
+   int  mNonScCount;
    
-   std::string mSelScName;
+   std::string mSelSpName;
    std::map<std::string, RgbColor> mOrbitColorMap;
    std::map<std::string, RgbColor> mTargetColorMap;
    
-   wxColour mScOrbitColor;
-   wxColour mScTargetColor;
+   wxColour mOrbitColor;
+   wxColour mTargetColor;
    
    wxListBox *mSpacecraftListBox;
-   wxListBox *mSelectedObjListBox;
    wxListBox *mCelesObjectListBox;
+   wxListBox *mSelectedScListBox;
+   wxListBox *mSelectedObjListBox;
    
    wxButton *addScButton;
    wxButton *removeScButton;
    wxButton *clearScButton;
-   wxButton *mScOrbitColorButton;
-   wxButton *mScTargetColorButton;
+   wxButton *mOrbitColorButton;
+   wxButton *mTargetColorButton;
    
    wxCheckBox *mPlotCheckBox;
    wxCheckBox *mWireFrameCheckBox;
@@ -69,9 +71,13 @@ protected:
    wxComboBox *mViewPointRefComboBox;
    wxComboBox *mViewPointVectorComboBox;
    wxComboBox *mViewDirectionComboBox;
+   wxComboBox *mViewUpCsComboBox;
+   wxComboBox *mViewUpAxisComboBox;
 
    wxStaticText *mTargetColorLabel;
+   wxStaticText *mFovLabel;
    
+   wxTextCtrl *mFovTextCtrl;
    wxTextCtrl *mViewScaleFactorTextCtrl;
    wxTextCtrl *mViewPointRef1TextCtrl;
    wxTextCtrl *mViewPointRef2TextCtrl;
@@ -83,8 +89,8 @@ protected:
    wxTextCtrl *mViewDir2TextCtrl;
    wxTextCtrl *mViewDir3TextCtrl;
    
-   wxFlexGridSizer *mFlexGridSizer;
-   wxFlexGridSizer *mPlotOptionSizer;
+   wxFlexGridSizer *mObjectGridSizer;
+   wxFlexGridSizer *mViewDefSizer;
    wxBoxSizer *mScOptionBoxSizer;
    wxBoxSizer *mViewPointRefSizer;
    wxBoxSizer *mViewPointVectorSizer;
@@ -96,11 +102,12 @@ protected:
    virtual void SaveData();
 
    // event handler
-   void OnAddSpacecraft(wxCommandEvent& event);
-   void OnRemoveSpacecraft(wxCommandEvent& event);
-   void OnClearSpacecraft(wxCommandEvent& event);
+   void OnAddSpacePoint(wxCommandEvent& event);
+   void OnRemoveSpacePoint(wxCommandEvent& event);
+   void OnClearSpacePoint(wxCommandEvent& event);
    void OnSelectAvailObject(wxCommandEvent& event);
    void OnSelectSpacecraft(wxCommandEvent& event);
+   void OnSelectOtherObject(wxCommandEvent& event);
    void OnCheckBoxChange(wxCommandEvent& event);
    void OnOrbitColorClick(wxCommandEvent& event);
    void OnTargetColorClick(wxCommandEvent& event);
@@ -116,16 +123,17 @@ protected:
       ID_COMBOBOX,
       ID_LISTBOX,
       SC_SEL_LISTBOX,
+      OBJ_SEL_LISTBOX,
       CHECKBOX,
-      ADD_SC_BUTTON,
-      REMOVE_SC_BUTTON,
-      CLEAR_SC_BUTTON,
-      SC_ORBIT_COLOR_BUTTON,
-      SC_TARGET_COLOR_BUTTON
+      ADD_SP_BUTTON,
+      REMOVE_SP_BUTTON,
+      CLEAR_SP_BUTTON,
+      ORBIT_COLOR_BUTTON,
+      TARGET_COLOR_BUTTON
    };
    
 private:
-   void ShowSpacecraftOption(const wxString &name, bool show = true);
+   void ShowSpacePointOption(const wxString &name, bool show = true);
    
 };
 #endif
