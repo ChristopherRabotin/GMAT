@@ -137,7 +137,7 @@ bool Moderator::Initialize(bool fromGui)
          // Create internal CoordinateSystem with noname, so that it will not
          // be configured
          theInternalCoordSystem = CreateCoordinateSystem("", true);
-         theInternalCoordSystem->SetName("EarthMJ2000Eq"); //loj: 1/28/05 Added
+         theInternalCoordSystem->SetName("EarthMJ2000Eq");
          
          // Read startup file
          theFileManager->ReadStartupFile();
@@ -363,8 +363,35 @@ StringArray Moderator::GetListOfFactoryItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 StringArray& Moderator::GetListOfConfiguredItems(Gmat::ObjectType type)
 {
+   //loj: 5/6/05 Added if block
+   if (type == Gmat::CELESTIAL_BODY || type == Gmat::SPACE_POINT)
+   {
+      theSpacePointList.clear();
+      
+      // add Spacecraft to the list
+      theSpacePointList = theConfigManager->GetListOfItems(Gmat::SPACECRAFT);
+
+      if (type == Gmat::SPACE_POINT)
+      {
+         // add bodies to the list
+         StringArray bodyList = theDefaultSolarSystem->GetBodiesInUse();
+         for (UnsignedInt i=0; i<bodyList.size(); i++)
+            theSpacePointList.push_back(bodyList[i]);
+         
+         // add CalculatedPoint to the list
+         StringArray calptList =
+            theConfigManager->GetListOfItems(Gmat::CALCULATED_POINT);
+         for (UnsignedInt i=0; i<calptList.size(); i++)
+            theSpacePointList.push_back(calptList[i]);
+         
+      }
+      
+      return theSpacePointList;
+   }
+   
    return theConfigManager->GetListOfItems(type);
 }
+
 
 //------------------------------------------------------------------------------
 // GmatBase* GetConfiguredItem(const std::string &name)
@@ -375,8 +402,17 @@ GmatBase* Moderator::GetConfiguredItem(const std::string &name)
    MessageInterface::ShowMessage("Moderator::GetConfiguredItem() entered: "
                                  "name = " + name + "\n");
    #endif
+
+   GmatBase *obj = theConfigManager->GetItem(name);
+
+   //loj: 5/9/05 Added
+   if (obj == NULL)
+   {
+      // try SolarSystem
+      return theDefaultSolarSystem->GetBody(name);
+   }
    
-   return theConfigManager->GetItem(name);
+   return obj;
 }
 
 //------------------------------------------------------------------------------
@@ -511,7 +547,7 @@ bool Moderator::SetSolarSystemInUse(const std::string &name)
    return theConfigManager->SetSolarSystemInUse(name);
 }
 
-//loj: 4/21/05 Added
+
 // CalculatedPoint
 //------------------------------------------------------------------------------
 // CalculatedPoint* CreateCalculatedPoint(const std::string &type,
@@ -1769,7 +1805,6 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
             }
             else if (type == "ReportFile")
             {
-               //loj: 3/3/05 Correctly created ReportFile               
                // add default parameters to ReportFile
                sub->SetStringParameter(sub->GetParameterID("Filename"),
                                        name + ".txt");
@@ -2347,7 +2382,7 @@ bool Moderator::ClearResource()
    MessageInterface::ShowMessage("Moderator::ClearResource() entered\n");
    
    theConfigManager->RemoveAllItems();
-   ClearAllSandboxes(); //loj: 3/3/05 Added
+   ClearAllSandboxes();
    
    return true;
 }
@@ -2452,8 +2487,6 @@ GmatCommand* Moderator::GetNextCommand(Integer sandboxNum)
 //------------------------------------------------------------------------------
 void Moderator::ClearAllSandboxes()
 {
-   //loj: 4/4/05 To fix runtime error
-   //for (int i=0; i<Gmat::MAX_SANDBOX; i++)
    for (UnsignedInt i=0; i<sandboxes.size(); i++)
       if (sandboxes[i])
          sandboxes[i]->Clear();
@@ -2946,7 +2979,7 @@ void Moderator::CreateDefaultMission()
       //Create default coordinate systems
       CreateDefaultCoordSystems();
       
-      // Hardware (loj: 2/8/05 Added)
+      // Hardware 
       CreateHardware("FuelTank", "DefaultFuelTank");
       CreateHardware("Thruster", "DefaultThruster");
       
@@ -3084,11 +3117,11 @@ void Moderator::CreateDefaultMission()
       // OpenGLPlot
       Subscriber *sub;
       sub = CreateSubscriber("OpenGLPlot", "DefaultOpenGl");
-      sub->SetStringParameter("Add", "DefaultSC", 0);
+      sub->SetStringParameter("Add", "DefaultSC"); // loj: 5/9/05 Removed the index
       sub->SetStringParameter("CoordinateSystem", "EarthMJ2000Eq");
       
       #if DEBUG_ACTION_REMOVE
-         sub->SetStringParameter("Add", "Spacecraft1", 1);
+         sub->SetStringParameter("Add", "Spacecraft1"); // loj: 5/9/05 Removed the index
          sub->TakeAction("Remove", "Spacecraft1");
       #endif
          
@@ -3449,6 +3482,7 @@ Parameter* Moderator::GetDefaultY()
    return param;
 }
 
+
 // sandbox
 //------------------------------------------------------------------------------
 // void AddSolarSystemToSandbox(Integer index)
@@ -3463,7 +3497,18 @@ void Moderator::AddSolarSystemToSandbox(Integer index)
    //SolarSystem *solarSys = theConfigManager->GetSolarSystemInUse();
    //sandboxes[index]->AddSolarSystem(solarSys);
    sandboxes[index]->AddSolarSystem(theDefaultSolarSystem);
+
+   // Add LibrationPoint and Barycenter objects (loj: 5/9/05 Added)
+   StringArray cpNames = theConfigManager->GetListOfItems(Gmat::CALCULATED_POINT);
+
+   CalculatedPoint *cp;
+   for (Integer i=0; i<(Integer)cpNames.size(); i++)
+   {
+      cp = theConfigManager->GetCalculatedPoint(cpNames[i]);
+      sandboxes[index]->AddObject(cp);
+   }
 }
+
 
 //------------------------------------------------------------------------------
 // void AddInternalCoordSystemToSandbox(Integer index)

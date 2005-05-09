@@ -360,6 +360,7 @@ private:
    StringArray thePlanetaryFileNames;
    StringArray thePlanetaryFileTypesInUse;
    StringArray theTempFileList;
+   StringArray theSpacePointList; //loj: 5/9/05 Added
 
    EopFile *theEopFile;
    ItrfCoefficientsFile *theItrfFile;
