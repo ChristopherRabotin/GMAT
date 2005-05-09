@@ -56,7 +56,8 @@ public:
    bool RenameChild(wxString oldName, wxString newName);
    void RemoveChild(wxString item);
    void CloseActiveChild();
-   void CloseAllChildren(bool closeScriptWindow = true, wxString title = "");
+   void CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
+                         wxString title = "");
    void MinimizeChildren();
    void CloseCurrentProject();
    void RunCurrentMission();

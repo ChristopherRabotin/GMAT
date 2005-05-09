@@ -653,7 +653,6 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       // maximize window
       //newChild->Maximize();
 
-      //loj: 2/9/05 Added check for newChild
       if (newChild && panel)
       {
          // set the datatype, so the gmatnotebook minimize/cascade accordingly
@@ -813,7 +812,7 @@ void GmatMainFrame::RemoveChild(wxString item)
 }
 
 //------------------------------------------------------------------------------
-// void GmatMainFrame::CloseActiveChild()
+// void CloseActiveChild()
 //------------------------------------------------------------------------------
 void GmatMainFrame::CloseActiveChild()
 {
@@ -823,9 +822,11 @@ void GmatMainFrame::CloseActiveChild()
 }
 
 //------------------------------------------------------------------------------
-// void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, wxString title)
+// void CloseAllChildren(bool closeScriptWindow, bool closePlots,
+//                       wxString title)
 //------------------------------------------------------------------------------
-void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, wxString title)
+void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
+                                     wxString title)
 {
    if (closeScriptWindow)
    {
@@ -857,19 +858,22 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, wxString title)
    }
 
    // close xy plots
-//   for (int i=0; i<MdiXyPlot::numChildren; i++)
-//   {
-//      MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
-//      frame->Close(TRUE);
-//   }
-//
-//   // close gl plots
-//   for (int i=0; i<MdiGlPlot::numChildren; i++)
-//   {
-//      MdiChildTrajFrame *frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
-//      frame->Close(TRUE);
-//   }
+   if (closePlots)
+   {
+      for (int i=0; i<MdiXyPlot::numChildren; i++)
+      {
+         MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
+         frame->Close(TRUE);
+      }
 
+      // close gl plots
+      for (int i=0; i<MdiGlPlot::numChildren; i++)
+      {
+         MdiChildTrajFrame *frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
+         frame->Close(TRUE);
+      }
+
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -1670,11 +1674,11 @@ bool GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
       InterpretScript(std::string(filename.c_str()));
 
    //close the open windows
-   GmatAppData::GetMainFrame()->CloseAllChildren(false, filename);
+   GmatAppData::GetMainFrame()->CloseAllChildren(false, false, filename);
 
    // Update ResourceTree and MissionTree
-   GmatAppData::GetResourceTree()->UpdateResource(true); //loj: 6/29/04 added true
-   GmatAppData::GetMissionTree()->UpdateMission(true); //loj: 6/29/04 added true
+   GmatAppData::GetResourceTree()->UpdateResource(true);
+   GmatAppData::GetMissionTree()->UpdateMission(true);
 
    return status;
 }
