@@ -368,11 +368,16 @@ StringArray& Moderator::GetListOfConfiguredItems(Gmat::ObjectType type)
    {
       theSpacePointList.clear();
       
-      // add Spacecraft to the list
-      theSpacePointList = theConfigManager->GetListOfItems(Gmat::SPACECRAFT);
-
-      if (type == Gmat::SPACE_POINT)
+      if (type == Gmat::CELESTIAL_BODY)
       {
+         // add bodies to the list
+         theSpacePointList = theDefaultSolarSystem->GetBodiesInUse();
+      }
+      else if (type == Gmat::SPACE_POINT)
+      {
+         // add Spacecraft to the list
+         theSpacePointList = theConfigManager->GetListOfItems(Gmat::SPACECRAFT);
+         
          // add bodies to the list
          StringArray bodyList = theDefaultSolarSystem->GetBodiesInUse();
          for (UnsignedInt i=0; i<bodyList.size(); i++)
