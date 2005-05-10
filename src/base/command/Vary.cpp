@@ -541,9 +541,13 @@ bool Vary::InterpretAction()
     SetRealParameter(variableMinimumID, -value);
     SetRealParameter(variableMaximumID, value);
     SetRealParameter(variableMaximumStepID, value);
-    MessageInterface::ShowMessage("Default Min, Max, Step = [%le  %le  %le]\n",
-       variableMinimum[0], variableMaximum[0], variableMaximumStep[0]);
-
+    
+    #ifdef DEBUG_VARIABLE_RANGES
+       MessageInterface::ShowMessage(
+          "Default Min, Max, Step = [%le  %le  %le]\n",
+          variableMinimum[0], variableMaximum[0], variableMaximumStep[0]);
+    #endif
+    
     loc = generatingString.find("MaxStep", strend);
     if ((UnsignedInt)loc != std::string::npos)
     {
@@ -568,9 +572,11 @@ bool Vary::InterpretAction()
        SetRealParameter(variableMaximumID, value);
     }
     
-    MessageInterface::ShowMessage("Min, Max, Step = [%le  %le  %le]\n",
-       variableMinimum[0], variableMaximum[0], variableMaximumStep[0]);
-
+    #ifdef DEBUG_VARIABLE_RANGES
+       MessageInterface::ShowMessage("Min, Max, Step = [%le  %le  %le]\n",
+          variableMinimum[0], variableMaximum[0], variableMaximumStep[0]);
+    #endif
+    
     return true;
 }
 
