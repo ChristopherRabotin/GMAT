@@ -22,6 +22,7 @@
 #include "gmatdefs.hpp"
 #include "Rvector.hpp"
 #include "SolarSystem.hpp"
+#include "CoordinateSystem.hpp"
 
 class PlotInterface
 {
