@@ -282,7 +282,9 @@ bool ScriptInterpreter::Parse(void)
 
                 if (!InterpretObject(type, name))
                    throw InterpreterException("Unable to create object " +
-                                              name + " of type " + type);
+                                              name + " of type " + type +
+                                              "\nScript text: \"" + line +
+                                              "\"");
                 ++phrase;
             }
         }

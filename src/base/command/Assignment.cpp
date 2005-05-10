@@ -462,12 +462,23 @@ bool Assignment::Execute()
          #endif
 
          if (lrowObj)
-            throw CommandException(
-               "Objects cannot be used to set row indexes yet.");
+         {
+            if (lrowObj->GetTypeName() == "Variable")
+               rowIndex = (Integer)(((Parameter*)lrowObj)->GetReal());
+            else
+               throw CommandException(
+                  "Non-\"Variable\" Objects (" + lrowObj->GetName() +
+                  ") cannot be used to set row indexes yet.");
+         }
          if (lcolObj)
-            throw CommandException(
-               "Objects cannot be used to set column indexes yet.");
-
+         {
+            if (lcolObj->GetTypeName() == "Variable")
+               colIndex = (Integer)(((Parameter*)lcolObj)->GetReal());
+            else
+               throw CommandException(
+                  "Non-\"Variable\" Objects (" + lcolObj->GetName() +
+                  ") cannot be used to set column indexes yet.");
+         }
          if (rowIndex == -1)
             throw CommandException(
                "Multiple array row elements cannot be set yet.");
@@ -699,7 +710,7 @@ bool Assignment::InitializeRHS(const std::string &rhs)
       ++end;
       
    chunk = rhs.substr(start, end - start);
-   subchunk = rhs.substr(end);
+   subchunk = rhs.substr(end+1);
    
    #ifdef DEBUG_PARM_ASSIGNMENT
       MessageInterface::ShowMessage(
@@ -783,18 +794,24 @@ bool Assignment::InitializeRHS(const std::string &rhs)
             throw CommandException(
                "Assignment commands cannot handle dynamic column indices yet.");
       }
+      else if (kind == "Variable")
+      {
+         throw CommandException(
+            "Assignment commands cannot handle Variables yet.");
+      }
+      else if (rhsObject->GetType() == Gmat::PARAMETER)
+      {
+         throw CommandException(
+            "Assignment commands cannot handle Parameters yet.");
+      }
       else
       {
-         if (kind == "Variable")
-         {
-            throw CommandException(
-               "Assignment commands cannot handle Variables yet.");
-         }
-         else if (rhsObject->GetType() == Gmat::PARAMETER)
-         {
-            throw CommandException(
-               "Assignment commands cannot handle Parameters yet.");
-         }
+         #ifdef DEBUG_PARM_ASSIGNMENT
+            MessageInterface::ShowMessage("%s is an object parm\n",
+               subchunk.c_str());
+         #endif
+         rhsParmName = subchunk;
+         rhsType = OBJECT_PARM;
       }
    }
    else
@@ -845,9 +862,21 @@ Real Assignment::EvaluateRHS()
          #endif
          return rhsObject->GetRealParameter("SingleValue", row, col);
 
+      case OBJECT_PARM:
+         #ifdef DEBUG_PARM_ASSIGNMENT
+            MessageInterface::ShowMessage(
+               "   Getting '%s' for %s\n", rhsParmName.c_str(),
+               rhsObject->GetName().c_str());
+         #endif
+         return rhsObject->GetRealParameter(rhsParmName);
+
       default:
          break;
    }
+   
+   #ifdef DEBUG_PARM_ASSIGNMENT
+      MessageInterface::ShowMessage("%s is just a number, right?\n", value.c_str());
+   #endif
    
    // It's just a number
    return atof(value.c_str());

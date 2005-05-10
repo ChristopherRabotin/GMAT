@@ -111,7 +111,8 @@ protected:
          NUMBER,
          PARAMETER,
          VARIABLE,
-         ARRAY_ELEMENT
+         ARRAY_ELEMENT,
+         OBJECT_PARM
       };
 };
 

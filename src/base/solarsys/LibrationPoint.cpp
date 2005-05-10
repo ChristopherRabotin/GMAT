@@ -34,9 +34,9 @@ using namespace std;
 const std::string
 LibrationPoint::PARAMETER_TEXT[LibrationPointParamCount - CalculatedPointParamCount] =
 {
-   "PrimaryBodyName",
-   "SecondaryBodyName",
-   "WhichLibrationPoint",
+   "Primary",
+   "Secondary",
+   "Point",
 };
 
 const Gmat::ParameterType
