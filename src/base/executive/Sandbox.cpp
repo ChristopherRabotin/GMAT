@@ -28,7 +28,7 @@
 #include <algorithm>       // for find
 
 //#define DEBUG_SANDBOX_OBJ 1
-//#define DEBUG_SANDBOX_INIT 2
+//#define DEBUG_SANDBOX_INIT 1
 //#define DEBUG_SANDBOX_RUN 1
 //#define DEBUG_SANDBOX_OBJECT_MAPS
 
@@ -548,7 +548,9 @@ bool Sandbox::Initialize()
    {
       #if DEBUG_SANDBOX_INIT
          MessageInterface::ShowMessage(
-            "Initializing %s command\n", current->GetTypeName().c_str());
+            "Initializing %s command\n   \"%s\"\n",
+            current->GetTypeName().c_str(),
+            current->GetGeneratingString(Gmat::SCRIPTING, "", "").c_str());
       #endif
       current->SetObjectMap(&objectMap);
       current->SetSolarSystem(solarSys);

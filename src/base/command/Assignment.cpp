@@ -708,10 +708,21 @@ bool Assignment::InitializeRHS(const std::string &rhs)
           (rhs[end] != '(')  && (rhs[end] != ',') &&
           (rhs[end] != '\t') && (end < (Integer)rhs.length()))
       ++end;
-      
+
+   #ifdef DEBUG_PARM_ASSIGNMENT
+      MessageInterface::ShowMessage("   length = %d, end = %d\n",
+         rhs.length(), end);
+   #endif
+
    chunk = rhs.substr(start, end - start);
-   subchunk = rhs.substr(end+1);
-   
+   if (end < (Integer)rhs.length())
+      subchunk = rhs.substr(end);
+   else
+      subchunk = "";
+
+   if (subchunk[0] == '.')
+      subchunk = subchunk.substr(1);
+
    #ifdef DEBUG_PARM_ASSIGNMENT
       MessageInterface::ShowMessage(
          "'%s' was broken into '%s' and '%s'\n", rhs.c_str(), chunk.c_str(),
