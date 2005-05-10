@@ -4,8 +4,9 @@
 HEADERS = -I../include -I../foundation -I../util -I../forcemodel \
           -I../spacecraft -I../executive
 
-OBJECTS = AtmosphereException.o \
-          AtmosphereModel.o \
+OBJECTS = AtmosphereModel.o \
+          Barycenter.o \
+          CalculatedPoint.o \
           CelestialBody.o \
           DeFile.o \
           ExponentialAtmosphere.o \
@@ -13,11 +14,12 @@ OBJECTS = AtmosphereException.o \
           msise90.o \
           Msise90Atmosphere.o \
           JacchiaRobertsAtmosphere.o \
-          SolarFluxFileReader.o \
+          LibrationPoint.o \
           Planet.o \
           PlanetaryEphem.o \
           PlanetaryEphemException.o \
           SlpFile.o \
+          SolarFluxFileReader.o \
           SolarSystem.o \
           SolarSystemException.o \
           Star.o

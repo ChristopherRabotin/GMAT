@@ -7,7 +7,6 @@ HEADERS = -I../include -I../foundation -I../subscriber -I../executive \
           -I../solarsys
 
 OBJECTS = Solver.o \
-          SolverException.o \
           DifferentialCorrector.o 
 
 all: libSolver

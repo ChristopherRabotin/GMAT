@@ -1,7 +1,9 @@
 # Makefile for GMAT Foundation library
 # Initial Version - D. Conway - 2003/11/19
 
-HEADERS = -I../include -I../util
+HEADERS = -I../include -I../util \
+          -I../executive
+
 OBJECTS = GmatBase.o \
           GmatBaseException.o \
           SpacePoint.o

@@ -26,6 +26,7 @@ OBJECTS = Factory.o \
           CelestialBodyFactory.o \
           FunctionFactory.o \
           AxisSystemFactory.o \
+          CalculatedPointFactory.o \
           CoordinateSystemFactory.o \
           SolarSystemFactory.o
 

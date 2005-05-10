@@ -8,10 +8,9 @@ HEADERS = -I../include -I../foundation -I../spacecraft -I../util \
           -I../solarsys -I../burn -I../command -I../configs -I../executive \
           -I../factory -I../interpolator -I../interpreter -I../parameter \
           -I../propagator -I../refframe -I../solver -I../stopcond \
-          -I../subscriber
+          -I../subscriber -I../coordsystem
 
-OBJECTS = DerivativeList.o \
-          ForceModel.o \
+OBJECTS = ForceModel.o \
           PhysicalModel.o \
           ForceModelException.o \
           PointMassForce.o \

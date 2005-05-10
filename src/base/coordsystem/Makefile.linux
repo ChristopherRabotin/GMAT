@@ -14,7 +14,15 @@ OBJECTS = AxisSystem.o \
           BodyFixedAxes.o \
           InertialAxes.o \
           MJ2000EcAxes.o \
-          MJ2000EqAxes.o
+          MJ2000EqAxes.o \
+          MOEEqAxes.o \
+          TOEEqAxes.o \
+          MODEqAxes.o \
+          MeanOfDateAxes.o \
+          TODEqAxes.o \
+          TrueOfDateAxes.o \
+          ObjectReferencedAxes.o \
+          ItrfCoefficientsFile.o
 
 
 all: libCoordinateSystem 

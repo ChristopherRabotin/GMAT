@@ -8,6 +8,7 @@ HEADERS = -I../include -I../executive
 OBJECTS = A1Date.o \
           A1Mjd.o \
           AngleUtil.o \
+          Anomaly.o \
           Cartesian.o \
           CoordUtil.o \
           Date.o \
