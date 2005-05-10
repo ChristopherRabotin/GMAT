@@ -289,11 +289,9 @@ void PropagationConfigPanel::SaveData()
             
             theGravForce = new GravityField("", forceList[i]->bodyName); 
             if (isGravTextChanged)
-            {
-               isGravTextChanged = false;
-               
-               Integer deg = atoi(gravityDegreeTextCtrl->GetValue());
-               Integer ord = atoi(gravityOrderTextCtrl->GetValue());
+            {                     
+               Integer deg = atoi(forceList[i]->gravDegree.c_str());
+               Integer ord = atoi(forceList[i]->gravOrder.c_str());
                
                if (deg < ord)
                {
@@ -306,11 +304,9 @@ void PropagationConfigPanel::SaveData()
                }    
                   
                theGravForce->SetIntegerParameter
-                  ("Degree", atoi(gravityDegreeTextCtrl->GetValue()));
+                  ("Degree", atoi(forceList[i]->gravDegree.c_str()));
                theGravForce->SetIntegerParameter
-                  ("Order",  atoi(gravityOrderTextCtrl->GetValue()));
-               MessageInterface::ShowMessage("Degree=%s\n", gravityDegreeTextCtrl->GetValue().c_str());
-               MessageInterface::ShowMessage("Order=%s\n", gravityOrderTextCtrl->GetValue().c_str());
+                  ("Order",  atoi(forceList[i]->gravOrder.c_str()));
             }                
             theGravForce->SetStringParameter("Filename", potFilename);
 
@@ -384,6 +380,8 @@ void PropagationConfigPanel::SaveData()
 #endif 
          }
       }
+      
+      isGravTextChanged = false;
       
       // save forces to the prop setup
       thePropSetup->SetForceModel(newFm);
@@ -518,14 +516,12 @@ void PropagationConfigPanel::Initialize()
             
             tempStr = "";
             tempStr << theGravForce->GetIntegerParameter("Degree");
-
             forceList[currentBodyId]->gravDegree = tempStr;
 
             tempStr = "";
             tempStr << theGravForce->GetIntegerParameter("Order");
-
             forceList[currentBodyId]->gravOrder = tempStr;
-
+   
             if (gravModelType == OTHER)
             {
                if (potFilename == "")
@@ -1182,8 +1178,8 @@ void PropagationConfigPanel::DisplayGravityFieldData()
    potFileStaticText->Enable(false);
    potFileTextCtrl->Enable(false);
 
-   gravityDegreeTextCtrl->SetValue(forceList[currentBodyId]->gravDegree);
-   gravityOrderTextCtrl->SetValue(forceList[currentBodyId]->gravOrder);
+   gravityDegreeTextCtrl->SetValue(forceList[currentBodyId]->gravDegree.c_str());
+   gravityOrderTextCtrl->SetValue(forceList[currentBodyId]->gravOrder.c_str());
      
    gravityDegreeTextCtrl->Enable(true);
    gravityOrderTextCtrl->Enable(true);
@@ -1211,7 +1207,7 @@ void PropagationConfigPanel::DisplayGravityFieldData()
       gravityOrderTextCtrl->Enable(false);
    }
 
-   isGravTextChanged = false;
+   //isGravTextChanged = false;
 }
 
 //------------------------------------------------------------------------------
@@ -1567,6 +1563,7 @@ void PropagationConfigPanel::OnAddBodyButton()
 
       theApplyButton->Enable(true);
       isForceModelChanged = true;
+      isGravTextChanged = true;
    }
 }
 
@@ -1586,8 +1583,8 @@ void PropagationConfigPanel::OnGravSearchButton()
       potFileTextCtrl->SetValue(filename);
       potFilename = std::string(filename.c_str());
 
-      gravityDegreeTextCtrl->SetValue(forceList[currentBodyId]->gravDegree);
-      gravityOrderTextCtrl->SetValue(forceList[currentBodyId]->gravOrder);
+      gravityDegreeTextCtrl->SetValue(forceList[currentBodyId]->gravDegree.c_str());
+      gravityOrderTextCtrl->SetValue(forceList[currentBodyId]->gravOrder.c_str());
       
       gravityDegreeTextCtrl->Enable(true);
       gravityOrderTextCtrl->Enable(true);
@@ -1772,12 +1769,18 @@ void PropagationConfigPanel::OnGravityTextUpdate(wxCommandEvent& event)
 {
    theApplyButton->Enable(true);
 
-   if (event.GetEventObject() == gravityDegreeTextCtrl ||
-       event.GetEventObject() == gravityOrderTextCtrl)
+   if (event.GetEventObject() == gravityDegreeTextCtrl)
    {
+      forceList[currentBodyId]->gravDegree = gravityDegreeTextCtrl->GetValue().c_str();
       isGravTextChanged = true;
       isForceModelChanged = true;
-      //MessageInterface::ShowMessage("OnGravityTextUpdate()\n");
+   }
+   else if (event.GetEventObject() == gravityOrderTextCtrl)
+   {     
+      forceList[currentBodyId]->gravOrder = gravityOrderTextCtrl->GetValue().c_str();
+      
+      isGravTextChanged = true;
+      isForceModelChanged = true;
    }
    else if (event.GetEventObject() == potFileTextCtrl)
    {
