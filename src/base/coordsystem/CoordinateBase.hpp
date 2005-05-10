@@ -120,6 +120,7 @@ public:
                                               const std::string &value);
    virtual GmatBase*       GetRefObject(const Gmat::ObjectType type,
                                         const std::string &name);
+   const StringArray&      GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                         const std::string &name = "");
    

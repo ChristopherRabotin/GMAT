@@ -94,9 +94,12 @@ public:
    virtual Gmat::ParameterType
                            GetParameterType(const Integer id) const;
    virtual std::string     GetParameterTypeString(const Integer id) const;
-   
+   std::string             GetStringParameter(const Integer id) const;
+   std::string             GetStringParameter(const std::string &label) const;
+
    virtual GmatBase*       GetRefObject(const Gmat::ObjectType type,
                                         const std::string &name);
+   const StringArray&      GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                         const std::string &name = "");
    

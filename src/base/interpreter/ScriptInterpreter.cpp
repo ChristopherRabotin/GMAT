@@ -749,10 +749,10 @@ bool ScriptInterpreter::WriteScript(void)
       if (!BuildObject(*current))
          return false;
 
-   // Arrays and Variables setups
+   // Array and Variable setups
    objs = moderator->GetListOfConfiguredItems(Gmat::PARAMETER);
    #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-      std::cout << "Found " << objs.size() << " Subscribers\n";
+      std::cout << "Found " << objs.size() << " Parameters\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
    {
@@ -760,10 +760,21 @@ bool ScriptInterpreter::WriteScript(void)
          return false;
    }
 
+   // Coordinate System setups
+   objs = moderator->GetListOfConfiguredItems(Gmat::COORDINATE_SYSTEM);
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+      std::cout << "Found " << objs.size() << " Coordinate Systems\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      if (!BuildObject(*current))
+         return false;
+   }
+
    // Function setups
    objs = moderator->GetListOfConfiguredItems(Gmat::FUNCTION);
    #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-      std::cout << "Found " << objs.size() << " Subscribers\n";
+      std::cout << "Found " << objs.size() << " Functions\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
       if (!BuildObject(*current))

@@ -287,13 +287,16 @@ bool CoordinateBase::Initialize()
 {
    if (!origin)
       throw CoordinateSystemException(
-            "Origin has not been defined for CoordinateBase object");
+            "Origin has not been defined for CoordinateBase object " +
+            instanceName);
    if (!j2000Body) // ????????????????????????????????
       throw CoordinateSystemException(
-            "j2000Body has not been defined for CoordinateBase object");
+            "j2000Body has not been defined for CoordinateBase object " +
+            instanceName);
    if (!solar)
       throw CoordinateSystemException(
-            "Solar System has not been defined for CoordinateBase object");
+            "Solar System has not been defined for CoordinateBase object " +
+            instanceName);
    return true;
 }
 
@@ -505,6 +508,36 @@ GmatBase* CoordinateBase::GetRefObject(const Gmat::ObjectType type,
    return GmatBase::GetRefObject(type, name);
 }
 
+// DJC added 5/9/05 to facilitate Sandbox initialization
+//------------------------------------------------------------------------------
+//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Returns the names of the reference object. (Derived classes should implement
+ * this as needed.)
+ *
+ * @param <type> reference object type.  Gmat::UnknownObject returns all of the
+ *               ref objects.
+ *
+ * @return The names of the reference object.
+ */
+//------------------------------------------------------------------------------
+const StringArray& CoordinateBase::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   if (type == Gmat::UNKNOWN_OBJECT)
+   {
+      static StringArray refs;
+      refs.push_back(originName);
+      if (j2000BodyName != originName)
+         refs.push_back(j2000BodyName);
+      return refs;
+   }
+
+   // Not handled here -- invoke the next higher GetRefObject call
+   return GmatBase::GetRefObjectNameArray(type);
+}
+
+
 //------------------------------------------------------------------------------
 //  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //                    const std::string &name)
@@ -524,24 +557,37 @@ bool CoordinateBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                   const std::string &name)
 {
    
-   switch (type)
+//   switch (type)
+//   {
+//      case Gmat::SPACE_POINT:
+//      {
+//         if (name == originName)
+//         {
+//            origin = (SpacePoint*) obj;
+//         }
+//         if (name == j2000BodyName)
+//         {
+//            j2000Body = (SpacePoint*) obj;
+//         }
+//         return true;
+//      }
+//      default:
+//         break;
+//   }
+
+   if (obj->IsOfType(Gmat::SPACE_POINT))
    {
-      case Gmat::SPACE_POINT:
+      if (name == originName)
       {
-         if (name == originName)
-         {
-            origin = (SpacePoint*) obj;
-         }
-         if (name == j2000BodyName)
-         {
-            j2000Body = (SpacePoint*) obj;
-         }
-         return true;
+         origin = (SpacePoint*) obj;
       }
-      default:
-         break;
+      if (name == j2000BodyName)
+      {
+         j2000Body = (SpacePoint*) obj;
+      }
+      return true;
    }
-   
+
    // Not handled here -- invoke the next higher SetRefObject call
    return GmatBase::SetRefObject(obj, type, name);
 }

@@ -495,6 +495,49 @@ std::string CoordinateSystem::GetParameterTypeString(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
+//  std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The string stored for this parameter, or throw ab=n exception if
+ *         there is no string association.
+ */
+//------------------------------------------------------------------------------
+std::string CoordinateSystem::GetStringParameter(const Integer id) const
+{
+   if (id == AXES)
+      if (axes)
+         return axes->GetTypeName();
+      else
+         throw CoordinateSystemException("Axis system not set for "
+                                         + instanceName);
+      
+   return CoordinateBase::GetStringParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ *
+ * @return The string stored for this parameter, or the empty string if there
+ *         is no string association.
+ */
+//------------------------------------------------------------------------------
+std::string CoordinateSystem::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
 //  GmatBase* GetRefObject(const Gmat::ObjectType type,
 //                         const std::string &name)
 //------------------------------------------------------------------------------
@@ -518,10 +561,49 @@ GmatBase* CoordinateSystem::GetRefObject(const Gmat::ObjectType type,
       default:
          break;
    }
-   
+
    // Not handled here -- invoke the next higher GetRefObject call
    return CoordinateBase::GetRefObject(type, name);
 }
+
+
+// DJC added 5/9/05 to facilitate Sandbox initialization
+//------------------------------------------------------------------------------
+//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Returns the names of the reference object. (Derived classes should implement
+ * this as needed.)
+ *
+ * @param <type> reference object type.  Gmat::UnknownObject returns all of the
+ *               ref objects.
+ *
+ * @return The names of the reference object.
+ */
+//------------------------------------------------------------------------------
+const StringArray& CoordinateSystem::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   if (type == Gmat::UNKNOWN_OBJECT)
+   {
+      // Here we want the names of all named refence objects used in this
+      // coordinate system.  (The axis system is not named, so we do not return
+      // anything for it.)
+      static StringArray refs = CoordinateBase::GetRefObjectNameArray(type);
+      if (axes)
+      {
+         StringArray axisRefs = axes->GetRefObjectNameArray(type);
+         for (StringArray::iterator i = axisRefs.begin();
+              i != axisRefs.end(); ++i)
+            if (find(refs.begin(), refs.end(), *i) == refs.end())
+               refs.push_back(*i);
+      }
+      return refs;
+   }
+
+   // Not handled here -- invoke the next higher GetRefObject call
+   return CoordinateBase::GetRefObjectNameArray(type);
+}
+
 
 //------------------------------------------------------------------------------
 //  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
@@ -541,6 +623,7 @@ GmatBase* CoordinateSystem::GetRefObject(const Gmat::ObjectType type,
 bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                     const std::string &name)
 { 
+   bool retval = false;
    
    switch (type)
    {
@@ -552,6 +635,17 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       default:
          break;
    }
+   
+   // DJC added 5/9/05
+   // Set ref object on owned axis system
+   if (obj->IsOfType(Gmat::SPACE_POINT))
+      retval = CoordinateBase::SetRefObject(obj, type, name);
+
+   if (axes)
+      retval |= axes->SetRefObject(obj, type, name);
+      
+   if (retval)
+      return true;
    
    // Not handled here -- invoke the next higher SetRefObject call
    return CoordinateBase::SetRefObject(obj, type, name);

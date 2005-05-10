@@ -26,10 +26,12 @@
 
 #include "MessageInterface.hpp"
 
-#include <iostream>
-using namespace std; //***************************** for debug only 
+//#include <iostream>
+//using namespace std; //***************************** for debug only
 
 //#define DEBUG_ROT_MATRIX 1
+//#define DEBUG_REFERENCE_SETTING
+
 //static Integer visitCount = 0;
 
 //---------------------------------
@@ -554,6 +556,44 @@ GmatBase* ObjectReferencedAxes::GetRefObject(const Gmat::ObjectType type,
    return DynamicAxes::GetRefObject(type, name);
 }
 
+
+// DJC added 5/9/05 to facilitate Sandbox initialization
+//------------------------------------------------------------------------------
+//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Returns the names of the reference object. (Derived classes should implement
+ * this as needed.)
+ *
+ * @param <type> reference object type.  Gmat::UnknownObject returns all of the
+ *               ref objects.
+ *
+ * @return The names of the reference object.
+ */
+//------------------------------------------------------------------------------
+const StringArray& ObjectReferencedAxes::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   if (type == Gmat::UNKNOWN_OBJECT)
+   {
+      static StringArray refs = DynamicAxes::GetRefObjectNameArray(type);
+
+      if (find(refs.begin(), refs.end(), primaryName) == refs.end())
+         refs.push_back(primaryName);
+      if (find(refs.begin(), refs.end(), secondaryName) == refs.end())
+         refs.push_back(secondaryName);
+      if (find(refs.begin(), refs.end(), originName) == refs.end())
+         refs.push_back(originName);
+      if (find(refs.begin(), refs.end(), j2000BodyName) == refs.end())
+         refs.push_back(j2000BodyName);
+
+      return refs;
+   }
+
+   // Not handled here -- invoke the next higher GetRefObject call
+   return DynamicAxes::GetRefObjectNameArray(type);
+}
+
+
 //------------------------------------------------------------------------------
 //  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //                    const std::string &name)
@@ -579,10 +619,18 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
       {
          if (name == primaryName)
          {
+            #ifdef DEBUG_REFERENCE_SETTING
+               MessageInterface::ShowMessage("Setting %s as primary for %s\n",
+                  name.c_str(), instanceName.c_str());
+            #endif
             primary = (SpacePoint*) obj;
          }
          if (name == secondaryName)
          {
+            #ifdef DEBUG_REFERENCE_SETTING
+               MessageInterface::ShowMessage("Setting %s as secondary for %s\n",
+                  name.c_str(), instanceName.c_str());
+            #endif
             secondary = (SpacePoint*) obj;
          }
          // add in the CoordinateBase SpacePoints here too because if
@@ -590,11 +638,19 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
          // (which is likely), the origin and/or j2000Body will never be set
          if (name == originName)
          {
+            #ifdef DEBUG_REFERENCE_SETTING
+               MessageInterface::ShowMessage("Setting %s as origin for %s\n",
+                  name.c_str(), instanceName.c_str());
+            #endif
             origin = (SpacePoint*) obj;
          }
          if (name == j2000BodyName)
          {
-            j2000Body = (SpacePoint*) obj;
+             #ifdef DEBUG_REFERENCE_SETTING
+               MessageInterface::ShowMessage("Setting %s as J2000body for %s\n",
+                  name.c_str(), instanceName.c_str());
+            #endif
+           j2000Body = (SpacePoint*) obj;
          }
          return true;
       }

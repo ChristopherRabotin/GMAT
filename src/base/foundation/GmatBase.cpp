@@ -2287,7 +2287,7 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                 (parmType != Gmat::UNSIGNED_INTARRAY_TYPE) &&
                 (parmType != Gmat::RVECTOR_TYPE) &&
                 (parmType != Gmat::RMATRIX_TYPE) &&
-                (parmType != Gmat::OBJECT_TYPE) &&
+//                (parmType != Gmat::OBJECT_TYPE) &&
                 (parmType != Gmat::UNKNOWN_PARAMETER_TYPE)
                )
             {

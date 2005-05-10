@@ -676,6 +676,7 @@ void Sandbox::BuildReferences(GmatBase *obj)
 //   // Not sure if needed...
 //   if (obj->GetType() == Gmat::SPACECRAFT)
 //      ((Spacecraft *)obj)->SaveDisplay();
+
 }
 
 
@@ -704,6 +705,8 @@ void Sandbox::InitializeInternalObjects()
    // set ref object for internal coordinate system
    internalCoordSys->SetSolarSystem(solarSys);
 
+   BuildReferences(internalCoordSys);
+
    // Set reference origin for internal coordinate system.
    oName = internalCoordSys->GetStringParameter("Origin");
    sp = FindSpacePoint(oName);
@@ -730,20 +733,26 @@ void Sandbox::InitializeCoordinateSystem(CoordinateSystem *cs)
    std::string oName;
 
    // Set the reference objects for the coordinate system
+   BuildReferences(cs);
+
    oName = cs->GetStringParameter("Origin");
+
    sp = FindSpacePoint(oName);
    if (sp == NULL)
       throw SandboxException("Cannot find SpacePoint named \"" +
          oName + "\" used for the coordinate system " +
          cs->GetName() + " origin");
+
    cs->SetRefObject(sp, Gmat::SPACE_POINT, oName);
 
    oName = cs->GetStringParameter("J2000Body");
+
    sp = FindSpacePoint(oName);
    if (sp == NULL)
       throw SandboxException("Cannot find SpacePoint named \"" +
          oName + "\" used for the coordinate system " +
          cs->GetName() + " J2000 body");
+         
    cs->SetRefObject(sp, Gmat::SPACE_POINT, oName);
 }
 
