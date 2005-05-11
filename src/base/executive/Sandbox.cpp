@@ -460,6 +460,8 @@ bool Sandbox::Initialize()
          if (obj->GetType() != Gmat::PROP_SETUP)
          {
             obj->SetSolarSystem(solarSys);
+            if (obj->IsOfType(Gmat::SPACE_POINT))
+               BuildReferences(obj);
             continue;
          }
          //************************************* END OF TEMPORARY ***************************************
