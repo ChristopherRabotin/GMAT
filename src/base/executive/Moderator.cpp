@@ -579,7 +579,21 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
    if (GetCalculatedPoint(name) == NULL)
    {
       CalculatedPoint *cp = theFactoryManager->CreateCalculatedPoint(type, name);
-    
+
+      // add default bodies
+      if (type == "LibrationPoint")
+      {
+         cp->SetStringParameter("Primary", "Sun");
+         cp->SetStringParameter("Secondary", "Earth");
+         cp->SetStringParameter("Point", "L1");
+      }
+      else if (type == "Barycenter")
+      {
+         cp->SetStringParameter("BodyNames", "Sun");
+         cp->SetStringParameter("BodyNames", "Earth");
+         cp->SetStringParameter("BodyNames", "Luna");
+      }
+      
       if (cp == NULL)
       {
          MessageInterface::ShowMessage
