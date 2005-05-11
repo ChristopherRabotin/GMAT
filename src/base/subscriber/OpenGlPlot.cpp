@@ -312,7 +312,7 @@ bool OpenGlPlot::Initialize()
             {
                #if DEBUG_OPENGL_INIT
                MessageInterface::ShowMessage
-                  ("OpenGlPlot::Initialize() mAllSpNameArray[%d]=%s addr=%d\n",
+                  ("OpenGlPlot::Initialize() mAllSpNameArray[%d]=%s, addr=%d\n",
                    i, mAllSpNameArray[i].c_str(), mAllSpArray[i]);
                #endif
                
@@ -333,6 +333,13 @@ bool OpenGlPlot::Initialize()
                      mNonScColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
                      mNonScArray.push_back(mAllSpArray[i]);
                   }
+               }
+               else
+               {
+                  //loj: 5/10/05 Added
+                  MessageInterface::PopupMessage
+                     (Gmat::WARNING_, "The SpacePoint name: %s has NULL pointer.\nIt will be "
+                      "removed from the OpenGL plot.\n", mAllSpNameArray[i].c_str());
                }
             }
             
@@ -1271,7 +1278,8 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       return true;
    }
    else if (type == Gmat::SPACE_POINT || type == Gmat::CELESTIAL_BODY ||
-            type == Gmat::SPACECRAFT)
+            type == Gmat::SPACECRAFT || type == Gmat::CALCULATED_POINT)
+      //loj: 5/10/05 Added CALCULATED_POINT
    {
       for (Integer i=0; i<mAllSpCount; i++)
       {
