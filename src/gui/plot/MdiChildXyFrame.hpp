@@ -81,7 +81,8 @@ public:
    void OnDrawDottedLine(wxCommandEvent& event);
    void OnHelpView(wxCommandEvent& event);
    void OnQuit(wxCommandEvent& event);
-   
+   void OnOpenXyPlotFile(wxCommandEvent& event);
+
    // window events
    void OnPlotClick(wxPlotEvent &event);
    void OnActivate(wxActivateEvent& event);

@@ -2913,8 +2913,8 @@ void TrajPlotCanvas::DrawSpacecraftOrbit()
             
             glVertex3f((-mScTempPos[sc][i][0]),
                        (-mScTempPos[sc][i][1]),
-                       ( mScTempPos[sc][i][2]));
-            
+                       (mScTempPos[sc][i][2]));
+
             //glVertex3fv(mScTempPos[sc][i-1]);
             //glVertex3fv(mScTempPos[sc][i]);
          }
