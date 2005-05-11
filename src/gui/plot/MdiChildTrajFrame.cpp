@@ -333,8 +333,10 @@ int MdiChildTrajFrame::GetAnimationUpdateInterval()
 wxString MdiChildTrajFrame::GetGotoObjectName()
 {
    if (mCanvas)
-      return mCanvas->GetGotoObjectName();
-
+   {
+     return mCanvas->GetGotoObjectName();
+   }
+   
    return "Unknown";
 }
 
@@ -363,18 +365,18 @@ CoordinateSystem* MdiChildTrajFrame::GetDesiredCoordSystem()
 }
 
 
-//------------------------------------------------------------------------------
-// const StringArray& GetBodyNamesInUse()
-//------------------------------------------------------------------------------
-const StringArray& MdiChildTrajFrame::GetBodyNamesInUse()
-{
-   static StringArray tempArray;
+// //------------------------------------------------------------------------------
+// // const StringArray& GetBodyNamesInUse()
+// //------------------------------------------------------------------------------
+// const StringArray& MdiChildTrajFrame::GetBodyNamesInUse()
+// {
+//    static StringArray tempArray;
    
-   if (mCanvas)
-      return mCanvas->GetBodyNamesInUse();
+//    if (mCanvas)
+//       return mCanvas->GetBodyNamesInUse();
 
-   return tempArray;
-}
+//    return tempArray;
+// }
 
 
 //------------------------------------------------------------------------------
@@ -608,18 +610,6 @@ void MdiChildTrajFrame::SetDesiredCoordSystem(const wxString &csName)
 
 
 //------------------------------------------------------------------------------
-// void SetDesiredCoordSystem(CoordinateSystem *cs)
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetDesiredCoordSystem(CoordinateSystem *cs)
-{
-   if (mCanvas)
-   {
-      mCanvas->SetDesiredCoordSystem(cs);
-   }
-}
-
-
-//------------------------------------------------------------------------------
 // void SetObjectColors(const wxStringColorMap &objectColorMap)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::SetObjectColors(const wxStringColorMap &objectColorMap)
@@ -649,18 +639,8 @@ void MdiChildTrajFrame::DrawInOtherCoordSystem(const wxString &csName)
    {
       mCanvas->DrawInOtherCoordSystem(csName);
    }
-}
-
-
-//------------------------------------------------------------------------------
-// void DrawInOtherCoordSystem(CoordinateSystem *cs)
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::DrawInOtherCoordSystem(CoordinateSystem *cs)
-{
-   if (mCanvas)
-   {
-      mCanvas->DrawInOtherCoordSystem(cs);
-   }
+   
+   mOptionDialog->SetGotoObjectName(mCanvas->GetGotoObjectName());
 }
 
 

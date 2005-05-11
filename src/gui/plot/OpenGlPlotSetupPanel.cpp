@@ -325,11 +325,11 @@ void OpenGlPlotSetupPanel::Create()
 
    // vector for ViewPointRef
    mViewPointRef1TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(50,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
    mViewPointRef2TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(50,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
    mViewPointRef3TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(50,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
    
    mViewPointRefSizer = new wxBoxSizer(wxHORIZONTAL);
    mViewPointRefSizer->Add(mViewPointRef1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -338,11 +338,11 @@ void OpenGlPlotSetupPanel::Create()
 
    // vector for ViewPointVector
    mViewPointVec1TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(50,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
    mViewPointVec2TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(50,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
    mViewPointVec3TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("30000"), wxDefaultPosition, wxSize(50,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("30000"), wxDefaultPosition, wxSize(60,-1), 0);
    
    mViewPointVectorSizer = new wxBoxSizer(wxHORIZONTAL);
    mViewPointVectorSizer->Add(mViewPointVec1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -351,11 +351,11 @@ void OpenGlPlotSetupPanel::Create()
 
    // vector for ViewDirection
    mViewDir1TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(50,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
    mViewDir2TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(50,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
    mViewDir3TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("-1"), wxDefaultPosition, wxSize(50,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("-1"), wxDefaultPosition, wxSize(60,-1), 0);
    
    mViewDirVectorSizer = new wxBoxSizer(wxHORIZONTAL);
    mViewDirVectorSizer->Add(mViewDir1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -463,11 +463,6 @@ void OpenGlPlotSetupPanel::Create()
 //------------------------------------------------------------------------------
 void OpenGlPlotSetupPanel::LoadData()
 {
-
-   MessageInterface::ShowMessage("=====>OpenGlPlotSetupPanel::LoadData() testing...\n");
-   MessageInterface::ShowMessage("Earth=%d\n",
-                                 theGuiInterpreter->GetConfiguredItem("Earth"));
-   
    #if DEBUG_OPENGL_PANEL_LOAD
       MessageInterface::ShowMessage("OpenGlPlotSetupPanel::LoadData() entering...\n");
    #endif
@@ -931,7 +926,7 @@ void OpenGlPlotSetupPanel::OnAddSpacePoint(wxCommandEvent& event)
          // deselect selected other object
          mSelectedObjListBox->Deselect(mSelectedObjListBox->GetSelection());
 
-         ShowSpacePointOption(s, true);
+         ShowSpacePointOption(s, true, GmatColor::RED32);
          mHasSpChanged = true;
          theApplyButton->Enable();
       }
@@ -946,15 +941,15 @@ void OpenGlPlotSetupPanel::OnAddSpacePoint(wxCommandEvent& event)
       {
          mSelectedObjListBox->Append(s);
          mSelectedObjListBox->SetStringSelection(s);
-      
+         
          // select next available item
          mCelesObjectListBox->
             SetSelection(mCelesObjectListBox->GetSelection()+1);
-
+         
          // deselect selected spacecraft
          mSelectedScListBox->Deselect(mSelectedScListBox->GetSelection());
          
-         ShowSpacePointOption(s, true);
+         ShowSpacePointOption(s, true, false, GmatColor::L_BROWN32);
          mHasSpChanged = true;
          theApplyButton->Enable();
       }
@@ -1058,7 +1053,7 @@ void OpenGlPlotSetupPanel::OnSelectSpacecraft(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OpenGlPlotSetupPanel::OnSelectOtherObject(wxCommandEvent& event)
 {
-   ShowSpacePointOption(mSelectedObjListBox->GetStringSelection(), true);
+   ShowSpacePointOption(mSelectedObjListBox->GetStringSelection(), true, false);
    mSelectedScListBox->Deselect(mSelectedScListBox->GetSelection());
 }
 
@@ -1224,79 +1219,57 @@ void OpenGlPlotSetupPanel::OnTextChange(wxCommandEvent& event)
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// void ShowSpacePointOption(const wxString &name, bool show = true)
+// void ShowSpacePointOption(const wxString &name, bool show = true,
+//                           bool isSc = true,
+//                           UnsignedInt color = GmatColor::RED32)
 //------------------------------------------------------------------------------
-void OpenGlPlotSetupPanel::ShowSpacePointOption(const wxString &name, bool show)
+void OpenGlPlotSetupPanel::ShowSpacePointOption(const wxString &name, bool show,
+                                                bool isSc, UnsignedInt color)
 {
    #if DEBUG_OPENGL_PANEL
    MessageInterface::ShowMessage
-      ("OpenGlPlotSetupPanel::ShowSpacePointOption() name=%s\n",
-       name.c_str());
+      ("OpenGlPlotSetupPanel::ShowSpacePointOption() name=%s, show=%d, isSc=%d\n",
+       name.c_str(), show, isSc);
    #endif
    
    if (!name.IsSameAs(""))
    {
       mSelSpName = std::string(name.c_str());
-      int found = mSpacecraftListBox->FindString(name);
 
-      //------------------------------------------
-      // if selected object is a spacecraft
-      //------------------------------------------
-      if (found != wxNOT_FOUND)
+      // if object name not found, insert
+      if (mOrbitColorMap.find(mSelSpName) == mOrbitColorMap.end())
       {
-         // if spacecraft name not found, insert
-         if (mOrbitColorMap.find(mSelSpName) == mOrbitColorMap.end())
-         {
-            mOrbitColorMap[mSelSpName] = RgbColor(GmatColor::RED32);
-            mTargetColorMap[mSelSpName] = RgbColor(GmatColor::ORANGE32);
-         }
-         
-         RgbColor orbColor = mOrbitColorMap[mSelSpName];
-         RgbColor targColor = mTargetColorMap[mSelSpName];
-         
-         #if DEBUG_OPENGL_PANEL
-         MessageInterface::ShowMessage
-            ("ShowSpacePointOption() orbColor=%08x targColor=%08x\n",
-             orbColor.GetIntColor(), targColor.GetIntColor());
-         #endif
-         
-         mOrbitColor.Set(orbColor.Red(), orbColor.Green(), orbColor.Blue());
-         mTargetColor.Set(targColor.Red(), targColor.Green(), targColor.Blue());
-         
-         mOrbitColorButton->SetBackgroundColour(mOrbitColor);
-         mTargetColorButton->SetBackgroundColour(mTargetColor);
+         mOrbitColorMap[mSelSpName] = RgbColor(color);
+         mTargetColorMap[mSelSpName] = RgbColor(GmatColor::ORANGE32);
+      }
+      
+      RgbColor orbColor = mOrbitColorMap[mSelSpName];
+      RgbColor targColor = mTargetColorMap[mSelSpName];
+      
+      #if DEBUG_OPENGL_PANEL
+      MessageInterface::ShowMessage
+         ("ShowSpacePointOption() orbColor=%08x targColor=%08x\n",
+          orbColor.GetIntColor(), targColor.GetIntColor());
+      #endif
+      
+      mOrbitColor.Set(orbColor.Red(), orbColor.Green(), orbColor.Blue());
+      mTargetColor.Set(targColor.Red(), targColor.Green(), targColor.Blue());
+      
+      mOrbitColorButton->SetBackgroundColour(mOrbitColor);
+      mTargetColorButton->SetBackgroundColour(mTargetColor);
+
+      if (isSc)
+      {
          mTargetColorLabel->Enable();
          mTargetColorButton->Enable();
-         mObjectGridSizer->Show(mScOptionBoxSizer, show);
       }
-      //------------------------------------------
-      // else selected object is a celestial body
-      //------------------------------------------
       else
       {
-         // if non-spacecraft name not found, insert
-         if (mOrbitColorMap.find(mSelSpName) == mOrbitColorMap.end())
-         {
-            mOrbitColorMap[mSelSpName] = RgbColor(GmatColor::RED32);
-         }
-         
-         RgbColor orbColor = mOrbitColorMap[mSelSpName];
-         
-         #if DEBUG_OPENGL_PANEL
-         MessageInterface::ShowMessage("ShowSpacePointOption() mSelSpName=%s\n",
-                                       mSelSpName.c_str());
-         MessageInterface::ShowMessage
-            ("ShowSpacePointOption() orbColor=%08x\n", orbColor.GetIntColor());
-         #endif
-         
-         mOrbitColor.Set(orbColor.Red(), orbColor.Green(), orbColor.Blue());
-         
-         mOrbitColorButton->SetBackgroundColour(mOrbitColor);
-         mTargetColorButton->SetBackgroundColour(*wxLIGHT_GREY);
          mTargetColorLabel->Disable();
          mTargetColorButton->Disable();
-         mObjectGridSizer->Show(mScOptionBoxSizer, show);
       }
+      
+      mObjectGridSizer->Show(mScOptionBoxSizer, show);
    }
    else
    {

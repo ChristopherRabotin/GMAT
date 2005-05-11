@@ -45,7 +45,7 @@ BEGIN_EVENT_TABLE(OpenGlOptionDialog, wxDialog)
    EVT_BUTTON(ID_SUNLINE_COLOR_BUTTON, OpenGlOptionDialog::OnColorButtonClick)
    EVT_BUTTON(ID_OBJECT_COLOR_BUTTON, OpenGlOptionDialog::OnObjectColorButtonClick)
 //    EVT_BUTTON(ID_ADD_BODY_BUTTON, OpenGlOptionDialog::OnAddBodyButtonClick)
-   
+
    EVT_CLOSE(OpenGlOptionDialog::OnClose)
 END_EVENT_TABLE()
 
@@ -166,7 +166,7 @@ void OpenGlOptionDialog::SetGotoObjectName(const wxString &objName)
 
 //------------------------------------------------------------------------------
 // void UpdateObject(const wxArrayString &objectNames,
-//                 const UnsignedIntArray &objectColors)
+//                   const UnsignedIntArray &objectColors)
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::UpdateObject(const wxArrayString &objectNames,
                                       const UnsignedIntArray &objectColors)
@@ -201,10 +201,10 @@ void OpenGlOptionDialog::UpdateObject(const wxArrayString &objectNames,
 void OpenGlOptionDialog::UpdateObjectList(const wxArrayString &objNames,
                                           const wxStringColorMap &objColors)
 {
-   #ifdef DEBUG_GLOPTION_UPDATE
+   #ifdef DEBUG_GLOPTION_OBJECT
    MessageInterface::ShowMessage
       ("OpenGlOptionDialog::UpdateObjectList() mObjectNames.size=%d, "
-       "mObjectIntColors.size=%d\n", mObjectNames.size(), mObjectIntColors.size());
+       "mObjectIntColors.size=%d\n", mObjectNames.GetCount(), mObjectIntColors.size());
    #endif
    
    mObjectCount = objNames.GetCount();
@@ -219,7 +219,7 @@ void OpenGlOptionDialog::UpdateObjectList(const wxArrayString &objNames,
       mObjectIntColors.push_back(intColor);
       mShowObjectMap[mObjectNames[i]] = true;
       
-      #ifdef DEBUG_GLOPTION_UPDATE
+      #ifdef DEBUG_GLOPTION_OBJECT
       MessageInterface::ShowMessage
          ("OpenGlOptionDialog::UpdateObjectList() object=%s, color=%d\n",
           mObjectNames[i].c_str(), mObjectIntColors[i]);
@@ -261,7 +261,7 @@ void OpenGlOptionDialog::Create()
                      wxDefaultPosition, wxSize(-1, -1), 0);
    
    wxStaticText *animationStaticText =
-      new wxStaticText(this, -1, wxT("Update Interval (msec)"),
+      new wxStaticText(this, -1, wxT("Update Interval (msec)\n<Esc> to interrupt"),
                        wxDefaultPosition, wxSize(-1, -1), 0);
    
    mAnimationUpdIntTextCtrl =
@@ -330,8 +330,8 @@ void OpenGlOptionDialog::Create()
    mCoordSysComboBox =
       theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(105, -1));
    
-   mCreateCoordSysButton =
-      new wxButton(this, ID_BUTTON, "Create", wxDefaultPosition, wxSize(-1, -1), 0);
+//    mCreateCoordSysButton =
+//       new wxButton(this, ID_BUTTON, "Create", wxDefaultPosition, wxSize(-1, -1), 0);
    
    wxFlexGridSizer *viewGridSizer = new wxFlexGridSizer(2, 0, 0);
    viewGridSizer->Add(distanceStaticText, 0, wxALIGN_LEFT|wxALL, borderSize);
@@ -353,7 +353,7 @@ void OpenGlOptionDialog::Create()
    
    viewOptionSizer->Add(mUsePerspModeCheckBox, 0, wxALIGN_LEFT|wxALL, borderSize);
    viewOptionSizer->Add(viewGridSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   viewOptionSizer->Add(mCreateCoordSysButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
+//    viewOptionSizer->Add(mCreateCoordSysButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
    
    #if DEBUG_GLOPTION_CREATE
    MessageInterface::ShowMessage
@@ -590,7 +590,7 @@ void OpenGlOptionDialog::LoadData()
    mObjectListBox->SetSelection(0);
    ShowSpacePointOption(mObjectListBox->GetStringSelection(), true);
 
-   mCreateCoordSysButton->Disable();
+//    mCreateCoordSysButton->Disable();
 //    mAddObjectButton->Enable();
    mEcPlaneCheckBox->Enable();
    mEcPlaneColorButton->Enable();
@@ -653,16 +653,16 @@ void OpenGlOptionDialog::SaveData()
       mTrajFrame->SetDistance(mDistance);
    }
    
-   if (mHasGotoObjectChanged)
-   {
-      mHasGotoObjectChanged = false;
-      mTrajFrame->SetGotoObjectName(mGotoObjectName);
-   }
-   
    if (mHasCoordSysChanged)
    {
       mHasCoordSysChanged = false;
       mTrajFrame->DrawInOtherCoordSystem(mCoordSysName);
+   }
+   
+   if (mHasGotoObjectChanged)
+   {
+      mHasGotoObjectChanged = false;
+      mTrajFrame->SetGotoObjectName(mGotoObjectName);
    }
    
    if (mHasDrawEqPlaneChanged)
@@ -761,19 +761,20 @@ void OpenGlOptionDialog::ResetData()
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::UpdateObjectComboBox()
 {
-   #ifdef DEBUG_GLOPTION_UPDATE
+   #ifdef DEBUG_GLOPTION_OBJECT
    MessageInterface::ShowMessage
       ("OpenGlOptionDialog::UpdateObjectComboBox() mObjectCount=%d\n", mObjectCount);
    #endif
    
-   wxString objectSel = mGotoObjectComboBox->GetStringSelection();
+   //wxString objectSel = mGotoObjectComboBox->GetStringSelection();
    
    mGotoObjectComboBox->Clear();
    
    for (int i=0; i<mObjectCount; i++)
       mGotoObjectComboBox->Append(mObjectNames[i]);
 
-   mGotoObjectComboBox->SetStringSelection(objectSel);
+   //mGotoObjectComboBox->SetStringSelection(objectSel);
+   mGotoObjectComboBox->SetStringSelection(mTrajFrame->GetGotoObjectName());
 }
 
 
@@ -782,7 +783,7 @@ void OpenGlOptionDialog::UpdateObjectComboBox()
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::UpdateObjectListBox()
 {
-   #ifdef DEBUG_GLOPTION_UPDATE
+   #ifdef DEBUG_GLOPTION_OBJECT
    MessageInterface::ShowMessage
       ("OpenGlOptionDialog::UpdateObjectListBox() mObjectCount=%d\n", mObjectCount);
    #endif
@@ -1027,14 +1028,14 @@ void OpenGlOptionDialog::OnApplyButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::OnButtonClick(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == mCreateCoordSysButton)
-   {
-      // show dialog to create CoordinateSystem
-      // assuming the dialog will create and configure the CoordinateSystem
+//    if (event.GetEventObject() == mCreateCoordSysButton)
+//    {
+//       // show dialog to create CoordinateSystem
+//       // assuming the dialog will create and configure the CoordinateSystem
 
-      // add CoordinateSystem to ComboBox
-   }
-   else if (event.GetEventObject() == mViewAnimationButton)
+//       // add CoordinateSystem to ComboBox
+//    }
+   if (event.GetEventObject() == mViewAnimationButton)
    {
       mTrajFrame->SetUseViewPointInfo(mUseInitialViewPointCheckBox->GetValue());
       mAnimationUpdInt = atoi(mAnimationUpdIntTextCtrl->GetValue());

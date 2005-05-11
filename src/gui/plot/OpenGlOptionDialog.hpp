@@ -112,7 +112,7 @@ protected:
    wxCheckBox *mShowObjectCheckBox;
 
    wxButton *mViewAnimationButton;
-   wxButton *mCreateCoordSysButton;
+   //wxButton *mCreateCoordSysButton;
    wxButton *mEqPlaneColorButton;
    wxButton *mEcPlaneColorButton;
    wxButton *mEcLineColorButton;

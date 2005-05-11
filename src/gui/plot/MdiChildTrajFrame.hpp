@@ -66,7 +66,6 @@ public:
    wxString GetGotoObjectName();
    wxString GetDesiredCoordSysName();
    CoordinateSystem* GetDesiredCoordSystem();
-   const StringArray& GetBodyNamesInUse();
    
    // setters
    void SetPlotName(const wxString &name);
@@ -87,13 +86,11 @@ public:
    void SetDistance(float dist);
    void SetGotoObjectName(const wxString &bodyName);
    void SetDesiredCoordSystem(const wxString &csName);
-   void SetDesiredCoordSystem(CoordinateSystem *cs);
    void SetObjectColors(const wxStringColorMap &objectColorMap);
    void SetShowObjects(const wxStringBoolMap &showObjMap);
    
    // actions
    void DrawInOtherCoordSystem(const wxString &csName);
-   void DrawInOtherCoordSystem(CoordinateSystem *cs);
    void RedrawPlot(bool viewAnimation);
 
    // menu actions

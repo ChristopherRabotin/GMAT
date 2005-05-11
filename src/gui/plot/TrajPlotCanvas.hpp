@@ -57,8 +57,7 @@ public:
    CoordinateSystem* GetDesiredCoordSystem() { return mDesiredCoordSystem;}
    const wxArrayString& GetObjectNames() { return mObjectNames;}
    const wxStringColorMap& GetObjectColorMap() { return mObjectColorMap;}
-   wxString GetGotoObjectName() { return mObjectNames[mOriginId]; }
-   const StringArray& GetBodyNamesInUse();
+   wxString GetGotoObjectName();
    
    // setters
    void SetDistance(float dist) {mAxisLength = dist;}
@@ -73,7 +72,6 @@ public:
    void SetEqPlaneColor(unsigned int color) {mEqPlaneColor = color;}
    void SetEcPlaneColor(unsigned int color) {mEcPlaneColor = color;}
    void SetEcLineColor(unsigned int color) {mEcLineColor = color;}
-   void SetDesiredCoordSystem(CoordinateSystem* cs) {mDesiredCoordSystem = cs;}
    void SetDesiredCoordSystem(const wxString &csName);
    void SetUsePerspectiveMode(bool perspMode);
    void SetObjectColors(const wxStringColorMap &objectColorMap);
@@ -92,7 +90,6 @@ public:
    void DrawEcPlane(bool flag);
    void OnDrawAxes(bool flag);
    void DrawInOtherCoordSystem(const wxString &csName);
-   void DrawInOtherCoordSystem(CoordinateSystem *cs);
    void GotoObject(const wxString &objName);
    void GotoOtherBody(const wxString &bodyName);
    void ViewAnimation(int interval);
@@ -121,9 +118,9 @@ public:
                    const UnsignedIntArray &scColors);
    
    // body
-   void AddBodyList(const wxArrayString &bodyNames,
-                    const UnsignedIntArray &bodyColors,
-                    bool clearList = true);
+   void AddObjectList(const wxArrayString &bodyNames,
+                      const UnsignedIntArray &bodyColors,
+                      bool clearList = true);
    
 protected:
    
@@ -210,6 +207,7 @@ private:
    
    // viewpoint
    StringArray mScNameArray;
+   std::string mViewPointRefObjName;
    SpacePoint *mViewPointRefObj;
    SpacePoint *mViewPointVectorObj;
    SpacePoint *mViewDirectionObj;
@@ -259,7 +257,6 @@ private:
    float mObjMaxZoomIn[GmatPlot::MAX_BODIES];
 
    // bodies
-   bool  mDrawEarth;
    bool  mObjectInUse[GmatPlot::MAX_BODIES];
    bool  mObjectHasData[GmatPlot::MAX_BODIES];
    float mObjectGciPos[GmatPlot::MAX_BODIES][MAX_DATA][3];
@@ -274,17 +271,17 @@ private:
    wxString mOriginName;
    CoordinateSystem *mInternalCoordSystem;
    CoordinateSystem *mDesiredCoordSystem;
+   int mOriginId;
    
    // coordinate sytem conversion
    bool mIsInternalCoordSystem;
    bool mNeedSpacecraftConversion;
-   bool mNeedEarthConversion;
-   bool mNeedOtherBodyConversion;
-   bool mNeedConversion;
+   bool mNeedOriginConversion;
+   bool mNeedObjectConversion;
+   bool mNeedInitialConversion;
    CoordinateConverter mCoordConverter;
    
    short mCurrViewFrame;
-   int   mOriginId;
    
    // view
    wxSize mCanvasSize;
@@ -316,7 +313,6 @@ private:
    // texture
    bool LoadGLTextures();
    GLuint BindTexture(const wxString &objName);
-   GLuint BindTexture(int bodyId);
    
    // view objects
    void SetProjection();
@@ -328,38 +324,35 @@ private:
    
    // drawing objects
    void DrawFrame();
-   void DrawPicture();
+   void DrawPlot();
    void DrawObject(const wxString &objName);
-   void DrawObjectOrbit(const wxString &objName);
-   void DrawEarth();
-   void DrawEarthOrbit();
+   void DrawObjectOrbit();
    void DrawEarthOrbit(int frame);
-   void DrawOtherBody(int bodyIndex);
-   void DrawOtherBodyOrbit(int bodyIndex);
    void DrawSpacecraft(UnsignedInt scColor);
    void DrawSpacecraftOrbit();
    void DrawSpacecraftOrbit(int frame);
    void DrawEquatorialPlane(UnsignedInt color);
-   void DrawEclipticPlane();
+   void DrawEclipticPlane(UnsignedInt color);
    void DrawEarthSunLine();
-   void DrawAxes(bool gci = false);  //loj: 4/15/05 Added earthZaxis
+   void DrawAxes(bool gci = false);
    
    // drawing primative objects
    void DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z);
    void DrawCircle(GLUquadricObj *qobj, Real radius);
    
-   // for body
-   int GetStdBodyId(const std::string &name);
-   void AddBody(const std::string &name);
+//    // for body
+//    int GetStdBodyId(const std::string &name);
+//    void AddBody(const std::string &name);
    
    // for object
    int GetObjectId(const wxString &name);
    
    // for coordinate system
-   bool TiltEarthZAxis();
+   bool TiltOriginZAxis();
    bool ConvertSpacecraftData();
    bool ConvertSpacecraftData(int frame);
-   bool ConvertOtherBodyData();
+   bool ConvertObjectData();
+   void ConvertObject(int objId, int index);
    
    // for copy
    void CopyVector3(float to[3], Real from[3]);
