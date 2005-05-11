@@ -164,24 +164,6 @@ void CoordPanel::LoadData()
          theGuiInterpreter->GetListOfFactoryItems(Gmat::AXIS_SYSTEM);
       for (unsigned int i = 0; i<itemNames.size(); i++)
          typeComboBox->Append(wxString(itemNames[i].c_str()));
-         
-      // append barycenters and libration points
-      // list of calculated points
-      StringArray items = theGuiInterpreter->
-                  GetListOfConfiguredItems(Gmat::CALCULATED_POINT);
-      int count = items.size();
-
-      if (count > 0)  // check to see if any barycenters exist
-      {
-         for (int i=0; i<count; i++)
-         {
-            wxString objName = wxString(items[i].c_str());
-
-            originComboBox->Append(objName);
-            primaryComboBox->Append(objName);
-            secondaryComboBox->Append(objName);
-         }
-      }
      
       // insert a blank option for primary and secondary
 //      primaryComboBox->Append("");
@@ -265,38 +247,42 @@ void CoordPanel::EnableOptions()
       mShowXyz = false;
    }
 
-   primaryStaticText->Enable(mShowPrimaryBody);
-   primaryComboBox->Enable(mShowPrimaryBody);
-   secondaryStaticText->Enable(mShowSecondaryBody);
-   secondaryComboBox->Enable(mShowSecondaryBody);
-   formatStaticText->Enable(mShowEpoch);
-   formatComboBox->Enable(mShowEpoch);
-   epochStaticText->Enable(mShowEpoch);
-   epochTextCtrl->Enable(mShowEpoch);
-   xStaticText->Enable(mShowXyz);
-   xComboBox->Enable(mShowXyz);
-   yStaticText->Enable(mShowXyz);
-   yComboBox->Enable(mShowXyz);
-   zStaticText->Enable(mShowXyz);
-   zComboBox->Enable(mShowXyz);
-
-   // enable all
-//   originStaticText->Enable(mEnableAll);
-//   typeStaticText->Enable(mEnableAll);
-//   primaryStaticText->Enable(mEnableAll);
-//   formatStaticText->Enable(mEnableAll);
-//   secondaryStaticText->Enable(mEnableAll);
-//   epochStaticText->Enable(mEnableAll);
-//   originComboBox->Enable(mEnableAll);
-//   typeComboBox->Enable(mEnableAll);
-//   primaryComboBox->Enable(mEnableAll);
-//   formatComboBox->Enable(mEnableAll);
-//   secondaryComboBox->Enable(mEnableAll);
-//   epochTextCtrl->Enable(mEnableAll);
-//   xStaticText->Enable(mEnableAll);
-//   xComboBox->Enable(mEnableAll);
-//   yStaticText->Enable(mEnableAll);
-//   yComboBox->Enable(mEnableAll);
-//   zStaticText->Enable(mEnableAll);
-//   zComboBox->Enable(mEnableAll);
+   if (mEnableAll)
+   {
+      primaryStaticText->Enable(mShowPrimaryBody);
+      primaryComboBox->Enable(mShowPrimaryBody);
+      secondaryStaticText->Enable(mShowSecondaryBody);
+      secondaryComboBox->Enable(mShowSecondaryBody);
+      formatStaticText->Enable(mShowEpoch);
+      formatComboBox->Enable(mShowEpoch);
+      epochStaticText->Enable(mShowEpoch);
+      epochTextCtrl->Enable(mShowEpoch);
+      xStaticText->Enable(mShowXyz);
+      xComboBox->Enable(mShowXyz);
+      yStaticText->Enable(mShowXyz);
+      yComboBox->Enable(mShowXyz);
+      zStaticText->Enable(mShowXyz);
+      zComboBox->Enable(mShowXyz);
+   }
+   else  // disable all of them
+   {
+      originStaticText->Enable(mEnableAll);
+      typeStaticText->Enable(mEnableAll);
+      primaryStaticText->Enable(mEnableAll);
+      formatStaticText->Enable(mEnableAll);
+      secondaryStaticText->Enable(mEnableAll);
+      epochStaticText->Enable(mEnableAll);
+      originComboBox->Enable(mEnableAll);
+      typeComboBox->Enable(mEnableAll);
+      primaryComboBox->Enable(mEnableAll);
+      formatComboBox->Enable(mEnableAll);
+      secondaryComboBox->Enable(mEnableAll);
+      epochTextCtrl->Enable(mEnableAll);
+      xStaticText->Enable(mEnableAll);
+      xComboBox->Enable(mEnableAll);
+      yStaticText->Enable(mEnableAll);
+      yComboBox->Enable(mEnableAll);
+      zStaticText->Enable(mEnableAll);
+      zComboBox->Enable(mEnableAll);
+   }
 }

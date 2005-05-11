@@ -16,6 +16,7 @@
 
 #include "CoordSysCreateDialog.hpp"
 #include "MessageInterface.hpp"
+#include "TimeSystemConverter.hpp"
 
 //#define DEBUG_COORD_DIALOG 1
 
@@ -104,6 +105,7 @@ void CoordSysCreateDialog::LoadData()
          zComboBox->SetValue("");
       }
 
+      wxFormatName = std::string(formatComboBox->GetValue().Trim());
       mCoordPanel->EnableOptions();
    }
    catch (BaseException &e)
@@ -127,12 +129,12 @@ void CoordSysCreateDialog::SaveData()
       std::string wxPrimName = std::string(primaryComboBox->GetValue().Trim());
       std::string wxSecName = std::string(secondaryComboBox->GetValue().Trim());
       std::string wxTypeName = std::string(typeComboBox->GetValue().Trim());
-      std::string wxFormatName = std::string(formatComboBox->GetValue().Trim());
+      wxFormatName = std::string(formatComboBox->GetValue().Trim());
       wxXString = xComboBox->GetValue();
       wxYString = yComboBox->GetValue();
       wxZString = zComboBox->GetValue();
 
-      Real epoch = atof(epochTextCtrl->GetValue());
+      std::string epochStr = std::string(epochTextCtrl->GetValue().Trim());
       bool validXYZ = true;
 
       if (mCoordPanel->GetShowXyz())
@@ -194,6 +196,13 @@ void CoordSysCreateDialog::SaveData()
             axis->SetYAxis(std::string(wxYString));
             axis->SetZAxis(std::string(wxZString));
 
+            axis->SetEpochFormat(wxFormatName);
+
+            // convert epoch to a1mjd
+            std::string taiEpochStr = timeConverter.Convert(epochStr, 
+                     wxFormatName, "TAIModJulian");
+            Real epoch = TimeConverterUtil::ConvertFromTaiMjd("A1Mjd", 
+                     atof(taiEpochStr.c_str()), GmatTimeUtil::JD_JAN_5_1941);
             axis->SetEpoch(epoch);
             mIsCoordCreated = true;
          }
@@ -242,6 +251,8 @@ void CoordSysCreateDialog::OnTextUpdate(wxCommandEvent& event)
    {
       theOkButton->Enable();
    }
+   else
+      theOkButton->Disable();
 }
 
 //------------------------------------------------------------------------------
@@ -258,7 +269,14 @@ void CoordSysCreateDialog::OnComboBoxChange(wxCommandEvent& event)
    }
    else if (event.GetEventObject() == formatComboBox)
    {
-      /// @todo OnComboBoxChange epoch format
+      std::string newFormat = std::string(formatComboBox->GetStringSelection().Trim());
+      if (newFormat != wxFormatName)
+      {
+         std::string newEpoch = timeConverter.Convert(epochTextCtrl->GetValue().c_str(),
+                                wxFormatName, newFormat);
+         epochTextCtrl->SetValue(newEpoch.c_str());
+         wxFormatName = newFormat;
+      }
    }
 
    if (nameTextCtrl->GetValue().Trim() != "")

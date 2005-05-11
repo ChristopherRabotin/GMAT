@@ -21,6 +21,7 @@
 #include "GmatAppData.hpp"
 #include "AxisSystem.hpp"
 #include "SpacePoint.hpp"
+#include "TimeSystemConverter.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -108,8 +109,6 @@ void CoordSystemConfigPanel::LoadData()
             if (primaryObj != NULL)
                primaryComboBox->SetValue(primaryObj->GetName().c_str());
             else
-//               MessageInterface::ShowMessage("Primary object was null - may not"
-//                  " be implemented yet\n");
                primaryComboBox->SetValue(axes->GetStringParameter("Primary").c_str());
          }
 
@@ -119,8 +118,6 @@ void CoordSystemConfigPanel::LoadData()
             if (secondObj != NULL)
                secondaryComboBox->SetValue(secondObj->GetName().c_str());
             else
-//               MessageInterface::ShowMessage("Secondary object was null - may "
-//                  "not be implemented yet\n");
                secondaryComboBox->SetValue(axes->GetStringParameter("Secondary").c_str());
          }
 
@@ -128,13 +125,16 @@ void CoordSystemConfigPanel::LoadData()
          {
             A1Mjd epoch = axes->GetEpoch();
 
-            // hard coded for now
-            /// @todo get epoch format from base code
-            formatComboBox->SetValue("TAIModJulian");
+            std::string epochFormat = axes->GetEpochFormat().c_str();
+            formatComboBox->SetValue(epochFormat.c_str());
 
-            wxString epochString;
-            epochString.Printf("%9.9f", epoch.Get());
-            epochTextCtrl->SetValue(epochString);
+            Real taiEpoch = TimeConverterUtil::ConvertToTaiMjd("A1Mjd", 
+                  epoch.Get(), GmatTimeUtil::JD_JAN_5_1941);
+            wxString taiEpochStr;
+            taiEpochStr.Printf("%9.9f", taiEpoch);
+            std::string epochString = timeConverter.Convert(taiEpochStr.c_str(), 
+                     "TAIModJulian", epochFormat);
+            epochTextCtrl->SetValue(epochString.c_str());
          }
 
          if (mCoordPanel->GetShowXyz())

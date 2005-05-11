@@ -19,6 +19,7 @@
 #include "gmatwxdefs.hpp"
 #include "GmatDialog.hpp"
 #include "CoordPanel.hpp"
+#include "TimeConverter.hpp"
 
 class CoordSysCreateDialog : public GmatDialog
 {
@@ -76,10 +77,13 @@ private:
    wxComboBox *xComboBox;
    wxComboBox *yComboBox;
    wxComboBox *zComboBox;
-
+   
+   std::string wxFormatName;
    wxString wxXString;
    wxString wxYString;
    wxString wxZString;
+
+   TimeConverter  timeConverter;
 
    bool CheckXYZ();
 };

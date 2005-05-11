@@ -20,6 +20,7 @@
 #include "GmatPanel.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordPanel.hpp"
+#include "TimeConverter.hpp"
 
 class CoordSystemConfigPanel : public GmatPanel
 {
@@ -43,6 +44,8 @@ private:
    wxComboBox *xComboBox;
    wxComboBox *yComboBox;
    wxComboBox *zComboBox;
+
+   TimeConverter  timeConverter;
 
    // methods inherited from GmatPanel
    virtual void Create();
