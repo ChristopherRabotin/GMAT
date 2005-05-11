@@ -75,7 +75,10 @@ public:
    virtual bool         SetStringParameter(const std::string &label, 
                                            const std::string &value,
                                            const Integer index);
-   
+
+   virtual const StringArray& 
+      GetRefObjectNameArray(const Gmat::ObjectType type);
+
    virtual GmatBase*    Clone() const;
    
    

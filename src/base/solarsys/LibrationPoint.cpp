@@ -600,6 +600,32 @@ bool  LibrationPoint::SetStringParameter(const std::string &label,
 }
 
 //------------------------------------------------------------------------------
+//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Returns the names of the reference object. 
+ *
+ * @param <type> reference object type.  Gmat::UnknownObject returns all of the
+ *               ref objects.
+ *
+ * @return The names of the reference object.
+ */
+//------------------------------------------------------------------------------
+const StringArray& LibrationPoint::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT)
+   {
+      static StringArray refs;
+      refs.push_back(primaryBodyName);
+      refs.push_back(secondaryBodyName);
+      return refs;
+   }
+   
+   // Not handled here -- invoke the next higher GetRefObject call
+   return CalculatedPoint::GetRefObjectNameArray(type);
+}
+
+//------------------------------------------------------------------------------
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
