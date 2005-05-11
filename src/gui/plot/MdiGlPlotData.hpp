@@ -15,7 +15,7 @@
 #ifndef MdiGlPlotData_hpp
 #define MdiGlPlotData_hpp
 
-#include "MdiParentGlFrame.hpp"
+#include "gmatwxdefs.hpp"
 #include "ColorTypes.hpp"       // for GmatColor::
 #include "RgbColor.hpp"
 #include <string>
@@ -76,7 +76,6 @@ namespace GmatPlot
 
 struct MdiGlPlot
 {
-   static MdiParentGlFrame *mdiParentGlFrame;
    static wxList mdiChildren;
    static int numChildren;
 };

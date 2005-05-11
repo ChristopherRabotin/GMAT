@@ -15,7 +15,7 @@
 #ifndef MdiXyPlotData_hpp
 #define MdiXyPlotData_hpp
 
-#include "MdiParentXyFrame.hpp"
+#include "gmatwxdefs.hpp"
 
 namespace GmatPlot
 {
@@ -36,7 +36,6 @@ namespace GmatPlot
 
 struct MdiXyPlot
 {
-    static MdiParentXyFrame *mdiParentXyFrame;
     static wxList mdiChildren;
     static int numChildren;
 };
