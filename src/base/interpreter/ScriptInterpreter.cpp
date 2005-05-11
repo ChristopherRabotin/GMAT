@@ -235,7 +235,7 @@ bool ScriptInterpreter::ReadLine(void)
 
 
 //------------------------------------------------------------------------------
-// bool Parse(void)
+// bool Parse()
 //------------------------------------------------------------------------------
 /**
  * Builds or configures GMAT objects based on the current line of script.
@@ -243,7 +243,7 @@ bool ScriptInterpreter::ReadLine(void)
  * @return true if the file parses successfully, false on failure.
  */
 //------------------------------------------------------------------------------
-bool ScriptInterpreter::Parse(void)
+bool ScriptInterpreter::Parse()
 {
     // Determine what kind of line we have
     ChunkLine();

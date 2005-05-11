@@ -1051,6 +1051,73 @@ bool Interpreter::InterpretFunctionCall()
          MessageInterface::ShowMessage("   Adding input %s\n", str->c_str());
       #endif
       cmd->SetStringParameter("AddInput", *str);
+      
+      // If the parameter does not exist, create it now
+      if (moderator->GetConfiguredItem(*str) == NULL)
+      {
+         GmatBase *parmObj;
+         std::string paramType, paramObj, parmSystem;
+
+         InterpretParameter(*str, paramType, paramObj, parmSystem);
+
+         parmObj = moderator->GetConfiguredItem(paramObj);
+         if (parmObj)
+         {
+            #ifdef DEBUG_TOKEN_PARSING
+               MessageInterface::ShowMessage(
+                  "   InterpretFunctionCall building a parameter named %s, "
+                  "with type %s and CS '%s' for object %s\n", str->c_str(),
+                  paramType.c_str(), parmSystem.c_str(),
+                  parmObj->GetName().c_str());
+            #endif
+            if (moderator->IsParameter(paramType))
+            {
+               #ifdef DEBUG_TOKEN_PARSING
+                  MessageInterface::ShowMessage("%s%s\" named \"%s\"\n",
+                     "Attempting to build parameter \"", paramType.c_str(),
+                     str->c_str());
+               #endif
+               Parameter *parm = CreateParameter(*str, paramType);
+               if (parm != NULL)
+               {
+                  //GmatBase *parmObj = FindObject(sar[0]);
+                  std::string parmtype = "Object";
+                  #ifdef DEBUG_TOKEN_PARSING
+                     MessageInterface::ShowMessage("%s%s%s%s%s%s\"\n",
+                                                   "Assigning \"",
+                                                   paramObj.c_str(),
+                                                   "\" to parameter \"",
+                                                   parm->GetName().c_str(),
+                                                   "\" with descriptor \"",
+                                                   parmtype.c_str());
+                  #endif
+                  parm->SetStringParameter(parmtype, paramObj);
+
+                  if (parm->IsCoordSysDependent())
+                  {
+                     if (parmSystem == "")
+                        parmSystem = "EarthMJ2000Eq";
+                     // Which is correct here???
+                     parm->SetStringParameter("DepObject", parmSystem);
+                     parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
+
+                  }
+
+                  if (parm->IsOriginDependent())
+                  {
+                     if (parmSystem == "")
+                        parmSystem = "Earth";
+                     parm->SetStringParameter("DepObject", parmSystem);
+                     parm->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
+                     if (parm->NeedCoordSystem())
+                        /// @todo Update coordinate system to better body parms
+                        parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
+                           "EarthMJ2000Eq");
+                  }
+               }
+            }
+         }
+      }
    }
       
    for (StringArray::iterator str = outputs.begin(); str != outputs.end();
