@@ -585,6 +585,29 @@ bool CalculatedPoint::RenameRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
+//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Returns the names of the reference object. 
+ *
+ * @param <type> reference object type.  Gmat::UnknownObject returns all of the
+ *               ref objects.
+ *
+ * @return The names of the reference object.
+ */
+//------------------------------------------------------------------------------
+const StringArray& CalculatedPoint::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT)
+   {
+      return bodyNames;
+   }
+   
+   // Not handled here -- invoke the next higher GetRefObject call
+   return SpacePoint::GetRefObjectNameArray(type);
+}
+
+//------------------------------------------------------------------------------
 // bool TakeAction(const std::string &action, const std::string &actionData)
 //------------------------------------------------------------------------------
 /**
