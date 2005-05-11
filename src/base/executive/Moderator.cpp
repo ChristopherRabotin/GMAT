@@ -37,6 +37,9 @@
 //#define DEBUG_CONFIG 1
 //#define DEBUG_FINALIZE 1
 
+//#define DEBUG_CREATE_VAR 1
+//#define DEBUG_CREATE_BURN 1
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -583,13 +586,22 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
       // add default bodies
       if (type == "LibrationPoint")
       {
+         //loj: 5/11/05 future work - It's not calculating state using DefaultBC
+         // first create default Earth-Moon Barycenter
+         //if (GetCalculatedPoint("DefaultBC") == NULL)
+         //{
+         //   CreateCalculatedPoint("Barycenter", "DefaultBC");
+         //}
+         
          cp->SetStringParameter("Primary", "Sun");
          cp->SetStringParameter("Secondary", "Earth");
          cp->SetStringParameter("Point", "L1");
+         
+         //loj: 5/11/05 future work
+         //cp->SetStringParameter("Secondary", "DefaultBC");
       }
       else if (type == "Barycenter")
       {
-         cp->SetStringParameter("BodyNames", "Sun");
          cp->SetStringParameter("BodyNames", "Earth");
          cp->SetStringParameter("BodyNames", "Luna");
       }
@@ -603,7 +615,7 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
 
          throw GmatBaseException("Error Creating CalculatedPoint: " + type);
       }
-    
+      
       // Manage it if it is a named calculated point
       try
       {
@@ -2993,10 +3005,6 @@ void Moderator::CreateDefaultMission()
       //Create default coordinate systems
       CreateDefaultCoordSystems();
       
-      // Hardware 
-      CreateHardware("FuelTank", "DefaultFuelTank");
-      CreateHardware("Thruster", "DefaultThruster");
-      
       // Spacecraft
       CreateSpacecraft("Spacecraft", "DefaultSC");
       
@@ -3011,14 +3019,19 @@ void Moderator::CreateDefaultMission()
       MessageInterface::ShowMessage("-->default PropSetup created\n");
       #endif
 
+      #ifdef DEBUG_CREATE_BURN
+      // Hardware 
+      CreateHardware("FuelTank", "DefaultFuelTank");
+      CreateHardware("Thruster", "DefaultThruster");
       // Burn
       GetDefaultBurn();
+      #endif
       
       // Time parameters
       CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD");
       CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
       CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");
-
+      
       // Cartesian parameters
       CreateParameter("X", "DefaultSC.EarthMJ2000Eq.X");
       CreateParameter("Y", "DefaultSC.EarthMJ2000Eq.Y");
@@ -3026,7 +3039,7 @@ void Moderator::CreateDefaultMission()
       CreateParameter("VX", "DefaultSC.EarthMJ2000Eq.VX");
       CreateParameter("VY", "DefaultSC.EarthMJ2000Eq.VY");
       CreateParameter("VZ", "DefaultSC.EarthMJ2000Eq.VZ");
-
+      
       // Keplerian parameters
       CreateParameter("SMA", "DefaultSC.Earth.SMA");
       CreateParameter("ECC", "DefaultSC.Earth.ECC");
@@ -3036,7 +3049,7 @@ void Moderator::CreateDefaultMission()
       CreateParameter("TA", "DefaultSC.Earth.TA");
       CreateParameter("MA", "DefaultSC.Earth.MA");
       CreateParameter("MM", "DefaultSC.Earth.MM");
-
+      
       // Orbital parameters
       CreateParameter("VelApoapsis", "DefaultSC.Earth.VelApoapsis");
       CreateParameter("VelPeriapsis", "DefaultSC.Earth.VelPeriapsis");
@@ -3048,7 +3061,7 @@ void Moderator::CreateDefaultMission()
       CreateParameter("C3Energy", "DefaultSC.Earth.C3Energy");
       CreateParameter("Energy", "DefaultSC.Earth.Energy");
       CreateParameter("Altitude", "DefaultSC.Earth.Altitude");
-
+      
       // Spherical parameters
       CreateParameter("RMAG", "DefaultSC.Earth.RMAG");
       CreateParameter("RA", "DefaultSC.Earth.RA");
@@ -3074,10 +3087,12 @@ void Moderator::CreateDefaultMission()
       CreateParameter("LST", "DefaultSC.Earth.LST");
       CreateParameter("BetaAngle", "DefaultSC.BetaAngle");
       
+      #ifdef DEBUG_CREATE_VAR
       // User variable
       Parameter *var = CreateParameter("Variable", "DefaultSC_EarthMJ2000Eq_Xx2");
       var->SetStringParameter("Expression", "DefaultSC.EarthMJ2000Eq.X * 2.0");
       var->SetRefObjectName(Gmat::PARAMETER, "DefaultSC.EarthMJ2000Eq.X");
+      #endif
       
       #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->default parameters created\n");
@@ -3126,7 +3141,7 @@ void Moderator::CreateDefaultMission()
       
       // Subscribers
       // ReportFile
-      GetDefaultSubscriber();
+      //GetDefaultSubscriber();
       
       // OpenGLPlot
       Subscriber *sub;
@@ -3141,18 +3156,18 @@ void Moderator::CreateDefaultMission()
          
       sub->Activate(true);
       
+      #if DEBUG_ACTION_REMOVE
       // XYPlot
       sub = CreateSubscriber("XYPlot", "DefaultXYPlot");
       sub->SetStringParameter("IndVar", "DefaultSC.CurrA1MJD");
       sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.X", 0);
       
-      #if DEBUG_ACTION_REMOVE
       sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Y", 1);
       sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Z", 2);
       sub->TakeAction("Remove", "DefaultSC.EarthMJ2000Eq.Y");
+      sub->Activate(true);
       #endif
       
-      sub->Activate(true);
       
       #if DEBUG_DEFAULT_MISSION
          MessageInterface::ShowMessage("-->default Subscribers created\n");
