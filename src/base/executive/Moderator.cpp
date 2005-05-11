@@ -2704,19 +2704,12 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
       status = theScriptInterpreter->Interpret(scriptFileName);
       if (status)
       {
-         StringArray csNames =
-            theConfigManager->GetListOfItems(Gmat::COORDINATE_SYSTEM);
-
-         if (csNames.size() == 0)
-         {
-            #if DEBUG_RUN
-            MessageInterface::ShowMessage
-               ("Moderator::InterpretScript() creating Default Coordinate "
-                "System...\n");
-            #endif
-
-            CreateDefaultCoordSystems();
-         }
+         #if DEBUG_RUN
+         MessageInterface::ShowMessage
+             ("Moderator::InterpretScript() creating Default Coordinate "
+              "System...\n");
+         #endif
+         CreateDefaultCoordSystems();
 
          MessageInterface::ShowMessage
             ("Moderator::InterpretScript() successfully interpreted the script\n");
@@ -2766,19 +2759,12 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
       status = theScriptInterpreter->Interpret();
       if (status)
       {
-         StringArray csNames =
-            theConfigManager->GetListOfItems(Gmat::COORDINATE_SYSTEM);
-
-         if (csNames.size() == 0)
-         {
-            #if DEBUG_RUN
-            MessageInterface::ShowMessage
-               ("Moderator::InterpretScript(ss) creating Default Coordinate "
-                "System...\n");
-            #endif
-
-            CreateDefaultCoordSystems();
-         }
+         #if DEBUG_RUN
+         MessageInterface::ShowMessage
+            ("Moderator::InterpretScript(ss) creating Default Coordinate "
+             "System...\n");
+         #endif
+         CreateDefaultCoordSystems();
 
          MessageInterface::ShowMessage
             ("Moderator::InterpretScript() successfully interpreted the script\n");
@@ -2937,25 +2923,34 @@ void Moderator::CreateDefaultCoordSystems()
 
    try
    {
+      StringArray csNames =
+            theConfigManager->GetListOfItems(Gmat::COORDINATE_SYSTEM);
       // EarthMJ2000Eq
-      CreateCoordinateSystem("EarthMJ2000Eq", true);
+      if (find(csNames.begin(), csNames.end(), "EarthMJ2000Eq") == csNames.end())
+         CreateCoordinateSystem("EarthMJ2000Eq", true);
       
       // EarthMJ2000Ec
-      CoordinateSystem *eccs = CreateCoordinateSystem("EarthMJ2000Ec", false);
-      AxisSystem *ecAxis = CreateAxisSystem("MJ2000Ec", "EarthMJ2000Ec");
-      eccs->SetStringParameter("Origin", "Earth");
-      eccs->SetStringParameter("J2000Body", "Earth");
-      eccs->SetRefObject(ecAxis, Gmat::AXIS_SYSTEM, ecAxis->GetName());
+      if (find(csNames.begin(), csNames.end(), "EarthMJ2000Ec") == csNames.end())
+      {
+         CoordinateSystem *eccs = CreateCoordinateSystem("EarthMJ2000Ec", false);
+         AxisSystem *ecAxis = CreateAxisSystem("MJ2000Ec", "EarthMJ2000Ec");
+         eccs->SetStringParameter("Origin", "Earth");
+         eccs->SetStringParameter("J2000Body", "Earth");
+         eccs->SetRefObject(ecAxis, Gmat::AXIS_SYSTEM, ecAxis->GetName());
+      }
 
       // EarthFixed
-      CoordinateSystem *bfcs = CreateCoordinateSystem("EarthFixed", false);
-      BodyFixedAxes *bfecAxis =
-         (BodyFixedAxes*)CreateAxisSystem("BodyFixed", "EarthFixed");
-      bfecAxis->SetEopFile(theEopFile);
-      bfecAxis->SetCoefficientsFile(theItrfFile);
-      bfcs->SetStringParameter("Origin", "Earth");
-      bfcs->SetStringParameter("J2000Body", "Earth");
-      bfcs->SetRefObject(bfecAxis, Gmat::AXIS_SYSTEM, bfecAxis->GetName());
+      if (find(csNames.begin(), csNames.end(), "EarthFixed") == csNames.end())
+      {
+         CoordinateSystem *bfcs = CreateCoordinateSystem("EarthFixed", false);
+         BodyFixedAxes *bfecAxis =
+            (BodyFixedAxes*)CreateAxisSystem("BodyFixed", "EarthFixed");
+         bfecAxis->SetEopFile(theEopFile);
+         bfecAxis->SetCoefficientsFile(theItrfFile);
+         bfcs->SetStringParameter("Origin", "Earth");
+         bfcs->SetStringParameter("J2000Body", "Earth");
+         bfcs->SetRefObject(bfecAxis, Gmat::AXIS_SYSTEM, bfecAxis->GetName());
+      }
    }
    catch (BaseException &e)
    {
