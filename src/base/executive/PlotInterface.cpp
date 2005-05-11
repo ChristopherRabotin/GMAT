@@ -24,11 +24,11 @@
 #include "GmatAppData.hpp"
 #include <wx/settings.h>    // for wxSYS_SCREEN_Y
 // for OpenGL plot
-#include "MdiParentGlFrame.hpp"
+//#include "MdiParentGlFrame.hpp"
 #include "MdiGlPlotData.hpp"
 #include "MdiChildTrajFrame.hpp"
 // for XY plot
-#include "MdiParentXyFrame.hpp"
+//#include "MdiParentXyFrame.hpp"
 #include "MdiXyPlotData.hpp"
 #include "MdiChildXyFrame.hpp"
 
