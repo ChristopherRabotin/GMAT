@@ -22,7 +22,8 @@
 #include "LibrationPointPanel.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_LIBRATIONPOINT_PANEL 1
+//#define DEBUG_LIBRATIONPOINT_PANEL 1
+
 //------------------------------
 // event tables for wxWindows
 //------------------------------
