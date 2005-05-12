@@ -14,8 +14,6 @@
 
 // gui includes
 #include "gmatwxdefs.hpp"
-#include <string.h>
-#include <wx/variant.h>
 #include "GmatAppData.hpp"
 #include "CelesBodySelectDialog.hpp"
 #include "ExponentialDragDialog.hpp"
@@ -26,6 +24,15 @@
 // base includes
 #include "MessageInterface.hpp"
 #include "PropagatorException.hpp"
+#include "StringTokenizer.hpp"
+
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <iomanip>
+
+//#include <string.h>
+//#include <wx/variant.h>
 
 //#define DEBUG_PROP_PANEL_SETUP 1
 //#define DEBUG_PROP_PANEL 1
@@ -273,21 +280,18 @@ void PropagationConfigPanel::SaveData()
          {                  
             if (forceList[i]->gravType == gravModelArray[JGM2])
             {
-               potFilename = theGuiInterpreter->GetPotentialFileName("JGM2");
+               forceList[i]->potFilename = theGuiInterpreter->GetPotentialFileName("JGM2");
             }
             else if (forceList[i]->gravType == gravModelArray[JGM3])
             {
-               potFilename = theGuiInterpreter->GetPotentialFileName("JGM3");
+               forceList[i]->potFilename = theGuiInterpreter->GetPotentialFileName("JGM3");
             }
-            else
-            {
-               potFilename = std::string(potFileTextCtrl->GetValue().c_str());
-               
-               if (isPotFileChanged)
-                  isPotFileChanged = false;
-            }
+         
+            if (isPotFileChanged)
+               isPotFileChanged = false;
             
             theGravForce = new GravityField("", forceList[i]->bodyName); 
+            
             if (isGravTextChanged)
             {                     
                Integer deg = atoi(forceList[i]->gravDegree.c_str());
@@ -308,7 +312,7 @@ void PropagationConfigPanel::SaveData()
                theGravForce->SetIntegerParameter
                   ("Order",  atoi(forceList[i]->gravOrder.c_str()));
             }                
-            theGravForce->SetStringParameter("Filename", potFilename);
+            theGravForce->SetStringParameter("Filename", forceList[i]->potFilename);
 
             forceList[i]->gravf = theGravForce;
             newFm->AddForce(theGravForce);
@@ -499,7 +503,7 @@ void PropagationConfigPanel::Initialize()
          {            
             theGravForce = (GravityField*)force;
             bodyName = theGravForce->GetStringParameter("BodyName");
-            potFilename = theGravForce->GetStringParameter("Filename");                 
+            std::string potFilename = theGravForce->GetStringParameter("Filename");                 
             
             GravModelType gravModelType;
             if (potFilename.find("JGM2") != std::string::npos)
@@ -513,6 +517,13 @@ void PropagationConfigPanel::Initialize()
             forceList[currentBodyId]->bodyName = bodyName;
             forceList[currentBodyId]->gravType = gravModelArray[gravModelType];
             forceList[currentBodyId]->gravf = theGravForce;
+            forceList[currentBodyId]->potFilename = potFilename;
+            
+            if (forceList[currentBodyId]->potFilename == "")
+            {
+               MessageInterface::PopupMessage
+               (Gmat::WARNING_, "Cannot Find Gravity Field File."); 
+            }
             
             tempStr = "";
             tempStr << theGravForce->GetIntegerParameter("Degree");
@@ -522,15 +533,6 @@ void PropagationConfigPanel::Initialize()
             tempStr << theGravForce->GetIntegerParameter("Order");
             forceList[currentBodyId]->gravOrder = tempStr;
    
-            if (gravModelType == OTHER)
-            {
-               if (potFilename == "")
-                  MessageInterface::PopupMessage
-                  (Gmat::WARNING_, "Potential Filename Not Found");
-               else
-                  forceList[currentBodyId]->potFilename = potFilename;
-            }  
-
             bool found = false;
             for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
             {
@@ -1191,6 +1193,8 @@ void PropagationConfigPanel::DisplayGravityFieldData()
          gravComboBox->SetSelection(JGM2);
       else
          gravComboBox->SetSelection(JGM3);
+         
+      potFileTextCtrl->SetValue("");
    }
    else if (forceList[currentBodyId]->gravType == gravModelArray[OTHER])
    {
@@ -1203,11 +1207,14 @@ void PropagationConfigPanel::DisplayGravityFieldData()
    else if (forceList[currentBodyId]->gravType == gravModelArray[NONE_GM])
    {
       gravComboBox->SetSelection(NONE_GM);
+      
+      potFileTextCtrl->SetValue("");
+      gravityDegreeTextCtrl->SetValue("");
+      gravityOrderTextCtrl->SetValue("");
+      
       gravityDegreeTextCtrl->Enable(false);
       gravityOrderTextCtrl->Enable(false);
    }
-
-   //isGravTextChanged = false;
 }
 
 //------------------------------------------------------------------------------
@@ -1274,6 +1281,31 @@ void PropagationConfigPanel::DisplaySRPData()
 {
    srpCheckBox->SetValue(forceList[currentBodyId]->useSrp);
 }
+
+//------------------------------------------------------------------------------
+// bool ParseGravityFile(std::string line)
+//------------------------------------------------------------------------------
+bool PropagationConfigPanel::ParseGravityFile(std::string line)
+{
+   StringTokenizer stringToken(line," ");
+   
+   Integer count = stringToken.CountTokens();
+   
+   std::string tempString = "";
+   
+   for (Integer i = 0; i < count; i++)
+   {
+      tempString = stringToken.GetToken(i);
+      
+      if (strcmp(tempString.c_str(), "POTFIELD") == 0)
+      {
+         forceList[currentBodyId]->gravDegree = stringToken.GetToken(i+1).c_str();
+         forceList[currentBodyId]->gravOrder = stringToken.GetToken(i+2).c_str();
+         return true;
+      }    
+   }  
+   return false;  
+} 
 
 //------------------------------------------------------------------------------
 // void OnIntegratorSelection()
@@ -1579,12 +1611,34 @@ void PropagationConfigPanel::OnGravSearchButton()
       wxString filename;
         
       filename = dialog.GetPath();
-        
-      potFileTextCtrl->SetValue(filename);
-      potFilename = std::string(filename.c_str());
+      
+      std::ifstream instream;
+      instream.open(filename.c_str());
+      
+      bool done = false;
+      
+      if (instream == NULL)
+      {
+         MessageInterface::PopupMessage
+         (Gmat::WARNING_, "Gravity field file can not be opened.\n");
+         return;
+      }    
+      else
+      {
+         while (!done)
+         {
+            std::string line;
+            getline(instream,line);
+            done = ParseGravityFile(line);
+         }
+         instream.close();
+      }    
 
       gravityDegreeTextCtrl->SetValue(forceList[currentBodyId]->gravDegree.c_str());
       gravityOrderTextCtrl->SetValue(forceList[currentBodyId]->gravOrder.c_str());
+      
+      potFileTextCtrl->SetValue(filename);
+      forceList[currentBodyId]->potFilename = std::string(filename.c_str());
       
       gravityDegreeTextCtrl->Enable(true);
       gravityOrderTextCtrl->Enable(true);
@@ -1877,5 +1931,4 @@ void PropagationConfigPanel::ShowForceList(const std::string &header)
    }
    MessageInterface::ShowMessage("============================================\n");
 #endif
-}
-
+}   

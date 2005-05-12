@@ -164,7 +164,6 @@ private:
    std::string currentBodyName;
    std::string gravTypeName;
    std::string dragTypeName;
-   std::string potFilename;
    
    StringArray gravModelArray;
    StringArray dragModelArray;
@@ -223,6 +222,7 @@ private:
    void DisplayPointMassData();
    void DisplayMagneticFieldData();
    void DisplaySRPData();
+   bool ParseGravityFile(std::string line);
     
    // Text control event method
    void OnIntegratorTextUpdate();
