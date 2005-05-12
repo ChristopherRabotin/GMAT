@@ -51,7 +51,10 @@ public:
    virtual Real SetRealParameter(const std::string &label,
                                  const Real value, const Integer row,
                                  const Integer col);
-   
+   virtual const std::string& GetGeneratingString(Gmat::WriteMode mode,
+                                                  const std::string &prefix,
+                                                  const std::string &useName);
+
    virtual Rvector GetRvectorParameter(const Integer id,
                                        const Integer index) const;
    virtual const Rvector& SetRvectorParameter(const Integer id,

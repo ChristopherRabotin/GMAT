@@ -230,6 +230,64 @@ Real Array::SetRealParameter(const std::string &label, const Real value,
    return SetRealParameter(GetParameterID(label), value, row, col);
 }
 
+//------------------------------------------------------------------------------
+// StringArray GetGeneratingString(Gmat::WriteMode mode,
+//                const std::string &prefix, const std::string &useName)
+//------------------------------------------------------------------------------
+/**
+ * Produces a string, possibly multi-line, containing the text that produces an
+ * object.
+ * 
+ * @param mode Specifies the type of serialization requested.
+ * @param prefix Optional prefix appended to the object's name
+ * @param useName Name that replaces the object's name.
+ * 
+ * @return A string containing the text.
+ */
+//------------------------------------------------------------------------------
+const std::string& Array::GetGeneratingString(Gmat::WriteMode mode,
+                                              const std::string &prefix,
+                                              const std::string &useName)
+{
+   std::stringstream data;
+
+   data.precision(18);   // Crank up data precision so we don't lose anything
+   std::string preface = "", nomme;
+   
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
+       (mode == Gmat::SHOW_SCRIPT))
+      inMatlabMode = false;
+   if (mode == Gmat::MATLAB_STRUCT)
+      inMatlabMode = true;
+   
+   if (useName != "")
+      nomme = useName;
+   else
+      nomme = instanceName;
+   
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT))
+   {
+      std::string tname = typeName;
+      data << "Create " << tname << " " << nomme 
+           << "[" << mNumRows << ", " << mNumCols << "];\n";
+      preface = "GMAT ";
+   }
+   
+   nomme += ".";
+   
+   if (mode == Gmat::OWNED_OBJECT) {
+      preface = prefix;
+      nomme = "";
+   }
+   
+   preface += nomme;
+   WriteParameters(mode, preface, data);
+   
+   generatingString = data.str();
+   return generatingString;
+}
+
+
 //----- Rvector parameter
 
 //------------------------------------------------------------------------------
@@ -448,7 +506,7 @@ std::string Array::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool Array::IsParameterReadOnly(const Integer id) const
 {
-   if (id == SINGLE_VALUE)
+   if ((id == NUM_ROWS) || (id == NUM_COLS) || (id == SINGLE_VALUE))
       return true;
 
    return Parameter::IsParameterReadOnly(id);
