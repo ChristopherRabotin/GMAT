@@ -175,6 +175,15 @@ const Rvector3 Barycenter::GetMJ2000Velocity(const A1Mjd &atTime)
    return (tmp.GetV());
 }
 
+Real Barycenter::GetMass() 
+{
+   Real     sumMass  = 0.0;
+   for (unsigned int i = 0; i < bodyList.size() ; i++)
+   {
+      sumMass    += ((CelestialBody*) (bodyList.at(i)))->GetMass();
+   }
+   return sumMass;
+}
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const

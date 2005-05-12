@@ -54,6 +54,8 @@ public:
    virtual const Rvector3           GetMJ2000Position(const A1Mjd &atTime);
    virtual const Rvector3           GetMJ2000Velocity(const A1Mjd &atTime);   
    
+   virtual Real                     GetMass();
+
    // Parameter access methods - overridden from GmatBase
    /*
    virtual std::string  GetParameterText(const Integer id) const;
