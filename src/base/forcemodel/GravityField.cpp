@@ -601,6 +601,17 @@ std::string GravityField::GetParameterTypeString(const Integer id) const
    return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];   
 }
 
+
+
+// All read only for now except degree and order
+bool GravityField::IsParameterReadOnly(const Integer id) const
+{
+   if ((id == DEGREE) || (id == ORDER))
+      return false;
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------

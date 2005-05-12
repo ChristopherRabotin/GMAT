@@ -243,6 +243,16 @@ void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
     
     pPhysicalModel->SetDimension(dimension);
     initialized = false;
+    
+    // Handle the name issues
+    std::string pmType = pPhysicalModel->GetTypeName();
+//    if ((pmType == "GravityField") || (pmType == "PointMassForce"))
+//       pPhysicalModel->SetName("Gravity." +
+//          pPhysicalModel->GetStringParameter("BodyName"));
+
+    if (pmType == "DragForce")
+       pPhysicalModel->SetName("Drag");
+
 
     forceList.push_back(pPhysicalModel);
     numForces = forceList.size();
@@ -648,6 +658,21 @@ bool ForceModel::Initialize(void)
    }
 
    return true;
+}
+
+
+Integer ForceModel::GetOwnedObjectCount()
+{
+   return numForces;
+}
+
+
+GmatBase* ForceModel::GetOwnedObject(Integer whichOne)
+{
+   if (whichOne < numForces)
+      return GetForce(whichOne);
+      
+   return NULL;
 }
 
 
@@ -1415,4 +1440,191 @@ ObjectArray& ForceModel::GetRefObjectArray(const std::string& typeString)
       }
    }
    return objects;
+}
+
+
+
+//------------------------------------------------------------------------------
+// StringArray GetGeneratingString(Gmat::WriteMode mode,
+//                const std::string &prefix, const std::string &useName)
+//------------------------------------------------------------------------------
+/**
+ * Produces a string, possibly multi-line, containing the text that produces an
+ * object.
+ *
+ * @param mode Specifies the type of serialization requested.
+ * @param prefix Optional prefix appended to the object's name
+ * @param useName Name that replaces the object's name.
+ *
+ * @return A string containing the text.
+ *
+ * @note Temporarily (?) put this code here to facilitate writing force model
+ *       parms prior to 5/25/05 demo
+ */
+//------------------------------------------------------------------------------
+const std::string& ForceModel::GetGeneratingString(Gmat::WriteMode mode,
+                                                   const std::string &prefix,
+                                                   const std::string &useName)
+{
+   std::stringstream data;
+
+   data.precision(18);   // Crank up data precision so we don't lose anything
+   std::string preface = "", nomme;
+
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
+       (mode == Gmat::SHOW_SCRIPT))
+      inMatlabMode = false;
+   if (mode == Gmat::MATLAB_STRUCT)
+      inMatlabMode = true;
+
+   if (useName != "")
+      nomme = useName;
+   else
+      nomme = instanceName;
+
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT))
+   {
+      std::string tname = typeName;
+      if (tname == "PropSetup")
+         tname = "Propagator";
+      data << "Create " << tname << " " << nomme << ";\n";
+      preface = "GMAT ";
+   }
+
+   nomme += ".";
+
+   if (mode == Gmat::OWNED_OBJECT) {
+      preface = prefix;
+      nomme = "";
+   }
+
+   preface += nomme;
+   WriteFMParameters(mode, preface, data);
+
+   generatingString = data.str();
+   return generatingString;
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteFMParameters(std::string &prefix, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Code that writes the parameter details for an object.
+ *
+ * @param prefix Starting portion of the script string used for the parameter.
+ * @param obj The object that is written.
+ *
+ * @note Temporarily (?) put this code here to facilitate writing force model
+ *       parms prior to 5/25/05 demo
+ */
+//------------------------------------------------------------------------------
+void ForceModel::WriteFMParameters(Gmat::WriteMode mode, std::string &prefix,
+                                   std::stringstream &stream)
+{
+   Integer i;
+   Gmat::ParameterType parmType;
+   std::stringstream value;
+   value.precision(18);
+
+   for (i = 0; i < parameterCount; ++i)
+   {
+      if (IsParameterReadOnly(i) == false)
+      {
+         parmType = GetParameterType(i);
+         // Handle StringArray parameters separately
+         if (parmType != Gmat::STRINGARRAY_TYPE)
+         {
+            // Skip unhandled types
+            if (
+                (parmType != Gmat::UNSIGNED_INTARRAY_TYPE) &&
+                (parmType != Gmat::RVECTOR_TYPE) &&
+                (parmType != Gmat::RMATRIX_TYPE) &&
+//                (parmType != Gmat::OBJECT_TYPE) &&
+                (parmType != Gmat::UNKNOWN_PARAMETER_TYPE)
+               )
+            {
+               // Fill in the l.h.s.
+               value.str("");
+               WriteParameterValue(i, value);
+               if (value.str() != "")
+                  stream << prefix << GetParameterText(i)
+                         << " = " << value.str() << ";\n";
+            }
+         }
+         else
+         {
+            // Handle StringArrays
+            StringArray sar = GetStringArrayParameter(i);
+            if (sar.size() > 0)
+            {
+               stream << prefix << GetParameterText(i) << " = {";
+               for (StringArray::iterator n = sar.begin(); n != sar.end(); ++n)
+               {
+                  if (n != sar.begin())
+                     stream << ", ";
+                  if (inMatlabMode)
+                     stream << "'";
+                  stream << (*n);
+                  if (inMatlabMode)
+                     stream << "'";
+               }
+               stream << "};\n";
+            }
+         }
+      }
+   }
+
+   GmatBase *ownedObject;
+   std::string nomme, newprefix;
+
+   #ifdef DEBUG_OWNED_OBJECT_STRINGS
+      MessageInterface::ShowMessage("\"%s\" has %d owned objects\n",
+         instanceName.c_str(), GetOwnedObjectCount());
+   #endif
+
+   for (i = 0; i < GetOwnedObjectCount(); ++i)
+   {
+      newprefix = prefix;
+      ownedObject = GetOwnedObject(i);
+      if ((ownedObject != NULL) &&
+          (ownedObject->GetTypeName() != "SolarRadiationPressure"))
+      {
+         nomme = BuildForceNameString((PhysicalModel*)ownedObject);
+
+         #ifdef DEBUG_OWNED_OBJECT_STRINGS
+             MessageInterface::ShowMessage(
+                "   id %d has type %s and name \"%s\"\n",
+                i, ownedObject->GetTypeName().c_str(),
+                nomme.c_str());
+         #endif
+
+         if (nomme != "")
+            newprefix += nomme + ".";
+         else if (GetType() == Gmat::FORCE_MODEL)
+            newprefix += ownedObject->GetTypeName();
+         stream << ownedObject->GetGeneratingString(Gmat::OWNED_OBJECT, newprefix);
+      }
+      else
+         MessageInterface::ShowMessage("Cannot access force %d\n", i);
+   }
+}
+
+
+std::string ForceModel::BuildForceNameString(PhysicalModel *force)
+{
+   std::string retval = "UnknownForce", forceType = force->GetTypeName();
+   
+   if (forceType == "DragForce")
+      retval = "Drag";
+   if (forceType == "GravityField")
+      retval = "Gravity." + force->GetStringParameter("BodyName");
+   if (forceType == "PointMassForce")
+      retval = force->GetStringParameter("BodyName");
+   if (forceType == "SolarRadiationPressure")
+      retval = force->GetStringParameter("SRP");
+
+   // Add others here
+      
+   return retval;
 }

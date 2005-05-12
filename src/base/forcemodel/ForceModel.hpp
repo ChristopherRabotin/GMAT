@@ -129,6 +129,13 @@ public:
 //    virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
     virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
     
+    virtual Integer     GetOwnedObjectCount();
+    virtual GmatBase*   GetOwnedObject(Integer whichOne);
+
+    virtual const std::string&
+                        GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                                            const std::string &prefix = "",
+                                            const std::string &useName = "");
     void                UpdateInitialData();
 
 protected:
@@ -159,6 +166,11 @@ protected:
     virtual Integer           SetupSpacecraftData(GmatBase *sat, 
                                                   PhysicalModel *pm, Integer i);
     void                      UpdateTransientForces();
+
+    void                      WriteFMParameters(Gmat::WriteMode mode,
+                                                std::string &prefix,
+                                                std::stringstream &stream);
+    std::string               BuildForceNameString(PhysicalModel *force);
 
     enum
     {

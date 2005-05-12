@@ -227,6 +227,7 @@ GmatBase* SolarRadiationPressure::Clone(void) const
 //------------------------------------------------------------------------------
 std::string SolarRadiationPressure::GetParameterText(const Integer id) const
 {
+MessageInterface::ShowMessage("SRP index %d\n", id);
    if (id >= USE_ANALYTIC && id < SRPParamCount)
       return SolarRadiationPressure::PARAMETER_TEXT[id - PhysicalModelParamCount];
    else
@@ -279,6 +280,14 @@ std::string SolarRadiationPressure::GetParameterTypeString(const Integer id) con
     else
       return PhysicalModel::GetParameterTypeString(id);
 }
+
+
+// All read only for now
+bool SolarRadiationPressure::IsParameterReadOnly(const Integer id) const
+{
+   return true;
+}
+
 
 //------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id) const

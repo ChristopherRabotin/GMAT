@@ -555,6 +555,14 @@ std::string PointMassForce::GetParameterTypeString(const Integer id) const
    return PhysicalModel::GetParameterTypeString(id);
 }
 
+
+// All read only for now
+bool PointMassForce::IsParameterReadOnly(const Integer id) const
+{
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 // Real PointMassForce::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
