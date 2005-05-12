@@ -153,6 +153,17 @@ GmatCoordinate::ParameterUsage TOEEqAxes::UsesEpoch() const
    return GmatCoordinate::REQUIRED;
 }
 
+GmatCoordinate::ParameterUsage TOEEqAxes::UsesEopFile() const
+{
+   return GmatCoordinate::REQUIRED;
+}
+
+GmatCoordinate::ParameterUsage TOEEqAxes::UsesItrfFile() const
+{
+   return GmatCoordinate::REQUIRED;
+}
+
+
 
 //------------------------------------------------------------------------------
 // public methods inherited from GmatBase

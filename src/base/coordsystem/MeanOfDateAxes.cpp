@@ -114,6 +114,16 @@ bool MeanOfDateAxes::Initialize()
    return DynamicAxes::Initialize();
 }
 
+GmatCoordinate::ParameterUsage MeanOfDateAxes::UsesEopFile() const
+{
+   return GmatCoordinate::REQUIRED;
+}
+
+GmatCoordinate::ParameterUsage MeanOfDateAxes::UsesItrfFile() const
+{
+   return GmatCoordinate::REQUIRED;
+}
+
 
 //------------------------------------------------------------------------------
 // public methods inherited from GmatBase

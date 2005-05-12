@@ -43,6 +43,10 @@ public:
    
    // initializes the MeanOfDateAxes
    virtual bool Initialize(); 
+
+   virtual GmatCoordinate::ParameterUsage UsesEopFile() const;
+   virtual GmatCoordinate::ParameterUsage UsesItrfFile() const;
+
 protected:
 
    enum

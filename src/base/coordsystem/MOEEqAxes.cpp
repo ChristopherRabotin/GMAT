@@ -147,6 +147,17 @@ GmatCoordinate::ParameterUsage MOEEqAxes::UsesEpoch() const
    return GmatCoordinate::REQUIRED;
 }
 
+GmatCoordinate::ParameterUsage MOEEqAxes::UsesEopFile() const
+{
+   return GmatCoordinate::REQUIRED;
+}
+
+GmatCoordinate::ParameterUsage MOEEqAxes::UsesItrfFile() const
+{
+   return GmatCoordinate::REQUIRED;
+}
+
+
 
 //------------------------------------------------------------------------------
 // public methods inherited from GmatBase

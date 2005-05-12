@@ -114,6 +114,17 @@ bool TrueOfDateAxes::Initialize()
    return DynamicAxes::Initialize();
 }
 
+GmatCoordinate::ParameterUsage TrueOfDateAxes::UsesEopFile() const
+{
+   return GmatCoordinate::REQUIRED;
+}
+
+GmatCoordinate::ParameterUsage TrueOfDateAxes::UsesItrfFile() const
+{
+   return GmatCoordinate::REQUIRED;
+}
+
+
 
 //------------------------------------------------------------------------------
 // public methods inherited from GmatBase
