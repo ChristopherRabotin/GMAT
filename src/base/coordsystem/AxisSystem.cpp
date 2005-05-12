@@ -497,6 +497,13 @@ std::string AxisSystem::GetParameterTypeString(const Integer id) const
 }
 
 
+bool AxisSystem::IsParameterReadOnly(const Integer id) const
+{
+   if ((id == ORIGIN_NAME) || (id == J2000_BODY_NAME))
+      return true;
+   return CoordinateBase::IsParameterReadOnly(id);
+}
+
 //------------------------------------------------------------------------------
 //  Real  GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
