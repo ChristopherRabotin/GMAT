@@ -1326,27 +1326,32 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index)
    #endif
    
    bool status = false;
-      
-   if (name != "" && index == mAllSpCount)
-   {
-      mAllSpNameArray.push_back(name);
-      mAllSpArray.push_back(NULL);
-      mAllSpCount = mAllSpNameArray.size();
-      
-      if (mAllSpCount < MAX_SP_COLOR)
-      {
-         mOrbitColorMap[name] = DEFAULT_ORBIT_COLOR[mAllSpCount-1];
-         mTargetColorMap[name] = GmatColor::TEAL32;
-      }
-      else
-      {
-         mOrbitColorMap[name] = GmatColor::RED32;
-         mTargetColorMap[name] = GmatColor::TEAL32;
-      }
-      
-      status = true;
-   }
 
+   // if name not in the list, add
+   if (find(mAllSpNameArray.begin(), mAllSpNameArray.end(), name) == mAllSpNameArray.end())
+   {
+
+      if (name != "" && index == mAllSpCount)
+      {
+         mAllSpNameArray.push_back(name);
+         mAllSpArray.push_back(NULL);
+         mAllSpCount = mAllSpNameArray.size();
+      
+         if (mAllSpCount < MAX_SP_COLOR)
+         {
+            mOrbitColorMap[name] = DEFAULT_ORBIT_COLOR[mAllSpCount-1];
+            mTargetColorMap[name] = GmatColor::TEAL32;
+         }
+         else
+         {
+            mOrbitColorMap[name] = GmatColor::RED32;
+            mTargetColorMap[name] = GmatColor::TEAL32;
+         }
+      
+         status = true;
+      }
+   }
+   
    #if DEBUG_OPENGL_ADD   
    std::string objName;
    for (int i=0; i<mAllSpCount; i++)
