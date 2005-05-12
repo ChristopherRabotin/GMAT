@@ -144,18 +144,14 @@ LibrationPoint::~LibrationPoint()
 const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
 {
    CheckBodies();
-   cout << "*** Bodies checked out OK ........" << endl;
    // Compute position and velocity from primary to secondary
    Rvector6 primaryState = primaryBody->GetMJ2000State(atTime);
    Rvector6 pToS = (secondaryBody->GetMJ2000State(atTime)) -
                    primaryState;
-   cout << "*** posvel of primary = " << primaryState << endl;
-   cout << "*** posvel of secondary (bary1) = " << pToS << endl;
    Rvector3 r    = pToS.GetR();
    Rvector3 v    = pToS.GetV();
    Rvector3 a    = (secondaryBody->GetMJ2000Acceleration(atTime)) -
                    (primaryBody->GetMJ2000Acceleration(atTime));
-   cout << "*** a = " << a << endl;
    
    Real     massPrimary, massSecondary;
    if ((primaryBody->GetType()) == Gmat::CELESTIAL_BODY)
