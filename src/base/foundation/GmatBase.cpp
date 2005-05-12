@@ -40,6 +40,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_OBJECT_TYPE_CHECKING
+//#define DEBUG_OWNED_OBJECT_STRINGS
 
 
 /// Set the static "undefined" parameters
@@ -613,7 +614,7 @@ Integer GmatBase::GetOwnedObjectCount()
 
 
 //---------------------------------------------------------------------------
-//  static Integer GetInstanceCount()
+//  GmatBase* GetOwnedObject(Integer whichOne)
 //---------------------------------------------------------------------------
 /**
  * Access GmatBase objects belonging to this instance.
@@ -629,8 +630,11 @@ Integer GmatBase::GetOwnedObjectCount()
  * The input parameter to GetOwnedObject an integer that identifies which owned
  * object is requested.
  * 
+ * @param <whichOne> The index for this owned object.
+ *
  * @return Pointer to the owned object.
  */
+//---------------------------------------------------------------------------
 GmatBase* GmatBase::GetOwnedObject(Integer whichOne)
 {
    throw GmatBaseException("No owned objects for this instance\n");
@@ -2179,10 +2183,11 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
 {
    std::stringstream data;
 
-   data.precision(18);   // Crank up the data precision so we don't use anything
+   data.precision(18);   // Crank up data precision so we don't lose anything
    std::string preface = "", nomme;
    
-   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT))
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
+       (mode == Gmat::SHOW_SCRIPT))
       inMatlabMode = false;
    if (mode == Gmat::MATLAB_STRUCT)
       inMatlabMode = true;
@@ -2273,7 +2278,8 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
 {
    Integer i;
    Gmat::ParameterType parmType;
-    
+   std::stringstream value;
+
    for (i = 0; i < parameterCount; ++i)
    {
       if (IsParameterReadOnly(i) == false)
@@ -2292,43 +2298,62 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                )
             {
                // Fill in the l.h.s.
-               stream << prefix << GetParameterText(i) << " = ";
-               WriteParameterValue(i, stream);
-               stream << ";\n";
+               value.str("");
+               WriteParameterValue(i, value);
+               if (value.str() != "")
+                  stream << prefix << GetParameterText(i)
+                         << " = " << value.str() << ";\n";
             }
          }
          else
          {
             // Handle StringArrays
-            stream << prefix << GetParameterText(i) << " = {";
             StringArray sar = GetStringArrayParameter(i);
-            for (StringArray::iterator n = sar.begin(); n != sar.end(); ++n)
+            if (sar.size() > 0)
             {
-               if (n != sar.begin())
-                  stream << ", ";
-               if (inMatlabMode)
-                  stream << "'";
-               stream << (*n);
-               if (inMatlabMode)
-                  stream << "'";
+               stream << prefix << GetParameterText(i) << " = {";
+               for (StringArray::iterator n = sar.begin(); n != sar.end(); ++n)
+               {
+                  if (n != sar.begin())
+                     stream << ", ";
+                  if (inMatlabMode)
+                     stream << "'";
+                  stream << (*n);
+                  if (inMatlabMode)
+                     stream << "'";
+               }
+               stream << "};\n";
             }
-            stream << "};\n";
          }
       }
    }
 
    GmatBase *ownedObject;
    std::string nomme, newprefix;
+
+   #ifdef DEBUG_OWNED_OBJECT_STRINGS
+      MessageInterface::ShowMessage("\"%s\" has %d owned objects\n",
+         instanceName.c_str(), GetOwnedObjectCount());
+   #endif
+
    for (i = 0; i < GetOwnedObjectCount(); ++i)
    {
-      newprefix = prefix + ".";
+      newprefix = prefix;
       ownedObject = GetOwnedObject(i);
       nomme = ownedObject->GetName();
+      
+      #ifdef DEBUG_OWNED_OBJECT_STRINGS
+          MessageInterface::ShowMessage(
+             "   id %d has type %s and name \"%s\"\n",
+             i, ownedObject->GetTypeName().c_str(),
+             ownedObject->GetName().c_str());
+      #endif
+
       if (nomme != "")
-         newprefix += nomme;
-      else
+         newprefix += nomme + ".";
+      else if (GetType() == Gmat::FORCE_MODEL)
          newprefix += ownedObject->GetTypeName();
-      ownedObject->GetGeneratingString(Gmat::OWNED_OBJECT, newprefix);
+      stream << ownedObject->GetGeneratingString(Gmat::OWNED_OBJECT, newprefix);
    }
 }
 

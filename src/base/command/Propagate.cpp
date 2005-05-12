@@ -313,35 +313,54 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
             gen += ", ";
          gen += (*sc);
       }
-         
-      // Now the stopping conditions
-      if (stopWhen.size() > 0) {
+
+      // Temporarily commented out because multiple SC support in incomplete
+      // Remove comments and rearrange things a bit when it is parsed correctly.
+//      // Now the stopping conditions
+//      if (stopWhen.size() > 0) {
+//         gen += ", {";
+//
+//         for (std::vector<StopCondition*>::iterator stp = stopWhen.begin();
+//              stp != stopWhen.end(); ++stp) {
+//            std::stringstream stopCondDesc;
+//            if (stp != stopWhen.begin())
+//               gen += ", ";
+//
+//            Parameter *stopParam = (*stp)->GetStopParameter();
+//            std::string stopName = stopParam->GetName();
+//            stopCondDesc << stopName;
+//
+//            if ((stopName.find("Periapsis") == std::string::npos) &&
+//                (stopName.find(".Apoapsis") == std::string::npos))
+//               stopCondDesc << " = " << (*stp)->GetRealParameter("Goal");
+//
+//            gen += stopCondDesc.str();
+//         }
+//         gen += "}";
+//      }
+
+      if (stopWhen.size() > index) {
          gen += ", {";
-         
-         for (std::vector<StopCondition*>::iterator stp = stopWhen.begin();
-              stp != stopWhen.end(); ++stp) {
-            std::stringstream stopCondDesc;
-            if (stp != stopWhen.begin())
-               gen += ", ";
-            
-            Parameter *stopParam = (*stp)->GetStopParameter();
-            std::string stopName = stopParam->GetName();
-            stopCondDesc << stopName;
 
-            if ((stopName.find("Periapsis") == std::string::npos) &&
-                (stopName.find(".Apoapsis") == std::string::npos))
-               stopCondDesc << " = " << (*stp)->GetRealParameter("Goal");
+         std::stringstream stopCondDesc;
 
-            gen += stopCondDesc.str();
-         }
+         Parameter *stopParam = stopWhen[index]->GetStopParameter();
+         std::string stopName = stopParam->GetName();
+         stopCondDesc << stopName;
+
+         if ((stopName.find("Periapsis") == std::string::npos) &&
+             (stopName.find(".Apoapsis") == std::string::npos))
+            stopCondDesc << " = " << stopWhen[index]->GetRealParameter("Goal");
+
+         gen += stopCondDesc.str();
+
          gen += "}";
       }
-
       gen += ")";
       
       ++index;
    }
-   
+
    generatingString = gen + ";";
    // Then call the base class method
    return GmatCommand::GetGeneratingString();

@@ -85,13 +85,13 @@ Interpreter::~Interpreter()
 
 
 //------------------------------------------------------------------------------
-// void Initialize(void)
+// void Initialize()
 //------------------------------------------------------------------------------
 /**
  * Builds core lists of available objects.
  */
 //------------------------------------------------------------------------------
-void Interpreter::Initialize(void)
+void Interpreter::Initialize()
 {
     // Build a mapping for all of the defined commands
     StringArray cmds = moderator->GetListOfFactoryItems(Gmat::COMMAND);
@@ -201,7 +201,7 @@ bool Interpreter::SetOutStream(std::ostream *str)
 
 
 //------------------------------------------------------------------------------
-// bool Interpret(void)
+// bool Interpret()
 //------------------------------------------------------------------------------
 /**
  * Translates text streams (e.g. scripts and subscripts) into GMAT objects.
@@ -212,7 +212,7 @@ bool Interpreter::SetOutStream(std::ostream *str)
  * @return true on success, false on failure.  (Default always returns false.)
  */
 //------------------------------------------------------------------------------
-bool Interpreter::Interpret(void)
+bool Interpreter::Interpret()
 {
     return false;
 }
@@ -407,25 +407,8 @@ bool Interpreter::BuildObject(std::string &objectname)
 
     (*outstream).precision(18);        /// @todo Make output precision generic
 
-//    // For now, "Create Propagator" creates a PropSetup.  This kludge handles
-//    // that special case.
-//    std::string tname = obj->GetTypeName();
-//    if (tname == "PropSetup")
-//        tname = "Propagator";
-//    *outstream << "Create " << tname << " "
-//               << obj->GetName() << "\n";
-//
-//    std::string prefix = "GMAT ";
-//    prefix += objectname;
-//    prefix += ".";
-//
-//    WriteParameters(prefix, obj);
-
     std::string genstring = obj->GetGeneratingString(Gmat::SCRIPTING);
     *outstream << genstring << "\n";
-//    \n\n***MATLAB Version:\n\n";
-//    genstring = obj->GetGeneratingString(Gmat::MATLAB_STRUCT);
-//    *outstream << genstring << "\n***\n\n";
 
     *outstream << "\n";
     return true;
@@ -497,10 +480,19 @@ void Interpreter::WriteParameters(std::string &prefix, GmatBase *obj)
 
     GmatBase *ownedObject;
     std::string nomme, newprefix;
+
+    MessageInterface::ShowMessage("\"%s\" has %d owned objects\n",
+       obj->GetName().c_str(), obj->GetOwnedObjectCount());
+
     for (i = 0; i < obj->GetOwnedObjectCount(); ++i) {
        newprefix = prefix;
        ownedObject = obj->GetOwnedObject(i);
        nomme = ownedObject->GetName();
+
+          MessageInterface::ShowMessage("   %d has type %s and name \"%s\"\n",
+             i, ownedObject->GetTypeName().c_str(),
+             ownedObject->GetName().c_str());
+
        if (nomme != "") {
           newprefix += ".";
           newprefix += nomme;
@@ -1666,6 +1658,17 @@ bool Interpreter::InterpretCoordinateSystemParameter(GmatBase *obj,
       {
          case Gmat::STRING_TYPE:
             axes->SetStringParameter(id, **phrase);
+            retval = true;
+            break;
+
+         case Gmat::REAL_TYPE:
+            {  // Set scope for local variables
+               std::stringstream temp;
+               temp << **phrase;
+               Real val;
+               temp >> val;
+               axes->SetRealParameter(id, val);
+            }
             retval = true;
             break;
 

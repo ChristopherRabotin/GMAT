@@ -567,6 +567,30 @@ GmatBase* CoordinateSystem::GetRefObject(const Gmat::ObjectType type,
 }
 
 
+//---------------------------------------------------------------------------
+//  GmatBase* GetOwnedObject(Integer whichOne)
+//---------------------------------------------------------------------------
+/**
+ * Access GmatBase objects belonging to this instance.
+ *
+ * This method is used to access the axis system when a script is written to a
+ * file.
+ *
+ * @param <whichOne> The index for this owned object.
+ *
+ * @return Pointer to the owned object.
+ */
+//---------------------------------------------------------------------------
+GmatBase* CoordinateSystem::GetOwnedObject(Integer whichOne)
+{
+   if (whichOne == 0)
+      return axes;
+
+   return CoordinateBase::GetOwnedObject(whichOne);
+}
+
+
+
 // DJC added 5/9/05 to facilitate Sandbox initialization
 //------------------------------------------------------------------------------
 //  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
@@ -630,6 +654,8 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       case Gmat::AXIS_SYSTEM:
       {
          axes = (AxisSystem*) obj;
+         axes->SetName("");
+         ownedObjectCount = 1;
          return true;
       }
       default:

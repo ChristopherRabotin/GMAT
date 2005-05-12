@@ -125,7 +125,7 @@ bool ScriptInterpreter::Interpret(const std::string &scriptfile)
 
 
 //------------------------------------------------------------------------------
-// bool Build(void)
+// bool Build()
 //------------------------------------------------------------------------------
 /**
  * Writes the currently configured data to an output stream.
@@ -133,7 +133,7 @@ bool ScriptInterpreter::Interpret(const std::string &scriptfile)
  * @return true if the file parses successfully, false on failure.
  */
 //------------------------------------------------------------------------------
-bool ScriptInterpreter::Build(void)
+bool ScriptInterpreter::Build()
 {
     if (!initialized)
         Initialize();
@@ -172,7 +172,7 @@ bool ScriptInterpreter::Build(const std::string &scriptfile)
 
 
 //------------------------------------------------------------------------------
-// bool ReadScript(void)
+// bool ReadScript()
 //------------------------------------------------------------------------------
 /**
  * Reads a script from the input stream line by line and parses it.
@@ -180,7 +180,7 @@ bool ScriptInterpreter::Build(const std::string &scriptfile)
  * @return true if the file parses successfully, false on failure.
  */
 //------------------------------------------------------------------------------
-bool ScriptInterpreter::ReadScript(void)
+bool ScriptInterpreter::ReadScript()
 {
     branchDepth = 0;
     
@@ -214,7 +214,7 @@ bool ScriptInterpreter::ReadScript(void)
 
 
 //------------------------------------------------------------------------------
-// bool ReadLine(void)
+// bool ReadLine()
 //------------------------------------------------------------------------------
 /**
  * Reads a line from the input stream.
@@ -222,7 +222,7 @@ bool ScriptInterpreter::ReadScript(void)
  * @return true if the file parses successfully, false on failure.
  */
 //------------------------------------------------------------------------------
-bool ScriptInterpreter::ReadLine(void)
+bool ScriptInterpreter::ReadLine()
 {
     char charLine[4096] = "";
     
@@ -657,7 +657,7 @@ bool ScriptInterpreter::Parse()
 
 
 //------------------------------------------------------------------------------
-// bool WriteScript(void)
+// bool WriteScript()
 //------------------------------------------------------------------------------
 /**
  * Writes a script -- including all configured objects -- to the output stream.
@@ -665,7 +665,7 @@ bool ScriptInterpreter::Parse()
  * @return true if the file parses successfully, false on failure.
  */
 //------------------------------------------------------------------------------
-bool ScriptInterpreter::WriteScript(void)
+bool ScriptInterpreter::WriteScript()
 {
    *outstream << "% GMAT Script File\n% GMAT Release " << REV_STRING << "\n\n";
      
@@ -697,13 +697,23 @@ bool ScriptInterpreter::WriteScript(void)
    // Spacecraft
    objs = moderator->GetListOfConfiguredItems(Gmat::SPACECRAFT);
 
-   #ifdef DEBUG_SCRIPT_READING_AND_WRITING 
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
       std::cout << "Found " << objs.size() << " Spacecraft\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
       if (!BuildObject(*current))
          return false;
-            
+
+   // Formations
+   objs = moderator->GetListOfConfiguredItems(Gmat::FORMATION);
+
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+      std::cout << "Found " << objs.size() << " Spacecraft\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+      if (!BuildObject(*current))
+         return false;
+
    // Force Models
    objs = moderator->GetListOfConfiguredItems(Gmat::FORCE_MODEL);
 

@@ -86,7 +86,8 @@ PropSetup::PropSetup(const std::string &name, Propagator *propagator,
    if (propagator != NULL)
        mPropagator = propagator;
    else 
-       mPropagator = new RungeKutta89("InternalRKV89"); //loj: 3/12/04 added the name
+//       mPropagator = new RungeKutta89("InternalRKV89"); //loj: 3/12/04 added the name
+       mPropagator = new RungeKutta89(""); //djc: 5/11/05 deleted the name
 
    if (forceModel != NULL)
    {

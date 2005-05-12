@@ -42,7 +42,7 @@ const Gmat::ParameterType
 Formation::PARAMETER_TYPE[FormationParamCount - SpaceObjectParamCount] =
 {
    Gmat::STRINGARRAY_TYPE,
-   Gmat::STRING_TYPE,     /// @todo Don't write the "remove" parms
+   Gmat::STRING_TYPE,     
    Gmat::BOOLEAN_TYPE
 };
 
@@ -313,6 +313,26 @@ Gmat::ParameterType Formation::GetParameterType(const Integer id) const
       return PARAMETER_TYPE[id - SpaceObjectParamCount];
       
    return GmatBase::GetParameterType(id);
+}
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool Formation::IsParameterReadOnly(const Integer id) const
+{
+   if ((id == REMOVED_SPACECRAFT) || (id == CLEAR_NAMES))
+      return true;
+
+   return SpaceObject::IsParameterReadOnly(id);
 }
 
 //------------------------------------------------------------------------------

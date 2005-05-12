@@ -1764,6 +1764,18 @@ AxisSystem* Moderator::CreateAxisSystem(const std::string &type,
    // Notes: AxisSystem is not configured. It is local to CoordinateSystem
    // and gets deleted when CoordinateSystem is deleted.
    
+   // DJC added 5/11/05.  The ScriptInterpreter does not have the parms needed
+   // to set these references, so defaults are set here.  This might need to be
+   // fixed later.
+
+   /// @todo Evaluate how the AxixSystem file usage really should be set
+   
+   // Set required internal references if they are used
+   if (axisSystem->UsesEopFile() == GmatCoordinate::REQUIRED)
+      axisSystem->SetEopFile(theEopFile);
+   if (axisSystem->UsesItrfFile() == GmatCoordinate::REQUIRED)
+      axisSystem->SetCoefficientsFile(theItrfFile);
+
    return axisSystem;
 }
 
