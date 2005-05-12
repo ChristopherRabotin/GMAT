@@ -777,8 +777,6 @@ void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
                                          GmatTree::VARIABLE));
       }
    };
-
-   //theGuiManager->UpdateParameter(); //loj: 4/8/05 Not needed here
     
    //    if (size > 0)
    //        Expand(itemId);
@@ -1786,7 +1784,7 @@ void ResourceTree::OnAddVariable(wxCommandEvent &event)
                     new GmatTreeItemData(names[i], GmatTree::VARIABLE));
       }
       
-      theGuiManager->UpdateParameter(); //loj: 4/8/05 Added
+      theGuiManager->UpdateParameter();
       Expand(item);
    }
 }
@@ -1946,9 +1944,16 @@ void ResourceTree::OnAddLibration(wxCommandEvent &event)
 
    if (theGuiInterpreter->CreateCalculatedPoint("LibrationPoint", name.c_str()) != NULL)
    {
-      AppendItem(item, name, GmatTree::ICON_DEFAULT, -1,
-                 new GmatTreeItemData(name, GmatTree::LIBRATION_POINT));
+      //loj: 5/11/05 the default LibrationPoint uses Earth-Luna barycenter as secondary,
+      // so need to pickup default barycenter when it shows the tree item.
+      
+      //AppendItem(item, name, GmatTree::ICON_DEFAULT, -1,
+      //           new GmatTreeItemData(name, GmatTree::LIBRATION_POINT));
 
+      //Collapse(mSpecialPointsItem);
+      DeleteChildren(mSpecialPointsItem);
+      AddDefaultSpecialPoints(mSpecialPointsItem);
+      
       Expand(item);
       
       theGuiManager->UpdateCelestialPoint(); //loj: 5/6/05 Added

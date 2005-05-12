@@ -586,19 +586,15 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
       // add default bodies
       if (type == "LibrationPoint")
       {
-         //loj: 5/11/05 future work - It's not calculating state using DefaultBC
          // first create default Earth-Moon Barycenter
-         //if (GetCalculatedPoint("DefaultBC") == NULL)
-         //{
-         //   CreateCalculatedPoint("Barycenter", "DefaultBC");
-         //}
+         if (GetCalculatedPoint("DefaultBC") == NULL)
+         {
+            CreateCalculatedPoint("Barycenter", "DefaultBC");
+         }
          
          cp->SetStringParameter("Primary", "Sun");
-         cp->SetStringParameter("Secondary", "Earth");
          cp->SetStringParameter("Point", "L1");
-         
-         //loj: 5/11/05 future work
-         //cp->SetStringParameter("Secondary", "DefaultBC");
+         cp->SetStringParameter("Secondary", "DefaultBC");
       }
       else if (type == "Barycenter")
       {
