@@ -1085,8 +1085,10 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
          {
             Rvector6 inState, outState;
             inState.Set(posX[sc], posY[sc], posZ[sc], 0.0, 0.0, 0.0);
+            
             mCoordConverter.Convert(time, inState, mInternalCoordSystem,
                                     outState, mDesiredCoordSystem);
+            
             mScTempPos[sc][mNumData][0] = outState[0];
             mScTempPos[sc][mNumData][1] = outState[1];
             mScTempPos[sc][mNumData][2] = outState[2];
@@ -1707,7 +1709,7 @@ void TrajPlotCanvas::SetupWorld()
       //MessageInterface::ShowMessage
       //   ("size=%f, dist=%f, mAxisLength=%f, fov=%f\n", size, dist, mAxisLength,
       //    mFovDeg);
-      
+
       //gluPerspective(mFovDeg, aspect, 1.0, mAxisLength*2);
       gluPerspective(mFovDeg, aspect, 1.0, mAxisLength * mFovDeg);
    }
@@ -1896,7 +1898,8 @@ void TrajPlotCanvas::ChangeProjection(int width, int height, float axisLength)
 void TrajPlotCanvas::ComputeProjection(int frame)
 {
    #if DEBUG_TRAJCANVAS_PROJ
-   MessageInterface::ShowMessage("ComputeProjection() frame=%d\n", frame);
+   MessageInterface::ShowMessage("ComputeProjection() frame=%d, time=%f\n",
+                                 frame, mTime[frame]);
    #endif
 
    //-----------------------------------------------------------------
@@ -2105,7 +2108,7 @@ void TrajPlotCanvas::ComputeProjection(int frame)
          }
       }
    }
-
+   
    #if DEBUG_TRAJCANVAS_PROJ
    MessageInterface::ShowMessage
       ("ComputeProjection() vpRefVec=%s, vpVec=%s\nmViewPointLocVector=%s, "
@@ -3056,6 +3059,9 @@ int TrajPlotCanvas::GetObjectId(const wxString &name)
 //---------------------------------------------------------------------------
 bool TrajPlotCanvas::TiltOriginZAxis()
 {
+   if (mNumData == 0)
+      return false;
+   
    if (mInternalCoordSystem == NULL || mDesiredCoordSystem == NULL)
       return false;
 
@@ -3074,6 +3080,7 @@ bool TrajPlotCanvas::TiltOriginZAxis()
       Rvector6 inState, outState;
       
       inState.Set(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
+      
       mCoordConverter.Convert(mTime[0], inState, mInternalCoordSystem,
                               outState, mDesiredCoordSystem);
       
@@ -3139,7 +3146,7 @@ bool TrajPlotCanvas::ConvertSpacecraftData()
          {
             inState.Set(mScGciPos[sc][i][0], mScGciPos[sc][i][1], mScGciPos[sc][i][2],
                         0.0, 0.0, 0.0);
-            
+                        
             mCoordConverter.Convert(mTime[i], inState, mInternalCoordSystem,
                                     outState, mDesiredCoordSystem);
             
