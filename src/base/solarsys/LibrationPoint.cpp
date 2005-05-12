@@ -18,6 +18,7 @@
 #include "gmatdefs.hpp"
 #include "CalculatedPoint.hpp"
 #include "LibrationPoint.hpp"
+#include "Barycenter.hpp"
 #include "SolarSystemException.hpp"
 #include "CelestialBody.hpp"
 #include "RealUtilities.hpp"
@@ -143,24 +144,28 @@ LibrationPoint::~LibrationPoint()
 const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
 {
    CheckBodies();
+   cout << "*** Bodies checked out OK ........" << endl;
    // Compute position and velocity from primary to secondary
    Rvector6 primaryState = primaryBody->GetMJ2000State(atTime);
    Rvector6 pToS = (secondaryBody->GetMJ2000State(atTime)) -
                    primaryState;
+   cout << "*** posvel of primary = " << primaryState << endl;
+   cout << "*** posvel of secondary (bary1) = " << pToS << endl;
    Rvector3 r    = pToS.GetR();
    Rvector3 v    = pToS.GetV();
    Rvector3 a    = (secondaryBody->GetMJ2000Acceleration(atTime)) -
                    (primaryBody->GetMJ2000Acceleration(atTime));
+   cout << "*** a = " << a << endl;
    
    Real     massPrimary, massSecondary;
    if ((primaryBody->GetType()) == Gmat::CELESTIAL_BODY)
       massPrimary = ((CelestialBody*) primaryBody)->GetMass();
    else  // Barycenter
-      massPrimary = 0.0;
+      massPrimary = ((Barycenter*) primaryBody)->GetMass();
    if ((secondaryBody->GetType()) == Gmat::CELESTIAL_BODY)
       massSecondary = ((CelestialBody*) secondaryBody)->GetMass();
    else  // Barycenter
-      massSecondary = 0.0;
+      massSecondary = ((Barycenter*) secondaryBody)->GetMass();
    if ((massPrimary == 0.0) && (massSecondary == 0.0))
       throw SolarSystemException(
             "Primary and secondary bodies for LibrationPoint are massless");
