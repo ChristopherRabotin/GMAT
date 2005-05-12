@@ -32,7 +32,7 @@ private:
 
     wxComboBox *primaryBodyCB;
     wxComboBox *secondaryBodyCB;
-    wxComboBox *librationPointCB;
+    wxComboBox *librationPtCB;
     
     // member functions
     void OnComboBoxChange(wxCommandEvent& event);

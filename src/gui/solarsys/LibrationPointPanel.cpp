@@ -1,55 +1,30 @@
 //$Header$
-
 //------------------------------------------------------------------------------
-
 //                              LibrationPointPanel
-
 //------------------------------------------------------------------------------
-
 // GMAT: Goddard Mission Analysis Tool
-
 //
-
 //
-
 // **Legal**
-
 //
-
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-
 // number NNG04CC06P.
-
 //
-
 //
-
 // Author: LaMont Ruley
-
 // Created: 2005/04/27
-
 /**
-
  * This class allows user to specify where Universe information is 
-
  * coming from
-
  */
-
 //------------------------------------------------------------------------------
 
 #include "LibrationPointPanel.hpp"
-
 #include "MessageInterface.hpp"
 
-
-
-//#define DEBUG_LIBRATIONPOINT_PANEL 1
-
+#define DEBUG_LIBRATIONPOINT_PANEL 1
 //------------------------------
-
 // event tables for wxWindows
-
 //------------------------------
 
 BEGIN_EVENT_TABLE(LibrationPointPanel, GmatPanel)
@@ -59,8 +34,6 @@ BEGIN_EVENT_TABLE(LibrationPointPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    EVT_COMBOBOX(ID_COMBOBOX, LibrationPointPanel::OnComboBoxChange)
 END_EVENT_TABLE()
-
-
 
 //------------------------------
 // public methods
@@ -105,7 +78,7 @@ LibrationPointPanel::~LibrationPointPanel()
 //------------------------------------------------------------------------------
 void LibrationPointPanel::OnComboBoxChange(wxCommandEvent& event)
 {
-    theApplyButton->Enable();
+   theApplyButton->Enable();
 }
 
 //----------------------------------
@@ -153,7 +126,7 @@ void LibrationPointPanel::Create()
          wxT("Libration point:"), wxDefaultPosition, wxDefaultSize, 0);
         
       // combo box for libration points 
-      librationPointCB = new wxComboBox(this, ID_COMBOBOX, wxT(""), 
+      librationPtCB = new wxComboBox(this, ID_COMBOBOX, wxT(""), 
          wxDefaultPosition, wxSize(100,-1), 5, librationList, wxCB_DROPDOWN);
 
       // add labels and comboboxes to page sizer    
@@ -162,7 +135,7 @@ void LibrationPointPanel::Create()
       pageSizer->Add(secondaryBodyLabel, 0, wxALIGN_LEFT | wxALL, bsize);
       pageSizer->Add(secondaryBodyCB, 0, wxALIGN_LEFT | wxALL, bsize);
       pageSizer->Add(librationPointLabel, 0, wxALIGN_LEFT | wxALL, bsize);
-      pageSizer->Add(librationPointCB, 0, wxALIGN_LEFT | wxALL, bsize);
+      pageSizer->Add(librationPtCB, 0, wxALIGN_LEFT | wxALL, bsize);
 
       // add page sizer to middle sizer
       theMiddleSizer->Add(pageSizer, 0, wxALIGN_CENTRE|wxALL, 5);
@@ -213,24 +186,12 @@ void LibrationPointPanel::LoadData()
       }
 
       // load primary body
-//      int primaryBodyID = theLibrationPt->GetParameterID("PrimaryBodyName");
-//      std::string primaryBody = theLibrationPt->GetStringParameter(primaryBodyID);
       std::string primaryBody = theLibrationPt->GetStringParameter("Primary");
-
-//      if (primaryBody == "")
-//         primaryBodyCB->SetSelection(0);
-//      else
-         primaryBodyCB->SetValue(primaryBody.c_str());
+      primaryBodyCB->SetValue(primaryBody.c_str());
 
       // load secondary body
-//      int secondaryBodyID = theLibrationPt->GetParameterID("SecondaryBodyName");
-//      std::string secondaryBody = theLibrationPt->GetStringParameter(secondaryBodyID);
       std::string secondaryBody = theLibrationPt->GetStringParameter("Secondary");
-
-//      if (secondaryBody == "")
-//         secondaryBodyCB->SetSelection(1);
-//      else
-         secondaryBodyCB->SetValue(secondaryBody.c_str());
+      secondaryBodyCB->SetValue(secondaryBody.c_str());
 
       #if DEBUG_LIBRATIONPOINT_PANEL
          MessageInterface::ShowMessage
@@ -242,19 +203,10 @@ void LibrationPointPanel::LoadData()
       #endif
 
       // load libration
-//      int librationPointID = theLibrationPt->GetParameterID("WhichLibrationPoint");
-//      std::string librationPoint = theLibrationPt->GetStringParameter(librationPointID);
       std::string librationPoint = theLibrationPt->GetStringParameter("Point");
-     
-//      if (librationPoint == "")
-//         librationPointCB->SetSelection(0);
-//      else
-         librationPointCB->SetValue(librationPoint.c_str());
+      librationPtCB->SetValue(librationPoint.c_str());
 
       #if DEBUG_LIBRATIONPOINT_PANEL
-         MessageInterface::ShowMessage
-            ("LibrationPointPanel::LoadData() libration point ID = %d\n",
-               librationPointID);
          MessageInterface::ShowMessage
             ("LibrationPointPanel::LoadData() libration point = %s\n",
                librationPoint.c_str());
@@ -277,21 +229,39 @@ void LibrationPointPanel::LoadData()
 void LibrationPointPanel::SaveData()
 {
    // Save data to core engine
+   
+   canClose = true;
 
    // Primary body
-   wxString primaryBodyString = primaryBodyCB->GetStringSelection();
+   wxString primaryBodyString = primaryBodyCB->GetValue().Trim();
    int primaryBodyID = theLibrationPt->GetParameterID("Primary");
-   std::string primaryBody = std::string (primaryBodyString.c_str());
-   theLibrationPt->SetStringParameter(primaryBodyID, primaryBody);
+   theLibrationPt->SetStringParameter(primaryBodyID, primaryBodyString.c_str());
+
+   #if DEBUG_LIBRATIONPOINT_PANEL
+      MessageInterface::ShowMessage
+         ("LibrationPointPanel::SaveData() primary body ID = %d\n", 
+            primaryBodyID);
+      MessageInterface::ShowMessage
+         ("LibrationPointPanel::SaveData() primary body = %s\n", 
+            primaryBodyString.c_str());
+   #endif
 
    // Secondary body
-   wxString secondaryBodyString = secondaryBodyCB->GetStringSelection();
+   wxString secondaryBodyString = secondaryBodyCB->GetValue().Trim();
    int secondaryBodyID = theLibrationPt->GetParameterID("Secondary");
-   std::string secondaryBody = std::string (secondaryBodyString.c_str());
-   theLibrationPt->SetStringParameter(secondaryBodyID, secondaryBody);
+   theLibrationPt->SetStringParameter(secondaryBodyID, secondaryBodyString.c_str());
+
+   #if DEBUG_LIBRATIONPOINT_PANEL
+      MessageInterface::ShowMessage
+         ("LibrationPointPanel::SaveData() secondary body ID = %d\n", 
+            secondaryBodyID);
+      MessageInterface::ShowMessage
+         ("LibrationPointPanel::SaveData() secondary body = %s\n", 
+            secondaryBodyString.c_str());
+   #endif
    
    // Check to make sure the primary body and secondary body are different          
-   if (strcmp(primaryBody.c_str(), secondaryBody.c_str()) == 0)
+   if (strcmp(primaryBodyString.c_str(), secondaryBodyString.c_str()) == 0)
    {
       MessageInterface::PopupMessage
       (Gmat::WARNING_, "Primary body and Secondary body are the same.\n"
@@ -300,14 +270,21 @@ void LibrationPointPanel::SaveData()
 
       return;
    }    
-   else
-      canClose = true;
         
    // Libration point
-   wxString librationPointString = librationPointCB->GetStringSelection();
+   wxString librationPointString = librationPtCB->GetValue().Trim();
    int librationPointID = theLibrationPt->GetParameterID("Point");
-   std::string librationPoint = std::string (librationPointString.c_str());
-   theLibrationPt->SetStringParameter(librationPointID, librationPoint);
+
+   #if DEBUG_LIBRATIONPOINT_PANEL
+      MessageInterface::ShowMessage
+         ("LibrationPointPanel::SaveData() libration point ID = %d\n", 
+            librationPointID);
+      MessageInterface::ShowMessage
+         ("LibrationPointPanel::SaveData() libration point = %s\n", 
+            librationPointString.c_str());
+   #endif
+
+   theLibrationPt->SetStringParameter(librationPointID, librationPointString.c_str());
 
    theApplyButton->Disable();
 }
