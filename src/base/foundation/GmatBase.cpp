@@ -2279,6 +2279,7 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    Integer i;
    Gmat::ParameterType parmType;
    std::stringstream value;
+   value.precision(18);
 
    for (i = 0; i < parameterCount; ++i)
    {
