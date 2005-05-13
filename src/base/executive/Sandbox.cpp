@@ -318,9 +318,18 @@ GmatBase* Sandbox::GetInternalObject(std::string name, Gmat::ObjectType type)
       }
    }
    else {
-      std::string errorStr = "Could not find ";
+      std::string errorStr = "Sandbox::GetInternalObject(" + name +
+                             "...) Could not find ";
       errorStr += name;
       errorStr += " in the Sandbox.";
+      
+      #ifdef DEBUG_SANDBOX_OBJECT_MAPS
+         MessageInterface::ShowMessage("Here is the current object map:\n");
+         for (std::map<std::string, GmatBase *>::iterator i = objectMap.begin();
+              i != objectMap.end(); ++i)
+            MessageInterface::ShowMessage("   %s\n", i->first.c_str());
+      #endif
+      
       throw SandboxException(errorStr);
    }
     
