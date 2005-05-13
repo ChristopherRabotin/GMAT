@@ -2394,7 +2394,32 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
         case Gmat::REAL_TYPE:
             stream << GetRealParameter(id);
             break;
-            
+
+        case Gmat::RVECTOR_TYPE:
+            {
+               Rvector rv = GetRvectorParameter(id);
+               stream << "[ " << rv.ToString() << "]";
+            }
+            break;
+
+        case Gmat::RMATRIX_TYPE:
+            {
+               Rmatrix ra = GetRmatrixParameter(id);
+               Integer r, c;
+               ra.GetSize(r, c);
+
+               stream << "[ ";
+               for (Integer i = 0; i < r; ++i)
+               {
+                  for (Integer j = 0; j < c; ++j)
+                     stream << ra.GetElement(i,j) << " ";
+                  if (i < r-1)
+                  stream << "; ";
+               }
+               stream << "]";
+            }
+            break;
+
         case Gmat::BOOLEAN_TYPE:
             stream << ((GetBooleanParameter(id)) ? "true" : "false");
             break;
