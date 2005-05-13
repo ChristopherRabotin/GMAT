@@ -144,23 +144,10 @@ void OrbitPanel::Create()
       wxT("State Type"), wxDefaultPosition, wxDefaultSize, 0 );
    item10->Add( item14, 0, wxALIGN_CENTER, bsize );
 
-//   wxString coordSysStrs[] =
-//   {
-//       wxT(""),
-//       wxT("")
-//   };
-
-   //loj: 1/19/05 Get CordinateSystem ComboBox from the GuiItemManager.
    mCoordSysComboBox =
       theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(120,-1));
 
    item10->Add(mCoordSysComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
-   // combo box for coordinate system
-//   coordSysComboBox = new wxComboBox( this, ID_COMBOBOX, wxT(""),
-//              wxDefaultPosition, wxSize(150,-1), 2, coordSysStrs,
-//              wxCB_DROPDOWN | wxCB_READONLY);
-
-//   item10->Add( coordSysComboBox, 0, wxALIGN_CENTER, 5 );
 
    wxString strs15[] =
    {
@@ -320,31 +307,17 @@ void OrbitPanel::AddElements(wxWindow *parent)
 //------------------------------------------------------------------------------
 void OrbitPanel::LoadData()
 {
-    //loj: since Spacecraft class is not complete,
-    //loj: use theSpacecraft->GetRealParameter(0) for epoch
-    //loj: use theSpacecraft->GetRealParameter(1) for state[0], etc
-
-    // default values for now
-    // do this first, otherwise on state change will
-    // change the element value
-  //      stateComboBox->SetSelection(1);
-  
-    // Get availible bodies for reference body
-//    int refBodyId = theSpacecraft->GetParameterID("ReferenceBody");
-//    std::string refBody = theSpacecraft->GetStringParameter(refBodyId);
-//    referenceBodyComboBox->SetValue(wxT(refBody.c_str()));
-
-      // load data from the core engine
-//      mCoordSysComboBox->SetStringSelection
-//         (mOpenGlPlot->GetStringParameter("CoordinateSystem").c_str());
-      mCoordSysComboBox->SetSelection(0);
-
-    // Reference Frame   
-//    std::string refFrame = theSpacecraft->GetStringParameter(8);
+   // load data from the core engine
+   
+   // CoordinateSystem (loj: 5/13/05 Used actual CoordinateSystem
+   mCoordSysComboBox->SetStringSelection
+      (theSpacecraft->GetStringParameter("CoordinateSystem").c_str());
+   
+   // State type
    std::string refFrame = theSpacecraft->GetDisplayCoordType();
    stateComboBox->SetValue(wxT(refFrame.c_str()));
-    // for the labels
-    //OnStateChange();  
+   // for the labels
+   //OnStateChange();  
   
    wxString description;
     
@@ -377,8 +350,8 @@ void OrbitPanel::LoadData()
       description.c_str());
    #endif
 
-     // hard code label change for now, should actually
-     // come from the spacecraft object
+   // hard code label change for now, should actually
+   // come from the spacecraft object
    if (refFrame == "Cartesian")
    {
       label1->SetLabel("Km");
@@ -434,7 +407,6 @@ void OrbitPanel::LoadData()
     //loj: do not readback from the elements field unless user enters the new value
     
     // get elements
-//    Real epoch = theSpacecraft->GetRealParameter(0);
    std::string epochStr = theSpacecraft->GetDisplayEpoch();
 //    MessageInterface::ShowMessage("\nLoaded epoch as %s", epochStr.c_str());
 
@@ -473,7 +445,11 @@ void OrbitPanel::LoadData()
 
    wxString el6;
    el6.Printf("%.9f", element6);
-   textCtrl6->SetValue(el6);    
+   textCtrl6->SetValue(el6);
+
+   //loj: 5/13/05 disable it for now
+   mCoordSysComboBox->Disable();
+
 }
 
 //------------------------------------------------------------------------------
