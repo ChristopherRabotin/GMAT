@@ -124,7 +124,9 @@ protected:
    void UpdateNonSpacecraftList(SpacePoint *sp);
    
    SolarSystem *mSolarSystem;
-   CoordinateSystem *mOutCoordSystem;
+   CoordinateSystem *mViewCoordSystem;
+   CoordinateSystem *mViewUpCoordSystem;
+   SpacePoint *mViewCoordSysOrigin;
    SpacePoint *mViewPointRefObj;
    SpacePoint *mViewPointVectorObj;
    SpacePoint *mViewDirectionObj;
@@ -140,10 +142,12 @@ protected:
    std::string mPerspectiveMode;
    
    std::string mOldName;
-   std::string mCoordSysName;
+   std::string mViewCoordSysName;
    std::string mViewPointRefName;
    std::string mViewPointVectorName;
    std::string mViewDirectionName;
+   std::string mViewUpCoordSysName;
+   std::string mViewUpAxisName;
 
    Rvector3 mViewPointRefVector;
    Rvector3 mViewPointVector;
@@ -188,6 +192,8 @@ protected:
       VIEW_DIRECTION,
       VIEW_DIRECTION_VECTOR,
       VIEW_SCALE_FACTOR,
+      VIEW_UP_COORD_SYSTEM,
+      VIEW_UP_AXIS,
       CELESTIAL_PLANE,
       EQUATORIAL_PLANE,
       WIRE_FRAME,

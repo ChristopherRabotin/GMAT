@@ -48,6 +48,8 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
    "ViewDirection",
    "ViewDirectionVector",
    "ViewScaleFactor",
+   "ViewUpCoordinateSystem",
+   "ViewUpAxis",
    "CelestialPlane",
    "EquatorialPlane",
    "WireFrame",
@@ -74,6 +76,8 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
    Gmat::STRING_TYPE,            //"ViewDirection",
    Gmat::RVECTOR_TYPE,           //"ViewDirectionVector",
    Gmat::REAL_TYPE,              //"ViewScaleFactor",
+   Gmat::STRING_TYPE,            //"ViewUpCoordinaetSystem"
+   Gmat::STRING_TYPE,            //"ViewUpAxis"
    Gmat::STRING_TYPE,            //"CelestialPlane"
    Gmat::STRING_TYPE,            //"EquatorialPlane"
    Gmat::STRING_TYPE,            //"WireFrame"
@@ -118,7 +122,9 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mPerspectiveMode = "Off";
    
    mOldName = instanceName;
-   mCoordSysName = "EarthMJ2000Eq";
+   mViewCoordSysName = "EarthMJ2000Eq";
+   mViewUpCoordSysName = "EarthMJ2000Eq";
+   mViewUpAxisName = "Z";
 
    // viewpoint
    mViewPointRefName = "Earth";
@@ -130,7 +136,9 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mViewDirectionVector.Set(0.0, 0.0, -1.0);
    
    mSolarSystem = NULL;
-   mOutCoordSystem = NULL;
+   mViewCoordSystem = NULL;
+   mViewUpCoordSystem = NULL;
+   mViewCoordSysOrigin = NULL;
    mViewPointRefObj = NULL;
    mViewPointVectorObj = NULL;
    mViewDirectionObj = NULL;
@@ -183,7 +191,7 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mPerspectiveMode = ogl.mPerspectiveMode;
    
    mOldName = ogl.mOldName;;
-   mCoordSysName = ogl.mCoordSysName;
+   mViewCoordSysName = ogl.mViewCoordSysName;
 
    // viewpoint
    mViewPointRefName = ogl.mViewPointRefName;
@@ -193,9 +201,13 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mViewPointRefVector = ogl.mViewPointRefVector;
    mViewPointVector = ogl.mViewPointVector;
    mViewDirectionVector = ogl.mViewDirectionVector;
+   mViewUpCoordSysName = ogl.mViewUpCoordSysName;
+   mViewUpAxisName = ogl.mViewUpAxisName;
    
    mSolarSystem = ogl.mSolarSystem;
-   mOutCoordSystem = ogl.mOutCoordSystem;
+   mViewCoordSystem = ogl.mViewCoordSystem;
+   mViewUpCoordSystem = ogl.mViewCoordSystem;
+   mViewCoordSysOrigin = ogl.mViewCoordSysOrigin;
    mViewPointRefObj = ogl.mViewPointRefObj;
    mViewPointVectorObj = ogl.mViewPointVectorObj;
    mViewDirectionObj = ogl.mViewDirectionObj;
@@ -288,7 +300,7 @@ bool OpenGlPlot::Initialize()
          #endif
          
          if (PlotInterface::CreateGlPlotWindow
-             (instanceName, mOldName, mCoordSysName, mSolarSystem,
+             (instanceName, mOldName, mViewCoordSysName, mSolarSystem,
               (mEclipticPlane == "On"), (mEquatorialPlane == "On"),
               (mWireFrame == "On"), (mOverlapPlot == "On"),
               (mUseViewPointInfo == "On"), (mPerspectiveMode == "On")))
@@ -348,6 +360,16 @@ bool OpenGlPlot::Initialize()
             
             // check ViewPoint info to see if any objects need to be
             // included in the non-spacecraft list
+            if (mViewCoordSystem == NULL)
+               throw GmatBaseException
+                  ("OpenGlPlot::Initialize() CoordinateSystem: " + mViewCoordSysName +
+                   "not set\n");
+            
+            // get CoordinateSystem Origin pointer
+            mViewCoordSysOrigin = mViewCoordSystem->GetOrigin();
+            
+            if (mViewCoordSysOrigin != NULL)
+               UpdateNonSpacecraftList(mViewCoordSysOrigin);
             
             if (mViewPointRefObj != NULL)
                   UpdateNonSpacecraftList(mViewPointRefObj);
@@ -382,7 +404,8 @@ bool OpenGlPlot::Initialize()
             //--------------------------------------------------------
             // set CoordinateSystem
             //--------------------------------------------------------
-            PlotInterface::SetGlCoordSystem(instanceName, mOutCoordSystem);
+            PlotInterface::SetGlCoordSystem(instanceName, mViewCoordSystem,
+                                            mViewUpCoordSystem);
             
             //--------------------------------------------------------
             // set viewpoint info
@@ -390,7 +413,7 @@ bool OpenGlPlot::Initialize()
             PlotInterface::SetGlViewOption
                (instanceName, mViewPointRefObj, mViewPointVectorObj,
                 mViewDirectionObj, mViewScaleFactor, mViewPointRefVector,
-                mViewPointVector, mViewDirectionVector,
+                mViewPointVector, mViewDirectionVector, mViewUpAxisName,
                 (mViewPointRefName == "Vector"), (mViewPointVectorName == "Vector"),
                 (mViewDirectionName == "Vector"));
             
@@ -973,13 +996,17 @@ std::string OpenGlPlot::GetStringParameter(const Integer id) const
    switch (id)
    {
    case COORD_SYSTEM:
-      return mCoordSysName;
+      return mViewCoordSysName;
    case VIEWPOINT_REF:
       return mViewPointRefName;
    case VIEWPOINT_VECTOR:
       return mViewPointVectorName;
    case VIEW_DIRECTION:
       return mViewDirectionName;
+   case VIEW_UP_COORD_SYSTEM:
+      return mViewUpCoordSysName;
+   case VIEW_UP_AXIS:
+      return mViewUpAxisName;
    case CELESTIAL_PLANE:
       return mEclipticPlane;
    case EQUATORIAL_PLANE:
@@ -1026,8 +1053,10 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
    
    switch (id)
    {
+   case ADD:
+      return AddSpacePoint(value, mAllSpCount);
    case COORD_SYSTEM:
-      mCoordSysName = value;
+      mViewCoordSysName = value;
       return true;
    case VIEWPOINT_REF:
       mViewPointRefName = value;
@@ -1038,8 +1067,12 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
    case VIEW_DIRECTION:
       mViewDirectionName = value;
       return true;
-   case ADD:
-      return AddSpacePoint(value, mAllSpCount);
+   case VIEW_UP_COORD_SYSTEM:
+      mViewUpCoordSysName = value;
+      return true;
+   case VIEW_UP_AXIS:
+      mViewUpAxisName = value;
+      return true;
    case CELESTIAL_PLANE:
       mEclipticPlane = value;
       return true;
@@ -1153,7 +1186,7 @@ std::string OpenGlPlot::GetRefObjectName(const Gmat::ObjectType type) const
    }
    else if (type == Gmat::COORDINATE_SYSTEM)
    {
-      return mCoordSysName;
+      return mViewCoordSysName; //just return this
    }
    
    #if DEBUG_OPENGL_OBJ
@@ -1175,9 +1208,14 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
    mAllRefObjectNames.clear();
 
    if (type == Gmat::SOLAR_SYSTEM)
+   {
       mAllRefObjectNames.push_back(mSolarSystem->GetName());
+   }
    else if (type == Gmat::COORDINATE_SYSTEM)
-      mAllRefObjectNames.push_back(mCoordSysName);
+   {
+      mAllRefObjectNames.push_back(mViewCoordSysName);
+      mAllRefObjectNames.push_back(mViewUpCoordSysName);
+   }
    else if (type == Gmat::SPACE_POINT)
    {
       mAllRefObjectNames = mAllSpNameArray;
@@ -1190,11 +1228,12 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
       if (mViewDirectionName != "Vector")
          mAllRefObjectNames.push_back(mViewDirectionName);
    }
-   else if (type == Gmat::UNKNOWN_OBJECT) //loj: 4/26/05 Added
+   else if (type == Gmat::UNKNOWN_OBJECT)
    {
       mAllRefObjectNames = mAllSpNameArray;
       
-      mAllRefObjectNames.push_back(mCoordSysName);
+      mAllRefObjectNames.push_back(mViewCoordSysName);
+      mAllRefObjectNames.push_back(mViewUpCoordSysName);
       mAllRefObjectNames.push_back(mViewPointRefName);
       
       if (mViewPointVectorName != "Vector")
@@ -1205,7 +1244,6 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
 
       for (Integer i=0; i<mAllSpCount; i++)
          mAllRefObjectNames.push_back(mAllSpNameArray[i]);
-      
    }
 
    #if DEBUG_OPENGL_OBJ
@@ -1229,7 +1267,12 @@ GmatBase* OpenGlPlot::GetRefObject(const Gmat::ObjectType type,
    if (type == Gmat::SOLAR_SYSTEM)
       return mSolarSystem;
    else if (type == Gmat::COORDINATE_SYSTEM)
-      return mOutCoordSystem;
+   {
+      if (name == mViewCoordSysName)
+         return mViewCoordSystem;
+      if (name == mViewUpCoordSysName)
+         return mViewUpCoordSystem;
+   }
    else if (type == Gmat::SPACE_POINT)
    {
       if (name == mViewPointRefName)
@@ -1239,9 +1282,11 @@ GmatBase* OpenGlPlot::GetRefObject(const Gmat::ObjectType type,
       else if (name == mViewDirectionName)
          return mViewDirectionObj;
    }
+
+   return Subscriber::GetRefObject(type, name);
    
-   throw GmatBaseException("OpenGlPlot::GetRefObject() the object name: " + name +
-                           "not found\n");
+//    throw GmatBaseException("OpenGlPlot::GetRefObject() the object name: " + name +
+//                            "not found\n");
 }
 
 
@@ -1274,12 +1319,15 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    }
    else if (type == Gmat::COORDINATE_SYSTEM)
    {
-      mOutCoordSystem = (CoordinateSystem*)obj;
+      if (name == mViewCoordSysName)
+         mViewCoordSystem = (CoordinateSystem*)obj;
+      if (name == mViewUpCoordSysName)
+         mViewUpCoordSystem = (CoordinateSystem*)obj;
       return true;
    }
-   else if (type == Gmat::SPACE_POINT || type == Gmat::CELESTIAL_BODY ||
-            type == Gmat::SPACECRAFT || type == Gmat::CALCULATED_POINT)
-      //loj: 5/10/05 Added CALCULATED_POINT
+//    else if (type == Gmat::SPACE_POINT || type == Gmat::CELESTIAL_BODY ||
+//             type == Gmat::SPACECRAFT || type == Gmat::CALCULATED_POINT)
+   else if (obj->IsOfType(Gmat::SPACE_POINT)) //loj: 5/13/05 changed to use IsOfType()
    {
       for (Integer i=0; i<mAllSpCount; i++)
       {
@@ -1306,8 +1354,9 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       
       return true;
    }
-   
-   return false;
+
+   return Subscriber::SetRefObject(obj, type, name);
+   //return false;
 }
 
 
@@ -1651,14 +1700,14 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
             if (thePublisher->GetRunState() == Gmat::TARGETING)
             {
                PlotInterface::
-                  UpdateGlPlot(instanceName, mOldName, mCoordSysName,
+                  UpdateGlPlot(instanceName, mOldName, mViewCoordSysName,
                                mScNameArray, dat[0], mScXArray,
                                mScYArray, mScZArray, mScTargetColorArray, update);
             }
             else
             {
                PlotInterface::
-                  UpdateGlPlot(instanceName, mOldName, mCoordSysName,
+                  UpdateGlPlot(instanceName, mOldName, mViewCoordSysName,
                                mScNameArray, dat[0], mScXArray,
                                mScYArray, mScZArray, mScOrbitColorArray, update);
             }
