@@ -317,6 +317,13 @@ void ObjectReferencedAxes::ResetAxes()
 bool ObjectReferencedAxes::Initialize()
 {
    DynamicAxes::Initialize();
+   // use defaults, per Steve's email of 2005.05.13
+   if (xAxis == "" && yAxis == "" && zAxis == "")
+   {
+      xAxis = "R";
+      zAxis = "N";
+      yAxis = "";
+   }
    return true;
 }
 
