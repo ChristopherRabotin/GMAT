@@ -55,6 +55,8 @@ Assignment::Assignment  () :
    col                  (0),
    rowObj               (NULL),
    colObj               (NULL),
+   lrow                 (""),
+   lcol                 (""),
    lrowObj              (NULL),
    lcolObj              (NULL),
    rowIndex             (0),
@@ -660,9 +662,27 @@ const std::string& Assignment::GetGeneratingString(Gmat::WriteMode mode,
                                                    const std::string &prefix,
                                                    const std::string &useName)
 {
-   std::string gen = "GMAT " + ownerName;
+   std::string gen = prefix + "GMAT " + ownerName;
    if (parmName != "")
       gen += "." + parmName;
+
+   // Could be setting an array element
+   if ((lrow != "") || (lcol != ""))
+   {
+      // Handle row and column separately, in case we allow ommission of one in
+      // the future.
+      gen += "(";
+      if (lrow != "")
+      {
+         gen += lrow;
+         if (lcol != "")
+            gen += ", ";
+      }
+      if (lcol != "")
+         gen += lcol;
+      gen += ")";
+   }
+   
    gen += " = " + value + ";";
    
    #ifdef DEBUG_ASSIGNMENT_SCRIPTING
