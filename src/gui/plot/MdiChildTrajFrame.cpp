@@ -906,13 +906,14 @@ void MdiChildTrajFrame::SetGlObject(const StringArray &nonScNames,
 
 
 //------------------------------------------------------------------------------
-// void SetGlObject(CoordinateSystem *cs)
+// void SetGlObject(CoordinateSystem *viewCs, ...
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetGlCoordSystem(CoordinateSystem *cs)
+void MdiChildTrajFrame::SetGlCoordSystem(CoordinateSystem *viewCs,
+                                         CoordinateSystem *viewUpCs)
 {
    if (mCanvas)
    {         
-      mCanvas->SetGlCoordSystem(cs);
+      mCanvas->SetGlCoordSystem(viewCs, viewUpCs);
    }
 }
 
@@ -923,8 +924,8 @@ void MdiChildTrajFrame::SetGlCoordSystem(CoordinateSystem *cs)
 void MdiChildTrajFrame::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
                                         SpacePoint *vdObj, Real vsFactor,
                                         const Rvector3 &vpRefVec, const Rvector3 &vpVec,
-                                        const Rvector3 &vdVec, bool usevpRefVec,
-                                        bool usevpVec, bool usevdVec)
+                                        const Rvector3 &vdVec, const std::string &upAxis,
+                                        bool usevpRefVec, bool usevpVec, bool usevdVec)
 {
    if (mCanvas)
    {
@@ -933,8 +934,8 @@ void MdiChildTrajFrame::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
             ("MdiChildTrajFrame::SetGlViewOption() vsFactor=%f\n", vsFactor);
       #endif
          
-      mCanvas->SetGlViewOption(vpRefObj, vpVecObj, vdObj, vsFactor,
-                               vpRefVec, vpVec, vdVec, usevpRefVec, usevpVec,
+      mCanvas->SetGlViewOption(vpRefObj, vpVecObj, vdObj, vsFactor, vpRefVec,
+                               vpVec, vdVec, upAxis, usevpRefVec, usevpVec,
                                usevdVec);
    }
 }

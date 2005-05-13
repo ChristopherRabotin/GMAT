@@ -53,8 +53,8 @@ public:
    unsigned int GetEcLineColor() {return mEcLineColor;}
    float GetDistance() {return mAxisLength;}
    int GetAnimationUpdateInterval() {return mUpdateInterval;}
-   wxString GetDesiredCoordSysName() {return mDesiredCoordSysName;}
-   CoordinateSystem* GetDesiredCoordSystem() { return mDesiredCoordSystem;}
+   wxString GetDesiredCoordSysName() {return mViewCoordSysName;}
+   CoordinateSystem* GetDesiredCoordSystem() { return mViewCoordSystem;}
    const wxArrayString& GetObjectNames() { return mObjectNames;}
    const wxStringColorMap& GetObjectColorMap() { return mObjectColorMap;}
    wxString GetGotoObjectName();
@@ -98,15 +98,16 @@ public:
                     const UnsignedIntArray &nonScColors,
                     const std::vector<SpacePoint*> nonScArray);
    
-   // CoordinateSystem (loj: 5/9/05 Added)
-   void SetGlCoordSystem(CoordinateSystem *cs);
+   // CoordinateSystem (loj: 5/13/05 Added viewUpCs)
+   void SetGlCoordSystem(CoordinateSystem *viewCs,
+                         CoordinateSystem *viewUpCs);
    
-   // viewpoint (loj: 4/20/05 Added)
+   // viewpoint
    void SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
                         SpacePoint *vdObj, Real vscaleFactor,
                         const Rvector3 &vpRefVec, const Rvector3 &vpVec,
-                        const Rvector3 &vdVec, bool usevpRefVec,
-                        bool usevpVec, bool usevdVec);
+                        const Rvector3 &vdVec, const std::string &upAxis,
+                        bool usevpRefVec, bool usevpVec, bool usevdVec);
    
    // data
    int  ReadTextTrajectory(const wxString &filename);
@@ -208,6 +209,7 @@ private:
    // viewpoint
    StringArray mScNameArray;
    std::string mViewPointRefObjName;
+   std::string mViewUpAxisName;
    SpacePoint *mViewPointRefObj;
    SpacePoint *mViewPointVectorObj;
    SpacePoint *mViewDirectionObj;
@@ -232,6 +234,7 @@ private:
 
    // spacecraft
    int   mScCount;
+   int   mScLastFrame[GmatPlot::MAX_SCS];
    float mScGciPos[GmatPlot::MAX_SCS][MAX_DATA][3];
    float mScTempPos[GmatPlot::MAX_SCS][MAX_DATA][3];
    unsigned int mScTrajColor[GmatPlot::MAX_SCS][MAX_DATA];
@@ -266,11 +269,13 @@ private:
    StringArray mObjectNamesInUse;
    
    // coordinate system
-   wxString mDesiredCoordSysName;
+   wxString mViewCoordSysName;
+   wxString mViewUpCoordSysName;
    wxString mInternalCoordSysName;
    wxString mOriginName;
    CoordinateSystem *mInternalCoordSystem;
-   CoordinateSystem *mDesiredCoordSystem;
+   CoordinateSystem *mViewCoordSystem;
+   CoordinateSystem *mViewUpCoordSystem;
    int mOriginId;
    
    // coordinate sytem conversion
@@ -329,7 +334,6 @@ private:
    void DrawObjectOrbit();
    void DrawEarthOrbit(int frame);
    void DrawSpacecraft(UnsignedInt scColor);
-   void DrawSpacecraftOrbit();
    void DrawSpacecraftOrbit(int frame);
    void DrawEquatorialPlane(UnsignedInt color);
    void DrawEclipticPlane(UnsignedInt color);

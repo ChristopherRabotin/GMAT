@@ -122,13 +122,14 @@ public:
                     const UnsignedIntArray &nonScColors,
                     const std::vector<SpacePoint*> nonScArray);
    
-   void SetGlCoordSystem(CoordinateSystem *cs);
+   void SetGlCoordSystem(CoordinateSystem *viewCs,
+                         CoordinateSystem *viewUpCs);
    
    void SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
                         SpacePoint *vdObj, Real vsFactor,
                         const Rvector3 &vpRefVec, const Rvector3 &vpVec,
-                        const Rvector3 &vdVec, bool usevpRefVec,
-                        bool usevpVec, bool usevdVec);
+                        const Rvector3 &vdVec, const std::string &upAxis,
+                        bool usevpRefVec, bool usevpVec, bool usevdVec);
    
    void UpdatePlot(const StringArray &scNames,
                    const Real &time, const RealArray &posX,

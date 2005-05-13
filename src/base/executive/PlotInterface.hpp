@@ -43,15 +43,16 @@ public:
                            const std::vector<SpacePoint*> nonScArray);
    
    static void SetGlCoordSystem(const std::string &plotName,
-                                CoordinateSystem *cs);
-
+                                CoordinateSystem *viewCs,
+                                CoordinateSystem *viewUpCs);
+   
    static void SetGlViewOption(const std::string &plotName,
                                SpacePoint *vpRefObj, SpacePoint *vpVecObj,
                                SpacePoint *vdObj, Real vsFactor,
                                const Rvector3 &vpRefVec, const Rvector3 &vpVec,
-                               const Rvector3 &vdVec, bool usevpRefVec,
-                               bool usevpVec, bool usevdVec);
-
+                               const Rvector3 &vdVec, const std::string &upAxis,
+                               bool usevpRefVec, bool usevpVec, bool usevdVec);
+   
    static bool IsThere(const std::string &plotName);
    
    static bool DeleteGlPlot();

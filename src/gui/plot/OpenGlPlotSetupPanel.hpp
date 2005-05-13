@@ -37,6 +37,7 @@ protected:
    bool mHasColorChanged;
    bool mHasCoordSysChanged;
    bool mHasViewInfoChanged;
+   bool mHasViewUpInfoChanged;
    int  mScCount;
    int  mNonScCount;
    

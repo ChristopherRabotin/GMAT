@@ -261,10 +261,11 @@ void PlotInterface::SetGlObject(const std::string &plotName,
 
 
 //------------------------------------------------------------------------------
-// static void SetGlCoordSystem(const std::string &plotName, CoordinateSystem *cs)
+// static void SetGlCoordSystem(const std::string &plotName, ...
 //------------------------------------------------------------------------------
 void PlotInterface::SetGlCoordSystem(const std::string &plotName,
-                                     CoordinateSystem *cs)
+                                     CoordinateSystem *viewCs,
+                                     CoordinateSystem *viewUpCs)
 {
 #if defined __CONSOLE_APP__
    return;
@@ -278,7 +279,7 @@ void PlotInterface::SetGlCoordSystem(const std::string &plotName,
             
       if (frame->GetPlotName().IsSameAs(owner.c_str()))
       {
-         frame->SetGlCoordSystem(cs);
+         frame->SetGlCoordSystem(viewCs, viewUpCs);
       }
    }
 #endif
@@ -293,8 +294,8 @@ void PlotInterface::SetGlViewOption(const std::string &plotName,
                                     SpacePoint *vpRefObj, SpacePoint *vpVecObj,
                                     SpacePoint *vdObj, Real vsFactor,
                                     const Rvector3 &vpRefVec, const Rvector3 &vpVec,
-                                    const Rvector3 &vdVec, bool usevpRefVec,
-                                    bool usevpVec, bool usevdVec)
+                                    const Rvector3 &vdVec, const std::string &upAxis,
+                                    bool usevpRefVec, bool usevpVec, bool usevdVec)
 {
 #if defined __CONSOLE_APP__
    return;
@@ -315,7 +316,8 @@ void PlotInterface::SetGlViewOption(const std::string &plotName,
          #endif
             
          frame->SetGlViewOption(vpRefObj, vpVecObj, vdObj, vsFactor, vpRefVec,
-                                vpVec, vdVec, usevpRefVec,usevpVec, usevdVec);
+                                vpVec, vdVec, upAxis, usevpRefVec,usevpVec,
+                                usevdVec);
       }
    }
 #endif

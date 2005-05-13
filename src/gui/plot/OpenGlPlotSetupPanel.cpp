@@ -488,15 +488,25 @@ void OpenGlPlotSetupPanel::LoadData()
       
       mCoordSysComboBox->SetStringSelection
          (mOpenGlPlot->GetStringParameter("CoordinateSystem").c_str());
-
+      
+      //--------------------------------------------------------------
+      // load view up direction info
+      //--------------------------------------------------------------
+      mViewUpAxisComboBox->
+         SetStringSelection(mOpenGlPlot->GetStringParameter("ViewUpAxis").c_str());
+      mViewUpCsComboBox->
+         SetStringSelection(mOpenGlPlot->GetStringParameter("ViewUpCoordinateSystem").c_str());
+      
+      //--------------------------------------------------------------
       // load ViewPoint info
+      //--------------------------------------------------------------
       mViewPointRefComboBox->
          SetStringSelection(mOpenGlPlot->GetStringParameter("ViewPointRef").c_str());
       mViewPointVectorComboBox->
          SetStringSelection(mOpenGlPlot->GetStringParameter("ViewPointVector").c_str());
       mViewDirectionComboBox->
          SetStringSelection(mOpenGlPlot->GetStringParameter("ViewDirection").c_str());
-
+      
       wxString str;
       str.Printf("%g", mOpenGlPlot->GetRealParameter("ViewScaleFactor"));
       mViewScaleFactorTextCtrl->SetValue(str);
@@ -548,7 +558,7 @@ void OpenGlPlotSetupPanel::LoadData()
       {
          mViewDefSizer->Show(mViewPointVectorSizer, false);
       }
-            
+      
       // show vector if view direction name is Vector
       if (mViewDirectionComboBox->GetStringSelection() == "Vector")
       {
@@ -567,10 +577,10 @@ void OpenGlPlotSetupPanel::LoadData()
       {
          mViewDefSizer->Show(mViewDirVectorSizer, false);
       }
-
+      
       // set layout
       mViewDefSizer->Layout();
-
+      
       //--------------------------------------------------------------
       // get SpacePoint list to plot
       //--------------------------------------------------------------
@@ -668,7 +678,7 @@ void OpenGlPlotSetupPanel::LoadData()
    mFovLabel->Disable();
    mFovTextCtrl->Disable();
    
-   mViewUpAxisComboBox->SetSelection(0);
+   //5.13.mViewUpAxisComboBox->SetSelection(0);
    
    // if perspective mode, enalbe fov
    if (mPerspectiveModeCheckBox->GetValue())
@@ -891,6 +901,18 @@ void OpenGlPlotSetupPanel::SaveData()
             vec(2) = val3;
             mOpenGlPlot->SetRvectorParameter("ViewDirectionVector", vec);
          }
+      }
+      
+      // save view up direction info
+      if (mHasViewUpInfoChanged)
+      {
+         mHasViewUpInfoChanged = false;
+         mOpenGlPlot->SetStringParameter
+            ("ViewUpCoordinateSystem",
+             std::string(mViewUpCsComboBox->GetStringSelection().c_str()));
+         mOpenGlPlot->SetStringParameter
+            ("ViewUpAxis",
+             std::string(mViewUpAxisComboBox->GetStringSelection().c_str()));
       }
    }
    catch (BaseException &e)
@@ -1163,6 +1185,11 @@ void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
    if (event.GetEventObject() == mCoordSysComboBox)
    {
       mHasCoordSysChanged = true;
+   }
+   else if (event.GetEventObject() == mViewUpCsComboBox ||
+            event.GetEventObject() == mViewUpAxisComboBox)
+   {
+      mHasViewUpInfoChanged = true;
    }
    else if (event.GetEventObject() == mViewPointRefComboBox)
    {

@@ -41,6 +41,7 @@
 
 //#define DEBUG_TRAJCANVAS_INIT 1
 //#define DEBUG_TRAJCANVAS_UPDATE 2
+//#define DEBUG_TRAJCANVAS_UPDATE_OBJECT 2
 //#define DEBUG_TRAJCANVAS_ACTION 1
 //#define DEBUG_TRAJCANVAS_CONVERT 2
 //#define DEBUG_TRAJCANVAS_DRAW 1
@@ -225,14 +226,17 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mScCount = 0;
    
    for (int i=0; i<MAX_SCS; i++)
+   {
+      mScLastFrame[i] = 0;
       mScTextureIndex[i] = UNINIT_TEXTURE;
+   }
    
    // Coordinate System
    mInternalCoordSystem = theGuiInterpreter->GetInternalCoordinateSystem();
    mInternalCoordSysName = wxString(mInternalCoordSystem->GetName().c_str());
 
-   mDesiredCoordSysName = csName;
-   mDesiredCoordSystem = theGuiInterpreter->
+   mViewCoordSysName = csName;
+   mViewCoordSystem = theGuiInterpreter->
       GetCoordinateSystem(std::string(csName.c_str()));
 
    // CoordinateSystem conversion
@@ -241,7 +245,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mNeedOriginConversion = false;
    mNeedObjectConversion = false;
    
-   if (!mDesiredCoordSysName.IsSameAs(mInternalCoordSysName))
+   if (!mViewCoordSysName.IsSameAs(mInternalCoordSysName))
        mNeedInitialConversion = true;
    else
        mNeedInitialConversion = false;
@@ -250,7 +254,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    #if DEBUG_TRAJCANVAS_INIT
    MessageInterface::ShowMessage
       ("TrajPlotCanvas() internalCS=%s, desiredCS=%s\n",
-       mInternalCoordSystem->GetName().c_str(), mDesiredCoordSystem->GetName().c_str());
+       mInternalCoordSystem->GetName().c_str(), mViewCoordSystem->GetName().c_str());
    #endif
 }
 
@@ -349,12 +353,12 @@ void TrajPlotCanvas::SetDesiredCoordSystem(const wxString &csName)
        mInternalCoordSystem->GetName().c_str(), csName.c_str());
    #endif
    
-   mDesiredCoordSysName = csName;
+   mViewCoordSysName = csName;
    
-   mDesiredCoordSystem =
+   mViewCoordSystem =
       theGuiInterpreter->GetCoordinateSystem(std::string(csName.c_str()));
    
-   if (!mDesiredCoordSysName.IsSameAs(mInternalCoordSysName))
+   if (!mViewCoordSysName.IsSameAs(mInternalCoordSysName))
    {
       mIsInternalCoordSystem = false;
       mNeedInitialConversion = true;
@@ -457,10 +461,13 @@ void TrajPlotCanvas::RedrawPlot(bool viewAnimation)
 
    ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
 
+   //Refresh(false);
+   
    if (viewAnimation)
       ViewAnimation(mUpdateInterval);
    else
       Refresh(false);
+     
 }
 
 
@@ -622,23 +629,23 @@ void TrajPlotCanvas::DrawInOtherCoordSystem(const wxString &csName)
    #if DEBUG_TRAJCANVAS_ACTION
    MessageInterface::ShowMessage
       ("TrajPlotCanvas::DrawInNewCoordSysName() desiredCS=%s, newCS=%s\n",
-       mDesiredCoordSysName.c_str(), csName.c_str());
+       mViewCoordSysName.c_str(), csName.c_str());
    #endif
 
    // if current desired CS name is different from the new CS name
-   if (!mDesiredCoordSysName.IsSameAs(csName))
+   if (!mViewCoordSysName.IsSameAs(csName))
    {
-      mDesiredCoordSysName = csName;
+      mViewCoordSysName = csName;
       
-      mDesiredCoordSystem =
+      mViewCoordSystem =
          theGuiInterpreter->GetCoordinateSystem(std::string(csName.c_str()));
       
-      if (mDesiredCoordSystem->GetName() == mInternalCoordSystem->GetName())
+      if (mViewCoordSystem->GetName() == mInternalCoordSystem->GetName())
          mIsInternalCoordSystem = true;
       else
          mIsInternalCoordSystem = false;
 
-      mOriginName = mDesiredCoordSystem->GetOriginName().c_str();
+      mOriginName = mViewCoordSystem->GetOriginName().c_str();
       mOriginId = GetObjectId(mOriginName);
       mMaxZoomIn = mObjMaxZoomIn[mOriginId];
       
@@ -780,24 +787,31 @@ void TrajPlotCanvas::SetGlObject(const StringArray &nonScNames,
 
 
 //------------------------------------------------------------------------------
-// void SetGlCoordSystem(CoordinateSystem *cs)
+// void SetGlCoordSystem(CoordinateSystem *viewCs, CoordinateSystem *viewUpCs)
 //------------------------------------------------------------------------------
-void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *cs)
+void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
+                                      CoordinateSystem *viewUpCs)
 {
-   mDesiredCoordSystem = cs;
-   mDesiredCoordSysName = wxString(cs->GetName().c_str());
+   mViewCoordSystem = viewCs;
+   mViewCoordSysName = wxString(viewCs->GetName().c_str());
+   
+   mViewUpCoordSystem = viewUpCs;
+   mViewUpCoordSysName = wxString(viewUpCs->GetName().c_str());
    
    // set view center object
-   mOriginName = wxString(cs->GetOriginName().c_str());
+   mOriginName = wxString(viewCs->GetOriginName().c_str());
    mOriginId = GetObjectId(mOriginName);
    mMaxZoomIn = mObjMaxZoomIn[mOriginId];
    mAxisLength = mMaxZoomIn;
    
    #if DEBUG_TRAJCANVAS_OBJECT
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::SetGlCoordSystem() csName=%s, originName=%s, "
-       "mOriginId=%d\n", mDesiredCoordSysName.c_str(), mOriginName.c_str(),
+      ("TrajPlotCanvas::SetGlCoordSystem() mViewCoordSystem=%s, originName=%s, "
+       "mOriginId=%d\n", mViewCoordSysName.c_str(), mOriginName.c_str(),
        mOriginId);
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::SetGlCoordSystem() mViewUpCoordSysName=%s\n",
+       mViewUpCoordSysName.c_str());
    #endif
 
 }
@@ -828,8 +842,8 @@ void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *cs)
 void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
                                      SpacePoint *vdObj, Real vsFactor,
                                      const Rvector3 &vpRefVec, const Rvector3 &vpVec,
-                                     const Rvector3 &vdVec, bool usevpRefVec,
-                                     bool usevpVec, bool usevdVec)
+                                     const Rvector3 &vdVec, const std::string &upAxis,
+                                     bool usevpRefVec, bool usevpVec, bool usevdVec)
 {
    mViewPointRefObj = vpRefObj;
    mViewPointVectorObj = vpVecObj;
@@ -838,6 +852,7 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
    mViewPointRefVector = vpRefVec;
    mViewPointVector = vpVec;
    mViewDirectionVector = vdVec;
+   mViewUpAxisName = upAxis;
    mUseViewPointRefVector = usevpRefVec;
    mUseViewPointVector = usevpVec;
    mUseViewDirectionVector = usevdVec;
@@ -849,10 +864,10 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
    #if DEBUG_TRAJCANVAS_PROJ
    MessageInterface::ShowMessage
       ("TrajPlotCanvas::SetGlViewOption() vpRefObj=%d, vpVecObj=%d, "
-       "vdObj=%d, vsFactor=%f\nvpRefVec=%s, vpVec=%s, vdVec=%s, usevpRefVec=%d, "
-       "usevpVec=%d, usevdVec=%d\n",  vpRefObj, vpVecObj, vdObj,
+       "vdObj=%d, vsFactor=%f\nvpRefVec=%s, vpVec=%s, vdVec=%s, upAxis=%s, "
+       "usevpRefVec=%d, usevpVec=%d, usevdVec=%d\n",  vpRefObj, vpVecObj, vdObj,
        vsFactor, lvpRefVec.ToString().c_str(), lvpVec.ToString().c_str(),
-       lvdVec.ToString().c_str(), usevpRefVec, usevpVec, usevdVec);
+       lvdVec.ToString().c_str(), upAxis.c_str(), usevpRefVec, usevpVec, usevdVec);
    #endif
 
    // Set viewpoint ref. object id, if not spacecraft
@@ -954,7 +969,8 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
              "ViewDirectionObject is NULL,"
              "so will use default Vector instead.\n");
    }
-}
+   
+} //TrajPlotCanvas::SetGlViewOption()
 
 
 //------------------------------------------------------------------------------
@@ -1087,7 +1103,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
             inState.Set(posX[sc], posY[sc], posZ[sc], 0.0, 0.0, 0.0);
             
             mCoordConverter.Convert(time, inState, mInternalCoordSystem,
-                                    outState, mDesiredCoordSystem);
+                                    outState, mViewCoordSystem);
             
             mScTempPos[sc][mNumData][0] = outState[0];
             mScTempPos[sc][mNumData][1] = outState[1];
@@ -1099,6 +1115,13 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
             mScTempPos[sc][mNumData][1] = posY[sc];
             mScTempPos[sc][mNumData][2] = posZ[sc];
          }
+         
+         #if DEBUG_TRAJCANVAS_UPDATE > 1
+         MessageInterface::ShowMessage
+            ("TrajPlotCanvas::UpdatePlot() Sc%d pos = %f, %f, %f\n", sc,
+             mScTempPos[sc][mNumData][0], mScTempPos[sc][mNumData][1],
+             mScTempPos[sc][mNumData][2]);
+         #endif
       }
       
       //----------------------------------------------------
@@ -1113,7 +1136,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
             {
                int objId = GetObjectId(mObjectNames[i]);
                
-               #if DEBUG_TRAJCANVAS_UPDATE
+               #if DEBUG_TRAJCANVAS_UPDATE_OBJECT
                MessageInterface::ShowMessage
                   ("TrajPlotCanvas::UpdatePlot() object=%s, objId=%d\n",
                    mObjectNames[i].c_str(), objId);
@@ -1127,7 +1150,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
                   mObjectGciPos[objId][mNumData][1] = objState[1];
                   mObjectGciPos[objId][mNumData][2] = objState[2];
                   
-                  #if DEBUG_TRAJCANVAS_UPDATE > 1
+                  #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
                   MessageInterface::ShowMessage
                      ("TrajPlotCanvas::UpdatePlot() objState=%s\n",
                       objState.ToString().c_str());
@@ -1139,7 +1162,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
                      Rvector6 outState;
                      
                      mCoordConverter.Convert(time, objState, mInternalCoordSystem,
-                                             outState, mDesiredCoordSystem);
+                                             outState, mViewCoordSystem);
                      
                      mObjectTempPos[objId][mNumData][0] = outState[0];
                      mObjectTempPos[objId][mNumData][1] = outState[1];
@@ -1151,7 +1174,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
                                  mObjectGciPos[objId][mNumData]);
                   }
                   
-                  #if DEBUG_TRAJCANVAS_UPDATE > 1
+                  #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
                   MessageInterface::ShowMessage
                      ("TrajPlotCanvas::UpdatePlot() %s pos = %f, %f, %f\n",
                       mObjectNames[i].c_str(), mObjectTempPos[objId][mNumData][0],
@@ -1161,7 +1184,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
                }
                else
                {
-                  #if DEBUG_TRAJCANVAS_UPDATE > 1
+                  #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
                   MessageInterface::ShowMessage
                      ("TrajPlotCanvas::UpdatePlot() Cannot Add data. Invalid objId=%d\n",
                       objId);
@@ -1170,7 +1193,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
             }
             else
             {
-               #if DEBUG_TRAJCANVAS_UPDATE > 1
+               #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
                MessageInterface::ShowMessage
                   ("TrajPlotCanvas::UpdatePlot() Cannot add data. %s is NULL\n",
                    mObjectNames[i].c_str());
@@ -2329,7 +2352,7 @@ void TrajPlotCanvas::DrawPlot()
    }
 
    // draw spacecraft orbit
-   DrawSpacecraftOrbit();
+   DrawSpacecraftOrbit(mNumData-1);
 
    // draw object orbit
    DrawObjectOrbit();
@@ -2582,84 +2605,6 @@ void TrajPlotCanvas::DrawSpacecraft(UnsignedInt scColor)
 
 
 //------------------------------------------------------------------------------
-//  void DrawSpacecraftOrbit()
-//------------------------------------------------------------------------------
-/**
- * Draws spacecraft trajectory and spacecraft at the last point.
- */
-//------------------------------------------------------------------------------
-void TrajPlotCanvas::DrawSpacecraftOrbit()
-{
-   glPushMatrix();
-   glBegin(GL_LINES);
-
-   // convert to proper coordinate system if needed
-   if (mNeedSpacecraftConversion)
-   {
-      ConvertSpacecraftData();
-      mNeedSpacecraftConversion = false;
-   }
-   
-   // assume same number of data points for all spacecrafts
-   for (int sc=0; sc<mScCount; sc++)
-   {
-      // Draw spacecraft orbit line based on points
-      for (int i=1; i<mNumData; i++)
-      {
-         if (mTime[i] > mTime[i-1])
-         {
-            *sIntColor = mScTrajColor[sc][i];
-            glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
-
-            //loj: 4/15/05 Added -sign to x,y
-            glVertex3f((-mScTempPos[sc][i-1][0]),
-                       (-mScTempPos[sc][i-1][1]),
-                       ( mScTempPos[sc][i-1][2]));
-            
-            glVertex3f((-mScTempPos[sc][i][0]),
-                       (-mScTempPos[sc][i][1]),
-                       (mScTempPos[sc][i][2]));
-
-            //glVertex3fv(mScTempPos[sc][i-1]);
-            //glVertex3fv(mScTempPos[sc][i]);
-         }
-      }
-   }
-   
-   glEnd();
-   glPopMatrix();
-
-
-   //-------------------------------------------------------
-   //draw spacecraft with texture
-   //-------------------------------------------------------
-   if (mDrawSpacecraft)
-   {
-      if (mNumData > 0)
-      {
-         for (int sc=0; sc<mScCount; sc++)
-         {
-            glPushMatrix();
-            
-            // put spacecraft at final position
-            //loj: 4/15/05 Added minus sign to x, y
-            glTranslatef(-mScTempPos[sc][mNumData-1][0],
-                         -mScTempPos[sc][mNumData-1][1],
-                          mScTempPos[sc][mNumData-1][2]);
-
-            //MessageInterface::ShowMessage
-            //   ("TrajPlotCanvas::DrawSpacecraftOrbit() scColor=%d\n",
-            //    mScTrajColor[sc][mNumData-1]);
-            
-            DrawSpacecraft(mScTrajColor[sc][mNumData-1]);
-            glPopMatrix();
-         }
-      }
-   }
-} // end DrawSpacecraftOrbit()
-
-
-//------------------------------------------------------------------------------
 //  void DrawSpacecraftOrbit(int frame)
 //------------------------------------------------------------------------------
 /**
@@ -2668,21 +2613,33 @@ void TrajPlotCanvas::DrawSpacecraftOrbit()
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::DrawSpacecraftOrbit(int frame)
 {
+   // convert to proper coordinate system if needed
    if (mNeedSpacecraftConversion)
    {
       ConvertSpacecraftData(frame);
    }
-
+   
    glPushMatrix();
    glBegin(GL_LINES);
-
+   
    for (int sc=0; sc<mScCount; sc++)
    {
+      //loj: 5/12/05 Why last data point is bad sometimes? Draw one less point?
       for (int i=1; i<=frame; i++)
       {
          // Draw spacecraft orbit line based on points
          if (mTime[frame] > mTime[frame-1])
          {
+            Rvector3 r1(mScTempPos[sc][i-1][0], mScTempPos[sc][i-1][1],
+                        mScTempPos[sc][i-1][2]);
+   
+            Rvector3 r2(mScTempPos[sc][i][0], mScTempPos[sc][i][1],
+                        mScTempPos[sc][i][2]);
+
+            // if spacecraft position magnitude is 0, skip
+            if (r1.GetMagnitude() == 0.0 || r2.GetMagnitude() == 0.0)
+               continue;
+            
             *sIntColor = mScTrajColor[sc][frame];
             glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
 
@@ -2693,6 +2650,8 @@ void TrajPlotCanvas::DrawSpacecraftOrbit(int frame)
             glVertex3f((-mScTempPos[sc][i][0]),
                        (-mScTempPos[sc][i][1]),
                        ( mScTempPos[sc][i][2]));
+            
+            mScLastFrame[sc] = i;
          }
       }
    }
@@ -2712,14 +2671,17 @@ void TrajPlotCanvas::DrawSpacecraftOrbit(int frame)
          glPushMatrix();
          
          // put spacecraft at final position
-         glTranslatef(-mScTempPos[sc][frame][0],
-                      -mScTempPos[sc][frame][1],
-                       mScTempPos[sc][frame][2]);
+         glTranslatef(-mScTempPos[sc][mScLastFrame[sc]][0],
+                      -mScTempPos[sc][mScLastFrame[sc]][1],
+                       mScTempPos[sc][mScLastFrame[sc]][2]);
          
-         DrawSpacecraft(mScTrajColor[sc][frame]);
+         DrawSpacecraft(mScTrajColor[sc][mScLastFrame[sc]]);
+         
          glPopMatrix();
       }
    }
+   
+   
 } // end DrawSpacecraftOrbit(int frame)
 
 
@@ -3062,11 +3024,11 @@ bool TrajPlotCanvas::TiltOriginZAxis()
    if (mNumData == 0)
       return false;
    
-   if (mInternalCoordSystem == NULL || mDesiredCoordSystem == NULL)
+   if (mInternalCoordSystem == NULL || mViewCoordSystem == NULL)
       return false;
 
    std::string axisTypeName =
-      mDesiredCoordSystem->GetRefObject(Gmat::AXIS_SYSTEM, "")->GetTypeName();
+      mViewCoordSystem->GetRefObject(Gmat::AXIS_SYSTEM, "")->GetTypeName();
    
    #if DEBUG_TRAJCANVAS_DRAW
    MessageInterface::ShowMessage
@@ -3074,7 +3036,7 @@ bool TrajPlotCanvas::TiltOriginZAxis()
    #endif
    
    // rotate earth Z axis if desired CS is MJ2000Ec
-   //5.10if (mDesiredCoordSystem->GetName() == "EarthMJ2000Ec")
+   //5.10if (mViewCoordSystem->GetName() == "EarthMJ2000Ec")
    if (axisTypeName == "MJ2000Ec")
    {
       Rvector6 inState, outState;
@@ -3082,7 +3044,7 @@ bool TrajPlotCanvas::TiltOriginZAxis()
       inState.Set(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
       
       mCoordConverter.Convert(mTime[0], inState, mInternalCoordSystem,
-                              outState, mDesiredCoordSystem);
+                              outState, mViewCoordSystem);
       
       #if DEBUG_TRAJCANVAS_DRAW > 2
          MessageInterface::ShowMessage
@@ -3113,7 +3075,7 @@ bool TrajPlotCanvas::TiltOriginZAxis()
 //---------------------------------------------------------------------------
 bool TrajPlotCanvas::ConvertSpacecraftData()
 {
-   if (mInternalCoordSystem == NULL || mDesiredCoordSystem == NULL)
+   if (mInternalCoordSystem == NULL || mViewCoordSystem == NULL)
       return false;
    
    Rvector6 inState, outState;
@@ -3121,11 +3083,11 @@ bool TrajPlotCanvas::ConvertSpacecraftData()
    #if DEBUG_TRAJCANVAS_CONVERT
    MessageInterface::ShowMessage
       ("TrajPlotCanvas::ConvertSpacecraftData() internalCS=%s, desiredCS=%s\n",
-       mInternalCoordSystem->GetName().c_str(), mDesiredCoordSystem->GetName().c_str());
+       mInternalCoordSystem->GetName().c_str(), mViewCoordSystem->GetName().c_str());
    #endif
    
    // do not convert if desired CS is internal CS
-   //if (mDesiredCoordSystem->GetName() == mInternalCoordSystem->GetName())
+   //if (mViewCoordSystem->GetName() == mInternalCoordSystem->GetName())
    if (mIsInternalCoordSystem)
    {
       for (int sc=0; sc<mScCount; sc++)
@@ -3148,7 +3110,7 @@ bool TrajPlotCanvas::ConvertSpacecraftData()
                         0.0, 0.0, 0.0);
                         
             mCoordConverter.Convert(mTime[i], inState, mInternalCoordSystem,
-                                    outState, mDesiredCoordSystem);
+                                    outState, mViewCoordSystem);
             
             mScTempPos[sc][i][0] = outState[0];
             mScTempPos[sc][i][1] = outState[1];
@@ -3171,7 +3133,7 @@ bool TrajPlotCanvas::ConvertSpacecraftData()
 //---------------------------------------------------------------------------
 bool TrajPlotCanvas::ConvertSpacecraftData(int frame)
 {
-   if (mInternalCoordSystem == NULL || mDesiredCoordSystem == NULL)
+   if (mInternalCoordSystem == NULL || mViewCoordSystem == NULL)
       return false;
    
    Rvector6 inState, outState;
@@ -3179,11 +3141,11 @@ bool TrajPlotCanvas::ConvertSpacecraftData(int frame)
    #if DEBUG_TRAJCANVAS_CONVERT
    MessageInterface::ShowMessage
       ("TrajPlotCanvas::ConvertSpacecraftData() internalCS=%s, desiredCS=%s\n",
-       mInternalCoordSystem->GetName().c_str(), mDesiredCoordSystem->GetName().c_str());
+       mInternalCoordSystem->GetName().c_str(), mViewCoordSystem->GetName().c_str());
    #endif
    
    // do not convert if desired CS is internal CS
-   //if (mDesiredCoordSystem->GetName() == mInternalCoordSystem->GetName())
+   //if (mViewCoordSystem->GetName() == mInternalCoordSystem->GetName())
    if (mIsInternalCoordSystem)
    {
       for (int sc=0; sc<mScCount; sc++)
@@ -3202,7 +3164,7 @@ bool TrajPlotCanvas::ConvertSpacecraftData(int frame)
                      0.0, 0.0, 0.0);
          
          mCoordConverter.Convert(mTime[frame], inState, mInternalCoordSystem,
-                                 outState, mDesiredCoordSystem);
+                                 outState, mViewCoordSystem);
          
          mScTempPos[sc][frame][0] = outState[0];
          mScTempPos[sc][frame][1] = outState[1];
@@ -3224,7 +3186,7 @@ bool TrajPlotCanvas::ConvertSpacecraftData(int frame)
 //---------------------------------------------------------------------------
 bool TrajPlotCanvas::ConvertObjectData()
 {
-   if (mInternalCoordSystem == NULL || mDesiredCoordSystem == NULL)
+   if (mInternalCoordSystem == NULL || mViewCoordSystem == NULL)
       return false;
    
    Rvector6 inState, outState;
@@ -3232,11 +3194,11 @@ bool TrajPlotCanvas::ConvertObjectData()
    #if DEBUG_TRAJCANVAS_CONVERT
    MessageInterface::ShowMessage
       ("TrajPlotCanvas::ConvertObjectData() internalCS=%s, desiredCS=%s\n",
-       mInternalCoordSystem->GetName().c_str(), mDesiredCoordSystem->GetName().c_str());
+       mInternalCoordSystem->GetName().c_str(), mViewCoordSystem->GetName().c_str());
    #endif
    
    // do not convert if desired CS is internal CS
-   //if (mDesiredCoordSystem->GetName() == mInternalCoordSystem->GetName())
+   //if (mViewCoordSystem->GetName() == mInternalCoordSystem->GetName())
    if (mIsInternalCoordSystem)
    {
       for (int i=0; i<mObjectCount; i++)
@@ -3279,7 +3241,7 @@ void TrajPlotCanvas::ConvertObject(int objId, int index)
                mObjectGciPos[objId][index][2], 0.0, 0.0, 0.0);
    
    mCoordConverter.Convert(mTime[index], inState, mInternalCoordSystem,
-                           outState, mDesiredCoordSystem);
+                           outState, mViewCoordSystem);
    
    mObjectTempPos[objId][index][0] = outState[0];
    mObjectTempPos[objId][index][1] = outState[1];
