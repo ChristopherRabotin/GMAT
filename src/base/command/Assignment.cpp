@@ -28,6 +28,7 @@
 #include "Assignment.hpp"
 #include "MessageInterface.hpp"
 #include "Parameter.hpp"
+#include "Variable.hpp"
 
 //#define DEBUG_RENAME 1
 //#define DEBUG_PARM_ASSIGNMENT
@@ -512,6 +513,10 @@ bool Assignment::Execute()
          return true;
       }
       
+      // Once inline equation handling is implemented, variables will do this:
+      // if (parmOwner->GetTypeName() == "Variable")
+      //    return ((Variable*)parmOwner)->EvaluateReal();
+      
       #ifdef DEBUG_ARRAY_INTERPRETING
          MessageInterface::ShowMessage("   Executing parameter setting\n");
       #endif
@@ -749,6 +754,14 @@ bool Assignment::InitializeRHS(const std::string &rhs)
          subchunk.c_str());
    #endif
    
+   // Code for inline equations.  Right now the parameter database doesn't know
+   // about Parameters on the right side of the =, so this doesn't work yet
+   // if (parmOwner->GetTypeName() == "Variable")
+   // {
+   //    parmOwner->SetStringParameter("Expression", rhs);
+   // }
+   // else
+
    if (objectMap->find(chunk) != objectMap->end())
    {
       rhsObject = (*objectMap)[chunk];
@@ -876,8 +889,8 @@ Real Assignment::EvaluateRHS()
    // RHS could be a parameter, an array element, a variable, or just a number
    switch (rhsType)
    {
-      case PARAMETER:
       case VARIABLE:
+      case PARAMETER:
          return ((Parameter*)rhsObject)->EvaluateReal();
 
       case ARRAY_ELEMENT:

@@ -61,7 +61,7 @@ protected:
    std::string          ownerName;
    /// Parameter associated with that object
    std::string          parmName;
-   /// Object named by pwnerName
+   /// Object named by ownerName
    GmatBase             *parmOwner;
    /// The object used for object assignment and variable/array evaluation
    GmatBase             *rhsObject;
