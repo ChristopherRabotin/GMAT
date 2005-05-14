@@ -410,6 +410,28 @@ bool Sandbox::Initialize()
 
    // Initialize the solar system, internal coord system, etc.
    InitializeInternalObjects();
+   
+   // Set J2000 Body for all SpacePoint derivatives before anything else
+   for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
+   {
+      obj = omi->second;
+      if (obj->IsOfType(Gmat::SPACE_POINT))
+      {
+         #ifdef DEBUG_SANDBOX_INIT
+            MessageInterface::ShowMessage(
+               "Setting J2000 Body for %s in the Sandbox\n",
+               obj->GetName().c_str());
+         #endif
+         SpacePoint *spObj = (SpacePoint *)obj;
+         SpacePoint* j2k = FindSpacePoint(spObj->GetJ2000BodyName());
+         if (j2k)
+            spObj->SetJ2000Body(j2k);
+         else
+            throw SandboxException("Sandbox did not find the Spacepoint \"" +
+               spObj->GetJ2000BodyName() + "\"");
+      }
+   }
+
 
    // Per Linda's request, the initialization order is:
    // 1. CoordinateSystem
@@ -427,7 +449,12 @@ bool Sandbox::Initialize()
       obj = omi->second;
       if (obj->GetType() == Gmat::COORDINATE_SYSTEM)
       {
+         #ifdef DEBUG_SC_INIT
+            MessageInterface::ShowMessage("Initializing CS %s\n",
+               obj->GetName().c_str());
+         #endif
          obj->SetSolarSystem(solarSys);
+         BuildReferences(obj); //djc: 5/13/05 Added
          InitializeCoordinateSystem((CoordinateSystem *)obj);
          obj->Initialize();
       }
@@ -641,7 +668,7 @@ void Sandbox::BuildReferences(GmatBase *obj)
             // Handle SandboxExceptions first.
             #ifdef DEBUG_SANDBOX_INIT
                MessageInterface::ShowMessage(
-                  "RefObjectName not found; ignoring " +
+                  "RefObjectName " + oName + " not found; ignoring " +
                   ex.GetMessage() + "\n");
             #endif
             //throw ex;
@@ -749,6 +776,9 @@ void Sandbox::InitializeCoordinateSystem(CoordinateSystem *cs)
    BuildReferences(cs);
 
    oName = cs->GetStringParameter("Origin");
+
+   GmatBase *axes = cs->GetOwnedObject(0);
+   BuildReferences(axes);
 
    sp = FindSpacePoint(oName);
    if (sp == NULL)

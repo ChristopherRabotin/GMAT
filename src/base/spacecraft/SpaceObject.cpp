@@ -21,7 +21,8 @@
 #include "SpaceObject.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_J2000_STATE 1
+
+// #define DEBUG_J2000_STATE 1
 
 
 //---------------------------------
@@ -98,6 +99,7 @@ SpaceObject::SpaceObject(const SpaceObject& so) :
    originName     (so.originName),
    origin         (so.origin)
 {
+   j2000Body = so.j2000Body;
 }
 
 
@@ -252,8 +254,9 @@ const Rvector6 SpaceObject::GetMJ2000State(const A1Mjd &atTime)
          "SpaceObject::GetMJ2000State entered; epoch is %lf\n", atTime.Get());
    #endif
    if (j2000Body == NULL)
-      throw SpaceObjectException("MJ2000 body not yet set for " +
-         instanceName);
+      throw SpaceObjectException(
+         "SpaceObject::GetMJ2000State MJ2000 body not yet set for " +
+         instanceName + "\n");
          
    PropState ps = GetState();
    

@@ -583,6 +583,7 @@ const StringArray& ObjectReferencedAxes::GetRefObjectNameArray(const Gmat::Objec
    if (type == Gmat::UNKNOWN_OBJECT)
    {
       static StringArray refs = DynamicAxes::GetRefObjectNameArray(type);
+      refs.clear();
 
       if (find(refs.begin(), refs.end(), primaryName) == refs.end())
          refs.push_back(primaryName);
@@ -592,6 +593,12 @@ const StringArray& ObjectReferencedAxes::GetRefObjectNameArray(const Gmat::Objec
          refs.push_back(originName);
       if (find(refs.begin(), refs.end(), j2000BodyName) == refs.end())
          refs.push_back(j2000BodyName);
+         
+      #ifdef DEBUG_REFERENCE_SETTING
+         MessageInterface::ShowMessage("+++ReferenceObjects:\n");
+         for (StringArray::iterator i = refs.begin(); i != refs.end(); ++i)
+            MessageInterface::ShowMessage("   %s\n", i->c_str());
+      #endif
 
       return refs;
    }
@@ -620,9 +627,12 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
                                         const Gmat::ObjectType type,
                                         const std::string &name)
 {
-   switch (type)
-   {
-      case Gmat::SPACE_POINT:
+   // DJC changed from case to IsOfType 5/13/05.  Definitely Friday the 13th!
+//   switch (type)
+//   {
+//      case Gmat::SPACE_POINT:
+//      {
+      if (obj->IsOfType(Gmat::SPACE_POINT))
       {
          if (name == primaryName)
          {
@@ -661,9 +671,9 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
          }
          return true;
       }
-      default:
-         break;
-   }
+//      default:
+//         break;
+//   }
 
    // Not handled here -- invoke the next higher SetRefObject call
    return DynamicAxes::SetRefObject(obj, type, name);
@@ -686,6 +696,10 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
 //---------------------------------------------------------------------------
 void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
 {
+   if (!primary)
+      throw CoordinateSystemException("Primary " + primaryName +
+         " is not set in object referenced!\n");
+
    if ((xAxis == yAxis) || (xAxis == zAxis) ||
        (yAxis == zAxis))
       throw CoordinateSystemException(

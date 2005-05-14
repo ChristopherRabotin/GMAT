@@ -29,6 +29,11 @@
 #include "Rvector6.hpp"
 #include "Rvector3.hpp"
 
+#include "MessageInterface.hpp"
+
+
+//#define DEBUG_J2000_STATE
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -169,7 +174,21 @@ bool SpacePoint::SetJ2000BodyName(const std::string &toName)
 
 void SpacePoint::SetJ2000Body(SpacePoint* toBody)
 {
+   #ifdef DEBUG_J2000_STATE
+      if (toBody)
+         MessageInterface::ShowMessage("Setting J2000 body to %s for %s\n",
+            toBody->GetName().c_str(), instanceName.c_str());
+      else
+         MessageInterface::ShowMessage("Setting J2000 body to NULL for %s\n",
+            instanceName.c_str());
+   #endif
+   
    j2000Body = toBody;
+
+   #ifdef DEBUG_J2000_STATE
+      if (j2000Body)
+         MessageInterface::ShowMessage("J2000 body is now set\n");
+   #endif
 }
 
 const Rvector3 SpacePoint::GetMJ2000Acceleration(const A1Mjd &atTime)
