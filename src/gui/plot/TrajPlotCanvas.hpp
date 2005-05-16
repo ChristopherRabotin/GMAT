@@ -170,7 +170,6 @@ private:
    bool mDrawEcPlane;
    bool mDrawEclipticPlane;
    bool mDrawEcLine;
-   bool mDrawSpacecraft;
    bool mDrawAxes;
    
    // color
@@ -256,8 +255,6 @@ private:
    float mObjMaxZoomIn[MAX_OBJECT];
    unsigned int mObjectOrbitColor[MAX_OBJECT][MAX_DATA];
    
-   bool  mObjectInUse[MAX_OBJECT];
-   bool  mObjectHasData[MAX_OBJECT];
    float mObjectGciPos[MAX_OBJECT][MAX_DATA][3];
    float mObjectTempPos[MAX_OBJECT][MAX_DATA][3];
    short mPivotBodyIndex[MAX_OBJECT];

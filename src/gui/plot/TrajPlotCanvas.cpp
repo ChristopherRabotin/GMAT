@@ -184,7 +184,6 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mScRadius = 200;        //km: make big enough to see
    
    // view options
-   mDrawSpacecraft = true;
    mDrawWireFrame = false;
    mDrawEqPlane = false;
    mDrawEcPlane = false;
@@ -209,8 +208,6 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    {
       mObjectTextureIndex[i] = UNINIT_TEXTURE;
       mObjMaxZoomIn[i] = MAX_ZOOM_IN;
-      mObjectInUse[i] = false;
-      mObjectHasData[i] = false;
    }
 
    // objects
@@ -870,29 +867,21 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
        lvdVec.ToString().c_str(), upAxis.c_str(), usevpRefVec, usevpVec, usevdVec);
    #endif
 
-   // Set viewpoint ref. object id, if not spacecraft
+   // Set viewpoint ref. object id
    if (!mUseViewPointRefVector && mViewPointRefObj)
    {
       mViewPointRefObjName = mViewPointRefObj->GetName();
       
-      if (mViewPointRefObj->GetType() != Gmat::SPACECRAFT)
-      {
-         mVpRefObjId = GetObjectId(mViewPointRefObj->GetName().c_str());
+      mVpRefObjId = GetObjectId(mViewPointRefObj->GetName().c_str());
          
-         if (mVpRefObjId == GmatPlot::UNKNOWN_BODY)
-         {
-            mUseViewPointRefVector = true;
-            MessageInterface::ShowMessage
-               ("TrajPlotCanvas::SetGlViewOption() ***** Cannot find "
-                "mViewPointRefObj name=%s, so using vector=%s\n",
-                mViewPointRefObj->GetName().c_str(),
-                mViewPointRefVector.ToString().c_str());
-         }
-         else
-         {
-            mObjectInUse[mVpRefObjId] = true;
-            mObjectHasData[mVpRefObjId] = true;
-         }
+      if (mVpRefObjId == GmatPlot::UNKNOWN_BODY)
+      {
+         mUseViewPointRefVector = true;
+         MessageInterface::ShowMessage
+            ("*** Warning *** TrajPlotCanvas::SetGlViewOption() ***** Cannot find "
+             "mViewPointRefObj name=%s, so using vector=%s\n",
+             mViewPointRefObj->GetName().c_str(),
+             mViewPointRefVector.ToString().c_str());
       }
    }
    else
@@ -906,27 +895,19 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
              "so will use default Vector instead.\n");
    }
    
-   // Set viewpoint vector object id, if not spacecraft
+   // Set viewpoint vector object id
    if (!mUseViewPointVector && mViewPointVectorObj)
    {
-      if (mViewPointVectorObj->GetType() != Gmat::SPACECRAFT)
-      {
-         mVpVecObjId = GetObjectId(mViewPointVectorObj->GetName().c_str());
+      mVpVecObjId = GetObjectId(mViewPointVectorObj->GetName().c_str());
          
-         if (mVpVecObjId == GmatPlot::UNKNOWN_BODY)
-         {
-            mUseViewPointVector = true;
-            MessageInterface::ShowMessage
-               ("TrajPlotCanvas::SetGlViewOption() ***** Cannot find "
-                "mViewPointVectorObj name=%s, so using vector=%s\n",
-                mViewPointVectorObj->GetName().c_str(),
-                mViewPointVector.ToString().c_str());
-         }
-         else
-         {
-            mObjectInUse[mVpVecObjId] = true;
-            mObjectHasData[mVpVecObjId] = true;
-         }
+      if (mVpVecObjId == GmatPlot::UNKNOWN_BODY)
+      {
+         mUseViewPointVector = true;
+         MessageInterface::ShowMessage
+            ("*** Warning *** TrajPlotCanvas::SetGlViewOption() ***** Cannot find "
+             "mViewPointVectorObj name=%s, so using vector=%s\n",
+             mViewPointVectorObj->GetName().c_str(),
+             mViewPointVector.ToString().c_str());
       }
    }
    else
@@ -938,27 +919,19 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
              "so will use default Vector instead.\n");
    }
    
-   // Set view direction object id, if not spacecraft
+   // Set view direction object id
    if (!mUseViewDirectionVector && mViewDirectionObj)
    {
-      if (mViewDirectionObj->GetType() != Gmat::SPACECRAFT)
-      {
-         mVdirBodyId = GetObjectId(mViewDirectionObj->GetName().c_str());
+      mVdirBodyId = GetObjectId(mViewDirectionObj->GetName().c_str());
          
-         if (mVdirBodyId == GmatPlot::UNKNOWN_BODY)
-         {
-            mUseViewDirectionVector = true;
-            MessageInterface::ShowMessage
-               ("TrajPlotCanvas::SetGlViewOption() ***** Cannot find "
-                "mViewDirectionObj name=%s, so using vector=%s\n",
-                mViewDirectionObj->GetName().c_str(),
-                mViewDirectionVector.ToString().c_str());
-         }
-         else
-         {
-            mObjectInUse[mVdirBodyId] = true;
-            mObjectHasData[mVdirBodyId] = true;
-         }
+      if (mVdirBodyId == GmatPlot::UNKNOWN_BODY)
+      {
+         mUseViewDirectionVector = true;
+         MessageInterface::ShowMessage
+            ("*** Warning *** TrajPlotCanvas::SetGlViewOption() ***** Cannot find "
+             "mViewDirectionObj name=%s, so using vector=%s\n",
+             mViewDirectionObj->GetName().c_str(),
+             mViewDirectionVector.ToString().c_str());
       }
    }
    else
@@ -1243,12 +1216,6 @@ void TrajPlotCanvas::AddObjectList(const wxArrayString &bodyNames,
    {
       mObjectNames.Empty();
       mObjectTextureIdMap.clear();
-      
-      for (int i=0; i<MAX_BODIES; i++)
-      {
-         mObjectInUse[i] = false;
-         mObjectHasData[i] = false;
-      }
    }
    
    RgbColor rgb;
@@ -1281,10 +1248,7 @@ void TrajPlotCanvas::AddObjectList(const wxArrayString &bodyNames,
          mObjectRadius[i] = mObjectDefaultRadius;
          mObjMaxZoomIn[i] = mObjectDefaultRadius * RADIUS_ZOOM_RATIO;
       }
-      
-      mObjectInUse[i] = true;
-      mObjectHasData[i] = true;
-      
+            
       #if DEBUG_TRAJCANVAS_OBJECT > 1
       MessageInterface::ShowMessage
          ("TrajPlotCanvas::AddObjectList() bodyNames[%d]=%s\n",
@@ -1936,59 +1900,21 @@ void TrajPlotCanvas::ComputeProjection(int frame)
    {
       #if DEBUG_TRAJCANVAS_PROJ
       MessageInterface::ShowMessage
-         ("ComputeProjection() mViewPointRefObj=%d, getting state\n",
-          mViewPointRefObj);
+         ("ComputeProjection() mViewPointRefObj=%d, name=%s\n",
+          mViewPointRefObj, mViewPointRefObj->GetName().c_str());
       #endif
 
-      // if viewpoint ref. object is a spacecraft, find the index
-      if (mViewPointRefObj->GetType() == Gmat::SPACECRAFT)
+      // if valid body id
+      if (mVpRefObjId != -1)
       {
-         mVpRefScId = -1;
-         for (int i=0; i<mScCount; i++)
-         {
-            if (mViewPointRefObj->GetName() == mScNameArray[i])
-            {
-               mVpRefScId = i;
-               break;
-            }
-         }
-         
-         // Is this reasonable?
-         // if spacecraft name not found, set to use a vector
-         if (mVpRefScId == -1)
-         {
-            mUseViewPointRefVector = true;
-            MessageInterface::ShowMessage
-               ("TrajPlotCanvas::ComputeProjection() ***** Cannot find "
-                "mViewPointRefObj name=%s, so using vector=%s\n",
-                mViewPointRefObj->GetName().c_str(), vpRefVec.ToString().c_str());
-         }
-         else
-         {
-            vpRefVec.Set(mObjectTempPos[mVpRefScId][frame][0],
-                         mObjectTempPos[mVpRefScId][frame][1],
-                         mObjectTempPos[mVpRefScId][frame][2]);
-         }
+         // for efficiency, body data are computed in UpdatePlot() once.
+         vpRefVec.Set(mObjectTempPos[mVpRefObjId][frame][0],
+                      mObjectTempPos[mVpRefObjId][frame][1],
+                      mObjectTempPos[mVpRefObjId][frame][2]);
       }
       else
       {
-         // if valid body id
-         if (mVpRefObjId != -1)
-         {
-            // for efficiency, body data are computed in UpdatePlot() once.
-            if (mObjectHasData[mVpRefObjId])
-            {
-               vpRefVec.Set(mObjectTempPos[mVpRefObjId][frame][0],
-                            mObjectTempPos[mVpRefObjId][frame][1],
-                            mObjectTempPos[mVpRefObjId][frame][2]);
-            }
-         }
-         else
-         {
-            // If body doesn't have data, then get the state
-            Rvector6 vpRefState = mViewPointRefObj->GetMJ2000State(mTime[frame]);
-            vpRefVec.Set(vpRefState[0], vpRefState[1], vpRefState[2]);
-         }
+         MessageInterface::ShowMessage("===> mVpRefObjId=%d\n", mVpRefObjId);
       }
    }
    
@@ -2001,59 +1927,22 @@ void TrajPlotCanvas::ComputeProjection(int frame)
    {
       #if DEBUG_TRAJCANVAS_PROJ
       MessageInterface::ShowMessage
-         ("ComputeProjection() mViewPointVectorObj=%d, type=%d, getting state\n",
-          mViewPointVectorObj, mViewPointVectorObj->GetType());
+         ("ComputeProjection() mViewPointVectorObj=%d, name=%s\n",
+          mViewPointVectorObj, mViewPointVectorObj->GetName().c_str());
       #endif
 
-      // if viewpoint vector object is a spacecraft, find the index
-      if (mViewPointVectorObj->GetType() == Gmat::SPACECRAFT)
+      // if valid body id
+      if (mVpVecObjId != -1)
       {
-         mVpVecScId = -1;
-         for (int i=0; i<mScCount; i++)
-         {
-            if (mViewPointVectorObj->GetName() == mScNameArray[i])
-            {
-               mVpVecScId = i;
-               break;
-            }
-         }
-         
-         // Is this reasonable?
-         // if spacecraft name not found, set to use a vector
-         if (mVpVecScId == -1)
-         {
-            mUseViewPointVector = true;
-            MessageInterface::ShowMessage
-               ("TrajPlotCanvas::ComputeProjection() ***** Cannot find "
-                "mViewPointVectorObj name=%s, so using vector=%s\n",
-                mViewPointVectorObj->GetName().c_str(), vpVec.ToString().c_str());
-         }
-         else
-         {
-            vpVec.Set(mObjectTempPos[mVpVecScId][frame][0],
-                      mObjectTempPos[mVpVecScId][frame][1],
-                      mObjectTempPos[mVpVecScId][frame][2]);
-         }
+         // for efficiency, body data are computed in UpdatePlot() once.
+         vpVec.Set(mObjectTempPos[mVpVecObjId][frame][0],
+                   mObjectTempPos[mVpVecObjId][frame][1],
+                   mObjectTempPos[mVpVecObjId][frame][2]);
       }
       else
       {
-         // if valid body id
-         if (mVpVecObjId != -1)
-         {
-            // for efficiency, body data are computed in UpdatePlot() once.
-            if (mObjectHasData[mVpVecObjId])
-            {
-               vpVec.Set(mObjectTempPos[mVpVecObjId][frame][0],
-                         mObjectTempPos[mVpVecObjId][frame][1],
-                         mObjectTempPos[mVpVecObjId][frame][2]);
-            }
-         }
-         else
-         {
-            // If body doesn't have data, then get the state
-            Rvector6 vpVecState = mViewPointRefObj->GetMJ2000State(mTime[frame]);
-            vpVec.Set(vpVecState[0], vpVecState[1], vpVecState[2]);
-         }
+         MessageInterface::ShowMessage("===> Error: ComputeProjection() mVpVecObjId=%d\n",
+                                       mVpVecObjId);
       }
    }
 
@@ -2071,66 +1960,27 @@ void TrajPlotCanvas::ComputeProjection(int frame)
    {
       #if DEBUG_TRAJCANVAS_PROJ
       MessageInterface::ShowMessage
-         ("ComputeProjection() mViewDirectionObj=%d, TypeName=%s, getting state\n",
-          mViewDirectionObj, mViewDirectionObj->GetTypeName().c_str());
+         ("ComputeProjection() mViewDirectionObj=%d, name=%s\n",
+          mViewDirectionObj, mViewDirectionObj->GetName().c_str());
       #endif
 
-      //if (mViewDirectionObj->GetName() == "Earth")
       // if viewpoint ref object is same as view direction object
       // just look opposite side
       if (mViewDirectionObj->GetName() == mViewPointRefObjName)
       {
          vdVec = -mViewPointLocVector;
       }
-      else if (mViewDirectionObj->GetType() == Gmat::SPACECRAFT)
+      else if (mVdirBodyId != -1)
       {
-         // if view direction object is a spacecraft, find the index
-         mVdirScId = -1;
-         for (int i=0; i<mScCount; i++)
-         {
-            if (mViewDirectionObj->GetName() == mScNameArray[i])
-            {
-               mVdirScId = i;
-               break;
-            }
-         }
-         
-         // Is this reasonable?
-         // if spacecraft name not found, set to use a vector
-         if (mVdirScId == -1)
-         {
-            mUseViewDirectionVector = true;
-            MessageInterface::ShowMessage
-               ("TrajPlotCanvas::ComputeProjection() ***** Cannot find "
-                "mViewDirectionObj name=%s, so using vector=%s\n",
-                mViewDirectionObj->GetName().c_str(), vdVec.ToString().c_str());
-         }
-         else
-         {
-            vdVec.Set(mObjectTempPos[mVdirScId][frame][0],
-                      mObjectTempPos[mVdirScId][frame][1],
-                      mObjectTempPos[mVdirScId][frame][2]);
-         }
+         // for efficiency, body data are computed in UpdatePlot() once.
+         vdVec.Set(mObjectTempPos[mVdirBodyId][frame][0],
+                   mObjectTempPos[mVdirBodyId][frame][1],
+                   mObjectTempPos[mVdirBodyId][frame][2]);
       }
       else
       {
-         // if valid body id
-         if (mVdirBodyId != -1)
-         {
-            // for efficiency, body data are computed in UpdatePlot() once.
-            if (mObjectHasData[mVdirBodyId])
-            {
-               vdVec.Set(mObjectTempPos[mVdirBodyId][frame][0],
-                         mObjectTempPos[mVdirBodyId][frame][1],
-                         mObjectTempPos[mVdirBodyId][frame][2]);
-            }
-         }
-         else
-         {
-            // If body doesn't have data, then get the state
-            Rvector6 vdVecState = mViewDirectionObj->GetMJ2000State(mTime[frame]);
-            vdVec.Set(vdVecState[0], vdVecState[1], vdVecState[2]);
-         }
+         MessageInterface::ShowMessage("===> Error: ComputeProjection() mVdirBodyId=%d\n",
+                                       mVdirBodyId);
       }
    }
    
@@ -2662,19 +2512,22 @@ void TrajPlotCanvas::DrawSpacecraftOrbit(int frame)
    //-------------------------------------------------------
    //loj: 4/25/05 Why is spcacecraft rotaing itself?
    
-   if (mDrawSpacecraft)
+   wxString scName;
+      
+   for (int sc=0; sc<mScCount; sc++)
    {
-      int objId;
-      for (int sc=0; sc<mScCount; sc++)
+      scName = mScNameArray[sc].c_str();
+         
+      if (mShowObjectMap[scName])
       {
-         objId = GetObjectId(mScNameArray[sc].c_str());
+         objId = GetObjectId(scName);
          
          glPushMatrix();
          
          // put spacecraft at final position
          glTranslatef(-mObjectTempPos[objId][mScLastFrame[sc]][0],
                       -mObjectTempPos[objId][mScLastFrame[sc]][1],
-                       mObjectTempPos[objId][mScLastFrame[sc]][2]);
+                      mObjectTempPos[objId][mScLastFrame[sc]][2]);
          
          DrawSpacecraft(mObjectOrbitColor[objId][mScLastFrame[sc]]);
          
