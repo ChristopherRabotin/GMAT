@@ -1200,6 +1200,7 @@ std::string OpenGlPlot::GetRefObjectName(const Gmat::ObjectType type) const
 }
 
 
+//loj: 5/16/05 only add unique object name to array
 //------------------------------------------------------------------------------
 // virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
@@ -1220,30 +1221,51 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
    {
       mAllRefObjectNames = mAllSpNameArray;
       
-      mAllRefObjectNames.push_back(mViewPointRefName);
+      if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
+               mViewPointRefName) == mAllRefObjectNames.end())
+         mAllRefObjectNames.push_back(mViewPointRefName);
       
       if (mViewPointVectorName != "Vector")
-         mAllRefObjectNames.push_back(mViewPointVectorName);
-
+      {
+         if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
+                  mViewPointVectorName) == mAllRefObjectNames.end())
+            mAllRefObjectNames.push_back(mViewPointVectorName);
+      }
+      
       if (mViewDirectionName != "Vector")
-         mAllRefObjectNames.push_back(mViewDirectionName);
+      {
+         if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
+                  mViewDirectionName) == mAllRefObjectNames.end())
+            mAllRefObjectNames.push_back(mViewDirectionName);
+      }
    }
    else if (type == Gmat::UNKNOWN_OBJECT)
    {
       mAllRefObjectNames = mAllSpNameArray;
       
       mAllRefObjectNames.push_back(mViewCoordSysName);
-      mAllRefObjectNames.push_back(mViewUpCoordSysName);
-      mAllRefObjectNames.push_back(mViewPointRefName);
+
+      if (mViewCoordSysName != mViewUpCoordSysName)
+         mAllRefObjectNames.push_back(mViewUpCoordSysName);
+
+      if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
+               mViewPointRefName) == mAllRefObjectNames.end())
+         mAllRefObjectNames.push_back(mViewPointRefName);
       
       if (mViewPointVectorName != "Vector")
-         mAllRefObjectNames.push_back(mViewPointVectorName);
+      {
+         if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
+                  mViewPointVectorName) == mAllRefObjectNames.end())
+            mAllRefObjectNames.push_back(mViewPointVectorName);
+      }
 
+      
       if (mViewDirectionName != "Vector")
-         mAllRefObjectNames.push_back(mViewDirectionName);
-
-      for (Integer i=0; i<mAllSpCount; i++)
-         mAllRefObjectNames.push_back(mAllSpNameArray[i]);
+      {
+         if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
+                  mViewDirectionName) == mAllRefObjectNames.end())
+            mAllRefObjectNames.push_back(mViewDirectionName);
+      }
    }
 
    #if DEBUG_OPENGL_OBJ
