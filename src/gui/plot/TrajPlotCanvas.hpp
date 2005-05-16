@@ -246,8 +246,6 @@ private:
    
    // earth
    float mEarthRadius;
-   float mEarthGciPos[MAX_DATA][3];
-   float mEarthTempPos[MAX_DATA][3];
 
    // objects
    wxArrayString mObjectNames;

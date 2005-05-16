@@ -40,7 +40,7 @@
 #endif
 
 //#define DEBUG_TRAJCANVAS_INIT 1
-//#define DEBUG_TRAJCANVAS_UPDATE 2
+//#define DEBUG_TRAJCANVAS_UPDATE 1
 //#define DEBUG_TRAJCANVAS_UPDATE_OBJECT 2
 //#define DEBUG_TRAJCANVAS_ACTION 1
 //#define DEBUG_TRAJCANVAS_CONVERT 2
@@ -1004,12 +1004,9 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
          mScTempPos[sc][mNumData][0] = mTrajectoryData[i].x;
          mScTempPos[sc][mNumData][1] = mTrajectoryData[i].y;
          mScTempPos[sc][mNumData][2] = mTrajectoryData[i].z;
-         mEarthTempPos[mNumData][0] = 0.0;
-         mEarthTempPos[mNumData][1] = 0.0;
-         mEarthTempPos[mNumData][2] = 0.0;
          mNumData++;
       }
-
+      
       mTextTrajFile->Close();
       wxLogStatus(GmatAppData::GetMainFrame(),
                   wxT("Number of data points: %d"), numDataPoints);
@@ -1080,23 +1077,20 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
 
    mScNameArray = scNames;
    
-   //-------------------------------------------------------
-   // update spacecraft position
-   //-------------------------------------------------------
    if (mNumData < MAX_DATA)
    {
+      mTime[mNumData] = time;
+      
+      //-------------------------------------------------------
+      // update spacecraft position
+      //-------------------------------------------------------
       for (int sc=0; sc<mScCount; sc++)
       {
-         mTime[mNumData] = time;
          mScTrajColor[sc][mNumData]  = scColors[sc];
          mScGciPos[sc][mNumData][0] = posX[sc];
          mScGciPos[sc][mNumData][1] = posY[sc];
          mScGciPos[sc][mNumData][2] = posZ[sc];
 
-         mEarthGciPos[mNumData][0] = 0.0;
-         mEarthGciPos[mNumData][1] = 0.0;
-         mEarthGciPos[mNumData][2] = 0.0;
-         
          if (mNeedInitialConversion)
          {
             Rvector6 inState, outState;
@@ -1116,94 +1110,94 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
             mScTempPos[sc][mNumData][2] = posZ[sc];
          }
          
-         #if DEBUG_TRAJCANVAS_UPDATE > 1
+         #if DEBUG_TRAJCANVAS_UPDATE
          MessageInterface::ShowMessage
             ("TrajPlotCanvas::UpdatePlot() Sc%d pos = %f, %f, %f\n", sc,
              mScTempPos[sc][mNumData][0], mScTempPos[sc][mNumData][1],
              mScTempPos[sc][mNumData][2]);
          #endif
+      
       }
       
       //----------------------------------------------------
       // update object position
       //----------------------------------------------------
-      if (mNumData < MAX_DATA)
+      for (int i=0; i<mObjectCount; i++)
       {
-         for (int i=0; i<mObjectCount; i++)
+         // if object pointer is not NULL
+         if (mObjectArray[i])
          {
-            // if object pointer is not NULL
-            if (mObjectArray[i])
+            int objId = GetObjectId(mObjectNames[i]);
+               
+            #if DEBUG_TRAJCANVAS_UPDATE_OBJECT
+            MessageInterface::ShowMessage
+               ("TrajPlotCanvas::UpdatePlot() object=%s, objId=%d\n",
+                mObjectNames[i].c_str(), objId);
+            #endif
+               
+            // if object id found
+            if (objId != -1)
             {
-               int objId = GetObjectId(mObjectNames[i]);
-               
-               #if DEBUG_TRAJCANVAS_UPDATE_OBJECT
+               Rvector6 objState = mObjectArray[i]->GetMJ2000State(time);
+               mObjectGciPos[objId][mNumData][0] = objState[0];
+               mObjectGciPos[objId][mNumData][1] = objState[1];
+               mObjectGciPos[objId][mNumData][2] = objState[2];
+                  
+               #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
                MessageInterface::ShowMessage
-                  ("TrajPlotCanvas::UpdatePlot() object=%s, objId=%d\n",
-                   mObjectNames[i].c_str(), objId);
+                  ("TrajPlotCanvas::UpdatePlot() objState=%s\n",
+                   objState.ToString().c_str());
                #endif
-               
-               // if object id found
-               if (objId != -1)
+                  
+               // convert objects to desired CoordinateSystem
+               if (mNeedInitialConversion)
                {
-                  Rvector6 objState = mObjectArray[i]->GetMJ2000State(time);
-                  mObjectGciPos[objId][mNumData][0] = objState[0];
-                  mObjectGciPos[objId][mNumData][1] = objState[1];
-                  mObjectGciPos[objId][mNumData][2] = objState[2];
-                  
-                  #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
-                  MessageInterface::ShowMessage
-                     ("TrajPlotCanvas::UpdatePlot() objState=%s\n",
-                      objState.ToString().c_str());
-                  #endif
-                  
-                  // convert objects to desired CoordinateSystem
-                  if (mNeedInitialConversion)
-                  {
-                     Rvector6 outState;
+                  Rvector6 outState;
                      
-                     mCoordConverter.Convert(time, objState, mInternalCoordSystem,
-                                             outState, mViewCoordSystem);
+                  mCoordConverter.Convert(time, objState, mInternalCoordSystem,
+                                          outState, mViewCoordSystem);
                      
-                     mObjectTempPos[objId][mNumData][0] = outState[0];
-                     mObjectTempPos[objId][mNumData][1] = outState[1];
-                     mObjectTempPos[objId][mNumData][2] = outState[2];
-                  }
-                  else
-                  {
-                     CopyVector3(mObjectTempPos[objId][mNumData],
-                                 mObjectGciPos[objId][mNumData]);
-                  }
-                  
-                  #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
-                  MessageInterface::ShowMessage
-                     ("TrajPlotCanvas::UpdatePlot() %s pos = %f, %f, %f\n",
-                      mObjectNames[i].c_str(), mObjectTempPos[objId][mNumData][0],
-                      mObjectTempPos[objId][mNumData][1], mObjectTempPos[objId][mNumData][2]);
-                  #endif
-               
+                  mObjectTempPos[objId][mNumData][0] = outState[0];
+                  mObjectTempPos[objId][mNumData][1] = outState[1];
+                  mObjectTempPos[objId][mNumData][2] = outState[2];
                }
                else
                {
-                  #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
-                  MessageInterface::ShowMessage
-                     ("TrajPlotCanvas::UpdatePlot() Cannot Add data. Invalid objId=%d\n",
-                      objId);
-                  #endif
-              }
+                  CopyVector3(mObjectTempPos[objId][mNumData],
+                              mObjectGciPos[objId][mNumData]);
+               }
+                  
+               #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
+               MessageInterface::ShowMessage
+                  ("TrajPlotCanvas::UpdatePlot() %s pos = %f, %f, %f\n",
+                   mObjectNames[i].c_str(), mObjectTempPos[objId][mNumData][0],
+                   mObjectTempPos[objId][mNumData][1],
+                   mObjectTempPos[objId][mNumData][2]);
+              #endif
+               
             }
             else
             {
                #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
                MessageInterface::ShowMessage
-                  ("TrajPlotCanvas::UpdatePlot() Cannot add data. %s is NULL\n",
-                   mObjectNames[i].c_str());
+                  ("TrajPlotCanvas::UpdatePlot() Cannot Add data. Invalid objId=%d\n",
+                   objId);
                #endif
             }
          }
+         else
+         {
+            #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
+            MessageInterface::ShowMessage
+               ("TrajPlotCanvas::UpdatePlot() Cannot add data. %s is NULL\n",
+                mObjectNames[i].c_str());
+            #endif
+         }
       }
-      
+         
       mNumData++;
-   }
+      
+   }   
    
    if (mUseInitialViewPoint)
    {
@@ -2628,7 +2622,7 @@ void TrajPlotCanvas::DrawSpacecraftOrbit(int frame)
       for (int i=1; i<=frame; i++)
       {
          // Draw spacecraft orbit line based on points
-         if (mTime[frame] > mTime[frame-1])
+         if (mTime[i] > mTime[i-1]) //loj: 5/16/05 Changed frame to i
          {
             Rvector3 r1(mScTempPos[sc][i-1][0], mScTempPos[sc][i-1][1],
                         mScTempPos[sc][i-1][2]);
