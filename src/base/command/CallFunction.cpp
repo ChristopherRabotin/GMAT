@@ -701,6 +701,9 @@ bool CallFunction::ExecuteMatlabFunction()
       Integer pathId = mFunction->GetParameterID("FunctionPath");
       std::string thePath = mFunction->GetStringParameter(pathId);
 
+      // 5/16/05: arg - clear last errormsg
+      MatlabInterface::EvalString("clear errormsg");
+
       if (thePath != "")
       {
          std::string setPath = "path(path ,'" + thePath + "')";
