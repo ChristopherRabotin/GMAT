@@ -841,32 +841,34 @@ wxListBox* GuiItemManager::GetAllUserParameterListBox(wxWindow *parent, wxWindow
    wxString *allUserParamList;
    int numParams = 0;
    int allUserParamCount = theNumUserVariable + theNumUserArray + theNumUserString;
-   
-   allUserParamList = new wxString[allUserParamCount];
-   
-   for (int i=0; i<theNumUserVariable; i++)
-      allUserParamList[numParams++] = theUserVariableList[i];
-   
-   for (int i=0; i<theNumUserString; i++)
-      allUserParamList[numParams++] = theUserStringList[i];
-   
-   for (int i=0; i<theNumUserArray; i++)
-      allUserParamList[numParams++] = theUserArrayList[i];
-   
+
+   // 5/16/05 - arg:  moved create and delete allUserParamList into the if-stmt
+   // to prevent crashing when trying to delete an empty array
    if (allUserParamCount > 0)
-   {       
+   {
+      allUserParamList = new wxString[allUserParamCount];
+
+      for (int i=0; i<theNumUserVariable; i++)
+         allUserParamList[numParams++] = theUserVariableList[i];
+
+      for (int i=0; i<theNumUserString; i++)
+         allUserParamList[numParams++] = theUserStringList[i];
+
+      for (int i=0; i<theNumUserArray; i++)
+         allUserParamList[numParams++] = theUserArrayList[i];
+
       theAllUserParamListBox =
          new wxListBox(parent, id, wxDefaultPosition, size, allUserParamCount,
                        allUserParamList, wxLB_SINGLE|wxLB_SORT);
+                       
+      delete allUserParamList;
    }
    else
-   {       
+   {
       theAllUserParamListBox =
          new wxListBox(parent, id, wxDefaultPosition, size, 0,
                        emptyList, wxLB_SINGLE|wxLB_SORT);
    }
-   
-   delete allUserParamList;
    
    return theAllUserParamListBox;
 }
