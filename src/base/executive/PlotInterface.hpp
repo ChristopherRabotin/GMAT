@@ -36,11 +36,11 @@ public:
                                   bool drawEcPlane, bool drawEqPlane,
                                   bool drawWireFrame, bool overlapPlot,
                                   bool usevpInfo, bool usepm);
-
+   
    static void SetGlObject(const std::string &plotName,
-                           const StringArray &nonScNames,
-                           const UnsignedIntArray &nonScColors,
-                           const std::vector<SpacePoint*> nonScArray);
+                           const StringArray &objNames,
+                           const UnsignedIntArray &objOrbitColors,
+                           const std::vector<SpacePoint*> objArray);
    
    static void SetGlCoordSystem(const std::string &plotName,
                                 CoordinateSystem *viewCs,

@@ -93,10 +93,10 @@ public:
    void GotoObject(const wxString &objName);
    void GotoOtherBody(const wxString &bodyName);
    void ViewAnimation(int interval);
-
-   void SetGlObject(const StringArray &nonScNames,
-                    const UnsignedIntArray &nonScColors,
-                    const std::vector<SpacePoint*> nonScArray);
+   
+   void SetGlObject(const StringArray &objNames,
+                    const UnsignedIntArray &objOrbitColors,
+                    const std::vector<SpacePoint*> objectArray);
    
    // CoordinateSystem (loj: 5/13/05 Added viewUpCs)
    void SetGlCoordSystem(CoordinateSystem *viewCs,
@@ -136,6 +136,7 @@ protected:
 private:
    
    static const int MAX_DATA = 20000;
+   static const int MAX_OBJECT = 50;
    static const int LAST_STD_BODY_ID = 10;
    static const int MAX_COORD_SYS = 10;
    static const std::string BODY_NAME[GmatPlot::MAX_BODIES];
@@ -178,9 +179,9 @@ private:
    unsigned int mEcLineColor;
    
    // texture
-   GLuint mObjectTextureIndex[GmatPlot::MAX_BODIES];
+   GLuint mObjectTextureIndex[MAX_OBJECT];
    std::map<wxString, GLuint> mObjectTextureIdMap;
-   GLuint mScTextureIndex[GmatPlot::MAX_SCS];
+   //5.16.GLuint mScTextureIndex[GmatPlot::MAX_SCS];
    bool mUseTexture;
    
    // rotating
@@ -235,9 +236,6 @@ private:
    // spacecraft
    int   mScCount;
    int   mScLastFrame[GmatPlot::MAX_SCS];
-   float mScGciPos[GmatPlot::MAX_SCS][MAX_DATA][3];
-   float mScTempPos[GmatPlot::MAX_SCS][MAX_DATA][3];
-   unsigned int mScTrajColor[GmatPlot::MAX_SCS][MAX_DATA];
    float mScRadius;
    GLuint mGlList;
    
@@ -254,15 +252,15 @@ private:
    std::vector<SpacePoint*> mObjectArray;
    int mObjectCount;
    float mObjectDefaultRadius;
-   float mObjectRadius[GmatPlot::MAX_BODIES];
-   float mObjMaxZoomIn[GmatPlot::MAX_BODIES];
-
-   // bodies
-   bool  mObjectInUse[GmatPlot::MAX_BODIES];
-   bool  mObjectHasData[GmatPlot::MAX_BODIES];
-   float mObjectGciPos[GmatPlot::MAX_BODIES][MAX_DATA][3];
-   float mObjectTempPos[GmatPlot::MAX_BODIES][MAX_DATA][3];
-   short mPivotBodyIndex[GmatPlot::MAX_BODIES];
+   float mObjectRadius[MAX_OBJECT];
+   float mObjMaxZoomIn[MAX_OBJECT];
+   unsigned int mObjectOrbitColor[MAX_OBJECT][MAX_DATA];
+   
+   bool  mObjectInUse[MAX_OBJECT];
+   bool  mObjectHasData[MAX_OBJECT];
+   float mObjectGciPos[MAX_OBJECT][MAX_DATA][3];
+   float mObjectTempPos[MAX_OBJECT][MAX_DATA][3];
+   short mPivotBodyIndex[MAX_OBJECT];
    int   mOtherBodyCount;
    StringArray mObjectNamesInUse;
    

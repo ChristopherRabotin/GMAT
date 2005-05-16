@@ -237,9 +237,9 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
 // void SetGlObject(const std::string &plotName,  ...
 //------------------------------------------------------------------------------
 void PlotInterface::SetGlObject(const std::string &plotName,
-                                const StringArray &nonScNames,
-                                const UnsignedIntArray &nonScColors,
-                                const std::vector<SpacePoint*> nonScArray)
+                                const StringArray &objNames,
+                                const UnsignedIntArray &objOrbitColors,
+                                const std::vector<SpacePoint*> objArray)
 {
 #if defined __CONSOLE_APP__
    return;
@@ -253,7 +253,7 @@ void PlotInterface::SetGlObject(const std::string &plotName,
             
       if (frame->GetPlotName().IsSameAs(owner.c_str()))
       {            
-         frame->SetGlObject(nonScNames, nonScColors, nonScArray);
+         frame->SetGlObject(objNames, objOrbitColors, objArray);
       }
    }
 #endif

@@ -886,21 +886,20 @@ void MdiChildTrajFrame::OnClose(wxCloseEvent& event)
    if (MdiGlPlot::numChildren == 0)
       GmatAppData::GetMainFrame()->trajSubframe = NULL;
 
-//   MdiGlPlot::mdiParentGlFrame->UpdateUI();
    event.Skip();
 }
 
 
 //------------------------------------------------------------------------------
-// void SetGlObject(const StringArray &otherNames, ...
+// void SetGlObject(const StringArray &objNames, ...
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetGlObject(const StringArray &nonScNames,
-                                    const UnsignedIntArray &nonScColors,
-                                    const std::vector<SpacePoint*> nonScArray)
+void MdiChildTrajFrame::SetGlObject(const StringArray &objNames,
+                                    const UnsignedIntArray &objOrbitColors,
+                                    const std::vector<SpacePoint*> objArray)
 {
    if (mCanvas)
    {         
-      mCanvas->SetGlObject(nonScNames, nonScColors, nonScArray);
+      mCanvas->SetGlObject(objNames, objOrbitColors, objArray);
    }
 }
 
@@ -942,7 +941,7 @@ void MdiChildTrajFrame::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
 
 
 //------------------------------------------------------------------------------
-// void UpdatePlot(const StringArray &nonScNames, ...
+// void UpdatePlot(const StringArray &scNames, ...
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::UpdatePlot( const StringArray &scNames,
                                    const Real &time, const RealArray &posX,

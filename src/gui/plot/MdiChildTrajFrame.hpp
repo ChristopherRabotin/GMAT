@@ -118,9 +118,9 @@ public:
    void OnClose(wxCloseEvent& event);
 
    // drawing
-   void SetGlObject(const StringArray &nonScNames,
-                    const UnsignedIntArray &nonScColors,
-                    const std::vector<SpacePoint*> nonScArray);
+   void SetGlObject(const StringArray &objNames,
+                    const UnsignedIntArray &objOrbitColors,
+                    const std::vector<SpacePoint*> objArray);
    
    void SetGlCoordSystem(CoordinateSystem *viewCs,
                          CoordinateSystem *viewUpCs);

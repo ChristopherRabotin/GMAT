@@ -119,9 +119,9 @@ protected:
    bool RemoveSpacePoint(const std::string &name);
    Integer FindIndexOfElement(StringArray &labelArray,
                               const std::string &label);
-//    bool IsNonSpacecraft(const std::string &name);
+
    void ClearDynamicArrays();
-   void UpdateNonSpacecraftList(SpacePoint *sp);
+   void UpdateObjectList(SpacePoint *sp);
    
    SolarSystem *mSolarSystem;
    CoordinateSystem *mViewCoordSystem;
@@ -130,7 +130,7 @@ protected:
    SpacePoint *mViewPointRefObj;
    SpacePoint *mViewPointVectorObj;
    SpacePoint *mViewDirectionObj;
-   std::vector<SpacePoint*> mNonScArray;
+   std::vector<SpacePoint*> mObjectArray;
    std::vector<SpacePoint*> mAllSpArray;
    
    std::string mEclipticPlane;
@@ -163,9 +163,9 @@ protected:
    
    Integer mAllSpCount;
    Integer mScCount;
-   Integer mNonScCount;
+   Integer mObjectCount;
    StringArray mScNameArray;
-   StringArray mNonScNameArray;
+   StringArray mObjectNameArray;
    StringArray mAllSpNameArray;
    StringArray mAllRefObjectNames;
    
@@ -174,9 +174,8 @@ protected:
    RealArray mScZArray;
    UnsignedIntArray mScOrbitColorArray;
    UnsignedIntArray mScTargetColorArray;
-//    UnsignedIntArray mOrbitColorArray;
-//    UnsignedIntArray mTargetColorArray;
-   UnsignedIntArray mNonScColorArray;
+   UnsignedIntArray mOrbitColorArray;
+   //UnsignedIntArray mTargetColorArray;
    
    std::map<std::string, UnsignedInt> mOrbitColorMap;
    std::map<std::string, UnsignedInt> mTargetColorMap;

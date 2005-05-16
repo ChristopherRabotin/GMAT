@@ -148,10 +148,10 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mNumData = 0;
    mNumCollected = 0;
    mScNameArray.clear();
-   mNonScNameArray.clear();
+   mObjectNameArray.clear();
    mAllSpNameArray.clear();
    mAllRefObjectNames.clear();
-   mNonScArray.clear();
+   mObjectArray.clear();
    mAllSpArray.clear();
    
    mScXArray.clear();
@@ -159,14 +159,13 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mScZArray.clear();
    mScOrbitColorArray.clear();
    mScTargetColorArray.clear();
-   mNonScColorArray.clear();
-//    mOrbitColorArray.clear();
-//    mTargetColorArray.clear();
+   mOrbitColorArray.clear();
+   //mTargetColorArray.clear();
    mOrbitColorMap.clear();
    mTargetColorMap.clear();
    mAllSpCount = 0;
    mScCount = 0;
-   mNonScCount = 0;
+   mObjectCount = 0;
    
    // add Earth, Luna and Sun as default
    AddSpacePoint("Earth", 0);
@@ -217,11 +216,11 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    
    mAllSpCount = ogl.mAllSpCount;
    mScCount = ogl.mScCount;
-   mNonScCount = ogl.mNonScCount;
-   mNonScArray = ogl.mNonScArray;
+   mObjectCount = ogl.mObjectCount;
+   mObjectArray = ogl.mObjectArray;
    mAllSpArray = ogl.mAllSpArray;
    mScNameArray = ogl.mScNameArray;
-   mNonScNameArray = ogl.mNonScNameArray;
+   mObjectNameArray = ogl.mObjectNameArray;
    mAllSpNameArray = ogl.mAllSpNameArray;
    mAllRefObjectNames = ogl.mAllRefObjectNames;
    mScXArray = ogl.mScXArray;
@@ -229,9 +228,8 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mScZArray = ogl.mScZArray;
    mScOrbitColorArray = ogl.mScOrbitColorArray;
    mScTargetColorArray = ogl.mScTargetColorArray;
-   mNonScColorArray = ogl.mNonScColorArray;
-//    mOrbitColorArray = ogl.mOrbitColorArray;
-//    mTargetColorArray = ogl.mTargetColorArray;
+   mOrbitColorArray = ogl.mOrbitColorArray;
+   //mTargetColorArray = ogl.mTargetColorArray;
    mOrbitColorMap = ogl.mOrbitColorMap;
    mTargetColorMap = ogl.mTargetColorMap;
    mNumData = ogl.mNumData;
@@ -269,7 +267,7 @@ const StringArray& OpenGlPlot::GetSpacecraftList()
 //------------------------------------------------------------------------------
 const StringArray& OpenGlPlot::GetNonSpacecraftList()
 {
-   return mNonScNameArray;
+   return mObjectNameArray;
 }
 
 
@@ -330,25 +328,24 @@ bool OpenGlPlot::Initialize()
                
                if (mAllSpArray[i])
                {
+                  //loj: 5/16/05 add all objects to object list
+                  mObjectNameArray.push_back(mAllSpNameArray[i]);
+                  mOrbitColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
+                  //mTargetColorArray.push_back(mTargetColorMap[mAllSpNameArray[i]]);
+                  mObjectArray.push_back(mAllSpArray[i]);
+                  
                   if (mAllSpArray[i]->IsOfType(Gmat::SPACECRAFT))
                   {
                      mScNameArray.push_back(mAllSpNameArray[i]);
                      mScOrbitColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
-                     mScTargetColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
+                     mScTargetColorArray.push_back(mTargetColorMap[mAllSpNameArray[i]]);
                      mScXArray.push_back(0.0);
                      mScYArray.push_back(0.0);
                      mScZArray.push_back(0.0);
                   }
-                  else
-                  {
-                     mNonScNameArray.push_back(mAllSpNameArray[i]);
-                     mNonScColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
-                     mNonScArray.push_back(mAllSpArray[i]);
-                  }
                }
                else
                {
-                  //loj: 5/10/05 Added
                   MessageInterface::PopupMessage
                      (Gmat::WARNING_, "The SpacePoint name: %s has NULL pointer.\nIt will be "
                       "removed from the OpenGL plot.\n", mAllSpNameArray[i].c_str());
@@ -356,7 +353,7 @@ bool OpenGlPlot::Initialize()
             }
             
             mScCount = mScNameArray.size();
-            mNonScCount = mNonScNameArray.size();
+            mObjectCount = mObjectNameArray.size();
             
             // check ViewPoint info to see if any objects need to be
             // included in the non-spacecraft list
@@ -369,16 +366,16 @@ bool OpenGlPlot::Initialize()
             mViewCoordSysOrigin = mViewCoordSystem->GetOrigin();
             
             if (mViewCoordSysOrigin != NULL)
-               UpdateNonSpacecraftList(mViewCoordSysOrigin);
+               UpdateObjectList(mViewCoordSysOrigin);
             
             if (mViewPointRefObj != NULL)
-                  UpdateNonSpacecraftList(mViewPointRefObj);
-
+                  UpdateObjectList(mViewPointRefObj);
+            
             if (mViewPointVectorObj != NULL)
-                  UpdateNonSpacecraftList(mViewPointVectorObj);
-
+                  UpdateObjectList(mViewPointVectorObj);
+            
             if (mViewDirectionObj != NULL)
-                  UpdateNonSpacecraftList(mViewDirectionObj);
+                  UpdateObjectList(mViewDirectionObj);
             
             #if DEBUG_OPENGL_INIT
             MessageInterface::ShowMessage
@@ -386,20 +383,22 @@ bool OpenGlPlot::Initialize()
                 "mScOrbitColorArray.size=%d\n", mScNameArray.size(),
                 mScOrbitColorArray.size());
             MessageInterface::ShowMessage
-               ("OpenGlPlot::Initialize() mNonScNameArray.size=%d, "
-                "mNonScColorArray.size=%d\n", mNonScNameArray.size(),
-                mNonScColorArray.size());
-            for (int i=0; i<mNonScCount; i++)
+               ("OpenGlPlot::Initialize() mObjectNameArray.size=%d, "
+                "mOrbitColorArray.size=%d\n", mObjectNameArray.size(),
+                mOrbitColorArray.size());
+            for (int i=0; i<mObjectCount; i++)
             {
                MessageInterface::ShowMessage
-                  ("OpenGlPlot::Initialize() mNonScNameArray[%d]=%s,"
-                   "color=%d\n", i, mNonScNameArray[i].c_str(),
-                   mNonScColorArray[i]);
+                  ("OpenGlPlot::Initialize() mObjectNameArray[%d]=%s,"
+                   "color=%d\n", i, mObjectNameArray[i].c_str(),
+                   mOrbitColorArray[i]);
             }
             #endif
+
+            // set all object array and pointers
             
-            PlotInterface::SetGlObject(instanceName, mNonScNameArray,
-                                       mNonScColorArray, mNonScArray);
+            PlotInterface::SetGlObject(instanceName, mObjectNameArray,
+                                       mOrbitColorArray, mObjectArray);
             
             //--------------------------------------------------------
             // set CoordinateSystem
@@ -1448,10 +1447,11 @@ bool OpenGlPlot::ClearSpacePointList()
    
    mAllSpNameArray.clear();
    mAllSpArray.clear();
-   mNonScArray.clear();
+   mObjectArray.clear();
    mScNameArray.clear();
-   mNonScNameArray.clear();
-   mNonScColorArray.clear();
+   mObjectNameArray.clear();
+   mOrbitColorArray.clear();
+   //mTargetColorArray.clear();
    
    mScXArray.clear();
    mScYArray.clear();
@@ -1460,7 +1460,7 @@ bool OpenGlPlot::ClearSpacePointList()
    mTargetColorMap.clear();
    mAllSpCount = 0;
    mScCount = 0;
-   mNonScCount = 0;
+   mObjectCount = 0;
    return true;
 }
 
@@ -1583,9 +1583,10 @@ Integer OpenGlPlot::FindIndexOfElement(StringArray &labelArray,
 //------------------------------------------------------------------------------
 void OpenGlPlot::ClearDynamicArrays()
 {
-   mNonScNameArray.clear();
-   mNonScColorArray.clear();
-   mNonScArray.clear();
+   mObjectNameArray.clear();
+   mOrbitColorArray.clear();
+   //mTargetColorArray.clear();
+   mObjectArray.clear();
    mScNameArray.clear();
    mScOrbitColorArray.clear();
    mScTargetColorArray.clear();
@@ -1596,29 +1597,31 @@ void OpenGlPlot::ClearDynamicArrays()
 
 
 //------------------------------------------------------------------------------
-// void UpdateNonSpacecraftList(SpacePoint *sp)
+// void UpdateObjectList(SpacePoint *sp)
 //------------------------------------------------------------------------------
 /**
  * Add non-spacecraft object to the list.
  */
 //------------------------------------------------------------------------------
-void OpenGlPlot::UpdateNonSpacecraftList(SpacePoint *sp)
+void OpenGlPlot::UpdateObjectList(SpacePoint *sp)
 {
-   if (!sp->IsOfType(Gmat::SPACECRAFT))
-   {
+   //loj: 5/16/05 Add all spacepoint objects
+//    if (!sp->IsOfType(Gmat::SPACECRAFT))
+//    {
       std::string name = sp->GetName();
       StringArray::iterator pos = 
-         find(mNonScNameArray.begin(), mNonScNameArray.end(), name);
+         find(mObjectNameArray.begin(), mObjectNameArray.end(), name);
 
       // if name not found
-      if (pos == mNonScNameArray.end())
+      if (pos == mObjectNameArray.end())
       {
-         mNonScNameArray.push_back(name);
-         mNonScColorArray.push_back(GmatColor::ORANGE32);
-         mNonScArray.push_back(sp);
-         mNonScCount = mNonScNameArray.size();
+         mObjectNameArray.push_back(name);
+         mOrbitColorArray.push_back(mOrbitColorMap[name]);
+         //mTargetColorArray.push_back(mTargetColorMap[name]);
+         mObjectArray.push_back(sp);
+         mObjectCount = mObjectNameArray.size();
       }
-   }
+//    }
 }
 
 

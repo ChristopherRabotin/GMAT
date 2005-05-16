@@ -228,7 +228,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    for (int i=0; i<MAX_SCS; i++)
    {
       mScLastFrame[i] = 0;
-      mScTextureIndex[i] = UNINIT_TEXTURE;
+      //5.16.mScTextureIndex[i] = UNINIT_TEXTURE;
    }
    
    // Coordinate System
@@ -744,39 +744,39 @@ void TrajPlotCanvas::ViewAnimation(int interval)
 
 
 //------------------------------------------------------------------------------
-// void SetGlObject(const StringArray &nonScNames,
-//                  const UnsignedIntArray &nonScColors,
-//                  const std::vector<SpacePoint*> nonScArray)
+// void SetGlObject(const StringArray &objNames,
+//                  const UnsignedIntArray &objOrbitColors,
+//                  const std::vector<SpacePoint*> objArray)
 //------------------------------------------------------------------------------
-void TrajPlotCanvas::SetGlObject(const StringArray &nonScNames,
-                                 const UnsignedIntArray &nonScColors,
-                                 const std::vector<SpacePoint*> nonScArray)
+void TrajPlotCanvas::SetGlObject(const StringArray &objNames,
+                                 const UnsignedIntArray &objOrbitColors,
+                                 const std::vector<SpacePoint*> objArray)
 {
    #if DEBUG_TRAJCANVAS_OBJECT
    MessageInterface::ShowMessage
       ("TrajPlotCanvas::SetGlObject() objCount=%d, colorCount=%d.\n",
-       nonScNames.size(), nonScColors.size());
+       objNames.size(), objOrbitColors.size());
    #endif
-
-   mObjectArray = nonScArray;
+   
+   mObjectArray = objArray;
    wxArrayString tempList;
-
-   if (nonScNames.size() == nonScColors.size() &&
-       nonScNames.size() == nonScArray.size())
+   
+   if (objNames.size() == objOrbitColors.size() &&
+       objNames.size() == objArray.size())
    {
-      for (unsigned int i=0; i<nonScNames.size(); i++)
+      for (unsigned int i=0; i<objNames.size(); i++)
       {
-         tempList.Add(nonScNames[i].c_str());
+         tempList.Add(objNames[i].c_str());
       
          #if DEBUG_TRAJCANVAS_OBJECT > 1
          MessageInterface::ShowMessage
-            ("TrajPlotCanvas::SetGlObject()  nonScNames[%d]=%s, objName=%s, "
-             "addr=%d\n", i, nonScNames[i].c_str(),
+            ("TrajPlotCanvas::SetGlObject()  objNames[%d]=%s, objName=%s, "
+             "addr=%d\n", i, objNames[i].c_str(),
              mObjectArray[i]->GetName().c_str(), mObjectArray[i]);
          #endif
       }
-   
-      AddObjectList(tempList, nonScColors);
+      
+      AddObjectList(tempList, objOrbitColors);
    }
    else
    {
@@ -996,14 +996,21 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
         
       numDataPoints = mTrajectoryData.size();
 
+      mObjectArray.push_back(NULL);
+      wxArrayString tempList;
+      tempList.Add("SC1");
+      UnsignedIntArray objOrbitColors;
+      objOrbitColors.push_back(GmatColor::RED32);
+      AddObjectList(tempList, objOrbitColors);
+      
       int sc = 0;
       for(int i=0; i<numDataPoints && i < MAX_DATA; i++)
       {
-         mScTrajColor[sc][mNumData] = GmatColor::RED32;
          mTime[mNumData] = mTrajectoryData[i].time;
-         mScTempPos[sc][mNumData][0] = mTrajectoryData[i].x;
-         mScTempPos[sc][mNumData][1] = mTrajectoryData[i].y;
-         mScTempPos[sc][mNumData][2] = mTrajectoryData[i].z;
+         mObjectOrbitColor[sc][mNumData] = GmatColor::RED32;
+         mObjectTempPos[sc][mNumData][0] = mTrajectoryData[i].x;
+         mObjectTempPos[sc][mNumData][1] = mTrajectoryData[i].y;
+         mObjectTempPos[sc][mNumData][2] = mTrajectoryData[i].z;
          mNumData++;
       }
       
@@ -1043,6 +1050,9 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
     
 } //end ReadTextTrajectory()
 
+
+//loj: 5/16/05
+// Removed mScGciPos[] and mScTempPos[] and use mObjectGciPos[] and mObjectTempPos[]
 
 //------------------------------------------------------------------------------
 // void UpdatePlot(const StringArray &scNames,
@@ -1086,77 +1096,81 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
       //-------------------------------------------------------
       for (int sc=0; sc<mScCount; sc++)
       {
-         mScTrajColor[sc][mNumData]  = scColors[sc];
-         mScGciPos[sc][mNumData][0] = posX[sc];
-         mScGciPos[sc][mNumData][1] = posY[sc];
-         mScGciPos[sc][mNumData][2] = posZ[sc];
-
-         if (mNeedInitialConversion)
-         {
-            Rvector6 inState, outState;
-            inState.Set(posX[sc], posY[sc], posZ[sc], 0.0, 0.0, 0.0);
-            
-            mCoordConverter.Convert(time, inState, mInternalCoordSystem,
-                                    outState, mViewCoordSystem);
-            
-            mScTempPos[sc][mNumData][0] = outState[0];
-            mScTempPos[sc][mNumData][1] = outState[1];
-            mScTempPos[sc][mNumData][2] = outState[2];
-         }
-         else
-         {
-            mScTempPos[sc][mNumData][0] = posX[sc];
-            mScTempPos[sc][mNumData][1] = posY[sc];
-            mScTempPos[sc][mNumData][2] = posZ[sc];
-         }
+         int objId = GetObjectId(mScNameArray[sc].c_str());
          
-         #if DEBUG_TRAJCANVAS_UPDATE
-         MessageInterface::ShowMessage
-            ("TrajPlotCanvas::UpdatePlot() Sc%d pos = %f, %f, %f\n", sc,
-             mScTempPos[sc][mNumData][0], mScTempPos[sc][mNumData][1],
-             mScTempPos[sc][mNumData][2]);
-         #endif
-      
+         if (objId != -1)
+         {
+            mObjectOrbitColor[objId][mNumData]  = scColors[sc];
+            mObjectGciPos[objId][mNumData][0] = posX[sc];
+            mObjectGciPos[objId][mNumData][1] = posY[sc];
+            mObjectGciPos[objId][mNumData][2] = posZ[sc];
+            
+            if (mNeedInitialConversion)
+            {
+               Rvector6 inState, outState;
+               inState.Set(posX[sc], posY[sc], posZ[sc], 0.0, 0.0, 0.0);
+            
+               mCoordConverter.Convert(time, inState, mInternalCoordSystem,
+                                       outState, mViewCoordSystem);
+            
+               mObjectTempPos[objId][mNumData][0] = outState[0];
+               mObjectTempPos[objId][mNumData][1] = outState[1];
+               mObjectTempPos[objId][mNumData][2] = outState[2];
+            }
+            else
+            {
+               CopyVector3(mObjectTempPos[objId][mNumData],
+                           mObjectGciPos[objId][mNumData]);
+            
+            }
+            
+            #if DEBUG_TRAJCANVAS_UPDATE
+            MessageInterface::ShowMessage
+               ("TrajPlotCanvas::UpdatePlot() Sc%d pos = %f, %f, %f, color=%d\n", objId,
+                mObjectTempPos[objId][mNumData][0], mObjectTempPos[objId][mNumData][1],
+                mObjectTempPos[objId][mNumData][2], mObjectOrbitColor[objId][mNumData]);
+            #endif
+         }
       }
       
       //----------------------------------------------------
       // update object position
       //----------------------------------------------------
-      for (int i=0; i<mObjectCount; i++)
+      for (int obj=0; obj<mObjectCount; obj++)
       {
          // if object pointer is not NULL
-         if (mObjectArray[i])
+         if (mObjectArray[obj])
          {
-            int objId = GetObjectId(mObjectNames[i]);
-               
+            int objId = GetObjectId(mObjectNames[obj]);
+            
             #if DEBUG_TRAJCANVAS_UPDATE_OBJECT
             MessageInterface::ShowMessage
                ("TrajPlotCanvas::UpdatePlot() object=%s, objId=%d\n",
-                mObjectNames[i].c_str(), objId);
+                mObjectNames[obj].c_str(), objId);
             #endif
-               
+            
             // if object id found
             if (objId != -1)
             {
-               Rvector6 objState = mObjectArray[i]->GetMJ2000State(time);
+               Rvector6 objState = mObjectArray[obj]->GetMJ2000State(time);
                mObjectGciPos[objId][mNumData][0] = objState[0];
                mObjectGciPos[objId][mNumData][1] = objState[1];
                mObjectGciPos[objId][mNumData][2] = objState[2];
-                  
+               
                #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
                MessageInterface::ShowMessage
                   ("TrajPlotCanvas::UpdatePlot() objState=%s\n",
                    objState.ToString().c_str());
                #endif
-                  
+               
                // convert objects to desired CoordinateSystem
                if (mNeedInitialConversion)
                {
                   Rvector6 outState;
-                     
+                  
                   mCoordConverter.Convert(time, objState, mInternalCoordSystem,
                                           outState, mViewCoordSystem);
-                     
+                  
                   mObjectTempPos[objId][mNumData][0] = outState[0];
                   mObjectTempPos[objId][mNumData][1] = outState[1];
                   mObjectTempPos[objId][mNumData][2] = outState[2];
@@ -1166,14 +1180,14 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
                   CopyVector3(mObjectTempPos[objId][mNumData],
                               mObjectGciPos[objId][mNumData]);
                }
-                  
+               
                #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
                MessageInterface::ShowMessage
                   ("TrajPlotCanvas::UpdatePlot() %s pos = %f, %f, %f\n",
-                   mObjectNames[i].c_str(), mObjectTempPos[objId][mNumData][0],
+                   mObjectNames[obj].c_str(), mObjectTempPos[objId][mNumData][0],
                    mObjectTempPos[objId][mNumData][1],
                    mObjectTempPos[objId][mNumData][2]);
-              #endif
+               #endif
                
             }
             else
@@ -1190,7 +1204,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
             #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
             MessageInterface::ShowMessage
                ("TrajPlotCanvas::UpdatePlot() Cannot add data. %s is NULL\n",
-                mObjectNames[i].c_str());
+                mObjectNames[obj].c_str());
             #endif
          }
       }
@@ -1745,12 +1759,6 @@ void TrajPlotCanvas::SetupWorld()
       glTranslatef(mfCamTransX, mfCamTransY, mfCamTransZ);
       glRotatef(mfCamSingleRotAngle, mfCamRotXAxis, mfCamRotYAxis, mfCamRotZAxis);
 
-      //gluLookAt(mViewPointLocVector[0], mViewPointLocVector[1],
-      //          mViewPointLocVector[2],
-      //          0.0, 0.0, 0.0,
-      //          -mScTempPos[0][mNumData-1][0],
-      //          -mScTempPos[0][mNumData-1][1],
-      //           mScTempPos[0][mNumData-1][2]);
    }
    else
    {
@@ -1957,9 +1965,9 @@ void TrajPlotCanvas::ComputeProjection(int frame)
          }
          else
          {
-            vpRefVec.Set(mScTempPos[mVpRefScId][frame][0],
-                         mScTempPos[mVpRefScId][frame][1],
-                         mScTempPos[mVpRefScId][frame][2]);
+            vpRefVec.Set(mObjectTempPos[mVpRefScId][frame][0],
+                         mObjectTempPos[mVpRefScId][frame][1],
+                         mObjectTempPos[mVpRefScId][frame][2]);
          }
       }
       else
@@ -2022,9 +2030,9 @@ void TrajPlotCanvas::ComputeProjection(int frame)
          }
          else
          {
-            vpVec.Set(mScTempPos[mVpVecScId][frame][0],
-                      mScTempPos[mVpVecScId][frame][1],
-                      mScTempPos[mVpVecScId][frame][2]);
+            vpVec.Set(mObjectTempPos[mVpVecScId][frame][0],
+                      mObjectTempPos[mVpVecScId][frame][1],
+                      mObjectTempPos[mVpVecScId][frame][2]);
          }
       }
       else
@@ -2099,9 +2107,9 @@ void TrajPlotCanvas::ComputeProjection(int frame)
          }
          else
          {
-            vdVec.Set(mScTempPos[mVdirScId][frame][0],
-                      mScTempPos[mVdirScId][frame][1],
-                      mScTempPos[mVdirScId][frame][2]);
+            vdVec.Set(mObjectTempPos[mVdirScId][frame][0],
+                      mObjectTempPos[mVdirScId][frame][1],
+                      mObjectTempPos[mVdirScId][frame][2]);
          }
       }
       else
@@ -2300,15 +2308,7 @@ void TrajPlotCanvas::DrawPlot()
    {
       //Translate Camera
       //glTranslatef(mfCamTransX, mfCamTransY, mfCamTransZ);
-      //glRotatef(mfCamSingleRotAngle, mfCamRotXAxis, mfCamRotYAxis, mfCamRotZAxis);
-
-//       gluLookAt(mViewPointLocVector[0], mViewPointLocVector[1],
-//                 mViewPointLocVector[2],
-//                 0.0, 0.0, 0.0,
-//                 -mScTempPos[0][mNumData-1][0],
-//                 -mScTempPos[0][mNumData-1][1],
-//                  mScTempPos[0][mNumData-1][2]);
-      
+      //glRotatef(mfCamSingleRotAngle, mfCamRotXAxis, mfCamRotYAxis, mfCamRotZAxis);      
    }
 
    
@@ -2615,35 +2615,39 @@ void TrajPlotCanvas::DrawSpacecraftOrbit(int frame)
    
    glPushMatrix();
    glBegin(GL_LINES);
+
+   int objId;
    
    for (int sc=0; sc<mScCount; sc++)
    {
+      objId = GetObjectId(mScNameArray[sc].c_str());
+      
       //loj: 5/12/05 Why last data point is bad sometimes? Draw one less point?
       for (int i=1; i<=frame; i++)
       {
          // Draw spacecraft orbit line based on points
          if (mTime[i] > mTime[i-1]) //loj: 5/16/05 Changed frame to i
          {
-            Rvector3 r1(mScTempPos[sc][i-1][0], mScTempPos[sc][i-1][1],
-                        mScTempPos[sc][i-1][2]);
+            Rvector3 r1(mObjectTempPos[objId][i-1][0], mObjectTempPos[objId][i-1][1],
+                        mObjectTempPos[objId][i-1][2]);
    
-            Rvector3 r2(mScTempPos[sc][i][0], mScTempPos[sc][i][1],
-                        mScTempPos[sc][i][2]);
+            Rvector3 r2(mObjectTempPos[objId][i][0], mObjectTempPos[objId][i][1],
+                        mObjectTempPos[objId][i][2]);
 
             // if spacecraft position magnitude is 0, skip
             if (r1.GetMagnitude() == 0.0 || r2.GetMagnitude() == 0.0)
                continue;
             
-            *sIntColor = mScTrajColor[sc][frame];
+            *sIntColor = mObjectOrbitColor[objId][i]; //loj: 5/16/05 Changed frame to i
             glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
-
-            glVertex3f((-mScTempPos[sc][i-1][0]),
-                       (-mScTempPos[sc][i-1][1]),
-                       ( mScTempPos[sc][i-1][2]));
             
-            glVertex3f((-mScTempPos[sc][i][0]),
-                       (-mScTempPos[sc][i][1]),
-                       ( mScTempPos[sc][i][2]));
+            glVertex3f((-mObjectTempPos[objId][i-1][0]),
+                       (-mObjectTempPos[objId][i-1][1]),
+                       ( mObjectTempPos[objId][i-1][2]));
+            
+            glVertex3f((-mObjectTempPos[objId][i][0]),
+                       (-mObjectTempPos[objId][i][1]),
+                       ( mObjectTempPos[objId][i][2]));
             
             mScLastFrame[sc] = i;
          }
@@ -2660,16 +2664,19 @@ void TrajPlotCanvas::DrawSpacecraftOrbit(int frame)
    
    if (mDrawSpacecraft)
    {
+      int objId;
       for (int sc=0; sc<mScCount; sc++)
       {
+         objId = GetObjectId(mScNameArray[sc].c_str());
+         
          glPushMatrix();
          
          // put spacecraft at final position
-         glTranslatef(-mScTempPos[sc][mScLastFrame[sc]][0],
-                      -mScTempPos[sc][mScLastFrame[sc]][1],
-                       mScTempPos[sc][mScLastFrame[sc]][2]);
+         glTranslatef(-mObjectTempPos[objId][mScLastFrame[sc]][0],
+                      -mObjectTempPos[objId][mScLastFrame[sc]][1],
+                       mObjectTempPos[objId][mScLastFrame[sc]][2]);
          
-         DrawSpacecraft(mScTrajColor[sc][mScLastFrame[sc]]);
+         DrawSpacecraft(mObjectOrbitColor[objId][mScLastFrame[sc]]);
          
          glPopMatrix();
       }
@@ -2960,39 +2967,6 @@ void TrajPlotCanvas::DrawCircle(GLUquadricObj *qobj, Real radius)
 }
 
 
-// //---------------------------------------------------------------------------
-// // int GetStdBodyId(const std::string &name)
-// //---------------------------------------------------------------------------
-// int TrajPlotCanvas::GetStdBodyId(const std::string &name)
-// {
-//    for (int i=0; i<=LAST_STD_BODY_ID; i++)
-//       if (BodyInfo::BODY_NAME[i] == name)
-//          return i;
-
-//    MessageInterface::PopupMessage
-//       (Gmat::ERROR_, "TrajPlotCanvas::GetStdBodyId() body name: " + name +
-//        " not found in the default body list\n");
-
-//    return -1;
-// }
-
-
-// //---------------------------------------------------------------------------
-// // void AddBody(const std::string &name)
-// //---------------------------------------------------------------------------
-// void TrajPlotCanvas::AddBody(const std::string &name)
-// {
-//    wxArrayString bodyNames;
-//    UnsignedIntArray bodyColors;
-
-//    bodyNames.Add(wxString(name.c_str()));
-//    bodyColors.push_back(GmatPlot::GetBodyColor(name.c_str()));
-
-//    AddObjectList(bodyNames, bodyColors, false);
-   
-// }
-
-
 //---------------------------------------------------------------------------
 // int GetObjectId(const wxString &name)
 //---------------------------------------------------------------------------
@@ -3079,6 +3053,8 @@ bool TrajPlotCanvas::ConvertSpacecraftData()
       ("TrajPlotCanvas::ConvertSpacecraftData() internalCS=%s, desiredCS=%s\n",
        mInternalCoordSystem->GetName().c_str(), mViewCoordSystem->GetName().c_str());
    #endif
+
+   int objId;
    
    // do not convert if desired CS is internal CS
    //if (mViewCoordSystem->GetName() == mInternalCoordSystem->GetName())
@@ -3086,11 +3062,13 @@ bool TrajPlotCanvas::ConvertSpacecraftData()
    {
       for (int sc=0; sc<mScCount; sc++)
       {
+         objId = GetObjectId(mScNameArray[sc].c_str());
+         
          for (int i=0; i<mNumData; i++)
          {
-            mScTempPos[sc][i][0] = mScGciPos[sc][i][0];
-            mScTempPos[sc][i][1] = mScGciPos[sc][i][1];
-            mScTempPos[sc][i][2] = mScGciPos[sc][i][2];
+            mObjectTempPos[objId][i][0] = mObjectGciPos[objId][i][0];
+            mObjectTempPos[objId][i][1] = mObjectGciPos[objId][i][1];
+            mObjectTempPos[objId][i][2] = mObjectGciPos[objId][i][2];
          }
       }
    }
@@ -3098,17 +3076,19 @@ bool TrajPlotCanvas::ConvertSpacecraftData()
    {
       for (int sc=0; sc<mScCount; sc++)
       {
+         objId = GetObjectId(mScNameArray[sc].c_str());
+         
          for (int i=0; i<mNumData; i++)
          {
-            inState.Set(mScGciPos[sc][i][0], mScGciPos[sc][i][1], mScGciPos[sc][i][2],
-                        0.0, 0.0, 0.0);
+            inState.Set(mObjectGciPos[objId][i][0], mObjectGciPos[objId][i][1],
+                        mObjectGciPos[objId][i][2], 0.0, 0.0, 0.0);
                         
             mCoordConverter.Convert(mTime[i], inState, mInternalCoordSystem,
                                     outState, mViewCoordSystem);
             
-            mScTempPos[sc][i][0] = outState[0];
-            mScTempPos[sc][i][1] = outState[1];
-            mScTempPos[sc][i][2] = outState[2];
+            mObjectTempPos[objId][i][0] = outState[0];
+            mObjectTempPos[objId][i][1] = outState[1];
+            mObjectTempPos[objId][i][2] = outState[2];
             
             #if DEBUG_TRAJCANVAS_CONVERT > 1
             MessageInterface::ShowMessage
@@ -3137,6 +3117,8 @@ bool TrajPlotCanvas::ConvertSpacecraftData(int frame)
       ("TrajPlotCanvas::ConvertSpacecraftData() internalCS=%s, desiredCS=%s\n",
        mInternalCoordSystem->GetName().c_str(), mViewCoordSystem->GetName().c_str());
    #endif
+
+   int objId;
    
    // do not convert if desired CS is internal CS
    //if (mViewCoordSystem->GetName() == mInternalCoordSystem->GetName())
@@ -3144,25 +3126,29 @@ bool TrajPlotCanvas::ConvertSpacecraftData(int frame)
    {
       for (int sc=0; sc<mScCount; sc++)
       {
-         mScTempPos[sc][frame][0] = mScGciPos[sc][frame][0];
-         mScTempPos[sc][frame][1] = mScGciPos[sc][frame][1];
-         mScTempPos[sc][frame][2] = mScGciPos[sc][frame][2];
+         objId = GetObjectId(mScNameArray[sc].c_str());
+         
+         mObjectTempPos[objId][frame][0] = mObjectGciPos[objId][frame][0];
+         mObjectTempPos[objId][frame][1] = mObjectGciPos[objId][frame][1];
+         mObjectTempPos[objId][frame][2] = mObjectGciPos[objId][frame][2];
       }
    }
    else
    {
       for (int sc=0; sc<mScCount; sc++)
       {
-         inState.Set(mScGciPos[sc][frame][0], mScGciPos[sc][frame][1],
-                     mScGciPos[sc][frame][2],
+         objId = GetObjectId(mScNameArray[sc].c_str());
+                  
+         inState.Set(mObjectGciPos[objId][frame][0], mObjectGciPos[objId][frame][1],
+                     mObjectGciPos[objId][frame][2],
                      0.0, 0.0, 0.0);
          
          mCoordConverter.Convert(mTime[frame], inState, mInternalCoordSystem,
                                  outState, mViewCoordSystem);
          
-         mScTempPos[sc][frame][0] = outState[0];
-         mScTempPos[sc][frame][1] = outState[1];
-         mScTempPos[sc][frame][2] = outState[2];
+         mObjectTempPos[objId][frame][0] = outState[0];
+         mObjectTempPos[objId][frame][1] = outState[1];
+         mObjectTempPos[objId][frame][2] = outState[2];
          
          #if DEBUG_TRAJCANVAS_CONVERT > 1
          MessageInterface::ShowMessage
