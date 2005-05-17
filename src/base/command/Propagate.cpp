@@ -1316,6 +1316,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          if (paramType != "Apoapsis" && paramType != "Periapsis")
          {
             loc = end + 1;
+            /// @todo Stopping conditions may be parameter evaluations; currently only Reals
             Real propStopVal = atof(&(i->c_str())[loc]);
             stopCond->SetRealParameter("Goal", propStopVal);
             
@@ -1940,7 +1941,7 @@ bool Propagate::Execute()
                   #if DEBUG_PROPAGATE_EXE
                      MessageInterface::ShowMessage
                         ("Propagate::Execute() %s met\n", 
-                        stopWhen[i]->GetName().c_str());
+                         stopWhen[i]->GetName().c_str());
                   #endif
                   break; // exit if any stop condition met
                }
@@ -1966,7 +1967,8 @@ bool Propagate::Execute()
          }
          else
          {  
-            for (UnsignedInt i = 0; i < fm.size(); ++i) {
+            for (UnsignedInt i = 0; i < fm.size(); ++i) 
+            {
                fm[i]->RevertSpaceObject();
                elapsedTime[i] = fm[i]->GetTime();
                currEpoch[i] = baseEpoch[i] +
@@ -1981,7 +1983,8 @@ bool Propagate::Execute()
    
          // Periodically see if the user has stopped the run 
          ++checkCount;
-         if ((checkCount == interruptCheckFrequency) && !stopCondMet){
+         if ((checkCount == interruptCheckFrequency) && !stopCondMet)
+         {
             inProgress = true;
             return true;
          }
@@ -1995,9 +1998,6 @@ bool Propagate::Execute()
    }
 
    inProgress = false;
-   
-   ClearTransientForces();
-   
    
    #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage(
@@ -2059,6 +2059,8 @@ bool Propagate::Execute()
       #endif
    }
    
+   ClearTransientForces();
+      
    return true;
 }
 
