@@ -65,6 +65,7 @@ public:
    void StartServer();
    void StopServer();
    wxToolBar* GetMainFrameToolBar();
+   wxMenuBar* CreateMainMenu(int dataType=GmatTree::RESOURCES_FOLDER);
 
    MdiChildTrajFrame *trajSubframe;
    MdiChildTrajFrame *trajMainSubframe;
@@ -85,7 +86,10 @@ public:
    bool OnScriptRun(wxCommandEvent& WXUNUSED(event));
 
    wxList *mdiChildren;
-
+   wxMenu *GetXyViewOptionMenu();
+   wxMenu *GetViewOptionMenu();
+   wxMenu *GetViewMenu();
+   
 protected:
 
 private:
@@ -100,6 +104,10 @@ private:
    wxSashLayoutWindow* win;
    wxSashLayoutWindow* msgWin;
    wxScrolledWindow *panel;
+
+   wxMenu *mXyViewOptionMenu;
+   wxMenu *mViewOptionMenu;
+   wxMenu *mViewMenu;
    
 //   wxDocManager *mDocManager;
 //   wxDocTemplate *mDocTemplate;
@@ -107,7 +115,6 @@ private:
    //GmatMainNotebook *rightTabs;
    
    void InitToolBar(wxToolBar* toolBar);
-   wxMenuBar* CreateMainMenu();
    wxMenu *mServerMenu;
    
    // event handling

@@ -41,7 +41,6 @@ BEGIN_EVENT_TABLE(MdiChildXyFrame, wxMDIChildFrame)
    EVT_MENU(GmatPlot::MDI_XY_SHOW_DEFAULT_VIEW, MdiChildXyFrame::OnShowDefaultView)
    EVT_MENU(GmatPlot::MDI_XY_DRAW_GRID, MdiChildXyFrame::OnDrawGrid)
    EVT_MENU(GmatPlot::MDI_XY_DRAW_DOTTED_LINE, MdiChildXyFrame::OnDrawDottedLine)
-   EVT_MENU(GmatPlot::MDI_XY_HELP_VIEW, MdiChildXyFrame::OnHelpView)
 
    EVT_PLOT_CLICKED(-1, MdiChildXyFrame::OnPlotClick)
    EVT_ACTIVATE(MdiChildXyFrame::OnActivate)
@@ -88,57 +87,8 @@ MdiChildXyFrame::MdiChildXyFrame(wxMDIParentFrame *parent, bool isMainFrame,
    SetIcon(wxIcon( mondrian_xpm ));
 #endif
 
-   // File menu
-   wxMenu *fileMenu = new wxMenu;
-
-   fileMenu->Append(GmatPlot::MDI_XY_OPEN_PLOT_FILE, _T("&Open XY Plot File"));
-//   fileMenu->Append(GmatPlot::MDI_XY_QUIT, _T("&Exit"));
-   fileMenu->Append(GmatPlot::MDI_XY_CHILD_QUIT, _T("&Close"),
-         _T("Close this window"));
-
-   // Plot menu
-   wxMenu *plotMenu = new wxMenu;
-
-   plotMenu->Append(GmatPlot::MDI_XY_CLEAR_PLOT, _T("Clear Plot"));
-   plotMenu->AppendSeparator();
-   plotMenu->Append(GmatPlot::MDI_XY_CHANGE_TITLE, _T("Change &title..."));
-
-   // View menu
-   wxMenu *viewMenu = new wxMenu;
-   viewMenu->Append(GmatPlot::MDI_XY_SHOW_DEFAULT_VIEW, _T("Reset\tCtrl-R"),
-                    _("Reset to default view"));
-   viewMenu->AppendSeparator();
-
-   // View Option submenu
-   mViewOptionMenu = new wxMenu;
-   wxMenuItem *item =
-      new wxMenuItem(viewMenu, GmatPlot::MDI_XY_VIEW_OPTION, _T("Option"),
-                     _T("view options"), wxITEM_NORMAL, mViewOptionMenu);
-   mViewOptionMenu->Append(GmatPlot::MDI_XY_DRAW_GRID,
-                          _T("Draw Grid"),
-                          _T("Draw Grid"), wxITEM_CHECK);
-   mViewOptionMenu->Append(GmatPlot::MDI_XY_DRAW_DOTTED_LINE,
-                          _T("Draw dotted line"),
-                          _T("Draw dotted line"), wxITEM_CHECK);
-
-   mViewOptionMenu->Check(GmatPlot::MDI_XY_DRAW_DOTTED_LINE, false);
-   
-   viewMenu->Append(item);
-
-   // Help menu
-   wxMenu *helpMenu = new wxMenu;
-   helpMenu->Append(GmatPlot::MDI_XY_HELP_VIEW, _T("View"), _T("View mouse control"));
-
-   // menu bar
-   wxMenuBar *menuBar = new wxMenuBar;
-
-   menuBar->Append(fileMenu, _T("&File"));
-   menuBar->Append(plotMenu, _T("&Plot"));
-   menuBar->Append(viewMenu, _T("&View"));
-   menuBar->Append(helpMenu, _T("&Help"));
-
    // Associate the menu bar with the frame
-   SetMenuBar(menuBar);
+   SetMenuBar(GmatAppData::GetMainFrame()->CreateMainMenu(GmatTree::OUTPUT_XY_PLOT));
 
    // status bar
    //CreateStatusBar();
@@ -526,6 +476,7 @@ void MdiChildXyFrame::SetShowGrid(bool show)
 {
    if (mXyPlot)
    {
+      wxMenu *mViewOptionMenu = GmatAppData::GetMainFrame()->GetXyViewOptionMenu();
       mViewOptionMenu->Check(GmatPlot::MDI_XY_DRAW_GRID, show);
       mXyPlot->SetShowGrid(show);
    }
@@ -617,13 +568,6 @@ void MdiChildXyFrame::OnDrawDottedLine(wxCommandEvent& event)
 {
    //if (mXyPlot)
    //   mXyPlot->DrawDottedLine(event.IsChecked());
-}
-
-//------------------------------------------------------------------------------
-// void OnHelpView(wxCommandEvent& WXUNUSED(event))
-//------------------------------------------------------------------------------
-void MdiChildXyFrame::OnHelpView(wxCommandEvent& event)
-{
 }
 
 //------------------------------------------------------------------------------

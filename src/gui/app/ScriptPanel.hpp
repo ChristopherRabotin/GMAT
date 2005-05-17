@@ -22,7 +22,7 @@ class ScriptPanel: public GmatSavePanel
 public:
    // constructors
    ScriptPanel(wxWindow *parent, const wxString &name);
-   wxMenuBar *CreateScriptMenu();
+//   wxMenuBar *CreateScriptMenu();
 
 private:
    wxString mScriptFilename;

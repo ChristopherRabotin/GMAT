@@ -150,9 +150,6 @@ protected:
    wxArrayString mBodyNames;
    UnsignedIntArray mBodyColors;
 
-   wxMenu *mViewOptionMenu;
-   wxMenu *mViewMenu;
-   
 //    wxMenu* CreateGotoBodyMenu();
 //    int GetMenuId(const wxString &body);
    

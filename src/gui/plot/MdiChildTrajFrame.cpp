@@ -31,13 +31,13 @@ BEGIN_EVENT_TABLE(MdiChildTrajFrame, wxMDIChildFrame)
    EVT_MENU(GmatPlot::MDI_GL_SHOW_DEFAULT_VIEW, MdiChildTrajFrame::OnShowDefaultView)
    EVT_MENU(GmatPlot::MDI_GL_ZOOM_IN, MdiChildTrajFrame::OnZoomIn)
    EVT_MENU(GmatPlot::MDI_GL_ZOOM_OUT, MdiChildTrajFrame::OnZoomOut)
-   
+
    EVT_MENU(GmatPlot::MDI_GL_SHOW_OPTION_PANEL, MdiChildTrajFrame::OnShowOptionDialog)
    EVT_MENU(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, MdiChildTrajFrame::OnDrawWireFrame)
    EVT_MENU(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, MdiChildTrajFrame::OnDrawEqPlane)
-      
+
    EVT_MENU(GmatPlot::MDI_GL_VIEW_ANIMATION, MdiChildTrajFrame::OnViewAnimation)
-   
+
    EVT_MENU(GmatPlot::MDI_GL_HELP_VIEW, MdiChildTrajFrame::OnHelpView)
 
    EVT_ACTIVATE(MdiChildTrajFrame::OnActivate)
@@ -83,66 +83,9 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
 #else
    SetIcon(wxIcon( mondrian_xpm ));
 #endif
-   
-   // File menu
-   wxMenu *fileMenu = new wxMenu;
-
-   fileMenu->Append(GmatPlot::MDI_GL_OPEN_TRAJECTORY_FILE, _T("&Open Trajectory File"));
-   fileMenu->Append(GmatPlot::MDI_GL_CHILD_QUIT, _T("&Close"), _T("Close this window"));
-
-   // Plot menu
-   wxMenu *plotMenu = new wxMenu;
-
-   plotMenu->Append(GmatPlot::MDI_GL_CLEAR_PLOT, _T("Clear Plot"));
-   plotMenu->AppendSeparator();
-   plotMenu->Append(GmatPlot::MDI_GL_CHANGE_TITLE, _T("Change &title..."));
-
-   // View menu
-   mViewMenu = new wxMenu;
-   mViewMenu->Append(GmatPlot::MDI_GL_SHOW_DEFAULT_VIEW, _T("Default\tCtrl-R"),
-                    _("Reset to default view"));
-   mViewMenu->Append(GmatPlot::MDI_GL_ZOOM_IN, _T("Zoom &in\tCtrl-I"), _("Zoom in"));
-   mViewMenu->Append(GmatPlot::MDI_GL_ZOOM_OUT, _T("Zoom &out\tCtrl-O"), _("Zoom out"));
-   mViewMenu->AppendSeparator();
-
-   // View Option submenu
-   mViewMenu->Append(GmatPlot::MDI_GL_SHOW_OPTION_PANEL,
-                     _T("Show View Option Dialog"),
-                     _T("Show view option dialog"), wxITEM_CHECK);
-   
-   mViewOptionMenu = new wxMenu;
-   wxMenuItem *item =
-      new wxMenuItem(mViewMenu, GmatPlot::MDI_GL_VIEW_OPTION, _T("Option"),
-                     _T("Show bodies in wire frame"), wxITEM_NORMAL, mViewOptionMenu);
-   mViewOptionMenu->Append(GmatPlot::MDI_GL_SHOW_WIRE_FRAME,
-                          _T("Show Wire Frame"),
-                          _T("Show bodies in wire frame"), wxITEM_CHECK);
-   mViewOptionMenu->Append(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE,
-                          _T("Show Equatorial Plane"),
-                          _T("Show equatorial plane lines"), wxITEM_CHECK);
-   
-   mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, true);
-   
-   mViewMenu->Append(item);
-
-   // Animation menu
-   mViewMenu->AppendSeparator();
-   mViewMenu->Append(GmatPlot::MDI_GL_VIEW_ANIMATION, _T("Animation"));
-   
-   // Help menu
-   wxMenu *helpMenu = new wxMenu;
-   helpMenu->Append(GmatPlot::MDI_GL_HELP_VIEW, _T("View"), _T("View mouse control"));
-
-   // menu bar
-   wxMenuBar *menuBar = new wxMenuBar;
-
-   menuBar->Append(fileMenu, _T("&File"));
-   menuBar->Append(plotMenu, _T("&Plot"));
-   menuBar->Append(mViewMenu, _T("&View"));
-   menuBar->Append(helpMenu, _T("&Help"));
 
    // Associate the menu bar with the frame
-   SetMenuBar(menuBar);
+   SetMenuBar(GmatAppData::GetMainFrame()->CreateMainMenu(GmatTree::OUTPUT_OPENGL_PLOT));
 
    // status bar
    //CreateStatusBar();
@@ -405,6 +348,7 @@ void MdiChildTrajFrame::ResetShowViewOption()
       ("MdiChildTrajFrame::ResetShowViewOption()\n");
    #endif
 
+   wxMenu *mViewMenu = GmatAppData::GetMainFrame()->GetViewMenu();
    mViewMenu->Check(GmatPlot::MDI_GL_SHOW_OPTION_PANEL, false);
 }
 
@@ -466,6 +410,7 @@ void MdiChildTrajFrame::SetDrawWireFrame(bool flag)
 {
    if (mCanvas)
    {
+      wxMenu *mViewOptionMenu = GmatAppData::GetMainFrame()->GetViewOptionMenu();
       mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, flag);
       mCanvas->SetDrawWireFrame(flag);
    }
@@ -478,6 +423,7 @@ void MdiChildTrajFrame::SetDrawEqPlane(bool flag)
 {
    if (mCanvas)
    {
+      wxMenu *mViewOptionMenu = GmatAppData::GetMainFrame()->GetViewOptionMenu();
       mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, flag);
       mCanvas->SetDrawEqPlane(flag);
    }

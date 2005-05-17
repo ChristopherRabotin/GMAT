@@ -35,7 +35,6 @@ class MdiChildXyFrame: public wxMDIChildFrame
 public:
    wxPlotWindow   *mXyPlot;
    wxTextCtrl     *mLogTextCtrl;
-   wxMenu         *mViewOptionMenu;
    
    bool mIsMainFrame;
         
@@ -79,7 +78,6 @@ public:
    void OnShowDefaultView(wxCommandEvent& event);
    void OnDrawGrid(wxCommandEvent& event);
    void OnDrawDottedLine(wxCommandEvent& event);
-   void OnHelpView(wxCommandEvent& event);
    void OnQuit(wxCommandEvent& event);
    void OnOpenXyPlotFile(wxCommandEvent& event);
 
