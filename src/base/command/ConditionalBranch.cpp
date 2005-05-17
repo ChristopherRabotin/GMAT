@@ -912,6 +912,12 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
          throw CommandException("Parameter " + theRHSParmName +
               " not found for RHS string in condition ");// + which);
    }
+
+   #ifdef DEBUG_CONDITIONS
+      MessageInterface::ShowMessage(
+         "   lhs = %le,  rhs = %le\"\n", lhsValue, rhsValue);
+   #endif
+
    switch (opList.at(which))
    {
       case EQUAL_TO:

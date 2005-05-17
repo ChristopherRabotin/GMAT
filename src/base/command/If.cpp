@@ -157,21 +157,37 @@ bool If::Append(GmatCommand *cmd)
 bool If::Execute()
 {
    bool retval = true;
-   
-   ConditionalBranch::Execute(); 
-   
-   //if (EvaluateCondition(0)) // must deal with multiple conditions later
-   if (EvaluateAllConditions()) 
+      
+   if (branchExecuting)
    {
       retval = ExecuteBranch();
+      if (!branchExecuting)
+      {
+         commandComplete  = true;
+         commandExecuting = false;
+      }
    }
-   else if ((Integer)branch.size() > 1)  // there could be an 'Else'
+   else 
    {
-      retval = ExecuteBranch(1);
+      if (!commandExecuting)
+         ConditionalBranch::Execute();
+      
+      //if (EvaluateCondition(0)) // must deal with multiple conditions later
+      if (EvaluateAllConditions()) 
+      {
+         branchExecuting = true;
+      }
+      else if ((Integer)branch.size() > 1)  // there could be an 'Else'
+      {
+         branchExecuting = true;
+      }
+      else
+      {
+         commandComplete  = true;
+         commandExecuting = false;
+      }
    }
-   commandComplete  = true;
-   commandExecuting = false;
-   
+
    return retval;
 }
 

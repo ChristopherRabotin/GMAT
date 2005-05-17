@@ -248,21 +248,34 @@ bool For::Initialize(void)
 bool For::Execute(void)
 {
    bool retval = true;
-   BranchCommand::Execute();
 
-   if (StillLooping())
+   if (branchExecuting)
    {
       retval = ExecuteBranch();
-      currentValue += stepSize;
-      if (indexIsParam)   indexParam->SetReal(currentValue);
+      if (!branchExecuting)
+      {
+         // Branch finished executing; update loop index
+         currentValue += stepSize;
+         if (indexIsParam)   indexParam->SetReal(currentValue);
+      }
    }
-   else
+   else 
    {
-      commandComplete  = true;
-      commandExecuting = false;
-      currentValue     = UNINITIALIZED_VALUE;  // start the loop over
-   }
+      if (!commandExecuting)
+         BranchCommand::Execute();
    
+      if (StillLooping())
+      {
+         branchExecuting = true;
+         retval = ExecuteBranch();
+      }
+      else
+      {
+         commandComplete  = true;
+         commandExecuting = false;
+         currentValue     = UNINITIALIZED_VALUE;  // start the loop over
+      }
+   }
    return retval;
 }
 

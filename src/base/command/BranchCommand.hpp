@@ -59,7 +59,8 @@ public:
    virtual GmatCommand*    GetChildCommand(Integer whichOne = 0);
    virtual bool            Initialize();
    virtual bool            Execute();
-    
+   virtual void            RunComplete();
+
 protected:
       
    // no additional parameters to add at this time
@@ -74,12 +75,16 @@ protected:
    bool                    commandComplete;
    /// Flag used to indicate a run is being executed
    bool                    commandExecuting;
+   /// Flag used to indicate a branch is being executed
+   bool                    branchExecuting;
    /// The branch that is being filled while the command sequence is being built
    Integer                 branchToFill;
    /// Local container used to return the full sequence from the branches
    std::string             fullString;
    /// Counter to track how deep the nesting is
    Integer                 nestLevel;
+   /// Currently executing member of the branch.  NULL if branch not executing.
+   GmatCommand             *current;
 };
 
 #endif // BranchCommand_hpp

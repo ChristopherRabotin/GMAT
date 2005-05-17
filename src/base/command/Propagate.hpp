@@ -110,6 +110,7 @@ public:
                                      StringArray& elements);
    virtual GmatCommand* GetNext();
    virtual bool        Execute();
+   virtual void        RunComplete();
 
 protected:
    /// Name of the propagator setup(s) used in this command

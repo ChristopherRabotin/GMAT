@@ -158,25 +158,47 @@ bool While::Execute()
    #ifdef DEBUG_WHILE_RERUN
       MessageInterface::ShowMessage(
          "While::Executing() status: commandComplete = %s, "
-         "commandExecuting = %s\n",
+         "commandExecuting = %s, branchExecuting = %s\n",
          ((commandComplete) ? "true" : "false"),
-         ((commandExecuting) ? "true" : "false") );
+         ((commandExecuting) ? "true" : "false"),
+         ((branchExecuting) ? "true" : "false") );
    #endif
 
    bool retval = true;
-   
-   ConditionalBranch::Execute();
-   //commandComplete  = false;
-   //commandExecuting = true;
-   
-   if (EvaluateAllConditions()) // must deal with multiple conditions later
+
+   // First see if we're in a branch run
+   if (branchExecuting)
    {
       retval = ExecuteBranch();
    }
-   else  // fails condition, so while loop is done
+   else 
    {
-      commandComplete  = true;
-      commandExecuting = false;
+      // If not, check to see what to do and do it.
+      if (!commandExecuting) {
+         #ifdef DEBUG_WHILE
+            MessageInterface::ShowMessage("Starting command\n");
+         #endif
+         ConditionalBranch::Execute();
+      }
+
+      if (EvaluateAllConditions()) // must deal with multiple conditions later
+      {
+         #ifdef DEBUG_WHILE
+            MessageInterface::ShowMessage("   Conditions true, running while loop\n");
+         #endif
+         branchExecuting = true;
+         while (branchExecuting && retval)
+            retval = ExecuteBranch();
+      }
+      else  // fails condition, so while loop is done
+      {
+         #ifdef DEBUG_WHILE
+            MessageInterface::ShowMessage("   Conditions false; command complete\n");
+         #endif
+         commandComplete  = true;
+         commandExecuting = false;
+         branchExecuting  = false;
+      }
    }
    
    return retval;

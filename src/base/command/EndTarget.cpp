@@ -32,6 +32,7 @@
 EndTarget::EndTarget() :
    GmatCommand         ("EndTarget")
 {
+   objectTypeNames.push_back("BranchEnd");
    depthChange = -1;
 }
 

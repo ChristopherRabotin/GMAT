@@ -33,7 +33,7 @@
 //#define DEBUG_USER_INTERRUPT 1
 //#define DEBUG_ACTION_REMOVE 1
 //#define DEBUG_LOOKUP_RESOURCE 1
-//#define DEBUG_SEQUENCE_CLEARING 1
+#define DEBUG_SEQUENCE_CLEARING 1
 //#define DEBUG_CONFIG 1
 //#define DEBUG_FINALIZE 1
 
@@ -2438,6 +2438,10 @@ bool Moderator::ClearCommandSeq(Integer sandboxNum)
    // the way GMAT acts from a script?  I think you want to do this, though:
    // commands[sandboxNum-1] = NULL;
    GmatCommand *cmd = commands[sandboxNum-1], *oldcmd;
+   
+   // Be sure we're in an idle state first
+   cmd->RunComplete();
+   
    oldcmd = cmd->GetNext();
    DeleteCommand(cmd);
    if (oldcmd) {

@@ -501,69 +501,89 @@ bool Target::Initialize()
 //------------------------------------------------------------------------------
 bool Target::Execute()
 {
-   bool retval = BranchCommand::Execute();
+   bool retval = true;
+
+   if (!commandExecuting)
+      retval = BranchCommand::Execute();
     
    // Drive through the state machine.
    Solver::SolverState state = targeter->GetState();
-   GmatCommand *current;
-    
-   switch (state) {
-      case Solver::INITIALIZING:
-         // Finalize initialization of the targeter data
-         current = branch[0];
-         targeterConverged = false;
-         while (current != this)  {
-            std::string type = current->GetTypeName();
-            if ((type == "Target") || (type == "Vary") ||
-                (type == "Achieve"))
-               current->Execute();
-            current = current->GetNext();
-         }
-         StoreLoopData();
-         break;
-            
-      case Solver::NOMINAL:
-         // Execute the nominal sequence
-         if (!commandComplete) {
-            ResetLoopData();
-            retval = ExecuteBranch();
-         }
-         break;
-            
-      case Solver::CHECKINGRUN:
-         // Check for convergence; this is done in the targeter state
-         // machine, so this case is a NoOp for the Target command
-         break;
-            
-      case Solver::PERTURBING:
-         ResetLoopData();
-         retval = ExecuteBranch();
-         break;
-            
-      case Solver::CALCULATING:
-         // Calculate the next set of variables to use; this is performed in
-         // the targeter -- nothing to be done here
-         break;
-            
-      case Solver::FINISHED:
-         // Final clean-up
+   
+   if (branchExecuting)
+   {
+      retval = ExecuteBranch();
+      if (!branchExecuting && (state == Solver::FINISHED))
          commandComplete = true;
-         targeterConverged = true;
-            
-         // Run once more to publish the data from the converged state
-         ResetLoopData();
-         retval = ExecuteBranch();
-         break;
-            
-      case Solver::ITERATING:     // Intentional fall-through
-      default:
-         throw CommandException("Invalid state in the Targeter state machine");
+   }
+   else
+   {
+      GmatCommand *currentCmd;
+   
+      switch (state) {
+         case Solver::INITIALIZING:
+            // Finalize initialization of the targeter data
+            currentCmd = branch[0];
+            targeterConverged = false;
+            while (currentCmd != this)  {
+               std::string type = currentCmd->GetTypeName();
+               if ((type == "Target") || (type == "Vary") ||
+                   (type == "Achieve"))
+                  currentCmd->Execute();
+               currentCmd = currentCmd->GetNext();
+            }
+            StoreLoopData();
+            break;
+               
+         case Solver::NOMINAL:
+            // Execute the nominal sequence
+            if (!commandComplete) {
+               branchExecuting = true;
+               ResetLoopData();
+            }
+            break;
+               
+         case Solver::CHECKINGRUN:
+            // Check for convergence; this is done in the targeter state
+            // machine, so this case is a NoOp for the Target command
+            break;
+   
+         case Solver::PERTURBING:
+            branchExecuting = true;
+            ResetLoopData();
+            break;
+               
+         case Solver::CALCULATING:
+            // Calculate the next set of variables to use; this is performed in
+            // the targeter -- nothing to be done here
+            break;
+               
+         case Solver::FINISHED:
+            // Final clean-up
+//            commandComplete = true;
+            targeterConverged = true;
+
+            // Run once more to publish the data from the converged state
+            if (!commandComplete)
+            {
+               ResetLoopData();
+               branchExecuting = true;
+            }
+            break;
+               
+         case Solver::ITERATING:     // Intentional fall-through
+         default:
+            throw CommandException(
+               "Invalid state in the Targeter state machine");
+      }
    }
 
-   targeter->AdvanceState();
+   if (!branchExecuting)
+   {
+      targeter->AdvanceState();
 
-   if (targeter->GetState() == Solver::FINISHED) {
-      targeterConverged = true;
+      if (targeter->GetState() == Solver::FINISHED) {
+         targeterConverged = true;
+      }
    }
 
    return retval;

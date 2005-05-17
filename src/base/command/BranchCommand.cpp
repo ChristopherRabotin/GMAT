@@ -40,6 +40,7 @@ BranchCommand::BranchCommand(const std::string &typeStr) :
    branch               (1),
    commandComplete      (false),
    commandExecuting     (false),
+   branchExecuting      (false),
    branchToFill         (0),
    nestLevel            (0)
 {
@@ -71,7 +72,11 @@ BranchCommand::~BranchCommand()
       {
          current = current->GetNext();
          if (current == NULL)
+         {
+MessageInterface::ShowMessage("current is NULL\n");
             break;
+         }
+MessageInterface::ShowMessage("current (%s) is not NULL\n", current->GetTypeName().c_str());
       }
          
       // Calling Remove this way just sets the next pointer to NULL
@@ -190,25 +195,28 @@ GmatCommand* BranchCommand::GetChildCommand(Integer whichOne)
 bool BranchCommand::Initialize()
 {
    std::vector<GmatCommand*>::iterator node;
-   GmatCommand *current;
+   GmatCommand *currentPtr;
    bool retval = true;
    
    for (node = branch.begin(); node != branch.end(); ++node)
    {
-      current = *node;
-      while (current != this)
+      currentPtr = *node;
+      while (currentPtr != this)
       {
-         if (!current->Initialize())
+         if (!currentPtr->Initialize())
                retval = false;
-         current = current->GetNext();
-         if (current == NULL)
+         currentPtr = currentPtr->GetNext();
+         if (currentPtr == NULL)
             throw CommandException("Branch command \"" + generatingString +
                                    "\" was not terminated!");
       }
    }
+//   for (UnsignedInt i = 0; i < current.size(); ++i)
+//      current[i] = NULL;
    
    commandComplete  = false;
    commandExecuting = false;
+   current = NULL;
    
    return retval;
 }
@@ -228,12 +236,21 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
 {
    // Increase the size of the vector if it's not big enough
    if (which >= (Integer)branch.capacity())
+   {
       branch.reserve(which+1);
+//      current.reserve(which+1);
+   }
    
    if (which == (Integer)(branch.size()))
-      branch.push_back(cmd);   
+   {
+      branch.push_back(cmd);
+//      current.push_back(NULL);
+   }   
    else if (branch[which] == NULL)
+   {
       branch.at(which) = cmd;
+//      current.at(which) = NULL;
+   }
    else
       (branch.at(which))->Append(cmd);
 }
@@ -550,13 +567,22 @@ bool BranchCommand::ExecuteBranch(Integer which)
 {
    bool retval = true;
    
-   GmatCommand *current = branch[which];
-   while ((current != NULL) && (current != this))
+   if (current == NULL)
+      current = branch[which];
+      
+   if (current == this)
+   {
+      branchExecuting = false;
+      current = NULL;
+   }
+
+   //while ((current != NULL) && (current != this))
+   if (current != NULL)
    {
       if (current->Execute() == false)
       {
          retval = false;
-         break;
+//         break;
       }
       // May need to add a test for user interruption here
       current = current->GetNext();
@@ -566,4 +592,32 @@ bool BranchCommand::ExecuteBranch(Integer which)
 }
 
 
+//------------------------------------------------------------------------------
+//  void RunComplete()
+//------------------------------------------------------------------------------
+/**
+ * Tells the sewuence that the run was ended, possibly before reaching the end.
+ *
+ * BranchCommands clear the "current" pointer and call RunComplete on their
+ * branches, ensuring that the command sequence has reset the branches to an
+ * idle state.
+ */
+//------------------------------------------------------------------------------
+void BranchCommand::RunComplete()
+{
+   current = NULL;
+   for (std::vector <GmatCommand *>::iterator i = branch.begin(); i != branch.end(); ++i)
+      if (*i != NULL)
+         if (!(*i)->IsOfType("BranchEnd"))
+            (*i)->RunComplete();
 
+   if (next)
+      if (!next->IsOfType("BranchEnd"))
+         next->RunComplete();
+
+   commandComplete = false;
+   commandExecuting = false;
+   branchExecuting = false;
+
+   GmatCommand::RunComplete();
+}

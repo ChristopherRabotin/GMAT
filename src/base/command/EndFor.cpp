@@ -26,6 +26,7 @@
 EndFor::EndFor(void) :
     GmatCommand         ("EndFor")
 {
+   objectTypeNames.push_back("BranchEnd");
    depthChange = -1;
 }
 

@@ -131,6 +131,7 @@ public:
     */
    //---------------------------------------------------------------------------
    virtual bool        Execute() = 0;
+   virtual void        RunComplete();
 
 protected:
    // no additional parameters to add at this time

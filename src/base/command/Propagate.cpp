@@ -298,7 +298,7 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
    std::string gen = prefix + "Propagate";
    
    // Construct the generating string
-   Integer index = 0;
+   UnsignedInt index = 0;
    
    if (currentPropMode != "")
       gen += (" " + currentPropMode);
@@ -2061,6 +2061,14 @@ bool Propagate::Execute()
    
    return true;
 }
+
+
+void Propagate::RunComplete()
+{
+   inProgress = false;
+   GmatCommand::RunComplete();
+}
+
 
 
 //------------------------------------------------------------------------------

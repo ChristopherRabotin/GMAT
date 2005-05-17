@@ -32,6 +32,7 @@
 EndIf::EndIf() :
     GmatCommand         ("EndIf")
 {
+   objectTypeNames.push_back("BranchEnd");
    depthChange = -1;
 }
 

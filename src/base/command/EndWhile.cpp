@@ -25,6 +25,7 @@
 EndWhile::EndWhile(void) :
 GmatCommand         ("EndWhile")
 {
+   objectTypeNames.push_back("BranchEnd");
    depthChange = -1;
 }
 
@@ -57,7 +58,7 @@ bool EndWhile::Initialize(void)
       throw CommandException("EndWhile Command not properly reconnected");
 
    if (next->GetTypeName() != "While")
-      throw CommandException("EndWhile Command not connected to IF Command");
+      throw CommandException("EndWhile Command not connected to While Command");
 
    return true;
 }

@@ -950,6 +950,11 @@ bool Sandbox::Execute()
       if (Interrupt())
       {
          MessageInterface::ShowMessage("Sandbox::Execution interrupted by Moderator\n");
+
+            MessageInterface::ShowMessage("   Interrupted in %s command\n",
+               current->GetTypeName().c_str());
+
+         sequence->RunComplete();
          return rv;
       }
 
@@ -992,6 +997,8 @@ bool Sandbox::Execute()
       }
       current = current->GetNext();
    }
+   
+   sequence->RunComplete();
    
    return rv;
 }

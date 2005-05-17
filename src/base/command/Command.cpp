@@ -22,9 +22,7 @@
 
 #include "Command.hpp"          // class's header file
 
-#ifdef DEBUG_COMMAND_DEALLOCATION
-  #include "MessageInterface.hpp" // MessageInterface
-#endif
+#include "MessageInterface.hpp" // MessageInterface
 
 //---------------------------------
 //  public methods
@@ -767,4 +765,29 @@ Integer GmatCommand::DepthIncrement()
 bool GmatCommand::HasPropStateChanged()
 {
    return commandChangedState;
+}
+
+
+//------------------------------------------------------------------------------
+//  void RunComplete()
+//------------------------------------------------------------------------------
+/**
+ * Tells the sewuence that the run was ended, possibly before reaching the end.
+ *
+ * Some commands -- for instance, the BranchCommands -- track state during a 
+ * run.  This method is called when the sequence is terminated by the Moderator
+ * to reset the commands to an idle state.
+ */
+//------------------------------------------------------------------------------
+void GmatCommand::RunComplete()
+{
+   #ifdef DEBUG_COMMAND_DEALLOCATION
+      MessageInterface::ShowMessage("RunComplete for %s\n", typeName.c_str());
+   #endif
+   
+   // By default, just call RunComplete on the next command.
+   if (next)
+      // Branch command ends point back to start; this line prevents looping
+      if (!next->IsOfType("BranchEnd"))
+         next->RunComplete();
 }

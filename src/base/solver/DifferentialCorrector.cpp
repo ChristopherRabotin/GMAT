@@ -718,7 +718,12 @@ Solver::SolverState DifferentialCorrector::AdvanceState()
          CheckCompletion();
          ++iterationsTaken;
          if (iterationsTaken > maxIterations)
+         {
+            MessageInterface::ShowMessage("Differential corrector %s %s\n",
+               instanceName.c_str(),
+               "has exceeded to maximum number of allowed iterations.");
             currentState = FINISHED;
+         }
          break;
         
       case FINISHED:
