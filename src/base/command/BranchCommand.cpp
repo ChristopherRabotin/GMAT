@@ -73,10 +73,8 @@ BranchCommand::~BranchCommand()
          current = current->GetNext();
          if (current == NULL)
          {
-MessageInterface::ShowMessage("current is NULL\n");
             break;
          }
-MessageInterface::ShowMessage("current (%s) is not NULL\n", current->GetTypeName().c_str());
       }
          
       // Calling Remove this way just sets the next pointer to NULL

@@ -31,7 +31,7 @@
 //#define DEBUG_SANDBOX_INIT 1
 //#define DEBUG_SANDBOX_RUN 1
 //#define DEBUG_SANDBOX_OBJECT_MAPS
-
+//#define DEBUG_MODERATOR_CALLBACK
 //------------------------------------------------------------------------------
 // Sandbox::Sandbox()
 //------------------------------------------------------------------------------
@@ -951,8 +951,10 @@ bool Sandbox::Execute()
       {
          MessageInterface::ShowMessage("Sandbox::Execution interrupted by Moderator\n");
 
+         #ifdef DEBUG_MODERATOR_CALLBACK
             MessageInterface::ShowMessage("   Interrupted in %s command\n",
                current->GetTypeName().c_str());
+         #endif
 
          sequence->RunComplete();
          return rv;
