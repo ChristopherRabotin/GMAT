@@ -25,14 +25,14 @@
 #include "CoordinateSystemException.hpp"
 
 #include "MessageInterface.hpp"
+/*
+#include <iostream>
+using namespace std; // ***************************** for debug only
 
-//#include <iostream>
-//using namespace std; //***************************** for debug only
-
-//#define DEBUG_ROT_MATRIX 1
-//#define DEBUG_REFERENCE_SETTING
-
-//static Integer visitCount = 0;
+#define DEBUG_ROT_MATRIX 1
+#define DEBUG_REFERENCE_SETTING
+static Integer visitCount = 0;
+ */
 
 //---------------------------------
 // static data
@@ -715,17 +715,10 @@ void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    if (visitCount == 0)
    {
       cout.precision(30);
-      cout << " ----------------- rv Earth to Moon    = " << rv << endl;
-      //visitCount++;
+      cout << " ----------------- rv Primary to Secondary    = " << rv << endl;
+      visitCount++;
    }
 #endif
-   // *********** temp - truncate to 9 digits ***********
-   rv(0) =   40767.49930669500000000;
-   rv(1) = -364288.91935739600000000;
-   rv(2) = -170267.76122865200000000;
-   rv(3) =       0.95812001000000000;
-   rv(4) =       0.06095713400000000;
-   rv(5) =       0.11464043900000000;
 #ifdef DEBUG_ROT_MATRIX
    if (visitCount == 0)
    {
