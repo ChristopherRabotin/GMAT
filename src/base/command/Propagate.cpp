@@ -1279,7 +1279,11 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          Moderator *theModerator = Moderator::Instance();
           
          // create parameter
-         std::string paramName = paramObj + "." + paramType;
+         std::string paramName;
+         if (parmSystem == "")
+            paramName = paramObj + "." + paramType;
+         else
+            paramName = paramObj + "." + parmSystem + "." + paramType;
          Parameter *stopParam = theModerator->CreateParameter(paramType,
                                    paramName);
          stopParam->SetRefObjectName(Gmat::SPACECRAFT, paramObj);
@@ -1290,13 +1294,13 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
 
             stopParam->SetStringParameter("DepObject", parmSystem);
             stopParam->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
-
          }
          
          if (stopParam->IsOriginDependent()) {
             if (parmSystem == "")
                parmSystem = "Earth";
             stopParam->SetStringParameter("DepObject", parmSystem);
+//            stopParam->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
             if (stopParam->NeedCoordSystem())
                /// @todo Update coordinate system to better value for body parms
                stopParam->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
