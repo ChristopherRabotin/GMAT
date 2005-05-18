@@ -44,7 +44,7 @@
 //#define DEBUG_TRAJCANVAS_UPDATE_OBJECT 2
 //#define DEBUG_TRAJCANVAS_ACTION 1
 //#define DEBUG_TRAJCANVAS_CONVERT 2
-//#define DEBUG_TRAJCANVAS_DRAW 1
+//#define DEBUG_TRAJCANVAS_DRAW 2
 //#define DEBUG_TRAJCANVAS_ZOOM 1
 //#define DEBUG_TRAJCANVAS_OBJECT 2
 //#define DEBUG_TRAJCANVAS_PROJ 1
@@ -206,12 +206,14 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    
    for (int i=0; i<MAX_BODIES; i++)
    {
-      mObjectTextureIndex[i] = UNINIT_TEXTURE;
       mObjMaxZoomIn[i] = MAX_ZOOM_IN;
    }
 
    // objects
    mObjectDefaultRadius = 200; //km: make big enough to see
+   mObjectTextureIdMap["Earth"] = UNINIT_TEXTURE;
+   mObjectTextureIdMap["Luna"] = UNINIT_TEXTURE;
+   mObjectTextureIdMap["Sun"] = UNINIT_TEXTURE;
    
    for (int body=0; body<MAX_BODIES; body++)
       mObjectRadius[body] = 0.0;
@@ -299,8 +301,9 @@ bool TrajPlotCanvas::InitGL()
    ilutRenderer(ILUT_OPENGL);
    
    // try to load textures
-   if (!LoadGLTextures())
-      return false;
+   //5/17:commented out, it is called from AddObjectList()
+   //if (!LoadGLTextures())
+   //   return false;
 #endif
 
    //loj: 3/10/05 Actually I don't need this
@@ -1198,45 +1201,53 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
 
 
 //---------------------------------------------------------------------------
-// void AddObjectList(wxArrayString &bodyNames, UnsignedIntArray &bodyColors,
+// void AddObjectList(wxArrayString &objNames, UnsignedIntArray &objColors,
 //                    bool clearList=true)
 //---------------------------------------------------------------------------
-void TrajPlotCanvas::AddObjectList(const wxArrayString &bodyNames,
-                                   const UnsignedIntArray &bodyColors,
+void TrajPlotCanvas::AddObjectList(const wxArrayString &objNames,
+                                   const UnsignedIntArray &objColors,
                                    bool clearList)
 {
    #if DEBUG_TRAJCANVAS_OBJECT
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::AddObjectList() body count=%d, color count=%d\n",
-       bodyNames.GetCount(), bodyColors.size());
+      ("TrajPlotCanvas::AddObjectList() object count=%d, color count=%d\n",
+       objNames.GetCount(), objColors.size());
    #endif
    
    // clear bodies
    if (clearList)
    {
       mObjectNames.Empty();
-      mObjectTextureIdMap.clear();
    }
    
    RgbColor rgb;
 
-   mObjectCount = bodyNames.GetCount();
+   mObjectCount = objNames.GetCount();
    
    for (int i=0; i<mObjectCount; i++)
    {
       // add object names
-      mObjectNames.Add(bodyNames[i]);
-
+      mObjectNames.Add(objNames[i]);
+      
       // initialize object texture
-      mObjectTextureIdMap[bodyNames[i]] = UNINIT_TEXTURE;
-
+      if (mObjectTextureIdMap.find(objNames[i]) == mObjectTextureIdMap.end())
+      {
+         #if DEBUG_TRAJCANVAS_OBJECT
+         MessageInterface::ShowMessage
+            ("TrajPlotCanvas::AddObjectList()  Bind new texture object=%s\n",
+             objNames[i].c_str());
+         #endif
+         
+         mObjectTextureIdMap[objNames[i]] = UNINIT_TEXTURE;
+      }
+      
       // initialize show object
-      mShowObjectMap[bodyNames[i]] = true;
+      mShowObjectMap[objNames[i]] = true;
       
       // initialize object color
-      rgb.Set(bodyColors[i]);
-      mObjectColorMap[bodyNames[i]] = rgb;
-
+      rgb.Set(objColors[i]);
+      mObjectColorMap[objNames[i]] = rgb;
+      
       // set real object radius, if it is CelestialBody
       if (mObjectArray[i]->IsOfType(Gmat::CELESTIAL_BODY))
       {
@@ -1248,16 +1259,16 @@ void TrajPlotCanvas::AddObjectList(const wxArrayString &bodyNames,
          mObjectRadius[i] = mObjectDefaultRadius;
          mObjMaxZoomIn[i] = mObjectDefaultRadius * RADIUS_ZOOM_RATIO;
       }
-            
+      
       #if DEBUG_TRAJCANVAS_OBJECT > 1
       MessageInterface::ShowMessage
-         ("TrajPlotCanvas::AddObjectList() bodyNames[%d]=%s\n",
-          i, bodyNames[i].c_str());
+         ("TrajPlotCanvas::AddObjectList() objNames[%d]=%s\n",
+          i, objNames[i].c_str());
       #endif
    }
-
+   
    LoadGLTextures();
-
+   
 } //AddObjectList()
 
 
@@ -1559,6 +1570,11 @@ bool TrajPlotCanvas::LoadGLTextures()
    
 #ifdef __WXMSW__
 
+   #if DEBUG_TRAJCANVAS_OBJECT
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::LoadGLTextures() mObjectCount=%d\n", mObjectCount);
+   #endif
+   
    //--------------------------------------------------
    // load object texture if used
    //--------------------------------------------------
@@ -1570,7 +1586,7 @@ bool TrajPlotCanvas::LoadGLTextures()
          MessageInterface::ShowMessage
             ("TrajPlotCanvas::LoadGLTextures() object=%s\n", mObjectNames[i].c_str());
          #endif
-         
+      
          mObjectTextureIdMap[mObjectNames[i]] = BindTexture(mObjectNames[i]);
       }
    }
@@ -1579,7 +1595,7 @@ bool TrajPlotCanvas::LoadGLTextures()
 #else
    return false;
 #endif
-}
+} //LoadGLTextures()
 
 
 //------------------------------------------------------------------------------
@@ -1596,7 +1612,7 @@ GLuint TrajPlotCanvas::BindTexture(const wxString &objName)
    FileManager *fm = FileManager::Instance();
    std::string textureFile;
    ILboolean status;
-
+   
    //@todo - Change FileManager to have Luna
    // special case for Luna, FileManager has Moon
    std::string filename;
@@ -1611,15 +1627,15 @@ GLuint TrajPlotCanvas::BindTexture(const wxString &objName)
    }
    
    textureFile = fm->GetStringParameter(filename);
-   if (textureFile != "UNKNOWN_ID") //loj: 5/10/05 Added
+   if (textureFile != "UNKNOWN_ID")
    {
       status = ilLoadImage((char*)textureFile.c_str());
-   
-      if (status != 1)
+      if (!status)
       {
          MessageInterface::ShowMessage
-            ("TrajPlotCanvas::LoadGLTextures() Unable to load texture file for %s\n"
-             "file name:%s\n", objName.c_str(), textureFile.c_str());
+            ("*** Warning *** TrajPlotCanvas::BindTexture() Unable to load "
+             "texture file for %s\nfile name:%s\n", objName.c_str(),
+             textureFile.c_str());
       }
       else
       {
@@ -1634,7 +1650,7 @@ GLuint TrajPlotCanvas::BindTexture(const wxString &objName)
    #endif
    
    return ret;
-}
+} //BindTexture()
 
 
 //------------------------------------------------------------------------------
@@ -1976,6 +1992,10 @@ void TrajPlotCanvas::ComputeProjection(int frame)
          vdVec.Set(mObjectTempPos[mVdirBodyId][frame][0],
                    mObjectTempPos[mVdirBodyId][frame][1],
                    mObjectTempPos[mVdirBodyId][frame][2]);
+
+         // check for 0.0 direction (loj: 5/17/05 Added)
+         if (vdVec.GetMagnitude() == 0.0)
+            vdVec = mViewDirectionVector;
       }
       else
       {
@@ -2236,6 +2256,12 @@ void TrajPlotCanvas::DrawObject(const wxString &objName)
    //-------------------------------------------------------
    if (mNumData > 1)
    {
+      #if DEBUG_TRAJCANVAS_DRAW > 1 //loj: 5/17/05
+      MessageInterface::ShowMessage
+         ("TrajPlotCanvas::DrawObject() mObjectTextureIdMap[%s]=%d\n",
+          objName.c_str(), mObjectTextureIdMap[objName]);
+      #endif
+      
       if (mObjectTextureIdMap[objName] != UNINIT_TEXTURE)
       {
          glPushMatrix();
@@ -2254,15 +2280,19 @@ void TrajPlotCanvas::DrawObject(const wxString &objName)
          gluQuadricTexture  (qobj, GL_TRUE   );
          gluSphere(qobj, mObjectRadius[objId], 50, 50);
          gluDeleteQuadric(qobj);
+         
+         glDisable(GL_TEXTURE_2D);
+         glPopMatrix();
       }
       else
       {
-         // just draw small sphere
+         // just draw small sphere?
       }
    }
-   
-   glPopMatrix();
-   glDisable(GL_TEXTURE_2D);
+
+   //5/17 why outside of if block?
+   //glPopMatrix();
+   //glDisable(GL_TEXTURE_2D);
 
 } // end DrawObject(const wxString &objName)
 

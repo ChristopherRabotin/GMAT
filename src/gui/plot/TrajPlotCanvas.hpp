@@ -118,9 +118,9 @@ public:
                    const RealArray &posY, const RealArray &posZ,
                    const UnsignedIntArray &scColors);
    
-   // body
-   void AddObjectList(const wxArrayString &bodyNames,
-                      const UnsignedIntArray &bodyColors,
+   // object
+   void AddObjectList(const wxArrayString &objNames,
+                      const UnsignedIntArray &objColors,
                       bool clearList = true);
    
 protected:
@@ -178,9 +178,7 @@ private:
    unsigned int mEcLineColor;
    
    // texture
-   GLuint mObjectTextureIndex[MAX_OBJECT];
    std::map<wxString, GLuint> mObjectTextureIdMap;
-   //5.16.GLuint mScTextureIndex[GmatPlot::MAX_SCS];
    bool mUseTexture;
    
    // rotating

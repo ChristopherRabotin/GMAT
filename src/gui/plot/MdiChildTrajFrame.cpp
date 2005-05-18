@@ -18,6 +18,7 @@
 #include "TrajPlotCanvas.hpp"
 #include "CelesBodySelectDialog.hpp"
 #include "OpenGlOptionDialog.hpp"
+#include "GmatAppData.hpp"
 
 #include "ColorTypes.hpp"         // for namespace GmatColor::
 #include "MessageInterface.hpp"
@@ -108,15 +109,21 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
 // ~MdiChildTrajFrame()
 //------------------------------------------------------------------------------
 MdiChildTrajFrame::~MdiChildTrajFrame()
-{   
+{
+   if (mOptionDialog)
+      delete mOptionDialog;
+   
    mOptionDialog = (OpenGlOptionDialog*)NULL;
    
    #if DEBUG_CHILDTRAJ_FRAME
-   MessageInterface::ShowMessage("~MdiChildTrajFrame mPlotName=%s\n",
-                                 mPlotName.c_str());
+   MessageInterface::ShowMessage
+      ("~MdiChildTrajFrame mPlotName=%s\n", mPlotName.c_str());
    #endif
    
    MdiGlPlot::mdiChildren.DeleteObject(this);
+   
+   MdiGlPlot::numChildren--;
+
 }
 
 
@@ -410,11 +417,16 @@ void MdiChildTrajFrame::SetDrawWireFrame(bool flag)
 {
    if (mCanvas)
    {
-      wxMenu *mViewOptionMenu = GmatAppData::GetMainFrame()->GetViewOptionMenu();
-      mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, flag);
+      
+      //loj: 5/18/05 Why this failing when this frame is closed?
+//       wxMenu *viewOptionMenu = GmatAppData::GetMainFrame()->GetViewOptionMenu();
+//       if (viewOptionMenu)
+//          viewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, flag);
+      
       mCanvas->SetDrawWireFrame(flag);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void SetDrawEqPlane(bool flag)
@@ -423,11 +435,15 @@ void MdiChildTrajFrame::SetDrawEqPlane(bool flag)
 {
    if (mCanvas)
    {
-      wxMenu *mViewOptionMenu = GmatAppData::GetMainFrame()->GetViewOptionMenu();
-      mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, flag);
+      //loj: 5/18/05 Why this failing when this frame is closed?
+//       wxMenu *viewOptionMenu = GmatAppData::GetMainFrame()->GetViewOptionMenu();
+//       if (viewOptionMenu)
+//          viewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, flag);
+      
       mCanvas->SetDrawEqPlane(flag);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void SetDrawEcPlane(bool flag)
@@ -808,9 +824,9 @@ void MdiChildTrajFrame::OnTrajSize(wxSizeEvent& event)
    // VZ: under MSW the size event carries the client size (quite
    //     unexpectedly) *except* for the very first one which has the full
    //     size... what should it really be? TODO: check under wxGTK
-   wxSize size1 = event.GetSize(),
-      size2 = GetSize(),
-      size3 = GetClientSize();
+   wxSize size1 = event.GetSize();
+   wxSize size2 = GetSize();
+   wxSize size3 = GetClientSize();
    wxLogStatus(GmatAppData::GetMainFrame(),
                wxT("size from event: %dx%d, from frame %dx%d, client %dx%d"),
                size1.x, size1.y, size2.x, size2.y, size3.x, size3.y);
@@ -824,14 +840,28 @@ void MdiChildTrajFrame::OnTrajSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::OnClose(wxCloseEvent& event)
 {
-   MdiGlPlot::numChildren--;
-
-   if (mIsMainFrame)
-      GmatAppData::GetMainFrame()->trajMainSubframe = NULL;
-
-   if (MdiGlPlot::numChildren == 0)
-      GmatAppData::GetMainFrame()->trajSubframe = NULL;
-
+   #if DEBUG_CHILDTRAJ_FRAME
+   MessageInterface::ShowMessage
+      ("MdiChildTrajFrame::OnClose() this->PlotName=%s\n", mPlotName.c_str());
+   #endif
+   
+//    if (mIsMainFrame)
+//    {
+//       MessageInterface::ShowMessage
+//          ("MdiChildTrajFrame::OnClose() this->PlotName=%s\n", mPlotName.c_str());
+      
+//       //GmatAppData::GetMainFrame()->trajMainSubframe = NULL;
+      
+//    }
+   
+   //MdiGlPlot::numChildren--; //loj: 5/18/05 moved to destructor
+   
+//    if (MdiGlPlot::numChildren == 0)
+//    {
+// //       GmatAppData::GetMainFrame()->trajMainSubframe = NULL;
+//       GmatAppData::GetMainFrame()->trajSubframe = NULL;
+//    }
+   
    event.Skip();
 }
 
@@ -897,10 +927,6 @@ void MdiChildTrajFrame::UpdatePlot( const StringArray &scNames,
 {
    if (mCanvas)
    {
-      //loj: 8/17/04 commented out so that MainFrame gets user input focus during
-      // the run
-      //mCanvas->SetFocus();
-      
       mCanvas->UpdatePlot(scNames, time, posX, posY, posZ, scColors);
       
       if (updateCanvas)
@@ -928,8 +954,8 @@ void MdiChildTrajFrame::RefreshPlot()
 void MdiChildTrajFrame::DeletePlot()
 {
    // This will call OnClose()
-   if (mIsMainFrame)
-      GmatAppData::GetMainFrame()->trajMainSubframe->Close();
+   Close(TRUE);
+   //if (mIsMainFrame)
+   //   GmatAppData::GetMainFrame()->trajMainSubframe->Close();
 }
-
 

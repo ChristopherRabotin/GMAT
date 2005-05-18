@@ -68,18 +68,18 @@ public:
    wxMenuBar* CreateMainMenu(int dataType=GmatTree::RESOURCES_FOLDER);
 
    MdiChildTrajFrame *trajSubframe;
-   MdiChildTrajFrame *trajMainSubframe;
+//    MdiChildTrajFrame *trajMainSubframe;
 
    MdiChildXyFrame *xySubframe;
-   MdiChildXyFrame *xyMainSubframe;
+//    MdiChildXyFrame *xyMainSubframe;
 
-   void UpdateUI();
-   void OnSize(wxSizeEvent& event);
+//    void UpdateUI();
+//    void OnSize(wxSizeEvent& event);
    void OnClose(wxCloseEvent& event);
-   void OnQuit(wxCommandEvent& event);
-   void OnOpenTrajectoryFile(wxCommandEvent& event);
-   void OnZoomIn(wxCommandEvent& event);
-   void OnZoomOut(wxCommandEvent& event);
+//    void OnQuit(wxCommandEvent& event);
+//    void OnOpenTrajectoryFile(wxCommandEvent& event);
+//    void OnZoomIn(wxCommandEvent& event);
+//    void OnZoomOut(wxCommandEvent& event);
 
    bool OnScriptBuildObject(wxCommandEvent& WXUNUSED(event));
    bool OnScriptBuildAndRun(wxCommandEvent& event);

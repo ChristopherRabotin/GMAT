@@ -147,7 +147,9 @@ MdiChildXyFrame::MdiChildXyFrame(wxMDIParentFrame *parent, bool isMainFrame,
 MdiChildXyFrame::~MdiChildXyFrame()
 {
    MdiXyPlot::mdiChildren.DeleteObject(this);
+   MdiXyPlot::numChildren--;
 }
+
 
 //------------------------------------------------------------------------------   
 // int ReadXyPlotFile(const wxString &filename)
@@ -229,9 +231,9 @@ int MdiChildXyFrame::ReadXyPlotFile(const wxString &filename)
 //------------------------------------------------------------------------------
 bool MdiChildXyFrame::DeletePlot()
 {
-   if (mIsMainFrame)
-      GmatAppData::GetMainFrame()->xyMainSubframe->Close();
-
+//    if (mIsMainFrame)
+//       GmatAppData::GetMainFrame()->xyMainSubframe->Close();
+   Close(TRUE);
    return true;
 }
 
@@ -476,8 +478,10 @@ void MdiChildXyFrame::SetShowGrid(bool show)
 {
    if (mXyPlot)
    {
-      wxMenu *mViewOptionMenu = GmatAppData::GetMainFrame()->GetXyViewOptionMenu();
-      mViewOptionMenu->Check(GmatPlot::MDI_XY_DRAW_GRID, show);
+      //loj: 5/18/05 Why this failing when this frame is close?
+//       wxMenu *viewOptionMenu = GmatAppData::GetMainFrame()->GetXyViewOptionMenu();
+//       viewOptionMenu->Check(GmatPlot::MDI_XY_DRAW_GRID, show);
+      
       mXyPlot->SetShowGrid(show);
    }
 }
@@ -650,19 +654,20 @@ void MdiChildXyFrame::OnSize(wxSizeEvent& event)
    event.Skip();
 }
 
+
 //------------------------------------------------------------------------------
 // void OnClose(wxCloseEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::OnClose(wxCloseEvent& event)
-{    
-   MdiXyPlot::numChildren--;
-        
-   if (mIsMainFrame)
-      GmatAppData::GetMainFrame()->xyMainSubframe = NULL;
-    
-   if (MdiXyPlot::numChildren == 0)
-      GmatAppData::GetMainFrame()->xySubframe = NULL;
-    
+{       
+//    MdiXyPlot::numChildren--; //loj: 5/18/05 moved to destructor
+   
+//    if (mIsMainFrame)
+//       GmatAppData::GetMainFrame()->xyMainSubframe = NULL;
+   
+//    if (MdiXyPlot::numChildren == 0)
+//       GmatAppData::GetMainFrame()->xySubframe = NULL;
+   
    event.Skip();
 }
 

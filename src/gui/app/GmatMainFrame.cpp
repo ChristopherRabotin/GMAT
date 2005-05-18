@@ -138,6 +138,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
 
    EVT_SIZE(GmatMainFrame::OnMainFrameSize)
    EVT_SET_FOCUS(GmatMainFrame::OnFocus)
+   EVT_CLOSE(GmatMainFrame::OnClose)
 
    EVT_MENU(GmatScript::MENU_SCRIPT_BUILD_OBJECT, GmatMainFrame::OnScriptBuildObject)
    EVT_MENU(GmatScript::MENU_SCRIPT_BUILD_AND_RUN, GmatMainFrame::OnScriptBuildAndRun)
@@ -190,9 +191,9 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
 
    // child frames
    trajSubframe = (MdiChildTrajFrame *)NULL;
-   trajMainSubframe = (MdiChildTrajFrame *)NULL;
+//    trajMainSubframe = (MdiChildTrajFrame *)NULL;
    xySubframe = (MdiChildXyFrame *)NULL;
-   xyMainSubframe = (MdiChildXyFrame *)NULL;
+//    xyMainSubframe = (MdiChildXyFrame *)NULL;
 
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
   
@@ -270,6 +271,9 @@ GmatMainFrame::~GmatMainFrame()
    
    if (GmatAppData::GetMessageWindow() != NULL)
       GmatAppData::GetMessageWindow()->Close();
+   
+//    MessageInterface::ShowMessage("==========> Closing GmatMainFrame\n");
+//    CloseAllChildren(true, true);
 }
 
 //------------------------------------------------------------------------------
@@ -780,11 +784,13 @@ void GmatMainFrame::RemoveChild(wxString item)
    while (node)
    {
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-#if DEBUG_MAINFRAME
+      
+      #if DEBUG_MAINFRAME
       MessageInterface::ShowMessage
          ("GmatMainFrame::RemoveChild() child %s  this %s\n",
           theChild->GetTitle().c_str(), item.c_str());
-#endif
+      #endif
+      
       if (theChild->GetTitle().IsSameAs(item.c_str()))
       {
          delete theChild;
@@ -841,22 +847,32 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       }
    }
 
-   // close xy plots
    if (closePlots)
    {
+      // close xy plots
       for (int i=0; i<MdiXyPlot::numChildren; i++)
       {
          MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
          frame->Close(TRUE);
       }
-
+      
       // close gl plots
+      #if DEBUG_MAINFRAME
+      MessageInterface::ShowMessage
+         ("CloseAllChildren() MdiGlPlot::numChildren=%d\n", MdiGlPlot::numChildren);
+      #endif
+      
       for (int i=0; i<MdiGlPlot::numChildren; i++)
       {
          MdiChildTrajFrame *frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
+         
+         #if DEBUG_MAINFRAME
+         MessageInterface::ShowMessage
+            ("CloseAllChildren() frame[%d]=%s\n", i, frame->GetPlotName().c_str());
+         #endif
+         
          frame->Close(TRUE);
       }
-
    }
 }
 
@@ -966,6 +982,17 @@ void GmatMainFrame::StopServer()
       MessageInterface::ShowMessage("Server has not started.\n");
    }
 }
+
+
+//------------------------------------------------------------------------------
+// void GmatMainFrame::OnClose(wxCloseEvent& event)
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnClose(wxCloseEvent& event)
+{
+   CloseAllChildren(true, true);
+   event.Skip();
+}
+
 
 //------------------------------------------------------------------------------
 // wxToolBar* GmatMainFrame::GetMainFrameToolBar()
