@@ -1443,7 +1443,8 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index)
 //------------------------------------------------------------------------------
 bool OpenGlPlot::ClearSpacePointList()
 {
-   MessageInterface::ShowMessage("OpenGlPlot::ClearSpacePointList()\n");
+   //loj: 5/17/05 
+   //MessageInterface::ShowMessage("OpenGlPlot::ClearSpacePointList()\n");
    
    mAllSpNameArray.clear();
    mAllSpArray.clear();
