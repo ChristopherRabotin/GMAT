@@ -37,7 +37,7 @@
 //#define DEBUG_CONFIG 1
 //#define DEBUG_FINALIZE 1
 
-//#define DEBUG_CREATE_VAR 1
+#define DEBUG_CREATE_VAR 1
 //#define DEBUG_CREATE_BURN 1
 
 //---------------------------------
@@ -1832,7 +1832,8 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
             if (type == "OpenGLPlot")
             {
                // add default spacecraft and coordinate system
-               sub->SetStringParameter("Add", GetDefaultSpacecraft()->GetName(), 0);
+                //loj: 5/17/05 removed the index
+               sub->SetStringParameter("Add", GetDefaultSpacecraft()->GetName());
                sub->SetStringParameter("CoordinateSystem", "EarthMJ2000Eq");
             }
             else if (type == "XYPlot")
@@ -3157,7 +3158,7 @@ void Moderator::CreateDefaultMission()
       
       // OpenGLPlot
       Subscriber *sub;
-      sub = CreateSubscriber("OpenGLPlot", "DefaultOpenGl");
+      sub = CreateSubscriber("OpenGLPlot", "DefaultOpenGL"); //loj: 5/17/05 Changed Gl to GL
       sub->SetStringParameter("Add", "DefaultSC"); // loj: 5/9/05 Removed the index
       sub->SetStringParameter("CoordinateSystem", "EarthMJ2000Eq");
       
