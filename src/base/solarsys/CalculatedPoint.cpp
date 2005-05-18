@@ -173,6 +173,9 @@ Integer     CalculatedPoint::GetParameterID(const std::string &str) const
          return i;
    }
    
+   // Special handler for "Add" - per Steve 2005.05.18
+   if (str == "Add") return BODY_NAMES;
+   
    return SpacePoint::GetParameterID(str);
 }
 
