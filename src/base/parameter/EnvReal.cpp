@@ -151,8 +151,9 @@ Integer EnvReal::GetNumRefObjects() const
    return EnvData::GetNumRefObjects();
 }
 
+
 //------------------------------------------------------------------------------
-// virtual bool AddRefObject(GmatBase *obj)
+// virtual bool AddRefObject(GmatBase *obj, bool replaceName = false)
 //------------------------------------------------------------------------------
 /**
  * Adds reference object.
@@ -162,13 +163,15 @@ Integer EnvReal::GetNumRefObjects() const
  * @return true if the object has been added.
  */
 //------------------------------------------------------------------------------
-bool EnvReal::AddRefObject(GmatBase *obj)
+bool EnvReal::AddRefObject(GmatBase *obj, bool replaceName)
 {
    if (obj != NULL)
-      return EnvData::AddRefObject(obj->GetType(), obj->GetName(), obj);
+      return EnvData::AddRefObject(obj->GetType(), obj->GetName(), obj,
+                                   replaceName);
    else
       return false;
 }
+
 
 //------------------------------------------------------------------------------
 // virtual bool Validate()

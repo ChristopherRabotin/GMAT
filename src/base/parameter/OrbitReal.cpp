@@ -184,7 +184,7 @@ Integer OrbitReal::GetNumRefObjects() const
 
 
 //------------------------------------------------------------------------------
-// virtual bool AddRefObject(GmatBase *obj)
+// virtual bool AddRefObject(GmatBase *obj, bool replaceName = false)
 //------------------------------------------------------------------------------
 /**
  * Adds reference object.
@@ -194,7 +194,7 @@ Integer OrbitReal::GetNumRefObjects() const
  * @return true if the object has been added.
  */
 //------------------------------------------------------------------------------
-bool OrbitReal::AddRefObject(GmatBase *obj)
+bool OrbitReal::AddRefObject(GmatBase *obj, bool replaceName)
 {
    if (obj != NULL)
    {
@@ -202,10 +202,20 @@ bool OrbitReal::AddRefObject(GmatBase *obj)
       // since CelestialBody subtypes are not set as SPACE_POINT
       ///@todo Use IsOfType(Gmat::SPACE_POINT) when GmatBase provides this method.
 
-      if (obj->GetType() == Gmat::CELESTIAL_BODY)
-         return OrbitData::AddRefObject(Gmat::SPACE_POINT, obj->GetName(), obj);
+      #if DEBUG_ORBITREAL
+      MessageInterface::ShowMessage
+         ("OrbitReal::AddRefObject() obj->GetName()=%s, type=%d\n",
+          obj->GetName().c_str(), obj->GetType());
+      #endif
+      
+      //if (obj->GetType() == Gmat::CELESTIAL_BODY)
+      if (obj->IsOfType(Gmat::CELESTIAL_BODY))
+         return OrbitData::AddRefObject(Gmat::SPACE_POINT, obj->GetName(), obj,
+                                        replaceName);
       else
-         return OrbitData::AddRefObject(obj->GetType(), obj->GetName(), obj);
+         return OrbitData::AddRefObject(obj->GetType(), obj->GetName(), obj,
+                                        replaceName);
+      
    }
    
    return false;
@@ -352,7 +362,7 @@ GmatBase* OrbitReal::GetRefObject(const Gmat::ObjectType type,
    {
       throw ParameterException
          ("OrbitReal::GetRefObject() Cannot find ref. object of type:" +
-          GmatBase::GetObjectTypeString(type) + ", name:" + name + "in " +
+          GmatBase::GetObjectTypeString(type) + ", name:" + name + " in " +
           this->GetName());
    }
    

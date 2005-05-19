@@ -516,9 +516,9 @@ bool Parameter::Evaluate()
 //------------------------------------------
 
 //------------------------------------------------------------------------------
-// virtual bool AddRefObject(GmatBase *object)
+// virtual bool AddRefObject(GmatBase *object, bool replaceName = false)
 //------------------------------------------------------------------------------
-bool Parameter::AddRefObject(GmatBase *object)
+bool Parameter::AddRefObject(GmatBase *object, bool replaceName)
 {
    if (mKey == GmatParam::SYSTEM_PARAM)
       throw ParameterException("Parameter: AddObject() should be implemented "

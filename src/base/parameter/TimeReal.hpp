@@ -41,8 +41,8 @@ public:
    virtual Integer GetNumRefObjects() const;
    virtual bool Validate();
    virtual bool Initialize();
-   virtual bool AddRefObject(GmatBase *obj);
-      
+   virtual bool AddRefObject(GmatBase *obj, bool replaceName = false);
+   
    // methods inherited from GmatBase
    virtual bool RenameRefObject(const Gmat::ObjectType type,
                                 const std::string &oldName,

@@ -67,10 +67,14 @@ protected:
    StringArray mObjectTypeNames;
    StringArray mAllRefObjectNames;
    Integer mNumRefObjects;
-   
-   bool AddRefObject(const Gmat::ObjectType type,
-                     const std::string &name, GmatBase *obj = NULL);
 
+   bool AddRefObject(const Gmat::ObjectType type,
+                     const std::string &name, GmatBase *obj = NULL,
+                     bool replaceName = false);
+   
+   bool SetRefObjectWithNewName(GmatBase *obj, const Gmat::ObjectType type,
+                                const std::string &name);
+   
    bool HasObjectType(const std::string &type) const;
    GmatBase* FindFirstObject(const std::string &type) const;
    GmatBase* FindFirstObject(const Gmat::ObjectType type) const;

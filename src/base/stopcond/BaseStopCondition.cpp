@@ -686,9 +686,12 @@ bool BaseStopCondition::Validate()
             mEccParam->AddRefObject
                (mStopParam->GetRefObject(Gmat::COORDINATE_SYSTEM, 
                                          mStopParam->GetRefObjectName(Gmat::COORDINATE_SYSTEM)));
+
+            //loj: 5/19/05 Added true
             mEccParam->AddRefObject
                (mStopParam->GetRefObject(Gmat::SPACE_POINT, 
-                                         mStopParam->GetRefObjectName(Gmat::SPACE_POINT)));
+                                         mStopParam->GetRefObjectName(Gmat::SPACE_POINT)),
+                true);
             
             mEccParam->SetInternalCoordSystem(mStopParam->GetInternalCoordSystem());            
             mEccParam->AddRefObject(mSolarSystem);
@@ -715,7 +718,8 @@ bool BaseStopCondition::Validate()
                                             mStopParam->GetRefObjectName(Gmat::COORDINATE_SYSTEM)));
                mRmagParam->AddRefObject
                   (mStopParam->GetRefObject(Gmat::SPACE_POINT,
-                                            mStopParam->GetRefObjectName(Gmat::SPACE_POINT)));
+                                            mStopParam->GetRefObjectName(Gmat::SPACE_POINT)),
+                   true);
             
                mRmagParam->SetInternalCoordSystem(mStopParam->GetInternalCoordSystem());
                mRmagParam->AddRefObject(mSolarSystem);

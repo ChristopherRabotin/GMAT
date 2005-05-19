@@ -87,7 +87,7 @@ public:
    virtual bool Evaluate();
    
    // methods all SYSTEM_PARAM should implement
-   virtual bool AddRefObject(GmatBase *object);
+   virtual bool AddRefObject(GmatBase *object, bool replaceName = false);
    virtual Integer GetNumRefObjects() const;
    virtual bool Validate();
    

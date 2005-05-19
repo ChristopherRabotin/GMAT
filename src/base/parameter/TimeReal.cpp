@@ -125,7 +125,7 @@ Integer TimeReal::GetNumRefObjects() const
 
 
 //------------------------------------------------------------------------------
-// virtual bool AddRefObject(GmatBase *obj)
+// virtual bool AddRefObject(GmatBase *obj, bool replaceName = false)
 //------------------------------------------------------------------------------
 /**
  * Adds reference object.
@@ -135,10 +135,11 @@ Integer TimeReal::GetNumRefObjects() const
  * @return true if the object has been added.
  */
 //------------------------------------------------------------------------------
-bool TimeReal::AddRefObject(GmatBase *obj)
+bool TimeReal::AddRefObject(GmatBase *obj, bool replaceName)
 {
    if (obj != NULL)
-      return TimeData::AddRefObject(obj->GetType(), obj->GetName(), obj);
+      return TimeData::AddRefObject(obj->GetType(), obj->GetName(), obj,
+                                    replaceName);
    else
       return false;
 }

@@ -153,7 +153,7 @@ Integer PlanetReal::GetNumRefObjects() const
 }
 
 //------------------------------------------------------------------------------
-// virtual bool AddRefObject(GmatBase *obj)
+// virtual bool AddRefObject(GmatBase *obj, bool replaceName = false)
 //------------------------------------------------------------------------------
 /**
  * Adds reference object.
@@ -163,10 +163,11 @@ Integer PlanetReal::GetNumRefObjects() const
  * @return true if the object has been added.
  */
 //------------------------------------------------------------------------------
-bool PlanetReal::AddRefObject(GmatBase *obj)
+bool PlanetReal::AddRefObject(GmatBase *obj, bool replaceName)
 {
    if (obj != NULL)
-      return PlanetData::AddRefObject(obj->GetType(), obj->GetName(), obj);
+      return PlanetData::AddRefObject(obj->GetType(), obj->GetName(), obj,
+                                      replaceName);
    else
       return false;
 }

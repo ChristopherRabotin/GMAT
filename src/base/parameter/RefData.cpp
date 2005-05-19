@@ -215,7 +215,7 @@ bool RefData::SetRefObjectName(Gmat::ObjectType type,
    MessageInterface::ShowMessage
       ("RefData::SetRefObjectName() type=%d, name=%s\n", type, name.c_str());
    #endif
-
+   
    if (FindFirstObjectName(type) != "")
    {
       for (int i=0; i<mNumRefObjects; i++)
@@ -223,7 +223,8 @@ bool RefData::SetRefObjectName(Gmat::ObjectType type,
          if (mRefObjList[i].objType == type)
          {
             mRefObjList[i].objName = name;
-            break;
+            //break;
+            return true;
          }
       }
    }
@@ -244,11 +245,13 @@ GmatBase* RefData::GetRefObject(const Gmat::ObjectType type,
    {
       if (mRefObjList[i].objType == type)
       {
-         if (name == "") //loj: 1/26/05 if name is "", return first object
+         if (name == "") //if name is "", return first object
             return mRefObjList[i].obj;
          
          if (mRefObjList[i].objName == name)
-            return mRefObjList[i].obj; 
+         {
+            return mRefObjList[i].obj;
+         }
       }
    }
    
@@ -258,7 +261,7 @@ GmatBase* RefData::GetRefObject(const Gmat::ObjectType type,
 
 //------------------------------------------------------------------------------
 // bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-//                   const std::string &name = "");
+//                   const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
  * Sets object which is used in evaluation.
@@ -300,10 +303,11 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          }
       }
    }
-
+   
    #if DEBUG_REFDATA_OBJECT
    MessageInterface::ShowMessage
-      ("RefData::SetRefObject() Cannot find type=%d, name=%s\n", type, name.c_str());
+      ("*** Warning *** RefData::SetRefObject() Cannot find type=%d, name=%s\n",
+       type, name.c_str());
    #endif
    
    return false;
@@ -360,9 +364,10 @@ const std::string* RefData::GetValidObjectList() const
 // protected methods
 //---------------------------------
 
+//loj: 5/19/05 Added replaceName
 //------------------------------------------------------------------------------
-// bool AddRefObject(const Gmat::ObjectType type,
-//                   const std::string &name, GmatBase *obj = NULL)
+// bool AddRefObject(const Gmat::ObjectType type, const std::string &name,
+//                   GmatBase *obj = NULL, bool replaceName = false)
 //------------------------------------------------------------------------------
 /**
  * Adds object which is used in evaluation.
@@ -370,8 +375,8 @@ const std::string* RefData::GetValidObjectList() const
  * @return true if the object has been added.
  */
 //------------------------------------------------------------------------------
-bool RefData::AddRefObject(const Gmat::ObjectType type,
-                           const std::string &name, GmatBase *obj)
+bool RefData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
+                           GmatBase *obj, bool replaceName)
 {
    #if DEBUG_REFDATA_OBJECT
    MessageInterface::ShowMessage
@@ -388,15 +393,84 @@ bool RefData::AddRefObject(const Gmat::ObjectType type,
             mRefObjList[mNumRefObjects].objName = name;
             mRefObjList[mNumRefObjects].obj = obj;
             mNumRefObjects++;
+            
+            #if DEBUG_REFDATA_OBJECT
+            MessageInterface::ShowMessage
+               ("RefData::AddRefObject() object added. mNumRefObjects=%d\n",
+                mNumRefObjects);
+            #endif
+            
             return true;
          }
       }
       else
       {
-         SetRefObject(obj, type, name);
+         if (replaceName) //loj: 5/19/05 Added
+            SetRefObjectWithNewName(obj, type, name);
+         else
+            SetRefObject(obj, type, name);
+         
          return true;
       }
    }
+   else
+   {
+      MessageInterface::ShowMessage
+         ("*** Error *** RefData::AddRefObject() type:%d is not valid object type\n");
+   }
+   
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetRefObjectWithNewName(GmatBase *obj, const Gmat::ObjectType type,
+//                              const std::string &name = "")
+//------------------------------------------------------------------------------
+/**
+ * Sets object pointer with new name which is used in evaluation.
+ *
+ * @return true if the object has been added.
+ */
+//------------------------------------------------------------------------------
+bool RefData::SetRefObjectWithNewName(GmatBase *obj, const Gmat::ObjectType type,
+                                      const std::string &name)
+{
+   #if DEBUG_REFDATA_OBJECT
+   MessageInterface::ShowMessage
+      ("RefData::SetRefObjectWithNewName() numRefObjects=%d, type=%d, name=%s obj addr=%d\n",
+       mNumRefObjects, type, name.c_str(), obj);
+   #endif
+   
+   #if DEBUG_REFDATA_OBJECT > 1
+   for (int i=0; i<mNumRefObjects; i++)
+   {
+      MessageInterface::ShowMessage
+         ("type=%d, name=%s, obj=%d\n", mRefObjList[i].objType,
+          mRefObjList[i].objName.c_str(), mRefObjList[i].obj);
+   }   
+   #endif
+   
+   for (int i=0; i<mNumRefObjects; i++)
+   {
+      if (mRefObjList[i].objType == type)
+      {
+         mRefObjList[i].objName = name;
+         mRefObjList[i].obj = obj;
+         
+         #if DEBUG_REFDATA_OBJECT > 1
+         MessageInterface::ShowMessage
+            ("RefData::SetRefObjectWithName() set %s to %d\n",
+             mRefObjList[i].objName.c_str(), obj);
+         #endif
+         return true;
+      }
+   }
+   
+   #if DEBUG_REFDATA_OBJECT
+   MessageInterface::ShowMessage
+      ("*** Warning *** RefData::SetRefObjectWithName() Cannot find type=%d\n", type);
+   #endif
    
    return false;
 }
@@ -476,6 +550,12 @@ std::string RefData::FindFirstObjectName(const Gmat::ObjectType type) const
 {
    for (int i=0; i<mNumRefObjects; i++)
    {
+      #if DEBUG_REFDATA_OBJECT > 1
+      MessageInterface::ShowMessage
+         ("RefData::FindFirstObjectName() mRefObjList[%d].objType=%d, objName=%s\n",
+          i, mRefObjList[i].objType, mRefObjList[i].objName.c_str());
+      #endif
+      
       if (mRefObjList[i].objType == type)
          return mRefObjList[i].objName;
    }
