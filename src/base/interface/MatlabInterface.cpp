@@ -43,6 +43,9 @@ int MatlabInterface::Open()
 {
 #if defined __USE_MATLAB__
 
+   if (enginePtrD == NULL)
+      MessageInterface::ShowMessage("Please wait while MATLAB opens...\n");
+
    if ((enginePtrD = engOpen(NULL)))
       return 1;
    else
