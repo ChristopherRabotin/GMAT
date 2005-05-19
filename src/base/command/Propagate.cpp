@@ -1300,7 +1300,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
             if (parmSystem == "")
                parmSystem = "Earth";
             stopParam->SetStringParameter("DepObject", parmSystem);
-//            stopParam->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
+            stopParam->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
             if (stopParam->NeedCoordSystem())
                /// @todo Update coordinate system to better value for body parms
                stopParam->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
