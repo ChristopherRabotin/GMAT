@@ -63,6 +63,8 @@ public:
    virtual SpacePoint*         GetOrigin() const;
    virtual std::string         GetJ2000BodyName() const;
    virtual SpacePoint*         GetJ2000Body() const;
+   
+   virtual Rmatrix33           GetLastRotationMatrix() const = 0;
 
    // pure virtual methods to check to see how/if an AxisSystem uses 
    // a particular parameter

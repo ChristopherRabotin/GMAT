@@ -290,6 +290,14 @@ ItrfCoefficientsFile* CoordinateSystem::GetItrfCoefficientsFile()
    return NULL;
 }
 
+Rmatrix33 CoordinateSystem::GetLastRotationMatrix() const
+{
+   if (!axes) 
+      throw CoordinateSystemException("No AxisSystem defined for " 
+            + instanceName);
+   return axes->GetLastRotationMatrix();
+}
+
 
 //---------------------------------------------------------------------------
 //  bool CoordinateSystem::Initialize()

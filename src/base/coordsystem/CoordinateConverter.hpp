@@ -52,7 +52,9 @@ public:
    bool Convert(const A1Mjd &epoch, const Rvector &inState,
                 CoordinateSystem *inCoord, Rvector &outState,
                 CoordinateSystem *outCoord);
-   
+   // method to return the rotation matrix used to do the last conversion
+
+   Rmatrix33 lastRotMatrix;
 protected:
    
    /// Origin for the return coordinate system (aligned with the MJ2000 Earth

@@ -211,6 +211,9 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
                       true : false);
    internalState = inCoord->ToMJ2000Eq(epoch, inState, coincident);
    outState      = outCoord->FromMJ2000Eq(epoch, internalState, coincident);
+   Rmatrix33 toMJ2000RotMatrix   = inCoord->GetLastRotationMatrix();
+   Rmatrix33 fromMJ2000Matrix    = outCoord->GetLastRotationMatrix();
+   lastRotMatrix = (fromMJ2000Matrix.Transpose()) * toMJ2000RotMatrix;
    return true;
 }
 

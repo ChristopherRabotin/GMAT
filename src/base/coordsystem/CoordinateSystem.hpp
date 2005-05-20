@@ -72,6 +72,7 @@ public:
    virtual std::string           GetZAxis() const;
    virtual EopFile*              GetEopFile() const;
    virtual ItrfCoefficientsFile* GetItrfCoefficientsFile();
+   virtual Rmatrix33             GetLastRotationMatrix() const;
    
    
    // initializes the CoordinateSystem
