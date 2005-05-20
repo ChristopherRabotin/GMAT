@@ -326,6 +326,10 @@ std::string AxisSystem::GetEpochFormat() const
    return epochFormat;
 }
 
+Rmatrix33 AxisSystem::GetLastRotationMatrix() const
+{
+   return rotMatrix;
+}
 
 //---------------------------------------------------------------------------
 //  void AxisSystem::Initialize()

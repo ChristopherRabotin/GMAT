@@ -73,6 +73,7 @@ public:
    virtual EopFile*              GetEopFile() const;
    virtual ItrfCoefficientsFile* GetItrfCoefficientsFile();
    virtual std::string           GetEpochFormat() const; // for GUI
+   virtual Rmatrix33             GetLastRotationMatrix() const;
    
    // initializes the AxisSystem
    virtual bool Initialize();
