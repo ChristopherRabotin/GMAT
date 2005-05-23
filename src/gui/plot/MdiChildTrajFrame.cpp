@@ -900,7 +900,8 @@ void MdiChildTrajFrame::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
                                         SpacePoint *vdObj, Real vsFactor,
                                         const Rvector3 &vpRefVec, const Rvector3 &vpVec,
                                         const Rvector3 &vdVec, const std::string &upAxis,
-                                        bool usevpRefVec, bool usevpVec, bool usevdVec)
+                                        bool usevpRefVec, bool usevpVec, bool usevdVec,
+                                        bool useFixedFov, Real fov)
 {
    if (mCanvas)
    {
@@ -911,7 +912,7 @@ void MdiChildTrajFrame::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
          
       mCanvas->SetGlViewOption(vpRefObj, vpVecObj, vdObj, vsFactor, vpRefVec,
                                vpVec, vdVec, upAxis, usevpRefVec, usevpVec,
-                               usevdVec);
+                               usevdVec, useFixedFov, fov);
    }
 }
 

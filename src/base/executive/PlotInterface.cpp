@@ -112,10 +112,11 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
       ("PlotInterface::CreateGlPlotWindow() MdiGlPlot::numChildren=%d, plotName=%s\n",
        MdiGlPlot::numChildren, plotName.c_str());
    #endif
-   
+     
    for (int i=0; i<MdiGlPlot::numChildren; i++)
    {
-      currPlotFrame = (MdiChildTrajFrame*)MdiGlPlot::mdiChildren[i];
+      //currPlotFrame = (MdiChildTrajFrame*)MdiGlPlot::mdiChildren[i];
+      currPlotFrame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
       currPlotName = currPlotFrame->GetPlotName();
       
       #if DEBUG_PLOTIF_GL
@@ -132,8 +133,9 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
       else if (currPlotName.IsSameAs(oldName.c_str()))
       {
          // change plot name
-         ((MdiChildTrajFrame*)MdiGlPlot::mdiChildren[i])->
-            SetPlotName(wxString(plotName.c_str()));
+//          ((MdiChildTrajFrame*)MdiGlPlot::mdiChildren[i])->
+//             SetPlotName(wxString(plotName.c_str()));
+         currPlotFrame->SetPlotName(wxString(plotName.c_str()));
          createNewFrame = false;
          break;
       }
@@ -155,13 +157,14 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
          new MdiChildTrajFrame(GmatAppData::GetMainFrame(), true,
                                wxString(plotName.c_str()),
                                wxString(plotName.c_str()),
-                               wxPoint(-1, -1), wxSize(500, 350), //wxSize(-1, -1),
+                               wxPoint(-1, -1), wxSize(-1, -1), //wxSize(500, 350), //wxSize(-1, -1),
                                wxDEFAULT_FRAME_STYLE, wxString(csName.c_str()),
                                ssPtr);
       
       #if DEBUG_PLOTIF_GL
       MessageInterface::ShowMessage
-         ("frame->GetPlotName()=%s\n", currPlotFrame->GetPlotName().c_str());
+         ("PlotInterface::CreateGlPlotWindow() frame->GetPlotName()=%s\n",
+          currPlotFrame->GetPlotName().c_str());
       //GmatAppData::GetMainFrame()->trajMainSubframe->GetPlotName().c_str());
       #endif
       
@@ -174,13 +177,13 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
       // initialize GL
       //----------------------------------------------------
       //if (!GmatAppData::GetMainFrame()->trajMainSubframe->mCanvas->InitGL())
-      if (!currPlotFrame->mCanvas->InitGL())
-      {
-         wxMessageDialog msgDialog(GmatAppData::GetMainFrame(),
-                                   _T("InitGL() failed"), _T("CreateGlPlotWindow"));
-         msgDialog.ShowModal();
-         return false;
-      }
+//       if (!currPlotFrame->mCanvas->InitGL())
+//       {
+//          wxMessageDialog msgDialog(GmatAppData::GetMainFrame(),
+//                                    _T("InitGL() failed"), _T("CreateGlPlotWindow"));
+//          msgDialog.ShowModal();
+//          return false;
+//       }
    }
    else
    {
@@ -202,7 +205,8 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    
    #if DEBUG_PLOTIF_GL
    MessageInterface::ShowMessage
-      ("PlotInterface::CreateGlPlotWindow() setting view options\n");
+      ("PlotInterface::CreateGlPlotWindow() setting view options for %s\n",
+       currPlotFrame->GetPlotName().c_str());
    #endif
    
    currPlotFrame->SetDrawEqPlane(drawEqPlane);
@@ -212,7 +216,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    currPlotFrame->SetUseViewPointInfo(usevpInfo);
    currPlotFrame->SetUsePerspectiveMode(usepm);
    currPlotFrame->SetDesiredCoordSystem(wxString(csName.c_str()));
-   
+
    #if DEBUG_PLOTIF_GL
    MessageInterface::ShowMessage
       ("PlotInterface::CreateGlPlotWindow() returning true\n");
@@ -237,14 +241,15 @@ void PlotInterface::SetGlObject(const std::string &plotName,
    
    #if DEBUG_PLOTIF_GL
    MessageInterface::ShowMessage
-      ("PlotInterface::SetGlObject() plotName:%\n", plotName.c_str());
+      ("PlotInterface::SetGlObject() plotName:%s\n", plotName.c_str());
    #endif
    
    wxString owner = wxString(plotName.c_str());
 
+   MdiChildTrajFrame *frame = NULL;
    for (int i=0; i<MdiGlPlot::numChildren; i++)
    {
-      MdiChildTrajFrame *frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
+      frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
       
       if (frame->GetPlotName().IsSameAs(owner.c_str()))
       {            
@@ -269,14 +274,15 @@ void PlotInterface::SetGlCoordSystem(const std::string &plotName,
 
    #if DEBUG_PLOTIF_GL
    MessageInterface::ShowMessage
-      ("PlotInterface::SetGlCoordSystem() plotName:%\n", plotName.c_str());
+      ("PlotInterface::SetGlCoordSystem() plotName:%s\n", plotName.c_str());
    #endif
    
    wxString owner = wxString(plotName.c_str());
-
+   MdiChildTrajFrame *frame = NULL;
+   
    for (int i=0; i<MdiGlPlot::numChildren; i++)
    {
-      MdiChildTrajFrame *frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
+      frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
       
       if (frame->GetPlotName().IsSameAs(owner.c_str()))
       {
@@ -296,7 +302,8 @@ void PlotInterface::SetGlViewOption(const std::string &plotName,
                                     SpacePoint *vdObj, Real vsFactor,
                                     const Rvector3 &vpRefVec, const Rvector3 &vpVec,
                                     const Rvector3 &vdVec, const std::string &upAxis,
-                                    bool usevpRefVec, bool usevpVec, bool usevdVec)
+                                    bool usevpRefVec, bool usevpVec, bool usevdVec,
+                                     bool useFixedFov, Real fov)
 {
 #if defined __CONSOLE_APP__
    return;
@@ -304,14 +311,15 @@ void PlotInterface::SetGlViewOption(const std::string &plotName,
    
    #if DEBUG_PLOTIF_GL
    MessageInterface::ShowMessage
-      ("PlotInterface::SetGlViewOption() plotName:%\n", plotName.c_str());
+      ("PlotInterface::SetGlViewOption() plotName:%s\n", plotName.c_str());
    #endif
    
    wxString owner = wxString(plotName.c_str());
-
+   MdiChildTrajFrame *frame = NULL;
+   
    for (int i=0; i<MdiGlPlot::numChildren; i++)
    {
-      MdiChildTrajFrame *frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
+      frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
       
       if (frame->GetPlotName().IsSameAs(owner.c_str()))
       {
@@ -323,7 +331,7 @@ void PlotInterface::SetGlViewOption(const std::string &plotName,
          
          frame->SetGlViewOption(vpRefObj, vpVecObj, vdObj, vsFactor, vpRefVec,
                                 vpVec, vdVec, upAxis, usevpRefVec,usevpVec,
-                                usevdVec);
+                                usevdVec, useFixedFov, fov);
       }
    }
 #endif
@@ -347,10 +355,10 @@ bool PlotInterface::IsThere(const std::string &plotName)
    {
       wxString owner = wxString(plotName.c_str());
       
+      MdiChildTrajFrame *frame  = NULL;
       for (int i=0; i<MdiGlPlot::numChildren; i++)
       {
-         MdiChildTrajFrame *frame =
-            (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
+         frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
             
          if (frame->GetPlotName().IsSameAs(owner.c_str()))
          {
@@ -376,20 +384,22 @@ bool PlotInterface::DeleteGlPlot()
 #if defined __CONSOLE_APP__
    return true;
 #else
-
+   
    if (GmatAppData::GetMainFrame() != NULL)
    {
       #if DEBUG_PLOTIF_GL
-         MessageInterface::ShowMessage("PlotInterface::DeleteGlPlot() "
-                                       "Deleting MdiGlPlot::mdiChildren[]\n");
+      MessageInterface::ShowMessage("PlotInterface::DeleteGlPlot() "
+                                    "Deleting MdiGlPlot::mdiChildren[]\n");
       #endif
+      
+      MdiChildTrajFrame *frame;
       for (int i=0; i<MdiGlPlot::numChildren; i++)
       {
-         ((MdiChildTrajFrame*)MdiGlPlot::mdiChildren[i])->DeletePlot();
+         frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
+         frame->DeletePlot();
       }
-
    }
-
+   
    return true;
 #endif
 }
@@ -415,11 +425,11 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
             ("PlotInterface::RefreshGlPlot() plotName=%s\n",plotName.c_str());
       #endif
       wxString owner = wxString(plotName.c_str());
-      
+
+      MdiChildTrajFrame *frame = NULL;
       for (int i=0; i<MdiGlPlot::numChildren; i++)
       {
-         MdiChildTrajFrame *frame =
-            (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
+         frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
             
          if (frame->GetPlotName().IsSameAs(owner.c_str()))
          {
@@ -468,9 +478,11 @@ bool PlotInterface::UpdateGlPlot(const std::string &plotName,
    //          return false;
    //    }
    
+   MdiChildTrajFrame *frame = NULL;
+   
    for (int i=0; i<MdiGlPlot::numChildren; i++)
    {
-      MdiChildTrajFrame *frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
+      frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
       
       #if DEBUG_PLOTIF_GL_UPDATE
       MessageInterface::ShowMessage
@@ -531,7 +543,7 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
    
    for (int i=0; i<MdiXyPlot::numChildren; i++)
    {
-      currPlotFrame = (MdiChildXyFrame*)MdiXyPlot::mdiChildren[i];
+      currPlotFrame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
       currPlotName = currPlotFrame->GetPlotName();
 
       if (currPlotName.IsSameAs(plotName.c_str()))
@@ -548,8 +560,9 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
          #endif
          
          // change plot name
-         ((MdiChildXyFrame*)MdiXyPlot::mdiChildren[i])->
-            SetPlotName(wxString(plotName.c_str()));
+//          ((MdiChildXyFrame*)MdiXyPlot::mdiChildren[i])-> //loj: 5/19/05
+//             SetPlotName(wxString(plotName.c_str()));
+         currPlotFrame->SetPlotName(wxString(plotName.c_str()));
          createNewFrame = false;
          break;
       }
@@ -608,20 +621,21 @@ bool PlotInterface::DeleteXyPlot(bool hideFrame)
 #if defined __CONSOLE_APP__
    return true;
 #else
-
+   
    if (GmatAppData::GetMainFrame() != NULL)
    {
       #if DEBUG_PLOTIF_XY
-         MessageInterface::ShowMessage("PlotInterface::DeleteXyPlot()\n");
+      MessageInterface::ShowMessage("PlotInterface::DeleteXyPlot()\n");
       #endif
-      
+
+      MdiChildXyFrame *frame = NULL;
       for (int i=0; i<MdiXyPlot::numChildren; i++)
       {
-         ((MdiChildXyFrame*)MdiXyPlot::mdiChildren[i])->DeletePlot();
+         frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
+         frame->DeletePlot();
       }
-
    }
-    
+   
    return true;
 #endif
 }
@@ -648,19 +662,20 @@ bool PlotInterface::AddXyPlotCurve(const std::string &plotName, int curveIndex,
    bool added = false;
    
    #if DEBUG_PLOTIF_XY
-      MessageInterface::ShowMessage
-         ("PlotInterface::AddXyPlotCurve() entered."
-          " plotName = " + plotName + " curveTitle = " + 
-          curveTitle + "\n");
-    
-      MessageInterface::ShowMessage
-         ("PlotInterface::AddXyPlotCurve() numChildren = %d\n",
-          MdiXyPlot::numChildren);
+   MessageInterface::ShowMessage
+      ("PlotInterface::AddXyPlotCurve() entered."
+       " plotName = " + plotName + " curveTitle = " + 
+       curveTitle + "\n");
+   
+   MessageInterface::ShowMessage
+      ("PlotInterface::AddXyPlotCurve() numChildren = %d\n",
+       MdiXyPlot::numChildren);
    #endif
    
+   MdiChildXyFrame *frame = NULL;
    for (int i=0; i<MdiXyPlot::numChildren; i++)
    {
-      MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
+      frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
         
       //if (frame->GetPlotName() == wxString(plotName.c_str()))
       if (frame->GetPlotName().IsSameAs(plotName.c_str()))
@@ -691,15 +706,16 @@ bool PlotInterface::DeleteAllXyPlotCurves(const std::string &plotName,
 #else
    
    #if DEBUG_PLOTIF_XY
-      MessageInterface::ShowMessage
-         ("PlotInterface::DeleteAllPlotCurve() plotName = %s "
-          "numChildren = %d\n", plotName.c_str(),
-          MdiXyPlot::numChildren);
+   MessageInterface::ShowMessage
+      ("PlotInterface::DeleteAllPlotCurve() plotName = %s "
+       "numChildren = %d\n", plotName.c_str(),
+       MdiXyPlot::numChildren);
    #endif
-   
+
+   MdiChildXyFrame *frame = NULL;
    for (int i=0; i<MdiXyPlot::numChildren; i++)
    {
-      MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
+      frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
       if (frame->GetPlotName().IsSameAs(plotName.c_str()) ||
           frame->GetPlotName().IsSameAs(oldName.c_str()))
       {
@@ -734,11 +750,12 @@ bool PlotInterface::DeleteXyPlotCurve(const std::string &plotName, int curveInde
          ("PlotInterface::DeleteXyPlotCurve() numChildren = %d\n",
           MdiXyPlot::numChildren);
    #endif
-   
+
+      MdiChildXyFrame *frame = NULL;
    for (int i=0; i<MdiXyPlot::numChildren; i++)
    {
-      MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
-
+      frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
+      
       if (frame->GetPlotName().IsSameAs(plotName.c_str()))
       {
          frame->DeletePlotCurve(curveIndex);
@@ -759,9 +776,10 @@ void PlotInterface::ClearXyPlotData(const std::string &plotName)
    return;
 #else
 
+   MdiChildXyFrame *frame = NULL;
    for (int i=0; i<MdiXyPlot::numChildren; i++)
    {
-      MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
+      frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
 
       if (frame->GetPlotName().IsSameAs(plotName.c_str()))
       {
@@ -782,15 +800,16 @@ void PlotInterface::SetXyPlotTitle(const std::string &plotName,
 #else
    
    #if DEBUG_PLOTIF_XY
-      MessageInterface::ShowMessage
-         ("PlotInterface::SetXyPlotTitle() plotName = %s "
-          "plotTitle = %s\n", plotName.c_str(), plotTitle.c_str());
+   MessageInterface::ShowMessage
+      ("PlotInterface::SetXyPlotTitle() plotName = %s "
+       "plotTitle = %s\n", plotName.c_str(), plotTitle.c_str());
    #endif
    
+   MdiChildXyFrame *frame = NULL;
    for (int i=0; i<MdiXyPlot::numChildren; i++)
    {
-      MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
-
+      frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
+      
       if (frame->GetPlotName().IsSameAs(plotName.c_str()))
       {
          #if DEBUG_PLOTIF_XY
@@ -814,10 +833,11 @@ void PlotInterface::ShowXyPlotLegend(const std::string &plotName)
 #if defined __CONSOLE_APP__
    return;
 #else
-      
+   
+   MdiChildXyFrame *frame = NULL;
    for (int i=0; i<MdiXyPlot::numChildren; i++)
    {
-      MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
+      frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
 
       if (frame->GetPlotName().IsSameAs(plotName.c_str()))
       {
@@ -857,12 +877,12 @@ bool PlotInterface::RefreshXyPlot(const std::string &plotName)
       #endif
       
       wxString owner = wxString(plotName.c_str());
-      
+
+      MdiChildXyFrame *frame = NULL;
       for (int i=0; i<MdiXyPlot::numChildren; i++)
       {
-         MdiChildXyFrame *frame =
-            (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
-      
+         frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
+         
          if (frame->GetPlotName().IsSameAs(owner.c_str()))
          {
             frame->RedrawCurve();
@@ -922,14 +942,15 @@ bool PlotInterface::UpdateXyPlot(const std::string &plotName,
 //    }
         
    #if DEBUG_PLOTIF_XY_UPDATE
-      MessageInterface::ShowMessage
-         ("PlotInterface::UpdateXyPlot() numChildren = %d\n",
-          MdiXyPlot::numChildren);
+   MessageInterface::ShowMessage
+      ("PlotInterface::UpdateXyPlot() numChildren = %d\n",
+       MdiXyPlot::numChildren);
    #endif
    
+   MdiChildXyFrame *frame = NULL;
    for (int i=0; i<MdiXyPlot::numChildren; i++)
    {
-      MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
+      frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
       
       if (frame->GetPlotName().IsSameAs(owner.c_str()))
       {

@@ -67,6 +67,7 @@ protected:
    wxCheckBox *mOverlapCheckBox;
    wxCheckBox *mUseViewPointInfoCheckBox;
    wxCheckBox *mPerspectiveModeCheckBox;
+   wxCheckBox *mUseFixedFovCheckBox;
    
    wxComboBox *mCoordSysComboBox;
    wxComboBox *mViewPointRefComboBox;
@@ -78,7 +79,7 @@ protected:
    wxStaticText *mTargetColorLabel;
    wxStaticText *mFovLabel;
    
-   wxTextCtrl *mFovTextCtrl;
+   wxTextCtrl *mFixedFovTextCtrl;
    wxTextCtrl *mViewScaleFactorTextCtrl;
    wxTextCtrl *mViewPointRef1TextCtrl;
    wxTextCtrl *mViewPointRef2TextCtrl;

@@ -34,10 +34,9 @@ public:
                   const wxString &csName = "", SolarSystem *solarSys = NULL,
                   long style = 0, const wxString& name = wxT("TrajPlotCanvas"));
    ~TrajPlotCanvas();
-   
+      
    // initialization
    bool InitGL();
-   bool IsInitialized();
 
    // getters
    bool  GetUseViewPointInfo() {return mUseInitialViewPoint;}
@@ -107,7 +106,8 @@ public:
                         SpacePoint *vdObj, Real vscaleFactor,
                         const Rvector3 &vpRefVec, const Rvector3 &vpVec,
                         const Rvector3 &vdVec, const std::string &upAxis,
-                        bool usevpRefVec, bool usevpVec, bool usevdVec);
+                        bool usevpRefVec, bool usevpVec, bool usevdVec,
+                        bool useFixedFov, Real fov);
    
    // data
    int  ReadTextTrajectory(const wxString &filename);
@@ -140,11 +140,11 @@ private:
    static const int LAST_STD_BODY_ID = 10;
    static const int MAX_COORD_SYS = 10;
    static const std::string BODY_NAME[GmatPlot::MAX_BODIES];
-   static const unsigned int UNINIT_TEXTURE = 999;
+//    static const unsigned int UNINIT_TEXTURE = 999; //loj: moved to MdiGlPlotData.hpp
    static const float MAX_ZOOM_IN = 3700.0;
    static const float RADIUS_ZOOM_RATIO = 2.2;
    static const float DEFAULT_DIST = 30000.0;
-
+   
    GuiInterpreter *theGuiInterpreter;
    TextTrajectoryFile *mTextTrajFile;
    TrajectoryArray mTrajectoryData;
@@ -162,6 +162,9 @@ private:
    
    // Camera translations
    GLfloat mfCamTransX, mfCamTransY, mfCamTransZ;
+
+   // view model
+   bool mUseGluLookAt;
    
    // draw option
    float mAxisLength;
@@ -179,7 +182,6 @@ private:
    
    // texture
    std::map<wxString, GLuint> mObjectTextureIdMap;
-   bool mUseTexture;
    
    // rotating
    bool mRotateXy;
@@ -195,16 +197,11 @@ private:
    float mZoomAmount;
    float mMaxZoomIn;
    
-   // initialization and limit
-   bool mInitialized;
-   bool mDdataCountOverLimit;
-   int  mNumData;
-
    // projection
    bool mUsePerspectiveMode;
    Real mFovDeg;
    
-   // viewpoint
+   // initial viewpoint
    StringArray mScNameArray;
    std::string mViewPointRefObjName;
    std::string mViewUpAxisName;
@@ -214,25 +211,36 @@ private:
    Rvector3 mViewPointRefVector;
    Rvector3 mViewPointVector;
    Rvector3 mViewDirectionVector;
-   Rvector3 mViewPointLocVector;
    Real mViewScaleFactor;
+   Real mFixedFovAngle;
+   
+   // computed viewpoint
+   Rvector3 mVpLocVec;
+   Rvector3 mVpRefVec;
+   Rvector3 mVpVec;
+   Rvector3 mVdVec;
+   Rvector3 mVcVec;
+   
    bool mUseInitialViewPoint;
+   bool mUseFixedFov;
    bool mUseViewPointRefVector;
    bool mUseViewPointVector;
    bool mUseViewDirectionVector;
-   int mVpRefScId;
-   int mVpVecScId;
-   int mVdirScId;
    int mVpRefObjId;
    int mVpVecObjId;
-   int mVdirBodyId;
+   int mVdirObjId;
+   Real mViewObjRadius;
+   wxString mViewObjName;
+   int mViewObjId;
    
+   // data count
+   int  mNumData;
+
    // time
    Real mTime[MAX_DATA];
 
    // spacecraft
    int   mScCount;
-   int   mScLastFrame[GmatPlot::MAX_SCS];
    float mScRadius;
    GLuint mGlList;
    
@@ -251,13 +259,11 @@ private:
    float mObjectDefaultRadius;
    float mObjectRadius[MAX_OBJECT];
    float mObjMaxZoomIn[MAX_OBJECT];
+   int   mObjLastFrame[MAX_OBJECT];
    unsigned int mObjectOrbitColor[MAX_OBJECT][MAX_DATA];
    
    float mObjectGciPos[MAX_OBJECT][MAX_DATA][3];
    float mObjectTempPos[MAX_OBJECT][MAX_DATA][3];
-   short mPivotBodyIndex[MAX_OBJECT];
-   int   mOtherBodyCount;
-   StringArray mObjectNamesInUse;
    
    // coordinate system
    wxString mViewCoordSysName;
@@ -276,9 +282,7 @@ private:
    bool mNeedObjectConversion;
    bool mNeedInitialConversion;
    CoordinateConverter mCoordConverter;
-   
-   short mCurrViewFrame;
-   
+      
    // view
    wxSize mCanvasSize;
    GLfloat mfViewLeft;
@@ -308,7 +312,9 @@ private:
    // initialization
    // texture
    bool LoadGLTextures();
+   bool LoadBodyTextures(); //loj: 5/20/05 Added
    GLuint BindTexture(const wxString &objName);
+   void SetDefaultView();
    
    // view objects
    void SetProjection();
@@ -317,15 +323,14 @@ private:
    void ChangeView(float viewX, float viewY, float viewZ);
    void ChangeProjection(int width, int height, float axisLength);
    void ComputeProjection(int frame); //loj: 4/25/05 Added frame
+   void ComputeViewMatrix();
    
    // drawing objects
    void DrawFrame();
    void DrawPlot();
    void DrawObject(const wxString &objName);
-   void DrawObjectOrbit();
-   void DrawEarthOrbit(int frame);
+   void DrawObjectOrbit(int frame);
    void DrawSpacecraft(UnsignedInt scColor);
-   void DrawSpacecraftOrbit(int frame);
    void DrawEquatorialPlane(UnsignedInt color);
    void DrawEclipticPlane(UnsignedInt color);
    void DrawEarthSunLine();
@@ -334,10 +339,6 @@ private:
    // drawing primative objects
    void DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z);
    void DrawCircle(GLUquadricObj *qobj, Real radius);
-   
-//    // for body
-//    int GetStdBodyId(const std::string &name);
-//    void AddBody(const std::string &name);
    
    // for object
    int GetObjectId(const wxString &name);

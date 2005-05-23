@@ -131,6 +131,7 @@ void OpenGlOptionDialog::SetDistance(float dist)
    mDistance = dist;
    strVal.Printf("%g", mDistance);
    mDistanceTextCtrl->SetValue(strVal);
+   theApplyButton->Disable(); //loj: 5/23/05 We don't want to enable it here.
 }
 
 

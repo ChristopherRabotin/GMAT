@@ -150,12 +150,16 @@ void OpenGlPlotSetupPanel::Create()
       new wxCheckBox(this, CHECKBOX, wxT("Use Perspective Mode"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
    
+   mUseFixedFovCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Use Fixed FOV Angle"),
+                     wxDefaultPosition, wxSize(-1, -1), 0);
+   
    mFovLabel =
-      new wxStaticText(this, -1, wxT("Field Of View(Deg)"),
+      new wxStaticText(this, -1, wxT("Field Of View(Deg): "),
                        wxDefaultPosition, wxSize(-1,-1), 0);
-   mFovTextCtrl =
+   mFixedFovTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(105, -1), 0);
+                     wxDefaultPosition, wxSize(40, -1), 0);
    
    wxBoxSizer *plotOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
    plotOptionBoxSizer->Add(mPlotCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -166,8 +170,12 @@ void OpenGlPlotSetupPanel::Create()
    plotOptionBoxSizer->Add(mOverlapCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    plotOptionBoxSizer->Add(mUseViewPointInfoCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    plotOptionBoxSizer->Add(mPerspectiveModeCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(mFovLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(mFovTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(mUseFixedFovCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   wxBoxSizer *fovBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+   fovBoxSizer->Add(mFovLabel, 0, wxALIGN_LEFT|wxALL, 0);
+   fovBoxSizer->Add(mFixedFovTextCtrl, 0, wxALIGN_LEFT|wxALL, 0);
+   plotOptionBoxSizer->Add(fovBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
    wxStaticBox *plotOptionStaticBox = new wxStaticBox(this, -1, wxT("Plot Option"));
    wxStaticBoxSizer *plotOptionStaticSizer
@@ -485,6 +493,12 @@ void OpenGlPlotSetupPanel::LoadData()
          SetValue(mOpenGlPlot->GetStringParameter("UseViewPointInfo") == "On");
       mPerspectiveModeCheckBox->
          SetValue(mOpenGlPlot->GetStringParameter("PerspectiveMode") == "On");
+      mUseFixedFovCheckBox->
+         SetValue(mOpenGlPlot->GetStringParameter("UseFixedFov") == "On");
+      
+      wxString str;
+      str.Printf("%g", mOpenGlPlot->GetRealParameter("FixedFovAngle"));
+      mFixedFovTextCtrl->SetValue(str);
       
       mCoordSysComboBox->SetStringSelection
          (mOpenGlPlot->GetStringParameter("CoordinateSystem").c_str());
@@ -507,7 +521,6 @@ void OpenGlPlotSetupPanel::LoadData()
       mViewDirectionComboBox->
          SetStringSelection(mOpenGlPlot->GetStringParameter("ViewDirection").c_str());
       
-      wxString str;
       str.Printf("%g", mOpenGlPlot->GetRealParameter("ViewScaleFactor"));
       mViewScaleFactorTextCtrl->SetValue(str);
       
@@ -674,18 +687,37 @@ void OpenGlPlotSetupPanel::LoadData()
    
    mPerspectiveModeCheckBox->Enable();
    theApplyButton->Disable();
-
-   mFovLabel->Disable();
-   mFovTextCtrl->Disable();
+   
+   if (!mUseFixedFovCheckBox->IsChecked())
+   {
+      mFovLabel->Disable();
+      mFixedFovTextCtrl->Disable();
+   }
    
    //5.13.mViewUpAxisComboBox->SetSelection(0);
    
    // if perspective mode, enalbe fov
-   if (mPerspectiveModeCheckBox->GetValue())
+   if (mPerspectiveModeCheckBox->IsChecked())
    {
-      mFovLabel->Enable();
-      mFovTextCtrl->Enable();
+      mUseFixedFovCheckBox->Enable();
+      if (mUseFixedFovCheckBox->IsChecked())
+      {
+         mFovLabel->Enable();
+         mFixedFovTextCtrl->Enable();
+      }
+      else
+      {
+         mFovLabel->Disable();
+         mFixedFovTextCtrl->Disable();
+      }
    }
+   else
+   {
+      mUseFixedFovCheckBox->Disable();
+      mFovLabel->Disable();
+      mFixedFovTextCtrl->Disable();
+   }
+
    
    #if DEBUG_OPENGL_PANEL_LOAD
    MessageInterface::ShowMessage("OpenGlPlotSetupPanel::LoadData() exiting...\n");
@@ -744,6 +776,15 @@ void OpenGlPlotSetupPanel::SaveData()
       else
          mOpenGlPlot->SetStringParameter("PerspectiveMode", "Off");
 
+      if (mUseFixedFovCheckBox->IsChecked())
+         mOpenGlPlot->SetStringParameter("UseFixedFov", "On");
+      else
+         mOpenGlPlot->SetStringParameter("UseFixedFov", "Off");
+      
+      Real fov;
+      mFixedFovTextCtrl->GetValue().ToDouble(&fov);
+      mOpenGlPlot->SetRealParameter("FixedFovAngle", fov);
+      
       // save spacecraft list
       if (mHasSpChanged)
       {
@@ -1085,6 +1126,43 @@ void OpenGlPlotSetupPanel::OnSelectOtherObject(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OpenGlPlotSetupPanel::OnCheckBoxChange(wxCommandEvent& event)
 {
+   if (event.GetEventObject() == mPerspectiveModeCheckBox)
+   {
+      if (mPerspectiveModeCheckBox->IsChecked())
+      {
+         mUseFixedFovCheckBox->Enable();
+         if (mUseFixedFovCheckBox->IsChecked())
+         {
+            mFovLabel->Enable();
+            mFixedFovTextCtrl->Enable();
+         }
+         else
+         {
+            mFovLabel->Disable();
+            mFixedFovTextCtrl->Disable();
+         }
+      }
+      else
+      {
+          mUseFixedFovCheckBox->Disable();
+          mFovLabel->Disable();
+          mFixedFovTextCtrl->Disable();
+      }
+   }
+   else if (event.GetEventObject() == mUseFixedFovCheckBox)
+   {
+      if (mUseFixedFovCheckBox->IsChecked())
+      {
+         mFovLabel->Enable();
+         mFixedFovTextCtrl->Enable();
+      }
+      else
+      {
+         mFovLabel->Disable();
+         mFixedFovTextCtrl->Disable();
+      }
+   }
+   
    theApplyButton->Enable();
 }
 

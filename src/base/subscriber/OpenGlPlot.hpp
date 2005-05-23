@@ -140,6 +140,7 @@ protected:
    std::string mOverlapPlot;
    std::string mUseViewPointInfo;
    std::string mPerspectiveMode;
+   std::string mUseFixedFov;
    
    std::string mOldName;
    std::string mViewCoordSysName;
@@ -154,6 +155,7 @@ protected:
    Rvector3 mViewDirectionVector;
    
    Real mViewScaleFactor;
+   Real mFixedFovAngle;
    
    Integer mDataCollectFrequency;
    Integer mUpdatePlotFrequency;
@@ -191,6 +193,7 @@ protected:
       VIEW_DIRECTION,
       VIEW_DIRECTION_VECTOR,
       VIEW_SCALE_FACTOR,
+      FIXED_FOV_ANGLE,
       VIEW_UP_COORD_SYSTEM,
       VIEW_UP_AXIS,
       CELESTIAL_PLANE,
@@ -200,6 +203,7 @@ protected:
       OVERLAP_PLOT,
       USE_VIEWPOINT_INFO,
       PERSPECTIVE_MODE,
+      USE_FIXED_FOV,
       //ORBIT_COLOR,
       //TARGET_COLOR,
       DATA_COLLECT_FREQUENCY,

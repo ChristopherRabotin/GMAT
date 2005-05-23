@@ -48,6 +48,7 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
    "ViewDirection",
    "ViewDirectionVector",
    "ViewScaleFactor",
+   "FixedFovAngle",
    "ViewUpCoordinateSystem",
    "ViewUpAxis",
    "CelestialPlane",
@@ -57,6 +58,7 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
    "Overlap",
    "UseViewPointInfo",
    "PerspectiveMode",
+   "UseFixedFov",
    //"OrbitColor",
    //"TargetColor",
    "DataCollectFrequency",
@@ -76,6 +78,7 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
    Gmat::STRING_TYPE,            //"ViewDirection",
    Gmat::RVECTOR_TYPE,           //"ViewDirectionVector",
    Gmat::REAL_TYPE,              //"ViewScaleFactor",
+   Gmat::REAL_TYPE,              //"FixedFovAngle",
    Gmat::STRING_TYPE,            //"ViewUpCoordinaetSystem"
    Gmat::STRING_TYPE,            //"ViewUpAxis"
    Gmat::STRING_TYPE,            //"CelestialPlane"
@@ -85,6 +88,7 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
    Gmat::STRING_TYPE,            //"Overlap"
    Gmat::STRING_TYPE,            //"UseViewPointInfo"
    Gmat::STRING_TYPE,            //"PerspectiveMode"
+   Gmat::STRING_TYPE,            //"UseFixedFov"
    //Gmat::UNSIGNED_INTARRAY_TYPE, //"OrbitColor"
    //Gmat::UNSIGNED_INTARRAY_TYPE, //"TargetColor"
    Gmat::INTEGER_TYPE,           //"DataCollectFrequency"
@@ -120,6 +124,7 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mOverlapPlot = "Off";
    mUseViewPointInfo = "On";
    mPerspectiveMode = "Off";
+   mUseFixedFov = "Off";
    
    mOldName = instanceName;
    mViewCoordSysName = "EarthMJ2000Eq";
@@ -131,6 +136,7 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mViewPointVectorName = "Vector";
    mViewDirectionName = "Earth";
    mViewScaleFactor = 1.0;
+   mFixedFovAngle = 45.0;
    mViewPointRefVector.Set(0.0, 0.0, 0.0);
    mViewPointVector.Set(0.0, 0.0, 30000.0);
    mViewDirectionVector.Set(0.0, 0.0, -1.0);
@@ -188,6 +194,7 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mOverlapPlot = ogl.mOverlapPlot;
    mUseViewPointInfo = ogl.mUseViewPointInfo;
    mPerspectiveMode = ogl.mPerspectiveMode;
+   mUseFixedFov = ogl.mUseFixedFov;
    
    mOldName = ogl.mOldName;;
    mViewCoordSysName = ogl.mViewCoordSysName;
@@ -197,6 +204,7 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mViewPointVectorName = ogl.mViewPointVectorName;
    mViewDirectionName = ogl.mViewDirectionName;
    mViewScaleFactor = ogl.mViewScaleFactor;
+   mFixedFovAngle = ogl.mFixedFovAngle;
    mViewPointRefVector = ogl.mViewPointRefVector;
    mViewPointVector = ogl.mViewPointVector;
    mViewDirectionVector = ogl.mViewDirectionVector;
@@ -414,7 +422,8 @@ bool OpenGlPlot::Initialize()
                 mViewDirectionObj, mViewScaleFactor, mViewPointRefVector,
                 mViewPointVector, mViewDirectionVector, mViewUpAxisName,
                 (mViewPointRefName == "Vector"), (mViewPointVectorName == "Vector"),
-                (mViewDirectionName == "Vector"));
+                (mViewDirectionName == "Vector"), (mUseFixedFov == "On"),
+                mFixedFovAngle);
             
             return true;
          }
@@ -844,6 +853,8 @@ Real OpenGlPlot::GetRealParameter(const Integer id) const
    {
    case VIEW_SCALE_FACTOR:
       return mViewScaleFactor;
+   case FIXED_FOV_ANGLE:
+      return mFixedFovAngle;
    default:
       return Subscriber::GetRealParameter(id);
    }
@@ -873,6 +884,9 @@ Real OpenGlPlot::SetRealParameter(const Integer id, const Real value)
    {
    case VIEW_SCALE_FACTOR:
       mViewScaleFactor = value;
+      return value;
+   case FIXED_FOV_ANGLE:
+      mFixedFovAngle = value;
       return value;
    default:
       return Subscriber::SetRealParameter(id, value);
@@ -1020,6 +1034,8 @@ std::string OpenGlPlot::GetStringParameter(const Integer id) const
       return mUseViewPointInfo;
    case PERSPECTIVE_MODE:
       return mPerspectiveMode;
+   case USE_FIXED_FOV:
+      return mUseFixedFov;
    default:
       return Subscriber::GetStringParameter(id);
    }
@@ -1092,6 +1108,9 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
       return true;
    case PERSPECTIVE_MODE:
       mPerspectiveMode = value;
+      return true;
+   case USE_FIXED_FOV:
+      mUseFixedFov = value;
       return true;
    default:
       return Subscriber::SetStringParameter(id, value);
