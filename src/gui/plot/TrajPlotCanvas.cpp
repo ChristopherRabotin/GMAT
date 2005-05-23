@@ -1229,6 +1229,9 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
    }
    
    Refresh(false);
+   
+   wxLogStatus(GmatAppData::GetMainFrame(), wxT("Frame#: %d, Time: %f"), mNumData-1,
+               mTime[mNumData-1]);
 }
 
 
@@ -2265,15 +2268,29 @@ void TrajPlotCanvas::DrawFrame()
       //loj: If It doesn't clear, it shows trace
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      // draw some info text
-      // it doesn't work.
-//       glPushMatrix();
-//       glBegin(GL_POINTS);
-//       glColor3f(0, 1, 0);   // x
-//       glTranslatef(0.0, 0.0, 0.0);
-//       DrawStringAt("Some text...", 0.0, 0.0, 0.0);
-//       glEnd();
-//       glPopMatrix();
+      //----------------------------------------------------
+      // draw current frame number
+      //----------------------------------------------------
+      //loj: 5/23/05 it doesn't work
+//       glMatrixMode(GL_PROJECTION);
+//       glLoadIdentity();
+//       gluOrtho2D(0.0, mCanvasSize.x, 0.0, mCanvasSize.y);
+//       glMatrixMode(GL_MODELVIEW);
+//       glLoadIdentity();
+//       wxString str;
+//       str.Printf("%d", frame);
+//       str = "Frame#: " + str;
+//       //loj: 5/23/05 I want to use glWindowPos2f but it is available in version 1.4
+//       // glRasterPos2f works only in default view.
+//       //glWindowPos2f(mfLeftPos, mfBottomPos);
+//       glRasterPos2f(0, mCanvasSize.y);
+//       glCallLists(strlen(str.c_str()), GL_BYTE, (GLubyte*)str.c_str());
+//       glLoadIdentity();
+      
+      wxLogStatus(GmatAppData::GetMainFrame(), wxT("Frame#: %d, Time: %f"), frame,
+                  mTime[frame]);
+      
+      ComputeViewMatrix();     
       
       if (mUseInitialViewPoint)
       {
@@ -2281,8 +2298,6 @@ void TrajPlotCanvas::DrawFrame()
          ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
          SetProjection();
       }
-      
-      ComputeViewMatrix();     
       
       // tilt Origin rotation axis if needed
       if (mNeedOriginConversion)
@@ -2334,6 +2349,7 @@ void TrajPlotCanvas::DrawFrame()
       glFlush();
       SwapBuffers();
    }
+   
 } // end DrawFrame()
 
 
