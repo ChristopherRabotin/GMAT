@@ -61,6 +61,7 @@ private:
    wxTreeItemId mSpecialPointsItem;
    wxTreeItemId mScriptItem;
    wxTreeItemId mUniverseItem;
+   wxTreeItemId mSampleScriptItem;
 
    int mNumSpacecraft;
    int mNumFuelTank;
@@ -79,6 +80,7 @@ private:
    int mNumScripts;
    int mNumBarycenter;
    int mNumLibration;
+   int mNumSampleScripts;
 
    void AddDefaultResources();
    void AddDefaultBodies(wxTreeItemId itemId);
@@ -96,6 +98,7 @@ private:
    void AddDefaultCoordSys(wxTreeItemId itemId);
    void AddDefaultScripts(wxTreeItemId itemId);
    void AddDefaultSpecialPoints(wxTreeItemId itemId);
+   void AddDefaultSampleScripts(wxTreeItemId itemId);
 
    // event handlers
    void OnItemRightClick(wxTreeEvent& event);

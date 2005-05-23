@@ -46,6 +46,7 @@
 #include "bitmaps/default.xpm"
 #include "bitmaps/tank.xpm"
 #include "bitmaps/thruster.xpm"
+#include <wx/dir.h>
 #include <wx/string.h> // for wxArrayString
 
 #include "GuiInterpreter.hpp"
@@ -148,6 +149,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    mNumScripts = 0;
    mNumBarycenter = 0;
    mNumLibration = 0;
+   mNumSampleScripts = 0;
 
    theGuiManager->UpdateAll();
 }
@@ -183,6 +185,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
       mNumCoordSys = 0;
       mNumBarycenter = 0;
       mNumLibration = 0;
+      mNumSampleScripts = 0;
    }
    
    // ag: collapse, so folder icon is closed
@@ -196,6 +199,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
    Collapse(mFunctItem);
    Collapse(mCoordSysItem);
    Collapse(mSpecialPointsItem);
+   Collapse(mSampleScriptItem);
 
    DeleteChildren(mSpacecraftItem);
    DeleteChildren(mUniverseItem);
@@ -217,6 +221,15 @@ void ResourceTree::UpdateResource(bool resetCounter)
 
    SetItemImage(mSpecialPointsItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
+                
+   //----- Sample script is child of Script (waw: 5/20/05 Added)
+   mSampleScriptItem =
+      AppendItem(mScriptItem, wxT("Sample Scripts"), GmatTree::ICON_FOLDER, -1,
+                 new GmatTreeItemData(wxT("Sample Scripts"),
+                                      GmatTree::SAMPLE_SCRIPTS_FOLDER));
+
+   SetItemImage(mSampleScriptItem, GmatTree::ICON_OPENFOLDER,
+                wxTreeItemIcon_Expanded);
 
    DeleteChildren(mFormationItem);
    DeleteChildren(mPropagatorItem);
@@ -229,6 +242,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
 
    AddDefaultBodies(mUniverseItem);
    AddDefaultSpecialPoints(mSpecialPointsItem);
+   AddDefaultSampleScripts(mSampleScriptItem);
    AddDefaultSpacecraft(mSpacecraftItem);
    AddDefaultHardware(mHardwareItem);
    AddDefaultFormations(mFormationItem);
@@ -390,6 +404,7 @@ void ResourceTree::AddDefaultResources()
 
    AddDefaultBodies(mUniverseItem);
    AddDefaultSpecialPoints(mSpecialPointsItem);
+   AddDefaultSampleScripts(mSampleScriptItem);
    AddDefaultSpacecraft(mSpacecraftItem);
    AddDefaultHardware(mHardwareItem);
    AddDefaultFormations(mFormationItem);
@@ -895,6 +910,55 @@ void ResourceTree::AddDefaultSpecialPoints(wxTreeItemId itemId)
 
 }
 
+//------------------------------------------------------------------------------
+// void AddDefaultSampleScripts(wxTreeItemId itemId)
+//------------------------------------------------------------------------------
+/**
+ * Add the default sample scripts
+ *
+ * @param <itemId> tree item for the sample scripts folder
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::AddDefaultSampleScripts(wxTreeItemId itemId)
+{
+   wxString filename1 = "ScriptEx_ControlFlow.m";
+   wxString filename2 = "ScriptEx_FiniteBurn.m";
+   wxString filename3 = "ScriptEx_ForceModels.m";
+   wxString filename4 = "ScriptEx_FormationOpenGL.m";
+   wxString filename5 = "ScriptEx_Integrators.m";
+   wxString filename6 = "ScriptEx_LibrationPointMission.m";
+   wxString filename7 = "ScriptEx_MatlabFunctions.m";
+   wxString filename8 = "ScriptEx_Propagation.m";
+   
+   wxString path1 = "files\\sample_scripts\\ScriptEx_ControlFlow.m";
+   wxString path2 = "files\\sample_scripts\\ScriptEx_FiniteBurn.m";
+   wxString path3 = "files\\sample_scripts\\ScriptEx_ForceModels.m";
+   wxString path4 = "files\\sample_scripts\\ScriptEx_FormationOpenGL.m";
+   wxString path5 = "files\\sample_scripts\\ScriptEx_Integrators.m";
+   wxString path6 = "files\\sample_scripts\\ScriptEx_LibrationPointMission.m";
+   wxString path7 = "files\\sample_scripts\\ScriptEx_MatlabFunctions.m";
+   wxString path8 = "files\\sample_scripts\\ScriptEx_Propagation.m";
+
+   AppendItem(itemId, filename1, GmatTree::ICON_DEFAULT, -1,
+                    new GmatTreeItemData(path1, GmatTree::SCRIPT_FILE));
+   AppendItem(itemId, filename2, GmatTree::ICON_DEFAULT, -1,
+                    new GmatTreeItemData(path2, GmatTree::SCRIPT_FILE));
+   AppendItem(itemId, filename3, GmatTree::ICON_DEFAULT, -1,
+                    new GmatTreeItemData(path3, GmatTree::SCRIPT_FILE));
+   AppendItem(itemId, filename4, GmatTree::ICON_DEFAULT, -1,
+                    new GmatTreeItemData(path4, GmatTree::SCRIPT_FILE));
+   AppendItem(itemId, filename5, GmatTree::ICON_DEFAULT, -1,
+                    new GmatTreeItemData(path5, GmatTree::SCRIPT_FILE));
+   AppendItem(itemId, filename6, GmatTree::ICON_DEFAULT, -1,
+                    new GmatTreeItemData(path6, GmatTree::SCRIPT_FILE));
+   AppendItem(itemId, filename7, GmatTree::ICON_DEFAULT, -1,
+                    new GmatTreeItemData(path7, GmatTree::SCRIPT_FILE));
+   AppendItem(itemId, filename8, GmatTree::ICON_DEFAULT, -1,
+                    new GmatTreeItemData(path8, GmatTree::SCRIPT_FILE));
+
+   Expand(mScriptItem);
+}    
+
 
 //==============================================================================
 //                         On Action Events
@@ -1097,7 +1161,6 @@ void ResourceTree::OnClose(wxCommandEvent &event)
 void ResourceTree::OnRename(wxCommandEvent &event)
 {
    //MessageInterface::ShowMessage("ResourceTree::OnRename() entered\n");
-
 
    wxTreeItemId item = GetSelection();
    GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
@@ -1980,7 +2043,7 @@ void ResourceTree::OnAddScript()
    {
       wxString filename = dialog.GetFilename().c_str();
       wxString path = dialog.GetPath().c_str();
-
+      
       // add item to tree
       wxTreeItemId newItem = AppendItem(mScriptItem, filename, GmatTree::ICON_DEFAULT, -1,
                     new GmatTreeItemData(path, GmatTree::SCRIPT_FILE));
