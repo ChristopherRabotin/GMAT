@@ -234,6 +234,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
    // create MessageWindow and save in GmatApp for later use
    wxTextCtrl *msgTextCtrl = new wxTextCtrl(msgWin, -1, _T(""), wxDefaultPosition, wxDefaultSize,
                                wxTE_MULTILINE);
+   msgTextCtrl->SetMaxLength(320000); //loj:5/20/05 Added
    GmatAppData::GetMessageWindow()->Show(false);
    GmatAppData::SetMessageTextCtrl(msgTextCtrl);
    
