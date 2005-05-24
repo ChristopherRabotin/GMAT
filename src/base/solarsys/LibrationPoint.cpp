@@ -174,9 +174,9 @@ const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
    cout << "Mass of the secondary is " << massSecondary << endl;
    cout << "Mu(star) = " << muStar << endl;
    */
-   Real gamma;
-   Real gamma2, gamma3, gamma4, gamma5, gammaPrev;
-   Real F, Fdot;
+   Real gamma = 0.0;
+   Real gamma2 = 0.0, gamma3 = 0.0, gamma4 = 0.0, gamma5 = 0.0, gammaPrev = 0.0;
+   Real F = 0.0, Fdot = 0.0;
    if ((whichPoint == "L1") || (whichPoint == "L2") ||
        (whichPoint == "L3"))
    {
