@@ -63,6 +63,10 @@ void ScriptPanel::Create()
    mFileContentsTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
                             wxDefaultPosition, wxDefaultSize,
                             wxTE_MULTILINE | wxGROW);
+                            
+   // 5/24/05 - arg: for demo change font size to HUGE
+   mFileContentsTextCtrl->SetFont( wxFont( 14, wxDEFAULT, wxNORMAL, wxBOLD, FALSE, "",
+                        wxFONTENCODING_SYSTEM ) );
 
    // wxButton
    mBuildButton =
@@ -229,3 +233,4 @@ void ScriptPanel::OnButton(wxCommandEvent& event)
 //
 //    return menu_bar;
 //}
+
