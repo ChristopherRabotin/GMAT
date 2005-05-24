@@ -193,16 +193,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
           plotName.c_str());
       #endif
    }
-   
-//    GmatAppData::GetMainFrame()->trajMainSubframe->SetDrawEcPlane(drawEcPlane);
-//    GmatAppData::GetMainFrame()->trajMainSubframe->SetDrawEqPlane(drawEqPlane);
-//    GmatAppData::GetMainFrame()->trajMainSubframe->SetDrawWireFrame(drawWireFrame);
-//    GmatAppData::GetMainFrame()->trajMainSubframe->SetOverlapPlot(overlapPlot);
-//    GmatAppData::GetMainFrame()->trajMainSubframe->SetUseViewPointInfo(usevpInfo);
-//    GmatAppData::GetMainFrame()->trajMainSubframe->SetUsePerspectiveMode(usepm);
-//    GmatAppData::GetMainFrame()->trajMainSubframe->
-//       SetDesiredCoordSystem(wxString(csName.c_str()));
-   
+      
    #if DEBUG_PLOTIF_GL
    MessageInterface::ShowMessage
       ("PlotInterface::CreateGlPlotWindow() setting view options for %s\n",
@@ -215,7 +206,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    currPlotFrame->SetOverlapPlot(overlapPlot);
    currPlotFrame->SetUseViewPointInfo(usevpInfo);
    currPlotFrame->SetUsePerspectiveMode(usepm);
-   currPlotFrame->SetDesiredCoordSystem(wxString(csName.c_str()));
+   currPlotFrame->SetViewCoordSystem(wxString(csName.c_str()));
 
    #if DEBUG_PLOTIF_GL
    MessageInterface::ShowMessage
