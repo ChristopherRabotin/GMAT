@@ -1237,8 +1237,8 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
       SetProjection();
    }
    
-   DrawPlot();
-   //Refresh(false);
+   //DrawPlot(); //loj: This will make slow plotting.
+   Refresh(false);
    
    //wxLogStatus(GmatAppData::GetMainFrame(), wxT("Frame#: %d, Time: %f"), mNumData-1,
    //            mTime[mNumData-1]);
@@ -2959,7 +2959,7 @@ void TrajPlotCanvas::DrawStatus(int frame)
    // draw current frame number and time
    //----------------------------------------------------
    //loj: 5/23/05 I want to use glWindowPos2f but it is available in version 1.4
-   //loj: 5/23/05 it doesn't work
+   // then I'll not need to set GL_PROJECTION mode
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
    gluOrtho2D(0.0, (GLfloat)mCanvasSize.x, 0.0, (GLfloat)mCanvasSize.y);
@@ -2971,7 +2971,8 @@ void TrajPlotCanvas::DrawStatus(int frame)
    text = "Frame#: " + str;
    str.Printf("%f", mTime[frame]);
    text = text + "  Time: " + str;
-
+   
+   glColor3f(1, 1, 0); //yellow
    glRasterPos2i(0, 0);
    glCallLists(strlen(text.c_str()), GL_BYTE, (GLubyte*)text.c_str());
    
