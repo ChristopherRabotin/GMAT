@@ -163,6 +163,9 @@ private:
    // Camera translations
    GLfloat mfCamTransX, mfCamTransY, mfCamTransZ;
 
+   // DJC added for "Up"   
+   GLfloat mfUpAngle, mfUpXAxis, mfUpYAxis, mfUpZAxis;
+
    // view model
    bool mUseGluLookAt;
    

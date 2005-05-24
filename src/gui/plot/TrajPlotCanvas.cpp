@@ -2139,6 +2139,12 @@ void TrajPlotCanvas::ComputeProjection(int frame)
    mfCamRotYAxis = -mVdVec[0];
    mfCamRotZAxis = 0.0;
    mUseSingleRotAngle = true;
+
+   // DJC added for "Up"   
+   mfUpAngle = atan2(mVdVec[1],mVdVec[0]) * DEG_PER_RAD + 90.0;
+   mfUpXAxis = mVdVec[0];
+   mfUpYAxis = mVdVec[1];
+   mfUpZAxis = mVdVec[2];
    
    #if DEBUG_TRAJCANVAS_PROJ
       MessageInterface::ShowMessage
@@ -2238,6 +2244,9 @@ void TrajPlotCanvas::ComputeViewMatrix()
       {
          glTranslatef(mfCamTransX, mfCamTransY, mfCamTransZ);
          glRotatef(mfCamSingleRotAngle, mfCamRotXAxis, mfCamRotYAxis, mfCamRotZAxis);
+
+         // DJC added for Up
+         glRotatef(-mfUpAngle, mfUpXAxis, mfUpYAxis, -mfUpZAxis);
       }
    }
    
