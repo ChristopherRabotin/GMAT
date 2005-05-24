@@ -185,7 +185,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
       mNumCoordSys = 0;
       mNumBarycenter = 0;
       mNumLibration = 0;
-      mNumSampleScripts = 0;
+//      mNumSampleScripts = 0;
    }
    
    // ag: collapse, so folder icon is closed
@@ -222,15 +222,6 @@ void ResourceTree::UpdateResource(bool resetCounter)
    SetItemImage(mSpecialPointsItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
                 
-   //----- Sample script is child of Script (waw: 5/20/05 Added)
-   mSampleScriptItem =
-      AppendItem(mScriptItem, wxT("Sample Scripts"), GmatTree::ICON_FOLDER, -1,
-                 new GmatTreeItemData(wxT("Sample Scripts"),
-                                      GmatTree::SAMPLE_SCRIPTS_FOLDER));
-
-   SetItemImage(mSampleScriptItem, GmatTree::ICON_OPENFOLDER,
-                wxTreeItemIcon_Expanded);
-
    DeleteChildren(mFormationItem);
    DeleteChildren(mPropagatorItem);
    DeleteChildren(mBurnItem);
@@ -242,7 +233,6 @@ void ResourceTree::UpdateResource(bool resetCounter)
 
    AddDefaultBodies(mUniverseItem);
    AddDefaultSpecialPoints(mSpecialPointsItem);
-   AddDefaultSampleScripts(mSampleScriptItem);
    AddDefaultSpacecraft(mSpacecraftItem);
    AddDefaultHardware(mHardwareItem);
    AddDefaultFormations(mFormationItem);
@@ -401,6 +391,16 @@ void ResourceTree::AddDefaultResources()
    AppendItem(resource, wxT("Ground Stations"), GmatTree::ICON_FOLDER, 
               -1, new GmatTreeItemData(wxT("Ground Stations"),
                                        GmatTree::GROUNDSTATIONS_FOLDER));
+
+   //----- Sample script is child of Script (waw: 5/20/05 Added)
+   mSampleScriptItem =
+      AppendItem(mScriptItem, wxT("Sample Scripts"), GmatTree::ICON_FOLDER, -1,
+                 new GmatTreeItemData(wxT("Sample Scripts"),
+                                      GmatTree::SAMPLE_SCRIPTS_FOLDER));
+
+   SetItemImage(mSampleScriptItem, GmatTree::ICON_OPENFOLDER,
+                wxTreeItemIcon_Expanded);
+
 
    AddDefaultBodies(mUniverseItem);
    AddDefaultSpecialPoints(mSpecialPointsItem);
