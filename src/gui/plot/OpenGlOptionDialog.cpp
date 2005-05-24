@@ -166,6 +166,18 @@ void OpenGlOptionDialog::SetGotoObjectName(const wxString &objName)
 
 
 //------------------------------------------------------------------------------
+// void SetCoordSysName(const wxString &csName)
+//------------------------------------------------------------------------------
+void OpenGlOptionDialog::SetCoordSysName(const wxString &csName)
+{
+   mCoordSysComboBox->SetStringSelection(csName);
+
+   // We don't want to enable this
+   theApplyButton->Disable();
+}
+
+
+//------------------------------------------------------------------------------
 // void UpdateObject(const wxArrayString &objectNames,
 //                   const UnsignedIntArray &objectColors)
 //------------------------------------------------------------------------------
@@ -565,7 +577,7 @@ void OpenGlOptionDialog::LoadData()
    #endif
    
    // coordinate system
-   mCoordSysComboBox->SetStringSelection(mTrajFrame->GetDesiredCoordSysName());
+   mCoordSysComboBox->SetStringSelection(mTrajFrame->GetViewCoordSysName());
    
    // equatorial plane, eclitic plane, Earth-Sun line
    mEqPlaneCheckBox->SetValue(mTrajFrame->GetDrawEqPlane());
@@ -895,7 +907,8 @@ void OpenGlOptionDialog::OnCheckBoxChange(wxCommandEvent& event)
       mHasShowObjectChanged = true;
    }
    
-   theApplyButton->Enable();
+   if (event.GetEventObject() != mUseInitialViewPointCheckBox)
+      theApplyButton->Enable();
 }
 
 

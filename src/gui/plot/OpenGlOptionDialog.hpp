@@ -50,6 +50,8 @@ public:
    void SetDrawEqPlane(bool flag);
    void SetDrawWireFrame(bool flag);
    void SetGotoObjectName(const wxString &objName);
+   void SetCoordSysName(const wxString &csName);
+   
    void UpdateObject(const wxArrayString &objectNames,
                      const UnsignedIntArray &objectColors);
    void UpdateObjectList(const wxArrayString &objectNames,

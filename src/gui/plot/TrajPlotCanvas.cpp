@@ -237,7 +237,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    
    #if DEBUG_TRAJCANVAS_INIT
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas() internalCS=%s, desiredCS=%s\n",
+      ("TrajPlotCanvas() internalCS=%s, viewCS=%s\n",
        mInternalCoordSystem->GetName().c_str(), mViewCoordSystem->GetName().c_str());
    #endif
 }
@@ -326,18 +326,19 @@ bool TrajPlotCanvas::InitGL()
 //------------------------------------------------------------------------------
 wxString TrajPlotCanvas::GetGotoObjectName()
 {
-   return mObjectNames[mOriginId];
+   //return mObjectNames[mOriginId];
+   return mObjectNames[mViewObjId];
 }
 
 
 //------------------------------------------------------------------------------
-// void SetDesiredCoordSystem(const wxString &csName)
+// void SetViewCoordSystem(const wxString &csName)
 //------------------------------------------------------------------------------
-void TrajPlotCanvas::SetDesiredCoordSystem(const wxString &csName)
+void TrajPlotCanvas::SetViewCoordSystem(const wxString &csName)
 {
    #if DEBUG_TRAJCANVAS_INIT
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas()::SetDesiredCoordSysName() internalCS=%s, desiredCS=%s\n",
+      ("TrajPlotCanvas()::SetViewCoordSysName() internalCS=%s, viewCS=%s\n",
        mInternalCoordSystem->GetName().c_str(), csName.c_str());
    #endif
    
@@ -637,11 +638,11 @@ void TrajPlotCanvas::DrawInOtherCoordSystem(const wxString &csName)
 {
    #if DEBUG_TRAJCANVAS_ACTION
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::DrawInNewCoordSysName() desiredCS=%s, newCS=%s\n",
+      ("TrajPlotCanvas::DrawInNewCoordSysName() viewCS=%s, newCS=%s\n",
        mViewCoordSysName.c_str(), csName.c_str());
    #endif
-
-   // if current desired CS name is different from the new CS name
+   
+   // if current view CS name is different from the new CS name
    if (!mViewCoordSysName.IsSameAs(csName))
    {
       mViewCoordSysName = csName;
@@ -653,16 +654,19 @@ void TrajPlotCanvas::DrawInOtherCoordSystem(const wxString &csName)
          mIsInternalCoordSystem = true;
       else
          mIsInternalCoordSystem = false;
-
+      
       mOriginName = mViewCoordSystem->GetOriginName().c_str();
       mOriginId = GetObjectId(mOriginName);
-      mMaxZoomIn = mObjMaxZoomIn[mOriginId];
+      //mMaxZoomIn = mObjMaxZoomIn[mOriginId]; //loj: 5/24/05 commented out
       
       mNeedSpacecraftConversion = true;
       mNeedOriginConversion = true;
       mNeedObjectConversion = true;
+      
+      ConvertObjectData(); //loj: 5/24/05 Added
+      
       Refresh(false);
-      GotoObject(mOriginName); //loj: 5/11/05 Added
+      GotoObject(mOriginName);
    }
    else
    {
@@ -801,8 +805,11 @@ void TrajPlotCanvas::SetGlObject(const StringArray &objNames,
 void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
                                       CoordinateSystem *viewUpCs)
 {
-   mViewCoordSystem = viewCs;
-   mViewCoordSysName = wxString(viewCs->GetName().c_str());
+   mInitialCoordSystem = viewCs;
+   mInitialCoordSysName = wxString(viewCs->GetName().c_str());
+   
+   mViewCoordSystem = mInitialCoordSystem;
+   mViewCoordSysName = mInitialCoordSysName;
    
    mViewUpCoordSystem = viewUpCs;
    mViewUpCoordSysName = wxString(viewUpCs->GetName().c_str());
@@ -810,7 +817,7 @@ void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
    // set view center object
    mOriginName = wxString(viewCs->GetOriginName().c_str());
    mOriginId = GetObjectId(mOriginName);
-
+   
    mViewObjName = mOriginName;
    mViewObjId = mOriginId;
    
@@ -1174,7 +1181,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
                    objState.ToString().c_str());
                #endif
                
-               // convert objects to desired CoordinateSystem
+               // convert objects to view CoordinateSystem
                if (mNeedInitialConversion)
                {
                   Rvector6 outState;
@@ -2269,7 +2276,37 @@ void TrajPlotCanvas::DrawFrame()
    #endif
    
    if (mUseInitialViewPoint)
+   {
       SetDefaultView();
+      
+      if (!mViewCoordSysName.IsSameAs(mInitialCoordSysName))
+      {
+         if (mInitialCoordSysName.IsSameAs(mInternalCoordSysName))
+         {
+            mViewCoordSystem = mInternalCoordSystem;
+            mViewCoordSysName = mInternalCoordSysName;
+            mIsInternalCoordSystem = true;
+         }
+         else
+         {
+            mViewCoordSystem = mInitialCoordSystem;
+            mViewCoordSysName = mInitialCoordSysName;
+            mIsInternalCoordSystem = false;
+         }
+      }
+      
+      // set view center object
+      mOriginName = wxString(mViewCoordSystem->GetOriginName().c_str());
+      mOriginId = GetObjectId(mOriginName);
+         
+      mViewObjName = mOriginName;
+      mViewObjId = mOriginId;
+         
+      mMaxZoomIn = mObjMaxZoomIn[mOriginId];
+      mAxisLength = mMaxZoomIn;
+         
+      ConvertObjectData();
+   }
    
    for (int frame=1; frame<mNumData; frame++)
    {
@@ -2286,9 +2323,9 @@ void TrajPlotCanvas::DrawFrame()
       
       //loj: If It doesn't clear, it shows trace
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+      
       DrawStatus(frame);
-           
+      
       if (mUseInitialViewPoint)
       {
          ComputeProjection(frame);
@@ -3040,7 +3077,7 @@ bool TrajPlotCanvas::TiltOriginZAxis()
       ("TrajPlotCanvas::TiltOriginZAxis() AxisTypeName=%s\n", axisTypeName.c_str());
    #endif
    
-   // rotate earth Z axis if desired CS is MJ2000Ec
+   // rotate earth Z axis if view CS is MJ2000Ec
    //5.10if (mViewCoordSystem->GetName() == "EarthMJ2000Ec")
    if (axisTypeName == "MJ2000Ec")
    {
@@ -3087,13 +3124,13 @@ bool TrajPlotCanvas::ConvertSpacecraftData()
    
    #if DEBUG_TRAJCANVAS_CONVERT
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::ConvertSpacecraftData() internalCS=%s, desiredCS=%s\n",
+      ("TrajPlotCanvas::ConvertSpacecraftData() internalCS=%s, viewCS=%s\n",
        mInternalCoordSystem->GetName().c_str(), mViewCoordSystem->GetName().c_str());
    #endif
-
+   
    int objId;
    
-   // do not convert if desired CS is internal CS
+   // do not convert if view CS is internal CS
    //if (mViewCoordSystem->GetName() == mInternalCoordSystem->GetName())
    if (mIsInternalCoordSystem)
    {
@@ -3151,13 +3188,13 @@ bool TrajPlotCanvas::ConvertSpacecraftData(int frame)
    
    #if DEBUG_TRAJCANVAS_CONVERT
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::ConvertSpacecraftData() internalCS=%s, desiredCS=%s\n",
+      ("TrajPlotCanvas::ConvertSpacecraftData() internalCS=%s, viewCS=%s\n",
        mInternalCoordSystem->GetName().c_str(), mViewCoordSystem->GetName().c_str());
    #endif
 
    int objId;
    
-   // do not convert if desired CS is internal CS
+   // do not convert if view CS is internal CS
    //if (mViewCoordSystem->GetName() == mInternalCoordSystem->GetName())
    if (mIsInternalCoordSystem)
    {
@@ -3210,11 +3247,11 @@ bool TrajPlotCanvas::ConvertObjectData()
    
    #if DEBUG_TRAJCANVAS_CONVERT
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::ConvertObjectData() internalCS=%s, desiredCS=%s\n",
+      ("TrajPlotCanvas::ConvertObjectData() internalCS=%s, viewCS=%s\n",
        mInternalCoordSystem->GetName().c_str(), mViewCoordSystem->GetName().c_str());
    #endif
    
-   // do not convert if desired CS is internal CS
+   // do not convert if view CS is internal CS
    //if (mViewCoordSystem->GetName() == mInternalCoordSystem->GetName())
    if (mIsInternalCoordSystem)
    {

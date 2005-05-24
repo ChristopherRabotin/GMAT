@@ -64,8 +64,8 @@ public:
    float GetDistance();
    int   GetAnimationUpdateInterval();
    wxString GetGotoObjectName();
-   wxString GetDesiredCoordSysName();
-   CoordinateSystem* GetDesiredCoordSystem();
+   wxString GetViewCoordSysName();
+   CoordinateSystem* GetViewCoordSystem();
    
    // setters
    void SetPlotName(const wxString &name);
@@ -85,7 +85,7 @@ public:
    void SetEcLineColor(unsigned int color);
    void SetDistance(float dist);
    void SetGotoObjectName(const wxString &bodyName);
-   void SetDesiredCoordSystem(const wxString &csName);
+   void SetViewCoordSystem(const wxString &csName);
    void SetObjectColors(const wxStringColorMap &objectColorMap);
    void SetShowObjects(const wxStringBoolMap &showObjMap);
    

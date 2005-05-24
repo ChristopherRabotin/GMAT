@@ -52,8 +52,8 @@ public:
    unsigned int GetEcLineColor() {return mEcLineColor;}
    float GetDistance() {return mAxisLength;}
    int GetAnimationUpdateInterval() {return mUpdateInterval;}
-   wxString GetDesiredCoordSysName() {return mViewCoordSysName;}
-   CoordinateSystem* GetDesiredCoordSystem() { return mViewCoordSystem;}
+   wxString GetViewCoordSysName() {return mViewCoordSysName;}
+   CoordinateSystem* GetViewCoordSystem() { return mViewCoordSystem;}
    const wxArrayString& GetObjectNames() { return mObjectNames;}
    const wxStringColorMap& GetObjectColorMap() { return mObjectColorMap;}
    wxString GetGotoObjectName();
@@ -71,7 +71,7 @@ public:
    void SetEqPlaneColor(unsigned int color) {mEqPlaneColor = color;}
    void SetEcPlaneColor(unsigned int color) {mEcPlaneColor = color;}
    void SetEcLineColor(unsigned int color) {mEcLineColor = color;}
-   void SetDesiredCoordSystem(const wxString &csName);
+   void SetViewCoordSystem(const wxString &csName);
    void SetUsePerspectiveMode(bool perspMode);
    void SetObjectColors(const wxStringColorMap &objectColorMap);
    void SetShowObjects(const wxStringBoolMap &showObjMap);
@@ -269,11 +269,13 @@ private:
    float mObjectTempPos[MAX_OBJECT][MAX_DATA][3];
    
    // coordinate system
+   wxString mInternalCoordSysName;
+   wxString mInitialCoordSysName;
    wxString mViewCoordSysName;
    wxString mViewUpCoordSysName;
-   wxString mInternalCoordSysName;
    wxString mOriginName;
    CoordinateSystem *mInternalCoordSystem;
+   CoordinateSystem *mInitialCoordSystem;
    CoordinateSystem *mViewCoordSystem;
    CoordinateSystem *mViewUpCoordSystem;
    int mOriginId;
@@ -285,7 +287,7 @@ private:
    bool mNeedObjectConversion;
    bool mNeedInitialConversion;
    CoordinateConverter mCoordConverter;
-      
+   
    // view
    wxSize mCanvasSize;
    GLfloat mfViewLeft;
@@ -302,7 +304,7 @@ private:
    float mCurrRotYAngle;
    float mCurrRotZAngle;
    float mCurrViewDist;
-
+   
    // animation
    bool mViewAnimation;
    bool mHasUserInterrupted;
@@ -311,7 +313,7 @@ private:
    // windows specific functions
    bool SetPixelFormatDescriptor();
    void SetDefaultGLFont();
-
+   
    // initialization
    // texture
    bool LoadGLTextures();

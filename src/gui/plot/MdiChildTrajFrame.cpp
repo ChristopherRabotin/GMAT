@@ -292,24 +292,24 @@ wxString MdiChildTrajFrame::GetGotoObjectName()
 
 
 //------------------------------------------------------------------------------
-// wxString GetDesiredCoordSysName()
+// wxString GetViewCoordSysName()
 //------------------------------------------------------------------------------
-wxString MdiChildTrajFrame::GetDesiredCoordSysName()
+wxString MdiChildTrajFrame::GetViewCoordSysName()
 {
    if (mCanvas)
-      return mCanvas->GetDesiredCoordSysName();
+      return mCanvas->GetViewCoordSysName();
 
    return "Unknown";
 }
 
 
 //------------------------------------------------------------------------------
-// CoordinateSystem* GetDesiredCoordSystem()
+// CoordinateSystem* GetViewCoordSystem()
 //------------------------------------------------------------------------------
-CoordinateSystem* MdiChildTrajFrame::GetDesiredCoordSystem()
+CoordinateSystem* MdiChildTrajFrame::GetViewCoordSystem()
 {
    if (mCanvas)
-      return mCanvas->GetDesiredCoordSystem();
+      return mCanvas->GetViewCoordSystem();
 
    return NULL;
 }
@@ -560,13 +560,13 @@ void MdiChildTrajFrame::SetGotoObjectName(const wxString &bodyName)
 
 
 //------------------------------------------------------------------------------
-// void SetDesiredCoordSystem(const wxString &csName)
+// void SetViewCoordSystem(const wxString &csName)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetDesiredCoordSystem(const wxString &csName)
+void MdiChildTrajFrame::SetViewCoordSystem(const wxString &csName)
 {
    if (mCanvas)
    {
-      mCanvas->SetDesiredCoordSystem(csName);
+      mCanvas->SetViewCoordSystem(csName);
    }
 }
 
@@ -612,13 +612,15 @@ void MdiChildTrajFrame::DrawInOtherCoordSystem(const wxString &csName)
 void MdiChildTrajFrame::RedrawPlot(bool viewAnimation)
 {
    #ifdef DEBUG_CHILDTRAJ_FRAME
-      MessageInterface::ShowMessage("MdiChildTrajFrame::RedrawPlot() entered.\n");
+   MessageInterface::ShowMessage("MdiChildTrajFrame::RedrawPlot() entered.\n");
    #endif
-
+   
    if (mCanvas)
       mCanvas->RedrawPlot(viewAnimation);
 
    mOptionDialog->SetDistance(mCanvas->GetDistance());
+   mOptionDialog->SetCoordSysName(mCanvas->GetViewCoordSysName());
+   mOptionDialog->SetGotoObjectName(mCanvas->GetGotoObjectName());
 }
 
 
