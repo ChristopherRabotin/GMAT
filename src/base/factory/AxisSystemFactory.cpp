@@ -135,13 +135,13 @@ Factory(Gmat::AXIS_SYSTEM) //loj: 1/19/05 Changed from ATMOSPHERE
       creatables.push_back("MJ2000Eq");
       creatables.push_back("MJ2000Ec");
       creatables.push_back("TOEEq");
-      creatables.push_back("TOEEc");
+      //creatables.push_back("TOEEc");
       creatables.push_back("MOEEq");
-      creatables.push_back("MOEEc");
+      //creatables.push_back("MOEEc");
       creatables.push_back("TODEq");
-      creatables.push_back("TODEc");
+      //creatables.push_back("TODEc");
       creatables.push_back("MODEq");
-      creatables.push_back("MODEc");
+      //creatables.push_back("MODEc");
       creatables.push_back("ObjectReferenced");
       creatables.push_back("Equator");
       creatables.push_back("BodyFixed");
