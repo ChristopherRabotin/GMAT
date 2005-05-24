@@ -335,6 +335,7 @@ private:
    void DrawEclipticPlane(UnsignedInt color);
    void DrawEarthSunLine();
    void DrawAxes(bool gci = false);
+   void DrawStatus(int frame);
    
    // drawing primative objects
    void DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z);

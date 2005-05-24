@@ -1230,8 +1230,8 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
    
    Refresh(false);
    
-   wxLogStatus(GmatAppData::GetMainFrame(), wxT("Frame#: %d, Time: %f"), mNumData-1,
-               mTime[mNumData-1]);
+   //wxLogStatus(GmatAppData::GetMainFrame(), wxT("Frame#: %d, Time: %f"), mNumData-1,
+   //            mTime[mNumData-1]);
 }
 
 
@@ -1724,13 +1724,13 @@ void TrajPlotCanvas::SetDefaultView()
 void TrajPlotCanvas::SetProjection()
 {
    // Setup the world view
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    glMatrixMode(GL_PROJECTION); // first go to projection mode
-   glPushMatrix();
+   //glPushMatrix();
    glLoadIdentity();
    SetupWorld();                // set it up
    glMatrixMode(GL_MODELVIEW);
-   glPopMatrix();
+   //glPopMatrix();
 }
 
 
@@ -1780,7 +1780,7 @@ void TrajPlotCanvas::SetupWorld()
             int objId = GetObjectId(mViewDirectionObj->GetName().c_str());
             mViewObjRadius = mObjectRadius[objId];
          }
-      
+         
          // compute fov angle
          mFovDeg = 2.0 * ATan(size/2.0, dist - mViewObjRadius) * DEG_PER_RAD;
          //mFovDeg = 2.0 *
@@ -2259,38 +2259,38 @@ void TrajPlotCanvas::DrawFrame()
       // input to all program windows before calling wxYield and re-enables
       // it again afterwards.
       wxSafeYield();
-
+      
       if (mHasUserInterrupted)
          break;
       
       Sleep(mUpdateInterval);
-
+      
       //loj: If It doesn't clear, it shows trace
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      //----------------------------------------------------
-      // draw current frame number
-      //----------------------------------------------------
-      //loj: 5/23/05 it doesn't work
+      DrawStatus(frame);
+      
+//       //----------------------------------------------------
+//       // draw current frame number and time
+//       //----------------------------------------------------
+//       //loj: 5/23/05 I want to use glWindowPos2f but it is available in version 1.4
+//       //loj: 5/23/05 it doesn't work
 //       glMatrixMode(GL_PROJECTION);
 //       glLoadIdentity();
-//       gluOrtho2D(0.0, mCanvasSize.x, 0.0, mCanvasSize.y);
+//       gluOrtho2D(0.0, (GLfloat)mCanvasSize.x, 0.0, (GLfloat)mCanvasSize.y);
 //       glMatrixMode(GL_MODELVIEW);
 //       glLoadIdentity();
 //       wxString str;
+//       wxString text;
 //       str.Printf("%d", frame);
-//       str = "Frame#: " + str;
-//       //loj: 5/23/05 I want to use glWindowPos2f but it is available in version 1.4
-//       // glRasterPos2f works only in default view.
-//       //glWindowPos2f(mfLeftPos, mfBottomPos);
-//       glRasterPos2f(0, mCanvasSize.y);
-//       glCallLists(strlen(str.c_str()), GL_BYTE, (GLubyte*)str.c_str());
-//       glLoadIdentity();
+//       text = "Frame#: " + str;
+//       str.Printf("%f", mTime[frame]);
+//       text = text + "  Time: " + str;
+//       glRasterPos2i(0, 0);
+//       glCallLists(strlen(text.c_str()), GL_BYTE, (GLubyte*)text.c_str());
       
-      wxLogStatus(GmatAppData::GetMainFrame(), wxT("Frame#: %d, Time: %f"), frame,
-                  mTime[frame]);
-      
-      ComputeViewMatrix();     
+//       //wxLogStatus(GmatAppData::GetMainFrame(), wxT("Frame#: %d, Time: %f"), frame,
+//       //            mTime[frame]);
       
       if (mUseInitialViewPoint)
       {
@@ -2298,6 +2298,12 @@ void TrajPlotCanvas::DrawFrame()
          ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
          SetProjection();
       }
+      else
+      {
+         SetProjection();
+      }
+      
+      ComputeViewMatrix();     
       
       // tilt Origin rotation axis if needed
       if (mNeedOriginConversion)
@@ -2371,8 +2377,11 @@ void TrajPlotCanvas::DrawPlot()
    
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+   DrawStatus(mNumData-1);
+   SetProjection();
+   
    ComputeViewMatrix();
-      
+   
    // tilt Origin rotation axis if needed
    if (mNeedOriginConversion)
    {
@@ -2939,6 +2948,37 @@ void TrajPlotCanvas::DrawAxes(bool gci)
       DrawStringAt("+zMJ2000Eq", 0.0, 0.0, viewDist);
    else
       DrawStringAt("+z", 0.0, 0.0, viewDist);
+   
+}
+
+
+//---------------------------------------------------------------------------
+// void DrawStatus(int frame)
+//---------------------------------------------------------------------------
+void TrajPlotCanvas::DrawStatus(int frame)
+{
+   //----------------------------------------------------
+   // draw current frame number and time
+   //----------------------------------------------------
+   //loj: 5/23/05 I want to use glWindowPos2f but it is available in version 1.4
+   //loj: 5/23/05 it doesn't work
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   gluOrtho2D(0.0, (GLfloat)mCanvasSize.x, 0.0, (GLfloat)mCanvasSize.y);
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
+   wxString str;
+   wxString text;
+   str.Printf("%d", frame);
+   text = "Frame#: " + str;
+   str.Printf("%f", mTime[frame]);
+   text = text + "  Time: " + str;
+
+   glRasterPos2i(0, 0);
+   glCallLists(strlen(text.c_str()), GL_BYTE, (GLubyte*)text.c_str());
+   
+   //wxLogStatus(GmatAppData::GetMainFrame(), wxT("Frame#: %d, Time: %f"), frame,
+   //            mTime[frame]);
    
 }
 
