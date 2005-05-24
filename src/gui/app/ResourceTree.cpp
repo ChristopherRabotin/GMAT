@@ -1041,6 +1041,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    {
       menu.Append(POPUP_ADD_MATLAB_FUNCT, wxT("Add MATLAB Function"));
       menu.Append(POPUP_ADD_GMAT_FUNCT, wxT("Add GMAT Function"));
+      menu.Enable(POPUP_ADD_GMAT_FUNCT, FALSE);
 //#if defined __USE_MATLAB__
 //      menu.Enable(POPUP_ADD_MATLAB_FUNCT, TRUE);
 //#else
