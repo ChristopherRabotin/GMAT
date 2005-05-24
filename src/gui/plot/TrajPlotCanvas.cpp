@@ -823,8 +823,11 @@ void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
    }
 
    //5.20
-   mMaxZoomIn = mObjMaxZoomIn[mOriginId];
-   mAxisLength = mMaxZoomIn;
+   if (mUseInitialViewPoint)
+   {
+      mMaxZoomIn = mObjMaxZoomIn[mOriginId];
+      mAxisLength = mMaxZoomIn;
+   }
    
    //    mMaxZoomIn = mObjMaxZoomIn[mViewObjId];
    //    mAxisLength = mMaxZoomIn;
@@ -1220,15 +1223,22 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
       mNumData++;
       
    }   
-   
+
+   // Set projection here, because DrawPlot() is called in OnPaint()
    if (mUseInitialViewPoint)
    {
       ComputeProjection(mNumData-1);
       ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
       SetProjection();
    }
+   else
+   {
+      ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
+      SetProjection();
+   }
    
-   Refresh(false);
+   DrawPlot();
+   //Refresh(false);
    
    //wxLogStatus(GmatAppData::GetMainFrame(), wxT("Frame#: %d, Time: %f"), mNumData-1,
    //            mTime[mNumData-1]);
@@ -1768,8 +1778,8 @@ void TrajPlotCanvas::SetupWorld()
       
       Real dist = mVpLocVec.GetMagnitude();
       mViewObjRadius = mObjectDefaultRadius*50; //loj:5/23/05 multiplied by 50
-
-      if (mUseFixedFov)
+      
+      if (mUseFixedFov && mUseSingleRotAngle)
       {
          mFovDeg = mFixedFovAngle;
       }
@@ -2269,29 +2279,7 @@ void TrajPlotCanvas::DrawFrame()
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       DrawStatus(frame);
-      
-//       //----------------------------------------------------
-//       // draw current frame number and time
-//       //----------------------------------------------------
-//       //loj: 5/23/05 I want to use glWindowPos2f but it is available in version 1.4
-//       //loj: 5/23/05 it doesn't work
-//       glMatrixMode(GL_PROJECTION);
-//       glLoadIdentity();
-//       gluOrtho2D(0.0, (GLfloat)mCanvasSize.x, 0.0, (GLfloat)mCanvasSize.y);
-//       glMatrixMode(GL_MODELVIEW);
-//       glLoadIdentity();
-//       wxString str;
-//       wxString text;
-//       str.Printf("%d", frame);
-//       text = "Frame#: " + str;
-//       str.Printf("%f", mTime[frame]);
-//       text = text + "  Time: " + str;
-//       glRasterPos2i(0, 0);
-//       glCallLists(strlen(text.c_str()), GL_BYTE, (GLubyte*)text.c_str());
-      
-//       //wxLogStatus(GmatAppData::GetMainFrame(), wxT("Frame#: %d, Time: %f"), frame,
-//       //            mTime[frame]);
-      
+           
       if (mUseInitialViewPoint)
       {
          ComputeProjection(frame);
@@ -2371,12 +2359,13 @@ void TrajPlotCanvas::DrawPlot()
    #if DEBUG_TRAJCANVAS_DRAW
    MessageInterface::ShowMessage
       ("TrajPlotCanvas::DrawPlot() mNumData=%d, mNeedOriginConversion=%d, "
-       "mIsInternalCoordSystem=%d, mUseInitialViewPoint=%d\n",
-       mNumData, mNeedOriginConversion, mIsInternalCoordSystem, mUseInitialViewPoint);
+       "mIsInternalCoordSystem=%d, mUseInitialViewPoint=%d, mAxisLength=%f\n",
+       mNumData, mNeedOriginConversion, mIsInternalCoordSystem, mUseInitialViewPoint,
+       mAxisLength);
    #endif
    
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+   
    DrawStatus(mNumData-1);
    SetProjection();
    
@@ -2391,7 +2380,7 @@ void TrajPlotCanvas::DrawPlot()
    
    // draw equatorial plane
    if (mDrawEqPlane)
-         DrawEquatorialPlane(mEqPlaneColor);
+      DrawEquatorialPlane(mEqPlaneColor);
    
    // draw axes
    if (mDrawAxes)
@@ -2399,7 +2388,7 @@ void TrajPlotCanvas::DrawPlot()
    
    // draw ecliptic plane
    if (mDrawEcPlane)
-         DrawEclipticPlane(mEcPlaneColor);
+      DrawEclipticPlane(mEcPlaneColor);
    
    if (mNeedOriginConversion)
    {
