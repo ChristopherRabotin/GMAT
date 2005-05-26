@@ -22,6 +22,8 @@
 #include "UniversePanel.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_UNIV_PANEL 1
+
 //------------------------------
 // event tables for wxWindows
 //------------------------------
@@ -31,21 +33,22 @@ BEGIN_EVENT_TABLE(UniversePanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
 
-   EVT_BUTTON(ID_BUTTON_ADD,       UniversePanel::OnAddButton)
-   EVT_BUTTON(ID_BUTTON_SORT,      UniversePanel::OnSortButton)
-   EVT_BUTTON(ID_BUTTON_REMOVE,    UniversePanel::OnRemoveButton)
-   EVT_BUTTON(ID_SLP_BUTTON_BROWSE,    UniversePanel::OnBrowseButton)
-   EVT_BUTTON(ID_DE405_BUTTON_BROWSE,    UniversePanel::OnBrowseButton)
-   EVT_BUTTON(ID_DE200_BUTTON_BROWSE,    UniversePanel::OnBrowseButton)
-
-   EVT_LISTBOX(ID_AVAILABLE_LIST, UniversePanel::OnAvailableSelectionChange)
-   EVT_LISTBOX(ID_SELECTED_LIST, UniversePanel::OnSelectedSelectionChange)
+   EVT_BUTTON(ID_BUTTON_ADD, UniversePanel::OnAddButton)
+   EVT_BUTTON(ID_BUTTON_SORT, UniversePanel::OnSortButton)
+   EVT_BUTTON(ID_BUTTON_REMOVE, UniversePanel::OnRemoveButton)
+   EVT_BUTTON(ID_BUTTON_CLEAR, UniversePanel::OnClearButton)
+   EVT_BUTTON(ID_BUTTON_BROWSE, UniversePanel::OnBrowseButton)
+   
+   EVT_LISTBOX(ID_AVAILABLE_LIST, UniversePanel::OnListBoxSelect)
+   
+   EVT_COMBOBOX(ID_COMBOBOX, UniversePanel::OnComboBoxChange)
 
 END_EVENT_TABLE()
-
-//------------------------------
+   
+   
+//---------------------------------
 // public methods
-//------------------------------
+//---------------------------------
 //------------------------------------------------------------------------------
 // UniversePanel(wxWindow *parent)
 //------------------------------------------------------------------------------
@@ -59,21 +62,25 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 UniversePanel::UniversePanel(wxWindow *parent):GmatPanel(parent)
 {
+   mHasFileNameChanged = false;
    Create();
    Show();
 }
 
+//------------------------------------------------------------------------------
+// ~UniversePanel()
+//------------------------------------------------------------------------------
 UniversePanel::~UniversePanel()
 {
 }
 
 
-//-------------------------------
+//---------------------------------
 // private methods
-//-------------------------------
-//----------------------------------
+//---------------------------------
+//---------------------------------
 // methods inherited from GmatPanel
-//----------------------------------
+//---------------------------------
 
 //------------------------------------------------------------------------------
 // void Create()
@@ -88,113 +95,140 @@ void UniversePanel::Create()
 {
    // SetParent(new wxFrame(0,-1,"title"));
    // parent = GetParent();
-    
-   //MessageInterface::ShowMessage("UniversePanel::Create() entering\n");
-    
-   wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
-   wxGridSizer *item1 = new wxGridSizer( 3, 0, 0 );
-   wxBoxSizer *item2 = new wxBoxSizer( wxVERTICAL );
-    
-   item3 = new wxStaticText( this, ID_TEXT, wxT("Available"), wxDefaultPosition, 
-                             wxSize(80,-1), 0 );
-   item2->Add( item3, 0, wxALIGN_CENTRE|wxALL, 5 );
 
-   wxString availableStrs [] = 
-   {
-   };
+   #if DEBUG_UNIV_PANEL
+   MessageInterface::ShowMessage("UniversePanel::Create() entering\n");
+   #endif
 
-//        ag: not needed for build 2
-//        wxT("Low Accuracy Analytic"), 
-//        wxT("High Accuracy Analytic")
-
-   availableListBox = new wxListBox( this, ID_AVAILABLE_LIST, wxDefaultPosition, 
-                                     wxSize(140,125), 0,
-                                     availableStrs, wxLB_SINGLE );
-   item2->Add( availableListBox, 0, wxALIGN_CENTRE|wxALL, 5 );
-   item1->Add( item2, 0, wxALIGN_CENTRE|wxALL, 5 );
-   wxBoxSizer *item5 = new wxBoxSizer( wxVERTICAL );
-   item5->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-   addButton = new wxButton( this, ID_BUTTON_ADD, wxT("Add"), wxDefaultPosition, 
-                             wxDefaultSize, 0 );
-   item5->Add( addButton, 0, wxALIGN_CENTRE|wxALL, 5 );
-
-    // ag:  changed button from "sort" to "prioritize"
-   prioritizeButton = new wxButton( this, ID_BUTTON_SORT, wxT("Prioritize"), 
-                                    wxDefaultPosition, wxDefaultSize, 0 );
-   item5->Add( prioritizeButton, 0, wxALIGN_CENTRE|wxALL, 5 );
-   prioritizeButton->Enable(false);
-
-   removeButton = new wxButton( this, ID_BUTTON_REMOVE, wxT("Remove"), 
-                                wxDefaultPosition, wxDefaultSize, 0 );
-   item5->Add( removeButton, 0, wxALIGN_CENTRE|wxALL, 5 );
-   removeButton->Enable(false);
-   item1->Add( item5, 0, wxALIGN_CENTRE|wxALL, 5 );
-   wxBoxSizer *item9 = new wxBoxSizer( wxVERTICAL );
-   item10 = new wxStaticText( this, ID_TEXT, wxT("Selected"), wxDefaultPosition, 
-                              wxSize(80,-1), 0 );
-   item9->Add( item10, 0, wxALIGN_CENTRE|wxALL, 5 );
-
-   wxString strs11[] = 
-   {
-   };
-   selectedListBox = new wxListBox( this, ID_SELECTED_LIST, wxDefaultPosition, 
-                                    wxSize(140,125), 0, strs11, wxLB_SINGLE );
-   item9->Add( selectedListBox, 0, wxALIGN_CENTRE|wxALL, 5 );
-
-   item1->Add( item9, 0, wxALIGN_CENTRE|wxALL, 5 );
-
-   wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
-   // will need to change
-   slpStaticText = new wxStaticText( this, ID_TEXT, 
-                                     wxT("SLP File: "), 
-                                     wxDefaultPosition, wxSize(80,-1), 0 );
-   slpFileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
-                                    wxDefaultPosition, 
-                                    wxSize(250, -1),  0);
-   browseButton = new wxButton( this, ID_SLP_BUTTON_BROWSE, wxT("Browse"), 
-                                wxDefaultPosition, wxDefaultSize, 0 );
- 
-   fileSizer->Add(slpStaticText, 0, wxALIGN_CENTER|wxALL, 5);
-   fileSizer->Add(slpFileTextCtrl, 0, wxALIGN_CENTER|wxALL, 5);
-   fileSizer->Add(browseButton, 0, wxALIGN_CENTER|wxALL, 5);
-
-
-   wxBoxSizer *de405FileSizer = new wxBoxSizer(wxHORIZONTAL);
-   de405StaticText = new wxStaticText( this, ID_TEXT, 
-                                       wxT("DE405 File: "), 
-                                       wxDefaultPosition, wxSize(80,-1), 0 );
-   de405FileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
-                                      wxDefaultPosition, 
-                                      wxSize(250, -1),  0);
-   browseButton = new wxButton( this, ID_DE405_BUTTON_BROWSE, wxT("Browse"), 
-                                wxDefaultPosition, wxDefaultSize, 0 );
- 
-   de405FileSizer->Add(de405StaticText, 0, wxALIGN_CENTER|wxALL, 5);
-   de405FileSizer->Add(de405FileTextCtrl, 0, wxALIGN_CENTER|wxALL, 5);
-   de405FileSizer->Add(browseButton, 0, wxALIGN_CENTER|wxALL, 5);
-
-
-   wxBoxSizer *de200FileSizer = new wxBoxSizer(wxHORIZONTAL);
-   de200StaticText = new wxStaticText( this, ID_TEXT, 
-                                       wxT("DE200 File: "), 
-                                       wxDefaultPosition, wxSize(80,-1), 0 );
-   de200FileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
-                                      wxDefaultPosition, 
-                                      wxSize(250, -1),  0);
-   browseButton = new wxButton( this, ID_DE200_BUTTON_BROWSE, wxT("Browse"), 
-                                wxDefaultPosition, wxDefaultSize, 0 );
- 
-   de200FileSizer->Add(de200StaticText, 0, wxALIGN_CENTER|wxALL, 5);
-   de200FileSizer->Add(de200FileTextCtrl, 0, wxALIGN_CENTER|wxALL, 5);
-   de200FileSizer->Add(browseButton, 0, wxALIGN_CENTER|wxALL, 5);
-
-   item0->Add( item1, 0, wxALIGN_CENTRE|wxALL, 5 );
-   item0->Add(fileSizer, 0, wxALIGN_CENTER|wxALL, 5);
-   item0->Add(de405FileSizer, 0, wxALIGN_CENTER|wxALL, 5);
-   item0->Add(de200FileSizer, 0, wxALIGN_CENTER|wxALL, 5);
-
-   theMiddleSizer->Add(item0, 0, wxALIGN_CENTER|wxALL, 5);
+   int bsize = 3;
+   
+   //-------------------------------------------------------
+   // 1st column (Available file types)
+   //-------------------------------------------------------
+   wxStaticText *availableLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Available Planetary File"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   
+   wxString availableStrs [] =  { };
+   
+   //ag: not needed for build 2
+   //wxT("Low Accuracy Analytic"), 
+   //wxT("High Accuracy Analytic")
+   
+   availableListBox =
+      new wxListBox(this, ID_AVAILABLE_LIST, wxDefaultPosition, 
+                     wxSize(140,125), 0, availableStrs, wxLB_SINGLE);
+   
+   wxBoxSizer *availableSizer = new wxBoxSizer(wxVERTICAL);
+   availableSizer->Add(availableLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
+   availableSizer->Add(availableListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   #if DEBUG_UNIV_PANEL
+   MessageInterface::ShowMessage
+      ("UniversePanel::Create() created availableSizer\n");
+   #endif
+   
+   //-------------------------------------------------------
+   // 2nd column (Add, Remove, Clear, Prioritize buttons)
+   //-------------------------------------------------------
+   addButton = new wxButton(this, ID_BUTTON_ADD, wxT("-->"),
+                            wxDefaultPosition, wxSize(20,20), 0);
+   
+   removeButton = new wxButton(this, ID_BUTTON_REMOVE, wxT("<--"), 
+                               wxDefaultPosition, wxSize(20,20), 0);
+   
+   clearButton = new wxButton(this, ID_BUTTON_CLEAR, wxT("<="), 
+                              wxDefaultPosition, wxSize(20,20), 0);
+   
+   prioritizeButton = new wxButton(this, ID_BUTTON_SORT, wxT("Prioritize"), 
+                                   wxDefaultPosition, wxSize(50,20), 0);
+   
+   wxBoxSizer *buttonSizer = new wxBoxSizer(wxVERTICAL);
+   buttonSizer->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   buttonSizer->Add(addButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   buttonSizer->Add(removeButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   buttonSizer->Add(clearButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   buttonSizer->Add(prioritizeButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   #if DEBUG_UNIV_PANEL
+   MessageInterface::ShowMessage
+      ("UniversePanel::Create() created buttonSizer\n");
+   #endif
+   
+   //-------------------------------------------------------
+   // 3rd column (Selected file types)
+   //-------------------------------------------------------
+   wxStaticText *selLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Selected File"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   
+   wxString strs11[] = {};
+   
+   selectedListBox =
+      new wxListBox(this, ID_SELECTED_LIST, wxDefaultPosition, 
+                    wxSize(140,125), 0, strs11, wxLB_SINGLE);
+   
+   wxBoxSizer *selectedSizer = new wxBoxSizer(wxVERTICAL);
+   selectedSizer->Add(selLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
+   selectedSizer->Add(selectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   #if DEBUG_UNIV_PANEL
+   MessageInterface::ShowMessage
+      ("UniversePanel::Create() created selectedSizer\n");
+   #endif
+   
+   //-------------------------------------------------------
+   // Add to topGridSizer
+   //-------------------------------------------------------
+   wxGridSizer *topGridSizer = new wxGridSizer(3, 0, 0);
+   topGridSizer->Add(availableSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   topGridSizer->Add(buttonSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   topGridSizer->Add(selectedSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   //-------------------------------------------------------
+   // bottom file path
+   //-------------------------------------------------------
+   
+   wxStaticText *fileTypeLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Planetary File"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   
+   wxStaticText *fileNameLabel =
+      new wxStaticText(this, ID_TEXT, wxT("File Name"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   
+   wxString emptyArray[] = { };
+   mFileTypeComboBox = 
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition,
+                     wxSize(100,20), 0, emptyArray, wxCB_READONLY);
+   
+   mFileNameTextCtrl =
+      new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""),
+                     wxDefaultPosition, wxSize(300, -1),  0);
+   
+   mBrowseButton =
+      new wxButton(this, ID_BUTTON_BROWSE, wxT("Browse"),
+                   wxDefaultPosition, wxSize(50,20), 0);
+   
+   wxFlexGridSizer *bottomGridSizer = new wxFlexGridSizer(3, 0, 0);
+   bottomGridSizer->Add(fileTypeLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
+   bottomGridSizer->Add(fileNameLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
+   bottomGridSizer->Add(20,20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   bottomGridSizer->Add(mFileTypeComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   bottomGridSizer->Add(mFileNameTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   bottomGridSizer->Add(mBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   
+   //-------------------------------------------------------
+   // Add to pageSizer
+   //-------------------------------------------------------
+   wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
+   pageSizer->Add(topGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageSizer->Add(bottomGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   theMiddleSizer->Add(pageSizer, 0, wxALIGN_CENTER|wxALL, bsize);
 }
+
 
 //------------------------------------------------------------------------------
 // virtual void LoadData()
@@ -202,54 +236,58 @@ void UniversePanel::Create()
 void UniversePanel::LoadData()
 {
    // load data from the core engine
-    
-   //loj: 4/6/04 updated due to GuiInterpreter change
-   StringArray fileTypes = theGuiInterpreter->GetPlanetaryFileTypes();
+   
+   mAllFileTypes = theGuiInterpreter->GetPlanetaryFileTypes();
    StringArray fileTypesInUse = theGuiInterpreter->GetPlanetaryFileTypesInUse();
-    
-    // available source
-   for (unsigned int i=0; i<fileTypes.size(); i++)
+   
+   // available source
+   for (unsigned int i=0; i<mAllFileTypes.size(); i++)
    {
-      availableListBox->Append(fileTypes[i].c_str());
+      availableListBox->Append(mAllFileTypes[i].c_str());
    }
-    
+   
+   wxString str;
+   
    // selected source
    for (unsigned int i=0; i<fileTypesInUse.size(); i++)
    {
-      selectedListBox->Append(fileTypesInUse[i].c_str());
-      //MessageInterface::ShowMessage("UniversePanel::LoadData() filesInUse = %s\n",
-      //                              filesInUse[i].c_str());
+      str = fileTypesInUse[i].c_str();
+      selectedListBox->Append(str);
+      availableListBox->Delete(availableListBox->FindString(str));
+      
+      #if DEBUG_UNIV_PANEL
+      MessageInterface::ShowMessage
+         ("UniversePanel::LoadData() fileTypesInUse[%d] = %s\n", i,
+          fileTypesInUse[i].c_str());
+      #endif
    }
-
-   //loj: 4/6/04
-   //@todo - use combobox for DE files
-   for (unsigned int i=0; i<fileTypes.size(); i++)
+   
+   for (unsigned int i=0; i<mAllFileTypes.size(); i++)
    {
-      //MessageInterface::ShowMessage("UniversePanel::LoadData() fileNames = %s\n",
-      //                              fileNames[i].c_str());
-        
-      if (fileTypes[i] == "SLP")
-      {
-         slpFileTextCtrl->SetValue(theGuiInterpreter->
-                                   GetPlanetaryFileName("SLP").c_str());
-      }
-      else if (fileTypes[i] == "DE200")
-      {
-         de200FileTextCtrl->SetValue(theGuiInterpreter->
-                                     GetPlanetaryFileName("DE200").c_str());
-      }
-      else if (fileTypes[i] == "DE405")
-      {
-         de405FileTextCtrl->SetValue(theGuiInterpreter->
-                                     GetPlanetaryFileName("DE405").c_str());
-      }
+      wxString type = mAllFileTypes[i].c_str();
+      mFileTypeNameMap[type] =
+         theGuiInterpreter->GetPlanetaryFileName(mAllFileTypes[i]).c_str();
+      
+      mFileTypeComboBox->Append(type);
    }
-
+   
+   // set defaults
+   availableListBox->SetSelection(0);
+   selectedListBox->SetSelection(0);
+   
    if (fileTypesInUse.size() > 0)
       removeButton->Enable(true);
-
+   else
+      removeButton->Enable(false);
+   
    if (fileTypesInUse.size() > 1)
-      prioritizeButton->Enable(true); //loj: 4/14/04 added
+      prioritizeButton->Enable(true);
+   else
+      prioritizeButton->Enable(false);
+   
+   mFileTypeComboBox->SetSelection(0);
+   mFileNameTextCtrl->
+      SetValue(mFileTypeNameMap[mFileTypeComboBox->GetStringSelection()]);
 }
 
 
@@ -266,33 +304,55 @@ void UniversePanel::SaveData()
          (Gmat::WARNING_, "Need to select at least one planetary source file.\n"
           "Added SLP file as default\n");
       
-      selectedListBox->Insert("SLP", 0);
+      selectedListBox->Insert("DE405", 0); //loj: 5/26/05 changed SLP to DE405
       selectedListBox->SetSelection(0);
    }
    else
    {
-      //loj: 4/5/04 updated due to GuiInterpreter change:
-      theFileTypesInUse.clear();
-
-      // put planetary file types in the priority order
-      for (int i=0; i<selectedListBox->GetCount(); i++)
+      // save planetary file name, if changed
+      if (mHasFileNameChanged)
       {
-         theFileTypesInUse.push_back(std::string(selectedListBox->GetString(i)));
-         //        MessageInterface::ShowMessage("UniversePanel::SaveData() types=%s\n",
-         //                                      theFileTypesInUse[i].c_str());
+         mHasFileNameChanged = false;
+         
+         for (unsigned int i=0; i<mAllFileTypes.size(); i++)
+         {
+            wxString type = mAllFileTypes[i].c_str();
+            std::string name = std::string(mFileTypeNameMap[type].c_str());
+            theGuiInterpreter->SetPlanetaryFileName(mAllFileTypes[i], name);
+         }
       }
-
-      Integer status = theGuiInterpreter->SetPlanetaryFileTypesInUse(theFileTypesInUse);
-
-      // if error opening the first file type, remove the file type from the list
-      if (status == 1)
+      
+      // save planetary file types in use, if changed
+      if (mHasFileTypesInUseChanged)
       {
-         selectedListBox->Delete(0);
+         mHasFileTypesInUseChanged = false;
+         mFileTypesInUse.clear();
+         
+         // put planetary file types in the priority order
+         for (int i=0; i<selectedListBox->GetCount(); i++)
+         {
+            mFileTypesInUse.push_back(std::string(selectedListBox->GetString(i)));
+         
+            #if DEBUG_UNIV_PANEL
+            MessageInterface::ShowMessage("UniversePanel::SaveData() types=%s\n",
+                                          mFileTypesInUse[i].c_str());
+            #endif
+         }
+         
+         Integer status = theGuiInterpreter->SetPlanetaryFileTypesInUse(mFileTypesInUse);
+         
+         // if error opening the first file type, remove the file type from the list
+         if (status == 1)
+         {
+            selectedListBox->Delete(0);
+         }
       }
-    
-      theApplyButton->Enable(false);
    }
-}
+   
+   theApplyButton->Enable(false);
+   
+}// end SaveData()
+
 
 //------------------------------------------------------------------------------
 // void OnAddButton(wxCommandEvent& event)
@@ -301,27 +361,92 @@ void UniversePanel::OnAddButton(wxCommandEvent& event)
 {
    // get string in first list and then search for it
    // in the second list
-   wxString s = availableListBox->GetStringSelection();
-   int found = selectedListBox->FindString(s);
+   wxString str = availableListBox->GetStringSelection();
+   int sel = availableListBox->GetSelection();
+   int found = selectedListBox->FindString(str);
     
-    // if the string wasn't found in the second list, insert it
-   if ( found == wxNOT_FOUND )
+   // if the string wasn't found in the second list, insert it
+   if (found == wxNOT_FOUND)
    {
-      selectedListBox->Insert(s, 0);
+      selectedListBox->Insert(str, 0);
+      availableListBox->Delete(sel); //loj: 5/25/05 Added
       selectedListBox->SetSelection(0);
+      
+      if (sel-1 < 0)
+         availableListBox->SetSelection(0);
+      else
+         availableListBox->SetSelection(sel-1);
+      
+      removeButton->Enable(false);
+      prioritizeButton->Enable(false);
+    
+      if (selectedListBox->GetCount() > 0)
+         removeButton->Enable(true);
+
+      if (selectedListBox->GetCount() > 1)
+         prioritizeButton->Enable(true);
+      
+      mHasFileTypesInUseChanged = true;
       theApplyButton->Enable();
    }
+}
 
+
+//------------------------------------------------------------------------------
+// void OnRemoveButton(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void UniversePanel::OnRemoveButton(wxCommandEvent& event)
+{
+   wxString str = selectedListBox->GetStringSelection();
+   int sel = selectedListBox->GetSelection();
+   
+   selectedListBox->Delete(sel);
+   availableListBox->Append(str);
+   availableListBox->SetStringSelection(str);
+   
+   if (sel-1 < 0)
+      selectedListBox->SetSelection(0);
+   else
+      selectedListBox->SetSelection(sel-1);
+   
    removeButton->Enable(false);
    prioritizeButton->Enable(false);
-    
+   
    if (selectedListBox->GetCount() > 0)
       removeButton->Enable(true);
 
    if (selectedListBox->GetCount() > 1)
       prioritizeButton->Enable(true);
-    
+
+   mHasFileTypesInUseChanged = true;
+   theApplyButton->Enable(true);
 }
+
+
+//------------------------------------------------------------------------------
+// void OnClearButton(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void UniversePanel::OnClearButton(wxCommandEvent& event)
+{
+   Integer count = selectedListBox->GetCount();
+   
+   if (count == 0)
+      return;
+   
+   for (Integer i=0; i<count; i++)
+   {
+      availableListBox->Append(selectedListBox->GetString(i));
+   }
+   
+   selectedListBox->Clear();
+   availableListBox->SetSelection(0);
+   removeButton->Enable(false);
+   prioritizeButton->Enable(false);
+   
+   mHasFileTypesInUseChanged = true;
+   theApplyButton->Enable();
+}
+
 
 // moves selected item to the top of the lsit
 //------------------------------------------------------------------------------
@@ -330,68 +455,53 @@ void UniversePanel::OnAddButton(wxCommandEvent& event)
 void UniversePanel::OnSortButton(wxCommandEvent& event)
 {
    // get string
-   wxString s = selectedListBox->GetStringSelection();
-
-   if (!s.IsEmpty())
+   wxString str = selectedListBox->GetStringSelection();
+   
+   if (!str.IsEmpty())
    {
       // remove string
       int sel = selectedListBox->GetSelection();
       selectedListBox->Delete(sel);
+      
       // add string to top
-      selectedListBox->Insert(s, 0);
+      selectedListBox->Insert(str, 0);
+      selectedListBox->SetSelection(0);
+      
+      mHasFileTypesInUseChanged = true;
+      theApplyButton->Enable(true);
    }
-    
-   theApplyButton->Enable(true);
 }
 
-//------------------------------------------------------------------------------
-// void OnRemoveButton(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-void UniversePanel::OnRemoveButton(wxCommandEvent& event)
-{
-   int sel = selectedListBox->GetSelection();
-
-   selectedListBox->Delete(sel);
-
-   removeButton->Enable(false);
-   prioritizeButton->Enable(false);
-    
-   if (selectedListBox->GetCount() > 0)
-      removeButton->Enable(true);
-
-   if (selectedListBox->GetCount() > 1)
-      prioritizeButton->Enable(true);
-    
-   theApplyButton->Enable(true);
-}
 
 //------------------------------------------------------------------------------
 // void OnBrowseButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void UniversePanel::OnBrowseButton(wxCommandEvent& event)
 {
-   int textCtrlId = event.GetId();
+   wxString oldname = mFileNameTextCtrl->GetValue();
    wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
-    
+   
    if (dialog.ShowModal() == wxID_OK)
    {
       wxString filename;
-        
+      
       filename = dialog.GetPath().c_str();
-        
-      if (textCtrlId == ID_SLP_BUTTON_BROWSE)
-         slpFileTextCtrl->SetValue(filename); 
-      else if (textCtrlId == ID_DE405_BUTTON_BROWSE)
-         de405FileTextCtrl->SetValue(filename); 
-      else if (textCtrlId == ID_DE200_BUTTON_BROWSE)
-         de200FileTextCtrl->SetValue(filename); 
+      
+      if (!filename.IsSameAs(oldname))
+      {
+         mFileNameTextCtrl->SetValue(filename);
+         mFileTypeNameMap[mFileTypeComboBox->GetStringSelection()] = filename;
+         mHasFileNameChanged = true;
+         theApplyButton->Enable(true);
+      }
    }
 }
 
+
 //------------------------------------------------------------------------------
-// void OnAvailableSelectionChange(wxCommandEvent& event)
+// void OnListBoxSelect(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void UniversePanel::OnAvailableSelectionChange(wxCommandEvent& event)
+void UniversePanel::OnListBoxSelect(wxCommandEvent& event)
 {
    // get string
    wxString s = availableListBox->GetStringSelection();
@@ -402,20 +512,16 @@ void UniversePanel::OnAvailableSelectionChange(wxCommandEvent& event)
    }
 }
 
+
 //------------------------------------------------------------------------------
-// void OnSelectedSelectionChange(wxCommandEvent& event)
+// void OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void UniversePanel::OnSelectedSelectionChange(wxCommandEvent& event)
+void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
 {
-    // get string
-//      wxString s = availableListBox->GetStringSelection();
-
-//      if (s.IsSameAs("SLP"))
-//      {
-//      }
-//      else
-//      {
-
-//      }
-    
+   if (event.GetEventObject() == mFileTypeComboBox)
+   {
+      wxString type = mFileTypeComboBox->GetStringSelection();
+      mFileNameTextCtrl->SetValue(mFileTypeNameMap[type]);
+   }
 }
+

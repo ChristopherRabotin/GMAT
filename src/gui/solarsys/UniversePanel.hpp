@@ -18,96 +18,63 @@
 #include "gmatwxdefs.hpp"
 #include "GmatPanel.hpp"
 #include "GuiInterpreter.hpp"
-
-//  #include <wx/sizer.h>
-//  #include <wx/image.h>
-//  #include <wx/statline.h>
-//  #include <wx/listctrl.h>
-
-// Declare window functions
-//loj: commented out
-//  #define ID_TEXT          10003
-//  #define ID_LISTBOX       10004
-//  #define ID_BUTTON        10005
-//  #define ID_BUTTON_ADD    10008
-//  #define ID_BUTTON_SORT   10009
-//  #define ID_BUTTON_REMOVE 10010
+#include <map>
 
 class UniversePanel: public GmatPanel
 {
 public:
-    UniversePanel(wxWindow *parent);
-    ~UniversePanel();
+   UniversePanel(wxWindow *parent);
+   ~UniversePanel();
     
    
 private:
-    StringArray theFileTypesInUse;
-    
-  //    void CreateUniverse(wxWindow *parent);
-    void OnAddButton(wxCommandEvent& event);
-    void OnSortButton(wxCommandEvent& event);
-    void OnRemoveButton(wxCommandEvent& event);
-    void OnBrowseButton(wxCommandEvent& event);
+   StringArray mAllFileTypes;
+   StringArray mFileTypesInUse;
+   std::map<wxString, wxString> mFileTypeNameMap;
+   bool mHasFileTypesInUseChanged;
+   bool mHasFileNameChanged;
+   
+   wxComboBox *mFileTypeComboBox;
+   wxTextCtrl *mFileNameTextCtrl;
+   wxButton   *mBrowseButton;
+   
+   wxListBox *availableListBox;
+   wxListBox *selectedListBox;
+   
+   wxButton *addButton;
+   wxButton *removeButton;
+   wxButton *clearButton;
+   wxButton *prioritizeButton;
+   
+   void OnAddButton(wxCommandEvent& event);
+   void OnSortButton(wxCommandEvent& event);
+   void OnRemoveButton(wxCommandEvent& event);
+   void OnClearButton(wxCommandEvent& event);
+   void OnBrowseButton(wxCommandEvent& event);
+   void OnListBoxSelect(wxCommandEvent& event);
+   void OnComboBoxChange(wxCommandEvent& event);
+   
+   // methods inherited from GmatPanel
+   virtual void Create();
+   virtual void LoadData();
+   virtual void SaveData();
 
-    void OnAvailableSelectionChange(wxCommandEvent& event);
-    void OnSelectedSelectionChange(wxCommandEvent& event);
-
-    // methods inherited from GmatPanel
-    virtual void Create();
-    virtual void LoadData();
-    virtual void SaveData();
-    //loj: 2/27/04 commented out
-    //virtual void OnHelp();
-    //virtual void OnScript();
-    
-//      wxBoxSizer *item0;
-//      wxGridSizer *item1;
-//      wxBoxSizer *item2;
-//      wxBoxSizer *item5;
-//      wxBoxSizer *item9;
-
-    //loj: 4/6/04
-    //@todo need DE file type combobox (DE102, DE200, DE202, DE403, DE405, DE406)
-    wxTextCtrl *slpFileTextCtrl;
-    wxTextCtrl *de405FileTextCtrl;
-    wxTextCtrl *de200FileTextCtrl;
-
-    wxStaticText *item3;
-    wxStaticText *item10;
-
-    wxStaticText *slpStaticText;  
-    wxStaticText *de405StaticText; 
-    wxStaticText *de200StaticText;   
-
-    wxListBox *availableListBox;
-    wxListBox *selectedListBox;
-    
-    wxButton *addButton;
-    wxButton *prioritizeButton;
-    wxButton *removeButton;
-    wxButton *browseButton;
-    
-    DECLARE_EVENT_TABLE();
-    
-    // IDs for the controls and the menu commands
-    enum
-    {     
-        ID_TEXT = 6100,
-        ID_LISTBOX,
-        ID_BUTTON,
-        ID_BUTTON_ADD,
-        ID_BUTTON_SORT,
-        ID_BUTTON_REMOVE,
-
-        ID_AVAILABLE_LIST,
-        ID_TEXT_CTRL,
-        ID_SLP_BUTTON_BROWSE,
-        ID_DE405_BUTTON_BROWSE,
-        ID_DE200_BUTTON_BROWSE,
-        ID_SELECTED_LIST,
-    };
+   DECLARE_EVENT_TABLE();
+   
+   // IDs for the controls and the menu commands
+   enum
+   {     
+      ID_TEXT = 6100,
+      ID_LISTBOX,
+      ID_COMBOBOX,
+      ID_BUTTON_ADD,
+      ID_BUTTON_SORT,
+      ID_BUTTON_REMOVE,
+      ID_BUTTON_CLEAR,
+      ID_AVAILABLE_LIST,
+      ID_TEXT_CTRL,
+      ID_BUTTON_BROWSE,
+      ID_SELECTED_LIST,
+   };
 };
 #endif
-
-
-
