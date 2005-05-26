@@ -196,13 +196,22 @@ void ReportFileSetupPanel::Create()
    
    colWidthTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
                                      wxDefaultPosition, wxSize(35, -1),  0);
-   
+
+   wxStaticText *precisionText =
+      new wxStaticText(this, -1, wxT("  Precision  "),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+
+   precisionTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""),
+                                     wxDefaultPosition, wxSize(35, -1),  0);
+
    wxBoxSizer *reportOptionSizer = new wxBoxSizer(wxHORIZONTAL);
    reportOptionSizer->Add(writeCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(showHeaderCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);                       
    reportOptionSizer->Add(colWidthText, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(colWidthTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
-   
+   reportOptionSizer->Add(precisionText, 0, wxALIGN_CENTER|wxALL, bsize);
+   reportOptionSizer->Add(precisionTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+
    optionBoxSizer = new wxBoxSizer(wxVERTICAL);
    optionBoxSizer->Add(fileSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    optionBoxSizer->Add(reportOptionSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -253,7 +262,12 @@ void ReportFileSetupPanel::LoadData()
    wxString numSpacesValue;
    numSpacesValue.Printf("%d", reportFile->GetIntegerParameter(spacesId));
    colWidthTextCtrl->SetValue(numSpacesValue);
-    
+
+   int precisionId = reportFile->GetParameterID("Precision");
+   wxString precisionValue;
+   precisionValue.Printf("%d", reportFile->GetIntegerParameter(precisionId));
+   precisionTextCtrl->SetValue(precisionValue);
+
    StringArray varParamList = reportFile->GetStringArrayParameter("Add");
    mNumVarParams = varParamList.size();
 
@@ -305,7 +319,11 @@ void ReportFileSetupPanel::SaveData()
     int spacesId = reportFile->GetParameterID("ColumnWidth");
     reportFile->SetIntegerParameter(spacesId,
                   atoi(colWidthTextCtrl->GetValue()));
-                  
+
+    int precisionId = reportFile->GetParameterID("Precision");
+    reportFile->SetIntegerParameter(precisionId,
+                  atoi(precisionTextCtrl->GetValue()));
+
     // save file name data to core engine
     wxString filename = fileTextCtrl->GetValue();
     int filenameId = reportFile->GetParameterID("Filename");

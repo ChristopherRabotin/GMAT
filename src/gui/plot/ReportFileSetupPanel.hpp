@@ -39,6 +39,7 @@ protected:
    wxStaticText *fileStaticText;
    
    wxTextCtrl *colWidthTextCtrl;
+   wxTextCtrl *precisionTextCtrl;
    wxTextCtrl *fileTextCtrl;
 
    wxButton *browseButton; 
