@@ -2540,7 +2540,8 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
       for (int i=1; i<=frame; i++)
       {
          // Draw object orbit line based on points
-         if (mTime[i] > mTime[i-1])
+         if ((mTime[i] > mTime[i-1]) ||
+             (i>2 && mTime[i] < mTime[i-1]) && mTime[i-1] < mTime[i-2]) //loj: 5/26/05 for backprop
          {
             Rvector3 r1(mObjectTempPos[objId][i-1][0], mObjectTempPos[objId][i-1][1],
                         mObjectTempPos[objId][i-1][2]);
