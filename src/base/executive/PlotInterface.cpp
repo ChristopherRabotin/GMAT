@@ -160,6 +160,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                wxPoint(-1, -1), wxSize(-1, -1), //wxSize(500, 350), //wxSize(-1, -1),
                                wxDEFAULT_FRAME_STYLE, wxString(csName.c_str()),
                                ssPtr);
+      currPlotFrame->Show();
       
       #if DEBUG_PLOTIF_GL
       MessageInterface::ShowMessage
@@ -581,6 +582,8 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
                              wxString(yAxisTitle.c_str()),
                              wxPoint(-1, -1), wxSize(500, 350),
                              wxDEFAULT_FRAME_STYLE);
+                             
+      currPlotFrame->Show();
       
       GmatAppData::GetMainFrame()->Tile(); //loj: 5/18/05 uncommented
 
