@@ -49,7 +49,7 @@
 //------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_PAINT(DecoratedTree::OnPaint)
-   EVT_UPDATE_UI(-1, DecoratedTree::OnPaint)
+//   EVT_UPDATE_UI(-1, DecoratedTree::OnPaint)
    //ag: 10/20/2004 Commented out so that the position of the click is not
    // checked to open up a panel from the variables/goals boxes
    //loj: 11/4/04 Uncommented so that double click on Target/If/For/While folder
@@ -59,8 +59,8 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_TREE_ITEM_RIGHT_CLICK(-1, MissionTree::OnItemRightClick)
    EVT_TREE_ITEM_ACTIVATED(-1, MissionTree::OnItemActivated)
    
-   EVT_MENU_HIGHLIGHT(POPUP_SWAP_BEFORE, MissionTree::OnBefore)
-   EVT_MENU_HIGHLIGHT(POPUP_SWAP_AFTER, MissionTree::OnAfter)
+//   EVT_MENU_HIGHLIGHT(POPUP_SWAP_BEFORE, MissionTree::OnBefore)
+//   EVT_MENU_HIGHLIGHT(POPUP_SWAP_AFTER, MissionTree::OnAfter)
 
    EVT_MENU(POPUP_OPEN, MissionTree::OnOpen)
    EVT_MENU(POPUP_CLOSE, MissionTree::OnClose)
@@ -99,8 +99,8 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_MENU(POPUP_INSERT_D0_WHILE, MissionTree::OnInsertDoWhile)
    EVT_MENU(POPUP_INSERT_SWITCH_CASE, MissionTree::OnInsertSwitchCase)
 
-   EVT_MENU(POPUP_VIEW_VARIABLES, MissionTree::OnViewVariables)
-   EVT_MENU(POPUP_VIEW_GOALS, MissionTree::OnViewGoals)
+//   EVT_MENU(POPUP_VIEW_VARIABLES, MissionTree::OnViewVariables)
+//   EVT_MENU(POPUP_VIEW_GOALS, MissionTree::OnViewGoals)
 
    EVT_MENU(POPUP_RUN, MissionTree::OnRun)
    
@@ -1007,17 +1007,17 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
 
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-void MissionTree::OnBefore ()
-{
-   before = true;
-}
-
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-void MissionTree::OnAfter ()
-{
-   before = false;
-}
+//void MissionTree::OnBefore ()
+//{
+//   before = true;
+//}
+//
+////------------------------------------------------------------------------------
+////------------------------------------------------------------------------------
+//void MissionTree::OnAfter ()
+//{
+//   before = false;
+//}
 
 //------------------------------------------------------------------------------
 // void OnAddMissionSeq(wxCommandEvent &event)
@@ -2487,33 +2487,33 @@ wxMenu* MissionTree::CreateInsertControlLogicPopupMenu()
 //------------------------------------------------------------------------------
 // void OnViewVariables()
 //------------------------------------------------------------------------------
-void MissionTree::OnViewVariables()
-{
-   MissionTreeItemData *item = new MissionTreeItemData(wxT("Variables"), 
-                                                       GmatTree::VIEW_SOLVER_VARIABLES);
-   GmatAppData::GetMainFrame()->CreateChild(item);
-}
-
-//------------------------------------------------------------------------------
-// void OnViewGoals()
-//------------------------------------------------------------------------------
-void MissionTree::OnViewGoals()
-{
-   MissionTreeItemData *item = new MissionTreeItemData(wxT("Goals"),
-                                                       GmatTree::VIEW_SOLVER_GOALS);
-   GmatAppData::GetMainFrame()->CreateChild(item);
-}
+//void MissionTree::OnViewVariables()
+//{
+//   MissionTreeItemData *item = new MissionTreeItemData(wxT("Variables"),
+//                                                       GmatTree::VIEW_SOLVER_VARIABLES);
+//   GmatAppData::GetMainFrame()->CreateChild(item);
+//}
+//
+////------------------------------------------------------------------------------
+//// void OnViewGoals()
+////------------------------------------------------------------------------------
+//void MissionTree::OnViewGoals()
+//{
+//   MissionTreeItemData *item = new MissionTreeItemData(wxT("Goals"),
+//                                                       GmatTree::VIEW_SOLVER_GOALS);
+//   GmatAppData::GetMainFrame()->CreateChild(item);
+//}
 
 //------------------------------------------------------------------------------
 // void OnDelete()
 //------------------------------------------------------------------------------
-void MissionTree::OnDelete()
+void MissionTree::OnDelete(wxCommandEvent &event)
 {
    // get selected item
    wxTreeItemId itemId = GetSelection();
    
    // if panel is open close it
-   OnClose();
+   OnClose(event);
    
    // delete from gui interpreter
    MissionTreeItemData *missionItem = (MissionTreeItemData *)GetItemData(itemId);
@@ -2538,7 +2538,7 @@ void MissionTree::OnDelete()
 //---------------------------------------------------------------------------
 // void MissionTree::OnRun()
 //--------------------------------------------------------------------------
-void MissionTree::OnRun()
+void MissionTree::OnRun(wxCommandEvent &event)
 {
    theGuiInterpreter->RunMission();
 }
@@ -2645,7 +2645,7 @@ bool MissionTree::CheckClickIn(wxPoint position)
  * Open chosen from popup menu
  */
 //------------------------------------------------------------------------------
-void MissionTree::OnOpen()
+void MissionTree::OnOpen(wxCommandEvent &event)
 {
    // Get info from selected item
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
@@ -2660,7 +2660,7 @@ void MissionTree::OnOpen()
  * Close chosen from popup menu
  */
 //------------------------------------------------------------------------------
-void MissionTree::OnClose()
+void MissionTree::OnClose(wxCommandEvent &event)
 {
    // Get info from selected item
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());

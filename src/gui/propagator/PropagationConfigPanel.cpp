@@ -1310,7 +1310,7 @@ bool PropagationConfigPanel::ParseGravityFile(std::string line)
 //------------------------------------------------------------------------------
 // void OnIntegratorSelection()
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::OnIntegratorSelection()
+void PropagationConfigPanel::OnIntegratorSelection(wxCommandEvent &event)
 {
    if (!integratorString.IsSameAs(integratorComboBox->GetStringSelection()))
    {
@@ -1324,7 +1324,7 @@ void PropagationConfigPanel::OnIntegratorSelection()
 //------------------------------------------------------------------------------
 // void OnBodySelection()
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::OnBodySelection()
+void PropagationConfigPanel::OnBodySelection(wxCommandEvent &event)
 {
    if (primaryBodiesArray.IsEmpty())
       return;
@@ -1346,7 +1346,7 @@ void PropagationConfigPanel::OnBodySelection()
 //------------------------------------------------------------------------------
 // void OnGravitySelection()
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::OnGravitySelection()
+void PropagationConfigPanel::OnGravitySelection(wxCommandEvent &event)
 {   
    if (primaryBodiesArray.IsEmpty())
       return;
@@ -1373,7 +1373,7 @@ void PropagationConfigPanel::OnGravitySelection()
 //------------------------------------------------------------------------------
 // void OnAtmosphereSelection()
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::OnAtmosphereSelection()
+void PropagationConfigPanel::OnAtmosphereSelection(wxCommandEvent &event)
 {
    if (primaryBodiesArray.IsEmpty())
       return;
@@ -1405,7 +1405,7 @@ void PropagationConfigPanel::OnAtmosphereSelection()
 //------------------------------------------------------------------------------
 // void OnAddBodyButton()
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::OnAddBodyButton()
+void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
 {     
    CelesBodySelectDialog bodyDlg(this, primaryBodiesArray, secondaryBodiesArray);
    bodyDlg.ShowModal();
@@ -1591,7 +1591,7 @@ void PropagationConfigPanel::OnAddBodyButton()
          bodyComboBox->Append(forceList[i]->bodyName.c_str());
          bodyComboBox->SetValue(forceList[i]->bodyName.c_str());
       }
-      OnBodySelection();    
+      OnBodySelection(event);
 
       theApplyButton->Enable(true);
       isForceModelChanged = true;
@@ -1602,7 +1602,7 @@ void PropagationConfigPanel::OnAddBodyButton()
 //------------------------------------------------------------------------------
 // void OnGravSearchButton()
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::OnGravSearchButton()
+void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
 {
    wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
     
@@ -1650,7 +1650,7 @@ void PropagationConfigPanel::OnGravSearchButton()
 //------------------------------------------------------------------------------
 // void OnSetupButton()
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::OnSetupButton()
+void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
 {
    DragForce *dragForce;
    
@@ -1687,7 +1687,7 @@ void PropagationConfigPanel::OnSetupButton()
 //------------------------------------------------------------------------------
 // void OnMagSearchButton()
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::OnMagSearchButton()
+void PropagationConfigPanel::OnMagSearchButton(wxCommandEvent &event)
 {
    wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
     
@@ -1704,7 +1704,7 @@ void PropagationConfigPanel::OnMagSearchButton()
 //------------------------------------------------------------------------------
 // void OnPMEditButton()
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::OnPMEditButton()
+void PropagationConfigPanel::OnPMEditButton(wxCommandEvent &event)
 {  
    CelesBodySelectDialog bodyDlg(this, secondaryBodiesArray, primaryBodiesArray);
    bodyDlg.ShowModal();
@@ -1788,16 +1788,16 @@ void PropagationConfigPanel::OnPMEditButton()
 //------------------------------------------------------------------------------
 // void OnSRPEditButton()
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::OnSRPEditButton()
+void PropagationConfigPanel::OnSRPEditButton(wxCommandEvent &event)
 {
    theApplyButton->Enable(true);
 }
 
 // wxTextCtrl Events
 //------------------------------------------------------------------------------
-// void OnIntegratorTextUpdate()
+// void OnIntegratorTextUpdate(wxCommandEvent &event)
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::OnIntegratorTextUpdate()
+void PropagationConfigPanel::OnIntegratorTextUpdate(wxCommandEvent &event)
 {
    isIntegratorChanged = true;
     
@@ -1856,7 +1856,7 @@ void PropagationConfigPanel::OnMagneticTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 // void OnSRPCheckBoxChange()
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::OnSRPCheckBoxChange()
+void PropagationConfigPanel::OnSRPCheckBoxChange(wxCommandEvent &event)
 {
    if (primaryBodiesArray.IsEmpty())
       return;

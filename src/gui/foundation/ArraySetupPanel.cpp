@@ -348,9 +348,9 @@ void ArraySetupPanel::OnButtonClick(wxCommandEvent& event)
 }
 
 //------------------------------------------------------------------------------
-// void OnGridCellChange(wxCommandEvent& event)
+// void OnGridCellChange(wxGridEvent& event)
 //------------------------------------------------------------------------------
-void ArraySetupPanel::OnGridCellChange(wxCommandEvent& event)
+void ArraySetupPanel::OnGridCellChange(wxGridEvent& event)
 {
    int row = mArrGrid->GetGridCursorRow();
    int col = mArrGrid->GetGridCursorCol();

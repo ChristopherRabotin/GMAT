@@ -250,7 +250,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
 
    GmatNotebook *projectTree = new GmatNotebook(win, -1, wxDefaultPosition,
                                 wxDefaultSize, wxCLIP_CHILDREN);          
-   new wxNotebookSizer(projectTree);  
+//   new wxNotebookSizer(projectTree);
   
    // set the main frame, because there will no longer be right notebook
    GmatAppData::SetMainFrame(this);
@@ -808,8 +808,8 @@ void GmatMainFrame::RemoveChild(wxString item)
 void GmatMainFrame::CloseActiveChild()
 {
    GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)GetActiveChild();
-   
-   theChild->OnClose();
+   wxCloseEvent event;
+   theChild->OnClose(event);
 }
 
 //------------------------------------------------------------------------------
@@ -1536,9 +1536,9 @@ void GmatMainFrame::OnNewScript(wxCommandEvent& WXUNUSED(event))
  * @param <event> input event.
  */
 //------------------------------------------------------------------------------
-void GmatMainFrame::OnOpenScript(wxCommandEvent& WXUNUSED(event))
+void GmatMainFrame::OnOpenScript(wxCommandEvent& event)
 {
-   GmatAppData::GetResourceTree()->OnAddScript();
+   GmatAppData::GetResourceTree()->OnAddScript(event);
 }
 
 //------------------------------------------------------------------------------
@@ -1783,7 +1783,7 @@ void GmatMainFrame::OnFocus(wxFocusEvent& event)
 //------------------------------------------------------------------------------
 // bool OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
-bool GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
+void GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 {
    wxString filename = ((GmatMdiChildFrame *)GetActiveChild())->GetTitle();
 
@@ -1797,17 +1797,18 @@ bool GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
    GmatAppData::GetResourceTree()->UpdateResource(true);
    GmatAppData::GetMissionTree()->UpdateMission(true);
 
-   return status;
+//   return status;
 }
 
 //------------------------------------------------------------------------------
 // bool OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
-bool GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
+void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 {
    bool status = false;
 
-   status = OnScriptBuildObject(event);
+//   status = OnScriptBuildObject(event);
+   OnScriptBuildObject(event);
    OnRun(event);
    
 //
@@ -1830,7 +1831,7 @@ bool GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 //      //status = GmatAppData::GetGuiInterpreter()->RunScript();
 //   }
 
-   return status;
+//   return status;
 }
 
 //------------------------------------------------------------------------------
@@ -1842,7 +1843,7 @@ bool GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
  *       to the message window.
  */
 //------------------------------------------------------------------------------
-bool GmatMainFrame::OnScriptRun(wxCommandEvent& WXUNUSED(event))
+void GmatMainFrame::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
    //MessageInterface::ClearMessage();
 
@@ -1853,7 +1854,7 @@ bool GmatMainFrame::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 
    //bool status = GmatAppData::GetGuiInterpreter()->RunScript();
 
-   return true;
+//   return true;
 }
 
 //------------------------------------------------------------------------------

@@ -48,7 +48,7 @@ protected:
    virtual void ResetData();
    
    // virtual methods from GmatDialog
-   virtual void OnOK();
+   virtual void OnOK(wxCommandEvent &event);
 
    // event handling
    void OnTextUpdate(wxCommandEvent& event);

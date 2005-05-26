@@ -92,8 +92,8 @@ void SpacecraftPanel::Create()
     actuatorNotebook = new wxNotebook( spacecraftNotebook, ID_NOTEBOOK, wxDefaultPosition, 
                          wxDefaultSize, wxGROW );
     // wxNotebookSizer                     
-    spacecraftSizer = new wxNotebookSizer( spacecraftNotebook );
-    actuatorSizer = new wxNotebookSizer( actuatorNotebook );
+//    spacecraftSizer = new wxNotebookSizer( spacecraftNotebook );
+//    actuatorSizer = new wxNotebookSizer( actuatorNotebook );
  
     // wxSizer
     wxGridSizer *theGridSizer = new wxGridSizer( 1, 0, 0 );
@@ -122,7 +122,7 @@ void SpacecraftPanel::Create()
     spacecraftNotebook->AddPage( actuatorNotebook, wxT("Actuators") );
     //spacecraftNotebook->AddPage( visuals , wxT("Visualization") );  
     
-    theGridSizer->Add(spacecraftSizer, 1, wxGROW, 5);
+    theGridSizer->Add(spacecraftNotebook, 1, wxGROW, 5);
     theMiddleSizer->Add(theGridSizer, 1, wxGROW, 5);
 }
 

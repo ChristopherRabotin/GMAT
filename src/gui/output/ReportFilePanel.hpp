@@ -37,7 +37,7 @@ public:
    // constructors
    ReportFilePanel( wxWindow *parent, wxString reportName);
 
-   void OnClose();
+   void OnClose(wxCommandEvent &event);
    void OnHelp();
 
 protected:

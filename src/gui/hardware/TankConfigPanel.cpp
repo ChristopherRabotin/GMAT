@@ -215,7 +215,7 @@ void TankConfigPanel::SaveData()
 //------------------------------------------------------------------------------
 // void OnTextChange()
 //------------------------------------------------------------------------------
-void TankConfigPanel::OnTextChange()
+void TankConfigPanel::OnTextChange(wxCommandEvent &event)
 {
     theApplyButton->Enable();
 }    

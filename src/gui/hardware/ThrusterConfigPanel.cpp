@@ -216,7 +216,7 @@ void ThrusterConfigPanel::SaveData()
 //------------------------------------------------------------------------------
 // void OnTextChange()
 //------------------------------------------------------------------------------
-void ThrusterConfigPanel::OnTextChange()
+void ThrusterConfigPanel::OnTextChange(wxCommandEvent &event)
 {
     theApplyButton->Enable();
 } 
@@ -224,7 +224,7 @@ void ThrusterConfigPanel::OnTextChange()
 //------------------------------------------------------------------------------
 // void OnComboBoxChange()
 //------------------------------------------------------------------------------
-void ThrusterConfigPanel::OnComboBoxChange()
+void ThrusterConfigPanel::OnComboBoxChange(wxCommandEvent &event)
 {
    isCoordSysChanged =  true;
    coordsysName = coordsysComboBox->GetStringSelection().c_str();

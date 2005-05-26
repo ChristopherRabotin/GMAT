@@ -33,7 +33,7 @@ public:
                 const wxPoint& pos, const wxSize& size,
                 long style);
    void UpdateResource(bool resetCounter);
-   void OnAddScript();
+   void OnAddScript(wxCommandEvent &event);
    void OnNewScript();
    void AddScriptItem(wxString path);
     

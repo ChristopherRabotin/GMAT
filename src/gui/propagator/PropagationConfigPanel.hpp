@@ -225,26 +225,26 @@ private:
    bool ParseGravityFile(std::string line);
     
    // Text control event method
-   void OnIntegratorTextUpdate();
+   void OnIntegratorTextUpdate(wxCommandEvent &event);
    void OnGravityTextUpdate(wxCommandEvent& event);
    void OnMagneticTextUpdate(wxCommandEvent& event);
     
    // Checkbox event method
-   void OnSRPCheckBoxChange();
+   void OnSRPCheckBoxChange(wxCommandEvent &event);
     
    // Combobox event method
-   void OnIntegratorSelection();
-   void OnBodySelection();
-   void OnGravitySelection();
-   void OnAtmosphereSelection();
+   void OnIntegratorSelection(wxCommandEvent &event);
+   void OnBodySelection(wxCommandEvent &event);
+   void OnGravitySelection(wxCommandEvent &event);
+   void OnAtmosphereSelection(wxCommandEvent &event);
     
    // Button event methods
-   void OnAddBodyButton();
-   void OnGravSearchButton();
-   void OnSetupButton();
-   void OnMagSearchButton();
-   void OnPMEditButton();
-   void OnSRPEditButton();
+   void OnAddBodyButton(wxCommandEvent &event);
+   void OnGravSearchButton(wxCommandEvent &event);
+   void OnSetupButton(wxCommandEvent &event);
+   void OnMagSearchButton(wxCommandEvent &event);
+   void OnPMEditButton(wxCommandEvent &event);
+   void OnSRPEditButton(wxCommandEvent &event);
 
    // for Debug
    void ShowPropData(const std::string &header);

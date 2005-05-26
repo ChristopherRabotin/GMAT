@@ -91,8 +91,8 @@ private:
    void OnItemActivated(wxTreeEvent &event);
    void OnDoubleClick(wxMouseEvent &event);
    void ShowMenu(wxTreeItemId id, const wxPoint& pt);
-   void OnBefore();
-   void OnAfter();
+//   void OnBefore();
+//   void OnAfter();
    bool CheckClickIn(wxPoint position);
     
    void OnAddMissionSeq(wxCommandEvent &event);
@@ -132,15 +132,15 @@ private:
    void OnInsertDoWhile(wxCommandEvent &event);
    void OnInsertSwitchCase(wxCommandEvent &event);
     
-   void OnViewVariables();
-   void OnViewGoals();
+//   void OnViewVariables();
+//   void OnViewGoals();
 
-   void OnRun();  
+   void OnRun(wxCommandEvent &event);
     
-   void OnDelete(); 
+   void OnDelete(wxCommandEvent &event);
     
-   void OnOpen();
-   void OnClose();
+   void OnOpen(wxCommandEvent &event);
+   void OnClose(wxCommandEvent &event);
 
    wxMenu* CreateAddPopupMenu();
    wxMenu* CreateInsertPopupMenu();

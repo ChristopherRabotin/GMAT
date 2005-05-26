@@ -300,7 +300,7 @@ void MSISE90Dialog::ResetData()
 //------------------------------------------------------------------------------
 // void OnTextChange()
 //------------------------------------------------------------------------------
-void MSISE90Dialog::OnTextChange()
+void MSISE90Dialog::OnTextChange(wxCommandEvent &event)
 {
     theOkButton->Enable(true);
 }
@@ -328,7 +328,7 @@ void MSISE90Dialog::OnRadioButtonChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 // void OnBrowse()
 //------------------------------------------------------------------------------
-void MSISE90Dialog::OnBrowse()
+void MSISE90Dialog::OnBrowse(wxCommandEvent &event)
 {
     wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
     

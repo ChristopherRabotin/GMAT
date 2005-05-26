@@ -342,7 +342,7 @@ void ParameterCreateDialog::ResetData()
  * Saves the data and closes the page
  */
 //------------------------------------------------------------------------------
-void ParameterCreateDialog::OnOK()
+void ParameterCreateDialog::OnOK(wxCommandEvent &event)
 {
 #if DEBUG_PARAM_DIALOG
    MessageInterface::ShowMessage

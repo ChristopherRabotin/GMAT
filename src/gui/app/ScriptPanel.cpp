@@ -62,7 +62,7 @@ void ScriptPanel::Create()
    //wxStaticText
    mFileContentsTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
                             wxDefaultPosition, wxDefaultSize,
-                            wxTE_MULTILINE | wxGROW);
+                            wxTE_MULTILINE | wxGROW | wxHSCROLL);
                             
    // 5/24/05 - arg: for demo change font size to HUGE
    mFileContentsTextCtrl->SetFont( wxFont( 14, wxDEFAULT, wxNORMAL, wxBOLD, FALSE, "",
@@ -73,6 +73,8 @@ void ScriptPanel::Create()
       new wxButton(this, ID_BUTTON, "Build", wxDefaultPosition, wxDefaultSize, 0);
    mBuildRunButton =
       new wxButton(this, ID_BUTTON, "Build and Run", wxDefaultPosition, wxDefaultSize, 0);
+   mFontButton =
+      new wxButton(this, ID_BUTTON, "Font", wxDefaultPosition, wxDefaultSize, 0);
 
 
    //------------------------------------------------------
@@ -80,6 +82,7 @@ void ScriptPanel::Create()
    //------------------------------------------------------
    mTopSizer->Add(mBuildButton, 0, wxALIGN_RIGHT | wxALL, bsize);
    mTopSizer->Add(mBuildRunButton, 0, wxALIGN_RIGHT | wxALL, bsize);
+   mTopSizer->Add(mFontButton, 0, wxALIGN_RIGHT | wxALL, bsize);
 
    mBottomSizer->Add(mFileContentsTextCtrl, 0, wxGROW | wxALIGN_CENTER | wxALL,
                      bsize);
@@ -174,6 +177,31 @@ void ScriptPanel::OnButton(wxCommandEvent& event)
       }
       GmatAppData::GetMainFrame()->OnScriptBuildAndRun(event);
    }
+   else if (event.GetEventObject() == mFontButton)
+   {
+      OnFontSelect(event);
+   }
+
+}
+
+//------------------------------------------------------------------------------
+// void OnFontSelect(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ScriptPanel::OnFontSelect(wxCommandEvent& event)
+{
+  wxFontData data;
+  data.SetInitialFont(mFileContentsTextCtrl->GetFont());
+//  data.SetColour(canvasTextColour);
+
+  wxFontDialog dialog(this, &data);
+  if (dialog.ShowModal() == wxID_OK)
+  {
+    wxFontData retData = dialog.GetFontData();
+    wxFont newFont = retData.GetChosenFont();
+
+
+    mFileContentsTextCtrl->SetFont(newFont);
+  }
 }
 
 //------------------------------------------------------------------------------

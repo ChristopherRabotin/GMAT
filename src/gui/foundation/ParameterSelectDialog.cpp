@@ -87,7 +87,7 @@ void ParameterSelectDialog::SetParamNameArray(const wxArrayString &paramNames)
 //------------------------------------------------------------------------------
 // virtual void OnOK()
 //------------------------------------------------------------------------------
-void ParameterSelectDialog::OnOK()
+void ParameterSelectDialog::OnOK(wxCommandEvent &event)
 {
    SaveData();
    

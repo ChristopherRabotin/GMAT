@@ -16,6 +16,7 @@
 #define ScriptPanel_hpp
 
 #include "GmatSavePanel.hpp"
+#include <wx/fontdlg.h>
 
 class ScriptPanel: public GmatSavePanel
 {
@@ -34,7 +35,7 @@ private:
 
    wxButton *mBuildButton;
    wxButton *mBuildRunButton;
-
+   wxButton *mFontButton;
 
    // methods inherited from GmatSavePanel
    virtual void Create();
@@ -44,6 +45,7 @@ private:
    // event handling
    void OnTextUpdate(wxCommandEvent& event);
    void OnButton(wxCommandEvent& event);
+   void OnFontSelect(wxCommandEvent& event);
 
    DECLARE_EVENT_TABLE();
 

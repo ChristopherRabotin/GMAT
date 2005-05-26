@@ -142,10 +142,10 @@ void GmatSavePanel::Show()
  * Saves the data and closes the page
  */
 //------------------------------------------------------------------------------
-void GmatSavePanel::OnSave()
+void GmatSavePanel::OnSave(wxCommandEvent &event)
 {
    if (mFilename == "")
-      OnSaveAs();
+      OnSaveAs(event);
 
    SaveData();
 }
@@ -157,7 +157,7 @@ void GmatSavePanel::OnSave()
  * Close page.
  */
 //------------------------------------------------------------------------------
-void GmatSavePanel::OnClose()
+void GmatSavePanel::OnClose(wxCommandEvent &event)
 {
    if (theSaveButton->IsEnabled())
    {
@@ -168,7 +168,7 @@ void GmatSavePanel::OnClose()
 
       if (result == wxID_YES)
       {
-         OnSave();
+         OnSave(event);
       }
    }
 
@@ -182,7 +182,7 @@ void GmatSavePanel::OnClose()
  * Saves the data and remain unclosed.
  */
 //------------------------------------------------------------------------------
-void GmatSavePanel::OnSaveAs()
+void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
 {
    wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""),
          _T("Script files (*.script, *.m)|*.script;*.m|"\
@@ -208,7 +208,7 @@ void GmatSavePanel::OnSaveAs()
  * Shows Helps
  */
 //------------------------------------------------------------------------------
-void GmatSavePanel::OnHelp()
+void GmatSavePanel::OnHelp(wxCommandEvent &event)
 {
    // open separate window to show help?
 }
@@ -220,7 +220,7 @@ void GmatSavePanel::OnHelp()
  * Shows Scripts
  */
 //------------------------------------------------------------------------------
-void GmatSavePanel::OnScript()
+void GmatSavePanel::OnScript(wxCommandEvent &event)
 {
    wxString title = "Object Script";
    // open separate window to show scripts?

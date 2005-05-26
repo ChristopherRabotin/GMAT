@@ -81,9 +81,9 @@ public:
 //    void OnZoomIn(wxCommandEvent& event);
 //    void OnZoomOut(wxCommandEvent& event);
 
-   bool OnScriptBuildObject(wxCommandEvent& WXUNUSED(event));
-   bool OnScriptBuildAndRun(wxCommandEvent& event);
-   bool OnScriptRun(wxCommandEvent& WXUNUSED(event));
+   void OnScriptBuildObject(wxCommandEvent& WXUNUSED(event));
+   void OnScriptBuildAndRun(wxCommandEvent& event);
+   void OnScriptRun(wxCommandEvent& WXUNUSED(event));
 
    wxList *mdiChildren;
    wxMenu *GetXyViewOptionMenu();

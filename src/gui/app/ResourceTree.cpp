@@ -2033,7 +2033,7 @@ void ResourceTree::OnAddLibration(wxCommandEvent &event)
  *
  */
 //------------------------------------------------------------------------------
-void ResourceTree::OnAddScript()
+void ResourceTree::OnAddScript(wxCommandEvent &event)
 {
    wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""),
          _T("Script files (*.script, *.m)|*.script;*.m|"\
@@ -2124,7 +2124,7 @@ void ResourceTree::OnRemoveScript(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
    wxString name = ((GmatTreeItemData *)GetItemData(item))->GetDesc();
-   wxTreeItemId parentItem = GetParent(item);
+   wxTreeItemId parentItem = GetItemParent(item);
 
    Collapse(parentItem);
 

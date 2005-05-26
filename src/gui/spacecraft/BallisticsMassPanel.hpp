@@ -41,7 +41,7 @@ private:
     
     // Event Handling
     DECLARE_EVENT_TABLE();
-    void OnTextChange();
+    void OnTextChange(wxCommandEvent &event);
     
     Spacecraft *theSpacecraft;
     wxButton *theApplyButton;

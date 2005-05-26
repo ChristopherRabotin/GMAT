@@ -36,7 +36,7 @@ public:
     wxString GetTitle();
     int GetDataType();
     void SetDataType(int type) {dataType = type;};
-    void OnClose();
+    void OnClose(wxCloseEvent &event);
    
 protected:
     wxString title;

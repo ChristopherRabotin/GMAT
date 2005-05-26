@@ -298,7 +298,7 @@ void JacchiaRobertsDialog::ResetData()
 //------------------------------------------------------------------------------
 // void OnTextChange()
 //------------------------------------------------------------------------------
-void JacchiaRobertsDialog::OnTextChange()
+void JacchiaRobertsDialog::OnTextChange(wxCommandEvent &event)
 {
     theOkButton->Enable(true);
 }
@@ -326,7 +326,7 @@ void JacchiaRobertsDialog::OnRadioButtonChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 // void OnBrowse()
 //------------------------------------------------------------------------------
-void JacchiaRobertsDialog::OnBrowse()
+void JacchiaRobertsDialog::OnBrowse(wxCommandEvent &event)
 {
     wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
     

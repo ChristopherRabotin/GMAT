@@ -180,7 +180,7 @@ void SolverGoalsPanel::OnTextUpdate(wxCommandEvent& event)
     theApplyButton->Enable(true);
 }
 
-void SolverGoalsPanel::OnSolverSelection()
+void SolverGoalsPanel::OnSolverSelection(wxCommandEvent &event)
 {
     theApplyButton->Enable(true);
 }
@@ -210,7 +210,7 @@ void SolverGoalsPanel::OnButton(wxCommandEvent& event)
         event.Skip();
 }
 
-void SolverGoalsPanel::OnCellValueChanged()
+void SolverGoalsPanel::OnCellValueChanged(wxGridEvent &event)
 { 
     theApplyButton->Enable(true);
 }

@@ -199,7 +199,7 @@ void BallisticsMassPanel::SaveData()
  * @note Activates the Apply button when text is changed
  */
 //------------------------------------------------------------------------------
-void BallisticsMassPanel::OnTextChange()
+void BallisticsMassPanel::OnTextChange(wxCommandEvent &event)
 {
     theApplyButton->Enable();
 }

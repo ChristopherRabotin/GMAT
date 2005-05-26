@@ -475,7 +475,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
  * @note Activates the Apply button when text is changed
  */
 //------------------------------------------------------------------------------
-void OrbitPanel::OnTextChange()
+void OrbitPanel::OnTextChange(wxCommandEvent &event)
 {
     theApplyButton->Enable();
 }
@@ -487,7 +487,7 @@ void OrbitPanel::OnTextChange()
  * @note Changes the element descriptors and labels based on the state combo box
  */
 //------------------------------------------------------------------------------
-void OrbitPanel::OnStateChange()
+void OrbitPanel::OnStateChange(wxCommandEvent &event)
 {
    wxString el1 = textCtrl1->GetValue();
    wxString el2 = textCtrl2->GetValue();
@@ -624,7 +624,7 @@ void OrbitPanel::OnStateChange()
  * @note Activates the Apply button when epoch combobox is changed
  */
 //------------------------------------------------------------------------------
-void OrbitPanel::OnEpochChange()
+void OrbitPanel::OnEpochChange(wxCommandEvent &event)
 {
     SaveData();   
 //    MessageInterface::ShowMessage("Inside epochchange()\n");
@@ -659,7 +659,7 @@ void OrbitPanel::OnEpochChange()
  * @note Activates the Apply button when anomaly combobox is changed
  */
 //------------------------------------------------------------------------------
-void OrbitPanel::OnAnomalyChange()
+void OrbitPanel::OnAnomalyChange(wxCommandEvent &event)
 {
    std::string anomalyType;
 

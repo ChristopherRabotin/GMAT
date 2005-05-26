@@ -68,9 +68,9 @@ private:
     virtual void ResetData();
     
     // Event-handling Methods
-    void OnTextChange();
+    void OnTextChange(wxCommandEvent &event);
     void OnRadioButtonChange(wxCommandEvent& event);
-    void OnBrowse();
+    void OnBrowse(wxCommandEvent &event);
 
     DECLARE_EVENT_TABLE();
 

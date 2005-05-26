@@ -150,7 +150,7 @@ void ReportFilePanel::LoadData()
  * Close page.
  */
 //------------------------------------------------------------------------------
-void ReportFilePanel::OnClose()
+void ReportFilePanel::OnClose(wxCommandEvent &event)
 {
    GmatAppData::GetMainFrame()->CloseActiveChild();
 }

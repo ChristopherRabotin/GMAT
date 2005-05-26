@@ -212,7 +212,7 @@ void SolverVariablesPanel::OnTextUpdate(wxCommandEvent& event)
         event.Skip();
 }
 
-void SolverVariablesPanel::OnSolverSelection()
+void SolverVariablesPanel::OnSolverSelection(wxCommandEvent &event)
 {
     theApplyButton->Enable(true);
 }
@@ -242,7 +242,7 @@ void SolverVariablesPanel::OnButton(wxCommandEvent& event)
         event.Skip();
 }
 
-void SolverVariablesPanel::OnCellValueChanged()
+void SolverVariablesPanel::OnCellValueChanged(wxGridEvent &event)
 { 
     theApplyButton->Enable(true);
 }

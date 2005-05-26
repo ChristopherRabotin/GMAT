@@ -39,11 +39,11 @@ public:
 
    //loj: 4/1/05 Moved from protected to public because derived classes won't
    //compile under GCC 3.4.2
-   virtual void OnSave();
-   virtual void OnSaveAs();
-   virtual void OnClose();
-   virtual void OnHelp();
-   virtual void OnScript();
+   virtual void OnSave(wxCommandEvent &event);
+   virtual void OnSaveAs(wxCommandEvent &event);
+   virtual void OnClose(wxCommandEvent &event);
+   virtual void OnHelp(wxCommandEvent &event);
+   virtual void OnScript(wxCommandEvent &event);
 
 protected:
    // member functions

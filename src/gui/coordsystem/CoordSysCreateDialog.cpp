@@ -230,7 +230,7 @@ void CoordSysCreateDialog::ResetData()
  * Saves the data and closes the page
  */
 //------------------------------------------------------------------------------
-void CoordSysCreateDialog::OnOK()
+void CoordSysCreateDialog::OnOK(wxCommandEvent &event)
 {
    SaveData();
 

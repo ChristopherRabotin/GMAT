@@ -50,7 +50,7 @@ GmatMdiChildFrame::~GmatMdiChildFrame()
 }
 
 
-void GmatMdiChildFrame::OnClose()
+void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
 {
    // check if window is dirty?
   

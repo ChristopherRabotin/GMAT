@@ -44,8 +44,8 @@ private:
     
     // Event Handling
     DECLARE_EVENT_TABLE();
-    void OnTextChange();
-    void OnComboBoxChange();
+    void OnTextChange(wxCommandEvent &event);
+    void OnComboBoxChange(wxCommandEvent &event);
     void OnButtonClick(wxCommandEvent &event);
     
     std::string thrusterName;

@@ -135,7 +135,7 @@ void ExponentialDragDialog::ResetData()
 //------------------------------------------------------------------------------
 // void OnTextChange()
 //------------------------------------------------------------------------------
-void ExponentialDragDialog::OnTextChange()
+void ExponentialDragDialog::OnTextChange(wxCommandEvent &event)
 {
 
 }

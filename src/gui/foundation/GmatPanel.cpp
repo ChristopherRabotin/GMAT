@@ -140,10 +140,10 @@ void GmatPanel::Show()
  * Saves the data and closes the page
  */
 //------------------------------------------------------------------------------
-void GmatPanel::OnOK()
+void GmatPanel::OnOK(wxCommandEvent &event)
 {
     if (theApplyButton->IsEnabled())
-        OnApply();
+        OnApply(event);
     
     // Close page from main notebook    
     // GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
@@ -159,7 +159,7 @@ void GmatPanel::OnOK()
  * Close page.
  */
 //------------------------------------------------------------------------------
-void GmatPanel::OnCancel()
+void GmatPanel::OnCancel(wxCommandEvent &event)
 {
    // Close page from main notebook
    // GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
@@ -174,7 +174,7 @@ void GmatPanel::OnCancel()
  * Saves the data and remain unclosed.
  */
 //------------------------------------------------------------------------------
-void GmatPanel::OnApply()
+void GmatPanel::OnApply(wxCommandEvent &event)
 {
    SaveData();
    theApplyButton->Disable();
@@ -187,7 +187,7 @@ void GmatPanel::OnApply()
  * Shows Helps
  */
 //------------------------------------------------------------------------------
-void GmatPanel::OnHelp()
+void GmatPanel::OnHelp(wxCommandEvent &event)
 {
    // open separate window to show help?
 }
@@ -199,7 +199,7 @@ void GmatPanel::OnHelp()
  * Shows Scripts
  */
 //------------------------------------------------------------------------------
-void GmatPanel::OnScript()
+void GmatPanel::OnScript(wxCommandEvent &event)
 {
    wxString title = "Object Script";
    // open separate window to show scripts?

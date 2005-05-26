@@ -52,7 +52,7 @@ private:
    
    // event handling   
    DECLARE_EVENT_TABLE();
-   void OnSelect();
+   void OnSelect(wxCommandEvent &event);
    void OnButtonClick(wxCommandEvent &event);
    
    // IDs for the controls and the menu commands

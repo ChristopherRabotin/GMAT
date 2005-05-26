@@ -63,7 +63,7 @@ private:
    void OnTextEnter(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent& event);
    void OnButtonClick(wxCommandEvent& event);
-   void OnGridCellChange(wxCommandEvent& event);
+   void OnGridCellChange(wxGridEvent& event);
    
    void UpdateCellValue();
    

@@ -137,7 +137,7 @@ void TankSelectionDialog::ResetData()
 //------------------------------------------------------------------------------
 // void OnSelect()
 //------------------------------------------------------------------------------
-void TankSelectionDialog::OnSelect()
+void TankSelectionDialog::OnSelect(wxCommandEvent &event)
 {   
 }  
 

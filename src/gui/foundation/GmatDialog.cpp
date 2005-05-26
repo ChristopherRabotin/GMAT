@@ -115,7 +115,7 @@ void GmatDialog::ShowData()
  * Saves the data and closes the page
  */
 //------------------------------------------------------------------------------
-void GmatDialog::OnOK()
+void GmatDialog::OnOK(wxCommandEvent &event)
 {
    SaveData();
    Close();
@@ -128,7 +128,7 @@ void GmatDialog::OnOK()
  * Close page.
  */
 //------------------------------------------------------------------------------
-void GmatDialog::OnCancel()
+void GmatDialog::OnCancel(wxCommandEvent &event)
 {
    ResetData();
    Close();
@@ -141,7 +141,7 @@ void GmatDialog::OnCancel()
  * Shows Helps
  */
 //------------------------------------------------------------------------------
-void GmatDialog::OnHelp()
+void GmatDialog::OnHelp(wxCommandEvent &event)
 {
    // open separate window to show help
 }

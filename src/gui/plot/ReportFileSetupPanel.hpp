@@ -62,7 +62,7 @@ protected:
 
    void OnWriteCheckBoxChange(wxCommandEvent& event);
    void OnBrowseButton(wxCommandEvent& event);
-   void OnTextChange();
+   void OnTextChange(wxCommandEvent &event);
     
    void OnAddVariable(wxCommandEvent& event);
    void OnRemoveVariable(wxCommandEvent& event);

@@ -352,7 +352,7 @@ void ReportFileSetupPanel::OnBrowseButton(wxCommandEvent& event)
  * @note Activates the Apply button when text is changed
  */
 //------------------------------------------------------------------------------
-void ReportFileSetupPanel::OnTextChange()
+void ReportFileSetupPanel::OnTextChange(wxCommandEvent &event)
 {
     theApplyButton->Enable();
 }

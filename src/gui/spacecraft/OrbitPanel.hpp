@@ -49,11 +49,11 @@ private:
     
    // Event Handling
    DECLARE_EVENT_TABLE();
-   void OnStateChange();
-   void OnEpochChange();
-   void OnAnomalyChange();
+   void OnStateChange(wxCommandEvent &event);
+   void OnEpochChange(wxCommandEvent &event);
+   void OnAnomalyChange(wxCommandEvent &event);
    void OnComboBoxChange(wxCommandEvent& event);
-   void OnTextChange();
+   void OnTextChange(wxCommandEvent &event);
 
    Spacecraft *theSpacecraft;
    wxButton *theApplyButton;

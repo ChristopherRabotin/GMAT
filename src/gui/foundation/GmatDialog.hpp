@@ -35,9 +35,9 @@ public:
    // constructors
    GmatDialog( wxWindow *parent, wxWindowID id, const wxString& title);
     
-   virtual void OnOK();
-   virtual void OnCancel();
-   virtual void OnHelp();
+   virtual void OnOK(wxCommandEvent &event);
+   virtual void OnCancel(wxCommandEvent &event);
+   virtual void OnHelp(wxCommandEvent &event);
 
 protected:
    // member functions

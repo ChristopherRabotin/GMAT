@@ -38,7 +38,7 @@ public:
    
 protected:
    // override methods from GmatDialog
-   virtual void OnOK();
+   virtual void OnOK(wxCommandEvent &event);
 
    wxString mParamName;
    wxArrayString mParamNameArray;

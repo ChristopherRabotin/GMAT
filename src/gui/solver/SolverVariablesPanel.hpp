@@ -72,13 +72,13 @@ private:
     void Setup(wxWindow *parent);
     
     // Grid table event method
-    void OnCellValueChanged();
+    void OnCellValueChanged(wxGridEvent &event);
     
     // Text control event method
     void OnTextUpdate(wxCommandEvent& event);    
     
     // Combobox event method
-    void OnSolverSelection();
+    void OnSolverSelection(wxCommandEvent &event);
     
     // Button event methods
     void OnButton(wxCommandEvent& event);
