@@ -15,7 +15,6 @@
 #define ResourceTree_hpp
 
 #include "gmatwxdefs.hpp"
-
 #include "wx/treectrl.h"
 #include "wx/image.h"
 #include "wx/imaglist.h"
@@ -108,6 +107,7 @@ private:
    void OnClose(wxCommandEvent &event);
    void OnRename(wxCommandEvent &event);
    void OnDelete(wxCommandEvent &event);
+   void OnClone(wxCommandEvent &event);
    void OnEndLabelEdit(wxTreeEvent &event);
    void OnBeginLabelEdit(wxTreeEvent &event);
 
@@ -176,6 +176,7 @@ private:
       POPUP_CLOSE,
       POPUP_RENAME,
       POPUP_DELETE,
+      POPUP_CLONE,
       
       POPUP_ADD_MATLAB_FUNCT,
       POPUP_ADD_COORD_SYS,

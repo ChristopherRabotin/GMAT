@@ -16,7 +16,6 @@
  * This class provides the resource tree and event handlers.
  */
 //------------------------------------------------------------------------------
-#include "gmatwxdefs.hpp"
 #include "bitmaps/folder.xpm"
 #include "bitmaps/openfolder.xpm"
 #include "bitmaps/file.xpm"
@@ -58,6 +57,8 @@
 #include "CoordSysCreateDialog.hpp"
 #include "GmatMainFrame.hpp"
 
+#include <sstream>
+
 //#define DEBUG_RESOURCE_TREE 1
 
 //------------------------------------------------------------------------------
@@ -97,6 +98,7 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_CLOSE, ResourceTree::OnClose)
    EVT_MENU(POPUP_RENAME, ResourceTree::OnRename)
    EVT_MENU(POPUP_DELETE, ResourceTree::OnDelete)
+   EVT_MENU(POPUP_CLONE, ResourceTree::OnClone)
    EVT_MENU(POPUP_ADD_SCRIPT, ResourceTree::OnAddScript)
 //   EVT_MENU(POPUP_NEW_SCRIPT, ResourceTree::OnNewScript)
    EVT_MENU(POPUP_REMOVE_ALL_SCRIPTS, ResourceTree::OnRemoveAllScripts)
@@ -1084,7 +1086,9 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       menu.AppendSeparator();
       menu.Append(POPUP_RENAME, wxT("Rename"));
       menu.Append(POPUP_DELETE, wxT("Delete"));
-        
+      menu.AppendSeparator();
+      menu.Append(POPUP_CLONE, wxT("Clone"));
+
       menu.Enable(POPUP_DELETE, FALSE);
    }
     
@@ -1280,6 +1284,60 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
    //    
    //
 }
+
+//------------------------------------------------------------------------------
+// void OnClone(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Clone chosen item
+ *
+ * @param <event> command event
+ * @todo Finish this when all items can be cloned in sandbox
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnClone(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+   GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
+   wxString name = selItem->GetDesc();
+   int dataType = selItem->GetDataType();
+   
+   if (dataType == GmatTree::SPACECRAFT)
+   {
+      const std::string stdName = name.c_str();
+      std::string newName = "CloneOf";
+      newName = newName + name.c_str();
+      Spacecraft *sc1 = theGuiInterpreter->GetSpacecraft(stdName);
+
+      // check to see if clone exists
+      if (theGuiInterpreter->GetSpacecraft(newName))
+      {
+         int counter = 2;
+         std::stringstream tmpNewName;
+         tmpNewName<<newName<< counter;
+         
+         while (theGuiInterpreter->GetSpacecraft(tmpNewName.str()))
+         {
+            ++counter;
+            tmpNewName.str("");
+            tmpNewName<<newName<< counter;
+         }
+         newName = tmpNewName.str();
+      }
+
+      Spacecraft* sc2 = theGuiInterpreter->CreateSpacecraft("Spacecraft", newName);
+      *sc2 = *sc1;
+      // refresh gui
+      UpdateResource(false);
+   }
+   else
+   {
+      MessageInterface::PopupMessage(Gmat::WARNING_,
+         "\nResourceTree::OnClone() Sandbox can not clone this object type yet.\n");
+   }
+
+}
+
 
 //------------------------------------------------------------------------------
 // void OnBeginLabelEdit(wxTreeEvent &event)

@@ -248,8 +248,10 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
    win->SetAlignment(wxLAYOUT_LEFT);
    win->SetSashVisible(wxSASH_RIGHT, TRUE);
 
-   GmatNotebook *projectTree = new GmatNotebook(win, -1, wxDefaultPosition,
+   new GmatNotebook(win, -1, wxDefaultPosition,
                                 wxDefaultSize, wxCLIP_CHILDREN);          
+//   GmatNotebook *projectTree = new GmatNotebook(win, -1, wxDefaultPosition,
+//                                wxDefaultSize, wxCLIP_CHILDREN);
 //   new wxNotebookSizer(projectTree);
   
    // set the main frame, because there will no longer be right notebook
@@ -1787,7 +1789,7 @@ void GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 {
    wxString filename = ((GmatMdiChildFrame *)GetActiveChild())->GetTitle();
 
-   bool status = GmatAppData::GetGuiInterpreter()->
+   GmatAppData::GetGuiInterpreter()->
       InterpretScript(std::string(filename.c_str()));
 
    //close the open windows
@@ -1805,9 +1807,6 @@ void GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 {
-   bool status = false;
-
-//   status = OnScriptBuildObject(event);
    OnScriptBuildObject(event);
    OnRun(event);
    
