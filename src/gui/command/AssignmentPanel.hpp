@@ -39,7 +39,7 @@ private:
    virtual void LoadData();
    virtual void SaveData();
 
-   void OnComboChange();
+   void OnComboChange(wxCommandEvent &event);
    void OnCellClick(wxGridEvent& event);
 
    // any class wishing to process wxWindows events must use this macro

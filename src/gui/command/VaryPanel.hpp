@@ -68,7 +68,7 @@ private:
    
    // event handling method
    void OnTextChange(wxCommandEvent& event);    
-   void OnSolverSelection();
+   void OnSolverSelection(wxCommandEvent &event);
    void OnButton(wxCommandEvent& event);
    
    // any class wishing to process wxWindows events must use this macro

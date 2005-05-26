@@ -317,9 +317,9 @@ void AchievePanel::OnTextChange(wxCommandEvent& event)
 
 
 //------------------------------------------------------------------------------
-// void AchievePanel::OnSolverSelection()
+// void AchievePanel::OnSolverSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
-void AchievePanel::OnSolverSelection()
+void AchievePanel::OnSolverSelection(wxCommandEvent &event)
 {
    mSolverData.solverName = mSolverComboBox->GetStringSelection();
 }

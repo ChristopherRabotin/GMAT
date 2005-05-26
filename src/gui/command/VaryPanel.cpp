@@ -351,9 +351,9 @@ void VaryPanel::OnTextChange(wxCommandEvent& event)
 }
 
 //------------------------------------------------------------------------------
-// void VaryPanel::OnSolverSelection()
+// void VaryPanel::OnSolverSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
-void VaryPanel::OnSolverSelection()
+void VaryPanel::OnSolverSelection(wxCommandEvent &event)
 {
    mSolverData.solverName = mSolverComboBox->GetStringSelection();
    theApplyButton->Enable();

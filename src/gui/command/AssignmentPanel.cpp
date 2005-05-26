@@ -154,7 +154,7 @@ void AssignmentPanel::OnCellClick(wxGridEvent& event)
  * @note Activates the Apply button when text is changed
  */
 //------------------------------------------------------------------------------
-void AssignmentPanel::OnComboChange()
+void AssignmentPanel::OnComboChange(wxCommandEvent &event)
 {
     theApplyButton->Enable();
 }

@@ -470,7 +470,7 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
  * @note Activates the Apply button when text is changed
  */
 //------------------------------------------------------------------------------
-void CallFunctionPanel::OnComboChange()
+void CallFunctionPanel::OnComboChange(wxCommandEvent &event)
 {
     theApplyButton->Enable();
 }
