@@ -65,8 +65,8 @@ void ScriptPanel::Create()
                             wxTE_MULTILINE | wxGROW | wxHSCROLL);
                             
    // 5/24/05 - arg: for demo change font size to HUGE
-   mFileContentsTextCtrl->SetFont( wxFont( 14, wxDEFAULT, wxNORMAL, wxBOLD, FALSE, "",
-                        wxFONTENCODING_SYSTEM ) );
+//   mFileContentsTextCtrl->SetFont( wxFont( 14, wxDEFAULT, wxNORMAL, wxBOLD, FALSE, "",
+//                        wxFONTENCODING_SYSTEM ) );
 
    // wxButton
    mBuildButton =
