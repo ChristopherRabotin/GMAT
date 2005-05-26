@@ -110,13 +110,13 @@ void FormationSetupPanel::Create()
    //------------------------------------------------------
    wxButton *addScButton = new wxButton(this, ADD_BUTTON, wxT("-->"),
                               wxDefaultPosition, wxSize(20,20), 0);
-
+   
    wxButton *removeScButton = new wxButton(this, REMOVE_BUTTON, wxT("<--"),
                                  wxDefaultPosition, wxSize(20,20), 0);
-    
+   
    wxButton *clearScButton = new wxButton(this, CLEAR_BUTTON, wxT("<="),
                                 wxDefaultPosition, wxSize(20,20), 0);
-    
+   
    wxBoxSizer *arrowButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
    arrowButtonsBoxSizer->Add(addScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    arrowButtonsBoxSizer->Add(removeScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -152,6 +152,7 @@ void FormationSetupPanel::Create()
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
 }
 
+
 //------------------------------------------------------------------------------
 // virtual void LoadData()
 //------------------------------------------------------------------------------
@@ -166,9 +167,13 @@ void FormationSetupPanel::LoadData()
    for (unsigned int i=0; i<scList.size(); i++)
    {
       mSoSelectedListBox->Append(scList[i].c_str());
-      mSoSelectedListBox->SetSelection(0);
    }
+
+   // Show defaults
+   mSoAvailableListBox->SetSelection(0);
+   mSoSelectedListBox->SetSelection(0);
 }
+
 
 //------------------------------------------------------------------------------
 // virtual void SaveData()
@@ -189,6 +194,7 @@ void FormationSetupPanel::SaveData()
    GmatAppData::GetResourceTree()->UpdateResource(false);
 }
 
+
 //------------------------------------------------------------------------------
 // void OnAddSpaceObject(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -196,43 +202,65 @@ void FormationSetupPanel::OnAddSpaceObject(wxCommandEvent& event)
 {
    // get string in first list and then search for it
    // in the second list
-   wxString s = mSoAvailableListBox->GetStringSelection();
-   int found = mSoSelectedListBox->FindString(s);
-    
+   wxString str = mSoAvailableListBox->GetStringSelection();
+   int sel = mSoAvailableListBox->GetSelection();
+   int found = mSoSelectedListBox->FindString(str);
+   
    // if the string wasn't found in the second list, insert it
    if (found == wxNOT_FOUND)
    {
-      mSoSelectedListBox->Append(s);
-      mSoSelectedListBox->SetStringSelection(s);
+      mSoSelectedListBox->Append(str);
+      mSoAvailableListBox->Delete(sel); //loj: 5/25/05 Added
+      mSoSelectedListBox->SetStringSelection(str);
+      
+      if (sel-1 < 0)
+         mSoAvailableListBox->SetSelection(0);
+      else
+         mSoAvailableListBox->SetSelection(sel-1);
+      
       theApplyButton->Enable();
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnRemoveSpaceObject(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void FormationSetupPanel::OnRemoveSpaceObject(wxCommandEvent& event)
 {
+   wxString str = mSoSelectedListBox->GetStringSelection();
    int sel = mSoSelectedListBox->GetSelection();
+   
    mSoSelectedListBox->Delete(sel);
-
+   mSoAvailableListBox->Append(str);
+   mSoAvailableListBox->SetStringSelection(str);
+   
    if (sel-1 < 0)
-   {
       mSoSelectedListBox->SetSelection(0);
-   }
    else
-   {
       mSoSelectedListBox->SetSelection(sel-1);
-   }
    
    theApplyButton->Enable();
 }
+
 
 //------------------------------------------------------------------------------
 // void OnClearSpaceObject(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void FormationSetupPanel::OnClearSpaceObject(wxCommandEvent& event)
 {
+   Integer count = mSoSelectedListBox->GetCount();
+   
+   if (count == 0)
+      return;
+   
+   for (Integer i=0; i<count; i++)
+   {
+      mSoAvailableListBox->Append(mSoSelectedListBox->GetString(i));
+   }
+   
    mSoSelectedListBox->Clear();
+   mSoAvailableListBox->SetSelection(0);
+   
    theApplyButton->Enable();
 }
