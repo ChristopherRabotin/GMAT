@@ -20,6 +20,10 @@
 #include "TimeSystemConverter.hpp"
 
 using namespace GmatMathUtil;
+
+static EopFile *theEopFile;
+static LeapSecsFileReader *theLeapSecsFileReader;
+
 //---------------------------------------------------------------------------
 //  Real TimeConverterUtil::Convert(const Real origValue,
 //                              const std::string &fromType,

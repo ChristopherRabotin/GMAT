@@ -69,9 +69,6 @@ namespace TimeConverterUtil
             "TtMjd",
          };
 
-   static EopFile *theEopFile;
-   static LeapSecsFileReader *theLeapSecsFileReader;
-
    Real Convert(const Real origValue,
                       const std::string &fromType,
                       const std::string &toType,
