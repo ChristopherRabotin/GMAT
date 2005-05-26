@@ -34,7 +34,6 @@
 #include "Spacecraft.hpp"
 #include "FuelTank.hpp"
 
-
 class SpacecraftPanel: public GmatPanel
 {
 public:

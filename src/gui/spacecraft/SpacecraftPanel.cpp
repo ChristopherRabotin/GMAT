@@ -86,44 +86,49 @@ void SpacecraftPanel::Create()
     mObject = currentSpacecraft;
 
     // wxNotebook
-    spacecraftNotebook = new wxNotebook( this, ID_NOTEBOOK, wxDefaultPosition, 
+    spacecraftNotebook = new wxNotebook( this, ID_NOTEBOOK, wxDefaultPosition,
                          wxDefaultSize, wxGROW );
-    actuators = new wxPanel( spacecraftNotebook, -1 );
-    actuatorNotebook = new wxNotebook( spacecraftNotebook, ID_NOTEBOOK, wxDefaultPosition, 
+    spacecraftNotebook->SetBackgroundColour(GetBackgroundColour());
+    spacecraftNotebook->SetForegroundColour(GetBackgroundColour());
+
+//    actuators = new wxPanel( spacecraftNotebook, -1 );
+    actuatorNotebook = new wxNotebook( spacecraftNotebook, ID_NOTEBOOK, wxDefaultPosition,
                          wxDefaultSize, wxGROW );
-    // wxNotebookSizer                     
+    actuatorNotebook->SetBackgroundColour(GetBackgroundColour());
+    actuatorNotebook->SetForegroundColour(GetBackgroundColour());
+    // wxNotebookSizer
 //    spacecraftSizer = new wxNotebookSizer( spacecraftNotebook );
 //    actuatorSizer = new wxNotebookSizer( actuatorNotebook );
- 
+
     // wxSizer
-    wxGridSizer *theGridSizer = new wxGridSizer( 1, 0, 0 );
-    
+//    wxGridSizer *theGridSizer = new wxGridSizer( 1, 0, 0 );
+
     //wx*Panel
-    attitude = new wxPanel( spacecraftNotebook, -1 ); 
-    sensors = new wxPanel( spacecraftNotebook, -1 );   
-    
-    theOrbitPanel = new OrbitPanel(spacecraftNotebook, currentSpacecraft, 
-                        theSolarSystem, theApplyButton);                        
-    theBallisticMassPanel = new BallisticsMassPanel(spacecraftNotebook, 
+    attitude = new wxPanel( spacecraftNotebook, -1 );
+    sensors = new wxPanel( spacecraftNotebook, -1 );
+
+    theOrbitPanel = new OrbitPanel(spacecraftNotebook, currentSpacecraft,
+                        theSolarSystem, theApplyButton);
+    theBallisticMassPanel = new BallisticsMassPanel(spacecraftNotebook,
                                 currentSpacecraft, theApplyButton);
-    theTankPanel = new TankPanel(spacecraftNotebook, currentSpacecraft, 
+    theTankPanel = new TankPanel(spacecraftNotebook, currentSpacecraft,
                        theApplyButton);
-    theThrusterPanel = new ThrusterPanel(actuatorNotebook, currentSpacecraft, 
-                       theApplyButton); 
+    theThrusterPanel = new ThrusterPanel(actuatorNotebook, currentSpacecraft,
+                       theApplyButton);
     // visuals = new wxPanel( mainNotebook, -1 );
-    
+
     // Adding panels to notebook
-    actuatorNotebook->AddPage( theThrusterPanel, wxT("Thruster") );                                                               
+    actuatorNotebook->AddPage( theThrusterPanel, wxT("Thruster") );
     spacecraftNotebook->AddPage( theOrbitPanel, wxT("Orbit") );
     spacecraftNotebook->AddPage( attitude, wxT("Attitude") );
     spacecraftNotebook->AddPage( theBallisticMassPanel, wxT("Ballistic/Mass") );
     spacecraftNotebook->AddPage( sensors, wxT("Sensors") );
     spacecraftNotebook->AddPage( theTankPanel, wxT("Tanks") );
     spacecraftNotebook->AddPage( actuatorNotebook, wxT("Actuators") );
-    //spacecraftNotebook->AddPage( visuals , wxT("Visualization") );  
-    
-    theGridSizer->Add(spacecraftNotebook, 1, wxGROW, 5);
-    theMiddleSizer->Add(theGridSizer, 1, wxGROW, 5);
+    //spacecraftNotebook->AddPage( visuals , wxT("Visualization") );
+
+//    theGridSizer->Add(spacecraftNotebook, 1, wxGROW, 5);
+    theMiddleSizer->Add(spacecraftNotebook, 1, wxGROW, 5);
 }
 
 //------------------------------------------------------------------------------
