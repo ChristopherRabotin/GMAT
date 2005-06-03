@@ -51,6 +51,7 @@ private:
       PD78,
       BS,
       ABM,
+      CW,
       IntegratorCount,
    };
    
@@ -184,7 +185,6 @@ private:
    bool isMagfTextChanged;
    bool isIntegratorChanged;
 
-   Propagator                     *thePropagator;
    Propagator                     *newProp;
    PropSetup                      *thePropSetup;
    ForceModel                     *theForceModel;

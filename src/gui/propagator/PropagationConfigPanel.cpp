@@ -31,9 +31,6 @@
 #include <sstream>
 #include <iomanip>
 
-//#include <string.h>
-//#include <wx/variant.h>
-
 //#define DEBUG_PROP_PANEL_SETUP 1
 //#define DEBUG_PROP_PANEL 1
 
@@ -84,7 +81,6 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
    // Default integrator values
    newPropName      = "";
    thePropSetup     = NULL;
-   thePropagator    = NULL;
    newProp          = NULL;
    integratorString = "RKV 8(9)";
     
@@ -187,6 +183,8 @@ void PropagationConfigPanel::LoadData()
       typeId = BS;
    else if (propType == "AdamsBashforthMoulton")
       typeId = ABM;
+   else if (propType == "Cowell")
+      typeId = CW;
 
    // Display primary bodies
    if ( !primaryBodiesArray.IsEmpty() )
@@ -416,7 +414,6 @@ Integer PropagationConfigPanel::FindBody(const std::string &bodyName,
          return i;
    }
 
-   // add body
    forceList.push_back(new ForceType(bodyName, gravType, dragType, magfType));
 
 #if DEBUG_PROP_PANEL
@@ -446,6 +443,7 @@ void PropagationConfigPanel::Initialize()
    integratorArray.Add("PD  7(8)");
    integratorArray.Add("BS");
    integratorArray.Add("ABM");
+   integratorArray.Add("Cowell");
     
    // initialize gravity model type array
    gravModelArray.push_back("None");
@@ -464,8 +462,7 @@ void PropagationConfigPanel::Initialize()
       
    if (thePropSetup != NULL)
    {
-      thePropagator = thePropSetup->GetPropagator();
-      newProp = thePropagator;
+      newProp = thePropSetup->GetPropagator();
       theForceModel = thePropSetup->GetForceModel();
       numOfForces   = thePropSetup->GetNumForces();
          
@@ -1036,6 +1033,14 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
          if (newProp == NULL)
             newProp = theGuiInterpreter->CreatePropagator("AdamsBashforthMoulton", newPropName);
       }
+      else if (integratorString.IsSameAs(integratorArray[CW]))
+      {   
+         newPropName = propSetupName + "CW";
+         newProp = theGuiInterpreter->GetPropagator(newPropName);
+        
+         if (newProp == NULL)
+            newProp = theGuiInterpreter->CreatePropagator("Cowell", newPropName);
+      }
    }
    else
    {
@@ -1090,6 +1095,13 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
          setting7StaticText->Show(true);
          setting6TextCtrl->Show(true);
          setting7TextCtrl->Show(true);
+   }
+   else if (integratorString.IsSameAs(integratorArray[CW]))
+   {   
+         setting6StaticText->Show(false);
+         setting7StaticText->Show(false);
+         setting6TextCtrl->Show(false);
+         setting7TextCtrl->Show(false);
    }
     
     // fill in data     
@@ -1308,7 +1320,7 @@ bool PropagationConfigPanel::ParseGravityFile(std::string line)
 } 
 
 //------------------------------------------------------------------------------
-// void OnIntegratorSelection()
+// void OnIntegratorSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnIntegratorSelection(wxCommandEvent &event)
 {
@@ -1322,7 +1334,7 @@ void PropagationConfigPanel::OnIntegratorSelection(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
-// void OnBodySelection()
+// void OnBodySelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnBodySelection(wxCommandEvent &event)
 {
@@ -1344,7 +1356,7 @@ void PropagationConfigPanel::OnBodySelection(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
-// void OnGravitySelection()
+// void OnGravitySelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnGravitySelection(wxCommandEvent &event)
 {   
@@ -1371,7 +1383,7 @@ void PropagationConfigPanel::OnGravitySelection(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
-// void OnAtmosphereSelection()
+// void OnAtmosphereSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnAtmosphereSelection(wxCommandEvent &event)
 {
@@ -1403,7 +1415,7 @@ void PropagationConfigPanel::OnAtmosphereSelection(wxCommandEvent &event)
 
 // wxButton events
 //------------------------------------------------------------------------------
-// void OnAddBodyButton()
+// void OnAddBodyButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
 {     
@@ -1591,7 +1603,7 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
          bodyComboBox->Append(forceList[i]->bodyName.c_str());
          bodyComboBox->SetValue(forceList[i]->bodyName.c_str());
       }
-      OnBodySelection(event);
+      OnBodySelection(event);    
 
       theApplyButton->Enable(true);
       isForceModelChanged = true;
@@ -1600,7 +1612,7 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
-// void OnGravSearchButton()
+// void OnGravSearchButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
 {
@@ -1648,7 +1660,7 @@ void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
-// void OnSetupButton()
+// void OnSetupButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
 {
@@ -1685,7 +1697,7 @@ void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
-// void OnMagSearchButton()
+// void OnMagSearchButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnMagSearchButton(wxCommandEvent &event)
 {
@@ -1702,7 +1714,7 @@ void PropagationConfigPanel::OnMagSearchButton(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
-// void OnPMEditButton()
+// void OnPMEditButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnPMEditButton(wxCommandEvent &event)
 {  
@@ -1786,7 +1798,7 @@ void PropagationConfigPanel::OnPMEditButton(wxCommandEvent &event)
 }   
 
 //------------------------------------------------------------------------------
-// void OnSRPEditButton()
+// void OnSRPEditButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnSRPEditButton(wxCommandEvent &event)
 {
@@ -1854,7 +1866,7 @@ void PropagationConfigPanel::OnMagneticTextUpdate(wxCommandEvent& event)
 
 // wxCheckBox Events
 //------------------------------------------------------------------------------
-// void OnSRPCheckBoxChange()
+// void OnSRPCheckBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnSRPCheckBoxChange(wxCommandEvent &event)
 {
