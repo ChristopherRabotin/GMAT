@@ -27,6 +27,7 @@
 #include "PrinceDormand78.hpp" 
 #include "AdamsBashforthMoulton.hpp"
 #include "BulirschStoer.hpp"
+#include "Cowell.hpp"
 /// @todo add others here for future builds
 
 //---------------------------------
@@ -60,6 +61,8 @@ Propagator* PropagatorFactory::CreatePropagator(const std::string &ofType,
       return new DormandElMikkawyPrince68(withName);
    if (ofType == "RungeKuttaFehlberg56")
       return new RungeKuttaFehlberg56(withName);
+   if (ofType == "Cowell")
+      return new Cowell(withName);
    /// @todo add others here as needed
    else
       return NULL;
@@ -89,6 +92,8 @@ PropagatorFactory::PropagatorFactory()
       creatables.push_back("AdamsBashforthMoulton");
       creatables.push_back("DormandElMikkawyPrince68");
       creatables.push_back("RungeKuttaFehlberg56");
+      creatables.push_back("Cowell");
+      
    }
 }
 
