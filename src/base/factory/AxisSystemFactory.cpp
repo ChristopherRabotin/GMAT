@@ -31,6 +31,12 @@
 #include "MOEEqAxes.hpp"
 #include "TODEqAxes.hpp"
 #include "MODEqAxes.hpp"
+#include "TOEEcAxes.hpp"
+#include "MOEEcAxes.hpp"
+#include "TODEcAxes.hpp"
+#include "MODEcAxes.hpp"
+//#include "GeocentricSolarEclipticAxes.hpp"
+//#include "GeocentricSolarMagneticAxes.hpp"
 
 //---------------------------------
 //  public methods
@@ -67,9 +73,7 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    }
    else if (ofType == "TOEEc")
    {
-      MessageInterface::ShowMessage(                // *** temporary
-         "TOEEcAxes not yet imnplemented.\n");
-      //withAxes = new TOEEcAxes(withName);
+      withAxes = new TOEEcAxes(withName);
    }
    else if (ofType == "MOEEq")
    {
@@ -77,9 +81,7 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    }
    else if (ofType == "MOEEc")
    {
-      MessageInterface::ShowMessage(                // *** temporary
-         "MOEEcAxes not yet imnplemented.\n");
-      //withAxes = new MOEEcAxes(withName);
+      withAxes = new MOEEcAxes(withName);
    }
    else if (ofType == "TODEq")
    {
@@ -87,9 +89,7 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    }
    else if (ofType == "TODEc")
    {
-      MessageInterface::ShowMessage(                // *** temporary
-         "TODEcAxes not yet imnplemented.\n");
-      //withAxes = new TODEcAxes(withName);
+      withAxes = new TODEcAxes(withName);
    }
    else if (ofType == "MODEq")
    {
@@ -97,11 +97,9 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    }
    else if (ofType == "MODEc")
    {
-      MessageInterface::ShowMessage(                // *** temporary
-         "MODEcAxes not yet imnplemented.\n");
-      //withAxes = new MODEcAxes(withName;
+      withAxes = new MODEcAxes(withName);
    }
-   else if (ofType == "ObjectReferenced")  // need to do more here????
+   else if (ofType == "ObjectReferenced")  
    {
       withAxes = new ObjectReferencedAxes(withName);
    }
@@ -112,6 +110,18 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    else if (ofType == "BodyFixed")
    {
       withAxes = new BodyFixedAxes(withName);
+   }
+   else if ((ofType == "GSE") || (ofType == "GeocentricSolarEcliptic"))
+   {
+      MessageInterface::ShowMessage(                // *** temporary
+             "GeocentricSolarEclipticAxes not yet implemented.\n");
+      //withAxes = new GeocentricSolarEclipticAxes(withName);
+   }
+   else if ((ofType == "GSM") || (ofType == "GeocentricSolarMagnetic"))
+   {
+      MessageInterface::ShowMessage(                // *** temporary
+             "GeocentricSolarMagneticAxes not yet implemented.\n");
+      //withAxes = new GeocentricSolarMagneticAxes(withName);
    }
    return withAxes;
 }
@@ -135,16 +145,18 @@ Factory(Gmat::AXIS_SYSTEM) //loj: 1/19/05 Changed from ATMOSPHERE
       creatables.push_back("MJ2000Eq");
       creatables.push_back("MJ2000Ec");
       creatables.push_back("TOEEq");
-      //creatables.push_back("TOEEc");
+      creatables.push_back("TOEEc");
       creatables.push_back("MOEEq");
-      //creatables.push_back("MOEEc");
+      creatables.push_back("MOEEc");
       creatables.push_back("TODEq");
-      //creatables.push_back("TODEc");
+      creatables.push_back("TODEc");
       creatables.push_back("MODEq");
-      //creatables.push_back("MODEc");
+      creatables.push_back("MODEc");
       creatables.push_back("ObjectReferenced");
       creatables.push_back("Equator");
       creatables.push_back("BodyFixed");
+      //creatables.push_back("GSE");
+      //creatables.push_back("GSM");
    }
 }
 
