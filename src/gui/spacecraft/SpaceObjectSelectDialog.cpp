@@ -23,7 +23,6 @@
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 
-//loj: 10/19/04 removed OnApply
 BEGIN_EVENT_TABLE(SpaceObjectSelectDialog, GmatDialog)
    EVT_BUTTON(ID_BUTTON_OK, GmatDialog::OnOK)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
@@ -48,6 +47,24 @@ SpaceObjectSelectDialog::SpaceObjectSelectDialog(wxWindow *parent,
    ShowData();
 }
 
+
+//------------------------------------------------------------------------------
+// ~SpaceObjectSelectDialog()
+//------------------------------------------------------------------------------
+SpaceObjectSelectDialog::~SpaceObjectSelectDialog()
+{
+   // Unregister GUI components (loj: 6/7/05 Added)
+   #if DEBUG_GUI_ITEM_UNREG
+   MessageInterface::ShowMessage
+      ("SpaceObjectSelectDialog::~SpaceObjectSelectDialog() unregistering "
+       "SpaceObjectListBox:%d, ExcList:%d\n", spaceObjAvailableListBox, &mSoExcList);
+   #endif
+   
+   theGuiManager->UnregisterListBox("SpaceObject", spaceObjAvailableListBox,
+                                    &mSoExcList);
+}
+
+
 //------------------------------------------------------------------------------
 // wxArrayString& GetSpaceObjectNames()
 //------------------------------------------------------------------------------
@@ -56,6 +73,7 @@ wxArrayString& SpaceObjectSelectDialog::GetSpaceObjectNames()
    return mSoNameList;
 }
 
+
 //------------------------------------------------------------------------------
 // bool IsSpaceObjectSelected()
 //------------------------------------------------------------------------------
@@ -63,6 +81,7 @@ bool SpaceObjectSelectDialog::IsSpaceObjectSelected()
 {
    return mIsSpaceObjectSelected;
 }
+
 
 //------------------------------------------------------------------------------
 // void Create()
@@ -74,14 +93,14 @@ void SpaceObjectSelectDialog::Create()
    wxString emptyList[] = {};
    wxString *tempList = NULL;
    
-#if DEBUG_SO_DIALOG
+   #if DEBUG_SO_DIALOG
    for (int i=0; i<soSelCount; i++)
    {
       MessageInterface::ShowMessage
          ("SpaceObjectSelectDialog::Create() mSoExcList[%d]=%s\n",
           i, mSoSelList[i].c_str());
    }
-#endif
+   #endif
    
    if (soSelCount > 0)
    {
@@ -113,14 +132,15 @@ void SpaceObjectSelectDialog::Create()
    clearSpaceObjectButton = new wxButton( this, ID_BUTTON, wxT("<="),
                                          wxDefaultPosition, wxSize(20,20), 0 );
 
-#if DEBUG_SO_DIALOG
+   #if DEBUG_SO_DIALOG
    MessageInterface::ShowMessage
       ("SpaceObjectSelectDialog::Create() Calling GetSpaceObjectListBox\n");
-#endif
+   #endif
    
    // wxListBox
    spaceObjAvailableListBox =
-      theGuiManager->GetSpaceObjectListBox(this, -1, wxSize(150, 100), mSoExcList);
+      //theGuiManager->GetSpaceObjectListBox(this, -1, wxSize(150, 100), mSoExcList);
+      theGuiManager->GetSpaceObjectListBox(this, -1, wxSize(150, 100), &mSoExcList);
    
    if (soSelCount > 0)
    {
@@ -165,6 +185,7 @@ void SpaceObjectSelectDialog::Create()
    delete tempList;
 }
 
+
 //------------------------------------------------------------------------------
 // void OnButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -176,16 +197,24 @@ void SpaceObjectSelectDialog::OnButton(wxCommandEvent& event)
       // add spacecraft object
       //-----------------------------------
       wxString s = spaceObjAvailableListBox->GetStringSelection();
+      int sel = spaceObjAvailableListBox->GetSelection();
       int strId = spaceObjSelectedListBox->FindString(s);
-        
+      
       // if the string wasn't found in the second list, insert it
       if (strId == wxNOT_FOUND)
       {
          spaceObjSelectedListBox->Append(s);
+         spaceObjAvailableListBox->Delete(sel);
          spaceObjSelectedListBox->SetStringSelection(s);
-         // select next available item (loj: 8/18/04)
-         spaceObjAvailableListBox->
-            SetSelection(spaceObjAvailableListBox->GetSelection()+1);
+         
+         // select next available item 
+         if (sel-1 < 0)
+            spaceObjAvailableListBox->SetSelection(0);
+         else
+            spaceObjAvailableListBox->SetSelection(sel-1);
+         
+         //spaceObjAvailableListBox->
+         //   SetSelection(spaceObjAvailableListBox->GetSelection()+1);
       }
       
       theOkButton->Enable();
@@ -196,11 +225,11 @@ void SpaceObjectSelectDialog::OnButton(wxCommandEvent& event)
       // remove spacecraft object
       //-----------------------------------
       int sel = spaceObjSelectedListBox->GetSelection();
-      wxString s = spaceObjSelectedListBox->GetStringSelection();
+      wxString str = spaceObjSelectedListBox->GetStringSelection();
       spaceObjSelectedListBox->Delete(sel);
-      spaceObjAvailableListBox->Append(s);
-      spaceObjAvailableListBox->SetStringSelection(s);
-         
+      spaceObjAvailableListBox->Append(str);
+      spaceObjAvailableListBox->SetStringSelection(str);
+      
       if (sel-1 < 0)
          spaceObjSelectedListBox->SetSelection(0);
       else
@@ -224,6 +253,7 @@ void SpaceObjectSelectDialog::OnButton(wxCommandEvent& event)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // virtual void LoadData()
 //------------------------------------------------------------------------------
@@ -231,33 +261,36 @@ void SpaceObjectSelectDialog::LoadData()
 {
 }
 
+
 //------------------------------------------------------------------------------
 // virtual void SaveData()
 //------------------------------------------------------------------------------
 void SpaceObjectSelectDialog::SaveData()
 {
-#if DEBUG_SO_DIALOG
+   #if DEBUG_SO_DIALOG
    MessageInterface::
       ShowMessage("SpaceObjectSelectDialog::SaveData() sc count = %d\n",
                   spaceObjSelectedListBox->GetCount());
-#endif
+   #endif
    
    mSoNameList.Clear();
    for(int i=0; i<spaceObjSelectedListBox->GetCount(); i++)
    {
       mSoNameList.Add(spaceObjSelectedListBox->GetString(i));
-#if DEBUG_SO_DIALOG
+      
+      #if DEBUG_SO_DIALOG
       MessageInterface::
          ShowMessage("SpaceObjectSelectDialog::SaveData()name = %s\n",
                      mSoNameList[i].c_str());
-#endif
+      #endif
    }
-
+   
    if (spaceObjSelectedListBox->GetCount() > 0)
       mIsSpaceObjectSelected = true;
    else
       mIsSpaceObjectSelected = false;
 }
+
 
 //------------------------------------------------------------------------------
 // virtual void ResetData()
@@ -266,3 +299,5 @@ void SpaceObjectSelectDialog::ResetData()
 {
    mIsSpaceObjectSelected = false;
 }
+
+

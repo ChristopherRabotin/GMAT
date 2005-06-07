@@ -60,6 +60,16 @@ FormationSetupPanel::FormationSetupPanel(wxWindow *parent,
    theApplyButton->Disable();
 }
 
+
+//------------------------------------------------------------------------------
+// ~FormationSetupPanel()
+//------------------------------------------------------------------------------
+FormationSetupPanel::~FormationSetupPanel()
+{
+   theGuiManager->UnregisterListBox("SpaceObject", mSoAvailableListBox, &mSoExcList);
+}
+
+
 //-------------------------------
 // protected methods
 //-------------------------------
@@ -96,11 +106,13 @@ void FormationSetupPanel::Create()
       new wxStaticText(this, -1, wxT("Space Objects"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    
-   wxArrayString soExcList;
-   soExcList.Add(mFormationName.c_str());
+   //wxArrayString soExcList;
+   //soExcList.Add(mFormationName.c_str());
+   mSoExcList.Add(mFormationName.c_str());
    
    mSoAvailableListBox = 
-       theGuiManager->GetSpaceObjectListBox(this, -1, wxSize(150, 200), soExcList);
+      //theGuiManager->GetSpaceObjectListBox(this, -1, wxSize(150, 200), soExcList);
+      theGuiManager->GetSpaceObjectListBox(this, -1, wxSize(150, 200), &mSoExcList); //loj: 6/6/05
    
    availableBoxSizer->Add(titleAvailable, 0, wxALIGN_CENTRE|wxALL, bsize);
    availableBoxSizer->Add(mSoAvailableListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -167,8 +179,9 @@ void FormationSetupPanel::LoadData()
    for (unsigned int i=0; i<scList.size(); i++)
    {
       mSoSelectedListBox->Append(scList[i].c_str());
+      mSoExcList.Add(scList[i].c_str());
    }
-
+   
    // Show defaults
    mSoAvailableListBox->SetSelection(0);
    mSoSelectedListBox->SetSelection(0);
@@ -191,7 +204,8 @@ void FormationSetupPanel::SaveData()
    }
 
    theGuiManager->UpdateFormation();
-   GmatAppData::GetResourceTree()->UpdateResource(false);
+   GmatAppData::GetResourceTree()->UpdateFormation(); //loj: 6/3/05 Changed to UpdateFormation()
+   //GmatAppData::GetResourceTree()->UpdateResource(false);
 }
 
 
@@ -212,6 +226,7 @@ void FormationSetupPanel::OnAddSpaceObject(wxCommandEvent& event)
       mSoSelectedListBox->Append(str);
       mSoAvailableListBox->Delete(sel); //loj: 5/25/05 Added
       mSoSelectedListBox->SetStringSelection(str);
+      mSoExcList.Add(str);
       
       if (sel-1 < 0)
          mSoAvailableListBox->SetSelection(0);
@@ -234,6 +249,7 @@ void FormationSetupPanel::OnRemoveSpaceObject(wxCommandEvent& event)
    mSoSelectedListBox->Delete(sel);
    mSoAvailableListBox->Append(str);
    mSoAvailableListBox->SetStringSelection(str);
+   mSoExcList.Remove(str.c_str());
    
    if (sel-1 < 0)
       mSoSelectedListBox->SetSelection(0);
@@ -260,6 +276,7 @@ void FormationSetupPanel::OnClearSpaceObject(wxCommandEvent& event)
    }
    
    mSoSelectedListBox->Clear();
+   mSoExcList.Empty();
    mSoAvailableListBox->SetSelection(0);
    
    theApplyButton->Enable();

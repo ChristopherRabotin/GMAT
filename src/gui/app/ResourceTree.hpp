@@ -31,6 +31,9 @@ public:
    ResourceTree(wxWindow *parent, const wxWindowID id,
                 const wxPoint& pos, const wxSize& size,
                 long style);
+   
+   void UpdateFormation();
+   void UpdateVariable();
    void UpdateResource(bool resetCounter);
    void OnAddScript(wxCommandEvent &event);
    void OnNewScript();

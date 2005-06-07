@@ -23,11 +23,14 @@ class ParameterSelectDialog : public GmatDialog
 {
 public:
     
-   ParameterSelectDialog(wxWindow *parent, bool showArrayAndString = false,
+   ParameterSelectDialog(wxWindow *parent,
+                         bool showArrayAndString = false,
                          bool showSysParams = true,
                          bool canSelectMultiVars = false,
-                         bool canSelectWholeObject = false);
-
+                         bool canSelectWholeObject = false,
+                         const wxString &ownerType = "Spacecraft");
+   ~ParameterSelectDialog();
+   
    bool IsParamSelected()
       { return mIsParamSelected; }
    wxString GetParamName()
@@ -41,6 +44,7 @@ protected:
    virtual void OnOK(wxCommandEvent &event);
 
    wxString mParamName;
+   wxString mOwnerType;
    wxArrayString mParamNameArray;
    
    bool mIsParamSelected;

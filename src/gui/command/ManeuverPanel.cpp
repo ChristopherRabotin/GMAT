@@ -57,6 +57,17 @@ ManeuverPanel::ManeuverPanel(wxWindow *parent, GmatCommand *cmd)
    }
 }
 
+
+//------------------------------------------------------------------------------
+// ~ManeuverPanel()
+//------------------------------------------------------------------------------
+ManeuverPanel::~ManeuverPanel()
+{
+   theGuiManager->UnregisterComboBox("Burn", burnCB);
+   theGuiManager->UnregisterComboBox("Spacecraft", satCB);
+}
+
+
 //-------------------------------
 // protected methods
 //-------------------------------
@@ -91,7 +102,7 @@ void ManeuverPanel::OnSatComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ManeuverPanel::Create()
 {
-   unsigned int i, count;
+//    unsigned int i, count;
    StringArray items;
 
    // create sizers
@@ -106,32 +117,34 @@ void ManeuverPanel::Create()
    wxStaticText *burnLabel =
       new wxStaticText(this, ID_TEXT,
                        wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0);
-        
+   
    // list of burns
-   items = theGuiInterpreter->GetListOfConfiguredItems(Gmat::BURN);
-   count = items.size();
-   wxString *burnList = new wxString[count];
+//    items = theGuiInterpreter->GetListOfConfiguredItems(Gmat::BURN);
+//    count = items.size();
+//    wxString *burnList = new wxString[count];
+   
+   // create burn combo box (loj: 6/6/06 get it from theGuiManager)
+   burnCB = theGuiManager->GetBurnComboBox(this, ID_BURN_COMBOBOX, wxSize(150,-1));
+   
+//    if (count > 0)  // check to see if any burns exist
+//    {
+//       for (i=0; i<count; i++)
+//          burnList[i] = items[i].c_str();
 
-   // create burn combo box
-   if (count > 0)  // check to see if any burns exist
-   {
-      for (i=0; i<count; i++)
-         burnList[i] = items[i].c_str();
-
-      // combo box for avaliable burns 
-      burnCB = new wxComboBox(this, ID_BURN_COMBOBOX, wxT(""), wxDefaultPosition, 
-                              wxSize(150,-1), count, burnList, wxCB_DROPDOWN);
-   }
-   else            // no burns available
-   {
-      wxString strs9[] =
-      {
-         wxT("No burn available"), 
-      }; 
-      burnCB = new wxComboBox(this, ID_BURN_COMBOBOX, wxT(""), wxDefaultPosition, 
-                              wxSize(150,-1), 1, strs9, wxCB_DROPDOWN);
-   }               
-
+//       // combo box for avaliable burns 
+//       burnCB = new wxComboBox(this, ID_BURN_COMBOBOX, wxT(""), wxDefaultPosition, 
+//                               wxSize(150,-1), count, burnList, wxCB_DROPDOWN);
+//    }
+//    else            // no burns available
+//    {
+//       wxString strs9[] =
+//       {
+//          wxT("No burn available"), 
+//       }; 
+//       burnCB = new wxComboBox(this, ID_BURN_COMBOBOX, wxT(""), wxDefaultPosition, 
+//                               wxSize(150,-1), 1, strs9, wxCB_DROPDOWN);
+//    }               
+   
    // add burn label and combobox to burn sizer
    burnSizer->Add(burnLabel, 0, wxALIGN_CENTER | wxALL, 5);
    burnSizer->Add(burnCB, 0, wxALIGN_CENTER | wxALL, 5);
@@ -145,29 +158,31 @@ void ManeuverPanel::Create()
                        wxT("To"), wxDefaultPosition, wxDefaultSize, 0);
 
    // list of spacecraft
-   items = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
-   count = items.size();
-   wxString *spacecraftList = new wxString[count];
+//    items = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+//    count = items.size();
+//    wxString *spacecraftList = new wxString[count];
 
    // create spacecraft combo box
-   if (count > 0)  // check to see if any spacecrafts exist
-   {
-      for (i=0; i<count; i++)
-         spacecraftList[i] = items[i].c_str();
-      // combo box for avaliable spacecrafts 
-      satCB = new wxComboBox(this, ID_SAT_COMBOBOX, wxT(""), wxDefaultPosition, 
-                             wxSize(150,-1), count, spacecraftList, wxCB_DROPDOWN);
-   }
-   else
-   {
-      // combo box for avaliable spacecrafts 
-      wxString strs9[] =
-      {
-         wxT("No spacecraft available"), 
-      }; 
-      satCB = new wxComboBox(this, ID_SAT_COMBOBOX, wxT(""), wxDefaultPosition, 
-                             wxSize(150,-1), 1, strs9, wxCB_DROPDOWN);
-   }
+   satCB = theGuiManager->GetSpacecraftComboBox(this, ID_SAT_COMBOBOX, wxSize(150,-1));
+   
+//    if (count > 0)  // check to see if any spacecrafts exist
+//    {
+//       for (i=0; i<count; i++)
+//          spacecraftList[i] = items[i].c_str();
+//       // combo box for avaliable spacecrafts 
+//       satCB = new wxComboBox(this, ID_SAT_COMBOBOX, wxT(""), wxDefaultPosition, 
+//                              wxSize(150,-1), count, spacecraftList, wxCB_DROPDOWN);
+//    }
+//    else
+//    {
+//       // combo box for avaliable spacecrafts 
+//       wxString strs9[] =
+//       {
+//          wxT("No spacecraft available"), 
+//       }; 
+//       satCB = new wxComboBox(this, ID_SAT_COMBOBOX, wxT(""), wxDefaultPosition, 
+//                              wxSize(150,-1), 1, strs9, wxCB_DROPDOWN);
+//    }
                        
    // add spacecraft label and combobox to spacecraft sizer
    spacecraftSizer->Add(spacecraftLabel, 0, wxALIGN_CENTER | wxALL, 5);

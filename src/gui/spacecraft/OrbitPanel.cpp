@@ -70,7 +70,8 @@ OrbitPanel::OrbitPanel(wxWindow *parent,
 
 OrbitPanel::~OrbitPanel()
 {
-//    delete(theSpacecraft);
+   //loj: 6/7/05 Added
+   theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
 }
 
 //-------------------------------

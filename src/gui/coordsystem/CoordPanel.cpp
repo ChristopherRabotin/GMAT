@@ -43,6 +43,10 @@ CoordPanel::CoordPanel(wxWindow *parent, bool enableAll)
 
 CoordPanel::~CoordPanel()
 {
+   // Unregisger GUI components(loj: 6/7/05 Added)
+   theGuiManager->UnregisterComboBox("SpacePoint", originComboBox);
+   theGuiManager->UnregisterComboBox("SpacePoint", primaryComboBox);
+   theGuiManager->UnregisterComboBox("SpacePoint", secondaryComboBox);
 }
 
 //-------------------------------

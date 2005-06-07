@@ -25,14 +25,16 @@ class FormationSetupPanel: public GmatPanel
 {
 public:
    FormationSetupPanel(wxWindow *parent, const wxString &formationName);
+   ~FormationSetupPanel();
    
 protected:
+   
+   std::string mFormationName;
+   wxArrayString mSoExcList;
    
    wxListBox *mSoAvailableListBox;
    wxListBox *mSoSelectedListBox;
 
-   std::string mFormationName;
-   
    void OnAddSpaceObject(wxCommandEvent& event);
    void OnRemoveSpaceObject(wxCommandEvent& event);
    void OnClearSpaceObject(wxCommandEvent& event);

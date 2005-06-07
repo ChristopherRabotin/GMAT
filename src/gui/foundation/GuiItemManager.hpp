@@ -35,24 +35,29 @@ class GuiItemManager
 public:
 
    // for SpacePoint
-   static const int MAX_SPACE_POINT_SIZE = 60;  // CELES_POINT + SPACE_OBJECT
-   static const int MAX_CELES_POINT_SIZE = 20;  // CELES_BODY + CAL_POINT
-   static const int MAX_CELES_BODY_SIZE = 20;
-   static const int MAX_CAL_POINT_SIZE = 20;
-   static const int MAX_SPACE_OBJECT_SIZE = 40; // FORMATION + SPACECRAFT
-   static const int MAX_FORMATION_SIZE = 10;
-   static const int MAX_SPACECRAFT_SIZE = 30;
-
+   static const int MAX_SPACE_POINT = 60;  // CELES_POINT + SPACE_OBJECT
+   static const int MAX_CELES_POINT = 20;  // CELES_BODY + CAL_POINT
+   static const int MAX_CELES_BODY = 20;
+   static const int MAX_CAL_POINT = 20;
+   static const int MAX_SPACE_OBJECT = 40; // FORMATION + SPACECRAFT
+   static const int MAX_FORMATION = 10;
+   static const int MAX_SPACECRAFT = 30;
+   
    // for Parameter
-   static const int MAX_PROPERTY_SIZE = 100;
-   static const int MAX_USER_VAR_SIZE = 20;
-   static const int MAX_USER_STRING_SIZE = 20;
-   static const int MAX_USER_ARRAY_SIZE = 20;
-   static const int MAX_USER_PARAM_SIZE = 40;
-   static const int MAX_PLOT_PARAM_SIZE = 140;
+   static const int MAX_SC_PROPERTY = 100; // Max Spacecraft
+   static const int MAX_IB_PROPERTY = 10;  // Max ImpulsiveBurn
+   static const int MAX_PROPERTY = 110;
+   static const int MAX_USER_VAR = 20;
+   static const int MAX_USER_STRING = 20;
+   static const int MAX_USER_ARRAY = 20;
+   static const int MAX_USER_PARAM = 40;
+   static const int MAX_PLOT_PARAM = 140;
 
-   // for CoordinateSystem
-   static const int MAX_COORD_SYS_SIZE = 20;
+   // Other
+   static const int MAX_COORD_SYS = 20;
+   static const int MAX_BURN = 10;
+   static const int MAX_HARDWARE = 10;
+   static const int MAX_FUNCTION = 10;
    
    static GuiItemManager* GetInstance();
    
@@ -60,18 +65,34 @@ public:
    void UpdateCelestialPoint();
    void UpdateFormation();
    void UpdateSpacecraft();
+   void UpdateBurn();
    void UpdateParameter();
    void UpdateSolarSystem();
    void UpdateCoordSystem();
+   void UpdateHardware();
+   void UpdateFunction();
+   
+   void UnregisterListBox(const wxString &type, wxListBox *lb,
+                          wxArrayString *excList = NULL);
+   void UnregisterComboBox(const wxString &type, wxComboBox *cb);
    
    int GetNumSpacecraft()
       { return theNumSpacecraft; }
+   
+   int GetNumFuelTank()
+      { return theNumFuelTank; }
+   
+   int GetNumThruster()
+      { return theNumThruster; }
    
    int GetNumConfigBody()
       { return theNumCelesBody; }
    
    int GetNumCoordSystem()
       { return theNumCoordSys; }
+   
+   int GetNumFunction()
+      { return theNumFunction; }
    
    int GetNumPlottableParameter()
       { return theNumPlottableParam; }
@@ -112,12 +133,15 @@ public:
    wxString* GetConfigBodyList()
       { return theCelesBodyList; }
    
-   int GetNumProperty(const wxString &objName);
-   wxString* GetPropertyList(const wxString &objName);
+   int GetNumProperty(const wxString &objType);
+   wxString* GetPropertyList(const wxString &objType);
 
    // ComboBox
    wxComboBox* GetSpacecraftComboBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size);
+   
+   wxComboBox* GetBurnComboBox(wxWindow *parent, wxWindowID id,
+                               const wxSize &size);
    
    wxComboBox* GetCoordSysComboBox(wxWindow *parent, wxWindowID id,
                                    const wxSize &size);
@@ -125,6 +149,9 @@ public:
    wxComboBox* GetConfigBodyComboBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size);
    
+   wxComboBox* GetFunctionComboBox(wxWindow *parent, wxWindowID id,
+                                   const wxSize &size);
+
    wxComboBox* GetSpacePointComboBox(wxWindow *parent, wxWindowID id, 
                                      const wxSize &size, bool addVector = false);
    
@@ -133,22 +160,22 @@ public:
    
    wxComboBox* GetUserVariableComboBox(wxWindow *parent, wxWindowID id,
                                        const wxSize &size);
-
+   
    // ListBox
    wxListBox* GetSpacePointListBox(wxWindow *parent, wxWindowID id, 
                                    const wxSize &size, bool addVector = false);
    
    wxListBox* GetCelestialPointListBox(wxWindow *parent, wxWindowID id,
                                        const wxSize &size,
-                                       wxArrayString &bodiesToExclude);
+                                       wxArrayString &excList);
    
    wxListBox* GetSpaceObjectListBox(wxWindow *parent, wxWindowID id,
                                     const wxSize &size,
-                                    wxArrayString &namesToExclude);
+                                    wxArrayString *excList = NULL);
    
    wxListBox* GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
                                    const wxSize &size,
-                                   wxArrayString &namesToExclude);
+                                   wxArrayString *excList = NULL);
    
    wxListBox* GetFormationListBox(wxWindow *parent, wxWindowID id,
                                   const wxSize &size,
@@ -156,7 +183,7 @@ public:
    
    wxListBox* GetPropertyListBox(wxWindow *parent, wxWindowID id,
                                  const wxSize &size,
-                                 const wxString &objName);
+                                 const wxString &objType);
    
    wxListBox* GetPlottableParameterListBox(wxWindow *parent, wxWindowID id,
                                         const wxSize &size,
@@ -182,8 +209,14 @@ public:
    
    wxListBox* GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
                                    const wxSize &size,
-                                   wxArrayString &bodiesToExclude);
-
+                                   wxArrayString &excList);
+   wxListBox* GetFuelTankListBox(wxWindow *parent, wxWindowID id,
+                                 const wxSize &size,
+                                 wxArrayString *excList = NULL);
+   wxListBox* GetThrusterListBox(wxWindow *parent, wxWindowID id,
+                                 const wxSize &size,
+                                 wxArrayString *excList);
+   
    // BoxSizer
    wxBoxSizer*
    CreateParameterSizer(wxWindow *parent,
@@ -194,7 +227,8 @@ public:
                         wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
                         wxComboBox **originComboBox, wxWindowID originComboBoxId,
                         wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer,
-                        bool showArrayAndString = false);
+                        bool showArrayAndString = false,
+                        const wxString &onwer = "Spacecraft");
    wxBoxSizer*
    CreateUserVarSizer(wxWindow *parent,
                       wxListBox **userParamListBox, wxWindowID userParamListBoxId,
@@ -208,28 +242,50 @@ private:
    GuiItemManager(const GuiItemManager&);
    GuiItemManager& operator=(const GuiItemManager&);
    
-   void UpdatePropertyList(const wxString &objName);
+   void UpdatePropertyList();
    void UpdateParameterList();
 
-   void UpdateSpaceObjectList();
+   void UpdateSpacecraftList();
    void UpdateFormationList();
-   void UpdateSpacePointList();
-   
+   void UpdateSpaceObjectList();
    void UpdateCelestialBodyList();
    void UpdateCelestialPointList();
-   void UpdateSpacecraftList();
-   
+   void UpdateSpacePointList();
+   void UpdateBurnList();
    void UpdateCoordSystemList();
+   void UpdateHardwareList();
+   void UpdateFunctionList();
    
    static GuiItemManager *theInstance;
    GuiInterpreter *theGuiInterpreter;
    SolarSystem *theSolarSystem;
    
+   std::vector<wxListBox*> mSpaceObjectLBList;
+   std::vector<wxListBox*> mSpacecraftLBList;
+   std::vector<wxListBox*> mFuelTankLBList;
+   std::vector<wxListBox*> mThrusterLBList;
+   
+   std::vector<wxComboBox*> mSpacePointCBList;
+   std::vector<wxComboBox*> mSpacecraftCBList;
+   std::vector<wxComboBox*> mBurnCBList;
+   std::vector<wxComboBox*> mCoordSysCBList;
+   std::vector<wxComboBox*> mFunctionCBList;
+   
+   std::vector<wxArrayString*> mSpaceObjectExcList;
+   std::vector<wxArrayString*> mSpacecraftExcList;
+   std::vector<wxArrayString*> mFuelTankExcList;
+   std::vector<wxArrayString*> mThrusterExcList;
+   
    int theNumScProperty;
+   int theNumImpBurnProperty;
    int theNumSpaceObject;
    int theNumFormation;
    int theNumSpacecraft;
+   int theNumBurn;
    int theNumCoordSys;
+   int theNumFunction;
+   int theNumFuelTank;
+   int theNumThruster;
    int theNumPlottableParam;
    int theNumSystemParam;
    int theNumUserVariable;
@@ -241,49 +297,29 @@ private:
    int theNumCalPoint;
    int theNumSpacePoint;
    
-   wxString theSpacePointList[MAX_SPACE_POINT_SIZE];
-   wxString theCelesPointList[MAX_CELES_POINT_SIZE];
-   wxString theCelesBodyList[MAX_CELES_BODY_SIZE];
-   wxString theCalPointList[MAX_CAL_POINT_SIZE];
+   wxString theSpacePointList[MAX_SPACE_POINT];
+   wxString theCelesPointList[MAX_CELES_POINT];
+   wxString theCelesBodyList[MAX_CELES_BODY];
+   wxString theCalPointList[MAX_CAL_POINT];
    
-   wxString theSpaceObjectList[MAX_SPACE_OBJECT_SIZE];
-   wxString theFormationList[MAX_FORMATION_SIZE];
-   wxString theSpacecraftList[MAX_SPACECRAFT_SIZE];
+   wxString theSpaceObjectList[MAX_SPACE_OBJECT];
+   wxString theFormationList[MAX_FORMATION];
+   wxString theSpacecraftList[MAX_SPACECRAFT];
+   wxString theBurnList[MAX_BURN];
+   wxString theCoordSysList[MAX_COORD_SYS];
+   wxString theFunctionList[MAX_FUNCTION];
+   wxString theFuelTankList[MAX_HARDWARE];
+   wxString theThrusterList[MAX_HARDWARE];
    
-   wxString theCoordSysList[MAX_COORD_SYS_SIZE];
+   wxString theScPropertyList[MAX_SC_PROPERTY];
+   wxString theImpBurnPropertyList[MAX_IB_PROPERTY];
+   wxString thePlottableParamList[MAX_PLOT_PARAM];
+   wxString theSystemParamList[MAX_PROPERTY];
+   wxString theUserVariableList[MAX_USER_VAR];
+   wxString theUserStringList[MAX_USER_STRING];
+   wxString theUserArrayList[MAX_USER_ARRAY];
+   wxString theUserParamList[MAX_USER_PARAM];
    
-   wxString theScPropertyList[MAX_PROPERTY_SIZE];
-   wxString thePlottableParamList[MAX_PLOT_PARAM_SIZE];
-   wxString theSystemParamList[MAX_PROPERTY_SIZE];
-   wxString theUserVariableList[MAX_USER_VAR_SIZE];
-   wxString theUserStringList[MAX_USER_STRING_SIZE];
-   wxString theUserArrayList[MAX_USER_ARRAY_SIZE];
-   wxString theUserParamList[MAX_USER_PARAM_SIZE];
-   
-   wxComboBox *theSpacecraftComboBox;
-   wxComboBox *theUserParamComboBox;
-   wxComboBox *theCoordSysComboBox;
-   wxComboBox *theCelesBodyComboBox;
-   wxComboBox *theSpacePointComboBox;
-   wxComboBox *theCelestialPointComboBox;
-   
-   wxListBox  *theSpacePointListBox;
-   wxListBox  *theCelesBodyListBox;
-   wxListBox  *theCelesPointListBox;
-   wxListBox  *theSpaceObjectListBox;
-   wxListBox  *theFormationListBox;
-   wxListBox  *theSpacecraftListBox;
-   
-   wxListBox  *theScPropertyListBox;
-   wxListBox  *thePlottableParamListBox;
-   wxListBox  *theSystemParamListBox;
-   wxListBox  *theAllUserParamListBox;
-   wxListBox  *theUserVariableListBox;
-   wxListBox  *theUserStringListBox;
-   wxListBox  *theUserArrayListBox;
-   wxListBox  *theUserParamListBox;
-
-   wxBoxSizer *theParamBoxSizer;
 };
 
 #endif // GuiItemManager_hpp

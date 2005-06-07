@@ -101,6 +101,17 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
    }
 }
 
+
+//------------------------------------------------------------------------------
+// ~XyPlotSetupPanel()
+//------------------------------------------------------------------------------
+XyPlotSetupPanel::~XyPlotSetupPanel()
+{
+   theGuiManager->UnregisterComboBox("Spacecraft", mObjectComboBox);   
+   theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);   
+}
+
+
 //-------------------------------
 // protected methods
 //-------------------------------
@@ -287,8 +298,11 @@ void XyPlotSetupPanel::OnCreateVariable(wxCommandEvent& event)
    {
       mUserParamListBox->Set(theGuiManager->GetNumUserVariable(),
                              theGuiManager->GetUserVariableList());
-      mAddXButton->Disable();
-      mAddYButton->Disable();
+//       mAddXButton->Disable();
+//       mAddYButton->Disable();
+      mUserParamListBox->SetSelection(0);
+      mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
+      mUseUserParam = true; //loj: 6/6/05 Added
    }
 }
 
@@ -873,7 +887,7 @@ Parameter* XyPlotSetupPanel::GetParameter(const wxString &name)
          if (param->IsCoordSysDependent())
             param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
          else if (param->IsOriginDependent())
-            param->SetRefObjectName(Gmat::SPACE_POINT, depObjName); //loj: 4/11/05 Added
+            param->SetRefObjectName(Gmat::SPACE_POINT, depObjName);
       }
       catch (BaseException &e)
       {

@@ -29,6 +29,7 @@ class OpenGlPlotSetupPanel: public GmatPanel
 {
 public:
    OpenGlPlotSetupPanel(wxWindow *parent, const wxString &subscriberName);
+   ~OpenGlPlotSetupPanel();
    
 protected:
    OpenGlPlot *mOpenGlPlot;
@@ -44,6 +45,8 @@ protected:
    std::string mSelSpName;
    std::map<std::string, RgbColor> mOrbitColorMap;
    std::map<std::string, RgbColor> mTargetColorMap;
+   
+   wxArrayString mExcludedScList;
    
    wxColour mOrbitColor;
    wxColour mTargetColor;

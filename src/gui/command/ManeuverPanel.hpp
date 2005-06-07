@@ -27,7 +27,8 @@ class ManeuverPanel : public GmatPanel
 public:
    // constructors
    ManeuverPanel(wxWindow *parent, GmatCommand *cmd);
-    
+   ~ManeuverPanel();
+   
 protected:
    // member data
    GmatCommand *theCommand;

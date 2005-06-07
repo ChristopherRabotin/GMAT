@@ -95,6 +95,28 @@ OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
    Show();
 }
 
+
+//------------------------------------------------------------------------------
+// ~OpenGlPlotSetupPanel()
+//------------------------------------------------------------------------------
+OpenGlPlotSetupPanel::~OpenGlPlotSetupPanel()
+{
+   #if DEBUG_OPENGL_PANEL
+   MessageInterface::ShowMessage
+      ("OpenGlPlotSetupPanel::~OpenGlPlotSetupPanel() unregistering mSpacecraftListBox:%d\n",
+       mSpacecraftListBox);
+   #endif
+   
+   theGuiManager->UnregisterListBox("Spacecraft", mSpacecraftListBox, &mExcludedScList);
+   
+   theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
+   theGuiManager->UnregisterComboBox("CoordinateSystem", mViewUpCsComboBox);
+   theGuiManager->UnregisterComboBox("SpacePoint", mViewPointRefComboBox);
+   theGuiManager->UnregisterComboBox("SpacePoint", mViewPointVectorComboBox);
+   theGuiManager->UnregisterComboBox("SpacePoint", mViewDirectionComboBox);
+}
+
+
 //---------------------------------
 // protected methods
 //---------------------------------
@@ -190,7 +212,8 @@ void OpenGlPlotSetupPanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), 0);
    wxArrayString empty;
    mSpacecraftListBox =
-      theGuiManager->GetSpacecraftListBox(this, ID_LISTBOX, wxSize(150,65), empty);
+      //theGuiManager->GetSpacecraftListBox(this, ID_LISTBOX, wxSize(150,65), empty); //loj: 6/2/05
+      theGuiManager->GetSpacecraftListBox(this, ID_LISTBOX, wxSize(150,65), &mExcludedScList);
    
    wxStaticText *coAvailableLabel =
       new wxStaticText(this, -1, wxT("Celestial Object"),

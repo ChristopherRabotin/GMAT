@@ -23,6 +23,7 @@
 
 #include "gmatwxdefs.hpp"
 #include "GuiInterpreter.hpp"
+#include "GuiItemManager.hpp"
 
 #include "gmatdefs.hpp"
 #include "Spacecraft.hpp"
@@ -32,48 +33,50 @@
 class TankPanel: public wxPanel
 {
 public:
-    TankPanel(wxWindow *parent, Spacecraft *spacecraft,
-              wxButton *theApplyButton);
-    ~TankPanel();
-    void SaveData();
-    void LoadData();
-    
+   TankPanel(wxWindow *parent, Spacecraft *spacecraft,
+             wxButton *theApplyButton);
+   ~TankPanel();
+   void SaveData();
+   void LoadData();
+   
 private:    
-    void Create();
-    void DisplayData();
-    
-    // Event Handling
-    DECLARE_EVENT_TABLE();
-    void OnSelect(wxCommandEvent &event);
-    void OnButtonClick(wxCommandEvent &event);
-    
-    Spacecraft *theSpacecraft;
-    GuiInterpreter *theGuiInterpreter;
-    
-    wxArrayString availableTanksArray;
-    wxArrayString selectedTanksArray;
-        
-    Integer availableTankCount;
-    Integer selectedTankCount;
-    
-    Integer currentAvailTank;
-    Integer currentSelectedTank;
-    
-    wxButton *theApplyButton;
-    wxButton *selectButton;
-    wxButton *removeButton;
-    wxButton *selectAllButton;
-    wxButton *removeAllButton;
-    
-    wxListBox *availableTankListBox;
-    wxListBox *selectedTankListBox;
-        
-    // IDs for the controls and the menu commands
-    enum
-    {     
-        ID_LISTBOX = 30200,
-        ID_BUTTON,
-    };
+   void Create();
+//    void DisplayData();
+   
+   // Event Handling
+   DECLARE_EVENT_TABLE();
+//    void OnSelect(wxCommandEvent &event);
+   void OnButtonClick(wxCommandEvent &event);
+   
+   Spacecraft *theSpacecraft;
+   GuiInterpreter *theGuiInterpreter;
+   GuiItemManager *theGuiManager;
+
+   wxArrayString mExcludedTankList;
+//    wxArrayString availableTanksArray;
+//    wxArrayString selectedTanksArray;
+   
+//    Integer availableTankCount;
+//    Integer selectedTankCount;
+   
+//    Integer currentAvailTank;
+//    Integer currentSelectedTank;
+   
+   wxButton *theApplyButton;
+   wxButton *selectButton;
+   wxButton *removeButton;
+   wxButton *selectAllButton;
+   wxButton *removeAllButton;
+   
+   wxListBox *availableTankListBox;
+   wxListBox *selectedTankListBox;
+   
+   // IDs for the controls and the menu commands
+   enum
+   {     
+      ID_LISTBOX = 30200,
+      ID_BUTTON,
+   };
 };
 #endif
 

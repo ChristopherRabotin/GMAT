@@ -28,6 +28,7 @@ class ReportFileSetupPanel: public GmatPanel
 {
 public:
    ReportFileSetupPanel(wxWindow *parent, const wxString &subscriberName);
+   ~ReportFileSetupPanel();
    
 protected:
    ReportFile *reportFile;

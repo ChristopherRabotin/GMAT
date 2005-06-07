@@ -62,6 +62,7 @@ CallFunctionPanel::CallFunctionPanel( wxWindow *parent, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 CallFunctionPanel::~CallFunctionPanel()
 {
+   theGuiManager->UnregisterComboBox("Function", functionComboBox);   
 }
 
 //---------------------------------
@@ -133,10 +134,13 @@ void CallFunctionPanel::Create()
    }
 
     // combo box for the date type
-   functionComboBox = new wxComboBox( this, ID_COMBO, wxT(""),
-             wxDefaultPosition, wxSize(130,-1), size, choices,
-             wxCB_DROPDOWN | wxCB_READONLY );
+//    functionComboBox = new wxComboBox( this, ID_COMBO, wxT(""),
+//              wxDefaultPosition, wxSize(130,-1), size, choices,
+//              wxCB_DROPDOWN | wxCB_READONLY );
 
+   //loj: 6/6/05 get it from theGuiManager
+   functionComboBox = theGuiManager->GetFunctionComboBox(this, ID_COMBO, wxSize(130,-1));
+   
    // wxGrid
    inputGrid =
       new wxGrid( this, -1, wxDefaultPosition, wxSize(290, 23), wxWANTS_CHARS );

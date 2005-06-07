@@ -200,7 +200,8 @@ void VaryPanel::LoadData()
 #endif
 
    mVarNameTextCtrl->Disable(); // we don't want user to edit this box
-   mViewVarButton->Disable(); //loj: disable until Burn parameter is ready
+   //mViewVarButton->Disable(); //loj: disable until Burn parameter is ready
+   mViewVarButton->Enable(); //loj: 5/31/05 enabled
    
    try
    {
@@ -365,17 +366,17 @@ void VaryPanel::OnSolverSelection(wxCommandEvent &event)
 void VaryPanel::OnButton(wxCommandEvent& event)
 {
    if (event.GetEventObject() == mViewVarButton)  
-   {       
+   {
       // show dialog to select parameter
-      ParameterSelectDialog paramDlg(this);
+      ParameterSelectDialog paramDlg(this, false, true, false, false, "Burn");
       paramDlg.ShowModal();
-
+      
       if (paramDlg.IsParamSelected())
       {
          wxString newParamName = paramDlg.GetParamName();
          mVarNameTextCtrl->SetValue(newParamName);
          mSolverData.varName = newParamName;
-
+         
          theApplyButton->Enable(true);
       }
    }

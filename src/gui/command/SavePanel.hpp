@@ -24,11 +24,10 @@
 class SavePanel : public GmatPanel
 {
 public:
-   // constructors
    SavePanel(wxWindow *parent, GmatCommand *cmd);
-    
+   ~SavePanel();
+   
 protected:
-   // member data
    GmatCommand *theCommand;
 
    wxComboBox *mObjectComboBox;

@@ -53,6 +53,16 @@ SavePanel::SavePanel(wxWindow *parent, GmatCommand *cmd)
    }
 }
 
+
+//------------------------------------------------------------------------------
+// ~SavePanel()
+//------------------------------------------------------------------------------
+SavePanel::~SavePanel()
+{
+   theGuiManager->UnregisterComboBox("Spacecraft", mObjectComboBox);   
+}
+
+
 //---------------------------------
 // protected methods
 //---------------------------------

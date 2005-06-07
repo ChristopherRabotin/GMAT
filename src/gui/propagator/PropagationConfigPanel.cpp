@@ -131,6 +131,9 @@ PropagationConfigPanel::~PropagationConfigPanel()
 
    primaryBodiesArray.Clear();
    integratorArray.Clear();
+
+   // Unregister GUI components (loj: 6/7/05 Added)
+   theGuiManager->UnregisterComboBox("CoordinateSystem", originComboBox);
 }
 
 //------------------------------------------

@@ -139,6 +139,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
 
    // mainNotebook = GmatAppData::GetMainNotebook();
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theGuiManager = GuiItemManager::GetInstance(); //loj: 6/6/05 Added
 
    mCommandList.Clear();
    mCommandList.Add("Propagate");
@@ -1108,8 +1109,9 @@ void MissionTree::OnAddManeuver(wxCommandEvent &event)
    {
       InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_DELTA_V,
                     GmatTree::MANEUVER_COMMAND, prevCmd, cmd, &mNumManeuver);
-      
+
       Expand(itemId);
+      theGuiManager->UpdateBurn(); //loj: 6/6/05 Added
    }
    
 #if DEBUG_MISSION_TREE

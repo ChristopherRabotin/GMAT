@@ -21,6 +21,7 @@
 
 #include "MissionTreeItemData.hpp"
 #include "DecoratedTree.hpp"
+#include "GuiItemManager.hpp"
 #include "GuiInterpreter.hpp"
 
 class MissionTree : public DecoratedTree
@@ -41,6 +42,8 @@ private:
    bool gridLines;
 
    GuiInterpreter *theGuiInterpreter;
+   GuiItemManager *theGuiManager;
+   
    // GmatMainNotebook *mainNotebook;
    wxArrayString mCommandList;
    wxWindow *parent;

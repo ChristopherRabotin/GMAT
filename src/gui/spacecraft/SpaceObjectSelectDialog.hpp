@@ -26,6 +26,7 @@ public:
     
    SpaceObjectSelectDialog(wxWindow *parent, wxArrayString &soSelList,
                           wxArrayString &soExcList);
+   ~SpaceObjectSelectDialog();
    
    wxArrayString& GetSpaceObjectNames();
    bool IsSpaceObjectSelected();
@@ -64,4 +65,6 @@ private:
 };
 
 #endif
+
+
 

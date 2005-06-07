@@ -101,12 +101,14 @@ PropagatePanel::PropagatePanel(wxWindow *parent, GmatCommand *cmd)
    theApplyButton->Disable();
 }
 
+
 //------------------------------------------------------------------------------
 // ~PropagatePanel()
 //------------------------------------------------------------------------------
 PropagatePanel::~PropagatePanel()
 {
 }
+
 
 //---------------------------------
 // private methods

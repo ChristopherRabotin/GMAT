@@ -21,7 +21,7 @@
 
 #include "wx/colordlg.h"   // for wxColourDialog
 
-//#define DEBUG_PARAM_DIALOG 1
+//#define DEBUG_PARAM_CREATE_DIALOG 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -37,6 +37,7 @@ BEGIN_EVENT_TABLE(ParameterCreateDialog, GmatDialog)
    EVT_TEXT(ID_TEXTCTRL, ParameterCreateDialog::OnTextUpdate)
 END_EVENT_TABLE()
 
+   
 //------------------------------------------------------------------------------
 // ParameterCreateDialog(wxWindow *parent)
 //------------------------------------------------------------------------------
@@ -53,6 +54,24 @@ ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent)
    Create();
    ShowData();
 }
+
+
+//------------------------------------------------------------------------------
+// ~ParameterCreateDialog()
+//------------------------------------------------------------------------------
+ParameterCreateDialog::~ParameterCreateDialog()
+{
+   #if DEBUG_GUI_ITEM_UNREG
+   MessageInterface::ShowMessage
+      ("ParameterCreateDialog::~ParameterCreateDialog() Unregister Spacecraft:%d\n",
+       mObjectListBox);
+   #endif
+
+   // Unregister GUI components
+   theGuiManager->UnregisterListBox("Spacecraft", mObjectListBox, &mExcludedScList);
+   theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
+}
+
 
 //------------------------------------------------------------------------------
 // virtual void Create()
@@ -140,12 +159,13 @@ void ParameterCreateDialog::Create()
    // wxListBox
    wxArrayString emptyArray;
    mObjectListBox = 
-      theGuiManager->GetSpacecraftListBox(this, -1, wxSize(135, 85), emptyArray);
+      theGuiManager->GetSpacecraftListBox(this, -1, wxSize(135, 85), &mExcludedScList);
+   //loj: 6/3/05 Added &mExcludedScList
    
    mPropertyListBox = 
       theGuiManager->GetPropertyListBox(this, ID_PROPERTY_LISTBOX,
                                         wxSize(135, 85), "Spacecraft");
-
+   
    //loj: 1/19/05 Changed width 130 to 170
    mUserVarListBox =
       theGuiManager->GetUserVariableListBox(this, -1, wxSize(170, 85), "");
@@ -344,11 +364,11 @@ void ParameterCreateDialog::ResetData()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::OnOK(wxCommandEvent &event)
 {
-#if DEBUG_PARAM_DIALOG
+   #if DEBUG_PARAM_CREATE_DIALOG
    MessageInterface::ShowMessage
       ("ParameterCreateDialog::OnOk() mCreateVariableButton->IsEnabled()=%d\n",
        mCreateVariableButton->IsEnabled());
-#endif
+   #endif
    
    if (mCreateVariableButton->IsEnabled())
       mCreateVariable = true;
@@ -595,11 +615,11 @@ void ParameterCreateDialog::CreateVariable()
    std::string varName = std::string(wxvarName.c_str());
    std::string varExpr = std::string(mExprTextCtrl->GetValue().c_str());
    
-#if DEBUG_PARAM_DIALOG
+   #if DEBUG_PARAM_CREATE_DIALOG
    MessageInterface::ShowMessage
       ("ParameterCreateDialog::CreateVariable() varName = "  + varName +
        " varExpr = " + varExpr + "\n");
-#endif
+   #endif
    
    if (varName != "" && varExpr != "")
    {
@@ -617,9 +637,10 @@ void ParameterCreateDialog::CreateVariable()
 
          for (unsigned int i=0; i<tokens.size(); i++)
          {
-#if DEBUG_PARAM_DIALOG
+            #if DEBUG_PARAM_CREATE_DIALOG
             MessageInterface::ShowMessage("token:<%s> \n", tokens[i].c_str());
-#endif
+            #endif
+            
             // if token does not start with number
             if (!isdigit(*tokens[i].c_str()))
             {
@@ -655,18 +676,20 @@ void ParameterCreateDialog::CreateVariable()
          RgbColor color(mColor.Red(), mColor.Green(), mColor.Blue());
          param->SetUnsignedIntParameter("Color", color.GetIntColor());
          
-#if DEBUG_PARAM_DIALOG
+         #if DEBUG_PARAM_CREATE_DIALOG
          MessageInterface::ShowMessage
             ("ParameterCreateDialog::CreateVariable() user var:%s added\n",
              varName.c_str());
-#endif
+         #endif
          
          mParamNames.Add(varName.c_str());
          mIsParamCreated = true;
          theGuiManager->UpdateParameter();
-
+         
+         GmatAppData::GetResourceTree()->UpdateVariable(); //loj: 6/3/05 Added
+         //GmatAppData::GetResourceTree()->UpdateResource(false);
          mUserVarListBox->Append(varName.c_str());
-
+         
          for (int i=0; i<mUserVarListBox->GetCount(); i++)
          {
             if (mUserVarListBox->GetString(i).IsSameAs(varName.c_str()))
@@ -675,7 +698,7 @@ void ParameterCreateDialog::CreateVariable()
                break;
             }
          }
-
+         
          //isVarCreated = true;
          // once variable is created cannot revert (delete) for now
          theOkButton->Enable();

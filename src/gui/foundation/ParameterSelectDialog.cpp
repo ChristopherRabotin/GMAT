@@ -36,14 +36,19 @@ END_EVENT_TABLE()
 
    
 //------------------------------------------------------------------------------
-// ParameterSelectDialog(wxWindow *parent,  bool showArrayAndString = false,
-//                       bool showSysVars = true, bool canSelectMultiVars = false)
+// ParameterSelectDialog(wxWindow *parent,
+//                       bool showArrayAndString = false,
+//                       bool showSysVars = true,
+//                       bool canSelectMultiVars = false,
+//                       bool canSelectWholeObject = false,
+//                       const wxString &ownerType = "Spacecraft")
 //------------------------------------------------------------------------------
 ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent,
                                              bool showArrayAndString,
                                              bool showSysVars,
                                              bool canSelectMultiVars,
-                                             bool canSelectWholeObject)
+                                             bool canSelectWholeObject,
+                                             const wxString &ownerType)
    : GmatDialog(parent, -1, wxString(_T("ParameterSelectDialog")))
 {
    mIsParamSelected = false;
@@ -53,6 +58,8 @@ ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent,
    mShowSysVars = showSysVars;
    mCanSelectMultiVars = canSelectMultiVars;
    mCanSelectWholeObject = canSelectWholeObject;
+   mOwnerType = ownerType;
+   
    mParamNameArray.Clear();
 
    Create();
@@ -60,7 +67,23 @@ ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent,
 }
 
 
-//loj: 2/8/05 Added
+//------------------------------------------------------------------------------
+// ~ParameterSelectDialog()
+//------------------------------------------------------------------------------
+ParameterSelectDialog::~ParameterSelectDialog()
+{
+   #if DEBUG_PARAM_SELECT_DIALOG
+   MessageInterface::ShowMessage
+      ("ParameterSelectDialog::~ParameterSelectDialog() Unregister Spacecraft:%d\n",
+       mObjectComboBox);
+   #endif
+   
+   theGuiManager->UnregisterComboBox("Spacecraft", mObjectComboBox);
+   theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
+   
+}
+
+
 //------------------------------------------------------------------------------
 //void SetParamNameArray(const wxArrayString &paramNames)
 //------------------------------------------------------------------------------
@@ -107,14 +130,14 @@ void ParameterSelectDialog::Create()
    
    int bsize = 2;
    wxString emptyList[] = {};
-
+   
    //------------------------------------------------------
    // available variables list (1st column)
    //------------------------------------------------------
    mVarBoxSizer = new wxBoxSizer(wxVERTICAL);
-    
+   
    wxButton *createVarButton;
-
+   
    if (mShowSysVars)
    {
       mParamBoxSizer = theGuiManager->
@@ -126,7 +149,7 @@ void ParameterSelectDialog::Create()
                               &mCoordSysComboBox, ID_COMBOBOX,
                               &mCentralBodyComboBox, ID_COMBOBOX,
                               &mCoordSysLabel, &mCoordSysSizer,
-                              mShowArrayAndString);
+                              mShowArrayAndString, mOwnerType);
    }
    else
    {
@@ -303,7 +326,7 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
          mVarSelectedListBox->SetSelection(0);
       else
          mVarSelectedListBox->SetSelection(sel-1);
-
+      
       if (mVarSelectedListBox->GetCount() > 0)
          theOkButton->Enable();
       else
@@ -327,8 +350,16 @@ void ParameterSelectDialog::OnCreateVariable(wxCommandEvent& event)
 
    if (paramDlg.IsParamCreated())
    {
-      mUserParamListBox->Set(theGuiManager->GetNumUserVariable(),
-                             theGuiManager->GetUserVariableList());
+      if (mShowArrayAndString)
+      {
+         mUserParamListBox->Set(theGuiManager->GetNumUserParameter(),
+                                theGuiManager->GetUserParameterList());
+      }
+      else
+      {
+         mUserParamListBox->Set(theGuiManager->GetNumUserVariable(),
+                                theGuiManager->GetUserVariableList());
+      }
    }
 }
 

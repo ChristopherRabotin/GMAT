@@ -29,6 +29,7 @@ class XyPlotSetupPanel: public GmatPanel
 {
 public:
    XyPlotSetupPanel(wxWindow *parent, const wxString &subscriberName);
+   ~XyPlotSetupPanel();
    
 protected:
    XyPlot *mXyPlot;

@@ -68,17 +68,28 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
    //MessageInterface::ShowMessage("ReportFileSetupPanel() entering...\n");
    //MessageInterface::ShowMessage("ReportFileSetupPanel() subscriberName = " +
    //                              std::string(subscriberName.c_str()) + "\n");
-    
+   
    Subscriber *subscriber =
       theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
-
+   
    reportFile = (ReportFile*)subscriber;
-
+   
    Create();
    Show();
    mUseUserParam = false;
    theApplyButton->Disable();
 }
+
+
+//------------------------------------------------------------------------------
+// ~ReportFileSetupPanel()
+//------------------------------------------------------------------------------
+ReportFileSetupPanel::~ReportFileSetupPanel()
+{
+   theGuiManager->UnregisterComboBox("Spacecraft", mObjectComboBox);   
+   theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);   
+}
+
 
 //-------------------------------
 // protected methods
@@ -243,10 +254,10 @@ void ReportFileSetupPanel::LoadData()
 {
    // Set the pointer for the "Show Script" button
    mObject = reportFile;
-    
+   
    // load data from the core engine
    writeCheckBox->SetValue(reportFile->IsActive());
-
+   
    // load file name data from core engine
    int filenameId = reportFile->GetParameterID("Filename");
    std::string filename = reportFile->GetStringParameter(filenameId);
@@ -257,7 +268,7 @@ void ReportFileSetupPanel::LoadData()
       showHeaderCheckBox->SetValue(true);
    else
       showHeaderCheckBox->SetValue(false);                     
-    
+   
    int spacesId = reportFile->GetParameterID("ColumnWidth");
    wxString numSpacesValue;
    numSpacesValue.Printf("%d", reportFile->GetIntegerParameter(spacesId));
@@ -377,7 +388,7 @@ void ReportFileSetupPanel::OnTextChange(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void OnAddSpacecraft(wxCommandEvent& event)
+// void OnAddVariable(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::OnAddVariable(wxCommandEvent& event)
 {
@@ -407,7 +418,7 @@ void ReportFileSetupPanel::OnAddVariable(wxCommandEvent& event)
 
 
 //------------------------------------------------------------------------------
-// void OnRemoveSpacecraft(wxCommandEvent& event)
+// void OnRemoveVariable(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::OnRemoveVariable(wxCommandEvent& event)
 {
@@ -428,7 +439,7 @@ void ReportFileSetupPanel::OnRemoveVariable(wxCommandEvent& event)
 
 
 //------------------------------------------------------------------------------
-// void OnClearSpacecraft(wxCommandEvent& event)
+// void OnClearVariable(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::OnClearVariable(wxCommandEvent& event)
 {
@@ -445,9 +456,13 @@ void ReportFileSetupPanel::OnCreateVariable(wxCommandEvent& event)
    paramDlg.ShowModal();
 
    if (paramDlg.IsParamCreated())
-   {
+   {      
       mUserParamListBox->Set(theGuiManager->GetNumUserVariable(),
                              theGuiManager->GetUserVariableList());
+
+      mUserParamListBox->SetSelection(0);
+      mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
+      mUseUserParam = true; //loj: 6/6/05 Added
    }
 }
 
