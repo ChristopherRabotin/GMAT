@@ -9,9 +9,13 @@ PROJECT_ROOT    = ../..
 # Source file for creating new library
 SRC =	AxisSystem.cpp BodyFixedAxes.cpp CoordinateBase.cpp CoordinateConverter.cpp \
 	CoordinateSystem.cpp CoordinateSystemException.cpp DynamicAxes.cpp \
-	EquatorAxes.cpp InertialAxes.cpp ItrfCoefficientsFile.cpp \
+	EquatorAxes.cpp GeocentricSolarAxes.cpp \
+	GeocentricSolarEclipticAxes.cpp GeocentricSolarMagneticAxes.cpp \
+	InertialAxes.cpp ItrfCoefficientsFile.cpp \
 	MeanOfDateAxes.cpp MJ2000EcAxes.cpp MJ2000EqAxes.cpp \
+	MODEcAxes.cpp MOEEcAxes.cpp \
 	MODEqAxes.cpp MOEEqAxes.cpp ObjectReferencedAxes.cpp \
+	TODEcAxes.cpp TOEEcAxes.cpp \
 	TODEqAxes.cpp TOEEqAxes.cpp TrueOfDateAxes.cpp
 
 # Define macro for using the included file 
