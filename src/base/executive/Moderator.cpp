@@ -22,6 +22,7 @@
 #include "GravityField.hpp"
 #include "TimeSystemConverter.hpp" // for SetLeapSecsFileReader(), SetEopFile()
 #include "BodyFixedAxes.hpp"       // for SetEopFile(), SetCoefficientsFile()
+#include "ObjectReferencedAxes.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_RUN 1
@@ -37,8 +38,8 @@
 //#define DEBUG_CONFIG 1
 //#define DEBUG_FINALIZE 1
 
-#define DEBUG_CREATE_VAR 1
-//#define DEBUG_CREATE_BURN 1
+//#define DEBUG_CREATE_VAR 1
+//#define DEBUG_CREATE_BURN_PARAM 1
 
 //---------------------------------
 // static data
@@ -366,7 +367,6 @@ StringArray Moderator::GetListOfFactoryItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 StringArray& Moderator::GetListOfConfiguredItems(Gmat::ObjectType type)
 {
-   //loj: 5/6/05 Added if block
    if (type == Gmat::CELESTIAL_BODY || type == Gmat::SPACE_POINT)
    {
       theSpacePointList.clear();
@@ -413,7 +413,6 @@ GmatBase* Moderator::GetConfiguredItem(const std::string &name)
 
    GmatBase *obj = theConfigManager->GetItem(name);
 
-   //loj: 5/9/05 Added
    if (obj == NULL)
    {
       // try SolarSystem
@@ -770,7 +769,7 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type, const std::str
          throw GmatBaseException("Error Creating Spacecraft");
       }
 
-      if (type == "Spacecraft") //loj: 5/4/05 Added
+      if (type == "Spacecraft")
          // Set default CoordinateSystem
          sc->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
       
@@ -1832,7 +1831,6 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
             if (type == "OpenGLPlot")
             {
                // add default spacecraft and coordinate system
-                //loj: 5/17/05 removed the index
                sub->SetStringParameter("Add", GetDefaultSpacecraft()->GetName());
                sub->SetStringParameter("CoordinateSystem", "EarthMJ2000Eq");
             }
@@ -1989,6 +1987,7 @@ GmatCommand* Moderator::CreateCommand(const std::string &type,
    return cmd;
 }
 
+
 //------------------------------------------------------------------------------
 // GmatCommand* CreateDefaultCommand(const std::string &type,
 //                                   const std::string &name)
@@ -2031,7 +2030,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       // set burn
       id = cmd->GetParameterID("Burn");
       cmd->SetStringParameter(id, GetDefaultBurn()->GetName());
-
+      
       // set spacecraft
       id = cmd->GetParameterID("Spacecraft");
       cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName());
@@ -2051,7 +2050,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
                                     GetDefaultSolver()->GetName());
       id = cmd->GetParameterID("TargeterName");
       cmd->SetStringParameter(id, solver->GetName());
-
+      
       // set variable parameter
       id = cmd->GetParameterID("Variable");
       //----------------------------------------------------
@@ -3032,12 +3031,32 @@ void Moderator::CreateDefaultMission()
       MessageInterface::ShowMessage("-->default PropSetup created\n");
       #endif
 
-      #ifdef DEBUG_CREATE_BURN
+      //loj: 6/7/05 Added
+      #ifdef DEBUG_CREATE_BURN_PARAM
       // Hardware 
       CreateHardware("FuelTank", "DefaultFuelTank");
       CreateHardware("Thruster", "DefaultThruster");
       // Burn
       GetDefaultBurn();
+      
+      // Create VNB CoordinateSystem
+      CoordinateSystem *vnb = CreateCoordinateSystem("VNB", false);
+      ObjectReferencedAxes *orAxis =
+         (ObjectReferencedAxes*)CreateAxisSystem("ObjectReferenced", "ObjectReferenced");
+      orAxis->SetEopFile(theEopFile);
+      orAxis->SetCoefficientsFile(theItrfFile);
+      orAxis->SetStringParameter("XAxis", "V");
+      orAxis->SetStringParameter("YAxis", "N");
+      orAxis->SetStringParameter("Primary", "Earth");
+      orAxis->SetStringParameter("Secondary", "DefaultSC");
+      vnb->SetStringParameter("Origin", "Earth");
+      vnb->SetStringParameter("J2000Body", "Earth");
+      vnb->SetRefObject(orAxis, Gmat::AXIS_SYSTEM, orAxis->GetName());
+      
+      // Burn parameters
+      CreateParameter("DeltaV1", "DefaultIB.VNB.DeltaV1");
+      CreateParameter("DeltaV2", "DefaultIB.VNB.DeltaV2");
+      CreateParameter("DeltaV3", "DefaultIB.VNB.DeltaV3");
       #endif
       
       // Time parameters
@@ -3082,17 +3101,17 @@ void Moderator::CreateDefaultMission()
       CreateParameter("VMAG", "DefaultSC.EarthMJ2000Eq.VMAG");
       CreateParameter("RAV", "DefaultSC.EarthMJ2000Eq.RAV");
       CreateParameter("DECV", "DefaultSC.EarthMJ2000Eq.DECV");
-
+      
       // Angular parameters
       CreateParameter("SemilatusRectum", "DefaultSC.Earth.SemilatusRectum");
       CreateParameter("HMAG", "DefaultSC.HMAG");
       CreateParameter("HX", "DefaultSC.EarthMJ2000Eq.HX");
       CreateParameter("HY", "DefaultSC.EarthMJ2000Eq.HY");
       CreateParameter("HZ", "DefaultSC.EarthMJ2000Eq.HZ");
-
+      
       // Environmental parameters
       CreateParameter("AtmosDensity", "DefaultSC.Earth.AtmosDensity");
-
+      
       // Planet parameters
       CreateParameter("GHA", "DefaultSC.Earth.GHA");
       CreateParameter("Longitude", "DefaultSC.Earth.Longitude");
@@ -3158,12 +3177,12 @@ void Moderator::CreateDefaultMission()
       
       // OpenGLPlot
       Subscriber *sub;
-      sub = CreateSubscriber("OpenGLPlot", "DefaultOpenGL"); //loj: 5/17/05 Changed Gl to GL
-      sub->SetStringParameter("Add", "DefaultSC"); // loj: 5/9/05 Removed the index
+      sub = CreateSubscriber("OpenGLPlot", "DefaultOpenGL");
+      sub->SetStringParameter("Add", "DefaultSC");
       sub->SetStringParameter("CoordinateSystem", "EarthMJ2000Eq");
       
       #if DEBUG_ACTION_REMOVE
-         sub->SetStringParameter("Add", "Spacecraft1"); // loj: 5/9/05 Removed the index
+         sub->SetStringParameter("Add", "Spacecraft1");
          sub->TakeAction("Remove", "Spacecraft1");
       #endif
          
@@ -3394,9 +3413,10 @@ Burn* Moderator::GetDefaultBurn()
    else
    {
       // create ImpulsiveBurn
-      return CreateBurn("ImpulsiveBurn", "DefaultImpulsiveBurn");
+      return CreateBurn("ImpulsiveBurn", "DefaultIB");
    }
 }
+
 
 //------------------------------------------------------------------------------
 // Subscriber* GetDefaultSubscriber()
@@ -3540,7 +3560,7 @@ void Moderator::AddSolarSystemToSandbox(Integer index)
    //sandboxes[index]->AddSolarSystem(solarSys);
    sandboxes[index]->AddSolarSystem(theDefaultSolarSystem);
 
-   // Add LibrationPoint and Barycenter objects (loj: 5/9/05 Added)
+   // Add LibrationPoint and Barycenter objects
    StringArray cpNames = theConfigManager->GetListOfItems(Gmat::CALCULATED_POINT);
 
    CalculatedPoint *cp;
