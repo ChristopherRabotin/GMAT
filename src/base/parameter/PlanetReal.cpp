@@ -127,11 +127,11 @@ Real PlanetReal::EvaluateReal()
 //------------------------------------------------------------------------------
 void PlanetReal::SetSolarSystem(SolarSystem *ss)
 {
-#if DEBUG_PLANET_REAL
+   #if DEBUG_PLANET_REAL
    MessageInterface::ShowMessage
       ("PlanetReal::SetSolarSystem() ss=%s to %s\n", ss->GetTypeName().c_str(),
        this->GetName().c_str());
-#endif
+   #endif
    
    if (PlanetData::GetRefObject(Gmat::SOLAR_SYSTEM, ss->GetName()) == NULL)
       PlanetData::AddRefObject(ss->GetType(), ss->GetName(), ss);
@@ -210,8 +210,8 @@ bool PlanetReal::Initialize()
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 bool PlanetReal::RenameRefObject(const Gmat::ObjectType type,
-                              const std::string &oldName,
-                              const std::string &newName)
+                                 const std::string &oldName,
+                                 const std::string &newName)
 {
    return PlanetData::RenameRefObject(type, oldName, newName);
 }
@@ -270,10 +270,20 @@ const StringArray& PlanetReal::GetRefObjectNameArray(const Gmat::ObjectType type
  */
 //------------------------------------------------------------------------------
 bool PlanetReal::SetRefObjectName(const Gmat::ObjectType type,
-                                    const std::string &name)
+                                  const std::string &name)
 {
-   return PlanetData::SetRefObjectName(type, name);
+   //loj: 5/27/05 write parameter name, if failed to set
+   bool ret = PlanetData::SetRefObjectName(type, name);
+   if (!ret)
+      MessageInterface::ShowMessage
+         ("*** Warning *** PlanetReal::SetRefObjectName() RefObjType:%s is not valid "
+          "for ParameterName:%s\n", GmatBase::GetObjectTypeString(type).c_str(),
+          this->GetName().c_str());
+   
+   return ret;
+   //return PlanetData::SetRefObjectName(type, name);
 }
+
 
 //------------------------------------------------------------------------------
 // virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
@@ -293,6 +303,7 @@ GmatBase* PlanetReal::GetRefObject(const Gmat::ObjectType type,
 {
    return PlanetData::GetRefObject(type, name);
 }
+
 
 //------------------------------------------------------------------------------
 // virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,

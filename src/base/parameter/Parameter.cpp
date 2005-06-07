@@ -135,8 +135,8 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    
    mIsPlottable = true;
 
-   // register parameter names with info
-   ParameterInfo::Instance()->Add(name, depObj);
+   // register parameter names with info (loj: 6/7/05 Added ownerType)
+   ParameterInfo::Instance()->Add(typeStr, ownerType, name, depObj);
 
    // set parameter count
    parameterCount = ParameterParamCount;

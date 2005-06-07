@@ -303,11 +303,12 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          }
       }
    }
-   
+
+   //loj: 6/7/05 Added type name
    #if DEBUG_REFDATA_OBJECT
    MessageInterface::ShowMessage
-      ("*** Warning *** RefData::SetRefObject() Cannot find type=%d, name=%s\n",
-       type, name.c_str());
+      ("*** Warning *** RefData::SetRefObject() Cannot find type=%s\n",
+       GmatBase::GetObjectTypeString(type).c_str());
    #endif
    
    return false;
@@ -413,11 +414,15 @@ bool RefData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
          return true;
       }
    }
-   else
-   {
-      MessageInterface::ShowMessage
-         ("*** Error *** RefData::AddRefObject() type:%d is not valid object type\n");
-   }
+   //loj: 6/7/05 Commented out
+//    else
+//    {
+//       #if DEBUG_REFDATA_OBJECT
+//       MessageInterface::ShowMessage
+//          ("*** Warning *** RefData::AddRefObject() type:%s is not valid "
+//           "object type\n", GmatBase::GetObjectTypeString(type).c_str());
+//       #endif
+//    }
    
    return false;
 }
@@ -438,8 +443,8 @@ bool RefData::SetRefObjectWithNewName(GmatBase *obj, const Gmat::ObjectType type
 {
    #if DEBUG_REFDATA_OBJECT
    MessageInterface::ShowMessage
-      ("RefData::SetRefObjectWithNewName() numRefObjects=%d, type=%d, name=%s obj addr=%d\n",
-       mNumRefObjects, type, name.c_str(), obj);
+      ("RefData::SetRefObjectWithNewName() numRefObjects=%d, type=%d, name=%s "
+       "obj addr=%d\n", mNumRefObjects, type, name.c_str(), obj);
    #endif
    
    #if DEBUG_REFDATA_OBJECT > 1
@@ -466,10 +471,12 @@ bool RefData::SetRefObjectWithNewName(GmatBase *obj, const Gmat::ObjectType type
          return true;
       }
    }
-   
+
+   //loj: 6/7/05 Added type name
    #if DEBUG_REFDATA_OBJECT
    MessageInterface::ShowMessage
-      ("*** Warning *** RefData::SetRefObjectWithName() Cannot find type=%d\n", type);
+      ("*** Warning *** RefData::SetRefObjectWithName() Cannot find type=%s\n",
+       GmatBase::GetObjectTypeString(type).c_str());
    #endif
    
    return false;

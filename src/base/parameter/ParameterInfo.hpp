@@ -31,10 +31,13 @@ public:
    static ParameterInfo* Instance();
    
    Integer GetNumParameters() const;
+   const StringArray& GetTypesOfParameters();
    const StringArray& GetNamesOfParameters();
+   Gmat::ObjectType GetOwnerType(const std::string &type);
    GmatParam::DepObject GetDepObjectType(const std::string &name);
    
-   void Add(const std::string &name, GmatParam::DepObject);
+   void Add(const std::string type, Gmat::ObjectType owner,
+            const std::string &name, GmatParam::DepObject depType);
    void Remove(const std::string &name);
    
 protected:
@@ -43,6 +46,8 @@ private:
    static ParameterInfo *theInstance;
    
    std::map<std::string, GmatParam::DepObject> mParamDepObjMap;
+   std::map<std::string, Gmat::ObjectType> mParamOwnerMap;
+   StringArray mParamTypes;
    StringArray mParamNames;
    Integer mNumParams;
    

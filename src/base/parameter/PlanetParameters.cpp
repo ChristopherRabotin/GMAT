@@ -45,8 +45,9 @@ GHA::GHA(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "Earth";
    PlanetData::mCentralBodyName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
-   SetRefObjectName(Gmat::PARAMETER, "CurrA1MJD"); //if parameter, use type name
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
+   //loj: 5/27/05 Commented out
+   //SetRefObjectName(Gmat::PARAMETER, "CurrA1MJD"); //if parameter, use type name
 }
 
 
