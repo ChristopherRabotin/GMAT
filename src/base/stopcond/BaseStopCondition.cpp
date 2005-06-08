@@ -30,6 +30,9 @@
 #endif
 
 //#define DEBUG_BASE_STOPCOND 1
+//#define DEBUG_BASE_STOPCOND_INIT 1
+//#define DEBUG_BASE_STOPCOND_GET 1
+//#define DEBUG_BASE_STOPCOND_SET 1
 //#define DEBUG_RENAME 1
 
 //---------------------------------
@@ -584,7 +587,7 @@ bool BaseStopCondition::Initialize()
       //loj: How about mRefFrame? - need for crossing plane
    }
 
-   #if DEBUG_BASE_STOPCOND
+   #if DEBUG_BASE_STOPCOND_INIT
    MessageInterface::ShowMessage
       ("BaseStopCondition::Initialize() mInitialized=%d\n",
        mInitialized);
@@ -663,7 +666,6 @@ bool BaseStopCondition::Validate()
       }
    }
 
-   //loj: 4/12/05 Added to set SpacePoint object for internal parameters.
    // Apoapsis and Periapsis need additional parameters
    if (valid)
    {
@@ -703,13 +705,22 @@ bool BaseStopCondition::Validate()
          {
             if (mRmagParam == NULL)
             {
-               #if DEBUG_BASE_STOPCOND
+               #if DEBUG_BASE_STOPCOND_INIT
                MessageInterface::ShowMessage
                   ("BaseStopCondition::Validate(): Creating SphRMag...\n");
                #endif
                
+               std::string depObjName = mStopParam->GetStringParameter("DepObject");
+               
+               #if DEBUG_BASE_STOPCOND_INIT
+               MessageInterface::ShowMessage
+                  ("BaseStopCondition::Validate() depObjName of mStopParam=%s\n",
+                   depObjName.c_str());
+               #endif
+               
                mRmagParam = new SphRMag("");
-            
+               mRmagParam->SetStringParameter("DepObject", depObjName);
+               
                mRmagParam->AddRefObject
                   (mStopParam->GetRefObject(Gmat::SPACECRAFT,
                                             mStopParam->GetRefObjectName(Gmat::SPACECRAFT)));
@@ -720,16 +731,25 @@ bool BaseStopCondition::Validate()
                   (mStopParam->GetRefObject(Gmat::SPACE_POINT,
                                             mStopParam->GetRefObjectName(Gmat::SPACE_POINT)),
                    true);
-            
+               
                mRmagParam->SetInternalCoordSystem(mStopParam->GetInternalCoordSystem());
                mRmagParam->AddRefObject(mSolarSystem);
                mRmagParam->Initialize();
+               
+               // set mRange (loj: 6/8/05 Added)
+               if (depObjName == "Earth")
+                  mRange = 5.0e5;
+               else if (depObjName == "Luna")
+                  //mRange = 2.0e5; // Swingby has this.
+                  mRange = 5.0e5;
+               else
+                  mRange = 1.0e10;
             }
          }
       }
    }
-
-   #if DEBUG_BASE_STOPCOND
+   
+   #if DEBUG_BASE_STOPCOND_INIT
    if (!valid)
    {
       MessageInterface::ShowMessage
@@ -737,9 +757,9 @@ bool BaseStopCondition::Validate()
           "mEpochParam=%d, mStopParam=%d, mInterpolator=%d\n",
           mUseInternalEpoch, mEpochParam, mStopParam, mInterpolator);
    }
-
+   
    MessageInterface::ShowMessage
-      ("BaseStopCondition::Validate() Exiting valid=%d\n", valid);
+      ("BaseStopCondition::Validate() Exiting valid=%d, mRange=%f\n", valid, mRange);
    
    #endif
    
@@ -759,11 +779,11 @@ bool BaseStopCondition::RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName)
 {
-#if DEBUG_RENAME
+   #if DEBUG_RENAME
    MessageInterface::ShowMessage
       ("BaseStopCondition::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
-#endif
+   #endif
    
    if (type == Gmat::SPACECRAFT)
    {
@@ -799,8 +819,11 @@ std::string BaseStopCondition::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer BaseStopCondition::GetParameterID(const std::string &str) const
 {
-   //MessageInterface::ShowMessage("BaseStopCondition::GetParameterID() str = %s\n", str.c_str());
-    
+   #if DEBUG_BASE_STOPCOND_GET
+   MessageInterface::ShowMessage
+      ("BaseStopCondition::GetParameterID() str = %s\n", str.c_str());
+   #endif
+   
    for (int i=GmatBaseParamCount; i<BaseStopConditionParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
@@ -957,9 +980,12 @@ Real BaseStopCondition::SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 Real BaseStopCondition::SetRealParameter(const std::string &label, const Real value)
 {
-   //MessageInterface::ShowMessage("BaseStopCondition::SetRealParameter() label=%s, "
-   //                              "value=%d\n", label.c_str(), value);
-    
+   #if DEBUG_BASE_STOPCOND_SET
+   MessageInterface::ShowMessage
+      ("BaseStopCondition::SetRealParameter() label=%s, "
+       "value=%d\n", label.c_str(), value);
+   #endif
+   
    return SetRealParameter(GetParameterID(label), value);
 }
 
@@ -981,11 +1007,6 @@ std::string BaseStopCondition::GetStringParameter(const Integer id) const
          return mStopParam->GetTypeName();
       else
          return "UndefinedStopVar";
-      //      case ECC_VAR:
-      //          if (mEccParam != NULL)
-      //              return mEccParam->GetTypeName();
-      //          else
-      //              return "UndefinedEccParam";
    case INTERPOLATOR:
       if (mInterpolator != NULL)
          return mInterpolator->GetTypeName();
@@ -1007,9 +1028,11 @@ std::string BaseStopCondition::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 std::string BaseStopCondition::GetStringParameter(const std::string &label) const
 {
-   //MessageInterface::ShowMessage("BaseStopCondition::GetStringParameter() label = %s\n",
-   //                              label.c_str());
-
+   #if DEBUG_BASE_STOPCOND_GET
+   MessageInterface::ShowMessage
+      ("BaseStopCondition::GetStringParameter() label = %s\n", label.c_str());
+   #endif
+   
    return GetStringParameter(GetParameterID(label));
 }
 
@@ -1019,9 +1042,12 @@ std::string BaseStopCondition::GetStringParameter(const std::string &label) cons
 //------------------------------------------------------------------------------
 bool BaseStopCondition::SetStringParameter(const Integer id, const std::string &value)
 {
-   //MessageInterface::ShowMessage("BaseStopCondition::SetStringParameter() id = %d, "
-   //                              "value = %s \n", id, value.c_str());
-    
+   #if DEBUG_BASE_STOPCOND_SET
+   MessageInterface::ShowMessage
+      ("BaseStopCondition::SetStringParameter() id = %d, value = %s \n",
+       id, value.c_str());
+   #endif
+   
    switch (id)
    {
    case EPOCH_VAR:
@@ -1045,9 +1071,12 @@ bool BaseStopCondition::SetStringParameter(const Integer id, const std::string &
 bool BaseStopCondition::SetStringParameter(const std::string &label,
                                            const std::string &value)
 {
-   //MessageInterface::ShowMessage("BaseStopCondition::SetStringParameter() label = %s, "
-   //                              "value = %s \n", label.c_str(), value.c_str());
-
+   #if DEBUG_BASE_STOPCOND_SET
+   MessageInterface::ShowMessage
+      ("BaseStopCondition::SetStringParameter() label = %s, "
+       "value = %s \n", label.c_str(), value.c_str());
+   #endif
+   
    return SetStringParameter(GetParameterID(label), value);
 }
 
