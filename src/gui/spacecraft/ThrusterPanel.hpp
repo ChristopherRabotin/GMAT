@@ -23,6 +23,7 @@
 
 #include "gmatwxdefs.hpp"
 #include "GuiInterpreter.hpp"
+#include "GuiItemManager.hpp"
 
 #include "gmatdefs.hpp"
 #include "Spacecraft.hpp"
@@ -39,24 +40,27 @@ public:
     
 private:    
     void Create();
-    void DisplayData();
+    //void DisplayData();
     
     // Event Handling
     DECLARE_EVENT_TABLE();
-    void OnSelect(wxCommandEvent &event);
+    //void OnSelect(wxCommandEvent &event);
     void OnButtonClick(wxCommandEvent &event);
     
     Spacecraft *theSpacecraft;
     GuiInterpreter *theGuiInterpreter;
+    GuiItemManager *theGuiManager;
     
-    wxArrayString availableThrusterArray;
-    wxArrayString selectedThrusterArray;
-        
-    Integer availableThrusterCount;
-    Integer selectedThrusterCount;
+    wxArrayString mExcludedThrusterList;
     
-    Integer currentAvailThruster;
-    Integer currentSelectedThruster;
+//    wxArrayString availableThrusterArray;
+//    wxArrayString selectedThrusterArray;
+//        
+//    Integer availableThrusterCount;
+//    Integer selectedThrusterCount;
+//    
+//    Integer currentAvailThruster;
+//    Integer currentSelectedThruster;
     
     wxButton *theApplyButton;
     wxButton *selectButton;
