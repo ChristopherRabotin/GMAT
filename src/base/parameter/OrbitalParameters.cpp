@@ -48,7 +48,7 @@ VelApoapsis::VelApoapsis(const std::string &name, GmatBase *obj)
                GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -166,7 +166,7 @@ VelPeriapsis::VelPeriapsis(const std::string &name, GmatBase *obj)
                GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -284,7 +284,7 @@ Apoapsis::Apoapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Apoapsis", obj, "Apoapsis", " ", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -350,20 +350,23 @@ Apoapsis::~Apoapsis()
 //------------------------------------------------------------------------------
 bool Apoapsis::Evaluate()
 {
-   Rvector6 cartState = OrbitData::GetCartState();
+   //loj: 6/8/05 call GetRelativeCartState()
+   //Rvector6 cartState = OrbitData::GetCartState();
+   Rvector6 cartState = OrbitData::GetRelativeCartState(mOrigin);
+   
    if (cartState == Rvector6::RVECTOR6_UNDEFINED)
       return false;
-
+   
    // compute position and velocity unit vectors
    Rvector3 pos = Rvector3(cartState[0], cartState[1], cartState[2]);
    Rvector3 vel = Rvector3(cartState[3], cartState[4], cartState[5]);
    Rvector3 R = pos.GetUnitVector();
    Rvector3 V = vel.GetUnitVector();
-    
+   
    // compute cos(90 - beta) as the dot product of the R and V vectors
    Real rdotv = R*V;
    mRealValue = rdotv;
-    
+   
    //MessageInterface::ShowMessage("Apoapsis::Evaluate() r=%f,%f,%f, v=%f,%f,%f, r.v=%f\n",
    //                              R[0], R[1], R[2], V[0], V[1], V[2], rdotv);
    return true;
@@ -413,7 +416,7 @@ Periapsis::Periapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Periapsis", obj, "Periapsis", " ", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -478,10 +481,16 @@ Periapsis::~Periapsis()
 //------------------------------------------------------------------------------
 bool Periapsis::Evaluate()
 {
-   Rvector6 cartState = OrbitData::GetCartState();
+   //loj: 6/8/05 call GetRelativeCartState()
+   //Rvector6 cartState = OrbitData::GetCartState();
+   Rvector6 cartState = OrbitData::GetRelativeCartState(mOrigin);
+   //MessageInterface::ShowMessage
+   //   ("===> Periapsis::Evaluate() mOrigin=%s, cartState=%s\n",
+   //    mOrigin->GetName().c_str(), cartState.ToString().c_str());
+   
    if (cartState == Rvector6::RVECTOR6_UNDEFINED)
       return false;
-
+   
    // compute position and velocity unit vectors
    Rvector3 pos = Rvector3(cartState[0], cartState[1], cartState[2]);
    Rvector3 vel = Rvector3(cartState[3], cartState[4], cartState[5]);
@@ -489,8 +498,9 @@ bool Periapsis::Evaluate()
    Rvector3 V = vel.GetUnitVector();
 
    // compute cos(90 - beta) as the dot product of the R and V vectors
-   Real rdotv = R*V;
-   mRealValue = rdotv;
+//    Real rdotv = R*V;
+//    mRealValue = rdotv;
+   mRealValue = R*V;
 
    return true;
 }
@@ -539,7 +549,7 @@ OrbitPeriod::OrbitPeriod(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "OrbitPeriod", obj, "Orbit Period", "s", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -653,7 +663,7 @@ RadApoapsis::RadApoapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "RadApo", obj, "Radius at Apoapsis", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -767,7 +777,7 @@ RadPeriapsis::RadPeriapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "RadPer", obj, "Radius at Periapsis", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -881,7 +891,7 @@ C3Energy::C3Energy(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "C3Energy", obj, "C-3 Energy", "Km^2/s^2", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -995,7 +1005,7 @@ Energy::Energy(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Energy", obj, "Energy", "Km^2/s^2", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -1109,7 +1119,7 @@ Altitude::Altitude(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Altitude", obj, "Altitude", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -1175,7 +1185,6 @@ Altitude::~Altitude()
 //------------------------------------------------------------------------------
 bool Altitude::Evaluate()
 {
-   //loj: 2/16/05 Changed from GetSphReal
    mRealValue = OrbitData::GetSphRaDecReal("Altitude");
    
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
