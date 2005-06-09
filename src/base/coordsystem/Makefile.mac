@@ -9,8 +9,7 @@ PROJECT_ROOT    = ../..
 # Source file for creating new library
 SRC =	AxisSystem.cpp BodyFixedAxes.cpp CoordinateBase.cpp CoordinateConverter.cpp \
 	CoordinateSystem.cpp CoordinateSystemException.cpp DynamicAxes.cpp \
-	EquatorAxes.cpp GeocentricSolarAxes.cpp \
-	GeocentricSolarEclipticAxes.cpp GeocentricSolarMagneticAxes.cpp \
+	EquatorAxes.cpp \
 	InertialAxes.cpp ItrfCoefficientsFile.cpp \
 	MeanOfDateAxes.cpp MJ2000EcAxes.cpp MJ2000EqAxes.cpp \
 	MODEcAxes.cpp MOEEcAxes.cpp \
