@@ -181,6 +181,8 @@ bool Cowell::Step(void)
 {
     if (!initialized)
         return false;
+        
+    return true;
 }
 
 //------------------------------------------------------------------------------
