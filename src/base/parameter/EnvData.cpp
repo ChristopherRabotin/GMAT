@@ -139,12 +139,25 @@ Real EnvData::GetEnvReal(const std::string &str)
       
       // Call GetDensity() on if origin is CelestialBody
       if (mOrigin->IsOfType(Gmat::CELESTIAL_BODY))
-         ((CelestialBody*)mOrigin)->GetDensity(state, &density, a1mjd, 1);
-
-      #ifdef DEBUG_ENVDATA_RUN
-         MessageInterface::ShowMessage
-            ("EnvData::GetEnvReal() density=%g\n", density);
-      #endif
+      {
+         if (((CelestialBody*)mOrigin)->GetDensity(state, &density, a1mjd, 1))
+         {
+            //loj: 6/9/05 Added
+            #ifdef DEBUG_ENVDATA_RUN
+            MessageInterface::ShowMessage
+               ("EnvData::GetEnvReal() mOrigin=%s, a1mjd=%f, state=%s, density=%g\n",
+                mOrigin->GetName().c_str(), a1mjd, cartState.ToString().c_str(), density);
+            #endif
+         }
+         else
+         {
+            #ifdef DEBUG_ENVDATA_RUN
+            MessageInterface::ShowMessage
+               ("EnvData::GetEnvReal() AtmosphereModel used for %s is NULL\n",
+                mOrigin->GetName().c_str());
+            #endif
+         }
+      }
       
       return density;
    }
