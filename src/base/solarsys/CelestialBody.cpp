@@ -40,6 +40,8 @@
 #include "TimeTypes.hpp"
 #include "AngleUtil.hpp"
 
+//#define DEBUG_CELESTIAL_BODY 1
+
 using namespace GmatMathUtil;
 using namespace std; 
 
@@ -263,11 +265,16 @@ CelestialBody::CelestialBody(const CelestialBody &cb) :
 
    if (cb.atmModel)
    {
-      MessageInterface::ShowMessage("Setting ATM on %s\n",
-         instanceName.c_str());
       atmModel = (AtmosphereModel*)(cb.atmModel->Clone());
-   }
 
+      //loj: 6/9/05 Write message on DEBUG
+      #ifdef DEBUG_CELESTIAL_BODY
+      MessageInterface::ShowMessage
+         ("CelestialBody::CelestialBody() Setting ATM:%s on %s\n",
+          atmModel->GetName().c_str(), instanceName.c_str());
+      #endif
+   }
+   
    //defaultCoefSize        = cb.defaultCoefSize;
    //defaultSij             = cb.defaultSij;
    //defaultCij             = cb.defaultCij;
