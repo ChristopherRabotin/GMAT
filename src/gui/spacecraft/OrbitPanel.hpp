@@ -25,7 +25,14 @@
 #include "gmatwxdefs.hpp"
 #include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
+#include "GmatAppData.hpp"
 #include "Spacecraft.hpp"
+#include "TimeConverter.hpp"
+#include "StateConverter.hpp"
+#include "CoordinateConverter.hpp"
+#include "CoordinateSystem.hpp"
+#include "Rvector6.hpp"
+#include "Anomaly.hpp"
 
 class OrbitPanel: public wxPanel
 {
@@ -38,24 +45,35 @@ public:
     void SaveData();
     void LoadData();
    
+protected:
+   Anomaly           anomaly;
+   TimeConverter     timeConverter;
+   StateConverter    stateConverter;
+
 private:
-   wxString bodiesArray[100];
-   SolarSystem *theSolarSystem;
+   Spacecraft     *theSpacecraft;
+   SolarSystem    *theSolarSystem;
    GuiItemManager *theGuiManager;
+   GuiInterpreter *theGuiInterpreter;
+
    bool mIsCoordSysChanged;
+   bool mIsTextChanged;
+   bool mIsStateChanged;
+
+   Rvector6 mCartState;
 
    void Create();
    void AddElements(wxWindow *parent);
     
    // Event Handling
    DECLARE_EVENT_TABLE();
-   void OnStateChange(wxCommandEvent &event);
-   void OnEpochChange(wxCommandEvent &event);
-   void OnAnomalyChange(wxCommandEvent &event);
    void OnComboBoxChange(wxCommandEvent& event);
-   void OnTextChange(wxCommandEvent &event);
+   void OnTextChange(wxCommandEvent& event);
 
-   Spacecraft *theSpacecraft;
+   void  InitializeCoordinateSystem(CoordinateSystem *cs);
+
+   wxString bodiesArray[100];
+
    wxButton *theApplyButton;
 
    wxStaticText *description1;
@@ -65,6 +83,15 @@ private:
    wxStaticText *description5;
    wxStaticText *description6;
     
+   wxStaticText *label1;
+   wxStaticText *label2;
+   wxStaticText *label3;
+   wxStaticText *label4;
+   wxStaticText *label5;
+   wxStaticText *label6;
+
+   wxStaticText *anomalyStaticText;
+    
    wxTextCtrl *textCtrl1;
    wxTextCtrl *textCtrl2;
    wxTextCtrl *textCtrl3;
@@ -72,57 +99,27 @@ private:
    wxTextCtrl *textCtrl5;
    wxTextCtrl *textCtrl6;
     
-   wxStaticText *label1;
-   wxStaticText *label2;
-   wxStaticText *label3;
-   wxStaticText *label4;
-   wxStaticText *label5;
-   wxStaticText *label6;
-    
-   wxPanel *elementsPanel;
-   wxComboBox *referenceBodyComboBox;
-   wxComboBox *stateComboBox;
-   wxComboBox *dateComboBox;
-   wxComboBox *coordSysComboBox;
-   wxComboBox *mCoordSysComboBox;
    wxTextCtrl *epochValue;
 
-   wxStaticText *anomalyLabel;
-   wxComboBox *anomalyCB;
+   wxPanel *elementsPanel;
 
+   wxComboBox *anomalyComboBox;
+   wxComboBox *mCoordSysComboBox;
+   wxComboBox *epochFormatComboBox;
+   wxComboBox *stateTypeComboBox;
+
+   std::string fromStateType;
+   std::string fromEpochFormat;
+   std::string fromCoordSys;
+   
    // IDs for the controls and the menu commands
    enum
    {     
       ID_TEXT = 30200,
-      ID_TEXT_CTRL,
       ID_TEXTCTRL,
       ID_COMBOBOX,
         
-      ID_ELEMENT_TAG1,
-      ID_ELEMENT_TAG2,
-      ID_ELEMENT_TAG3,
-      ID_ELEMENT_TAG4,
-      ID_ELEMENT_TAG5,
-      ID_ELEMENT_TAG6,
-        
-      ID_ELEMENT_VALUE1,
-      ID_ELEMENT_VALUE2,
-      ID_ELEMENT_VALUE3,
-      ID_ELEMENT_VALUE4,
-      ID_ELEMENT_VALUE5,
-      ID_ELEMENT_VALUE6,
-        
-      ID_STATIC_COORD,
-      ID_STATIC_ORBIT,
-      ID_STATIC_ELEMENT,
-        
-      ID_CB_BODY,
-      ID_CB_FRAME,
-      ID_CB_EPOCH,
-      ID_CB_ANOMALY,
-      ID_CB_STATE,
-        
-      ID_EPOCH_VALUE,
+      ID_STATIC_ELEMENT     
    };
 };
 #endif
