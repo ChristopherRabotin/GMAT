@@ -412,6 +412,22 @@ bool DragForce::Initialize()
          {
             std::string modelBodyIsUsing =
                centralBody->GetAtmosphereModelType();
+            
+            //loj: 6/8/05 Added if block for AtmosDensity parameter getting
+            // Density from the body
+            if (modelBodyIsUsing == "Undefined")
+            {
+               #ifdef DEBUG_DRAGFORCE_DENSITY
+               MessageInterface::ShowMessage
+                  ("===> Setting atmosphereType=%s addr:%d to body:%s\n",
+                   atmosphereType.c_str(), internalAtmos,
+                   centralBody->GetName().c_str());
+               #endif
+               
+               centralBody->SetAtmosphereModelType(atmosphereType);
+               centralBody->SetAtmosphereModel(internalAtmos);
+            }
+            
             //if (atmosphereType == "BodyDefault")
             if ((atmosphereType == "BodyDefault") ||
                 (atmosphereType == modelBodyIsUsing))
@@ -420,6 +436,7 @@ bool DragForce::Initialize()
                atmos = internalAtmos;
             if (!atmos)
                throw ForceModelException("Atmosphere model not defined");
+            
          }
                
          if (atmos)
@@ -1042,6 +1059,7 @@ bool DragForce::SetInternalAtmosphereModel(AtmosphereModel* atm)
 {
    if (internalAtmos)
       delete internalAtmos;
+
    internalAtmos = atm;
    return true;
 }
