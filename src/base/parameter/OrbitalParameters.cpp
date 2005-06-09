@@ -286,6 +286,7 @@ Apoapsis::Apoapsis(const std::string &name, GmatBase *obj)
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+   mIsPlottable = false; //loj: 6/9/05 Added
 }
 
 
@@ -418,6 +419,7 @@ Periapsis::Periapsis(const std::string &name, GmatBase *obj)
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+   mIsPlottable = false; //loj: 6/9/05 Added
 }
 
 

@@ -1545,6 +1545,8 @@ void GuiItemManager::UpdatePropertyList()
       if (items[i].find("CartState") == std::string::npos &&
           items[i].find("KepElem") == std::string::npos &&
           items[i].find("SphElem") == std::string::npos &&
+          items[i].find("Apoapsis") == std::string::npos &&  //loj: 6/9/05 Added
+          items[i].find("Periapsis") == std::string::npos && //loj: 6/9/05 Added
           items[i].find("Variable") == std::string::npos &&
           items[i].find("Array") == std::string::npos &&
           items[i].find("String") == std::string::npos)
