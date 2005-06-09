@@ -168,12 +168,17 @@ bool XyPlot::AddYParameter(const std::string &paramName, Integer index)
    
    if (paramName != "" && index == mNumYParams)
    {
-      mYParamNames.push_back(paramName);
-      mNumYParams = mYParamNames.size();
-      mYParams.push_back(NULL);
-      return true;
+      // if paramName not found, add (loj: 6/9/05 Added)
+      if (find(mYParamNames.begin(), mYParamNames.end(), paramName) ==
+          mYParamNames.end())
+      {
+         mYParamNames.push_back(paramName);
+         mNumYParams = mYParamNames.size();
+         mYParams.push_back(NULL);
+         return true;
+      }
    }
-
+   
    return false;
 }
 

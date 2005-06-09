@@ -553,12 +553,17 @@ bool ReportFile::AddVarParameter(const std::string &paramName, Integer index)
 {
    if (paramName != "" && index == mNumVarParams)
    {
-      mVarParamNames.push_back(paramName);
-      mNumVarParams = mVarParamNames.size();
-      mVarParams.push_back(NULL);
-      return true;
+      // if paramName not found, add (loj: 6/9/05 Added)
+      if (find(mVarParamNames.begin(), mVarParamNames.end(), paramName) ==
+          mVarParamNames.end())
+      {
+         mVarParamNames.push_back(paramName);
+         mNumVarParams = mVarParamNames.size();
+         mVarParams.push_back(NULL);
+         return true;
+      }
    }
-
+   
    return false;
 }
 
