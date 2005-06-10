@@ -27,7 +27,7 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
    wxWindow       (parent, -1, pos, size, style),
    left           (80),
    right          (30),
-   top            (30),
+   top            (20),
    bottom         (50),
    titleSize      (10),
    labelSize      (10),
@@ -60,6 +60,8 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
    zooming        (false),
    movingLegend   (false),
    dataUpdated    (false),
+   showTitle      (false),
+   labelAxes      (false),
    hasGrid        (true),
    hasLegend      (true),
    legendColumns  (1)
@@ -238,6 +240,11 @@ void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
 {
    wxCoord w, h;
    dc.GetSize(&w, &h);
+   
+   if (showTitle)
+      top = 30;
+   else
+      top = 20;
 
    Rescale(dc);
 
@@ -569,32 +576,38 @@ void TsPlotCanvas::DrawLabels(wxDC &dc)
       }
    }
    
-   if (plotTitle == "")
-      plotTitle = yLabel + " vs " + xLabel;
-   
-   // Draw the title
-   dc.SetFont(titleFont);
-   wxString label;
-   wxString title = _T(plotTitle.c_str());
-   dc.GetTextExtent(title, &w, &h);
-   int xloc = xCenter - w / 2;
-   int yloc = (top - h) / 2;
-   dc.DrawText(title, xloc, yloc);
+   if (showTitle)
+   {
+      if (plotTitle == "")
+         plotTitle = yLabel + " vs " + xLabel;
 
-   // Add x-axis label
-   dc.SetFont(axisFont);
-   title = _T(xLabel.c_str());
-   dc.GetTextExtent(title, &w, &h);
-   xloc = xCenter - w / 2;
-   yloc = ht - bottom / 2;
-   dc.DrawText(title, xloc, yloc);
-   
-   // Add y-axis label
-   title = _T(yLabel.c_str());
-   dc.GetTextExtent(title, &w, &h);
-   xloc = h / 2;
-   yloc = yCenter + w / 2;
-   dc.DrawRotatedText(title, xloc, yloc, 90.0);
+      // Draw the title
+      dc.SetFont(titleFont);
+      wxString label;
+      wxString title = _T(plotTitle.c_str());
+      dc.GetTextExtent(title, &w, &h);
+      int xloc = xCenter - w / 2;
+      int yloc = (top - h) / 2;
+      dc.DrawText(title, xloc, yloc);
+   }
+
+   if (labelAxes)
+   {
+      // Add x-axis label
+      dc.SetFont(axisFont);
+      wxString title = _T(xLabel.c_str());
+      dc.GetTextExtent(title, &w, &h);
+      int xloc = xCenter - w / 2;
+      int yloc = ht - bottom / 2;
+      dc.DrawText(title, xloc, yloc);
+
+      // Add y-axis label
+      title = _T(yLabel.c_str());
+      dc.GetTextExtent(title, &w, &h);
+      xloc = h / 2;
+      yloc = yCenter + w / 2;
+      dc.DrawRotatedText(title, xloc, yloc, 90.0);
+   }
 }
 
 

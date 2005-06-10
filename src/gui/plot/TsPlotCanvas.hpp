@@ -129,6 +129,8 @@ protected:
    bool dataUpdated;
    
    // Appearance parms
+   bool showTitle;
+   bool labelAxes;
    bool hasGrid;
    bool hasLegend;
 
