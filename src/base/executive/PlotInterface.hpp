@@ -96,6 +96,36 @@ public:
                             const std::string &yAxisTitle,
                             bool updateCanvas, bool drawGrid);
    
+
+
+   static bool CreateTsPlotWindow(const std::string &plotName,
+                                  const std::string &oldName,
+                                  const std::string &plotTitle,
+                                  const std::string &xAxisTitle,
+                                  const std::string &yAxisTitle,
+                                  bool drawGrid = false);
+   static bool DeleteTsPlot(bool hideFrame);
+   static bool AddTsPlotCurve(const std::string &plotName, int curveIndex,
+                              int yOffset, Real yMin, Real yMax,
+                              const std::string &curveTitle,
+                              UnsignedInt penColor);
+   static bool DeleteAllTsPlotCurves(const std::string &plotName,
+                                     const std::string &oldName);
+   static bool DeleteTsPlotCurve(const std::string &plotName, int curveIndex);
+   static void ClearTsPlotData(const std::string &plotName);
+   static void SetTsPlotTitle(const std::string &plotName,
+                              const std::string &plotTitle);
+   static void ShowTsPlotLegend(const std::string &plotName);
+   static bool RefreshTsPlot(const std::string &plotName);
+   static bool UpdateTsPlot(const std::string &plotName,
+                            const std::string &oldName,
+                            const Real &xval, const Rvector &yvals,
+                            const std::string &plotTitle,
+                            const std::string &xAxisTitle,
+                            const std::string &yAxisTitle,
+                            bool updateCanvas, bool drawGrid);
+   
+
    
 private:
 

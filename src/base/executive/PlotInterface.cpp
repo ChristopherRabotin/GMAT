@@ -29,6 +29,9 @@
 // for XY plot
 #include "MdiXyPlotData.hpp"
 #include "MdiChildXyFrame.hpp"
+// for TS plot
+#include "MdiTsPlotData.hpp"
+#include "MdiChildTsFrame.hpp"
 
 #endif
 
@@ -960,6 +963,473 @@ bool PlotInterface::UpdateXyPlot(const std::string &plotName,
             #if DEBUG_PLOTIF_XY_UPDATE
                MessageInterface::ShowMessage
                   ("PlotInterface::UpdateXyPlot() yvals[%d] = %f\n", j, yvals(j));
+            #endif
+               
+            frame->AddDataPoints(j, xval, yvals(j));
+         }
+
+         if (updateCanvas)
+            frame->RedrawCurve();
+            
+         updated = true;
+      }
+   }
+   
+   return updated;
+#endif
+}
+
+
+
+
+
+
+
+
+//------------------------------------------------------------------------------
+//  bool CreateTsPlotWindow(const std::string &plotName,
+//                          const std::string &oldName,
+//                          const std::string &plotTitle,
+//                          const std::string &xAxisTitle,
+//                          const std::string &yAxisTitle,
+//                          bool drawGrid = false)
+//------------------------------------------------------------------------------
+/*
+ * Creates TsPlot window.
+ *
+ * @param <plotName> name of plot
+ */
+//------------------------------------------------------------------------------
+bool PlotInterface::CreateTsPlotWindow(const std::string &plotName,
+                                       const std::string &oldName,
+                                       const std::string &plotTitle,
+                                       const std::string &xAxisTitle,
+                                       const std::string &yAxisTitle,
+                                       bool drawGrid)
+{    
+#if defined __CONSOLE_APP__
+   return true;
+#else
+
+   //-------------------------------------------------------
+   // check if new MDI child frame needed
+   //-------------------------------------------------------
+   bool createNewFrame = true;
+   wxString currPlotName;
+   MdiChildTsFrame *currPlotFrame = NULL;
+   
+   for (int i=0; i<MdiTsPlot::numChildren; i++)
+   {
+      currPlotFrame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+      currPlotName = currPlotFrame->GetPlotName();
+
+      if (currPlotName.IsSameAs(plotName.c_str()))
+      {
+         createNewFrame = false;
+         break;
+      }
+      else if (currPlotName.IsSameAs(oldName.c_str()))
+      {
+         #if DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("PlotInterface::CreateTsPlotWindow() currPlotName=%s, oldName=%s\n",
+             currPlotName.c_str(), oldName.c_str());
+         #endif
+         
+         // change plot name
+//          ((MdiChildXyFrame*)MdiTsPlot::mdiChildren[i])-> //loj: 5/19/05
+//             SetPlotName(wxString(plotName.c_str()));
+         currPlotFrame->SetPlotName(wxString(plotName.c_str()));
+         createNewFrame = false;
+         break;
+      }
+   }
+   
+   //-------------------------------------------------------
+   // create MDI child XY frame
+   //-------------------------------------------------------
+   if (createNewFrame)
+   {
+        
+      #if DEBUG_PLOTIF_XY
+      MessageInterface::ShowMessage
+         ("PlotInterface::CreateTsPlotWindow() Creating new "
+          "MdiChildXyFrame\n X Axis Title = %s  Y Axis Title = %s\n",
+          xAxisTitle.c_str(), yAxisTitle.c_str());
+      #endif
+      
+      // create a frame, containing a XY plot canvas
+      currPlotFrame =
+         new MdiChildTsFrame(GmatAppData::GetMainFrame(), true,
+                             wxString(plotName.c_str()),
+                             wxString(plotTitle.c_str()),
+                             wxString(xAxisTitle.c_str()),
+                             wxString(yAxisTitle.c_str()),
+                             wxPoint(-1, -1), wxSize(500, 350),
+                             wxDEFAULT_FRAME_STYLE);
+                             
+      currPlotFrame->Show();
+      
+      GmatAppData::GetMainFrame()->Tile(); //loj: 5/18/05 uncommented
+
+      ++MdiTsPlot::numChildren;
+
+//       GmatAppData::GetMainFrame()->xyMainSubframe->RedrawCurve();
+      currPlotFrame->RedrawCurve();
+   }
+
+//    GmatAppData::GetMainFrame()->xyMainSubframe->SetShowGrid(drawGrid);
+//    GmatAppData::GetMainFrame()->xyMainSubframe->ResetZoom();
+   currPlotFrame->SetShowGrid(drawGrid);
+   currPlotFrame->ResetZoom();
+   
+   return true;
+#endif
+}
+
+//------------------------------------------------------------------------------
+//  bool DeleteTsPlot(bool hideFrame)
+//------------------------------------------------------------------------------
+/*
+ * Deletes TsPlot.
+ *
+ */
+//------------------------------------------------------------------------------
+bool PlotInterface::DeleteTsPlot(bool hideFrame)
+{    
+#if defined __CONSOLE_APP__
+   return true;
+#else
+   
+   if (GmatAppData::GetMainFrame() != NULL)
+   {
+      #if DEBUG_PLOTIF_XY
+         MessageInterface::ShowMessage("PlotInterface::DeleteTsPlot()\n");
+      #endif
+
+      MdiChildTsFrame *frame = NULL;
+      for (int i=0; i<MdiTsPlot::numChildren; i++)
+      {
+         frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+         frame->DeletePlot();
+      }
+   }
+   
+   return true;
+#endif
+}
+
+//------------------------------------------------------------------------------
+// bool AddTsPlotCurve(const std::string &plotName, int curveIndex,
+//                     int yOffset, Real yMin, Real yMax,
+//                     const std::string &curveTitle,
+//                     UnsignedInt penColor)
+//------------------------------------------------------------------------------
+/*
+ * Adds a plot curve to XY plow window.
+ */
+//------------------------------------------------------------------------------
+bool PlotInterface::AddTsPlotCurve(const std::string &plotName, int curveIndex,
+                                   int yOffset, Real yMin, Real yMax,
+                                   const std::string &curveTitle,
+                                   UnsignedInt penColor)
+{
+#if defined __CONSOLE_APP__
+   return true;
+#else
+
+   bool added = false;
+   
+   #if DEBUG_PLOTIF_XY
+   MessageInterface::ShowMessage
+      ("PlotInterface::AddTsPlotCurve() entered."
+       " plotName = " + plotName + " curveTitle = " + 
+       curveTitle + "\n");
+   
+   MessageInterface::ShowMessage
+      ("PlotInterface::AddTsPlotCurve() numChildren = %d\n",
+       MdiTsPlot::numChildren);
+   #endif
+   
+   MdiChildTsFrame *frame = NULL;
+   for (int i = 0; i < MdiTsPlot::numChildren; i++)
+   {
+      frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+        
+      //if (frame->GetPlotName() == wxString(plotName.c_str()))
+      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+      {
+         frame->AddPlotCurve(curveIndex, yOffset, yMin, yMax,
+                             wxString(curveTitle.c_str()), penColor);
+         added = true;
+      }
+   }
+
+   return added;
+#endif
+}
+
+//------------------------------------------------------------------------------
+// bool DeleteAllTsPlotCurves(const std::string &plotName,
+//                            const std::string &oldName)
+//------------------------------------------------------------------------------
+/*
+ * Deletes all plot curves in XY plow window.
+ */
+//------------------------------------------------------------------------------
+bool PlotInterface::DeleteAllTsPlotCurves(const std::string &plotName,
+                                          const std::string &oldName)
+{
+#if defined __CONSOLE_APP__
+   return true;
+#else
+   
+//   #if DEBUG_PLOTIF_XY
+//   MessageInterface::ShowMessage
+//      ("PlotInterface::DeleteAllPlotCurve() plotName = %s "
+//       "numChildren = %d\n", plotName.c_str(),
+//       MdiTsPlot::numChildren);
+//   #endif
+//
+//   MdiChildXyFrame *frame = NULL;
+//   for (int i=0; i<MdiTsPlot::numChildren; i++)
+//   {
+//      frame = (MdiChildXyFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+//      if (frame->GetPlotName().IsSameAs(plotName.c_str()) ||
+//          frame->GetPlotName().IsSameAs(oldName.c_str()))
+//      {
+//         frame->DeleteAllPlotCurves();
+//      }
+//   }
+
+   return true;
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+// bool DeleteTsPlotCurve(const std::string &plotName, int curveIndex)
+//------------------------------------------------------------------------------
+/*
+ * Deletes a plot curve to XY plow window.
+ */
+//------------------------------------------------------------------------------
+bool PlotInterface::DeleteTsPlotCurve(const std::string &plotName, int curveIndex)
+{
+#if defined __CONSOLE_APP__
+   return true;
+#else
+   
+//   #if DEBUG_PLOTIF_XY
+//      MessageInterface::ShowMessage
+//         ("PlotInterface::DeleteTsPlotCurve() entered plotName = %s "
+//          "curveIndex = %d\n", plotName.c_str(), curveIndex);
+//    
+//      MessageInterface::ShowMessage
+//         ("PlotInterface::DeleteTsPlotCurve() numChildren = %d\n",
+//          MdiTsPlot::numChildren);
+//   #endif
+//
+//      MdiChildXyFrame *frame = NULL;
+//   for (int i=0; i<MdiTsPlot::numChildren; i++)
+//   {
+//      frame = (MdiChildXyFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+//      
+//      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+//      {
+//         frame->DeletePlotCurve(curveIndex);
+//      }
+//   }
+
+   return true;
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+// void ClearTsPlotData(const std::string &plotName))
+//------------------------------------------------------------------------------
+void PlotInterface::ClearTsPlotData(const std::string &plotName)
+{
+#if defined __CONSOLE_APP__
+   return;
+#else
+
+//   MdiChildXyFrame *frame = NULL;
+//   for (int i=0; i<MdiTsPlot::numChildren; i++)
+//   {
+//      frame = (MdiChildXyFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+//
+//      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+//      {
+//         frame->ClearPlotData();
+//      }
+//   }
+#endif
+}
+
+//------------------------------------------------------------------------------
+// void SetTsPlotTitle(const std::string &plotName, const std::string &plotTitle)
+//------------------------------------------------------------------------------
+void PlotInterface::SetTsPlotTitle(const std::string &plotName,
+                                   const std::string &plotTitle)
+{
+#if defined __CONSOLE_APP__
+   return;
+#else
+   
+   #if DEBUG_PLOTIF_XY
+   MessageInterface::ShowMessage
+      ("PlotInterface::SetTsPlotTitle() plotName = %s "
+       "plotTitle = %s\n", plotName.c_str(), plotTitle.c_str());
+   #endif
+   
+   MdiChildTsFrame *frame = NULL;
+   for (int i=0; i<MdiTsPlot::numChildren; i++)
+   {
+      frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+      
+      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+      {
+         #if DEBUG_PLOTIF_XY
+            MessageInterface::ShowMessage
+               ("PlotInterface::SetTsPlotTitle() calling "
+                " frame->SetPlotTitle() \n");
+         #endif
+            
+         frame->SetPlotTitle(wxString(plotTitle.c_str()));
+      }
+   }
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+// void ShowTsPlotLegend(const std::string &plotName)
+//------------------------------------------------------------------------------
+void PlotInterface::ShowTsPlotLegend(const std::string &plotName)
+{
+#if defined __CONSOLE_APP__
+   return;
+#else
+   
+//   MdiChildXyFrame *frame = NULL;
+//   for (int i=0; i<MdiTsPlot::numChildren; i++)
+//   {
+//      frame = (MdiChildXyFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+//
+//      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+//      {
+//         #if DEBUG_PLOTIF_XY
+//            MessageInterface::ShowMessage
+//               ("PlotInterface::ShowTsPlotLegend() calling  frame->ShowPlotLegend() \n");
+//         #endif
+//            
+//         frame->ShowPlotLegend();
+//      }
+//   }
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+// bool RefreshTsPlot(const std::string &plotName)
+//------------------------------------------------------------------------------
+/*
+ * Refreshes XY plot curve.
+ *
+ * @param <plotName> name of xy plot
+ */
+//------------------------------------------------------------------------------
+bool PlotInterface::RefreshTsPlot(const std::string &plotName)
+{
+#if defined __CONSOLE_APP__
+   return true;
+#else
+
+   if (GmatAppData::GetMainFrame() != NULL)
+   {        
+      #if DEBUG_PLOTIF_XY_UPDATE
+         MessageInterface::ShowMessage
+            ("PlotInterface::RefreshTsPlot() plotName=%s, numChildren=%d\n",
+             plotName.c_str(), MdiTsPlot::numChildren);
+      #endif
+      
+      wxString owner = wxString(plotName.c_str());
+
+      MdiChildTsFrame *frame = NULL;
+      for (int i=0; i<MdiTsPlot::numChildren; i++)
+      {
+         frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+         if (frame)
+            if (frame->GetPlotName().IsSameAs(owner.c_str()))
+            {
+               frame->RedrawCurve();
+            }
+      }
+   }
+   
+   return true;
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+// bool UpdateTsPlot(const std::string &plotName, const std::string &oldName,
+//                   const Real &xval, const Rvector &yvals,
+//                   const std::string &plotTitle,
+//                   const std::string &xAxisTitle,
+//                   const std::string &yAxisTitle, bool updateCanvas,
+//                   bool drawGrid)
+//------------------------------------------------------------------------------
+/*
+ * Updates XY plot curve.
+ *
+ * @param <plotName> name of xy plot
+ * @param <xval> x value
+ * @param <yvals> y values, should be in the order of curve added
+ */
+//------------------------------------------------------------------------------
+bool PlotInterface::UpdateTsPlot(const std::string &plotName,
+                                 const std::string &oldName,
+                                 const Real &xval, const Rvector &yvals,
+                                 const std::string &plotTitle,
+                                 const std::string &xAxisTitle,
+                                 const std::string &yAxisTitle,
+                                 bool updateCanvas, bool drawGrid)
+{
+#if defined __CONSOLE_APP__
+   return true;
+#else
+
+   bool updated = false;
+   wxString owner = wxString(plotName.c_str());
+
+   #if DEBUG_PLOTIF_XY_UPDATE
+   MessageInterface::ShowMessage
+      ("PlotInterface::UpdateTsPlot() numChildren = %d\n",
+       MdiTsPlot::numChildren);
+   #endif
+   
+   MdiChildTsFrame *frame = NULL;
+   for (int i=0; i<MdiTsPlot::numChildren; i++)
+   {
+      frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+      
+      if (frame->GetPlotName().IsSameAs(owner.c_str()))
+      {
+         int numCurves = frame->GetCurveCount();
+            
+         #if DEBUG_PLOTIF_XY_UPDATE
+            MessageInterface::ShowMessage
+               ("PlotInterface::UpdateTsPlot() numCurves = %d\n", numCurves);
+         #endif
+            
+         for (int j=0; j<numCurves; j++)
+         {
+            #if DEBUG_PLOTIF_XY_UPDATE
+               MessageInterface::ShowMessage
+                  ("PlotInterface::UpdateTsPlot() yvals[%d] = %f\n", j, yvals(j));
             #endif
                
             frame->AddDataPoints(j, xval, yvals(j));

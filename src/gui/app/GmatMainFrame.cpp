@@ -31,6 +31,7 @@
 #include "GmatAppData.hpp"
 #include "MdiGlPlotData.hpp"
 #include "MdiXyPlotData.hpp"
+#include "MdiTsPlotData.hpp"
 #include "GmatNotebook.hpp"
 
 #include "GmatTreeItemData.hpp"
@@ -192,6 +193,8 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
    // child frames
    trajSubframe = (MdiChildTrajFrame *)NULL;
 //    trajMainSubframe = (MdiChildTrajFrame *)NULL;
+   tsSubframe = (MdiChildTsFrame *)NULL;
+
    xySubframe = (MdiChildXyFrame *)NULL;
 //    xyMainSubframe = (MdiChildXyFrame *)NULL;
 
@@ -248,10 +251,8 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
    win->SetAlignment(wxLAYOUT_LEFT);
    win->SetSashVisible(wxSASH_RIGHT, TRUE);
 
-   new GmatNotebook(win, -1, wxDefaultPosition,
+   GmatNotebook *projectTree = new GmatNotebook(win, -1, wxDefaultPosition,
                                 wxDefaultSize, wxCLIP_CHILDREN);          
-//   GmatNotebook *projectTree = new GmatNotebook(win, -1, wxDefaultPosition,
-//                                wxDefaultSize, wxCLIP_CHILDREN);
 //   new wxNotebookSizer(projectTree);
   
    // set the main frame, because there will no longer be right notebook
@@ -856,6 +857,19 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       for (int i=0; i<MdiXyPlot::numChildren; i++)
       {
          MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
+         frame->Close(TRUE);
+      }
+      
+      // close ts plots
+      int count = MdiTsPlot::numChildren;
+      for (int i=0; i<count; ++i)
+      {
+         #if DEBUG_MAINFRAME
+            MessageInterface::ShowMessage
+               ("CloseAllChildren() MdiTsPlot::numChildren=%d\n",
+                MdiTsPlot::numChildren);
+         #endif
+         MdiChildTsFrame *frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren[i]);
          frame->Close(TRUE);
       }
       
@@ -1789,7 +1803,7 @@ void GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 {
    wxString filename = ((GmatMdiChildFrame *)GetActiveChild())->GetTitle();
 
-   GmatAppData::GetGuiInterpreter()->
+   bool status = GmatAppData::GetGuiInterpreter()->
       InterpretScript(std::string(filename.c_str()));
 
    //close the open windows
@@ -1807,6 +1821,9 @@ void GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 {
+   bool status = false;
+
+//   status = OnScriptBuildObject(event);
    OnScriptBuildObject(event);
    OnRun(event);
    

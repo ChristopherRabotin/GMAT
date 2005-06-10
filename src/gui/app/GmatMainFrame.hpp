@@ -34,6 +34,7 @@
 #include "MatlabInterface.hpp"
 #include "MdiChildTrajFrame.hpp"
 #include "MdiChildXyFrame.hpp"
+#include "MdiChildTsFrame.hpp"
 
 #include "wx/notebook.h"
 #include "wx/toolbar.h"
@@ -69,6 +70,8 @@ public:
 
    MdiChildTrajFrame *trajSubframe;
 //    MdiChildTrajFrame *trajMainSubframe;
+
+   MdiChildTsFrame *tsSubframe;
 
    MdiChildXyFrame *xySubframe;
 //    MdiChildXyFrame *xyMainSubframe;

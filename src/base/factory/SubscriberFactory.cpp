@@ -24,6 +24,7 @@
 #include "MessageWindow.hpp"
 #include "OpenGlPlot.hpp"
 #include "XyPlot.hpp"
+#include "TsPlot.hpp"
 #include "MatlabWs.hpp" //loj: 9/4/04 added
 
 //---------------------------------
@@ -55,6 +56,8 @@ Subscriber* SubscriberFactory::CreateSubscriber(const std::string &ofType,
       return new OpenGlPlot(withName);
    else if (ofType == "XYPlot")     //loj: 10/28/04 Changed from XyPlot
       return new XyPlot(withName);
+   else if (ofType == "TSPlot")     //loj: 10/28/04 Changed from XyPlot
+      return new TsPlot(withName);
    else if (ofType == "MatlabWS")   //loj: 10/28/04 Changed from MatlabWs
       return new MatlabWs(withName);
    return NULL;
@@ -80,6 +83,7 @@ Factory(Gmat::SUBSCRIBER)
       creatables.push_back("MessageWindow");
       creatables.push_back("OpenGLPlot");
       creatables.push_back("XYPlot");
+      creatables.push_back("TSPlot");
       creatables.push_back("MatlabWS");
    }
 }
