@@ -28,7 +28,8 @@ HEADERS = -I../include \
           -I../function \
           -I../coordsystem
 
-OBJECTS = PropSetup.o \
+OBJECTS = Cowell.o \
+          PropSetup.o \
           Propagator.o \
           Integrator.o \
           RungeKutta.o \

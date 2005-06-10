@@ -5,24 +5,30 @@ HEADERS = -I../include -I../foundation -I../util -I../forcemodel \
           -I../spacecraft -I../executive -I../solarsys
 
 OBJECTS = AxisSystem.o \
+          BodyFixedAxes.o \
           CoordinateBase.o \
           CoordinateConverter.o \
           CoordinateSystem.o \
           CoordinateSystemException.o \
           DynamicAxes.o \
           EquatorAxes.o \
-          BodyFixedAxes.o \
           InertialAxes.o \
+          ItrfCoefficientsFile.o \
+          MeanOfDateAxes.o \
           MJ2000EcAxes.o \
           MJ2000EqAxes.o \
-          MOEEqAxes.o \
-          TOEEqAxes.o \
+          MODEcAxes.o \
           MODEqAxes.o \
-          MeanOfDateAxes.o \
-          TODEqAxes.o \
-          TrueOfDateAxes.o \
+          MOEEcAxes.o \
+          MOEEqAxes.o \
           ObjectReferencedAxes.o \
-          ItrfCoefficientsFile.o
+          TODEcAxes.o \
+          TODEqAxes.o \
+          TOEEcAxes.o \
+          TOEEqAxes.o \
+          TOEEcAxes.o \
+          TOEEqAxes.o \
+          TrueOfDateAxes.o
 
 
 all: libCoordinateSystem 
