@@ -1226,7 +1226,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          objType = Gmat::BURN;
          break;
       case GmatTree::PROPAGATOR:
-         objType = Gmat::PROPAGATOR;
+         objType = Gmat::PROP_SETUP; //loj: 6/10/05 - Changed from PROPAGATOR
          break;
       case GmatTree::DIFF_CORR:
          objType = Gmat::SOLVER;
