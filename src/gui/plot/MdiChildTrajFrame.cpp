@@ -197,13 +197,14 @@ bool MdiChildTrajFrame::GetDrawEcPlane()
    return false;
 }
 
+
 //------------------------------------------------------------------------------
-// bool GetDrawEcLine()
+// bool GetDrawESLine()
 //------------------------------------------------------------------------------
-bool MdiChildTrajFrame::GetDrawEcLine()
+bool MdiChildTrajFrame::GetDrawESLine()
 {
    if (mCanvas)
-      return mCanvas->GetDrawEcLine();
+      return mCanvas->GetDrawESLine();
 
    return false;
 }
@@ -243,12 +244,12 @@ unsigned int MdiChildTrajFrame::GetEcPlaneColor()
 }
 
 //------------------------------------------------------------------------------
-// unsigned int GetEcLineColor()
+// unsigned int GetESLineColor()
 //------------------------------------------------------------------------------
-unsigned int MdiChildTrajFrame::GetEcLineColor()
+unsigned int MdiChildTrajFrame::GetESLineColor()
 {
    if (mCanvas)
-      return mCanvas->GetEcLineColor();
+      return mCanvas->GetESLineColor();
 
    return 0;
 }
@@ -460,15 +461,15 @@ void MdiChildTrajFrame::SetDrawEcPlane(bool flag)
 
 
 //------------------------------------------------------------------------------
-// void SetDrawEcLine(bool flag)
+// void SetDrawESLine(bool flag)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetDrawEcLine(bool flag)
+void MdiChildTrajFrame::SetDrawESLine(bool flag)
 {
    if (mCanvas)
    {
       //loj: the event ID is not in the GmatPlot yet
       //mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_ECLIPTIC_LINE, flag);
-      mCanvas->SetDrawEcLine(flag);
+      mCanvas->SetDrawESLine(flag);
    }
 }
 
@@ -526,13 +527,13 @@ void MdiChildTrajFrame::SetEcPlaneColor(UnsignedInt color)
 
 
 //------------------------------------------------------------------------------
-// void SetEcLineColor(UnsignedInt color)
+// void SetESLineColor(UnsignedInt color)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetEcLineColor(UnsignedInt color)
+void MdiChildTrajFrame::SetESLineColor(UnsignedInt color)
 {
    if (mCanvas)
    {
-      mCanvas->SetEcLineColor(color);
+      mCanvas->SetESLineColor(color);
    }
 }
 
@@ -588,6 +589,16 @@ void MdiChildTrajFrame::SetShowObjects(const wxStringBoolMap &showObjMap)
 {
    if (mCanvas)
       mCanvas->SetShowObjects(showObjMap);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetShowOrbitNormals(const wxStringBoolMap &showOrbNormMap)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetShowOrbitNormals(const wxStringBoolMap &showOrbNormMap)
+{
+   if (mCanvas)
+      mCanvas->SetShowOrbitNormals(showOrbNormMap);
 }
 
 
@@ -922,15 +933,17 @@ void MdiChildTrajFrame::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
 //------------------------------------------------------------------------------
 // void UpdatePlot(const StringArray &scNames, ...
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::UpdatePlot( const StringArray &scNames,
-                                   const Real &time, const RealArray &posX,
-                                   const RealArray &posY, const RealArray &posZ,
+void MdiChildTrajFrame::UpdatePlot(const StringArray &scNames, const Real &time,
+                                   const RealArray &posX, const RealArray &posY,
+                                   const RealArray &posZ, const RealArray &velX,
+                                   const RealArray &velY, const RealArray &velZ,
                                    const UnsignedIntArray &scColors,
                                    bool updateCanvas)
 {
    if (mCanvas)
    {
-      mCanvas->UpdatePlot(scNames, time, posX, posY, posZ, scColors);
+      mCanvas->UpdatePlot(scNames, time, posX, posY, posZ, velX, velY, velZ,
+                          scColors);
       
       if (updateCanvas)
          Update();

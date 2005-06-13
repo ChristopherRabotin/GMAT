@@ -44,12 +44,12 @@ public:
    bool  GetDrawWireFrame() {return mDrawWireFrame;}
    bool  GetDrawEqPlane() {return mDrawEqPlane;}
    bool  GetDrawEcPlane() {return mDrawEcPlane;}
-   bool  GetDrawEcLine() {return mDrawEcLine;}
+   bool  GetDrawESLine() {return mDrawESLine;}
    bool  GetDrawAxes() {return mDrawAxes;}
    bool  GetRotateAboutXY() {return mRotateXy;}
    unsigned int GetEqPlaneColor() {return mEqPlaneColor;}
    unsigned int GetEcPlaneColor() {return mEcPlaneColor;}
-   unsigned int GetEcLineColor() {return mEcLineColor;}
+   unsigned int GetESLineColor() {return mESLinecolor;}
    float GetDistance() {return mAxisLength;}
    int GetAnimationUpdateInterval() {return mUpdateInterval;}
    wxString GetViewCoordSysName() {return mViewCoordSysName;}
@@ -65,16 +65,17 @@ public:
    void SetDrawWireFrame(bool flag) {mDrawWireFrame = flag;}
    void SetDrawEqPlane(bool flag) {mDrawEqPlane = flag;}
    void SetDrawEcPlane(bool flag) {mDrawEcPlane = flag;}
-   void SetDrawEcLine(bool flag) {mDrawEcLine = flag;}
+   void SetDrawESLine(bool flag) {mDrawESLine = flag;}
    void SetDrawAxes(bool flag) {mDrawAxes = flag;}
    void SetRotateAboutXY(bool flag) {mRotateXy = flag;}
    void SetEqPlaneColor(unsigned int color) {mEqPlaneColor = color;}
    void SetEcPlaneColor(unsigned int color) {mEcPlaneColor = color;}
-   void SetEcLineColor(unsigned int color) {mEcLineColor = color;}
+   void SetESLineColor(unsigned int color) {mESLinecolor = color;}
    void SetViewCoordSystem(const wxString &csName);
    void SetUsePerspectiveMode(bool perspMode);
    void SetObjectColors(const wxStringColorMap &objectColorMap);
    void SetShowObjects(const wxStringBoolMap &showObjMap);
+   void SetShowOrbitNormals(const wxStringBoolMap &showOrbitNormalMap);
    void UpdateObjectList(const wxArrayString &bodyNames,
                          const wxStringColorMap &bodyColors);
 
@@ -113,9 +114,10 @@ public:
    int  ReadTextTrajectory(const wxString &filename);
 
    // update
-   void UpdatePlot(const StringArray &scNames,
-                   const Real &time, const RealArray &posX,
-                   const RealArray &posY, const RealArray &posZ,
+   void UpdatePlot(const StringArray &scNames, const Real &time,
+                   const RealArray &posX, const RealArray &posY,
+                   const RealArray &posZ, const RealArray &velX,
+                   const RealArray &velY, const RealArray &velZ,
                    const UnsignedIntArray &scColors);
    
    // object
@@ -175,14 +177,15 @@ private:
    bool mDrawEqPlane;
    bool mDrawEcPlane;
    bool mDrawEclipticPlane;
-   bool mDrawEcLine;
+   bool mDrawESLine;
    bool mDrawAxes;
+   bool mDrawOrbitNormal;
    
    // color
    unsigned int mEqPlaneColor;
    unsigned int mEcPlaneColor;
-   unsigned int mEcLineColor;
-   
+   unsigned int mESLinecolor;
+
    // texture
    std::map<wxString, GLuint> mObjectTextureIdMap;
    
@@ -257,16 +260,19 @@ private:
    wxArrayString mObjectNames;
    wxStringColorMap mObjectColorMap;
    wxStringBoolMap  mShowObjectMap;
+   wxStringBoolMap  mShowOrbitNormalMap;
    std::vector<SpacePoint*> mObjectArray;
    int mObjectCount;
    float mObjectDefaultRadius;
    float mObjectRadius[MAX_OBJECT];
    float mObjMaxZoomIn[MAX_OBJECT];
    int   mObjLastFrame[MAX_OBJECT];
-   unsigned int mObjectOrbitColor[MAX_OBJECT][MAX_DATA];
+   UnsignedInt mObjectOrbitColor[MAX_OBJECT][MAX_DATA];
    
    float mObjectGciPos[MAX_OBJECT][MAX_DATA][3];
    float mObjectTempPos[MAX_OBJECT][MAX_DATA][3];
+   float mObjectGciVel[MAX_OBJECT][MAX_DATA][3];
+   float mObjectTempVel[MAX_OBJECT][MAX_DATA][3];
    
    // coordinate system
    wxString mInternalCoordSysName;
@@ -335,10 +341,11 @@ private:
    void DrawPlot();
    void DrawObject(const wxString &objName);
    void DrawObjectOrbit(int frame);
+   void DrawObjectOrbitNormal(int objId, int frame, UnsignedInt color);
    void DrawSpacecraft(UnsignedInt scColor);
    void DrawEquatorialPlane(UnsignedInt color);
    void DrawEclipticPlane(UnsignedInt color);
-   void DrawEarthSunLine();
+   void DrawESLine();
    void DrawAxes(bool gci = false);
    void DrawStatus(int frame);
    

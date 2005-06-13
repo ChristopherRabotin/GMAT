@@ -18,7 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include "OpenGlPlot.hpp"
-#include "PlotInterface.hpp"     // for UpdateGlSpacecraft()
+#include "PlotInterface.hpp"     // for UpdateGlPlot()
 #include "ColorTypes.hpp"        // for namespace GmatColor::
 #include "Publisher.hpp"         // for Instance()
 #include "GmatBaseException.hpp" // for GmatBaseException()
@@ -29,7 +29,7 @@
 //#define DEBUG_OPENGL_ADD 1
 //#define DEBUG_OPENGL_OBJ 2
 //#define DEBUG_OPENGL_PARAM 1
-//#define DEBUG_OPENGL_UPDATE 1
+//#define DEBUG_OPENGL_UPDATE 2
 //#define DEBUG_REMOVE_ACTION 1
 //#define DEBUG_RENAME 1
 
@@ -163,6 +163,9 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mScXArray.clear();
    mScYArray.clear();
    mScZArray.clear();
+   mScVxArray.clear();
+   mScVyArray.clear();
+   mScVzArray.clear();
    mScOrbitColorArray.clear();
    mScTargetColorArray.clear();
    mOrbitColorArray.clear();
@@ -234,6 +237,9 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mScXArray = ogl.mScXArray;
    mScYArray = ogl.mScYArray;
    mScZArray = ogl.mScZArray;
+   mScVxArray = ogl.mScVxArray;
+   mScVyArray = ogl.mScVyArray;
+   mScVzArray = ogl.mScVzArray;
    mScOrbitColorArray = ogl.mScOrbitColorArray;
    mScTargetColorArray = ogl.mScTargetColorArray;
    mOrbitColorArray = ogl.mOrbitColorArray;
@@ -350,6 +356,9 @@ bool OpenGlPlot::Initialize()
                      mScXArray.push_back(0.0);
                      mScYArray.push_back(0.0);
                      mScZArray.push_back(0.0);
+                     mScVxArray.push_back(0.0);
+                     mScVyArray.push_back(0.0);
+                     mScVzArray.push_back(0.0);
                   }
                }
                else
@@ -1476,6 +1485,9 @@ bool OpenGlPlot::ClearSpacePointList()
    mScXArray.clear();
    mScYArray.clear();
    mScZArray.clear();
+   mScVxArray.clear();
+   mScVyArray.clear();
+   mScVzArray.clear();
    mOrbitColorMap.clear();
    mTargetColorMap.clear();
    mAllSpCount = 0;
@@ -1532,6 +1544,10 @@ bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
          mScXArray.erase(--mScXArray.end());
          mScYArray.erase(--mScYArray.end());
          mScZArray.erase(--mScZArray.end());
+         
+         mScVxArray.erase(--mScXArray.end());
+         mScVyArray.erase(--mScYArray.end());
+         mScVzArray.erase(--mScZArray.end());
          
          mAllSpCount = mAllSpNameArray.size();
 
@@ -1613,6 +1629,9 @@ void OpenGlPlot::ClearDynamicArrays()
    mScXArray.clear();
    mScYArray.clear();
    mScZArray.clear();
+   mScVxArray.clear();
+   mScVyArray.clear();
+   mScVzArray.clear();
 }
 
 
@@ -1715,6 +1734,7 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
             #endif
             
             Integer idX, idY, idZ;
+            Integer idVx, idVy, idVz;
             Integer scIndex = -1;
             for (int i=0; i<mScCount; i++)
             {
@@ -1722,21 +1742,35 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
                idY = FindIndexOfElement(labelArray, mScNameArray[i]+".Y");
                idZ = FindIndexOfElement(labelArray, mScNameArray[i]+".Z");
                
+               //loj: 6/13/05 Added
+               idVx = FindIndexOfElement(labelArray, mScNameArray[i]+".Vx");
+               idVy = FindIndexOfElement(labelArray, mScNameArray[i]+".Vy");
+               idVz = FindIndexOfElement(labelArray, mScNameArray[i]+".Vz");
+               
                #if DEBUG_OPENGL_UPDATE > 1
                MessageInterface::ShowMessage
-                  ("OpenGlPlot::Distribute() i=%d, idX=%d, idY=%d, idZ=%d\n",
-                   i, idX, idY, idZ);
+                  ("OpenGlPlot::Distribute() i=%d, idX=%d, idY=%d, idZ=%d, "
+                   "idVx=%d, idVy=%d, idVz=%d\n", i, idX, idY, idZ,
+                   idVx, idVy, idVz);
                #endif
                
                scIndex++;
                mScXArray[scIndex] = dat[idX];
                mScYArray[scIndex] = dat[idY];
                mScZArray[scIndex] = dat[idZ];
-                              
+               
+               //loj: 6/13/05 Added
+               mScVxArray[scIndex] = dat[idVx];
+               mScVyArray[scIndex] = dat[idVy];
+               mScVzArray[scIndex] = dat[idVz];
+               
                #if DEBUG_OPENGL_UPDATE
                MessageInterface::ShowMessage
-                  ("OpenGlPlot::Distribute() scNo=%d x=%f y=%f z=%f\n",
+                  ("OpenGlPlot::Distribute() scNo=%d X=%f Y=%f Z=%f\n",
                    i, mScXArray[scIndex], mScYArray[scIndex], mScZArray[scIndex]);
+               MessageInterface::ShowMessage
+                  ("OpenGlPlot::Distribute() scNo=%d Vx=%f Vy=%f Vz=%f\n",
+                   i, mScVxArray[scIndex], mScVyArray[scIndex], mScVzArray[scIndex]);
                #endif
                
             }
@@ -1746,15 +1780,17 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
             {
                PlotInterface::
                   UpdateGlPlot(instanceName, mOldName, mViewCoordSysName,
-                               mScNameArray, dat[0], mScXArray,
-                               mScYArray, mScZArray, mScTargetColorArray, update);
+                               mScNameArray, dat[0], mScXArray, mScYArray,
+                               mScZArray, mScVxArray, mScVyArray, mScVzArray,
+                               mScTargetColorArray, update);
             }
             else
             {
                PlotInterface::
                   UpdateGlPlot(instanceName, mOldName, mViewCoordSysName,
-                               mScNameArray, dat[0], mScXArray,
-                               mScYArray, mScZArray, mScOrbitColorArray, update);
+                               mScNameArray, dat[0], mScXArray, mScYArray,
+                               mScZArray, mScVxArray, mScVyArray, mScVzArray,
+                               mScOrbitColorArray, update);
             }
             
             if (update)

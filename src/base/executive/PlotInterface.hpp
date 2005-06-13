@@ -62,9 +62,10 @@ public:
    static bool UpdateGlPlot(const std::string &plotName,
                             const std::string &oldName,
                             const std::string &csName,
-                            const StringArray &scNames,
-                            const Real &time, const RealArray &posX,
-                            const RealArray &posY, const RealArray &posZ,
+                            const StringArray &scNames, const Real &time,
+                            const RealArray &posX, const RealArray &posY,
+                            const RealArray &posZ, const RealArray &velX,
+                            const RealArray &velY, const RealArray &velZ,
                             const UnsignedIntArray &scColors,
                             bool updateCanvas);
 

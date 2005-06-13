@@ -55,12 +55,12 @@ public:
    bool GetDrawWireFrame();
    bool GetDrawEqPlane();
    bool GetDrawEcPlane();
-   bool GetDrawEcLine();
+   bool GetDrawESLine();
    bool GetDrawAxes();
    bool GetRotateAboutXY();
    unsigned int GetEqPlaneColor();
    unsigned int GetEcPlaneColor();
-   unsigned int GetEcLineColor();
+   unsigned int GetESLineColor();
    float GetDistance();
    int   GetAnimationUpdateInterval();
    wxString GetGotoObjectName();
@@ -77,17 +77,18 @@ public:
    void SetDrawWireFrame(bool flag);
    void SetDrawEqPlane(bool flag);
    void SetDrawEcPlane(bool flag);
-   void SetDrawEcLine(bool flag);
+   void SetDrawESLine(bool flag);
    void SetDrawAxes(bool flag);
    void SetRotateAboutXY(bool flag);
    void SetEqPlaneColor(unsigned int color);
    void SetEcPlaneColor(unsigned int color);
-   void SetEcLineColor(unsigned int color);
+   void SetESLineColor(unsigned int color);
    void SetDistance(float dist);
    void SetGotoObjectName(const wxString &bodyName);
    void SetViewCoordSystem(const wxString &csName);
    void SetObjectColors(const wxStringColorMap &objectColorMap);
    void SetShowObjects(const wxStringBoolMap &showObjMap);
+   void SetShowOrbitNormals(const wxStringBoolMap &showOrbNormMap);
    
    // actions
    void DrawInOtherCoordSystem(const wxString &csName);
@@ -132,14 +133,15 @@ public:
                         bool usevpRefVec, bool usevpVec, bool usevdVec,
                         bool useFixedFov, Real fov);
    
-   void UpdatePlot(const StringArray &scNames,
-                   const Real &time, const RealArray &posX,
-                   const RealArray &posY, const RealArray &posZ,
+   void UpdatePlot(const StringArray &scNames, const Real &time,
+                   const RealArray &posX, const RealArray &posY,
+                   const RealArray &posZ, const RealArray &velX,
+                   const RealArray &velY, const RealArray &velZ,
                    const UnsignedIntArray &scColors, bool updateCanvas);
    
    void RefreshPlot();
    void DeletePlot();
-
+   
 protected:
 
    OpenGlOptionDialog *mOptionDialog;

@@ -174,6 +174,9 @@ protected:
    RealArray mScXArray;
    RealArray mScYArray;
    RealArray mScZArray;
+   RealArray mScVxArray;
+   RealArray mScVyArray;
+   RealArray mScVzArray;
    UnsignedIntArray mScOrbitColorArray;
    UnsignedIntArray mScTargetColorArray;
    UnsignedIntArray mOrbitColorArray;

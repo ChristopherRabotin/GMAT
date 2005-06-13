@@ -35,6 +35,7 @@
 #else
 #  include <GL/gl.h>
 #  include <GL/glu.h>
+//#  include <GL/glut.h> //loj: 6/13/05 Added
 #  include <IL/il.h>
 #  include <IL/ilu.h>
 #  include <IL/ilut.h>
@@ -110,7 +111,6 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    mTextTrajFile = NULL;
    mGlList = 0;
-//    mInitialized = false;
    mNumData = 0;
 
    // projection
@@ -181,10 +181,11 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mDrawEqPlane = false;
    mDrawEcPlane = false;
    mDrawAxes = false;
+   mDrawOrbitNormal = true;
    mEqPlaneColor = GmatColor::GRAY32;
    mEcPlaneColor = GmatColor::TEAL32;
-   mEcLineColor = GmatColor::D_BROWN32;
-
+   mESLinecolor = GmatColor::D_BROWN32;
+   
    // animation
    mViewAnimation = false;
    mHasUserInterrupted = false;
@@ -402,11 +403,20 @@ void TrajPlotCanvas::SetObjectColors(const wxStringColorMap &objectColorMap)
 
 
 //------------------------------------------------------------------------------
-// void SetShowObjects(const wxStringColorMap &objectColorMap)
+// void SetShowObjects(const wxStringColorMap &showObjMap)
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::SetShowObjects(const wxStringBoolMap &showObjMap)
 {
    mShowObjectMap = showObjMap;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetShowOrbitNormals(const wxStringColorMap &showOrbNormMap)
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::SetShowOrbitNormals(const wxStringBoolMap &showOrbNormMap)
+{
+   mShowOrbitNormalMap = showOrbNormMap;
 }
 
 
@@ -777,7 +787,7 @@ void TrajPlotCanvas::SetGlObject(const StringArray &objNames,
    if (objNames.size() == objOrbitColors.size() &&
        objNames.size() == objArray.size())
    {
-      for (unsigned int i=0; i<objNames.size(); i++)
+      for (UnsignedInt i=0; i<objNames.size(); i++)
       {
          tempList.Add(objNames[i].c_str());
       
@@ -1073,9 +1083,10 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
 // Removed mScGciPos[] and mScTempPos[] and use mObjectGciPos[] and mObjectTempPos[]
 
 //------------------------------------------------------------------------------
-// void UpdatePlot(const StringArray &scNames,
-//                 const Real &time, const RealArray &posX,
-//                 const RealArray &posY, const RealArray &posZ,
+// void UpdatePlot(const StringArray &scNames, const Real &time,
+//                 const RealArray &posX, const RealArray &posY,
+//                 const RealArray &posZ, const RealArray &velX,
+//                 const RealArray &velY, const RealArray &velZ,
 //                 const UnsignedIntArray &scColors)
 //------------------------------------------------------------------------------
 /**
@@ -1086,12 +1097,16 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
  * @param <posX> position x array
  * @param <posY> position y array
  * @param <posZ> position z array
+ * @param <velX> velocity x array
+ * @param <velY> velocity y array
+ * @param <velZ> velocity z array
  * @param <scColors> orbit color array
  */
 //------------------------------------------------------------------------------
-void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
-                                const Real &time, const RealArray &posX,
-                                const RealArray &posY, const RealArray &posZ,
+void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
+                                const RealArray &posX, const RealArray &posY,
+                                const RealArray &posZ, const RealArray &velX,
+                                const RealArray &velY, const RealArray &velZ,
                                 const UnsignedIntArray &scColors)
 {
    #if DEBUG_TRAJCANVAS_UPDATE
@@ -1102,7 +1117,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
    mScCount = posX.size();
    if (mScCount > MAX_SCS)
       mScCount = MAX_SCS;
-
+   
    mScNameArray = scNames;
    
    if (mNumData < MAX_DATA)
@@ -1123,22 +1138,37 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
             mObjectGciPos[objId][mNumData][1] = posY[sc];
             mObjectGciPos[objId][mNumData][2] = posZ[sc];
             
+            //loj: 6/13/05 Added
+            mObjectGciVel[objId][mNumData][0] = velX[sc];
+            mObjectGciVel[objId][mNumData][1] = velY[sc];
+            mObjectGciVel[objId][mNumData][2] = velZ[sc];
+            
             if (mNeedInitialConversion)
             {
                Rvector6 inState, outState;
-               inState.Set(posX[sc], posY[sc], posZ[sc], 0.0, 0.0, 0.0);
-            
+
+               // convert position and velocity (loj: 6/13/05 convert velocity also)
+               inState.Set(posX[sc], posY[sc], posZ[sc],
+                           velX[sc], velY[sc], velZ[sc]);
+               
                mCoordConverter.Convert(time, inState, mInternalCoordSystem,
                                        outState, mViewCoordSystem);
-            
+               
                mObjectTempPos[objId][mNumData][0] = outState[0];
                mObjectTempPos[objId][mNumData][1] = outState[1];
                mObjectTempPos[objId][mNumData][2] = outState[2];
+               
+               mObjectTempVel[objId][mNumData][0] = outState[3];
+               mObjectTempVel[objId][mNumData][1] = outState[4];
+               mObjectTempVel[objId][mNumData][2] = outState[5];
+               
             }
             else
             {
                CopyVector3(mObjectTempPos[objId][mNumData],
                            mObjectGciPos[objId][mNumData]);
+               CopyVector3(mObjectTempVel[objId][mNumData],
+                           mObjectGciVel[objId][mNumData]);
             
             }
             
@@ -1147,6 +1177,10 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
                ("TrajPlotCanvas::UpdatePlot() Sc%d pos = %f, %f, %f, color=%d\n", objId,
                 mObjectTempPos[objId][mNumData][0], mObjectTempPos[objId][mNumData][1],
                 mObjectTempPos[objId][mNumData][2], mObjectOrbitColor[objId][mNumData]);
+            MessageInterface::ShowMessage
+               ("TrajPlotCanvas::UpdatePlot() Sc%d vel = %f, %f, %f\n", objId,
+                mObjectTempVel[objId][mNumData][0], mObjectTempVel[objId][mNumData][1],
+                mObjectTempVel[objId][mNumData][2]);
             #endif
          }
       }
@@ -1175,6 +1209,10 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
                mObjectGciPos[objId][mNumData][1] = objState[1];
                mObjectGciPos[objId][mNumData][2] = objState[2];
                
+               mObjectGciVel[objId][mNumData][0] = objState[3];
+               mObjectGciVel[objId][mNumData][1] = objState[4];
+               mObjectGciVel[objId][mNumData][2] = objState[5];
+               
                #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
                MessageInterface::ShowMessage
                   ("TrajPlotCanvas::UpdatePlot() objState=%s\n",
@@ -1192,11 +1230,17 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
                   mObjectTempPos[objId][mNumData][0] = outState[0];
                   mObjectTempPos[objId][mNumData][1] = outState[1];
                   mObjectTempPos[objId][mNumData][2] = outState[2];
+                  
+                  mObjectTempVel[objId][mNumData][0] = outState[3];
+                  mObjectTempVel[objId][mNumData][1] = outState[4];
+                  mObjectTempVel[objId][mNumData][2] = outState[5];
                }
                else
                {
                   CopyVector3(mObjectTempPos[objId][mNumData],
                               mObjectGciPos[objId][mNumData]);
+                  CopyVector3(mObjectTempVel[objId][mNumData],
+                              mObjectGciVel[objId][mNumData]);
                }
                
                #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
@@ -1247,8 +1291,6 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames,
    //DrawPlot(); //loj: This will make slow plotting.
    Refresh(false);
    
-   //wxLogStatus(GmatAppData::GetMainFrame(), wxT("Frame#: %d, Time: %f"), mNumData-1,
-   //            mTime[mNumData-1]);
 }
 
 
@@ -1298,6 +1340,7 @@ void TrajPlotCanvas::AddObjectList(const wxArrayString &objNames,
       
       // initialize show object
       mShowObjectMap[objNames[i]] = true;
+      mShowOrbitNormalMap[objNames[i]] = false;
       
       // initialize object color
       rgb.Set(objColors[i]);
@@ -2376,8 +2419,8 @@ void TrajPlotCanvas::DrawFrame()
       DrawObjectOrbit(frame);
       
       // draw Earth-Sun line
-      if (mDrawEcLine)
-         DrawEarthSunLine();
+      if (mDrawESLine)
+         DrawESLine();
       
       // draw axes in other coord. system
       if (!mIsInternalCoordSystem)
@@ -2443,10 +2486,10 @@ void TrajPlotCanvas::DrawPlot()
    
    // draw object orbit
    DrawObjectOrbit(mNumData-1);
-   
+      
    // draw Earth-Sun line
-   if (mDrawEcLine)
-      DrawEarthSunLine();
+   if (mDrawESLine)
+      DrawESLine();
    
    // draw axes in other coord. system
    if (!mIsInternalCoordSystem)
@@ -2533,7 +2576,7 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
    {
       objName = mObjectNames[obj];
       objId = GetObjectId(objName);
-            
+      
       glPushMatrix();
       glBegin(GL_LINES);
       
@@ -2568,13 +2611,60 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
                        (-mObjectTempPos[objId][i][1]),
                        ( mObjectTempPos[objId][i][2]));
             
-            mObjLastFrame[objId] = i;
+            mObjLastFrame[objId] = i;            
+            
          }
       }
       
       glEnd();
       glPopMatrix();
       
+      //-------------------------------------------------------
+      // draw object orbit normal vector
+      // (loj: 6/13/05 Fow now it only draws spacecraft orbit normal vector.)
+      //-------------------------------------------------------
+      if (mShowOrbitNormalMap[objName])
+      {
+         int numSkip = frame/12;
+         UnsignedInt color;
+         
+         for (int i=1; i<=frame; i++)
+         {
+            if (numSkip <= 0 || i % numSkip != 0)
+               continue;
+            
+            if ((mTime[i] > mTime[i-1]) ||
+                (i>2 && mTime[i] < mTime[i-1]) && mTime[i-1] < mTime[i-2])
+            {
+               Rvector3 r1(mObjectTempPos[objId][i-1][0],
+                           mObjectTempPos[objId][i-1][1],
+                           mObjectTempPos[objId][i-1][2]);
+               
+               Rvector3 r2(mObjectTempPos[objId][i][0],
+                           mObjectTempPos[objId][i][1],
+                           mObjectTempPos[objId][i][2]);
+               
+               // if object position magnitude is 0, skip
+               if (r1.GetMagnitude() == 0.0 || r2.GetMagnitude() == 0.0)
+                  continue;
+               
+               glPushMatrix();
+               
+               // move to origin
+               glTranslatef(-mObjectTempPos[mOriginId][i][0],
+                            -mObjectTempPos[mOriginId][i][1],
+                             mObjectTempPos[mOriginId][i][2]);
+               
+               if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT))
+                  color = mObjectOrbitColor[objId][i];
+               else
+                  color = mObjectColorMap[objName].GetIntColor();
+               
+               DrawObjectOrbitNormal(objId, i, color);
+               glPopMatrix();
+            }
+         }
+      }
       
       //-------------------------------------------------------
       //draw object with texture
@@ -2594,10 +2684,10 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
                 mObjectTempPos[objId][mObjLastFrame[objId]][1],
                 mObjectTempPos[objId][mObjLastFrame[objId]][2]);
             #endif
-
+            
             glPushMatrix();
             
-            // put spacecraft at final position
+            // put object at final position
             glTranslatef(-mObjectTempPos[objId][mObjLastFrame[objId]][0],
                          -mObjectTempPos[objId][mObjLastFrame[objId]][1],
                           mObjectTempPos[objId][mObjLastFrame[objId]][2]);
@@ -2614,6 +2704,64 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
    }
    
 } // end DrawObjectOrbit(int frame)
+
+
+//------------------------------------------------------------------------------
+//  void DrawObjectOrbitNormal(int obj, int objId, int frame, UnsignedInt color)
+//------------------------------------------------------------------------------
+/**
+ * Draws object orbit normal vector.
+ */
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::DrawObjectOrbitNormal(int objId, int frame, UnsignedInt color)
+{
+   Real distance = (Real)mAxisLength/2.2;
+   float endPos[3];
+   
+   Rvector3 r(mObjectTempPos[objId][frame][0], mObjectTempPos[objId][frame][1],
+              mObjectTempPos[objId][frame][2]);
+            
+   Rvector3 v(mObjectTempVel[objId][frame][0], mObjectTempVel[objId][frame][1],
+              mObjectTempVel[objId][frame][2]);
+      
+   Rvector3 normV = Cross(r, v);
+   normV.Normalize();
+   
+   //--------------------------------
+   // draw normal vector line
+   //--------------------------------
+   
+   // set color
+   *sIntColor = color;
+   glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
+   
+   glBegin(GL_LINES);
+   
+   // get orbit normal unit vector and multiply by distance
+   // Add minus sign to x, y
+   endPos[0] = -normV[0] * distance;
+   endPos[1] = -normV[1] * distance;
+   endPos[2] =  normV[2] * distance;
+   
+   glVertex3f(0.0, 0.0, 0.0);
+   glVertex3f(endPos[0], endPos[1], endPos[2]);
+   
+   glEnd();
+
+   // Draw a cone (loj: 6/13/05 need to compute cone up direction)
+   //glPushMatrix();
+   //glTranslatef(endPos[0], endPos[1], endPos[2]);
+   //GLUquadricObj* qobj = gluNewQuadric();
+   //gluQuadricDrawStyle(qobj, GLU_FILL  );
+   //gluQuadricNormals  (qobj, GLU_SMOOTH);
+   //gluCylinder(qobj, 200.0, 0.0, 250.0, 50, 50);
+   //gluDeleteQuadric(qobj);
+   //glPopMatrix();
+   
+   // Show Orbit Normal direction text
+   //glColor3f(1.0, 1.0, 0.0); // yellow
+   DrawStringAt(" +N", endPos[0], endPos[1], endPos[2]);
+}
 
 
 //------------------------------------------------------------------------------
@@ -2867,58 +3015,52 @@ void TrajPlotCanvas::DrawEclipticPlane(UnsignedInt color)
 
 
 //------------------------------------------------------------------------------
-//  void DrawEarthSunLine()
+//  void DrawESLine()
 //------------------------------------------------------------------------------
 /**
  * Draws ecliptic plane circles.
  */
 //------------------------------------------------------------------------------
-void TrajPlotCanvas::DrawEarthSunLine()
+void TrajPlotCanvas::DrawESLine()
 {
-   int numSkip;
    Real objPos[3], endPos[3];
    Real distance = (Real)mAxisLength;
-   Real norm;
+   Real mag;
+   int numSkip = mNumData/12; // draw 24 lines (12*2)
    
-   glPushMatrix();
-   glBegin(GL_LINES);
-   
-   // set color
-   *sIntColor = mEcLineColor;
-   glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
-
    int objId = GetObjectId("Sun");
    
    // if origin is Sun, get Earth position
    if (mOriginName == "Sun")
       objId = GetObjectId("Earth");
    
-   objPos[0] = mObjectTempPos[objId][mNumData-1][0];
-   objPos[1] = mObjectTempPos[objId][mNumData-1][1];
-   objPos[2] = mObjectTempPos[objId][mNumData-1][2];
-   
    //--------------------------------
    // draw sun lines
    //--------------------------------
-   numSkip = mNumData/12; // draw 24 lines (12*2)
+   
+   // set color
+   *sIntColor = mESLinecolor;
+   glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
+   
+   glBegin(GL_LINES);
    
    for (int i=0; i<mNumData; i+=numSkip)
-   {      
+   {
       //loj: 4/15/05 Added minus sign to x, y
       objPos[0] = -mObjectTempPos[objId][i][0];
       objPos[1] = -mObjectTempPos[objId][i][1];
       objPos[2] =  mObjectTempPos[objId][i][2];
       
       // get sun unit vector and multiply by distance
-      norm = sqrt(objPos[0]*objPos[0] + objPos[1]*objPos[1] + objPos[2]*objPos[2]);
-      endPos[0] = objPos[0]/norm * distance;
-      endPos[1] = objPos[1]/norm * distance;
-      endPos[2] = objPos[2]/norm * distance;
-
-      //MessageInterface::ShowMessage("endPos=%g, %g, %g\n", endPos[0], endPos[1], endPos[2]);
-      //normalize_vector(objPos, sunUnitVec);
-      //scalar_times_vector(distance, sunUnitVec, 3, endPos);
-
+      mag = sqrt(objPos[0]*objPos[0] + objPos[1]*objPos[1] + objPos[2]*objPos[2]);
+      endPos[0] = objPos[0]/mag * distance;
+      endPos[1] = objPos[1]/mag * distance;
+      endPos[2] = objPos[2]/mag * distance;
+      
+      //loj: 6/10/05 Why setting alpha doesn't work?
+      //*sIntColor = mESLinecolor;
+      //glColor4ub(sGlColor->red, sGlColor->green, sGlColor->blue, 255);
+      
       //glVertex3f(0.0, 0.0, 0.0);
       glVertex3f(endPos[0], endPos[1], endPos[2]);
       //glVertex3f(0.0, 0.0, 0.0);
@@ -2926,9 +3068,15 @@ void TrajPlotCanvas::DrawEarthSunLine()
    }
    
    glEnd();
-   glPopMatrix();
    
-} // end DrawEarthSunLine()
+   // Show Sun direction text(loj: 6/10/05)
+   glColor3f(1.0, 1.0, 0.0); // yellow
+   if (mOriginName == "Earth")
+      DrawStringAt(" +S", endPos[0]/2.2, endPos[1]/2.2, endPos[2]/2.2);
+   else if (mOriginName == "Sun")
+      DrawStringAt(" -S", endPos[0]/2.2, endPos[1]/2.2, endPos[2]/2.2);
+   
+} // end DrawESLine()
 
 
 //---------------------------------------------------------------------------

@@ -63,23 +63,27 @@ protected:
    GuiItemManager *theGuiManager;
    MdiChildTrajFrame *mTrajFrame;
    
+   bool mHasRotateAboutXYChanged;
    bool mHasUseViewPointSpecChanged;
    bool mHasUsePerspModeChanged;
    bool mHasDistanceChanged;
    bool mHasGotoObjectChanged;
    bool mHasCoordSysChanged;
+   
+   bool mHasDrawWireFrameChanged;
+   bool mHasDrawAxesChanged;
    bool mHasDrawEqPlaneChanged;
    bool mHasDrawEcPlaneChanged;
-   bool mHasDrawEcLineChanged;
-   bool mHasDrawAxesChanged;
-   bool mHasDrawWireFrameChanged;
+   bool mHasDrawESLineChanged;
+   
    bool mHasEqPlaneColorChanged;
    bool mHasEcPlaneColorChanged;
-   bool mHasEcLineColorChanged;
-   bool mHasRotateAboutXYChanged;
+   bool mHasESLineColorChanged;
    bool mHasObjectColorChanged;
-   bool mHasShowObjectChanged;
    
+   bool mHasShowObjectChanged;
+   bool mHasShowOrbitNormalChanged;
+
    int   mAnimationUpdInt;
    float mDistance;
    
@@ -92,6 +96,7 @@ protected:
    
    wxStringColorMap mObjectColorMap;
    wxStringBoolMap  mShowObjectMap;
+   wxStringBoolMap  mShowOrbitNormalMap;
    
    wxTextCtrl *mDistanceTextCtrl;
    wxTextCtrl *mAnimationUpdIntTextCtrl;
@@ -104,20 +109,21 @@ protected:
    wxCheckBox *mUseInitialViewPointCheckBox;
    wxCheckBox *mUsePerspModeCheckBox;
    
+   wxCheckBox *mRotateAboutXYCheckBox;
    wxCheckBox *mWireFrameCheckBox;
    wxCheckBox *mEqPlaneCheckBox;
    wxCheckBox *mEcPlaneCheckBox;
-   wxCheckBox *mEcLineCheckBox;
    wxCheckBox *mDrawAxesCheckBox;
-   wxCheckBox *mRotateAboutXYCheckBox;
+   wxCheckBox *mESLineCheckBox;
    
    wxCheckBox *mShowObjectCheckBox;
+   wxCheckBox *mShowOrbitNormalCheckBox;
 
    wxButton *mViewAnimationButton;
    //wxButton *mCreateCoordSysButton;
    wxButton *mEqPlaneColorButton;
    wxButton *mEcPlaneColorButton;
-   wxButton *mEcLineColorButton;
+   wxButton *mESLineColorButton;
    
    wxButton *mObjectColorButton;
    wxButton *mAddObjectButton;
@@ -126,7 +132,7 @@ protected:
    
    wxColor mEqPlaneColor;
    wxColor mEcPlaneColor;
-   wxColor mEcLineColor;
+   wxColor mESLineColor;
    wxColour mObjectColor;
    
    wxBoxSizer *theDialogSizer;
