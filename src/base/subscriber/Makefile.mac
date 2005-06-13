@@ -3,13 +3,15 @@
 # Created:    Joey Gurgnaus 
 # Date:       2003/11/13
 # Modified:   2004/01/16 - Added OpenGlPlot.cpp and XyPlot.cpp 
+#             2005/06/13 - Added TsPlot.cpp 
 #
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = MatlabWs.cpp MessageWindow.cpp OpenGlPlot.cpp ReportFile.cpp Subscriber.cpp XyPlot.cpp
+SRC = MatlabWs.cpp MessageWindow.cpp OpenGlPlot.cpp ReportFile.cpp \
+	Subscriber.cpp TsPlot.cpp XyPlot.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
