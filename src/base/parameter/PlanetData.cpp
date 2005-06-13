@@ -11,6 +11,8 @@
 //
 // Author: Linda Jun
 // Created: 2004/12/13
+// Modified:
+//   2005/6/10 Linda Jun - Moved BetaAngle to AngularParamters.cpp
 //
 /**
  * Implements class which provides planet related data, such as HourAngle.
@@ -212,58 +214,6 @@ Real PlanetData::GetReal(const std::string &dataType)
       #endif
       
       return lst;
-   }
-   //--------------------------------------------------
-   // BetaAngle
-   //--------------------------------------------------
-   else if (dataType == "BetaAngle")
-   {
-      // compute the beta angle.
-      // according to Vallado section 5.3.2 Beta Angle
-      // Sin(BetaAngle) = Sin(Epsilon) * Cos(INC) * Sin(SunDec) -
-      // Cos(Epsilon) * Sin(INC) * Cos(RAAN) * Sin(SunDec) +
-      // Sin(INC) * Sin(RAAN) * Cos(SunDec);
-
-      // compute Epsilon accorging to Vallado section 5.1.1
-      // algorithm 29: epsilon = 23.439291(deg) - 0.0130042 * T(tdb)
-      // where T_tdb =~ T_ut1
-
-      Real a1mjdReal = mSpacecraft->GetRealParameter("Epoch");
-      A1Mjd a1mjd(a1mjdReal);
-      Ut1Mjd ut1mjd = a1mjd.ToUt1Mjd();
-      Real epsilonRad = (23.439291 - 0.0130042 * ut1mjd) * RAD_PER_DEG;
-
-      // compute Sun declination
-      CelestialBody *sun = mSolarSystem->GetBody(SolarSystem::SUN_NAME);
-      Rvector6 sunState = sun->GetState(a1mjdReal);
-      Real sunDecRad = ATan(sunState[2], Sqrt(sunState[0] * sunState[0] +
-                                              sunState[1] * sunState[1]));
-      
-      // compute beta angle
-      // Rvector6 kepState = mSpacecraft->GetStateVector("Keplerian");
-      Rvector6 kepState = mSpacecraft->GetKeplerianState();
-      Real incRad = kepState[2] * RAD_PER_DEG;
-      Real raanRad = kepState[3] * RAD_PER_DEG;
-      
-      #ifdef DEBUG_PLANETDATA_RUN
-         MessageInterface::ShowMessage
-            ("PlanetData::GetReal() sunDecRad=%f, incRad=%f, raanRad=%f\n",
-             sunDecRad, incRad, raanRad);
-      #endif
-      
-      Real sinBetaAngle = Sin(epsilonRad) * Cos(incRad) * Sin(sunDecRad) -
-         Cos(epsilonRad) * Sin(incRad) * Cos(raanRad) * Sin(sunDecRad) +
-         Sin(incRad) * Sin(raanRad) * Cos(sunDecRad);
-      
-      Real betaAngleDeg = ASin(sinBetaAngle) * DEG_PER_RAD;
-      betaAngleDeg = AngleUtil::PutAngleInDegRange(betaAngleDeg, 0.0, 360.0);
-
-      #ifdef DEBUG_PLANETDATA_RUN
-         MessageInterface::ShowMessage
-            ("PlanetData::GetReal() betaAngle=%f\n", betaAngleDeg);
-      #endif
-      
-      return betaAngleDeg;
    }
    else
    {

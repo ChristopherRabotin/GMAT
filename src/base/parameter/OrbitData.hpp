@@ -49,6 +49,7 @@ public:
    Real GetSphRaDecReal(const std::string &str);
    Real GetSphAzFpaReal(const std::string &str);
    Real GetAngularReal(const std::string &str);
+   Real GetOtherAngleReal(const std::string &str);
    
    // The inherited methods from RefData
    virtual bool ValidateRefObjects(GmatBase *param);

@@ -734,8 +734,48 @@ Real OrbitData::GetAngularReal(const std::string &str)
    }
    else
    {
-      throw ParameterException("OrbitData::GetAngularReal() Unknown parameter name: " +
-                               str);
+      throw ParameterException
+         ("OrbitData::GetAngularReal() Unknown parameter name: " + str);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetOtherAngleReal(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Computes other angle related data.
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetOtherAngleReal(const std::string &str)
+{
+   Rvector6 state = GetCartState();
+   
+   if (str == "BetaAngle")
+   {
+      if (mOrigin->GetName() != mScOrigin->GetName())
+         state = GetRelativeCartState(mOrigin);
+
+      // compute orbit normal unit vector
+      Rvector3 pos = Rvector3(state[0], state[1], state[2]);
+      Rvector3 vel = Rvector3(state[3], state[4], state[5]);
+      Rvector3 hVec3 = Cross(pos, vel);
+      hVec3.Normalize();
+      
+      // compute sun unit vector from the origin
+      Rvector3 sunPos = (mSolarSystem->GetBody(SolarSystem::SUN_NAME))->
+         GetMJ2000Position(mCartEpoch);
+      Rvector3 originPos = mOrigin->GetMJ2000Position(mCartEpoch);
+      Rvector3 originToSun = sunPos - originPos;
+      originToSun.Normalize();
+      
+      Real betaAngle = ACos(hVec3*originToSun) * DEG_PER_RAD;
+      return betaAngle;
+   }
+   else
+   {
+      throw ParameterException
+         ("OrbitData::GetOtherAngleReal() Unknown parameter name: " + str);
    }
 }
 

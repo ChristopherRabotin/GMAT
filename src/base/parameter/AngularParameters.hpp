@@ -13,9 +13,9 @@
 // Created: 2004/03/12
 //
 /**
- * Declares Angular related parameter classes.
+ * Declares angle related parameter classes.
  *   SemilatusRectum, AngularMomemtumMag, AngularMomentumX, AngularMomentumY,
- *   AngularMomentumZ
+ *   AngularMomentumZ, BetaAngle
  */
 //------------------------------------------------------------------------------
 #ifndef AngularParameters_hpp
@@ -150,6 +150,35 @@ public:
    AngularMomentumZ(const AngularMomentumZ &copy);
    const AngularMomentumZ& operator=(const AngularMomentumZ &right);
    virtual ~AngularMomentumZ();
+
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
+
+//==============================================================================
+//                                     BetaAngle
+//==============================================================================
+/**
+ * Declares BetaAngle parameter class. BetaAngle is the angle between the
+ * orbit normal vector, and the vector from the celestial body to the sun.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API BetaAngle : public OrbitReal
+{
+public:
+
+   BetaAngle(const std::string &name = "", GmatBase *obj = NULL);
+   BetaAngle(const BetaAngle &copy);
+   const BetaAngle& operator=(const BetaAngle &right);
+   virtual ~BetaAngle();
 
    // methods inherited from Parameter
    virtual bool Evaluate();

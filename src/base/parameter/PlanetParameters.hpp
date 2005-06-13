@@ -11,10 +11,12 @@
 //
 // Author: Linda Jun
 // Created: 2004/12/13
+// Modified:
+//   2005/6/10 Linda Jun - Moved BetaAngle to AngularParamters.hpp
 //
 /**
  * Declares planet related parameter classes.
- *   GHA, Longitude, Latitude, LST, BetaAngle
+ *   GHA, Longitude, Latitude, LST
  */
 //------------------------------------------------------------------------------
 #ifndef PlanetParameters_hpp
@@ -121,35 +123,6 @@ public:
    LST(const LST &copy);
    const LST& operator=(const LST &right);
    virtual ~LST();
-
-   // methods inherited from Parameter
-   virtual bool Evaluate();
-
-   // methods inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
-   
-protected:
-
-};
-
-
-//==============================================================================
-//                                     BetaAngle
-//==============================================================================
-/**
- * Declares BetaAngle parameter class.. BetaAngle is the angle between the
- * satellites's orbital plane and the Sun.
- */
-//------------------------------------------------------------------------------
-
-class GMAT_API BetaAngle : public PlanetReal
-{
-public:
-
-   BetaAngle(const std::string &name = "", GmatBase *obj = NULL);
-   BetaAngle(const BetaAngle &copy);
-   const BetaAngle& operator=(const BetaAngle &right);
-   virtual ~BetaAngle();
 
    // methods inherited from Parameter
    virtual bool Evaluate();

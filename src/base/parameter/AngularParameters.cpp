@@ -15,7 +15,7 @@
 /**
  * Implements Angular related parameter classes.
  *   SemilatusRectum, AngularMomemtumMag, AngularMomentumX, AngularMomentumY,
- *   AngularMomentumZ
+ *   AngularMomentumZ, BetaAngle
  */
 //------------------------------------------------------------------------------
 
@@ -583,4 +583,118 @@ bool AngularMomentumZ::Evaluate()
 GmatBase* AngularMomentumZ::Clone(void) const
 {
    return new AngularMomentumZ(*this);
+}
+
+
+//==============================================================================
+//                              BetaAngle
+//==============================================================================
+/**
+ * Implements BetaAngle parameter class. BetaAngle is the angle between the
+ * orbit normal vector, and the vector from the celestial body to the sun.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// BetaAngle(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+BetaAngle::BetaAngle(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "BetaAngle", obj, "Beta Angle", "deg", GmatParam::ORIGIN)
+{
+   mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+}
+
+
+//------------------------------------------------------------------------------
+// BetaAngle(const BetaAngle &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+BetaAngle::BetaAngle(const BetaAngle &copy)
+   : OrbitReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// const BetaAngle& operator=(const BetaAngle &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const BetaAngle&
+BetaAngle::operator=(const BetaAngle &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~BetaAngle()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+BetaAngle::~BetaAngle()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool BetaAngle::Evaluate()
+{
+   mRealValue = OrbitData::GetOtherAngleReal("BetaAngle");
+   
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* BetaAngle::Clone(void) const
+{
+   return new BetaAngle(*this);
 }
