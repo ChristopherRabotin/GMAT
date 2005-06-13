@@ -2293,13 +2293,17 @@ void GuiItemManager::UpdateCoordSystemList()
    //-------------------------------------------------------
    // update registered CoordinateSystem ComboBox
    //-------------------------------------------------------
+   int sel;
    for (std::vector<wxComboBox*>::iterator pos = mCoordSysCBList.begin();
         pos != mCoordSysCBList.end(); ++pos)
-   {      
+   {
+      sel = (*pos)->GetSelection(); //loj: 6/10/05 Added
+      
       (*pos)->Clear();
       (*pos)->Append(coordSysNames);
       
-      (*pos)->SetSelection(theNumCoordSys-1);
+      //loj: 6/10/05 (*pos)->SetSelection(theNumCoordSys-1);
+      (*pos)->SetSelection(sel);
    }
 }
 
