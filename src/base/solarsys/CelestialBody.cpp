@@ -1436,8 +1436,8 @@ Real        CelestialBody::SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 Integer     CelestialBody::GetIntegerParameter(const Integer id) const
 {
-   //if (id == ORDER)                return order;
-   //if (id == DEGREE)               return degree;
+   if (id == ORDER)                return order;
+   if (id == DEGREE)               return degree;
    if (id == BODY_NUMBER)          return bodyNumber;
    if (id == REF_BODY_NUMBER)      return referenceBodyNumber;
   // if (id == COEFFICIENT_SIZE)     return coefficientSize;

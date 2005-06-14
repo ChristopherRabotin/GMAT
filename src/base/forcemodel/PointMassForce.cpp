@@ -65,6 +65,8 @@
 #include "Rvector6.hpp"
 #include "ForceModelException.hpp"
 
+//#define DEBUG_FORCE_MODEL
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -210,6 +212,12 @@ bool PointMassForce::Initialize(void)
                  body->GetName().c_str());
          #endif
          
+         #ifdef DEBUG_FORCE_MODEL
+            MessageInterface::ShowMessage(
+               "%s%s%s%16le\n",
+               "Point mass body ", body->GetName().c_str(),
+               " has mu = ", mu);
+         #endif
       }
       else
       {
@@ -340,9 +348,6 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
       {
          // Do dv/dt first, in case deriv = state
          // DJC 07/27/04 relativePosition is an RVector6.  Old code:
-//         deriv[3 + i6] = relativePosition[i6]     * mu_r;
-//         deriv[4 + i6] = relativePosition[1 + i6] * mu_r;
-//         deriv[5 + i6] = relativePosition[2 + i6] * mu_r;
          deriv[3 + i6] = relativePosition[0] * mu_r - a_indirect[0];
          deriv[4 + i6] = relativePosition[1] * mu_r - a_indirect[1];
          deriv[5 + i6] = relativePosition[2] * mu_r - a_indirect[2];
@@ -370,7 +375,16 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
 #if DEBUG_PMF_DERV
    ShowDerivative("PointMassForce::GetDerivatives() AFTER compute", state, satCount);
 #endif
-   
+
+   #ifdef DEBUG_FORCE_MODEL
+      MessageInterface::ShowMessage(
+         "%s%s%s%lf, %lf, %lf%s%lf, %lf, %lf%s%le, %le, %le]\n",
+         "Point mass force for ", body->GetName().c_str(),
+         "\n   Sat position:  [", state[0], state[1], state[2],
+         "]\n   Body position: [", (*rv)[0], (*rv)[1], (*rv)[2],
+         "]\n   Acceleration:  [", deriv[3], deriv[4], deriv[5]);
+   #endif
+
    return true;
 }
 

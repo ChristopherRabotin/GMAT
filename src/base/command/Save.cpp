@@ -164,6 +164,17 @@ bool Save::Initialize()
    {
       if (objectMap->find(*i) == objectMap->end())
       {
+         // Maybe it's a solar system object
+         if (solarSys)
+         {
+            GmatBase *bod = solarSys->GetBody(*i);
+            if (bod != NULL)
+            {
+               obj.push_back(bod);
+               return retval;
+            }
+         }
+         
          std::string errorString = "Save command cannot find object \"";
          errorString += *i;
          errorString += "\"";
@@ -304,7 +315,8 @@ void Save::WriteParameterValue(GmatBase *o, std::ofstream &file, Integer id)
    switch (tid)
    {
       case Gmat::OBJECT_TYPE:
-         file << o->GetName();
+         if (!o->IsOfType("CelestialBody"))
+            file << o->GetName();
          break;
          
       case Gmat::INTEGER_TYPE:
@@ -314,7 +326,14 @@ void Save::WriteParameterValue(GmatBase *o, std::ofstream &file, Integer id)
       case Gmat::REAL_TYPE:
          file << o->GetRealParameter(id);
          break;
-            
+
+      case Gmat::RVECTOR_TYPE:
+         {
+            Rvector st = o->GetRvectorParameter(id);
+            file << "[" << st.ToString() << "]";
+         }
+         break;
+
       case Gmat::BOOLEAN_TYPE:
          file << ((o->GetBooleanParameter(id)) ? "true" : "false");
          break;
