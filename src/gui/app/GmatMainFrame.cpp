@@ -30,7 +30,7 @@
 #include "ViewTextFrame.hpp"
 #include "GmatAppData.hpp"
 #include "MdiGlPlotData.hpp"
-#include "MdiXyPlotData.hpp"
+//#include "MdiXyPlotData.hpp"
 #include "MdiTsPlotData.hpp"
 #include "GmatNotebook.hpp"
 
@@ -195,7 +195,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
 //    trajMainSubframe = (MdiChildTrajFrame *)NULL;
    tsSubframe = (MdiChildTsFrame *)NULL;
 
-   xySubframe = (MdiChildXyFrame *)NULL;
+   //   xySubframe = (MdiChildXyFrame *)NULL;
 //    xyMainSubframe = (MdiChildXyFrame *)NULL;
 
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
@@ -853,12 +853,13 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
 
    if (closePlots)
    {
-      // close xy plots
-      for (int i=0; i<MdiXyPlot::numChildren; i++)
-      {
-         MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
-         frame->Close(TRUE);
-      }
+      //loj: 6/14/05
+//       // close xy plots
+//       for (int i=0; i<MdiXyPlot::numChildren; i++)
+//       {
+//          MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
+//          frame->Close(TRUE);
+//       }
       
       // close ts plots
       int count = MdiTsPlot::numChildren;
@@ -1348,7 +1349,7 @@ wxMenuBar *GmatMainFrame::CreateMainMenu(int dataType)
    if (dataType == GmatTree::OUTPUT_OPENGL_PLOT)
       fileMenu->Append(GmatPlot::MDI_GL_OPEN_TRAJECTORY_FILE, _T("&Open Trajectory File"));
    if (dataType == GmatTree::OUTPUT_XY_PLOT)
-      fileMenu->Append(GmatPlot::MDI_XY_OPEN_PLOT_FILE, _T("&Open XY Plot File"));
+      fileMenu->Append(GmatPlot::MDI_TS_OPEN_PLOT_FILE, _T("&Open XY Plot File"));
 
    fileMenu->Append(MENU_FILE_SAVE_SCRIPT, wxT("Save to Script"), wxT(""), FALSE);
    fileMenu->Append(MENU_FILE_SAVE_AS_SCRIPT, wxT("Save to Script As"),
@@ -1361,7 +1362,7 @@ wxMenuBar *GmatMainFrame::CreateMainMenu(int dataType)
    if (dataType == GmatTree::OUTPUT_OPENGL_PLOT)
       fileMenu->Append(GmatPlot::MDI_GL_CHILD_QUIT, _T("&Close Plot"), _T("Close this window"));
    if (dataType == GmatTree::OUTPUT_XY_PLOT)
-      fileMenu->Append(GmatPlot::MDI_XY_CHILD_QUIT, _T("&Close Plot"),
+      fileMenu->Append(GmatPlot::MDI_TS_CHILD_QUIT, _T("&Close Plot"),
          _T("Close this window"));
 
 
@@ -1455,37 +1456,38 @@ wxMenuBar *GmatMainFrame::CreateMainMenu(int dataType)
       mViewMenu->Append(GmatPlot::MDI_GL_VIEW_ANIMATION, _T("Animation"));
       menuBar->Append(mViewMenu, wxT("View"));
    }
-   
+
+   //loj: 6/14/05 Changed MDI_XY_ to MDI_TS_
    if (dataType == GmatTree::OUTPUT_XY_PLOT)
    {
       // Plot menu
       wxMenu *plotMenu = new wxMenu;
 
-      plotMenu->Append(GmatPlot::MDI_XY_CLEAR_PLOT, _T("Clear Plot"));
-      plotMenu->Enable(GmatPlot::MDI_XY_CLEAR_PLOT, FALSE);
+      plotMenu->Append(GmatPlot::MDI_TS_CLEAR_PLOT, _T("Clear Plot"));
+      plotMenu->Enable(GmatPlot::MDI_TS_CLEAR_PLOT, FALSE);
       plotMenu->AppendSeparator();
-      plotMenu->Append(GmatPlot::MDI_XY_CHANGE_TITLE, _T("Change &title..."));
+      plotMenu->Append(GmatPlot::MDI_TS_CHANGE_TITLE, _T("Change &title..."));
       menuBar->Append(plotMenu, wxT("Plot"));
 
       // View menu
       wxMenu *xyViewMenu = new wxMenu;
-      xyViewMenu->Append(GmatPlot::MDI_XY_SHOW_DEFAULT_VIEW, _T("Reset\tCtrl-R"),
+      xyViewMenu->Append(GmatPlot::MDI_TS_SHOW_DEFAULT_VIEW, _T("Reset\tCtrl-R"),
                        _("Reset to default view"));
       xyViewMenu->AppendSeparator();
-
+      
       // View Option submenu
       mXyViewOptionMenu = new wxMenu;
       wxMenuItem *item =
-         new wxMenuItem(xyViewMenu, GmatPlot::MDI_XY_VIEW_OPTION, _T("Option"),
+         new wxMenuItem(xyViewMenu, GmatPlot::MDI_TS_VIEW_OPTION, _T("Option"),
                         _T("view options"), wxITEM_NORMAL, mXyViewOptionMenu);
-      mXyViewOptionMenu->Append(GmatPlot::MDI_XY_DRAW_GRID,
+      mXyViewOptionMenu->Append(GmatPlot::MDI_TS_DRAW_GRID,
                              _T("Draw Grid"),
                              _T("Draw Grid"), wxITEM_CHECK);
-      mXyViewOptionMenu->Append(GmatPlot::MDI_XY_DRAW_DOTTED_LINE,
+      mXyViewOptionMenu->Append(GmatPlot::MDI_TS_DRAW_DOTTED_LINE,
                              _T("Draw dotted line"),
                              _T("Draw dotted line"), wxITEM_CHECK);
 
-      mXyViewOptionMenu->Check(GmatPlot::MDI_XY_DRAW_DOTTED_LINE, false);
+      mXyViewOptionMenu->Check(GmatPlot::MDI_TS_DRAW_DOTTED_LINE, false);
 
       xyViewMenu->Append(item);
       menuBar->Append(xyViewMenu, wxT("View"));
@@ -1510,7 +1512,6 @@ wxMenuBar *GmatMainFrame::CreateMainMenu(int dataType)
    menuBar->Append(toolsMenu, wxT("Tools"));
 
    // Server
-   //wxMenu *mServerMenu = new wxMenu; (loj: 2/8/05 Made mServerMenu member data)
    mServerMenu = new wxMenu;
    mServerMenu->Append(MENU_START_SERVER, _T("Start"), _T("Start server"));
    mServerMenu->Append(MENU_STOP_SERVER, _T("Stop"), _T("Stop server"));

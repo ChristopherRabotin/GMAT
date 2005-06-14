@@ -77,7 +77,8 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
    Subscriber *subscriber =
       theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
 
-   mXyPlot = (XyPlot*)subscriber;
+   //loj: 6/14/05 mXyPlot = (XyPlot*)subscriber;
+   mXyPlot = (TsPlot*)subscriber;
 
    mXParamChanged = false;
    mYParamChanged = false;

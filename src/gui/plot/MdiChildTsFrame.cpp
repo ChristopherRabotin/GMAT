@@ -46,7 +46,8 @@ BEGIN_EVENT_TABLE(MdiChildTsFrame, wxMDIChildFrame)
    EVT_MENU(GmatPlot::MDI_TS_HELP_VIEW, MdiChildTsFrame::OnHelpView)
 
 //   EVT_PLOT_CLICKED(-1, MdiChildTsFrame::OnPlotClick)
-   EVT_ACTIVATE(MdiChildXyFrame::OnActivate)
+   //EVT_ACTIVATE(MdiChildXyFrame::OnActivate)
+   EVT_ACTIVATE(MdiChildTsFrame::OnActivate)
    EVT_SIZE(MdiChildTsFrame::OnSize)
    EVT_MOVE(MdiChildTsFrame::OnMove)
    EVT_CLOSE(MdiChildTsFrame::OnClose)
@@ -150,7 +151,7 @@ MdiChildTsFrame::MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
    int width, height;
    GetClientSize(&width, &height);
    TsPlotCanvas *frame =
-      new TsPlotCanvas(this, -1, wxPoint(0, 0), wxSize(width, height), wxPLOT_DEFAULT,
+      new TsPlotCanvas(this, -1, wxPoint(0, 0), wxSize(width, height), wxTAB_TRAVERSAL,//wxPLOT_DEFAULT,
                        plotTitle);
 
    mXyPlot = frame;
@@ -779,19 +780,25 @@ void MdiChildTsFrame::OnOpenXyPlotFile(wxCommandEvent& WXUNUSED(event) )
         wxString xyPlotFileName = fileDialog.GetPath();
 
         ++MdiTsPlot::numChildren;
-        GmatAppData::GetMainFrame()->xySubframe->SetPlotName("XYPlotFile"
+//         GmatAppData::GetMainFrame()->xySubframe->SetPlotName("XYPlotFile"
+//                   + MdiTsPlot::numChildren);
+//         GmatAppData::GetMainFrame()->xySubframe->SetTitle(xyPlotFileName);
+        GmatAppData::GetMainFrame()->tsSubframe->SetPlotName("XYPlotFile"
                   + MdiTsPlot::numChildren);
-        GmatAppData::GetMainFrame()->xySubframe->SetTitle(xyPlotFileName);
+        GmatAppData::GetMainFrame()->tsSubframe->SetTitle(xyPlotFileName);
 
         //-----------------------------------
         // Read text XY Plot file
         //-----------------------------------
-        int dataPoints = GmatAppData::GetMainFrame()->xySubframe->ReadXyPlotFile(xyPlotFileName);
+        //int dataPoints = GmatAppData::GetMainFrame()->xySubframe->ReadXyPlotFile(xyPlotFileName);
+        int dataPoints =
+           GmatAppData::GetMainFrame()->tsSubframe->ReadXyPlotFile(xyPlotFileName);
         if (dataPoints > 0)
         {
-            GmatAppData::GetMainFrame()->xySubframe->Show(TRUE);
-            wxLogStatus(GmatAppData::GetMainFrame(),
-                        wxT("Number of lines read: %d"), dataPoints);
+           //GmatAppData::GetMainFrame()->xySubframe->Show(TRUE);
+           GmatAppData::GetMainFrame()->tsSubframe->Show(TRUE);
+           wxLogStatus(GmatAppData::GetMainFrame(),
+                       wxT("Number of lines read: %d"), dataPoints);
         }
     }
 }

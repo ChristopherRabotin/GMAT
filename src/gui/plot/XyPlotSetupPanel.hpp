@@ -22,7 +22,8 @@
 #include "GmatPanel.hpp"
 #include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
-#include "XyPlot.hpp"
+//loj: 6/14/05#include "XyPlot.hpp"
+#include "TsPlot.hpp"
 #include "RgbColor.hpp"
 
 class XyPlotSetupPanel: public GmatPanel
@@ -32,7 +33,8 @@ public:
    ~XyPlotSetupPanel();
    
 protected:
-   XyPlot *mXyPlot;
+   //XyPlot *mXyPlot;
+   TsPlot *mXyPlot;
    
    int  mNumXParams;
    int  mNumYParams;

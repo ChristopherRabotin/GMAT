@@ -33,7 +33,7 @@
 #include "GmatServer.hpp"
 #include "MatlabInterface.hpp"
 #include "MdiChildTrajFrame.hpp"
-#include "MdiChildXyFrame.hpp"
+//#include "MdiChildXyFrame.hpp"
 #include "MdiChildTsFrame.hpp"
 
 #include "wx/notebook.h"
@@ -73,7 +73,7 @@ public:
 
    MdiChildTsFrame *tsSubframe;
 
-   MdiChildXyFrame *xySubframe;
+   //   MdiChildXyFrame *xySubframe;
 //    MdiChildXyFrame *xyMainSubframe;
 
 //    void UpdateUI();

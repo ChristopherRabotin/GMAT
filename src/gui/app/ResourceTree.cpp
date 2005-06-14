@@ -762,7 +762,9 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId)
          AppendItem(itemId, wxT(objName), GmatTree::ICON_REPORT, -1,
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::REPORT_FILE));
-      else if ((objTypeName == "XYPlot") || (objTypeName == "TsPlot"))
+      //loj: 6/14/05 changed the SubscriberFactory so we dont need here
+      //else if ((objTypeName == "XYPlot") || (objTypeName == "TsPlot"))
+      else if (objTypeName == "XYPlot")
          AppendItem(itemId, wxT(objName), GmatTree::ICON_XY_PLOT, -1,
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::XY_PLOT));

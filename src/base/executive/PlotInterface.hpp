@@ -69,33 +69,33 @@ public:
                             const UnsignedIntArray &scColors,
                             bool updateCanvas);
 
-   // for XY plot
-   static bool CreateXyPlotWindow(const std::string &plotName,
-                                  const std::string &oldName,
-                                  const std::string &plotTitle,
-                                  const std::string &xAxisTitle,
-                                  const std::string &yAxisTitle,
-                                  bool drawGrid = false);
-   static bool DeleteXyPlot(bool hideFrame);
-   static bool AddXyPlotCurve(const std::string &plotName, int curveIndex,
-                              int yOffset, Real yMin, Real yMax,
-                              const std::string &curveTitle,
-                              UnsignedInt penColor);
-   static bool DeleteAllXyPlotCurves(const std::string &plotName,
-                                     const std::string &oldName);
-   static bool DeleteXyPlotCurve(const std::string &plotName, int curveIndex);
-   static void ClearXyPlotData(const std::string &plotName);
-   static void SetXyPlotTitle(const std::string &plotName,
-                              const std::string &plotTitle);
-   static void ShowXyPlotLegend(const std::string &plotName);
-   static bool RefreshXyPlot(const std::string &plotName);
-   static bool UpdateXyPlot(const std::string &plotName,
-                            const std::string &oldName,
-                            const Real &xval, const Rvector &yvals,
-                            const std::string &plotTitle,
-                            const std::string &xAxisTitle,
-                            const std::string &yAxisTitle,
-                            bool updateCanvas, bool drawGrid);
+//    // for XY plot
+//    static bool CreateXyPlotWindow(const std::string &plotName,
+//                                   const std::string &oldName,
+//                                   const std::string &plotTitle,
+//                                   const std::string &xAxisTitle,
+//                                   const std::string &yAxisTitle,
+//                                   bool drawGrid = false);
+//    static bool DeleteXyPlot(bool hideFrame);
+//    static bool AddXyPlotCurve(const std::string &plotName, int curveIndex,
+//                               int yOffset, Real yMin, Real yMax,
+//                               const std::string &curveTitle,
+//                               UnsignedInt penColor);
+//    static bool DeleteAllXyPlotCurves(const std::string &plotName,
+//                                      const std::string &oldName);
+//    static bool DeleteXyPlotCurve(const std::string &plotName, int curveIndex);
+//    static void ClearXyPlotData(const std::string &plotName);
+//    static void SetXyPlotTitle(const std::string &plotName,
+//                               const std::string &plotTitle);
+//    static void ShowXyPlotLegend(const std::string &plotName);
+//    static bool RefreshXyPlot(const std::string &plotName);
+//    static bool UpdateXyPlot(const std::string &plotName,
+//                             const std::string &oldName,
+//                             const Real &xval, const Rvector &yvals,
+//                             const std::string &plotTitle,
+//                             const std::string &xAxisTitle,
+//                             const std::string &yAxisTitle,
+//                             bool updateCanvas, bool drawGrid);
    
 
 

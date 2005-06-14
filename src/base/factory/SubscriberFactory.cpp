@@ -23,9 +23,9 @@
 #include "ReportFile.hpp"
 #include "MessageWindow.hpp"
 #include "OpenGlPlot.hpp"
-#include "XyPlot.hpp"
+//#include "XyPlot.hpp" //loj: 6/14/05 this will be removed
 #include "TsPlot.hpp"
-#include "MatlabWs.hpp" //loj: 9/4/04 added
+#include "MatlabWs.hpp"
 
 //---------------------------------
 //  public methods
@@ -52,13 +52,14 @@ Subscriber* SubscriberFactory::CreateSubscriber(const std::string &ofType,
       return new ReportFile(withName, fileName);
    else if (ofType == "MessageWindow")
       return new MessageWindow(withName);
-   else if (ofType == "OpenGLPlot") //loj: 10/28/04 Changed from OpenGlPlot
+   else if (ofType == "OpenGLPlot")
       return new OpenGlPlot(withName);
-   else if (ofType == "XYPlot")     //loj: 10/28/04 Changed from XyPlot
-      return new XyPlot(withName);
-   else if (ofType == "TSPlot")     //loj: 10/28/04 Changed from XyPlot
+   else if (ofType == "XYPlot")
+      //return new XyPlot(withName); //loj: 6/14/05 XyPlot will be removed
       return new TsPlot(withName);
-   else if (ofType == "MatlabWS")   //loj: 10/28/04 Changed from MatlabWs
+   else if (ofType == "TSPlot")
+      return new TsPlot(withName);
+   else if (ofType == "MatlabWS")
       return new MatlabWs(withName);
    return NULL;
 }
@@ -83,7 +84,7 @@ Factory(Gmat::SUBSCRIBER)
       creatables.push_back("MessageWindow");
       creatables.push_back("OpenGLPlot");
       creatables.push_back("XYPlot");
-      creatables.push_back("TSPlot");
+      //creatables.push_back("TSPlot");
       creatables.push_back("MatlabWS");
    }
 }

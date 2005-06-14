@@ -26,9 +26,9 @@
 // for OpenGL plot
 #include "MdiGlPlotData.hpp"
 #include "MdiChildTrajFrame.hpp"
-// for XY plot
-#include "MdiXyPlotData.hpp"
-#include "MdiChildXyFrame.hpp"
+// // for XY plot
+// #include "MdiXyPlotData.hpp"
+// #include "MdiChildXyFrame.hpp"
 // for TS plot
 #include "MdiTsPlotData.hpp"
 #include "MdiChildTsFrame.hpp"
@@ -505,480 +505,480 @@ bool PlotInterface::UpdateGlPlot(const std::string &plotName,
 } // end UpdateGlPlot()
 
 
-//------------------------------------------------------------------------------
-//  bool CreateXyPlotWindow(const std::string &plotName,
-//                          const std::string &oldName,
-//                          const std::string &plotTitle,
-//                          const std::string &xAxisTitle,
-//                          const std::string &yAxisTitle,
-//                          bool drawGrid = false)
-//------------------------------------------------------------------------------
-/*
- * Creates XyPlot window.
- *
- * @param <plotName> name of plot
- */
-//------------------------------------------------------------------------------
-bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
-                                       const std::string &oldName,
-                                       const std::string &plotTitle,
-                                       const std::string &xAxisTitle,
-                                       const std::string &yAxisTitle,
-                                       bool drawGrid)
-{    
-#if defined __CONSOLE_APP__
-   return true;
-#else
+// //------------------------------------------------------------------------------
+// //  bool CreateXyPlotWindow(const std::string &plotName,
+// //                          const std::string &oldName,
+// //                          const std::string &plotTitle,
+// //                          const std::string &xAxisTitle,
+// //                          const std::string &yAxisTitle,
+// //                          bool drawGrid = false)
+// //------------------------------------------------------------------------------
+// /*
+//  * Creates XyPlot window.
+//  *
+//  * @param <plotName> name of plot
+//  */
+// //------------------------------------------------------------------------------
+// bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
+//                                        const std::string &oldName,
+//                                        const std::string &plotTitle,
+//                                        const std::string &xAxisTitle,
+//                                        const std::string &yAxisTitle,
+//                                        bool drawGrid)
+// {    
+// #if defined __CONSOLE_APP__
+//    return true;
+// #else
 
-   //-------------------------------------------------------
-   // check if new MDI child frame needed
-   //-------------------------------------------------------
-   bool createNewFrame = true;
-   wxString currPlotName;
-   MdiChildXyFrame *currPlotFrame = NULL;
+//    //-------------------------------------------------------
+//    // check if new MDI child frame needed
+//    //-------------------------------------------------------
+//    bool createNewFrame = true;
+//    wxString currPlotName;
+//    MdiChildXyFrame *currPlotFrame = NULL;
    
-   for (int i=0; i<MdiXyPlot::numChildren; i++)
-   {
-      currPlotFrame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
-      currPlotName = currPlotFrame->GetPlotName();
+//    for (int i=0; i<MdiXyPlot::numChildren; i++)
+//    {
+//       currPlotFrame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
+//       currPlotName = currPlotFrame->GetPlotName();
 
-      if (currPlotName.IsSameAs(plotName.c_str()))
-      {
-         createNewFrame = false;
-         break;
-      }
-      else if (currPlotName.IsSameAs(oldName.c_str()))
-      {
-         #if DEBUG_RENAME
-         MessageInterface::ShowMessage
-            ("PlotInterface::CreateXyPlotWindow() currPlotName=%s, oldName=%s\n",
-             currPlotName.c_str(), oldName.c_str());
-         #endif
+//       if (currPlotName.IsSameAs(plotName.c_str()))
+//       {
+//          createNewFrame = false;
+//          break;
+//       }
+//       else if (currPlotName.IsSameAs(oldName.c_str()))
+//       {
+//          #if DEBUG_RENAME
+//          MessageInterface::ShowMessage
+//             ("PlotInterface::CreateXyPlotWindow() currPlotName=%s, oldName=%s\n",
+//              currPlotName.c_str(), oldName.c_str());
+//          #endif
          
-         // change plot name
-//          ((MdiChildXyFrame*)MdiXyPlot::mdiChildren[i])-> //loj: 5/19/05
-//             SetPlotName(wxString(plotName.c_str()));
-         currPlotFrame->SetPlotName(wxString(plotName.c_str()));
-         createNewFrame = false;
-         break;
-      }
-   }
+//          // change plot name
+// //          ((MdiChildXyFrame*)MdiXyPlot::mdiChildren[i])-> //loj: 5/19/05
+// //             SetPlotName(wxString(plotName.c_str()));
+//          currPlotFrame->SetPlotName(wxString(plotName.c_str()));
+//          createNewFrame = false;
+//          break;
+//       }
+//    }
    
-   //-------------------------------------------------------
-   // create MDI child XY frame
-   //-------------------------------------------------------
-   if (createNewFrame)
-   {
+//    //-------------------------------------------------------
+//    // create MDI child XY frame
+//    //-------------------------------------------------------
+//    if (createNewFrame)
+//    {
         
-      #if DEBUG_PLOTIF_XY
-      MessageInterface::ShowMessage
-         ("PlotInterface::CreateXyPlotWindow() Creating new "
-          "MdiChildXyFrame\n X Axis Title = %s  Y Axis Title = %s\n",
-          xAxisTitle.c_str(), yAxisTitle.c_str());
-      #endif
+//       #if DEBUG_PLOTIF_XY
+//       MessageInterface::ShowMessage
+//          ("PlotInterface::CreateXyPlotWindow() Creating new "
+//           "MdiChildXyFrame\n X Axis Title = %s  Y Axis Title = %s\n",
+//           xAxisTitle.c_str(), yAxisTitle.c_str());
+//       #endif
       
-      // create a frame, containing a XY plot canvas
-      currPlotFrame =
-         new MdiChildXyFrame(GmatAppData::GetMainFrame(), true,
-                             wxString(plotName.c_str()),
-                             wxString(plotTitle.c_str()),
-                             wxString(xAxisTitle.c_str()),
-                             wxString(yAxisTitle.c_str()),
-                             wxPoint(-1, -1), wxSize(500, 350),
-                             wxDEFAULT_FRAME_STYLE);
+//       // create a frame, containing a XY plot canvas
+//       currPlotFrame =
+//          new MdiChildXyFrame(GmatAppData::GetMainFrame(), true,
+//                              wxString(plotName.c_str()),
+//                              wxString(plotTitle.c_str()),
+//                              wxString(xAxisTitle.c_str()),
+//                              wxString(yAxisTitle.c_str()),
+//                              wxPoint(-1, -1), wxSize(500, 350),
+//                              wxDEFAULT_FRAME_STYLE);
                              
-      currPlotFrame->Show();
+//       currPlotFrame->Show();
       
-      GmatAppData::GetMainFrame()->Tile(); //loj: 5/18/05 uncommented
+//       GmatAppData::GetMainFrame()->Tile(); //loj: 5/18/05 uncommented
 
-      ++MdiXyPlot::numChildren;
+//       ++MdiXyPlot::numChildren;
 
-//       GmatAppData::GetMainFrame()->xyMainSubframe->RedrawCurve();
-      currPlotFrame->RedrawCurve();
-   }
+// //       GmatAppData::GetMainFrame()->xyMainSubframe->RedrawCurve();
+//       currPlotFrame->RedrawCurve();
+//    }
 
-//    GmatAppData::GetMainFrame()->xyMainSubframe->SetShowGrid(drawGrid);
-//    GmatAppData::GetMainFrame()->xyMainSubframe->ResetZoom();
-   currPlotFrame->SetShowGrid(drawGrid);
-   currPlotFrame->ResetZoom();
+// //    GmatAppData::GetMainFrame()->xyMainSubframe->SetShowGrid(drawGrid);
+// //    GmatAppData::GetMainFrame()->xyMainSubframe->ResetZoom();
+//    currPlotFrame->SetShowGrid(drawGrid);
+//    currPlotFrame->ResetZoom();
    
-   return true;
-#endif
-}
+//    return true;
+// #endif
+// }
 
-//------------------------------------------------------------------------------
-//  bool DeleteXyPlot(bool hideFrame)
-//------------------------------------------------------------------------------
-/*
- * Deletes XyPlot.
- *
- */
-//------------------------------------------------------------------------------
-bool PlotInterface::DeleteXyPlot(bool hideFrame)
-{    
-#if defined __CONSOLE_APP__
-   return true;
-#else
+// //------------------------------------------------------------------------------
+// //  bool DeleteXyPlot(bool hideFrame)
+// //------------------------------------------------------------------------------
+// /*
+//  * Deletes XyPlot.
+//  *
+//  */
+// //------------------------------------------------------------------------------
+// bool PlotInterface::DeleteXyPlot(bool hideFrame)
+// {    
+// #if defined __CONSOLE_APP__
+//    return true;
+// #else
    
-   if (GmatAppData::GetMainFrame() != NULL)
-   {
-      #if DEBUG_PLOTIF_XY
-      MessageInterface::ShowMessage("PlotInterface::DeleteXyPlot()\n");
-      #endif
+//    if (GmatAppData::GetMainFrame() != NULL)
+//    {
+//       #if DEBUG_PLOTIF_XY
+//       MessageInterface::ShowMessage("PlotInterface::DeleteXyPlot()\n");
+//       #endif
 
-      MdiChildXyFrame *frame = NULL;
-      for (int i=0; i<MdiXyPlot::numChildren; i++)
-      {
-         frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
-         frame->DeletePlot();
-      }
-   }
+//       MdiChildXyFrame *frame = NULL;
+//       for (int i=0; i<MdiXyPlot::numChildren; i++)
+//       {
+//          frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
+//          frame->DeletePlot();
+//       }
+//    }
    
-   return true;
-#endif
-}
+//    return true;
+// #endif
+// }
 
-//------------------------------------------------------------------------------
-// bool AddXyPlotCurve(const std::string &plotName, int curveIndex,
-//                     int yOffset, Real yMin, Real yMax,
-//                     const std::string &curveTitle,
-//                     UnsignedInt penColor)
-//------------------------------------------------------------------------------
-/*
- * Adds a plot curve to XY plow window.
- */
-//------------------------------------------------------------------------------
-bool PlotInterface::AddXyPlotCurve(const std::string &plotName, int curveIndex,
-                                   int yOffset, Real yMin, Real yMax,
-                                   const std::string &curveTitle,
-                                   UnsignedInt penColor)
-{
-#if defined __CONSOLE_APP__
-   return true;
-#else
+// //------------------------------------------------------------------------------
+// // bool AddXyPlotCurve(const std::string &plotName, int curveIndex,
+// //                     int yOffset, Real yMin, Real yMax,
+// //                     const std::string &curveTitle,
+// //                     UnsignedInt penColor)
+// //------------------------------------------------------------------------------
+// /*
+//  * Adds a plot curve to XY plow window.
+//  */
+// //------------------------------------------------------------------------------
+// bool PlotInterface::AddXyPlotCurve(const std::string &plotName, int curveIndex,
+//                                    int yOffset, Real yMin, Real yMax,
+//                                    const std::string &curveTitle,
+//                                    UnsignedInt penColor)
+// {
+// #if defined __CONSOLE_APP__
+//    return true;
+// #else
 
-   bool added = false;
+//    bool added = false;
    
-   #if DEBUG_PLOTIF_XY
-   MessageInterface::ShowMessage
-      ("PlotInterface::AddXyPlotCurve() entered."
-       " plotName = " + plotName + " curveTitle = " + 
-       curveTitle + "\n");
+//    #if DEBUG_PLOTIF_XY
+//    MessageInterface::ShowMessage
+//       ("PlotInterface::AddXyPlotCurve() entered."
+//        " plotName = " + plotName + " curveTitle = " + 
+//        curveTitle + "\n");
    
-   MessageInterface::ShowMessage
-      ("PlotInterface::AddXyPlotCurve() numChildren = %d\n",
-       MdiXyPlot::numChildren);
-   #endif
+//    MessageInterface::ShowMessage
+//       ("PlotInterface::AddXyPlotCurve() numChildren = %d\n",
+//        MdiXyPlot::numChildren);
+//    #endif
    
-   MdiChildXyFrame *frame = NULL;
-   for (int i=0; i<MdiXyPlot::numChildren; i++)
-   {
-      frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
+//    MdiChildXyFrame *frame = NULL;
+//    for (int i=0; i<MdiXyPlot::numChildren; i++)
+//    {
+//       frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
         
-      //if (frame->GetPlotName() == wxString(plotName.c_str()))
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->AddPlotCurve(curveIndex, yOffset, yMin, yMax,
-                             wxString(curveTitle.c_str()), penColor);
-         added = true;
-      }
-   }
+//       //if (frame->GetPlotName() == wxString(plotName.c_str()))
+//       if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+//       {
+//          frame->AddPlotCurve(curveIndex, yOffset, yMin, yMax,
+//                              wxString(curveTitle.c_str()), penColor);
+//          added = true;
+//       }
+//    }
 
-   return added;
-#endif
-}
+//    return added;
+// #endif
+// }
 
-//------------------------------------------------------------------------------
-// bool DeleteAllXyPlotCurves(const std::string &plotName,
-//                            const std::string &oldName)
-//------------------------------------------------------------------------------
-/*
- * Deletes all plot curves in XY plow window.
- */
-//------------------------------------------------------------------------------
-bool PlotInterface::DeleteAllXyPlotCurves(const std::string &plotName,
-                                          const std::string &oldName)
-{
-#if defined __CONSOLE_APP__
-   return true;
-#else
+// //------------------------------------------------------------------------------
+// // bool DeleteAllXyPlotCurves(const std::string &plotName,
+// //                            const std::string &oldName)
+// //------------------------------------------------------------------------------
+// /*
+//  * Deletes all plot curves in XY plow window.
+//  */
+// //------------------------------------------------------------------------------
+// bool PlotInterface::DeleteAllXyPlotCurves(const std::string &plotName,
+//                                           const std::string &oldName)
+// {
+// #if defined __CONSOLE_APP__
+//    return true;
+// #else
    
-   #if DEBUG_PLOTIF_XY
-   MessageInterface::ShowMessage
-      ("PlotInterface::DeleteAllPlotCurve() plotName = %s "
-       "numChildren = %d\n", plotName.c_str(),
-       MdiXyPlot::numChildren);
-   #endif
+//    #if DEBUG_PLOTIF_XY
+//    MessageInterface::ShowMessage
+//       ("PlotInterface::DeleteAllPlotCurve() plotName = %s "
+//        "numChildren = %d\n", plotName.c_str(),
+//        MdiXyPlot::numChildren);
+//    #endif
 
-   MdiChildXyFrame *frame = NULL;
-   for (int i=0; i<MdiXyPlot::numChildren; i++)
-   {
-      frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()) ||
-          frame->GetPlotName().IsSameAs(oldName.c_str()))
-      {
-         frame->DeleteAllPlotCurves();
-      }
-   }
+//    MdiChildXyFrame *frame = NULL;
+//    for (int i=0; i<MdiXyPlot::numChildren; i++)
+//    {
+//       frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
+//       if (frame->GetPlotName().IsSameAs(plotName.c_str()) ||
+//           frame->GetPlotName().IsSameAs(oldName.c_str()))
+//       {
+//          frame->DeleteAllPlotCurves();
+//       }
+//    }
 
-   return true;
-#endif
-}
+//    return true;
+// #endif
+// }
 
 
-//------------------------------------------------------------------------------
-// bool DeleteXyPlotCurve(const std::string &plotName, int curveIndex)
-//------------------------------------------------------------------------------
-/*
- * Deletes a plot curve to XY plow window.
- */
-//------------------------------------------------------------------------------
-bool PlotInterface::DeleteXyPlotCurve(const std::string &plotName, int curveIndex)
-{
-#if defined __CONSOLE_APP__
-   return true;
-#else
+// //------------------------------------------------------------------------------
+// // bool DeleteXyPlotCurve(const std::string &plotName, int curveIndex)
+// //------------------------------------------------------------------------------
+// /*
+//  * Deletes a plot curve to XY plow window.
+//  */
+// //------------------------------------------------------------------------------
+// bool PlotInterface::DeleteXyPlotCurve(const std::string &plotName, int curveIndex)
+// {
+// #if defined __CONSOLE_APP__
+//    return true;
+// #else
    
-   #if DEBUG_PLOTIF_XY
-      MessageInterface::ShowMessage
-         ("PlotInterface::DeleteXyPlotCurve() entered plotName = %s "
-          "curveIndex = %d\n", plotName.c_str(), curveIndex);
+//    #if DEBUG_PLOTIF_XY
+//       MessageInterface::ShowMessage
+//          ("PlotInterface::DeleteXyPlotCurve() entered plotName = %s "
+//           "curveIndex = %d\n", plotName.c_str(), curveIndex);
     
-      MessageInterface::ShowMessage
-         ("PlotInterface::DeleteXyPlotCurve() numChildren = %d\n",
-          MdiXyPlot::numChildren);
-   #endif
+//       MessageInterface::ShowMessage
+//          ("PlotInterface::DeleteXyPlotCurve() numChildren = %d\n",
+//           MdiXyPlot::numChildren);
+//    #endif
 
-      MdiChildXyFrame *frame = NULL;
-   for (int i=0; i<MdiXyPlot::numChildren; i++)
-   {
-      frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
+//       MdiChildXyFrame *frame = NULL;
+//    for (int i=0; i<MdiXyPlot::numChildren; i++)
+//    {
+//       frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
       
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->DeletePlotCurve(curveIndex);
-      }
-   }
+//       if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+//       {
+//          frame->DeletePlotCurve(curveIndex);
+//       }
+//    }
 
-   return true;
-#endif
-}
+//    return true;
+// #endif
+// }
 
 
-//------------------------------------------------------------------------------
-// void ClearXyPlotData(const std::string &plotName))
-//------------------------------------------------------------------------------
-void PlotInterface::ClearXyPlotData(const std::string &plotName)
-{
-#if defined __CONSOLE_APP__
-   return;
-#else
+// //------------------------------------------------------------------------------
+// // void ClearXyPlotData(const std::string &plotName))
+// //------------------------------------------------------------------------------
+// void PlotInterface::ClearXyPlotData(const std::string &plotName)
+// {
+// #if defined __CONSOLE_APP__
+//    return;
+// #else
 
-   MdiChildXyFrame *frame = NULL;
-   for (int i=0; i<MdiXyPlot::numChildren; i++)
-   {
-      frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
+//    MdiChildXyFrame *frame = NULL;
+//    for (int i=0; i<MdiXyPlot::numChildren; i++)
+//    {
+//       frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->ClearPlotData();
-      }
-   }
-#endif
-}
+//       if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+//       {
+//          frame->ClearPlotData();
+//       }
+//    }
+// #endif
+// }
 
-//------------------------------------------------------------------------------
-// void SetXyPlotTitle(const std::string &plotName, const std::string &plotTitle)
-//------------------------------------------------------------------------------
-void PlotInterface::SetXyPlotTitle(const std::string &plotName,
-                                   const std::string &plotTitle)
-{
-#if defined __CONSOLE_APP__
-   return;
-#else
+// //------------------------------------------------------------------------------
+// // void SetXyPlotTitle(const std::string &plotName, const std::string &plotTitle)
+// //------------------------------------------------------------------------------
+// void PlotInterface::SetXyPlotTitle(const std::string &plotName,
+//                                    const std::string &plotTitle)
+// {
+// #if defined __CONSOLE_APP__
+//    return;
+// #else
    
-   #if DEBUG_PLOTIF_XY
-   MessageInterface::ShowMessage
-      ("PlotInterface::SetXyPlotTitle() plotName = %s "
-       "plotTitle = %s\n", plotName.c_str(), plotTitle.c_str());
-   #endif
+//    #if DEBUG_PLOTIF_XY
+//    MessageInterface::ShowMessage
+//       ("PlotInterface::SetXyPlotTitle() plotName = %s "
+//        "plotTitle = %s\n", plotName.c_str(), plotTitle.c_str());
+//    #endif
    
-   MdiChildXyFrame *frame = NULL;
-   for (int i=0; i<MdiXyPlot::numChildren; i++)
-   {
-      frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
+//    MdiChildXyFrame *frame = NULL;
+//    for (int i=0; i<MdiXyPlot::numChildren; i++)
+//    {
+//       frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
       
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         #if DEBUG_PLOTIF_XY
-            MessageInterface::ShowMessage
-               ("PlotInterface::SetXyPlotTitle() calling "
-                " frame->SetPlotTitle() \n");
-         #endif
+//       if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+//       {
+//          #if DEBUG_PLOTIF_XY
+//             MessageInterface::ShowMessage
+//                ("PlotInterface::SetXyPlotTitle() calling "
+//                 " frame->SetPlotTitle() \n");
+//          #endif
             
-         frame->SetPlotTitle(wxString(plotTitle.c_str()));
-      }
-   }
-#endif
-}
+//          frame->SetPlotTitle(wxString(plotTitle.c_str()));
+//       }
+//    }
+// #endif
+// }
 
 
-//------------------------------------------------------------------------------
-// void ShowXyPlotLegend(const std::string &plotName)
-//------------------------------------------------------------------------------
-void PlotInterface::ShowXyPlotLegend(const std::string &plotName)
-{
-#if defined __CONSOLE_APP__
-   return;
-#else
+// //------------------------------------------------------------------------------
+// // void ShowXyPlotLegend(const std::string &plotName)
+// //------------------------------------------------------------------------------
+// void PlotInterface::ShowXyPlotLegend(const std::string &plotName)
+// {
+// #if defined __CONSOLE_APP__
+//    return;
+// #else
    
-   MdiChildXyFrame *frame = NULL;
-   for (int i=0; i<MdiXyPlot::numChildren; i++)
-   {
-      frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
+//    MdiChildXyFrame *frame = NULL;
+//    for (int i=0; i<MdiXyPlot::numChildren; i++)
+//    {
+//       frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         #if DEBUG_PLOTIF_XY
-            MessageInterface::ShowMessage
-               ("PlotInterface::ShowXyPlotLegend() calling  frame->ShowPlotLegend() \n");
-         #endif
+//       if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+//       {
+//          #if DEBUG_PLOTIF_XY
+//             MessageInterface::ShowMessage
+//                ("PlotInterface::ShowXyPlotLegend() calling  frame->ShowPlotLegend() \n");
+//          #endif
             
-         frame->ShowPlotLegend();
-      }
-   }
-#endif
-}
+//          frame->ShowPlotLegend();
+//       }
+//    }
+// #endif
+// }
 
 
-//------------------------------------------------------------------------------
-// bool RefreshXyPlot(const std::string &plotName)
-//------------------------------------------------------------------------------
-/*
- * Refreshes XY plot curve.
- *
- * @param <plotName> name of xy plot
- */
-//------------------------------------------------------------------------------
-bool PlotInterface::RefreshXyPlot(const std::string &plotName)
-{
-#if defined __CONSOLE_APP__
-   return true;
-#else
+// //------------------------------------------------------------------------------
+// // bool RefreshXyPlot(const std::string &plotName)
+// //------------------------------------------------------------------------------
+// /*
+//  * Refreshes XY plot curve.
+//  *
+//  * @param <plotName> name of xy plot
+//  */
+// //------------------------------------------------------------------------------
+// bool PlotInterface::RefreshXyPlot(const std::string &plotName)
+// {
+// #if defined __CONSOLE_APP__
+//    return true;
+// #else
 
-   if (GmatAppData::GetMainFrame() != NULL)
-   {        
-      #if DEBUG_PLOTIF_XY_UPDATE
-         MessageInterface::ShowMessage
-            ("PlotInterface::RefreshXyPlot() plotName=%s, numChildren=%d\n",
-             plotName.c_str(), MdiXyPlot::numChildren);
-      #endif
-      
-      wxString owner = wxString(plotName.c_str());
-
-      MdiChildXyFrame *frame = NULL;
-      for (int i=0; i<MdiXyPlot::numChildren; i++)
-      {
-         frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
-         
-         if (frame->GetPlotName().IsSameAs(owner.c_str()))
-         {
-            frame->RedrawCurve();
-            //loj: 8/17/04 commented out so that MainFrame gets user input focus
-            // during the run
-            //frame->SetFocus();
-         }
-      }
-   }
-   
-   return true;
-#endif
-}
-
-
-//------------------------------------------------------------------------------
-// bool UpdateXyPlot(const std::string &plotName, const std::string &oldName,
-//                   const Real &xval, const Rvector &yvals,
-//                   const std::string &plotTitle,
-//                   const std::string &xAxisTitle,
-//                   const std::string &yAxisTitle, bool updateCanvas,
-//                   bool drawGrid)
-//------------------------------------------------------------------------------
-/*
- * Updates XY plot curve.
- *
- * @param <plotName> name of xy plot
- * @param <xval> x value
- * @param <yvals> y values, should be in the order of curve added
- */
-//------------------------------------------------------------------------------
-bool PlotInterface::UpdateXyPlot(const std::string &plotName,
-                                 const std::string &oldName,
-                                 const Real &xval, const Rvector &yvals,
-                                 const std::string &plotTitle,
-                                 const std::string &xAxisTitle,
-                                 const std::string &yAxisTitle,
-                                 bool updateCanvas, bool drawGrid)
-{
-#if defined __CONSOLE_APP__
-   return true;
-#else
-
-   bool updated = false;
-   wxString owner = wxString(plotName.c_str());
-
-   //loj: 5/18/05 This code is not needed.
-//    if (GmatAppData::GetMainFrame() == NULL)
+//    if (GmatAppData::GetMainFrame() != NULL)
 //    {        
-//       CreateXyPlotWindow(plotName, oldName, plotTitle, xAxisTitle, yAxisTitle,
-//                          drawGrid);
 //       #if DEBUG_PLOTIF_XY_UPDATE
 //          MessageInterface::ShowMessage
-//             ("PlotInterface::UpdateXyPlot()" + plotName + " " +
-//              plotTitle + " " + xAxisTitle + " " + yAxisTitle + "\n");
+//             ("PlotInterface::RefreshXyPlot() plotName=%s, numChildren=%d\n",
+//              plotName.c_str(), MdiXyPlot::numChildren);
 //       #endif
-//    }
-        
-   #if DEBUG_PLOTIF_XY_UPDATE
-   MessageInterface::ShowMessage
-      ("PlotInterface::UpdateXyPlot() numChildren = %d\n",
-       MdiXyPlot::numChildren);
-   #endif
-   
-   MdiChildXyFrame *frame = NULL;
-   for (int i=0; i<MdiXyPlot::numChildren; i++)
-   {
-      frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
       
-      if (frame->GetPlotName().IsSameAs(owner.c_str()))
-      {
-         int numCurves = frame->GetCurveCount();
-            
-         #if DEBUG_PLOTIF_XY_UPDATE
-            MessageInterface::ShowMessage
-               ("PlotInterface::UpdateXyPlot() numCurves = %d\n", numCurves);
-         #endif
-            
-         for (int j=0; j<numCurves; j++)
-         {
-            #if DEBUG_PLOTIF_XY_UPDATE
-               MessageInterface::ShowMessage
-                  ("PlotInterface::UpdateXyPlot() yvals[%d] = %f\n", j, yvals(j));
-            #endif
-               
-            frame->AddDataPoints(j, xval, yvals(j));
-         }
+//       wxString owner = wxString(plotName.c_str());
 
-         if (updateCanvas)
-            frame->RedrawCurve();
-            
-         updated = true;
-      }
-   }
+//       MdiChildXyFrame *frame = NULL;
+//       for (int i=0; i<MdiXyPlot::numChildren; i++)
+//       {
+//          frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
+         
+//          if (frame->GetPlotName().IsSameAs(owner.c_str()))
+//          {
+//             frame->RedrawCurve();
+//             //loj: 8/17/04 commented out so that MainFrame gets user input focus
+//             // during the run
+//             //frame->SetFocus();
+//          }
+//       }
+//    }
    
-   return updated;
-#endif
-}
+//    return true;
+// #endif
+// }
+
+
+// //------------------------------------------------------------------------------
+// // bool UpdateXyPlot(const std::string &plotName, const std::string &oldName,
+// //                   const Real &xval, const Rvector &yvals,
+// //                   const std::string &plotTitle,
+// //                   const std::string &xAxisTitle,
+// //                   const std::string &yAxisTitle, bool updateCanvas,
+// //                   bool drawGrid)
+// //------------------------------------------------------------------------------
+// /*
+//  * Updates XY plot curve.
+//  *
+//  * @param <plotName> name of xy plot
+//  * @param <xval> x value
+//  * @param <yvals> y values, should be in the order of curve added
+//  */
+// //------------------------------------------------------------------------------
+// bool PlotInterface::UpdateXyPlot(const std::string &plotName,
+//                                  const std::string &oldName,
+//                                  const Real &xval, const Rvector &yvals,
+//                                  const std::string &plotTitle,
+//                                  const std::string &xAxisTitle,
+//                                  const std::string &yAxisTitle,
+//                                  bool updateCanvas, bool drawGrid)
+// {
+// #if defined __CONSOLE_APP__
+//    return true;
+// #else
+
+//    bool updated = false;
+//    wxString owner = wxString(plotName.c_str());
+
+//    //loj: 5/18/05 This code is not needed.
+// //    if (GmatAppData::GetMainFrame() == NULL)
+// //    {        
+// //       CreateXyPlotWindow(plotName, oldName, plotTitle, xAxisTitle, yAxisTitle,
+// //                          drawGrid);
+// //       #if DEBUG_PLOTIF_XY_UPDATE
+// //          MessageInterface::ShowMessage
+// //             ("PlotInterface::UpdateXyPlot()" + plotName + " " +
+// //              plotTitle + " " + xAxisTitle + " " + yAxisTitle + "\n");
+// //       #endif
+// //    }
+        
+//    #if DEBUG_PLOTIF_XY_UPDATE
+//    MessageInterface::ShowMessage
+//       ("PlotInterface::UpdateXyPlot() numChildren = %d\n",
+//        MdiXyPlot::numChildren);
+//    #endif
+   
+//    MdiChildXyFrame *frame = NULL;
+//    for (int i=0; i<MdiXyPlot::numChildren; i++)
+//    {
+//       frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren.Item(i)->GetData());
+      
+//       if (frame->GetPlotName().IsSameAs(owner.c_str()))
+//       {
+//          int numCurves = frame->GetCurveCount();
+            
+//          #if DEBUG_PLOTIF_XY_UPDATE
+//             MessageInterface::ShowMessage
+//                ("PlotInterface::UpdateXyPlot() numCurves = %d\n", numCurves);
+//          #endif
+            
+//          for (int j=0; j<numCurves; j++)
+//          {
+//             #if DEBUG_PLOTIF_XY_UPDATE
+//                MessageInterface::ShowMessage
+//                   ("PlotInterface::UpdateXyPlot() yvals[%d] = %f\n", j, yvals(j));
+//             #endif
+               
+//             frame->AddDataPoints(j, xval, yvals(j));
+//          }
+
+//          if (updateCanvas)
+//             frame->RedrawCurve();
+            
+//          updated = true;
+//       }
+//    }
+   
+//    return updated;
+// #endif
+// }
 
 
 
