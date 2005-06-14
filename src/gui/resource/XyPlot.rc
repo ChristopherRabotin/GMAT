@@ -1,9 +1,0 @@
-//$Header$
-// For XyPlotWindow.cpp
-// originally for plot.cpp
-plot_up_bmp  BITMAP  "bitmaps/plot_up.bmp"
-plot_dwn_bmp BITMAP  "bitmaps/plot_dwn.bmp"
-plot_enl_bmp BITMAP  "bitmaps/plot_enl.bmp"
-plot_shr_bmp BITMAP  "bitmaps/plot_shr.bmp"
-plot_zin_bmp BITMAP  "bitmaps/plot_zin.bmp"
-plot_zot_bmp BITMAP  "bitmaps/plot_zot.bmp"
