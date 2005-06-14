@@ -257,7 +257,8 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime)
       return result;
    }
    
-   stateType* rv = new stateType;
+//   stateType* rv = new stateType;
+   stateType rv;
    // add to the MJD to get the absolute Julian Date
    //double absJD = atTime.Get() + 2430000.5;
    //double absJD = atTime.Get() + 2430000.0;
@@ -277,17 +278,24 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime)
    // it is supposed to be a geocentric state from the DE file
 
    // interpolate the data to get the state
-   Interpolate_State(absJD, forBody, rv);
+//   Interpolate_State(absJD, forBody, rv);
+   Interpolate_State(absJD, forBody, &rv);
 
    if (forBody == DeFile::MOON_ID)
    {
-      result[0] = (Real) rv->Position[0]; // temporary
-      result[1] = (Real) rv->Position[1];
-      result[2] = (Real) rv->Position[2];
-      result[3] = (Real) rv->Velocity[0] ; //* GmatTimeUtil::SECS_PER_DAY;
-      result[4] = (Real) rv->Velocity[1] ; //* GmatTimeUtil::SECS_PER_DAY;
-      result[5] = (Real) rv->Velocity[2] ; //* GmatTimeUtil::SECS_PER_DAY;
-
+//      result[0] = (Real) rv->Position[0]; // temporary
+//      result[1] = (Real) rv->Position[1];
+//      result[2] = (Real) rv->Position[2];
+//      result[3] = (Real) rv->Velocity[0] ; //* GmatTimeUtil::SECS_PER_DAY;
+//      result[4] = (Real) rv->Velocity[1] ; //* GmatTimeUtil::SECS_PER_DAY;
+//      result[5] = (Real) rv->Velocity[2] ; //* GmatTimeUtil::SECS_PER_DAY;
+//      delete rv;
+      result[0] = (Real) rv.Position[0]; // temporary
+      result[1] = (Real) rv.Position[1];
+      result[2] = (Real) rv.Position[2];
+      result[3] = (Real) rv.Velocity[0] ; //* GmatTimeUtil::SECS_PER_DAY;
+      result[4] = (Real) rv.Velocity[1] ; //* GmatTimeUtil::SECS_PER_DAY;
+      result[5] = (Real) rv.Velocity[2] ; //* GmatTimeUtil::SECS_PER_DAY;
       return result;
    }
 
@@ -295,24 +303,52 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime)
    // coordinates), then get the Earth-Moon state in SSBarycentric,
    // then get the Earth state from that (using the Moon state in
    // geocentric), then figure out the body's state wrt the Earth
-   stateType* emrv = new stateType;
-   stateType* mrv  = new stateType;
+//   stateType* emrv = new stateType;
+//   stateType* mrv  = new stateType;
+   stateType emrv, mrv;
 
+//   // earth-moon barycenter rel to solar system barycenter
+//   Interpolate_State(absJD,(int)DeFile::EARTH_ID, emrv);
+//   // moon state (geocentric)
+//   Interpolate_State(absJD,(int)DeFile::MOON_ID, mrv);
+//
+//   // compute Earth state in Solar System barycenter coordinates
+//   Rvector6 earthMoonRv(emrv->Position[0],emrv->Position[1],emrv->Position[2],
+//                        emrv->Velocity[0],emrv->Velocity[1],emrv->Velocity[2]);
+//   Rvector6 moonRv(mrv->Position[0],mrv->Position[1],mrv->Position[2],
+//                   mrv->Velocity[0],mrv->Velocity[1],mrv->Velocity[2]);
+//   Rvector6 earthRv = earthMoonRv - (moonRv / (R1.EMRAT + 1.0));
+//
+//   // now compute the state of the requested body wrt the Earth
+//   Rvector6 bodyRv(rv->Position[0],rv->Position[1],rv->Position[2],
+//                   rv->Velocity[0],rv->Velocity[1],rv->Velocity[2]);
+//   Rvector6 bodyWrtEarth = bodyRv - earthRv;
+//
+//   result[0] = bodyWrtEarth.Get(0);
+//   result[1] = bodyWrtEarth.Get(1);
+//   result[2] = bodyWrtEarth.Get(2);
+//   result[3] = bodyWrtEarth.Get(3) ; //* GmatTimeUtil::SECS_PER_DAY;
+//   result[4] = bodyWrtEarth.Get(4) ; //* GmatTimeUtil::SECS_PER_DAY;
+//   result[5] = bodyWrtEarth.Get(5) ; //* GmatTimeUtil::SECS_PER_DAY;
+//
+//   delete rv;
+//   delete emrv;
+//   delete mrv;
    // earth-moon barycenter rel to solar system barycenter
-   Interpolate_State(absJD,(int)DeFile::EARTH_ID, emrv);
+   Interpolate_State(absJD,(int)DeFile::EARTH_ID, &emrv);
    // moon state (geocentric)
-   Interpolate_State(absJD,(int)DeFile::MOON_ID, mrv);
+   Interpolate_State(absJD,(int)DeFile::MOON_ID, &mrv);
 
    // compute Earth state in Solar System barycenter coordinates
-   Rvector6 earthMoonRv(emrv->Position[0],emrv->Position[1],emrv->Position[2],
-                        emrv->Velocity[0],emrv->Velocity[1],emrv->Velocity[2]);
-   Rvector6 moonRv(mrv->Position[0],mrv->Position[1],mrv->Position[2],
-                   mrv->Velocity[0],mrv->Velocity[1],mrv->Velocity[2]);
+   Rvector6 earthMoonRv(emrv.Position[0],emrv.Position[1],emrv.Position[2],
+                        emrv.Velocity[0],emrv.Velocity[1],emrv.Velocity[2]);
+   Rvector6 moonRv(mrv.Position[0],mrv.Position[1],mrv.Position[2],
+                   mrv.Velocity[0],mrv.Velocity[1],mrv.Velocity[2]);
    Rvector6 earthRv = earthMoonRv - (moonRv / (R1.EMRAT + 1.0));
 
    // now compute the state of the requested body wrt the Earth
-   Rvector6 bodyRv(rv->Position[0],rv->Position[1],rv->Position[2],
-                   rv->Velocity[0],rv->Velocity[1],rv->Velocity[2]);
+   Rvector6 bodyRv(rv.Position[0],rv.Position[1],rv.Position[2],
+                   rv.Velocity[0],rv.Velocity[1],rv.Velocity[2]);
    Rvector6 bodyWrtEarth = bodyRv - earthRv;
 
    result[0] = bodyWrtEarth.Get(0);
@@ -321,7 +357,7 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime)
    result[3] = bodyWrtEarth.Get(3) ; //* GmatTimeUtil::SECS_PER_DAY;
    result[4] = bodyWrtEarth.Get(4) ; //* GmatTimeUtil::SECS_PER_DAY;
    result[5] = bodyWrtEarth.Get(5) ; //* GmatTimeUtil::SECS_PER_DAY;
-   
+
    return result;
 }
 
