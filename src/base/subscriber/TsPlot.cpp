@@ -75,7 +75,7 @@ TsPlot::TsPlot(const std::string &name, Parameter *xParam,
                Parameter *firstYParam, const std::string &plotTitle,
                const std::string &xAxisTitle, const std::string &yAxisTitle,
                bool drawGrid) :
-   Subscriber("TsPlot", name)
+   Subscriber("XYPlot", name)
 {
    // GmatBase data
    parameterCount = TsPlotParamCount;
