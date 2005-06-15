@@ -22,10 +22,10 @@
 #include "PlotInterface.hpp"     // for XY plot
 #include "MessageInterface.hpp"  // for ShowMessage()
 
-//#define DEBUG_XYPLOT_INIT 1
-//#define DEBUG_XYPLOT_PARAM 1
-//#define DEBUG_XYPLOT_OBJECT 1 
-//#define DEBUG_XYPLOT_UPDATE 1
+#define DEBUG_TSPLOT_INIT 1
+#define DEBUG_TSPLOT_PARAM 1
+//#define DEBUG_TSPLOT_OBJECT 1 
+//#define DEBUG_TSPLOT_UPDATE 1
 //#define DEBUG_ACTION_REMOVE 1
 //#define DEBUG_RENAME 1
 
@@ -161,7 +161,7 @@ bool TsPlot::SetXParameter(const std::string &paramName)
 //------------------------------------------------------------------------------
 bool TsPlot::AddYParameter(const std::string &paramName, Integer index)
 {
-   #if DEBUG_TsPlot_PARAM
+   #if DEBUG_TSPLOT_PARAM
    MessageInterface::ShowMessage("TsPlot::AddYParameter() name = %s\n",
                                  paramName.c_str());
    #endif
@@ -217,7 +217,7 @@ bool TsPlot::Initialize()
    
    Subscriber::Initialize();
    
-   #if DEBUG_TsPlot_INIT
+   #if DEBUG_TSPLOT_INIT
    MessageInterface::ShowMessage("TsPlot::Initialize() active=%d\n", active);
    #endif
    
@@ -230,7 +230,7 @@ bool TsPlot::Initialize()
       BuildPlotTitle();
       
       // Create TsPlotWindow, if not exist
-      #if DEBUG_TsPlot_INIT
+      #if DEBUG_TSPLOT_INIT
       MessageInterface::ShowMessage("TsPlot::Initialize() calling CreateTsPlotWindow()\n");
       #endif
       
@@ -251,7 +251,7 @@ bool TsPlot::Initialize()
          std::string curveTitle = mYParams[i]->GetName();
          UnsignedInt penColor = mYParams[i]->GetUnsignedIntParameter("Color");
             
-         #if DEBUG_TsPlot_INIT
+         #if DEBUG_TSPLOT_INIT
          MessageInterface::ShowMessage("TsPlot::Initialize() curveTitle = %s\n",
                                        curveTitle.c_str());
          #endif
@@ -262,8 +262,8 @@ bool TsPlot::Initialize()
       
       PlotInterface::ShowTsPlotLegend(instanceName);
       status = true;
-        
-      #if DEBUG_TsPlot_INIT
+      
+      #if DEBUG_TSPLOT_INIT
       MessageInterface::ShowMessage("TsPlot::Initialize() calling ClearTsPlotData()\n");
       #endif
       
@@ -569,7 +569,7 @@ std::string TsPlot::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool TsPlot::SetStringParameter(const Integer id, const std::string &value)
 {
-   #if DEBUG_TsPlot_PARAM
+   #if DEBUG_TSPLOT_PARAM
    MessageInterface::ShowMessage("TsPlot::SetStringParameter() id = %d, "
                                  "value = %s \n", id, value.c_str());
    #endif
@@ -622,7 +622,7 @@ bool TsPlot::SetStringParameter(const Integer id, const std::string &value)
 bool TsPlot::SetStringParameter(const std::string &label,
                                 const std::string &value)
 {
-   #if DEBUG_TsPlot_PARAM
+   #if DEBUG_TSPLOT_PARAM
    MessageInterface::ShowMessage("TsPlot::SetStringParameter() label = %s, "
                                  "value = %s \n", label.c_str(), value.c_str());
    #endif
@@ -657,7 +657,7 @@ bool TsPlot::SetStringParameter(const std::string &label,
                                 const std::string &value,
                                 const Integer index)
 {
-   #if DEBUG_TsPlot_PARAM
+   #if DEBUG_TSPLOT_PARAM
    MessageInterface::ShowMessage
       ("TsPlot::SetStringParameter() label=%s, value=%s, index=%d \n",
        label.c_str(), value.c_str(), index);
@@ -726,36 +726,39 @@ bool TsPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 {
    if (type == Gmat::PARAMETER)
    {
+      //loj: 6/15/05
+      // Allow same parameter can be set to X and Y
       if (name == mXParamName)
       {
          mXParam = (Parameter*)obj;
       
-         #if DEBUG_TsPlot_OBJECT
+         #if DEBUG_TSPLOT_OBJECT
          MessageInterface::ShowMessage
             ("TsPlot::SetRefObject() mXParam:%s successfully set\n",
              obj->GetName().c_str());
          #endif
-      
-         return true;
+         
+         //return true;
       }
-      else
+      
+      //else
+      //{
+      for (int i=0; i<mNumYParams; i++)
       {
-         for (int i=0; i<mNumYParams; i++)
+         if (mYParamNames[i] == name)
          {
-            if (mYParamNames[i] == name)
-            {
-               mYParams[i] = (Parameter*)obj;
+            mYParams[i] = (Parameter*)obj;
                
-               #if DEBUG_TsPlot_OBJECT
-               MessageInterface::ShowMessage
-                  ("TsPlot::SetRefObject() mYParams[%s] successfully set\n",
-                   obj->GetName().c_str());
-               #endif
-               
-               return true;
-            }
+            #if DEBUG_TSPLOT_OBJECT
+            MessageInterface::ShowMessage
+               ("TsPlot::SetRefObject() mYParams[%s] successfully set\n",
+                obj->GetName().c_str());
+            #endif
+            
+            return true;
          }
       }
+      //}
    }
    
    return false;
@@ -810,7 +813,7 @@ void TsPlot::BuildPlotTitle()
       }
       //}
       
-   #if DEBUG_TsPlot_INIT
+   #if DEBUG_TSPLOT_INIT
    MessageInterface::ShowMessage("TsPlot::BuildPlotTitle() mXAxisTitle = %s\n",
                                  mXAxisTitle.c_str());
    #endif
@@ -822,14 +825,14 @@ void TsPlot::BuildPlotTitle()
    }
    mYAxisTitle += mYParams[mNumYParams-1]->GetName();
    
-   #if DEBUG_TsPlot_INIT
+   #if DEBUG_TSPLOT_INIT
    MessageInterface::ShowMessage("TsPlot::BuildPlotTitle() mYAxisTitle = %s\n",
                                  mYAxisTitle.c_str());
    #endif
    
    mPlotTitle = "(" + mXAxisTitle + ")" + " vs " + "(" + mYAxisTitle + ")";
    
-   #if DEBUG_TsPlot_INIT
+   #if DEBUG_TSPLOT_INIT
    MessageInterface::ShowMessage("TsPlot::BuildPlotTitle() mPlotTitle = %s\n",
                                  mPlotTitle.c_str());
    #endif
@@ -940,7 +943,7 @@ bool TsPlot::Distribute(int len)
 //------------------------------------------------------------------------------
 bool TsPlot::Distribute(const Real * dat, Integer len)
 {
-   #if DEBUG_TsPlot_UPDATE > 1
+   #if DEBUG_TSPLOT_UPDATE > 1
    MessageInterface::ShowMessage("TsPlot::Distribute() entered. isEndOfReceive=%d\n",
                                  isEndOfReceive);
    #endif
@@ -962,7 +965,7 @@ bool TsPlot::Distribute(const Real * dat, Integer len)
          // get x param
          Real xval = mXParam->EvaluateReal();
 
-         #if DEBUG_TsPlot_UPDATE
+         #if DEBUG_TSPLOT_UPDATE
          MessageInterface::ShowMessage("TsPlot::Distribute() xval = %f\n", xval);
          #endif
          
@@ -977,7 +980,7 @@ bool TsPlot::Distribute(const Real * dat, Integer len)
          {
             yvals[i] = mYParams[i]->EvaluateReal();
             
-            #if DEBUG_TsPlot_UPDATE
+            #if DEBUG_TSPLOT_UPDATE
             MessageInterface::ShowMessage
                ("TsPlot::Distribute() yvals[%d] = %f\n", i, yvals[i]);
             #endif
