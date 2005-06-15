@@ -2013,12 +2013,15 @@ bool Propagate::Execute()
 
    inProgress = false;
    
+   // Update the epoch on the force models
+   for (UnsignedInt i = 0; i < fm.size(); ++i)
+      fm[i]->UpdateInitialData();
+
    #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage(
          "Propagate::Execute() currEpoch = %f, stopEpoch = %f, "
          "elapsedTime = %f\n", currEpoch[0], stopEpoch, elapsedTime[0]);
    #endif
-   
    
    Real secsToStep = (
       stopEpoch - currEpoch[trigger]) * GmatTimeUtil::SECS_PER_DAY;

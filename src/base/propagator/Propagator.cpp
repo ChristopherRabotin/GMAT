@@ -416,7 +416,10 @@ Integer Propagator::GetPropagatorOrder(void) const
 //------------------------------------------------------------------------------
 bool Propagator::Step(Real dt)
 {
-    if (initialized) 
+    #ifdef DEBUG_PROPAGATOR_FLOW
+       MessageInterface::ShowMessage("^");
+    #endif
+    if (initialized)
     {
         stepSize = dt;
         return Step();
@@ -437,6 +440,9 @@ bool Propagator::Step(Real dt)
 //------------------------------------------------------------------------------
 bool Propagator::RawStep(Real dt)
 {
+    #ifdef DEBUG_PROPAGATOR_FLOW
+       MessageInterface::ShowMessage("!");
+    #endif
     Real ctlstepsize = stepSize;
     stepSize = dt;
     bool retval = RawStep();

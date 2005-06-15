@@ -268,6 +268,14 @@ bool RungeKutta::Initialize()
 //------------------------------------------------------------------------------
 bool RungeKutta::Step(void)
 {
+    #ifdef DEBUG_PROPAGATOR_FLOW
+       MessageInterface::ShowMessage(".");
+    #endif
+
+    // Force epoch updates at every step (a test, but left in place in case
+    // it's needed later -- DJC
+    // ((ForceModel*)physicalModel)->UpdateInitialData();
+
     if (!initialized)
         return false;
     if (fabs(stepSize) < minimumStep)
@@ -305,6 +313,10 @@ bool RungeKutta::Step(void)
 //------------------------------------------------------------------------------
 bool RungeKutta::RawStep(void)
 {
+    #ifdef DEBUG_PROPAGATOR_FLOW
+       MessageInterface::ShowMessage("*");
+    #endif
+    
     Integer i, j, k;
 
     // Calculate the stages
