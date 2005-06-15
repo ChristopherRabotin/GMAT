@@ -315,8 +315,7 @@ void Save::WriteParameterValue(GmatBase *o, std::ofstream &file, Integer id)
    switch (tid)
    {
       case Gmat::OBJECT_TYPE:
-         if (!o->IsOfType("CelestialBody"))
-            file << o->GetName();
+         file << o->GetName();
          break;
          
       case Gmat::INTEGER_TYPE:
@@ -325,6 +324,14 @@ void Save::WriteParameterValue(GmatBase *o, std::ofstream &file, Integer id)
             
       case Gmat::REAL_TYPE:
          file << o->GetRealParameter(id);
+         break;
+
+      // DJC, 06/15/05: Temporarily put an accessor in place to help debug the
+      // force model.  This piece may be replaced by a different call when epoch
+      // issues are updated in the Spacecraft/SpaceObject code.
+      case Gmat::TIME_TYPE:
+         if (o->IsOfType("CelestialBody"))
+            file << o->GetRealParameter(id);
          break;
 
       case Gmat::RVECTOR_TYPE:

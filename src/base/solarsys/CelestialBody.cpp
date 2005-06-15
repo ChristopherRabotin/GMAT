@@ -1383,6 +1383,11 @@ Real        CelestialBody::GetRealParameter(const Integer id) const
    if (id == MU)                 return mu;
    if (id == HOUR_ANGLE)         return hourAngle;
 
+   // DJC, 06/15/05: Temporarily put an accessor in place to help debug the
+   // force model.  This piece may be replaced by a different call when epoch
+   // issues are updated in the Spacecraft/SpaceObject code.
+   if (id == STATE_TIME)         return stateTime.Get();
+   
    return SpacePoint::GetRealParameter(id);
 }
 

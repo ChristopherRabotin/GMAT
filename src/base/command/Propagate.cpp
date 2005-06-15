@@ -1905,15 +1905,14 @@ bool Propagate::Execute()
          inProgress = true;
       }
 
-
-      /// @todo Find a more elegant way to update epoch during propagation
-      for (UnsignedInt i = 0; i < fm.size(); ++i)
-         fm[i]->UpdateInitialData();
-      
       Integer epochID = sats[0]->GetParameterID("Epoch");
-      
+
       while (!stopCondMet)
       {
+         // Update the epoch on the force models
+         for (UnsignedInt i = 0; i < fm.size(); ++i)
+            fm[i]->UpdateInitialData();
+
          if (!TakeAStep())
             throw CommandException(
                "Propagate::Execute() Propagator Failed to Step\n");

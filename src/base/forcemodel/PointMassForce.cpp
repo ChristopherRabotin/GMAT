@@ -65,6 +65,9 @@
 #include "Rvector6.hpp"
 #include "ForceModelException.hpp"
 
+#define DEBUG_PMF_BODY 0
+#define DEBUG_PMF_DERV 0
+
 //#define DEBUG_FORCE_MODEL
 
 //---------------------------------
@@ -91,9 +94,6 @@ PointMassForce::PARAMETER_TYPE[PointMassParamCount - PhysicalModelParamCount] =
    Gmat::BOOLEAN_TYPE,
 //   Gmat::STRING_TYPE,
 };
-
-#define DEBUG_PMF_BODY 0
-#define DEBUG_PMF_DERV 0
 
 //---------------------------------
 // public
@@ -181,13 +181,13 @@ PointMassForce& PointMassForce::operator= (const PointMassForce& pmf)
 }
 
 //------------------------------------------------------------------------------
-// bool PointMassForce::Initialize(void)
+// bool PointMassForce::Initialize()
 //------------------------------------------------------------------------------
 /**
  * Method used to ititialize the state data
  */
 //------------------------------------------------------------------------------
-bool PointMassForce::Initialize(void)
+bool PointMassForce::Initialize()
 {
    //MessageInterface::ShowMessage("PointMassForce::Initialize() entered\n");
    
@@ -378,8 +378,8 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
 
    #ifdef DEBUG_FORCE_MODEL
       MessageInterface::ShowMessage(
-         "%s%s%s%lf, %lf, %lf%s%lf, %lf, %lf%s%le, %le, %le]\n",
-         "Point mass force for ", body->GetName().c_str(),
+         "%s%s%s%16.10lf%s%lf, %lf, %lf%s%lf, %lf, %lf%s%le, %le, %le]\n",
+         "Point mass force for ", body->GetName().c_str(), " at epoch ", now,
          "\n   Sat position:  [", state[0], state[1], state[2],
          "]\n   Body position: [", (*rv)[0], (*rv)[1], (*rv)[2],
          "]\n   Acceleration:  [", deriv[3], deriv[4], deriv[5]);
