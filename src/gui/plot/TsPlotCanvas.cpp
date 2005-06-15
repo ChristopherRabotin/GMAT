@@ -238,6 +238,11 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
 
 void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
 {
+   #if DEBUG_TS_CANVAS
+   MessageInterface::ShowMessage
+      ("TsPlotCanvas::Refresh() datasize=%d, drawAll=%d\n", data.size(), drawAll);
+   #endif
+   
    wxCoord w, h;
    dc.GetSize(&w, &h);
    
@@ -264,7 +269,7 @@ void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
       plotArea.width  = w - (left + right);
       plotArea.height = h - (top + bottom);
    }
-
+   
    // Set curves to plot all data when needed
    if ((!rescaled && drawAll) || zoomed)
       for (std::vector<TsPlotCurve *>::iterator i = data.begin(); i != data.end(); ++i)
@@ -289,7 +294,7 @@ void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
       if (hasLegend)
          DrawLegend(dc);
    }
-
+   
    dc.EndDrawing();
    dataUpdated = false;
 }
@@ -667,6 +672,11 @@ void TsPlotCanvas::PlotData(wxDC &dc)
 
 void TsPlotCanvas::DrawLegend(wxDC &dc)
 {
+   #if DEBUG_TS_CANVAS
+   MessageInterface::ShowMessage
+      ("TsPlotCanvas::DrawLegend() names.size=%d\n", names.size());
+   #endif
+   
    int j = 0, h, w, labelCount = (int)names.size();
    wxString label;
    int xloc, yloc, rowCount = 1, colCount;
@@ -717,7 +727,7 @@ void TsPlotCanvas::DrawLegend(wxDC &dc)
       yloc = legendRect.y + (h+1)*j + 4;
       dc.DrawText(label, xloc, yloc);
    }
-
+   
    dc.SetTextForeground(textFore);
    dc.DestroyClippingRegion();
 }
@@ -847,6 +857,16 @@ void TsPlotCanvas::DeletePlotCurve(int index)
       data.erase(iter);
       delete curve;
    }
+
+   //loj: 6/15/05
+   // We dont keep track of deleted names, so just clear
+   names.clear();
+
+   #if DEBUG_TS_CANVAS
+   MessageInterface::ShowMessage
+      ("TsPlotCanvas::DeletePlotCurve() datasize=%d, index=%d\n",
+       index, data.size());
+   #endif
 }
 
 int TsPlotCanvas::GetCurveCount()
@@ -892,6 +912,34 @@ void TsPlotCanvas::ClearAllCurveData()
    for (std::vector<TsPlotCurve*>::iterator i = data.begin();
         i != data.end(); ++i)
       (*i)->Clear();
+
+   #if DEBUG_TS_CANVAS
+   MessageInterface::ShowMessage("TsPlotCanvas::ClearAllCurveData() clearing dc\n");
+   #endif
+
+   //loj: 6/15/05 Added
+   // Clear plot area and redraw other area
+   wxClientDC dc(this);
+   
+   dc.SetClippingRegion(plotArea.x, plotArea.y, plotArea.width, plotArea.height);
+   dc.SetBackground(wxBrush(plotColor, wxTRANSPARENT));
+   dc.Clear();
+   dc.DestroyClippingRegion();
+   
+   // Now draw other area
+   dc.BeginDrawing();
+
+   DrawAxes(dc);
+   DrawLabels(dc);
+   
+   if (hasGrid)
+      DrawGrid(dc);
+
+   if (hasLegend)
+      DrawLegend(dc);
+
+   dc.EndDrawing();
+   dataUpdated = false;
 }
 
 

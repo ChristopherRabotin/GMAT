@@ -32,7 +32,7 @@
 #include "RgbColor.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_XY_MDI_FRAME 1
+//#define DEBUG_MDI_TS_FRAME 1
 //#define DEBUG_RENAME 1
 
 BEGIN_EVENT_TABLE(MdiChildTsFrame, wxMDIChildFrame)
@@ -270,7 +270,7 @@ bool MdiChildTsFrame::DeletePlot()
 //------------------------------------------------------------------------------
 void MdiChildTsFrame::SetPlotTitle(const wxString &title)
 {
-#if DEBUG_XY_MDI_FRAME
+#if DEBUG_MDI_TS_FRAME
    MessageInterface::ShowMessage("MdiChildTsFrame::SetPlotTitle() title = %s\n",
                                  title.c_str());
 #endif
@@ -286,7 +286,7 @@ void MdiChildTsFrame::SetPlotTitle(const wxString &title)
 //------------------------------------------------------------------------------
 void MdiChildTsFrame::ShowPlotLegend()
 {
-   #if DEBUG_XY_MDI_FRAME
+   #if DEBUG_MDI_TS_FRAME
       MessageInterface::ShowMessage("MdiChildTsFrame::ShowLegend() entered\n");
    #endif
       
@@ -303,31 +303,31 @@ void MdiChildTsFrame::AddPlotCurve(int curveIndex, int yOffset, double yMin,
                                    double yMax, const wxString &curveTitle,
                                    UnsignedInt penColor)
 {
-   #if DEBUG_XY_MDI_FRAME
-      MessageInterface::ShowMessage("MdiChildTsFrame::AddPlotCurve() yMin = %f, yMax = %f\n",
-                                    yMin, yMax);
+   #if DEBUG_MDI_TS_FRAME
+      MessageInterface::ShowMessage
+         ("MdiChildTsFrame::AddPlotCurve() yMin = %f, yMax = %f\n", yMin, yMax);
    #endif
    
    if (mXyPlot != NULL)
    {
       mHasFirstXSet[curveIndex] = false;
-
+      
       // Create XyPlotCurve
       TsPlotCurve *curve = new TsPlotCurve(yOffset, yMin, yMax, curveTitle);
-
-      #if DEBUG_XY_MDI_FRAME
+      
+      #if DEBUG_MDI_TS_FRAME
          MessageInterface::ShowMessage(
             "MdiChildTsFrame::AddPlotCurve() curve title = %s\n",
             curveTitle.c_str());
       #endif
-    
+         
       mXyPlot->AddData(curve);
       mXyPlot->SetDataName(curveTitle.c_str());
-
-      #if DEBUG_XY_MDI_FRAME
+      
+      #if DEBUG_MDI_TS_FRAME
             MessageInterface::ShowMessage
                ("MdiChildTsFrame::AddPlotCurve() curve count = %d added\n",
-                mXyPlot->GetCount());
+                mXyPlot->GetCurveCount()); //loj: 6/16/05 Changed from GetCount()
       #endif
    }
    else
@@ -341,10 +341,14 @@ void MdiChildTsFrame::AddPlotCurve(int curveIndex, int yOffset, double yMin,
 //------------------------------------------------------------------------------   
 void MdiChildTsFrame::DeleteAllPlotCurves()
 {
-   //MessageInterface::ShowMessage("MdiChildTsFrame::DeleteAllPlotCurve() entered \n");
-                                 
    if (mXyPlot != NULL)
    {
+      #if DEBUG_MDI_TS_FRAME
+      MessageInterface::ShowMessage
+         ("MdiChildTsFrame::DeleteAllPlotCurve() curve count=%d \n",
+          mXyPlot->GetCurveCount());
+      #endif
+      
       while (mXyPlot->GetCurveCount() > 0)
          DeletePlotCurve(0);
    }
@@ -359,9 +363,11 @@ void MdiChildTsFrame::DeleteAllPlotCurves()
 //------------------------------------------------------------------------------   
 void MdiChildTsFrame::DeletePlotCurve(int curveIndex)
 {
-   //MessageInterface::ShowMessage("MdiChildTsFrame::DeletePlotCurve() curveIndex = %d\n",
-   //                              curveIndex);
-    
+   #if DEBUG_MDI_TS_FRAME
+   MessageInterface::ShowMessage
+      ("MdiChildTsFrame::DeletePlotCurve() curveIndex = %d\n", curveIndex);
+   #endif
+   
    if (mXyPlot != NULL)
    {
       TsPlotCurve* curve = mXyPlot->GetPlotCurve(curveIndex);
@@ -676,11 +682,11 @@ void MdiChildTsFrame::AdjustYScale()
 //   double yMaxScale = Max(Abs(ymin), Abs(ymax));
 //   double yMargin = yMaxScale * 0.1;
    
-#if DEBUG_XY_MDI_FRAME
-   MessageInterface::ShowMessage
-      ("MdiChildTsFrame::AdjustYScale() ymin=%f ymax=%f yMaxScale=%f yMargin=%f\n",
-       ymin, ymax, yMaxScale, yMargin);
-#endif
+// #if DEBUG_MDI_TS_FRAME
+//    MessageInterface::ShowMessage
+//       ("MdiChildTsFrame::AdjustYScale() ymin=%f ymax=%f yMaxScale=%f yMargin=%f\n",
+//        ymin, ymax, yMaxScale, yMargin);
+// #endif
 
 //   for (unsigned int i=0; i<mXyPlot->GetCount(); i++)
 //   {
@@ -705,7 +711,7 @@ double MdiChildTsFrame::GetYMin()
       std::vector<double> yMinVals;
       std::vector<double>::iterator pos;
    
-      #if DEBUG_XY_MDI_FRAME
+      #if DEBUG_MDI_TS_FRAME
          MessageInterface::ShowMessage
             ("MdiChildTsFrame::GetYMin() yMinVals.size()=%d\n",
              yMinVals.size());;
@@ -741,7 +747,7 @@ double MdiChildTsFrame::GetYMax()
       std::vector<double> yMaxVals;
       std::vector<double>::iterator pos;
    
-      #if DEBUG_XY_MDI_FRAME
+      #if DEBUG_MDI_TS_FRAME
          MessageInterface::ShowMessage
             ("MdiChildTsFrame::GetYMax() yMaxVals.size()=%d\n",
             yMaxVals.size());;
