@@ -22,8 +22,8 @@
 #include "PlotInterface.hpp"     // for XY plot
 #include "MessageInterface.hpp"  // for ShowMessage()
 
-#define DEBUG_TSPLOT_INIT 1
-#define DEBUG_TSPLOT_PARAM 1
+//#define DEBUG_TSPLOT_INIT 1
+//#define DEBUG_TSPLOT_PARAM 1
 //#define DEBUG_TSPLOT_OBJECT 1 
 //#define DEBUG_TSPLOT_UPDATE 1
 //#define DEBUG_ACTION_REMOVE 1
