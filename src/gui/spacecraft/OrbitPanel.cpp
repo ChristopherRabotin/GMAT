@@ -105,7 +105,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
    inState[4] = atof(el5);
    inState[5] = atof(el6);
 
-   // epoch change
+   // epoch format change
    if (event.GetEventObject() == epochFormatComboBox)
    {
       wxString toEpochFormat = epochFormatComboBox->GetStringSelection();    
@@ -125,6 +125,10 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
    {
       try
       {
+         #if DEBUG_ORBIT_PANEL
+            MessageInterface::ShowMessage("---------- C/S change ----------\n");
+         #endif
+
          // epoch
          Real epoch = theSpacecraft->GetRealParameter("Epoch");
     
@@ -137,51 +141,60 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
          CoordinateSystem* outCoord = (CoordinateSystem*) 
             theGuiInterpreter->GetCoordinateSystem(outCoordSystem.c_str());
 
-         // if state type -> cartesian and text field not changed
-         if (fromStateType != "Cartesian")
+         #if DEBUG_ORBIT_PANEL
+            MessageInterface::ShowMessage
+               ("from coordinate system = %s\nto coordinate system = %s\n", 
+                inCoord->GetName().c_str(),outCoord->GetName().c_str());
+            MessageInterface::ShowMessage
+               ("state type = %s\n" , fromStateType.c_str());
+         #endif
+
+         if ( (fromStateType == "Cartesian") && (outCoordSystem == "EarthMJ2000Eq") 
+           && (!mIsTextChanged) )
          {
-            tempState = stateConverter.Convert(inState, fromStateType,
-                                               "Cartesian", anomaly);
+            // use unchanged cartesian earth-MJ2000-Equatorial values for output
+            outState = mCartState;
          }
          else
          {
-            tempState = inState;
-         }            
-
-         // initialize coordinate systems
-         InitializeCoordinateSystem(inCoord);
-         InitializeCoordinateSystem(outCoord);
-
-         // convert to output coordinate system
-         mCoordConverter.Convert(A1Mjd(epoch), tempState, inCoord, outState,
-            outCoord);
-
-         if (fromStateType != "Cartesian")
-         {
-            // convert from cartesian to selected state type
-            tempState = stateConverter.Convert(outState, "Cartesian",
-                                                        fromStateType, anomaly);
-            outState = tempState;  
+            // if state type -> cartesian and text field not changed
+            if (fromStateType != "Cartesian")
+            {
+               tempState = stateConverter.Convert(inState, fromStateType,
+                                                  "Cartesian", anomaly);
+            }
+            else
+            {
+               tempState = inState;
+            }            
+   
+            // initialize coordinate systems
+            InitializeCoordinateSystem(inCoord);
+            InitializeCoordinateSystem(outCoord);
+   
+            // convert to output coordinate system
+            mCoordConverter.Convert(A1Mjd(epoch), tempState, inCoord, outState,
+               outCoord);
+   
+            if (fromStateType != "Cartesian")
+            {
+               // convert from cartesian to selected state type
+               tempState = stateConverter.Convert(outState, "Cartesian",
+                                                           fromStateType, anomaly);
+               outState = tempState;  
+            }
+   
+            #if DEBUG_ORBIT_PANEL
+               MessageInterface::ShowMessage
+                  ("--- after convert --- \nepoch = %f\nstate = %s\n",
+                     epoch, outState.ToString().c_str());
+            #endif
          }
-
-         #if DEBUG_ORBIT_PANEL
-            MessageInterface::ShowMessage
-               ("OrbitPanel::OnComboBoxChange() temp state = %s\n",
-                  tempState.ToString().c_str());
-            MessageInterface::ShowMessage
-               ("OrbitPanel:OnComboBoxChange() Input coordinate system = %s\n" 
-                "                              Output coordinate system = %s\n", 
-                  inCoord->GetName().c_str(), outCoord->GetName().c_str());
-            MessageInterface::ShowMessage
-               ("OrbitPanel:OnComboBoxChange() --After convert: epoch = %f\n"
-                "state = %s\n", epoch, outState.ToString().c_str());
-            MessageInterface::ShowMessage
-               ("OrbitPanel:OnComboBoxChange() from state type = %s\n" , 
-                  fromStateType.c_str());
-         #endif
-
-//         mIsCoordSysChanged = true;
+         mIsCoordSysChanged = true;
          fromCoordSys = outCoordSystem.c_str();
+         #if DEBUG_ORBIT_PANEL
+            MessageInterface::ShowMessage("---------- C/S change ----------\n\n");
+         #endif
       }
       catch (BaseException &e)
       {
@@ -194,9 +207,19 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
    // state type change 
    if (event.GetEventObject() == stateTypeComboBox)
    {
+      #if DEBUG_ORBIT_PANEL
+         MessageInterface::ShowMessage("---------- state change ----------\n");
+      #endif
+
       wxString stateType = stateTypeComboBox->GetStringSelection();
       std::string toStateType = stateType.c_str();
     
+      #if DEBUG_ORBIT_PANEL
+         MessageInterface::ShowMessage
+            ("from state type = %s\n to state type = %s\n" , 
+               fromStateType.c_str(),toStateType.c_str());
+      #endif
+
       if ( (toStateType == "Cartesian") && (!mIsTextChanged) )
       {
          // use unchanged cartesian values for output
@@ -205,7 +228,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       else if (!mIsTextChanged)
       {
          // convert to new state type
-         outState = stateConverter.Convert(inState, fromStateType, toStateType,
+         outState = stateConverter.Convert(inState,fromStateType,toStateType,
                                            anomaly);
       }
       else if (mIsTextChanged)
@@ -217,6 +240,11 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
                                              anomaly);
       }
 
+      #if DEBUG_ORBIT_PANEL
+         MessageInterface::ShowMessage
+            ("--- after convert--- \nout state = %s\ncartesian state = %s\n",
+               outState.ToString().c_str(), mCartState.ToString().c_str());
+      #endif
       anomalyStaticText->Show(false);
       anomalyComboBox->Show(false);
     
@@ -239,7 +267,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
          label5->SetLabel("Km/s");
          label6->SetLabel("Km/s");    
       }
-      else if ((stateType == "Keplerian") || (stateType == "ModifiedKeplerian"))
+      else if ( (stateType == "Keplerian") || (stateType == "ModifiedKeplerian") )
       {
          // set the labels for the elements
          if (stateType == "Keplerian")
@@ -307,7 +335,12 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
          label6->SetLabel("deg"); 
       }
     
+      mIsStateChanged = true;
       fromStateType = stateType.c_str(); 
+
+      #if DEBUG_ORBIT_PANEL
+         MessageInterface::ShowMessage("---------- state change ----------\n\n");
+      #endif
    }
 
    // anomaly type change 
@@ -338,28 +371,55 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       textCtrl6->SetValue(stateValue);
    }
    
-   if ((event.GetEventObject() == mCoordSysComboBox) || 
-       (event.GetEventObject() == stateTypeComboBox))
+   if ( (event.GetEventObject() == mCoordSysComboBox) || 
+        (event.GetEventObject() == stateTypeComboBox) )
    {
-      wxString stateValue;
-    
-      stateValue.Printf("%.9f", outState[0]);
-      textCtrl1->SetValue(stateValue);
-    
-      stateValue.Printf("%.9f", outState[1]);
-      textCtrl2->SetValue(stateValue);
-    
-      stateValue.Printf("%.9f", outState[2]);
-      textCtrl3->SetValue(stateValue);
-    
-      stateValue.Printf("%.9f", outState[3]);
-      textCtrl4->SetValue(stateValue);
-    
-      stateValue.Printf("%.9f", outState[4]);
-      textCtrl5->SetValue(stateValue);
-    
-      stateValue.Printf("%.9f", outState[5]);
-      textCtrl6->SetValue(stateValue);
+      char buffer [20];
+      wxString element;
+
+      gcvt (outState[0],16,buffer);
+      element.Printf ("%s",buffer);
+      textCtrl1->SetValue (element);
+
+      gcvt (outState[1],16,buffer);
+      element.Printf ("%s",buffer);
+      textCtrl2->SetValue (element);
+            
+      gcvt (outState[2],16,buffer);
+      element.Printf ("%s",buffer);
+      textCtrl3->SetValue (element);
+
+      gcvt (outState[3],16,buffer);
+      element.Printf ("%s",buffer);
+      textCtrl4->SetValue (element);
+
+      gcvt (outState[4],16,buffer);
+      element.Printf ("%s",buffer);
+      textCtrl5->SetValue (element);
+
+      gcvt (outState[5],16,buffer);
+      element.Printf ("%s",buffer);
+      textCtrl6->SetValue (element);
+
+//      wxString stateValue;
+//    
+//      stateValue.Printf("%.9f", outState[0]);
+//      textCtrl1->SetValue(stateValue);
+//    
+//      stateValue.Printf("%.9f", outState[1]);
+//      textCtrl2->SetValue(stateValue);
+//    
+//      stateValue.Printf("%.9f", outState[2]);
+//      textCtrl3->SetValue(stateValue);
+//    
+//      stateValue.Printf("%.9f", outState[3]);
+//      textCtrl4->SetValue(stateValue);
+//    
+//      stateValue.Printf("%.9f", outState[4]);
+//      textCtrl5->SetValue(stateValue);
+//    
+//      stateValue.Printf("%.9f", outState[5]);
+//      textCtrl6->SetValue(stateValue);
    }
       
    theApplyButton->Enable();
@@ -376,7 +436,7 @@ void OrbitPanel::OnTextChange(wxCommandEvent& event)
 {
    if ( (textCtrl1->IsModified()) || (textCtrl2->IsModified()) || 
         (textCtrl3->IsModified()) || (textCtrl4->IsModified()) ||
-        (textCtrl1->IsModified()) )
+        (textCtrl5->IsModified()) || (textCtrl6->IsModified()) )
    {     
       mIsTextChanged = true;
    }
@@ -770,48 +830,76 @@ void OrbitPanel::LoadData()
        
       // get elements
       Real *inState = theSpacecraft->GetDisplayState();
-      Real element1 = inState[0];
-      Real element2 = inState[1];
-      Real element3 = inState[2];
-      Real element4 = inState[3];
-      Real element5 = inState[4];
-      Real element6 = inState[5];
-   
-      wxString el1;
-      el1.Printf("%.9f", element1);
-      textCtrl1->SetValue(el1);
-       
-      wxString el2;
-      el2.Printf("%.9f", element2);
-      textCtrl2->SetValue(el2);
-   
-      wxString el3;
-      el3.Printf("%.9f", element3);
-      textCtrl3->SetValue(el3);
-   
-      wxString el4;
-      el4.Printf("%.9f", element4);
-      textCtrl4->SetValue(el4);
-   
-      wxString el5;
-      el5.Printf("%.9f", element5);
-      textCtrl5->SetValue(el5);
-   
-      wxString el6;
-      el6.Printf("%.9f", element6);
-      textCtrl6->SetValue(el6);    
 
-       // if the state type converting to is not cartesian,
-       // then compute the cartesian state
-       if (fromStateType != "Cartesian")
-       {
-          mCartState = stateConverter.Convert(inState, fromStateType, "Cartesian", 
+      char buffer [20];
+      wxString element;
+
+      gcvt (inState[0],16,buffer);
+      element.Printf ("%s",buffer);
+      textCtrl1->SetValue (element);
+
+      gcvt (inState[1],16,buffer);
+      element.Printf ("%s",buffer);
+      textCtrl2->SetValue (element);
+            
+      gcvt (inState[2],16,buffer);
+      element.Printf ("%s",buffer);
+      textCtrl3->SetValue (element);
+
+      gcvt (inState[3],16,buffer);
+      element.Printf ("%s",buffer);
+      textCtrl4->SetValue (element);
+
+      gcvt (inState[4],16,buffer);
+      element.Printf ("%s",buffer);
+      textCtrl5->SetValue (element);
+
+      gcvt (inState[5],16,buffer);
+      element.Printf ("%s",buffer);
+      textCtrl6->SetValue (element);
+
+//      Real element1 = inState[0];
+//      Real element2 = inState[1];
+//      Real element3 = inState[2];
+//      Real element4 = inState[3];
+//      Real element5 = inState[4];
+//      Real element6 = inState[5];
+//   
+//      wxString el1;
+//      el1.Printf("%.9f", element1);
+//      textCtrl1->SetValue(el1);
+//       
+//      wxString el2;
+//      el2.Printf("%.9f", element2);
+//      textCtrl2->SetValue(el2);
+//  
+//      wxString el3;
+//      el3.Printf("%.9f", element3);
+//      textCtrl3->SetValue(el3);
+//   
+//      wxString el4;
+//      el4.Printf("%.9f", element4);
+//      textCtrl4->SetValue(el4);
+//   
+//      wxString el5;
+//      el5.Printf("%.9f", element5);
+//      textCtrl5->SetValue(el5);
+//   
+//      wxString el6;
+//      el6.Printf("%.9f", element6);
+//      textCtrl6->SetValue(el6);    
+
+      // if the state type converting to is not cartesian,
+      // then compute the cartesian state
+      if (fromStateType != "Cartesian")
+      {
+         mCartState = stateConverter.Convert(inState, fromStateType, "Cartesian", 
                                             anomaly);
-       }
-       else
-       {
-          mCartState = inState;
-       }
+      }
+      else
+      {
+         mCartState = inState;
+      }
      
    }
    catch (BaseException &e)
