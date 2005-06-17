@@ -75,9 +75,6 @@ namespace GmatMathUtil
    Real    Round(Real theNumber);
    Real    Floor(Real theNumber);
    Real    Ceiling(Real theNumber);
-   //Integer Round(Real theNumber); //loj: 5/5/04 changed to Real
-   //Integer Floor(Real theNumber);
-   //Integer Ceiling(Real theNumber);
    Real    Mod(Real left, Real right);
    Real    Rem(Real left, Real right);
    void    Quotient(Real top, Real bottom, Integer &result);
@@ -94,26 +91,30 @@ namespace GmatMathUtil
    
    Real    Rad(Real angleInDeg, bool modBy2Pi = false);
    Real    Deg(Real angleInRad, bool modBy360 = false);
-   Real    DegToRad(Real deg, bool modBy2Pi = false); //loj: 4/19/04 added
-   Real    RadToDeg(Real rad, bool modBy360 = false); //loj: 4/19/04 added
-   Real    ArcsecToDeg(Real asec,bool modBy360 = false); // wcs: 2005/02/07 added
-   Real    ArcsecToRad(Real asec,bool modBy2Pi = false); // wcs: 2005/02/07 added
+   Real    DegToRad(Real deg, bool modBy2Pi = false);
+   Real    RadToDeg(Real rad, bool modBy360 = false);
+   Real    ArcsecToDeg(Real asec,bool modBy360 = false);
+   Real    ArcsecToRad(Real asec,bool modBy2Pi = false);
    
    Real    Sin(Real angleInRad, Real cycleInRad=TWO_PI); 
    //loj:Real    SinXOverX(Real angleInRad, Real cycleInRad=TWO_PI); 
    Real    Cos(Real angleInRad, Real cycleInRad=TWO_PI); 
    Real    Tan(Real angleInRad, Real cycleInRad=TWO_PI);
 
-   Real    Cosh(Real angleInRad, Real cycleInRad=TWO_PI); //loj: 4/19/04 added
-   Real    Sinh(Real angleInRad, Real cycleInRad=TWO_PI); //loj: 4/19/04 added
-   Real    Tanh(Real angleInRad, Real cycleInRad=TWO_PI); //loj: 4/19/04 added
+   Real    Cosh(Real angleInRad, Real cycleInRad=TWO_PI);
+   Real    Sinh(Real angleInRad, Real cycleInRad=TWO_PI);
+   Real    Tanh(Real angleInRad, Real cycleInRad=TWO_PI);
    
    Real    ASin(Real x, Real cycleInRad=TWO_PI); 
    Real    ACos(Real x, Real cycleInRad=TWO_PI); 
    Real    ATan(Real y, Real x=1.0, Real cycleInRad=TWO_PI);
    
-   Real    Log(Real x, Real base=10.0); 
+   Real    Ln(Real x);             // Natural (base e) Logarithm of x
+   Real    Log(Real x);            // Natural (base e) Logarithm of x
+   Real    Log10(Real x);          // Base 10 Logarithm of x
+   Real    Log(Real x, Real base); // Base <base> Logarithm of x
    Real    Log(Real x, Integer base);
+   
    void    SetSeed(Integer initialSeed1, Integer initialSeed2); 
    void    GetSeed(Integer& initialSeed1, Integer& initialSeed2);
    //loj:void    SetSeedByClock();
@@ -124,7 +125,11 @@ namespace GmatMathUtil
    //loj:Real    Cot(Real x);
    Real    Cbrt(Real x);
    Real    Sqrt(Real x);
-   Real    Pow(Real x, Real y);
+   
+   Real    Exp(Real x);            // Raises e  to the x power(e^x)
+   Real    Exp10(Real x);          // Raises 10 to the x power(10^x)
+   Real    Pow(Real x, Real y);    // Raises x to the y power(x^y)
+   Real    Pow(Real x, Integer y); // Raises x to the y power(x^y)
 
 }
 #endif // RealUtilities_hpp
