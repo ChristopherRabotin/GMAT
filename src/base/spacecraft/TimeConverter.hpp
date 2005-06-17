@@ -31,6 +31,8 @@
 #include "DateUtil.hpp"
 #include "GregorianDate.hpp"
 
+#include "TimeSystemConverter.hpp"
+
 class GMAT_API TimeConverter : public Converter
 {
 public:
@@ -61,7 +63,8 @@ public:
                         const std::string &toDateFormat);
 
 protected:
-    // Declare protetced method data 
+   std::string          ModJulianToGregorian(const Real mjTime);
+   Real                 GregorianToModJulian(const std::string greg);
 
 private:
 

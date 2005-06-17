@@ -110,181 +110,120 @@ std::string TimeConverter::Convert(const std::string &time,
                                    const std::string &fromDateFormat,
                                    const std::string &toDateFormat)
 {
-    Real realTime = atof(time.c_str());
-    std::string newTime = time;
+   Real inTime = atof(time.c_str()), outTime;
+   std::string newTime = time;
 
-    std::ostringstream timeBuffer;
-    timeBuffer.precision(9);
-    timeBuffer.setf(std::ios::fixed);
-    timeBuffer.str("");
+   std::ostringstream timeBuffer;
+   timeBuffer.precision(11);
+   timeBuffer.setf(std::ios::fixed);
+   timeBuffer.str("");
 
-    // Determine the input of date format 
-    if (fromDateFormat == "TAIModJulian" && toDateFormat != "TAIModJulian") 
-    {
-       A1Mjd jd(realTime);
+   // Determine the input of date format
+   if (fromDateFormat == "TAIModJulian" && toDateFormat != "TAIModJulian")
+   {
+      if (toDateFormat == "TAIGregorian")
+         return ModJulianToGregorian(inTime);
+      
+      outTime = TimeConverterUtil::Convert(inTime, "A1Mjd", "UtcMjd",
+         GmatTimeUtil::JD_JAN_5_1941);
 
-       if (toDateFormat == "UTCModJulian")
-       {
-          realTime = jd.ToUtcMjd();
-          timeBuffer << realTime;
-          newTime = timeBuffer.str();
-       }
-    
-       else if (toDateFormat == "UTCGregorian")
-       {
-          UtcDate utcDate = jd.ToUtcDate();
+      if (toDateFormat == "UTCModJulian")
+      {
+         timeBuffer << outTime;
+         newTime = timeBuffer.str();
+      }
+      else if (toDateFormat == "UTCGregorian")
+         newTime = ModJulianToGregorian(outTime);
+   }
+   else if (fromDateFormat == "TAIGregorian" && toDateFormat != "TAIGregorian")
+   {
+      inTime = GregorianToModJulian(time);
+      if (toDateFormat == "TAIModJulian")
+      {
+         timeBuffer << inTime;
+         return(timeBuffer.str());
+      }
 
-          GregorianDate gregorianDate(&utcDate);
-          newTime = gregorianDate.GetDate();   
-       }
+      outTime = TimeConverterUtil::Convert(inTime, "A1Mjd", "UtcMjd",
+         GmatTimeUtil::JD_JAN_5_1941);
 
-       else if (toDateFormat == "TAIGregorian")
-       {
-          A1Date a1Date = jd.ToA1Date();
+      if (toDateFormat == "UTCGregorian")
+         newTime = ModJulianToGregorian(outTime);
+      else if (toDateFormat == "UTCModJulian")
+      {
+         timeBuffer << outTime;
+         return(timeBuffer.str());
+      }
+   }
+   else if (fromDateFormat == "UTCModJulian" && toDateFormat != "UTCModJulian")
+   {
+      if (toDateFormat == "UTCGregorian")
+         return ModJulianToGregorian(inTime);
 
-          GregorianDate gregorianDate(&a1Date);
-          newTime = gregorianDate.GetDate();   
-       }
-
-    }
-
-    else if (fromDateFormat == "TAIGregorian" && toDateFormat != "TAIGregorian")
-    {
-       Real mjd;  
-       GregorianDate gregorianDate(time);
-
-       if (!gregorianDate.IsValid())
-          throw TimeConverterException();
-
-       try
-       {
-          A1Date a1Date(gregorianDate.GetYMDHMS());
-
-          mjd = ModifiedJulianDate(a1Date.GetYear(),a1Date.GetMonth(),
-                                   a1Date.GetDay(),a1Date.GetHour(),
-                                   a1Date.GetMinute(),a1Date.GetSecond());
-                                   
-       }
-       catch (Date::TimeRangeError& e)
-       {
-          throw TimeConverterException();
-       }
-    
-       if (toDateFormat == "TAIModJulian")
-       {
-          timeBuffer << mjd;
-          return(timeBuffer.str());
-       }
-       // Convert to A1 MJD and then UTC MJD 
-       A1Mjd a1Mjd(mjd);
-
-       if (toDateFormat == "UTCGregorian")
-       {
-          UtcDate utcDate = a1Mjd.ToUtcDate();
-          gregorianDate.SetDate(&utcDate);
-  
-          if (!gregorianDate.IsValid())
-             throw TimeConverterException();
-  
-          newTime = gregorianDate.GetDate();
-
-          // newTime = utcDate.ToPackedCalendarString();
-       }
-       else if (toDateFormat == "UTCModJulian")  
-       {
-
-          realTime = a1Mjd.ToUtcMjd();
-
-          timeBuffer << realTime;
-          return(timeBuffer.str());
-       }
-
-    }
-
-    else if (fromDateFormat == "UTCModJulian" && toDateFormat != "UTCModJulian")
-    {
-       GregorianDate gregorianDate;
-
-       if (toDateFormat == "TAIGregorian")
-       {
-          // Convert to A1 MJD and then A1 Date 
-          A1Mjd a1Mjd;
-          Real mjd =  a1Mjd.UtcMjdToA1Mjd(realTime); 
-          a1Mjd.Set(mjd);
-          A1Date a1Date = a1Mjd.ToA1Date();
-
-          gregorianDate.SetDate(&a1Date);
-  
-          if (!gregorianDate.IsValid())
-             throw TimeConverterException();
-  
-          newTime = gregorianDate.GetDate();
-       }
-
-       else if (toDateFormat == "TAIModJulian")
-       {
-          A1Mjd a1Mjd;
-          realTime = a1Mjd.UtcMjdToA1Mjd(realTime);
- 
-          timeBuffer << realTime;
-          return(timeBuffer.str());
-       }
-
-       else if (toDateFormat == "UTCGregorian")
-       {
-          A1Mjd a1Mjd;
-          Real a1mjd = a1Mjd.UtcMjdToA1Mjd(realTime);
-          a1Mjd.Set(a1mjd);  
-          UtcDate utcDate = a1Mjd.ToUtcDate();
-
-          gregorianDate.SetDate(&utcDate);
-  
-          if (!gregorianDate.IsValid())
-             throw TimeConverterException();
-  
-          newTime = gregorianDate.GetDate();
-       }
-    }
-
-    else if (fromDateFormat == "UTCGregorian" && toDateFormat != "UTCGregorian")
-    {
-       GregorianDate gregorianDate(time);
-
-       if (!gregorianDate.IsValid())
-          throw TimeConverterException();
- 
-       UtcDate utcDate(gregorianDate.GetYMDHMS());
-
-       // Get UTC MJD 
-       Real mjd = ModifiedJulianDate(utcDate.GetYear(),
-                                     utcDate.GetMonth(),
-                                     utcDate.GetDay(),
-                                     utcDate.GetHour(),
-                                     utcDate.GetMinute(),
-                                     utcDate.GetSecond());
-
-       if (toDateFormat == "TAIModJulian" || toDateFormat == "UTCModJulian")
-       {
-          realTime = mjd;
-          if (toDateFormat == "TAIModJulian") 
-              realTime = utcDate.ToA1Mjd();
-  
-          timeBuffer << realTime;
-          newTime = timeBuffer.str();
-       }
-       else if (toDateFormat == "TAIGregorian")
-       {
-          // Convert to A1 MJD and then A1 Date 
-          A1Mjd a1Mjd;
-          mjd =  a1Mjd.UtcMjdToA1Mjd(mjd); 
-          a1Mjd.Set(mjd);
-          A1Date a1Date = a1Mjd.ToA1Date();
+      outTime = TimeConverterUtil::Convert(inTime, "UtcMjd", "A1Mjd",
+         GmatTimeUtil::JD_JAN_5_1941);
          
-          gregorianDate.SetDate(&a1Date);
-          newTime = gregorianDate.GetDate();
-       }
-       
-    }
+      if (toDateFormat == "TAIGregorian")
+         newTime = ModJulianToGregorian(outTime);
+      else if (toDateFormat == "TAIModJulian")
+      {
+         timeBuffer << outTime;
+         return timeBuffer.str();
+      }
+   }
+   else if (fromDateFormat == "UTCGregorian" && toDateFormat != "UTCGregorian")
+   {
+      inTime = GregorianToModJulian(time);
+      if (toDateFormat == "UTCModJulian")
+      {
+         timeBuffer << inTime;
+         return timeBuffer.str();
+      }
 
-    return newTime;
+      outTime = TimeConverterUtil::Convert(inTime, "UtcMjd", "A1Mjd",
+         GmatTimeUtil::JD_JAN_5_1941);
+
+      if (toDateFormat == "TAIModJulian")
+      {
+         timeBuffer << outTime;
+         return timeBuffer.str();
+      }
+      else if (toDateFormat == "TAIGregorian")
+         newTime = ModJulianToGregorian(outTime);
+   }
+
+   return newTime;
+}
+
+
+std::string TimeConverter::ModJulianToGregorian(const Real mjTime)
+{
+   A1Mjd a1Mjd(mjTime);
+   A1Date a1Date = a1Mjd.ToA1Date();
+   GregorianDate gregorianDate(&a1Date);
+   return gregorianDate.GetDate();
+}
+
+
+Real TimeConverter::GregorianToModJulian(const std::string greg)
+{
+   GregorianDate gregorianDate(greg);
+   Real jules;
+
+   if (!gregorianDate.IsValid())
+      throw TimeConverterException();
+
+   try
+   {
+      A1Date a1Date(gregorianDate.GetYMDHMS());
+      jules = ModifiedJulianDate(a1Date.GetYear(),a1Date.GetMonth(),
+                                 a1Date.GetDay(),a1Date.GetHour(),
+                                 a1Date.GetMinute(),a1Date.GetSecond());
+   }
+   catch (Date::TimeRangeError& e)
+   {
+      throw TimeConverterException();
+   }
+
+   return jules;
 }

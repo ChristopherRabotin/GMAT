@@ -50,7 +50,6 @@ Real TimeConverterUtil::Convert(const Real origValue,
    return returnTime;
 }
 
-
 //---------------------------------------------------------------------------
 // Real ConvertToTaiMjd(std::string fromType, Real origValue, Real refJd)
 //---------------------------------------------------------------------------
@@ -70,7 +69,9 @@ Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
 
       if (refJd != GmatTimeUtil::JD_NOV_17_1858)
       {
-         offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
+         // DJC: 6/16/05 Reversed order of difference so future times are positive
+         // offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
+         offsetValue = refJd - GmatTimeUtil::JD_NOV_17_1858;
       }
 
       //loj: 4/12/05 Added
