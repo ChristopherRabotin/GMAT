@@ -2937,14 +2937,14 @@ void TrajPlotCanvas::DrawEquatorialPlane(UnsignedInt color)
       // Argosy code
       //==============================================================
       //orthoDepth = (half-size-of-image)*60/(half-FOV-degrees)
-
+      
       Real ort = orthoDepth * 8;
       //int pwr = gile(log10 (ort));
-      Real pwr = GmatMathUtil::Floor(GmatMathUtil::Log(ort));
+      Real pwr = Floor(Log10(ort)); //loj: 6/17/05 Changed to use Log10()
       //Real size = exp10(pwr)/100;
-      Real size = GmatMathUtil::Pow(10.0, pwr)/100;
+      Real size = Exp10(pwr)/100;   //loj: 6/17/05 Changed to use Exp10()
       Real imax = orthoDepth/size;
-
+      
       //------------------------------------------
       // Draw MAJOR circles
       //------------------------------------------
@@ -2976,7 +2976,7 @@ void TrajPlotCanvas::DrawEquatorialPlane(UnsignedInt color)
       //==============================================================
       int maxCircle = (int)(distance/5000);
       Real radius;
-   
+      
       if (maxCircle > 50)
          maxCircle = 50;
       
