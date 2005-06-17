@@ -3165,6 +3165,10 @@ void Moderator::CreateDefaultMission()
       CreateParameter("LST", "DefaultSC.Earth.LST");
       CreateParameter("BetaAngle", "DefaultSC.BetaAngle");
       
+      // B-Plane parameters (loj: 6/16/05 Added)
+      CreateParameter("BdotT", "DefaultSC.Earth.BdotT");
+      CreateParameter("BdotR", "DefaultSC.Earth.BdotR");
+      
       #ifdef DEBUG_CREATE_VAR
       // User variable
       Parameter *var = CreateParameter("Variable", "DefaultSC_EarthMJ2000Eq_Xx2");

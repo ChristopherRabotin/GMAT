@@ -32,6 +32,7 @@
 #include "Variable.hpp"
 #include "StringVar.hpp"
 #include "Array.hpp"
+#include "BplaneParameters.hpp" //loj: 6/15/05 Added
 
 //---------------------------------
 //  public methods
@@ -174,6 +175,12 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    if (ofType == "BetaAngle")
       return new BetaAngle(withName);
    
+   // B-Plane parameters
+   if (ofType == "BdotT")
+      return new BdotT(withName);
+   if (ofType == "BdotR")
+      return new BdotR(withName);
+   
    // add others here
    else
       return NULL;
@@ -265,8 +272,13 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("Latitude");
       creatables.push_back("LST");
       creatables.push_back("BetaAngle");
+      
+      // B-Plane parameters
+      creatables.push_back("BdotT");
+      creatables.push_back("BdotR");
    }
 }
+
 
 //------------------------------------------------------------------------------
 //  ParameterFactory(StringArray createList)
@@ -284,6 +296,7 @@ ParameterFactory::ParameterFactory(StringArray createList) :
 {
 }
 
+
 //------------------------------------------------------------------------------
 //  ParameterFactory(const ParameterFactory &fact)
 //------------------------------------------------------------------------------
@@ -298,6 +311,7 @@ ParameterFactory::ParameterFactory(const ParameterFactory &fact) :
    Factory(fact)
 {
 }
+
 
 //------------------------------------------------------------------------------
 //  ParameterFactory& operator= (const ParameterFactory &fact)
@@ -316,6 +330,7 @@ ParameterFactory& ParameterFactory::operator= (const ParameterFactory &fact)
    Factory::operator=(fact);
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~ParameterFactory()
