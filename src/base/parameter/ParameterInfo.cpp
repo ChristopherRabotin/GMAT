@@ -20,7 +20,7 @@
 #include "ParameterInfo.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_PARAM_INFO
+//#define DEBUG_PARAM_INFO 1
 
 //---------------------------------
 // static data
@@ -159,12 +159,12 @@ void ParameterInfo::Add(const std::string type, Gmat::ObjectType owner,
    std::string propertyName = name.substr(pos+1, name.npos-pos);
    
    mParamDepObjMap[propertyName] = depType;
-
-#ifdef DEBUG_PARAM_INFO
+   
+   #if DEBUG_PARAM_INFO
    MessageInterface::ShowMessage
-      ("ParameterInfo::Add() propertyName:%s with type:%d added\n",
-       propertyName.c_str(), depType);
-#endif
+      ("ParameterInfo::Add() propertyName:%s with owner=%d, depType:%d added\n",
+       propertyName.c_str(), owner, depType);
+   #endif
    
    mNumParams = mParamDepObjMap.size();
 }
