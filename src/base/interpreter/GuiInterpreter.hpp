@@ -58,7 +58,7 @@ public:
    //----- factory
    StringArray GetListOfFactoryItems(Gmat::ObjectType type);
    GmatBase* GetConfiguredItem(const std::string &name);
-
+   
    //----- config
    StringArray& GetListOfConfiguredItems(Gmat::ObjectType type);
    bool RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName,
@@ -82,7 +82,7 @@ public:
    Spacecraft* CreateSpacecraft(const std::string&type,
                                 const std::string &name);
    Spacecraft* GetSpacecraft(const std::string &name);
-
+   
    // Formation
    Formation* GuiInterpreter::CreateFormation(const std::string &type,
                                            const std::string &name);
@@ -130,6 +130,7 @@ public:
    CoordinateSystem* CreateCoordinateSystem(const std::string &name);
    CoordinateSystem* GetCoordinateSystem(const std::string &name);
    CoordinateSystem* GetInternalCoordinateSystem();
+   bool IsDefaultCoordinateSystem(const std::string &name);
    
    // AxisSystem
    AxisSystem* CreateAxisSystem(const std::string &type,

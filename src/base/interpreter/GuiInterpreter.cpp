@@ -647,6 +647,8 @@ Parameter* GuiInterpreter::GetParameter(const std::string &name)
 {
     return moderator->GetParameter(name);
 }
+
+
 //------------------------------------------------------------------------------
 // CoordinateSystem* CreateCoordinateSystem(const std::string &name)
 //------------------------------------------------------------------------------
@@ -685,6 +687,20 @@ CoordinateSystem* GuiInterpreter::GetCoordinateSystem(const std::string &name)
 CoordinateSystem* GuiInterpreter::GetInternalCoordinateSystem()
 {
    return moderator->GetInternalCoordinateSystem();
+}
+
+
+//loj: 6/20/05 Added
+//------------------------------------------------------------------------------
+// bool IsDefaultCoordinateSystem(const std::string &name)
+//------------------------------------------------------------------------------
+bool GuiInterpreter::IsDefaultCoordinateSystem(const std::string &name)
+{
+   if (name == "EarthMJ2000Eq" || name == "EarthMJ2000Ec" ||
+       name == "EarthFixed")
+      return true;
+   else
+      return false;
 }
 
 
