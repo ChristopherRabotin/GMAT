@@ -571,7 +571,9 @@ GuiItemManager::GetSpacePointComboBox(wxWindow *parent, wxWindowID id,
       spacePointComboBox->Append(theSpacePointList[i]);
    
    // select first item
-   spacePointComboBox->SetSelection(0);
+   //loj: 6/21/05 commented out.
+   // We don't want to show object selected for CoordinateSystem.
+   //spacePointComboBox->SetSelection(0);
    
    //---------------------------------------------
    // register to update list
