@@ -253,6 +253,35 @@ Real Anomaly::GetValue() const
 }
 
 //------------------------------------------------------------------------------
+// Real Anomaly::GetValue(const std::string &mType) const
+//------------------------------------------------------------------------------
+/** 
+ * Gets anomaly value from the given anomaly type.
+ * 
+ @ @param <mType> type of anomaly
+ * @return Anomaly value.
+ *
+ */
+Real Anomaly::GetValue(const std::string &mType) const
+{
+   if (IsInvalid(mType))
+      throw UtilityException("Anomaly::GetValue() - invalid input type");
+
+   if (mType == type) return GetValue();
+
+   if (mType == "TA")
+      return GetTrueAnomaly();
+
+   else if (mType == "MA") 
+      return GetMeanAnomaly();
+
+   else                             // Get EA value 
+      return GetEccentricAnomaly();
+
+}
+
+
+//------------------------------------------------------------------------------
 // void Anomaly::SetValue(const Real value)
 //------------------------------------------------------------------------------
 /** 
@@ -316,7 +345,7 @@ void Anomaly::SetType(const std::string &t)
 }
 
 //------------------------------------------------------------------------------
-// Real Anomaly::GetTrueAnomaly()
+// Real Anomaly::GetTrueAnomaly() const
 //------------------------------------------------------------------------------
 /** 
  * Gets true anomaly.
@@ -324,7 +353,7 @@ void Anomaly::SetType(const std::string &t)
  * @return    value of true anomaly.
  *
  */
-Real Anomaly::GetTrueAnomaly()
+Real Anomaly::GetTrueAnomaly() const
 {
    Real ta;
    if (type == "MA")
@@ -350,7 +379,7 @@ Real Anomaly::GetTrueAnomaly()
 }
 
 //------------------------------------------------------------------------------
-// Real Anomaly::GetMeanAnomaly()
+// Real Anomaly::GetMeanAnomaly() const
 //------------------------------------------------------------------------------
 /** 
  * Gets mean anomaly.
@@ -358,7 +387,7 @@ Real Anomaly::GetTrueAnomaly()
  * @return    value of mean anomaly.
  *
  */
-Real Anomaly::GetMeanAnomaly()
+Real Anomaly::GetMeanAnomaly() const
 {
 #if __DEBUG_ANOMALY__
     std::cout << "\nAnomaly::GetMeanAnomlay() with type = " << type 
@@ -448,7 +477,7 @@ Real Anomaly::GetMeanAnomaly()
 }
 
 //------------------------------------------------------------------------------
-// Real Anomaly::GetEccentricAnomaly()
+// Real Anomaly::GetEccentricAnomaly() const
 //------------------------------------------------------------------------------
 /** 
  * Gets eccentric anomaly.
@@ -456,7 +485,7 @@ Real Anomaly::GetMeanAnomaly()
  * @return   value of eccentric anomaly.
  *
  */
-Real Anomaly::GetEccentricAnomaly()
+Real Anomaly::GetEccentricAnomaly() const
 {
 #if __DEBUG_ANOMALY__
    std::cout << std::setprecision(30);

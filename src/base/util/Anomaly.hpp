@@ -49,14 +49,15 @@ public:
     void SetECC(const Real e);
 
     Real GetValue() const;
+    Real GetValue(const std::string &mType) const;
     void SetValue(const Real value);
 
     std::string GetType() const;
     void SetType(const std::string &t);
 
-    Real GetTrueAnomaly();
-    Real GetMeanAnomaly();
-    Real GetEccentricAnomaly();
+    Real GetTrueAnomaly() const;
+    Real GetMeanAnomaly() const;
+    Real GetEccentricAnomaly() const;
 
     bool IsInvalid(const std::string &inputType) const;
 
