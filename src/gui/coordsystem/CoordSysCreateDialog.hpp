@@ -19,7 +19,6 @@
 #include "gmatwxdefs.hpp"
 #include "GmatDialog.hpp"
 #include "CoordPanel.hpp"
-#include "TimeConverter.hpp"
 
 class CoordSysCreateDialog : public GmatDialog
 {
@@ -35,12 +34,11 @@ public:
 protected:
    bool mIsCoordCreated;
    wxString mCoordName;
-   CoordinateSystem *mCoordSys;
    CoordPanel *mCoordPanel;
-
+   
    wxStaticText *nameStaticText;
    wxTextCtrl *nameTextCtrl;
-
+   
    // abstract methods from GmatDialog
    virtual void Create();
    virtual void LoadData();
@@ -49,11 +47,11 @@ protected:
    
    // virtual methods from GmatDialog
    virtual void OnOK(wxCommandEvent &event);
-
+   
    // event handling
    void OnTextUpdate(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent& event);
-
+   
    DECLARE_EVENT_TABLE();
    
    // IDs for the controls and the menu commands
@@ -66,26 +64,20 @@ protected:
    };
    
 private:
+   wxString wxFormatName;
+   
    wxTextCtrl *epochTextCtrl;
-
+   
    wxComboBox *originComboBox;
    wxComboBox *typeComboBox;
    wxComboBox *primaryComboBox;
    wxComboBox *formatComboBox;
    wxComboBox *secondaryComboBox;
-
+   
    wxComboBox *xComboBox;
    wxComboBox *yComboBox;
    wxComboBox *zComboBox;
    
-   std::string wxFormatName;
-   wxString wxXString;
-   wxString wxYString;
-   wxString wxZString;
-
-   TimeConverter  timeConverter;
-
-   bool CheckXYZ();
 };
 
 #endif

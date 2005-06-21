@@ -15,12 +15,9 @@
 
 // gui includes
 #include "gmatwxdefs.hpp"
-#include "GuiInterpreter.hpp"
-#include "GmatAppData.hpp"
 #include "GmatPanel.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordPanel.hpp"
-#include "TimeConverter.hpp"
 
 class CoordSystemConfigPanel : public GmatPanel
 {
@@ -28,25 +25,24 @@ public:
     // constructors
     CoordSystemConfigPanel(wxWindow *parent, const wxString &coordName);
     ~CoordSystemConfigPanel();  
-
+   
 private:
    CoordinateSystem *theCoordSys;
    CoordPanel *mCoordPanel;
-
+   wxString mEpochFormat;
+   
    wxTextCtrl *epochTextCtrl;
-
+   
    wxComboBox *originComboBox;
    wxComboBox *typeComboBox;
    wxComboBox *primaryComboBox;
    wxComboBox *formatComboBox;
    wxComboBox *secondaryComboBox;
-
+   
    wxComboBox *xComboBox;
    wxComboBox *yComboBox;
    wxComboBox *zComboBox;
-
-   TimeConverter  timeConverter;
-
+      
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();

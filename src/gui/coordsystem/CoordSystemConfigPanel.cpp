@@ -18,10 +18,7 @@
 
 // base includes
 #include "gmatdefs.hpp"
-#include "GmatAppData.hpp"
 #include "AxisSystem.hpp"
-#include "SpacePoint.hpp"
-#include "TimeSystemConverter.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -39,18 +36,21 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 CoordSystemConfigPanel::CoordSystemConfigPanel(wxWindow *parent,
-    const wxString &coordName)
-    : GmatPanel(parent)
+                                               const wxString &coordName)
+   : GmatPanel(parent)
 {
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-
    theCoordSys = (CoordinateSystem*) theGuiInterpreter->GetCoordinateSystem(
                   coordName.c_str());
-
+   mEpochFormat = "TAIModJulian";
+   
    Create();
    Show();
 }
 
+
+//------------------------------------------------------------------------------
+// ~CoordSystemConfigPanel()
+//------------------------------------------------------------------------------
 CoordSystemConfigPanel::~CoordSystemConfigPanel()
 {
 }
@@ -58,112 +58,101 @@ CoordSystemConfigPanel::~CoordSystemConfigPanel()
 //-------------------------------
 // private methods
 //-------------------------------
+
+//------------------------------------------------------------------------------
+// void Create()
+//------------------------------------------------------------------------------
 void CoordSystemConfigPanel::Create()
 {
     Setup(this);    
 }
 
+
+//------------------------------------------------------------------------------
+// void Setup( wxWindow *parent)
+//------------------------------------------------------------------------------
 void CoordSystemConfigPanel::Setup( wxWindow *parent)
 {
-   mCoordPanel = new CoordPanel(this, false);
+   std::string coordSysName = theCoordSys->GetName();
 
-   theMiddleSizer->Add( mCoordPanel, 0, wxALIGN_CENTRE|wxALL, 5);
+   // if CoordinateSystem is non-default, allow user to edit
+   if (theGuiInterpreter->IsDefaultCoordinateSystem(coordSysName))
+      mCoordPanel = new CoordPanel(this, false);
+   else
+      mCoordPanel = new CoordPanel(this, true); //loj: 6/2/05 allow user to edit
+   
+   theMiddleSizer->Add( mCoordPanel, 0, wxALIGN_CENTRE|wxALL, 3);
 }
+
 
 //------------------------------------------------------------------------------
 // void LoadData()
 //------------------------------------------------------------------------------
 void CoordSystemConfigPanel::LoadData()
 {
-   try
+   epochTextCtrl = mCoordPanel->GetEpochTextCtrl();
+   
+   originComboBox = mCoordPanel->GetOriginComboBox();
+   typeComboBox = mCoordPanel->GetTypeComboBox();
+   primaryComboBox = mCoordPanel->GetPrimaryComboBox();
+   formatComboBox = mCoordPanel->GetFormatComboBox();
+   secondaryComboBox = mCoordPanel->GetSecondaryComboBox();
+   
+   xComboBox = mCoordPanel->GetXComboBox();
+   yComboBox = mCoordPanel->GetYComboBox();
+   zComboBox = mCoordPanel->GetZComboBox();
+   
+   //mCoordPanel->SetDefaultAxis();
+   
+   // get the data from the base
+   wxString origin = theCoordSys->GetStringParameter("Origin").c_str();
+   originComboBox->SetValue(origin);
+   
+   AxisSystem *axis =
+      (AxisSystem *)theCoordSys->GetRefObject(Gmat::AXIS_SYSTEM, "");
+   
+   if (axis != NULL)
    {
-      epochTextCtrl = mCoordPanel->GetEpochTextCtrl();
-
-      originComboBox = mCoordPanel->GetOriginComboBox();
-      typeComboBox = mCoordPanel->GetTypeComboBox();
-      primaryComboBox = mCoordPanel->GetPrimaryComboBox();
-      formatComboBox = mCoordPanel->GetFormatComboBox();
-      secondaryComboBox = mCoordPanel->GetSecondaryComboBox();
-
-      xComboBox = mCoordPanel->GetXComboBox();
-      yComboBox = mCoordPanel->GetYComboBox();
-      zComboBox = mCoordPanel->GetZComboBox();
-
-      // get the data from the base
-      wxString origin = theCoordSys->GetStringParameter("Origin").c_str();
-      originComboBox->SetValue(origin);
-
-      AxisSystem *axes = (AxisSystem *)theCoordSys->GetRefObject(
-                  Gmat::AXIS_SYSTEM, "");
-
-      if (axes != NULL)
-      {
-         int sel =typeComboBox->FindString(axes->GetTypeName().c_str());
-         typeComboBox->SetSelection(sel);
-         mCoordPanel->EnableOptions();
-
-         if (mCoordPanel->GetShowPrimaryBody())
-         {
-            // Primary/Secondary edits to just get the names  05/05/05, DJC
-            SpacePoint *primaryObj = axes->GetPrimaryObject();
-            if (primaryObj != NULL)
-               primaryComboBox->SetValue(primaryObj->GetName().c_str());
-            else
-               primaryComboBox->SetValue(axes->GetStringParameter("Primary").c_str());
-         }
-
-         if (mCoordPanel->GetShowSecondaryBody())
-         {
-            SpacePoint *secondObj = axes->GetSecondaryObject();
-            if (secondObj != NULL)
-               secondaryComboBox->SetValue(secondObj->GetName().c_str());
-            else
-               secondaryComboBox->SetValue(axes->GetStringParameter("Secondary").c_str());
-         }
-
-         if (mCoordPanel->GetShowEpoch())
-         {
-            A1Mjd epoch = axes->GetEpoch();
-
-            std::string epochFormat = axes->GetEpochFormat().c_str();
-            formatComboBox->SetValue(epochFormat.c_str());
-
-            Real taiEpoch = TimeConverterUtil::ConvertToTaiMjd("A1Mjd", 
-                  epoch.Get(), GmatTimeUtil::JD_JAN_5_1941);
-            wxString taiEpochStr;
-            taiEpochStr.Printf("%9.9f", taiEpoch);
-            std::string epochString = timeConverter.Convert(taiEpochStr.c_str(), 
-                     "TAIModJulian", epochFormat);
-            epochTextCtrl->SetValue(epochString.c_str());
-         }
-
-         if (mCoordPanel->GetShowXyz())
-         {
-            std::string xString = axes->GetXAxis();
-            std::string yString = axes->GetYAxis();
-            std::string zString = axes->GetZAxis();
-
-            xComboBox->SetValue(xString.c_str());
-            yComboBox->SetValue(yString.c_str());
-            zComboBox->SetValue(zString.c_str());
-         }
-      }
-      mObject = theCoordSys;
+      mCoordPanel->ShowAxisData(axis);
+      mEpochFormat = wxString(axis->GetEpochFormat().c_str());
    }
-   catch (BaseException &e)
+   else
    {
       MessageInterface::ShowMessage
-         ("CoordSystemConfigPanel:LoadData() error occurred!\n%s\n",
-            e.GetMessage().c_str());
+         ("CoordSystemConfigPanel::LoadData() the AxisSystem of %s is NULL\n",
+          theCoordSys->GetName().c_str());
    }
+   
+   mObject = theCoordSys;
+   
+   theApplyButton->Enable(false);
 }
+
 
 //------------------------------------------------------------------------------
 // void SaveData()
 //------------------------------------------------------------------------------
 void CoordSystemConfigPanel::SaveData()
 {
+   canClose = false;
+   
+   wxString originName = originComboBox->GetValue().Trim();   
+   AxisSystem *axis = mCoordPanel->CreateAxis();
+   
+   if (axis != NULL)
+   {
+      theCoordSys->SetStringParameter("Origin", std::string(originName.c_str()));
+      AxisSystem *oldAxis =
+         (AxisSystem *)theCoordSys->GetRefObject(Gmat::AXIS_SYSTEM, "");
+      
+      // delete old axis and set new axis
+      delete oldAxis;
+      theCoordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
+      
+      canClose = true;
+   }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnGravityTextUpdate(wxCommandEvent& event)
@@ -172,6 +161,7 @@ void CoordSystemConfigPanel::OnTextUpdate(wxCommandEvent& event)
 {  
    theApplyButton->Enable(true);
 }
+
 
 //------------------------------------------------------------------------------
 // void OnComboUpdate(wxCommandEvent& event)
@@ -187,7 +177,8 @@ void CoordSystemConfigPanel::OnComboUpdate(wxCommandEvent& event)
    }
    else if (event.GetEventObject() == formatComboBox)
    {
+      mCoordPanel->ChangeEpoch(mEpochFormat);
    }
-
+   
    theApplyButton->Enable(true);
 }

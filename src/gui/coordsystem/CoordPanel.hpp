@@ -27,36 +27,43 @@ public:
     // constructors
     CoordPanel(wxWindow *parent, bool enableAll);
     ~CoordPanel();
-
-   void EnableOptions();
-
+   
    wxComboBox *GetOriginComboBox() {return originComboBox;}
    wxComboBox *GetTypeComboBox() {return typeComboBox;}
    wxComboBox *GetPrimaryComboBox() {return primaryComboBox;}
    wxComboBox *GetSecondaryComboBox() {return secondaryComboBox;}
    wxComboBox *GetFormatComboBox() {return formatComboBox;}
-
+   
    wxComboBox *GetXComboBox() {return xComboBox;}
    wxComboBox *GetYComboBox() {return yComboBox;}
    wxComboBox *GetZComboBox() {return zComboBox;}
-
+   
    bool GetShowPrimaryBody() {return mShowPrimaryBody;}
    bool GetShowSecondaryBody() {return mShowSecondaryBody;}
    bool GetShowEpoch() {return mShowEpoch;}
    bool GetShowXyz() {return mShowXyz;}
-
+   
    wxTextCtrl *GetEpochTextCtrl() {return epochTextCtrl;}
-
+   
+   void EnableOptions();
+   void SetDefaultAxis();
+   void SetDefaultEpochRefAxis();
+   void SetDefaultObjectRefAxis();
+   void ShowAxisData(AxisSystem *axis);
+   AxisSystem* CreateAxis();
+   void ChangeEpoch(wxString &oldFormat);
+   
 private:
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
-
+   TimeConverter  mTimeConverter;
+   
    bool mShowPrimaryBody;
    bool mShowSecondaryBody;
    bool mShowEpoch;
    bool mShowXyz;
    bool mEnableAll;
-
+   
    wxStaticText *originStaticText;
    wxStaticText *typeStaticText;
    wxStaticText *primaryStaticText;
@@ -85,6 +92,11 @@ private:
 
    // Layout & data handling methods
    void Setup(wxWindow *parent);
+   
+   bool IsValidAxis(const wxString &axisType, const wxString &priName,
+                    const wxString &secName, const wxString &x,
+                    const wxString &y, const wxString &z);
+   bool IsValidXYZ(const wxString &x, const wxString &y, const wxString &z);
     
    // IDs for the controls and the menu commands
    enum

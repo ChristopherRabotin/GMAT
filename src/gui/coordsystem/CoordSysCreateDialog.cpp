@@ -16,7 +16,7 @@
 
 #include "CoordSysCreateDialog.hpp"
 #include "MessageInterface.hpp"
-#include "TimeSystemConverter.hpp"
+#include "AxisSystem.hpp"
 
 //#define DEBUG_COORD_DIALOG 1
 
@@ -38,7 +38,6 @@ CoordSysCreateDialog::CoordSysCreateDialog(wxWindow *parent)
    : GmatDialog(parent, -1, wxString(_T("CoordSysCreateDialog")))
 {
    mIsCoordCreated = false;
-
    Create();
    ShowData();
 }
@@ -87,25 +86,9 @@ void CoordSysCreateDialog::LoadData()
       yComboBox = mCoordPanel->GetYComboBox();
       zComboBox = mCoordPanel->GetZComboBox();
 
-      if (mCoordSys != NULL)
-      {
-         // will it ever be anything besides null?
-      }
-      else
-      {
-         // default settings
-         typeComboBox->SetValue("MJ2000Eq");
-         originComboBox->SetValue("Earth");
-         primaryComboBox->SetValue("Earth");
-         secondaryComboBox->SetValue("Earth");
-         formatComboBox->SetValue("TAIModJulian");
-         epochTextCtrl->SetValue("21545");
-         xComboBox->SetValue("R");
-         yComboBox->SetValue("V");;
-         zComboBox->SetValue("");
-      }
-
-      wxFormatName = std::string(formatComboBox->GetValue().Trim());
+      mCoordPanel->SetDefaultAxis();
+            
+      wxFormatName = formatComboBox->GetValue().Trim();
       mCoordPanel->EnableOptions();
    }
    catch (BaseException &e)
@@ -114,107 +97,46 @@ void CoordSysCreateDialog::LoadData()
          ("CoordSysCreateDialog:LoadData() error occurred!\n%s\n",
             e.GetMessage().c_str());
    }
-
+   
 }
+
 
 //------------------------------------------------------------------------------
 // virtual void SaveData()
 //------------------------------------------------------------------------------
 void CoordSysCreateDialog::SaveData()
 {
-   try
+   mIsCoordCreated = false;
+   std::string coordName = std::string(nameTextCtrl->GetValue().Trim().c_str());
+   
+   if (theGuiInterpreter->GetCoordinateSystem(coordName) == NULL)
    {
-      std::string wxCoordName = std::string(nameTextCtrl->GetValue().Trim());
-      std::string wxOriginName = std::string(originComboBox->GetValue().Trim());
-      std::string wxPrimName = std::string(primaryComboBox->GetValue().Trim());
-      std::string wxSecName = std::string(secondaryComboBox->GetValue().Trim());
-      std::string wxTypeName = std::string(typeComboBox->GetValue().Trim());
-      wxFormatName = std::string(formatComboBox->GetValue().Trim());
-      wxXString = xComboBox->GetValue();
-      wxYString = yComboBox->GetValue();
-      wxZString = zComboBox->GetValue();
-
-      std::string epochStr = std::string(epochTextCtrl->GetValue().Trim());
-      bool validXYZ = true;
-
-      if (mCoordPanel->GetShowXyz())
-         validXYZ = CheckXYZ();
-
-      // need to check if coord name is null
-
-      if ((theGuiInterpreter->GetCoordinateSystem(wxCoordName) == NULL) &&
-           validXYZ)
+      // create AxisSystem
+      AxisSystem *axis = mCoordPanel->CreateAxis();
+      
+      if (axis != NULL)
       {
-         mCoordSys = theGuiInterpreter->CreateCoordinateSystem(wxCoordName);
-         mCoordName = wxCoordName.c_str();
-
-         mCoordSys->SetStringParameter("Origin", wxOriginName);
-
-         AxisSystem *axis = (AxisSystem *)theGuiInterpreter->
-                  CreateAxisSystem(wxTypeName, wxTypeName);
-
-         if (axis != NULL)
-         {
-            mCoordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
-
-            if (wxPrimName != "")
-            {
-               SpacePoint *primary = (SpacePoint *)theGuiInterpreter->
-                     GetConfiguredItem(wxPrimName);
-               if (primary != NULL)
-                  axis->SetPrimaryObject(primary);
-               else
-               {
-                  SolarSystem *ss = theGuiInterpreter->GetDefaultSolarSystem();
-                  axis->SetPrimaryObject((SpacePoint *)ss->GetBody(wxPrimName));
-               }
-            }
-            else if (wxTypeName == "ObjectReferenced")
-            {
-               MessageInterface::PopupMessage
-                  (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
-                  "ObjectReferenced must have a primary body.");
-               mIsCoordCreated = false;
-               return;
-            }
-            
-            if (wxSecName != "")
-            {
-               SpacePoint *secondary = (SpacePoint *)theGuiInterpreter->
-                     GetConfiguredItem(wxSecName);
-               if (secondary != NULL)
-                  axis->SetSecondaryObject(secondary);
-               else
-               {
-                  SolarSystem *ss = theGuiInterpreter->GetDefaultSolarSystem();
-                  axis->SetSecondaryObject((SpacePoint *)ss->GetBody(wxSecName));
-               }
-            }
+         // create CoordinateSystem
+         CoordinateSystem *coordSys =
+            theGuiInterpreter->CreateCoordinateSystem(coordName);
          
-            // set the x, y, and z
-            axis->SetXAxis(std::string(wxXString));
-            axis->SetYAxis(std::string(wxYString));
-            axis->SetZAxis(std::string(wxZString));
-
-            axis->SetEpochFormat(wxFormatName);
-
-            // convert epoch to a1mjd
-            std::string taiEpochStr = timeConverter.Convert(epochStr, 
-                     wxFormatName, "TAIModJulian");
-            Real epoch = TimeConverterUtil::ConvertFromTaiMjd("A1Mjd", 
-                     atof(taiEpochStr.c_str()), GmatTimeUtil::JD_JAN_5_1941);
-            axis->SetEpoch(epoch);
-            mIsCoordCreated = true;
-         }
+         wxString originName = originComboBox->GetValue().Trim();
+         coordSys->SetStringParameter("Origin", std::string(originName.c_str()));
+         coordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
+         
+         mIsCoordCreated = true;
+         mCoordName = wxString(coordName.c_str());
       }
    }
-   catch (BaseException &e)
+   else
    {
-      MessageInterface::ShowMessage
-         ("CoordSysCreateDialog:SaveData() error occurred!\n%s\n",
-            e.GetMessage().c_str());
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "The CoordinateSystem: " + coordName +
+          " already exist. Please enter different name\n");
    }
+   
 }
+
 
 //------------------------------------------------------------------------------
 // virtual void ResetData()
@@ -233,7 +155,7 @@ void CoordSysCreateDialog::ResetData()
 void CoordSysCreateDialog::OnOK(wxCommandEvent &event)
 {
    SaveData();
-
+   
    if (mIsCoordCreated)
       Close();
 }
@@ -269,97 +191,10 @@ void CoordSysCreateDialog::OnComboBoxChange(wxCommandEvent& event)
    }
    else if (event.GetEventObject() == formatComboBox)
    {
-      std::string newFormat = std::string(formatComboBox->GetStringSelection().Trim());
-      if (newFormat != wxFormatName)
-      {
-         std::string newEpoch = timeConverter.Convert(epochTextCtrl->GetValue().c_str(),
-                                wxFormatName, newFormat);
-         epochTextCtrl->SetValue(newEpoch.c_str());
-         wxFormatName = newFormat;
-      }
+      mCoordPanel->ChangeEpoch(wxFormatName);
    }
-
+   
    if (nameTextCtrl->GetValue().Trim() != "")
       theOkButton->Enable();
 }
 
-//------------------------------------------------------------------------------
-// bool CheckXYZ()
-//------------------------------------------------------------------------------
-bool CoordSysCreateDialog::CheckXYZ()
-{
-   // Check to see if x,y,z are valid axes
-   if (wxXString.Contains("R") &&
-      (wxYString.Contains("R") || wxZString.Contains("R")))
-   {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
-         "The x, y, and z axis must be orthognal.");
-      return false;
-   }
-   else if (wxXString.Contains("V") &&
-           (wxYString.Contains("V") || wxZString.Contains("V")))
-   {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
-         "The x, y, and z axis must be orthognal.");
-      return false;
-   }
-   else if (wxXString.Contains("N") &&
-           (wxYString.Contains("N") || wxZString.Contains("N")))
-   {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
-         "The x, y, and z axis must be orthognal.");
-      return false;
-   }
-   else if (wxXString.IsSameAs("") &&
-           (wxYString.IsSameAs("") || wxZString.IsSameAs("")))
-   {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
-         "The x, y, and z axis must be orthognal.");
-      return false;
-   }
-
-   if (wxYString.Contains("R") && wxZString.Contains("R"))
-   {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
-         "The x, y, and z axis must be orthognal.");
-      return false;
-   }
-   else if (wxYString.Contains("V") && wxZString.Contains("V"))
-   {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
-         "The x, y, and z axis must be orthognal.");
-      return false;
-   }
-   else if (wxYString.Contains("N") && wxZString.Contains("N"))
-   {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
-         "The x, y, and z axis must be orthognal.");
-      return false;
-   }
-   else if (wxYString.IsSameAs("") && wxZString.IsSameAs(""))
-   {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
-         "The x, y, and z axis must be orthognal.");
-      return false;
-   }
-
-   // Check to make sure at least one is blank
-   if (wxXString.IsSameAs("") || wxYString.IsSameAs("") ||
-       wxZString.IsSameAs(""))
-      return true;
-   else
-   {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
-         "One coordinate must be a blank string.");
-      return false;
-   }
-}

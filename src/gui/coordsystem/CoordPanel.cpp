@@ -15,6 +15,7 @@
 
 #include "AxisSystem.hpp"
 #include "SpacePoint.hpp"
+#include "TimeSystemConverter.hpp"
 
 //#define DEBUG_COORD_PANEL 1
 
@@ -26,21 +27,25 @@
  */
 //------------------------------------------------------------------------------
 CoordPanel::CoordPanel(wxWindow *parent, bool enableAll)
-    : wxPanel(parent)
+   : wxPanel(parent)
 {
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
-
+   
    mShowPrimaryBody = false;
    mShowSecondaryBody = false;
    mShowEpoch = false;
    mShowXyz = false;
-
+   
    mEnableAll = enableAll;
-
+   
    Create();
 }
 
+
+//------------------------------------------------------------------------------
+// ~CoordPanel()
+//------------------------------------------------------------------------------
 CoordPanel::~CoordPanel()
 {
    // Unregisger GUI components(loj: 6/7/05 Added)
@@ -49,15 +54,440 @@ CoordPanel::~CoordPanel()
    theGuiManager->UnregisterComboBox("SpacePoint", secondaryComboBox);
 }
 
+
+//------------------------------------------------------------------------------
+// void EnableOptions()
+//------------------------------------------------------------------------------
+void CoordPanel::EnableOptions()
+{
+   #if DEBUG_COORD_PANEL
+      MessageInterface::ShowMessage("CoordPanel::EnableOptions() type =%s\n",
+      typeComboBox->GetStringSelection().c_str());
+   #endif
+
+   if ((typeComboBox->GetStringSelection() == "Equator") ||
+       (typeComboBox->GetStringSelection() == "BodyFixed"))
+   {
+      mShowPrimaryBody = false;   // 05/03/05: ag changed from true to false
+      mShowSecondaryBody = false;
+      mShowEpoch = false;
+      mShowXyz = false;
+   }
+   else if (typeComboBox->GetStringSelection() == "ObjectReferenced")
+   {
+      mShowPrimaryBody = true;
+      mShowSecondaryBody = true;
+      mShowEpoch = false;
+      mShowXyz = true;
+      SetDefaultObjectRefAxis();
+   }
+   else if ((typeComboBox->GetStringSelection() == "TOEEq") ||
+            (typeComboBox->GetStringSelection() == "TOEEc") ||
+            (typeComboBox->GetStringSelection() == "MOEEq") ||
+            (typeComboBox->GetStringSelection() == "MOEEc"))
+   {
+      mShowPrimaryBody = false;
+      mShowSecondaryBody = false;
+      mShowEpoch = true;
+      mShowXyz = false;
+      SetDefaultEpochRefAxis();
+   }
+   else
+   {
+      mShowPrimaryBody = false;
+      mShowSecondaryBody = false;
+      mShowEpoch = false;
+      mShowXyz = false;
+   }
+   
+   if (mEnableAll)
+   {
+      primaryStaticText->Enable(mShowPrimaryBody);
+      primaryComboBox->Enable(mShowPrimaryBody);
+      secondaryStaticText->Enable(mShowSecondaryBody);
+      secondaryComboBox->Enable(mShowSecondaryBody);
+      formatStaticText->Enable(mShowEpoch);
+      formatComboBox->Enable(mShowEpoch);
+      epochStaticText->Enable(mShowEpoch);
+      epochTextCtrl->Enable(mShowEpoch);
+      xStaticText->Enable(mShowXyz);
+      xComboBox->Enable(mShowXyz);
+      yStaticText->Enable(mShowXyz);
+      yComboBox->Enable(mShowXyz);
+      zStaticText->Enable(mShowXyz);
+      zComboBox->Enable(mShowXyz);
+   }
+   else  // disable all of them
+   {
+      //loj: 6/20/05 Just set to false for clearness
+      originStaticText->Enable(false);
+      typeStaticText->Enable(false);
+      primaryStaticText->Enable(false);
+      formatStaticText->Enable(false);
+      secondaryStaticText->Enable(false);
+      epochStaticText->Enable(false);
+      originComboBox->Enable(false);
+      typeComboBox->Enable(false);
+      primaryComboBox->Enable(false);
+      formatComboBox->Enable(false);
+      secondaryComboBox->Enable(false);
+      epochTextCtrl->Enable(false);
+      xStaticText->Enable(false);
+      xComboBox->Enable(false);
+      yStaticText->Enable(false);
+      yComboBox->Enable(false);
+      zStaticText->Enable(false);
+      zComboBox->Enable(false);
+   }
+}
+
+
+//loj: 6/21/05 Added
+//------------------------------------------------------------------------------
+// void SetDefaultAxis()
+//------------------------------------------------------------------------------
+void CoordPanel::SetDefaultAxis()
+{
+   // default settings
+   typeComboBox->SetValue("MJ2000Eq");
+   originComboBox->SetValue("Earth");
+   primaryComboBox->SetValue("Earth");
+   secondaryComboBox->SetValue("Luna");
+   formatComboBox->SetValue("TAIModJulian");
+   epochTextCtrl->SetValue("21545");
+   xComboBox->SetValue("R");
+   yComboBox->SetValue("");;
+   zComboBox->SetValue("N");
+}
+
+
+//loj: 6/21/05 Added
+//------------------------------------------------------------------------------
+// void SetDefaultEpochRefAxis()
+//------------------------------------------------------------------------------
+void CoordPanel::SetDefaultEpochRefAxis()
+{
+   // default settings
+   formatComboBox->SetValue("TAIModJulian");
+   epochTextCtrl->SetValue("21545");
+}
+
+
+//loj: 6/21/05 Added
+//------------------------------------------------------------------------------
+// void SetDefaultObjectRefAxis()
+//------------------------------------------------------------------------------
+void CoordPanel::SetDefaultObjectRefAxis()
+{
+   // default settings
+   primaryComboBox->SetValue("Earth");
+   secondaryComboBox->SetValue("Luna");
+   xComboBox->SetValue("R");
+   yComboBox->SetValue("");;
+   zComboBox->SetValue("N");
+}
+
+
+//loj: 6/21/05 Added
+//------------------------------------------------------------------------------
+// void ShowAxisData(AxisSystem *axis)
+//------------------------------------------------------------------------------
+void CoordPanel::ShowAxisData(AxisSystem *axis)
+{
+   try
+   {
+      int sel = typeComboBox->FindString(axis->GetTypeName().c_str());
+      typeComboBox->SetSelection(sel);
+      EnableOptions();
+      
+      if (GetShowPrimaryBody())
+      {
+         // Primary/Secondary edits to just get the names  05/05/05, DJC
+         SpacePoint *primaryObj = axis->GetPrimaryObject();
+         if (primaryObj != NULL)
+            primaryComboBox->SetStringSelection(primaryObj->GetName().c_str());
+         else
+            primaryComboBox->
+               SetStringSelection(axis->GetStringParameter("Primary").c_str());
+      }
+      
+      if (GetShowSecondaryBody())
+      {
+         SpacePoint *secondObj = axis->GetSecondaryObject();
+         if (secondObj != NULL)
+            secondaryComboBox->SetStringSelection(secondObj->GetName().c_str());
+         else
+            secondaryComboBox->
+               SetStringSelection(axis->GetStringParameter("Secondary").c_str());
+      }
+      
+      if (GetShowEpoch())
+      {
+         A1Mjd epoch = axis->GetEpoch();
+         
+         std::string epochFormat = axis->GetEpochFormat();
+         
+         //loj: 6/21/05 Changed SetValue() to SetStringSelection()
+         formatComboBox->SetStringSelection(epochFormat.c_str());
+         
+         Real taiEpoch = TimeConverterUtil::ConvertToTaiMjd
+            ("A1Mjd", epoch.Get(), GmatTimeUtil::JD_JAN_5_1941);
+         
+         wxString taiEpochStr;
+         taiEpochStr.Printf("%9.9f", taiEpoch);
+         std::string epochString =
+            mTimeConverter.Convert(taiEpochStr.c_str(), "TAIModJulian",
+                                   epochFormat);
+         epochTextCtrl->SetValue(epochString.c_str());
+      }
+      
+      if (GetShowXyz())
+      {
+         //loj: 6/21/05 Chagned SetValue() to SetStringSelection()
+         xComboBox->SetStringSelection(axis->GetXAxis().c_str());
+         yComboBox->SetStringSelection(axis->GetYAxis().c_str());
+         zComboBox->SetStringSelection(axis->GetZAxis().c_str());
+      }
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("CoordPanel::ShowAxisData() error occurred in getting data!\n%s\n",
+          e.GetMessage().c_str());
+   }
+}
+
+
+//loj: 6/21/05 Added
+//------------------------------------------------------------------------------
+// AxisSystem* CreateAxis()
+//------------------------------------------------------------------------------
+AxisSystem* CoordPanel::CreateAxis()
+{
+   wxString priName = primaryComboBox->GetValue().Trim();
+   wxString secName = secondaryComboBox->GetValue().Trim();
+   wxString axisType = typeComboBox->GetValue().Trim();
+   wxString epochFormat = formatComboBox->GetValue().Trim();
+   wxString epochStr = epochTextCtrl->GetValue().Trim();
+   wxString xStr = xComboBox->GetValue();
+   wxString yStr = yComboBox->GetValue();
+   wxString zStr = zComboBox->GetValue();
+   
+   AxisSystem *axis = NULL;
+   
+   if (IsValidAxis(axisType, priName, secName, xStr, yStr, zStr))
+   {
+      // Create AxisSystem
+      axis = (AxisSystem *)theGuiInterpreter->
+         CreateAxisSystem(std::string(axisType.c_str()), "");
+      
+      if (axis != NULL)
+      {
+         try
+         {
+            if (priName != "")
+            {
+               SpacePoint *primary = (SpacePoint *)theGuiInterpreter->
+                  GetConfiguredItem(std::string(priName.c_str()));
+               axis->SetPrimaryObject(primary);
+            }
+            
+            if (secName != "")
+            {
+               SpacePoint *secondary = (SpacePoint *)theGuiInterpreter->
+                  GetConfiguredItem(std::string(secName.c_str()));
+               axis->SetSecondaryObject(secondary);
+            }
+            
+            // set the x, y, and z
+            axis->SetXAxis(std::string(xStr.c_str()));
+            axis->SetYAxis(std::string(yStr.c_str()));
+            axis->SetZAxis(std::string(zStr.c_str()));
+            
+            axis->SetEpochFormat(std::string(epochFormat.c_str()));
+            
+            // convert epoch to a1mjd
+            std::string taiEpochStr = mTimeConverter.Convert
+               (std::string(epochStr.c_str()), std::string(epochFormat.c_str()),
+                "TAIModJulian");
+            Real epoch = TimeConverterUtil::ConvertFromTaiMjd
+               ("A1Mjd", atof(taiEpochStr.c_str()), GmatTimeUtil::JD_JAN_5_1941);
+            axis->SetEpoch(epoch);
+            
+         }
+         catch (BaseException &e)
+         {
+            MessageInterface::ShowMessage
+               ("CoordPanel::CreateAxis() error occurred in setting data!\n%s\n",
+                e.GetMessage().c_str());
+            
+            delete axis;
+            axis = NULL;
+         }
+      }
+   }
+   
+   return axis;
+}
+
+
+//loj: 6/21/05 Added
+//------------------------------------------------------------------------------
+// void ChangeEpoch(wxString &oldFormat)
+//------------------------------------------------------------------------------
+void CoordPanel::ChangeEpoch(wxString &oldFormat)
+{
+   wxString newFormat = formatComboBox->GetStringSelection().Trim();
+
+   #if DEBUG_COORD_PANEL
+   MessageInterface::ShowMessage
+      ("CoordPanel::ChangeEpoch() oldFormat=%s, newFormat=%s\n",
+       oldFormat.c_str(), newFormat.c_str());
+   #endif
+   
+   if (newFormat != oldFormat)
+   {
+      std::string newEpoch =
+         mTimeConverter.Convert(epochTextCtrl->GetValue().c_str(),
+                                oldFormat.c_str(), newFormat.c_str());
+      epochTextCtrl->SetValue(newEpoch.c_str());
+      oldFormat = newFormat;
+   }
+}
+
+
+//---------------------------------
+// private methods
+//---------------------------------
+
+//loj: 6/21/05 Added
+//------------------------------------------------------------------------------
+// bool IsValidAxis(const wxString &axisType, const wxString &priName,
+//                  const wxString &secName, const wxString &xStr,
+//                  const wxString &yStr, const wxString &zStr)
+//------------------------------------------------------------------------------
+bool CoordPanel::IsValidAxis(const wxString &axisType, const wxString &priName,
+                             const wxString &secName, const wxString &xStr,
+                             const wxString &yStr, const wxString &zStr)
+{
+   if (axisType == "")
+   {
+      MessageInterface::PopupMessage(Gmat::INFO_, "Please select Axis.");
+      return false;
+   }
+   
+   if (axisType == "ObjectReferenced")
+   {
+      if (priName == "" && secName == "")
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_,
+             "ObjectReferenced must have a primary and secondary body.");
+         return false;
+      }
+      else if (priName == secName)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_,
+             "The primary and the secondary body must be different.");
+         return false;
+      }
+      
+      return IsValidXYZ(xStr, yStr, zStr);
+   }
+   
+   return true;
+}
+
+
+//loj: 6/21/05 Added
+//------------------------------------------------------------------------------
+// bool IsValidXYZ(const wxString &xStr, const wxString &yStr,
+//                 const wxString &zStr)
+//------------------------------------------------------------------------------
+bool CoordPanel::IsValidXYZ(const wxString &xStr, const wxString &yStr,
+                            const wxString &zStr)
+{
+   // Check to see if x,y,z are valid axes
+   if (xStr.IsSameAs("") && (yStr.IsSameAs("") || zStr.IsSameAs("")))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_,  "Please select 2 coordinates from X, Y, and Z.");
+      return false;
+   }
+   else if (xStr.Contains("R") && (yStr.Contains("R") || zStr.Contains("R")))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "The X, Y, and Z axis must be orthognal.");
+      return false;
+   }
+   else if (xStr.Contains("V") && (yStr.Contains("V") || zStr.Contains("V")))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "The X, Y, and Z axis must be orthognal.");
+      return false;
+   }
+   else if (xStr.Contains("N") && (yStr.Contains("N") || zStr.Contains("N")))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "The X, Y, and Z axis must be orthognal.");
+      return false;
+   }
+   
+   if (yStr.Contains("R") && zStr.Contains("R"))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "The X, Y, and Z axis must be orthognal.");
+      return false;
+   }
+   else if (yStr.Contains("V") && zStr.Contains("V"))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "The X, Y, and Z axis must be orthognal.");
+      return false;
+   }
+   else if (yStr.Contains("N") && zStr.Contains("N"))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "The X, Y, and Z axis must be orthognal.");
+      return false;
+   }
+   else if (yStr.IsSameAs("") && zStr.IsSameAs(""))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "The X, Y, and Z axis must be orthognal.");
+      return false;
+   }
+   
+   // Check to make sure at least one is blank
+   if (xStr.IsSameAs("") || yStr.IsSameAs("") || zStr.IsSameAs(""))
+      return true;
+   else
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_,  "One coordinate must be a blank string.");
+      return false;
+   }
+}
+
+
 //-------------------------------
 // private methods
 //-------------------------------
+
+//------------------------------------------------------------------------------
+// void Create()
+//------------------------------------------------------------------------------
 void CoordPanel::Create()
 {
    Setup(this);
    LoadData();
 }
 
+
+//------------------------------------------------------------------------------
+// void Setup( wxWindow *parent)
+//------------------------------------------------------------------------------
 void CoordPanel::Setup( wxWindow *parent)
 {
     // wxStaticText
@@ -95,7 +525,6 @@ void CoordPanel::Setup( wxWindow *parent)
       wxSize(120,-1), 0, emptyList, wxCB_DROPDOWN );
    secondaryComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
       wxSize(120,-1), false);
-
    xComboBox = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition,
       wxSize(50,-1), 0, emptyList, wxCB_DROPDOWN );
    yComboBox = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition,
@@ -149,12 +578,24 @@ void CoordPanel::Setup( wxWindow *parent)
 
    theMainSizer->Add(boxsizer1, 0, wxALIGN_CENTRE|wxALL, 5);
    theMainSizer->Add(staticboxsizer1, 0, wxALIGN_CENTRE|wxALL, 5);
-
+   
+   if (!mEnableAll)
+   {
+      wxStaticText *msg =
+         new wxStaticText(parent, ID_TEXT,
+                          wxT("This is default Coordinate "
+                              "System and cannot be modified."),
+                          wxDefaultPosition, wxDefaultSize, 0);
+      msg->SetForegroundColour(*wxRED);
+      theMainSizer->Add(msg, 0, wxALIGN_CENTRE|wxALL, 5);
+   }
+   
    this->SetAutoLayout( true );
    this->SetSizer( theMainSizer );
    theMainSizer->Fit( this );
    theMainSizer->SetSizeHints( this );
 }
+
 
 //------------------------------------------------------------------------------
 // void LoadData()
@@ -168,11 +609,11 @@ void CoordPanel::LoadData()
          theGuiInterpreter->GetListOfFactoryItems(Gmat::AXIS_SYSTEM);
       for (unsigned int i = 0; i<itemNames.size(); i++)
          typeComboBox->Append(wxString(itemNames[i].c_str()));
-     
+      
       // insert a blank option for primary and secondary
 //      primaryComboBox->Append("");
       secondaryComboBox->Append("");
-         
+      
       // Load epoch types - hard coded for now
       wxString epochStrs[] =
       {
@@ -181,10 +622,10 @@ void CoordPanel::LoadData()
          wxT("TAIGregorian"),
          wxT("UTCGregorian"),
       };
-
+      
       for (unsigned int i = 0; i<4; i++)
          formatComboBox->Append(wxString(epochStrs[i].c_str()));
-
+      
       wxString xyzStrs[] =
       {
          wxT(""),
@@ -195,7 +636,7 @@ void CoordPanel::LoadData()
          wxT("N"),
          wxT("-N"),
       };
-
+      
       for (unsigned int i=0; i<7; i++)
       {
          xComboBox->Append(wxString(xyzStrs[i].c_str()));
@@ -211,82 +652,4 @@ void CoordPanel::LoadData()
    }
 }
 
-void CoordPanel::EnableOptions()
-{
-   #if DEBUG_COORD_PANEL
-      MessageInterface::ShowMessage("CoordPanel::EnableOptions() type =%s\n",
-      typeComboBox->GetStringSelection().c_str());
-   #endif
 
-   if ((typeComboBox->GetStringSelection() == "Equator") ||
-      (typeComboBox->GetStringSelection() == "BodyFixed"))
-   {
-      mShowPrimaryBody = false;   // 05/03/05: ag changed from true to false
-      mShowSecondaryBody = false;
-      mShowEpoch = false;
-      mShowXyz = false;
-   }
-   else if (typeComboBox->GetStringSelection() == "ObjectReferenced")
-   {
-      mShowPrimaryBody = true;
-      mShowSecondaryBody = true;
-      mShowEpoch = false;
-      mShowXyz = true;
-   }
-   else if ((typeComboBox->GetStringSelection() == "TOEEq") ||
-            (typeComboBox->GetStringSelection() == "TOEEc") ||
-            (typeComboBox->GetStringSelection() == "MOEEq") ||
-            (typeComboBox->GetStringSelection() == "MOEEc"))
-   {
-      mShowPrimaryBody = false;
-      mShowSecondaryBody = false;
-      mShowEpoch = true;
-      mShowXyz = false;
-   }
-   else
-   {
-      mShowPrimaryBody = false;
-      mShowSecondaryBody = false;
-      mShowEpoch = false;
-      mShowXyz = false;
-   }
-
-   if (mEnableAll)
-   {
-      primaryStaticText->Enable(mShowPrimaryBody);
-      primaryComboBox->Enable(mShowPrimaryBody);
-      secondaryStaticText->Enable(mShowSecondaryBody);
-      secondaryComboBox->Enable(mShowSecondaryBody);
-      formatStaticText->Enable(mShowEpoch);
-      formatComboBox->Enable(mShowEpoch);
-      epochStaticText->Enable(mShowEpoch);
-      epochTextCtrl->Enable(mShowEpoch);
-      xStaticText->Enable(mShowXyz);
-      xComboBox->Enable(mShowXyz);
-      yStaticText->Enable(mShowXyz);
-      yComboBox->Enable(mShowXyz);
-      zStaticText->Enable(mShowXyz);
-      zComboBox->Enable(mShowXyz);
-   }
-   else  // disable all of them
-   {
-      originStaticText->Enable(mEnableAll);
-      typeStaticText->Enable(mEnableAll);
-      primaryStaticText->Enable(mEnableAll);
-      formatStaticText->Enable(mEnableAll);
-      secondaryStaticText->Enable(mEnableAll);
-      epochStaticText->Enable(mEnableAll);
-      originComboBox->Enable(mEnableAll);
-      typeComboBox->Enable(mEnableAll);
-      primaryComboBox->Enable(mEnableAll);
-      formatComboBox->Enable(mEnableAll);
-      secondaryComboBox->Enable(mEnableAll);
-      epochTextCtrl->Enable(mEnableAll);
-      xStaticText->Enable(mEnableAll);
-      xComboBox->Enable(mEnableAll);
-      yStaticText->Enable(mEnableAll);
-      yComboBox->Enable(mEnableAll);
-      zStaticText->Enable(mEnableAll);
-      zComboBox->Enable(mEnableAll);
-   }
-}
