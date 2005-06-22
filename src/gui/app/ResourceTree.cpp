@@ -235,6 +235,15 @@ void ResourceTree::UpdateResource(bool resetCounter)
 
    DeleteChildren(mSpacecraftItem);
    DeleteChildren(mUniverseItem);
+   DeleteChildren(mFormationItem);
+   DeleteChildren(mPropagatorItem);
+   DeleteChildren(mBurnItem);
+   DeleteChildren(mSolverItem);
+   DeleteChildren(mSubscriberItem);
+   DeleteChildren(mVariableItem);
+   DeleteChildren(mFunctItem);
+   DeleteChildren(mCoordSysItem);
+
 
    //----- Hardware is child of spacecraft
    mHardwareItem =
@@ -250,18 +259,29 @@ void ResourceTree::UpdateResource(bool resetCounter)
       AppendItem(mUniverseItem, wxT("Special Points"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Special Points"),
                                       GmatTree::SPECIAL_POINTS_FOLDER));
-   
+
    SetItemImage(mSpecialPointsItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
-   
-   DeleteChildren(mFormationItem);
-   DeleteChildren(mPropagatorItem);
-   DeleteChildren(mBurnItem);
-   DeleteChildren(mSolverItem);
-   DeleteChildren(mSubscriberItem);
-   DeleteChildren(mVariableItem);
-   DeleteChildren(mFunctItem);
-   DeleteChildren(mCoordSysItem);
+
+   //--------------- Boundry Value Solvers is a child of solvers
+   mBoundarySolverItem =
+      AppendItem(mSolverItem, wxT("Boundary Value Solvers"), GmatTree::ICON_FOLDER, -1,
+                 new GmatTreeItemData(wxT("Boundary Value Solvers"),
+                                      GmatTree::BOUNDARY_SOLVERS_FOLDER));
+
+   SetItemImage(mBoundarySolverItem, GmatTree::ICON_OPENFOLDER,
+                wxTreeItemIcon_Expanded);
+
+
+   //--------------- Optimizers is a child of solvers
+   mOptimizerItem =
+      AppendItem(mSolverItem, wxT("Optimizers"), GmatTree::ICON_FOLDER, -1,
+                 new GmatTreeItemData(wxT("Optimizers"),
+                                      GmatTree::OPTIMIZERS_FOLDER));
+
+   SetItemImage(mOptimizerItem, GmatTree::ICON_OPENFOLDER,
+                wxTreeItemIcon_Expanded);
+
 
    AddDefaultBodies(mUniverseItem);
    AddDefaultSpecialPoints(mSpecialPointsItem);
@@ -724,16 +744,35 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId)
       Solver *solver = theGuiInterpreter->GetSolver(itemNames[i]);
       objName = wxString(itemNames[i].c_str());
       objTypeName = wxString(solver->GetTypeName().c_str());
-        
+
+      /// @todo:  need to create different types for the solvers and check strings
       if (objTypeName == "DifferentialCorrector")
       {
-         AppendItem(itemId, wxT(objName), GmatTree::ICON_DEFAULT, -1,
+         AppendItem(mBoundarySolverItem, wxT(objName), GmatTree::ICON_DEFAULT, -1,
                     new GmatTreeItemData(wxT(objName), GmatTree::DIFF_CORR));
+      }
+      else if (objTypeName == "Broyden")
+      {
+         AppendItem(mBoundarySolverItem, wxT(objName), GmatTree::ICON_DEFAULT, -1,
+                    new GmatTreeItemData(wxT(objName), GmatTree::BROYDEN));
+      }
+      else if (objTypeName == "Quasi-Newton")
+      {
+         AppendItem(mOptimizerItem, wxT(objName), GmatTree::ICON_DEFAULT, -1,
+                    new GmatTreeItemData(wxT(objName), GmatTree::QUASI_NEWTON));
+      }
+      else if (objTypeName == "Sqp")
+      {
+         AppendItem(mOptimizerItem, wxT(objName), GmatTree::ICON_DEFAULT, -1,
+                    new GmatTreeItemData(wxT(objName), GmatTree::SQP));
       }
    };
 
    if (size > 0)
-      Expand(itemId);
+   {
+      Expand(mBoundarySolverItem);
+      Expand(mOptimizerItem);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -1048,7 +1087,27 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    else if (strcmp(title, wxT("Propagators")) == 0)
       menu.Append(POPUP_ADD_PROPAGATOR, wxT("Add Propagator"));
    else if (strcmp(title, wxT("Solvers")) == 0)
-      menu.Append(POPUP_ADD_SOLVER, wxT("Add"), CreatePopupMenu(Gmat::SOLVER));
+      return;     //no menu
+//      menu.Append(POPUP_ADD_SOLVER, wxT("Add"), CreatePopupMenu(Gmat::SOLVER));
+   else if (strcmp(title, wxT("Boundary Value Solvers")) == 0)
+   {
+      wxMenu *bvsMenu = new wxMenu;
+      bvsMenu->Append(POPUP_ADD_DIFF_CORR, wxT("DifferentialCorrector"));
+      bvsMenu->Append(POPUP_ADD_BROYDEN, wxT("Broyden"));
+      bvsMenu->Enable(POPUP_ADD_BROYDEN, false);
+      
+      menu.Append(POPUP_ADD_SOLVER, wxT("Add"), bvsMenu);
+   }
+   else if (strcmp(title, wxT("Optimizers")) == 0)
+   {
+      wxMenu *oMenu = new wxMenu;
+      oMenu->Append(POPUP_ADD_QUASI_NEWTON, wxT("Quasi-Newton"));
+      oMenu->Append(POPUP_ADD_SQP, wxT("SQP (fmincon)"));
+      oMenu->Enable(POPUP_ADD_QUASI_NEWTON, false);
+      oMenu->Enable(POPUP_ADD_SQP, false);
+
+      menu.Append(POPUP_ADD_SOLVER, wxT("Add"), oMenu);
+   }
    else if (strcmp(title, wxT("Universe")) == 0)
       menu.Append(POPUP_ADD_BODY, wxT("Add Body"));
    else if (strcmp(title, wxT("Plots/Reports")) == 0)
@@ -1073,9 +1132,13 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 //   }
    else if (dataType == GmatTree::FUNCT_FOLDER)
    {
-      menu.Append(POPUP_ADD_MATLAB_FUNCT, wxT("Add MATLAB Function"));
-      menu.Append(POPUP_ADD_GMAT_FUNCT, wxT("Add GMAT Function"));
-      menu.Enable(POPUP_ADD_GMAT_FUNCT, FALSE);
+      wxMenu *fMenu = new wxMenu;
+      fMenu->Append(POPUP_ADD_MATLAB_FUNCT, wxT("MATLAB Function"));
+      fMenu->Append(POPUP_ADD_GMAT_FUNCT, wxT("GMAT Function"));
+
+      menu.Append(POPUP_ADD_SOLVER, wxT("Add"), fMenu);
+
+//      menu.Enable(POPUP_ADD_GMAT_FUNCT, FALSE);
 //#if defined __USE_MATLAB__
 //      menu.Enable(POPUP_ADD_MATLAB_FUNCT, TRUE);
 //#else
@@ -1111,6 +1174,10 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       spMenu->Append(POPUP_ADD_LIBRATION, wxT("Libration Point"));
       menu.Append(POPUP_ADD_SPECIAL_POINT, _T("Add"), spMenu);
    }
+   else if (strcmp(title, wxT("Interfaces")) == 0)
+      return;     //no menu
+   else if (strcmp(title, wxT("Ground Stations")) == 0)
+      return;     //no menu
    else
    {
       menu.Append(POPUP_OPEN, wxT("Open"));

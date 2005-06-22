@@ -112,6 +112,8 @@ namespace GmatTree
         PROPAGATORS_FOLDER,
         UNIVERSE_FOLDER,
         SOLVERS_FOLDER,
+        BOUNDARY_SOLVERS_FOLDER,
+        OPTIMIZERS_FOLDER,
         SUBSCRIBERS_FOLDER,
         INTERFACES_FOLDER,
         SUBSCRIPTS_FOLDER,
@@ -139,7 +141,12 @@ namespace GmatTree
         IMPULSIVE_BURN,
         FINITE_BURN,
         CELESTIAL_BODY,
+        
         DIFF_CORR,
+        BROYDEN,
+        QUASI_NEWTON,
+        SQP,
+        
         REPORT_FILE,
         XY_PLOT,
         OPENGL_PLOT,

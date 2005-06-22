@@ -56,6 +56,8 @@ private:
    wxTreeItemId mBurnItem;
    wxTreeItemId mSubscriberItem;
    wxTreeItemId mSolverItem;
+   wxTreeItemId mBoundarySolverItem;
+   wxTreeItemId mOptimizerItem;
    wxTreeItemId mVariableItem;
    wxTreeItemId mFunctItem;
    wxTreeItemId mCoordSysItem;
@@ -168,21 +170,20 @@ private:
       
       POPUP_ADD_SOLVER,
       POPUP_ADD_DIFF_CORR,
+      POPUP_ADD_BROYDEN,
+      POPUP_ADD_QUASI_NEWTON,
+      POPUP_ADD_SQP,
       
       POPUP_ADD_SUBSCRIBER,
       POPUP_ADD_REPORT_FILE,
       POPUP_ADD_XY_PLOT,
       POPUP_ADD_OPENGL_PLOT,
       POPUP_ADD_VARIABLE,
-      
-      POPUP_OPEN,
-      POPUP_CLOSE,
-      POPUP_RENAME,
-      POPUP_DELETE,
-      POPUP_CLONE,
-      
-      POPUP_ADD_MATLAB_FUNCT,
+
       POPUP_ADD_COORD_SYS,
+
+      POPUP_ADD_FUNCTION,
+      POPUP_ADD_MATLAB_FUNCT,
       POPUP_ADD_GMAT_FUNCT,
 
       POPUP_ADD_SCRIPT,
@@ -193,6 +194,12 @@ private:
       POPUP_ADD_SPECIAL_POINT,
       POPUP_ADD_BARYCENTER,
       POPUP_ADD_LIBRATION,
+
+      POPUP_OPEN,
+      POPUP_CLOSE,
+      POPUP_RENAME,
+      POPUP_DELETE,
+      POPUP_CLONE,
    };
 };
 
