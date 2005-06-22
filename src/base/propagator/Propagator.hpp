@@ -97,8 +97,8 @@ public:
     virtual void SetPhysicalModel(PhysicalModel *pPhysicalModel);
     virtual bool Step(Real dt);
 
-    virtual void Update(void);
-    const Real* AccessOutState(void);
+    virtual void Update();
+    const Real* AccessOutState();
 
     virtual Integer GetPropagatorOrder(void) const;    
 
@@ -162,6 +162,8 @@ protected:
         
     /// Size of the default time step
     Real stepSize;
+    /// Buffer for the stepsize.
+    Real stepSizeBuffer;
     /// Flag used to determine if the propagator has been initialized
     bool initialized;
     /// Pointer to the input state vector

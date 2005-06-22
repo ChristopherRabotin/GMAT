@@ -74,6 +74,9 @@
 #include "PhysicalModel.hpp"
 #include "MessageInterface.hpp"
 
+
+//#define DEBUG_PROP_RERUN
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -109,6 +112,7 @@ Propagator::Propagator(const std::string &typeStr,
                        const std::string &nomme)
     : GmatBase(Gmat::PROPAGATOR, typeStr, nomme),
       stepSize            (60.0),
+      stepSizeBuffer      (60.0),
       initialized         (false),
       inState             (NULL),
       outState            (NULL),
@@ -122,14 +126,14 @@ Propagator::Propagator(const std::string &typeStr,
 }
 
 //------------------------------------------------------------------------------
-// Propagator::~Propagator(void)
+// Propagator::~Propagator()
 //------------------------------------------------------------------------------
 /**
  * Base class destructor
  * The base class destructor does not perform any actions
  */
 //------------------------------------------------------------------------------
-Propagator::~Propagator(void)
+Propagator::~Propagator()
 {
 }
 
@@ -143,6 +147,7 @@ Propagator::~Propagator(void)
 Propagator::Propagator(const Propagator& p)
     : GmatBase            (p),
       stepSize            (p.stepSize),
+      stepSizeBuffer      (p.stepSizeBuffer),
       initialized         (false),
       inState             (NULL),
       outState            (NULL),
@@ -165,8 +170,9 @@ Propagator& Propagator::operator=(const Propagator& p)
     if (this == &p)
         return *this;
 
-    stepSize = p.stepSize;
-    dimension = p.dimension;
+    stepSize       = p.stepSize;
+    stepSizeBuffer = p.stepSizeBuffer;
+    dimension      = p.dimension;
 
     inState = outState = NULL;
     physicalModel = NULL;
@@ -189,15 +195,6 @@ std::string Propagator::GetParameterText(const Integer id) const
         return PARAMETER_TEXT[id - GmatBaseParamCount];
     else
         return GmatBase::GetParameterText(id);
-    
-    //loj: 3/18/04
-//      switch (id)
-//      {
-//          case STEP_SIZE:
-//              return Propagator::PARAMETER_TEXT[id];
-//          default:
-//              return GmatBase::GetParameterText(id);
-//      }
 }
 
 //------------------------------------------------------------------------------
@@ -231,15 +228,6 @@ Gmat::ParameterType Propagator::GetParameterType(const Integer id) const
         return PARAMETER_TYPE[id - GmatBaseParamCount];
     else
         return GmatBase::GetParameterType(id);
-
-    //loj: 3/18/04
-//      switch (id)
-//      {
-//          case STEP_SIZE:
-//              return Propagator::PARAMETER_TYPE[id];
-//          default:
-//              return GmatBase::GetParameterType(id);
-//      }
 }
 
 //------------------------------------------------------------------------------
@@ -255,15 +243,6 @@ std::string Propagator::GetParameterTypeString(const Integer id) const
         return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
     else
         return GmatBase::GetParameterTypeString(id);
-
-    //loj: 3/18/04
-//      switch (id)
-//      {
-//          case STEP_SIZE:
-//              return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
-//          default:
-//              return GmatBase::GetParameterTypeString(id);
-//      }
 }
 
 //------------------------------------------------------------------------------
@@ -276,7 +255,7 @@ std::string Propagator::GetParameterTypeString(const Integer id) const
 Real Propagator::GetRealParameter(const Integer id) const
 {
     if (id == STEP_SIZE)
-        return stepSize;
+        return stepSizeBuffer;
         
     return GmatBase::GetRealParameter(id);
 }
@@ -302,7 +281,7 @@ Real Propagator::SetRealParameter(const Integer id, const Real value)
 {
     if (id == STEP_SIZE)
     {
-        stepSize = value;
+        stepSizeBuffer = value;
         return stepSize;
     }
     return GmatBase::SetRealParameter(id, value);
@@ -317,7 +296,7 @@ Real Propagator::SetRealParameter(const std::string &label, const Real value)
 }
 
 //------------------------------------------------------------------------------
-// bool Propagator::Initialize(void)
+// bool Propagator::Initialize()
 //------------------------------------------------------------------------------
 /**
  * Initialize the propagation system
@@ -328,7 +307,7 @@ Real Propagator::SetRealParameter(const std::string &label, const Real value)
  * method in your derived classes.
  */
 //------------------------------------------------------------------------------
-bool Propagator::Initialize(void)
+bool Propagator::Initialize()
 {
     if (physicalModel != NULL) 
     {
@@ -341,6 +320,8 @@ bool Propagator::Initialize(void)
 
         inState  = physicalModel->GetState();
         outState = physicalModel->GetState();
+        
+        stepSize = stepSizeBuffer;
     }
     else
        throw PropagatorException("Propagator::Initialize -- Force model is not defined");
@@ -366,36 +347,42 @@ void Propagator::SetPhysicalModel(PhysicalModel *pPhysicalModel)
 }
 
 //------------------------------------------------------------------------------
-// void Propagator::Update(void)
+// void Propagator::Update()
 //------------------------------------------------------------------------------
 /**
  * Envoked to force a propagator reset if the PhysicalModel changes
  */
 //------------------------------------------------------------------------------
-void Propagator::Update(void)
+void Propagator::Update()
 {
+   #ifdef DEBUG_PROP_RERUN
+      static int count = 0;
+      MessageInterface::ShowMessage(
+         "Propagator::Update() called (iteration %d)\n", ++count);
+   #endif
+   stepSize = stepSizeBuffer;
 }
 
 //------------------------------------------------------------------------------
-// const Real * Propagator::AccessOutState(void)
+// const Real * Propagator::AccessOutState()
 //------------------------------------------------------------------------------
 /**
  * Provide a look at the output state
  */
 //------------------------------------------------------------------------------
-const Real * Propagator::AccessOutState(void)
+const Real * Propagator::AccessOutState()
 {
     return outState;
 }
 
 //------------------------------------------------------------------------------
-// Integer Propagator::GetPropagatorOrder(void) const
+// Integer Propagator::GetPropagatorOrder() const
 //------------------------------------------------------------------------------
 /**
  * Returns derivative order needed by the propagator; 0 for analytic
  */
 //------------------------------------------------------------------------------
-Integer Propagator::GetPropagatorOrder(void) const
+Integer Propagator::GetPropagatorOrder() const
 {
     return 0;
 }

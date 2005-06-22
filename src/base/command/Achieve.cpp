@@ -744,7 +744,7 @@ bool Achieve::Initialize()
 
 
 //------------------------------------------------------------------------------
-//  bool Execute(void)
+//  bool Execute()
 //------------------------------------------------------------------------------
 /**
  * Achieve the variables defined for this targeting loop.
@@ -775,14 +775,28 @@ bool Achieve::Execute()
    // Evaluate the floating target (if there is one) and set it on the targeter
    if (goalTarget != NULL) {
       val = goalTarget->EvaluateReal();
+      #ifdef DEBUG_ACHIEVE_EXEC
+         MessageInterface::ShowMessage("Floating target: val = %lf\n", val);
+      #endif
       targeter->UpdateSolverGoal(goalId, val);
    }
 
    // Evaluate goal and pass it to the targeter
    if (goalParm != NULL)
+   {
       val = goalParm->EvaluateReal();
+      #ifdef DEBUG_ACHIEVE_EXEC
+         MessageInterface::ShowMessage("Parameter target: %s val = %lf\n",
+            goalParm->GetTypeName().c_str(), val);
+      #endif
+   }
    else 
+   {
       val = goalObject->GetRealParameter(parmId);
+      #ifdef DEBUG_ACHIEVE_EXEC
+         MessageInterface::ShowMessage("Object target: val = %lf\n", val);
+      #endif
+   }
 
    targeter->SetResultValue(goalId, val);
    return retval;

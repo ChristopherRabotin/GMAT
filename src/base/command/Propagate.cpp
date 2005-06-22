@@ -1796,6 +1796,7 @@ bool Propagate::Execute()
             fm[n]->UpdateInitialData();
          
             p[n]->Initialize();
+            p[n]->Update();
             state = fm[n]->GetState();
             dim += fm[n]->GetDimension();
          }   
