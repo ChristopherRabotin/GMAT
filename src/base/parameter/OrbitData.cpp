@@ -29,6 +29,9 @@
 #include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
 
+#define USE_COORDUTIL_FOR_AOP 1
+#define USE_COORDUTIL_FOR_TA  1
+
 //#define DEBUG_ORBITDATA_INIT 1
 //#define DEBUG_ORBITDATA_CONVERT 1
 //#define DEBUG_ORBITDATA_RUN 1
@@ -173,7 +176,7 @@ Rvector6 OrbitData::GetCartState()
             ("OrbitData::GetCartState() Before convert: mCartEpoch=%f\nstate = %s\n", 
              mCartEpoch, mCartState.ToString().c_str());
          #endif
-
+         
          try
          {
             mCoordConverter.Convert(A1Mjd(mCartEpoch), mCartState, mInternalCoordSystem,
@@ -182,7 +185,7 @@ Rvector6 OrbitData::GetCartState()
                MessageInterface::ShowMessage
                   ("OrbitData::GetCartState() --After convert: mCartEpoch=%f\n"
                    "state = %s\n", mCartEpoch, mCartState.ToString().c_str());
-             #endif
+            #endif
          }
          catch (BaseException &e)
          {
@@ -197,9 +200,9 @@ Rvector6 OrbitData::GetCartState()
       PropState ps = mSpacecraft->GetState(); // should be keplerian state
       Real kepl[6];
       memcpy(kepl, ps.GetState(), 6*sizeof(Real));
-
+      
       Rvector6 keplState = Rvector6(kepl);
-
+      
       #if DEBUG_ORBITDATA_RUN
       MessageInterface::ShowMessage("OrbitData::GetCartState() keplState=%s\n",
                                     keplState.ToString().c_str());
@@ -225,10 +228,10 @@ Rvector6 OrbitData::GetKepState()
 {
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
-      
+   
    Integer id = mSpacecraft->GetParameterID("StateType");
    std::string elemType = mSpacecraft->GetStringParameter(id);
-      
+   
    #ifdef DEBUG_ORBITDATA_RUN
    PropState ps = mSpacecraft->GetState(); // should be cartesian state
    std::cout << "OrbitData::GetKepState for spacecraft " << mSpacecraft->GetName() <<"\n";
@@ -238,7 +241,7 @@ Rvector6 OrbitData::GetKepState()
       std::cout << "  el[" << i << "] = " << ps[i] << "\n";
    }            
    #endif
-
+   
    if (elemType == "Keplerian")
    {
       PropState ps = mSpacecraft->GetState(); // should be keplerian state
@@ -468,27 +471,195 @@ Real OrbitData::GetCartReal(const std::string &str)
 //------------------------------------------------------------------------------
 Real OrbitData::GetKepReal(const std::string &str)
 {
-   Rvector6 state = GetKepState();
-
+   Rvector6 state = GetCartState();
+   
+   Rvector3 pos(state[0], state[1], state[2]);
+   Rvector3 vel(state[3], state[4], state[5]);
+   
+   Real rMag = pos.GetMagnitude();
+   
+   if (rMag < ORBIT_ZERO_TOL)
+      throw ParameterException
+         ("OrbitData::GetKepReal(" + str + ") position vector is zero. pos: " +
+          pos.ToString() + " vel: " + vel.ToString());
+      
    if (str == "KepSMA")
-      return mKepState[SMA];
+   {
+      return GetSemiMajorAxis(pos, vel);
+   }
    else if (str == "KepEcc")
-      return mKepState[ECC];
+   {
+      return GetEccentricity(pos, vel);
+   }
    else if (str == "KepInc")
-      return mKepState[INC];
-   else if (str == "KepRAAN")
-      return mKepState[RAAN];
-   else if (str == "KepRADN")
-      return AngleUtil::PutAngleInDegRange(mKepState[RAAN] + 180, 0.0, 360.0);
-   else if (str == "KepAOP")
-      return mKepState[AOP];
+   {
+      Rvector6 hVec = GetAngularMomentum(pos, vel);
+      Real incDeg = ACos(hVec[2]) * DEG_PER_RAD;
+      return incDeg;
+   }
    else if (str == "KepTA")
+   {
+      #if USE_COORDUTIL_FOR_TA
+      
+      Rvector6 state = GetKepState();
       return mKepState[TA];
+      
+      #else
+      
+      // I don't know how much efficient it will be just computing TA here
+      // than computing keplerian state and return TA.
+      
+      // find cos ta and sind ta
+      Real a = GetSemiMajorAxis(pos, vel);
+      Rvector6 hVec = GetAngularMomentum(pos, vel);
+      Real hMag = hVec[3];
+      Real orbParam = hVec[5];
+      Real e = Sqrt(Abs(1.0 - orbParam/a));
+      Real inc = ACos(hVec[2]);
+      Real cosTa = 0.0;
+      Real sinTa = 0.0;
+      
+      if (e >= ORBIT_TOL)
+      {
+         // for elliptic orbit
+         Real er = e * rMag;
+         cosTa = (orbParam - rMag) / er;
+         //loj: 6/22/05 Spec 2.21 does not give correct results
+         //sinTa = (pos*vel) / (mGravConst * er); // GMAT Spec 2.11
+         sinTa = (pos*vel)*hMag / (mGravConst * er); // Swingby CoordUtil
+      }
+      else
+      {
+         // for circular orbit
+         Real hzx = hVec[2] * hVec[0];
+         Real hzy = hVec[2] * hVec[1];
+         Real hxySq = hVec[0]*hVec[0] + hVec[1]*hVec[1];
+         
+         if (inc >= ORBIT_TOL)
+         {
+            // for circular inclined case
+            Rvector3 nVec(-hzx, -hzy, hxySq);
+            Real nMag = nVec.GetMagnitude();
+            cosTa = (-hzx*pos[0] - hzy*pos[1]) / (rMag * hxySq);
+            sinTa = (-hzx*pos[0] - hzy*pos[1] + hxySq*pos[2]) / (rMag*nMag);
+         }
+         else
+         {
+            // for circular equatorial case
+            cosTa = pos[0] / rMag;
+            sinTa = pos[1] / rMag;
+         }
+      }
+      
+      Real taDeg = ATan(sinTa, cosTa) * DEG_PER_RAD;
+      
+      if (taDeg < 0.0)
+         taDeg = taDeg + 360.0;
+      
+      return taDeg;
+      
+      #endif // USE_COORDUTIL_FOR_TA
+   }
+   else if (str == "KepRAAN")
+   {
+      return GetRAofAN(pos, vel);
+   }
+   else if (str == "KepRADN")
+   {
+      Real raanDeg = GetRAofAN(pos, vel);
+      return AngleUtil::PutAngleInDegRange(raanDeg + 180, 0.0, 360.0);
+   }
+   else if (str == "KepAOP")
+   {
+      #if USE_COORDUTIL_FOR_AOP
+      
+      Rvector6 state = GetKepState();
+      return mKepState[AOP];
+      
+      #else
+      
+      // I don't know how much efficient it will be just computing AOP here
+      // than computing keplerian state and return AOP.
+      
+      Real a = GetSemiMajorAxis(pos, vel);
+      Rvector6 hVec = GetAngularMomentum(pos, vel);
+      Real vMagSq = hVec[4];
+      Real orbParam = hVec[5];
+      Real e = Sqrt(Abs(1.0 - orbParam/a));
+      Real inc = ACos(hVec[2]);
+      Real aopDeg;
+      
+      if (e < ORBIT_TOL)
+      {
+         aopDeg = 0.0;
+      }
+      else
+      {
+         Real hzx = hVec[2] * hVec[0];
+         Real hzy = hVec[2] * hVec[1];
+         Real hxySq = hVec[0]*hVec[0] + hVec[1]*hVec[1];
+         Real hxySqrt = Sqrt(hxySq);
+         Rvector3 nVec(-hzx, -hzy, hxySq);
+         Rvector3 xVec = (vMagSq - mGravConst/rMag)*pos - (pos*vel)*vel;
+         Real hyxX = -hVec[1]*xVec[0] + hVec[0]*xVec[1]; //Swingby CoordUtil
+         Real nMag = nVec.GetMagnitude();
+         Real xMag = xVec.GetMagnitude();
+         
+         if (Abs(inc) >= ORBIT_TOL)
+         {
+            //loj: 6/22/05 Spec 2.23 does not give correct results
+            //aopDeg = ACos((nVec*xVec) / (nMag*xMag)) * DEG_PER_RAD; //Spec 2.23)
+            aopDeg = ACos(hyxX / (hxySqrt*xMag)) * DEG_PER_RAD; //Swingby CoordUtil
+            
+            if (xVec[2] < 0.0)
+               aopDeg = -aopDeg;
+         }
+         else
+         {
+            xVec.Normalize();
+            aopDeg = ATan(xVec[1], xVec[0]) * DEG_PER_RAD;
+         }
+      }
+      
+      if (aopDeg < 0.0)
+         aopDeg = aopDeg + 360.0;
+      
+      return aopDeg;
+      
+      #endif
+   }
    else if (str == "KepMA")
+   {
+      Rvector6 state = GetKepState();
       return mMA;
+   }
    else
       throw ParameterException("OrbitData::GetCartReal() Unknown parameter name: " +
                                str);
+   
+   
+//    //=== old ==============================================
+//    Rvector6 state = GetKepState();
+
+//    if (str == "KepSMA")
+//       return mKepState[SMA];
+//    else if (str == "KepEcc")
+//       return mKepState[ECC];
+//    else if (str == "KepInc")
+//       return mKepState[INC];
+//    else if (str == "KepRAAN")
+//       return mKepState[RAAN];
+//    else if (str == "KepRADN")
+//       return AngleUtil::PutAngleInDegRange(mKepState[RAAN] + 180, 0.0, 360.0);
+//    else if (str == "KepAOP")
+//       return mKepState[AOP];
+//    else if (str == "KepTA")
+//       return mKepState[TA];
+//    else if (str == "KepMA")
+//       return mMA;
+//    else
+//       throw ParameterException("OrbitData::GetCartReal() Unknown parameter name: " +
+//                                str);
 }
 
 
@@ -501,13 +672,15 @@ Real OrbitData::GetKepReal(const std::string &str)
 //------------------------------------------------------------------------------
 Real OrbitData::GetOtherKepReal(const std::string &str)
 {
-
-   //loj: 4/6/05 for efficiency, just call GetKepState()
-   //Real sma = GetKepReal("KepSMA");
-   //Real ecc = GetKepReal("KepEcc");
-   Rvector6 state = GetKepState();
-   Real sma = state[SMA];
-   Real ecc = state[ECC];
+//    Rvector6 state = GetKepState();
+//    Real sma = state[SMA];
+//    Real ecc = state[ECC];
+   Rvector6 state = GetCartState();
+   Rvector3 pos(state[0], state[1], state[2]);
+   Rvector3 vel(state[3], state[4], state[5]);
+   
+   Real sma = GetSemiMajorAxis(pos, vel);   
+   Real ecc = GetEccentricity(pos, vel);
    
    Real grav = mGravConst;
    Real E, R;
@@ -667,7 +840,7 @@ Real OrbitData::GetSphAzFpaReal(const std::string &str)
 // Real GetAngularReal(const std::string &str)
 //------------------------------------------------------------------------------
 /**
- * Retrives angular related element.
+ * Computes angular related parameter.
  */
 //------------------------------------------------------------------------------
 Real OrbitData::GetAngularReal(const std::string &str)
@@ -744,7 +917,7 @@ Real OrbitData::GetAngularReal(const std::string &str)
 // Real GetOtherAngleReal(const std::string &str)
 //------------------------------------------------------------------------------
 /**
- * Computes other angle related data.
+ * Computes other angle related parameters.
  */
 //------------------------------------------------------------------------------
 Real OrbitData::GetOtherAngleReal(const std::string &str)
@@ -755,7 +928,7 @@ Real OrbitData::GetOtherAngleReal(const std::string &str)
    {
       if (mOrigin->GetName() != mScOrigin->GetName())
          state = GetRelativeCartState(mOrigin);
-
+      
       // compute orbit normal unit vector
       Rvector3 pos = Rvector3(state[0], state[1], state[2]);
       Rvector3 vel = Rvector3(state[3], state[4], state[5]);
@@ -819,6 +992,197 @@ bool OrbitData::ValidateRefObjects(GmatBase *param)
 // protected methods
 //---------------------------------
 
+//------------------------------------------------------------------------------
+// Rvector6 GetAngularMomentum(const Rvector3 &pos, const Rvector3 &vel)
+//------------------------------------------------------------------------------
+/**
+ * Computes angular momentum, its magnitude, and other related data.
+ *
+ * @param <pos> input position vector
+ * @param <vel> input velocity vector
+ *
+ * @return [0] Angular momentum x unit vector
+ *         [1] Angular momentum y unit vector
+ *         [2] Angular momentum z unit vector
+ *         [3] Angular momentum magnitude
+ *         [4] velocity magnitude squared
+ *         [5] Orbit parameter
+ */
+//------------------------------------------------------------------------------
+Rvector6 OrbitData::GetAngularMomentum(const Rvector3 &pos, const Rvector3 &vel)
+{
+   Rvector3 r = pos;
+   Rvector3 v = vel;
+   
+   Real vMag = v.GetMagnitude();
+   Real vMagSq = vMag*vMag;
+   
+   Rvector3 hVec = Cross(pos, vel);
+   Real hMag = Sqrt(hVec * hVec);
+   Real orbParam = (hMag*hMag) / mGravConst;
+   hVec.Normalize();
+   
+   Rvector6 h(hVec[0], hVec[1], hVec[2], hMag, vMagSq, orbParam);
+   return h;
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetSemiMajorAxis(const Rvector3 &pos, const Rvector3 &vel)
+//------------------------------------------------------------------------------
+Real OrbitData::GetSemiMajorAxis(const Rvector3 &pos, const Rvector3 &vel)
+{   
+   Rvector3 r = pos;
+   Rvector3 v = vel;
+   
+   Real rMag = r.GetMagnitude();
+   Real vMag = v.GetMagnitude();
+   Real vMagSq = vMag*vMag;
+   Real denom = (2.0 - (rMag*vMagSq)/mGravConst);
+
+   if (Abs(denom) < ORBIT_ZERO_TOL)
+      throw ParameterException
+         ("OrbitData::GetSemiMajorAxis() divide-by-zero occurred. pos: " +
+          r.ToString() + " vel: " + v.ToString());
+   
+   Real a = rMag / denom;
+   return a;
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetEccentricity(const Rvector3 &pos, const Rvector3 &vel)
+//------------------------------------------------------------------------------
+Real OrbitData::GetEccentricity(const Rvector3 &pos, const Rvector3 &vel)
+{
+   Real a = GetSemiMajorAxis(pos, vel);
+   Rvector6 hVec = GetAngularMomentum(pos, vel);
+   Real orbParam = hVec[5];
+   Real e = Sqrt(Abs(1.0 - orbParam/a));
+   return e;
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetRAofAN(const Rvector3 &pos, const Rvector3 &vel)
+//------------------------------------------------------------------------------
+Real OrbitData::GetRAofAN(const Rvector3 &pos, const Rvector3 &vel)
+{
+   Rvector6 hVec = GetAngularMomentum(pos, vel);
+   Real inc = ACos(hVec[2]);
+   Real raanDeg;
+      
+   if (Abs(inc) < ORBIT_TOL)
+      raanDeg = 0.0;
+   else
+      raanDeg = ATan(hVec[0], -hVec[1]) * DEG_PER_RAD;
+
+   if (raanDeg < 0.0)
+      raanDeg = raanDeg + 360.0;
+      
+   return raanDeg;
+}
+
+
+//------------------------------------------------------------------------------
+// SolarSystem* GetSolarSystem()
+//------------------------------------------------------------------------------
+SolarSystem* OrbitData::GetSolarSystem()
+{
+   return mSolarSystem;
+}
+
+
+//------------------------------------------------------------------------------
+// CoordinateSystem* GetInternalCoordSys()
+//------------------------------------------------------------------------------
+CoordinateSystem* OrbitData::GetInternalCoordSys()
+{
+   return mInternalCoordSystem;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetInternalCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+/*
+ * @param <cs> internal coordinate system what parameter data is representing.
+ */
+//------------------------------------------------------------------------------ 
+void OrbitData::SetInternalCoordSys(CoordinateSystem *cs)
+{
+   mInternalCoordSystem = cs;
+}
+
+
+//loj: 4/7/05 Added
+//------------------------------------------------------------------------------
+// Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
+//------------------------------------------------------------------------------
+/**
+ * Computes spacecraft cartesian state from the given origin.
+ *
+ * @param <origin> origin pointer
+ *
+ * @return spacecraft state from the given origin.
+ */
+//------------------------------------------------------------------------------
+Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
+{
+   // get spacecraft state
+   Rvector6 scState = GetCartState();
+
+   // get origin state
+   Rvector6 originState = origin->GetMJ2000State(mCartEpoch);
+
+   #if DEBUG_ORBITDATA_RUN
+      MessageInterface::ShowMessage
+         ("OrbitData::GetRelativeCartState() origin=%s, state=%s\n",
+          origin->GetName().c_str(), originState.ToString().c_str());
+   #endif
+      
+   // return relative state
+   return scState - originState;
+}
+
+
+//------------------------------------------------------------------------------
+// Real OrbitData::GetPositionMagnitude(SpacePoint *origin)
+//------------------------------------------------------------------------------
+/**
+ * Computes position magnitude from the given origin.
+ *
+ * @param <origin> origin pointer
+ *
+ * @return position magnitude from the given origin.
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetPositionMagnitude(SpacePoint *origin)
+{
+   // get spacecraft position
+   Rvector6 scState = GetCartState();
+   Rvector3 scPos = Rvector3(scState[0], scState[1], scState[2]);
+
+   // get origin position
+   //Rvector6 originState = origin->GetState(mCartEpoch);
+   Rvector6 originState = origin->GetMJ2000State(mCartEpoch);
+   Rvector3 originPos = Rvector3(originState[0], originState[1], originState[2]);
+
+   // get relative position magnitude
+   Rvector3 relPos = scPos - originPos;
+   
+   #if DEBUG_ORBITDATA_RUN
+      MessageInterface::ShowMessage
+         ("OrbitData::GetPositionMagnitude() scPos=%s, originPos=%s, relPos=%s\n",
+          scPos.ToString().c_str(), originPos.ToString().c_str(),
+          relPos.ToString().c_str());
+   #endif
+   
+   return relPos.GetMagnitude();
+}
+
+
+// The inherited methods from RefData
 //------------------------------------------------------------------------------
 // virtual void InitializeRefObjects()
 //------------------------------------------------------------------------------
@@ -945,99 +1309,3 @@ bool OrbitData::IsValidObjectType(Gmat::ObjectType type)
 }
 
 
-//------------------------------------------------------------------------------
-// SolarSystem* GetSolarSystem()
-//------------------------------------------------------------------------------
-SolarSystem* OrbitData::GetSolarSystem()
-{
-   return mSolarSystem;
-}
-
-
-//------------------------------------------------------------------------------
-// CoordinateSystem* GetInternalCoordSys()
-//------------------------------------------------------------------------------
-CoordinateSystem* OrbitData::GetInternalCoordSys()
-{
-   return mInternalCoordSystem;
-}
-
-
-//------------------------------------------------------------------------------
-// void SetInternalCoordSystem(CoordinateSystem *cs)
-//------------------------------------------------------------------------------
-/*
- * @param <cs> internal coordinate system what parameter data is representing.
- */
-//------------------------------------------------------------------------------ 
-void OrbitData::SetInternalCoordSys(CoordinateSystem *cs)
-{
-   mInternalCoordSystem = cs;
-}
-
-
-//loj: 4/7/05 Added
-//------------------------------------------------------------------------------
-// Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
-//------------------------------------------------------------------------------
-/**
- * Computes spacecraft cartesian state from the given origin.
- *
- * @param <origin> origin pointer
- *
- * @return spacecraft state from the given origin.
- */
-//------------------------------------------------------------------------------
-Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
-{
-   // get spacecraft state
-   Rvector6 scState = GetCartState();
-
-   // get origin state
-   Rvector6 originState = origin->GetMJ2000State(mCartEpoch);
-
-   #if DEBUG_ORBITDATA_RUN
-      MessageInterface::ShowMessage
-         ("OrbitData::GetRelativeCartState() origin=%s, state=%s\n",
-          origin->GetName().c_str(), originState.ToString().c_str());
-   #endif
-      
-   // return relative state
-   return scState - originState;
-}
-
-
-//------------------------------------------------------------------------------
-// Real OrbitData::GetPositionMagnitude(SpacePoint *origin)
-//------------------------------------------------------------------------------
-/**
- * Computes position magnitude from the given origin.
- *
- * @param <origin> origin pointer
- *
- * @return position magnitude from the given origin.
- */
-//------------------------------------------------------------------------------
-Real OrbitData::GetPositionMagnitude(SpacePoint *origin)
-{
-   // get spacecraft position
-   Rvector6 scState = GetCartState();
-   Rvector3 scPos = Rvector3(scState[0], scState[1], scState[2]);
-
-   // get origin position
-   //Rvector6 originState = origin->GetState(mCartEpoch);
-   Rvector6 originState = origin->GetMJ2000State(mCartEpoch);
-   Rvector3 originPos = Rvector3(originState[0], originState[1], originState[2]);
-
-   // get relative position magnitude
-   Rvector3 relPos = scPos - originPos;
-   
-   #if DEBUG_ORBITDATA_RUN
-      MessageInterface::ShowMessage
-         ("OrbitData::GetPositionMagnitude() scPos=%s, originPos=%s, relPos=%s\n",
-          scPos.ToString().c_str(), originPos.ToString().c_str(),
-          relPos.ToString().c_str());
-   #endif
-   
-   return relPos.GetMagnitude();
-}

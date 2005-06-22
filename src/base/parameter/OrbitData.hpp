@@ -50,26 +50,32 @@ public:
    Real GetSphAzFpaReal(const std::string &str);
    Real GetAngularReal(const std::string &str);
    Real GetOtherAngleReal(const std::string &str);
-   
+
    // The inherited methods from RefData
    virtual bool ValidateRefObjects(GmatBase *param);
    virtual const std::string* GetValidObjectList() const;
    
    const static Real ORBIT_REAL_UNDEFINED = -9876543210.1234;
-   const static Real ORBIT_TOL = 1.0e-10;
-
+   const static Real ORBIT_TOL = 1.0e-6; //1.0e-10;
+   const static Real ORBIT_ZERO_TOL = 1.0e-30;
+   
 protected:
 
-   // The inherited methods from RefData
-   virtual void InitializeRefObjects();
-   virtual bool IsValidObjectType(Gmat::ObjectType type);
-   
    SolarSystem* GetSolarSystem();
    CoordinateSystem* GetInternalCoordSys();
+   
+   Rvector6 GetAngularMomentum(const Rvector3 &pos, const Rvector3 &vel);
+   Real GetSemiMajorAxis(const Rvector3 &pos, const Rvector3 &vel);
+   Real GetEccentricity(const Rvector3 &pos, const Rvector3 &vel);
+   Real GetRAofAN(const Rvector3 &pos, const Rvector3 &vel);
    
    void SetInternalCoordSys(CoordinateSystem *cs);
    Rvector6 GetRelativeCartState(SpacePoint *origin);
    Real GetPositionMagnitude(SpacePoint *origin);
+   
+   // The inherited methods from RefData
+   virtual void InitializeRefObjects();
+   virtual bool IsValidObjectType(Gmat::ObjectType type);
    
    Rvector6 mCartState;
    Rvector6 mKepState;
