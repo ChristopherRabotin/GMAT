@@ -1029,3 +1029,109 @@ bool PhysicalModel::SetStringParameter(const std::string &label,
 {
    return SetStringParameter(GetParameterID(label), value);
 }
+
+//------------------------------------------------------------------------------
+//  GmatBase* GetRefObject(const Gmat::ObjectType type,
+//                         const std::string &name)
+//------------------------------------------------------------------------------
+/**
+* This method returns a reference object from the ObjectReferencedAxes class.
+ *
+ * @param type  type of the reference object requested
+ * @param name  name of the reference object requested
+ *
+ * @return pointer to the reference object requested.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* PhysicalModel::GetRefObject(const Gmat::ObjectType type,
+                                      const std::string &name)
+{
+   switch (type)
+   {
+      case Gmat::SPACE_POINT:
+      case Gmat::CELESTIAL_BODY:
+         if ((body) && (name == bodyName))     return body;
+         break;
+      default:
+            break;
+   }
+   
+   // Not handled here -- invoke the next higher GetRefObject call
+   return GmatBase::GetRefObject(type, name);
+}
+
+
+//------------------------------------------------------------------------------
+//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Returns the names of the reference object. (Derived classes should implement
+ * this as needed.)
+ *
+ * @param <type> reference object type.  Gmat::UnknownObject returns all of the
+ *               ref objects.
+ *
+ * @return The names of the reference object.
+ */
+//------------------------------------------------------------------------------
+const StringArray& PhysicalModel::GetRefObjectNameArray(
+                                  const Gmat::ObjectType type)
+{
+   if (type == Gmat::UNKNOWN_OBJECT)
+   {
+      static StringArray refs;
+      
+         refs.push_back(bodyName);
+      
+         #ifdef DEBUG_REFERENCE_SETTING
+            MessageInterface::ShowMessage("+++ReferenceObjects:\n");
+            for (StringArray::iterator i = refs.begin(); i != refs.end(); ++i)
+               MessageInterface::ShowMessage("   %s\n", i->c_str());
+         #endif
+      
+      return refs;
+   }
+   
+   // Not handled here -- invoke the next higher GetRefObject call
+   return GmatBase::GetRefObjectNameArray(type);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                    const std::string &name)
+//------------------------------------------------------------------------------
+/**
+* This method sets a reference object for the ObjectReferencedAxes class.
+ *
+ * @param obj   pointer to the reference object
+ * @param type  type of the reference object
+ * @param name  name of the reference object
+ *
+ * @return true if successful; otherwise, false.
+ *
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::SetRefObject(GmatBase *obj,
+                                 const Gmat::ObjectType type,
+                                 const std::string &name)
+{
+   if (obj->IsOfType("CelestialBody"))
+   {
+      if (name == bodyName)
+      {
+         #ifdef DEBUG_REFERENCE_SETTING
+            MessageInterface::ShowMessage("Setting %s as primary for %s\n",
+                                          name.c_str(), instanceName.c_str());
+         #endif
+         body = (CelestialBody*) obj;
+      }
+      return true;
+   }
+   
+   // Not handled here -- invoke the next higher SetRefObject call
+   return GmatBase::SetRefObject(obj, type, name);
+   }
+
+

@@ -181,6 +181,11 @@ public:
    virtual std::string GetStringParameter(const std::string &label) const;
    virtual bool        SetStringParameter(const std::string &label,
                                           const std::string &value); 
+   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
+                                    const std::string &name);
+   const StringArray&  GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                    const std::string &name = "");
 protected:
       
    /// pointer to the body for which this force is computed
