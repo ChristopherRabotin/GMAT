@@ -11,6 +11,9 @@ OBJECTS = Parameter.o \
           ParameterDatabase.o \
           ParameterInfo.o \
           AngularParameters.o \
+          BplaneData.o \
+          BplaneParameters.o \
+          BplaneReal.o \
           CartesianParameters.o \
           EnvData.o \
           EnvParameters.o \

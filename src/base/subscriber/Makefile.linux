@@ -31,7 +31,6 @@ OBJECTS = Subscriber.o \
         ReportFile.o \
         MessageWindow.o \
         OpenGlPlot.o \
-        XyPlot.o \
         TsPlot.o \
         MatlabWs.o
 
