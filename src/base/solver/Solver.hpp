@@ -60,6 +60,19 @@ public:
    virtual SolverState GetState();
    virtual SolverState AdvanceState();
    virtual bool        UpdateSolverGoal(Integer id, Real newValue);
+   
+   // Access methods overriden from the base class
+   virtual std::string GetParameterText(const Integer id) const;
+   virtual Integer     GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType
+                       GetParameterType(const Integer id) const;
+   virtual std::string GetParameterTypeString(const Integer id) const;
+
+   virtual bool        GetBooleanParameter(const Integer id) const;
+   virtual bool        SetBooleanParameter(const Integer id,
+                                           const bool value);
+                                           
+   virtual void        ReportProgress();
     
    //---------------------------------------------------------------------------
    //  bool Initialize()
@@ -139,13 +152,22 @@ protected:
    SolverState         currentState;
    /// Output mode: Compact, Normal, and Verbose
    std::string         textFileMode;
+   /// Toggle for showing solver status
+   bool                showProgress;
 
-   /// Generic solver parameters (there are none defined at this time, so the
-   /// enumeration is basically empty).
+   /// Generic solver parameters.
    enum
    {
-      SolverParamCount = GmatBaseParamCount
+      ShowProgressID   = GmatBaseParamCount,
+      SolverParamCount
    };
+   
+   static const std::string    PARAMETER_TEXT[SolverParamCount -
+                                              GmatBaseParamCount];
+   static const Gmat::ParameterType
+                               PARAMETER_TYPE[SolverParamCount -
+                                              GmatBaseParamCount];
+
 
    // Methods that correspond to the solver states.  Derived classes should
    // implement the methods that correspond to the Solver's state machine.  The
@@ -158,6 +180,8 @@ protected:
    virtual void        CalculateParameters();
    virtual void        CheckCompletion();
    virtual void        RunComplete();
+   
+   virtual std::string GetProgressString();
     
    //---------------------------------------------------------------------------
    //  void WriteToTextFile()

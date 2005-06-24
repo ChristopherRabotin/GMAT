@@ -19,7 +19,29 @@
 
 
 #include "Solver.hpp"
+#include "MessageInterface.hpp"
 
+
+//---------------------------------
+// static data
+//---------------------------------
+
+const std::string
+Solver::PARAMETER_TEXT[SolverParamCount - GmatBaseParamCount] =
+{
+   "ShowProgress",
+};
+
+const Gmat::ParameterType
+Solver::PARAMETER_TYPE[SolverParamCount - GmatBaseParamCount] =
+{
+   Gmat::BOOLEAN_TYPE
+};
+
+
+//---------------------------------
+// public methods
+//---------------------------------
 
 //------------------------------------------------------------------------------
 //  Solver(const std::string &type, const std::string &name)
@@ -35,7 +57,8 @@
 Solver::Solver(const std::string &type, const std::string &name) :
    GmatBase        (Gmat::SOLVER, type, name),
    currentState    (INITIALIZING),
-   textFileMode    ("Normal")
+   textFileMode    ("Normal"),
+   showProgress    (true)
 {
    objectTypes.push_back(Gmat::SOLVER);
    objectTypeNames.push_back("Solver");
@@ -66,7 +89,8 @@ Solver::~Solver()
 Solver::Solver(const Solver &sol) :
     GmatBase        (sol),
     currentState    (sol.currentState),
-    textFileMode    (sol.textFileMode)
+    textFileMode    (sol.textFileMode),
+    showProgress    (sol.showProgress)
 {
 }
 
@@ -87,6 +111,7 @@ Solver& Solver::operator=(const Solver &sol)
         
     currentState = sol.currentState;
     textFileMode = sol.textFileMode;
+    showProgress = sol.showProgress;
 
     return *this;
 }
@@ -124,6 +149,152 @@ Solver::SolverState Solver::GetState()
 bool Solver::UpdateSolverGoal(Integer id, Real newValue)
 {
    return false;
+}
+
+
+// Access methods overriden from the base class
+
+//------------------------------------------------------------------------------
+//  std::string  GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter text, given the input parameter ID.
+ *
+ * @param <id> Id for the requested parameter text.
+ *
+ * @return parameter text for the requested parameter.
+ */
+//------------------------------------------------------------------------------
+std::string Solver::GetParameterText(const Integer id) const
+{
+   if ((id >= GmatBaseParamCount) && (id < SolverParamCount))
+      return PARAMETER_TEXT[id - GmatBaseParamCount];
+   return GmatBase::GetParameterText(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  Integer  GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter ID, given the input parameter string.
+ *
+ * @param <str> string for the requested parameter.
+ *
+ * @return ID for the requested parameter.
+ */
+//------------------------------------------------------------------------------
+Integer Solver::GetParameterID(const std::string &str) const
+{
+   for (Integer i = GmatBaseParamCount; i < SolverParamCount; ++i)
+   {
+      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+         return i;
+   }
+
+   return GmatBase::GetParameterID(str);
+}
+
+
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType  GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter type, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return parameter type of the requested parameter.
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType Solver::GetParameterType(const Integer id) const
+{
+   if ((id >= GmatBaseParamCount) && (id < SolverParamCount))
+      return PARAMETER_TYPE[id - GmatBaseParamCount];
+
+   return GmatBase::GetParameterType(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string  GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter type string, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return parameter type string of the requested parameter.
+ */
+//------------------------------------------------------------------------------
+std::string Solver::GetParameterTypeString(const Integer id) const
+{
+   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+}
+
+
+//------------------------------------------------------------------------------
+//  bool  GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the Boolean parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return  Boolean value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+bool Solver::GetBooleanParameter(const Integer id) const
+{
+    if (id == ShowProgressID)
+        return showProgress;
+
+    return GmatBase::GetBooleanParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  Integer SetBooleanParameter(const Integer id, const bool value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets a Boolean parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id>    ID for the requested parameter.
+ * @param <value> Boolean value for the parameter.
+ *
+ * @return  The value of the parameter at the completion of the call.
+ */
+//------------------------------------------------------------------------------
+bool Solver::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == ShowProgressID)
+   {
+      showProgress = value;
+      return showProgress;
+   }
+
+   return GmatBase::SetBooleanParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+//  void ReportProgress()
+//------------------------------------------------------------------------------
+/**
+ * Shows the progress string to the user.
+ *
+ * This default version just passes the progress string to the MessageInterface.
+ */
+//------------------------------------------------------------------------------
+void Solver::ReportProgress()
+{
+   if (showProgress)
+   {
+      MessageInterface::ShowMessage("%s\n", GetProgressString().c_str());
+   }
 }
 
 
@@ -172,6 +343,7 @@ Solver::SolverState Solver::AdvanceState()
             throw SolverException("Undefined Solver state");
     };
     
+    ReportProgress();
     return currentState; 
 }
     
@@ -281,4 +453,17 @@ void Solver::CheckCompletion()
 void Solver::RunComplete()
 {
     currentState = FINISHED;
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string GetProgressString()
+//------------------------------------------------------------------------------
+/**
+ * Generates a string that is written out by solvers when showProgress is true.
+ */
+//------------------------------------------------------------------------------
+std::string Solver::GetProgressString()
+{
+   return "Solver progress string not yet implemented for " + typeName;
 }

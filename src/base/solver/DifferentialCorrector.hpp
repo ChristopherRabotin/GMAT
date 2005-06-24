@@ -165,11 +165,8 @@ protected:
    void                        InvertJacobian();
 
    void                        FreeArrays();
+   virtual std::string         GetProgressString();
    virtual void                WriteToTextFile();
-    
-//   // Methods used to implement LU decomposition
-//   void                        LUDecompose();
-//   void                        LUBackSubstitute();
 };
 
 #endif // DifferentialCorrector_hpp

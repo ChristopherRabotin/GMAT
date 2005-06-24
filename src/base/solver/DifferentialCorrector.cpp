@@ -181,7 +181,7 @@ GmatBase* DifferentialCorrector::Clone() const
 std::string DifferentialCorrector::GetParameterText(const Integer id) const
 {
    if ((id >= SolverParamCount) && (id < DifferentialCorrectorParamCount))
-      return PARAMETER_TEXT[id - GmatBaseParamCount];
+      return PARAMETER_TEXT[id - SolverParamCount];
    return Solver::GetParameterText(id);
 }
 
@@ -226,7 +226,7 @@ Gmat::ParameterType DifferentialCorrector::GetParameterType(
    if ((id >= SolverParamCount) && (id < DifferentialCorrectorParamCount))
       return PARAMETER_TYPE[id - SolverParamCount];
 
-   return GmatBase::GetParameterType(id);
+   return Solver::GetParameterType(id);
 }
 
 
@@ -699,18 +699,25 @@ Solver::SolverState DifferentialCorrector::AdvanceState()
    {
       case INITIALIZING:
          WriteToTextFile();
+         ReportProgress();
          CompleteInitialization();
          break;
             
       case NOMINAL:
+         ReportProgress();
          RunNominal();
+         ReportProgress();
          break;
         
       case PERTURBING:
+//MessageInterface::ShowMessage("PERT\n");
+         ReportProgress();
          RunPerturbation();
          break;
         
       case CALCULATING:
+//MessageInterface::ShowMessage("CALC\n");
+         ReportProgress();
          CalculateParameters();
          break;
         
@@ -728,6 +735,8 @@ Solver::SolverState DifferentialCorrector::AdvanceState()
         
       case FINISHED:
          RunComplete();
+//MessageInterface::ShowMessage("FINIS\n");
+         ReportProgress();
          break;
         
       case ITERATING:             // Intentional drop-through
@@ -1028,6 +1037,137 @@ void DifferentialCorrector::FreeArrays()
 
 
 //------------------------------------------------------------------------------
+//  std::string GetProgressString()
+//------------------------------------------------------------------------------
+/**
+ * Generates a string that reporting the current differential corrector state.
+ */
+//------------------------------------------------------------------------------
+std::string DifferentialCorrector::GetProgressString()
+{
+   StringArray::iterator current;
+   Integer i;
+   std::stringstream progress;
+   progress.str("");
+   progress.precision(12);
+
+   if (initialized)
+   {
+      switch (currentState)
+      {
+         case INITIALIZING:
+            // This state is basically a "paused state" used for the Target
+            // command to finalize the initial data for the variables and
+            // goals.  All that is written here is the header information.
+            {
+               Integer localVariableCount = variableNames.size(),
+                       localGoalCount = goalNames.size();
+               progress << "************************************************"
+                        << "********\n"
+                        << "*** Performing Differential Correction "
+                        << "(using \"" << instanceName << "\")\n";
+
+               // Write out the setup data
+               progress << "*** " << localVariableCount << " variables; "
+                        << localGoalCount << " goals\n   Variables:  ";
+
+               // Iterate through the variables and goals, writing them to
+               // the file
+               for (current = variableNames.begin(), i = 0;
+                    current != variableNames.end(); ++current)
+               {
+                  if (current != variableNames.begin())
+                     progress << ", ";
+                  progress << *current;
+               }
+
+               progress << "\n   Goals:  ";
+
+               for (current = goalNames.begin(), i = 0;
+                    current != goalNames.end(); ++current)
+               {
+                  if (current != goalNames.begin())
+                     progress << ", ";
+                  progress << *current;
+               }
+
+               progress << "\n****************************"
+                        << "****************************";
+            }
+            break;
+
+         case NOMINAL:
+            progress << instanceName << " Iteration " << iterationsTaken+1
+                     << "; Nominal Pass\n   Variables:  ";
+            // Iterate through the variables, writing them to the string
+            for (current = variableNames.begin(), i = 0;
+                 current != variableNames.end(); ++current)
+            {
+               if (current != variableNames.begin())
+                  progress << ", ";
+               progress << *current << " = " << variable[i++];
+            }
+            break;
+
+         case PERTURBING:
+            progress << "   Completed iteration " << iterationsTaken
+                     << ", pert " << pertNumber+1 << " ("
+                     << variableNames[pertNumber] << " = "
+                     << variable[pertNumber] << ")\n";
+            break;
+
+         case CALCULATING:
+            // Just forces a blank line
+            break;
+
+         case CHECKINGRUN:
+            // Iterate through the goals, writing them to the file
+            progress << "   Goals and achieved values:\n      ";
+
+            for (current = goalNames.begin(), i = 0;
+                 current != goalNames.end(); ++current)
+            {
+               if (current != goalNames.begin())
+                  progress << ",  ";
+               progress << *current << "  Desired: " << goal[i]
+                        << "  Achieved: " << nominal[i];
+               ++i;
+            }
+
+            break;
+
+         case FINISHED:
+            progress << "\n*** Targeting Completed in " << iterationsTaken
+                     << " iterations";
+                     
+            if (iterationsTaken > maxIterations)
+               progress << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+                     << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+                     << "!!! WARNING: Targeter did NOT converge!"
+                     << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+                     << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+
+            progress << "\nFinal Variable values:\n";
+            // Iterate through the variables, writing them to the string
+            for (current = variableNames.begin(), i = 0;
+                 current != variableNames.end(); ++current)
+               progress << "   " << *current << " = " << variable[i++] << "\n";
+            break;
+
+         case ITERATING:     // Intentional fall through
+         default:
+            throw SolverException(
+               "Solver state not supported for the targeter");
+      }
+   }
+   else
+      return Solver::GetProgressString();
+      
+   return progress.str();
+}
+
+
+//------------------------------------------------------------------------------
 //  void WriteToTextFile()
 //------------------------------------------------------------------------------
 /**
@@ -1208,92 +1348,3 @@ void DifferentialCorrector::WriteToTextFile()
       }
    }
 }
-//
-//
-//void DifferentialCorrector::LUDecompose()
-//{
-//    // Implementation as in Numerical Recipes -- needs to be reworked to real C
-//    Integer i, j, imax = 0, k;
-//    Real big, dum, sum, temp, d;
-//    Real *vv = new Real[variableCount];
-//
-//    // Copy the Jacobian into ludMatrix
-//    for (i = 0; i < variableCount; ++i)
-//        for (j = 0; j < goalCount; ++j)
-//            ludMatrix[i][j] = jacobian[i][j];
-//
-//    d = 1.0;
-//    for (i = 0; i < variableCount; ++i) {
-//        big = 0.0;
-//        for (j = 0; j < variableCount; ++j)
-//            if ((temp = fabs(ludMatrix[i][j])) > big)
-//                big = temp;
-//        if (big == 0.0)
-//            throw SolverException("Singular matrix in DifferentialCorrector::LUDecompose");
-//        vv[i] = 1.0 / big;
-//    }
-//    for (j = 0; j < variableCount; ++j) {
-//        for (i = 0; i < j; ++i) {
-//            sum = ludMatrix[i][j];
-//            for (k = 0; k < i; ++k)
-//                sum -= ludMatrix[i][k]*ludMatrix[k][j];
-//            // ludMatrix[i][j] = sum;
-//            ludMatrix[i][j] = sum;
-//        }
-//        big = 0.0;
-//        for (i = j; i < variableCount; ++i) {
-//            sum = ludMatrix[i][j];
-//            for (k = 0; k < j; ++k)
-//                sum -= ludMatrix[i][k] * ludMatrix[k][j];
-//            ludMatrix[i][j] = sum;
-//            if ((dum = vv[i]*fabs(sum)) >= big) {
-//                big = dum;
-//                imax = i;
-//            }
-//        }
-//        if (j != imax) {
-//           for (k = 0; k < variableCount; ++k) {
-//               dum = ludMatrix[imax][k];
-//               ludMatrix[imax][k] = ludMatrix[j][k];
-//               ludMatrix[j][k] = dum;
-//           }
-//           d = -d;
-//           vv[imax] = vv[j];
-//        }
-//        indx[j] = imax;
-//        if (ludMatrix[j][j] == 0.0)
-//            ludMatrix[j][j] = 1.0e-20;           // Handle singular matrix
-//        if (j != variableCount-1) {
-//            dum = 1.0 / ludMatrix[j][j];
-//            for (i = j+1; i < variableCount; ++i)
-//                ludMatrix[i][j] *= dum;
-//        }
-//    }
-//    delete [] vv;
-//}
-//
-//
-//void DifferentialCorrector::LUBackSubstitute()
-//{
-//    Integer i, ii=0, ip, j;
-//    Real sum;
-//
-//    for (i = 0; i < variableCount; ++i) {
-//        ip = indx[i];
-//        sum = b[ip];
-//        b[ip] = b[i];
-//        if (ii)
-//            for (j = ii; j <= i-1; ++j)
-//                sum -= ludMatrix[i][j] * b[j];
-//        else if (sum)
-//            ii = i;
-//        b[i] = sum;
-//    }
-//    for (i = variableCount-1; i >= 0; --i) {    // Back-substitute
-//        sum = b[i];
-//        for (j = i+1; j < variableCount; ++j)
-//            sum -= ludMatrix[i][j] * b[j];
-//        b[i] = sum / ludMatrix[i][i];
-//    }
-//}
-//
