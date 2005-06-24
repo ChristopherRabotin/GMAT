@@ -40,7 +40,7 @@ public:
    static void SetGlObject(const std::string &plotName,
                            const StringArray &objNames,
                            const UnsignedIntArray &objOrbitColors,
-                           const std::vector<SpacePoint*> objArray);
+                           const std::vector<SpacePoint*> &objArray);
    
    static void SetGlCoordSystem(const std::string &plotName,
                                 CoordinateSystem *viewCs,
@@ -53,6 +53,9 @@ public:
                                const Rvector3 &vdVec, const std::string &upAxis,
                                bool usevpRefVec, bool usevpVec, bool usevdVec,
                                bool useFixedFov, Real fov);
+   
+   static void SetGlDrawObjectFlag(const std::string &plotName,
+                                   const std::vector<bool> &drawArray);
    
    static bool IsThere(const std::string &plotName);
    

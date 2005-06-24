@@ -25,6 +25,8 @@
 #include "MessageInterface.hpp"  // for ShowMessage()
 #include <algorithm>             // for find(), distance()
 
+#define REMOVE_OBJ_BY_SETTING_FLAG 1
+
 //#define DEBUG_OPENGL_INIT 1
 //#define DEBUG_OPENGL_ADD 1
 //#define DEBUG_OPENGL_OBJ 2
@@ -59,8 +61,6 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
    "UseViewPointInfo",
    "PerspectiveMode",
    "UseFixedFov",
-   //"OrbitColor",
-   //"TargetColor",
    "DataCollectFrequency",
    "UpdatePlotFrequency",
 }; 
@@ -89,8 +89,6 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
    Gmat::STRING_TYPE,            //"UseViewPointInfo"
    Gmat::STRING_TYPE,            //"PerspectiveMode"
    Gmat::STRING_TYPE,            //"UseFixedFov"
-   //Gmat::UNSIGNED_INTARRAY_TYPE, //"OrbitColor"
-   //Gmat::UNSIGNED_INTARRAY_TYPE, //"TargetColor"
    Gmat::INTEGER_TYPE,           //"DataCollectFrequency"
    Gmat::INTEGER_TYPE,           //"DataCollectFrequency"
 };
@@ -169,7 +167,6 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mScOrbitColorArray.clear();
    mScTargetColorArray.clear();
    mOrbitColorArray.clear();
-   //mTargetColorArray.clear();
    mOrbitColorMap.clear();
    mTargetColorMap.clear();
    mAllSpCount = 0;
@@ -243,7 +240,6 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mScOrbitColorArray = ogl.mScOrbitColorArray;
    mScTargetColorArray = ogl.mScTargetColorArray;
    mOrbitColorArray = ogl.mOrbitColorArray;
-   //mTargetColorArray = ogl.mTargetColorArray;
    mOrbitColorMap = ogl.mOrbitColorMap;
    mTargetColorMap = ogl.mTargetColorMap;
    mNumData = ogl.mNumData;
@@ -330,7 +326,7 @@ bool OpenGlPlot::Initialize()
             //--------------------------------------------------------
             
             ClearDynamicArrays();
-
+            
             // add non-spacecraft plot objects to the list
             for (int i=0; i<mAllSpCount; i++)
             {
@@ -345,8 +341,8 @@ bool OpenGlPlot::Initialize()
                   //loj: 5/16/05 add all objects to object list
                   mObjectNameArray.push_back(mAllSpNameArray[i]);
                   mOrbitColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
-                  //mTargetColorArray.push_back(mTargetColorMap[mAllSpNameArray[i]]);
                   mObjectArray.push_back(mAllSpArray[i]);
+                  mDrawObjArray.push_back(true); //loj: 6/24/05 Added
                   
                   if (mAllSpArray[i]->IsOfType(Gmat::SPACECRAFT))
                   {
@@ -411,7 +407,7 @@ bool OpenGlPlot::Initialize()
                    mOrbitColorArray[i]);
             }
             #endif
-
+            
             // set all object array and pointers
             
             PlotInterface::SetGlObject(instanceName, mObjectNameArray,
@@ -433,6 +429,11 @@ bool OpenGlPlot::Initialize()
                 (mViewPointRefName == "Vector"), (mViewPointVectorName == "Vector"),
                 (mViewDirectionName == "Vector"), (mUseFixedFov == "On"),
                 mFixedFovAngle);
+            
+            //--------------------------------------------------------
+            // set drawing object flag
+            //--------------------------------------------------------
+            PlotInterface::SetGlDrawObjectFlag(instanceName, mDrawObjArray);
             
             return true;
          }
@@ -1480,7 +1481,6 @@ bool OpenGlPlot::ClearSpacePointList()
    mScNameArray.clear();
    mObjectNameArray.clear();
    mOrbitColorArray.clear();
-   //mTargetColorArray.clear();
    
    mScXArray.clear();
    mScYArray.clear();
@@ -1511,20 +1511,110 @@ bool OpenGlPlot::ClearSpacePointList()
 //------------------------------------------------------------------------------
 bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
 {
+   //-----------------------------------------------------------------
+   #if REMOVE_OBJ_BY_SETTING_FLAG
+   //-----------------------------------------------------------------
+
+   for (UnsignedInt i=0; i<mObjectNameArray.size(); i++)
+   {
+      if (mObjectNameArray[i] == name)
+      {
+         mDrawObjArray[i] = false;
+         PlotInterface::SetGlDrawObjectFlag(instanceName, mDrawObjArray);
+         return true;
+      }
+   }
+   
+   return false;
+   
+   //-----------------------------------------------------------------
+   #else
+   //-----------------------------------------------------------------
+   
+   bool removedFromScArray = false;
+   bool removedFromAllSpArray = false;
+   
+   //loj: 6/24/05 Added
+   //-------------------------------------------------------
+   // remove from mScNameArray
+   //-------------------------------------------------------
    #if DEBUG_REMOVE_ACTION
    MessageInterface::ShowMessage
-      ("OpenGlPlot::RemoveSpacePoint() name=%s\n--- Before remove:\n", name.c_str());
-   for (int i=0; i<mAllSpCount; i++)
+      ("OpenGlPlot::RemoveSpacePoint() name=%s\n--- Before remove from "
+       "mScNameArray:\n", name.c_str());
+   MessageInterface::ShowMessage("mScCount=%d\n", mScCount);
+   for (int i=0; i<mScCount; i++)
    {
-      MessageInterface::ShowMessage("mAllSpNameArray[%d]=%s\n", i,
-                                    mAllSpNameArray[i].c_str());
+      MessageInterface::ShowMessage
+         ("mScNameArray[%d]=%s\n", i, mScNameArray[i].c_str());
    }
    #endif
    
    StringArray::iterator scPos = 
-      find(mAllSpNameArray.begin(), mAllSpNameArray.end(), name);
+      find(mScNameArray.begin(), mScNameArray.end(), name);
    
-   if (scPos != mAllSpNameArray.end())
+   if (scPos != mScNameArray.end())
+   {
+      MessageInterface::ShowMessage("sc to be erased=%s\n", (*scPos).c_str());
+      
+      // erase given spacecraft from the arrays
+      mScNameArray.erase(scPos);
+      
+      // just reduce the size of array
+      mScOrbitColorArray.erase(mScOrbitColorArray.begin());
+      mScTargetColorArray.erase(mScTargetColorArray.begin());
+      mScXArray.erase(mScXArray.begin());
+      mScYArray.erase(mScYArray.begin());
+      mScZArray.erase(mScZArray.begin());
+      mScVxArray.erase(mScVxArray.begin());
+      mScVyArray.erase(mScVyArray.begin());
+      mScVzArray.erase(mScVzArray.begin());
+      
+      mScCount = mScNameArray.size();
+      
+      // update color array
+      for (int i=0; i<mScCount; i++)
+      {
+         mScOrbitColorArray[i] = mOrbitColorMap[mScNameArray[i]];
+         mScTargetColorArray[i] = mTargetColorMap[mScNameArray[i]];
+      }
+      
+      #if DEBUG_REMOVE_ACTION
+      MessageInterface::ShowMessage("---After remove from mScNameArray:\n");
+      MessageInterface::ShowMessage("mScCount=%d\n", mScCount);
+      for (int i=0; i<mScCount; i++)
+      {
+         MessageInterface::ShowMessage
+            ("mScNameArray[%d]=%s\n", i, mScNameArray[i].c_str());
+      }
+      #endif
+      
+      removedFromScArray = true;
+      //return true;
+   }
+   
+   
+   //-------------------------------------------------------
+   // remove from mAllSpNameArray and mObjectNameArray
+   //-------------------------------------------------------
+   #if DEBUG_REMOVE_ACTION
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::RemoveSpacePoint() name=%s\n--- Before remove from "
+       "mAllSpNameArray:\n", name.c_str());
+   MessageInterface::ShowMessage("mAllSpCount=%d\n", mAllSpCount);
+   for (int i=0; i<mAllSpCount; i++)
+   {
+      MessageInterface::ShowMessage
+         ("mAllSpNameArray[%d]=%s\n", i, mAllSpNameArray[i].c_str());
+   }
+   #endif
+   
+   StringArray::iterator spPos = 
+      find(mAllSpNameArray.begin(), mAllSpNameArray.end(), name);
+   StringArray::iterator objPos = 
+      find(mObjectNameArray.begin(), mObjectNameArray.end(), name);
+   
+   if (spPos != mAllSpNameArray.end() && objPos != mObjectNameArray.end())
    {
       std::map<std::string, UnsignedInt>::iterator orbColorPos, targColorPos;
       orbColorPos = mOrbitColorMap.find(name);
@@ -1534,44 +1624,76 @@ bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
           targColorPos != mTargetColorMap.end())
       {
          // erase given spacecraft name
-         mAllSpNameArray.erase(scPos);
+         mAllSpNameArray.erase(spPos);
+         mObjectNameArray.erase(objPos);
          mOrbitColorMap.erase(orbColorPos);
          mTargetColorMap.erase(targColorPos);
-
-         // reduce the size of array
-//          mOrbitColorArray.erase(--mOrbitColorArray.end());
-//          mTargetColorArray.erase(--mTargetColorArray.end());
-         mScXArray.erase(--mScXArray.end());
-         mScYArray.erase(--mScYArray.end());
-         mScZArray.erase(--mScZArray.end());
          
-         mScVxArray.erase(--mScXArray.end());
-         mScVyArray.erase(--mScYArray.end());
-         mScVzArray.erase(--mScZArray.end());
+         // reduce the size of array
+         mOrbitColorArray.erase(mOrbitColorArray.begin());
          
          mAllSpCount = mAllSpNameArray.size();
-
-//          // update color array
-//          for (int i=0; i<mAllSpCount; i++)
-//          {
-//             mOrbitColorArray[i] = mOrbitColorMap[mAllSpNameArray[i]];
-//             mTargetColorArray[i] = mTargetColorMap[mAllSpNameArray[i]];
-//          }
          
-         #if DEBUG_REMOVE_ACTION
-         MessageInterface::ShowMessage("---After remove\n");
+         // update color array
          for (int i=0; i<mAllSpCount; i++)
          {
-            MessageInterface::ShowMessage("mAllSpNameArray[%d]=%s\n", i,
-                                          mAllSpNameArray[i].c_str());
+            mOrbitColorArray[i] = mOrbitColorMap[mAllSpNameArray[i]];
+         }
+         
+         #if DEBUG_REMOVE_ACTION
+         MessageInterface::ShowMessage("---After remove from mAllSpNameArray\n");
+         MessageInterface::ShowMessage("mAllSpCount=%d\n", mAllSpCount);
+         for (int i=0; i<mAllSpCount; i++)
+         {
+            MessageInterface::ShowMessage
+               ("mAllSpNameArray[%d]=%s\n", i, mAllSpNameArray[i].c_str());
          }
          #endif
          
-         return true;
+         removedFromAllSpArray = true;
+         //return true;
       }
    }
 
-   return false;
+   //-------------------------------------------------------
+   // remove from mObjectArray
+   //-------------------------------------------------------
+   #if DEBUG_REMOVE_ACTION
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::RemoveSpacePoint() name=%s\n--- Before remove from "
+       "mObjectArray:\n", name.c_str());
+   MessageInterface::ShowMessage("size=%d\n", mObjectArray.size());
+   #endif
+   
+   for (std::vector<SpacePoint*>::iterator objptPos = mObjectArray.begin();
+        objptPos != mObjectArray.end(); ++objptPos)
+   {
+      MessageInterface::ShowMessage
+         ("mObjectArray=%s\n", (*objptPos)->GetName().c_str());
+      if ((*objptPos)->GetName() == name)
+      {
+         mObjectArray.erase(objptPos);
+         break;
+      }
+   }
+   
+   #if DEBUG_REMOVE_ACTION
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::RemoveSpacePoint() name=%s\n--- After remove from "
+       "mObjectArray:\n", name.c_str());
+   MessageInterface::ShowMessage("size=%d\n", mObjectArray.size());
+   #endif
+   
+   //loj: 6/24/05 Added
+   if (removedFromScArray && removedFromAllSpArray)
+      // set all object array and pointers
+      PlotInterface::SetGlObject(instanceName, mObjectNameArray,
+                                 mOrbitColorArray, mObjectArray);
+   
+   return (removedFromScArray && removedFromAllSpArray);
+   //return false;
+   
+   #endif
 }
 
 
@@ -1590,30 +1712,6 @@ Integer OpenGlPlot::FindIndexOfElement(StringArray &labelArray,
 }
 
 
-// //------------------------------------------------------------------------------
-// // bool IsNonSpacecraft(const std::string &name)
-// //------------------------------------------------------------------------------
-// bool OpenGlPlot::IsNonSpacecraft(const std::string &name)
-// {
-//    // How do I know from the name? mSolarSystem may be null.
-//    // so create SolarSystem here?
-   
-//    SolarSystem ss("");
-//    StringArray bodies = ss.GetBodiesInUse();
-   
-//    for (unsigned int i=0; i<bodies.size(); i++)
-//    {
-//       if (name == bodies[i])
-//          return true;
-//    }
-
-//    MessageInterface::ShowMessage
-//       ("OpenGlPlot::IsNonSpacecraft() %s is a Spacecraft\n", name.c_str());
-   
-//    return false;
-// }
-
-
 //------------------------------------------------------------------------------
 // void ClearDynamicArrays()
 //------------------------------------------------------------------------------
@@ -1621,7 +1719,6 @@ void OpenGlPlot::ClearDynamicArrays()
 {
    mObjectNameArray.clear();
    mOrbitColorArray.clear();
-   //mTargetColorArray.clear();
    mObjectArray.clear();
    mScNameArray.clear();
    mScOrbitColorArray.clear();
@@ -1656,7 +1753,6 @@ void OpenGlPlot::UpdateObjectList(SpacePoint *sp)
       {
          mObjectNameArray.push_back(name);
          mOrbitColorArray.push_back(mOrbitColorMap[name]);
-         //mTargetColorArray.push_back(mTargetColorMap[name]);
          mObjectArray.push_back(sp);
          mObjectCount = mObjectNameArray.size();
       }
@@ -1683,10 +1779,10 @@ bool OpenGlPlot::Distribute(int len)
 //------------------------------------------------------------------------------
 bool OpenGlPlot::Distribute(const Real *dat, Integer len)
 {
-   #if DEBUG_OPENGL_UPDATE > 1
+   #if DEBUG_OPENGL_UPDATE
    MessageInterface::ShowMessage
-      ("OpenGlPlot::Distribute() isEndOfReceive=%d, mAllSpCount=%d, len=%d\n",
-       isEndOfReceive, mAllSpCount, len);
+      ("OpenGlPlot::Distribute() isEndOfReceive=%d, mAllSpCount=%d, mScCount=%d, "
+       "len=%d\n", isEndOfReceive, mAllSpCount, mScCount, len);
    #endif
    
    if (isEndOfReceive)
@@ -1694,9 +1790,9 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
       if (active) //loj: 5/2/05 Added
          return PlotInterface::RefreshGlPlot(instanceName);
    }
-
+   
    Publisher *thePublisher = Publisher::Instance();
-
+   
    // if targetting and draw target is off, just return
    if ((mTargetStatus == "Off") && (thePublisher->GetRunState() == Gmat::TARGETING))
    {
@@ -1736,6 +1832,7 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
             Integer idX, idY, idZ;
             Integer idVx, idVy, idVz;
             Integer scIndex = -1;
+            
             for (int i=0; i<mScCount; i++)
             {
                idX = FindIndexOfElement(labelArray, mScNameArray[i]+".X");

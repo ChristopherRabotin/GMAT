@@ -31,11 +31,11 @@ public:
    OpenGlPlot(const std::string &name);
    OpenGlPlot(const OpenGlPlot &ogl);
    virtual ~OpenGlPlot(void);
-
+   
    const StringArray& GetSpacePointList();
    const StringArray& GetSpacecraftList();
    const StringArray& GetNonSpacecraftList();
-
+   
    // methods inherited from Subscriber
    virtual bool Initialize();
    
@@ -59,23 +59,12 @@ public:
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
    virtual bool        IsParameterReadOnly(const Integer id) const;
-
+   
    virtual Integer GetIntegerParameter(const Integer id) const;
    virtual Integer GetIntegerParameter(const std::string &label) const;
    virtual Integer SetIntegerParameter(const Integer id, const Integer value);
    virtual Integer SetIntegerParameter(const std::string &label,
                                        const Integer value);
-   
-//    virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
-//                                                const UnsignedInt value,
-//                                                const Integer index);
-//    virtual UnsignedInt SetUnsignedIntParameter(const std::string &label,
-//                                                const UnsignedInt value,
-//                                                const Integer index);
-//    virtual const UnsignedIntArray&
-//            GetUnsignedIntArrayParameter(const Integer id) const; 
-//    virtual const UnsignedIntArray& 
-//            GetUnsignedIntArrayParameter(const std::string &label) const;
    
    virtual Real GetRealParameter(const Integer id) const;
    virtual Real GetRealParameter(const std::string &label) const;
@@ -103,7 +92,7 @@ public:
    
    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
-
+   
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
    virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
    
@@ -111,7 +100,7 @@ public:
                                   const std::string &name);
    virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                              const std::string &name = "");
-
+   
 protected:
    
    bool AddSpacePoint(const std::string &name, Integer index);
@@ -119,7 +108,7 @@ protected:
    bool RemoveSpacePoint(const std::string &name);
    Integer FindIndexOfElement(StringArray &labelArray,
                               const std::string &label);
-
+   
    void ClearDynamicArrays();
    void UpdateObjectList(SpacePoint *sp);
    
@@ -132,6 +121,7 @@ protected:
    SpacePoint *mViewDirectionObj;
    std::vector<SpacePoint*> mObjectArray;
    std::vector<SpacePoint*> mAllSpArray;
+   std::vector<bool> mDrawObjArray;
    
    std::string mEclipticPlane;
    std::string mEquatorialPlane;
@@ -149,7 +139,7 @@ protected:
    std::string mViewDirectionName;
    std::string mViewUpCoordSysName;
    std::string mViewUpAxisName;
-
+   
    Rvector3 mViewPointRefVector;
    Rvector3 mViewPointVector;
    Rvector3 mViewDirectionVector;
@@ -180,7 +170,6 @@ protected:
    UnsignedIntArray mScOrbitColorArray;
    UnsignedIntArray mScTargetColorArray;
    UnsignedIntArray mOrbitColorArray;
-   //UnsignedIntArray mTargetColorArray;
    
    std::map<std::string, UnsignedInt> mOrbitColorMap;
    std::map<std::string, UnsignedInt> mTargetColorMap;
@@ -207,8 +196,6 @@ protected:
       USE_VIEWPOINT_INFO,
       PERSPECTIVE_MODE,
       USE_FIXED_FOV,
-      //ORBIT_COLOR,
-      //TARGET_COLOR,
       DATA_COLLECT_FREQUENCY,
       UPDATE_PLOT_FREQUENCY,
       OpenGlPlotParamCount

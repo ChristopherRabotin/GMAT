@@ -884,7 +884,7 @@ void MdiChildTrajFrame::OnClose(wxCloseEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::SetGlObject(const StringArray &objNames,
                                     const UnsignedIntArray &objOrbitColors,
-                                    const std::vector<SpacePoint*> objArray)
+                                    const std::vector<SpacePoint*> &objArray)
 {
    if (mCanvas)
    {         
@@ -926,6 +926,18 @@ void MdiChildTrajFrame::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
       mCanvas->SetGlViewOption(vpRefObj, vpVecObj, vdObj, vsFactor, vpRefVec,
                                vpVec, vdVec, upAxis, usevpRefVec, usevpVec,
                                usevdVec, useFixedFov, fov);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGlDrawObjectFlag(const std::vector<bool> &drawArray)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetGlDrawObjectFlag(const std::vector<bool> &drawArray)
+{
+   if (mCanvas)
+   {
+      mCanvas->SetGlDrawObjectFlag(drawArray);
    }
 }
 

@@ -48,7 +48,7 @@
 //#define DEBUG_TRAJCANVAS_CONVERT 2
 //#define DEBUG_TRAJCANVAS_DRAW 2
 //#define DEBUG_TRAJCANVAS_ZOOM 1
-//#define DEBUG_TRAJCANVAS_OBJECT 2
+//#define DEBUG_TRAJCANVAS_OBJECT 1
 //#define DEBUG_TRAJCANVAS_TEXTURE 2
 //#define DEBUG_TRAJCANVAS_PROJ 1
 //#define DEBUG_TRAJCANVAS_ANIMATION 1
@@ -210,11 +210,6 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    
    // Spacecraft
    mScCount = 0;
-   
-//    for (int i=0; i<MAX_SCS; i++)
-//    {
-//       mScLastFrame[i] = 0;
-//    }
    
    // Coordinate System
    mInternalCoordSystem = theGuiInterpreter->GetInternalCoordinateSystem();
@@ -769,11 +764,11 @@ void TrajPlotCanvas::ViewAnimation(int interval)
 //------------------------------------------------------------------------------
 // void SetGlObject(const StringArray &objNames,
 //                  const UnsignedIntArray &objOrbitColors,
-//                  const std::vector<SpacePoint*> objArray)
+//                  const std::vector<SpacePoint*> &objArray)
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::SetGlObject(const StringArray &objNames,
                                  const UnsignedIntArray &objOrbitColors,
-                                 const std::vector<SpacePoint*> objArray)
+                                 const std::vector<SpacePoint*> &objArray)
 {
    #if DEBUG_TRAJCANVAS_OBJECT
    MessageInterface::ShowMessage
@@ -1002,6 +997,15 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
 
 
 //------------------------------------------------------------------------------
+// void SetGlDrawObjectFlag(const std::vector<bool> &drawArray)
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::SetGlDrawObjectFlag(const std::vector<bool> &drawArray)
+{
+   mDrawObjArray = drawArray;
+}
+
+
+//------------------------------------------------------------------------------
 // int ReadTextTrajectory(const wxString &filename)
 //------------------------------------------------------------------------------
 /**
@@ -1109,14 +1113,15 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
                                 const RealArray &velY, const RealArray &velZ,
                                 const UnsignedIntArray &scColors)
 {
-   #if DEBUG_TRAJCANVAS_UPDATE
-   MessageInterface::ShowMessage
-      ("TrajPlotCanvas::UpdatePlot() time=%f, mNumData=%d\n", time, mNumData);
-   #endif
-   
-   mScCount = posX.size();
+   mScCount = scNames.size();
    if (mScCount > MAX_SCS)
       mScCount = MAX_SCS;
+   
+   #if DEBUG_TRAJCANVAS_UPDATE
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::UpdatePlot() time=%f, mNumData=%d, mScCount=%d\n",
+       time, mNumData, mScCount);
+   #endif
    
    mScNameArray = scNames;
    
@@ -1133,6 +1138,15 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
          
          if (objId != -1)
          {
+            //loj: 6/24/05 Added
+            if (!mDrawObjArray[objId])
+            {
+               mDrawObjFlag[objId][mNumData] = false;
+               continue;
+            }
+            
+            mDrawObjFlag[objId][mNumData] = true;
+            
             mObjectOrbitColor[objId][mNumData]  = scColors[sc];
             mObjectGciPos[objId][mNumData][0] = posX[sc];
             mObjectGciPos[objId][mNumData][1] = posY[sc];
@@ -1146,7 +1160,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             if (mNeedInitialConversion)
             {
                Rvector6 inState, outState;
-
+               
                // convert position and velocity (loj: 6/13/05 convert velocity also)
                inState.Set(posX[sc], posY[sc], posZ[sc],
                            velX[sc], velY[sc], velZ[sc]);
@@ -1160,16 +1174,14 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
                
                mObjectTempVel[objId][mNumData][0] = outState[3];
                mObjectTempVel[objId][mNumData][1] = outState[4];
-               mObjectTempVel[objId][mNumData][2] = outState[5];
-               
+               mObjectTempVel[objId][mNumData][2] = outState[5];               
             }
             else
             {
                CopyVector3(mObjectTempPos[objId][mNumData],
                            mObjectGciPos[objId][mNumData]);
                CopyVector3(mObjectTempVel[objId][mNumData],
-                           mObjectGciVel[objId][mNumData]);
-            
+                           mObjectGciVel[objId][mNumData]);            
             }
             
             #if DEBUG_TRAJCANVAS_UPDATE
@@ -1204,6 +1216,15 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             // if object id found
             if (objId != -1)
             {
+               //loj: 6/24/05 Added
+               if (!mDrawObjArray[objId])
+               {
+                  mDrawObjFlag[objId][mNumData] = false;
+                  continue;
+               }
+            
+               mDrawObjFlag[objId][mNumData] = true;
+            
                Rvector6 objState = mObjectArray[obj]->GetMJ2000State(time);
                mObjectGciPos[objId][mNumData][0] = objState[0];
                mObjectGciPos[objId][mNumData][1] = objState[1];
@@ -2576,6 +2597,10 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
    {
       objName = mObjectNames[obj];
       objId = GetObjectId(objName);
+      
+      //loj: 6/24/05 Added
+      if (!mDrawObjFlag[objId])
+         continue;
       
       glPushMatrix();
       glBegin(GL_LINES);

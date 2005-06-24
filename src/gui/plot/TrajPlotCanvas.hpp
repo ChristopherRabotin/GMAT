@@ -96,7 +96,7 @@ public:
    
    void SetGlObject(const StringArray &objNames,
                     const UnsignedIntArray &objOrbitColors,
-                    const std::vector<SpacePoint*> objectArray);
+                    const std::vector<SpacePoint*> &objectArray);
    
    // CoordinateSystem (loj: 5/13/05 Added viewUpCs)
    void SetGlCoordSystem(CoordinateSystem *viewCs,
@@ -109,6 +109,9 @@ public:
                         const Rvector3 &vdVec, const std::string &upAxis,
                         bool usevpRefVec, bool usevpVec, bool usevdVec,
                         bool useFixedFov, Real fov);
+   
+   // drawing toggle switch
+   void SetGlDrawObjectFlag(const std::vector<bool> &drawArray);
    
    // data
    int  ReadTextTrajectory(const wxString &filename);
@@ -142,7 +145,6 @@ private:
    static const int LAST_STD_BODY_ID = 10;
    static const int MAX_COORD_SYS = 10;
    static const std::string BODY_NAME[GmatPlot::MAX_BODIES];
-//    static const unsigned int UNINIT_TEXTURE = 999; //loj: moved to MdiGlPlotData.hpp
    static const float MAX_ZOOM_IN = 3700.0;
    static const float RADIUS_ZOOM_RATIO = 2.2;
    static const float DEFAULT_DIST = 30000.0;
@@ -262,13 +264,14 @@ private:
    wxStringBoolMap  mShowObjectMap;
    wxStringBoolMap  mShowOrbitNormalMap;
    std::vector<SpacePoint*> mObjectArray;
+   std::vector<bool> mDrawObjArray;
    int mObjectCount;
    float mObjectDefaultRadius;
    float mObjectRadius[MAX_OBJECT];
    float mObjMaxZoomIn[MAX_OBJECT];
    int   mObjLastFrame[MAX_OBJECT];
    UnsignedInt mObjectOrbitColor[MAX_OBJECT][MAX_DATA];
-   
+   bool  mDrawObjFlag[MAX_OBJECT][MAX_DATA]; //loj: 6/24/05 Added
    float mObjectGciPos[MAX_OBJECT][MAX_DATA][3];
    float mObjectTempPos[MAX_OBJECT][MAX_DATA][3];
    float mObjectGciVel[MAX_OBJECT][MAX_DATA][3];

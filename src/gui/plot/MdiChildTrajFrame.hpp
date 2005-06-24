@@ -121,7 +121,7 @@ public:
    // drawing
    void SetGlObject(const StringArray &objNames,
                     const UnsignedIntArray &objOrbitColors,
-                    const std::vector<SpacePoint*> objArray);
+                    const std::vector<SpacePoint*> &objArray);
    
    void SetGlCoordSystem(CoordinateSystem *viewCs,
                          CoordinateSystem *viewUpCs);
@@ -132,6 +132,8 @@ public:
                         const Rvector3 &vdVec, const std::string &upAxis,
                         bool usevpRefVec, bool usevpVec, bool usevdVec,
                         bool useFixedFov, Real fov);
+   
+   void SetGlDrawObjectFlag(const std::vector<bool> &drawArray);
    
    void UpdatePlot(const StringArray &scNames, const Real &time,
                    const RealArray &posX, const RealArray &posY,

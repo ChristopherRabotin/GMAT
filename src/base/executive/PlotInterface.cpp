@@ -226,7 +226,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
 void PlotInterface::SetGlObject(const std::string &plotName,
                                 const StringArray &objNames,
                                 const UnsignedIntArray &objOrbitColors,
-                                const std::vector<SpacePoint*> objArray)
+                                const std::vector<SpacePoint*> &objArray)
 {
 #if defined __CONSOLE_APP__
    return;
@@ -325,6 +325,43 @@ void PlotInterface::SetGlViewOption(const std::string &plotName,
          frame->SetGlViewOption(vpRefObj, vpVecObj, vdObj, vsFactor, vpRefVec,
                                 vpVec, vdVec, upAxis, usevpRefVec,usevpVec,
                                 usevdVec, useFixedFov, fov);
+      }
+   }
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGlDrawObjectFlag(const std::string &plotName, ...
+//------------------------------------------------------------------------------
+void PlotInterface::SetGlDrawObjectFlag(const std::string &plotName,
+                                        const std::vector<bool> &drawArray)
+{
+#if defined __CONSOLE_APP__
+   return;
+#else
+   
+   #if DEBUG_PLOTIF_GL
+   MessageInterface::ShowMessage
+      ("PlotInterface::SetGlDrawObjectFlag() plotName:%s\n", plotName.c_str());
+   #endif
+   
+   wxString owner = wxString(plotName.c_str());
+   MdiChildTrajFrame *frame = NULL;
+   
+   for (int i=0; i<MdiGlPlot::numChildren; i++)
+   {
+      frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
+      
+      if (frame->GetPlotName().IsSameAs(owner.c_str()))
+      {
+         #if DEBUG_PLOTIF_GL
+         MessageInterface::ShowMessage
+            ("PlotInterface::SetGlDrawObjectFlag() vpRefObj=%d, vsFactor=%f\n",
+             vpRefObj, vsFactor);
+         #endif
+         
+         frame->SetGlDrawObjectFlag(drawArray);
       }
    }
 #endif
