@@ -221,17 +221,20 @@ void ResourceTree::UpdateResource(bool resetCounter)
    }
    
    // ag: collapse, so folder icon is closed
-   Collapse(mSpacecraftItem);
-   Collapse(mFormationItem);
-   Collapse(mPropagatorItem);
-   Collapse(mBurnItem);
-   Collapse(mSolverItem);
-   Collapse(mSubscriberItem);
-   Collapse(mVariableItem);
-   Collapse(mFunctItem);
-   Collapse(mCoordSysItem);
-   Collapse(mSpecialPointsItem);
-   Collapse(mSampleScriptItem);
+   // djc: Under Linux, this crashes so it only applies to Windows
+   #ifdef __WXMSW__
+      Collapse(mSpacecraftItem);
+      Collapse(mFormationItem);
+      Collapse(mPropagatorItem);
+      Collapse(mBurnItem);
+      Collapse(mSolverItem);
+      Collapse(mSubscriberItem);
+      Collapse(mVariableItem);
+      Collapse(mFunctItem);
+      Collapse(mCoordSysItem);
+      Collapse(mSpecialPointsItem);
+      Collapse(mSampleScriptItem);
+   #endif
 
    DeleteChildren(mSpacecraftItem);
    DeleteChildren(mUniverseItem);
