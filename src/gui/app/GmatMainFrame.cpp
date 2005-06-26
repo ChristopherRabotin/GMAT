@@ -669,6 +669,11 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
 
          // list of open children
          mdiChildren->Append(newChild);
+
+         // djc: Under linux, force the new child to display
+         #ifndef __WXMSW__
+            newChild->Show();
+         #endif
       }
    }
 }
