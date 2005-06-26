@@ -101,14 +101,13 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
 
 void TsPlotCanvas::OnPaint(wxPaintEvent& ev)
 {
-   wxPaintDC dc(this);
-   
-   // On linux, this line floods the processor with messages.  For now, 
+   // On linux, this line floods the processor with messages.  For now,
    // only call on Windows
    #ifdef __WXMSW__
       wxWindow::Refresh(false);
    #endif
-   
+
+   wxPaintDC dc(this);
    wxCoord w, h;
    dc.GetSize(&w, &h);
 
