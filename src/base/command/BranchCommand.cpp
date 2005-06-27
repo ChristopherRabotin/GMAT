@@ -23,7 +23,6 @@
 #include "MessageInterface.hpp"
 
 // #define DEBUG_BRANCHCOMMAND_DEALLOCATION
-// #define DEBUG_BRANCHCOMMAND_DEALLOCATION
 
 
 //------------------------------------------------------------------------------
@@ -397,7 +396,8 @@ GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
       current = branch[which];
       if (current != NULL)
       {
-         fromBranch = current->Remove(cmd);
+         //fromBranch = current->Remove(cmd); //loj: 6/27/05 this goes into infinite loop
+         fromBranch = GmatCommand::Remove(cmd);
          if (fromBranch != NULL)
                return fromBranch;
       }
