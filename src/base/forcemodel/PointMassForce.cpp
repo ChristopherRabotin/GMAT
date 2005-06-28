@@ -313,15 +313,16 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
    }
    else
       a_indirect[0] = a_indirect[1] = a_indirect[2] = 0.0;
-   
-#if DEBUG_PMF_BODY
-   ShowBodyState("PointMassForce::GetDerivatives() BEFORE compute " +
-                 body->GetName(), now, rv);
-#endif
 
-#if DEBUG_PMF_DERV
-   ShowDerivative("PointMassForce::GetDerivatives() BEFORE compute", state, satCount);
-#endif
+	#if DEBUG_PMF_BODY
+	   ShowBodyState("PointMassForce::GetDerivatives() BEFORE compute " +
+	                 body->GetName(), now, rv);
+	#endif
+
+	#if DEBUG_PMF_DERV
+	   ShowDerivative("PointMassForce::GetDerivatives() BEFORE compute", state, 
+	      satCount);
+	#endif
    
    for (Integer i = 0; i < satCount; i++) 
    {
@@ -331,23 +332,17 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
       relativePosition[1] = (*rv)[1] - state[i6+1];
       relativePosition[2] = (*rv)[2] - state[i6+2];
 
-      // DJC 07/27/04 relativePosition is an RVector6.  Old code:
-//      r3 = relativePosition[ i6 ]*relativePosition[ i6 ] + 
-//         relativePosition[1+i6]*relativePosition[1+i6] + 
-//         relativePosition[2+i6]*relativePosition[2+i6];
       r3 = relativePosition[0]*relativePosition[0] + 
            relativePosition[1]*relativePosition[1] + 
            relativePosition[2]*relativePosition[2];
       
       radius = sqrt(r3);
       r3 *= radius;
-      //mu_r = - mu / r3;  waw: 05/06/04
       mu_r = mu / r3;
 
       if (order == 1) 
       {
          // Do dv/dt first, in case deriv = state
-         // DJC 07/27/04 relativePosition is an RVector6.  Old code:
          deriv[3 + i6] = relativePosition[0] * mu_r - a_indirect[0];
          deriv[4 + i6] = relativePosition[1] * mu_r - a_indirect[1];
          deriv[5 + i6] = relativePosition[2] * mu_r - a_indirect[2];
@@ -359,10 +354,6 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
       else 
       {
          // Feed accelerations to corresponding components directly for RKN
-         // DJC 07/27/04 relativePosition is an RVector6.  Old code:
-//         deriv[ i6 ] = relativePosition[ i6 ] * mu_r; 
-//         deriv[i6+1] = relativePosition[i6+1] * mu_r; 
-//         deriv[i6+2] = relativePosition[i6+2] * mu_r; 
          deriv[ i6 ] = relativePosition[0] * mu_r - a_indirect[0]; 
          deriv[i6+1] = relativePosition[1] * mu_r - a_indirect[1]; 
          deriv[i6+2] = relativePosition[2] * mu_r - a_indirect[2]; 
@@ -372,9 +363,9 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
       }
    }
 
-#if DEBUG_PMF_DERV
-   ShowDerivative("PointMassForce::GetDerivatives() AFTER compute", state, satCount);
-#endif
+   #if DEBUG_PMF_DERV
+      ShowDerivative("PointMassForce::GetDerivatives() AFTER compute", state, satCount);
+   #endif
 
    #ifdef DEBUG_FORCE_MODEL
       MessageInterface::ShowMessage(
