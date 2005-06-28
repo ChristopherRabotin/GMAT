@@ -22,6 +22,7 @@
 #include "MessageInterface.hpp"
 
 
+// #define DEBUG_SPACEOBJECT 1
 // #define DEBUG_J2000_STATE 1
 
 
@@ -39,7 +40,8 @@ const std::string SpaceObject::PARAMETER_TEXT[SpaceObjectParamCount -
 const Gmat::ParameterType SpaceObject::PARAMETER_TYPE[SpaceObjectParamCount - 
                                                       SpacePointParamCount] =
    {
-      Gmat::REAL_TYPE
+//      Gmat::REAL_TYPE
+      Gmat::STRING_TYPE	
    };
 
 
@@ -94,6 +96,7 @@ SpaceObject::~SpaceObject()
 //------------------------------------------------------------------------------
 SpaceObject::SpaceObject(const SpaceObject& so) :
    SpacePoint     (so),
+   epoch          (so.epoch),
    state          (so.state),
    isManeuvering  (so.isManeuvering),
    originName     (so.originName),
@@ -120,6 +123,7 @@ SpaceObject& SpaceObject::operator=(const SpaceObject& so)
       return *this;
       
    SpacePoint::operator=(so);
+   epoch         = so.epoch;
    state         = so.state;
    isManeuvering = so.isManeuvering;
    originName    = so.originName;
@@ -162,20 +166,31 @@ Real SpaceObject::GetEpoch()
 
 
 //------------------------------------------------------------------------------
-// Real SetEpoch(const Real ep)
+// Real SetEpoch(const Real ep, const bool needUpdate)
 //------------------------------------------------------------------------------
 /**
  * Accessor used to set epoch (in A.1 Modified Julian format) of the object.
  *
- * @param <ep> The new A.1 epoch.
+ * @param <ep>         The new A.1 epoch.
+ * @param <needUpdate> Flag indicator for updating spacecraft new epoch.
  *
  * @return The updated A.1 epoch.
  *
  * @todo The epoch probably should be TAI throughout GMAT.
  */
 //------------------------------------------------------------------------------
-Real SpaceObject::SetEpoch(const Real ep)
+Real SpaceObject::SetEpoch(const Real ep, const bool needUpdated)
 {
+   // Update spacecraft's epoch data if needed
+   if (needUpdated) 
+   {
+      if (!epoch.UpdateValue(ep))
+      {
+         throw SpaceObjectException("SpaceObject::SetEpoch() "
+               "- failure of updating spacecraft's epoch value");  
+      }
+   }
+
    return state.SetEpoch(ep);
 }
 
@@ -367,6 +382,14 @@ const Rvector3 SpaceObject::GetMJ2000Velocity(const A1Mjd &atTime)
 //------------------------------------------------------------------------------
 Integer SpaceObject::GetParameterID(const std::string &str) const
 {
+#if DEBUG_SPACEOBJECT
+    MessageInterface::ShowMessage("\nSpaceObject::GetParameterID(\"%s\")\n",
+                                  str.c_str());
+#endif
+
+   if (epoch.IsValidFormat(str)) 
+      return EPOCH_PARAM;
+
    for (Integer i = SpacePointParamCount; i < SpaceObjectParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - SpacePointParamCount])
@@ -390,8 +413,18 @@ Integer SpaceObject::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 std::string SpaceObject::GetParameterText(const Integer id) const
 {
+#if DEBUG_SPACEOBJECT
+    MessageInterface::ShowMessage("\nSpaceObject::GetParameterText(\"%d\")\n",
+                                  id);
+#endif
    if (id >= SpacePointParamCount && id < SpaceObjectParamCount)
-      return PARAMETER_TEXT[id - SpacePointParamCount];
+   {
+      if (id == EPOCH_PARAM)
+         return epoch.GetLabel();
+      else
+         return PARAMETER_TEXT[id - SpacePointParamCount];
+   }
+
    return SpacePoint::GetParameterText(id);
 }
 

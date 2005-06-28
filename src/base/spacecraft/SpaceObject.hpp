@@ -23,6 +23,7 @@
 
 #include "GmatBase.hpp"
 #include "SpacePoint.hpp"
+#include "Epoch.hpp"
 #include "PropState.hpp"
 #include "SpaceObjectException.hpp"
 
@@ -37,7 +38,7 @@ public:
    
    virtual PropState&   GetState();
    virtual Real         GetEpoch();
-   virtual Real         SetEpoch(const Real ep);
+   virtual Real         SetEpoch(const Real ep, const bool needUpdated = true);
    virtual bool         IsManeuvering();
    virtual void         IsManeuvering(bool mnvrFlag);
    
@@ -62,10 +63,12 @@ public:
    virtual std::string GetParameterTypeString(const Integer id) const;
 
 protected:
+   /// The spacecraft epoch
+   Epoch             epoch;
    /// The spacecraft state
-   PropState            state;
+   PropState         state;
    /// true when a finite burn needs to be applied to this SpaceObject
-   bool                 isManeuvering;
+   bool              isManeuvering;
    /// Reference SpacePoint for the data
    std::string       originName;
    /// Reference SpacePoint for the data
