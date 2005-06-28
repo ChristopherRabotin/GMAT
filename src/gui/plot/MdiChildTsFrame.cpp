@@ -405,7 +405,7 @@ void MdiChildTsFrame::AddDataPoints(int curveIndex, double xData, double yData)
       TsPlotCurve *curve = mXyPlot->GetPlotCurve(curveIndex);
       if (curve)
          curve->AddData(xData, yData);
-   }
+   } 
 }
 
 //------------------------------------------------------------------------------
@@ -441,6 +441,11 @@ void MdiChildTsFrame::RedrawCurve()
       wxPaintEvent pvt;
       mXyPlot->OnPaint(pvt);
       mXyPlot->Update();
+      
+      // On linux, this call gives the GUI a time slice to update the plot
+      #ifndef __WXMSW__
+         ::wxYield();
+      #endif
    }
 }
 
