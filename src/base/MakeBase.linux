@@ -45,13 +45,13 @@ HEADERS = -Iinclude \
           -I../gui/mission
 
 
-# Uncomment this section to build with Matlab
-#CPPFLAGS = $(OPTIMIZATIONS) -Wall -D__USE_MATLAB__=1 \
-#            `wx-config --cppflags` \
-#           -I/usr/local/matlab7_0_1/extern/include 
+# Uncomment this section (and edit the path) to build with Matlab
+CPPFLAGS = $(OPTIMIZATIONS) -Wall -D__USE_MATLAB__=1 \
+            `wx-config --cppflags` \
+           -I/usr/local/matlab704/extern/include 
 
 # Uncomment this section to build without Matlab
-CPPFLAGS = $(OPTIMIZATIONS) -Wall `wx-config --cppflags`
+#CPPFLAGS = $(OPTIMIZATIONS) -Wall `wx-config --cppflags`
 
 
 export CPPFLAGS

@@ -5,11 +5,14 @@ WXTARGET = gmat
 
 TARGETS = $(WXTARGET)
 
-LIBS = ../base/lib/libGmatGui.a `wx-config --libs` \
-       -lwx_gtk2_gl-2.6
+LIBS = ../base/lib/libGmatGui.a 
 
-#`wx-config --libs opengl`
+MATLAB_LIBRARIES = -leng -lmx -lut -lmat -lpthread \
+                   -lstdc++ -lgcc_s -licudata -licui18n \
+                   -licuuc -lustdio -lz
 
+LINK_FLAGS = `wx-config --libs` -lwx_gtk2_gl-2.6 -L/usr/local/matlab704/bin/glnx86
+ 
 all: $(TARGETS)
 
 gui: $(WXTARGET)
@@ -61,13 +64,13 @@ HEADERS = -I../base/include \
           -Iview
 
 
-# Uncomment this section to build with Matlab
-#CPPFLAGS = $(OPTIMIZATIONS) -Wall -D__USE_MATLAB__=1 \
-#            `wx-config --cppflags` \
-#           -I/usr/local/matlab7_0_1/extern/include 
+# Uncomment this section (and edit the path) to build with Matlab
+CPPFLAGS = $(OPTIMIZATIONS) -Wall -D__USE_MATLAB__=1 \
+            `wx-config --cppflags` \
+           -I/usr/local/matlab704/extern/include 
 
 # Uncomment this section to build without Matlab
-CPPFLAGS = $(OPTIMIZATIONS) -Wall `wx-config --cppflags`
+#CPPFLAGS = $(OPTIMIZATIONS) -Wall `wx-config --cppflags`
 
 
 export CPPFLAGS
@@ -174,8 +177,9 @@ OBJECTS = \
 # Unused:    solver/VariableCreatePanel.o \
 # Dummied up for now:    plot/TrajPlotCanvas.o \
 
-$(WXTARGET) : $(OBJECTS)
-	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) -lGL -lGLU
+$(WXTARGET) : $(OBJECTS) $(LIBS)
+	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) -lGL -lGLU $(MATLAB_LIBRARIES)
+	cp -f $(WXTARGET) ../bin/.
 
 .cpp.o:
 	$(CPP) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
