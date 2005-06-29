@@ -22,7 +22,7 @@
 #include "BranchCommand.hpp"
 #include "MessageInterface.hpp"
 
-// #define DEBUG_BRANCHCOMMAND_DEALLOCATION
+//#define DEBUG_BRANCHCOMMAND_DEALLOCATION
 
 
 //------------------------------------------------------------------------------
@@ -58,15 +58,21 @@ BranchCommand::BranchCommand(const std::string &typeStr) :
 BranchCommand::~BranchCommand()
 {
    #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
-      MessageInterface::ShowMessage("In BranchCommand::~BranchCommand()\n");
+      MessageInterface::ShowMessage
+         ("In BranchCommand::~BranchCommand() this=%s\n", this->GetTypeName().c_str());
    #endif
    std::vector<GmatCommand*>::iterator node;
    GmatCommand* current;
-      
+
    for (node = branch.begin(); node != branch.end(); ++node)
    {
       // Find the end for each branch and disconnect it fron the start
       current = *node;
+      
+      #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
+         MessageInterface::ShowMessage("current=%s\n", current->GetTypeName().c_str());
+      #endif
+         
       while (current->GetNext() != this)
       {
          current = current->GetNext();
@@ -75,7 +81,7 @@ BranchCommand::~BranchCommand()
             break;
          }
       }
-         
+      
       // Calling Remove this way just sets the next pointer to NULL
       if (current)
       {
@@ -83,7 +89,8 @@ BranchCommand::~BranchCommand()
             MessageInterface::ShowMessage("Removing %s\n", 
                                        current->GetTypeName().c_str());
          #endif
-         current->Remove(current);  
+            
+         current->Remove(current);
       }
       
       if (*node)
@@ -389,17 +396,23 @@ GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
    
    GmatCommand *fromBranch = NULL;
    GmatCommand *current = NULL;
+   GmatCommand *tempNext = NULL;
    
    // If we have branches, try to remove there first
    for (Integer which = 0; which < (Integer)branch.size(); ++which)
    {
       current = branch[which];
+      tempNext = current->GetNext();
+      
       if (current != NULL)
       {
-         //fromBranch = current->Remove(cmd); //loj: 6/27/05 this goes into infinite loop
-         fromBranch = GmatCommand::Remove(cmd);
+         fromBranch = current->Remove(cmd); //loj: 6/29/05 put old code back
+         
+         if (fromBranch == current) //loj: 6/29/05 Added
+            branch[which] = tempNext;
+         
          if (fromBranch != NULL)
-               return fromBranch;
+            return fromBranch;
       }
    }
    

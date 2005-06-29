@@ -18,11 +18,10 @@
 //------------------------------------------------------------------------------
 
 
-// #define DEBUG_COMMAND_DEALLOCATION
-
 #include "Command.hpp"          // class's header file
-
 #include "MessageInterface.hpp" // MessageInterface
+
+//#define DEBUG_COMMAND_DEALLOCATION
 
 //---------------------------------
 //  public methods
@@ -69,6 +68,19 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
 //------------------------------------------------------------------------------
 GmatCommand::~GmatCommand()
 {
+   #ifdef DEBUG_COMMAND_DEALLOCATION
+      std::string nextStr = "NULL";
+      if (next)
+         nextStr = next->GetTypeName();
+   
+      MessageInterface::ShowMessage
+         ("In GmatCommand::~GmatCommand() this=%s, next=%s\n",
+          this->GetTypeName().c_str(), nextStr.c_str());
+   #endif
+      
+   if (this->IsOfType("BranchEnd")) //loj: 6/29/05 Added
+      return;
+   
    // Delete the subsequent GmatCommands
    if (next) {
       #ifdef DEBUG_COMMAND_DEALLOCATION
@@ -595,6 +607,9 @@ bool GmatCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 //------------------------------------------------------------------------------
 GmatCommand* GmatCommand::Remove(GmatCommand *cmd)
 {
+   if (this->IsOfType("BranchEnd")) //loj: 6/29/05 Added
+      return NULL;
+   
    if (this == cmd)
    {  // NULL the next pointer
       next = NULL;
