@@ -151,7 +151,8 @@ protected:
 //   StoppingCondition*            CreateStopCond(std::string conditiontype);
    Subscriber*                   CreateSubscriber(std::string name, 
                                                   std::string type);
-   Burn*                         CreateBurn(std::string satname, bool isImpulsive = false);
+   Burn*                         CreateBurn(std::string satname, 
+                                    bool isImpulsive = false);
                                                     
    // The following method signature depends on an open scripting issue: if
    // props and force models are named, the following Create method should use
@@ -167,13 +168,19 @@ protected:
                                                 GmatCommand *cmd);
    
    bool                          InterpretPropSetupParameter(GmatBase *obj, 
-                                                StringArray& items,
-                                                std::vector<std::string*>::iterator& phrase, 
-                                                Integer index = 1);
-   bool                          InterpretCoordinateSystemParameter(GmatBase *obj,
-                                                StringArray& items,
-                                                std::vector<std::string*>::iterator& phrase,
-                                                Integer index = 1);
+                                    StringArray& items,
+                                    std::vector<std::string*>::iterator& phrase, 
+                                    Integer index = 1);
+   bool                          InterpretCoordinateSystemParameter(
+                                    GmatBase *obj,
+                                    StringArray& items,
+                                    std::vector<std::string*>::iterator& phrase,
+                                    Integer index = 1);
+   bool                          InterpretGlobalSetting(const StringArray &sar, 
+                                    const std::string &rhs);
+   bool                          Interpreter::InterpretSolarSetting(
+                                    const StringArray &sar, 
+                                    const std::string &rhs);
 
    // Methods used to break apart lines of script
    void                          ChunkLine(void);

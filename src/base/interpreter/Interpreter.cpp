@@ -1681,6 +1681,39 @@ bool Interpreter::InterpretCoordinateSystemParameter(GmatBase *obj,
 }
 
 
+bool Interpreter::InterpretGlobalSetting(const StringArray &sar, 
+   const std::string &rhs)
+{
+   #ifdef DEBUG_GLOBAL_INTERPRETING
+      MessageInterface::ShowMessage("Setting global for %s to %s\n", 
+         sar[0].c_str(), rhs.c_str());
+   #endif
+
+   if (sar[0] == "SolarSystem")
+      return InterpretSolarSetting(sar, rhs);
+      
+   return true;
+}
+
+
+bool Interpreter::InterpretSolarSetting(const StringArray &sar, 
+   const std::string &rhs)
+{
+   if (sar[1] == "Ephemeris")
+   {
+      StringArray ephems = SeparateBraces(rhs);
+      #ifdef DEBUG_GLOBAL_INTERPRETING
+         for (StringArray::iterator i = ephems.begin(); i != ephems.end(); ++i)
+            MessageInterface::ShowMessage("   %s\n", i->c_str());
+      #endif
+      moderator->SetPlanetaryFileTypesInUse(ephems);
+      return true;
+   }
+   
+   return false;
+}
+
+
 //------------------------------------------------------------------------------
 // void ChunkLine(void)
 //------------------------------------------------------------------------------

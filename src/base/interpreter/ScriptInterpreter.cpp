@@ -325,6 +325,25 @@ bool ScriptInterpreter::Parse()
 
             StringArray sar = SeparateDots(**phrase);
             std::string objName = sar[0];
+
+            // Handle global objects -- currently only the SolarSystem
+            if ( (objName == "SolarSystem")
+                 // Add others here
+               )
+            {
+               ++phrase;
+               if ((**phrase) != "=")
+                  throw InterpreterException("Line \"" + line + 
+                     "\" is attempting to set a global parameter;" +
+                     " an '=' is required\n");
+               ++phrase;
+               if (InterpretGlobalSetting(sar, (**phrase)))
+               {
+                  chunks.clear();
+                  return true;
+               }
+            }
+            
             GmatBase *obj = FindObject(objName);
             if (obj == NULL)
             {
