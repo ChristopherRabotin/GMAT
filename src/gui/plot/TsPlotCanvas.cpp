@@ -15,8 +15,12 @@ bool TsPlotCanvas::defaultLabels = false;
 
 
 BEGIN_EVENT_TABLE(TsPlotCanvas, wxWindow)
-   EVT_PAINT(TsPlotCanvas::OnPaint)
-   EVT_MOUSE_EVENTS(TsPlotCanvas::OnMouseEvent)
+   EVT_PAINT         (TsPlotCanvas::OnPaint)
+   EVT_MOUSE_EVENTS  (TsPlotCanvas::OnMouseEvent)
+   EVT_MENU          (ID_TOGGLE_GRID, TsPlotCanvas::ToggleGrid)
+   EVT_MENU          (ID_TOGGLE_LEGEND, TsPlotCanvas::ToggleLegend)
+   EVT_MENU          (ID_PLOT_DETAILS, TsPlotCanvas::SetOptions)
+   EVT_MENU          (ID_PLOT_SAVE, TsPlotCanvas::SaveData)
 END_EVENT_TABLE()
 
 
@@ -135,8 +139,23 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
    PrepareDC(dc);
 
    wxPoint pt(event.GetLogicalPosition(dc));
-
-   if (event.LeftDClick())
+   
+   if (event.RightDown())
+   {
+      wxMenu menu;
+      menu.AppendCheckItem(ID_TOGGLE_GRID, "Toggle Grid");
+      menu.AppendCheckItem(ID_TOGGLE_LEGEND, "Toggle Legend");
+      menu.AppendSeparator();
+      menu.Append(ID_PLOT_DETAILS, "Set Plot Options...");
+      menu.AppendSeparator();
+      menu.Append(ID_PLOT_SAVE, "Save Plot");
+      
+      menu.Check(ID_TOGGLE_GRID, hasGrid);
+      menu.Check(ID_TOGGLE_LEGEND, hasLegend);
+      
+      PopupMenu(&menu);
+   }
+   else if (event.LeftDClick())
    {
       changed = true;
       UnZoom();
@@ -481,9 +500,11 @@ void TsPlotCanvas::DrawAxes(wxDC &dc)
       start = div * delta;
 
       #ifdef DEBUG_INTERFACE
-         MessageInterface::ShowMessage("step = %lf, logStep = %lf, factor = %lf, div = %lf\n",
-            step, logStep, factor, div);
-         MessageInterface::ShowMessage("Start = %lf, delta = %lf\n", start, delta);
+         MessageInterface::ShowMessage(
+            "step = %lf, logStep = %lf, factor = %lf, div = %lf\n", step, 
+            logStep, factor, div);
+         MessageInterface::ShowMessage("Start = %lf, delta = %lf\n", start,
+            delta);
       #endif
    }
    else
@@ -491,7 +512,8 @@ void TsPlotCanvas::DrawAxes(wxDC &dc)
       start = currentXMin;
       delta = step;
       #ifdef DEBUG_INTERFACE
-         MessageInterface::ShowMessage("Start = %lf, delta = %lf\n", start, delta);
+         MessageInterface::ShowMessage("Start = %lf, delta = %lf\n", start, 
+            delta);
       #endif
    }
    
@@ -512,7 +534,8 @@ void TsPlotCanvas::DrawAxes(wxDC &dc)
 
    delta = currentYMax - currentYMin;
    #ifdef DEBUG_INTERFACE
-      MessageInterface::ShowMessage("***YMin = %lf, YMax = %lf\n", currentYMin, currentYMax);
+      MessageInterface::ShowMessage("***YMin = %lf, YMax = %lf\n", currentYMin,
+         currentYMax);
    #endif
    step = delta / (yticks+1.0);
    if (delta > 0.0)
@@ -526,9 +549,11 @@ void TsPlotCanvas::DrawAxes(wxDC &dc)
       start = div * delta;
 
       #ifdef DEBUG_INTERFACE
-         MessageInterface::ShowMessage("step = %lf, logStep = %lf, factor = %lf, div = %lf\n",
+         MessageInterface::ShowMessage(
+            "step = %lf, logStep = %lf, factor = %lf, div = %lf\n",
             step, logStep, factor, div);
-         MessageInterface::ShowMessage("Start = %lf, delta = %lf\n", start, delta);
+         MessageInterface::ShowMessage("Start = %lf, delta = %lf\n", start, 
+            delta);
       #endif
    }
    else
@@ -536,7 +561,8 @@ void TsPlotCanvas::DrawAxes(wxDC &dc)
       start = currentYMin;
       delta = step;
       #ifdef DEBUG_INTERFACE
-         MessageInterface::ShowMessage("Start = %lf, delta = %lf\n", start, delta);
+         MessageInterface::ShowMessage("Start = %lf, delta = %lf\n", start, 
+            delta);
       #endif
    }
 
@@ -661,10 +687,11 @@ void TsPlotCanvas::PlotData(wxDC &dc)
          for (j = (*curve)->lastPointPlotted;
               j < (int)((*curve)->abscissa.size())-1; ++j)
          {
-            dc.DrawLine(int(left+((*curve)->abscissa[j]-currentXMin)*xScale + 0.5),
+            dc.DrawLine(
+                  int(left+((*curve)->abscissa[j]-currentXMin)*xScale + 0.5),
                   int(top + (currentYMax-(*curve)->ordinate[j])*yScale + 0.5),
                   int(left+((*curve)->abscissa[j+1]-currentXMin)*xScale + 0.5),
-                  int(top + (currentYMax-(*curve)->ordinate[j+1])*yScale + 0.5));
+                  int(top + (currentYMax-(*curve)->ordinate[j+1])*yScale+0.5));
          }
          (*curve)->lastPointPlotted = j-1;
          ++n;
@@ -719,9 +746,11 @@ void TsPlotCanvas::DrawLegend(wxDC &dc)
    dc.DrawLine(legendRect.x + 1, legendRect.y + 1,
                legendRect.x + legendRect.width - 2, legendRect.y + 1);
    dc.DrawLine(legendRect.x + legendRect.width - 2, legendRect.y + 1,
-               legendRect.x + legendRect.width - 2, legendRect.y + legendRect.height - 2);
+               legendRect.x + legendRect.width - 2, 
+               legendRect.y + legendRect.height - 2);
    dc.DrawLine(legendRect.x + 1, legendRect.y + legendRect.height - 2,
-               legendRect.x + legendRect.width - 2, legendRect.y + legendRect.height - 2);
+               legendRect.x + legendRect.width - 2, 
+               legendRect.y + legendRect.height - 2);
 
    for (j = 0; j < labelCount; ++j)
    {
@@ -758,7 +787,8 @@ void TsPlotCanvas::SetLabel(const std::string &dataName,
    {
       case PLOT_TITLE:
          #ifdef DEBUG_LABELS
-            MessageInterface::ShowMessage("Plot title is %s\n", dataName.c_str());
+            MessageInterface::ShowMessage("Plot title is %s\n", 
+               dataName.c_str());
          #endif
          plotTitle = dataName;
          yLabel = "";
@@ -895,10 +925,12 @@ void TsPlotCanvas::DumpData(const std::string &fn)
               << xLabel << "   " << yLabel << std::endl;
       
       /// @todo Determine a better format to write out the plot data
+      int curveNum = 0;
       for (std::vector<TsPlotCurve*>::iterator i = data.begin();
            i != data.end(); ++i)
       {
          int j;
+         outfile << names[curveNum++] << "\n";
          for (j = 0; j < (int)((*i)->abscissa.size()); ++j)
             outfile << (*i)->abscissa[j] << ", " << (*i)->ordinate[j] << "\n";
          outfile << "\n";
@@ -918,14 +950,16 @@ void TsPlotCanvas::ClearAllCurveData()
       (*i)->Clear();
 
    #if DEBUG_TS_CANVAS
-   MessageInterface::ShowMessage("TsPlotCanvas::ClearAllCurveData() clearing dc\n");
+   MessageInterface::ShowMessage(
+      "TsPlotCanvas::ClearAllCurveData() clearing dc\n");
    #endif
 
    //loj: 6/15/05 Added
    // Clear plot area and redraw other area
    wxClientDC dc(this);
    
-   dc.SetClippingRegion(plotArea.x, plotArea.y, plotArea.width, plotArea.height);
+   dc.SetClippingRegion(plotArea.x, plotArea.y, plotArea.width, 
+      plotArea.height);
    dc.SetBackground(wxBrush(plotColor, wxTRANSPARENT));
    dc.Clear();
    dc.DestroyClippingRegion();
@@ -961,6 +995,13 @@ void TsPlotCanvas::ShowGrid(bool show)
 }
 
 
+void TsPlotCanvas::ToggleGrid(wxCommandEvent& event)
+{
+   hasGrid = (hasGrid ? false : true);
+   wxWindow::Refresh(true);
+}
+
+
 void TsPlotCanvas::ShowLegend(bool show)
 {
    #ifdef DEBUG_INTERFACE
@@ -968,6 +1009,26 @@ void TsPlotCanvas::ShowLegend(bool show)
          (show ? "true" : "false"));
    #endif
    hasLegend = show;
+}
+
+
+void TsPlotCanvas::ToggleLegend(wxCommandEvent& event)
+{
+   hasLegend = (hasLegend ? false : true);
+   wxWindow::Refresh(true);
+}
+
+
+void TsPlotCanvas::SetOptions(wxCommandEvent& event)
+{
+   wxMessageDialog dlg(this, "Plot options here");
+   dlg.ShowModal();
+}
+
+
+void TsPlotCanvas::SaveData(wxCommandEvent& event)
+{
+   DumpData("");
 }
 
 

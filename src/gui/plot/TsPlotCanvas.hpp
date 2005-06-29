@@ -41,7 +41,11 @@ public:
       PLOT_AREA,
       XAXIS,
       YAXIS,
-      YAXIS2
+      YAXIS2,
+      ID_TOGGLE_GRID,
+      ID_TOGGLE_LEGEND,
+      ID_PLOT_DETAILS,
+      ID_PLOT_SAVE
    };
 
 public:
@@ -142,7 +146,12 @@ protected:
    void Rescale(wxDC &dc);
    
    void DrawGrid(wxDC &dc);
+   void ToggleGrid(wxCommandEvent& event);
    void DrawLegend(wxDC &dc);
+   void ToggleLegend(wxCommandEvent& event);
+
+   void SetOptions(wxCommandEvent& event);
+   void SaveData(wxCommandEvent& event);
 
    void Zoom(const wxRect &region);
    void UnZoom();

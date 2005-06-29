@@ -958,7 +958,12 @@ void MdiChildTrajFrame::UpdatePlot(const StringArray &scNames, const Real &time,
                           scColors);
       
       if (updateCanvas)
+      {
          Update();
+         #ifndef __WXMSW__
+            ::wxYield();
+         #endif
+      }
    }
 }
 

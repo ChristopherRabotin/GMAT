@@ -8,7 +8,7 @@ TARGETS = $(WXTARGET)
 LIBS = ../base/lib/libGmatGui.a 
 
 MATLAB_LIBRARIES = -leng -lmx -lut -lmat -lpthread \
-                   -lstdc++ -lgcc_s -licudata -licui18n \
+                   -lgcc_s -licudata -licui18n \
                    -licuuc -lustdio -lz
 
 LINK_FLAGS = `wx-config --libs` -lwx_gtk2_gl-2.6 -L/usr/local/matlab704/bin/glnx86
