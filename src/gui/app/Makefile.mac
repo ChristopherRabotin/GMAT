@@ -2,15 +2,14 @@
 # Module:     Makefile.mac for app directory 
 # Created:    Joey Gurgnaus 
 # Date:       2004/02/13
+# Modified:   2005/06/29 - Replaced *.cpp with wildcard
 #
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library 
-SRC = GmatApp.cpp GmatAppData.cpp GmatConnection.cpp GmatMainFrame.cpp \
-	GmatNotebook.cpp GmatServer.cpp GmatTreeItemData.cpp \
-	MissionTreeItemData.cpp ResourceTree.cpp
+SRC := $(wildcard *.cpp)
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/gui/inc.mac

@@ -2,14 +2,14 @@
 # Module:     Makefile.mac for gui/command directory 
 # Created:    Wendy Shoan
 # Date:       2004/10/21
+# Modified:   2005/06/29 - J. Gurganus - replaced *.cpp with wildcard
 #
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = AchievePanel.cpp CallFunctionPanel.cpp ManeuverPanel.cpp PropagatePanel.cpp \
-	SavePanel.cpp TogglePanel.cpp VaryPanel.cpp
+SRC := $(wildcard *.cpp)
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/gui/inc.mac
