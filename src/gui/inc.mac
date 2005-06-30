@@ -7,6 +7,8 @@
 #             2004/09/24 - J. Gurgnaus - cleaned up
 #             2004/09/27 - J. Gurgnaus - removed WX_HOME and WXBASE 
 #             2004/12/23 - J. Gurgnaus - included coordsystem directory
+#             2005/06/29 - J. Gurgnaus - Added hardware, function, and 
+#                                        output directories
 
 #
 # Program to make (library)
@@ -45,11 +47,14 @@ CTRLLOGIC  = $(PROJECT_ROOT)/gui/controllogic
 COORDSYS   = $(PROJECT_ROOT)/gui/coordsystem
 FORCEMODEL = $(PROJECT_ROOT)/gui/forcemodel
 FOUNDATION = $(PROJECT_ROOT)/gui/foundation
+FUNCTION   = $(PROJECT_ROOT)/gui/function
+HARDWARE   = $(PROJECT_ROOT)/gui/hardware
 INCLUDE    = $(PROJECT_ROOT)/gui/include
 XPM        = $(PROJECT_ROOT)/gui/include/bitmaps
 INC_IL     = $(PROJECT_ROOT)/gui/include/il
 MANEUVER   = $(PROJECT_ROOT)/gui/maneuver
 MISSION    = $(PROJECT_ROOT)/gui/mission
+OUTPUT     = $(PROJECT_ROOT)/gui/output
 PLOT       = $(PROJECT_ROOT)/gui/plot
 PROPAGATOR = $(PROJECT_ROOT)/gui/propagator
 RESOURCE   = $(PROJECT_ROOT)/gui/resource
@@ -58,7 +63,7 @@ SOLVER     = $(PROJECT_ROOT)/gui/solver
 SPACECRAFT = $(PROJECT_ROOT)/gui/spacecraft
 VIEW       = $(PROJECT_ROOT)/gui/view
 
-BASE_INCS = -I$(B_BURN) -I$(B_COMMAND) -I$(B_CONFIGS) -I$(B_COORDSYS \
+BASE_INCS = -I$(B_BURN) -I$(B_COMMAND) -I$(B_CONFIGS) -I$(B_COORDSYS) \
 	-I$(B_EXECUTIVE) -I$(B_FACTORY) -I$(B_FORCEMODEL) -I$(B_FOUNDATION) \
 	-I$(B_FUNCTION) -I$(B_INCLUDE) -I$(B_INTERFACE) \
 	-I$(B_INTERPOL) -I$(B_INTERPRET) -I$(B_PARAM) -I$(B_PROPAG) \
@@ -66,15 +71,17 @@ BASE_INCS = -I$(B_BURN) -I$(B_COMMAND) -I$(B_CONFIGS) -I$(B_COORDSYS \
 	-I$(B_STOPCOND) -I$(B_SUBSCRIBER) -I$(B_UTIL)
 
 GUI_INCS = -I$(APP) -I$(BURN) -I$(COMMAND) -I$(CTRLLOGIC) -I$(COORDSYS) \
-	-I$(FORCEMODEL) -I$(FOUNDATION) \
-	-I$(INCLUDE) -I$(XPM) -I$(INC_IL) -I$(MANEUVER) \
-	-I$(MISSION) -I$(PLOT) -I$(PROPAGATOR) -I$(RESOURCE) -I$(SOLVER) \
-	-I$(SOLARSYS) -I$(SPACECRAFT) -I$(VIEW) -I.
+	-I$(FORCEMODEL) -I$(FOUNDATION) -I$(FUNCTION) -I$(HARDWARE) \
+	-I$(INCLUDE) -I$(XPM) -I$(INC_IL) \
+	-I$(MANEUVER) -I$(MISSION) -I$(OUTPUT) -I$(PLOT) -I$(PROPAGATOR) \
+	-I$(RESOURCE) -I$(SOLVER) -I$(SOLARSYS) -I$(SPACECRAFT) -I$(VIEW) -I.
 
 # Object modules for library
 OBJ = $(SRC:.cpp=.o)
 #
-CXXFLAGS = $(BASE_INCS) $(GUI_INCS) $(WXFLAGS) `$(WX_HOME)/wx-config --cxxflags` -dynamic -Wall
+CXXFLAGS = $(BASE_INCS) $(GUI_INCS) $(WXFLAGS) \
+	`$(WX_HOME)/wx-config --cxxflags` -dynamic -Wall
+
 CPP = g++ $(CXXFLAGS) $(TESTFLAGS)
 #
 # Default suffix rule
