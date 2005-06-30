@@ -153,7 +153,12 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
       menu.Check(ID_TOGGLE_GRID, hasGrid);
       menu.Check(ID_TOGGLE_LEGEND, hasLegend);
       
-      PopupMenu(&menu);
+      #ifdef __WXMSW__
+         // Windows seems to need a location here.
+         PopupMenu(&menu, pt);
+      #else
+         PopupMenu(&menu);
+      #endif
    }
    else if (event.LeftDClick())
    {
