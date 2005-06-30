@@ -5,15 +5,14 @@
 # Modified:   2004/04/19 - Added BallisticsMassPanel.cpp and OrbitPanel.cpp
 #             2004/08/09 - W. Shoan added SpaceObjectSelectDialog & 
 #                          FormationSetupPanel
+#             2005/06/29 - J.Gurganus - replaced *.cpp with wildcard 
 #
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = BallisticsMassPanel.cpp FormationSetupPanel.cpp OrbitPanel.cpp \
-	SpacecraftPanel.cpp SpaceObjectSelectDialog.cpp TankPanel.cpp \
-	ThrusterCoefficientDialog.cpp ThrusterPanel.cpp
+SRC := $(wildcard *.cpp) 
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/gui/inc.mac
