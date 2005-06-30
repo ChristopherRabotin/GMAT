@@ -5,10 +5,12 @@
 # Modified:   2004/05/21 - Added controllogic directory
 #             2004/09/24 - Added 'testing' target, but nothing.
 #             2004/12/09 - Added coordsystem directory
+#             2005/06/30 - Added function, hardware, and output directories.
 #
 #
 SUBS = app burn command controllogic coordsystem foundation forcemodel \
-	maneuver mission plot propagator solarsys solver spacecraft view
+	function hardware maneuver mission output plot propagator solarsys \
+	solver spacecraft view
 
 # Holding 'resource' directory for later
 
