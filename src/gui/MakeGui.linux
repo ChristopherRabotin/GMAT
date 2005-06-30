@@ -13,9 +13,13 @@ MATLAB_LIBRARIES = -leng -lmx -lut -lmat -lpthread \
 
 LINK_FLAGS = `wx-config --libs` -lwx_gtk2_gl-2.6 -L/usr/local/matlab704/bin/glnx86
  
-all: $(TARGETS)
+all: prep $(TARGETS)
 
 gui: $(WXTARGET)
+
+prep:
+	rm -f app/GmatMainFrame.o
+	mkdir -p ../bin
 
 CPP = g++
 
