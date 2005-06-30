@@ -193,6 +193,7 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
       }
       if (event.Dragging())
       {
+         int logfun = dc.GetLogicalFunction();
          dc.SetLogicalFunction(wxINVERT);
          if (zooming)
          {
@@ -214,6 +215,7 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
             oldY = pt.y;
             dc.DrawLine(mouseRect.x, mouseRect.y, oldX, oldY);
          }
+         dc.SetLogicalFunction(logfun);
       }
       if (event.LeftUp() && (movingLegend || zooming))
       {
@@ -260,6 +262,15 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
          }
 
          if (zooming)
+         {
+            // First clear the rubberband, in case no zoom is made
+            int logfun = dc.GetLogicalFunction();
+            dc.SetLogicalFunction(wxINVERT);
+            dc.DrawLine(mouseRect.x, mouseRect.y, mouseRect.x, oldY);
+            dc.DrawLine(mouseRect.x, mouseRect.y, oldX, mouseRect.y);
+            dc.DrawLine(oldX, mouseRect.y, oldX, oldY);
+            dc.DrawLine(mouseRect.x, oldY, oldX, oldY);
+            dc.SetLogicalFunction(logfun);
             if (plotArea.Inside(pt))
                if ((mouseRect.width > xSensitivity) &&
                    (mouseRect.height > ySensitivity))
@@ -267,6 +278,7 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
                   Zoom(mouseRect);
                   changed = true;
                }
+         }
       }
    }
 
