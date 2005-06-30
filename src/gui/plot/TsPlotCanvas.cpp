@@ -137,6 +137,7 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
 
    wxClientDC dc(this);
    PrepareDC(dc);
+   static int oldX, oldY;
 
    wxPoint pt(event.GetLogicalPosition(dc));
    
@@ -171,6 +172,8 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
       {
          mouseRect.x = pt.x;
          mouseRect.y = pt.y;
+         oldX = pt.x;
+         oldY = pt.y;
 
          // First check to see if the user is dragging the legend
          if (hasLegend)
@@ -186,6 +189,30 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
             #endif
             if (plotArea.Inside(pt))
                zooming = true;
+         }
+      }
+      if (event.Dragging())
+      {
+         dc.SetLogicalFunction(wxINVERT);
+         if (zooming)
+         {
+            dc.DrawLine(mouseRect.x, mouseRect.y, mouseRect.x, oldY);
+            dc.DrawLine(mouseRect.x, mouseRect.y, oldX, mouseRect.y);
+            dc.DrawLine(oldX, mouseRect.y, oldX, oldY);
+            dc.DrawLine(mouseRect.x, oldY, oldX, oldY);
+            oldX = pt.x;
+            oldY = pt.y;
+            dc.DrawLine(mouseRect.x, mouseRect.y, mouseRect.x, oldY);
+            dc.DrawLine(mouseRect.x, mouseRect.y, oldX, mouseRect.y);
+            dc.DrawLine(oldX, mouseRect.y, oldX, oldY);
+            dc.DrawLine(mouseRect.x, oldY, oldX, oldY);
+         }
+         else
+         {
+            dc.DrawLine(mouseRect.x, mouseRect.y, oldX, oldY);
+            oldX = pt.x;
+            oldY = pt.y;
+            dc.DrawLine(mouseRect.x, mouseRect.y, oldX, oldY);
          }
       }
       if (event.LeftUp() && (movingLegend || zooming))
