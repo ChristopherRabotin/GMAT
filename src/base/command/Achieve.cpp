@@ -382,6 +382,20 @@ bool Achieve::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == goalID) {
       goalString = value;
+      // Goal can be either a parameter or a number; ConstructGoal determines this.
+      Real realValue;
+      if (ConstructGoal(value.c_str()))
+         // It's a parameter; just set dummy value here -- gets reset on execution
+         realValue = 54321.0;
+      else
+         realValue = atof(goalString.c_str());
+
+      #ifdef DEBUG_ACHIEVE
+         MessageInterface::ShowMessage("GoalString = '%s'\n",
+            goalString.c_str());
+      #endif
+
+      goal = realValue;
       return true;
    }
 
@@ -524,7 +538,12 @@ bool Achieve::InterpretAction()
       // It's a parameter; just set dummy value here -- gets reset on execution
       value = 54321.0;    
    else
-      value = atof(&str[loc]);
+      value = atof(goalString.c_str());
+
+   #ifdef DEBUG_ACHIEVE
+      MessageInterface::ShowMessage("GoalString = '%s'\n", goalString.c_str());
+   #endif
+
    goal = value;
 
    // Find perts
@@ -550,6 +569,9 @@ bool Achieve::InterpretAction()
 //------------------------------------------------------------------------------
 bool Achieve::ConstructGoal(const char* str)
 {
+   #ifdef DEBUG_ACHIEVE
+      MessageInterface::ShowMessage("ConstructGoal(%s) called\n", str);
+   #endif
    // Skip white space
    Integer start = 0, dot, end;
    while (str[start] == ' ')
