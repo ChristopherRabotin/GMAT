@@ -89,7 +89,8 @@ void SpacecraftPanel::Create()
     spacecraftNotebook = new wxNotebook( this, ID_NOTEBOOK, wxDefaultPosition,
                          wxDefaultSize, wxGROW );
     spacecraftNotebook->SetBackgroundColour(GetBackgroundColour());
-    spacecraftNotebook->SetForegroundColour(GetBackgroundColour());
+//    spacecraftNotebook->SetForegroundColour(GetBackgroundColour());
+    spacecraftNotebook->SetForegroundColour(GetForegroundColour());
 
 //    actuators = new wxPanel( spacecraftNotebook, -1 );
     actuatorNotebook = new wxNotebook( spacecraftNotebook, ID_NOTEBOOK, wxDefaultPosition,
