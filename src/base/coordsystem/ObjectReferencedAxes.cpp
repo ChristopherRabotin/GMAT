@@ -90,6 +90,34 @@ zAxis         ("")
 }
 
 //---------------------------------------------------------------------------
+//  ObjectReferencedAxes(const std::string &itsType,
+//                       const std::string &itsName);
+//---------------------------------------------------------------------------
+/**
+ * Constructs base ObjectReferencedAxes structures
+ * (constructor).
+ *
+ * @param itsType Type for the object.
+ * @param itsName Name for the object.
+ *
+ */
+//---------------------------------------------------------------------------
+ObjectReferencedAxes::ObjectReferencedAxes(const std::string &itsType,
+                                           const std::string &itsName) :
+DynamicAxes(itsType,itsName),
+primaryName   (""),
+secondaryName (""),
+primary       (NULL),
+secondary     (NULL),
+xAxis         (""),
+yAxis         (""),
+zAxis         ("")
+{
+   objectTypeNames.push_back("ObjectReferencedAxes");
+   parameterCount = ObjectReferencedAxesParamCount;
+}
+
+//---------------------------------------------------------------------------
 //  ObjectReferencedAxes(const ObjectReferencedAxes &orAxes);
 //---------------------------------------------------------------------------
 /**
@@ -538,7 +566,7 @@ bool ObjectReferencedAxes::SetStringParameter(const std::string &label,
 //                         const std::string &name)
 //------------------------------------------------------------------------------
 /**
- * This method returns a reference object from the CoordinateBase class.
+ * This method returns a reference object from the ObjectReferencedAxes class.
  *
  * @param type  type of the reference object requested
  * @param name  name of the reference object requested
@@ -613,7 +641,7 @@ const StringArray& ObjectReferencedAxes::GetRefObjectNameArray(const Gmat::Objec
 //                    const std::string &name)
 //------------------------------------------------------------------------------
 /**
- * This method sets a reference object for the CoordinateBase class.
+ * This method sets a reference object for the ObjectReferencedAxes class.
  *
  * @param obj   pointer to the reference object
  * @param type  type of the reference object

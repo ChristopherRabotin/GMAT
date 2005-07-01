@@ -32,6 +32,9 @@ public:
 
    // default constructor
    ObjectReferencedAxes(const std::string &itsName = "");
+   // another constructor - for derived classes to call
+   ObjectReferencedAxes(const std::string &itsType,
+                        const std::string &itsName);
    // copy constructor
    ObjectReferencedAxes(const ObjectReferencedAxes &orAxes);
    // operator = for assignment
