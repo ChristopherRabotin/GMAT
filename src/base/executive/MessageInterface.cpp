@@ -266,11 +266,11 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string
       wxLogError(wxT(wxString(msg.c_str())));
       wxLog::FlushActive();
       break;
-   case Gmat::WARNING_:
+   case Gmat::WARNING_: // May not show message right away
       wxLogWarning(wxT(wxString(msg.c_str())));
       wxLog::FlushActive();
       break;
-   case Gmat::INFO_:
+   case Gmat::INFO_:    // Shows message right away
       (void)wxMessageBox(wxT(wxString(msg.c_str())),
                          wxT("Information"));
       break;
