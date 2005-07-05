@@ -128,7 +128,7 @@ protected:
    std::string mWireFrame;
    std::string mTargetStatus;
    std::string mOverlapPlot;
-   std::string mUseViewPointInfo;
+   std::string mLockView;
    std::string mPerspectiveMode;
    std::string mUseFixedFov;
    

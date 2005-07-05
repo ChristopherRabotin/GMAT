@@ -58,7 +58,7 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
    "WireFrame",
    "TargetStatus",
    "Overlap",
-   "UseViewPointInfo",
+   "LockView",
    "PerspectiveMode",
    "UseFixedFov",
    "DataCollectFrequency",
@@ -86,11 +86,11 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
    Gmat::STRING_TYPE,            //"WireFrame"
    Gmat::STRING_TYPE,            //"TargetStatus"
    Gmat::STRING_TYPE,            //"Overlap"
-   Gmat::STRING_TYPE,            //"UseViewPointInfo"
+   Gmat::STRING_TYPE,            //"LockView"
    Gmat::STRING_TYPE,            //"PerspectiveMode"
    Gmat::STRING_TYPE,            //"UseFixedFov"
    Gmat::INTEGER_TYPE,           //"DataCollectFrequency"
-   Gmat::INTEGER_TYPE,           //"DataCollectFrequency"
+   Gmat::INTEGER_TYPE,           //"UpdatePlotFrequency"
 };
 
 
@@ -120,7 +120,7 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mWireFrame = "Off";
    mTargetStatus = "Off";
    mOverlapPlot = "Off";
-   mUseViewPointInfo = "On";
+   mLockView = "Off";
    mPerspectiveMode = "Off";
    mUseFixedFov = "Off";
    
@@ -192,7 +192,7 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mWireFrame = ogl.mWireFrame;
    mTargetStatus = ogl.mTargetStatus;
    mOverlapPlot = ogl.mOverlapPlot;
-   mUseViewPointInfo = ogl.mUseViewPointInfo;
+   mLockView = ogl.mLockView;
    mPerspectiveMode = ogl.mPerspectiveMode;
    mUseFixedFov = ogl.mUseFixedFov;
    
@@ -311,7 +311,7 @@ bool OpenGlPlot::Initialize()
              (instanceName, mOldName, mViewCoordSysName, mSolarSystem,
               (mEclipticPlane == "On"), (mEquatorialPlane == "On"),
               (mWireFrame == "On"), (mOverlapPlot == "On"),
-              (mUseViewPointInfo == "On"), (mPerspectiveMode == "On")))
+              (mLockView == "On"), (mPerspectiveMode == "On")))
          {
             #if DEBUG_OPENGL_INIT
             MessageInterface::ShowMessage
@@ -1041,7 +1041,7 @@ std::string OpenGlPlot::GetStringParameter(const Integer id) const
    case OVERLAP_PLOT:
       return mOverlapPlot;
    case USE_VIEWPOINT_INFO:
-      return mUseViewPointInfo;
+      return mLockView;
    case PERSPECTIVE_MODE:
       return mPerspectiveMode;
    case USE_FIXED_FOV:
@@ -1114,7 +1114,7 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
       mOverlapPlot = value;
       return true;
    case USE_VIEWPOINT_INFO:
-      mUseViewPointInfo = value;
+      mLockView = value;
       return true;
    case PERSPECTIVE_MODE:
       mPerspectiveMode = value;

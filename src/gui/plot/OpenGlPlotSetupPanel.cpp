@@ -138,6 +138,48 @@ void OpenGlPlotSetupPanel::Create()
    Integer bsize = 2; // border size
    
    //------------------------------------------------------
+   // update option
+   //------------------------------------------------------
+   wxStaticText *dataCollectFreqLabel1 =
+      new wxStaticText(this, -1, wxT("Collect data every "),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   mDataCollectFreqTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                     wxDefaultPosition, wxSize(40, -1), 0);
+   wxStaticText *dataCollectFreqLabel2 =
+      new wxStaticText(this, -1, wxT("step"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   wxStaticText *updatePlotFreqLabel1 =
+      new wxStaticText(this, -1, wxT("Update plot every "),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   mUpdatePlotFreqTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                     wxDefaultPosition, wxSize(40, -1), 0);
+   wxStaticText *updatePlotFreqLabel2 =
+      new wxStaticText(this, -1, wxT("cycle"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   
+   wxBoxSizer *colFreqBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+   colFreqBoxSizer->Add(mDataCollectFreqTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   colFreqBoxSizer->Add(dataCollectFreqLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   wxBoxSizer *updFreqBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+   updFreqBoxSizer->Add(mUpdatePlotFreqTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   updFreqBoxSizer->Add(updatePlotFreqLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   wxBoxSizer *updateBoxSizer = new wxBoxSizer(wxVERTICAL);
+   updateBoxSizer->Add(dataCollectFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
+   updateBoxSizer->Add(colFreqBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   updateBoxSizer->Add(updatePlotFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
+   updateBoxSizer->Add(updFreqBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   wxStaticBox *updateStaticBox =
+      new wxStaticBox(this, -1, wxT("Data Collect/Update"));
+   wxStaticBoxSizer *updateStaticSizer =
+      new wxStaticBoxSizer(updateStaticBox, wxVERTICAL);
+   updateStaticSizer->Add(updateBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   //------------------------------------------------------
    // plot option
    //------------------------------------------------------
    mPlotCheckBox =
@@ -163,9 +205,9 @@ void OpenGlPlotSetupPanel::Create()
    mOverlapCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Overlap Plot"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
-
-   mUseViewPointInfoCheckBox =
-      new wxCheckBox(this, CHECKBOX, wxT("Use ViewPoint Info"),
+   
+   mLockViewCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Lock View"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
    
    mPerspectiveModeCheckBox =
@@ -190,7 +232,7 @@ void OpenGlPlotSetupPanel::Create()
    plotOptionBoxSizer->Add(mEclipticPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    plotOptionBoxSizer->Add(mEquatorialPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    plotOptionBoxSizer->Add(mOverlapCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(mUseViewPointInfoCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(mLockViewCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    plotOptionBoxSizer->Add(mPerspectiveModeCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    plotOptionBoxSizer->Add(mUseFixedFovCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    
@@ -200,8 +242,8 @@ void OpenGlPlotSetupPanel::Create()
    plotOptionBoxSizer->Add(fovBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
    wxStaticBox *plotOptionStaticBox = new wxStaticBox(this, -1, wxT("Plot Option"));
-   wxStaticBoxSizer *plotOptionStaticSizer
-      = new wxStaticBoxSizer(plotOptionStaticBox, wxVERTICAL);
+   wxStaticBoxSizer *plotOptionStaticSizer =
+      new wxStaticBoxSizer(plotOptionStaticBox, wxVERTICAL);
    plotOptionStaticSizer->Add(plotOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
    //------------------------------------------------------
@@ -211,16 +253,14 @@ void OpenGlPlotSetupPanel::Create()
       new wxStaticText(this, -1, wxT("Spacecraft"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    wxArrayString empty;
-   mSpacecraftListBox =
-      //theGuiManager->GetSpacecraftListBox(this, ID_LISTBOX, wxSize(150,65), empty); //loj: 6/2/05
-      theGuiManager->GetSpacecraftListBox(this, ID_LISTBOX, wxSize(150,65), &mExcludedScList);
+   mSpacecraftListBox = theGuiManager->
+      GetSpacecraftListBox(this, ID_LISTBOX, wxSize(150,65), &mExcludedScList);
    
    wxStaticText *coAvailableLabel =
       new wxStaticText(this, -1, wxT("Celestial Object"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
-   mCelesObjectListBox =
-      //theGuiManager->GetConfigBodyListBox(this, ID_LISTBOX, wxSize(150,65), empty);
-      theGuiManager->GetCelestialPointListBox(this, ID_LISTBOX, wxSize(150,65), empty);
+   mCelesObjectListBox = theGuiManager->
+      GetCelestialPointListBox(this, ID_LISTBOX, wxSize(150,65), empty);
    
    wxBoxSizer *availObjBoxSizer = new wxBoxSizer(wxVERTICAL);
    
@@ -392,11 +432,11 @@ void OpenGlPlotSetupPanel::Create()
    mViewDirVectorSizer->Add(mViewDir1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewDirVectorSizer->Add(mViewDir2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewDirVectorSizer->Add(mViewDir3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-
+   
    
    // view definition sizer
    mViewDefSizer = new wxFlexGridSizer(3, 0, 0);
-
+   
    mViewDefSizer->Add(coordSysLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
    mViewDefSizer->Add(mCoordSysComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewDefSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -412,16 +452,16 @@ void OpenGlPlotSetupPanel::Create()
    mViewDefSizer->Add(viewScaleFactorLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
    mViewDefSizer->Add(mViewScaleFactorTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewDefSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-
+   
    mViewDefSizer->Add(viewDirectionLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
    mViewDefSizer->Add(mViewDirectionComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewDefSizer->Add(mViewDirVectorSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-
+   
    wxStaticBox *viewDefStaticBox = new wxStaticBox(this, -1, wxT("View Definition"));
    wxStaticBoxSizer *viewDefStaticSizer
       = new wxStaticBoxSizer(viewDefStaticBox, wxVERTICAL);
    viewDefStaticSizer->Add(mViewDefSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-
+   
    //------------------------------------------------------
    // view up definition
    //------------------------------------------------------
@@ -455,27 +495,29 @@ void OpenGlPlotSetupPanel::Create()
 //       = new wxStaticBoxSizer(viewDefStaticBox, wxHORIZONTAL);
 //    viewDefStaticSizer->Add(viewDefStaticSizer, 0, wxALIGN_LEFT|wxALL, bsize);
 //    viewDefStaticSizer->Add(upDefStaticSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-
+   
    
    #if DEBUG_OPENGL_PANEL_CREATE
-      MessageInterface::ShowMessage
-         ("OpenGlPlotSetupPanel::Create() put in the order...\n");
+   MessageInterface::ShowMessage
+      ("OpenGlPlotSetupPanel::Create() put in the order...\n");
    #endif
    
    //------------------------------------------------------
    // put in the order
    //------------------------------------------------------    
    wxBoxSizer *topViewBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+   topViewBoxSizer->Add(updateStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    topViewBoxSizer->Add(plotOptionStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    topViewBoxSizer->Add(viewObjectStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   wxBoxSizer *bottomViewBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-   bottomViewBoxSizer->Add(viewDefStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   bottomViewBoxSizer->Add(upDefStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   //BoxSizer *mBottomViewSizer = new wxBoxSizer(wxHORIZONTAL);
+   mBottomViewSizer = new wxBoxSizer(wxHORIZONTAL);
+   mBottomViewSizer->Add(viewDefStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mBottomViewSizer->Add(upDefStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    pageBoxSizer->Add(topViewBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   pageBoxSizer->Add(bottomViewBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   pageBoxSizer->Add(mBottomViewSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
    //------------------------------------------------------
    // add to parent sizer
@@ -483,9 +525,9 @@ void OpenGlPlotSetupPanel::Create()
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    #if DEBUG_OPENGL_PANEL_CREATE
-      MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() exiting...\n");
+   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() exiting...\n");
    #endif
-
+   
 }
 
 
@@ -501,6 +543,12 @@ void OpenGlPlotSetupPanel::LoadData()
    try
    {
       // load data from the core engine
+      wxString str;
+      str.Printf("%d", mOpenGlPlot->GetIntegerParameter("DataCollectFrequency"));
+      mDataCollectFreqTextCtrl->SetValue(str);
+      str.Printf("%d", mOpenGlPlot->GetIntegerParameter("UpdatePlotFrequency"));
+      mUpdatePlotFreqTextCtrl->SetValue(str);
+      
       mPlotCheckBox->SetValue(mOpenGlPlot->IsActive());
       mEquatorialPlaneCheckBox->
          SetValue(mOpenGlPlot->GetStringParameter("EquatorialPlane") == "On");
@@ -512,14 +560,13 @@ void OpenGlPlotSetupPanel::LoadData()
          SetValue(mOpenGlPlot->GetStringParameter("TargetStatus") == "On");
       mOverlapCheckBox->
          SetValue(mOpenGlPlot->GetStringParameter("Overlap") == "On");
-      mUseViewPointInfoCheckBox->
-         SetValue(mOpenGlPlot->GetStringParameter("UseViewPointInfo") == "On");
+      mLockViewCheckBox->
+         SetValue(mOpenGlPlot->GetStringParameter("LockView") == "On");
       mPerspectiveModeCheckBox->
          SetValue(mOpenGlPlot->GetStringParameter("PerspectiveMode") == "On");
       mUseFixedFovCheckBox->
          SetValue(mOpenGlPlot->GetStringParameter("UseFixedFov") == "On");
       
-      wxString str;
       str.Printf("%g", mOpenGlPlot->GetRealParameter("FixedFovAngle"));
       mFixedFovTextCtrl->SetValue(str);
       
@@ -762,43 +809,49 @@ void OpenGlPlotSetupPanel::SaveData()
    try
    {
       // save data to core engine
+      long longVal;
+      mDataCollectFreqTextCtrl->GetValue().ToLong(&longVal);
+      mOpenGlPlot->SetIntegerParameter("DataCollectFrequency", longVal);
+      mUpdatePlotFreqTextCtrl->GetValue().ToLong(&longVal);
+      mOpenGlPlot->SetIntegerParameter("UpdatePlotFrequency", longVal);
+      
       mOpenGlPlot->Activate(mPlotCheckBox->IsChecked());
       
       if (mEquatorialPlaneCheckBox->IsChecked())
          mOpenGlPlot->SetStringParameter("EquatorialPlane", "On");
       else
          mOpenGlPlot->SetStringParameter("EquatorialPlane", "Off");
-   
+      
       if (mEclipticPlaneCheckBox->IsChecked())
          mOpenGlPlot->SetStringParameter("CelestialPlane", "On");
       else
          mOpenGlPlot->SetStringParameter("CelestialPlane", "Off");
-   
+      
       if (mWireFrameCheckBox->IsChecked())
          mOpenGlPlot->SetStringParameter("WireFrame", "On");
       else
          mOpenGlPlot->SetStringParameter("WireFrame", "Off");
-   
+      
       if (mTargetStatusCheckBox->IsChecked())
          mOpenGlPlot->SetStringParameter("TargetStatus", "On");
       else
          mOpenGlPlot->SetStringParameter("TargetStatus", "Off");
-
+      
       if (mOverlapCheckBox->IsChecked())
          mOpenGlPlot->SetStringParameter("Overlap", "On");
       else
          mOpenGlPlot->SetStringParameter("Overlap", "Off");
-
-      if (mUseViewPointInfoCheckBox->IsChecked())
-         mOpenGlPlot->SetStringParameter("UseViewPointInfo", "On");
+      
+      if (mLockViewCheckBox->IsChecked())
+         mOpenGlPlot->SetStringParameter("LockView", "On");
       else
-         mOpenGlPlot->SetStringParameter("UseViewPointInfo", "Off");
-
+         mOpenGlPlot->SetStringParameter("LockView", "Off");
+      
       if (mPerspectiveModeCheckBox->IsChecked())
          mOpenGlPlot->SetStringParameter("PerspectiveMode", "On");
       else
          mOpenGlPlot->SetStringParameter("PerspectiveMode", "Off");
-
+      
       if (mUseFixedFovCheckBox->IsChecked())
          mOpenGlPlot->SetStringParameter("UseFixedFov", "On");
       else
@@ -1300,9 +1353,9 @@ void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
          mViewDefSizer->Show(mViewPointRefSizer, true);
       else
          mViewDefSizer->Show(mViewPointRefSizer, false);
-
-      mViewDefSizer->Layout();
-        
+      
+      //mViewDefSizer->Layout();
+      mBottomViewSizer->Layout();
    }
    else if (event.GetEventObject() == mViewPointVectorComboBox)
    {
@@ -1312,9 +1365,9 @@ void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
          mViewDefSizer->Show(mViewPointVectorSizer, true);
       else
          mViewDefSizer->Show(mViewPointVectorSizer, false);
-
-      mViewDefSizer->Layout();
-        
+      
+      //mViewDefSizer >Layout();
+      mBottomViewSizer->Layout();      
    }
    else if (event.GetEventObject() == mViewDirectionComboBox)
    {
@@ -1324,8 +1377,9 @@ void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
          mViewDefSizer->Show(mViewDirVectorSizer, true);
       else
          mViewDefSizer->Show(mViewDirVectorSizer, false);
-        
-      mViewDefSizer->Layout();
+      
+      //mViewDefSizer->Layout();
+      mBottomViewSizer->Layout();      
    }
    
    theApplyButton->Enable();

@@ -59,6 +59,7 @@ public:
    wxString GetGotoObjectName();
    
    // setters
+   void SetEndOfRun(bool flag) {mIsEndOfRun = flag;}
    void SetDistance(float dist) {mAxisLength = dist;}
    void SetUseViewPointInfo(bool flag) {mUseInitialViewPoint = flag;}
    void SetAnimationUpdateInterval(int interval) {mUpdateInterval = interval;}
@@ -243,7 +244,8 @@ private:
    
    // data count
    int  mNumData;
-
+   bool mIsEndOfRun;
+   
    // time
    Real mTime[MAX_DATA];
 
@@ -318,6 +320,10 @@ private:
    bool mViewAnimation;
    bool mHasUserInterrupted;
    int mUpdateInterval;
+
+   // message
+   bool mShowMaxWarning;
+   int  mOverCounter;
    
    // windows specific functions
    bool SetPixelFormatDescriptor();
@@ -350,7 +356,7 @@ private:
    void DrawEclipticPlane(UnsignedInt color);
    void DrawESLine();
    void DrawAxes(bool gci = false);
-   void DrawStatus(int frame);
+   void DrawStatus(const wxString &label, int frame, double time);
    
    // drawing primative objects
    void DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z);

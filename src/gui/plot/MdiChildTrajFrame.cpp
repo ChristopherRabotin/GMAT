@@ -977,7 +977,11 @@ void MdiChildTrajFrame::UpdatePlot(const StringArray &scNames, const Real &time,
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::RefreshPlot()
 {
-   Update();
+   if (mCanvas)
+   {
+      Update();
+      mCanvas->SetEndOfRun(true); //loj: 6/30/05 Added
+   }
 }
 
 

@@ -68,7 +68,7 @@ protected:
    wxCheckBox *mEclipticPlaneCheckBox;
    wxCheckBox *mEquatorialPlaneCheckBox;
    wxCheckBox *mOverlapCheckBox;
-   wxCheckBox *mUseViewPointInfoCheckBox;
+   wxCheckBox *mLockViewCheckBox;
    wxCheckBox *mPerspectiveModeCheckBox;
    wxCheckBox *mUseFixedFovCheckBox;
    
@@ -78,10 +78,12 @@ protected:
    wxComboBox *mViewDirectionComboBox;
    wxComboBox *mViewUpCsComboBox;
    wxComboBox *mViewUpAxisComboBox;
-
+   
    wxStaticText *mTargetColorLabel;
    wxStaticText *mFovLabel;
    
+   wxTextCtrl *mDataCollectFreqTextCtrl;
+   wxTextCtrl *mUpdatePlotFreqTextCtrl;
    wxTextCtrl *mFixedFovTextCtrl;
    wxTextCtrl *mViewScaleFactorTextCtrl;
    wxTextCtrl *mViewPointRef1TextCtrl;
@@ -100,6 +102,7 @@ protected:
    wxBoxSizer *mViewPointRefSizer;
    wxBoxSizer *mViewPointVectorSizer;
    wxBoxSizer *mViewDirVectorSizer;
+   wxBoxSizer *mBottomViewSizer;
    
    // methods inherited from GmatPanel
    virtual void Create();

@@ -112,7 +112,8 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mTextTrajFile = NULL;
    mGlList = 0;
    mNumData = 0;
-
+   mIsEndOfRun = false;
+   
    // projection
    mUsePerspectiveMode = false;
    
@@ -156,7 +157,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mAxisLength = mCurrViewDist;
    mOriginName = "";
    mOriginId = 0;
-
+   
    //original value
    //mRotateAboutXaxis = true;
    //mRotateAboutYaxis = false;
@@ -191,6 +192,10 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mHasUserInterrupted = false;
    mUpdateInterval = 50;
    
+   // message
+   mShowMaxWarning = true;
+   mOverCounter = 0;
+   
    // solar system
    mSolarSystem = solarSys;
       
@@ -206,7 +211,8 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
       mObjectRadius[obj] = 0.0;
    
    // Zoom
-   mMaxZoomIn = 0;
+   //mMaxZoomIn = 0; //loj: 6/30/05
+   mMaxZoomIn = MAX_ZOOM_IN;
    
    // Spacecraft
    mScCount = 0;
@@ -299,6 +305,11 @@ bool TrajPlotCanvas::InitGL()
    SetDefaultGLFont();
 
 //    mInitialized = true;
+   
+   mShowMaxWarning = true;
+   mNumData = 0;
+   mOverCounter = 0;
+   mIsEndOfRun = false;
    
    return true;
 }
@@ -430,7 +441,6 @@ void TrajPlotCanvas::ClearPlot()
    glFlush();
    SwapBuffers();
    mNumData = 0;
-   //mDrawEqPlane = false;
 }
 
 
@@ -828,16 +838,17 @@ void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
    
    // set center view object as origin of the CoordinateSystem if view direction
    // is not an object
-   if (!mUseViewDirectionVector && mViewDirectionObj != NULL) //loj: 5/20
+   if (!mUseViewDirectionVector && mViewDirectionObj != NULL)
    {
       mViewObjName = wxString(mViewDirectionObj->GetName().c_str());
       mViewObjId = GetObjectId(mViewObjName);
    }
+   
+   mMaxZoomIn = mObjMaxZoomIn[mOriginId]; //loj: 6/30/05
 
-   //5.20
    if (mUseInitialViewPoint)
    {
-      mMaxZoomIn = mObjMaxZoomIn[mOriginId];
+      //mMaxZoomIn = mObjMaxZoomIn[mOriginId]; //loj: 6/30/05
       mAxisLength = mMaxZoomIn;
    }
    
@@ -857,7 +868,7 @@ void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
        mViewUpCoordSysName.c_str());
    #endif
 
-}
+} // end SetGlCoordSystem()
 
 
 //------------------------------------------------------------------------------
@@ -916,7 +927,7 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
        vsFactor, lvpRefVec.ToString().c_str(), lvpVec.ToString().c_str(),
        lvdVec.ToString().c_str(), upAxis.c_str(), usevpRefVec, usevpVec, usevdVec);
    #endif
-
+   
    // Set viewpoint ref. object id
    if (!mUseViewPointRefVector && mViewPointRefObj)
    {
@@ -992,7 +1003,7 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
              "ViewDirectionObject is NULL,"
              "so will use default Vector instead.\n");
    }
-   
+      
 } //end SetGlViewOption()
 
 
@@ -1060,7 +1071,7 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
       msgDialog.ShowModal();
       return numDataPoints;
    }
-        
+   
    // initialize GL
    if (!InitGL())
    {
@@ -1127,6 +1138,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    
    if (mNumData < MAX_DATA)
    {
+      mIsEndOfRun = false; //loj: 6/30/05 Added to use in OnMouse()
       mTime[mNumData] = time;
       
       //-------------------------------------------------------
@@ -1291,27 +1303,46 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             #endif
          }
       }
-         
+      
       mNumData++;
       
-   }   
-
-   // Set projection here, because DrawPlot() is called in OnPaint()
-   if (mUseInitialViewPoint)
-   {
-      ComputeProjection(mNumData-1);
-      ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
-      SetProjection();
-   }
+      //} // if (mNumData < MAX_DATA)
+      
+      // Set projection here, because DrawPlot() is called in OnPaint()
+      if (mUseInitialViewPoint)
+      {
+         ComputeProjection(mNumData-1);
+         ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
+         SetProjection();
+      }
+      else
+      {
+         ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
+         SetProjection();
+      }
+      
+      //DrawPlot(); //loj: This will make plotting slower.
+      Refresh(false);
+      
+   } // if (mNumData < MAX_DATA)
    else
    {
-      ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
-      SetProjection();
+      mOverCounter++;
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      DrawStatus("Over Counter#: ", mOverCounter, time);
+      glFlush();
+      SwapBuffers();
+      
+      if (mShowMaxWarning)
+      {
+         mShowMaxWarning = false;
+         wxString msg;
+         msg.Printf("The number of data points exceeded the maximum of %d.\n"
+                    "Please adjust data collect frequency to see the whole plot.\n", MAX_DATA);
+         MessageInterface::PopupMessage(Gmat::INFO_, msg.c_str());
+         MessageInterface::ShowMessage(msg.c_str());
+      }
    }
-   
-   //DrawPlot(); //loj: This will make slow plotting.
-   Refresh(false);
-   
 }
 
 
@@ -1463,10 +1494,16 @@ void TrajPlotCanvas::OnTrajSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
 {
+   // Allow user to change the view during the run
+   // if not using initial viewpoint or
+   // when run ended if using initial viewpoint
+   if (mUseInitialViewPoint && !mIsEndOfRun)
+      return;
+   
    int flippedY;
    int clientWidth, clientHeight;
    int mouseX, mouseY;
-
+   
    mViewAnimation = false;
    
    GetClientSize(&clientWidth, &clientHeight);
@@ -2057,9 +2094,8 @@ void TrajPlotCanvas::ComputeProjection(int frame)
    //-----------------------------------------------------------------
    // get viewpoint reference vector
    //-----------------------------------------------------------------
-   //5.19Rvector3 vpRefVec(0.0, 0.0, 0.0);
    mVpRefVec.Set(0.0, 0.0, 0.0);
-
+   
    if (!mUseViewPointRefVector && mViewPointRefObj != NULL)
    {
       #if DEBUG_TRAJCANVAS_PROJ
@@ -2073,8 +2109,8 @@ void TrajPlotCanvas::ComputeProjection(int frame)
       {
          // for efficiency, body data are computed in UpdatePlot() once.
          mVpRefVec.Set(mObjectTempPos[mVpRefObjId][frame][0],
-                      mObjectTempPos[mVpRefObjId][frame][1],
-                      mObjectTempPos[mVpRefObjId][frame][2]);
+                       mObjectTempPos[mVpRefObjId][frame][1],
+                       mObjectTempPos[mVpRefObjId][frame][2]);
       }
       else
       {
@@ -2362,13 +2398,13 @@ void TrajPlotCanvas::DrawFrame()
       // set view center object
       mOriginName = wxString(mViewCoordSystem->GetOriginName().c_str());
       mOriginId = GetObjectId(mOriginName);
-         
+      
       mViewObjName = mOriginName;
       mViewObjId = mOriginId;
-         
+      
       mMaxZoomIn = mObjMaxZoomIn[mOriginId];
       mAxisLength = mMaxZoomIn;
-         
+      
       ConvertObjectData();
    }
    
@@ -2388,7 +2424,8 @@ void TrajPlotCanvas::DrawFrame()
       //loj: If It doesn't clear, it shows trace
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       
-      DrawStatus(frame);
+      //DrawStatus(frame);
+      DrawStatus("Frame#: ", frame, mTime[frame]);
       
       if (mUseInitialViewPoint)
       {
@@ -2476,7 +2513,7 @@ void TrajPlotCanvas::DrawPlot()
    
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    
-   DrawStatus(mNumData-1);
+   DrawStatus("Frame#: ", mNumData-1, mTime[mNumData-1]);
    SetProjection();
    
    ComputeViewMatrix();
@@ -3162,9 +3199,9 @@ void TrajPlotCanvas::DrawAxes(bool gci)
 
 
 //---------------------------------------------------------------------------
-// void DrawStatus(int frame)
+// void DrawStatus(const wxString &label, int frame, double time)
 //---------------------------------------------------------------------------
-void TrajPlotCanvas::DrawStatus(int frame)
+void TrajPlotCanvas::DrawStatus(const wxString &label, int frame, double time)
 {
    //----------------------------------------------------
    // draw current frame number and time
@@ -3179,8 +3216,10 @@ void TrajPlotCanvas::DrawStatus(int frame)
    wxString str;
    wxString text;
    str.Printf("%d", frame);
-   text = "Frame#: " + str;
-   str.Printf("%f", mTime[frame]);
+   text = label + str;
+   //text = "Frame#: " + str;
+   //str.Printf("%f", mTime[frame]);
+   str.Printf("%f", time);
    text = text + "  Time: " + str;
    
    glColor3f(1, 1, 0); //yellow
