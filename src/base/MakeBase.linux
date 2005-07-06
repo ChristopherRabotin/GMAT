@@ -98,6 +98,7 @@ OBJECTS = \
     command/Maneuver.o \
     command/NoOp.o \
     command/Propagate.o \
+    command/Report.o \
     command/Save.o \
     command/Target.o \
     command/Toggle.o \

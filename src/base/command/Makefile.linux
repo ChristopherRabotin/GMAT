@@ -32,6 +32,7 @@ OBJECTS = Command.o CommandException.o \
           While.o \
           EndWhile.o \
           Assignment.o \
+          Report.o \
           Save.o \
           CallFunction.o \
           BeginFiniteBurn.o \

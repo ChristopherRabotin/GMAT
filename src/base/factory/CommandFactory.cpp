@@ -17,7 +17,7 @@
  *  creating Command objects.
  */
 //------------------------------------------------------------------------------
-
+ 
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "CommandFactory.hpp"
@@ -36,6 +36,7 @@
 #include "While.hpp"          // for FOR command
 #include "EndWhile.hpp"       // for EndFor command
 #include "Assignment.hpp"     // for Assignment (GMAT) command  
+#include "Report.hpp"         // for Report command
 #include "Save.hpp"           // for Save command  
 #include "CallFunction.hpp"   // for CallFunction command
 #include "Assignment.hpp"     // for Assignment command
@@ -98,6 +99,8 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
         return new EndIf;
     else if (ofType == "GMAT")
         return new Assignment;
+    else if (ofType == "Report")
+        return new Report;
     else if (ofType == "Save")
         return new Save;
     else if (ofType == "CallFunction")
@@ -150,6 +153,7 @@ CommandFactory::CommandFactory() :
       creatables.push_back("While");
       creatables.push_back("EndWhile");
       creatables.push_back("GMAT");
+      creatables.push_back("Report");
       creatables.push_back("Save");
       creatables.push_back("CallFunction");
       creatables.push_back("Assignment");
@@ -206,6 +210,7 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
       creatables.push_back("While");
       creatables.push_back("EndWhile");
       creatables.push_back("GMAT");
+      creatables.push_back("Report");
       creatables.push_back("Save");
       creatables.push_back("CallFunction");
       creatables.push_back("Assignment");
