@@ -70,7 +70,7 @@ HEADERS = -I../base/include \
 
 # Uncomment this section (and edit the path) to build with Matlab
 CPPFLAGS = $(OPTIMIZATIONS) -Wall -D__USE_MATLAB__=1 \
-            `wx-config --cppflags` \
+            -DSKIP_DEVIL `wx-config --cppflags` \
            -I/usr/local/matlab704/extern/include 
 
 # Uncomment this section to build without Matlab
@@ -151,7 +151,7 @@ OBJECTS = \
     plot/OpenGlOptionDialog.o \
     plot/OpenGlPlotSetupPanel.o \
     plot/ReportFileSetupPanel.o \
-    plot/TrajPlotCanvasLinux.o \
+    plot/TrajPlotCanvas.o \
     plot/TsPlotCanvas.o \
     plot/TsPlotCurve.o \
     plot/XyPlotSetupPanel.o \
@@ -179,7 +179,6 @@ OBJECTS = \
 
 # Unused:    plot/glcanvas.o \
 # Unused:    solver/VariableCreatePanel.o \
-# Dummied up for now:    plot/TrajPlotCanvas.o \
 
 $(WXTARGET) : $(OBJECTS) $(LIBS)
 	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) -lGL -lGLU $(MATLAB_LIBRARIES)

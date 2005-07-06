@@ -36,9 +36,23 @@
 #  include <GL/gl.h>
 #  include <GL/glu.h>
 //#  include <GL/glut.h> //loj: 6/13/05 Added
+
+#ifndef SKIP_DEVIL
+
 #  include <IL/il.h>
 #  include <IL/ilu.h>
 #  include <IL/ilut.h>
+
+#endif
+
+#endif
+
+// If Sleep in not defined (on unix boxes)
+#ifndef Sleep 
+#ifdef __unix__
+#include <unistd.h>
+#define Sleep(t) usleep((t))
+#endif
 #endif
 
 //#define DEBUG_TRAJCANVAS_INIT 1
@@ -1768,7 +1782,10 @@ GLuint TrajPlotCanvas::BindTexture(const wxString &objName)
    
    FileManager *fm = FileManager::Instance();
    std::string textureFile;
+   
+   #ifndef SKIP_DEVIL
    ILboolean status;
+   #endif
    
    //@todo - Change FileManager to have Luna
    // special case for Luna, FileManager has Moon
@@ -1786,19 +1803,21 @@ GLuint TrajPlotCanvas::BindTexture(const wxString &objName)
    textureFile = fm->GetStringParameter(filename);
    if (textureFile != "UNKNOWN_ID")
    {
-      status = ilLoadImage((char*)textureFile.c_str());
-      if (!status)
-      {
-         MessageInterface::ShowMessage
-            ("*** Warning *** TrajPlotCanvas::BindTexture() Unable to load "
-             "texture file for %s\nfile name:%s\n", objName.c_str(),
-             textureFile.c_str());
-      }
-      else
-      {
-         ret = ilutGLBindTexImage();
-         //glBindTexture(GL_TEXTURE_2D, ret);
-      }
+      #ifndef SKIP_DEVIL
+         status = ilLoadImage((char*)textureFile.c_str());
+         if (!status)
+         {
+            MessageInterface::ShowMessage
+               ("*** Warning *** TrajPlotCanvas::BindTexture() Unable to load "
+                "texture file for %s\nfile name:%s\n", objName.c_str(),
+                textureFile.c_str());
+         }
+         else
+         {
+            ret = ilutGLBindTexImage();
+            //glBindTexture(GL_TEXTURE_2D, ret);
+         }
+      #endif
    }
    
    #if DEBUG_TRAJCANVAS_TEXTURE
