@@ -19,17 +19,18 @@
 #             2005/01/06 - J. Gurganus - added BeginManeuver and EndManeuver
 #             2005/02/07 - W. Shoan - changed Begin/EndManeuver to Begin/EndFiniteBurn
 #             2005/03/01 - W. Shoan - added BeginScript and EndScript
+#             2005/07/07 - J. Gurganus- added Report 
 #
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = Achieve.cpp Assignment.cpp BeginFiniteBurn.cpp BeginScript.cpp BranchCommand.cpp \
-	CallFunction.cpp Command.cpp CommandException.cpp ConditionalBranch.cpp \
-	Else.cpp ElseIf.cpp EndIf.cpp  EndFor.cpp EndFiniteBurn.cpp EndScript.cpp \
-	EndTarget.cpp \
-	EndWhile.cpp For.cpp If.cpp Maneuver.cpp NoOp.cpp Propagate.cpp Target.cpp \
+SRC = Achieve.cpp Assignment.cpp BeginFiniteBurn.cpp BeginScript.cpp \
+	BranchCommand.cpp CallFunction.cpp Command.cpp CommandException.cpp \
+	ConditionalBranch.cpp Else.cpp ElseIf.cpp EndIf.cpp  EndFor.cpp \
+	EndFiniteBurn.cpp EndScript.cpp EndTarget.cpp EndWhile.cpp For.cpp \
+	If.cpp Maneuver.cpp NoOp.cpp Propagate.cpp Report.cpp Target.cpp \
 	Save.cpp Toggle.cpp Vary.cpp While.cpp
 #
 # Define macro for using the included file 
