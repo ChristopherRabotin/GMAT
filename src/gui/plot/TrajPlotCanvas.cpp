@@ -36,20 +36,19 @@
 #  include <GL/gl.h>
 #  include <GL/glu.h>
 //#  include <GL/glut.h> //loj: 6/13/05 Added
+#endif
+
 
 #ifndef SKIP_DEVIL
-
 #  include <IL/il.h>
 #  include <IL/ilu.h>
 #  include <IL/ilut.h>
-
 #endif
 
-#endif
 
 // If Sleep in not defined (on unix boxes)
 #ifndef Sleep 
-#ifdef __unix__
+#ifndef __WXMSW__
 #include <unistd.h>
 #define Sleep(t) usleep((t))
 #endif
