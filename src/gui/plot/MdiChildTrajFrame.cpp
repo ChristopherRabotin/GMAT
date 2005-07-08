@@ -25,7 +25,7 @@
 
 //#define DEBUG_CHILDTRAJ_FRAME 1
 
-BEGIN_EVENT_TABLE(MdiChildTrajFrame, wxMDIChildFrame)
+BEGIN_EVENT_TABLE(MdiChildTrajFrame, GmatMdiChildFrame)
    EVT_MENU(GmatPlot::MDI_GL_CHILD_QUIT, MdiChildTrajFrame::OnQuit)
    EVT_MENU(GmatPlot::MDI_GL_CHANGE_TITLE, MdiChildTrajFrame::OnChangeTitle)
    EVT_MENU(GmatPlot::MDI_GL_CLEAR_PLOT, MdiChildTrajFrame::OnClearPlot)
@@ -44,7 +44,7 @@ BEGIN_EVENT_TABLE(MdiChildTrajFrame, wxMDIChildFrame)
    EVT_ACTIVATE(MdiChildTrajFrame::OnActivate)
    EVT_SIZE(MdiChildTrajFrame::OnTrajSize)
    EVT_MOVE(MdiChildTrajFrame::OnMove)
-   EVT_CLOSE(MdiChildTrajFrame::OnClose)
+//   EVT_CLOSE(MdiChildTrajFrame::OnClose)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -55,8 +55,9 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
                                      const wxPoint& pos, const wxSize& size,
                                      const long style, const wxString &csName,
                                      SolarSystem *solarSys)
-   : wxMDIChildFrame(parent, -1, title, pos, size,
-                     style | wxNO_FULL_REPAINT_ON_RESIZE)
+   : GmatMdiChildFrame(parent, -1, title, pos, size,
+                     style | wxNO_FULL_REPAINT_ON_RESIZE, title,
+                     GmatTree::OUTPUT_OPENGL_PLOT)
 {
    mCanvas = (TrajPlotCanvas *) NULL;
    mIsMainFrame = isMainFrame;
@@ -86,7 +87,7 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
 #endif
 
    // Associate the menu bar with the frame
-   SetMenuBar(GmatAppData::GetMainFrame()->CreateMainMenu(GmatTree::OUTPUT_OPENGL_PLOT));
+//   SetMenuBar(GmatAppData::GetMainFrame()->CreateMainMenu(GmatTree::OUTPUT_OPENGL_PLOT));
 
    // status bar
    //CreateStatusBar();
@@ -103,6 +104,7 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
    
    // this should work for MDI frames as well as for normal ones
    SetSizeHints(100, 100);
+   GmatAppData::GetMainFrame()->mdiChildren->Append(this);
 }
 
 //------------------------------------------------------------------------------
@@ -356,8 +358,9 @@ void MdiChildTrajFrame::ResetShowViewOption()
       ("MdiChildTrajFrame::ResetShowViewOption()\n");
    #endif
 
-   wxMenu *mViewMenu = GmatAppData::GetMainFrame()->GetViewMenu();
-   mViewMenu->Check(GmatPlot::MDI_GL_SHOW_OPTION_PANEL, false);
+   /// @todo: ag: fix this
+//   wxMenu *mViewMenu = GmatAppData::GetMainFrame()->GetViewMenu();
+//   mViewMenu->Check(GmatPlot::MDI_GL_SHOW_OPTION_PANEL, false);
 }
 
 
@@ -851,32 +854,32 @@ void MdiChildTrajFrame::OnTrajSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 // void OnClose(wxCloseEvent& event)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::OnClose(wxCloseEvent& event)
-{
-   #if DEBUG_CHILDTRAJ_FRAME
-   MessageInterface::ShowMessage
-      ("MdiChildTrajFrame::OnClose() this->PlotName=%s\n", mPlotName.c_str());
-   #endif
-   
-//    if (mIsMainFrame)
-//    {
-//       MessageInterface::ShowMessage
-//          ("MdiChildTrajFrame::OnClose() this->PlotName=%s\n", mPlotName.c_str());
-      
-//       //GmatAppData::GetMainFrame()->trajMainSubframe = NULL;
-      
-//    }
-   
-   //MdiGlPlot::numChildren--; //loj: 5/18/05 moved to destructor
-   
-//    if (MdiGlPlot::numChildren == 0)
-//    {
-// //       GmatAppData::GetMainFrame()->trajMainSubframe = NULL;
-//       GmatAppData::GetMainFrame()->trajSubframe = NULL;
-//    }
-   
-   event.Skip();
-}
+//void MdiChildTrajFrame::OnClose(wxCloseEvent& event)
+//{
+//   #if DEBUG_CHILDTRAJ_FRAME
+//   MessageInterface::ShowMessage
+//      ("MdiChildTrajFrame::OnClose() this->PlotName=%s\n", mPlotName.c_str());
+//   #endif
+//
+////    if (mIsMainFrame)
+////    {
+////       MessageInterface::ShowMessage
+////          ("MdiChildTrajFrame::OnClose() this->PlotName=%s\n", mPlotName.c_str());
+//
+////       //GmatAppData::GetMainFrame()->trajMainSubframe = NULL;
+//
+////    }
+//
+//   //MdiGlPlot::numChildren--; //loj: 5/18/05 moved to destructor
+//
+////    if (MdiGlPlot::numChildren == 0)
+////    {
+//// //       GmatAppData::GetMainFrame()->trajMainSubframe = NULL;
+////       GmatAppData::GetMainFrame()->trajSubframe = NULL;
+////    }
+//
+//   event.Skip();
+//}
 
 
 //------------------------------------------------------------------------------

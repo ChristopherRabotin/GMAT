@@ -15,6 +15,7 @@
 #ifndef MdiChildTrajFrame_hpp
 #define MdiChildTrajFrame_hpp
 
+#include "GmatMdiChildFrame.hpp"
 #include "TrajPlotCanvas.hpp"
 #include "OpenGlOptionDialog.hpp"
 
@@ -33,7 +34,7 @@
 #include "wx/mdi.h"
 #endif
 
-class MdiChildTrajFrame: public wxMDIChildFrame
+class MdiChildTrajFrame: public GmatMdiChildFrame
 {
 public:
    TrajPlotCanvas *mCanvas;
@@ -116,7 +117,7 @@ public:
    void OnActivate(wxActivateEvent& event);
    void OnTrajSize(wxSizeEvent& event);
    void OnMove(wxMoveEvent& event);
-   void OnClose(wxCloseEvent& event);
+//   void OnClose(wxCloseEvent& event);
 
    // drawing
    void SetGlObject(const StringArray &objNames,
