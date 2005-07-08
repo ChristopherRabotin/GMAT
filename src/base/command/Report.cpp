@@ -136,9 +136,13 @@ bool Report::Execute()
 {
    std::stringstream datastream;
    datastream.precision(15);
+   datastream.width(20);
    
    for (std::vector<Parameter*>::iterator i = parms.begin(); i != parms.end(); ++i)
+   {
+      datastream.width(20);
       datastream << (*i)->EvaluateReal() << " ";
+   }
 
 //   // Build the data
 //   reportID = reporter->GetProviderId();
