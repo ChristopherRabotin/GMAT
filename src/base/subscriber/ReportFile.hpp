@@ -110,6 +110,8 @@ protected:
    StringArray mVarParamNames;
    StringArray mAllRefObjectNames;
    Integer lastUsedProvider;
+   bool usedByReport;
+   bool calledByReport;
    
    virtual bool        Distribute(Integer len);
    virtual bool        Distribute(const Real * dat, Integer len);
@@ -122,7 +124,7 @@ private:
 
     enum
     {
-                FILENAME = SubscriberParamCount,
+      FILENAME = SubscriberParamCount,
       PRECISION,
       ADD,
       WRITE_HEADERS,

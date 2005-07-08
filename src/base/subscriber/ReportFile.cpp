@@ -61,7 +61,8 @@ ReportFile::ReportFile(const std::string &name, const std::string &fileName,
    precision       (12),
    columnWidth     (20),
    writeHeaders    (true),
-   lastUsedProvider (-1)
+   lastUsedProvider(-1),
+   usedByReport    (false)
 {
    if (filename == "")
     filename = "ReportFile.txt";
@@ -95,7 +96,8 @@ ReportFile::ReportFile(const ReportFile &rf) :
    precision       (rf.precision),
    columnWidth     (rf.columnWidth),
    writeHeaders    (rf.writeHeaders),
-   lastUsedProvider (-1)
+   lastUsedProvider (-1),
+   usedByReport    (rf.usedByReport)
 {
    if (filename == "")
     filename = "ReportFile.txt";
@@ -123,7 +125,8 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
 
    Subscriber::operator=(rf);
    lastUsedProvider = -1;
-    
+   usedByReport = rf.usedByReport;
+   
    filename = rf.filename;
    precision = rf.precision;
    columnWidth = rf.columnWidth;
@@ -150,7 +153,7 @@ bool ReportFile::Initialize()
    // Check if there are parameters selected for report
    if (active)
    {
-      if (mNumVarParams == 0)
+      if ((mNumVarParams == 0) && !usedByReport)
       {
          MessageInterface::PopupMessage
             (Gmat::WARNING_, "ReportFile::Initialize() Report will not be written."
@@ -158,16 +161,16 @@ bool ReportFile::Initialize()
          return false;
       }
 
-      if (mVarParams[0] == NULL)
-      {
-         active = false;
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_,
-             "ReportFile::Initialize() ReportFile will not be created.\n"
-             "The first parameter selected for the report file is NULL\n");
-         return false;
-      }
-
+      if ((mNumVarParams > 0))
+         if (mVarParams[0] == NULL)
+         {
+            active = false;
+            MessageInterface::PopupMessage
+               (Gmat::WARNING_,
+                "ReportFile::Initialize() ReportFile will not be created.\n"
+                "The first parameter selected for the report file is NULL\n");
+            return false;
+         }
    }
    
    Subscriber::Initialize();
@@ -213,7 +216,7 @@ GmatBase* ReportFile::Clone(void) const
  */
 //------------------------------------------------------------------------------
 bool ReportFile::TakeAction(const std::string &action,
-                        const std::string &actionData)
+                            const std::string &actionData)
 {
    if (action == "Clear")
    {
@@ -221,6 +224,17 @@ bool ReportFile::TakeAction(const std::string &action,
       return true;
    }
 
+   if (action == "PassedToReport")
+   {
+      usedByReport = true;
+      return true;
+   }
+
+   if (action == "ActivateForReport")
+   {
+      calledByReport = ((actionData == "On") ? true : false);
+   }
+   
    return false;
 }
 
@@ -606,6 +620,32 @@ bool ReportFile::OpenReportFile(void)
 //------------------------------------------------------------------------------
 bool ReportFile::Distribute(int len)
 {
+   #ifdef DEBUG_REPORTFILE_DATA
+      MessageInterface::ShowMessage("ReportFile::Distribute called\n");
+      MessageInterface::ShowMessage("   data = '%s'\n", data);
+      MessageInterface::ShowMessage(
+         "   usedByReport = %s, calledByReport = %s\n",
+         (usedByReport ? "true" : "false"), 
+         (calledByReport ? "true" : "false"));
+   #endif
+   
+   if (usedByReport && calledByReport)
+   {
+      if (len == 0)
+         return false;
+      else {
+         if (!dstream.is_open())
+            if (!OpenReportFile())
+               return false;
+   
+         if (!dstream.good())
+            dstream.clear();
+   
+         dstream << data;
+         dstream << std::endl;
+      }
+      return true;
+   }
    return false;
 }
 
@@ -615,41 +655,43 @@ bool ReportFile::Distribute(int len)
 //------------------------------------------------------------------------------
 bool ReportFile::Distribute(const Real * dat, Integer len)
 {   
-
-   Rvector varvals = Rvector(mNumVarParams);
-
-   if (len == 0)
-      return false;
-   else {
-
-     if (!dstream.is_open())
-        if (!OpenReportFile())
-           return false;
-
-     if (initial)
-        WriteHeaders();
-        
-     if (!dstream.good())
-        dstream.clear();
-
-    for (int i=0; i < mNumVarParams; i++)
-    {
-        varvals[i] = mVarParams[i]->EvaluateReal();
-        dstream.width(columnWidth);
-        dstream.precision(precision);
-        dstream.setf(std::ios::showpoint);
-        dstream << varvals[i];
-    }
-
-    dstream << std::endl;
-
-    //loj: 4/18/05 Added debug
-    #if DEBUG_REPORTFILE_DATA
-       MessageInterface::ShowMessage
-          ("ReportFile::Distribute() dat=%f %f %f %f %g %g %g\n", dat[0], dat[1],
-           dat[2], dat[3], dat[4], dat[5], dat[6]);
-    #endif
-       
+   if (mNumVarParams > 0)
+   {
+      Rvector varvals = Rvector(mNumVarParams);
+   
+      if (len == 0)
+         return false;
+      else {
+   
+        if (!dstream.is_open())
+           if (!OpenReportFile())
+              return false;
+   
+        if (initial)
+           WriteHeaders();
+           
+        if (!dstream.good())
+           dstream.clear();
+   
+       for (int i=0; i < mNumVarParams; i++)
+       {
+           varvals[i] = mVarParams[i]->EvaluateReal();
+           dstream.width(columnWidth);
+           dstream.precision(precision);
+           dstream.setf(std::ios::showpoint);
+           dstream << varvals[i];
+       }
+   
+       dstream << std::endl;
+   
+       //loj: 4/18/05 Added debug
+       #if DEBUG_REPORTFILE_DATA
+          MessageInterface::ShowMessage
+             ("ReportFile::Distribute() dat=%f %f %f %f %g %g %g\n", dat[0], dat[1],
+              dat[2], dat[3], dat[4], dat[5], dat[6]);
+       #endif
+          
+      }
    }
 
    return true;

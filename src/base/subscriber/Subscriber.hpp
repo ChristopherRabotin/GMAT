@@ -60,6 +60,7 @@ public:
    bool IsActive();
    
    virtual void SetProviderId(Integer id);
+   virtual Integer GetProviderId();
    virtual void SetInternalCoordSystem(CoordinateSystem *cs); //loj: 1/27/05 Added
    
 protected:

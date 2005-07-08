@@ -163,6 +163,9 @@ protected:
                                                  GmatCommand *cmd = NULL);
    bool                          AssembleForCommand(const StringArray topLevel, 
                                                     GmatCommand *cmd);
+   bool                          AssembleReportCommand(
+                                    const StringArray topLevel, 
+                                    GmatCommand *cmd);
    bool                          InterpretFunctionCall();
    GmatBase*                     AssemblePhrase(StringArray& phrase,
                                                 GmatCommand *cmd);

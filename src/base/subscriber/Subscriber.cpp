@@ -233,6 +233,14 @@ void Subscriber::SetProviderId(Integer id)
 }
 
 //------------------------------------------------------------------------------
+// void SetProviderId(Integer id)
+//------------------------------------------------------------------------------
+Integer Subscriber::GetProviderId()
+{
+   return currentProvider;
+}
+
+//------------------------------------------------------------------------------
 // virtual void SetInternalCoordSystem(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
 void Subscriber::SetInternalCoordSystem(CoordinateSystem *cs)

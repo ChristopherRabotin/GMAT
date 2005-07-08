@@ -861,6 +861,9 @@ bool Interpreter::AssembleCommand(const std::string& scriptline,
    if (cmdCase == "For") 
       return AssembleForCommand(topLevel, cmd);
    
+   if (cmdCase == "Report") 
+      return AssembleReportCommand(topLevel, cmd);
+   
    // Handle all other commands here
    for (StringArray::iterator i = topLevel.begin()+1; i != topLevel.end(); ++i)
    {
@@ -985,6 +988,75 @@ bool Interpreter::AssembleForCommand(const StringArray topLevel,
    cmd->SetRealParameter("StartValue", start);
    cmd->SetRealParameter("Step", step);
    cmd->SetRealParameter("EndValue", stop);
+   return true;
+}
+
+bool Interpreter::AssembleReportCommand(const StringArray topLevel, 
+                                        GmatCommand *cmd)
+{
+   StringArray sublevel[10];  // Allow up to 10 deep for now
+   Integer     cl = 0;        // Current level of decomposition
+   GmatBase    *object;
+   Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT;
+   Integer parmNumber = 0;
+
+   for (StringArray::const_iterator i = topLevel.begin()+1; i != topLevel.end(); ++i)
+   {
+      // If we see a comment character, we're done
+      if ((*i)[0] == '%')
+         break;
+         
+      // Walk through the rest of the command, setting it up
+      sublevel[cl] = Decompose(*i);
+      #ifdef DEBUG_TOKEN_PARSING
+         MessageInterface::ShowMessage(
+            "Decomposing \"%s\"; found %d elements\n", i->c_str(),
+            sublevel[cl].size());
+         for (StringArray::iterator z = sublevel[cl].begin(); 
+              z != sublevel[cl].end(); ++z)
+            MessageInterface::ShowMessage("   \"%s\"\n", z->c_str());
+      #endif
+
+      if (sublevel[cl].size() == 1) 
+      {
+         // Size 1 implies an object reference or parm string
+         #ifdef DEBUG_TOKEN_PARSING
+            MessageInterface::ShowMessage("Looking for \"%s\"\n", 
+                                          sublevel[cl][0].c_str());
+         #endif
+         object = moderator->GetConfiguredItem(sublevel[cl][0]);
+         if (object) {
+            #ifdef DEBUG_TOKEN_PARSING
+               MessageInterface::ShowMessage("   Found a \"%s\"\n", 
+                                          (object->GetTypeName()).c_str());
+            #endif
+            type = object->GetType();
+            if (!cmd->SetRefObject(object, type, object->GetName(), 
+                parmNumber++))
+               throw InterpreterException("Cannot set object " + (*i) + 
+                  " for command " + (cmd->GetTypeName()));
+         }
+         else 
+            throw InterpreterException("Cannot find object named " + *i);
+      }
+      else 
+      {
+         #ifdef DEBUG_TOKEN_PARSING
+            MessageInterface::ShowMessage("Assembling %s\n",sublevel[cl][0].c_str()); 
+         #endif
+         object = AssemblePhrase(sublevel[cl], cmd);
+         if (object == NULL)
+            return false;
+         #ifdef DEBUG_TOKEN_PARSING
+            MessageInterface::ShowMessage("Assembled a %s\n", object->GetTypeName().c_str());
+         #endif
+         if (!cmd->SetRefObject(object, type, object->GetName(), 
+             parmNumber++))
+            throw InterpreterException("Cannot set Parameter object " + (*i) + 
+                     " for command " + (cmd->GetTypeName()));
+      }
+   }
+   
    return true;
 }
 
