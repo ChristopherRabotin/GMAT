@@ -17,14 +17,11 @@
  */
 //------------------------------------------------------------------------------
 
-
 #ifndef Msise90Atmosphere_hpp
 #define Msise90Atmosphere_hpp
 
 #include "AtmosphereModel.hpp"
-#include "msise90.hpp"
-
-
+ 
 /**
  * Wraps the MSISE90 atmosphere code, ported by a.i. Solutions from the FORTRAN,
  * into the GMAT atmosphere model format.
@@ -41,8 +38,6 @@ public:
 
    virtual GmatBase*       Clone() const; // inherited from GmatBase
 protected:
-   /// Instance of the calculation engine
-   MSISE90                 msise90;
    /// Flag to indicate if data comes from a file
    bool                    fileData;
    /// Name of the file
@@ -57,6 +52,8 @@ protected:
    Real                    f107a;
    /// Geomagnetic index (Ap, not Kp)
    Real                    ap[7];
+   
+   Real                    mass;
 
    void                    GetInputs(Real epoch);
 
@@ -64,6 +61,5 @@ private:
    Msise90Atmosphere(const Msise90Atmosphere& msise);
    Msise90Atmosphere&      operator=(const Msise90Atmosphere& msise);
 };
-
 
 #endif // Msise90Atmosphere_hpp

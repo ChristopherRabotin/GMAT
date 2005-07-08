@@ -16,14 +16,19 @@
  * The MSISE90 atmosphere
  */
 //------------------------------------------------------------------------------
-
+#include <stdio.h>
+#include <math.h>
 
 #include "Msise90Atmosphere.hpp"
-#include <math.h>
 #include "MessageInterface.hpp"
 #include "CelestialBody.hpp"
 
-// #define DEBUG_MSISE90_ATMOSPHERE
+extern "C" 
+{ 
+   void gtd6_(int*,float*,float*,float*,float*,float*,float*,float*,float*,float*,float*,float*);
+}
+   
+//#define DEBUG_MSISE90_ATMOSPHERE
 
 //------------------------------------------------------------------------------
 //  Msise90Atmosphere()
@@ -39,7 +44,6 @@ Msise90Atmosphere::Msise90Atmosphere() :
 {
 }
 
-
 //------------------------------------------------------------------------------
 //  ~Msise90Atmosphere()
 //------------------------------------------------------------------------------
@@ -50,7 +54,6 @@ Msise90Atmosphere::Msise90Atmosphere() :
 Msise90Atmosphere::~Msise90Atmosphere()
 {
 }
-
 
 //------------------------------------------------------------------------------
 //  bool Density(Real *pos, Real *density, Real epoch, Integer count)
@@ -85,9 +88,12 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
    Real gmst, gha = mCentralBody->GetHourAngle(epoch);
 
    GetInputs(epoch);
-   for (i = 0; i < count; ++i) {
+   
+   for (i = 0; i < count; ++i) 
+   {
       i6 = i*6;
-
+      mass = 48.0;
+      
       //--------------------------------------------------
       // Longitude
       //--------------------------------------------------
@@ -122,7 +128,13 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       geoRad = geodesicFactor / sqrt(1.0 - (2.0 - flatteningFactor) *
                                 flatteningFactor * cos(radlat) * cos(radlat));
       alt = rad - geoRad;
-
+      
+      #ifdef DEBUG_MSISE90_ATMOSPHERE
+         MessageInterface::ShowMessage(
+            "   Radius = %15.9lf\n   GeodesicRad = %15.9lf\n  "
+            "GeodesicLat = %lf\n", rad, geoRad, geolat);      
+      #endif
+      
       #ifdef DEBUG_MSISE90_ATMOSPHERE
          MessageInterface::ShowMessage(
             "Calculating MSISE90 Density from parameters:\n   "
@@ -130,12 +142,42 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
             "   lst = %lf\n   f107a = %lf\n   f107 = %lf\n   ap = "
             "[%lf %lf %lf %lf %lf %lf %lf]\n", yd, sod, alt, lat, lon, lst,
             f107a, f107, ap[0], ap[1], ap[2], ap[3], ap[4], ap[5], ap[6]);
-         MessageInterface::ShowMessage(
-            "   Radius = %15.9lf\n   GeodesicRad = %15.9lf\n  "
-            "GeodesicLat = %lf\n", rad, geoRad, geolat);
       #endif
+      
+      int xyd = yd;
+      float xsod = sod;
+      float xalt = alt;
+      float xlat = lat;
+      float xlon = lon;
+      float xlst = lst;
+      float xf107a = f107a;
+      float xf107 = f107;
+      float xap[7];
+      float xmass = mass;
+      float xden[8];
+      float xtemp[2];
+      
+      Integer i;
+      for (i = 0; i < 7; i++)  xap[i] = ap[i];
+      for (i = 0; i < 8; i++)  xden[i] = den[i];
+      for (i = 0; i < 2; i++)   xtemp[i] = temp[i];
 
-      msise90.GTD6(yd,sod,alt,lat,lon,lst,f107a,f107,ap,48,den,temp);
+      gtd6_(&xyd,&xsod,&xalt,&xlat,&xlon,&xlst,&xf107a,&xf107,xap,&xmass,xden,xtemp);
+      
+      yd = xyd;
+      sod = xsod;
+      alt = xalt;
+      lat = xlat;
+      lon = xlon;
+      lst = xlst;
+      f107a = xf107a;
+      f107 = xf107;
+      mass = xmass;
+      
+      for (i = 0; i < 7; i++)  ap[i] = xap[i];
+      for (i = 0; i < 8; i++)  den[i] = xden[i];
+      for (i = 0; i < 2; i++)  temp[i] = xtemp[i];
+
       density[i] = den[5];
 
       #ifdef DEBUG_MSISE90_ATMOSPHERE
@@ -143,10 +185,9 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
             "   Density = %15.9le\n", density[i]);
       #endif
    }
-
+      
    return true;
 }
-
 
 //------------------------------------------------------------------------------
 //  void GetInputs(Real epoch)
@@ -194,7 +235,6 @@ GmatBase* Msise90Atmosphere::Clone() const
 {
    return new Msise90Atmosphere(*this);
 }
-
 
 //------------------------------------------------------------------------------
 //  Msise90Atmosphere(const Msise90Atmosphere& msise)
