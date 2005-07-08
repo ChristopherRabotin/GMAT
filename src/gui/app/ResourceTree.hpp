@@ -145,6 +145,8 @@ private:
 //   void OnNewScript(wxCommandEvent &event);
    void OnRemoveAllScripts(wxCommandEvent &event);
    void OnRemoveScript(wxCommandEvent &event);
+   void OnScriptBuildObject(wxCommandEvent& event);
+   void OnScriptBuildAndRun(wxCommandEvent& event);
 
    wxMenu* CreatePopupMenu(Gmat::ObjectType type);
     
@@ -187,6 +189,8 @@ private:
       POPUP_ADD_GMAT_FUNCT,
 
       POPUP_ADD_SCRIPT,
+      POPUP_BUILD_SCRIPT,
+      POPUP_BUILD_AND_RUN_SCRIPT,
 //      POPUP_NEW_SCRIPT,
       POPUP_REMOVE_ALL_SCRIPTS,
       POPUP_REMOVE_SCRIPT,

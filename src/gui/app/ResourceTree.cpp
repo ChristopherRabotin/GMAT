@@ -103,6 +103,8 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
 //   EVT_MENU(POPUP_NEW_SCRIPT, ResourceTree::OnNewScript)
    EVT_MENU(POPUP_REMOVE_ALL_SCRIPTS, ResourceTree::OnRemoveAllScripts)
    EVT_MENU(POPUP_REMOVE_SCRIPT, ResourceTree::OnRemoveScript)
+   EVT_MENU(POPUP_BUILD_SCRIPT, ResourceTree::OnScriptBuildObject)
+   EVT_MENU(POPUP_BUILD_AND_RUN_SCRIPT, ResourceTree::OnScriptBuildAndRun)
 
 END_EVENT_TABLE()
 
@@ -493,8 +495,8 @@ void ResourceTree::AddDefaultBodies(wxTreeItemId itemId)
 
    wxTreeItemId earth = AppendItem(itemId, wxT("Earth"), GmatTree::ICON_EARTH, -1,
                                    new GmatTreeItemData(wxT("Earth"), GmatTree::CELESTIAL_BODY));
-   AppendItem(earth, wxT("Moon"), GmatTree::ICON_MOON, -1,
-              new GmatTreeItemData(wxT("Moon"), GmatTree::CELESTIAL_BODY));
+   AppendItem(earth, wxT("Luna"), GmatTree::ICON_MOON, -1,
+              new GmatTreeItemData(wxT("Luna"), GmatTree::CELESTIAL_BODY));
 
    AppendItem(itemId, wxT("Mars"), GmatTree::ICON_MARS, -1,
               new GmatTreeItemData(wxT("Mars"), GmatTree::CELESTIAL_BODY));
@@ -1160,8 +1162,8 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       menu.Append(POPUP_OPEN, wxT("Open"));
       menu.Append(POPUP_CLOSE, wxT("Close"));
       menu.AppendSeparator();
-      menu.Append(GmatScript::MENU_SCRIPT_BUILD_OBJECT, wxT("Build"));
-      menu.Append(GmatScript::MENU_SCRIPT_BUILD_AND_RUN, wxT("Build and Run"));
+      menu.Append(POPUP_BUILD_SCRIPT, wxT("Build"));
+      menu.Append(POPUP_BUILD_AND_RUN_SCRIPT, wxT("Build and Run"));
       menu.AppendSeparator();
       menu.Append(POPUP_REMOVE_SCRIPT, wxT("Remove"));
    }
@@ -2450,3 +2452,34 @@ void ResourceTree::AddScriptItem(wxString path)
                     new GmatTreeItemData(path, GmatTree::SCRIPT_FILE));
 }
 
+//------------------------------------------------------------------------------
+// bool OnScriptBuildObject(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ResourceTree::OnScriptBuildObject(wxCommandEvent& event)
+{
+   // Get info from selected item
+   GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
+   wxString filename = item->GetDesc();
+
+   GmatAppData::GetGuiInterpreter()->
+      InterpretScript(std::string(filename.c_str()));
+
+   //close the open windows
+   GmatAppData::GetMainFrame()->CloseAllChildren(false, false, filename);
+
+   // Update ResourceTree and MissionTree
+   GmatAppData::GetResourceTree()->UpdateResource(true);
+   GmatAppData::GetMissionTree()->UpdateMission(true);
+
+//   return status;
+}
+
+//------------------------------------------------------------------------------
+// bool OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+void ResourceTree::OnScriptBuildAndRun(wxCommandEvent& event)
+{
+   OnScriptBuildObject(event);
+   //close the open windows
+   GmatAppData::GetMainFrame()->OnScriptRun(event);
+}
