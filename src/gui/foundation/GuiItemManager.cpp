@@ -2471,13 +2471,16 @@ void GuiItemManager::UpdateFunctionList()
    //-------------------------------------------------------
    // update registered Function ComboBox
    //-------------------------------------------------------
+   int sel;
    for (std::vector<wxComboBox*>::iterator pos = mFunctionCBList.begin();
         pos != mFunctionCBList.end(); ++pos)
    {      
+       sel = (*pos)->GetSelection(); //arg: 7/05/05 Added
+
       (*pos)->Clear();
       (*pos)->Append(functionNames);
       
-      (*pos)->SetSelection(theNumFunction-1);
+      (*pos)->SetSelection(sel);
    }
 }
 
