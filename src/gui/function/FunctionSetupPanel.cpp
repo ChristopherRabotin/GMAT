@@ -40,7 +40,7 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 FunctionSetupPanel::FunctionSetupPanel(wxWindow *parent, const wxString &name)
-   : GmatPanel(parent, false)
+   : GmatPanel(parent, true)
 {
    mEnableLoad = false;
    mEnableSave = false;
