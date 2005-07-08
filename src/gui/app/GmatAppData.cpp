@@ -29,4 +29,6 @@ MissionTree* GmatAppData::theMissionTree = NULL;
 OutputTree* GmatAppData::theOutputTree = NULL;
 //GmatMainNotebook *GmatAppData::theMainNotebook = NULL;
 GmatMainFrame *GmatAppData::theMainFrame = NULL;
+wxFont GmatAppData::theFont = wxFont(10, wxMODERN, wxNORMAL, wxNORMAL);
+
 #endif

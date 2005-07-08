@@ -74,6 +74,11 @@ public:
     static void SetMainFrame(GmatMainFrame *mainFrame)
         { theMainFrame = mainFrame;};
 
+    static wxFont GetFont()
+        { return theFont;};
+    static void SetFont(wxFont font)
+        { theFont = font;};
+
     static ViewTextFrame *theMessageWindow;
 #endif
     
@@ -86,18 +91,10 @@ private:
     static OutputTree *theOutputTree;
 //    static GmatMainNotebook *theMainNotebook;
     static GmatMainFrame *theMainFrame;
+    static wxFont theFont;
 #endif
     
 };
 
-namespace GmatScript
-{
-    enum MenuType
-    {
-        MENU_SCRIPT_BUILD_OBJECT = 100,
-        MENU_SCRIPT_RUN,
-        MENU_SCRIPT_BUILD_AND_RUN
-    };
-}
 
 #endif // GmatAppData_hpp
