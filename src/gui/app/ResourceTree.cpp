@@ -45,8 +45,6 @@
 #include "bitmaps/default.xpm"
 #include "bitmaps/tank.xpm"
 #include "bitmaps/thruster.xpm"
-#include <wx/dir.h>
-#include <wx/string.h> // for wxArrayString
 
 #include "GuiInterpreter.hpp"
 #include "ResourceTree.hpp"
@@ -833,10 +831,10 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultInterfaces(wxTreeItemId itemId)
 {
-   AppendItem(itemId, wxT("TCP/IP"), GmatTree::ICON_NETWORK, -1,
-              new GmatTreeItemData(wxT("TCP/IP"), GmatTree::INTERFACE));
-   AppendItem(itemId, wxT("Mex"), GmatTree::ICON_DEFAULT, -1,
-              new GmatTreeItemData(wxT("Mex"), GmatTree::INTERFACE));
+   AppendItem(itemId, wxT("Matlab"), GmatTree::ICON_DEFAULT, -1,
+              new GmatTreeItemData(wxT("Matlab"), GmatTree::INTERFACE));
+   AppendItem(itemId, wxT("Matlab Server"), GmatTree::ICON_DEFAULT, -1,
+              new GmatTreeItemData(wxT("Matlab Server"), GmatTree::INTERFACE));
     
 }
 
@@ -1115,6 +1113,16 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    }
    else if (strcmp(title, wxT("Universe")) == 0)
       menu.Append(POPUP_ADD_BODY, wxT("Add Body"));
+   else if (strcmp(title, wxT("Matlab")) == 0)
+   {
+      menu.Append(GmatMenu::MENU_TOOLS_MATLAB_OPEN, wxT("Open"));
+      menu.Append(GmatMenu::MENU_TOOLS_MATLAB_CLOSE, wxT("Close"));
+   }
+   else if (strcmp(title, wxT("Matlab Server")) == 0)
+   {
+      menu.Append(GmatMenu::MENU_START_SERVER, wxT("Start"));
+      menu.Append(GmatMenu::MENU_STOP_SERVER, wxT("Stop"));
+   }
    else if (strcmp(title, wxT("Plots/Reports")) == 0)
       menu.Append(POPUP_ADD_SUBSCRIBER, _T("Add"), CreatePopupMenu(Gmat::SUBSCRIBER));
    else if (strcmp(title, wxT("Variables/Arrays")) == 0)
