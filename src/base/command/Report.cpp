@@ -1,4 +1,25 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                            Report
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under MOMS Purchase
+// order MOMS418823
+//
+// Author: Darrel Conway, Thinking Systems, Inc.
+// Created: 2005/07/06
+//
+/**
+ *  Class implementation for the Report command.
+ */
+//------------------------------------------------------------------------------
+
+
 #include "Report.hpp"
+
 
 Report::Report() :
    GmatCommand ("Report"),
@@ -6,6 +27,7 @@ Report::Report() :
    reporter    (NULL)
 {
 }
+
 
 Report::~Report()
 {
