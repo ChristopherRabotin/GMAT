@@ -1055,7 +1055,6 @@ bool Sandbox::Interrupt()
 void Sandbox::Clear()
 {
    solarSys  = NULL;
-   publisher = NULL;
    sequence  = NULL;
    current   = NULL;
    state     = IDLE;
@@ -1075,8 +1074,8 @@ void Sandbox::Clear()
 
    for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
    {
-//      if ((omi->second)->GetType() == Gmat::SUBSCRIBER)
-//         publisher->Unsubscribe((Subscriber*)(omi->second));
+      if ((omi->second)->GetType() == Gmat::SUBSCRIBER)
+         publisher->Unsubscribe((Subscriber*)(omi->second));
       #ifdef DEBUG_SANDBOX_OBJECT_MAPS
          MessageInterface::ShowMessage("Sandbox clearing %s\n",
             (omi->first).c_str());
@@ -1090,6 +1089,8 @@ void Sandbox::Clear()
       /// @todo Subscribers are cloned; where are they deleted?
    }
    
+   publisher = NULL;
+
    if (solarSys != NULL)
       delete solarSys;
    
