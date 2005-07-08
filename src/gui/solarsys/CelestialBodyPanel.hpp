@@ -1,0 +1,79 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                              CelestialBodyPanel
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool
+//
+// Author: Allison Greene
+// Created: 2005/07/06
+//
+/**
+ * Declares CelestialBodyPanel class.
+ */
+//------------------------------------------------------------------------------
+
+#ifndef CelestialBodyPanel_hpp
+#define CelestialBodyPanel_hpp
+
+#include "GmatPanel.hpp"
+#include "CelestialBody.hpp"
+
+class CelestialBodyPanel: public GmatPanel
+{
+public:
+   // constructors
+   CelestialBodyPanel(wxWindow *parent, const wxString &name);
+    
+private:
+   CelestialBody *theCelestialBody;
+   
+   wxTextCtrl *mEpochTextCtrl;
+   wxTextCtrl *mElement1TextCtrl;
+   wxTextCtrl *mElement2TextCtrl;
+   wxTextCtrl *mElement3TextCtrl;
+   wxTextCtrl *mElement4TextCtrl;
+   wxTextCtrl *mElement5TextCtrl;
+   wxTextCtrl *mElement6TextCtrl;
+
+   wxStaticText *epochStaticText;
+   wxStaticText *initialStaticText;
+   wxStaticText *centralBodyText;
+   wxStaticText *noCentralBodyText;
+   wxStaticText *nameStaticText1;
+   wxStaticText *unitStaticText1;
+   wxStaticText *nameStaticText2;
+   wxStaticText *unitStaticText2;
+   wxStaticText *nameStaticText3;
+   wxStaticText *unitStaticText3;
+   wxStaticText *nameStaticText4;
+   wxStaticText *unitStaticText4;
+   wxStaticText *nameStaticText5;
+   wxStaticText *unitStaticText5;
+   wxStaticText *nameStaticText6;
+   wxStaticText *unitStaticText6;
+   
+   // methods inherited from GmatPanel
+   virtual void Create();
+   virtual void LoadData();
+   virtual void SaveData();
+    
+   void EnableAll(bool enable);
+
+   // event handling
+   void OnTextUpdate(wxCommandEvent& event);
+
+   DECLARE_EVENT_TABLE();
+
+   // IDs for the controls and the menu commands
+   enum
+   {     
+      ID_TEXT = 9000,
+      ID_TEXTCTRL
+   };
+   
+   static const std::string KEP_ELEMENT_NAMES[6];
+   static const std::string KEP_ELEMENT_UNITS[6];
+
+};
+
+#endif
