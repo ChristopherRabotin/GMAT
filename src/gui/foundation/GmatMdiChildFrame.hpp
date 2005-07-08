@@ -17,10 +17,6 @@
 
 #include "gmatwxdefs.hpp"
 
-#include "GmatAppData.hpp"
-#include "GuiInterpreter.hpp"
-#include "GuiItemManager.hpp"
-
 class GmatMdiChildFrame : public wxMDIChildFrame
 {
 public:
@@ -31,16 +27,21 @@ public:
                         const wxPoint& pos = wxDefaultPosition, 
                         const wxSize& size = wxDefaultSize, 
                         long style = wxDEFAULT_FRAME_STYLE, 
-                        const wxString& name = "");
+                        const wxString& name = "",
+                        const int type = 20000);
     ~GmatMdiChildFrame();
     wxString GetTitle();
     int GetDataType();
     void SetDataType(int type) {dataType = type;};
     void OnClose(wxCloseEvent &event);
-   
+    wxMenuBar *CreateMenu(int dataType);
+    void SetScriptTextCtrl(wxTextCtrl *scriptTC) {theScriptTextCtrl = scriptTC;};
+    wxTextCtrl *GetScriptTextCtrl(){return theScriptTextCtrl;};
+
 protected:
     wxString title;
     int dataType;
+    wxTextCtrl *theScriptTextCtrl;
     
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();
