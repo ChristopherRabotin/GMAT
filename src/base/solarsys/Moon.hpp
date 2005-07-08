@@ -67,7 +67,7 @@ public:
 
 protected:
 
-   void InitializeMoon(const std::string &cBody);
+   void             InitializeMoon(const std::string &cBody);
 
 private:
 

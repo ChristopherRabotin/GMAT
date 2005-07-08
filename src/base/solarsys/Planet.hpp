@@ -19,6 +19,15 @@
  *       values, based on the input name of the planet (e.g., if the planet's
  *       name is Mercury, the default values for Mercury will be used)
  *
+ * @note When the Planet is the Earth, the initial epoch and Keplerian elements
+ *       used for the Low Fidelity modeling are set, they must be 'forwarded'
+ *       on to the Sun.  This is necessary because:
+ *       1. the KeplersProbelm code computes the state of a body with respect to
+ *          its central body, then returms it with respect to the Earth
+ *       2. the Sun has no cental body, so
+ *       3. the Sun will have to use the Earth's information to compute and
+ *          return its state
+ *
  */
 //------------------------------------------------------------------------------
 
@@ -54,6 +63,12 @@ public:
 
    virtual Rvector       GetBodyCartographicCoordinates(
                             const A1Mjd &forTime) const;
+   
+   // For the Earth, these methods need to update the Sun's information, as the 
+   // Sun has no cental body and its initial epoch and keplerian elements need 
+   // to be set and stored differently
+   virtual bool          SetLowFidelityEpoch(const A1Mjd &toTime);
+   virtual bool          SetLowFidelityElements(const Rvector6 &kepl);
 
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -92,7 +107,7 @@ protected:
    static const Rmatrix               CIJ[NumberOfPlanets];
    /// @todo add other ones as needed
 
-   void InitializePlanet(const std::string &cBody);
+   void             InitializePlanet(const std::string &cBody);
 
 private:
 

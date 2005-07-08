@@ -117,7 +117,8 @@ protected:
    Real      referenceDistance;
    Real      photosphereRadius;  // meters
 
-   void InitializeStar();
+   void             InitializeStar();
+   virtual Rvector6 ComputeLowFidelity(const A1Mjd &forTime);
 
 private:
 

@@ -25,8 +25,10 @@
 #include <iomanip>
 #include "gmatdefs.hpp"
 #include "SpacePoint.hpp"
+#include "CoordUtil.hpp"                // for conversion to/from Cartesian
 #include "CelestialBody.hpp"
 #include "PlanetaryEphem.hpp"
+#include "SolarSystem.hpp"
 #include "SolarSystemException.hpp"
 #include "PlanetaryEphemException.hpp"
 #include "Rvector3.hpp"
@@ -41,6 +43,7 @@
 #include "AngleUtil.hpp"
 
 //#define DEBUG_CELESTIAL_BODY 1
+
 
 using namespace GmatMathUtil;
 using namespace std; 
@@ -123,7 +126,7 @@ const std::string CelestialBody::POS_VEL_STRINGS[Gmat::PosVelSourceCount] =
 
 const std::string CelestialBody::ANALYTIC_METHOD_STRINGS[Gmat::AnalyticMethodCount] =
 {
-   "NoAnalyticMethod", "TwoBody", "EarthAnalytic", "MoonAnalytic", "NumAnalytic"
+   "NoAnalyticMethod", "KeplersProblem"
 };
 
 //------------------------------------------------------------------------------
@@ -149,7 +152,7 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    polarRadius        (6356.76),
    mu                 (398600.4415),
    posVelSrc          (Gmat::DE_405),
-   analyticMethod     (Gmat::NO_ANALYTIC_METHOD),
+   analyticMethod     (Gmat::LOW_FIDELITY),
    stateTime          (21545.0),
    centralBody        (""),
    bodyNumber         (0),
@@ -165,7 +168,8 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    defaultMu          (398600.4415),
    defaultEqRadius    (6378.14),
    order              (4),
-   degree             (4)
+   degree             (4),
+   newLF              (true)
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
    objectTypeNames.push_back("CelestialBody");
@@ -210,7 +214,8 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    defaultMu          (398600.4415),
    defaultEqRadius    (6378.14),
    order              (0),
-   degree             (0)
+   degree             (0),
+   newLF              (true)
 
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
@@ -254,7 +259,12 @@ CelestialBody::CelestialBody(const CelestialBody &cb) :
    order               (cb.order),
    degree              (cb.degree),
    sij                 (cb.sij),
-   cij                 (cb.cij)
+   cij                 (cb.cij),
+   lfEpoch             (cb.lfEpoch),
+   lfKepler            (cb.lfKepler),
+   prevLFEpoch         (cb.prevLFEpoch),
+   prevLFState         (cb.prevLFState),
+   newLF               (cb.newLF)
 {
    state                  = cb.state;
    stateTime              = cb.stateTime;
@@ -339,6 +349,13 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
    //dSbar               = cb.dSbar;
    //order               = cb.order;
    //degree              = cb.degree;
+
+   lfEpoch      = cb.lfEpoch;
+   lfKepler     = cb.lfKepler;
+   prevLFEpoch  = cb.prevLFEpoch;
+   prevLFState  = cb.prevLFState;
+   newLF        = cb.newLF;
+      
    return *this;
 }
 
@@ -373,6 +390,7 @@ CelestialBody::~CelestialBody()
 //------------------------------------------------------------------------------
 const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
 {
+   cout << "In GetState for body " << instanceName << endl;
    Real*     posVel = NULL;
    switch (posVelSrc)
    {
@@ -391,40 +409,34 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
          // figure out the ID of the body
          bodyNumber = theSourceFile->GetBodyID(instanceName);
          posVel     = theSourceFile->GetPosVel(bodyNumber,atTime);
+         state.SetElement(0,posVel[0]);
+         state.SetElement(1,posVel[1]);
+         state.SetElement(2,posVel[2]);
+         state.SetElement(3,posVel[3]);
+         state.SetElement(4,posVel[4]);
+         state.SetElement(5,posVel[5]);
          break;
       case Gmat::ANALYTIC :
          switch (analyticMethod)
          {
             case Gmat::NO_ANALYTIC_METHOD :
-               throw SolarSystemException("No analytic method specified for body " +
-                                          instanceName);
-            case Gmat::TWO_BODY :
-               // call the two body stuff here ...........
-               break;
-            case Gmat::EARTH_ANALYTIC :
-               // call the earth analytic stuff here ....... but what is it?
-               break;
-            case Gmat::MOON_ANALYTIC :
-               // call the moon analytic stuff here ........ but what is it?
-               break;
-            case Gmat::NUM_ANALYTIC :
-               // call the num analytic stuff here ......... but what is it?
+               throw SolarSystemException(
+                     "No analytic method specified for body " +instanceName);
+            case Gmat::LOW_FIDELITY :
+               state = ComputeLowFidelity(atTime);
                break;
             default:
                break;
          }
+         break;
 //      case Gmat::EPHEMERIS :  
 //         break; // other cases later <<<<<<<<<<<<<<<<
       default:
+         throw SolarSystemException("Invalid data source defined for body "
+                                    + instanceName);
          break;
    }
    stateTime  = atTime;
-   state.SetElement(0,posVel[0]);
-   state.SetElement(1,posVel[1]);
-   state.SetElement(2,posVel[2]);
-   state.SetElement(3,posVel[3]);
-   state.SetElement(4,posVel[4]);
-   state.SetElement(5,posVel[5]);
    return state;
 }
 
@@ -904,6 +916,17 @@ bool CelestialBody::GetDensity(Real *position, Real *density, Real epoch,
    return atmModel->Density(position,density,epoch,count);
 }
 
+A1Mjd CelestialBody::GetLowFidelityEpoch() const
+{
+   return lfEpoch;
+}
+
+Rvector6 CelestialBody::GetLowFidelityElements() const
+{
+   return lfKepler;
+}
+
+
 //------------------------------------------------------------------------------
 //  bool SetBodyType(Gmat::BodyType bType)
 //------------------------------------------------------------------------------
@@ -918,7 +941,8 @@ bool CelestialBody::GetDensity(Real *position, Real *density, Real epoch,
 //------------------------------------------------------------------------------
 bool CelestialBody::SetBodyType(Gmat::BodyType bType)
 {
-   return (bodyType = bType); // will need to change default parameters here too, if they
+   bodyType = bType;
+   return true; // will need to change default parameters here too, if they
                      // are set to values that make no sense for this type of body?
 }
 
@@ -1029,7 +1053,8 @@ bool CelestialBody::SetFlattening(Real flat)
 //------------------------------------------------------------------------------
 bool CelestialBody::SetSource(Gmat::PosVelSource pvSrc)
 {
-   return (posVelSrc = pvSrc);
+   posVelSrc = pvSrc;
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -1066,7 +1091,8 @@ bool CelestialBody::SetSourceFile(PlanetaryEphem *src)
 //------------------------------------------------------------------------------
 bool CelestialBody::SetAnalyticMethod(Gmat::AnalyticMethod aM)
 {
-   return (analyticMethod = aM); 
+   analyticMethod = aM;
+   return true; 
 }
 
 //------------------------------------------------------------------------------
@@ -1100,7 +1126,8 @@ bool CelestialBody::SetUsePotentialFile(bool useIt)
       //sij              = defaultSij;
       //cij              = defaultCij;
    }
-   return (usePotentialFile = useIt);
+   usePotentialFile = useIt;
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -1162,6 +1189,21 @@ bool CelestialBody::SetPotentialFilename(const std::string &fn)
    return true;
 }
 
+bool CelestialBody::SetLowFidelityEpoch(const A1Mjd &toTime)
+{
+   lfEpoch = toTime;
+   newLF   = true;
+   return true;
+}
+
+bool CelestialBody::SetLowFidelityElements(const Rvector6 &kepl)
+{
+   lfKepler = kepl;
+   newLF    = true;
+   return true;
+}
+
+
 const Rvector6 CelestialBody::GetMJ2000State(const A1Mjd &atTime)
 {
    if (j2000Body == NULL)
@@ -1187,7 +1229,6 @@ const Rvector6 CelestialBody::GetMJ2000State(const A1Mjd &atTime)
    {
       throw SolarSystemException("j2000Body is of incorrect type.");
    }
-   
    return (stateEphem - j2kEphemState);
    
 }
@@ -1420,8 +1461,16 @@ Real        CelestialBody::SetRealParameter(const Integer id, const Real value)
       return true;
    }
    //if (id == POLAR_RADIUS)      return (polarRadius        = value); // make sense?
-   if (id == MU)                return (mu                 = value);
-   if (id == HOUR_ANGLE)        return (hourAngle          = value);
+   if (id == MU)
+   {
+      mu = value;
+      return true;
+   }
+   if (id == HOUR_ANGLE)
+   {
+      hourAngle = value;
+      return true;
+   }
    
    return SpacePoint::SetRealParameter(id, value);
 }
@@ -1467,10 +1516,26 @@ Integer     CelestialBody::GetIntegerParameter(const Integer id) const
 Integer     CelestialBody::SetIntegerParameter(const Integer id,
                                         const Integer value) // const?
 {
-   if (id == ORDER)                return (order               = value);
-   if (id == DEGREE)               return (degree              = value);
-   if (id == BODY_NUMBER)          return (bodyNumber          = value);
-   if (id == REF_BODY_NUMBER)      return (referenceBodyNumber = value);
+   if (id == ORDER)
+   {
+      order = value;
+      return true;
+   }
+   if (id == DEGREE)
+   {
+      degree = value;
+      return true;
+   }
+   if (id == BODY_NUMBER)
+   {
+      bodyNumber = value;
+      return true;
+   }
+   if (id == REF_BODY_NUMBER)
+   {
+      referenceBodyNumber = value;
+      return true;
+   }
    //if (id == COEFFICIENT_SIZE)     return (coefficientSize     = value);
    
    return SpacePoint::SetIntegerParameter(id,value);  // add others in later
@@ -1616,7 +1681,11 @@ bool        CelestialBody::GetBooleanParameter(const Integer id) const
 bool        CelestialBody::SetBooleanParameter(const Integer id,
                                         const bool value) // const?
 {
-   if (id == USE_POTENTIAL_FILE_FLAG)   return (usePotentialFile = value); 
+   if (id == USE_POTENTIAL_FILE_FLAG)
+   {
+      usePotentialFile = value;
+      return true; 
+   }
 
    return SpacePoint::SetBooleanParameter(id,value);
 }
@@ -1757,8 +1826,16 @@ const Rvector& CelestialBody::SetRvectorParameter(const std::string &label,
 //const Rmatrix& CelestialBody::SetRmatrixParameter(const Integer id,
 //                                                  const Rmatrix &value)
 //{
-//   if (id == SIJ)               return (sij = value);
-//   if (id == CIJ)               return (cij = value);
+//   if (id == SIJ) 
+//   {
+//      sij = value;
+//      return true;
+//   }
+//   if (id == CIJ)
+//   {
+//      cij = value;
+//      return true;
+//   }
 //
 //   return SpacePoint::SetRmatrixParameter(id,value);
 //}
@@ -1824,6 +1901,125 @@ const StringArray& CelestialBody::GetStringArrayParameter(const Integer id) cons
 
    return SpacePoint::GetStringArrayParameter(id);
 }
+
+
+//------------------------------------------------------------------------------
+//  GmatBase* GetRefObject(const Gmat::ObjectType type,
+//                         const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * This method returns a reference object from the CelestialBody class.
+ *
+ * @param type  type of the reference object requested
+ * @param name  name of the reference object requested
+ *
+ * @return pointer to the reference object requested.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* CelestialBody::GetRefObject(const Gmat::ObjectType type,
+                                      const std::string &name)
+{
+   switch (type)
+   {
+      case Gmat::SPACE_POINT:
+      case Gmat::CELESTIAL_BODY:
+         if ((cb) && (name == centralBody))     return cb;
+         break;
+      default:
+         break;
+   }
+
+   // Not handled here -- invoke the next higher GetRefObject call
+   return SpacePoint::GetRefObject(type, name);
+}
+
+
+//------------------------------------------------------------------------------
+//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Returns the names of the reference object. (Derived classes should implement
+ * this as needed.)
+ *
+ * @param <type> reference object type.  Gmat::UnknownObject returns all of the
+ *               ref objects.
+ *
+ * @return The names of the reference object.
+ */
+//------------------------------------------------------------------------------
+const StringArray& CelestialBody::GetRefObjectNameArray(
+                                  const Gmat::ObjectType type)
+{
+   if (type == Gmat::UNKNOWN_OBJECT)
+   {
+      static StringArray refs = SpacePoint::GetRefObjectNameArray(type);
+
+      refs.push_back(centralBody);
+
+      #ifdef DEBUG_REFERENCE_SETTING
+         MessageInterface::ShowMessage("+++ReferenceObjects:\n");
+         for (StringArray::iterator i = refs.begin(); i != refs.end(); ++i)
+            MessageInterface::ShowMessage("   %s\n", i->c_str());
+      #endif
+
+      return refs;
+   }
+
+   // Not handled here -- invoke the next higher GetRefObject call
+   return SpacePoint::GetRefObjectNameArray(type);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                    const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * This method sets a reference object for the CelestialBody class.
+ *
+ * @param obj   pointer to the reference object
+ * @param type  type of the reference object
+ * @param name  name of the reference object
+ *
+ * @return true if successful; otherwise, false.
+ *
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::SetRefObject(GmatBase *obj,
+                                 const Gmat::ObjectType type,
+                                 const std::string &name)
+{
+   bool foundHere = false;
+   bool trySP     = false;
+   if (obj->IsOfType("CelestialBody"))
+   {
+      if (name == centralBody)
+      {
+         #ifdef DEBUG_REFERENCE_SETTING
+            MessageInterface::ShowMessage("Setting %s as primary for %s\n",
+                                          name.c_str(), instanceName.c_str());
+         #endif
+         cb = (CelestialBody*) obj;
+         foundHere = true;
+      }
+   }
+
+   // may also be the right object for a higher level parameter ...
+   try
+   {
+      trySP = SpacePoint::SetRefObject(obj, type, name);
+   }
+   catch (GmatBaseException &gbe)
+   {
+      if (!foundHere) throw;
+   }
+   if (foundHere || trySP) return true;
+   return false;
+}
+
+
+
 
 //------------------------------------------------------------------------------
 // protected methods
@@ -2105,7 +2301,7 @@ bool CelestialBody::ReadDatFile()
 //  bool IsBlank(char* aLine)
 //------------------------------------------------------------------------------
 /**
- * This method returns true if teh string is empty or is all white space.
+ * This method returns true if the string is empty or is all white space.
  *
  * @return success flag.
  */
@@ -2120,12 +2316,199 @@ bool CelestialBody::IsBlank(char* aLine)
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+//  Real GetJulianDaysFromTCBEpoch(const A1Mjd &forTime)
+//------------------------------------------------------------------------------
+/**
+ * This method computes the Julian days from the TCB Epoch.
+ *
+ * @return number of Julian days since the TCB epoch.
+ */
+//------------------------------------------------------------------------------
 Real CelestialBody::GetJulianDaysFromTCBEpoch(const A1Mjd &forTime) const
 {
    Real mjdTCB = TimeConverterUtil::Convert(forTime.Get(),
                  "A1Mjd", "TcbMjd", GmatTimeUtil::JD_JAN_5_1941); 
    Real jdTCB  = mjdTCB + GmatTimeUtil::JD_JAN_5_1941; 
    return (jdTCB - JD_EPOCH_2000_TCB);
+}
+
+//------------------------------------------------------------------------------
+//  Rvector6 ComputeLowFidelity(const A1Mjd &forTime)
+//------------------------------------------------------------------------------
+/**
+ * This method computes the position and velocity at time forTime
+ *
+ * @return body state (position, velocity) at time forTime, with respect to
+ *         the Earth.
+ *
+ */
+//------------------------------------------------------------------------------
+Rvector6 CelestialBody::ComputeLowFidelity(const A1Mjd &forTime)
+{
+   cout << "In LowFidelity for body " << instanceName << endl;
+   // Since we want the state in MJ2000Eq Earth-centered
+   if (instanceName == SolarSystem::EARTH_NAME) 
+      return Rvector6(0.0,0.0,0.0,0.0,0.0,0.0);
+
+   cout << "Getting central body state x ........." << endl;
+   Rvector6 cbState = cb->GetState(forTime);
+   cout << "The central body state = \n" << cbState << endl;
+   return (KeplersProblem(forTime) + cbState);    
+}
+
+
+//------------------------------------------------------------------------------
+//  Rvector6 KeplersProblem(const A1Mjd &forTime)
+//------------------------------------------------------------------------------
+/**
+ * This method computes the position and velocity at time forTime
+ *
+ * @return body state (position, velocity) at time forTime, with respect to
+ *         the central body.
+ *
+ * @note This is based on Algorithm 8 on pp. 101-2 (and algorithm 1 on
+ *       p. 71) of "Fundamentals of Astrodynamics and Applications",
+ *       Second Edition, by David A. Vallado.
+ */
+//------------------------------------------------------------------------------
+Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
+{
+   
+   //cout << "------- IN KeplersProblem ............." << endl;
+   Real     cbMu  = cb->GetGravitationalConstant() + mu;
+   //cout << "cbMu = " << cbMu << endl;
+   Rvector6 cart;  // or MA???
+   Real     dTime;
+   if (newLF)
+   {
+      cart  = KeplerianToCartesian(lfKepler, cbMu, CoordUtil::TA);  // or MA???
+      dTime = forTime.Subtract(lfEpoch) * GmatTimeUtil::SECS_PER_DAY;
+   }
+   else
+   {
+      cart  = prevLFState;
+      dTime = forTime.Subtract(prevLFEpoch) * GmatTimeUtil::SECS_PER_DAY;
+   }
+   //cout << "elements successfully converted to \n" << cart << endl;
+   //cout << "dTime = " << dTime << endl; // units are seconds, right?
+   Rvector3 r0    = cart.GetR();
+   Rvector3 v0    = cart.GetV();
+   Real     rMag  = r0.GetMagnitude();
+   Real     vMag  = v0.GetMagnitude();
+   //Real     xi    = (vMag * vMag / 2.0) - (cbMu / rMag); // not used ???
+   Real     alpha = (-vMag * vMag / cbMu) + (2.0 / rMag);
+   Real     x0    = -999.999;
+   Real     rDotv = r0 * v0;
+   //cout << "Made it through to determining the initial guess ...." << endl;
+   //cout << "alpha = " << alpha << endl;
+   
+   // Determine initial guess .......
+   // for a circle or ellipse
+   if (alpha > KEPLER_TOL)  
+   {
+      x0 = GmatMathUtil::Sqrt(cbMu) * dTime * cbMu;
+      if (alpha == 1.0) 
+         throw SolarSystemException("Low fidelity model error for body "
+                                    + instanceName);
+   }
+   // for a parabola
+   else if (GmatMathUtil::Abs(alpha) < KEPLER_TOL)
+   {
+      Rvector3 h    = Cross(r0, v0);
+      Real     hMag = h.GetMagnitude();
+      Real     p    = (hMag * hMag) / cbMu;
+      Real     s    = (1.0 / 2.0) * (PI_OVER_TWO - 
+                      ATan(3.0 * Sqrt(cbMu / (p * p * p)) * dTime));
+      Real     w    = ATan(Pow(Tan(s), (1.0 / 3.0)));
+      x0            = Sqrt(p) * 2.0 / Tan(2.0 * w);
+   }
+   // for a hyperbola
+   else if (alpha < -KEPLER_TOL)
+   {
+      Real     a     = 1.0 / alpha;
+      Real     signT;
+      if (dTime >= 0.0) signT =  1.0;
+      else              signT = -1.0;
+      Real     num   = -2.0 * cbMu * alpha * dTime;
+      Real     den   = rDotv + signT * Sqrt(-cbMu * a) * 
+                       (1.0 - rMag * alpha);
+      x0             = signT * Sqrt(-a) * Ln(num / den);
+   }
+   cout << "initial guess = " << x0 << endl;
+   // Loop until difference falls within tolerance
+   Real psi, rVal, xNew;
+   Real xn    = x0;
+   bool done  = false;
+   Real c2    = -999.99;
+   Real c3    = -999.99;
+   while (!done)
+   {
+      psi = xn * xn * alpha;
+      //cout << "In loop, psi = " << psi << endl;
+      
+      // compute c2 and c3, per Algorithm 1, p. 71
+      if (psi > KEPLER_TOL)
+      {
+         c2 = (1.0 - Cos(Sqrt(psi))) / psi;
+         c3 = (Sqrt(psi) - Sin(Sqrt(psi))) / Sqrt(psi * psi * psi);
+      }
+      else if (psi < -KEPLER_TOL)
+      {
+         c2 = (1.0 - Cosh(Sqrt(-psi))) / psi;
+         c3 = (Sinh(Sqrt(-psi)) - Sqrt(-psi)) / Sqrt((-psi) * (-psi) * (-psi));
+      }
+      else
+      {
+         c2 = 1.0 / 2.0;
+         c3 = 1.0 / 6.0;
+      }
+      rVal = (xn * xn * c2) + (rDotv / Sqrt(cbMu)) * xn * (1.0 - psi * c3) +
+              rMag * (1.0 - psi * c2);
+      xNew = xn + ((Sqrt(cbMu) * dTime) - (xn * xn * xn * c3) - 
+                   (rDotv / Sqrt(cbMu)) * (xn * xn * c2) -
+                   rMag * xn * (1.0 - psi *c3)) / rVal;
+      //cout << "rVal = " << rVal << endl;
+      //cout << "xNew = " << xNew << endl;
+      //cout << "xn - xNew = " << (xn - xNew) << endl;
+      
+      //if (Abs(xn - xNew) < KEPLER_TOL) done = true;
+      if (Abs(xn - xNew) < KEPLER_TOL) done = true;
+      xn = xNew;
+   }
+   //cout << "DONE with looping ......." << endl;
+   
+   Real f     = 1.0 - ((xn * xn) / rMag) * c2;
+   Real g     = dTime - ((xn * xn * xn) / Sqrt(cbMu)) * c3;
+   //cout << "f = " << f << endl;
+   //cout << "g = " << g << endl;
+   Real gDot  = 1.0 - ((xn * xn) / rVal) * c2;
+   Real fDot  = (Sqrt(cbMu) / (rVal * rMag)) * xn * (psi * c3 - 1.0);
+   //cout << "fDot = " << fDot << endl;
+   //cout << "gDot = " << gDot << endl;
+   Rvector3 r = f    * r0 + g    * v0;
+   Rvector3 v = fDot * r0 + gDot * v0;
+   
+   //Real tmp = f * gDot - g * fDot; // ***** temporary
+   cout.setf(ios::fixed);
+   cout.precision(30);
+
+   //cout << "The fgDot - gfDot value is : " << tmp << endl;
+   if (!IsEqual((f * gDot - g * fDot), 1.0, 1.0e-10))
+      throw SolarSystemException(
+            "Error computing low fidelity ephemeris for body "
+            + instanceName);
+   
+   Rvector6 newState(r,v);
+   prevLFEpoch = forTime;
+   prevLFState = newState;
+   newLF       = false;
+   
+   return newState;
+   //Rvector6 cbState = cb->GetState(forTime);
+   //cout << "The central body state = \n" << cbState << endl;
+   //return (newState + cbState); 
 }
 
 //------------------------------------------------------------------------------

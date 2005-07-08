@@ -21,6 +21,7 @@
 #include "MessageInterface.hpp"
 #include "PhysicalConstants.hpp"
 #include "RealUtilities.hpp"
+#include "SolarSystemException.hpp"
 
 using namespace GmatMathUtil;
 
@@ -28,7 +29,7 @@ using namespace GmatMathUtil;
 // default values for Planet data
 const Gmat::BodyType        Planet::DEFAULT_BODY_TYPE         = Gmat::PLANET;
 const Gmat::PosVelSource    Planet::DEFAULT_POS_VEL_SOURCE    = Gmat::SLP; 
-const Gmat::AnalyticMethod  Planet::DEFAULT_ANALYTIC_METHOD   = Gmat::TWO_BODY;
+const Gmat::AnalyticMethod  Planet::DEFAULT_ANALYTIC_METHOD   = Gmat::LOW_FIDELITY;
 const Integer               Planet::DEFAULT_BODY_NUMBER       = 1;
 const Integer               Planet::DEFAULT_REF_BODY_NUMBER   = 3;
 
@@ -261,9 +262,10 @@ const Rmatrix               Planet::CIJ[NumberOfPlanets]                 =
 //------------------------------------------------------------------------------
 Planet::Planet(std::string name) :
 CelestialBody     ("Planet",name)
+
 {   
    objectTypeNames.push_back("Planet");
-   InitializePlanet(NULL);  
+   InitializePlanet(SolarSystem::SUN_NAME);  
 }
 
 //------------------------------------------------------------------------------
@@ -429,6 +431,35 @@ Rvector Planet::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
    
    return Rvector(4, alpha, delta, W, Wdot);
 }
+
+bool Planet::SetLowFidelityEpoch(const A1Mjd &toTime)
+{
+   // For the Earth, send the information to the Sun
+   if (instanceName == SolarSystem::EARTH_NAME)
+   {
+      if (!cb) 
+         throw SolarSystemException("Central body must be set for " 
+                                    + instanceName);
+      cb->SetLowFidelityEpoch(toTime);
+   }
+   return CelestialBody::SetLowFidelityEpoch(toTime);
+}
+
+bool Planet::SetLowFidelityElements(const Rvector6 &kepl)
+{
+   // For the Earth, send the information to the Sun
+   if (instanceName == SolarSystem::EARTH_NAME)
+   {
+      if (!cb) 
+         throw SolarSystemException("Central body must be set for " 
+                                    + instanceName);
+      cb->SetLowFidelityElements(-kepl);
+   }
+   return CelestialBody::SetLowFidelityElements(kepl);
+}
+
+
+
 
 
 //------------------------------------------------------------------------------

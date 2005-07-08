@@ -28,7 +28,7 @@ using namespace GmatMathUtil;
 // default values for CelesitalBody data
 const Gmat::BodyType        Moon::BODY_TYPE           = Gmat::MOON;
 const Gmat::PosVelSource    Moon::POS_VEL_SOURCE      = Gmat::SLP; 
-const Gmat::AnalyticMethod  Moon::ANALYTIC_METHOD     = Gmat::TWO_BODY; 
+const Gmat::AnalyticMethod  Moon::ANALYTIC_METHOD     = Gmat::LOW_FIDELITY; 
 const Integer               Moon::ORDER               = 0; 
 const Integer               Moon::DEGREE              = 0;  
 const Real                  Moon::LUNA_EQUATORIAL_RADIUS   = 1738.1; // km
@@ -83,7 +83,7 @@ Moon::Moon(std::string name) :
 CelestialBody     ("Moon",name)
 {
    objectTypeNames.push_back("Moon");
-   InitializeMoon(NULL);  
+   InitializeMoon(SolarSystem::EARTH_NAME);  
 }
 
 //------------------------------------------------------------------------------
@@ -319,6 +319,7 @@ void Moon::InitializeMoon(const std::string &cBody)
    MessageInterface::ShowMessage(
          "Unknown moon created - please supply physical parameter values");
 }
+
 
 //------------------------------------------------------------------------------
 // private methods

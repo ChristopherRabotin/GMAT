@@ -137,11 +137,12 @@ SolarSystem::SolarSystem(std::string withName)
    objectTypeNames.push_back("SolarSystem");
    parameterCount   = SolarSystemParamCount;
    pvSrcForAll      = Gmat::SLP;
-   anMethodForAll   = Gmat::TWO_BODY;
+   anMethodForAll   = Gmat::LOW_FIDELITY;
    pE               = NULL;
    
    // create and add the default bodies
    Star* theSun     = new Star(SUN_NAME);
+   theSun->SetCentralBody(EARTH_NAME);  // central body here is a reference body
    Planet* theEarth = new Planet(EARTH_NAME,   SUN_NAME);
    Moon* theMoon    = new Moon(MOON_NAME,      EARTH_NAME);
    Planet* mercury  = new Planet(MERCURY_NAME, SUN_NAME);

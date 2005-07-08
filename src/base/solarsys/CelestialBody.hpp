@@ -57,10 +57,7 @@ namespace Gmat
    enum AnalyticMethod
    {
       NO_ANALYTIC_METHOD = 0,
-      TWO_BODY,
-      EARTH_ANALYTIC,
-      MOON_ANALYTIC,
-      NUM_ANALYTIC,
+      LOW_FIDELITY,
       AnalyticMethodCount
    };
 
@@ -72,6 +69,7 @@ namespace Gmat
       MOON,
       ASTEROID,
       COMET,
+      KBO,
       BodyTypeCount
    };
 };
@@ -127,6 +125,9 @@ public:
    virtual bool                 GetDensity(Real *position, Real *density,
                                         Real epoch = 21545.0,
                                         Integer count = 1);
+   // methods to get the initial epoch and keplerian elements 
+   virtual A1Mjd                GetLowFidelityEpoch() const;
+   virtual Rvector6             GetLowFidelityElements() const; 
    
 
    // methods to return the body type, central body,
@@ -146,6 +147,8 @@ public:
    virtual bool           SetAtmosphereModelType(std::string toAtmModelType);
    virtual bool           SetAtmosphereModel(AtmosphereModel *toAtmModel);
    virtual bool           SetPotentialFilename(const std::string &fn);
+   virtual bool           SetLowFidelityEpoch(const A1Mjd &toTime);
+   virtual bool           SetLowFidelityElements(const Rvector6 &kepl);
 
    // methods inherited from SpacePoint, that must be implemented here (and/or
    // in the derived classes
@@ -197,6 +200,12 @@ public:
    //                                              const Rmatrix &value);
    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
 
+   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
+                                    const std::string &name);
+   const StringArray&  GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                    const std::string &name = "");
+   
    // need methods to get/set stateTime (a1MJD type)?
 
    //virtual const Rmatrix&       GetCoefDriftS();
@@ -271,6 +280,7 @@ protected:
    //static const Real TDot              = dDot / 36525.0;
    static const Real dDot              = 1.0;
    static const Real TDot              = 1.0;
+   static const Real KEPLER_TOL        = 1.0e-06;
    
    // body type of the body
    Gmat::BodyType         bodyType;
@@ -293,8 +303,10 @@ protected:
    // time of the state
    A1Mjd                  stateTime;
 
-   /// central body around which this body revolves
+   /// name of central body around which this body revolves
    std::string            centralBody;
+   /// central body around which this body revolves
+   CelestialBody          *cb;
    /// body number for the SLP file
    Integer                bodyNumber;
    /// body number of origin of coordinate system for file
@@ -333,7 +345,19 @@ protected:
    Rmatrix                sij;
    /// spherical harmonic coefficients (Cij) for the body
    Rmatrix                cij;
-
+   /// Initial epoch for low fidelity analytic model
+   A1Mjd                  lfEpoch;
+   /// initial Keplerian elements for low fidelity analytic model 
+   /// (with respect to central body)
+   Rvector6               lfKepler; 
+   /// most recent epoch for low fidelity model
+   A1Mjd                  prevLFEpoch;  
+   /// most recent state (cartesian - wrt the Earth) for low fidelity model
+   Rvector6               prevLFState;
+   /// flag indicating whether or not the low fidelity epoch and 
+   /// state have been modified
+   bool                   newLF;
+   
    /// date and time of start of source file
    //A1Mjd                  sourceStart;      // currently unused
    /// date and time of end of sourcce file
@@ -345,17 +369,20 @@ protected:
    //Rmatrix                defaultSij;
    //Rmatrix                defaultCij;
 
+
    
    // initialze the body
-   void Initialize(std::string withBodyType = "Planet");
-   // method to read the potential file, if requested
-   bool          ReadPotentialFile();
-   bool          ReadCofFile();
-   bool          ReadGrvFile();
-   bool          ReadDatFile();
+   void             Initialize(std::string withBodyType = "Planet");
+   // methods to read the potential file, if requested
+   bool             ReadPotentialFile();
+   bool             ReadCofFile();
+   bool             ReadGrvFile();
+   bool             ReadDatFile();
    
-   bool          IsBlank(char* aLine);
-   virtual Real  GetJulianDaysFromTCBEpoch(const A1Mjd &forTime) const;
+   bool             IsBlank(char* aLine);
+   virtual Real     GetJulianDaysFromTCBEpoch(const A1Mjd &forTime) const;
+   virtual Rvector6 ComputeLowFidelity(const A1Mjd &forTime);
+   virtual Rvector6 KeplersProblem(const A1Mjd &forTime);
    
 private:
 
