@@ -76,6 +76,7 @@
 #include "ReportFilePanel.hpp"
 #include "BarycenterPanel.hpp"
 #include "LibrationPointPanel.hpp"
+#include "CelestialBodyPanel.hpp"
 
 #include <wx/gdicmn.h>
 #include "ddesetup.hpp"   // for IPC_SERVICE, IPC_TOPIC
@@ -96,7 +97,7 @@
 #include "bitmaps/build.xpm"
 
 //#define DEBUG_MAINFRAME 1
-
+using namespace GmatMenu;
 //------------------------------
 // event tables for wxWindows
 //------------------------------
@@ -116,6 +117,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(MENU_FILE_SAVE_SCRIPT, GmatMainFrame::OnSaveScript)
    EVT_MENU(MENU_FILE_SAVE_AS_SCRIPT, GmatMainFrame::OnSaveScriptAs)
    EVT_MENU(MENU_PROJECT_EXIT, GmatMainFrame::OnProjectExit)
+   EVT_MENU(MENU_PROJECT_PREFERENCES_FONT, GmatMainFrame::OnFont)
    EVT_MENU(TOOL_RUN, GmatMainFrame::OnRun)
    EVT_MENU(TOOL_STOP, GmatMainFrame::OnStop)
    EVT_MENU(TOOL_CLOSE_CHILDREN, GmatMainFrame::OnCloseChildren)
@@ -127,6 +129,14 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(MENU_FILE_NEW_SCRIPT, GmatMainFrame::OnNewScript)
    EVT_MENU(MENU_FILE_OPEN_SCRIPT, GmatMainFrame::OnOpenScript)
    
+   EVT_MENU(MENU_EDIT_UNDO, GmatMainFrame::OnUndo)
+   EVT_MENU(MENU_EDIT_REDO, GmatMainFrame::OnRedo)
+   EVT_MENU(MENU_EDIT_COPY, GmatMainFrame::OnCopy)
+   EVT_MENU(MENU_EDIT_CUT, GmatMainFrame::OnCut)
+   EVT_MENU(MENU_EDIT_PASTE, GmatMainFrame::OnPaste)
+   EVT_MENU(MENU_EDIT_COMMENT, GmatMainFrame::OnComment)
+   EVT_MENU(MENU_EDIT_UNCOMMENT, GmatMainFrame::OnUncomment)
+
    EVT_MENU(MENU_START_SERVER, GmatMainFrame::OnStartServer)
    EVT_MENU(MENU_STOP_SERVER, GmatMainFrame::OnStopServer)
 
@@ -141,9 +151,9 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_SET_FOCUS(GmatMainFrame::OnFocus)
    EVT_CLOSE(GmatMainFrame::OnClose)
 
-   EVT_MENU(GmatScript::MENU_SCRIPT_BUILD_OBJECT, GmatMainFrame::OnScriptBuildObject)
-   EVT_MENU(GmatScript::MENU_SCRIPT_BUILD_AND_RUN, GmatMainFrame::OnScriptBuildAndRun)
-   EVT_MENU(GmatScript::MENU_SCRIPT_RUN, GmatMainFrame::OnScriptRun)
+   EVT_MENU(MENU_SCRIPT_BUILD_OBJECT, GmatMainFrame::OnScriptBuildObject)
+   EVT_MENU(MENU_SCRIPT_BUILD_AND_RUN, GmatMainFrame::OnScriptBuildAndRun)
+   EVT_MENU(MENU_SCRIPT_RUN, GmatMainFrame::OnScriptRun)
 
 END_EVENT_TABLE()
 
@@ -310,17 +320,27 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style );
+                                          style, item->GetDesc(), dataType );
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new SpacecraftPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
       }
+      else if (dataType == GmatTree::CELESTIAL_BODY)
+      {
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                          wxPoint(-1,-1), wxSize(-1,-1),
+                                          style, item->GetDesc(), dataType );
+         panel = new wxScrolledWindow(newChild);
+         sizer->Add(new CelestialBodyPanel(panel, item->GetDesc()),
+                    0, wxGROW|wxALL, 0);
+      }
+
       else if (dataType == GmatTree::FUELTANK)
       {
          //wxLogMessage("This panel is coming soon...");
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                             wxPoint(-1,-1), wxSize(-1,-1),
-                                            style);
+                                            style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new TankConfigPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0);
       }
@@ -328,7 +348,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                             wxPoint(-1,-1), wxSize(-1,-1),
-                                            style);
+                                            style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new ThrusterConfigPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0);
       }
@@ -336,7 +356,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new FormationSetupPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0);         
       }   
@@ -344,7 +364,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new UniversePanel(panel), 0, wxGROW|wxALL, 0);
       }
@@ -357,7 +377,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new ImpulsiveBurnSetupPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
@@ -366,7 +386,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new FiniteBurnSetupPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
@@ -375,7 +395,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new PropagationConfigPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
@@ -384,7 +404,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new DCSetupPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
@@ -393,7 +413,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new ReportFileSetupPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
@@ -402,7 +422,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new XyPlotSetupPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);          
@@ -411,7 +431,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new OpenGlPlotSetupPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
@@ -424,7 +444,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);
          
          #if DEBUG_MAINFRAME
@@ -438,7 +458,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
 //        {
 //           newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
 //                                            wxPoint(-1,-1), wxSize(-1,-1),
-//                                            style);
+//                                            style, dataType);
 //           panel = new wxScrolledWindow(newChild);
 //           sizer->Add(new PropagatePanel(panel, item->GetCommand()),
 //                      0, wxGROW|wxALL, 0);
@@ -447,7 +467,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new ManeuverPanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
@@ -456,7 +476,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);
          sizer->Add(new TargetPanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
@@ -465,7 +485,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);              
          sizer->Add(new AchievePanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
@@ -474,7 +494,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);
          sizer->Add(new VaryPanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
@@ -483,7 +503,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);
          sizer->Add(new SavePanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
@@ -492,7 +512,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);
          sizer->Add(new TogglePanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
@@ -501,7 +521,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);
          sizer->Add(new ScriptEventPanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
@@ -510,7 +530,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);
 
          if (theGuiInterpreter->GetParameter
@@ -534,7 +554,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new FunctionSetupPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
@@ -543,7 +563,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);
          sizer->Add(new MatlabFunctionSetupPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
@@ -552,17 +572,17 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);
          ScriptPanel *scriptPanel = new ScriptPanel(panel, item->GetDesc());
          sizer->Add(scriptPanel, 0, wxGROW|wxALL, 0);
-//         newChild->SetMenuBar(scriptPanel->CreateScriptMenu());
+         newChild->SetScriptTextCtrl(scriptPanel->mFileContentsTextCtrl);
       }
       else if (dataType == GmatTree::IF_CONTROL)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new IfPanel(panel, item->GetCommand()), 0, wxGROW|wxALL, 0);
       }
@@ -570,7 +590,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
          
          sizer->Add(new WhilePanel(panel, item->GetCommand()), 0, wxGROW|wxALL, 0);
@@ -587,7 +607,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new ForLoopPanel(panel, item->GetCommand()), 0, wxGROW|wxALL, 0);
       }
@@ -595,7 +615,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);
          sizer->Add (new CallFunctionPanel (panel, item->GetCommand()),
                      0, wxGROW|wxALL, 0 );
@@ -613,7 +633,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);
          sizer->Add(new CoordSystemConfigPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
@@ -622,7 +642,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);
          sizer->Add(new BarycenterPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
@@ -631,7 +651,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);
          sizer->Add(new LibrationPointPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
@@ -640,7 +660,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
-                                          style);
+                                          style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);
          sizer->Add(new ReportFilePanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
@@ -658,8 +678,8 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       if (newChild && panel)
       {
          // set the datatype, so the gmatnotebook minimize/cascade accordingly
-         newChild->SetDataType(dataType);
-         newChild->SetMenuBar(CreateMainMenu(dataType));
+//         newChild->SetDataType(dataType);
+//         newChild->SetMenuBar(CreateMainMenu(dataType));
 
          panel->SetScrollRate(5, 5);
          panel->SetAutoLayout(TRUE);
@@ -1340,7 +1360,7 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
  * @return Menu bar.
  */
 //------------------------------------------------------------------------------
-wxMenuBar *GmatMainFrame::CreateMainMenu(int dataType)
+wxMenuBar *GmatMainFrame::CreateMainMenu()
 {
    wxMenuBar *menuBar = new wxMenuBar;
    wxMenu *fileMenu = new wxMenu;
@@ -1350,12 +1370,6 @@ wxMenuBar *GmatMainFrame::CreateMainMenu(int dataType)
  
    fileMenu->Append(MENU_FILE_NEW_SCRIPT, wxT("New Script"));  
    fileMenu->Append(MENU_FILE_OPEN_SCRIPT, wxT("Open Script"), wxT(""), FALSE);  
-
-   if (dataType == GmatTree::OUTPUT_OPENGL_PLOT)
-      fileMenu->Append(GmatPlot::MDI_GL_OPEN_TRAJECTORY_FILE, _T("&Open Trajectory File"));
-   if (dataType == GmatTree::OUTPUT_XY_PLOT)
-      fileMenu->Append(GmatPlot::MDI_TS_OPEN_PLOT_FILE, _T("&Open XY Plot File"));
-
    fileMenu->Append(MENU_FILE_SAVE_SCRIPT, wxT("Save to Script"), wxT(""), FALSE);
    fileMenu->Append(MENU_FILE_SAVE_AS_SCRIPT, wxT("Save to Script As"),
                      wxT(""), FALSE);  
@@ -1363,13 +1377,6 @@ wxMenuBar *GmatMainFrame::CreateMainMenu(int dataType)
    fileMenu->AppendSeparator();
    fileMenu->Append(TOOL_CLOSE_CHILDREN, wxT("Close All"),
                      wxT(""), FALSE);
-
-   if (dataType == GmatTree::OUTPUT_OPENGL_PLOT)
-      fileMenu->Append(GmatPlot::MDI_GL_CHILD_QUIT, _T("&Close Plot"), _T("Close this window"));
-   if (dataType == GmatTree::OUTPUT_XY_PLOT)
-      fileMenu->Append(GmatPlot::MDI_TS_CHILD_QUIT, _T("&Close Plot"),
-         _T("Close this window"));
-
 
    fileMenu->AppendSeparator();
    fileMenu->Append(MENU_PROJECT_LOAD_DEFAULT_MISSION, wxT("Default Project"), 
@@ -1392,112 +1399,13 @@ wxMenuBar *GmatMainFrame::CreateMainMenu(int dataType)
    fileMenu->Enable(MENU_PROJECT_PRINT, FALSE);
    menuBar->Append(fileMenu, wxT("File"));
 
-   editMenu->Append(MENU_EDIT_CUT, wxT("Cut"), wxT(""), FALSE);
-   editMenu->Append(MENU_EDIT_COPY, wxT("Copy"), wxT(""), FALSE);
-   editMenu->Append(MENU_EDIT_PASTE, wxT("Paste"), wxT(""), FALSE);
-   editMenu->AppendSeparator();
    editMenu->Append(MENU_EDIT_RESOURCES, wxT("Resources"), wxT(""), FALSE);
    editMenu->Append(MENU_EDIT_MISSION, wxT("Mission"), wxT(""), FALSE);
 
-   editMenu->Enable(MENU_EDIT_CUT, FALSE);
-   editMenu->Enable(MENU_EDIT_COPY, FALSE);
-   editMenu->Enable(MENU_EDIT_PASTE, FALSE);
    editMenu->Enable(MENU_EDIT_RESOURCES, FALSE);
    editMenu->Enable(MENU_EDIT_MISSION, FALSE);
    menuBar->Append(editMenu, wxT("Edit"));
-
-   // create and add script menu
-   if (dataType == GmatTree::SCRIPT_FILE)
-   {
-      wxMenu *scriptMenu = new wxMenu;
-      scriptMenu->Append(GmatScript::MENU_SCRIPT_BUILD_OBJECT,
-            _T("&Build Object"));
-      scriptMenu->Append(GmatScript::MENU_SCRIPT_BUILD_AND_RUN,
-            _T("&Build and Run"));
-      scriptMenu->Append(GmatScript::MENU_SCRIPT_RUN, _T("&Run"));
-      menuBar->Append(scriptMenu, wxT("Script"));
-   }
    
-   if (dataType == GmatTree::OUTPUT_OPENGL_PLOT)
-   {
-      // Plot menu
-      wxMenu *plotMenu = new wxMenu;
-
-      plotMenu->Append(GmatPlot::MDI_GL_CLEAR_PLOT, _T("Clear Plot"));
-      plotMenu->AppendSeparator();
-      plotMenu->Append(GmatPlot::MDI_GL_CHANGE_TITLE, _T("Change &title..."));
-      menuBar->Append(plotMenu, wxT("Plot"));
-
-      // View menu
-      mViewMenu = new wxMenu;
-      mViewMenu->Append(GmatPlot::MDI_GL_SHOW_DEFAULT_VIEW, _T("Default\tCtrl-R"),
-                       _("Reset to default view"));
-      mViewMenu->Append(GmatPlot::MDI_GL_ZOOM_IN, _T("Zoom &in\tCtrl-I"), _("Zoom in"));
-      mViewMenu->Append(GmatPlot::MDI_GL_ZOOM_OUT, _T("Zoom &out\tCtrl-O"), _("Zoom out"));
-      mViewMenu->AppendSeparator();
-
-      // View Option submenu
-      mViewMenu->Append(GmatPlot::MDI_GL_SHOW_OPTION_PANEL,
-                        _T("Show View Option Dialog"),
-                        _T("Show view option dialog"), wxITEM_CHECK);
-
-      mViewOptionMenu = new wxMenu;
-      wxMenuItem *item =
-         new wxMenuItem(mViewMenu, GmatPlot::MDI_GL_VIEW_OPTION, _T("Option"),
-                        _T("Show bodies in wire frame"), wxITEM_NORMAL, mViewOptionMenu);
-      mViewOptionMenu->Append(GmatPlot::MDI_GL_SHOW_WIRE_FRAME,
-                             _T("Show Wire Frame"),
-                             _T("Show bodies in wire frame"), wxITEM_CHECK);
-      mViewOptionMenu->Append(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE,
-                             _T("Show Equatorial Plane"),
-                             _T("Show equatorial plane lines"), wxITEM_CHECK);
-
-      mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, true);
-
-      mViewMenu->Append(item);
-
-      // Animation menu
-      mViewMenu->AppendSeparator();
-      mViewMenu->Append(GmatPlot::MDI_GL_VIEW_ANIMATION, _T("Animation"));
-      menuBar->Append(mViewMenu, wxT("View"));
-   }
-
-   //loj: 6/14/05 Changed MDI_XY_ to MDI_TS_
-   if (dataType == GmatTree::OUTPUT_XY_PLOT)
-   {
-      // Plot menu
-      wxMenu *plotMenu = new wxMenu;
-
-      plotMenu->Append(GmatPlot::MDI_TS_CLEAR_PLOT, _T("Clear Plot"));
-      plotMenu->Enable(GmatPlot::MDI_TS_CLEAR_PLOT, FALSE);
-      plotMenu->AppendSeparator();
-      plotMenu->Append(GmatPlot::MDI_TS_CHANGE_TITLE, _T("Change &title..."));
-      menuBar->Append(plotMenu, wxT("Plot"));
-
-      // View menu
-      wxMenu *xyViewMenu = new wxMenu;
-      xyViewMenu->Append(GmatPlot::MDI_TS_SHOW_DEFAULT_VIEW, _T("Reset\tCtrl-R"),
-                       _("Reset to default view"));
-      xyViewMenu->AppendSeparator();
-      
-      // View Option submenu
-      mXyViewOptionMenu = new wxMenu;
-      wxMenuItem *item =
-         new wxMenuItem(xyViewMenu, GmatPlot::MDI_TS_VIEW_OPTION, _T("Option"),
-                        _T("view options"), wxITEM_NORMAL, mXyViewOptionMenu);
-      mXyViewOptionMenu->Append(GmatPlot::MDI_TS_DRAW_GRID,
-                             _T("Draw Grid"),
-                             _T("Draw Grid"), wxITEM_CHECK);
-      mXyViewOptionMenu->Append(GmatPlot::MDI_TS_DRAW_DOTTED_LINE,
-                             _T("Draw dotted line"),
-                             _T("Draw dotted line"), wxITEM_CHECK);
-
-      mXyViewOptionMenu->Check(GmatPlot::MDI_TS_DRAW_DOTTED_LINE, false);
-
-      xyViewMenu->Append(item);
-      menuBar->Append(xyViewMenu, wxT("View"));
-   }
-
    // Tools
    toolsMenu->Append(MENU_TOOLS_SWINGBY, wxT("Swingby"), wxT(""), FALSE); 
    toolsMenu->Enable(MENU_TOOLS_SWINGBY, FALSE);
@@ -1524,8 +1432,6 @@ wxMenuBar *GmatMainFrame::CreateMainMenu(int dataType)
 
    // Help
    helpMenu->Append(MENU_HELP_TOPICS, wxT("Topics"), wxT(""), FALSE);
-   if (dataType == GmatTree::OUTPUT_OPENGL_PLOT)
-      helpMenu->Append(GmatPlot::MDI_GL_HELP_VIEW, _T("Plot View"), _T("View mouse control"));
    helpMenu->AppendSeparator();
    helpMenu->Append(MENU_HELP_ABOUT, wxT("About"), wxT(""), FALSE);
  
@@ -1880,25 +1786,116 @@ void GmatMainFrame::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 }
 
 //------------------------------------------------------------------------------
-// wxMenu *GetXyViewOptionMenu()
+// void OnUndo(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-wxMenu *GmatMainFrame::GetXyViewOptionMenu()
+void GmatMainFrame::OnUndo(wxCommandEvent& event)
 {
-   return mXyViewOptionMenu;
+   GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
+   theChild->GetScriptTextCtrl()->Undo();
+//   theSaveButton->Enable(true);
 }
 
 //------------------------------------------------------------------------------
-// wxMenu *GetViewOptionMenu()
+// void OnRedo(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-wxMenu *GmatMainFrame::GetViewOptionMenu()
+void GmatMainFrame::OnRedo(wxCommandEvent& event)
 {
-   return mViewOptionMenu;
+   GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
+   theChild->GetScriptTextCtrl()->Redo();
+//   theSaveButton->Enable(true);
 }
 
 //------------------------------------------------------------------------------
-// wxMenu *GetViewMenu()
+// void OnCut(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-wxMenu *GmatMainFrame::GetViewMenu()
+void GmatMainFrame::OnCut(wxCommandEvent& event)
 {
-   return mViewMenu;
+   GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
+   theChild->GetScriptTextCtrl()->Cut();
+//   theSaveButton->Enable(true);
 }
+//------------------------------------------------------------------------------
+// void OnCopy(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnCopy(wxCommandEvent& event)
+{
+   GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
+   theChild->GetScriptTextCtrl()->Copy();
+//   theSaveButton->Enable(true);
+}
+//------------------------------------------------------------------------------
+// void OnPaste(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnPaste(wxCommandEvent& event)
+{
+   GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
+   theChild->GetScriptTextCtrl()->Paste();
+//   theSaveButton->Enable(true);
+}
+//------------------------------------------------------------------------------
+// void OnComment(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnComment(wxCommandEvent& event)
+{
+   GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
+   wxTextCtrl *scriptTC = theChild->GetScriptTextCtrl();
+   wxString selString = scriptTC->GetStringSelection();
+   selString.Replace("\n", "\n%");
+   selString = "%" + selString;
+   
+   if (selString.Last() == '%')
+      selString = selString.Mid(0, selString.Length()-1);
+
+   scriptTC->WriteText(selString);
+
+}
+//------------------------------------------------------------------------------
+// void OnUncomment(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnUncomment(wxCommandEvent& event)
+{
+   GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
+   wxTextCtrl *scriptTC = theChild->GetScriptTextCtrl();
+   wxString selString = scriptTC->GetStringSelection();
+
+   if (selString.StartsWith("%"))  // gets rid of first %
+      selString = selString.Mid(1, selString.Length()-1);
+
+   selString.Replace("\n%", "\n");
+   scriptTC->WriteText(selString);
+}
+
+//------------------------------------------------------------------------------
+// void OnFont(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnFont(wxCommandEvent& event)
+{
+  GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
+  wxTextCtrl *scriptTC = theChild->GetScriptTextCtrl();
+
+  wxFontData data;
+  data.SetInitialFont(scriptTC->GetFont());
+//  data.SetColour(canvasTextColour);
+
+  wxFontDialog dialog(this, &data);
+  if (dialog.ShowModal() == wxID_OK)
+  {
+    wxFontData retData = dialog.GetFontData();
+    wxFont newFont = retData.GetChosenFont();
+
+    // change all script windows to new font
+    wxNode *node = mdiChildren->GetFirst();
+    while (node)
+    {
+      GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+      if (theChild->GetDataType() == GmatTree::SCRIPT_FILE)
+      {
+         theChild->GetScriptTextCtrl()->SetFont(newFont);
+      }
+      node = node->GetNext();
+    }
+
+    GmatAppData::SetFont(newFont);
+  }
+}
+

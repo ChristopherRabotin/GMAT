@@ -66,8 +66,6 @@ public:
    void StartServer();
    void StopServer();
    wxToolBar* GetMainFrameToolBar();
-   wxMenuBar* CreateMainMenu(int dataType=GmatTree::RESOURCES_FOLDER);
-
    MdiChildTrajFrame *trajSubframe;
 //    MdiChildTrajFrame *trajMainSubframe;
 
@@ -89,10 +87,7 @@ public:
    void OnScriptRun(wxCommandEvent& WXUNUSED(event));
 
    wxList *mdiChildren;
-   wxMenu *GetXyViewOptionMenu();
-   wxMenu *GetViewOptionMenu();
-   wxMenu *GetViewMenu();
-   
+
 protected:
 
 private:
@@ -108,15 +103,12 @@ private:
    wxSashLayoutWindow* msgWin;
    wxScrolledWindow *panel;
 
-   wxMenu *mXyViewOptionMenu;
-   wxMenu *mViewOptionMenu;
-   wxMenu *mViewMenu;
-   
 //   wxDocManager *mDocManager;
 //   wxDocTemplate *mDocTemplate;
    ViewTextFrame *mTextFrame;
    //GmatMainNotebook *rightTabs;
    
+   wxMenuBar* CreateMainMenu();
    void InitToolBar(wxToolBar* toolBar);
    wxMenu *mServerMenu;
    
@@ -136,7 +128,16 @@ private:
    void OnOpenScript(wxCommandEvent &event);
 
    void OnScriptBuild(wxCommandEvent &event);
-   
+
+   void OnUndo(wxCommandEvent& event);
+   void OnRedo(wxCommandEvent& event);
+   void OnCut(wxCommandEvent& event);
+   void OnCopy(wxCommandEvent& event);
+   void OnPaste(wxCommandEvent& event);
+   void OnComment(wxCommandEvent& event);
+   void OnUncomment(wxCommandEvent& event);
+   void OnFont(wxCommandEvent& event);
+
    void OnGlPlotTrajectoryFile(wxCommandEvent &event);
    void OnXyPlotTrajectoryFile(wxCommandEvent &event);
    
@@ -154,6 +155,10 @@ private:
    void OnMainFrameSize(wxSizeEvent &event);
    void OnFocus(wxFocusEvent &event);
 
+};
+
+namespace GmatMenu
+{
    // IDs for the controls and the menu commands
    enum
    {
@@ -161,24 +166,33 @@ private:
       MENU_PROJECT_LOAD_DEFAULT_MISSION,
       MENU_PROJECT_PRINT,
       MENU_PROJECT_PREFERENCES,
+      MENU_PROJECT_PREFERENCES_FONT,
       MENU_PROJECT_EXIT,
       MENU_SET_PATH_AND_LOG,
       MENU_INFORMATION,
-        
+
       MENU_FILE_OPEN_SCRIPT,
       MENU_FILE_NEW_SCRIPT,
       MENU_FILE_SAVE_SCRIPT,
       MENU_FILE_SAVE_AS_SCRIPT,
 
-      MENU_SCRIPT_OPEN_EDITOR,
-      MENU_SCRIPT_BUILD,
-        
+      MENU_EDIT_UNDO,
+      MENU_EDIT_REDO,
       MENU_EDIT_CUT,
       MENU_EDIT_COPY,
       MENU_EDIT_PASTE,
+      MENU_EDIT_COMMENT,
+      MENU_EDIT_UNCOMMENT,
+
       MENU_EDIT_RESOURCES,
       MENU_EDIT_MISSION,
-    
+      
+      MENU_SCRIPT_OPEN_EDITOR,
+      MENU_SCRIPT_BUILD,
+      MENU_SCRIPT_BUILD_OBJECT,
+      MENU_SCRIPT_RUN,
+      MENU_SCRIPT_BUILD_AND_RUN,
+
       MENU_PARAMETERS_PROP_CONFIG,
       MENU_PARAMETERS_PROPAGATOR,
       MENU_PARAMETERS_LAUNCH_MODEL,
@@ -188,14 +202,14 @@ private:
       MENU_PARAMETERS_ATTITUDE_MODES,
       MENU_PARAMETERS_SOLAR_SAILS,
       MENU_PARAMETERS_SOLAR_ELEC_CONV,
-    
+
       MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE,
       MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE,
       MENU_ORBIT_FILES_EPHEM_FILE,
-    
+
       MENU_VARIABLES_CREATE,
       MENU_VARIABLES_EVALUATE,
-        
+
       MENU_TOOLS_SWINGBY,
       MENU_TOOLS_MATLAB,
       MENU_TOOLS_MATLAB_OPEN,
@@ -203,27 +217,26 @@ private:
       MENU_TOOLS_MATLAB_CLOSE,
 
       MENU_HELP_TOPICS,
-        
+
       TOOL_RUN,
       TOOL_PAUSE,
       TOOL_RESUME,
       TOOL_STOP,
       TOOL_BUILD,
-        
+
       TOOL_CLOSE_CHILDREN,
       TOOL_SCRIPT,
-        
+
       MENU_START_SERVER,
       MENU_STOP_SERVER,
-      
+
       ID_SASH_WINDOW,
       ID_MSG_SASH_WINDOW,
-        
+
       // it is important for the id corresponding to the "About" command to have
       // this standard value as otherwise it won't be handled properly under Mac
-      // (where it is special and put into the "Apple" menu)    
+      // (where it is special and put into the "Apple" menu)
       MENU_HELP_ABOUT = wxID_ABOUT,
    };
 };
-
 #endif // GmatMainFrame_hpp
