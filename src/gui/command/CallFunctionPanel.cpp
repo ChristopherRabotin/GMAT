@@ -140,7 +140,7 @@ void CallFunctionPanel::Create()
 
    //loj: 6/6/05 get it from theGuiManager
    functionComboBox = theGuiManager->GetFunctionComboBox(this, ID_COMBO, wxSize(130,-1));
-   
+
    // wxGrid
    inputGrid =
       new wxGrid( this, -1, wxDefaultPosition, wxSize(290, 23), wxWANTS_CHARS );
