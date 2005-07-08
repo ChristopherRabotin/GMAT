@@ -817,6 +817,8 @@ void CallFunction::SendInParam(Parameter *param)
          int numRows = array->GetIntegerParameter("NumRows");
          int numCols = array->GetIntegerParameter("NumCols");
          std::ostringstream os;
+         
+         os.precision(18);
 
          Rmatrix rmatrix = array->GetMatrix();
 
