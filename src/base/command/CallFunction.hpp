@@ -102,6 +102,7 @@ private:
    ObjectArray objectArray;
    std::vector<Parameter*> mInputList;
    std::vector<Parameter*> mOutputList;
+   ObjectArray callcmds;
 
    StringArray mInputListNames;
    StringArray mOutputListNames;
@@ -124,6 +125,7 @@ private:
       FUNCTION_NAME = GmatCommandParamCount,
       ADD_INPUT,
       ADD_OUTPUT,
+      COMMAND_STREAM,
       CallFunctionParamCount  /// Count of the parameters for this class
    };
 

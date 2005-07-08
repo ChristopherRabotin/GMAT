@@ -36,6 +36,7 @@ CallFunction::PARAMETER_TEXT[CallFunctionParamCount - GmatCommandParamCount] =
    "FunctionName",
    "AddInput",
    "AddOutput",
+   "CommandStream",
 };
 
 const Gmat::ParameterType
@@ -44,6 +45,7 @@ CallFunction::PARAMETER_TYPE[CallFunctionParamCount - GmatCommandParamCount] =
    Gmat::STRING_TYPE,
    Gmat::STRINGARRAY_TYPE,
    Gmat::STRINGARRAY_TYPE,
+   Gmat::OBJECT_TYPE,
 };
 
 CallFunction::CallFunction() :
@@ -59,6 +61,9 @@ CallFunction::CallFunction() :
 
 CallFunction::~CallFunction()
 {
+   for (ObjectArray::iterator i = callcmds.begin(); i < callcmds.end(); ++i)
+      delete *i;
+
 }
 
 CallFunction::CallFunction(const CallFunction& cf) :
@@ -72,6 +77,7 @@ CallFunction::CallFunction(const CallFunction& cf) :
    objectArray = cf.objectArray;
    mInputList = cf.mInputList;
    mOutputList = cf.mOutputList;
+   callcmds = cf.callcmds;
 
    mInputListNames = cf.mInputListNames;
    mOutputListNames = cf.mOutputListNames;
@@ -96,6 +102,7 @@ CallFunction& CallFunction::operator=(const CallFunction& cf)
    objectArray = cf.objectArray;
    mInputList = cf.mInputList;
    mOutputList = cf.mOutputList;
+   callcmds = cf.callcmds;
 
    mInputListNames = cf.mInputListNames;
    mOutputListNames = cf.mOutputListNames;
@@ -452,7 +459,6 @@ bool CallFunction::RenameRefObject(const Gmat::ObjectType type,
 
    }
 
-
    return true;
 }
 
@@ -484,6 +490,12 @@ GmatBase* CallFunction::GetRefObject(const Gmat::ObjectType type,
 
       case Gmat::FUNCTION:
          return mFunction;
+      case Gmat::COMMAND:
+         for (ObjectArray::iterator i = callcmds.begin();
+              i < callcmds.end(); ++i) {
+            if ((*i)->GetName() == name)
+               return *i;
+         }
       default:
          break;
    }
@@ -528,6 +540,13 @@ bool CallFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       mFunction = (Function *)obj;
       mFunctionName = name;
       return true;
+   case Gmat::COMMAND:
+      if (find(callcmds.begin(), callcmds.end(), obj) == callcmds.end())
+      {
+         callcmds.push_back(obj);
+         return true;
+      }
+      return false;
    default:
       break;
    }
@@ -552,6 +571,8 @@ ObjectArray& CallFunction::GetRefObjectArray(const Gmat::ObjectType type)
          objectArray.push_back(mOutputList[i]);
 
       return objectArray;
+   case Gmat::COMMAND:
+      return callcmds;
    default:
       break;
    }
@@ -625,7 +646,25 @@ bool CallFunction::Initialize()
           return false;
       }
 
-   return true;
+   bool rv = true;  // Initialization return value
+
+   for (ObjectArray::iterator i = callcmds.begin();
+        i < callcmds.end(); ++i)
+   {
+      ((GmatCommand *)(*i))->SetObjectMap(objectMap);
+      ((GmatCommand *)(*i))->SetSolarSystem(solarSys);
+      rv = ((GmatCommand *)(*i))->Initialize();
+      
+      if (!rv)
+         return false;
+         
+      // You'll need to override this base class method for CallFunction so
+      // finite burns act correctly; when we're this far, I'll help if you need me to
+      /// @todo:  get transients to work
+//      ((GmatCommand *)(*i))->SetTransientForces(&transients);
+   }
+
+   return rv;
 }
 
 //------------------------------------------------------------------------------
@@ -676,8 +715,29 @@ bool CallFunction::Execute()
       if (mFunction->GetTypeName() == "MatlabFunction")
       {
          status = ExecuteMatlabFunction();
+         return status;
       }
    #endif
+   
+   if (mFunction->GetTypeName() == "GmatFunction")
+   {
+      bool rv = true;  // Initialization return value
+
+      for (ObjectArray::iterator i = callcmds.begin();
+           i < callcmds.end(); ++i)
+      {
+         rv = ((GmatCommand *)(*i))->Execute();
+
+         if (!rv)
+         {
+            std::string str = "\"" + ((GmatCommand *)(*i))->GetTypeName() +
+               "\" Command failed to run to completion\nCommand Text is \"" +
+               ((GmatCommand *)(*i))->GetGeneratingString() + "\"";
+            throw CommandException(str);
+         }
+      }
+
+   }
 
    #if DEBUG_CALL_FUNCTION
       MessageInterface::ShowMessage("Excecuted command\n");
