@@ -23,46 +23,109 @@
 #include <sstream>
 
 
+//---------------------------------
+// public members
+//---------------------------------
+
+//------------------------------------------------------------------------------
+//  Report()
+//------------------------------------------------------------------------------
+/**
+ * Constructs the Report Command (default constructor).
+ */
+//------------------------------------------------------------------------------
 Report::Report() :
    GmatCommand ("Report"),
    rfName      (""),
-   reporter    (NULL)
+   reporter    (NULL),
+   reportID    (-1)
 {
 }
 
 
+//------------------------------------------------------------------------------
+//  ~Report()
+//------------------------------------------------------------------------------
+/**
+ * Destroys the Report Command (destructor).
+ */
+//------------------------------------------------------------------------------
 Report::~Report()
 {
 }
 
 
+//------------------------------------------------------------------------------
+//  Report(const Report &rep)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the Report Command based on another instance (copy constructor).
+ * 
+ * @param rep The Report that is copied.
+ */
+//------------------------------------------------------------------------------
 Report::Report(const Report &rep) :
    GmatCommand    (rep),
    rfName         (rep.rfName),
-   reporter       (NULL)
+   reporter       (NULL),
+   reportID       (-1)
 {
+   parmNames = rep.parmNames;
+   parms.clear();
 }
 
 
+//------------------------------------------------------------------------------
+//  Report& operator=(const Report &rep)
+//------------------------------------------------------------------------------
+/**
+ * Sets this Report Command to match another instance (Assignment operator).
+ * 
+ * @param rep The Report that is copied.
+ * 
+ * @return This instance, configured to match the other and ready for 
+ *         initialization.
+ */
+//------------------------------------------------------------------------------
 Report& Report::operator=(const Report &rep)
 {
    if (this != &rep)
    {
       rfName = rep.rfName;
       reporter = NULL;
+      reportID = -1;
+
+      parmNames = rep.parmNames;
+      parms.clear();
    }
    
    return *this;
 }
 
 
-//bool Report::SetRefObjectName(const Gmat::ObjectType type, 
-//                              const std::string &name)
-//{
-//   if (type == 
-//}
-
-
+//------------------------------------------------------------------------------
+//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                    const std::string &name, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets the ReportFile and Parameter objects used bt the Report command.
+ * 
+ * This method received the global instances of the objects used in the Report
+ * command.  It checks their types and stores their names, so that the the 
+ * objects can be retrieved from the local store in the Sandbox during 
+ * initiialization.  It also tells the ReportFile instance that it will need
+ * to be ready to receive data from a ReportCommand, so that the ReportFile does
+ * not erroneously inform the user that no data will be written to the 
+ * ReportFile.
+ * 
+ * @param <obj> Pointer to the reference object.
+ * @param <type> type of the reference object.
+ * @param <name> name of the reference object.
+ * @param <index> Index into the object array.
+ *
+ * @return true if object successfully set, throws otherwise.
+ */
+//------------------------------------------------------------------------------
 bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                           const std::string &name, const Integer index)
 {
@@ -97,6 +160,15 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 }
 
 
+//------------------------------------------------------------------------------
+//  GmatBase* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of this Report.
+ *
+ * @return clone of the Report.
+ */
+//------------------------------------------------------------------------------
 GmatBase* Report::Clone() const
 {
    return new Report(*this);
@@ -104,6 +176,15 @@ GmatBase* Report::Clone() const
 
 
 
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Performs the initialization needed to run the Report command.
+ *
+ * @return true if the Report is initialized, false if an error occurs.
+ */
+//------------------------------------------------------------------------------
 bool Report::Initialize()
 {
    GmatBase *object;
@@ -132,8 +213,19 @@ bool Report::Initialize()
 }
 
 
+//------------------------------------------------------------------------------
+// bool Execute()
+//------------------------------------------------------------------------------
+/**
+ * Write teh report data to a ReportFile.
+ *
+ * @return true if the Command runs to completion, false if an error
+ *         occurs.
+ */
+//------------------------------------------------------------------------------
 bool Report::Execute()
 {
+   // Build the data as a string
    std::stringstream datastream;
    datastream.precision(15);
    datastream.width(20);
@@ -144,11 +236,13 @@ bool Report::Execute()
       datastream << (*i)->EvaluateReal() << " ";
    }
 
-//   // Build the data
+   // Publish it
+
+// This is how it should be done:
 //   reportID = reporter->GetProviderId();
+//   #ifdef DEBUG_REPORTING
 //      MessageInterface::ShowMessage("Reporting to subscriber %d\n", reportID);
-//   
-//   // Publish it
+//   #endif
 //   publisher->Publish(reportID, "Here is some data");
    
    // Publisher seems broken right now -- do it by hand

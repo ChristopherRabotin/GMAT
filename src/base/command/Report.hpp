@@ -24,6 +24,18 @@
 #include "ReportFile.hpp"
 #include "Parameter.hpp"
 
+/**
+ * The Report command is used to write data to a ReportFile at specific times.
+ * 
+ * The ReportFile object is a subscriber used to generate data in an ASCII file.
+ * Parameters added directly to the ReportFile are written whenever the 
+ * publisher is fed data.  Parmeters that need to be seen only at specific times 
+ * in a script are published using this command.
+ * 
+ * @note The Publisher does not currently pass text strings correctly.  The
+ *       Report command is set to directly write data to the ReportFile until
+ *       this defect is corrected.
+ */
 class GMAT_API Report : public GmatCommand
 {
 public:
@@ -33,9 +45,6 @@ public:
    Report(const Report &rep);
    Report&           operator=(const Report &rep);
    
-   
-//   virtual bool      SetRefObjectName(const Gmat::ObjectType type,
-//                                      const std::string &name);
    virtual bool      SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                   const std::string &name,
                                   const Integer index);
@@ -47,16 +56,15 @@ public:
    
 protected:
    /// Name of the subscriber
-   std::string       rfName;
+   std::string                rfName;
    /// The ReportFile subscriber that receives the data
-   ReportFile        *reporter;
+   ReportFile                 *reporter;
    /// The ID for the subscriber
-   Integer           reportID;
+   Integer                    reportID;
    /// Array of parameter names
-   StringArray       parmNames;
-   /// Array of parameters
-   std::vector<Parameter*>
-                     parms;
+   StringArray                parmNames;
+   /// Array of parameters that get written to the report
+   std::vector<Parameter*>    parms;
 };
 
 #endif      // Report_hpp
