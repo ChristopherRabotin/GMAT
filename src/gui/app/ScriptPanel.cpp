@@ -27,6 +27,7 @@ BEGIN_EVENT_TABLE(ScriptPanel, GmatSavePanel)
 
    EVT_TEXT(ID_TEXTCTRL, ScriptPanel::OnTextUpdate)
    EVT_BUTTON(ID_BUTTON, ScriptPanel::OnButton)
+
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -65,16 +66,15 @@ void ScriptPanel::Create()
                             wxTE_MULTILINE | wxGROW | wxHSCROLL);
                             
    // 5/24/05 - arg: for demo change font size to HUGE
-//   mFileContentsTextCtrl->SetFont( wxFont( 14, wxDEFAULT, wxNORMAL, wxBOLD, FALSE, "",
-//                        wxFONTENCODING_SYSTEM ) );
+   mFileContentsTextCtrl->SetFont( GmatAppData::GetFont() );
 
    // wxButton
    mBuildButton =
       new wxButton(this, ID_BUTTON, "Build", wxDefaultPosition, wxDefaultSize, 0);
    mBuildRunButton =
       new wxButton(this, ID_BUTTON, "Build and Run", wxDefaultPosition, wxDefaultSize, 0);
-   mFontButton =
-      new wxButton(this, ID_BUTTON, "Font", wxDefaultPosition, wxDefaultSize, 0);
+//   mFontButton =
+//      new wxButton(this, ID_BUTTON, "Font", wxDefaultPosition, wxDefaultSize, 0);
 
 
    //------------------------------------------------------
@@ -82,7 +82,7 @@ void ScriptPanel::Create()
    //------------------------------------------------------
    mTopSizer->Add(mBuildButton, 0, wxALIGN_RIGHT | wxALL, bsize);
    mTopSizer->Add(mBuildRunButton, 0, wxALIGN_RIGHT | wxALL, bsize);
-   mTopSizer->Add(mFontButton, 0, wxALIGN_RIGHT | wxALL, bsize);
+//   mTopSizer->Add(mFontButton, 0, wxALIGN_RIGHT | wxALL, bsize);
 
    mBottomSizer->Add(mFileContentsTextCtrl, 0, wxGROW | wxALIGN_CENTER | wxALL,
                      bsize);
@@ -177,88 +177,28 @@ void ScriptPanel::OnButton(wxCommandEvent& event)
       }
       GmatAppData::GetMainFrame()->OnScriptBuildAndRun(event);
    }
-   else if (event.GetEventObject() == mFontButton)
-   {
-      OnFontSelect(event);
-   }
+//   else if (event.GetEventObject() == mFontButton)
+//   {
+//      OnFontSelect(event);
+//   }
 
 }
 
 //------------------------------------------------------------------------------
 // void OnFontSelect(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void ScriptPanel::OnFontSelect(wxCommandEvent& event)
-{
-  wxFontData data;
-  data.SetInitialFont(mFileContentsTextCtrl->GetFont());
-//  data.SetColour(canvasTextColour);
-
-  wxFontDialog dialog(this, &data);
-  if (dialog.ShowModal() == wxID_OK)
-  {
-    wxFontData retData = dialog.GetFontData();
-    wxFont newFont = retData.GetChosenFont();
-
-
-    mFileContentsTextCtrl->SetFont(newFont);
-  }
-}
-
-//------------------------------------------------------------------------------
-// wxMenuBar *CreateScriptMenu()
-//------------------------------------------------------------------------------
-/**
- * Adds items to the script menu.
- *
- * @return script Menu bar.
- */
-//------------------------------------------------------------------------------
-//wxMenuBar *ScriptPanel::CreateScriptMenu()
+//void ScriptPanel::OnFontSelect(wxCommandEvent& event)
 //{
-//    // Make a menubar
-//    wxMenu *file_menu = new wxMenu;
+//  wxFontData data;
+//  data.SetInitialFont(mFileContentsTextCtrl->GetFont());
+////  data.SetColour(canvasTextColour);
 //
-//    file_menu->Append(wxID_NEW, _T("&New"));
-//    file_menu->Enable(wxID_NEW, false);
-//    file_menu->Append(wxID_OPEN, _T("&Open"));
-//    file_menu->Enable(wxID_OPEN, false);
-////    file_menu->Append(MENU_FILE_NEW_SCRIPT, _T("&New"));
-////    file_menu->Append(MENU_FILE_OPEN_SCRIPT, _T("&Open"));
-//    file_menu->Append(ID_BUTTON_CLOSE, _T("&Close"));
-//    file_menu->Enable(ID_BUTTON_CLOSE, false);
-//    file_menu->Append(ID_BUTTON_SAVE, _T("&Save"));
-//    file_menu->Enable(ID_BUTTON_SAVE, false);
-//    file_menu->Append(ID_BUTTON_SAVE_AS, _T("Save &As"));
-//    file_menu->Enable(ID_BUTTON_SAVE_AS, false);
+//  wxFontDialog dialog(this, &data);
+//  if (dialog.ShowModal() == wxID_OK)
+//  {
+//    wxFontData retData = dialog.GetFontData();
+//    wxFont newFont = retData.GetChosenFont();
 //
-//    wxMenu *editMenu = new wxMenu;
-//    editMenu->Append(wxID_UNDO, _T("&Undo"));
-//    editMenu->Enable(wxID_UNDO, false);
-//    editMenu->Append(wxID_REDO, _T("&Redo"));
-//    editMenu->Enable(wxID_REDO, false);
-//    editMenu->AppendSeparator();
-//    editMenu->Append(wxID_CUT, _T("Cu&t"));
-//    editMenu->Enable(wxID_CUT, false);
-//    editMenu->Append(wxID_COPY, _T("&Copy"));
-//    editMenu->Enable(wxID_COPY, false);
-//    editMenu->Append(wxID_PASTE, _T("&Paste"));
-//    editMenu->Enable(wxID_PASTE, false);
-//
-//    wxMenu *scriptMenu = (wxMenu *) NULL;
-//
-//    scriptMenu = new wxMenu;
-//    scriptMenu->Append(GmatScript::MENU_SCRIPT_BUILD_OBJECT,
-//          _T("&Build Object"));
-//    scriptMenu->Append(GmatScript::MENU_SCRIPT_BUILD_AND_RUN,
-//          _T("&Build and Run"));
-//    scriptMenu->Append(GmatScript::MENU_SCRIPT_RUN, _T("&Run"));
-//
-//    wxMenuBar *menu_bar = new wxMenuBar;
-//
-//    menu_bar->Append(file_menu, _T("&File"));
-//    menu_bar->Append(editMenu, _T("&Edit"));
-//    menu_bar->Append(scriptMenu, _T("&Script"));
-//
-//    return menu_bar;
+//    mFileContentsTextCtrl->SetFont(newFont);
+//  }
 //}
-

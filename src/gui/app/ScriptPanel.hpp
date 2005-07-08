@@ -23,7 +23,7 @@ class ScriptPanel: public GmatSavePanel
 public:
    // constructors
    ScriptPanel(wxWindow *parent, const wxString &name);
-//   wxMenuBar *CreateScriptMenu();
+   wxTextCtrl *mFileContentsTextCtrl;
 
 private:
    wxString mScriptFilename;
@@ -31,11 +31,9 @@ private:
    wxGridSizer *mBottomSizer;
    wxBoxSizer *mPageSizer;
 
-   wxTextCtrl *mFileContentsTextCtrl;
-
    wxButton *mBuildButton;
    wxButton *mBuildRunButton;
-   wxButton *mFontButton;
+//   wxButton *mFontButton;
 
    // methods inherited from GmatSavePanel
    virtual void Create();
@@ -45,7 +43,7 @@ private:
    // event handling
    void OnTextUpdate(wxCommandEvent& event);
    void OnButton(wxCommandEvent& event);
-   void OnFontSelect(wxCommandEvent& event);
+//   void OnFontSelect(wxCommandEvent& event);
 
    DECLARE_EVENT_TABLE();
 
