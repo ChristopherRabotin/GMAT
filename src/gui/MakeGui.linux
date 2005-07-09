@@ -5,13 +5,14 @@ WXTARGET = gmat
 
 TARGETS = $(WXTARGET)
 
-LIBS = ../base/lib/libGmatGui.a 
+LIBS = ../base/lib/libGmatGui.a
 
 MATLAB_LIBRARIES = -leng -lmx -lut -lmat -lpthread \
                    -lgcc_s -licudata -licui18n \
                    -licuuc -lustdio -lz
 
-LINK_FLAGS = `wx-config --libs` -lwx_gtk2_gl-2.6 -L/usr/local/matlab704/bin/glnx86
+LINK_FLAGS = `wx-config --libs` -lwx_gtk2_gl-2.6 \
+              -lg2c -L/usr/local/matlab704/bin/glnx86
  
 all: prep $(TARGETS)
 
@@ -159,6 +160,7 @@ OBJECTS = \
     propagator/PropagatorSelectDialog.o \
     solarsys/BarycenterPanel.o \
     solarsys/CelesBodySelectDialog.o \
+    solarsys/CelestialBodyPanel.o \
     solarsys/LibrationPointPanel.o \
     solarsys/SolarSystemWindow.o \
     solarsys/UniversePanel.o \

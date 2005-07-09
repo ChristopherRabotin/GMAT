@@ -11,6 +11,8 @@ gui: $(WXTARGET)
 
 CPP = g++
 
+FORTRAN = g77
+
 OPTIMIZATIONS = -O2
 
 HEADERS = -Iinclude \
@@ -299,12 +301,23 @@ OBJECTS = \
     util/SphericalRADEC.o \
     util/StringTokenizer.o \
     util/TimeSystemConverter.o \
-    util/UtcDate.o
+    util/UtcDate.o \
+    \
+    \
+    solarsys/msise90_sub.o
 
 $(WXTARGET) : $(OBJECTS)
+	mkdir -p lib
 	ar rs $(WXTARGET) $(OBJECTS)
 	ranlib $(WXTARGET)
 
 .cpp.o:
 	$(CPP) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
 
+#.for.o:
+#	$(FORTRAN) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
+
+solarsys/msise90_sub.o: solarsys/msise90_sub.for
+	$(FORTRAN) -c solarsys/msise90_sub.for -o solarsys/msise90_sub.o $(CPPFLAGS) 
+	
+	
