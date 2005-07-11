@@ -390,7 +390,7 @@ CelestialBody::~CelestialBody()
 //------------------------------------------------------------------------------
 const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
 {
-   cout << "In GetState for body " << instanceName << endl;
+   //cout << "In GetState for body " << instanceName << endl;
    Real*     posVel = NULL;
    switch (posVelSrc)
    {
@@ -2347,14 +2347,14 @@ Real CelestialBody::GetJulianDaysFromTCBEpoch(const A1Mjd &forTime) const
 //------------------------------------------------------------------------------
 Rvector6 CelestialBody::ComputeLowFidelity(const A1Mjd &forTime)
 {
-   cout << "In LowFidelity for body " << instanceName << endl;
+   //cout << "In LowFidelity for body " << instanceName << endl;
    // Since we want the state in MJ2000Eq Earth-centered
    if (instanceName == SolarSystem::EARTH_NAME) 
       return Rvector6(0.0,0.0,0.0,0.0,0.0,0.0);
 
-   cout << "Getting central body state x ........." << endl;
+   //cout << "Getting central body state x ........." << endl;
    Rvector6 cbState = cb->GetState(forTime);
-   cout << "The central body state = \n" << cbState << endl;
+   //cout << "The central body state = \n" << cbState << endl;
    return (KeplersProblem(forTime) + cbState);    
 }
 
@@ -2436,7 +2436,7 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
                        (1.0 - rMag * alpha);
       x0             = signT * Sqrt(-a) * Ln(num / den);
    }
-   cout << "initial guess = " << x0 << endl;
+   //cout << "initial guess = " << x0 << endl;
    // Loop until difference falls within tolerance
    Real psi, rVal, xNew;
    Real xn    = x0;
@@ -2491,8 +2491,8 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
    Rvector3 v = fDot * r0 + gDot * v0;
    
    //Real tmp = f * gDot - g * fDot; // ***** temporary
-   cout.setf(ios::fixed);
-   cout.precision(30);
+   //cout.setf(ios::fixed);
+   //cout.precision(30);
 
    //cout << "The fgDot - gfDot value is : " << tmp << endl;
    if (!IsEqual((f * gDot - g * fDot), 1.0, 1.0e-10))
