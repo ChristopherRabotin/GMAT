@@ -21,8 +21,6 @@
 #include "MessageInterface.hpp"
 #include "A1Mjd.hpp"
 
-#include <iostream>
-using namespace std;
 
 // initialize static default values
 // default values for CelesitalBody data
@@ -432,7 +430,6 @@ void Star::InitializeStar()
 //------------------------------------------------------------------------------
 Rvector6 Star::ComputeLowFidelity(const A1Mjd &forTime)
 {
-   cout << "In LowFidelity for body ........... " << instanceName << endl;
    return KeplersProblem(forTime);   // already Earth-centered 
 }
 
