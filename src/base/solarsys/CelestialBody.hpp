@@ -275,12 +275,12 @@ protected:
    static const std::string PARAMETER_TEXT[CelestialBodyParamCount - SpacePointParamCount];
 
    static const Gmat::ParameterType PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount];
-   static const Real JD_EPOCH_2000_TCB = 2451545.0;
+   static const Real JD_EPOCH_2000_TCB;
    //static const Real dDot              = 1.0 / GmatTimeUtil::SECS_PER_DAY;
    //static const Real TDot              = dDot / 36525.0;
-   static const Real dDot              = 1.0;
-   static const Real TDot              = 1.0;
-   static const Real KEPLER_TOL        = 1.0e-06;
+   static const Real dDot;
+   static const Real TDot;
+   static const Real KEPLER_TOL;
    
    // body type of the body
    Gmat::BodyType         bodyType;

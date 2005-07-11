@@ -129,6 +129,11 @@ const std::string CelestialBody::ANALYTIC_METHOD_STRINGS[Gmat::AnalyticMethodCou
    "NoAnalyticMethod", "KeplersProblem"
 };
 
+const Real CelestialBody::JD_EPOCH_2000_TCB = 2451545.0;
+const Real CelestialBody::dDot              = 1.0;
+const Real CelestialBody::TDot              = 1.0;
+const Real CelestialBody::KEPLER_TOL        = 1.0e-06;
+
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
