@@ -38,7 +38,8 @@ Report::Report() :
    GmatCommand ("Report"),
    rfName      (""),
    reporter    (NULL),
-   reportID    (-1)
+   reportID    (-1),
+   needsHeaders(true)
 {
 }
 
@@ -68,7 +69,8 @@ Report::Report(const Report &rep) :
    GmatCommand    (rep),
    rfName         (rep.rfName),
    reporter       (NULL),
-   reportID       (-1)
+   reportID       (-1),
+   needsHeaders   (rep.needsHeaders)
 {
    parmNames = rep.parmNames;
    parms.clear();
@@ -97,6 +99,7 @@ Report& Report::operator=(const Report &rep)
 
       parmNames = rep.parmNames;
       parms.clear();
+      needsHeaders = rep.needsHeaders;
    }
    
    return *this;
@@ -217,7 +220,7 @@ bool Report::Initialize()
 // bool Execute()
 //------------------------------------------------------------------------------
 /**
- * Write teh report data to a ReportFile.
+ * Write the report data to a ReportFile.
  *
  * @return true if the Command runs to completion, false if an error
  *         occurs.
@@ -227,17 +230,36 @@ bool Report::Execute()
 {
    // Build the data as a string
    std::stringstream datastream;
-   datastream.precision(15);
-   datastream.width(20);
+   
+   // Set the stream to use the settings in the ReportFile
+   // Note that this is done here, rather than during initialization, in case
+   // the user has changed the values during the run.
+   datastream.precision(reporter->GetIntegerParameter(reporter->GetParameterID("Precision")));
+   int colWidth = reporter->GetIntegerParameter(reporter->GetParameterID("ColumnWidth"));
+
+   if (needsHeaders && 
+       (reporter->GetStringParameter(reporter->GetParameterID("WriteHeaders")) == "On"))
+   {
+      reporter->TakeAction("ActivateForReport", "On");
+      for (StringArray::iterator i = parmNames.begin(); i != parmNames.end(); ++i)
+      {
+         datastream.width(colWidth);
+         datastream << (*i);
+         datastream << " ";
+      }
+      std::string header = datastream.str();
+      reporter->ReceiveData(header.c_str(), header.length());
+      datastream.str("");
+   }
+   needsHeaders = false;
    
    for (std::vector<Parameter*>::iterator i = parms.begin(); i != parms.end(); ++i)
    {
-      datastream.width(20);
+      datastream.width(colWidth);
       datastream << (*i)->EvaluateReal() << " ";
    }
 
    // Publish it
-
 // This is how it should be done:
 //   reportID = reporter->GetProviderId();
 //   #ifdef DEBUG_REPORTING

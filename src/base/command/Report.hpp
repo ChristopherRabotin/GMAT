@@ -65,6 +65,8 @@ protected:
    StringArray                parmNames;
    /// Array of parameters that get written to the report
    std::vector<Parameter*>    parms;
+   /// Flag indicating whether the header data has been written
+   bool                       needsHeaders;
 };
 
 #endif      // Report_hpp
