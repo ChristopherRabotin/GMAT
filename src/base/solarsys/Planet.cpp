@@ -18,6 +18,7 @@
 #include "CelestialBody.hpp"
 #include "Rmatrix.hpp"
 #include "Planet.hpp"
+#include "CoordUtil.hpp"
 #include "MessageInterface.hpp"
 #include "PhysicalConstants.hpp"
 #include "RealUtilities.hpp"
@@ -28,7 +29,7 @@ using namespace GmatMathUtil;
 // initialize static default values
 // default values for Planet data
 const Gmat::BodyType        Planet::DEFAULT_BODY_TYPE         = Gmat::PLANET;
-const Gmat::PosVelSource    Planet::DEFAULT_POS_VEL_SOURCE    = Gmat::SLP; 
+const Gmat::PosVelSource    Planet::DEFAULT_POS_VEL_SOURCE    = Gmat::DE_405; 
 const Gmat::AnalyticMethod  Planet::DEFAULT_ANALYTIC_METHOD   = Gmat::LOW_FIDELITY;
 const Integer               Planet::DEFAULT_BODY_NUMBER       = 1;
 const Integer               Planet::DEFAULT_REF_BODY_NUMBER   = 3;
@@ -453,7 +454,13 @@ bool Planet::SetLowFidelityElements(const Rvector6 &kepl)
       if (!cb) 
          throw SolarSystemException("Central body must be set for " 
                                     + instanceName);
-      cb->SetLowFidelityElements(-kepl);
+      Real     ma;
+      Real     totalMu = mu + cb->GetGravitationalConstant();
+      Rvector6 cart    = - (KeplerianToCartesian(kepl,
+                            totalMu, CoordUtil::TA)); 
+      Rvector6 sunKepl = CartesianToKeplerian(cart, totalMu, &ma);
+
+      cb->SetLowFidelityElements(sunKepl);
    }
    return CelestialBody::SetLowFidelityElements(kepl);
 }

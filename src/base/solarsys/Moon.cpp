@@ -27,7 +27,7 @@ using namespace GmatMathUtil;
 // initialize static default values
 // default values for CelesitalBody data
 const Gmat::BodyType        Moon::BODY_TYPE           = Gmat::MOON;
-const Gmat::PosVelSource    Moon::POS_VEL_SOURCE      = Gmat::SLP; 
+const Gmat::PosVelSource    Moon::POS_VEL_SOURCE      = Gmat::DE_405; 
 const Gmat::AnalyticMethod  Moon::ANALYTIC_METHOD     = Gmat::LOW_FIDELITY; 
 const Integer               Moon::ORDER               = 0; 
 const Integer               Moon::DEGREE              = 0;  

@@ -136,7 +136,7 @@ SolarSystem::SolarSystem(std::string withName)
    objectTypes.push_back(Gmat::SOLAR_SYSTEM);
    objectTypeNames.push_back("SolarSystem");
    parameterCount   = SolarSystemParamCount;
-   pvSrcForAll      = Gmat::SLP;
+   pvSrcForAll      = Gmat::DE_405;
    anMethodForAll   = Gmat::LOW_FIDELITY;
    pE               = NULL;
    

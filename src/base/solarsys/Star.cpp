@@ -29,7 +29,7 @@ const Real                  Star::EQUATORIAL_RADIUS   = 6.97E5;      // km
 const Real                  Star::FLATTENING          = 0.0; 
 // Units for MU are km^3/s^2
 const Real                  Star::MU                  = 1.32712438e11;
-const Gmat::PosVelSource    Star::POS_VEL_SOURCE      = Gmat::SLP;
+const Gmat::PosVelSource    Star::POS_VEL_SOURCE      = Gmat::DE_405;
 const Gmat::AnalyticMethod  Star::ANALYTIC_METHOD     = Gmat::LOW_FIDELITY;
 const Integer               Star::BODY_NUMBER         = 3;  
 const Integer               Star::REF_BODY_NUMBER     = 3;    
