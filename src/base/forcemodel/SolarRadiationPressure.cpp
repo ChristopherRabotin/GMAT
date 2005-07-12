@@ -285,6 +285,9 @@ std::string SolarRadiationPressure::GetParameterTypeString(const Integer id) con
 // All read only for now
 bool SolarRadiationPressure::IsParameterReadOnly(const Integer id) const
 {
+   if ((id == FLUX) || (id == NOMINAL_SUN))
+      return false;
+   
    return true;
 }
 

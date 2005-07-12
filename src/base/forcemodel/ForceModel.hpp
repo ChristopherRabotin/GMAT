@@ -139,22 +139,27 @@ public:
     void                UpdateInitialData();
 
 protected:
+    /// Count of the number of forces in the model
     Integer numForces;
+    /// Index of the force currently in use
     Integer currentForce;
+    /// The size of the state for a single spacecraft
     Integer stateSize;
     
     /// List of spacecraft and formations that get propagated
     std::vector<SpaceObject *> spacecraft;
 
+    /// Names of the forces in the force model
     StringArray forceTypeNames;
+    /// Array of the forces
     std::vector<PhysicalModel *> forceList; //loj: 2/11/04 added
     
     /// Epoch for the previous state
     Real previousTime;
     /// Buffer that allows quick reversion to the previous state
     Real *previousState;
-    /// ???
-    Real estimationMethod;
+    /// Parameter used to determine the method of error estimation.
+    Integer estimationMethod;
     /// List of transient forces that need removal before reusing this instance 
     StringArray               transientForceNames;
     
@@ -181,7 +186,12 @@ protected:
         SRP,
         ForceModelParamCount
     };
-
+    
+    enum
+    {
+        ESTIMATE_IN_BASE = 1,
+        ESTIMATE_LOCALLY
+    };
     
     static const std::string PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount];
     static const Gmat::ParameterType PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount];

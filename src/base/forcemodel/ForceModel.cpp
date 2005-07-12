@@ -47,11 +47,12 @@
 // **************************************************************************
 
 #include "ForceModel.hpp"
-#include <string.h> // waw: added 03/10/04
 #include "PointMassForce.hpp"
 #include "MessageInterface.hpp"
-
 #include "Formation.hpp"      // for BuildState()
+
+#include <string.h> 
+
 
 //#define DEBUG_FORCEMODEL_INIT 1
 //#define DEBUG_FORCEMODEL_EXE 1
@@ -103,7 +104,7 @@ std::map<std::string, std::string> ForceModel::scriptAliases;
 ForceModel::ForceModel(const std::string &nomme) :
    PhysicalModel     (Gmat::FORCE_MODEL, "ForceModel", nomme),
    previousState     (NULL),
-   estimationMethod  (2.0)
+   estimationMethod  (ESTIMATE_LOCALLY)
 {
    objectTypes.push_back(Gmat::FORCE_MODEL);
    objectTypeNames.push_back("ForceModel");
@@ -114,6 +115,7 @@ ForceModel::ForceModel(const std::string &nomme) :
    currentForce = 0;
    parameterCount = ForceModelParamCount;
 }
+
 
 //------------------------------------------------------------------------------
 // ForceModel::~ForceModel(void)
@@ -989,14 +991,14 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
  * should never be negative, so a return value less than 0.0 can be used to 
  * indicate an error condition.
  *     
- * @param diffs         Array of differences calculated by the integrator.  This array 
- *                  must be the same size as the state vector
- * @param answer        Candidate new state from the integrator
+ * @param diffs         Array of differences calculated by the integrator.  This
+ *                      array must be the same size as the state vector.
+ * @param answer        Candidate new state from the integrator.
  */
 //------------------------------------------------------------------------------
 Real ForceModel::EstimateError(Real *diffs, Real *answer) const
 {
-    if (estimationMethod == 1.0)
+    if (estimationMethod == ESTIMATE_IN_BASE)
         return PhysicalModel::EstimateError(diffs, answer);
 
     Real retval = 0.0, err, mag, vec[3];
@@ -1587,8 +1589,8 @@ void ForceModel::WriteFMParameters(Gmat::WriteMode mode, std::string &prefix,
    {
       newprefix = prefix;
       ownedObject = GetOwnedObject(i);
-      if ((ownedObject != NULL) &&
-          (ownedObject->GetTypeName() != "SolarRadiationPressure"))
+      if ((ownedObject != NULL))// &&
+//          (ownedObject->GetTypeName() != "SolarRadiationPressure"))
       {
          nomme = BuildForceNameString((PhysicalModel*)ownedObject);
 
@@ -1622,7 +1624,7 @@ std::string ForceModel::BuildForceNameString(PhysicalModel *force)
    if (forceType == "PointMassForce")
       retval = force->GetStringParameter("BodyName");
    if (forceType == "SolarRadiationPressure")
-      retval = force->GetStringParameter("SRP");
+      retval = "SRP";
 
    // Add others here
       
