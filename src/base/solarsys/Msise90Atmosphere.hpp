@@ -53,7 +53,7 @@ protected:
    /// Geomagnetic index (Ap, not Kp)
    Real                    ap[7];
    
-   Real                    mass;
+   Integer                 mass;
 
    void                    GetInputs(Real epoch);
 

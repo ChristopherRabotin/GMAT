@@ -25,10 +25,13 @@
 
 extern "C" 
 { 
-   void gtd6_(int*,float*,float*,float*,float*,float*,float*,float*,float*,float*,float*,float*);
+   void gtd6_(int*,float*,float*,float*,float*,float*,float*,float*,float*,int*,float*,float*);
 }
    
 //#define DEBUG_MSISE90_ATMOSPHERE
+
+// Temp log file
+static FILE *logFile;
 
 //------------------------------------------------------------------------------
 //  Msise90Atmosphere()
@@ -42,6 +45,7 @@ Msise90Atmosphere::Msise90Atmosphere() :
     fileData            (false),
     fluxfilename        ("")
 {
+    logFile = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -80,6 +84,8 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
    Real    den[8], temp[2], rad2deg = 180.0 / M_PI, ra;
    Real    flatteningFactor = 1.0 / 298.257223563;  // WGS-84
    Real    geodesicFactor = 6378.137 * (1.0 - flatteningFactor);
+   
+   logFile = fopen("GMAT-MSISE90.txt", "w");
 
    if (mCentralBody == NULL)
       throw AtmosphereException(
@@ -88,11 +94,11 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
    Real gmst, gha = mCentralBody->GetHourAngle(epoch);
 
    GetInputs(epoch);
-   
+
    for (i = 0; i < count; ++i) 
    {
       i6 = i*6;
-      mass = 48.0;
+      mass = 48;
       
       //--------------------------------------------------
       // Longitude
@@ -153,16 +159,80 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       float xf107a = f107a;
       float xf107 = f107;
       float xap[7];
-      float xmass = mass;
+      int xmass = mass;
       float xden[8];
       float xtemp[2];
-      
-      Integer i;
-      for (i = 0; i < 7; i++)  xap[i] = ap[i];
-      for (i = 0; i < 8; i++)  xden[i] = den[i];
-      for (i = 0; i < 2; i++)   xtemp[i] = temp[i];
 
-      gtd6_(&xyd,&xsod,&xalt,&xlat,&xlon,&xlst,&xf107a,&xf107,xap,&xmass,xden,xtemp);
+      Integer j;
+      for (j = 0; j < 7; j++)  xap[j] = ap[j];
+      for (j = 0; j < 8; j++)  xden[j] = den[j];
+      for (j = 0; j < 2; j++)   xtemp[j] = temp[j];
+
+      fprintf(logFile, "Pre-GTDS6() \n");
+      fprintf(logFile, "=========== \n");
+      fprintf(logFile, "Epoch                  = %le \n", epoch);
+      fprintf(logFile, "Year & Days            = %d \n", xyd);
+      fprintf(logFile, "Seconds                = %le \n", xsod);
+      fprintf(logFile, "Altitude               = %le \n", xalt);
+      fprintf(logFile, "Latitude               = %le \n", xlat);
+      fprintf(logFile, "Longitude              = %le \n", xlon);
+      fprintf(logFile, "Solar Time             = %le \n", xlst);
+      fprintf(logFile, "F107 Average           = %le \n", xf107a);
+      fprintf(logFile, "F107                   = %le \n", xf107);
+      fprintf(logFile, "Geomagnetic index[0]   = %le \n", xap[0]);
+      fprintf(logFile, "Geomagnetic index[1]   = %le \n", xap[1]);
+      fprintf(logFile, "Geomagnetic index[2]   = %le \n", xap[2]);
+      fprintf(logFile, "Geomagnetic index[3]   = %le \n", xap[3]);
+      fprintf(logFile, "Geomagnetic index[4]   = %le \n", xap[4]);
+      fprintf(logFile, "Geomagnetic index[5]   = %le \n", xap[5]);
+      fprintf(logFile, "Geomagnetic index[6]   = %le \n", xap[6]);
+      fprintf(logFile, "Mass                   = %le \n", xmass);
+      fprintf(logFile, "HE Number Density      = %le \n", xden[0]);
+      fprintf(logFile, "O Number Density       = %le \n", xden[1]);
+      fprintf(logFile, "N2 Number Density      = %le \n", xden[2]);
+      fprintf(logFile, "O2 Number Density      = %le \n", xden[3]);
+      fprintf(logFile, "AR Number Density      = %le \n", xden[4]);
+      fprintf(logFile, "Total Mass Density     = %le \n", xden[5]);
+      fprintf(logFile, "H Number Density       = %le \n", xden[7]);
+      fprintf(logFile, "EXOSPHERIC Temperature = %le \n", xtemp[0]);
+      fprintf(logFile, "Temperature at Alt     = %le \n", xtemp[1]);
+      fprintf(logFile, "\n");
+      fprintf(logFile, "\n");
+      
+      //gtd6_(&xyd,&xsod,&xalt,&xlat,&xlon,&xlst,&xf107a,&xf107,xap,&xmass,xden,xtemp);
+      gtd6_(&xyd,&xsod,&xalt,&xlat,&xlon,&xlst,&xf107a,&xf107,&xap[0],&xmass,&xden[0],&xtemp[0]);
+      
+      fprintf(logFile, "Post-GTDS6() \n");
+      fprintf(logFile, "=========== \n");
+      fprintf(logFile, "Epoch                  = %le \n", epoch);
+      fprintf(logFile, "Year & Days            = %d \n", xyd);
+      fprintf(logFile, "Seconds                = %le \n", xsod);
+      fprintf(logFile, "Altitude               = %le \n", xalt);
+      fprintf(logFile, "Latitude               = %le \n", xlat);
+      fprintf(logFile, "Longitude              = %le \n", xlon);
+      fprintf(logFile, "Solar Time             = %le \n", xlst);
+      fprintf(logFile, "F107 Average           = %le \n", xf107a);
+      fprintf(logFile, "F107                   = %le \n", xf107);
+      fprintf(logFile, "Geomagnetic index[0]   = %le \n", xap[0]);
+      fprintf(logFile, "Geomagnetic index[1]   = %le \n", xap[1]);
+      fprintf(logFile, "Geomagnetic index[2]   = %le \n", xap[2]);
+      fprintf(logFile, "Geomagnetic index[3]   = %le \n", xap[3]);
+      fprintf(logFile, "Geomagnetic index[4]   = %le \n", xap[4]);
+      fprintf(logFile, "Geomagnetic index[5]   = %le \n", xap[5]);
+      fprintf(logFile, "Geomagnetic index[6]   = %le \n", xap[6]);
+      fprintf(logFile, "Mass                   = %le \n", xmass);
+      fprintf(logFile, "HE Number Density      = %le \n", xden[0]);
+      fprintf(logFile, "O Number Density       = %le \n", xden[1]);
+      fprintf(logFile, "N2 Number Density      = %le \n", xden[2]);
+      fprintf(logFile, "O2 Number Density      = %le \n", xden[3]);
+      fprintf(logFile, "AR Number Density      = %le \n", xden[4]);
+      fprintf(logFile, "Total Mass Density     = %le \n", xden[5]);
+      fprintf(logFile, "H Number Density       = %le \n", xden[6]);
+      fprintf(logFile, "N Number Density       = %le \n", xden[7]);
+      fprintf(logFile, "EXOSPHERIC Temperature = %le \n", xtemp[0]);
+      fprintf(logFile, "Temperature at Alt     = %le \n", xtemp[1]);
+      fprintf(logFile, "\n");
+      fprintf(logFile, "\n");
       
       yd = xyd;
       sod = xsod;
@@ -174,9 +244,9 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       f107 = xf107;
       mass = xmass;
       
-      for (i = 0; i < 7; i++)  ap[i] = xap[i];
-      for (i = 0; i < 8; i++)  den[i] = xden[i];
-      for (i = 0; i < 2; i++)  temp[i] = xtemp[i];
+      for (j = 0; j < 7; j++)  ap[j] = xap[j];
+      for (j = 0; j < 8; j++)  den[j] = xden[j];
+      for (j = 0; j < 2; j++)  temp[j] = xtemp[j];
 
       density[i] = den[5];
 
@@ -185,7 +255,8 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
             "   Density = %15.9le\n", density[i]);
       #endif
    }
-      
+   fflush(logFile);
+   fclose(logFile);
    return true;
 }
 
