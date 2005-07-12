@@ -1033,7 +1033,10 @@ C      VERSION OF GLOBE FOR LOWER ATMOSPHERE 1/17/90
       COMMON/CSW/SW(25),ISW,SWC(25)
       DIMENSION P(100),T(14)
       SAVE
-      DATA DR/1.72142E-2/,DGTR/1.74533E-2/
+C     GMAT Change: Removed DGTR due to warning messages
+C     waw 07/12/05
+C      DATA DR/1.72142E-2/,DGTR/1.74533E-2/
+      DATA DR/1.72142E-2/
       DATA DAYL/-1./,P32,P18,P14,P39/4*-1000./
       DO 10 J=1,14
         T(J)=0.
