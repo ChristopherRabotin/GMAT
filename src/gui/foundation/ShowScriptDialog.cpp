@@ -65,7 +65,7 @@ void ShowScriptDialog::Create()
    }
    
    theScript = new wxTextCtrl(this, -1, text, wxPoint(0,0), scriptPanelSize, 
-                      wxTE_MULTILINE | wxTE_READONLY);
+                      wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL);
    theMiddleSizer->Add(theScript, 0, wxALIGN_CENTRE|wxALL, 3);
 }
 
