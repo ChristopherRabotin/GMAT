@@ -49,12 +49,13 @@
 IMPLEMENT_APP(GmatApp)
     
 //------------------------------------------------------------------------------
-// GmatApp(void)
+// GmatApp()
 //------------------------------------------------------------------------------
-GmatApp::GmatApp(void)
+GmatApp::GmatApp()
 {
     theModerator = (Moderator *)NULL;
 }
+
 
 //------------------------------------------------------------------------------
 // OnInit()
@@ -72,38 +73,51 @@ bool GmatApp::OnInit()
         new ViewTextFrame((wxFrame *)NULL, _T("Message Window"),
                           20, 20, 600, 350, "Permanent");
     GmatAppData::theMessageWindow->Show(false);
-
+    
     // create the Moderator - GMAT executive
     theModerator = Moderator::Instance();
-
+    
     // initialize the moderator
     if (theModerator->Initialize(true))
     {
         // get GuiInterpreter
         GmatAppData::SetGuiInterpreter(theModerator->GetGuiInterpreter());
-
+        
         // Make default size larger for Linux
         wxSize size = ((wxUSE_UNIX != 1) ? wxDefaultSize : wxSize(800, 600));
         
         //show the splash screen
-        wxImage::AddHandler(new wxTIFFHandler);
-        wxBitmap *bitmap = new wxBitmap("files/splash/GMATSplashScreen.tif",
-                           wxBITMAP_TYPE_TIF);
-
-        new wxSplashScreen(*bitmap,
-                wxSPLASH_CENTRE_ON_SCREEN|wxSPLASH_TIMEOUT,
-                6000, NULL, -1, wxDefaultPosition, wxSize(100, 100),
-                wxSIMPLE_BORDER|wxSTAY_ON_TOP);
-
+        try
+        {
+           wxImage::AddHandler(new wxTIFFHandler);
+           
+           //loj: 7/7/05 Get splash file from FileManager through the Moderator
+           wxString splashFile = theModerator->GetFileName("SPLASH_FILE").c_str();
+           wxBitmap *bitmap = new wxBitmap(splashFile, wxBITMAP_TYPE_TIF);
+        
+           //wxBitmap *bitmap = new wxBitmap("files/splash/GMATSplashScreen.tif",
+           //                   wxBITMAP_TYPE_TIF);
+           
+           new wxSplashScreen(*bitmap,
+                              wxSPLASH_CENTRE_ON_SCREEN|wxSPLASH_TIMEOUT,
+                              6000, NULL, -1, wxDefaultPosition, wxSize(100, 100),
+                              wxSIMPLE_BORDER|wxSTAY_ON_TOP);
+        }
+        catch (BaseException &e)
+        {
+           MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+        }
+        
         wxYield();
-
+        
         theMainFrame =
             new GmatMainFrame((wxFrame *)NULL, -1,
                               _T("GMAT - Goddard Mission Analysis Tool"),
                               wxDefaultPosition, size,
                               wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
+        
         theMainFrame->Maximize();
-
+        
         // and show it (the frames, unlike simple controls, are not shown when
         // created initially)
         theMainFrame->CenterOnScreen(wxBOTH);
@@ -121,13 +135,13 @@ bool GmatApp::OnInit()
             // and if ~wxBusyCursor doesn't do it, then call it manually
             wxYield();
         }
-
+        
         //loj: How do I change the title?
         wxLogError(wxT("The error occurred during the initialization.  GMAT will exit"));
         wxLog::FlushActive();
         status = false;
     }
-
+    
     // success: wxApp::OnRun() will be called which will enter the main message
     // loop and the application will run. If we returned FALSE here, the
     // application would exit immediately.
@@ -140,5 +154,10 @@ bool GmatApp::OnInit()
 //------------------------------------------------------------------------------
 int GmatApp::OnExit()
 {
-    return 0;
+   //loj: 7/8/05 Why I cannot Finalize here?
+   //I had to do in GmatMainFrame destructor
+   //if (theModerator)
+   //   theModerator->Finalize();
+   
+   return 0;
 }
