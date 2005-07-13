@@ -68,6 +68,7 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
    labelAxes      (false),
    hasGrid        (true),
    hasLegend      (true),
+   initializeLegendLoc (true),
    legendColumns  (1)
 {
    wxPaintDC dc(this);
@@ -779,6 +780,13 @@ void TsPlotCanvas::DrawLegend(wxDC &dc)
 
    legendRect.height = (h+1)*rowCount + 8;
    legendRect.width = (maxw + 10) * colCount;
+   
+   if ((maxw > 0) && (initializeLegendLoc))
+   { 
+      legendRect.x = plotArea.x + plotArea.width - legendRect.width + 5;
+      legendRect.y = plotArea.y - 5;
+      initializeLegendLoc = false;
+   }
 
    dc.SetClippingRegion(legendRect);
    dc.SetBackground(wxBrush(legendColor, wxTRANSPARENT));

@@ -137,6 +137,7 @@ protected:
    bool labelAxes;
    bool hasGrid;
    bool hasLegend;
+   bool initializeLegendLoc;
 
    long zoomLeft, zoomTop, zoomWidth, zoomHeight;
    
@@ -166,7 +167,7 @@ protected:
    static int  defaultLineWidth;
    static bool defaultLabels;
 
-   /// Rectagle wit screen coordinates of the plot area
+   /// Rectangle with screen coordinates of the plot area
    wxRect  plotArea;
    /// Rectangle used when dragging the mouse
    wxRect  mouseRect;
