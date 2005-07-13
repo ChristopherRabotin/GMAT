@@ -30,7 +30,6 @@
 #include "ViewTextFrame.hpp"
 #include "GmatAppData.hpp"
 #include "MdiGlPlotData.hpp"
-//#include "MdiXyPlotData.hpp"
 #include "MdiTsPlotData.hpp"
 #include "GmatNotebook.hpp"
 
@@ -177,15 +176,12 @@ END_EVENT_TABLE()
  *       for the right hand side and the left hand side.
  */
 //------------------------------------------------------------------------------
-//GmatMainFrame::GmatMainFrame(const wxString& title, const wxPoint& pos, const wxSize& size,
-//                             long style)
+//GmatMainFrame::GmatMainFrame(const wxString& title, const wxPoint& pos,
+//                             const wxSize& size, long style)
 //              : wxFrame(NULL, -1, title, pos, size, style)
-GmatMainFrame::GmatMainFrame(wxWindow *parent,
-                             const wxWindowID id,
-                             const wxString& title, 
-                             const wxPoint& pos, 
-                             const wxSize& size,
-                             long style)
+GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
+                             const wxString& title, const wxPoint& pos, 
+                             const wxSize& size, long style)
    : wxMDIParentFrame(parent, id, title, pos, size, 
                       style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
@@ -222,7 +218,8 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
 #endif // wxUSE_STATUSBAR
 
 #if DEBUG_MAINFRAME
-   MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() creating ToolBar...\n");
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::GmatMainFrame() creating ToolBar...\n");
 #endif
    
    CreateToolBar(wxNO_BORDER | wxTB_HORIZONTAL);
@@ -245,7 +242,8 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
    msgWin->SetSashVisible(wxSASH_TOP, TRUE);
 
    // create MessageWindow and save in GmatApp for later use
-   wxTextCtrl *msgTextCtrl = new wxTextCtrl(msgWin, -1, _T(""), wxDefaultPosition, wxDefaultSize,
+   wxTextCtrl *msgTextCtrl =
+      new wxTextCtrl(msgWin, -1, _T(""), wxDefaultPosition, wxDefaultSize,
                                wxTE_MULTILINE);
    msgTextCtrl->SetMaxLength(320000); //loj:5/20/05 Added
    GmatAppData::GetMessageWindow()->Show(false);
@@ -288,6 +286,9 @@ GmatMainFrame::~GmatMainFrame()
    
 //    MessageInterface::ShowMessage("==========> Closing GmatMainFrame\n");
 //    CloseAllChildren(true, true);
+   
+   if (theGuiInterpreter)
+      theGuiInterpreter->Finalize(); //loj: 7/8/05 Added
 }
 
 //------------------------------------------------------------------------------
