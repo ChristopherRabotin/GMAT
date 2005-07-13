@@ -32,11 +32,11 @@ const std::string
 CelestialBodyPanel::KEP_ELEMENT_UNITS[6] =
 {
    "Km",
-   "Km",
-   "Km",
-   "Km/s",
-   "Km/s",
-   "Km/s",
+   "",
+   "deg",
+   "deg",
+   "deg",
+   "deg",
 };
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -76,12 +76,14 @@ void CelestialBodyPanel::Create()
    int bsize = 3; // border size
 
    wxStaticBox *staticBox = new wxStaticBox(this, -1, wxT(""));
+   wxStaticBox *analyticStaticBox = new wxStaticBox(this, -1, wxT("Settings for Low Fidelity Model"));
 
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    wxBoxSizer *horizontalBoxSizer = new wxBoxSizer(wxHORIZONTAL);
    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
    wxFlexGridSizer *flexGridSizer = new wxFlexGridSizer( 3, 0, 0 );
    wxStaticBoxSizer *staticBoxSizer = new wxStaticBoxSizer(staticBox, wxVERTICAL);
+   wxStaticBoxSizer *analyticBoxSizer = new wxStaticBoxSizer(analyticStaticBox, wxVERTICAL);
 
    mEpochTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                                  wxDefaultPosition, wxSize(150,-1), 0);
@@ -191,7 +193,9 @@ void CelestialBodyPanel::Create()
    pageBoxSizer->Add(noCentralBodyText, 0, wxALIGN_CENTER | wxALL, bsize);
    pageBoxSizer->Add(flexGridSizer1, 0, wxALIGN_CENTER | wxALL, bsize);
    pageBoxSizer->Add(staticBoxSizer, 0, wxALIGN_CENTER | wxALL, bsize);
-   theMiddleSizer->Add(pageBoxSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
+
+   analyticBoxSizer->Add(pageBoxSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
+   theMiddleSizer->Add(analyticBoxSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
 }
 
 //------------------------------------------------------------------------------
@@ -199,15 +203,67 @@ void CelestialBodyPanel::Create()
 //------------------------------------------------------------------------------
 void CelestialBodyPanel::LoadData()
 {
-   if (theCelestialBody->GetBodyType() != Gmat::STAR)
+   try
    {
-      std::string centralBody = theCelestialBody->GetCentralBody();
-      centralBodyText->SetLabel(centralBody.c_str());
+      std::string centralBody;
+      Real epoch;
+      Rvector6 elements;
+      
+      if (theCelestialBody->GetBodyType() != Gmat::STAR)
+      {
+         centralBody = theCelestialBody->GetCentralBody();
+         epoch = theCelestialBody->GetLowFidelityEpoch().Get();
+         elements = theCelestialBody->GetLowFidelityElements();
+
+         centralBodyText->SetLabel(centralBody.c_str());
+      }
+      else
+      {
+         noCentralBodyText->SetLabel("Computing from initial Earth elements");
+         EnableAll(false);
+
+         centralBody = theCelestialBody->GetCentralBody();
+         epoch = theCelestialBody->GetLowFidelityEpoch().Get();
+         elements = theCelestialBody->GetLowFidelityElements();
+
+         centralBodyText->Show(false);
+         initialStaticText->Show(false);
+      }
+      
+      wxString epochStr, elementStr;
+
+      epochStr.Printf("%f", epoch);
+      mEpochTextCtrl->SetValue(epochStr);
+
+
+      elementStr.Printf("%f", elements.Get(0));
+      mElement1TextCtrl->SetValue(elementStr);
+
+      elementStr.Printf("%f", elements.Get(1));
+      mElement2TextCtrl->SetValue(elementStr);
+
+      elementStr.Printf("%f", elements.Get(2));
+      mElement3TextCtrl->SetValue(elementStr);
+
+      elementStr.Printf("%f", elements.Get(3));
+      mElement4TextCtrl->SetValue(elementStr);
+
+      elementStr.Printf("%f", elements.Get(4));
+      mElement5TextCtrl->SetValue(elementStr);
+
+      elementStr.Printf("%f", elements.Get(5));
+      mElement6TextCtrl->SetValue(elementStr);
+
    }
-   else
+   catch (BaseException &e)
    {
-      EnableAll(false);
+      MessageInterface::ShowMessage
+         ("CelestialBodyPanel:LoadData() error occurred!\n%s\n",
+            e.GetMessage().c_str());
    }
+
+   // Activate "ShowScript"
+//   mObject = theCelestialBody;
 
 }
 
@@ -216,7 +272,28 @@ void CelestialBodyPanel::LoadData()
 //------------------------------------------------------------------------------
 void CelestialBodyPanel::SaveData()
 {
+   try
+   {
 
+      A1Mjd a1mjd =  A1Mjd(atof(mEpochTextCtrl->GetValue()));
+      theCelestialBody->SetLowFidelityEpoch(a1mjd);
+
+      Rvector6 elements;
+      elements.Set(atof(mElement1TextCtrl->GetValue()),
+                  atof(mElement2TextCtrl->GetValue()),
+                  atof(mElement3TextCtrl->GetValue()),
+                  atof(mElement4TextCtrl->GetValue()),
+                  atof(mElement5TextCtrl->GetValue()),
+                  atof(mElement6TextCtrl->GetValue()));
+
+      theCelestialBody->SetLowFidelityElements(elements);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("CelestialBodyPanel:SaveData() error occurred!\n%s\n",
+            e.GetMessage().c_str());
+   }
 
 }
 
@@ -260,5 +337,3 @@ void CelestialBodyPanel::EnableAll(bool enable)
 
 //   wxStaticText *noCentralBodyText;
 }
-
-
