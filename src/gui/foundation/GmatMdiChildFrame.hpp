@@ -42,6 +42,8 @@ protected:
     wxString title;
     int dataType;
     wxTextCtrl *theScriptTextCtrl;
+    wxMenu *mViewMenu;
+    wxMenu *mViewOptionMenu;
     
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();

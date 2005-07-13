@@ -724,7 +724,8 @@ bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item)
           theChild->GetTitle().c_str(), item->GetDesc().c_str());
 #endif
     
-      if (theChild->GetTitle().IsSameAs(item->GetDesc().c_str()))
+      if ((theChild->GetTitle().IsSameAs(item->GetDesc().c_str())) &&
+          (theChild->GetDataType() == item->GetDataType()))
       {
          // move child to the front
          theChild->Activate();
@@ -761,7 +762,8 @@ bool GmatMainFrame::RenameChild(GmatTreeItemData *item, wxString newName)
           theChild->GetTitle().c_str(), item->GetDesc().c_str());
 #endif
     
-      if (theChild->GetTitle().IsSameAs(item->GetDesc().c_str()))
+      if ((theChild->GetTitle().IsSameAs(item->GetDesc().c_str()))&&
+          (theChild->GetDataType() == item->GetDataType()))
       {
          theChild->SetTitle(newName);
          return TRUE;   
@@ -806,9 +808,9 @@ bool GmatMainFrame::RenameChild(wxString oldName, wxString newName)
 
 
 //------------------------------------------------------------------------------
-// void GmatMainFrame::RemoveChild(wxString *item)
+// void GmatMainFrame::RemoveChild(wxString *item, int dataTpe)
 //------------------------------------------------------------------------------
-void GmatMainFrame::RemoveChild(wxString item)
+void GmatMainFrame::RemoveChild(wxString item, int dataType)
 {
    wxNode *node = mdiChildren->GetFirst();
    while (node)
@@ -821,7 +823,8 @@ void GmatMainFrame::RemoveChild(wxString item)
           theChild->GetTitle().c_str(), item.c_str());
       #endif
       
-      if (theChild->GetTitle().IsSameAs(item.c_str()))
+      if ((theChild->GetTitle().IsSameAs(item.c_str())) &&
+           (theChild->GetDataType() == dataType))
       {
          delete theChild;
          delete node;
@@ -930,7 +933,8 @@ void GmatMainFrame::MinimizeChildren()
    while (node)
    {
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-      theChild->Iconize(TRUE);
+      if (theChild->GetDataType() != GmatTree::OUTPUT_OPENGL_PLOT)
+         theChild->Iconize(TRUE);
       node = node->GetNext();
    }
 
@@ -1383,8 +1387,13 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    fileMenu->Append(MENU_PROJECT_LOAD_DEFAULT_MISSION, wxT("Default Project"), 
                      wxT(""), FALSE);   
    fileMenu->AppendSeparator();
-   fileMenu->Append(MENU_PROJECT_PREFERENCES, wxT("Preferences"), wxT(""),
-                    FALSE);
+
+   wxMenu *prefMenu = new wxMenu;
+   prefMenu->Append(MENU_PROJECT_PREFERENCES_FONT, wxT("Font"));
+
+   fileMenu->Append(MENU_PROJECT_PREFERENCES,
+                        wxT("Preferences"), prefMenu, wxT(""));
+
    fileMenu->Append(MENU_SET_PATH_AND_LOG, wxT("Set File Paths and Log Level"),
                     wxT(""), FALSE);
    fileMenu->Append(MENU_INFORMATION, wxT("Information"), wxT(""), FALSE);
@@ -1394,7 +1403,6 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    fileMenu->AppendSeparator();
    fileMenu->Append(MENU_PROJECT_EXIT, wxT("Exit"), wxT(""), FALSE);
    
-   fileMenu->Enable(MENU_PROJECT_PREFERENCES, FALSE);
    fileMenu->Enable(MENU_SET_PATH_AND_LOG, FALSE);
    fileMenu->Enable(MENU_INFORMATION, FALSE);
    fileMenu->Enable(MENU_PROJECT_PRINT, FALSE);
@@ -1871,11 +1879,11 @@ void GmatMainFrame::OnUncomment(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnFont(wxCommandEvent& event)
 {
-  GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
-  wxTextCtrl *scriptTC = theChild->GetScriptTextCtrl();
+//  GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
+//  wxTextCtrl *scriptTC = theChild->GetScriptTextCtrl();
 
   wxFontData data;
-  data.SetInitialFont(scriptTC->GetFont());
+  data.SetInitialFont(GmatAppData::GetFont());
 //  data.SetColour(canvasTextColour);
 
   wxFontDialog dialog(this, &data);

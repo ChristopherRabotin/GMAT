@@ -55,7 +55,7 @@ public:
    bool IsChildOpen(GmatTreeItemData *item);
    bool RenameChild(GmatTreeItemData *item, wxString newName);
    bool RenameChild(wxString oldName, wxString newName);
-   void RemoveChild(wxString item);
+   void RemoveChild(wxString item, int dataType);
    void CloseActiveChild();
    void CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
                          wxString title = "");

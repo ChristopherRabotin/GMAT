@@ -56,7 +56,7 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
                                      const long style, const wxString &csName,
                                      SolarSystem *solarSys)
    : GmatMdiChildFrame(parent, -1, title, pos, size,
-                     style | wxNO_FULL_REPAINT_ON_RESIZE, title,
+                     style | wxNO_FULL_REPAINT_ON_RESIZE, plotName,
                      GmatTree::OUTPUT_OPENGL_PLOT)
 {
    mCanvas = (TrajPlotCanvas *) NULL;
@@ -360,7 +360,7 @@ void MdiChildTrajFrame::ResetShowViewOption()
 
    /// @todo: ag: fix this
 //   wxMenu *mViewMenu = GmatAppData::GetMainFrame()->GetViewMenu();
-//   mViewMenu->Check(GmatPlot::MDI_GL_SHOW_OPTION_PANEL, false);
+   mViewMenu->Check(GmatPlot::MDI_GL_SHOW_OPTION_PANEL, false);
 }
 
 
@@ -425,7 +425,7 @@ void MdiChildTrajFrame::SetDrawWireFrame(bool flag)
       //loj: 5/18/05 Why this failing when this frame is closed?
 //       wxMenu *viewOptionMenu = GmatAppData::GetMainFrame()->GetViewOptionMenu();
 //       if (viewOptionMenu)
-//          viewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, flag);
+      mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, flag);
       
       mCanvas->SetDrawWireFrame(flag);
    }
@@ -442,7 +442,7 @@ void MdiChildTrajFrame::SetDrawEqPlane(bool flag)
       //loj: 5/18/05 Why this failing when this frame is closed?
 //       wxMenu *viewOptionMenu = GmatAppData::GetMainFrame()->GetViewOptionMenu();
 //       if (viewOptionMenu)
-//          viewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, flag);
+      mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, flag);
       
       mCanvas->SetDrawEqPlane(flag);
    }

@@ -2278,9 +2278,10 @@ void ResourceTree::OnRemoveAllScripts(wxCommandEvent &event)
    {
       wxTreeItemId lastChild = GetLastChild(item);
       wxString name = ((GmatTreeItemData *)GetItemData(lastChild))->GetDesc();
-
+      int dataType = ((GmatTreeItemData *)GetItemData(lastChild))->GetDataType();
+      
       // close window
-      GmatAppData::GetMainFrame()->RemoveChild(name);
+      GmatAppData::GetMainFrame()->RemoveChild(name, dataType);
 
       // delete item
       Delete(lastChild);
@@ -2303,12 +2304,13 @@ void ResourceTree::OnRemoveScript(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
    wxString name = ((GmatTreeItemData *)GetItemData(item))->GetDesc();
+   int dataType = ((GmatTreeItemData *)GetItemData(item))->GetDataType();
    wxTreeItemId parentItem = GetItemParent(item);
 
    Collapse(parentItem);
 
    // close window
-   GmatAppData::GetMainFrame()->RemoveChild(name);
+   GmatAppData::GetMainFrame()->RemoveChild(name, dataType);
    // delete item
    Delete(item);
 
