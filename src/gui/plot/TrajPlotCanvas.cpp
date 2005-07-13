@@ -14,7 +14,7 @@
 //------------------------------------------------------------------------------
 #include "TrajPlotCanvas.hpp"
 #include "GmatAppData.hpp"        // for GetGuiInterpreter()
-#include "FileManager.hpp"        // for Earth texture file
+#include "FileManager.hpp"        // for texture files
 #include "ColorTypes.hpp"         // for namespace GmatColor::
 #include "Rvector3.hpp"           // for Rvector3::GetMagnitude()
 #include "AngleUtil.hpp"          // for ComputeAngleInDeg()
@@ -1782,28 +1782,20 @@ GLuint TrajPlotCanvas::BindTexture(const wxString &objName)
    FileManager *fm = FileManager::Instance();
    std::string textureFile;
    
-   #ifndef SKIP_DEVIL
-   ILboolean status;
-   #endif
+   //#ifndef SKIP_DEVIL
+   //ILboolean status;
+   //#endif
    
-   //@todo - Change FileManager to have Luna
-   // special case for Luna, FileManager has Moon
-   std::string filename;
-   if (objName == "Luna")
-   {
-      filename = "FULL_MOON_TEXTURE_FILE";
-   }
-   else
-   {
-      std::string name = std::string(objName.Upper().c_str());
-      filename = "FULL_" + name + "_TEXTURE_FILE";
-   }
+   //loj: 7/6/05 Using new FileManager
+   std::string name = std::string(objName.Upper().c_str());
+   std::string filename = name + "_TEXTURE_FILE";
    
-   textureFile = fm->GetStringParameter(filename);
-   if (textureFile != "UNKNOWN_ID")
+   try
    {
+      textureFile = fm->GetFullPathname(filename);
+   
       #ifndef SKIP_DEVIL
-         status = ilLoadImage((char*)textureFile.c_str());
+         ILboolean status = ilLoadImage((char*)textureFile.c_str());
          if (!status)
          {
             MessageInterface::ShowMessage
@@ -1817,6 +1809,15 @@ GLuint TrajPlotCanvas::BindTexture(const wxString &objName)
             //glBindTexture(GL_TEXTURE_2D, ret);
          }
       #endif
+   }
+   catch (BaseException &e)
+   {
+      //MessageInterface::PopupMessage
+      //   (Gmat::WARNING_, "TrajPlotCanvas::BindTexture() Cannot bind texture "
+      //    "image for %s.\n%s\n", objName.c_str(), e.GetMessage().c_str());
+      MessageInterface::ShowMessage
+         ("*** Warning *** TrajPlotCanvas::BindTexture() Cannot bind texture "
+          "image for %s.\n%s\n", objName.c_str(), e.GetMessage().c_str());
    }
    
    #if DEBUG_TRAJCANVAS_TEXTURE
