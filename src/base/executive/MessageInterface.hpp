@@ -52,8 +52,9 @@ public:
                                   const std::string &continueMsg,
                                   const std::string &msg);
    static void LogMessage(const std::string &msg);
+   static void SetLogFile(const std::string &filename);
    static void CloseLogFile();
-
+   
    static const int MAX_MESSAGE_LENGTH = 1000;
    
    static std::queue<std::string> messageQueue;
@@ -67,7 +68,7 @@ public:
    static FILE *logFile;
    static bool logEnabled;
    static std::ostream *msgStream;
-
+   
    MessageInterface();
    ~MessageInterface();
 };

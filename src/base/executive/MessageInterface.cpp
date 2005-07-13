@@ -33,6 +33,8 @@
 #include <fstream>
 #include <queue>                   // for queue
 #include "MessageInterface.hpp"    // for MessageInterface functions
+#include "BaseException.hpp"
+#include "FileManager.hpp"         // for GetFullPathname()
 
 //---------------------------------
 //  static data
@@ -45,7 +47,7 @@ Gmat::MessageType MessageInterface::messageType = Gmat::INFO_;
 int MessageInterface::showIntervalInMilSec = 2000;
 short MessageInterface::messageExist = 0;
 std::string MessageInterface::logFileName = "GmatLog.txt";
-bool MessageInterface::logEnabled = true; //loj: 6/29/04 switch to true
+bool MessageInterface::logEnabled = true;
 FILE* MessageInterface::logFile = NULL;
 
 //---------------------------------
@@ -348,6 +350,7 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
    
 //  } // end PopupMessage()
 
+
 //------------------------------------------------------------------------------
 // void LogMessage(const std::string &msg)
 //------------------------------------------------------------------------------
@@ -357,10 +360,21 @@ void MessageInterface::LogMessage(const std::string &msg)
 
    if (logEnabled)
    {
-
       if (logFile == NULL)
-         logFile = fopen(logFileName.c_str(), "w");
-
+      {
+         //loj: 7/7/05 Get LogFile name from the setartup file.
+         FileManager *fm = FileManager::Instance();
+         try
+         {
+            std::string filename = fm->GetFullPathname("LOG_FILE");
+            logFile = fopen(filename.c_str(), "w");
+         }
+         catch (BaseException &e)
+         {
+            logFile = fopen(logFileName.c_str(), "w");
+         }
+      }
+      
       if (logFile)
       {
          fprintf(logFile, "%s", msg.c_str());
@@ -369,10 +383,28 @@ void MessageInterface::LogMessage(const std::string &msg)
    }
 }
 
+
+//------------------------------------------------------------------------------
+// void SetLogFile(const std::string &filename)
+//------------------------------------------------------------------------------
+void MessageInterface::SetLogFile(const std::string &filename)
+{
+   logFileName = filename;
+   
+   if (logFile)
+      fclose(logFile);
+   
+   logFile = fopen(logFileName.c_str(), "w");
+   fprintf(logFile, "MessageInterface::SetLogFile() Log file set to %s\n",
+           logFileName.c_str());
+}
+
+
 //------------------------------------------------------------------------------
 // void CloseLogFile()
 //------------------------------------------------------------------------------
 void MessageInterface::CloseLogFile()
 {
-   fclose(logFile);
+   if (logFile) //loj: 7/6/05 Added
+      fclose(logFile);
 }
