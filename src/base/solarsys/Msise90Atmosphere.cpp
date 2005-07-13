@@ -30,8 +30,9 @@ extern "C"
    
 //#define DEBUG_MSISE90_ATMOSPHERE
 
-// Temp log file
-static FILE *logFile;
+#ifdef DEBUG_MSISE90_ATMOSPHERE
+static FILE *logFile;  // Temp log file
+#endif
 
 //------------------------------------------------------------------------------
 //  Msise90Atmosphere()
@@ -45,7 +46,9 @@ Msise90Atmosphere::Msise90Atmosphere() :
     fileData            (false),
     fluxfilename        ("")
 {
+    #ifdef DEBUG_MSISE90_ATMOSPHERE
     logFile = NULL;
+    #endif
 }
 
 //------------------------------------------------------------------------------
@@ -85,8 +88,10 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
    Real    flatteningFactor = 1.0 / 298.257223563;  // WGS-84
    Real    geodesicFactor = 6378.137 * (1.0 - flatteningFactor);
    
+   #ifdef DEBUG_MSISE90_ATMOSPHERE
    logFile = fopen("GMAT-MSISE90.txt", "w");
-
+   #endif
+   
    if (mCentralBody == NULL)
       throw AtmosphereException(
          "Central body pointer not set in MSISE90 model.");
@@ -168,6 +173,7 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       for (j = 0; j < 8; j++)  xden[j] = den[j];
       for (j = 0; j < 2; j++)   xtemp[j] = temp[j];
 
+      #ifdef DEBUG_MSISE90_ATMOSPHERE
       fprintf(logFile, "Pre-GTDS6() \n");
       fprintf(logFile, "=========== \n");
       fprintf(logFile, "Epoch                  = %le \n", epoch);
@@ -198,10 +204,11 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       fprintf(logFile, "Temperature at Alt     = %le \n", xtemp[1]);
       fprintf(logFile, "\n");
       fprintf(logFile, "\n");
+      #endif
       
-      //gtd6_(&xyd,&xsod,&xalt,&xlat,&xlon,&xlst,&xf107a,&xf107,xap,&xmass,xden,xtemp);
       gtd6_(&xyd,&xsod,&xalt,&xlat,&xlon,&xlst,&xf107a,&xf107,&xap[0],&xmass,&xden[0],&xtemp[0]);
       
+      #ifdef DEBUG_MSISE90_ATMOSPHERE
       fprintf(logFile, "Post-GTDS6() \n");
       fprintf(logFile, "=========== \n");
       fprintf(logFile, "Epoch                  = %le \n", epoch);
@@ -233,6 +240,7 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       fprintf(logFile, "Temperature at Alt     = %le \n", xtemp[1]);
       fprintf(logFile, "\n");
       fprintf(logFile, "\n");
+      #endif
       
       yd = xyd;
       sod = xsod;
@@ -248,15 +256,19 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       for (j = 0; j < 8; j++)  den[j] = xden[j];
       for (j = 0; j < 2; j++)  temp[j] = xtemp[j];
 
-      density[i] = den[5];
+      density[i] = den[5] * 1000.0;
 
       #ifdef DEBUG_MSISE90_ATMOSPHERE
          MessageInterface::ShowMessage(
             "   Density = %15.9le\n", density[i]);
       #endif
    }
+   
+   #ifdef DEBUG_MSISE90_ATMOSPHERE
    fflush(logFile);
    fclose(logFile);
+   #endif
+   
    return true;
 }
 
