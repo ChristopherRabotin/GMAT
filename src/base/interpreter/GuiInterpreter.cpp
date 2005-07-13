@@ -782,6 +782,15 @@ std::string GuiInterpreter::GetPotentialFileName(const std::string &filetype)
 
 
 //------------------------------------------------------------------------------
+// std::string GetFileName(const std::string &filetype)
+//------------------------------------------------------------------------------
+std::string GuiInterpreter::GetFileName(const std::string &filetype)
+{
+   return moderator->GetFileName(filetype);
+}
+
+
+//------------------------------------------------------------------------------
 // Subscriber* CreateSubscriber(const std::string &type,
 //                              const const std::string &name,
 //                              const std::string &filename = "",

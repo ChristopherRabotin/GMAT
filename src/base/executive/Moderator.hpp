@@ -197,12 +197,12 @@ public:
                             const std::string &name);
    RefFrame* GetRefFrame(const std::string &name);
 
-   // CoordinateSystem (loj: 1/18/05 Added)
+   // CoordinateSystem
    CoordinateSystem* CreateCoordinateSystem(const std::string &name,
                                             bool createDefault = false);
    CoordinateSystem* GetCoordinateSystem(const std::string &name);
 
-   // AxisSystem (loj: 1/18/05 Added)
+   // AxisSystem
    AxisSystem* CreateAxisSystem(const std::string &type,
                                 const std::string &name);
 
@@ -234,16 +234,20 @@ public:
    std::string GetPlanetaryFileName(const std::string &fileType);
    bool SetPlanetaryFileName(const std::string &fileType,
                              const std::string &fileName);
-
+   
    Integer SetPlanetaryFileTypesInUse(const StringArray &fileTypes); 
    Integer GetPlanetaryFileId(const std::string &fileType);
-    
+   
    // Potential field files
    std::string GetPotentialFileName(const std::string &fileType);
-
+   
+   //loj: 7/7/05 Added
+   // This will eventually replace Get*FileName() above
+   std::string GetFileName(const std::string &fileType);
+   
    // Mission
    bool LoadDefaultMission();
-    
+   
    // Resource
    bool ClearResource();
     
@@ -257,10 +261,9 @@ public:
                       Integer sandboxNum = 1);
    GmatCommand* DeleteCommand(GmatCommand *cmd, Integer sandboxNum = 1);
    GmatCommand* GetNextCommand(Integer sanboxNum = 1);
-
+   
    // Sandbox
    void ClearAllSandboxes();
-   //loj: 3/2/05 Added so that MATLAB can get the final object state
    GmatBase* GetInternalObject(const std::string &name, Integer sandboxNum = 1);
    Integer RunMission(Integer sandboxNum = 1);
    Integer ChangeRunState(const std::string &state, Integer sandboxNum = 1);
@@ -318,9 +321,8 @@ private:
    virtual ~Moderator();
    Moderator(const Moderator&);
    Moderator& operator=(const Moderator&);
-
+   
    // member data
-   bool isInitialized;
    bool isSlpAlreadyInUse;
    bool isRunReady;
    std::vector<Sandbox*> sandboxes;
@@ -360,7 +362,7 @@ private:
    StringArray thePlanetaryFileNames;
    StringArray thePlanetaryFileTypesInUse;
    StringArray theTempFileList;
-   StringArray theSpacePointList; //loj: 5/9/05 Added
+   StringArray theSpacePointList;
 
    EopFile *theEopFile;
    ItrfCoefficientsFile *theItrfFile;

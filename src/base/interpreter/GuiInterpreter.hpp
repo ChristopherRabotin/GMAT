@@ -147,6 +147,9 @@ public:
    // Potential field files
    std::string GetPotentialFileName(const std::string &filetype);
 
+   //loj: 7/7/05 Added
+   // This will eventually replace Get*FileName() above
+   std::string GetFileName(const std::string &fileType);
    
    // Subscriber
    Subscriber* CreateSubscriber(const std::string &type,

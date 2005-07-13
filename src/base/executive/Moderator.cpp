@@ -79,80 +79,79 @@ bool Moderator::Initialize(bool fromGui)
 {
    try
    {
-      if (!isInitialized)
+      //loj: 7/7/05 Moved from the bottom
+      // Read startup file, Set Log file
+      theFileManager = FileManager::Instance();
+      theFileManager->ReadStartupFile();
+      
+      MessageInterface::ShowMessage("Moderator is creating core engine...\n");
+      
+      // Create interpreters and managers
+      theGuiInterpreter = GuiInterpreter::Instance();
+      theScriptInterpreter = ScriptInterpreter::Instance();
+      theFactoryManager = FactoryManager::Instance();
+      theConfigManager = ConfigManager::Instance();
+      
+      // Create publisher
+      thePublisher = Publisher::Instance();
+      
+      // Create factories
+      theAtmosphereFactory = new AtmosphereFactory();
+      theAxisSystemFactory = new AxisSystemFactory();
+      theBurnFactory = new BurnFactory();
+      theCalculatedPointFactory = new CalculatedPointFactory();
+      theCommandFactory = new CommandFactory();
+      theCoordinateSystemFactory = new CoordinateSystemFactory();
+      theForceModelFactory = new ForceModelFactory();
+      theFunctionFactory = new FunctionFactory();
+      theHardwareFactory = new HardwareFactory();
+      theParameterFactory = new ParameterFactory();
+      thePhysicalModelFactory = new PhysicalModelFactory();
+      thePropagatorFactory = new PropagatorFactory();
+      thePropSetupFactory = new PropSetupFactory();
+      theSolverFactory = new SolverFactory();
+      theSpacecraftFactory = new SpacecraftFactory();
+      theStopConditionFactory = new StopConditionFactory();
+      theSubscriberFactory = new SubscriberFactory();
+      
+      // Register factories
+      theFactoryManager->RegisterFactory(theAtmosphereFactory);
+      theFactoryManager->RegisterFactory(theAxisSystemFactory);
+      theFactoryManager->RegisterFactory(theBurnFactory);
+      theFactoryManager->RegisterFactory(theCalculatedPointFactory);
+      theFactoryManager->RegisterFactory(theCommandFactory);
+      theFactoryManager->RegisterFactory(theCoordinateSystemFactory);
+      theFactoryManager->RegisterFactory(theForceModelFactory);
+      theFactoryManager->RegisterFactory(theFunctionFactory);
+      theFactoryManager->RegisterFactory(theHardwareFactory);
+      theFactoryManager->RegisterFactory(theParameterFactory);
+      theFactoryManager->RegisterFactory(thePhysicalModelFactory);
+      theFactoryManager->RegisterFactory(thePropagatorFactory);
+      theFactoryManager->RegisterFactory(thePropSetupFactory);
+      theFactoryManager->RegisterFactory(theSolverFactory);
+      theFactoryManager->RegisterFactory(theSpacecraftFactory);
+      theFactoryManager->RegisterFactory(theStopConditionFactory);
+      theFactoryManager->RegisterFactory(theSubscriberFactory);
+      
+      // Create default SolarSystem
+      theDefaultSolarSystem = new SolarSystem("DefaultSolarSystem");
+      //theDefaultSolarSystem = CreateSolarSystem("DefaultSolarSystem");
+      //SetSolarSystemInUse("DefaultSolarSystem");
+      //MessageInterface::ShowMessage
+      //   ("Moderator::Initialize() theDefaultSolarSystem created\n");
+      
+      // Create internal CoordinateSystem with noname, so that it will not
+      // be configured
+      theInternalCoordSystem = CreateCoordinateSystem("", true);
+      theInternalCoordSystem->SetName("EarthMJ2000Eq");
+      
+      InitializePlanetarySource();
+      InitializePlanetaryCoeffFile();
+      InitializeTimeFile();
+      
+      if (fromGui)
       {
-         MessageInterface::ShowMessage("Moderator is creating core engine...\n");
-        
-         // Create interpreters and managers
-         theGuiInterpreter = GuiInterpreter::Instance();
-         theScriptInterpreter = ScriptInterpreter::Instance();
-         theFactoryManager = FactoryManager::Instance();
-         theConfigManager = ConfigManager::Instance();
-         theFileManager = FileManager::Instance();
-        
-         // Create publisher
-         thePublisher = Publisher::Instance();
-         
-         // Create factories
-         theAtmosphereFactory = new AtmosphereFactory();
-         theAxisSystemFactory = new AxisSystemFactory();
-         theBurnFactory = new BurnFactory();
-         theCalculatedPointFactory = new CalculatedPointFactory();
-         theCommandFactory = new CommandFactory();
-         theCoordinateSystemFactory = new CoordinateSystemFactory();
-         theForceModelFactory = new ForceModelFactory();
-         theFunctionFactory = new FunctionFactory();
-         theHardwareFactory = new HardwareFactory();
-         theParameterFactory = new ParameterFactory();
-         thePhysicalModelFactory = new PhysicalModelFactory();
-         thePropagatorFactory = new PropagatorFactory();
-         thePropSetupFactory = new PropSetupFactory();
-         theSolverFactory = new SolverFactory();
-         theSpacecraftFactory = new SpacecraftFactory();
-         theStopConditionFactory = new StopConditionFactory();
-         theSubscriberFactory = new SubscriberFactory();
-         
-         // Register factories
-         theFactoryManager->RegisterFactory(theAtmosphereFactory);
-         theFactoryManager->RegisterFactory(theAxisSystemFactory);
-         theFactoryManager->RegisterFactory(theBurnFactory);
-         theFactoryManager->RegisterFactory(theCalculatedPointFactory);
-         theFactoryManager->RegisterFactory(theCommandFactory);
-         theFactoryManager->RegisterFactory(theCoordinateSystemFactory);
-         theFactoryManager->RegisterFactory(theForceModelFactory);
-         theFactoryManager->RegisterFactory(theFunctionFactory);
-         theFactoryManager->RegisterFactory(theHardwareFactory);
-         theFactoryManager->RegisterFactory(theParameterFactory);
-         theFactoryManager->RegisterFactory(thePhysicalModelFactory);
-         theFactoryManager->RegisterFactory(thePropagatorFactory);
-         theFactoryManager->RegisterFactory(thePropSetupFactory);
-         theFactoryManager->RegisterFactory(theSolverFactory);
-         theFactoryManager->RegisterFactory(theSpacecraftFactory);
-         theFactoryManager->RegisterFactory(theStopConditionFactory);
-         theFactoryManager->RegisterFactory(theSubscriberFactory);
-         
-         // Create default SolarSystem
-         theDefaultSolarSystem = new SolarSystem("DefaultSolarSystem");
-         //theDefaultSolarSystem = CreateSolarSystem("DefaultSolarSystem");
-         //SetSolarSystemInUse("DefaultSolarSystem");
-         //MessageInterface::ShowMessage
-         //   ("Moderator::Initialize() theDefaultSolarSystem created\n");
-         
-         // Create internal CoordinateSystem with noname, so that it will not
-         // be configured
-         theInternalCoordSystem = CreateCoordinateSystem("", true);
-         theInternalCoordSystem->SetName("EarthMJ2000Eq");
-         
-         // Read startup file
-         theFileManager->ReadStartupFile();
-         InitializePlanetarySource();
-         InitializePlanetaryCoeffFile();
-         InitializeTimeFile();
-         
-         if (fromGui)
-         {
-            CreateDefaultMission();
-         }
+         CreateDefaultMission();
       }
    }
    catch (BaseException &e)
@@ -160,16 +159,17 @@ bool Moderator::Initialize(bool fromGui)
       MessageInterface::PopupMessage(Gmat::WARNING_,
                                      "Error occured during initialization: " +
                                      e.GetMessage());
+      return false;
    }
    catch (...)
    {
       MessageInterface::PopupMessage(Gmat::WARNING_,
                                      "Unknown Error occured during initialization");
+      return false;
    }
    
    MessageInterface::ShowMessage("Moderator successfully created core engine\n");
-   isInitialized = true;
-   return isInitialized;
+   return true;;
 }
 
 
@@ -184,24 +184,22 @@ void Moderator::Finalize()
 {
    MessageInterface::ShowMessage("Moderator is deleting core engine...\n");
    
-   //MessageInterface::ShowMessage("deleting files\n");
+   MessageInterface::ShowMessage("deleting files\n");
+   delete theFileManager;
    delete theDefaultSlpFile;
    delete theDefaultDeFile;
    delete theEopFile;
    delete theItrfFile;
    delete theLeapSecsFile;
-
-   //MessageInterface::ShowMessage("deleting internal objects\n");
-   delete theDefaultSolarSystem;
-   delete theInternalCoordSystem;
-
-   //MessageInterface::ShowMessage("deleting factories\n");
-   delete theAtmosphereFactory;
-   delete theCalculatedPointFactory;
-   delete theFunctionFactory;
-   delete theSpacecraftFactory;
-   delete theHardwareFactory;
+   
+   MessageInterface::ShowMessage("deleting factories\n");
    delete theStopConditionFactory;
+   
+   //delete theCalculatedPointFactory;
+   //delete theFunctionFactory;
+   //delete theAtmosphereFactory;
+   //delete theHardwareFactory;
+   //delete theSpacecraftFactory;
    
    //MessageInterface::ShowMessage("deleting theCommandFactory\n");
    //if (theCommandFactory)
@@ -244,10 +242,17 @@ void Moderator::Finalize()
    //   delete theScriptInterpreter;
    //if (thePublisher)
    //   delete thePublisher;
+   
+   //MessageInterface::ShowMessage("deleting internal objects\n");
+   //delete theDefaultSolarSystem;
+   //delete theInternalCoordSystem;
+   
    //if (instance)
    //   delete instance;
    
-   //MessageInterface::ShowMessage("Moderator::Finalize() exiting\n");
+   //#if DEBUG_FINALIZE
+   MessageInterface::ShowMessage("Moderator::Finalize() exiting\n");
+   //#endif
 }
 
 
@@ -1552,7 +1557,9 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
    // create default force model with Earth primary body
    ForceModel *newfm= CreateForceModel("");
    GravityField *gravForce = new GravityField("", "Earth");
-   gravForce->SetStringParameter("Filename", GetPotentialFileName("JGM2"));
+   //loj: 7/7/05 Using new FileManager
+   //gravForce->SetStringParameter("Filename", GetPotentialFileName("JGM2"));
+   gravForce->SetStringParameter("Filename", GetFileName("JGM2_FILE"));
    newfm->AddForce(gravForce);
    propSetup->SetForceModel(newfm);
    
@@ -2246,12 +2253,22 @@ bool Moderator::SetPlanetaryFileName(const std::string &fileType,
 //------------------------------------------------------------------------------
 std::string Moderator::GetPotentialFileName(const std::string &fileType)
 {
+   //loj: 7/6/05 using new FileManager
    if (fileType == "JGM2")
-      return theFileManager->GetStringParameter("FULL_EARTH_JGM2_FILE");
+      return theFileManager->GetFullPathname("JGM2_FILE");
    else if (fileType == "JGM3")
-      return theFileManager->GetStringParameter("FULL_EARTH_JGM3_FILE");
+      return theFileManager->GetFullPathname("JGM3_FILE");
    else
       return "Unknown Potential File Type:" + fileType;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetFileName(const std::string &fileType)
+//------------------------------------------------------------------------------
+std::string Moderator::GetFileName(const std::string &fileType)
+{
+   return theFileManager->GetFullPathname(fileType);
 }
 
 
@@ -2937,14 +2954,15 @@ void Moderator::InitializePlanetarySource()
    thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[SLP]);
    thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[DE200]);
    thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[DE405]);
-    
-   thePlanetaryFileNames.push_back(theFileManager->
-                                   GetStringParameter("FULL_SLP_FILE"));
-   thePlanetaryFileNames.push_back(theFileManager->
-                                   GetStringParameter("FULL_DE200_FILE"));
-   thePlanetaryFileNames.push_back(theFileManager->
-                                   GetStringParameter("FULL_DE405_FILE"));
 
+   //loj: 7/7/05 using new FileManager
+   thePlanetaryFileNames.push_back(theFileManager->
+                                   GetFullPathname("SLP_FILE"));
+   thePlanetaryFileNames.push_back(theFileManager->
+                                   GetFullPathname("DE200_FILE"));
+   thePlanetaryFileNames.push_back(theFileManager->
+                                   GetFullPathname("DE405_FILE"));
+   
    // initialize planetary file types/names in use
    // default is DE405
    thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE405]); 
@@ -2960,12 +2978,13 @@ void Moderator::InitializePlanetaryCoeffFile()
    MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage("Moderator initializing planetary coeff. file...\n");
    
+   //loj: 7/7/05 using new FileManager
    std::string nutFileName =
-      theFileManager->GetStringParameter("FULL_NUTATION_COEFF_FILE");
+      theFileManager->GetFullPathname("NUTATION_COEFF_FILE");
    MessageInterface::ShowMessage("Moderator setting nutation file to %s\n",
                                  nutFileName.c_str());
    std::string planFileName =
-      theFileManager->GetStringParameter("FULL_PLANETARY_COEFF_FILE");
+      theFileManager->GetFullPathname("PLANETARY_COEFF_FILE");
    MessageInterface::ShowMessage("Moderator setting planetary coeff. file to %s\n",
                                  planFileName.c_str());
    
@@ -2982,13 +3001,14 @@ void Moderator::InitializeTimeFile()
    MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage("Moderator initializing time file...\n");
    
-   std::string filename = theFileManager->GetStringParameter("FULL_LEAP_SECS_FILE");
+   //loj: 7/7/05 using new FileManager
+   std::string filename = theFileManager->GetFullPathname("LEAP_SECS_FILE");
    MessageInterface::ShowMessage("Moderator setting leap seconds file to %s\n",
                                  filename.c_str());
    theLeapSecsFile = new LeapSecsFileReader(filename);
    theLeapSecsFile->Initialize();
-
-   filename = theFileManager->GetStringParameter("FULL_EOP_FILE");
+   
+   filename = theFileManager->GetFullPathname("EOP_FILE");
    theEopFile = new EopFile(filename);
    theEopFile->Initialize();
    
@@ -3918,17 +3938,17 @@ void Moderator::ExecuteSandbox(Integer index)
 //------------------------------------------------------------------------------
 Moderator::Moderator()
 {
-   isInitialized = false;
+//    isInitialized = false;
    isRunReady = false;
    theDefaultSolarSystem = NULL;
    theInternalCoordSystem = NULL;
    theDefaultSlpFile = NULL;
    runState = Gmat::IDLE;
    
-   theFactoryManager = FactoryManager::Instance();
-   theConfigManager = ConfigManager::Instance();
-   theFileManager = FileManager::Instance();
-
+//    theFactoryManager = FactoryManager::Instance();
+//    theConfigManager = ConfigManager::Instance();
+//    theFileManager = FileManager::GetInstance();
+   
    sandboxes.reserve(Gmat::MAX_SANDBOX);
    commands.reserve(Gmat::MAX_SANDBOX);
 
