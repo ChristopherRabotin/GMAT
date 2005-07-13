@@ -54,6 +54,7 @@ BEGIN_EVENT_TABLE(PropagationConfigPanel, GmatPanel)
    EVT_TEXT(ID_TEXTCTRL_MAGF, PropagationConfigPanel::OnMagneticTextUpdate)
    EVT_COMBOBOX(ID_CB_INTGR, PropagationConfigPanel::OnIntegratorSelection)
    EVT_TEXT(ID_CB_BODY, PropagationConfigPanel::OnBodySelection)
+   EVT_COMBOBOX(ID_CB_BODY, PropagationConfigPanel::OnBodyComboBoxChange)
    EVT_COMBOBOX(ID_CB_GRAV, PropagationConfigPanel::OnGravitySelection)
    EVT_COMBOBOX(ID_CB_ATMOS, PropagationConfigPanel::OnAtmosphereSelection)
    EVT_CHECKBOX(ID_CHECKBOX, PropagationConfigPanel::OnSRPCheckBoxChange)
@@ -83,7 +84,7 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
    thePropSetup     = NULL;
    newProp          = NULL;
    integratorString = "RKV 8(9)";
-    
+   
    forceList.clear();
    pmForceList.clear();
    gravModelArray.clear();
@@ -124,14 +125,14 @@ PropagationConfigPanel::~PropagationConfigPanel()
       delete forceList[i];
    for (unsigned int i=0; i<pmForceList.size(); i++)
       delete pmForceList[i]; 
-        
+   
    gravModelArray.clear();
    dragModelArray.clear();
    magfModelArray.clear();
-
+   
    primaryBodiesArray.Clear();
    integratorArray.Clear();
-
+   
    // Unregister GUI components (loj: 6/7/05 Added)
    theGuiManager->UnregisterComboBox("CoordinateSystem", originComboBox);
 }
@@ -284,13 +285,16 @@ void PropagationConfigPanel::SaveData()
          {                  
             if (forceList[i]->gravType == gravModelArray[JGM2])
             {
-               forceList[i]->potFilename = theGuiInterpreter->GetPotentialFileName("JGM2");
+               //loj: 7/7/05 Using new FileManager
+               //forceList[i]->potFilename = theGuiInterpreter->GetPotentialFileName("JGM2");
+               forceList[i]->potFilename = theGuiInterpreter->GetFileName("JGM2_FILE");
             }
             else if (forceList[i]->gravType == gravModelArray[JGM3])
             {
-               forceList[i]->potFilename = theGuiInterpreter->GetPotentialFileName("JGM3");
+               //forceList[i]->potFilename = theGuiInterpreter->GetPotentialFileName("JGM3");
+               forceList[i]->potFilename = theGuiInterpreter->GetFileName("JGM3_FILE");
             }
-         
+            
             if (isPotFileChanged)
                isPotFileChanged = false;
             
@@ -309,15 +313,16 @@ void PropagationConfigPanel::SaveData()
                   gravityDegreeTextCtrl->SetValue(forceList[currentBodyId]->gravDegree);
                   gravityOrderTextCtrl->SetValue(forceList[currentBodyId]->gravOrder);
                   return;
-               }    
-                  
+               }
+               
                theGravForce->SetIntegerParameter
                   ("Degree", atoi(forceList[i]->gravDegree.c_str()));
                theGravForce->SetIntegerParameter
                   ("Order",  atoi(forceList[i]->gravOrder.c_str()));
-            }                
+            }
+            
             theGravForce->SetStringParameter("Filename", forceList[i]->potFilename);
-
+            
             forceList[i]->gravf = theGravForce;
             newFm->AddForce(theGravForce);
             
@@ -423,9 +428,9 @@ Integer PropagationConfigPanel::FindBody(const std::string &bodyName,
       if (forceList[i]->bodyName == bodyName)
          return i;
    }
-
+   
    forceList.push_back(new ForceType(bodyName, gravType, dragType, magfType));
-
+   
    #if DEBUG_PROP_PANEL
    ShowForceList("FindBody() after add body to forceList");
    #endif
@@ -507,7 +512,7 @@ void PropagationConfigPanel::Initialize()
                dragModelArray[NONE_DM], magfModelArray[NONE_MM])); 
          }
          else if (force->GetTypeName() == "GravityField")
-         {            
+         {
             theGravForce = (GravityField*)force;
             bodyName = theGravForce->GetStringParameter("BodyName");
             std::string potFilename = theGravForce->GetStringParameter("Filename");                 
@@ -715,7 +720,6 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                       wxSize(165,-1), 0 );
    pmEditTextCtrl =
       new wxTextCtrl( parent, -1, wxT(""), wxDefaultPosition,
-                      //wxSize(220,-1), wxTE_READONLY ); //loj: 6/9/05 to line up
                       wxSize(235,-1), wxTE_READONLY );
    magneticDegreeTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_MAGF, wxT(""), wxDefaultPosition,
@@ -840,11 +844,10 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    wxStaticBox *staticBox4 = new wxStaticBox( parent, -1, wxT("Coordinate Systems") );
    wxStaticBoxSizer *staticBoxSizer4 = new wxStaticBoxSizer( staticBox4, wxHORIZONTAL );
    wxStaticBox *item37 = new wxStaticBox( parent, -1, wxT("Gravity Field") );
-   //loj: 5/20/04 wxStaticBoxSizer *item36 = new wxStaticBoxSizer( item37, wxHORIZONTAL );
    wxStaticBoxSizer *item36 = new wxStaticBoxSizer( item37, wxVERTICAL );
    
-   wxBoxSizer *item361 = new wxBoxSizer( wxHORIZONTAL ); //loj: 5/20/04
-   wxBoxSizer *item362 = new wxBoxSizer( wxHORIZONTAL ); //loj: 5/20/04
+   wxBoxSizer *item361 = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *item362 = new wxBoxSizer( wxHORIZONTAL );
    
    wxStaticBox *item46 = new wxStaticBox( parent, -1, wxT("Atmospheric Model") );
    wxStaticBoxSizer *item45 = new wxStaticBoxSizer( item46, wxHORIZONTAL );
@@ -1173,23 +1176,23 @@ void PropagationConfigPanel::DisplayPrimaryBodyData()
 // void DisplayGravityFieldData()
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::DisplayGravityFieldData()
-{            
+{
    #if DEBUG_PROP_PANEL
    MessageInterface::ShowMessage
       ("DisplayGravityFieldData() currentBodyName=%s gravType=%s\n",
        currentBodyName.c_str(), forceList[currentBodyId]->gravType.c_str());
    #endif
-
+   
    searchGravityButton->Enable(false);
    potFileStaticText->Enable(false);
    potFileTextCtrl->Enable(false);
-
+   
    gravityDegreeTextCtrl->SetValue(forceList[currentBodyId]->gravDegree.c_str());
    gravityOrderTextCtrl->SetValue(forceList[currentBodyId]->gravOrder.c_str());
-     
+   
    gravityDegreeTextCtrl->Enable(true);
    gravityOrderTextCtrl->Enable(true);
- 
+   
    if (forceList[currentBodyId]->gravType == gravModelArray[JGM2] ||
        forceList[currentBodyId]->gravType == gravModelArray[JGM3])
    {
@@ -1197,7 +1200,7 @@ void PropagationConfigPanel::DisplayGravityFieldData()
          gravComboBox->SetSelection(JGM2);
       else
          gravComboBox->SetSelection(JGM3);
-         
+      
       potFileTextCtrl->SetValue("");
    }
    else if (forceList[currentBodyId]->gravType == gravModelArray[OTHER])
@@ -1213,8 +1216,9 @@ void PropagationConfigPanel::DisplayGravityFieldData()
       gravComboBox->SetSelection(NONE_GM);
       
       potFileTextCtrl->SetValue("");
-      gravityDegreeTextCtrl->SetValue("");
-      gravityOrderTextCtrl->SetValue("");
+      //loj: 7/7/05 Commented out
+      //gravityDegreeTextCtrl->SetValue("");
+      //gravityOrderTextCtrl->SetValue("");
       
       gravityDegreeTextCtrl->Enable(false);
       gravityOrderTextCtrl->Enable(false);
@@ -1325,6 +1329,17 @@ void PropagationConfigPanel::OnIntegratorSelection(wxCommandEvent &event)
    }
 }
 
+//loj: 7/7/05 Added. We don't want to enable Apply when just switching body.
+//------------------------------------------------------------------------------
+// void OnBodyComboBoxChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::OnBodyComboBoxChange(wxCommandEvent &event)
+{
+   OnBodySelection(event);
+   theApplyButton->Enable(false);
+}
+
+
 //------------------------------------------------------------------------------
 // void OnBodySelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -1332,15 +1347,15 @@ void PropagationConfigPanel::OnBodySelection(wxCommandEvent &event)
 {
    if (primaryBodiesArray.IsEmpty())
       return;
-      
-   std::string selBody = bodyComboBox->GetStringSelection().c_str();
    
+   std::string selBody = bodyComboBox->GetStringSelection().c_str();
+
    if (currentBodyName != selBody)
    {
       primaryBodyString = bodyComboBox->GetStringSelection();
       currentBodyName = selBody;
       currentBodyId = FindBody(currentBodyName);
-     
+      
       DisplayGravityFieldData();
       DisplayAtmosphereModelData();
       DisplayMagneticFieldData();
@@ -1411,14 +1426,14 @@ void PropagationConfigPanel::OnAtmosphereSelection(wxCommandEvent &event)
 // void OnAddBodyButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
-{     
+{
    CelesBodySelectDialog bodyDlg(this, primaryBodiesArray, secondaryBodiesArray);
    bodyDlg.ShowModal();
-        
+   
    if (bodyDlg.IsBodySelected())
    {
       wxArrayString &names = bodyDlg.GetBodyNames();
-
+      
       if (names.IsEmpty())
       {
          forceList.clear();
@@ -1429,159 +1444,178 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
          isForceModelChanged = true;
          return;
       }
-               
+      
       std::vector<ForceType*> fl;
       
       std::string bodyName;
-      std::string gravType;
-      std::string dragType;
-      std::string magfType;
-      wxString gravDegree;
-      wxString gravOrder;
-      wxString magfDegree;
-      wxString magfOrder;
-      std::string potFilename;
-      PointMassForce *pmf = NULL;
-      GravityField *gravf =  NULL;
-      DragForce *dragf = NULL;
-      SolarRadiationPressure *srpf = NULL;
-      bool useSrp = false;
       
-      wxString degreeString;
-      wxString orderString;
-         
+   //loj: 7/7/05 The ForceType() constructor sets defaults
+//       std::string gravType;
+//       std::string dragType;
+//       std::string magfType;
+//       wxString gravDegree;
+//       wxString gravOrder;
+//       wxString magfDegree;
+//       wxString magfOrder;
+//       std::string potFilename;
+//       PointMassForce *pmf = NULL;
+//       GravityField *gravf =  NULL;
+//       DragForce *dragf = NULL;
+//       SolarRadiationPressure *srpf = NULL;
+//       bool useSrp = false;
+      
+//       wxString degreeString;
+//       wxString orderString;
+      
       fl = forceList;
       forceList.clear();
       primaryBodiesArray.Clear();
-               
-      //----------------------------
-      // when user addes more bodies
-      //----------------------------
-      if (names.GetCount() > fl.size())
-      {                           
-         for (Integer i = 0; i < (Integer)names.GetCount(); i++)
-         {
-            bodyName = names[i].c_str();
-            theCelestialBody = theSolarSystem->GetBody(bodyName.c_str());
-            
-            degreeString.Printf("%d", theCelestialBody->GetDegree());
-            orderString.Printf("%d", theCelestialBody->GetOrder());
-            
-            // If no previous body selection was made
-            if (fl.empty())
-            {
-               gravType = gravModelArray[JGM2];
-               dragType = dragModelArray[NONE_DM];
-               magfType = magfModelArray[NONE_MM];   
-               gravDegree = degreeString.c_str();
-               gravOrder = orderString.c_str();
-               magfDegree = "0";
-               magfOrder = "0";
-               potFilename = "";
-               pmf = NULL;
-               gravf = NULL;
-               dragf = NULL;
-               srpf = NULL;
-               useSrp = false;                
-            }
-            else
-            {                        
-               for (Integer j = 0; j < (Integer)fl.size(); j++)
-               {
-                  if (strcmp(bodyName.c_str(), fl[j]->bodyName.c_str()) == 0)
-                  {
-                     gravType = fl[j]->gravType;
-                     dragType = fl[j]->dragType;
-                     magfType = fl[j]->magfType;
-                     gravDegree = fl[j]->gravDegree;
-                     gravOrder = fl[j]->gravOrder;
-                     magfDegree = fl[j]->magfDegree;
-                     magfOrder = fl[j]->magfOrder;
-                     potFilename = fl[j]->potFilename;
-                     pmf = fl[j]->pmf;
-                     gravf = fl[j]->gravf;
-                     dragf = fl[j]->dragf;
-                     srpf = fl[j]->srpf;
-                  }            
-                  else
-                  {
-                     gravType = gravModelArray[JGM2];
-                     dragType = dragModelArray[NONE_DM];
-                     magfType = magfModelArray[NONE_MM];   
-                     gravDegree = degreeString.c_str();
-                     gravOrder = orderString.c_str();
-                     magfDegree = "0";
-                     magfOrder = "0";
-                     potFilename = "";
-                     pmf = NULL;
-                     gravf = NULL;
-                     dragf = NULL;
-                     srpf = NULL;
-                     useSrp = false;       
-                  }
-               }
-            }
-            currentBodyId = FindBody(bodyName,gravType,dragType,magfType);
-            
-            forceList[currentBodyId]->gravDegree = gravDegree;
-            forceList[currentBodyId]->gravOrder = gravOrder;
-            forceList[currentBodyId]->magfDegree = magfDegree;
-            forceList[currentBodyId]->magfOrder = magfOrder;
-            forceList[currentBodyId]->potFilename = potFilename;
-            forceList[currentBodyId]->pmf = pmf;
-            forceList[currentBodyId]->gravf = gravf;
-            forceList[currentBodyId]->dragf = dragf;
-            forceList[currentBodyId]->srpf = srpf;
-            forceList[currentBodyId]->useSrp = useSrp;
-            
-            primaryBodiesArray.Add(bodyName.c_str());
-         }
-      }
-      //---------------------------------------------
-      // when user removes a body or bodies from list
-      //---------------------------------------------
-      else
-      {
-         for (Integer i = 0; i < (Integer)fl.size(); i++)
-         {
-            bodyName = fl[i]->bodyName.c_str();
-                        
-            for (Integer j = 0; j < (Integer)names.GetCount(); j++)
-            {
-               if (strcmp(bodyName.c_str(), names[j].c_str()) == 0)
-               {
-                  gravType = fl[j]->gravType;
-                  dragType = fl[j]->dragType;
-                  magfType = fl[j]->magfType;
-                  gravDegree = fl[j]->gravDegree;
-                  gravOrder = fl[j]->gravOrder;
-                  magfDegree = fl[j]->magfDegree;
-                  magfOrder = fl[j]->magfOrder;
-                  potFilename = fl[j]->potFilename;
-                  pmf = fl[j]->pmf;
-                  gravf = fl[j]->gravf;
-                  dragf = fl[j]->dragf;
-                  srpf = fl[j]->srpf;
-                  useSrp = fl[j]->useSrp;
-                  
-                  currentBodyId = FindBody(bodyName,gravType,dragType,magfType);
 
-                  forceList[currentBodyId]->gravDegree = gravDegree;
-                  forceList[currentBodyId]->gravOrder = gravOrder;
-                  forceList[currentBodyId]->magfDegree = magfDegree;
-                  forceList[currentBodyId]->magfOrder = magfOrder;
-                  forceList[currentBodyId]->potFilename = potFilename;
-                  forceList[currentBodyId]->pmf = pmf;
-                  forceList[currentBodyId]->gravf = gravf;
-                  forceList[currentBodyId]->dragf = dragf;
-                  forceList[currentBodyId]->srpf = srpf;
-                  forceList[currentBodyId]->useSrp = useSrp;
-                  
-                  primaryBodiesArray.Add(bodyName.c_str());
-               }            
-            }            
+      for (Integer i = 0; i < (Integer)names.GetCount(); i++)
+      {
+         bodyName = names[i].c_str();
+         primaryBodiesArray.Add(bodyName.c_str());
+         currentBodyId = FindBody(bodyName);
+         
+         for (Integer j = 0; j < (Integer)fl.size(); j++)
+         {
+            if (bodyName == fl[j]->bodyName)
+            {
+               forceList[currentBodyId] = fl[j];
+            }
          }
       }
+   }
+   
+//       //----------------------------
+//       // when user addes more bodies
+//       //----------------------------
+//       if (names.GetCount() > fl.size())
+//       {                           
+//          for (Integer i = 0; i < (Integer)names.GetCount(); i++)
+//          {
+//             bodyName = names[i].c_str();
+//             theCelestialBody = theSolarSystem->GetBody(bodyName.c_str());
+            
+//             degreeString.Printf("%d", theCelestialBody->GetDegree());
+//             orderString.Printf("%d", theCelestialBody->GetOrder());
+            
+//             // If no previous body selection was made
+//             if (fl.empty())
+//             {
+//                gravType = gravModelArray[JGM2];
+//                dragType = dragModelArray[NONE_DM];
+//                magfType = magfModelArray[NONE_MM];   
+//                gravDegree = degreeString.c_str();
+//                gravOrder = orderString.c_str();
+//                magfDegree = "0";
+//                magfOrder = "0";
+//                potFilename = "";
+//                pmf = NULL;
+//                gravf = NULL;
+//                dragf = NULL;
+//                srpf = NULL;
+//                useSrp = false;                
+//             }
+//             else
+//             {                        
+//                for (Integer j = 0; j < (Integer)fl.size(); j++)
+//                {
+//                   if (strcmp(bodyName.c_str(), fl[j]->bodyName.c_str()) == 0)
+//                   {
+//                      gravType = fl[j]->gravType;
+//                      dragType = fl[j]->dragType;
+//                      magfType = fl[j]->magfType;
+//                      gravDegree = fl[j]->gravDegree;
+//                      gravOrder = fl[j]->gravOrder;
+//                      magfDegree = fl[j]->magfDegree;
+//                      magfOrder = fl[j]->magfOrder;
+//                      potFilename = fl[j]->potFilename;
+//                      pmf = fl[j]->pmf;
+//                      gravf = fl[j]->gravf;
+//                      dragf = fl[j]->dragf;
+//                      srpf = fl[j]->srpf;
+//                   }
+//                   else
+//                   {
+//                      gravType = gravModelArray[JGM2];
+//                      dragType = dragModelArray[NONE_DM];
+//                      magfType = magfModelArray[NONE_MM];   
+//                      gravDegree = degreeString.c_str();
+//                      gravOrder = orderString.c_str();
+//                      magfDegree = "0";
+//                      magfOrder = "0";
+//                      potFilename = "";
+//                      pmf = NULL;
+//                      gravf = NULL;
+//                      dragf = NULL;
+//                      srpf = NULL;
+//                      useSrp = false;       
+//                   }
+//                }
+//             }
+            
+//             currentBodyId = FindBody(bodyName, gravType, dragType, magfType);
+            
+//             forceList[currentBodyId]->gravDegree = gravDegree;
+//             forceList[currentBodyId]->gravOrder = gravOrder;
+//             forceList[currentBodyId]->magfDegree = magfDegree;
+//             forceList[currentBodyId]->magfOrder = magfOrder;
+//             forceList[currentBodyId]->potFilename = potFilename;
+//             forceList[currentBodyId]->pmf = pmf;
+//             forceList[currentBodyId]->gravf = gravf;
+//             forceList[currentBodyId]->dragf = dragf;
+//             forceList[currentBodyId]->srpf = srpf;
+//             forceList[currentBodyId]->useSrp = useSrp;
+            
+//             primaryBodiesArray.Add(bodyName.c_str());
+//          }
+//       }
+//       //---------------------------------------------
+//       // when user removes a body or bodies from list
+//       //---------------------------------------------
+//       else
+//       {
+//          for (Integer i = 0; i < (Integer)fl.size(); i++)
+//          {
+//             bodyName = fl[i]->bodyName.c_str();
+                        
+//             for (Integer j = 0; j < (Integer)names.GetCount(); j++)
+//             {
+//                if (strcmp(bodyName.c_str(), names[j].c_str()) == 0)
+//                {
+//                   gravType = fl[j]->gravType;
+//                   dragType = fl[j]->dragType;
+//                   magfType = fl[j]->magfType;
+//                   gravDegree = fl[j]->gravDegree;
+//                   gravOrder = fl[j]->gravOrder;
+//                   magfDegree = fl[j]->magfDegree;
+//                   magfOrder = fl[j]->magfOrder;
+//                   potFilename = fl[j]->potFilename;
+//                   pmf = fl[j]->pmf;
+//                   gravf = fl[j]->gravf;
+//                   dragf = fl[j]->dragf;
+//                   srpf = fl[j]->srpf;
+//                   useSrp = fl[j]->useSrp;
+                  
+//                   currentBodyId = FindBody(bodyName,gravType,dragType,magfType);
+
+//                   forceList[currentBodyId]->gravDegree = gravDegree;
+//                   forceList[currentBodyId]->gravOrder = gravOrder;
+//                   forceList[currentBodyId]->magfDegree = magfDegree;
+//                   forceList[currentBodyId]->magfOrder = magfOrder;
+//                   forceList[currentBodyId]->potFilename = potFilename;
+//                   forceList[currentBodyId]->pmf = pmf;
+//                   forceList[currentBodyId]->gravf = gravf;
+//                   forceList[currentBodyId]->dragf = dragf;
+//                   forceList[currentBodyId]->srpf = srpf;
+//                   forceList[currentBodyId]->useSrp = useSrp;
+                  
+//                   primaryBodiesArray.Add(bodyName.c_str());
+//                }            
+//             }            
+//          }
+//       }
       
       //----------------------------------------------
       // Append body names to combobox and text field
@@ -1596,12 +1630,13 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
          bodyComboBox->Append(forceList[i]->bodyName.c_str());
          bodyComboBox->SetValue(forceList[i]->bodyName.c_str());
       }
-      OnBodySelection(event);    
-
+      
+      OnBodySelection(event);
+      
       theApplyButton->Enable(true);
       isForceModelChanged = true;
       isGravTextChanged = true;
-   }
+      //}
 }
 
 //------------------------------------------------------------------------------
@@ -1684,8 +1719,8 @@ void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
          JacchiaRobertsDialog dragDlg(this, dragForce);
          dragDlg.ShowModal();
       }
-
-      theApplyButton->Enable(true); //loj: do we need this here?
+      
+      theApplyButton->Enable(true);
    }
 }
 
@@ -1713,7 +1748,7 @@ void PropagationConfigPanel::OnPMEditButton(wxCommandEvent &event)
 {  
    CelesBodySelectDialog bodyDlg(this, secondaryBodiesArray, primaryBodiesArray);
    bodyDlg.ShowModal();
-        
+   
    if (bodyDlg.IsBodySelected())
    {
       wxArrayString &names = bodyDlg.GetBodyNames();
@@ -1730,19 +1765,19 @@ void PropagationConfigPanel::OnPMEditButton(wxCommandEvent &event)
       std::vector<ForceType*> fl;
       
       std::string bodyName;
-      std::string gravType;
-      std::string dragType;
-      std::string magfType;
-      wxString gravDegree;
-      wxString gravOrder;
-      wxString magfDegree;
-      wxString magfOrder;
-      std::string potFilename;
-      PointMassForce *pmf;
-      GravityField *gravf;
-      DragForce *dragf;
-      SolarRadiationPressure *srpf;
-      bool useSrp;
+//       std::string gravType;
+//       std::string dragType;
+//       std::string magfType;
+//       wxString gravDegree;
+//       wxString gravOrder;
+//       wxString magfDegree;
+//       wxString magfOrder;
+//       std::string potFilename;
+//       PointMassForce *pmf;
+//       GravityField *gravf;
+//       DragForce *dragf;
+//       SolarRadiationPressure *srpf;
+//       bool useSrp;
 
       fl = pmForceList;      
       pmForceList.clear();
@@ -1755,35 +1790,39 @@ void PropagationConfigPanel::OnPMEditButton(wxCommandEvent &event)
       for (Integer i=0; i < (Integer)names.GetCount(); i++)
       {
          bodyName = names[i].c_str();
-         gravType = gravModelArray[NONE_GM];
-         dragType = dragModelArray[NONE_DM];
-         magfType = magfModelArray[NONE_MM];   
-         gravDegree = "4";
-         gravOrder = "4";
-         magfDegree = "0";
-         magfOrder = "0";
-         potFilename = "";
-         pmf = NULL;
-         gravf = NULL;
-         dragf = NULL;
-         srpf = NULL;
-         useSrp = false;       
+         pmForceList.push_back(new ForceType(bodyName));
 
-         pmForceList.push_back(new ForceType(bodyName, gravType, dragType, magfType));
-         pmForceList[i]->gravDegree = gravDegree;
-         pmForceList[i]->gravOrder = gravOrder;
-         pmForceList[i]->magfDegree = magfDegree;
-         pmForceList[i]->magfOrder = magfOrder;
-         pmForceList[i]->potFilename = potFilename;
-         pmForceList[i]->pmf = pmf;
-         pmForceList[i]->gravf = gravf;
-         pmForceList[i]->dragf = dragf;
-         pmForceList[i]->srpf = srpf;
-         pmForceList[i]->useSrp = useSrp;
-            
+         //loj: 7/7/05 The ForceType() constructor sets defaults
+//          gravType = gravModelArray[NONE_GM];
+//          dragType = dragModelArray[NONE_DM];
+//          magfType = magfModelArray[NONE_MM];   
+//          gravDegree = "4";
+//          gravOrder = "4";
+//          magfDegree = "0";
+//          magfOrder = "0";
+//          potFilename = "";
+//          pmf = NULL;
+//          gravf = NULL;
+//          dragf = NULL;
+//          srpf = NULL;
+//          useSrp = false;       
+         
+//          pmForceList.push_back(new ForceType(bodyName, gravType, dragType, magfType));
+//          pmForceList[i]->gravDegree = gravDegree;
+//          pmForceList[i]->gravOrder = gravOrder;
+//          pmForceList[i]->magfDegree = magfDegree;
+//          pmForceList[i]->magfOrder = magfOrder;
+//          pmForceList[i]->potFilename = potFilename;
+//          pmForceList[i]->pmf = pmf;
+//          pmForceList[i]->gravf = gravf;
+//          pmForceList[i]->dragf = dragf;
+//          pmForceList[i]->srpf = srpf;
+//          pmForceList[i]->useSrp = useSrp;
+         
          secondaryBodiesArray.Add(bodyName.c_str());
          pmEditTextCtrl->AppendText(names[i] + " ");
-      } 
+      }
+      
       theApplyButton->Enable(true);
       isForceModelChanged = true;
    }

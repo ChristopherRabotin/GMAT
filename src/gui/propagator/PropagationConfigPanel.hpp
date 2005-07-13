@@ -96,16 +96,32 @@ private:
       SolarRadiationPressure *srpf;
       bool useSrp;
       
-      ForceType(const std::string &body, const std::string &grav,
-                const std::string &drag, const std::string &mag)
+      ForceType(const std::string &body, const std::string &grav = "None",
+                const std::string &drag = "None", const std::string &mag = "None")
          {
             bodyName = body; gravType = grav; dragType = drag; magfType = mag;
-            gravDegree = "4"; gravOrder = "4"; magfDegree = "0"; magfOrder = "0";
+            //gravDegree = "4"; gravOrder = "4"; magfDegree = "0"; magfOrder = "0";
+            gravDegree = "0"; gravOrder = "0"; magfDegree = "0"; magfOrder = "0";
             potFilename = ""; pmf = NULL; gravf = NULL; dragf = NULL; srpf = NULL;
             useSrp = false;
          }
+      
+      ForceType& operator= (const ForceType& right) //loj: 7/7/05 Added
+         {
+            if (this == &right)
+               return *this;
+            
+            bodyName = right.bodyName; gravType = right.gravType;
+            dragType = right.dragType; magfType = right.magfType;
+            gravDegree = right.gravDegree; gravOrder = right.gravOrder;
+            magfDegree = right.magfDegree; magfOrder = right.magfOrder;
+            potFilename = right.potFilename; pmf = right.pmf;
+            gravf = right.gravf; dragf = right.dragf; srpf = right.srpf;
+            useSrp = right.useSrp;
+            return *this;
+         }
    };
-    
+   
    wxStaticText *integratorStaticText;
    wxStaticText *setting1StaticText;
    wxStaticText *setting2StaticText;
@@ -138,28 +154,28 @@ private:
    wxTextCtrl *magneticDegreeTextCtrl;
    wxTextCtrl *magneticOrderTextCtrl;
    wxTextCtrl *pmEditTextCtrl;
-
+   
    wxComboBox *integratorComboBox;
    wxComboBox *bodyComboBox;
    wxComboBox *atmosComboBox;
    wxComboBox *gravComboBox;
    wxComboBox *magfComboBox;
    wxComboBox *originComboBox;
-
+   
    wxCheckBox *srpCheckBox;
-
+   
    wxButton *bodyButton;
    wxButton *searchGravityButton;
    wxButton *dragSetupButton;
    wxButton *searchMagneticButton;
    wxButton *editPmfButton;
    wxButton *editSrpButton;
-    
+   
    wxString integratorString;
    wxString primaryBodyString;
    wxString gravityFieldString;
    wxString atmosModelString;
-
+   
    std::string propSetupName;
    std::string newPropName;
    std::string currentBodyName;
@@ -198,18 +214,17 @@ private:
    std::vector<PointMassForce *>  thePMForces;
    std::vector<ForceType*> forceList;
    std::vector<ForceType*> pmForceList;
-
+   
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
-   //loj: 2/27/04 commented out
-   //virtual void OnHelp();
-   //virtual void OnScript();
-      
+   
    // Layout & data handling methods
    Integer FindBody(const std::string &bodyName,
-                    const std::string &gravType = "Point Mass",
+                    //loj: 7/7/05 We no longer have Pont Mass
+                    //const std::string &gravType = "Point Mass", 
+                    const std::string &gravType = "None",
                     const std::string &dragType = "None",
                     const std::string &magfType = "None");
    void Initialize();
@@ -223,21 +238,22 @@ private:
    void DisplayMagneticFieldData();
    void DisplaySRPData();
    bool ParseGravityFile(std::string line);
-    
+   
    // Text control event method
    void OnIntegratorTextUpdate(wxCommandEvent &event);
    void OnGravityTextUpdate(wxCommandEvent& event);
    void OnMagneticTextUpdate(wxCommandEvent& event);
-    
+   
    // Checkbox event method
    void OnSRPCheckBoxChange(wxCommandEvent &event);
-    
+   
    // Combobox event method
    void OnIntegratorSelection(wxCommandEvent &event);
+   void OnBodyComboBoxChange(wxCommandEvent &event);
    void OnBodySelection(wxCommandEvent &event);
    void OnGravitySelection(wxCommandEvent &event);
    void OnAtmosphereSelection(wxCommandEvent &event);
-    
+   
    // Button event methods
    void OnAddBodyButton(wxCommandEvent &event);
    void OnGravSearchButton(wxCommandEvent &event);
@@ -245,7 +261,7 @@ private:
    void OnMagSearchButton(wxCommandEvent &event);
    void OnPMEditButton(wxCommandEvent &event);
    void OnSRPEditButton(wxCommandEvent &event);
-
+   
    // for Debug
    void ShowPropData(const std::string &header);
    void ShowForceList(const std::string &header);
