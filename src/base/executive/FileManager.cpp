@@ -22,6 +22,7 @@
 #include "GmatBaseException.hpp"
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 
 //#define DEBUG_FILE_MANAGER 1
 
@@ -29,74 +30,42 @@
 // static data
 //---------------------------------
 const std::string
-FileManager::PARAMETER_TEXT[FileManagerParamCount] =
+FileManager::FILE_TYPE_STRING[FileTypeCount] =
 {
    // file path
-   "OUTPUT_FILE_PATH",
-   "SLP_FILE_PATH",
-   "DE_FILE_PATH",
-   "EARTH_POT_FILE_PATH",
-   "TEXTURE_FILE_PATH",
-   "PLANETARY_COEFF_FILE_PATH",
-   "TIME_FILE_PATH",
+   "SPLASH_PATH",
+   "OUTPUT_PATH",
+   "SLP_PATH",
+   "DE_PATH",
+   "EARTH_POT_PATH",
+   "PLANETARY_COEFF_PATH",
+   "TIME_PATH",
+   "TEXTURE_PATH",
    
    // file name
+   "SPLASH_FILE",
    "TIME_COEFF_FILE",
    "SLP_FILE",
    "DE200_FILE",
    "DE202_FILE",
    "DE405_FILE",
-   "EARTH_JGM2_FILE",
-   "EARTH_JGM3_FILE",
+   "JGM2_FILE",
+   "JGM3_FILE",
    "EOP_FILE",
    "PLANETARY_COEFF_FILE",
    "NUTATION_COEFF_FILE",
    "LEAP_SECS_FILE",
-   
-   "SUN_TEXTURE_FILE",
-   "MERCURY_TEXTURE_FILE",
-   "VENUS_TEXTURE_FILE",
-   "EARTH_TEXTURE_FILE",
-   "MARS_TEXTURE_FILE",
-   "JUPITER_TEXTURE_FILE",
-   "SATURN_TEXTURE_FILE",
-   "URANUS_TEXTURE_FILE",
-   "NEPTUNE_TEXTURE_FILE",
-   "PLUTO_TEXTURE_FILE",
-   "MOON_TEXTURE_FILE",
-
-   // full file name
-   "FULL_TIME_COEFF_FILE",
-   "FULL_SLP_FILE",
-   "FULL_DE200_FILE",
-   "FULL_DE202_FILE",
-   "FULL_DE405_FILE",
-   "FULL_EARTH_JGM2_FILE",
-   "FULL_EARTH_JGM3_FILE",
-   "FULL_EOP_FILE",
-   "FULL_PLANETARY_COEFF_FILE",
-   "FULL_NUTATION_COEFF_FILE",
-   "FULL_LEAP_SECS_FILE",
-   
-   "FULL_SUN_TEXTURE_FILE",
-   "FULL_MERCURY_TEXTURE_FILE",
-   "FULL_VENUS_TEXTURE_FILE",
-   "FULL_EARTH_TEXTURE_FILE",
-   "FULL_MARS_TEXTURE_FILE",
-   "FULL_JUPITER_TEXTURE_FILE",
-   "FULL_SATURN_TEXTURE_FILE",
-   "FULL_URANUS_TEXTURE_FILE",
-   "FULL_NEPTUNE_TEXTURE_FILE",
-   "FULL_PLUTO_TEXTURE_FILE",
-   "FULL_MOON_TEXTURE_FILE",
 };
 
 FileManager* FileManager::theInstance = NULL;
+const std::string FileManager::VERSION_DATE = "2005-07-13";
+
+using namespace std;
 
 //---------------------------------
 // public methods
 //---------------------------------
-   
+
 //------------------------------------------------------------------------------
 // FileManager* Instance()
 //------------------------------------------------------------------------------
@@ -107,355 +76,480 @@ FileManager* FileManager::Instance()
    return theInstance;
 }
 
+
+//------------------------------------------------------------------------------
+// ~FileManager()
+//------------------------------------------------------------------------------
+FileManager::~FileManager()
+{
+   for (std::map<std::string, FileInfo*>::iterator pos = mFileMap.begin();
+        pos != mFileMap.end(); ++pos)
+   {
+      if (pos->second)
+      {
+         #if DEBUG_FILE_MANAGER
+         MessageInterface::ShowMessage
+            ("FileManager::~FileManager deleting %s\n", pos->first.c_str());
+         #endif
+         
+         delete pos->second;
+      }
+   }
+}
+
+
 //------------------------------------------------------------------------------
 // void ReadStartupFile(const std::string &fileName = "")
 //------------------------------------------------------------------------------
+/**
+ * Reads GMAT startup file.
+ *
+ * @param <fileName> startup file name.
+ *
+ * @exception thrown if file not found, or VERSION date on the startup up file
+ *    does not exist or does not match with VERSION_DATE.
+ */
+//------------------------------------------------------------------------------
 void FileManager::ReadStartupFile(const std::string &fileName)
 {
-   char line[200] = "";
-    
-   if (fileName != "")
-      theStartupFileName = fileName;
-
-#ifdef DEBUG_FILE_MANAGER
-   MessageInterface::ShowMessage("FileManager::ReadStartupFile() reading:%s\n",
-                                 theStartupFileName.c_str());
-#endif
+   char line[MAX_LENGTH] = "";
+   bool correctVersionFound = false;
    
-   std::ifstream instream(theStartupFileName.c_str());
-
-   if (!instream)
+   if (fileName != "")
+      mStartupFileName = fileName;
+   
+   #if DEBUG_FILE_MANAGER
+   MessageInterface::ShowMessage("FileManager::ReadStartupFile() reading:%s\n",
+                                 mStartupFileName.c_str());
+   #endif
+   
+   std::ifstream mInStream(mStartupFileName.c_str());
+   
+   if (!mInStream)
       throw GmatBaseException
          ("FileManager::ReadStartupFile() cannot open:" + fileName);
-
-   while (!instream.eof())
+   
+   while (!mInStream.eof())
    {
       line[0] = '\0';
-      instream.getline(line, 200);
+      mInStream.getline(line, 512);
       
-#ifdef DEBUG_FILE_MANAGER
-      MessageInterface::ShowMessage("FileManager::ReadStartupFile() line=%s\n",
-                                    line);
-#endif
-
+      #if DEBUG_FILE_MANAGER
+      MessageInterface::ShowMessage("line=%s\n", line);
+      #endif
+      
       if (line[0] == '\0')
          break;
       if (line[0] == '#')
          continue;
-        
+      
       std::string type, equal, name;
       std::stringstream ss("");
-        
+      
       ss << line;
       ss >> type >> equal;
-        
+      
       if (equal != "=")
       {
-         instream.close();
-         throw GmatBaseException("FileManager::ReadStartupFile() expecting =");
+         mInStream.close();
+         throw GmatBaseException
+            ("FileManager::ReadStartupFile() expecting '=' at line:\n" +
+             std::string(line) + "\n");
       }
-        
+      
       ss >> name;
-            
-#ifdef DEBUG_FILE_MANAGER
-      MessageInterface::ShowMessage("FileManager::ReadStartupFile() type=%s, "
-                                    "name=%s\n", type.c_str(), name.c_str());
-#endif
       
-      // find string match
+      #if DEBUG_FILE_MANAGER
+      MessageInterface::ShowMessage("type=%s, name=%s\n", type.c_str(), name.c_str());
+      #endif
+      
+      if (type == "VERSION")
+      {
+         // check for version date
+         if (name == VERSION_DATE)
+         {
+            correctVersionFound = true;
+            continue;
+         }
+         else
+         {
+            throw GmatBaseException
+               ("FileManager::ReadStartupFile() the VERSION is incorrect.\n"
+                "The version date it can handle is " + VERSION_DATE + "\n");
+         }
+      }
+      
+      if (correctVersionFound)
+         AddFileType(type, name);
+      else
+         throw GmatBaseException
+            ("FileManager::ReadStartupFile() the VERSION not found.\n"
+             "It no longer can read old startup file.\n");
+      
+   } // end While()
+   
+   mInStream.close();
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteStartupFile(const std::string &fileName = "")
+//------------------------------------------------------------------------------
+/**
+ * Reads GMAT startup file.
+ *
+ * @param <fileName> startup file name.
+ */
+//------------------------------------------------------------------------------
+void FileManager::WriteStartupFile(const std::string &fileName)
+{
+   std::string outFileName = "gmat_startup_file.new.txt";
+   
+   if (fileName != "")
+      outFileName = fileName;
+   
+   #if DEBUG_FILE_MANAGER
+   MessageInterface::ShowMessage
+      ("FileManager::WriteStartupFile() outFileName = %s\n", outFileName.c_str());
+   #endif
+   
+   std::ofstream outStream(outFileName.c_str());
+   
+   if (!outStream)
+      throw GmatBaseException
+         ("FileManager::WriteStartupFile() cannot open:" + fileName);
+
+   //---------------------------------------------
+   // write header
+   //---------------------------------------------
+   outStream << "VERSION = " << VERSION_DATE << "\n";
+   outStream << "#-------------------------------------------------------------"
+      "------------------\n";
+   outStream << "# ! Do not remove or change VERSION date, "
+      "it won't work otherwise!!\n";
+   outStream << "# Only the new FileManager, version after 2005/07/06, "
+      "reconizes this new format.\n";
+   outStream << "#-------------------------------------------------------------"
+      "------------------\n";
+   
+   outStream.setf(std::ios::left);
+   
+   //---------------------------------------------
+   // write paths
+   //---------------------------------------------
+   for (std::map<std::string, std::string>::iterator pos = mPathMap.begin();
+        pos != mPathMap.end(); ++pos)
+   {
+      outStream << setw(20) << pos->first << " = " << pos->second  << "\n";
+   }
+   
+   outStream << "#-------------------------------------------------------------"
+      "--------\n";
+   
+   //---------------------------------------------
+   // write files
+   //---------------------------------------------
+   for (std::map<std::string, FileInfo*>::iterator pos = mFileMap.begin();
+        pos != mFileMap.end(); ++pos)
+   {
+      if (pos->second)
+      {
+         outStream << setw(20) << pos->first << " = " << pos->second->mPath << "/"
+                   << pos->second->mFile << "\n";
+      }
+   }
+   
+   outStream << "#-------------------------------------------------------------"
+      "--------\n";
+   outStream << "\n";
+   outStream.close();
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetPathname(const FileType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrives file pathname for the type. 
+ *
+ * @param <type> enum file type of which pathname to be returned.
+ *
+ * @return file pathname if path type found.
+ * @exception thrown if enum type is out of bounds.
+ */
+//------------------------------------------------------------------------------
+std::string FileManager::GetPathname(const FileType type)
+{
+   if (type >=0 && type < FileTypeCount)
+      return GetPathname(FILE_TYPE_STRING[type]);
+   
+   std::stringstream ss("");
+   ss << "FileManager::GetPathname() enum type: " << type
+      << " is out of bounds\n";
+   
+   throw GmatBaseException(ss.str());
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetPathname(const std::string &typeName)
+//------------------------------------------------------------------------------
+/**
+ * Retrives file pathname for the type name.
+ *
+ * @param <typeName> file type name of which pathname to be returned.
+ *
+ * @return pathname if type found.
+ * @exception thrown if type cannot be found.
+ */
+//------------------------------------------------------------------------------
+std::string FileManager::GetPathname(const std::string &typeName)
+{
+   if (mFileMap.find(typeName) != mFileMap.end())
+      return mPathMap[mFileMap[typeName]->mPath];
+   
+   //MessageInterface::ShowMessage
+   //   ("FileManager::GetPathname() file type: %s is unknown\n", typeName.c_str());
+   
+   //return "UNKNOWN_FILE_TYPE";
+   
+   throw GmatBaseException("FileManager::GetPathname() file type: " + typeName +
+                           " is unknown\n");
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetFilename(const FileType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrives filename for the type. 
+ *
+ * @param <type> enum file type of which filename to be returned.
+ *
+ * @return file filename if file type found
+ * @exception thrown if enum type is out of bounds
+ */
+//------------------------------------------------------------------------------
+std::string FileManager::GetFilename(const FileType type)
+{
+   if (type >=0 && type < FileTypeCount)
+      return GetFilename(FILE_TYPE_STRING[type]);
+   
+   std::stringstream ss("");
+   ss << "FileManager::GetFilename() enum type: " << type
+      << " is out of bounds\n";
+   
+   throw GmatBaseException(ss.str());
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetFilename(const std::string &typeName)
+//------------------------------------------------------------------------------
+/**
+ * Retrives filename for the type name.
+ *
+ * @param <type> file type name of which filename to be returned.
+ *
+ * @return file filename if file type found
+ * @exception thrown if type cannot be found.
+ */
+//------------------------------------------------------------------------------
+std::string FileManager::GetFilename(const std::string &typeName)
+{
+   if (mFileMap.find(typeName) != mFileMap.end())
+      return mFileMap[typeName]->mFile;
+
+   //MessageInterface::ShowMessage
+   //   ("FileManager::GetFilename() file type: %s is unknown\n", typeName.c_str());
+   
+   //return "UNKNOWN_FILE_TYPE";
+   
+   throw GmatBaseException("FileManager::GetFilename() file type: " + typeName +
+                           " is unknown\n");
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetFullPathname(const FileType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrives full pathname for the type.
+ *
+ * @param <type> file type of which filename to be returned.
+ *
+ * @return file pathname if file type found
+ * @exception thrown if enum type is out of bounds
+ */
+//------------------------------------------------------------------------------
+std::string FileManager::GetFullPathname(const FileType type)
+{
+   if (type >=0 && type < FileTypeCount)
+      return GetFullPathname(FILE_TYPE_STRING[type]);
+   
+   std::stringstream ss("");
+   ss << "FileManager::GetFullPathname() enum type: " << type <<
+      " is out of bounds\n";
+   
+   throw GmatBaseException(ss.str());
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetFullPathname(const std::string &typeName)
+//------------------------------------------------------------------------------
+/**
+ * Retrives full pathname for the type name.
+ *
+ * @param <type> file type name of which filename to be returned.
+ *
+ * @return file pathname if file type name found
+ * @exception thrown if type cannot be found.
+ */
+//------------------------------------------------------------------------------
+std::string FileManager::GetFullPathname(const std::string &typeName)
+{
+   if (mFileMap.find(typeName) != mFileMap.end())
+   {
+      std::string path = GetPathname(typeName);
+      return path + mFileMap[typeName]->mFile;
+   }
+   
+   //MessageInterface::ShowMessage
+   //   ("FileManager::GetFullPathname() file type: %s is unknown\n",
+   //    typeName.c_str());
+   
+   //return "UNKNOWN_FILE_TYPE";
+   
+   throw GmatBaseException("FileManager::GetFullPathname() file type: " +
+                           typeName + " is unknown\n");
+}
+
+
+//---------------------------------
+// private methods
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// void AddFileType(const std::string &typeName, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Adds file type, path, name to the list. If typeName ends with _PATH, it is
+ * added to path map. If typeName ends with _FILE, it is added to file map, an
+ * exception is throw otherwise.
+ *
+ * @param <type> file type
+ * @param <name> file path or name
+ *
+ * @excepton thrown if typeName does not end with _PATH or _FILE
+ */
+//------------------------------------------------------------------------------
+void FileManager::AddFileType(const std::string &type, const std::string &name)
+{
+   #if DEBUG_FILE_MANAGER
+   MessageInterface::ShowMessage
+      ("FileManager::AddFileType() type=%s, name=%s\n", type.c_str(), name.c_str());
+   #endif
+   
+   if (type.find("_PATH") != type.npos)
+   {
       // file path
-      if (type == "OUTPUT_FILE_PATH")
-         theFileList[OUTPUT_FILE_PATH] = name;
-      else if (type == "SLP_FILE_PATH")
-         theFileList[SLP_FILE_PATH] = name;
-      else if (type == "DE_FILE_PATH")
-         theFileList[DE_FILE_PATH] = name;
-      else if (type == "EARTH_POT_FILE_PATH")
-         theFileList[EARTH_POT_FILE_PATH] = name;
-      else if (type == "TEXTURE_FILE_PATH")
-         theFileList[TEXTURE_FILE_PATH] = name;
-      else if (type == "PLANETARY_COEFF_FILE_PATH")
-         theFileList[PLANETARY_COEFF_FILE_PATH] = name;
-      else if (type == "TIME_FILE_PATH")
-         theFileList[TIME_FILE_PATH] = name;
-
-      // file name
-      else if (type == "TIME_COEFF_FILE")
-         theFileList[TIME_COEFF_FILE] = name;
-      else if (type == "SLP_FILE")
-         theFileList[SLP_FILE] = name;
-      else if (type == "DE200_FILE")
-         theFileList[DE200_FILE] = name;
-      else if (type == "DE202_FILE")
-         theFileList[DE202_FILE] = name;
-      else if (type == "DE405_FILE")
-         theFileList[DE405_FILE] = name;
-      else if (type == "DE405_FILE")
-         theFileList[DE405_FILE] = name;
-
-      // potential field file
-      else if (type == "EARTH_JGM2_FILE")
-         theFileList[EARTH_JGM2_FILE] = name;
-      else if (type == "EARTH_JGM3_FILE")
-         theFileList[EARTH_JGM3_FILE] = name;
-
-      // planetary coeff. file
-      else if (type == "EOP_FILE")
-         theFileList[EOP_FILE] = name;
-      else if (type == "PLANETARY_COEFF_FILE")
-         theFileList[PLANETARY_COEFF_FILE] = name;
-      else if (type == "NUTATION_COEFF_FILE")
-         theFileList[NUTATION_COEFF_FILE] = name;
-
-      // time file
-      else if (type == "LEAP_SECS_FILE")
-         theFileList[LEAP_SECS_FILE] = name;
+      mPathMap[type] = name;
+   }
+   else if (type.find("_FILE") != type.npos)
+   {
+      std::string pathName;
+      std::string fileName;
       
-      // texture file
-      else if (type == "SUN_TEXTURE_FILE")
-         theFileList[SUN_TEXTURE_FILE] = name;
-      else if (type == "MERCURY_TEXTURE_FILE")
-         theFileList[MERCURY_TEXTURE_FILE] = name;
-      else if (type == "VENUS_TEXTURE_FILE")
-         theFileList[VENUS_TEXTURE_FILE] = name;
-      else if (type == "EARTH_TEXTURE_FILE")
-         theFileList[EARTH_TEXTURE_FILE] = name;
-      else if (type == "MARS_TEXTURE_FILE")
-         theFileList[MARS_TEXTURE_FILE] = name;
-      else if (type == "JUPITER_TEXTURE_FILE")
-         theFileList[JUPITER_TEXTURE_FILE] = name;
-      else if (type == "SATURN_TEXTURE_FILE")
-         theFileList[SATURN_TEXTURE_FILE] = name;
-      else if (type == "URANUS_TEXTURE_FILE")
-         theFileList[URANUS_TEXTURE_FILE] = name;
-      else if (type == "NEPTUNE_TEXTURE_FILE")
-         theFileList[NEPTUNE_TEXTURE_FILE] = name;
-      else if (type == "PLUTO_TEXTURE_FILE")
-         theFileList[PLUTO_TEXTURE_FILE] = name;
-      else if (type == "MOON_TEXTURE_FILE")
-         theFileList[MOON_TEXTURE_FILE] = name;
+      // file name
+      std::string::size_type pos = name.find("/");
+      if (pos != name.npos)
+      {
+         std::string pathName = name.substr(0, pos);
+         std::string fileName = name.substr(pos+1, name.npos);
+         mFileMap[type] = new FileInfo(pathName, fileName);
+      }
       else
       {
-         instream.close();
-         throw GmatBaseException("FileManager::ReadStartupFile() Invalid file type:" +
-                                 type);
+         //loj: Should we add current path?
+         std::string pathName = "CURRENT_PATH";
+         mPathMap[pathName] = "./";
+         std::string fileName = name;
+         mFileMap[type] = new FileInfo(pathName, fileName);
+         
+         MessageInterface::ShowMessage
+            ("FileManager::AddFileType() 'PATH/' not found in line:\n% = % \n"
+             "So adding CURRENT_PATH = ./\n", type.c_str(), name.c_str());
+         
+         //loj: Should we just throw an exception?
+         //mInStream.close();
+         //throw GmatBaseException
+         //   ("FileManager::AddFileType() expecting 'PATH/' in line:\n" +
+         //    type + " = " + name);
       }
    }
-
-   // create full file name
-   theFileList[FULL_TIME_COEFF_FILE]
-      = theFileList[SLP_FILE_PATH] + theFileList[TIME_COEFF_FILE];
-    
-   theFileList[FULL_SLP_FILE]
-      = theFileList[SLP_FILE_PATH] + theFileList[SLP_FILE];
-    
-   theFileList[FULL_DE200_FILE]
-      = theFileList[DE_FILE_PATH] + theFileList[DE200_FILE];
-    
-   theFileList[FULL_DE202_FILE]
-      = theFileList[DE_FILE_PATH] + theFileList[DE202_FILE];
-    
-   theFileList[FULL_DE405_FILE]
-      = theFileList[DE_FILE_PATH] + theFileList[DE405_FILE];
-
-   // planetary gravity files
-   theFileList[FULL_EARTH_JGM2_FILE]
-      = theFileList[EARTH_POT_FILE_PATH] + theFileList[EARTH_JGM2_FILE];
-    
-   theFileList[FULL_EARTH_JGM3_FILE]
-      = theFileList[EARTH_POT_FILE_PATH] + theFileList[EARTH_JGM3_FILE];
-   
-   // planetary coeff. files
-   theFileList[FULL_EOP_FILE]
-      = theFileList[PLANETARY_COEFF_FILE_PATH] + theFileList[EOP_FILE];
-   
-   theFileList[FULL_PLANETARY_COEFF_FILE]
-      = theFileList[PLANETARY_COEFF_FILE_PATH] + theFileList[PLANETARY_COEFF_FILE];
-   
-   theFileList[FULL_NUTATION_COEFF_FILE]
-      = theFileList[PLANETARY_COEFF_FILE_PATH] + theFileList[NUTATION_COEFF_FILE];
-   
-   theFileList[FULL_LEAP_SECS_FILE]
-      = theFileList[TIME_FILE_PATH] + theFileList[LEAP_SECS_FILE];
-   
-   // texture files
-   theFileList[FULL_SUN_TEXTURE_FILE]
-      = theFileList[TEXTURE_FILE_PATH] + theFileList[SUN_TEXTURE_FILE];
-   
-   theFileList[FULL_MERCURY_TEXTURE_FILE]
-      = theFileList[TEXTURE_FILE_PATH] + theFileList[MERCURY_TEXTURE_FILE];
-   
-   theFileList[FULL_VENUS_TEXTURE_FILE]
-      = theFileList[TEXTURE_FILE_PATH] + theFileList[VENUS_TEXTURE_FILE];
-
-   theFileList[FULL_EARTH_TEXTURE_FILE]
-      = theFileList[TEXTURE_FILE_PATH] + theFileList[EARTH_TEXTURE_FILE];
-   
-   theFileList[FULL_MARS_TEXTURE_FILE]
-      = theFileList[TEXTURE_FILE_PATH] + theFileList[MARS_TEXTURE_FILE];
-   
-   theFileList[FULL_JUPITER_TEXTURE_FILE]
-      = theFileList[TEXTURE_FILE_PATH] + theFileList[JUPITER_TEXTURE_FILE];
-    
-   theFileList[FULL_SATURN_TEXTURE_FILE]
-      = theFileList[TEXTURE_FILE_PATH] + theFileList[SATURN_TEXTURE_FILE];
-   
-   theFileList[FULL_URANUS_TEXTURE_FILE]
-      = theFileList[TEXTURE_FILE_PATH] + theFileList[URANUS_TEXTURE_FILE];
-   
-   theFileList[FULL_NEPTUNE_TEXTURE_FILE]
-      = theFileList[TEXTURE_FILE_PATH] + theFileList[NEPTUNE_TEXTURE_FILE];
-    
-   theFileList[FULL_PLUTO_TEXTURE_FILE]
-      = theFileList[TEXTURE_FILE_PATH] + theFileList[PLUTO_TEXTURE_FILE];
-   
-   theFileList[FULL_MOON_TEXTURE_FILE]
-      = theFileList[TEXTURE_FILE_PATH] + theFileList[MOON_TEXTURE_FILE];
-    
-   instream.close();
-}
-
-//------------------------------------------------------------------------------
-// virtual std::string GetParameterText(const Integer id) const
-//------------------------------------------------------------------------------
-std::string FileManager::GetParameterText(const Integer id) const
-{
-   if (id >= 0 && id < FileManagerParamCount)
-      return PARAMETER_TEXT[id];
    else
-      return "UNKNOWN_ID";
-    
-}
-
-//------------------------------------------------------------------------------
-// virtual Integer GetParameterID(const std::string &str) const
-//------------------------------------------------------------------------------
-Integer FileManager::GetParameterID(const std::string &str) const
-{
-   for (int i=0; i<FileManagerParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i])
-         return i;
+      throw GmatBaseException
+         ("FileManager::AddFileType() file type should have '_PATH' or '_FILE'"
+          " in:\n" + type);
    }
-   
-   return -1;
 }
 
-//------------------------------------------------------------------------------
-// virtual std::string GetStringParameter(const Integer id) const
-//------------------------------------------------------------------------------
-std::string FileManager::GetStringParameter(const Integer id) const
-{
-   if (id >= 0 && id < FileManagerParamCount)
-      return theFileList[id];
-   else
-      return "UNKNOWN_ID";
-}
-
-//------------------------------------------------------------------------------
-// virtual std::string GetStringParameter(const std::string &label) const
-//------------------------------------------------------------------------------
-std::string FileManager::GetStringParameter(const std::string &label) const
-{
-   return GetStringParameter(GetParameterID(label));
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetStringParameter(const Integer id, const std::string &value)
-//------------------------------------------------------------------------------
-bool FileManager::SetStringParameter(const Integer id, const std::string &value)
-{
-   if (id >= 0 && id < FileManagerParamCount)
-   {
-      theFileList[id] = value;
-      return true;
-   }
-
-   return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetStringParameter(const std::string &label,
-//                                 const std::string &value)
-//------------------------------------------------------------------------------
-bool FileManager::SetStringParameter(const std::string &label,
-                                     const std::string &value)
-{
-#ifdef DEBUG_FILE_MANAGER
-   MessageInterface::ShowMessage("FileManager::SetStringParameter() entered: "
-                                 "label = " + label + ", value = " + value + "\n");
-#endif
-   return SetStringParameter(GetParameterID(label), value);
-}
-
-//---------------------------------
-// protected methods
-//---------------------------------
 
 //------------------------------------------------------------------------------
 // FileManager()
 //------------------------------------------------------------------------------
 /*
  * Constructor
- *
- * @note It uses DOS file system as a default.  Handling of other file
- *       system (such as MAC) will be implemented later.
  */
 //------------------------------------------------------------------------------
 FileManager::FileManager()
-{    
-   
-   // create default paths and files
-   theFileList[OUTPUT_FILE_PATH] = ".\\files\\output\\";
-
-   // slp files
-   theFileList[SLP_FILE_PATH] = ".\\files\\planetary_ephem\\slp\\";
-   theFileList[TIME_COEFF_FILE] = "timecof.pc";
-   theFileList[SLP_FILE] = "mn2000.pc";
-
-   // de files
-   theFileList[DE_FILE_PATH] = ".\\files\\planetary_ephem\\de\\";
-   theFileList[DE200_FILE] = "winp1941.200";
-   theFileList[DE202_FILE] = "winp1950.202";
-   theFileList[DE405_FILE] = "winp1941.405";
-
-   // earth gravity files
-   theFileList[EARTH_POT_FILE_PATH] = ".\\files\\gravity\\earth\\";
-   theFileList[EARTH_JGM2_FILE] = "JGM2.grv";
-   theFileList[EARTH_JGM3_FILE] = "JGM3.grv";
-
-   // planetary coeff. fiels
-   theFileList[PLANETARY_COEFF_FILE_PATH] = ".\\files\\planetary_coeff\\";
-   theFileList[EOP_FILE] = "eopc04.62-now";
-   theFileList[PLANETARY_COEFF_FILE] = "NUT85.DAT";
-   theFileList[NUTATION_COEFF_FILE] = "NUTATION.DAT";
-
-   // time files
-   theFileList[TIME_FILE_PATH] = ".\\files\\time\\";
-   theFileList[LEAP_SECS_FILE] = "tai-utc.dat";
-   
-   // texture files
-   theFileList[TEXTURE_FILE_PATH] = ".\\files\\plot\\texture\\";
-   theFileList[SUN_TEXTURE_FILE] = "sun-0512.jpg";
-   theFileList[MERCURY_TEXTURE_FILE] = "mercury-0512.jpg";
-   theFileList[VENUS_TEXTURE_FILE] = "venus-0512.jpg";
-   theFileList[EARTH_TEXTURE_FILE] = "earth-0512.jpg";
-   theFileList[MARS_TEXTURE_FILE] = "mars-0512.jpg";
-   theFileList[JUPITER_TEXTURE_FILE] = "jupiter-0512.jpg";
-   theFileList[SATURN_TEXTURE_FILE] = "saturn-0512.jpg";
-   theFileList[URANUS_TEXTURE_FILE] = "uranus-0512.jpg";
-   theFileList[NEPTUNE_TEXTURE_FILE] = "neptune-0512.jpg";
-   theFileList[PLUTO_TEXTURE_FILE] = "pluto-0512.jpg";
-   theFileList[MOON_TEXTURE_FILE] = "moon-0512.jpg";
-
-   theStartupFileName = "gmat_startup_file.txt";
-   
-}
-
-//------------------------------------------------------------------------------
-// ~FileManager(void)
-//------------------------------------------------------------------------------
-FileManager::~FileManager(void)
 {
+   //loj: Should we create defaults?
+   //#define FM_CREATE_DEFAULT
+   
+#ifdef FM_CREATE_DEFAULT
+   
+   //-------------------------------------------------------
+   // create default paths and files
+   //-------------------------------------------------------
+   // output file path
+   AddFileType("OUTPUT_PATH", "./files/output/");
+   
+   // texture file path
+   AddFileType("TEXTURE_PATH", "./files/plot/texture/");
+   
+   // slp files
+   AddFileType("SLP_PATH", "./files/planetary_ephem/slp/");
+   AddFileType("SLP_FILE", "SLP_PATH/mn2000.pc");
+   AddFileType("SLP_TIME_COEFF_FILE", "SLP_PATH/timecof.pc");
+   
+   // de files
+   AddFileType("DE_PATH", "./files/planetary_ephem/de/");
+   AddFileType("DE200_FILE", "DE_PATH/winp1941.200");
+   AddFileType("DE202_FILE", "DE_PATH/winp1950.202");
+   AddFileType("DE405_FILE", "DE_PATH/winp1941.405");
+   
+   // earth gravity files
+   AddFileType("EARTH_POT_PATH", "./files/gravity/earth/");
+   AddFileType("JGM2_FILE", "EARTH_POT_PATH/JGM2.grv");
+   AddFileType("JGM3_FILE", "EARTH_POT_PATH/JGM3.grv");
+   
+   // planetary coeff. fiels
+   AddFileType("PLANETARY_COEFF_PATH", "./files/planetary_coeff/");
+   AddFileType("EOP_FILE", "PLANETARY_COEFF_PATH/eopc04.62-now");
+   AddFileType("PLANETARY_COEFF_FILE", "PLANETARY_COEFF_PATH/NUT85.DAT");
+   AddFileType("NUTATION_COEFF_FILE", "PLANETARY_COEFF_PATH/NUTATION.DAT");
+   
+   // time files
+   AddFileType("TIME_PATH", "./files/time/");
+   AddFileType("LEAP_SECS_FILE", "TIME_PATH/tai-utc.dat");
+   
+#endif
+   
+   mStartupFileName = "gmat_startup_file.txt";
+   
 }
+
 
