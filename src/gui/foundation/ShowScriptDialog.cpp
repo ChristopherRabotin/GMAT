@@ -55,13 +55,17 @@ ShowScriptDialog::ShowScriptDialog(wxWindow *parent, wxWindowID id,
 //------------------------------------------------------------------------------
 void ShowScriptDialog::Create()
 {
+   Integer w, h;
    wxString text = "Script not yet available for this panel";
+   // Find the height of a line of test, to use when sizing the text control
+   GetTextExtent(text, &w, &h);
+
    wxSize scriptPanelSize(500, 32);
    if (theObject != NULL) {
       text = theObject->GetGeneratingString(Gmat::SHOW_SCRIPT).c_str();
       StringArray sar = theObject->GetGeneratingStringArray(Gmat::SHOW_SCRIPT);
       Integer size = sar.size();
-      scriptPanelSize.Set(500, 32 + size * 14);
+      scriptPanelSize.Set(500, 32 + (size+1) * h);
    }
    
    theScript = new wxTextCtrl(this, -1, text, wxPoint(0,0), scriptPanelSize, 
