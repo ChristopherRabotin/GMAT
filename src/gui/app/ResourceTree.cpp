@@ -1112,7 +1112,10 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       menu.Append(POPUP_ADD_SOLVER, wxT("Add"), oMenu);
    }
    else if (strcmp(title, wxT("Universe")) == 0)
+   {
       menu.Append(POPUP_ADD_BODY, wxT("Add Body"));
+      menu.Enable(POPUP_ADD_BODY, false);
+   }
    else if (strcmp(title, wxT("Matlab")) == 0)
    {
       menu.Append(GmatMenu::MENU_TOOLS_MATLAB_OPEN, wxT("Open"));
