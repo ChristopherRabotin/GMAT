@@ -676,8 +676,8 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxStaticText( parent, ID_TEXT, wxT("Other Potential Field File:"),
                         wxDefaultPosition, wxDefaultSize, 0 );
    originStaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Propagation Origin"),
-                        wxDefaultPosition, wxDefaultSize, 0 );
+      new wxStaticText( parent, ID_TEXT, wxT("Propagation Origin"), //loj: 7/14/05 changed size
+                        wxDefaultPosition, wxSize(122,20), wxST_NO_AUTORESIZE );
    
    #if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
@@ -809,8 +809,11 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxComboBox( parent, ID_CB_MAG, wxT(magfArray[0]),
                       wxDefaultPosition, wxSize(70,-1), MagfModelCount,
                       magfArray, wxCB_DROPDOWN|wxCB_READONLY );
+   //loj: 7/14/05 Chagned to celestial body origin
+   //originComboBox  =
+   //   theGuiManager->GetCoordSysComboBox(this, ID_CB_BODY, wxSize(120,-1));
    originComboBox  =
-      theGuiManager->GetCoordSysComboBox(this, ID_CB_BODY, wxSize(120,-1));
+      theGuiManager->GetConfigBodyComboBox(this, ID_CB_BODY, wxSize(100,-1));
       
    #if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
@@ -831,17 +834,18 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    wxBoxSizer *boxSizer2 = new wxBoxSizer( wxHORIZONTAL );
    wxBoxSizer *boxSizer3 = new wxBoxSizer( wxHORIZONTAL );
    wxBoxSizer *boxSizer4 = new wxBoxSizer( wxVERTICAL );
-
+   
    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
    wxFlexGridSizer *flexGridSizer2 = new wxFlexGridSizer( 2, 0, 2 );
-        
+   
    wxStaticBox *staticBox1 = new wxStaticBox( parent, -1, wxT("Numerical Integrator") );
    wxStaticBoxSizer *staticBoxSizer1 = new wxStaticBoxSizer( staticBox1, wxVERTICAL );
    wxStaticBox *staticBox2 = new wxStaticBox( parent, -1, wxT("Environment Model") );
    wxStaticBoxSizer *staticBoxSizer2 = new wxStaticBoxSizer( staticBox2, wxVERTICAL );
    wxStaticBox *staticBox3 = new wxStaticBox( parent, -1, wxT("Primary Bodies") );
    wxStaticBoxSizer *staticBoxSizer3 = new wxStaticBoxSizer( staticBox3, wxVERTICAL );
-   wxStaticBox *staticBox4 = new wxStaticBox( parent, -1, wxT("Coordinate Systems") );
+   //wxStaticBox *staticBox4 = new wxStaticBox( parent, -1, wxT("Coordinate Systems") );
+   wxStaticBox *staticBox4 = new wxStaticBox( parent, -1, wxT("Origin") ); //loj: 7/14/05
    wxStaticBoxSizer *staticBoxSizer4 = new wxStaticBoxSizer( staticBox4, wxHORIZONTAL );
    wxStaticBox *item37 = new wxStaticBox( parent, -1, wxT("Gravity Field") );
    wxStaticBoxSizer *item36 = new wxStaticBoxSizer( item37, wxVERTICAL );
@@ -857,7 +861,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    wxStaticBoxSizer *staticBoxSizer7 = new wxStaticBoxSizer( staticBox7, wxVERTICAL );
    wxStaticBox *item65 = new wxStaticBox( parent, -1, wxT("Solar Radiation Pressure") );
    wxStaticBoxSizer *item64 = new wxStaticBoxSizer( item65, wxHORIZONTAL );
-
+   
    Integer bsize = 2; // border size
    
    // Add to wx*Sizers  
@@ -930,7 +934,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    staticBoxSizer2->Add( item64, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    
    staticBoxSizer4->Add(originStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   staticBoxSizer4->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   //staticBoxSizer4->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    staticBoxSizer4->Add(originComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    boxSizer4->Add( staticBoxSizer1, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
