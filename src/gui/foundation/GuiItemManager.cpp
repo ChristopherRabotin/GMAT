@@ -1971,23 +1971,27 @@ void GuiItemManager::UpdateSpaceObjectList()
             }
          }
          
-         //------------------------------------------
-         // Add formation to theSpaceObjectList
-         //------------------------------------------
-         for (int i=0; i<numFm; i++)
-         {
-            if (soCount < MAX_SPACECRAFT)
-            {
-               theSpaceObjectList[soCount] = wxString(fmList[i].c_str());
-               soCount++;
+         //loj: 7/14/05
+         // Do not add Formation to theSpaceObjectList until it can handle not including
+         // each other; e.g) form1 includes form2 and form2 includes form1.
+         
+//          //------------------------------------------
+//          // Add formation to theSpaceObjectList
+//          //------------------------------------------
+//          for (int i=0; i<numFm; i++)
+//          {
+//             if (soCount < MAX_SPACECRAFT)
+//             {
+//                theSpaceObjectList[soCount] = wxString(fmList[i].c_str());
+//                soCount++;
                
-               #if DEBUG_GUI_ITEM_SO > 1
-               MessageInterface::ShowMessage
-                  ("theSpaceObjectList[%d]=%s\n", soCount-1,
-                   theSpaceObjectList[soCount-1].c_str());
-               #endif
-            }
-         }
+//                #if DEBUG_GUI_ITEM_SO > 1
+//                MessageInterface::ShowMessage
+//                   ("theSpaceObjectList[%d]=%s\n", soCount-1,
+//                    theSpaceObjectList[soCount-1].c_str());
+//                #endif
+//             }
+//          }
       }
       // no formation, Save scList to theSpaceObjectList
       else
