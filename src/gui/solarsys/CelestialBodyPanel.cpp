@@ -76,7 +76,7 @@ void CelestialBodyPanel::Create()
    int bsize = 3; // border size
 
    wxStaticBox *staticBox = new wxStaticBox(this, -1, wxT(""));
-   wxStaticBox *analyticStaticBox = new wxStaticBox(this, -1, wxT("Settings for Low Fidelity Model"));
+   wxStaticBox *analyticStaticBox = new wxStaticBox(this, -1, wxT("Low Fidelity Model"));
 
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    wxBoxSizer *horizontalBoxSizer = new wxBoxSizer(wxHORIZONTAL);
