@@ -2071,7 +2071,6 @@ bool Interpreter::SetVariable(GmatBase *obj, const std::string &val,
    }
    else
       other = val;
-      
    if (cmd) {
       if (cmd->GetTypeName() != "GMAT")
          throw InterpreterException(
@@ -2082,6 +2081,7 @@ bool Interpreter::SetVariable(GmatBase *obj, const std::string &val,
       return true;
    }
 
+MessageInterface::ShowMessage("It's an assignment\n");
    return obj->SetStringParameter("Expression", other);
 }
 
@@ -2430,7 +2430,7 @@ StringArray& Interpreter::SeparateBraces(const std::string &chunk)
    static StringArray chunkArray;
    chunkArray.clear();
 
-   Integer loc, start = chunk.find("{", 0), stop = chunk.find("}", 0);
+   Integer loc, subchunkEnd, start = chunk.find("{", 0), stop = chunk.find("}", 0);
    bool parseComplete = false;
    
    if (start == (Integer)std::string::npos) 
@@ -2454,12 +2454,24 @@ StringArray& Interpreter::SeparateBraces(const std::string &chunk)
          loc = stop;
          parseComplete = true;
       }
-      token.assign(str, start, loc-start);
-      
+      // remove leading and trailing white space
+      while (str[start] == ' ')
+         ++start;
+      subchunkEnd = loc;
+      while (str[subchunkEnd-1] == ' ')
+         --subchunkEnd;
+      token.assign(str, start, subchunkEnd-start);
+
       // Prep for the next token
       if (token != "")
          chunkArray.push_back(token);
    }
+
+   #ifdef DEBUG_PARSING
+      MessageInterface::ShowMessage("%s breaks into these pieces:\n", chunk.c_str());
+      for (StringArray::iterator i = chunkArray.begin(); i != chunkArray.end(); ++i)
+         MessageInterface::ShowMessage("   '%s'\n", i->c_str());
+   #endif
       
    return chunkArray;
 }

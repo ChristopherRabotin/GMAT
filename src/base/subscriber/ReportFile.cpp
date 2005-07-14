@@ -403,6 +403,11 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
    }
    else if (id == ADD)
    {
+      #ifdef DEBUG_REPORTFILE
+         MessageInterface::ShowMessage(
+            "Adding parameter '%s' to ReportFile '%s'\n", value.c_str(),
+            instanceName.c_str());
+      #endif
       return AddVarParameter(value, mNumVarParams);
    }
    else if (id == WRITE_HEADERS)
@@ -565,6 +570,12 @@ Integer ReportFile::GetNumVarParameters()
 //------------------------------------------------------------------------------
 bool ReportFile::AddVarParameter(const std::string &paramName, Integer index)
 {
+   #ifdef DEBUG_REPORTFILE
+      MessageInterface::ShowMessage(
+         "Adding parameter '%s' to ReportFile '%s'\n", paramName.c_str(),
+         instanceName.c_str());
+   #endif
+   
    if (paramName != "" && index == mNumVarParams)
    {
       // if paramName not found, add (loj: 6/9/05 Added)
