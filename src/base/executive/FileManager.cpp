@@ -227,8 +227,8 @@ void FileManager::WriteStartupFile(const std::string &fileName)
       "------------------\n";
    outStream << "# ! Do not remove or change VERSION date, "
       "it won't work otherwise!!\n";
-   outStream << "# Only the new FileManager, version after 2005/07/06, "
-      "reconizes this new format.\n";
+   outStream << "# Only the new FileManager, version after " << VERSION_DATE <<
+      " reconizes this new format.\n";
    outStream << "#-------------------------------------------------------------"
       "------------------\n";
    
@@ -237,14 +237,17 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    //---------------------------------------------
    // write paths
    //---------------------------------------------
+   // write ROOT_PATH first
+   outStream << setw(20) << "ROOT_PATH" << " = " << mPathMap["ROOT_PATH"] << "\n";
+   
    for (std::map<std::string, std::string>::iterator pos = mPathMap.begin();
         pos != mPathMap.end(); ++pos)
    {
-      outStream << setw(20) << pos->first << " = " << pos->second  << "\n";
+      if (pos->first != "ROOT_PATH")
+         outStream << setw(20) << pos->first << " = " << pos->second  << "\n";
    }
    
-   outStream << "#-------------------------------------------------------------"
-      "--------\n";
+   outStream << "#-----------------------------------------------------------\n";
    
    //---------------------------------------------
    // write files
@@ -259,10 +262,24 @@ void FileManager::WriteStartupFile(const std::string &fileName)
       }
    }
    
-   outStream << "#-------------------------------------------------------------"
-      "--------\n";
+   outStream << "#-----------------------------------------------------------\n";
    outStream << "\n";
    outStream.close();
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetRootPath()
+//------------------------------------------------------------------------------
+/**
+ * Retrives root pathname.
+ *
+ * @return file pathname if path type found.
+ */
+//------------------------------------------------------------------------------
+std::string FileManager::GetRootPath()
+{
+   return mPathMap["ROOT_PATH"];
 }
 
 
@@ -306,7 +323,21 @@ std::string FileManager::GetPathname(const FileType type)
 std::string FileManager::GetPathname(const std::string &typeName)
 {
    if (mFileMap.find(typeName) != mFileMap.end())
-      return mPathMap[mFileMap[typeName]->mPath];
+   {
+      // Replace ROOT_PATH with abs path (loj: 7/14/05)
+      std::string pathname = mPathMap[mFileMap[typeName]->mPath];
+      if (pathname.find("ROOT_PATH") != pathname.npos)
+      {
+         std::string pathname2 = mPathMap["ROOT_PATH"] + mPathMap[mFileMap[typeName]->mPath];
+         std::string::size_type pos1 = pathname2.find("ROOT_PATH");
+         pathname2.replace(pos1, 10, "");
+         return pathname2;
+      }
+      else
+      {
+         return mPathMap[mFileMap[typeName]->mPath];
+      }
+   }
    
    //MessageInterface::ShowMessage
    //   ("FileManager::GetPathname() file type: %s is unknown\n", typeName.c_str());
@@ -453,7 +484,6 @@ void FileManager::AddFileType(const std::string &type, const std::string &name)
    
    if (type.find("_PATH") != type.npos)
    {
-      // file path
       mPathMap[type] = name;
    }
    else if (type.find("_FILE") != type.npos)
@@ -506,6 +536,9 @@ void FileManager::AddFileType(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
 FileManager::FileManager()
 {
+   AddFileType("ROOT_PATH", "./");
+   mStartupFileName = "gmat_startup_file.txt";
+   
    //loj: Should we create defaults?
    //#define FM_CREATE_DEFAULT
    
@@ -547,9 +580,7 @@ FileManager::FileManager()
    AddFileType("LEAP_SECS_FILE", "TIME_PATH/tai-utc.dat");
    
 #endif
-   
-   mStartupFileName = "gmat_startup_file.txt";
-   
+      
 }
 
 

@@ -67,6 +67,8 @@ public:
    
    void ReadStartupFile(const std::string &fileName = "");
    void WriteStartupFile(const std::string &fileName = "");
+
+   std::string GetRootPath();
    
    std::string GetPathname(const FileType type);
    std::string GetPathname(const std::string &typeName);
