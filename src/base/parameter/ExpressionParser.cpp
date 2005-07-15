@@ -374,10 +374,11 @@ void ExpressionParser::GetToken()
    {
       while (!IsDelimiter(*mExp))
          *temp++ = *mExp++;
-
+      
       mTokenType = VARIABLE;
    }
-   else if (isdigit(*mExp))
+   //else if (isdigit(*mExp))
+   else if (isdigit(*mExp) || *mExp == '.') //loj: 7/15/05 Added check for .
    {
       while (!IsDelimiter(*mExp))
          *temp++ = *mExp++;

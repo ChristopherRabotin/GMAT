@@ -160,13 +160,11 @@ void ParameterCreateDialog::Create()
    wxArrayString emptyArray;
    mObjectListBox = 
       theGuiManager->GetSpacecraftListBox(this, -1, wxSize(135, 85), &mExcludedScList);
-   //loj: 6/3/05 Added &mExcludedScList
    
    mPropertyListBox = 
       theGuiManager->GetPropertyListBox(this, ID_PROPERTY_LISTBOX,
                                         wxSize(135, 85), "Spacecraft");
    
-   //loj: 1/19/05 Changed width 130 to 170
    mUserVarListBox =
       theGuiManager->GetUserVariableListBox(this, -1, wxSize(170, 85), "");
    
@@ -259,7 +257,6 @@ void ParameterCreateDialog::Create()
    mCreateStringButton = new wxButton(this, ID_BUTTON, wxT("Create"),
                                       wxDefaultPosition, wxDefaultSize, 0);
 
-   //loj: 1/19/05 Changed 135 to 170
    mUserStringListBox =
       theGuiManager->GetUserStringListBox(this, -1, wxSize(170, 50), "");
    
@@ -613,7 +610,8 @@ void ParameterCreateDialog::CreateVariable()
 {
    wxString wxvarName = mVarNameTextCtrl->GetValue().Trim();
    std::string varName = std::string(wxvarName.c_str());
-   std::string varExpr = std::string(mExprTextCtrl->GetValue().c_str());
+   wxString wxvarExpr = mExprTextCtrl->GetValue().Trim();
+   std::string varExpr = std::string(wxvarExpr.c_str());
    
    #if DEBUG_PARAM_CREATE_DIALOG
    MessageInterface::ShowMessage
@@ -627,51 +625,61 @@ void ParameterCreateDialog::CreateVariable()
       if (theGuiInterpreter->GetParameter(varName) == NULL)
       {
          Parameter *param;
+         Real realNum;
          
          param = theGuiInterpreter->CreateParameter("Variable", varName);
+         
          param->SetStringParameter("Expression", varExpr);
-
-         // Parse the Parameter
-         StringTokenizer st(varExpr, "()*/+-^ ");
-         StringArray tokens = st.GetAllTokens();
-
-         for (unsigned int i=0; i<tokens.size(); i++)
+         
+         //loj: 7/15/05 Added check for a number
+         // If expresstion is not a number
+         if (!wxvarExpr.ToDouble(&realNum))
          {
-            #if DEBUG_PARAM_CREATE_DIALOG
-            MessageInterface::ShowMessage("token:<%s> \n", tokens[i].c_str());
-            #endif
+            // Parse the Parameter
+            StringTokenizer st(varExpr, "()*/+-^ ");
+            StringArray tokens = st.GetAllTokens();
             
-            // if token does not start with number
-            if (!isdigit(*tokens[i].c_str()))
+            for (unsigned int i=0; i<tokens.size(); i++)
             {
-               // create system parameter if it is NULL              
-               if (theGuiInterpreter->GetParameter(tokens[i]) == NULL)
+               #if DEBUG_PARAM_CREATE_DIALOG
+               MessageInterface::ShowMessage("token:<%s> \n", tokens[i].c_str());
+               #endif
+               
+               //loj: 7/15/05 Added check for a number
+               //if (!isdigit(*tokens[i].c_str()))
+               wxString wxtoken = tokens[i].c_str();
+               if (!wxtoken.ToDouble(&realNum))
                {
-                  //find objName.depObj.typeName
-                  std::string::size_type pos1 = tokens[i].find(".");
-                  std::string::size_type pos2 = tokens[i].find_last_of(".");
-                  if (pos1 != tokens[i].npos && pos2 != tokens[i].npos)
+                  // create system parameter if it is NULL
+                  if (theGuiInterpreter->GetParameter(tokens[i]) == NULL)
                   {
-                     std::string objName = tokens[i].substr(0, pos1);
-                     std::string typeName = tokens[i].substr(pos2+1, tokens[i].npos-pos2);
-                     
-                     Parameter *sysParam =
-                        theGuiInterpreter->CreateParameter(typeName, tokens[i]);
-                     sysParam->SetRefObjectName(Gmat::SPACECRAFT, objName);
-                     
-                     // set dependent object name
-                     if (pos2 > pos1)
+                     //find objName.depObj.typeName
+                     std::string::size_type pos1 = tokens[i].find(".");
+                     std::string::size_type pos2 = tokens[i].find_last_of(".");
+                     if (pos1 != tokens[i].npos && pos2 != tokens[i].npos)
                      {
-                        std::string depObjName = tokens[i].substr(pos1+1, pos2);
-                        sysParam->SetStringParameter("DepObject", depObjName);
+                        std::string objName = tokens[i].substr(0, pos1);
+                        std::string typeName = tokens[i].substr(pos2+1, tokens[i].npos-pos2);
+                        
+                        Parameter *sysParam =
+                           theGuiInterpreter->CreateParameter(typeName, tokens[i]);
+                        sysParam->SetRefObjectName(Gmat::SPACECRAFT, objName);
+                        
+                        // set dependent object name
+                        if (pos2 > pos1)
+                        {
+                           std::string depObjName = tokens[i].substr(pos1+1, pos2);
+                           sysParam->SetStringParameter("DepObject", depObjName);
+                        }
                      }
                   }
+                  
+                  param->SetRefObjectName(Gmat::PARAMETER, tokens[i]);
+                  
                }
-               
-               param->SetRefObjectName(Gmat::PARAMETER, tokens[i]);
-               
             }
          }
+         
          
          RgbColor color(mColor.Red(), mColor.Green(), mColor.Blue());
          param->SetUnsignedIntParameter("Color", color.GetIntColor());
@@ -686,8 +694,7 @@ void ParameterCreateDialog::CreateVariable()
          mIsParamCreated = true;
          theGuiManager->UpdateParameter();
          
-         GmatAppData::GetResourceTree()->UpdateVariable(); //loj: 6/3/05 Added
-         //GmatAppData::GetResourceTree()->UpdateResource(false);
+         GmatAppData::GetResourceTree()->UpdateVariable();
          mUserVarListBox->Append(varName.c_str());
          
          for (int i=0; i<mUserVarListBox->GetCount(); i++)
@@ -703,6 +710,7 @@ void ParameterCreateDialog::CreateVariable()
          // once variable is created cannot revert (delete) for now
          theOkButton->Enable();
          theCancelButton->Disable();
+         
       }
       else
       {
@@ -717,6 +725,7 @@ void ParameterCreateDialog::CreateVariable()
       mVarNameTextCtrl->SetValue("");
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void CreateString()
@@ -758,7 +767,7 @@ void ParameterCreateDialog::CreateString()
    else
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "ParameterCreateDialog::CreateVariable()\nThe string: %s"
+         (Gmat::WARNING_, "ParameterCreateDialog::CreateString()\nThe string: %s"
           " cannot be created. It already exists.", strName.c_str());
    }
 
@@ -767,6 +776,7 @@ void ParameterCreateDialog::CreateString()
    mStringNameTextCtrl->SetValue("");
    mStringValueTextCtrl->SetValue("");
 }
+
 
 //------------------------------------------------------------------------------
 // void CreateArray()
