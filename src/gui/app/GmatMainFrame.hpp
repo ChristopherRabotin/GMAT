@@ -91,6 +91,7 @@ public:
 protected:
 
 private:
+   int scriptCounter;
    
    GmatServer *mServer;
    std::string scriptFilename;
@@ -137,7 +138,8 @@ private:
    void OnComment(wxCommandEvent& event);
    void OnUncomment(wxCommandEvent& event);
    void OnFont(wxCommandEvent& event);
-
+   void OnSelectAll(wxCommandEvent& event);
+   
    void OnGlPlotTrajectoryFile(wxCommandEvent &event);
    void OnXyPlotTrajectoryFile(wxCommandEvent &event);
    
@@ -183,6 +185,7 @@ namespace GmatMenu
       MENU_EDIT_PASTE,
       MENU_EDIT_COMMENT,
       MENU_EDIT_UNCOMMENT,
+      MENU_EDIT_SELECT_ALL,
 
       MENU_EDIT_RESOURCES,
       MENU_EDIT_MISSION,

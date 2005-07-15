@@ -135,6 +135,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(MENU_EDIT_PASTE, GmatMainFrame::OnPaste)
    EVT_MENU(MENU_EDIT_COMMENT, GmatMainFrame::OnComment)
    EVT_MENU(MENU_EDIT_UNCOMMENT, GmatMainFrame::OnUncomment)
+   EVT_MENU(MENU_EDIT_SELECT_ALL, GmatMainFrame::OnSelectAll)
 
    EVT_MENU(MENU_START_SERVER, GmatMainFrame::OnStartServer)
    EVT_MENU(MENU_STOP_SERVER, GmatMainFrame::OnStopServer)
@@ -191,6 +192,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    
    // set the script name
    scriptFilename = "$gmattempscript$.script";
+   scriptCounter =0;
 
    // Set frame full/reduced size
    mFullSize = size;
@@ -729,6 +731,7 @@ bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item)
       {
          // move child to the front
          theChild->Activate();
+         theChild->Restore();
          return TRUE;   
       }
       node = node->GetNext();
@@ -766,7 +769,7 @@ bool GmatMainFrame::RenameChild(GmatTreeItemData *item, wxString newName)
           (theChild->GetDataType() == item->GetDataType()))
       {
          theChild->SetTitle(newName);
-         return TRUE;   
+         return TRUE;
       }
       node = node->GetNext();
    }
@@ -1092,6 +1095,7 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
 
    GmatAppData::GetResourceTree()->UpdateResource(true);
    GmatAppData::GetMissionTree()->UpdateMission(true);
+   GmatAppData::GetOutputTree()->UpdateOutput(true);
 }
 
 //------------------------------------------------------------------------------
@@ -1187,7 +1191,7 @@ void GmatMainFrame::OnRun(wxCommandEvent& WXUNUSED(event))
    toolBar->EnableTool(TOOL_STOP, FALSE);
 
    // put items in output tab
-   GmatAppData::GetOutputTree()->UpdateOutput();
+   GmatAppData::GetOutputTree()->UpdateOutput(false);
 }
 
 //------------------------------------------------------------------------------
@@ -1461,7 +1465,36 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnNewScript(wxCommandEvent& WXUNUSED(event))
 {
-   GmatAppData::GetResourceTree()->OnNewScript();
+//   GmatAppData::GetResourceTree()->OnNewScript();
+   wxString name;
+   name.Printf("Script%d.script", ++scriptCounter);
+
+   wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
+   panel = NULL;
+   GmatMdiChildFrame *newChild = new GmatMdiChildFrame(this, -1, name,
+                    wxPoint(-1,-1), wxSize(-1,-1), wxDEFAULT_FRAME_STYLE, "",
+                    GmatTree::SCRIPT_FILE);
+   panel = new wxScrolledWindow(newChild);
+   ScriptPanel *scriptPanel = new ScriptPanel(panel, "");
+   sizer->Add(scriptPanel, 0, wxGROW|wxALL, 0);
+   newChild->SetScriptTextCtrl(scriptPanel->mFileContentsTextCtrl);
+
+   if (newChild && panel)
+   {
+       panel->SetScrollRate(5, 5);
+       panel->SetAutoLayout(TRUE);
+       panel->SetSizer(sizer);
+       sizer->Fit(panel);
+       sizer->SetSizeHints(panel);
+
+       // list of open children
+       mdiChildren->Append(newChild);
+
+       // djc: Under linux, force the new child to display
+       #ifndef __WXMSW__
+          newChild->Show();
+       #endif
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -1873,6 +1906,17 @@ void GmatMainFrame::OnUncomment(wxCommandEvent& event)
    selString.Replace("\n%", "\n");
    scriptTC->WriteText(selString);
 }
+
+//------------------------------------------------------------------------------
+// void OnSelectAll(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnSelectAll(wxCommandEvent& event)
+{
+   GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
+   wxTextCtrl *scriptTC = theChild->GetScriptTextCtrl();
+   scriptTC->SetSelection(-1, -1);
+}
+
 
 //------------------------------------------------------------------------------
 // void OnFont(wxCommandEvent& event)
