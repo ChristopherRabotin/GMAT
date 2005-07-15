@@ -30,7 +30,8 @@ public:
                         const wxString& name = "",
                         const int type = 20000);
     ~GmatMdiChildFrame();
-    wxString GetTitle();
+//    wxString GetTitle();
+//    void SetTitle(wxString newTitle);
     int GetDataType();
     void SetDataType(int type) {dataType = type;};
     void OnClose(wxCloseEvent &event);

@@ -68,10 +68,16 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
 //   event.Skip();
 }
 
-wxString GmatMdiChildFrame::GetTitle()
-{
-   return title;
-}
+//void GmatMdiChildFrame::SetTitle(wxString newTitle)
+//{
+////   SetTitle(newTitle);
+//   title = newTitle;
+//}
+//
+//wxString GmatMdiChildFrame::GetTitle()
+//{
+//   return title;
+//}
 
 int GmatMdiChildFrame::GetDataType()
 {
@@ -154,6 +160,8 @@ wxMenuBar *GmatMdiChildFrame::CreateMenu(int dataType)
       editMenu->Append(MENU_EDIT_CUT, wxT("Cut\tCtrl-X"), wxT(""), FALSE);
       editMenu->Append(MENU_EDIT_COPY, wxT("Copy\tCtrl-C"), wxT(""), FALSE);
       editMenu->Append(MENU_EDIT_PASTE, wxT("Paste\tCtrl-V"), wxT(""), FALSE);
+      editMenu->AppendSeparator();
+      editMenu->Append(MENU_EDIT_SELECT_ALL, wxT("Select All\tCtrl-A"), wxT(""), FALSE);
       editMenu->AppendSeparator();
       editMenu->Append(MENU_EDIT_COMMENT, wxT("Comment"), wxT(""), FALSE);
       editMenu->Append(MENU_EDIT_UNCOMMENT, wxT("Uncomment"), wxT(""), FALSE);

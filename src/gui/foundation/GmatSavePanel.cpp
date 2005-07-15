@@ -145,7 +145,10 @@ void GmatSavePanel::Show()
 void GmatSavePanel::OnSave(wxCommandEvent &event)
 {
    if (mFilename == "")
+   {
       OnSaveAs(event);
+      return;
+   }
 
    SaveData();
 }
@@ -196,9 +199,10 @@ void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
 
       // just for now
       mFilename = path;
+      SaveData();
    }
 
-   SaveData();
+
 }
 
 //------------------------------------------------------------------------------
