@@ -284,9 +284,11 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string
       break;
    };
 #endif
+   
    LogMessage(msg);
    
 } // end PopupMessage()
+
 
 //------------------------------------------------------------------------------
 //  static void PopupMessage(Gmat::MessageType msgType, const char *msg, ...)
@@ -300,19 +302,19 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
    short    size;
    va_list  marker;
    char     *msgBuffer;
-
+   
    size = strlen(msg) + MAX_MESSAGE_LENGTH;
-      
+   
    if( (msgBuffer = (char *)malloc(size)) != NULL )
    {
       va_start(marker, msg);      
       ret = vsprintf(msgBuffer, msg, marker);      
       va_end(marker);
 
-      popupMessage = std::string(msgBuffer);
+      //popupMessage = std::string(msgBuffer);
    }
-
-
+   
+   
 #if !defined __CONSOLE_APP__
    switch (msgType)
    {
@@ -321,8 +323,11 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
       wxLog::FlushActive();
       break;
    case Gmat::WARNING_:
-      wxLogWarning(wxT(wxString(msgBuffer)));
-      wxLog::FlushActive();
+      //loj: 7/14/05 use wxMessageBox so that messages shows immediately
+      //wxLogWarning(wxT(wxString(msgBuffer)));
+      //wxLog::FlushActive();
+      (void)wxMessageBox(wxT(wxString(msgBuffer)),
+                         wxT("Warning"));
       break;
    case Gmat::INFO_:
       (void)wxMessageBox(wxT(wxString(msgBuffer)),
@@ -333,9 +338,13 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
       break;
    };
 #endif
-   LogMessage(msg);
+   
+   //LogMessage(msg); //loj: 7/14/05 Use msgBuffer
+   LogMessage(std::string(msgBuffer));
+   free(msgBuffer);
    
 } // end PopupMessage()
+
 
 //  //------------------------------------------------------------------------------
 //  //  static void PopupMessage(Gmat::MessageType msgType, const std::string &msg,
