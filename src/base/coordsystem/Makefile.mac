@@ -10,6 +10,7 @@ PROJECT_ROOT    = ../..
 SRC =	AxisSystem.cpp BodyFixedAxes.cpp CoordinateBase.cpp CoordinateConverter.cpp \
 	CoordinateSystem.cpp CoordinateSystemException.cpp DynamicAxes.cpp \
 	EquatorAxes.cpp \
+	GeocentricSolarEclipticAxes.cpp GeocentricSolarMagneticAxes.cpp \
 	InertialAxes.cpp ItrfCoefficientsFile.cpp \
 	MeanOfDateAxes.cpp MJ2000EcAxes.cpp MJ2000EqAxes.cpp \
 	MODEcAxes.cpp MOEEcAxes.cpp \
