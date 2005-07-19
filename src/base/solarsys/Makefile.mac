@@ -13,93 +13,25 @@
 #             2005/04/05 - W. Shoan - removed AtmosphereException
 #             2005/07/11 - J. Gurganus - updated for compling fortran (g77) and
 #                                        removed msise90.cpp 
+#             2005/07/19 - J. Gurganus - Cleaned up stuff
+################################################################################
+#
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
-# Program to make (library)
-LIBDIR = $(PROJECT_ROOT)/lib
-LIB = $(LIBDIR)/libgmatbase.a
-#
-#
-# Define macros for the base directory
-BURN       = $(PROJECT_ROOT)/base/burn
-COMMAND    = $(PROJECT_ROOT)/base/command
-CONFIGS    = $(PROJECT_ROOT)/base/configs
-COORDSYS   = $(PROJECT_ROOT)/base/coordsystem
-INCLUDE    = $(PROJECT_ROOT)/base/include
-EXECUTIVE  = $(PROJECT_ROOT)/base/executive
-FACTORY    = $(PROJECT_ROOT)/base/factory
-FOUNDATION = $(PROJECT_ROOT)/base/foundation
-FORCEMODEL = $(PROJECT_ROOT)/base/forcemodel
-FUNCTION   = $(PROJECT_ROOT)/base/function
-INTERFACE  = $(PROJECT_ROOT)/base/interface
-INTERPOL   = $(PROJECT_ROOT)/base/interpolator
-INTERPRET  = $(PROJECT_ROOT)/base/interpreter
-PARAM      = $(PROJECT_ROOT)/base/parameter
-PROPAG     = $(PROJECT_ROOT)/base/propagator
-REFFRAME   = $(PROJECT_ROOT)/base/refframe
-SOLARSYS   = $(PROJECT_ROOT)/base/solarsys
-SOLVER     = $(PROJECT_ROOT)/base/solver
-SPACECRAFT = $(PROJECT_ROOT)/base/spacecraft
-STOPCOND   = $(PROJECT_ROOT)/base/stopcond
-SUBSCRIBER = $(PROJECT_ROOT)/base/subscriber
-UTIL       = $(PROJECT_ROOT)/base/util
-
-INCS = -I$(BURN) -I$(COMMAND) -I$(CONFIGS) -I$(COORDSYS) -I$(EXECUTIVE) -I$(FACTORY) \
-	-I$(FORCEMODEL) -I$(FOUNDATION) -I$(FUNCTION) -I$(INCLUDE) \
-	-I$(INTERFACE) -I$(INTERPOL) -I$(INTERPRET) \
-	-I$(PARAM) -I$(PROPAG) -I$(REFFRAME) -I$(SOLARSYS) -I$(SOLVER) \
-	-I$(SPACECRAFT) -I$(STOPCOND) -I$(SUBSCRIBER) -I$(UTIL)
-
 # Source file for creating new library
-SRC =	AtmosphereModel.cpp Barycenter.cpp CalculatedPoint.cpp \
+SRC = 	AtmosphereModel.cpp Barycenter.cpp CalculatedPoint.cpp \
 	CelestialBody.cpp DeFile.cpp ExponentialAtmosphere.cpp \
 	JacchiaRobertsAtmosphere.cpp LibrationPoint.cpp Moon.cpp \
-	Msise90Atmosphere.cpp Planet.cpp \
-	PlanetaryEphemException.cpp PlanetaryEphem.cpp SlpFile.cpp \
-	SolarFluxFileReader.cpp SolarSystem.cpp SolarSystemException.cpp \
-	Star.cpp 
-#
-# Object modules for library
-OBJ = $(SRC:.cpp=.o)
-#
-CXXFLAGS = $(INCS) $(TESTFLAGS) -dynamic -Wall
-CPP = g++ $(CXXFLAGS)
+	Msise90Atmosphere.cpp Planet.cpp PlanetaryEphemException.cpp \
+	PlanetaryEphem.cpp SlpFile.cpp SolarFluxFileReader.cpp \
+	SolarSystem.cpp SolarSystemException.cpp Star.cpp
 #
 # Fortran source file(s)
-SRC_FOR = msise90_sub.for
+FOR_SRC = msise90_sub.for
 #
-# Object modules for library
-OBJ += $(SRC_FOR:.for=.o)
+# Define macro for using the included file 
+INCMK = $(PROJECT_ROOT)/base/inc.mac
+include ${INCMK}
 #
-G77 = g77
-#
-# Default suffix rule
-.SUFFIXES: .o .cpp .for
-#
-###############################################################################
-# Target definitions
-#
-all: $(LIB)
-
-$(LIB): $(OBJ)
-	@mkdir -p $(LIBDIR)
-	ar cr $@ $(OBJ)
-	@ranlib $@
-	@chmod -R 755 $(LIBDIR)
-
-.cpp.o:
-	$(CPP) -c $<
-
-.for.o:
-	$(G77) -c $<
-
-clean:
-	rm -f $(OBJ) core
-
-bare: clean
-	rm -f $(LIB)
-
-testing:
-	${MAKE} -f Makefile.mac "TESTFLAGS = -D__CONSOLE_APP__"
