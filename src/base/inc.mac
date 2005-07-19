@@ -1,3 +1,4 @@
+###############################################################################
 # Project:    GMAT
 # Module:     inc.mac for base directory 
 # Created:    Joey Gurgnaus 
@@ -5,7 +6,9 @@
 # Modified:   2004/01/14 - added burn directory and compiler option -Wall
 #             2004/09/23 - W. Shoan - added function directory
 #             2004/09/24 - J. Gurganus - cleaned up and added 'testing' target 
-
+#             2005/07/19 - J. Gurganus - added Fortan compiler (g77) 
+###############################################################################
+#
 # Program to make (library)
 LIBDIR = $(PROJECT_ROOT)/lib
 LIB = $(LIBDIR)/libgmatbase.a
@@ -44,11 +47,17 @@ INCS = -I$(BURN) -I$(COMMAND) -I$(CONFIGS) -I$(COORDSYS) -I$(EXECUTIVE) -I$(FACT
 # Object modules for library
 OBJ = $(SRC:.cpp=.o)
 #
+# Fortran source file(s)
+OBJ += $(FOR_SRC:.for=.o)
+#
 CXXFLAGS = $(INCS) $(TESTFLAGS) -dynamic -Wall
 CPP = g++ $(CXXFLAGS)
 #
+# Fortran compiler
+G77 = g77
+#
 # Default suffix rule
-.SUFFIXES: .o .cpp
+.SUFFIXES: .o .cpp .for
 #
 ###############################################################################
 # Target definitions
@@ -63,6 +72,9 @@ $(LIB): $(OBJ)
 
 .cpp.o:
 	$(CPP) -c $<
+
+.for.o:
+	$(G77) -c $<
 
 clean:
 	rm -f $(OBJ) core
