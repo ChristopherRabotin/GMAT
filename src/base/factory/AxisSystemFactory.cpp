@@ -35,8 +35,8 @@
 #include "MOEEcAxes.hpp"
 #include "TODEcAxes.hpp"
 #include "MODEcAxes.hpp"
-//#include "GeocentricSolarEclipticAxes.hpp"
-//#include "GeocentricSolarMagneticAxes.hpp"
+#include "GeocentricSolarEclipticAxes.hpp"
+#include "GeocentricSolarMagneticAxes.hpp"
 
 //---------------------------------
 //  public methods
@@ -113,15 +113,11 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    }
    else if ((ofType == "GSE") || (ofType == "GeocentricSolarEcliptic"))
    {
-      MessageInterface::ShowMessage(                // *** temporary
-             "GeocentricSolarEclipticAxes not yet implemented.\n");
-      //withAxes = new GeocentricSolarEclipticAxes(withName);
+      withAxes = new GeocentricSolarEclipticAxes(withName);
    }
    else if ((ofType == "GSM") || (ofType == "GeocentricSolarMagnetic"))
    {
-      MessageInterface::ShowMessage(                // *** temporary
-             "GeocentricSolarMagneticAxes not yet implemented.\n");
-      //withAxes = new GeocentricSolarMagneticAxes(withName);
+      withAxes = new GeocentricSolarMagneticAxes(withName);
    }
    return withAxes;
 }
