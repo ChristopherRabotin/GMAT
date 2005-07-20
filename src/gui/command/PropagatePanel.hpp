@@ -61,17 +61,12 @@ private:
       wxString       varName;
       wxString       typeName;
       wxString       relOpStr;
-      Real           goal;
+      wxString       goalStr;
+      //Real           goal;
       Real           tol;
       Integer        repeat;
       StopCondition *stopCondPtr;
    };
-   
-   wxStaticText *synchStaticText;
-   wxStaticText *varStaticText;
-   wxStaticText *repeatStaticText;
-   wxStaticText *tolStaticText;
-   wxStaticText *nameStaticText;
    
    wxTextCtrl *stopNameTextCtrl;
    wxTextCtrl *varNameTextCtrl;
@@ -81,7 +76,8 @@ private:
    
    wxButton *updateButton;
    wxButton *deleteButton;
-   wxButton *viewButton;
+   wxButton *mStopViewButton;
+   wxButton *mGoalViewButton;
    
    wxComboBox *mPropModeComboBox;
    wxComboBox *equalityComboBox;
@@ -91,7 +87,7 @@ private:
    
    wxBoxSizer *mMiddleBoxSizer;
    wxStaticBoxSizer *mStopSizer;
-
+   
    bool    mPropModeChanged;
    bool    mPropChanged;
    bool    mStopCondChanged;
@@ -132,7 +128,8 @@ private:
 
    wxString FormatStopCondDesc(const wxString &varName,
                                const wxString &relOpStr,
-                               Real &goal);
+                               //Real &goal);
+                               const wxString &goalStr);
    void MoveUpPropData();
    
    // any class wishing to process wxWindows events must use this macro
