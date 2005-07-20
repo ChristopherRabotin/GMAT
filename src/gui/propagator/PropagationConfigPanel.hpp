@@ -100,13 +100,12 @@ private:
                 const std::string &drag = "None", const std::string &mag = "None")
          {
             bodyName = body; gravType = grav; dragType = drag; magfType = mag;
-            //gravDegree = "4"; gravOrder = "4"; magfDegree = "0"; magfOrder = "0";
             gravDegree = "0"; gravOrder = "0"; magfDegree = "0"; magfOrder = "0";
             potFilename = ""; pmf = NULL; gravf = NULL; dragf = NULL; srpf = NULL;
             useSrp = false;
          }
       
-      ForceType& operator= (const ForceType& right) //loj: 7/7/05 Added
+      ForceType& operator= (const ForceType& right)
          {
             if (this == &right)
                return *this;
@@ -222,8 +221,6 @@ private:
    
    // Layout & data handling methods
    Integer FindBody(const std::string &bodyName,
-                    //loj: 7/7/05 We no longer have Pont Mass
-                    //const std::string &gravType = "Point Mass", 
                     const std::string &gravType = "None",
                     const std::string &dragType = "None",
                     const std::string &magfType = "None");
