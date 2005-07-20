@@ -162,12 +162,6 @@ void PropagatePanel::Create()
    stopCondGrid->SetRowLabelSize(0);
    stopCondGrid->SetScrollbars(5, 14, 15, 15);
    stopCondGrid->EnableEditing(false);
-
-   // wxString
-   wxString strArray1[] = 
-   {
-      wxT("None")
-   };
    
    StringArray propModes = thePropCmd->GetStringArrayParameter
       (thePropCmd->GetParameterID("AvailablePropModes"));
@@ -179,6 +173,9 @@ void PropagatePanel::Create()
       propModeList[i] = propModes[i].c_str();
    }
    
+   if (strcmp(propModeList[0].c_str(), "") == 0)
+      propModeList[0] = "None";
+      
    wxString logicalOpArray[] =
    {
       wxT("="),
@@ -197,7 +194,7 @@ void PropagatePanel::Create()
                         wxDefaultPosition, wxDefaultSize, 0);
 
    mPropModeComboBox =
-      new wxComboBox(this, ID_COMBOBOX, wxT(strArray1[0]), wxDefaultPosition,
+      new wxComboBox(this, ID_COMBOBOX, wxT(propModeList[0].c_str()), wxDefaultPosition,
                       wxSize(150,-1), mPropModeCount, propModeList,
                       wxCB_DROPDOWN|wxCB_READONLY);
 
@@ -468,10 +465,11 @@ void PropagatePanel::SaveData()
    if (mPropModeChanged)
    {
       mPropModeChanged = false;
+      wxString str = mPropModeComboBox->GetStringSelection();
+      if (str.CmpNoCase("None") == 0)
+         str = "";
       thePropCmd->SetStringParameter
-         (thePropCmd->GetParameterID("PropagateMode"),
-          std::string(mPropModeComboBox->GetStringSelection().c_str()));;
-      
+         (thePropCmd->GetParameterID("PropagateMode"), str.c_str());
    }
    
    int soCount = 0;
