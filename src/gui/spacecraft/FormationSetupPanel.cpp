@@ -106,13 +106,11 @@ void FormationSetupPanel::Create()
       new wxStaticText(this, -1, wxT("Space Objects"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    
-   //wxArrayString soExcList;
-   //soExcList.Add(mFormationName.c_str());
    mSoExcList.Add(mFormationName.c_str());
    
    mSoAvailableListBox = 
-      //theGuiManager->GetSpaceObjectListBox(this, -1, wxSize(150, 200), soExcList);
-      theGuiManager->GetSpaceObjectListBox(this, -1, wxSize(150, 200), &mSoExcList); //loj: 6/6/05
+      theGuiManager->GetSpaceObjectListBox(this, -1, wxSize(150, 200),
+                                           &mSoExcList, false); //loj: 7/18/05 Added false
    
    availableBoxSizer->Add(titleAvailable, 0, wxALIGN_CENTRE|wxALL, bsize);
    availableBoxSizer->Add(mSoAvailableListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
