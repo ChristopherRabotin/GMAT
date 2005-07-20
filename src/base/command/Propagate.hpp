@@ -215,7 +215,8 @@ protected:
    
    void                    AddTransientForce(StringArray *sats, ForceModel *p);
    void                    ClearTransientForces();
-    
+   std::string             CreateParameter(const std::string &name);
+   
 private:
     
 };

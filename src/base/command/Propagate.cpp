@@ -63,7 +63,7 @@ Propagate::Propagate() :
    interruptCheckFrequencyID   (parameterCount+2),
    satNameID                   (parameterCount+3),
    propNameID                  (parameterCount+4),
-   stopWhenID                  (parameterCount+5), //loj: 4/4/05 Added
+   stopWhenID                  (parameterCount+5),
    singleStepMode              (false),
    currentMode                 (INDEPENDENT)
 {
@@ -107,7 +107,7 @@ Propagate::Propagate(const Propagate &p) :
    interruptCheckFrequencyID   (p.interruptCheckFrequencyID),
    satNameID                   (p.satNameID),
    propNameID                  (p.propNameID),
-   stopWhenID                  (p.stopWhenID), //loj:4/4/05 Added
+   stopWhenID                  (p.stopWhenID),
    singleStepMode              (p.singleStepMode),
    currentMode                 (p.currentMode)
 {
@@ -350,8 +350,9 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
 
          if ((stopName.find("Periapsis") == std::string::npos) &&
              (stopName.find(".Apoapsis") == std::string::npos))
-            stopCondDesc << " = " << stopWhen[index]->GetRealParameter("Goal");
-
+            //stopCondDesc << " = " << stopWhen[index]->GetRealParameter("Goal"); //loj: 7/19/05
+            stopCondDesc << " = " << stopWhen[index]->GetStringParameter("Goal");
+         
          gen += stopCondDesc.str();
 
          gen += "}";
@@ -998,12 +999,11 @@ bool Propagate::RenameRefObject(const Gmat::ObjectType type,
    
    // Propagate needs to know about spacecraft or formation only
    if (type != Gmat::SPACECRAFT && type != Gmat::FORMATION &&
-       type != Gmat::PROP_SETUP) //loj: 6/10/05 Added PROP_SETUP
+       type != Gmat::PROP_SETUP)
       return true;
 
    StringArray::iterator pos;
    
-   //loj: 6/10/05 Added PROP_SETUP
    if (type == Gmat::PROP_SETUP)
    {
       // rename PropSetup
@@ -1183,17 +1183,19 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
    #endif
    
    Integer satEnd;
-
-   for (StringArray::iterator i = pieces.begin(); i != pieces.end(); ++i) {
+   
+   //for (StringArray::iterator i = pieces.begin(); i != pieces.end(); ++i) {
+   std::vector<Real>::iterator dir = direction.begin();
+   for (StringArray::iterator i = pieces.begin(); i != pieces.end(); ++i, ++dir) {
       loc = 0;
       end = i->find("(", loc);
       if (end == (Integer)std::string::npos)
          throw CommandException(
             "Propagate string does not identify propagator\n");
-
+      
       std::string component = i->substr(loc, end-loc);
       SetObject(component, Gmat::PROP_SETUP);
-   
+      
       loc = end + 1;
       satEnd = loc;
       end = i->find(",", loc);
@@ -1276,7 +1278,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
                throw CommandException("Propagate " + (*i) +
                   " does not identify stopping condition: looking for }\n");
          }
-          
+         
          UnsignedInt start = 0;
          for (UnsignedInt idx=start; idx<paramType.size(); ++idx)
          {
@@ -1286,10 +1288,10 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
                start = idx;
             }
          }
-          
+         
          Moderator *theModerator = Moderator::Instance();
           
-         // create parameter
+         // create stop parameter
          std::string paramName;
          if (parmSystem == "")
             paramName = paramObj + "." + paramType;
@@ -1322,33 +1324,43 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
             theModerator->CreateStopCondition("StopCondition", "StopOn" +
                              paramName);
          
+         // Set backwards propagation (loj: 7/20/05 Added)
+         //stopCond->SetPropDirection(*dir);
+         
          stopCond->SetStringParameter("StopVar", paramName);
          
          SetObject(stopCond, Gmat::STOP_CONDITION);
          // Store the spacecraft name for use when setting the epoch data
          TakeAction("SetStopSpacecraft", paramObj);
-      
+         
          if (paramType != "Apoapsis" && paramType != "Periapsis")
          {
             loc = end + 1;
             /// @todo Stopping conditions may be parameter evaluations; currently only Reals
-            Real propStopVal = atof(&(i->c_str())[loc]);
-            stopCond->SetRealParameter("Goal", propStopVal);
+            //loj: 7/19/05 Now it handles goal as string
+            //Real propStopVal = atof(&(i->c_str())[loc]);
+            //stopCond->SetRealParameter("Goal", propStopVal);
+            endchar = i->find("}", loc);
+            component = i->substr(loc, endchar-loc);
+            
+            // create goal parameter
+            component = CreateParameter(component);
+            stopCond->SetStringParameter("Goal", component);
             
             #ifdef DEBUG_PROPAGATE_EXE
                MessageInterface::ShowMessage("Propagate::AssemblePropagators()"
                   " propStopVal = %f\n", propStopVal);
             #endif
-      
+               
             loc = end + 1;
             end = i->find(",", loc);
             if (end != (Integer)std::string::npos)
                throw CommandException("Propagate does not yet support multiple "
                   "stopping condition\n");
-          
+            
             loc = end + 1;
             end = i->find("}", loc);
-              
+            
             if (end == (Integer)std::string::npos)
                throw CommandException("Propagate does not identify stopping "
                   "condition: looking for }\n");
@@ -1666,12 +1678,28 @@ bool Propagate::Initialize()
    
    if (solarSys != NULL)
    {
+      StringArray refNames;
+      
       for (UnsignedInt i=0; i<stopWhen.size(); i++)
       {
          stopWhen[i]->SetSolarSystem(solarSys);
+
+         //loj: 7/19/05 Set StopCondition parameters here
+         // (Use of Moderator has been removed from the BaseStopCondition)
+         refNames = stopWhen[i]->GetRefObjectNameArray(Gmat::PARAMETER);
+         
+         for (UnsignedInt j=0; j<refNames.size(); j++)
+         {
+            #if DEBUG_PROPAGATE_INIT
+               MessageInterface::ShowMessage("===> refNames=<%s>\n", refNames[j].c_str());
+            #endif
+            stopWhen[i]->SetRefObject((*objectMap)[refNames[j]],
+                                      Gmat::PARAMETER, refNames[j]);
+         }
+         
          stopWhen[i]->Initialize();
          stopWhen[i]->SetSpacecraft(sats[0]);
-          
+         
          if (!stopWhen[i]->IsInitialized())
          {
             initialized = false;
@@ -2217,4 +2245,88 @@ void Propagate::SetNames(const std::string& name, StringArray& owners,
    elements.push_back(name+".Vx");
    elements.push_back(name+".Vy");
    elements.push_back(name+".Vz");
+}
+
+//loj: 7/20/05 Added
+//------------------------------------------------------------------------------
+// std::string CreateParameter(const std::string name)
+//------------------------------------------------------------------------------
+std::string Propagate::CreateParameter(const std::string &name)
+{
+   Moderator *theModerator = Moderator::Instance();
+   std::string str = name;
+   std::string owner, dep, type;
+   
+   // remove blanks
+   for (std::string::iterator i = str.begin(); i != str.end(); ++i)
+      if (*i == ' ')
+         str.erase(i);
+
+   #if DEBUG_PROPAGATE_OBJ
+      MessageInterface::ShowMessage
+         ("Propagate::CreateParameter() name=<%s>, str=<%s>\n",
+          name.c_str(), str.c_str());
+   #endif
+   
+   if (theModerator->GetParameter(str))
+      return str;
+   
+   std::string::size_type pos1 = str.find('.');
+   
+   if (pos1 != str.npos)
+      owner = str.substr(0, pos1);
+   else
+      return str;
+   
+   std::string::size_type pos2 = str.find(pos1);
+   if (pos2 != str.npos)
+   {
+      dep = str.substr(pos1, pos2-pos1);
+      type = str.substr(pos2+1);
+   }
+   else
+   {
+      type = str.substr(pos1+1, pos2-pos1);
+   }
+   
+   #if DEBUG_PROPAGATE_OBJ
+      MessageInterface::ShowMessage
+         ("Propagate::CreateParameter() str=%s, owner=%s, dep=%s, type=%s\n",
+          str.c_str(), owner.c_str(), dep.c_str(), type.c_str());
+   #endif
+   
+   Parameter *param = theModerator->CreateParameter(type, str);
+   param->SetRefObjectName(Gmat::SPACECRAFT, owner);
+   
+   if (param->IsCoordSysDependent())
+   {
+      if (dep == "")
+         dep = "EarthMJ2000Eq";
+      
+      param->SetStringParameter("DepObject", dep);
+      param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, dep);
+   }
+   
+   if (param->IsOriginDependent())
+   {
+      if (dep == "")
+         dep = "Earth";
+      
+      param->SetStringParameter("DepObject", dep);
+      param->SetRefObjectName(Gmat::SPACE_POINT, dep);
+      
+      if (param->NeedCoordSystem())
+         /// @todo Update coordinate system to better value for body parms
+         param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+   }
+   
+   #if DEBUG_PROPAGATE_OBJ
+      MessageInterface::ShowMessage
+         ("Propagate::CreateParameter() name=%s, owner=%s, dep=%s, type=%s\n",
+          param->GetName().c_str(), param->GetStringParameter("Object").c_str(),
+          param->GetStringParameter("DepObject").c_str(),
+          param->GetTypeName().c_str());
+   #endif
+   
+   return str;
 }
