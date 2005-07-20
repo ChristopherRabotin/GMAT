@@ -45,6 +45,8 @@ using namespace GmatTimeUtil;      // for JD offsets, etc.
 //---------------------------------
 // static data
 //---------------------------------
+const Real GeocentricSolarMagneticAxes::lambdaD = 70.1;  // degrees West
+const Real GeocentricSolarMagneticAxes::phiD    = 78.6;  // degrees North
 
 
 //------------------------------------------------------------------------------

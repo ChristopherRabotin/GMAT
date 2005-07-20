@@ -60,8 +60,8 @@ protected:
       GeocentricSolarMagneticAxesParamCount = ObjectReferencedAxesParamCount
    };
 
-   const static Real lambdaD = 70.1;  // degrees West
-   const static Real phiD    = 78.6;  // degrees North
+   static const Real lambdaD;  // degrees West
+   static const Real phiD;  // degrees North
 
    Rvector3          dipoleEF;
 
