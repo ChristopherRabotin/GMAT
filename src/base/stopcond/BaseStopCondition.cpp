@@ -19,15 +19,10 @@
 
 #include "StopCondition.hpp"
 #include "StopConditionException.hpp"
-#include "MeanJ2000Equatorial.hpp"
 #include "CubicSplineInterpolator.hpp"
 #include "KeplerianParameters.hpp"     // for KepEcc()
 #include "SphericalParameters.hpp"     // for SphRMag()
 #include "MessageInterface.hpp"
-
-#if !defined __UNIT_TEST__
-#include "Moderator.hpp"
-#endif
 
 //#define DEBUG_BASE_STOPCOND 1
 //#define DEBUG_BASE_STOPCOND_INIT 1
@@ -53,23 +48,21 @@ BaseStopCondition::PARAMETER_TEXT[BaseStopConditionParamCount - GmatBaseParamCou
    "Range",
    "Repeat",
    "Interpolator",
-   "RefFrame",
 };
 
 const Gmat::ParameterType
 BaseStopCondition::PARAMETER_TYPE[BaseStopConditionParamCount - GmatBaseParamCount] =
 {
-   Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
-   Gmat::INTEGER_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
+   Gmat::REAL_TYPE,    //"BaseEpoch",
+   Gmat::REAL_TYPE,    //"Epoch",
+   Gmat::STRING_TYPE,  //"EpochVar",
+   Gmat::STRING_TYPE,  //"StopVar",
+   Gmat::STRING_TYPE,  //"Goal",
+   Gmat::REAL_TYPE,    //"Tol",
+   Gmat::REAL_TYPE,    //"EccTol",
+   Gmat::REAL_TYPE,    //"Range",
+   Gmat::INTEGER_TYPE, //"Repeat",
+   Gmat::STRING_TYPE,  //"Interpolator",
 };
 
 //---------------------------------
@@ -79,7 +72,7 @@ BaseStopCondition::PARAMETER_TYPE[BaseStopConditionParamCount - GmatBaseParamCou
 //------------------------------------------------------------------------------
 // BaseStopCondition(const std::string &name, const std::string &desc,
 //                   Parameter *epochParam, Parameter *stopParam, const Real &goal,
-//                   const Real &tol, const Integer repeatCount, RefFrame *refFrame,
+//                   const Real &tol, const Integer repeatCount,
 //                   Interpolator *interp)
 //------------------------------------------------------------------------------
 /**
@@ -89,22 +82,23 @@ BaseStopCondition::PARAMETER_TYPE[BaseStopConditionParamCount - GmatBaseParamCou
 BaseStopCondition::BaseStopCondition(const std::string &name, const std::string &desc,
                                      Parameter *epochParam, Parameter *stopParam,
                                      const Real &goal, const Real &tol,
-                                     const Integer repeatCount, RefFrame *refFrame,
+                                     const Integer repeatCount, //RefFrame *refFrame,
                                      Interpolator *interp)
    : GmatBase(Gmat::STOP_CONDITION, "StopCondition", name)
 {
    objectTypes.push_back(Gmat::STOP_CONDITION);
    objectTypeNames.push_back("BaseStopCondition");
-
+   
    mBaseEpoch = 0.0;
    mEpoch = 0.0;
    mGoal = goal;
    mTolerance = tol;
    mRepeatCount = repeatCount;
-   mRefFrame = refFrame;
+   mGoalStr = "0.0";
    mInterpolator = interp;
-   mEpochParam = epochParam;
    mStopParam = stopParam;
+   mGoalParam = NULL;
+   mEpochParam = epochParam;
    mEccParam = NULL;
    mRmagParam = NULL;
    mDescription = desc;
@@ -112,8 +106,12 @@ BaseStopCondition::BaseStopCondition(const std::string &name, const std::string 
    mRange = 100000;   //loj: valid default? 6/16/04 changed to 100000 from 10000
    
    mStopParamType = "";
+   mStopParamName = "";
    if (mStopParam != NULL)
+   {
       mStopParamType = mStopParam->GetTypeName();
+      mStopParamName = mStopParam->GetName();
+   }
    
    mNumValidPoints = 0;
    mBufferSize = 0;
@@ -122,22 +120,15 @@ BaseStopCondition::BaseStopCondition(const std::string &name, const std::string 
    mInitialized = false;
    mUseInternalEpoch = false;
    mNeedInterpolator = false;
-   mNeedRefFrame = false;
+   mAllowGoalParam = false;
+   mBackwardsProp = false;
    
    if (epochParam == NULL)
       mUseInternalEpoch = true;
    
    // Create default Interpolator
    if (mInterpolator == NULL)
-   {
       mInterpolator = new CubicSplineInterpolator("InternalInterpolator");
-   }
-   
-   // Create default RefFrame
-   if (mRefFrame == NULL)
-   {
-      mRefFrame = new MeanJ2000Equatorial("InternalRefFrame");
-   }
    
    mSolarSystem = NULL;
 }
@@ -157,15 +148,28 @@ BaseStopCondition::BaseStopCondition(const BaseStopCondition &copy)
    mEpoch = copy.mEpoch;
    mGoal = copy.mGoal;
    mTolerance = copy.mTolerance;
+   mEccTol = copy.mEccTol;
+   mRange = copy.mRange;
    mRepeatCount = copy.mRepeatCount;
-   mRefFrame = copy.mRefFrame;
    mInterpolator = copy.mInterpolator;
    mSolarSystem = copy.mSolarSystem;
-   mEpochParam = copy.mEpochParam;
+   mDescription = copy.mDescription;
+   mStopParamType = copy.mStopParamType;
+   mStopParamName = copy.mStopParamName;
+   mGoalStr = copy.mGoalStr;
+   
    mStopEpoch = copy.mStopEpoch;
    mStopParam = copy.mStopParam;
+   mEpochParam = copy.mEpochParam;
+   mGoalParam = copy.mGoalParam;
    mEccParam = copy.mEccParam;
    mRmagParam = copy.mRmagParam;
+   
+   mInitialized = copy.mInitialized;
+   mUseInternalEpoch = copy.mUseInternalEpoch;
+   mNeedInterpolator = copy.mNeedInterpolator;
+   mAllowGoalParam = copy.mAllowGoalParam;
+   mBackwardsProp = copy.mBackwardsProp;
    
    CopyDynamicData(copy);
 }
@@ -180,24 +184,39 @@ BaseStopCondition::BaseStopCondition(const BaseStopCondition &copy)
 //------------------------------------------------------------------------------
 BaseStopCondition& BaseStopCondition::operator= (const BaseStopCondition &right)
 {
-   if (this != &right)
-   {
-      GmatBase::operator=(right);        
-      mBaseEpoch = right.mBaseEpoch;
-      mEpoch = right.mEpoch;
-      mGoal = right.mGoal;
-      mTolerance = right.mTolerance;
-      mRepeatCount = right.mRepeatCount;
-      mRefFrame = right.mRefFrame;
-      mInterpolator = right.mInterpolator;
-      mSolarSystem = right.mSolarSystem;
-      mEpochParam = right.mEpochParam;
-      mStopEpoch = right.mStopEpoch;
-      mEccParam = right.mEccParam;
-      mRmagParam = right.mRmagParam;
-
-      CopyDynamicData(right);
-   }
+   if (this == &right)
+      return *this;
+   
+   GmatBase::operator=(right);
+   
+   mBaseEpoch = right.mBaseEpoch;
+   mEpoch = right.mEpoch;
+   mGoal = right.mGoal;
+   mTolerance = right.mTolerance;
+   mEccTol = right.mEccTol;
+   mRange = right.mRange;
+   mRepeatCount = right.mRepeatCount;
+   mInterpolator = right.mInterpolator;
+   mSolarSystem = right.mSolarSystem;
+   mDescription = right.mDescription;
+   mStopParamType = right.mStopParamType;
+   mStopParamName = right.mStopParamName;
+   mGoalStr = right.mGoalStr;
+   
+   mStopEpoch = right.mStopEpoch;
+   mStopParam = right.mStopParam;
+   mEpochParam = right.mEpochParam;
+   mGoalParam = right.mGoalParam;
+   mEccParam = right.mEccParam;
+   mRmagParam = right.mRmagParam;
+   
+   mInitialized = right.mInitialized;
+   mUseInternalEpoch = right.mUseInternalEpoch;
+   mNeedInterpolator = right.mNeedInterpolator;
+   mAllowGoalParam = right.mAllowGoalParam;
+   mBackwardsProp = right.mBackwardsProp;
+   
+   CopyDynamicData(right);
 
    return *this;
 }
@@ -217,6 +236,194 @@ BaseStopCondition::~BaseStopCondition()
 
    if (mRmagParam != NULL)
       delete mRmagParam;
+}
+
+
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+bool BaseStopCondition::Initialize()
+{
+   mInitialized = false;
+   
+   if (Validate())
+   {
+      if (mStopParam->GetTypeName() == "Apoapsis" ||
+          mStopParam->GetTypeName() == "Periapsis")
+      {
+         mGoal = 0.0;
+         mAllowGoalParam = false;
+      }
+      
+      if (mNeedInterpolator)
+      {
+         mBufferSize = mInterpolator->GetBufferSize();
+         mEpochBuffer.reserve(mBufferSize);
+         mValueBuffer.reserve(mBufferSize);
+         
+         for (int i=0; i<mBufferSize; i++)
+         {
+            mEpochBuffer[i] = 0.0;
+            mValueBuffer[i] = 0.0;
+         }
+         
+         mNumValidPoints = 0;
+         mInitialized = true;
+      }
+      else
+      {
+         mInitialized = true;
+      }
+   }
+   
+   #if DEBUG_BASE_STOPCOND_INIT
+   MessageInterface::ShowMessage
+      ("BaseStopCondition::Initialize() mInitialized=%d\n",
+       mInitialized);
+   #endif
+   
+   return mInitialized;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool Validate()
+//------------------------------------------------------------------------------
+/**
+ * @return true if all necessary objects have been set; false otherwise
+ *
+ * @exception thrown if necessary object pointer is NULL
+ */
+//------------------------------------------------------------------------------
+bool BaseStopCondition::Validate()
+{   
+   // check on epoch parameter
+   if (!mUseInternalEpoch && mEpochParam == NULL)
+   {
+      throw StopConditionException
+         ("BaseStopCondition::Validate() epoch parameter: " + mEpochParamName +
+          " has NULL pointer.\n");
+   }
+   
+   // check on stop parameter
+   if (mStopParam == NULL)
+   {
+      throw StopConditionException
+         ("BaseStopCondition::Validate() stop parameter: " + mStopParamName +
+          " has NULL pointer.\n");
+   }
+   
+   // check on interpolator
+   if (mStopParam->IsTimeParameter())
+   {
+      mNeedInterpolator = false;
+   }
+   else
+   {
+      if (mInterpolator == NULL)
+      {
+         throw StopConditionException
+            ("BaseStopCondition::Validate() Interpolator: " + mInterpolatorName +
+             " has NULL pointer.\n");
+      }
+         
+      mNeedInterpolator = true;
+   }
+   
+   // check on goal parameter
+   if (mAllowGoalParam && mGoalParam == NULL)
+      throw StopConditionException
+         ("BaseStopCondition::Validate() goal parameter: " + mGoalStr +
+          " has NULL pointer.\n");
+   
+   // Apoapsis and Periapsis need additional parameters
+   if (mStopParam->GetTypeName() == "Apoapsis" ||
+       mStopParam->GetTypeName() == "Periapsis")
+   {
+      // check on Ecc parameter
+      if (mEccParam  == NULL)
+      {
+         #if DEBUG_BASE_STOPCOND
+         MessageInterface::ShowMessage
+            ("BaseStopCondition::Validate(): Creating KepEcc...\n");
+         #endif
+         
+         mEccParam = new KepEcc("");
+         
+         mEccParam->AddRefObject
+            (mStopParam->GetRefObject(Gmat::SPACECRAFT, 
+                                      mStopParam->GetRefObjectName(Gmat::SPACECRAFT)));
+         mEccParam->AddRefObject
+            (mStopParam->GetRefObject(Gmat::COORDINATE_SYSTEM, 
+                                      mStopParam->GetRefObjectName(Gmat::COORDINATE_SYSTEM)));
+         
+         //loj: 5/19/05 Added true
+         mEccParam->AddRefObject
+            (mStopParam->GetRefObject(Gmat::SPACE_POINT, 
+                                      mStopParam->GetRefObjectName(Gmat::SPACE_POINT)),
+             true);
+         
+         mEccParam->SetInternalCoordSystem(mStopParam->GetInternalCoordSystem());            
+         mEccParam->AddRefObject(mSolarSystem);
+         mEccParam->Initialize();
+      }
+      
+      // check on SphRMag parameter if "Periapsis"
+      if (mStopParam->GetTypeName() == "Periapsis")
+      {
+         if (mRmagParam == NULL)
+         {
+            #if DEBUG_BASE_STOPCOND_INIT
+            MessageInterface::ShowMessage
+               ("BaseStopCondition::Validate(): Creating SphRMag...\n");
+            #endif
+            
+            std::string depObjName = mStopParam->GetStringParameter("DepObject");
+            
+            #if DEBUG_BASE_STOPCOND_INIT
+            MessageInterface::ShowMessage
+               ("BaseStopCondition::Validate() depObjName of mStopParam=%s\n",
+                depObjName.c_str());
+            #endif
+            
+            mRmagParam = new SphRMag("");
+            mRmagParam->SetStringParameter("DepObject", depObjName);
+            
+            mRmagParam->AddRefObject
+               (mStopParam->GetRefObject(Gmat::SPACECRAFT,
+                                         mStopParam->GetRefObjectName(Gmat::SPACECRAFT)));
+            mRmagParam->AddRefObject
+               (mStopParam->GetRefObject(Gmat::COORDINATE_SYSTEM,
+                                         mStopParam->GetRefObjectName(Gmat::COORDINATE_SYSTEM)));
+            mRmagParam->AddRefObject
+               (mStopParam->GetRefObject(Gmat::SPACE_POINT,
+                                         mStopParam->GetRefObjectName(Gmat::SPACE_POINT)),
+                true);
+            
+            mRmagParam->SetInternalCoordSystem(mStopParam->GetInternalCoordSystem());
+            mRmagParam->AddRefObject(mSolarSystem);
+            mRmagParam->Initialize();
+            
+            // set mRange (loj: 6/8/05 Added)
+            if (depObjName == "Earth")
+               mRange = 5.0e5;
+            else if (depObjName == "Luna")
+               //mRange = 2.0e5; // Swingby has this.
+               mRange = 5.0e5;
+            else
+               mRange = 1.0e10;
+         }
+      }
+   }
+   
+   #if DEBUG_BASE_STOPCOND_INIT
+   MessageInterface::ShowMessage
+      ("BaseStopCondition::Validate() mUseInternalEpoch=%d, "
+       "mEpochParam=%d, mStopParam=%d\n   mInterpolator=%d, mRange=%f\n",
+       mUseInternalEpoch, mEpochParam, mStopParam, mInterpolator, mRange);
+   #endif
+   
+   return true;
 }
 
 
@@ -266,15 +473,6 @@ Parameter* BaseStopCondition::GetStopParameter()
 
 
 //------------------------------------------------------------------------------
-// RefFrame* GetRefFrame()
-//------------------------------------------------------------------------------
-RefFrame* BaseStopCondition::GetRefFrame()
-{
-   return mRefFrame;
-}
-
-
-//------------------------------------------------------------------------------
 // Interpolator* GetInterpolator()
 //------------------------------------------------------------------------------
 Interpolator* BaseStopCondition::GetInterpolator()
@@ -293,29 +491,20 @@ void BaseStopCondition::SetDescription(const std::string &desc)
 
 
 //------------------------------------------------------------------------------
-// bool SetInterpolator(Interpolator *interp)
+// void SetPropDirection(Real dir)
 //------------------------------------------------------------------------------
-/**
- * Sets Interpolator to interpolate stop condition epoch.
- *
- * @return true if Interplator is successfully set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool BaseStopCondition::SetInterpolator(Interpolator *interp)
-{
-   if (interp != NULL)
-   {
-      if (mInterpolator->GetName() == "InternalInterpolator")
-         delete mInterpolator;
-        
-      mInterpolator = interp;
-      //Initialize();
-      return true;
-   }
+void BaseStopCondition::SetPropDirection(Real dir)
+{   
+   if (dir >= 1.0)
+      mBackwardsProp = false;
    else
-   {
-      return false;
-   }
+      mBackwardsProp = true;
+   
+   #if DEBUG_BASE_STOPCOND
+   MessageInterface::ShowMessage
+      ("BaseStopCondition::SetPropDirection() dir=%f, mBackwardsProp=%d\n",
+       dir, mBackwardsProp);
+   #endif
 }
 
 
@@ -341,7 +530,7 @@ void BaseStopCondition::SetSolarSystem(SolarSystem *solarSystem)
 
 
 //------------------------------------------------------------------------------
-// bool SetInterpolator(const std::string &name)
+// bool SetInterpolator(Interpolator *interp)
 //------------------------------------------------------------------------------
 /**
  * Sets Interpolator to interpolate stop condition epoch.
@@ -349,83 +538,20 @@ void BaseStopCondition::SetSolarSystem(SolarSystem *solarSystem)
  * @return true if Interplator is successfully set; false otherwise
  */
 //------------------------------------------------------------------------------
-bool BaseStopCondition::SetInterpolator(const std::string &name)
+bool BaseStopCondition::SetInterpolator(Interpolator *interp)
 {
-   bool status = false;
-
-   //@todo Do not use Moderator
-    
-#if !defined __UNIT_TEST__
-   Moderator *theModerator = Moderator::Instance();
-    
-   if (name != "")
+   if (interp != NULL)
    {
-      // get Interpolator pointer
-      Interpolator *interp = theModerator->GetInterpolator(name);
-      if (interp != NULL)
-      {
-         status = SetInterpolator(interp);
-      }
-   }
-
-#endif
-   return status;
-}
-
-
-//------------------------------------------------------------------------------
-// bool SetRefFrame(RefFrame *refFrame)
-//------------------------------------------------------------------------------
-/**
- * Sets reference frame
- *
- * @return true if RefFrame is successfully set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool BaseStopCondition::SetRefFrame(RefFrame *refFrame)
-{
-   if (refFrame != NULL)
-   {
-      if (mRefFrame->GetName() == "InternalRefFrame")
-         delete mRefFrame;
-            
-      mRefFrame = refFrame;
+      if (mInterpolator->GetName() == "InternalInterpolator")
+         delete mInterpolator;
+      
+      mInterpolator = interp;
       return true;
    }
    else
    {
       return false;
    }
-}
-
-
-//------------------------------------------------------------------------------
-// bool SetRefFrame(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Sets reference frame
- *
- * @return true if RefFrame is successfully set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool BaseStopCondition::SetRefFrame(const std::string &name)
-{
-   bool status = false;
-
-#if !defined __UNIT_TEST__
-   Moderator *theModerator = Moderator::Instance();
-    
-   if (name != "")
-   {
-      // get RefFrame pointer
-      RefFrame *refFrame = theModerator->GetRefFrame(name);
-      if (refFrame != NULL)
-      {
-         status = SetRefFrame(refFrame);
-      }
-   }
-#endif
-   return status;
 }
 
 
@@ -454,43 +580,6 @@ bool BaseStopCondition::SetEpochParameter(Parameter *param)
 
 
 //------------------------------------------------------------------------------
-// bool SetEpochParameter(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Sets epoch parameter which will be used to interpolate stop epoch
- *
- * @return true if EpochParam is successfully set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool BaseStopCondition::SetEpochParameter(const std::string &name)
-{
-   bool status = false;
-
-   #if DEBUG_BASE_STOPCOND
-   MessageInterface::ShowMessage("BaseStopCondition::SetEpochParameter() name = %s\n",
-                                 name.c_str());
-   #endif
-   
-#if !defined __UNIT_TEST__
-   Moderator *theModerator = Moderator::Instance();
-    
-   if (name != "")
-   {
-      // get parameter pointer
-      Parameter *param = theModerator->GetParameter(name);
-      if (param != NULL)
-      {
-         //MessageInterface::ShowMessage("BaseStopCondition::SetEpochParameter() name = %s\n",
-         //                               param->GetName().c_str());
-         status = SetEpochParameter(param);
-      }
-   }
-#endif
-   return status;
-}
-
-
-//------------------------------------------------------------------------------
 // virtual bool SetStopParameter(Parameter *param)
 //------------------------------------------------------------------------------
 /**
@@ -505,10 +594,10 @@ bool BaseStopCondition::SetStopParameter(Parameter *param)
    {
       mStopParam = param;
       mStopParamType = mStopParam->GetTypeName();
-        
+      
       if (param->IsTimeParameter())
          mInitialized = true;
-        
+      
       return true;
    }
    
@@ -517,83 +606,50 @@ bool BaseStopCondition::SetStopParameter(Parameter *param)
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetStopParameter(const std::string &name)
+// virtual bool SetGoalParameter(Parameter *param)
 //------------------------------------------------------------------------------
-bool BaseStopCondition::SetStopParameter(const std::string &name)
+/**
+ * Sets goal parameter to stop condition.
+ *
+ * @return true if parameter has added to array.
+ */
+//------------------------------------------------------------------------------
+bool BaseStopCondition::SetGoalParameter(Parameter *param)
 {
-   #if DEBUG_BASE_STOPCOND
-   MessageInterface::ShowMessage("BaseStopCondition::SetStopParameter() name = %s\n",
-                                 name.c_str());
-   #endif
+   mGoalParam = param;
    
-   bool status = false;
-   
-#if !defined __UNIT_TEST__
-   Moderator *theModerator = Moderator::Instance();
-   
-   if (name != "")
-   {
-      // get parameter pointer
-      Parameter *param = theModerator->GetParameter(name);
-      if (param != NULL)
-      {
-         //MessageInterface::ShowMessage("BaseStopCondition::SetStopParameter() name = %s\n",
-         //                               param->GetName().c_str());
-         SetStopParameter(param);
-         status = true;
-      }
-   }
-#endif
-   
-   return status;
+   return true;
 }
 
 
 //------------------------------------------------------------------------------
-// bool Initialize()
+// void SetGoalString(const std::string &str)
 //------------------------------------------------------------------------------
-bool BaseStopCondition::Initialize()
+void BaseStopCondition::SetGoalString(const std::string &str)
 {
-   mInitialized = false;
+   mGoalStr = str;
    
-   if (Validate())
+   // remove leading blanks
+   std::string::size_type pos = mGoalStr.find_first_not_of(' ');
+   mGoalStr.erase(0, pos);
+   
+   // if str is just a number
+   if (isdigit(mGoalStr[0]) || mGoalStr[0] == '.' || mGoalStr[0] == '-')
    {
-      if (mStopParam->GetTypeName() == "Apoapsis" ||
-          mStopParam->GetTypeName() == "Periapsis")
-      {
-         mGoal = 0.0;
-      }
-      
-      if (mNeedInterpolator)
-      {
-         mBufferSize = mInterpolator->GetBufferSize();
-         mEpochBuffer.reserve(mBufferSize);
-         mValueBuffer.reserve(mBufferSize);
-        
-         for (int i=0; i<mBufferSize; i++)
-         {
-            mEpochBuffer[i] = 0.0;
-            mValueBuffer[i] = 0.0;
-         }
-        
-         mNumValidPoints = 0;
-         mInitialized = true;
-      }
-      else
-      {
-         mInitialized = true;
-      }
-      
-      //loj: How about mRefFrame? - need for crossing plane
+      mGoal = atof(mGoalStr.c_str());
+      mAllowGoalParam = false;
    }
-
-   #if DEBUG_BASE_STOPCOND_INIT
+   else
+   {
+      mAllowGoalParam = true;
+   }
+   
+   #if DEBUG_BASE_STOPCOND
    MessageInterface::ShowMessage
-      ("BaseStopCondition::Initialize() mInitialized=%d\n",
-       mInitialized);
+      ("BaseStopCondition::SetGoalString() mAllowGoalParam=%d, mGoalStr=<%s>, "
+       "mGoal=%le\n", mAllowGoalParam, mGoalStr.c_str(), mGoal);
    #endif
    
-   return mInitialized;
 }
 
 
@@ -610,12 +666,11 @@ bool BaseStopCondition::SetSpacecraft(SpaceObject *sc)
 {
    if (mEccParam != NULL)
       mEccParam->SetRefObject(sc, Gmat::SPACECRAFT, sc->GetName());
-
+   
    if (mRmagParam != NULL)
       mRmagParam->SetRefObject(sc, Gmat::SPACECRAFT, sc->GetName());
-
+   
    return true;
-   //return false; // base class doesn't know which object is used
 }
 
 
@@ -629,141 +684,6 @@ bool BaseStopCondition::SetSpacecraft(SpaceObject *sc)
 Real BaseStopCondition::GetStopEpoch()
 {
    return mStopEpoch;
-}
-
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * @return true if all necessary objects have been set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool BaseStopCondition::Validate()
-{
-   bool valid = false;
-
-   // check on epoch parameter
-   if (mUseInternalEpoch || mEpochParam != NULL)
-      valid = true;
-   
-   // check on stop parameter
-   if (valid)
-   {
-      valid = false;
-      if (mStopParam != NULL)
-      {
-         if (mStopParam->IsTimeParameter())
-         {
-            mNeedInterpolator = false;
-            valid = true;
-         }
-         else if (mInterpolator != NULL)
-         {
-            mNeedInterpolator = true;
-            valid = true;
-         }
-      }
-   }
-
-   // Apoapsis and Periapsis need additional parameters
-   if (valid)
-   {
-      if (mStopParam->GetTypeName() == "Apoapsis" ||
-          mStopParam->GetTypeName() == "Periapsis")
-      {
-         // check on Ecc parameter
-         if (mEccParam  == NULL)
-         {
-            #if DEBUG_BASE_STOPCOND
-            MessageInterface::ShowMessage
-               ("BaseStopCondition::Validate(): Creating KepEcc...\n");
-            #endif
-            
-            mEccParam = new KepEcc("");
-            
-            mEccParam->AddRefObject
-               (mStopParam->GetRefObject(Gmat::SPACECRAFT, 
-                                         mStopParam->GetRefObjectName(Gmat::SPACECRAFT)));
-            mEccParam->AddRefObject
-               (mStopParam->GetRefObject(Gmat::COORDINATE_SYSTEM, 
-                                         mStopParam->GetRefObjectName(Gmat::COORDINATE_SYSTEM)));
-
-            //loj: 5/19/05 Added true
-            mEccParam->AddRefObject
-               (mStopParam->GetRefObject(Gmat::SPACE_POINT, 
-                                         mStopParam->GetRefObjectName(Gmat::SPACE_POINT)),
-                true);
-            
-            mEccParam->SetInternalCoordSystem(mStopParam->GetInternalCoordSystem());            
-            mEccParam->AddRefObject(mSolarSystem);
-            mEccParam->Initialize();
-         }
-         
-         // check on SphRMag parameter if "Periapsis"
-         if (mStopParam->GetTypeName() == "Periapsis")
-         {
-            if (mRmagParam == NULL)
-            {
-               #if DEBUG_BASE_STOPCOND_INIT
-               MessageInterface::ShowMessage
-                  ("BaseStopCondition::Validate(): Creating SphRMag...\n");
-               #endif
-               
-               std::string depObjName = mStopParam->GetStringParameter("DepObject");
-               
-               #if DEBUG_BASE_STOPCOND_INIT
-               MessageInterface::ShowMessage
-                  ("BaseStopCondition::Validate() depObjName of mStopParam=%s\n",
-                   depObjName.c_str());
-               #endif
-               
-               mRmagParam = new SphRMag("");
-               mRmagParam->SetStringParameter("DepObject", depObjName);
-               
-               mRmagParam->AddRefObject
-                  (mStopParam->GetRefObject(Gmat::SPACECRAFT,
-                                            mStopParam->GetRefObjectName(Gmat::SPACECRAFT)));
-               mRmagParam->AddRefObject
-                  (mStopParam->GetRefObject(Gmat::COORDINATE_SYSTEM,
-                                            mStopParam->GetRefObjectName(Gmat::COORDINATE_SYSTEM)));
-               mRmagParam->AddRefObject
-                  (mStopParam->GetRefObject(Gmat::SPACE_POINT,
-                                            mStopParam->GetRefObjectName(Gmat::SPACE_POINT)),
-                   true);
-               
-               mRmagParam->SetInternalCoordSystem(mStopParam->GetInternalCoordSystem());
-               mRmagParam->AddRefObject(mSolarSystem);
-               mRmagParam->Initialize();
-               
-               // set mRange (loj: 6/8/05 Added)
-               if (depObjName == "Earth")
-                  mRange = 5.0e5;
-               else if (depObjName == "Luna")
-                  //mRange = 2.0e5; // Swingby has this.
-                  mRange = 5.0e5;
-               else
-                  mRange = 1.0e10;
-            }
-         }
-      }
-   }
-   
-   #if DEBUG_BASE_STOPCOND_INIT
-   if (!valid)
-   {
-      MessageInterface::ShowMessage
-         ("BaseStopCondition::Validate() failed mUseInternalEpoch=%d, "
-          "mEpochParam=%d, mStopParam=%d, mInterpolator=%d\n",
-          mUseInternalEpoch, mEpochParam, mStopParam, mInterpolator);
-   }
-   
-   MessageInterface::ShowMessage
-      ("BaseStopCondition::Validate() Exiting valid=%d, mRange=%f\n", valid, mRange);
-   
-   #endif
-   
-   return valid;
 }
 
 
@@ -801,6 +721,67 @@ bool BaseStopCondition::RenameRefObject(const Gmat::ObjectType type,
 }
 
 
+//---------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//---------------------------------------------------------------------------
+/**
+ * Retrieves reference object name array for given type. It will return all
+ * object names if type is Gmat::UNKNOWN_NAME.
+ *
+ * @param <type> object type
+ * @return reference object name.
+ */
+//------------------------------------------------------------------------------
+const StringArray&
+BaseStopCondition::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   mAllRefObjectNames.clear();
+   
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::PARAMETER)
+   {
+      mAllRefObjectNames.push_back(mStopParamName);
+      if (mAllowGoalParam)
+         mAllRefObjectNames.push_back(mGoalStr);
+   }
+   
+   return mAllRefObjectNames;
+}
+
+
+//---------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                   const std::string &name)
+//---------------------------------------------------------------------------
+bool BaseStopCondition::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name)
+{
+   #if DEBUG_BASE_STOPCOND_GET
+   MessageInterface::ShowMessage
+      ("BaseStopCondition::SetRefObject() Name=%s, mStopParamName=%s, mGoalStr=%s\n",
+       this->GetName().c_str(), mStopParamName.c_str(), mGoalStr.c_str());
+   #endif
+   
+   if (type == Gmat::PARAMETER)
+   {
+      if (name == mStopParamName)
+         SetStopParameter((Parameter*)obj);
+      else if (name == mGoalStr)
+         SetGoalParameter((Parameter*)obj);
+      else if (name == mEpochParamName)
+         SetEpochParameter((Parameter*)obj);
+      
+      return true;
+   }
+   else if (type == Gmat::INTERPOLATOR)
+   {
+      SetInterpolator((Interpolator*)obj);
+      return true;
+   }
+   
+   return GmatBase::SetRefObject(obj, type, name);
+}
+
+
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
@@ -819,7 +800,7 @@ std::string BaseStopCondition::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer BaseStopCondition::GetParameterID(const std::string &str) const
 {
-   #if DEBUG_BASE_STOPCOND_GET
+   #if DEBUG_BASE_STOPCOND_GET > 1
    MessageInterface::ShowMessage
       ("BaseStopCondition::GetParameterID() str = %s\n", str.c_str());
    #endif
@@ -917,8 +898,6 @@ Real BaseStopCondition::GetRealParameter(const Integer id) const
 {
    switch (id)
    {
-   case GOAL:
-      return mGoal;
    case TOLERANCE:
       return mTolerance;
    case ECC_TOL:
@@ -951,9 +930,6 @@ Real BaseStopCondition::SetRealParameter(const Integer id, const Real value)
 {
    switch (id)
    {
-   case GOAL:
-      mGoal = value;
-      return mGoal;
    case TOLERANCE:
       mTolerance = value;
       return mTolerance;
@@ -983,7 +959,7 @@ Real BaseStopCondition::SetRealParameter(const std::string &label, const Real va
    #if DEBUG_BASE_STOPCOND_SET
    MessageInterface::ShowMessage
       ("BaseStopCondition::SetRealParameter() label=%s, "
-       "value=%d\n", label.c_str(), value);
+       "value=%le\n", label.c_str(), value);
    #endif
    
    return SetRealParameter(GetParameterID(label), value);
@@ -998,25 +974,13 @@ std::string BaseStopCondition::GetStringParameter(const Integer id) const
    switch (id)
    {
    case EPOCH_VAR:
-      if (mEpochParam != NULL)
-         return mEpochParam->GetTypeName();
-      else
-         return "InternalEpoch";
+      return mEpochParamName;
    case STOP_VAR:
-      if (mStopParam != NULL)
-         return mStopParam->GetTypeName();
-      else
-         return "UndefinedStopVar";
+      return mStopParamName;
+   case GOAL:
+      return mGoalStr;
    case INTERPOLATOR:
-      if (mInterpolator != NULL)
-         return mInterpolator->GetTypeName();
-      else
-         return "UndefinedInterpolator";
-   case REF_FRAME:
-      if (mRefFrame != NULL)
-         return mRefFrame->GetTypeName();
-      else
-         return "UndefinedRefFrame";
+      return mInterpolatorName;
    default:
       return GmatBase::GetStringParameter(id);
    }
@@ -1051,13 +1015,17 @@ bool BaseStopCondition::SetStringParameter(const Integer id, const std::string &
    switch (id)
    {
    case EPOCH_VAR:
-      return SetEpochParameter(value);
+      mEpochParamName = value;
+      return true;
    case STOP_VAR:
-      return SetStopParameter(value);
+      mStopParamName = value;
+      return true;
+   case GOAL:
+      SetGoalString(value);
+      return true;
    case INTERPOLATOR:
-      return SetInterpolator(value);
-   case REF_FRAME:
-      return SetRefFrame(value);
+      mInterpolatorName = value;
+      return true;
    default:
       return GmatBase::SetStringParameter(id, value);
    }
@@ -1091,8 +1059,14 @@ bool BaseStopCondition::SetStringParameter(const std::string &label,
 void BaseStopCondition::CopyDynamicData(const BaseStopCondition &stopCond)
 {
    mNumValidPoints = stopCond.mNumValidPoints;
-      
    mBufferSize = stopCond.mBufferSize;
+
+   if ((Integer)mEpochBuffer.size() < mBufferSize)
+      mEpochBuffer.reserve(mBufferSize);
+
+   if ((Integer)mValueBuffer.size() < mBufferSize)
+      mValueBuffer.reserve(mBufferSize);
+      
    for (int i=0; i<mBufferSize; i++)
    {
       mEpochBuffer[i] = stopCond.mEpochBuffer[i];

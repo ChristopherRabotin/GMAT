@@ -32,9 +32,9 @@ public:
                  Parameter *epochParam = NULL,
                  Parameter *stopParam = NULL,
                  const Real &goal = GmatBase::REAL_PARAMETER_UNDEFINED,
-                 const Real &tol = STOP_COND_TOL, //loj:3/10/05 GmatRealConst::REAL_TOL,
+                 const Real &tol = STOP_COND_TOL,
                  const Integer repeatCount = 1,
-                 RefFrame *refFrame = NULL,
+                 //RefFrame *refFrame = NULL,
                  Interpolator *interp = NULL);
    StopCondition(const StopCondition &copy);
    StopCondition& operator= (const StopCondition &right); 
@@ -50,7 +50,7 @@ protected:
    bool CheckOnPeriapsis();
    bool CheckOnApoapsis();
    bool CheckOnAnomaly(Real anomaly);
-
+   
 private:
    
 };

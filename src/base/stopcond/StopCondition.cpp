@@ -19,14 +19,15 @@
 
 #include "StopCondition.hpp"
 #include "StopConditionException.hpp"
-#include "MeanJ2000Equatorial.hpp"
 #include "CubicSplineInterpolator.hpp"
 #include "RealUtilities.hpp"           // for Abs()
 #include "AngleUtil.hpp"               // for PutAngleInDegRange()
 #include "MessageInterface.hpp"
 
-//#define DEBUG_STOPCOND 1
+//#define DEBUG_STOPCOND 2
 //#define DEBUG_STOPCOND_PERIAPSIS 1
+
+using namespace GmatMathUtil;
 
 //---------------------------------
 // public methods
@@ -34,8 +35,8 @@
 
 //------------------------------------------------------------------------------
 // StopCondition(const std::string &name, const std::string &desc,
-//               Parameter *epochParam, Parameter *stopParam, const Real &goal,
-//               const Real &tol, const Integer repeatCount, RefFrame *refFrame,
+//               Parameter *epochParam, Parameter *stopParam, const Real &goal
+//               const Real &tol, const Integer repeatCount,
 //               Interpolator *interp)
 //------------------------------------------------------------------------------
 /**
@@ -45,10 +46,11 @@
 StopCondition::StopCondition(const std::string &name, const std::string &desc,
                              Parameter *epochParam, Parameter *stopParam,
                              const Real &goal, const Real &tol,
-                             const Integer repeatCount, RefFrame *refFrame,
+                             const Integer repeatCount, //RefFrame *refFrame,
                              Interpolator *interp)
    : BaseStopCondition(name, desc, epochParam, stopParam, goal, tol,
-                       repeatCount, refFrame, interp)
+                       //repeatCount, refFrame, interp)
+                       repeatCount, interp)
 {
    objectTypeNames.push_back("StopCondition");
 }
@@ -117,20 +119,29 @@ bool StopCondition::Evaluate()
    Real rval;
    Real stopEpoch; //in A1Mjd
    
+   if (mStopParam == NULL ||
+       (mAllowGoalParam && mGoalParam == NULL))
+      Initialize();
+   
+   //loj: 7/15/05 Added evaulating goal
+   // evaluate goal
+   if (mAllowGoalParam)
+      mGoal = mGoalParam->EvaluateReal();
+   
    // set current epoch
    if (mUseInternalEpoch)
       epoch = mEpoch;
    else
       epoch = mEpochParam->EvaluateReal();
-    
+   
    // for time data we don't need to interpolate
    if (mStopParam->IsTimeParameter())
    {
       rval = mStopParam->EvaluateReal();
-
+      
       #if DEBUG_STOPCOND > 1
       MessageInterface::ShowMessage
-         ("StopCondition::Evaluate() mUseInternalEpoch = %d, eppoch = %f, "
+         ("StopCondition::Evaluate() mUseInternalEpoch = %d, epoch = %f, "
           "mGoal = %f, rval = %f\n",  mUseInternalEpoch, epoch, mGoal, rval);
       #endif
       
@@ -159,7 +170,6 @@ bool StopCondition::Evaluate()
       mNumValidPoints = (mNumValidPoints < mBufferSize) ?
          mNumValidPoints + 1 : mNumValidPoints;
       
-      //loj: 6/8/05 added > 1 for detailed debug output
       #if DEBUG_STOPCOND > 1
       MessageInterface::ShowMessage("StopCondition::Evaluate() mNumValidPoints=%d, "
                                     "mBufferSize=%d\n", mNumValidPoints, mBufferSize);
@@ -176,8 +186,8 @@ bool StopCondition::Evaluate()
       
       #if DEBUG_STOPCOND
       MessageInterface::ShowMessage
-         ("StopCondition::Evaluate() epoch=%f, mStopParam=%s, rval=%f\n",
-          epoch, mStopParam->GetName().c_str(), rval);
+         ("StopCondition::Evaluate() epoch=%f, mStopParam=%s, rval=%f, mGoal=%f\n",
+          epoch, mStopParam->GetName().c_str(), rval, mGoal);
       #endif
       
       mEpochBuffer[mBufferSize - 1] = epoch;
@@ -274,7 +284,7 @@ GmatBase* StopCondition::Clone(void) const
 //------------------------------------------------------------------------------
 bool StopCondition::CheckOnPeriapsis()
 {   
-   bool backwards = false; //loj: from Propagator?
+   //bool backwards = false; //loj: from Propagator?
    Real ecc = mEccParam->EvaluateReal();
    Real rmag = mRmagParam->EvaluateReal();
    
@@ -293,10 +303,12 @@ bool StopCondition::CheckOnPeriapsis()
    if ((rmag <= mRange) && (ecc >= mEccTol))
    {
       if (mNumValidPoints >= mBufferSize &&
-          ((backwards &&
+          //((backwards && //loj: 7/20/04 use memeber data
+          ((mBackwardsProp &&
             mValueBuffer[mBufferSize-2] >= mGoal  &&
             mValueBuffer[mBufferSize-1] <= mGoal) ||  
-           (!backwards &&
+           //(!backwards &&
+           (!mBackwardsProp &&
             mValueBuffer[mBufferSize-2] <= mGoal  &&
             mValueBuffer[mBufferSize-1] >= mGoal)))
       {
@@ -326,7 +338,7 @@ bool StopCondition::CheckOnPeriapsis()
 //------------------------------------------------------------------------------
 bool StopCondition::CheckOnApoapsis()
 {
-   bool backwards = false; //loj: from Propagator?
+   //bool backwards = false; //loj: from Propagator?
    Real ecc = mEccParam->EvaluateReal();
    
    //----------------------------------------------------------------------
@@ -338,17 +350,19 @@ bool StopCondition::CheckOnApoapsis()
    if (ecc >= mEccTol)
    {
       if (mNumValidPoints >= mBufferSize &&
-          ((backwards &&
+          //((backwards &&
+          ((mBackwardsProp &&
             mValueBuffer[mBufferSize-2] <= mGoal  &&
             mValueBuffer[mBufferSize-1] >= mGoal) ||  
-           (!backwards &&
+           //(!backwards &&
+           (!mBackwardsProp &&
             mValueBuffer[mBufferSize-2] >= mGoal  &&
             mValueBuffer[mBufferSize-1] <= mGoal)))
       {
          return true;
       }
    }
-
+   
    return false;
 }
 
@@ -366,11 +380,12 @@ bool StopCondition::CheckOnAnomaly(Real anomaly)
    Real diff = AngleUtil::PutAngleInDegRange
       (GmatMathUtil::Abs(tempGoal - mValueBuffer[mBufferSize-1]),
        0.0, GmatMathUtil::TWO_PI_DEG);
-
+   
    #if DEBUG_STOPCOND
-   MessageInterface::ShowMessage("CheckOnAnomaly() mGoal=%f tempGoal=%f diff=%f last=%f curr=%f\n",
-                                 mGoal, tempGoal, diff, mValueBuffer[mBufferSize-2],
-                                 mValueBuffer[mBufferSize-1]);
+   MessageInterface::ShowMessage
+      ("CheckOnAnomaly() mGoal=%f tempGoal=%f diff=%f last=%f curr=%f\n",
+       mGoal, tempGoal, diff, mValueBuffer[mBufferSize-2],
+       mValueBuffer[mBufferSize-1]);
    #endif
    
    //----------------------------------------------------------------------   
@@ -386,7 +401,7 @@ bool StopCondition::CheckOnAnomaly(Real anomaly)
    {
       return true;
    }
-
+   
    return false;
 }
 
