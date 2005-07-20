@@ -40,11 +40,9 @@ public:
     
 private:    
     void Create();
-    //void DisplayData();
     
     // Event Handling
     DECLARE_EVENT_TABLE();
-    //void OnSelect(wxCommandEvent &event);
     void OnButtonClick(wxCommandEvent &event);
     
     Spacecraft *theSpacecraft;
@@ -52,15 +50,6 @@ private:
     GuiItemManager *theGuiManager;
     
     wxArrayString mExcludedThrusterList;
-    
-//    wxArrayString availableThrusterArray;
-//    wxArrayString selectedThrusterArray;
-//        
-//    Integer availableThrusterCount;
-//    Integer selectedThrusterCount;
-//    
-//    Integer currentAvailThruster;
-//    Integer currentSelectedThruster;
     
     wxButton *theApplyButton;
     wxButton *selectButton;

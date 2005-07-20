@@ -26,7 +26,6 @@
 // event tables for wxWindows
 //------------------------------
 BEGIN_EVENT_TABLE(ThrusterPanel, wxPanel)
-//   EVT_LISTBOX(ID_LISTBOX, ThrusterPanel::OnSelect)
    EVT_BUTTON(ID_BUTTON, ThrusterPanel::OnButtonClick)
 END_EVENT_TABLE()
 
@@ -49,12 +48,6 @@ ThrusterPanel::ThrusterPanel(wxWindow *parent, Spacecraft *spacecraft,
     
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
     theGuiManager = GuiItemManager::GetInstance();
-    
-//    availableThrusterCount = 0;
-//    selectedThrusterCount = 0;
-//    
-//    currentAvailThruster = 0;
-//    currentSelectedThruster = 0;
     
     Create();
 }
@@ -87,15 +80,8 @@ void ThrusterPanel::Create()
    removeAllButton = new wxButton( this, ID_BUTTON, wxT("<="),
                               wxDefaultPosition, wxDefaultSize, 0 );
                               
-   // wxString
    wxString emptyList[] = {};
-                            
-   // wxListBox
-//   availableThrusterListBox = new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
-//                    wxSize(150,200), availableThrusterCount, emptyList, wxLB_SINGLE);
-//   selectedThrusterListBox = new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
-//                    wxSize(150,200), selectedThrusterCount, emptyList, wxLB_SINGLE);
-
+   
    Integer paramID = theSpacecraft->GetParameterID("Thrusters");
    StringArray thrusterNames = theSpacecraft->GetStringArrayParameter(paramID);
    
@@ -144,51 +130,11 @@ void ThrusterPanel::Create()
    boxSizer1->Fit( this );
    boxSizer1->SetSizeHints( this );
    
-   selectButton->Enable(false);
-   removeButton->Enable(false);
-   selectAllButton->Enable(false);
-   removeAllButton->Enable(false);
+   selectButton->Enable(true);
+   removeButton->Enable(true);
+   selectAllButton->Enable(true);
+   removeAllButton->Enable(true);
 }
-
-//------------------------------------------------------------------------------
-// void DisplayData()
-//------------------------------------------------------------------------------
-//void ThrusterPanel::DisplayData()
-//{
-//    if (availableThrusterCount > 0)
-//    {
-//        selectButton->Enable(true);
-//        selectAllButton->Enable(true);
-//    } 
-//    else
-//    {
-//        selectButton->Enable(false);
-//        selectAllButton->Enable(false);
-//    }     
-//    
-//    if (selectedThrusterCount > 0)
-//    {
-//        removeButton->Enable(true);
-//        removeAllButton->Enable(true);
-//    } 
-//    else
-//    {
-//        removeButton->Enable(false);
-//        removeAllButton->Enable(false);         
-//    }     
-//    
-//    availableThrusterListBox->Clear();  
-//    selectedThrusterListBox->Clear(); 
-//    
-//    for (Integer i = 0; i < availableThrusterCount; i++) 
-//        availableThrusterListBox->Append(availableThrusterArray[i].c_str());
-//        
-//    for (Integer i = 0; i < selectedThrusterCount; i++) 
-//        selectedThrusterListBox->Append(selectedThrusterArray[i].c_str());
-//        
-//    availableThrusterListBox->SetSelection(currentAvailThruster, true);
-//    selectedThrusterListBox->SetSelection(currentSelectedThruster, true);
-//}    
 
 //------------------------------------------------------------------------------
 // void LoadData()
@@ -198,44 +144,13 @@ void ThrusterPanel::LoadData()
     if (theSpacecraft == NULL)
        return;
 
-    // Load list of selected thruster
-//    Integer paramID = theSpacecraft->GetParameterID("Thrusters");
-//    StringArray thrusterNames = theSpacecraft->GetStringArrayParameter(paramID);
-//    
-//    for (Integer i = 0; i < (Integer)thrusterNames.size(); i++)
-//       selectedThrusterArray.Add(thrusterNames[i].c_str());
-//       
-//    selectedThrusterCount = selectedThrusterArray.GetCount();
-//           
-//    // Load list of available thrusters
-//    availableThrusterCount = 0;
-//
-//    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::HARDWARE);
-//    Integer size = itemNames.size();  
-//      
-//    for (Integer i = 0; i < size; i++)
-//    {
-//        Hardware *hw = theGuiInterpreter->GetHardware(itemNames[i]);
-//        wxString objTypeName = wxString(hw->GetTypeName().c_str());
-//
-//        if (objTypeName == "Thruster")
-//        {
-//           if (find(thrusterNames.begin(), thrusterNames.end(), itemNames[i].c_str()) == thrusterNames.end()) 
-//              availableThrusterArray.Add(itemNames[i].c_str());
-//        }    
-//    }
-
-     // Load list of selected thrusters
-     Integer paramID = theSpacecraft->GetParameterID("Thrusters");
-     StringArray thrustersNames = theSpacecraft->GetStringArrayParameter(paramID);
+    // Load list of selected thrusters
+    Integer paramID = theSpacecraft->GetParameterID("Thrusters");
+    StringArray thrustersNames = theSpacecraft->GetStringArrayParameter(paramID);
      
-//    availableThrusterCount = availableThrusterArray.GetCount();
-
     Integer count = thrustersNames.size();
     for (Integer i = 0; i < count; i++) 
         selectedThrusterListBox->Append(thrustersNames[i].c_str());
-
-//    DisplayData();
 }
 
 //------------------------------------------------------------------------------
@@ -256,33 +171,8 @@ void ThrusterPanel::SaveData()
         paramID = theSpacecraft->GetParameterID("Thrusters");
         theSpacecraft->SetStringParameter(paramID,
            std::string(selectedThrusterListBox->GetString(i).c_str()));       
-    }
-        
-//    Integer paramID = 0; 
-//    theSpacecraft->TakeAction("RemoveThruster", "");    
-//    for (Integer i = 0; i < selectedThrusterCount; i++) 
-//    {       
-//        paramID = theSpacecraft->GetParameterID("Thrusters");
-//        theSpacecraft->SetStringParameter(paramID, selectedThrusterArray[i].c_str());     
-//    }   
+    }  
 }
-
-//------------------------------------------------------------------------------
-// void OnSelect()
-//------------------------------------------------------------------------------
-//void ThrusterPanel::OnSelect(wxCommandEvent &event)
-//{
-//    if (event.GetEventObject() == availableThrusterListBox)
-//    {
-//        currentAvailThruster = availableThrusterListBox->GetSelection(); 
-//        availableThrusterListBox->SetSelection(currentAvailThruster, true);
-//    }    
-//    else if (event.GetEventObject() == selectedThrusterListBox)
-//    {
-//        currentSelectedThruster = selectedThrusterListBox->GetSelection(); 
-//        selectedThrusterListBox->SetSelection(currentSelectedThruster, true);
-//    }    
-//}   
 
 //------------------------------------------------------------------------------
 // void OnButtonClick(wxCommandEvent &event)
@@ -308,16 +198,7 @@ void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
              availableThrusterListBox->SetSelection(sel-1);
       
        }
-//        wxString thruster = availableThrusterArray.Item(currentAvailThruster);
-//        availableThrusterArray.Remove(thruster.c_str());
-//        availableThrusterCount = availableThrusterArray.GetCount();
-//        currentAvailThruster = 0;
-//        
-//        selectedThrusterArray.Add(thruster);
-//        selectedThrusterCount = selectedThrusterArray.GetCount();
-//        currentSelectedThruster = 0;
-//        
-//        DisplayData();
+
         theApplyButton->Enable();
     }
     else if (event.GetEventObject() == removeButton)
@@ -334,16 +215,7 @@ void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
           selectedThrusterListBox->SetSelection(0);
        else
           selectedThrusterListBox->SetSelection(sel-1);
-//        wxString thruster = selectedThrusterArray.Item(currentSelectedThruster);
-//        selectedThrusterArray.Remove(thruster.c_str());
-//        selectedThrusterCount = selectedThrusterArray.GetCount();
-//        currentSelectedThruster = 0;
-//        
-//        availableThrusterArray.Add(thruster);
-//        availableThrusterCount = availableThrusterArray.GetCount();
-//        currentAvailThruster = 0;
-//        
-//        DisplayData();
+
         theApplyButton->Enable();
     }   
     else if (event.GetEventObject() == selectAllButton)
@@ -361,17 +233,7 @@ void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
        
        availableThrusterListBox->Clear();
        selectedThrusterListBox->SetSelection(0);
-//        for (Integer i = 0; i < availableThrusterCount; i++) 
-//           selectedThrusterArray.Add(availableThrusterArray.Item(i));
-//  
-//        availableThrusterArray.Clear();
-//        availableThrusterCount = availableThrusterArray.GetCount();
-//        currentAvailThruster = 0;
-//        
-//        selectedThrusterCount = selectedThrusterArray.GetCount();
-//        currentSelectedThruster = 0;
-//        
-//        DisplayData();
+
         theApplyButton->Enable();
     } 
     else if (event.GetEventObject() == removeAllButton)
@@ -389,17 +251,7 @@ void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
        selectedThrusterListBox->Clear();
        mExcludedThrusterList.Clear();
        availableThrusterListBox->SetSelection(0);
-//        for (Integer i = 0; i < selectedThrusterCount; i++) 
-//           availableThrusterArray.Add(selectedThrusterArray.Item(i));
-//        
-//        selectedThrusterArray.Clear();
-//        selectedThrusterCount = selectedThrusterArray.GetCount();
-//        currentSelectedThruster = 0;
-//        
-//        availableThrusterCount = availableThrusterArray.GetCount();
-//        currentAvailThruster = 0;
-//        
-//        DisplayData();
+
         theApplyButton->Enable();
     }   
 }     
