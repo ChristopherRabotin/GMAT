@@ -395,7 +395,6 @@ CelestialBody::~CelestialBody()
 //------------------------------------------------------------------------------
 const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
 {
-   //cout << "In GetState for body " << instanceName << endl;
    Real*     posVel = NULL;
    switch (posVelSrc)
    {
@@ -2352,14 +2351,11 @@ Real CelestialBody::GetJulianDaysFromTCBEpoch(const A1Mjd &forTime) const
 //------------------------------------------------------------------------------
 Rvector6 CelestialBody::ComputeLowFidelity(const A1Mjd &forTime)
 {
-   //cout << "In LowFidelity for body " << instanceName << endl;
    // Since we want the state in MJ2000Eq Earth-centered
    if (instanceName == SolarSystem::EARTH_NAME) 
       return Rvector6(0.0,0.0,0.0,0.0,0.0,0.0);
 
-   //cout << "Getting central body state x ........." << endl;
    Rvector6 cbState = cb->GetState(forTime);
-   //cout << "The central body state = \n" << cbState << endl;
    return (KeplersProblem(forTime) + cbState);    
 }
 
@@ -2381,9 +2377,7 @@ Rvector6 CelestialBody::ComputeLowFidelity(const A1Mjd &forTime)
 Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
 {
    
-   //cout << "------- IN KeplersProblem ............." << endl;
    Real     cbMu  = cb->GetGravitationalConstant() + mu;
-   //cout << "cbMu = " << cbMu << endl;
    Rvector6 cart;  // or MA???
    Real     dTime;
    if (newLF)
@@ -2396,8 +2390,6 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
       cart  = prevLFState;
       dTime = forTime.Subtract(prevLFEpoch) * GmatTimeUtil::SECS_PER_DAY;
    }
-   //cout << "elements successfully converted to \n" << cart << endl;
-   //cout << "dTime = " << dTime << endl; // units are seconds, right?
    Rvector3 r0    = cart.GetR();
    Rvector3 v0    = cart.GetV();
    Real     rMag  = r0.GetMagnitude();
@@ -2406,8 +2398,6 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
    Real     alpha = (-vMag * vMag / cbMu) + (2.0 / rMag);
    Real     x0    = -999.999;
    Real     rDotv = r0 * v0;
-   //cout << "Made it through to determining the initial guess ...." << endl;
-   //cout << "alpha = " << alpha << endl;
    
    // Determine initial guess .......
    // for a circle or ellipse
@@ -2441,7 +2431,6 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
                        (1.0 - rMag * alpha);
       x0             = signT * Sqrt(-a) * Ln(num / den);
    }
-   //cout << "initial guess = " << x0 << endl;
    // Loop until difference falls within tolerance
    Real psi, rVal, xNew;
    Real xn    = x0;
@@ -2451,7 +2440,6 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
    while (!done)
    {
       psi = xn * xn * alpha;
-      //cout << "In loop, psi = " << psi << endl;
       
       // compute c2 and c3, per Algorithm 1, p. 71
       if (psi > KEPLER_TOL)
@@ -2474,32 +2462,19 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
       xNew = xn + ((Sqrt(cbMu) * dTime) - (xn * xn * xn * c3) - 
                    (rDotv / Sqrt(cbMu)) * (xn * xn * c2) -
                    rMag * xn * (1.0 - psi *c3)) / rVal;
-      //cout << "rVal = " << rVal << endl;
-      //cout << "xNew = " << xNew << endl;
-      //cout << "xn - xNew = " << (xn - xNew) << endl;
       
       //if (Abs(xn - xNew) < KEPLER_TOL) done = true;
       if (Abs(xn - xNew) < KEPLER_TOL) done = true;
       xn = xNew;
    }
-   //cout << "DONE with looping ......." << endl;
    
    Real f     = 1.0 - ((xn * xn) / rMag) * c2;
    Real g     = dTime - ((xn * xn * xn) / Sqrt(cbMu)) * c3;
-   //cout << "f = " << f << endl;
-   //cout << "g = " << g << endl;
    Real gDot  = 1.0 - ((xn * xn) / rVal) * c2;
    Real fDot  = (Sqrt(cbMu) / (rVal * rMag)) * xn * (psi * c3 - 1.0);
-   //cout << "fDot = " << fDot << endl;
-   //cout << "gDot = " << gDot << endl;
    Rvector3 r = f    * r0 + g    * v0;
    Rvector3 v = fDot * r0 + gDot * v0;
    
-   //Real tmp = f * gDot - g * fDot; // ***** temporary
-   //cout.setf(ios::fixed);
-   //cout.precision(30);
-
-   //cout << "The fgDot - gfDot value is : " << tmp << endl;
    if (!IsEqual((f * gDot - g * fDot), 1.0, 1.0e-10))
       throw SolarSystemException(
             "Error computing low fidelity ephemeris for body "
@@ -2509,11 +2484,26 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
    prevLFEpoch = forTime;
    prevLFState = newState;
    newLF       = false;
+   /* debug stuff
+   static std::ofstream foutMarsFromEarth;
+   static bool first = true;
+   if (first)
+   {
+      foutMarsFromEarth.open("./TestLowMarsData.out");
+      foutMarsFromEarth.setf(ios::fixed);
+      foutMarsFromEarth.precision(30);
+      first = false;
+   }
+   if (instanceName == SolarSystem::MARS_NAME)
+   {
+      Real  td = (Real) forTime.Subtract(lfEpoch) * GmatTimeUtil::SECS_PER_DAY;
+      foutMarsFromEarth << td << "  " << newState[0] << " " << newState[1] << " " << newState[2]
+         << "  " << newState[3] << " " << newState[4] << " " << newState[5] << std::endl;
+
+   }
+   */
    
    return newState;
-   //Rvector6 cbState = cb->GetState(forTime);
-   //cout << "The central body state = \n" << cbState << endl;
-   //return (newState + cbState); 
 }
 
 //------------------------------------------------------------------------------
