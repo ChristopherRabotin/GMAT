@@ -184,7 +184,10 @@ void Moderator::Finalize()
 {
    MessageInterface::ShowMessage("Moderator is deleting core engine...\n");
    
+   #if DEBUG_FINALIZE
    MessageInterface::ShowMessage("deleting files\n");
+   #endif
+   
    delete theFileManager;
    delete theDefaultSlpFile;
    delete theDefaultDeFile;
@@ -192,9 +195,12 @@ void Moderator::Finalize()
    delete theItrfFile;
    delete theLeapSecsFile;
    
-   MessageInterface::ShowMessage("deleting factories\n");
-   delete theStopConditionFactory;
+   //clear resource and command sequence
+   ClearResource();
+   ClearCommandSeq();
    
+   //MessageInterface::ShowMessage("deleting factories\n");
+   //delete theStopConditionFactory;
    //delete theCalculatedPointFactory;
    //delete theFunctionFactory;
    //delete theAtmosphereFactory;
@@ -250,9 +256,9 @@ void Moderator::Finalize()
    //if (instance)
    //   delete instance;
    
-   //#if DEBUG_FINALIZE
+   #if DEBUG_FINALIZE
    MessageInterface::ShowMessage("Moderator::Finalize() exiting\n");
-   //#endif
+   #endif
 }
 
 
@@ -1294,7 +1300,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    if (GetParameter(name) == NULL)
    {
       Parameter *parameter = theFactoryManager->CreateParameter(type, name);
-
+      
       if (parameter == NULL)
       {
          MessageInterface::PopupMessage
@@ -1305,7 +1311,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
          return NULL;
          //throw GmatBaseException("Error Creating Parameter: " + type);
       }
-
+      
       // Manage it if it is a named parameter
       try
       {
@@ -1317,7 +1323,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
          MessageInterface::ShowMessage("Moderator::CreateParameter()\n" +
                                        e.GetMessage());
       }
-   
+      
       return parameter;
    }
    else
@@ -1654,43 +1660,6 @@ Interpolator* Moderator::CreateInterpolator(const std::string &type,
  */
 //------------------------------------------------------------------------------
 Interpolator* Moderator::GetInterpolator(const std::string &name)
-{
-   return NULL;
-}
-
-//loj: 1/18/05 RefFrame will removed later.
-//(This was replaced by CoordinateSystem)
-//------------------------------------------------------------------------------
-// RefFrame* CreateRefFrame(const std::string &type, const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Creates a RefFrame object by given type and name.
- *
- * @param <type> object type
- * @param <name> object name
- *
- * @return a RefFrame object pointer
- */
-//------------------------------------------------------------------------------
-RefFrame* Moderator::CreateRefFrame(const std::string &type,
-                                    const std::string &name)
-{
-   //loj: 3/22/04 theFactoryManager->CreateRefFrame() not implemented
-   return NULL;
-}
-
-//------------------------------------------------------------------------------
-// RefFrame* GetRefFrame(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a celestial body object pointer by given name.
- *
- * @param <name> object name
- *
- * @return a RefFrame object pointer, return null if name not found
- */
-//------------------------------------------------------------------------------
-RefFrame* Moderator::GetRefFrame(const std::string &name)
 {
    return NULL;
 }
@@ -3235,7 +3204,8 @@ void Moderator::CreateDefaultMission()
          CreateStopCondition("StopCondition", "StopOnDefaultSC.ElapsedSecs");
       stopOnElapsedSecs->SetStringParameter("EpochVar", "DefaultSC.CurrA1MJD");
       stopOnElapsedSecs->SetStringParameter("StopVar", "DefaultSC.ElapsedSecs");
-      stopOnElapsedSecs->SetRealParameter("Goal", 8640.0);
+      //stopOnElapsedSecs->SetRealParameter("Goal", 8640.0);
+      stopOnElapsedSecs->SetStringParameter("Goal", "8640.0");
       
       #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->default StopCondition created\n");

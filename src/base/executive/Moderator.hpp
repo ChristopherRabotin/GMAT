@@ -39,7 +39,6 @@
 #include "PhysicalModel.hpp"
 #include "ForceModel.hpp"
 #include "Propagator.hpp"
-#include "RefFrame.hpp"
 #include "Spacecraft.hpp"
 #include "Formation.hpp"
 #include "Parameter.hpp"
@@ -186,33 +185,28 @@ public:
                               const std::string &propagatorName = "",
                               const std::string &forceModelName = "");
    PropSetup* GetPropSetup(const std::string &name);
-
+   
    // Interpolator
    Interpolator* CreateInterpolator(const std::string &type,
                                     const std::string &name);
    Interpolator* GetInterpolator(const std::string &name);
-
-   // RefFrame (loj: 1/18/05 This will be removed later)
-   RefFrame* CreateRefFrame(const std::string &type,
-                            const std::string &name);
-   RefFrame* GetRefFrame(const std::string &name);
-
+   
    // CoordinateSystem
    CoordinateSystem* CreateCoordinateSystem(const std::string &name,
                                             bool createDefault = false);
    CoordinateSystem* GetCoordinateSystem(const std::string &name);
-
+   
    // AxisSystem
    AxisSystem* CreateAxisSystem(const std::string &type,
                                 const std::string &name);
-
+   
    // Subscriber
    Subscriber* CreateSubscriber(const std::string &type,
                                 const std::string &name,
                                 const std::string &fileName = "",
                                 bool createDefault = false);
    Subscriber* GetSubscriber(const std::string &name);
-
+   
    // Function
    Function* CreateFunction(const std::string &type,
                             const std::string &name);
