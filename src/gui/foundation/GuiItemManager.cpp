@@ -736,16 +736,16 @@ wxListBox* GuiItemManager::GetCelestialPointListBox(wxWindow *parent, wxWindowID
 
 
 //------------------------------------------------------------------------------
-// wxListBox* GetSpaceObjectListBox(wxWindow *parent, wxWindowID id,
-//                                  const wxSize &size, wxArrayString &excList = NULL
+// wxListBox* GetSpaceObjectListBox(wxWindow *parent, wxWindowID id, ...)
 //------------------------------------------------------------------------------
 /**
- * @return configured Spacecraft anf Formation object ListBox pointer
+ * @return configured Spacecraft and Formation object ListBox pointer
  */
 //------------------------------------------------------------------------------
 wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id,
                                                  const wxSize &size,
-                                                 wxArrayString *excList)
+                                                 wxArrayString *excList,
+                                                 bool includeFormation)
 {
    #if DEBUG_GUI_ITEM_SO
    MessageInterface::ShowMessage
@@ -762,6 +762,10 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
    wxListBox *spaceObjectListBox =
       new wxListBox(parent, id, wxDefaultPosition, size, 0,
                     emptyList, wxLB_SINGLE|wxLB_SORT);
+
+   // get Formation list (loj: 7/18/05 Added)
+   StringArray fmList =
+      theGuiInterpreter->GetListOfConfiguredItems(Gmat::FORMATION);
    
    if (excList != NULL && excList->GetCount() > 0)
    {
@@ -770,11 +774,25 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
          if (excList->Index(theSpaceObjectList[i]) == wxNOT_FOUND)
             spaceObjectListBox->Append(theSpaceObjectList[i]);
       }
+
+      // if include formation
+      if (includeFormation)
+      {
+         for (unsigned int i=0; i<fmList.size(); i++)
+            if (excList->Index(fmList[i].c_str()) == wxNOT_FOUND)
+               spaceObjectListBox->Append(fmList[i].c_str());
+      }
    }
    else
    {
       for (int i=0; i<theNumSpaceObject; i++)
          spaceObjectListBox->Append(theSpaceObjectList[i]);
+
+      // if include formation
+      if (includeFormation)
+         for (unsigned int i=0; i<fmList.size(); i++)
+            spaceObjectListBox->Append(fmList[i].c_str());
+      
    }
    
    spaceObjectListBox->SetSelection(0);
@@ -1974,6 +1992,7 @@ void GuiItemManager::UpdateSpaceObjectList()
          //loj: 7/14/05
          // Do not add Formation to theSpaceObjectList until it can handle not including
          // each other; e.g) form1 includes form2 and form2 includes form1.
+         //loj: 7/14/05 Added formation option in the GetSpaceObjectListBox()
          
 //          //------------------------------------------
 //          // Add formation to theSpaceObjectList

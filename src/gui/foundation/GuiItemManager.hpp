@@ -171,7 +171,8 @@ public:
    
    wxListBox* GetSpaceObjectListBox(wxWindow *parent, wxWindowID id,
                                     const wxSize &size,
-                                    wxArrayString *excList = NULL);
+                                    wxArrayString *excList = NULL,
+                                    bool includeFormation = true);
    
    wxListBox* GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
                                    const wxSize &size,
