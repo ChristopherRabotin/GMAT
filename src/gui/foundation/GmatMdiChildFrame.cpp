@@ -68,16 +68,18 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
 //   event.Skip();
 }
 
-//void GmatMdiChildFrame::SetTitle(wxString newTitle)
-//{
-////   SetTitle(newTitle);
-//   title = newTitle;
-//}
-//
-//wxString GmatMdiChildFrame::GetTitle()
-//{
-//   return title;
-//}
+#ifdef __WXMAC__
+void GmatMdiChildFrame::SetTitle(wxString newTitle)
+{
+//   SetTitle(newTitle);
+   title = newTitle;
+}
+
+wxString GmatMdiChildFrame::GetTitle()
+{
+   return title;
+}
+#endif
 
 int GmatMdiChildFrame::GetDataType()
 {
