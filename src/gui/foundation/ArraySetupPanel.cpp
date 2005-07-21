@@ -58,6 +58,7 @@ ArraySetupPanel::ArraySetupPanel(wxWindow *parent, const wxString &name)
    Show();
 }
 
+
 //------------------------------------------------------------------------------
 // void Create()
 //------------------------------------------------------------------------------
@@ -97,7 +98,7 @@ void ArraySetupPanel::Create()
    mArrColTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                                     wxDefaultPosition, wxSize(35,20), 0);
    
-   wxStaticBox *arrayStaticBox = new wxStaticBox(this, -1, wxT("Array")); //loj: 1/7/05 added Array
+   wxStaticBox *arrayStaticBox = new wxStaticBox(this, -1, wxT("Array"));
    mArrStaticBoxSizer = new wxStaticBoxSizer(arrayStaticBox, wxVERTICAL);
    wxFlexGridSizer *arr1FlexGridSizer = new wxFlexGridSizer(5, 0, 0);
    
@@ -151,11 +152,11 @@ void ArraySetupPanel::Create()
    mArrGrid->SetColLabelSize(20);
    mArrGrid->SetScrollbars(5, 8, 15, 15);
    mArrGrid->EnableEditing(true);
-
+   
    mArrValBoxSizer = new wxBoxSizer(wxVERTICAL);
    mArrValBoxSizer->Add(singleValBoxSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    mArrValBoxSizer->Add(mArrGrid, 0, wxALIGN_CENTER|wxALL, bsize);
-
+   
    mArrStaticBoxSizer->Add(arr1FlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    mArrStaticBoxSizer->Add(mArrValBoxSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    
@@ -168,6 +169,7 @@ void ArraySetupPanel::Create()
    theMiddleSizer->Add(mPageBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
 
 }
+
 
 //------------------------------------------------------------------------------
 // void LoadData()
@@ -182,10 +184,10 @@ void ArraySetupPanel::LoadData()
    if (mParam != NULL)
    {
       
-#if DEBUG_ARRAY_PANEL
+      #if DEBUG_ARRAY_PANEL
       MessageInterface::ShowMessage
          ("ArraySetupPanel::LoadData() paramName=%s\n", mParam->GetName().c_str());
-#endif
+      #endif
 
       try
       {
@@ -199,25 +201,25 @@ void ArraySetupPanel::LoadData()
          str = "";
          str << mNumCols;
          mArrColTextCtrl->SetValue(str);
-
+         
          // append row index to ComboBox
          for (int i=0; i<mNumRows; i++)
          {
             wxString intStr;
-            intStr << i;
+            intStr << i+1; //loj: 7/21/05 changed to start from 1
             mRowComboBox->Append(intStr);
          }
          mRowComboBox->SetSelection(0);
-            
+         
          // append column index to ComboBox
          for (int i=0; i<mNumCols; i++)
          {
             wxString intStr;
-            intStr << i;
+            intStr << i+1; //loj: 7/21/05 changed to start from 1
             mColComboBox->Append(intStr);
          }
          mColComboBox->SetSelection(0);
-
+         
          Array *arrParam = (Array*)mParam;
          
          // set value (wxTextCtrl)
@@ -225,10 +227,10 @@ void ArraySetupPanel::LoadData()
          str.Printf("%g", val);
          mArrValTextCtrl->SetValue(str);
          
-#ifdef DEBUG_ARRAY_PANEL
+         #ifdef DEBUG_ARRAY_PANEL
          MessageInterface::ShowMessage("mNumRows=%d, mNumCols=%d\n",
                                        mNumRows, mNumCols);
-#endif
+         #endif
          
          // set value (wxGrid)
          mArrGrid->CreateGrid(mNumRows, mNumCols);
@@ -237,14 +239,13 @@ void ArraySetupPanel::LoadData()
             
          for (row=0; row<mNumRows; row++)
          {
-            str.Printf("%d", row);
+            str.Printf("%d", row+1); //loj: 7/21/05 changed to start from 1
             mArrGrid->SetRowLabelValue(row, str);
          }
          
          for (col=0; col<mNumCols; col++)
          {
-            //mArrGrid->SetColFormatFloat(col, 6, 2);
-            str.Printf("%d", col);
+            str.Printf("%d", col+1); //loj: 7/21/05 changed to start from 1
             mArrGrid->SetColLabelValue(col, str);
          }
          
@@ -267,12 +268,13 @@ void ArraySetupPanel::LoadData()
          wxLog::FlushActive();
       }
    }
-
+   
    mArrNameTextCtrl->Disable();
    mArrRowTextCtrl->Disable();
    mArrColTextCtrl->Disable();
    mUpdateButton->Disable();
 }
+
 
 //------------------------------------------------------------------------------
 // void SaveData()
@@ -298,6 +300,7 @@ void ArraySetupPanel::SaveData()
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -310,6 +313,7 @@ void ArraySetupPanel::OnTextUpdate(wxCommandEvent& event)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnTextEnter(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -320,6 +324,7 @@ void ArraySetupPanel::OnTextEnter(wxCommandEvent& event)
       UpdateCellValue();
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnComboBoxChange(wxCommandEvent& event)
@@ -336,6 +341,7 @@ void ArraySetupPanel::OnComboBoxChange(wxCommandEvent& event)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -346,6 +352,7 @@ void ArraySetupPanel::OnButtonClick(wxCommandEvent& event)
       UpdateCellValue();
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnGridCellChange(wxGridEvent& event)
@@ -382,6 +389,7 @@ void ArraySetupPanel::OnGridCellChange(wxGridEvent& event)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void UpdateCellValue()
 //------------------------------------------------------------------------------
@@ -391,7 +399,7 @@ void ArraySetupPanel::UpdateCellValue()
    
    int row = mRowComboBox->GetSelection();
    int col = mColComboBox->GetSelection();
-      
+   
    wxString strVal = mArrValTextCtrl->GetValue();
    Real val;
    
@@ -408,3 +416,5 @@ void ArraySetupPanel::UpdateCellValue()
       wxLog::FlushActive();
    }
 }
+
+
