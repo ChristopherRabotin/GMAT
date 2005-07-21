@@ -748,6 +748,7 @@ void ParameterCreateDialog::CreateString()
       mIsParamCreated = true;
       theGuiManager->UpdateParameter();
       
+      GmatAppData::GetResourceTree()->UpdateVariable(); //loj: 7/21/05 Added
       mUserStringListBox->Append(strName.c_str());
       
       for (int i=0; i<mUserStringListBox->GetCount(); i++)
@@ -809,6 +810,7 @@ void ParameterCreateDialog::CreateArray()
          mIsParamCreated = true;
          theGuiManager->UpdateParameter();
 
+         GmatAppData::GetResourceTree()->UpdateVariable(); //loj: 7/21/05 Added
          mUserArrayListBox->Append(arrName.c_str());
 
          for (int i=0; i<mUserArrayListBox->GetCount(); i++)
