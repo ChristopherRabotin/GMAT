@@ -41,11 +41,9 @@ public:
    
 private:    
    void Create();
-//    void DisplayData();
    
    // Event Handling
    DECLARE_EVENT_TABLE();
-//    void OnSelect(wxCommandEvent &event);
    void OnButtonClick(wxCommandEvent &event);
    
    Spacecraft *theSpacecraft;
@@ -53,14 +51,6 @@ private:
    GuiItemManager *theGuiManager;
 
    wxArrayString mExcludedTankList;
-//    wxArrayString availableTanksArray;
-//    wxArrayString selectedTanksArray;
-   
-//    Integer availableTankCount;
-//    Integer selectedTankCount;
-   
-//    Integer currentAvailTank;
-//    Integer currentSelectedTank;
    
    wxButton *theApplyButton;
    wxButton *selectButton;
