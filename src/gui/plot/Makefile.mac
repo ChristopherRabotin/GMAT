@@ -1,19 +1,23 @@
+################################################################################
 # Project:    GMAT
 # Module:     Makefile.mac for plot directory 
 # Created:    Joey Gurgnaus 
 # Date:       2004/02/18
 # Modified:   2005/06/29 - Cleaned up including removing and adding new sources.
+#             2005/07/22 - Removed glcanvas_mac.cpp
+################################################################################
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
+TESTFLAGS = -DSKIP_DEVIL
+#	
 # Source file for creating new library
 SRC = MdiChildTrajFrame.cpp MdiChildTsFrame.cpp MdiGlPlotData.cpp \
 	MdiTsPlotData.cpp OpenGlOptionDialog.cpp OpenGlPlotSetupPanel.cpp \
 	ReportFileSetupPanel.cpp TrajPlotCanvas.cpp TsPlotCanvas.cpp \
-	TsPlotCurve.cpp XyPlotSetupPanel.cpp glcanvas_mac.cpp
+	TsPlotCurve.cpp XyPlotSetupPanel.cpp
 # 
-# NOTE: glcanvas_mac.cpp for MacOS X and glcanvas.cpp for MS Windows
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/gui/inc.mac
