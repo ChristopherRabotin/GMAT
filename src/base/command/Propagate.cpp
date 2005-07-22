@@ -2267,7 +2267,12 @@ std::string Propagate::CreateParameter(const std::string &name)
          ("Propagate::CreateParameter() name=<%s>, str=<%s>\n",
           name.c_str(), str.c_str());
    #endif
-   
+
+   // if string is a number
+   if (isdigit(str[0]) || str[0] == '.' || str[0] == '-')
+      return str;
+
+   // if parameter exist
    if (theModerator->GetParameter(str))
       return str;
    
