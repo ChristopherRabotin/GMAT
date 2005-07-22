@@ -61,6 +61,7 @@ private:
    bool mIsStateChanged;
 
    Rvector6 mCartState;
+   CoordinateConverter mCoordConverter;
 
    void Create();
    void AddElements(wxWindow *parent);
@@ -70,9 +71,10 @@ private:
    void OnComboBoxChange(wxCommandEvent& event);
    void OnTextChange(wxCommandEvent& event);
 
-   void  InitializeCoordinateSystem(CoordinateSystem *cs);
+   void InitializeCoordinateSystem(CoordinateSystem *cs);
+   void SetLabelsUnits(const std::string &stateType);
 
-   wxString bodiesArray[100];
+//   wxString bodiesArray[100];
 
    wxButton *theApplyButton;
 

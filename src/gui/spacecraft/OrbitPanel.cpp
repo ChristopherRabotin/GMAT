@@ -23,6 +23,8 @@
 #include "MessageInterface.hpp"
 #include "GmatAppData.hpp"
 
+#include <sstream>
+
 //#define DEBUG_ORBIT_PANEL 1
 
 //------------------------------
@@ -88,8 +90,11 @@ OrbitPanel::~OrbitPanel()
 void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
 {
    Rvector6 inState, outState, tempState;
-   CoordinateConverter mCoordConverter;
    
+   wxString element;
+   std::stringstream buffer;
+   buffer.precision(18);
+
    // get values from text fields
    wxString el1 = textCtrl1->GetValue();
    wxString el2 = textCtrl2->GetValue();
@@ -120,7 +125,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       fromEpochFormat = toEpochFormat.c_str();
    }
 
-   // coordinate system change 
+   // -------------------- coordinate system change --------------------
    if (event.GetEventObject() == mCoordSysComboBox)
    {
       try
@@ -132,69 +137,95 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
          // epoch
          Real epoch = theSpacecraft->GetRealParameter("Epoch");
     
-         // input Coordinate System
-         CoordinateSystem* inCoord = (CoordinateSystem*) 
-            theGuiInterpreter->GetCoordinateSystem(fromCoordSys.c_str());
-
          // output Coordinate System
          wxString outCoordSystem = mCoordSysComboBox->GetStringSelection();
          CoordinateSystem* outCoord = (CoordinateSystem*) 
             theGuiInterpreter->GetCoordinateSystem(outCoordSystem.c_str());
 
-         #if DEBUG_ORBIT_PANEL
-            MessageInterface::ShowMessage
-               ("from coordinate system = %s\nto coordinate system = %s\n", 
-                inCoord->GetName().c_str(),outCoord->GetName().c_str());
-            MessageInterface::ShowMessage
-               ("state type = %s\n" , fromStateType.c_str());
-         #endif
-
-         if ( (fromStateType == "Cartesian") && (outCoordSystem == "EarthMJ2000Eq") 
-           && (!mIsTextChanged) )
+         if ( (strcmp(fromStateType.c_str(), "Cartesian") == 0) && 
+              (strcmp(outCoordSystem.c_str(), "EarthMJ2000Eq") == 0) && 
+              (!mIsTextChanged) )
          {
-            // use unchanged cartesian earth-MJ2000-Equatorial values for output
+            // use unchanged cartesian values for output
             outState = mCartState;
          }
-         else
+         else if ( (strcmp(fromStateType.c_str(), "Cartesian") == 0) && 
+                   (strcmp(outCoordSystem.c_str(), "EarthMJ2000Eq") != 0) &&
+                   (!mIsTextChanged) )
          {
-            // if state type -> cartesian and text field not changed
-            if (fromStateType != "Cartesian")
-            {
-               tempState = stateConverter.Convert(inState, fromStateType,
-                                                  "Cartesian", anomaly);
-            }
-            else
-            {
-               tempState = inState;
-            }            
-   
+            // input Coordinate System
+            CoordinateSystem* inCoord = (CoordinateSystem*) 
+               theGuiInterpreter->GetCoordinateSystem("EarthMJ2000Eq");
+
             // initialize coordinate systems
             InitializeCoordinateSystem(inCoord);
             InitializeCoordinateSystem(outCoord);
    
             // convert to output coordinate system
-            mCoordConverter.Convert(A1Mjd(epoch), tempState, inCoord, outState,
-               outCoord);
-   
-            if (fromStateType != "Cartesian")
-            {
-               // convert from cartesian to selected state type
-               tempState = stateConverter.Convert(outState, "Cartesian",
-                                                           fromStateType, anomaly);
-               outState = tempState;  
-            }
-   
-            #if DEBUG_ORBIT_PANEL
-               MessageInterface::ShowMessage
-                  ("--- after convert --- \nepoch = %f\nstate = %s\n",
-                     epoch, outState.ToString().c_str());
-            #endif
+            mCoordConverter.Convert(A1Mjd(epoch), mCartState, inCoord, outState,
+                                    outCoord);
          }
-         mIsCoordSysChanged = true;
-         fromCoordSys = outCoordSystem.c_str();
+         else if ( (strcmp(fromStateType.c_str(), "Cartesian") != 0) && 
+                   (strcmp(outCoordSystem.c_str(), "EarthMJ2000Eq") != 0) &&
+                   (!mIsTextChanged) )
+         {
+            // input Coordinate System
+            CoordinateSystem* inCoord = (CoordinateSystem*) 
+               theGuiInterpreter->GetCoordinateSystem("EarthMJ2000Eq");
+
+            // initialize coordinate systems
+            InitializeCoordinateSystem(inCoord);
+            InitializeCoordinateSystem(outCoord);
+   
+            // convert to output coordinate system
+            mCoordConverter.Convert(A1Mjd(epoch), mCartState, inCoord, outState,
+                                    outCoord);
+
+            // convert from cartesian to selected state type
+            tempState = stateConverter.Convert(outState, "Cartesian",
+                                               fromStateType, anomaly);
+            outState = tempState;
+         }
+         else
+         {
+            // convert to cartesian
+            tempState = stateConverter.Convert(inState, fromStateType,
+                                               "Cartesian", anomaly);
+
+            // input Coordinate System
+            CoordinateSystem* inCoord = (CoordinateSystem*) 
+               theGuiInterpreter->GetCoordinateSystem(fromCoordSys.c_str());
+
+            // initialize coordinate systems
+            InitializeCoordinateSystem(inCoord);
+            InitializeCoordinateSystem(outCoord);
+
+            // convert to output coordinate system
+            mCoordConverter.Convert(A1Mjd(epoch), tempState, inCoord, outState,
+                                    outCoord);
+
+            // convert from cartesian to selected state type
+            tempState = stateConverter.Convert(outState, "Cartesian",
+                                               fromStateType, anomaly);
+            outState = tempState;
+         }
+
          #if DEBUG_ORBIT_PANEL
+//            MessageInterface::ShowMessage
+//               ( "from coordinate system = %s\nto coordinate system = %s\n", 
+//                inCoord->GetName().c_str(),outCoord->GetName().c_str() );
+            MessageInterface::ShowMessage
+               ( "state type = %s\n" ,fromStateType.c_str() );
+            MessageInterface::ShowMessage
+               ( "anomaly type = %s\n",anomaly.GetType().c_str() );
+            MessageInterface::ShowMessage
+               ( "--- after C/S convert --- \nstate = %s\n",
+               outState.ToString().c_str());
             MessageInterface::ShowMessage("---------- C/S change ----------\n\n");
          #endif
+
+         mIsCoordSysChanged = true;
+         fromCoordSys = outCoordSystem.c_str();
       }
       catch (BaseException &e)
       {
@@ -204,7 +235,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
 
    }
    
-   // state type change 
+   // -------------------- state type change --------------------
    if (event.GetEventObject() == stateTypeComboBox)
    {
       #if DEBUG_ORBIT_PANEL
@@ -220,120 +251,48 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
                fromStateType.c_str(),toStateType.c_str());
       #endif
 
-      if ( (toStateType == "Cartesian") && (!mIsTextChanged) )
+      if ( (strcmp(toStateType.c_str(), "Cartesian") == 0) && 
+           (strcmp(fromCoordSys.c_str(), "EarthMJ2000Eq") == 0)&& 
+           (!mIsTextChanged) )
       {
+         #if DEBUG_ORBIT_PANEL
+            MessageInterface::ShowMessage( "Cartesian state, no text changed\n" );
+         #endif
+
          // use unchanged cartesian values for output
          outState = mCartState;
       }
-      else if (!mIsTextChanged)
+      else if ( (strcmp(toStateType.c_str(), "Cartesian") != 0) && 
+                (strcmp(fromCoordSys.c_str(), "EarthMJ2000Eq") == 0)&& 
+                (!mIsTextChanged) )
       {
+         #if DEBUG_ORBIT_PANEL
+            MessageInterface::ShowMessage( "Not Cartesian and no text changed\n" );
+         #endif
+
          // convert to new state type
-         outState = stateConverter.Convert(inState,fromStateType,toStateType,
+         outState = stateConverter.Convert(mCartState,"Cartesian",toStateType,
                                            anomaly);
       }
-      else if (mIsTextChanged)
+      else
       {
+         #if DEBUG_ORBIT_PANEL
+            MessageInterface::ShowMessage( "Text change\n" );
+         #endif
+
          // convert to new state type
-         outState = stateConverter.Convert(inState, fromStateType, toStateType, 
+         outState = stateConverter.Convert(inState,fromStateType,toStateType, 
                                            anomaly);
-         mCartState = stateConverter.Convert(inState, fromStateType, "Cartesian", 
-                                             anomaly);
       }
 
       #if DEBUG_ORBIT_PANEL
          MessageInterface::ShowMessage
-            ("--- after convert--- \nout state = %s\ncartesian state = %s\n",
+            ("--- after state convert--- \nout state = %s\ncartesian state = %s\n",
                outState.ToString().c_str(), mCartState.ToString().c_str());
       #endif
-      anomalyStaticText->Show(false);
-      anomalyComboBox->Show(false);
     
       // labels for elements, anomaly and units
-      if (stateType == "Cartesian")
-      {
-         // set the labels for the elements
-         description1->SetLabel("X");
-         description2->SetLabel("Y");
-         description3->SetLabel("Z");
-         description4->SetLabel("VX");
-         description5->SetLabel("VY");
-         description6->SetLabel("VZ");
-    
-         // set the labels for the units
-         label1->SetLabel("Km");
-         label2->SetLabel("Km");
-         label3->SetLabel("Km");
-         label4->SetLabel("Km/s");
-         label5->SetLabel("Km/s");
-         label6->SetLabel("Km/s");    
-      }
-      else if ( (stateType == "Keplerian") || (stateType == "ModifiedKeplerian") )
-      {
-         // set the labels for the elements
-         if (stateType == "Keplerian")
-         {
-            description1->SetLabel("SMA");
-            description2->SetLabel("ECC");
-         }
-         else
-         {
-            description1->SetLabel("RadPer");
-            description2->SetLabel("RadApo");
-         }
-         description3->SetLabel("INC");
-         description4->SetLabel("RAAN");
-         description5->SetLabel("AOP");
-         wxString description = anomaly.GetType().c_str();
-         description6->SetLabel(description);
-    
-         // set the labels for the units
-         label1->SetLabel("Km");
-         if (stateType == "Keplerian")
-            label2->SetLabel("");
-         else
-            label2->SetLabel("Km");
-         label3->SetLabel("deg");
-         label4->SetLabel("deg");
-         label5->SetLabel("deg");
-         label6->SetLabel("deg");
-          
-         // set the labels for the anomaly
-         anomalyStaticText->Show(true);
-         anomalyComboBox->Show(true);
-          
-         if (strcmp(description.c_str(), "MA") == 0) 
-            anomalyComboBox->SetSelection(0);
-         else if (strcmp(description.c_str(), "TA") == 0) 
-            anomalyComboBox->SetSelection(1);
-         else if (strcmp(description.c_str(), "EA") == 0)
-            anomalyComboBox->SetSelection(2);
-      }
-      else if ((stateType == "SphericalAZFPA") || (stateType == "SphericalRADEC"))
-      {
-         // set the labels for the elements
-         description1->SetLabel("RMAG");
-         description2->SetLabel("RA");
-         description3->SetLabel("DEC");
-         description4->SetLabel("VMAG");
-         if (stateType == "SphericalAZFPA")
-         {
-            description5->SetLabel("AZI");
-            description6->SetLabel("FPA");
-         }
-         else
-         {
-            description5->SetLabel("RAV");
-            description6->SetLabel("DECV");
-         }
-    
-         // set the labels for the units
-         label1->SetLabel("Km");
-         label2->SetLabel("deg");
-         label3->SetLabel("deg");
-         label4->SetLabel("Km/s");
-         label5->SetLabel("deg");
-         label6->SetLabel("deg"); 
-      }
+      SetLabelsUnits(toStateType);
     
       mIsStateChanged = true;
       fromStateType = stateType.c_str(); 
@@ -343,7 +302,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       #endif
    }
 
-   // anomaly type change 
+   // -------------------- anomaly type change --------------------
    if (event.GetEventObject() == anomalyComboBox)
    {
       std::string anomalyType;
@@ -365,61 +324,57 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       description6->SetLabel(description);
        
       theSpacecraft->SetStringParameter(anomalyID, anomalyType);
+      this->anomaly = theSpacecraft->anomaly;
        
-      Real anomaly = theSpacecraft->GetRealParameter(anomalyType);
-      stateValue.Printf("%f", anomaly);
-      textCtrl6->SetValue(stateValue);
+      Real an = theSpacecraft->GetRealParameter(anomalyType);
+      buffer << an;
+      element.Printf ("%s",buffer.str().c_str());
+      textCtrl6->SetValue (element);
+      buffer.str(std::string());
+      
+      #if DEBUG_ORBIT_PANEL
+         MessageInterface::ShowMessage( "anomaly id = %d\n",anomalyID );
+         MessageInterface::ShowMessage( "anomaly type = %s\n",anomalyType.c_str() );
+         MessageInterface::ShowMessage( "s/c anomaly type = %s\n",anomaly.GetType().c_str() );
+      #endif
    }
    
    if ( (event.GetEventObject() == mCoordSysComboBox) || 
         (event.GetEventObject() == stateTypeComboBox) )
    {
-      char buffer [20];
       wxString element;
-
-      gcvt (outState[0],16,buffer);
-      element.Printf ("%s",buffer);
+      std::stringstream buffer;
+      buffer.precision(18);
+   
+      buffer << outState[0];
+      element.Printf ("%s",buffer.str().c_str());
       textCtrl1->SetValue (element);
+      buffer.str(std::string()); 
 
-      gcvt (outState[1],16,buffer);
-      element.Printf ("%s",buffer);
+      buffer << outState[1];
+      element.Printf ("%s",buffer.str().c_str());
       textCtrl2->SetValue (element);
-            
-      gcvt (outState[2],16,buffer);
-      element.Printf ("%s",buffer);
+      buffer.str(std::string()); 
+
+      buffer << outState[2];
+      element.Printf ("%s",buffer.str().c_str());
       textCtrl3->SetValue (element);
-
-      gcvt (outState[3],16,buffer);
-      element.Printf ("%s",buffer);
+      buffer.str(std::string()); 
+   
+      buffer << outState[3];
+      element.Printf ("%s",buffer.str().c_str());
       textCtrl4->SetValue (element);
+      buffer.str(std::string()); 
 
-      gcvt (outState[4],16,buffer);
-      element.Printf ("%s",buffer);
+      buffer << outState[4];
+      element.Printf ("%s",buffer.str().c_str());
       textCtrl5->SetValue (element);
+      buffer.str(std::string()); 
 
-      gcvt (outState[5],16,buffer);
-      element.Printf ("%s",buffer);
+      buffer << outState[5];
+      element.Printf ("%s",buffer.str().c_str());
       textCtrl6->SetValue (element);
-
-//      wxString stateValue;
-//    
-//      stateValue.Printf("%.9f", outState[0]);
-//      textCtrl1->SetValue(stateValue);
-//    
-//      stateValue.Printf("%.9f", outState[1]);
-//      textCtrl2->SetValue(stateValue);
-//    
-//      stateValue.Printf("%.9f", outState[2]);
-//      textCtrl3->SetValue(stateValue);
-//    
-//      stateValue.Printf("%.9f", outState[3]);
-//      textCtrl4->SetValue(stateValue);
-//    
-//      stateValue.Printf("%.9f", outState[4]);
-//      textCtrl5->SetValue(stateValue);
-//    
-//      stateValue.Printf("%.9f", outState[5]);
-//      textCtrl6->SetValue(stateValue);
+      buffer.str(std::string());
    }
       
    theApplyButton->Enable();
@@ -446,6 +401,115 @@ void OrbitPanel::OnTextChange(wxCommandEvent& event)
    }
    
    theApplyButton->Enable();
+}
+
+//------------------------------------------------------------------------------
+// void OrbitPanel::SetLabelsUnits(const std::string &stateType)
+//------------------------------------------------------------------------------
+/**
+ * @param <stateType> input state type for display.
+ *
+ * @note Sets the labels and units for the state.
+ */
+//------------------------------------------------------------------------------
+void OrbitPanel::SetLabelsUnits(const std::string &stateType)
+{
+   // labels for elements, anomaly and units
+   if ( strcmp(stateType.c_str(), "Cartesian") == 0 )
+   {
+      // set the labels for the elements
+      description1->SetLabel("X");
+      description2->SetLabel("Y");
+      description3->SetLabel("Z");
+      description4->SetLabel("VX");
+      description5->SetLabel("VY");
+      description6->SetLabel("VZ");
+
+      // set the labels for the units
+      label1->SetLabel("Km");
+      label2->SetLabel("Km");
+      label3->SetLabel("Km");
+      label4->SetLabel("Km/s");
+      label5->SetLabel("Km/s");
+      label6->SetLabel("Km/s");
+        
+      anomalyStaticText->Show(false);
+      anomalyComboBox->Show(false);
+   }
+   else if ( (strcmp(stateType.c_str(), "Keplerian") == 0) || 
+             (strcmp(stateType.c_str(), "ModifiedKeplerian") == 0) )
+   {
+      // set the labels for the elements
+      if ( strcmp(stateType.c_str(), "Keplerian") == 0 )
+      {
+         description1->SetLabel("SMA");
+         description2->SetLabel("ECC");
+      }
+      else
+      {
+         description1->SetLabel("RadPer");
+         description2->SetLabel("RadApo");
+      }
+      description3->SetLabel("INC");
+      description4->SetLabel("RAAN");
+      description5->SetLabel("AOP");
+
+      int anomalyID = theSpacecraft->GetParameterID("AnomalyType");
+      wxString description = (theSpacecraft->GetStringParameter(anomalyID)).c_str();
+      description6->SetLabel(description);
+
+      // set the labels for the units
+      label1->SetLabel("Km");
+      if (strcmp(stateType.c_str(), "Keplerian") == 0)
+         label2->SetLabel("");
+      else
+         label2->SetLabel("Km");
+      label3->SetLabel("deg");
+      label4->SetLabel("deg");
+      label5->SetLabel("deg");
+      label6->SetLabel("deg");
+      
+      // set the labels for the anomaly
+      anomalyStaticText->Show(true);
+      anomalyComboBox->Show(true);
+      
+      if (strcmp(description.c_str(), "MA") == 0) 
+         anomalyComboBox->SetSelection(0);
+      else if (strcmp(description.c_str(), "TA") == 0) 
+         anomalyComboBox->SetSelection(1);
+      else if (strcmp(description.c_str(), "EA") == 0)
+         anomalyComboBox->SetSelection(2);
+   }
+   else if ( (strcmp(stateType.c_str(), "SphericalAZFPA") == 0) || 
+             (strcmp(stateType.c_str(), "SphericalRADEC") == 0) )
+   {
+      // set the labels for the elements
+      description1->SetLabel("RMAG");
+      description2->SetLabel("RA");
+      description3->SetLabel("DEC");
+      description4->SetLabel("VMAG");
+      if (strcmp(stateType.c_str(), "SphericalAZFPA") == 0)
+      {
+         description5->SetLabel("AZI");
+         description6->SetLabel("FPA");
+      }
+      else
+      {
+         description5->SetLabel("RAV");
+         description6->SetLabel("DECV");
+      }
+
+      // set the labels for the units
+      label1->SetLabel("Km");
+      label2->SetLabel("deg");
+      label3->SetLabel("deg");
+      label4->SetLabel("Km/s");
+      label5->SetLabel("deg");
+      label6->SetLabel("deg");
+     
+      anomalyStaticText->Show(false);
+      anomalyComboBox->Show(false);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -726,10 +790,12 @@ void OrbitPanel::LoadData()
    // load data from the core engine
    try
    {
+      Rvector6 inState, outState, tempState;
+
       // load the epoch format
       std::string epochFormat = theSpacecraft->GetDisplayDateFormat();
-      fromEpochFormat = epochFormat.c_str();
       epochFormatComboBox->SetValue(wxT(epochFormat.c_str()));
+      fromEpochFormat = epochFormat.c_str();
    
       // load the epoch
       std::string epochStr = theSpacecraft->GetDisplayEpoch();
@@ -737,170 +803,113 @@ void OrbitPanel::LoadData()
    
       // load the coordiante system
       std::string coordSystem = theSpacecraft->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
-      fromCoordSys = coordSystem.c_str();
       mCoordSysComboBox->SetValue(coordSystem.c_str());
+      fromCoordSys = coordSystem.c_str();
    
       // load the state type  
-      std::string stateType = theSpacecraft->GetDisplayCoordType();
-      fromStateType = stateType.c_str();
-      stateTypeComboBox->SetValue(wxT(stateType.c_str()));
+      std::string stType = theSpacecraft->GetDisplayCoordType();
+      stateTypeComboBox->SetValue(wxT(stType.c_str()));
+      fromStateType = stType.c_str();
 
-      // load the orbital elements  
-      wxString description;
-       
-      int stateId = theSpacecraft->GetParameterID("Element1");
-      description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-      description1->SetLabel(description);
-   
-      stateId = theSpacecraft->GetParameterID("Element2");
-      description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-      description2->SetLabel(description);
-   
-      stateId = theSpacecraft->GetParameterID("Element3");
-      description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-      description3->SetLabel(description);
-   
-      stateId = theSpacecraft->GetParameterID("Element4");
-      description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-      description4->SetLabel(description);
-   
-      stateId = theSpacecraft->GetParameterID("Element5");
-      description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-      description5->SetLabel(description);
-   
-      stateId = theSpacecraft->GetParameterID("Element6");
-      description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-      description6->SetLabel(description);
-       
-      // hard code label change for now, should actually
-      // come from the spacecraft object
-      if (stateType == "Cartesian")
-      {
-         label1->SetLabel("Km");
-         label2->SetLabel("Km");
-         label3->SetLabel("Km");
-         label4->SetLabel("Km/s");
-         label5->SetLabel("Km/s");
-         label6->SetLabel("Km/s");
+      // load orbital elements  
+      PropState ps = theSpacecraft->GetState(); // should be cartesian state
+      Rvector6 displayState;
          
-         anomalyStaticText->Show(false);
-         anomalyComboBox->Show(false);
-      }
-      else if ((stateType == "Keplerian") || (stateType == "ModifiedKeplerian"))
+      for (int i=0; i<6; i++)
       {
-         label1->SetLabel("Km");
-         if (stateType == "Keplerian")
-            label2->SetLabel("");
+         mCartState[i] = ps[i];
+      }
+
+      #if DEBUG_ORBIT_PANEL
+         MessageInterface::ShowMessage( "epoch format = %s\n",epochFormat.c_str() );
+         MessageInterface::ShowMessage( "epoch = %s\n",epochStr.c_str() );
+         MessageInterface::ShowMessage( "coordinate system = %s\n",coordSystem.c_str() );
+         MessageInterface::ShowMessage( "state type = %s\n",stType.c_str() );
+         for (int i=0; i<6; i++)
+         {
+            MessageInterface::ShowMessage( "mCartState[%d] = %.16f\n", i, mCartState[i] );
+         }
+         MessageInterface::ShowMessage( "anomaly type = %s\n",anomaly.GetType().c_str() );
+      #endif
+
+      if (strcmp(coordSystem.c_str(), "EarthMJ2000Eq") == 0)
+      {
+          if (strcmp(stType.c_str(), "Cartesian") == 0)
+         {
+            displayState = mCartState;
+         }
          else
-            label2->SetLabel("Km");
-         label3->SetLabel("deg");
-         label4->SetLabel("deg");
-         label5->SetLabel("deg");
-         label6->SetLabel("deg");
-         
-         anomalyStaticText->Show(true);
-         anomalyComboBox->Show(true);
-         
-         if (strcmp(description.c_str(), "MA") == 0) 
-            anomalyComboBox->SetSelection(0);
-         else if (strcmp(description.c_str(), "TA") == 0) 
-            anomalyComboBox->SetSelection(1);
-         else if (strcmp(description.c_str(), "EA") == 0)
-            anomalyComboBox->SetSelection(2);
-      }
-      else if ((stateType == "SphericalAZFPA") || (stateType == "SphericalRADEC"))
-      {
-         label1->SetLabel("Km");
-         label2->SetLabel("deg");
-         label3->SetLabel("deg");
-         label4->SetLabel("Km/s");
-         label5->SetLabel("deg");
-         label6->SetLabel("deg");
-         
-         anomalyStaticText->Show(false);
-         anomalyComboBox->Show(false);
-      }
-   
-      //loj: get element type first
-      //loj: if element type is Cartesian, the combobox should show Cartesian
-      //loj: if Keplerian, the combobox should show Keplerian, etc
-      //loj: copy actual element type and elements to diaplay member data.
-      //loj: when combobox changes, use display data to convert and display
-      //loj: do not readback from the elements field unless user enters the new value
-       
-      // get elements
-      Real *inState = theSpacecraft->GetDisplayState();
-
-      char buffer [20];
-      wxString element;
-
-      gcvt (inState[0],16,buffer);
-      element.Printf ("%s",buffer);
-      textCtrl1->SetValue (element);
-
-      gcvt (inState[1],16,buffer);
-      element.Printf ("%s",buffer);
-      textCtrl2->SetValue (element);
-            
-      gcvt (inState[2],16,buffer);
-      element.Printf ("%s",buffer);
-      textCtrl3->SetValue (element);
-
-      gcvt (inState[3],16,buffer);
-      element.Printf ("%s",buffer);
-      textCtrl4->SetValue (element);
-
-      gcvt (inState[4],16,buffer);
-      element.Printf ("%s",buffer);
-      textCtrl5->SetValue (element);
-
-      gcvt (inState[5],16,buffer);
-      element.Printf ("%s",buffer);
-      textCtrl6->SetValue (element);
-
-//      Real element1 = inState[0];
-//      Real element2 = inState[1];
-//      Real element3 = inState[2];
-//      Real element4 = inState[3];
-//      Real element5 = inState[4];
-//      Real element6 = inState[5];
-//   
-//      wxString el1;
-//      el1.Printf("%.9f", element1);
-//      textCtrl1->SetValue(el1);
-//       
-//      wxString el2;
-//      el2.Printf("%.9f", element2);
-//      textCtrl2->SetValue(el2);
-//  
-//      wxString el3;
-//      el3.Printf("%.9f", element3);
-//      textCtrl3->SetValue(el3);
-//   
-//      wxString el4;
-//      el4.Printf("%.9f", element4);
-//      textCtrl4->SetValue(el4);
-//   
-//      wxString el5;
-//      el5.Printf("%.9f", element5);
-//      textCtrl5->SetValue(el5);
-//   
-//      wxString el6;
-//      el6.Printf("%.9f", element6);
-//      textCtrl6->SetValue(el6);    
-
-      // if the state type converting to is not cartesian,
-      // then compute the cartesian state
-      if (fromStateType != "Cartesian")
-      {
-         mCartState = stateConverter.Convert(inState, fromStateType, "Cartesian", 
-                                            anomaly);
+         {
+            displayState = stateConverter.Convert(mCartState, "Cartesian",
+                                                  stType, anomaly);
+         }        
       }
       else
       {
-         mCartState = inState;
+         Real epoch = theSpacecraft->GetRealParameter("Epoch");
+
+         // Earth Mean J2000 Equatorial Coordinate System
+         CoordinateSystem* inCoord = (CoordinateSystem*) 
+            theGuiInterpreter->GetCoordinateSystem("EarthMJ2000Eq");
+
+         // output Coordinate System
+         CoordinateSystem* outCoord = (CoordinateSystem*) 
+            theGuiInterpreter->GetCoordinateSystem(coordSystem.c_str());
+
+         // convert to output coordinate system
+         mCoordConverter.Convert(A1Mjd(epoch), mCartState, inCoord, outState,
+                                 outCoord);
+
+         // if the state type is Cartesian, then display state equals Cartesian
+         // else convert to the display state
+         if (strcmp(stType.c_str(), "Cartesian") == 0)
+         {
+            displayState = outState;
+         }
+         else
+         {
+            displayState = stateConverter.Convert(outState, "Cartesian",
+                                               stType, anomaly);
+         }
       }
-     
+
+      // place values into text fields
+      wxString element;
+      std::stringstream buffer;
+      buffer.precision(18);
+   
+      buffer << displayState[0];
+      element.Printf ("%s",buffer.str().c_str());
+      textCtrl1->SetValue (element);
+      buffer.str(std::string()); 
+
+      buffer << displayState[1];
+      element.Printf ("%s",buffer.str().c_str());
+      textCtrl2->SetValue (element);
+      buffer.str(std::string()); 
+
+      buffer << displayState[2];
+      element.Printf ("%s",buffer.str().c_str());
+      textCtrl3->SetValue (element);
+      buffer.str(std::string()); 
+   
+      buffer << displayState[3];
+      element.Printf ("%s",buffer.str().c_str());
+      textCtrl4->SetValue (element);
+      buffer.str(std::string()); 
+
+      buffer << displayState[4];
+      element.Printf ("%s",buffer.str().c_str());
+      textCtrl5->SetValue (element);
+      buffer.str(std::string()); 
+
+      buffer << displayState[5];
+      element.Printf ("%s",buffer.str().c_str());
+      textCtrl6->SetValue (element);
+      buffer.str(std::string()); 
+
+      // labels for elements, anomaly and units
+      SetLabelsUnits(stType);     
    }
    catch (BaseException &e)
    {
@@ -919,28 +928,27 @@ void OrbitPanel::LoadData()
 void OrbitPanel::SaveData()
 {
    #if DEBUG_ORBIT_PANEL
-      MessageInterface::ShowMessage("In OrbitPanel::SaveData() \n");
+      MessageInterface::ShowMessage( "In OrbitPanel::SaveData() \n" );
    #endif
-   // save the epoch format
+   
+   Rvector6 outState, cartState;
+   Real displayState[6], propagateState[6];
+   
+   // save epoch format
    wxString epochFormatStr = epochFormatComboBox->GetStringSelection();
    theSpacecraft->SetDisplayDateFormat(epochFormatStr.c_str());
 
-   // save the epoch
+   // save epoch
    wxString epochStr = epochValue->GetValue();
    theSpacecraft->SetDisplayEpoch(epochStr.c_str());
-   #if DEBUG_ORBIT_PANEL
-      MessageInterface::ShowMessage
-         ("OrbitPanel:SaveData() theSpacecraft->GetDisplayEpoch: %s\n", 
-            epochStr.c_str());
-   #endif
 
    // save coordinate system
    wxString coordSystemStr = mCoordSysComboBox->GetStringSelection();
    theSpacecraft->SetRefObjectName(Gmat::COORDINATE_SYSTEM, coordSystemStr.c_str());
     
    // save state type
-   wxString stateStr = stateTypeComboBox->GetStringSelection();
-   theSpacecraft->SetDisplayCoordType(std::string (stateStr.c_str()));
+   wxString stateTypeStr = stateTypeComboBox->GetStringSelection();
+   theSpacecraft->SetDisplayCoordType(std::string (stateTypeStr.c_str()));
 
    // save orbital elements    
    wxString el1 = textCtrl1->GetValue();
@@ -950,7 +958,6 @@ void OrbitPanel::SaveData()
    wxString el5 = textCtrl5->GetValue();
    wxString el6 = textCtrl6->GetValue(); 
     
-   Real displayState[6];
    displayState[0] = atof(el1);
    displayState[1] = atof(el2);
    displayState[2] = atof(el3);
@@ -960,23 +967,83 @@ void OrbitPanel::SaveData()
     
    // Check to make sure that the Keplerian values 
    // are acceptable for the spacecraft
-   if (stateStr.IsSameAs("Keplerian"))
+   if (strcmp(stateTypeStr.c_str(), "Keplerian") == 0)
    {
       if(displayState[1] < 0.0)
       {
          displayState[1] *= -1.0;
+         MessageInterface::PopupMessage
+         (Gmat::WARNING_, "ECC < 0, so multipled ECC by -1\n");
       }
       else if((displayState[0] > 0.0) && (displayState[1] > 1.0))
       {
          displayState[0] *= -1.0;
+         MessageInterface::PopupMessage
+         (Gmat::WARNING_, "SMA > 0 and ECC > 1, so multipled SMA by -1\n");
       }
       else if((displayState[0] < 0.0) && (displayState[1] < 1.0))
       {
          displayState[0] *= -1.0;
+         MessageInterface::PopupMessage
+         (Gmat::WARNING_, "SMA < 0 and ECC < 1, so multipled SMA by -1\n");
       }          
    }    
+
+   // Check to see if state needs to be converted to Cartesian before save
+   if (mIsTextChanged)
+   {
+      #if DEBUG_ORBIT_PANEL
+         MessageInterface::ShowMessage( "text changed\n" );
+      #endif
+
+      if (strcmp(stateTypeStr.c_str(), "Cartesian") != 0)
+      {
+         // convert to Cartesian state
+         cartState = stateConverter.Convert(displayState,stateTypeStr.c_str(),
+                                                 "Cartesian", anomaly);
+     
+         if (strcmp(coordSystemStr.c_str(), "EarthMJ2000Eq") == 0)
+         {
+            Real epoch = theSpacecraft->GetRealParameter("Epoch");
+
+            // input Coordinate System
+            CoordinateSystem* inCoord = (CoordinateSystem*) 
+               theGuiInterpreter->GetCoordinateSystem(coordSystemStr.c_str());
+
+            // Earth Mean J2000 Equatorial Coordinate System
+            CoordinateSystem* outCoord = (CoordinateSystem*) 
+               theGuiInterpreter->GetCoordinateSystem("EarthMJ2000Eq");
+
+            // convert to output coordinate system
+            mCoordConverter.Convert(A1Mjd(epoch), cartState, inCoord, outState,
+                                    outCoord);
+         }
+  
+      }         
+      
+      for (int i=0; i<6; i++)
+      {
+         propagateState[i] = outState[i];
+         mCartState[i] = outState[i];
+      }
+         
+      theSpacecraft->SetEpoch();
+      theSpacecraft->SetState(stateTypeStr.c_str(), propagateState);
+   }
+
+   #if DEBUG_ORBIT_PANEL
+      MessageInterface::ShowMessage( "epoch format = %s\n",epochFormatStr.c_str() );
+      MessageInterface::ShowMessage( "epoch = %s\n",epochStr.c_str() );
+      MessageInterface::ShowMessage( "coordinate system = %s\n",coordSystemStr.c_str() );
+      MessageInterface::ShowMessage( "coordinate system = %s\n",stateTypeStr.c_str() );
+      MessageInterface::ShowMessage( "anomaly type = %s\n",anomaly.GetType().c_str() );
+      for (int i=0; i<6; i++)
+      {
+         MessageInterface::ShowMessage( "propagateState[%d] = %.16f\n", i, propagateState[i] );
+         MessageInterface::ShowMessage( "mCartState[%d] = %.16f\n", i, mCartState[i] );
+      }
+   #endif
     
-   theSpacecraft->SetDisplayState(displayState);
-   theSpacecraft->SaveDisplay();
+//   theSpacecraft->SaveDisplay();
 }
 
