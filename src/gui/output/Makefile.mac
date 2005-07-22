@@ -1,7 +1,9 @@
+################################################################################
 # Project:    GMAT
 # Module:     Makefile.mac for output directory 
 # Created:    Joey Gurgnaus 
 # Date:       2005/06/29
+################################################################################
 #
 #
 # Define the marco for the top-level directories
@@ -10,7 +12,6 @@ PROJECT_ROOT    = ../..
 # Source file for creating new library
 SRC := $(wildcard *.cpp)
 # 
-# save glcanvas.cpp for tempoary
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/gui/inc.mac
