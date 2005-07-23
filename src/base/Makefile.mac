@@ -7,7 +7,7 @@
 #             2004/09/24 - J. Gurganus - added new target 'testing'
 
 SUBS = burn command configs coordsystem executive factory forcemodel foundation function \
-	interface interpolator interpreter parameter propagator refframe \
+	interface interpolator interpreter parameter propagator \
 	solarsys solver spacecraft stopcond subscriber util
 
 all clean bare testing :
