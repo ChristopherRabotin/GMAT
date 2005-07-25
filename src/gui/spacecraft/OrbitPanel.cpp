@@ -324,7 +324,9 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       description6->SetLabel(description);
        
       theSpacecraft->SetStringParameter(anomalyID, anomalyType);
-      this->anomaly = theSpacecraft->anomaly;
+
+      // this->anomaly = theSpacecraft->anomaly;
+      this->anomaly = theSpacecraft->GetAnomaly();   // Joey added it
        
       Real an = theSpacecraft->GetRealParameter(anomalyType);
       buffer << an;
@@ -1027,7 +1029,7 @@ void OrbitPanel::SaveData()
          mCartState[i] = outState[i];
       }
          
-      theSpacecraft->SetEpoch();
+      // theSpacecraft->SetEpoch();   *** Joey commented it out for now ***
       theSpacecraft->SetState(stateTypeStr.c_str(), propagateState);
    }
 
