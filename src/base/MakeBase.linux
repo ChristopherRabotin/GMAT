@@ -242,7 +242,6 @@ OBJECTS = \
     solarsys/LibrationPoint.o \
     solarsys/Moon.o \
     solarsys/Msise90Atmosphere.o \
-    solarsys/msise90.o \
     solarsys/PlanetaryEphemException.o \
     solarsys/PlanetaryEphem.o \
     solarsys/Planet.o \
