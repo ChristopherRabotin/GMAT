@@ -109,6 +109,9 @@ public:
    // Rvector6 GetSphericalOneState() const;
    // Rvector6 GetSphericalTwoState() const;
 
+
+   Anomaly GetAnomaly() const;
+
    bool GetDisplay() const;
    void SetDisplay(const bool displayFlag);
 

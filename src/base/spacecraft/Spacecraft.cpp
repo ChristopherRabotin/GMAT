@@ -1332,6 +1332,11 @@ Rvector6 Spacecraft::GetModifiedKeplerianState()
    return (modifiedKeplerianState);
 }
 
+Anomaly Spacecraft::GetAnomaly() const
+{
+   return anomaly;
+}
+
 //---------------------------------------------------------------------------
 //  bool GetDisplay() const
 //---------------------------------------------------------------------------
