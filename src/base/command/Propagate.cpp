@@ -344,8 +344,13 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
 
          std::stringstream stopCondDesc;
 
-         Parameter *stopParam = stopWhen[index]->GetStopParameter();
-         std::string stopName = stopParam->GetName();
+         //loj: 7/26/06 Fix for crash on ShowScript
+         // Since Moderator is removed from the StopCondition
+         // stopParam is NULL until command is initialized.
+         // So use GetStringParameter("StopVar") instead
+         //Parameter *stopParam = stopWhen[index]->GetStopParameter();
+         //std::string stopName = stopParam->GetName();
+         std::string stopName = stopWhen[index]->GetStringParameter("StopVar");
          stopCondDesc << stopName;
 
          if ((stopName.find("Periapsis") == std::string::npos) &&
