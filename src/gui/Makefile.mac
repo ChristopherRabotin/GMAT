@@ -6,10 +6,11 @@
 #             2004/09/24 - Added 'testing' target, but nothing.
 #             2004/12/09 - Added coordsystem directory
 #             2005/06/30 - Added function, hardware, and output directories.
+#             2005/07/26 - Removed maneuver until it is implemented
 #
 #
 SUBS = app burn command controllogic coordsystem foundation forcemodel \
-	function hardware maneuver mission output plot propagator solarsys \
+	function hardware mission output plot propagator solarsys \
 	solver spacecraft view
 
 # Holding 'resource' directory for later
