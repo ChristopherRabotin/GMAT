@@ -36,18 +36,18 @@ public:
    
 private:
    
-   static const int MAX_PROP_ROW = 5;
-   static const int MAX_STOPCOND_ROW = 10;
-   static const int PROP_NAME_COL = 0;
-   static const int PROP_SOS_COL = 1;
-   static const int PROP_BK_COL = 2;
-   static const int STOPCOND_NAME_COL = 0;
-   static const int STOPCOND_DESC_COL = 1;
+   static const Integer MAX_PROP_ROW = 5;
+   static const Integer MAX_STOPCOND_ROW = 10;
+   static const Integer PROP_NAME_COL = 0;
+   static const Integer PROP_SOS_COL = 1;
+   static const Integer PROP_BK_COL = 2;
+   static const Integer STOPCOND_NAME_COL = 0;
+   static const Integer STOPCOND_DESC_COL = 1;
    
    struct PropType
    {
       bool isChanged;
-      int  soCount;
+      Integer  soCount;
       wxString propName;
       wxString soNames;
       wxArrayString soNameList;
@@ -111,11 +111,11 @@ private:
    
    // Layout & data handling methods
    void DisplayPropagator();
-   void DisplayStopCondition(int selRow);
+   void DisplayStopCondition(Integer selRow);
    void UpdateStopCondition();
    void RemoveStopCondition();
-   void ClearStopCondition(int selRow);
-   void ShowDetailedStopCond(int stopRow);
+   void ClearStopCondition(Integer selRow);
+   void ShowDetailedStopCond(Integer stopRow);
    void ActivateUpdateButton();
    
    // event handling method
@@ -124,7 +124,6 @@ private:
    void OnButtonClick(wxCommandEvent &event);
    void OnCellLeftClick(wxGridEvent &event);
    void OnCellRightClick(wxGridEvent &event);
-   void OnCellValueChange(wxGridEvent &event);
 
    wxString FormatStopCondDesc(const wxString &varName,
                                const wxString &relOpStr,

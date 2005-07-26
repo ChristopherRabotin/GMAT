@@ -39,7 +39,6 @@ BEGIN_EVENT_TABLE(PropagatePanel, GmatPanel)
    EVT_COMBOBOX(ID_COMBOBOX, PropagatePanel::OnComboBoxChange)
    EVT_GRID_CELL_LEFT_CLICK(PropagatePanel::OnCellLeftClick)
    EVT_GRID_CELL_RIGHT_CLICK(PropagatePanel::OnCellRightClick)
-   EVT_GRID_CELL_CHANGE(PropagatePanel::OnCellValueChange)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -71,7 +70,7 @@ PropagatePanel::PropagatePanel(wxWindow *parent, GmatCommand *cmd)
    mTempPropCount = 0;
    mCurrStopRow = 0;
    
-   for (int i=0; i<MAX_PROP_ROW; i++)
+   for (Integer i=0; i<MAX_PROP_ROW; i++)
    {
       mTempProp[i].isChanged = false;
       mTempProp[i].propName = "";
@@ -79,7 +78,7 @@ PropagatePanel::PropagatePanel(wxWindow *parent, GmatCommand *cmd)
       mTempProp[i].soNameList.Clear();
    }
 
-   for (int i=0; i<MAX_STOPCOND_ROW; i++)
+   for (Integer i=0; i<MAX_STOPCOND_ROW; i++)
    {
       mTempStopCond[i].isChanged = false;
       mTempStopCond[i].name = "";
@@ -100,14 +99,12 @@ PropagatePanel::PropagatePanel(wxWindow *parent, GmatCommand *cmd)
    theApplyButton->Disable();
 }
 
-
 //------------------------------------------------------------------------------
 // ~PropagatePanel()
 //------------------------------------------------------------------------------
 PropagatePanel::~PropagatePanel()
 {
 }
-
 
 //---------------------------------
 // private methods
@@ -122,7 +119,7 @@ void PropagatePanel::Create()
    MessageInterface::ShowMessage("PropagatePanel::Create() entered\n");
    #endif
    
-   int bsize = 1; // bordersize
+   Integer bsize = 1; // bordersize
    
    // wxGrid
    propGrid =
@@ -131,15 +128,14 @@ void PropagatePanel::Create()
    propGrid->CreateGrid(MAX_PROP_ROW, 3, wxGrid::wxGridSelectCells);
    propGrid->SetColSize(0, 200);
    propGrid->SetColSize(1, 400);
-   //propGrid->SetColSize(2, 100);
    propGrid->SetColSize(2, 80);
-   //propGrid->SetMargins(0, 0);
+   propGrid->SetMargins(0, 0);
    propGrid->SetColLabelValue(0, _T("Propagator"));
    propGrid->SetColLabelValue(1, _T("Spacecraft List"));
-   propGrid->SetColLabelValue(2, _T("Backward"));
+   propGrid->SetColLabelValue(2, _T("Backward?"));
    propGrid->SetRowLabelSize(0);
-   //propGrid->SetScrollbars(5, 8, 15, 15);
-   //propGrid->EnableEditing(false);
+   propGrid->SetScrollbars(5, 8, 15, 15);
+   propGrid->EnableEditing(false);
    
    // create and insert boolean choice editor
    wxGridCellAttr *attrBool = new wxGridCellAttr;
@@ -167,7 +163,7 @@ void PropagatePanel::Create()
    
    mPropModeCount = propModes.size();
    wxString *propModeList = new wxString[mPropModeCount];
-   for (int i=0; i<mPropModeCount; i++)
+   for (Integer i=0; i<mPropModeCount; i++)
    {
       propModeList[i] = propModes[i].c_str();
    }
@@ -306,7 +302,6 @@ void PropagatePanel::Create()
    equalityComboBox->Enable(false);
 }
 
-
 //------------------------------------------------------------------------------
 // void LoadData()
 //------------------------------------------------------------------------------
@@ -346,9 +341,9 @@ void PropagatePanel::LoadData()
       ("PropagatePanel::LoadData() mPropCount=%d\n", mPropCount);
    #endif
 
-   int soCount = 0;
+   Integer soCount = 0;
    
-   for (int i=0; i<mPropCount; i++)
+   for (Integer i=0; i<mPropCount; i++)
    {
       mTempProp[i].propName = wxT(propNames[i].c_str());
 
@@ -362,8 +357,8 @@ void PropagatePanel::LoadData()
        propNames[i].c_str(), soCount);
    #endif
    
-      int actualSoCount = 0;
-      for (int j=0; j<soCount; j++)
+      Integer actualSoCount = 0;
+      for (Integer j=0; j<soCount; j++)
       {
          #if DEBUG_PROPAGATE_PANEL
          MessageInterface::ShowMessage
@@ -391,7 +386,7 @@ void PropagatePanel::LoadData()
       
       if (soCount > 0)
       {
-         for (int j=0; j<soCount-1; j++)
+         for (Integer j=0; j<soCount-1; j++)
          {
             mTempProp[i].soNames += soList[j].c_str();
             mTempProp[i].soNames += ", ";
@@ -418,7 +413,7 @@ void PropagatePanel::LoadData()
    #endif
    
    StopCondition  *stopCond;
-   for (int i=0; i<mStopCondCount; i++)
+   for (Integer i=0; i<mStopCondCount; i++)
    {
       stopCond = (StopCondition *)stopArray[i];
       
@@ -478,7 +473,7 @@ void PropagatePanel::SaveData()
          (thePropCmd->GetParameterID("PropagateMode"), str.c_str());
    }
    
-   int soCount = 0;
+   Integer soCount = 0;
    
    //-------------------------------------------------------
    // Saving propagator
@@ -501,7 +496,7 @@ void PropagatePanel::SaveData()
             ("PropagatePanel::SaveData() mPropCount=%d\n", mPropCount);
          #endif
          
-         for (int i=0; i<mPropCount; i++)
+         for (Integer i=0; i<mPropCount; i++)
          {
             thePropCmd->SetStringParameter
                (propId, std::string(mTempProp[i].propName.c_str()));
@@ -516,7 +511,7 @@ void PropagatePanel::SaveData()
                ("PropagatePanel::SaveData() soCount=%d\n", soCount);
             #endif
             
-            for (int j=0; j<soCount; j++)
+            for (Integer j=0; j<soCount; j++)
             {
                #if DEBUG_PROPAGATE_PANEL > 1
                MessageInterface::ShowMessage
@@ -541,8 +536,8 @@ void PropagatePanel::SaveData()
       {
          mStopCondChanged = false;
          
-         int stopCount = 0;
-         for (int i=0; i<MAX_STOPCOND_ROW; i++)
+         Integer stopCount = 0;
+         for (Integer i=0; i<MAX_STOPCOND_ROW; i++)
          {
             if (mTempStopCond[i].desc != "")
                stopCount++;
@@ -561,7 +556,7 @@ void PropagatePanel::SaveData()
          if (stopCount < mStopCondCount)
          {
             thePropCmd->TakeAction("Clear", "StopCondition");
-            for (int i=0; i<stopCount; i++)
+            for (Integer i=0; i<stopCount; i++)
                mTempStopCond[i].isChanged = true;
          }
          
@@ -570,7 +565,7 @@ void PropagatePanel::SaveData()
          //---------------------------------------------
          // Set stopCondition.
          //---------------------------------------------
-         for (int i=0; i<mStopCondCount; i++)
+         for (Integer i=0; i<mStopCondCount; i++)
          {
             if (mTempStopCond[i].isChanged)
             {
@@ -636,7 +631,7 @@ void PropagatePanel::DisplayPropagator()
    #endif
 
    wxString name;
-   for (int i=0; i<mTempPropCount; i++)
+   for (Integer i=0; i<mTempPropCount; i++)
    {
       propGrid->SetCellValue(i, PROP_NAME_COL, mTempProp[i].propName);
       propGrid->SetCellValue(i, PROP_SOS_COL, mTempProp[i].soNames);
@@ -644,7 +639,7 @@ void PropagatePanel::DisplayPropagator()
       propGrid->SetReadOnly(i, PROP_SOS_COL, true);
       
       name = mTempProp[i].propName;
-      int x = name.Find("-");
+      Integer x = name.Find("-");
       
       if (x == -1)
       {
@@ -661,9 +656,9 @@ void PropagatePanel::DisplayPropagator()
 
 
 //------------------------------------------------------------------------------
-// void DisplayStopCondition(int selRow)
+// void DisplayStopCondition(Integer selRow)
 //------------------------------------------------------------------------------
-void PropagatePanel::DisplayStopCondition(int selRow)
+void PropagatePanel::DisplayStopCondition(Integer selRow)
 {
    #if DEBUG_PROPAGATE_PANEL
    MessageInterface::ShowMessage
@@ -671,7 +666,7 @@ void PropagatePanel::DisplayStopCondition(int selRow)
    #endif
    
    //----- for stopCondGrid - show all
-   for (int i=0; i<MAX_STOPCOND_ROW; i++)
+   for (Integer i=0; i<MAX_STOPCOND_ROW; i++)
    {
       stopCondGrid->SetCellValue(i, STOPCOND_NAME_COL, mTempStopCond[i].name);
       stopCondGrid->SetCellValue(i, STOPCOND_DESC_COL, mTempStopCond[i].desc);        
@@ -708,7 +703,7 @@ void PropagatePanel::DisplayStopCondition(int selRow)
 //------------------------------------------------------------------------------
 void PropagatePanel::UpdateStopCondition()
 {
-   int stopRow = mCurrStopRow;
+   Integer stopRow = mCurrStopRow;
    
    #if DEBUG_PROPAGATE_PANEL
    MessageInterface::ShowMessage
@@ -785,7 +780,7 @@ void PropagatePanel::RemoveStopCondition()
    }
    
    // go through the table and move upward if name is not blank
-   for (int i=mCurrStopRow; i<MAX_STOPCOND_ROW; i++)
+   for (Integer i=mCurrStopRow; i<MAX_STOPCOND_ROW; i++)
    {
       if (mTempStopCond[i+1].name != "")
       {
@@ -818,9 +813,9 @@ void PropagatePanel::RemoveStopCondition()
 
 
 //------------------------------------------------------------------------------
-// void ClearStopCondition(int selRow)
+// void ClearStopCondition(Integer selRow)
 //------------------------------------------------------------------------------
-void PropagatePanel::ClearStopCondition(int selRow)
+void PropagatePanel::ClearStopCondition(Integer selRow)
 {
    #if DEBUG_PROPAGATE_PANEL
    MessageInterface::ShowMessage
@@ -862,7 +857,7 @@ void PropagatePanel::OnComboBoxChange(wxCommandEvent& event)
 {
    // Assume single selection
    wxArrayInt stopRows = stopCondGrid->GetSelectedRows();
-   int stopRow = stopRows[0];
+   Integer stopRow = stopRows[0];
     
    if (event.GetEventObject() == mPropModeComboBox)
    {
@@ -960,7 +955,7 @@ void PropagatePanel::OnButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void PropagatePanel::OnCellLeftClick(wxGridEvent& event)
 {
-   int row = event.GetRow();
+   Integer row = event.GetRow();
   
    if (event.GetEventObject() == stopCondGrid)
    {
@@ -973,6 +968,10 @@ void PropagatePanel::OnCellLeftClick(wxGridEvent& event)
       ShowDetailedStopCond(row);
       updateButton->Disable();
    }
+   else if (event.GetEventObject() == propGrid)
+   {
+      propGrid->SelectRow(row);
+   }
 }
 
 
@@ -981,14 +980,15 @@ void PropagatePanel::OnCellLeftClick(wxGridEvent& event)
 //------------------------------------------------------------------------------
 void PropagatePanel::OnCellRightClick(wxGridEvent& event)
 {    
-   int row = event.GetRow();
-   int col = event.GetCol();
+   Integer row = event.GetRow();
+   Integer col = event.GetCol();
 
    if (row <= mTempPropCount)
    {
       if (event.GetEventObject() == propGrid)
       {
-         //propGrid->SelectRow(row);
+         propGrid->SelectRow(row);
+         
          if (col == 0)
          {
             //----------------------------------
@@ -1036,12 +1036,12 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
             // select spacecraft
             //----------------------------------
             wxArrayString soExcList;
-            int soCount = 0;
-            for (int i=0; i<mTempPropCount; i++)
+            Integer soCount = 0;
+            for (Integer i=0; i<mTempPropCount; i++)
             {
                soCount = mTempProp[i].soNameList.Count();
             
-               for (int j=0; j<soCount; j++)
+               for (Integer j=0; j<soCount; j++)
                   soExcList.Add(mTempProp[i].soNameList[j]);
             }
             
@@ -1062,7 +1062,7 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
                #endif
             
                mTempProp[row].soNameList.Clear();
-               for (int j=0; j<soCount; j++)
+               for (Integer j=0; j<soCount; j++)
                {
                   mTempProp[row].soNameList.Add(names[j]);
                   
@@ -1089,47 +1089,54 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
                theApplyButton->Enable(true);
             }
          }
+         else if (col == 2)
+         {
+            wxString s1 = propGrid->GetCellValue(row, PROP_NAME_COL);
+            wxString s2 = propGrid->GetCellValue(row, PROP_SOS_COL);
+            
+            // Exit if empty row
+            if ( (s1 == "") || (s2 == "") )
+               return;        
+
+            wxString strArray[] = {wxT("Yes"), wxT("No")};        
+      
+            wxSingleChoiceDialog dialog(this, 
+               _T("Propagate Backwards? \n"),
+               _T("Backwards"), 2, strArray);
+               
+            dialog.SetSelection(0);
+            
+            if (dialog.ShowModal() == wxID_OK)
+            {
+               wxString str = dialog.GetStringSelection();
+               wxString temp = propGrid->GetCellValue(row, col);
+               
+               wxString name = mTempProp[row].propName;
+                  
+               if (str == "Yes")
+               {
+                  mTempProp[row].propName.Prepend("-");  
+                  propGrid->SetCellValue(row, PROP_BK_COL, "1");
+               }
+               else if (str == "No")
+               {
+                  wxString name = mTempProp[row].propName;
+                  name.Replace("-", "", false);
+                  mTempProp[row].propName = name; 
+                  propGrid->SetCellValue(row, PROP_BK_COL, "");   
+               } 
+               theApplyButton->Enable(true);
+               mPropChanged = true;   
+            }
+         }
       }
    }
 }
 
-
 //------------------------------------------------------------------------------
-// void OnCellValueChange(wxGridEvent &event)
+// void ShowDetailedStopCond(Integer stopRow)
 //------------------------------------------------------------------------------
-void PropagatePanel::OnCellValueChange(wxGridEvent &event)
-{
-   int row = event.GetRow();
-   int col = event.GetCol();
-   
-   if (event.GetEventObject() == propGrid)
-   { 
-       if (col == 2)
-       {
-           wxString temp = propGrid->GetCellValue(row, col);
-           wxString name = mTempProp[row].propName;
-           
-           if (temp == "1")
-           {
-               mTempProp[row].propName.Prepend("-");  
-           }
-           else
-           {
-              wxString name = mTempProp[row].propName;
-              name.Replace("-", "", false);
-              mTempProp[row].propName = name;    
-           }                 
-           theApplyButton->Enable(true); 
-           mPropChanged = true;    
-       }    
-   }    
-}
-
-
-//------------------------------------------------------------------------------
-// void ShowDetailedStopCond(int stopRow)
-//------------------------------------------------------------------------------
-void PropagatePanel::ShowDetailedStopCond(int stopRow)
+void PropagatePanel::ShowDetailedStopCond(Integer stopRow)
 {
    stopNameTextCtrl->SetValue(mTempStopCond[stopRow].name);
    varNameTextCtrl->SetValue(mTempStopCond[stopRow].varName);
@@ -1164,7 +1171,7 @@ void PropagatePanel::ActivateUpdateButton()
 {
    // assume single selection
    wxArrayInt stopRows = stopCondGrid->GetSelectedRows();
-   int stopRow = stopRows[0];
+   Integer stopRow = stopRows[0];
 
    mTempStopCond[stopRow].isChanged = true;
    updateButton->Enable(true);
@@ -1206,7 +1213,7 @@ void PropagatePanel::MoveUpPropData()
 {
    PropType tempProp[MAX_PROP_ROW];
    
-   for (int i=0; i<MAX_PROP_ROW; i++)
+   for (Integer i=0; i<MAX_PROP_ROW; i++)
    {
       tempProp[i].isChanged = mTempProp[i].isChanged;
       tempProp[i].propName = mTempProp[i].propName;
@@ -1214,7 +1221,7 @@ void PropagatePanel::MoveUpPropData()
       tempProp[i].soNameList = mTempProp[i].soNameList;
    }
    
-   for (int i=0; i<MAX_PROP_ROW; i++)
+   for (Integer i=0; i<MAX_PROP_ROW; i++)
    {
       mTempProp[i].isChanged = false;
       mTempProp[i].propName = "";
@@ -1222,8 +1229,8 @@ void PropagatePanel::MoveUpPropData()
       mTempProp[i].soNameList.Clear();
    }
    
-   int propCount = 0;
-   for (int i=0; i<MAX_PROP_ROW; i++)
+   Integer propCount = 0;
+   for (Integer i=0; i<MAX_PROP_ROW; i++)
    {
       if (tempProp[i].propName != "")
       {
@@ -1237,7 +1244,7 @@ void PropagatePanel::MoveUpPropData()
 
    mTempPropCount = propCount;
    
-   for (int i=0; i<MAX_PROP_ROW; i++)
+   for (Integer i=0; i<MAX_PROP_ROW; i++)
    {
       propGrid->SetCellValue(i, PROP_NAME_COL, mTempProp[i].propName);
       propGrid->SetCellValue(i, PROP_SOS_COL, mTempProp[i].soNames);
