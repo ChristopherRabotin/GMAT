@@ -120,6 +120,8 @@ protected:
    Real                    nominalKp;
    /// Nominal geomagnetic planetary amplitude, calculated via Vallado eq. 8-31.
    Real                    nominalAp;
+   
+   Real                    ConvertKpToAp(const Real kp);
 
    enum {
       NOMINAL_FLUX = GmatBaseParamCount,

@@ -23,6 +23,8 @@
 #include <cmath>                    // for exp
 
 
+// #define CHECK_KP2AP
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -71,7 +73,14 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr) :
 
    fileName = "";
    parameterCount = AtmosphereModelParamCount;
-   nominalAp = exp((nominalKp + 1.6) / 1.75);      // Vallado, 8-31
+   nominalAp = ConvertKpToAp(nominalKp);
+
+   #ifdef CHECK_KP2AP
+      MessageInterface::ShowMessage("K_p to A_p conversions:\n");
+      for (Integer i = 0; i < 28; ++i)
+         MessageInterface::ShowMessage("   %12.9lf -> %12.9lf\n", i/3.0,
+            ConvertKpToAp(i/3.0));
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -109,7 +118,7 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
 {
    fileName = am.fileName;
    parameterCount = AtmosphereModelParamCount;
-   nominalAp = exp((nominalKp + 1.6) / 1.75);      // Vallado, 8-31
+   nominalAp = ConvertKpToAp(nominalKp);
 }
 
 //------------------------------------------------------------------------------
@@ -141,7 +150,7 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    nominalF107         = am.nominalF107;
    nominalF107a        = am.nominalF107a;
    nominalKp           = am.nominalKp;
-   nominalAp = exp((nominalKp + 1.6) / 1.75);      // Vallado, 8-31
+   nominalAp = ConvertKpToAp(nominalKp);
 
    return *this;
 }
@@ -337,7 +346,7 @@ Real AtmosphereModel::SetRealParameter(const Integer id, const Real value)
       if (value > 0.0)
       {
          nominalKp = value;
-         nominalAp = exp((nominalKp + 1.6) / 1.75);      // Vallado, 8-31
+         nominalAp = ConvertKpToAp(nominalKp);
       }
       return nominalKp;
    }
@@ -407,4 +416,48 @@ void AtmosphereModel::CloseFile()
       fileRead = false;
    else
       throw AtmosphereException("Error closing Atmosphere Model data file.\n");
+}
+
+
+//------------------------------------------------------------------------------
+// Real ConvertKpToAp(const Real kp)
+//------------------------------------------------------------------------------
+/**
+ * Routine to convert Kp values into Ap values, using a secant method.
+ * 
+ * This method solves the transcendental equation
+ * 
+ *    \f[28 K_p + 0.03 e^{K_p} = A_p + 100 (1 - e^{-0.08 A_p})\f]
+ * 
+ * using an iterative secant method.
+ * 
+ * @param <kp> The geomagnetic index, Kp.
+ * 
+ * @return the corresponding geomagnetic amplitude, Ap. 
+ */
+//------------------------------------------------------------------------------
+Real AtmosphereModel::ConvertKpToAp(const Real kp)
+{
+   Real r = 28.0 * kp + 0.03 * exp(kp) - 100.0;
+   
+   Real x[3], y[2];
+   x[0] = 0.0;
+   x[1] = 500.0;
+   
+   Real epsilon = 1.0e-6;
+   Integer maxIterations = 15, i = 0;
+   
+   do {
+      y[0] = 100.0 * exp(-0.08 * x[0]) + r - x[0];
+      y[1] = 100.0 * exp(-0.08 * x[1]) + r - x[1];
+      
+      x[2] = x[1] - y[1] * (x[1] - x[0]) / (y[1] - y[0]);
+      x[0] = x[1];
+      x[1] = x[2];
+      
+      if (i++ > maxIterations)
+         throw AtmosphereException("ConvertKpToAp failed; too many iterations");
+   } while (fabs(y[1]) > epsilon);
+   
+   return x[2];
 }
