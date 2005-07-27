@@ -611,7 +611,7 @@ const StringArray& ObjectReferencedAxes::GetRefObjectNameArray(const Gmat::Objec
    if (type == Gmat::UNKNOWN_OBJECT)
    {
       static StringArray refs = DynamicAxes::GetRefObjectNameArray(type);
-      refs.clear();
+      //refs.clear(); // huh?
 
       if (find(refs.begin(), refs.end(), primaryName) == refs.end())
          refs.push_back(primaryName);
