@@ -97,7 +97,7 @@ namespace GmatMathUtil
    Real    ArcsecToRad(Real asec,bool modBy2Pi = false);
    
    Real    Sin(Real angleInRad, Real cycleInRad=TWO_PI); 
-   //loj:Real    SinXOverX(Real angleInRad, Real cycleInRad=TWO_PI); 
+   Real    SinXOverX(Real angleInRad, Real cycleInRad=TWO_PI); //loj: 7/22/05 Uncommented
    Real    Cos(Real angleInRad, Real cycleInRad=TWO_PI); 
    Real    Tan(Real angleInRad, Real cycleInRad=TWO_PI);
 

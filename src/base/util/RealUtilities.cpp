@@ -274,18 +274,20 @@ Real GmatMathUtil::Sin (Real angleInRad, Real cycleInRad)
    return sin( (TWO_PI/cycleInRad)*angleInRad);
 }
 
+
 //------------------------------------------------------------------------------
 //  Real SinXOverX (Real angleInRad, Real cycleInRad)
 //------------------------------------------------------------------------------
-//  Real GmatMathUtil::SinXOverX (Real angleInRad, Real cycleInRad)
-//  {
-//     if ( fabs(angleInRad) > pow(10.0,(-(GmatRealConst::REAL_DIG/2)))) 
-//     {
-//        Real sinValue = GmatMathUtil::Sin(angleInRad, cycleInRad);
-//        return sinValue/angleInRad;
-//     }
-//     return 1.0;
-//  }
+Real GmatMathUtil::SinXOverX (Real angleInRad, Real cycleInRad)
+{
+   if ( Abs(angleInRad) > Pow(10.0,(-(GmatRealConst::REAL_DIG/2)))) 
+   {
+      Real sinValue = GmatMathUtil::Sin(angleInRad, cycleInRad);
+      return sinValue/angleInRad;
+   }
+   return 1.0;
+}
+
 
 //------------------------------------------------------------------------------
 //  Real Cos (Real angleInRad, Real cycleInRad)
