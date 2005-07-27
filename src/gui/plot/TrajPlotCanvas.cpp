@@ -20,9 +20,8 @@
 #include "AngleUtil.hpp"          // for ComputeAngleInDeg()
 #include "MdiGlPlotData.hpp"
 #include "MessageInterface.hpp"
-#include <string.h>               // for strlen()
 
-#include <math.h>
+#include <string.h>               // for strlen()
 
 #ifdef __WXMAC__
 #  ifdef __DARWIN__
@@ -144,9 +143,9 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mUseViewPointRefVector = true;
    mUseViewPointVector = true;
    mUseViewDirectionVector = true;
-   mVpRefObjId = -1;
-   mVpVecObjId = -1;
-   mVdirObjId = -1;
+   mVpRefObjId = UNKNOWN_OBJ_ID;
+   mVpVecObjId = UNKNOWN_OBJ_ID;
+   mVdirObjId = UNKNOWN_OBJ_ID;
 
    // view
    mCanvasSize = size;
@@ -166,22 +165,23 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    
    // view model
    mUseGluLookAt = false;
+   mUseSingleRotAngle = true;
    
    mAxisLength = mCurrViewDist;
    mOriginName = "";
    mOriginId = 0;
    
    //original value
-   //mRotateAboutXaxis = true;
-   //mRotateAboutYaxis = false;
-   //mRotateAboutZaxis = false;
-
-   mRotateAboutXaxis = false;
-   mRotateAboutYaxis = false;
-   mRotateAboutZaxis = true;
+   //mRotateAboutXaxis = true;   // 2-3-1
+   //mRotateAboutYaxis = false;  // 3-1-2
+   //mRotateAboutZaxis = false;  // 1-2-3
+   
+   mRotateAboutXaxis = false;  // 2-3-1
+   mRotateAboutYaxis = true ;  // 3-1-2
+   mRotateAboutZaxis = false;  // 1-2-3
    
    mRotateXy = true;
-
+   
    mZoomAmount = 300.0;
    
    // projection
@@ -190,7 +190,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mEarthRadius = 6378.14; //km
    mScRadius = 200;        //km: make big enough to see
    
-   // view options
+   // drawing options
    mDrawWireFrame = false;
    mDrawEqPlane = false;
    mDrawEcPlane = false;
@@ -224,7 +224,6 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
       mObjectRadius[obj] = 0.0;
    
    // Zoom
-   //mMaxZoomIn = 0; //loj: 6/30/05
    mMaxZoomIn = MAX_ZOOM_IN;
    
    // Spacecraft
@@ -683,18 +682,19 @@ void TrajPlotCanvas::DrawInOtherCoordSystem(const wxString &csName)
       else
          mIsInternalCoordSystem = false;
       
+      wxString oldOriginName = mOriginName;
       mOriginName = mViewCoordSystem->GetOriginName().c_str();
       mOriginId = GetObjectId(mOriginName);
-      //mMaxZoomIn = mObjMaxZoomIn[mOriginId]; //loj: 5/24/05 commented out
       
       mNeedSpacecraftConversion = true;
       mNeedOriginConversion = true;
       mNeedObjectConversion = true;
       
-      ConvertObjectData(); //loj: 5/24/05 Added
+      ConvertObjectData();
       
       Refresh(false);
-      GotoObject(mOriginName);
+      if (!mOriginName.IsSameAs(oldOriginName)) //loj: 7/22/05 Added
+         GotoObject(mOriginName);
    }
    else
    {
@@ -713,12 +713,10 @@ void TrajPlotCanvas::GotoObject(const wxString &objName)
    int objId = GetObjectId(objName);
    
    mViewObjId = objId;
-   //loj:5.20mOriginId = objId;
    mMaxZoomIn = mObjMaxZoomIn[objId];
    
    // if goto Object is center(0,0,0), zoom out to see the object,
    // otherwise, set to final position of the object
-   //loj:5.20 if (objName == mOriginName)
    if (objName == mViewObjName)
    {
       mAxisLength = mMaxZoomIn;
@@ -857,17 +855,13 @@ void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
       mViewObjId = GetObjectId(mViewObjName);
    }
    
-   mMaxZoomIn = mObjMaxZoomIn[mOriginId]; //loj: 6/30/05
+   mMaxZoomIn = mObjMaxZoomIn[mOriginId];
 
    if (mUseInitialViewPoint)
    {
-      //mMaxZoomIn = mObjMaxZoomIn[mOriginId]; //loj: 6/30/05
       mAxisLength = mMaxZoomIn;
    }
-   
-   //    mMaxZoomIn = mObjMaxZoomIn[mViewObjId];
-   //    mAxisLength = mMaxZoomIn;
-   
+      
    #if DEBUG_TRAJCANVAS_OBJECT
    MessageInterface::ShowMessage
       ("TrajPlotCanvas::SetGlCoordSystem() mViewCoordSystem=%s, originName=%s, "
@@ -1107,9 +1101,6 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
 } //end ReadTextTrajectory()
 
 
-//loj: 5/16/05
-// Removed mScGciPos[] and mScTempPos[] and use mObjectGciPos[] and mObjectTempPos[]
-
 //------------------------------------------------------------------------------
 // void UpdatePlot(const StringArray &scNames, const Real &time,
 //                 const RealArray &posX, const RealArray &posY,
@@ -1151,7 +1142,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    
    if (mNumData < MAX_DATA)
    {
-      mIsEndOfRun = false; //loj: 6/30/05 Added to use in OnMouse()
+      mIsEndOfRun = false;
       mTime[mNumData] = time;
       
       //-------------------------------------------------------
@@ -1161,9 +1152,8 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
       {
          int objId = GetObjectId(mScNameArray[sc].c_str());
          
-         if (objId != -1)
+         if (objId != UNKNOWN_OBJ_ID)
          {
-            //loj: 6/24/05 Added
             if (!mDrawObjArray[objId])
             {
                mDrawObjFlag[objId][mNumData] = false;
@@ -1177,7 +1167,6 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             mObjectGciPos[objId][mNumData][1] = posY[sc];
             mObjectGciPos[objId][mNumData][2] = posZ[sc];
             
-            //loj: 6/13/05 Added
             mObjectGciVel[objId][mNumData][0] = velX[sc];
             mObjectGciVel[objId][mNumData][1] = velY[sc];
             mObjectGciVel[objId][mNumData][2] = velZ[sc];
@@ -1186,7 +1175,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             {
                Rvector6 inState, outState;
                
-               // convert position and velocity (loj: 6/13/05 convert velocity also)
+               // convert position and velocity
                inState.Set(posX[sc], posY[sc], posZ[sc],
                            velX[sc], velY[sc], velZ[sc]);
                
@@ -1239,9 +1228,8 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             #endif
             
             // if object id found
-            if (objId != -1)
+            if (objId != UNKNOWN_OBJ_ID)
             {
-               //loj: 6/24/05 Added
                if (!mDrawObjArray[objId])
                {
                   mDrawObjFlag[objId][mNumData] = false;
@@ -1861,13 +1849,10 @@ void TrajPlotCanvas::SetDefaultView()
 void TrajPlotCanvas::SetProjection()
 {
    // Setup the world view
-   //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    glMatrixMode(GL_PROJECTION); // first go to projection mode
-   //glPushMatrix();
    glLoadIdentity();
    SetupWorld();                // set it up
    glMatrixMode(GL_MODELVIEW);
-   //glPopMatrix();
 }
 
 
@@ -1904,7 +1889,7 @@ void TrajPlotCanvas::SetupWorld()
                                      mfViewFar  * mfViewFar);
       
       Real dist = mVpLocVec.GetMagnitude();
-      mViewObjRadius = mObjectDefaultRadius*50; //loj:5/23/05 multiplied by 50
+      mViewObjRadius = mObjectDefaultRadius*50;
       
       if (mUseFixedFov && mUseSingleRotAngle)
       {
@@ -1973,12 +1958,7 @@ void TrajPlotCanvas::SetupWorld()
    
    //camera moves opposite direction to center on object
    //this is the point of rotation
-   //loj: 4/15/05 Added minus sign to x, y
 
-   //loj:5.20
-//    glTranslatef( mObjectTempPos[mOriginId][mNumData-1][0],
-//                  mObjectTempPos[mOriginId][mNumData-1][1],
-//                  -mObjectTempPos[mOriginId][mNumData-1][2]);
    glTranslatef(mObjectTempPos[mViewObjId][mNumData-1][0],
                 mObjectTempPos[mViewObjId][mNumData-1][1],
                 -mObjectTempPos[mViewObjId][mNumData-1][2]);
@@ -2124,7 +2104,7 @@ void TrajPlotCanvas::ComputeProjection(int frame)
       #endif
 
       // if valid body id
-      if (mVpRefObjId != -1)
+      if (mVpRefObjId != UNKNOWN_OBJ_ID)
       {
          // for efficiency, body data are computed in UpdatePlot() once.
          mVpRefVec.Set(mObjectTempPos[mVpRefObjId][frame][0],
@@ -2155,7 +2135,7 @@ void TrajPlotCanvas::ComputeProjection(int frame)
       #endif
       
       // if valid body id
-      if (mVpVecObjId != -1)
+      if (mVpVecObjId != UNKNOWN_OBJ_ID)
       {
          // for efficiency, body data are computed in UpdatePlot() once.
          mVpVec.Set(mObjectTempPos[mVpVecObjId][frame][0],
@@ -2197,7 +2177,7 @@ void TrajPlotCanvas::ComputeProjection(int frame)
       {
          mVdVec = -mVpLocVec;
       }
-      else if (mVdirObjId != -1)
+      else if (mVdirObjId != UNKNOWN_OBJ_ID)
       {
          // for efficiency, body data are computed in UpdatePlot() once.
          mVdVec.Set(mObjectTempPos[mVdirObjId][frame][0],
@@ -2207,7 +2187,7 @@ void TrajPlotCanvas::ComputeProjection(int frame)
          // view center vector
          mVcVec = mVdVec;
          
-         // check for 0.0 direction (loj: 5/17/05 Added)
+         // check for 0.0 direction 
          if (mVdVec.GetMagnitude() == 0.0)
             mVdVec = mViewDirectionVector;
       }
@@ -2231,9 +2211,6 @@ void TrajPlotCanvas::ComputeProjection(int frame)
    //-----------------------------------------------------------------
    // set view center object
    //-----------------------------------------------------------------
-   //loj:5.20 it's already set in SetGlCoordSystem()
-   //mOriginId = GetObjectId(mOriginName);
-   //mMaxZoomIn = mObjMaxZoomIn[mOriginId];
    
    if (mUsePerspectiveMode)
    {
@@ -2275,19 +2252,24 @@ void TrajPlotCanvas::ComputeProjection(int frame)
    #if DEBUG_TRAJCANVAS_PROJ
       MessageInterface::ShowMessage
          ("ComputeProjection() mfCamTransXYZ=%f, %f, %f, mfCamSingleRotAngle=%f\n"
-          "mfCamRotXYZ=%f, %f, %f mAxisLength=%f\n", mfCamTransX, mfCamTransY, mfCamTransZ,
-          mfCamSingleRotAngle, mfCamRotXAxis, mfCamRotYAxis, mfCamRotZAxis, mAxisLength);
+          "mfCamRotXYZ=%f, %f, %f mAxisLength=%f\n", mfCamTransX, mfCamTransY,
+          mfCamTransZ, mfCamSingleRotAngle, mfCamRotXAxis, mfCamRotYAxis,
+          mfCamRotZAxis, mAxisLength);
    #endif
 }
 
 
 //------------------------------------------------------------------------------
-// void ComputeViewMatrix()
+// void ComputeViewMatrix(int frame)
 //------------------------------------------------------------------------------
-void TrajPlotCanvas::ComputeViewMatrix()
+void TrajPlotCanvas::ComputeViewMatrix(int frame)
 {
+   if (frame < 0)
+      return;
+   
    //MessageInterface::ShowMessage
-   //   ("===> TrajPlotCanvas::ComputeViewMatrix() mUseGluLookAt=%d\n", mUseGluLookAt);
+   //   ("===> TrajPlotCanvas::ComputeViewMatrix() mUseSingleRotAngle=%d, "
+   //    "mUseGluLookAt=%d\n", mUseSingleRotAngle, mUseGluLookAt);
    
    if (mUseSingleRotAngle)
    {
@@ -2295,46 +2277,55 @@ void TrajPlotCanvas::ComputeViewMatrix()
       
       // calculate view up direction
       
-      Rvector6 inState, outState;
+      Rvector6 upState, upOutState;
       
       if (mViewUpAxisName == "X")
-         inState.Set(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+         upState.Set(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       else if (mViewUpAxisName == "-X")
-         inState.Set(-1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+         upState.Set(-1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       else if (mViewUpAxisName == "Y")
-         inState.Set(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+         upState.Set(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
       else if (mViewUpAxisName == "-Y")
-         inState.Set(0.0, -1.0, 0.0, 0.0, 0.0, 0.0);
+         upState.Set(0.0, -1.0, 0.0, 0.0, 0.0, 0.0);
       else if (mViewUpAxisName == "Z")
-         inState.Set(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
+         upState.Set(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
       else if (mViewUpAxisName == "-Z")
-         inState.Set(0.0, 0.0, -1.0, 0.0, 0.0, 0.0);
+         upState.Set(0.0, 0.0, -1.0, 0.0, 0.0, 0.0);
       
-      outState = inState;
+      upOutState = upState;
       Rvector6 originIn;
       Rvector6 originOut;
+      Rvector3 upOutVec;
       
-      if (mViewUpCoordSystem->GetName() != mViewCoordSystem->GetName())
+      mUseGluLookAt = false;
+      
+      if (mUseGluLookAt)
       {
-         mCoordConverter.Convert(mTime[0], inState, mViewUpCoordSystem,
-                                 outState, mInternalCoordSystem);
+         if (mViewUpCoordSystem->GetName() != mViewCoordSystem->GetName())
+         {
+           //=========================== from Steve
+            mCoordConverter.Convert(mTime[frame], upState, mViewUpCoordSystem,
+                                    upOutState, mInternalCoordSystem);
             
-         mCoordConverter.Convert(mTime[0], originIn, mViewUpCoordSystem,
-                                 originOut, mInternalCoordSystem);
-         
-         Rvector6 r1 = outState - originOut;
-         Rvector6 r2;
-         
-         mCoordConverter.Convert(mTime[0], r1, mInternalCoordSystem,
-                                 r2, mViewCoordSystem);
+            mCoordConverter.Convert(mTime[frame], originIn, mViewUpCoordSystem,
+                                    originOut, mInternalCoordSystem);
             
-         mCoordConverter.Convert(mTime[0], originIn, mInternalCoordSystem,
-                                 originOut, mViewCoordSystem);
+            Rvector6 r1 = upOutState - originOut;
+            Rvector6 r2;
             
-         outState = r2 - originOut;
-         
-         //mCoordConverter.Convert(mTime[0], inState, mViewUpCoordSystem,
-         //                        outState, mViewCoordSystem);
+            mCoordConverter.Convert(mTime[frame], r1, mInternalCoordSystem,
+                                    r2, mViewCoordSystem);
+            
+            mCoordConverter.Convert(mTime[frame], originIn, mInternalCoordSystem,
+                                    originOut, mViewCoordSystem);
+            
+            upOutState = r2 - originOut;
+            //=========================== from Steve
+         }
+         else
+         {
+            upOutVec.Set(upOutState(0), upOutState(1), upOutState(2));
+         }
       }
       
       #if DEBUG_TRAJCANVAS_PROJ
@@ -2342,7 +2333,7 @@ void TrajPlotCanvas::ComputeViewMatrix()
          ("===> mVpLocVec=%s, mVcVec=%s\n", mVpLocVec.ToString().c_str(),
           mVcVec.ToString().c_str());
       MessageInterface::ShowMessage
-         ("===> outState= %f, %f, %f\n", outState[0], outState[1], outState[2]);
+         ("===> upOutVec=%s\n", upOutVec.ToString().c_str());
       #endif
       
       if (mUsePerspectiveMode)
@@ -2354,27 +2345,38 @@ void TrajPlotCanvas::ComputeViewMatrix()
             //-------------------------------------------------
             gluLookAt(mVpLocVec[0], mVpLocVec[1], mVpLocVec[2],
                       mVcVec[0], mVcVec[1], mVcVec[2],
-                      outState[0], outState[1], outState[2]);
-            
-            //Rvector3 upVec(outState[0], outState[1], outState[2]);
-            //Real rotAngle = ACos(-(upVec[2]/upVec.GetMagnitude())) * DEG_PER_RAD;
-            //glRotatef(rotAngle, upVec[1], -upVec[0], 0.0);
+                      upOutVec[0], upOutVec[1], upOutVec[2]);
          }
          else
          {
             glTranslatef(mfCamTransX, mfCamTransY, mfCamTransZ);
-            glRotatef(mfCamSingleRotAngle, mfCamRotXAxis, mfCamRotYAxis, mfCamRotZAxis);
+            glRotatef(mfCamSingleRotAngle,
+                      mfCamRotXAxis, mfCamRotYAxis, mfCamRotZAxis);
          }
       }
       else
       {
-         glTranslatef(mfCamTransX, mfCamTransY, mfCamTransZ);
-         glRotatef(mfCamSingleRotAngle, mfCamRotXAxis, mfCamRotYAxis, mfCamRotZAxis);
-
-         // DJC added for Up
-         glRotatef(-mfUpAngle, mfUpXAxis, mfUpYAxis, -mfUpZAxis);
-      }
-   }
+         if (mUseGluLookAt)
+         {
+            //-------------------------------------------------
+            // use gluLookAt()
+            //-------------------------------------------------
+            gluLookAt(mVpLocVec[0], mVpLocVec[1], mVpLocVec[2],
+                      mVcVec[0], mVcVec[1], mVcVec[2],
+                      upOutVec[0], upOutVec[1], upOutVec[2]);
+         }
+         else
+         {
+            glTranslatef(mfCamTransX, mfCamTransY, mfCamTransZ);
+            glRotatef(mfCamSingleRotAngle,
+                      mfCamRotXAxis, mfCamRotYAxis, mfCamRotZAxis);
+            
+            // DJC added for Up
+            glRotatef(-mfUpAngle, mfUpXAxis, mfUpYAxis, -mfUpZAxis);
+            
+         } //if (mUseGluLookAt)
+      } //if (mUsePerspectiveMode)      
+   } //if (mUseSingleRotAngle)
    
 } // end ComputeViewMatrix()
 
@@ -2457,7 +2459,7 @@ void TrajPlotCanvas::DrawFrame()
          SetProjection();
       }
       
-      ComputeViewMatrix();     
+      ComputeViewMatrix(frame);     
       
       // tilt Origin rotation axis if needed
       if (mNeedOriginConversion)
@@ -2476,7 +2478,7 @@ void TrajPlotCanvas::DrawFrame()
       
       // draw axes
       if (mDrawAxes)
-         DrawAxes(true);
+         DrawAxes();
       
       // draw ecliptic plane
       if (mDrawEcPlane)
@@ -2496,14 +2498,14 @@ void TrajPlotCanvas::DrawFrame()
       DrawObjectOrbit(frame);
       
       // draw Earth-Sun line
-      if (mDrawESLine)
-         DrawESLine();
+      if (mDrawESLines)
+         DrawESLines(frame);
       
       // draw axes in other coord. system
       if (!mIsInternalCoordSystem)
       {
          if (mDrawAxes)
-            DrawAxes(false);
+            DrawAxes();
       }
       
       glFlush();
@@ -2535,7 +2537,7 @@ void TrajPlotCanvas::DrawPlot()
    DrawStatus("Frame#: ", mNumData-1, mTime[mNumData-1]);
    SetProjection();
    
-   ComputeViewMatrix();
+   ComputeViewMatrix(mNumData-1);
    
    // tilt Origin rotation axis if needed
    if (mNeedOriginConversion)
@@ -2550,7 +2552,7 @@ void TrajPlotCanvas::DrawPlot()
    
    // draw axes
    if (mDrawAxes)
-      DrawAxes(true);
+      DrawAxes();
    
    // draw ecliptic plane
    if (mDrawEcPlane)
@@ -2563,17 +2565,17 @@ void TrajPlotCanvas::DrawPlot()
    
    // draw object orbit
    DrawObjectOrbit(mNumData-1);
-      
-   // draw Earth-Sun line
-   if (mDrawESLine)
-      DrawESLine();
    
-   // draw axes in other coord. system
-   if (!mIsInternalCoordSystem)
-   {
-      if (mDrawAxes)
-         DrawAxes(false);
-   }
+   // draw Earth-Sun line
+   if (mDrawESLines)
+      DrawESLines(mNumData-1);
+   
+//    // draw axes in other coord. system
+//    if (!mIsInternalCoordSystem)
+//    {
+//       if (mDrawAxes)
+//          DrawAxes(false);
+//    }
    
    glFlush();
    SwapBuffers();
@@ -2654,7 +2656,6 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
       objName = mObjectNames[obj];
       objId = GetObjectId(objName);
       
-      //loj: 6/24/05 Added
       if (!mDrawObjFlag[objId])
          continue;
       
@@ -2665,7 +2666,7 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
       {
          // Draw object orbit line based on points
          if ((mTime[i] > mTime[i-1]) ||
-             (i>2 && mTime[i] < mTime[i-1]) && mTime[i-1] < mTime[i-2]) //loj: 5/26/05 for backprop
+             (i>2 && mTime[i] < mTime[i-1]) && mTime[i-1] < mTime[i-2]) //for backprop
          {
             Rvector3 r1(mObjectTempPos[objId][i-1][0], mObjectTempPos[objId][i-1][1],
                         mObjectTempPos[objId][i-1][2]);
@@ -3020,10 +3021,8 @@ void TrajPlotCanvas::DrawEquatorialPlane(UnsignedInt color)
       //orthoDepth = (half-size-of-image)*60/(half-FOV-degrees)
       
       Real ort = orthoDepth * 8;
-      //int pwr = gile(log10 (ort));
-      Real pwr = Floor(Log10(ort)); //loj: 6/17/05 Changed to use Log10()
-      //Real size = exp10(pwr)/100;
-      Real size = Exp10(pwr)/100;   //loj: 6/17/05 Changed to use Exp10()
+      Real pwr = Floor(Log10(ort));
+      Real size = Exp10(pwr)/100;
       Real imax = orthoDepth/size;
       
       //------------------------------------------
@@ -3096,24 +3095,35 @@ void TrajPlotCanvas::DrawEclipticPlane(UnsignedInt color)
 
 
 //------------------------------------------------------------------------------
-//  void DrawESLine()
+//  void DrawESLines(int frame)
 //------------------------------------------------------------------------------
 /**
- * Draws ecliptic plane circles.
+ * Draws Earth Sun lines.
  */
 //------------------------------------------------------------------------------
-void TrajPlotCanvas::DrawESLine()
+void TrajPlotCanvas::DrawESLines(int frame)
 {
-   Real objPos[3], endPos[3];
+   
+   if (frame <= 0)
+      return;
+   
+   //int objId = GetObjectId("Sun");
+   int earthId = GetObjectId("Earth");
+   int sunId = GetObjectId("Sun");
+   
+   //loj: 7/27/05 Added check for Earth and Sun
+   if (earthId == UNKNOWN_OBJ_ID || sunId == UNKNOWN_OBJ_ID)
+      return;
+   
+   //Real objPos[3], endPos[3];
+   Real earthPos[3], sunPos[3];
    Real distance = (Real)mAxisLength;
    Real mag;
-   int numSkip = mNumData/12; // draw 24 lines (12*2)
+
+   int numSkip = frame/12; // draw 24 lines (12*2)
+   if (numSkip == 0)
+      numSkip = 1;
    
-   int objId = GetObjectId("Sun");
-   
-   // if origin is Sun, get Earth position
-   if (mOriginName == "Sun")
-      objId = GetObjectId("Earth");
    
    //--------------------------------
    // draw sun lines
@@ -3125,48 +3135,89 @@ void TrajPlotCanvas::DrawESLine()
    
    glBegin(GL_LINES);
    
-   for (int i=0; i<mNumData; i+=numSkip)
-   {
-      //loj: 4/15/05 Added minus sign to x, y
-      objPos[0] = -mObjectTempPos[objId][i][0];
-      objPos[1] = -mObjectTempPos[objId][i][1];
-      objPos[2] =  mObjectTempPos[objId][i][2];
+   //for (int i=0; i<mNumData; i+=numSkip)
+   for (int i=1; i<=frame; i+=numSkip)
+   {      
+      earthPos[0] = -mObjectTempPos[earthId][i][0];
+      earthPos[1] = -mObjectTempPos[earthId][i][1];
+      earthPos[2] =  mObjectTempPos[earthId][i][2];
+      
+      sunPos[0] = -mObjectTempPos[sunId][i][0];
+      sunPos[1] = -mObjectTempPos[sunId][i][1];
+      sunPos[2] =  mObjectTempPos[sunId][i][2];
       
       // get sun unit vector and multiply by distance
-      mag = sqrt(objPos[0]*objPos[0] + objPos[1]*objPos[1] + objPos[2]*objPos[2]);
-      endPos[0] = objPos[0]/mag * distance;
-      endPos[1] = objPos[1]/mag * distance;
-      endPos[2] = objPos[2]/mag * distance;
+      //mag = sqrt(objPos[0]*objPos[0] + objPos[1]*objPos[1] + objPos[2]*objPos[2]);
+      
+      //endPos[0] = objPos[0]/mag * distance;
+      //endPos[1] = objPos[1]/mag * distance;
+      //endPos[2] = objPos[2]/mag * distance;
       
       //loj: 6/10/05 Why setting alpha doesn't work?
       //*sIntColor = mESLinecolor;
       //glColor4ub(sGlColor->red, sGlColor->green, sGlColor->blue, 255);
       
-      //glVertex3f(0.0, 0.0, 0.0);
-      glVertex3f(endPos[0], endPos[1], endPos[2]);
-      //glVertex3f(0.0, 0.0, 0.0);
-      glVertex3f(-endPos[0], -endPos[1], -endPos[2]);
+      //loj: 7/21/05 This doesn't work if central body is not Earth or Sun
+      //glVertex3f(endPos[0], endPos[1], endPos[2]);
+      //glVertex3f(-endPos[0], -endPos[1], -endPos[2]);
+      
+      if (mOriginName == "Earth")
+      {
+         // show lines beyond the Sun
+         mag = sqrt(sunPos[0]*sunPos[0] + sunPos[1]*sunPos[1] +
+                    sunPos[2]*sunPos[2]);
+         glVertex3f(sunPos[0]/mag*distance, sunPos[1]/mag*distance,
+                    sunPos[2]/mag*distance);
+         glVertex3f(-sunPos[0]/mag*distance, -sunPos[1]/mag*distance,
+                    -sunPos[2]/mag*distance);
+      }
+      else if (mOriginName == "Sun")
+      {
+         // show lines beyond the Earth
+         mag = sqrt(earthPos[0]*earthPos[0] + earthPos[1]*earthPos[1] +
+                    earthPos[2]*earthPos[2]);
+         glVertex3f(earthPos[0]/mag*distance, earthPos[1]/mag*distance,
+                    earthPos[2]/mag*distance);
+         glVertex3f(-earthPos[0]/mag*distance, -earthPos[1]/mag*distance,
+                    -earthPos[2]/mag*distance);
+      }
+      else
+      {
+         // show lines between Sun and Earth and to -Sun
+         glVertex3f(earthPos[0], earthPos[1], earthPos[2]);
+         glVertex3f(sunPos[0], sunPos[1], sunPos[2]);
+         glVertex3f(earthPos[0], earthPos[1], earthPos[2]);
+         glVertex3f(-sunPos[0], -sunPos[1], -sunPos[2]);
+      }
+      
    }
    
    glEnd();
    
    // Show Sun direction text(loj: 6/10/05)
    glColor3f(1.0, 1.0, 0.0); // yellow
-   if (mOriginName == "Earth")
-      DrawStringAt(" +S", endPos[0]/2.2, endPos[1]/2.2, endPos[2]/2.2);
-   else if (mOriginName == "Sun")
-      DrawStringAt(" -S", endPos[0]/2.2, endPos[1]/2.2, endPos[2]/2.2);
+   //if (mOriginName == "Earth")
+   //   DrawStringAt(" +S", endPos[0]/2.2, endPos[1]/2.2, endPos[2]/2.2);
+   //else if (mOriginName == "Sun")
+   //   DrawStringAt(" -S", endPos[0]/2.2, endPos[1]/2.2, endPos[2]/2.2);
    
-} // end DrawESLine()
+   // get sun unit vector and multiply by distance (loj: 7/22/05)
+   mag = sqrt(sunPos[0]*sunPos[0] + sunPos[1]*sunPos[1] + sunPos[2]*sunPos[2]);
+   DrawStringAt(" +S", sunPos[0]/mag*distance/2.2,
+                sunPos[1]/mag*distance/2.2,
+                sunPos[2]/mag*distance/2.2);
+   
+} // end DrawESLines()
 
 
 //---------------------------------------------------------------------------
-// void DrawAxes(bool gci = false)
+// void DrawAxes()
 //---------------------------------------------------------------------------
-void TrajPlotCanvas::DrawAxes(bool gci)
+void TrajPlotCanvas::DrawAxes()
 {
+   wxString axisLabel;
    GLfloat viewDist;
-
+   
    //-----------------------------------
    // draw axes
    //-----------------------------------
@@ -3176,45 +3227,103 @@ void TrajPlotCanvas::DrawAxes(bool gci)
    glBegin(GL_LINES);
    
    glColor3f(0, 1, 0);   // x
-   glTranslatef(viewDist, 0.0, 0.0);
+   //glTranslatef(viewDist, 0.0, 0.0);
    glVertex3f(-viewDist, 0, 0);
    glVertex3f( viewDist, 0, 0);
-   glTranslatef(-viewDist, 0.0, 0.0);
-
+   //loj:7/22 ?? glTranslatef(-viewDist, 0.0, 0.0);
+   
    glColor3f(0, 0, 1);   // y
-   glTranslatef(0.0, -viewDist, 0.0);
+   //glTranslatef(0.0, -viewDist, 0.0);
    glVertex3f(0, -viewDist, 0);
    glVertex3f(0,  viewDist, 0);
-
+   
    glColor3f(1, 1, 0);   // z
-   glTranslatef(0.0, 0.0, viewDist);
+   //glTranslatef(0.0, 0.0, viewDist);
    glVertex3f(0, 0, -viewDist);
    glVertex3f(0, 0, viewDist);
-
+   
    glEnd();
    
    //-----------------------------------
    // throw some text out...
    //-----------------------------------
-   glColor3f(0, 1, 0);   // x
-   if (gci)
-      DrawStringAt("+xMJ2000Eq", -viewDist, 0.0, 0.0);
-   else
-      DrawStringAt("+x", -viewDist, 0.0, 0.0);
-
-   glColor3f(0, 0, 1);   // y
-   if (gci)
-      DrawStringAt("+yMJ2000Eq", 0.0, -viewDist, 0.0);
-   else
-      DrawStringAt("+y", 0.0, -viewDist, 0.0);
-      
-   glColor3f(1, 1, 0);   // z
-   if (gci)
-      DrawStringAt("+zMJ2000Eq", 0.0, 0.0, viewDist);
-   else
-      DrawStringAt("+z", 0.0, 0.0, viewDist);
+   glColor3f(0, 1, 0);   // green
+   axisLabel = "+X " + mViewCoordSysName;
+   DrawStringAt(axisLabel, -viewDist, 0.0, 0.0);
    
+   glColor3f(0, 0, 1);   // blue
+   axisLabel = "+Y " + mViewCoordSysName;
+   DrawStringAt(axisLabel, 0.0, -viewDist, 0.0);
+   
+   glColor3f(1, 1, 0);   // yellow
+   axisLabel = "+Z " + mViewCoordSysName;
+   DrawStringAt(axisLabel, 0.0, 0.0, viewDist);   
 }
+
+
+// //---------------------------------------------------------------------------
+// // void DrawAxes(int frame)
+// //---------------------------------------------------------------------------
+// void TrajPlotCanvas::DrawAxes(int frame)
+// {
+//    if (frame < 0)
+//       return;
+   
+//    GLfloat viewDist;
+//    Rvector6 axisIn, axisOut;
+//    wxString axisLabel;
+   
+//    viewDist = mAxisLength/2.2; // stays the same
+   
+//    glBegin(GL_LINES);
+
+//    //-----------------------------------
+//    // draw X axes
+//    //-----------------------------------
+//    glColor3f(0, 1, 0);   // green
+//    axisIn.Set(viewDist, 0.0, 0.0, 0.0, 0.0, 0.0);
+//    mCoordConverter.Convert(mTime[frame], axisIn, mInternalCoordSystem,
+//                            axisOut, mViewCoordSystem);
+//    glVertex3f(-axisOut[0], 0, 0);
+//    glVertex3f( axisOut[0], 0, 0);
+   
+//    //-----------------------------------
+//    // draw Y axes
+//    //-----------------------------------
+//    glColor3f(0, 0, 1);   // blue
+//    axisIn.Set(0.0, viewDist, 0.0, 0.0, 0.0, 0.0);
+//    mCoordConverter.Convert(mTime[frame], axisIn, mInternalCoordSystem,
+//                            axisOut, mViewCoordSystem);
+//    glVertex3f(0.0, -axisOut[1], 0.0);
+//    glVertex3f(0.0,  axisOut[1], 0.0);
+   
+//    //-----------------------------------
+//    // draw Z axes
+//    //-----------------------------------
+//    glColor3f(1, 1, 0);   // yellow
+//    axisIn.Set(0.0, 0.0, viewDist, 0.0, 0.0, 0.0);
+//    mCoordConverter.Convert(mTime[frame], axisIn, mInternalCoordSystem,
+//                            axisOut, mViewCoordSystem);
+//    glVertex3f(0.0, 0.0, -axisOut[2]);
+//    glVertex3f(0.0, 0.0,  axisOut[2]);
+   
+//    glEnd();
+   
+//    //-----------------------------------
+//    // throw some text out...
+//    //-----------------------------------
+//    glColor3f(0, 1, 0);   // green
+//    axisLabel = "+X " + mViewCoordSysName;
+//    DrawStringAt(axisLabel, -axisOut[0], 0.0, 0.0);
+   
+//    glColor3f(0, 0, 1);   // blue
+//    axisLabel = "+Y " + mViewCoordSysName;
+//    DrawStringAt(axisLabel, 0.0, -axisOut[0], 0.0);
+   
+//    glColor3f(1, 1, 0);   // yellow
+//    axisLabel = "+Z " + mViewCoordSysName;
+//    DrawStringAt(axisLabel, 0.0, 0.0, axisOut[0]);
+// }
 
 
 //---------------------------------------------------------------------------
@@ -3251,13 +3360,24 @@ void TrajPlotCanvas::DrawStatus(const wxString &label, int frame, double time)
 }
 
 
+// //---------------------------------------------------------------------------
+// // void DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z)
+// //---------------------------------------------------------------------------
+// void TrajPlotCanvas::DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z)
+// {
+//    glRasterPos3f(x, y, z);
+//    glCallLists(strlen(inMsg), GL_BYTE, (GLubyte*)inMsg);
+// }
+
+
 //---------------------------------------------------------------------------
-// void DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z)
+// void DrawStringAt(const wxString &str, GLfloat x, GLfloat y, GLfloat z)
 //---------------------------------------------------------------------------
-void TrajPlotCanvas::DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z)
+void TrajPlotCanvas::DrawStringAt(const wxString &str, GLfloat x, GLfloat y,
+                                  GLfloat z)
 {
    glRasterPos3f(x, y, z);
-   glCallLists(strlen(inMsg), GL_BYTE, (GLubyte*)inMsg);
+   glCallLists(strlen(str.c_str()), GL_BYTE, (GLubyte*)str.c_str());
 }
 
 
@@ -3281,12 +3401,13 @@ int TrajPlotCanvas::GetObjectId(const wxString &name)
    for (int i=0; i<mObjectCount; i++)
       if (mObjectNames[i] == name)
          return i;
-
-   MessageInterface::PopupMessage
-      (Gmat::ERROR_, "TrajPlotCanvas::GetObjectId() obj name: " + name +
+   
+   //loj: 7/27/05 Changed from PopoupMessage
+   MessageInterface::ShowMessage
+      ("*** ERROR *** TrajPlotCanvas::GetObjectId() obj name: " + name +
        " not found in the object list\n");
-
-   return -1;
+   
+   return UNKNOWN_OBJ_ID;
 }
 
 
@@ -3309,9 +3430,9 @@ bool TrajPlotCanvas::TiltOriginZAxis()
       ("TrajPlotCanvas::TiltOriginZAxis() AxisTypeName=%s\n", axisTypeName.c_str());
    #endif
    
-   // rotate earth Z axis if view CS is MJ2000Ec
-   //5.10if (mViewCoordSystem->GetName() == "EarthMJ2000Ec")
-   if (axisTypeName == "MJ2000Ec")
+   // rotate earth Z axis if view CS is EarthMJ2000Ec
+   if (mViewCoordSystem->GetName() == "EarthMJ2000Ec")
+   //7.22if (axisTypeName == "MJ2000Ec")
    {
       Rvector6 inState, outState;
       
@@ -3332,7 +3453,7 @@ bool TrajPlotCanvas::TiltOriginZAxis()
          //outState = 0, 0.397777, 0.917482
          //angDeg = 23.4393
       #endif
-
+         
       // convert outState to rotation angle
       // How???
       

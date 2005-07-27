@@ -72,6 +72,7 @@ PlotInterface::~PlotInterface()
 //  bool CreateGlPlotWindow(const std::string &plotName, const std::string &oldName,
 //                          const std::string &csName, SolarSystem *ssPtr,
 //                          bool drawEcPlane, bool drawEqPlane, bool drawWireFrame,
+//                          bool drawAxes, bool drawEarthSunLines,
 //                          bool overlapPlot, bool usevpInfo, bool usepm)
 //------------------------------------------------------------------------------
 /*
@@ -84,6 +85,8 @@ PlotInterface::~PlotInterface()
  * @param <drawEcPlane>  true if draw ecliptic plane
  * @param <drawEqPlane>  true if draw equatorial plane
  * @param <drawWirePlane>  true if draw wire frame
+ * @param <drawAxes>  true if draw axes
+ * @param <drawESLine>  true if draw earth sun lines
  * @param <overlapPlot>  true if overlap plot without clearing the plot
  * @param <usevpInfo>  true if use viewpoint info to draw plot
  * @param <usepm>  true if use perspective projection mode
@@ -94,7 +97,8 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                        const std::string &csName,
                                        SolarSystem *ssPtr,
                                        bool drawEcPlane, bool drawEqPlane,
-                                       bool drawWireFrame, bool overlapPlot,
+                                       bool drawWireFrame, bool drawAxes,
+                                       bool drawESLines, bool overlapPlot,
                                        bool usevpInfo, bool usepm)
 {    
 #if defined __CONSOLE_APP__
@@ -116,7 +120,6 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
      
    for (int i=0; i<MdiGlPlot::numChildren; i++)
    {
-      //currPlotFrame = (MdiChildTrajFrame*)MdiGlPlot::mdiChildren[i];
       currPlotFrame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
       currPlotName = currPlotFrame->GetPlotName();
       
@@ -134,8 +137,6 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
       else if (currPlotName.IsSameAs(oldName.c_str()))
       {
          // change plot name
-//          ((MdiChildTrajFrame*)MdiGlPlot::mdiChildren[i])->
-//             SetPlotName(wxString(plotName.c_str()));
          currPlotFrame->SetPlotName(wxString(plotName.c_str()));
          createNewFrame = false;
          break;
@@ -153,12 +154,11 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
           "%s\n", plotName.c_str());
       #endif
       
-      //GmatAppData::GetMainFrame()->trajMainSubframe =
       currPlotFrame =
          new MdiChildTrajFrame(GmatAppData::GetMainFrame(), true,
                                wxString(plotName.c_str()),
                                wxString(plotName.c_str()),
-                               wxPoint(-1, -1), wxSize(-1, -1), //wxSize(500, 350), //wxSize(-1, -1),
+                               wxPoint(-1, -1), wxSize(-1, -1),
                                wxDEFAULT_FRAME_STYLE, wxString(csName.c_str()),
                                ssPtr);
       currPlotFrame->Show();
@@ -167,25 +167,11 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
       MessageInterface::ShowMessage
          ("PlotInterface::CreateGlPlotWindow() frame->GetPlotName()=%s\n",
           currPlotFrame->GetPlotName().c_str());
-      //GmatAppData::GetMainFrame()->trajMainSubframe->GetPlotName().c_str());
       #endif
       
       GmatAppData::GetMainFrame()->Tile();
       
       ++MdiGlPlot::numChildren;
-
-      
-      //----------------------------------------------------
-      // initialize GL
-      //----------------------------------------------------
-      //if (!GmatAppData::GetMainFrame()->trajMainSubframe->mCanvas->InitGL())
-//       if (!currPlotFrame->mCanvas->InitGL())
-//       {
-//          wxMessageDialog msgDialog(GmatAppData::GetMainFrame(),
-//                                    _T("InitGL() failed"), _T("CreateGlPlotWindow"));
-//          msgDialog.ShowModal();
-//          return false;
-//       }
    }
    else
    {
@@ -205,6 +191,9 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    currPlotFrame->SetDrawEqPlane(drawEqPlane);
    currPlotFrame->SetDrawEcPlane(drawEcPlane);
    currPlotFrame->SetDrawWireFrame(drawWireFrame);
+   currPlotFrame->SetDrawAxes(drawAxes);
+   currPlotFrame->SetDrawESLines(drawESLines);
+   
    currPlotFrame->SetOverlapPlot(overlapPlot);
    currPlotFrame->SetUseViewPointInfo(usevpInfo);
    currPlotFrame->SetUsePerspectiveMode(usepm);

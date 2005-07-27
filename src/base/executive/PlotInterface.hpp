@@ -34,7 +34,8 @@ public:
                                   const std::string &csName,
                                   SolarSystem *ssPtr,
                                   bool drawEcPlane, bool drawEqPlane,
-                                  bool drawWireFrame, bool overlapPlot,
+                                  bool drawWireFrame, bool drawAxes,
+                                  bool drawESLines, bool overlapPlot,
                                   bool usevpInfo, bool usepm);
    
    static void SetGlObject(const std::string &plotName,

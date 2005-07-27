@@ -49,6 +49,8 @@ public:
    void SetDistance(float dist);
    void SetDrawEqPlane(bool flag);
    void SetDrawWireFrame(bool flag);
+   void SetDrawAxes(bool flag);
+   void SetDrawEarthSunLines(bool flag);
    void SetGotoObjectName(const wxString &objName);
    void SetCoordSysName(const wxString &csName);
    
@@ -58,7 +60,7 @@ public:
                          const wxStringColorMap &objectColors);
    
 protected:
-      
+   
    // member data
    GuiItemManager *theGuiManager;
    MdiChildTrajFrame *mTrajFrame;
@@ -113,8 +115,8 @@ protected:
    wxCheckBox *mWireFrameCheckBox;
    wxCheckBox *mEqPlaneCheckBox;
    wxCheckBox *mEcPlaneCheckBox;
-   wxCheckBox *mDrawAxesCheckBox;
-   wxCheckBox *mESLineCheckBox;
+   wxCheckBox *mAxesCheckBox;
+   wxCheckBox *mESLinesCheckBox;
    
    wxCheckBox *mShowObjectCheckBox;
    wxCheckBox *mShowOrbitNormalCheckBox;
@@ -123,7 +125,7 @@ protected:
    //wxButton *mCreateCoordSysButton;
    wxButton *mEqPlaneColorButton;
    wxButton *mEcPlaneColorButton;
-   wxButton *mESLineColorButton;
+   wxButton *mESLinesColorButton;
    
    wxButton *mObjectColorButton;
    wxButton *mAddObjectButton;
@@ -132,7 +134,7 @@ protected:
    
    wxColor mEqPlaneColor;
    wxColor mEcPlaneColor;
-   wxColor mESLineColor;
+   wxColor mESLinesColor;
    wxColour mObjectColor;
    
    wxBoxSizer *theDialogSizer;

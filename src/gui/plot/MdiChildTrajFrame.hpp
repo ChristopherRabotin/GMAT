@@ -56,7 +56,7 @@ public:
    bool GetDrawWireFrame();
    bool GetDrawEqPlane();
    bool GetDrawEcPlane();
-   bool GetDrawESLine();
+   bool GetDrawESLines();
    bool GetDrawAxes();
    bool GetRotateAboutXY();
    unsigned int GetEqPlaneColor();
@@ -78,7 +78,7 @@ public:
    void SetDrawWireFrame(bool flag);
    void SetDrawEqPlane(bool flag);
    void SetDrawEcPlane(bool flag);
-   void SetDrawESLine(bool flag);
+   void SetDrawESLines(bool flag);
    void SetDrawAxes(bool flag);
    void SetRotateAboutXY(bool flag);
    void SetEqPlaneColor(unsigned int color);

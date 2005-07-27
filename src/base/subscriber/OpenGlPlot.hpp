@@ -90,8 +90,23 @@ public:
                                    const std::string &value,
                                    const Integer index);
    
-   virtual const StringArray& GetStringArrayParameter(const Integer id) const;
-   virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
+   virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
+                                               const UnsignedInt value,
+                                               const Integer index);
+   
+   virtual UnsignedInt SetUnsignedIntParameter(const std::string &label,
+                                               const UnsignedInt value,
+                                               const Integer index);
+   
+   virtual const UnsignedIntArray&
+                 GetUnsignedIntArrayParameter(const Integer id) const;
+   virtual const UnsignedIntArray& 
+                 GetUnsignedIntArrayParameter(const std::string &label) const;
+      
+   virtual const StringArray&
+                 GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                 GetStringArrayParameter(const std::string &label) const;
    
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
    virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
@@ -131,6 +146,8 @@ protected:
    std::string mLockView;
    std::string mPerspectiveMode;
    std::string mUseFixedFov;
+   std::string mAxes;
+   std::string mEarthSunLines;
    
    std::string mOldName;
    std::string mViewCoordSysName;
@@ -192,12 +209,16 @@ protected:
       EQUATORIAL_PLANE,
       WIRE_FRAME,
       TARGET_STATUS,
+      AXES,
+      EARTH_SUN_LINES,
       OVERLAP_PLOT,
       USE_VIEWPOINT_INFO,
       PERSPECTIVE_MODE,
       USE_FIXED_FOV,
       DATA_COLLECT_FREQUENCY,
       UPDATE_PLOT_FREQUENCY,
+      ORBIT_COLOR,
+      //TARGET_COLOR,
       OpenGlPlotParamCount
    };
    

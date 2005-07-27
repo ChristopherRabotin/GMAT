@@ -67,10 +67,12 @@ protected:
    wxCheckBox *mTargetStatusCheckBox;
    wxCheckBox *mEclipticPlaneCheckBox;
    wxCheckBox *mEquatorialPlaneCheckBox;
-   wxCheckBox *mOverlapCheckBox;
+   //wxCheckBox *mOverlapCheckBox;
    wxCheckBox *mLockViewCheckBox;
    wxCheckBox *mPerspectiveModeCheckBox;
    wxCheckBox *mUseFixedFovCheckBox;
+   wxCheckBox *mAxesCheckBox;
+   wxCheckBox *mEarthSunLinesCheckBox;
    
    wxComboBox *mCoordSysComboBox;
    wxComboBox *mViewPointRefComboBox;

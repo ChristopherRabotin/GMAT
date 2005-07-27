@@ -57,12 +57,16 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
    "EquatorialPlane",
    "WireFrame",
    "TargetStatus",
+   "Axes",
+   "EarthSunLines",
    "Overlap",
    "LockView",
    "PerspectiveMode",
    "UseFixedFov",
    "DataCollectFrequency",
    "UpdatePlotFrequency",
+   "OrbitColor",
+   //"TargetColor",
 }; 
 
 
@@ -81,28 +85,36 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
    Gmat::REAL_TYPE,              //"FixedFovAngle",
    Gmat::STRING_TYPE,            //"ViewUpCoordinaetSystem"
    Gmat::STRING_TYPE,            //"ViewUpAxis"
+   
    Gmat::STRING_TYPE,            //"CelestialPlane"
    Gmat::STRING_TYPE,            //"EquatorialPlane"
    Gmat::STRING_TYPE,            //"WireFrame"
    Gmat::STRING_TYPE,            //"TargetStatus"
+   Gmat::STRING_TYPE,            //"Axes"
+   Gmat::STRING_TYPE,            //"EarthSunLines"
+
    Gmat::STRING_TYPE,            //"Overlap"
    Gmat::STRING_TYPE,            //"LockView"
    Gmat::STRING_TYPE,            //"PerspectiveMode"
    Gmat::STRING_TYPE,            //"UseFixedFov"
    Gmat::INTEGER_TYPE,           //"DataCollectFrequency"
    Gmat::INTEGER_TYPE,           //"UpdatePlotFrequency"
+   
+   Gmat::UNSIGNED_INTARRAY_TYPE, //"OrbitColor",
+   //Gmat::UNSIGNED_INTARRAY_TYPE, //"TargetColor",
+
 };
 
 
 const UnsignedInt
 OpenGlPlot::DEFAULT_ORBIT_COLOR[MAX_SP_COLOR] =
 {
-   // first three are defaults: Earth, Luna, Sun
-   GmatColor::GREEN32,   GmatColor::L_BROWN32,  GmatColor::YELLOW32,
-   GmatColor::RED32,     GmatColor::YELLOW32,   GmatColor::LIME32,
-   GmatColor::AQUA32,    GmatColor::BLUE32,     GmatColor::FUCHSIA32,
-   GmatColor::PINK32,    GmatColor::ORANGE32,   GmatColor::PURPLE32,
-   GmatColor::BEIGE32,   GmatColor::SILVER32,   GmatColor::NAVY32
+   // first two are defaults: Earth, Sun (7/22/05 No Luna was added as default)
+   GmatColor::GREEN32,     GmatColor::YELLOW32,   GmatColor::RED32,
+   GmatColor::GREEN32,     GmatColor::YELLOW32,   GmatColor::LIME32,
+   GmatColor::AQUA32,      GmatColor::BLUE32,     GmatColor::FUCHSIA32,
+   GmatColor::PINK32,      GmatColor::ORANGE32,   GmatColor::PURPLE32,
+   GmatColor::BEIGE32,     GmatColor::SILVER32,   GmatColor::NAVY32
 };
 
 
@@ -116,9 +128,11 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    parameterCount = OpenGlPlotParamCount;
 
    mEclipticPlane = "Off";
-   mEquatorialPlane = "On"; //loj: 5/5/05 Changed from off
+   mEquatorialPlane = "On";
    mWireFrame = "Off";
    mTargetStatus = "Off";
+   mAxes = "Off";
+   mEarthSunLines = "Off";
    mOverlapPlot = "Off";
    mLockView = "Off";
    mPerspectiveMode = "Off";
@@ -172,11 +186,10 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mAllSpCount = 0;
    mScCount = 0;
    mObjectCount = 0;
-   
-   // add Earth, Luna and Sun as default
-   AddSpacePoint("Earth", 0);
-   AddSpacePoint("Luna", 1);
-   AddSpacePoint("Sun", 2);
+
+//    //loj: 7/22/05 Add only Earth and Sun because Earth-Sun line options
+//    AddSpacePoint("Earth", 0);
+//    AddSpacePoint("Sun", 1);
    
 }
 
@@ -191,6 +204,8 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mEquatorialPlane = ogl.mEquatorialPlane;
    mWireFrame = ogl.mWireFrame;
    mTargetStatus = ogl.mTargetStatus;
+   mAxes = ogl.mAxes;
+   mEarthSunLines = ogl.mEarthSunLines;
    mOverlapPlot = ogl.mOverlapPlot;
    mLockView = ogl.mLockView;
    mPerspectiveMode = ogl.mPerspectiveMode;
@@ -297,7 +312,7 @@ bool OpenGlPlot::Initialize()
          ("OpenGlPlot::Initialize() isEndOfReceive = %d, mAllSpCount = %d\n",
           isEndOfReceive, mAllSpCount);
    #endif
-   
+      
    if (mAllSpCount > 0)
    {
       if (active)
@@ -310,7 +325,8 @@ bool OpenGlPlot::Initialize()
          if (PlotInterface::CreateGlPlotWindow
              (instanceName, mOldName, mViewCoordSysName, mSolarSystem,
               (mEclipticPlane == "On"), (mEquatorialPlane == "On"),
-              (mWireFrame == "On"), (mOverlapPlot == "On"),
+              (mWireFrame == "On"), (mAxes == "On"),
+              (mEarthSunLines == "On"), (mOverlapPlot == "On"),
               (mLockView == "On"), (mPerspectiveMode == "On")))
          {
             #if DEBUG_OPENGL_INIT
@@ -338,11 +354,11 @@ bool OpenGlPlot::Initialize()
                
                if (mAllSpArray[i])
                {
-                  //loj: 5/16/05 add all objects to object list
+                  //add all objects to object list
                   mObjectNameArray.push_back(mAllSpNameArray[i]);
                   mOrbitColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
                   mObjectArray.push_back(mAllSpArray[i]);
-                  mDrawObjArray.push_back(true); //loj: 6/24/05 Added
+                  mDrawObjArray.push_back(true);
                   
                   if (mAllSpArray[i]->IsOfType(Gmat::SPACECRAFT))
                   {
@@ -714,7 +730,7 @@ bool OpenGlPlot::IsParameterReadOnly(const Integer id) const
 {
    if ((id == OVERLAP_PLOT) || (id == DATA_COLLECT_FREQUENCY) ||
        (id == UPDATE_PLOT_FREQUENCY) || (id == USE_VIEWPOINT_INFO) ||
-       (id == PERSPECTIVE_MODE))// || (id == ORBIT_COLOR) || (id == TARGET_COLOR))
+       (id == PERSPECTIVE_MODE))
       return true;
 
    return Subscriber::IsParameterReadOnly(id);
@@ -775,83 +791,6 @@ Integer OpenGlPlot::SetIntegerParameter(const std::string &label,
 {
    return SetIntegerParameter(GetParameterID(label), value);
 }
-
-
-// //------------------------------------------------------------------------------
-// // virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
-// //                                             const UnsignedInt value,
-// //                                             const Integer index)
-// //------------------------------------------------------------------------------
-// UnsignedInt OpenGlPlot::SetUnsignedIntParameter(const Integer id,
-//                                                 const UnsignedInt value,
-//                                                 const Integer index)
-// {
-//    switch (id)
-//    {
-//    case ORBIT_COLOR:
-//       if (index < mAllSpCount)
-//       {
-//          mOrbitColorArray[index] = value;
-//          return value;
-//       }
-//       break;
-//    case TARGET_COLOR:
-//       if (index < mAllSpCount)
-//       {
-//          mTargetColorArray[index] = value;
-//          return value;
-//       }
-//       break;
-//    default:
-//       return Subscriber::SetUnsignedIntParameter(id, value, index);
-//    }
-
-//    throw GmatBaseException("OpenGlPlot::SetUnsignedIntParameter() index out of bounds "
-//                            "for " + GetParameterText(id));
-// }
-
-
-// //------------------------------------------------------------------------------
-// // virtual UnsignedInt SetUnsignedIntParameter(const std::string &label,
-// //                                             const UnsignedInt value,
-// //                                             const Integer index)
-// //------------------------------------------------------------------------------
-// UnsignedInt OpenGlPlot::SetUnsignedIntParameter(const std::string &label,
-//                                                 const UnsignedInt value,
-//                                                 const Integer index)
-// {
-//    return SetUnsignedIntParameter(GetParameterID(label), value, index);
-// }
-
-
-// //------------------------------------------------------------------------------
-// // virtual const UnsignedIntArray&
-// // GetUnsignedIntArrayParameter(const Integer id) const
-// //------------------------------------------------------------------------------
-// const UnsignedIntArray&
-// OpenGlPlot::GetUnsignedIntArrayParameter(const Integer id) const
-// {
-//    switch (id)
-//    {
-//    case ORBIT_COLOR:
-//       return mOrbitColorArray;
-//    case TARGET_COLOR:
-//       return mTargetColorArray;
-//    default:
-//       return Subscriber::GetUnsignedIntArrayParameter(id);
-//    }
-// }
-
-
-// //------------------------------------------------------------------------------
-// // virtual const UnsignedIntArray& 
-// // GetUnsignedIntArrayParameter(const std::string &label) const
-// //------------------------------------------------------------------------------
-// const UnsignedIntArray& 
-// OpenGlPlot::GetUnsignedIntArrayParameter(const std::string &label) const
-// {
-//    return GetUnsignedIntArrayParameter(GetParameterID(label));
-// }
 
 
 //------------------------------------------------------------------------------
@@ -1038,6 +977,10 @@ std::string OpenGlPlot::GetStringParameter(const Integer id) const
       return mWireFrame;
    case TARGET_STATUS:
       return mTargetStatus;
+   case AXES:
+      return mAxes;
+   case EARTH_SUN_LINES:
+      return mEarthSunLines;
    case OVERLAP_PLOT:
       return mOverlapPlot;
    case USE_VIEWPOINT_INFO:
@@ -1110,6 +1053,12 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
    case TARGET_STATUS:
       mTargetStatus = value;
       return true;
+   case AXES:
+      mAxes = value;
+      return true;
+   case EARTH_SUN_LINES:
+      mEarthSunLines = value;
+      return true;
    case OVERLAP_PLOT:
       mOverlapPlot = value;
       return true;
@@ -1174,6 +1123,83 @@ bool OpenGlPlot::SetStringParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
+// virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
+//                                             const UnsignedInt value,
+//                                             const Integer index)
+//------------------------------------------------------------------------------
+UnsignedInt OpenGlPlot::SetUnsignedIntParameter(const Integer id,
+                                                const UnsignedInt value,
+                                                const Integer index)
+{
+   switch (id)
+   {
+   case ORBIT_COLOR:
+      if (index < mAllSpCount)
+      {
+         mOrbitColorArray[index] = value;
+         return value;
+      }
+      break;
+//    case TARGET_COLOR:
+//       if (index < mAllSpCount)
+//       {
+//          mTargetColorArray[index] = value;
+//          return value;
+//       }
+//       break;
+   default:
+      return Subscriber::SetUnsignedIntParameter(id, value, index);
+   }
+
+   throw GmatBaseException("OpenGlPlot::SetUnsignedIntParameter() index out of bounds "
+                           "for " + GetParameterText(id));
+}
+
+
+//------------------------------------------------------------------------------
+// virtual UnsignedInt SetUnsignedIntParameter(const std::string &label,
+//                                             const UnsignedInt value,
+//                                             const Integer index)
+//------------------------------------------------------------------------------
+UnsignedInt OpenGlPlot::SetUnsignedIntParameter(const std::string &label,
+                                                const UnsignedInt value,
+                                                const Integer index)
+{
+   return SetUnsignedIntParameter(GetParameterID(label), value, index);
+}
+
+
+//------------------------------------------------------------------------------
+// virtual const UnsignedIntArray&
+// GetUnsignedIntArrayParameter(const Integer id) const
+//------------------------------------------------------------------------------
+const UnsignedIntArray&
+OpenGlPlot::GetUnsignedIntArrayParameter(const Integer id) const
+{
+   switch (id)
+   {
+   case ORBIT_COLOR:
+      return mOrbitColorArray;
+      //case TARGET_COLOR:
+      //return mTargetColorArray;
+   default:
+      return Subscriber::GetUnsignedIntArrayParameter(id);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// virtual const UnsignedIntArray& 
+// GetUnsignedIntArrayParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+const UnsignedIntArray& 
+OpenGlPlot::GetUnsignedIntArrayParameter(const std::string &label) const
+{
+   return GetUnsignedIntArrayParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
 // const StringArray& GetStringArrayParameter(const Integer id) const
 //------------------------------------------------------------------------------
 const StringArray& OpenGlPlot::GetStringArrayParameter(const Integer id) const
@@ -1228,7 +1254,6 @@ std::string OpenGlPlot::GetRefObjectName(const Gmat::ObjectType type) const
 }
 
 
-//loj: 5/16/05 only add unique object name to array
 //------------------------------------------------------------------------------
 // virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
@@ -1236,6 +1261,13 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
 {
    mAllRefObjectNames.clear();
 
+   // if Draw Earth-Sun lines is on (loj: 7/27/05 Added)
+   if (mEarthSunLines == "On")
+   {
+      AddSpacePoint("Earth", mAllSpCount);
+      AddSpacePoint("Sun", mAllSpCount);
+   }
+   
    if (type == Gmat::SOLAR_SYSTEM)
    {
       mAllRefObjectNames.push_back(mSolarSystem->GetName());
@@ -1272,10 +1304,10 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
       mAllRefObjectNames = mAllSpNameArray;
       
       mAllRefObjectNames.push_back(mViewCoordSysName);
-
+      
       if (mViewCoordSysName != mViewUpCoordSysName)
          mAllRefObjectNames.push_back(mViewUpCoordSysName);
-
+      
       if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
                mViewPointRefName) == mAllRefObjectNames.end())
          mAllRefObjectNames.push_back(mViewPointRefName);
@@ -1286,7 +1318,6 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
                   mViewPointVectorName) == mAllRefObjectNames.end())
             mAllRefObjectNames.push_back(mViewPointVectorName);
       }
-
       
       if (mViewDirectionName != "Vector")
       {
@@ -1295,7 +1326,7 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
             mAllRefObjectNames.push_back(mViewDirectionName);
       }
    }
-
+   
    #if DEBUG_OPENGL_OBJ
    MessageInterface::ShowMessage
       ("OpenGlPlot::GetRefObjectNameArray() returning for type:%d\n", type);
@@ -1377,7 +1408,7 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    }
 //    else if (type == Gmat::SPACE_POINT || type == Gmat::CELESTIAL_BODY ||
 //             type == Gmat::SPACECRAFT || type == Gmat::CALCULATED_POINT)
-   else if (obj->IsOfType(Gmat::SPACE_POINT)) //loj: 5/13/05 changed to use IsOfType()
+   else if (obj->IsOfType(Gmat::SPACE_POINT))
    {
       for (Integer i=0; i<mAllSpCount; i++)
       {
@@ -1427,15 +1458,15 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index)
    bool status = false;
 
    // if name not in the list, add
-   if (find(mAllSpNameArray.begin(), mAllSpNameArray.end(), name) == mAllSpNameArray.end())
+   if (find(mAllSpNameArray.begin(), mAllSpNameArray.end(), name) ==
+       mAllSpNameArray.end())
    {
-
       if (name != "" && index == mAllSpCount)
       {
          mAllSpNameArray.push_back(name);
          mAllSpArray.push_back(NULL);
          mAllSpCount = mAllSpNameArray.size();
-      
+         
          if (mAllSpCount < MAX_SP_COLOR)
          {
             mOrbitColorMap[name] = DEFAULT_ORBIT_COLOR[mAllSpCount-1];
@@ -1446,7 +1477,7 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index)
             mOrbitColorMap[name] = GmatColor::RED32;
             mTargetColorMap[name] = GmatColor::TEAL32;
          }
-      
+         
          status = true;
       }
    }
@@ -1472,7 +1503,6 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index)
 //------------------------------------------------------------------------------
 bool OpenGlPlot::ClearSpacePointList()
 {
-   //loj: 5/17/05 
    //MessageInterface::ShowMessage("OpenGlPlot::ClearSpacePointList()\n");
    
    mAllSpNameArray.clear();
@@ -1534,7 +1564,6 @@ bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
    bool removedFromScArray = false;
    bool removedFromAllSpArray = false;
    
-   //loj: 6/24/05 Added
    //-------------------------------------------------------
    // remove from mScNameArray
    //-------------------------------------------------------
@@ -1684,7 +1713,6 @@ bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
    MessageInterface::ShowMessage("size=%d\n", mObjectArray.size());
    #endif
    
-   //loj: 6/24/05 Added
    if (removedFromScArray && removedFromAllSpArray)
       // set all object array and pointers
       PlotInterface::SetGlObject(instanceName, mObjectNameArray,
@@ -1706,7 +1734,7 @@ Integer OpenGlPlot::FindIndexOfElement(StringArray &labelArray,
    std::vector<std::string>::iterator pos;
    pos = find(labelArray.begin(), labelArray.end(),  label);
    if (pos == labelArray.end())
-      return -1; //loj: 5/3/05 Added
+      return -1;
    else
       return distance(labelArray.begin(), pos);
 }
@@ -1741,22 +1769,19 @@ void OpenGlPlot::ClearDynamicArrays()
 //------------------------------------------------------------------------------
 void OpenGlPlot::UpdateObjectList(SpacePoint *sp)
 {
-   //loj: 5/16/05 Add all spacepoint objects
-//    if (!sp->IsOfType(Gmat::SPACECRAFT))
-//    {
-      std::string name = sp->GetName();
-      StringArray::iterator pos = 
-         find(mObjectNameArray.begin(), mObjectNameArray.end(), name);
+   // Add all spacepoint objects
+   std::string name = sp->GetName();
+   StringArray::iterator pos = 
+      find(mObjectNameArray.begin(), mObjectNameArray.end(), name);
 
-      // if name not found
-      if (pos == mObjectNameArray.end())
-      {
-         mObjectNameArray.push_back(name);
-         mOrbitColorArray.push_back(mOrbitColorMap[name]);
-         mObjectArray.push_back(sp);
-         mObjectCount = mObjectNameArray.size();
-      }
-//    }
+   // if name not found
+   if (pos == mObjectNameArray.end())
+   {
+      mObjectNameArray.push_back(name);
+      mOrbitColorArray.push_back(mOrbitColorMap[name]);
+      mObjectArray.push_back(sp);
+      mObjectCount = mObjectNameArray.size();
+   }
 }
 
 
@@ -1787,7 +1812,7 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
    
    if (isEndOfReceive)
    {
-      if (active) //loj: 5/2/05 Added
+      if (active)
          return PlotInterface::RefreshGlPlot(instanceName);
    }
    
@@ -1839,7 +1864,6 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
                idY = FindIndexOfElement(labelArray, mScNameArray[i]+".Y");
                idZ = FindIndexOfElement(labelArray, mScNameArray[i]+".Z");
                
-               //loj: 6/13/05 Added
                idVx = FindIndexOfElement(labelArray, mScNameArray[i]+".Vx");
                idVy = FindIndexOfElement(labelArray, mScNameArray[i]+".Vy");
                idVz = FindIndexOfElement(labelArray, mScNameArray[i]+".Vz");
@@ -1856,7 +1880,6 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
                mScYArray[scIndex] = dat[idY];
                mScZArray[scIndex] = dat[idZ];
                
-               //loj: 6/13/05 Added
                mScVxArray[scIndex] = dat[idVx];
                mScVyArray[scIndex] = dat[idVy];
                mScVzArray[scIndex] = dat[idVz];

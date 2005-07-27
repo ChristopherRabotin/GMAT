@@ -23,6 +23,7 @@
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
 #include "Rvector3.hpp"
+
 #include <map>
 
 class TrajPlotCanvas: public wxGLCanvas
@@ -34,17 +35,17 @@ public:
                   const wxString &csName = "", SolarSystem *solarSys = NULL,
                   long style = 0, const wxString& name = wxT("TrajPlotCanvas"));
    ~TrajPlotCanvas();
-      
+   
    // initialization
    bool InitGL();
-
+   
    // getters
    bool  GetUseViewPointInfo() {return mUseInitialViewPoint;}
    bool  GetUsePerspectiveMode() {return mUsePerspectiveMode;}
    bool  GetDrawWireFrame() {return mDrawWireFrame;}
    bool  GetDrawEqPlane() {return mDrawEqPlane;}
    bool  GetDrawEcPlane() {return mDrawEcPlane;}
-   bool  GetDrawESLine() {return mDrawESLine;}
+   bool  GetDrawESLines() {return mDrawESLines;}
    bool  GetDrawAxes() {return mDrawAxes;}
    bool  GetRotateAboutXY() {return mRotateXy;}
    unsigned int GetEqPlaneColor() {return mEqPlaneColor;}
@@ -66,7 +67,7 @@ public:
    void SetDrawWireFrame(bool flag) {mDrawWireFrame = flag;}
    void SetDrawEqPlane(bool flag) {mDrawEqPlane = flag;}
    void SetDrawEcPlane(bool flag) {mDrawEcPlane = flag;}
-   void SetDrawESLine(bool flag) {mDrawESLine = flag;}
+   void SetDrawESLines(bool flag) {mDrawESLines = flag;}
    void SetDrawAxes(bool flag) {mDrawAxes = flag;}
    void SetRotateAboutXY(bool flag) {mRotateXy = flag;}
    void SetEqPlaneColor(unsigned int color) {mEqPlaneColor = color;}
@@ -99,7 +100,7 @@ public:
                     const UnsignedIntArray &objOrbitColors,
                     const std::vector<SpacePoint*> &objectArray);
    
-   // CoordinateSystem (loj: 5/13/05 Added viewUpCs)
+   // CoordinateSystem
    void SetGlCoordSystem(CoordinateSystem *viewCs,
                          CoordinateSystem *viewUpCs);
    
@@ -149,6 +150,7 @@ private:
    static const float MAX_ZOOM_IN = 3700.0;
    static const float RADIUS_ZOOM_RATIO = 2.2;
    static const float DEFAULT_DIST = 30000.0;
+   static const int UNKNOWN_OBJ_ID = -999;
    
    GuiInterpreter *theGuiInterpreter;
    TextTrajectoryFile *mTextTrajFile;
@@ -180,7 +182,7 @@ private:
    bool mDrawEqPlane;
    bool mDrawEcPlane;
    bool mDrawEclipticPlane;
-   bool mDrawESLine;
+   bool mDrawESLines;
    bool mDrawAxes;
    bool mDrawOrbitNormal;
    
@@ -273,7 +275,7 @@ private:
    float mObjMaxZoomIn[MAX_OBJECT];
    int   mObjLastFrame[MAX_OBJECT];
    UnsignedInt mObjectOrbitColor[MAX_OBJECT][MAX_DATA];
-   bool  mDrawObjFlag[MAX_OBJECT][MAX_DATA]; //loj: 6/24/05 Added
+   bool  mDrawObjFlag[MAX_OBJECT][MAX_DATA];
    float mObjectGciPos[MAX_OBJECT][MAX_DATA][3];
    float mObjectTempPos[MAX_OBJECT][MAX_DATA][3];
    float mObjectGciVel[MAX_OBJECT][MAX_DATA][3];
@@ -332,7 +334,7 @@ private:
    // initialization
    // texture
    bool LoadGLTextures();
-   bool LoadBodyTextures(); //loj: 5/20/05 Added
+   bool LoadBodyTextures();
    GLuint BindTexture(const wxString &objName);
    void SetDefaultView();
    
@@ -342,8 +344,8 @@ private:
    void ComputeView(GLfloat fEndX, GLfloat fEndY);
    void ChangeView(float viewX, float viewY, float viewZ);
    void ChangeProjection(int width, int height, float axisLength);
-   void ComputeProjection(int frame); //loj: 4/25/05 Added frame
-   void ComputeViewMatrix();
+   void ComputeProjection(int frame);
+   void ComputeViewMatrix(int frame); //loj: 7/22/05 Added frame
    
    // drawing objects
    void DrawFrame();
@@ -354,12 +356,14 @@ private:
    void DrawSpacecraft(UnsignedInt scColor);
    void DrawEquatorialPlane(UnsignedInt color);
    void DrawEclipticPlane(UnsignedInt color);
-   void DrawESLine();
-   void DrawAxes(bool gci = false);
+   void DrawESLines(int frame);
+   void DrawAxes();
+   //void DrawAxes(int frame);
    void DrawStatus(const wxString &label, int frame, double time);
    
    // drawing primative objects
-   void DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z);
+   //void DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z);
+   void DrawStringAt(const wxString &str, GLfloat x, GLfloat y, GLfloat z);
    void DrawCircle(GLUquadricObj *qobj, Real radius);
    
    // for object

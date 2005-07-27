@@ -201,12 +201,12 @@ bool MdiChildTrajFrame::GetDrawEcPlane()
 
 
 //------------------------------------------------------------------------------
-// bool GetDrawESLine()
+// bool GetDrawESLines()
 //------------------------------------------------------------------------------
-bool MdiChildTrajFrame::GetDrawESLine()
+bool MdiChildTrajFrame::GetDrawESLines()
 {
    if (mCanvas)
-      return mCanvas->GetDrawESLine();
+      return mCanvas->GetDrawESLines();
 
    return false;
 }
@@ -378,6 +378,7 @@ void MdiChildTrajFrame::SetOverlapPlot(bool overlap)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void SetUseViewPointInfo(bool flag)
 //------------------------------------------------------------------------------
@@ -464,15 +465,15 @@ void MdiChildTrajFrame::SetDrawEcPlane(bool flag)
 
 
 //------------------------------------------------------------------------------
-// void SetDrawESLine(bool flag)
+// void SetDrawESLines(bool flag)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetDrawESLine(bool flag)
+void MdiChildTrajFrame::SetDrawESLines(bool flag)
 {
    if (mCanvas)
    {
       //loj: the event ID is not in the GmatPlot yet
       //mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_ECLIPTIC_LINE, flag);
-      mCanvas->SetDrawESLine(flag);
+      mCanvas->SetDrawESLines(flag);
    }
 }
 

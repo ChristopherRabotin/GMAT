@@ -138,6 +138,28 @@ void OpenGlPlotSetupPanel::Create()
    Integer bsize = 2; // border size
    
    //------------------------------------------------------
+   // plot/update option
+   //------------------------------------------------------
+   mPlotCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Show Plot"),
+                     wxDefaultPosition, wxSize(-1, -1), 0);
+   //loj: 7/22/05 OverlapPlot will no longer works, because it clears
+   // plot every time.
+   //mOverlapCheckBox =
+   //   new wxCheckBox(this, CHECKBOX, wxT("Overlap Plot"),
+   //                  wxDefaultPosition, wxSize(-1, -1), 0);
+   
+   wxBoxSizer *plotOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
+   plotOptionBoxSizer->Add(mPlotCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   //plotOptionBoxSizer->Add(mOverlapCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(20, 14, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   wxStaticBox *plotOptionStaticBox = new wxStaticBox(this, -1, wxT("Plot Option"));
+   wxStaticBoxSizer *plotOptionStaticSizer =
+      new wxStaticBoxSizer(plotOptionStaticBox, wxVERTICAL);
+   plotOptionStaticSizer->Add(plotOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   //------------------------------------------------------
    // update option
    //------------------------------------------------------
    wxStaticText *dataCollectFreqLabel1 =
@@ -167,45 +189,14 @@ void OpenGlPlotSetupPanel::Create()
    updFreqBoxSizer->Add(mUpdatePlotFreqTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    updFreqBoxSizer->Add(updatePlotFreqLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   wxBoxSizer *updateBoxSizer = new wxBoxSizer(wxVERTICAL);
-   updateBoxSizer->Add(dataCollectFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
-   updateBoxSizer->Add(colFreqBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   updateBoxSizer->Add(updatePlotFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
-   updateBoxSizer->Add(updFreqBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   wxStaticBox *updateStaticBox =
-      new wxStaticBox(this, -1, wxT("Data Collect/Update"));
-   wxStaticBoxSizer *updateStaticSizer =
-      new wxStaticBoxSizer(updateStaticBox, wxVERTICAL);
-   updateStaticSizer->Add(updateBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(dataCollectFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(colFreqBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(updatePlotFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(updFreqBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
    //------------------------------------------------------
-   // plot option
+   // view option
    //------------------------------------------------------
-   mPlotCheckBox =
-      new wxCheckBox(this, CHECKBOX, wxT("Show Plot"),
-                     wxDefaultPosition, wxSize(-1, -1), 0);
-   
-   mWireFrameCheckBox =
-      new wxCheckBox(this, CHECKBOX, wxT("Draw WireFrame"),
-                     wxDefaultPosition, wxSize(-1, -1), 0);
-   
-   mTargetStatusCheckBox =
-      new wxCheckBox(this, CHECKBOX, wxT("Draw Targeting"),
-                     wxDefaultPosition, wxSize(-1, -1), 0);
-   
-   mEclipticPlaneCheckBox =
-      new wxCheckBox(this, CHECKBOX, wxT("Draw Ecliptic Plane"),
-                     wxDefaultPosition, wxSize(-1, -1), 0);
-   
-   mEquatorialPlaneCheckBox =
-      new wxCheckBox(this, CHECKBOX, wxT("Draw Equatorial Plane"),
-                     wxDefaultPosition, wxSize(-1, -1), 0);
-   
-   mOverlapCheckBox =
-      new wxCheckBox(this, CHECKBOX, wxT("Overlap Plot"),
-                     wxDefaultPosition, wxSize(-1, -1), 0);
-   
    mLockViewCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Lock View"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
@@ -225,29 +216,69 @@ void OpenGlPlotSetupPanel::Create()
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                      wxDefaultPosition, wxSize(40, -1), 0);
    
-   wxBoxSizer *plotOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
-   plotOptionBoxSizer->Add(mPlotCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(mWireFrameCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(mTargetStatusCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(mEclipticPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(mEquatorialPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(mOverlapCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(mLockViewCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(mPerspectiveModeCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(mUseFixedFovCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   wxBoxSizer *viewOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
+   viewOptionBoxSizer->Add(mLockViewCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   viewOptionBoxSizer->Add(mPerspectiveModeCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   viewOptionBoxSizer->Add(mUseFixedFovCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    
    wxBoxSizer *fovBoxSizer = new wxBoxSizer(wxHORIZONTAL);
    fovBoxSizer->Add(mFovLabel, 0, wxALIGN_LEFT|wxALL, 0);
    fovBoxSizer->Add(mFixedFovTextCtrl, 0, wxALIGN_LEFT|wxALL, 0);
-   plotOptionBoxSizer->Add(fovBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   viewOptionBoxSizer->Add(fovBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   wxStaticBox *plotOptionStaticBox = new wxStaticBox(this, -1, wxT("Plot Option"));
-   wxStaticBoxSizer *plotOptionStaticSizer =
-      new wxStaticBoxSizer(plotOptionStaticBox, wxVERTICAL);
-   plotOptionStaticSizer->Add(plotOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   wxStaticBox *viewOptionStaticBox =
+      new wxStaticBox(this, -1, wxT("View Option"));
+   wxStaticBoxSizer *viewOptionStaticSizer =
+      new wxStaticBoxSizer(viewOptionStaticBox, wxVERTICAL);
+   viewOptionStaticSizer->Add(viewOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
    //------------------------------------------------------
-   // available spacecraft/celestial object list (1st column)
+   // draw option
+   //------------------------------------------------------
+   mWireFrameCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Draw WireFrame"),
+                     wxDefaultPosition, wxSize(-1, -1), 0);
+   
+   mTargetStatusCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Draw Targeting"),
+                     wxDefaultPosition, wxSize(-1, -1), 0);
+   
+   mEclipticPlaneCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Draw Ecliptic Plane"),
+                     wxDefaultPosition, wxSize(-1, -1), 0);
+   
+   mEquatorialPlaneCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Draw Equatorial Plane"),
+                     wxDefaultPosition, wxSize(-1, -1), 0);
+   
+   mAxesCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Draw Axes"),
+                     wxDefaultPosition, wxSize(-1, -1), 0);
+   
+   mEarthSunLinesCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Draw Earth Sun Lines"),
+                     wxDefaultPosition, wxSize(-1, -1), 0);
+   
+   wxBoxSizer *drawOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
+   drawOptionBoxSizer->Add(mWireFrameCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionBoxSizer->Add(mTargetStatusCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionBoxSizer->Add(mEclipticPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionBoxSizer->Add(mEquatorialPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionBoxSizer->Add(mAxesCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionBoxSizer->Add(mEarthSunLinesCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   wxStaticBox *drawOptionStaticBox = new wxStaticBox(this, -1, wxT("Drawing Option"));
+   wxStaticBoxSizer *drawOptionStaticSizer =
+      new wxStaticBoxSizer(drawOptionStaticBox, wxVERTICAL);
+   drawOptionStaticSizer->Add(drawOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   //------------------------------------------------------
+   // available spacecraft/celestial object list
    //------------------------------------------------------
    wxStaticText *scAvailableLabel =
       new wxStaticText(this, -1, wxT("Spacecraft"),
@@ -275,7 +306,7 @@ void OpenGlPlotSetupPanel::Create()
    #endif
       
    //------------------------------------------------------
-   // add, remove, clear Y buttons (2nd column)
+   // add, remove, clear Y buttons
    //------------------------------------------------------
    addScButton = new wxButton(this, ADD_SP_BUTTON, wxT("-->"),
                               wxDefaultPosition, wxSize(20,20), 0);
@@ -297,7 +328,7 @@ void OpenGlPlotSetupPanel::Create()
    #endif
    
    //------------------------------------------------------
-   // selected spacecraft list (3rd column)
+   // selected spacecraft list
    //------------------------------------------------------
    wxStaticText *titleSelectedSc =
       new wxStaticText(this, -1, wxT("Selected Spacecraft"),
@@ -322,7 +353,7 @@ void OpenGlPlotSetupPanel::Create()
    mObjSelectedBoxSizer->Add(mSelectedObjListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
-   // spacecraft color (4th column)
+   // spacecraft color 
    //------------------------------------------------------
    wxStaticText *orbitColorLabel =
       new wxStaticText(this, -1, wxT("Orbit Color"),
@@ -433,7 +464,6 @@ void OpenGlPlotSetupPanel::Create()
    mViewDirVectorSizer->Add(mViewDir2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewDirVectorSizer->Add(mViewDir3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   
    // view definition sizer
    mViewDefSizer = new wxFlexGridSizer(3, 0, 0);
    
@@ -487,15 +517,7 @@ void OpenGlPlotSetupPanel::Create()
    upDefStaticSizer->Add(upCsLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    upDefStaticSizer->Add(mViewUpCsComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    upDefStaticSizer->Add(upAxisLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   upDefStaticSizer->Add(mViewUpAxisComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-
-//    // view geometry sizer
-//    wxStaticBox *viewDefStaticBox = new wxStaticBox(this, -1, wxT("View Geometry"));
-//    wxStaticBoxSizer *viewDefStaticSizer
-//       = new wxStaticBoxSizer(viewDefStaticBox, wxHORIZONTAL);
-//    viewDefStaticSizer->Add(viewDefStaticSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-//    viewDefStaticSizer->Add(upDefStaticSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
+   upDefStaticSizer->Add(mViewUpAxisComboBox, 0, wxALIGN_LEFT|wxALL, bsize);   
    
    #if DEBUG_OPENGL_PANEL_CREATE
    MessageInterface::ShowMessage
@@ -506,12 +528,14 @@ void OpenGlPlotSetupPanel::Create()
    // put in the order
    //------------------------------------------------------    
    wxBoxSizer *topViewBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-   topViewBoxSizer->Add(updateStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   //topViewBoxSizer->Add(updateStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   //topViewBoxSizer->Add(plotUpdateBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    topViewBoxSizer->Add(plotOptionStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   topViewBoxSizer->Add(drawOptionStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    topViewBoxSizer->Add(viewObjectStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   //BoxSizer *mBottomViewSizer = new wxBoxSizer(wxHORIZONTAL);
    mBottomViewSizer = new wxBoxSizer(wxHORIZONTAL);
+   mBottomViewSizer->Add(viewOptionStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    mBottomViewSizer->Add(viewDefStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    mBottomViewSizer->Add(upDefStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
@@ -558,8 +582,12 @@ void OpenGlPlotSetupPanel::LoadData()
          SetValue(mOpenGlPlot->GetStringParameter("WireFrame") == "On");
       mTargetStatusCheckBox->
          SetValue(mOpenGlPlot->GetStringParameter("TargetStatus") == "On");
-      mOverlapCheckBox->
-         SetValue(mOpenGlPlot->GetStringParameter("Overlap") == "On");
+      mAxesCheckBox->
+         SetValue(mOpenGlPlot->GetStringParameter("Axes") == "On");
+      mEarthSunLinesCheckBox->
+         SetValue(mOpenGlPlot->GetStringParameter("EarthSunLines") == "On");
+      //mOverlapCheckBox->
+      //   SetValue(mOpenGlPlot->GetStringParameter("Overlap") == "On");
       mLockViewCheckBox->
          SetValue(mOpenGlPlot->GetStringParameter("LockView") == "On");
       mPerspectiveModeCheckBox->
@@ -837,10 +865,20 @@ void OpenGlPlotSetupPanel::SaveData()
       else
          mOpenGlPlot->SetStringParameter("TargetStatus", "Off");
       
-      if (mOverlapCheckBox->IsChecked())
-         mOpenGlPlot->SetStringParameter("Overlap", "On");
+      if (mAxesCheckBox->IsChecked())
+         mOpenGlPlot->SetStringParameter("Axes", "On");
       else
-         mOpenGlPlot->SetStringParameter("Overlap", "Off");
+         mOpenGlPlot->SetStringParameter("Axes", "Off");
+      
+      if (mEarthSunLinesCheckBox->IsChecked())
+         mOpenGlPlot->SetStringParameter("EarthSunLines", "On");
+      else
+         mOpenGlPlot->SetStringParameter("EarthSunLines", "Off");
+      
+      //if (mOverlapCheckBox->IsChecked())
+      //   mOpenGlPlot->SetStringParameter("Overlap", "On");
+      //else
+      //   mOpenGlPlot->SetStringParameter("Overlap", "Off");
       
       if (mLockViewCheckBox->IsChecked())
          mOpenGlPlot->SetStringParameter("LockView", "On");
@@ -917,7 +955,7 @@ void OpenGlPlotSetupPanel::SaveData()
                SetStringParameter("Add", mSelSpName, mScCount+i);
          }
       }
-      
+            
       // save color
       if (mHasColorChanged)
       {

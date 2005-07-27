@@ -121,7 +121,7 @@ OpenGlOptionDialog::OpenGlOptionDialog(wxWindow *parent, const wxString &title,
    
    mEqPlaneColor = wxColor("GREY");
    mEcPlaneColor = wxColor("DARK SLATE BLUE");
-   mESLineColor = wxColor("BROWN");
+   mESLinesColor = wxColor("BROWN");
    
    Create();
    ShowData();
@@ -156,6 +156,24 @@ void OpenGlOptionDialog::SetDrawEqPlane(bool flag)
 void OpenGlOptionDialog::SetDrawWireFrame(bool flag)
 {
    mWireFrameCheckBox->SetValue(flag);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetDrawAxes(bool flag)
+//------------------------------------------------------------------------------
+void OpenGlOptionDialog::SetDrawAxes(bool flag)
+{
+   mAxesCheckBox->SetValue(flag);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetDrawEarthSunLines(bool flag)
+//------------------------------------------------------------------------------
+void OpenGlOptionDialog::SetDrawEarthSunLines(bool flag)
+{
+   mESLinesCheckBox->SetValue(flag);
 }
 
 
@@ -398,11 +416,11 @@ void OpenGlOptionDialog::Create()
       new wxCheckBox(this, ID_CHECKBOX, wxT("Draw Ecliptic Plane"),
                      wxDefaultPosition, wxSize(150, -1), 0);
    
-   mDrawAxesCheckBox =
+   mAxesCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT("Draw Axes"),
                      wxDefaultPosition, wxSize(150, -1), 0);
 
-   mESLineCheckBox =
+   mESLinesCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT("Draw Earth Sun Lines"),
                      wxDefaultPosition, wxSize(150, -1), 0);
 
@@ -419,10 +437,10 @@ void OpenGlOptionDialog::Create()
    mEcPlaneColorButton->SetBackgroundColour(mEcPlaneColor);
 
    // Sun line color
-   mESLineColorButton =
+   mESLinesColorButton =
       new wxButton(this, ID_SUNLINE_COLOR_BUTTON, "", wxDefaultPosition,
                    wxSize(20, 15), 0);
-   mESLineColorButton->SetBackgroundColour(mESLineColor);
+   mESLinesColorButton->SetBackgroundColour(mESLinesColor);
 
    wxStaticBox *drawingOptionStaticBox =
       new wxStaticBox(this, -1, wxT("Drawing Options"));
@@ -436,14 +454,14 @@ void OpenGlOptionDialog::Create()
    drawGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mWireFrameCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   drawGridSizer->Add(mDrawAxesCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   drawGridSizer->Add(mAxesCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mEqPlaneCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mEqPlaneColorButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mEcPlaneCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mEcPlaneColorButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   drawGridSizer->Add(mESLineCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   drawGridSizer->Add(mESLineColorButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   drawGridSizer->Add(mESLinesCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   drawGridSizer->Add(mESLinesColorButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
    
    #if DEBUG_GLOPTION_CREATE
    MessageInterface::ShowMessage
@@ -601,15 +619,16 @@ void OpenGlOptionDialog::LoadData()
    mEcPlaneColor.Set(rgb.Red(), rgb.Green(), rgb.Blue());
    mEcPlaneColorButton->SetBackgroundColour(mEcPlaneColor);
    
-   mESLineCheckBox->SetValue(mTrajFrame->GetDrawESLine());
+   mESLinesCheckBox->SetValue(mTrajFrame->GetDrawESLines());
    rgb.Set(mTrajFrame->GetESLineColor());
-   mESLineColor.Set(rgb.Red(), rgb.Green(), rgb.Blue());
-   mESLineColorButton->SetBackgroundColour(mESLineColor);
+   mESLinesColor.Set(rgb.Red(), rgb.Green(), rgb.Blue());
+   mESLinesColorButton->SetBackgroundColour(mESLinesColor);
    
-   // wire frame
+   // wire frame, axes, rotation axis
    mWireFrameCheckBox->SetValue(mTrajFrame->GetDrawWireFrame());
    mRotateAboutXYCheckBox->SetValue(mTrajFrame->GetRotateAboutXY());
-
+   mAxesCheckBox->SetValue(mTrajFrame->GetDrawAxes()); //loj: 7/27/05 Added
+   
    // view object
    mObjectListBox->SetSelection(0);
    ShowSpacePointOption(mObjectListBox->GetStringSelection(), true);
@@ -713,7 +732,7 @@ void OpenGlOptionDialog::SaveData()
    if (mHasDrawESLineChanged)
    {
       mHasDrawESLineChanged = false;
-      mTrajFrame->SetDrawESLine(mESLineCheckBox->GetValue());
+      mTrajFrame->SetDrawESLines(mESLinesCheckBox->GetValue());
    }
    
    if (mHasDrawWireFrameChanged)
@@ -725,7 +744,7 @@ void OpenGlOptionDialog::SaveData()
    if (mHasDrawAxesChanged)
    {
       mHasDrawAxesChanged = false;
-      mTrajFrame->SetDrawAxes(mDrawAxesCheckBox->GetValue());
+      mTrajFrame->SetDrawAxes(mAxesCheckBox->GetValue());
    }
    
    if (mHasEqPlaneColorChanged)
@@ -745,7 +764,7 @@ void OpenGlOptionDialog::SaveData()
    if (mHasESLineColorChanged)
    {
       mHasESLineColorChanged = false;
-      RgbColor rgb(mESLineColor.Red(), mESLineColor.Green(), mESLineColor.Blue());
+      RgbColor rgb(mESLinesColor.Red(), mESLinesColor.Green(), mESLinesColor.Blue());
       mTrajFrame->SetESLineColor(rgb.GetIntColor());      
    }
    
@@ -764,7 +783,7 @@ void OpenGlOptionDialog::SaveData()
    if (mHasObjectColorChanged)
    {
       mHasObjectColorChanged = false;
-      RgbColor rgb(mESLineColor.Red(), mESLineColor.Green(), mESLineColor.Blue());
+      RgbColor rgb(mESLinesColor.Red(), mESLinesColor.Green(), mESLinesColor.Blue());
       mTrajFrame->SetObjectColors(mObjectColorMap);      
    }
    
@@ -909,11 +928,11 @@ void OpenGlOptionDialog::OnCheckBoxChange(wxCommandEvent& event)
       mHasDrawEqPlaneChanged = true;
    else if (event.GetEventObject() == mEcPlaneCheckBox)
       mHasDrawEcPlaneChanged = true;
-   else if (event.GetEventObject() == mESLineCheckBox)
+   else if (event.GetEventObject() == mESLinesCheckBox)
       mHasDrawESLineChanged = true;
    else if (event.GetEventObject() == mWireFrameCheckBox)
       mHasDrawWireFrameChanged = true;
-   else if (event.GetEventObject() == mDrawAxesCheckBox)
+   else if (event.GetEventObject() == mAxesCheckBox)
       mHasDrawAxesChanged = true;
    else if (event.GetEventObject() == mRotateAboutXYCheckBox)
       mHasRotateAboutXYChanged = true;
@@ -979,9 +998,9 @@ void OpenGlOptionDialog::OnColorButtonClick(wxCommandEvent& event)
    {
       mHasEcPlaneColorChanged = ShowColorDialog(mEcPlaneColor, mEcPlaneColorButton);
    }
-   else if (event.GetEventObject() == mESLineColorButton)
+   else if (event.GetEventObject() == mESLinesColorButton)
    {
-      mHasESLineColorChanged = ShowColorDialog(mESLineColor, mESLineColorButton);
+      mHasESLineColorChanged = ShowColorDialog(mESLinesColor, mESLinesColorButton);
    }
 }
 
