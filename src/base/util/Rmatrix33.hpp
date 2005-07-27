@@ -31,64 +31,65 @@ class Rvector3;
 class Rmatrix33 : public Rmatrix
 {
 public:
-    Rmatrix33(bool IsIdentityMatrix = true);
-    Rmatrix33(Real a00, Real a01, Real a02,
-              Real a10, Real a11, Real a12,
-              Real a20, Real a21, Real a22);
-    Rmatrix33(const Rmatrix33 &m);
-    virtual ~Rmatrix33();
-    const Rmatrix33& operator=(const Rmatrix33 &m);
-    bool operator==(const Rmatrix33 &m)const;
-    bool operator!=(const Rmatrix33 &m)const;
-
-    bool IsOrthogonal(Real accuracyRequired = 
+   Rmatrix33(bool IsIdentityMatrix = true);
+   Rmatrix33(Real a00, Real a01, Real a02,
+             Real a10, Real a11, Real a12,
+             Real a20, Real a21, Real a22);
+   Rmatrix33(const Rmatrix33 &m);
+   virtual ~Rmatrix33();
+   const Rmatrix33& operator=(const Rmatrix33 &m);
+   bool operator==(const Rmatrix33 &m)const;
+   bool operator!=(const Rmatrix33 &m)const;
+   
+   bool IsOrthogonal(Real accuracyRequired = 
+                     GmatRealConst::REAL_EPSILON) const;
+   bool IsOrthonormal(Real accuracyRequired = 
                       GmatRealConst::REAL_EPSILON) const;
-    bool IsOrthonormal(Real accuracyRequired = 
-                       GmatRealConst::REAL_EPSILON) const;
-    
-    Rmatrix33 operator+(const Rmatrix33& m) const;
-    const Rmatrix33& operator+=(const Rmatrix33& m);
-
-    Rmatrix33 operator-(const Rmatrix33& m) const;
-    const Rmatrix33& operator-=(const Rmatrix33& m);
-
-    Rmatrix33 operator*(const Rmatrix33& m) const;
-    const Rmatrix33& operator*=(const Rmatrix33& m);
-
-    Rmatrix33 operator/(const Rmatrix33& m) const;
-    const Rmatrix33& operator/=(const Rmatrix33& m);
-
-    Rmatrix33 operator*(Real scalar) const;
-    const Rmatrix33& operator*=(Real scalar);
-
-    Rmatrix33 operator/(Real scalar) const;
-    const Rmatrix33& operator/=(Real scalar);
-
-    Rmatrix33 operator-() const;
-
-    friend class Rvector3;
-    Rvector3 operator*(const Rvector3& v) const;
-
-    friend Rmatrix33 operator*(Real scalar, const Rmatrix33& m);
-
-    Real               Trace() const;
-    Real               Determinant() const;
-    virtual Rmatrix33  Transpose() const;
-    virtual Rmatrix33  Inverse() const;
-    virtual Rmatrix33  Symmetric() const;
-    Rmatrix33          AntiSymmetric() const;
-
-    friend Rmatrix33  SkewSymmetric(const Rvector3& v);
-    friend Rmatrix33  TransposeTimesMatrix(const Rmatrix33& m1,
-                                           const Rmatrix33& m2);
-    friend Rmatrix33  MatrixTimesTranspose(const Rmatrix33& m1,
-                                           const Rmatrix33& m2); 
-    friend Rmatrix33  TransposeTimesTranspose(const Rmatrix33& m1,
-                                              const Rmatrix33& m2); 
-
+   
+   Rmatrix33 operator+(const Rmatrix33& m) const;
+   const Rmatrix33& operator+=(const Rmatrix33& m);
+   
+   Rmatrix33 operator-(const Rmatrix33& m) const;
+   const Rmatrix33& operator-=(const Rmatrix33& m);
+   
+   Rmatrix33 operator*(const Rmatrix33& m) const;
+   const Rmatrix33& operator*=(const Rmatrix33& m);
+   
+   Rmatrix33 operator/(const Rmatrix33& m) const;
+   const Rmatrix33& operator/=(const Rmatrix33& m);
+   
+   Rmatrix33 operator*(Real scalar) const;
+   const Rmatrix33& operator*=(Real scalar);
+   
+   Rmatrix33 operator/(Real scalar) const;
+   const Rmatrix33& operator/=(Real scalar);
+   
+   Rmatrix33 operator-() const;
+   
+   friend class Rvector3;
+   Rvector3 operator*(const Rvector3& v) const;
+   
+   friend Rmatrix33 operator*(Real scalar, const Rmatrix33& m);
+   
+   Real               Trace() const;
+   Real               Determinant() const;
+   virtual Rmatrix33  Transpose() const;
+   virtual Rmatrix33  Inverse() const;
+   virtual Rmatrix33  Symmetric() const;
+   Rmatrix33          AntiSymmetric() const;
+   
+   friend Rmatrix33  SkewSymmetric(const Rvector3& v);
+   friend Rmatrix33  TransposeTimesMatrix(const Rmatrix33& m1,
+                                          const Rmatrix33& m2);
+   friend Rmatrix33  MatrixTimesTranspose(const Rmatrix33& m1,
+                                          const Rmatrix33& m2); 
+   friend Rmatrix33  TransposeTimesTranspose(const Rmatrix33& m1,
+                                             const Rmatrix33& m2); 
+   
    const std::string* GetDataDescriptions() const;
-   std::string* ToValueStrings();
-
+   std::string* ToValueStrings(Integer w=14, Integer p=10);
+   virtual std::string ToString(Integer w=14, Integer p=10); //loj: 7/25/05 Added
+   
 protected:
 private:
    static const std::string descs[9];

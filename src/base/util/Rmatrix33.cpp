@@ -17,7 +17,10 @@
  * Defines linear algebra operations for 3x3 matrices.
  */
 //------------------------------------------------------------------------------
+
 #include <sstream>
+#include <iomanip>
+
 #include "gmatdefs.hpp"
 #include "Rvector3.hpp"
 #include "Rmatrix33.hpp"
@@ -33,6 +36,7 @@ const std::string Rmatrix33::descs[9] =
    "Element 2,1", "Element 2,2", "Element 2,3",
    "Element 3,1", "Element 3,2", "Element 3,3"
 };
+
 
 //---------------------------------
 //  public
@@ -479,6 +483,7 @@ Rmatrix33 SkewSymmetric(const Rvector3& v)
 
 } 
 
+
 //------------------------------------------------------------------------------
 //  <friend>
 //  Rmatrix33 TransposeTimesRmatrix(const Rmatrix33& m1,  const Rmatrix33& m2)
@@ -496,11 +501,13 @@ Rmatrix33 TransposeTimesRmatrix(const Rmatrix33& m1, const Rmatrix33& m2)
                      m1(0,2)*m2(0,2) + m1(1,2)*m2(1,2) + m1(2,2)*m2(2,2));
 }
 
+
+//loj: 7/22/05 Corrected the name from RmatrixTimesTranspose()
 //------------------------------------------------------------------------------
 //  <friend>
-//  Rmatrix33 RmatrixTimesTranspose(const Rmatrix33& m1, const Rmatrix33& m2)
+//  Rmatrix33 MatrixTimesTranspose(const Rmatrix33& m1, const Rmatrix33& m2)
 //------------------------------------------------------------------------------
-Rmatrix33 RmatrixTimesTranspose(const Rmatrix33& m1, const Rmatrix33& m2)
+Rmatrix33 MatrixTimesTranspose(const Rmatrix33& m1, const Rmatrix33& m2)
 {
     return Rmatrix33(m1(0,0)*m2(0,0) + m1(0,1)*m2(0,1) + m1(0,2)*m2(0,2),
                      m1(0,0)*m2(1,0) + m1(0,1)*m2(1,1) + m1(0,2)*m2(1,2),
@@ -512,6 +519,7 @@ Rmatrix33 RmatrixTimesTranspose(const Rmatrix33& m1, const Rmatrix33& m2)
                      m1(2,0)*m2(1,0) + m1(2,1)*m2(1,1) + m1(2,2)*m2(1,2),
                      m1(2,0)*m2(2,0) + m1(2,1)*m2(2,1) + m1(2,2)*m2(2,2));
 }
+
 
 //------------------------------------------------------------------------------
 //  <friend>
@@ -530,6 +538,7 @@ Rmatrix33 TransposeTimesTranspose(const Rmatrix33& m1, const Rmatrix33& m2)
                      m1(0,2)*m2(2,0) + m1(1,2)*m2(2,1) + m1(2,2)*m2(2,2));
 }
 
+
 //------------------------------------------------------------------------------
 // const std::string* GetDataDescriptions() const
 //------------------------------------------------------------------------------
@@ -538,32 +547,75 @@ const std::string* Rmatrix33::GetDataDescriptions() const
    return descs;
 }
 
+
+//loj: 7/25/05 Added width and precision
 //------------------------------------------------------------------------------
-//  std::string* ToValueStrings()
+//  std::string* ToValueStrings(Integer w=10, Integer p=8)
 //------------------------------------------------------------------------------
-std::string* Rmatrix33::ToValueStrings()
+std::string* Rmatrix33::ToValueStrings(Integer w, Integer p)
 {
    std::stringstream ss("");
-
-   ss << elementD[0];
+   
+   ss.setf(std::ios::right);
+   
+   ss << std::setw(w) << std::setprecision(p) << elementD[0];
    stringValues[0] = ss.str();
-   ss << elementD[1];
+   
+   ss.str("");
+   ss << std::setw(w) << std::setprecision(p) << elementD[1];
    stringValues[1] = ss.str();
-   ss << elementD[2];
+   
+   ss.str("");
+   ss << std::setw(w) << std::setprecision(p) << elementD[2];
    stringValues[2] = ss.str();
-   ss << elementD[3];
+   
+   ss.str("");
+   ss << std::setw(w) << std::setprecision(p) << elementD[3];
    stringValues[3] = ss.str();
-   ss << elementD[4];
+   
+   ss.str("");
+   ss << std::setw(w) << std::setprecision(p) << elementD[4];
    stringValues[4] = ss.str();
-   ss << elementD[5];
+   
+   ss.str("");
+   ss << std::setw(w) << std::setprecision(p) << elementD[5];
    stringValues[5] = ss.str();
-   ss << elementD[6];
+   
+   ss.str("");
+   ss << std::setw(w) << std::setprecision(p) << elementD[6];
    stringValues[6] = ss.str();
-   ss << elementD[7];
+   
+   ss.str("");
+   ss << std::setw(w) << std::setprecision(p) << elementD[7];
    stringValues[7] = ss.str();
-   ss << elementD[8];
+   
+   ss.str("");
+   ss << std::setw(w) << std::setprecision(p) << elementD[8];
    stringValues[8] = ss.str();
    
    return stringValues;
+}
+
+
+//loj: 7/25/05 Added
+//------------------------------------------------------------------------------
+//  std::string ToString(Integer w=10, Integer p=8)
+//------------------------------------------------------------------------------
+/**
+ * @return data value string
+ */
+//------------------------------------------------------------------------------
+std::string Rmatrix33::ToString(Integer w, Integer p)
+{
+   std::string s;
+   std::string *val;
+   
+   val = ToValueStrings(w, p);
+   
+   s = s + "\n";
+   for (int i=0; i<3; i++)
+   s = s + val[i*3] + val[i*3+1] + val[i*3+2] + "\n";
+   
+   return s;
 }
 
