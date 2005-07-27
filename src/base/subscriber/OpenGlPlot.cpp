@@ -92,7 +92,7 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
    Gmat::STRING_TYPE,            //"TargetStatus"
    Gmat::STRING_TYPE,            //"Axes"
    Gmat::STRING_TYPE,            //"EarthSunLines"
-
+   
    Gmat::STRING_TYPE,            //"Overlap"
    Gmat::STRING_TYPE,            //"LockView"
    Gmat::STRING_TYPE,            //"PerspectiveMode"
@@ -109,8 +109,7 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
 const UnsignedInt
 OpenGlPlot::DEFAULT_ORBIT_COLOR[MAX_SP_COLOR] =
 {
-   // first two are defaults: Earth, Sun (7/22/05 No Luna was added as default)
-   GmatColor::GREEN32,     GmatColor::YELLOW32,   GmatColor::RED32,
+   GmatColor::RED32,       GmatColor::GREEN32,    GmatColor::YELLOW32,
    GmatColor::GREEN32,     GmatColor::YELLOW32,   GmatColor::LIME32,
    GmatColor::AQUA32,      GmatColor::BLUE32,     GmatColor::FUCHSIA32,
    GmatColor::PINK32,      GmatColor::ORANGE32,   GmatColor::PURPLE32,
@@ -186,10 +185,6 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mAllSpCount = 0;
    mScCount = 0;
    mObjectCount = 0;
-
-//    //loj: 7/22/05 Add only Earth and Sun because Earth-Sun line options
-//    AddSpacePoint("Earth", 0);
-//    AddSpacePoint("Sun", 1);
    
 }
 
