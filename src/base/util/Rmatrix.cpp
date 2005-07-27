@@ -783,7 +783,7 @@ Rmatrix Rmatrix::Pseudoinverse() const
     Real accuracyRequired = 0.005;
     if (rowsD < colsD) 
     {
-        m1 = RmatrixTimesTranspose(*this, *this);
+        m1 = MatrixTimesTranspose(*this, *this);
         if (!GmatMathUtil::IsZero(m1.Determinant(),accuracyRequired))
             InverseM = Transpose()*m1.Inverse();
         else
@@ -863,6 +863,7 @@ Rmatrix SkewSymmetric4by4(const Rvector3 &v)
     return skew;
 }
 
+
 //------------------------------------------------------------------------------
 //  <friend>
 //  Rmatrix TransposeTimesRmatrix(const Rmatrix &m1, const Rmatrix &m2)
@@ -894,11 +895,13 @@ Rmatrix TransposeTimesRmatrix(const Rmatrix &m1, const Rmatrix &m2)
     return m;
 }
 
+
+//loj: 7/22/05 Corrected the name from RmatrixTimesTranspose()
 //------------------------------------------------------------------------------
 //  <friend>
-//  RmatrixTimesTranspose(const Rmatrix &m1, const Rmatrix &m2)
+//  MatrixTimesTranspose(const Rmatrix &m1, const Rmatrix &m2)
 //------------------------------------------------------------------------------
-Rmatrix RmatrixTimesTranspose(const Rmatrix &m1, const Rmatrix &m2) 
+Rmatrix MatrixTimesTranspose(const Rmatrix &m1, const Rmatrix &m2) 
 {
     if ((m1.IsSized() == false) || (m2.IsSized() == false))
     {
