@@ -194,14 +194,13 @@ void VaryPanel::Create()
 //------------------------------------------------------------------------------
 void VaryPanel::LoadData()
 {
-#if DEBUG_VARY_PANEL
+   #if DEBUG_VARY_PANEL
    MessageInterface::ShowMessage("VaryPanel::LoadData() entered\n");
    MessageInterface::ShowMessage("Command=%s\n", mVaryCommand->GetTypeName().c_str());
-#endif
+   #endif
 
    mVarNameTextCtrl->Disable(); // we don't want user to edit this box
-   //mViewVarButton->Disable(); //loj: disable until Burn parameter is ready
-   mViewVarButton->Enable(); //loj: 5/31/05 enabled
+   mViewVarButton->Enable();
    
    try
    {
@@ -211,16 +210,16 @@ void VaryPanel::LoadData()
       std::string solverName =
          mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("TargeterName"));
 
-#if DEBUG_VARY_PANEL
+      #if DEBUG_VARY_PANEL
       MessageInterface::ShowMessage("solverName=%s\n", solverName.c_str());
-#endif
+      #endif
       
       std::string varName =
          mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("Variable"));
 
-#if DEBUG_VARY_PANEL
+      #if DEBUG_VARY_PANEL
       MessageInterface::ShowMessage("varName=%s\n", varName.c_str());
-#endif
+      #endif
    
       Real value;
 
@@ -263,9 +262,9 @@ void VaryPanel::LoadData()
 //------------------------------------------------------------------------------
 void VaryPanel::SaveData()
 {   
-#if DEBUG_VARY_PANEL
+   #if DEBUG_VARY_PANEL
    MessageInterface::ShowMessage("VaryPanel::SaveData() enteredd\n");
-#endif
+   #endif
    
    //-------------------------------------------------------
    // Saving Solver Data
@@ -273,11 +272,11 @@ void VaryPanel::SaveData()
    mVaryCommand->SetStringParameter
       (mVaryCommand->GetParameterID("TargeterName"),
        std::string(mSolverData.solverName.c_str()));
-      
+   
    mVaryCommand->SetStringParameter
       (mVaryCommand->GetParameterID("Variable"),
        std::string(mSolverData.varName.c_str()));
-      
+   
    mVaryCommand->SetRealParameter
       (mVaryCommand->GetParameterID("InitialValue"),
        mSolverData.initialValue);
@@ -368,7 +367,9 @@ void VaryPanel::OnButton(wxCommandEvent& event)
    if (event.GetEventObject() == mViewVarButton)  
    {
       // show dialog to select parameter
-      ParameterSelectDialog paramDlg(this, false, true, false, false, "Burn");
+      //loj: 7/28/05 set flag not to create Parameter
+      ParameterSelectDialog paramDlg(this, false, true, false, false, false,
+                                     "Burn");
       paramDlg.ShowModal();
       
       if (paramDlg.IsParamSelected())
