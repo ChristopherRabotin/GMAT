@@ -41,6 +41,7 @@ END_EVENT_TABLE()
 //                       bool showSysVars = true,
 //                       bool canSelectMultiVars = false,
 //                       bool canSelectWholeObject = false,
+//                       bool createParam = true,
 //                       const wxString &ownerType = "Spacecraft")
 //------------------------------------------------------------------------------
 ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent,
@@ -48,6 +49,7 @@ ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent,
                                              bool showSysVars,
                                              bool canSelectMultiVars,
                                              bool canSelectWholeObject,
+                                             bool createParam,
                                              const wxString &ownerType)
    : GmatDialog(parent, -1, wxString(_T("ParameterSelectDialog")))
 {
@@ -58,6 +60,7 @@ ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent,
    mShowSysVars = showSysVars;
    mCanSelectMultiVars = canSelectMultiVars;
    mCanSelectWholeObject = canSelectWholeObject;
+   mCreateParam = createParam;
    mOwnerType = ownerType;
    
    mParamNameArray.Clear();
@@ -74,13 +77,13 @@ ParameterSelectDialog::~ParameterSelectDialog()
 {
    #if DEBUG_PARAM_SELECT_DIALOG
    MessageInterface::ShowMessage
-      ("ParameterSelectDialog::~ParameterSelectDialog() Unregister Spacecraft:%d\n",
-       mObjectComboBox);
+      ("ParameterSelectDialog::~ParameterSelectDialog() Unregister "
+       "mObjectComboBox:%d\n", mObjectComboBox);
    #endif
    
-   theGuiManager->UnregisterComboBox("Spacecraft", mObjectComboBox);
+   //loj: 7/28/05 Changed "Spacecraft" to mOwnerType to fix crash
+   theGuiManager->UnregisterComboBox(mOwnerType, mObjectComboBox);
    theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
-   
 }
 
 
@@ -304,7 +307,7 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
       wxString newParam = FormParamName();
       
       // Create a system paramete if it does not exist
-      if (mShowSysVars)
+      if (mShowSysVars && mCreateParam)
          GetParameter(newParam);
       
       int found = mVarSelectedListBox->FindString(newParam);
@@ -424,19 +427,21 @@ wxString ParameterSelectDialog::FormParamName()
          depObj = mCoordSysComboBox->GetStringSelection();
       else if (mCentralBodyComboBox->IsShown())
          depObj = mCentralBodyComboBox->GetStringSelection();
-
-      // error checking
-//      if (mPropertyListBox->GetSelection == -1)
-//      {
-//         throw
-//      }
-
-      if (depObj == "")
-         return mObjectComboBox->GetStringSelection() + "." + 
-            mPropertyListBox->GetStringSelection();
+      
+      if (mCreateParam) //loj: 7/28/05 Added
+      {
+         if (depObj == "")
+            return mObjectComboBox->GetStringSelection() + "." + 
+               mPropertyListBox->GetStringSelection();
+         else
+            return mObjectComboBox->GetStringSelection() + "." + depObj + "." +
+               mPropertyListBox->GetStringSelection();
+      }
       else
-         return mObjectComboBox->GetStringSelection() + "." + depObj + "." +
+      {
+         return mObjectComboBox->GetStringSelection() + "." + "." +
             mPropertyListBox->GetStringSelection();
+      }
    }
 }
 

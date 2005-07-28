@@ -28,6 +28,7 @@ public:
                          bool showSysParams = true,
                          bool canSelectMultiVars = false,
                          bool canSelectWholeObject = false,
+                         bool createParam = true,
                          const wxString &ownerType = "Spacecraft");
    ~ParameterSelectDialog();
    
@@ -54,6 +55,7 @@ protected:
    bool mShowSysVars;
    bool mCanSelectMultiVars;
    bool mCanSelectWholeObject;
+   bool mCreateParam;
    
    wxStaticText *mCoordSysLabel;
    
