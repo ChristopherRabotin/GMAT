@@ -3438,23 +3438,24 @@ PropSetup* Moderator::GetDefaultPropSetup()
    }
 }
 
+
 //------------------------------------------------------------------------------
 // Burn* GetDefaultBurn()
 //------------------------------------------------------------------------------
 Burn* Moderator::GetDefaultBurn()
 {
    StringArray &configList = GetListOfConfiguredItems(Gmat::BURN);
-   
+
+   //loj: 7/38/05 Added check for ImpulsiveBurn
    if (configList.size() > 0)
    {
-      // return 1st Burn from the list
-      return GetBurn(configList[0]);
+      for (UnsignedInt i=0; i<configList.size(); i++)
+         if (GetBurn(configList[i])->IsOfType("ImpulsiveBurn"))
+            return GetBurn(configList[i]);
    }
-   else
-   {
-      // create ImpulsiveBurn
-      return CreateBurn("ImpulsiveBurn", "DefaultIB");
-   }
+   
+   // create ImpulsiveBurn
+   return CreateBurn("ImpulsiveBurn", "DefaultIB");
 }
 
 
