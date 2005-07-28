@@ -139,7 +139,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
 
    // mainNotebook = GmatAppData::GetMainNotebook();
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-   theGuiManager = GuiItemManager::GetInstance(); //loj: 6/6/05 Added
+   theGuiManager = GuiItemManager::GetInstance();
 
    mCommandList.Clear();
    mCommandList.Add("Propagate");
@@ -170,7 +170,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mNumTarget = 0;
    mNumAchieve = 0;
    mNumVary = 0;
-   mNumSave = 0; //loj: 10/20/04 added Save, Toggle
+   mNumSave = 0;
    mNumToggle = 0;
    mNumIfStatement = 0;
    mNumWhileLoop = 0;
@@ -200,7 +200,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    
 }
 
-//loj: 6/29/04 added resetCounter
+
 //------------------------------------------------------------------------------
 // void UpdateMission(bool resetCounter)
 //------------------------------------------------------------------------------
@@ -364,7 +364,7 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
                        cmd, &mNumVary);
       Expand(parent);
    }
-   else if (cmdTypeName.CmpNoCase("Save") == 0) //loj: actual command is "save"
+   else if (cmdTypeName.CmpNoCase("Save") == 0)
    {
       mNewTreeId =
          AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::SAVE_COMMAND,
@@ -903,7 +903,6 @@ void MissionTree::OnDoubleClick(wxMouseEvent &event)
       ("MissionTree::OnDoubleClick() item=%s\n", item->GetDesc().c_str());
 #endif
    
-   //loj: 11/04/04 added
    // Show panel here. because OnItemActivated() always collapse the node.
    GmatAppData::GetMainFrame()->CreateChild(item);
 
@@ -1055,7 +1054,7 @@ void MissionTree::OnAddPropagate(wxCommandEvent &event)
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
    GmatCommand *prevCmd = NULL;
 
-   //loj: 12/6/04 - handle case prevItem is NULL
+   // handle case prevItem is NULL
    if (prevItem != NULL)
       prevCmd = prevItem->GetCommand();
    else
@@ -1092,7 +1091,7 @@ void MissionTree::OnAddManeuver(wxCommandEvent &event)
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
    GmatCommand *prevCmd = NULL;
    
-   //loj: 12/6/04 - handle case prevItem is NULL
+   // handle case prevItem is NULL
    if (prevItem != NULL)
       prevCmd = prevItem->GetCommand();
    else
@@ -1111,7 +1110,7 @@ void MissionTree::OnAddManeuver(wxCommandEvent &event)
                     GmatTree::MANEUVER_COMMAND, prevCmd, cmd, &mNumManeuver);
 
       Expand(itemId);
-      theGuiManager->UpdateBurn(); //loj: 6/6/05 Added
+      theGuiManager->UpdateBurn();
    }
    
 #if DEBUG_MISSION_TREE
@@ -1134,7 +1133,7 @@ void MissionTree::OnAddAchieve(wxCommandEvent &event)
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);   
    GmatCommand *prevCmd = NULL;
 
-   //loj: 12/6/04 - handle case prevItem is NULL
+   // handle case prevItem is NULL
    if (prevItem != NULL)
       prevCmd = prevItem->GetCommand();
    else
@@ -1170,12 +1169,12 @@ void MissionTree::OnAddVary(wxCommandEvent &event)
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);   
    GmatCommand *prevCmd = NULL;
 
-   //loj: 12/6/04 - handle case prevItem is NULL
+   // handle case prevItem is NULL
    if (prevItem != NULL)
       prevCmd = prevItem->GetCommand();
    else
       prevCmd = currItem->GetCommand();
-
+   
    GmatCommand *cmd = theGuiInterpreter->CreateDefaultCommand("Vary");
    
    if (cmd != NULL)
@@ -1184,12 +1183,14 @@ void MissionTree::OnAddVary(wxCommandEvent &event)
                     GmatTree::VARY_COMMAND, prevCmd, cmd, &mNumVary);
 
       Expand(itemId);
+      theGuiManager->UpdateBurn(); //loj: 7/28/05 Added to show in ParameterSelectDialog
    }
-
+   
 #if DEBUG_MISSION_TREE
    ShowCommands("After OnAddVary()");
 #endif
 }
+
 
 //------------------------------------------------------------------------------
 // void OnAddFunction(wxCommandEvent &event)
@@ -1206,7 +1207,7 @@ void MissionTree::OnAddFunction(wxCommandEvent &event)
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
    GmatCommand *prevCmd = NULL;
 
-   //loj: 12/6/04 - handle case prevItem is NULL
+   // handle case prevItem is NULL
    if (prevItem != NULL)
       prevCmd = prevItem->GetCommand();
    else
@@ -1330,7 +1331,7 @@ void MissionTree::OnAddTarget(wxCommandEvent &event)
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);   
    GmatCommand *prevCmd = NULL;
 
-   //loj: 12/6/04 - handle case prevItem is NULL
+   // handle case prevItem is NULL
    if (prevItem != NULL)
       prevCmd = prevItem->GetCommand();
    else
@@ -1375,7 +1376,7 @@ void MissionTree::OnAddScriptEvent(wxCommandEvent &event)
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);   
    GmatCommand *prevCmd = NULL;
 
-   //loj: 12/6/04 - handle case prevItem is NULL
+   // handle case prevItem is NULL
    if (prevItem != NULL)
       prevCmd = prevItem->GetCommand();
    else
@@ -1421,7 +1422,7 @@ void MissionTree::OnAddIfStatement(wxCommandEvent &event)
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);   
    GmatCommand *prevCmd = NULL;
   
-   //loj: 12/6/04 - handle case prevItem is NULL
+   // handle case prevItem is NULL
    if (prevItem != NULL)
       prevCmd = prevItem->GetCommand();
    else
@@ -1461,7 +1462,7 @@ void MissionTree::OnAddIfElseStatement(wxCommandEvent &event)
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);   
    GmatCommand *prevCmd = NULL;
   
-   //loj: 12/6/04 - handle case prevItem is NULL
+   // handle case prevItem is NULL
    if (prevItem != NULL)
       prevCmd = prevItem->GetCommand();
    else
@@ -1514,7 +1515,7 @@ void MissionTree::OnAddWhileLoop(wxCommandEvent &event)
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);   
    GmatCommand *prevCmd = NULL;
 
-   //loj: 12/6/04 - handle case prevItem is NULL
+   // handle case prevItem is NULL
    if (prevItem != NULL)
       prevCmd = prevItem->GetCommand();
    else
@@ -1552,7 +1553,7 @@ void MissionTree::OnAddForLoop(wxCommandEvent &event)
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);   
    GmatCommand *prevCmd = NULL;
 
-   //loj: 12/6/04 - handle case prevItem is NULL
+   // handle case prevItem is NULL
    if (prevItem != NULL)
       prevCmd = prevItem->GetCommand();
    else
@@ -1592,7 +1593,7 @@ void MissionTree::OnAddDoWhile(wxCommandEvent &event)
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);   
    GmatCommand *prevCmd = NULL;
 
-   //loj: 12/6/04 - handle case prevItem is NULL
+   // handle case prevItem is NULL
    if (prevItem != NULL)
       prevCmd = prevItem->GetCommand();
    else
@@ -1632,7 +1633,7 @@ void MissionTree::OnAddSwitchCase(wxCommandEvent &event)
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
    GmatCommand *prevCmd = NULL;
 
-   //loj: 12/6/04 - handle case prevItem is NULL
+   // handle case prevItem is NULL
    if (prevItem != NULL)
       prevCmd = prevItem->GetCommand();
    else
@@ -2061,7 +2062,6 @@ void MissionTree::OnInsertIfStatement(wxCommandEvent &event)
 
    if (prevCmd != NULL)
    {
-      //loj: 10/15/04 finished the code
       GmatCommand *cmd = theGuiInterpreter->CreateCommand("If");
 
       if (cmd != NULL)
@@ -2097,7 +2097,6 @@ void MissionTree::OnInsertWhileLoop(wxCommandEvent &event)
   
    if (prevCmd != NULL)
    {
-      //loj: 10/15/04 finished the code
       GmatCommand *cmd = theGuiInterpreter->CreateCommand("While");
       
       if (cmd != NULL)
@@ -2132,7 +2131,6 @@ void MissionTree::OnInsertForLoop(wxCommandEvent &event)
 
    if (prevCmd != NULL)
    {
-      //loj: 10/15/04 finished the code
       GmatCommand *cmd = theGuiInterpreter->CreateCommand("For");
       
       if (cmd != NULL)
@@ -2168,7 +2166,6 @@ void MissionTree::OnInsertDoWhile(wxCommandEvent &event)
 
    if (prevCmd != NULL)
    {
-      //loj: 10/15/04 finished the code
       GmatCommand *cmd = theGuiInterpreter->CreateCommand("Do");
       
       if (cmd != NULL)
@@ -2204,7 +2201,6 @@ void MissionTree::OnInsertSwitchCase(wxCommandEvent &event)
    
    if (prevCmd != NULL)
    {
-      //loj: 10/15/04 finished the code
       GmatCommand *cmd = theGuiInterpreter->CreateCommand("Switch");
       
       if (cmd != NULL)
@@ -2403,7 +2399,7 @@ wxMenu* MissionTree::CreateAddIfPopupMenu()
 //           menu->Append(POPUP_ADD_FUNCTION, wxT("Function"));
 //     }
    
-   menu = CreateAddPopupMenu(); //loj: 11/15/04 added
+   menu = CreateAddPopupMenu();
 
    //-----------------------------------------------------------  
    wxMenu *popupMenu = new wxMenu;
@@ -2422,7 +2418,7 @@ wxMenu* MissionTree::CreateAddIfPopupMenu()
 //   popupMenu->Append(POPUP_ADD_D0_WHILE, wxT("Do While"));
    popupMenu->Append(POPUP_ADD_SWITCH_CASE, wxT("Switch")); 
 
-   //loj: 10/15/04 disable control statements that aren't ready yet
+   // disable control statements that aren't ready yet
    popupMenu->Enable(POPUP_ADD_ELSE_IF_STATEMENT, FALSE);
    popupMenu->Enable(POPUP_ADD_ELSE_STATEMENT, FALSE);
    popupMenu->Enable(POPUP_ADD_SWITCH_CASE, FALSE);
