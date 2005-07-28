@@ -31,7 +31,7 @@
 //#define DEBUG_GUI_ITEM_SC 1
 //#define DEBUG_GUI_ITEM_CS 1
 //#define DEBUG_GUI_ITEM_HW 1
-//#define DEBUG_GUI_ITEM_BURN 1
+//#define DEBUG_GUI_ITEM_BURN 2
 
 //------------------------------
 // static data
@@ -886,7 +886,7 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
       throw GmatBaseException("There are no properties associated with " +
                               std::string(objType.c_str()));
    }
-
+   
    propertyListBox->SetSelection(0);
    return propertyListBox;
 }
@@ -1555,7 +1555,7 @@ void GuiItemManager::UpdatePropertyList()
    #endif
    
    theNumScProperty = 0;
-   theNumImpBurnProperty = 0;
+   //theNumImpBurnProperty = 0; //loj: 7/28/05 Until BurnParameter is added to Factory
    Gmat::ObjectType ownerType;
    ParameterInfo *theParamInfo = ParameterInfo::Instance();
    
@@ -1610,7 +1610,7 @@ void GuiItemManager::UpdatePropertyList()
          }
       }
    }
-   
+
    #if DEBUG_GUI_ITEM_PROPERTY
    MessageInterface::ShowMessage
       ("GuiItemManager::UpdatePropertyList() theNumScProperty=%d, "
@@ -2247,7 +2247,7 @@ void GuiItemManager::UpdateBurnList()
           "The number of burns configured: %d\n", MAX_BURN, theNumBurn);
       theNumBurn = MAX_BURN;
    }
-
+   
    wxArrayString burnNames;
    
    for (int i=0; i<theNumBurn; i++)
@@ -2260,7 +2260,7 @@ void GuiItemManager::UpdateBurnList()
                                     std::string(theBurnList[i].c_str()) + "\n");
       #endif
    }
-
+   
    //-------------------------------------------------------
    // update registered Burn ComboBox
    //-------------------------------------------------------
@@ -2540,10 +2540,18 @@ GuiItemManager::GuiItemManager()
    theNumCelesPoint = 0;
    theNumCalPoint = 0;
    theNumSpacePoint = 0;
-      
+   
+   //loj: 7/28/05
+   // Until Burn parameter is added to ParameterFactor, add V, B, N
+   theImpBurnPropertyList[0] = "V";
+   theImpBurnPropertyList[1] = "B";
+   theImpBurnPropertyList[2] = "N";
+   theNumImpBurnProperty = 3;
+   
    // update property list
    UpdatePropertyList();
 }
+
 
 //------------------------------------------------------------------------------
 // ~GuiItemManager()
