@@ -56,7 +56,7 @@
 
 //#define DEBUG_FORCEMODEL_INIT 1
 //#define DEBUG_FORCEMODEL_EXE 1
-#define FORCE_REFERENCE_OBJECTS
+//#define FORCE_REFERENCE_OBJECTS
 
 #define normType 2
 
