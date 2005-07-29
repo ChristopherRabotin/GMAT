@@ -135,10 +135,14 @@ PhysicalModel::PARAMETER_TYPE[PhysicalModelParamCount - GmatBaseParamCount] =
 PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
                              const std::string &nomme) :
    GmatBase                    (id, typeStr, nomme),
+   body                        (NULL),
+   forceOrigin                 (NULL),
+   bodyName                    ("Earth"),
    dimension                   (1),
    initialized                 (false),
    stateChanged                (false),
    modelState                  (NULL),
+   rawState                    (NULL),
    epoch                       (21545.0),
    elapsedTime                 (0.0),
    prevElapsedTime             (0.0),
@@ -161,6 +165,10 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
 //------------------------------------------------------------------------------
 PhysicalModel::~PhysicalModel()
 {
+   if (rawState != modelState)
+      if (rawState)
+         delete [] rawState;
+         
    if (modelState)
       delete [] modelState;
 
@@ -177,6 +185,9 @@ PhysicalModel::~PhysicalModel()
 //------------------------------------------------------------------------------
 PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
    GmatBase                    (pm),
+   body                        (NULL),
+   forceOrigin                 (NULL),
+   bodyName                    (pm.bodyName),
    dimension                   (pm.dimension),
    initialized                 (pm.initialized),
    stateChanged                (pm.stateChanged),
@@ -188,6 +199,8 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
 {
    if (pm.modelState != NULL) 
    {
+      if (modelState)
+         delete [] modelState;
       modelState = new Real[dimension];
       if (modelState != NULL) 
          memcpy(modelState, pm.modelState, dimension * sizeof(Real));
@@ -196,6 +209,7 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
    }
    else
       modelState = NULL;
+   rawState = modelState;
 
    if (pm.deriv != NULL) 
    {
@@ -224,6 +238,9 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
       return *this;
 
    GmatBase::operator=(pm);
+   body        = NULL;
+   forceOrigin = NULL;
+   bodyName    = pm.bodyName;
    dimension   = pm.dimension;
    initialized = pm.initialized;
    epoch       = pm.epoch;
@@ -245,6 +262,8 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
    
       stateChanged = pm.stateChanged;
    }
+
+   rawState = modelState;
    
    if (pm.deriv) 
    {
@@ -310,6 +329,11 @@ void PhysicalModel::SetBody(CelestialBody *theBody)
 }
 
 
+void PhysicalModel::SetForceOrigin(CelestialBody* toBody)
+{
+    forceOrigin = toBody;
+}
+
 //------------------------------------------------------------------------------
 // bool PhysicalModel::Initialize(void)
 //------------------------------------------------------------------------------
@@ -347,6 +371,7 @@ bool PhysicalModel::Initialize(void)
       else
          initialized = false;
    }
+   rawState = modelState;
   
    return initialized;
 }
@@ -445,7 +470,7 @@ void PhysicalModel::SetDimension(Integer n)
 }
 
 //------------------------------------------------------------------------------
-// Real * PhysicalModel::GetState(void)
+// Real * PhysicalModel::GetState()
 //------------------------------------------------------------------------------
 /**
  * Accessor method used to access the state array
@@ -455,9 +480,26 @@ void PhysicalModel::SetDimension(Integer n)
  * encapsulation of the state data.
  */
 //------------------------------------------------------------------------------
-Real * PhysicalModel::GetState(void)
+Real * PhysicalModel::GetState()
 {
    return modelState;
+//   return rawState;
+}
+
+//------------------------------------------------------------------------------
+// Real * PhysicalModel::GetState()
+//------------------------------------------------------------------------------
+/**
+ * Accessor method used to access the J2000 body based state array
+ * Use this method with care -- it exposes the internal array of state data to
+ * external users.  The Propagator and Integrator classes can use this access to
+ * make system evelotion more efficient, but at the cost of loss of 
+ * encapsulation of the state data.
+ */
+//------------------------------------------------------------------------------
+Real * PhysicalModel::GetJ2KState()
+{
+   return rawState;
 }
 
 //------------------------------------------------------------------------------
@@ -513,7 +555,7 @@ void PhysicalModel::IncrementTime(Real dt)
 }
 
 //------------------------------------------------------------------------------
-// Real PhysicalModel::GetTime(void)
+// Real PhysicalModel::GetTime()
 //------------------------------------------------------------------------------
 /**
  * Read accessor for the time elapsed 
@@ -523,7 +565,7 @@ void PhysicalModel::IncrementTime(Real dt)
  * write accessor.
  */
 //------------------------------------------------------------------------------
-Real PhysicalModel::GetTime(void)
+Real PhysicalModel::GetTime()
 {
    return elapsedTime;
 }
@@ -1132,6 +1174,4 @@ bool PhysicalModel::SetRefObject(GmatBase *obj,
    
    // Not handled here -- invoke the next higher SetRefObject call
    return GmatBase::SetRefObject(obj, type, name);
-   }
-
-
+}

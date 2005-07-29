@@ -32,6 +32,8 @@
 //#define DEBUG_SANDBOX_RUN 1
 //#define DEBUG_SANDBOX_OBJECT_MAPS
 //#define DEBUG_MODERATOR_CALLBACK
+//#define DEBUG_FM_INITIALIZATION
+
 //------------------------------------------------------------------------------
 // Sandbox::Sandbox()
 //------------------------------------------------------------------------------
@@ -500,6 +502,11 @@ bool Sandbox::Initialize()
                BuildReferences(obj);
             continue;
          }
+         #ifdef DEBUG_FM_INITIALIZATION
+            else
+               MessageInterface::ShowMessage("Initializing PropSetup '%s'\n", 
+                  obj->GetName().c_str());
+         #endif         
          //************************************* END OF TEMPORARY ***************************************
 
          BuildReferences(obj);
@@ -622,8 +629,75 @@ void Sandbox::BuildReferences(GmatBase *obj)
    
    obj->SetSolarSystem(solarSys);
    // PropSetup probably should do this...
-   if (obj->GetType() == Gmat::PROP_SETUP)
-      ((PropSetup *)obj)->GetForceModel()->SetSolarSystem(solarSys);
+   if ((obj->GetType() == Gmat::PROP_SETUP) || 
+       (obj->GetType() == Gmat::FORCE_MODEL))
+   {
+      ForceModel *fm = ((PropSetup *)obj)->GetForceModel();
+      fm->SetSolarSystem(solarSys);
+
+      #ifdef DEBUG_FM_INITIALIZATION
+         MessageInterface::ShowMessage(
+            "Initializing force model references for '%s'\n", 
+            (fm->GetName() == "" ? obj->GetName().c_str() : 
+                                   fm->GetName().c_str()) );
+      #endif
+      
+      try 
+      {
+         StringArray fmRefs = fm->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
+         for (StringArray::iterator i = fmRefs.begin();
+              i != fmRefs.end(); ++i)
+         {
+            oName = *i;
+            try
+            {
+               SetRefFromName(fm, oName);
+            }
+            catch (SandboxException &ex)
+            {
+               // Handle SandboxExceptions first.
+               #ifdef DEBUG_SANDBOX_INIT
+                  MessageInterface::ShowMessage(
+                     "RefObjectName " + oName + " not found; ignoring " +
+                     ex.GetMessage() + "\n");
+               #endif
+               //throw ex;
+            }
+            catch (BaseException &ex)
+            {
+               // Post a message and -- otherwise -- ignore the exceptions
+               // Handle SandboxExceptions first.
+               #ifdef DEBUG_SANDBOX_INIT
+                  MessageInterface::ShowMessage(
+                     "RefObjectName not found; ignoring " +
+                     ex.GetMessage() + "\n");
+               #endif
+            }
+         }
+      }
+      catch (SandboxException &ex)
+      {
+         // Handle SandboxExceptions first.
+         #ifdef DEBUG_SANDBOX_INIT
+            MessageInterface::ShowMessage(
+               "RefObjectNameArray not found; ignoring " +
+               ex.GetMessage() + "\n");
+         #endif
+         //throw ex;
+      }
+      catch (BaseException &ex) // Handles no refObject array
+      {
+         // Post a message and -- otherwise -- ignore the exceptions
+         #ifdef DEBUG_SANDBOX_INIT
+            MessageInterface::ShowMessage(
+               "RefObjectNameArray not found; ignoring " +
+               ex.GetMessage() + "\n");
+         #endif
+      }
+      
+      if (obj->GetType() == Gmat::FORCE_MODEL)
+         return;
+   }
 
    try
    {

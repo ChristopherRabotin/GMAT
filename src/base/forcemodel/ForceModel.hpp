@@ -84,10 +84,10 @@ public:
     const PhysicalModel* GetForce(std::string forcetype, Integer whichOne = 0) const; 
     bool AddSpaceObject(SpaceObject *so);
     void UpdateSpaceObject(Real newEpoch = -1.0);
-    void UpdateFromSpaceObject(void);
-    void RevertSpaceObject(void);
+    void UpdateFromSpaceObject();
+    void RevertSpaceObject();
     
-    virtual bool Initialize(void);
+    virtual bool Initialize();
     virtual void IncrementTime(Real dt);
     virtual void SetTime(Real t);
 
@@ -98,7 +98,13 @@ public:
 
 
     // inherited from GmatBase
-    virtual GmatBase* Clone(void) const;
+    virtual GmatBase* Clone() const;
+    
+    virtual const StringArray&
+                      GetRefObjectNameArray(const Gmat::ObjectType type);
+    virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                              const std::string &name = "");
+
 
     // Access methods derived classes can override
     virtual std::string GetParameterText(const Integer id) const;
@@ -162,8 +168,12 @@ protected:
     Integer estimationMethod;
     /// List of transient forces that need removal before reusing this instance 
     StringArray               transientForceNames;
+    /// List of reference objects for the owned forces
+    StringArray               forceReferenceNames;
     
-    std::string centralBodyName;
+    /// Name of the force model origin; actual body is the inherited forceOrigin
+    std::string               centralBodyName;
+    
     /// Mapping between script descriptions and force names.
     static std::map<std::string, std::string> scriptAliases;
     
@@ -176,6 +186,15 @@ protected:
                                                 std::string &prefix,
                                                 std::stringstream &stream);
     std::string               BuildForceNameString(PhysicalModel *force);
+    
+    // Pieces for prop with origin code
+    /// Name of the common J2000 body that the spacecraft atates all use
+    std::string               j2kBodyName;
+    /// Pointer to the spacecraft J2000 body
+    CelestialBody             *j2kBody;
+    
+    void                      MoveToOrigin();
+    void                      ReturnFromOrigin();
 
     enum
     {

@@ -56,8 +56,9 @@
 
 //#define DEBUG_FORCEMODEL_INIT 1
 //#define DEBUG_FORCEMODEL_EXE 1
+//#define FORCE_REFERENCE_OBJECTS
 
-#define normType -2
+#define normType 2
 
 //---------------------------------
 // static data
@@ -104,7 +105,11 @@ std::map<std::string, std::string> ForceModel::scriptAliases;
 ForceModel::ForceModel(const std::string &nomme) :
    PhysicalModel     (Gmat::FORCE_MODEL, "ForceModel", nomme),
    previousState     (NULL),
-   estimationMethod  (ESTIMATE_LOCALLY)
+   estimationMethod  (ESTIMATE_LOCALLY),
+   centralBodyName   ("Earth"),
+//   rawState          (NULL),
+   j2kBodyName       ("Earth"),
+   j2kBody           (NULL)  
 {
    objectTypes.push_back(Gmat::FORCE_MODEL);
    objectTypeNames.push_back("ForceModel");
@@ -118,17 +123,19 @@ ForceModel::ForceModel(const std::string &nomme) :
 
 
 //------------------------------------------------------------------------------
-// ForceModel::~ForceModel(void)
+// ForceModel::~ForceModel()
 //------------------------------------------------------------------------------
 /**
  * The destructor
  * The destructor deletes the list of PhysicalModel instances.
  */
 //------------------------------------------------------------------------------
-ForceModel::~ForceModel(void)
+ForceModel::~ForceModel()
 {
    if (previousState)
       delete [] previousState;
+//   if (rawState)
+//      delete [] rawState;   
         
    // Delete the owned forces
    std::vector<PhysicalModel *>::iterator ppm = forceList.begin();
@@ -152,7 +159,7 @@ ForceModel::~ForceModel(void)
  * NOTE: The ForceModel copy constructor is not yet implemented.  This
  * method should be completed before the class is used in external code.
  *
- * @param fdf   The original of the ForceModel that are copied
+ * @param fdf   The original of the ForceModel that is copied
  * 
  * @todo Check the PhysicalModel copy constructors and assignment operators.
  */
@@ -160,7 +167,11 @@ ForceModel::~ForceModel(void)
 ForceModel::ForceModel(const ForceModel& fdf) :
     PhysicalModel    (fdf),
     previousState    (fdf.previousState),
-    estimationMethod (fdf.estimationMethod)
+    estimationMethod (fdf.estimationMethod),
+    centralBodyName  (fdf.centralBodyName),
+//    rawState         (NULL),
+    j2kBodyName      (fdf.j2kBodyName),
+    j2kBody          (NULL)  
 {
    numForces = fdf.numForces;
    stateSize = fdf.stateSize;
@@ -191,11 +202,14 @@ ForceModel& ForceModel::operator=(const ForceModel& fdf)
    if (&fdf == this)
         return *this;
 
-   numForces = fdf.numForces;
-   stateSize = fdf.stateSize;
-   dimension = fdf.dimension;
-   currentForce = fdf.currentForce;
-   parameterCount = ForceModelParamCount;
+   numForces       = fdf.numForces;
+   stateSize       = fdf.stateSize;
+   dimension       = fdf.dimension;
+   currentForce    = fdf.currentForce;
+   parameterCount  = ForceModelParamCount;
+   centralBodyName = fdf.centralBodyName;
+   j2kBodyName     = fdf.j2kBodyName;
+   j2kBody         = NULL;  
    
    // Copy the forces.  May not work -- the copy constructors need to be checked
    for (std::vector<PhysicalModel *>::const_iterator pm = fdf.forceList.begin();
@@ -436,8 +450,27 @@ bool ForceModel::AddSpaceObject(SpaceObject *so)
 {
     if (so == NULL)
         return false;
+        
     if (find(spacecraft.begin(), spacecraft.end(), so) != spacecraft.end())
         return false;
+
+    std::string soJ2KBodyName = so->GetStringParameter("J2000BodyName");
+
+    // Set the refence body for the spacecraft states to match the J2000 body
+    // on the first spacecraft added to the force model.
+    if (spacecraft.size() == 0)
+       j2kBodyName = soJ2KBodyName;
+    else
+    {
+       if (j2kBodyName != soJ2KBodyName)
+          throw ForceModelException(
+             "Force model error -- the internal reference body for all "
+             "spacecraft in a force model must be the same.\n"
+             "The J2000Body for " + so->GetName() + " is " + soJ2KBodyName +
+             ", but the force model is already using " + j2kBodyName + 
+             " as the reference body.");
+    }
+    
     spacecraft.push_back(so);
 
     // Quick fix for the epoch update
@@ -462,6 +495,10 @@ void ForceModel::UpdateSpaceObject(Real newEpoch)
       std::vector<SpaceObject *>::iterator sat;
       PropState *state;
 
+//MessageInterface::ShowMessage("USO1  = [%lf %lf %lf]\n", rawState[0], rawState[1], rawState[2]);
+      ReturnFromOrigin();
+//MessageInterface::ShowMessage("USO2  = [%lf %lf %lf]\n", rawState[0], rawState[1], rawState[2]);
+      
       for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) {
          state = &((*sat)->GetState());
          stateSize = state->GetSize();
@@ -470,7 +507,10 @@ void ForceModel::UpdateSpaceObject(Real newEpoch)
          previousTime = 
             ((*sat)->GetRealParameter((*sat)->GetParameterID("Epoch")) - epoch)
             * 86400.0;
-         memcpy(state->GetState(), &modelState[j*stateSize], vectorSize);
+            
+//         memcpy(state->GetState(), &modelState[j*stateSize], vectorSize);
+
+         memcpy(state->GetState(), &rawState[j*stateSize], vectorSize);
          ++j;
             
          // Quick fix to get the epoch updated
@@ -498,7 +538,7 @@ void ForceModel::UpdateSpaceObject(Real newEpoch)
 
 
 //------------------------------------------------------------------------------
-// void ForceModel::UpdateFromSpacecraft(void)
+// void UpdateFromSpacecraft()
 //------------------------------------------------------------------------------
 /**
  * Updates the model state data from the spacecraft state -- useful to revert
@@ -508,7 +548,7 @@ void ForceModel::UpdateSpaceObject(Real newEpoch)
  *       folded into the code
  */
 //------------------------------------------------------------------------------
-void ForceModel::UpdateFromSpaceObject(void)
+void ForceModel::UpdateFromSpaceObject()
 {
     if (spacecraft.size() > 0) 
     {
@@ -519,15 +559,19 @@ void ForceModel::UpdateFromSpaceObject(void)
         for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
         {
             state = &((*sat)->GetState());
-            memcpy(&modelState[j*stateSize], state->GetState(), stateSize * sizeof(Real));
+            memcpy(&rawState[j*stateSize], state->GetState(), 
+                   stateSize * sizeof(Real));
             ++j;
         }
     }
+    
+    // Transform to the force model origin
+    MoveToOrigin();
 }
 
 
 //------------------------------------------------------------------------------
-// void ForceModel::RevertSpacecraft(void)
+// void RevertSpacecraft()
 //------------------------------------------------------------------------------
 /**
  * Resets the model state data from the previous spacecraft state.
@@ -536,7 +580,7 @@ void ForceModel::UpdateFromSpaceObject(void)
  *       folded into the code
  */
 //------------------------------------------------------------------------------
-void ForceModel::RevertSpaceObject(void)
+void ForceModel::RevertSpaceObject()
 {
    #ifdef DEBUG_FORCEMODEL_EXE
       MessageInterface::ShowMessage
@@ -545,22 +589,38 @@ void ForceModel::RevertSpaceObject(void)
    #endif
    //loj: 7/1/04 elapsedTime = previousTime;
    elapsedTime = prevElapsedTime;
-   memcpy(modelState, previousState, dimension*sizeof(Real)); 
+   
+   memcpy(rawState, previousState, dimension*sizeof(Real)); 
+   MoveToOrigin();
 }
 
 
 //------------------------------------------------------------------------------
-// bool ForceModel::Initialize(void)
+// bool ForceModel::Initialize()
 //------------------------------------------------------------------------------
 /**
  * Initializes model and all contained models
  */
 //------------------------------------------------------------------------------
-bool ForceModel::Initialize(void)
+bool ForceModel::Initialize()
 {
    Integer stateSize = 6;      // Will change if we integrate more variables
    Integer satCount = 1;
    std::vector<SpaceObject *>::iterator sat;
+
+   if (!solarSystem)
+      throw ForceModelException("Cannot initialize force model; no solar system");
+
+   j2kBody = solarSystem->GetBody(j2kBodyName);
+   if (j2kBody == NULL) 
+      throw ForceModelException("Satellite J2000 body (" + j2kBodyName + 
+         ") was not found in the solar system");
+
+   forceOrigin = solarSystem->GetBody(centralBodyName);
+   if (forceOrigin == NULL) 
+      throw ForceModelException(
+         "Force model origin (" + centralBodyName + 
+         ") was not found in the solar system");
 
    if (spacecraft.size() > 0)
       satCount = spacecraft.size();
@@ -579,10 +639,12 @@ bool ForceModel::Initialize(void)
       if ((*sat)->GetType() == Gmat::FORMATION)
          ((Formation*)(*sat))->BuildState();
       stateSize = state->GetSize();
-      dimension += stateSize;  }
+      dimension += stateSize;  
+   }
     
    if (!PhysicalModel::Initialize())
       return false;
+   rawState = new Real[dimension];
 
    if (spacecraft.size() == 0) 
    {
@@ -600,16 +662,17 @@ bool ForceModel::Initialize(void)
       {
          state = &((*sat)->GetState());
          stateSize = state->GetSize();
-         memcpy(&modelState[j], state->GetState(), stateSize * sizeof(Real));
+         memcpy(&rawState[j], state->GetState(), stateSize * sizeof(Real));
          j += stateSize;
       }
+      MoveToOrigin();
    }
     
    previousTime = 0.0;
    if (previousState)
       delete [] previousState;
    previousState = new Real[dimension];
-   memcpy(previousState, modelState, dimension*sizeof(Real));
+   memcpy(previousState, rawState, dimension*sizeof(Real));
 
    UpdateTransientForces();
 
@@ -636,6 +699,7 @@ bool ForceModel::Initialize(void)
       currentPm = current;  // waw: added 06/04/04 
       currentPm->SetDimension(dimension);
       currentPm->SetSolarSystem(solarSystem);
+      currentPm->SetForceOrigin(forceOrigin);
 
       // Initialize the forces
       if (!currentPm->Initialize()) 
@@ -687,6 +751,7 @@ GmatBase* ForceModel::GetOwnedObject(Integer whichOne)
 //------------------------------------------------------------------------------
 void ForceModel::UpdateInitialData()
 {
+//MessageInterface::ShowMessage("UID1  = [%lf %lf %lf]\n", rawState[0], rawState[1], rawState[2]);
    Integer cf = currentForce;
    PhysicalModel *current = GetForce(cf);  // waw: added 06/04/04
 
@@ -707,6 +772,7 @@ void ForceModel::UpdateInitialData()
       cf++;
       current = GetForce(cf);
    }
+//MessageInterface::ShowMessage("UID2  = [%lf %lf %lf]\n", rawState[0], rawState[1], rawState[2]);
 }
 
 
@@ -890,6 +956,8 @@ void ForceModel::SetTime(Real t)
 //------------------------------------------------------------------------------
 bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
 {
+try
+{
    if (order > 2)
       return false;
    if (!initialized)
@@ -957,13 +1025,20 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
                                           deriv[4], deriv[5]);
          #endif
       }
-      cf++;
+      ++cf;
       current = GetForce(cf);
    }
    #ifdef DEBUG_FORCEMODEL_EXE
       MessageInterface::ShowMessage("  ===============================\n");
    #endif
-
+}
+catch (BaseException &ex)
+{
+    MessageInterface::ShowMessage(
+       "Exception caught in ForceModel::GetDerivatives():\n   '%s'\n",
+       ex.GetMessage().c_str());
+    throw;
+}
    return true;
 }
 
@@ -1002,6 +1077,8 @@ Real ForceModel::EstimateError(Real *diffs, Real *answer) const
         return PhysicalModel::EstimateError(diffs, answer);
 
     Real retval = 0.0, err, mag, vec[3];
+
+//MessageInterface::ShowMessage("normType == %d\n", normType);
 
     for (int i = 0; i < dimension; i += 3) 
     {
@@ -1075,7 +1152,7 @@ Real ForceModel::EstimateError(Real *diffs, Real *answer) const
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the ForceModel.
@@ -1084,15 +1161,165 @@ Real ForceModel::EstimateError(Real *diffs, Real *answer) const
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* ForceModel::Clone(void) const
+GmatBase* ForceModel::Clone() const
 {
    return (new ForceModel(*this));
 }
 
 //------------------------------------------------------------------------------
-// Integer GetParameterCount(void) const
+//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
-Integer ForceModel::GetParameterCount(void) const
+/**
+ * Retrieves the list of ref objects used by the member forces.
+ *
+ * @param <type> The type of object desired, or Gmat::UNKNOWN_OBJECT for the
+ *               full list.
+ * 
+ * @return the list of object names.
+ * 
+ * @note This method catches exceptions, and just returns true or false to
+ *       indicate success or failure.
+ */
+//------------------------------------------------------------------------------
+const StringArray& 
+   ForceModel::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   std::string pmName;
+   StringArray pmRefs;
+   
+   forceReferenceNames.clear();
+   
+   // First do the base class call
+   try
+   {
+      pmName = PhysicalModel::GetRefObjectName(type);
+      if (find(forceReferenceNames.begin(), forceReferenceNames.end(), 
+               pmName) != forceReferenceNames.end())
+         forceReferenceNames.push_back(pmName);
+   }
+   catch (BaseException &ex)
+   {
+      // Do nothing
+   }
+   
+   try
+   {
+      pmRefs = PhysicalModel::GetRefObjectNameArray(type);
+
+      // Add them all to the list
+      for (StringArray::iterator j = pmRefs.begin(); j != pmRefs.end(); ++j)
+      {
+         if (find(forceReferenceNames.begin(), forceReferenceNames.end(), 
+                  *j) != forceReferenceNames.end())
+            forceReferenceNames.push_back(pmName);
+      }
+   }
+   catch (BaseException &ex)
+   {
+      // Do nothing
+   }
+   
+   // Build the list of references
+   for (std::vector<PhysicalModel*>::iterator i =  forceList.begin(); 
+        i != forceList.end(); ++i)
+   {
+      try
+      {
+         pmName = (*i)->GetRefObjectName(type);
+         if (find(forceReferenceNames.begin(), forceReferenceNames.end(), 
+                  pmName) != forceReferenceNames.end())
+            forceReferenceNames.push_back(pmName);
+      }
+      catch (BaseException &ex)
+      {
+         // Do nothing
+      }
+      
+      try
+      {
+         pmRefs = (*i)->GetRefObjectNameArray(type);
+         // Add them all to the list
+         for (StringArray::iterator j = pmRefs.begin(); j != pmRefs.end(); ++j)
+         {
+            if (find(forceReferenceNames.begin(), forceReferenceNames.end(), 
+                     *j) != forceReferenceNames.end())
+               forceReferenceNames.push_back(pmName);
+         }
+      }
+      catch (BaseException &ex)
+      {
+         // Do nothing
+      }
+   }
+   
+   #ifdef FORCE_REFERENCE_OBJECTS
+      MessageInterface::ShowMessage("Reference object names for '%s'\n", 
+         instanceName.c_str());
+      for (StringArray::iterator i = forceReferenceNames.begin(); 
+           i != forceReferenceNames.end(); ++i)
+         MessageInterface::ShowMessage("   %s\n", i->c_str());
+   #endif
+         
+   // and return it
+   return forceReferenceNames;
+}
+
+//------------------------------------------------------------------------------
+//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                    const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Sets ref objects used by the member forces.
+ *
+ * @param <obj>  Pointer to the refence object.
+ * @param <type> The type of object being set.
+ * @param <name> Name of the reference object.
+ * 
+ * @return true if the object was set, false if not.
+ * 
+ * @note This method catches exceptions, and just returns true or false to
+ *       indicate success or failure.
+ */
+//------------------------------------------------------------------------------
+bool ForceModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                              const std::string &name)
+{
+   bool wasSet = false;
+
+   // Attempt to set the object for the base class    
+   try
+   {
+      if (PhysicalModel::SetRefObject(obj, type, name))
+         wasSet = true;
+   }
+   catch (BaseException &ex)
+   {
+      // Do nothing
+   }
+   
+   // Build the list of references
+   for (std::vector<PhysicalModel*>::iterator i =  forceList.begin(); 
+        i != forceList.end(); ++i)
+   {
+      try
+      {
+         if ((*i)->SetRefObject(obj, type, name))
+            wasSet = true;
+      }
+      catch (BaseException &ex)
+      {
+         // Do nothing
+      }
+   }
+   
+   return (wasSet);
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetParameterCount() const
+//------------------------------------------------------------------------------
+Integer ForceModel::GetParameterCount() const
 {
     return parameterCount;
 }
@@ -1162,7 +1389,7 @@ std::string ForceModel::GetStringParameter(const Integer id) const
     switch (id)
     {
     case CENTRAL_BODY:
-       return "Earth";
+       return centralBodyName;
     case  DRAG:
     {
        // Find the drag force
@@ -1629,4 +1856,104 @@ std::string ForceModel::BuildForceNameString(PhysicalModel *force)
    // Add others here
       
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// void MoveToOrigin()
+//------------------------------------------------------------------------------
+/**
+ * Transforms the state vector from the internal coordinate system to the force 
+ * model origin.
+ */
+//------------------------------------------------------------------------------
+void ForceModel::MoveToOrigin()
+{
+   Integer satCount = dimension / stateSize;
+   Integer currentScState = 0;
+    
+   if (centralBodyName == j2kBodyName)
+      memcpy(modelState, rawState, dimension*sizeof(Real));
+   else
+   {
+      Rvector6 cbState, j2kState, delta;
+      Real now = epoch + elapsedTime / 86400.0; ;
+      cbState = forceOrigin->GetState(now);
+      j2kState = j2kBody->GetState(now);
+      
+      delta = cbState - j2kState;
+      
+      for (Integer i = 0; i < satCount; ++i)
+      {
+         for (int j = 0; j < 6; ++j)
+            modelState[currentScState+j] = rawState[currentScState+j] - delta[j];
+            
+         // Copy any remaining state elements
+         if (stateSize > 6)
+            memcpy(&modelState[currentScState+6], &rawState[currentScState+6], 
+                (stateSize-6)*sizeof(Real));
+         // Move to the next state
+         currentScState += stateSize;
+      }
+      #ifdef DEBUG_REORIGIN
+         MessageInterface::ShowMessage(
+             "ForceModel::MoveToOrigin()\n   Input state: [%lf %lf %lf %lf %lf "
+             "%lf]\n   j2k state:   [%lf %lf %lf %lf %lf %lf]\n"
+             "   cb state:    [%lf %lf %lf %lf %lf %lf]\n"
+             "   delta:       [%lf %lf %lf %lf %lf %lf]\n"
+             "   model state: [%lf %lf %lf %lf %lf %lf]\n\n",
+             rawState[0], rawState[1], rawState[2], rawState[3], rawState[4], 
+             rawState[5],    
+             j2kState[0], j2kState[1], j2kState[2], j2kState[3], j2kState[4], 
+             j2kState[5],    
+             cbState[0], cbState[1], cbState[2], cbState[3], cbState[4], 
+             cbState[5],    
+             delta[0], delta[1], delta[2], delta[3], delta[4], delta[5],    
+             modelState[0], modelState[1], modelState[2], modelState[3], 
+             modelState[4], modelState[5]);    
+      #endif
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void MoveToOrigin()
+//------------------------------------------------------------------------------
+/**
+ * Transforms the state vector from the force model origin to the internal 
+ * coordinate system.
+ */
+//------------------------------------------------------------------------------
+void ForceModel::ReturnFromOrigin()
+{
+//static Integer counter = 0;
+
+   Integer satCount = dimension / stateSize;
+   Integer currentScState = 0;
+    
+   if (centralBodyName == j2kBodyName)
+      memcpy(rawState, modelState, dimension*sizeof(Real));
+   else
+   {
+      Rvector6 cbState, j2kState, delta;
+      Real now = epoch + elapsedTime / 86400.0; ;
+      cbState = forceOrigin->GetState(now);
+      j2kState = j2kBody->GetState(now);
+      
+      delta = j2kState - cbState;
+      
+      for (Integer i = 0; i < satCount; ++i)
+      {
+         for (int j = 0; j < 6; ++j)
+            rawState[currentScState+j] = modelState[currentScState+j] - delta[j];
+            
+         // Copy any remaining state elements
+         if (stateSize > 6)
+            memcpy(&rawState[currentScState+6], &modelState[currentScState+6], 
+                (stateSize-6)*sizeof(Real));
+         // Move to the next state
+         currentScState += stateSize;
+      }
+   }
+//MessageInterface::ShowMessage("ReturnFromOrigin[%d], \n", ++counter);
 }

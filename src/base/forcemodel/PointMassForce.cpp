@@ -65,10 +65,11 @@
 #include "Rvector6.hpp"
 #include "ForceModelException.hpp"
 
-#define DEBUG_PMF_BODY 0
-#define DEBUG_PMF_DERV 0
+//#define DEBUG_PMF_BODY 0
+//#define DEBUG_PMF_DERV 0
 
 //#define DEBUG_FORCE_MODEL
+//#define DEBUG_FORCE_ORIGIN
 
 //---------------------------------
 // static data
@@ -301,18 +302,47 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
     
    //waw: 04/27/04
    Real now = epoch + dt/86400.0, relativePosition[3];
-   const Rvector6 *rv = &(body->GetState(now));
+//MessageInterface::ShowMessage("Now = %16.9lf\n", now);
+   Rvector6 bodyrv = body->GetState(now);
+   Rvector6 orig = forceOrigin->GetState(now);
+
+   // The vector from the force origin to the gravitating body
+   Rvector3 rv = bodyrv.GetR() - orig.GetR();
    // Precalculations for the indirect effect term
-   rbb3 = (*rv)[0] * (*rv)[0] + (*rv)[1] * (*rv)[1] + (*rv)[2] * (*rv)[2];
+   rbb3 = rv.GetMagnitude();
    if (rbb3 != 0.0) {
-      rbb3 = rbb3 * sqrt(rbb3);
+      rbb3 = rbb3 * rbb3 * rbb3;
       mu_rbb = mu / rbb3;
-      a_indirect[0] = mu_rbb * (*rv)[0];
-      a_indirect[1] = mu_rbb * (*rv)[1];
-      a_indirect[2] = mu_rbb * (*rv)[2];
+      a_indirect[0] = mu_rbb * rv[0];
+      a_indirect[1] = mu_rbb * rv[1];
+      a_indirect[2] = mu_rbb * rv[2];
    }
    else
       a_indirect[0] = a_indirect[1] = a_indirect[2] = 0.0;
+
+   #ifdef DEBUG_FORCE_ORIGIN
+      MessageInterface::ShowMessage(
+         "Epoch:  %15.9lf\n  Origin:  [%s]\n  J2KBod:  [%s]\n",
+         now, orig.ToString().c_str(), bodyrv.ToString().c_str());
+      MessageInterface::ShowMessage(
+         "Now = %16.11lf rbb3 = %16.11le rv = [%16lf %16lf %16lf]\n",
+         now, rbb3, rv[0], rv[1], rv[2]);
+   #endif
+
+
+//   // DJC, 7/12/05 -- Old code:
+//   const Rvector6 *rv = &(body->GetState(now));
+//   // Precalculations for the indirect effect term
+//   rbb3 = (*rv)[0] * (*rv)[0] + (*rv)[1] * (*rv)[1] + (*rv)[2] * (*rv)[2];
+//   if (rbb3 != 0.0) {
+//      rbb3 = rbb3 * sqrt(rbb3);
+//      mu_rbb = mu / rbb3;
+//      a_indirect[0] = mu_rbb * (*rv)[0];
+//      a_indirect[1] = mu_rbb * (*rv)[1];
+//      a_indirect[2] = mu_rbb * (*rv)[2];
+//   }
+//   else
+//      a_indirect[0] = a_indirect[1] = a_indirect[2] = 0.0;
 
 	#if DEBUG_PMF_BODY
 	   ShowBodyState("PointMassForce::GetDerivatives() BEFORE compute " +
@@ -327,10 +357,15 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
    for (Integer i = 0; i < satCount; i++) 
    {
       i6 = i * 6;
-       
-      relativePosition[0] = (*rv)[0] - state[ i6 ];
-      relativePosition[1] = (*rv)[1] - state[i6+1];
-      relativePosition[2] = (*rv)[2] - state[i6+2];
+      
+      relativePosition[0] = rv[0] - state[ i6 ];
+      relativePosition[1] = rv[1] - state[i6+1];
+      relativePosition[2] = rv[2] - state[i6+2];
+
+//   // DJC, 7/12/05 -- Old code:
+//      relativePosition[0] = (*rv)[0] - state[ i6 ];
+//      relativePosition[1] = (*rv)[1] - state[i6+1];
+//      relativePosition[2] = (*rv)[2] - state[i6+2];
 
       r3 = relativePosition[0]*relativePosition[0] + 
            relativePosition[1]*relativePosition[1] + 
@@ -369,10 +404,10 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
 
    #ifdef DEBUG_FORCE_MODEL
       MessageInterface::ShowMessage(
-         "%s%s%s%16.10lf%s%lf, %lf, %lf%s%lf, %lf, %lf%s%le, %le, %le]\n",
+         "%s%s%s%16.10lf%s%16.10lf, %16.10lf, %16.10lf%s%16.10lf, %16.10lf, %16.10lf%s%16.10le, %16.10le, %16.10le]\n",
          "Point mass force for ", body->GetName().c_str(), " at epoch ", now,
          "\n   Sat position:  [", state[0], state[1], state[2],
-         "]\n   Body position: [", (*rv)[0], (*rv)[1], (*rv)[2],
+         "]\n   Body position: [", rv[0], rv[1], rv[2],
          "]\n   Acceleration:  [", deriv[3], deriv[4], deriv[5]);
    #endif
 
@@ -772,32 +807,34 @@ void  PointMassForce::ShowBodyState(const std::string &header, Real time,
 void  PointMassForce::ShowDerivative(const std::string &header, Real *state,
                                      Integer satCount)
 {
-#if DEBUG_PMF_DERV
-   static int debugCount2 = 0;
-   static bool showDeriv = true;
-   
-   if (showDeriv)
-   {
-      MessageInterface::ShowMessage("%s\n", header.c_str());
-      MessageInterface::ShowMessage(">>>>>=======================================\n");
-      Integer i6;
-      Rvector6 stateVec = Rvector6(state);
-   
-      for (Integer i = 0; i < satCount; i++) 
+   #if DEBUG_PMF_DERV
+      static int debugCount2 = 0;
+      static bool showDeriv = true;
+      
+      if (showDeriv)
       {
-         i6 = i * 6;
-         MessageInterface::ShowMessage
-            ("sc#=%d  state=%s\n", i, stateVec.ToString().c_str());
+         MessageInterface::ShowMessage("%s\n", header.c_str());
+         MessageInterface::ShowMessage(
+            ">>>>>=======================================\n");
+         Integer i6;
+         Rvector6 stateVec = Rvector6(state);
       
-         MessageInterface::ShowMessage
-            ("deriv=%f %f %f %f %f %f\n", deriv[i6], deriv[i6+1], deriv[i6+2],
-             deriv[i6+3], deriv[i6+4], deriv[i6+5]);
+         for (Integer i = 0; i < satCount; i++) 
+         {
+            i6 = i * 6;
+            MessageInterface::ShowMessage
+               ("sc#=%d  state=%s\n", i, stateVec.ToString().c_str());
+         
+            MessageInterface::ShowMessage
+               ("deriv=%f %f %f %f %f %f\n", deriv[i6], deriv[i6+1], 
+                deriv[i6+2], deriv[i6+3], deriv[i6+4], deriv[i6+5]);
+         }
+         MessageInterface::ShowMessage(
+            "=======================================<<<<<\n");
+         
+         debugCount2++;
+         if (debugCount2 > 10)
+            showDeriv = false;
       }
-      MessageInterface::ShowMessage("=======================================<<<<<\n");
-      
-      debugCount2++;
-      if (debugCount2 > 10)
-         showDeriv = false;
-   }
-#endif
+   #endif
 }

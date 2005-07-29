@@ -134,11 +134,13 @@ public:
    virtual std::string    GetBodyName();
    virtual Integer        GetDimension(void);
    virtual Real *         GetState(void);
+   virtual Real*          GetJ2KState();
    const Real *           GetDerivativeArray(void);
 
    virtual bool SetBody(const std::string& theBody);
    virtual void SetBodyName(const std::string& theBody);
    virtual void SetBody(CelestialBody* toBody);
+   virtual void SetForceOrigin(CelestialBody* toBody);
    virtual void SetDimension(Integer);
    virtual void SetState(const Real * st);
 
@@ -189,7 +191,9 @@ public:
 protected:
       
    /// pointer to the body for which this force is computed
-   CelestialBody*          body;
+   CelestialBody           *body;
+   /// pointer to the origin used in propagation
+   CelestialBody           *forceOrigin;
    /// name of the body
    std::string             bodyName;
    /// Number of parameters being modeled
@@ -201,6 +205,8 @@ protected:
 
    /// Array of data parameters containing the model data
    Real *modelState;
+    /// The state vector in J2000BodyMJ2000Eq coordinates.
+    Real *rawState;
    /// The base epoch
    Real epoch;
    /// Number of seconds elapsed from the base epoch
