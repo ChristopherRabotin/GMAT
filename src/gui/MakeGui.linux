@@ -12,7 +12,8 @@ MATLAB_LIBRARIES = -leng -lmx -lut -lmat -lpthread \
                    -licuuc -lustdio -lz
 
 LINK_FLAGS = `wx-config --libs` -lwx_gtk2_gl-2.6 \
-              -lg2c -L/usr/local/matlab704/bin/glnx86
+              -lg2c -L/usr/local/matlab704/bin/glnx86 \
+              -lIL -lILU -lILUT 
  
 all: prep $(TARGETS)
 
@@ -71,8 +72,10 @@ HEADERS = -I../base/include \
 
 # Uncomment this section (and edit the path) to build with Matlab
 CPPFLAGS = $(OPTIMIZATIONS) -Wall -D__USE_MATLAB__=1 \
-            -DSKIP_DEVIL `wx-config --cppflags` \
+            `wx-config --cppflags` \
            -I/usr/local/matlab704/extern/include 
+           
+# -DSKIP_DEVIL 
 
 # Uncomment this section to build without Matlab
 #CPPFLAGS = $(OPTIMIZATIONS) -Wall `wx-config --cppflags`

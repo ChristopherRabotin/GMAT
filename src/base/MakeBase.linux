@@ -116,6 +116,8 @@ OBJECTS = \
     coordsystem/CoordinateSystem.o \
     coordsystem/DynamicAxes.o \
     coordsystem/EquatorAxes.o \
+    coordsystem/GeocentricSolarEclipticAxes.o \
+    coordsystem/GeocentricSolarMagneticAxes.o \
     coordsystem/InertialAxes.o \
     coordsystem/ItrfCoefficientsFile.o \
     coordsystem/MeanOfDateAxes.o \
@@ -230,8 +232,6 @@ OBJECTS = \
     propagator/RungeKuttaFehlberg56.o \
     propagator/RungeKuttaNystrom.o \
     propagator/RungeKutta.o \
-    refframe/MeanJ2000Equatorial.o \
-    refframe/RefFrame.o \
     solarsys/AtmosphereModel.o \
     solarsys/Barycenter.o \
     solarsys/CalculatedPoint.o \
@@ -304,6 +304,10 @@ OBJECTS = \
     \
     \
     solarsys/msise90_sub.o
+
+#    refframe/MeanJ2000Equatorial.o \
+#    refframe/RefFrame.o \
+
 
 $(WXTARGET) : $(OBJECTS)
 	mkdir -p lib
