@@ -56,7 +56,7 @@
 
 //#define DEBUG_FORCEMODEL_INIT 1
 //#define DEBUG_FORCEMODEL_EXE 1
-//#define FORCE_REFERENCE_OBJECTS
+#define FORCE_REFERENCE_OBJECTS
 
 #define normType 2
 
@@ -1227,7 +1227,7 @@ const StringArray&
       {
          pmName = (*i)->GetRefObjectName(type);
          if (find(forceReferenceNames.begin(), forceReferenceNames.end(), 
-                  pmName) != forceReferenceNames.end())
+                  pmName) == forceReferenceNames.end())
             forceReferenceNames.push_back(pmName);
       }
       catch (BaseException &ex)
@@ -1242,8 +1242,8 @@ const StringArray&
          for (StringArray::iterator j = pmRefs.begin(); j != pmRefs.end(); ++j)
          {
             if (find(forceReferenceNames.begin(), forceReferenceNames.end(), 
-                     *j) != forceReferenceNames.end())
-               forceReferenceNames.push_back(pmName);
+                     *j) == forceReferenceNames.end())
+               forceReferenceNames.push_back(*j);
          }
       }
       catch (BaseException &ex)
