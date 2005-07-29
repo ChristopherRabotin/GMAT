@@ -1377,9 +1377,9 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    wxMenu *toolsMenu = new wxMenu;
    wxMenu *helpMenu = new wxMenu;
  
-   fileMenu->Append(MENU_FILE_NEW_SCRIPT, wxT("New Script"));  
-   fileMenu->Append(MENU_FILE_OPEN_SCRIPT, wxT("Open Script"), wxT(""), FALSE);  
-   fileMenu->Append(MENU_FILE_SAVE_SCRIPT, wxT("Save to Script"), wxT(""), FALSE);
+   fileMenu->Append(MENU_FILE_NEW_SCRIPT, wxT("&New Script"));  
+   fileMenu->Append(MENU_FILE_OPEN_SCRIPT, wxT("&Open Script"), wxT(""), FALSE);  
+   fileMenu->Append(MENU_FILE_SAVE_SCRIPT, wxT("&Save to Script"), wxT(""), FALSE);
    fileMenu->Append(MENU_FILE_SAVE_AS_SCRIPT, wxT("Save to Script As"),
                      wxT(""), FALSE);  
 
@@ -1410,7 +1410,7 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    fileMenu->Enable(MENU_SET_PATH_AND_LOG, FALSE);
    fileMenu->Enable(MENU_INFORMATION, FALSE);
    fileMenu->Enable(MENU_PROJECT_PRINT, FALSE);
-   menuBar->Append(fileMenu, wxT("File"));
+   menuBar->Append(fileMenu, wxT("&File"));
 
    editMenu->Append(MENU_EDIT_RESOURCES, wxT("Resources"), wxT(""), FALSE);
    editMenu->Append(MENU_EDIT_MISSION, wxT("Mission"), wxT(""), FALSE);
