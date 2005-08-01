@@ -178,7 +178,7 @@ void CoordinateConverter::Initialize()
 //------------------------------------------------------------------------------
 //  bool  Convert(const A1Mjd &epoch, const Rvector &inState,
 //                CoordinateSystem *inCoord, Rvector &outState,
-//                CoordinateSystem *outCoord) 
+//                CoordinateSystem *outCoord, bool omitTranslation) 
 //------------------------------------------------------------------------------
 /**
  * This method converts the inState vector from coordIn CoordinateSystem
@@ -190,6 +190,8 @@ void CoordinateConverter::Initialize()
  * @param inCoord  pointer to the input CoordinateSystem.
  * @param outState resulting vector, in the outCoord system.
  * @param outCoord pointer to the output CoordinateSystem.
+ * @param omitTranslation omit the translation whether coincident or not
+ *                        (default is false)
  *
  * @return true if successful; false otherwise.
  */
