@@ -53,9 +53,10 @@ public:
                 CoordinateSystem *inCoord, Rvector &outState,
                 CoordinateSystem *outCoord, bool omitTranslation = false);
    // method to return the rotation matrix used to do the last conversion
+   Rmatrix33    GetLastRotationMatrix() const;
 
-   Rmatrix33 lastRotMatrix;
 protected:
+   Rmatrix33 lastRotMatrix;
    
    /// Origin for the return coordinate system (aligned with the MJ2000 Earth
    /// Equatorial coordinate system)

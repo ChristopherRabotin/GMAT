@@ -220,3 +220,8 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
    return true;
 }
 
+Rmatrix33 CoordinateConverter::GetLastRotationMatrix() const
+{
+   return lastRotMatrix;
+}
+
