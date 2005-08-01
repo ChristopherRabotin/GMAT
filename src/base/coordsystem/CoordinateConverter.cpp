@@ -196,7 +196,7 @@ void CoordinateConverter::Initialize()
 //------------------------------------------------------------------------------
 bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
                           CoordinateSystem *inCoord, Rvector &outState,
-                          CoordinateSystem *outCoord)
+                          CoordinateSystem *outCoord, bool omitTranslation)
 {
    if (inState.GetSize() != outState.GetSize())
       throw CoordinateSystemException(
@@ -209,8 +209,9 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
    Rvector internalState(inState.GetSize());
    bool coincident = (inCoord->GetOrigin() == outCoord->GetOrigin() ? 
                       true : false);
-   internalState = inCoord->ToMJ2000Eq(epoch, inState, coincident);
-   outState      = outCoord->FromMJ2000Eq(epoch, internalState, coincident);
+   bool translateFlag = coincident || omitTranslation;
+   internalState = inCoord->ToMJ2000Eq(epoch, inState, translateFlag);
+   outState      = outCoord->FromMJ2000Eq(epoch, internalState, translateFlag);
    Rmatrix33 toMJ2000RotMatrix   = inCoord->GetLastRotationMatrix();
    Rmatrix33 fromMJ2000Matrix    = outCoord->GetLastRotationMatrix();
    lastRotMatrix = (fromMJ2000Matrix.Transpose()) * toMJ2000RotMatrix;

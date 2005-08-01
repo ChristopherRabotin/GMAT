@@ -51,7 +51,7 @@ public:
    
    bool Convert(const A1Mjd &epoch, const Rvector &inState,
                 CoordinateSystem *inCoord, Rvector &outState,
-                CoordinateSystem *outCoord);
+                CoordinateSystem *outCoord, bool omitTranslation = false);
    // method to return the rotation matrix used to do the last conversion
 
    Rmatrix33 lastRotMatrix;
