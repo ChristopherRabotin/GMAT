@@ -2720,6 +2720,7 @@ Integer Moderator::ChangeRunState(const std::string &state, Integer sandboxNum)
    return 0;
 }
 
+
 //------------------------------------------------------------------------------
 // Gmat::RunState GetUserInterrupt()
 //------------------------------------------------------------------------------
@@ -2744,6 +2745,28 @@ Gmat::RunState Moderator::GetUserInterrupt()
    return runState;
 }
 
+//loj: 8/1/05 Added
+//------------------------------------------------------------------------------
+// Gmat::RunState GetRunState()
+//------------------------------------------------------------------------------
+/**
+ * @return the state of the system (Gmat::RUNNING, Gmat::PAUSED, Gmat::IDLE)
+ */
+//------------------------------------------------------------------------------
+Gmat::RunState Moderator::GetRunState()
+{
+   #if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::GetRunsState() runState=%d\n", runState);
+   #endif
+
+   if (!isRunReady)
+      runState = Gmat::RUNNING;
+   
+   return runState;
+}
+
+
 // Script
 //------------------------------------------------------------------------------
 // bool InterpretScript(const std::string &scriptFileName)
@@ -2760,7 +2783,7 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
 {
    bool status = false;
    isRunReady = false;
-    
+   
    MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage("Moderator::InterpretScript() entered\n"
                                  "file: " + scriptFileName + "\n");

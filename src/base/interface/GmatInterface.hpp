@@ -34,7 +34,8 @@ public:
    void BuildObject();
    void UpdateObject();
    void RunScript();
-
+   
+   char* GetRunState();
    char* GetObject(const std::string &name);
    char* GetParameter(const std::string &name);
    

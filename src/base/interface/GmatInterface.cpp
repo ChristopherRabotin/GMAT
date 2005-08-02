@@ -167,6 +167,42 @@ void GmatInterface::RunScript()
    Moderator::Instance()->RunScript();
 }
 
+//loj: 8/2/05 Added
+//------------------------------------------------------------------------------
+// char* GetRunState()
+//------------------------------------------------------------------------------
+/*
+ * @return the state of system ("RUNNING", "PAUSED", "IDLE").
+ */
+//------------------------------------------------------------------------------
+char* GmatInterface::GetRunState()
+{
+   static char dataString[MAX_PARAM_VAL_STRING];
+   static char *runningStr = "Running\0";
+   static char *pausedStr = "Paused\0";
+   static char *idleStr = "Idle\0";
+   strcpy(dataString, idleStr);
+   
+   Gmat::RunState state = Moderator::Instance()->GetRunState();
+   
+   if (state == Gmat::RUNNING)
+      sprintf(dataString, "%s", runningStr);
+   else if (state == Gmat::PAUSED)
+      sprintf(dataString, "%s", pausedStr);
+   else if (state == Gmat::IDLE)
+      sprintf(dataString, "%s", idleStr);
+   else
+      sprintf(dataString, "Unknown");
+   
+   #if DEBUG_GMAT_INTERFACE
+   MessageInterface::ShowMessage
+      ("GmatInterface::GetRunState() state=%d, dataString=<%s>\n", state,
+       dataString);
+   #endif
+   
+   return dataString;
+}
+
 
 //------------------------------------------------------------------------------
 // char* GetParameter(const std::string &name)
@@ -184,9 +220,7 @@ char* GmatInterface::GetParameter(const std::string &name)
    
    static char dataString[MAX_PARAM_VAL_STRING];
    static char *undefindString = "-123456789.123456789\0";
-   //static char *tempString2 = "[123456.12345, 234567.12345, 345678.12345]\0";
    strcpy(dataString, undefindString);
-   //dataString[0] = '\0';
    Parameter *param;
    
    param = Moderator::Instance()->GetParameter(name);
@@ -232,12 +266,9 @@ char* GmatInterface::GetObject(const std::string &name)
 
    static char dataString[MAX_OBJECT_VAL_STRING];
    static char *undefindString = "-123456789.123456789\0";
-   //static char *tempString2 = "[123456.12345, 234567.12345, 345678.12345]\0";
    strcpy(dataString, undefindString);
-   //dataString[0] = '\0';
    GmatBase *obj;
    
-   //obj = Moderator::Instance()->GetConfiguredItem(name);
    obj = Moderator::Instance()->GetInternalObject(name);
    
    if (obj != NULL)
