@@ -156,6 +156,15 @@ wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
       tempItem.RemoveLast();
       data = GmatInterface::Instance()->GetObject(std::string(tempItem.c_str()));
    }
+   else if (item == "RunState") //loj: 8/2/05 Added
+   {
+      data = GmatInterface::Instance()->GetRunState();
+      
+      #if DEBUG_CONNECTION
+      MessageInterface::ShowMessage
+         ("GmatConnection::OnRequest() data=%s\n", data);
+      #endif
+   }
    else
    {
       data = GmatInterface::Instance()->GetParameter(std::string(item.c_str()));
@@ -169,8 +178,20 @@ wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
 // bool OnStartAdvise(const wxString& WXUNUSED(topic),
 //------------------------------------------------------------------------------
 bool GmatConnection::OnStartAdvise(const wxString& WXUNUSED(topic),
-                                   const wxString& WXUNUSED(item))
+                                   const wxString& item)
 {
+   #if DEBUG_CONNECTION
+   MessageInterface::ShowMessage
+      ("GmatConnection::OnRequest() %s\n", item.c_str());
+   #endif
+   
+   //char* data = GmatInterface::Instance()->GetRunState();
+   
+   #if DEBUG_CONNECTION
+   MessageInterface::ShowMessage
+      ("GmatConnection::OnStartAdvise() data=%s\n", data);
+   #endif
+   
    return TRUE;
 }
 
