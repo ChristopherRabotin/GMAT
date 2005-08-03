@@ -265,7 +265,7 @@ void TODEcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
                     0.0, -GmatMathUtil::Sin(Epsbar), GmatMathUtil::Cos(Epsbar));
       
    Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB);
-   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, dPsi,
+   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
                           longAscNodeLunar, cosEpsbar);
    
    

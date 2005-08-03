@@ -147,7 +147,7 @@ bool TOEEcAxes::Initialize()
    
    
    Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB);
-   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, dPsi,
+   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, epoch, dPsi,
                                                 longAscNodeLunar, cosEpsbar);
 
    Rmatrix33 R3Psi( GmatMathUtil::Cos(-dPsi),  GmatMathUtil::Sin(-dPsi),  0.0, 

@@ -255,7 +255,7 @@ void TODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    Real tTDB  = (jdTT - 2451545.0) / 36525.0;
    
    Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB);
-   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, dPsi,
+   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
                           longAscNodeLunar, cosEpsbar);
    
    rotMatrix = PREC.Transpose() * NUT.Transpose();

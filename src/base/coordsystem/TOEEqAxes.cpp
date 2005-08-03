@@ -136,7 +136,7 @@ bool TOEEqAxes::Initialize()
    Real tTDB  = (jdTT - 2451545.0) / 36525.0;
    
    Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB);
-   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, dPsi,
+   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, epoch, dPsi,
                                                 longAscNodeLunar, cosEpsbar);
    
    rotMatrix = PREC.Transpose() * NUT.Transpose();
