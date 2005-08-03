@@ -87,8 +87,7 @@ CoordinateBase(Gmat::AXIS_SYSTEM,itsType,itsName),
 eop              (NULL),
 itrf             (NULL),
 epochFormat      (""),
-//updateInterval   (0.0),
-updateInterval   (0.0), 
+updateInterval   (60.0), 
 lastDPsi         (0.0)
 {
    objectTypes.push_back(Gmat::AXIS_SYSTEM);
