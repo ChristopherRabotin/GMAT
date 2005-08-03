@@ -41,7 +41,7 @@ using namespace GmatTimeUtil;      // for SECS_PER_DAY
 //#define DEBUG_ROT_MATRIX 1
 //static Integer visitCount = 0;
 
-#define DEBUG_UPDATE
+//#define DEBUG_UPDATE
 
 //---------------------------------
 // static data
