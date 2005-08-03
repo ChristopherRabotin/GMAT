@@ -232,8 +232,8 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    Real cosEpsbar        = 0.0;
    Real cosAst           = 0.0;
    Real sinAst           = 0.0;
-   Real xVal             = 0.0;
-   Real yVal             = 0.0;
+   //Real xVal             = 0.0;
+   //Real yVal             = 0.0;
    // Convert to MJD UTC to use for polar motion  and LOD
    // interpolations
    Real mjdUTC = TimeConverterUtil::Convert(atEpoch.Get(),
@@ -258,14 +258,14 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    Real tTDB    = (jdTT - 2451545.0) / 36525.0;
 
    Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB);
-   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, dPsi,
+   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
                                                 longAscNodeLunar, cosEpsbar);
    Rmatrix33  ST        = ComputeSiderealTimeRotation(jdTT, tUT1,
                                                       dPsi, longAscNodeLunar, cosEpsbar,
                                                       cosAst, sinAst);
    Rmatrix33  STderiv   = ComputeSiderealTimeDotRotation(mjdUTC,
-                                                         cosAst, sinAst, xVal, yVal);
-   Rmatrix33  PM        = ComputePolarMotionRotation(xVal, yVal);
+                                                         cosAst, sinAst);
+   Rmatrix33  PM        = ComputePolarMotionRotation(mjdUTC);
 
    Rmatrix33 fixedToMJ2000    = PREC.Transpose() * (NUT.Transpose() *
                                  (ST.Transpose() * PM.Transpose()));
