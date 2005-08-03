@@ -56,6 +56,13 @@
 #include "Rmatrix.hpp"
 #include "MessageInterface.hpp"
 
+/*
+#include <iostream>
+ using namespace std; // ***************************** for debug only
+ 
+#define DEBUG_REFERENCE_SETTING
+*/
+
 using namespace GmatMathUtil;
 
 // #define DEBUG_HARMONIC_FIELD
@@ -71,16 +78,22 @@ HarmonicField::PARAMETER_TEXT[HarmonicFieldParamCount - PhysicalModelParamCount]
    "Degree",
    "Order",
    "Filename",
+   "InputCoordinateSystem",
+   "FixedCoordinateSystem",
+   "TargetCoordinateSystem",
 };
 
 const Gmat::ParameterType
 HarmonicField::PARAMETER_TYPE[HarmonicFieldParamCount - PhysicalModelParamCount] =
 {
-Gmat::INTEGER_TYPE,
-Gmat::INTEGER_TYPE,
-Gmat::INTEGER_TYPE,
-Gmat::INTEGER_TYPE,
-Gmat::STRING_TYPE,
+   Gmat::INTEGER_TYPE,
+   Gmat::INTEGER_TYPE,
+   Gmat::INTEGER_TYPE,
+   Gmat::INTEGER_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
 };
 
 
@@ -111,7 +124,10 @@ Abar                    (NULL),
 re                      (NULL),
 im                      (NULL),
 filename                (""),
-fileRead                (false)
+fileRead                (false),
+inputCSName             ("EarthMJ2000Eq"),
+fixedCSName             ("EarthFixed"),
+targetCSName            ("EarthMJ2000Eq")
 //epoch                   (21545.0)
 {
    objectTypeNames.push_back("HarmonicField");
@@ -172,7 +188,10 @@ u                       (0.0),
 re                      (NULL),
 im                      (NULL),
 filename                (hf.filename),
-fileRead                (false)
+fileRead                (false),
+inputCSName             (hf.inputCSName),
+fixedCSName             (hf.fixedCSName),
+targetCSName            (hf.targetCSName)
 {
 }
 
@@ -206,6 +225,9 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
    im             = NULL;    // or hf.im?
    filename       = hf.filename;
    fileRead       = false;
+   inputCSName    = hf.inputCSName;
+   fixedCSName    = hf.fixedCSName;
+   targetCSName   = hf.targetCSName;
 
    return *this;
 }
@@ -223,9 +245,21 @@ bool HarmonicField::Initialize(void)
 {
     if (!PhysicalModel::Initialize())
         return false;
-   // initialize the body
    if (solarSystem == NULL) throw ForceModelException(
-                            "Solar System undefined for Harmonic Field.");
+                            "Solar System undefined for Harmonic Field " 
+                             + instanceName);
+   if (!inputCS) throw ForceModelException(
+                 "Input coordinate system undefined for Harmonic Field "
+                  + instanceName);
+   if (!fixedCS) throw ForceModelException(
+                 "Body fixed coordinate system undefined for Harmonic Field "
+                  + instanceName);
+   //if (!targetCS) throw ForceModelException(
+   //               "Target coordinate system undefined for Harmonic Field "
+   //               + instanceName);
+   if (!targetCS) targetCS = inputCS;
+
+   // initialize the body
    //body = solarSystem->GetBody(bodyName);
    return legendreP_init();
 }
@@ -560,7 +594,10 @@ Integer HarmonicField::SetIntegerParameter(const std::string &label,
 //------------------------------------------------------------------------------
 std::string HarmonicField::GetStringParameter(const Integer id) const
 {
-   if (id == FILENAME) return filename;
+   if (id == FILENAME)            return filename;
+   if (id == INPUT_COORD_SYSTEM)  return inputCSName;
+   if (id == FIXED_COORD_SYSTEM)  return fixedCSName;
+   if (id == TARGET_COORD_SYSTEM) return targetCSName;
    return PhysicalModel::GetStringParameter(id);
 }
 
@@ -621,6 +658,45 @@ bool HarmonicField::SetStringParameter(const Integer id,
       }
       return true;
    }
+   if (id == INPUT_COORD_SYSTEM)
+   {
+      #ifdef DEBUG_HARMONIC_FIELD
+         char str[1024];
+         strcpy(str, value.c_str());
+         
+         MessageInterface::ShowMessage(
+                "Setting input coordinate system name to \"%s\"\n", str);
+      #endif
+      inputCSName = value;
+      
+      return true;
+   }
+   if (id == FIXED_COORD_SYSTEM)
+   {
+      #ifdef DEBUG_HARMONIC_FIELD
+         char str[1024];
+         strcpy(str, value.c_str());
+         
+         MessageInterface::ShowMessage(
+                "Setting fixed coordinate system name to \"%s\"\n", str);
+      #endif
+      fixedCSName = value;
+      
+      return true;
+   }
+   if (id == TARGET_COORD_SYSTEM)
+   {
+      #ifdef DEBUG_HARMONIC_FIELD
+         char str[1024];
+         strcpy(str, value.c_str());
+         
+         MessageInterface::ShowMessage(
+                "Setting target coordinate system name to \"%s\"\n", str);
+      #endif
+      targetCSName = value;
+      
+      return true;
+   }
    return PhysicalModel::SetStringParameter(id, value);
 }
 
@@ -655,6 +731,129 @@ bool HarmonicField::SetStringParameter(const std::string &label,
 {
    return SetStringParameter(GetParameterID(label), value);
 }
+
+//------------------------------------------------------------------------------
+//  GmatBase* GetRefObject(const Gmat::ObjectType type,
+//                         const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * This method returns a reference object from the HarmonicField class.
+ *
+ * @param type  type of the reference object requested
+ * @param name  name of the reference object requested
+ *
+ * @return pointer to the reference object requested.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* HarmonicField::GetRefObject(const Gmat::ObjectType type,
+                                      const std::string &name)
+{
+   switch (type)
+   {
+      case Gmat::COORDINATE_SYSTEM:
+         if ((inputCS) && (name == inputCSName))       return inputCS;
+         if ((fixedCS) && (name == fixedCSName))       return fixedCS;
+         if ((targetCS) && (name == targetCSName))     return targetCS;
+         break;
+      default:
+            break;
+   }
+   
+   // Not handled here -- invoke the next higher GetRefObject call
+   return PhysicalModel::GetRefObject(type, name);
+}
+
+
+//------------------------------------------------------------------------------
+//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Returns the names of the reference object. (Derived classes should implement
+ * this as needed.)
+ *
+ * @param <type> reference object type.  Gmat::UnknownObject returns all of the
+ *               ref objects.
+ *
+ * @return The names of the reference object.
+ */
+//------------------------------------------------------------------------------
+const StringArray& HarmonicField::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   if (type == Gmat::UNKNOWN_OBJECT)
+   {
+      static StringArray refs = PhysicalModel::GetRefObjectNameArray(type);
+      //refs.clear(); // why would I want to clear this????
+      
+      refs.push_back(inputCSName);
+      refs.push_back(fixedCSName);
+      refs.push_back(targetCSName);
+      
+      #ifdef DEBUG_REFERENCE_SETTING
+         MessageInterface::ShowMessage("+++ReferenceObjects:\n");
+         for (StringArray::iterator i = refs.begin(); i != refs.end(); ++i)
+            MessageInterface::ShowMessage("   %s\n", i->c_str());
+      #endif
+      
+      return refs;
+   }
+   
+   // Not handled here -- invoke the next higher GetRefObject call
+   return PhysicalModel::GetRefObjectNameArray(type);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                    const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * This method sets a reference object for the HarmonicField class.
+ *
+ * @param obj   pointer to the reference object
+ * @param type  type of the reference object
+ * @param name  name of the reference object
+ *
+ * @return true if successful; otherwise, false.
+ *
+ */
+//------------------------------------------------------------------------------
+bool HarmonicField::SetRefObject(GmatBase *obj,
+                                 const Gmat::ObjectType type,
+                                 const std::string &name)
+{
+   if (obj->IsOfType(Gmat::COORDINATE_SYSTEM))
+   {
+      if (name == inputCSName)
+      {
+         #ifdef DEBUG_REFERENCE_SETTING
+            MessageInterface::ShowMessage("Setting %s as input CS for %s\n",
+                                          name.c_str(), instanceName.c_str());
+         #endif
+         inputCS = (CoordinateSystem*) obj;
+      }
+      if (name == fixedCSName)
+      {
+         #ifdef DEBUG_REFERENCE_SETTING
+            MessageInterface::ShowMessage("Setting %s as body fixed CS for %s\n",
+                                          name.c_str(), instanceName.c_str());
+         #endif
+         fixedCS = (CoordinateSystem*) obj;
+      }
+      if (name == targetCSName)
+      {
+         #ifdef DEBUG_REFERENCE_SETTING
+            MessageInterface::ShowMessage("Setting %s as target CS for %s\n",
+                                          name.c_str(), instanceName.c_str());
+         #endif
+         targetCS = (CoordinateSystem*) obj;
+      }
+      return true;
+   }
+   
+   // Not handled here -- invoke the next higher SetRefObject call
+   return PhysicalModel::SetRefObject(obj, type, name);
+   }
 
 
 //---------------------------------

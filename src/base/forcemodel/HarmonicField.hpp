@@ -54,6 +54,7 @@
 #include "CelestialBody.hpp"
 #include "Rvector.hpp"
 #include "Rmatrix.hpp"
+#include "CoordinateSystem.hpp"
 
 
 /* Common header file definitions for execution of gravity, legendreP, and redux routines
@@ -100,6 +101,11 @@ public:
     virtual std::string GetStringParameter(const std::string &label) const;
     virtual bool        SetStringParameter(const std::string &label,
                                            const std::string &value);
+    virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
+                                     const std::string &name);
+    const StringArray&  GetRefObjectNameArray(const Gmat::ObjectType type);
+    virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name = "");
     
     // constants defining maximum degree and order
     static const Integer HF_MAX_DEGREE = 360;
@@ -114,6 +120,9 @@ protected:
       DEGREE,
       ORDER,
       FILENAME,
+      INPUT_COORD_SYSTEM,
+      FIXED_COORD_SYSTEM,
+      TARGET_COORD_SYSTEM,
       HarmonicFieldParamCount
    };
 
@@ -148,6 +157,14 @@ protected:
 
    /// has the file been read?
    bool                    fileRead;
+   
+   std::string             inputCSName;
+   std::string             fixedCSName;
+   std::string             targetCSName;
+   
+   CoordinateSystem        *inputCS;
+   CoordinateSystem        *fixedCS;
+   CoordinateSystem        *targetCS;
 
    bool                    legendreP_init(void);
 
