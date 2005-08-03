@@ -340,8 +340,8 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       Real cosEpsbar        = 0.0;
       Real cosAst           = 0.0;
       Real sinAst           = 0.0;
-      Real x                = 0.0;
-      Real y                = 0.0;
+      //Real x                = 0.0;
+      //Real y                = 0.0;
       // Convert to MJD UTC to use for polar motion  and LOD 
       // interpolations
       Real mjdUTC = TimeConverterUtil::Convert(atEpoch.Get(),
@@ -366,14 +366,14 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       Real tTDB    = (jdTT - 2451545.0) / 36525.0;
  
       Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB);
-      Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, dPsi,
+      Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
                              longAscNodeLunar, cosEpsbar);
       Rmatrix33  ST        = ComputeSiderealTimeRotation(jdTT, tUT1,
                              dPsi, longAscNodeLunar, cosEpsbar,
                              cosAst, sinAst);
       Rmatrix33  STderiv   = ComputeSiderealTimeDotRotation(mjdUTC, 
-                             cosAst, sinAst, x, y);
-      Rmatrix33  PM        = ComputePolarMotionRotation(x, y);
+                             cosAst, sinAst);
+      Rmatrix33  PM        = ComputePolarMotionRotation(mjdUTC);
      
       rotMatrix    = PREC.Transpose() * (NUT.Transpose() * 
                      (ST.Transpose() * PM.Transpose()));
