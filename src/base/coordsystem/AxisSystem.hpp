@@ -149,6 +149,7 @@ protected:
    enum
    {
       EPOCH = CoordinateBaseParamCount,
+      UPDATE_INTERVAL, // for nutation
       AxisSystemParamCount
    };
    
@@ -187,6 +188,11 @@ protected:
    
    std::string               epochFormat;
    
+   Real                      updateInterval;
+   A1Mjd                     lastEpoch;
+   Rmatrix33                 lastNUT;
+   Real                      lastDPsi;  // ?????????????
+   
    std::vector<IntegerArray> a, ap;
    Rvector                   A, B, C, D, E, F, Ap, Bp, Cp, Dp;
    
@@ -195,7 +201,8 @@ protected:
    virtual void      InitializeFK5();
 
    virtual Rmatrix33 ComputePrecessionMatrix(const Real tTDB);
-   virtual Rmatrix33 ComputeNutationMatrix(const Real tTDB, Real &dPsi,
+   virtual Rmatrix33 ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch, 
+                                           Real &dPsi,
                                            Real &longAscNodeLunar,
                                            Real &cosEpsbar);
    virtual Rmatrix33 ComputeSiderealTimeRotation(const Real jdTT,
@@ -206,9 +213,8 @@ protected:
                                                  Real &cosAst,
                                                  Real &sinAst);
    virtual Rmatrix33 ComputeSiderealTimeDotRotation(const Real mjdUTC, 
-                                                    Real cosAst, Real sinAst,
-                                                    Real &x, Real &y);
-   virtual Rmatrix33 ComputePolarMotionRotation(Real x, Real y);
+                                                    Real cosAst, Real sinAst);
+   virtual Rmatrix33 ComputePolarMotionRotation(const Real mjdUTC);
    
 };
 #endif // AxisSystem_hpp
