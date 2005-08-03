@@ -62,10 +62,11 @@
 #include "MessageInterface.hpp"
 #include "Rvector.hpp"
 #include "TimeTypes.hpp"
+#include "CoordinateConverter.hpp"
 //#include "SolarSystemException.hpp"
 
 
-// #define DEBUG_GRAVITY_FIELD
+ // #define DEBUG_GRAVITY_FIELD
 // #define DEBUG_GRAVITY_FIELD_DETAILS
 
 
@@ -430,7 +431,7 @@ bool GravityField::gravity_rtq(Real jday, Real F[] )
  */
 //------------------------------------------------------------------------------
 bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
-{
+{   
    if ((dvorder > 2) || (dvorder < 1))
       return false;
       
@@ -456,37 +457,72 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
    Real* satState;
    Real f[3], rbb3, mu_rbb, aIndirect[3], now;
    Integer nOffset;
+   CoordinateConverter cc;
+   bool sameCS = false;
+   Rmatrix33 rotMatrix;
    
    now = epoch + dt/GmatTimeUtil::SECS_PER_DAY;
-   const Rvector6 *rv = &(body->GetState(now));
+   //const Rvector6 *rv = &(body->GetState(now));
+   //if (body->GetName() != fixedCS->GetOriginName())
+   //   throw ForceModelException(
+   //         "Incorrect central body for Body Fixed coordinate system in "
+   //         + instanceName);
+   if (targetCS == inputCS)   sameCS = true;
+   
+   SpacePoint *targetBody = targetCS->GetOrigin();
+   SpacePoint *fixedBody = fixedCS->GetOrigin();
+   const Rvector6 rv = fixedBody->GetMJ2000State(now) - 
+                       targetBody->GetMJ2000State(now);
 
    // Precalculations for the indirect effect term
-   rbb3 = (*rv)[0] * (*rv)[0] + (*rv)[1] * (*rv)[1] + (*rv)[2] * (*rv)[2];
-   if (rbb3 != 0.0) {
+   //rbb3 = (*rv)[0] * (*rv)[0] + (*rv)[1] * (*rv)[1] + (*rv)[2] * (*rv)[2];
+   rbb3 = (rv[0] * rv[0]) + (rv[1] * rv[1]) + (rv[2] * rv[2]);
+   if (body->GetName() != targetCS->GetOriginName())  // or fixed?????
+   //if (rbb3 != 0.0) 
+   {
       rbb3 = rbb3 * sqrt(rbb3);
       mu_rbb = mu / rbb3;
-      aIndirect[0] = mu_rbb * (*rv)[0];
-      aIndirect[1] = mu_rbb * (*rv)[1];
-      aIndirect[2] = mu_rbb * (*rv)[2];
+      //aIndirect[0] = mu_rbb * (*rv)[0];
+      //aIndirect[1] = mu_rbb * (*rv)[1];
+      //aIndirect[2] = mu_rbb * (*rv)[2];
+      aIndirect[0] = mu_rbb * rv[0];
+      aIndirect[1] = mu_rbb * rv[1];
+      aIndirect[2] = mu_rbb * rv[2];
    }
    else
       aIndirect[0] = aIndirect[1] = aIndirect[2] = 0.0;
 
-   for (Integer n = 0; n < satcount; ++n) {
+   for (Integer n = 0; n < satcount; ++n) 
+   {
       nOffset = n * stateSize;
       satState = state + nOffset;
+      
+      // convert to body fixed coordinate system
+      Rvector6            outState;
+      A1Mjd               a1Now(now);
+      Real                tmpState[6];
+      Rvector6 theState(satState[0], satState[1], satState[2],
+                        satState[3], satState[4], satState[5]);
+      cc.Convert(a1Now, theState, inputCS, outState, fixedCS);
+      if (sameCS) rotMatrix = cc.GetLastRotationMatrix();
+      outState.GetR(tmpState);
+      outState.GetV(tmpState + 3);
     
-      if (!legendreP_rtq(satState))
+      //if (!legendreP_rtq(satState))
+      if (!legendreP_rtq(tmpState))
          throw ForceModelException("GravityField::legendreP_rtq failed");
 
       #ifdef DEBUG_GRAVITY_FIELD
          MessageInterface::ShowMessage("%s%le  s = %le  t = %le  u = %le\n", 
             "legendreP_rtq r = ", r, s, t, u);
          MessageInterface::ShowMessage("%s%le\n", 
-            "Calling gravity_rtq for Julian epoch = ", epoch + 2430000.0 + dt/86400.0);
+                           "Calling gravity_rtq for Julian epoch = ", 
+                           epoch + GmatTimeUtil::JD_JAN_5_1941 
+                           + dt/GmatTimeUtil::SECS_PER_DAY);
       #endif
 
-      if (!gravity_rtq(epoch + 2430000.0 + dt/86400.0, f))
+      if (!gravity_rtq(epoch + GmatTimeUtil::JD_JAN_5_1941 + 
+                       dt/GmatTimeUtil::SECS_PER_DAY, f))
          throw ForceModelException("GravityField::gravity_rtq failed");
 
       #ifdef DEBUG_GRAVITY_FIELD
@@ -496,6 +532,30 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
             "Indirect term is", aIndirect[0], aIndirect[1], aIndirect[2]);
       #endif
 
+      // Convert back to target CS
+      Real fNew[3];
+      if (sameCS)
+      {
+         Rvector3 fAccel(f[0], f[1], f[2]);
+         Rvector3 fNewVector = rotMatrix.Transpose() * fAccel;
+         fNew[0] = fNewVector[0];
+         fNew[1] = fNewVector[1];
+         fNew[2] = fNewVector[2];
+      }
+      else
+      {
+         Rvector6 fState(f[0], f[1], f[2], 0.0, 0.0, 0.0);
+         Rvector6 fConv;
+         cc.Convert(a1Now, fState, fixedCS, fConv, targetCS, true); 
+         fNew[0] = fConv[0];
+         fNew[1] = fConv[1];
+         fNew[2] = fConv[2];
+      }
+      
+      #ifdef DEBUG_GRAVITY_FIELD
+         MessageInterface::ShowMessage("%s %le  %le  %le\n", 
+                 "converted force = ", fNew[0], fNew[1], fNew[2]);
+      #endif
    
       switch (dvorder)
       {
@@ -503,15 +563,15 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
             deriv[0+nOffset] = satState[3];
             deriv[1+nOffset] = satState[4];
             deriv[2+nOffset] = satState[5];
-            deriv[3+nOffset] = f[0] - aIndirect[0];
-            deriv[4+nOffset] = f[1] - aIndirect[1];
-            deriv[5+nOffset] = f[2] - aIndirect[2];
+            deriv[3+nOffset] = fNew[0] - aIndirect[0];
+            deriv[4+nOffset] = fNew[1] - aIndirect[1];
+            deriv[5+nOffset] = fNew[2] - aIndirect[2];
             break;
    
          case 2:
-            deriv[0+nOffset] = f[0] - aIndirect[0];
-            deriv[1+nOffset] = f[1] - aIndirect[1];
-            deriv[2+nOffset] = f[2] - aIndirect[2];
+            deriv[0+nOffset] = fNew[0] - aIndirect[0];
+            deriv[1+nOffset] = fNew[1] - aIndirect[1];
+            deriv[2+nOffset] = fNew[2] - aIndirect[2];
             deriv[3+nOffset] =
                deriv[4+nOffset] =
                deriv[5+nOffset] = 0.0;
@@ -519,8 +579,8 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
    
          default:
             throw ForceModelException("GravityField::GetDerivatives requires order = 1 or 2");
-      }
-   }
+      } // end switch
+   }  // end for
 
    return true;
 }
@@ -529,7 +589,7 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
 // inherited methods from GmatBase
 //---------------------------------
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the GravityField.
