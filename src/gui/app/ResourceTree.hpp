@@ -38,14 +38,15 @@ public:
    void OnAddScript(wxCommandEvent &event);
    void OnNewScript();
    void AddScriptItem(wxString path);
-    
+   
 private:
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
-
+   bool mHasUserInterrupted;
+   
    //GmatMainNotebook *mainNotebook;
    //GmatMainFrame *mainFrame;
-
+   
    //wxWindow *parent;
    wxTreeItemId mDraggedItem;
    wxTreeItemId mSpacecraftItem;
@@ -64,9 +65,9 @@ private:
    wxTreeItemId mPredefinedFunctItem;
    wxTreeItemId mSpecialPointsItem;
    wxTreeItemId mScriptItem;
+   wxTreeItemId mScriptFolderItem;
    wxTreeItemId mUniverseItem;
-   wxTreeItemId mSampleScriptItem;
-
+   
    int mNumSpacecraft;
    int mNumFuelTank;
    int mNumThruster;
@@ -84,8 +85,7 @@ private:
    int mNumScripts;
    int mNumBarycenter;
    int mNumLibration;
-   int mNumSampleScripts;
-
+   
    void AddDefaultResources();
    void AddDefaultBodies(wxTreeItemId itemId);
    void AddDefaultSpacecraft(wxTreeItemId itemId);
@@ -102,7 +102,6 @@ private:
    void AddDefaultCoordSys(wxTreeItemId itemId);
    void AddDefaultScripts(wxTreeItemId itemId);
    void AddDefaultSpecialPoints(wxTreeItemId itemId);
-   void AddDefaultSampleScripts(wxTreeItemId itemId);
 
    // event handlers
    void OnItemRightClick(wxTreeEvent& event);
@@ -117,9 +116,9 @@ private:
    void OnBeginLabelEdit(wxTreeEvent &event);
 
    void OnBeginDrag(wxTreeEvent &event);
-   //    void OnBeginRDrag(wxTreeEvent &event);
+   //void OnBeginRDrag(wxTreeEvent &event);
    void OnEndDrag(wxTreeEvent &event);    
-
+   
    void AddIcons();   
    void OnAddBody(wxCommandEvent &event);
    void OnAddImpulsiveBurn(wxCommandEvent &event);
@@ -141,15 +140,23 @@ private:
    void OnAddBarycenter(wxCommandEvent &event);
    void OnAddLibration(wxCommandEvent &event);
 
-//   void OnAddScript(wxCommandEvent &event);
-//   void OnNewScript(wxCommandEvent &event);
+   //void OnAddScript(wxCommandEvent &event);
+   //void OnNewScript(wxCommandEvent &event);
    void OnRemoveAllScripts(wxCommandEvent &event);
    void OnRemoveScript(wxCommandEvent &event);
    void OnScriptBuildObject(wxCommandEvent& event);
    void OnScriptBuildAndRun(wxCommandEvent& event);
 
+   // script folder (loj: 8/4/05 Added)
+   void OnAddScriptFolder(wxCommandEvent &event);
+   void OnRunScriptsFromFolder(wxCommandEvent& event);
+   void OnQuitRunScriptsFromFolder(wxCommandEvent& event);
+   void OnRemoveScriptFolder(wxCommandEvent& event);
+   
+   void BuildScript(const wxString &filename);
+   
    wxMenu* CreatePopupMenu(Gmat::ObjectType type);
-    
+   
    DECLARE_EVENT_TABLE();
 
    // for popup menu
@@ -181,23 +188,27 @@ private:
       POPUP_ADD_XY_PLOT,
       POPUP_ADD_OPENGL_PLOT,
       POPUP_ADD_VARIABLE,
-
+      
       POPUP_ADD_COORD_SYS,
-
+      
       POPUP_OPEN_MATLAB,
       POPUP_CLOSE_MATLAB,
       
       POPUP_START_SERVER,
       POPUP_STOP_SERVER,
-
+      
       POPUP_ADD_FUNCTION,
       POPUP_ADD_MATLAB_FUNCT,
       POPUP_ADD_GMAT_FUNCT,
-
+      
       POPUP_ADD_SCRIPT,
+      POPUP_ADD_SCRIPT_FOLDER,
+      POPUP_RUN_SCRIPTS_FROM_FOLDER,
+      POPUP_QUIT_RUN_SCRIPTS_FROM_FOLDER,
+      POPUP_REMOVE_SCRIPT_FOLDER,
       POPUP_BUILD_SCRIPT,
       POPUP_BUILD_AND_RUN_SCRIPT,
-//      POPUP_NEW_SCRIPT,
+      //POPUP_NEW_SCRIPT,
       POPUP_REMOVE_ALL_SCRIPTS,
       POPUP_REMOVE_SCRIPT,
 

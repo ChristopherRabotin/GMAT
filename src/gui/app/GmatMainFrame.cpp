@@ -1757,12 +1757,14 @@ void GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 {
    wxString filename = ((GmatMdiChildFrame *)GetActiveChild())->GetTitle();
 
-   /*bool status = */GmatAppData::GetGuiInterpreter()->
+   GmatAppData::GetGuiInterpreter()->
       InterpretScript(std::string(filename.c_str()));
 
    //close the open windows
-   GmatAppData::GetMainFrame()->CloseAllChildren(false, false, filename);
-
+   //GmatAppData::GetMainFrame()->CloseAllChildren(false, false, filename);
+   //loj: 8/4/05 Changed to close all plots
+   GmatAppData::GetMainFrame()->CloseAllChildren(false, true, filename);
+   
    // Update ResourceTree and MissionTree
    GmatAppData::GetResourceTree()->UpdateResource(true);
    GmatAppData::GetMissionTree()->UpdateMission(true);
@@ -1775,33 +1777,8 @@ void GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 {
-//   bool status = false;
-
-//   status = OnScriptBuildObject(event);
    OnScriptBuildObject(event);
    OnRun(event);
-   
-//
-//   status = GmatAppData::GetGuiInterpreter()->
-//      InterpretScript(std::string(filename.c_str()));
-//
-//   if (status)
-//   {
-//      //close the open windows
-//      GmatAppData::GetMainFrame()->CloseAllChildren(false, filename);
-//
-//      // Update ResourceTree
-//      GmatAppData::GetResourceTree()->UpdateResource(true);
-//      GmatAppData::GetMissionTree()->UpdateMission(true);
-//
-//      //loj: 9/24/04 added so that it enables Red(stop) button on the main frame
-//      GmatAppData::GetMainFrame()->RunCurrentMission();
-//
-//      //loj: 3/17/04 Should I close all plot window?
-//      //status = GmatAppData::GetGuiInterpreter()->RunScript();
-//   }
-
-//   return status;
 }
 
 //------------------------------------------------------------------------------
@@ -1815,16 +1792,7 @@ void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
-   //MessageInterface::ClearMessage();
-
-   //loj: 3/17/04 Should I close all plot window?
-
-   //loj: 9/24/04 added so that it enables Red(stop) button on the main frame
    GmatAppData::GetMainFrame()->RunCurrentMission();
-
-   //bool status = GmatAppData::GetGuiInterpreter()->RunScript();
-
-//   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -1856,6 +1824,7 @@ void GmatMainFrame::OnCut(wxCommandEvent& event)
    theChild->GetScriptTextCtrl()->Cut();
 //   theSaveButton->Enable(true);
 }
+
 //------------------------------------------------------------------------------
 // void OnCopy(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -1865,6 +1834,7 @@ void GmatMainFrame::OnCopy(wxCommandEvent& event)
    theChild->GetScriptTextCtrl()->Copy();
 //   theSaveButton->Enable(true);
 }
+
 //------------------------------------------------------------------------------
 // void OnPaste(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -1874,6 +1844,7 @@ void GmatMainFrame::OnPaste(wxCommandEvent& event)
    theChild->GetScriptTextCtrl()->Paste();
 //   theSaveButton->Enable(true);
 }
+
 //------------------------------------------------------------------------------
 // void OnComment(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -1891,6 +1862,7 @@ void GmatMainFrame::OnComment(wxCommandEvent& event)
    scriptTC->WriteText(selString);
 
 }
+
 //------------------------------------------------------------------------------
 // void OnUncomment(wxCommandEvent& event)
 //------------------------------------------------------------------------------

@@ -158,14 +158,15 @@ namespace GmatTree
         COORD_SYSTEM,
         GROUNDSTATION,
         SCRIPT_FILE,
+        SCRIPT_FOLDER,
         BARYCENTER,
         LIBRATION_POINT,
-
+        
         //Mission Tree
         MISSIONS_FOLDER,
         MISSION_SEQ_TOP_FOLDER,
         MISSION_SEQ_SUB_FOLDER,
-
+        
         MISSION_SEQ_COMMAND,
         PROPAGATE_COMMAND,
         MANEUVER_COMMAND,
@@ -179,11 +180,11 @@ namespace GmatTree
         ASSIGNMENT_COMMAND,
         FREE_FORM_SCRIPT_COMMAND, //arg: 1/12/05 added FREE_FORM_SCRIPT
         SCRIPT_COMMAND,
-
+        
         // Temporary to show the panel
         VIEW_SOLVER_VARIABLES,
         VIEW_SOLVER_GOALS, 
-
+        
         // Instead of Variable_Folder
         VARIABLES,
         
@@ -199,7 +200,7 @@ namespace GmatTree
         END_DO_CONTROL,
         SWITCH_CONTROL,
         END_SWITCH_CONTROL,
-
+        
         // for the output tree
         OUTPUT_FOLDER,
         REPORTS_FOLDER,
