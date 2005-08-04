@@ -158,7 +158,7 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       int xyd = yd;
       float xsod = sod;
       float xalt = alt;
-      float xlat = lat;
+      float xlat = geolat; // Geodetic Latitude
       float xlon = lon;
       float xlst = lst;
       float xf107a = f107a;
