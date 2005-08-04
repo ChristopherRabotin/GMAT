@@ -773,7 +773,7 @@ void MdiChildTrajFrame::OnViewAnimation(wxCommandEvent& event)
                                       strInterval, this);
       long interval;
       strInterval.ToLong(&interval);
-
+      
       // set maximum interval to 100 milli seconds
       if (interval > 100)
          interval = 100;
@@ -824,12 +824,14 @@ void MdiChildTrajFrame::OnMove(wxMoveEvent& event)
    // VZ: here everything is totally wrong under MSW, the positions are
    //     different and both wrong (pos2 is off by 2 pixels for me which seems
    //     to be the width of the MDI canvas border)
-   wxPoint pos1 = event.GetPosition(),
-      pos2 = GetPosition();
-   wxLogStatus(GmatAppData::GetMainFrame(),
-               wxT("position from event: (%d, %d), from frame (%d, %d)"),
-               pos1.x, pos1.y, pos2.x, pos2.y);
+   wxPoint pos1 = event.GetPosition();
+   wxPoint pos2 = GetPosition();
 
+   //loj: 8/4/05 Commented out
+   //wxLogStatus(GmatAppData::GetMainFrame(),
+   //            wxT("position from event: (%d, %d), from frame (%d, %d)"),
+   //            pos1.x, pos1.y, pos2.x, pos2.y);
+   
    event.Skip();
 }
 
@@ -844,10 +846,12 @@ void MdiChildTrajFrame::OnTrajSize(wxSizeEvent& event)
    wxSize size1 = event.GetSize();
    wxSize size2 = GetSize();
    wxSize size3 = GetClientSize();
-   wxLogStatus(GmatAppData::GetMainFrame(),
-               wxT("size from event: %dx%d, from frame %dx%d, client %dx%d"),
-               size1.x, size1.y, size2.x, size2.y, size3.x, size3.y);
 
+   //loj: 8/4/05 commented out
+   //wxLogStatus(GmatAppData::GetMainFrame(),
+   //            wxT("size from event: %dx%d, from frame %dx%d, client %dx%d"),
+   //            size1.x, size1.y, size2.x, size2.y, size3.x, size3.y);
+   
    event.Skip();
 }
 
