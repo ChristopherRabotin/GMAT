@@ -939,7 +939,7 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
    }
    else if (dataType == GmatTree::MISSION_SEQ_SUB_FOLDER)
    {
-      menu.Append(POPUP_ADD_COMMAND, wxT("Add"), CreateAddPopupMenu());
+      menu.Append(POPUP_ADD_COMMAND, wxT("Append"), CreateAddPopupMenu());
       // ag: can't delete because sys. doesn't handle multiple sequences yet
       // menu.Append(POPUP_DELETE, wxT("Delete"));
       menu.Append(POPUP_RENAME, wxT("Rename"));
@@ -955,11 +955,11 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       
       if (dataType == GmatTree::TARGET_COMMAND)
       {
-         menu.Append(POPUP_ADD_COMMAND, wxT("Add"), CreateTargetPopupMenu(false));
+         menu.Append(POPUP_ADD_COMMAND, wxT("Append"), CreateTargetPopupMenu(false));
          if (parentDataType == GmatTree::TARGET_COMMAND)
-            menu.Append(POPUP_INSERT_COMMAND, wxT("Insert"), CreateTargetPopupMenu(true));
+            menu.Append(POPUP_INSERT_COMMAND, wxT("Insert Before"), CreateTargetPopupMenu(true));
          else
-            menu.Append(POPUP_INSERT_COMMAND, wxT("Insert"), CreateInsertPopupMenu());
+            menu.Append(POPUP_INSERT_COMMAND, wxT("Insert Before"), CreateInsertPopupMenu());
          
          menu.Append(POPUP_DELETE, wxT("Delete"));
          menu.Append(POPUP_RENAME, wxT("Rename"));
@@ -974,16 +974,16 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
 //               (dataType == GmatTree::ELSE_IF_CONTROL) ||
 //               (dataType == GmatTree::ELSE_CONTROL))   
       {
-         menu.Append(POPUP_ADD_COMMAND, wxT("Add"), CreateAddPopupMenu());
-         menu.Append(POPUP_INSERT_COMMAND, wxT("Insert"), CreateInsertPopupMenu());
+         menu.Append(POPUP_ADD_COMMAND, wxT("Append"), CreateAddPopupMenu());
+         menu.Append(POPUP_INSERT_COMMAND, wxT("Insert Before"), CreateInsertPopupMenu());
          menu.Append(POPUP_DELETE, wxT("Delete"));
          menu.Append(POPUP_RENAME, wxT("Rename"));
          menu.Enable(POPUP_RENAME, FALSE);
       } 
       else if (dataType == GmatTree::IF_CONTROL) 
       {
-         menu.Append(POPUP_ADD_COMMAND, wxT("Add"), CreateAddIfPopupMenu());
-         menu.Append(POPUP_INSERT_COMMAND, wxT("Insert"), CreateInsertPopupMenu());
+         menu.Append(POPUP_ADD_COMMAND, wxT("Append"), CreateAddIfPopupMenu());
+         menu.Append(POPUP_INSERT_COMMAND, wxT("Insert Before"), CreateInsertPopupMenu());
          menu.Append(POPUP_DELETE, wxT("Delete"));
          menu.Append(POPUP_RENAME, wxT("Rename"));
          menu.Enable(POPUP_RENAME, FALSE);
@@ -991,9 +991,9 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       else 
       {         
          if (parentDataType == GmatTree::TARGET_COMMAND)
-            menu.Append(POPUP_INSERT_COMMAND, wxT("Insert"), CreateTargetPopupMenu(true));
+            menu.Append(POPUP_INSERT_COMMAND, wxT("Insert Before"), CreateTargetPopupMenu(true));
          else
-            menu.Append(POPUP_INSERT_COMMAND, wxT("Insert"), CreateInsertPopupMenu());
+            menu.Append(POPUP_INSERT_COMMAND, wxT("Insert Before"), CreateInsertPopupMenu());
          
          menu.Append(POPUP_DELETE, wxT("Delete"));
          menu.Append(POPUP_RENAME, wxT("Rename"));
