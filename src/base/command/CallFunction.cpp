@@ -983,8 +983,11 @@ void CallFunction::EvalMatlabString(std::string evalString)
          // get rid of "errormsg ="
          char *ptr = strtok((char *)buffer, "=");
          ptr = strtok(NULL, "\n");
+         
+         std::stringstream errorStr;
+         errorStr << "Error from Matlab\n"<< ptr;
 
-         throw CommandException(ptr);
+         throw CommandException(errorStr.str());
       }
 
    #endif
