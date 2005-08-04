@@ -151,8 +151,8 @@ Factory(Gmat::AXIS_SYSTEM) //loj: 1/19/05 Changed from ATMOSPHERE
       creatables.push_back("ObjectReferenced");
       creatables.push_back("Equator");
       creatables.push_back("BodyFixed");
-      //creatables.push_back("GSE");
-      //creatables.push_back("GSM");
+      creatables.push_back("GSE");
+      creatables.push_back("GSM");
    }
 }
 
