@@ -57,8 +57,8 @@
 //#define DEBUG_FORCEMODEL_INIT 1
 //#define DEBUG_FORCEMODEL_EXE 1
 //#define FORCE_REFERENCE_OBJECTS
+//#define DEBUG_FORCE_EPOCHS
 
-#define normType 2
 
 //---------------------------------
 // static data
@@ -71,7 +71,8 @@ ForceModel::PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount] =
     "PrimaryBodies",
     "PointMasses",
     "Drag",
-    "SRP"
+    "SRP",
+    "ErrorControl"
 };
 
 
@@ -82,10 +83,12 @@ ForceModel::PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount] =
     Gmat::STRINGARRAY_TYPE,
     Gmat::STRINGARRAY_TYPE,
     Gmat::STRING_TYPE,
+    Gmat::STRING_TYPE,
     Gmat::STRING_TYPE
 };
 
 
+// Table of alternative words used in force model scripting
 std::map<std::string, std::string> ForceModel::scriptAliases;
 
 
@@ -106,8 +109,8 @@ ForceModel::ForceModel(const std::string &nomme) :
    PhysicalModel     (Gmat::FORCE_MODEL, "ForceModel", nomme),
    previousState     (NULL),
    estimationMethod  (ESTIMATE_LOCALLY),
+   normType          (L2_DIFFERENCES),
    centralBodyName   ("Earth"),
-//   rawState          (NULL),
    j2kBodyName       ("Earth"),
    j2kBody           (NULL)  
 {
@@ -148,6 +151,11 @@ ForceModel::~ForceModel()
          delete pm;
       ppm = forceList.begin();
    }
+
+   #ifdef DEBUG_FORCE_EPOCHS
+      if (epochFile.is_open())
+         epochFile.close();
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -168,6 +176,7 @@ ForceModel::ForceModel(const ForceModel& fdf) :
     PhysicalModel    (fdf),
     previousState    (fdf.previousState),
     estimationMethod (fdf.estimationMethod),
+    normType         (fdf.normType),
     centralBodyName  (fdf.centralBodyName),
 //    rawState         (NULL),
     j2kBodyName      (fdf.j2kBodyName),
@@ -210,6 +219,9 @@ ForceModel& ForceModel::operator=(const ForceModel& fdf)
    centralBodyName = fdf.centralBodyName;
    j2kBodyName     = fdf.j2kBodyName;
    j2kBody         = NULL;  
+   
+   estimationMethod = fdf.estimationMethod;
+   normType         = fdf.normType;
    
    // Copy the forces.  May not work -- the copy constructors need to be checked
    for (std::vector<PhysicalModel *>::const_iterator pm = fdf.forceList.begin();
@@ -262,10 +274,6 @@ void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
     
     // Handle the name issues
     std::string pmType = pPhysicalModel->GetTypeName();
-//    if ((pmType == "GravityField") || (pmType == "PointMassForce"))
-//       pPhysicalModel->SetName("Gravity." +
-//          pPhysicalModel->GetStringParameter("BodyName"));
-
     if (pmType == "DragForce")
        pPhysicalModel->SetName("Drag");
 
@@ -480,7 +488,7 @@ bool ForceModel::AddSpaceObject(SpaceObject *so)
 
 
 //------------------------------------------------------------------------------
-// void ForceModel::UpdateSpaceObject(void)
+// void ForceModel::UpdateSpaceObject(Real newEpoch)
 //------------------------------------------------------------------------------
 /**
  * Updates state data for the spacecraft or formation that use this force model.
@@ -495,9 +503,7 @@ void ForceModel::UpdateSpaceObject(Real newEpoch)
       std::vector<SpaceObject *>::iterator sat;
       PropState *state;
 
-//MessageInterface::ShowMessage("USO1  = [%lf %lf %lf]\n", rawState[0], rawState[1], rawState[2]);
-      ReturnFromOrigin();
-//MessageInterface::ShowMessage("USO2  = [%lf %lf %lf]\n", rawState[0], rawState[1], rawState[2]);
+      ReturnFromOrigin(newEpoch);
       
       for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) {
          state = &((*sat)->GetState());
@@ -508,17 +514,12 @@ void ForceModel::UpdateSpaceObject(Real newEpoch)
             ((*sat)->GetRealParameter((*sat)->GetParameterID("Epoch")) - epoch)
             * 86400.0;
             
-//         memcpy(state->GetState(), &modelState[j*stateSize], vectorSize);
-
          memcpy(state->GetState(), &rawState[j*stateSize], vectorSize);
          ++j;
             
          // Quick fix to get the epoch updated
          Real newepoch = epoch + elapsedTime / 86400.0;      
 
-         //loj: 6/16/04 uncommented lines setting newEpoch.
-         // for consecutive Propagate command, spacecraft epoch doesn't get updated
-         
          // Update the epoch if it was passed in
          if (newEpoch != -1.0)
             newepoch = newEpoch;
@@ -722,6 +723,18 @@ bool ForceModel::Initialize()
       cf++;
       current = GetForce(cf);
    }
+
+   #ifdef DEBUG_FORCE_EPOCHS
+      std::string epfile = "ForceEpochs.txt";
+      if (instanceName != "")
+         epfile = instanceName + "_" + epfile;
+      if (!epochFile.is_open()) 
+      {
+         epochFile.open(epfile.c_str());
+         epochFile << "Epoch data for the force model '" 
+                   << instanceName << "'\n";
+      }
+   #endif
 
    return true;
 }
@@ -956,13 +969,11 @@ void ForceModel::SetTime(Real t)
 //------------------------------------------------------------------------------
 bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
 {
-try
-{
    if (order > 2)
       return false;
    if (!initialized)
       return false;
-      
+
    Integer satCount = dimension / stateSize, i, iOffset;
 
    #ifdef DEBUG_FORCEMODEL_EXE
@@ -1031,14 +1042,7 @@ try
    #ifdef DEBUG_FORCEMODEL_EXE
       MessageInterface::ShowMessage("  ===============================\n");
    #endif
-}
-catch (BaseException &ex)
-{
-    MessageInterface::ShowMessage(
-       "Exception caught in ForceModel::GetDerivatives():\n   '%s'\n",
-       ex.GetMessage().c_str());
-    throw;
-}
+
    return true;
 }
 
@@ -1135,7 +1139,7 @@ Real ForceModel::EstimateError(Real *diffs, Real *answer) const
 
                 mag = vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2];        
                 err = diffs[i]*diffs[i] + diffs[i+1]*diffs[i+1] + diffs[i+2]*diffs[i+2];
-                if (mag >relativeErrorThreshold) 
+                if (mag > relativeErrorThreshold) 
                     err = sqrt(err / mag);
                 else
                     err = sqrt(err);
@@ -1386,32 +1390,53 @@ std::string ForceModel::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ForceModel::GetStringParameter(const Integer id) const
 {
-    switch (id)
-    {
-    case CENTRAL_BODY:
-       return centralBodyName;
-    case  DRAG:
-    {
-       // Find the drag force
-       const PhysicalModel *pm = GetForce("DragForce");
-       // No drag force, return "None"
-       if (pm == NULL)
-          return "None";
-       // Get the atmosphere model from the drag force
-       Integer id = pm->GetParameterID("AtmosphereModel");
-       std::string am = pm->GetStringParameter(id);
-       return am;
-    }
-    case  SRP:
-    {
-       const PhysicalModel *pm = GetForce("SolarRadiationPressure");
-       if (pm == NULL)
-          return "Off";
-       return "On";
-    }
-    default:
-        return PhysicalModel::GetStringParameter(id);
-    }
+   switch (id)
+   {
+      case CENTRAL_BODY:
+         return centralBodyName;
+         
+      case  DRAG:
+      {
+         // Find the drag force
+         const PhysicalModel *pm = GetForce("DragForce");
+         // No drag force, return "None"
+         if (pm == NULL)
+            return "None";
+         // Get the atmosphere model from the drag force
+         Integer id = pm->GetParameterID("AtmosphereModel");
+         std::string am = pm->GetStringParameter(id);
+         return am;
+      }
+      
+      case  SRP:
+      {
+         const PhysicalModel *pm = GetForce("SolarRadiationPressure");
+         if (pm == NULL)
+            return "Off";
+         return "On";
+      }
+      
+      case NORM_TYPE:
+         switch (normType)
+         {
+            case -2:
+               return "RSSState";
+            case -1:
+               return "LargestState";
+            case 0:
+               return "None";
+            case 1:
+               return "LargestStep";
+            case 2:
+               return "RSSStep";
+            default:
+               throw ForceModelException("Unrecognized error control method.");
+         }
+         break;
+      
+      default:
+         return PhysicalModel::GetStringParameter(id);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -1427,22 +1452,55 @@ std::string ForceModel::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool ForceModel::SetStringParameter(const Integer id, const std::string &value)
 {
-    switch (id)
-    {
-    case CENTRAL_BODY:
-       centralBodyName = value;
-       bodyName = centralBodyName;
-       return true;
-    case PRIMARY_BODIES:
-       return false;
-    case POINT_MASSES:
-       return false;
-    case  DRAG:
-       return false;
-    case  SRP:
-       return false;
-    default:
-        return PhysicalModel::SetStringParameter(id, value);
+   switch (id)
+   {
+      case CENTRAL_BODY:
+         centralBodyName = value;
+         bodyName = centralBodyName;
+         return true;
+         
+      case PRIMARY_BODIES:
+         return false;
+         
+      case POINT_MASSES:
+         return false;
+         
+      case  DRAG:
+         return false;
+         
+      case  SRP:
+         return false;
+         
+      case NORM_TYPE:
+         if (value == "RSSState")
+         {
+            normType = -2;
+            return true;
+         }
+         if (value == "LargestState")
+         {
+            normType = -1;
+            return true;
+         }
+         if (value == "None")
+         {
+            normType = 0;
+            return true;
+         }
+         if (value == "LargestStep")
+         {
+            normType = 1;
+            return true;
+         }
+         if (value == "RSSStep")
+         {
+            normType = 2;
+            return true;
+         }
+         throw ForceModelException("Unrecognized error control method.");
+
+      default:
+         return PhysicalModel::SetStringParameter(id, value);
     }
 }
 
@@ -1860,14 +1918,14 @@ std::string ForceModel::BuildForceNameString(PhysicalModel *force)
 
 
 //------------------------------------------------------------------------------
-// void MoveToOrigin()
+// void MoveToOrigin(Real newEpoch)
 //------------------------------------------------------------------------------
 /**
  * Transforms the state vector from the internal coordinate system to the force 
  * model origin.
  */
 //------------------------------------------------------------------------------
-void ForceModel::MoveToOrigin()
+void ForceModel::MoveToOrigin(Real newEpoch)
 {
    Integer satCount = dimension / stateSize;
    Integer currentScState = 0;
@@ -1877,10 +1935,10 @@ void ForceModel::MoveToOrigin()
    else
    {
       Rvector6 cbState, j2kState, delta;
-      Real now = epoch + elapsedTime / 86400.0; ;
+      Real now = ((newEpoch < 0.0) ? epoch : newEpoch);
       cbState = forceOrigin->GetState(now);
       j2kState = j2kBody->GetState(now);
-      
+
       delta = cbState - j2kState;
       
       for (Integer i = 0; i < satCount; ++i)
@@ -1917,14 +1975,14 @@ void ForceModel::MoveToOrigin()
 
 
 //------------------------------------------------------------------------------
-// void MoveToOrigin()
+// void ReturnFromOrigin(Real newEpoch)
 //------------------------------------------------------------------------------
 /**
  * Transforms the state vector from the force model origin to the internal 
  * coordinate system.
  */
 //------------------------------------------------------------------------------
-void ForceModel::ReturnFromOrigin()
+void ForceModel::ReturnFromOrigin(Real newEpoch)
 {
 //static Integer counter = 0;
 
@@ -1936,7 +1994,7 @@ void ForceModel::ReturnFromOrigin()
    else
    {
       Rvector6 cbState, j2kState, delta;
-      Real now = epoch + elapsedTime / 86400.0; ;
+      Real now = ((newEpoch < 0.0) ? epoch : newEpoch);
       cbState = forceOrigin->GetState(now);
       j2kState = j2kBody->GetState(now);
       
@@ -1955,5 +2013,44 @@ void ForceModel::ReturnFromOrigin()
          currentScState += stateSize;
       }
    }
-//MessageInterface::ShowMessage("ReturnFromOrigin[%d], \n", ++counter);
+}
+
+
+//------------------------------------------------------------------------------
+// void ReportEpochData()
+//------------------------------------------------------------------------------
+/**
+ * Utility to help debug epoch issues.
+ */
+//------------------------------------------------------------------------------
+void ForceModel::ReportEpochData()
+{
+   if (epochFile.is_open())
+   {
+      epochFile.precision(16);
+         epochFile << epoch << " " << elapsedTime;
+
+      epochFile << " Members ";
+      for (std::vector<PhysicalModel*>::iterator i = forceList.begin();
+           i != forceList.end(); ++i)
+      {
+         epochFile.precision(16);
+         epochFile << " " 
+                   << (*i)->GetRealParameter((*i)->GetParameterID("Epoch")) 
+                   << " " << (*i)->GetTime();
+      }
+
+      epochFile << " Sats " ;
+      for (std::vector<SpaceObject*>::iterator i = spacecraft.begin(); 
+           i != spacecraft.end(); ++i)
+      {
+         epochFile.precision(16);
+         epochFile << " " << (*i)->GetEpoch();
+      }
+      epochFile << "\n";
+   }
+   else
+      throw ForceModelException(
+         "ForceModel::ReportEpochData: Attempting to write epoch data without "
+         "opening the data file.");
 }

@@ -258,6 +258,7 @@ OBJECTS = \
     spacecraft/HardwareException.o \
     spacecraft/Hardware.o \
     spacecraft/PropState.o \
+    spacecraft/Satellite.o \
     spacecraft/Spacecraft.o \
     spacecraft/SpaceObject.o \
     spacecraft/StateConverter.o \

@@ -196,10 +196,9 @@ bool PointMassForce::Initialize()
     
    if (solarSystem != NULL)
    {
-      //MessageInterface::ShowMessage("PointMassForce::Initialize() bodyName=%s\n",
-      //                              bodyName.c_str());
+      //MessageInterface::ShowMessage(
+      //   "PointMassForce::Initialize() bodyName=%s\n", bodyName.c_str());
       
-      //SetBodyName("Earth"); //loj: 5/7/04 commented out
       body = solarSystem->GetBody(bodyName); //loj: 5/7/04 added
        
       if (body != NULL)
@@ -228,7 +227,6 @@ bool PointMassForce::Initialize()
          initialized = false;
          throw ForceModelException("PointMassForce::Initialize() body \"" +
             bodyName + "\" is not in the solar system\n");
-         //return false;
       }
    }
    else
@@ -302,7 +300,6 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
     
    //waw: 04/27/04
    Real now = epoch + dt/86400.0, relativePosition[3];
-//MessageInterface::ShowMessage("Now = %16.9lf\n", now);
    Rvector6 bodyrv = body->GetState(now);
    Rvector6 orig = forceOrigin->GetState(now);
 
@@ -329,21 +326,6 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
          now, rbb3, rv[0], rv[1], rv[2]);
    #endif
 
-
-//   // DJC, 7/12/05 -- Old code:
-//   const Rvector6 *rv = &(body->GetState(now));
-//   // Precalculations for the indirect effect term
-//   rbb3 = (*rv)[0] * (*rv)[0] + (*rv)[1] * (*rv)[1] + (*rv)[2] * (*rv)[2];
-//   if (rbb3 != 0.0) {
-//      rbb3 = rbb3 * sqrt(rbb3);
-//      mu_rbb = mu / rbb3;
-//      a_indirect[0] = mu_rbb * (*rv)[0];
-//      a_indirect[1] = mu_rbb * (*rv)[1];
-//      a_indirect[2] = mu_rbb * (*rv)[2];
-//   }
-//   else
-//      a_indirect[0] = a_indirect[1] = a_indirect[2] = 0.0;
-
 	#if DEBUG_PMF_BODY
 	   ShowBodyState("PointMassForce::GetDerivatives() BEFORE compute " +
 	                 body->GetName(), now, rv);
@@ -361,11 +343,6 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
       relativePosition[0] = rv[0] - state[ i6 ];
       relativePosition[1] = rv[1] - state[i6+1];
       relativePosition[2] = rv[2] - state[i6+2];
-
-//   // DJC, 7/12/05 -- Old code:
-//      relativePosition[0] = (*rv)[0] - state[ i6 ];
-//      relativePosition[1] = (*rv)[1] - state[i6+1];
-//      relativePosition[2] = (*rv)[2] - state[i6+2];
 
       r3 = relativePosition[0]*relativePosition[0] + 
            relativePosition[1]*relativePosition[1] + 
@@ -399,12 +376,14 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
    }
 
    #if DEBUG_PMF_DERV
-      ShowDerivative("PointMassForce::GetDerivatives() AFTER compute", state, satCount);
+      ShowDerivative("PointMassForce::GetDerivatives() AFTER compute", state, 
+         satCount);
    #endif
 
    #ifdef DEBUG_FORCE_MODEL
       MessageInterface::ShowMessage(
-         "%s%s%s%16.10lf%s%16.10lf, %16.10lf, %16.10lf%s%16.10lf, %16.10lf, %16.10lf%s%16.10le, %16.10le, %16.10le]\n",
+         "%s%s%s%16.10lf%s%16.10lf, %16.10lf, %16.10lf%s%16.10lf, %16.10lf, "
+         "%16.10lf%s%16.10le, %16.10le, %16.10le]\n",
          "Point mass force for ", body->GetName().c_str(), " at epoch ", now,
          "\n   Sat position:  [", state[0], state[1], state[2],
          "]\n   Body position: [", rv[0], rv[1], rv[2],
@@ -440,8 +419,6 @@ bool PointMassForce::GetComponentMap(Integer * map, Integer order) const
 {
    Integer i6;
 
-   //MessageInterface::ShowMessage("PointMassForce::GetComponentMap() order = %d\n", order);
-    
    if (order != 1)
       return false;
 
@@ -663,12 +640,6 @@ Real PointMassForce::SetRealParameter(const Integer id, const Real value)
    if (id == RADIUS)
       return false;   // Not used in this implementation
 
-   //if (id == flatteningParameter)
-   //    return false;   // Not used in this implementation
-
-   //if (id == poleRadiusParameter)
-   //    return false;   // Not used in this implementation
-
    if (id == ESTIMATE_METHOD) 
    {
       if ((value == 1.0) || (value == 2.0)) 
@@ -707,10 +678,12 @@ std::string PointMassForce::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
-bool PointMassForce::SetStringParameter(const Integer id, const std::string &value)
+bool PointMassForce::SetStringParameter(const Integer id, 
+                                        const std::string &value)
 {
-   //MessageInterface::ShowMessage("PointMassForce::SetStringParameter() id = %d, value = %s\n",
-   //                              id, value.c_str());
+   //MessageInterface::ShowMessage(
+   //   "PointMassForce::SetStringParameter() id = %d, value = %s\n",
+   //   id, value.c_str());
 
    switch (id)
    {
@@ -783,23 +756,27 @@ bool PointMassForce::SetBooleanParameter(const Integer id, const bool value)
 void  PointMassForce::ShowBodyState(const std::string &header, Real time,
                                     Rvector6 &rv)
 {
-#if DEBUG_PMF_BODY
-   static int debugCount1 = 0;
-   static bool showBodyState = true;
-   
-   if (showBodyState)
-   {
-      MessageInterface::ShowMessage("%s\n", header.c_str());
-      MessageInterface::ShowMessage(">>>>>=======================================\n");
-      MessageInterface::ShowMessage("time=%f  rv=%s\n", time, rv.ToString().c_str());
-      MessageInterface::ShowMessage("=======================================<<<<<\n");
+   #if DEBUG_PMF_BODY
+      static int debugCount1 = 0;
+      static bool showBodyState = true;
       
-      debugCount1++;
-      if (debugCount1 > 10)
-         showBodyState = false;
-   }
-#endif
+      if (showBodyState)
+      {
+         MessageInterface::ShowMessage("%s\n", header.c_str());
+         MessageInterface::ShowMessage(
+            ">>>>>=======================================\n");
+         MessageInterface::ShowMessage("time=%f  rv=%s\n", time,
+            rv.ToString().c_str());
+         MessageInterface::ShowMessage(
+            "=======================================<<<<<\n");
+         
+         debugCount1++;
+         if (debugCount1 > 10)
+            showBodyState = false;
+      }
+   #endif
 }
+
 
 //------------------------------------------------------------------------------
 // void ShowDerivative(const std::string &header, Real *state, Integer satCount)

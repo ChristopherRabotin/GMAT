@@ -211,7 +211,12 @@ protected:
                                               std::string &paramType, 
                                               std::string &paramObj, 
                                               std::string &parmSystem);
+   virtual void            PrepareToPropagate();
+   virtual void            CheckStopConditions(Integer EpochID);
+   virtual void            TakeFinalStep(Integer EpochID, Integer trigger);
+   
    virtual bool            TakeAStep(Real propStep = 0.0);
+   
    
    void                    AddTransientForce(StringArray *sats, ForceModel *p);
    void                    ClearTransientForces();

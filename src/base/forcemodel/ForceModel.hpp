@@ -64,6 +64,9 @@
 #include <map>
 #include <string.h>
 
+#include <fstream>            // Used for streams in debugging methods
+
+
 class GMAT_API ForceModel : public PhysicalModel
 {
 public:
@@ -143,6 +146,7 @@ public:
                                             const std::string &prefix = "",
                                             const std::string &useName = "");
     void                UpdateInitialData();
+    void                ReportEpochData();
 
 protected:
     /// Count of the number of forces in the model
@@ -164,8 +168,10 @@ protected:
     Real previousTime;
     /// Buffer that allows quick reversion to the previous state
     Real *previousState;
-    /// Parameter used to determine the method of error estimation.
+    /// Determines if the method of error estimation is local or remote.
     Integer estimationMethod;
+    /// Defines the type of norm used in the error estimation.
+    Integer normType;
     /// List of transient forces that need removal before reusing this instance 
     StringArray               transientForceNames;
     /// List of reference objects for the owned forces
@@ -193,8 +199,11 @@ protected:
     /// Pointer to the spacecraft J2000 body
     CelestialBody             *j2kBody;
     
-    void                      MoveToOrigin();
-    void                      ReturnFromOrigin();
+    void                      MoveToOrigin(Real newEpoch = -1.0);
+    void                      ReturnFromOrigin(Real newEpoch = -1.0);
+    
+    /// Data file used when debugging epoch data
+    std::ofstream             epochFile;
 
     enum
     {
@@ -203,6 +212,7 @@ protected:
         POINT_MASSES,
         DRAG,
         SRP,
+        NORM_TYPE,
         ForceModelParamCount
     };
     
@@ -210,6 +220,15 @@ protected:
     {
         ESTIMATE_IN_BASE = 1,
         ESTIMATE_LOCALLY
+    };
+    
+    enum
+    {
+        L2_MAGNITUDE = -2,
+        L1_MAGNITUDE,
+        NO_CONTROL,
+        L1_DIFFERENCES,
+        L2_DIFFERENCES
     };
     
     static const std::string PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount];
