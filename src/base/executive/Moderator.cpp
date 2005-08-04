@@ -25,6 +25,7 @@
 #include "ObjectReferencedAxes.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_INIT 1
 //#define DEBUG_RUN 1
 //#define DEBUG_CREATE_RESOURCE 1
 //#define DEBUG_RENAME 1
@@ -2412,10 +2413,9 @@ Integer Moderator::SetPlanetaryFileTypesInUse(const StringArray &fileTypes)
    }
    
    if (retCode > 0)
-      MessageInterface::
-      ShowMessage("Moderator::SetPlanetaryFileTypesInUse() Successfully "
-                  "set Planetary file to use: %s\n",
-                  PLANETARY_SOURCE_STRING[fileTypeInUse].c_str());
+      MessageInterface::ShowMessage
+         ("Successfully set Planetary file to use: %s\n",
+          PLANETARY_SOURCE_STRING[fileTypeInUse].c_str());
    return retCode;
 }
 
@@ -2450,7 +2450,9 @@ bool Moderator::LoadDefaultMission()
 //------------------------------------------------------------------------------
 bool Moderator::ClearResource()
 {
+   #if DEBUG_RUN
    MessageInterface::ShowMessage("Moderator::ClearResource() entered\n");
+   #endif
    
    theConfigManager->RemoveAllItems();
    ClearAllSandboxes();
@@ -2464,8 +2466,10 @@ bool Moderator::ClearResource()
 //------------------------------------------------------------------------------
 bool Moderator::ClearCommandSeq(Integer sandboxNum)
 {
+   #if DEBUG_RUN
    MessageInterface::ShowMessage("Moderator::ClearCommandSeq() entered\n");
-    
+   #endif
+   
    //djc: Maybe set to NULL if you plan to do something completely different from
    // the way GMAT acts from a script?  I think you want to do this, though:
    // commands[sandboxNum-1] = NULL;
@@ -2582,8 +2586,9 @@ GmatBase* Moderator::GetInternalObject(const std::string &name, Integer sandboxN
 //------------------------------------------------------------------------------
 Integer Moderator::RunMission(Integer sandboxNum)
 {
-   MessageInterface::ShowMessage("========================================\n");
-   MessageInterface::ShowMessage("Moderator::RunMission() entered\n");
+   //MessageInterface::ShowMessage("\n========================================\n");
+   //MessageInterface::ShowMessage("Moderator::RunMission() entered\n");
+   MessageInterface::ShowMessage("Running mission...\n");
    Integer status = 0;
    
    if (isRunReady)
@@ -2679,9 +2684,11 @@ Integer Moderator::RunMission(Integer sandboxNum)
    theGuiInterpreter->NotifyRunCompleted();
    
    if (status == 0)
-      MessageInterface::ShowMessage("Mission ran successfully.\n");
+      MessageInterface::ShowMessage("Mission run completed.\n");
    else
       MessageInterface::ShowMessage("*** Mission run failed.\n");
+   
+   MessageInterface::ShowMessage("\n========================================\n");
    
    return status;
 }
@@ -2784,10 +2791,12 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
    bool status = false;
    isRunReady = false;
    
-   MessageInterface::ShowMessage("========================================\n");
-   MessageInterface::ShowMessage("Moderator::InterpretScript() entered\n"
-                                 "file: " + scriptFileName + "\n");
-
+   //MessageInterface::ShowMessage("========================================\n");
+   //MessageInterface::ShowMessage("Moderator::InterpretScript() entered\n"
+   //                              "***** file: " + scriptFileName + "\n");
+   MessageInterface::ShowMessage
+      ("Interpreting scripts from the file.\n***** file: " + scriptFileName + "\n");
+   
    //clear both resource and command sequence
    ClearResource();
    ClearCommandSeq();
@@ -2804,8 +2813,11 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
          #endif
          CreateDefaultCoordSystems();
 
+         #if DEBUG_RUN
          MessageInterface::ShowMessage
             ("Moderator::InterpretScript() successfully interpreted the script\n");
+         #endif
+         
          isRunReady = true;
       }
    }
@@ -2836,9 +2848,11 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
    bool status = false;
    isRunReady = false;
     
-   MessageInterface::ShowMessage("========================================\n");
-   MessageInterface::ShowMessage("Moderator::InterpretScript(ss) entered\n");
-
+   //MessageInterface::ShowMessage("========================================\n");
+   //MessageInterface::ShowMessage("Moderator::InterpretScript(ss) entered\n");
+   MessageInterface::ShowMessage
+      ("Interpreting scripts from the input stream\n");
+   
    //clear both resource and command sequence
    if (clearObjs)
    {
@@ -2859,8 +2873,11 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
          #endif
          CreateDefaultCoordSystems();
 
+         #if DEBUG_RUN
          MessageInterface::ShowMessage
             ("Moderator::InterpretScript() successfully interpreted the script\n");
+         #endif
+         
          isRunReady = true;
       }
    }
@@ -2932,9 +2949,11 @@ Integer Moderator::RunScript(Integer sandboxNum)
 //------------------------------------------------------------------------------
 void Moderator::InitializePlanetarySource()
 {
-   MessageInterface::ShowMessage("========================================\n");
+   #if DEBUG_INIT
+   //MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage("Moderator initializing planetary source...\n");
-
+   #endif
+   
    // initialize planetary source
    for (int i=0; i<PlanetaryFileCount; i++)
    {
@@ -2967,17 +2986,19 @@ void Moderator::InitializePlanetarySource()
 //------------------------------------------------------------------------------
 void Moderator::InitializePlanetaryCoeffFile()
 {
-   MessageInterface::ShowMessage("========================================\n");
+   #if DEBUG_INIT
+   //MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage("Moderator initializing planetary coeff. file...\n");
+   #endif
    
    //loj: 7/7/05 using new FileManager
    std::string nutFileName =
       theFileManager->GetFullPathname("NUTATION_COEFF_FILE");
-   MessageInterface::ShowMessage("Moderator setting nutation file to %s\n",
+   MessageInterface::ShowMessage("Setting nutation file to %s\n",
                                  nutFileName.c_str());
    std::string planFileName =
       theFileManager->GetFullPathname("PLANETARY_COEFF_FILE");
-   MessageInterface::ShowMessage("Moderator setting planetary coeff. file to %s\n",
+   MessageInterface::ShowMessage("Setting planetary coeff. file to %s\n",
                                  planFileName.c_str());
    
    theItrfFile = new ItrfCoefficientsFile(nutFileName, planFileName);
@@ -2990,12 +3011,14 @@ void Moderator::InitializePlanetaryCoeffFile()
 //------------------------------------------------------------------------------
 void Moderator::InitializeTimeFile()
 {
-   MessageInterface::ShowMessage("========================================\n");
+   #if DEBUG_INIT
+   //MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage("Moderator initializing time file...\n");
+   #endif
    
    //loj: 7/7/05 using new FileManager
    std::string filename = theFileManager->GetFullPathname("LEAP_SECS_FILE");
-   MessageInterface::ShowMessage("Moderator setting leap seconds file to %s\n",
+   MessageInterface::ShowMessage("Setting leap seconds file to %s\n",
                                  filename.c_str());
    theLeapSecsFile = new LeapSecsFileReader(filename);
    theLeapSecsFile->Initialize();
@@ -3014,9 +3037,11 @@ void Moderator::InitializeTimeFile()
 //------------------------------------------------------------------------------
 void Moderator::CreateDefaultCoordSystems()
 {
-   MessageInterface::ShowMessage("========================================\n");
+   #if DEBUG_INIT
+   //MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage("Moderator creating default coordinate systems...\n");
-
+   #endif
+   
    try
    {
       StringArray csNames =
@@ -3063,9 +3088,11 @@ void Moderator::CreateDefaultCoordSystems()
 //------------------------------------------------------------------------------
 void Moderator::CreateDefaultMission()
 {
-   MessageInterface::ShowMessage("========================================\n");
+   #if DEBUG_INIT
+   //MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage("Moderator creating default mission...\n");
-
+   #endif
+   
    try
    {
       //----------------------------------------------------
