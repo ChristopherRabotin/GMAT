@@ -42,9 +42,11 @@ public:
    bool GetShowSecondaryBody() {return mShowSecondaryBody;}
    bool GetShowEpoch() {return mShowEpoch;}
    bool GetShowXyz() {return mShowXyz;}
-   
+   bool GetShowUpdateInterval() {return mShowUpdate;}
+
    wxTextCtrl *GetEpochTextCtrl() {return epochTextCtrl;}
-   
+   wxTextCtrl *GetIntervalTextCtrl() {return intervalTextCtrl;}
+
    void EnableOptions();
    void SetDefaultAxis();
    void SetDefaultEpochRefAxis();
@@ -62,6 +64,7 @@ private:
    bool mShowSecondaryBody;
    bool mShowEpoch;
    bool mShowXyz;
+   bool mShowUpdate;
    bool mEnableAll;
    
    wxStaticText *originStaticText;
@@ -75,7 +78,11 @@ private:
    wxStaticText *yStaticText;
    wxStaticText *zStaticText;
 
+   wxStaticText *updateStaticText;
+   wxStaticText *secStaticText;
+
    wxTextCtrl *epochTextCtrl;
+   wxTextCtrl *intervalTextCtrl;
 
    wxComboBox *originComboBox;
    wxComboBox *typeComboBox;

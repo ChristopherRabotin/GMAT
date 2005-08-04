@@ -32,7 +32,8 @@ private:
    wxString mEpochFormat;
    
    wxTextCtrl *epochTextCtrl;
-   
+   wxTextCtrl *intervalTextCtrl;
+
    wxComboBox *originComboBox;
    wxComboBox *typeComboBox;
    wxComboBox *primaryComboBox;

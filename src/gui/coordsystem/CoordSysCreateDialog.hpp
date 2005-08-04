@@ -67,7 +67,8 @@ private:
    wxString wxFormatName;
    
    wxTextCtrl *epochTextCtrl;
-   
+   wxTextCtrl *intervalTextCtrl;
+
    wxComboBox *originComboBox;
    wxComboBox *typeComboBox;
    wxComboBox *primaryComboBox;

@@ -36,6 +36,7 @@ CoordPanel::CoordPanel(wxWindow *parent, bool enableAll)
    mShowSecondaryBody = false;
    mShowEpoch = false;
    mShowXyz = false;
+   mShowUpdate = false;
    
    mEnableAll = enableAll;
    
@@ -65,13 +66,21 @@ void CoordPanel::EnableOptions()
       typeComboBox->GetStringSelection().c_str());
    #endif
 
-   if ((typeComboBox->GetStringSelection() == "Equator") ||
-       (typeComboBox->GetStringSelection() == "BodyFixed"))
+   if (typeComboBox->GetStringSelection() == "Equator")
    {
       mShowPrimaryBody = false;   // 05/03/05: ag changed from true to false
       mShowSecondaryBody = false;
       mShowEpoch = false;
       mShowXyz = false;
+      mShowUpdate = false;
+   }
+   else if (typeComboBox->GetStringSelection() == "BodyFixed")
+   {
+      mShowPrimaryBody = false;   // 05/03/05: ag changed from true to false
+      mShowSecondaryBody = false;
+      mShowEpoch = false;
+      mShowXyz = false;
+      mShowUpdate = true;
    }
    else if (typeComboBox->GetStringSelection() == "ObjectReferenced")
    {
@@ -79,18 +88,49 @@ void CoordPanel::EnableOptions()
       mShowSecondaryBody = true;
       mShowEpoch = false;
       mShowXyz = true;
+      mShowUpdate = false;
       SetDefaultObjectRefAxis();
    }
    else if ((typeComboBox->GetStringSelection() == "TOEEq") ||
-            (typeComboBox->GetStringSelection() == "TOEEc") ||
-            (typeComboBox->GetStringSelection() == "MOEEq") ||
+            (typeComboBox->GetStringSelection() == "TOEEc"))
+            
+   {
+      mShowPrimaryBody = false;
+      mShowSecondaryBody = false;
+      mShowEpoch = true;
+      mShowXyz = false;
+      mShowUpdate = true;
+      SetDefaultEpochRefAxis();
+   }
+   else if ((typeComboBox->GetStringSelection() == "TODEq") ||
+            (typeComboBox->GetStringSelection() == "TODEc"))
+
+   {
+      mShowPrimaryBody = false;
+      mShowSecondaryBody = false;
+      mShowEpoch = false;
+      mShowXyz = false;
+      mShowUpdate = true;
+      SetDefaultEpochRefAxis();
+   }
+   else if((typeComboBox->GetStringSelection() == "MOEEq") ||
             (typeComboBox->GetStringSelection() == "MOEEc"))
    {
       mShowPrimaryBody = false;
       mShowSecondaryBody = false;
       mShowEpoch = true;
       mShowXyz = false;
+      mShowUpdate = false;
       SetDefaultEpochRefAxis();
+   }
+   else if((typeComboBox->GetStringSelection() == "GSM") ||
+            (typeComboBox->GetStringSelection() == "GeocentricSolarMagnetic"))
+   {
+      mShowPrimaryBody = false;
+      mShowSecondaryBody = false;
+      mShowEpoch = false;
+      mShowXyz = false;
+      mShowUpdate = true;
    }
    else
    {
@@ -98,6 +138,7 @@ void CoordPanel::EnableOptions()
       mShowSecondaryBody = false;
       mShowEpoch = false;
       mShowXyz = false;
+      mShowUpdate = false;
    }
    
    if (mEnableAll)
@@ -116,6 +157,9 @@ void CoordPanel::EnableOptions()
       yComboBox->Enable(mShowXyz);
       zStaticText->Enable(mShowXyz);
       zComboBox->Enable(mShowXyz);
+      updateStaticText->Enable(mShowUpdate);
+      secStaticText->Enable(mShowUpdate);
+      intervalTextCtrl->Enable(mShowUpdate);
    }
    else  // disable all of them
    {
@@ -138,6 +182,9 @@ void CoordPanel::EnableOptions()
       yComboBox->Enable(false);
       zStaticText->Enable(false);
       zComboBox->Enable(false);
+      updateStaticText->Enable(false);
+      secStaticText->Enable(false);
+      intervalTextCtrl->Enable(false);
    }
 }
 
@@ -158,6 +205,7 @@ void CoordPanel::SetDefaultAxis()
    xComboBox->SetValue("R");
    yComboBox->SetValue("");;
    zComboBox->SetValue("N");
+   intervalTextCtrl->SetValue("60");
 }
 
 
@@ -248,6 +296,20 @@ void CoordPanel::ShowAxisData(AxisSystem *axis)
          yComboBox->SetStringSelection(axis->GetYAxis().c_str());
          zComboBox->SetStringSelection(axis->GetZAxis().c_str());
       }
+      
+      if (GetShowUpdateInterval())
+      {
+         /// @todo:
+         Real updateInterval = axis->GetRealParameter("UpdateInterval");
+
+         wxString updateStr;
+         std::stringstream buffer;
+         buffer.precision(18);
+         buffer << updateInterval;
+         updateStr.Printf ("%s",buffer.str().c_str());
+
+         intervalTextCtrl->SetValue(updateStr);
+      }
    }
    catch (BaseException &e)
    {
@@ -269,6 +331,7 @@ AxisSystem* CoordPanel::CreateAxis()
    wxString axisType = typeComboBox->GetValue().Trim();
    wxString epochFormat = formatComboBox->GetValue().Trim();
    wxString epochStr = epochTextCtrl->GetValue().Trim();
+   wxString updateStr = intervalTextCtrl->GetValue().Trim();
    wxString xStr = xComboBox->GetValue();
    wxString yStr = yComboBox->GetValue();
    wxString zStr = zComboBox->GetValue();
@@ -305,7 +368,8 @@ AxisSystem* CoordPanel::CreateAxis()
             axis->SetZAxis(std::string(zStr.c_str()));
             
             axis->SetEpochFormat(std::string(epochFormat.c_str()));
-            
+            axis->SetRealParameter("UpdateInterval", atof(updateStr.c_str()));
+
             // convert epoch to a1mjd
             std::string taiEpochStr = mTimeConverter.Convert
                (std::string(epochStr.c_str()), std::string(epochFormat.c_str()),
@@ -503,6 +567,10 @@ void CoordPanel::Setup( wxWindow *parent)
       wxDefaultPosition, wxDefaultSize, 0 );
    epochStaticText = new wxStaticText( parent, ID_TEXT, wxT("Epoch"),
       wxDefaultPosition, wxDefaultSize, 0 );
+   updateStaticText = new wxStaticText( parent, ID_TEXT, wxT("Update Interval"),
+      wxDefaultPosition, wxDefaultSize, 0 );
+   secStaticText = new wxStaticText( parent, ID_TEXT, wxT("seconds"),
+      wxDefaultPosition, wxDefaultSize, 0 );
 
    xStaticText = new wxStaticText( parent, ID_TEXT, wxT("X: "),
       wxDefaultPosition, wxDefaultSize, 0 );
@@ -535,6 +603,8 @@ void CoordPanel::Setup( wxWindow *parent)
    //wxTextCtrl
    epochTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
+   intervalTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(45,-1), 0 );
 
    // wx*Sizers
    wxBoxSizer *theMainSizer = new wxBoxSizer( wxVERTICAL );
@@ -544,6 +614,7 @@ void CoordPanel::Setup( wxWindow *parent)
    wxFlexGridSizer *flexgridsizer1 = new wxFlexGridSizer( 3, 4, 0, 0 );
    wxBoxSizer *boxsizer1 = new wxBoxSizer( wxHORIZONTAL );
    wxBoxSizer *boxsizer2 = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *boxsizer3 = new wxBoxSizer( wxHORIZONTAL );
 
    boxsizer1->Add( originStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
    boxsizer1->Add( originComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
@@ -573,8 +644,13 @@ void CoordPanel::Setup( wxWindow *parent)
    boxsizer2->Add(zStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
    boxsizer2->Add(zComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
 
+   boxsizer3->Add(updateStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+   boxsizer3->Add(intervalTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+   boxsizer3->Add(secStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+
    staticboxsizer1->Add( flexgridsizer1, 0, wxALIGN_CENTER|wxALL, 5 );
    staticboxsizer1->Add( boxsizer2, 0, wxALIGN_CENTER|wxALL, 5 );
+   staticboxsizer1->Add( boxsizer3, 0, wxALIGN_CENTER|wxALL, 5 );
 
    theMainSizer->Add(boxsizer1, 0, wxALIGN_CENTRE|wxALL, 5);
    theMainSizer->Add(staticboxsizer1, 0, wxALIGN_CENTRE|wxALL, 5);

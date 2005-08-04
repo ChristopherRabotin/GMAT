@@ -86,6 +86,8 @@ void CoordSysCreateDialog::LoadData()
       yComboBox = mCoordPanel->GetYComboBox();
       zComboBox = mCoordPanel->GetZComboBox();
 
+      intervalTextCtrl = mCoordPanel->GetIntervalTextCtrl();
+
       mCoordPanel->SetDefaultAxis();
             
       wxFormatName = formatComboBox->GetValue().Trim();

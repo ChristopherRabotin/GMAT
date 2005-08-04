@@ -91,7 +91,8 @@ void CoordSystemConfigPanel::Setup( wxWindow *parent)
 void CoordSystemConfigPanel::LoadData()
 {
    epochTextCtrl = mCoordPanel->GetEpochTextCtrl();
-   
+   intervalTextCtrl = mCoordPanel->GetIntervalTextCtrl();
+
    originComboBox = mCoordPanel->GetOriginComboBox();
    typeComboBox = mCoordPanel->GetTypeComboBox();
    primaryComboBox = mCoordPanel->GetPrimaryComboBox();
