@@ -3315,7 +3315,8 @@ void Moderator::CreateDefaultMission()
          CreateStopCondition("StopCondition", "StopOnDefaultSC.EarthMJ2000Eq.X");
       stopOnX->SetStringParameter("EpochVar", "DefaultSC.CurrA1MJD");
       stopOnX->SetStringParameter("StopVar", "DefaultSC.EarthMJ2000Eq.X");
-      stopOnX->SetRealParameter("Goal", 5000.0);
+      //stopOnX->SetRealParameter("Goal", 5000.0);
+      stopOnX->SetStringParameter("Goal", "5000.0");
       propCommand->SetRefObject(stopOnX, Gmat::STOP_CONDITION, "", 1);
       #endif
       
@@ -3597,7 +3598,8 @@ StopCondition* Moderator::CreateDefaultStopCondition()
    
    stopCond->SetStringParameter("EpochVar", epochVar);
    stopCond->SetStringParameter("StopVar", stopVar);
-   stopCond->SetRealParameter("Goal", 8640.0);
+   //stopCond->SetRealParameter("Goal", 8640.0); //loj: 8/5/05
+   stopCond->SetStringParameter("Goal", "8640.0");
    return stopCond;
 }
 
