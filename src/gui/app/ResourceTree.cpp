@@ -2461,11 +2461,21 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    wxTreeItemIdValue cookie;
    wxTreeItemId scriptId = GetFirstChild(item, cookie);
    int numScripts = GetChildrenCount(item, false);
-   
+   wxString strRunCount;
+   strRunCount.Printf("%d", numScripts);
    long runCount = numScripts;
-   runCount = wxGetNumberFromUser("", "Enter number of scripts to run:",
-                                  "Run Scripts", runCount, 1, numScripts, this);
-   if (runCount < 0)
+   
+   //loj: 8/5/05 wxGetNumberFromUser() doesn't ruturn -1 when invalid number has
+   //entered as it is documented.
+   //runCount = wxGetNumberFromUser("", "Enter number of scripts to run:",
+   //                               "Run Scripts", runCount, 1, numScripts, this);
+   //if (runCount < 0)
+   //   return;
+   
+   strRunCount = wxGetTextFromUser("Enter number of scripts to run: ",
+                                   "Run Scripts", strRunCount, this);
+   
+   if (!strRunCount.ToLong(&runCount))
       return;
    
    int count = 0;
