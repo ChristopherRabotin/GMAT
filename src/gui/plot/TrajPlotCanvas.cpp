@@ -2587,7 +2587,7 @@ void TrajPlotCanvas::DrawPlot()
 //  void DrawObject(const wxString &objName)
 //------------------------------------------------------------------------------
 /**
- * Draws object shpere and maps texture image.
+ * Draws object sphere and maps texture image.
  */
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::DrawObject(const wxString &objName)
@@ -2620,7 +2620,7 @@ void TrajPlotCanvas::DrawObject(const wxString &objName)
       gluQuadricDrawStyle(qobj, GLU_FILL  );
       gluQuadricNormals  (qobj, GLU_SMOOTH);
       gluQuadricTexture  (qobj, GL_TRUE   );
-      gluSphere(qobj, mObjectRadius[objId], 50, 50);
+      gluSphere(qobj, 6378 /*mObjectRadius[objId]*/, 50, 50);
       gluDeleteQuadric(qobj);
       
       glDisable(GL_TEXTURE_2D);
@@ -2633,7 +2633,16 @@ void TrajPlotCanvas::DrawObject(const wxString &objName)
           objName.c_str());
       #endif
       
-      // just draw small sphere?
+      // Just draw a wireframe sphere if we get here
+      glColor3f(0.20, 0.20, 0.50);
+      GLUquadricObj* qobj = gluNewQuadric();
+      gluQuadricDrawStyle(qobj, GLU_LINE  );
+      gluQuadricNormals  (qobj, GLU_SMOOTH);
+      gluQuadricTexture  (qobj, GL_TRUE   );
+      gluSphere(qobj, mObjectRadius[objId], 50, 50);
+      gluDeleteQuadric(qobj);
+      
+      glDisable(GL_TEXTURE_2D);
    }
    
 } // end DrawObject(const wxString &objName)
