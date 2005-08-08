@@ -39,8 +39,10 @@ public:
    TsPlotCurve(int offsetY, double startY, double endY,
                const wxString &curveTitle);
    virtual ~TsPlotCurve();
-    
+   
    void AddData(double x, double y);
+   void SetColour(wxColour rgb);
+   
    virtual void   Clear();
 
    virtual double GetMinX();
@@ -49,10 +51,12 @@ public:
    virtual double GetMinY();
    virtual double GetMaxY();
 
+   virtual void PenUp();
+
 protected:
    double minX;
    double maxX;
-   double minY;
+   double minY; 
    double maxY;
    
    bool   rangeChanged;
@@ -64,6 +68,12 @@ protected:
    std::vector<double> abscissa;
    /// Dependent data
    std::vector<double> ordinate;
+   /// Location for "pen up" commands
+   std::vector<int>    penUpIndex;
+   /// Location for "pen up" commands
+   std::vector<wxColour> linecolor;
+   /// Location for color changes
+   std::vector<int>    colorChange;
 
    unsigned int lastPointPlotted;
    

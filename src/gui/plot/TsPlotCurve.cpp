@@ -19,7 +19,7 @@
  *       base.
  */
 //------------------------------------------------------------------------------
-
+ 
 
 #include "TsPlotCurve.hpp"
 #include "LinearInterpolator.hpp"
@@ -180,6 +180,9 @@ void TsPlotCurve::Clear()
 {
    abscissa.clear();
    ordinate.clear();
+   penUpIndex.clear();
+   linecolor.clear();
+   colorChange.clear();
 }
 
 
@@ -204,4 +207,20 @@ double TsPlotCurve::GetMaxY()
 #endif
    
    return maxY;
+}
+
+
+//------------------------------------------------------------------------------
+// void PenUp()
+//------------------------------------------------------------------------------
+void TsPlotCurve::PenUp()
+{
+   penUpIndex.push_back(abscissa.size() - 1);
+}
+
+
+void TsPlotCurve::SetColour(wxColour rgb)
+{
+   linecolor.push_back(rgb);
+   colorChange.push_back(abscissa.size());
 }

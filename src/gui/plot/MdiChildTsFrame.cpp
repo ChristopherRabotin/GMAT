@@ -321,7 +321,7 @@ void MdiChildTsFrame::AddPlotCurve(int curveIndex, int yOffset, double yMin,
             curveTitle.c_str());
       #endif
          
-      mXyPlot->AddData(curve);
+      mXyPlot->AddData(curve, penColor);
       mXyPlot->SetDataName(curveTitle.c_str());
       
       #if DEBUG_MDI_TS_FRAME

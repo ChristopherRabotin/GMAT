@@ -867,7 +867,7 @@ void TsPlotCanvas::SetLabel(const std::string &dataName,
 }
 
 
-void TsPlotCanvas::AddData(TsPlotCurve *curve)
+void TsPlotCanvas::AddData(TsPlotCurve *curve, wxColour startColor)
 {
    data.push_back(curve);
 
@@ -910,13 +910,17 @@ void TsPlotCanvas::AddData(TsPlotCurve *curve)
          newPens[penID].SetColour(0, 0, 0);  // Black for the rest
    }
 
-      newPens[penID].SetWidth(defaultLineWidth);
+   newPens[penID].SetWidth(defaultLineWidth);
 
-   /// @todo Set colors based on old settings before deleting old pens
-   
    if (plotPens)
       delete [] plotPens;
+      
+   if (startColor != *wxWHITE)
+      newPens[penID].SetColour(startColor);
+   
    plotPens = newPens;
+   
+   curve->SetColour(plotPens[penID].GetColour());
 }
 
 

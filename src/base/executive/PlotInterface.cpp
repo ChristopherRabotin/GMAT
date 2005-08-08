@@ -678,6 +678,10 @@ bool PlotInterface::AddTsPlotCurve(const std::string &plotName, int curveIndex,
    return true;
 #else
 
+   UnsignedInt localPenColor = penColor;
+   if (penColor == 0) 
+      localPenColor = 0xFFFFFF;
+
    bool added = false;
    
    #if DEBUG_PLOTIF_XY
@@ -700,7 +704,7 @@ bool PlotInterface::AddTsPlotCurve(const std::string &plotName, int curveIndex,
       if (frame->GetPlotName().IsSameAs(plotName.c_str()))
       {
          frame->AddPlotCurve(curveIndex, yOffset, yMin, yMax,
-                             wxString(curveTitle.c_str()), penColor);
+                             wxString(curveTitle.c_str()), localPenColor);
          added = true;
       }
    }
