@@ -63,7 +63,7 @@ public:
    void DumpData(const std::string &fn);
    void SetLabel(const std::string &dataName, const PlotComponents which);
    void SetDataName(const std::string &dataName);
-   void AddData(TsPlotCurve *curve, wxColour startColor = wxWHITE);
+   void AddData(TsPlotCurve *curve, wxColour startColor = *wxWHITE);
    void DataUpdate(bool tf = true);
    int  GetCurveCount();
    void ShowGrid(bool show);
