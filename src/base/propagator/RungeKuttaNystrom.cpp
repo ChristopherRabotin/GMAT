@@ -264,7 +264,12 @@ bool RungeKuttaNystrom::Step()
         if (!initialized)
             throw PropagatorException("Cannot Step: RKN is not initialized");
     }
-
+    
+    if (fabs(stepSize) < minimumStep)
+        stepSize = ((stepSize > 0.0) ? minimumStep : -minimumStep);
+    if (fabs(stepSize) > maximumStep)
+        stepSize = ((stepSize > 0.0) ? maximumStep : -maximumStep);
+        
     bool goodStepTaken = false;
     double maxerror;
     
