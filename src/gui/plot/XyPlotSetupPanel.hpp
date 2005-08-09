@@ -22,7 +22,6 @@
 #include "GmatPanel.hpp"
 #include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
-//loj: 6/14/05#include "XyPlot.hpp"
 #include "TsPlot.hpp"
 #include "RgbColor.hpp"
 
@@ -33,8 +32,8 @@ public:
    ~XyPlotSetupPanel();
    
 protected:
-   //XyPlot *mXyPlot;
    TsPlot *mXyPlot;
+   wxString mLastCoordSysName;
    
    int  mNumXParams;
    int  mNumYParams;
@@ -52,7 +51,7 @@ protected:
    
    wxComboBox *mObjectComboBox;
    wxComboBox *mCoordSysComboBox;
-   wxComboBox *mCentralBodyComboBox; //loj: 1/19/05 Added
+   wxComboBox *mCentralBodyComboBox;
    
    wxListBox *mUserParamListBox;
    wxListBox *mPropertyListBox;

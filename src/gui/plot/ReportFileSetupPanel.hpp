@@ -35,7 +35,8 @@ protected:
 
    int  mNumVarParams;
    bool mUseUserParam;
-    
+   wxString mLastCoordSysName;
+   
    wxStaticText *mCoordSysLabel;
    wxStaticText *fileStaticText;
    
@@ -50,15 +51,13 @@ protected:
     
    wxComboBox *mObjectComboBox;
    wxComboBox *mCoordSysComboBox;
-   wxComboBox *mCentralBodyComboBox; //loj: 1/19/05 Added
+   wxComboBox *mCentralBodyComboBox;
 
    wxListBox *mUserParamListBox;
    wxListBox *mPropertyListBox;
    wxListBox *mVarListBox;
    wxListBox *mVarSelectedListBox;
    
-   wxBoxSizer *mVarBoxSizer;
-   wxBoxSizer *optionBoxSizer;
    wxBoxSizer *mCoordSysSizer;
    wxBoxSizer *mParamBoxSizer;
 

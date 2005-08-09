@@ -46,6 +46,7 @@ protected:
 
    wxString mParamName;
    wxString mOwnerType;
+   wxString mLastCoordSysName;
    wxArrayString mParamNameArray;
    
    bool mIsParamSelected;
@@ -66,7 +67,7 @@ protected:
    
    wxComboBox *mObjectComboBox;
    wxComboBox *mCoordSysComboBox;
-   wxComboBox *mCentralBodyComboBox; //loj: 2/4/05 Added
+   wxComboBox *mCentralBodyComboBox;
    
    wxListBox *mUserParamListBox;
    wxListBox *mPropertyListBox;

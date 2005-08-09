@@ -77,7 +77,6 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
    Subscriber *subscriber =
       theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
 
-   //loj: 6/14/05 mXyPlot = (XyPlot*)subscriber;
    mXyPlot = (TsPlot*)subscriber;
 
    mXParamChanged = false;
@@ -163,20 +162,33 @@ void XyPlotSetupPanel::OnAddY(wxCommandEvent& event)
    {
       // Get a parameter
       Parameter *param = GetParameter(newParam);
-
+      
       if (param->IsPlottable())
       {
          mYSelectedListBox->Append(newParam);
          mYSelectedListBox->SetStringSelection(newParam);
          ShowParameterOption(newParam, true);
+         //Show next parameter (loj: 8/9/05 Added)
+         mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
+         OnSelectProperty(event);
          mYParamChanged = true;
          theApplyButton->Enable();
       }
       else
       {
-         wxLogMessage("Selected Y parameter:%s is not plottable. Please select "
-                      "another parameter\n", newParam.c_str());
+         wxLogMessage("Selected Y parameter:%s is not plottable.\nPlease select "
+                      "another parameter.\n", newParam.c_str());
+         
+         //Show next parameter (loj: 8/9/05 Added)
+         mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
+         OnSelectProperty(event);
       }
+   }
+   else
+   {
+      //Show next parameter (loj: 8/9/05 Added)
+      mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
+      OnSelectProperty(event);
    }
 }
 
@@ -260,7 +272,6 @@ void XyPlotSetupPanel::OnSelectProperty(wxCommandEvent& event)
 
    // show coordinate system or central body
    ShowCoordSystem();
-   
    mUseUserParam = false;
 }
 
@@ -284,6 +295,10 @@ void XyPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
       mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
       mUseUserParam = false;
    }
+   else if(event.GetEventObject() == mCoordSysComboBox)
+   {
+      mLastCoordSysName = mCoordSysComboBox->GetStringSelection();
+   }
 }
 
 
@@ -299,11 +314,9 @@ void XyPlotSetupPanel::OnCreateVariable(wxCommandEvent& event)
    {
       mUserParamListBox->Set(theGuiManager->GetNumUserVariable(),
                              theGuiManager->GetUserVariableList());
-//       mAddXButton->Disable();
-//       mAddYButton->Disable();
       mUserParamListBox->SetSelection(0);
       mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
-      mUseUserParam = true; //loj: 6/6/05 Added
+      mUseUserParam = true;
    }
 }
 
@@ -355,8 +368,6 @@ void XyPlotSetupPanel::Create()
    wxString emptyList[] = {};
    Integer bsize = 1; // border size
    
-   wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
-   mFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
 
    // empty text for spacing line
    wxStaticText *emptyText =
@@ -497,9 +508,11 @@ void XyPlotSetupPanel::Create()
    //------------------------------------------------------
    // put in the order
    //------------------------------------------------------
+   mFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
    mFlexGridSizer->Add(xSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    mFlexGridSizer->Add(xButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mFlexGridSizer->Add(mParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   //loj: 8/9/05 Changed from wxALIGN_CENTRE TO wxALIGN_TOP for Layout()
+   mFlexGridSizer->Add(mParamBoxSizer, 0, wxALIGN_TOP|wxALL, bsize);
    mFlexGridSizer->Add(yButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    mFlexGridSizer->Add(ySelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
@@ -509,6 +522,7 @@ void XyPlotSetupPanel::Create()
    mFlexGridSizer->Add(emptyText, 0, wxALIGN_LEFT|wxALL, bsize);
    mFlexGridSizer->Add(mParamOptionBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
+   wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    pageBoxSizer->Add(mFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
@@ -530,6 +544,7 @@ void XyPlotSetupPanel::LoadData()
    {   
       // Set the pointer for the "Show Script" button
       mObject = mXyPlot;
+      mLastCoordSysName = mCoordSysComboBox->GetString(0);
       
       showPlotCheckBox->SetValue(mXyPlot->IsActive());
       showGridCheckBox->SetValue(mXyPlot->GetStringParameter("Grid") == "On");
@@ -780,8 +795,9 @@ void XyPlotSetupPanel::ShowCoordSystem()
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Coordinate System");
       
-      mCoordSysComboBox->SetSelection(0);
-      
+      //loj: 8/9/05 Set CoordSystem to last one selected
+      //mCoordSysComboBox->SetSelection(0);
+      mCoordSysComboBox->SetStringSelection(mLastCoordSysName);
       mCoordSysSizer->Remove(mCoordSysComboBox);
       mCoordSysSizer->Remove(mCentralBodyComboBox);
       mCoordSysSizer->Add(mCoordSysComboBox);

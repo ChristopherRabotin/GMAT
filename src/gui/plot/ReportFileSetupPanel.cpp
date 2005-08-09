@@ -122,14 +122,14 @@ void ReportFileSetupPanel::Create()
    
    Integer bsize = 2; // border size
    wxString emptyList[] = {};
-
+   
    //------------------------------------------------------
    // available variables list (1st column)
    //------------------------------------------------------
-   mVarBoxSizer = new wxBoxSizer(wxVERTICAL);
-    
+   //mVarBoxSizer = new wxBoxSizer(wxVERTICAL);
+   
    wxButton *createVarButton;
-
+   
    mParamBoxSizer = theGuiManager->
       CreateParameterSizer(this, &mUserParamListBox, USER_PARAM_LISTBOX,
                            &createVarButton, CREATE_VARIABLE,
@@ -217,28 +217,28 @@ void ReportFileSetupPanel::Create()
 
    wxBoxSizer *reportOptionSizer = new wxBoxSizer(wxHORIZONTAL);
    reportOptionSizer->Add(writeCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
-   reportOptionSizer->Add(showHeaderCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);                       
+   reportOptionSizer->Add(showHeaderCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(colWidthText, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(colWidthTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(precisionText, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(precisionTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
-
-   optionBoxSizer = new wxBoxSizer(wxVERTICAL);
+   
+   wxBoxSizer *optionBoxSizer = new wxBoxSizer(wxVERTICAL);
    optionBoxSizer->Add(fileSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    optionBoxSizer->Add(reportOptionSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //-------------------------------------------------------
    // put in the order
    //-------------------------------------------------------
-   wxFlexGridSizer *mFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
+   wxFlexGridSizer *paramGridSizer = new wxFlexGridSizer(3, 0, 0);
+   //loj: 8/9/05 Changed from wxALIGN_CENTRE TO wxALIGN_TOP for Layout()
+   paramGridSizer->Add(mParamBoxSizer, 0, wxALIGN_TOP|wxALL, bsize);
+   paramGridSizer->Add(arrowButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   paramGridSizer->Add(mVarSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
    wxBoxSizer *variablesBoxSizer = new wxBoxSizer(wxVERTICAL);
+   variablesBoxSizer->Add(paramGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   mFlexGridSizer->Add(mParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mFlexGridSizer->Add(arrowButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mFlexGridSizer->Add(mVarSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   variablesBoxSizer->Add(mFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-
    //-------------------------------------------------------
    // add to parent sizer
    //-------------------------------------------------------
@@ -254,6 +254,7 @@ void ReportFileSetupPanel::LoadData()
 {
    // Set the pointer for the "Show Script" button
    mObject = reportFile;
+   mLastCoordSysName = mCoordSysComboBox->GetString(0);
    
    // load data from the core engine
    writeCheckBox->SetValue(reportFile->IsActive());
@@ -273,36 +274,36 @@ void ReportFileSetupPanel::LoadData()
    wxString numSpacesValue;
    numSpacesValue.Printf("%d", reportFile->GetIntegerParameter(spacesId));
    colWidthTextCtrl->SetValue(numSpacesValue);
-
+   
    int precisionId = reportFile->GetParameterID("Precision");
    wxString precisionValue;
    precisionValue.Printf("%d", reportFile->GetIntegerParameter(precisionId));
    precisionTextCtrl->SetValue(precisionValue);
-
+   
    StringArray varParamList = reportFile->GetStringArrayParameter("Add");
    mNumVarParams = varParamList.size();
-
+   
    if (mNumVarParams > 0)
    {
-
+      
       wxString *varParamNames = new wxString[mNumVarParams];
       Parameter *param;
-         
+      
       for (int i=0; i<mNumVarParams; i++)
       {
          varParamNames[i] = varParamList[i].c_str();
          param = theGuiInterpreter->GetParameter(varParamList[i]);
       }
-    
+      
       mVarSelectedListBox->Set(mNumVarParams, varParamNames);
       mVarSelectedListBox->SetSelection(0);
       delete varParamNames;
    }
-    
+   
    mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
    mObjectComboBox->SetSelection(0);
    mPropertyListBox->SetSelection(0);
-    
+   
    // show coordinate system or central body
    ShowCoordSystem();
 
@@ -401,18 +402,31 @@ void ReportFileSetupPanel::OnAddVariable(wxCommandEvent& event)
    {
       // Create a paramete if it does not exist
       Parameter *param = GetParameter(newParam);
-
+      
       if (param->IsPlottable())
       {
          mVarSelectedListBox->Append(newParam);
          mVarSelectedListBox->SetStringSelection(newParam);
+         //Show next parameter (loj: 8/9/05 Added)
+         mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
+         OnSelectProperty(event);
          theApplyButton->Enable();
       }
       else
       {
-         wxLogMessage("Selected  parameter:%s is not reportable. Please select "
-                      "another parameter\n", newParam.c_str());
+         wxLogMessage("Selected  parameter:%s is not reportable.\nPlease select "
+                      "another parameter.\n", newParam.c_str());
+         
+         //Show next parameter (loj: 8/9/05 Added)
+         mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
+         OnSelectProperty(event);
       }
+   }
+   else
+   {
+      //Show next parameter (loj: 8/9/05 Added)
+      mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
+      OnSelectProperty(event);
    }
 }
 
@@ -504,6 +518,10 @@ void ReportFileSetupPanel::OnComboBoxChange(wxCommandEvent& event)
       mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
       mUseUserParam = false;
    }
+   else if(event.GetEventObject() == mCoordSysComboBox)
+   {
+      mLastCoordSysName = mCoordSysComboBox->GetStringSelection();
+   }
 }
 
 
@@ -515,14 +533,15 @@ void ReportFileSetupPanel::ShowCoordSystem()
    // use ParameterInfo for dependent object type
    std::string property = std::string(mPropertyListBox->GetStringSelection().c_str());
    GmatParam::DepObject depObj = ParameterInfo::Instance()->GetDepObjectType(property);
-
+   
    if (depObj == GmatParam::COORD_SYS)
    {
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Coordinate System");
       
-      mCoordSysComboBox->SetSelection(0);
-      
+      //loj: 8/9/05 Set CoordSystem to last one selected
+      //mCoordSysComboBox->SetSelection(0);
+      mCoordSysComboBox->SetStringSelection(mLastCoordSysName);
       mCoordSysSizer->Remove(mCoordSysComboBox);
       mCoordSysSizer->Remove(mCentralBodyComboBox);
       mCoordSysSizer->Add(mCoordSysComboBox);

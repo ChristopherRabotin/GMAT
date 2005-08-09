@@ -230,6 +230,7 @@ void ParameterSelectDialog::LoadData()
       mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
       mObjectComboBox->SetSelection(0);
       mPropertyListBox->SetSelection(0);
+      mLastCoordSysName = mCoordSysComboBox->GetString(0);
       
       // show coordinate system or central body
       ShowCoordSystem();
@@ -407,6 +408,10 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
       mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
       mUseUserParam = false;
    }
+   else if(event.GetEventObject() == mCoordSysComboBox)
+   {
+      mLastCoordSysName = mCoordSysComboBox->GetStringSelection();
+   }
 }
 
 
@@ -505,7 +510,9 @@ void ParameterSelectDialog::ShowCoordSystem()
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Coordinate System");
       
-      mCoordSysComboBox->SetSelection(0);
+      //loj: 8/9/05 Set CoordSystem to last one selected
+      //mCoordSysComboBox->SetSelection(0);
+      mCoordSysComboBox->SetStringSelection(mLastCoordSysName);
       
       mCoordSysSizer->Remove(mCoordSysComboBox);
       mCoordSysSizer->Remove(mCentralBodyComboBox);
