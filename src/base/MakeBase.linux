@@ -257,7 +257,6 @@ OBJECTS = \
     spacecraft/HardwareException.o \
     spacecraft/Hardware.o \
     spacecraft/PropState.o \
-    spacecraft/Satellite.o \
     spacecraft/Spacecraft.o \
     spacecraft/SpaceObject.o \
     spacecraft/StateConverter.o \
@@ -304,6 +303,8 @@ OBJECTS = \
     \
     \
     solarsys/msise90_sub.o
+
+#    spacecraft/Satellite.o \
 
 #    refframe/MeanJ2000Equatorial.o \
 #    refframe/RefFrame.o \
