@@ -315,8 +315,6 @@ bool TrajPlotCanvas::InitGL()
    
    // font
    SetDefaultGLFont();
-
-//    mInitialized = true;
    
    mShowMaxWarning = true;
    mNumData = 0;
@@ -325,19 +323,6 @@ bool TrajPlotCanvas::InitGL()
    
    return true;
 }
-
-
-// //------------------------------------------------------------------------------
-// // bool IsInitialized()
-// //------------------------------------------------------------------------------
-// /**
-//  * Retrives initialized flag.
-//  */
-// //------------------------------------------------------------------------------
-// bool TrajPlotCanvas::IsInitialized()
-// {
-//    return mInitialized;
-// }
 
 
 //------------------------------------------------------------------------------
@@ -501,16 +486,6 @@ void TrajPlotCanvas::ShowDefaultView()
    int clientWidth, clientHeight;
    GetClientSize(&clientWidth, &clientHeight);
 
-//    mCurrRotXAngle = mDefaultRotXAngle;
-//    mCurrRotYAngle = mDefaultRotYAngle;
-//    mCurrRotZAngle = mDefaultRotZAngle;
-//    mCurrViewDist = mDefaultViewDist;
-//    mAxisLength = mCurrViewDist;
-//    mfCamTransX = 0;
-//    mfCamTransY = 0;
-//    mfCamTransZ = 0;
-
-//    mOriginId = GetObjectId("Earth");
    SetDefaultView();
    ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
    ChangeProjection(clientWidth, clientHeight, mAxisLength);
@@ -1087,14 +1062,6 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
       msgDialog.ShowModal();
       return false;
    }
-   //      else
-   //      {
-   //          wxMessageDialog msgDialog(this, _T("InitGL() successful"),
-   //                                   _T("ReadTextTrajectory File"));
-   //          msgDialog.ShowModal();
-   //      }
-
-//    mInitialized = true;
     
    return numDataPoints;
     
@@ -1339,7 +1306,8 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
          mShowMaxWarning = false;
          wxString msg;
          msg.Printf("The number of data points exceeded the maximum of %d.\n"
-                    "Please adjust data collect frequency to see the whole plot.\n", MAX_DATA);
+                    "Please adjust data collect frequency to see the whole plot.\n",
+                    MAX_DATA);
          MessageInterface::PopupMessage(Gmat::INFO_, msg.c_str());
          MessageInterface::ShowMessage(msg.c_str());
       }
@@ -1364,7 +1332,6 @@ void TrajPlotCanvas::AddObjectList(const wxArrayString &objNames,
    // clear bodies
    if (clearList)
    {
-      //mObjectTextureIdMap.clear();
       mObjectNames.Empty();
    }
    
@@ -1376,9 +1343,6 @@ void TrajPlotCanvas::AddObjectList(const wxArrayString &objNames,
    {
       // add object names
       mObjectNames.Add(objNames[i]);
-      
-      // initialize object texture
-      //mObjectTextureIdMap[objNames[i]] = UNINIT_TEXTURE;
       
       if (mObjectTextureIdMap.find(objNames[i]) == mObjectTextureIdMap.end())
       {
@@ -1774,7 +1738,6 @@ GLuint TrajPlotCanvas::BindTexture(const wxString &objName)
    //ILboolean status;
    //#endif
    
-   //loj: 7/6/05 Using new FileManager
    std::string name = std::string(objName.Upper().c_str());
    std::string filename = name + "_TEXTURE_FILE";
    
@@ -1800,9 +1763,6 @@ GLuint TrajPlotCanvas::BindTexture(const wxString &objName)
    }
    catch (BaseException &e)
    {
-      //MessageInterface::PopupMessage
-      //   (Gmat::WARNING_, "TrajPlotCanvas::BindTexture() Cannot bind texture "
-      //    "image for %s.\n%s\n", objName.c_str(), e.GetMessage().c_str());
       MessageInterface::ShowMessage
          ("*** Warning *** TrajPlotCanvas::BindTexture() Cannot bind texture "
           "image for %s.\n%s\n", objName.c_str(), e.GetMessage().c_str());
@@ -2114,8 +2074,8 @@ void TrajPlotCanvas::ComputeProjection(int frame)
       else
       {
          MessageInterface::ShowMessage
-            ("*** Warning *** TrajPlotCanvas::ComputeProjection() Invalid mVpRefObjId=%d\n",
-             mVpRefObjId);
+            ("*** Warning *** TrajPlotCanvas::ComputeProjection() Invalid "
+             "mVpRefObjId=%d\n", mVpRefObjId);
       }
    }
    
@@ -2145,8 +2105,8 @@ void TrajPlotCanvas::ComputeProjection(int frame)
       else
       {
          MessageInterface::ShowMessage
-            ("*** Warning *** TrajPlotCanvas::ComputeProjection() Invalid mVpVecObjId=%d\n",
-             mVpVecObjId);
+            ("*** Warning *** TrajPlotCanvas::ComputeProjection() Invalid "
+             "mVpVecObjId=%d\n", mVpVecObjId);
       }
    }
    
@@ -2194,8 +2154,8 @@ void TrajPlotCanvas::ComputeProjection(int frame)
       else
       {
          MessageInterface::ShowMessage
-            ("*** Warning *** TrajPlotCanvas::ComputeProjection() Invalid mVdirObjId=%d\n",
-             mVdirObjId);
+            ("*** Warning *** TrajPlotCanvas::ComputeProjection() Invalid "
+             "mVdirObjId=%d\n", mVdirObjId);
       }
    }
    
@@ -2500,14 +2460,7 @@ void TrajPlotCanvas::DrawFrame()
       // draw Earth-Sun line
       if (mDrawESLines)
          DrawESLines(frame);
-      
-      // draw axes in other coord. system
-      if (!mIsInternalCoordSystem)
-      {
-         if (mDrawAxes)
-            DrawAxes();
-      }
-      
+            
       glFlush();
       SwapBuffers();
    }
@@ -2569,14 +2522,7 @@ void TrajPlotCanvas::DrawPlot()
    // draw Earth-Sun line
    if (mDrawESLines)
       DrawESLines(mNumData-1);
-   
-//    // draw axes in other coord. system
-//    if (!mIsInternalCoordSystem)
-//    {
-//       if (mDrawAxes)
-//          DrawAxes(false);
-//    }
-   
+      
    glFlush();
    SwapBuffers();
    
@@ -2620,7 +2566,7 @@ void TrajPlotCanvas::DrawObject(const wxString &objName)
       gluQuadricDrawStyle(qobj, GLU_FILL  );
       gluQuadricNormals  (qobj, GLU_SMOOTH);
       gluQuadricTexture  (qobj, GL_TRUE   );
-      gluSphere(qobj, 6378 /*mObjectRadius[objId]*/, 50, 50);
+      gluSphere(qobj, mObjectRadius[objId], 50, 50);
       gluDeleteQuadric(qobj);
       
       glDisable(GL_TEXTURE_2D);
@@ -3116,15 +3062,13 @@ void TrajPlotCanvas::DrawESLines(int frame)
    if (frame <= 0)
       return;
    
-   //int objId = GetObjectId("Sun");
    int earthId = GetObjectId("Earth");
    int sunId = GetObjectId("Sun");
    
-   //loj: 7/27/05 Added check for Earth and Sun
+   // check for Earth and Sun
    if (earthId == UNKNOWN_OBJ_ID || sunId == UNKNOWN_OBJ_ID)
       return;
    
-   //Real objPos[3], endPos[3];
    Real earthPos[3], sunPos[3];
    Real distance = (Real)mAxisLength;
    Real mag;
@@ -3154,21 +3098,6 @@ void TrajPlotCanvas::DrawESLines(int frame)
       sunPos[0] = -mObjectTempPos[sunId][i][0];
       sunPos[1] = -mObjectTempPos[sunId][i][1];
       sunPos[2] =  mObjectTempPos[sunId][i][2];
-      
-      // get sun unit vector and multiply by distance
-      //mag = sqrt(objPos[0]*objPos[0] + objPos[1]*objPos[1] + objPos[2]*objPos[2]);
-      
-      //endPos[0] = objPos[0]/mag * distance;
-      //endPos[1] = objPos[1]/mag * distance;
-      //endPos[2] = objPos[2]/mag * distance;
-      
-      //loj: 6/10/05 Why setting alpha doesn't work?
-      //*sIntColor = mESLinecolor;
-      //glColor4ub(sGlColor->red, sGlColor->green, sGlColor->blue, 255);
-      
-      //loj: 7/21/05 This doesn't work if central body is not Earth or Sun
-      //glVertex3f(endPos[0], endPos[1], endPos[2]);
-      //glVertex3f(-endPos[0], -endPos[1], -endPos[2]);
       
       if (mOriginName == "Earth")
       {
@@ -3203,14 +3132,10 @@ void TrajPlotCanvas::DrawESLines(int frame)
    
    glEnd();
    
-   // Show Sun direction text(loj: 6/10/05)
+   // Show Sun direction text
    glColor3f(1.0, 1.0, 0.0); // yellow
-   //if (mOriginName == "Earth")
-   //   DrawStringAt(" +S", endPos[0]/2.2, endPos[1]/2.2, endPos[2]/2.2);
-   //else if (mOriginName == "Sun")
-   //   DrawStringAt(" -S", endPos[0]/2.2, endPos[1]/2.2, endPos[2]/2.2);
    
-   // get sun unit vector and multiply by distance (loj: 7/22/05)
+   // get sun unit vector and multiply by distance
    mag = sqrt(sunPos[0]*sunPos[0] + sunPos[1]*sunPos[1] + sunPos[2]*sunPos[2]);
    DrawStringAt(" +S", sunPos[0]/mag*distance/2.2,
                 sunPos[1]/mag*distance/2.2,
@@ -3236,18 +3161,14 @@ void TrajPlotCanvas::DrawAxes()
    glBegin(GL_LINES);
    
    glColor3f(0, 1, 0);   // x
-   //glTranslatef(viewDist, 0.0, 0.0);
    glVertex3f(-viewDist, 0, 0);
    glVertex3f( viewDist, 0, 0);
-   //loj:7/22 ?? glTranslatef(-viewDist, 0.0, 0.0);
    
    glColor3f(0, 0, 1);   // y
-   //glTranslatef(0.0, -viewDist, 0.0);
    glVertex3f(0, -viewDist, 0);
    glVertex3f(0,  viewDist, 0);
    
    glColor3f(1, 1, 0);   // z
-   //glTranslatef(0.0, 0.0, viewDist);
    glVertex3f(0, 0, -viewDist);
    glVertex3f(0, 0, viewDist);
    
@@ -3270,71 +3191,6 @@ void TrajPlotCanvas::DrawAxes()
 }
 
 
-// //---------------------------------------------------------------------------
-// // void DrawAxes(int frame)
-// //---------------------------------------------------------------------------
-// void TrajPlotCanvas::DrawAxes(int frame)
-// {
-//    if (frame < 0)
-//       return;
-   
-//    GLfloat viewDist;
-//    Rvector6 axisIn, axisOut;
-//    wxString axisLabel;
-   
-//    viewDist = mAxisLength/2.2; // stays the same
-   
-//    glBegin(GL_LINES);
-
-//    //-----------------------------------
-//    // draw X axes
-//    //-----------------------------------
-//    glColor3f(0, 1, 0);   // green
-//    axisIn.Set(viewDist, 0.0, 0.0, 0.0, 0.0, 0.0);
-//    mCoordConverter.Convert(mTime[frame], axisIn, mInternalCoordSystem,
-//                            axisOut, mViewCoordSystem);
-//    glVertex3f(-axisOut[0], 0, 0);
-//    glVertex3f( axisOut[0], 0, 0);
-   
-//    //-----------------------------------
-//    // draw Y axes
-//    //-----------------------------------
-//    glColor3f(0, 0, 1);   // blue
-//    axisIn.Set(0.0, viewDist, 0.0, 0.0, 0.0, 0.0);
-//    mCoordConverter.Convert(mTime[frame], axisIn, mInternalCoordSystem,
-//                            axisOut, mViewCoordSystem);
-//    glVertex3f(0.0, -axisOut[1], 0.0);
-//    glVertex3f(0.0,  axisOut[1], 0.0);
-   
-//    //-----------------------------------
-//    // draw Z axes
-//    //-----------------------------------
-//    glColor3f(1, 1, 0);   // yellow
-//    axisIn.Set(0.0, 0.0, viewDist, 0.0, 0.0, 0.0);
-//    mCoordConverter.Convert(mTime[frame], axisIn, mInternalCoordSystem,
-//                            axisOut, mViewCoordSystem);
-//    glVertex3f(0.0, 0.0, -axisOut[2]);
-//    glVertex3f(0.0, 0.0,  axisOut[2]);
-   
-//    glEnd();
-   
-//    //-----------------------------------
-//    // throw some text out...
-//    //-----------------------------------
-//    glColor3f(0, 1, 0);   // green
-//    axisLabel = "+X " + mViewCoordSysName;
-//    DrawStringAt(axisLabel, -axisOut[0], 0.0, 0.0);
-   
-//    glColor3f(0, 0, 1);   // blue
-//    axisLabel = "+Y " + mViewCoordSysName;
-//    DrawStringAt(axisLabel, 0.0, -axisOut[0], 0.0);
-   
-//    glColor3f(1, 1, 0);   // yellow
-//    axisLabel = "+Z " + mViewCoordSysName;
-//    DrawStringAt(axisLabel, 0.0, 0.0, axisOut[0]);
-// }
-
-
 //---------------------------------------------------------------------------
 // void DrawStatus(const wxString &label, int frame, double time)
 //---------------------------------------------------------------------------
@@ -3354,8 +3210,6 @@ void TrajPlotCanvas::DrawStatus(const wxString &label, int frame, double time)
    wxString text;
    str.Printf("%d", frame);
    text = label + str;
-   //text = "Frame#: " + str;
-   //str.Printf("%f", mTime[frame]);
    str.Printf("%f", time);
    text = text + "  Time: " + str;
    
@@ -3367,16 +3221,6 @@ void TrajPlotCanvas::DrawStatus(const wxString &label, int frame, double time)
    //            mTime[frame]);
    
 }
-
-
-// //---------------------------------------------------------------------------
-// // void DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z)
-// //---------------------------------------------------------------------------
-// void TrajPlotCanvas::DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z)
-// {
-//    glRasterPos3f(x, y, z);
-//    glCallLists(strlen(inMsg), GL_BYTE, (GLubyte*)inMsg);
-// }
 
 
 //---------------------------------------------------------------------------
@@ -3411,7 +3255,6 @@ int TrajPlotCanvas::GetObjectId(const wxString &name)
       if (mObjectNames[i] == name)
          return i;
    
-   //loj: 7/27/05 Changed from PopoupMessage
    MessageInterface::ShowMessage
       ("*** ERROR *** TrajPlotCanvas::GetObjectId() obj name: " + name +
        " not found in the object list\n");
@@ -3441,7 +3284,6 @@ bool TrajPlotCanvas::TiltOriginZAxis()
    
    // rotate earth Z axis if view CS is EarthMJ2000Ec
    if (mViewCoordSystem->GetName() == "EarthMJ2000Ec")
-   //7.22if (axisTypeName == "MJ2000Ec")
    {
       Rvector6 inState, outState;
       
@@ -3493,7 +3335,6 @@ bool TrajPlotCanvas::ConvertSpacecraftData()
    int objId;
    
    // do not convert if view CS is internal CS
-   //if (mViewCoordSystem->GetName() == mInternalCoordSystem->GetName())
    if (mIsInternalCoordSystem)
    {
       for (int sc=0; sc<mScCount; sc++)
@@ -3528,8 +3369,9 @@ bool TrajPlotCanvas::ConvertSpacecraftData()
             
             #if DEBUG_TRAJCANVAS_CONVERT > 1
             MessageInterface::ShowMessage
-               ("TrajPlotCanvas::ConvertSpacecraftData() in=%g, %g, %g, out=%g, %g, %g\n",
-                inState[0], inState[1], inState[2], outState[0], outState[1], outState[2]);
+               ("TrajPlotCanvas::ConvertSpacecraftData() in=%g, %g, %g, "
+                "out=%g, %g, %g\n", inState[0], inState[1], inState[2],
+                outState[0], outState[1], outState[2]);
             #endif
          }
       }
@@ -3557,7 +3399,6 @@ bool TrajPlotCanvas::ConvertSpacecraftData(int frame)
    int objId;
    
    // do not convert if view CS is internal CS
-   //if (mViewCoordSystem->GetName() == mInternalCoordSystem->GetName())
    if (mIsInternalCoordSystem)
    {
       for (int sc=0; sc<mScCount; sc++)
@@ -3588,8 +3429,9 @@ bool TrajPlotCanvas::ConvertSpacecraftData(int frame)
          
          #if DEBUG_TRAJCANVAS_CONVERT > 1
          MessageInterface::ShowMessage
-            ("TrajPlotCanvas::ConvertSpacecraftData() in=%g, %g, %g, out=%g, %g, %g\n",
-             inState[0], inState[1], inState[2], outState[0], outState[1], outState[2]);
+            ("TrajPlotCanvas::ConvertSpacecraftData() in=%g, %g, %g, "
+             "out=%g, %g, %g\n",inState[0], inState[1], inState[2], outState[0],
+             outState[1], outState[2]);
          #endif
       }
    }
