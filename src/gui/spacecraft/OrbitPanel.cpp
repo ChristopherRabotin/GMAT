@@ -110,7 +110,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
    inState[4] = atof(el5);
    inState[5] = atof(el6);
 
-   // epoch format change
+   // -------------------- epoch format change --------------------
    if (event.GetEventObject() == epochFormatComboBox)
    {
       wxString toEpochFormat = epochFormatComboBox->GetStringSelection();    
@@ -792,7 +792,7 @@ void OrbitPanel::LoadData()
    // load data from the core engine
    try
    {
-      Rvector6 inState, outState, tempState;
+      Rvector6 outState, displayState;
 
       // load the epoch format
       std::string epochFormat = theSpacecraft->GetDisplayDateFormat();
@@ -815,28 +815,14 @@ void OrbitPanel::LoadData()
 
       // load orbital elements  
       PropState ps = theSpacecraft->GetState(); // should be cartesian state
-      Rvector6 displayState;
-         
       for (int i=0; i<6; i++)
       {
          mCartState[i] = ps[i];
       }
 
-      #if DEBUG_ORBIT_PANEL
-         MessageInterface::ShowMessage( "epoch format = %s\n",epochFormat.c_str() );
-         MessageInterface::ShowMessage( "epoch = %s\n",epochStr.c_str() );
-         MessageInterface::ShowMessage( "coordinate system = %s\n",coordSystem.c_str() );
-         MessageInterface::ShowMessage( "state type = %s\n",stType.c_str() );
-         for (int i=0; i<6; i++)
-         {
-            MessageInterface::ShowMessage( "mCartState[%d] = %.16f\n", i, mCartState[i] );
-         }
-         MessageInterface::ShowMessage( "anomaly type = %s\n",anomaly.GetType().c_str() );
-      #endif
-
       if (strcmp(coordSystem.c_str(), "EarthMJ2000Eq") == 0)
       {
-          if (strcmp(stType.c_str(), "Cartesian") == 0)
+         if (strcmp(stType.c_str(), "Cartesian") == 0)
          {
             displayState = mCartState;
          }
@@ -849,12 +835,12 @@ void OrbitPanel::LoadData()
       else
       {
          Real epoch = theSpacecraft->GetRealParameter("Epoch");
-
+         
          // Earth Mean J2000 Equatorial Coordinate System
          CoordinateSystem* inCoord = (CoordinateSystem*) 
             theGuiInterpreter->GetCoordinateSystem("EarthMJ2000Eq");
 
-         // output Coordinate System
+         // output coordinate system
          CoordinateSystem* outCoord = (CoordinateSystem*) 
             theGuiInterpreter->GetCoordinateSystem(coordSystem.c_str());
 
@@ -912,6 +898,15 @@ void OrbitPanel::LoadData()
 
       // labels for elements, anomaly and units
       SetLabelsUnits(stType);     
+
+      #if DEBUG_ORBIT_PANEL
+         MessageInterface::ShowMessage( "epoch format      = %s\n",epochFormat.c_str() );
+         MessageInterface::ShowMessage( "epoch             = %s\n",epochStr.c_str() );
+         MessageInterface::ShowMessage( "coordinate system = %s\n",coordSystem.c_str() );
+         MessageInterface::ShowMessage( "state type        = %s\n",stType.c_str() );
+         MessageInterface::ShowMessage( "mCartState        = %s\n",mCartState.ToString().c_str() );
+         MessageInterface::ShowMessage( "anomaly type      = %s\n",anomaly.GetType().c_str() );
+      #endif
    }
    catch (BaseException &e)
    {
@@ -933,8 +928,8 @@ void OrbitPanel::SaveData()
       MessageInterface::ShowMessage( "In OrbitPanel::SaveData() \n" );
    #endif
    
-   Rvector6 outState, cartState;
-   Real displayState[6], propagateState[6];
+   Rvector6 outState, cartState, displayState;
+   Real propagateState[6];
    
    // save epoch format
    wxString epochFormatStr = epochFormatComboBox->GetStringSelection();
@@ -951,6 +946,7 @@ void OrbitPanel::SaveData()
    // save state type
    wxString stateTypeStr = stateTypeComboBox->GetStringSelection();
    theSpacecraft->SetDisplayCoordType(std::string (stateTypeStr.c_str()));
+   /// @todo: need to correct in spacecraft code because this should only save display state type
 
    // save orbital elements    
    wxString el1 = textCtrl1->GetValue();
@@ -994,58 +990,81 @@ void OrbitPanel::SaveData()
    // Check to see if state needs to be converted to Cartesian before save
    if (mIsTextChanged)
    {
+      mIsTextChanged = false; //loj: added
+      
       #if DEBUG_ORBIT_PANEL
          MessageInterface::ShowMessage( "text changed\n" );
       #endif
 
-      if (strcmp(stateTypeStr.c_str(), "Cartesian") != 0)
+      // Make sure the saved state is cartesian
+      if (strcmp(stateTypeStr.c_str(), "Cartesian") == 0)
       {
-         // convert to Cartesian state
+         // already cartesian state
+         cartState = displayState;
+      }
+      else
+      {
+         // convert to cartesian state
          cartState = stateConverter.Convert(displayState,stateTypeStr.c_str(),
                                                  "Cartesian", anomaly);
-     
-         if (strcmp(coordSystemStr.c_str(), "EarthMJ2000Eq") == 0)
-         {
-            Real epoch = theSpacecraft->GetRealParameter("Epoch");
+      }
+      
+      // Make sure the saved state is earth mean J2000 equatorial
+      if (strcmp(coordSystemStr.c_str(), "EarthMJ2000Eq") == 0)
+      {
+         // already earth mean J2000 equatorial
+         outState = cartState;
+      }         
+      else
+      {
+         Real epoch = theSpacecraft->GetRealParameter("Epoch");
 
-            // input Coordinate System
-            CoordinateSystem* inCoord = (CoordinateSystem*) 
-               theGuiInterpreter->GetCoordinateSystem(coordSystemStr.c_str());
+         // input Coordinate System
+         CoordinateSystem* inCoord = (CoordinateSystem*) 
+            theGuiInterpreter->GetCoordinateSystem(coordSystemStr.c_str());
 
-            // Earth Mean J2000 Equatorial Coordinate System
-            CoordinateSystem* outCoord = (CoordinateSystem*) 
-               theGuiInterpreter->GetCoordinateSystem("EarthMJ2000Eq");
+         // Earth Mean J2000 Equatorial Coordinate System
+         CoordinateSystem* outCoord = (CoordinateSystem*) 
+            theGuiInterpreter->GetCoordinateSystem("EarthMJ2000Eq");
 
-            // convert to output coordinate system
-            mCoordConverter.Convert(A1Mjd(epoch), cartState, inCoord, outState,
-                                    outCoord);
-         }
-  
+         // convert to Earth Mean J2000 Equatorial
+         mCoordConverter.Convert(A1Mjd(epoch), cartState, inCoord, outState,
+                                 outCoord);
       }         
       
+      // save outState
+      mCartState = outState;       
+      MessageInterface::ShowMessage("===> SaveData() after convert mCartState=%s\n",
+                                    mCartState.ToString().c_str());
       for (int i=0; i<6; i++)
       {
          propagateState[i] = outState[i];
-         mCartState[i] = outState[i];
       }
-         
-      // theSpacecraft->SetEpoch();   *** Joey commented it out for now ***
-      theSpacecraft->SetState(stateTypeStr.c_str(), propagateState);
+      
+      theSpacecraft->SetState("Cartesian", propagateState);
+      //theSpacecraft->SetDisplayState(displayState);
+      theSpacecraft->SetDisplayState(mCartState); //loj: need to set mCartState here
    }
+   else
+   {
+      outState = mCartState;
+   }
+       
+//   // theSpacecraft->SetEpoch();   *** Joey commented it out for now ***
+//   // theSpacecraft->SetState(stateTypeStr.c_str(), propagateState);
+//   // theSpacecraft->SaveDisplay();
 
    #if DEBUG_ORBIT_PANEL
-      MessageInterface::ShowMessage( "epoch format = %s\n",epochFormatStr.c_str() );
-      MessageInterface::ShowMessage( "epoch = %s\n",epochStr.c_str() );
+      MessageInterface::ShowMessage( "epoch format      = %s\n",epochFormatStr.c_str() );
+      MessageInterface::ShowMessage( "epoch             = %s\n",epochStr.c_str() );
       MessageInterface::ShowMessage( "coordinate system = %s\n",coordSystemStr.c_str() );
-      MessageInterface::ShowMessage( "coordinate system = %s\n",stateTypeStr.c_str() );
-      MessageInterface::ShowMessage( "anomaly type = %s\n",anomaly.GetType().c_str() );
+      MessageInterface::ShowMessage( "state type        = %s\n",stateTypeStr.c_str() );
+      MessageInterface::ShowMessage( "anomaly type      = %s\n",anomaly.GetType().c_str() );
+      MessageInterface::ShowMessage( "mCartState        = %s\n",mCartState.ToString().c_str() );
       for (int i=0; i<6; i++)
       {
          MessageInterface::ShowMessage( "propagateState[%d] = %.16f\n", i, propagateState[i] );
-         MessageInterface::ShowMessage( "mCartState[%d] = %.16f\n", i, mCartState[i] );
       }
    #endif
-    
-//   theSpacecraft->SaveDisplay();
 }
 
