@@ -192,7 +192,7 @@ void ParameterSelectDialog::Create()
    
    wxStaticBoxSizer *mVarSelectedBoxSizer =
       new wxStaticBoxSizer(selectedStaticBox, wxVERTICAL);
-
+   
    mVarSelectedBoxSizer->Add(selectedParamLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
    mVarSelectedBoxSizer->Add(mVarSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    
@@ -202,7 +202,7 @@ void ParameterSelectDialog::Create()
    wxFlexGridSizer *mFlexGridSizer = new wxFlexGridSizer(3, 0, 0);
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
 
-   mFlexGridSizer->Add(mParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mFlexGridSizer->Add(mParamBoxSizer, 0, wxALIGN_TOP|wxALL, bsize);
    mFlexGridSizer->Add(arrowButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    mFlexGridSizer->Add(mVarSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
@@ -320,6 +320,10 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
          mVarSelectedListBox->SetStringSelection(newParam);
          theOkButton->Enable();
       }
+
+      //Show next parameter (loj: 8/9/05 Added)
+      mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
+      OnSelectProperty(event);
    }
    else if (event.GetEventObject() == mRemoveParamButton)
    {
