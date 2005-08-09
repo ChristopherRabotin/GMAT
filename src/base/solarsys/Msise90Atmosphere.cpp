@@ -96,7 +96,7 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       throw AtmosphereException(
          "Central body pointer not set in MSISE90 model.");
 
-   Real gmst, gha = mCentralBody->GetHourAngle(epoch);
+   Real gha = mCentralBody->GetHourAngle(epoch);
 
    GetInputs(epoch);
 
@@ -114,23 +114,33 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       // Compute east longitude
       lon = ra - gha;
 
+      // Range check because the lst calculation needs 0 < lon < 360
+      if (lon < 0.0) lon += 360.0;
+      if (lon > 360.0) lon -= 360.0;
+
       lat = atan2(pos[i6+2], sqrt(pos[i6]*pos[i6] + pos[i6+1]*pos[i6+1]))
                * rad2deg;
 
-      // compute Local Sidereal Time (LST = GMST + Longitude)
-      // according to Vallado Eq. 3-41
-      gmst = -gha;
-      lst = gmst + lon;
+      // // compute Local Sidereal Time (LST = GMST + Longitude)
+      // // according to Vallado Eq. 3-41
+      // Real gmst = -gha;
+      // lst = gmst + lon;
+      //
+      // // convert it to hours (1h = 15 deg according to Vallado 3.5)
+      // lst /= 15.0;
 
-      // convert it to hours (1h = 15 deg according to Vallado 3.5)
-      lst /= 15.0;
+      // Calculate lst as documented in the FORTRAN code
+      lst = sod/3600.0 + lon/15.0;
+
       rad = sqrt(pos[ i6 ]*pos[ i6 ] +
                  pos[i6+1]*pos[i6+1] +
                  pos[i6+2]*pos[i6+2]);
+                 
       // Now geodetic latitude
       arg = pos[i6+2] / rad;
       arg = ((fabs(arg) <= 1.0) ? arg : arg / fabs(arg));
       radlat = M_PI / 2.0 - acos(arg);
+      
       // Convert to geodetic latitude, in degrees
       radlat += flatteningFactor * sin(2.0 * radlat);
       geolat = radlat * 180.0 / M_PI;
@@ -151,7 +161,7 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
             "Calculating MSISE90 Density from parameters:\n   "
             "yd = %d\n   sod = %lf   alt = %lf\n   lat = %lf\n   lon = %lf\n"
             "   lst = %lf\n   f107a = %lf\n   f107 = %lf\n   ap = "
-            "[%lf %lf %lf %lf %lf %lf %lf]\n", yd, sod, alt, lat, lon, lst,
+            "[%lf %lf %lf %lf %lf %lf %lf]\n", yd, sod, alt, geolat, lon, lst,
             f107a, f107, ap[0], ap[1], ap[2], ap[3], ap[4], ap[5], ap[6]);
       #endif
       
@@ -290,7 +300,7 @@ void Msise90Atmosphere::GetInputs(Real epoch)
     Integer year   = 1941 + yearOffset;
     Integer doy = iEpoch - (Integer)(yearOffset * 365.25) + 5;
 
-    sod  = 86400.0 * (epoch - iEpoch);  // Includes noon/midnight adjustment
+    sod  = 86400.0 * (epoch - iEpoch + 0.5);  // Includes noon/midnight adjustment
     sod = (sod < 0.0 ? sod + 86400.0 : sod);
     yd   = year * 1000 + doy;
 

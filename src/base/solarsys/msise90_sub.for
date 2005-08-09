@@ -95,8 +95,10 @@ C
       DATA MN2/4/,ZN2/72.5,55.,45.,32.5/
       DATA ZMIX/62.5/,ALAST/99999./,MSSL/-999/
       DATA SV/25*1./
-      
-      IF(ISW.NE.64999) CALL TSELEC(SV)
+      SV(1) = 0.0
+
+C      IF(ISW.NE.64999) CALL TSELEC(SV)
+      CALL TSELEC(SV)
 C      Put identification data into common/datime/
       DO 1 I=1,3
         ISDATE(I)=ISD(I)
