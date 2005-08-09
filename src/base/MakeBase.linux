@@ -48,13 +48,12 @@ HEADERS = -Iinclude \
 
 
 # Uncomment this section (and edit the path) to build with Matlab
-CPPFLAGS = $(OPTIMIZATIONS) -Wall -D__USE_MATLAB__=1 \
-            `wx-config --cppflags` \
-           -I/usr/local/matlab704/extern/include 
+#CPPFLAGS = $(OPTIMIZATIONS) -Wall -D__USE_MATLAB__=1 \
+#           -DSKIP_DEVIL `wx-config --cppflags` \
+#           -I/usr/local/matlab704/extern/include 
 
 # Uncomment this section to build without Matlab
-#CPPFLAGS = $(OPTIMIZATIONS) -Wall `wx-config --cppflags`
-
+CPPFLAGS = $(OPTIMIZATIONS) -DSKIP_DEVIL -Wall `wx-config --cppflags`
 
 export CPPFLAGS
 export CPP
