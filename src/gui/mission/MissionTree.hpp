@@ -33,13 +33,12 @@ public:
                long style);
    // void SetMainNotebook (GmatMainNotebook *mainNotebook);
    // GmatMainNotebook *GetMainNotebook();
-
+   
    void UpdateMission(bool resetCounter);
     
 protected:
-
+   
 private:
-   bool gridLines;
 
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
@@ -47,7 +46,7 @@ private:
    // GmatMainNotebook *mainNotebook;
    wxArrayString mCommandList;
    wxWindow *parent;
-    
+   
    wxTreeItemId mMissionSeqTopItem;
    wxTreeItemId mMissionSeqSubItem;
    wxTreeItemId mNewTreeId;
@@ -73,7 +72,8 @@ private:
    
    // Added 2/25/05, DJC
    bool inScriptEvent;
-
+   
+   void InitializeCounter();
    void UpdateCommand();
    wxTreeItemId& UpdateCommandTree(wxTreeItemId parent, GmatCommand *cmd);
    void ExpandChildCommand(wxTreeItemId parent, GmatCommand *baseCmd,
@@ -83,23 +83,25 @@ private:
                               int *cmdCount, int endCount = 0);
    wxTreeItemId InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
                               wxTreeItemId prevId, GmatTree::MissionIconType icon,
-                              GmatTree::ItemType type, GmatCommand *prevCmd,
-                              GmatCommand *cmd, int *cmdCount);
+                              GmatTree::ItemType type, const wxString &cmdName,
+                              GmatCommand *prevCmd, GmatCommand *cmd, int *cmdCount);
+   
+   void AppendCommand(const wxString &cmdName);
+   void InsertCommand(const wxString &cmdName);
+   
    void AddDefaultMission();
    void AddDefaultMissionSeq(wxTreeItemId universe);
    void AddIcons();
-
+   
    // event handlers
    void OnItemRightClick(wxTreeEvent& event);
    void OnItemActivated(wxTreeEvent &event);
    void OnDoubleClick(wxMouseEvent &event);
    void ShowMenu(wxTreeItemId id, const wxPoint& pt);
-//   void OnBefore();
-//   void OnAfter();
    bool CheckClickIn(wxPoint position);
-    
+   
    void OnAddMissionSeq(wxCommandEvent &event);
-    
+   
    void OnAddPropagate(wxCommandEvent &event);
    void OnAddManeuver(wxCommandEvent &event);
    void OnAddAchieve(wxCommandEvent &event);
@@ -109,16 +111,16 @@ private:
    void OnAddToggle(wxCommandEvent &event);
    void OnAddTarget(wxCommandEvent &event);
    void OnAddScriptEvent(wxCommandEvent &event);
-
+   
    void OnAddIfStatement(wxCommandEvent &event);
    void OnAddIfElseStatement(wxCommandEvent &event);
+   void OnAddElseStatement(wxCommandEvent &event);
+   void OnAddElseIfStatement(wxCommandEvent &event);
    void OnAddWhileLoop(wxCommandEvent &event);
    void OnAddForLoop(wxCommandEvent &event);
    void OnAddDoWhile(wxCommandEvent &event);
    void OnAddSwitchCase(wxCommandEvent &event);
-   void OnAddElseIfStatement(wxCommandEvent &event);
-   void OnAddElseStatement(wxCommandEvent &event);
-    
+   
    void OnInsertPropagate(wxCommandEvent &event);
    void OnInsertManeuver(wxCommandEvent &event);
    void OnInsertAchieve(wxCommandEvent &event);
@@ -128,36 +130,35 @@ private:
    void OnInsertToggle(wxCommandEvent &event);
    void OnInsertTarget(wxCommandEvent &event);
    void OnInsertScriptEvent(wxCommandEvent &event);
-
+   
    void OnInsertIfStatement(wxCommandEvent &event);
+   void OnInsertIfElseStatement(wxCommandEvent &event);
    void OnInsertWhileLoop(wxCommandEvent &event);
    void OnInsertForLoop(wxCommandEvent &event);
    void OnInsertDoWhile(wxCommandEvent &event);
    void OnInsertSwitchCase(wxCommandEvent &event);
-    
-//   void OnViewVariables();
-//   void OnViewGoals();
-
+   
    void OnRun(wxCommandEvent &event);
-    
+   
    void OnDelete(wxCommandEvent &event);
-    
+   
    void OnOpen(wxCommandEvent &event);
    void OnClose(wxCommandEvent &event);
-
-   wxMenu* CreateAddPopupMenu();
-   wxMenu* CreateInsertPopupMenu();
-   wxMenu* CreateTargetPopupMenu(bool insert);
+   
+   wxMenu* CreatePopupMenu(int type, bool insert);
+   wxMenu* CreateTargetPopupMenu(int type, bool insert);
    wxMenu* AppendTargetPopupMenu(wxMenu *menu, bool insert);
-   // wxMenu* CreateControlLogicPopupMenu();
-   wxMenu* CreateAddControlLogicPopupMenu();
-   wxMenu* CreateAddIfPopupMenu();
-   wxMenu* CreateInsertControlLogicPopupMenu();
-   int GetMenuId(const wxString &cmd, bool insert); //loj: 11/15/04 added
+   wxMenu* CreateControlLogicPopupMenu(int type, bool insert);
+   
+   int GetMenuId(const wxString &cmd, bool insert);
+   GmatTree::MissionIconType GetIconId(const wxString &cmd);
+   GmatTree::ItemType GetCommandId(const wxString &cmd);
+   int* GetCommandCounter(const wxString &cmd);
+   wxTreeItemId FindChild(wxTreeItemId parentId, const wxString &cmd);
    
    // for Debug
    void ShowCommands(const wxString &msg = "");
-   void ShowSubCommands(GmatCommand *baseCmd, GmatCommand *cmd, Integer level);
+   void ShowSubCommands(GmatCommand* brCmd, Integer level);
    
    DECLARE_EVENT_TABLE();
    
@@ -216,6 +217,7 @@ private:
       POPUP_ADD_ELSE_STATEMENT,
       
       POPUP_INSERT_IF_STATEMENT,
+      POPUP_INSERT_ELSE_STATEMENT,
       POPUP_INSERT_IF_ELSE_STATEMENT,
       POPUP_INSERT_WHILE_LOOP,
       POPUP_INSERT_FOR_LOOP,
