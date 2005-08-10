@@ -52,7 +52,7 @@
 #include "SolarRadiationPressure.hpp"
 #include <sstream>                      // For stringstream
 
-
+//#define DEBUG_SRP_ORIGIN
 
 //---------------------------------
 // static data
@@ -519,8 +519,16 @@ bool SolarRadiationPressure::Initialize(void)
       if (!theSun)
          throw ForceModelException("Solar system does not contain the Sun for SRP force.");
 
-      /// @todo: Update to get the central body for solar radiation pressure
-      body = solarSystem->GetBody(SolarSystem::EARTH_NAME);
+      // Set the body to the force model origin, or Earth if origin isn't set
+      if (forceOrigin)
+         body = forceOrigin;
+      else
+         body = solarSystem->GetBody(SolarSystem::EARTH_NAME);
+   
+      #ifdef DEBUG_SRP_ORIGIN
+         MessageInterface::ShowMessage("SRP body is %s\n", 
+            body->GetName().c_str());
+      #endif
 
       if (!body)
          throw ForceModelException("Central body not set for SRP force.");
@@ -537,6 +545,10 @@ bool SolarRadiationPressure::Initialize(void)
 
       initialized = true;
    }
+   
+   #ifdef DEBUG_SRP_ORIGIN
+      shadowModel = 0;  // CONICAL_MODEL
+   #endif
    
    return initialized;
 }
@@ -558,15 +570,29 @@ bool SolarRadiationPressure::SetCentralBody()
    if (!theSun)
       throw ForceModelException("Solar system does not contain the Sun for SRP force.");
    
-   // DJC: Changed to use the Earth as the SRP central body for now
-   /// @todo: Update to get the central body for solar radiation pressure
-   body = solarSystem->GetBody(SolarSystem::EARTH_NAME);
+   // Set the body to the force model origin, or Earth if origin isn't set
+   if (forceOrigin)
+      body = forceOrigin;
+   else
+      body = solarSystem->GetBody(SolarSystem::EARTH_NAME);
+
+   #ifdef DEBUG_SRP_ORIGIN
+      MessageInterface::ShowMessage("SRP body is %s\n", 
+         body->GetName().c_str());
+   #endif
 
    if (!body)
       throw ForceModelException("Central body not set for SRP force.");
 
    bodyRadius = body->GetEquatorialRadius();
 
+   #ifdef DEBUG_SRP_ORIGIN
+      MessageInterface::ShowMessage("SRP central body set to %s\n", 
+         body->GetName().c_str());
+      shadowModel = 0;  // CONICAL_MODEL
+   #endif
+   
+   
    return true;
 }
 
@@ -587,7 +613,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
     if (!theSun)
        throw ForceModelException("The Sun is not set in SRP::GetDerivatives");
 
-      if (!body)
+    if (!body)
        throw ForceModelException(
           "The central body is not set in SRP::GetDerivatives");
     
@@ -629,6 +655,17 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
     cbSunVector[1] = sunrv[1] - cbrv[1];
     cbSunVector[2] = sunrv[2] - cbrv[2];
 
+    #ifdef DEBUG_SRP_ORIGIN
+      bool showData = false;
+      if (shadowModel == 0) 
+      {
+         MessageInterface::ShowMessage("SRP[%s] Sun Position: %lf %lf %lf\n", 
+            body->GetName().c_str(), cbSunVector[0], cbSunVector[1], 
+            cbSunVector[2]);
+         showData = true;
+      }
+    #endif
+ 
     if (order > 2)
         return false;
 
@@ -655,6 +692,11 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
         // Factor of 0.001 converts m/s^2 to km/s^2
         distancefactor *= distancefactor * 0.001;
       
+        #ifdef DEBUG_SRP_ORIGIN
+           if (shadowModel == 0) 
+              shadowModel = CONICAL_MODEL;
+        #endif
+        
         // Test shadow condition for surrent spacecraft
         FindShadowState(inSunlight, inShadow, &state[i6]);
         
@@ -696,6 +738,25 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
          ep, nominalSun, sunDistance, percentSun, cr, fluxPressure, area, mass, 
          distancefactor, forceVector[0], forceVector[1], forceVector[2]);
    #endif
+
+   #ifdef DEBUG_SRP_ORIGIN
+      if (showData) 
+      {
+         MessageInterface::ShowMessage(
+            "SRP Parameters at %s:\n   SunVec = [%16le %16le %16le]\n   posVec"
+            " = [%16le %16le %16le]\n", body->GetName().c_str(), cbSunVector[0], 
+            cbSunVector[1], cbSunVector[2], state[0], state[1], state[2]);
+         MessageInterface::ShowMessage(
+            "   epoch = %16le\n   nomSun = %16le\n   sunDist = %16le\n   "
+            "percent = %16le\n   cr = %16le\n   fluxP = %16le\n   area = %16le"
+            "\n   mass = %16le\n   distFac = %16le\n   forceVector = [%16le "
+            "%16le %16le]\n   magnitude = %16le\n\n", ep, nominalSun, 
+            sunDistance, percentSun, cr[0], fluxPressure, area[0], mass[0], 
+            distancefactor, forceVector[0], forceVector[1], forceVector[2], 
+            mag);
+      }
+   #endif
+
    return true;
 }
 

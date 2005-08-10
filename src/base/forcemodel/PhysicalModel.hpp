@@ -205,8 +205,8 @@ protected:
 
    /// Array of data parameters containing the model data
    Real *modelState;
-    /// The state vector in J2000BodyMJ2000Eq coordinates.
-    Real *rawState;
+   /// The state vector in J2000BodyMJ2000Eq coordinates.
+   Real *rawState;
    /// The base epoch
    Real epoch;
    /// Number of seconds elapsed from the base epoch
