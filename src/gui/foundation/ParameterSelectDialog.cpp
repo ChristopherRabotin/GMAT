@@ -284,7 +284,7 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
       // if only one parameter is allowed
       if (!mCanSelectMultiVars)
          mVarSelectedListBox->Clear();
-
+      
       // if whole object is selected and not property or user param
       if ((mCanSelectWholeObject) &&  (mShowSysVars) &&
           (mPropertyListBox->GetSelection() == -1) &&
@@ -298,12 +298,12 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
          {
             mVarSelectedListBox->Append(newParam);
             mVarSelectedListBox->SetStringSelection(newParam);
-            theOkButton->Enable();
+            //theOkButton->Enable();
          }
-
+         
          return;
       }
-
+      
       // get string in first list
       wxString newParam = FormParamName();
       
@@ -320,7 +320,7 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
          mVarSelectedListBox->SetStringSelection(newParam);
          theOkButton->Enable();
       }
-
+      
       //Show next parameter (loj: 8/9/05 Added)
       mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
       OnSelectProperty(event);
@@ -335,16 +335,18 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
       else
          mVarSelectedListBox->SetSelection(sel-1);
       
-      if (mVarSelectedListBox->GetCount() > 0)
-         theOkButton->Enable();
-      else
-         theOkButton->Disable();
+      //if (mVarSelectedListBox->GetCount() > 0)
+      //   theOkButton->Enable();
+      //else
+      //   theOkButton->Disable();
    }
    else if (event.GetEventObject() == mRemoveAllParamButton)
    {
       mVarSelectedListBox->Clear();
-      theOkButton->Disable();
+      //theOkButton->Disable();
    }
+   
+   theOkButton->Enable(); //loj: 8/10/05 Added
 }
 
 
