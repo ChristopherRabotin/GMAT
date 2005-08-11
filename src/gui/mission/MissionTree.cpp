@@ -60,52 +60,17 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_TREE_ITEM_RIGHT_CLICK(-1, MissionTree::OnItemRightClick)
    EVT_TREE_ITEM_ACTIVATED(-1, MissionTree::OnItemActivated)
    
-   //EVT_MENU_HIGHLIGHT(POPUP_SWAP_BEFORE, MissionTree::OnBefore)
-   //EVT_MENU_HIGHLIGHT(POPUP_SWAP_AFTER, MissionTree::OnAfter)
-   
    EVT_MENU(POPUP_OPEN, MissionTree::OnOpen)
    EVT_MENU(POPUP_CLOSE, MissionTree::OnClose)
    
    EVT_MENU(POPUP_ADD_MISSION_SEQ, MissionTree::OnAddMissionSeq)
-   EVT_MENU(POPUP_ADD_MANEUVER, MissionTree::OnAddManeuver)
-   EVT_MENU(POPUP_ADD_PROPAGATE, MissionTree::OnAddPropagate)
-   EVT_MENU(POPUP_ADD_ACHIEVE, MissionTree::OnAddAchieve)
-   EVT_MENU(POPUP_ADD_VARY, MissionTree::OnAddVary)
-   EVT_MENU(POPUP_ADD_FUNCTION, MissionTree::OnAddFunction)
-   //EVT_MENU(POPUP_ADD_ASSIGNMENT, MissionTree::OnAddAssignment)
-   //EVT_MENU(POPUP_ADD_TOGGLE, MissionTree::OnAddToggle)
-   EVT_MENU(POPUP_ADD_TARGET, MissionTree::OnAddTarget)
-   EVT_MENU(POPUP_ADD_SCRIPT_EVENT, MissionTree::OnAddScriptEvent)
-   EVT_MENU(POPUP_ADD_IF_STATEMENT, MissionTree::OnAddIfStatement)
-   EVT_MENU(POPUP_ADD_IF_ELSE_STATEMENT, MissionTree::OnAddIfElseStatement)
-   EVT_MENU(POPUP_ADD_WHILE_LOOP, MissionTree::OnAddWhileLoop)
-   EVT_MENU(POPUP_ADD_FOR_LOOP, MissionTree::OnAddForLoop)
-   EVT_MENU(POPUP_ADD_D0_WHILE, MissionTree::OnAddDoWhile)
-   EVT_MENU(POPUP_ADD_SWITCH_CASE, MissionTree::OnAddSwitchCase)
-   EVT_MENU(POPUP_ADD_ELSE_IF_STATEMENT, MissionTree::OnAddElseIfStatement)
-   EVT_MENU(POPUP_ADD_ELSE_STATEMENT, MissionTree::OnAddElseStatement)
-
-   EVT_MENU(POPUP_INSERT_MANEUVER, MissionTree::OnInsertManeuver)
-   EVT_MENU(POPUP_INSERT_PROPAGATE, MissionTree::OnInsertPropagate)
-   EVT_MENU(POPUP_INSERT_ACHIEVE, MissionTree::OnInsertAchieve)
-   EVT_MENU(POPUP_INSERT_VARY, MissionTree::OnInsertVary)
-   EVT_MENU(POPUP_INSERT_FUNCTION, MissionTree::OnInsertFunction)
-   //EVT_MENU(POPUP_INSERT_ASSIGNMENT, MissionTree::OnInsertAssignment)
-   //EVT_MENU(POPUP_INSERT_TOGGLE, MissionTree::OnInsertToggle)
-   EVT_MENU(POPUP_INSERT_TARGET, MissionTree::OnInsertTarget)
-   EVT_MENU(POPUP_INSERT_SCRIPT_EVENT, MissionTree::OnInsertScriptEvent)
-   EVT_MENU(POPUP_INSERT_IF_STATEMENT, MissionTree::OnInsertIfStatement)
-   EVT_MENU(POPUP_INSERT_IF_ELSE_STATEMENT, MissionTree::OnInsertIfElseStatement)
-   EVT_MENU(POPUP_INSERT_WHILE_LOOP, MissionTree::OnInsertWhileLoop)
-   EVT_MENU(POPUP_INSERT_FOR_LOOP, MissionTree::OnInsertForLoop)
-   EVT_MENU(POPUP_INSERT_D0_WHILE, MissionTree::OnInsertDoWhile)
-   EVT_MENU(POPUP_INSERT_SWITCH_CASE, MissionTree::OnInsertSwitchCase)
    
-   //EVT_MENU(POPUP_VIEW_VARIABLES, MissionTree::OnViewVariables)
-   //EVT_MENU(POPUP_VIEW_GOALS, MissionTree::OnViewGoals)
+   EVT_MENU_RANGE(POPUP_ADD_PROPAGATE, POPUP_ADD_SWITCH_CASE,
+                  MissionTree::OnAddCommand)
+   EVT_MENU_RANGE(POPUP_INSERT_PROPAGATE, POPUP_INSERT_SWITCH_CASE,
+                  MissionTree::OnInsertCommand)
    
    EVT_MENU(POPUP_RUN, MissionTree::OnRun)
-   
    EVT_MENU(POPUP_DELETE, MissionTree::OnDelete)
 
 END_EVENT_TABLE()
@@ -938,9 +903,6 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
          menu.Append(POPUP_DELETE, wxT("Delete"));
          menu.Append(POPUP_RENAME, wxT("Rename"));
          menu.Enable(POPUP_RENAME, FALSE);
-         //menu.AppendSeparator();
-         //menu.Append(POPUP_VIEW_VARIABLES, wxT("View Variables"));
-         //menu.Append(POPUP_VIEW_GOALS, wxT("View Goals")); 
       } 
       else 
       {
@@ -983,9 +945,9 @@ void MissionTree::OnAddMissionSeq(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
    wxString name;
-    
+   
    name.Printf("Sequence%d", ++mNumMissionSeq);
-  
+   
    mMissionSeqSubItem =
       AppendItem(item, name, GmatTree::MISSION_ICON_FOLDER, -1,
                  new MissionTreeItemData(name, GmatTree::MISSION_SEQ_SUB_FOLDER));
@@ -996,362 +958,134 @@ void MissionTree::OnAddMissionSeq(wxCommandEvent &event)
    Expand(item);
 }
 
+
 //------------------------------------------------------------------------------
-// void OnAddPropagate(wxCommandEvent &event)
+// void OnAddCommand(wxCommandEvent &event)
 //------------------------------------------------------------------------------
-void MissionTree::OnAddPropagate(wxCommandEvent &event)
+void MissionTree::OnAddCommand(wxCommandEvent &event)
 {
-   AppendCommand("Propagate");
-}
-
-//------------------------------------------------------------------------------
-// void OnAddManeuver(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnAddManeuver(wxCommandEvent &event)
-{
-   AppendCommand("Maneuver");
-}
-
-//------------------------------------------------------------------------------
-// void OnAddAchieve(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnAddAchieve(wxCommandEvent &event)
-{
-   AppendCommand("Achieve");
-}
-
-//------------------------------------------------------------------------------
-// void :OnAddVary(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnAddVary(wxCommandEvent &event)
-{
-   AppendCommand("Vary");
-}
-
-
-//------------------------------------------------------------------------------
-// void OnAddFunction(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnAddFunction(wxCommandEvent &event)
-{
-   AppendCommand("CallFunction");
-}
-
-//------------------------------------------------------------------------------
-// void OnAddAssignment(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnAddAssignment(wxCommandEvent &event)
-{
-   //AppendCommand("Assignment");
-}
-
-//------------------------------------------------------------------------------
-// void OnAddToggle(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnAddToggle(wxCommandEvent &event)
-{
-   //AppendCommand("Toggle");
-}
-
-
-//------------------------------------------------------------------------------
-// void OnAddTarget(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnAddTarget(wxCommandEvent &event)
-{
-   AppendCommand("Target");
-}
-
-//------------------------------------------------------------------------------
-// void OnAddScriptEvent(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnAddScriptEvent(wxCommandEvent &event)
-{
-   AppendCommand("BeginScript");
-}
-
-//------------------------------------------------------------------------------
-// void OnAddIfStatement(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnAddIfStatement(wxCommandEvent &event)
-{
-   AppendCommand("If");
+   switch (event.GetId())
+   {
+   case POPUP_ADD_PROPAGATE:
+      AppendCommand("Propagate");
+      break;
+   case POPUP_ADD_MANEUVER:
+      AppendCommand("Maneuver");
+      break;
+   case POPUP_ADD_TARGET:
+      AppendCommand("Target");
+      break;
+   case POPUP_ADD_VARY:
+      AppendCommand("Vary");
+      break;
+   case POPUP_ADD_ACHIEVE:
+      AppendCommand("Achieve");
+      break;
+   case POPUP_ADD_FUNCTION:
+      AppendCommand("CallFunction");
+      break;
+   case POPUP_ADD_ASSIGNMENT:
+      //AppendCommand("Assignment");
+      break;
+   case POPUP_ADD_TOGGLE:
+      //AppendCommand("Toggle");
+      break;
+   case POPUP_ADD_SCRIPT_EVENT:
+      AppendCommand("BeginScript");
+      break;
+   case POPUP_ADD_IF_STATEMENT:
+      AppendCommand("If");
+      break;
+   case POPUP_ADD_IF_ELSE_STATEMENT:
+      AppendCommand("IfElse");
+      break;
+   case POPUP_ADD_ELSE_STATEMENT:
+      //AppendCommand("Else");
+      break;
+   case POPUP_ADD_ELSE_IF_STATEMENT:
+      //AppendCommand("ElseIf");
+      break;
+   case POPUP_ADD_FOR_LOOP:
+      AppendCommand("For");
+      break;
+   case POPUP_ADD_WHILE_LOOP:
+      AppendCommand("While");
+      break;
+   case POPUP_ADD_D0_WHILE:
+      //AppendCommand("Do");
+      break;
+   case POPUP_ADD_SWITCH_CASE:
+      //AppendCommand("Switch");
+      break;
+   default:
+      break;
+   }
 }
 
 
 //------------------------------------------------------------------------------
-// void OnAddIfElseStatement(wxCommandEvent &event)
+// void OnInsertCommand(wxCommandEvent &event)
 //------------------------------------------------------------------------------
-void MissionTree::OnAddIfElseStatement(wxCommandEvent &event)
+void MissionTree::OnInsertCommand(wxCommandEvent &event)
 {
-   AppendCommand("IfElse");
+   switch (event.GetId())
+   {
+   case POPUP_INSERT_PROPAGATE:
+      InsertCommand("Propagate");
+      break;
+   case POPUP_INSERT_MANEUVER:
+      InsertCommand("Maneuver");
+      break;
+   case POPUP_INSERT_TARGET:
+      InsertCommand("Target");
+      break;
+   case POPUP_INSERT_VARY:
+      InsertCommand("Vary");
+      break;
+   case POPUP_INSERT_ACHIEVE:
+      InsertCommand("Achieve");
+      break;
+   case POPUP_INSERT_FUNCTION:
+      InsertCommand("CallFunction");
+      break;
+   case POPUP_INSERT_ASSIGNMENT:
+      //InsertCommand("Assignment");
+      break;
+   case POPUP_INSERT_TOGGLE:
+      //InsertCommand("Toggle");
+      break;
+   case POPUP_INSERT_SCRIPT_EVENT:
+      InsertCommand("BeginScript");
+      break;
+   case POPUP_INSERT_IF_STATEMENT:
+      InsertCommand("If");
+      break;
+   case POPUP_INSERT_IF_ELSE_STATEMENT:
+      InsertCommand("IfElse");
+      break;
+   case POPUP_INSERT_ELSE_STATEMENT:
+      //InsertCommand("Else");
+      break;
+   case POPUP_INSERT_ELSE_IF_STATEMENT:
+      //InsertCommand("ElseIf");
+      break;
+   case POPUP_INSERT_FOR_LOOP:
+      InsertCommand("For");
+      break;
+   case POPUP_INSERT_WHILE_LOOP:
+      InsertCommand("While");
+      break;
+   case POPUP_INSERT_D0_WHILE:
+      //InsertCommand("Do");
+      break;
+   case POPUP_INSERT_SWITCH_CASE:
+      //InsertCommand("Switch");
+      break;
+   default:
+      break;
+   }
 }
 
-
-//------------------------------------------------------------------------------
-// void OnAddElseStatement(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnAddElseStatement(wxCommandEvent &event)
-{
-   AppendCommand("Else");
-   
-//    wxTreeItemId itemId = GetSelection();
-//    wxTreeItemId parent = GetItemParent(itemId);
-   
-//    // go through the items in the command sequence to find either
-//    // last else or the end
-//    GmatTreeItemData *itemData = (GmatTreeItemData *)GetItemData(itemId);
-//    while ( (itemData->GetDataType() != GmatTree::ELSE_CONTROL) &&
-//            (itemData->GetDataType() != GmatTree::END_IF_CONTROL) )
-//    {
-//       //MessageInterface::ShowMessage("The cur sibling is %s\n", itemData->GetDesc().c_str());
-//       itemId = GetNextSibling(itemId);  
-//       itemData = (GmatTreeItemData *)GetItemData(itemId);
-//       //MessageInterface::ShowMessage("The next sibling is %s\n", itemData->GetDesc().c_str());
-//    }   
-   
-//    if (itemData->GetDataType() == GmatTree::ELSE_CONTROL)
-//       // need to output message to user that they can't have 2 elses
-//       return;
-   
-//    // add the "else if" to the sibling before that last else or end
-//    itemId = GetPrevSibling(itemId);
-   
-//    wxString name;
-//    name.Printf("Else%d", mNumIfStatement);
-//    //    endName.Printf("End If%d", mNumIfStatement);
-//    //    ++mNumIfStatement;
-//    // ag: need gui interpreter to get control logic
-//    //    GmatCommand *cmd =
-//    //        theGuiInterpreter->CreateCommand("Maneuver", std::string(name.c_str()));
-//    //    
-//    //    if (cmd != NULL)
-//    //    {
-//    //        if (theGuiInterpreter->AppendCommand(cmd))
-//    //        {   
-//    wxTreeItemId targetId =
-//       InsertItem(parent, itemId, name, GmatTree::MISSION_ICON_FOLDER, -1,
-//                  new MissionTreeItemData(name, GmatTree::ELSE_CONTROL, 
-//                                          name, NULL));
-//    SetItemImage(targetId, GmatTree::MISSION_ICON_OPENFOLDER,
-//                 wxTreeItemIcon_Expanded);    
-//    //            AppendItem(itemId, endName, GmatTree::MISSION_ICON_NEST_RETURN, -1,
-//    //                       new MissionTreeItemData(endName, GmatTree::END_CONTROL, 
-//    //                                               endName, NULL));
-
-//    Expand(itemId);
-//    //        }
-//    //    }
-
-}
-
-//------------------------------------------------------------------------------
-// void OnAddElseIfStatement(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnAddElseIfStatement(wxCommandEvent &event)
-{
-   //AppendCommand("ElseIf");
-   
-//    wxTreeItemId itemId = GetSelection();
-//    wxTreeItemId parent = GetItemParent(itemId);
-   
-//    // go through the items in the command sequence to find either
-//    // last else or the end
-//    GmatTreeItemData *itemData = (GmatTreeItemData *)GetItemData(itemId);
-//    while ( (itemData->GetDataType() != GmatTree::ELSE_CONTROL) &&
-//            (itemData->GetDataType() != GmatTree::END_IF_CONTROL) )
-//    {
-//       //MessageInterface::ShowMessage("The cur sibling is %s\n", itemData->GetDesc().c_str());
-//       itemId = GetNextSibling(itemId);  
-//       itemData = (GmatTreeItemData *)GetItemData(itemId);
-//       //MessageInterface::ShowMessage("The next sibling is %s\n", itemData->GetDesc().c_str());
-//    }   
-   
-//    // add the "else if" to the sibling before that last else or end
-//    itemId = GetPrevSibling(itemId);
-   
-//    wxString name;
-//    name.Printf("Else If%d", ++mNumIfStatement);
-//    //    endName.Printf("End If%d", mNumIfStatement);
-//    //    ++mNumIfStatement;
-//    // ag: need gui interpreter to get control logic
-//    //    GmatCommand *cmd =
-//    //        theGuiInterpreter->CreateCommand("Maneuver", std::string(name.c_str()));
-//    //    
-//    //    if (cmd != NULL)
-//    //    {
-//    //        if (theGuiInterpreter->AppendCommand(cmd))
-//    //        {   
-//    wxTreeItemId targetId =
-//       InsertItem(parent, itemId, name, GmatTree::MISSION_ICON_FOLDER, -1,
-//                  new MissionTreeItemData(name, GmatTree::ELSE_IF_CONTROL, 
-//                                          name, NULL));
-//    SetItemImage(targetId, GmatTree::MISSION_ICON_OPENFOLDER,
-//                 wxTreeItemIcon_Expanded);    
-//    //            AppendItem(item, endName, GmatTree::MISSION_ICON_NEST_RETURN, -1,
-//    //                       new MissionTreeItemData(endName, GmatTree::END_CONTROL, 
-//    //                                               endName, NULL));
-
-//    Expand(itemId);
-//    //        }
-//    //    }
-}
-
-
-//------------------------------------------------------------------------------
-// void OnAddWhileLoop(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnAddWhileLoop(wxCommandEvent &event)
-{
-   AppendCommand("While");
-}
-
-//------------------------------------------------------------------------------
-// void OnAddForLoop(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnAddForLoop(wxCommandEvent &event)
-{
-   AppendCommand("For");
-}
-
-//------------------------------------------------------------------------------
-// void OnAddDoWhile(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnAddDoWhile(wxCommandEvent &event)
-{
-   AppendCommand("Do");
-}
-
-//------------------------------------------------------------------------------
-// void OnAddSwitchCase(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnAddSwitchCase(wxCommandEvent &event)
-{
-   AppendCommand("Switch");
-}
-
-//------------------------------------------------------------------------------
-// void OnInsertPropagate(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnInsertPropagate(wxCommandEvent &event)
-{
-   InsertCommand("Propagate");
-}
-
-//------------------------------------------------------------------------------
-// void OnInsertManeuver(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnInsertManeuver(wxCommandEvent &event)
-{
-   InsertCommand("Maneuver");
-}
-
-//------------------------------------------------------------------------------
-// void OnInsertAchieve(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnInsertAchieve(wxCommandEvent &event)
-{
-   InsertCommand("Achieve");
-}
-
-//------------------------------------------------------------------------------
-// void OnInsertVary(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnInsertVary(wxCommandEvent &event)
-{
-   InsertCommand("Vary");
-}
-
-//------------------------------------------------------------------------------
-// void OnInsertFunction(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnInsertFunction(wxCommandEvent &event)
-{
-   InsertCommand("CallFunction");
-}
-
-//------------------------------------------------------------------------------
-// void OnInsertAssignment(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnInsertAssignment(wxCommandEvent &event)
-{
-   //InsertCommand("Assignment");
-}
-
-//------------------------------------------------------------------------------
-// void OnInsertToggle(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnInsertToggle(wxCommandEvent &event)
-{
-   //InsertCommand("Toggle");
-}
-
-
-//------------------------------------------------------------------------------
-// void OnInsertTarget(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnInsertTarget(wxCommandEvent &event)
-{
-  InsertCommand("Target");
-}
-
-//------------------------------------------------------------------------------
-// void OnInsertScriptEvent(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnInsertScriptEvent(wxCommandEvent &event)
-{
-   InsertCommand("BeginScript");
-}
-
-//------------------------------------------------------------------------------
-// void OnInsertIfStatement(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnInsertIfStatement(wxCommandEvent &event)
-{
-   InsertCommand("If");
-}
-
-
-//------------------------------------------------------------------------------
-// void OnInsertIfElseStatement(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnInsertIfElseStatement(wxCommandEvent &event)
-{
-   InsertCommand("IfElse");
-}
-
-
-//------------------------------------------------------------------------------
-// void OnInsertWhileLoop(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnInsertWhileLoop(wxCommandEvent &event)
-{
-   InsertCommand("While");
-}
-
-//------------------------------------------------------------------------------
-// void OnInsertForLoop(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnInsertForLoop(wxCommandEvent &event)
-{
-   InsertCommand("For");
-}
-
-//------------------------------------------------------------------------------
-// void OnInsertDoWhile(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnInsertDoWhile(wxCommandEvent &event)
-{
-   InsertCommand("Do");
-}
-
-//------------------------------------------------------------------------------
-// void OnInsertSwitchCase(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::OnInsertSwitchCase(wxCommandEvent &event)
-{
-   InsertCommand("Switch");
-}
 
 //---------------------------------
 // Crete popup menu
@@ -1511,6 +1245,7 @@ void MissionTree::OnRun(wxCommandEvent &event)
    theGuiInterpreter->RunMission();
 }
 
+
 //---------------------------------------------------------------------------
 // bool MissionTree::CheckClickIn(wxPoint position)
 //--------------------------------------------------------------------------
@@ -1646,8 +1381,11 @@ void MissionTree::OnClose(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 int MissionTree::GetMenuId(const wxString &cmd, bool insert)
 {
-   //MessageInterface::ShowMessage("MissionTree::GetMenuId() cmd=%s, insert=%d\n",
-   //                              cmd.c_str(), insert);
+   #if DEBUG_MISSION_TREE
+   MessageInterface::ShowMessage("MissionTree::GetMenuId() cmd=%s, insert=%d\n",
+                                 cmd.c_str(), insert);
+   #endif
+   
    int id = 0;
    
    for (unsigned int i=0; i<mCommandList.Count(); i++)
@@ -1662,10 +1400,10 @@ int MissionTree::GetMenuId(const wxString &cmd, bool insert)
             return POPUP_INSERT_TARGET;
          else if (cmd == "CallFunction")
             return POPUP_INSERT_FUNCTION;
-//         else if (cmd == "Assignment")
-//            return POPUP_INSERT_ASSIGNMENT;
-//         else if (cmd == "Toggle")
-//            return POPUP_INSERT_TOGGLE;
+         else if (cmd == "Assignment")
+            return POPUP_INSERT_ASSIGNMENT;
+         else if (cmd == "Toggle")
+            return POPUP_INSERT_TOGGLE;
          else if (cmd == "ScriptEvent")
             return POPUP_INSERT_SCRIPT_EVENT;
          else
@@ -1682,10 +1420,10 @@ int MissionTree::GetMenuId(const wxString &cmd, bool insert)
             return POPUP_ADD_TARGET;
          else if (cmd == "CallFunction")
             return POPUP_ADD_FUNCTION;
-//         else if (cmd == "Assignment")
-//            return POPUP_ADD_ASSIGNMENT;
-//         else if (cmd == "Toggle")
-//            return POPUP_ADD_TOGGLE;
+         else if (cmd == "Assignment")
+            return POPUP_ADD_ASSIGNMENT;
+         else if (cmd == "Toggle")
+            return POPUP_ADD_TOGGLE;
          else if (cmd == "ScriptEvent")
             return POPUP_ADD_SCRIPT_EVENT;
          else

@@ -35,7 +35,7 @@ public:
    // GmatMainNotebook *GetMainNotebook();
    
    void UpdateMission(bool resetCounter);
-    
+   
 protected:
    
 private:
@@ -101,43 +101,10 @@ private:
    bool CheckClickIn(wxPoint position);
    
    void OnAddMissionSeq(wxCommandEvent &event);
-   
-   void OnAddPropagate(wxCommandEvent &event);
-   void OnAddManeuver(wxCommandEvent &event);
-   void OnAddAchieve(wxCommandEvent &event);
-   void OnAddVary(wxCommandEvent &event);
-   void OnAddFunction(wxCommandEvent &event);
-   void OnAddAssignment(wxCommandEvent &event);
-   void OnAddToggle(wxCommandEvent &event);
-   void OnAddTarget(wxCommandEvent &event);
-   void OnAddScriptEvent(wxCommandEvent &event);
-   
-   void OnAddIfStatement(wxCommandEvent &event);
-   void OnAddIfElseStatement(wxCommandEvent &event);
-   void OnAddElseStatement(wxCommandEvent &event);
-   void OnAddElseIfStatement(wxCommandEvent &event);
-   void OnAddWhileLoop(wxCommandEvent &event);
-   void OnAddForLoop(wxCommandEvent &event);
-   void OnAddDoWhile(wxCommandEvent &event);
-   void OnAddSwitchCase(wxCommandEvent &event);
-   
-   void OnInsertPropagate(wxCommandEvent &event);
-   void OnInsertManeuver(wxCommandEvent &event);
-   void OnInsertAchieve(wxCommandEvent &event);
-   void OnInsertVary(wxCommandEvent &event);
-   void OnInsertFunction(wxCommandEvent &event);
-   void OnInsertAssignment(wxCommandEvent &event);
-   void OnInsertToggle(wxCommandEvent &event);
-   void OnInsertTarget(wxCommandEvent &event);
-   void OnInsertScriptEvent(wxCommandEvent &event);
-   
-   void OnInsertIfStatement(wxCommandEvent &event);
-   void OnInsertIfElseStatement(wxCommandEvent &event);
-   void OnInsertWhileLoop(wxCommandEvent &event);
-   void OnInsertForLoop(wxCommandEvent &event);
-   void OnInsertDoWhile(wxCommandEvent &event);
-   void OnInsertSwitchCase(wxCommandEvent &event);
-   
+
+   void OnAddCommand(wxCommandEvent &event);
+   void OnInsertCommand(wxCommandEvent &event);
+      
    void OnRun(wxCommandEvent &event);
    
    void OnDelete(wxCommandEvent &event);
@@ -174,8 +141,12 @@ private:
       POPUP_OPEN,
       POPUP_CLOSE,
       
+      POPUP_CONTROL_LOGIC,
+      
       POPUP_ADD_MISSION_SEQ,
       POPUP_ADD_COMMAND,
+      
+      //----- begin of MENU_EVT_RANGE of OnAddCommand()
       POPUP_ADD_PROPAGATE,
       POPUP_ADD_MANEUVER,
       POPUP_ADD_TARGET,
@@ -186,8 +157,20 @@ private:
       POPUP_ADD_TOGGLE,
       POPUP_ADD_SCRIPT_EVENT,
       
+      POPUP_ADD_IF_STATEMENT,
+      POPUP_ADD_IF_ELSE_STATEMENT,
+      POPUP_ADD_ELSE_STATEMENT,
+      POPUP_ADD_ELSE_IF_STATEMENT,
+      POPUP_ADD_FOR_LOOP,
+      POPUP_ADD_WHILE_LOOP,
+      POPUP_ADD_D0_WHILE,
+      POPUP_ADD_SWITCH_CASE,
+      //----- end of MENU_EVT_RANGE
+      
       POPUP_INSERT_COMMAND,
-      POPUP_INSERT_PROPAGATE,
+      
+      //----- begin of MENU_EVT_RANGE of OnInsertCommand()
+      POPUP_INSERT_PROPAGATE, 
       POPUP_INSERT_MANEUVER,
       POPUP_INSERT_TARGET,
       POPUP_INSERT_VARY,
@@ -197,32 +180,21 @@ private:
       POPUP_INSERT_TOGGLE,
       POPUP_INSERT_SCRIPT_EVENT,
       
+      POPUP_INSERT_IF_STATEMENT,
+      POPUP_INSERT_IF_ELSE_STATEMENT,
+      POPUP_INSERT_ELSE_STATEMENT,
+      POPUP_INSERT_ELSE_IF_STATEMENT,
+      POPUP_INSERT_FOR_LOOP,
+      POPUP_INSERT_WHILE_LOOP,
+      POPUP_INSERT_D0_WHILE,
+      POPUP_INSERT_SWITCH_CASE,
+      //----- end of MENU_EVT_RANGE
+      
       POPUP_VIEW_VARIABLES,
       POPUP_VIEW_GOALS, 
       
       POPUP_RUN,
       
-      POPUP_CONTROL_LOGIC,
-      POPUP_WHILE_CONTROL,
-      POPUP_FOR_CONTROL,
-      POPUP_DO_CONTROL,
-      
-      POPUP_ADD_IF_STATEMENT,
-      POPUP_ADD_IF_ELSE_STATEMENT,
-      POPUP_ADD_WHILE_LOOP,
-      POPUP_ADD_FOR_LOOP,
-      POPUP_ADD_D0_WHILE,
-      POPUP_ADD_SWITCH_CASE,
-      POPUP_ADD_ELSE_IF_STATEMENT,
-      POPUP_ADD_ELSE_STATEMENT,
-      
-      POPUP_INSERT_IF_STATEMENT,
-      POPUP_INSERT_ELSE_STATEMENT,
-      POPUP_INSERT_IF_ELSE_STATEMENT,
-      POPUP_INSERT_WHILE_LOOP,
-      POPUP_INSERT_FOR_LOOP,
-      POPUP_INSERT_D0_WHILE,
-      POPUP_INSERT_SWITCH_CASE,
    };
 };
 
