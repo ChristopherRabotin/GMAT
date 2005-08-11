@@ -38,9 +38,9 @@ class ScriptInterpreter : public Interpreter
         // class constructor
         static ScriptInterpreter*   Instance();
 
-        virtual bool                Interpret(void);
+        virtual bool                Interpret();
         virtual bool                Interpret(const std::string &scriptfile);
-        virtual bool                Build(void);
+        virtual bool                Build();
         virtual bool                Build(const std::string &scriptfile);
         
     protected:
@@ -51,14 +51,14 @@ class ScriptInterpreter : public Interpreter
         /// Toggle for the portion of the script -- Initialization or sequence
         bool                        sequenceStarted;
         
-        bool                        ReadScript(void);
-        bool                        ReadLine(void);
-        bool                        Parse(void);
+        bool                        ReadScript();
+        bool                        ReadLine();
+        bool                        Parse();
         
-        bool                        WriteScript(void);
+        bool                        WriteScript();
 
         bool                        ConfigureCommand(GmatCommand *);
-        bool                        ConfigureMathematics(void);
+        bool                        ConfigureMathematics();
         
         ScriptInterpreter();
         virtual ~ScriptInterpreter();

@@ -22,7 +22,7 @@
 #include <fstream>
 
 // Maybe put something like this in the Gmat namespace?
-#define REV_STRING "Build 4.1, May 2005"
+#define REV_STRING "Build 5.0, August 2005"
 
 
 //#define DEBUG_SCRIPTINTERPRETER
@@ -86,7 +86,7 @@ ScriptInterpreter::~ScriptInterpreter()
  * @return true if the stream parses successfully, false on failure.
  */
 //------------------------------------------------------------------------------
-bool ScriptInterpreter::Interpret(void)
+bool ScriptInterpreter::Interpret()
 {
     if (!initialized)
         Initialize();
@@ -851,7 +851,7 @@ bool ScriptInterpreter::ConfigureCommand(GmatCommand *)
 
 
 //------------------------------------------------------------------------------
-// bool ConfigureMathematics(void)
+// bool ConfigureMathematics()
 //------------------------------------------------------------------------------
 /**
  * Configures mathematics embedded in a script.
@@ -861,7 +861,7 @@ bool ScriptInterpreter::ConfigureCommand(GmatCommand *)
  * @note This method is not implemented (Build 5?).
  */
 //------------------------------------------------------------------------------
-bool ScriptInterpreter::ConfigureMathematics(void)
+bool ScriptInterpreter::ConfigureMathematics()
 {
     return false;
 }
