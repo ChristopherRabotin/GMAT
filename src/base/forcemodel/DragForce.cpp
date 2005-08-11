@@ -23,7 +23,6 @@
 #include "MessageInterface.hpp"
 
 // Uncomment to generate drag model data for debugging:
-//loj: 1/14/05 Changed DEBUG to DEBUG_DRAGFORCE_DENSITY
 //#define DEBUG_DRAGFORCE_DENSITY
 //#define DEBUG_DRAGFORCE_PARAM
 
@@ -54,6 +53,8 @@ DragForce::DragForce(const std::string &name) :
    density                (NULL),
    prefactor              (NULL),
    firedOnce              (false),
+   satCount               (1),
+   dragState              (NULL),
    //bodyName               ("Earth"),
    dataType               ("Constant"),
    fluxFile               (""),
@@ -111,6 +112,9 @@ DragForce::~DragForce()
         
    if (density)
       delete [] density;
+      
+   if (dragState)
+      delete [] dragState;
         
    if (prefactor)
       delete [] prefactor;
@@ -381,6 +385,11 @@ bool DragForce::Initialize()
    if (retval)
    {
       satCount = dimension / 6;
+      
+      if (dragState)
+         delete [] dragState;\
+      dragState = new Real[dimension];
+      
       if (satCount <= 0)
          throw ForceModelException("Drag called with dimension zero");
            
@@ -395,6 +404,15 @@ bool DragForce::Initialize()
             throw ForceModelException("The Sun is not in solar system");
            
          std::string bodyName;
+         // Drag currently requires that the drag body be the Earth.  When other
+         // drag models are implemented, remove this block and test.
+         for (StringArray::iterator i = dragBody.begin(); i != dragBody.end(); 
+              ++i)
+            if ((*i) != "Earth")
+               throw ForceModelException(
+                  "Drag modeling only works at the Earth in current GMAT "
+                  "builds.");
+         
          if (dragBody.size() > 0)
             bodyName = dragBody[0];
          else
@@ -464,7 +482,7 @@ bool DragForce::Initialize()
    #ifdef DEBUG_DRAGFORCE_DENSITY
       dragdata << "Leaving DragForce::Initialize()\n";
    #endif
-    
+   
    return retval;
 }
 
@@ -490,7 +508,11 @@ void DragForce::BuildPrefactors()
    #ifdef DEBUG_DRAGFORCE_DENSITY
       dragdata << "Building prefactors for " << satCount <<" Spacecraft\n";
    #endif
-
+   
+   if (!forceOrigin)
+      throw ForceModelException(
+         "Cannot use drag force: force model origin not set.");
+    
    for (Integer i = 0; i < satCount; ++i)
    {
       if (mass.size() < (unsigned)(i+1))
@@ -520,6 +542,48 @@ void DragForce::BuildPrefactors()
             dragCoeff[i], area[i], mass[i], prefactor[i]);
       #endif
     }
+}
+
+
+//------------------------------------------------------------------------------
+// void TranslateOrigin(const Real *state, const Real now)
+//------------------------------------------------------------------------------
+/**
+ * Used when the force model origin is not coincident with the drag body.
+ * 
+ * @param state The state vector, in MJ2000Eq coordinates centered at the force
+ *              model origin.
+ * @param now   The epoch of the calculations, in A.1 Modified Julian format.
+ *
+ * @note The current implementation throws if the force model origin is not the
+ *       same as the body producing drag.
+ */
+//------------------------------------------------------------------------------
+void DragForce::TranslateOrigin(const Real *state, const Real now)
+{
+   memcpy(dragState, state, dimension * sizeof(Real));
+   if (forceOrigin != centralBody)
+   {
+      throw ForceModelException(
+         "DragForce::TranslateOrigin: Drag forces only work when the force "
+         "model origin is the same as the body with the atmosphere producing "
+         "drag in the current GMAT build.");
+      Rvector6 cbrv = centralBody->GetMJ2000State(now);
+      Rvector6 forv = forceOrigin->GetMJ2000State(now);
+      Rvector6 delta = cbrv - forv;
+
+      Integer i6;
+      for (Integer i = 0; i < satCount; ++i)
+      {
+         i6 = i * 6;  //stateSize;
+         dragState[i6]   -= delta[0];
+         dragState[i6+1] -= delta[1];
+         dragState[i6+2] -= delta[2];
+         dragState[i6+3] -= delta[3];
+         dragState[i6+4] -= delta[4];
+         dragState[i6+5] -= delta[5];
+      }
+   }
 }
 
 
@@ -563,6 +627,10 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
          if (mass.size() == 0)
             for (Integer i = 0; i < satCount; ++i)
             {
+               if (!forceOrigin)
+                  throw ForceModelException(
+                     "Cannot use drag force: force model origin not set.");
+    
                #ifdef DEBUG_DRAGFORCE_DENSITY
                    dragdata << "Using default prefactors for " << satCount
                             << " Spacecraft\n";
@@ -576,12 +644,16 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
    #ifdef DEBUG_DRAGFORCE_DENSITY
       dragdata << "Looking up density\n";
    #endif
-   GetDensity(state, epoch + (elapsedTime + dt) / 86400.0);
+
+   // First translate to the drag body from the force model origin
+   Real now = epoch + (elapsedTime + dt) / 86400.0;
+   TranslateOrigin(state, now);
+   GetDensity(dragState, now);
+
    #ifdef DEBUG_DRAGFORCE_DENSITY
       dragdata << "density[0] = " << density[0] << "\n";
    #endif
-    
-    
+   
    for (i = 0; i < satCount; ++i)
    {
       i6 = i * 6;
@@ -590,12 +662,12 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
       #endif
 
       // v_rel = v - w x R
-      vRelative[0] = state[i6+3] -
-                     (angVel[1]*state[i6+2] - angVel[2]*state[i6+1]);
-      vRelative[1] = state[i6+4] -
-                     (angVel[2]*state[ i6 ] - angVel[0]*state[i6+2]);
-      vRelative[2] = state[i6+5] -
-                     (angVel[0]*state[i6+1] - angVel[1]*state[ i6 ]);
+      vRelative[0] = dragState[i6+3] -
+                     (angVel[1]*dragState[i6+2] - angVel[2]*dragState[i6+1]);
+      vRelative[1] = dragState[i6+4] -
+                     (angVel[2]*dragState[ i6 ] - angVel[0]*dragState[i6+2]);
+      vRelative[2] = dragState[i6+5] -
+                     (angVel[0]*dragState[i6+1] - angVel[1]*dragState[ i6 ]);
       vRelMag = sqrt(vRelative[0]*vRelative[0] + vRelative[1]*vRelative[1] +
                      vRelative[2]*vRelative[2]);
         
@@ -604,9 +676,9 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
       if (order == 1)
       {
          // Do dv/dt first, in case deriv = state
-         deriv[3+i6] = factor * vRelMag * vRelative[0];
-         deriv[4+i6] = factor * vRelMag * vRelative[1];
-         deriv[5+i6] = factor * vRelMag * vRelative[2];
+         deriv[3+i6] = factor * vRelMag * vRelative[0];// - a_indirect[0];
+         deriv[4+i6] = factor * vRelMag * vRelative[1];// - a_indirect[1];
+         deriv[5+i6] = factor * vRelMag * vRelative[2];// - a_indirect[2];
          // dr/dt = v
          deriv[i6]   = state[3+i6];
          deriv[1+i6] = state[4+i6];
@@ -637,9 +709,9 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
       else
       {
          // Feed accelerations to corresponding components directly for RKN
-         deriv[ i6 ] = factor * vRelMag * vRelative[0];
-         deriv[1+i6] = factor * vRelMag * vRelative[1];
-         deriv[2+i6] = factor * vRelMag * vRelative[2];
+         deriv[ i6 ] = factor * vRelMag * vRelative[0];// - a_indirect[0];
+         deriv[1+i6] = factor * vRelMag * vRelative[1];// - a_indirect[1];
+         deriv[2+i6] = factor * vRelMag * vRelative[2];// - a_indirect[2];
          deriv[3+i6] = 0.0;
          deriv[4+i6] = 0.0;
          deriv[5+i6] = 0.0;
@@ -974,6 +1046,12 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
    {
       if (value == "")
          return false;
+      
+      // Drag currently requires that the drag body be the Earth.  When other
+      // drag models are implemented, remove this block and test.
+      if (value != "Earth")
+         throw ForceModelException(
+            "Drag models only function at the Earth in this build of GMAT.");
       bodyName = value;
       return true;
    }

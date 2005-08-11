@@ -106,14 +106,15 @@ protected:
     /// Number of spacecraft in the state vector
     Integer             satCount;
     /// Central bodies used for atmosphere source
-    std::vector<std::string>
-                        dragBody;
+    StringArray         dragBody;
     /// Spacecraft drag areas
     std::vector <Real>  area;
     /// Spacecraft masses
     std::vector <Real>  mass;
     /// Spacecraft coefficients of drag
     std::vector <Real>  dragCoeff;
+    /// State vector translated from force model origin to body with atmosphere
+    Real                *dragState;
     
     // Optional input parameters used by atmospheric models
     /// Name of the body with the atmosphere
@@ -131,7 +132,8 @@ protected:
     /// Magnetic field index, Kp (user specified)
     Real                kp;
 
-    void                BuildPrefactors(void);
+    void                BuildPrefactors();
+    void                TranslateOrigin(const Real *state, const Real now);
     void                GetDensity(Real *state, Real when = 21545.0);
     
     /// ID for the atmosphere model
