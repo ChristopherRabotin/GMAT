@@ -172,3 +172,5 @@ void PropagatorSelectDialog::SaveData()
 void PropagatorSelectDialog::ResetData()
 {
 }
+
+

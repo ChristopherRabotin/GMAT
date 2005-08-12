@@ -337,3 +337,5 @@ void CelestialBodyPanel::EnableAll(bool enable)
 
 //   wxStaticText *noCentralBodyText;
 }
+
+

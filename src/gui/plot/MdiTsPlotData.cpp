@@ -14,6 +14,5 @@
 //------------------------------------------------------------------------------
 #include "MdiTsPlotData.hpp" 
 
-//MdiParentXyFrame* MdiXyPlot::mdiParentXyFrame = (MdiParentXyFrame *) NULL;
-wxList MdiTsPlot::mdiChildren = 0;
+wxList MdiTsPlot::mdiChildren;
 int MdiTsPlot::numChildren = 0;

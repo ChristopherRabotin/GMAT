@@ -247,3 +247,7 @@ void ParameterSetupPanel::OnColorButtonClick(wxCommandEvent& event)
       theApplyButton->Enable();
    }
 }
+
+
+
+

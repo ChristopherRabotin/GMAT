@@ -162,14 +162,15 @@ void DecoratedTree::ExpandAll(void)
  */
 void DecoratedTree::ExpandAll(wxTreeItemId root)
 {
-    long cookie;
-    wxTreeItemId current = GetFirstChild(root, cookie);
+   //long cookie;
+   wxTreeItemIdValue  cookie;
+   wxTreeItemId current = GetFirstChild(root, cookie);
     
-    while (current > 0) {
-        Expand(current);
-        ExpandAll(current);
-        current = GetNextChild(root, cookie);
-    }
+   while (current > 0) {
+      Expand(current);
+      ExpandAll(current);
+      current = GetNextChild(root, cookie);
+   }
 }
 
 
@@ -193,21 +194,22 @@ wxTreeItemId DecoratedTree::Find(wxString str)
  */
 wxTreeItemId DecoratedTree::Find(wxString str, wxTreeItemId root)
 {
-    long cookie;
-    wxTreeItemId current = GetFirstChild(root, cookie), item;
+   //long cookie;
+   wxTreeItemIdValue  cookie;
+   wxTreeItemId current = GetFirstChild(root, cookie), item;
 
-    while (current > 0) {
-        if (str == GetItemText(current))
-            return current;
+   while (current > 0) {
+      if (str == GetItemText(current))
+         return current;
         
-        item = Find(str, current);
-        if (item > 0)
-            return item;
+      item = Find(str, current);
+      if (item > 0)
+         return item;
         
-        current = GetNextChild(root, cookie);
-    }
+      current = GetNextChild(root, cookie);
+   }
 
-    return current;
+   return current;
 }
 
 
@@ -265,7 +267,7 @@ void DecoratedTree::DrawOutline(wxTreeItemId id)
     wxRect bound;
     int w, h;
     bool visible;
-    long cookie;
+    wxTreeItemIdValue cookie;
     wxTreeItemId current = GetFirstChild(id, cookie);
     
     GetSize(&w, &h);
@@ -307,7 +309,7 @@ void DecoratedTree::DrawBoxes(wxTreeItemId id)
     int w, h;
     int lft, rt, top, btm;
     bool visible;
-    long cookie;
+    wxTreeItemIdValue cookie;
     wxTreeItemId current = GetFirstChild(id, cookie);
     
     GetSize(&w, &h);

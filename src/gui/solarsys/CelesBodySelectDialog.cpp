@@ -386,3 +386,4 @@ void CelesBodySelectDialog::ShowBodyOption(const wxString &name, bool show)
 }
 
 
+

@@ -202,3 +202,5 @@ void ScriptPanel::OnButton(wxCommandEvent& event)
 //    mFileContentsTextCtrl->SetFont(newFont);
 //  }
 //}
+
+

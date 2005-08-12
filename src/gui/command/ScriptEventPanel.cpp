@@ -147,3 +147,5 @@ void ScriptEventPanel::OnTextUpdate(wxCommandEvent& event)
    theApplyButton->Enable();
 }
 
+
+

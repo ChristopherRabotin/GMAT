@@ -323,3 +323,5 @@ void ThrusterCoefficientDialog::OnCellValueChange(wxGridEvent &event)
        theOkButton->Enable(true);
     }    
 }
+
+

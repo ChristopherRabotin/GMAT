@@ -242,3 +242,5 @@ void FunctionSetupPanel::OnButton(wxCommandEvent& event)
    mSaveButton->Enable(mEnableSave);
 }
 
+
+

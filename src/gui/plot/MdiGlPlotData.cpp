@@ -14,7 +14,7 @@
 //------------------------------------------------------------------------------
 #include "MdiGlPlotData.hpp"
 
-wxList MdiGlPlot::mdiChildren = 0;
+wxList MdiGlPlot::mdiChildren;
 int MdiGlPlot::numChildren = 0;
 
 

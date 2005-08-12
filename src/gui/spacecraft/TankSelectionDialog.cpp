@@ -146,5 +146,8 @@ void TankSelectionDialog::OnSelect(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void TankSelectionDialog::OnButtonClick(wxCommandEvent &event)
 {
-}    
-@
+}
+
+
+
+
