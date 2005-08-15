@@ -1,0 +1,364 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                            File: BurnParameters.cpp
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
+//
+// Author: Linda Jun
+// Created: 2005/05/27
+//
+/**
+ * Implements Burn related parameter classes.
+ *   DeltaVDir1, DeltaVDir2, DeltaVDir3
+ */
+//------------------------------------------------------------------------------
+
+#include "BurnParameters.hpp"
+#include "ColorTypes.hpp"
+
+//#define DEBUG_BURN_PARAM 1
+
+
+//==============================================================================
+//                              DeltaVDir1
+//==============================================================================
+/**
+ * Implements Cartesian position X class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// DeltaVDir1(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+DeltaVDir1::DeltaVDir1(const std::string &name, GmatBase *obj)
+   : BurnReal(name, "DeltaVDir1", obj, "DeltaVDir1", "Km/s", GmatParam::COORD_SYS)
+{
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   mColor = GmatColor::RED32;
+}
+
+
+//------------------------------------------------------------------------------
+// DeltaVDir1(const DeltaVDir1 &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+DeltaVDir1::DeltaVDir1(const DeltaVDir1 &copy)
+   : BurnReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// DeltaVDir1& operator=(const DeltaVDir1 &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+DeltaVDir1& DeltaVDir1::operator=(const DeltaVDir1 &right)
+{
+   if (this != &right)
+      BurnReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~DeltaVDir1()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+DeltaVDir1::~DeltaVDir1()
+{
+}
+
+
+//-------------------------------------
+// methods inherited from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool DeltaVDir1::Evaluate()
+{
+   mRealValue = BurnData::GetBurnReal("DeltaVDir1");
+    
+   if (mRealValue == BurnData::BURN_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* DeltaVDir1::Clone(void) const
+{
+   return new DeltaVDir1(*this);
+}
+
+
+//==============================================================================
+//                              DeltaVDir2
+//==============================================================================
+/**
+ * Implements Cartesian position Y class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// DeltaVDir2(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+DeltaVDir2::DeltaVDir2(const std::string &name, GmatBase *obj)
+   : BurnReal(name, "DeltaVDir2", obj, "DeltaVDir2", "Km/s", GmatParam::COORD_SYS)
+{
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   mColor = GmatColor::GREEN32;
+}
+
+
+//------------------------------------------------------------------------------
+// DeltaVDir2(const DeltaVDir2 &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+DeltaVDir2::DeltaVDir2(const DeltaVDir2 &copy)
+   : BurnReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// DeltaVDir2& operator=(const DeltaVDir2 &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+DeltaVDir2& DeltaVDir2::operator=(const DeltaVDir2 &right)
+{
+   if (this != &right)
+      BurnReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~DeltaVDir2()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+DeltaVDir2::~DeltaVDir2()
+{
+}
+
+
+//-------------------------------------
+// methods inherited from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool DeltaVDir2::Evaluate()
+{
+   mRealValue = BurnData::GetBurnReal("DeltaVDir2");
+    
+   if (mRealValue == BurnData::BURN_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* DeltaVDir2::Clone(void) const
+{
+   return new DeltaVDir2(*this);
+}
+
+
+//==============================================================================
+//                              DeltaVDir3
+//==============================================================================
+/**
+ * Implements DeltaV third compoment.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// DeltaVDir3(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+DeltaVDir3::DeltaVDir3(const std::string &name, GmatBase *obj)
+   : BurnReal(name, "DeltaVDir3", obj, "DeltaVDir3", "Km/s", GmatParam::COORD_SYS)
+{
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   mColor = GmatColor::BLUE32;
+}
+
+
+//------------------------------------------------------------------------------
+// DeltaVDir3(const DeltaVDir3 &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+DeltaVDir3::DeltaVDir3(const DeltaVDir3 &copy)
+   : BurnReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// DeltaVDir3& operator=(const DeltaVDir3 &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+DeltaVDir3& DeltaVDir3::operator=(const DeltaVDir3 &right)
+{
+   if (this != &right)
+      BurnReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~DeltaVDir3()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+DeltaVDir3::~DeltaVDir3()
+{
+}
+
+
+//--------------------------------------
+// methods inherited from Parameter
+//--------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool DeltaVDir3::Evaluate()
+{
+   mRealValue = BurnData::GetBurnReal("DeltaVDir3");    
+    
+   if (mRealValue == BurnData::BURN_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* DeltaVDir3::Clone(void) const
+{
+   return new DeltaVDir3(*this);
+}
+
+
