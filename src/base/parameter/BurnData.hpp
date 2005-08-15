@@ -1,0 +1,82 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                                  BurnData
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
+//
+// Author: Linda Jun
+// Created: 2004/01/09
+//
+/**
+ * Declares Burn related data class.
+ */
+//------------------------------------------------------------------------------
+#ifndef BurnData_hpp
+#define BurnData_hpp
+
+#include "gmatdefs.hpp"
+#include "GmatBase.hpp"
+#include "RefData.hpp"
+#include "Spacecraft.hpp"
+#include "SolarSystem.hpp"
+#include "CoordinateSystem.hpp"
+#include "CoordinateConverter.hpp"
+#include "ImpulsiveBurn.hpp"
+
+class GMAT_API BurnData : public RefData
+{
+public:
+
+   BurnData();
+   BurnData(const BurnData &data);
+   BurnData& operator= (const BurnData& right);
+   virtual ~BurnData();
+      
+   Real GetBurnReal(const std::string &str);
+   
+   // The inherited methods from RefData
+   virtual bool ValidateRefObjects(GmatBase *param);
+   virtual const std::string* GetValidObjectList() const;
+   
+   const static Real BURN_REAL_UNDEFINED = -9876543210.1234;
+   const static Real BURN_TOL = 1.0e-10;
+
+protected:
+
+   // The inherited methods from RefData
+   virtual void InitializeRefObjects();
+   virtual bool IsValidObjectType(Gmat::ObjectType type);
+   
+   SolarSystem* GetSolarSystem();
+   CoordinateSystem* GetInternalCoordSys();
+   
+   void SetInternalCoordSys(CoordinateSystem *cs);
+   
+   Spacecraft *mSpacecraft;
+   ImpulsiveBurn *mImpBurn;
+   SolarSystem *mSolarSystem;
+   SpacePoint *mOrigin;
+   CoordinateSystem *mInternalCoordSystem;
+   CoordinateSystem *mOutCoordSystem;
+   
+   CoordinateConverter mCoordConverter;
+   
+   enum
+   {
+      BURN = 0,
+      SOLAR_SYSTEM,
+      COORD_SYSTEM,
+      SPACECRAFT,
+      BurnDataObjectCount
+   };
+   
+   static const std::string VALID_OBJECT_TYPE_LIST[BurnDataObjectCount];
+};
+#endif // BurnData_hpp
+
+   

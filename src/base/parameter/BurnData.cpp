@@ -1,0 +1,321 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                                  BurnData
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
+//
+// Author: Linda Jun
+// Created: 2005/05/27
+//
+/**
+ * Implements Burn related data class.
+ */
+//------------------------------------------------------------------------------
+#include "gmatdefs.hpp"
+#include "BurnData.hpp"
+#include "ParameterException.hpp"
+#include "RealUtilities.hpp"
+#include "UtilityException.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_BURNDATA_INIT 1
+//#define DEBUG_BURNDATA_CONVERT 1
+//#define DEBUG_BURNDATA_RUN 1
+
+using namespace GmatMathUtil;
+
+//---------------------------------
+// static data
+//---------------------------------
+
+const std::string
+BurnData::VALID_OBJECT_TYPE_LIST[BurnDataObjectCount] =
+{
+   "Burn",
+   "SolarSystem",
+   "CoordinateSystem",
+   "Spacecraft"
+}; 
+
+
+//---------------------------------
+// public methods
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// BurnData()
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ */
+//------------------------------------------------------------------------------
+BurnData::BurnData()
+   : RefData()
+{
+   mImpBurn = NULL;
+   mSpacecraft = NULL;
+   mSolarSystem = NULL;
+   mOrigin = NULL;
+   mInternalCoordSystem = NULL;
+   mOutCoordSystem = NULL;
+}
+
+
+//------------------------------------------------------------------------------
+// BurnData(const BurnData &data)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <data> the BurnData object being copied.
+ */
+//------------------------------------------------------------------------------
+BurnData::BurnData(const BurnData &data)
+   : RefData(data)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// BurnData& operator= (const BurnData& right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the object being copied.
+ *
+ * @return reference to this object
+ */
+//------------------------------------------------------------------------------
+BurnData& BurnData::operator= (const BurnData& right)
+{
+   if (this != &right)
+      RefData::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~BurnData()
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
+BurnData::~BurnData()
+{
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetBurnReal(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Retrives Cartesian element
+ */
+//------------------------------------------------------------------------------
+Real BurnData::GetBurnReal(const std::string &str)
+{
+   ///@todo convert internal DeltaV to Parameter CoordinateSystem.
+   if (mImpBurn == NULL)
+      InitializeRefObjects();
+   
+   if (str == "DeltaV1")
+   {
+      return mImpBurn->GetRealParameter(mImpBurn->GetParameterID("Element1"));
+   }
+   else if (str == "DeltaV2")
+   {
+      return mImpBurn->GetRealParameter(mImpBurn->GetParameterID("Element2"));
+   }
+   else if (str == "DeltaV3")
+   {
+      return mImpBurn->GetRealParameter(mImpBurn->GetParameterID("Element3"));
+   }
+   else
+      throw ParameterException
+         ("BurnData::GetBurnReal() Unknown parameter name: \n" + str);
+    
+}
+
+
+//-------------------------------------
+// Inherited methods from RefData
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual const std::string* GetValidObjectList() const
+//------------------------------------------------------------------------------
+const std::string* BurnData::GetValidObjectList() const
+{
+   return VALID_OBJECT_TYPE_LIST;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ValidateRefObjects(GmatBase *param)
+//------------------------------------------------------------------------------
+/**
+ * Validates reference objects for given parameter
+ */
+//------------------------------------------------------------------------------
+bool BurnData::ValidateRefObjects(GmatBase *param)
+{
+   int objCount = 0;
+   for (int i=0; i<BurnDataObjectCount; i++)
+   {
+      if (HasObjectType(VALID_OBJECT_TYPE_LIST[i]))
+         objCount++;
+   }
+
+   if (objCount == BurnDataObjectCount)
+      return true;
+   else
+      return false;
+}
+
+//---------------------------------
+// protected methods
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// virtual void InitializeRefObjects()
+//------------------------------------------------------------------------------
+void BurnData::InitializeRefObjects()
+{
+   #if DEBUG_BURNDATA_INIT
+   MessageInterface::ShowMessage
+      ("BurnData::InitializeRefObjects() entered.\n");
+   #endif
+   
+   mImpBurn = (ImpulsiveBurn*)FindFirstObject(VALID_OBJECT_TYPE_LIST[BURN]);
+   
+   if (mImpBurn == NULL)
+      throw ParameterException
+         ("BurnData::InitializeRefObjects() Cannot find Spacecraft object.\n"
+          "Make sure Spacecraft is set to any unnamed parameters\n");
+   
+   mSolarSystem =
+      (SolarSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SOLAR_SYSTEM]);
+   
+   if (mSolarSystem == NULL)
+      throw ParameterException
+         ("BurnData::InitializeRefObjects() Cannot find SolarSystem object\n");
+   
+   if (mInternalCoordSystem == NULL)
+      throw ParameterException
+         ("BurnData::InitializeRefObjects() Cannot find internal "
+          "CoordinateSystem object\n");
+   
+   mOutCoordSystem =
+      (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
+   
+   if (mOutCoordSystem == NULL)
+      throw ParameterException
+         ("BurnData::InitializeRefObjects() Cannot find output "
+          "CoordinateSystem object\n");
+   
+//    // get Burn CoordinateSystem
+//    std::string csName = mImpBurn->GetRefObjectName(Gmat::COORDINATE_SYSTEM);   
+//    CoordinateSystem *cs = (CoordinateSystem*)mImpBurn->
+//       GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+   
+//    if (!cs)
+//       throw ParameterException
+//          ("BurnData::InitializeRefObjects() spacecraft CoordinateSystem not "
+//           "found: " + csName + "\n");
+
+//    // get origin
+//    std::string originName =
+//       FindFirstObjectName(GmatBase::GetObjectType(VALID_OBJECT_TYPE_LIST[SPACE_POINT]));
+   
+//    if (originName != "")
+//    {
+//       #if DEBUG_BURNDATA_INIT
+//       MessageInterface::ShowMessage
+//          ("BurnData::InitializeRefObjects() getting originName:%s pointer.\n",
+//           originName.c_str());
+//       #endif
+      
+//       mOrigin =
+//          (SpacePoint*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACE_POINT]);
+
+//       if (!mOrigin)
+//          throw ParameterException
+//             ("BurnData::InitializeRefObjects() Cannot find Origin object: " +
+//              originName + "\n");
+      
+//    }
+//    else
+//    {
+//       throw ParameterException
+//          ("BurnData::InitializeRefObjects() Burn Origin not specified\n");
+//    }
+   
+   #if DEBUG_BURNDATA_INIT
+   MessageInterface::ShowMessage
+      ("BurnData::InitializeRefObjects() mScOrignName=%s, mOriginName=%s\n",
+       mScOrigin->GetName().c_str(), mOrigin->GetName().c_str());
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool IsValidObjectType(Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Checks reference object type.
+ *
+ * @return return true if object is valid object, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool BurnData::IsValidObjectType(Gmat::ObjectType type)
+{
+   for (int i=0; i<BurnDataObjectCount; i++)
+   {
+      if (GmatBase::GetObjectTypeString(type) == VALID_OBJECT_TYPE_LIST[i])
+         return true;
+   }
+   
+   return false;
+
+}
+
+
+//------------------------------------------------------------------------------
+// SolarSystem* GetSolarSystem()
+//------------------------------------------------------------------------------
+SolarSystem* BurnData::GetSolarSystem()
+{
+   return mSolarSystem;
+}
+
+
+//------------------------------------------------------------------------------
+// CoordinateSystem* GetInternalCoordSys()
+//------------------------------------------------------------------------------
+CoordinateSystem* BurnData::GetInternalCoordSys()
+{
+   return mInternalCoordSystem;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetInternalCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+/*
+ * @param <cs> internal coordinate system what parameter data is representing.
+ */
+//------------------------------------------------------------------------------ 
+void BurnData::SetInternalCoordSys(CoordinateSystem *cs)
+{
+   mInternalCoordSystem = cs;
+}
+
+
