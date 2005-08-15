@@ -33,10 +33,13 @@ public:
    ImpulsiveBurn(const ImpulsiveBurn &copy);
    ImpulsiveBurn&          operator=(const ImpulsiveBurn &orig);
 
-   virtual bool            Fire(Real *burnData = NULL);
+   virtual bool            Fire(Real *burnData = NULL, Real epoch = 21545.0);
 
    // inherited from GmatBase
    virtual GmatBase*       Clone() const;
+
+protected:
+   void                    TransformDeltaVToJ2kFrame(Real *deltaV, Real epoch);
 };
 
 #endif // ImpulsiveBurn_hpp

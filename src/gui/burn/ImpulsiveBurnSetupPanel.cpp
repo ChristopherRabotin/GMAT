@@ -100,7 +100,7 @@ void ImpulsiveBurnSetupPanel::AddVector(wxWindow *parent)
    item3->AddGrowableCol( 1 );
    item3->AddGrowableCol( 2 );
 
-   description1 = new wxStaticText( vectorPanel, ID_TEXT, wxT("Descriptor1     "), 
+   description1 = new wxStaticText(vectorPanel, ID_TEXT, wxT("Descriptor1    "), 
                                     wxDefaultPosition, wxDefaultSize, 0 );
    item3->Add( description1, 0, wxALIGN_CENTER | wxALL, 5 );
    textCtrl1 = new wxTextCtrl( vectorPanel, ID_TEXTCTRL, wxT(""), 
@@ -110,7 +110,7 @@ void ImpulsiveBurnSetupPanel::AddVector(wxWindow *parent)
                               wxDefaultPosition, wxDefaultSize, 0 );
    item3->Add( label1, 0, wxALIGN_CENTER | wxALL, 5 );
 
-   description2 = new wxStaticText( vectorPanel, ID_TEXT, wxT("Descriptor2    "), 
+   description2 = new wxStaticText(vectorPanel, ID_TEXT, wxT("Descriptor2    "), 
                                     wxDefaultPosition, wxDefaultSize, 0 );
    item3->Add( description2, 0, wxALIGN_CENTER | wxALL, 5 );
    textCtrl2 = new wxTextCtrl( vectorPanel, ID_TEXTCTRL, wxT(""), 
@@ -120,7 +120,7 @@ void ImpulsiveBurnSetupPanel::AddVector(wxWindow *parent)
                               wxDefaultPosition, wxDefaultSize, 0 );
    item3->Add( label2, 0, wxALIGN_CENTER | wxALL, 5 );
     
-   description3 = new wxStaticText( vectorPanel, ID_TEXT, wxT("Descriptor3    "), 
+   description3 = new wxStaticText(vectorPanel, ID_TEXT, wxT("Descriptor3    "), 
                                     wxDefaultPosition, wxDefaultSize, 0 );
    item3->Add( description3, 0, wxALIGN_CENTER | wxALL, 5 );
    textCtrl3 = new wxTextCtrl( vectorPanel, ID_TEXTCTRL, wxT(""), 
@@ -169,7 +169,7 @@ void ImpulsiveBurnSetupPanel::LabelsUnits()
    vectorStr = formatCB->GetStringSelection();
 
    // get the ID of the coordinate frame parameter 
-   id = theBurn->GetParameterID("CoordinateFrame");
+   id = theBurn->GetParameterID("Axes");
 
    // store the coordinate from for cancellation
    std::string coordFrame = theBurn->GetStringParameter(id);
@@ -202,7 +202,7 @@ void ImpulsiveBurnSetupPanel::LabelsUnits()
    label3->SetLabel("km/s");
 
    // reset coordinate frame to original selection if cancel button selected
-   id = theBurn->GetParameterID("CoordinateFrame");
+   id = theBurn->GetParameterID("Axes");
    theBurn->SetStringParameter(id, coordFrame);
 
    theApplyButton->Enable();
@@ -241,7 +241,7 @@ void ImpulsiveBurnSetupPanel::Create()
                           wxDefaultPosition, wxDefaultSize, 0);
         
       // list of coordinate frames
-      Integer id = theBurn->GetParameterID("CoordinateFrame");
+      Integer id = theBurn->GetParameterID("Axes");
       items = theBurn->GetStringArrayParameter(id);
       count = items.size();
       wxString *frameList = new wxString[count];
@@ -336,7 +336,7 @@ void ImpulsiveBurnSetupPanel::LoadData()
       mObject = theBurn;
 
       // Coordinate Frame
-      id = theBurn->GetParameterID("CoordinateFrame");
+      id = theBurn->GetParameterID("Axes");
       std::string coordFrame = theBurn->GetStringParameter(id);
       StringArray frames = theBurn->GetStringArrayParameter(id);
       int index = 0;
@@ -399,7 +399,7 @@ void ImpulsiveBurnSetupPanel::SaveData()
     
    // save coordinate frame
    wxString frameString = frameCB->GetStringSelection();
-   id = theBurn->GetParameterID("CoordinateFrame");
+   id = theBurn->GetParameterID("Axes");
    std::string coordFrame = std::string (frameString.c_str());
    theBurn->SetStringParameter(id, coordFrame);
     

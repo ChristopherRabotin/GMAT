@@ -63,6 +63,9 @@ public:
     
    // Accessor method used by Maneuver to pass in the spacecraft pointer
    void                    SetSpacecraftToManeuver(Spacecraft *sat);
+   
+   virtual void            SetSolarSystem(SolarSystem *ss);
+   virtual bool            Initialize();
 
    //---------------------------------------------------------------------------
    // bool Burn(std::string typeStr, std::string nomme)
@@ -79,13 +82,15 @@ public:
     * @return true on success, false or throw on failure.
     */
    //---------------------------------------------------------------------------
-   virtual bool            Fire(Real *burnData = NULL) = 0;
+   virtual bool            Fire(Real *burnData = NULL, Real epoch = 21545.0) = 0;
     
 protected:
-   /// Text description of the coordinate frame type -- e.g. VNB or LVLH
-   std::string             coordFrame;
-   /// Text description of the coordinate system -- e.g. Cartesian or Spherical
-   std::string             coordSystem;
+   /// Text description of the (internal) coordinate axis type - VNB or inertial
+   std::string             coordAxes;
+   /// Text description of the vector format - e.g. Cartesian or Spherical
+   std::string             vectorFormat;
+   /// Text description of the GMAT coordinate system, if used
+   std::string             coordinateSystem;
    /// Orientation vector for maneuver; includes magnitude for impulsive burns
    Real                    deltaV[3];
    /// Common string names for the 3 components
@@ -100,12 +105,27 @@ protected:
    std::string             satName;
    /// Pointer to the spacecraft that maneuvers
    Spacecraft              *sc;
+   /// Solar system used to find the J2000 body, etc.
+   SolarSystem             *solarSystem;
+   /// Name of the Spacepoint used as the origin of the burn
+   std::string             burnOriginName;
+   /// Ponter to the burn origin
+   SpacePoint              *burnOrigin;
+   /// Pointer to the J2000 body
+   std::string             j2000BodyName;
+   /// Pointer to the J2000 body
+   CelestialBody           *j2000Body;
+   
+   void                    TransformJ2kToBurnOrigin(const Real *scState, 
+                              Real *state, Real epoch);
    
    /// Published parameters for burns
    enum
    {
-      COORDFRAME = GmatBaseParamCount,
-      COORDSYSTEM,
+      BURNORIGIN = GmatBaseParamCount,
+      BURNAXES,
+      COORDINATESYSTEM,
+      VECTORFORMAT,
       DELTAV1,
       DELTAV2,
       DELTAV3,

@@ -55,7 +55,7 @@ public:
    virtual Real            SetRealParameter(const Integer id, const Real value);
 
    virtual bool            Initialize();
-   virtual bool            Fire(Real *burnData);
+   virtual bool            Fire(Real *burnData, Real epoch);
    
    GmatBase*               Clone() const;
    

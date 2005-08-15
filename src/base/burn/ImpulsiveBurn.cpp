@@ -20,7 +20,7 @@
 
 #include "ImpulsiveBurn.hpp"
 #include "MessageInterface.hpp"
-
+ 
 
 //#define DEBUG_IMPULSIVE_BURN
 
@@ -102,27 +102,34 @@ ImpulsiveBurn& ImpulsiveBurn::operator=(const ImpulsiveBurn &orig)
  * @return true on success, throws on failure.
  */
 //------------------------------------------------------------------------------
-bool ImpulsiveBurn::Fire(Real *burnData)
+bool ImpulsiveBurn::Fire(Real *burnData, Real epoch)
 {
    #ifdef DEBUG_IMPULSIVE_BURN
       MessageInterface::ShowMessage("ImpulsiveBurn::Fire entered for %s\n",
          instanceName.c_str());
    #endif
 
-   frame = frameman->GetFrameInstance(coordFrame);
+   frame = frameman->GetFrameInstance(coordAxes);
    if (frame == NULL)
       throw BurnException("Maneuver frame undefined");
     
-   PropState *state;
+   Real *satState;
 
    /// @todo Consolidate Finite & Impulsive burn initialization into base class
    if (sc)
-      state = &sc->GetState();
+      satState = sc->GetState().GetState();
    else
       throw BurnException("Maneuver initial state undefined (No spacecraft?)");
     
+   Real state[6];
+
+   if (epoch == 21545.0)
+      epoch = sc->GetRealParameter("Epoch");
+   
+   TransformJ2kToBurnOrigin(satState, state, epoch);
+
    // Set the state 6-vector from the associated spacecraft
-   frame->SetState(state->GetState());
+   frame->SetState(state);
    // Calculate the maneuver basis vectors
    frame->CalculateBasis(frameBasis);
     
@@ -139,15 +146,17 @@ bool ImpulsiveBurn::Fire(Real *burnData)
    #endif
 
    // Add in the delta-V
-   (*state)[3] += deltaV[0]*frameBasis[0][0] +
-               deltaV[1]*frameBasis[0][1] +
-               deltaV[2]*frameBasis[0][2];
-   (*state)[4] += deltaV[0]*frameBasis[1][0] +
-               deltaV[1]*frameBasis[1][1] +
-               deltaV[2]*frameBasis[1][2];
-   (*state)[5] += deltaV[0]*frameBasis[2][0] +
-               deltaV[1]*frameBasis[2][1] +
-               deltaV[2]*frameBasis[2][2];
+//   TransformDeltaVToJ2kFrame(deltaV, epoch);
+
+   satState[3] += deltaV[0]*frameBasis[0][0] +
+                  deltaV[1]*frameBasis[0][1] +
+                  deltaV[2]*frameBasis[0][2];
+   satState[4] += deltaV[0]*frameBasis[1][0] +
+                  deltaV[1]*frameBasis[1][1] +
+                  deltaV[2]*frameBasis[1][2];
+   satState[5] += deltaV[0]*frameBasis[2][0] +
+                  deltaV[1]*frameBasis[2][1] +
+                  deltaV[2]*frameBasis[2][2];
 
    #ifdef DEBUG_IMPULSIVE_BURN
       MessageInterface::ShowMessage(
@@ -156,6 +165,24 @@ bool ImpulsiveBurn::Fire(Real *burnData)
    #endif
 
    return true;
+}
+
+
+void ImpulsiveBurn::TransformDeltaVToJ2kFrame(Real *deltaV, Real epoch)
+{
+   if ((j2000Body == NULL) || (burnOrigin == NULL))
+      Initialize();
+      
+   if (j2000Body != burnOrigin)
+   {
+      Rvector6 j2kState = j2000Body->GetMJ2000State(epoch);
+      Rvector6 originState = burnOrigin->GetMJ2000State(epoch);
+      Rvector6 delta = j2kState - originState;
+      
+      deltaV[0] += delta[3];
+      deltaV[1] += delta[4];
+      deltaV[2] += delta[5];
+   }      
 }
 
 

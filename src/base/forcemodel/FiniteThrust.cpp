@@ -261,7 +261,7 @@ void FiniteThrust::SetPropList(std::vector<SpaceObject*> *soList)
  * @return              true if the call succeeds, false on failure.
  */
 //------------------------------------------------------------------------------
-bool FiniteThrust::Initialize(void)
+bool FiniteThrust::Initialize()
 {
    if (!PhysicalModel::Initialize())
       throw ForceModelException("Unable to initialize FiniteThrust base");
@@ -330,7 +330,8 @@ bool FiniteThrust::GetDerivatives(Real * state, Real dt, Integer order)
    
    // Loop through the spacecraft list, building accels for active sats
    for (std::vector<SpaceObject *>::iterator sc = spacecraft->begin();
-        sc != spacecraft->end(); ++sc) {
+        sc != spacecraft->end(); ++sc) 
+   {
       i6 = i * 6;
       // Just a convenience
       sat = *sc;
@@ -341,7 +342,8 @@ bool FiniteThrust::GetDerivatives(Real * state, Real dt, Integer order)
       #endif
 
       if (find(mySpacecraft.begin(), mySpacecraft.end(), sat->GetName()) != 
-          mySpacecraft.end()) {
+          mySpacecraft.end()) 
+      {
 
          #ifdef DEBUG_FINITETHRUST_EXE
             MessageInterface::ShowMessage("   Maneuvering ");
@@ -358,7 +360,9 @@ bool FiniteThrust::GetDerivatives(Real * state, Real dt, Integer order)
               fb != burns.end(); ++fb)
          {
             (*fb)->SetSpacecraftToManeuver((Spacecraft*)sat);
-            if ((*fb)->Fire(burnData)) {
+            Real now = epoch + dt / 86400.0;
+            if ((*fb)->Fire(burnData, now)) 
+            {
                #ifdef DEBUG_FINITETHRUST_EXE
                   MessageInterface::ShowMessage("%s ",(*fb)->GetName().c_str());
                #endif
@@ -379,7 +383,8 @@ bool FiniteThrust::GetDerivatives(Real * state, Real dt, Integer order)
          #endif
          // Divide through by masses to get accelerations
          mTotal = sat->GetRealParameter("TotalMass");
-         if (mTotal <= 0.0) {
+         if (mTotal <= 0.0) 
+         {
             std::stringstream massval;
             massval << mTotal;
             throw ForceModelException("Finite thrust applied to spacecraft " +
@@ -401,7 +406,7 @@ bool FiniteThrust::GetDerivatives(Real * state, Real dt, Integer order)
             deriv[4 + i6] = accel[1];
             deriv[5 + i6] = accel[2];
          } 
-         else 
+         else  
          {
             deriv[ i6 ] = accel[0]; 
             deriv[i6+1] = accel[1]; 

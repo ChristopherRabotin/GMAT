@@ -29,7 +29,9 @@
 const std::string
 Burn::PARAMETER_TEXT[BurnParamCount - GmatBaseParamCount] =
 {
-   "CoordinateFrame",
+   "Origin",
+   "Axes",
+   "CoordinateSystem",
    "VectorFormat",
    "Element1",
    "Element2",
@@ -37,13 +39,15 @@ Burn::PARAMETER_TEXT[BurnParamCount - GmatBaseParamCount] =
    "Element1Label",
    "Element2Label",
    "Element3Label",
-   "SpacecraftName"
+   "SpacecraftName",
 };
 
 /// Types of the parameters used by thrusters.
 const Gmat::ParameterType
 Burn::PARAMETER_TYPE[BurnParamCount - GmatBaseParamCount] =
 {
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::REAL_TYPE, 
@@ -72,10 +76,17 @@ Burn::PARAMETER_TYPE[BurnParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 Burn::Burn(const std::string &typeStr, const std::string &nomme) :
    GmatBase        (Gmat::BURN, typeStr, nomme),
-   coordFrame      ("Inertial"),
-   coordSystem     ("Cartesian"),
+   coordAxes       ("Inertial"),
+   vectorFormat    ("Cartesian"),
+   coordinateSystem(""),
    satName         (""),
-   sc              (NULL)
+   sc              (NULL),
+   solarSystem     (NULL),
+   burnOriginName  ("Earth"),
+   burnOrigin      (NULL),
+   j2000BodyName   ("Earth"),
+   j2000Body       (NULL)
+
 {
    objectTypes.push_back(Gmat::BURN);
    objectTypeNames.push_back("Burn");
@@ -86,7 +97,7 @@ Burn::Burn(const std::string &typeStr, const std::string &nomme) :
    frameman = new ManeuverFrameManager;
 
    /// Load the default maneuver frame
-   frame = frameman->GetFrameInstance(coordFrame);
+   frame = frameman->GetFrameInstance(coordAxes);
 
    dvLabels[0] = frame->GetFrameLabel(1);
    dvLabels[1] = frame->GetFrameLabel(2);
@@ -122,10 +133,16 @@ Burn::~Burn()
 //------------------------------------------------------------------------------
 Burn::Burn(const Burn &b) :
    GmatBase        (b),
-   coordFrame      (b.coordFrame),
-   coordSystem     (b.coordSystem),
+   coordAxes       (b.coordAxes),
+   vectorFormat    (b.vectorFormat),
+   coordinateSystem(b.coordinateSystem),
    satName         (b.satName),
-   sc              (NULL)
+   sc              (NULL),
+   solarSystem     (b.solarSystem),
+   burnOriginName  (b.burnOriginName),
+   burnOrigin      (NULL),
+   j2000BodyName   (b.j2000BodyName),
+   j2000Body       (NULL)
 {
    deltaV[0] = b.deltaV[0];
    deltaV[1] = b.deltaV[1];
@@ -151,21 +168,28 @@ Burn::Burn(const Burn &b) :
 //------------------------------------------------------------------------------
 Burn& Burn::operator=(const Burn &b)
 {
-   if (this == &b)
-      return *this;
-        
-   GmatBase::operator=(b);
-
-   coordFrame  = b.coordFrame;
-   coordSystem = b.coordSystem;
-   satName     = b.satName;
-   sc          = NULL;
-   deltaV[0]   = b.deltaV[0];
-   deltaV[1]   = b.deltaV[1];
-   deltaV[2]   = b.deltaV[2];
-   dvLabels[0] = b.dvLabels[0];
-   dvLabels[1] = b.dvLabels[1];
-   dvLabels[2] = b.dvLabels[2];
+   if (this != &b)
+   {
+      GmatBase::operator=(b);
+   
+      coordAxes         = b.coordAxes;
+      vectorFormat      = b.vectorFormat;
+      coordinateSystem  = b.coordinateSystem;
+      satName           = b.satName;
+      sc                = NULL;
+      solarSystem       = b.solarSystem;
+      burnOriginName    = b.burnOriginName;
+      burnOrigin        = NULL;
+      j2000BodyName     = b.j2000BodyName;
+      j2000Body         = NULL;
+   
+      deltaV[0]         = b.deltaV[0];
+      deltaV[1]         = b.deltaV[1];
+      deltaV[2]         = b.deltaV[2];
+      dvLabels[0]       = b.dvLabels[0];
+      dvLabels[1]       = b.dvLabels[1];
+      dvLabels[2]       = b.dvLabels[2];
+   }
 
    return *this;
 }
@@ -358,11 +382,17 @@ Real Burn::SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 std::string Burn::GetStringParameter(const Integer id) const
 {
-   if (id == COORDFRAME)
-      return coordFrame;
+   if (id == BURNORIGIN)
+      return burnOriginName;
         
-   if (id == COORDSYSTEM)
-      return coordSystem;
+   if (id == BURNAXES)
+      return coordAxes;
+        
+   if (id == COORDINATESYSTEM)
+      return coordinateSystem;
+        
+   if (id == VECTORFORMAT)
+      return vectorFormat;
         
    if (id == DELTAV1LABEL)
       return dvLabels[0];
@@ -375,7 +405,7 @@ std::string Burn::GetStringParameter(const Integer id) const
         
    if (id == SATNAME)
       return satName;
-        
+      
    return GmatBase::GetStringParameter(id);
 }
 
@@ -394,13 +424,19 @@ std::string Burn::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool Burn::SetStringParameter(const Integer id, const std::string &value)
 {
-   if (id == COORDFRAME)
+   if (id == BURNORIGIN)
+   {
+      burnOriginName = value;
+      return true;
+   }
+           
+   if (id == BURNAXES)
    {
       /// @todo validate the input value when the CS code is incorporated.
       // if (!IsValidFrame(value))
       //    return false;
-      coordFrame = value;
-      frame = frameman->GetFrameInstance(coordFrame);
+      coordAxes = value;
+      frame = frameman->GetFrameInstance(coordAxes);
 
       dvLabels[0] = frame->GetFrameLabel(1);
       dvLabels[1] = frame->GetFrameLabel(2);
@@ -408,12 +444,15 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
         
-   if (id == COORDSYSTEM)
+   if (id == COORDINATESYSTEM)
    {
-      /// @todo validate the input value when the CS code is incorporated.
-      // if (!IsValidSystem(value))
-      //     return false;
-      coordSystem = value;
+      throw BurnException("Burns cannot use GMAT coordinate systems yet.");
+   }
+
+
+   if (id == VECTORFORMAT)
+   {
+      vectorFormat = value;
       return true;
    }
         
@@ -432,7 +471,7 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value)
       satName = value;
       return true;
    }
-        
+   
    return GmatBase::SetStringParameter(id, value);
 }
 
@@ -475,7 +514,7 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value,
 //------------------------------------------------------------------------------
 const StringArray& Burn::GetStringArrayParameter(const Integer id) const
 {
-   if (id == COORDFRAME)
+   if (id == BURNAXES)
       return frameman->GetSupportedFrames();
 
    return GmatBase::GetStringArrayParameter(id);
@@ -495,4 +534,107 @@ const StringArray& Burn::GetStringArrayParameter(const Integer id) const
 void Burn::SetSpacecraftToManeuver(Spacecraft *sat)
 {
    sc = sat;
+}
+
+
+//------------------------------------------------------------------------------
+//  void SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+/**
+ * Sets the internal solar system pointer for objects that have one.
+ *
+ * @param ss   The solar system.
+ */
+//------------------------------------------------------------------------------
+void Burn::SetSolarSystem(SolarSystem *ss)
+{
+   solarSystem = ss;
+}
+
+
+//------------------------------------------------------------------------------
+//  bool Burn::Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Sets up the bodies used in teh burn calculations.
+ */
+//------------------------------------------------------------------------------
+bool Burn::Initialize()
+{
+   bool retval = GmatBase::Initialize();
+   
+   if (retval)
+   {
+      j2000Body = solarSystem->GetBody(j2000BodyName);
+      if (!burnOrigin)
+         burnOrigin = solarSystem->GetBody(burnOriginName);
+   
+      if ((!burnOrigin) || (!j2000Body))
+         throw BurnException("Unable to initialize the burn object " + 
+            instanceName + "; either " + j2000BodyName + " or " + 
+            burnOriginName + " was not set for the burn.");
+   }
+         
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+//  void TransformJ2kToBurnOrigin(const Real *scState, Real *state, Real epoch)
+//------------------------------------------------------------------------------
+/**
+ * Resets the state to use the origin specified for the Burn.
+ *
+ * @param scState The input spacecraft state.
+ * @param state   The transformed state.
+ * @param epoch   The epoch of the input (and output) state.
+ */
+//------------------------------------------------------------------------------
+void Burn::TransformJ2kToBurnOrigin(const Real *scState, Real *state, 
+                                    Real epoch)
+{
+   #ifdef DEBUG_BURN_ORIGIN
+      MessageInterface::ShowMessage(
+         "State transformation for Burn\n"
+         "   Input state =  [ %lf %lf %lf %.9lf %.9lf %.9lf ]\n", scState[0], 
+         scState[1], scState[2], scState[3], scState[4], scState[5]);
+   #endif
+
+   if ((j2000Body == NULL) || (burnOrigin == NULL))
+      Initialize();
+      
+   memcpy(state, scState, 6*sizeof(Real));
+   if (j2000Body != burnOrigin)
+   {
+      Rvector6 j2kState = j2000Body->GetMJ2000State(epoch);
+      Rvector6 originState = burnOrigin->GetMJ2000State(epoch);
+      Rvector6 delta = j2kState - originState;
+
+      #ifdef DEBUG_BURN_ORIGIN
+         MessageInterface::ShowMessage(
+            "   j2000       =  [ %lf %lf %lf %.9lf %.9lf %.9lf ]\n",
+            j2kState[0], j2kState[1], j2kState[2], j2kState[3], j2kState[4], 
+            j2kState[5]);
+         MessageInterface::ShowMessage(
+            "   Origin      =  [ %lf %lf %lf %.9lf %.9lf %.9lf ]\n",
+            originState[0], originState[1], originState[2], originState[3], 
+            originState[4], originState[5]);
+         MessageInterface::ShowMessage(
+            "   Delta       =  [ %lf %lf %lf %.9lf %.9lf %.9lf ]\n",
+            delta[0], delta[1], delta[2], delta[3], delta[4], delta[5]);
+      #endif
+      
+      state[0] += delta[0];
+      state[1] += delta[1];
+      state[2] += delta[2];
+      state[3] += delta[3];
+      state[4] += delta[4];
+      state[5] += delta[5];
+   }
+   
+   #ifdef DEBUG_BURN_ORIGIN
+      MessageInterface::ShowMessage(
+         "   Output state = [ %lf %lf %lf %.9lf %.9lf %.9lf ]\n",
+         state[0], state[1], state[2], state[3], state[4], state[5]);
+   #endif
 }
