@@ -64,6 +64,9 @@ public:
    static const Real                  LUNA_MU;
    static const Rmatrix               LUNA_SIJ;
    static const Rmatrix               LUNA_CIJ;
+   
+   static const Real                  LF_EPOCH;
+   static const Rvector6              LF_ELEMENTS;
 
 protected:
 

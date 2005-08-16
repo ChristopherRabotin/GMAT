@@ -29,7 +29,7 @@ const Real                  Star::EQUATORIAL_RADIUS   = 6.97E5;      // km
 const Real                  Star::FLATTENING          = 0.0; 
 // Units for MU are km^3/s^2
 const Real                  Star::MU                  = 1.32712438e11;
-const Gmat::PosVelSource    Star::POS_VEL_SOURCE      = Gmat::DE_405;
+const Gmat::PosVelSource    Star::POS_VEL_SOURCE      = Gmat::ANALYTIC;
 const Gmat::AnalyticMethod  Star::ANALYTIC_METHOD     = Gmat::LOW_FIDELITY;
 const Integer               Star::BODY_NUMBER         = 3;  
 const Integer               Star::REF_BODY_NUMBER     = 3;    
@@ -43,6 +43,12 @@ const Rmatrix               Star::CIJ                 = Rmatrix(5,5,
       0.0, 0.0,             0.0,             0.0,             0.0,
       0.0, 0.0,             0.0,             0.0,             0.0);
 //const Integer               Star::COEFFICIENT_SIZE    = 4;
+
+// NOTE - these must change when Earth's default values change!!!!!!!!!!!!
+const Real                  Star::LF_EPOCH                 = 21544.500370768266;
+const Rvector6              Star::LF_ELEMENTS              = Rvector6(
+      149653978.9783766,        0.01704556707314489,  23.439034090426388,
+      0.00018646554487906264, 281.7416388084352,     358.12708491129);
 
 // Units for radiant power are W / m^2
 const Real                  Star::STAR_RADIANT_POWER       = 1358.0;     
@@ -407,6 +413,10 @@ void Star::InitializeStar()
    cij                 = Star::CIJ;
    defaultMu           = Star::MU;
    defaultEqRadius     = Star::EQUATORIAL_RADIUS;
+   
+   lfEpoch             = Star::LF_EPOCH;
+   lfKepler            = Star::LF_ELEMENTS;
+   
    //coefficientSize     = Star::COEFFICIENT_SIZE;
    //defaultSij          = Star::SIJ;
    //defaultCij          = Star::CIJ;

@@ -105,6 +105,9 @@ protected:
    static const Integer               DEGREE[NumberOfPlanets];
    static const Rmatrix               SIJ[NumberOfPlanets];
    static const Rmatrix               CIJ[NumberOfPlanets];
+   
+   static const Real                  LF_EPOCH[NumberOfPlanets];
+   static const Rvector6              LF_ELEMENTS[NumberOfPlanets];
    /// @todo add other ones as needed
 
    void             InitializePlanet(const std::string &cBody);

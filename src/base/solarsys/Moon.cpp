@@ -27,7 +27,7 @@ using namespace GmatMathUtil;
 // initialize static default values
 // default values for CelesitalBody data
 const Gmat::BodyType        Moon::BODY_TYPE           = Gmat::MOON;
-const Gmat::PosVelSource    Moon::POS_VEL_SOURCE      = Gmat::DE_405; 
+const Gmat::PosVelSource    Moon::POS_VEL_SOURCE      = Gmat::ANALYTIC; 
 const Gmat::AnalyticMethod  Moon::ANALYTIC_METHOD     = Gmat::LOW_FIDELITY; 
 const Integer               Moon::ORDER               = 0; 
 const Integer               Moon::DEGREE              = 0;  
@@ -60,6 +60,11 @@ const Rmatrix               Moon::LUNA_CIJ                 = Rmatrix(5,5,
     1.22860504604000E-05,                 0.0,
     3.21502582986000E-06,-6.01154071094000E-06,-7.10667037450000E-06,
    -1.37041711834000E-06,-6.03652719918000E-06);
+
+const Real                  Moon::LF_EPOCH                 = 21544.500370768266;
+const Rvector6              Moon::LF_ELEMENTS              = Rvector6(
+      385494.90434829952,  0.055908943292024992,   20.940245433093748,
+      12.233244412716252, 68.004298803147648,     137.94325682926458);
 
 
 /// @todo add other ones as needed

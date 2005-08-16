@@ -83,6 +83,9 @@ public:
    static const Integer               DEGREE;
    static const Rmatrix               SIJ;
    static const Rmatrix               CIJ;
+   
+   static const Real                  LF_EPOCH;
+   static const Rvector6              LF_ELEMENTS;
 
    static const Real                  STAR_RADIANT_POWER;       // W / m^2
    static const Real                  STAR_REFERENCE_DISTANCE;  // km
