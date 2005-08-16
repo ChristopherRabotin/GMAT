@@ -231,6 +231,7 @@ private:
    Rvector3 mVpVec;
    Rvector3 mVdVec;
    Rvector3 mVcVec;
+   Rvector3 mUpVec;
    
    bool mUseInitialViewPoint;
    bool mUseFixedFov;
@@ -345,7 +346,8 @@ private:
    void ChangeView(float viewX, float viewY, float viewZ);
    void ChangeProjection(int width, int height, float axisLength);
    void ComputeProjection(int frame);
-   void ComputeViewMatrix(int frame); //loj: 7/22/05 Added frame
+   void ComputeUpAngleAxis(int frame);
+   void TransformView(int frame);
    
    // drawing objects
    void DrawFrame();
