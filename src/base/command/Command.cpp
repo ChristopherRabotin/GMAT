@@ -541,6 +541,12 @@ GmatCommand* GmatCommand::GetNext()
    return next;
 }
 
+bool GmatCommand::ForceSetNext(GmatCommand *toCmd) // dangerous!
+{
+   next = toCmd;
+   return true;
+}
+
 
 //------------------------------------------------------------------------------
 //  bool Append(GmatCommand *cmd)

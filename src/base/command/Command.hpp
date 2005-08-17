@@ -104,6 +104,7 @@ public:
    // Sequence methods
    virtual bool         Initialize();
    virtual GmatCommand* GetNext();
+   virtual bool         ForceSetNext(GmatCommand *toCmd); // dangerous!
    virtual bool         Append(GmatCommand *cmd);
    virtual bool         Insert(GmatCommand *cmd, GmatCommand *prev);
    virtual GmatCommand* Remove(GmatCommand *cmd);
