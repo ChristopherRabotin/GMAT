@@ -77,6 +77,8 @@ protected:
    bool                    commandExecuting;
    /// Flag used to indicate a branch is being executed
    bool                    branchExecuting;
+   /// the branch that is executing
+   Integer                 branchToExecute;
    /// The branch that is being filled while the command sequence is being built
    Integer                 branchToFill;
    /// Local container used to return the full sequence from the branches
@@ -85,6 +87,8 @@ protected:
    Integer                 nestLevel;
    /// Currently executing member of the branch.  NULL if branch not executing.
    GmatCommand             *current;
+   
+   bool  ShiftBranches(GmatCommand *startWith, Integer ofBranchNumber);
 };
 
 #endif // BranchCommand_hpp

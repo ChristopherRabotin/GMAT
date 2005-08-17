@@ -24,6 +24,10 @@
 
 //#define DEBUG_BRANCHCOMMAND_DEALLOCATION
 
+//------------------------------------------------------------------------------
+// public methods
+//------------------------------------------------------------------------------
+
 
 //------------------------------------------------------------------------------
 //  BranchCommand(const std::string &typeStr)
@@ -40,8 +44,10 @@ BranchCommand::BranchCommand(const std::string &typeStr) :
    commandComplete      (false),
    commandExecuting     (false),
    branchExecuting      (false),
+   branchToExecute      (0),
    branchToFill         (0),
-   nestLevel            (0)
+   nestLevel            (0),
+   current              (NULL)
 {
    depthChange = 1;
    parameterCount = BranchCommandParamCount;
@@ -116,8 +122,10 @@ BranchCommand::BranchCommand(const BranchCommand& bc) :
    branch            (1),
    commandComplete   (false),
    commandExecuting  (false),
+   branchToExecute   (0),
    branchToFill      (0),
-   nestLevel        (bc.nestLevel)
+   nestLevel         (bc.nestLevel),
+   current           (NULL)
 {
    depthChange = 1;
    parameterCount = BranchCommandParamCount;
@@ -334,44 +342,103 @@ bool BranchCommand::Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
-   GmatCommand *current = NULL;
+   GmatCommand *currentOne   = NULL;
+   GmatCommand *toShift      = NULL;
+   bool        newBranch     = false;
+   Integer     brNum         = -1;
+   bool        foundHere     = false;
+   bool        hereOrNested  = false;
+   
+   // if we're adding a new Else or ElseIf, we will need to add a branch 
+   if ( (this->GetTypeName() == "If") && 
+        ( (cmd->GetTypeName() == "Else") || 
+          (cmd->GetTypeName() == "ElseIf") ) )  newBranch = true;
+   
    
    // See if we're supposed to put it at the top of the first branch
    if (prev == this)
    {
       
-      current = branch[0];
+      currentOne = branch[0];
       branch[0] = cmd;
-      cmd->Append(current);
-      return true;
+      if (newBranch)
+      {
+         toShift = currentOne;
+         brNum   = 0;
+      }
+      cmd->Append(currentOne);
+      foundHere = true;
+      //return true;
    }
    // see if we're supposed to add it to the front of a branch
    // i.e. the prev = the last command in the previous branch
    // (e.g. an Else command)
    // check all but the last branch - End*** should take care of it
    // at that point
-   for (Integer br = 0; br < (Integer) (branch.size() - 1); ++br)
+   if (!foundHere)
    {
-      current = branch.at(br);
-      if (current != NULL)
+      for (Integer br = 0; br < (Integer) (branch.size() - 1); ++br)
       {
-         while (current->GetNext() != this)
-            current = current->GetNext();
-         if (current == prev) 
+         currentOne = branch.at(br);
+         if (currentOne != NULL)
          {
-            AddToFrontOfBranch(cmd,br+1);
-            return true;
+            while (currentOne->GetNext() != this)
+               currentOne = currentOne->GetNext();
+            if (currentOne == prev) 
+            {
+               if (newBranch)
+               {
+                  toShift = currentOne;
+                  brNum   = br;
+               }
+               AddToFrontOfBranch(cmd,br+1);
+               foundHere = true;
+               //return true;
+            }
          }
       }
    }
    // If we have branches, try to insert there first
-   for (Integer which = 0; which < (Integer)branch.size(); ++which)
+   if (!foundHere)
    {
-      current = branch[which];
-      if (current != NULL)
-         if (current->Insert(cmd, prev))
-               return true;
+      GmatCommand *nc = NULL;
+      for (Integer which = 0; which < (Integer)branch.size(); ++which)
+      {
+         currentOne = branch[which];
+         if (currentOne != NULL)
+         {
+            nc = currentOne;
+            while((nc != this) && !foundHere)
+            {
+                // let a nested If handle it, if it is supposed to go in there
+               if (newBranch && (nc == prev) && (nc->GetTypeName() != "If"))
+               {
+                  toShift   = nc->GetNext();
+                  brNum     = which;
+                  foundHere = true;
+               }
+               nc = nc->GetNext();
+            }
+            //if (inNested = currentOne->Insert(cmd, prev))
+            //   return true;
+            hereOrNested = currentOne->Insert(cmd, prev);
+         }
+      }
    }
+   
+   if (newBranch && foundHere && (toShift != NULL))
+   {
+      // make sure the new Else or ElseIf points back to the If command
+      cmd->ForceSetNext(this);
+         
+      // shift all the later comamnds down one branch
+      bool isOK = ShiftBranches(toShift, brNum);
+      if (!isOK) 
+         MessageInterface::ShowMessage
+            ("In BranchCommand::Insert - error adding Else/ElseIf");
+   }
+   
+   if (foundHere || hereOrNested) return true;
    
    // Otherwise, just call the base class method
    return GmatCommand::Insert(cmd, prev);
@@ -577,7 +644,7 @@ bool BranchCommand::Execute()
 bool BranchCommand::ExecuteBranch(Integer which)
 {
    bool retval = true;
-   
+      
    if (current == NULL)
       current = branch[which];
       
@@ -632,3 +699,41 @@ void BranchCommand::RunComplete()
 
    GmatCommand::RunComplete();
 }
+
+
+//------------------------------------------------------------------------------
+// protected methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//  bool ShiftBranches(GmatCommand *startWith, Integer ofBranchNumber)
+//------------------------------------------------------------------------------
+/**
+ * Shifts command in the branches down one branch, starting with command 
+ * startWith in branch ofBranchNumber.
+ *
+ * @param startingWith   first command to shift down one branch
+ * @param ofBranchNumber branch where the command is located
+ *
+ * @return success of the operation
+ *
+ */
+//------------------------------------------------------------------------------
+bool  
+BranchCommand::ShiftBranches(GmatCommand *startWith, Integer ofBranchNumber)
+{   
+   Integer brSz = (Integer) branch.size();
+   // add another branch at the end
+   branch.push_back(NULL);
+   for (Integer i = brSz-1; i > ofBranchNumber; i--)
+   {
+      branch.at(i+1) = branch.at(i);
+   }
+   branch.at(ofBranchNumber+1) = startWith;
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// protected methods
+//------------------------------------------------------------------------------
+// none at this time
