@@ -723,10 +723,13 @@ std::string OpenGlPlot::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool OpenGlPlot::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == OVERLAP_PLOT) || (id == DATA_COLLECT_FREQUENCY) ||
-       (id == UPDATE_PLOT_FREQUENCY) || (id == USE_VIEWPOINT_INFO) ||
-       (id == PERSPECTIVE_MODE))
+   if (id == OVERLAP_PLOT)
       return true;
+   
+//    if ((id == OVERLAP_PLOT) || (id == DATA_COLLECT_FREQUENCY) ||
+//        (id == UPDATE_PLOT_FREQUENCY) || (id == USE_VIEWPOINT_INFO) ||
+//        (id == PERSPECTIVE_MODE))
+//       return true;
 
    return Subscriber::IsParameterReadOnly(id);
 }
