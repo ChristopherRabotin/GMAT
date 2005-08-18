@@ -34,6 +34,7 @@ public:
     ~BallisticsMassPanel();
     void SaveData();
     void LoadData();
+    bool canClose;
    
 private:
 

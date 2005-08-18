@@ -48,6 +48,7 @@ BallisticsMassPanel::BallisticsMassPanel(wxWindow *parent,
 {
     this->theSpacecraft = spacecraft;
     this->theApplyButton = theApplyButton;
+    canClose=true;
     Create();
 }
 
@@ -72,10 +73,14 @@ BallisticsMassPanel::~BallisticsMassPanel()
 //------------------------------------------------------------------------------
 void BallisticsMassPanel::Create()
 {
+    wxStaticText *emptyText = new wxStaticText( this, ID_TEXT,
+                            wxT(""),
+                            wxDefaultPosition, wxDefaultSize, 0 );
+
     wxStaticBox *item1 = new wxStaticBox( this, -1, wxT("") );
     wxStaticBoxSizer *item0 = new wxStaticBoxSizer( item1, wxVERTICAL );
 
-    wxFlexGridSizer *item2 = new wxFlexGridSizer( 2, 0, 0 );
+    wxFlexGridSizer *item2 = new wxFlexGridSizer( 3, 0, 0 );
 
     wxStaticText *dryMassStaticText = new wxStaticText( this, ID_TEXT, 
                             wxT("Dry Mass"), 
@@ -86,6 +91,11 @@ void BallisticsMassPanel::Create()
                             wxDefaultPosition, wxSize(80,-1), 0 );
     item2->Add( dryMassTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
 
+    wxStaticText *dryMassUnitsText = new wxStaticText( this, ID_TEXT,
+                            wxT("Kg"),
+                            wxDefaultPosition, wxDefaultSize, 0 );
+    item2->Add( dryMassUnitsText, 0, wxALIGN_CENTER|wxALL, 5 );
+
     wxStaticText *dragCoeffStaticText = new wxStaticText( this, ID_TEXT, 
                             wxT("Coefficient of Drag"), wxDefaultPosition, 
                             wxDefaultSize, 0 );
@@ -94,6 +104,7 @@ void BallisticsMassPanel::Create()
     dragCoeffTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
                             wxDefaultPosition, wxSize(80,-1), 0 );
     item2->Add( dragCoeffTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+    item2->Add( emptyText, 0, wxALIGN_CENTER|wxALL, 5 );
 
     wxStaticText *reflectCoeffStaticText = new wxStaticText( this, ID_TEXT, 
                             wxT("Coefficient of Reflectivity"), 
@@ -103,6 +114,7 @@ void BallisticsMassPanel::Create()
     reflectCoeffTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
                             wxDefaultPosition, wxSize(80,-1), 0 );
     item2->Add( reflectCoeffTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+    item2->Add( emptyText, 0, wxALIGN_CENTER|wxALL, 5 );
 
     wxStaticText *dragAreaStaticText = new wxStaticText( this, ID_TEXT, 
                             wxT("Drag Area"), 
@@ -112,6 +124,10 @@ void BallisticsMassPanel::Create()
     dragAreaTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
                             wxDefaultPosition, wxSize(80,-1), 0 );
     item2->Add( dragAreaTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+    wxStaticText *dragAreaUnitsText = new wxStaticText( this, ID_TEXT,
+                            wxT("m^2"),
+                            wxDefaultPosition, wxDefaultSize, 0 );
+    item2->Add( dragAreaUnitsText, 0, wxALIGN_CENTER|wxALL, 5 );
 
     wxStaticText *srpAreaStaticText = new wxStaticText( this, ID_TEXT, 
                             wxT("SRP Area"), 
@@ -121,6 +137,10 @@ void BallisticsMassPanel::Create()
     srpAreaTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
                             wxDefaultPosition, wxSize(80,-1), 0 );
     item2->Add( srpAreaTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+    wxStaticText *srpAreaUnitsText = new wxStaticText( this, ID_TEXT,
+                            wxT("m^2"),
+                            wxDefaultPosition, wxDefaultSize, 0 );
+    item2->Add( srpAreaUnitsText, 0, wxALIGN_CENTER|wxALL, 5 );
 
     item0->Add( item2, 0, wxALIGN_CENTER|wxALL, 5 );
 
@@ -170,6 +190,8 @@ void BallisticsMassPanel::LoadData()
 
 void BallisticsMassPanel::SaveData()
 {
+    canClose=true;
+
     int dryMassID = theSpacecraft->GetParameterID("DryMass");
 //    int coeffDragID = theSpacecraft->GetParameterID("CoefficientDrag");
     int coeffDragID = theSpacecraft->GetParameterID("Cd");
@@ -184,6 +206,30 @@ void BallisticsMassPanel::SaveData()
     wxString srpAreaStr = srpAreaTextCtrl->GetValue();
     wxString reflectCoeffStr = reflectCoeffTextCtrl->GetValue();
     
+    if (atof(massStr) < 0)
+    {
+       MessageInterface::PopupMessage
+         (Gmat::WARNING_, "Mass can not be negative");
+       canClose=false;
+       return;
+    }
+
+    if (atof(srpAreaStr) < 0)
+    {
+       MessageInterface::PopupMessage
+         (Gmat::WARNING_, "SRP Area can not be negative");
+       canClose=false;
+       return;
+    }
+    
+    if (atof(dragAreaStr) < 0)
+    {
+       MessageInterface::PopupMessage
+         (Gmat::WARNING_, "Drag Area can not be negative");
+       canClose=false;
+       return;
+    }
+
     theSpacecraft->SetRealParameter(dryMassID, atof(massStr));
     theSpacecraft->SetRealParameter(coeffDragID, atof(dragCoeffStr));
     theSpacecraft->SetRealParameter(dragAreaID, atof(dragAreaStr));
