@@ -62,7 +62,10 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 UniversePanel::UniversePanel(wxWindow *parent):GmatPanel(parent)
 {
+   mHasFileTypesInUseChanged = false;
    mHasFileNameChanged = false;
+   mHasAnaModelChanged = false;
+   
    Create();
    Show();
 }
@@ -75,9 +78,6 @@ UniversePanel::~UniversePanel()
 }
 
 
-//---------------------------------
-// private methods
-//---------------------------------
 //---------------------------------
 // methods inherited from GmatPanel
 //---------------------------------
@@ -101,23 +101,18 @@ void UniversePanel::Create()
    #endif
 
    int bsize = 3;
+   wxString emptyArray[] = { };
    
    //-------------------------------------------------------
    // 1st column (Available file types)
    //-------------------------------------------------------
    wxStaticText *availableLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Available Planetary File"),
+      new wxStaticText(this, ID_TEXT, wxT("Available Planetary Source"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
-   
-   wxString availableStrs [] =  { };
-   
-   //ag: not needed for build 2
-   //wxT("Low Accuracy Analytic"), 
-   //wxT("High Accuracy Analytic")
    
    availableListBox =
       new wxListBox(this, ID_AVAILABLE_LIST, wxDefaultPosition, 
-                     wxSize(140,125), 0, availableStrs, wxLB_SINGLE);
+                     wxSize(140,125), 0, emptyArray, wxLB_SINGLE);
    
    wxBoxSizer *availableSizer = new wxBoxSizer(wxVERTICAL);
    availableSizer->Add(availableLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -159,14 +154,12 @@ void UniversePanel::Create()
    // 3rd column (Selected file types)
    //-------------------------------------------------------
    wxStaticText *selLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Selected File"),
+      new wxStaticText(this, ID_TEXT, wxT("Selected Source"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
-   
-   wxString strs11[] = {};
    
    selectedListBox =
       new wxListBox(this, ID_SELECTED_LIST, wxDefaultPosition, 
-                    wxSize(140,125), 0, strs11, wxLB_SINGLE);
+                    wxSize(140,125), 0, emptyArray, wxLB_SINGLE);
    
    wxBoxSizer *selectedSizer = new wxBoxSizer(wxVERTICAL);
    selectedSizer->Add(selLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -186,22 +179,21 @@ void UniversePanel::Create()
    topGridSizer->Add(selectedSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //-------------------------------------------------------
-   // bottom file path
+   // file path
    //-------------------------------------------------------
    
    wxStaticText *fileTypeLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Planetary File"),
+      new wxStaticText(this, ID_TEXT, wxT("Planetary Source"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    
    wxStaticText *fileNameLabel =
       new wxStaticText(this, ID_TEXT, wxT("File Name"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    
-   wxString emptyArray[] = { };
    mFileTypeComboBox = 
       new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition,
                      wxSize(100,20), 0, emptyArray, wxCB_READONLY);
-   
+
    mFileNameTextCtrl =
       new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""),
                      wxDefaultPosition, wxSize(300, -1),  0);
@@ -211,22 +203,39 @@ void UniversePanel::Create()
                    wxDefaultPosition, wxSize(50,20), 0);
    
    wxFlexGridSizer *bottomGridSizer = new wxFlexGridSizer(3, 0, 0);
-   bottomGridSizer->Add(fileTypeLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
+   bottomGridSizer->Add(fileTypeLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    bottomGridSizer->Add(fileNameLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
    bottomGridSizer->Add(20,20, 0, wxALIGN_CENTRE|wxALL, bsize);
    bottomGridSizer->Add(mFileTypeComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    bottomGridSizer->Add(mFileNameTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
    bottomGridSizer->Add(mBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    
+   //-------------------------------------------------------
+   // analytic motel
+   //-------------------------------------------------------
+   
+   wxStaticText *anaModelLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Analytic Model"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   
+   mAnalyticModelComboBox = 
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition,
+                     wxSize(120,20), 0, emptyArray, wxCB_READONLY);
+   
+   mAnaModelSizer = new wxBoxSizer(wxVERTICAL);
+   mAnaModelSizer->Add(20, 10, 0, wxALIGN_LEFT|wxALL, bsize);
+   mAnaModelSizer->Add(anaModelLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   mAnaModelSizer->Add(mAnalyticModelComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    
    //-------------------------------------------------------
    // Add to pageSizer
    //-------------------------------------------------------
-   wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
-   pageSizer->Add(topGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   pageSizer->Add(bottomGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mPageSizer = new wxBoxSizer(wxVERTICAL);
+   mPageSizer->Add(topGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mPageSizer->Add(bottomGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mPageSizer->Add(mAnaModelSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   theMiddleSizer->Add(pageSizer, 0, wxALIGN_CENTER|wxALL, bsize);
+   theMiddleSizer->Add(mPageSizer, 0, wxALIGN_CENTER|wxALL, bsize);
 }
 
 
@@ -237,8 +246,9 @@ void UniversePanel::LoadData()
 {
    // load data from the core engine
    
-   mAllFileTypes = theGuiInterpreter->GetPlanetaryFileTypes();
-   StringArray fileTypesInUse = theGuiInterpreter->GetPlanetaryFileTypesInUse();
+   mAllFileTypes = theGuiInterpreter->GetPlanetarySourceTypes();
+   mAnalyticModels = theGuiInterpreter->GetAnalyticModelNames();
+   StringArray fileTypesInUse = theGuiInterpreter->GetPlanetarySourceTypesInUse();
    
    // available source
    for (unsigned int i=0; i<mAllFileTypes.size(); i++)
@@ -266,14 +276,21 @@ void UniversePanel::LoadData()
    {
       wxString type = mAllFileTypes[i].c_str();
       mFileTypeNameMap[type] =
-         theGuiInterpreter->GetPlanetaryFileName(mAllFileTypes[i]).c_str();
+         theGuiInterpreter->GetPlanetarySourceName(mAllFileTypes[i]).c_str();
       
       mFileTypeComboBox->Append(type);
+   }
+   
+   // available analytic models
+   for (unsigned int i=0; i<mAnalyticModels.size(); i++)
+   {
+      mAnalyticModelComboBox->Append(mAnalyticModels[i].c_str());
    }
    
    // set defaults
    availableListBox->SetSelection(0);
    selectedListBox->SetSelection(0);
+   mAnalyticModelComboBox->SetSelection(0);
    
    if (fileTypesInUse.size() > 0)
       removeButton->Enable(true);
@@ -285,9 +302,23 @@ void UniversePanel::LoadData()
    else
       prioritizeButton->Enable(false);
    
-   mFileTypeComboBox->SetSelection(0);
+   //mFileTypeComboBox->SetSelection(0);
+   mFileTypeComboBox->SetStringSelection(selectedListBox->GetString(0));
+   if (mFileTypeComboBox->GetStringSelection() == "Analytic")
+   {
+      mBrowseButton->Disable();
+      mPageSizer->Show(mAnaModelSizer, true);
+   }
+   else
+   {
+      mBrowseButton->Enable();
+      mPageSizer->Show(mAnaModelSizer, false);
+   }
+   
    mFileNameTextCtrl->
       SetValue(mFileTypeNameMap[mFileTypeComboBox->GetStringSelection()]);
+
+   mPageSizer->Layout();
 }
 
 
@@ -318,7 +349,7 @@ void UniversePanel::SaveData()
          {
             wxString type = mAllFileTypes[i].c_str();
             std::string name = std::string(mFileTypeNameMap[type].c_str());
-            theGuiInterpreter->SetPlanetaryFileName(mAllFileTypes[i], name);
+            theGuiInterpreter->SetPlanetarySourceName(mAllFileTypes[i], name);
          }
       }
       
@@ -339,7 +370,7 @@ void UniversePanel::SaveData()
             #endif
          }
          
-         Integer status = theGuiInterpreter->SetPlanetaryFileTypesInUse(mFileTypesInUse);
+         Integer status = theGuiInterpreter->SetPlanetarySourceTypesInUse(mFileTypesInUse);
          
          // if error opening the first file type, remove the file type from the list
          if (status == 1)
@@ -347,6 +378,13 @@ void UniversePanel::SaveData()
             selectedListBox->Delete(0);
          }
       }
+   }
+
+   if (mHasAnaModelChanged)
+   {
+      mHasAnaModelChanged = false;
+      theGuiInterpreter->
+         SetAnalyticModelToUse(mAnalyticModelComboBox->GetStringSelection().c_str());
    }
    
    theApplyButton->Enable(false);
@@ -522,6 +560,26 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
    {
       wxString type = mFileTypeComboBox->GetStringSelection();
       mFileNameTextCtrl->SetValue(mFileTypeNameMap[type]);
+
+      if (type == "Analytic")
+      {
+         mPageSizer->Show(mAnaModelSizer, true);
+         mBrowseButton->Disable();
+      }
+      else
+      {
+         mPageSizer->Show(mAnaModelSizer, false);
+         mBrowseButton->Enable();
+      }
+
+      mPageSizer->Layout();
    }
+   else if (event.GetEventObject() == mAnalyticModelComboBox)
+   {
+      mHasAnaModelChanged = true;
+   }
+   
+   theApplyButton->Enable();
+
 }
 

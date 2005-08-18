@@ -222,15 +222,16 @@ public:
    CoordinateSystem* GetInternalCoordinateSystem();
    
    // Planetary files
-   StringArray& GetPlanetaryFileTypes();
-   StringArray& GetPlanetaryFileNames();
-   StringArray& GetPlanetaryFileTypesInUse();
-   std::string GetPlanetaryFileName(const std::string &fileType);
-   bool SetPlanetaryFileName(const std::string &fileType,
-                             const std::string &fileName);
-   
-   Integer SetPlanetaryFileTypesInUse(const StringArray &fileTypes); 
-   Integer GetPlanetaryFileId(const std::string &fileType);
+   StringArray& GetPlanetarySourceTypes();
+   StringArray& GetPlanetarySourceNames();
+   StringArray& GetPlanetarySourceTypesInUse();
+   StringArray& GetAnalyticModelNames();
+   bool SetAnalyticModelToUse(const std::string &modelName);
+   bool SetPlanetarySourceName(const std::string &sourceType,
+                               const std::string &fileName);
+   Integer SetPlanetarySourceTypesInUse(const StringArray &sourceTypes); 
+   Integer GetPlanetarySourceId(const std::string &sourceType);
+   std::string GetPlanetarySourceName(const std::string &sourceType);
    
    // Potential field files
    std::string GetPotentialFileName(const std::string &fileType);
@@ -353,27 +354,36 @@ private:
    CoordinateSystem *theInternalCoordSystem;
    SlpFile *theDefaultSlpFile;
    DeFile *theDefaultDeFile;
-   StringArray thePlanetaryFileTypes;
-   StringArray thePlanetaryFileNames;
-   StringArray thePlanetaryFileTypesInUse;
+   StringArray thePlanetarySourceTypes;
+   StringArray thePlanetarySourceNames;
+   StringArray thePlanetarySourceTypesInUse;
+   StringArray theAnalyticModelNames;
    StringArray theTempFileList;
    StringArray theSpacePointList;
-
    EopFile *theEopFile;
    ItrfCoefficientsFile *theItrfFile;
    LeapSecsFileReader *theLeapSecsFile;
+   Gmat::AnalyticMethod theAnalyticMethod;
    
    enum
    {
-      SLP = 0,
+      ANALYTIC = 0,
+      SLP,
       DE200,
       DE405,
-      PlanetaryFileCount,
+      PlanetarySourceCount,
    };
-    
-   Integer thePlanetarySourcePriority[PlanetaryFileCount];
-   bool isPlanetaryFileInUse[PlanetaryFileCount];
-   static const std::string PLANETARY_SOURCE_STRING[PlanetaryFileCount];
+   
+   enum
+   {
+      LOW_FIDELITY = 0,
+      AnalyticModelCount,
+   };
+   
+   Integer thePlanetarySourcePriority[PlanetarySourceCount];
+   bool isPlanetarySourceInUse[PlanetarySourceCount];
+   static const std::string PLANETARY_SOURCE_STRING[PlanetarySourceCount];
+   static const std::string ANALYTIC_MODEL_STRING[AnalyticModelCount];
    static const Integer HIGHEST_PRIORITY = 10;
    Gmat::RunState runState;
 };

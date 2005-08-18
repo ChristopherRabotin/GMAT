@@ -50,11 +50,18 @@ GuiInterpreter* Moderator::theGuiInterpreter = NULL;
 ScriptInterpreter* Moderator::theScriptInterpreter = NULL;
 
 const std::string
-Moderator::PLANETARY_SOURCE_STRING[PlanetaryFileCount] =
+Moderator::PLANETARY_SOURCE_STRING[PlanetarySourceCount] =
 {
+   "Analytic",
    "SLP",
    "DE200",
    "DE405",
+};
+
+const std::string
+Moderator::ANALYTIC_MODEL_STRING[AnalyticModelCount] =
+{
+   "Low Fidelity",
 };
 
 //---------------------------------
@@ -2145,77 +2152,338 @@ CoordinateSystem* Moderator::GetInternalCoordinateSystem()
 
 //Planetary files
 //------------------------------------------------------------------------------
-// StringArray& GetPlanetaryFileTypes()
+// StringArray& GetPlanetarySourceTypes()
 //------------------------------------------------------------------------------
 /**
  * @return a planetary source types
  */
 //------------------------------------------------------------------------------
-StringArray& Moderator::GetPlanetaryFileTypes()
+StringArray& Moderator::GetPlanetarySourceTypes()
 {
-   return thePlanetaryFileTypes;
+   return thePlanetarySourceTypes;
 }
 
 //------------------------------------------------------------------------------
-// StringArray& GetPlanetaryFileNames()
+// StringArray& GetPlanetarySourceNames()
 //------------------------------------------------------------------------------
 /**
  * @return a planetary source file names
  */
 //------------------------------------------------------------------------------
-StringArray& Moderator::GetPlanetaryFileNames()
+StringArray& Moderator::GetPlanetarySourceNames()
 {
-   return thePlanetaryFileNames;
+   return thePlanetarySourceNames;
 }
 
 //------------------------------------------------------------------------------
-// StringArray& GetPlanetaryFileTypesInUse()
+// StringArray& GetPlanetarySourceTypesInUse()
 //------------------------------------------------------------------------------
 /**
  * @return a planetary source types in use
  */
 //------------------------------------------------------------------------------
-StringArray& Moderator::GetPlanetaryFileTypesInUse()
+StringArray& Moderator::GetPlanetarySourceTypesInUse()
 {
    theTempFileList.clear();
-   for (unsigned int i=0; i<thePlanetaryFileTypesInUse.size(); i++)
-      theTempFileList.push_back(thePlanetaryFileTypesInUse[i]);
+   for (unsigned int i=0; i<thePlanetarySourceTypesInUse.size(); i++)
+      theTempFileList.push_back(thePlanetarySourceTypesInUse[i]);
 
    return theTempFileList;
 }
 
-//------------------------------------------------------------------------------
-// std::string GetPlanetaryFileName(const std::string &fileType)
-//------------------------------------------------------------------------------
-std::string Moderator::GetPlanetaryFileName(const std::string &fileType)
-{
-   Integer id = GetPlanetaryFileId(fileType);
 
-   if (id >= 0)
-      return thePlanetaryFileNames[id];
-   else
-      return "Unknown File Type";
+//------------------------------------------------------------------------------
+// StringArray& GetAnalyticModelNames()
+//------------------------------------------------------------------------------
+/**
+ * @return available planetary analytic model names.
+ */
+//------------------------------------------------------------------------------
+StringArray& Moderator::GetAnalyticModelNames()
+{
+   return theAnalyticModelNames;
 }
 
+
 //------------------------------------------------------------------------------
-// bool SetPlanetaryFileName(const std::string &fileType,
+// bool SetAnalyticModelToUse(const std::string &modelName)
+//------------------------------------------------------------------------------
+bool Moderator::SetAnalyticModelToUse(const std::string &modelName)
+{
+   int modelId = 0;
+   for (int i=0; i<AnalyticModelCount; i++)
+   {
+      if (ANALYTIC_MODEL_STRING[i] == modelName)
+      {
+         modelId = i;
+         break;
+      }
+   }
+   
+   // because NO_ANALYTIC_METHOD = 0 in CelestialBody.hpp
+   theAnalyticMethod = Gmat::AnalyticMethod(modelId + 1);
+   
+   #if DEBUG_PLANETARY_FILE
+   MessageInterface::ShowMessage
+      ("Moderator::SetAnalyticModelToUse() theAnalyticMethod=%d\n",
+       theAnalyticMethod);
+   #endif
+   
+   return theDefaultSolarSystem->SetAnalyticMethod(theAnalyticMethod);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetPlanetarySourceName(const std::string &sourceType,
 //                           const std::string &fileName)
 //------------------------------------------------------------------------------
-bool Moderator::SetPlanetaryFileName(const std::string &fileType,
+bool Moderator::SetPlanetarySourceName(const std::string &sourceType,
                                      const std::string &fileName)
 {
    bool status = false;
-   Integer id = GetPlanetaryFileId(fileType);
+   Integer id = GetPlanetarySourceId(sourceType);
 
    if (id >= 0)
    {
-      thePlanetaryFileNames[id] = fileName;
+      thePlanetarySourceNames[id] = fileName;
       status = true;
    }
     
    return status;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetPlanetarySourceName(const std::string &sourceType)
+//------------------------------------------------------------------------------
+std::string Moderator::GetPlanetarySourceName(const std::string &sourceType)
+{
+   Integer id = GetPlanetarySourceId(sourceType);
+
+   if (id >= 0)
+      return thePlanetarySourceNames[id];
+   else
+      return "Unknown Source Type";
+}
+
+
+//------------------------------------------------------------------------------
+// Integer SetPlanetarySourceTypesInUse(const StringArray &sourceTypes)
+//------------------------------------------------------------------------------
+/*
+ * @param <sourceTypes> list of file type in the priority order of use
+ *
+ * @return 0, if error setting any of planetary file in the list.
+ *         1, if error setting first planetary file in the list, but set to
+ *            next available file.
+ *         2, if successfuly set to first planetary file in the list
+ */
+//------------------------------------------------------------------------------
+Integer Moderator::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes)
+{
+   #if DEBUG_PLANETARY_FILE
+   MessageInterface::
+      ShowMessage("Moderator::SetPlanetarySourceTypesInUse() num source types=%d\n",
+                  sourceTypes.size());
+   #endif
+   
+   bool status = false;
+   Integer sourceTypeInUse = -1;
+   Integer retCode = 0;
+   
+   // update planetary file types
+   if (&thePlanetarySourceTypesInUse != &sourceTypes)
+   {
+      #if DEBUG_PLANETARY_FILE
+      MessageInterface::ShowMessage
+         ("Moderator::SetPlanetarySourceTypesInUse() updating planetary source\n");
+      #endif
+      
+      thePlanetarySourceTypesInUse.clear();
+    
+      for (unsigned int i=0; i<sourceTypes.size(); i++)
+      {
+         thePlanetarySourceTypesInUse.push_back(sourceTypes[i]);
+      }
+   }
+
+   theTempFileList.clear();
+   for (unsigned int i=0; i<thePlanetarySourceTypesInUse.size(); i++)
+      theTempFileList.push_back(thePlanetarySourceTypesInUse[i]);
+   
+   // create planetary ephem file if non-analytic
+   for (unsigned int i=0; i<thePlanetarySourceTypesInUse.size(); i++)
+   {
+      if (thePlanetarySourceTypesInUse[i] == PLANETARY_SOURCE_STRING[ANALYTIC])
+      {
+         thePlanetarySourcePriority[ANALYTIC] = 0;
+         status = theDefaultSolarSystem->SetAnalyticMethod(theAnalyticMethod);
+         if (status)
+         {
+            thePlanetarySourcePriority[ANALYTIC] = HIGHEST_PRIORITY - i;
+            isPlanetarySourceInUse[ANALYTIC] = true;
+            sourceTypeInUse = ANALYTIC;
+            break;
+         }
+         else
+         {
+            MessageInterface::ShowMessage
+               ("*** Error *** Failed to Set AnalyticMethod: %d\n",
+                theAnalyticMethod);
+         }
+      }
+      else if (thePlanetarySourceTypesInUse[i] == PLANETARY_SOURCE_STRING[SLP])
+      {
+         thePlanetarySourcePriority[SLP] = 0;
+         status = CreateSlpFile(thePlanetarySourceNames[SLP]);
+         if (status)
+         {
+            thePlanetarySourcePriority[SLP] = HIGHEST_PRIORITY - i;
+            isPlanetarySourceInUse[SLP] = true;
+            sourceTypeInUse = SLP;
+            break;
+         }
+      }
+      else if (thePlanetarySourceTypesInUse[i] == PLANETARY_SOURCE_STRING[DE200])
+      {
+         #if DEBUG_PLANETARY_FILE
+         MessageInterface::
+            ShowMessage("Moderator::SetPlanetarySourceTypesInUse() create DE200\n");
+         #endif
+         
+         thePlanetarySourcePriority[DE200] = 0;
+         status = CreateDeFile(DE200, thePlanetarySourceNames[DE200]);
+         if (status)
+         {
+            thePlanetarySourcePriority[DE200] = HIGHEST_PRIORITY - i;
+            isPlanetarySourceInUse[DE200] = true;
+            sourceTypeInUse = DE200;
+            break;
+         }
+      }
+      else if (thePlanetarySourceTypesInUse[i] == PLANETARY_SOURCE_STRING[DE405])
+      {
+         #if DEBUG_PLANETARY_FILE
+         MessageInterface::
+            ShowMessage("Moderator::SetPlanetarySourceTypesInUse() create DE405\n");
+         #endif
+         
+         thePlanetarySourcePriority[DE405] = 0;
+         status = CreateDeFile(DE405, thePlanetarySourceNames[DE405]);
+         if (status)
+         {
+            thePlanetarySourcePriority[DE405] = HIGHEST_PRIORITY - i;
+            isPlanetarySourceInUse[DE405] = true;
+            sourceTypeInUse = DE405;
+            break;
+         }
+      }
+   }
+
+   // set SolarSystem to use the file
+   if (sourceTypeInUse == -1)
+   {
+      MessageInterface::ShowMessage("Moderator::SetPlanetarySourceTypesInUse() NO "
+                                    "Planetary file is set to use \n");
+      retCode = 0;
+   }
+   else
+   {
+      #if DEBUG_PLANETARY_FILE
+      MessageInterface::
+         ShowMessage("Moderator::SetPlanetarySourceTypesInUse() "
+                     "Set Planetary Source to use:%d\n", sourceTypeInUse);
+      #endif
+      switch (sourceTypeInUse)
+      {
+      case ANALYTIC:
+         if (theDefaultSolarSystem->SetSource(Gmat::ANALYTIC))
+            if (theDefaultSolarSystem->SetAnalyticMethod(theAnalyticMethod))
+               retCode = 1;
+         break;
+      case SLP:
+         if (theDefaultSolarSystem->SetSource(Gmat::SLP))
+            if (theDefaultSolarSystem->SetSourceFile(theDefaultSlpFile))
+               retCode = 1;
+         break;
+      case DE200:
+         if (theDefaultSolarSystem->SetSource(Gmat::DE_200))
+            if (theDefaultSolarSystem->SetSourceFile(theDefaultDeFile))
+               retCode = 1;
+         break;
+      case DE405:
+         if (theDefaultSolarSystem->SetSource(Gmat::DE_405))
+            if (theDefaultSolarSystem->SetSourceFile(theDefaultDeFile))
+               retCode = 1;
+         break;
+      default:
+         break;
+      }
+   }
+
+   // if planetary file is set to first type in the list
+   if (retCode == 1 && PLANETARY_SOURCE_STRING[sourceTypeInUse] == sourceTypes[0])
+      retCode = 2;
+
+
+   // if error setting given planetary file, re-arrange planetary file list
+   if (retCode == 1)
+   {      
+      thePlanetarySourceTypesInUse.clear();
+
+      for (unsigned int i=0; i<theTempFileList.size(); i++)
+      {            
+         if (theTempFileList[i] == PLANETARY_SOURCE_STRING[ANALYTIC])
+         {
+            if (thePlanetarySourcePriority[ANALYTIC] > 0)
+               thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[ANALYTIC]);
+         }
+         else if (theTempFileList[i] == PLANETARY_SOURCE_STRING[SLP])
+         {
+            if (thePlanetarySourcePriority[SLP] > 0)
+               thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[SLP]);
+         }
+         else if (theTempFileList[i] == PLANETARY_SOURCE_STRING[DE200])
+         {
+            if (thePlanetarySourcePriority[DE200] > 0)
+               thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE200]);
+         }
+         else if (theTempFileList[i] == PLANETARY_SOURCE_STRING[DE405])
+         {
+            if (thePlanetarySourcePriority[DE405] > 0)
+               thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE405]);
+         }
+      }
+      
+      #if DEBUG_PLANETARY_FILE
+      for (unsigned int i=0; i<thePlanetarySourceTypesInUse.size(); i++)
+      {
+         MessageInterface::ShowMessage
+            ("thePlanetarySourceTypesInUse[%d]=%s\n", i,
+             thePlanetarySourceTypesInUse[i].c_str());
+      }
+      #endif
+   }
+   
+   if (retCode > 0)
+      MessageInterface::ShowMessage
+         ("Successfully set Planetary Source to use: %s\n",
+          PLANETARY_SOURCE_STRING[sourceTypeInUse].c_str());
+   return retCode;
+}
+
+//------------------------------------------------------------------------------
+// Integer GetPlanetarySourceId(const std::string &sourceType)
+//------------------------------------------------------------------------------
+Integer Moderator::GetPlanetarySourceId(const std::string &sourceType)
+{
+   for (int i=0; i<PlanetarySourceCount; i++)
+   {
+      if (sourceType == PLANETARY_SOURCE_STRING[i])
+         return i;
+   }
+   
+   return -1;
+}
 
 // Potential field files
 //------------------------------------------------------------------------------
@@ -2241,197 +2509,6 @@ std::string Moderator::GetFileName(const std::string &fileType)
    return theFileManager->GetFullPathname(fileType);
 }
 
-
-//------------------------------------------------------------------------------
-// Integer SetPlanetaryFileTypesInUse(const StringArray &fileTypes)
-//------------------------------------------------------------------------------
-/*
- * @param <fileTypes> list of file type in the priority order of use
- *
- * @return 0, if error setting any of planetary file in the list.
- *         1, if error setting first planetary file in the list, but set to
- *            next available file.
- *         2, if successfuly set to first planetary file in the list
- */
-//------------------------------------------------------------------------------
-Integer Moderator::SetPlanetaryFileTypesInUse(const StringArray &fileTypes)
-{
-   #if DEBUG_PLANETARY_FILE
-   MessageInterface::
-      ShowMessage("Moderator::SetPlanetaryFileTypesInUse() num filetypes=%d\n",
-                  fileTypes.size());
-   #endif
-   
-   bool status = false;
-   Integer fileTypeInUse = -1;
-   Integer retCode = 0;
-   
-   // update planetary file types
-   if (&thePlanetaryFileTypesInUse != &fileTypes)
-   {
-      #if DEBUG_PLANETARY_FILE
-      MessageInterface::ShowMessage
-         ("Moderator::SetPlanetaryFileTypesInUse() updating planetary source\n");
-      #endif
-      
-      thePlanetaryFileTypesInUse.clear();
-    
-      for (unsigned int i=0; i<fileTypes.size(); i++)
-      {
-         thePlanetaryFileTypesInUse.push_back(fileTypes[i]);
-      }
-   }
-
-   theTempFileList.clear();
-   for (unsigned int i=0; i<thePlanetaryFileTypesInUse.size(); i++)
-      theTempFileList.push_back(thePlanetaryFileTypesInUse[i]);
-   
-   // create planetary ephem file
-   for (unsigned int i=0; i<thePlanetaryFileTypesInUse.size(); i++)
-   {
-      if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[SLP])
-      {
-         thePlanetarySourcePriority[SLP] = 0;
-         status = CreateSlpFile(thePlanetaryFileNames[SLP]);
-         if (status)
-         {
-            thePlanetarySourcePriority[SLP] = HIGHEST_PRIORITY - i;
-            isPlanetaryFileInUse[SLP] = true;
-            fileTypeInUse = SLP;
-            break;
-         }
-      }
-      else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE200])
-      {
-         #if DEBUG_PLANETARY_FILE
-         MessageInterface::
-            ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create DE200\n");
-         #endif
-         
-         thePlanetarySourcePriority[DE200] = 0;
-         status = CreateDeFile(DE200, thePlanetaryFileNames[DE200]);
-         if (status)
-         {
-            thePlanetarySourcePriority[DE200] = HIGHEST_PRIORITY - i;
-            isPlanetaryFileInUse[DE200] = true;
-            fileTypeInUse = DE200;
-            break;
-         }
-      }
-      else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE405])
-      {
-         #if DEBUG_PLANETARY_FILE
-         MessageInterface::
-            ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create DE405\n");
-         #endif
-         
-         thePlanetarySourcePriority[DE405] = 0;
-         status = CreateDeFile(DE405, thePlanetaryFileNames[DE405]);
-         if (status)
-         {
-            thePlanetarySourcePriority[DE405] = HIGHEST_PRIORITY - i;
-            isPlanetaryFileInUse[DE405] = true;
-            fileTypeInUse = DE405;
-            break;
-         }
-      }
-   }
-
-   // set SolarSystem to use the file
-   if (fileTypeInUse == -1)
-   {
-      MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() NO "
-                                    "Planetary file is set to use \n");
-      retCode = 0;
-   }
-   else
-   {
-      #if DEBUG_PLANETARY_FILE
-      MessageInterface::
-         ShowMessage("Moderator::SetPlanetaryFileTypesInUse() "
-                     "Set Planetary file to use:%d\n", fileTypeInUse);
-      #endif
-      switch (fileTypeInUse)
-      {
-      case SLP:
-         if (theDefaultSolarSystem->SetSource(Gmat::SLP))
-            if (theDefaultSolarSystem->SetSourceFile(theDefaultSlpFile))
-               retCode = 1;
-         break;
-      case DE200:
-         if (theDefaultSolarSystem->SetSource(Gmat::DE_200))
-            if (theDefaultSolarSystem->SetSourceFile(theDefaultDeFile))
-               retCode = 1;
-         break;
-      case DE405:
-         if (theDefaultSolarSystem->SetSource(Gmat::DE_405))
-            if (theDefaultSolarSystem->SetSourceFile(theDefaultDeFile))
-               retCode = 1;
-         break;
-      default:
-         break;
-      }
-   }
-
-   // if planetary file is set to first type in the list
-   if (retCode == 1 && PLANETARY_SOURCE_STRING[fileTypeInUse] == fileTypes[0])
-      retCode = 2;
-
-
-   // if error setting given planetary file, re-arrange planetary file list
-   if (retCode == 1)
-   {      
-      thePlanetaryFileTypesInUse.clear();
-
-      for (unsigned int i=0; i<theTempFileList.size(); i++)
-      {            
-         if (theTempFileList[i] == PLANETARY_SOURCE_STRING[SLP])
-         {
-            if (thePlanetarySourcePriority[SLP] > 0)
-               thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[SLP]);
-         }
-         else if (theTempFileList[i] == PLANETARY_SOURCE_STRING[DE200])
-         {
-            if (thePlanetarySourcePriority[DE200] > 0)
-               thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE200]);
-         }
-         else if (theTempFileList[i] == PLANETARY_SOURCE_STRING[DE405])
-         {
-            if (thePlanetarySourcePriority[DE405] > 0)
-               thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE405]);
-         }
-      }
-      
-      #if DEBUG_PLANETARY_FILE
-      for (unsigned int i=0; i<thePlanetaryFileTypesInUse.size(); i++)
-      {
-         MessageInterface::ShowMessage
-            ("thePlanetaryFileTypesInUse[%d]=%s\n", i,
-             thePlanetaryFileTypesInUse[i].c_str());
-      }
-      #endif
-   }
-   
-   if (retCode > 0)
-      MessageInterface::ShowMessage
-         ("Successfully set Planetary file to use: %s\n",
-          PLANETARY_SOURCE_STRING[fileTypeInUse].c_str());
-   return retCode;
-}
-
-//------------------------------------------------------------------------------
-// Integer GetPlanetaryFileId(const std::string &fileType)
-//------------------------------------------------------------------------------
-Integer Moderator::GetPlanetaryFileId(const std::string &fileType)
-{
-   for (int i=0; i<PlanetaryFileCount; i++)
-   {
-      if (fileType == PLANETARY_SOURCE_STRING[i])
-         return i;
-   }
-    
-   return -1;
-}
 
 // Mission
 //------------------------------------------------------------------------------
@@ -2955,29 +3032,42 @@ void Moderator::InitializePlanetarySource()
    #endif
    
    // initialize planetary source
-   for (int i=0; i<PlanetaryFileCount; i++)
+   for (int i=0; i<PlanetarySourceCount; i++)
    {
       thePlanetarySourcePriority[i] = 0;
-      isPlanetaryFileInUse[i] = false;
+      isPlanetarySourceInUse[i] = false;
+      
+      thePlanetarySourceTypes.push_back(PLANETARY_SOURCE_STRING[i]);
+   }
+   
+//    // initialize in the order of enum data
+//    thePlanetarySourceTypes.push_back(PLANETARY_SOURCE_STRING[ANALYTIC]);
+//    thePlanetarySourceTypes.push_back(PLANETARY_SOURCE_STRING[SLP]);
+//    thePlanetarySourceTypes.push_back(PLANETARY_SOURCE_STRING[DE200]);
+//    thePlanetarySourceTypes.push_back(PLANETARY_SOURCE_STRING[DE405]);
+
+   for (int i=0; i<AnalyticModelCount; i++)
+   {
+      theAnalyticModelNames.push_back(ANALYTIC_MODEL_STRING[i]);
    }
 
-   // initialize in the order of enum data
-   thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[SLP]);
-   thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[DE200]);
-   thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[DE405]);
-
-   //loj: 7/7/05 using new FileManager
-   thePlanetaryFileNames.push_back(theFileManager->
-                                   GetFullPathname("SLP_FILE"));
-   thePlanetaryFileNames.push_back(theFileManager->
-                                   GetFullPathname("DE200_FILE"));
-   thePlanetaryFileNames.push_back(theFileManager->
-                                   GetFullPathname("DE405_FILE"));
+   theAnalyticMethod = Gmat::LOW_FIDELITY;
+   
+   //initialize file names
+   thePlanetarySourceNames.push_back("NA");
+   thePlanetarySourceNames.push_back(theFileManager->
+                                     GetFullPathname("SLP_FILE"));
+   thePlanetarySourceNames.push_back(theFileManager->
+                                     GetFullPathname("DE200_FILE"));
+   thePlanetarySourceNames.push_back(theFileManager->
+                                     GetFullPathname("DE405_FILE"));
    
    // initialize planetary file types/names in use
-   // default is DE405
-   thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE405]); 
-   SetPlanetaryFileTypesInUse(thePlanetaryFileTypesInUse);
+   // default is ANALYTIC (loj: 8/17/05 set to ANALYTIC. system crashes when using
+   // Analytic, so switched back
+   thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE405]);
+   //thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[ANALYTIC]); 
+   SetPlanetarySourceTypesInUse(thePlanetarySourceTypesInUse);
 }
 
 
@@ -3358,7 +3448,7 @@ bool Moderator::CreateSlpFile(const std::string &fileName)
     
    bool status = false;
     
-   if (isPlanetaryFileInUse[SLP])
+   if (isPlanetarySourceInUse[SLP])
    {
       MessageInterface::ShowMessage
          ("Moderator::CreateSlpFile() SlpFile already created\n");
@@ -3386,7 +3476,7 @@ bool Moderator::CreateDeFile(Integer id, const std::string &fileName,
    bool status = false;
    Gmat::DeFileType deFileType;
     
-   if (isPlanetaryFileInUse[id])
+   if (isPlanetarySourceInUse[id])
    {
       MessageInterface::ShowMessage
          ("Moderator::CreateDeFile() DeFile already created\n");

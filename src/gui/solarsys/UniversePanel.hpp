@@ -30,11 +30,16 @@ public:
 private:
    StringArray mAllFileTypes;
    StringArray mFileTypesInUse;
+   StringArray mAnalyticModels;
+   
    std::map<wxString, wxString> mFileTypeNameMap;
    bool mHasFileTypesInUseChanged;
    bool mHasFileNameChanged;
+   bool mHasAnaModelChanged;
    
    wxComboBox *mFileTypeComboBox;
+   wxComboBox *mAnalyticModelComboBox;
+   
    wxTextCtrl *mFileNameTextCtrl;
    wxButton   *mBrowseButton;
    
@@ -45,6 +50,9 @@ private:
    wxButton *removeButton;
    wxButton *clearButton;
    wxButton *prioritizeButton;
+   
+   wxBoxSizer *mAnaModelSizer;
+   wxBoxSizer *mPageSizer;
    
    void OnAddButton(wxCommandEvent& event);
    void OnSortButton(wxCommandEvent& event);

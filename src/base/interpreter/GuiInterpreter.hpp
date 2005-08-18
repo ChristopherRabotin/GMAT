@@ -135,18 +135,20 @@ public:
    // AxisSystem
    AxisSystem* CreateAxisSystem(const std::string &type,
                                 const std::string &name);
-   // Planetary files
-   StringArray& GetPlanetaryFileTypes();
-   StringArray& GetPlanetaryFileNames();
-   StringArray& GetPlanetaryFileTypesInUse();
-   std::string GetPlanetaryFileName(const std::string &filetype);
-   bool SetPlanetaryFileName(const std::string &filetype,
-                             const std::string &filename);
-   Integer SetPlanetaryFileTypesInUse(const StringArray &filetypes);
-
+   // Planetary source
+   StringArray& GetPlanetarySourceTypes();
+   StringArray& GetPlanetarySourceNames();
+   StringArray& GetPlanetarySourceTypesInUse();
+   StringArray& GetAnalyticModelNames();
+   bool SetAnalyticModelToUse(const std::string &modelName);
+   bool SetPlanetarySourceName(const std::string &sourceType,
+                               const std::string &filename);
+   Integer SetPlanetarySourceTypesInUse(const StringArray &sourceTypes);
+   std::string GetPlanetarySourceName(const std::string &sourceType);
+   
    // Potential field files
-   std::string GetPotentialFileName(const std::string &filetype);
-
+   std::string GetPotentialFileName(const std::string &fileType);
+   
    //loj: 7/7/05 Added
    // This will eventually replace Get*FileName() above
    std::string GetFileName(const std::string &fileType);

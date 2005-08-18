@@ -705,88 +705,106 @@ bool GuiInterpreter::IsDefaultCoordinateSystem(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// StringArray& GetPlanetaryFileTypes()
+// StringArray& GetPlanetarySourceTypes()
 //------------------------------------------------------------------------------
 /**
  * @return a planetary source types
  */
 //------------------------------------------------------------------------------
-StringArray& GuiInterpreter::GetPlanetaryFileTypes()
+StringArray& GuiInterpreter::GetPlanetarySourceTypes()
 {
-   return moderator->GetPlanetaryFileTypes();
+   return moderator->GetPlanetarySourceTypes();
 }
 
 
 //------------------------------------------------------------------------------
-// StringArray& GetPlanetaryFileNames()
+// StringArray& GetPlanetarySourceNames()
 //------------------------------------------------------------------------------
 /**
  * @return a planetary source file names
  */
 //------------------------------------------------------------------------------
-StringArray& GuiInterpreter::GetPlanetaryFileNames()
+StringArray& GuiInterpreter::GetPlanetarySourceNames()
 {
-   return moderator->GetPlanetaryFileNames();
+   return moderator->GetPlanetarySourceNames();
 }
 
 
 //------------------------------------------------------------------------------
-// StringArray& GuiInterpreter::GetPlanetaryFileTypesInUse()
+// StringArray& GetPlanetarySourceTypesInUse()
 //------------------------------------------------------------------------------
-StringArray& GuiInterpreter::GetPlanetaryFileTypesInUse()
+StringArray& GuiInterpreter::GetPlanetarySourceTypesInUse()
 {
-   return moderator->GetPlanetaryFileTypesInUse();
+   return moderator->GetPlanetarySourceTypesInUse();
 }
 
 
 //------------------------------------------------------------------------------
-// std::string GetPlanetaryFileName(const std::string &filetype)
+// StringArray& GetAnalyticModelNames()
 //------------------------------------------------------------------------------
-std::string GuiInterpreter::GetPlanetaryFileName(const std::string &filetype)
+StringArray& GuiInterpreter::GetAnalyticModelNames()
 {
-   return moderator->GetPlanetaryFileName(filetype);
+   return moderator->GetAnalyticModelNames();
 }
 
 
 //------------------------------------------------------------------------------
-// bool SetPlanetaryFileName(const std::string &filetype,
+// bool SetAnalyticModelToUse(const std::string &modelName)
+//------------------------------------------------------------------------------
+bool GuiInterpreter::SetAnalyticModelToUse(const std::string &modelName)
+{
+   return moderator->SetAnalyticModelToUse(modelName);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetPlanetarySourceName(const std::string &sourceType,
 //                           const std::string &filename)
 //------------------------------------------------------------------------------
-bool GuiInterpreter::SetPlanetaryFileName(const std::string &filetype,
+bool GuiInterpreter::SetPlanetarySourceName(const std::string &sourceType,
                                           const std::string &filename)
 {
-   return moderator->SetPlanetaryFileName(filetype, filename);
+   return moderator->SetPlanetarySourceName(sourceType, filename);
 }
 
 
 //------------------------------------------------------------------------------
-// Integer SetPlanetaryFileTypesInUse(const StringArray &filetypes)
+// Integer SetPlanetarySourceTypesInUse(const StringArray &sourceTypes)
 //------------------------------------------------------------------------------
 /*
- * @param <filetypes> list of file type in the priority order of use
+ * @param <sourceTypes> list of file type in the priority order of use
  */
 //------------------------------------------------------------------------------
-Integer GuiInterpreter::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
+Integer GuiInterpreter::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes)
 {
-   return moderator->SetPlanetaryFileTypesInUse(filetypes);
+   return moderator->SetPlanetarySourceTypesInUse(sourceTypes);
 }
 
 
 //------------------------------------------------------------------------------
-// std::string GetPotentialFileName(const std::string &filetype)
+// std::string GetPlanetarySourceName(const std::string &sourceType)
 //------------------------------------------------------------------------------
-std::string GuiInterpreter::GetPotentialFileName(const std::string &filetype)
+std::string GuiInterpreter::GetPlanetarySourceName(const std::string &sourceType)
 {
-   return moderator->GetPotentialFileName(filetype);
+   return moderator->GetPlanetarySourceName(sourceType);
 }
 
 
 //------------------------------------------------------------------------------
-// std::string GetFileName(const std::string &filetype)
+// std::string GetPotentialFileName(const std::string &fileType)
 //------------------------------------------------------------------------------
-std::string GuiInterpreter::GetFileName(const std::string &filetype)
+std::string GuiInterpreter::GetPotentialFileName(const std::string &fileType)
 {
-   return moderator->GetFileName(filetype);
+   return moderator->GetPotentialFileName(fileType);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetFileName(const std::string &fileType)
+//------------------------------------------------------------------------------
+std::string GuiInterpreter::GetFileName(const std::string &fileType)
+{
+   return moderator->GetFileName(fileType);
 }
 
 
