@@ -152,8 +152,17 @@ void SpacecraftPanel::LoadData()
 //------------------------------------------------------------------------------
 void SpacecraftPanel::SaveData()
 {
+    theBallisticMassPanel->SaveData();
+    canClose = theBallisticMassPanel->canClose;
+    enableApply=true;
+
+    if (!canClose)
+    {
+      enableApply=false;
+      return;
+    }
+      
     theOrbitPanel->SaveData();
-    theBallisticMassPanel->SaveData();   
     theTankPanel->SaveData(); 
     theThrusterPanel->SaveData();
       
