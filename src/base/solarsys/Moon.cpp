@@ -34,7 +34,7 @@ const Integer               Moon::DEGREE              = 0;
 const Real                  Moon::LUNA_EQUATORIAL_RADIUS   = 1738.1; // km
 const Real                  Moon::LUNA_FLATTENING          = 0.0;
 // Units for mu are km^3 / s^2
-const Real                  Moon::LUNA_MU                  = 4902.799;
+const Real                  Moon::LUNA_MU                  = 4902.8005821478;
 const Integer               Moon::LUNA_BODY_NUMBER         = 2; 
 const Integer               Moon::LUNA_REF_BODY_NUMBER     = 3; 
 

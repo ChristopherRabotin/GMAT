@@ -63,15 +63,15 @@ const Real                  Planet::FLATTENING[NumberOfPlanets]         =
 // Units for Mu are km^3/s^2
 const Real                  Planet::MU[NumberOfPlanets]                        =
 {
-   0.220320804727213035e+05, // Vallado has 2.2032E+04
-   0.324858765616871577e+06, // Vallado has 3.257E+05
-   398600.4415,              // Swingby says 0.398600448073446198e+06
-   0.428282865887688895e+05, // Vallado has 4.305E+04
-   0.126712597081794508e+09, // Vallado has 1.268E+08
-   0.379395197088299505e+08, // Vallado has 3.794E+07
-   0.578015853359771776e+07, // Vallaod has 5.794E+06
-   0.687130777147952165e+07, // Vallado has 6.809E+06
-   0.102086492070628526e+04  // Vallado has 9.00E+02
+   22032.080486418, 
+   324858.59882646, 
+   398600.4415,  
+   42828.314258067, 
+   126712767.85780, 
+   37940626.061137,
+   5794549.0070719, 
+   6836534.0638793, 
+   981.60088770700  
 };
 const Integer               Planet::ORDER[NumberOfPlanets]               =
                             {0, 0, 4, 0, 0, 0, 0, 0, 0};
