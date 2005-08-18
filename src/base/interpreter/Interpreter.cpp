@@ -1778,7 +1778,8 @@ bool Interpreter::InterpretSolarSetting(const StringArray &sar,
          for (StringArray::iterator i = ephems.begin(); i != ephems.end(); ++i)
             MessageInterface::ShowMessage("   %s\n", i->c_str());
       #endif
-      moderator->SetPlanetaryFileTypesInUse(ephems);
+      //loj: 8/18/05 moderator->SetPlanetaryFileTypesInUse(ephems);
+      moderator->SetPlanetarySourceTypesInUse(ephems);
       return true;
    }
    
