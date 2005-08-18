@@ -55,6 +55,7 @@ protected:
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
    bool canClose;
+   bool enableApply;
    bool mShowScriptButton;
    
    wxWindow *theParent;

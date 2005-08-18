@@ -50,6 +50,8 @@ GmatPanel::GmatPanel(wxWindow *parent, bool showScriptButton)
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    canClose = true;
+   enableApply = true;
+
    mShowScriptButton = showScriptButton;
 
    theParent = parent;
@@ -177,7 +179,7 @@ void GmatPanel::OnCancel(wxCommandEvent &event)
 void GmatPanel::OnApply(wxCommandEvent &event)
 {
    SaveData();
-   theApplyButton->Disable();
+   theApplyButton->Enable(!enableApply);
 }
 
 //------------------------------------------------------------------------------
