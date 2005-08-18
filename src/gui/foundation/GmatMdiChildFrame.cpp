@@ -100,7 +100,7 @@ wxMenuBar *GmatMdiChildFrame::CreateMenu(int dataType)
    wxMenuBar *menuBar = new wxMenuBar;
    wxMenu *fileMenu = new wxMenu;
    wxMenu *editMenu = new wxMenu;
-   wxMenu *toolsMenu = new wxMenu;
+//   wxMenu *toolsMenu = new wxMenu;
    wxMenu *helpMenu = new wxMenu;
 
    fileMenu->Append(MENU_FILE_NEW_SCRIPT, wxT("New Script"));
@@ -165,8 +165,8 @@ wxMenuBar *GmatMdiChildFrame::CreateMenu(int dataType)
       editMenu->AppendSeparator();
       editMenu->Append(MENU_EDIT_SELECT_ALL, wxT("Select All\tCtrl-A"), wxT(""), FALSE);
       editMenu->AppendSeparator();
-      editMenu->Append(MENU_EDIT_COMMENT, wxT("Comment"), wxT(""), FALSE);
-      editMenu->Append(MENU_EDIT_UNCOMMENT, wxT("Uncomment"), wxT(""), FALSE);
+      editMenu->Append(MENU_EDIT_COMMENT, wxT("Comment\tCtrl-T"), wxT(""), FALSE);
+      editMenu->Append(MENU_EDIT_UNCOMMENT, wxT("Uncomment\tCtrl-M"), wxT(""), FALSE);
       editMenu->AppendSeparator();
    }
    
@@ -280,28 +280,28 @@ wxMenuBar *GmatMdiChildFrame::CreateMenu(int dataType)
    }
 
    // Tools
-   toolsMenu->Append(MENU_TOOLS_SWINGBY, wxT("Swingby"), wxT(""), FALSE);
-   toolsMenu->Enable(MENU_TOOLS_SWINGBY, FALSE);
+//   toolsMenu->Append(MENU_TOOLS_SWINGBY, wxT("Swingby"), wxT(""), FALSE);
+//   toolsMenu->Enable(MENU_TOOLS_SWINGBY, FALSE);
 
-   wxMenu *matlabMenu = new wxMenu;
-   matlabMenu->Append(MENU_TOOLS_MATLAB_OPEN, wxT("Open"),
-                          wxT(""), FALSE);
-   matlabMenu->Append(MENU_TOOLS_MATLAB_CLOSE, wxT("Close"),
-                          wxT(""), FALSE);
+//   wxMenu *matlabMenu = new wxMenu;
+//   matlabMenu->Append(MENU_TOOLS_MATLAB_OPEN, wxT("Open"),
+//                          wxT(""), FALSE);
+//   matlabMenu->Append(MENU_TOOLS_MATLAB_CLOSE, wxT("Close"),
+//                          wxT(""), FALSE);
 //   matlabMenu->AppendSeparator();
 //   matlabMenu->Append(MENU_TOOLS_MATLAB_INTERACTIVE, wxT("Interact"),
 //                          wxT(""), FALSE);
 //   matlabMenu->Enable(MENU_TOOLS_MATLAB_INTERACTIVE, FALSE);
 
 
-   toolsMenu->Append(MENU_TOOLS_MATLAB, wxT("Matlab"), matlabMenu, wxT(""));
-   menuBar->Append(toolsMenu, wxT("Tools"));
+//   toolsMenu->Append(MENU_TOOLS_MATLAB, wxT("Matlab"), matlabMenu, wxT(""));
+//   menuBar->Append(toolsMenu, wxT("Tools"));
 
    // Server
-   wxMenu *mServerMenu = new wxMenu;
-   mServerMenu->Append(MENU_START_SERVER, _T("Start"), _T("Start server"));
-   mServerMenu->Append(MENU_STOP_SERVER, _T("Stop"), _T("Stop server"));
-   menuBar->Append(mServerMenu, wxT("Server"));
+//   wxMenu *mServerMenu = new wxMenu;
+//   mServerMenu->Append(MENU_START_SERVER, _T("Start"), _T("Start server"));
+//   mServerMenu->Append(MENU_STOP_SERVER, _T("Stop"), _T("Stop server"));
+//   menuBar->Append(mServerMenu, wxT("Server"));
 
    // Help
    helpMenu->Append(MENU_HELP_TOPICS, wxT("Topics"), wxT(""), FALSE);
