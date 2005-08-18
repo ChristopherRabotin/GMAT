@@ -1573,7 +1573,7 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
    GravityField *gravForce = new GravityField("", "Earth");
    //loj: 7/7/05 Using new FileManager
    //gravForce->SetStringParameter("Filename", GetPotentialFileName("JGM2"));
-   gravForce->SetStringParameter("Filename", GetFileName("JGM2_FILE"));
+   gravForce->SetStringParameter("PotentialFile", GetFileName("JGM2_FILE"));
    newfm->AddForce(gravForce);
    propSetup->SetForceModel(newfm);
    

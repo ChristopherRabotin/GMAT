@@ -77,7 +77,7 @@ HarmonicField::PARAMETER_TEXT[HarmonicFieldParamCount - PhysicalModelParamCount]
    "MaxOrder",
    "Degree",
    "Order",
-   "Filename",
+   "PotentialFile",
    "InputCoordinateSystem",
    "FixedCoordinateSystem",
    "TargetCoordinateSystem",
@@ -474,7 +474,7 @@ Integer HarmonicField::GetParameterID(const std::string &str) const
 {
    std::string useStr = str;
    if (useStr == "Model")
-      useStr = "Filename";
+      useStr = "PotentialFile";
  
    for (Integer i = PhysicalModelParamCount; i < HarmonicFieldParamCount; i++)
    {
@@ -697,6 +697,16 @@ bool HarmonicField::SetStringParameter(const Integer id,
       
       return true;
    }
+   if (id == BODY_NAME)
+   {
+      if (PhysicalModel::SetStringParameter(id, value))
+      {   
+         fixedCSName = value + "Fixed";
+         return true;
+      }
+      return false;
+   }
+   
    return PhysicalModel::SetStringParameter(id, value);
 }
 
@@ -780,10 +790,32 @@ GmatBase* HarmonicField::GetRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 const StringArray& HarmonicField::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
+   static StringArray refs;
+   
+   // Start from an empty list
+   refs.clear();
+   
    if (type == Gmat::UNKNOWN_OBJECT)
    {
-      static StringArray refs = PhysicalModel::GetRefObjectNameArray(type);
+      refs = PhysicalModel::GetRefObjectNameArray(type);
       //refs.clear(); // why would I want to clear this????
+      
+      refs.push_back(inputCSName);
+      refs.push_back(fixedCSName);
+      refs.push_back(targetCSName);
+      
+      #ifdef DEBUG_REFERENCE_SETTING
+         MessageInterface::ShowMessage("+++ReferenceObjects:\n");
+         for (StringArray::iterator i = refs.begin(); i != refs.end(); ++i)
+            MessageInterface::ShowMessage("   %s\n", i->c_str());
+      #endif
+      
+      return refs;
+   }
+   
+   if (type == Gmat::COORDINATE_SYSTEM)
+   {
+      refs = PhysicalModel::GetRefObjectNameArray(type);
       
       refs.push_back(inputCSName);
       refs.push_back(fixedCSName);
@@ -853,7 +885,28 @@ bool HarmonicField::SetRefObject(GmatBase *obj,
    
    // Not handled here -- invoke the next higher SetRefObject call
    return PhysicalModel::SetRefObject(obj, type, name);
-   }
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                    const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the force model origin, and derived the base coordinate 
+ * system names from that SpacePoint.
+ *
+ * @param toBody  pointer to the force model origin.
+ */
+//------------------------------------------------------------------------------
+void HarmonicField::SetForceOrigin(CelestialBody* toBody)
+{
+   PhysicalModel::SetForceOrigin(toBody);
+   
+   std::string originName = toBody->GetName();
+   inputCSName = originName + "MJ2000Eq";
+   targetCSName = inputCSName;
+}
 
 
 //---------------------------------
@@ -941,3 +994,31 @@ bool HarmonicField::legendreP_rtq(Real *R )
    return true;
 }
 
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool HarmonicField::IsParameterReadOnly(const Integer id) const
+{
+   if (id < PhysicalModelParamCount)
+      return PhysicalModel::IsParameterReadOnly(id);
+      
+   if (id >= HarmonicFieldParamCount)
+      throw ForceModelException(
+         "Attempting to determine accessibility of a parameter outside of the "
+         "scope of a HarmonicField object.");
+      
+   if ((id == DEGREE) || (id == ORDER) || (id == FILENAME))
+      return false;
+      
+   return true;
+}

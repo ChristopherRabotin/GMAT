@@ -66,7 +66,7 @@
 //#include "SolarSystemException.hpp"
 
 
- // #define DEBUG_GRAVITY_FIELD
+// #define DEBUG_GRAVITY_FIELD
 // #define DEBUG_GRAVITY_FIELD_DETAILS
 
 
@@ -188,6 +188,9 @@ GravityField::GravityField(const GravityField &gf) :
 //    dSbar           (NULL),  // or (gf.dSbar)
     gfInitialized   (false)
 {
+   objectTypeNames.push_back("GravityField");
+   bodyName = gf.bodyName;
+   parameterCount = GravityFieldParamCount;
 }
 
 
@@ -212,6 +215,7 @@ GravityField& GravityField::operator=(const GravityField &gf)
    a                = gf.a;
    defaultMu        = gf.defaultMu;
    defaultA         = gf.defaultA;
+   bodyName         = gf.bodyName;
 //   if (Cbar) {
 //      for (cc = 0;cc <= maxDegree+1; ++cc)
 //         delete [] Cbar[cc];
@@ -488,6 +492,15 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
       aIndirect[0] = mu_rbb * rv[0];
       aIndirect[1] = mu_rbb * rv[1];
       aIndirect[2] = mu_rbb * rv[2];
+
+      #ifdef DEBUG_GRAVITY_FIELD
+         MessageInterface::ShowMessage(
+            "Indirect calcs for body %s, target %s, and fixed  %s\n"
+            "   rv = [%lf %lf %lf %lf %lf %lf]\n",
+            body->GetName().c_str(), targetCS->GetOriginName().c_str(), 
+            fixedCS->GetOriginName().c_str(), 
+            rv[0], rv[1], rv[2], rv[3], rv[4], rv[5]);
+      #endif
    }
    else
       aIndirect[0] = aIndirect[1] = aIndirect[2] = 0.0;
@@ -666,8 +679,9 @@ std::string GravityField::GetParameterTypeString(const Integer id) const
 // All read only for now except degree and order
 bool GravityField::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == DEGREE) || (id == ORDER))
-      return false;
+   if (id < HarmonicFieldParamCount)
+      return HarmonicField::IsParameterReadOnly(id);
+      
    return true;
 }
 

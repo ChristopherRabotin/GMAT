@@ -2563,17 +2563,19 @@ GmatBase* Interpreter::FindOwnedObject(StringArray tokenList, GmatBase *owner,
                                        Integer index)
 {
    GmatBase* obj = NULL;
-   Integer count = tokenList.size(), i = 0;
+   Integer count = tokenList.size();
    
    #ifdef DEBUG_TOKEN_PARSING
-      std::cout << "Current owner is \"" << owner->GetName() 
-                << "\" of type \"" << owner->GetTypeName()  
-                << "\"\n";
-      std::cout << "Token list:\n   ";
+      std::stringstream msg;
+      msg << "Current owner is \"" << owner->GetName() 
+          << "\" of type \"" << owner->GetTypeName()  
+          << "\"\n";
+      msg << "Token list:\n   ";
       for (StringArray::iterator ix = tokenList.begin(); ix != tokenList.end();
            ++ix)
-         std::cout << *ix << "\n   ";
-      std::cout << "\n";
+         msg << *ix << "\n   ";
+      msg << "\n";
+      MessageInterface::ShowMessage(msg.str());
    #endif
    
    GmatBase* topOwner = FindObject(tokenList[0]);
@@ -2585,7 +2587,8 @@ GmatBase* Interpreter::FindOwnedObject(StringArray tokenList, GmatBase *owner,
    if (index == count - 2) {
 
       #ifdef DEBUG_TOKEN_PARSING
-            std::cout << "Looking for " << tokenList[index] << "\n";
+         MessageInterface::ShowMessage("Looking for %s on %s\n", 
+            tokenList[index].c_str(), owner->GetName().c_str());
       #endif
 
       if (tokenList[index] == owner->GetName())
@@ -2616,12 +2619,31 @@ GmatBase* Interpreter::FindOwnedObject(StringArray tokenList, GmatBase *owner,
       if (objs.size() == 0)
          throw InterpreterException("Could not find objects of type \"" + 
                                     tokenList[index] + "\"");
-      obj = FindOwnedObject(tokenList, objs[i], index+1); 
+
+      for (ObjectArray::iterator member = objs.begin(); member != objs.end();
+           ++member)
+      {
+         try
+         {
+            obj = FindOwnedObject(tokenList, *member, index+1);
+         }
+         catch (BaseException &ex)
+         {
+         }
+      }
+      
+      if (obj == NULL)
+         throw InterpreterException("Could not find object of type \"" + 
+                                    tokenList[index+1] + "\" for  the line '" + 
+                                    line + "'");
+      
    }
    
    #ifdef DEBUG_TOKEN_PARSING
-      std::cout << "Returning a \"" << obj->GetTypeName() << "\" object"
+      std::stringstream msg;
+      msg << "Returning a \"" << obj->GetTypeName() << "\" object"
                 << "named \"" << obj->GetName() << "\"\n";   
+      MessageInterface::ShowMessage(msg.str());
    #endif
 
    return obj;
@@ -2691,7 +2713,7 @@ void Interpreter::CheckForSpecialCase(GmatBase *obj, Integer id,
    
    // JGM2 and JGM3 are special strings  in GMAT; handle them here
    if ((obj->GetTypeName() == "GravityField") &&
-       (obj->GetParameterText(id) == "Filename")) {
+       (obj->GetParameterText(id) == "PotentialFile")) {
       val = moderator->GetPotentialFileName(value);
       if (val.find("Unknown Potential File Type") == std::string::npos)
          value = val;
@@ -2724,9 +2746,13 @@ bool Interpreter::ConfigureForce(ForceModel *obj, std::string& objParm,
    bool retval = false;
    
    #ifdef DEBUG_TOKEN_PARSING
-      std::cout << "Interpreter::ConfigureForce entered for line\n  \""
-                << line << "\"\n  with parm = \"" << objParm <<"\" = \""
-                << parm << "\"\n";
+      std::stringstream msgstr;
+      msgstr << "Interpreter::ConfigureForce entered for line\n  \""
+             << line << "\"\n  Current force is a " << obj->GetTypeName()
+             << " named '" << obj->GetName() 
+             << "'\n  parm is \"" << objParm <<"\" = \""
+             << parm << "\"\n";
+      MessageInterface::ShowMessage(msgstr.str());
    #endif
    
    std::string forcetype = ForceModel::GetScriptAlias(objParm);
@@ -2761,16 +2787,18 @@ bool Interpreter::ConfigureForce(ForceModel *obj, std::string& objParm,
                pm->SetRefObject(m, Gmat::ATMOSPHERE);
          }
       }
-      if (forcetype == "GravityField") {
-         std::string potFilename = moderator->GetPotentialFileName("JGM2");
-         if (potFilename == "") {
+      if (forcetype == "GravityField")
+      {
+         std::string potName = moderator->GetPotentialFileName("JGM2");
+         if (potName == "") 
+         {
             // No file name set, so set to a default value
-            potFilename = "./files/gravity/earth/JGM2.grv";
+            potName = "JGM2";
             MessageInterface::ShowMessage(
-               "No potential file set, so using \"%s\"", potFilename.c_str());
+               "No potential file set, so using \"%s\"", potName.c_str());
          }
-         if (!pm->SetStringParameter("Filename", potFilename))
-            throw InterpreterException("Unable to set full field model file.");
+         if (!pm->SetStringParameter("PotentialFile", potName))
+            throw InterpreterException("Unable to set full field model.");
       }
    
       obj->AddForce(pm);

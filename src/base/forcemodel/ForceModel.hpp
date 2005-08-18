@@ -103,6 +103,7 @@ public:
     // inherited from GmatBase
     virtual GmatBase* Clone() const;
     
+    virtual void SetSolarSystem(SolarSystem *ss);
     virtual const StringArray&
                       GetRefObjectNameArray(const Gmat::ObjectType type);
     virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
@@ -192,12 +193,23 @@ protected:
                                                 std::string &prefix,
                                                 std::stringstream &stream);
     std::string               BuildForceNameString(PhysicalModel *force);
+    void                      ClearInternalCoordinateSystems();
+    void                      SetInternalCoordinateSystem(const std::string csId, PhysicalModel *currentPm);
     
     // Pieces for prop with origin code
     /// Name of the common J2000 body that the spacecraft atates all use
     std::string               j2kBodyName;
     /// Pointer to the spacecraft J2000 body
     CelestialBody             *j2kBody;
+    
+    /// Locally defined coordinate systems, if needed
+    std::vector <CoordinateSystem*>
+                              InternalCoordinateSystems;
+                              
+    /// EarthMJ2000Eq pointer, so that it can be cloned to make other Eq systems 
+    CoordinateSystem          *earthEq;
+    /// EarthFixed pointer, so that it can be cloned to make other fixed systems 
+    CoordinateSystem          *earthFixed;
     
     void                      MoveToOrigin(Real newEpoch = -1.0);
     void                      ReturnFromOrigin(Real newEpoch = -1.0);
@@ -231,8 +243,10 @@ protected:
         L2_DIFFERENCES
     };
     
-    static const std::string PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount];
-    static const Gmat::ParameterType PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount];
+    static const std::string 
+      PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount];
+    static const Gmat::ParameterType 
+      PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount];
 };
 
 #endif  // ForceModel_hpp

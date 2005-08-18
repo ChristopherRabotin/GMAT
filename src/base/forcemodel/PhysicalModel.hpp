@@ -231,8 +231,10 @@ protected:
       PhysicalModelParamCount
    };
 
-   static const std::string PARAMETER_TEXT[PhysicalModelParamCount - GmatBaseParamCount];
-   static const Gmat::ParameterType PARAMETER_TYPE[PhysicalModelParamCount - GmatBaseParamCount];
+   static const std::string 
+      PARAMETER_TEXT[PhysicalModelParamCount - GmatBaseParamCount];
+   static const Gmat::ParameterType 
+      PARAMETER_TYPE[PhysicalModelParamCount - GmatBaseParamCount];
 };
 
 #endif // PhysicalModel_hpp

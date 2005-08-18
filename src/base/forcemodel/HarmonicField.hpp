@@ -70,7 +70,7 @@
 class GMAT_API HarmonicField : public PhysicalModel
 {
 public:
-   HarmonicField(const std::string &name, const std::string &typeName = "HarmonicField",
+    HarmonicField(const std::string &name, const std::string &typeName = "HarmonicField",
                  Integer maxDeg = HF_MAX_DEGREE, Integer maxOrd = HF_MAX_ORDER);
     virtual ~HarmonicField(void);
 
@@ -106,6 +106,9 @@ public:
     const StringArray&  GetRefObjectNameArray(const Gmat::ObjectType type);
     virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
+    virtual void        SetForceOrigin(CelestialBody* toBody);
+                                     
+    bool                IsParameterReadOnly(const Integer id) const;
     
     // constants defining maximum degree and order
     static const Integer HF_MAX_DEGREE = 360;

@@ -112,7 +112,10 @@ ForceModel::ForceModel(const std::string &nomme) :
    normType          (L2_DIFFERENCES),
    centralBodyName   ("Earth"),
    j2kBodyName       ("Earth"),
-   j2kBody           (NULL)  
+   j2kBody           (NULL),
+   earthEq           (NULL),
+   earthFixed        (NULL)
+     
 {
    objectTypes.push_back(Gmat::FORCE_MODEL);
    objectTypeNames.push_back("ForceModel");
@@ -151,6 +154,8 @@ ForceModel::~ForceModel()
          delete pm;
       ppm = forceList.begin();
    }
+   
+   ClearInternalCoordinateSystems();
 
    #ifdef DEBUG_FORCE_EPOCHS
       if (epochFile.is_open())
@@ -180,7 +185,9 @@ ForceModel::ForceModel(const ForceModel& fdf) :
     centralBodyName  (fdf.centralBodyName),
 //    rawState         (NULL),
     j2kBodyName      (fdf.j2kBodyName),
-    j2kBody          (NULL)  
+    j2kBody          (NULL),
+   earthEq           (NULL),
+   earthFixed        (NULL)  
 {
    numForces = fdf.numForces;
    stateSize = fdf.stateSize;
@@ -218,7 +225,9 @@ ForceModel& ForceModel::operator=(const ForceModel& fdf)
    parameterCount  = ForceModelParamCount;
    centralBodyName = fdf.centralBodyName;
    j2kBodyName     = fdf.j2kBodyName;
-   j2kBody         = NULL;  
+   j2kBody         = NULL;
+   earthEq         = NULL;
+   earthFixed      = NULL; 
    
    estimationMethod = fdf.estimationMethod;
    normType         = fdf.normType;
@@ -617,12 +626,6 @@ bool ForceModel::Initialize()
       throw ForceModelException("Satellite J2000 body (" + j2kBodyName + 
          ") was not found in the solar system");
 
-   forceOrigin = solarSystem->GetBody(centralBodyName);
-   if (forceOrigin == NULL) 
-      throw ForceModelException(
-         "Force model origin (" + centralBodyName + 
-         ") was not found in the solar system");
-
    if (spacecraft.size() > 0)
       satCount = spacecraft.size();
     
@@ -700,7 +703,16 @@ bool ForceModel::Initialize()
       currentPm = current;  // waw: added 06/04/04 
       currentPm->SetDimension(dimension);
       currentPm->SetSolarSystem(solarSystem);
-      currentPm->SetForceOrigin(forceOrigin);
+      
+      // Handle missing coordinate system issues for GravityFields
+      if (currentPm->IsOfType("HarmonicField"))
+      {
+         std::string csName;
+ 
+         SetInternalCoordinateSystem("InputCoordinateSystem", currentPm);
+         SetInternalCoordinateSystem("FixedCoordinateSystem", currentPm);
+         SetInternalCoordinateSystem("TargetCoordinateSystem", currentPm);
+      }
 
       // Initialize the forces
       if (!currentPm->Initialize()) 
@@ -738,6 +750,79 @@ bool ForceModel::Initialize()
 
    return true;
 }
+
+
+//------------------------------------------------------------------------------
+// void ClearInternalCoordinateSystems()
+//------------------------------------------------------------------------------
+/**
+ * Manages the deallocation of coordinate systems used internally.
+ */
+//------------------------------------------------------------------------------
+void ForceModel::ClearInternalCoordinateSystems()
+{
+   for (std::vector<CoordinateSystem*>::iterator i = 
+           InternalCoordinateSystems.begin();
+        i != InternalCoordinateSystems.end(); ++i)
+   {
+      delete (*i);
+   }
+   InternalCoordinateSystems.clear();
+}
+
+//------------------------------------------------------------------------------
+// void SetInternalCoordinateSystem(const std::string csId, 
+//      PhysicalModel *currentPm)
+//------------------------------------------------------------------------------
+/**
+ * Manages the allocation of coordinate systems used internally.
+ * 
+ * @param <csId>			Parameter name for the coordinate system label.
+ * @param <currentPm>	Force that needs the CoordinateSystem.
+ */
+//------------------------------------------------------------------------------
+void ForceModel::SetInternalCoordinateSystem(const std::string csId, PhysicalModel *currentPm)
+{
+   std::string csName;
+   CoordinateSystem *cs = NULL;
+   
+   csName = currentPm->GetStringParameter(csId);
+
+   try
+   {
+      currentPm->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+   }
+   catch (BaseException &ex)
+   {
+      MessageInterface::ShowMessage(
+         "Adding a coordinate system named '%s' for the full field model\n",
+         csName.c_str());
+         
+      for (std::vector<CoordinateSystem*>::iterator i = 
+              InternalCoordinateSystems.begin();
+           i != InternalCoordinateSystems.end(); ++i)
+         if ((*i)->GetName() == csName)
+            cs = *i;
+      
+      if (cs == NULL)
+      {
+         cs = (CoordinateSystem *)earthEq->Clone();
+         cs->SetName(csName);
+         cs->SetStringParameter("Origin", centralBodyName);
+         cs->SetRefObject(forceOrigin, Gmat::CELESTIAL_BODY, 
+            centralBodyName);
+         InternalCoordinateSystems.push_back(cs);
+      }
+      
+      cs->SetSolarSystem(solarSystem);
+      cs->SetJ2000BodyName(j2kBody->GetName());
+      cs->SetJ2000Body(j2kBody);
+      cs->Initialize();
+      currentPm->SetRefObject(cs, Gmat::COORDINATE_SYSTEM, csName);
+   }
+}
+
+
 
 
 Integer ForceModel::GetOwnedObjectCount()
@@ -1193,7 +1278,11 @@ const StringArray&
    
    forceReferenceNames.clear();
    
-   // First do the base class call
+   // Always grab these two:
+   forceReferenceNames.push_back("EarthMJ2000Eq");
+   forceReferenceNames.push_back("EarthFixed");
+   
+   // Do the base class call
    try
    {
       pmName = PhysicalModel::GetRefObjectName(type);
@@ -1269,6 +1358,34 @@ const StringArray&
 }
 
 //------------------------------------------------------------------------------
+// void SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+/**
+ * Sets the solar system pointer
+ * 
+ * @param ss Pointer to the solar system used in the modeling.
+ */
+//------------------------------------------------------------------------------
+void ForceModel::SetSolarSystem(SolarSystem *ss)
+{
+   PhysicalModel::SetSolarSystem(ss);
+   
+   if (solarSystem != NULL)
+   {
+      forceOrigin = solarSystem->GetBody(centralBodyName);
+      
+      if (forceOrigin == NULL) 
+         throw ForceModelException(
+            "Force model origin (" + centralBodyName + 
+            ") was not found in the solar system");
+
+      for (std::vector<PhysicalModel*>::iterator i = forceList.begin();
+           i != forceList.end(); ++i)
+         (*i)->SetForceOrigin(forceOrigin);
+   }
+}
+
+//------------------------------------------------------------------------------
 //  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------
@@ -1289,6 +1406,20 @@ bool ForceModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                               const std::string &name)
 {
    bool wasSet = false;
+   
+   // Handle the CS pointers we always want
+   if (name == "EarthMJ2000Eq")
+      if (type == Gmat::COORDINATE_SYSTEM)
+         earthEq = (CoordinateSystem*)obj;
+      else
+         throw ForceModelException(
+            "Object named EarthMJ2000Eq is not a coordinate system.");
+   if (name == "EarthFixed")
+      if (type == Gmat::COORDINATE_SYSTEM)
+         earthFixed = (CoordinateSystem*)obj;
+      else
+         throw ForceModelException(
+            "Object named EarthFixed is not a coordinate system.");
 
    // Attempt to set the object for the base class    
    try
@@ -1827,7 +1958,6 @@ void ForceModel::WriteFMParameters(Gmat::WriteMode mode, std::string &prefix,
                 (parmType != Gmat::UNSIGNED_INTARRAY_TYPE) &&
                 (parmType != Gmat::RVECTOR_TYPE) &&
                 (parmType != Gmat::RMATRIX_TYPE) &&
-//                (parmType != Gmat::OBJECT_TYPE) &&
                 (parmType != Gmat::UNKNOWN_PARAMETER_TYPE)
                )
             {
@@ -1874,8 +2004,7 @@ void ForceModel::WriteFMParameters(Gmat::WriteMode mode, std::string &prefix,
    {
       newprefix = prefix;
       ownedObject = GetOwnedObject(i);
-      if ((ownedObject != NULL))// &&
-//          (ownedObject->GetTypeName() != "SolarRadiationPressure"))
+      if (ownedObject != NULL)
       {
          nomme = BuildForceNameString((PhysicalModel*)ownedObject);
 

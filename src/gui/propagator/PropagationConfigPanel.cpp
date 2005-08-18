@@ -321,7 +321,7 @@ void PropagationConfigPanel::SaveData()
                   ("Order",  atoi(forceList[i]->gravOrder.c_str()));
             }
             
-            theGravForce->SetStringParameter("Filename", forceList[i]->potFilename);
+            theGravForce->SetStringParameter("PotentialFile", forceList[i]->potFilename);
             
             forceList[i]->gravf = theGravForce;
             newFm->AddForce(theGravForce);
@@ -515,7 +515,7 @@ void PropagationConfigPanel::Initialize()
          {
             theGravForce = (GravityField*)force;
             bodyName = theGravForce->GetStringParameter("BodyName");
-            std::string potFilename = theGravForce->GetStringParameter("Filename");                 
+            std::string potFilename = theGravForce->GetStringParameter("PotentialFile");                 
             
             GravModelType gravModelType;
             if (potFilename.find("JGM2") != std::string::npos)
