@@ -358,6 +358,22 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
       if (pos != mFunctionCBList.end())
          mFunctionCBList.erase(pos);
    }
+   else if (type == "FuelTank")
+   {
+      std::vector<wxComboBox*>::iterator pos =
+         find(mFuelTankCBList.begin(), mFuelTankCBList.end(), cb);
+      
+      if (pos != mFuelTankCBList.end())
+         mFuelTankCBList.erase(pos);
+   }
+   else if (type == "Thruster")
+   {
+      std::vector<wxComboBox*>::iterator pos =
+         find(mThrusterCBList.begin(), mThrusterCBList.end(), cb);
+      
+      if (pos != mThrusterCBList.end())
+         mThrusterCBList.erase(pos);
+   }
 }
 
 
@@ -430,7 +446,7 @@ wxComboBox* GuiItemManager::GetSpacecraftComboBox(wxWindow *parent, wxWindowID i
 
 
 //------------------------------------------------------------------------------
-//  wxComboBox* GetBurnComboBox(wxWindow *parent, const wxSize &size)
+//  wxComboBox* GetBurnComboBox(wxWindow *parent, wxWindowID id, const wxSize &size)
 //------------------------------------------------------------------------------
 /**
  * @return burn combo box pointer
@@ -649,6 +665,62 @@ GuiItemManager::GetUserVariableComboBox(wxWindow *parent, wxWindowID id,
    userParamComboBox->SetSelection(0);
    
    return userParamComboBox;
+}
+
+
+//------------------------------------------------------------------------------
+//  wxComboBox* GetFuelTankComboBox(wxWindow *parent, wxWindowID id, const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return fuel tank combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox* GuiItemManager::GetFuelTankComboBox(wxWindow *parent, wxWindowID id,
+                                                const wxSize &size)
+{
+   // combo box for avaliable fuel tanks
+   
+   wxComboBox *fuelTankComboBox =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                     theNumFuelTank, theFuelTankList, wxCB_READONLY);
+   
+   // show first burn
+   fuelTankComboBox->SetSelection(0);
+   
+   //---------------------------------------------
+   // register for update
+   //---------------------------------------------
+   mFuelTankCBList.push_back(fuelTankComboBox);
+   
+   return fuelTankComboBox;
+}
+
+
+//------------------------------------------------------------------------------
+//  wxComboBox* GetThrusterComboBox(wxWindow *parent, wxWindowID id, const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return thruster combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox* GuiItemManager::GetThrusterComboBox(wxWindow *parent, wxWindowID id,
+                                                const wxSize &size)
+{
+   // combo box for avaliable thruster
+   
+   wxComboBox *thrusterComboBox =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                     theNumThruster, theThrusterList, wxCB_READONLY);
+   
+   // show first thruster
+   thrusterComboBox->SetSelection(0);
+   
+   //---------------------------------------------
+   // register for update
+   //---------------------------------------------
+   mThrusterCBList.push_back(thrusterComboBox);
+   
+   return thrusterComboBox;
 }
 
 

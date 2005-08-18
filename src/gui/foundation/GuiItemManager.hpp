@@ -161,6 +161,12 @@ public:
    wxComboBox* GetUserVariableComboBox(wxWindow *parent, wxWindowID id,
                                        const wxSize &size);
    
+   wxComboBox* GetFuelTankComboBox(wxWindow *parent, wxWindowID id,
+                                   const wxSize &size);
+   
+   wxComboBox* GetThrusterComboBox(wxWindow *parent, wxWindowID id,
+                                   const wxSize &size);
+   
    // ListBox
    wxListBox* GetSpacePointListBox(wxWindow *parent, wxWindowID id, 
                                    const wxSize &size, bool addVector = false);
@@ -271,6 +277,8 @@ private:
    std::vector<wxComboBox*> mBurnCBList;
    std::vector<wxComboBox*> mCoordSysCBList;
    std::vector<wxComboBox*> mFunctionCBList;
+   std::vector<wxComboBox*> mFuelTankCBList;
+   std::vector<wxComboBox*> mThrusterCBList;
    
    std::vector<wxArrayString*> mSpaceObjectExcList;
    std::vector<wxArrayString*> mSpacecraftExcList;
