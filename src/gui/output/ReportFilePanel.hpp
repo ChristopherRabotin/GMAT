@@ -40,6 +40,8 @@ public:
    void OnClose(wxCommandEvent &event);
    void OnHelp();
 
+   wxTextCtrl *mFileContentsTextCtrl;
+
 protected:
    // member functions
    void Create();
@@ -56,8 +58,6 @@ protected:
    wxBoxSizer *thePanelSizer;
    wxStaticBoxSizer *theMiddleSizer;
    wxStaticBoxSizer *theBottomSizer;
-
-   wxTextCtrl *mFileContentsTextCtrl;
 
    wxButton *theCloseButton;
    wxButton *theHelpButton;

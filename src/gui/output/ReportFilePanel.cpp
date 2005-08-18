@@ -80,7 +80,9 @@ void ReportFilePanel::Create()
                                wxDefaultPosition, wxDefaultSize, wxTE_DONTWRAP |
                                wxTE_READONLY | wxTE_MULTILINE | wxGROW);
 
-
+      // 5/24/05 - arg: for demo change font size to HUGE
+      mFileContentsTextCtrl->SetFont( GmatAppData::GetFont() );
+   
       // create bottom buttons
       theCloseButton =
          new wxButton(this, ID_BUTTON_CLOSE, "Close", wxDefaultPosition, wxDefaultSize, 0);
