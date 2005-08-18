@@ -122,9 +122,24 @@ void CoordSysCreateDialog::SaveData()
          CoordinateSystem *coordSys =
             theGuiInterpreter->CreateCoordinateSystem(coordName);
          
+         // set origin and Axis
          wxString originName = originComboBox->GetValue().Trim();
          coordSys->SetStringParameter("Origin", std::string(originName.c_str()));
          coordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
+         
+         CelestialBody *origin = (CelestialBody*)theGuiInterpreter->
+            GetConfiguredItem(originName.c_str());
+         
+         coordSys->SetOrigin(origin);
+         
+         // set Earth as J000Body if NULL
+         if (origin->GetJ2000Body() == NULL)
+         {
+            CelestialBody *j2000body = (CelestialBody*)theGuiInterpreter->
+               GetConfiguredItem("Earth");
+            j2000body->SetJ2000Body(j2000body);
+            origin->SetJ2000Body(j2000body);
+         }
          
          mIsCoordCreated = true;
          mCoordName = wxString(coordName.c_str());

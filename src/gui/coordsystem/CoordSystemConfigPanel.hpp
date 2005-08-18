@@ -22,14 +22,16 @@
 class CoordSystemConfigPanel : public GmatPanel
 {
 public:
-    // constructors
-    CoordSystemConfigPanel(wxWindow *parent, const wxString &coordName);
-    ~CoordSystemConfigPanel();  
+   // constructors
+   CoordSystemConfigPanel(wxWindow *parent, const wxString &coordName);
+   ~CoordSystemConfigPanel();  
    
 private:
    CoordinateSystem *theCoordSys;
    CoordPanel *mCoordPanel;
    wxString mEpochFormat;
+   bool mOriginChanged;
+   bool mAxisChanged;
    
    wxTextCtrl *epochTextCtrl;
    wxTextCtrl *intervalTextCtrl;
@@ -43,12 +45,12 @@ private:
    wxComboBox *xComboBox;
    wxComboBox *yComboBox;
    wxComboBox *zComboBox;
-      
+   
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
-
+   
    // Layout & data handling methods
    void Setup(wxWindow *parent);
     

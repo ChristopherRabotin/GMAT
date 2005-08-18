@@ -42,6 +42,8 @@ CoordSystemConfigPanel::CoordSystemConfigPanel(wxWindow *parent,
    theCoordSys = (CoordinateSystem*) theGuiInterpreter->GetCoordinateSystem(
                   coordName.c_str());
    mEpochFormat = "TAIModJulian";
+   mOriginChanged = false;
+   mAxisChanged = false;
    
    Create();
    Show();
@@ -136,21 +138,55 @@ void CoordSystemConfigPanel::LoadData()
 void CoordSystemConfigPanel::SaveData()
 {
    canClose = false;
-   
-   wxString originName = originComboBox->GetValue().Trim();   
-   AxisSystem *axis = mCoordPanel->CreateAxis();
-   
-   if (axis != NULL)
+
+   if (mOriginChanged)
    {
-      theCoordSys->SetStringParameter("Origin", std::string(originName.c_str()));
-      AxisSystem *oldAxis =
-         (AxisSystem *)theCoordSys->GetRefObject(Gmat::AXIS_SYSTEM, "");
+      wxString originName = originComboBox->GetValue().Trim();
       
-      // delete old axis and set new axis
-      delete oldAxis;
-      theCoordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
+      //MessageInterface::ShowMessage
+      //   ("===> originName = %s\n", originName.c_str());
+      
+      mOriginChanged = false;
+      theCoordSys->SetStringParameter("Origin", std::string(originName.c_str()));
+      
+      // set Earth as J2000Body
+      CelestialBody *origin = (CelestialBody*)theGuiInterpreter->
+         GetConfiguredItem(originName.c_str());
+      
+      theCoordSys->SetOrigin(origin);
+      
+      // set Earth as J000Body if NULL
+      if (origin->GetJ2000Body() == NULL)
+      {
+         CelestialBody *j2000body = (CelestialBody*)theGuiInterpreter->
+            GetConfiguredItem("Earth");
+         origin->SetJ2000Body(j2000body);
+      }
       
       canClose = true;
+   }
+   
+   if (mAxisChanged)
+   {
+      canClose = false;
+      AxisSystem *axis = mCoordPanel->CreateAxis();
+   
+      if (axis != NULL)
+      {
+         AxisSystem *oldAxis =
+            (AxisSystem *)theCoordSys->GetRefObject(Gmat::AXIS_SYSTEM, "");
+         
+         // delete old axis and set new axis
+         delete oldAxis;
+         theCoordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
+         
+         canClose = true;
+      }
+      else
+      {
+         MessageInterface::ShowMessage
+            ("CoordSystemConfigPanel::SaveData() Cannot create AxisSystem.\n");
+      }
    }
 }
 
@@ -171,10 +207,12 @@ void CoordSystemConfigPanel::OnComboUpdate(wxCommandEvent& event)
 {
    if (event.GetEventObject() == originComboBox)
    {
+      mOriginChanged = true;
    }
    else if (event.GetEventObject() == typeComboBox)
    {
       mCoordPanel->EnableOptions();
+      mAxisChanged = true;
    }
    else if (event.GetEventObject() == formatComboBox)
    {
