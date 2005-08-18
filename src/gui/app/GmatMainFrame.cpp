@@ -665,8 +665,9 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);
-         sizer->Add(new ReportFilePanel(panel, item->GetDesc()),
-                    0, wxGROW|wxALL, 0);
+         ReportFilePanel *reportPanel = new ReportFilePanel(panel, item->GetDesc());
+         sizer->Add(reportPanel, 0, wxGROW|wxALL, 0);
+         newChild->SetScriptTextCtrl(reportPanel->mFileContentsTextCtrl);
       }
       else
       {
@@ -1374,7 +1375,7 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    wxMenuBar *menuBar = new wxMenuBar;
    wxMenu *fileMenu = new wxMenu;
    wxMenu *editMenu = new wxMenu;
-   wxMenu *toolsMenu = new wxMenu;
+//   wxMenu *toolsMenu = new wxMenu;
    wxMenu *helpMenu = new wxMenu;
  
    fileMenu->Append(MENU_FILE_NEW_SCRIPT, wxT("&New Script"));  
@@ -1420,28 +1421,28 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    menuBar->Append(editMenu, wxT("Edit"));
    
    // Tools
-   toolsMenu->Append(MENU_TOOLS_SWINGBY, wxT("Swingby"), wxT(""), FALSE); 
-   toolsMenu->Enable(MENU_TOOLS_SWINGBY, FALSE);
+//   toolsMenu->Append(MENU_TOOLS_SWINGBY, wxT("Swingby"), wxT(""), FALSE);
+//   toolsMenu->Enable(MENU_TOOLS_SWINGBY, FALSE);
 
-   wxMenu *matlabMenu = new wxMenu;
-   matlabMenu->Append(MENU_TOOLS_MATLAB_OPEN, wxT("Open"),
-                          wxT(""), FALSE);
-   matlabMenu->Append(MENU_TOOLS_MATLAB_CLOSE, wxT("Close"),
-                          wxT(""), FALSE);
+//   wxMenu *matlabMenu = new wxMenu;
+//   matlabMenu->Append(MENU_TOOLS_MATLAB_OPEN, wxT("Open"),
+//                          wxT(""), FALSE);
+//   matlabMenu->Append(MENU_TOOLS_MATLAB_CLOSE, wxT("Close"),
+//                          wxT(""), FALSE);
 //   matlabMenu->AppendSeparator();
 //   matlabMenu->Append(MENU_TOOLS_MATLAB_INTERACTIVE, wxT("Interact"),
 //                          wxT(""), FALSE);
 //   matlabMenu->Enable(MENU_TOOLS_MATLAB_INTERACTIVE, FALSE);
 
 
-   toolsMenu->Append(MENU_TOOLS_MATLAB, wxT("Matlab"), matlabMenu, wxT(""));
-   menuBar->Append(toolsMenu, wxT("Tools"));
+//   toolsMenu->Append(MENU_TOOLS_MATLAB, wxT("Matlab"), matlabMenu, wxT(""));
+//   menuBar->Append(toolsMenu, wxT("Tools"));
 
    // Server
-   mServerMenu = new wxMenu;
-   mServerMenu->Append(MENU_START_SERVER, _T("Start"), _T("Start server"));
-   mServerMenu->Append(MENU_STOP_SERVER, _T("Stop"), _T("Stop server"));
-   menuBar->Append(mServerMenu, wxT("Server"));
+//   mServerMenu = new wxMenu;
+//   mServerMenu->Append(MENU_START_SERVER, _T("Start"), _T("Start server"));
+//   mServerMenu->Append(MENU_STOP_SERVER, _T("Stop"), _T("Stop server"));
+//   menuBar->Append(mServerMenu, wxT("Server"));
 
    // Help
    helpMenu->Append(MENU_HELP_TOPICS, wxT("Topics"), wxT(""), FALSE);
@@ -1913,7 +1914,8 @@ void GmatMainFrame::OnFont(wxCommandEvent& event)
     while (node)
     {
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-      if (theChild->GetDataType() == GmatTree::SCRIPT_FILE)
+      if ((theChild->GetDataType() == GmatTree::SCRIPT_FILE) ||
+         (theChild->GetDataType() == GmatTree::OUTPUT_REPORT))
       {
          theChild->GetScriptTextCtrl()->SetFont(newFont);
       }
