@@ -25,8 +25,7 @@ BEGIN_EVENT_TABLE(ImpulsiveBurnSetupPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
-   EVT_COMBOBOX(ID_FRAME_COMBOBOX, ImpulsiveBurnSetupPanel::OnFrameComboBoxChange)
-   EVT_COMBOBOX(ID_FORMAT_COMBOBOX, ImpulsiveBurnSetupPanel::OnFormatComboBoxChange)
+   EVT_COMBOBOX(ID_COMBOBOX, ImpulsiveBurnSetupPanel::OnComboBoxChange)
    EVT_TEXT(ID_TEXTCTRL, ImpulsiveBurnSetupPanel::OnTextChange)
 END_EVENT_TABLE()
 
@@ -64,20 +63,16 @@ END_EVENT_TABLE()
 //-------------------------------
 
 //------------------------------------------------------------------------------
-// void OnFrameComboBoxChange(wxCommandEvent& event)
+// void OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void ImpulsiveBurnSetupPanel::OnFrameComboBoxChange(wxCommandEvent& event)
+void ImpulsiveBurnSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 {
-   LabelsUnits();
-   theApplyButton->Enable();
-}
-
-//------------------------------------------------------------------------------
-// void OnFormatComboBoxChange(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-void ImpulsiveBurnSetupPanel::OnFormatComboBoxChange(wxCommandEvent& event)
-{
-   LabelsUnits();
+   if ( (event.GetEventObject() == axesComboBox) || 
+        (event.GetEventObject() == vectorFormatComboBox) )
+   {
+      LabelsUnits();
+   }   
+   
    theApplyButton->Enable();
 }
 
@@ -165,14 +160,14 @@ void ImpulsiveBurnSetupPanel::LabelsUnits()
    std::string element;
     
    // get the string of the combo box selections
-   coordStr = frameCB->GetStringSelection();
-   vectorStr = formatCB->GetStringSelection();
+   coordStr = axesComboBox->GetStringSelection();
+   vectorStr = vectorFormatComboBox->GetStringSelection();
 
    // get the ID of the coordinate frame parameter 
    id = theBurn->GetParameterID("Axes");
 
    // store the coordinate from for cancellation
-   std::string coordFrame = theBurn->GetStringParameter(id);
+   std::string axesStr = theBurn->GetStringParameter(id);
     
    // check the combo box selection
    if (coordStr == "Inertial")
@@ -203,7 +198,7 @@ void ImpulsiveBurnSetupPanel::LabelsUnits()
 
    // reset coordinate frame to original selection if cancel button selected
    id = theBurn->GetParameterID("Axes");
-   theBurn->SetStringParameter(id, coordFrame);
+   theBurn->SetStringParameter(id, axesStr);
 
    theApplyButton->Enable();
 }
@@ -235,38 +230,36 @@ void ImpulsiveBurnSetupPanel::Create()
       wxStaticBoxSizer *vectorSizer = new wxStaticBoxSizer(vectorBox, wxVERTICAL);
       wxBoxSizer *bodyBoxSizer = new wxBoxSizer(wxHORIZONTAL);
 
-      // label for coordinate frames combo box
-      wxStaticText *frameLabel =
-         new wxStaticText(this, ID_TEXT, wxT("Coordinate frame:"),
+      // label for axes combo box
+      wxStaticText *axesLabel =
+         new wxStaticText(this, ID_TEXT, wxT("Axes:"),
                           wxDefaultPosition, wxDefaultSize, 0);
         
-      // list of coordinate frames
+      // list of axes frames
       Integer id = theBurn->GetParameterID("Axes");
       items = theBurn->GetStringArrayParameter(id);
       count = items.size();
-      wxString *frameList = new wxString[count];
+      wxString *axesList = new wxString[count];
        
-      if (count > 0)        // check to see if any coordinate frames exist
+      if (count > 0)        // check to see if any axes exist
       {
          for (i=0; i<count; i++)
-            frameList[i] = wxString(items[i].c_str());
+            axesList[i] = wxString(items[i].c_str());
 
          // combo box for avaliable coordinate frames 
-         frameCB =
-            new wxComboBox(this, ID_FRAME_COMBOBOX, wxT(""), 
-                           wxDefaultPosition, wxSize(150,-1), count,
-                           frameList, wxCB_DROPDOWN);
+         axesComboBox =
+            new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, 
+                           wxSize(150,-1), count, axesList, wxCB_DROPDOWN);
       }
-      else                 // no coordinate frames exist
+      else                 // no coordinate axes exist
       { 
          wxString strs6[] =
          {
-            wxT("No coordinate frame available") 
+            wxT("No axes available") 
          };    
-         frameCB =
-            new wxComboBox(this, ID_FRAME_COMBOBOX, wxT(""),
-                           wxDefaultPosition, wxSize(150,-1), 1,
-                           strs6, wxCB_DROPDOWN);
+         axesComboBox =
+            new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, 
+                           wxSize(150,-1), 1, strs6, wxCB_DROPDOWN);
       }
             
       wxStaticText *formatLabel =
@@ -279,14 +272,14 @@ void ImpulsiveBurnSetupPanel::Create()
          wxT("Cartesian") 
          //wxT("Spherical") 
       };
-      formatCB = new wxComboBox(this, ID_FORMAT_COMBOBOX, wxT(""),
+      vectorFormatComboBox = new wxComboBox(this, ID_COMBOBOX, wxT(""),
                                 wxDefaultPosition, wxSize(120,-1), 1,
                                 strs7, wxCB_DROPDOWN);
 
-      topGridSizer->Add(frameLabel, 0, wxALIGN_CENTER | wxALL, 5);
+      topGridSizer->Add(axesLabel, 0, wxALIGN_CENTER | wxALL, 5);
       topGridSizer->Add(formatLabel, 0, wxALIGN_CENTER | wxALL, 5);
-      topGridSizer->Add(frameCB, 0, wxALIGN_CENTER | wxALL, 5);
-      topGridSizer->Add(formatCB, 0, wxALIGN_CENTER | wxALL, 5);
+      topGridSizer->Add(axesComboBox, 0, wxALIGN_CENTER | wxALL, 5);
+      topGridSizer->Add(vectorFormatComboBox, 0, wxALIGN_CENTER | wxALL, 5);
 
       // panel that has the labels and text fields for the vectors
       // set it to null
@@ -297,13 +290,16 @@ void ImpulsiveBurnSetupPanel::Create()
       vectorSizer->Add(vectorPanel, 0, wxGROW | wxALIGN_CENTER | wxALL, 5);
         
       // create label and text field for the central body
-      wxStaticText *item6 = new wxStaticText(this, ID_TEXT, wxT("Central body:"),
-                                             wxDefaultPosition, wxDefaultSize, 0);
-      // list of bodies
-      wxStaticText *item7 = new wxStaticText(this, ID_TEXT, wxT("Earth"),
-                                             wxDefaultPosition, wxDefaultSize, wxCAPTION);
-      bodyBoxSizer->Add( item6, 0, wxGROW | wxALIGN_CENTER_VERTICAL | wxALL, 5);
-      bodyBoxSizer->Add( item7, 0, wxGROW | wxALIGN_CENTER_VERTICAL | wxALL, 5);
+      wxStaticText *centralBodyLabel = 
+         new wxStaticText(this, ID_TEXT, wxT("Central body:"), wxDefaultPosition,
+            wxDefaultSize, 0);
+
+      // combo box for avaliable bodies 
+      centralBodyCB = theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX,
+         wxSize(120,-1), false);
+
+      bodyBoxSizer->Add( centralBodyLabel, 0, wxGROW | wxALIGN_CENTER_VERTICAL | wxALL, 5);
+      bodyBoxSizer->Add( centralBodyCB, 0, wxGROW | wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
       // add to page sizer
       pageBoxSizer->Add(topGridSizer, 0, wxGROW | wxALIGN_CENTER_VERTICAL | wxALL, 5);
@@ -335,16 +331,16 @@ void ImpulsiveBurnSetupPanel::LoadData()
       // Set object pointer for "Show Script"
       mObject = theBurn;
 
-      // Coordinate Frame
+      // Axes
       id = theBurn->GetParameterID("Axes");
-      std::string coordFrame = theBurn->GetStringParameter(id);
+      std::string axesStr = theBurn->GetStringParameter(id);
       StringArray frames = theBurn->GetStringArrayParameter(id);
       int index = 0;
       for (StringArray::iterator iter = frames.begin(); 
         iter != frames.end(); ++iter) 
       {
-         if (coordFrame == *iter) 
-            frameCB->SetSelection(index);
+         if (axesStr == *iter) 
+            axesComboBox->SetSelection(index);
          else
             ++index;
       }
@@ -354,9 +350,9 @@ void ImpulsiveBurnSetupPanel::LoadData()
       std::string vectorFormat = theBurn->GetStringParameter(id);
 
       if (vectorFormat == "Cartesian") 
-         formatCB->SetSelection(0);
+         vectorFormatComboBox->SetSelection(0);
       else
-         formatCB->SetSelection(1);
+         vectorFormatComboBox->SetSelection(1);
 
       // Element1
       el = theBurn->GetParameterID("Element1");
@@ -380,6 +376,11 @@ void ImpulsiveBurnSetupPanel::LoadData()
       textCtrl3->SetValue(el3);
 
       LabelsUnits();
+      
+      // load central body
+      int burnOriginID = theBurn->GetParameterID("Origin");
+      std::string burnOriginName = theBurn->GetStringParameter(burnOriginID);
+      centralBodyCB->SetValue(burnOriginName.c_str());
    }
    catch (BaseException &e)
    {
@@ -397,16 +398,16 @@ void ImpulsiveBurnSetupPanel::SaveData()
    Integer id;
    wxString elemString;
     
-   // save coordinate frame
-   wxString frameString = frameCB->GetStringSelection();
+   // save axes
+   wxString axesStr = axesComboBox->GetStringSelection();
    id = theBurn->GetParameterID("Axes");
-   std::string coordFrame = std::string (frameString.c_str());
-   theBurn->SetStringParameter(id, coordFrame);
+   std::string axes = std::string (axesStr.c_str());
+   theBurn->SetStringParameter(id, axes);
     
     // save vector format
-   wxString vectorString = formatCB->GetStringSelection();
+   wxString vectorStr = vectorFormatComboBox->GetStringSelection();
    id = theBurn->GetParameterID("VectorFormat");
-   std::string vectorFormat = std::string (vectorString.c_str());
+   std::string vectorFormat = std::string (vectorStr.c_str());
    theBurn->SetStringParameter(id, vectorFormat);
 
    // save element1
@@ -423,6 +424,12 @@ void ImpulsiveBurnSetupPanel::SaveData()
    elemString = textCtrl3->GetValue();
    id = theBurn->GetParameterID("Element3");
    theBurn->SetRealParameter(id, atof(elemString));
+
+   // save central body
+   wxString burnOriginStr = centralBodyCB->GetStringSelection();
+   id = theBurn->GetParameterID("Origin");
+   std::string origin = std::string (burnOriginStr.c_str());
+   theBurn->SetStringParameter(id, origin);
 
    theApplyButton->Disable();
 }

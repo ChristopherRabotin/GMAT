@@ -32,8 +32,8 @@ private:
     GuiInterpreter *theGuiInterpreter;
     Burn *theBurn;
 
-    wxComboBox *frameCB;
-    wxComboBox *formatCB;
+    wxComboBox *axesComboBox;
+    wxComboBox *vectorFormatComboBox;
     wxComboBox *centralBodyCB;
     
     wxPanel *vectorPanel;
@@ -52,9 +52,8 @@ private:
     // member functions
     void AddVector(wxWindow *parent);
     void LabelsUnits();
+    void OnComboBoxChange(wxCommandEvent& event);
     void OnTextChange(wxCommandEvent& event);
-    void OnFrameComboBoxChange(wxCommandEvent& event);
-    void OnFormatComboBoxChange(wxCommandEvent& event);
 
     // methods inherited from GmatPanel
     virtual void Create();
@@ -70,8 +69,7 @@ private:
         ID_TEXT = 81000,
         ID_TEXTCTRL,
 
-        ID_FORMAT_COMBOBOX,
-        ID_FRAME_COMBOBOX,
+        ID_COMBOBOX,
 
         ID_STATIC_VECTOR
     };
