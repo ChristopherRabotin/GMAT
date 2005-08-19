@@ -2434,15 +2434,23 @@ void GuiItemManager::UpdateHardwareList()
    theNumFuelTank = 0;
    theNumThruster = 0;
    Hardware *hw;
+   wxArrayString tankNames;
+   wxArrayString thrusterNames;
    
    for (int i=0; i<numHardware; i++)
    {
       hw = theGuiInterpreter->GetHardware(items[i]);
       
       if (hw->IsOfType(Gmat::FUEL_TANK))
+      {
          theFuelTankList[theNumFuelTank++] = items[i].c_str();
+         tankNames.Add(items[i].c_str());
+      }
       else if (hw->IsOfType(Gmat::THRUSTER))
+      {
          theThrusterList[theNumThruster++] = items[i].c_str();
+         thrusterNames.Add(items[i].c_str());
+      }
       
       #if DEBUG_GUI_ITEM_HW > 1
       MessageInterface::ShowMessage
@@ -2519,6 +2527,34 @@ void GuiItemManager::UpdateHardwareList()
       }
       
       (*pos)->SetSelection((*pos)->GetCount() - 1);
+   }
+   
+   //-------------------------------------------------------
+   // update registered FuelTank ComboBox
+   //-------------------------------------------------------
+   
+   int sel;
+   for (std::vector<wxComboBox*>::iterator pos = mFuelTankCBList.begin();
+        pos != mFuelTankCBList.end(); ++pos)
+   {
+      sel = (*pos)->GetSelection();
+      
+      (*pos)->Clear();
+      (*pos)->Append(tankNames);
+      (*pos)->SetSelection(sel);
+   }
+   
+   //-------------------------------------------------------
+   // update registered Thruster ComboBox
+   //-------------------------------------------------------
+   for (std::vector<wxComboBox*>::iterator pos = mThrusterCBList.begin();
+        pos != mThrusterCBList.end(); ++pos)
+   {
+      sel = (*pos)->GetSelection();
+      
+      (*pos)->Clear();
+      (*pos)->Append(thrusterNames);
+      (*pos)->SetSelection(sel);
    }
    
 } // end UpdateHardwareList()
