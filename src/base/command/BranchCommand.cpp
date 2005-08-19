@@ -422,6 +422,13 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
             //if (inNested = currentOne->Insert(cmd, prev))
             //   return true;
             hereOrNested = currentOne->Insert(cmd, prev);
+            // check to see if it got added after the nested command
+            if (hereOrNested && (currentOne->GetNext() == cmd))
+            {
+               toShift   = cmd->GetNext();
+               brNum     = which;
+               foundHere = true;
+            }
          }
       }
    }
