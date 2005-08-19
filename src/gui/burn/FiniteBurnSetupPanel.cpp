@@ -13,7 +13,6 @@
 //------------------------------------------------------------------------------
 
 #include "FiniteBurnSetupPanel.hpp"
-
 #include "MessageInterface.hpp"
 
 //#define DEBUG_FINITEBURN_PANEL 1
@@ -60,6 +59,20 @@ FiniteBurnSetupPanel::FiniteBurnSetupPanel(wxWindow *parent,
    theApplyButton->Disable();
 }
 
+//------------------------------------------------------------------------------
+// ~FiniteBurnSetupPanel()
+//------------------------------------------------------------------------------
+/**
+ * Destroys FiniteBurnSetupPanel object.
+ *
+ */
+//------------------------------------------------------------------------------
+FiniteBurnSetupPanel::~FiniteBurnSetupPanel()
+{
+   theGuiManager->UnregisterComboBox("FuelTank", mTankComboBox);
+   theGuiManager->UnregisterComboBox("Thruster", mThrusterComboBox);
+}
+
 //-------------------------------
 // protected methods
 //-------------------------------
@@ -98,14 +111,16 @@ void FiniteBurnSetupPanel::OnTextChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void FiniteBurnSetupPanel::Create()
 {
-   int bsize = 5; // bordersize
+   #if DEBUG_FINITEBURN_PANEL
+      MessageInterface::ShowMessage( "FiniteBurnSetupPanel::Create() \n" );
+   #endif
 
-   wxString emptyList[] = {};
+   int bsize = 5; // bordersize
 
    if (theBurn != NULL)
    {
       // create sizers
-      wxFlexGridSizer *pageSizer = new wxFlexGridSizer(3, 2, bsize, bsize);
+      wxFlexGridSizer *pageSizer = new wxFlexGridSizer(4, 2, bsize, bsize);
 
       // Coordinate frames
       // Implemented in later build
@@ -115,16 +130,16 @@ void FiniteBurnSetupPanel::Create()
          wxT("Use thruster:"), wxDefaultPosition, wxDefaultSize, 0);
         
       // combo box for avaliable thrusters 
-      thrusterCB = new wxComboBox(this, ID_COMBOBOX, wxT(""), 
-         wxDefaultPosition, wxSize(150,-1), 0, emptyList, wxCB_DROPDOWN);
+      mThrusterComboBox =
+         theGuiManager->GetThrusterComboBox(this, ID_COMBOBOX, wxSize(150,-1));
 
       // label for tank combobox
       wxStaticText *tankLabel = new wxStaticText(this, ID_TEXT,
          wxT("Use tank:"), wxDefaultPosition, wxDefaultSize, 0);
         
       // combo box for avaliable tanks 
-      tankCB = new wxComboBox(this, ID_COMBOBOX, wxT(""), 
-         wxDefaultPosition, wxSize(150,-1), 0, emptyList, wxCB_DROPDOWN);
+      mTankComboBox =
+         theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(150,-1));
 
       // create label for burn scale factor
       wxStaticText *scaleLabel = new wxStaticText(this, ID_TEXT,
@@ -134,20 +149,33 @@ void FiniteBurnSetupPanel::Create()
       scaleTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
          wxDefaultPosition, wxSize(50,-1), 0 );
 
+      // create label and text field for the central body
+      wxStaticText *centralBodyLabel = new wxStaticText(this, ID_TEXT, 
+         wxT("Central body:"), wxDefaultPosition, wxDefaultSize, 0);
+
+      // combo box for avaliable bodies 
+      mCentralBodyComboBox = 
+         theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX, wxSize(120,-1),
+         false);
+
       // add thruster label and combobox to thruster sizer    
       pageSizer->Add(thrusterLabel, 0, wxALIGN_LEFT | wxALL, bsize);
-      pageSizer->Add(thrusterCB, 0, wxALIGN_LEFT | wxALL, bsize);
+      pageSizer->Add(mThrusterComboBox, 0, wxALIGN_LEFT | wxALL, bsize);
 
       // add tank label and combobox to tank sizer    
       pageSizer->Add(tankLabel, 0, wxALIGN_LEFT | wxALL, bsize);
-      pageSizer->Add(tankCB, 0, wxALIGN_LEFT | wxALL, bsize);
+      pageSizer->Add(mTankComboBox, 0, wxALIGN_LEFT | wxALL, bsize);
 
       // add scale factor label and text control field to scale sizer    
       pageSizer->Add(scaleLabel, 0, wxALIGN_LEFT | wxALL, bsize);
       pageSizer->Add(scaleTextCtrl, 0, wxALIGN_LEFT | wxALL, bsize);
 
+      // add central body label and combobox to page sizer    
+      pageSizer->Add(centralBodyLabel, 0, wxALIGN_LEFT | wxALL, bsize);
+      pageSizer->Add(mCentralBodyComboBox, 0, wxALIGN_LEFT | wxALL, bsize);
+
       // create grid for tanks and thruster selections
-      // Implemented in later build - SPH 2/305
+      // Implemented in later build - SPH 2/3/05
       // Right now user can select only 1 tank and 1 thruster
 
       // add page sizer to middle sizer
@@ -166,68 +194,25 @@ void FiniteBurnSetupPanel::Create()
 //------------------------------------------------------------------------------
 void FiniteBurnSetupPanel::LoadData()
 {
+   #if DEBUG_FINITEBURN_PANEL
+      MessageInterface::ShowMessage( "FiniteBurnSetupPanel::LoadData() \n" );
+   #endif
+
    // load data from the core engine 
    try
    {
-      int tankCount = 0;       // counter for configured tanks
-      int thrusterCount = 0;   // counter for configured thrusters
-   
       // Set object pointer for "Show Script"
       mObject = theBurn;
-
-      // list of thrusters and tanks
-      StringArray itemNames = 
-         theGuiInterpreter->GetListOfConfiguredItems(Gmat::HARDWARE);
-      int size = itemNames.size();
-      
-      wxString *tankList = new wxString[size];
-      wxString *thrusterList = new wxString[size];
-      
-      for (int i = 0; i<size; i++)
-      {
-         Hardware *hw = theGuiInterpreter->GetHardware(itemNames[i]);
-         wxString objName = wxString(itemNames[i].c_str());
-         wxString objTypeName = wxString(hw->GetTypeName().c_str());
-
-         if (objTypeName == "Thruster")
-         {
-            thrusterList[thrusterCount] = objName;
-            ++thrusterCount;
-         }   
-         else if (objTypeName == "FuelTank")
-         {
-            tankList[tankCount] = objName;
-            ++tankCount;
-         }   
-      };
-
-      #if DEBUG_FINITEBURN_PANEL
-      MessageInterface::ShowMessage
-         ("FiniteBurnSetupPanel::LoadData() thruster count = %d\n",thrusterCount);
-      MessageInterface::ShowMessage
-         ("FiniteBurnSetupPanel::LoadData() tank count = %d\n",tankCount);
-      #endif
-      // append list of thrusters and tanks to combobox
-      for (int i = 0; i<thrusterCount; i++)
-         thrusterCB->Append(thrusterList[i]);
-
-      for (int i = 0; i<tankCount; i++)
-         tankCB->Append(tankList[i]);
-     
+    
       // load thruster
       int thrusterID = theBurn->GetParameterID("Thrusters");
       StringArray thrusters = theBurn->GetStringArrayParameter(thrusterID);
       std::string thruster = "";
-
-      thrusterCB->SetSelection(0);
             
       if (thrusters.size() > 0)
-         thruster = thrusters[0]; 
-      
-      for (int i = 0; i<=thrusterCount; i++)
       {
-         if (!strcmp(thruster.c_str(), thrusterList[i].c_str())) 
-            thrusterCB->SetSelection(i);
+         thruster = thrusters[0]; 
+         mThrusterComboBox->SetValue(thruster.c_str());
       }
 
       // load tanks
@@ -235,15 +220,10 @@ void FiniteBurnSetupPanel::LoadData()
       StringArray tanks = theBurn->GetStringArrayParameter(tankID);
       std::string tank = "";
 
-      tankCB->SetSelection(0);
-
       if (tanks.size() > 0)
-         tank = tanks[0];
-
-      for (int i = 0; i<=tankCount; i++)
       {
-         if (!strcmp(tank.c_str(), tankList[i].c_str())) 
-            tankCB->SetSelection(i);
+         tank = tanks[0];
+         mTankComboBox->SetValue(tank.c_str());
       }
 
       // load burn scale factor
@@ -251,7 +231,19 @@ void FiniteBurnSetupPanel::LoadData()
       Real bsf = theBurn->GetRealParameter(bsfID);
       wxString bsfStr;
       bsfStr.Printf("%f", bsf);
-      scaleTextCtrl->SetValue(bsfStr); 
+      scaleTextCtrl->SetValue(bsfStr);
+      
+      // load central body
+      int burnOriginID = theBurn->GetParameterID("Origin");
+      std::string burnOriginName = theBurn->GetStringParameter(burnOriginID);
+      mCentralBodyComboBox->SetValue(burnOriginName.c_str());
+
+      #if DEBUG_FINITEBURN_PANEL
+      MessageInterface::ShowMessage
+         ( "thruster list size = %d\n",thrusters.size() );
+      MessageInterface::ShowMessage
+         ( "tank list size = %d\n",tanks.size() );
+      #endif
    }
    catch (BaseException &e)
    {
@@ -266,23 +258,35 @@ void FiniteBurnSetupPanel::LoadData()
 //------------------------------------------------------------------------------
 void FiniteBurnSetupPanel::SaveData()
 {
+   #if DEBUG_FINITEBURN_PANEL
+      MessageInterface::ShowMessage( "FiniteBurnSetupPanel::SaveData() \n" );
+   #endif
+
    // Save data to core engine
+   Integer id;
+
    // Thrusters
-   wxString thrusterString = thrusterCB->GetStringSelection();
-   int thrusterID = theBurn->GetParameterID("Thrusters");
+   wxString thrusterString = mThrusterComboBox->GetStringSelection();
+   id = theBurn->GetParameterID("Thrusters");
    std::string thruster = std::string (thrusterString.c_str());
-   theBurn->SetStringParameter(thrusterID, thruster, 0);
+   theBurn->SetStringParameter(id, thruster, 0);
 
    // Tanks
-   wxString tankString = tankCB->GetStringSelection();
-   int tankID = theBurn->GetParameterID("Tanks");
+   wxString tankString = mTankComboBox->GetStringSelection();
+   id = theBurn->GetParameterID("Tanks");
    std::string tank = std::string (tankString.c_str());
-   theBurn->SetStringParameter(tankID, tank, 0);
+   theBurn->SetStringParameter(id, tank, 0);
     
    // Burn scale factor
-   int bsfID = theBurn->GetParameterID("BurnScaleFactor");
+   id = theBurn->GetParameterID("BurnScaleFactor");
    wxString bsfStr = scaleTextCtrl->GetValue();
-   theBurn->SetRealParameter(bsfID, atof(bsfStr));
+   theBurn->SetRealParameter(id, atof(bsfStr));
+
+   // save central body
+   wxString burnOriginStr = mCentralBodyComboBox->GetStringSelection();
+   id = theBurn->GetParameterID("Origin");
+   std::string origin = std::string (burnOriginStr.c_str());
+   theBurn->SetStringParameter(id, origin);
 
    theApplyButton->Disable();
 }

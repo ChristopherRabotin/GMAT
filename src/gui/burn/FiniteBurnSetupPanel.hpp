@@ -17,28 +17,27 @@
 
 #include "gmatwxdefs.hpp"
 #include "GuiInterpreter.hpp"
+#include "GuiItemManager.hpp"
 #include "GmatAppData.hpp"
 #include "GmatPanel.hpp"
 #include "FiniteBurn.hpp"
-//#include "Burn.hpp"
 
 class FiniteBurnSetupPanel : public GmatPanel
 {
 public:
-    // constructors
     FiniteBurnSetupPanel( wxWindow *parent, const wxString &burnName);
-    
+    ~FiniteBurnSetupPanel();
+
 private:
     static const int MAX_PROP_ROW = 5;
 
     // member data
-//    Burn *theBurn;
     FiniteBurn *theBurn;
 
-    wxComboBox *frameCB;
-    wxComboBox *tankCB;
-    wxComboBox *thrusterCB;
-    wxGrid *engGrid;
+    wxComboBox *mTankComboBox;
+    wxComboBox *mThrusterComboBox;
+    wxComboBox *mCentralBodyComboBox;
+//    wxGrid *engGrid;
     wxTextCtrl *scaleTextCtrl;
     
     // member functions
