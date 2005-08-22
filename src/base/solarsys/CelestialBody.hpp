@@ -89,9 +89,9 @@ public:
    // additional constructor, specifying type (as Gmat::BodyType) and name
    CelestialBody(Gmat::BodyType itsBodyType, std::string name);
    // copy constructor
-   CelestialBody(const CelestialBody &cb);
+   CelestialBody(const CelestialBody &cBody);
    // operator=
-   CelestialBody& operator=(const CelestialBody &cb);
+   CelestialBody& operator=(const CelestialBody &cBody);
    // destructor
    virtual ~CelestialBody();
 

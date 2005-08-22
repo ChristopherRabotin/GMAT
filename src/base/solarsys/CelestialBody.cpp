@@ -160,6 +160,7 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    analyticMethod     (Gmat::LOW_FIDELITY),
    stateTime          (21545.0),
    centralBody        (""),
+   cb                 (NULL),
    bodyNumber         (0),
    referenceBodyNumber(0),
    sourceFilename     (""),
@@ -206,6 +207,7 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    analyticMethod     (Gmat::LOW_FIDELITY),
    stateTime          (21545.0),
    centralBody        (""),
+   cb                 (NULL),
    bodyNumber         (0),
    referenceBodyNumber(0),
    sourceFilename     (""),
@@ -230,57 +232,58 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
 }
 
 //------------------------------------------------------------------------------
-//  CelestialBody(const CelestialBody &cb)
+//  CelestialBody(const CelestialBody &cBody)
 //------------------------------------------------------------------------------
 /**
  * This method creates an object of the CelestialBody class as a copy of the
  * specified CelestialBody class (copy constructor).
  *
- * @param <cb> CelestialBody object to copy.
+ * @param <cBody> CelestialBody object to copy.
  */
 //------------------------------------------------------------------------------
-CelestialBody::CelestialBody(const CelestialBody &cb) :
-   SpacePoint          (cb),
-   bodyType            (cb.bodyType),
-   mass                (cb.mass),
-   equatorialRadius    (cb.equatorialRadius),
-   flattening          (cb.flattening),
-   polarRadius         (cb.polarRadius),
-   mu                  (cb.mu),
-   posVelSrc           (cb.posVelSrc),
-   analyticMethod      (cb.analyticMethod),
-   centralBody         (cb.centralBody),
-   bodyNumber          (cb.bodyNumber),
-   referenceBodyNumber (cb.referenceBodyNumber),
-   sourceFilename      (cb.sourceFilename),
-   theSourceFile       (cb.theSourceFile), // ????????????????
-   usePotentialFile    (cb.usePotentialFile),
-   potentialFileName   (cb.potentialFileName),
-   hourAngle           (cb.hourAngle),
+CelestialBody::CelestialBody(const CelestialBody &cBody) :
+   SpacePoint          (cBody),
+   bodyType            (cBody.bodyType),
+   mass                (cBody.mass),
+   equatorialRadius    (cBody.equatorialRadius),
+   flattening          (cBody.flattening),
+   polarRadius         (cBody.polarRadius),
+   mu                  (cBody.mu),
+   posVelSrc           (cBody.posVelSrc),
+   analyticMethod      (cBody.analyticMethod),
+   centralBody         (cBody.centralBody),
+   cb                  (cBody.cb),
+   bodyNumber          (cBody.bodyNumber),
+   referenceBodyNumber (cBody.referenceBodyNumber),
+   sourceFilename      (cBody.sourceFilename),
+   theSourceFile       (cBody.theSourceFile), // ????????????????
+   usePotentialFile    (cBody.usePotentialFile),
+   potentialFileName   (cBody.potentialFileName),
+   hourAngle           (cBody.hourAngle),
    atmModel            (NULL),
    //coefficientSize     (cb.coefficientSize),
    //dCbar               (cb.dCbar),
    //dSbar               (cb.dSbar),
-   order               (cb.order),
-   degree              (cb.degree),
-   sij                 (cb.sij),
-   cij                 (cb.cij),
-   lfEpoch             (cb.lfEpoch),
-   lfKepler            (cb.lfKepler),
-   prevLFEpoch         (cb.prevLFEpoch),
-   prevLFState         (cb.prevLFState),
-   newLF               (cb.newLF)
+   order               (cBody.order),
+   degree              (cBody.degree),
+   sij                 (cBody.sij),
+   cij                 (cBody.cij),
+   lfEpoch             (cBody.lfEpoch),
+   lfKepler            (cBody.lfKepler),
+   prevLFEpoch         (cBody.prevLFEpoch),
+   prevLFState         (cBody.prevLFState),
+   newLF               (cBody.newLF)
 {
-   state                  = cb.state;
-   stateTime              = cb.stateTime;
-   angularVelocity        = cb.angularVelocity;
-   defaultMu              = cb.defaultMu;
-   defaultEqRadius        = cb.defaultEqRadius;
+   state                  = cBody.state;
+   stateTime              = cBody.stateTime;
+   angularVelocity        = cBody.angularVelocity;
+   defaultMu              = cBody.defaultMu;
+   defaultEqRadius        = cBody.defaultEqRadius;
    potentialFileRead      = false;
 
-   if (cb.atmModel)
+   if (cBody.atmModel)
    {
-      atmModel = (AtmosphereModel*)(cb.atmModel->Clone());
+      atmModel = (AtmosphereModel*)(cBody.atmModel->Clone());
 
       //loj: 6/9/05 Write message on DEBUG
       #ifdef DEBUG_CELESTIAL_BODY
@@ -296,56 +299,57 @@ CelestialBody::CelestialBody(const CelestialBody &cb) :
 }
 
 //------------------------------------------------------------------------------
-//  CelestialBody& operator= (const CelestialBody& cb)
+//  CelestialBody& operator= (const CelestialBody& cBody)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator for the CelestialBody class.
  *
- * @param <cb> the CelestialBody object whose data to assign to "this"
+ * @param <cBody> the CelestialBody object whose data to assign to "this"
  *            solar system.
  *
  * @return "this" CelestialBody with data of input CelestialBody cb.
  */
 //------------------------------------------------------------------------------
-CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
+CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
 {
-   if (&cb == this)
+   if (&cBody == this)
       return *this;
 
-   SpacePoint::operator=(cb);
-   bodyType            = cb.bodyType;
-   mass                = cb.mass;
-   equatorialRadius    = cb.equatorialRadius;
-   flattening          = cb.flattening;
-   polarRadius         = cb.polarRadius;
-   mu                  = cb.mu;
-   posVelSrc           = cb.posVelSrc;
-   analyticMethod      = cb.analyticMethod;
-   state               = cb.state;
-   stateTime           = cb.stateTime;
-   centralBody         = cb.centralBody;
-   bodyNumber          = cb.bodyNumber;
-   referenceBodyNumber = cb.referenceBodyNumber;
-   sourceFilename      = cb.sourceFilename;
-   theSourceFile       = cb.theSourceFile;   // ??????????????
-   usePotentialFile    = cb.usePotentialFile;
-   potentialFileName   = cb.potentialFileName;
-   angularVelocity     = cb.angularVelocity;
-   hourAngle           = cb.hourAngle;
+   SpacePoint::operator=(cBody);
+   bodyType            = cBody.bodyType;
+   mass                = cBody.mass;
+   equatorialRadius    = cBody.equatorialRadius;
+   flattening          = cBody.flattening;
+   polarRadius         = cBody.polarRadius;
+   mu                  = cBody.mu;
+   posVelSrc           = cBody.posVelSrc;
+   analyticMethod      = cBody.analyticMethod;
+   state               = cBody.state;
+   stateTime           = cBody.stateTime;
+   centralBody         = cBody.centralBody;
+   cb                  = cBody.cb;
+   bodyNumber          = cBody.bodyNumber;
+   referenceBodyNumber = cBody.referenceBodyNumber;
+   sourceFilename      = cBody.sourceFilename;
+   theSourceFile       = cBody.theSourceFile;   // ??????????????
+   usePotentialFile    = cBody.usePotentialFile;
+   potentialFileName   = cBody.potentialFileName;
+   angularVelocity     = cBody.angularVelocity;
+   hourAngle           = cBody.hourAngle;
 
    if (atmModel)
       delete atmModel;
 
-   if (cb.atmModel)
+   if (cBody.atmModel)
    {
-      atmModel = (AtmosphereModel*)(cb.atmModel)->Clone();
+      atmModel = (AtmosphereModel*)(cBody.atmModel)->Clone();
    }
    else
       atmModel = NULL;
 
    potentialFileRead   = false;
-   defaultMu           = cb.defaultMu;
-   defaultEqRadius     = cb.defaultEqRadius;
+   defaultMu           = cBody.defaultMu;
+   defaultEqRadius     = cBody.defaultEqRadius;
 
    //coefficientSize     = cb.coefficientSize;  // what about all of these?
    //sij                 = cb.sij;
@@ -355,11 +359,11 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
    //order               = cb.order;
    //degree              = cb.degree;
 
-   lfEpoch      = cb.lfEpoch;
-   lfKepler     = cb.lfKepler;
-   prevLFEpoch  = cb.prevLFEpoch;
-   prevLFState  = cb.prevLFState;
-   newLF        = cb.newLF;
+   lfEpoch      = cBody.lfEpoch;
+   lfKepler     = cBody.lfKepler;
+   prevLFEpoch  = cBody.prevLFEpoch;
+   prevLFState  = cBody.prevLFState;
+   newLF        = cBody.newLF;
       
    return *this;
 }
@@ -398,6 +402,19 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
    Real*     posVel = NULL;
    switch (posVelSrc)
    {
+      case Gmat::ANALYTIC :
+         switch (analyticMethod)
+         {
+            case Gmat::NO_ANALYTIC_METHOD :
+               throw SolarSystemException(
+                      "No analytic method specified for body " +instanceName);
+            case Gmat::LOW_FIDELITY :
+               state = ComputeLowFidelity(atTime);
+               break;
+            default:
+               break;
+         }
+         break;
       case Gmat::SLP :
 //      case Gmat::DE_102 :
       case Gmat::DE_200 :
@@ -419,19 +436,6 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
          state.SetElement(3,posVel[3]);
          state.SetElement(4,posVel[4]);
          state.SetElement(5,posVel[5]);
-         break;
-      case Gmat::ANALYTIC :
-         switch (analyticMethod)
-         {
-            case Gmat::NO_ANALYTIC_METHOD :
-               throw SolarSystemException(
-                     "No analytic method specified for body " +instanceName);
-            case Gmat::LOW_FIDELITY :
-               state = ComputeLowFidelity(atTime);
-               break;
-            default:
-               break;
-         }
          break;
 //      case Gmat::EPHEMERIS :  
 //         break; // other cases later <<<<<<<<<<<<<<<<
@@ -1955,7 +1959,8 @@ GmatBase* CelestialBody::GetRefObject(const Gmat::ObjectType type,
 const StringArray& CelestialBody::GetRefObjectNameArray(
                                   const Gmat::ObjectType type)
 {
-   if (type == Gmat::UNKNOWN_OBJECT)
+   if ((type == Gmat::UNKNOWN_OBJECT) ||
+       (type == Gmat::CELESTIAL_BODY))
    {
       static StringArray refs = SpacePoint::GetRefObjectNameArray(type);
 
@@ -2375,8 +2380,7 @@ Rvector6 CelestialBody::ComputeLowFidelity(const A1Mjd &forTime)
  */
 //------------------------------------------------------------------------------
 Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
-{
-   
+{   
    Real     cbMu  = cb->GetGravitationalConstant() + mu;
    Rvector6 cart;  // or MA???
    Real     dTime;
