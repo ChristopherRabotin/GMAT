@@ -189,26 +189,32 @@ void TankConfigPanel::SaveData()
       return; 
        
    Integer paramID;
-   
-   paramID = theFuelTank->GetParameterID("Temperature");
-   theFuelTank->SetRealParameter(paramID, atof(temperatureTextCtrl->GetValue()));
-        
-   paramID = theFuelTank->GetParameterID("RefTemperature");
-   theFuelTank->SetRealParameter(paramID, atof(refTemperatureTextCtrl->GetValue()));
-        
-   paramID = theFuelTank->GetParameterID("FuelMass");
-   theFuelTank->SetRealParameter(paramID, atof(fuelMassTextCtrl->GetValue()));
-        
-   paramID = theFuelTank->GetParameterID("FuelDensity");
-   theFuelTank->SetRealParameter(paramID, atof(fuelDensityTextCtrl->GetValue()));
-        
-   paramID = theFuelTank->GetParameterID("Pressure");
-   theFuelTank->SetRealParameter(paramID, atof(pressureTextCtrl->GetValue()));
-        
-   paramID = theFuelTank->GetParameterID("Volume");
-   theFuelTank->SetRealParameter(paramID, atof(volumeTextCtrl->GetValue()));
-   
-   theApplyButton->Disable();
+   try
+   {
+      paramID = theFuelTank->GetParameterID("Temperature");
+      theFuelTank->SetRealParameter(paramID, atof(temperatureTextCtrl->GetValue()));
+
+      paramID = theFuelTank->GetParameterID("RefTemperature");
+      theFuelTank->SetRealParameter(paramID, atof(refTemperatureTextCtrl->GetValue()));
+
+      paramID = theFuelTank->GetParameterID("FuelMass");
+      theFuelTank->SetRealParameter(paramID, atof(fuelMassTextCtrl->GetValue()));
+
+      paramID = theFuelTank->GetParameterID("FuelDensity");
+      theFuelTank->SetRealParameter(paramID, atof(fuelDensityTextCtrl->GetValue()));
+
+      paramID = theFuelTank->GetParameterID("Pressure");
+      theFuelTank->SetRealParameter(paramID, atof(pressureTextCtrl->GetValue()));
+
+      paramID = theFuelTank->GetParameterID("Volume");
+      theFuelTank->SetRealParameter(paramID, atof(volumeTextCtrl->GetValue()));
+
+      theApplyButton->Disable();
+   }
+   catch (BaseException &ex)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetMessage());
+   }
 }
   
 
