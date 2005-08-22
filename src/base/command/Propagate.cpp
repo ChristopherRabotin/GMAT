@@ -1753,6 +1753,9 @@ void Propagate::FillFormation(SpaceObject *so, StringArray& owners,
    StringArray comps = so->GetStringArrayParameter(so->GetParameterID("Add"));
    SpaceObject *el;
    for (StringArray::iterator i = comps.begin(); i != comps.end(); ++i) {
+      if ((*objectMap).find(*i) == objectMap->end())
+         throw CommandException("Formation " + so->GetName() +
+            " uses unknown object named '" + (*i) + "'");
       el = (SpaceObject*)(*objectMap)[*i];
       so->SetRefObject(el, el->GetType(), el->GetName()); 
       if (el->GetType() == Gmat::FORMATION)

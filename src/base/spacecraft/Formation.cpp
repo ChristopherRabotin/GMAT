@@ -21,7 +21,7 @@
 #include "Formation.hpp"
 #include <algorithm>          // for find()
 
-// #define DEBUG_FORMATION_ACTIONS
+//#define DEBUG_FORMATION_ACTIONS
 
 #include "MessageInterface.hpp"
 
@@ -171,7 +171,7 @@ const Rvector6 Formation::GetMJ2000State(const A1Mjd &atTime)
          "Warning: Attempting to find MJ2000 state for an empty formation\n");
       return centerState;
    }
-   
+
    // The Formation PropState contains state data for the spacecraft, tanks, and
    // (eventually) attitude.  The first 6*satcount elements are the spacecraft
    // position and velocity data.
@@ -809,17 +809,30 @@ ObjectArray& Formation::GetRefObjectArray(const std::string& typeString)
 //------------------------------------------------------------------------------
 void Formation::BuildState()
 {
+   #ifdef DEBUG_FORMATION_ACTIONS
+      MessageInterface::ShowMessage("%s%s%s%d\n",
+         "In BuildState, Formation \"", instanceName.c_str(),
+         "\" has dimension ", dimension);
+   #endif
+
+   if (dimension <= 0)
+      throw SpaceObjectException(
+         "Error building Formation state; no spacecraft are set");
+
    // Setup the PropState
    Real *data = new Real[dimension], *st;
    Integer j = 0, k;
    PropState *ps;
-   
+
    if (state.GetSize() < dimension)
       state.SetSize(dimension);
    
    for (std::vector<SpaceObject*>::iterator i = components.begin();
         i != components.end(); ++i)
    {
+      if ((*i) == NULL)
+         throw SpaceObjectException(
+            "Error building Formation state; member spacecraft not set");
       ps = &((*i)->GetState());
       st = ps->GetState();
       for (k = 0; k < ps->GetSize(); ++k)
