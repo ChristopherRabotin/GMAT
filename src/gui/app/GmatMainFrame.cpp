@@ -1007,8 +1007,8 @@ void GmatMainFrame::StartServer()
       mServer = new GmatServer;
       mServer->Create(service);
       MessageInterface::ShowMessage("Server started.\n");
-      mServerMenu->Enable(MENU_START_SERVER, false);
-      mServerMenu->Enable(MENU_STOP_SERVER, true);
+//      mServerMenu->Enable(MENU_START_SERVER, false);
+//      mServerMenu->Enable(MENU_STOP_SERVER, true);
    }
    else
    {
@@ -1025,8 +1025,8 @@ void GmatMainFrame::StopServer()
    {
       delete mServer;
       MessageInterface::ShowMessage("Server terminated.\n");
-      mServerMenu->Enable(MENU_START_SERVER, true);
-      mServerMenu->Enable(MENU_STOP_SERVER, false);
+//      mServerMenu->Enable(MENU_START_SERVER, true);
+//      mServerMenu->Enable(MENU_STOP_SERVER, false);
       mServer = NULL;
    }
    else
