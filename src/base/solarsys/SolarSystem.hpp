@@ -75,8 +75,10 @@ public:
    // methods to set the source, source file, and analytic method for each
    // of the bodies in use
    bool SetSource(Gmat::PosVelSource pvSrc);
+   bool SetSource(const std::string &pvSrc);
    bool SetSourceFile(PlanetaryEphem *src);
    bool SetAnalyticMethod(Gmat::AnalyticMethod aM);
+   bool SetAnalyticMethod(const std::string &aM);
    
 
    // Parameter access methods - overridden from GmatBase do I need these???

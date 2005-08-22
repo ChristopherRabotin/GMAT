@@ -19,11 +19,11 @@
 #include <list>
 #include <string>
 #include "SolarSystem.hpp" // class's header file
+#include "SolarSystemException.hpp"
 #include "CelestialBody.hpp"
 #include "Star.hpp"
 #include "Planet.hpp"
 #include "Moon.hpp"
-
 
 //---------------------------------
 // static data
@@ -403,6 +403,41 @@ bool SolarSystem::SetSource(Gmat::PosVelSource pvSrc)
       if ((*cbi)->SetSource(pvSrc) == false)  return false;
       ++cbi;
    }
+   pvSrcForAll = pvSrc;
+   return true;
+}
+
+//------------------------------------------------------------------------------
+//  bool SetSource(const std::string &pvSrc)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the source for the bodies in
+ * use (assuming all have the same source).
+ *
+ * @param <pvSrc> source (for pos and vel) for all of the bodies.
+ *
+ * @return success flag for the operation.
+ *
+ */
+//------------------------------------------------------------------------------
+bool SolarSystem::SetSource(const std::string &pvSrc)
+{
+   Gmat::PosVelSource theSrc = Gmat::PosVelSourceCount;
+   for (Integer i = 0; i < Gmat::PosVelSourceCount; i++)
+   {
+      if (pvSrc == CelestialBody::POS_VEL_STRINGS[i]) 
+         theSrc = (Gmat::PosVelSource) i; 
+   }
+   if (theSrc == Gmat::PosVelSourceCount)
+      throw SolarSystemException("Unknown ephemeris source " + pvSrc);
+   // Search through bodiesInUse and set the source for all
+   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   while (cbi != bodiesInUse.end())
+   {
+      if ((*cbi)->SetSource(theSrc) == false)  return false;
+      ++cbi;
+   }
+   pvSrcForAll = theSrc;
    return true;
 }
 
@@ -435,12 +470,12 @@ bool SolarSystem::SetSourceFile(PlanetaryEphem *src)
 //  bool SetAnalyticMethod(Gmat::AnalyticMethod aM)
 //------------------------------------------------------------------------------
 /**
- * This method sets the analytic method for the bodies in
+* This method sets the analytic method for the bodies in
  * use (assuming all have the same method).
  *
  * @param aMc> analytic method selection for all of the bodies.
  *
-* @return success flag for the operation.
+ * @return success flag for the operation.
  *
  */
 //------------------------------------------------------------------------------
@@ -453,6 +488,41 @@ bool SolarSystem::SetAnalyticMethod(Gmat::AnalyticMethod aM)
       if ((*cbi)->SetAnalyticMethod(aM) == false)  return false;
       ++cbi;
    }
+   anMethodForAll = aM;
+   return true;
+}
+
+//------------------------------------------------------------------------------
+//  bool SetAnalyticMethod(const std::string &aM)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the analytic method for the bodies in
+ * use (assuming all have the same method).
+ *
+ * @param aMc> analytic method selection for all of the bodies.
+ *
+ * @return success flag for the operation.
+ *
+ */
+//------------------------------------------------------------------------------
+bool SolarSystem::SetAnalyticMethod(const std::string &aM)
+{
+   Gmat::AnalyticMethod theMethod = Gmat::AnalyticMethodCount;
+   for (Integer i = 0; i < Gmat::AnalyticMethodCount; i++)
+   {
+      if (aM == CelestialBody::ANALYTIC_METHOD_STRINGS[i]) 
+         theMethod = (Gmat::AnalyticMethod) i; 
+   }
+   if (theMethod == Gmat::AnalyticMethodCount)
+      throw SolarSystemException("Unknown analytic method " + aM);
+   // Search through bodiesInUse and set it for all
+   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   while (cbi != bodiesInUse.end())
+   {
+      if ((*cbi)->SetAnalyticMethod(theMethod) == false)  return false;
+      ++cbi;
+   }
+   anMethodForAll = theMethod;
    return true;
 }
 
