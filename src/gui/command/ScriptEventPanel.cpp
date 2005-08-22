@@ -136,7 +136,16 @@ void ScriptEventPanel::SaveData()
    }
 
    theCommand->SetGeneratingString(scriptText.str());
-   theGuiInterpreter->Interpret(theCommand, scriptText.str());
+   
+   try
+   {
+      theGuiInterpreter->Interpret(theCommand, scriptText.str());
+   }
+   catch (BaseException &ex)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_,
+         "Error parsing the ScriptEvent; please correct the text");
+   }
 }
 
 //------------------------------------------------------------------------------
