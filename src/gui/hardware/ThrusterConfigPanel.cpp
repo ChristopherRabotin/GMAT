@@ -20,7 +20,6 @@
 //------------------------------------------------------------------------------
 #include "ThrusterConfigPanel.hpp"
 #include "ThrusterCoefficientDialog.hpp"
-#include "TankSelectionDialog.hpp"
 #include "MessageInterface.hpp"
 #include <wx/variant.h>
 
