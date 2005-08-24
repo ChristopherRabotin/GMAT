@@ -13,7 +13,10 @@ MATLAB_LIBRARIES = -leng -lmx -lut -lmat -lpthread \
                    -lgcc_s -licudata -licui18n \
                    -licuuc -lustdio -lz
 
-LINK_FLAGS = `wx-config --libs --static=no` -lwx_gtk2_gl-2.6 -lg2c
+#DEBUG_FLAGS = -pg
+DEBUG_FLAGS = 
+
+LINK_FLAGS = `wx-config --libs --static=no` -lwx_gtk2_gl-2.6 -lg2c $(DEBUG_FLAGS)
 #             -L/usr/local/matlab704/bin/glnx86 \
 #             -lIL -lILU -lILUT 
  
@@ -83,7 +86,7 @@ HEADERS = -I../base/include \
 #           -I/usr/local/matlab704/extern/include 
 
 # Uncomment this section to build without Matlab
-CPPFLAGS = $(OPTIMIZATIONS) -Wall `wx-config --cppflags` -DSKIP_DEVIL
+CPPFLAGS = $(OPTIMIZATIONS) -Wall `wx-config --cppflags` -DSKIP_DEVIL $(DEBUG_FLAGS)
 
 
 export CPPFLAGS
@@ -144,6 +147,7 @@ OBJECTS = \
     foundation/ParameterSelectDialog.o \
     foundation/ParameterSetupPanel.o \
     foundation/ShowScriptDialog.o \
+    foundation/ShowSummaryDialog.o \
     function/FunctionSetupPanel.o \
     function/MatlabFunctionSetupPanel.o \
     hardware/TankConfigPanel.o \

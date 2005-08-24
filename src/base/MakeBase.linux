@@ -9,6 +9,9 @@ all: $(TARGETS)
 
 gui: $(WXTARGET)
 
+#DEBUG_FLAGS = -pg
+DEBUG_FLAGS = 
+
 CPP = g++
 
 FORTRAN = g77
@@ -53,7 +56,7 @@ HEADERS = -Iinclude \
 #           -I/usr/local/matlab704/extern/include 
 
 # Uncomment this section to build without Matlab
-CPPFLAGS = $(OPTIMIZATIONS) -DSKIP_DEVIL -Wall `wx-config --cppflags`
+CPPFLAGS = $(OPTIMIZATIONS) -DSKIP_DEVIL -Wall `wx-config --cppflags` $(DEBUG_FLAGS)
 
 export CPPFLAGS
 export CPP
