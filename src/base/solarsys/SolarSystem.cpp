@@ -167,6 +167,7 @@ SolarSystem::SolarSystem(std::string withName)
    AddBody(pluto);
    
    // at least for now, give each body a pointer to its central body
+   theSun->SetRefObject(theEarth, Gmat::CELESTIAL_BODY, SolarSystem::EARTH_NAME); // for reference!!!
    theEarth->SetRefObject(theSun, Gmat::CELESTIAL_BODY, SolarSystem::SUN_NAME);
    theMoon->SetRefObject(theEarth, Gmat::CELESTIAL_BODY, SolarSystem::EARTH_NAME);
    mercury->SetRefObject(theSun, Gmat::CELESTIAL_BODY, SolarSystem::SUN_NAME);
