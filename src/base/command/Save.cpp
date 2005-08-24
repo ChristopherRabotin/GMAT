@@ -223,6 +223,7 @@ bool Save::Execute()
    wasWritten = true;
    file.close();
    
+   BuildCommandSummary(true);
    return true;
 }
   

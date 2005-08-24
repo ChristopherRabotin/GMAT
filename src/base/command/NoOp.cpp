@@ -91,6 +91,7 @@ NoOp& NoOp::operator=(const NoOp& noop)
 //------------------------------------------------------------------------------
 bool NoOp::Execute()
 {
+   BuildCommandSummary(true);
    return true;
 }
 

@@ -273,5 +273,6 @@ bool Report::Execute()
    bool retval = reporter->ReceiveData(data.c_str(), data.length());
    reporter->TakeAction("ActivateForReport", "Off");
    
+   BuildCommandSummary(true);   
    return retval;
 }

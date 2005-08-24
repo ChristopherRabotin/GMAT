@@ -91,6 +91,7 @@ EndScript& EndScript::operator=(const EndScript& noop)
 //------------------------------------------------------------------------------
 bool EndScript::Execute()
 {
+   BuildCommandSummary(true);
    return true;
 }
 

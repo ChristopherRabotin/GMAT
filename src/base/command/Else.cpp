@@ -135,6 +135,7 @@ bool Else::Initialize()
 //------------------------------------------------------------------------------
 bool Else::Execute()
 {
+   BuildCommandSummary(true);
    return true;
 }
 

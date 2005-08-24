@@ -1732,6 +1732,14 @@ bool Propagate::Initialize()
          ((*j) > 0.0 ? "forwards" : "backwards"));
    #endif
 
+   if (singleStepMode)
+   {
+      commandSummary = "Command Summary: ";
+      commandSummary += typeName;
+      commandSummary += " Command\nSummary not available in single step mode\n";
+   }
+      
+
    return initialized;
 }
 
@@ -2166,6 +2174,9 @@ bool Propagate::Execute()
    #endif
    
    ClearTransientForces();
+   // Only build command summary if not in single step mode
+   if (!singleStepMode)
+      BuildCommandSummary(true);
    return true;
 }
 

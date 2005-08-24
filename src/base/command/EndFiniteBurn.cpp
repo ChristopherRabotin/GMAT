@@ -444,5 +444,6 @@ bool EndFiniteBurn::Execute()
          MessageInterface::ShowMessage("   %s\n", (*j)->GetName().c_str());
    #endif
    
+   BuildCommandSummary(true);
    return true;
 }

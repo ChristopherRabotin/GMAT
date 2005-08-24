@@ -492,6 +492,7 @@ bool Assignment::Execute()
          parmOwner->SetRealParameter("SingleValue", EvaluateRHS(), rowIndex-1,
             colIndex-1);
 
+         BuildCommandSummary(true);
          return true;
       }
 
@@ -510,6 +511,8 @@ bool Assignment::Execute()
                parmOwner->GetName() + "\" and \"" + rhsObject->GetName() +
                "\"");
          parmOwner->Copy(rhsObject);
+         
+         BuildCommandSummary(true);
          return true;
       }
       
@@ -591,6 +594,9 @@ bool Assignment::Execute()
    #ifdef DEBUG_PARM_ASSIGNMENT
       MessageInterface::ShowMessage("Assignment::Execute finished\n");
    #endif
+   
+   BuildCommandSummary(true);
+   
    return retval;
 }
 

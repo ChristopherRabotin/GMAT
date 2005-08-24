@@ -586,6 +586,7 @@ bool Target::Execute()
       }
    }
 
+   BuildCommandSummary(true);
    return retval;
 }
 

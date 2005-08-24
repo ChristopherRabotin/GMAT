@@ -187,7 +187,8 @@ bool If::Execute()
          commandExecuting = false;
       }
    }
-
+   
+   BuildCommandSummary(true);
    return retval;
 }
 

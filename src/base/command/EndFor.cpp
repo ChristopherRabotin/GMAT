@@ -68,6 +68,7 @@ bool EndFor::Initialize(void)
 
 bool EndFor::Execute(void)
 {
+   BuildCommandSummary(true);
    return true;
 }
 

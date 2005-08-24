@@ -821,6 +821,8 @@ bool Achieve::Execute()
    }
 
    targeter->SetResultValue(goalId, val);
+   BuildCommandSummary(true);
+   
    return retval;
 }
 

@@ -715,6 +715,8 @@ bool CallFunction::Execute()
       if (mFunction->GetTypeName() == "MatlabFunction")
       {
          status = ExecuteMatlabFunction();
+         
+         BuildCommandSummary(true);
          return status;
       }
    #endif
@@ -742,7 +744,8 @@ bool CallFunction::Execute()
    #if DEBUG_CALL_FUNCTION
       MessageInterface::ShowMessage("Excecuted command\n");
    #endif
-
+   
+   BuildCommandSummary(true);
    return status;
 }
 

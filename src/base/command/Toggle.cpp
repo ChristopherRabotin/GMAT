@@ -161,6 +161,8 @@ bool Toggle::Execute()
     
    char data[] = "Toggle executed\n\n";
    publisher->Publish(streamID, data, strlen(data));
+   
+   BuildCommandSummary(true);
    return true;
 }
 

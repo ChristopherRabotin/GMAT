@@ -17,6 +17,7 @@
 #include "MessageInterface.hpp"
 
 #include "ShowScriptDialog.hpp"
+#include "ShowSummaryDialog.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -27,6 +28,7 @@ BEGIN_EVENT_TABLE(GmatPanel, wxPanel)
    EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
+   EVT_BUTTON(ID_BUTTON_SUMMARY, GmatPanel::OnSummary)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -68,8 +70,13 @@ GmatPanel::GmatPanel(wxWindow *parent, bool showScriptButton)
    theBottomSizer = new wxStaticBoxSizer( bottomStaticBox, wxVERTICAL );
    wxBoxSizer *theButtonSizer = new wxBoxSizer(wxHORIZONTAL);
 
+   wxBoxSizer *theTopButtonSizer = new wxBoxSizer(wxHORIZONTAL);
+
    // create script button
    theScriptButton = new wxButton(this, ID_BUTTON_SCRIPT, "Show Script",
+                                  wxDefaultPosition, wxDefaultSize, 0);
+
+   theSummaryButton = new wxButton(this, ID_BUTTON_SUMMARY, "Command Summary",
                                   wxDefaultPosition, wxDefaultSize, 0);
 
    // create bottom buttons
@@ -83,7 +90,9 @@ GmatPanel::GmatPanel(wxWindow *parent, bool showScriptButton)
       new wxButton(this, ID_BUTTON_HELP, "Help", wxDefaultPosition, wxDefaultSize, 0);
 
    // add items to top sizer
-   theTopSizer->Add(theScriptButton, 0, wxALIGN_RIGHT | wxALL, borderSize);
+   theTopButtonSizer->Add(theScriptButton, 0, wxALIGN_RIGHT | wxALL, borderSize);
+   theTopButtonSizer->Add(theSummaryButton, 0, wxALIGN_RIGHT | wxALL, borderSize);
+   theTopSizer->Add(theTopButtonSizer, 0, wxALIGN_RIGHT | wxALL, borderSize);
 
    // adds the buttons to button sizer
    theButtonSizer->Add(theOkButton, 0, wxALIGN_CENTER | wxALL, borderSize);
@@ -133,6 +142,9 @@ void GmatPanel::Show()
 
 //    theScriptButton->Disable(); //loj: for build2
     theHelpButton->Disable();   //loj: for build2
+
+    if ((mObject == NULL) || (!mObject->IsOfType(Gmat::COMMAND)))
+    theSummaryButton->Hide();
 }
 
 //------------------------------------------------------------------------------
@@ -213,3 +225,22 @@ void GmatPanel::OnScript(wxCommandEvent &event)
    ssd.ShowModal();
 }
 
+
+//------------------------------------------------------------------------------
+// void OnSummary()
+//------------------------------------------------------------------------------
+/**
+ * Shows command summary
+ */
+//------------------------------------------------------------------------------
+void GmatPanel::OnSummary(wxCommandEvent &event)
+{
+   wxString title = "Object Script";
+   // open separate window to show scripts?
+   if (mObject != NULL) {
+      title = "Command Summary for ";
+      title += mObject->GetName().c_str();
+   }
+   ShowSummaryDialog ssd(this, -1, title, (GmatCommand*)mObject);
+   ssd.ShowModal();
+}

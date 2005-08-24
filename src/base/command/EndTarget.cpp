@@ -120,6 +120,7 @@ bool EndTarget::Initialize()
 //------------------------------------------------------------------------------
 bool EndTarget::Execute()
 {
+   BuildCommandSummary(true);
    return true;
 }
 

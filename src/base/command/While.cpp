@@ -201,6 +201,7 @@ bool While::Execute()
       }
    }
    
+   BuildCommandSummary(true);   
    return retval;
 }
 

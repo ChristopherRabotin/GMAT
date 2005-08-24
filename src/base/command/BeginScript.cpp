@@ -101,7 +101,8 @@ BeginScript& BeginScript::operator=(const BeginScript& noop)
 //------------------------------------------------------------------------------
 bool BeginScript::Execute()
 {
-    return true;
+   BuildCommandSummary(true);
+   return true;
 }
 
 

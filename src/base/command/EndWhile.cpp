@@ -66,6 +66,7 @@ bool EndWhile::Initialize(void)
 
 bool EndWhile::Execute(void)
 {
+   BuildCommandSummary(true);
    return true;
 }
 

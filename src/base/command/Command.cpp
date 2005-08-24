@@ -20,8 +20,35 @@
 
 #include "Command.hpp"          // class's header file
 #include "MessageInterface.hpp" // MessageInterface
+#include "Spacecraft.hpp"
+
+#include <sstream>              // for command summary generation
+#include <cmath>                // for Cartesian to Keplerian conversion; 
+                                // remove it when the real conversions are
+                                // used.
+
 
 //#define DEBUG_COMMAND_DEALLOCATION
+
+
+//---------------------------------
+//  static members
+//---------------------------------
+const std::string 
+   GmatCommand::PARAMETER_TEXT[GmatCommandParamCount - GmatBaseParamCount] =
+   {
+      "Comment",
+      "Summary"
+   };
+
+
+const Gmat::ParameterType 
+   GmatCommand::PARAMETER_TYPE[GmatCommandParamCount - GmatBaseParamCount] =
+   {
+      Gmat::STRING_TYPE,
+      Gmat::STRING_TYPE
+   };
+
 
 //---------------------------------
 //  public methods
@@ -44,10 +71,14 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    publisher            (NULL),
    streamID             (-1),
    depthChange          (0),
-   commandChangedState  (false)
+   commandChangedState  (false),
+   comment              ("")
 {
    generatingString = "";
    parameterCount = GmatCommandParamCount;
+   objectTypes.push_back(Gmat::COMMAND);
+   
+   BuildCommandSummary(false);
 }
 
 
@@ -391,6 +422,306 @@ void GmatCommand::SetPublisher(Publisher *p)
 {
    publisher = p;
 }
+
+
+//------------------------------------------------------------------------------
+//  std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Gets the name of the parameter with the input id.
+ * 
+ * @param <id> Integer id for the parameter.
+ * 
+ * @return The string name of the parameter.
+ */
+//------------------------------------------------------------------------------
+std::string GmatCommand::GetParameterText(const Integer id) const
+{
+   if (id >= GmatBaseParamCount && id < GmatCommandParamCount)
+      return PARAMETER_TEXT[id - GmatBaseParamCount];
+      
+   return GmatBase::GetParameterText(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+ * Gets the id corresponding to a named parameter.
+ * 
+ * @param <str> Name of the parameter.
+ * 
+ * @return The ID.
+ */
+//------------------------------------------------------------------------------
+Integer GmatCommand::GetParameterID(const std::string &str) const
+{
+   for (Integer i = GmatBaseParamCount; i < GmatCommandParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+         return i;
+   }
+
+   return GmatBase::GetParameterID(str);
+}
+
+
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve the enumerated type of the object.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The enumeration for the type of the parameter.
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType GmatCommand::GetParameterType(const Integer id) const
+{
+   if (id >= GmatBaseParamCount && id < GmatCommandParamCount)
+      return PARAMETER_TYPE[id - GmatBaseParamCount];
+      
+   return GmatBase::GetParameterType(id);
+}
+
+
+
+//------------------------------------------------------------------------------
+//  std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Gets the text description for the type of a parameter.
+ * 
+ * @param <id> Integer ID of the parameter.
+ * 
+ * @return The text description of the type of the parameter.
+ */
+//------------------------------------------------------------------------------
+std::string GmatCommand::GetParameterTypeString(const Integer id) const
+{
+   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ * 
+ * For GmatCommands, this is a bit of a misnomer because the comment field is 
+ * not read-only.  It is accessed only in special circumstances, though -- 
+ * comment lines come before the command in the script -- and therefore gets
+ * special treatment in the Interpreters.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool GmatCommand::IsParameterReadOnly(const Integer id) const
+{
+   if ((id >= GmatBaseParamCount) && (id < GmatCommandParamCount))
+      return true;
+
+   return GmatBase::IsParameterReadOnly(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ * 
+ * @param <label> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool GmatCommand::IsParameterReadOnly(const std::string &label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param <id>    The integer ID for the parameter.
+ *
+ * @return The string stored for this parameter.
+ */
+//------------------------------------------------------------------------------
+std::string GmatCommand::GetStringParameter(const Integer id) const
+{
+   if (id == COMMENT)
+   {
+      return comment;
+   }
+         
+   if (id == SUMMARY)
+   {
+      return commandSummary;
+   }
+         
+   return GmatBase::GetStringParameter(id);
+}
+
+   
+//------------------------------------------------------------------------------
+//  std::string GetStringParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param <id>    The integer ID for the parameter.
+ * @param <index> Array index for parameters.
+ *
+ * @return The string stored for this parameter.
+ */
+//------------------------------------------------------------------------------
+std::string GmatCommand::GetStringParameter(const Integer id, 
+                                            const Integer index) const
+{
+   return GmatBase::GetStringParameter(id, index);
+}
+
+   
+//------------------------------------------------------------------------------
+//  Real SetStringParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a std::string parameter.
+ * 
+ * @param <id>    Integer ID of the parameter.
+ * @param <value> New value for the parameter.
+ * 
+ * @return The value of the parameter.
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::SetStringParameter(const Integer id, const std::string &value)
+{
+   if (id == COMMENT)
+   {
+      comment = value;
+      return true;
+   }
+         
+   if (id == SUMMARY)
+   {
+      return false;
+   }
+         
+   return GmatBase::SetStringParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+//  Real SetStringParameter(const Integer id, const Real value, 
+//                          const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a std::string parameter.
+ * 
+ * @param <id>    Integer ID of the parameter.
+ * @param <value> New value for the parameter.
+ * @param <index> array index for the parameter.
+ * 
+ * @return The value of the parameter.
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::SetStringParameter(const Integer id, const std::string &value,
+                                     const Integer index)
+{
+   return GmatBase::SetStringParameter(id, value, index);
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ *
+ * @return The string stored for this parameter.
+ */
+//------------------------------------------------------------------------------
+std::string GmatCommand::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string GetStringParameter(const std::string &label,
+//                                 const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param <index> array index for the parameter.
+ *
+ * @return The string stored for this parameter.
+ */
+//------------------------------------------------------------------------------
+std::string GmatCommand::GetStringParameter(const std::string &label,
+                                            const Integer index) const
+{
+   return GetStringParameter(GetParameterID(label), index);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a std::string parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param <value> New value for the parameter.
+ *
+ * @return The string stored for this parameter.
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::SetStringParameter(const std::string &label, 
+                                     const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const std::string &value,
+//                          const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a std::string parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param <value> New value for the parameter.
+ * @param <index> array index for the parameter.
+ *
+ * @return The string stored for this parameter.
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::SetStringParameter(const std::string &label, 
+                                     const std::string &value,
+                                     const Integer index)
+{
+   return SetStringParameter(GetParameterID(label), value, index);
+}
+
 
 //------------------------------------------------------------------------------
 //  bool SetCondition(const std::string &lhs, 
@@ -811,4 +1142,169 @@ void GmatCommand::RunComplete()
       // Branch command ends point back to start; this line prevents looping
       if (!next->IsOfType("BranchEnd"))
          next->RunComplete();
+}
+
+
+//------------------------------------------------------------------------------
+//  void BuildCommandSummary(bool commandCompleted)
+//------------------------------------------------------------------------------
+/**
+ * Generates the summary string for the command
+ *
+ * Inherited commands override this method for specialized summary data.
+ * 
+ * @param <commandCompleted> True if the command ran successfully.
+ */
+//------------------------------------------------------------------------------
+void GmatCommand::BuildCommandSummary(bool commandCompleted)
+{
+   std::stringstream data;
+   
+   StateConverter    stateConverter;
+   
+      
+   data << "Command Summary: " << typeName << " Command\n";
+   if (!commandCompleted)
+      data << "Execute the script to generate command summary data\n";
+   else
+   {
+      data << "-------------------------------------------"
+           << "-------------------------------------------\n";
+
+      // Build summary data for each spacecraft in the object list
+      GmatBase *obj;
+      for (std::map<std::string, GmatBase *>::iterator i = objectMap->begin();
+           i != objectMap->end(); ++i)
+      {
+         obj = i->second;
+         if (obj->GetTypeName() == "Spacecraft")
+         {
+            Rvector6 rawState = ((Spacecraft*)obj)->GetState().GetState();
+            Rvector6 newState = rawState;
+                                
+            data.precision(16);                 
+            data << "  Spacecraft " << obj->GetName() << "\n"
+                 << "     A.1 Modified Julian Epoch: " 
+                 << obj->GetRealParameter("Epoch") << "\n\n"
+                 << "    Coordinate System: EarthMJ2000Eq \n\n"
+                 << "    Cartesian State:\n"
+                 << "        X  = " << newState[0] << " km\n"
+                 << "        Y  = " << newState[1] << " km\n"
+                 << "        Z  = " << newState[2] << " km\n"
+                 << "        VX = " << newState[3] << " km/s\n"
+                 << "        VY = " << newState[4] << " km/s\n"
+                 << "        VZ = " << newState[5] << " km/s\n";
+
+            obj->SetStringParameter("StateType", "Keplerian");
+            
+            CartToKep(rawState, newState);
+                             
+            data << "\n    Keplerian State:\n"
+                 << "        SMA  = " << newState[0] << " km\n"
+                 << "        ECC  = " << newState[1] << "\n"
+                 << "        INC  = " << newState[2] << " deg\n"
+                 << "        RAAN = " << newState[3] << " deg\n"
+                 << "        AOP  = " << newState[4] << " deg\n"
+                 << "        TA   = " << newState[5] << " deg\n";
+                 
+            data << "\n\n    Spacecraft properties:\n"
+                 << "        Cd = " 
+                 << obj->GetRealParameter("Cd") << "\n"
+                 << "        Drag area = " 
+                 << obj->GetRealParameter("DragArea") << " m^2\n"
+                 << "        Cr = " 
+                 << obj->GetRealParameter("Cr") << "\n"
+                 << "        Reflective (SRP) area = " 
+                 << obj->GetRealParameter("SRPArea") << " m^2\n"
+                 << "        Dry mass = " 
+                 << obj->GetRealParameter("DryMass") << " kg\n";
+                
+             StringArray tanks = obj->GetStringArrayParameter("Tanks");
+             if (tanks.size() > 0)
+                data << "        Tanks:\n";
+             for (StringArray::iterator i = tanks.begin(); i != tanks.end(); ++i)
+                data << "           " << (*i) << "\n";
+                 
+            data << "        Total mass = " 
+                 << obj->GetRealParameter("TotalMass") << " kg\n";
+
+            data << "-------------------------------------------"
+                 << "-------------------------------------------\n";
+         }
+      }
+   }
+
+   commandSummary = data.str();
+}
+
+
+////------------------------------------------------------------------------------
+////  void BuildCommandSummary(bool commandCompleted)
+////------------------------------------------------------------------------------
+///**
+// * Generates the summary string for the command
+// *
+// * Inherited commands override this method for specialized summary data.
+// * 
+// * @param <commandCompleted> True if the command ran successfully.
+// */
+////------------------------------------------------------------------------------
+//std::string GmatCommand::GetCommandSummary()
+//{
+//   return commandSummary;
+//}
+
+
+// Temporary -- need to figure out how we're supposed to do transformations 
+// generically
+void GmatCommand::CartToKep(const Rvector6 in, Rvector6 &out)
+{
+   Real mu = 398600.4415;
+   Real r = sqrt(in[0]*in[0]+in[1]*in[1]+in[2]*in[2]);
+   Real v2 = in[3]*in[3]+in[4]*in[4]+in[5]*in[5];
+   Real rdotv = in[0]*in[3] + in[1]*in[4] + in[2]*in[5];
+   Real energy = 0.5*v2 - mu / r;
+   /// SMA
+   out[0] = -mu / (2.0 * energy);
+   
+   Rvector3 h, ecc;
+
+   // angular vel = r cross v
+   h[0] = in[1]*in[5] - in[2]*in[4];
+   h[1] = in[2]*in[3] - in[0]*in[5];
+   h[2] = in[0]*in[4] - in[1]*in[3];
+   // eccentricity vector
+   ecc[0] = (in[4]*h[2] - in[5]*h[1]) / mu - in[0] / r;
+   ecc[1] = (in[5]*h[0] - in[3]*h[2]) / mu - in[1] / r;
+   ecc[2] = (in[3]*h[1] - in[4]*h[0]) / mu - in[2] / r;
+   
+   // eccentricity
+   out[1] = sqrt(ecc[0]*ecc[0] + ecc[1]*ecc[1] + ecc[2]*ecc[2]);
+   
+   // inclination
+   Real hMag = sqrt(h[0]*h[0] + h[1]*h[1] + h[2]*h[2]);
+   out[2] = acos(h[2]/hMag) * 180.0 / M_PI;
+   
+   Rvector3 nodevec;
+   nodevec[0] = -h[1];
+   nodevec[1] = h[0];
+   nodevec[2] = 0.0;
+
+   Real magnodevec = sqrt(nodevec[0]*nodevec[0] + nodevec[1]*nodevec[1]);
+
+   // RAAN
+   out[3] = atan2(nodevec[1], nodevec[0]) * 180.0 / M_PI;
+
+   // AOP
+   out[4] = acos((ecc[0]*nodevec[0] + ecc[1]*nodevec[1]) / (out[1]*magnodevec));
+   if (ecc[2] < 0)
+      out[4] = 2.0 * M_PI - out[4];
+   out[4] *= 180.0 / M_PI;
+
+   // TA
+   out[5] = acos((ecc[0]*in[0] + ecc[1]*in[1] + ecc[2]*in[2]) / 
+                 (out[1] * r));
+   if (rdotv < 0)
+      out[5] = 2.0 * M_PI - out[5];
+   out[5] *= 180.0 / M_PI;
 }

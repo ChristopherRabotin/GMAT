@@ -133,6 +133,7 @@ bool ElseIf::Initialize()
 //------------------------------------------------------------------------------
 bool ElseIf::Execute()
 {
+    BuildCommandSummary(true);
     return true;
 }
 

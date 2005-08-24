@@ -483,5 +483,7 @@ bool Maneuver::Execute()
 {
    Real epoch = sat->GetRealParameter("Epoch");
    burn->SetSpacecraftToManeuver(sat);
-   return burn->Fire(NULL, epoch);
+   bool retval = burn->Fire(NULL, epoch);
+   BuildCommandSummary(true);
+   return retval;
 }

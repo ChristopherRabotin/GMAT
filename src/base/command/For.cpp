@@ -276,6 +276,8 @@ bool For::Execute(void)
          currentValue     = UNINITIALIZED_VALUE;  // start the loop over
       }
    }
+   
+   BuildCommandSummary(true);
    return retval;
 }
 

@@ -43,6 +43,7 @@ public:
    virtual void OnCancel(wxCommandEvent &event);
    virtual void OnHelp(wxCommandEvent &event);
    virtual void OnScript(wxCommandEvent &event);
+   virtual void OnSummary(wxCommandEvent &event);
 
 protected:
    // member functions
@@ -70,6 +71,7 @@ protected:
    wxButton *theCancelButton;
    wxButton *theHelpButton;
    wxButton *theScriptButton;
+   wxButton *theSummaryButton;
    
    GmatBase *mObject;
     
@@ -84,6 +86,7 @@ protected:
       ID_BUTTON_CANCEL,
       ID_BUTTON_HELP,
       ID_BUTTON_SCRIPT,
+      ID_BUTTON_SUMMARY,
    };
 
 };

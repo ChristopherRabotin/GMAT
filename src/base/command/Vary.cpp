@@ -685,6 +685,8 @@ bool Vary::Execute(void)
         parmId.push_back(id);
 
         targeterDataFinalized = true;
+        
+        BuildCommandSummary(true);
         return retval;
     }
     
@@ -708,5 +710,6 @@ bool Vary::Execute(void)
 
     pobject[0]->SetRealParameter(parmId[0], var);
 
+    BuildCommandSummary(true);
     return retval;
 }
