@@ -182,6 +182,10 @@ void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
     if (event.GetEventObject() == selectButton)
     {  
        wxString str = availableThrusterListBox->GetStringSelection();
+       
+       if (str.IsEmpty())
+          return;
+          
        int sel = availableThrusterListBox->GetSelection();
        int found = selectedThrusterListBox->FindString(str);
        
@@ -204,6 +208,10 @@ void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
     else if (event.GetEventObject() == removeButton)
     {
        wxString str = selectedThrusterListBox->GetStringSelection();
+       
+       if (str.IsEmpty())
+          return;
+       
        int sel = selectedThrusterListBox->GetSelection();
        
        selectedThrusterListBox->Delete(sel);
