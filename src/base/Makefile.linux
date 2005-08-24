@@ -17,7 +17,7 @@ CPP = g++
 OPTIMIZATIONS = -O9
 
 CPPFLAGS = $(OPTIMIZATIONS) -Wall -D__USE_MATLAB__=1 \
-           -I/usr/local/matlab7_0_1/extern/include
+           -I/usr/local/matlab704/extern/include
 
 export CPPFLAGS
 export CPP
@@ -33,7 +33,6 @@ LIBRARIES = lib/libUtilities.a \
             lib/libFunction.a \
             lib/libBurn.a	\
             lib/libInterpolator.a \
-            lib/libRefFrame.a \
             lib/libStopCondition.a \
             lib/libSubscriber.a \
             lib/libSolver.a \

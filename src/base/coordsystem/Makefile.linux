@@ -12,6 +12,8 @@ OBJECTS = AxisSystem.o \
           CoordinateSystemException.o \
           DynamicAxes.o \
           EquatorAxes.o \
+          GeocentricSolarEclipticAxes.o \
+          GeocentricSolarMagneticAxes.o \
           InertialAxes.o \
           ItrfCoefficientsFile.o \
           MeanOfDateAxes.o \

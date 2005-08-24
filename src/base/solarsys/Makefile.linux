@@ -11,7 +11,7 @@ OBJECTS = AtmosphereModel.o \
           DeFile.o \
           ExponentialAtmosphere.o \
           Moon.o \
-          msise90.o \
+          msise90_sub.o \
           Msise90Atmosphere.o \
           JacchiaRobertsAtmosphere.o \
           LibrationPoint.o \
@@ -23,6 +23,8 @@ OBJECTS = AtmosphereModel.o \
           SolarSystem.o \
           SolarSystemException.o \
           Star.o
+
+FORTRAN = g77
 
 all: libSolarSystem 
 	mkdir -p ../lib
@@ -39,3 +41,6 @@ libSolarSystem : ../lib/libSolarSystem.a
 ../lib/libSolarSystem.a : $(OBJECTS)
 	ar rs libSolarSystem.a $(OBJECTS)
 	ranlib libSolarSystem.a
+
+msise90_sub.o: msise90_sub.for
+	$(FORTRAN) -c msise90_sub.for -o msise90_sub.o $(CPPFLAGS) 
