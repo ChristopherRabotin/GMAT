@@ -1215,15 +1215,18 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
                  << "        Cr = " 
                  << obj->GetRealParameter("Cr") << "\n"
                  << "        Reflective (SRP) area = " 
-                 << obj->GetRealParameter("SRPArea") << " m^2\n"
-                 << "        Dry mass = " 
-                 << obj->GetRealParameter("DryMass") << " kg\n";
-                
-             StringArray tanks = obj->GetStringArrayParameter("Tanks");
-             if (tanks.size() > 0)
-                data << "        Tanks:\n";
-             for (StringArray::iterator i = tanks.begin(); i != tanks.end(); ++i)
-                data << "           " << (*i) << "\n";
+                 << obj->GetRealParameter("SRPArea") << " m^2\n";
+                 
+            StringArray tanks = obj->GetStringArrayParameter("Tanks");
+            if (tanks.size() > 0)
+            {
+               data << "        Dry mass = "
+                    << obj->GetRealParameter("DryMass") << " kg\n";
+               data << "        Tanks:\n";
+               for (StringArray::iterator i = tanks.begin();
+                    i != tanks.end(); ++i)
+                  data << "           " << (*i) << "\n";
+            }
                  
             data << "        Total mass = " 
                  << obj->GetRealParameter("TotalMass") << " kg\n";
