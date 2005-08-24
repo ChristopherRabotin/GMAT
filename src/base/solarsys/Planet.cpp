@@ -567,6 +567,10 @@ void Planet::InitializePlanet(const std::string &cBody)
    degree              = Planet::DEGREE[bodyIndex];
    sij                 = Planet::SIJ[bodyIndex];
    cij                 = Planet::CIJ[bodyIndex];
+   
+   lfEpoch             = Planet::LF_EPOCH[bodyIndex];
+   lfKepler            = Planet::LF_ELEMENTS[bodyIndex];
+
 
    // set defaults in case use chooses to go back to not using potential file
    defaultMu           = mu;

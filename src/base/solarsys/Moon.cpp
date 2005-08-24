@@ -298,6 +298,10 @@ void Moon::InitializeMoon(const std::string &cBody)
 
    order               = Moon::ORDER;
    degree              = Moon::DEGREE;
+   
+   lfEpoch             = Moon::LF_EPOCH;
+   lfKepler            = Moon::LF_ELEMENTS;
+
 
    if (instanceName == SolarSystem::MOON_NAME)
    {
