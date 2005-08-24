@@ -56,7 +56,7 @@ public:
    // Other
    static const int MAX_COORD_SYS = 20;
    static const int MAX_BURN = 10;
-   static const int MAX_HARDWARE = 10;
+   static const int MAX_HARDWARE = 100;  //waw: Changed from 10 to 100
    static const int MAX_FUNCTION = 10;
    
    static GuiItemManager* GetInstance();
