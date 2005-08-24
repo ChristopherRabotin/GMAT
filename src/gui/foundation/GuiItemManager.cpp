@@ -72,7 +72,7 @@ void GuiItemManager::UpdateAll()
    MessageInterface::ShowMessage("==================> GuiItemManager::UpdateAll()\n");
    #endif
    
-   UpdateCelestialPoint(); // All CelestialBodis and CalculatedPoints
+   UpdateCelestialPoint(); // All CelestialBodies and CalculatedPoints
    UpdateFormation();
    UpdateSpacecraft();
    UpdateBurn();
@@ -1391,7 +1391,8 @@ wxListBox* GuiItemManager::GetThrusterListBox(wxWindow *parent, wxWindowID id,
    {
       for (int i=0; i<theNumThruster; i++)
          if (excList->Index(theThrusterList[i].c_str()) == wxNOT_FOUND)
-            thrusterListBox->Append(theFuelTankList[i]);
+            thrusterListBox->Append(theThrusterList[i]);
+            //thrusterListBox->Append(theFuelTankList[i]);
 
    }
    else
