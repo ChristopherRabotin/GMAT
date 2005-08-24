@@ -183,6 +183,10 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
     if (event.GetEventObject() == selectButton)
     {
        wxString str = availableTankListBox->GetStringSelection();
+       
+       if (str.IsEmpty())
+          return;
+          
        int sel = availableTankListBox->GetSelection();
        int found = selectedTankListBox->FindString(str);
        
@@ -204,6 +208,10 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
     else if (event.GetEventObject() == removeButton)
     {
        wxString str = selectedTankListBox->GetStringSelection();
+       
+       if (str.IsEmpty())
+          return;
+          
        int sel = selectedTankListBox->GetSelection();
        
        selectedTankListBox->Delete(sel);
