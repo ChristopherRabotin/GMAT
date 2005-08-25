@@ -186,7 +186,6 @@ OBJECTS = \
     spacecraft/SpacecraftPanel.o \
     spacecraft/SpaceObjectSelectDialog.o \
     spacecraft/TankPanel.o \
-    spacecraft/TankSelectionDialog.o \
     spacecraft/ThrusterPanel.o \
     view/ViewTextFrame.o 
 
