@@ -345,7 +345,8 @@ bool Interpreter::InterpretObject(std::string objecttype,
  * changes on a ScriptEvent panel, and to build the commands that are encoded
  * in a BeginScript/EndScript block.
  *
- * @param obj The object that is being reinterpreted.
+ * @param <obj>         The object that is being reinterpreted.
+ * @param <generator>   The string that gets interpreted.
  *
  * @return true on success, false on failure.
  *
@@ -1660,7 +1661,12 @@ bool Interpreter::InterpretCoordinateSystemParameter(GmatBase *obj,
    bool retval = true;
    // Set object associations
    std::string objParm = items[index];
-
+   
+   #ifdef DEBUG_INTERPRETER
+      MessageInterface::ShowMessage("ICSP: Object is a %s named %s, id = %d\n", 
+         obj->GetTypeName().c_str(), obj->GetName().c_str(), index);
+   #endif
+   
    try {
       Integer id = obj->GetParameterID(objParm);
 
@@ -1689,8 +1695,13 @@ bool Interpreter::InterpretCoordinateSystemParameter(GmatBase *obj,
                   obj->GetName());
 
             AxisSystem *axes = moderator->CreateAxisSystem(**phrase, "");
-            axes->SetName(**phrase);
-            obj->SetRefObject(axes, axes->GetType(), axes->GetName());
+            if (axes != NULL)
+            {
+               axes->SetName(**phrase);
+               obj->SetRefObject(axes, axes->GetType(), axes->GetName());
+            }
+            else
+               retval = false;
          }
          else
             throw InterpreterException("Preparing to handle " + objParm);
