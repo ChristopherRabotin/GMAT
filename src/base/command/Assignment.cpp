@@ -343,6 +343,10 @@ bool Assignment::InterpretAction()
 //------------------------------------------------------------------------------
 bool Assignment::Initialize()
 {
+	#ifdef DEBUG_ASSIGNMENT
+      MessageInterface::ShowMessage("Assignment::Initialize() entered\n");
+   #endif
+   
    // Find the object
    if (objectMap->find(ownerName) == objectMap->end())
       throw CommandException("Assignment command cannot find object \"" +
@@ -541,6 +545,11 @@ bool Assignment::Execute()
             break;
                
          case Gmat::REAL_TYPE:
+            #ifdef DEBUG_ASSIGNMENT
+               MessageInterface::ShowMessage("Setting %s on %s to %lf\n", 
+                  parmOwner->GetParameterText(parmID).c_str(), 
+                  parmOwner->GetName().c_str(), EvaluateRHS());
+            #endif
             parmOwner->SetRealParameter(parmID, EvaluateRHS());
             retval = true;
             break;
@@ -846,8 +855,7 @@ bool Assignment::InitializeRHS(const std::string &rhs)
       }
       else if (kind == "Variable")
       {
-         throw CommandException(
-            "Assignment commands cannot handle Variables yet.");
+         rhsType = VARIABLE;
       }
       else if (rhsObject->GetType() == Gmat::PARAMETER)
       {
@@ -897,7 +905,17 @@ Real Assignment::EvaluateRHS()
    {
       case VARIABLE:
       case PARAMETER:
-         return ((Parameter*)rhsObject)->EvaluateReal();
+      {
+         Real value = ((Parameter*)rhsObject)->EvaluateReal();
+
+         #ifdef DEBUG_ASSIGNMENT
+            MessageInterface::ShowMessage("Evaluating: the %s named %s = %lf\n", 
+               rhsObject->GetTypeName().c_str(), rhsObject->GetName().c_str(),
+               value);
+         #endif
+
+         return value;
+      }
 
       case ARRAY_ELEMENT:
          if (rowObj != NULL)
