@@ -1042,7 +1042,41 @@ void GmatMainFrame::StopServer()
 void GmatMainFrame::OnClose(wxCloseEvent& event)
 {
    CloseAllChildren(true, true);
-   event.Skip();
+
+   // prompt save
+   wxMessageDialog *msgDlg = new wxMessageDialog(this,
+      "Would you like to save changes?", "Save...", wxYES_NO | wxICON_QUESTION ,
+      wxDefaultPosition);
+   int result = msgDlg->ShowModal();
+
+   if (result == wxID_YES)
+   {
+      if (strcmp(scriptFilename.c_str(), "$gmattempscript$.script") == 0)
+      {
+         //open up dialog box to get the script name
+         wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.script"), wxSAVE );
+
+         if (dialog.ShowModal() == wxID_OK)
+         {
+           scriptFilename = dialog.GetPath().c_str();
+           GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+           GmatAppData::GetResourceTree()->AddScriptItem(scriptFilename.c_str());
+           GmatAppData::GetResourceTree()->UpdateResource(false);
+         }
+      }
+      else
+      {
+         GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+      }
+      
+      event.Skip();
+   }
+   else
+   {
+      event.Skip();
+   }
+
+//   event.Skip();
 }
 
 
