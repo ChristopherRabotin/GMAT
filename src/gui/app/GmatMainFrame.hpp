@@ -33,7 +33,6 @@
 #include "GmatServer.hpp"
 #include "MatlabInterface.hpp"
 #include "MdiChildTrajFrame.hpp"
-//#include "MdiChildXyFrame.hpp"
 #include "MdiChildTsFrame.hpp"
 
 #include "wx/notebook.h"
@@ -41,7 +40,6 @@
 #include "wx/docview.h"
 #include "wx/laywin.h"
 #include "wx/textctrl.h"
-
 
 
 class GmatMainFrame : public wxMDIParentFrame
@@ -62,17 +60,14 @@ public:
    void MinimizeChildren();
    void CloseCurrentProject();
    void RunCurrentMission();
-   void NotifyRunCompleted(); //loj: 10/28/04 added
+   void NotifyRunCompleted();
    void StartServer();
    void StopServer();
    wxToolBar* GetMainFrameToolBar();
    MdiChildTrajFrame *trajSubframe;
-//    MdiChildTrajFrame *trajMainSubframe;
 
    MdiChildTsFrame *tsSubframe;
 
-   //   MdiChildXyFrame *xySubframe;
-//    MdiChildXyFrame *xyMainSubframe;
 
 //    void UpdateUI();
 //    void OnSize(wxSizeEvent& event);
@@ -97,21 +92,19 @@ private:
    std::string scriptFilename;
    GuiInterpreter *theGuiInterpreter;
    
-   wxSize mFullSize;    //loj: 10/28/04 added
-   wxSize mReducedSize; //loj: 10/28/04 added
+   wxSize mFullSize;
+   wxSize mReducedSize;
    
    wxSashLayoutWindow* win;
    wxSashLayoutWindow* msgWin;
    wxScrolledWindow *panel;
 
-//   wxDocManager *mDocManager;
-//   wxDocTemplate *mDocTemplate;
    ViewTextFrame *mTextFrame;
-   //GmatMainNotebook *rightTabs;
+   wxMenu *mServerMenu;
    
    wxMenuBar* CreateMainMenu();
    void InitToolBar(wxToolBar* toolBar);
-   wxMenu *mServerMenu;
+   bool InterpretScript(const wxString &filename);
    
    // event handling
    DECLARE_EVENT_TABLE();

@@ -96,7 +96,9 @@
 #include "bitmaps/build.xpm"
 
 //#define DEBUG_MAINFRAME 1
+
 using namespace GmatMenu;
+
 //------------------------------
 // event tables for wxWindows
 //------------------------------
@@ -200,11 +202,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
 
    // child frames
    trajSubframe = (MdiChildTrajFrame *)NULL;
-//    trajMainSubframe = (MdiChildTrajFrame *)NULL;
    tsSubframe = (MdiChildTsFrame *)NULL;
-
-   //   xySubframe = (MdiChildXyFrame *)NULL;
-//    xyMainSubframe = (MdiChildXyFrame *)NULL;
 
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
   
@@ -247,7 +245,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    wxTextCtrl *msgTextCtrl =
       new wxTextCtrl(msgWin, -1, _T(""), wxDefaultPosition, wxDefaultSize,
                                wxTE_MULTILINE);
-   msgTextCtrl->SetMaxLength(320000); //loj:5/20/05 Added
+   msgTextCtrl->SetMaxLength(320000);
    GmatAppData::GetMessageWindow()->Show(false);
    GmatAppData::SetMessageTextCtrl(msgTextCtrl);
    
@@ -290,7 +288,7 @@ GmatMainFrame::~GmatMainFrame()
 //    CloseAllChildren(true, true);
    
    if (theGuiInterpreter)
-      theGuiInterpreter->Finalize(); //loj: 7/8/05 Added
+      theGuiInterpreter->Finalize(); 
 }
 
 //------------------------------------------------------------------------------
@@ -340,7 +338,6 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
 
       else if (dataType == GmatTree::FUELTANK)
       {
-         //wxLogMessage("This panel is coming soon...");
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                             wxPoint(-1,-1), wxSize(-1,-1),
                                             style, item->GetDesc(), dataType);
@@ -885,15 +882,7 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
    }
 
    if (closePlots)
-   {
-      //loj: 6/14/05
-//       // close xy plots
-//       for (int i=0; i<MdiXyPlot::numChildren; i++)
-//       {
-//          MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
-//          frame->Close(TRUE);
-//       }
-      
+   {      
       // close ts plots
       int count = MdiTsPlot::numChildren;
       for (int i=0; i<count; ++i)
@@ -1284,6 +1273,100 @@ void GmatMainFrame::OnHelpAbout(wxCommandEvent& WXUNUSED(event))
 }
 
 //------------------------------------------------------------------------------
+// wxMenuBar *CreateMainMenu(int dataType)
+//------------------------------------------------------------------------------
+/**
+ * Adds items to the menu.
+ *
+ * @return Menu bar.
+ */
+//------------------------------------------------------------------------------
+wxMenuBar *GmatMainFrame::CreateMainMenu()
+{
+   wxMenuBar *menuBar = new wxMenuBar;
+   wxMenu *fileMenu = new wxMenu;
+   wxMenu *editMenu = new wxMenu;
+//   wxMenu *toolsMenu = new wxMenu;
+   wxMenu *helpMenu = new wxMenu;
+ 
+   fileMenu->Append(MENU_FILE_NEW_SCRIPT, wxT("&New Script"));  
+   fileMenu->Append(MENU_FILE_OPEN_SCRIPT, wxT("&Open Script"), wxT(""), FALSE);  
+   fileMenu->Append(MENU_FILE_SAVE_SCRIPT, wxT("&Save to Script"), wxT(""), FALSE);
+   fileMenu->Append(MENU_FILE_SAVE_AS_SCRIPT, wxT("Save to Script As"),
+                     wxT(""), FALSE);  
+
+   fileMenu->AppendSeparator();
+   fileMenu->Append(TOOL_CLOSE_CHILDREN, wxT("Close All"),
+                     wxT(""), FALSE);
+
+   fileMenu->AppendSeparator();
+   fileMenu->Append(MENU_PROJECT_LOAD_DEFAULT_MISSION, wxT("Default Project"), 
+                     wxT(""), FALSE);   
+   fileMenu->AppendSeparator();
+
+   wxMenu *prefMenu = new wxMenu;
+   prefMenu->Append(MENU_PROJECT_PREFERENCES_FONT, wxT("Font"));
+
+   fileMenu->Append(MENU_PROJECT_PREFERENCES,
+                        wxT("Preferences"), prefMenu, wxT(""));
+
+   fileMenu->Append(MENU_SET_PATH_AND_LOG, wxT("Set File Paths and Log Level"),
+                    wxT(""), FALSE);
+   fileMenu->Append(MENU_INFORMATION, wxT("Information"), wxT(""), FALSE);
+
+   fileMenu->AppendSeparator();
+   fileMenu->Append(MENU_PROJECT_PRINT, wxT("Print"), wxT(""), FALSE);
+   fileMenu->AppendSeparator();
+   fileMenu->Append(MENU_PROJECT_EXIT, wxT("Exit"), wxT(""), FALSE);
+   
+   fileMenu->Enable(MENU_SET_PATH_AND_LOG, FALSE);
+   fileMenu->Enable(MENU_INFORMATION, FALSE);
+   fileMenu->Enable(MENU_PROJECT_PRINT, FALSE);
+   menuBar->Append(fileMenu, wxT("&File"));
+
+   editMenu->Append(MENU_EDIT_RESOURCES, wxT("Resources"), wxT(""), FALSE);
+   editMenu->Append(MENU_EDIT_MISSION, wxT("Mission"), wxT(""), FALSE);
+
+   editMenu->Enable(MENU_EDIT_RESOURCES, FALSE);
+   editMenu->Enable(MENU_EDIT_MISSION, FALSE);
+   menuBar->Append(editMenu, wxT("Edit"));
+   
+   // Tools
+//   toolsMenu->Append(MENU_TOOLS_SWINGBY, wxT("Swingby"), wxT(""), FALSE);
+//   toolsMenu->Enable(MENU_TOOLS_SWINGBY, FALSE);
+
+//   wxMenu *matlabMenu = new wxMenu;
+//   matlabMenu->Append(MENU_TOOLS_MATLAB_OPEN, wxT("Open"),
+//                          wxT(""), FALSE);
+//   matlabMenu->Append(MENU_TOOLS_MATLAB_CLOSE, wxT("Close"),
+//                          wxT(""), FALSE);
+//   matlabMenu->AppendSeparator();
+//   matlabMenu->Append(MENU_TOOLS_MATLAB_INTERACTIVE, wxT("Interact"),
+//                          wxT(""), FALSE);
+//   matlabMenu->Enable(MENU_TOOLS_MATLAB_INTERACTIVE, FALSE);
+
+
+//   toolsMenu->Append(MENU_TOOLS_MATLAB, wxT("Matlab"), matlabMenu, wxT(""));
+//   menuBar->Append(toolsMenu, wxT("Tools"));
+
+   // Server
+//   mServerMenu = new wxMenu;
+//   mServerMenu->Append(MENU_START_SERVER, _T("Start"), _T("Start server"));
+//   mServerMenu->Append(MENU_STOP_SERVER, _T("Stop"), _T("Stop server"));
+//   menuBar->Append(mServerMenu, wxT("Server"));
+
+   // Help
+   helpMenu->Append(MENU_HELP_TOPICS, wxT("Topics"), wxT(""), FALSE);
+   helpMenu->AppendSeparator();
+   helpMenu->Append(MENU_HELP_ABOUT, wxT("About"), wxT(""), FALSE);
+ 
+   helpMenu->Enable(MENU_HELP_TOPICS, FALSE);
+   menuBar->Append(helpMenu, wxT("Help"));
+    
+   return menuBar;
+}
+
+//------------------------------------------------------------------------------
 // void InitToolBar(wxToolBar* toolBar)
 //------------------------------------------------------------------------------
 /**
@@ -1395,99 +1478,42 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
 #endif
 }
 
+
 //------------------------------------------------------------------------------
-// wxMenuBar *CreateMainMenu(int dataType)
+// bool InterpretScript(const wxString &filename)
 //------------------------------------------------------------------------------
-/**
- * Adds items to the menu.
- *
- * @return Menu bar.
- */
-//------------------------------------------------------------------------------
-wxMenuBar *GmatMainFrame::CreateMainMenu()
+bool GmatMainFrame::InterpretScript(const wxString &filename)
 {
-   wxMenuBar *menuBar = new wxMenuBar;
-   wxMenu *fileMenu = new wxMenu;
-   wxMenu *editMenu = new wxMenu;
-//   wxMenu *toolsMenu = new wxMenu;
-   wxMenu *helpMenu = new wxMenu;
- 
-   fileMenu->Append(MENU_FILE_NEW_SCRIPT, wxT("&New Script"));  
-   fileMenu->Append(MENU_FILE_OPEN_SCRIPT, wxT("&Open Script"), wxT(""), FALSE);  
-   fileMenu->Append(MENU_FILE_SAVE_SCRIPT, wxT("&Save to Script"), wxT(""), FALSE);
-   fileMenu->Append(MENU_FILE_SAVE_AS_SCRIPT, wxT("Save to Script As"),
-                     wxT(""), FALSE);  
-
-   fileMenu->AppendSeparator();
-   fileMenu->Append(TOOL_CLOSE_CHILDREN, wxT("Close All"),
-                     wxT(""), FALSE);
-
-   fileMenu->AppendSeparator();
-   fileMenu->Append(MENU_PROJECT_LOAD_DEFAULT_MISSION, wxT("Default Project"), 
-                     wxT(""), FALSE);   
-   fileMenu->AppendSeparator();
-
-   wxMenu *prefMenu = new wxMenu;
-   prefMenu->Append(MENU_PROJECT_PREFERENCES_FONT, wxT("Font"));
-
-   fileMenu->Append(MENU_PROJECT_PREFERENCES,
-                        wxT("Preferences"), prefMenu, wxT(""));
-
-   fileMenu->Append(MENU_SET_PATH_AND_LOG, wxT("Set File Paths and Log Level"),
-                    wxT(""), FALSE);
-   fileMenu->Append(MENU_INFORMATION, wxT("Information"), wxT(""), FALSE);
-
-   fileMenu->AppendSeparator();
-   fileMenu->Append(MENU_PROJECT_PRINT, wxT("Print"), wxT(""), FALSE);
-   fileMenu->AppendSeparator();
-   fileMenu->Append(MENU_PROJECT_EXIT, wxT("Exit"), wxT(""), FALSE);
+   bool status = false;
+   try
+   {
+      // If successfully interpreted the script
+      if (GmatAppData::GetGuiInterpreter()->
+          InterpretScript(std::string(filename.c_str())))
+      {
    
-   fileMenu->Enable(MENU_SET_PATH_AND_LOG, FALSE);
-   fileMenu->Enable(MENU_INFORMATION, FALSE);
-   fileMenu->Enable(MENU_PROJECT_PRINT, FALSE);
-   menuBar->Append(fileMenu, wxT("&File"));
-
-   editMenu->Append(MENU_EDIT_RESOURCES, wxT("Resources"), wxT(""), FALSE);
-   editMenu->Append(MENU_EDIT_MISSION, wxT("Mission"), wxT(""), FALSE);
-
-   editMenu->Enable(MENU_EDIT_RESOURCES, FALSE);
-   editMenu->Enable(MENU_EDIT_MISSION, FALSE);
-   menuBar->Append(editMenu, wxT("Edit"));
+         GmatAppData::GetMainFrame()->CloseAllChildren(false, true, filename);
    
-   // Tools
-//   toolsMenu->Append(MENU_TOOLS_SWINGBY, wxT("Swingby"), wxT(""), FALSE);
-//   toolsMenu->Enable(MENU_TOOLS_SWINGBY, FALSE);
-
-//   wxMenu *matlabMenu = new wxMenu;
-//   matlabMenu->Append(MENU_TOOLS_MATLAB_OPEN, wxT("Open"),
-//                          wxT(""), FALSE);
-//   matlabMenu->Append(MENU_TOOLS_MATLAB_CLOSE, wxT("Close"),
-//                          wxT(""), FALSE);
-//   matlabMenu->AppendSeparator();
-//   matlabMenu->Append(MENU_TOOLS_MATLAB_INTERACTIVE, wxT("Interact"),
-//                          wxT(""), FALSE);
-//   matlabMenu->Enable(MENU_TOOLS_MATLAB_INTERACTIVE, FALSE);
-
-
-//   toolsMenu->Append(MENU_TOOLS_MATLAB, wxT("Matlab"), matlabMenu, wxT(""));
-//   menuBar->Append(toolsMenu, wxT("Tools"));
-
-   // Server
-//   mServerMenu = new wxMenu;
-//   mServerMenu->Append(MENU_START_SERVER, _T("Start"), _T("Start server"));
-//   mServerMenu->Append(MENU_STOP_SERVER, _T("Stop"), _T("Stop server"));
-//   menuBar->Append(mServerMenu, wxT("Server"));
-
-   // Help
-   helpMenu->Append(MENU_HELP_TOPICS, wxT("Topics"), wxT(""), FALSE);
-   helpMenu->AppendSeparator();
-   helpMenu->Append(MENU_HELP_ABOUT, wxT("About"), wxT(""), FALSE);
- 
-   helpMenu->Enable(MENU_HELP_TOPICS, FALSE);
-   menuBar->Append(helpMenu, wxT("Help"));
-    
-   return menuBar;
+         // Update ResourceTree and MissionTree
+         GmatAppData::GetResourceTree()->UpdateResource(true);
+         GmatAppData::GetMissionTree()->UpdateMission(true);
+         status = true;
+      }
+      else
+      {
+         wxLogError
+            ("Error occurred during parsing.\nPlease check the syntax and try again\n");
+      }
+   }
+   catch (BaseException &e)
+   {
+      wxLogMessage(e.GetMessage().c_str());
+      MessageInterface::ShowMessage(e.GetMessage());
+   }
+   
+   return status;
 }
+
 
 //------------------------------------------------------------------------------
 // void OnNewScript(wxCommandEvent& WXUNUSED(event))
@@ -1786,34 +1812,44 @@ void GmatMainFrame::OnFocus(wxFocusEvent& event)
 }
 
 //------------------------------------------------------------------------------
-// bool OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
+// void OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 {
    wxString filename = ((GmatMdiChildFrame *)GetActiveChild())->GetTitle();
-
-   GmatAppData::GetGuiInterpreter()->
-      InterpretScript(std::string(filename.c_str()));
-
-   //close the open windows
-   //GmatAppData::GetMainFrame()->CloseAllChildren(false, false, filename);
-   //loj: 8/4/05 Changed to close all plots
-   GmatAppData::GetMainFrame()->CloseAllChildren(false, true, filename);
+   InterpretScript(filename);
    
-   // Update ResourceTree and MissionTree
-   GmatAppData::GetResourceTree()->UpdateResource(true);
-   GmatAppData::GetMissionTree()->UpdateMission(true);
-
-//   return status;
+//    try
+//    {
+//       if (GmatAppData::GetGuiInterpreter()->
+//           InterpretScript(std::string(filename.c_str())))
+//       {
+   
+//          GmatAppData::GetMainFrame()->CloseAllChildren(false, true, filename);
+   
+//          // Update ResourceTree and MissionTree
+//          GmatAppData::GetResourceTree()->UpdateResource(true);
+//          GmatAppData::GetMissionTree()->UpdateMission(true);
+//       }
+//    }
+//    catch (BaseException &e)
+//    {
+//       MessageInterface::ShowMessage("*** Error: %s\n", e.GetMessage().c_str());
+//    }
 }
 
 //------------------------------------------------------------------------------
-// bool OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
+// void OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 {
-   OnScriptBuildObject(event);
-   OnRun(event);
+   wxString filename = ((GmatMdiChildFrame *)GetActiveChild())->GetTitle();
+   
+   if (InterpretScript(filename))
+      OnRun(event);
+   
+   //OnScriptBuildObject(event);
+   //OnRun(event);
 }
 
 //------------------------------------------------------------------------------
