@@ -91,10 +91,12 @@ public:
    virtual Integer GetNumRefObjects() const;
    virtual bool Validate();
    
-   // DJC added 2/17/05 to enable var1 = var2
-   virtual void        Copy(const GmatBase*);
-   
    // methods inherited from GmatBase
+   virtual void        Copy(const GmatBase*);
+   virtual bool RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName);
+   
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;

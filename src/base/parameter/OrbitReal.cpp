@@ -276,7 +276,10 @@ bool OrbitReal::RenameRefObject(const Gmat::ObjectType type,
                                 const std::string &oldName,
                                 const std::string &newName)
 {
-   return OrbitData::RenameRefObject(type, oldName, newName);
+   OrbitData::RenameRefObject(type, oldName, newName);
+   RealVar::RenameRefObject(type, oldName, newName);
+   
+   return true;
 }
 
 

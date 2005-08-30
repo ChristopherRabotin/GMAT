@@ -71,13 +71,16 @@ public:
    StringArray&        GetListOfAllItems();
    StringArray&        GetListOfItems(Gmat::ObjectType itemType);
    GmatBase*           GetItem(const std::string &name);
-    
+   
    bool                RenameItem(Gmat::ObjectType itemType,
                                   const std::string &oldName,
                                   const std::string &newName);
    
    bool                RemoveAllItems();
    bool                RemoveItem(Gmat::ObjectType type, const std::string &name);
+   StringArray&        GetListOfItemsHas(Gmat::ObjectType type,
+                                         const std::string &name,
+                                         bool includeSysParam = true);
    
    PhysicalModel*      GetPhysicalModel(const std::string &name);
    Propagator*         GetPropagator(const std::string &name);

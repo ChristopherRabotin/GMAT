@@ -441,6 +441,7 @@ GmatBase* Moderator::GetConfiguredItem(const std::string &name)
    return obj;
 }
 
+
 //------------------------------------------------------------------------------
 // bool RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName
 //                           const std::string &newName)
@@ -513,20 +514,109 @@ bool Moderator::RenameConfiguredItem(Gmat::ObjectType type, const std::string &o
 }
 
 //------------------------------------------------------------------------------
-// bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name)
+// bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name,
+//                           bool delIfNotUsed)
 //------------------------------------------------------------------------------
 /**
  * Removes item from the configured list.
  *
  * @param <type> object type
  * @param <name> object name
+ * @param <delIfNotUse> flag indicating delete if item is not used in the mission
+ *                      sequence
  *
  * @return true if the item has been removed; false otherwise
  */
 //------------------------------------------------------------------------------
-bool Moderator::RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name)
+bool Moderator::RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name,
+                                     bool delOnlyIfNotUsed)
 {
-   return theConfigManager->RemoveItem(type, name);
+   if (!delOnlyIfNotUsed)
+   {
+      return theConfigManager->RemoveItem(type, name);
+   }
+   else
+   {
+      bool nameUsed = false;
+      
+      //--------------------------------------------------------------
+      // check configure items
+      //--------------------------------------------------------------
+      
+      StringArray itemList = theConfigManager->GetListOfItemsHas(type, name, false);
+      
+      if (itemList.size() > 0)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** Cannot remove %s. The first object it is used: %s\n",
+             name.c_str(), itemList[0].c_str());
+         
+         return false;
+      }
+      
+      //--------------------------------------------------------------
+      // check mission sequence
+      //--------------------------------------------------------------
+      
+      std::string::size_type pos;
+      int sandboxIndex = 0; //handles one sandbox for now
+      GmatCommand *cmd = commands[sandboxIndex]->GetNext();
+      GmatCommand *child;
+      std::string cmdString;
+      std::string typeName;
+      
+      while (cmd != NULL)
+      {
+         typeName = cmd->GetTypeName();
+         #if DEBUG_REMOVE
+         MessageInterface::ShowMessage("--typeName=%s\n", typeName.c_str());
+         #endif
+         
+         cmdString = cmd->GetGeneratingString();
+         pos = cmdString.find(name);
+         if (pos != cmdString.npos)
+         {
+            nameUsed = true;
+            break;
+         }
+         
+         child = cmd->GetChildCommand(0);
+         
+         while ((child != NULL) && (child != cmd))
+         {
+            typeName = child->GetTypeName();
+            #if DEBUG_REMOVE
+            MessageInterface::ShowMessage("----typeName=%s\n", typeName.c_str());
+            #endif
+            if (typeName.find("End") == typeName.npos)
+            {
+               cmdString = child->GetGeneratingString();
+               pos = cmdString.find(name);
+               if (pos != cmdString.npos)
+               {
+                  nameUsed = true;
+                  break;
+               }
+            }
+            
+            child = child->GetNext();
+         }
+         
+         cmd = cmd->GetNext();
+      } // end While
+      
+      if (nameUsed)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** Cannot remove %s. It is used in the %s\n",
+             name.c_str(), cmd->GetTypeName().c_str());
+         return false;
+      }
+      else
+      {
+         return theConfigManager->RemoveItem(type, name);
+      }
+   }
 }
 
 
@@ -2982,13 +3072,14 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
 //------------------------------------------------------------------------------
 bool Moderator::SaveScript(const std::string &scriptFileName)
 {
-   MessageInterface::ShowMessage("Moderator::SaveScript() entered\n"
-                                 "file: " + scriptFileName + "\n");
-//   MessageInterface::PopupMessage(Gmat::INFO_, "The Script is saved to " +
-//                                  scriptFileName);
+   //MessageInterface::ShowMessage("Moderator::SaveScript() entered\n"
+   //                              "file: " + scriptFileName + "\n");
+   //   MessageInterface::PopupMessage(Gmat::INFO_, "The Script is saved to " +
+   //                                  scriptFileName);
+   
    MessageInterface::ShowMessage("The Script is saved to " +
-                                  scriptFileName);
-
+                                 scriptFileName + "\n"); //loj:8/30/05 added eol
+   
    try
    {
       return theScriptInterpreter->Build(scriptFileName);

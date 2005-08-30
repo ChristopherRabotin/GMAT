@@ -32,36 +32,35 @@ public:
    TimeData(const TimeData &ct);
    TimeData& operator= (const TimeData& right);
    virtual ~TimeData();
-
+   
    bool IsInitialEpochSet();
-   Real GetInitialEpoch();
+   Real GetInitialEpoch() const;
    void SetInitialEpoch(const Real &initialEpoch);
-    
+   
    Real GetCurrentTimeReal(const std::string &str);
    Real GetElapsedTimeReal(const std::string &str);
-
+   
    //loj: future build
    //std::string GetCurrentTimeString(const std::string &str);
    //std::string GetElapsedTimeString(const std::string &str);
-    
-    // The inherited methods from RefData
+   
+   // The inherited methods from RefData
    virtual bool ValidateRefObjects(GmatBase *param);
    virtual const std::string* GetValidObjectList() const;
    
 protected:
     
    // The inherited methods from RefData
-   virtual void InitializeRefObjects(); //loj: 4/29/04 changed from Initialize()
-   //loj: 9/10/04 virtual bool IsValidObject(GmatBase *obj);
+   virtual void InitializeRefObjects();
    virtual bool IsValidObjectType(Gmat::ObjectType type);
-
+   
    Real mInitialEpoch;
    bool mIsInitialEpochSet;
    Spacecraft *mSpacecraft;
     
    const static Real MJD_OFFSET = 2430000.0; //loj: check the value
    const static Real TIME_REAL_UNDEFINED = -9876543210.1234;
-
+   
    enum
    {
       SPACECRAFT = 0,
@@ -69,7 +68,7 @@ protected:
    };
    
    static const std::string VALID_OBJECT_TYPE_LIST[TimeDataObjectCount];
-    
+   
 };
 #endif // TimeData_hpp
 

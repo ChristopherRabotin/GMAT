@@ -328,7 +328,11 @@ bool RefData::RenameRefObject(const Gmat::ObjectType type,
       ("RefData::RenameRefObject() type=%d, oldName=%s, newName=%s\n",
        type, oldName.c_str(), newName.c_str());
    #endif
-
+   
+   if (type != Gmat::SPACECRAFT && type != Gmat::COORDINATE_SYSTEM &&
+       type != Gmat::CALCULATED_POINT)
+      return true;
+   
    for (int i=0; i<mNumRefObjects; i++)
    {
       if (mRefObjList[i].objType == type)
@@ -342,13 +346,11 @@ bool RefData::RenameRefObject(const Gmat::ObjectType type,
                ("RefData::RenameRefObject() renamed to:%s\n",
                 mRefObjList[i].objName.c_str());
             #endif
-            
-            return true;
          }
       }
    }
-
-   return false;
+   
+   return true;
 }
 
 

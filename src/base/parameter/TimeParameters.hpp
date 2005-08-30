@@ -47,6 +47,7 @@ private:
 
 };
 
+
 //==============================================================================
 //                              ElapsedDays
 //==============================================================================
@@ -68,19 +69,20 @@ public:
    
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
-   virtual std::string GetParameterText(const Integer id);
-   virtual Integer GetParameterID(const std::string &str);
-   virtual Real GetRealParameter(const Integer id);
-   virtual Real GetRealParameter(const std::string &label);
+   virtual std::string GetParameterText(const Integer id) const;
+   virtual bool IsParameterReadOnly(const Integer id) const;
+   virtual Integer GetParameterID(const std::string &str) const;
+   
+   virtual Real GetRealParameter(const Integer id) const;
+   virtual Real GetRealParameter(const std::string &label) const;
    virtual Real SetRealParameter(const Integer id, const Real value);
    virtual Real SetRealParameter(const std::string &label, const Real value);
     
 protected:
 
-   //loj: 1/26/05 use ParameterParamCount instead of RealVarParamCount
    enum
    {
-      INITIAL_EPOCH = ParameterParamCount, //RealVarParamCount,
+      INITIAL_EPOCH = ParameterParamCount,
       ElapsedDaysParamCount
    };
    
@@ -91,6 +93,7 @@ protected:
     
 private:
 };
+
 
 //==============================================================================
 //                              ElapsedSecs
@@ -113,26 +116,28 @@ public:
    
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
-   virtual std::string GetParameterText(const Integer id);
-   virtual Integer GetParameterID(const std::string &str);
-   virtual Real GetRealParameter(const Integer id);
-   virtual Real GetRealParameter(const std::string &label);
+   virtual std::string GetParameterText(const Integer id) const;
+   virtual bool IsParameterReadOnly(const Integer id) const;
+   virtual Integer GetParameterID(const std::string &str) const;
+   
+   virtual Real GetRealParameter(const Integer id) const;
+   virtual Real GetRealParameter(const std::string &label) const;
    virtual Real SetRealParameter(const Integer id, const Real value);
    virtual Real SetRealParameter(const std::string &label, const Real value);
-    
+   
 protected:
-    
+   
    enum
    {
       INITIAL_EPOCH = ParameterParamCount,
       ElapsedSecsParamCount
    };
-
+   
    static const Gmat::ParameterType
       PARAMETER_TYPE[ElapsedSecsParamCount - ParameterParamCount];
    static const std::string
       PARAMETER_TEXT[ElapsedSecsParamCount - ParameterParamCount];
-    
+   
 private:
 };
 

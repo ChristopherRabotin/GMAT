@@ -97,23 +97,24 @@ public:
    static ScriptInterpreter* GetScriptInterpreter();
    static void SetGuiInterpreter(GuiInterpreter *guiInterp);
    static void SetScriptInterpreter(ScriptInterpreter *scriptInterp);
-
+   
    //----- factory
    StringArray GetListOfFactoryItems(Gmat::ObjectType type);
-
+   
    //----- configuration
    StringArray& GetListOfConfiguredItems(Gmat::ObjectType type);
    GmatBase* GetConfiguredItem(const std::string &name);
    bool RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName,
                              const std::string &newName);
-   bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name);
-    
+   bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name,
+                             bool delOnlyIfNotUsed);
+   
    // SolarSystem
    SolarSystem* GetDefaultSolarSystem();
    SolarSystem* CreateSolarSystem(const std::string &name);
    SolarSystem* GetSolarSystemInUse();
    bool SetSolarSystemInUse(const std::string &name);
-
+   
    // CalculatedPoint
    CalculatedPoint* CreateCalculatedPoint(const std::string &type,
                                           const std::string &name);

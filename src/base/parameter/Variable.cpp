@@ -134,17 +134,16 @@ Real Variable::GetReal()
 Real Variable::EvaluateReal()
 {
    // if expression is variable itself or empty or first char is digit
-   //loj: 11/4/04 added isdigit
    if (this->GetName() == mExpr || mExpr == "" || isdigit(mExpr[0]))
       return mRealValue;
       
-#if DEBUG_VARIABLE
+   #if DEBUG_VARIABLE
    StringArray paramNames = mParamDb->GetNamesOfParameters();
    for (int i = 0; i<mParamDb->GetNumParameters(); i++)
       MessageInterface::ShowMessage
          ("Variable::EvaluateReal() In mParamDb :%s\n", paramNames[i].c_str());
-#endif
-
+   #endif
+   
    // Evaluate the expression
    mRealValue = mExpParser->EvalExp(mExpr.c_str());
    return mRealValue;
@@ -167,7 +166,6 @@ GmatBase* Variable::Clone() const
    return new Variable(*this);
 }
 
-//loj: 11/16/04 added
 //---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
@@ -176,16 +174,19 @@ bool Variable::RenameRefObject(const Gmat::ObjectType type,
                                const std::string &oldName,
                                const std::string &newName)
 {
-#if DEBUG_RENAME
+   #if DEBUG_RENAME
    MessageInterface::ShowMessage
       ("Variable::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
-#endif
-
-   if (type == Gmat::PARAMETER)
-      return mParamDb->RenameParameter(oldName, newName);
+   #endif
    
-   return false;
+   if (type != Gmat::PARAMETER && type != Gmat::COORDINATE_SYSTEM &&
+       type != Gmat::SPACECRAFT && type != Gmat::CALCULATED_POINT)
+      return true;
+   
+   mParamDb->RenameParameter(oldName, newName);
+   RealVar::RenameRefObject(type, oldName, newName);
+   return true;
 }
 
 
@@ -210,6 +211,7 @@ std::string Variable::GetRefObjectName(const Gmat::ObjectType type) const
    return mParamDb->GetFirstParameterName();
 }
 
+
 //------------------------------------------------------------------------------
 // virtual bool SetRefObjectName(const Gmat::ObjectType type,
 //                               const std::string &name)
@@ -225,10 +227,11 @@ std::string Variable::GetRefObjectName(const Gmat::ObjectType type) const
 bool Variable::SetRefObjectName(const Gmat::ObjectType type,
                                 const std::string &name)
 {
-#if DEBUG_VARIABLE
+   #if DEBUG_VARIABLE
    MessageInterface::ShowMessage
       ("Variable::SetRefObjectName() type=%d, name=%s\n", type, name.c_str());
-#endif
+   #endif
+   
    if (type != Gmat::PARAMETER)
    {
       throw ParameterException
@@ -239,6 +242,7 @@ bool Variable::SetRefObjectName(const Gmat::ObjectType type,
    mParamDb->Add(name);
    return true;
 }
+
 
 //------------------------------------------------------------------------------
 // virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
@@ -265,6 +269,7 @@ GmatBase* Variable::GetRefObject(const Gmat::ObjectType type,
    
    return mParamDb->GetParameter(name);
 }
+
 
 //------------------------------------------------------------------------------
 // virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
@@ -294,17 +299,15 @@ bool Variable::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    return mParamDb->SetParameter(name, (Parameter*)obj);
 }
 
+
 //------------------------------------------------------------------------------
 // const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 const StringArray& Variable::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
-#if DEBUG_VARIABLE
+   #if DEBUG_VARIABLE
    MessageInterface::ShowMessage
       ("Variable::GetStringArrayParameter() type=%d\n", type);
-#endif
-   
-#if DEBUG_VARIABLE
    StringArray paramNames = mParamDb->GetNamesOfParameters();
    MessageInterface::ShowMessage
       ("Variable::GetStringArrayParameter() mParamDb->GetNamesOfParameters() "
@@ -313,7 +316,7 @@ const StringArray& Variable::GetRefObjectNameArray(const Gmat::ObjectType type)
       MessageInterface::ShowMessage
          ("Variable::GetStringArrayParameter() "
           "paramNames[%d]=%s\n", i, paramNames[i].c_str());
-#endif
+   #endif
    
    return mParamDb->GetNamesOfParameters();
 }

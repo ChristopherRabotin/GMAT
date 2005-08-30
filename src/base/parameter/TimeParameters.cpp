@@ -19,8 +19,6 @@
 //------------------------------------------------------------------------------
 #include "TimeParameters.hpp"
 
-//1/26/05 loj: Removed AddRefObject(obj) because it is also added in TimeReal
-//             Changed RealVarParamCount to ParameterParamCount
 
 //==============================================================================
 //                              CurrA1MJD
@@ -37,10 +35,10 @@
  */
 //------------------------------------------------------------------------------
 CurrA1MJD::CurrA1MJD(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "CurrA1MJD", obj, "A1 Mod. Julian Days",
-              "day")
+   : TimeReal(name, "CurrA1MJD", obj, "A1 Mod. Julian Days", "day")
 {
 }
+
 
 //------------------------------------------------------------------------------
 // CurrA1MJD::CurrA1MJD(const CurrA1MJD &param)
@@ -103,6 +101,7 @@ bool CurrA1MJD::Evaluate()
       return true;
 }
 
+
 //------------------------------------------------------------------------------
 // virtual GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
@@ -114,6 +113,7 @@ GmatBase* CurrA1MJD::Clone(void) const
 {
    return new CurrA1MJD(*this);
 }
+
 
 //==============================================================================
 //                              ElapsedDays
@@ -155,6 +155,7 @@ ElapsedDays::ElapsedDays(const std::string &name, GmatBase *obj)
    parameterCount = ElapsedDaysParamCount;
 }
 
+
 //------------------------------------------------------------------------------
 // ElapsedDays(const ElapsedDays &copy)
 //------------------------------------------------------------------------------
@@ -168,6 +169,7 @@ ElapsedDays::ElapsedDays(const ElapsedDays &copy)
     : TimeReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const ElapsedDays& operator=(const ElapsedDays &right)
@@ -186,6 +188,7 @@ const ElapsedDays& ElapsedDays::operator=(const ElapsedDays &right)
    }
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~ElapsedDays()
@@ -221,6 +224,7 @@ bool ElapsedDays::Evaluate()
       return true;
 }
 
+
 //--------------------------------------
 // Inherited methods from GmatBase
 //--------------------------------------
@@ -236,6 +240,7 @@ GmatBase* ElapsedDays::Clone(void) const
 {
    return new ElapsedDays(*this);
 }
+
 
 //------------------------------------------------------------------------------
 // Gmat::ParameterType GetParameterType(const Integer id) const
@@ -253,6 +258,7 @@ Gmat::ParameterType ElapsedDays::GetParameterType(const Integer id) const
 
 }
 
+
 //------------------------------------------------------------------------------
 // std::string GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
@@ -269,30 +275,52 @@ std::string ElapsedDays::GetParameterTypeString(const Integer id) const
 
 }
 
+
 //------------------------------------------------------------------------------
-// std::string GetParameterText(const Integer id)
+// std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-std::string ElapsedDays::GetParameterText(const Integer id)
+std::string ElapsedDays::GetParameterText(const Integer id) const
 {
    if (id >= ParameterParamCount && id < ElapsedDaysParamCount)
       return PARAMETER_TEXT[id - ParameterParamCount];
    else
       return TimeReal::GetParameterText(id);
-
 }
 
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> parameter index.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool ElapsedDays::IsParameterReadOnly(const Integer id) const
+{
+   if (id == INITIAL_EPOCH)
+      return true;
+   
+   return TimeReal::IsParameterReadOnly(id);
+}
+
+
 //------------------------------------------------------------------------------
-// Integer GetParameterID(const std::string &str)
+// Integer GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-Integer ElapsedDays::GetParameterID(const std::string &str)
+Integer ElapsedDays::GetParameterID(const std::string &str) const
 {
    for (int i = ParameterParamCount; i < ElapsedDaysParamCount; i++)
    {
@@ -303,14 +331,15 @@ Integer ElapsedDays::GetParameterID(const std::string &str)
    return TimeReal::GetParameterID(str);
 }
 
+
 //------------------------------------------------------------------------------
-// Real GetRealParameter(const Integer id)
+// Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-Real ElapsedDays::GetRealParameter(const Integer id)
+Real ElapsedDays::GetRealParameter(const Integer id) const
 {
    switch (id)
    {
@@ -321,20 +350,22 @@ Real ElapsedDays::GetRealParameter(const Integer id)
    }
 }
 
+
 //------------------------------------------------------------------------------
-// Real GetRealParameter(const std::string &label)
+// Real GetRealParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-Real ElapsedDays::GetRealParameter(const std::string &label)
+Real ElapsedDays::GetRealParameter(const std::string &label) const
 {
    if (label == "InitialEpoch")
       return GetInitialEpoch();
    else
       return TimeReal::GetRealParameter(label);
 }
+
 
 //------------------------------------------------------------------------------
 // Real SetRealParameter(const Integer id, const Real value)
@@ -354,6 +385,7 @@ Real ElapsedDays::SetRealParameter(const Integer id, const Real value)
       return TimeReal::SetRealParameter(id, value);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // Real SetRealParameter(const std:string &label, const Real value)
@@ -375,6 +407,7 @@ Real ElapsedDays::SetRealParameter(const std::string &label, const Real value)
    }
 }
 
+
 //==============================================================================
 //                              ElapsedSecs
 //==============================================================================
@@ -393,6 +426,7 @@ ElapsedSecs::PARAMETER_TYPE[ElapsedSecsParamCount - ParameterParamCount] =
 {
    Gmat::REAL_TYPE
 };
+
 
 //---------------------------------
 // public methods
@@ -415,6 +449,7 @@ ElapsedSecs::ElapsedSecs(const std::string &name, GmatBase *obj)
    parameterCount = ElapsedSecsParamCount;
 }
 
+
 //------------------------------------------------------------------------------
 // ElapsedSecs(const ElapsedSecs &copy)
 //------------------------------------------------------------------------------
@@ -428,6 +463,7 @@ ElapsedSecs::ElapsedSecs(const ElapsedSecs &copy)
    : TimeReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const ElapsedSecs& operator=(const ElapsedSecs &right)
@@ -446,6 +482,7 @@ const ElapsedSecs& ElapsedSecs::operator=(const ElapsedSecs &right)
    }
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~ElapsedSecs()
@@ -498,6 +535,7 @@ GmatBase* ElapsedSecs::Clone(void) const
    return new ElapsedSecs(*this);
 }
 
+
 //------------------------------------------------------------------------------
 // Gmat::ParameterType GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
@@ -513,6 +551,7 @@ Gmat::ParameterType ElapsedSecs::GetParameterType(const Integer id) const
       return TimeReal::GetParameterType(id);
 
 }
+
 
 //------------------------------------------------------------------------------
 // std::string GetParameterTypeString(const Integer id) const
@@ -530,30 +569,52 @@ std::string ElapsedSecs::GetParameterTypeString(const Integer id) const
 
 }
 
+
 //------------------------------------------------------------------------------
-// std::string GetParameterText(const Integer id)
+// std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-std::string ElapsedSecs::GetParameterText(const Integer id)
+std::string ElapsedSecs::GetParameterText(const Integer id) const
 {
    if (id >= ParameterParamCount && id < ElapsedSecsParamCount)
       return PARAMETER_TEXT[id - ParameterParamCount];
    else
       return TimeReal::GetParameterText(id);
-
 }
 
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> parameter index.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool ElapsedSecs::IsParameterReadOnly(const Integer id) const
+{
+   if (id == INITIAL_EPOCH)
+      return true;
+   
+   return TimeReal::IsParameterReadOnly(id);
+}
+
+
 //------------------------------------------------------------------------------
-// Integer GetParameterID(const std::string &str)
+// Integer GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-Integer ElapsedSecs::GetParameterID(const std::string &str)
+Integer ElapsedSecs::GetParameterID(const std::string &str) const
 {
    for (int i = ParameterParamCount; i < ElapsedSecsParamCount; i++)
    {
@@ -564,14 +625,15 @@ Integer ElapsedSecs::GetParameterID(const std::string &str)
    return TimeReal::GetParameterID(str);
 }
 
+
 //------------------------------------------------------------------------------
-// Real GetRealParameter(const Integer id)
+// Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-Real ElapsedSecs::GetRealParameter(const Integer id)
+Real ElapsedSecs::GetRealParameter(const Integer id) const
 {
    switch (id)
    {
@@ -582,20 +644,22 @@ Real ElapsedSecs::GetRealParameter(const Integer id)
    }
 }
 
+
 //------------------------------------------------------------------------------
-// Real GetRealParameter(const std::string &label)
+// Real GetRealParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-Real ElapsedSecs::GetRealParameter(const std::string &label)
+Real ElapsedSecs::GetRealParameter(const std::string &label) const
 {
    if (label == "InitialEpoch")
       return GetInitialEpoch();
    else
       return TimeReal::GetRealParameter(label);
 }
+
 
 //------------------------------------------------------------------------------
 // Real SetRealParameter(const Integer id, const Real value)
@@ -615,6 +679,7 @@ Real ElapsedSecs::SetRealParameter(const Integer id, const Real value)
       return TimeReal::SetRealParameter(id, value);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // Real SetRealParameter(const std:string &label, const Real value)

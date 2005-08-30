@@ -23,6 +23,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_PARAMETER 1
+//#define DEBUG_RENAME 1
 
 //---------------------------------
 // static data
@@ -557,9 +558,50 @@ bool Parameter::Validate()
 //---------------------------------
 
 // required method for all subclasses that can be copied in a script
+//------------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//------------------------------------------------------------------------------
 void Parameter::Copy(const GmatBase* orig)
 {
    operator=(*((Parameter *)(orig)));
+}
+
+
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool Parameter::RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName)
+{
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Parameter::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+   #endif
+
+   // loj: Should I add SPACE_POINT?
+   if (type != Gmat::SPACECRAFT && type != Gmat::COORDINATE_SYSTEM)
+      return true;
+   
+   std::string oldExpr = mExpr;
+   std::string::size_type pos;
+   
+   pos = mExpr.find(oldName);
+   
+   // change expression, if oldName found
+   if (pos != mExpr.npos)
+   {
+      mExpr.replace(pos, oldName.size(), newName);
+   }
+   
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("oldExpr=%s, mExpr=%s\n", oldExpr.c_str(), mExpr.c_str());
+   #endif
+   
+   return true;
 }
 
 
@@ -574,6 +616,7 @@ std::string Parameter::GetParameterText(const Integer id) const
       return GmatBase::GetParameterText(id);
 }
 
+
 //------------------------------------------------------------------------------
 // Integer GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
@@ -587,6 +630,7 @@ Integer Parameter::GetParameterID(const std::string &str) const
    
    return GmatBase::GetParameterID(str);
 }
+
 
 //------------------------------------------------------------------------------
 // Gmat::ParameterType GetParameterType(const Integer id) const

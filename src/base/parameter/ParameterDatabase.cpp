@@ -40,6 +40,7 @@ ParameterDatabase::ParameterDatabase()
    mStringParamPtrMap = new StringParamPtrMap;
 }
 
+
 //------------------------------------------------------------------------------
 // ~ParameterDatabase()
 //------------------------------------------------------------------------------
@@ -70,6 +71,7 @@ Integer ParameterDatabase::GetNumParameters() const
    return mNumParams;
 }
 
+
 //------------------------------------------------------------------------------
 // const StringArray& GetNamesOfParameters()
 //------------------------------------------------------------------------------
@@ -89,6 +91,7 @@ const StringArray& ParameterDatabase::GetNamesOfParameters()
    
    return mParamNames;
 }
+
 
 //------------------------------------------------------------------------------
 // ParameterPtrArray GetParameters() const
@@ -110,6 +113,7 @@ ParameterPtrArray ParameterDatabase::GetParameters() const
    return parameters;
 }
 
+
 //------------------------------------------------------------------------------
 // bool HasParameter(const std::string &name) const
 //------------------------------------------------------------------------------
@@ -130,7 +134,7 @@ bool ParameterDatabase::HasParameter(const std::string &name) const
    return found;
 }
 
-//loj: 11/17/04 added
+
 //------------------------------------------------------------------------------
 // bool RenameParameter(const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
@@ -144,34 +148,41 @@ bool ParameterDatabase::HasParameter(const std::string &name) const
 bool ParameterDatabase::RenameParameter(const std::string &oldName,
                                         const std::string &newName)
 {
-#if DEBUG_RENAME
+   #if DEBUG_RENAME
    MessageInterface::ShowMessage
       ("ParameterDatabase::RenameParameter() oldName=%s, newName=%s\n",
        oldName.c_str(), newName.c_str());
-#endif
+   #endif
    
-   StringParamPtrMap::iterator pos;
+   StringArray paramNames = GetNamesOfParameters();
+   std::string::size_type pos;
+   StringParamPtrMap::iterator pos1;
+   std::string newParamName;
    
-   pos = mStringParamPtrMap->find(oldName);
-   
-   if (pos != mStringParamPtrMap->end())
+   for (UnsignedInt i=0; i<paramNames.size(); i++)
    {
-      // add new parameter name key and delete old
-      Add(newName, pos->second);
-      mStringParamPtrMap->erase(pos);
-
-//        for (int i=0; i<mNumParams; i++)
-//        {
-//           if (mParamNames[i] == oldName)
-//           {
-//              mParamNames[i] = newName;
-//              return true;
-//           }
-//        }
+      pos = paramNames[i].find(oldName);
+      
+      // if oldName found
+      if (pos != paramNames[i].npos)
+      {
+         newParamName = paramNames[i];
+         newParamName.replace(pos, oldName.size(), newName);
+         
+         pos1 = mStringParamPtrMap->find(paramNames[i]);
+         
+         if (pos1 != mStringParamPtrMap->end())
+         {
+            // add new parameter name key and delete old
+            Add(newParamName, pos1->second);
+            mStringParamPtrMap->erase(pos1);
+         }
+      }
    }
-   
-   return false;
+      
+   return true;
 }
+
 
 //------------------------------------------------------------------------------
 // Integer GetParameterCount(const std::string &name) const
@@ -193,6 +204,7 @@ Integer ParameterDatabase::GetParameterCount(const std::string &name) const
       return pos->second->GetParameterCount();
 }
 
+
 //------------------------------------------------------------------------------
 // Parameter* GetParameter(const std::string &name) const
 //------------------------------------------------------------------------------
@@ -213,6 +225,7 @@ Parameter* ParameterDatabase::GetParameter(const std::string &name) const
       return pos->second;
 }
 
+
 //------------------------------------------------------------------------------
 // std::string GetFirstParameterName() const
 //------------------------------------------------------------------------------
@@ -222,6 +235,7 @@ std::string ParameterDatabase::GetFirstParameterName() const
    pos = mStringParamPtrMap->begin();
    return pos->first;
 }
+
 
 //------------------------------------------------------------------------------
 // bool SetParameter(const std::string &name, Parameter *param)
@@ -262,6 +276,7 @@ void ParameterDatabase::Add(Parameter *param)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void Add(const std::string &name, Parameter *param = NULL)
 //------------------------------------------------------------------------------
@@ -271,17 +286,14 @@ void ParameterDatabase::Add(const std::string &name, Parameter *param)
 
    pos = mStringParamPtrMap->find(name);
 
-   //loj: 1/5/05 if name already in the database, just ignore
-//     if (pos != mStringParamPtrMap->end())
-//        throw ParameterDatabaseException
-//           ("ParameterDatabase::Add() Parameter name: " + name +
-//            " already in the database\n");
+   //if name already in the database, just ignore
    if (pos == mStringParamPtrMap->end())
    {
       mStringParamPtrMap->insert(StringParamPtrPair(name, param));
       mNumParams = mStringParamPtrMap->size();
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void Remove(const Parameter *param)
@@ -290,6 +302,7 @@ void ParameterDatabase::Remove(const Parameter *param)
 {
    Remove(param->GetName());
 }
+
 
 //------------------------------------------------------------------------------
 // void Remove(const std::string &name)

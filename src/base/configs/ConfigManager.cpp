@@ -20,6 +20,7 @@
 #include "ConfigManagerException.hpp"
 
 //#define DEBUG_RENAME 1
+//#define DEBUG_CONFIG 1
 //#define DEBUG_CONFIG_MEMORY
 
 //---------------------------------
@@ -542,6 +543,7 @@ GmatBase* ConfigManager::GetItem(const std::string &name)
    return obj;
 }
 
+
 //------------------------------------------------------------------------------
 // bool RenameItem(Gmat::ObjectType type, const std::string &oldName,
 //                 const std::string &newName)
@@ -560,13 +562,18 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
                                const std::string &oldName,
                                const std::string &newName)
 {
-#if DEBUG_RENAME
-   MessageInterface::ShowMessage
-      ("ConfigManager::RenameItem() type=%d, oldName=%s, newName=%s\n",
-       type, oldName.c_str(), newName.c_str());
-#endif
+   #if DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("ConfigManager::RenameItem() type=%d, oldName=%s, newName=%s\n",
+          type, oldName.c_str(), newName.c_str());
+   #endif
+   
    bool renamed = false;
-    
+   
+   //--------------------------------------------------
+   // change mapping name
+   //--------------------------------------------------
+   
    if (mapping.find(oldName) != mapping.end())
    {
       GmatBase *obj = mapping[oldName];
@@ -587,6 +594,12 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
                 newName.c_str());
          }
       }
+      else
+      {
+         MessageInterface::ShowMessage
+            ("ConfigManager::RenameItem() oldName has different type:%d\n",
+             obj->GetType());
+      }
    }
    
    if (!renamed)
@@ -598,134 +611,98 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
       return false;
    }
    
-   //--------------------------------------------------
-   // rename ref. object name used in parameters
-   //--------------------------------------------------
-   
-   if (type == Gmat::SPACECRAFT)
+   //----------------------------------------------------
+   // Rename ref. objects
+   //----------------------------------------------------
+   GmatBase *obj;
+   StringArray itemList = GetListOfItemsHas(type, oldName);
+   for (UnsignedInt i=0; i<itemList.size(); i++)
    {
-      StringArray forms = GetListOfItems(Gmat::FORMATION);
-      StringArray subs = GetListOfItems(Gmat::SUBSCRIBER);
+      obj = GetItem(itemList[i]);
+      if (obj)
+      {
+         //MessageInterface::ShowMessage("===> Rename obj=%s\n", obj->GetName().c_str());
+         renamed = obj->RenameRefObject(type, oldName, newName);
+      }
+   }
+   
+   //----------------------------------------------------
+   // Rename tanks in the thrusters.
+   // Tank is ReadOnly parameter so it does show in
+   // GeneratingString()
+   //----------------------------------------------------
+   
+   if (type == Gmat::HARDWARE)
+   {
+      itemList = GetListOfItems(Gmat::HARDWARE);
+      
+      for (unsigned int i=0; i<itemList.size(); i++)
+      {
+         obj = GetItem(itemList[i]);
+         if (obj->IsOfType("Thruster"))
+             obj->RenameRefObject(type, oldName, newName);
+      }
+   }
+   
+   //----------------------------------------------------
+   // Rename system parameters
+   //----------------------------------------------------
+      
+   else if (type == Gmat::SPACECRAFT || type == Gmat::COORDINATE_SYSTEM ||
+       type == Gmat::CALCULATED_POINT)
+   {
       StringArray params = GetListOfItems(Gmat::PARAMETER);
-      Subscriber *sub;
+      std::string oldParamName, newParamName;
       Parameter *param;
-      std::string oldParamName;
-      std::string newParamName;
-      std::string::size_type pos1;
+      std::string::size_type pos;
       
-      //loj: 2/22/05 - Added
-      //------------------------------------------
-      // Formation has spacecraft name
-      //------------------------------------------
-      for (unsigned int i=0; i<forms.size(); i++)
-      {
-         GetSpacecraft(forms[i])->RenameRefObject(type, oldName, newName);
-      }
-      
-      //------------------------------------------
-      // OpenGLPlot has spacecraft name
-      //------------------------------------------
-      for (unsigned int i=0; i<subs.size(); i++)
-      {
-         sub = GetSubscriber(subs[i]);
-         if (sub->GetTypeName() == "OpenGLPlot")
-         {
-            sub->RenameRefObject(type, oldName, newName);
-         }
-      }
-
-      //------------------------------------------
-      // Parameter name consists of spacecraft name
-      //------------------------------------------
       for (unsigned int i=0; i<params.size(); i++)
       {
          #if DEBUG_RENAME
          MessageInterface::ShowMessage("params[%d]=%s\n", i, params[i].c_str());
          #endif
-         
+            
          param = GetParameter(params[i]);
-         
+            
          // if system parameter
          if (param->GetKey() == GmatParam::SYSTEM_PARAM)
          {
             oldParamName = param->GetName();
-            // if parameter name has old name
-            if (oldParamName.find(oldName) != oldParamName.npos)
+            pos = oldParamName.find(oldName);
+               
+            // rename actual parameter name
+            if (pos != oldParamName.npos)
             {
-               // rename ref. object name
-               param->RenameRefObject(type, oldName, newName);
-               
-               // rename actual parameter name
                newParamName = oldParamName;
-               pos1 = newParamName.find(".");
-               newParamName.replace(0, pos1, newName);
-               
-               // rename configured parameter name
-               renamed = RenameItem(Gmat::PARAMETER, oldParamName, newParamName);
-               
+               newParamName.replace(pos, oldName.size(), newName);
+                  
                #if DEBUG_RENAME
                MessageInterface::ShowMessage
-                  ("newParamName=%s\n", param->GetName().c_str());
-               MessageInterface::ShowMessage
-                  ("===> Change Subscriber ref object names\n");
+                  ("===> oldParamName=%s, newParamName=%s\n",
+                   oldParamName.c_str(), newParamName.c_str());
                #endif
                
-               //--------------------------------------------------
-               // rename ref. objects used in subscribers
-               //--------------------------------------------------
-               for (unsigned int i=0; i<subs.size(); i++)
+               // change parameter mapping name
+               if (mapping.find(oldParamName) != mapping.end())
                {
-                  sub = GetSubscriber(subs[i]);
-                  
-                  // Subscribers other than OpenGLPlot has paramter name
-                  if (sub->GetTypeName() != "OpenGLPlot")
-                     sub->RenameRefObject(Gmat::PARAMETER, oldParamName, newParamName);
-                  
+                  mapping.erase(oldParamName);
+                  mapping[newParamName] = (GmatBase*)param;
+                  param->SetName(newParamName);
+                  renamed = true;
                }
             }
          }
-         else if (param->GetTypeName() == "Variable")
-         {
-            // if parameter name has oldName replace with newName
-            oldParamName = param->GetName();
-            newParamName = oldParamName;
-            std::string::size_type pos = newParamName.find(oldName);
-            
-            if (pos != newParamName.npos)
-               newParamName.replace(pos, oldName.size(), newName);
-        
-            // if parameter expression has oldName replace with newName
-            std::string newExp = param->GetStringParameter("Expression");
-            pos = newExp.find(oldName);
-            
-            if (pos != newExp.npos)
-            {
-               newExp.replace(pos, oldName.size(), newName);
-               param->SetStringParameter("Expression", newExp);
-               
-               // rename ref. parameter name
-               //loj: 2/22/05 "RefParams" no longer used
-               //StringArray refParamNames = param->GetStringArrayParameter("RefParams");
-               StringArray refParamNames = param->GetRefObjectNameArray(Gmat::PARAMETER);
-               for (unsigned int i=0; i<refParamNames.size(); i++)
-               {
-                  oldParamName = refParamNames[i];
-                  newParamName = oldParamName;
-                  pos = oldParamName.find(oldName);
-                  if (pos != oldParamName.npos)
-                  {
-                     newParamName.replace(pos, oldName.size(), newName);
-                     param->RenameRefObject(Gmat::PARAMETER, oldParamName, newParamName);
-                  }
-               }
-            }
-         }//if (param->GetKey() == Parameter::SYSTEM_PARAM)
-      } //for (unsigned int i=0; i<params.size(); i++)
+      }
    }
-   
+
+   #if DEBUG_RENAME
+   StringArray& allItems = GetListOfAllItems();
+   for (UnsignedInt i=0; i<allItems.size(); i++)
+      MessageInterface::ShowMessage("===> item[%d] = %s\n", i, allItems[i].c_str());
+   #endif
    
    return renamed;
-}
+} // RenameItem()
 
 
 //------------------------------------------------------------------------------
@@ -762,6 +739,7 @@ bool ConfigManager::RemoveAllItems()
    return true;
 }
 
+
 //------------------------------------------------------------------------------
 // bool RemoveItem(Gmat::ObjectType type, const std::string &name)
 //------------------------------------------------------------------------------
@@ -777,11 +755,11 @@ bool ConfigManager::RemoveAllItems()
 bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name)
 {
    bool status = false;
-
+   
    // remove from objects
    std::vector<GmatBase*>::iterator currentIter =
       (std::vector<GmatBase*>::iterator)(objects.begin());
-    
+   
    while (currentIter != (std::vector<GmatBase*>::iterator)(objects.end()))
    {
       if ((*currentIter)->GetType() == type)
@@ -794,7 +772,7 @@ bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name)
       }
       ++currentIter;
    }
-    
+   
    // remove from mapping
    if (mapping.find(name) != mapping.end())
    {
@@ -806,8 +784,96 @@ bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name)
          status = true;
       }
    }
-    
+   
    return status;
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray& GetListOfItemsHas(Gmat::ObjectType type, const std::string &name,
+//                                bool includeSysParam)
+//------------------------------------------------------------------------------
+/**
+ * Checks a specific item used in anywhere.
+ *
+ * @param type The type of the object that is being checked.
+ * @param name The name of the object.
+ * @param includeSysParam True if system parameter to be included
+ *
+ * @return array of item names where the name is used.
+ */
+//------------------------------------------------------------------------------
+StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
+                                              const std::string &name,
+                                              bool includeSysParam)
+{
+   StringArray items = GetListOfAllItems();
+   std::string::size_type pos;
+   GmatBase *obj;
+   std::string objName;
+   std::string objString;
+   static StringArray itemList;
+   itemList.clear();
+
+   #if DEBUG_CONFIG
+   MessageInterface::ShowMessage
+      ("ConfigManager::GetListOfItemsHas() name=%s, includeSysParam=%d\n",
+       name.c_str(), includeSysParam);
+   #endif
+   
+   try
+   {
+      for (UnsignedInt i=0; i<items.size(); i++)
+      {
+         obj = GetItem(items[i]);
+         
+         #if DEBUG_CONFIG > 1
+         MessageInterface::ShowMessage
+            ("===> obj[%d]=%s, %s\n", i, obj->GetTypeName().c_str(),
+             obj->GetName().c_str());
+         #endif
+         
+         // if same type, skip
+         if (obj->IsOfType(type))
+            continue;
+         
+         // if system parameter not to be included, skip
+         if (!includeSysParam)
+         {
+            if (obj->IsOfType(Gmat::PARAMETER))
+               if (((Parameter*)obj)->GetKey() == GmatParam::SYSTEM_PARAM)
+                  continue;
+         }
+         
+         objName = obj->GetName();
+         objString = obj->GetGeneratingString();
+         pos = objString.find(name);
+         
+         #if DEBUG_CONFIG > 1
+         MessageInterface::ShowMessage
+            ("===> objString=\n%s\n", objString.c_str());
+         #endif
+         
+         if (pos != objString.npos)
+         {
+            itemList.push_back(objName);
+         }
+      }
+      
+      #if DEBUG_CONFIG
+      for (UnsignedInt i=0; i<itemList.size(); i++)
+      {
+         MessageInterface::ShowMessage
+            ("===> itemList[%d]=%s\n", i, itemList[i].c_str());
+      }
+      #endif
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage("*** Error: %s\n", e.GetMessage().c_str());
+   }
+   
+   return itemList;
 }
 
 
@@ -1191,7 +1257,7 @@ CoordinateSystem* ConfigManager::GetCoordinateSystem(const std::string &name)
    return cs;
 }
 
-//loj: 4/22/05 Added
+
 //------------------------------------------------------------------------------
 // CalculatedPoint* GetCalculatedPoint(const std::string &name)
 //------------------------------------------------------------------------------
