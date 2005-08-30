@@ -156,6 +156,7 @@ namespace GmatTree
         MATLAB_FUNCTION,
         GMAT_FUNCTION,
         COORD_SYSTEM,
+        USER_COORD_SYSTEM,
         GROUNDSTATION,
         SCRIPT_FILE,
         SCRIPT_FOLDER,
