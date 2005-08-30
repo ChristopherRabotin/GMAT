@@ -151,11 +151,11 @@ bool Sandbox::AddObject(GmatBase *obj)
       if (find(clonable.begin(), clonable.end(), obj->GetType()) !=
              clonable.end())
       {
-//         #ifdef DEBUG_SANDBOX_OBJECT_MAPS
+         #ifdef DEBUG_SANDBOX_OBJECT_MAPS
             MessageInterface::ShowMessage(
                "Cloning object %s of type %s\n", obj->GetName().c_str(),
                obj->GetTypeName().c_str());
-//         #endif
+         #endif
          
          // Subscribers are already cloned in AddSubscriber()
          if (obj->GetType() != Gmat::SUBSCRIBER)
