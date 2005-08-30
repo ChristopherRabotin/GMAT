@@ -54,32 +54,32 @@ Sandbox::Sandbox() :
    // when the cloning has been tested for all of GMAT's classes.
    clonable.push_back(Gmat::SPACECRAFT);
    clonable.push_back(Gmat::FORMATION);
-//   clonable.push_back(Gmat::SPACEOBJECT);
-//   clonable.push_back(Gmat::GROUND_STATION);
+   clonable.push_back(Gmat::SPACEOBJECT);
+   clonable.push_back(Gmat::GROUND_STATION);
 //   clonable.push_back(Gmat::BURN);
-//   clonable.push_back(Gmat::COMMAND);
-//   clonable.push_back(Gmat::PROPAGATOR);
-//   clonable.push_back(Gmat::FORCE_MODEL);
-//   clonable.push_back(Gmat::PHYSICAL_MODEL);
-//   clonable.push_back(Gmat::TRANSIENT_FORCE);
-//   clonable.push_back(Gmat::INTERPOLATOR);
-//   clonable.push_back(Gmat::SPACE_POINT);
-//   clonable.push_back(Gmat::CELESTIAL_BODY);
-//   clonable.push_back(Gmat::CALCULATED_POINT);
+   clonable.push_back(Gmat::COMMAND);
+   clonable.push_back(Gmat::PROPAGATOR);
+   clonable.push_back(Gmat::FORCE_MODEL);
+   clonable.push_back(Gmat::PHYSICAL_MODEL);
+   clonable.push_back(Gmat::TRANSIENT_FORCE);
+   clonable.push_back(Gmat::INTERPOLATOR);
+   clonable.push_back(Gmat::SPACE_POINT);
+   clonable.push_back(Gmat::CELESTIAL_BODY);
+   clonable.push_back(Gmat::CALCULATED_POINT);
 //   clonable.push_back(Gmat::LIBRATION_POINT);
-//   clonable.push_back(Gmat::BARYCENTER);
-//   clonable.push_back(Gmat::ATMOSPHERE);
+   clonable.push_back(Gmat::BARYCENTER);
+   clonable.push_back(Gmat::ATMOSPHERE);
 //   clonable.push_back(Gmat::PARAMETER);
-//   clonable.push_back(Gmat::STOP_CONDITION);
-//   clonable.push_back(Gmat::SOLVER);
-//   clonable.push_back(Gmat::PROP_SETUP);
-//   clonable.push_back(Gmat::REF_FRAME);
-//   clonable.push_back(Gmat::FUNCTION);
-//   clonable.push_back(Gmat::FUEL_TANK);
-//   clonable.push_back(Gmat::THRUSTER);
-//   clonable.push_back(Gmat::HARDWARE);
-//   clonable.push_back(Gmat::COORDINATE_SYSTEM);
-//   clonable.push_back(Gmat::AXIS_SYSTEM);
+   clonable.push_back(Gmat::STOP_CONDITION);
+   clonable.push_back(Gmat::SOLVER);
+   clonable.push_back(Gmat::PROP_SETUP);
+   clonable.push_back(Gmat::REF_FRAME);
+   clonable.push_back(Gmat::FUNCTION);
+   clonable.push_back(Gmat::FUEL_TANK);
+   clonable.push_back(Gmat::THRUSTER);
+   clonable.push_back(Gmat::HARDWARE);
+   clonable.push_back(Gmat::COORDINATE_SYSTEM);
+   clonable.push_back(Gmat::AXIS_SYSTEM);
 
    // SolarSystem instances are handled separately from the other objects
    // clonable.push_back(Gmat::SOLAR_SYSTEM);
@@ -151,11 +151,11 @@ bool Sandbox::AddObject(GmatBase *obj)
       if (find(clonable.begin(), clonable.end(), obj->GetType()) !=
              clonable.end())
       {
-         #ifdef DEBUG_SANDBOX_OBJECT_MAPS
+//         #ifdef DEBUG_SANDBOX_OBJECT_MAPS
             MessageInterface::ShowMessage(
                "Cloning object %s of type %s\n", obj->GetName().c_str(),
                obj->GetTypeName().c_str());
-         #endif
+//         #endif
          
          // Subscribers are already cloned in AddSubscriber()
          if (obj->GetType() != Gmat::SUBSCRIBER)
