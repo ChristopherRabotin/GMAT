@@ -292,7 +292,8 @@ void XyPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 {    
    if (event.GetEventObject() == mObjectComboBox)
    {
-      mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
+      //loj: 8/19/05 commented out so it won't cause crash when it is added
+      //mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
       mUseUserParam = false;
    }
    else if(event.GetEventObject() == mCoordSysComboBox)

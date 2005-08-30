@@ -476,7 +476,7 @@ void ReportFileSetupPanel::OnCreateVariable(wxCommandEvent& event)
 
       mUserParamListBox->SetSelection(0);
       mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
-      mUseUserParam = true; //loj: 6/6/05 Added
+      mUseUserParam = true;
    }
 }
 
@@ -515,7 +515,8 @@ void ReportFileSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 {
    if (event.GetEventObject() == mObjectComboBox)
    {
-      mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
+      //loj: 8/19/05 commented out so it won't cause crash when it is added
+      //mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
       mUseUserParam = false;
    }
    else if(event.GetEventObject() == mCoordSysComboBox)
@@ -640,7 +641,7 @@ Parameter* ReportFileSetupPanel::GetParameter(const wxString &name)
          if (param->IsCoordSysDependent())
             param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
          else if (param->IsOriginDependent())
-            param->SetRefObjectName(Gmat::SPACE_POINT, depObjName); //loj: 4/11/05 Added
+            param->SetRefObjectName(Gmat::SPACE_POINT, depObjName);
       }
       catch (BaseException &e)
       {
