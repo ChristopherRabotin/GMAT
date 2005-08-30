@@ -88,7 +88,11 @@ public:
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
    virtual GmatBase*       Clone() const;
-
+   
+   virtual bool RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName);
+   
    // Parameter access methods - overridden from GmatBase 
    virtual std::string     GetParameterText(const Integer id) const;     
    virtual Integer         GetParameterID(const std::string &str) const; 

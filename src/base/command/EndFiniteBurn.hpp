@@ -34,8 +34,8 @@
 class GMAT_API EndFiniteBurn : public GmatCommand
 {
 public:
-	EndFiniteBurn();
-	virtual ~EndFiniteBurn();
+        EndFiniteBurn();
+        virtual ~EndFiniteBurn();
    EndFiniteBurn(const EndFiniteBurn& endman);
    EndFiniteBurn&         operator=(const EndFiniteBurn& endman);
 
@@ -46,6 +46,9 @@ public:
                                         const std::string &name);
 
    virtual GmatBase*    Clone() const;
+   virtual bool        RenameRefObject(const Gmat::ObjectType type,
+                                       const std::string &oldName,
+                                       const std::string &newName);
    virtual const std::string&
                         GetGeneratingString(Gmat::WriteMode mode,
                                             const std::string &prefix,

@@ -49,6 +49,9 @@ public:
                                   const std::string objName = "");
 
    virtual GmatBase*    Clone() const;
+   virtual bool        RenameRefObject(const Gmat::ObjectType type,
+                                       const std::string &oldName,
+                                       const std::string &newName);
    virtual const std::string&
                         GetGeneratingString(Gmat::WriteMode mode,
                                             const std::string &prefix,

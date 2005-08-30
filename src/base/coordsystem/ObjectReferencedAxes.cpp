@@ -373,6 +373,34 @@ GmatBase* ObjectReferencedAxes::Clone() const
    return (new ObjectReferencedAxes(*this));
 }
 
+
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool ObjectReferencedAxes::RenameRefObject(const Gmat::ObjectType type,
+                                           const std::string &oldName,
+                                           const std::string &newName)
+{
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("ObjectReferencedAxes::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+   #endif
+   
+   if (type != Gmat::CALCULATED_POINT)
+      return true;
+
+   if (primaryName == oldName)
+      primaryName = newName;
+   
+   if (secondaryName == oldName)
+      secondaryName = newName;
+   
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------

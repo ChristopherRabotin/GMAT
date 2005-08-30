@@ -21,7 +21,8 @@
 #include "FiniteBurn.hpp"
 
 //#define DEBUG_BURN_ORIGIN
- 
+//#define DEBUG_RENAME 1
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -352,7 +353,7 @@ const StringArray& FiniteBurn::GetStringArrayParameter(const Integer id) const
       
    if (id == FUEL_TANK)
    {
-      // MessageInterface::ShowMessage("Retrieving %d tanks\n", tanks.size());
+      //MessageInterface::ShowMessage("Retrieving %d tanks\n", tanks.size());
       return tanks;
    }
 
@@ -562,6 +563,35 @@ bool FiniteBurn::Fire(Real *burnData, Real epoch)
 GmatBase* FiniteBurn::Clone() const
 {
    return (new FiniteBurn(*this));
+}
+
+
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool FiniteBurn::RenameRefObject(const Gmat::ObjectType type,
+                                 const std::string &oldName,
+                                 const std::string &newName)
+{
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("FiniteBurn::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+   #endif
+   
+   if (type != Gmat::HARDWARE)
+      return true;
+   
+   for (UnsignedInt i=0; i<thrusters.size(); i++)
+      if (thrusters[i] == oldName)
+         thrusters[i] = newName;
+   
+   for (UnsignedInt i=0; i<tanks.size(); i++)
+      if (tanks[i] == oldName)
+         tanks[i] = newName;
+   
+   return true;
 }
 
 

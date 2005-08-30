@@ -27,7 +27,9 @@
 #include "CoordinateSystemException.hpp"
 #include "CoordinateBase.hpp"
 #include "Rmatrix33.hpp"
+#include "MessageInterface.hpp"
 
+//#define DEBUG_RENAME 1
 
 //---------------------------------
 // static data
@@ -422,6 +424,31 @@ GmatBase* CoordinateSystem::Clone() const
 {
    return (new CoordinateSystem(*this));
 }
+
+
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool CoordinateSystem::RenameRefObject(const Gmat::ObjectType type,
+                                       const std::string &oldName,
+                                       const std::string &newName)
+{
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("CoordinateSystem::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+   #endif
+   
+   if (type != Gmat::CALCULATED_POINT)
+      return true;
+
+   if (originName == oldName)
+      originName = newName;
+   
+   return true;
+}
+
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const

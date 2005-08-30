@@ -59,6 +59,10 @@ public:
    
    GmatBase*               Clone() const;
    
+   virtual bool RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName);
+   
 protected:
    /// List of thrusters used in the maneuver
    StringArray             thrusters;
