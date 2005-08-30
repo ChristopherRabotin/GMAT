@@ -49,6 +49,9 @@ public:
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
    virtual void Copy(const GmatBase* orig);
+   virtual bool RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName);
    
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
 
@@ -184,7 +187,7 @@ protected:
    ObjectArray    tanks;
    /// Pointers to the spacecraft thrusters
    ObjectArray    thrusters;
-          
+   
    /// Dry mass plus fuel masses, a calculated parameter
    Real           totalMass;
    

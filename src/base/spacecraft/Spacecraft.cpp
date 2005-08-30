@@ -20,7 +20,8 @@
 #include "Spacecraft.hpp"
 #include "MessageInterface.hpp"
 
-// #define DEBUG_SPACECRAFT 1 
+//#define DEBUG_SPACECRAFT 1 
+//#define DEBUG_RENAME 1
 
 #if DEBUG_SPACECRAFT
 #include <iostream>
@@ -179,6 +180,45 @@ GmatBase* Spacecraft::Clone(void) const
 void Spacecraft::Copy(const GmatBase* orig)
 {
    operator=(*((Spacecraft *)(orig)));
+}
+
+
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool Spacecraft::RenameRefObject(const Gmat::ObjectType type,
+                                 const std::string &oldName,
+                                 const std::string &newName)
+{
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Spacecraft::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+   #endif
+   
+   if (type != Gmat::HARDWARE)
+      return true;
+   
+   for (UnsignedInt i=0; i<thrusterNames.size(); i++)
+   {
+      if (thrusterNames[i] == oldName)
+      {
+         thrusterNames[i] = newName;
+         break;
+      }
+   }
+   
+   for (UnsignedInt i=0; i<tankNames.size(); i++)
+   {
+      if (tankNames[i] == oldName)
+      {
+         tankNames[i] = newName;
+         break;
+      }
+   }
+   
+   return true;
 }
 
 
@@ -1919,13 +1959,14 @@ void Spacecraft::InitializeDataMethod(const Spacecraft &s)
     displayCoordType = s.displayCoordType;
     initialDisplay = s.initialDisplay;
     isForDisplay = s.isForDisplay;
-
+    
     dryMass = s.dryMass;
     coeffDrag = s.coeffDrag;
     dragArea = s.dragArea;
     srpArea = s.srpArea;
     reflectCoeff = s.reflectCoeff;
-
+    
     tankNames = s.tankNames;
     thrusterNames = s.thrusterNames;
+    
 }

@@ -21,7 +21,6 @@
 
 // #define DEBUG_THRUSTER
 
-
 #ifdef DEBUG_THRUSTER
    #include "MessageInterface.hpp"
 #endif
@@ -821,6 +820,36 @@ GmatBase* Thruster::Clone() const
 void Thruster::Copy(const GmatBase* orig)
 {
    operator=(*((Thruster *)(orig)));
+}
+
+
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool Thruster::RenameRefObject(const Gmat::ObjectType type,
+                               const std::string &oldName,
+                               const std::string &newName)
+{
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Thruster::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+   #endif
+   
+   if (type != Gmat::HARDWARE)
+      return true;
+   
+   for (UnsignedInt i=0; i<tankNames.size(); i++)
+   {
+      if (tankNames[i] == oldName)
+      {
+         tankNames[i] = newName;
+         break;
+      }
+   }
+   
+   return true;
 }
 
 

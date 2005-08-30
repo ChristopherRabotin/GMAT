@@ -357,7 +357,6 @@ bool BaseStopCondition::Validate()
             (mStopParam->GetRefObject(Gmat::COORDINATE_SYSTEM, 
                                       mStopParam->GetRefObjectName(Gmat::COORDINATE_SYSTEM)));
          
-         //loj: 5/19/05 Added true
          mEccParam->AddRefObject
             (mStopParam->GetRefObject(Gmat::SPACE_POINT, 
                                       mStopParam->GetRefObjectName(Gmat::SPACE_POINT)),
@@ -404,7 +403,7 @@ bool BaseStopCondition::Validate()
             mRmagParam->AddRefObject(mSolarSystem);
             mRmagParam->Initialize();
             
-            // set mRange (loj: 6/8/05 Added)
+            // set mRange
             if (depObjName == "Earth")
                mRange = 5.0e5;
             else if (depObjName == "Luna")
@@ -710,11 +709,22 @@ bool BaseStopCondition::RenameRefObject(const Gmat::ObjectType type,
       // set new StopCondition name
       std::string name = GetName();
       std::string::size_type pos = name.find(oldName);
+      
       if (pos != name.npos)
       {
          name.replace(pos, oldName.size(), newName);
          SetName(name);
       }
+      
+      // epoch parameter name
+      pos = mEpochParamName.find(oldName);
+      if (pos != mEpochParamName.npos)
+         mEpochParamName.replace(pos, oldName.size(), newName);
+      
+      // stop parameter name
+      pos = mStopParamName.find(oldName);
+      if (pos != mStopParamName.npos)
+         mStopParamName.replace(pos, oldName.size(), newName);
    }
    
    return true;

@@ -74,6 +74,9 @@ public:
    // required method for all subclasses
    virtual GmatBase*          Clone() const;
    virtual void               Copy(const GmatBase* inst);
+   virtual bool RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName);
    
 protected:
    /// Finite burn instances access thruster data directly
