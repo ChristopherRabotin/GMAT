@@ -71,6 +71,7 @@ FiniteBurnSetupPanel::~FiniteBurnSetupPanel()
 {
    theGuiManager->UnregisterComboBox("FuelTank", mTankComboBox);
    theGuiManager->UnregisterComboBox("Thruster", mThrusterComboBox);
+   theGuiManager->UnregisterComboBox("SpacePoint", mCentralBodyComboBox);
 }
 
 //-------------------------------
@@ -219,7 +220,9 @@ void FiniteBurnSetupPanel::LoadData()
       int tankID = theBurn->GetParameterID("Tanks");
       StringArray tanks = theBurn->GetStringArrayParameter(tankID);
       std::string tank = "";
-
+      mTankComboBox->Insert("", 0); //loj: 8/30/05 Added to show blank
+      mTankComboBox->SetValue("");
+      
       if (tanks.size() > 0)
       {
          tank = tanks[0];
