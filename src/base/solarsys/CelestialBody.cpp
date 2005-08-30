@@ -2479,7 +2479,7 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
    Rvector3 r = f    * r0 + g    * v0;
    Rvector3 v = fDot * r0 + gDot * v0;
    
-   if (!IsEqual((f * gDot - g * fDot), 1.0, 1.0e-10))
+   if (!IsEqual((f * gDot - g * fDot), 1.0, 1.0e-9))
       throw SolarSystemException(
             "Error computing low fidelity ephemeris for body "
             + instanceName);
