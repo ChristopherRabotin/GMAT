@@ -253,6 +253,10 @@ bool ReportFile::RenameRefObject(const Gmat::ObjectType type,
           GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
    
+   if (type != Gmat::PARAMETER && type != Gmat::COORDINATE_SYSTEM &&
+       type != Gmat::SPACECRAFT)
+      return true;
+   
    if (type == Gmat::PARAMETER)
    {
       // parameters
@@ -262,8 +266,20 @@ bool ReportFile::RenameRefObject(const Gmat::ObjectType type,
             mVarParamNames[i] = newName;
       }
    }
-
-   return false;
+   else
+   {
+      std::string::size_type pos;
+      
+      for (unsigned int i=0; i<mVarParamNames.size(); i++)
+      {
+         pos = mVarParamNames[i].find(oldName);
+         
+         if (pos != mVarParamNames[i].npos)
+            mVarParamNames[i].replace(pos, oldName.size(), newName);
+      }
+   }
+   
+   return true;
 }
 
 

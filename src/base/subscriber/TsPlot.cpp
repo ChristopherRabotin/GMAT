@@ -369,28 +369,45 @@ bool TsPlot::RenameRefObject(const Gmat::ObjectType type,
                              const std::string &newName)
 {
    #if DEBUG_RENAME
-      MessageInterface::ShowMessage
-         ("TsPlot::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
-          GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+   MessageInterface::ShowMessage
+      ("TsPlot::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
+   
+   if (type != Gmat::PARAMETER && type != Gmat::COORDINATE_SYSTEM &&
+       type != Gmat::SPACECRAFT)
+      return true;
    
    if (type == Gmat::PARAMETER)
    {
       // X parameter
       if (mXParamName == oldName)
          mXParamName = newName;
-      
+   
       // Y parameters
       for (unsigned int i=0; i<mYParamNames.size(); i++)
       {
          if (mYParamNames[i] == oldName)
             mYParamNames[i] = newName;
       }
+   }
+   else
+   {
+      std::string::size_type pos = mXParamName.find(oldName);
       
-      return true;
+      if (pos != mXParamName.npos)
+         mXParamName.replace(pos, oldName.size(), newName);
+      
+      for (unsigned int i=0; i<mYParamNames.size(); i++)
+      {
+         pos = mYParamNames[i].find(oldName);
+         
+         if (pos != mYParamNames[i].npos)
+            mYParamNames[i].replace(pos, oldName.size(), newName);
+      }
    }
    
-   return false;
+   return true;
 }
 
 

@@ -615,46 +615,55 @@ bool OpenGlPlot::RenameRefObject(const Gmat::ObjectType type,
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
    
-   if (type != Gmat::SPACECRAFT)
+   if (type != Gmat::SPACECRAFT && type != Gmat::COORDINATE_SYSTEM)
       return true;
-
-   // for spacecraft name
-   for (int i=0; i<mAllSpCount; i++)
-      if (mAllSpNameArray[i] == oldName)
-         mAllSpNameArray[i] = newName;
    
-   //----------------------------------------------------
-   // Since spacecraft name is used as key for spacecraft
-   // color map, I can't change the key name, so it is
-   // removed and inserted with new name
-   //----------------------------------------------------
-   std::map<std::string, UnsignedInt>::iterator orbColorPos, targColorPos;
-   orbColorPos = mOrbitColorMap.find(oldName);
-   targColorPos = mTargetColorMap.find(oldName);
-   
-   if (orbColorPos != mOrbitColorMap.end() &&
-       targColorPos != mTargetColorMap.end())
+   if (type == Gmat::SPACECRAFT)
    {
-      // add new spacecraft name key and delete old
-      mOrbitColorMap[newName] = mOrbitColorMap[oldName];
-      mTargetColorMap[newName] = mTargetColorMap[oldName];
-      mOrbitColorMap.erase(orbColorPos);
-      mTargetColorMap.erase(targColorPos);
+      // for spacecraft name
+      for (int i=0; i<mAllSpCount; i++)
+         if (mAllSpNameArray[i] == oldName)
+            mAllSpNameArray[i] = newName;
       
-      #if DEBUG_RENAME
-      MessageInterface::ShowMessage("---After rename\n");
-      for (orbColorPos = mOrbitColorMap.begin();
-           orbColorPos != mOrbitColorMap.end(); ++orbColorPos)
+      //----------------------------------------------------
+      // Since spacecraft name is used as key for spacecraft
+      // color map, I can't change the key name, so it is
+      // removed and inserted with new name
+      //----------------------------------------------------
+      std::map<std::string, UnsignedInt>::iterator orbColorPos, targColorPos;
+      orbColorPos = mOrbitColorMap.find(oldName);
+      targColorPos = mTargetColorMap.find(oldName);
+   
+      if (orbColorPos != mOrbitColorMap.end() &&
+          targColorPos != mTargetColorMap.end())
       {
-         MessageInterface::ShowMessage
-            ("sc=%s, color=%d\n", orbColorPos->first.c_str(), orbColorPos->second);
-      }
-      #endif
+         // add new spacecraft name key and delete old
+         mOrbitColorMap[newName] = mOrbitColorMap[oldName];
+         mTargetColorMap[newName] = mTargetColorMap[oldName];
+         mOrbitColorMap.erase(orbColorPos);
+         mTargetColorMap.erase(targColorPos);
       
-      return true;
+         #if DEBUG_RENAME
+         MessageInterface::ShowMessage("---After rename\n");
+         for (orbColorPos = mOrbitColorMap.begin();
+              orbColorPos != mOrbitColorMap.end(); ++orbColorPos)
+         {
+            MessageInterface::ShowMessage
+               ("sc=%s, color=%d\n", orbColorPos->first.c_str(), orbColorPos->second);
+         }
+         #endif
+      }
+   }
+   else if (type == Gmat::COORDINATE_SYSTEM)
+   {
+      if (mViewCoordSysName == oldName)
+         mViewCoordSysName = newName;
+
+      if (mViewUpCoordSysName == oldName)
+         mViewUpCoordSysName = newName;      
    }
    
-   return false;
+   return true;
 }
 
 
