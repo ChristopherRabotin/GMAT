@@ -156,6 +156,7 @@ private:
    void BuildScript(const wxString &filename);
    
    wxMenu* CreatePopupMenu(Gmat::ObjectType type);
+   Gmat::ObjectType GetObjectType(int itemType);
    
    DECLARE_EVENT_TABLE();
 

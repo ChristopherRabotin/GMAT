@@ -58,6 +58,7 @@
 #include <wx/dir.h>
 
 //#define DEBUG_RESOURCE_TREE 1
+//#define DEBUG_RENAME 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -929,8 +930,18 @@ void ResourceTree::AddDefaultCoordSys(wxTreeItemId itemId)
    for (int i = 0; i<size; i++)
    {
       objName = wxString(itemNames[i].c_str());
-      AppendItem(itemId, wxT(objName), GmatTree::ICON_COORDINATE_SYSTEM, -1,
-                 new GmatTreeItemData(wxT(objName), GmatTree::COORD_SYSTEM));
+      //loj: 8/19/05 Added to check for default coord. system
+      if (objName == "EarthMJ2000Eq" || objName == "EarthMJ2000Ec" ||
+          objName == "EarthFixed")
+      {
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_COORDINATE_SYSTEM, -1,
+                    new GmatTreeItemData(wxT(objName), GmatTree::COORD_SYSTEM));
+      }
+      else
+      {
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_COORDINATE_SYSTEM, -1,
+                    new GmatTreeItemData(wxT(objName), GmatTree::USER_COORD_SYSTEM));
+      }
    };
    
    if (size > 0)
@@ -1144,6 +1155,12 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       return;     //no menu
    else if (strcmp(title, wxT("Ground Stations")) == 0)
       return;     //no menu
+   else if (dataType == GmatTree::CELESTIAL_BODY ||
+            dataType == GmatTree::COORD_SYSTEM) //loj: 8/19/05 Added
+   {
+      menu.Append(POPUP_OPEN, wxT("Open"));
+      menu.Append(POPUP_CLOSE, wxT("Close"));
+   }
    else
    {
       menu.Append(POPUP_OPEN, wxT("Open"));
@@ -1154,7 +1171,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       menu.AppendSeparator();
       menu.Append(POPUP_CLONE, wxT("Clone"));
 
-      menu.Enable(POPUP_DELETE, FALSE);
+      //menu.Enable(POPUP_DELETE, FALSE); //loj: 8/19/05 commented out
    }
     
    PopupMenu(&menu, pt);
@@ -1219,6 +1236,7 @@ void ResourceTree::OnClose(wxCommandEvent &event)
       return;
 }
 
+
 //------------------------------------------------------------------------------
 // void OnRename(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -1240,52 +1258,19 @@ void ResourceTree::OnRename(wxCommandEvent &event)
    wxString newName = oldName;
    newName = wxGetTextFromUser(wxT("New name: "), wxT("Input Text"),
                                newName, this);
-
-   //if newName != oldName
+   
    if ( !newName.IsEmpty() && !(newName.IsSameAs(oldName)))
    {
-      Gmat::ObjectType objType;
+      Gmat::ObjectType objType = GetObjectType(dataType);
       
-      switch (dataType)
-      {
-      case GmatTree::SPACECRAFT:
-         objType = Gmat::SPACECRAFT;
-         break;
-      case GmatTree::FORMATION_FOLDER:
-         objType = Gmat::FORMATION;
-         break;
-      case GmatTree::IMPULSIVE_BURN:
-         objType = Gmat::BURN;
-         break;
-      case GmatTree::FINITE_BURN:
-         objType = Gmat::BURN;
-         break;
-      case GmatTree::PROPAGATOR:
-         objType = Gmat::PROP_SETUP; //loj: 6/10/05 - Changed from PROPAGATOR
-         break;
-      case GmatTree::DIFF_CORR:
-         objType = Gmat::SOLVER;
-         break;
-      case GmatTree::REPORT_FILE:
-      case GmatTree::XY_PLOT:
-      case GmatTree::OPENGL_PLOT:
-         objType = Gmat::SUBSCRIBER;
-         break;
-      case GmatTree::VARIABLE:
-         objType = Gmat::PARAMETER;
-         break;
-      case GmatTree::MATLAB_FUNCTION:
-      case GmatTree::GMAT_FUNCTION:
-         objType = Gmat::FUNCTION;
-         break;
-      default:
-         objType = Gmat::UNKNOWN_OBJECT;
-         MessageInterface::ShowMessage
-            ("ResourceTree::OnRename() unknown object type.\n");
-         break;
-      }
-
-
+      #if DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("ResourceTree::OnRename() objType = %d\n", objType);
+      #endif
+      
+      if (objType == Gmat::UNKNOWN_OBJECT)
+         return;
+      
       // update item only if successful
       if (theGuiInterpreter->
           RenameConfiguredItem(objType, oldName.c_str(), newName.c_str()))
@@ -1295,14 +1280,14 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
          selItem->SetDesc(newName);
          theGuiManager->UpdateAll();
-
+         
          // update formation which may use new spacecraft name
          if (objType == Gmat::SPACECRAFT)
          {
             Collapse(mSpacecraftItem);
             DeleteChildren(mSpacecraftItem);
             AddDefaultSpacecraft(mSpacecraftItem);
-
+            
             Collapse(mFormationItem);
             DeleteChildren(mFormationItem);
             AddDefaultFormations(mFormationItem);
@@ -1313,6 +1298,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          DeleteChildren(mVariableItem);
          AddDefaultVariables(mVariableItem);
          UpdateResource(false);
+         
       }
       else
       {
@@ -1321,8 +1307,8 @@ void ResourceTree::OnRename(wxCommandEvent &event)
              oldName.c_str(), newName.c_str());
       }
    }
-
 }
+
 
 //------------------------------------------------------------------------------
 // void OnDelete(wxCommandEvent &event)
@@ -1337,18 +1323,32 @@ void ResourceTree::OnRename(wxCommandEvent &event)
 void ResourceTree::OnDelete(wxCommandEvent &event)
 {
    event.Skip();
-   //    wxTreeItemId item = GetSelection();
-   //    wxTreeItemId parentId = GetPrevVisible(item);
-   //    this->Collapse(parentId);
-   //    
-   //    // delete from gui interpreter
-   //    GmatTreeItemData *gmatItem = (GmatTreeItemData *)GetItemData(item);
-   ////    theGuiInterpreter->RemoveConfiguredItem("Spacecraft", gmatItem->GetDesc());
-   //    
-   //    this->Delete(item);
-   //    
-   //
+   
+   wxTreeItemId item = GetSelection();
+   GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
+   int itemType = selItem->GetDataType();
+   
+   Gmat::ObjectType objType = GetObjectType(itemType);
+   if (objType == Gmat::UNKNOWN_OBJECT)
+      return;
+   
+   // delete item if object successfully deleted
+   if (theGuiInterpreter->RemoveItemIfNotUsed(objType, selItem->GetDesc().c_str()))
+   {
+      wxTreeItemId parentId = GetPrevVisible(item);
+      this->Collapse(parentId);
+      this->Delete(item);
+      
+      theGuiManager->UpdateAll();
+      UpdateResource(false);
+   }
+   else
+   {
+      wxLogWarning(selItem->GetDesc() +
+                   " cannot be deleted.\n It is currently used in other object(s).");
+   }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnClone(wxCommandEvent &event)
@@ -2151,8 +2151,10 @@ void ResourceTree::OnAddCoordSys(wxCommandEvent &event)
       wxString name = coordDlg.GetCoordName();
 
       AppendItem(item, name, GmatTree::ICON_COORDINATE_SYSTEM, -1,
-                    new GmatTreeItemData(name, GmatTree::COORD_SYSTEM));
-
+                 new GmatTreeItemData(name, GmatTree::USER_COORD_SYSTEM));
+      //loj: 8/19/05 changed to USER_COORD_SYSTEM because we don't want to delete
+      // default coord. system
+      
       Expand(item);
 
       theGuiManager->UpdateCoordSystem();
@@ -2570,10 +2572,6 @@ void ResourceTree::BuildScript(const wxString &filename)
 }
 
 
-//---------------------------------
-// Crete popup menu
-//---------------------------------
-
 //------------------------------------------------------------------------------
 // wxMenu* CreatePopupMenu(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
@@ -2642,3 +2640,66 @@ wxMenu* ResourceTree::CreatePopupMenu(Gmat::ObjectType type)
    return menu;
 }
 
+
+//------------------------------------------------------------------------------
+// Gmat::ObjectType GetObjectType(int itemType)
+//------------------------------------------------------------------------------
+Gmat::ObjectType ResourceTree::GetObjectType(int itemType)
+{
+   Gmat::ObjectType objType;
+   
+   switch (itemType)
+   {
+   case GmatTree::SPACECRAFT:
+      objType = Gmat::SPACECRAFT;
+      break;
+   case GmatTree::FORMATION_FOLDER:
+      objType = Gmat::FORMATION;
+      break;
+   case GmatTree::IMPULSIVE_BURN:
+      objType = Gmat::BURN;
+      break;
+   case GmatTree::FINITE_BURN:
+      objType = Gmat::BURN;
+      break;
+   case GmatTree::PROPAGATOR:
+      objType = Gmat::PROP_SETUP;
+      break;
+   case GmatTree::DIFF_CORR:
+      objType = Gmat::SOLVER;
+      break;
+   case GmatTree::REPORT_FILE:
+   case GmatTree::XY_PLOT:
+   case GmatTree::OPENGL_PLOT:
+      objType = Gmat::SUBSCRIBER;
+      break;
+   case GmatTree::VARIABLE:
+      objType = Gmat::PARAMETER;
+      break;
+   case GmatTree::MATLAB_FUNCTION:
+   case GmatTree::GMAT_FUNCTION:
+      objType = Gmat::FUNCTION;
+      break;
+   case GmatTree::FUELTANK:
+   case GmatTree::THRUSTER:
+      objType = Gmat::HARDWARE;
+      break;
+   case GmatTree::BARYCENTER:
+   case GmatTree::LIBRATION_POINT:
+      objType = Gmat::CALCULATED_POINT;
+      break;
+   case GmatTree::COORD_SYSTEM:
+   case GmatTree::USER_COORD_SYSTEM:
+      objType = Gmat::COORDINATE_SYSTEM;
+      break;
+      
+   default:
+      objType = Gmat::UNKNOWN_OBJECT;
+      MessageInterface::ShowMessage
+         ("ResourceTree::GetObjectType() unknown object type.\n");
+      break;
+   }
+   
+   return objType;
+   
+}
