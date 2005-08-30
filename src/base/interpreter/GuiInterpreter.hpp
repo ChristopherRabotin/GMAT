@@ -64,7 +64,8 @@ public:
    bool RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName,
                              const std::string &newName);
    bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name);
-
+   bool RemoveItemIfNotUsed(Gmat::ObjectType type, const std::string &name);
+   
    // SolarSystem
    SolarSystem* GetDefaultSolarSystem();
 

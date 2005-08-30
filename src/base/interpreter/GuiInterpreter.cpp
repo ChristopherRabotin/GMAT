@@ -171,7 +171,27 @@ bool GuiInterpreter::RenameConfiguredItem(Gmat::ObjectType type,
 bool GuiInterpreter::RemoveConfiguredItem(Gmat::ObjectType type,
                                           const std::string &name)
 {
-   return moderator->RemoveConfiguredItem(type, name);
+   return moderator->RemoveConfiguredItem(type, name, false);
+}
+
+
+//------------------------------------------------------------------------------
+// bool RemoveItemIfNotUsed(Gmat::ObjectType type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Removes item from the configured list if it is not used in the mission
+ * sequence.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return true if the item has been removed; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GuiInterpreter::RemoveItemIfNotUsed(Gmat::ObjectType type,
+                                          const std::string &name)
+{
+   return moderator->RemoveConfiguredItem(type, name, true);
 }
 
 
