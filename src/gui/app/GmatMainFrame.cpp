@@ -629,7 +629,8 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
 //         sizer->Add (new AssignmentPanel (panel, item->GetCommand()),
 //                     0, wxGROW|wxALL, 0 );
 //      }
-      else if (dataType == GmatTree::COORD_SYSTEM)
+      else if (dataType == GmatTree::COORD_SYSTEM ||
+               dataType == GmatTree::USER_COORD_SYSTEM)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
