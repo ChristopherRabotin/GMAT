@@ -62,8 +62,12 @@ void ScriptPanel::Create()
 
    //wxStaticText
    mFileContentsTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
-                            wxDefaultPosition, wxDefaultSize,
-                            wxTE_MULTILINE | wxGROW | wxHSCROLL);
+                               wxDefaultPosition, wxDefaultSize,
+#ifdef __WXMAC__
+                               wxTE_MULTILINE); 
+#else
+                               wxTE_MULTILINE | wxGROW | wxHSCROLL);
+#endif
                             
    // 5/24/05 - arg: for demo change font size to HUGE
    mFileContentsTextCtrl->SetFont( GmatAppData::GetFont() );
@@ -202,5 +206,3 @@ void ScriptPanel::OnButton(wxCommandEvent& event)
 //    mFileContentsTextCtrl->SetFont(newFont);
 //  }
 //}
-
-
