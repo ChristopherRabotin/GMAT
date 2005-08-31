@@ -43,10 +43,10 @@ public:
    bool GetShowEpoch() {return mShowEpoch;}
    bool GetShowXyz() {return mShowXyz;}
    bool GetShowUpdateInterval() {return mShowUpdate;}
-
+   
    wxTextCtrl *GetEpochTextCtrl() {return epochTextCtrl;}
    wxTextCtrl *GetIntervalTextCtrl() {return intervalTextCtrl;}
-
+   
    void EnableOptions();
    void SetDefaultAxis();
    void SetDefaultEpochRefAxis();
@@ -54,6 +54,8 @@ public:
    void ShowAxisData(AxisSystem *axis);
    AxisSystem* CreateAxis();
    void ChangeEpoch(wxString &oldFormat);
+   bool SaveData(const std::string &coordName, AxisSystem *axis,
+                 wxString &epochFormat);
    
 private:
    GuiInterpreter *theGuiInterpreter;
@@ -96,7 +98,7 @@ private:
 
    void Create();
    void LoadData();
-
+   
    // Layout & data handling methods
    void Setup(wxWindow *parent);
    
@@ -104,7 +106,7 @@ private:
                     const wxString &secName, const wxString &x,
                     const wxString &y, const wxString &z);
    bool IsValidXYZ(const wxString &x, const wxString &y, const wxString &z);
-    
+   
    // IDs for the controls and the menu commands
    enum
    {

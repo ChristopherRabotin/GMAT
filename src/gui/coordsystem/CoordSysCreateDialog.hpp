@@ -33,6 +33,7 @@ public:
 
 protected:
    bool mIsCoordCreated;
+   bool mCanClose;
    wxString mCoordName;
    CoordPanel *mCoordPanel;
    

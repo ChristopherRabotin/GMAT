@@ -49,7 +49,7 @@ CoordPanel::CoordPanel(wxWindow *parent, bool enableAll)
 //------------------------------------------------------------------------------
 CoordPanel::~CoordPanel()
 {
-   // Unregisger GUI components(loj: 6/7/05 Added)
+   // Unregisger GUI components
    theGuiManager->UnregisterComboBox("SpacePoint", originComboBox);
    theGuiManager->UnregisterComboBox("SpacePoint", primaryComboBox);
    theGuiManager->UnregisterComboBox("SpacePoint", secondaryComboBox);
@@ -68,7 +68,7 @@ void CoordPanel::EnableOptions()
 
    if (typeComboBox->GetStringSelection() == "Equator")
    {
-      mShowPrimaryBody = false;   // 05/03/05: ag changed from true to false
+      mShowPrimaryBody = false; 
       mShowSecondaryBody = false;
       mShowEpoch = false;
       mShowXyz = false;
@@ -76,7 +76,7 @@ void CoordPanel::EnableOptions()
    }
    else if (typeComboBox->GetStringSelection() == "BodyFixed")
    {
-      mShowPrimaryBody = false;   // 05/03/05: ag changed from true to false
+      mShowPrimaryBody = false; 
       mShowSecondaryBody = false;
       mShowEpoch = false;
       mShowXyz = false;
@@ -163,7 +163,6 @@ void CoordPanel::EnableOptions()
    }
    else  // disable all of them
    {
-      //loj: 6/20/05 Just set to false for clearness
       originStaticText->Enable(false);
       typeStaticText->Enable(false);
       primaryStaticText->Enable(false);
@@ -189,7 +188,6 @@ void CoordPanel::EnableOptions()
 }
 
 
-//loj: 6/21/05 Added
 //------------------------------------------------------------------------------
 // void SetDefaultAxis()
 //------------------------------------------------------------------------------
@@ -209,7 +207,6 @@ void CoordPanel::SetDefaultAxis()
 }
 
 
-//loj: 6/21/05 Added
 //------------------------------------------------------------------------------
 // void SetDefaultEpochRefAxis()
 //------------------------------------------------------------------------------
@@ -221,7 +218,6 @@ void CoordPanel::SetDefaultEpochRefAxis()
 }
 
 
-//loj: 6/21/05 Added
 //------------------------------------------------------------------------------
 // void SetDefaultObjectRefAxis()
 //------------------------------------------------------------------------------
@@ -236,7 +232,6 @@ void CoordPanel::SetDefaultObjectRefAxis()
 }
 
 
-//loj: 6/21/05 Added
 //------------------------------------------------------------------------------
 // void ShowAxisData(AxisSystem *axis)
 //------------------------------------------------------------------------------
@@ -250,7 +245,7 @@ void CoordPanel::ShowAxisData(AxisSystem *axis)
       
       if (GetShowPrimaryBody())
       {
-         // Primary/Secondary edits to just get the names  05/05/05, DJC
+         // Primary/Secondary edits to just get the names
          SpacePoint *primaryObj = axis->GetPrimaryObject();
          if (primaryObj != NULL)
             primaryComboBox->SetStringSelection(primaryObj->GetName().c_str());
@@ -271,27 +266,32 @@ void CoordPanel::ShowAxisData(AxisSystem *axis)
       
       if (GetShowEpoch())
       {
-         A1Mjd epoch = axis->GetEpoch();
-         
+         Real epoch = axis->GetEpoch().Get();
          std::string epochFormat = axis->GetEpochFormat();
          
-         //loj: 6/21/05 Changed SetValue() to SetStringSelection()
          formatComboBox->SetStringSelection(epochFormat.c_str());
+         wxString wxEpochStr;
+         wxEpochStr.Printf("%9.9f", epoch);
+         std::string epochString = wxEpochStr.c_str();
          
-         Real taiEpoch = TimeConverterUtil::ConvertToTaiMjd
-            ("A1Mjd", epoch.Get(), GmatTimeUtil::JD_JAN_5_1941);
+         // convert if epoch is not in TAIModJulian
+         if (epochFormat != "TAIModJulian")
+         {
+            Real taiEpoch = TimeConverterUtil::ConvertToTaiMjd
+               ("A1Mjd", epoch, GmatTimeUtil::JD_JAN_5_1941);
+            
+            wxString taiEpochStr;
+            taiEpochStr.Printf("%9.9f", taiEpoch);
+            epochString =
+               mTimeConverter.Convert(taiEpochStr.c_str(), "TAIModJulian",
+                                      epochFormat);
+         }
          
-         wxString taiEpochStr;
-         taiEpochStr.Printf("%9.9f", taiEpoch);
-         std::string epochString =
-            mTimeConverter.Convert(taiEpochStr.c_str(), "TAIModJulian",
-                                   epochFormat);
          epochTextCtrl->SetValue(epochString.c_str());
       }
       
       if (GetShowXyz())
       {
-         //loj: 6/21/05 Chagned SetValue() to SetStringSelection()
          xComboBox->SetStringSelection(axis->GetXAxis().c_str());
          yComboBox->SetStringSelection(axis->GetYAxis().c_str());
          zComboBox->SetStringSelection(axis->GetZAxis().c_str());
@@ -320,7 +320,6 @@ void CoordPanel::ShowAxisData(AxisSystem *axis)
 }
 
 
-//loj: 6/21/05 Added
 //------------------------------------------------------------------------------
 // AxisSystem* CreateAxis()
 //------------------------------------------------------------------------------
@@ -369,7 +368,7 @@ AxisSystem* CoordPanel::CreateAxis()
             
             axis->SetEpochFormat(std::string(epochFormat.c_str()));
             axis->SetRealParameter("UpdateInterval", atof(updateStr.c_str()));
-
+            
             // convert epoch to a1mjd
             std::string taiEpochStr = mTimeConverter.Convert
                (std::string(epochStr.c_str()), std::string(epochFormat.c_str()),
@@ -395,7 +394,6 @@ AxisSystem* CoordPanel::CreateAxis()
 }
 
 
-//loj: 6/21/05 Added
 //------------------------------------------------------------------------------
 // void ChangeEpoch(wxString &oldFormat)
 //------------------------------------------------------------------------------
@@ -424,7 +422,6 @@ void CoordPanel::ChangeEpoch(wxString &oldFormat)
 // private methods
 //---------------------------------
 
-//loj: 6/21/05 Added
 //------------------------------------------------------------------------------
 // bool IsValidAxis(const wxString &axisType, const wxString &priName,
 //                  const wxString &secName, const wxString &xStr,
@@ -464,7 +461,6 @@ bool CoordPanel::IsValidAxis(const wxString &axisType, const wxString &priName,
 }
 
 
-//loj: 6/21/05 Added
 //------------------------------------------------------------------------------
 // bool IsValidXYZ(const wxString &xStr, const wxString &yStr,
 //                 const wxString &zStr)
@@ -579,10 +575,10 @@ void CoordPanel::Setup( wxWindow *parent)
    zStaticText = new wxStaticText( parent, ID_TEXT, wxT("Z: "),
       wxDefaultPosition, wxDefaultSize, 0 );
 
-    // wxTextCtrl
-    wxString emptyList[] = {};
+   // wxTextCtrl
+   wxString emptyList[] = {};
 
-    // wxComboBox
+   // wxComboBox
    originComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
       wxSize(120,-1), false);
    typeComboBox = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition,
@@ -686,8 +682,7 @@ void CoordPanel::LoadData()
       for (unsigned int i = 0; i<itemNames.size(); i++)
          typeComboBox->Append(wxString(itemNames[i].c_str()));
       
-      // insert a blank option for primary and secondary
-//      primaryComboBox->Append("");
+      // insert a blank option for secondary
       secondaryComboBox->Append("");
       
       // Load epoch types - hard coded for now
@@ -728,4 +723,157 @@ void CoordPanel::LoadData()
    }
 }
 
+//loj: 8/31/05 Added
+//------------------------------------------------------------------------------
+// bool SaveData(const std::string &coordName, AxisSystem *axis,
+//               const wxString &epochFormat)
+//------------------------------------------------------------------------------
+bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
+                          wxString &epochFormat)
+{
+   #if DEBUG_COORD_PANEL
+   MessageInterface::ShowMessage
+      ("oordPanel::SaveData() coordName=%s, epochFormat=%s\n",
+       coordName.c_str(), epochFormat.c_str());
+   #endif
+   
+   bool canClose = true;
+   
+   try
+   {
+      // create CoordinateSystem if not exist
+      CoordinateSystem *coordSys = theGuiInterpreter->GetCoordinateSystem(coordName);
+      
+      if (coordSys == NULL)
+      {
+         coordSys = theGuiInterpreter->CreateCoordinateSystem(coordName);
+         #if DEBUG_COORD_PANEL
+         MessageInterface::ShowMessage
+            ("CoordPanel::SaveData() coordName=%s created.\n",
+             coordName.c_str());
+         #endif
+      }
+      
+      //-------------------------------------------------------
+      // set origin and Axis
+      //-------------------------------------------------------
+      wxString originName = originComboBox->GetValue().Trim();
+      coordSys->SetStringParameter("Origin", std::string(originName.c_str()));
+      coordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
+      
+      SpacePoint *origin = (SpacePoint*)theGuiInterpreter->
+         GetConfiguredItem(originName.c_str());
+      
+      coordSys->SetOrigin(origin);
+      
+      // set Earth as J000Body if NULL
+      if (origin->GetJ2000Body() == NULL)
+      {
+         CelestialBody *j2000body = (CelestialBody*)theGuiInterpreter->
+            GetConfiguredItem("Earth");
+         j2000body->SetJ2000Body(j2000body);
+         origin->SetJ2000Body(j2000body);
+      }
+      
+      //-------------------------------------------------------
+      // set primary and secondary 
+      //-------------------------------------------------------
+      // Set primary body if exist
+      if (primaryComboBox->IsEnabled())
+      {
+         wxString primaryName = primaryComboBox->GetValue().Trim();
+         SpacePoint *primary = (SpacePoint*)theGuiInterpreter->
+            GetConfiguredItem(primaryName.c_str());
+         
+         axis->SetStringParameter("Primary", primaryName.c_str());
+         axis->SetPrimaryObject(primary);
+      }
+      
+      // set secondary body if exist
+      if (secondaryComboBox->IsEnabled())
+      {
+         wxString secondaryName = secondaryComboBox->GetValue().Trim();
+         SpacePoint *secondary = (SpacePoint*)theGuiInterpreter->
+            GetConfiguredItem(secondaryName.c_str());
+         
+         axis->SetStringParameter("Secondary", secondaryName.c_str());
+         axis->SetSecondaryObject(secondary);
+      }
+      
+      //-------------------------------------------------------
+      // set new direction
+      //-------------------------------------------------------
+      // set X value if exist
+      if (xComboBox->IsEnabled())
+         axis->SetXAxis(xComboBox->GetValue().Trim().c_str());
+      
+      // set Y value if exist
+      if (yComboBox->IsEnabled())
+         axis->SetYAxis(yComboBox->GetValue().Trim().c_str());
+      
+      // set z value if exist
+      if (zComboBox->IsEnabled())
+         axis->SetZAxis(zComboBox->GetValue().Trim().c_str());
+      
+      //-------------------------------------------------------
+      // set new epoch format and epoch
+      //-------------------------------------------------------
+      if (epochTextCtrl->IsEnabled())
+      {     
+         wxString newEpochFormat = formatComboBox->GetValue().Trim();
+         std::string epochStr = epochTextCtrl->GetValue().c_str();
+         Real epoch;
+         
+         if (epochTextCtrl->GetValue().ToDouble(&epoch))
+         {
+            if (epochFormat != newEpochFormat)
+            {
+               axis->SetEpochFormat(newEpochFormat.c_str());
+               epochFormat = newEpochFormat;
+               
+               //convert epoch to a1mjd if not in this format
+               if (newEpochFormat != "TAIModJulian")
+               {
+                  std::string taiEpochStr = mTimeConverter.Convert
+                     (epochStr, newEpochFormat.c_str(), "TAIModJulian");
+                  epoch = TimeConverterUtil::ConvertFromTaiMjd
+                     ("A1Mjd", atof(taiEpochStr.c_str()), GmatTimeUtil::JD_JAN_5_1941);
+               }
+            }
+            
+            axis->SetEpoch(epoch);
+         }
+         else
+         {
+            wxLogError("Invalid epoch value entered.");
+            canClose = false;
+         }
+      }
+      
+      //-------------------------------------------------------
+      // set new update interval
+      //-------------------------------------------------------
+      if (intervalTextCtrl->IsEnabled())
+      {
+         Real interval;
+         if (intervalTextCtrl->GetValue().ToDouble(&interval))
+         {
+            axis->SetRealParameter("UpdateInterval", interval);
+         }
+         else
+         {
+            wxLogError("Invalid update interval value entered.");
+            canClose = false;
+         }
+      }
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("*** Error *** %s\n", e.GetMessage().c_str());
+      canClose = false;
+   }
+   
+   return canClose;
+}
 

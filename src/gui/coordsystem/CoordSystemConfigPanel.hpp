@@ -31,7 +31,7 @@ private:
    CoordPanel *mCoordPanel;
    wxString mEpochFormat;
    bool mOriginChanged;
-   bool mAxisChanged;
+   bool mObjRefChanged;
    
    wxTextCtrl *epochTextCtrl;
    wxTextCtrl *intervalTextCtrl;

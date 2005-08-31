@@ -1,4 +1,4 @@
-//$Header:
+//$Header$
 //------------------------------------------------------------------------------
 //                              CoordSystemConfigPanel
 //------------------------------------------------------------------------------
@@ -43,7 +43,7 @@ CoordSystemConfigPanel::CoordSystemConfigPanel(wxWindow *parent,
                   coordName.c_str());
    mEpochFormat = "TAIModJulian";
    mOriginChanged = false;
-   mAxisChanged = false;
+   mObjRefChanged = false;
    
    Create();
    Show();
@@ -105,8 +105,6 @@ void CoordSystemConfigPanel::LoadData()
    yComboBox = mCoordPanel->GetYComboBox();
    zComboBox = mCoordPanel->GetZComboBox();
    
-   //mCoordPanel->SetDefaultAxis();
-   
    // get the data from the base
    wxString origin = theCoordSys->GetStringParameter("Origin").c_str();
    originComboBox->SetValue(origin);
@@ -137,55 +135,57 @@ void CoordSystemConfigPanel::LoadData()
 //------------------------------------------------------------------------------
 void CoordSystemConfigPanel::SaveData()
 {
-   canClose = false;
+   canClose = true;
+   std::string originName = originComboBox->GetValue().Trim().c_str();
 
+   //-------------------------------------------------------
+   // set new origin
+   //-------------------------------------------------------
    if (mOriginChanged)
-   {
-      wxString originName = originComboBox->GetValue().Trim();
-      
+   { 
       //MessageInterface::ShowMessage
       //   ("===> originName = %s\n", originName.c_str());
       
       mOriginChanged = false;
-      theCoordSys->SetStringParameter("Origin", std::string(originName.c_str()));
+      theCoordSys->SetStringParameter("Origin", originName);
       
-      // set Earth as J2000Body
-      CelestialBody *origin = (CelestialBody*)theGuiInterpreter->
-         GetConfiguredItem(originName.c_str());
-      
+      // set coordinate system origin
+      SpacePoint *origin = (SpacePoint*)theGuiInterpreter->
+         GetConfiguredItem(originName);
       theCoordSys->SetOrigin(origin);
       
       // set Earth as J000Body if NULL
       if (origin->GetJ2000Body() == NULL)
       {
-         CelestialBody *j2000body = (CelestialBody*)theGuiInterpreter->
+         SpacePoint *j2000body = (SpacePoint*)theGuiInterpreter->
             GetConfiguredItem("Earth");
          origin->SetJ2000Body(j2000body);
       }
-      
-      canClose = true;
    }
    
-   if (mAxisChanged)
+   //-------------------------------------------------------
+   // set new axis system
+   //-------------------------------------------------------
+   if (mObjRefChanged)
    {
-      canClose = false;
       AxisSystem *axis = mCoordPanel->CreateAxis();
-   
+      
       if (axis != NULL)
       {
          AxisSystem *oldAxis =
             (AxisSystem *)theCoordSys->GetRefObject(Gmat::AXIS_SYSTEM, "");
          
+         canClose = mCoordPanel->SaveData(theCoordSys->GetName(), axis, mEpochFormat);
+         
          // delete old axis and set new axis
          delete oldAxis;
          theCoordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
-         
-         canClose = true;
       }
       else
       {
          MessageInterface::ShowMessage
             ("CoordSystemConfigPanel::SaveData() Cannot create AxisSystem.\n");
+         canClose = false;
       }
    }
 }
@@ -195,7 +195,8 @@ void CoordSystemConfigPanel::SaveData()
 // void OnGravityTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void CoordSystemConfigPanel::OnTextUpdate(wxCommandEvent& event)
-{  
+{
+   mObjRefChanged = true;
    theApplyButton->Enable(true);
 }
 
@@ -212,11 +213,22 @@ void CoordSystemConfigPanel::OnComboUpdate(wxCommandEvent& event)
    else if (event.GetEventObject() == typeComboBox)
    {
       mCoordPanel->EnableOptions();
-      mAxisChanged = true;
+      mObjRefChanged = true;
    }
    else if (event.GetEventObject() == formatComboBox)
    {
       mCoordPanel->ChangeEpoch(mEpochFormat);
+   }
+   else if (event.GetEventObject() == primaryComboBox ||
+            event.GetEventObject() == secondaryComboBox)
+   {
+      mObjRefChanged = true;
+   }
+   else if (event.GetEventObject() == xComboBox ||
+            event.GetEventObject() == yComboBox ||
+            event.GetEventObject() == zComboBox)
+   {
+      mObjRefChanged = true;
    }
    
    theApplyButton->Enable(true);

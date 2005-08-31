@@ -16,6 +16,7 @@
 
 #include "CoordSysCreateDialog.hpp"
 #include "MessageInterface.hpp"
+#include "CoordinateSystem.hpp"
 #include "AxisSystem.hpp"
 
 //#define DEBUG_COORD_DIALOG 1
@@ -108,50 +109,38 @@ void CoordSysCreateDialog::LoadData()
 //------------------------------------------------------------------------------
 void CoordSysCreateDialog::SaveData()
 {
-   mIsCoordCreated = false;
+   mCanClose = true;
    std::string coordName = std::string(nameTextCtrl->GetValue().Trim().c_str());
    
-   if (theGuiInterpreter->GetCoordinateSystem(coordName) == NULL)
+   CoordinateSystem *coord = theGuiInterpreter->GetCoordinateSystem(coordName);
+   
+   if (mIsCoordCreated)
    {
-      // create AxisSystem
-      AxisSystem *axis = mCoordPanel->CreateAxis();
+      AxisSystem *axis =
+         (AxisSystem *)coord->GetRefObject(Gmat::AXIS_SYSTEM, "");
       
-      if (axis != NULL)
-      {
-         // create CoordinateSystem
-         CoordinateSystem *coordSys =
-            theGuiInterpreter->CreateCoordinateSystem(coordName);
-         
-         // set origin and Axis
-         wxString originName = originComboBox->GetValue().Trim();
-         coordSys->SetStringParameter("Origin", std::string(originName.c_str()));
-         coordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
-         
-         CelestialBody *origin = (CelestialBody*)theGuiInterpreter->
-            GetConfiguredItem(originName.c_str());
-         
-         coordSys->SetOrigin(origin);
-         
-         // set Earth as J000Body if NULL
-         if (origin->GetJ2000Body() == NULL)
-         {
-            CelestialBody *j2000body = (CelestialBody*)theGuiInterpreter->
-               GetConfiguredItem("Earth");
-            j2000body->SetJ2000Body(j2000body);
-            origin->SetJ2000Body(j2000body);
-         }
-         
-         mIsCoordCreated = true;
-         mCoordName = wxString(coordName.c_str());
-      }
+      mCanClose = mCoordPanel->SaveData(coordName, axis, wxFormatName);
    }
    else
    {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, "The CoordinateSystem: " + coordName +
-          " already exist. Please enter different name\n");
+      if (coord == NULL)
+      {
+         // create AxisSystem
+         AxisSystem *axis = mCoordPanel->CreateAxis();
+         
+         if (axis != NULL)
+         {
+            mCanClose = mCoordPanel->SaveData(coordName, axis, wxFormatName);
+            mIsCoordCreated = true;
+            mCoordName = wxString(coordName.c_str());
+         }
+      }
+      else
+      {
+         wxLogError("The CoordinateSystem: " + wxString(coordName.c_str()) +
+                    " already exist. Please enter different name\n");
+      }
    }
-   
 }
 
 
@@ -173,7 +162,7 @@ void CoordSysCreateDialog::OnOK(wxCommandEvent &event)
 {
    SaveData();
    
-   if (mIsCoordCreated)
+   if (mIsCoordCreated && mCanClose)
       Close();
 }
 
