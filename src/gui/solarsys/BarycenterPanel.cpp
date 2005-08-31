@@ -99,12 +99,15 @@ void BarycenterPanel::Create()
                         wxDefaultPosition, wxDefaultSize, 0 );
 
    // wxButton
-   addBodyButton = new wxButton( this, ID_BUTTON, wxT("->"),
-                                 wxDefaultPosition, wxSize(20,20), 0 );
-   removeBodyButton = new wxButton( this, ID_BUTTON, wxT("<-"),
-                                    wxDefaultPosition, wxSize(20,20), 0 );
+   addBodyButton = new wxButton( this, ID_BUTTON, wxT("->"), 
+                       wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
+
+   removeBodyButton = new wxButton( this, ID_BUTTON, wxT("<-"), 
+                          wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
+                                    
+
    clearBodyButton = new wxButton( this, ID_BUTTON, wxT("<="),
-                                   wxDefaultPosition, wxSize(20,20), 0 );
+                         wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
 
    wxArrayString tmpArrayString;
 

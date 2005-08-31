@@ -127,13 +127,16 @@ void UniversePanel::Create()
    // 2nd column (Add, Remove, Clear, Prioritize buttons)
    //-------------------------------------------------------
    addButton = new wxButton(this, ID_BUTTON_ADD, wxT("-->"),
-                            wxDefaultPosition, wxSize(20,20), 0);
+                            wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+                            // wxDefaultPosition, wxSize(20,20), 0);
    
    removeButton = new wxButton(this, ID_BUTTON_REMOVE, wxT("<--"), 
-                               wxDefaultPosition, wxSize(20,20), 0);
+                               wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+                               // wxDefaultPosition, wxSize(20,20), 0);
    
    clearButton = new wxButton(this, ID_BUTTON_CLEAR, wxT("<="), 
-                              wxDefaultPosition, wxSize(20,20), 0);
+                              wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+                              // wxDefaultPosition, wxSize(20,20), 0);
    
    prioritizeButton = new wxButton(this, ID_BUTTON_SORT, wxT("Prioritize"), 
                                    wxDefaultPosition, wxSize(50,20), 0);
