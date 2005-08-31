@@ -66,6 +66,7 @@ LibrationPoint::LibrationPoint(const std::string &itsName) :
 CalculatedPoint("LibrationPoint", itsName),
 primaryBodyName     (""),
 secondaryBodyName   (""),
+whichPoint          (""),
 primaryBody         (NULL),
 secondaryBody       (NULL)
 {
@@ -88,8 +89,9 @@ LibrationPoint::LibrationPoint(const LibrationPoint &lp) :
 CalculatedPoint          (lp),
 primaryBodyName          (lp.primaryBodyName),
 secondaryBodyName        (lp.secondaryBodyName),
-primaryBody              (NULL),
-secondaryBody            (NULL)
+whichPoint               (lp.whichPoint),
+primaryBody              (lp.primaryBody),
+secondaryBody            (lp.secondaryBody)
 {
 }
 
@@ -113,6 +115,7 @@ LibrationPoint& LibrationPoint::operator=(const LibrationPoint &lp)
    CalculatedPoint::operator=(lp);
    primaryBodyName     = lp.primaryBodyName;
    secondaryBodyName   = lp.secondaryBodyName;
+   whichPoint          = lp.whichPoint;
    primaryBody         = lp.primaryBody;
    secondaryBody       = lp.secondaryBody;
    return *this;
