@@ -20,6 +20,8 @@
 #include "Formation.hpp"
 #include "MessageInterface.hpp"
 
+// #define DEBUG_FORMATION 1
+
 //------------------------------
 // event tables for wxWindows
 //------------------------------
@@ -89,7 +91,9 @@ FormationSetupPanel::~FormationSetupPanel()
 //------------------------------------------------------------------------------
 void FormationSetupPanel::Create()
 {
-   //MessageInterface::ShowMessage("FormationSetupPanel::Create() entering...\n");
+#ifdef DEBUG_FORMATION
+   MessageInterface::ShowMessage("FormationSetupPanel::Create() enters...\n");
+#endif
 
    Integer bsize = 3; // border size
    wxString emptyList[] = {};
@@ -119,13 +123,13 @@ void FormationSetupPanel::Create()
    // add, remove, clear parameter buttons (2nd column)
    //------------------------------------------------------
    wxButton *addScButton = new wxButton(this, ADD_BUTTON, wxT("-->"),
-                              wxDefaultPosition, wxSize(20,20), 0);
+                               wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    
    wxButton *removeScButton = new wxButton(this, REMOVE_BUTTON, wxT("<--"),
-                                 wxDefaultPosition, wxSize(20,20), 0);
+                              wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    
    wxButton *clearScButton = new wxButton(this, CLEAR_BUTTON, wxT("<="),
-                                wxDefaultPosition, wxSize(20,20), 0);
+                              wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    
    wxBoxSizer *arrowButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
    arrowButtonsBoxSizer->Add(addScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -160,6 +164,11 @@ void FormationSetupPanel::Create()
    // add to parent sizer
    //------------------------------------------------------
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+
+#ifdef DEBUG_FORMATION
+   MessageInterface::ShowMessage("FormationSetupPanel::Create() exits...\n");
+#endif
+
 }
 
 
@@ -212,15 +221,33 @@ void FormationSetupPanel::SaveData()
 //------------------------------------------------------------------------------
 void FormationSetupPanel::OnAddSpaceObject(wxCommandEvent& event)
 {
+#ifdef DEBUG_FORMATION
+   MessageInterface::ShowMessage(
+                   "\nFormationSetupPanel::OnAddSpaceObject() enters...");
+#endif
+
    // get string in first list and then search for it
    // in the second list
    wxString str = mSoAvailableListBox->GetStringSelection();
    int sel = mSoAvailableListBox->GetSelection();
    int found = mSoSelectedListBox->FindString(str);
    
+   #ifdef DEBUG_FORMATION
+      MessageInterface::ShowMessage("\nstr = \"%s\", sel = %d, found = %d\n",
+                      str.c_str(),sel,found);
+   #endif
+
+   // Check no selection then do nothing
+   if (sel == -1)
+      return;
+
    // if the string wasn't found in the second list, insert it
    if (found == wxNOT_FOUND)
    {
+      #ifdef DEBUG_FORMATION
+         MessageInterface::ShowMessage("\nstring is not found...");
+      #endif
+
       mSoSelectedListBox->Append(str);
       mSoAvailableListBox->Delete(sel); //loj: 5/25/05 Added
       mSoSelectedListBox->SetStringSelection(str);
@@ -233,6 +260,11 @@ void FormationSetupPanel::OnAddSpaceObject(wxCommandEvent& event)
       
       theApplyButton->Enable();
    }
+
+#ifdef DEBUG_FORMATION
+   MessageInterface::ShowMessage(
+                   "\nFormationSetupPanel::OnAddSpaceObject() exits...");
+#endif
 }
 
 
@@ -241,9 +273,23 @@ void FormationSetupPanel::OnAddSpaceObject(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void FormationSetupPanel::OnRemoveSpaceObject(wxCommandEvent& event)
 {
+#ifdef DEBUG_FORMATION
+   MessageInterface::ShowMessage(
+                   "\nFormationSetupPanel::OnRemoveSpaceObject() enters...");
+#endif
+
    wxString str = mSoSelectedListBox->GetStringSelection();
    int sel = mSoSelectedListBox->GetSelection();
    
+   #ifdef DEBUG_FORMATION
+      MessageInterface::ShowMessage("\nstr = \"%s\", sel = %d\n",
+                                    str.c_str(),sel);
+   #endif
+
+   // Check if no selection the do nothing
+   if (sel == -1)
+      return;
+
    mSoSelectedListBox->Delete(sel);
    mSoAvailableListBox->Append(str);
    mSoAvailableListBox->SetStringSelection(str);
@@ -255,6 +301,11 @@ void FormationSetupPanel::OnRemoveSpaceObject(wxCommandEvent& event)
       mSoSelectedListBox->SetSelection(sel-1);
    
    theApplyButton->Enable();
+
+#ifdef DEBUG_FORMATION
+   MessageInterface::ShowMessage(
+                   "\nFormationSetupPanel::OnRemoveSpaceObject() exits...\n");
+#endif
 }
 
 
