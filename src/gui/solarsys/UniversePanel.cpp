@@ -128,18 +128,16 @@ void UniversePanel::Create()
    //-------------------------------------------------------
    addButton = new wxButton(this, ID_BUTTON_ADD, wxT("-->"),
                             wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-                            // wxDefaultPosition, wxSize(20,20), 0);
    
    removeButton = new wxButton(this, ID_BUTTON_REMOVE, wxT("<--"), 
                                wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-                               // wxDefaultPosition, wxSize(20,20), 0);
    
    clearButton = new wxButton(this, ID_BUTTON_CLEAR, wxT("<="), 
                               wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-                              // wxDefaultPosition, wxSize(20,20), 0);
    
    prioritizeButton = new wxButton(this, ID_BUTTON_SORT, wxT("Prioritize"), 
-                                   wxDefaultPosition, wxSize(50,20), 0);
+                                   wxDefaultPosition, wxDefaultSize, 
+                                   wxBU_EXACTFIT);
    
    wxBoxSizer *buttonSizer = new wxBoxSizer(wxVERTICAL);
    buttonSizer->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -195,7 +193,7 @@ void UniversePanel::Create()
    
    mFileTypeComboBox = 
       new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition,
-                     wxSize(100,20), 0, emptyArray, wxCB_READONLY);
+                     wxDefaultSize, 0, emptyArray, wxCB_READONLY);
 
    mFileNameTextCtrl =
       new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""),
@@ -203,7 +201,7 @@ void UniversePanel::Create()
    
    mBrowseButton =
       new wxButton(this, ID_BUTTON_BROWSE, wxT("Browse"),
-                   wxDefaultPosition, wxSize(50,20), 0);
+                   wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    
    wxFlexGridSizer *bottomGridSizer = new wxFlexGridSizer(3, 0, 0);
    bottomGridSizer->Add(fileTypeLabel, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -223,7 +221,7 @@ void UniversePanel::Create()
    
    mAnalyticModelComboBox = 
       new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition,
-                     wxSize(120,20), 0, emptyArray, wxCB_READONLY);
+                     wxDefaultSize, 0, emptyArray, wxCB_READONLY);
    
    mAnaModelSizer = new wxBoxSizer(wxVERTICAL);
    mAnaModelSizer->Add(20, 10, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -406,6 +404,10 @@ void UniversePanel::OnAddButton(wxCommandEvent& event)
    int sel = availableListBox->GetSelection();
    int found = selectedListBox->FindString(str);
     
+   // if no selection then do nothing
+   if (sel == -1)
+      return;
+
    // if the string wasn't found in the second list, insert it
    if (found == wxNOT_FOUND)
    {
@@ -441,6 +443,10 @@ void UniversePanel::OnRemoveButton(wxCommandEvent& event)
    wxString str = selectedListBox->GetStringSelection();
    int sel = selectedListBox->GetSelection();
    
+   // if no selection then do nothing
+   if (sel == -1)
+      return;
+
    selectedListBox->Delete(sel);
    availableListBox->Append(str);
    availableListBox->SetStringSelection(str);
