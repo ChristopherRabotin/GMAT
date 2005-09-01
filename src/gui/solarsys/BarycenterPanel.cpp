@@ -14,12 +14,13 @@
 // Author: Allison Greene
 // Created: 2005/04/21
 /**
- * This class allows user to specify where Universe information is 
- * coming from
+ * This class allows user to specify Barycenter.
  */
 //------------------------------------------------------------------------------
 #include "BarycenterPanel.hpp"
 #include "MessageInterface.hpp"
+
+//#define DEBUG_BARYCENTER_PANEL 1
 
 //------------------------------
 // event tables for wxWindows
@@ -60,16 +61,16 @@ BarycenterPanel::BarycenterPanel(wxWindow *parent, const wxString &name)
    Show();
 }
 
+//------------------------------------------------------------------------------
+// ~BarycenterPanel()
+//------------------------------------------------------------------------------
 BarycenterPanel::~BarycenterPanel()
 {
 }
 
-//-------------------------------
-// private methods
-//-------------------------------
-//----------------------------------
-// methods inherited from GmatPanel
-//----------------------------------
+//-------------------------------------------
+// protected methods inherited from GmatPanel
+//-------------------------------------------
 
 //------------------------------------------------------------------------------
 // void Create()
@@ -191,10 +192,31 @@ void BarycenterPanel::SaveData()
       if (count == 0)
          return;
 
+      // get Earth pointer as J2000Body
+      CelestialBody *j2000body = (CelestialBody*)theGuiInterpreter->GetConfiguredItem("Earth");
+      CelestialBody *body;
+      std::string bodyName;
+      
       for (Integer i = 0; i < count; i++)
       {
-        theBarycenter->SetStringParameter
-            ("BodyNames", bodySelectedListBox->GetString(i).c_str(), i);
+         bodyName = bodySelectedListBox->GetString(i).c_str();
+         theBarycenter->SetStringParameter("BodyNames", bodyName, i);
+         
+         //loj: 8/31/05 Set body and J2000Body pointer
+         // set body pointer
+         body = (CelestialBody*)theGuiInterpreter->GetConfiguredItem(bodyName);
+         
+         // set J2000Body for the body
+         if (body->GetJ2000Body() == NULL)
+            body->SetJ2000Body(j2000body);
+         
+         theBarycenter->SetRefObject(body, Gmat::SPACE_POINT, bodyName);
+         
+         #if DEBUG_BARYCENTER_PANEL
+         MessageInterface::ShowMessage
+            ("BarycenterPanel::SaveData() body[%d]=%d, name=%s, J2000Body=%d\n",
+             i, body, bodyName.c_str(), j2000body);
+         #endif
       }
    }
    catch (BaseException &e)
