@@ -22,7 +22,7 @@
 class ParameterSelectDialog : public GmatDialog
 {
 public:
-    
+   
    ParameterSelectDialog(wxWindow *parent,
                          bool showArrayAndString = false,
                          bool showSysParams = true,
@@ -57,6 +57,8 @@ protected:
    bool mCanSelectMultiVars;
    bool mCanSelectWholeObject;
    bool mCreateParam;
+   int  mLastUserParamSelection;
+   int  mLastPropertySelection;
    
    wxStaticText *mCoordSysLabel;
    
@@ -89,6 +91,7 @@ protected:
    void OnCreateVariable(wxCommandEvent& event);
    void OnSelectUserParam(wxCommandEvent& event);
    void OnSelectProperty(wxCommandEvent& event);
+   void OnDoubleClick(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent& event);
    
    DECLARE_EVENT_TABLE();
@@ -111,7 +114,7 @@ private:
    wxString FormParamName();
    Parameter* GetParameter(const wxString &name);
    void ShowCoordSystem();
-   
+   void HighlightObject(wxCommandEvent& event, bool highlight);
 };
 
 #endif

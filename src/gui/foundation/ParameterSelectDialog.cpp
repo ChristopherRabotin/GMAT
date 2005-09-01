@@ -32,6 +32,8 @@ BEGIN_EVENT_TABLE(ParameterSelectDialog, GmatDialog)
    EVT_BUTTON(CREATE_VARIABLE, ParameterSelectDialog::OnCreateVariable)
    EVT_LISTBOX(USER_PARAM_LISTBOX, ParameterSelectDialog::OnSelectUserParam)
    EVT_LISTBOX(PROPERTY_LISTBOX, ParameterSelectDialog::OnSelectProperty)
+   EVT_LISTBOX_DCLICK(USER_PARAM_LISTBOX, ParameterSelectDialog::OnDoubleClick)
+   EVT_LISTBOX_DCLICK(PROPERTY_LISTBOX, ParameterSelectDialog::OnDoubleClick)
 END_EVENT_TABLE()
 
    
@@ -62,6 +64,8 @@ ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent,
    mCanSelectWholeObject = canSelectWholeObject;
    mCreateParam = createParam;
    mOwnerType = ownerType;
+   mLastPropertySelection = wxNOT_FOUND;
+   mLastUserParamSelection = wxNOT_FOUND;
    
    mParamNameArray.Clear();
 
@@ -81,7 +85,6 @@ ParameterSelectDialog::~ParameterSelectDialog()
        "mObjectComboBox:%d\n", mObjectComboBox);
    #endif
    
-   //loj: 7/28/05 Changed "Spacecraft" to mOwnerType to fix crash
    theGuiManager->UnregisterComboBox(mOwnerType, mObjectComboBox);
    theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
 }
@@ -292,13 +295,13 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
       {
          wxString newParam = mObjectComboBox->GetStringSelection();
          int found = mVarSelectedListBox->FindString(newParam);
-
+         
          // if the string wasn't found in the second list, insert it
          if (found == wxNOT_FOUND)
          {
             mVarSelectedListBox->Append(newParam);
             mVarSelectedListBox->SetStringSelection(newParam);
-            //theOkButton->Enable();
+            theOkButton->Enable(); //loj: 8/31/05 Uncommented. Why commented out?
          }
          
          return;
@@ -307,29 +310,33 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
       // get string in first list
       wxString newParam = FormParamName();
       
-      // Create a system paramete if it does not exist
-      if (mShowSysVars && mCreateParam)
-         GetParameter(newParam);
-      
-      int found = mVarSelectedListBox->FindString(newParam);
-      
-      // if the string wasn't found in the second list, insert it
-      if (found == wxNOT_FOUND)
+      // if newParam is properly created
+      if (newParam != "")
       {
-         mVarSelectedListBox->Append(newParam);
-         mVarSelectedListBox->SetStringSelection(newParam);
-         theOkButton->Enable();
-      }
+         // Create a system paramete if it does not exist
+         if (mShowSysVars && mCreateParam)
+            GetParameter(newParam);
+         
+         int found = mVarSelectedListBox->FindString(newParam);
       
-      //Show next parameter (loj: 8/9/05 Added)
-      mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
-      OnSelectProperty(event);
+         // if the string wasn't found in the second list, insert it
+         if (found == wxNOT_FOUND)
+         {
+            mVarSelectedListBox->Append(newParam);
+            mVarSelectedListBox->SetStringSelection(newParam);
+            theOkButton->Enable();
+         }
+         
+         //Show next parameter
+         mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
+         OnSelectProperty(event);
+      }
    }
    else if (event.GetEventObject() == mRemoveParamButton)
    {
       int sel = mVarSelectedListBox->GetSelection();
       mVarSelectedListBox->Delete(sel);
-
+      
       if (sel-1 < 0)
          mVarSelectedListBox->SetSelection(0);
       else
@@ -346,7 +353,7 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
       //theOkButton->Disable();
    }
    
-   theOkButton->Enable(); //loj: 8/10/05 Added
+   theOkButton->Enable();
 }
 
 
@@ -379,13 +386,25 @@ void ParameterSelectDialog::OnCreateVariable(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::OnSelectUserParam(wxCommandEvent& event)
 {
-   if (mShowSysVars)
+   if (mUserParamListBox->GetSelection() == mLastUserParamSelection)
    {
+      mUserParamListBox->Deselect(mLastUserParamSelection);
+      mLastUserParamSelection = wxNOT_FOUND;
+
+      if (mPropertyListBox->GetSelection() == wxNOT_FOUND)
+         HighlightObject(event, true);
+   }
+   else if (mShowSysVars)
+   {
+      HighlightObject(event, false);
+      mLastUserParamSelection = mUserParamListBox->GetSelection();
+      
       // deselect property
       mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
-   }
+      mLastPropertySelection = wxNOT_FOUND;
    
-   mUseUserParam = true;
+      mUseUserParam = true;
+   }
 }
 
 
@@ -394,13 +413,55 @@ void ParameterSelectDialog::OnSelectUserParam(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::OnSelectProperty(wxCommandEvent& event)
 {
-   // deselect user param
-   mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
+   // if click on selected item, deselect
+   if (mPropertyListBox->GetSelection() == mLastPropertySelection)
+   {
+      mPropertyListBox->Deselect(mLastPropertySelection);
+      mLastPropertySelection = wxNOT_FOUND;
+      
+      if (mUserParamListBox->GetSelection() == wxNOT_FOUND)
+         HighlightObject(event, true);
+   }
+   else
+   {
+      HighlightObject(event, false);
+      mLastPropertySelection = mPropertyListBox->GetSelection();
+      
+      // deselect user param
+      mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
+      mLastUserParamSelection = wxNOT_FOUND;
+      
+      // show coordinate system or central body
+      ShowCoordSystem();
+      
+      mUseUserParam = false;
+   }
+}
 
-   // show coordinate system or central body
-   ShowCoordSystem();
 
-   mUseUserParam = false;
+//------------------------------------------------------------------------------
+// void OnDoubleClick(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ParameterSelectDialog::OnDoubleClick(wxCommandEvent& event)
+{
+   if (event.GetEventObject() == mPropertyListBox)
+   {
+      // deselect property
+      mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
+      mLastPropertySelection = wxNOT_FOUND;
+      
+      if (mUserParamListBox->GetSelection() == wxNOT_FOUND)
+         HighlightObject(event, true);
+   }
+   else if (event.GetEventObject() == mUserParamListBox)
+   {
+      // deselect variable
+      mUserParamListBox->Deselect(mPropertyListBox->GetSelection());
+      mLastUserParamSelection = wxNOT_FOUND;
+      
+      if (mPropertyListBox->GetSelection() == wxNOT_FOUND)
+         HighlightObject(event, true);
+   }
 }
 
 
@@ -433,13 +494,21 @@ wxString ParameterSelectDialog::FormParamName()
    else
    {
       wxString depObj = "";
+
+      // make sure property is selected
+      if (mPropertyListBox->GetSelection() == wxNOT_FOUND)
+      {
+         wxLogMessage("A whole object cannot be selected.\n"
+                      "Please select a property or a variable.");
+         return "";
+      }
       
       if (mCoordSysComboBox->IsShown())
          depObj = mCoordSysComboBox->GetStringSelection();
       else if (mCentralBodyComboBox->IsShown())
          depObj = mCentralBodyComboBox->GetStringSelection();
       
-      if (mCreateParam) //loj: 7/28/05 Added
+      if (mCreateParam)
       {
          if (depObj == "")
             return mObjectComboBox->GetStringSelection() + "." + 
@@ -450,7 +519,7 @@ wxString ParameterSelectDialog::FormParamName()
       }
       else
       {
-         return mObjectComboBox->GetStringSelection() + "." + "." +
+         return mObjectComboBox->GetStringSelection() + "." + depObj + "." +
             mPropertyListBox->GetStringSelection();
       }
    }
@@ -494,7 +563,6 @@ Parameter* ParameterSelectDialog::GetParameter(const wxString &name)
       if (depObjName != "")
          param->SetStringParameter("DepObject", depObjName);
 
-      //loj: 2/10/05 Changed from NeedCoordSystem()
       if (param->IsCoordSysDependent())
          param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
    }
@@ -516,8 +584,6 @@ void ParameterSelectDialog::ShowCoordSystem()
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Coordinate System");
       
-      //loj: 8/9/05 Set CoordSystem to last one selected
-      //mCoordSysComboBox->SetSelection(0);
       mCoordSysComboBox->SetStringSelection(mLastCoordSysName);
       
       mCoordSysSizer->Remove(mCoordSysComboBox);
@@ -549,5 +615,29 @@ void ParameterSelectDialog::ShowCoordSystem()
       mCoordSysComboBox->Hide();
       mCentralBodyComboBox->Hide();
       mParamBoxSizer->Layout();
+   }
+}
+
+//------------------------------------------------------------------------------
+// void HighlightObject(wxCommandEvent& event, bool highlight)
+//------------------------------------------------------------------------------
+void ParameterSelectDialog::HighlightObject(wxCommandEvent& event, bool highlight)
+{
+   if (highlight)
+   {
+      //loj: 9/1/05
+      // How can I select the item from the code as the user selects it?
+      // So it will show reverse mode?
+      //mObjectComboBox->SetSelection(mObjectComboBox->GetSelection());
+      //OnComboBoxChange(event);
+      
+      // Just set background color for now
+      mObjectComboBox->SetBackgroundColour(*wxCYAN);
+      mObjectComboBox->Refresh();
+   }
+   else
+   {
+      mObjectComboBox->SetBackgroundColour(*wxWHITE);
+      mObjectComboBox->Refresh();
    }
 }
