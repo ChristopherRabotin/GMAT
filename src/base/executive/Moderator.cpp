@@ -706,21 +706,43 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
       if (type == "LibrationPoint")
       {
          // first create default Earth-Moon Barycenter
-         if (GetCalculatedPoint("DefaultBC") == NULL)
+         CalculatedPoint *defBc = GetCalculatedPoint("DefaultBC");
+         
+         if (defBc == NULL)
          {
-            CreateCalculatedPoint("Barycenter", "DefaultBC");
+            defBc = CreateCalculatedPoint("Barycenter", "DefaultBC");
          }
          
          cp->SetStringParameter("Primary", "Sun");
          cp->SetStringParameter("Point", "L1");
          cp->SetStringParameter("Secondary", "DefaultBC");
+         
+         // set body and J2000Body pointer
+         //(loj: 8/31/05 so that GUI can create LibrationPoint and use it in Coord.System
+         // conversion
+         SpacePoint *sun = (SpacePoint*)GetConfiguredItem("Sun");
+         SpacePoint *earth = (SpacePoint*)GetConfiguredItem("Earth");
+         if (sun->GetJ2000Body() == NULL)
+            sun->SetJ2000Body(earth);
+         
+         cp->SetRefObject(sun, Gmat::SPACE_POINT, "Sun");
+         cp->SetRefObject(defBc, Gmat::SPACE_POINT, "DefaultBC");         
       }
       else if (type == "Barycenter")
       {
          cp->SetStringParameter("BodyNames", "Earth");
          cp->SetStringParameter("BodyNames", "Luna");
+
+         // set body and J2000Body pointer
+         //(loj: 8/31/05 so that GUI can create Barycenter and use it in Coord.System
+         // conversion
+         SpacePoint *earth = (SpacePoint*)GetConfiguredItem("Earth");
+         SpacePoint *luna = (SpacePoint*)GetConfiguredItem("Luna");
+         cp->SetRefObject(earth, Gmat::SPACE_POINT, "Earth");
+         if (luna->GetJ2000Body() == NULL)
+            luna->SetJ2000Body(earth);
+         cp->SetRefObject(luna, Gmat::SPACE_POINT, "Luna");
       }
-      
       
       // Manage it if it is a named calculated point
       try
@@ -1800,10 +1822,10 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage("Moderator::CreateCoordinateSystem()\n" +
-                                    e.GetMessage());
+      MessageInterface::ShowMessage("Moderator::CreateCoordinateSystem() %s\n",
+                                    e.GetMessage().c_str()); //loj: 8/31/05 added eol
    }
-
+   
    return cs;
 }
 
