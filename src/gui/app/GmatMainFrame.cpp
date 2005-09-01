@@ -196,10 +196,6 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    scriptFilename = "$gmattempscript$.script";
    scriptCounter =0;
 
-   // Set frame full/reduced size
-   mFullSize = size;
-   mReducedSize = wxSize(400, 200);
-
    // child frames
    trajSubframe = (MdiChildTrajFrame *)NULL;
    tsSubframe = (MdiChildTsFrame *)NULL;
@@ -960,9 +956,7 @@ void GmatMainFrame::RunCurrentMission()
    toolBar->EnableTool(TOOL_RUN, FALSE);
    toolBar->EnableTool(TOOL_STOP, TRUE);
    wxYield();
-//   mFullSize = GetSize();
-//   SetSize(mReducedSize);
-//   SetFocus();
+   SetFocus();
    
    theGuiInterpreter->RunMission();
    
@@ -979,8 +973,7 @@ void GmatMainFrame::RunCurrentMission()
 //------------------------------------------------------------------------------
 void GmatMainFrame::NotifyRunCompleted()
 {
-   //show full size when mission run completed
-   SetSize(mFullSize);
+   // do nothing for now.
 }
 
 //------------------------------------------------------------------------------
@@ -1205,9 +1198,7 @@ void GmatMainFrame::OnRun(wxCommandEvent& WXUNUSED(event))
    toolBar->EnableTool(TOOL_RUN, FALSE);
    toolBar->EnableTool(TOOL_STOP, TRUE);
    wxYield();
-   mFullSize = GetSize();
-//   SetSize(mReducedSize);
-//   SetFocus();
+   SetFocus();
 
    MinimizeChildren();
    theGuiInterpreter->RunMission();
@@ -1233,7 +1224,6 @@ void GmatMainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
    wxToolBar* toolBar = GetToolBar();
    toolBar->EnableTool(TOOL_STOP, FALSE);
    wxYield();
-   SetSize(mFullSize);
    
    theGuiInterpreter->ChangeRunState("Stop");
    
@@ -1504,11 +1494,13 @@ bool GmatMainFrame::InterpretScript(const wxString &filename)
       {
          wxLogError
             ("Error occurred during parsing.\nPlease check the syntax and try again\n");
+         wxLog::FlushActive();
       }
    }
    catch (BaseException &e)
    {
-      wxLogMessage(e.GetMessage().c_str());
+      wxLogError(e.GetMessage().c_str());
+      wxLog::FlushActive();
       MessageInterface::ShowMessage(e.GetMessage());
    }
    

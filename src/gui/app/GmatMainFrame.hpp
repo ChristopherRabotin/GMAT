@@ -92,9 +92,6 @@ private:
    std::string scriptFilename;
    GuiInterpreter *theGuiInterpreter;
    
-   wxSize mFullSize;
-   wxSize mReducedSize;
-   
    wxSashLayoutWindow* win;
    wxSashLayoutWindow* msgWin;
    wxScrolledWindow *panel;
