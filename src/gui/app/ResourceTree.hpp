@@ -147,13 +147,13 @@ private:
    void OnScriptBuildObject(wxCommandEvent& event);
    void OnScriptBuildAndRun(wxCommandEvent& event);
 
-   // script folder (loj: 8/4/05 Added)
+   // script folder
    void OnAddScriptFolder(wxCommandEvent &event);
    void OnRunScriptsFromFolder(wxCommandEvent& event);
    void OnQuitRunScriptsFromFolder(wxCommandEvent& event);
    void OnRemoveScriptFolder(wxCommandEvent& event);
    
-   void BuildScript(const wxString &filename);
+   bool BuildScript(const wxString &filename);
    
    wxMenu* CreatePopupMenu(Gmat::ObjectType type);
    Gmat::ObjectType GetObjectType(int itemType);

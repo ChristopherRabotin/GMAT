@@ -1346,6 +1346,7 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
    {
       wxLogWarning(selItem->GetDesc() +
                    " cannot be deleted.\n It is currently used in other object(s).");
+      wxLog::FlushActive();
    }
 }
 
@@ -2366,19 +2367,8 @@ void ResourceTree::OnScriptBuildObject(wxCommandEvent& event)
    // Get info from selected item
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
    wxString filename = item->GetDesc();
-
+   
    BuildScript(filename);
-
-   //loj: 8/4/05 use BuildScript()
-//    GmatAppData::GetGuiInterpreter()->
-//       InterpretScript(std::string(filename.c_str()));
-
-//    //close the open windows
-//    GmatAppData::GetMainFrame()->CloseAllChildren(false, false, filename);
-
-//    // Update ResourceTree and MissionTree
-//    GmatAppData::GetResourceTree()->UpdateResource(true);
-//    GmatAppData::GetMissionTree()->UpdateMission(true);
 }
 
 //------------------------------------------------------------------------------
@@ -2502,8 +2492,8 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       
       try
       {
-         BuildScript(filename);
-         GmatAppData::GetMainFrame()->OnScriptRun(event);
+         if (BuildScript(filename))
+            GmatAppData::GetMainFrame()->OnScriptRun(event);
       }
       catch(BaseException &e)
       {
@@ -2558,17 +2548,27 @@ void ResourceTree::OnRemoveScriptFolder(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // bool BuildScript(const wxString &filename)
 //------------------------------------------------------------------------------
-void ResourceTree::BuildScript(const wxString &filename)
+bool ResourceTree::BuildScript(const wxString &filename)
 {
-   GmatAppData::GetGuiInterpreter()->
-      InterpretScript(std::string(filename.c_str()));
+   // if successfuly interpreted the script
+   if (GmatAppData::GetGuiInterpreter()->
+       InterpretScript(std::string(filename.c_str())))
+   {
+      //close the open windows
+      GmatAppData::GetMainFrame()->CloseAllChildren(true, true, filename);
    
-   //close the open windows
-   GmatAppData::GetMainFrame()->CloseAllChildren(true, true, filename);
-   
-   // Update ResourceTree and MissionTree
-   GmatAppData::GetResourceTree()->UpdateResource(true);
-   GmatAppData::GetMissionTree()->UpdateMission(true);
+      // Update ResourceTree and MissionTree
+      GmatAppData::GetResourceTree()->UpdateResource(true);
+      GmatAppData::GetMissionTree()->UpdateMission(true);
+      return true;
+   }
+   else
+   {
+      wxLogError
+         ("Error occurred during parsing.\nPlease check the syntax and try again\n");
+      wxLog::FlushActive();
+      return false;
+   }
 }
 
 
