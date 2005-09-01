@@ -14,6 +14,10 @@
 #include "engine.h"         // for Engine
 #endif
 
+#ifdef __WXMAC__
+#include <stdlib.h>         // for system() to launch X11 application
+#endif
+
 #include "MatlabInterface.hpp" // for MatlabInterface methods
 #include "MessageInterface.hpp"
 
@@ -46,13 +50,29 @@ int MatlabInterface::Open()
    if (enginePtrD == NULL)
       MessageInterface::ShowMessage("Please wait while MATLAB opens...\n");
 
+#ifdef __WXMAC__
+   /// Check if MATLAB is still running then doesn't need to re-launch
+   if (enginePtrD != NULL)
+      return 1;
+
+   // open the X11 application before launching the matlab
+   system("open -a X11");
+   if ((enginePtrD = engOpen("\0")))
+      return 1;
+   else
+      return 0;
+#else
    if ((enginePtrD = engOpen(NULL)))
       return 1;
    else
       return 0;
-#endif
+#endif  // End-ifdef __WXMAC__
+
+      return 0;
+#endif // End-ifdef __USE_MATLAB__
 
    return 0;
+
 } // end Open()
 
 //------------------------------------------------------------------------------
@@ -67,9 +87,20 @@ int MatlabInterface::Open()
 int MatlabInterface::Close()
 {
 #if defined __USE_MATLAB__
-   engClose(enginePtrD);
-   enginePtrD = NULL;      // set to NULL, so it can be reopened
+   // Check if MATLAB is still running then close it.
+   if (enginePtrD != NULL)
+   {
+      engClose(enginePtrD);
+      enginePtrD = NULL;      // set to NULL, so it can be reopened
+   }
+   else
+   {
+      MessageInterface::ShowMessage("\nMATLAB can't close due to no MATLAB\n");
+      return 0;
+   }
+
 #endif
+
    return 1;
 
 } // end Close()
