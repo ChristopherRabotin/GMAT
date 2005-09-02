@@ -72,13 +72,13 @@ Sandbox::Sandbox() :
 //   clonable.push_back(Gmat::PARAMETER);
    clonable.push_back(Gmat::STOP_CONDITION);
    clonable.push_back(Gmat::SOLVER);
-   clonable.push_back(Gmat::PROP_SETUP);
+//   clonable.push_back(Gmat::PROP_SETUP);
    clonable.push_back(Gmat::REF_FRAME);
    clonable.push_back(Gmat::FUNCTION);
    clonable.push_back(Gmat::FUEL_TANK);
    clonable.push_back(Gmat::THRUSTER);
    clonable.push_back(Gmat::HARDWARE);
-   clonable.push_back(Gmat::COORDINATE_SYSTEM);
+//   clonable.push_back(Gmat::COORDINATE_SYSTEM);
    clonable.push_back(Gmat::AXIS_SYSTEM);
 
    // SolarSystem instances are handled separately from the other objects
