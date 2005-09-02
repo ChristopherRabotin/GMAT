@@ -21,6 +21,7 @@
 
 #include <ctype.h>         // for isalpha
 #include <sstream>         // for std::stringstream
+#include <fstream>         // for std::ifstream used bt GMAT functions
 
 
 //#define DEBUG_INTERPRETER 1
@@ -30,7 +31,7 @@
 //#define DEBUG_RHS_PARSING_DETAILS 1
 //#define DEBUG_ARRAY_INTERPRETING 1
 //#define DEBUG_INTERPRET_OBJECTEQUATES 1
-
+//#define DEBUG_FUNCTION_PARSING
 
 #include "MessageInterface.hpp"
 
@@ -1073,7 +1074,7 @@ bool Interpreter::AssembleReportCommand(const StringArray topLevel,
 //------------------------------------------------------------------------------
 bool Interpreter::InterpretFunctionCall()
 {
-   #ifdef DEBUG_TOKEN_PARSING
+   #if defined DEBUG_TOKEN_PARSING || defined DEBUG_FUNCTION_PARSING
       MessageInterface::ShowMessage(
          "Entered Interpreter::InterpretFunctionCall\n");
       MessageInterface::ShowMessage(
@@ -1112,7 +1113,7 @@ bool Interpreter::InterpretFunctionCall()
    
    for (StringArray::iterator str = inputs.begin(); str != inputs.end(); ++str)
    {
-      #ifdef DEBUG_TOKEN_PARSING
+      #if defined DEBUG_TOKEN_PARSING || defined DEBUG_FUNCTION_PARSING
          MessageInterface::ShowMessage("   Adding input %s\n", str->c_str());
       #endif
       cmd->SetStringParameter("AddInput", *str);
@@ -1128,7 +1129,7 @@ bool Interpreter::InterpretFunctionCall()
          parmObj = moderator->GetConfiguredItem(paramObj);
          if (parmObj)
          {
-            #ifdef DEBUG_TOKEN_PARSING
+            #if defined DEBUG_TOKEN_PARSING || defined DEBUG_FUNCTION_PARSING
                MessageInterface::ShowMessage(
                   "   InterpretFunctionCall building a parameter named %s, "
                   "with type %s and CS '%s' for object %s\n", str->c_str(),
@@ -1137,7 +1138,7 @@ bool Interpreter::InterpretFunctionCall()
             #endif
             if (moderator->IsParameter(paramType))
             {
-               #ifdef DEBUG_TOKEN_PARSING
+               #if defined DEBUG_TOKEN_PARSING || defined DEBUG_FUNCTION_PARSING
                   MessageInterface::ShowMessage("%s%s\" named \"%s\"\n",
                      "Attempting to build parameter \"", paramType.c_str(),
                      str->c_str());
@@ -1187,13 +1188,13 @@ bool Interpreter::InterpretFunctionCall()
       
    for (StringArray::iterator str = outputs.begin(); str != outputs.end();
         ++str) {
-      #ifdef DEBUG_TOKEN_PARSING
+      #if defined DEBUG_TOKEN_PARSING || defined DEBUG_FUNCTION_PARSING
          MessageInterface::ShowMessage("   Adding output %s\n", str->c_str());
       #endif
       cmd->SetStringParameter("AddOutput", *str);
    }
       
-   #ifdef DEBUG_TOKEN_PARSING
+   #if defined DEBUG_TOKEN_PARSING || defined DEBUG_FUNCTION_PARSING
       MessageInterface::ShowMessage(
          "Leaving Interpreter::InterpretFunctionCall\n");
       MessageInterface::ShowMessage(
@@ -1219,6 +1220,48 @@ bool Interpreter::InterpretFunctionCall()
 
    chunks.clear();
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatCommand* InterpretGMATFunction(const std::string &pathAndName)
+//------------------------------------------------------------------------------
+/**
+ * Reads a GMATFunction file and builds the corresponding command stream.
+ * 
+ * @param <pathAndName> The full path and name for the GMAT function file
+ *
+ * @return The head of the generated command list.
+ */
+//------------------------------------------------------------------------------
+GmatCommand* Interpreter::InterpretGMATFunction(const std::string &pathAndName)
+{
+   // Verify that the function file can be found
+   std::ifstream funFile;
+   funFile.open(pathAndName.c_str());
+   if (funFile.is_open() == false)
+      throw InterpreterException("Could not open the GMAT function file " + 
+         pathAndName);
+         
+   // Start reading and parsing the file
+   
+   
+   // Parse the function definition
+   std::string functionName = "";
+   
+   // Build a block of text that contains the commands
+   std::string block = "";
+   
+   // Build the command stream
+   GmatCommand *commands = moderator->CreateCommand("BeginFunction", 
+      functionName);
+   InterpretTextBlock(commands, block);
+   
+   // Close the file when done, and end the function stream
+   funFile.close();
+   commands->Append(moderator->CreateCommand("EndFunction", functionName));
+   
+   return commands;
 }
 
 

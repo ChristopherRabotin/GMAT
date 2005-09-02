@@ -2091,6 +2091,27 @@ Function* Moderator::GetFunction(const std::string &name)
       return theConfigManager->GetFunction(name);
 }
 
+
+//------------------------------------------------------------------------------
+// GmatCommand* InterpretGmatFunction(const std::string functionFilename)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a function object pointer by given name.
+ *
+ * @param <functionFilename>  Full path and name of the GmatFunction file.
+ *
+ * @return A command list that is executed to run the function.
+ */
+//------------------------------------------------------------------------------
+GmatCommand* Moderator::InterpretGmatFunction(const std::string &functionFilename)
+{
+   if (functionFilename == "")
+      return NULL;
+   else
+      return theScriptInterpreter->InterpretGMATFunction(functionFilename);
+}
+
+
 // GmatCommand
 //------------------------------------------------------------------------------
 // GmatCommand* CreateCommand(const std::string &type, const std::string &name)

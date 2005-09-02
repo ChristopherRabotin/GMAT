@@ -212,6 +212,7 @@ public:
    Function* CreateFunction(const std::string &type,
                             const std::string &name);
    Function* GetFunction(const std::string &name);
+   GmatCommand* InterpretGmatFunction(const std::string &functionFilename);
    
    // GmatCommand
    GmatCommand* CreateCommand(const std::string &type,

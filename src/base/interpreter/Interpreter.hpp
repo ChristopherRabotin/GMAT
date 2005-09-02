@@ -73,6 +73,8 @@ public:
                                                     std::string objectname);
    virtual bool                    Interpret(GmatBase *obj,
                                              const std::string generator);
+   GmatCommand*                    InterpretGMATFunction(
+                                      const std::string &pathAndName);
 
    // The "Build" methods take GMAT objects and write out scripts or subscripts
    virtual bool                    Build(void) = 0;
@@ -126,7 +128,7 @@ protected:
                                  UNKNOWN };
 
 
-   void                          Initialize(void);
+   void                          Initialize();
 
    // The "Create" methods make calls, through the Moderator, to the Factories
    // to get new instances of the requested objects
@@ -181,8 +183,7 @@ protected:
                                     Integer index = 1);
    bool                          InterpretGlobalSetting(const StringArray &sar, 
                                     const std::string &rhs);
-   bool                          Interpreter::InterpretSolarSetting(
-                                    const StringArray &sar, 
+   bool                          InterpretSolarSetting(const StringArray &sar, 
                                     const std::string &rhs);
 
    // Methods used to break apart lines of script
