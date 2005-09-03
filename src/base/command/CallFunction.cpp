@@ -26,6 +26,7 @@
 //#define DEBUG_CALL_FUNCTION 1
 //#define DEBUG_UPDATE_VAR 1
 //#define DEBUG_USE_ARRAY 1
+#define DEBUG_GMAT_FUNCTION_INIT
 
 //---------------------------------
 // static data
@@ -50,6 +51,7 @@ CallFunction::PARAMETER_TYPE[CallFunctionParamCount - GmatCommandParamCount] =
 
 CallFunction::CallFunction() :
    GmatCommand     ("CallFunction"),
+   callcmds        (NULL),
    mFunction       (NULL),
    mFunctionName   ("")
 {
@@ -61,13 +63,17 @@ CallFunction::CallFunction() :
 
 CallFunction::~CallFunction()
 {
-   for (ObjectArray::iterator i = callcmds.begin(); i < callcmds.end(); ++i)
-      delete *i;
+   // Changed 8/31/05, DJC
+//   for (ObjectArray::iterator i = callcmds.begin(); i < callcmds.end(); ++i)
+//      delete *i;
 
+   if (callcmds)
+      delete callcmds;
 }
 
 CallFunction::CallFunction(const CallFunction& cf) :
    GmatCommand     (cf),
+   callcmds        (NULL),
    mFunction       (cf.mFunction),
    mFunctionName   (cf.mFunctionName)
 {
@@ -77,7 +83,7 @@ CallFunction::CallFunction(const CallFunction& cf) :
    objectArray = cf.objectArray;
    mInputList = cf.mInputList;
    mOutputList = cf.mOutputList;
-   callcmds = cf.callcmds;
+//   callcmds = cf.callcmds;        // Commands must be reinitialized
 
    mInputListNames = cf.mInputListNames;
    mOutputListNames = cf.mOutputListNames;
@@ -102,7 +108,8 @@ CallFunction& CallFunction::operator=(const CallFunction& cf)
    objectArray = cf.objectArray;
    mInputList = cf.mInputList;
    mOutputList = cf.mOutputList;
-   callcmds = cf.callcmds;
+//   callcmds = cf.callcmds;
+   callcmds = NULL;           // Commands must be reinitialized
 
    mInputListNames = cf.mInputListNames;
    mOutputListNames = cf.mOutputListNames;
@@ -491,11 +498,14 @@ GmatBase* CallFunction::GetRefObject(const Gmat::ObjectType type,
       case Gmat::FUNCTION:
          return mFunction;
       case Gmat::COMMAND:
-         for (ObjectArray::iterator i = callcmds.begin();
-              i < callcmds.end(); ++i) {
-            if ((*i)->GetName() == name)
-               return *i;
-         }
+         // Changed 8/31/05, DJC
+//         for (ObjectArray::iterator i = callcmds.begin();
+//              i < callcmds.end(); ++i) {
+//            if ((*i)->GetName() == name)
+//               return *i;
+//         }
+         return callcmds;
+         
       default:
          break;
    }
@@ -541,12 +551,17 @@ bool CallFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       mFunctionName = name;
       return true;
    case Gmat::COMMAND:
-      if (find(callcmds.begin(), callcmds.end(), obj) == callcmds.end())
-      {
-         callcmds.push_back(obj);
-         return true;
-      }
-      return false;
+      // Changed 8/31/05, DJC
+//      if (find(callcmds.begin(), callcmds.end(), obj) == callcmds.end())
+//      {
+//         callcmds.push_back(obj);
+//         return true;
+//      }
+//      return false;
+      if (callcmds)
+         delete callcmds;
+      callcmds = (GmatCommand*)obj;
+      return true;
    default:
       break;
    }
@@ -571,8 +586,10 @@ ObjectArray& CallFunction::GetRefObjectArray(const Gmat::ObjectType type)
          objectArray.push_back(mOutputList[i]);
 
       return objectArray;
-   case Gmat::COMMAND:
-      return callcmds;
+
+      // Changed 8/31/05, DJC
+//   case Gmat::COMMAND:
+//      return callcmds;
    default:
       break;
    }
@@ -581,11 +598,12 @@ ObjectArray& CallFunction::GetRefObjectArray(const Gmat::ObjectType type)
    return GmatCommand::GetRefObjectArray(type);
 }
 
+
 bool CallFunction::Initialize()
 {
-   #if DEBUG_CALL_FUNCTION
-      MessageInterface::ShowMessage("In Initialized\n");
-   #endif
+//   #if DEBUG_CALL_FUNCTION
+      MessageInterface::ShowMessage("In CallFunction::Initialize()\n");
+//   #endif
 
    GmatCommand::Initialize();
 
@@ -596,6 +614,9 @@ bool CallFunction::Initialize()
 
    // need to initialize parameters
    mInputList.clear();
+   
+MessageInterface::ShowMessage("Initializing the function '%s' with type %s\n", 
+   mFunctionName.c_str(), mFunction->GetTypeName().c_str());   
 
    for (StringArray::iterator i = mInputListNames.begin(); i != mInputListNames.end(); ++i)
    {
@@ -648,20 +669,49 @@ bool CallFunction::Initialize()
 
    bool rv = true;  // Initialization return value
 
-   for (ObjectArray::iterator i = callcmds.begin();
-        i < callcmds.end(); ++i)
+   // Changed 8/31/05, DJC
+//   for (ObjectArray::iterator i = callcmds.begin();
+//        i < callcmds.end(); ++i)
+//   {
+//      ((GmatCommand *)(*i))->SetObjectMap(objectMap);
+//      ((GmatCommand *)(*i))->SetSolarSystem(solarSys);
+//      rv = ((GmatCommand *)(*i))->Initialize();
+//      
+//      if (!rv)
+//         return false;
+//         
+//      // You'll need to override this base class method for CallFunction so
+//      // finite burns act correctly; when we're this far, I'll help if you need me to
+//      /// @todo:  get transients to work
+////      ((GmatCommand *)(*i))->SetTransientForces(&transients);
+//   }
+   // Handle additional initialization for GmatFunctions
+   if (mFunction->GetTypeName() == "GmatFunction")
    {
-      ((GmatCommand *)(*i))->SetObjectMap(objectMap);
-      ((GmatCommand *)(*i))->SetSolarSystem(solarSys);
-      rv = ((GmatCommand *)(*i))->Initialize();
+      #ifdef DEBUG_GMAT_FUNCTION_INIT
+         MessageInterface::ShowMessage("Initializing GmatFunction '%s'\n",
+            mFunction->GetName().c_str());
+      #endif
       
-      if (!rv)
-         return false;
-         
-      // You'll need to override this base class method for CallFunction so
-      // finite burns act correctly; when we're this far, I'll help if you need me to
-      /// @todo:  get transients to work
-//      ((GmatCommand *)(*i))->SetTransientForces(&transients);
+      if (callcmds == NULL)
+         throw CommandException(
+            "Error initializing the function call for this command:\n" +
+            GetGeneratingString(Gmat::SCRIPTING));
+   
+      callcmds->TakeAction("ClearLocalData");
+      callcmds->SetPublisher(publisher);
+      callcmds->SetObjectMap(objectMap);
+      callcmds->SetSolarSystem(solarSys);
+   
+      // Pass in the input and output object names
+      for (StringArray::iterator i = mInputListNames.begin(); 
+           i != mInputListNames.end(); ++i)
+         callcmds->SetStringParameter("CallFunctionInput", *i);
+      for (StringArray::iterator i = mOutputListNames.begin(); 
+           i != mOutputListNames.end(); ++i)
+         callcmds->SetStringParameter("CallFunctionOutput", *i);
+   
+      rv = callcmds->Initialize();
    }
 
    return rv;
@@ -725,24 +775,56 @@ bool CallFunction::Execute()
    {
       bool rv = true;  // Initialization return value
 
-      for (ObjectArray::iterator i = callcmds.begin();
-           i < callcmds.end(); ++i)
+      // Changed 8/31/05, DJC
+//      for (ObjectArray::iterator i = callcmds.begin();
+//           i < callcmds.end(); ++i)
+//      {
+//         rv = ((GmatCommand *)(*i))->Execute();
+//
+//         if (!rv)
+//         {
+//            std::string str = "\"" + ((GmatCommand *)(*i))->GetTypeName() +
+//               "\" Command failed to run to completion\nCommand Text is \"" +
+//               ((GmatCommand *)(*i))->GetGeneratingString() + "\"";
+//            throw CommandException(str);
+//         }
+//      }
+
+      // There are still 2 things to do here, but let's get this working first:
+      //
+      // 1.  Add code to make the method reentrant, so a user can break while
+      //     in the GmatFunction.
+      // 2.  Add code so that GmatFunctions can nest -- right now, we'll break
+      //     when the first EndFunction is encountered.
+      GmatCommand *current = callcmds;
+      
+      while (current->GetTypeName() != "EndFunction") 
       {
-         rv = ((GmatCommand *)(*i))->Execute();
-
+         rv = current->Execute();
          if (!rv)
-         {
-            std::string str = "\"" + ((GmatCommand *)(*i))->GetTypeName() +
-               "\" Command failed to run to completion\nCommand Text is \"" +
-               ((GmatCommand *)(*i))->GetGeneratingString() + "\"";
-            throw CommandException(str);
-         }
+            throw
+         current = current->GetNext();
       }
+      
+      // Now set the outputs.  current points to the EndFunction command, which
+      // knows about these puppies!
+      Integer memberNum = 0;
+      for (StringArray::iterator i = mOutputListNames.begin(); 
+           i != mOutputListNames.end(); ++i)
+      {
+         // Get the object that maps to the output name
+         GmatBase *obj = current->GetRefObject(Gmat::UNKNOWN_OBJECT, *i);
 
+         // Use the assignment operator, called through the Copy method to set
+         // the output value.  We may need to check the Copy methods for this
+         // to work...
+         mOutputList[memberNum]->Copy(obj);
+         ++memberNum;
+      }
    }
 
    #if DEBUG_CALL_FUNCTION
-      MessageInterface::ShowMessage("Excecuted command\n");
+      MessageInterface::ShowMessage("Executed command\n");
    #endif
    
    BuildCommandSummary(true);

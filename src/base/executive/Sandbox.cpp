@@ -23,6 +23,7 @@
 #include "SandboxException.hpp"
 #include "Parameter.hpp"
 #include "FiniteThrust.hpp"
+#include "GmatFunction.hpp"
 #include "MessageInterface.hpp"
 
 #include <algorithm>       // for find
@@ -599,6 +600,38 @@ bool Sandbox::Initialize()
       #endif
       current->SetObjectMap(&objectMap);
       current->SetSolarSystem(solarSys);
+      
+      // Handle GmatFunctions
+      if (current->GetTypeName() == "CallFunction")
+      {
+         // Check to see if it is a GmatFunction
+         std::string funName = current->GetStringParameter("FunctionName");
+         if (objectMap.find(funName) == objectMap.end())
+            throw SandboxException("The script line \n  '" + 
+               current->GetGeneratingString(Gmat::SCRIPTING) +
+               "'\nreferences the function '" + funName + 
+               "', which cannot be found.");
+         GmatFunction *fun = (GmatFunction*)objectMap[funName];
+         if (fun->GetTypeName() == "GmatFunction")
+         {
+            /// @todo Make the GmatFunction file name handling more robust
+            std::string pathAndName = 
+               fun->GetStringParameter(fun->GetParameterID("FunctionPath"));
+            if (pathAndName == "")
+               pathAndName = funName + ".gmf";
+            
+            GmatCommand *funStream = 
+               moderator->InterpretGmatFunction(pathAndName);
+            if (!current->SetRefObject(funStream, Gmat::COMMAND, ""))
+            {
+               std::string errstr = "Error setting the GmatFunction commands "
+                  "for the script line\n  '";
+               throw SandboxException(errstr +
+                  current->GetGeneratingString(Gmat::SCRIPTING) + "'");
+            }
+         }
+      }
+      
       rv = current->Initialize();
       if (!rv)
          return false;

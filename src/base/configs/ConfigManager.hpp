@@ -106,6 +106,9 @@ public:
    CelestialBody*      GetCelestialBody(const std::string &name);
    GmatCommand*        GetCommand(const std::string name);
    
+   bool                HasConfigurationChanged();
+   void                ConfigurationChanged(bool tf);
+   
 private:
    /// The singleton instance
    static ConfigManager*               theConfigManager;
@@ -120,6 +123,8 @@ private:
    StringArray                         listOfItems;
    /// Mapping between the object names and their pointers
    std::map<std::string, GmatBase *>   mapping;
+   /// Flag indicating that a managed object has been changed by a user
+   bool                                objectChanged;
 };
 
 

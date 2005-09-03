@@ -68,9 +68,10 @@ public:
     
    // The "Interpret" methods translate text streams (e.g. scripts and 
    // subscripts) into GMAT objects 
-   virtual bool                    Interpret(void) = 0;
+   virtual bool                    Interpret() = 0;
    bool                            InterpretObject(std::string objecttype,
-                                                    std::string objectname);
+                                                    std::string objectname,
+                                                    GmatBase **objptr = NULL);
    virtual bool                    Interpret(GmatBase *obj,
                                              const std::string generator);
    GmatCommand*                    InterpretGMATFunction(
@@ -228,7 +229,7 @@ protected:
                                               std::string value);
    void                          CheckForSpecialCase(GmatBase *obj, Integer id, 
                                                      std::string& value);
-   void                          RegisterAliases(void);
+   void                          RegisterAliases();
    bool                          ConfigureForce(ForceModel *obj, 
                                                 std::string& objParm, 
                                                 std::string& parm);

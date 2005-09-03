@@ -102,8 +102,10 @@ private:
    ObjectArray objectArray;
    std::vector<Parameter*> mInputList;
    std::vector<Parameter*> mOutputList;
-   ObjectArray callcmds;
-
+   // Changed 8/31/05, DJC
+   //   ObjectArray callcmds;
+   GmatCommand *callcmds;
+   
    StringArray mInputListNames;
    StringArray mOutputListNames;
 

@@ -60,7 +60,8 @@ ConfigManager* ConfigManager::Instance()
  * Constructor.
  */
 //------------------------------------------------------------------------------
-ConfigManager::ConfigManager()
+ConfigManager::ConfigManager() :
+   objectChanged     (false)
 {
 }
 
@@ -447,6 +448,8 @@ void ConfigManager::AddObject(GmatBase *obj)
       objects.push_back(obj);
       mapping[name] = obj;
    }
+   
+   objectChanged = true;
 }
 
 //------------------------------------------------------------------------------
@@ -701,6 +704,8 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
       MessageInterface::ShowMessage("===> item[%d] = %s\n", i, allItems[i].c_str());
    #endif
    
+   objectChanged = true;
+      
    return renamed;
 } // RenameItem()
 
@@ -784,7 +789,8 @@ bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name)
          status = true;
       }
    }
-   
+    
+   objectChanged = true;
    return status;
 }
 
@@ -1348,4 +1354,16 @@ GmatCommand* ConfigManager::GetCommand(const std::string name)
 {
    throw ConfigManagerException
       ("ConfigManager::GetCommand() has not been implemented.\n");
+}
+
+
+bool ConfigManager::HasConfigurationChanged()
+{
+   return objectChanged;
+}
+
+
+void ConfigManager::ConfigurationChanged(bool tf)
+{
+   objectChanged = tf;
 }

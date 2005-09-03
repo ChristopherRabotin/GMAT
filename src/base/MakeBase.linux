@@ -65,7 +65,7 @@ clean : archclean
 
 archclean :
 	rm -rf */*.o
-	rm -rf */*.a
+	rm -rf $(TARGETS)
 	rm -rf */*~
 	rm -rf core
 	rm -rf */core
@@ -84,6 +84,7 @@ OBJECTS = \
     command/Achieve.o \
     command/Assignment.o \
     command/BeginFiniteBurn.o \
+    command/BeginFunction.o \
     command/BeginScript.o \
     command/BranchCommand.o \
     command/CallFunction.o \
@@ -93,6 +94,7 @@ OBJECTS = \
     command/Else.o \
     command/EndFiniteBurn.o \
     command/EndFor.o \
+    command/EndFunction.o \
     command/EndIf.o \
     command/EndScript.o \
     command/EndTarget.o \

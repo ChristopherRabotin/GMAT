@@ -232,107 +232,130 @@ bool Interpreter::Interpret()
  */
 //------------------------------------------------------------------------------
 bool Interpreter::InterpretObject(std::string objecttype,
-                                  std::string objectname)
+                                  std::string objectname,
+                                  GmatBase **objptr)
 {
-    if (objecttype == "Spacecraft") {
-        CreateSpacecraft(objectname);
-        return true;
-    }
+   bool retval = false;
+   
+   GmatBase *obj = NULL;
+   if (objecttype == "Spacecraft") 
+   {
+      obj = CreateSpacecraft(objectname);
+      retval = true;
+   }
     
-    if (objecttype == "Formation") {
-        CreateFormation(objectname);
-        return true;
-    }
+   if (objecttype == "Formation") 
+   {
+      obj = CreateFormation(objectname);
+      retval = true;
+   }
     
-    if (objecttype == "Propagator") {
-        CreatePropSetup(objectname);
-        return true;
-    }
+   if (objecttype == "Propagator") 
+   {
+      obj = CreatePropSetup(objectname);
+      retval = true;
+   }
 
-    if (objecttype == "ForceModel") {
-        CreateForceModel(objectname);
-        return true;
-    }
+   if (objecttype == "ForceModel") 
+   {
+      obj = CreateForceModel(objectname);
+      retval = true;
+   }
     
-    if (objecttype == "ImpulsiveBurn") {
-        CreateBurn(objectname, true);
-        return true;
-    }
+   if (objecttype == "ImpulsiveBurn") 
+   {
+      obj = CreateBurn(objectname, true);
+      retval = true;
+   }
 
-    if (objecttype == "FiniteBurn") {
-        CreateBurn(objectname, false);
-        return true;
-    }
+   if (objecttype == "FiniteBurn") 
+   {
+      obj = CreateBurn(objectname, false);
+      retval = true;
+   }
 
-    if ((objecttype == "Barycenter") || (objecttype == "LibrationPoint"))
-    {
-       moderator->CreateCalculatedPoint(objecttype, objectname);
-       return true;
-    }
+   if ((objecttype == "Barycenter") || (objecttype == "LibrationPoint"))
+   {
+      obj = moderator->CreateCalculatedPoint(objecttype, objectname);
+      retval = true;
+   }
 
-    if (objecttype == "CoordinateSystem") {
-        CreateCoordinateSystem(objectname);
-        return true;
-    }
+   if (objecttype == "CoordinateSystem") 
+   {
+      obj = CreateCoordinateSystem(objectname);
+      retval = true;
+   }
 
-    // Array definitions may include the row and column counts, so they are
-    // given special treatment.
-    if (objecttype == "Array") {
-        return CreateArray(objectname, objecttype);
-    }
+   // Array definitions may include the row and column counts, so they are
+   // given special treatment.
+   if (objecttype == "Array") 
+   {
+      return CreateArray(objectname, objecttype);
+   }
 
     // Handle tanks, thrusters, etc.
-    if (find(hardwaremap.begin(), hardwaremap.end(), objecttype) != 
-        hardwaremap.end()) {
-        CreateHardware(objectname, objecttype);
-        return true;
-    }
+   if (find(hardwaremap.begin(), hardwaremap.end(), objecttype) != 
+      hardwaremap.end()) 
+   {
+      obj = CreateHardware(objectname, objecttype);
+      retval = true;
+   }
 
-    // Handle Parameters
-    if (find(parametermap.begin(), parametermap.end(), objecttype) != 
-        parametermap.end())
-    {
-        Parameter *parm = moderator->CreateParameter(objecttype, objectname);
-
-        if (parm) {
-           /// @todo: "Raw" objects are set to default body or C.S.; update?
-           if (parm->IsCoordSysDependent()) {
-              parm->SetStringParameter("DepObject", "EarthMJ2000Eq");
-              parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
-           }
+   // Handle Parameters
+   if (find(parametermap.begin(), parametermap.end(), objecttype) != 
+       parametermap.end())
+   {
+      Parameter *parm = moderator->CreateParameter(objecttype, objectname);
+      obj = parm;
+        
+      if (parm) 
+      {
+         /// @todo: "Raw" objects are set to default body or C.S.; update?
+         if (parm->IsCoordSysDependent()) 
+         {
+            parm->SetStringParameter("DepObject", "EarthMJ2000Eq");
+            parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+         }
             
-           if (parm->IsOriginDependent()) {
-              parm->SetStringParameter("DepObject", "Earth");
-              if (parm->NeedCoordSystem())
-                 parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
-                    "EarthMJ2000Eq");
-           }
-        }        
-        return true;
-    }
+         if (parm->IsOriginDependent()) 
+         {
+            parm->SetStringParameter("DepObject", "Earth");
+            if (parm->NeedCoordSystem())
+               parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
+                  "EarthMJ2000Eq");
+         }
+      }        
+      retval = true;
+   }
     
-    // Handle Subscribers
-    if (find(subscribermap.begin(), subscribermap.end(), objecttype) != 
-                                                          subscribermap.end()) {
-        moderator->CreateSubscriber(objecttype, objectname);
-        return true;
-    }
+   // Handle Subscribers
+   if (find(subscribermap.begin(), subscribermap.end(), objecttype) != 
+       subscribermap.end())
+   {
+      obj = moderator->CreateSubscriber(objecttype, objectname);
+      retval = true;
+   }
 
     // Handle Solvers
-    if (find(solvermap.begin(), solvermap.end(), objecttype) != 
-                                                          solvermap.end()) {
-        moderator->CreateSolver(objecttype, objectname);
-        return true;
-    }
+   if (find(solvermap.begin(), solvermap.end(), objecttype) != 
+       solvermap.end()) 
+   {
+      obj = moderator->CreateSolver(objecttype, objectname);
+      retval = true;
+   }
     
     // Handle Functions
-    if (find(functionmap.begin(), functionmap.end(), objecttype) != 
-                                                          functionmap.end()) {
-        moderator->CreateFunction(objecttype, objectname);
-        return true;
-    }
+   if (find(functionmap.begin(), functionmap.end(), objecttype) != 
+       functionmap.end()) 
+   {
+      obj = moderator->CreateFunction(objecttype, objectname);
+      retval = true;
+   }
+   
+   if (objptr != NULL)
+      *objptr = obj;
 
-    return false;
+   return retval;
 }
 
 
@@ -1236,6 +1259,12 @@ bool Interpreter::InterpretFunctionCall()
 //------------------------------------------------------------------------------
 GmatCommand* Interpreter::InterpretGMATFunction(const std::string &pathAndName)
 {
+   #ifdef DEBUG_FUNCTION_PARSING
+      MessageInterface::ShowMessage(
+         "Entered Interpreter::InterpretGMATFunction(%s)...\n", 
+         pathAndName.c_str());
+   #endif
+
    // Verify that the function file can be found
    std::ifstream funFile;
    funFile.open(pathAndName.c_str());
@@ -1244,25 +1273,169 @@ GmatCommand* Interpreter::InterpretGMATFunction(const std::string &pathAndName)
          pathAndName);
          
    // Start reading and parsing the file
+   std::string currentLine;
+   char buffer[4096];
    
-   
-   // Parse the function definition
-   std::string functionName = "";
-   
-   // Build a block of text that contains the commands
+   UnsignedInt loc, lineNum = 0;;
+   bool functionDefined = false;
+
    std::string block = "";
+
+   // Set the start of the command stream
+   GmatCommand *commands = NULL;
    
-   // Build the command stream
-   GmatCommand *commands = moderator->CreateCommand("BeginFunction", 
-      functionName);
+   // Parse the file
+   funFile.getline(buffer, 4095);
+   while (!funFile.eof())
+   {
+      ++lineNum;
+      currentLine = buffer;
+
+         MessageInterface::ShowMessage("%d: %s\n", lineNum, 
+            currentLine.c_str());
+      
+      // Truncate the line at the comment character, if there is one
+      loc = currentLine.find('%', 0);
+      if (loc != std::string::npos)
+         currentLine = currentLine.substr(0, loc);
+      
+      // Handle the function definition line
+      if (!functionDefined)
+      {
+         loc = currentLine.find("GmatFunction ", 0);
+         if (loc != std::string::npos)
+         {
+            UnsignedInt funLoc = loc + 13;
+            UnsignedInt parenLoc = currentLine.find('(', 0);
+
+            std::string functionName = 
+               currentLine.substr(funLoc,parenLoc-funLoc);
+            
+            if (parenLoc == std::string::npos)
+            {
+               std::string errstr = 
+                  "Attempting to define a GmatFunction in the file '";
+               throw InterpreterException(errstr + pathAndName + 
+                  "', but the file definition line\n   '" +
+                  currentLine + 
+                  "'\ndoes not contain an input argument list " +
+                  "(missing parentheses?)");
+            }
+
+            StringArray invals, outvals;
+            std::string subLine, argLine;
+            
+            argLine = currentLine.substr(parenLoc);
+            invals = SeparateParens(argLine);
+            
+            loc = currentLine.find("=");
+            if (loc != std::string::npos)
+            {
+               subLine = currentLine.substr(0, loc);
+            
+               Integer start = SkipWhiteSpace(0, subLine);
+               if (start >=0)
+                  subLine = subLine.substr(start);
+               if (subLine[0] == '[')
+                  outvals = SeparateBrackets(subLine);
+               else
+                  outvals.push_back(subLine);
+            }
+   
+            #ifdef DEBUG_FUNCTION_PARSING
+               MessageInterface::ShowMessage("Function:  '%s'\n", 
+                  functionName.c_str());
+               MessageInterface::ShowMessage("Inputs:\n");
+               for (StringArray::iterator i = invals.begin(); 
+                    i != invals.end(); ++i)
+                  MessageInterface::ShowMessage("   %s\n", i->c_str());
+               MessageInterface::ShowMessage("Outputs:\n");
+               for (StringArray::iterator i = outvals.begin(); 
+                    i != outvals.end(); ++i)
+                  MessageInterface::ShowMessage("   %s\n", i->c_str());
+            #endif
+
+            commands = moderator->CreateCommand("BeginFunction");
+            commands->SetStringParameter("FunctionName", functionName);
+            for (StringArray::iterator i = invals.begin(); i != invals.end();
+                 ++i)
+               commands->SetStringParameter("Input", *i);
+            for (StringArray::iterator i = outvals.begin(); i != outvals.end();
+                 ++i)
+               commands->SetStringParameter("Output", *i);
+            functionDefined = true;
+         }
+      }
+      else  // Toss the remaining lines into the buffer for parsing
+      {
+         loc = currentLine.find("Create ", 0);
+         if (loc != std::string::npos)
+         {
+            // Handle Create lines
+            std::string type, name;
+            StringArray createLine = this->SeparateSpaces(currentLine);
+            if (createLine[0] != "Create")
+            {
+               std::string errstr = 
+                  "Create needs to be the first word in the line \n'";
+               throw InterpreterException(errstr + currentLine + "'");
+            }
+            
+            type = createLine[1]; 
+            name = createLine[2];
+            
+            GmatBase *obj; 
+            InterpretObject(type, "", &obj);
+            if (!obj)
+               throw InterpreterException("Unable to create object " +
+                                           name + " of type " + type +
+                                           "\nFunctiuon text: \"" + 
+                                           currentLine + "\"");
+            obj->SetName(name);
+            if (commands == NULL)
+               throw InterpreterException(
+                  "Did not create BeginFunction command");
+            commands->SetRefObject(obj, Gmat::UNKNOWN_OBJECT, name);
+         }
+         else
+         {
+            // Add all others to the block of commands that are parsed
+            block += currentLine + "\n";
+         }
+      }
+      
+      funFile.getline(buffer, 4095);
+   }
+   
+   if (commands == NULL)
+      throw InterpreterException("Did not create BeginFunction command");
+      
    InterpretTextBlock(commands, block);
    
    // Close the file when done, and end the function stream
    funFile.close();
-   commands->Append(moderator->CreateCommand("EndFunction", functionName));
+   
+   #ifdef DEBUG_FUNCTION_PARSING
+      MessageInterface::ShowMessage(
+         "...Finished parsing '%s'.\n", 
+         pathAndName.c_str());
+
+      MessageInterface::ShowMessage("Here is the generated command stream:\n");
+      GmatCommand *cmd = commands;
+      while (cmd != NULL)
+      {
+         std::string cmdtxt = cmd->GetGeneratingString(Gmat::SCRIPTING, "   ");
+         MessageInterface::ShowMessage("%s\n", cmdtxt.c_str());
+         cmd = cmd->GetNext();
+      } 
+
+      throw InterpreterException("A temporary break to check parsing");
+   #endif
    
    return commands;
 }
+
+
 
 
 GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
@@ -3061,7 +3234,9 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
    StringArray sar = SeparateLines(block);
    StringArray cmdList = moderator->GetListOfFactoryItems(Gmat::COMMAND);
    
-   if (cmd->GetTypeName() == "BeginScript") {
+   if ((cmd->GetTypeName() == "BeginScript") || 
+       (cmd->GetTypeName() == "BeginFunction"))
+   {
       // First check to be sure that the command block has matched nesting
       if (!ValidateBlock(sar)) {
          MessageInterface::PopupMessage(Gmat::WARNING_,
@@ -3069,9 +3244,11 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
          return false;
       }
 
+      std::string endtype = ((cmd->GetTypeName() == "BeginScript") ?
+         "EndScript" : "EndFunction");
       GmatCommand *current, *subsequent = cmd->GetNext();
       while ((subsequent != NULL) &&
-             (subsequent->GetTypeName() != "EndScript")) {
+             (subsequent->GetTypeName() != endtype)) {
          // Remove all of the commands between cmd and its terminator
          current = subsequent;
          subsequent = current->GetNext();
@@ -3088,14 +3265,22 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
       // Fancy footwork -- Prep the mission sequence for insertion of new cmds
       GmatCommand *terminalCommand = cmd->GetNext();
       if (terminalCommand == NULL)
-         terminalCommand = moderator->CreateCommand("EndScript");
+         terminalCommand = moderator->CreateCommand(endtype);
       // Temporarily set the BeginScript->next pointer to NULL
       cmd->Remove(cmd);
       
       // Now build the commands in the block, one line at a time
       current = cmd;
       std::string cmdType;
-      for (StringArray::iterator i = sar.begin()+1; i != sar.end()-1; ++i) {
+      
+      StringArray::iterator lastOne;
+      if (cmd->GetTypeName() == "BeginScript")
+         lastOne = sar.end()-1;
+      else
+         lastOne = sar.end();
+         
+      for (StringArray::iterator i = sar.begin()+1; i != lastOne; ++i) 
+      {
          // Grab the name for the command
          std::stringstream cmdLine;
          cmdLine.str() = "";
@@ -3113,14 +3298,14 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
                cmdType);
          }
          
-         // Prevent multiple "EndScript" commands
-         if (cmdType == "EndScript")
+         // Prevent multiple "EndScript" or "EndFunction" commands
+         if (cmdType == endtype)
             continue;
 
-         #ifdef DEBUG_TOKEN_PARSING
+//         #ifdef DEBUG_TOKEN_PARSING
             MessageInterface::ShowMessage(
                "   Constructing a command of type %s\n", cmdType.c_str());
-         #endif
+//         #endif
 
          // Create the command
          if (find(cmdList.begin(), cmdList.end(), cmdType) == cmdList.end()) {
@@ -3166,7 +3351,6 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
       MessageInterface::ShowMessage(
          "Interpreter::InterpretTextBlock completed\n");
    #endif
-   
    return false;
 }
 
@@ -3201,12 +3385,12 @@ StringArray Interpreter::SeparateLines(const std::string block)
       ++end;
    }
    
-   #ifdef DEBUG_TOKEN_PARSING
+//   #ifdef DEBUG_TOKEN_PARSING
       MessageInterface::ShowMessage(
-         "Broke this text:\n\n%s\ninto these lines:\n", block.c_str());
+         "Broke this text:\n  '%s'\ninto these lines:\n", block.c_str());
       for (StringArray::iterator i = sar.begin(); i != sar.end(); ++i)
          MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
-   #endif
+//   #endif
    
    return sar;
 }
@@ -3244,13 +3428,13 @@ bool Interpreter::ValidateBlock(StringArray &sar)
    std::map<std::string, Integer> depth;
    std::map<std::string, std::string> startEnd, endStart;
    
-   startEnd["Target"]   = "EndTarget";
-   startEnd["If"]       = "EndIf";
-   startEnd["For"]      = "EndFor";
-   startEnd["While"]    = "EndWhile";
-   startEnd["Optimize"] = "EndOptimize";
-   startEnd["Case"]     = "EndCase";
-
+   startEnd["Target"]        = "EndTarget";
+   startEnd["If"]            = "EndIf";
+   startEnd["For"]           = "EndFor";
+   startEnd["While"]         = "EndWhile";
+   startEnd["Optimize"]      = "EndOptimize";
+   startEnd["Case"]          = "EndCase";
+   
    endStart["EndTarget"]   = "Target";
    endStart["EndIf"]       = "If";
    endStart["EndFor"]      = "For";
