@@ -140,8 +140,7 @@ void GmatPanel::Show()
     theApplyButton->Disable();
     LoadData();
 
-//    theScriptButton->Disable(); //loj: for build2
-    theHelpButton->Disable();   //loj: for build2
+    theHelpButton->Disable();   //loj: not implemented yet
 
     if ((mObject == NULL) || (!mObject->IsOfType(Gmat::COMMAND)))
     theSummaryButton->Hide();
@@ -162,7 +161,7 @@ void GmatPanel::OnOK(wxCommandEvent &event)
     // Close page from main notebook    
     // GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
     // gmatMainNotebook->ClosePage();
-    if (canClose) //loj: 2/4/05 Added
+    if (canClose)
        GmatAppData::GetMainFrame()->CloseActiveChild();
 }
 
@@ -191,8 +190,10 @@ void GmatPanel::OnCancel(wxCommandEvent &event)
 void GmatPanel::OnApply(wxCommandEvent &event)
 {
    SaveData();
+   theGuiInterpreter->ConfigurationChanged(mObject, true);
    theApplyButton->Enable(!enableApply);
 }
+
 
 //------------------------------------------------------------------------------
 // void OnHelp()
