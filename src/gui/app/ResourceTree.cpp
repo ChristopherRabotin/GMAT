@@ -138,7 +138,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    
    AddIcons();
    AddDefaultResources();
-
+   
    // set the counters to 0
    mNumSpacecraft = 0;
    mNumFuelTank = 0;
@@ -222,6 +222,8 @@ void ResourceTree::UpdateResource(bool resetCounter)
       mNumCoordSys = 0;
       mNumBarycenter = 0;
       mNumLibration = 0;
+
+      theGuiInterpreter->ResetConfigurationChanged();
    }
    
    // ag: collapse, so folder icon is closed
@@ -463,6 +465,8 @@ void ResourceTree::AddDefaultResources()
    AddDefaultVariables(mVariableItem);
    AddDefaultFunctions(mFunctItem);
    AddDefaultCoordSys(mCoordSysItem);
+   
+   theGuiInterpreter->ResetConfigurationChanged(true, false);
 }
 
 //------------------------------------------------------------------------------
