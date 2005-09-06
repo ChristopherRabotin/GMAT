@@ -157,7 +157,8 @@ public:
    virtual bool        Execute() = 0;
    virtual void        RunComplete();
    
-   
+   bool                HasConfigurationChanged();
+   virtual void        ConfigurationChanged(bool tf, bool setAll = false);
 
 protected:
    enum
@@ -203,6 +204,8 @@ protected:
    std::string          commandSummary;
    /// Optional comment string associated with the command
    std::string          comment;
+   /// Flag indicating that a command has been changed by a user
+   bool                 commandChanged;
       
    virtual bool         AssignObjects();
    virtual bool         ClearObjects();

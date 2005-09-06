@@ -182,34 +182,42 @@ bool ScriptInterpreter::Build(const std::string &scriptfile)
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::ReadScript()
 {
-    branchDepth = 0;
+   branchDepth = 0;
     
-    if (instream->fail() || instream->eof()) {
-        return false;
-    }
+   if (instream->fail() || instream->eof()) 
+   {
+      return false;
+   }
     
-    chunks.clear();
+   chunks.clear();
     
-    while (!instream->eof()) {
-        if (!ReadLine())
-            return false;
-        if (!Parse())
-            return false;
-    }
+   while (!instream->eof()) 
+   {
+      if (!ReadLine())
+         return false;
+      if (!Parse())
+         return false;
+   }
     
-    if (branchDepth != 0) {
-       // Clear the command sequence
-       moderator->ClearCommandSeq();
-       if (branchDepth > 0)
-          MessageInterface::ShowMessage("ScriptInterpreter::ReadScript "
-             "completed without terminating all branch commands\n");
-       if (branchDepth < 0)
-          MessageInterface::ShowMessage("ScriptInterpreter::ReadScript "
-             "completed with more End commands than branch commands\n");
-       return false;
-    }
+   ConfigManager* cm = ConfigManager::Instance();
+   cm->ConfigurationChanged(false);
+   
+   moderator->SetCommandsUnchanged();
+   
+   if (branchDepth != 0) 
+   {
+      // Clear the command sequence
+      moderator->ClearCommandSeq();
+      if (branchDepth > 0)
+         MessageInterface::ShowMessage("ScriptInterpreter::ReadScript "
+            "completed without terminating all branch commands\n");
+      if (branchDepth < 0)
+         MessageInterface::ShowMessage("ScriptInterpreter::ReadScript "
+            "completed with more End commands than branch commands\n");
+      return false;
+   }
     
-    return true;
+   return true;
 }
 
 

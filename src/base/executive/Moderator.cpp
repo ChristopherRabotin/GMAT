@@ -2270,6 +2270,21 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
 }
 
 
+//------------------------------------------------------------------------------
+// void SetCommandsUnchanged(Integer whichList)
+//------------------------------------------------------------------------------
+/**
+ * Resets the command list to the unchanged state.
+ * 
+ * @param <whichList>   index indicating which command list gets updated
+ */
+//------------------------------------------------------------------------------
+void Moderator::SetCommandsUnchanged(Integer whichList)
+{
+   commands[whichList]->ConfigurationChanged(false, true);
+}
+
+
 // CoordinateSystem
 //------------------------------------------------------------------------------
 // CoordinateSystem* GetInternalCoordinateSystem()

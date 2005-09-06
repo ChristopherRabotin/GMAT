@@ -72,7 +72,8 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    streamID             (-1),
    depthChange          (0),
    commandChangedState  (false),
-   comment              ("")
+   comment              (""),
+   commandChanged       (false)
 {
    generatingString = "";
    parameterCount = GmatCommandParamCount;
@@ -148,7 +149,9 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    publisher            (c.publisher),
    streamID             (c.streamID),
    depthChange          (c.depthChange),
-   commandChangedState  (c.commandChangedState)
+   commandChangedState  (c.commandChangedState),
+   comment              (c.comment),
+   commandChanged       (c.commandChanged)
 {
    generatingString = c.generatingString;
    parameterCount = GmatCommandParamCount;
@@ -191,7 +194,10 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
    solarSys = c.solarSys;
    publisher = c.publisher;
    generatingString = c.generatingString;
-   streamID = c.streamID;   
+   streamID = c.streamID;
+   comment = c.comment;
+   commandChanged = c.commandChanged;
+   
    return *this;
 }
 
@@ -257,6 +263,10 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
       empty = "% Generating string not set for " + typeName + " command.";
       return empty;
    }
+
+   if (comment != "")
+      generatingString = "% " + comment + "\n" + generatingString; 
+
    return generatingString;
 }
 
@@ -897,7 +907,11 @@ bool GmatCommand::Append(GmatCommand *cmd)
    if (next)
       next->Append(cmd);
    else
+   {
+      // Always set the command changed flag when a command is added to the list
+      commandChanged = true;
       next = cmd;
+   }
       
    return true;
 }
@@ -1258,6 +1272,28 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
 //}
 
 
+bool GmatCommand::HasConfigurationChanged()
+{
+   bool changed = commandChanged;
+   if (!changed)
+   {
+      if (next != NULL)
+         changed = next->HasConfigurationChanged();
+   }
+   
+   return changed;
+}
+
+
+void GmatCommand::ConfigurationChanged(bool tf, bool setAll)
+{
+   commandChanged = tf;
+   if (setAll)
+      if (next)
+         next->ConfigurationChanged(tf, setAll);
+}
+
+
 // Temporary -- need to figure out how we're supposed to do transformations 
 // generically
 void GmatCommand::CartToKep(const Rvector6 in, Rvector6 &out)
@@ -1311,3 +1347,5 @@ void GmatCommand::CartToKep(const Rvector6 in, Rvector6 &out)
       out[5] = 2.0 * M_PI - out[5];
    out[5] *= 180.0 / M_PI;
 }
+
+

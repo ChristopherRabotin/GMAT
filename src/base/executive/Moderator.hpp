@@ -219,6 +219,7 @@ public:
                               const std::string &name = "");
    GmatCommand* CreateDefaultCommand(const std::string &type,
                                      const std::string &name = "");
+   void         SetCommandsUnchanged(Integer whichList = 0); 
 
    // CoordinateSystem
    CoordinateSystem* GetInternalCoordinateSystem();
