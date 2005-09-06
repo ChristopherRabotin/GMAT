@@ -683,10 +683,12 @@ void MissionTree::AddDefaultMission()
     
    SetItemImage(mMissionSeqTopItem, GmatTree::MISSION_ICON_OPENFOLDER,
                wxTreeItemIcon_Expanded);
-
+   
    AddDefaultMissionSeq(mMissionSeqTopItem);
-
+   
    UpdateCommand();
+   
+   theGuiInterpreter->ResetConfigurationChanged(false, true);
 
 }
 
