@@ -108,6 +108,11 @@ public:
                              const std::string &newName);
    bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name,
                              bool delOnlyIfNotUsed);
+   bool HasConfigurationChanged(Integer sandboxNum = 1);
+   void ConfigurationChanged(GmatBase *obj, bool tf);
+   void ResetConfigurationChanged(bool resetResource = true,
+                                  bool resetCommands = true,
+                                  Integer sandboxNum = 1);
    
    // SolarSystem
    SolarSystem* GetDefaultSolarSystem();
@@ -239,8 +244,8 @@ public:
    // Potential field files
    std::string GetPotentialFileName(const std::string &fileType);
    
-   //loj: 7/7/05 Added
-   // This will eventually replace Get*FileName() above
+   // Getting file names
+   // This will eventually replace Get*FileName() above (loj: 7/7/05)
    std::string GetFileName(const std::string &fileType);
    
    // Mission

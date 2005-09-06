@@ -196,6 +196,37 @@ bool GuiInterpreter::RemoveItemIfNotUsed(Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
+// bool HasConfigurationChanged(Integer sandboxNum = 1)
+//------------------------------------------------------------------------------
+bool GuiInterpreter::HasConfigurationChanged(Integer sandboxNum)
+{
+   return moderator->HasConfigurationChanged(sandboxNum);
+}
+
+
+//------------------------------------------------------------------------------
+// void ConfigurationChanged(GmatBase *obj, bool tf)
+//------------------------------------------------------------------------------
+void GuiInterpreter::ConfigurationChanged(GmatBase *obj, bool tf)
+{
+   moderator->ConfigurationChanged(obj, tf);
+}
+
+
+//------------------------------------------------------------------------------
+// void ResetConfigurationChanged(bool resetResource = true,
+//                                bool resetCommands = true,
+//                                Integer sandboxNum = 1)
+//------------------------------------------------------------------------------
+void GuiInterpreter::ResetConfigurationChanged(bool resetResource,
+                                               bool resetCommands,
+                                               Integer sandboxNum)
+{
+   moderator->ResetConfigurationChanged(resetResource, resetCommands, sandboxNum);
+}
+
+
+//------------------------------------------------------------------------------
 // SolarSystem* GetDefaultSolarSystem()
 //------------------------------------------------------------------------------
 /**

@@ -620,6 +620,60 @@ bool Moderator::RemoveConfiguredItem(Gmat::ObjectType type, const std::string &n
 }
 
 
+//------------------------------------------------------------------------------
+// bool HasConfigurationChanged(Integer sandboxNum = 1)
+//------------------------------------------------------------------------------
+bool Moderator::HasConfigurationChanged(Integer sandboxNum)
+{
+   bool rsrcChanged = theConfigManager->HasConfigurationChanged();
+   bool cmdsChanged = commands[sandboxNum-1]->HasConfigurationChanged();
+   
+   #if DEBUG_CONFIG
+   MessageInterface::ShowMessage
+      ("Moderator::HasConfigurationChanged() rsrcChanged=%d, "
+       "cmdsChanged=%d\n", rsrcChanged, cmdsChanged);
+   #endif
+   
+   return (rsrcChanged || cmdsChanged);
+}
+
+
+//------------------------------------------------------------------------------
+// void ConfigurationChanged(GmatBase *obj, bool tf)
+//------------------------------------------------------------------------------
+void Moderator::ConfigurationChanged(GmatBase *obj, bool tf)
+{
+   if (obj != NULL)
+   {
+      if (obj->IsOfType(Gmat::COMMAND))
+         ((GmatCommand*)obj)->ConfigurationChanged(true);
+      else
+         theConfigManager->ConfigurationChanged(true);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void ResetConfigurationChanged(bool resetResource = true,
+//                                bool resetCommands = true,
+//                                Integer sandboxNum = 1)
+//------------------------------------------------------------------------------
+void Moderator::ResetConfigurationChanged(bool resetResource, bool resetCommands,
+                                          Integer sandboxNum)
+{
+   #if DEBUG_CONFIG
+   MessageInterface::ShowMessage
+      ("Moderator::ResetConfigurationChanged() entered\n");
+   #endif
+   
+   if (resetResource)
+      theConfigManager->ConfigurationChanged(false);
+   
+   if (resetCommands)
+      SetCommandsUnchanged(sandboxNum-1);
+}
+
+
 // SolarSystem
 //------------------------------------------------------------------------------
 // SolarSystem* GetDefaultSolarSystem()
@@ -1683,8 +1737,6 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
    // create default force model with Earth primary body
    ForceModel *newfm= CreateForceModel("");
    GravityField *gravForce = new GravityField("", "Earth");
-   //loj: 7/7/05 Using new FileManager
-   //gravForce->SetStringParameter("Filename", GetPotentialFileName("JGM2"));
    gravForce->SetStringParameter("PotentialFile", GetFileName("JGM2_FILE"));
    newfm->AddForce(gravForce);
    propSetup->SetForceModel(newfm);
@@ -2639,7 +2691,6 @@ Integer Moderator::GetPlanetarySourceId(const std::string &sourceType)
 //------------------------------------------------------------------------------
 std::string Moderator::GetPotentialFileName(const std::string &fileType)
 {
-   //loj: 7/6/05 using new FileManager
    if (fileType == "JGM2")
       return theFileManager->GetFullPathname("JGM2_FILE");
    else if (fileType == "JGM3")
@@ -2977,7 +3028,7 @@ Gmat::RunState Moderator::GetUserInterrupt()
    return runState;
 }
 
-//loj: 8/1/05 Added
+
 //------------------------------------------------------------------------------
 // Gmat::RunState GetRunState()
 //------------------------------------------------------------------------------
@@ -3045,6 +3096,11 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
          
          isRunReady = true;
       }
+      else
+      {
+         //loj: 9/1/05 Added
+         MessageInterface::ShowMessage("\n========================================\n");
+      }
    }
    catch (BaseException &e)
    {
@@ -3104,6 +3160,11 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
          #endif
          
          isRunReady = true;
+      }
+      else
+      {
+         //loj: 9/1/05 Added
+         MessageInterface::ShowMessage("\n========================================\n");
       }
    }
    catch (BaseException &e)
@@ -3214,10 +3275,9 @@ void Moderator::InitializePlanetarySource()
                                      GetFullPathname("DE405_FILE"));
    
    // initialize planetary file types/names in use
-   // default is ANALYTIC (loj: 8/17/05 set to ANALYTIC. system crashes when using
-   // Analytic, so switched back
-   thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE405]);
-   //thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[ANALYTIC]); 
+   // Set ANALYTIC as default (loj: 9/6/05)
+   //thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE405]);
+   thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[ANALYTIC]); 
    SetPlanetarySourceTypesInUse(thePlanetarySourceTypesInUse);
 }
 
