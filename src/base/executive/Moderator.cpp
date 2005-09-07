@@ -4267,6 +4267,7 @@ Moderator::Moderator()
    theDefaultSolarSystem = NULL;
    theInternalCoordSystem = NULL;
    theDefaultSlpFile = NULL;
+   theDefaultDeFile = NULL;
    runState = Gmat::IDLE;
    
 //    theFactoryManager = FactoryManager::Instance();
