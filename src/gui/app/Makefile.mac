@@ -1,17 +1,24 @@
+################################################################################
 # Project:    GMAT
 # Module:     Makefile.mac for app directory 
 # Created:    Joey Gurgnaus 
 # Date:       2004/02/13
 # Modified:   2005/06/29 - Replaced *.cpp with wildcard
+#             2005/07/07 - Added MATLAB flag 
+################################################################################
 #
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
+# Include MATLAB directory
+MATLAB_INCDIR = ${MATLAB}/extern/include
+#
 # Source file for creating new library 
 SRC := $(wildcard *.cpp)
+#
+TESTFLAGS = -D__USE_MATLAB__ -I$(MATLAB_INCDIR)
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/gui/inc.mac
 include ${INCMK}
-#
