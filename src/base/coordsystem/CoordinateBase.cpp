@@ -94,9 +94,9 @@ solar          (NULL)
 //---------------------------------------------------------------------------
 CoordinateBase::CoordinateBase(const CoordinateBase &coordBase) :
 GmatBase(coordBase),
-origin        (NULL),
+origin        (coordBase.origin),
 originName    (coordBase.originName),
-j2000Body     (NULL),
+j2000Body     (coordBase.j2000Body),
 j2000BodyName (coordBase.j2000BodyName),
 solar         (coordBase.solar)
 {
