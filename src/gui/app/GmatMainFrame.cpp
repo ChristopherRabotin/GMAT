@@ -274,6 +274,10 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
 //------------------------------------------------------------------------------
 GmatMainFrame::~GmatMainFrame()
 {
+#ifdef __WXMAC__             // Need to close MATLAB on Mac
+   MatlabInterface::Close();
+#endif
+
    if (mServer)
       delete mServer;
    
