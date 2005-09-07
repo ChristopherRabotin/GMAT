@@ -1,12 +1,18 @@
+################################################################################
 # Project:    GMAT
-# Module:     Makefile.mac for executive directory 
+# Module:     Makefile.mac for interface directory 
 # Created:    Wendy Shoan
 # Date:       2004/09/10	
-# Modified:   2004/09/27 - J. Gurganus - removed WX_HOME
+# Modified:   2004/09/27 -J. Gurganus - removed WX_HOME 
 #             2004/10/27 - W. Shoan - added MatlabInterface
+#             2005/07/27 - J. Gurganus - added MATLAB flag 
+################################################################################
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
+#
+# Define the MATLAB include directory
+MATLAB_INCDIR = ${MATLAB}/extern/include
 #
 # Define the directory for including gui file header
 G_APP     = $(PROJECT_ROOT)/gui/app
@@ -20,12 +26,14 @@ G_VIEW    = $(PROJECT_ROOT)/gui/view
 GUI_INCS = -I$(G_APP) -I$(G_BITMAPS) -I$(G_FOUND) -I$(G_INC) -I$(G_PLOT) \
 	-I$(G_MISSION) -I$(G_VIEW)
 #
+MATLAB_FLAGS = -I$(MATLAB_INCDIR) -D__USE_MATLAB__
+#
 # Source file for creating new library
 SRC = GmatInterface.cpp MatlabInterface.cpp
 
 #
 #TESTFLAGS = -D__CONSOLE_APP__
-TESTFLAGS = $(GUI_INCS) `$(WX_HOME)/wx-config --cxxflags`
+TESTFLAGS = $(MATLAB_FLAGS) $(GUI_INCS) `$(WX_HOME)/wx-config --cxxflags`
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
