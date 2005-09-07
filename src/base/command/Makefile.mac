@@ -1,3 +1,4 @@
+################################################################################
 # Project:    GMAT
 # Module:     Makefile.mac for command directory 
 # Created:    Joey Gurgnaus 
@@ -20,18 +21,27 @@
 #             2005/02/07 - W. Shoan - changed Begin/EndManeuver to Begin/EndFiniteBurn
 #             2005/03/01 - W. Shoan - added BeginScript and EndScript
 #             2005/07/07 - J. Gurganus- added Report 
+#             2005/07/07 - J. Gurganus- added MATLAB flag 
+#             2005/09/07 - J. Gurganus- added BeginFunction and EndFunction 
+################################################################################
 #
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
+# Include MATLAB directory
+MATLAB_INCDIR = ${MATLAB}/extern/include
+#
 # Source file for creating new library
-SRC = Achieve.cpp Assignment.cpp BeginFiniteBurn.cpp BeginScript.cpp \
-	BranchCommand.cpp CallFunction.cpp Command.cpp CommandException.cpp \
-	ConditionalBranch.cpp Else.cpp ElseIf.cpp EndIf.cpp  EndFor.cpp \
-	EndFiniteBurn.cpp EndScript.cpp EndTarget.cpp EndWhile.cpp For.cpp \
-	If.cpp Maneuver.cpp NoOp.cpp Propagate.cpp Report.cpp Target.cpp \
-	Save.cpp Toggle.cpp Vary.cpp While.cpp
+SRC = Achieve.cpp Assignment.cpp BeginFiniteBurn.cpp BeginFunction.cpp \
+	BeginScript.cpp BranchCommand.cpp CallFunction.cpp Command.cpp \
+	CommandException.cpp ConditionalBranch.cpp Else.cpp ElseIf.cpp \
+	EndIf.cpp  EndFor.cpp EndFiniteBurn.cpp EndFunction.cpp EndScript.cpp \
+	EndTarget.cpp EndWhile.cpp For.cpp If.cpp Maneuver.cpp NoOp.cpp \
+	Propagate.cpp Report.cpp Target.cpp Save.cpp Toggle.cpp Vary.cpp \
+	While.cpp
+#
+TESTFLAGS = -D__USE_MATLAB__ -I$(MATLAB_INCDIR)
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
