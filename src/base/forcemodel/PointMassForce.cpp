@@ -77,12 +77,10 @@
 const std::string
 PointMassForce::PARAMETER_TEXT[PointMassParamCount - PhysicalModelParamCount] =
 {
-   "Epoch",
    "GravConst",
    "Radius",
    "EstimateMethod",
    "PrimaryBody",
-//   "Body",
 };
 
 const Gmat::ParameterType
@@ -91,9 +89,7 @@ PointMassForce::PARAMETER_TYPE[PointMassParamCount - PhysicalModelParamCount] =
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
    Gmat::BOOLEAN_TYPE,
-//   Gmat::STRING_TYPE,
 };
 
 //---------------------------------
@@ -110,7 +106,6 @@ PointMassForce::PARAMETER_TYPE[PointMassParamCount - PhysicalModelParamCount] =
 PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
    PhysicalModel          (Gmat::PHYSICAL_MODEL, "PointMassForce", name),
    mu                     (398600.4415),
-   epoch                  (21545.0),
    estimationMethod       (1.0),
    isPrimaryBody          (true)
 {
@@ -147,8 +142,8 @@ PointMassForce::~PointMassForce(void)
 PointMassForce::PointMassForce(const PointMassForce& pmf) :
    PhysicalModel          (pmf),
    mu                     (pmf.mu),
-   epoch                  (pmf.epoch),
-   estimationMethod       (pmf.estimationMethod)
+   estimationMethod       (pmf.estimationMethod),
+   isPrimaryBody          (pmf.isPrimaryBody)
 {
    parameterCount = PointMassParamCount;
    dimension = pmf.dimension;
@@ -591,9 +586,6 @@ bool PointMassForce::IsParameterReadOnly(const Integer id) const
 //------------------------------------------------------------------------------
 Real PointMassForce::GetRealParameter(const Integer id) const
 {
-   if (id == EPOCH)
-      return epoch + elapsedTime / 86400.0;
-
    if (id == MU)
       return mu;
     
@@ -624,13 +616,6 @@ Real PointMassForce::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real PointMassForce::SetRealParameter(const Integer id, const Real value)
 {
-   if (id == EPOCH) 
-   {
-      epoch = value;
-      elapsedTime = 0.0;
-      return true;
-   }
-
    if (id == MU) 
    {
       mu = value;
@@ -650,7 +635,7 @@ Real PointMassForce::SetRealParameter(const Integer id, const Real value)
       return false;
    }
 
-   return GmatBase::SetRealParameter(id, value);
+   return PhysicalModel::SetRealParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -722,7 +707,7 @@ bool PointMassForce::GetBooleanParameter(const Integer id) const
 {
    if (id == PRIMARY_BODY)       return isPrimaryBody;
 
-   return GmatBase::GetBooleanParameter(id);
+   return PhysicalModel::GetBooleanParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -743,7 +728,7 @@ bool PointMassForce::SetBooleanParameter(const Integer id, const bool value)
 {
    if (id == PRIMARY_BODY)   return (isPrimaryBody = value); 
 
-   return GmatBase::SetBooleanParameter(id,value);
+   return PhysicalModel::SetBooleanParameter(id,value);
 }
 
 //---------------------------------

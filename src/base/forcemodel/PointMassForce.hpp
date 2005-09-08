@@ -112,9 +112,7 @@ protected:
    // Parameter IDs
    enum
    {
-      /// ID for the epoch, used by PointMass and PointMassForce instances
-      EPOCH = PhysicalModelParamCount,  
-      MU,
+      MU = PhysicalModelParamCount,
       /// ID for the radius, used by PointMass and PointMassForce instances
       RADIUS,
       /// Flattening factor ID, used by PointMass and PointMassForce instances
@@ -133,8 +131,6 @@ protected:
 
    /// Gravitational constant for the central body (\f$G*M\f$)
    Real mu;
-   /// Epoch of the PhysicalModel
-   Real epoch;
    /// Type of error estimate to perform
    Real estimationMethod;
    //CelestialBody *theBody; // wcs - 2004/06/21 - exists in PhysicalModel
