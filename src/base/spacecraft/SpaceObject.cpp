@@ -64,7 +64,8 @@ SpaceObject::SpaceObject(Gmat::ObjectType typeId, const std::string &typeStr,
    SpacePoint       (typeId, typeStr, instName),
    isManeuvering    (false),
    originName       ("Earth"),
-   origin           (NULL)
+   origin           (NULL),
+   parmsChanged     (true)
 {
    objectTypes.push_back(Gmat::SPACEOBJECT);
    objectTypeNames.push_back("SpaceObject");
@@ -97,7 +98,8 @@ SpaceObject::SpaceObject(const SpaceObject& so) :
    state          (so.state),
    isManeuvering  (so.isManeuvering),
    originName     (so.originName),
-   origin         (so.origin)
+   origin         (so.origin),
+   parmsChanged   (true)
 {
    j2000Body = so.j2000Body;
 }
@@ -124,6 +126,7 @@ SpaceObject& SpaceObject::operator=(const SpaceObject& so)
    isManeuvering = so.isManeuvering;
    originName    = so.originName;
    origin        = so.origin;
+   parmsChanged  = true;       // Always update after using assignment
 
    return *this;
 }
@@ -211,6 +214,35 @@ bool SpaceObject::IsManeuvering()
 void SpaceObject::IsManeuvering(bool mnvrFlag)
 {
    isManeuvering = mnvrFlag;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ParametersHaveChanged()
+//------------------------------------------------------------------------------
+/**
+ * Function used to test the parmsChanged flag.
+ * 
+ * @return The value of the flag.
+ */
+//------------------------------------------------------------------------------
+bool SpaceObject::ParametersHaveChanged()
+{
+   return parmsChanged;
+}
+
+//------------------------------------------------------------------------------
+// void ParametersHaveChanged(bool flag)
+//------------------------------------------------------------------------------
+/**
+ * Uset to set or clear the parmsChanged flag from outside of the SpaceObject.
+ * 
+ * @param <flag>  The new value for the flag.
+ */
+//------------------------------------------------------------------------------
+void SpaceObject::ParametersHaveChanged(bool flag)
+{
+   parmsChanged = flag;
 }
 
 

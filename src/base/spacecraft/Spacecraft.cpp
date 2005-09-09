@@ -725,13 +725,34 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
        }   
     }
 
-    if (id == DRY_MASS_ID) return SetRealParameter("DryMass", value);
+    if (id == DRY_MASS_ID)
+    {
+       parmsChanged = true;
+       return SetRealParameter("DryMass", value);
+    }
 
-    if (id == CD_ID) return SetRealParameter("Cd",value);
-    if (id == CR_ID) return SetRealParameter("Cr",value);
-    if (id == DRAG_AREA_ID) return SetRealParameter("DragArea",value);
-    if (id == SRP_AREA_ID) return SetRealParameter("SRPArea",value);
+    if (id == CD_ID)
+    {
+       parmsChanged = true;
+       return SetRealParameter("Cd",value);
+    }
+    if (id == CR_ID)
+    {
+       parmsChanged = true;
+       return SetRealParameter("Cr",value);
+    }
+    if (id == DRAG_AREA_ID)
+    {
+       parmsChanged = true;
+       return SetRealParameter("DragArea",value);
+    }
+    if (id == SRP_AREA_ID)
+    {
+       parmsChanged = true;
+       return SetRealParameter("SRPArea",value);
+    }
     
+    // WE should not allow users to set this one -- it's a calculated parameter
     if (id == TOTAL_MASS_ID) return SetRealParameter("TotalMass",value);
 
     return SpaceObject::SetRealParameter(id, value);
@@ -928,12 +949,31 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
        //return state[5] = value;
     }
 
-    if (label == "DryMass") return dryMass = value;
-
-    if (label == "Cd") return coeffDrag = value;
-    if (label == "DragArea") return dragArea = value;
-    if (label == "SRPArea") return srpArea = value;
-    if (label == "Cr") return reflectCoeff = value;
+    if (label == "DryMass")
+    {
+       parmsChanged = true;
+       return dryMass = value;
+    }
+    if (label == "Cd")
+    {
+       parmsChanged = true;
+       return coeffDrag = value;
+    }
+    if (label == "DragArea")
+    {
+       parmsChanged = true;
+       return dragArea = value;
+    }
+    if (label == "SRPArea")
+    {
+       parmsChanged = true;
+       return srpArea = value;
+    }
+    if (label == "Cr")
+    {
+       parmsChanged = true;
+       return reflectCoeff = value;
+    }
 
     if (label == "TotalMass") return totalMass;    // Don't change the total mass
 
@@ -1074,6 +1114,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
     }
     else if (id == COORD_SYS_ID) 
     {
+       parmsChanged = true;
        coordSysName = value;
     }
     else if (id == FUEL_TANK_ID) {

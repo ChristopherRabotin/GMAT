@@ -40,6 +40,8 @@ public:
    virtual Real         SetEpoch(const Real ep);
    virtual bool         IsManeuvering();
    virtual void         IsManeuvering(bool mnvrFlag);
+   virtual bool         ParametersHaveChanged();
+   virtual void         ParametersHaveChanged(bool flag);
    
    virtual Integer GetParameterID(const std::string &str) const;
    virtual Real GetRealParameter(const Integer id) const;
@@ -63,13 +65,15 @@ public:
 
 protected:
    /// The spacecraft state
-   PropState            state;
+   PropState         state;
    /// true when a finite burn needs to be applied to this SpaceObject
-   bool                 isManeuvering;
+   bool              isManeuvering;
    /// Reference SpacePoint for the data
    std::string       originName;
    /// Reference SpacePoint for the data
    SpacePoint        *origin;
+   /// Flag indicating if the force model parms have changed
+   bool              parmsChanged;
 
    /// Enumerated parameter IDs   
    enum

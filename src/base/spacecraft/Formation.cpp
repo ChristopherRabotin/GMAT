@@ -255,6 +255,26 @@ GmatBase* Formation::Clone() const
 
 
 //------------------------------------------------------------------------------
+// void ParametersHaveChanged(bool flag)
+//------------------------------------------------------------------------------
+/**
+ * Uset to set or clear the parmsChanged flag from outside of the SpaceObject.
+ * 
+ * @param <flag>  The new value for the flag.
+ */
+//------------------------------------------------------------------------------
+void Formation::ParametersHaveChanged(bool flag)
+{
+   parmsChanged = flag;
+   // Set the flag for all of the members
+   for (std::vector<SpaceObject*>::iterator i = components.begin(); 
+        i != components.end(); ++i)
+      (*i)->ParametersHaveChanged(flag);
+}
+
+
+
+//------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 /**
@@ -475,6 +495,7 @@ bool Formation::SetStringParameter(const Integer id, const std::string &value)
             MessageInterface::ShowMessage("    \"%s\"\n", i->c_str());
       #endif
 
+      parmsChanged = true;
       return true;
    }
    if (id == REMOVED_SPACECRAFT)
@@ -994,6 +1015,7 @@ bool Formation::RemoveSpacecraft(const std::string &name)
          }
       #endif
 
+      parmsChanged = true;
       return true;
    }
 

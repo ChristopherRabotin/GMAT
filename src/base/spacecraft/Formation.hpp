@@ -40,6 +40,7 @@ public:
                                         const std::string &oldName,
                                         const std::string &newName);
    virtual GmatBase*    Clone() const;
+   virtual void         ParametersHaveChanged(bool flag);
    
    // Access methods derived classes can override
    virtual std::string  GetParameterText(const Integer id) const;
