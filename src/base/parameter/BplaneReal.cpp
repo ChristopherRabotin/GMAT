@@ -65,7 +65,7 @@ BplaneReal::BplaneReal(const std::string &name, const std::string &typeStr,
  */
 //------------------------------------------------------------------------------
 BplaneReal::BplaneReal(const BplaneReal &copy)
-   : RealVar(copy)
+   : RealVar(copy), BplaneData(copy)
 {
 }
 
@@ -82,8 +82,11 @@ BplaneReal::BplaneReal(const BplaneReal &copy)
 BplaneReal& BplaneReal::operator=(const BplaneReal &right)
 {
    if (this != &right)
-      RealVar::operator=(right);
-
+      return *this;
+   
+   RealVar::operator=(right);
+   BplaneData::operator=(right);
+   
    return *this;
 }
 
@@ -248,7 +251,7 @@ bool BplaneReal::Initialize()
    }
    catch(BaseException &e)
    {
-      throw GmatBaseException
+      throw ParameterException
          ("BplaneReal::Initialize() Fail to initialize Parameter:" +
           this->GetTypeName() + "\n" + e.GetMessage());
    }

@@ -73,22 +73,31 @@ BplaneData::BplaneData()
 
 
 //------------------------------------------------------------------------------
-// BplaneData(const BplaneData &data)
+// BplaneData(const BplaneData &copy)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
  *
- * @param <data> the BplaneData object being copied.
+ * @param <copy> the BplaneData object being copied.
  */
 //------------------------------------------------------------------------------
-BplaneData::BplaneData(const BplaneData &data)
-   : RefData(data)
+BplaneData::BplaneData(const BplaneData &copy)
+   : RefData(copy)
 {
+   mCartState = copy.mCartState;
+   mSpacecraft = copy.mSpacecraft;
+   mSolarSystem = copy.mSolarSystem;
+   mScOrigin = copy.mScOrigin;
+   mOrigin = copy.mOrigin;
+   mInternalCoordSystem = copy.mInternalCoordSystem;
+   mOutCoordSystem = copy.mOutCoordSystem;
+   mCartEpoch = copy.mCartEpoch;
+   mGravConst = copy.mGravConst;
 }
 
 
 //------------------------------------------------------------------------------
-// BplaneData& operator= (const BplaneData& right)
+// BplaneData& operator= (const BplaneData &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -98,11 +107,23 @@ BplaneData::BplaneData(const BplaneData &data)
  * @return reference to this object
  */
 //------------------------------------------------------------------------------
-BplaneData& BplaneData::operator= (const BplaneData& right)
+BplaneData& BplaneData::operator= (const BplaneData &right)
 {
-   if (this != &right)
-      RefData::operator=(right);
-
+   if (this == &right)
+      return *this;
+   
+   RefData::operator=(right);
+   
+   mCartState = right.mCartState;
+   mSpacecraft = right.mSpacecraft;
+   mSolarSystem = right.mSolarSystem;
+   mScOrigin = right.mScOrigin;
+   mOrigin = right.mOrigin;
+   mInternalCoordSystem = right.mInternalCoordSystem;
+   mOutCoordSystem = right.mOutCoordSystem;
+   mCartEpoch = right.mCartEpoch;
+   mGravConst = right.mGravConst;
+   
    return *this;
 }
 

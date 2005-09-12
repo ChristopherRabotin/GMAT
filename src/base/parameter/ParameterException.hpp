@@ -24,8 +24,7 @@
 class ParameterException : public BaseException
 {
    public:
-      ParameterException(const std::string& message = 
-                         "Error occurred in Parameter class") 
-         : BaseException(message) {};
+      ParameterException(const std::string& message) 
+         : BaseException("ParameterException Thrown: ", message) {};
 };
 #endif

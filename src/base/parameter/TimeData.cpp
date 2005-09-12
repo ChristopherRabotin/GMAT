@@ -56,22 +56,25 @@ TimeData::TimeData()
 
 
 //------------------------------------------------------------------------------
-// TimeData(const TimeData &td)
+// TimeData(const TimeData &copy)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
  *
- * @param <td> the object being copied.
+ * @param <copy> the object being copied.
  */
 //------------------------------------------------------------------------------
-TimeData::TimeData(const TimeData &td)
-   : RefData(td)
+TimeData::TimeData(const TimeData &copy)
+   : RefData(copy)
 {
+   mInitialEpoch = copy.mInitialEpoch;
+   mIsInitialEpochSet = copy.mIsInitialEpochSet;
+   mSpacecraft = copy.mSpacecraft;
 }
 
 
 //------------------------------------------------------------------------------
-// TimeData& operator= (const TimeData& right)
+// TimeData& operator= (const TimeData &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -81,11 +84,17 @@ TimeData::TimeData(const TimeData &td)
  * @return reference to this object
  */
 //------------------------------------------------------------------------------
-TimeData& TimeData::operator= (const TimeData& right)
+TimeData& TimeData::operator= (const TimeData &right)
 {
    if (this != &right)
+   {
       RefData::operator=(right);
-
+      
+      mInitialEpoch = right.mInitialEpoch;
+      mIsInitialEpochSet = right.mIsInitialEpochSet;
+      mSpacecraft = right.mSpacecraft;
+   }
+   
    return *this;
 }
 

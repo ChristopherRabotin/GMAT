@@ -56,6 +56,8 @@ PlanetData::VALID_OBJECT_TYPE_LIST[PlanetDataObjectCount] =
 PlanetData::PlanetData()
    : RefData()
 {
+   mCentralBodyName = "";
+   
    mSpacecraft = NULL;
    mSolarSystem = NULL;
    mCentralBody = NULL;
@@ -64,22 +66,27 @@ PlanetData::PlanetData()
 
 
 //------------------------------------------------------------------------------
-// PlanetData(const PlanetData &data)
+// PlanetData(const PlanetData &copy)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
  *
- * @param <data> the PlanetData object being copied.
+ * @param <copy> the PlanetData object being copied.
  */
 //------------------------------------------------------------------------------
-PlanetData::PlanetData(const PlanetData &data)
-   : RefData(data)
+PlanetData::PlanetData(const PlanetData &copy)
+   : RefData(copy)
 {
+   mCentralBodyName = copy.mCentralBodyName;
+   mSpacecraft = copy.mSpacecraft;
+   mSolarSystem = copy.mSolarSystem;
+   mCentralBody = copy.mCentralBody;
+   mOrigin = copy.mOrigin;
 }
 
 
 //------------------------------------------------------------------------------
-// PlanetData& operator= (const PlanetData& right)
+// PlanetData& operator= (const PlanetData &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -89,11 +96,19 @@ PlanetData::PlanetData(const PlanetData &data)
  * @return reference to this object
  */
 //------------------------------------------------------------------------------
-PlanetData& PlanetData::operator= (const PlanetData& right)
+PlanetData& PlanetData::operator= (const PlanetData &right)
 {
-   if (this != &right)
-      RefData::operator=(right);
+   if (this == &right)
+      return *this;
 
+   RefData::operator=(right);
+      
+   mCentralBodyName = right.mCentralBodyName;
+   mSpacecraft = right.mSpacecraft;
+   mSolarSystem = right.mSolarSystem;
+   mCentralBody = right.mCentralBody;
+   mOrigin = right.mOrigin;
+   
    return *this;
 }
 

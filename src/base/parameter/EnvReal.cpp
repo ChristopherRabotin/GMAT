@@ -67,7 +67,7 @@ EnvReal::EnvReal(const std::string &name, const std::string &typeStr,
  */
 //------------------------------------------------------------------------------
 EnvReal::EnvReal(const EnvReal &copy)
-   : RealVar(copy)
+   : RealVar(copy), EnvData(copy)
 {
 }
 
@@ -83,8 +83,11 @@ EnvReal::EnvReal(const EnvReal &copy)
 EnvReal& EnvReal::operator=(const EnvReal &right)
 {
    if (this != &right)
+   {
       RealVar::operator=(right);
-
+      EnvData::operator=(right);
+   }
+   
    return *this;
 }
 

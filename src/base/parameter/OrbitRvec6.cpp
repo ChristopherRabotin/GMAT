@@ -62,7 +62,7 @@ OrbitRvec6::OrbitRvec6(const std::string &name, const std::string &typeStr,
  */
 //------------------------------------------------------------------------------
 OrbitRvec6::OrbitRvec6(const OrbitRvec6 &copy)
-   : Rvec6Var(copy)
+   : Rvec6Var(copy), OrbitData(copy)
 {
 }
 
@@ -78,8 +78,11 @@ OrbitRvec6::OrbitRvec6(const OrbitRvec6 &copy)
 OrbitRvec6& OrbitRvec6::operator=(const OrbitRvec6 &right)
 {
    if (this != &right)
+   {
       Rvec6Var::operator=(right);
-
+      OrbitData::operator=(right);
+   }
+   
    return *this;
 }
 

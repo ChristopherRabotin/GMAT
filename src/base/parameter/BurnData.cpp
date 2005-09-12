@@ -67,17 +67,23 @@ BurnData::BurnData()
 
 
 //------------------------------------------------------------------------------
-// BurnData(const BurnData &data)
+// BurnData(const BurnData &copy)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
  *
- * @param <data> the BurnData object being copied.
+ * @param <copy> the BurnData object being copied.
  */
 //------------------------------------------------------------------------------
-BurnData::BurnData(const BurnData &data)
-   : RefData(data)
+BurnData::BurnData(const BurnData &copy)
+   : RefData(copy)
 {
+   mImpBurn = copy.mImpBurn;
+   mSpacecraft = copy.mSpacecraft;
+   mSolarSystem = copy.mSolarSystem;
+   mOrigin = copy.mOrigin;
+   mInternalCoordSystem = copy.mInternalCoordSystem;
+   mOutCoordSystem = copy.mOutCoordSystem;   
 }
 
 
@@ -94,9 +100,18 @@ BurnData::BurnData(const BurnData &data)
 //------------------------------------------------------------------------------
 BurnData& BurnData::operator= (const BurnData& right)
 {
-   if (this != &right)
-      RefData::operator=(right);
-
+   if (this == &right)
+      return *this;
+   
+   RefData::operator=(right);
+      
+   mImpBurn = right.mImpBurn;
+   mSpacecraft = right.mSpacecraft;
+   mSolarSystem = right.mSolarSystem;
+   mOrigin = right.mOrigin;
+   mInternalCoordSystem = right.mInternalCoordSystem;
+   mOutCoordSystem = right.mOutCoordSystem;   
+   
    return *this;
 }
 

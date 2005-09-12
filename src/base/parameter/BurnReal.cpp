@@ -65,7 +65,7 @@ BurnReal::BurnReal(const std::string &name, const std::string &typeStr,
  */
 //------------------------------------------------------------------------------
 BurnReal::BurnReal(const BurnReal &copy)
-   : RealVar(copy)
+   : RealVar(copy), BurnData(copy)
 {
 }
 
@@ -82,8 +82,11 @@ BurnReal::BurnReal(const BurnReal &copy)
 BurnReal& BurnReal::operator=(const BurnReal &right)
 {
    if (this != &right)
+   {
       RealVar::operator=(right);
-
+      BurnData::operator=(right);
+   }
+   
    return *this;
 }
 

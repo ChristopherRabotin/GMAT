@@ -58,7 +58,7 @@ TimeReal::TimeReal(const std::string &name, const std::string &typeStr,
  */
 //------------------------------------------------------------------------------
 TimeReal::TimeReal(const TimeReal &copy)
-   : RealVar(copy)
+   : RealVar(copy), TimeData(copy)
 {
 }
 
@@ -75,8 +75,11 @@ TimeReal::TimeReal(const TimeReal &copy)
 TimeReal& TimeReal::operator=(const TimeReal &right)
 {
    if (this != &right)
+   {
       RealVar::operator=(right);
-
+      TimeData::operator=(right);
+   }
+   
    return *this;
 }
 

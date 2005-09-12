@@ -122,6 +122,7 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    mUnit = unit;
    mDepObjectName = "";
    mOwnerType = ownerType;
+   mDepObj = depObj;
    mColor = 0; // black
    
    mIsTimeParam = isTimeParam;
@@ -136,13 +137,14 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    
    mIsPlottable = true;
 
-   // register parameter names with info (loj: 6/7/05 Added ownerType)
-   ParameterInfo::Instance()->Add(typeStr, ownerType, name, depObj);
+   // register parameter names with info
+   ParameterInfo::Instance()->Add(typeName, mOwnerType, instanceName, mDepObj);
 
    // set parameter count
    parameterCount = ParameterParamCount;
 
 }
+
 
 //------------------------------------------------------------------------------
 // Parameter(const Parameter &copy)
@@ -162,13 +164,17 @@ Parameter::Parameter(const Parameter &copy)
    mUnit = copy.mUnit;
    mDepObjectName = copy.mDepObjectName;
    mOwnerType = copy.mOwnerType;
+   mDepObj = copy.mDepObj;
    mColor = copy.mColor;
    mIsTimeParam = copy.mIsTimeParam;
    mIsPlottable = copy.mIsPlottable;
    mIsCoordSysDependent = copy.mIsCoordSysDependent;
    mIsOriginDependent = copy.mIsOriginDependent;
    mNeedCoordSystem = copy.mNeedCoordSystem;
+   
+   ParameterInfo::Instance()->Add(typeName, mOwnerType, instanceName, mDepObj);
 }
+
 
 //------------------------------------------------------------------------------
 // Parameter& operator= (const Parameter& right)
@@ -183,23 +189,27 @@ Parameter::Parameter(const Parameter &copy)
 //------------------------------------------------------------------------------
 Parameter& Parameter::operator= (const Parameter& right)
 {
-   if (this != &right)
-   {
-      GmatBase::operator=(right);
-      mKey = right.mKey;
-      mExpr = right.mExpr;
-      mDesc = right.mDesc;
-      mUnit = right.mUnit;
-      mDepObjectName = right.mDepObjectName;
-      mOwnerType = right.mOwnerType;
-      mColor = right.mColor;
-      mIsTimeParam = right.mIsTimeParam;
-      mIsPlottable = right.mIsPlottable;
-      mIsCoordSysDependent = right.mIsCoordSysDependent;
-      mIsOriginDependent = right.mIsOriginDependent;
-      mNeedCoordSystem = right.mNeedCoordSystem;
-   }
+   if (this == &right)
+      return *this;
 
+   GmatBase::operator=(right);
+   
+   mKey = right.mKey;
+   mExpr = right.mExpr;
+   mDesc = right.mDesc;
+   mUnit = right.mUnit;
+   mDepObjectName = right.mDepObjectName;
+   mOwnerType = right.mOwnerType;
+   mDepObj = right.mDepObj;
+   mColor = right.mColor;
+   mIsTimeParam = right.mIsTimeParam;
+   mIsPlottable = right.mIsPlottable;
+   mIsCoordSysDependent = right.mIsCoordSysDependent;
+   mIsOriginDependent = right.mIsOriginDependent;
+   mNeedCoordSystem = right.mNeedCoordSystem;
+   
+   ParameterInfo::Instance()->Add(typeName, mOwnerType, instanceName, mDepObj);
+   
    return *this;
 }
 

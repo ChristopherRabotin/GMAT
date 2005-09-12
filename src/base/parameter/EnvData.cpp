@@ -61,22 +61,25 @@ EnvData::EnvData()
 
 
 //------------------------------------------------------------------------------
-// EnvData(const EnvData &data)
+// EnvData(const EnvData &copy)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
  *
- * @param <data> the EnvData object being copied.
+ * @param <copy> the EnvData object being copied.
  */
 //------------------------------------------------------------------------------
-EnvData::EnvData(const EnvData &data)
-   : RefData(data)
+EnvData::EnvData(const EnvData &copy)
+   : RefData(copy)
 {
+   mSpacecraft = copy.mSpacecraft;
+   mSolarSystem = copy.mSolarSystem;
+   mOrigin = copy.mOrigin;
 }
 
 
 //------------------------------------------------------------------------------
-// EnvData& operator= (const EnvData& right)
+// EnvData& operator= (const EnvData &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -86,11 +89,17 @@ EnvData::EnvData(const EnvData &data)
  * @return reference to this object
  */
 //------------------------------------------------------------------------------
-EnvData& EnvData::operator= (const EnvData& right)
+EnvData& EnvData::operator= (const EnvData &right)
 {
-   if (this != &right)
-      RefData::operator=(right);
-
+   if (this == &right)
+      return *this;
+   
+   RefData::operator=(right);
+   
+   mSpacecraft = right.mSpacecraft;
+   mSolarSystem = right.mSolarSystem;
+   mOrigin = right.mOrigin;
+   
    return *this;
 }
 

@@ -65,8 +65,13 @@ OrbitReal::OrbitReal(const std::string &name, const std::string &typeStr,
  */
 //------------------------------------------------------------------------------
 OrbitReal::OrbitReal(const OrbitReal &copy)
-   : RealVar(copy)
+   : RealVar(copy), OrbitData(copy)
 {
+   #if DEBUG_ORBITREAL
+   MessageInterface::ShowMessage
+      ("===> OrbitReal::OrbitReal() copy constructor called on %s\n",
+       instanceName.c_str());
+   #endif
 }
 
 
@@ -82,8 +87,11 @@ OrbitReal::OrbitReal(const OrbitReal &copy)
 OrbitReal& OrbitReal::operator=(const OrbitReal &right)
 {
    if (this != &right)
+   {
       RealVar::operator=(right);
-
+      OrbitData::operator=(right);
+   }
+   
    return *this;
 }
 
@@ -113,7 +121,17 @@ OrbitReal::~OrbitReal()
 //------------------------------------------------------------------------------
 Real OrbitReal::EvaluateReal()
 {
-   Evaluate();
+   try
+   {
+      Evaluate();
+   }
+   catch (BaseException &e)
+   {
+      throw ParameterException
+         ("OrbitReal::EvaluateReal() for parameter " +  this->GetTypeName() + ":" +
+          instanceName + "\n" + e.GetDetails());
+   }
+   
    return mRealValue;
 }
 
@@ -198,24 +216,18 @@ bool OrbitReal::AddRefObject(GmatBase *obj, bool replaceName)
 {
    if (obj != NULL)
    {
-      //loj: 4/12/05 if obj->GetType() is CELESTIAL_BODY, set as SPACE_POINT
-      // since CelestialBody subtypes are not set as SPACE_POINT
-      ///@todo Use IsOfType(Gmat::SPACE_POINT) when GmatBase provides this method.
-
       #if DEBUG_ORBITREAL
       MessageInterface::ShowMessage
          ("OrbitReal::AddRefObject() obj->GetName()=%s, type=%d\n",
           obj->GetName().c_str(), obj->GetType());
       #endif
       
-      //if (obj->GetType() == Gmat::CELESTIAL_BODY)
       if (obj->IsOfType(Gmat::CELESTIAL_BODY))
          return OrbitData::AddRefObject(Gmat::SPACE_POINT, obj->GetName(), obj,
                                         replaceName);
       else
          return OrbitData::AddRefObject(obj->GetType(), obj->GetName(), obj,
                                         replaceName);
-      
    }
    
    return false;
@@ -250,11 +262,17 @@ bool OrbitReal::Initialize()
 {
    try
    {
+      #if DEBUG_ORBITREAL
+      MessageInterface::ShowMessage
+         ("===> OrbitReal::Initialize() calling InitializeRefObjects() on %s\n",
+          instanceName.c_str());
+      #endif
+      
       InitializeRefObjects();
    }
    catch(BaseException &e)
    {
-      throw GmatBaseException
+      throw ParameterException
          ("OrbitReal::Initialize() Fail to initialize Parameter:" +
           this->GetTypeName() + "\n" + e.GetMessage());
    }
@@ -267,7 +285,6 @@ bool OrbitReal::Initialize()
 // Methods inherited from GmatBase
 //-------------------------------------
 
-//loj: 11/16/04 added
 //---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
@@ -391,11 +408,11 @@ GmatBase* OrbitReal::GetRefObject(const Gmat::ObjectType type,
 bool OrbitReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                              const std::string &name)
 {
-#if DEBUG_ORBITREAL
+   #if DEBUG_ORBITREAL
    MessageInterface::ShowMessage
       ("OrbitReal::SetRefObject() setting type=%d, name=%s to %s\n",
        type, name.c_str(), this->GetName().c_str());
-#endif
+   #endif
    
    return OrbitData::SetRefObject(obj, type, name);
 }

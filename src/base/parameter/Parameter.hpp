@@ -126,6 +126,7 @@ protected:
    std::string   mDepObjectName;
    
    Gmat::ObjectType   mOwnerType;
+   GmatParam::DepObject mDepObj;
    UnsignedInt   mColor;
    
    bool mIsTimeParam;

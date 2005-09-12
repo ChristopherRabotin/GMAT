@@ -54,6 +54,7 @@ Variable::Variable(const std::string &name, const std::string &desc,
    mExpParser->SetParameterDatabase(mParamDb);
 }
 
+
 //------------------------------------------------------------------------------
 // Variable(const Variable &copy)
 //------------------------------------------------------------------------------
@@ -69,8 +70,13 @@ Variable::Variable(const Variable &copy)
    mParamDb = new ParameterDatabase();
    *mParamDb = *copy.mParamDb;
    mExpParser = new ExpressionParser();
-   mExpParser->SetParameterDatabase(mParamDb);   
+   mExpParser->SetParameterDatabase(mParamDb);
+
+   MessageInterface::ShowMessage("===> Variable::Variable() copy constructor\n");
+   MessageInterface::ShowMessage("copy.numDBParams = %d\n", copy.mParamDb->GetNumParameters());
+   MessageInterface::ShowMessage("numDBParams = %d\n", mParamDb->GetNumParameters());
 }
+
 
 //------------------------------------------------------------------------------
 // Variable& operator=(const Variable &right)
@@ -94,6 +100,7 @@ Variable& Variable::operator=(const Variable &right)
    
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~Variable()

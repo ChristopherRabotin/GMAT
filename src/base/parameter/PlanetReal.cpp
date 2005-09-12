@@ -57,6 +57,7 @@ PlanetReal::PlanetReal(const std::string &name, const std::string &typeStr,
    AddRefObject(obj);
 }
 
+
 //------------------------------------------------------------------------------
 // PlanetReal(const PlanetReal &copy)
 //------------------------------------------------------------------------------
@@ -67,9 +68,10 @@ PlanetReal::PlanetReal(const std::string &name, const std::string &typeStr,
  */
 //------------------------------------------------------------------------------
 PlanetReal::PlanetReal(const PlanetReal &copy)
-   : RealVar(copy)
+   : RealVar(copy), PlanetData(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // PlanetReal& operator=(const PlanetReal &right)
@@ -83,8 +85,11 @@ PlanetReal::PlanetReal(const PlanetReal &copy)
 PlanetReal& PlanetReal::operator=(const PlanetReal &right)
 {
    if (this != &right)
+   {
       RealVar::operator=(right);
-
+      PlanetData::operator=(right);
+   }
+   
    return *this;
 }
 

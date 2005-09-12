@@ -35,6 +35,7 @@
 //#define DEBUG_ORBITDATA_INIT 1
 //#define DEBUG_ORBITDATA_CONVERT 1
 //#define DEBUG_ORBITDATA_RUN 1
+//#define DEBUG_CLONE 1
 
 using namespace GmatMathUtil;
 
@@ -72,14 +73,15 @@ OrbitData::OrbitData()
    mSphRaDecState = Rvector6::RVECTOR6_UNDEFINED;
    mSphAzFpaState = Rvector6::RVECTOR6_UNDEFINED;
    mMA = ORBIT_REAL_UNDEFINED;
+   mCartEpoch = 0.0;
+   mGravConst = 0.0;
+   
    mSpacecraft = NULL;
    mSolarSystem = NULL;
    mScOrigin = NULL;
-   mOrigin = NULL; //loj: 4/7/05 Added
+   mOrigin = NULL;
    mInternalCoordSystem = NULL;
    mOutCoordSystem = NULL;
-   mCartEpoch = 0.0;
-   mGravConst = 0.0;
 }
 
 
@@ -95,11 +97,31 @@ OrbitData::OrbitData()
 OrbitData::OrbitData(const OrbitData &data)
    : RefData(data)
 {
+   #if DEBUG_CLONE
+   MessageInterface::ShowMessage
+      ("OrbitData::OrbitData copy constructor called\n");
+   #endif
+   
+   mCartState = data.mCartState;
+   mKepState = data.mKepState;
+   mModKepState = data.mModKepState;
+   mSphRaDecState = data.mSphRaDecState;
+   mSphAzFpaState = data.mSphAzFpaState;
+   mMA = data.mMA;
+   mCartEpoch = data.mCartEpoch;
+   mGravConst = data.mGravConst;
+   
+   mSpacecraft = data.mSpacecraft;
+   mSolarSystem = data.mSolarSystem;
+   mScOrigin = data.mScOrigin;
+   mOrigin = data.mOrigin;
+   mInternalCoordSystem = data.mInternalCoordSystem;
+   mOutCoordSystem = data.mOutCoordSystem;
 }
 
 
 //------------------------------------------------------------------------------
-// OrbitData& operator= (const OrbitData& right)
+// OrbitData& operator= (const OrbitData &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -109,11 +131,29 @@ OrbitData::OrbitData(const OrbitData &data)
  * @return reference to this object
  */
 //------------------------------------------------------------------------------
-OrbitData& OrbitData::operator= (const OrbitData& right)
+OrbitData& OrbitData::operator= (const OrbitData &right)
 {
-   if (this != &right)
-      RefData::operator=(right);
-
+   if (this == &right)
+      return *this;
+   
+   RefData::operator=(right);
+   
+   mCartState = right.mCartState;
+   mKepState = right.mKepState;
+   mModKepState = right.mModKepState;
+   mSphRaDecState = right.mSphRaDecState;
+   mSphAzFpaState = right.mSphAzFpaState;
+   mMA = right.mMA;
+   mCartEpoch = right.mCartEpoch;
+   mGravConst = right.mGravConst;
+   
+   mSpacecraft = right.mSpacecraft;
+   mSolarSystem = right.mSolarSystem;
+   mScOrigin = right.mScOrigin;
+   mOrigin = right.mOrigin;
+   mInternalCoordSystem = right.mInternalCoordSystem;
+   mOutCoordSystem = right.mOutCoordSystem;
+   
    return *this;
 }
 
@@ -636,30 +676,6 @@ Real OrbitData::GetKepReal(const std::string &str)
    else
       throw ParameterException("OrbitData::GetCartReal() Unknown parameter name: " +
                                str);
-   
-   
-//    //=== old ==============================================
-//    Rvector6 state = GetKepState();
-
-//    if (str == "KepSMA")
-//       return mKepState[SMA];
-//    else if (str == "KepEcc")
-//       return mKepState[ECC];
-//    else if (str == "KepInc")
-//       return mKepState[INC];
-//    else if (str == "KepRAAN")
-//       return mKepState[RAAN];
-//    else if (str == "KepRADN")
-//       return AngleUtil::PutAngleInDegRange(mKepState[RAAN] + 180, 0.0, 360.0);
-//    else if (str == "KepAOP")
-//       return mKepState[AOP];
-//    else if (str == "KepTA")
-//       return mKepState[TA];
-//    else if (str == "KepMA")
-//       return mMA;
-//    else
-//       throw ParameterException("OrbitData::GetCartReal() Unknown parameter name: " +
-//                                str);
 }
 
 
@@ -672,9 +688,6 @@ Real OrbitData::GetKepReal(const std::string &str)
 //------------------------------------------------------------------------------
 Real OrbitData::GetOtherKepReal(const std::string &str)
 {
-//    Rvector6 state = GetKepState();
-//    Real sma = state[SMA];
-//    Real ecc = state[ECC];
    Rvector6 state = GetCartState();
    Rvector3 pos(state[0], state[1], state[2]);
    Rvector3 vel(state[3], state[4], state[5]);
@@ -1115,7 +1128,6 @@ void OrbitData::SetInternalCoordSys(CoordinateSystem *cs)
 }
 
 
-//loj: 4/7/05 Added
 //------------------------------------------------------------------------------
 // Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
 //------------------------------------------------------------------------------
@@ -1164,7 +1176,6 @@ Real OrbitData::GetPositionMagnitude(SpacePoint *origin)
    Rvector3 scPos = Rvector3(scState[0], scState[1], scState[2]);
 
    // get origin position
-   //Rvector6 originState = origin->GetState(mCartEpoch);
    Rvector6 originState = origin->GetMJ2000State(mCartEpoch);
    Rvector3 originPos = Rvector3(originState[0], originState[1], originState[2]);
 
@@ -1195,12 +1206,13 @@ void OrbitData::InitializeRefObjects()
    
    mSpacecraft =
       (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
-
+   
    if (mSpacecraft == NULL)
       throw ParameterException
-         ("OrbitData::InitializeRefObjects() Cannot find Spacecraft object.\n"
-          "Make sure Spacecraft is set to any unnamed parameters\n");
-
+         ("OrbitData::InitializeRefObjects() Cannot find Spacecraft object: " +
+          GetRefObjectName(Gmat::SPACECRAFT) + ".\n" +
+          "Make sure Spacecraft is set to any internal parameters.\n");
+   
    mSolarSystem =
       (SolarSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SOLAR_SYSTEM]);
    
@@ -1220,11 +1232,6 @@ void OrbitData::InitializeRefObjects()
       throw ParameterException
          ("OrbitData::InitializeRefObjects() Cannot find output "
           "CoordinateSystem object\n");
-
-   //loj: 4/28/05 old code
-   //Integer id = mSpacecraft->GetParameterID("CoordinateSystem");
-   //std::string bodyName = mSpacecraft->GetStringParameter(id);
-   //mScOrigin = mSolarSystem->GetBody(bodyName);
    
    // get spacecraft CoordinateSystem
    std::string csName = mSpacecraft->GetRefObjectName(Gmat::COORDINATE_SYSTEM);   
@@ -1271,7 +1278,7 @@ void OrbitData::InitializeRefObjects()
              originName + "\n");
       
       // override gravity constant if origin is CelestialBody
-      if (mOrigin->GetType() == Gmat::CELESTIAL_BODY)
+      if (mOrigin->IsOfType(Gmat::CELESTIAL_BODY))
          mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
    }
    else
