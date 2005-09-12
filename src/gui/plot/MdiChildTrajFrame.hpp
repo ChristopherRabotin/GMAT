@@ -59,11 +59,11 @@ public:
    bool GetDrawESLines();
    bool GetDrawAxes();
    bool GetRotateAboutXY();
-   unsigned int GetEqPlaneColor();
-   unsigned int GetEcPlaneColor();
-   unsigned int GetESLineColor();
+   UnsignedInt GetEqPlaneColor();
+   UnsignedInt GetEcPlaneColor();
+   UnsignedInt GetESLineColor();
    float GetDistance();
-   int   GetAnimationUpdateInterval();
+   Integer GetAnimationUpdateInterval();
    wxString GetGotoObjectName();
    wxString GetViewCoordSysName();
    CoordinateSystem* GetViewCoordSystem();
@@ -74,22 +74,23 @@ public:
    void SetOverlapPlot(bool overlap);
    void SetUseViewPointInfo(bool flag);
    void SetUsePerspectiveMode(bool flag);
-   void SetAnimationUpdateInterval(int interval);
+   void SetAnimationUpdateInterval(Integer interval);
    void SetDrawWireFrame(bool flag);
    void SetDrawEqPlane(bool flag);
    void SetDrawEcPlane(bool flag);
    void SetDrawESLines(bool flag);
    void SetDrawAxes(bool flag);
    void SetRotateAboutXY(bool flag);
-   void SetEqPlaneColor(unsigned int color);
-   void SetEcPlaneColor(unsigned int color);
-   void SetESLineColor(unsigned int color);
+   void SetEqPlaneColor(UnsignedInt color);
+   void SetEcPlaneColor(UnsignedInt color);
+   void SetESLineColor(UnsignedInt color);
    void SetDistance(float dist);
    void SetGotoObjectName(const wxString &bodyName);
    void SetViewCoordSystem(const wxString &csName);
    void SetObjectColors(const wxStringColorMap &objectColorMap);
    void SetShowObjects(const wxStringBoolMap &showObjMap);
    void SetShowOrbitNormals(const wxStringBoolMap &showOrbNormMap);
+   void SetNumPointsToRedraw(Integer numPoints);
    
    // actions
    void DrawInOtherCoordSystem(const wxString &csName);
@@ -134,7 +135,8 @@ public:
                         bool usevpRefVec, bool usevpVec, bool usevdVec,
                         bool useFixedFov, Real fov);
    
-   void SetGlDrawObjectFlag(const std::vector<bool> &drawArray);
+   void SetGlDrawOrbitFlag(const std::vector<bool> &drawArray);
+   void SetGlShowObjectFlag(const std::vector<bool> &showArray);
    
    void UpdatePlot(const StringArray &scNames, const Real &time,
                    const RealArray &posX, const RealArray &posY,

@@ -36,12 +36,14 @@ public:
    const StringArray& GetSpacecraftList();
    const StringArray& GetNonSpacecraftList();
    
-   // methods inherited from Subscriber
-   virtual bool Initialize();
-   
    UnsignedInt GetColor(const std::string &item, const std::string &scName);
    bool SetColor(const std::string &item, const std::string &name,
-                 const UnsignedInt value);
+                 UnsignedInt value);
+   bool GetShowObject(const std::string &name);
+   void SetShowObject(const std::string &name, bool value);
+   
+   // methods inherited from Subscriber
+   virtual bool Initialize();
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -136,7 +138,8 @@ protected:
    SpacePoint *mViewDirectionObj;
    std::vector<SpacePoint*> mObjectArray;
    std::vector<SpacePoint*> mAllSpArray;
-   std::vector<bool> mDrawObjArray;
+   std::vector<bool> mDrawOrbitArray;
+   std::vector<bool> mShowObjectArray;
    
    std::string mEclipticPlane;
    std::string mEquatorialPlane;
@@ -166,7 +169,7 @@ protected:
    
    Integer mDataCollectFrequency;
    Integer mUpdatePlotFrequency;
-   
+   Integer mNumPointsToRedraw;
    Integer mNumData;
    Integer mNumCollected;
    
@@ -190,6 +193,8 @@ protected:
    
    std::map<std::string, UnsignedInt> mOrbitColorMap;
    std::map<std::string, UnsignedInt> mTargetColorMap;
+   std::map<std::string, bool> mDrawOrbitMap;
+   std::map<std::string, bool> mShowObjectMap;
    
    enum
    {
@@ -217,6 +222,7 @@ protected:
       USE_FIXED_FOV,
       DATA_COLLECT_FREQUENCY,
       UPDATE_PLOT_FREQUENCY,
+      NUM_POINTS_TO_REDRAW,
       ORBIT_COLOR,
       //TARGET_COLOR,
       OpenGlPlotParamCount

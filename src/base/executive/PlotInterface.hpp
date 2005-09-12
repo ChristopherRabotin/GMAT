@@ -36,7 +36,8 @@ public:
                                   bool drawEcPlane, bool drawEqPlane,
                                   bool drawWireFrame, bool drawAxes,
                                   bool drawESLines, bool overlapPlot,
-                                  bool usevpInfo, bool usepm);
+                                  bool usevpInfo, bool usepm,
+                                  Integer numPtsToRedraw);
    
    static void SetGlObject(const std::string &plotName,
                            const StringArray &objNames,
@@ -55,8 +56,11 @@ public:
                                bool usevpRefVec, bool usevpVec, bool usevdVec,
                                bool useFixedFov, Real fov);
    
-   static void SetGlDrawObjectFlag(const std::string &plotName,
-                                   const std::vector<bool> &drawArray);
+   static void SetGlDrawOrbitFlag(const std::string &plotName,
+                                  const std::vector<bool> &drawArray);
+   
+   static void SetGlShowObjectFlag(const std::string &plotName,
+                                   const std::vector<bool> &showArray);
    
    static bool IsThere(const std::string &plotName);
    

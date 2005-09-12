@@ -56,14 +56,14 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
                                      const long style, const wxString &csName,
                                      SolarSystem *solarSys)
    : GmatMdiChildFrame(parent, -1, title, pos, size,
-                     style | wxNO_FULL_REPAINT_ON_RESIZE, plotName,
-                     GmatTree::OUTPUT_OPENGL_PLOT)
+                       style | wxNO_FULL_REPAINT_ON_RESIZE, plotName,
+                       GmatTree::OUTPUT_OPENGL_PLOT)
 {
    mCanvas = (TrajPlotCanvas *) NULL;
    mIsMainFrame = isMainFrame;
    mPlotName = plotName;
    mPlotTitle = plotName;
-
+   
    mOverlapPlot = false;
    
    // add Sun, Earth, Luan as default body
@@ -75,7 +75,7 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
    mBodyColors.push_back(GmatColor::L_BROWN32);
    
    MdiGlPlot::mdiChildren.Append(this);
-
+   
    // use this if we want option dialog to be modeless
    mOptionDialog = (OpenGlOptionDialog*)NULL;
    
@@ -87,13 +87,13 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
 #endif
 
    // Associate the menu bar with the frame
-//   SetMenuBar(GmatAppData::GetMainFrame()->CreateMainMenu(GmatTree::OUTPUT_OPENGL_PLOT));
+   //SetMenuBar(GmatAppData::GetMainFrame()->CreateMainMenu(GmatTree::OUTPUT_OPENGL_PLOT));
 
    // status bar
    //CreateStatusBar();
    //SetStatusText(title);
-
-    // Create GLCanvas
+   
+   // Create GLCanvas
    int width, height;
    GetClientSize(&width, &height);
    TrajPlotCanvas *canvas =
@@ -106,6 +106,7 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
    SetSizeHints(100, 100);
    GmatAppData::GetMainFrame()->mdiChildren->Append(this);
 }
+
 
 //------------------------------------------------------------------------------
 // ~MdiChildTrajFrame()
@@ -224,9 +225,9 @@ bool MdiChildTrajFrame::GetDrawAxes()
 }
 
 //------------------------------------------------------------------------------
-// unsigned int GetEqPlaneColor()
+// UnsignedInt GetEqPlaneColor()
 //------------------------------------------------------------------------------
-unsigned int MdiChildTrajFrame::GetEqPlaneColor()
+UnsignedInt MdiChildTrajFrame::GetEqPlaneColor()
 {
    if (mCanvas)
       return mCanvas->GetEqPlaneColor();
@@ -235,9 +236,9 @@ unsigned int MdiChildTrajFrame::GetEqPlaneColor()
 }
 
 //------------------------------------------------------------------------------
-// unsigned int GetEcPlaneColor()
+// UnsignedInt GetEcPlaneColor()
 //------------------------------------------------------------------------------
-unsigned int MdiChildTrajFrame::GetEcPlaneColor()
+UnsignedInt MdiChildTrajFrame::GetEcPlaneColor()
 {
    if (mCanvas)
       return mCanvas->GetEcPlaneColor();
@@ -246,9 +247,9 @@ unsigned int MdiChildTrajFrame::GetEcPlaneColor()
 }
 
 //------------------------------------------------------------------------------
-// unsigned int GetESLineColor()
+// UnsignedInt GetESLineColor()
 //------------------------------------------------------------------------------
-unsigned int MdiChildTrajFrame::GetESLineColor()
+UnsignedInt MdiChildTrajFrame::GetESLineColor()
 {
    if (mCanvas)
       return mCanvas->GetESLineColor();
@@ -269,9 +270,9 @@ float MdiChildTrajFrame::GetDistance()
 
 
 //------------------------------------------------------------------------------
-// int GetAnimationUpdateInterval()
+// Integer GetAnimationUpdateInterval()
 //------------------------------------------------------------------------------
-int MdiChildTrajFrame::GetAnimationUpdateInterval()
+Integer MdiChildTrajFrame::GetAnimationUpdateInterval()
 {
    if (mCanvas)
       return mCanvas->GetAnimationUpdateInterval();
@@ -572,6 +573,18 @@ void MdiChildTrajFrame::SetViewCoordSystem(const wxString &csName)
    if (mCanvas)
    {
       mCanvas->SetViewCoordSystem(csName);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetNumPointsToRedraw(Integer numPoints)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetNumPointsToRedraw(Integer numPoints)
+{
+   if (mCanvas)
+   {
+      mCanvas->SetNumPointsToRedraw(numPoints);
    }
 }
 
@@ -939,13 +952,25 @@ void MdiChildTrajFrame::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
 
 
 //------------------------------------------------------------------------------
-// void SetGlDrawObjectFlag(const std::vector<bool> &drawArray)
+// void SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetGlDrawObjectFlag(const std::vector<bool> &drawArray)
+void MdiChildTrajFrame::SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
 {
    if (mCanvas)
    {
-      mCanvas->SetGlDrawObjectFlag(drawArray);
+      mCanvas->SetGlDrawOrbitFlag(drawArray);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGlShowObjectFlag(const std::vector<bool> &showArray)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetGlShowObjectFlag(const std::vector<bool> &showArray)
+{
+   if (mCanvas)
+   {
+      mCanvas->SetGlShowObjectFlag(showArray);
    }
 }
 
@@ -967,7 +992,18 @@ void MdiChildTrajFrame::UpdatePlot(const StringArray &scNames, const Real &time,
       
       if (updateCanvas)
       {
+         //MessageInterface::ShowMessage
+         //   ("===> MdiChildTrajFrame::UpdatePlot() time=%f\n", time);
+         
+         //loj: 9/2/05
+         // Added mCanvas->Refresh(false) here since Refresh() is removed from the
+         // TrajPlotCanvas::UpdatePlot(). The UpdateFrequency was not actually used
+         // since TrajPlotCanvas::UpdatePlot() always called Refresh().
+         // The correct use UpdateFrequency will improve performance.
+         
+         mCanvas->Refresh(false);
          Update();
+         
          #ifndef __WXMSW__
             ::wxYield();
          #endif
@@ -987,8 +1023,9 @@ void MdiChildTrajFrame::RefreshPlot()
 {
    if (mCanvas)
    {
+      mCanvas->SetEndOfRun(true);
+      mCanvas->Refresh(false); //loj: 9/8/05 Added
       Update();
-      mCanvas->SetEndOfRun(true); //loj: 6/30/05 Added
    }
 }
 

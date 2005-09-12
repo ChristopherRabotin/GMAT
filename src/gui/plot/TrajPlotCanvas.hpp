@@ -113,11 +113,12 @@ public:
                         bool useFixedFov, Real fov);
    
    // drawing toggle switch
-   void SetGlDrawObjectFlag(const std::vector<bool> &drawArray);
+   void SetGlDrawOrbitFlag(const std::vector<bool> &drawArray);
+   void SetGlShowObjectFlag(const std::vector<bool> &showArray);
    
-   // data
-   int  ReadTextTrajectory(const wxString &filename);
-
+   // performance
+   void SetNumPointsToRedraw(Integer numPoints);
+   
    // update
    void UpdatePlot(const StringArray &scNames, const Real &time,
                    const RealArray &posX, const RealArray &posY,
@@ -130,6 +131,9 @@ public:
                       const UnsignedIntArray &objColors,
                       bool clearList = true);
    
+   // file
+   int  ReadTextTrajectory(const wxString &filename);
+
 protected:
    
    // events
@@ -175,6 +179,11 @@ private:
 
    // view model
    bool mUseGluLookAt;
+
+   // performance
+   bool mViewPointChanged;
+   bool mRedrawLastPointsOnly;
+   int  mNumPointsToRedraw;
    
    // draw option
    float mAxisLength;
@@ -225,14 +234,6 @@ private:
    Real mViewScaleFactor;
    Real mFixedFovAngle;
    
-   // computed viewpoint
-   Rvector3 mVpLocVec;
-   Rvector3 mVpRefVec;
-   Rvector3 mVpVec;
-   Rvector3 mVdVec;
-   Rvector3 mVcVec;
-   Rvector3 mUpVec;
-   
    bool mUseInitialViewPoint;
    bool mUseFixedFov;
    bool mUseViewPointRefVector;
@@ -244,6 +245,14 @@ private:
    Real mViewObjRadius;
    wxString mViewObjName;
    int mViewObjId;
+   
+   // computed viewpoint
+   Rvector3 mVpLocVec;
+   Rvector3 mVpRefVec;
+   Rvector3 mVpVec;
+   Rvector3 mVdVec;
+   Rvector3 mVcVec;
+   Rvector3 mUpVec;
    
    // data count
    int  mNumData;
@@ -269,14 +278,18 @@ private:
    wxStringBoolMap  mShowObjectMap;
    wxStringBoolMap  mShowOrbitNormalMap;
    std::vector<SpacePoint*> mObjectArray;
-   std::vector<bool> mDrawObjArray;
+   std::vector<bool> mDrawOrbitArray;
+   std::vector<bool> mShowObjectArray;
    int mObjectCount;
    float mObjectDefaultRadius;
    float mObjectRadius[MAX_OBJECT];
    float mObjMaxZoomIn[MAX_OBJECT];
    int   mObjLastFrame[MAX_OBJECT];
+   bool  mShowObjectFlag[MAX_OBJECT];
+   
+   bool  mDrawOrbitFlag[MAX_OBJECT][MAX_DATA];
    UnsignedInt mObjectOrbitColor[MAX_OBJECT][MAX_DATA];
-   bool  mDrawObjFlag[MAX_OBJECT][MAX_DATA];
+   
    float mObjectGciPos[MAX_OBJECT][MAX_DATA][3];
    float mObjectTempPos[MAX_OBJECT][MAX_DATA][3];
    float mObjectGciVel[MAX_OBJECT][MAX_DATA][3];

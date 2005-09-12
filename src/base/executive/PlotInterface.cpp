@@ -37,7 +37,6 @@
 #include "Rvector.hpp"
 #include "MessageInterface.hpp"    // for ShowMessage()
 
-//loj: 6/15/05 debug
 //#define DEBUG_PLOTIF_GL 1
 //#define DEBUG_PLOTIF_GL_UPDATE 1
 //#define DEBUG_PLOTIF_XY 1
@@ -73,7 +72,8 @@ PlotInterface::~PlotInterface()
 //                          const std::string &csName, SolarSystem *ssPtr,
 //                          bool drawEcPlane, bool drawEqPlane, bool drawWireFrame,
 //                          bool drawAxes, bool drawEarthSunLines,
-//                          bool overlapPlot, bool usevpInfo, bool usepm)
+//                          bool overlapPlot, bool usevpInfo, bool usepm,
+//                          bool Integer numPtsToRedraw)
 //------------------------------------------------------------------------------
 /*
  * Creates OpenGlPlot window
@@ -90,6 +90,7 @@ PlotInterface::~PlotInterface()
  * @param <overlapPlot>  true if overlap plot without clearing the plot
  * @param <usevpInfo>  true if use viewpoint info to draw plot
  * @param <usepm>  true if use perspective projection mode
+ * @param <numPtsToRedraw>  number of points to redraw during the run
  */
 //------------------------------------------------------------------------------
 bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
@@ -99,7 +100,8 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                        bool drawEcPlane, bool drawEqPlane,
                                        bool drawWireFrame, bool drawAxes,
                                        bool drawESLines, bool overlapPlot,
-                                       bool usevpInfo, bool usepm)
+                                       bool usevpInfo, bool usepm,
+                                       Integer numPtsToRedraw)
 {    
 #if defined __CONSOLE_APP__
    return true;
@@ -181,7 +183,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
           plotName.c_str());
       #endif
    }
-      
+   
    #if DEBUG_PLOTIF_GL
    MessageInterface::ShowMessage
       ("PlotInterface::CreateGlPlotWindow() setting view options for %s\n",
@@ -198,7 +200,8 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    currPlotFrame->SetUseViewPointInfo(usevpInfo);
    currPlotFrame->SetUsePerspectiveMode(usepm);
    currPlotFrame->SetViewCoordSystem(wxString(csName.c_str()));
-
+   currPlotFrame->SetNumPointsToRedraw(numPtsToRedraw);
+   
    #if DEBUG_PLOTIF_GL
    MessageInterface::ShowMessage
       ("PlotInterface::CreateGlPlotWindow() returning true\n");
@@ -321,10 +324,10 @@ void PlotInterface::SetGlViewOption(const std::string &plotName,
 
 
 //------------------------------------------------------------------------------
-// void SetGlDrawObjectFlag(const std::string &plotName, ...
+// void SetGlDrawOrbitFlag(const std::string &plotName, ...
 //------------------------------------------------------------------------------
-void PlotInterface::SetGlDrawObjectFlag(const std::string &plotName,
-                                        const std::vector<bool> &drawArray)
+void PlotInterface::SetGlDrawOrbitFlag(const std::string &plotName,
+                                       const std::vector<bool> &drawArray)
 {
 #if defined __CONSOLE_APP__
    return;
@@ -332,7 +335,7 @@ void PlotInterface::SetGlDrawObjectFlag(const std::string &plotName,
    
    #if DEBUG_PLOTIF_GL
    MessageInterface::ShowMessage
-      ("PlotInterface::SetGlDrawObjectFlag() plotName:%s\n", plotName.c_str());
+      ("PlotInterface::SetGlDrawOrbitFlag() plotName:%s\n", plotName.c_str());
    #endif
    
    wxString owner = wxString(plotName.c_str());
@@ -344,13 +347,38 @@ void PlotInterface::SetGlDrawObjectFlag(const std::string &plotName,
       
       if (frame->GetPlotName().IsSameAs(owner.c_str()))
       {
-         #if DEBUG_PLOTIF_GL
-         MessageInterface::ShowMessage
-            ("PlotInterface::SetGlDrawObjectFlag() vpRefObj=%d, vsFactor=%f\n",
-             vpRefObj, vsFactor);
-         #endif
-         
-         frame->SetGlDrawObjectFlag(drawArray);
+         frame->SetGlDrawOrbitFlag(drawArray);
+      }
+   }
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGlShowObjectFlag(const std::string &plotName, ...
+//------------------------------------------------------------------------------
+void PlotInterface::SetGlShowObjectFlag(const std::string &plotName,
+                                        const std::vector<bool> &showArray)
+{
+#if defined __CONSOLE_APP__
+   return;
+#else
+   
+   #if DEBUG_PLOTIF_GL
+   MessageInterface::ShowMessage
+      ("PlotInterface::SetGlShowObjectFlag() plotName:%s\n", plotName.c_str());
+   #endif
+   
+   wxString owner = wxString(plotName.c_str());
+   MdiChildTrajFrame *frame = NULL;
+   
+   for (int i=0; i<MdiGlPlot::numChildren; i++)
+   {
+      frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
+      
+      if (frame->GetPlotName().IsSameAs(owner.c_str()))
+      {
+         frame->SetGlShowObjectFlag(showArray);
       }
    }
 #endif

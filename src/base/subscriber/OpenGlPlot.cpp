@@ -65,6 +65,7 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
    "UseFixedFov",
    "DataCollectFrequency",
    "UpdatePlotFrequency",
+   "NumPointsToRedraw",
    "OrbitColor",
    //"TargetColor",
 }; 
@@ -99,6 +100,7 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
    Gmat::STRING_TYPE,            //"UseFixedFov"
    Gmat::INTEGER_TYPE,           //"DataCollectFrequency"
    Gmat::INTEGER_TYPE,           //"UpdatePlotFrequency"
+   Gmat::INTEGER_TYPE,           //"NumPointsToRedraw"
    
    Gmat::UNSIGNED_INTARRAY_TYPE, //"OrbitColor",
    //Gmat::UNSIGNED_INTARRAY_TYPE, //"TargetColor",
@@ -161,7 +163,8 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mViewDirectionObj = NULL;
    
    mDataCollectFrequency = 1;
-   mUpdatePlotFrequency = 10;
+   mUpdatePlotFrequency = 50;
+   mNumPointsToRedraw = 0;
    mNumData = 0;
    mNumCollected = 0;
    mScNameArray.clear();
@@ -169,6 +172,8 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mAllSpNameArray.clear();
    mAllRefObjectNames.clear();
    mObjectArray.clear();
+   mDrawOrbitArray.clear();
+   mShowObjectArray.clear();
    mAllSpArray.clear();
    
    mScXArray.clear();
@@ -180,12 +185,15 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mScOrbitColorArray.clear();
    mScTargetColorArray.clear();
    mOrbitColorArray.clear();
+   
    mOrbitColorMap.clear();
    mTargetColorMap.clear();
+   mDrawOrbitMap.clear();
+   mShowObjectMap.clear();
+   
    mAllSpCount = 0;
    mScCount = 0;
    mObjectCount = 0;
-   
 }
 
 
@@ -231,11 +239,14 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    
    mDataCollectFrequency = ogl.mDataCollectFrequency;
    mUpdatePlotFrequency = ogl.mUpdatePlotFrequency;
+   mNumPointsToRedraw = ogl.mNumPointsToRedraw;
    
    mAllSpCount = ogl.mAllSpCount;
    mScCount = ogl.mScCount;
    mObjectCount = ogl.mObjectCount;
    mObjectArray = ogl.mObjectArray;
+   mDrawOrbitArray = ogl.mDrawOrbitArray;
+   mShowObjectArray = ogl.mShowObjectArray;
    mAllSpArray = ogl.mAllSpArray;
    mScNameArray = ogl.mScNameArray;
    mObjectNameArray = ogl.mObjectNameArray;
@@ -250,8 +261,12 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mScOrbitColorArray = ogl.mScOrbitColorArray;
    mScTargetColorArray = ogl.mScTargetColorArray;
    mOrbitColorArray = ogl.mOrbitColorArray;
+   
    mOrbitColorMap = ogl.mOrbitColorMap;
    mTargetColorMap = ogl.mTargetColorMap;
+   mDrawOrbitMap = ogl.mDrawOrbitMap;
+   mShowObjectMap = ogl.mShowObjectMap;
+   
    mNumData = ogl.mNumData;
    mNumCollected = ogl.mNumCollected;
 }
@@ -291,6 +306,97 @@ const StringArray& OpenGlPlot::GetNonSpacecraftList()
 }
 
 
+//------------------------------------------------------------------------------
+// UnsignedInt GetColor(const std::string &item, const std::string &name)
+//------------------------------------------------------------------------------
+UnsignedInt OpenGlPlot::GetColor(const std::string &item,
+                                 const std::string &name)
+{
+   #if DEBUG_OPENGL_PARAM
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::GetColor() item=%s, name=%s\n",
+       item.c_str(), name.c_str());
+   #endif
+   
+   if (item == "Orbit")
+   {
+      if (mOrbitColorMap.find(name) != mOrbitColorMap.end())
+         return mOrbitColorMap[name];
+   }
+   else if (item == "Target")
+   {
+      if (mTargetColorMap.find(name) != mTargetColorMap.end())
+         return mTargetColorMap[name];
+   }
+   
+   return GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetColor(const std::string &item, const std::string &name,
+//               UnsignedInt value)
+//------------------------------------------------------------------------------
+bool OpenGlPlot::SetColor(const std::string &item, const std::string &name,
+                          UnsignedInt value)
+{
+   #if DEBUG_OPENGL_PARAM
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::SetColor() item=%s, name=%s, value=%u\n",
+       item.c_str(), name.c_str(), value);
+   #endif
+   
+   if (item == "Orbit")
+   {
+      if (mOrbitColorMap.find(name) != mOrbitColorMap.end())
+      {
+         mOrbitColorMap[name] = value;
+         return true;
+      }
+   }
+   else if (item == "Target")
+   {
+      if (mTargetColorMap.find(name) != mTargetColorMap.end())
+      {
+         mTargetColorMap[name] = value;
+         return true;
+      }
+   }
+   
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool GetShowObject(const std::string &name)
+//------------------------------------------------------------------------------
+bool OpenGlPlot::GetShowObject(const std::string &name)
+{
+   #if DEBUG_OPENGL_PARAM
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::GetShowObject() name=%s returning %d\n",
+       name.c_str(), mDrawOrbitMap[name]);
+   #endif
+   
+   return mShowObjectMap[name];
+}
+
+
+//------------------------------------------------------------------------------
+// void SetShowObject(const std::string &name, bool value)
+//------------------------------------------------------------------------------
+void OpenGlPlot::SetShowObject(const std::string &name, bool value)
+{
+   #if DEBUG_OPENGL_PARAM
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::SetShowObject() name=%s setting %d\n",
+       name.c_str(), value);
+   #endif
+   
+   mShowObjectMap[name] = value;
+}
+
+
 //----------------------------------
 // inherited methods from Subscriber
 //----------------------------------
@@ -303,11 +409,11 @@ bool OpenGlPlot::Initialize()
    Subscriber::Initialize();
    
    #if DEBUG_OPENGL_INIT
-      MessageInterface::ShowMessage
-         ("OpenGlPlot::Initialize() isEndOfReceive = %d, mAllSpCount = %d\n",
-          isEndOfReceive, mAllSpCount);
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::Initialize() isEndOfReceive = %d, mAllSpCount = %d\n",
+       isEndOfReceive, mAllSpCount);
    #endif
-      
+   
    if (mAllSpCount > 0)
    {
       if (active)
@@ -322,7 +428,8 @@ bool OpenGlPlot::Initialize()
               (mEclipticPlane == "On"), (mEquatorialPlane == "On"),
               (mWireFrame == "On"), (mAxes == "On"),
               (mEarthSunLines == "On"), (mOverlapPlot == "On"),
-              (mLockView == "On"), (mPerspectiveMode == "On")))
+              (mLockView == "On"), (mPerspectiveMode == "On"),
+              mNumPointsToRedraw))
          {
             #if DEBUG_OPENGL_INIT
             MessageInterface::ShowMessage
@@ -350,10 +457,11 @@ bool OpenGlPlot::Initialize()
                if (mAllSpArray[i])
                {
                   //add all objects to object list
-                  mObjectNameArray.push_back(mAllSpNameArray[i]);
+                  mObjectNameArray.push_back(mAllSpNameArray[i]);                  
+                  mDrawOrbitArray.push_back(mDrawOrbitMap[mAllSpNameArray[i]]);
+                  mShowObjectArray.push_back(mShowObjectMap[mAllSpNameArray[i]]);
                   mOrbitColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
                   mObjectArray.push_back(mAllSpArray[i]);
-                  mDrawObjArray.push_back(true);
                   
                   if (mAllSpArray[i]->IsOfType(Gmat::SPACECRAFT))
                   {
@@ -393,13 +501,13 @@ bool OpenGlPlot::Initialize()
                UpdateObjectList(mViewCoordSysOrigin);
             
             if (mViewPointRefObj != NULL)
-                  UpdateObjectList(mViewPointRefObj);
+               UpdateObjectList(mViewPointRefObj);
             
             if (mViewPointVectorObj != NULL)
-                  UpdateObjectList(mViewPointVectorObj);
+               UpdateObjectList(mViewPointVectorObj);
             
             if (mViewDirectionObj != NULL)
-                  UpdateObjectList(mViewDirectionObj);
+               UpdateObjectList(mViewDirectionObj);
             
             #if DEBUG_OPENGL_INIT
             MessageInterface::ShowMessage
@@ -410,12 +518,16 @@ bool OpenGlPlot::Initialize()
                ("OpenGlPlot::Initialize() mObjectNameArray.size=%d, "
                 "mOrbitColorArray.size=%d\n", mObjectNameArray.size(),
                 mOrbitColorArray.size());
+            
+            bool draw, show;
             for (int i=0; i<mObjectCount; i++)
             {
+               draw = mDrawOrbitArray[i] ? true : false;
+               show = mShowObjectArray[i] ? true : false;
                MessageInterface::ShowMessage
-                  ("OpenGlPlot::Initialize() mObjectNameArray[%d]=%s,"
-                   "color=%d\n", i, mObjectNameArray[i].c_str(),
-                   mOrbitColorArray[i]);
+                  ("OpenGlPlot::Initialize() mObjectNameArray[%d]=%s, draw=%d, "
+                   "show=%d, color=%d\n", i, mObjectNameArray[i].c_str(), draw,
+                   show, mOrbitColorArray[i]);
             }
             #endif
             
@@ -444,7 +556,8 @@ bool OpenGlPlot::Initialize()
             //--------------------------------------------------------
             // set drawing object flag
             //--------------------------------------------------------
-            PlotInterface::SetGlDrawObjectFlag(instanceName, mDrawObjArray);
+            PlotInterface::SetGlDrawOrbitFlag(instanceName, mDrawOrbitArray);
+            PlotInterface::SetGlShowObjectFlag(instanceName, mShowObjectArray);
             
             return true;
          }
@@ -472,60 +585,6 @@ bool OpenGlPlot::Initialize()
    }
 }
 
-
-//------------------------------------------------------------------------------
-// UnsignedInt GetColor(const std::string &item, const std::string &scName)
-//------------------------------------------------------------------------------
-UnsignedInt OpenGlPlot::GetColor(const std::string &item,
-                                 const std::string &scName)
-{
-   if (item == "Orbit")
-   {
-      if (mOrbitColorMap.find(scName) != mOrbitColorMap.end())
-         return mOrbitColorMap[scName];
-   }
-   else if (item == "Target")
-   {
-      if (mTargetColorMap.find(scName) != mTargetColorMap.end())
-         return mTargetColorMap[scName];
-   }
-   
-   return GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED;
-}
-
-
-//------------------------------------------------------------------------------
-// bool SetColor(const std::string &item, const std::string &name,
-//               const UnsignedInt value)
-//------------------------------------------------------------------------------
-bool OpenGlPlot::SetColor(const std::string &item, const std::string &name,
-                          const UnsignedInt value)
-{
-   #if DEBUG_OPENGL_PARAM
-   MessageInterface::ShowMessage
-      ("OpenGlPlot::SetColor() item=%s, name=%s, value=%d\n",
-       item.c_str(), item.c_str(), value);
-   #endif
-
-   if (item == "Orbit")
-   {
-      if (mOrbitColorMap.find(name) != mOrbitColorMap.end())
-      {
-         mOrbitColorMap[name] = value;
-         return true;
-      }
-   }
-   else if (item == "Target")
-   {
-      if (mTargetColorMap.find(name) != mTargetColorMap.end())
-      {
-         mTargetColorMap[name] = value;
-         return true;
-      }
-   }
-   
-   return false;
-}
 
 //---------------------------------
 // inherited methods from GmatBase
@@ -755,6 +814,8 @@ Integer OpenGlPlot::GetIntegerParameter(const Integer id) const
       return mDataCollectFrequency;
    case UPDATE_PLOT_FREQUENCY:
       return mUpdatePlotFrequency;
+   case NUM_POINTS_TO_REDRAW:
+      return mNumPointsToRedraw;
    default:
       return Subscriber::GetIntegerParameter(id);
    }
@@ -782,6 +843,9 @@ Integer OpenGlPlot::SetIntegerParameter(const Integer id, const Integer value)
       return value;
    case UPDATE_PLOT_FREQUENCY:
       mUpdatePlotFrequency = value;
+      return value;
+   case NUM_POINTS_TO_REDRAW:
+      mNumPointsToRedraw = value;
       return value;
    default:
       return Subscriber::SetIntegerParameter(id, value);
@@ -1444,7 +1508,6 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    }
 
    return Subscriber::SetRefObject(obj, type, name);
-   //return false;
 }
 
 
@@ -1474,6 +1537,9 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index)
          mAllSpArray.push_back(NULL);
          mAllSpCount = mAllSpNameArray.size();
          
+         mDrawOrbitMap[name] = true;
+         mShowObjectMap[name] = true;
+         
          if (mAllSpCount < MAX_SP_COLOR)
          {
             mOrbitColorMap[name] = DEFAULT_ORBIT_COLOR[mAllSpCount-1];
@@ -1495,9 +1561,9 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index)
    {
       objName = mAllSpNameArray[i];
       MessageInterface::ShowMessage
-         ("OpenGlPlot::AddSpacePoint() mAllSpNameArray[%d]=%s, orbColor=%d, "
-          "targColor=%d\n", i, objName.c_str(), mOrbitColorMap[objName],
-          mTargetColorMap[objName]);
+         ("OpenGlPlot::AddSpacePoint() mAllSpNameArray[%d]=%s, draw=%d, show=%d"
+          "orbColor=%d, targColor=%d\n", i, objName.c_str(), mDrawOrbitMap[objName],
+          mShowObjectMap[objName], mOrbitColorMap[objName], mTargetColorMap[objName]);
    }
    #endif
    
@@ -1515,6 +1581,8 @@ bool OpenGlPlot::ClearSpacePointList()
    mAllSpNameArray.clear();
    mAllSpArray.clear();
    mObjectArray.clear();
+   mDrawOrbitArray.clear();
+   mShowObjectArray.clear();
    mScNameArray.clear();
    mObjectNameArray.clear();
    mOrbitColorArray.clear();
@@ -1556,8 +1624,8 @@ bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
    {
       if (mObjectNameArray[i] == name)
       {
-         mDrawObjArray[i] = false;
-         PlotInterface::SetGlDrawObjectFlag(instanceName, mDrawObjArray);
+         mDrawOrbitArray[i] = false;
+         PlotInterface::SetGlDrawOrbitFlag(instanceName, mDrawOrbitArray);
          return true;
       }
    }
@@ -1687,7 +1755,6 @@ bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
          #endif
          
          removedFromAllSpArray = true;
-         //return true;
       }
    }
 
@@ -1726,7 +1793,6 @@ bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
                                  mOrbitColorArray, mObjectArray);
    
    return (removedFromScArray && removedFromAllSpArray);
-   //return false;
    
    #endif
 }
@@ -1755,6 +1821,8 @@ void OpenGlPlot::ClearDynamicArrays()
    mObjectNameArray.clear();
    mOrbitColorArray.clear();
    mObjectArray.clear();
+   mDrawOrbitArray.clear();
+   mShowObjectArray.clear();
    mScNameArray.clear();
    mScOrbitColorArray.clear();
    mScTargetColorArray.clear();
@@ -1787,8 +1855,25 @@ void OpenGlPlot::UpdateObjectList(SpacePoint *sp)
       mObjectNameArray.push_back(name);
       mOrbitColorArray.push_back(mOrbitColorMap[name]);
       mObjectArray.push_back(sp);
+      mDrawOrbitMap[name] = true; //loj: 9/8/05
+      mShowObjectMap[name] = true; //loj: 9/8/05
+      mDrawOrbitArray.push_back(true);
+      mShowObjectArray.push_back(true);
       mObjectCount = mObjectNameArray.size();
    }
+   
+   #if DEBUG_OPENGL_INIT
+   Integer draw, show;
+   for (int i=0; i<mObjectCount; i++)
+   {
+      draw = mDrawOrbitArray[i] ? 1 : 0;
+      show = mShowObjectArray[i] ? 1 : 0;
+      MessageInterface::ShowMessage
+         ("OpenGlPlot::UpdateObjectList() mObjectNameArray[%d]=%s, draw=%d, "
+          "show=%d, color=%d\n", i, mObjectNameArray[i].c_str(), draw, show,
+          mOrbitColorArray[i]);
+   }
+   #endif
 }
 
 

@@ -167,7 +167,15 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mUseGluLookAt = false;
    mUseSingleRotAngle = true;
    
+   // performance
+   // if mNumPointsToRedraw =  0 It redraws whole plot
+   // if mNumPointsToRedraw = -1 It does not clear GL_COLOR_BUFFER
+   mViewPointChanged = false;
+   mNumPointsToRedraw = 0;
+   mRedrawLastPointsOnly = false;
+   
    mAxisLength = mCurrViewDist;
+   
    mOriginName = "";
    mOriginId = 0;
    
@@ -284,10 +292,10 @@ bool TrajPlotCanvas::InitGL()
    // remove back faces
    glDisable(GL_CULL_FACE);
    glEnable(GL_DEPTH_TEST);
-
+   
    glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
    glDepthFunc(GL_LESS);
-   glDepthRange(0.0, 100.0); //loj: 5.20 just to try
+   //glDepthRange(0.0, 100.0); //loj: just to try - made no difference
    
    // speedups
    glEnable(GL_DITHER);
@@ -320,6 +328,7 @@ bool TrajPlotCanvas::InitGL()
    mNumData = 0;
    mOverCounter = 0;
    mIsEndOfRun = false;
+   mViewAnimation = false;
    
    return true;
 }
@@ -753,6 +762,7 @@ void TrajPlotCanvas::ViewAnimation(int interval)
    mViewAnimation = true;
    mUpdateInterval = interval;
    mHasUserInterrupted = false;
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    DrawFrame();
 }
 
@@ -966,7 +976,7 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
    if (!mUseViewDirectionVector && mViewDirectionObj)
    {
       mVdirObjId = GetObjectId(mViewDirectionObj->GetName().c_str());
-         
+      
       if (mVdirObjId == GmatPlot::UNKNOWN_BODY)
       {
          mUseViewDirectionVector = true;
@@ -985,87 +995,78 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
              "ViewDirectionObject is NULL,"
              "so will use default Vector instead.\n");
    }
-      
+   
 } //end SetGlViewOption()
 
 
 //------------------------------------------------------------------------------
-// void SetGlDrawObjectFlag(const std::vector<bool> &drawArray)
+// void SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
 //------------------------------------------------------------------------------
-void TrajPlotCanvas::SetGlDrawObjectFlag(const std::vector<bool> &drawArray)
+void TrajPlotCanvas::SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
 {
-   mDrawObjArray = drawArray;
+   mDrawOrbitArray = drawArray;
+   
+   #if DEBUG_TRAJCANVAS_OBJECT
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::SetGlDrawObjectFlag() mDrawOrbitArray.size()=%d, "
+       "mObjectCount=%d\n", mDrawOrbitArray.size(), mObjectCount);
+   #endif
+   
+   bool draw;
+   for (int i=0; i<mObjectCount; i++)
+   {
+      draw = mDrawOrbitArray[i] ? true : false;
+      
+      #if DEBUG_TRAJCANVAS_OBJECT
+      MessageInterface::ShowMessage
+         ("TrajPlotCanvas::SetGlDrawObjectFlag() mDrawOrbitArray[%d]=%d\n",
+          i, draw);
+      #endif
+   }
 }
 
 
 //------------------------------------------------------------------------------
-// int ReadTextTrajectory(const wxString &filename)
+// void SetGlShowObjectFlag(const std::vector<bool> &showArray)
 //------------------------------------------------------------------------------
-/**
- * Reads text trajectory file and initializes OpenGL.
- *
- * @param <filename> file name
- * @return number of data points.
- *
- * @note Assumes the trajectory file has time, x, y, z, vx, vy, vz.
- */
-//------------------------------------------------------------------------------
-int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
+void TrajPlotCanvas::SetGlShowObjectFlag(const std::vector<bool> &showArray)
 {
-   int numDataPoints = 0;
-   mTextTrajFile =  new TextTrajectoryFile(std::string(filename.c_str()));
-    
-   if (mTextTrajFile->Open())
-   {
-      mTrajectoryData = mTextTrajFile->GetData();
-        
-      numDataPoints = mTrajectoryData.size();
+   mShowObjectArray = showArray;
 
-      mObjectArray.push_back(NULL);
-      wxArrayString tempList;
-      tempList.Add("SC1");
-      UnsignedIntArray objOrbitColors;
-      objOrbitColors.push_back(GmatColor::RED32);
-      AddObjectList(tempList, objOrbitColors);
-      
-      int sc = 0;
-      for(int i=0; i<numDataPoints && i < MAX_DATA; i++)
-      {
-         mTime[mNumData] = mTrajectoryData[i].time;
-         mObjectOrbitColor[sc][mNumData] = GmatColor::RED32;
-         mObjectTempPos[sc][mNumData][0] = mTrajectoryData[i].x;
-         mObjectTempPos[sc][mNumData][1] = mTrajectoryData[i].y;
-         mObjectTempPos[sc][mNumData][2] = mTrajectoryData[i].z;
-         mNumData++;
-      }
-      
-      mTextTrajFile->Close();
-      wxLogStatus(GmatAppData::GetMainFrame(),
-                  wxT("Number of data points: %d"), numDataPoints);
-   }
-   else
-   {
-      wxString info;
-      info.Printf(_T("Cannot open trajectory file name: %s\n"),
-                  filename.c_str());
-        
-      wxMessageDialog msgDialog(this, info, _T("ReadTextTrajectory File"));
-      msgDialog.ShowModal();
-      return numDataPoints;
-   }
+   #if DEBUG_TRAJCANVAS_OBJECT
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::SetGlDrawObjectFlag() mDrawOrbitArray.size()=%d, "
+       "mObjectCount=%d\n", mShowObjectArray.size(), mObjectCount);
+   #endif
    
-   // initialize GL
-   if (!InitGL())
+   bool show;
+   for (int i=0; i<mObjectCount; i++)
    {
-      wxMessageDialog msgDialog(this, _T("InitGL() failed"),
-                                _T("ReadTextTrajectory File"));
-      msgDialog.ShowModal();
-      return false;
+      show = mShowObjectArray[i] ? true : false;
+      mShowObjectMap[mObjectNames[i]] = show;
+      
+      #if DEBUG_TRAJCANVAS_OBJECT
+      MessageInterface::ShowMessage
+         ("TrajPlotCanvas::SetGlShowObjectFlag() mShowObjectMap[%s]=%d\n",
+          mObjectNames[i].c_str(), show);
+      #endif
    }
-    
-   return numDataPoints;
-    
-} //end ReadTextTrajectory()
+}
+
+
+//------------------------------------------------------------------------------
+// void SetNumPointsToRedraw(Integer numPoints)
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::SetNumPointsToRedraw(Integer numPoints)
+{
+   mNumPointsToRedraw = numPoints;
+   mRedrawLastPointsOnly = false;
+
+   // if mNumPointsToRedraw =  0 It redraws whole plot
+   // if mNumPointsToRedraw = -1 It does not clear GL_COLOR_BUFFER
+   if (mNumPointsToRedraw > 0)
+      mRedrawLastPointsOnly = true;
+}
 
 
 //------------------------------------------------------------------------------
@@ -1121,13 +1122,13 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
          
          if (objId != UNKNOWN_OBJ_ID)
          {
-            if (!mDrawObjArray[objId])
+            if (!mDrawOrbitArray[objId])
             {
-               mDrawObjFlag[objId][mNumData] = false;
+               mDrawOrbitFlag[objId][mNumData] = false;
                continue;
             }
             
-            mDrawObjFlag[objId][mNumData] = true;
+            mDrawOrbitFlag[objId][mNumData] = true;
             
             mObjectOrbitColor[objId][mNumData]  = scColors[sc];
             mObjectGciPos[objId][mNumData][0] = posX[sc];
@@ -1197,14 +1198,14 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             // if object id found
             if (objId != UNKNOWN_OBJ_ID)
             {
-               if (!mDrawObjArray[objId])
+               if (!mDrawOrbitArray[objId])
                {
-                  mDrawObjFlag[objId][mNumData] = false;
+                  mDrawOrbitFlag[objId][mNumData] = false;
                   continue;
                }
-            
-               mDrawObjFlag[objId][mNumData] = true;
-            
+               
+               mDrawOrbitFlag[objId][mNumData] = true;
+               
                Rvector6 objState = mObjectArray[obj]->GetMJ2000State(time);
                mObjectGciPos[objId][mNumData][0] = objState[0];
                mObjectGciPos[objId][mNumData][1] = objState[1];
@@ -1273,20 +1274,21 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
       }
       
       mNumData++;
+      mViewPointChanged = false;
       
       //} // if (mNumData < MAX_DATA)
-      
-      // Set projection here, because DrawPlot() is called in OnPaint()
-      if (mUseInitialViewPoint)
-      {
-         ComputeProjection(mNumData-1);
-      }
-      
-      ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
-      //SetProjection();
+
+
+      //loj: 9/2/05 moved to DrawPlot() since the plot will not be updated here.
+      //if (mUseInitialViewPoint)
+      //   ComputeProjection(mNumData-1);
+      //
+      //ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
       
       //DrawPlot(); //loj: This will make plotting slower.
-      Refresh(false);
+      //loj: 9/2/05 commented out.
+      //MdiChildTrajFram::UpdatePlot() will call Refresh()
+      //Refresh(false);
       
    } // if (mNumData < MAX_DATA)
    else
@@ -1379,8 +1381,79 @@ void TrajPlotCanvas::AddObjectList(const wxArrayString &objNames,
    }
 
    InitGL();
-   
+   ClearPlot();
+
 } //AddObjectList()
+
+
+//------------------------------------------------------------------------------
+// int ReadTextTrajectory(const wxString &filename)
+//------------------------------------------------------------------------------
+/**
+ * Reads text trajectory file and initializes OpenGL.
+ *
+ * @param <filename> file name
+ * @return number of data points.
+ *
+ * @note Assumes the trajectory file has time, x, y, z, vx, vy, vz.
+ */
+//------------------------------------------------------------------------------
+int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
+{
+   int numDataPoints = 0;
+   mTextTrajFile =  new TextTrajectoryFile(std::string(filename.c_str()));
+    
+   if (mTextTrajFile->Open())
+   {
+      mTrajectoryData = mTextTrajFile->GetData();
+        
+      numDataPoints = mTrajectoryData.size();
+
+      mObjectArray.push_back(NULL);
+      wxArrayString tempList;
+      tempList.Add("SC1");
+      UnsignedIntArray objOrbitColors;
+      objOrbitColors.push_back(GmatColor::RED32);
+      AddObjectList(tempList, objOrbitColors);
+      
+      int sc = 0;
+      for(int i=0; i<numDataPoints && i < MAX_DATA; i++)
+      {
+         mTime[mNumData] = mTrajectoryData[i].time;
+         mObjectOrbitColor[sc][mNumData] = GmatColor::RED32;
+         mObjectTempPos[sc][mNumData][0] = mTrajectoryData[i].x;
+         mObjectTempPos[sc][mNumData][1] = mTrajectoryData[i].y;
+         mObjectTempPos[sc][mNumData][2] = mTrajectoryData[i].z;
+         mNumData++;
+      }
+      
+      mTextTrajFile->Close();
+      wxLogStatus(GmatAppData::GetMainFrame(),
+                  wxT("Number of data points: %d"), numDataPoints);
+   }
+   else
+   {
+      wxString info;
+      info.Printf(_T("Cannot open trajectory file name: %s\n"),
+                  filename.c_str());
+        
+      wxMessageDialog msgDialog(this, info, _T("ReadTextTrajectory File"));
+      msgDialog.ShowModal();
+      return numDataPoints;
+   }
+   
+   // initialize GL
+   if (!InitGL())
+   {
+      wxMessageDialog msgDialog(this, _T("InitGL() failed"),
+                                _T("ReadTextTrajectory File"));
+      msgDialog.ShowModal();
+      return false;
+   }
+    
+   return numDataPoints;
+    
+} //end ReadTextTrajectory()
 
 
 //------------------------------------------------------------------------------
@@ -1392,15 +1465,16 @@ void TrajPlotCanvas::AddObjectList(const wxArrayString &objNames,
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::OnPaint(wxPaintEvent& event)
 {
+   //MessageInterface::ShowMessage("===> TrajPlotCanvas::OnPaint() called\n");
    // must always be here
    wxPaintDC dc(this);
-     
+   
 #ifndef __WXMOTIF__
    if (!GetContext()) return;
 #endif
-
+   
    SetCurrent();    
-
+   
    if (mDrawWireFrame)
    {
       glPolygonMode(GL_FRONT, GL_LINE); // for wire frame
@@ -1411,8 +1485,7 @@ void TrajPlotCanvas::OnPaint(wxPaintEvent& event)
       glPolygonMode(GL_FRONT, GL_FILL);
       glPolygonMode(GL_BACK, GL_FILL);
    }
-
-   //SetProjection();
+   
    DrawPlot();
 }
 
@@ -1471,6 +1544,7 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
    int mouseX, mouseY;
    
    mViewAnimation = false;
+   mViewPointChanged = true;
    
    GetClientSize(&clientWidth, &clientHeight);
    ChangeProjection(clientWidth, clientHeight, mAxisLength);
@@ -2373,6 +2447,7 @@ void TrajPlotCanvas::DrawFrame()
    
    int numberOfData = mNumData;
    mIsEndOfRun = false;
+   mViewPointChanged = false;
    
    for (int frame=1; frame<numberOfData; frame++)
    {
@@ -2398,8 +2473,8 @@ void TrajPlotCanvas::DrawFrame()
       
       ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
       
+      mViewPointChanged = false;
       Refresh(false);
-      
    }
    
    mNumData = numberOfData;
@@ -2425,10 +2500,20 @@ void TrajPlotCanvas::DrawPlot()
        mAxisLength);
    #endif
    
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   if (mViewPointChanged || mRedrawLastPointsOnly || mNumPointsToRedraw == 0)
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   else
+      glClear(GL_DEPTH_BUFFER_BIT);
    
    DrawStatus("Frame#: ", mNumData-1, mTime[mNumData-1]);
-
+   
+   // compute projection if not using initial viewpoint and not end of run
+   //if (mUseInitialViewPoint) (loj: 9/6/05 added !mIsEndOfRun)
+   if (mUseInitialViewPoint && !mIsEndOfRun)
+      ComputeProjection(mNumData-1);
+   
+   ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
+   
    // change back to view projection
    SetProjection();
    
@@ -2553,13 +2638,29 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
       objName = mObjectNames[obj];
       objId = GetObjectId(objName);
       
-      if (!mDrawObjFlag[objId])
+      if (!mDrawOrbitFlag[objId][frame])
          continue;
       
       glPushMatrix();
       glBegin(GL_LINES);
       
-      for (int i=1; i<=frame; i++)
+      int beginFrame = 1;
+      
+      if (mRedrawLastPointsOnly && !mIsEndOfRun && !mViewPointChanged)
+      {
+         beginFrame = frame - mNumPointsToRedraw;
+         if (beginFrame < 1)
+            beginFrame = 1;
+      }
+      else if (!mIsEndOfRun && mNumPointsToRedraw == -1)
+      {
+         beginFrame = frame - 2;
+         if (beginFrame < 1)
+            beginFrame = 1;
+      }
+      
+      //for (int i=1; i<=frame; i++)
+      for (int i=beginFrame; i<=frame; i++)
       {
          // Draw object orbit line based on points
          if ((mTime[i] > mTime[i-1]) ||
