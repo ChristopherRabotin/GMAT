@@ -30,6 +30,8 @@ class BaseException
 public:
     virtual std::string GetMessage() const 
         {return theMessage + theDetails;};
+    virtual std::string GetDetails() const 
+        {return theDetails;};
     virtual void SetMessage(const std::string &message)  
         {theMessage = message;};
     virtual void SetDetails(const std::string &details)  
