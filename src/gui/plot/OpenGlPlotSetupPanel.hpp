@@ -35,7 +35,9 @@ protected:
    OpenGlPlot *mOpenGlPlot;
    
    bool mHasSpChanged;
-   bool mHasColorChanged;
+   bool mHasOrbitColorChanged;
+   bool mHasTargetColorChanged;
+   bool mHasShowObjectChanged;
    bool mHasCoordSysChanged;
    bool mHasViewInfoChanged;
    bool mHasViewUpInfoChanged;
@@ -45,6 +47,7 @@ protected:
    std::string mSelSpName;
    std::map<std::string, RgbColor> mOrbitColorMap;
    std::map<std::string, RgbColor> mTargetColorMap;
+   std::map<std::string, bool> mShowObjectMap;
    
    wxArrayString mExcludedScList;
    
@@ -73,6 +76,7 @@ protected:
    wxCheckBox *mUseFixedFovCheckBox;
    wxCheckBox *mAxesCheckBox;
    wxCheckBox *mEarthSunLinesCheckBox;
+   wxCheckBox *mShowObjectCheckBox;
    
    wxComboBox *mCoordSysComboBox;
    wxComboBox *mViewPointRefComboBox;
@@ -86,6 +90,7 @@ protected:
    
    wxTextCtrl *mDataCollectFreqTextCtrl;
    wxTextCtrl *mUpdatePlotFreqTextCtrl;
+   wxTextCtrl *mNumPointsToRedrawTextCtrl;
    wxTextCtrl *mFixedFovTextCtrl;
    wxTextCtrl *mViewScaleFactorTextCtrl;
    wxTextCtrl *mViewPointRef1TextCtrl;

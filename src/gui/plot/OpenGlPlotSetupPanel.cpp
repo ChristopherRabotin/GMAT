@@ -82,7 +82,9 @@ OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
    mObject = mOpenGlPlot;
    
    mHasSpChanged = false;
-   mHasColorChanged = false;
+   mHasOrbitColorChanged = false;
+   mHasTargetColorChanged = false;
+   mHasShowObjectChanged = false;
    mHasCoordSysChanged = false;
    mHasViewInfoChanged = false;
    mScCount = 0;
@@ -152,7 +154,7 @@ void OpenGlPlotSetupPanel::Create()
    wxBoxSizer *plotOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
    plotOptionBoxSizer->Add(mPlotCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    //plotOptionBoxSizer->Add(mOverlapCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(20, 14, 0, wxALIGN_LEFT|wxALL, bsize);
+   //plotOptionBoxSizer->Add(20, 14, 0, wxALIGN_LEFT|wxALL, bsize);
    
    wxStaticBox *plotOptionStaticBox = new wxStaticBox(this, -1, wxT("Plot Option"));
    wxStaticBoxSizer *plotOptionStaticSizer =
@@ -167,32 +169,48 @@ void OpenGlPlotSetupPanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mDataCollectFreqTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(40, -1), 0);
+                     wxDefaultPosition, wxSize(35, -1), 0);
    wxStaticText *dataCollectFreqLabel2 =
       new wxStaticText(this, -1, wxT("step"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
+   
    wxStaticText *updatePlotFreqLabel1 =
       new wxStaticText(this, -1, wxT("Update plot every "),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mUpdatePlotFreqTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(40, -1), 0);
+                     wxDefaultPosition, wxSize(35, -1), 0);
    wxStaticText *updatePlotFreqLabel2 =
       new wxStaticText(this, -1, wxT("cycle"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    
+   wxStaticText *numPointsToRedrawLabel1 =
+      new wxStaticText(this, -1, wxT("Number of points to redraw"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   wxStaticText *numPointsToRedrawLabel2 =
+      new wxStaticText(this, -1, wxT("(Enter 0 to redraw whole plot)"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   mNumPointsToRedrawTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                     wxDefaultPosition, wxSize(40, -1), 0);
+   
    wxBoxSizer *colFreqBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+   colFreqBoxSizer->Add(dataCollectFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
    colFreqBoxSizer->Add(mDataCollectFreqTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    colFreqBoxSizer->Add(dataCollectFreqLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
    
    wxBoxSizer *updFreqBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+   updFreqBoxSizer->Add(updatePlotFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
    updFreqBoxSizer->Add(mUpdatePlotFreqTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    updFreqBoxSizer->Add(updatePlotFreqLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   plotOptionBoxSizer->Add(dataCollectFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
+   //plotOptionBoxSizer->Add(dataCollectFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
    plotOptionBoxSizer->Add(colFreqBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(updatePlotFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
+   //plotOptionBoxSizer->Add(updatePlotFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
    plotOptionBoxSizer->Add(updFreqBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(numPointsToRedrawLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(numPointsToRedrawLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(mNumPointsToRedrawTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    
    //------------------------------------------------------
    // view option
@@ -214,7 +232,7 @@ void OpenGlPlotSetupPanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mFixedFovTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(40, -1), 0);
+                     wxDefaultPosition, wxSize(35, -1), 0);
    
    wxBoxSizer *viewOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
    viewOptionBoxSizer->Add(mLockViewCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -353,8 +371,11 @@ void OpenGlPlotSetupPanel::Create()
    mObjSelectedBoxSizer->Add(mSelectedObjListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
-   // spacecraft color 
+   // object show, color 
    //------------------------------------------------------
+   mShowObjectCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Show Object"),
+                     wxDefaultPosition, wxSize(-1, -1), 0);
    wxStaticText *orbitColorLabel =
       new wxStaticText(this, -1, wxT("Orbit Color"),
                        wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
@@ -364,11 +385,13 @@ void OpenGlPlotSetupPanel::Create()
    
    mOrbitColorButton = new wxButton(this, ORBIT_COLOR_BUTTON, "",
                                     wxDefaultPosition, wxSize(25,20), 0);
-
+   
    mTargetColorButton = new wxButton(this, TARGET_COLOR_BUTTON, "",
                                      wxDefaultPosition, wxSize(25,20), 0);
    
    wxFlexGridSizer *scOptionBoxSizer1 = new wxFlexGridSizer(1, 0, 0);
+   scOptionBoxSizer1->Add(mShowObjectCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   scOptionBoxSizer1->Add(20, 10, 0, wxALIGN_LEFT|wxALL, bsize);
    scOptionBoxSizer1->Add(orbitColorLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    scOptionBoxSizer1->Add(mOrbitColorButton, 0, wxALIGN_LEFT|wxALL, bsize);
    scOptionBoxSizer1->Add(mTargetColorLabel, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -388,7 +411,7 @@ void OpenGlPlotSetupPanel::Create()
    wxStaticBoxSizer *viewObjectStaticSizer
       = new wxStaticBoxSizer(viewObjectStaticBox, wxVERTICAL);
    viewObjectStaticSizer->Add(mObjectGridSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-
+   
    #if DEBUG_OPENGL_PANEL_CREATE
    MessageInterface::ShowMessage
       ("OpenGlPlotSetupPanel::Create() view geometry...\n");
@@ -572,6 +595,8 @@ void OpenGlPlotSetupPanel::LoadData()
       mDataCollectFreqTextCtrl->SetValue(str);
       str.Printf("%d", mOpenGlPlot->GetIntegerParameter("UpdatePlotFrequency"));
       mUpdatePlotFreqTextCtrl->SetValue(str);
+      str.Printf("%d", mOpenGlPlot->GetIntegerParameter("NumPointsToRedraw"));
+      mNumPointsToRedrawTextCtrl->SetValue(str);
       
       mPlotCheckBox->SetValue(mOpenGlPlot->IsActive());
       mEquatorialPlaneCheckBox->
@@ -709,7 +734,7 @@ void OpenGlPlotSetupPanel::LoadData()
              i, spNameList[i].c_str());
       }
       #endif
-
+      
       StringArray scNameArray;
       StringArray nonScNameArray;
       
@@ -721,7 +746,7 @@ void OpenGlPlotSetupPanel::LoadData()
          else
             scNameArray.push_back(spNameList[i]);
       }
-
+      
       mScCount = scNameArray.size();
       mNonScCount = nonScNameArray.size();
 
@@ -731,22 +756,34 @@ void OpenGlPlotSetupPanel::LoadData()
           mScCount, mNonScCount);
       #endif
       
+      //--------------------------------------------------------------
+      // get object show, color
+      //--------------------------------------------------------------
       if (mScCount > 0)
       {
          wxString *scNames = new wxString[mScCount];
          for (int i=0; i<mScCount; i++)
          {
             scNames[i] = scNameArray[i].c_str();
-         
+            
+            mShowObjectMap[scNameArray[i]] =
+               mOpenGlPlot->GetShowObject(scNameArray[i]);
             mOrbitColorMap[scNameArray[i]]
                = RgbColor(mOpenGlPlot->GetColor("Orbit", scNameArray[i]));
             mTargetColorMap[scNameArray[i]]
                = RgbColor(mOpenGlPlot->GetColor("Target", scNameArray[i]));
+            
+            #if DEBUG_OPENGL_PANEL_LOAD > 1
+            MessageInterface::ShowMessage
+               ("OpenGlPlotSetupPanel::LoadData() scName=%s, orbColor=%u, "
+                "targetColor=%u\n", scNameArray[i].c_str(),
+                mOrbitColorMap[scNameArray[i]].GetIntColor(),
+                mTargetColorMap[scNameArray[i]].GetIntColor());
+            #endif
          }
          
          mSelectedScListBox->Set(mScCount, scNames);
          delete scNames;
-
       }
       
       if (mNonScCount > 0)
@@ -756,6 +793,8 @@ void OpenGlPlotSetupPanel::LoadData()
          {
             nonScNames[i] = nonScNameArray[i].c_str();
          
+            mShowObjectMap[nonScNameArray[i]] =
+               mOpenGlPlot->GetShowObject(nonScNameArray[i]);
             mOrbitColorMap[nonScNameArray[i]]
                = RgbColor(mOpenGlPlot->GetColor("Orbit", nonScNameArray[i]));
             mTargetColorMap[nonScNameArray[i]]
@@ -764,19 +803,19 @@ void OpenGlPlotSetupPanel::LoadData()
          
          mSelectedObjListBox->Set(mNonScCount, nonScNames);
          delete nonScNames;
-
       }
       
       // show spacecraft option
       mSelectedScListBox->SetSelection(0);
       ShowSpacePointOption(mSelectedScListBox->GetStringSelection(), true);
-
-         
+      
+      
    }
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
-         ("OpenGlPlotSetupPanel:LoadData() error occurred!\n%s\n", e.GetMessage().c_str());
+         ("OpenGlPlotSetupPanel:LoadData() error occurred!\n%s\n",
+          e.GetMessage().c_str());
    }
 
    // deselect available object list
@@ -842,6 +881,8 @@ void OpenGlPlotSetupPanel::SaveData()
       mOpenGlPlot->SetIntegerParameter("DataCollectFrequency", longVal);
       mUpdatePlotFreqTextCtrl->GetValue().ToLong(&longVal);
       mOpenGlPlot->SetIntegerParameter("UpdatePlotFrequency", longVal);
+      mNumPointsToRedrawTextCtrl->GetValue().ToLong(&longVal);
+      mOpenGlPlot->SetIntegerParameter("NumPointsToRedraw", longVal);
       
       mOpenGlPlot->Activate(mPlotCheckBox->IsChecked());
       
@@ -898,12 +939,15 @@ void OpenGlPlotSetupPanel::SaveData()
       Real fov;
       mFixedFovTextCtrl->GetValue().ToDouble(&fov);
       mOpenGlPlot->SetRealParameter("FixedFovAngle", fov);
-      
+
+      //--------------------------------------------------------------
       // save spacecraft list
+      //--------------------------------------------------------------
       if (mHasSpChanged)
       {
          mHasSpChanged = false;
-         mHasColorChanged = true;
+         mHasOrbitColorChanged = true;
+         mHasTargetColorChanged = true;
       
          mScCount = mSelectedScListBox->GetCount();
          mNonScCount = mSelectedObjListBox->GetCount();
@@ -955,26 +999,57 @@ void OpenGlPlotSetupPanel::SaveData()
                SetStringParameter("Add", mSelSpName, mScCount+i);
          }
       }
-            
-      // save color
-      if (mHasColorChanged)
+      
+      //--------------------------------------------------------------
+      // save draw object
+      //--------------------------------------------------------------
+      if (mHasShowObjectChanged)
       {
-         mHasColorChanged = false;
-
-         // change spacecraft color
+         mHasShowObjectChanged = false;
+         
+         // change draw spacecraft
          for (int i=0; i<mScCount; i++)
          {
             mSelSpName = std::string(mSelectedScListBox->GetString(i).c_str());
          
             mOpenGlPlot->
-               SetColor("Orbit", mSelSpName,
-                        mOrbitColorMap[mSelSpName].GetIntColor());
-            mOpenGlPlot->
-               SetColor("Target", mSelSpName,
-                        mTargetColorMap[mSelSpName].GetIntColor());
+               SetShowObject( mSelSpName, mShowObjectMap[mSelSpName]);
          }
          
-         // change non-spacecraft color
+         // change draw non-spacecraft
+         for (int i=0; i<mNonScCount; i++)
+         {
+            mSelSpName = std::string(mSelectedObjListBox->GetString(i).c_str());
+         
+            mOpenGlPlot->
+               SetShowObject(mSelSpName, mShowObjectMap[mSelSpName]);
+         }
+      }
+      
+      //--------------------------------------------------------------
+      // save orbit color
+      //--------------------------------------------------------------
+      if (mHasOrbitColorChanged)
+      {
+         mHasOrbitColorChanged = false;
+         
+         // change spacecraft orbit color
+         for (int i=0; i<mScCount; i++)
+         {
+            mSelSpName = std::string(mSelectedScListBox->GetString(i).c_str());
+            
+            #if DEBUG_OPENGL_PANEL_SAVE
+            MessageInterface::ShowMessage
+               ("OpenGlPlotSetupPanel::SaveData() objName=%s, orbColor=%u\n",
+                mSelSpName.c_str(), mOrbitColorMap[mSelSpName].GetIntColor());
+            #endif
+            
+            mOpenGlPlot->
+               SetColor("Orbit", mSelSpName,
+                        mOrbitColorMap[mSelSpName].GetIntColor());
+         }
+         
+         // change non-spacecraft orbit color
          for (int i=0; i<mNonScCount; i++)
          {
             mSelSpName = std::string(mSelectedObjListBox->GetString(i).c_str());
@@ -982,13 +1057,36 @@ void OpenGlPlotSetupPanel::SaveData()
             mOpenGlPlot->
                SetColor("Orbit", mSelSpName,
                         mOrbitColorMap[mSelSpName].GetIntColor());
+         }
+      }
+      
+      //--------------------------------------------------------------
+      // save target color
+      //--------------------------------------------------------------
+      if (mHasTargetColorChanged)
+      {
+         mHasTargetColorChanged = false;
+         
+         // change spacecraft target color
+         for (int i=0; i<mScCount; i++)
+         {
+            mSelSpName = std::string(mSelectedScListBox->GetString(i).c_str());
+            
+            #if DEBUG_OPENGL_PANEL_SAVE
+            MessageInterface::ShowMessage
+               ("OpenGlPlotSetupPanel::SaveData() objName=%s targetColor=%u\n",
+                mSelSpName.c_str(), mTargetColorMap[mSelSpName].GetIntColor());
+            #endif
+            
             mOpenGlPlot->
                SetColor("Target", mSelSpName,
                         mTargetColorMap[mSelSpName].GetIntColor());
          }
       }
       
+      //--------------------------------------------------------------
       // save coordinate system
+      //--------------------------------------------------------------
       if (mHasCoordSysChanged)
       {
          mHasCoordSysChanged = false;
@@ -997,7 +1095,9 @@ void OpenGlPlotSetupPanel::SaveData()
              std::string(mCoordSysComboBox->GetStringSelection().c_str()));
       }
       
+      //--------------------------------------------------------------
       // save ViewPoint info
+      //--------------------------------------------------------------
       if (mHasViewInfoChanged)
       {
          mHasViewInfoChanged = false;
@@ -1058,7 +1158,9 @@ void OpenGlPlotSetupPanel::SaveData()
          }
       }
       
+      //--------------------------------------------------------------
       // save view up direction info
+      //--------------------------------------------------------------
       if (mHasViewUpInfoChanged)
       {
          mHasViewUpInfoChanged = false;
@@ -1276,6 +1378,12 @@ void OpenGlPlotSetupPanel::OnCheckBoxChange(wxCommandEvent& event)
          mFixedFovTextCtrl->Disable();
       }
    }
+   else if (event.GetEventObject() == mShowObjectCheckBox)
+   {
+      mSelSpName = std::string(mSelectedScListBox->GetStringSelection().c_str());
+      mShowObjectMap[mSelSpName] = mShowObjectCheckBox->GetValue();
+      mHasShowObjectChanged = true;
+   }
    
    theApplyButton->Enable();
 }
@@ -1301,7 +1409,7 @@ void OpenGlPlotSetupPanel::OnOrbitColorClick(wxCommandEvent& event)
       
          mOrbitColor = dialog.GetColourData().GetColour();
          mOrbitColorButton->SetBackgroundColour(mOrbitColor);
-      
+         mOrbitColorButton->Refresh();
          mOrbitColorMap[mSelSpName].Set(mOrbitColor.Red(),
                                         mOrbitColor.Green(),
                                         mOrbitColor.Blue());
@@ -1310,9 +1418,10 @@ void OpenGlPlotSetupPanel::OnOrbitColorClick(wxCommandEvent& event)
          MessageInterface::ShowMessage("OnOrbitColorClick() r=%d g=%d b=%d\n",
                                        mOrbitColor.Red(), mOrbitColor.Green(),
                                        mOrbitColor.Blue());
-
-         MessageInterface::ShowMessage("OnOrbitColorClick() UnsignedInt=%d\n",
-                                       mOrbitColorMap[mSelSpName].GetIntColor());
+         
+         MessageInterface::ShowMessage
+            ("OnOrbitColorClick() mOrbitColorMap[%s]=%u\n",
+             mSelSpName.c_str(), mOrbitColorMap[mSelSpName].GetIntColor());
          #endif
       }
       else if (mSelectedObjListBox->GetSelection() != -1)
@@ -1321,25 +1430,28 @@ void OpenGlPlotSetupPanel::OnOrbitColorClick(wxCommandEvent& event)
       
          mOrbitColor = dialog.GetColourData().GetColour();
          mOrbitColorButton->SetBackgroundColour(mOrbitColor);
-      
+         mOrbitColorButton->Refresh();
+
          mOrbitColorMap[mSelSpName].Set(mOrbitColor.Red(),
                                         mOrbitColor.Green(),
                                         mOrbitColor.Blue());
-
+         
          #if DEBUG_OPENGL_PANEL
-         MessageInterface::ShowMessage("OnOrbitColorClick() r=%d g=%d b=%d\n",
-                                       mOrbitColor.Red(), mOrbitColor.Green(),
-                                       mOrbitColor.Blue());
+         MessageInterface::ShowMessage
+            ("OnOrbitColorClick() r=%d g=%d b=%d\n", mOrbitColor.Red(),
+             mOrbitColor.Green(), mOrbitColor.Blue());
 
-         MessageInterface::ShowMessage("OnOrbitColorClick() UnsignedInt=%d\n",
-                                       mOrbitColorMap[mSelSpName].GetIntColor());
+         MessageInterface::ShowMessage
+            ("OnOrbitColorClick() mOrbitColorMap[%s]=%u\n",
+             mSelSpName.c_str(), mOrbitColorMap[mSelSpName].GetIntColor());
          #endif
       }
       
       theApplyButton->Enable();
-      mHasColorChanged = true;
+      mHasOrbitColorChanged = true;
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnTargetColorClick(wxCommandEvent& event)
@@ -1355,16 +1467,27 @@ void OpenGlPlotSetupPanel::OnTargetColorClick(wxCommandEvent& event)
    
    if (dialog.ShowModal() == wxID_OK)
    {
-      mSelSpName = std::string(mSelectedObjListBox->GetStringSelection().c_str());
+      mSelSpName = std::string(mSelectedScListBox->GetStringSelection().c_str());
       
       mTargetColor = dialog.GetColourData().GetColour();
       mTargetColorButton->SetBackgroundColour(mTargetColor);
+      mTargetColorButton->Refresh();
       mTargetColorMap[mSelSpName].Set(mTargetColor.Red(),
                                       mTargetColor.Green(),
                                       mTargetColor.Blue());
       
+      #if DEBUG_OPENGL_PANEL
+      MessageInterface::ShowMessage
+         ("OnTargetColorClick() r=%d g=%d b=%d\n", mTargetColor.Red(),
+          mTargetColor.Green(), mTargetColor.Blue());
+      
+      MessageInterface::ShowMessage
+         ("OnTargetColorClick() mTargetColorMap[%s]=%u\n",
+          mSelSpName.c_str(), mTargetColorMap[mSelSpName].GetIntColor());
+      #endif
+      
       theApplyButton->Enable();
-      mHasColorChanged = true;
+      mHasTargetColorChanged = true;
    }
 }
 
@@ -1448,17 +1571,22 @@ void OpenGlPlotSetupPanel::ShowSpacePointOption(const wxString &name, bool show,
 {
    #if DEBUG_OPENGL_PANEL
    MessageInterface::ShowMessage
-      ("OpenGlPlotSetupPanel::ShowSpacePointOption() name=%s, show=%d, isSc=%d\n",
-       name.c_str(), show, isSc);
+      ("OpenGlPlotSetupPanel::ShowSpacePointOption() name=%s, show=%d, isSc=%d, "
+       "color=%u\n", name.c_str(), show, isSc, color);
    #endif
    
    if (!name.IsSameAs(""))
    {
       mSelSpName = std::string(name.c_str());
-
+      
       // if object name not found, insert
       if (mOrbitColorMap.find(mSelSpName) == mOrbitColorMap.end())
       {
+         #if DEBUG_OPENGL_PANEL
+         MessageInterface::ShowMessage
+            ("ShowSpacePointOption() name not found, so adding it to color map\n");
+         #endif
+         
          mOrbitColorMap[mSelSpName] = RgbColor(color);
          mTargetColorMap[mSelSpName] = RgbColor(GmatColor::ORANGE32);
       }
@@ -1468,16 +1596,20 @@ void OpenGlPlotSetupPanel::ShowSpacePointOption(const wxString &name, bool show,
       
       #if DEBUG_OPENGL_PANEL
       MessageInterface::ShowMessage
-         ("ShowSpacePointOption() orbColor=%08x targColor=%08x\n",
+         ("OpenGlPlotSetupPanel::ShowSpacePointOption() orbColor=%u, targColor=%u\n",
           orbColor.GetIntColor(), targColor.GetIntColor());
       #endif
+      
+      mShowObjectCheckBox->SetValue(mShowObjectMap[mSelSpName]);
       
       mOrbitColor.Set(orbColor.Red(), orbColor.Green(), orbColor.Blue());
       mTargetColor.Set(targColor.Red(), targColor.Green(), targColor.Blue());
       
       mOrbitColorButton->SetBackgroundColour(mOrbitColor);
       mTargetColorButton->SetBackgroundColour(mTargetColor);
-
+      mOrbitColorButton->Refresh();
+      mTargetColorButton->Refresh();
+      
       if (isSc)
       {
          mTargetColorLabel->Enable();
