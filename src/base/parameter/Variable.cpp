@@ -72,9 +72,11 @@ Variable::Variable(const Variable &copy)
    mExpParser = new ExpressionParser();
    mExpParser->SetParameterDatabase(mParamDb);
 
-   MessageInterface::ShowMessage("===> Variable::Variable() copy constructor\n");
+   #if DEBUG_VARIABLE
+   MessageInterface::ShowMessage("Variable::Variable() copy constructor\n");
    MessageInterface::ShowMessage("copy.numDBParams = %d\n", copy.mParamDb->GetNumParameters());
    MessageInterface::ShowMessage("numDBParams = %d\n", mParamDb->GetNumParameters());
+   #endif
 }
 
 
