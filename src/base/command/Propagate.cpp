@@ -2328,6 +2328,7 @@ bool Propagate::Execute()
 void Propagate::RunComplete()
 {
    inProgress = false;
+   hasFired = false;
    GmatCommand::RunComplete();
 }
 
