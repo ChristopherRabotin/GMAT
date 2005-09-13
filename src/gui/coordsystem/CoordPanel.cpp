@@ -66,7 +66,9 @@ void CoordPanel::EnableOptions()
       typeComboBox->GetStringSelection().c_str());
    #endif
 
-   if (typeComboBox->GetStringSelection() == "Equator")
+   wxString typeStr = typeComboBox->GetStringSelection();
+   
+   if (typeStr == "Equator")
    {
       mShowPrimaryBody = false; 
       mShowSecondaryBody = false;
@@ -74,7 +76,7 @@ void CoordPanel::EnableOptions()
       mShowXyz = false;
       mShowUpdate = false;
    }
-   else if (typeComboBox->GetStringSelection() == "BodyFixed")
+   else if (typeStr == "BodyFixed")
    {
       mShowPrimaryBody = false; 
       mShowSecondaryBody = false;
@@ -82,7 +84,7 @@ void CoordPanel::EnableOptions()
       mShowXyz = false;
       mShowUpdate = true;
    }
-   else if (typeComboBox->GetStringSelection() == "ObjectReferenced")
+   else if (typeStr == "ObjectReferenced")
    {
       mShowPrimaryBody = true;
       mShowSecondaryBody = true;
@@ -91,8 +93,7 @@ void CoordPanel::EnableOptions()
       mShowUpdate = false;
       SetDefaultObjectRefAxis();
    }
-   else if ((typeComboBox->GetStringSelection() == "TOEEq") ||
-            (typeComboBox->GetStringSelection() == "TOEEc"))
+   else if ((typeStr == "TOEEq") || (typeStr == "TOEEc"))
             
    {
       mShowPrimaryBody = false;
@@ -102,8 +103,7 @@ void CoordPanel::EnableOptions()
       mShowUpdate = true;
       SetDefaultEpochRefAxis();
    }
-   else if ((typeComboBox->GetStringSelection() == "TODEq") ||
-            (typeComboBox->GetStringSelection() == "TODEc"))
+   else if ((typeStr == "TODEq") || (typeStr == "TODEc"))
 
    {
       mShowPrimaryBody = false;
@@ -113,8 +113,7 @@ void CoordPanel::EnableOptions()
       mShowUpdate = true;
       SetDefaultEpochRefAxis();
    }
-   else if((typeComboBox->GetStringSelection() == "MOEEq") ||
-            (typeComboBox->GetStringSelection() == "MOEEc"))
+   else if((typeStr == "MOEEq") || (typeStr == "MOEEc"))
    {
       mShowPrimaryBody = false;
       mShowSecondaryBody = false;
@@ -123,11 +122,18 @@ void CoordPanel::EnableOptions()
       mShowUpdate = false;
       SetDefaultEpochRefAxis();
    }
-   else if((typeComboBox->GetStringSelection() == "GSM") ||
-            (typeComboBox->GetStringSelection() == "GeocentricSolarMagnetic"))
+   else if(typeStr == "GSE") //loj: 9/13/05 Added
    {
-      mShowPrimaryBody = false;
-      mShowSecondaryBody = false;
+      mShowPrimaryBody = true;
+      mShowSecondaryBody = true;
+      mShowEpoch = false;
+      mShowXyz = false;
+      mShowUpdate = false;
+   }
+   else if(typeStr == "GSM")
+   {
+      mShowPrimaryBody = true;
+      mShowSecondaryBody = true;
       mShowEpoch = false;
       mShowXyz = false;
       mShowUpdate = true;
@@ -160,6 +166,18 @@ void CoordPanel::EnableOptions()
       updateStaticText->Enable(mShowUpdate);
       secStaticText->Enable(mShowUpdate);
       intervalTextCtrl->Enable(mShowUpdate);
+      
+      // disable some items (loj: 9/13/05 Added)
+      if (typeStr == "GSE" || typeStr == "GSM")
+      {
+         primaryComboBox->SetStringSelection("Earth");
+         secondaryComboBox->SetStringSelection("Sun");
+         
+         primaryStaticText->Enable(false);
+         primaryComboBox->Enable(false);
+         secondaryStaticText->Enable(false);
+         secondaryComboBox->Enable(false);
+      }
    }
    else  // disable all of them
    {
