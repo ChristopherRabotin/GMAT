@@ -87,7 +87,6 @@ bool Moderator::Initialize(bool fromGui)
 {
    try
    {
-      //loj: 7/7/05 Moved from the bottom
       // Read startup file, Set Log file
       theFileManager = FileManager::Instance();
       theFileManager->ReadStartupFile();
@@ -771,9 +770,8 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
          cp->SetStringParameter("Point", "L1");
          cp->SetStringParameter("Secondary", "DefaultBC");
          
-         // set body and J2000Body pointer
-         //(loj: 8/31/05 so that GUI can create LibrationPoint and use it in Coord.System
-         // conversion
+         // Set body and J2000Body pointer, so that GUI can create LibrationPoint
+         // and use it in Coord.System conversion
          SpacePoint *sun = (SpacePoint*)GetConfiguredItem("Sun");
          SpacePoint *earth = (SpacePoint*)GetConfiguredItem("Earth");
          if (sun->GetJ2000Body() == NULL)
@@ -787,9 +785,8 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
          cp->SetStringParameter("BodyNames", "Earth");
          cp->SetStringParameter("BodyNames", "Luna");
 
-         // set body and J2000Body pointer
-         //(loj: 8/31/05 so that GUI can create Barycenter and use it in Coord.System
-         // conversion
+         // Set body and J2000Body pointer, so that GUI can create LibrationPoint
+         // and use it in Coord.System conversion
          SpacePoint *earth = (SpacePoint*)GetConfiguredItem("Earth");
          SpacePoint *luna = (SpacePoint*)GetConfiguredItem("Luna");
          cp->SetRefObject(earth, Gmat::SPACE_POINT, "Earth");
@@ -1875,7 +1872,7 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage("Moderator::CreateCoordinateSystem() %s\n",
-                                    e.GetMessage().c_str()); //loj: 8/31/05 added eol
+                                    e.GetMessage().c_str());
    }
    
    return cs;
@@ -3098,7 +3095,6 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
       }
       else
       {
-         //loj: 9/1/05 Added
          MessageInterface::ShowMessage("\n========================================\n");
       }
    }
@@ -3163,7 +3159,6 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
       }
       else
       {
-         //loj: 9/1/05 Added
          MessageInterface::ShowMessage("\n========================================\n");
       }
    }
@@ -3197,7 +3192,7 @@ bool Moderator::SaveScript(const std::string &scriptFileName)
    //                                  scriptFileName);
    
    MessageInterface::ShowMessage("The Script is saved to " +
-                                 scriptFileName + "\n"); //loj:8/30/05 added eol
+                                 scriptFileName + "\n");
    
    try
    {
@@ -3275,9 +3270,11 @@ void Moderator::InitializePlanetarySource()
                                      GetFullPathname("DE405_FILE"));
    
    // initialize planetary file types/names in use
-   // Set ANALYTIC as default (loj: 9/6/05)
-   //thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE405]);
+   // Set DE405 as default (loj: 9/12/05)
+   thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE405]);
    thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[ANALYTIC]); 
+   thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[SLP]);
+   
    SetPlanetarySourceTypesInUse(thePlanetarySourceTypesInUse);
 }
 
@@ -3292,7 +3289,6 @@ void Moderator::InitializePlanetaryCoeffFile()
    MessageInterface::ShowMessage("Moderator initializing planetary coeff. file...\n");
    #endif
    
-   //loj: 7/7/05 using new FileManager
    std::string nutFileName =
       theFileManager->GetFullPathname("NUTATION_COEFF_FILE");
    MessageInterface::ShowMessage("Setting nutation file to %s\n",
@@ -3317,7 +3313,6 @@ void Moderator::InitializeTimeFile()
    MessageInterface::ShowMessage("Moderator initializing time file...\n");
    #endif
    
-   //loj: 7/7/05 using new FileManager
    std::string filename = theFileManager->GetFullPathname("LEAP_SECS_FILE");
    MessageInterface::ShowMessage("Setting leap seconds file to %s\n",
                                  filename.c_str());
@@ -3417,7 +3412,9 @@ void Moderator::CreateDefaultMission()
       MessageInterface::ShowMessage("-->default PropSetup created\n");
       #endif
 
-      //loj: 6/7/05 Added
+      //--------------------------------------------------------------
+      // test Burn Parameter
+      //--------------------------------------------------------------
       #ifdef DEBUG_CREATE_BURN_PARAM
       // Hardware 
       CreateHardware("FuelTank", "DefaultFuelTank");
@@ -3428,7 +3425,8 @@ void Moderator::CreateDefaultMission()
       // Create VNB CoordinateSystem
       CoordinateSystem *vnb = CreateCoordinateSystem("VNB", false);
       ObjectReferencedAxes *orAxis =
-         (ObjectReferencedAxes*)CreateAxisSystem("ObjectReferenced", "ObjectReferenced");
+         (ObjectReferencedAxes*)CreateAxisSystem("ObjectReferenced",
+                                                 "ObjectReferenced");
       orAxis->SetEopFile(theEopFile);
       orAxis->SetCoefficientsFile(theItrfFile);
       orAxis->SetStringParameter("XAxis", "V");
@@ -3444,6 +3442,7 @@ void Moderator::CreateDefaultMission()
       CreateParameter("DeltaV2", "DefaultIB.VNB.DeltaV2");
       CreateParameter("DeltaV3", "DefaultIB.VNB.DeltaV3");
       #endif
+      //--------------------------------------------------------------
       
       // Time parameters
       CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD");
@@ -3505,7 +3504,7 @@ void Moderator::CreateDefaultMission()
       CreateParameter("LST", "DefaultSC.Earth.LST");
       CreateParameter("BetaAngle", "DefaultSC.BetaAngle");
       
-      // B-Plane parameters (loj: 6/16/05 Added)
+      // B-Plane parameters
       CreateParameter("BdotT", "DefaultSC.Earth.BdotT");
       CreateParameter("BdotR", "DefaultSC.Earth.BdotR");
       
@@ -3555,7 +3554,6 @@ void Moderator::CreateDefaultMission()
          CreateStopCondition("StopCondition", "StopOnDefaultSC.ElapsedSecs");
       stopOnElapsedSecs->SetStringParameter("EpochVar", "DefaultSC.CurrA1MJD");
       stopOnElapsedSecs->SetStringParameter("StopVar", "DefaultSC.ElapsedSecs");
-      //stopOnElapsedSecs->SetRealParameter("Goal", 8640.0);
       stopOnElapsedSecs->SetStringParameter("Goal", "8640.0");
       
       #if DEBUG_DEFAULT_MISSION
@@ -3563,9 +3561,6 @@ void Moderator::CreateDefaultMission()
       #endif
       
       // Subscribers
-      // ReportFile
-      //GetDefaultSubscriber();
-      
       // OpenGLPlot
       Subscriber *sub;
       sub = CreateSubscriber("OpenGLPlot", "DefaultOpenGL");
@@ -3590,7 +3585,6 @@ void Moderator::CreateDefaultMission()
       sub->TakeAction("Remove", "DefaultSC.EarthMJ2000Eq.Y");
       sub->Activate(true);
       #endif
-      
       
       #if DEBUG_DEFAULT_MISSION
          MessageInterface::ShowMessage("-->default Subscribers created\n");
@@ -3798,7 +3792,6 @@ Burn* Moderator::GetDefaultBurn()
 {
    StringArray &configList = GetListOfConfiguredItems(Gmat::BURN);
 
-   //loj: 7/38/05 Added check for ImpulsiveBurn
    if (configList.size() > 0)
    {
       for (UnsignedInt i=0; i<configList.size(); i++)
@@ -3899,7 +3892,6 @@ StopCondition* Moderator::CreateDefaultStopCondition()
    
    stopCond->SetStringParameter("EpochVar", epochVar);
    stopCond->SetStringParameter("StopVar", stopVar);
-   //stopCond->SetRealParameter("Goal", 8640.0); //loj: 8/5/05
    stopCond->SetStringParameter("Goal", "8640.0");
    return stopCond;
 }
