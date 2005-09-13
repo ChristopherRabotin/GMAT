@@ -790,24 +790,24 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    // wxComboBox
    integratorComboBox =
       new wxComboBox( parent, ID_CB_INTGR, wxT(integratorString),
-                      wxDefaultPosition, wxSize(80,-1), IntegratorCount,
+                      wxDefaultPosition, wxDefaultSize, IntegratorCount,
                       intgArray, wxCB_DROPDOWN|wxCB_READONLY );
    bodyComboBox =
       new wxComboBox( parent, ID_CB_BODY, wxT(primaryBodyString),
-                      wxDefaultPosition,  wxSize(70,-1), 0,
+                      wxDefaultPosition,  wxDefaultSize, 0,
                       bodyArray, wxCB_DROPDOWN|wxCB_READONLY );
    
    gravComboBox =
       new wxComboBox( parent, ID_CB_GRAV, wxT(gravArray[0]),
-                      wxDefaultPosition, wxSize(70,-1), GravModelCount,
+                      wxDefaultPosition, wxDefaultSize, GravModelCount,
                       gravArray, wxCB_DROPDOWN|wxCB_READONLY );
    atmosComboBox =
       new wxComboBox( parent, ID_CB_ATMOS, wxT(dragArray[0]),
-                      wxDefaultPosition, wxSize(80,-1), DragModelCount,
+                      wxDefaultPosition, wxDefaultSize, DragModelCount,
                       dragArray, wxCB_DROPDOWN|wxCB_READONLY );
    magfComboBox =
       new wxComboBox( parent, ID_CB_MAG, wxT(magfArray[0]),
-                      wxDefaultPosition, wxSize(70,-1), MagfModelCount,
+                      wxDefaultPosition, wxDefaultSize, MagfModelCount,
                       magfArray, wxCB_DROPDOWN|wxCB_READONLY );
    //loj: 7/14/05 Changed to celestial body origin
    //originComboBox  =
