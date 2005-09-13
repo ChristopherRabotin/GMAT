@@ -87,6 +87,8 @@ protected:
    Real mCartEpoch;
    Real mGravConst;
    
+   Integer stateTypeId;
+   
    Spacecraft *mSpacecraft;
    SolarSystem *mSolarSystem;
    SpacePoint *mScOrigin;

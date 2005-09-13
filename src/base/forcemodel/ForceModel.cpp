@@ -58,6 +58,7 @@
 //#define DEBUG_FORCEMODEL_EXE 1
 //#define FORCE_REFERENCE_OBJECTS
 //#define DEBUG_FORCE_EPOCHS
+//#define DEBUG_SATELLITE_PARAMETERS
 
 
 //---------------------------------
@@ -110,13 +111,17 @@ ForceModel::ForceModel(const std::string &nomme) :
    previousState     (NULL),
    estimationMethod  (ESTIMATE_LOCALLY),
    normType          (L2_DIFFERENCES),
+   parametersSetOnce (false),
    centralBodyName   ("Earth"),
+   modelEpochId      (-1),
    j2kBodyName       ("Earth"),
    j2kBody           (NULL),
    earthEq           (NULL),
    earthFixed        (NULL)
-     
 {
+   satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
+   satIds[5] = satIds[6] = -1;
+   
    objectTypes.push_back(Gmat::FORCE_MODEL);
    objectTypeNames.push_back("ForceModel");
 
@@ -178,17 +183,22 @@ ForceModel::~ForceModel()
  */
 //------------------------------------------------------------------------------
 ForceModel::ForceModel(const ForceModel& fdf) :
-    PhysicalModel    (fdf),
-    previousState    (fdf.previousState),
-    estimationMethod (fdf.estimationMethod),
-    normType         (fdf.normType),
-    centralBodyName  (fdf.centralBodyName),
+   PhysicalModel     (fdf),
+   previousState     (fdf.previousState),
+   estimationMethod  (fdf.estimationMethod),
+   normType          (fdf.normType),
+   parametersSetOnce (false),
+   centralBodyName   (fdf.centralBodyName),
+   modelEpochId      (-1),
 //    rawState         (NULL),
-    j2kBodyName      (fdf.j2kBodyName),
-    j2kBody          (NULL),
+   j2kBodyName       (fdf.j2kBodyName),
+   j2kBody           (NULL),
    earthEq           (NULL),
-   earthFixed        (NULL)  
+   earthFixed        (NULL)
 {
+   satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
+   satIds[5] = satIds[6] = -1;
+
    numForces = fdf.numForces;
    stateSize = fdf.stateSize;
    dimension = fdf.dimension;
@@ -218,6 +228,9 @@ ForceModel& ForceModel::operator=(const ForceModel& fdf)
    if (&fdf == this)
         return *this;
 
+   satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
+   satIds[5] = satIds[6] = -1;
+
    numForces       = fdf.numForces;
    stateSize       = fdf.stateSize;
    dimension       = fdf.dimension;
@@ -229,8 +242,9 @@ ForceModel& ForceModel::operator=(const ForceModel& fdf)
    earthEq         = NULL;
    earthFixed      = NULL; 
    
-   estimationMethod = fdf.estimationMethod;
-   normType         = fdf.normType;
+   estimationMethod  = fdf.estimationMethod;
+   normType          = fdf.normType;
+   parametersSetOnce = false;
    
    // Copy the forces.  May not work -- the copy constructors need to be checked
    for (std::vector<PhysicalModel *>::const_iterator pm = fdf.forceList.begin();
@@ -491,7 +505,9 @@ bool ForceModel::AddSpaceObject(SpaceObject *so)
     spacecraft.push_back(so);
 
     // Quick fix for the epoch update
-    epoch = so->GetRealParameter(so->GetParameterID("Epoch"));
+    satIds[0] = so->GetParameterID("Epoch");
+    epoch = so->GetRealParameter(satIds[0]);
+    parametersSetOnce = false;
     return true;
 }
 
@@ -520,7 +536,7 @@ void ForceModel::UpdateSpaceObject(Real newEpoch)
          vectorSize = stateSize * sizeof(Real);
          memcpy(&previousState[j*stateSize], state->GetState(), vectorSize);
          previousTime = 
-            ((*sat)->GetRealParameter((*sat)->GetParameterID("Epoch")) - epoch)
+            ((*sat)->GetRealParameter(satIds[0]) - epoch)
             * 86400.0;
             
          memcpy(state->GetState(), &rawState[j*stateSize], vectorSize);
@@ -533,7 +549,7 @@ void ForceModel::UpdateSpaceObject(Real newEpoch)
          if (newEpoch != -1.0)
             newepoch = newEpoch;
          
-         (*sat)->SetRealParameter((*sat)->GetParameterID("Epoch"), newepoch);
+         (*sat)->SetRealParameter(satIds[0], newepoch);
          #ifdef DEBUG_FORCEMODEL_EXE
              MessageInterface::ShowMessage
                 ("ForceModel::UpdateSpacecraft() on \"%s\" prevElapsedTime=%f "
@@ -849,7 +865,6 @@ GmatBase* ForceModel::GetOwnedObject(Integer whichOne)
 //------------------------------------------------------------------------------
 void ForceModel::UpdateInitialData()
 {
-//MessageInterface::ShowMessage("UID1  = [%lf %lf %lf]\n", rawState[0], rawState[1], rawState[2]);
    Integer cf = currentForce;
    PhysicalModel *current = GetForce(cf);  // waw: added 06/04/04
 
@@ -857,9 +872,26 @@ void ForceModel::UpdateInitialData()
    std::string parmName, stringParm;
    std::vector<SpaceObject *>::iterator sat;
    Integer i;
+   
+   // Detect if spacecraft parameters need complete refresh
+   // Set spacecraft parameters for forces that need them
+   for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
+      if ((*sat)->ParametersHaveChanged())
+      {
+         #ifdef DEBUG_SATELLITE_PARAMETERS
+            MessageInterface::ShowMessage("Parms changed for %s\n", 
+               (*sat)->GetName().c_str());
+         #endif
+         parametersSetOnce = false;
+         (*sat)->ParametersHaveChanged(false);
+      }
+         
    while (current) 
    {
-      current->ClearSatelliteParameters();
+      if (!parametersSetOnce)
+      {
+         current->ClearSatelliteParameters();
+      }
       i = 0;
       // Set spacecraft parameters for forces that need them
       for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
@@ -870,7 +902,8 @@ void ForceModel::UpdateInitialData()
       cf++;
       current = GetForce(cf);
    }
-//MessageInterface::ShowMessage("UID2  = [%lf %lf %lf]\n", rawState[0], rawState[1], rawState[2]);
+   
+   parametersSetOnce = true;
 }
 
 
@@ -902,121 +935,167 @@ void ForceModel::UpdateTransientForces()
 }
 
 
+//------------------------------------------------------------------------------
+// Integer SetupSpacecraftData(GmatBase *sat, PhysicalModel *pm, Integer i)
+//------------------------------------------------------------------------------
+/**
+ * Passes spacecraft parameters into the force model.
+ * 
+ * @param <sat>   The SpaceObject that supplies the parameters.
+ * @param <pm>    The PhysicalModel receiving the data.
+ * @param <i>     The index of the SpaceObject in the physical model.
+ * 
+ * @return For Spacecraft, the corresponding index; for formations, a count of
+ *         the number of spacecraft in the formation.
+ */
+//------------------------------------------------------------------------------
 Integer ForceModel::SetupSpacecraftData(GmatBase *sat, PhysicalModel *pm, 
                                         Integer i)
 {
-   Integer retval = i, id;
-   std::string parmName;
+   Integer retval = i; //, id;
    Real parm;
    std::string stringParm;
    
-   if (sat->GetType() == Gmat::SPACECRAFT) {
-      // Set epoch for the PhysicalModel to match the Spacecraft's
-      parmName = "Epoch";
-      id = sat->GetParameterID(parmName);
-      if (id < 0)
+   // Only retrieve the parameter IDs once
+   if ((satIds[1] < 0) && sat->IsOfType("Spacecraft"))
+   {
+      satIds[0] = sat->GetParameterID("Epoch");
+      if (satIds[0] < 0)
          throw ForceModelException("Epoch parameter undefined on object " +
                                    sat->GetName());
-      parm = sat->GetRealParameter(id);
-      // Update local value for epoch
-      epoch = parm;
-      id = pm->GetParameterID(parmName);
-      if (id < 0)
+
+      modelEpochId = pm->GetParameterID("Epoch");
+      if (modelEpochId < 0)
          throw ForceModelException("Epoch parameter undefined on PhysicalModel");
-      pm->SetRealParameter(id, parm);
 
-      //loj: 4/28/05 Replaced "ReferenceBody" with "CoordinateSystem"
-      //parmName = "ReferenceBody";
-      //id = sat->GetParameterID(parmName);
-      //if (id < 0)
-      //   throw ForceModelException("Reference body parameter undefined on object " +
-      //                                   sat->GetName());
+      satIds[1] = sat->GetParameterID("CoordinateSystem");
+      if (satIds[1] < 0)
+         throw ForceModelException(
+            "CoordinateSystem parameter undefined on object " + sat->GetName());
       
-      //stringParm = sat->GetStringParameter(id);
-      //pm->SetSatelliteParameter(i, parmName, stringParm);
-
-      parmName = "CoordinateSystem";
-      id = sat->GetParameterID(parmName);
-      if (id < 0)
-         throw ForceModelException(parmName + " parameter undefined on object " +
+      // Should this be total mass?
+      satIds[2] = sat->GetParameterID("DryMass");
+      if (satIds[2] < 0)
+         throw ForceModelException("DryMass parameter undefined on object " +
                                    sat->GetName());
-      
-      stringParm = sat->GetStringParameter(id);
-      
-      CoordinateSystem *cs =
-         (CoordinateSystem*)(sat->GetRefObject(Gmat::COORDINATE_SYSTEM, stringParm));
-      if (!cs)
-         throw ForceModelException("CoordinateSystem is NULL\n");
 
-      pm->SetSatelliteParameter(i, "ReferenceBody", cs->GetOriginName());
-      
-      parmName = "DryMass";
-      id = sat->GetParameterID(parmName);
-      if (id < 0)
-         throw ForceModelException("Dry Mass parameter undefined on object " +
-                                   sat->GetName());
-      parm = sat->GetRealParameter(id);
-      if (parm <= 0)
-         throw ForceModelException("Mass parameter unphysical on object " + 
-                                         sat->GetName());
-      pm->SetSatelliteParameter(i, parmName, parm);
-        
-      parmName = "Cd";
-      id = sat->GetParameterID(parmName);
-      if (id < 0)
+      satIds[3] = sat->GetParameterID("Cd");
+      if (satIds[3] < 0)
          throw ForceModelException("Cd parameter undefined on object " +
                                    sat->GetName());
-      parm = sat->GetRealParameter(id);
-      if (parm < 0)
-         throw ForceModelException("Cd parameter unphysical on object " + 
-                                   sat->GetName());
-      pm->SetSatelliteParameter(i, parmName, parm);
-      
-      parmName = "DragArea";
-      id = sat->GetParameterID(parmName);
-      if (id < 0)
+
+      satIds[4] = sat->GetParameterID("DragArea");
+      if (satIds[4] < 0)
          throw ForceModelException("Drag Area parameter undefined on object " +
                                    sat->GetName());
-      parm = sat->GetRealParameter(id);
-      if (parm < 0)
-         throw ForceModelException("Drag Area parameter unphysical on object " + 
-                                   sat->GetName());
-      pm->SetSatelliteParameter(i, parmName, parm);
-      
-      parmName = "SRPArea";
-      id = sat->GetParameterID(parmName);
-      if (id < 0)
+
+      satIds[5] = sat->GetParameterID("SRPArea");
+      if (satIds[5] < 0)
          throw ForceModelException("SRP Area parameter undefined on object " +
                                    sat->GetName());
-      parm = sat->GetRealParameter(id);
-      if (parm < 0)
-         throw ForceModelException("SRP Area parameter unphysical on object " + 
-                                   sat->GetName());
-      pm->SetSatelliteParameter(i, parmName, parm);
-      
-      parmName = "Cr";
-      id = sat->GetParameterID(parmName);
-      if (id < 0)
+
+      satIds[6] = sat->GetParameterID("Cr");
+      if (satIds[6] < 0)
          throw ForceModelException("Cr parameter undefined on object " +
                                    sat->GetName());
-      parm = sat->GetRealParameter(id);
-      if (parm < 0)
-         throw ForceModelException("Cr parameter unphysical on object " + 
-                                   sat->GetName());
-      pm->SetSatelliteParameter(i, parmName, parm);
+                                   
+      #ifdef DEBUG_SATELLITE_PARAMETERS
+         MessageInterface::ShowMessage(
+            "Parameter ID Array: [%d %d %d %d %d %d %d]; PMepoch id  = %d\n",
+            satIds[0], satIds[1], satIds[2], satIds[3], satIds[4], satIds[5], 
+            satIds[6], modelEpochId);
+      #endif
    }
-   else if (sat->GetType() == Gmat::FORMATION) {
+
+   if (sat->GetType() == Gmat::SPACECRAFT)
+   { 
+      #ifdef DEBUG_SATELLITE_PARAMETERS
+         MessageInterface::ShowMessage(
+            "ForceModel '%s', Member %s: %s->ParmsChanged = %s, "
+            "parametersSetOnce = %s\n",
+            GetName().c_str(), pm->GetTypeName().c_str(), 
+            sat->GetName().c_str(), 
+            (((SpaceObject*)sat)->ParametersHaveChanged() ? "true" : "false"), 
+            (parametersSetOnce ? "true" : "false"));
+      #endif
+
+      // Manage the epoch ...
+      parm = sat->GetRealParameter(satIds[0]);
+      // Update local value for epoch
+      epoch = parm;
+      pm->SetRealParameter(modelEpochId, parm);
+
+      if (((SpaceObject*)sat)->ParametersHaveChanged() || !parametersSetOnce)
+      {
+         #ifdef DEBUG_SATELLITE_PARAMETERS
+            MessageInterface::ShowMessage("Setting parameters for %s\n", 
+               pm->GetTypeName().c_str());
+         #endif
+         
+         // ... Coordinate System ...
+         stringParm = sat->GetStringParameter(satIds[1]);
+         
+         CoordinateSystem *cs =
+            (CoordinateSystem*)(sat->GetRefObject(Gmat::COORDINATE_SYSTEM, 
+                                stringParm));
+         if (!cs)
+            throw ForceModelException("CoordinateSystem is NULL\n");
+         pm->SetSatelliteParameter(i, "ReferenceBody", cs->GetOriginName());
+         
+         // ... Mass ...
+         parm = sat->GetRealParameter(satIds[2]);
+         if (parm <= 0)
+            throw ForceModelException("Mass parameter unphysical on object " + 
+                                            sat->GetName());
+         pm->SetSatelliteParameter(i, "DryMass", parm);
+           
+         // ... Coefficient of drag ...
+         parm = sat->GetRealParameter(satIds[3]);
+         if (parm < 0)
+            throw ForceModelException("Cd parameter unphysical on object " + 
+                                      sat->GetName());
+         pm->SetSatelliteParameter(i, "Cd", parm);
+         
+         // ... Drag area ...
+         parm = sat->GetRealParameter(satIds[4]);
+         if (parm < 0)
+            throw ForceModelException("Drag Area parameter unphysical on object " + 
+                                      sat->GetName());
+         pm->SetSatelliteParameter(i, "DragArea", parm);
+         
+         // ... SRP area ...
+         parm = sat->GetRealParameter(satIds[5]);
+         if (parm < 0)
+            throw ForceModelException("SRP Area parameter unphysical on object " + 
+                                      sat->GetName());
+         pm->SetSatelliteParameter(i, "SRPArea", parm);
+         
+         // ... and Coefficient of reflectivity
+         parm = sat->GetRealParameter(satIds[6]);
+         if (parm < 0)
+            throw ForceModelException("Cr parameter unphysical on object " + 
+                                      sat->GetName());
+         pm->SetSatelliteParameter(i, "Cr", parm);
+         
+         ((SpaceObject*)sat)->ParametersHaveChanged(false);
+      }
+   }
+   else if (sat->GetType() == Gmat::FORMATION) 
+   {
       Integer j = -1;
       ObjectArray elements = sat->GetRefObjectArray("SpaceObject");
-      for (ObjectArray::iterator n = elements.begin(); n != elements.end(); ++n) {
+      for (ObjectArray::iterator n = elements.begin(); n != elements.end();
+           ++n) 
+      {
          ++j;
          j = SetupSpacecraftData(*n, pm, j);
       }
       retval = j;
    }
    else
-      throw ForceModelException("Setting SpaceObject parameters on unknown type for " +
-                                 sat->GetName());
+      throw ForceModelException(
+         "Setting SpaceObject parameters on unknown type for " + 
+         sat->GetName());
 
    return retval;
 }
@@ -2165,7 +2244,7 @@ void ForceModel::ReportEpochData()
       {
          epochFile.precision(16);
          epochFile << " " 
-                   << (*i)->GetRealParameter((*i)->GetParameterID("Epoch")) 
+                   << (*i)->GetRealParameter(satIds[0]) 
                    << " " << (*i)->GetTime();
       }
 

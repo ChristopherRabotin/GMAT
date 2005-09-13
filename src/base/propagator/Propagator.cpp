@@ -85,7 +85,7 @@ Propagator::PARAMETER_TEXT[PropagatorParamCount - GmatBaseParamCount] =
 {
     //loj: 3/18/04 field name should not have blank spaces
     //"Step Size (sec)"
-    "StepSize"
+    "InitialStepSize"
 };
 
 const Gmat::ParameterType

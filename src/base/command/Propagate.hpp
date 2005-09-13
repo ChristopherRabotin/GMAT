@@ -127,6 +127,10 @@ protected:
    Integer                 interruptCheckFrequency;
    /// Flag that specifies if we are rejoining a run in progress
    bool                    inProgress;
+   /// Flag indicating if this command was already fired once before
+   bool                    hasFired;
+   /// ID for the spacecraft epoch parameter
+   Integer                 epochID;
    /// Starting epoch for the propagation
    std::vector<Real>       baseEpoch;
 
@@ -141,7 +145,7 @@ protected:
    /// The spacecraft used by the stopping conditions
    std::vector<SpaceObject *> stopSats;
    /// The object array used in GetRefObjectArray()
-   ObjectArray objectArray;
+   ObjectArray             objectArray;
    
    // For convenience, set variables for the parameter IDs
    /// ID for available propagation modes

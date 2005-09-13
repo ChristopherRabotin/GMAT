@@ -460,6 +460,10 @@ ObjectArray& Spacecraft::GetRefObjectArray(const std::string& typeString)
  */
 Integer Spacecraft::GetParameterID(const std::string &str) const
 {
+   #ifdef DEBUG_PARM_PERFORMANCE
+      MessageInterface::ShowMessage("%s ", str.c_str());
+   #endif
+
 //    if (str == "Epoch") return epochID;
 
     if (str == "DateFormat") return DATE_FORMAT_ID;
@@ -637,6 +641,10 @@ Real Spacecraft::GetRealParameter(const Integer id) const
  */
 Real Spacecraft::GetRealParameter(const std::string &label) const
 {
+   // Performance!
+    if (label == "Epoch")
+       return state.GetEpoch();
+   
     // First check with anomaly
     if (label == "TA" || label == "MA" || label == "EA")
        return anomaly.GetValue();
@@ -1021,6 +1029,9 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
  */
 std::string Spacecraft::GetStringParameter(const std::string &label) const
 {
+   if (label == "StateType")
+      return stateType;
+   
    return GetStringParameter(GetParameterID(label));
 }
 

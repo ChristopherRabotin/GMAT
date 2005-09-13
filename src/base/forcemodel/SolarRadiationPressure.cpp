@@ -505,7 +505,7 @@ Integer SolarRadiationPressure::SetIntegerParameter(const Integer id, const Inte
  * 
  */
 //------------------------------------------------------------------------------
-bool SolarRadiationPressure::Initialize(void)
+bool SolarRadiationPressure::Initialize()
 {
    bool retval = PhysicalModel::Initialize();
 

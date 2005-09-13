@@ -871,7 +871,7 @@ bool PredictorCorrector::SetBooleanParameter(const Integer id, const bool value)
 //    else if (id == PREDICTORCORRECTOR_TARGETERROR)
 //        targetError = val;
 //    else {
-//        if (id == GetParameterID("StepSize"))   // ag: was STEP_SIZE_PARAMETER
+//        if (id == GetParameterID("InitialStepSize"))   // ag: was STEP_SIZE_PARAMETER
 //            if (val == 0.0)
 //                return false;
 //        

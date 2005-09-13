@@ -233,7 +233,7 @@ void PropagationConfigPanel::SaveData()
          return;
       }    
         
-      newProp->SetRealParameter("StepSize", atof(setting1TextCtrl->GetValue()));
+      newProp->SetRealParameter("InitialStepSize", atof(setting1TextCtrl->GetValue()));
       newProp->SetRealParameter("Accuracy", atof(setting2TextCtrl->GetValue()));
       newProp->SetRealParameter("MinStep", atof(setting3TextCtrl->GetValue()));
       newProp->SetRealParameter("MaxStep", atof(setting4TextCtrl->GetValue()));
@@ -1106,7 +1106,7 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
     // waw: Changed to show all digits
     wxString s1, s2, s3, s4, s5;
     
-    Real i1 = newProp->GetRealParameter("StepSize");
+    Real i1 = newProp->GetRealParameter("InitialStepSize");
     Real i2 = newProp->GetRealParameter("Accuracy");
     Real i3 = newProp->GetRealParameter("MinStep");
     Real i4 = newProp->GetRealParameter("MaxStep");

@@ -177,9 +177,15 @@ protected:
     StringArray               transientForceNames;
     /// List of reference objects for the owned forces
     StringArray               forceReferenceNames;
+    // Flag indicating if forces have been passed all spacecraft parms once
+    bool                      parametersSetOnce;
     
     /// Name of the force model origin; actual body is the inherited forceOrigin
     std::string               centralBodyName;
+    
+   Integer                    satIds[7];
+   Integer                    modelEpochId;
+    
     
     /// Mapping between script descriptions and force names.
     static std::map<std::string, std::string> scriptAliases;

@@ -65,7 +65,8 @@ OrbitData::VALID_OBJECT_TYPE_LIST[OrbitDataObjectCount] =
  */
 //------------------------------------------------------------------------------
 OrbitData::OrbitData()
-   : RefData()
+   : RefData(),
+   stateTypeId (-1)
 {
    mCartState = Rvector6::RVECTOR6_UNDEFINED;
    mKepState = Rvector6::RVECTOR6_UNDEFINED;
@@ -95,7 +96,8 @@ OrbitData::OrbitData()
  */
 //------------------------------------------------------------------------------
 OrbitData::OrbitData(const OrbitData &data)
-   : RefData(data)
+   : RefData(data),
+   stateTypeId (data.stateTypeId)
 {
    #if DEBUG_CLONE
    MessageInterface::ShowMessage
@@ -154,6 +156,8 @@ OrbitData& OrbitData::operator= (const OrbitData &right)
    mInternalCoordSystem = right.mInternalCoordSystem;
    mOutCoordSystem = right.mOutCoordSystem;
    
+   stateTypeId = right.stateTypeId;
+   
    return *this;
 }
 
@@ -178,8 +182,7 @@ Rvector6 OrbitData::GetCartState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   Integer id = mSpacecraft->GetParameterID("StateType"); 
-   std::string elemType = mSpacecraft->GetStringParameter(id);
+   std::string elemType = mSpacecraft->GetStringParameter(stateTypeId);
    mCartEpoch = mSpacecraft->GetRealParameter("Epoch");
    
    #if DEBUG_ORBITDATA_RUN
@@ -269,8 +272,7 @@ Rvector6 OrbitData::GetKepState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   Integer id = mSpacecraft->GetParameterID("StateType");
-   std::string elemType = mSpacecraft->GetStringParameter(id);
+   std::string elemType = mSpacecraft->GetStringParameter(stateTypeId);
    
    #ifdef DEBUG_ORBITDATA_RUN
    PropState ps = mSpacecraft->GetState(); // should be cartesian state
@@ -329,8 +331,7 @@ Rvector6 OrbitData::GetModKepState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   Integer id = mSpacecraft->GetParameterID("StateType");
-   std::string elemType = mSpacecraft->GetStringParameter(id);
+   std::string elemType = mSpacecraft->GetStringParameter(stateTypeId);
    
    #ifdef DEBUG_ORBITDATA_RUN
    PropState ps = mSpacecraft->GetState(); // should be cartesian state
@@ -392,8 +393,7 @@ Rvector6 OrbitData::GetSphRaDecState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   Integer id = mSpacecraft->GetParameterID("StateType");
-   std::string elemType = mSpacecraft->GetStringParameter(id);
+   std::string elemType = mSpacecraft->GetStringParameter(stateTypeId);
 
    if (elemType == "Cartesian")
    {
@@ -435,8 +435,7 @@ Rvector6 OrbitData::GetSphAzFpaState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   Integer id = mSpacecraft->GetParameterID("StateType");
-   std::string elemType = mSpacecraft->GetStringParameter(id);
+   std::string elemType = mSpacecraft->GetStringParameter(stateTypeId);
 
    if (elemType == "Cartesian")
    {
@@ -1206,6 +1205,9 @@ void OrbitData::InitializeRefObjects()
    
    mSpacecraft =
       (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
+   
+   if (stateTypeId == -1)
+      stateTypeId = mSpacecraft->GetParameterID("StateType");
    
    if (mSpacecraft == NULL)
       throw ParameterException

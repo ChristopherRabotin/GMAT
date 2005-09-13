@@ -78,7 +78,7 @@ protected:
    /// Enumerated parameter IDs   
    enum
    {
-       EPOCH_PARAM= SpacePointParamCount,
+       EPOCH_PARAM = SpacePointParamCount,
        SpaceObjectParamCount
    };
    /// Array of supported parameters
