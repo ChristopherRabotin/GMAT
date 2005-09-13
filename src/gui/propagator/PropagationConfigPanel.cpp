@@ -624,7 +624,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                         wxDefaultPosition, wxSize(120,20),
                         wxST_NO_AUTORESIZE);
    setting1StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Step Size: "),
+      new wxStaticText( parent, ID_TEXT, wxT("Initial Step Size: "),
                         wxDefaultPosition, wxSize(120,20),
                         wxST_NO_AUTORESIZE );
    setting2StaticText =
