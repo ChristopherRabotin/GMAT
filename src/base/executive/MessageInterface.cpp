@@ -76,8 +76,9 @@ MessageInterface::~MessageInterface()
 //------------------------------------------------------------------------------
 //  void GetMessage()
 //------------------------------------------------------------------------------
-//  Purpose:
-//     Pops one message from message queue and concatenates.
+/**
+ * Pops one message from message queue and concatenates.
+ */
 //------------------------------------------------------------------------------
 std::string MessageInterface::GetMessage()
 {
@@ -93,11 +94,9 @@ std::string MessageInterface::GetMessage()
    return msg;
 }
 
+
 //------------------------------------------------------------------------------
 //  void ClearMessage()
-//------------------------------------------------------------------------------
-//  Purpose:
-//     Clear message window.
 //------------------------------------------------------------------------------
 void MessageInterface::ClearMessage()
 {
@@ -114,11 +113,9 @@ void MessageInterface::ClearMessage()
 #endif
 }
 
+
 //------------------------------------------------------------------------------
 //  int GetNumberOfMessageLines()
-//------------------------------------------------------------------------------
-//  Purpose:
-//     Clear message window.
 //------------------------------------------------------------------------------
 int MessageInterface::GetNumberOfMessageLines()
 {
@@ -129,7 +126,8 @@ int MessageInterface::GetNumberOfMessageLines()
    }
    else
    {
-      wxLogError("MessageInterface::GetNumberOfMessageLines(): MessageWindow was not created.");
+      wxLogError("MessageInterface::GetNumberOfMessageLines(): "
+                 "MessageWindow was not created.");
       wxLog::FlushActive();
       return 0;
    }
@@ -137,108 +135,61 @@ int MessageInterface::GetNumberOfMessageLines()
    return 0;
 }
 
+
 //------------------------------------------------------------------------------
 //  void ShowMessage(const std::string &msgString)
 //------------------------------------------------------------------------------
-//  Purpose:
-//     Pushes message into message queue and displays the message.
+/**
+ * Displays the message.
+ */
 //------------------------------------------------------------------------------
 void MessageInterface::ShowMessage(const std::string &msgString)
 {
-   //loj: I don't think we need this
-   //MessageInterface::messageQueue.push(msgString);
+   ShowMessage(msgString.c_str());
    
-#if !defined __CONSOLE_APP__
-//   if (GmatAppData::theMessageWindow != NULL)
-//   {
-////      GmatAppData::theMessageWindow->Show(true);
-////      GmatAppData::theMessageWindow->AppendText(wxString(msgString.c_str()));
-//
-      if (GmatAppData::GetMessageTextCtrl() != NULL)
-      {
-          GmatAppData::GetMessageTextCtrl()->AppendText(wxString(msgString.c_str()));
-      }  
-//   }
-//   else
-//   {
-////      wxLogWarning("MessageWindow was not created. Creating a new MessageWindow...");
-////      wxLog::FlushActive();
-//      GmatAppData::theMessageWindow =
-//         new ViewTextFrame((wxFrame *)NULL, _T("Message Window"),
-//                           20, 20, 600, 350, "Permanent");
-////      GmatAppData::theMessageWindow->SetMaxLength(600000);
-////      GmatAppData::theMessageWindow->Show(true);
-////      GmatAppData::theMessageWindow->AppendText(wxString(msgString.c_str())); 
-//      
-//      if (GmatAppData::GetMessageTextCtrl() != NULL)
-//          GmatAppData::GetMessageTextCtrl()->AppendText(wxString(msgString.c_str()));       
-//   }
-#endif
-   LogMessage(msgString);
+}
 
-} // end ShowMessage()
 
 //------------------------------------------------------------------------------
 //  void ShowMessage(const char *msg, ...)
 //------------------------------------------------------------------------------
-//  Purpose:
-//     Pushes message into message queue and displays the message.
+/**
+ * Displays the message.
+ */
 //------------------------------------------------------------------------------
 void MessageInterface::ShowMessage(const char *msg, ...)
 {
-
    short    ret;
    short    size;
    va_list  marker;
    char     *msgBuffer;
-
+   
    size = strlen(msg) + MAX_MESSAGE_LENGTH;
-      
+   
    if( (msgBuffer = (char *)malloc(size)) != NULL )
    {
       va_start(marker, msg);      
       ret = vsprintf(msgBuffer, msg, marker);      
       va_end(marker);
-
-      //std::string message(msgBuffer);
    }
-    
+   
 #if !defined __CONSOLE_APP__
-//   if (GmatAppData::theMessageWindow != NULL)
-//   {
-////      GmatAppData::theMessageWindow->Show(true);
-////      GmatAppData::theMessageWindow->AppendText(wxString(msgBuffer));
-//
-      if (GmatAppData::GetMessageTextCtrl() != NULL)
-          GmatAppData::GetMessageTextCtrl()->AppendText(wxString(msgBuffer));
-//   }
-//   else
-//   {
-////      wxLogWarning("MessageWindow was not created. Creating a new MessageWindow...");
-////      wxLog::FlushActive();
-//      GmatAppData::theMessageWindow =
-//         new ViewTextFrame((wxFrame *)NULL, _T("Message Window"),
-//                           20, 20, 600, 350, "Permanent");
-////      GmatAppData::theMessageWindow->SetMaxLength(600000);
-////      GmatAppData::theMessageWindow->Show(true);
-////      GmatAppData::theMessageWindow->AppendText(wxString(msgBuffer));     
-//      
-//      if (GmatAppData::GetMessageTextCtrl() != NULL)
-//          GmatAppData::GetMessageTextCtrl()->AppendText(wxString(msgBuffer));   
-//   }
-//
+   if (GmatAppData::GetMessageTextCtrl() != NULL)
+      GmatAppData::GetMessageTextCtrl()->AppendText(wxString(msgBuffer));
 #endif
-
+   
    LogMessage(std::string(msgBuffer));
    free(msgBuffer);
    
 } // end ShowMessage()
 
+
 //------------------------------------------------------------------------------
 //  void PopupAbortContinue(const std::string abortMsg, ...)
 //------------------------------------------------------------------------------
-//  Purpose:
-//     Pop up Abort or Continue message box
+/**
+ * Pops up Abort or Continue message box.
+ */
 //------------------------------------------------------------------------------
 void MessageInterface::PopupAbortContinue(const std::string &abortMsg,
                                           const std::string &continueMsg,
@@ -247,45 +198,23 @@ void MessageInterface::PopupAbortContinue(const std::string &abortMsg,
    MessageInterface::popupMessage = msg;
    MessageInterface::abortMessage = abortMsg;
    MessageInterface::continueMessage = continueMsg;
-
+   
 } // end PopupAbortContinue()
+
 
 //------------------------------------------------------------------------------
 //  static void PopupMessage(Gmat::MessageType msgType, const std::string &msg)
 //------------------------------------------------------------------------------
-//  Purpose:
-//     Shows popup message
+/**
+ * Pops up message box.
+ */
 //------------------------------------------------------------------------------
 void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string &msg)
 {
    MessageInterface::popupMessage = msg;
    MessageInterface::messageType = msgType;
-
-#if !defined __CONSOLE_APP__
-   switch (msgType)
-   {
-   case Gmat::ERROR_:
-      wxLogError(wxT(wxString(msg.c_str())));
-      wxLog::FlushActive();
-      break;
-   case Gmat::WARNING_: // wxLogWarning nay not show message right away
-      //loj: 7/14/05 use wxMessageBox so that messages shows immediately
-      //wxLogWarning(wxT(wxString(msg.c_str())));
-      //wxLog::FlushActive();
-      (void)wxMessageBox(wxT(wxString(msg.c_str())),
-                         wxT("Warning"));
-      break;
-   case Gmat::INFO_:    // wxMessageBox shows message right away
-      (void)wxMessageBox(wxT(wxString(msg.c_str())),
-                         wxT("Information"));
-      break;
-      //loj: there should be more
-   default:
-      break;
-   };
-#endif
    
-   LogMessage(msg);
+   PopupMessage(msgType, msg.c_str());
    
 } // end PopupMessage()
 
@@ -293,8 +222,9 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string
 //------------------------------------------------------------------------------
 //  static void PopupMessage(Gmat::MessageType msgType, const char *msg, ...)
 //------------------------------------------------------------------------------
-//  Purpose:
-//     Shows popup message
+/**
+ * Pops up message box.
+ */
 //------------------------------------------------------------------------------
 void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, ...)
 {
@@ -310,8 +240,6 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
       va_start(marker, msg);      
       ret = vsprintf(msgBuffer, msg, marker);      
       va_end(marker);
-
-      //popupMessage = std::string(msgBuffer);
    }
    
    
@@ -319,27 +247,28 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
    switch (msgType)
    {
    case Gmat::ERROR_:
-      wxLogError(wxT(wxString(msgBuffer)));
-      wxLog::FlushActive();
+      (void)wxMessageBox(wxT(wxString(msgBuffer)),
+                         wxT("GMAT Error"));
+      //loj: 9/13/05 use wxMessageBox so that messages shows immediately
+      //wxLogError(wxT(wxString(msgBuffer)));
+      //wxLog::FlushActive();
       break;
    case Gmat::WARNING_:
       //loj: 7/14/05 use wxMessageBox so that messages shows immediately
       //wxLogWarning(wxT(wxString(msgBuffer)));
       //wxLog::FlushActive();
       (void)wxMessageBox(wxT(wxString(msgBuffer)),
-                         wxT("Warning"));
+                         wxT("GMAT Warning"));
       break;
    case Gmat::INFO_:
       (void)wxMessageBox(wxT(wxString(msgBuffer)),
                          wxT("Information"));
       break;
-      //loj: there should be more
    default:
       break;
    };
 #endif
    
-   //LogMessage(msg); //loj: 7/14/05 Use msgBuffer
    LogMessage(std::string(msgBuffer));
    free(msgBuffer);
    
@@ -374,7 +303,6 @@ void MessageInterface::LogMessage(const std::string &msg)
    {
       if (logFile == NULL)
       {
-         //loj: 7/7/05 Get LogFile name from the setartup file.
          FileManager *fm = FileManager::Instance();
          try
          {
@@ -417,6 +345,6 @@ void MessageInterface::SetLogFile(const std::string &filename)
 //------------------------------------------------------------------------------
 void MessageInterface::CloseLogFile()
 {
-   if (logFile) //loj: 7/6/05 Added
+   if (logFile)
       fclose(logFile);
 }
