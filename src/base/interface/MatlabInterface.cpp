@@ -158,7 +158,7 @@ int MatlabInterface::GetVariable(const std::string &matlabVarName, int numElemen
    if (mxArrayOutputPtrD == NULL)
    {
 //      MessageInterface::ShowMessage("MatlabInterface::GetArray(): mxArrayOutputPtrD is NULL\n");
-      printf("MatlabInterface::GetArray(): mxArrayOutputPtrD is NULL\n");
+      // printf("MatlabInterface::GetArray(): mxArrayOutputPtrD is NULL\n");
       return 0;
    }
    else
@@ -209,7 +209,7 @@ int MatlabInterface::OutputBuffer(char *buffer, int size)
 #if defined __USE_MATLAB__
    if (buffer == NULL)
    {
-      printf("MatlabInterface::OutputBuffer(): buffer is NULL\n");
+      // printf("MatlabInterface::OutputBuffer(): buffer is NULL\n");
       return 0;
    }
    else
