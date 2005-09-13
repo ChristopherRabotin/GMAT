@@ -135,7 +135,7 @@ void MSISE90Dialog::Create()
     // wxStaticText
     solarFluxStaticText = new wxStaticText( this, ID_TEXT, wxT("Solar Flux"), wxDefaultPosition, wxDefaultSize, 0 );
     avgSolarFluxStaticText = new wxStaticText( this, ID_TEXT, wxT("Average Solar Flux"), wxDefaultPosition, wxDefaultSize, 0 );
-    geomagneticIndexStaticText = new wxStaticText( this, ID_TEXT, wxT("Geomagnetic Index"), wxDefaultPosition, wxDefaultSize, 0 );
+    geomagneticIndexStaticText = new wxStaticText( this, ID_TEXT, wxT("Geomagnetic Index (Kp)"), wxDefaultPosition, wxDefaultSize, 0 );
     fileNameStaticText = new wxStaticText( this, ID_TEXT, wxT("File Name"), wxDefaultPosition, wxDefaultSize, 0 );
     
     // wxTextCtrl
