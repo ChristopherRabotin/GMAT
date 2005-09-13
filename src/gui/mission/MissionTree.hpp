@@ -70,7 +70,6 @@ private:
    int mNumAssign;
    int mNumScriptEvent;
    
-   // Added 2/25/05, DJC
    bool inScriptEvent;
    
    void InitializeCounter();
@@ -78,6 +77,7 @@ private:
    wxTreeItemId& UpdateCommandTree(wxTreeItemId parent, GmatCommand *cmd);
    void ExpandChildCommand(wxTreeItemId parent, GmatCommand *baseCmd,
                            GmatCommand *cmd);
+   void ExpandChildCommand(wxTreeItemId parent, GmatCommand *cmd, Integer level);
    wxTreeItemId AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
                               GmatTree::ItemType type, GmatCommand *cmd,
                               int *cmdCount, int endCount = 0);

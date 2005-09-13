@@ -33,6 +33,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_MISSION_TREE 1
+//#define DEBUG_MISSION_TREE_CHILD 1
 //#define DEBUG_MISSION_TREE_MENU 1
 
 //------------------------------
@@ -210,7 +211,7 @@ void MissionTree::UpdateCommand()
 
       if (child != NULL)
       {
-         ExpandChildCommand(node, cmd, child);
+         ExpandChildCommand(node, cmd, 0);
       }
       
       cmd = cmd->GetNext();
@@ -230,6 +231,11 @@ void MissionTree::UpdateCommand()
 wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
                                              GmatCommand *cmd)
 {
+   #if DEBUG_MISSION_TREE
+   MessageInterface::ShowMessage
+      ("MissionTree::UpdateCommandTree() cmd=%s\n", cmd->GetTypeName().c_str());
+   #endif
+   
    wxString cmdTypeName = cmd->GetTypeName().c_str();
    
    // Moved BeginScript to the top so it can catch all of the commands between
@@ -267,6 +273,7 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    return mNewTreeId;
 }
 
+
 //------------------------------------------------------------------------------
 // void ExpandChildCommand(wxTreeItemId parent, GmatCommand *cmd)
 //------------------------------------------------------------------------------
@@ -274,33 +281,41 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
  * Expands child commands in the mission sequence
  */
 //------------------------------------------------------------------------------
-void MissionTree::ExpandChildCommand(wxTreeItemId parent, GmatCommand *baseCmd,
-                                     GmatCommand *cmd)
+void MissionTree::ExpandChildCommand(wxTreeItemId parent, GmatCommand *cmd,
+                                     Integer level)
 {
    #if DEBUG_MISSION_TREE
    MessageInterface::ShowMessage
-      ("MissionTree::ExpandChildCommand() baseCmd=%s cmd=%s\n",
-       baseCmd->GetTypeName().c_str(), cmd->GetTypeName().c_str());
+      ("MissionTree::ExpandChildCommand() cmd=%s, level=%d\n",
+       cmd->GetTypeName().c_str(), level);
    #endif
    
    wxTreeItemId node;
-   GmatCommand *childCmd;
-   Integer i = 0;
-
-   while (cmd != baseCmd)
+   Integer childNo = 0;
+   GmatCommand* nextInBranch;
+   GmatCommand* child;
+   
+   while((child = cmd->GetChildCommand(childNo)) != NULL)
    {
-      node = UpdateCommandTree(parent, cmd);
-      childCmd = cmd->GetChildCommand(i);
-
-      while (childCmd != NULL)
+      nextInBranch = child;
+      
+      while ((nextInBranch != NULL) && (nextInBranch != cmd))
       {
-         ExpandChildCommand(node, cmd, childCmd);
-         ++i;
-         childCmd = cmd->GetChildCommand(i);
+         #if DEBUG_MISSION_TREE_CHILD
+         for (int i=0; i<=level; i++)
+            MessageInterface::ShowMessage("-----");
+         MessageInterface::ShowMessage("----- %s\n", nextInBranch->GetTypeName().c_str());
+         #endif
+         
+         node = UpdateCommandTree(parent, nextInBranch);
+         
+         if (nextInBranch->GetChildCommand() != NULL)
+            ExpandChildCommand(node, nextInBranch, level+1);
+         
+         nextInBranch = nextInBranch->GetNext();
       }
-
-      cmd = cmd->GetNext();
-      i = 0;
+      
+      ++childNo;
    }
 }
 
@@ -337,7 +352,6 @@ void MissionTree::AppendCommand(const wxString &cmdName)
    else
       prevCmd = currItem->GetCommand();
 
-   //loj: 8/10/05 work-around until "Else" is implemented
    if (cmdName == "IfElse")
    {
       cmd = theGuiInterpreter->CreateDefaultCommand("If");
@@ -439,7 +453,6 @@ void MissionTree::InsertCommand(const wxString &cmdName)
    
    if (prevCmd != NULL)
    {
-      //loj: 8/10/05 work-around until "Else" is implemented
       if (cmdName == "IfElse")
       {
          cmd = theGuiInterpreter->CreateDefaultCommand("If");
@@ -1002,7 +1015,7 @@ void MissionTree::OnAddCommand(wxCommandEvent &event)
       AppendCommand("IfElse");
       break;
    case POPUP_ADD_ELSE_STATEMENT:
-      //AppendCommand("Else");
+      AppendCommand("Else");
       break;
    case POPUP_ADD_ELSE_IF_STATEMENT:
       //AppendCommand("ElseIf");
@@ -1066,7 +1079,7 @@ void MissionTree::OnInsertCommand(wxCommandEvent &event)
       InsertCommand("IfElse");
       break;
    case POPUP_INSERT_ELSE_STATEMENT:
-      //InsertCommand("Else");
+      InsertCommand("Else");
       break;
    case POPUP_INSERT_ELSE_IF_STATEMENT:
       //InsertCommand("ElseIf");
@@ -1178,8 +1191,7 @@ wxMenu* MissionTree::CreateControlLogicPopupMenu(int type, bool insert)
          addElse = false;
    }
 
-   //loj: 8/10/05 The base code "Else" has not been implemented yet, so set to false
-   addElse = false;
+   addElse = true;
    
    if (insert)
    {
@@ -1607,7 +1619,7 @@ void MissionTree::ShowCommands(const wxString &msg)
    {
       MessageInterface::ShowMessage("----- %s\n", cmd->GetTypeName().c_str());
 
-      if ((cmd->GetChildCommand(0))!=NULL)
+      if ((cmd->GetChildCommand(0)) != NULL)
          ShowSubCommands(cmd, 0);
       
       cmd = cmd->GetNext();
@@ -1627,7 +1639,7 @@ void MissionTree::ShowSubCommands(GmatCommand* brCmd, Integer level)
    GmatCommand* nextInBranch;
    GmatCommand* child;
    
-   while((child = current->GetChildCommand(childNo))!=NULL)
+   while((child = current->GetChildCommand(childNo)) != NULL)
    {
       nextInBranch = child;
       while ((nextInBranch != NULL) && (nextInBranch != current))
