@@ -64,12 +64,12 @@ const Real GeocentricSolarMagneticAxes::phiD    = 78.6;  // degrees North
  */
 //------------------------------------------------------------------------------
 GeocentricSolarMagneticAxes::GeocentricSolarMagneticAxes(const std::string &itsName) :
-ObjectReferencedAxes("GeocentricSolarMagnetic",itsName)
+ObjectReferencedAxes("GSM",itsName)
 {
    primaryName   = SolarSystem::EARTH_NAME;
    secondaryName = SolarSystem::SUN_NAME;
    ComputeDipoleEarthFixed();
-   objectTypeNames.push_back("GeocentricSolarMagneticAxes");
+   objectTypeNames.push_back("GSM");
    parameterCount = GeocentricSolarMagneticAxesParamCount;
 }
 

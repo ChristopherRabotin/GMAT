@@ -62,11 +62,11 @@ using namespace GmatTimeUtil;      // for JD offsets, etc.
  */
 //------------------------------------------------------------------------------
 GeocentricSolarEclipticAxes::GeocentricSolarEclipticAxes(const std::string &itsName) :
-ObjectReferencedAxes("GeocentricSolarEcliptic",itsName)
+ObjectReferencedAxes("GSE",itsName)
 {
    primaryName   = SolarSystem::EARTH_NAME;
    secondaryName = SolarSystem::SUN_NAME;
-   objectTypeNames.push_back("GeocentricSolarEclipticAxes");
+   objectTypeNames.push_back("GSE");
    parameterCount = GeocentricSolarEclipticAxesParamCount;
 }
 
