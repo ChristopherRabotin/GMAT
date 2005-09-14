@@ -1172,11 +1172,16 @@ void GmatCommand::RunComplete()
 //------------------------------------------------------------------------------
 void GmatCommand::BuildCommandSummary(bool commandCompleted)
 {
+   if (objectMap == NULL)
+   {
+      MessageInterface::ShowMessage(
+         "Command Summary will not be built -- no local object map\n");
+      return; 
+   }
+
    std::stringstream data;
-   
    StateConverter    stateConverter;
    
-      
    data << "Command Summary: " << typeName << " Command\n";
    if (!commandCompleted)
       data << "Execute the script to generate command summary data\n";
