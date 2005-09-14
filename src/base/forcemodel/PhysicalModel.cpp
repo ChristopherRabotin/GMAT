@@ -199,8 +199,6 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
 {
    if (pm.modelState != NULL) 
    {
-      if (modelState)
-         delete [] modelState;
       modelState = new Real[dimension];
       if (modelState != NULL) 
          memcpy(modelState, pm.modelState, dimension * sizeof(Real));
