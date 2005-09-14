@@ -33,10 +33,13 @@
 #include "TimeTypes.hpp"
 #include "DeFile.hpp"
 #include "TimeSystemConverter.hpp"
+#include "MessageInterface.hpp"
 
 #if defined (__UNIT_TEST__)
 #include <fstream> //for debug output
 #endif
+
+//#define DEBUG_DEFILE 1
 
 // DE file code from JPL/JSC (Hoffman) includes
 #include <stdio.h>
@@ -552,13 +555,21 @@ void DeFile::Read_Coefficients( double Time )
   //fseek(Ephemeris_File,(Offset-1)*ARRAY_SIZE*sizeof(double),SEEK_CUR);
   //fread(&Coeff_Array,sizeof(double),ARRAY_SIZE,Ephemeris_File);
 
-  fseek(Ephemeris_File,(Offset-1)*arraySize*sizeof(double),SEEK_CUR); // wcs
-  fread(&Coeff_Array,sizeof(double),arraySize,Ephemeris_File);        // wcs
+  #if DEBUG_DEFILE
+  MessageInterface::ShowMessage
+     ("DeFile::Read_Coefficients() Offset=%d\n", Offset);
+  #endif
   
-  T_beg  = Coeff_Array[0];
-  T_end  = Coeff_Array[1];
-  T_span = T_end - T_beg;
+  if (Offset > 0) //loj: 9/14/05 Added
+  {
+     fseek(Ephemeris_File,(Offset-1)*arraySize*sizeof(double),SEEK_CUR); // wcs
+     fread(&Coeff_Array,sizeof(double),arraySize,Ephemeris_File);        // wcs
 
+     T_beg  = Coeff_Array[0];
+     T_end  = Coeff_Array[1];
+     T_span = T_end - T_beg;
+  }
+  
   /*--------------------------------------------------------------------------*/
   /*  Debug print (optional)                                                  */
   /*--------------------------------------------------------------------------*/
@@ -737,7 +748,7 @@ void DeFile::Interpolate_Libration( double Time , int Target , double Libration[
   /*--------------------------------------------------------------------------*/
   /* Determine if a new record needs to be input (if so, get it).             */
   /*--------------------------------------------------------------------------*/
-    
+
   if ( Time < T_beg || Time > T_end ) Read_Coefficients(Time);
 
   /*--------------------------------------------------------------------------*/
@@ -1178,8 +1189,21 @@ void DeFile::Interpolate_State(double Time , int Target, stateType *p)
   /*--------------------------------------------------------------------------*/
   /* Determine if a new record needs to be input.                             */
   /*--------------------------------------------------------------------------*/
+
+  #if DEBUG_DEFILE
+  MessageInterface::ShowMessage
+     ("DeFile::Interpolate_State() before Read_Coefficients()\nTime=%f, T_beg=%f, "
+      "T_end=%f T_span=%f\n", Time, T_beg, T_end, T_span);
+  #endif
   
   if (Time < T_beg || Time > T_end)  Read_Coefficients(Time);
+  
+  #if DEBUG_DEFILE
+  MessageInterface::ShowMessage
+     ("DeFile::Interpolate_State() after  Read_Coefficients()\nTime=%f, T_beg=%f, "
+      "T_end=%f T_span=%f\n", Time, T_beg, T_end, T_span);
+  #endif
+  
 
   /*--------------------------------------------------------------------------*/
   /* Read the coefficients from the binary record.                            */
