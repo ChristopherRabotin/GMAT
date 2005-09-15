@@ -1196,7 +1196,7 @@ void Sandbox::Clear()
                (omi->second)->GetName().c_str());
          #endif
          delete omi->second;
-         objectMap.erase(omi);
+         // objectMap.erase(omi);
       }
       /// @todo Subscribers are cloned; where are they deleted?
    }
