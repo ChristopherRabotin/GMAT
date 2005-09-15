@@ -76,9 +76,9 @@ Sandbox::Sandbox() :
 //   clonable.push_back(Gmat::PROP_SETUP);
    clonable.push_back(Gmat::REF_FRAME);
    clonable.push_back(Gmat::FUNCTION);
-   clonable.push_back(Gmat::FUEL_TANK);
-   clonable.push_back(Gmat::THRUSTER);
-   clonable.push_back(Gmat::HARDWARE);
+//   clonable.push_back(Gmat::FUEL_TANK);
+//   clonable.push_back(Gmat::THRUSTER);
+//   clonable.push_back(Gmat::HARDWARE);
 //   clonable.push_back(Gmat::COORDINATE_SYSTEM);
    clonable.push_back(Gmat::AXIS_SYSTEM);
 
@@ -1191,6 +1191,10 @@ void Sandbox::Clear()
       if (find(clonable.begin(), clonable.end(),
           (omi->second)->GetType()) != clonable.end())
       {
+         #ifdef DEBUG_SANDBOX_OBJECT_MAPS
+            MessageInterface::ShowMessage("Deleting '%s'\n",
+               (omi->second)->GetName().c_str());
+         #endif
          delete omi->second;
          objectMap.erase(omi);
       }
