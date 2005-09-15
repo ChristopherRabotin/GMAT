@@ -60,15 +60,20 @@ Propagate::Propagate() :
    inProgress                  (false),
    hasFired                    (false),
    epochID                     (-1),
+   state                       (NULL),
+   pubdata                     (NULL),
+   stopCondMet                 (false),
+   stopEpoch                   (0.0),
+   dim                         (0),
+   singleStepMode              (false),
+   currentMode                 (INDEPENDENT),
    // Set the parameter IDs
    availablePropModesID        (parameterCount),
    propCoupledID               (parameterCount+1),
    interruptCheckFrequencyID   (parameterCount+2),
    satNameID                   (parameterCount+3),
    propNameID                  (parameterCount+4),
-   stopWhenID                  (parameterCount+5),
-   singleStepMode              (false),
-   currentMode                 (INDEPENDENT)
+   stopWhenID                  (parameterCount+5)
 {
    parameterCount += 5;
 }
@@ -85,8 +90,8 @@ Propagate::~Propagate()
 {
    /// @todo: clean memory for satName.push_back(new StringArray);
  
-//   for (UnsignedInt i=0; i<stopWhen.size(); i++)
-//      delete stopWhen[i];
+   for (UnsignedInt i=0; i<stopWhen.size(); i++)
+      delete stopWhen[i];
    if (pubdata)
       delete [] pubdata;
 }
@@ -108,15 +113,20 @@ Propagate::Propagate(const Propagate &p) :
    inProgress                  (false),
    hasFired                    (false),
    epochID                     (p.epochID),
+   state                       (NULL),
+   pubdata                     (NULL),
+   stopCondMet                 (false),
+   stopEpoch                   (p.stopEpoch),
+   dim                         (p.dim),
+   singleStepMode              (p.singleStepMode),
+   currentMode                 (p.currentMode),
    // Set the parameter IDs
    availablePropModesID        (p.availablePropModesID),
    propCoupledID               (p.propCoupledID),
    interruptCheckFrequencyID   (p.interruptCheckFrequencyID),
    satNameID                   (p.satNameID),
    propNameID                  (p.propNameID),
-   stopWhenID                  (p.stopWhenID),
-   singleStepMode              (p.singleStepMode),
-   currentMode                 (p.currentMode)
+   stopWhenID                  (p.stopWhenID)
 {
    parameterCount = p.parameterCount;
    initialized = false;
@@ -147,6 +157,11 @@ Propagate& Propagate::operator=(const Propagate &p)
    inProgress              = false;
    hasFired                = false;   
    epochID                 = p.epochID;   
+   state                   = NULL;
+   pubdata                 = NULL;
+   stopCondMet             = false;
+   stopEpoch               = p.stopEpoch;
+   dim                     = p.dim;
    singleStepMode          = p.singleStepMode;
    currentMode             = p.currentMode;
    initialized = false;

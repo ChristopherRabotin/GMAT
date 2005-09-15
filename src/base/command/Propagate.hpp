@@ -146,21 +146,7 @@ protected:
    std::vector<SpaceObject *> stopSats;
    /// The object array used in GetRefObjectArray()
    ObjectArray             objectArray;
-   
-   // For convenience, set variables for the parameter IDs
-   /// ID for available propagation modes
-   const Integer           availablePropModesID;
-   /// ID for the boolean flag used for the prop mode
-   const Integer           propCoupledID;
-   /// ID for the number of iterations before calling to check for interrupts
-   const Integer           interruptCheckFrequencyID;
-   /// ID for the satellite name array
-   const Integer           satNameID;
-   /// ID for the propagator name
-   const Integer           propNameID;
-   /// ID used to get the stopping conditions
-   const Integer           stopWhenID;
-    
+
    /// Temporary parameter used to stop on time
 //   Real                    secondsToProp;
    /// ID for the temporary parameter
@@ -176,6 +162,13 @@ protected:
    /// The ForceModel
    std::vector<ForceModel*> fm;
 
+   /// Allowed modes of propagation
+   enum PropModes
+   {
+      INDEPENDENT,
+      SYNCHRONIZED,
+      PropModeCount
+   };
 
    /// The state that is propagated
    Real                    *state;
@@ -192,16 +185,25 @@ protected:
    /// List of forces that can be turned on or off by other commands
    std::vector<PhysicalModel*> 
                            *transientForces;
-   
-   /// Allowed modes of propagation
-   enum PropModes
-   {
-      INDEPENDENT,
-      SYNCHRONIZED,
-      PropModeCount
-   };
    /// Variable that tracks the current propagation mode
    PropModes               currentMode;
+   
+   // For convenience, set variables for the parameter IDs
+   /// @todo Replace these ID's with the newer ID setting scheme
+   
+   /// ID for available propagation modes
+   const Integer           availablePropModesID;
+   /// ID for the boolean flag used for the prop mode
+   const Integer           propCoupledID;
+   /// ID for the number of iterations before calling to check for interrupts
+   const Integer           interruptCheckFrequencyID;
+   /// ID for the satellite name array
+   const Integer           satNameID;
+   /// ID for the propagator name
+   const Integer           propNameID;
+   /// ID used to get the stopping conditions
+   const Integer           stopWhenID;
+    
    /// Array of allowed propagation modes
    static std::string      PropModeList[PropModeCount];
    
