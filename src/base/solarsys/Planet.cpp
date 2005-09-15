@@ -30,7 +30,7 @@ using namespace GmatMathUtil;
 // initialize static default values
 // default values for Planet data
 const Gmat::BodyType        Planet::DEFAULT_BODY_TYPE         = Gmat::PLANET;
-const Gmat::PosVelSource    Planet::DEFAULT_POS_VEL_SOURCE    = Gmat::ANALYTIC; 
+const Gmat::PosVelSource    Planet::DEFAULT_POS_VEL_SOURCE    = Gmat::DE_405; 
 const Gmat::AnalyticMethod  Planet::DEFAULT_ANALYTIC_METHOD   = Gmat::LOW_FIDELITY;
 const Integer               Planet::DEFAULT_BODY_NUMBER       = 1;
 const Integer               Planet::DEFAULT_REF_BODY_NUMBER   = 3;
