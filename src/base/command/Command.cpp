@@ -1172,86 +1172,87 @@ void GmatCommand::RunComplete()
 //------------------------------------------------------------------------------
 void GmatCommand::BuildCommandSummary(bool commandCompleted)
 {
-   if (objectMap == NULL)
-   {
-      MessageInterface::ShowMessage(
-         "Command Summary will not be built -- no local object map\n");
-      return; 
-   }
-
    std::stringstream data;
    StateConverter    stateConverter;
    
-   data << "Command Summary: " << typeName << " Command\n";
-   if (!commandCompleted)
-      data << "Execute the script to generate command summary data\n";
+   if (objectMap == NULL)
+   {
+      data << "Command Summary: " << typeName << " Command\n"
+           << "Execute the script to generate command summary data\n";
+   }
    else
    {
-      data << "-------------------------------------------"
-           << "-------------------------------------------\n";
-
-      // Build summary data for each spacecraft in the object list
-      GmatBase *obj;
-      for (std::map<std::string, GmatBase *>::iterator i = objectMap->begin();
-           i != objectMap->end(); ++i)
+      data << "Command Summary: " << typeName << " Command\n";
+      if (!commandCompleted)
+         data << "Execute the script to generate command summary data\n";
+      else
       {
-         obj = i->second;
-         if (obj->GetTypeName() == "Spacecraft")
+         data << "-------------------------------------------"
+              << "-------------------------------------------\n";
+   
+         // Build summary data for each spacecraft in the object list
+         GmatBase *obj;
+         for (std::map<std::string, GmatBase *>::iterator i = objectMap->begin();
+              i != objectMap->end(); ++i)
          {
-            Rvector6 rawState = ((Spacecraft*)obj)->GetState().GetState();
-            Rvector6 newState = rawState;
-                                
-            data.precision(16);                 
-            data << "  Spacecraft " << obj->GetName() << "\n"
-                 << "     A.1 Modified Julian Epoch: " 
-                 << obj->GetRealParameter("Epoch") << "\n\n"
-                 << "    Coordinate System: EarthMJ2000Eq \n\n"
-                 << "    Cartesian State:\n"
-                 << "        X  = " << newState[0] << " km\n"
-                 << "        Y  = " << newState[1] << " km\n"
-                 << "        Z  = " << newState[2] << " km\n"
-                 << "        VX = " << newState[3] << " km/s\n"
-                 << "        VY = " << newState[4] << " km/s\n"
-                 << "        VZ = " << newState[5] << " km/s\n";
-
-            obj->SetStringParameter("StateType", "Keplerian");
-            
-            CartToKep(rawState, newState);
-                             
-            data << "\n    Keplerian State:\n"
-                 << "        SMA  = " << newState[0] << " km\n"
-                 << "        ECC  = " << newState[1] << "\n"
-                 << "        INC  = " << newState[2] << " deg\n"
-                 << "        RAAN = " << newState[3] << " deg\n"
-                 << "        AOP  = " << newState[4] << " deg\n"
-                 << "        TA   = " << newState[5] << " deg\n";
-                 
-            data << "\n\n    Spacecraft properties:\n"
-                 << "        Cd = " 
-                 << obj->GetRealParameter("Cd") << "\n"
-                 << "        Drag area = " 
-                 << obj->GetRealParameter("DragArea") << " m^2\n"
-                 << "        Cr = " 
-                 << obj->GetRealParameter("Cr") << "\n"
-                 << "        Reflective (SRP) area = " 
-                 << obj->GetRealParameter("SRPArea") << " m^2\n";
-                 
-            StringArray tanks = obj->GetStringArrayParameter("Tanks");
-            if (tanks.size() > 0)
+            obj = i->second;
+            if (obj->GetTypeName() == "Spacecraft")
             {
-               data << "        Dry mass = "
-                    << obj->GetRealParameter("DryMass") << " kg\n";
-               data << "        Tanks:\n";
-               for (StringArray::iterator i = tanks.begin();
-                    i != tanks.end(); ++i)
-                  data << "           " << (*i) << "\n";
+               Rvector6 rawState = ((Spacecraft*)obj)->GetState().GetState();
+               Rvector6 newState = rawState;
+                                   
+               data.precision(16);                 
+               data << "  Spacecraft " << obj->GetName() << "\n"
+                    << "     A.1 Modified Julian Epoch: " 
+                    << obj->GetRealParameter("Epoch") << "\n\n"
+                    << "    Coordinate System: EarthMJ2000Eq \n\n"
+                    << "    Cartesian State:\n"
+                    << "        X  = " << newState[0] << " km\n"
+                    << "        Y  = " << newState[1] << " km\n"
+                    << "        Z  = " << newState[2] << " km\n"
+                    << "        VX = " << newState[3] << " km/s\n"
+                    << "        VY = " << newState[4] << " km/s\n"
+                    << "        VZ = " << newState[5] << " km/s\n";
+   
+               obj->SetStringParameter("StateType", "Keplerian");
+               
+               CartToKep(rawState, newState);
+                                
+               data << "\n    Keplerian State:\n"
+                    << "        SMA  = " << newState[0] << " km\n"
+                    << "        ECC  = " << newState[1] << "\n"
+                    << "        INC  = " << newState[2] << " deg\n"
+                    << "        RAAN = " << newState[3] << " deg\n"
+                    << "        AOP  = " << newState[4] << " deg\n"
+                    << "        TA   = " << newState[5] << " deg\n";
+                    
+               data << "\n\n    Spacecraft properties:\n"
+                    << "        Cd = " 
+                    << obj->GetRealParameter("Cd") << "\n"
+                    << "        Drag area = " 
+                    << obj->GetRealParameter("DragArea") << " m^2\n"
+                    << "        Cr = " 
+                    << obj->GetRealParameter("Cr") << "\n"
+                    << "        Reflective (SRP) area = " 
+                    << obj->GetRealParameter("SRPArea") << " m^2\n";
+                    
+               StringArray tanks = obj->GetStringArrayParameter("Tanks");
+               if (tanks.size() > 0)
+               {
+                  data << "        Dry mass = "
+                       << obj->GetRealParameter("DryMass") << " kg\n";
+                  data << "        Tanks:\n";
+                  for (StringArray::iterator i = tanks.begin();
+                       i != tanks.end(); ++i)
+                     data << "           " << (*i) << "\n";
+               }
+                    
+               data << "        Total mass = " 
+                    << obj->GetRealParameter("TotalMass") << " kg\n";
+   
+               data << "-------------------------------------------"
+                    << "-------------------------------------------\n";
             }
-                 
-            data << "        Total mass = " 
-                 << obj->GetRealParameter("TotalMass") << " kg\n";
-
-            data << "-------------------------------------------"
-                 << "-------------------------------------------\n";
          }
       }
    }

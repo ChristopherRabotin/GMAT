@@ -366,29 +366,33 @@ bool BeginFiniteBurn::Initialize()
       if ((*objectMap)[burnName]->GetTypeName() != "FiniteBurn")
          throw CommandException((burnName) + " is not a FiniteBurn");
 
-      #ifdef DEBUG_BEGIN_MANEUVER
-         MessageInterface::ShowMessage("BeginFiniteBurn::Initialize() found %s\n", 
-            burnName.c_str());
-      #endif      
-
       maneuver = (FiniteBurn*)((*objectMap)[burnName]);
+
+      #ifdef DEBUG_BEGIN_MANEUVER
+         MessageInterface::ShowMessage(
+            "BeginFiniteBurn::Initialize() found %s with type %s\n", 
+            maneuver->GetName().c_str(), maneuver->GetTypeName().c_str());
+      #endif      
 
       // find all of the spacecraft
       StringArray::iterator scName;
       Spacecraft *sc;
+      sats.clear();
       for (scName = satNames.begin(); scName != satNames.end(); ++scName)
       {
          if (objectMap->find(*scName) == objectMap->end()) 
             throw CommandException("Unknown SpaceObject \"" + (*scName) + "\"");
 
-         #ifdef DEBUG_BEGIN_MANEUVER
-            MessageInterface::ShowMessage(
-               "BeginFiniteBurn::Initialize() found %s\n", scName->c_str());
-         #endif
-         
          if ((*objectMap)[*scName]->GetType() != Gmat::SPACECRAFT)
             throw CommandException((*scName) + " is not a Spacecraft");
          sc = (Spacecraft*)(*objectMap)[*scName];
+
+         #ifdef DEBUG_BEGIN_MANEUVER
+            MessageInterface::ShowMessage(
+               "BeginFiniteBurn::Initialize() found %s with type %s\n", 
+               scName->c_str(), sc->GetTypeName().c_str());
+         #endif
+         
          sats.push_back(sc);
       }
       

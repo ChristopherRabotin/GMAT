@@ -85,8 +85,8 @@ Propagate::~Propagate()
 {
    /// @todo: clean memory for satName.push_back(new StringArray);
  
-   for (UnsignedInt i=0; i<stopWhen.size(); i++)
-      delete stopWhen[i];
+//   for (UnsignedInt i=0; i<stopWhen.size(); i++)
+//      delete stopWhen[i];
    if (pubdata)
       delete [] pubdata;
 }
@@ -958,7 +958,10 @@ bool Propagate::TakeAction(const std::string &action,
       if (actionData == "Propagator")
       {
          for (Integer i = 0; i < (Integer)satName.size(); ++i)
+         {
             delete satName[i];
+//            satName[i] = NULL;  // Paranoia sets in!
+         }
          satName.clear();
 
          propName.clear();
@@ -1572,6 +1575,7 @@ bool Propagate::Initialize()
    inProgress = false;
    UnsignedInt index = 0;
    prop.clear();
+   sats.clear();
    SpaceObject *so;
    std::string pName;
    Real dir;
@@ -2187,10 +2191,15 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
    
       publisher->FlushBuffers();
     
-      for (UnsignedInt i=0; i<stopWhen.size(); i++)
+      for (std::vector<StopCondition *>::iterator i = stopWhen.begin(); 
+           i != stopWhen.end(); ++i)
       {
-         if (stopWhen[i]->GetName() == "")
-            delete stopWhen[i];
+         if ((*i)->GetName() == "")
+         {
+            StopCondition *localSc = *i;
+            stopWhen.erase(i);
+            delete localSc;
+         }
       }
       
       #if DEBUG_PROPAGATE_EXE
