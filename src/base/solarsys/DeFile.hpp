@@ -255,7 +255,8 @@ private:
    FILE        *Ephemeris_File;
    double       Coeff_Array[MAX_ARRAY_SIZE];   // MAX
    double       T_beg , T_end , T_span;
-
+   double       mFileBeg;
+   
    Integer EPHEMERIS; // caps because of reuse from JPL/JSC code (Hoffman)
 
    

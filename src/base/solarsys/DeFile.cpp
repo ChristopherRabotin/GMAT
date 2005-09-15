@@ -473,6 +473,10 @@ void DeFile::InitializeDeFile(std::string fName, Gmat::DeFileFormat fileFmt)
    g_pef_dcb.recl                      = arraySize;
    if (Ephemeris_File)  g_pef_dcb.fptr = Ephemeris_File;
    jdMjdOffset          = (double) DeFile::JD_MJD_OFFSET;
+
+   // store file begin time (loj: 9/15/05 Added)
+   mFileBeg = T_beg;
+
 }
 
 //------------------------------------------------------------------------------
@@ -559,8 +563,9 @@ void DeFile::Read_Coefficients( double Time )
   MessageInterface::ShowMessage
      ("DeFile::Read_Coefficients() Offset=%d\n", Offset);
   #endif
-  
-  if (Offset > 0) //loj: 9/14/05 Added
+
+  // if time is less than file begin time, do not update time info.
+  if (Time > mFileBeg) //loj: 9/15/05 Added
   {
      fseek(Ephemeris_File,(Offset-1)*arraySize*sizeof(double),SEEK_CUR); // wcs
      fread(&Coeff_Array,sizeof(double),arraySize,Ephemeris_File);        // wcs
