@@ -71,8 +71,6 @@ public:
    Real   UtcMjdToA1Mjd(const Real utcMjd);
    //Real   Ut1MjdToA1Mjd(const Real ut1Mjd); //wcs: add later
    UtcMjd ToUtcMjd();
-   Ut1Mjd ToUt1Mjd();
-
 
    Integer GetNumData() const;
    const std::string* GetDataDescriptions() const;
