@@ -1364,6 +1364,17 @@ void PropagationConfigPanel::OnBodySelection(wxCommandEvent &event)
       DisplayAtmosphereModelData();
       DisplayMagneticFieldData();
    }
+   
+   if (strcmp(selBody.c_str(), "Earth") == 0)
+   {
+      atmosComboBox->Enable(true);
+      dragSetupButton->Enable(true);
+   }
+   else
+   {
+      atmosComboBox->Enable(false);
+      dragSetupButton->Enable(false);
+   }
 }
 
 //------------------------------------------------------------------------------
