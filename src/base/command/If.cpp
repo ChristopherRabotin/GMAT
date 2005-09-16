@@ -22,6 +22,9 @@
 #include "gmatdefs.hpp"
 #include "If.hpp"
 #include "Parameter.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_IF
 
 //---------------------------------
 // static data
@@ -156,11 +159,19 @@ bool If::Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 bool If::Execute()
 {
+#ifdef DEBUG_IF
+   MessageInterface::ShowMessage
+   ("In If::Execute ............\n");
+#endif
    bool retval = true;
       
    if (branchExecuting)
    {
-      retval = ExecuteBranch();
+#ifdef DEBUG_IF
+      MessageInterface::ShowMessage
+      ("In If::Execute - Branch Executing -------------\n");
+#endif
+      retval = ExecuteBranch(branchToExecute);
       if (!branchExecuting)
       {
          commandComplete  = true;
@@ -169,26 +180,49 @@ bool If::Execute()
    }
    else 
    {
+#ifdef DEBUG_IF
+      MessageInterface::ShowMessage
+      ("In If::Execute - Branch NOT Executing -------------\n");
+#endif
       if (!commandExecuting)
          ConditionalBranch::Execute();
       
       //if (EvaluateCondition(0)) // must deal with multiple conditions later
       if (EvaluateAllConditions()) 
       {
+#ifdef DEBUG_IF
+         MessageInterface::ShowMessage
+         ("In If::Execute all conditions are true - executing first branch\n");
+#endif
+         branchToExecute = 0;
          branchExecuting = true;
       }
       else if ((Integer)branch.size() > 1)  // there could be an 'Else'
       {
+#ifdef DEBUG_IF
+         MessageInterface::ShowMessage
+         ("In If::Execute some conditions are FALSE - executing second branch\n");
+#endif
          branchExecuting = true;
+         branchToExecute = 1; // @todo - add ElseIf (more than two branches)
       }
       else
       {
+#ifdef DEBUG_IF
+         MessageInterface::ShowMessage
+         ("In If::Execute - ERROR with number of branches\n");
+#endif
+         branchToExecute = 0;
          commandComplete  = true;
          commandExecuting = false;
       }
    }
    
    BuildCommandSummary(true);
+#ifdef DEBUG_IF
+   MessageInterface::ShowMessage
+      ("BuildCOmmandSummary completed\n");
+#endif
    return retval;
 }
 
