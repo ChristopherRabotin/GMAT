@@ -45,6 +45,7 @@ public:
    virtual ~Moon();
 
    virtual Rvector GetBodyCartographicCoordinates(const A1Mjd &forTime) const;
+   virtual Real    GetHourAngle(A1Mjd atTime); 
    
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;

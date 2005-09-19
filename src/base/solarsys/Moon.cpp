@@ -15,11 +15,13 @@
 
 #include "gmatdefs.hpp"
 #include "SolarSystem.hpp"
+#include "SolarSystemException.hpp"
 #include "CelestialBody.hpp"
 #include "Moon.hpp"
 #include "PhysicalConstants.hpp"
 #include "MessageInterface.hpp"
 #include "RealUtilities.hpp"
+#include "AngleUtil.hpp"
 
 using namespace GmatMathUtil;
 
@@ -257,6 +259,38 @@ Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
    }
    
    return Rvector(4, alpha, delta, W, Wdot);
+}
+
+//------------------------------------------------------------------------------
+//  Real GetHourAngle(A1Mjd atTime)
+//------------------------------------------------------------------------------
+/**
+ * This method returns the hour angle for the body, referenced from the
+ * Prime Meridian, measured westward
+ *
+ * @param <atTime> time for which to compute the hour angle
+ *
+ * @return hour angle for the body, in degrees, from the Prime Meridian
+ *
+ * @note algorithm 15, Vallado p. 192
+ * @todo move this to Planet?  Add generic calculation here.
+ *
+ */
+//------------------------------------------------------------------------------
+Real  Moon::GetHourAngle(A1Mjd atTime) 
+{
+   try
+   {
+      Rvector cart = GetBodyCartographicCoordinates(atTime);
+      hourAngle = cart[2];  
+      // reduce to a quantity within one day (86400 seconds, 360.0 degrees)
+      hourAngle = AngleUtil::PutAngleInDegRange(hourAngle,0.0,360.0);
+      return hourAngle;
+   }
+   catch (SolarSystemException &sse)
+   {
+      return CelestialBody::GetHourAngle(atTime);
+   }
 }
 
 //------------------------------------------------------------------------------
