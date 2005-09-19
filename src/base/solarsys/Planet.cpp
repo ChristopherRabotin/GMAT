@@ -23,7 +23,9 @@
 #include "PhysicalConstants.hpp"
 #include "RealUtilities.hpp"
 #include "SolarSystemException.hpp"
-
+#include "TimeTypes.hpp"
+#include "TimeSystemConverter.hpp"
+#include "AngleUtil.hpp"
 
 using namespace GmatMathUtil;
 
@@ -460,6 +462,111 @@ Rvector Planet::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
    return Rvector(4, alpha, delta, W, Wdot);
 }
 
+//------------------------------------------------------------------------------
+//  Real GetHourAngle(A1Mjd atTime)
+//------------------------------------------------------------------------------
+/**
+ * This method returns the hour angle for the body, referenced from the
+ * Prime Meridian, measured westward
+ *
+ * @param <atTime> time for which to compute the hour angle
+ *
+ * @return hour angle for the body, in degrees, from the Prime Meridian
+ *
+ * @note algorithm 15, Vallado p. 192
+ * @todo move this to Planet?  Add generic calculation here.
+ *
+ */
+//------------------------------------------------------------------------------
+Real  Planet::GetHourAngle(A1Mjd atTime) 
+{
+   if (instanceName == SolarSystem::EARTH_NAME)
+   {
+      // Convert the time to a UT1 MJD
+      Real mjdUT1 = TimeConverterUtil::Convert(atTime.Get(),
+                                               "A1Mjd", "Ut1Mjd", GmatTimeUtil::JD_JAN_5_1941);
+      Real jdUT1    = mjdUT1 + GmatTimeUtil::JD_JAN_5_1941; // right?
+                                                            // Compute elapsed Julian centuries (UT1)
+      Real tUT1     = (jdUT1 - 2451545.0) / 36525.0;
+      //Real timeUt1  = (ut1Jd - 2451545.0) / 36525;
+      
+      // compute mean sidereal time, in degrees
+      // according to Vallado Eq. 3-45, converted to degrees, where
+      // 1 hour = 15 degrees and 1 second = 1/240 of a second
+      
+      Real mst        = (67310.54841 / 240) +
+         (((876600 * 15) + (8640184.812866 / 240)) * tUT1) +
+         ((0.093104 / 240) * tUT1 * tUT1) -
+         ((6.2e-06 / 240) * tUT1 * tUT1 * tUT1);
+      
+      // reduce to a quantity within one day (86400 seconds, 360.0 degrees)
+      hourAngle = AngleUtil::PutAngleInDegRange(mst,0.0,360.0);
+   }
+   else
+   {
+      Real d = GetJulianDaysFromTCBEpoch(atTime); // interval in Julian days
+      Real T = d / 36525;                        // interval in Julian centuries
+      if (instanceName == SolarSystem::MERCURY_NAME)
+      {
+         hourAngle     = 329.548 + 6.1385025 * d;
+      }
+      else if (instanceName == SolarSystem::VENUS_NAME)
+      {
+         hourAngle     = 160.20 - 1.4813688 * d;
+      }
+      //else if (instanceName == SolarSystem::EARTH_NAME)
+      //{
+      //   hourAngle     = 190.147 + 360.9856235 * d;
+      //}
+      else if (instanceName == SolarSystem::MARS_NAME)
+      {
+         hourAngle     = 176.630   + 350.89198226 * d;
+      }
+      else if (instanceName == SolarSystem::JUPITER_NAME)
+      {
+         hourAngle     = 284.95 + 870.5366420 * d;
+      }
+      else if (instanceName == SolarSystem::SATURN_NAME)
+      {
+         hourAngle     = 38.90  + 810.7939024 * d;
+      }
+      else if (instanceName == SolarSystem::URANUS_NAME)
+      {
+         hourAngle     = 203.81 - 501.1600928 * d;
+      }
+      else if (instanceName == SolarSystem::NEPTUNE_NAME)
+      {
+         Real N        = 357.85 + 52.316 * T;
+         hourAngle     = 253.18 + 536.3128492 * d - 0.48 * Sin(Rad(N));
+      }
+      else if (instanceName == SolarSystem::PLUTO_NAME)
+      {
+         hourAngle     = 236.77 - 56.3623195 * d;
+      }
+      else
+      {
+         return CelestialBody::GetHourAngle(atTime);
+      }
+      // reduce to a quantity within one day (86400 seconds, 360.0 degrees)
+      hourAngle = AngleUtil::PutAngleInDegRange(hourAngle,0.0,360.0);
+   }
+   
+   return hourAngle; 
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetLowFidelityEpoch(const A1Mjd &toTime)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the epoch to be used for Low Fidelity analytic modeling.
+ *
+ * @param <toTime> epoch
+ *
+ * @return success of the operation.
+ *
+ */
+//------------------------------------------------------------------------------
 bool Planet::SetLowFidelityEpoch(const A1Mjd &toTime)
 {
    // For the Earth, send the information to the Sun
@@ -473,6 +580,18 @@ bool Planet::SetLowFidelityEpoch(const A1Mjd &toTime)
    return CelestialBody::SetLowFidelityEpoch(toTime);
 }
 
+//------------------------------------------------------------------------------
+//  bool SetLowFidelityElements(const Rvector6 &kepl)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the elements to be used for Low Fidelity analytic modeling.
+ *
+ * @param <kepl> initial keplerian elements.
+ *
+ * @return success of the operation.
+ *
+ */
+//------------------------------------------------------------------------------
 bool Planet::SetLowFidelityElements(const Rvector6 &kepl)
 {
    // For the Earth, send the information to the Sun
@@ -491,8 +610,6 @@ bool Planet::SetLowFidelityElements(const Rvector6 &kepl)
    }
    return CelestialBody::SetLowFidelityElements(kepl);
 }
-
-
 
 
 

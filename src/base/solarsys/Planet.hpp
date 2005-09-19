@@ -63,6 +63,7 @@ public:
 
    virtual Rvector       GetBodyCartographicCoordinates(
                             const A1Mjd &forTime) const;
+   virtual Real          GetHourAngle(A1Mjd atTime); 
    
    // For the Earth, these methods need to update the Sun's information, as the 
    // Sun has no cental body and its initial epoch and keplerian elements need 
