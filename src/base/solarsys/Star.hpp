@@ -53,6 +53,7 @@ public:
 
    virtual Rvector       GetBodyCartographicCoordinates(
                             const A1Mjd &forTime) const;
+   virtual Real          GetHourAngle(A1Mjd atTime); 
 
    // overridden access methods from CelestialBody
    virtual std::string    GetParameterText(const Integer id) const;
