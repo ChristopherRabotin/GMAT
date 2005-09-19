@@ -693,9 +693,8 @@ const Rvector3& CelestialBody::GetAngularVelocity()
    return angularVelocity; 
 }
 
-
 //------------------------------------------------------------------------------
-//  Real CelestialBody::GetHourAngle(A1Mjd atTime)
+//  Real GetHourAngle(A1Mjd atTime)
 //------------------------------------------------------------------------------
 /**
  * This method returns the hour angle for the body, referenced from the
@@ -705,38 +704,14 @@ const Rvector3& CelestialBody::GetAngularVelocity()
  *
  * @return hour angle for the body, in degrees, from the Prime Meridian
  *
- * @note algorithm 15, Vallado p. 192
- * @todo move this to Planet?  Add generic calculation here.
- *
+ * @note This is a catch-all when information for the body is not defined.
  */
 //------------------------------------------------------------------------------
-Real  CelestialBody:: GetHourAngle(A1Mjd atTime) 
+Real  CelestialBody::GetHourAngle(A1Mjd atTime) 
 {
-   // Convert the time to a UT1 MJD
-   //Ut1Mjd ut1Time  = atTime.ToUt1Mjd();
-   // Now convert to UT1 Julian Date
-   //Real ut1Jd      = ((Real) ut1Time) + GmatTimeUtil::JULIAN_DATE_OF_010541;
-   // convert input time to UT1 for later use (for AST calculation)
-   Real mjdUT1 = TimeConverterUtil::Convert(atTime.Get(),
-                 "A1Mjd", "Ut1Mjd", GmatTimeUtil::JD_JAN_5_1941);
-   Real jdUT1    = mjdUT1 + GmatTimeUtil::JD_JAN_5_1941; // right?
-                                           // Compute elapsed Julian centuries (UT1)
-   Real tUT1     = (jdUT1 - 2451545.0) / 36525.0;
-   //Real timeUt1  = (ut1Jd - 2451545.0) / 36525;
-   
-   // compute mean sidereal time, in degrees
-   // according to Vallado Eq. 3-45, converted to degrees, where
-   // 1 hour = 15 degrees and 1 second = 1/240 of a second
-
-   Real mst        = (67310.54841 / 240) +
-      (((876600 * 15) + (8640184.812866 / 240)) * tUT1) +
-      ((0.093104 / 240) * tUT1 * tUT1) -
-      ((6.2e-06 / 240) * tUT1 * tUT1 * tUT1);
-
-   // reduce to a quantity within one day (86400 seconds, 360.0 degrees)
-   hourAngle = AngleUtil::PutAngleInDegRange(mst,0.0,360.0);
-
-   return hourAngle; 
+   // should be implemented in derived classes
+   throw SolarSystemException(
+         "Hour Angles not yet available for body " + instanceName);
 }
 
 //------------------------------------------------------------------------------
