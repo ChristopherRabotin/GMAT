@@ -855,7 +855,7 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
          MessageInterface::ShowMessage("      \"%s\"\n", l->c_str());
       MessageInterface::ShowMessage(
          "\n   RHS conditions known:\n");
-      for (StringArray::iterator r = lhsList.begin(); r != lhsList.end(); ++r)
+      for (StringArray::iterator r = rhsList.begin(); r != rhsList.end(); ++r)
          MessageInterface::ShowMessage("      \"%s\"\n", r->c_str());
 
       MessageInterface::ShowMessage("\n   Actual parms known:\n");
@@ -915,7 +915,9 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
 
    #ifdef DEBUG_CONDITIONS
       MessageInterface::ShowMessage(
-         "   lhs = %le,  rhs = %le\"\n", lhsValue, rhsValue);
+         "   lhs = %le,  rhs = %le\n", lhsValue, rhsValue);
+      MessageInterface::ShowMessage(
+         "   operator = %d\n", (Integer) opList.at(which));
    #endif
 
    switch (opList.at(which))
@@ -930,6 +932,12 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
          return (lhsValue > rhsValue);
          break;
       case LESS_THAN:
+#ifdef DEBUG_CONDITIONS
+         if (lhsValue < rhsValue)
+            MessageInterface::ShowMessage("   returning TRUE .......\n");
+         else
+            MessageInterface::ShowMessage("   returning FALSE .......\n");
+#endif
          return (lhsValue < rhsValue);
          break;
       case GREATER_OR_EQUAL:
@@ -983,6 +991,12 @@ bool ConditionalBranch::EvaluateAllConditions()
             break;
       }
    }
+#ifdef DEBUG_CONDITIONS
+   if (soFar)
+      MessageInterface::ShowMessage("   all are TRUE .......\n");
+   else
+      MessageInterface::ShowMessage("   some are FALSE .......\n");
+#endif
    return soFar;
 }
 // remove this?
