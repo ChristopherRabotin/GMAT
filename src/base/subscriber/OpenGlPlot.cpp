@@ -111,11 +111,11 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
 const UnsignedInt
 OpenGlPlot::DEFAULT_ORBIT_COLOR[MAX_SP_COLOR] =
 {
-   GmatColor::RED32,       GmatColor::GREEN32,    GmatColor::YELLOW32,
-   GmatColor::GREEN32,     GmatColor::YELLOW32,   GmatColor::LIME32,
-   GmatColor::AQUA32,      GmatColor::BLUE32,     GmatColor::FUCHSIA32,
-   GmatColor::PINK32,      GmatColor::ORANGE32,   GmatColor::PURPLE32,
-   GmatColor::BEIGE32,     GmatColor::SILVER32,   GmatColor::NAVY32
+   GmatColor::RED32,       GmatColor::LIME32,    GmatColor::YELLOW32,
+   GmatColor::AQUA32,      GmatColor::PINK32,    GmatColor::L_BLUE32,
+   GmatColor::L_GRAY32,    GmatColor::BLUE32,    GmatColor::FUCHSIA32,
+   GmatColor::BEIGE32,     GmatColor::RED32,     GmatColor::LIME32,
+   GmatColor::YELLOW32,    GmatColor::AQUA32,    GmatColor::PINK32
 };
 
 
@@ -194,6 +194,21 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mAllSpCount = 0;
    mScCount = 0;
    mObjectCount = 0;
+   mNonStdBodyCount = 0;
+   
+   // default planet color
+   mOrbitColorMap["Earth"] = GmatColor::GREEN32;
+   mOrbitColorMap["Luna"] = GmatColor::SILVER32;
+   mOrbitColorMap["Sun"] = GmatColor::ORANGE32;
+   mOrbitColorMap["Mercury"] = GmatColor::GRAY32;
+   mOrbitColorMap["Venus"] = GmatColor::BEIGE32;
+   mOrbitColorMap["Mars"] = GmatColor::L_GRAY32;
+   mOrbitColorMap["Jupiter"] = GmatColor::L_BROWN32;
+   mOrbitColorMap["Saturn"] = GmatColor::D_BROWN32;
+   mOrbitColorMap["Uranus"] = GmatColor::BLUE32;
+   mOrbitColorMap["Neptune"] = GmatColor::NAVY32;
+   mOrbitColorMap["Pluto"] = GmatColor::PURPLE32;
+   
 }
 
 
@@ -244,6 +259,8 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mAllSpCount = ogl.mAllSpCount;
    mScCount = ogl.mScCount;
    mObjectCount = ogl.mObjectCount;
+   mNonStdBodyCount = ogl.mNonStdBodyCount;
+   
    mObjectArray = ogl.mObjectArray;
    mDrawOrbitArray = ogl.mDrawOrbitArray;
    mShowObjectArray = ogl.mShowObjectArray;
@@ -1542,7 +1559,15 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index)
          
          if (mAllSpCount < MAX_SP_COLOR)
          {
-            mOrbitColorMap[name] = DEFAULT_ORBIT_COLOR[mAllSpCount-1];
+            // If object is non-standard-body, use mNonStdBodyCount.
+            // So that spacecraft color starts from DEFAULT_ORBIT_COLOR
+            if (mOrbitColorMap.find(name) == mOrbitColorMap.end())
+            {
+               mOrbitColorMap[name] = DEFAULT_ORBIT_COLOR[mNonStdBodyCount];
+               mNonStdBodyCount++;
+               //mOrbitColorMap[name] = DEFAULT_ORBIT_COLOR[mAllSpCount-1]; //loj:9/19/05
+            }
+            
             mTargetColorMap[name] = GmatColor::TEAL32;
          }
          else
@@ -1598,6 +1623,8 @@ bool OpenGlPlot::ClearSpacePointList()
    mAllSpCount = 0;
    mScCount = 0;
    mObjectCount = 0;
+   mNonStdBodyCount = 0;
+   
    return true;
 }
 

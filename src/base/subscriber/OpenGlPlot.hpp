@@ -176,6 +176,8 @@ protected:
    Integer mAllSpCount;
    Integer mScCount;
    Integer mObjectCount;
+   Integer mNonStdBodyCount;
+   
    StringArray mScNameArray;
    StringArray mObjectNameArray;
    StringArray mAllSpNameArray;
