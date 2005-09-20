@@ -1206,14 +1206,15 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
                                     " Propagator strings Identified:\n");
       std::vector<Real>::iterator j = direction.begin();
       for (StringArray::iterator i = pieces.begin(); i != pieces.end(); ++i,++j)
-         MessageInterface::ShowMessage("   \"%s\" running %s\n", i->c_str(),
-         ((*j) > 0.0 ? "forwards" : "backwards"));
+         MessageInterface::ShowMessage(
+         "   \"%s\" running %s (direction = %lf)\n", i->c_str(),
+         ((*j) > 0.0 ? "forwards" : "backwards"), *j);
    #endif
    
    Integer satEnd;
    
-   std::vector<Real>::iterator dir = direction.begin();
-   for (StringArray::iterator i = pieces.begin(); i != pieces.end(); ++i, ++dir) 
+   Integer dirIndex = 0;
+   for (StringArray::iterator i = pieces.begin(); i != pieces.end(); ++i, ++dirIndex) 
    {
       loc = 0;
       end = i->find("(", loc);
@@ -1353,7 +1354,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
                              paramName);
          
          // Set backwards propagation (loj: 7/20/05 Added)
-         stopCond->SetPropDirection(*dir);
+         stopCond->SetPropDirection(direction[dirIndex]);
          
          stopCond->SetStringParameter("StopVar", paramName);
          
