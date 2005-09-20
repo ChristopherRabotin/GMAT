@@ -202,10 +202,12 @@ void Spacecraft::SetInternalCoordSystem(CoordinateSystem *cs)
 //---------------------------------------------------------------------------
 void Spacecraft::SetState(const Rvector6 &cartState)
 {
+   cartesianState = cartState;
+   
    #if DEBUG_SPACECRAFT_SET
-   Rvector6 state(cartState);
    MessageInterface::ShowMessage
-      ("Spacecraft::SetState(Rvector6) cartState=%s\n", state.ToString().c_str());
+      ("Spacecraft::SetState(Rvector6) cartesianState=%s\n",
+       cartesianState.ToString().c_str());
    #endif
    
    SetState(cartState[0], cartState[1], cartState[2],
