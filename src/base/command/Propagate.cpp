@@ -1353,7 +1353,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
                              paramName);
          
          // Set backwards propagation (loj: 7/20/05 Added)
-         //stopCond->SetPropDirection(*dir);
+         stopCond->SetPropDirection(*dir);
          
          stopCond->SetStringParameter("StopVar", paramName);
          
