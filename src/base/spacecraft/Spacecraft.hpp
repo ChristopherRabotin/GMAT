@@ -22,14 +22,15 @@
 
 #include <valarray>
 #include "SpaceObject.hpp"
-#include "CoordinateSystem.hpp"
 #include "Rvector6.hpp"
-#include "StateConverter.hpp"
-#include "TimeConverter.hpp"
 #include "PropState.hpp"
 #include "FuelTank.hpp"
 #include "Thruster.hpp"
 #include "Anomaly.hpp"
+#include "CoordinateSystem.hpp"
+#include "CoordinateConverter.hpp"
+#include "TimeConverter.hpp"
+#include "StateConverter.hpp"
 
 class GMAT_API Spacecraft : public SpaceObject
 {
@@ -46,6 +47,44 @@ public:
    // Destructor
    virtual ~Spacecraft(void);
 
+   CoordinateSystem* GetInternalCoordSystem();
+   void SetInternalCoordSystem(CoordinateSystem *cs);
+   
+   //    virtual PropState& GetState(void); 
+   // @todo will work on GetStateVector()
+   // Rvector6 GetStateVector(const std::string &elementType);
+   
+   void SetState(const Rvector6 &cartState);
+   void SetState(const std::string &elementType, Real *instate);
+   void SetState(const Real s1, const Real s2, const Real s3, 
+                 const Real s4, const Real s5, const Real s6);
+   
+   Rvector6 GetCartesianState();
+   Rvector6 GetKeplerianState();
+   Rvector6 GetModifiedKeplerianState();
+   // Will add more methods below later
+   // Rvector6 GetSphericalOneState() const;
+   // Rvector6 GetSphericalTwoState() const;
+
+
+   Anomaly GetAnomaly() const;
+
+   bool GetDisplay() const;
+   void SetDisplay(const bool displayFlag);
+
+   std::string GetDisplayDateFormat() const;
+   void SetDisplayDateFormat(const std::string &dateType);
+   std::string GetDisplayEpoch();
+   bool SetDisplayEpoch(const std::string &value);
+
+   std::string GetDisplayCoordType() const;
+   void SetDisplayCoordType(const std::string &coordType);
+
+   Real* GetDisplayState();
+   void SetDisplayState(const Real *s);
+   void SetDisplayState(const Rvector6 s);
+   void SaveDisplay();
+   
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
    virtual void Copy(const GmatBase* orig);
@@ -59,8 +98,8 @@ public:
    // and therefore need these methods from GmatBase
    virtual const StringArray&
                        GetRefObjectNameArray(const Gmat::ObjectType type);
-  virtual bool        SetRefObjectName(const Gmat::ObjectType type,
-                                       const std::string &name);
+   virtual bool        SetRefObjectName(const Gmat::ObjectType type,
+                                        const std::string &name);
    virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
                                     const std::string &name);
    virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
@@ -96,41 +135,6 @@ public:
    virtual bool TakeAction(const std::string &action, 
                            const std::string &actionData = "");
    
-
-   //    virtual PropState& GetState(void); 
-   // @todo will work on GetStateVector()
-   // Rvector6 GetStateVector(const std::string &elementType);
-
-   void SetState(const std::string &elementType, Real *instate);
-   void SetState(const Real s1, const Real s2, const Real s3, 
-                 const Real s4, const Real s5, const Real s6);
-
-   Rvector6 GetCartesianState();
-   Rvector6 GetKeplerianState();
-   Rvector6 GetModifiedKeplerianState();
-   // Will add more methods below later
-   // Rvector6 GetSphericalOneState() const;
-   // Rvector6 GetSphericalTwoState() const;
-
-
-   Anomaly GetAnomaly() const;
-
-   bool GetDisplay() const;
-   void SetDisplay(const bool displayFlag);
-
-   std::string GetDisplayDateFormat() const;
-   void SetDisplayDateFormat(const std::string &dateType);
-   std::string GetDisplayEpoch();
-   bool SetDisplayEpoch(const std::string &value);
-
-   std::string GetDisplayCoordType() const;
-   void SetDisplayCoordType(const std::string &coordType);
-
-   Real* GetDisplayState();
-   void SetDisplayState(const Real *s);
-   void SetDisplayState(const Rvector6 s);
-   void SaveDisplay();
-
 protected:
    enum SC_Param_ID 
    {
@@ -161,11 +165,14 @@ protected:
    std::string       stateType;
    Anomaly           anomaly;
    CoordinateSystem  *coordinateSystem;
+   CoordinateSystem  *internalCoordSystem;
    std::string       coordSysName;
 
    // for non-internal spacecraft information
    StateConverter stateConverter;
    TimeConverter  timeConverter;
+   CoordinateConverter coordConverter;
+   
    Rvector6       cartesianState;
    Rvector6       keplerianState;
    Rvector6       modifiedKeplerianState;
@@ -195,12 +202,16 @@ protected:
    Real           UpdateTotalMass();
    Real           UpdateTotalMass() const;
    
+   void SetCoordinateSystem(CoordinateSystem *cs);
+   
 private:
    bool        initialDisplay;
    bool        hasElements[6];
-
+   CoordinateSystem *interalCoordSys;
+   
    // private methods
    void        SetEpoch();
+   void        SetState();
    std::string GetElementName(const Integer id) const; 
    std::string GetLocalCoordType() const;
    void        SetInitialDisplay();
