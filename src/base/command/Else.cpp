@@ -32,6 +32,8 @@
 Else::Else() :
     GmatCommand      ("Else")
 {
+   objectTypeNames.push_back("BranchEnd");
+   //depthChange = -1;  // is this correct here?
 }
 
 
