@@ -24,6 +24,8 @@
 
 //#define DEBUG_BRANCHCOMMAND_DEALLOCATION
 
+//#define DEBUG_BRANCHCOMMAND_EXECUTION
+
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
@@ -655,8 +657,23 @@ bool BranchCommand::ExecuteBranch(Integer which)
    if (current == NULL)
       current = branch[which];
       
+#ifdef DEBUG_BRANCHCOMMAND_EXECUTION
+   if (current != NULL)
+   {
+      std::string curName = current->GetTypeName();
+      MessageInterface::ShowMessage
+      ("In ExecuteBranch - current = %s\n", curName.c_str());
+   }
+   else
+      MessageInterface::ShowMessage
+         ("In ExecuteBranch - current = NULL\n");
+#endif
    if (current == this)
    {
+#ifdef DEBUG_BRANCHCOMMAND_EXECUTION
+      MessageInterface::ShowMessage
+      ("In ExecuteBranch - current = this -> resetting\n");
+#endif
       branchExecuting = false;
       current = NULL;
    }
