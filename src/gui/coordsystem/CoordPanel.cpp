@@ -784,14 +784,17 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       
       coordSys->SetOrigin(origin);
       
+      CelestialBody *j2000body = (CelestialBody*)theGuiInterpreter->
+         GetConfiguredItem("Earth");
+      
       // set Earth as J000Body if NULL
       if (origin->GetJ2000Body() == NULL)
       {
-         CelestialBody *j2000body = (CelestialBody*)theGuiInterpreter->
-            GetConfiguredItem("Earth");
          j2000body->SetJ2000Body(j2000body);
          origin->SetJ2000Body(j2000body);
       }
+      
+      coordSys->SetJ2000Body(j2000body);
       
       //-------------------------------------------------------
       // set primary and secondary 
@@ -884,6 +887,10 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
             canClose = false;
          }
       }
+      
+      coordSys->SetSolarSystem(theGuiInterpreter->GetDefaultSolarSystem());
+      coordSys->Initialize();
+
    }
    catch (BaseException &e)
    {
