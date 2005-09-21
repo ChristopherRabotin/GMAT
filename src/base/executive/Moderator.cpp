@@ -41,6 +41,7 @@
 
 //#define DEBUG_CREATE_VAR 1
 //#define DEBUG_CREATE_BURN_PARAM 1
+//#define TEST_SPACECRAFT_CS 1
 
 //---------------------------------
 // static data
@@ -142,8 +143,17 @@ bool Moderator::Initialize(bool fromGui)
       
       // Create default SolarSystem
       theDefaultSolarSystem = new SolarSystem("DefaultSolarSystem");
-      //theDefaultSolarSystem = CreateSolarSystem("DefaultSolarSystem");
-      //SetSolarSystemInUse("DefaultSolarSystem");
+      StringArray bodies = theDefaultSolarSystem->GetBodiesInUse();
+      SpacePoint *sp;
+      SpacePoint *earth = theDefaultSolarSystem->GetBody("Earth");
+      
+      // Set J2000Body to SolarSystem bodies
+      for (UnsignedInt i=0; i<bodies.size(); i++)
+      {
+         sp = theDefaultSolarSystem->GetBody(bodies[i]);
+         sp->SetJ2000Body(earth);
+      }
+      
       //MessageInterface::ShowMessage
       //   ("Moderator::Initialize() theDefaultSolarSystem created\n");
       
@@ -151,6 +161,20 @@ bool Moderator::Initialize(bool fromGui)
       // be configured
       theInternalCoordSystem = CreateCoordinateSystem("", true);
       theInternalCoordSystem->SetName("EarthMJ2000Eq");
+      
+      //loj: 9/16/05 Added
+      // Set object pointers so that it can be used in CS conversion in the GUI
+      //SpacePoint *earth = (SpacePoint*)GetConfiguredItem("Earth");
+      SpacePoint *origin =
+         (SpacePoint*)GetConfiguredItem(theInternalCoordSystem->GetOriginName());
+      origin->SetJ2000Body(earth);
+      SpacePoint *j2000body =
+         (SpacePoint*)GetConfiguredItem(theInternalCoordSystem->GetJ2000BodyName());
+      j2000body->SetJ2000Body(earth);
+      theInternalCoordSystem->SetOrigin(origin);
+      theInternalCoordSystem->SetJ2000Body(j2000body);
+      theInternalCoordSystem->SetSolarSystem(theDefaultSolarSystem);
+      theInternalCoordSystem->Initialize();
       
       InitializePlanetarySource();
       InitializePlanetaryCoeffFile();
@@ -1865,8 +1889,11 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
          // create MJ2000Eq AxisSystem with Earth as origin
          AxisSystem *axis = CreateAxisSystem("MJ2000Eq", "");
          cs->SetStringParameter("Origin", "Earth");
+         cs->SetRefObject(GetConfiguredItem("Earth"), Gmat::SPACE_POINT, "Earth");
          cs->SetStringParameter("J2000Body", "Earth");
          cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
+         cs->SetSolarSystem(theDefaultSolarSystem);
+         cs->Initialize();
       }
    }
    catch (BaseException &e)
@@ -1877,6 +1904,7 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
    
    return cs;
 }
+
 
 //------------------------------------------------------------------------------
 // CoordinateSystem* GetCoordinateSystem(const std::string &name)
@@ -1922,6 +1950,10 @@ AxisSystem* Moderator::CreateAxisSystem(const std::string &type,
       return NULL;
       //throw GmatBaseException("Error Creating AxisSystem: " + type);
    }
+
+   // set origin and j2000body
+   axisSystem->SetOrigin((SpacePoint*)GetConfiguredItem(axisSystem->GetOriginName()));
+   axisSystem->SetJ2000Body((SpacePoint*)GetConfiguredItem(axisSystem->GetJ2000BodyName()));
    
    // Notes: AxisSystem is not configured. It is local to CoordinateSystem
    // and gets deleted when CoordinateSystem is deleted.
@@ -3076,6 +3108,9 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
    
    try
    {
+      // DJC, 9/21/2005 Need default CS's in case they are used in the script
+      CreateDefaultCoordSystems();
+
       status = theScriptInterpreter->Interpret(scriptFileName);
       if (status)
       {
@@ -3084,7 +3119,8 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
              ("Moderator::InterpretScript() creating Default Coordinate "
               "System...\n");
          #endif
-         CreateDefaultCoordSystems();
+         // DJC, 9/21/2005 So this was moved above
+         // CreateDefaultCoordSystems();
 
          #if DEBUG_RUN
          MessageInterface::ShowMessage
@@ -3092,6 +3128,45 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
          #endif
          
          isRunReady = true;
+         
+         //========== begin of TEST_SPACECRAFT_CS ================================
+         #if TEST_SPACECRAFT_CS
+         // Get CoordinateSystem and set origin pointer
+         StringArray &items = GetListOfConfiguredItems(Gmat::COORDINATE_SYSTEM);
+         CoordinateSystem *cs;
+         SpacePoint *origin, *j2000body;
+         SpacePoint *earth = (SpacePoint*)GetConfiguredItem("Earth");
+         
+         for (unsigned int i=0; i<items.size(); i++)
+         {
+            cs = (CoordinateSystem*)GetCoordinateSystem(items[i]);
+            
+            origin = (SpacePoint*)GetConfiguredItem(cs->GetOriginName());
+            origin->SetJ2000Body(earth);
+            
+            j2000body = (SpacePoint*)GetConfiguredItem(cs->GetJ2000BodyName());
+            j2000body->SetJ2000Body(earth);
+            
+            cs->SetOrigin(origin);
+            cs->SetJ2000Body(j2000body);
+            cs->SetSolarSystem(theDefaultSolarSystem);
+            cs->Initialize();
+         }
+         
+         // Get Spacecraft and set CoordinateSystem pointer
+         items = GetListOfConfiguredItems(Gmat::SPACECRAFT);
+         Spacecraft *sc;
+         
+         for (unsigned int i=0; i<items.size(); i++)
+         {
+            sc = (Spacecraft*)GetSpacecraft(items[i]);
+            sc->SetInternalCoordSystem(theInternalCoordSystem);
+            sc->SetRefObject(GetConfiguredItem(sc->GetRefObjectName(Gmat::COORDINATE_SYSTEM)),
+                             Gmat::COORDINATE_SYSTEM,
+                             sc->GetRefObjectName(Gmat::COORDINATE_SYSTEM));
+         }
+         #endif
+         //========== end of TEST_SPACECRAFT_CS ================================
       }
       else
       {
@@ -3102,7 +3177,7 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
    {
       MessageInterface::PopupMessage
          (Gmat::ERROR_, e.GetMessage() +
-          "\n Check Type in the appropriate Factory or parameter text");
+          "\n Check Type in the appropriate Factory or parameter text.\n");
       isRunReady = false;
    }
 
@@ -3148,6 +3223,7 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
             ("Moderator::InterpretScript(ss) creating Default Coordinate "
              "System...\n");
          #endif
+         
          CreateDefaultCoordSystems();
 
          #if DEBUG_RUN
@@ -3166,7 +3242,7 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
    {
       MessageInterface::PopupMessage
          (Gmat::ERROR_, e.GetMessage() +
-          "\n Check Type in the appropriate Factory or parameter text");
+          "\n Check Type in the appropriate Factory or parameter text.\n");
       isRunReady = false;
    }
 
@@ -3342,6 +3418,9 @@ void Moderator::CreateDefaultCoordSystems()
    {
       StringArray csNames =
             theConfigManager->GetListOfItems(Gmat::COORDINATE_SYSTEM);
+      
+      SpacePoint *earth = (SpacePoint*)GetConfiguredItem("Earth");
+      
       // EarthMJ2000Eq
       if (find(csNames.begin(), csNames.end(), "EarthMJ2000Eq") == csNames.end())
          CreateCoordinateSystem("EarthMJ2000Eq", true);
@@ -3354,8 +3433,12 @@ void Moderator::CreateDefaultCoordSystems()
          eccs->SetStringParameter("Origin", "Earth");
          eccs->SetStringParameter("J2000Body", "Earth");
          eccs->SetRefObject(ecAxis, Gmat::AXIS_SYSTEM, ecAxis->GetName());
+         eccs->SetOrigin(earth);
+         eccs->SetJ2000Body(earth);
+         eccs->SetSolarSystem(theDefaultSolarSystem);
+         eccs->Initialize();
       }
-
+      
       // EarthFixed
       if (find(csNames.begin(), csNames.end(), "EarthFixed") == csNames.end())
       {
@@ -3367,6 +3450,10 @@ void Moderator::CreateDefaultCoordSystems()
          bfcs->SetStringParameter("Origin", "Earth");
          bfcs->SetStringParameter("J2000Body", "Earth");
          bfcs->SetRefObject(bfecAxis, Gmat::AXIS_SYSTEM, bfecAxis->GetName());
+         bfcs->SetOrigin(earth);
+         bfcs->SetJ2000Body(earth);
+         bfcs->SetSolarSystem(theDefaultSolarSystem);
+         bfcs->Initialize();
       }
    }
    catch (BaseException &e)
@@ -3399,7 +3486,10 @@ void Moderator::CreateDefaultMission()
       CreateDefaultCoordSystems();
       
       // Spacecraft
-      CreateSpacecraft("Spacecraft", "DefaultSC");
+      Spacecraft *sc = (Spacecraft*)CreateSpacecraft("Spacecraft", "DefaultSC");
+      sc->SetInternalCoordSystem(theInternalCoordSystem);
+      sc->SetRefObject(GetCoordinateSystem("EarthMJ2000Eq"),
+                       Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
       
       #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->default Spacecraft created\n");

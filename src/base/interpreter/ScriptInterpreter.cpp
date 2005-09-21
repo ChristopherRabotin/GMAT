@@ -88,11 +88,16 @@ ScriptInterpreter::~ScriptInterpreter()
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::Interpret()
 {
-    if (!initialized)
-        Initialize();
+   if (!initialized)
+      Initialize();
         
-    sequenceStarted = false;
-    return ReadScript();
+   sequenceStarted = false;
+   bool retval = ReadScript();
+
+   if (retval)
+      retval = FinalPass();
+      
+   return retval;       
 }
 
 

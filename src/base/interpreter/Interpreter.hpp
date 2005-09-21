@@ -249,6 +249,7 @@ protected:
                                                GmatCommand *cmdEnd = NULL);
    bool                          ValidateBlock(StringArray &sar);
 
+   bool                          FinalPass();
 };
 
 #endif // INTERPRETER_HPP

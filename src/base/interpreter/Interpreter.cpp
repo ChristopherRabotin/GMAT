@@ -32,6 +32,7 @@
 //#define DEBUG_ARRAY_INTERPRETING 1
 //#define DEBUG_INTERPRET_OBJECTEQUATES 1
 //#define DEBUG_FUNCTION_PARSING
+//#define DEBUG_PASS_TWO
 
 #include "MessageInterface.hpp"
 
@@ -3536,5 +3537,179 @@ bool Interpreter::ValidateBlock(StringArray &sar)
          "Interpreter::ValidateBlock(StringArray) finished\n");
    #endif
 
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+//  bool FinalPass()
+//------------------------------------------------------------------------------
+/**
+ * Finishes up the Interpret call by setting internal references that are needed 
+ * by the GUI.
+ *
+ * @return true if the references were set; false otherwise.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::FinalPass()
+{
+   #ifdef DEBUG_PASS_TWO
+      MessageInterface::ShowMessage(
+         "Finalizing the references in the interpreter...\n");
+   #endif
+   
+   bool retval = true;
+   
+   SolarSystem *solar = moderator->GetDefaultSolarSystem();
+
+   std::string ptName;
+   SpacePoint *pt, *sp;
+
+   // Set J2000 bodies for solar system objects -- should this happen here?
+   const StringArray biu = solar->GetBodiesInUse();
+   for (StringArray::const_iterator i = biu.begin(); i != biu.end(); ++i)
+   {
+      #ifdef DEBUG_PASS_TWO
+         MessageInterface::ShowMessage("Setting up %s\n", i->c_str());
+      #endif
+      sp = solar->GetBody(*i);
+      ptName = sp->GetStringParameter("J2000BodyName");
+      pt = solar->GetBody(ptName);;
+      if (pt == NULL)
+         throw InterpreterException("Unable to find the J2000body, '" + ptName +
+            "', in the solar system, but it is needed for '" + (*i) + "'");
+      sp->SetJ2000Body(pt);
+   }
+
+   // Initialize the coordinate systems
+   CoordinateSystem *cs;
+
+   #ifdef DEBUG_PASS_TWO
+      cs = moderator->GetCoordinateSystem("EarthMJ2000Eq");
+      MessageInterface::ShowMessage("Moderator says that EarthMJ2000Eq is %s\n", 
+         (cs == NULL ? "NULL" : "defined"));
+   #endif
+   
+   cs = moderator->GetInternalCoordinateSystem();
+   cs->SetSolarSystem(solar);
+   ptName = cs->GetStringParameter("Origin");
+   pt = solar->GetBody(ptName);
+ 
+   if (pt == NULL)
+      pt = (SpacePoint *)(moderator->GetConfiguredItem(ptName));
+   if (pt == NULL)
+      throw InterpreterException("Unable to find the origin, '" + ptName +
+         "', for the coordinate system '" + cs->GetName() + "'");
+   if (!pt->IsOfType("SpacePoint"))
+      throw InterpreterException("The object named '" + ptName +
+         "' is not a space point, but is used as one "
+         "in the coordinate system '" + cs->GetName() + "'");
+   cs->SetRefObject(pt, Gmat::SPACE_POINT, ptName);
+
+   ptName = cs->GetStringParameter("J2000Body");
+   pt = solar->GetBody(ptName);
+   if (pt == NULL)
+      pt = (SpacePoint *)(moderator->GetConfiguredItem(ptName));
+   if (pt == NULL)
+      throw InterpreterException("Unable to find the J2000Body, '" + ptName +
+         "', for the coordinate system '" + cs->GetName() + "'");
+   if (!pt->IsOfType("SpacePoint"))
+      throw InterpreterException("The object named '" + ptName +
+         "' is not a space point, but is used as one "
+         "in the coordinate system '" + cs->GetName() + "'");
+   cs->SetRefObject(pt, Gmat::SPACE_POINT, ptName);
+   cs->Initialize();
+
+   StringArray csList = 
+      moderator->GetListOfConfiguredItems(Gmat::COORDINATE_SYSTEM);
+
+   for (StringArray::iterator i = csList.begin(); i != csList.end(); ++i)
+   {
+      #ifdef DEBUG_PASS_TWO
+         MessageInterface::ShowMessage("Setting up %s\n", i->c_str());
+      #endif
+      cs = moderator->GetCoordinateSystem(*i);
+      cs->SetSolarSystem(solar);
+    
+      std::string ptName = cs->GetStringParameter("Origin");
+      pt = (SpacePoint *)(moderator->GetConfiguredItem(ptName));
+      if (pt == NULL)
+         throw InterpreterException("Unable to find the origin, '" + ptName +
+            "', for the coordinate system '" + cs->GetName() + "'");
+      if (!pt->IsOfType("SpacePoint"))
+         throw InterpreterException("The object named '" + ptName +
+            "' is not a space point, but is used as one "
+            "in the coordinate system '" + cs->GetName() + "'");
+      cs->SetRefObject(pt, Gmat::SPACE_POINT, ptName);
+   
+      ptName = cs->GetStringParameter("J2000Body");
+      pt = (SpacePoint *)(moderator->GetConfiguredItem(ptName));
+      if (pt == NULL)
+         throw InterpreterException("Unable to find the J2000Body, '" + ptName +
+            "', for the coordinate system '" + cs->GetName() + "'");
+      if (!pt->IsOfType("SpacePoint"))
+         throw InterpreterException("The object named '" + ptName +
+            "' is not a space point, but is used as one "
+            "in the coordinate system '" + cs->GetName() + "'");
+      cs->SetRefObject(pt, Gmat::SPACE_POINT, ptName);
+      
+      cs->Initialize();
+   }
+
+   CoordinateSystem *configuredCs;
+   std::string configuredCsName;
+   
+   // Set the coordinate system pointers for the Spacecraft
+   StringArray satNames = moderator->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+   Spacecraft *sat;
+   cs = moderator->GetInternalCoordinateSystem();
+   for (StringArray::iterator i = satNames.begin(); i != satNames.end(); ++i)
+   {
+      #ifdef DEBUG_PASS_TWO
+         MessageInterface::ShowMessage("Setting up %s\n", i->c_str());
+      #endif
+      
+      sat = (Spacecraft *)moderator->GetConfiguredItem(*i);
+      
+      #ifdef DEBUG_PASS_TWO
+         std::string gen = sat->GetGeneratingString(Gmat::SCRIPTING);
+         MessageInterface::ShowMessage(
+            "Prior to setting coordinate system on %s\n%s\n", i->c_str(), 
+            gen.c_str());
+      #endif
+      
+      if (sat == NULL)
+         throw InterpreterException("Unable to locate the spacecraft named '" 
+            + (*i) + "'");
+      if (sat->IsOfType("Spacecraft") == false)
+         throw InterpreterException("The object named '" +
+            (*i) + "' was expected to be a spacecraft, but it is a '" +
+            sat->GetTypeName() + "' instead.");
+      sat->SetInternalCoordSystem(cs);
+      configuredCsName = sat->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+      configuredCs = moderator->GetCoordinateSystem(configuredCsName);
+      if (configuredCs == NULL)
+         throw InterpreterException(
+            "Unable to locate the coordinate system named '" +
+            configuredCsName + "', referenced in the spacecraft named " +
+            (*i));
+      if (configuredCs->IsOfType("CoordinateSystem") == false)
+         throw InterpreterException("The object named '" +
+            configuredCsName + "' was expected to be a coordinate system, "
+            "but it is a '" + configuredCs->GetTypeName() + "' instead.");
+      sat->SetRefObject(configuredCs, Gmat::COORDINATE_SYSTEM, configuredCsName);
+      
+      #ifdef DEBUG_PASS_TWO
+         MessageInterface::ShowMessage(
+            "After setting coordinate system on %s\n%s\n", i->c_str(), 
+            gen.c_str());
+      #endif
+   }
+   
+   #ifdef DEBUG_PASS_TWO   
+      MessageInterface::ShowMessage(
+         "...finalization complete.\n");
+   #endif
+   
    return retval;
 }
