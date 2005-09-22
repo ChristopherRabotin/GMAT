@@ -1898,8 +1898,10 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
    }
    catch (BaseException &e)
    {
+      #if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage("Moderator::CreateCoordinateSystem() %s\n",
                                     e.GetMessage().c_str());
+      #endif
    }
    
    return cs;
@@ -3214,6 +3216,8 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
    
    try
    {
+      CreateDefaultCoordSystems();
+      
       theScriptInterpreter->SetInStream(ss);
       status = theScriptInterpreter->Interpret();
       if (status)
@@ -3224,7 +3228,7 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
              "System...\n");
          #endif
          
-         CreateDefaultCoordSystems();
+         //CreateDefaultCoordSystems();
 
          #if DEBUG_RUN
          MessageInterface::ShowMessage
@@ -3588,7 +3592,7 @@ void Moderator::CreateDefaultMission()
       CreateParameter("AtmosDensity", "DefaultSC.Earth.AtmosDensity");
       
       // Planet parameters
-      CreateParameter("GHA", "DefaultSC.Earth.GHA");
+      CreateParameter("MHA", "DefaultSC.Earth.MHA");
       CreateParameter("Longitude", "DefaultSC.Earth.Longitude");
       CreateParameter("Latitude", "DefaultSC.Earth.Latitude");
       CreateParameter("LST", "DefaultSC.Earth.LST");
