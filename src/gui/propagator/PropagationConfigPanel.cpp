@@ -108,7 +108,6 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
    Show();
    
    isForceModelChanged = false;
-   isGravTextChanged = false;
    isPotFileChanged = false;
    isMagfTextChanged = false;
    isIntegratorChanged = false;
@@ -299,27 +298,24 @@ void PropagationConfigPanel::SaveData()
                isPotFileChanged = false;
             
             theGravForce = new GravityField("", forceList[i]->bodyName); 
-            
-            if (isGravTextChanged)
-            {                     
-               Integer deg = atoi(forceList[i]->gravDegree.c_str());
-               Integer ord = atoi(forceList[i]->gravOrder.c_str());
+                            
+            Integer deg = atoi(forceList[i]->gravDegree.c_str());
+            Integer ord = atoi(forceList[i]->gravOrder.c_str());
                
-               if (deg < ord)
-               {
-                  MessageInterface::PopupMessage
-                  (Gmat::WARNING_, "Gravity field degree should be greater than "
+            if (deg < ord)
+            {
+               MessageInterface::PopupMessage
+               (Gmat::WARNING_, "Gravity field degree should be greater than "
                                    "or equal to the order.");
-                  gravityDegreeTextCtrl->SetValue(forceList[currentBodyId]->gravDegree);
-                  gravityOrderTextCtrl->SetValue(forceList[currentBodyId]->gravOrder);
-                  return;
-               }
-               
-               theGravForce->SetIntegerParameter
-                  ("Degree", atoi(forceList[i]->gravDegree.c_str()));
-               theGravForce->SetIntegerParameter
-                  ("Order",  atoi(forceList[i]->gravOrder.c_str()));
+               gravityDegreeTextCtrl->SetValue(forceList[currentBodyId]->gravDegree);
+               gravityOrderTextCtrl->SetValue(forceList[currentBodyId]->gravOrder);
+               return;
             }
+               
+            theGravForce->SetIntegerParameter
+                  ("Degree", atoi(forceList[i]->gravDegree.c_str()));
+            theGravForce->SetIntegerParameter
+                  ("Order",  atoi(forceList[i]->gravOrder.c_str()));
             
             theGravForce->SetStringParameter("PotentialFile", forceList[i]->potFilename);
             
@@ -397,8 +393,6 @@ void PropagationConfigPanel::SaveData()
             #endif 
          }
       }
-      
-      isGravTextChanged = false;
       
       // save forces to the prop setup
       thePropSetup->SetForceModel(newFm);
@@ -1502,7 +1496,6 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
       
    theApplyButton->Enable(true);
    isForceModelChanged = true;
-   isGravTextChanged = true;
 }
 
 //------------------------------------------------------------------------------
@@ -1695,14 +1688,11 @@ void PropagationConfigPanel::OnGravityTextUpdate(wxCommandEvent& event)
    if (event.GetEventObject() == gravityDegreeTextCtrl)
    {
       forceList[currentBodyId]->gravDegree = gravityDegreeTextCtrl->GetValue().c_str();
-      isGravTextChanged = true;
       isForceModelChanged = true;
    }
    else if (event.GetEventObject() == gravityOrderTextCtrl)
    {     
       forceList[currentBodyId]->gravOrder = gravityOrderTextCtrl->GetValue().c_str();
-      
-      isGravTextChanged = true;
       isForceModelChanged = true;
    }
    else if (event.GetEventObject() == potFileTextCtrl)
