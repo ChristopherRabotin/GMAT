@@ -290,10 +290,10 @@ void Spacecraft::SetState(const Real s1, const Real s2, const Real s3,
  */
 Rvector6 Spacecraft::GetCartesianState() 
 {   
-//    Real *tempState = state.GetState();
+   Real *tempState = state.GetState();
 
-//    for (int i=0; i<6; i++)
-//       cartesianState[i] = tempState[i];
+   for (int i=0; i<6; i++)
+      cartesianState[i] = tempState[i];
    
    return cartesianState;
 }
