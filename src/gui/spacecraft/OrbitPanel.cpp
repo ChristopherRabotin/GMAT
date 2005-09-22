@@ -856,6 +856,8 @@ void OrbitPanel::LoadData()
          }
          else
          {
+            // DJC added, 9/22/05
+            stateConverter.SetMu(outCoord);
             displayState = stateConverter.Convert(outState, "Cartesian",
                                                stType, anomaly);
          }

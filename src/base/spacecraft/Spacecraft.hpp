@@ -134,6 +134,12 @@ public:
 
    virtual bool TakeAction(const std::string &action, 
                            const std::string &actionData = "");
+
+
+   virtual const std::string&  
+                GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                                    const std::string &prefix = "",
+                                    const std::string &useName = "");
    
 protected:
    enum SC_Param_ID 
@@ -220,6 +226,9 @@ private:
    void        SetInitialState();
    void        DefineDefaultSpacecraft(); //loj: 4/28/05 Added
    void        InitializeDataMethod(const Spacecraft &s);
+   virtual void WriteParameters(Gmat::WriteMode mode,
+                                       std::string &prefix, 
+                                       std::stringstream &stream);
 };
 
 #endif // Spacecraft_hpp

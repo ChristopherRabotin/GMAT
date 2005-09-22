@@ -2163,8 +2163,8 @@ void GmatBase::CopyParameters(const GmatBase &a)
 }
 
 //------------------------------------------------------------------------------
-// StringArray GetGeneratingString(Gmat::WriteMode mode,
-//                const std::string &prefix, const std::string &useName)
+// const std::string&  GetGeneratingString(Gmat::WriteMode mode,
+//                        const std::string &prefix, const std::string &useName)
 //------------------------------------------------------------------------------
 /**
  * Produces a string, possibly multi-line, containing the text that produces an

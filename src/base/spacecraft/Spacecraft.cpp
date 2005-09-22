@@ -2307,3 +2307,235 @@ void Spacecraft::InitializeDataMethod(const Spacecraft &s)
    internalCoordSystem = s.internalCoordSystem;
    coordinateSystem = s.coordinateSystem;
 }
+
+
+
+
+
+
+
+
+
+//------------------------------------------------------------------------------
+// const std::string&  GetGeneratingString(Gmat::WriteMode mode,
+//                const std::string &prefix, const std::string &useName)
+//------------------------------------------------------------------------------
+/**
+ * Produces a string, possibly multi-line, containing the text that produces an
+ * object.
+ * 
+ * @param mode Specifies the type of serialization requested.
+ * @param prefix Optional prefix appended to the object's name
+ * @param useName Name that replaces the object's name.
+ * 
+ * @return A string containing the text.
+ */
+//------------------------------------------------------------------------------
+const std::string& Spacecraft::GetGeneratingString(Gmat::WriteMode mode,
+                                                   const std::string &prefix,
+                                                   const std::string &useName)
+{
+   std::stringstream data;
+
+   data.precision(18);   // Crank up data precision so we don't lose anything
+   std::string preface = "", nomme;
+   
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
+       (mode == Gmat::SHOW_SCRIPT))
+      inMatlabMode = false;
+   if (mode == Gmat::MATLAB_STRUCT)
+      inMatlabMode = true;
+   
+   if (useName != "")
+      nomme = useName;
+   else
+      nomme = instanceName;
+   
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT))
+   {
+      std::string tname = typeName;
+      data << "Create " << tname << " " << nomme << ";\n";
+      preface = "GMAT ";
+   }
+   
+   nomme += ".";
+   
+   if (mode == Gmat::OWNED_OBJECT) {
+      preface = prefix;
+      nomme = "";
+   }
+   
+   preface += nomme;
+   WriteParameters(mode, preface, data);
+   
+   generatingString = data.str();
+   return generatingString;
+}
+
+
+
+
+//------------------------------------------------------------------------------
+// void WriteParameters(std::string &prefix, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Code that writes the parameter details for an object.
+ * 
+ * @param prefix Starting portion of the script string used for the parameter.
+ * @param obj The object that is written.
+ */
+//------------------------------------------------------------------------------
+void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix, 
+                                 std::stringstream &stream)
+{
+   Integer i;
+   Gmat::ParameterType parmType;
+   std::stringstream value;
+   value.precision(18);
+   
+   // Set the parameter order for output
+   Integer parmOrder[parameterCount], parmIndex = 0;
+   parmOrder[parmIndex++] = DATE_FORMAT_ID;
+   parmOrder[parmIndex++] = EPOCH_PARAM;
+   parmOrder[parmIndex++] = COORD_SYS_ID;
+   parmOrder[parmIndex++] = STATE_TYPE_ID;
+   parmOrder[parmIndex++] = ANOMALY_ID;
+   parmOrder[parmIndex++] = ELEMENT1_ID;
+   parmOrder[parmIndex++] = ELEMENT2_ID;
+   parmOrder[parmIndex++] = ELEMENT3_ID;
+   parmOrder[parmIndex++] = ELEMENT4_ID;
+   parmOrder[parmIndex++] = ELEMENT5_ID;
+   parmOrder[parmIndex++] = ELEMENT6_ID;
+   parmOrder[parmIndex++] = DRY_MASS_ID;
+   parmOrder[parmIndex++] = CD_ID;
+   parmOrder[parmIndex++] = CR_ID;
+   parmOrder[parmIndex++] = DRAG_AREA_ID;
+   parmOrder[parmIndex++] = SRP_AREA_ID;
+   parmOrder[parmIndex++] = FUEL_TANK_ID;
+   parmOrder[parmIndex++] = THRUSTER_ID;
+   
+   bool registered;
+   for (i = 0; i < parameterCount; ++i)
+   {
+      registered = false;
+      for (Integer j = 0; j < parmIndex; ++j)
+      {
+         if (parmOrder[j] == i)
+         {
+            registered = true;
+            break;
+         }
+      }
+      if (!registered)
+         parmOrder[parmIndex++] = i;
+   }
+   
+   Rvector6 genState;
+   coordConverter.Convert(A1Mjd(GetEpoch()), Rvector6(GetState().GetState()), 
+                          internalCoordSystem, 
+                          genState, coordinateSystem);
+
+   if ((displayCoordType == "Keplerian") || (displayCoordType == "ModifiedKeplerian"))
+   {
+      if (coordinateSystem->GetOrigin()->IsOfType("CelestialBody"))
+         stateConverter.SetMu(coordinateSystem);
+      else
+         throw SpaceObjectException(
+            "When generating output for the spacecraft '" + instanceName +
+            "', GMAT cannot set up Keplerian element conversion for the "
+            "coordinate system '" + coordinateSystem->GetName() + 
+            "' because the oribin is not a celestial body.");
+   }
+   
+   if (displayCoordType != "Cartesian")
+      genState = stateConverter.Convert(genState, "Cartesian",
+                                        displayCoordType, anomaly);
+   
+   for (i = 0; i < parameterCount; ++i)
+   {
+      if ((IsParameterReadOnly(parmOrder[i]) == false) &&
+          (parmOrder[i] != J2000_BODY_NAME) &&
+          (parmOrder[i] != TOTAL_MASS_ID))
+      {
+         parmType = GetParameterType(parmOrder[i]);
+         // Handle StringArray parameters separately
+         if (parmType != Gmat::STRINGARRAY_TYPE)
+         {
+            // Skip unhandled types
+            if (
+                (parmType != Gmat::UNSIGNED_INTARRAY_TYPE) &&
+                (parmType != Gmat::RVECTOR_TYPE) &&
+                (parmType != Gmat::RMATRIX_TYPE) &&
+                (parmType != Gmat::UNKNOWN_PARAMETER_TYPE)
+               )
+            {
+               // Fill in the l.h.s.
+               value.str("");
+               if ((parmOrder[i] >= ELEMENT1_ID) && 
+                   (parmOrder[i] <= ELEMENT6_ID))
+                  value << genState[parmOrder[i] - ELEMENT1_ID];
+               else if (parmOrder[i] == STATE_TYPE_ID)  
+                  value << displayCoordType;
+               else
+                  WriteParameterValue(parmOrder[i], value);
+               
+               
+               if (value.str() != "")
+                  stream << prefix << GetParameterText(parmOrder[i])
+                         << " = " << value.str() << ";\n";
+            }
+         }
+         else
+         {
+            // Handle StringArrays
+            StringArray sar = GetStringArrayParameter(parmOrder[i]);
+            if (sar.size() > 0)
+            {
+               stream << prefix << GetParameterText(i) << " = {";
+               for (StringArray::iterator n = sar.begin(); n != sar.end(); ++n)
+               {
+                  if (n != sar.begin())
+                     stream << ", ";
+                  if (inMatlabMode)
+                     stream << "'";
+                  stream << (*n);
+                  if (inMatlabMode)
+                     stream << "'";
+               }
+               stream << "};\n";
+            }
+         }
+      }
+   }
+
+   // Prep in case spacecraft "own" the attached hardware
+   GmatBase *ownedObject;
+   std::string nomme, newprefix;
+
+   #ifdef DEBUG_OWNED_OBJECT_STRINGS
+      MessageInterface::ShowMessage("\"%s\" has %d owned objects\n",
+         instanceName.c_str(), GetOwnedObjectCount());
+   #endif
+
+   for (i = 0; i < GetOwnedObjectCount(); ++i)
+   {
+      newprefix = prefix;
+      ownedObject = GetOwnedObject(i);
+      nomme = ownedObject->GetName();
+      
+      #ifdef DEBUG_OWNED_OBJECT_STRINGS
+          MessageInterface::ShowMessage(
+             "   id %d has type %s and name \"%s\"\n",
+             i, ownedObject->GetTypeName().c_str(),
+             ownedObject->GetName().c_str());
+      #endif
+
+      if (nomme != "")
+         newprefix += nomme + ".";
+      else if (GetType() == Gmat::FORCE_MODEL)
+         newprefix += ownedObject->GetTypeName();
+      stream << ownedObject->GetGeneratingString(Gmat::OWNED_OBJECT, newprefix);
+   }
+}
+
+

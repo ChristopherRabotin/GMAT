@@ -324,7 +324,7 @@ protected:
    /// flag used to deterine if the current write is in Matlab mode
    bool                inMatlabMode;   
    void                CopyParameters(const GmatBase &a);
-   void                WriteParameters(Gmat::WriteMode mode,
+   virtual void        WriteParameters(Gmat::WriteMode mode,
                                        std::string &prefix, 
                                        std::stringstream &stream);
    void                WriteParameterValue(Integer id, 
