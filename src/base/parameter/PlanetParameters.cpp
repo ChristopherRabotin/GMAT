@@ -16,7 +16,7 @@
 //
 /**
  * Implements planet related parameter classes.
- *   GHA, Longitude, Latitude, LST
+ *   MHA, Longitude, Latitude, LST
  */
 //------------------------------------------------------------------------------
 
@@ -24,7 +24,7 @@
 
 
 //==============================================================================
-//                              GHA
+//                              MHA
 //==============================================================================
 /**
  * Implements Greenwich Hour Angle parameter class.
@@ -32,7 +32,7 @@
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// GHA(const std::string &name, GmatBase *obj)
+// MHA(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -41,20 +41,18 @@
  * @param <obj> reference object pointer
  */
 //------------------------------------------------------------------------------
-GHA::GHA(const std::string &name, GmatBase *obj)
-   : PlanetReal(name, "GHA", obj, "Greenwich Hour Angle", "deg",
+MHA::MHA(const std::string &name, GmatBase *obj)
+   : PlanetReal(name, "MHA", obj, "Greenwich Hour Angle", "deg",
                 Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
    PlanetData::mCentralBodyName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
-   //loj: 5/27/05 Commented out
-   //SetRefObjectName(Gmat::PARAMETER, "CurrA1MJD"); //if parameter, use type name
 }
 
 
 //------------------------------------------------------------------------------
-// GHA(const GHA &copy)
+// MHA(const MHA &copy)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
@@ -62,14 +60,14 @@ GHA::GHA(const std::string &name, GmatBase *obj)
  * @param <copy> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-GHA::GHA(const GHA &copy)
+MHA::MHA(const MHA &copy)
    : PlanetReal(copy)
 {
 }
 
 
 //------------------------------------------------------------------------------
-// const GHA& operator=(const GHA &right)
+// const MHA& operator=(const MHA &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -77,8 +75,8 @@ GHA::GHA(const GHA &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const GHA&
-GHA::operator=(const GHA &right)
+const MHA&
+MHA::operator=(const MHA &right)
 {
    if (this != &right)
       PlanetReal::operator=(right);
@@ -88,13 +86,13 @@ GHA::operator=(const GHA &right)
 
 
 //------------------------------------------------------------------------------
-// ~GHA()
+// ~MHA()
 //------------------------------------------------------------------------------
 /**
  * Destructor.
  */
 //------------------------------------------------------------------------------
-GHA::~GHA()
+MHA::~MHA()
 {
 }
 
@@ -112,9 +110,9 @@ GHA::~GHA()
  * @return true if parameter value successfully evaluated; false otherwise
  */
 //------------------------------------------------------------------------------
-bool GHA::Evaluate()
+bool MHA::Evaluate()
 {
-   mRealValue = PlanetData::GetReal("GHA");    
+   mRealValue = PlanetData::GetReal("MHA");    
    
    if (mRealValue == PlanetData::PLANET_REAL_UNDEFINED)
       return false;
@@ -134,9 +132,9 @@ bool GHA::Evaluate()
  * Method used to create a copy of the object
  */
 //------------------------------------------------------------------------------
-GmatBase* GHA::Clone(void) const
+GmatBase* MHA::Clone(void) const
 {
-   return new GHA(*this);
+   return new MHA(*this);
 }
 
 
@@ -163,7 +161,7 @@ Longitude::Longitude(const std::string &name, GmatBase *obj)
                 Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    PlanetData::mCentralBodyName = "Earth";
 }
 
@@ -278,7 +276,7 @@ Latitude::Latitude(const std::string &name, GmatBase *obj)
                 Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    PlanetData::mCentralBodyName = "Earth";
 }
 
@@ -393,7 +391,7 @@ LST::LST(const std::string &name, GmatBase *obj)
                 Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    PlanetData::mCentralBodyName = "Earth";
 }
 

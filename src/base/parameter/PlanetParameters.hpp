@@ -16,7 +16,7 @@
 //
 /**
  * Declares planet related parameter classes.
- *   GHA, Longitude, Latitude, LST
+ *   MHA, Longitude, Latitude, LST
  */
 //------------------------------------------------------------------------------
 #ifndef PlanetParameters_hpp
@@ -24,22 +24,23 @@
 
 #include "PlanetReal.hpp"
 
+
 //==============================================================================
-//                                     GHA
+//                                     MHA
 //==============================================================================
 /**
  * Declares Greenwich hour angle parameter class.
  */
 //------------------------------------------------------------------------------
 
-class GMAT_API GHA : public PlanetReal
+class GMAT_API MHA : public PlanetReal
 {
 public:
 
-   GHA(const std::string &name = "", GmatBase *obj = NULL);
-   GHA(const GHA &copy);
-   const GHA& operator=(const GHA &right);
-   virtual ~GHA();
+   MHA(const std::string &name = "", GmatBase *obj = NULL);
+   MHA(const MHA &copy);
+   const MHA& operator=(const MHA &right);
+   virtual ~MHA();
 
    // methods inherited from Parameter
    virtual bool Evaluate();
@@ -50,6 +51,7 @@ public:
 protected:
 
 };
+
 
 //==============================================================================
 //                                 Longitude

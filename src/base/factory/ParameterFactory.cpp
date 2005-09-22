@@ -164,8 +164,8 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new AtmosDensity(withName);
    
    // Planet parameters
-   if (ofType == "GHA")
-      return new GHA(withName);
+   if (ofType == "MHA")
+      return new MHA(withName);
    if (ofType == "Longitude")
       return new Longitude(withName);
    if (ofType == "Latitude")
@@ -267,7 +267,7 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("AtmosDensity");
       
       // Planet parameters
-      creatables.push_back("GHA");
+      creatables.push_back("MHA");
       creatables.push_back("Longitude");
       creatables.push_back("Latitude");
       creatables.push_back("LST");
