@@ -260,6 +260,11 @@ Rvector6 OrbitData::GetCartState()
           "and Keplerian are not supported at this time." + elemType + "\n");
    }
    
+   #if DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage
+      ("OrbitData::GetCartState() mCartState=\n   %s\n", mCartState.ToString().c_str());
+   #endif
+   
    return mCartState;
 }
 
@@ -406,9 +411,19 @@ Rvector6 OrbitData::GetSphRaDecState()
           cartState.ToString().c_str());
       #endif
       
-      // update SphericalRADEC state
-      mSphRaDecState = CartesianToSphericalRADEC(cartState);
-
+      try
+      {
+         // update SphericalRADEC state
+         mSphRaDecState = CartesianToSphericalRADEC(cartState);
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::ShowMessage
+            ("*** ERROR *** OrbitData::GetSphRaDecState() %s\n   Possible Cause: "
+             "Devide by Zero, Continue processing...\n   state = %s\n",
+             e.GetMessage().c_str(), cartState.ToString().c_str());
+      }
+      
       #if DEBUG_ORBITDATA_RUN
       MessageInterface::ShowMessage
          ("OrbitData::GetSphRaDecState() mSphRaDecState=%s\n",
@@ -772,12 +787,11 @@ Real OrbitData::GetSphRaDecReal(const std::string &str)
    
    if (str == "SphRMag")
    {
-      // if orgin is the same as central body, just return default
-      if (mOrigin->GetName() == mScOrigin->GetName())
+      // if orgin is "Earth" just return default
+      if (mOrigin->GetName() == "Earth")
          return mSphRaDecState[RD_RMAG];
       else
          return GetPositionMagnitude(mOrigin);
-
    }
    else if (str == "SphRA")
       return mSphRaDecState[RD_RRA];
@@ -791,8 +805,8 @@ Real OrbitData::GetSphRaDecReal(const std::string &str)
       return mSphRaDecState[RD_DECV];
    else if (str == "Altitude")
    {
-      // if orgin is the same as central body, just return default
-      if (mOrigin->GetName() == mScOrigin->GetName())
+      // if orgin is Earth, just return default
+      if (mOrigin->GetName() == "Earth")
       {
          return mSphRaDecState[RD_RMAG] -
             ((CelestialBody*)mScOrigin)->GetEquatorialRadius();
@@ -1051,7 +1065,7 @@ Real OrbitData::GetSemiMajorAxis(const Rvector3 &pos, const Rvector3 &vel)
    Real vMag = v.GetMagnitude();
    Real vMagSq = vMag*vMag;
    Real denom = (2.0 - (rMag*vMagSq)/mGravConst);
-
+   
    if (Abs(denom) < ORBIT_ZERO_TOL)
       throw ParameterException
          ("OrbitData::GetSemiMajorAxis() divide-by-zero occurred. pos: " +
@@ -1244,8 +1258,10 @@ void OrbitData::InitializeRefObjects()
       throw ParameterException
          ("OrbitData::InitializeRefObjects() spacecraft CoordinateSystem not "
           "found: " + csName + "\n");
-   
-   mScOrigin = cs->GetOrigin();
+
+   // Always set to default origin to Earth
+   //loj: 9/22/05 mScOrigin = cs->GetOrigin();
+   mScOrigin = mSolarSystem->GetBody("Earth");
    
    if (!mScOrigin)
       throw ParameterException
