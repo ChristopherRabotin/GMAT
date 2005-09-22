@@ -39,7 +39,7 @@ PlanetData::VALID_OBJECT_TYPE_LIST[PlanetDataObjectCount] =
 {
    "Spacecraft",
    "SolarSystem",
-   "SpacePoint" //loj: 4/11/05
+   "SpacePoint"
 }; 
 
 //---------------------------------
@@ -143,22 +143,20 @@ Real PlanetData::GetReal(const std::string &dataType)
       InitializeRefObjects();
 
    //--------------------------------------------------
-   // GHA
+   // MHA
    //--------------------------------------------------
-   if (dataType == "GHA")
+   if (dataType == "MHA")
    {
       // Get current time
       Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
       
-      // Call GetHourAngle() on central body
-      //Real gha = mCentralBody->GetHourAngle(a1mjd);
-      
-      // Call GetHourAngle() on origin (loj: 4/7/05)
+      // Call GetHourAngle() on origin
       Real gha = mOrigin->GetHourAngle(a1mjd);
       
       #ifdef DEBUG_PLANETDATA_RUN
          MessageInterface::ShowMessage
-            ("PlanetData::GetReal() a1mdj=%f, gha=%f\n", a1mjd, gha);
+            ("PlanetData::GetReal() a1mdj=%f, origin=%s, gha=%f\n", a1mjd,
+             mOrigin->GetName().c_str(), gha);
       #endif
       
       return gha;
@@ -169,12 +167,12 @@ Real PlanetData::GetReal(const std::string &dataType)
    else if (dataType == "Longitude")
    {
       // Get spacecraft RightAscension
-      // Rvector6 state = mSpacecraft->GetStateVector("Cartesian");
       Rvector6 state = mSpacecraft->GetCartesianState();
+      
       Real raRad = GmatMathUtil::ATan(state[1], state[0]);
       Real raDeg = GmatMathUtil::RadToDeg(raRad, true);
-      Real gha = GetReal("GHA");
-
+      Real gha = GetReal("MHA");
+      
       // Compute east longitude
       // Longitude is measured positive to east from Greenwich
       // Reference: Valado 3.2.1 Location Parameters
@@ -216,12 +214,12 @@ Real PlanetData::GetReal(const std::string &dataType)
    {
       // compute Local Sidereal Time (LST = GMST + Longitude)
       // according to Vallado Eq. 3-41
-      Real gmst = GetReal("GHA") * -1.0;
+      Real gmst = GetReal("MHA");
       Real lst = gmst + GetReal("Longitude");
       lst = AngleUtil::PutAngleInDegRange(lst, 0.0, 360.0);
-
+      
       // convert it to hours (1h = 15 deg according to Vallado 3.5)
-      lst = lst / 15.0;
+      //lst = lst / 15.0;
       
       #ifdef DEBUG_PLANETDATA_RUN
          MessageInterface::ShowMessage
@@ -296,7 +294,6 @@ void PlanetData::InitializeRefObjects()
       throw ParameterException("PlanetData::GetCartState() Body not found in the "
                                "SolarSystem: " + mCentralBodyName + "\n");
    
-   //loj: 4/7/05 Added
    // if dependent body name exist and it is a CelestialBody, set gravity constant
    
    std::string originName =
