@@ -116,11 +116,13 @@ bool GmatApp::OnInit()
                               wxDefaultPosition, size,
                               wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
         
+#ifndef __WXMAC__   // Mac user rather smaller frame and top left corner
         theMainFrame->Maximize();
         
         // and show it (the frames, unlike simple controls, are not shown when
         // created initially)
         theMainFrame->CenterOnScreen(wxBOTH);
+#endif 
         theMainFrame->Show(true);
         
         status = true;
