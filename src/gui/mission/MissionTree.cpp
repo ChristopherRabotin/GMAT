@@ -333,11 +333,19 @@ void MissionTree::AppendCommand(const wxString &cmdName)
    wxTreeItemId itemId = GetSelection();
    wxTreeItemId lastId = GetLastChild(itemId);
 
+   #if DEBUG_MISSION_TREE
+   MessageInterface::ShowMessage("MissionTree::AppendCommand(%s) still here,  "
+                     "\n    itemId = \"%s\"\n   lastId = \"%s\"\n",
+                     cmdName.c_str(),
+                     GetItemText(itemId).c_str(),
+                     GetItemText(lastId).c_str());
+   #endif
+   
    // Append command before Else, if there is Else
    if (cmdName != "Else")
    {
       wxTreeItemId elseId = FindChild(itemId, "Else");
-      
+
       if (elseId.IsOk())
          lastId = elseId;
    }
@@ -399,6 +407,14 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
                            GmatTree::ItemType type, GmatCommand *cmd,
                            int *cmdCount, int endCount)
 {
+   #if DEBUG_MISSION_TREE
+   MessageInterface::ShowMessage("MissionTree::OnAppendCommand(%s) entered, "
+                                 "type = \"%s\" and name = \"%s\"\n",
+                                 GetItemText(parent).c_str(),
+                                 cmd->GetTypeName().c_str(), 
+                                 cmd->GetName().c_str());
+   #endif
+
    wxString cmdTypeName = cmd->GetTypeName().c_str();
    wxString nodeName = cmd->GetName().c_str();
    
@@ -450,9 +466,31 @@ void MissionTree::InsertCommand(const wxString &cmdName)
    
    wxTreeItemId itemId = GetSelection();
    wxTreeItemId parentId = GetItemParent(itemId);
+
+#ifdef __WXMAC__
+   wxTreeItemId prevId = GetPrevSibling(itemId);
+
+   // Check if no previous item then get parent item
+   if (!prevId.IsOk())
+   {
+      if (parentId.IsOk())
+         prevId = parentId;
+   }
+#else
    wxTreeItemId prevId = GetPrevVisible(itemId);
+#endif
+
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);   
-   
+   // Check if empty previous item then doesn't insert anything
+   if (prevItem == NULL)
+   {
+      MessageInterface::ShowMessage("\n***************  Warning ***************"
+             "\nMissionTree::InsertCommand() has empty prevItem "
+             "so it can't insert before this."
+             "\n****************************************");
+      return;
+   } 
+
    GmatCommand *prevCmd = prevItem->GetCommand();
    GmatCommand *cmd = NULL;
    
@@ -464,7 +502,8 @@ void MissionTree::InsertCommand(const wxString &cmdName)
       }
       else
       {
-         cmd = theGuiInterpreter->CreateDefaultCommand(std::string(cmdName.c_str()));
+         cmd = theGuiInterpreter->CreateDefaultCommand(
+                                                 std::string(cmdName.c_str()));
       }
       
       if (cmd != NULL)
@@ -474,7 +513,8 @@ void MissionTree::InsertCommand(const wxString &cmdName)
                           GetCommandId(cmdName), cmdName, prevCmd, cmd,
                           GetCommandCounter(cmdName));
          
-         SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+         SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, 
+                      wxTreeItemIcon_Expanded);
          
          Expand(node);
       }
@@ -1152,7 +1192,7 @@ wxMenu* MissionTree::CreatePopupMenu(int type, bool insert)
    
    menu->Append(POPUP_CONTROL_LOGIC, "Control Logic",
                 CreateControlLogicPopupMenu(type, insert));
-   
+
    return menu;
 }
 
@@ -1623,7 +1663,7 @@ wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd)
    wxTreeItemIdValue cookie;
    MissionTreeItemData *item;
    wxTreeItemId childId = GetFirstChild(parentId, cookie);
-   
+
    #if DEBUG_MISSION_TREE_FIND
    MessageInterface::ShowMessage 
       ("MissionTree::FindChild() childId=<%s>\n", GetItemText(childId).c_str());
@@ -1632,17 +1672,21 @@ wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd)
    while (childId.IsOk())
    {
       item = (MissionTreeItemData *)GetItemData(childId);
-      
+       
+      #if DEBUG_MISSION_TREE
+      MessageInterface::ShowMessage("MissionTree::FindChild() while-loop, "
+                    "item->GetDesc(): \"%s\"\n",item->GetDesc().c_str());
+      #endif
+
       if (item->GetDesc().Contains(cmd))
          return childId;
       
       childId = GetNextChild(parentId, cookie);
       
       #if DEBUG_MISSION_TREE_FIND > 1
-      MessageInterface::ShowMessage 
-         ("MissionTree::FindChild() childId=<%s>\n", GetItemText(childId).c_str());
+      MessageInterface::ShowMessage("MissionTree::FindChild() childId=<%s>\n", 
+                                    GetItemText(childId).c_str());
       #endif
-      
    }
    
    return childId;
