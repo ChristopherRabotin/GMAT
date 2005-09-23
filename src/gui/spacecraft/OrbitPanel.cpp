@@ -285,40 +285,54 @@ void OrbitPanel::SaveData()
       {
          MessageInterface::PopupMessage
             (Gmat::WARNING_, "ECC must be greater than or equal to zero");
-          canClose = false;
-          return;
+         canClose = false;
+         return;
       }
+      else if((displayState[0] > 0.0) && (displayState[1] > 1.0))
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "SMA > 0 and ECC > 1, both can not be");
+         canClose = false;
+         return;
+      }
+      else if((displayState[0] < 0.0) && (displayState[1] < 1.0))
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "SMA < 0 and ECC < 1, both can not be");
+         canClose = false;
+         return;
+      }          
    }
 
    if (strcmp(stateTypeStr.c_str(), "ModifiedKeplerian") == 0)
    {
-      if(displayState[0] < 0.0)
+      if(displayState[0] <= 0.0)
       {
          MessageInterface::PopupMessage
-            (Gmat::WARNING_, "RadPer must be greater than or equal to zero");
-             canClose = false;
-             return;
+            (Gmat::WARNING_, "RadPer must be greater than zero");
+         canClose = false;
+         return;
       }
 
-      if(displayState[1] = 0.0)
+      if(displayState[1] == 0.0)
       {
          MessageInterface::PopupMessage
             (Gmat::WARNING_, "RadApo can not equal zero");
-             canClose = false;
-             return;
+         canClose = false;
+         return;
       }
    }
 
    if ( (strcmp(stateTypeStr.c_str(), "SphericalAZFPA") == 0) || 
         (strcmp(stateTypeStr.c_str(), "SphericalRADEC") == 0) )
    {
-       if (displayState[0] <= 0.0)
-       {
-          MessageInterface::PopupMessage
+      if (displayState[0] <= 0.0)
+      {
+         MessageInterface::PopupMessage
             (Gmat::WARNING_, "RMAG must be greater than zero");
-          canClose = false;
-          return;
-       }
+         canClose = false;
+         return;
+      }
    }
 
 //   // Check to make sure that the Keplerian values 
