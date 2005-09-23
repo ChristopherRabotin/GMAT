@@ -42,8 +42,11 @@ public:
                SolarSystem *solarsystem, 
                wxButton *theApplyButton);
     ~OrbitPanel();
-    void SaveData();
+   
     void LoadData();
+    void SaveData();
+   
+   bool canClose;
    
 protected:
    Anomaly           anomaly;
@@ -55,17 +58,28 @@ private:
    SolarSystem    *theSolarSystem;
    GuiItemManager *theGuiManager;
    GuiInterpreter *theGuiInterpreter;
-
+   CoordinateSystem *mInternalCoord;
+   CoordinateSystem *mOutCoord;
+   CoordinateSystem *mFromCoord;
+   
+   Real mEpoch;
+   
    bool mIsCoordSysChanged;
-   bool mIsTextChanged;
    bool mIsStateChanged;
+   bool mIsStateTypeChanged;
+   bool mIsEpochChanged;
 
    Rvector6 mCartState;
+   Rvector6 mTempCartState;
+   Rvector6 mOutState;
+   
    CoordinateConverter mCoordConverter;
-
+   wxString mFromCoordStr;
+   wxString mFromStateTypeStr;
+   
    void Create();
    void AddElements(wxWindow *parent);
-    
+   
    // Event Handling
    DECLARE_EVENT_TABLE();
    void OnComboBoxChange(wxCommandEvent& event);
@@ -73,9 +87,13 @@ private:
 
    void InitializeCoordinateSystem(CoordinateSystem *cs);
    void SetLabelsUnits(const std::string &stateType);
-
-//   wxString bodiesArray[100];
-
+   
+   void UpdateEpoch();
+   void DisplayState();
+   Rvector6 ConvertState(CoordinateSystem *cs, const Rvector6 &state, 
+                         const std::string &fromElementType, 
+                         const std::string &toElementType);
+   
    wxButton *theApplyButton;
 
    wxStaticText *description1;
@@ -84,7 +102,7 @@ private:
    wxStaticText *description4;
    wxStaticText *description5;
    wxStaticText *description6;
-    
+   
    wxStaticText *label1;
    wxStaticText *label2;
    wxStaticText *label3;
