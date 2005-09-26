@@ -161,7 +161,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    theGuiManager->UpdateAll();
 }
 
-//loj: 6/3/05 Added
+
 //------------------------------------------------------------------------------
 // void UpdateFormation()
 //------------------------------------------------------------------------------
@@ -176,7 +176,6 @@ void ResourceTree::UpdateFormation()
 }
 
 
-//loj: 6/3/05 Added
 //------------------------------------------------------------------------------
 // void UpdateVariable()
 //------------------------------------------------------------------------------
@@ -262,7 +261,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
    SetItemImage(mHardwareItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
 
-   //----- SpecialPoint is child of Universe (loj: 5/6/05 Added)
+   //----- SpecialPoint is child of Universe
    mSpecialPointsItem =
       AppendItem(mUniverseItem, wxT("Special Points"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Special Points"),
@@ -368,7 +367,7 @@ void ResourceTree::AddDefaultResources()
    SetItemImage(mPropagatorItem, GmatTree::ICON_OPENFOLDER, 
                 wxTreeItemIcon_Expanded);
    
-   //----- Universe (loj: 5/6/05 made mUniverseItem member data)
+   //----- Universe
    mUniverseItem =
       AppendItem(resource, wxT("Universe"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Universe"),
@@ -800,8 +799,6 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId)
          AppendItem(itemId, wxT(objName), GmatTree::ICON_REPORT, -1,
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::REPORT_FILE));
-      //loj: 6/14/05 changed the SubscriberFactory so we dont need here
-      //else if ((objTypeName == "XYPlot") || (objTypeName == "TsPlot"))
       else if (objTypeName == "XYPlot")
          AppendItem(itemId, wxT(objName), GmatTree::ICON_XY_PLOT, -1,
                     new GmatTreeItemData(wxT(objName),
@@ -832,6 +829,7 @@ void ResourceTree::AddDefaultInterfaces(wxTreeItemId itemId)
    AppendItem(itemId, wxT("Matlab Server"), GmatTree::ICON_DEFAULT, -1,
               new GmatTreeItemData(wxT("Matlab Server"), GmatTree::INTERFACE));
     
+   Expand(itemId); //loj: 9/22/05 Added
 }
 
 //------------------------------------------------------------------------------
@@ -934,7 +932,6 @@ void ResourceTree::AddDefaultCoordSys(wxTreeItemId itemId)
    for (int i = 0; i<size; i++)
    {
       objName = wxString(itemNames[i].c_str());
-      //loj: 8/19/05 Added to check for default coord. system
       if (objName == "EarthMJ2000Eq" || objName == "EarthMJ2000Ec" ||
           objName == "EarthFixed")
       {
@@ -965,7 +962,6 @@ void ResourceTree::AddDefaultCoordSys(wxTreeItemId itemId)
 void ResourceTree::AddDefaultSpecialPoints(wxTreeItemId itemId)
 {
    /// @todo:  need to wait for method in gui interpreter
-   //loj: 5/6/05 uncommented 
    StringArray itemNames = GmatAppData::GetGuiInterpreter()->
       GetListOfConfiguredItems(Gmat::CALCULATED_POINT);
    int size = itemNames.size();
@@ -1121,8 +1117,37 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    else if (strcmp(title, wxT("Scripts")) == 0)
    {
       menu.Append(POPUP_ADD_SCRIPT, wxT("Add Script"));
-      menu.Append(POPUP_ADD_SCRIPT_FOLDER, wxT("Add Script Folder")); //loj: 8/3/05 Added
+      menu.Append(POPUP_ADD_SCRIPT_FOLDER, wxT("Add Script Folder"));
       //menu.Append(POPUP_NEW_SCRIPT, wxT("New"));
+
+      // Show run script menu if node has script file (loj: 9/23/05 Added)
+      if (GetChildrenCount(itemId, false) > 0)
+      {
+         wxTreeItemIdValue cookie;
+         wxTreeItemId scriptId = GetFirstChild(itemId, cookie);
+         bool hasScriptFile = false;
+         
+         while (scriptId.IsOk())
+         {
+            
+            if (GetItemImage(scriptId) != GmatTree::ICON_FOLDER)
+            {
+               hasScriptFile = true;
+               break;
+            }
+            
+            scriptId = GetNextChild(itemId, cookie);
+         }
+         
+         if (hasScriptFile)
+         {
+            menu.AppendSeparator();
+            menu.Append(POPUP_RUN_SCRIPTS_FROM_FOLDER, wxT("Run Scripts"));
+            menu.Append(POPUP_QUIT_RUN_SCRIPTS_FROM_FOLDER,
+                        wxT("Quit Running Scripts"));
+         }
+      }
+      
       menu.AppendSeparator();
       menu.Append(POPUP_REMOVE_ALL_SCRIPTS, wxT("Remove All"));
    }
@@ -1136,7 +1161,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       menu.AppendSeparator();
       menu.Append(POPUP_REMOVE_SCRIPT, wxT("Remove"));
    }
-   else if (dataType == GmatTree::SCRIPT_FOLDER) //loj: 8/3/05 Added
+   else if (dataType == GmatTree::SCRIPT_FOLDER)
    {
       menu.Append(POPUP_RUN_SCRIPTS_FROM_FOLDER, wxT("Run Scripts"));
       menu.Append(POPUP_QUIT_RUN_SCRIPTS_FROM_FOLDER, wxT("Quit Running Scripts"));
@@ -1160,7 +1185,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    else if (strcmp(title, wxT("Ground Stations")) == 0)
       return;     //no menu
    else if (dataType == GmatTree::CELESTIAL_BODY ||
-            dataType == GmatTree::COORD_SYSTEM) //loj: 8/19/05 Added
+            dataType == GmatTree::COORD_SYSTEM)
    {
       menu.Append(POPUP_OPEN, wxT("Open"));
       menu.Append(POPUP_CLOSE, wxT("Close"));
@@ -1878,7 +1903,7 @@ void ResourceTree::OnAddImpulsiveBurn(wxCommandEvent &event)
 
       Expand(item);
       
-      theGuiManager->UpdateBurn(); //loj: 6/1/05 Added
+      theGuiManager->UpdateBurn();
    }
 }
 
@@ -1905,7 +1930,7 @@ void ResourceTree::OnAddFiniteBurn(wxCommandEvent &event)
       AppendItem(item, name, GmatTree::ICON_BURN, -1,
                  new GmatTreeItemData(name, GmatTree::FINITE_BURN));
 
-      theGuiManager->UpdateBurn(); //loj: 6/1/05 Added
+      theGuiManager->UpdateBurn();
       
       Expand(item);
    }
@@ -2032,23 +2057,6 @@ void ResourceTree::OnAddVariable(wxCommandEvent &event)
    // show dialog to create user parameter
    ParameterCreateDialog paramDlg(this);
    paramDlg.ShowModal();
-
-   //loj: 6/3/05 Commented out - resource tree is updated in ParameterCreateDialog
-   // so that varibles created via the ReportFilePanel or XyPlotPanel can also be shown.
-   
-//    if (paramDlg.IsParamCreated())
-//    {
-//       wxArrayString names = paramDlg.GetParamNames();
-
-//       for (unsigned int i=0; i<names.GetCount(); i++)
-//       {
-//          AppendItem(item, names[i], GmatTree::ICON_VARIABLE, -1,
-//                     new GmatTreeItemData(names[i], GmatTree::VARIABLE));
-//       }
-      
-//       theGuiManager->UpdateParameter();
-//       Expand(item);
-//    }
 }
 
 
@@ -2084,7 +2092,7 @@ void ResourceTree::OnAddMatlabFunction(wxCommandEvent &event)
                     new GmatTreeItemData(withName, GmatTree::MATLAB_FUNCTION));
 
          Expand(item);
-         theGuiManager->UpdateFunction(); //loj: 6/6/05 Added
+         theGuiManager->UpdateFunction();
       }
 
       SelectItem(GetLastChild(item));
@@ -2124,7 +2132,7 @@ void ResourceTree::OnAddGmatFunction(wxCommandEvent &event)
                     new GmatTreeItemData(withName, GmatTree::GMAT_FUNCTION));
 
          Expand(item);
-         theGuiManager->UpdateFunction(); //loj: 6/6/05 Added
+         theGuiManager->UpdateFunction();
       }
 
       SelectItem(GetLastChild(item));
@@ -2157,8 +2165,6 @@ void ResourceTree::OnAddCoordSys(wxCommandEvent &event)
 
       AppendItem(item, name, GmatTree::ICON_COORDINATE_SYSTEM, -1,
                  new GmatTreeItemData(name, GmatTree::USER_COORD_SYSTEM));
-      //loj: 8/19/05 changed to USER_COORD_SYSTEM because we don't want to delete
-      // default coord. system
       
       Expand(item);
 
@@ -2189,7 +2195,7 @@ void ResourceTree::OnAddBarycenter(wxCommandEvent &event)
 
       Expand(item);
       
-      theGuiManager->UpdateCelestialPoint(); //loj: 5/6/05 Added
+      theGuiManager->UpdateCelestialPoint();
    }
 }
 
@@ -2211,19 +2217,12 @@ void ResourceTree::OnAddLibration(wxCommandEvent &event)
 
    if (theGuiInterpreter->CreateCalculatedPoint("LibrationPoint", name.c_str()) != NULL)
    {
-      //loj: 5/11/05 the default LibrationPoint uses Earth-Luna barycenter as secondary,
-      // so need to pickup default barycenter when it shows the tree item.
-      
-      //AppendItem(item, name, GmatTree::ICON_DEFAULT, -1,
-      //           new GmatTreeItemData(name, GmatTree::LIBRATION_POINT));
-
-      //Collapse(mSpecialPointsItem);
       DeleteChildren(mSpecialPointsItem);
       AddDefaultSpecialPoints(mSpecialPointsItem);
       
       Expand(item);
       
-      theGuiManager->UpdateCelestialPoint(); //loj: 5/6/05 Added
+      theGuiManager->UpdateCelestialPoint();
    }
 }
 
@@ -2247,15 +2246,75 @@ void ResourceTree::OnAddScript(wxCommandEvent &event)
    {
       wxString filename = dialog.GetFilename().c_str();
       wxString path = dialog.GetPath().c_str();
+
+      #if DEBUG_RESOURCE_TREE
+      MessageInterface::ShowMessage
+         ("ResourceTree::OnAddScript() filename=<%s>\npath=<%s>\n",
+          filename.c_str(), path.c_str());
+      #endif
       
-      // add item to tree
-      wxTreeItemId newItem = AppendItem(mScriptItem, filename, GmatTree::ICON_DEFAULT, -1,
-                    new GmatTreeItemData(path, GmatTree::SCRIPT_FILE));
+      wxTreeItemIdValue cookie;
+      wxString scriptPath, childText;
+      wxTreeItemId childId = GetFirstChild(mScriptItem, cookie);
+      wxTreeItemId scriptId;
+      bool hasSameName = false;
 
+      // find child with same path
+      while (childId.IsOk())
+      {
+         childText = GetItemText(childId);
+         
+         #if DEBUG_RESOURCE_TREE > 1
+         MessageInterface::ShowMessage
+            ("ResourceTree::OnAddScript() childText=<%s>\n", childText.c_str());
+         #endif
+         
+         scriptPath = ((GmatTreeItemData *)GetItemData(childId))->GetDesc();
+         
+         if (childText == filename)
+         {
+            hasSameName = true;
+            if (scriptPath == path)
+               break;
+         }
+         
+         childId = GetNextChild(mScriptItem, cookie);
+      }
+      
+      // if same path found, do not add a child
+      if (childId.IsOk())
+      {
+         #if DEBUG_RESOURCE_TREE
+         MessageInterface::ShowMessage
+            ("ResourceTree::OnAddScript() Same path found.\npath=<%s>\n",
+             path.c_str());
+         #endif
+         
+         scriptId = childId;
+         GmatAppData::GetMainFrame()->CloseAllChildren(false, false, childText);
+      }
+      else
+      {
+         if (hasSameName)
+         {
+            // add path to tree
+            scriptId =
+               AppendItem(mScriptItem, path, GmatTree::ICON_DEFAULT, -1,
+                          new GmatTreeItemData(path, GmatTree::SCRIPT_FILE));
+         }
+         else
+         {
+            // add filename to tree
+            scriptId =
+               AppendItem(mScriptItem, filename, GmatTree::ICON_DEFAULT, -1,
+                          new GmatTreeItemData(path, GmatTree::SCRIPT_FILE));
+         }
+      }
+      
       // open item
-      GmatAppData::GetMainFrame()->CreateChild(
-                  (GmatTreeItemData *)GetItemData(newItem));
-
+      GmatAppData::GetMainFrame()->
+         CreateChild((GmatTreeItemData *)GetItemData(scriptId));
+      
       Expand(mScriptItem);
    }
 }
@@ -2385,7 +2444,7 @@ void ResourceTree::OnScriptBuildAndRun(wxCommandEvent& event)
    GmatAppData::GetMainFrame()->OnScriptRun(event);
 }
 
-//loj: 8/4/05 Added
+
 //------------------------------------------------------------------------------
 // void OnAddScriptFolder()
 //------------------------------------------------------------------------------
@@ -2441,7 +2500,6 @@ void ResourceTree::OnAddScriptFolder(wxCommandEvent &event)
 }
 
 
-//loj: 8/4/05 Added
 //------------------------------------------------------------------------------
 // void OnRunScriptsFromFolder()
 //------------------------------------------------------------------------------
@@ -2456,10 +2514,29 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    wxString filename;
    wxTreeItemIdValue cookie;
    wxTreeItemId scriptId = GetFirstChild(item, cookie);
-   int numScripts = GetChildrenCount(item, false);
+   int numScripts = 0;
+   
+   // find only script file, exclude script folder
+   while (scriptId.IsOk())
+   {
+      #if DEBUG_RESOURCE_TREE > 1
+      MessageInterface::ShowMessage
+         ("ResourceTree::OnRunScriptsFromFolder() scriptText=<%s>\n",
+          GetItemText(scriptId).c_str());
+      #endif
+      
+      if (GetItemImage(scriptId) != GmatTree::ICON_FOLDER)
+         numScripts++;
+      
+      scriptId = GetNextChild(item, cookie);
+   }
+   
+   //int numScripts = GetChildrenCount(item, false);
    wxString strRunCount;
+   wxString strRepeatCount = "1";
    strRunCount.Printf("%d", numScripts);
    long runCount = numScripts;
+   long repeatCount = 1;
    
    //loj: 8/5/05 wxGetNumberFromUser() doesn't ruturn -1 when invalid number has
    //entered as it is documented.
@@ -2470,15 +2547,27 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    
    strRunCount = wxGetTextFromUser("Enter number of scripts to run: ",
                                    "Run Scripts", strRunCount, this);
+   strRepeatCount = wxGetTextFromUser("Enter number of times to run each script: ",
+                                      "Repeat Count", strRepeatCount, this);
    
    if (!strRunCount.ToLong(&runCount))
       return;
    
+   if (!strRepeatCount.ToLong(&repeatCount))
+      repeatCount = 1;
+   
    int count = 0;
    mHasUserInterrupted = false;
+   scriptId = GetFirstChild(item, cookie);
    
    while (scriptId.IsOk())
-   {
+   {     
+      if (GetItemImage(scriptId) == GmatTree::ICON_FOLDER)
+      {
+         scriptId = GetNextChild(item, cookie);
+         continue;
+      }
+      
       if (mHasUserInterrupted)
          break;
       
@@ -2494,23 +2583,28 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
                   "Running script %d out of %d: %s\n", count, numScripts,
                   filename.c_str());
       
-      try
-      {
-         if (BuildScript(filename))
-            GmatAppData::GetMainFrame()->OnScriptRun(event);
-      }
-      catch(BaseException &e)
+      for (int i=0; i<repeatCount; i++)
       {
          MessageInterface::ShowMessage
-            ("*** Error running: %s\n   %s\n", e.GetMessage().c_str());
+            ("====> Run Count: %d\n", i+1);
+         
+         try
+         {
+            if (BuildScript(filename))
+               GmatAppData::GetMainFrame()->OnScriptRun(event);
+         }
+         catch(BaseException &e)
+         {
+            MessageInterface::ShowMessage
+               ("*** Error running: %s\n   %s\n", e.GetMessage().c_str());
+         }
       }
-      
+   
       scriptId = GetNextChild(item, cookie);
    }
 }
 
 
-//loj: 8/4/05 Added
 //------------------------------------------------------------------------------
 // void OnQuitRunScriptsFromFolder()
 //------------------------------------------------------------------------------
@@ -2529,7 +2623,6 @@ void ResourceTree::OnQuitRunScriptsFromFolder(wxCommandEvent &event)
 }
 
 
-//loj: 8/4/05 Added
 //------------------------------------------------------------------------------
 // void OnRemoveScriptFolder()
 //------------------------------------------------------------------------------
