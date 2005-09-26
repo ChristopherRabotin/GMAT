@@ -368,18 +368,11 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
 
          std::stringstream stopCondDesc;
 
-         //loj: 7/26/06 Fix for crash on ShowScript
-         // Since Moderator is removed from the StopCondition
-         // stopParam is NULL until command is initialized.
-         // So use GetStringParameter("StopVar") instead
-         //Parameter *stopParam = stopWhen[index]->GetStopParameter();
-         //std::string stopName = stopParam->GetName();
          std::string stopName = stopWhen[index]->GetStringParameter("StopVar");
          stopCondDesc << stopName;
 
          if ((stopName.find("Periapsis") == std::string::npos) &&
              (stopName.find(".Apoapsis") == std::string::npos))
-            //stopCondDesc << " = " << stopWhen[index]->GetRealParameter("Goal"); //loj: 7/19/05
             stopCondDesc << " = " << stopWhen[index]->GetStringParameter("Goal");
          
          gen += stopCondDesc.str();
@@ -1353,7 +1346,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
             theModerator->CreateStopCondition("StopCondition", "StopOn" +
                              paramName);
          
-         // Set backwards propagation (loj: 7/20/05 Added)
+         // Set backwards propagation
          stopCond->SetPropDirection(direction[dirIndex]);
          
          stopCond->SetStringParameter("StopVar", paramName);
@@ -1366,9 +1359,6 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          {
             loc = end + 1;
 
-            //loj: 7/19/05 Now it handles goal as string
-            //Real propStopVal = atof(&(i->c_str())[loc]);
-            //stopCond->SetRealParameter("Goal", propStopVal);
             endchar = i->find("}", loc);
             component = i->substr(loc, endchar-loc);
             
@@ -1714,9 +1704,8 @@ bool Propagate::Initialize()
       for (UnsignedInt i=0; i<stopWhen.size(); i++)
       {
          stopWhen[i]->SetSolarSystem(solarSys);
-
-         //loj: 7/19/05 Set StopCondition parameters here
-         // (Use of Moderator has been removed from the BaseStopCondition)
+         
+         //Set StopCondition parameters
          refNames = stopWhen[i]->GetRefObjectNameArray(Gmat::PARAMETER);
          
          for (UnsignedInt j=0; j<refNames.size(); j++)
@@ -2352,11 +2341,13 @@ bool Propagate::Execute()
 //------------------------------------------------------------------------------
 void Propagate::RunComplete()
 {
+   if (inProgress)
+      publisher->FlushBuffers();
+   
    inProgress = false;
    hasFired = false;
    GmatCommand::RunComplete();
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -2487,7 +2478,7 @@ void Propagate::SetNames(const std::string& name, StringArray& owners,
    elements.push_back(name+".Vz");
 }
 
-//loj: 7/20/05 Added
+
 //------------------------------------------------------------------------------
 // std::string CreateParameter(const std::string name)
 //------------------------------------------------------------------------------
