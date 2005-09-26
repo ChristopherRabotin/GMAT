@@ -2393,6 +2393,9 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    std::stringstream value;
    value.precision(18);
    
+   bool coordType = isForDisplay, showAnomaly = false;
+   isForDisplay = true;
+   
    // Set the parameter order for output
    Integer parmOrder[parameterCount], parmIndex = 0;
    parmOrder[parmIndex++] = DATE_FORMAT_ID;
@@ -2445,6 +2448,7 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
             "', GMAT cannot set up Keplerian element conversion for the "
             "coordinate system '" + coordinateSystem->GetName() + 
             "' because the oribin is not a celestial body.");
+      showAnomaly = true;
    }
    
    if (displayCoordType != "Cartesian")
@@ -2479,6 +2483,8 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                else
                   WriteParameterValue(parmOrder[i], value);
                
+               if ((showAnomaly == false) && (parmOrder[i] == ANOMALY_ID))
+                  value.str("");
                
                if (value.str() != "")
                   stream << prefix << GetParameterText(parmOrder[i])
@@ -2536,6 +2542,8 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
          newprefix += ownedObject->GetTypeName();
       stream << ownedObject->GetGeneratingString(Gmat::OWNED_OBJECT, newprefix);
    }
+   
+   isForDisplay = coordType;
 }
 
 
