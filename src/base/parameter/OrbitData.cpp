@@ -420,7 +420,7 @@ Rvector6 OrbitData::GetSphRaDecState()
       {
          MessageInterface::ShowMessage
             ("*** ERROR *** OrbitData::GetSphRaDecState() %s\n   Possible Cause: "
-             "Devide by Zero, Continue processing...\n   state = %s\n",
+             "Divide by Zero, Continue processing...\n   state = %s\n",
              e.GetMessage().c_str(), cartState.ToString().c_str());
       }
       
@@ -525,18 +525,23 @@ Real OrbitData::GetCartReal(const std::string &str)
 //------------------------------------------------------------------------------
 Real OrbitData::GetKepReal(const std::string &str)
 {
+
    Rvector6 state = GetCartState();
    
-   Rvector3 pos(state[0], state[1], state[2]);
-   Rvector3 vel(state[3], state[4], state[5]);
+   if (mOrigin->GetName() != "Earth")
+   {
+      state = state - mOrigin->GetMJ2000State(mCartEpoch);
+   }
    
+   Rvector3 pos(state[0], state[1], state[2]);
+   Rvector3 vel(state[3], state[4], state[5]);   
    Real rMag = pos.GetMagnitude();
    
    if (rMag < ORBIT_ZERO_TOL)
       throw ParameterException
          ("OrbitData::GetKepReal(" + str + ") position vector is zero. pos: " +
           pos.ToString() + " vel: " + vel.ToString());
-      
+
    if (str == "KepSMA")
    {
       return GetSemiMajorAxis(pos, vel);
@@ -703,6 +708,12 @@ Real OrbitData::GetKepReal(const std::string &str)
 Real OrbitData::GetOtherKepReal(const std::string &str)
 {
    Rvector6 state = GetCartState();
+   
+   if (mOrigin->GetName() != "Earth")
+   {
+      state = state - mOrigin->GetMJ2000State(mCartEpoch);
+   }
+   
    Rvector3 pos(state[0], state[1], state[2]);
    Rvector3 vel(state[3], state[4], state[5]);
    
@@ -1072,6 +1083,14 @@ Real OrbitData::GetSemiMajorAxis(const Rvector3 &pos, const Rvector3 &vel)
           r.ToString() + " vel: " + v.ToString());
    
    Real a = rMag / denom;
+
+   #if DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage
+      ("OrbitData::GetSemiMajorAxis() mOrigin=%s, mGravConst=%f\n   r=%s, "
+       "v=%s, sma=%f\n", mOrigin->GetName().c_str(), mGravConst,
+       r.ToString().c_str(), v.ToString().c_str(), a);
+   #endif
+   
    return a;
 }
 
@@ -1306,7 +1325,7 @@ void OrbitData::InitializeRefObjects()
    
    #if DEBUG_ORBITDATA_INIT
    MessageInterface::ShowMessage
-      ("OrbitData::InitializeRefObjects() mScOrignName=%s, mOriginName=%s\n",
+      ("OrbitData::InitializeRefObjects() mScOrign.Name=%s, mOrigin.Name=%s\n",
        mScOrigin->GetName().c_str(), mOrigin->GetName().c_str());
    #endif
 }
