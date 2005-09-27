@@ -154,6 +154,8 @@ void SpacecraftPanel::SaveData()
 {
     theBallisticMassPanel->SaveData();
     canClose = theBallisticMassPanel->canClose;
+    theOrbitPanel->SaveData();
+    canClose = canClose && theOrbitPanel->canClose;
     enableApply=true;
 
     if (!canClose)
@@ -162,7 +164,6 @@ void SpacecraftPanel::SaveData()
       return;
     }
       
-    theOrbitPanel->SaveData();
     theTankPanel->SaveData(); 
     theThrusterPanel->SaveData();
       
