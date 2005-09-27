@@ -1390,7 +1390,7 @@ GmatCommand* Interpreter::InterpretGMATFunction(const std::string &pathAndName)
             if (!obj)
                throw InterpreterException("Unable to create object " +
                                            name + " of type " + type +
-                                           "\nFunctiuon text: \"" + 
+                                           "\nFunction text: \"" + 
                                            currentLine + "\"");
             obj->SetName(name);
             if (commands == NULL)
@@ -3232,6 +3232,11 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
          "Interpreter::InterpretTextBlock entered\n");
    #endif
 
+   bool registerParameters = false;
+   
+   if (cmd->GetTypeName() == "BeginFunction")
+      registerParameters = true;
+
    StringArray sar = SeparateLines(block);
    StringArray cmdList = moderator->GetListOfFactoryItems(Gmat::COMMAND);
    
@@ -3303,10 +3308,10 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
          if (cmdType == endtype)
             continue;
 
-//         #ifdef DEBUG_TOKEN_PARSING
+         #ifdef DEBUG_TOKEN_PARSING
             MessageInterface::ShowMessage(
                "   Constructing a command of type %s\n", cmdType.c_str());
-//         #endif
+         #endif
 
          // Create the command
          if (find(cmdList.begin(), cmdList.end(), cmdType) == cmdList.end()) {
@@ -3322,6 +3327,20 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
                "Interpreter::InterpretTextBlock failed to create a " + cmdType +
                " command; please check the script syntax.");
          subsequent->SetGeneratingString(*i);
+         
+//         // Add parameters to the BeginFunction command
+//         if (registerParameters)
+//         {
+//            StringArray refParms = 
+//               subsequent->GetRefObjectNameArray(Gmat::PARAMETER);
+//            for (StringArray::iterator i = refParms.begin(); 
+//                 i != refParms.end(); ++i)
+//            {
+//               GmatBase *obj = moderator->GetConfiguredItem(*i);
+//               if (obj != NULL)
+//                  cmd->SetRefObject(obj, obj->GetType(), obj->GetName());
+//            }
+//         }
 
          #ifdef DEBUG_TOKEN_PARSING
             MessageInterface::ShowMessage(
@@ -3345,6 +3364,21 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
       // Now reconnect the rest of the mission sequence
       cmd->Append(terminalCommand);
       
+      // Add all parameters to the BeginFunction command
+      /// @note Seems like overkill here; may want to find a better approach
+      if (registerParameters)
+      {
+         StringArray refParms = 
+            moderator->GetListOfConfiguredItems(Gmat::PARAMETER);
+         for (StringArray::iterator i = refParms.begin(); 
+              i != refParms.end(); ++i)
+         {
+            GmatBase *obj = moderator->GetConfiguredItem(*i);
+            if (obj != NULL)
+               cmd->SetRefObject(obj, obj->GetType(), obj->GetName());
+         }
+      }
+
       return true;
    }
    
