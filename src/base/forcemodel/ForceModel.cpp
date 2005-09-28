@@ -282,27 +282,47 @@ ForceModel& ForceModel::operator=(const ForceModel& fdf)
 //------------------------------------------------------------------------------
 void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
 {
-    if (pPhysicalModel == NULL)
-       throw ForceModelException("Attempting to add a NULL force to " +
-                instanceName);
+   if (pPhysicalModel == NULL)
+      throw ForceModelException("Attempting to add a NULL force to " +
+         instanceName);
 
-    #ifdef DEBUG_FORCEMODEL_INIT
-       MessageInterface::ShowMessage(
-          "ForceModel::AddForce() entered for a %s force\n", 
-          pPhysicalModel->GetTypeName().c_str());
-    #endif       
+   #ifdef DEBUG_FORCEMODEL_INIT
+      MessageInterface::ShowMessage(
+         "ForceModel::AddForce() entered for a %s force\n", 
+         pPhysicalModel->GetTypeName().c_str());
+   #endif       
     
-    pPhysicalModel->SetDimension(dimension);
-    initialized = false;
+   pPhysicalModel->SetDimension(dimension);
+   initialized = false;
     
-    // Handle the name issues
-    std::string pmType = pPhysicalModel->GetTypeName();
-    if (pmType == "DragForce")
-       pPhysicalModel->SetName("Drag");
+   // Handle the name issues
+   std::string pmType = pPhysicalModel->GetTypeName();
+   if (pmType == "DragForce")
+      pPhysicalModel->SetName("Drag");
 
-
-    forceList.push_back(pPhysicalModel);
-    numForces = forceList.size();
+   // Trap multiple instances
+   if ((pmType == "GravityField") || (pmType == "PointMassForce"))
+   {
+      std::string forceBody = pPhysicalModel->GetBodyName(), compType;
+      
+      for (std::vector<PhysicalModel*>::iterator i = forceList.begin();
+           i != forceList.end(); ++i)
+      {
+         compType = (*i)->GetTypeName();
+         if ((compType == "GravityField") || (compType == "PointMassForce"))
+         {
+            if ((*i)->GetBodyName() == forceBody)
+               throw ForceModelException(
+                  "Attempted to add a " + pmType + 
+                  " force to the force model for the body " + forceBody +
+                  ", but there is already a " + compType + 
+                  " force in place for that body.");
+         }
+      }      
+   }
+   
+   forceList.push_back(pPhysicalModel);
+   numForces = forceList.size();
 }
 
 //------------------------------------------------------------------------------
