@@ -33,6 +33,7 @@ SolarSystem::PARAMETER_TEXT[SolarSystemParamCount - GmatBaseParamCount] =
 {
    "BodiesInUse",
    "NumberOfBodies",
+   "OverrideTimeSystem",
 };
 
 const Gmat::ParameterType
@@ -40,7 +41,9 @@ SolarSystem::PARAMETER_TYPE[SolarSystemParamCount - GmatBaseParamCount] =
 {
    Gmat::STRINGARRAY_TYPE,
    Gmat::INTEGER_TYPE,
+   Gmat::BOOLEAN_TYPE,
 };
+
 
 // define default names form solar system bodies
 const std::string SolarSystem::SUN_NAME        = "Sun";
@@ -139,6 +142,7 @@ SolarSystem::SolarSystem(std::string withName)
    pvSrcForAll      = Gmat::DE_405;
    anMethodForAll   = Gmat::LOW_FIDELITY;
    pE               = NULL;
+   overrideTimeForAll = false;
    
    // create and add the default bodies
    Star* theSun     = new Star(SUN_NAME);
@@ -195,6 +199,7 @@ GmatBase        (ss),
 pvSrcForAll     (ss.pvSrcForAll),
 anMethodForAll  (ss.anMethodForAll),
 pE              (NULL),
+overrideTimeForAll (ss.overrideTimeForAll),
 bodiesInUse     (ss.bodiesInUse), // copy it first
 bodyStrings     (ss.bodyStrings)
 {
@@ -228,6 +233,7 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
    pvSrcForAll    = ss.pvSrcForAll;
    anMethodForAll = ss.anMethodForAll;
    pE             = NULL;
+   overrideTimeForAll      = ss.overrideTimeForAll;
    bodiesInUse.clear();
    bodyStrings.clear();
    bodiesInUse    = ss.bodiesInUse;
@@ -528,6 +534,32 @@ bool SolarSystem::SetAnalyticMethod(const std::string &aM)
 }
 
 //------------------------------------------------------------------------------
+//  bool SetOverrideTimeSystem(bool overrideIt)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the override time system flag.
+ *
+ * @param <overrideIt> override time system selection for all of the bodies?.
+ *
+ * @return success flag for the operation.
+ *
+ */
+//------------------------------------------------------------------------------
+bool SolarSystem::SetOverrideTimeSystem(bool overrideIt)
+{
+   // Set it for each of the bodies
+   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   while (cbi != bodiesInUse.end())
+   {
+      if ((*cbi)->SetOverrideTimeSystem(overrideIt) == false)  return false;
+      ++cbi;
+   }
+   overrideTimeForAll = overrideIt;
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
 //  const StringArray& GetBodiesInUse() const
 //------------------------------------------------------------------------------
 /**
@@ -675,6 +707,35 @@ Integer SolarSystem::GetIntegerParameter(const std::string &label) const
 {
    return GetIntegerParameter(GetParameterID(label));
 }
+
+bool SolarSystem::GetBooleanParameter(const Integer id) const
+{
+   if (id == OVERRIDE_TIME_SYSTEM) return overrideTimeForAll;
+   return GmatBase::GetBooleanParameter(id); 
+}
+
+bool SolarSystem::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
+}
+
+bool SolarSystem::SetBooleanParameter(const Integer id,
+                                      const bool value)
+{
+   if (id == OVERRIDE_TIME_SYSTEM)
+   {
+      SetOverrideTimeSystem(value);
+      return true;
+   }
+   return GmatBase::SetBooleanParameter(id, value);
+}
+
+bool SolarSystem::SetBooleanParameter(const std::string &label,
+                                      const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
+}
+
 
 //------------------------------------------------------------------------------
 //  const StringArray&   GetStringArrayParameter(const Integer id) const

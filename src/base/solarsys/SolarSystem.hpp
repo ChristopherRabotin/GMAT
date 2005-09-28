@@ -45,6 +45,8 @@
 class SolarSystem : public GmatBase
 {
 public:
+   
+
    // class default constructor - creates default solar system
    // for Build 2 - this is Sun, Earth, Moon only
    SolarSystem(std::string withName = "");
@@ -80,7 +82,8 @@ public:
    bool SetAnalyticMethod(Gmat::AnalyticMethod aM);
    bool SetAnalyticMethod(const std::string &aM);
    
-
+   bool SetOverrideTimeSystem(bool overrideIt);
+   
    // Parameter access methods - overridden from GmatBase do I need these???
    virtual std::string    GetParameterText(const Integer id) const;     // const?
    virtual Integer        GetParameterID(const std::string &str) const; // const?
@@ -100,9 +103,12 @@ public:
    //virtual std::string    GetStringParameter(const Integer id) const; // const?
    //virtual bool           SetStringParameter(const Integer id,
    //                                          const std::string &value); // const?
-   //virtual bool           GetBooleanParameter(const Integer id) const; // const?
-   //virtual bool           SetBooleanParameter(const Integer id,
-   //                                           const bool value); // const?
+   virtual bool           GetBooleanParameter(const Integer id) const; 
+   virtual bool           GetBooleanParameter(const std::string &label) const; 
+   virtual bool           SetBooleanParameter(const Integer id,
+                                              const bool value); 
+   virtual bool           SetBooleanParameter(const std::string &label,
+                                              const bool value);
    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
 
@@ -190,18 +196,20 @@ protected:
    {
       BODIES_IN_USE = GmatBaseParamCount,
       NUMBER_OF_BODIES,
+      OVERRIDE_TIME_SYSTEM,
       SolarSystemParamCount
    };
+   
    
    static const std::string PARAMETER_TEXT[SolarSystemParamCount - GmatBaseParamCount];
    
    static const Gmat::ParameterType PARAMETER_TYPE[SolarSystemParamCount - GmatBaseParamCount];
    
-   
+    
    Gmat::PosVelSource    pvSrcForAll;
    Gmat::AnalyticMethod  anMethodForAll;
    PlanetaryEphem*       pE;
-   //Integer               bodiesInUseID;
+   bool                  overrideTimeForAll;
 
 private:
 

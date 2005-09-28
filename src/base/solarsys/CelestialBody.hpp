@@ -84,6 +84,7 @@ namespace Gmat
 class GMAT_API CelestialBody : public SpacePoint
 {
 public:
+   
    // additional constructor, specifying body type (as string) and name
    CelestialBody(std::string itsBodyType, std::string name);
    // additional constructor, specifying type (as Gmat::BodyType) and name
@@ -143,6 +144,9 @@ public:
    virtual bool           SetSourceFile(PlanetaryEphem *src);
    virtual bool           SetAnalyticMethod(Gmat::AnalyticMethod aM);
    virtual bool           SetUsePotentialFile(bool useIt);
+   
+   virtual bool           SetOverrideTimeSystem(bool overrideIt);
+
    
    virtual bool           SetAtmosphereModelType(std::string toAtmModelType);
    virtual bool           SetAtmosphereModel(AtmosphereModel *toAtmModel);
@@ -276,6 +280,7 @@ protected:
 
    static const Gmat::ParameterType PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount];
    static const Real JD_EPOCH_2000_TCB;
+   static const Real JD_EPOCH_2000_TT;
    //static const Real dDot              = 1.0 / GmatTimeUtil::SECS_PER_DAY;
    //static const Real TDot              = dDot / 36525.0;
    static const Real dDot;
@@ -357,6 +362,8 @@ protected:
    /// flag indicating whether or not the low fidelity epoch and 
    /// state have been modified
    bool                   newLF;
+   /// flag indicating whether or not to override the TDB/TCB tiems with TT
+   bool                   overrideTime;
    
    /// date and time of start of source file
    //A1Mjd                  sourceStart;      // currently unused

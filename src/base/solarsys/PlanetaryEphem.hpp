@@ -79,12 +79,17 @@ public:
    /**
     * Returns the the position and velocity of the specified body
     * at the specified time.
+	*
+	* @param forBody            body number for which to return the state
+	* @param atTime             time at which to get the state for the body
+	* @param overrideTimeSystem override the TCB or TDB time used, with TT?
     *
     * @return the position and velocity of the specified body at the rerquested
     *         time.
     */
    //------------------------------------------------------------------------------
-   virtual Real* GetPosVel(Integer forBody, A1Mjd atTime) = 0;
+   virtual Real* GetPosVel(Integer forBody, A1Mjd atTime, 
+                           bool overrideTimeSystem = false) = 0;
 
    // method to return the day-of-year and year of the start time of the
    // file.

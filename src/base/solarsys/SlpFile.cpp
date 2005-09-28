@@ -174,7 +174,7 @@ Integer SlpFile::GetBodyID(std::string bodyName)
 }
 
 //------------------------------------------------------------------------------
-//  Real* GetPosVel(Integer forBody, A1Mjd atTime)
+//  Real* GetPosVel(Integer forBody, A1Mjd atTime, overrideTimeSystem)
 //------------------------------------------------------------------------------
 /**
  * This method returns the position and velocity of the specified body at the
@@ -182,6 +182,7 @@ Integer SlpFile::GetBodyID(std::string bodyName)
  *
  * @param <forbody>  the requested body (number on SLP file).
  * @param <atTime>   time for which state of the body is requested.
+ * @param <overrideTimeSystem> currently ignored for SLP file ******
  *
  * @return state of the body at the requested time.
  *
@@ -190,7 +191,7 @@ Integer SlpFile::GetBodyID(std::string bodyName)
  *            message is based on error
  */
 //------------------------------------------------------------------------------
-Real* SlpFile::GetPosVel(Integer forBody, A1Mjd atTime)
+Real* SlpFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
 {
    double    forTime            = (double) atTime.Get();
 

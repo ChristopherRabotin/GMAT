@@ -228,7 +228,7 @@ Integer  DeFile::GetBodyID(std::string bodyName)
 }
 
 //------------------------------------------------------------------------------
-//  Real* GetPosVel(Integer forBody, A1Mjd atTime)
+//  Real* GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
 //------------------------------------------------------------------------------
 /**
  * This method returns the position and velocity of the specified body at the
@@ -236,6 +236,7 @@ Integer  DeFile::GetBodyID(std::string bodyName)
  *
  * @param <forbody>  the requested body (ID number on DE file).
  * @param <atTime>   time for which state of the body is requested.
+ * @param <overrideTimeSystem> override the TDB time and use TT?
  *
  * @return state of the body at the requested time.
  *
@@ -244,7 +245,7 @@ Integer  DeFile::GetBodyID(std::string bodyName)
  *            message is based on error
  */
 //------------------------------------------------------------------------------
-Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime)
+Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
 {
    static Real      result[6];
    // if we're asking for the Earth state, return 0.0 (since we're
@@ -267,12 +268,19 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime)
    //double absJD = atTime.Get() + 2430000.0;
    //double absJD = atTime.Get() + jdMjdOffset + TT_OFFSET / GmatTimeUtil::SECS_PER_DAY;
    //double tmpJD = atTime.Get() + jdMjdOffset + TT_OFFSET / GmatTimeUtil::SECS_PER_DAY;
-   double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
-                   "A1Mjd", "TdbMjd", GmatTimeUtil::JD_JAN_5_1941);
-   //double mjdTT = (double) TimeConverterUtil::Convert(atTime.Get(),
-   //                "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941);
-   //double absJD  = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
-   double absJD  = mjdTDB + GmatTimeUtil::JD_JAN_5_1941;
+   double absJD = 0.0;
+   if (overrideTimeSystem)
+   {
+	   double mjdTT = (double) TimeConverterUtil::Convert(atTime.Get(),
+					   "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941);
+	   absJD        = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
+	}
+	else
+    {
+	   double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
+					   "A1Mjd", "TdbMjd", GmatTimeUtil::JD_JAN_5_1941);
+	   absJD         = mjdTDB + GmatTimeUtil::JD_JAN_5_1941;
+    }
    
    //cout << "absJd = " << absJD << endl;
 

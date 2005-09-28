@@ -71,7 +71,8 @@ public:
 
    // method to return the position and velocity of the specified body
    // at the specified time
-   Real* GetPosVel(Integer forBody, A1Mjd atTime);
+   Real* GetPosVel(Integer forBody, A1Mjd atTime, 
+                   bool overrideTimeSystem = false);
 
    // method to return the day-of-year and year of the start time of the
    // DE file.

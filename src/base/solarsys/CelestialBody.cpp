@@ -131,6 +131,7 @@ const std::string CelestialBody::ANALYTIC_METHOD_STRINGS[Gmat::AnalyticMethodCou
 };
 
 const Real CelestialBody::JD_EPOCH_2000_TCB = 2451545.0;
+const Real CelestialBody::JD_EPOCH_2000_TT  = 2451545.0; // FIGURE THIS OUT!!!
 const Real CelestialBody::dDot              = 1.0;
 const Real CelestialBody::TDot              = 1.0;
 const Real CelestialBody::KEPLER_TOL        = 1.0e-06;
@@ -176,7 +177,8 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    defaultEqRadius    (6378.14),
    order              (4),
    degree             (4),
-   newLF              (true)
+   newLF              (true),
+   overrideTime       (false)
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
    objectTypeNames.push_back("CelestialBody");
@@ -223,8 +225,8 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    defaultEqRadius    (6378.14),
    order              (0),
    degree             (0),
-   newLF              (true)
-
+   newLF              (true),
+   overrideTime       (false)
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
    objectTypeNames.push_back("CelestialBody");
@@ -273,7 +275,8 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    lfKepler            (cBody.lfKepler),
    prevLFEpoch         (cBody.prevLFEpoch),
    prevLFState         (cBody.prevLFState),
-   newLF               (cBody.newLF)
+   newLF               (cBody.newLF),
+   overrideTime        (cBody.overrideTime)
 {
    state                  = cBody.state;
    stateTime              = cBody.stateTime;
@@ -365,6 +368,7 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    prevLFEpoch  = cBody.prevLFEpoch;
    prevLFState  = cBody.prevLFState;
    newLF        = cBody.newLF;
+   overrideTime = cBody.overrideTime;
       
    return *this;
 }
@@ -430,7 +434,7 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
          }
          // figure out the ID of the body
          bodyNumber = theSourceFile->GetBodyID(instanceName);
-         posVel     = theSourceFile->GetPosVel(bodyNumber,atTime);
+         posVel     = theSourceFile->GetPosVel(bodyNumber,atTime, overrideTime);
          state.SetElement(0,posVel[0]);
          state.SetElement(1,posVel[1]);
          state.SetElement(2,posVel[2]);
@@ -1119,6 +1123,26 @@ bool CelestialBody::SetUsePotentialFile(bool useIt)
    usePotentialFile = useIt;
    return true;
 }
+
+//------------------------------------------------------------------------------
+//  bool SetOverrideTimeSystem(bool overrideIt)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the time system override flag for the body 
+ * (i.e. if true, TDB and TCB times will be overridden with TT times).
+ *
+ * @param <overrideIt> overrride TDB or TCB time with TT?.
+ *
+ * @return flag indicating success of the method.
+ *
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::SetOverrideTimeSystem(bool overrideIt)
+{
+   overrideTime = overrideIt;
+   return true;
+}
+
 
 //------------------------------------------------------------------------------
 //  bool SetAtmosphereModelType(std::string toAtmModelType)
@@ -2315,14 +2339,28 @@ bool CelestialBody::IsBlank(char* aLine)
  * This method computes the Julian days from the TCB Epoch.
  *
  * @return number of Julian days since the TCB epoch.
+ *
+ * @note If the overrideTime flag is set, this actually computes the Julian Days
+ *       from TT epoch.
  */
 //------------------------------------------------------------------------------
 Real CelestialBody::GetJulianDaysFromTCBEpoch(const A1Mjd &forTime) const
 {
-   Real mjdTCB = TimeConverterUtil::Convert(forTime.Get(),
-                 "A1Mjd", "TcbMjd", GmatTimeUtil::JD_JAN_5_1941); 
-   Real jdTCB  = mjdTCB + GmatTimeUtil::JD_JAN_5_1941; 
-   return (jdTCB - JD_EPOCH_2000_TCB);
+   Real jdTime = 0.0;
+   if (overrideTime)
+   {
+	   Real mjdTT  = TimeConverterUtil::Convert(forTime.Get(),
+					 "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941); 
+	   jdTime      = mjdTT + GmatTimeUtil::JD_JAN_5_1941; 
+       return (jdTime - JD_EPOCH_2000_TT);
+   }
+   else
+   {
+	   Real mjdTCB = TimeConverterUtil::Convert(forTime.Get(),
+					 "A1Mjd", "TcbMjd", GmatTimeUtil::JD_JAN_5_1941); 
+	   jdTime      = mjdTCB + GmatTimeUtil::JD_JAN_5_1941; 
+       return (jdTime - JD_EPOCH_2000_TCB);
+   }
 }
 
 //------------------------------------------------------------------------------
