@@ -328,8 +328,15 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
          }
          
          //Show next parameter
-         mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
-         OnSelectProperty(event);
+         if (mUseUserParam)
+         {
+            mUserParamListBox->SetSelection(mUserParamListBox->GetSelection() + 1);
+         }
+         else
+         {
+            mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
+            OnSelectProperty(event);
+         }
       }
    }
    else if (event.GetEventObject() == mRemoveParamButton)
