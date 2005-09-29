@@ -335,12 +335,12 @@ void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
             if ((*i)->GetBodyName() == forceBody)
                hasGravityField = true;
          }
-         if (hasGravityField == false)
-            throw ForceModelException(
-               "Attempted to add a drag force for the body " + forceBody + 
-               ", but that body is not set as a primary body, so it does not " + 
-               "support additional forces.");
       }
+      if (hasGravityField == false)
+         throw ForceModelException(
+            "Attempted to add a drag force for the body " + forceBody +
+            ", but that body is not set as a primary body, so it does not " +
+            "support additional forces.");
    }
    
    forceList.push_back(pPhysicalModel);
