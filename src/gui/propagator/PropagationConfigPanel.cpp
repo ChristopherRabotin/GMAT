@@ -504,6 +504,22 @@ void PropagationConfigPanel::Initialize()
             secondaryBodiesArray.Add(bodyName.c_str());    
             pmForceList.push_back(new ForceType(bodyName, gravModelArray[NONE_GM], 
                dragModelArray[NONE_DM], magfModelArray[NONE_MM])); 
+               
+            //waw: Added 09/28/05
+            //Warn user about bodies already added as Primary body
+            Integer fmSize = (Integer)forceList.size();
+            Integer last = (Integer)pmForceList.size() - 1;
+            
+            for (Integer i = 0; i < fmSize; i++)
+            {
+                if (strcmp(pmForceList[last]->bodyName.c_str(), 
+                           forceList[i]->bodyName.c_str()) == 0)
+                {
+                   MessageInterface::PopupMessage
+                                 (Gmat::WARNING_, "Cannot set %s both as Primary body and Point Mass", pmForceList[last]->bodyName.c_str());
+                }
+            }
+
          }
          else if (force->GetTypeName() == "GravityField")
          {
@@ -524,6 +540,21 @@ void PropagationConfigPanel::Initialize()
             forceList[currentBodyId]->gravType = gravModelArray[gravModelType];
             forceList[currentBodyId]->gravf = theGravForce;
             forceList[currentBodyId]->potFilename = potFilename;
+            
+            //waw: Added 09/28/05
+            //Warn user about bodies already added as Primary body
+            Integer pmSize = (Integer)pmForceList.size();
+            Integer last = (Integer)forceList.size() - 1;
+            
+            for (Integer i = 0; i < pmSize; i++)
+            {
+                if (strcmp(forceList[last]->bodyName.c_str(), 
+                           pmForceList[i]->bodyName.c_str()) == 0)
+                {
+                   MessageInterface::PopupMessage
+                                 (Gmat::WARNING_, "Cannot set %s both as Primary body and Point Mass", pmForceList[last]->bodyName.c_str());
+                }
+            }
             
             if (forceList[currentBodyId]->potFilename == "")
             {
@@ -561,6 +592,21 @@ void PropagationConfigPanel::Initialize()
             forceList[currentBodyId]->bodyName = bodyName;
             forceList[currentBodyId]->dragType = atmosModelString;
             forceList[currentBodyId]->dragf = theDragForce;
+            
+            //waw: Added 09/28/05
+            //Warn user about bodies already added as Primary body
+            Integer pmSize = (Integer)pmForceList.size();
+            Integer last = (Integer)forceList.size() - 1;
+            
+            for (Integer i = 0; i < pmSize; i++)
+            {
+                if (strcmp(forceList[last]->bodyName.c_str(), 
+                           pmForceList[i]->bodyName.c_str()) == 0)
+                {
+                   MessageInterface::PopupMessage
+                                 (Gmat::WARNING_, "Cannot set %s both as Primary body and Point Mass", pmForceList[last]->bodyName.c_str());
+                }
+            }
             
             bool found = false;
             for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
