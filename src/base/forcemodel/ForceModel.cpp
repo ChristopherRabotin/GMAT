@@ -300,10 +300,12 @@ void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
    if (pmType == "DragForce")
       pPhysicalModel->SetName("Drag");
 
+   std::string forceBody = pPhysicalModel->GetBodyName();
+
    // Trap multiple instances
    if ((pmType == "GravityField") || (pmType == "PointMassForce"))
    {
-      std::string forceBody = pPhysicalModel->GetBodyName(), compType;
+      std::string compType;
       
       for (std::vector<PhysicalModel*>::iterator i = forceList.begin();
            i != forceList.end(); ++i)
@@ -319,6 +321,26 @@ void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
                   " force in place for that body.");
          }
       }      
+   }
+
+   // Check to be sure there is an associated PrimaryBody for drag forces
+   if (pmType == "DragForce")
+   {
+      bool hasGravityField = false;
+      for (std::vector<PhysicalModel*>::iterator i = forceList.begin();
+           i != forceList.end(); ++i)
+      {
+         if ((*i)->GetTypeName() == "GravityField")
+         {
+            if ((*i)->GetBodyName() == forceBody)
+               hasGravityField = true;
+         }
+         if (hasGravityField == false)
+            throw ForceModelException(
+               "Attempted to add a drag force for the body " + forceBody + 
+               ", but that body is not set as a primary body, so it does not " + 
+               "support additional forces.");
+      }
    }
    
    forceList.push_back(pPhysicalModel);
