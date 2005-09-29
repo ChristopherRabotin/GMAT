@@ -2868,7 +2868,6 @@ GmatBase* Interpreter::FindOwnedObject(StringArray tokenList, GmatBase *owner,
    }
    
    #ifdef DEBUG_TOKEN_PARSING
-      std::stringstream msg;
       msg << "Returning a \"" << obj->GetTypeName() << "\" object"
                 << "named \"" << obj->GetName() << "\"\n";   
       MessageInterface::ShowMessage(msg.str());
@@ -3017,14 +3016,26 @@ bool Interpreter::ConfigureForce(ForceModel *obj, std::string& objParm,
       }
       if (forcetype == "GravityField")
       {
-         std::string potName = moderator->GetPotentialFileName("JGM2");
-         if (potName == "") 
+         std::string potName;
+         if (parm == "Earth")
          {
-            // No file name set, so set to a default value
-            potName = "JGM2";
-            MessageInterface::ShowMessage(
-               "No potential file set, so using \"%s\"", potName.c_str());
+            potName = moderator->GetPotentialFileName("JGM2");
+            if (potName == "") 
+            {
+               // No file name set, so set to a default value
+               potName = "JGM2";
+               MessageInterface::ShowMessage(
+                  "No potential file set, so using \"%s\"", potName.c_str());
+            }
          }
+         else
+            potName = "";
+
+         #ifdef DEBUG_INTERPRETER
+            MessageInterface::ShowMessage("Potential file set to '%s'\n"
+               "on line '%s'\n", potName.c_str(), line.c_str());
+         #endif
+
          if (!pm->SetStringParameter("PotentialFile", potName))
             throw InterpreterException("Unable to set full field model.");
       }

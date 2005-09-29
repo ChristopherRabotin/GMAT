@@ -449,7 +449,8 @@ bool ScriptInterpreter::Parse()
                    /// @todo Correct epoch handling the Spacecraft code
                    // Code to handle "Sat.Epoch.TAIGregorian", etc.
                    if ((objParm == "Epoch") && 
-                       (obj->GetType() == Gmat::SPACECRAFT)) {
+                       (obj->GetType() == Gmat::SPACECRAFT)) 
+                   {
                        if (sar.size() > 2) {
                          // obj->SetStringParameter("DateFormat", sar[2]);
                          ((Spacecraft*)obj)->SetDisplayDateFormat(sar[2].c_str());
@@ -494,10 +495,11 @@ bool ScriptInterpreter::Parse()
                          ((Spacecraft*)obj)->SaveDisplay();
                          // obj->SetRealParameter(objParm, &(linestr[start]));
                       }
-                   }
+                   }  // Completes epoch parse
                    
                    // Look for owned objects if the list is deeper than 2
-                   if (sar.size() > 2) {
+                   if (sar.size() > 2) 
+                   {
 //                      // Check to see if it's a subparameter first
 //                      if (obj->GetParameterType(id) == Gmat::STRING_TYPE) {
 //                         obj->SetStringParameter(objParm, sar[2]);
@@ -507,7 +509,8 @@ bool ScriptInterpreter::Parse()
 //                      if (obj->GetParameterType(id) == Gmat::OBJECT_TYPE) {
                          // Maybe it's an owned object
                          obj = FindOwnedObject(sar, obj, 1);
-                         if (obj == NULL) {
+                         if (obj == NULL) 
+                         {
                             std::string errstr = objName;
                             errstr += sar[1];
                             errstr += ": Object was not found";
@@ -521,21 +524,32 @@ bool ScriptInterpreter::Parse()
                    // Set parameter data
                    
                    ++phrase;
+                   std::string objPhrase;
                    if (**phrase == "=")
+                   {
                        ++phrase;
+                       if (phrase == chunks.end())
+                          objPhrase = "";
+                       else
+                          objPhrase = (**phrase);
+                   }
 
                    #ifdef DEBUG_PARAMETER_PARSING
                       std::cout << "Setting \"" << (**phrase) 
                                 << "\" on object \""<< obj->GetName() << "\"\n";
                    #endif
                    
-                   if (!ConstructRHS(obj, **phrase, objParm)) {
-      
+                   if (!ConstructRHS(obj, objPhrase, objParm)) {
                       StringArray sa;
-                      if (IsGroup((**phrase).c_str()))
-                          sa = Decompose(**phrase);
+                      if (phrase == chunks.end())
+                         sa.push_back("");
                       else
-                          sa.push_back(**phrase);
+                      {
+                         if (IsGroup((**phrase).c_str()))
+                            sa = Decompose(**phrase);
+                         else
+                            sa.push_back(**phrase);
+                      }
                       for (StringArray::iterator i = sa.begin(); i != sa.end(); ++i) {
                          #ifdef DEBUG_PARAMETER_PARSING
                             std::cout << "Calling SetParameter with \"" << *i 
