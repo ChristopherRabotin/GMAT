@@ -139,11 +139,12 @@ void CallFunctionPanel::Create()
 //              wxCB_DROPDOWN | wxCB_READONLY );
 
    //loj: 6/6/05 get it from theGuiManager
-   functionComboBox = theGuiManager->GetFunctionComboBox(this, ID_COMBO, wxSize(130,-1));
+   functionComboBox = theGuiManager->GetFunctionComboBox(this, ID_COMBO, 
+                                                         wxDefaultSize);
 
    // wxGrid
    inputGrid =
-      new wxGrid( this, -1, wxDefaultPosition, wxSize(290, 23), wxWANTS_CHARS );
+      new wxGrid( this, -1, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS );
 
    inputGrid->CreateGrid( 1, 1, wxGrid::wxGridSelectRows );
    inputGrid->SetColSize(0, 290);
@@ -155,7 +156,7 @@ void CallFunctionPanel::Create()
    inputGrid->EnableEditing(false);
 
    outputGrid =
-      new wxGrid( this, -1, wxDefaultPosition, wxSize(290, 23), wxWANTS_CHARS );
+      new wxGrid( this, -1, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS );
 
    outputGrid->CreateGrid( 1, 1, wxGrid::wxGridSelectRows );
    outputGrid->SetColSize(0, 290);
