@@ -168,13 +168,13 @@ void ParameterSelectDialog::Create()
    // add parameter button (2nd column)
    //-------------------------------------------------------
    mAddParamButton = new wxButton(this, ID_BUTTON, wxT("->"),
-                                  wxDefaultPosition, wxSize(20,20), 0);
+                                  wxDefaultPosition, wxDefaultSize, 0);
    
    mRemoveParamButton = new wxButton(this, ID_BUTTON, wxT("<-"),
-                                      wxDefaultPosition, wxSize(20,20), 0);
+                                      wxDefaultPosition, wxDefaultSize, 0);
    
    mRemoveAllParamButton = new wxButton(this, ID_BUTTON, wxT("<="),
-                                        wxDefaultPosition, wxSize(20,20), 0);
+                                        wxDefaultPosition, wxDefaultSize, 0);
    
    wxBoxSizer *arrowButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
    arrowButtonsBoxSizer->Add(mAddParamButton, 0, wxALIGN_CENTRE|wxALL, bsize);
