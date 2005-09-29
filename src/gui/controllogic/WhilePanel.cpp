@@ -84,7 +84,8 @@ void WhilePanel::Setup(wxWindow *parent)
     wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
 
     conditionGrid = new wxGrid( parent, ID_GRID, wxDefaultPosition, 
-                    wxSize(454,238), wxWANTS_CHARS );
+                                wxDefaultSize, wxWANTS_CHARS );
+//                    wxSize(454,238), wxWANTS_CHARS );
     conditionGrid->CreateGrid( MAX_ROW, MAX_COL, wxGrid::wxGridSelectCells );
     conditionGrid->SetRowLabelSize(0);
     conditionGrid->SetDefaultCellAlignment(wxALIGN_CENTRE, wxALIGN_CENTRE);
@@ -101,7 +102,11 @@ void WhilePanel::Setup(wxWindow *parent)
     conditionGrid->SetColLabelValue(1, _T("LHS"));
     conditionGrid->SetColSize(1, 165);
     conditionGrid->SetColLabelValue(2, _T("Condition"));
+#ifdef __WXMAC__
+    conditionGrid->SetColSize(2, 80);
+#else
     conditionGrid->SetColSize(2, 60);
+#endif
     conditionGrid->SetColLabelValue(3, _T("RHS"));
     conditionGrid->SetColSize(3, 165);
     conditionGrid->SetCellValue(0, COMMAND_COL, "While");
