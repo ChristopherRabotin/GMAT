@@ -70,6 +70,7 @@ void ShowScriptDialog::Create()
    
    theScript = new wxTextCtrl(this, -1, text, wxPoint(0,0), scriptPanelSize, 
                       wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL);
+   theScript->SetFont( GmatAppData::GetFont() );
    theMiddleSizer->Add(theScript, 0, wxALIGN_CENTRE|wxALL, 3);
 }
 

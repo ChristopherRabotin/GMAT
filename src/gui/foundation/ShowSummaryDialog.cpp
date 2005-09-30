@@ -68,6 +68,7 @@ void ShowSummaryDialog::Create()
    
    theSummary = new wxTextCtrl(this, -1, text, wxPoint(0,0), scriptPanelSize, 
                       wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL);
+   theSummary->SetFont( GmatAppData::GetFont() );
    theMiddleSizer->Add(theSummary, 0, wxALIGN_CENTRE|wxALL, 3);
 }
 
