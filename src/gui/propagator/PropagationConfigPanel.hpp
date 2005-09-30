@@ -180,6 +180,7 @@ private:
    std::string currentBodyName;
    std::string gravTypeName;
    std::string dragTypeName;
+   std::string propOriginName;
    
    StringArray gravModelArray;
    StringArray dragModelArray;
@@ -195,10 +196,10 @@ private:
       
    bool useDragForce;
    bool isForceModelChanged;
-   bool isGravTextChanged;
    bool isPotFileChanged;
    bool isMagfTextChanged;
    bool isIntegratorChanged;
+   bool isOriginChanged;
 
    Propagator                     *newProp;
    PropSetup                      *thePropSetup;
@@ -247,6 +248,7 @@ private:
    // Combobox event method
    void OnIntegratorSelection(wxCommandEvent &event);
    void OnBodyComboBoxChange(wxCommandEvent &event);
+   void OnOriginComboBoxChange(wxCommandEvent &event);
    void OnBodySelection(wxCommandEvent &event);
    void OnGravitySelection(wxCommandEvent &event);
    void OnAtmosphereSelection(wxCommandEvent &event);
@@ -277,6 +279,7 @@ private:
       ID_CHECKBOX,
       ID_CB_INTGR,
       ID_CB_BODY,
+      ID_CB_ORIGIN,
       ID_CB_GRAV,
       ID_CB_ATMOS,
       ID_CB_MAG,

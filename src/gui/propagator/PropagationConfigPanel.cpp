@@ -55,10 +55,12 @@ BEGIN_EVENT_TABLE(PropagationConfigPanel, GmatPanel)
    EVT_COMBOBOX(ID_CB_INTGR, PropagationConfigPanel::OnIntegratorSelection)
    EVT_TEXT(ID_CB_BODY, PropagationConfigPanel::OnBodySelection)
    EVT_COMBOBOX(ID_CB_BODY, PropagationConfigPanel::OnBodyComboBoxChange)
+   EVT_COMBOBOX(ID_CB_ORIGIN, PropagationConfigPanel::OnOriginComboBoxChange)
    EVT_COMBOBOX(ID_CB_GRAV, PropagationConfigPanel::OnGravitySelection)
    EVT_COMBOBOX(ID_CB_ATMOS, PropagationConfigPanel::OnAtmosphereSelection)
    EVT_CHECKBOX(ID_CHECKBOX, PropagationConfigPanel::OnSRPCheckBoxChange)
 END_EVENT_TABLE()
+
 
 //------------------------------------------------------------------------------
 // PropagationConfigPanel()
@@ -111,6 +113,7 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
    isPotFileChanged = false;
    isMagfTextChanged = false;
    isIntegratorChanged = false;
+   isOriginChanged = false;
    
    theApplyButton->Disable();
 }
@@ -196,6 +199,10 @@ void PropagationConfigPanel::LoadData()
 
    integratorComboBox->SetSelection(typeId);
    integratorString = integratorArray[typeId]; 
+   
+   // Display the Origin (Central Body)
+   originComboBox->SetValue(propOriginName.c_str());
+   
    DisplayIntegratorData(false);
    DisplayForceData();
 }
@@ -392,6 +399,15 @@ void PropagationConfigPanel::SaveData()
             ShowForceList("SaveData() AFTER  saving SRP");
             #endif 
          }
+         
+         //-------------------------------------------------------
+         // Saving the Origin (Central Body)
+         //-------------------------------------------------------
+         if (isOriginChanged)
+         {
+            isOriginChanged = false;
+            newFm->SetStringParameter("CentralBody", propOriginName.c_str());
+         }
       }
       
       // save forces to the prop setup
@@ -474,6 +490,8 @@ void PropagationConfigPanel::Initialize()
       newProp = thePropSetup->GetPropagator();
       theForceModel = thePropSetup->GetForceModel();
       numOfForces   = thePropSetup->GetNumForces();
+      
+      propOriginName = theForceModel->GetStringParameter("CentralBody");
          
       PhysicalModel *force;     
       Integer paramId;
@@ -716,7 +734,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxStaticText( parent, ID_TEXT, wxT("Other Potential Field File:"),
                         wxDefaultPosition, wxDefaultSize, 0 );
    originStaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Propagation Origin"), //loj: 7/14/05 changed size
+      new wxStaticText( parent, ID_TEXT, wxT("Central Body"), //loj: 7/14/05 changed size
                         wxDefaultPosition, wxSize(122,20), wxST_NO_AUTORESIZE );
    
    #if DEBUG_PROP_PANEL_SETUP
@@ -851,9 +869,9 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                       magfArray, wxCB_DROPDOWN|wxCB_READONLY );
    //loj: 7/14/05 Changed to celestial body origin
    //originComboBox  =
-   //   theGuiManager->GetCoordSysComboBox(this, ID_CB_BODY, wxSize(120,-1));
+   //   theGuiManager->GetCoordSysComboBox(this, ID_CB_ORIGIN, wxSize(120,-1));
    originComboBox  =
-      theGuiManager->GetConfigBodyComboBox(this, ID_CB_BODY, wxSize(100,-1));
+      theGuiManager->GetConfigBodyComboBox(this, ID_CB_ORIGIN, wxSize(100,-1));
       
    #if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
@@ -1178,6 +1196,7 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
       setting7TextCtrl->SetValue(s7);
    }
    
+   
    #if DEBUG_PROP_PANEL
    ShowPropData("DisplayIntegratorData() exiting...");
    #endif
@@ -1381,6 +1400,19 @@ void PropagationConfigPanel::OnBodyComboBoxChange(wxCommandEvent &event)
 {
    OnBodySelection(event);
    theApplyButton->Enable(false);
+}
+
+//------------------------------------------------------------------------------
+// void OnOriginComboBoxChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::OnOriginComboBoxChange(wxCommandEvent &event)
+{
+   propOriginName = originComboBox->GetValue().c_str();
+   
+   isOriginChanged = true;
+   isForceModelChanged = true;
+   
+   theApplyButton->Enable(true);
 }
 
 
