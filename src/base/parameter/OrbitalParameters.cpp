@@ -15,7 +15,7 @@
 /**
  * Implements other orbit related parameter classes.
  *   VelApoapsis, VelPeriapsis, Apoapsis, Periapsis, OrbitPeriod,
- *   RadApoapsis, RadPeriapais, C3Energy, Energy, Altitude
+ *   RadApoapsis, RadPeriapais, C3Energy, Energy
  */
 //------------------------------------------------------------------------------
 #include "OrbitalParameters.hpp"
@@ -1097,119 +1097,4 @@ GmatBase* Energy::Clone(void) const
 {
    return new Energy(*this);
 }
-
-
-//==============================================================================
-//                              Altitude
-//==============================================================================
-/**
- * Implements spcecraft altitude.
- */
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// Altitude(const std::string &name, GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Constructor.
- *
- * @param <name> name of the parameter
- * @param <obj> reference object pointer
- */
-//------------------------------------------------------------------------------
-Altitude::Altitude(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "Altitude", obj, "Altitude", "Km", GmatParam::ORIGIN)
-{
-   mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
-   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
-}
-
-
-//------------------------------------------------------------------------------
-// Altitude(const Altitude &copy)
-//------------------------------------------------------------------------------
-/**
- * Copy constructor.
- *
- * @param <copy> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-Altitude::Altitude(const Altitude &copy)
-   : OrbitReal(copy)
-{
-}
-
-
-//------------------------------------------------------------------------------
-// const Altitude& operator=(const Altitude &right)
-//------------------------------------------------------------------------------
-/**
- * Assignment operator.
- *
- * @param <right> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-const Altitude&
-Altitude::operator=(const Altitude &right)
-{
-   if (this != &right)
-      OrbitReal::operator=(right);
-
-   return *this;
-}
-
-
-//------------------------------------------------------------------------------
-// ~Altitude()
-//------------------------------------------------------------------------------
-/**
- * Destructor.
- */
-//------------------------------------------------------------------------------
-Altitude::~Altitude()
-{
-}
-
-
-//-------------------------------------
-// Inherited methods from Parameter
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual bool Evaluate()
-//------------------------------------------------------------------------------
-/**
- * Evaluates value of the parameter.
- *
- * @return true if parameter value successfully evaluated; false otherwise
- */
-//------------------------------------------------------------------------------
-bool Altitude::Evaluate()
-{
-   mRealValue = OrbitData::GetSphRaDecReal("Altitude");
-   
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-      return false;
-   else
-      return true;
-}
-
-
-//-------------------------------------
-// methods inherited from GmatBase
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual GmatBase* Clone(void) const
-//------------------------------------------------------------------------------
-/**
- * Method used to create a copy of the object
- */
-//------------------------------------------------------------------------------
-GmatBase* Altitude::Clone(void) const
-{
-   return new Altitude(*this);
-}
-
 

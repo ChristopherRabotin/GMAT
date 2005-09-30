@@ -14,6 +14,8 @@
 //
 /**
  * Implements Orbit related data class.
+ *   VelApoapsis, VelPeriapsis, Apoapsis, Periapsis, OrbitPeriod,
+ *   RadApoapsis, RadPeriapais, C3Energy, Energy, Altitude(Geodetic)
  */
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
@@ -212,11 +214,11 @@ Rvector6 OrbitData::GetCartState()
       {
          #if DEBUG_ORBITDATA_CONVERT
          MessageInterface::ShowMessage
-            ("OrbitData::GetCartState() ===> mOutCoordSystem:%s Axis=%s\n",
+            ("OrbitData::GetCartState() mOutCoordSystem:%s, Axis addr=%d\n",
              mOutCoordSystem->GetName().c_str(),
-             mOutCoordSystem->GetRefObject(Gmat::AXIS_SYSTEM, "")->GetName().c_str());
+             mOutCoordSystem->GetRefObject(Gmat::AXIS_SYSTEM, ""));
          MessageInterface::ShowMessage
-            ("OrbitData::GetCartState() Before convert: mCartEpoch=%f\nstate = %s\n", 
+            ("OrbitData::GetCartState() <-- Before convert: mCartEpoch=%f\nstate = %s\n", 
              mCartEpoch, mCartState.ToString().c_str());
          #endif
          
@@ -226,7 +228,7 @@ Rvector6 OrbitData::GetCartState()
                                     mCartState, mOutCoordSystem);
             #if DEBUG_ORBITDATA_CONVERT
                MessageInterface::ShowMessage
-                  ("OrbitData::GetCartState() --After convert: mCartEpoch=%f\n"
+                  ("OrbitData::GetCartState() --> After  convert: mCartEpoch=%f\n"
                    "state = %s\n", mCartEpoch, mCartState.ToString().c_str());
             #endif
          }
@@ -814,20 +816,6 @@ Real OrbitData::GetSphRaDecReal(const std::string &str)
       return mSphRaDecState[RD_RAV];
    else if (str == "SphDecV")
       return mSphRaDecState[RD_DECV];
-   else if (str == "Altitude")
-   {
-      // if orgin is Earth, just return default
-      if (mOrigin->GetName() == "Earth")
-      {
-         return mSphRaDecState[RD_RMAG] -
-            ((CelestialBody*)mScOrigin)->GetEquatorialRadius();
-      }
-      else
-      {
-         Real rmag = GetPositionMagnitude(mOrigin);
-         return rmag - ((CelestialBody*)mOrigin)->GetEquatorialRadius();
-      }
-   }
    else
    {
       throw ParameterException

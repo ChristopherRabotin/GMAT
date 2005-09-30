@@ -43,7 +43,7 @@ public:
    const static Real PLANET_REAL_UNDEFINED = -9876543210.1234;
    
 protected:
-   
+
    // The inherited methods from RefData
    virtual void InitializeRefObjects();
    virtual bool IsValidObjectType(Gmat::ObjectType type);

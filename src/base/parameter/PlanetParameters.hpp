@@ -16,7 +16,7 @@
 //
 /**
  * Declares planet related parameter classes.
- *   MHA, Longitude, Latitude, LST
+ *   MHA, Longitude, Altitude(Geodetic), Latitude(Geodetic), LST
  */
 //------------------------------------------------------------------------------
 #ifndef PlanetParameters_hpp
@@ -78,6 +78,34 @@ public:
    
 protected:
 
+};
+
+
+//==============================================================================
+//                              Altitude
+//==============================================================================
+/**
+ * Declares Altitude class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API Altitude : public PlanetReal
+{
+public:
+   
+   Altitude(const std::string &name = "", GmatBase *obj = NULL);
+   Altitude(const Altitude &copy);
+   const Altitude& operator=(const Altitude &right);
+   virtual ~Altitude();
+   
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+   
 };
 
 

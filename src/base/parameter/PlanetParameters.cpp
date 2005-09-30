@@ -11,12 +11,10 @@
 //
 // Author: Linda Jun
 // Created: 2004/12/13
-// Modified:
-//   2005/6/10 Linda Jun - Moved BetaAngle to AngularParamters.cpp
 //
 /**
  * Implements planet related parameter classes.
- *   MHA, Longitude, Latitude, LST
+ *   MHA, Longitude, Altitude(Geodetic), Latitude(Geodetic), LST
  */
 //------------------------------------------------------------------------------
 
@@ -250,6 +248,121 @@ bool Longitude::Evaluate()
 GmatBase* Longitude::Clone(void) const
 {
    return new Longitude(*this);
+}
+
+
+//==============================================================================
+//                              Altitude
+//==============================================================================
+/**
+ * Implements spcecraft altitude.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Altitude(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+Altitude::Altitude(const std::string &name, GmatBase *obj)
+   : PlanetReal(name, "Altitude", obj, "Altitude", "Km",
+                Gmat::SPACECRAFT, GmatParam::ORIGIN)
+{
+   mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
+   PlanetData::mCentralBodyName = "Earth";
+}
+
+
+//------------------------------------------------------------------------------
+// Altitude(const Altitude &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+Altitude::Altitude(const Altitude &copy)
+   : PlanetReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// const Altitude& operator=(const Altitude &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const Altitude&
+Altitude::operator=(const Altitude &right)
+{
+   if (this != &right)
+      PlanetReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~Altitude()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+Altitude::~Altitude()
+{
+}
+
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool Altitude::Evaluate()
+{
+   mRealValue = PlanetData::GetReal("Altitude");
+   
+   if (mRealValue == PlanetData::PLANET_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* Altitude::Clone(void) const
+{
+   return new Altitude(*this);
 }
 
 
