@@ -142,11 +142,11 @@ protected:
    std::vector<bool> mShowObjectArray;
    
    std::string mEclipticPlane;
-   std::string mEquatorialPlane;
+   std::string mXYPlane;
    std::string mWireFrame;
    std::string mTargetStatus;
    std::string mOverlapPlot;
-   std::string mLockView;
+   std::string mUseInitialView;
    std::string mPerspectiveMode;
    std::string mUseFixedFov;
    std::string mAxes;
@@ -213,13 +213,13 @@ protected:
       VIEW_UP_COORD_SYSTEM,
       VIEW_UP_AXIS,
       CELESTIAL_PLANE,
-      EQUATORIAL_PLANE,
+      XY_PLANE,
       WIRE_FRAME,
       TARGET_STATUS,
       AXES,
       EARTH_SUN_LINES,
       OVERLAP_PLOT,
-      USE_VIEWPOINT_INFO,
+      USE_INITIAL_VIEW,
       PERSPECTIVE_MODE,
       USE_FIXED_FOV,
       DATA_COLLECT_FREQUENCY,

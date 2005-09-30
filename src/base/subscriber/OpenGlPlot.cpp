@@ -54,13 +54,13 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
    "ViewUpCoordinateSystem",
    "ViewUpAxis",
    "CelestialPlane",
-   "EquatorialPlane",
+   "XYPlane",
    "WireFrame",
    "TargetStatus",
    "Axes",
    "EarthSunLines",
    "Overlap",
-   "LockView",
+   "UseInitialView",
    "PerspectiveMode",
    "UseFixedFov",
    "DataCollectFrequency",
@@ -88,7 +88,7 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
    Gmat::STRING_TYPE,            //"ViewUpAxis"
    
    Gmat::STRING_TYPE,            //"CelestialPlane"
-   Gmat::STRING_TYPE,            //"EquatorialPlane"
+   Gmat::STRING_TYPE,            //"XYPlane"
    Gmat::STRING_TYPE,            //"WireFrame"
    Gmat::STRING_TYPE,            //"TargetStatus"
    Gmat::STRING_TYPE,            //"Axes"
@@ -129,13 +129,13 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    parameterCount = OpenGlPlotParamCount;
 
    mEclipticPlane = "Off";
-   mEquatorialPlane = "On";
+   mXYPlane = "On";
    mWireFrame = "Off";
    mTargetStatus = "Off";
    mAxes = "Off";
    mEarthSunLines = "Off";
    mOverlapPlot = "Off";
-   mLockView = "Off";
+   mUseInitialView = "On";
    mPerspectiveMode = "Off";
    mUseFixedFov = "Off";
    
@@ -219,13 +219,13 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    : Subscriber(ogl)
 {
    mEclipticPlane = ogl.mEclipticPlane;
-   mEquatorialPlane = ogl.mEquatorialPlane;
+   mXYPlane = ogl.mXYPlane;
    mWireFrame = ogl.mWireFrame;
    mTargetStatus = ogl.mTargetStatus;
    mAxes = ogl.mAxes;
    mEarthSunLines = ogl.mEarthSunLines;
    mOverlapPlot = ogl.mOverlapPlot;
-   mLockView = ogl.mLockView;
+   mUseInitialView = ogl.mUseInitialView;
    mPerspectiveMode = ogl.mPerspectiveMode;
    mUseFixedFov = ogl.mUseFixedFov;
    
@@ -442,10 +442,10 @@ bool OpenGlPlot::Initialize()
          
          if (PlotInterface::CreateGlPlotWindow
              (instanceName, mOldName, mViewCoordSysName, mSolarSystem,
-              (mEclipticPlane == "On"), (mEquatorialPlane == "On"),
+              (mEclipticPlane == "On"), (mXYPlane == "On"),
               (mWireFrame == "On"), (mAxes == "On"),
               (mEarthSunLines == "On"), (mOverlapPlot == "On"),
-              (mLockView == "On"), (mPerspectiveMode == "On"),
+              (mUseInitialView == "On"), (mPerspectiveMode == "On"),
               mNumPointsToRedraw))
          {
             #if DEBUG_OPENGL_INIT
@@ -812,7 +812,7 @@ bool OpenGlPlot::IsParameterReadOnly(const Integer id) const
       return true;
    
 //    if ((id == OVERLAP_PLOT) || (id == DATA_COLLECT_FREQUENCY) ||
-//        (id == UPDATE_PLOT_FREQUENCY) || (id == USE_VIEWPOINT_INFO) ||
+//        (id == UPDATE_PLOT_FREQUENCY) || (id == USE_INITIAL_VIEW) ||
 //        (id == PERSPECTIVE_MODE))
 //       return true;
 
@@ -1059,8 +1059,8 @@ std::string OpenGlPlot::GetStringParameter(const Integer id) const
       return mViewUpAxisName;
    case CELESTIAL_PLANE:
       return mEclipticPlane;
-   case EQUATORIAL_PLANE:
-      return mEquatorialPlane;
+   case XY_PLANE:
+      return mXYPlane;
    case WIRE_FRAME:
       return mWireFrame;
    case TARGET_STATUS:
@@ -1071,8 +1071,8 @@ std::string OpenGlPlot::GetStringParameter(const Integer id) const
       return mEarthSunLines;
    case OVERLAP_PLOT:
       return mOverlapPlot;
-   case USE_VIEWPOINT_INFO:
-      return mLockView;
+   case USE_INITIAL_VIEW:
+      return mUseInitialView;
    case PERSPECTIVE_MODE:
       return mPerspectiveMode;
    case USE_FIXED_FOV:
@@ -1132,8 +1132,8 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
    case CELESTIAL_PLANE:
       mEclipticPlane = value;
       return true;
-   case EQUATORIAL_PLANE:
-      mEquatorialPlane = value;
+   case XY_PLANE:
+      mXYPlane = value;
       return true;
    case WIRE_FRAME:
       mWireFrame = value;
@@ -1150,8 +1150,8 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
    case OVERLAP_PLOT:
       mOverlapPlot = value;
       return true;
-   case USE_VIEWPOINT_INFO:
-      mLockView = value;
+   case USE_INITIAL_VIEW:
+      mUseInitialView = value;
       return true;
    case PERSPECTIVE_MODE:
       mPerspectiveMode = value;

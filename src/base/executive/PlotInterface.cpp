@@ -70,7 +70,7 @@ PlotInterface::~PlotInterface()
 //------------------------------------------------------------------------------
 //  bool CreateGlPlotWindow(const std::string &plotName, const std::string &oldName,
 //                          const std::string &csName, SolarSystem *ssPtr,
-//                          bool drawEcPlane, bool drawEqPlane, bool drawWireFrame,
+//                          bool drawEcPlane, bool drawXyPlane, bool drawWireFrame,
 //                          bool drawAxes, bool drawEarthSunLines,
 //                          bool overlapPlot, bool usevpInfo, bool usepm,
 //                          bool Integer numPtsToRedraw)
@@ -83,7 +83,7 @@ PlotInterface::~PlotInterface()
  * @param <csName>  coordinate system name
  * @param <ssPtr>  solar system pionter
  * @param <drawEcPlane>  true if draw ecliptic plane
- * @param <drawEqPlane>  true if draw equatorial plane
+ * @param <drawXyPlane>  true if draw XY plane
  * @param <drawWirePlane>  true if draw wire frame
  * @param <drawAxes>  true if draw axes
  * @param <drawESLine>  true if draw earth sun lines
@@ -97,7 +97,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                        const std::string &oldName,
                                        const std::string &csName,
                                        SolarSystem *ssPtr,
-                                       bool drawEcPlane, bool drawEqPlane,
+                                       bool drawEcPlane, bool drawXyPlane,
                                        bool drawWireFrame, bool drawAxes,
                                        bool drawESLines, bool overlapPlot,
                                        bool usevpInfo, bool usepm,
@@ -190,7 +190,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
        currPlotFrame->GetPlotName().c_str());
    #endif
    
-   currPlotFrame->SetDrawEqPlane(drawEqPlane);
+   currPlotFrame->SetDrawXyPlane(drawXyPlane);
    currPlotFrame->SetDrawEcPlane(drawEcPlane);
    currPlotFrame->SetDrawWireFrame(drawWireFrame);
    currPlotFrame->SetDrawAxes(drawAxes);
