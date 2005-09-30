@@ -24,6 +24,7 @@
 #include "BodyFixedAxes.hpp"       // for SetEopFile(), SetCoefficientsFile()
 #include "ObjectReferencedAxes.hpp"
 #include "MessageInterface.hpp"
+#include <ctime>                   // for clock()
 
 //#define DEBUG_INIT 1
 //#define DEBUG_RUN 1
@@ -2897,6 +2898,8 @@ Integer Moderator::RunMission(Integer sandboxNum)
    //MessageInterface::ShowMessage("Moderator::RunMission() entered\n");
    MessageInterface::ShowMessage("Running mission...\n");
    Integer status = 0;
+
+   clock_t t1 = clock();
    
    if (isRunReady)
    {
@@ -2995,10 +2998,15 @@ Integer Moderator::RunMission(Integer sandboxNum)
    else
       MessageInterface::ShowMessage("*** Mission run failed.\n");
    
+   clock_t t2 = clock();
+   MessageInterface::ShowMessage
+      ("===> Total Run Time: %f seconds\n", (Real)(t2-t1)/CLOCKS_PER_SEC);
+   
    MessageInterface::ShowMessage("\n========================================\n");
    
    return status;
 }
+
 
 //------------------------------------------------------------------------------
 // Integer ChangeRunState(const std::string &state, Integer sandboxNum)
