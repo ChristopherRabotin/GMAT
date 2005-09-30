@@ -502,7 +502,6 @@ Rmatrix33 TransposeTimesRmatrix(const Rmatrix33& m1, const Rmatrix33& m2)
 }
 
 
-//loj: 7/22/05 Corrected the name from RmatrixTimesTranspose()
 //------------------------------------------------------------------------------
 //  <friend>
 //  Rmatrix33 MatrixTimesTranspose(const Rmatrix33& m1, const Rmatrix33& m2)
@@ -548,7 +547,6 @@ const std::string* Rmatrix33::GetDataDescriptions() const
 }
 
 
-//loj: 7/25/05 Added width and precision
 //------------------------------------------------------------------------------
 //  std::string* ToValueStrings(Integer w=10, Integer p=8)
 //------------------------------------------------------------------------------
@@ -597,9 +595,8 @@ std::string* Rmatrix33::ToValueStrings(Integer w, Integer p)
 }
 
 
-//loj: 7/25/05 Added
 //------------------------------------------------------------------------------
-//  std::string ToString(Integer w=10, Integer p=8)
+//  std::string ToString(Integer w=17, Integer p=10)
 //------------------------------------------------------------------------------
 /**
  * @return data value string
@@ -614,7 +611,7 @@ std::string Rmatrix33::ToString(Integer w, Integer p)
    
    s = s + "\n";
    for (int i=0; i<3; i++)
-   s = s + val[i*3] + val[i*3+1] + val[i*3+2] + "\n";
+      s = s + val[i*3] + "  " + val[i*3+1] + "  " +  val[i*3+2] + "\n";
    
    return s;
 }
