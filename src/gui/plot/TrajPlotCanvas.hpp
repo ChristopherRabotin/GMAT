@@ -43,12 +43,12 @@ public:
    bool  GetUseViewPointInfo() {return mUseInitialViewPoint;}
    bool  GetUsePerspectiveMode() {return mUsePerspectiveMode;}
    bool  GetDrawWireFrame() {return mDrawWireFrame;}
-   bool  GetDrawEqPlane() {return mDrawEqPlane;}
+   bool  GetDrawXyPlane() {return mDrawXyPlane;}
    bool  GetDrawEcPlane() {return mDrawEcPlane;}
    bool  GetDrawESLines() {return mDrawESLines;}
    bool  GetDrawAxes() {return mDrawAxes;}
    bool  GetRotateAboutXY() {return mRotateXy;}
-   unsigned int GetEqPlaneColor() {return mEqPlaneColor;}
+   unsigned int GetXyPlaneColor() {return mXyPlaneColor;}
    unsigned int GetEcPlaneColor() {return mEcPlaneColor;}
    unsigned int GetESLineColor() {return mESLinecolor;}
    float GetDistance() {return mAxisLength;}
@@ -65,12 +65,12 @@ public:
    void SetUseViewPointInfo(bool flag) {mUseInitialViewPoint = flag;}
    void SetAnimationUpdateInterval(int interval) {mUpdateInterval = interval;}
    void SetDrawWireFrame(bool flag) {mDrawWireFrame = flag;}
-   void SetDrawEqPlane(bool flag) {mDrawEqPlane = flag;}
+   void SetDrawXyPlane(bool flag) {mDrawXyPlane = flag;}
    void SetDrawEcPlane(bool flag) {mDrawEcPlane = flag;}
    void SetDrawESLines(bool flag) {mDrawESLines = flag;}
    void SetDrawAxes(bool flag) {mDrawAxes = flag;}
    void SetRotateAboutXY(bool flag) {mRotateXy = flag;}
-   void SetEqPlaneColor(unsigned int color) {mEqPlaneColor = color;}
+   void SetXyPlaneColor(unsigned int color) {mXyPlaneColor = color;}
    void SetEcPlaneColor(unsigned int color) {mEcPlaneColor = color;}
    void SetESLineColor(unsigned int color) {mESLinecolor = color;}
    void SetViewCoordSystem(const wxString &csName);
@@ -88,7 +88,7 @@ public:
    void ZoomIn();
    void ZoomOut();
    void DrawWireFrame(bool flag);
-   void DrawEqPlane(bool flag);
+   void DrawXyPlane(bool flag);
    void DrawEcPlane(bool flag);
    void OnDrawAxes(bool flag);
    void DrawInOtherCoordSystem(const wxString &csName);
@@ -188,7 +188,7 @@ private:
    // draw option
    float mAxisLength;
    bool mDrawWireFrame;
-   bool mDrawEqPlane;
+   bool mDrawXyPlane;
    bool mDrawEcPlane;
    bool mDrawEclipticPlane;
    bool mDrawESLines;
@@ -196,7 +196,7 @@ private:
    bool mDrawOrbitNormal;
    
    // color
-   unsigned int mEqPlaneColor;
+   unsigned int mXyPlaneColor;
    unsigned int mEcPlaneColor;
    unsigned int mESLinecolor;
 
@@ -340,7 +340,7 @@ private:
    // message
    bool mShowMaxWarning;
    int  mOverCounter;
-   
+
    // windows specific functions
    bool SetPixelFormatDescriptor();
    void SetDefaultGLFont();
@@ -390,6 +390,9 @@ private:
    bool ConvertSpacecraftData(int frame);
    bool ConvertObjectData();
    void ConvertObject(int objId, int index);
+
+   // for attitude
+   Rvector3 ComputeEulerAngles();
    
    // for copy
    void CopyVector3(float to[3], Real from[3]);

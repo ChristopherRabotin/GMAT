@@ -35,7 +35,7 @@ BEGIN_EVENT_TABLE(MdiChildTrajFrame, GmatMdiChildFrame)
 
    EVT_MENU(GmatPlot::MDI_GL_SHOW_OPTION_PANEL, MdiChildTrajFrame::OnShowOptionDialog)
    EVT_MENU(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, MdiChildTrajFrame::OnDrawWireFrame)
-   EVT_MENU(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, MdiChildTrajFrame::OnDrawEqPlane)
+   EVT_MENU(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, MdiChildTrajFrame::OnDrawXyPlane)
 
    EVT_MENU(GmatPlot::MDI_GL_VIEW_ANIMATION, MdiChildTrajFrame::OnViewAnimation)
 
@@ -179,12 +179,12 @@ bool MdiChildTrajFrame::GetRotateAboutXY()
 
 
 //------------------------------------------------------------------------------
-// bool GetDrawEqPlane()
+// bool GetDrawXyPlane()
 //------------------------------------------------------------------------------
-bool MdiChildTrajFrame::GetDrawEqPlane()
+bool MdiChildTrajFrame::GetDrawXyPlane()
 {
    if (mCanvas)
-      return mCanvas->GetDrawEqPlane();
+      return mCanvas->GetDrawXyPlane();
 
    return false;
 }
@@ -225,12 +225,12 @@ bool MdiChildTrajFrame::GetDrawAxes()
 }
 
 //------------------------------------------------------------------------------
-// UnsignedInt GetEqPlaneColor()
+// UnsignedInt GetXyPlaneColor()
 //------------------------------------------------------------------------------
-UnsignedInt MdiChildTrajFrame::GetEqPlaneColor()
+UnsignedInt MdiChildTrajFrame::GetXyPlaneColor()
 {
    if (mCanvas)
-      return mCanvas->GetEqPlaneColor();
+      return mCanvas->GetXyPlaneColor();
 
    return 0;
 }
@@ -435,9 +435,9 @@ void MdiChildTrajFrame::SetDrawWireFrame(bool flag)
 
 
 //------------------------------------------------------------------------------
-// void SetDrawEqPlane(bool flag)
+// void SetDrawXyPlane(bool flag)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetDrawEqPlane(bool flag)
+void MdiChildTrajFrame::SetDrawXyPlane(bool flag)
 {
    if (mCanvas)
    {
@@ -446,7 +446,7 @@ void MdiChildTrajFrame::SetDrawEqPlane(bool flag)
 //       if (viewOptionMenu)
       mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, flag);
       
-      mCanvas->SetDrawEqPlane(flag);
+      mCanvas->SetDrawXyPlane(flag);
    }
 }
 
@@ -508,13 +508,13 @@ void MdiChildTrajFrame::SetRotateAboutXY(bool flag)
 
 
 //------------------------------------------------------------------------------
-// void SetEqPlaneColor(UnsignedInt color)
+// void SetXyPlaneColor(UnsignedInt color)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetEqPlaneColor(UnsignedInt color)
+void MdiChildTrajFrame::SetXyPlaneColor(UnsignedInt color)
 {
    if (mCanvas)
    {
-      mCanvas->SetEqPlaneColor(color);
+      mCanvas->SetXyPlaneColor(color);
    }
 }
 
@@ -759,15 +759,15 @@ void MdiChildTrajFrame::OnDrawWireFrame(wxCommandEvent& event)
 
 
 //------------------------------------------------------------------------------
-// void OnDrawEqPlane(wxCommandEvent& WXUNUSED(event))
+// void OnDrawXyPlane(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::OnDrawEqPlane(wxCommandEvent& event)
+void MdiChildTrajFrame::OnDrawXyPlane(wxCommandEvent& event)
 {
    if (mCanvas)
-      mCanvas->DrawEqPlane(event.IsChecked());
+      mCanvas->DrawXyPlane(event.IsChecked());
 
    if (mOptionDialog)
-      mOptionDialog->SetDrawEqPlane(event.IsChecked());
+      mOptionDialog->SetDrawXyPlane(event.IsChecked());
 }
 
 

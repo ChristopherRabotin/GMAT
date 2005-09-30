@@ -81,12 +81,12 @@ OpenGlOptionDialog::OpenGlOptionDialog(wxWindow *parent, const wxString &title,
    mHasCoordSysChanged = false;
    
    mHasDrawWireFrameChanged = false;
-   mHasDrawEqPlaneChanged = false;
+   mHasDrawXyPlaneChanged = false;
    mHasDrawAxesChanged = false;
    mHasDrawEcPlaneChanged = false;
    mHasDrawESLineChanged = false;
    
-   mHasEqPlaneColorChanged = false;
+   mHasXyPlaneColorChanged = false;
    mHasEcPlaneColorChanged = false;
    mHasESLineColorChanged = false;
    mHasObjectColorChanged = false;
@@ -119,7 +119,7 @@ OpenGlOptionDialog::OpenGlOptionDialog(wxWindow *parent, const wxString &title,
       #endif
    }
    
-   mEqPlaneColor = wxColor("GREY");
+   mXyPlaneColor = wxColor("GREY");
    mEcPlaneColor = wxColor("DARK SLATE BLUE");
    mESLinesColor = wxColor("BROWN");
    
@@ -142,11 +142,11 @@ void OpenGlOptionDialog::SetDistance(float dist)
 
 
 //------------------------------------------------------------------------------
-// void SetDrawEqPlane(bool flag)
+// void SetDrawXyPlane(bool flag)
 //------------------------------------------------------------------------------
-void OpenGlOptionDialog::SetDrawEqPlane(bool flag)
+void OpenGlOptionDialog::SetDrawXyPlane(bool flag)
 {
-   mEqPlaneCheckBox->SetValue(flag);
+   mXyPlaneCheckBox->SetValue(flag);
 }
 
 
@@ -408,8 +408,8 @@ void OpenGlOptionDialog::Create()
       new wxCheckBox(this, ID_CHECKBOX, wxT("Draw Wire Frame"),
                      wxDefaultPosition, wxSize(150, -1), 0);
    
-   mEqPlaneCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, wxT("Draw Equatorial Plane"),
+   mXyPlaneCheckBox =
+      new wxCheckBox(this, ID_CHECKBOX, wxT("Draw XY Plane"),
                      wxDefaultPosition, wxSize(150, -1), 0);
    
    mEcPlaneCheckBox =
@@ -425,10 +425,10 @@ void OpenGlOptionDialog::Create()
                      wxDefaultPosition, wxSize(150, -1), 0);
 
    // equatorial plane color
-   mEqPlaneColorButton =
+   mXyPlaneColorButton =
       new wxButton(this, ID_EQPLANE_COLOR_BUTTON, "", wxDefaultPosition,
                    wxSize(20, 15), 0);
-   mEqPlaneColorButton->SetBackgroundColour(mEqPlaneColor);
+   mXyPlaneColorButton->SetBackgroundColour(mXyPlaneColor);
    
    // ecliptic plane color
    mEcPlaneColorButton =
@@ -456,8 +456,8 @@ void OpenGlOptionDialog::Create()
    drawGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mAxesCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   drawGridSizer->Add(mEqPlaneCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   drawGridSizer->Add(mEqPlaneColorButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   drawGridSizer->Add(mXyPlaneCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   drawGridSizer->Add(mXyPlaneColorButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mEcPlaneCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mEcPlaneColorButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mESLinesCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
@@ -609,10 +609,10 @@ void OpenGlOptionDialog::LoadData()
    mCoordSysComboBox->SetStringSelection(mTrajFrame->GetViewCoordSysName());
    
    // equatorial plane, eclitic plane, Earth-Sun line
-   mEqPlaneCheckBox->SetValue(mTrajFrame->GetDrawEqPlane());
-   RgbColor rgb(mTrajFrame->GetEqPlaneColor());
-   mEqPlaneColor.Set(rgb.Red(), rgb.Green(), rgb.Blue());
-   mEqPlaneColorButton->SetBackgroundColour(mEqPlaneColor);
+   mXyPlaneCheckBox->SetValue(mTrajFrame->GetDrawXyPlane());
+   RgbColor rgb(mTrajFrame->GetXyPlaneColor());
+   mXyPlaneColor.Set(rgb.Red(), rgb.Green(), rgb.Blue());
+   mXyPlaneColorButton->SetBackgroundColour(mXyPlaneColor);
    
    mEcPlaneCheckBox->SetValue(mTrajFrame->GetDrawEcPlane());
    rgb.Set(mTrajFrame->GetEcPlaneColor());
@@ -717,10 +717,10 @@ void OpenGlOptionDialog::SaveData()
       mTrajFrame->SetGotoObjectName(mGotoObjectName);
    }
    
-   if (mHasDrawEqPlaneChanged)
+   if (mHasDrawXyPlaneChanged)
    {
-      mHasDrawEqPlaneChanged = false;
-      mTrajFrame->SetDrawEqPlane(mEqPlaneCheckBox->GetValue());
+      mHasDrawXyPlaneChanged = false;
+      mTrajFrame->SetDrawXyPlane(mXyPlaneCheckBox->GetValue());
    }
    
    if (mHasDrawEcPlaneChanged)
@@ -747,11 +747,11 @@ void OpenGlOptionDialog::SaveData()
       mTrajFrame->SetDrawAxes(mAxesCheckBox->GetValue());
    }
    
-   if (mHasEqPlaneColorChanged)
+   if (mHasXyPlaneColorChanged)
    {
-      mHasEqPlaneColorChanged = false;
-      RgbColor rgb(mEqPlaneColor.Red(), mEqPlaneColor.Green(), mEqPlaneColor.Blue());
-      mTrajFrame->SetEqPlaneColor(rgb.GetIntColor());      
+      mHasXyPlaneColorChanged = false;
+      RgbColor rgb(mXyPlaneColor.Red(), mXyPlaneColor.Green(), mXyPlaneColor.Blue());
+      mTrajFrame->SetXyPlaneColor(rgb.GetIntColor());      
    }
    
    if (mHasEcPlaneColorChanged)
@@ -924,8 +924,8 @@ void OpenGlOptionDialog::OnCheckBoxChange(wxCommandEvent& event)
       mHasUseViewPointSpecChanged = true;
    else if (event.GetEventObject() == mUsePerspModeCheckBox)
       mHasUsePerspModeChanged = true;
-   else if (event.GetEventObject() == mEqPlaneCheckBox)
-      mHasDrawEqPlaneChanged = true;
+   else if (event.GetEventObject() == mXyPlaneCheckBox)
+      mHasDrawXyPlaneChanged = true;
    else if (event.GetEventObject() == mEcPlaneCheckBox)
       mHasDrawEcPlaneChanged = true;
    else if (event.GetEventObject() == mESLinesCheckBox)
@@ -990,9 +990,9 @@ void OpenGlOptionDialog::OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::OnColorButtonClick(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == mEqPlaneColorButton)
+   if (event.GetEventObject() == mXyPlaneColorButton)
    {
-      mHasEqPlaneColorChanged = ShowColorDialog(mEqPlaneColor, mEqPlaneColorButton);
+      mHasXyPlaneColorChanged = ShowColorDialog(mXyPlaneColor, mXyPlaneColorButton);
    }
    else if (event.GetEventObject() == mEcPlaneColorButton)
    {

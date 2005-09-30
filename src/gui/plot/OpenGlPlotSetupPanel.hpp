@@ -69,9 +69,9 @@ protected:
    wxCheckBox *mWireFrameCheckBox;
    wxCheckBox *mTargetStatusCheckBox;
    wxCheckBox *mEclipticPlaneCheckBox;
-   wxCheckBox *mEquatorialPlaneCheckBox;
+   wxCheckBox *mXYPlaneCheckBox;
    //wxCheckBox *mOverlapCheckBox;
-   wxCheckBox *mLockViewCheckBox;
+   wxCheckBox *mUseInitialViewCheckBox;
    wxCheckBox *mPerspectiveModeCheckBox;
    wxCheckBox *mUseFixedFovCheckBox;
    wxCheckBox *mAxesCheckBox;

@@ -54,12 +54,12 @@ public:
    bool GetUseViewPointInfo();
    bool GetUsePerspectiveMode();
    bool GetDrawWireFrame();
-   bool GetDrawEqPlane();
+   bool GetDrawXyPlane();
    bool GetDrawEcPlane();
    bool GetDrawESLines();
    bool GetDrawAxes();
    bool GetRotateAboutXY();
-   UnsignedInt GetEqPlaneColor();
+   UnsignedInt GetXyPlaneColor();
    UnsignedInt GetEcPlaneColor();
    UnsignedInt GetESLineColor();
    float GetDistance();
@@ -76,12 +76,12 @@ public:
    void SetUsePerspectiveMode(bool flag);
    void SetAnimationUpdateInterval(Integer interval);
    void SetDrawWireFrame(bool flag);
-   void SetDrawEqPlane(bool flag);
+   void SetDrawXyPlane(bool flag);
    void SetDrawEcPlane(bool flag);
    void SetDrawESLines(bool flag);
    void SetDrawAxes(bool flag);
    void SetRotateAboutXY(bool flag);
-   void SetEqPlaneColor(UnsignedInt color);
+   void SetXyPlaneColor(UnsignedInt color);
    void SetEcPlaneColor(UnsignedInt color);
    void SetESLineColor(UnsignedInt color);
    void SetDistance(float dist);
@@ -105,7 +105,7 @@ public:
    
    void OnShowOptionDialog(wxCommandEvent& event);
    void OnDrawWireFrame(wxCommandEvent& event);
-   void OnDrawEqPlane(wxCommandEvent& event);
+   void OnDrawXyPlane(wxCommandEvent& event);
    
    //void OnAddBody(wxCommandEvent& event);
    //void OnGotoStdBody(wxCommandEvent& event);

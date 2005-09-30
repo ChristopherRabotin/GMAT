@@ -47,7 +47,7 @@ public:
       { return mObjectIntColors; }
 
    void SetDistance(float dist);
-   void SetDrawEqPlane(bool flag);
+   void SetDrawXyPlane(bool flag);
    void SetDrawWireFrame(bool flag);
    void SetDrawAxes(bool flag);
    void SetDrawEarthSunLines(bool flag);
@@ -74,11 +74,11 @@ protected:
    
    bool mHasDrawWireFrameChanged;
    bool mHasDrawAxesChanged;
-   bool mHasDrawEqPlaneChanged;
+   bool mHasDrawXyPlaneChanged;
    bool mHasDrawEcPlaneChanged;
    bool mHasDrawESLineChanged;
    
-   bool mHasEqPlaneColorChanged;
+   bool mHasXyPlaneColorChanged;
    bool mHasEcPlaneColorChanged;
    bool mHasESLineColorChanged;
    bool mHasObjectColorChanged;
@@ -113,7 +113,7 @@ protected:
    
    wxCheckBox *mRotateAboutXYCheckBox;
    wxCheckBox *mWireFrameCheckBox;
-   wxCheckBox *mEqPlaneCheckBox;
+   wxCheckBox *mXyPlaneCheckBox;
    wxCheckBox *mEcPlaneCheckBox;
    wxCheckBox *mAxesCheckBox;
    wxCheckBox *mESLinesCheckBox;
@@ -123,7 +123,7 @@ protected:
 
    wxButton *mViewAnimationButton;
    //wxButton *mCreateCoordSysButton;
-   wxButton *mEqPlaneColorButton;
+   wxButton *mXyPlaneColorButton;
    wxButton *mEcPlaneColorButton;
    wxButton *mESLinesColorButton;
    
@@ -132,7 +132,7 @@ protected:
    wxButton *mAddSatButton;
    wxButton *theApplyButton;
    
-   wxColor mEqPlaneColor;
+   wxColor mXyPlaneColor;
    wxColor mEcPlaneColor;
    wxColor mESLinesColor;
    wxColour mObjectColor;

@@ -215,8 +215,8 @@ void OpenGlPlotSetupPanel::Create()
    //------------------------------------------------------
    // view option
    //------------------------------------------------------
-   mLockViewCheckBox =
-      new wxCheckBox(this, CHECKBOX, wxT("Lock View"),
+   mUseInitialViewCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Use Initial View Def."),
                      wxDefaultPosition, wxSize(-1, -1), 0);
    
    mPerspectiveModeCheckBox =
@@ -235,7 +235,7 @@ void OpenGlPlotSetupPanel::Create()
                      wxDefaultPosition, wxSize(35, -1), 0);
    
    wxBoxSizer *viewOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
-   viewOptionBoxSizer->Add(mLockViewCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   viewOptionBoxSizer->Add(mUseInitialViewCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    viewOptionBoxSizer->Add(mPerspectiveModeCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    viewOptionBoxSizer->Add(mUseFixedFovCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    
@@ -265,8 +265,8 @@ void OpenGlPlotSetupPanel::Create()
       new wxCheckBox(this, CHECKBOX, wxT("Draw Ecliptic Plane"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
    
-   mEquatorialPlaneCheckBox =
-      new wxCheckBox(this, CHECKBOX, wxT("Draw Equatorial Plane"),
+   mXYPlaneCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Draw XY Plane"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
    
    mAxesCheckBox =
@@ -284,7 +284,7 @@ void OpenGlPlotSetupPanel::Create()
    drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionBoxSizer->Add(mEclipticPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(mEquatorialPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionBoxSizer->Add(mXYPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionBoxSizer->Add(mAxesCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -599,8 +599,8 @@ void OpenGlPlotSetupPanel::LoadData()
       mNumPointsToRedrawTextCtrl->SetValue(str);
       
       mPlotCheckBox->SetValue(mOpenGlPlot->IsActive());
-      mEquatorialPlaneCheckBox->
-         SetValue(mOpenGlPlot->GetStringParameter("EquatorialPlane") == "On");
+      mXYPlaneCheckBox->
+         SetValue(mOpenGlPlot->GetStringParameter("XYPlane") == "On");
       mEclipticPlaneCheckBox->
          SetValue(mOpenGlPlot->GetStringParameter("CelestialPlane") == "On");
       mWireFrameCheckBox->
@@ -613,8 +613,8 @@ void OpenGlPlotSetupPanel::LoadData()
          SetValue(mOpenGlPlot->GetStringParameter("EarthSunLines") == "On");
       //mOverlapCheckBox->
       //   SetValue(mOpenGlPlot->GetStringParameter("Overlap") == "On");
-      mLockViewCheckBox->
-         SetValue(mOpenGlPlot->GetStringParameter("LockView") == "On");
+      mUseInitialViewCheckBox->
+         SetValue(mOpenGlPlot->GetStringParameter("UseInitialView") == "On");
       mPerspectiveModeCheckBox->
          SetValue(mOpenGlPlot->GetStringParameter("PerspectiveMode") == "On");
       mUseFixedFovCheckBox->
@@ -886,10 +886,10 @@ void OpenGlPlotSetupPanel::SaveData()
       
       mOpenGlPlot->Activate(mPlotCheckBox->IsChecked());
       
-      if (mEquatorialPlaneCheckBox->IsChecked())
-         mOpenGlPlot->SetStringParameter("EquatorialPlane", "On");
+      if (mXYPlaneCheckBox->IsChecked())
+         mOpenGlPlot->SetStringParameter("XYPlane", "On");
       else
-         mOpenGlPlot->SetStringParameter("EquatorialPlane", "Off");
+         mOpenGlPlot->SetStringParameter("XYPlane", "Off");
       
       if (mEclipticPlaneCheckBox->IsChecked())
          mOpenGlPlot->SetStringParameter("CelestialPlane", "On");
@@ -921,10 +921,10 @@ void OpenGlPlotSetupPanel::SaveData()
       //else
       //   mOpenGlPlot->SetStringParameter("Overlap", "Off");
       
-      if (mLockViewCheckBox->IsChecked())
-         mOpenGlPlot->SetStringParameter("LockView", "On");
+      if (mUseInitialViewCheckBox->IsChecked())
+         mOpenGlPlot->SetStringParameter("UseInitialView", "On");
       else
-         mOpenGlPlot->SetStringParameter("LockView", "Off");
+         mOpenGlPlot->SetStringParameter("UseInitialView", "Off");
       
       if (mPerspectiveModeCheckBox->IsChecked())
          mOpenGlPlot->SetStringParameter("PerspectiveMode", "On");
