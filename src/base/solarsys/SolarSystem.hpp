@@ -73,6 +73,7 @@ public:
    Gmat::PosVelSource   GetPosVelSource() const;
    Gmat::AnalyticMethod GetAnalyticMethod() const;
    std::string          GetSourceFileName() const;
+   bool                 GetOverrideTimeSystem() const;
 
    // methods to set the source, source file, and analytic method for each
    // of the bodies in use

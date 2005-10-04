@@ -89,7 +89,7 @@ PlanetaryEphem& PlanetaryEphem::operator=(const PlanetaryEphem& pef)
 //------------------------------------------------------------------------------
 PlanetaryEphem::~PlanetaryEphem()
 {
-   fclose(g_pef_dcb.fptr);   
+   if (g_pef_dcb.fptr)  fclose(g_pef_dcb.fptr);   
 }
 
 //------------------------------------------------------------------------------

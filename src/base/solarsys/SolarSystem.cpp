@@ -265,7 +265,6 @@ SolarSystem::~SolarSystem()
       delete (*cbi);       // delete each body first
       ++cbi;
    }
-   //bodiesInUse.~list<CelestialBody*>();
    delete pE;
 }
 
@@ -291,6 +290,15 @@ bool SolarSystem::AddBody(CelestialBody* cb)
 
    bodiesInUse.push_back(cb);
    bodyStrings.push_back(cb->GetName());
+
+   // Set the source, source file, analytic method, and override flag for the 
+   // new body
+   if (!cb->SetSource(pvSrcForAll))  return false; 
+   if (!cb->SetAnalyticMethod(anMethodForAll))  return false; 
+   if (pE)
+      if (!cb->SetSourceFile(pE))  return false; 
+   if (!cb->SetOverrideTimeSystem(overrideTimeForAll))  return false; 
+   
    return true;
 }
 
@@ -388,6 +396,12 @@ std::string SolarSystem::GetSourceFileName() const
    return pE->GetName();
 }
 
+bool SolarSystem::GetOverrideTimeSystem() const
+{
+   return overrideTimeForAll;
+}
+
+
 //------------------------------------------------------------------------------
 //  bool SetSource(Gmat::PosVelSource pvSrc)
 //------------------------------------------------------------------------------
@@ -470,6 +484,7 @@ bool SolarSystem::SetSourceFile(PlanetaryEphem *src)
       if ((*cbi)->SetSourceFile(src) == false)  return false;
       ++cbi;
    }
+   pE = src;
    return true;
 }
 

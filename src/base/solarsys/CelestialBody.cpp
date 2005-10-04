@@ -650,6 +650,14 @@ Gmat::PosVelSource  CelestialBody::GetPosVelSource() const
    return posVelSrc;
 }
 
+std::string CelestialBody::GetSourceFileName() const
+{
+   if (theSourceFile)
+      return theSourceFile->GetName();
+   return "";
+}
+
+
 //------------------------------------------------------------------------------
 //  Gmat::AnalyticMethod GetAnalyticMethod() const
 //------------------------------------------------------------------------------
@@ -681,6 +689,12 @@ bool CelestialBody::GetUsePotentialFile() const
 {
    return usePotentialFile;
 }
+
+bool CelestialBody::GetOverrideTimeSystem() const
+{
+   return overrideTime;
+}
+
 
 //------------------------------------------------------------------------------
 //  const Rvector3& CelestialBody::GetAngularVelocity() 

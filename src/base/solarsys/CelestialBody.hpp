@@ -111,8 +111,10 @@ public:
    virtual Real                 GetPolarRadius();
    virtual Real                 GetMass();
    virtual Gmat::PosVelSource   GetPosVelSource() const;
+   virtual std::string          GetSourceFileName() const;
    virtual Gmat::AnalyticMethod GetAnalyticMethod() const;
    virtual bool                 GetUsePotentialFile() const;
+   virtual bool                 GetOverrideTimeSystem() const;
    virtual const Rvector3&      GetAngularVelocity();             // rad/sec
 
    virtual Real                 GetHourAngle(A1Mjd atTime); 
