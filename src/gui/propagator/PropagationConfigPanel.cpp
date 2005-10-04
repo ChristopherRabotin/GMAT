@@ -205,6 +205,23 @@ void PropagationConfigPanel::LoadData()
    
    DisplayIntegratorData(false);
    DisplayForceData();
+   
+   Integer count = (Integer)forceList.size(); 
+   
+   if (count == 0)
+   {
+      gravComboBox->Enable(false);
+      atmosComboBox->Enable(false);
+      magfComboBox->Enable(false);
+      srpCheckBox->Enable(false);
+   }
+   else
+   {
+      gravComboBox->Enable(true);
+      atmosComboBox->Enable(true);
+      magfComboBox->Enable(true);
+      srpCheckBox->Enable(true);       
+   } 
 }
 
 //------------------------------------------------------------------------------
@@ -1217,7 +1234,7 @@ void PropagationConfigPanel::DisplayForceData()
    DisplayGravityFieldData(); 
    DisplayAtmosphereModelData(); 
    DisplayMagneticFieldData();  
-   DisplaySRPData();  
+   DisplaySRPData();
 }
 
 //------------------------------------------------------------------------------
@@ -1226,6 +1243,7 @@ void PropagationConfigPanel::DisplayForceData()
 void PropagationConfigPanel::DisplayPrimaryBodyData()
 {
    Integer bodyIndex = 0;
+   
    for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
    {
       bodyTextCtrl->AppendText(primaryBodiesArray.Item(i) + " ");
@@ -1527,9 +1545,22 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
          primaryBodiesArray.Clear(); 
          bodyComboBox->Clear();
          bodyTextCtrl->Clear();
+         
+         gravComboBox->Enable(false);
+         atmosComboBox->Enable(false);
+         magfComboBox->Enable(false);
+         srpCheckBox->Enable(false);
+      
          theApplyButton->Enable(true);
          isForceModelChanged = true;
          return;
+      }
+      else
+      {
+         gravComboBox->Enable(true);
+         atmosComboBox->Enable(true);
+         magfComboBox->Enable(true);
+         srpCheckBox->Enable(true);
       }
       
       std::vector<ForceType*> fl;
