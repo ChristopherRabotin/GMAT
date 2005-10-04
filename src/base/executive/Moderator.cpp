@@ -3030,11 +3030,11 @@ Integer Moderator::ChangeRunState(const std::string &state, Integer sandboxNum)
    if (state == "Stop")   
       runState = Gmat::IDLE;
 
-   //else if (state == "Pause")  // Commented until build 4
-   //   runState = Gmat::PAUSED;
-   //
-   //else if (state == "Resume") // Commented until build 4
-   //   runState = Gmat::RUNNING;
+   else if (state == "Pause")
+      runState = Gmat::PAUSED;
+   
+   else if (state == "Resume")
+      runState = Gmat::RUNNING;
    
    else
       ; // no action
@@ -3061,7 +3061,7 @@ Gmat::RunState Moderator::GetUserInterrupt()
    #if DEBUG_USER_INTERRUPT
    MessageInterface::ShowMessage("Moderator::GetUserInterrupt() entered\n");
    #endif
-
+   
    // give MainFrame input focus
    theGuiInterpreter->SetInputFocus();
    return runState;
@@ -3077,14 +3077,14 @@ Gmat::RunState Moderator::GetUserInterrupt()
 //------------------------------------------------------------------------------
 Gmat::RunState Moderator::GetRunState()
 {
+   if (!isRunReady)
+      runState = Gmat::RUNNING;
+   
    #if DEBUG_RUN
    MessageInterface::ShowMessage
       ("Moderator::GetRunsState() runState=%d\n", runState);
    #endif
 
-   if (!isRunReady)
-      runState = Gmat::RUNNING;
-   
    return runState;
 }
 
@@ -3185,9 +3185,7 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, e.GetMessage() +
-          "\n Check Type in the appropriate Factory or parameter text.\n");
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
       isRunReady = false;
    }
 
@@ -3252,9 +3250,7 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, e.GetMessage() +
-          "\n Check Type in the appropriate Factory or parameter text.\n");
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
       isRunReady = false;
    }
 

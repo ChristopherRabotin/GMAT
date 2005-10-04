@@ -103,10 +103,9 @@ private:
    
    void                              InitializeInternalObjects();
    
-   //*********************  TEMPORARY  ******************************************************************
+   //*********************  TEMPORARY  *****************************************
    void  InitializeCoordinateSystem(CoordinateSystem *cs);
-   void  InitializeParameter(Parameter *param);
-   //*********************  END OF TEMPORARY  ***********************************************************
+   //*********************  END OF TEMPORARY  **********************************
 
    void                              BuildReferences(GmatBase *obj);
    void                              SetRefFromName(GmatBase *obj,

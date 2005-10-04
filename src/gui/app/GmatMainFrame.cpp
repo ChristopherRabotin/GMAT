@@ -120,6 +120,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(MENU_PROJECT_EXIT, GmatMainFrame::OnProjectExit)
    EVT_MENU(MENU_PROJECT_PREFERENCES_FONT, GmatMainFrame::OnFont)
    EVT_MENU(TOOL_RUN, GmatMainFrame::OnRun)
+   EVT_MENU(TOOL_PAUSE, GmatMainFrame::OnPause)
    EVT_MENU(TOOL_STOP, GmatMainFrame::OnStop)
    EVT_MENU(TOOL_CLOSE_CHILDREN, GmatMainFrame::OnCloseChildren)
    EVT_MENU(MENU_HELP_ABOUT, GmatMainFrame::OnHelpAbout)
@@ -262,7 +263,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    GmatAppData::SetMainFrame(this);
 
    mServer = NULL;
-   mActivateCounter = 0;
+   mRunPaused = false;
    
 #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() exiting\n");
@@ -917,6 +918,7 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void GmatMainFrame::MinimizeChildren()
 //------------------------------------------------------------------------------
@@ -951,21 +953,40 @@ void GmatMainFrame::CloseCurrentProject()
    GmatAppData::GetMissionTree()->UpdateMission(true);
 }
 
+
 //------------------------------------------------------------------------------
 // void RunCurrentMission()
 //------------------------------------------------------------------------------
 void GmatMainFrame::RunCurrentMission()
 {
    wxToolBar* toolBar = GetToolBar();
+   
    toolBar->EnableTool(TOOL_RUN, FALSE);
+   toolBar->EnableTool(TOOL_PAUSE, TRUE);
    toolBar->EnableTool(TOOL_STOP, TRUE);
+   
    wxYield();
    SetFocus();
    
-   theGuiInterpreter->RunMission();
+   if (mRunPaused)
+   {
+      mRunPaused = false;
+
+      MessageInterface::ShowMessage("Execution resumed.\n");
+      theGuiInterpreter->ChangeRunState("Resume");
+   }
+   else
+   {
+      MinimizeChildren();
+      theGuiInterpreter->RunMission();
    
-   toolBar->EnableTool(TOOL_RUN, TRUE);
-   toolBar->EnableTool(TOOL_STOP, FALSE);
+      toolBar->EnableTool(TOOL_RUN, TRUE);
+      toolBar->EnableTool(TOOL_PAUSE, FALSE);
+      toolBar->EnableTool(TOOL_STOP, FALSE);
+      
+      //put items in output tab
+      GmatAppData::GetOutputTree()->UpdateOutput(false);
+   }
 }
 
 
@@ -1217,21 +1238,32 @@ void GmatMainFrame::OnProjectExit(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnRun(wxCommandEvent& WXUNUSED(event))
 {
-   wxToolBar* toolBar = GetToolBar();
-   toolBar->EnableTool(TOOL_RUN, FALSE);
-   toolBar->EnableTool(TOOL_STOP, TRUE);
-   wxYield();
-   SetFocus();
+   RunCurrentMission();
+}
 
-   MinimizeChildren();
-   theGuiInterpreter->RunMission();
+
+//------------------------------------------------------------------------------
+// void OnPause(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles pause command from the tool bar.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnPause(wxCommandEvent& WXUNUSED(event))
+{
+   wxToolBar* toolBar = GetToolBar();
+   toolBar->EnableTool(TOOL_PAUSE, FALSE);
+   wxYield();
+   
+   theGuiInterpreter->ChangeRunState("Pause");
+   MessageInterface::ShowMessage("Execution paused.\n");
    
    toolBar->EnableTool(TOOL_RUN, TRUE);
-   toolBar->EnableTool(TOOL_STOP, FALSE);
-
-   // put items in output tab
-   GmatAppData::GetOutputTree()->UpdateOutput(false);
+   mRunPaused = true;
 }
+
 
 //------------------------------------------------------------------------------
 // void OnStop(wxCommandEvent& WXUNUSED(event))
@@ -1252,6 +1284,7 @@ void GmatMainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
    
    toolBar->EnableTool(TOOL_RUN, TRUE);
 }
+
 
 //------------------------------------------------------------------------------
 // void OnCloseChildren(wxCommandEvent& WXUNUSED(event))

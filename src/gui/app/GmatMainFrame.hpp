@@ -88,7 +88,7 @@ protected:
 
 private:
    int scriptCounter;
-   int mActivateCounter;
+   bool mRunPaused;
    
    GmatServer *mServer;
    std::string scriptFilename;
@@ -113,6 +113,7 @@ private:
    void OnSaveScript(wxCommandEvent &event);
    void OnProjectExit(wxCommandEvent &event);
    void OnRun(wxCommandEvent &event);
+   void OnPause(wxCommandEvent &event);
    void OnStop(wxCommandEvent &event);
    void OnCloseChildren(wxCommandEvent &event);
    void OnHelpAbout(wxCommandEvent &event);
