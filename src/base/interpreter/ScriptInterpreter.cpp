@@ -18,7 +18,7 @@
 
 #include "ScriptInterpreter.hpp" // class's header file
 #include "Moderator.hpp" // class's header file
-#include "Command.hpp" //loj:added
+#include "Command.hpp"
 #include <fstream>
 
 // Maybe put something like this in the Gmat namespace?
@@ -284,13 +284,18 @@ bool ScriptInterpreter::Parse()
 
                 if (name[0] == '(')
                 {
-                   MessageInterface::ShowMessage(
-                      "Unknown characters found in Create line; please check %s"
-                      " in the line \n   \"%s\"\n"
-                      "(Perhaps you meant square braces to size an array?)\n",
-                      name.c_str(), line.c_str());
-                   ++phrase;
-                   continue;
+                   //loj: 10/4/05 Throw an exception
+                   //MessageInterface::ShowMessage(
+                   //   "Unknown characters found in Create line; please check %s"
+                   //   " in the line \n   \"%s\"\n"
+                   //   "(Perhaps you meant square braces to size an array?)\n",
+                   //   name.c_str(), line.c_str());
+                   throw InterpreterException(
+                      "Unknown characters found in Create line.\nPlease check " +
+                      name + " in the line:\n" + line + "\n" + 
+                      "(Perhaps you meant square braces to size an array?)\n");
+                   //++phrase;
+                   //continue;
                 }
 
                 if (!InterpretObject(type, name))
