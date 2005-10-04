@@ -1165,7 +1165,10 @@ Integer GuiInterpreter::RunScript(Integer sandboxNum)
 void GuiInterpreter::SetInputFocus()
 {
 #if !defined __CONSOLE_APP__
-   GmatAppData::GetMainFrame()->SetFocus();
+   GmatMainFrame *mainFrame = GmatAppData::GetMainFrame();
+   mainFrame->SetFocus();
+   if (mainFrame->IsIconized())
+      mainFrame->ProcessPendingEvent();
 #endif
 }
 

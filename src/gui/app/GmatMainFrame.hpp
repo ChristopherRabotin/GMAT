@@ -61,6 +61,7 @@ public:
    void CloseCurrentProject();
    void RunCurrentMission();
    void NotifyRunCompleted();
+   void ProcessPendingEvent();
    void StartServer();
    void StopServer();
    wxToolBar* GetMainFrameToolBar();
@@ -87,6 +88,7 @@ protected:
 
 private:
    int scriptCounter;
+   int mActivateCounter;
    
    GmatServer *mServer;
    std::string scriptFilename;
@@ -145,8 +147,7 @@ private:
    void OnSashDrag(wxSashEvent &event);
    void OnMsgSashDrag(wxSashEvent &event);
    void OnMainFrameSize(wxSizeEvent &event);
-   void OnFocus(wxFocusEvent &event);
-
+   void OnSetFocus(wxFocusEvent &event);
 };
 
 namespace GmatMenu

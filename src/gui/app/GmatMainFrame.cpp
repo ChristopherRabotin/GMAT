@@ -148,11 +148,11 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
 
    EVT_SASH_DRAGGED(ID_SASH_WINDOW, GmatMainFrame::OnSashDrag) 
    EVT_SASH_DRAGGED(ID_MSG_SASH_WINDOW, GmatMainFrame::OnMsgSashDrag) 
-
+   
    EVT_SIZE(GmatMainFrame::OnMainFrameSize)
-   EVT_SET_FOCUS(GmatMainFrame::OnFocus)
    EVT_CLOSE(GmatMainFrame::OnClose)
-
+   EVT_SET_FOCUS(GmatMainFrame::OnSetFocus)
+   
    EVT_MENU(MENU_SCRIPT_BUILD_OBJECT, GmatMainFrame::OnScriptBuildObject)
    EVT_MENU(MENU_SCRIPT_BUILD_AND_RUN, GmatMainFrame::OnScriptBuildAndRun)
    EVT_MENU(MENU_SCRIPT_RUN, GmatMainFrame::OnScriptRun)
@@ -185,8 +185,7 @@ END_EVENT_TABLE()
 GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
                              const wxString& title, const wxPoint& pos, 
                              const wxSize& size, long style)
-   : wxMDIParentFrame(parent, id, title, pos, size, 
-                      style | wxNO_FULL_REPAINT_ON_RESIZE)
+   : wxMDIParentFrame(parent, id, title, pos, size, style)
 {
 #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() entered\n");
@@ -263,6 +262,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    GmatAppData::SetMainFrame(this);
 
    mServer = NULL;
+   mActivateCounter = 0;
    
 #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() exiting\n");
@@ -358,7 +358,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add(new FormationSetupPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0);         
+         sizer->Add(new FormationSetupPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0);
       }   
       else if (dataType == GmatTree::UNIVERSE_FOLDER)
       {
@@ -968,6 +968,7 @@ void GmatMainFrame::RunCurrentMission()
    toolBar->EnableTool(TOOL_STOP, FALSE);
 }
 
+
 //------------------------------------------------------------------------------
 // void NotifyRunCompleted()
 //------------------------------------------------------------------------------
@@ -979,6 +980,20 @@ void GmatMainFrame::NotifyRunCompleted()
 {
    // do nothing for now.
 }
+
+
+//------------------------------------------------------------------------------
+// void ProcessPendingEvent()
+//------------------------------------------------------------------------------
+/*
+ * Process any pending event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::ProcessPendingEvent()
+{   
+   wxYield();
+}
+
 
 //------------------------------------------------------------------------------
 // void GmatMainFrame::StartServer()
@@ -1002,6 +1017,7 @@ void GmatMainFrame::StartServer()
       MessageInterface::ShowMessage("Server has already started.\n");
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void GmatMainFrame::StopServer()
@@ -1764,7 +1780,7 @@ void GmatMainFrame::OnMsgSashDrag(wxSashEvent& event)
 }
 
 
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 // void OnMainFrameSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 /**
@@ -1775,24 +1791,27 @@ void GmatMainFrame::OnMsgSashDrag(wxSashEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnMainFrameSize(wxSizeEvent& event)
 {
+   //MessageInterface::ShowMessage("===> GmatMainFrame::OnMainFrameSize() called\n");
+   
    wxLayoutAlgorithm layout;
    layout.LayoutMDIFrame(this);
 }
 
+
 //------------------------------------------------------------------------------
-// void OnFocus(wxFocusEvent& event)
+// void OnSetFocus(wxFocusEvent& event)
 //------------------------------------------------------------------------------
 /**
- * Handles focus event of the window
+ * Handles set focus event of the window
  *
  * @param <event> input event.
  */
 //------------------------------------------------------------------------------
-void GmatMainFrame::OnFocus(wxFocusEvent& event)
+void GmatMainFrame::OnSetFocus(wxFocusEvent& event)
 {
-#if DEBUG_MAINFRAME
-   MessageInterface::ShowMessage("GmatMainFrame::OnFocus() entered\n");
-#endif
+   //#if DEBUG_MAINFRAME
+   //MessageInterface::ShowMessage("GmatMainFrame::OnSetFocus() entered\n");
+   //#endif
 
 
 //   wxObject *obj = event.GetEventObject();
@@ -1807,9 +1826,18 @@ void GmatMainFrame::OnFocus(wxFocusEvent& event)
 //         MessageInterface::ShowMessage("ScriptFile brought into focus\n");
 //      // set the menu
 //   }
+
+   //loj: GmatMainFrame is not getting Focus when iconized
+   
    wxYield();
+   
+//    MessageInterface::ShowMessage
+//       ("GmatMainFrame::OnSetFocus()  IsIconized=%d, IsEnabled=%d\n",
+//        IsIconized(), IsEnabled());
+   
    event.Skip(true);
 }
+
 
 //------------------------------------------------------------------------------
 // void OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
