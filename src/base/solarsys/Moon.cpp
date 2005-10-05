@@ -353,7 +353,10 @@ void Moon::InitializeMoon(const std::string &cBody)
       
       defaultMu           = Moon::LUNA_MU;
       defaultEqRadius     = Moon::LUNA_EQUATORIAL_RADIUS;
+      models[Gmat::GRAVITY_FIELD].push_back("LP100");
+      models[Gmat::GRAVITY_FIELD].push_back("Other");
    }
+
    // NEED values for other moons in here!!!!
    // And how do I get position and velocity for the other moons?
    

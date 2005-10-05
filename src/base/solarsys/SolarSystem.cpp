@@ -401,6 +401,20 @@ bool SolarSystem::GetOverrideTimeSystem() const
    return overrideTimeForAll;
 }
 
+StringArray SolarSystem::GetValidModelList(Gmat::ModelType m, 
+                         const std::string &forBody)
+{
+   for (std::list<CelestialBody*>::iterator i = bodiesInUse.begin();
+        i != bodiesInUse.end(); ++i)
+   {
+      if ((*i)->GetName() == forBody)
+         return (*i)->GetValidModelList(m);
+   }
+   throw SolarSystemException("Model list requested for unknown body " 
+                               + forBody);
+}
+
+
 
 //------------------------------------------------------------------------------
 //  bool SetSource(Gmat::PosVelSource pvSrc)
@@ -573,6 +587,33 @@ bool SolarSystem::SetOverrideTimeSystem(bool overrideIt)
    return true;
 }
 
+bool SolarSystem::AddValidModelName(Gmat::ModelType m, 
+                  const std::string &forBody,
+                  const std::string &theModel)
+{
+   for (std::list<CelestialBody*>::iterator i = bodiesInUse.begin();
+        i != bodiesInUse.end(); ++i)
+   {
+      if ((*i)->GetName() == forBody)
+         return (*i)->AddValidModelName(m, theModel);
+   }
+   throw SolarSystemException("Cannot set new model for unknown body " 
+                              + forBody);
+}
+
+bool SolarSystem::RemoveValidModelName(Gmat::ModelType m, 
+                  const std::string & forBody,
+                  const std::string &theModel)
+{
+   for (std::list<CelestialBody*>::iterator i = bodiesInUse.begin();
+        i != bodiesInUse.end(); ++i)
+   {
+      if ((*i)->GetName() == forBody)
+         return (*i)->RemoveValidModelName(m, theModel);
+   }
+   throw SolarSystemException("Cannot remove model for unknown body " 
+                              + forBody);
+}
 
 //------------------------------------------------------------------------------
 //  const StringArray& GetBodiesInUse() const

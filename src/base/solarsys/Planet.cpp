@@ -672,6 +672,25 @@ void Planet::InitializePlanet(const std::string &cBody)
       errMsg            +=  "potential file or physical parameter values\n";
       MessageInterface::ShowMessage(errMsg);
    }
+   if (bodyIndex == EARTH)
+   {
+      models[Gmat::ATMOSPHERE_MODEL].push_back("Exponential");
+      models[Gmat::ATMOSPHERE_MODEL].push_back("MSISE90");
+      models[Gmat::ATMOSPHERE_MODEL].push_back("Jacchia-Roberts");
+      
+      models[Gmat::GRAVITY_FIELD].push_back("JGM2");
+      models[Gmat::GRAVITY_FIELD].push_back("JGM3");
+      models[Gmat::GRAVITY_FIELD].push_back("EGM96");
+      models[Gmat::GRAVITY_FIELD].push_back("Other");
+      
+      // for now, magnetic field remains empty
+   }
+   else if (bodyIndex == MARS)
+   {
+      models[Gmat::GRAVITY_FIELD].push_back("GMM-1");
+      models[Gmat::GRAVITY_FIELD].push_back("Other");
+   }
+      
    
    mu                  = Planet::MU[bodyIndex];
    mass                = mu / 

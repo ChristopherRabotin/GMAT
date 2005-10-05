@@ -182,6 +182,10 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
    objectTypeNames.push_back("CelestialBody");
+   
+   for (Integer i = 0; i < Gmat::ModelTypeCount; i++)
+      models[i].push_back("None");
+   
    parameterCount = CelestialBodyParamCount;
    Initialize(itsBodyType);
 }
@@ -230,6 +234,10 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
    objectTypeNames.push_back("CelestialBody");
+   
+   for (Integer i = 0; i < Gmat::ModelTypeCount; i++)
+      models[i].push_back("None");
+
    parameterCount = CelestialBodyParamCount;
    Initialize(CelestialBody::BODY_TYPE_STRINGS[itsBodyType]);
 }
@@ -296,6 +304,9 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
           atmModel->GetName().c_str(), instanceName.c_str());
       #endif
    }
+
+   for (Integer i = 0; i < Gmat::ModelTypeCount; i++)
+      models[i] = cBody.models[i];
    
    //defaultCoefSize        = cb.defaultCoefSize;
    //defaultSij             = cb.defaultSij;
@@ -362,6 +373,9 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    //dSbar               = cb.dSbar;
    //order               = cb.order;
    //degree              = cb.degree;
+
+   for (Integer i = 0; i < Gmat::ModelTypeCount; i++)
+      models[i] = cBody.models[i];
 
    lfEpoch      = cBody.lfEpoch;
    lfKepler     = cBody.lfKepler;
@@ -693,6 +707,11 @@ bool CelestialBody::GetUsePotentialFile() const
 bool CelestialBody::GetOverrideTimeSystem() const
 {
    return overrideTime;
+}
+
+StringArray CelestialBody::GetValidModelList(Gmat::ModelType m) const
+{
+   return models[(Integer)m]; 
 }
 
 
@@ -1156,6 +1175,36 @@ bool CelestialBody::SetOverrideTimeSystem(bool overrideIt)
    overrideTime = overrideIt;
    return true;
 }
+
+bool CelestialBody::AddValidModelName(Gmat::ModelType m, 
+                                      const std::string &newModel)
+{
+   // first, make sure it is not already on the list
+   if (find(models[(Integer)m].begin(), models[(Integer)m].end(), newModel) == models[(Integer)m].end())
+      models[(Integer)m].push_back(newModel);
+   
+   return true;
+   
+}
+
+bool CelestialBody::RemoveValidModelName(Gmat::ModelType m, 
+                                         const std::string &modelName)
+{
+   // remove it, if it's on the list
+   bool found = false;
+   for (StringArray::iterator i = models[(Integer)m].begin();
+        i != models[(Integer)m].end(); ++i)
+   {
+      if (*i == modelName)
+      {
+         models[(Integer)m].erase(i);
+         found = true;
+         break;
+      }
+   }
+   return true;  // found?
+}
+
 
 
 //------------------------------------------------------------------------------

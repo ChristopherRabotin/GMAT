@@ -74,6 +74,8 @@ public:
    Gmat::AnalyticMethod GetAnalyticMethod() const;
    std::string          GetSourceFileName() const;
    bool                 GetOverrideTimeSystem() const;
+   StringArray          GetValidModelList(Gmat::ModelType m, 
+                                          const std::string &forBody);
 
    // methods to set the source, source file, and analytic method for each
    // of the bodies in use
@@ -84,6 +86,10 @@ public:
    bool SetAnalyticMethod(const std::string &aM);
    
    bool SetOverrideTimeSystem(bool overrideIt);
+   bool AddValidModelName(Gmat::ModelType m, const std::string &forBody,
+                          const std::string &theModel);
+   bool RemoveValidModelName(Gmat::ModelType m, const std::string &forBody,
+                             const std::string &theModel);
    
    // Parameter access methods - overridden from GmatBase do I need these???
    virtual std::string    GetParameterText(const Integer id) const;     // const?

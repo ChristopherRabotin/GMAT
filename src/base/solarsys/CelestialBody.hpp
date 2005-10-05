@@ -52,6 +52,14 @@ namespace Gmat
 //      EPHEMERIS,           // do we need more?
       PosVelSourceCount
    };
+   
+   const std::string POS_VEL_SOURCE_STRINGS[PosVelSourceCount] = 
+   {
+      "Analytic",
+      "SLP",
+      "DE_200", 
+      "DE_405",
+   };
 
    // if using an analytical method, which one?
    enum AnalyticMethod
@@ -61,16 +69,48 @@ namespace Gmat
       AnalyticMethodCount
    };
 
+   const std::string ANALYTIC_METHOD_STRINGS[AnalyticMethodCount] = 
+   {
+      "NoAnalyticMethod",
+      "LowFidelity",
+   };
+   
    // possible types of celestial bodies
    enum BodyType
    {
       STAR = 0,
       PLANET,
       MOON,
-      ASTEROID,
-      COMET,
-      KBO,
+      ASTEROID,             // asteroids not yet implemented
+      COMET,                // comets not yet implemented
+      KBO,                  // KBOs not yet implemented
       BodyTypeCount
+   };
+   
+   const std::string BODY_TYPE_STRINGS[BodyTypeCount] = 
+   {
+      "Star",
+      "Planet",
+      "Moon",
+      "Asteroid",           // asteroids not yet implemented
+      "Comet",              // comets not yet implemented
+      "KuiperBeltObject",   // KBOs not yet implemented
+   };
+      
+   // types of environment models for a body
+   enum ModelType
+   {
+      ATMOSPHERE_MODEL = 0,
+      GRAVITY_FIELD,
+      MAGNETIC_FIELD,
+      ModelTypeCount
+   };
+   
+   const std::string MODEL_TYPE_STRINGS[ModelTypeCount] =
+   {
+      "AtmosphereModel",
+      "GravityField",
+      "MagneticField",
    };
 };
 
@@ -115,6 +155,7 @@ public:
    virtual Gmat::AnalyticMethod GetAnalyticMethod() const;
    virtual bool                 GetUsePotentialFile() const;
    virtual bool                 GetOverrideTimeSystem() const;
+   virtual StringArray          GetValidModelList(Gmat::ModelType m) const;
    virtual const Rvector3&      GetAngularVelocity();             // rad/sec
 
    virtual Real                 GetHourAngle(A1Mjd atTime); 
@@ -148,6 +189,10 @@ public:
    virtual bool           SetUsePotentialFile(bool useIt);
    
    virtual bool           SetOverrideTimeSystem(bool overrideIt);
+   virtual bool           AddValidModelName(Gmat::ModelType m, 
+                                            const std::string &newModel);
+   virtual bool           RemoveValidModelName(Gmat::ModelType m, 
+                                               const std::string &modelName);
 
    
    virtual bool           SetAtmosphereModelType(std::string toAtmModelType);
@@ -366,6 +411,9 @@ protected:
    bool                   newLF;
    /// flag indicating whether or not to override the TDB/TCB tiems with TT
    bool                   overrideTime;
+   
+   /// lists of valid models
+   StringArray            models[Gmat::ModelTypeCount];
    
    /// date and time of start of source file
    //A1Mjd                  sourceStart;      // currently unused
