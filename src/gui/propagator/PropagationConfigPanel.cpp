@@ -1550,6 +1550,8 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
          atmosComboBox->Enable(false);
          magfComboBox->Enable(false);
          srpCheckBox->Enable(false);
+         gravityDegreeTextCtrl->Enable(false);
+         gravityOrderTextCtrl->Enable(false);
       
          theApplyButton->Enable(true);
          isForceModelChanged = true;
@@ -1561,10 +1563,11 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
          atmosComboBox->Enable(true);
          magfComboBox->Enable(true);
          srpCheckBox->Enable(true);
+         gravityDegreeTextCtrl->Enable(true);
+         gravityOrderTextCtrl->Enable(true);
       }
       
       std::vector<ForceType*> fl;
-      
       std::string bodyName;
       
       fl = forceList;
@@ -1574,8 +1577,8 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
       for (Integer i = 0; i < (Integer)names.GetCount(); i++)
       {
          bodyName = names[i].c_str();
-         primaryBodiesArray.Add(bodyName.c_str());
-         currentBodyId = FindBody(bodyName);
+         primaryBodiesArray.Add(bodyName.c_str()); 
+         currentBodyId = FindBody(bodyName,gravModelArray[JGM2]);
          
          for (Integer j = 0; j < (Integer)fl.size(); j++)
          {
@@ -1596,12 +1599,13 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
    for (Integer i = 0; i < (Integer)forceList.size(); i++)
    {
       name = forceList[i]->bodyName.c_str();
-      bodyTextCtrl->AppendText(name + " ");
+//      bodyTextCtrl->AppendText(name + " ");
       bodyComboBox->Append(forceList[i]->bodyName.c_str());
       bodyComboBox->SetValue(forceList[i]->bodyName.c_str());
    }
       
    OnBodySelection(event);
+   DisplayForceData();
       
    theApplyButton->Enable(true);
    isForceModelChanged = true;
@@ -1724,6 +1728,7 @@ void PropagationConfigPanel::OnPMEditButton(wxCommandEvent &event)
       if (names.IsEmpty())
       {
          pmForceList.clear();
+         secondaryBodiesArray.Clear(); 
          pmEditTextCtrl->Clear();
          theApplyButton->Enable(true);
          isForceModelChanged = true;
