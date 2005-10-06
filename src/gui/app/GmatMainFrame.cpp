@@ -1153,6 +1153,7 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
    }
 
    CloseCurrentProject();
+   scriptFilename = "$gmattempscript$.script";
    theGuiInterpreter->LoadDefaultMission();
 
    GmatAppData::GetResourceTree()->UpdateResource(true);
