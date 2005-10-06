@@ -165,6 +165,15 @@ protected:
 
    static const Integer GRAV_MAX_DRIFT_DEGREE = 2;
    static const Integer BUFSIZE               = 256;
+   static const Integer stateSize             = 6;
+   
+   // stuff moved in here for performance
+   Rvector6 frv;
+   Rvector6 trv;
+   A1Mjd    now;
+   Integer satcount;
+   
+
 };
 
 

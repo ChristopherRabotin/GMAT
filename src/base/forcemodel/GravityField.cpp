@@ -89,8 +89,6 @@ Gmat::REAL_TYPE,
 Gmat::REAL_TYPE
 };
 
-
-
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
@@ -260,6 +258,7 @@ GravityField& GravityField::operator=(const GravityField &gf)
 //------------------------------------------------------------------------------
 bool GravityField::Initialize(void)
 {
+   //if (gfInitialized && hMinitialized) return true;
    if (!HarmonicField::Initialize())
    {
       throw ForceModelException(
@@ -335,7 +334,9 @@ bool GravityField::gravity_rtq(Real jday, Real F[] )
    Real               p, summ[4], D, dT, Cbar_nm, Sbar_nm;
 
    Real               arr[4] = {0.0, 0.0, 0.0, 0.0};
-   Real               sqrt2 = Sqrt(2.0);
+   static const Real  sqrt2 = Sqrt(2.0);
+
+   dT = (jday - (Real)2.4464305e+06)/(Real)365.25; /* years since Jan 1, 1986 */
 
    if (r == 0.0)  // (should I) check for hFinitialized here?
    {
@@ -362,7 +363,7 @@ bool GravityField::gravity_rtq(Real jday, Real F[] )
       for (m = 0;(m <= n && m <= order); ++m)
       {
          #ifdef DEBUG_GRAVITY_FIELD_DETAILS
-            dT = (jday - (Real)2.4464305e+06)/(Real)365.25; /* years since Jan 1, 1986 */
+            //dT = (jday - (Real)2.4464305e+06)/(Real)365.25; /* years since Jan 1, 1986 */
             MessageInterface::ShowMessage("  m = %d  n = %d\n   Cbar[n][m] = %le   Sbar[n][m] = %le\n",
                m, n, Cbar[n][m], Sbar[n][m]);
             if ( n <= GRAV_MAX_DRIFT_DEGREE )
@@ -375,7 +376,7 @@ bool GravityField::gravity_rtq(Real jday, Real F[] )
          /* time rate of change of coefficients (drift/year)*/
          if ( n <= GRAV_MAX_DRIFT_DEGREE )
          {
-            dT = (jday - (Real)2.4464305e+06)/(Real)365.25; /* years since Jan 1, 1986 */
+            //dT = (jday - (Real)2.4464305e+06)/(Real)365.25; /* years since Jan 1, 1986 */
             Cbar_nm = Cbar[n][m] + dCbar[n][m] * dT;
             Sbar_nm = Sbar[n][m] + dSbar[n][m] * dT;
          }
@@ -448,8 +449,8 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
       
 /// @todo Optimize this code -- May be possible to make GravityField calcs more efficient
 
-   Integer stateSize = 6;
-   Integer satcount = dimension / stateSize; 
+   //Integer stateSize = 6;
+   satcount = dimension / stateSize; 
    
    if (stateSize * satcount != dimension)
       throw ForceModelException("GravityField state dimension and state size do not match!");
@@ -459,7 +460,7 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
       throw ForceModelException("GravityField requires at least one spacecraft.");
       
    Real* satState;
-   Real f[3], rbb3, mu_rbb, aIndirect[3], now;
+   Real f[3], rbb3, mu_rbb, aIndirect[3]; // , now;
    Integer nOffset;
    CoordinateConverter cc;
    bool sameCS = false;
@@ -473,17 +474,33 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
    //         + instanceName);
    if (targetCS == inputCS)   sameCS = true;
    
-   SpacePoint *targetBody = targetCS->GetOrigin();
-   SpacePoint *fixedBody = fixedCS->GetOrigin();
-   const Rvector6 rv = fixedBody->GetMJ2000State(now) - 
-                       targetBody->GetMJ2000State(now);
-
-   // Precalculations for the indirect effect term
-   //rbb3 = (*rv)[0] * (*rv)[0] + (*rv)[1] * (*rv)[1] + (*rv)[2] * (*rv)[2];
-   rbb3 = (rv[0] * rv[0]) + (rv[1] * rv[1]) + (rv[2] * rv[2]);
+   CelestialBody *targetBody = (CelestialBody*) targetCS->GetOrigin();
+   CelestialBody *fixedBody  = (CelestialBody*) fixedCS->GetOrigin();
+   //SpacePoint *targetBody = targetCS->GetOrigin();
+   //SpacePoint *fixedBody = fixedCS->GetOrigin();
+   //const Rvector6 rv = fixedBody->GetMJ2000State(now) - 
+   //   targetBody->GetMJ2000State(now);
+   //const Rvector6 rv = fixedBody->GetState(now) - 
+   //   targetBody->GetState(now);
+   //Rvector frv = ((CelestialBody*) fixedBody)->GetState(now);
+   //Rvector trv = ((CelestialBody*) targetBody)->GetState(now);
    if (body->GetName() != targetCS->GetOriginName())  // or fixed?????
    //if (rbb3 != 0.0) 
    {
+      frv = fixedBody->GetState(now);
+      trv = targetBody->GetState(now);
+      
+      const Real *rvf = frv.GetDataVector();
+      const Real *rvt = trv.GetDataVector();
+      
+      Real rv[3];
+      rv[0] = rvf[0] - rvt[0];
+      rv[1] = rvf[1] - rvt[1];
+      rv[2] = rvf[2] - rvt[2];
+      
+      // Precalculations for the indirect effect term
+      //rbb3 = (*rv)[0] * (*rv)[0] + (*rv)[1] * (*rv)[1] + (*rv)[2] * (*rv)[2];
+      rbb3 = (rv[0] * rv[0]) + (rv[1] * rv[1]) + (rv[2] * rv[2]);
       rbb3 = rbb3 * sqrt(rbb3);
       mu_rbb = mu / rbb3;
       //aIndirect[0] = mu_rbb * (*rv)[0];
@@ -512,11 +529,12 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
       
       // convert to body fixed coordinate system
       Rvector6            outState;
-      A1Mjd               a1Now(now);
+      //A1Mjd               a1Now(now);
       Real                tmpState[6];
       Rvector6 theState(satState[0], satState[1], satState[2],
                         satState[3], satState[4], satState[5]);
-      cc.Convert(a1Now, theState, inputCS, outState, fixedCS);
+      //cc.Convert(a1Now, theState, inputCS, outState, fixedCS);
+      cc.Convert(now, theState, inputCS, outState, fixedCS);
       if (sameCS) rotMatrix = cc.GetLastRotationMatrix();
       outState.GetR(tmpState);
       outState.GetV(tmpState + 3);
@@ -559,7 +577,8 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
       {
          Rvector6 fState(f[0], f[1], f[2], 0.0, 0.0, 0.0);
          Rvector6 fConv;
-         cc.Convert(a1Now, fState, fixedCS, fConv, targetCS, true); 
+         //cc.Convert(a1Now, fState, fixedCS, fConv, targetCS, true); 
+         cc.Convert(now, fState, fixedCS, fConv, targetCS, true); 
          fNew[0] = fConv[0];
          fNew[1] = fConv[1];
          fNew[2] = fConv[2];
