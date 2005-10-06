@@ -260,7 +260,7 @@ void MODEcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
                     0.0,  GmatMathUtil::Cos(Epsbar), GmatMathUtil::Sin(Epsbar),
                     0.0, -GmatMathUtil::Sin(Epsbar), GmatMathUtil::Cos(Epsbar));
    
-   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB);
+   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
    
    rotMatrix = PREC.Transpose() * R1Eps.Transpose();
    // rotDotMatrix is still the default zero matrix

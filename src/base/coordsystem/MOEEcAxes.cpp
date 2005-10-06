@@ -143,7 +143,7 @@ bool MOEEcAxes::Initialize()
                     0.0, -GmatMathUtil::Sin(Epsbar), GmatMathUtil::Cos(Epsbar));
    
    
-   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB);
+   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, epoch);
    
    rotMatrix = PREC.Transpose() * R1Eps.Transpose();
 

@@ -257,15 +257,16 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
                                           // NOTE - this is really TT, an approximation of TDB *********
    Real tTDB    = (jdTT - 2451545.0) / 36525.0;
 
-   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB);
+   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
    Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
                                                 longAscNodeLunar, cosEpsbar);
    Rmatrix33  ST        = ComputeSiderealTimeRotation(jdTT, tUT1,
-                                                      dPsi, longAscNodeLunar, cosEpsbar,
+                                                      dPsi, longAscNodeLunar, 
+                                                      cosEpsbar,
                                                       cosAst, sinAst);
-   Rmatrix33  STderiv   = ComputeSiderealTimeDotRotation(mjdUTC,
+   Rmatrix33  STderiv   = ComputeSiderealTimeDotRotation(mjdUTC, atEpoch,
                                                          cosAst, sinAst);
-   Rmatrix33  PM        = ComputePolarMotionRotation(mjdUTC);
+   Rmatrix33  PM        = ComputePolarMotionRotation(mjdUTC, atEpoch);
 
    Rmatrix33 fixedToMJ2000    = PREC.Transpose() * (NUT.Transpose() *
                                  (ST.Transpose() * PM.Transpose()));

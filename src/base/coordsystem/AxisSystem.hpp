@@ -189,9 +189,15 @@ protected:
    std::string               epochFormat;
    
    Real                      updateInterval;
-   A1Mjd                     lastEpoch;
+   A1Mjd                     lastPRECEpoch;
+   A1Mjd                     lastNUTEpoch;
+   A1Mjd                     lastSTDerivEpoch;
+   A1Mjd                     lastPMEpoch;
+   Rmatrix33                 lastPREC;
    Rmatrix33                 lastNUT;
-   Real                      lastDPsi;  // ?????????????
+   Rmatrix33                 lastSTDeriv;
+   Rmatrix33                 lastPM;
+   Real                      lastDPsi;  
    
    std::vector<IntegerArray> a, ap;
    Rvector                   A, B, C, D, E, F, Ap, Bp, Cp, Dp;
@@ -200,7 +206,7 @@ protected:
    
    virtual void      InitializeFK5();
 
-   virtual Rmatrix33 ComputePrecessionMatrix(const Real tTDB);
+   virtual Rmatrix33 ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch);
    virtual Rmatrix33 ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch, 
                                            Real &dPsi,
                                            Real &longAscNodeLunar,
@@ -212,9 +218,9 @@ protected:
                                                  Real cosEpsbar,
                                                  Real &cosAst,
                                                  Real &sinAst);
-   virtual Rmatrix33 ComputeSiderealTimeDotRotation(const Real mjdUTC, 
+   virtual Rmatrix33 ComputeSiderealTimeDotRotation(const Real mjdUTC, A1Mjd atEpoch,
                                                     Real cosAst, Real sinAst);
-   virtual Rmatrix33 ComputePolarMotionRotation(const Real mjdUTC);
+   virtual Rmatrix33 ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch);
    
 };
 #endif // AxisSystem_hpp

@@ -254,7 +254,7 @@ void TODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    // Compute Julian centuries of TDB from the base epoch (J2000) 
    Real tTDB  = (jdTT - 2451545.0) / 36525.0;
    
-   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB);
+   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
    Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
                           longAscNodeLunar, cosEpsbar);
    

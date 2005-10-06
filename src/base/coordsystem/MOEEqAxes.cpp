@@ -131,7 +131,7 @@ bool MOEEqAxes::Initialize()
    // Compute Julian centuries of TDB from the base epoch (J2000) 
    Real tTDB  = (jdTT - 2451545.0) / 36525.0;
    
-   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB);
+   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, epoch);
    
    rotMatrix = PREC.Transpose();
    //rotMatrix = PREC;

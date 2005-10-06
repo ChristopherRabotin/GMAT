@@ -96,7 +96,10 @@ lastDPsi         (0.0)
    rotMatrix    = Rmatrix33(false); // want zero matrix, not identity matrix
    rotDotMatrix = Rmatrix33(false); // want zero matrix, not identity matrix
    epoch        = GmatTimeUtil::A1MJD_OF_J2000;
-   lastEpoch    = A1Mjd(0.0); // 1941?  strange, but ...
+   lastPRECEpoch       = A1Mjd(0.0); // 1941?  strange, but ...
+   lastNUTEpoch        = A1Mjd(0.0); // 1941?  strange, but ...
+   lastSTDerivEpoch    = A1Mjd(0.0); // 1941?  strange, but ...
+   lastPMEpoch         = A1Mjd(0.0); // 1941?  strange, but ...
 }
 
 //---------------------------------------------------------------------------
@@ -120,7 +123,10 @@ epochFormat       (axisSys.epochFormat),
 updateInterval    (axisSys.updateInterval),
 lastDPsi          (0.0)
 {
-   lastEpoch = A1Mjd(0.0);
+   lastPRECEpoch    = A1Mjd(0.0);
+   lastNUTEpoch     = A1Mjd(0.0);
+   lastSTDerivEpoch = A1Mjd(0.0);
+   lastPMEpoch      = A1Mjd(0.0);
 }
 
 //---------------------------------------------------------------------------
@@ -146,9 +152,15 @@ const AxisSystem& AxisSystem::operator=(const AxisSystem &axisSys)
    itrf           = axisSys.itrf;
    epochFormat    = axisSys.epochFormat;
    updateInterval = axisSys.updateInterval;
-   lastEpoch      = axisSys.lastEpoch;
-   lastNUT        = axisSys.lastNUT;
-   lastDPsi       = axisSys.lastDPsi;
+   lastPRECEpoch     = axisSys.lastPRECEpoch;
+   lastNUTEpoch      = axisSys.lastNUTEpoch;
+   lastSTDerivEpoch  = axisSys.lastSTDerivEpoch;
+   lastPMEpoch       = axisSys.lastPMEpoch;
+   lastPREC          = axisSys.lastPREC;
+   lastNUT           = axisSys.lastNUT;
+   lastSTDeriv       = axisSys.lastSTDeriv;
+   lastPM            = axisSys.lastPM;
+   lastDPsi          = axisSys.lastDPsi;
    Initialize();
    
    return *this;
@@ -649,8 +661,17 @@ void AxisSystem::InitializeFK5()
  *       will refer to those of the Vallado book.
  */
 //------------------------------------------------------------------------------
-Rmatrix33 AxisSystem::ComputePrecessionMatrix(const Real tTDB)
+Rmatrix33 AxisSystem::ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch)
 {
+   Real dt = Abs(atEpoch.Subtract(lastPRECEpoch)) * SECS_PER_DAY;
+   if ( dt < updateInterval)
+   {
+      #ifdef DEBUG_UPDATE
+         cout << ">>> Using previous saved PREC values ......" << endl;
+         cout << "lastPREC = "  << lastPREC << endl;
+      #endif
+      return lastPREC; 
+   }
    
    #ifdef DEBUG_ROT_MATRIX
       cout << "**** tTDB = " << tTDB << endl;
@@ -689,6 +710,8 @@ Rmatrix33 AxisSystem::ComputePrecessionMatrix(const Real tTDB)
    #ifdef DEBUG_ROT_MATRIX
       cout << "PREC = " << endl << PREC << endl;
    #endif
+   lastPREC = PREC;
+   lastPRECEpoch = atEpoch;
    return PREC;
 }
 
@@ -712,12 +735,12 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    cosEpsbar         = Cos(Epsbar);
    
    // if not enough time has passed, just return the last value
-   Real dt = Abs(atEpoch.Subtract(lastEpoch)) * SECS_PER_DAY;
+   Real dt = Abs(atEpoch.Subtract(lastNUTEpoch)) * SECS_PER_DAY;
    #ifdef DEBUG_UPDATE
       cout.precision(30);
       cout << "ENTERED ComputeNutation ....." << endl;
       cout << "atEpoch = " << atEpoch.Get() << endl;
-      cout << "lastEpoch = " << lastEpoch.Get() << endl;
+      cout << "lastNUTEpoch = " << lastNUTEpoch.Get() << endl;
       cout << "dt = " << dt << endl;
       cout << "longAscNodeLunar = "  << longAscNodeLunar << endl;
       cout << "cosEpsbar = "  << cosEpsbar << endl;
@@ -777,6 +800,7 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    // First, compute the mean Heliocentric longitudes of the planets, and the
    // general precession in longitude
    
+   /*
     Real longVenus   = (181.979800853  + 58517.8156748  * tTDB)* RAD_PER_DEG;
     Real longEarth   = (100.466448494  + 35999.3728521  * tTDB)* RAD_PER_DEG;
     Real longMars    = (355.433274605  + 19140.299314   * tTDB)* RAD_PER_DEG;
@@ -802,6 +826,7 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
        dPsi += (( Ap[i] + Bp[i]*tTDB )*sinApP) * RAD_PER_ARCSEC;
        dEps += (( Cp[i] + Dp[i]*tTDB )*cosApP) * RAD_PER_ARCSEC;
     }
+     */
     
    // FOR NOW, SQ's code to approximate GSRF frame
    // NOTE - do we delete this when we put in the planetary stuff above?
@@ -832,12 +857,12 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    NUT(2,1) =  sinTEoE*cosdPsi*cosEpsbar - sinEpsbar*cosTEoE;
    NUT(2,2) =  sinTEoE*sinEpsbar*cosdPsi + cosTEoE*cosEpsbar;
    
-   lastEpoch = atEpoch;
-   lastNUT   = NUT;
-   lastDPsi  = dPsi; 
+   lastNUTEpoch = atEpoch;
+   lastNUT      = NUT;
+   lastDPsi     = dPsi; 
    
    #ifdef DEBUG_ROT_MATRIX
-      cout << "atEpoch = " << endl << atEpoch << endl;
+      cout << "atEpoch = " << endl << atEpoch.Get() << endl;
       cout << "NUT = " << endl << NUT << endl;
       cout << "longAscNodeLunar = " << endl << longAscNodeLunar << endl;
       cout << "cosEpsbar = " << endl << cosEpsbar << endl;
@@ -908,9 +933,19 @@ Rmatrix33 AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
    return ST;
 }
 
-Rmatrix33 AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC,
+Rmatrix33 AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC, 
+                                                     A1Mjd atEpoch,
                                                      Real cosAst, Real sinAst)
 {
+   Real dt = Abs(atEpoch.Subtract(lastSTDerivEpoch)) * SECS_PER_DAY;
+   if ( dt < updateInterval)
+   {
+      #ifdef DEBUG_UPDATE
+         cout << ">>> Using previous saved STDeriv values ......" << endl;
+         cout << "lastSTDeriv = "  << lastSTDeriv << endl;
+      #endif
+      return lastSTDeriv; 
+   }
    // Convert to MJD UTC to use for polar motion  and LOD 
    // interpolations
    // Get the polar motion and lod data
@@ -935,12 +970,24 @@ Rmatrix33 AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC,
       cout << "lod = " << lod << endl;
       cout << "STderiv = " << endl << STderiv << endl;
    #endif
+      
+   lastSTDeriv      = STderiv;
+   lastSTDerivEpoch = atEpoch;
    
    return STderiv;
 }
 
-Rmatrix33 AxisSystem::ComputePolarMotionRotation(const Real mjdUTC)
+Rmatrix33 AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch)
 {
+   Real dt = Abs(atEpoch.Subtract(lastPMEpoch)) * SECS_PER_DAY;
+   if ( dt < updateInterval)
+   {
+      #ifdef DEBUG_UPDATE
+         cout << ">>> Using previous saved PM values ......" << endl;
+         cout << "lastPM = "  << lastPM << endl;
+      #endif
+      return lastPM; 
+   }
    // Get the polar motion and lod data
    Real lod = 0.0;
    Real x, y;
@@ -968,6 +1015,9 @@ Rmatrix33 AxisSystem::ComputePolarMotionRotation(const Real mjdUTC)
       cout << "x = " << x << " and y = " << y << endl;
       cout << "PM = " << endl << PM << endl;
    #endif
+      
+   lastPM      = PM;
+   lastPMEpoch = atEpoch;
 
    return PM;
 }
