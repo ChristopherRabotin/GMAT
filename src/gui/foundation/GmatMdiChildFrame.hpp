@@ -42,7 +42,10 @@ public:
     wxTextCtrl *GetScriptTextCtrl(){return theScriptTextCtrl;};
 
 protected:
+#ifdef __WXMAC__
     wxString title;
+#endif
+
     int dataType;
     wxTextCtrl *theScriptTextCtrl;
     wxMenu *mViewMenu;

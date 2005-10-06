@@ -49,7 +49,10 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame* parent,
                  :wxMDIChildFrame(parent, id, title, pos, size, style, name)
 {
    dataType = type;
+#ifdef __WXMAC__
    this->title.Printf("%s", title.c_str());
+#endif
+
    SetMenuBar(CreateMenu(dataType));
 }
 
@@ -63,7 +66,7 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
    // check if window is dirty?
   
    // remove from list of frames
-   GmatAppData::GetMainFrame()->RemoveChild(title, dataType);
+   GmatAppData::GetMainFrame()->RemoveChild(GetTitle(), dataType);
 
 //   event.Skip();
 }
