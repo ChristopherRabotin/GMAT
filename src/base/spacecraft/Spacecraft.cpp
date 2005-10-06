@@ -2369,6 +2369,9 @@ const std::string& Spacecraft::GetGeneratingString(Gmat::WriteMode mode,
    WriteParameters(mode, preface, data);
    
    generatingString = data.str();
+   
+MessageInterface::ShowMessage("\nSpacecraftGenString:\n\n%s\n\n", generatingString.c_str());
+   
    return generatingString;
 }
 
@@ -2478,8 +2481,13 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                if ((parmOrder[i] >= ELEMENT1_ID) && 
                    (parmOrder[i] <= ELEMENT6_ID))
                   value << genState[parmOrder[i] - ELEMENT1_ID];
-               else if (parmOrder[i] == STATE_TYPE_ID)  
-                  value << displayCoordType;
+               else if (parmOrder[i] == STATE_TYPE_ID)
+               {
+                  if (mode != Gmat::MATLAB_STRUCT)
+                     value << displayCoordType;
+                  else
+                     value << "'" << displayCoordType << "'";
+               }
                else
                   WriteParameterValue(parmOrder[i], value);
                
