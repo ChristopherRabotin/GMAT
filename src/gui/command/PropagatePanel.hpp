@@ -62,7 +62,6 @@ private:
       wxString       typeName;
       wxString       relOpStr;
       wxString       goalStr;
-      //Real           goal;
       Real           tol;
       Integer        repeat;
       StopCondition *stopCondPtr;
@@ -103,8 +102,10 @@ private:
    StopCondType mTempStopCond[MAX_STOPCOND_ROW];
    
    Propagate *thePropCmd;
+   std::vector<StopCondition*> mRemovedStopCondList;
    
    // methods inherited from GmatPanel
+   virtual void OnCancel(wxCommandEvent &event);
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
