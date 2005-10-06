@@ -447,7 +447,8 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
                   "SLP or DE file requested, but no file specified");
          }
          // figure out the ID of the body
-         bodyNumber = theSourceFile->GetBodyID(instanceName);
+         // Moved to SetSourceFile to improve performance
+         // bodyNumber = theSourceFile->GetBodyID(instanceName);
          posVel     = theSourceFile->GetPosVel(bodyNumber,atTime, overrideTime);
          state.SetElement(0,posVel[0]);
          state.SetElement(1,posVel[1]);
@@ -1101,6 +1102,7 @@ bool CelestialBody::SetSourceFile(PlanetaryEphem *src)
    // should I delete the old one here???
    theSourceFile = src;
    sourceFilename = theSourceFile->GetName();
+   bodyNumber = theSourceFile->GetBodyID(instanceName);
    return true;
 }
 

@@ -233,7 +233,7 @@ bool PointMassForce::Initialize()
          "PointMassForce::Initialize() solarSystem is NULL\n");
    }
     
-   Integer satCount = (Integer)(dimension / 6);
+   satCount = (Integer)(dimension / 6);
    if (dimension != satCount * 6) 
    {
       initialized = false;
@@ -285,25 +285,25 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
       // throw("Arrays not yet initialized -- exiting");
       return false;
 
-   // Calculate how many spacecraft are in the model
-   Integer satCount = (Integer)(dimension / 6);
-   if (dimension != satCount * 6) 
-      return false;
-
    Real radius, r3, mu_r, rbb3, mu_rbb, a_indirect[3];
    Integer i6;
-    
-   //waw: 04/27/04
-   Real now = epoch + dt/86400.0, relativePosition[3];
-   Rvector6 bodyrv = body->GetState(now);
-   Rvector6 orig = forceOrigin->GetState(now);
+
+   now = epoch + dt/86400.0;
+   Real relativePosition[3];
+   bodyrv = body->GetState(now);
+   orig = forceOrigin->GetState(now);
+
+   const Real *brv = bodyrv.GetDataVector(), *orv = orig.GetDataVector();
+   Real rv[3];
+   rv[0] = brv[0] - orv[0];
+   rv[1] = brv[1] - orv[1];
+   rv[2] = brv[2] - orv[2];
 
    // The vector from the force origin to the gravitating body
-   Rvector3 rv = bodyrv.GetR() - orig.GetR();
    // Precalculations for the indirect effect term
-   rbb3 = rv.GetMagnitude();
+   rbb3 = rv[0]*rv[0]+rv[1]*rv[1]+rv[2]*rv[2];
    if (rbb3 != 0.0) {
-      rbb3 = rbb3 * rbb3 * rbb3;
+      rbb3 = sqrt(rbb3 * rbb3 * rbb3);
       mu_rbb = mu / rbb3;
       a_indirect[0] = mu_rbb * rv[0];
       a_indirect[1] = mu_rbb * rv[1];

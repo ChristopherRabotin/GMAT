@@ -137,6 +137,12 @@ protected:
    //std::string theBodyName; //loj: 5/6/04 added // wcs - 2004/06/21 - exists in PhysicalModel
    bool isPrimaryBody;
    
+   // Moved here for performance
+   Rvector6 bodyrv, orig;
+   Rvector3 rv;
+   A1Mjd now;
+   Integer satCount;
+   
    // for Debug
    void ShowBodyState(const std::string &header, Real time, Rvector6 &rv);
    void ShowDerivative(const std::string &header, Real *state, Integer satCount);
