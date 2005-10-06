@@ -51,6 +51,8 @@ private:
    wxButton *clearButton;
    wxButton *prioritizeButton;
    
+   wxCheckBox *mOverrideCheckBox;
+
    wxBoxSizer *mAnaModelSizer;
    wxBoxSizer *mPageSizer;
    
@@ -61,7 +63,8 @@ private:
    void OnBrowseButton(wxCommandEvent& event);
    void OnListBoxSelect(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent& event);
-   
+   void OnCheckBoxChange(wxCommandEvent& event);
+
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
@@ -83,6 +86,7 @@ private:
       ID_TEXT_CTRL,
       ID_BUTTON_BROWSE,
       ID_SELECTED_LIST,
+      CHECKBOX,
    };
 };
 #endif

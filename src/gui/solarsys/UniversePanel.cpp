@@ -43,6 +43,8 @@ BEGIN_EVENT_TABLE(UniversePanel, GmatPanel)
    
    EVT_COMBOBOX(ID_COMBOBOX, UniversePanel::OnComboBoxChange)
 
+   EVT_CHECKBOX(CHECKBOX, UniversePanel::OnCheckBoxChange)
+
 END_EVENT_TABLE()
    
    
@@ -202,6 +204,11 @@ void UniversePanel::Create()
    mBrowseButton =
       new wxButton(this, ID_BUTTON_BROWSE, wxT("Browse"),
                    wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+                   
+   mOverrideCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Override Time System"),
+                     wxDefaultPosition, wxSize(-1, -1), 0);
+
    
    wxFlexGridSizer *bottomGridSizer = new wxFlexGridSizer(3, 0, 0);
    bottomGridSizer->Add(fileTypeLabel, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -210,7 +217,8 @@ void UniversePanel::Create()
    bottomGridSizer->Add(mFileTypeComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    bottomGridSizer->Add(mFileNameTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
    bottomGridSizer->Add(mBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
+   bottomGridSizer->Add(mOverrideCheckBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+
    //-------------------------------------------------------
    // analytic motel
    //-------------------------------------------------------
@@ -319,6 +327,10 @@ void UniversePanel::LoadData()
    mFileNameTextCtrl->
       SetValue(mFileTypeNameMap[mFileTypeComboBox->GetStringSelection()]);
 
+   SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
+   mOverrideCheckBox->SetValue(theSolarSystem->GetBooleanParameter(
+      "OverrideTimeSystem"));
+
    mPageSizer->Layout();
 }
 
@@ -388,6 +400,10 @@ void UniversePanel::SaveData()
          SetAnalyticModelToUse(mAnalyticModelComboBox->GetStringSelection().c_str());
    }
    
+   SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
+   theSolarSystem->SetBooleanParameter("OverrideTimeSystem",
+      mOverrideCheckBox->IsChecked());
+
    theApplyButton->Enable(false);
    
 }// end SaveData()
@@ -592,3 +608,10 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
 
 }
 
+//------------------------------------------------------------------------------
+// void OnCheckBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void UniversePanel::OnCheckBoxChange(wxCommandEvent& event)
+{
+   theApplyButton->Enable();
+}
