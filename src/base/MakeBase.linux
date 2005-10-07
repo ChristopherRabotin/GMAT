@@ -56,7 +56,7 @@ HEADERS = -Iinclude \
 #           -I/usr/local/matlab704/extern/include 
 
 # Uncomment this section to build without Matlab
-CPPFLAGS = $(OPTIMIZATIONS) -DSKIP_DEVIL -Wall `wx-config --cppflags` $(DEBUG_FLAGS)
+CPPFLAGS = $(OPTIMIZATIONS) -Wall `wx-config --cppflags` $(DEBUG_FLAGS)
 
 export CPPFLAGS
 export CPP
@@ -280,6 +280,7 @@ OBJECTS = \
     util/A1Mjd.o \
     util/AngleUtil.o \
     util/Anomaly.o \
+    util/AttitudeUtil.o \
     util/Cartesian.o \
     util/CoordUtil.o \
     util/Date.o \

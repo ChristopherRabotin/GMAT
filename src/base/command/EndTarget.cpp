@@ -20,6 +20,7 @@
 
 #include "EndTarget.hpp"
 #include "BranchCommand.hpp"
+#include "MessageInterface.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -120,6 +121,15 @@ bool EndTarget::Initialize()
 //------------------------------------------------------------------------------
 bool EndTarget::Execute()
 {
+   #ifdef DEBUG_TARGET_COMMANDS
+      if (next)
+         MessageInterface::ShowMessage(
+            "End Target points to a %s command\n", next->GetTypeName().c_str());
+      else
+         MessageInterface::ShowMessage(
+            "EndTarget does not reconnect to Target comamnd\n");
+   #endif
+   
    BuildCommandSummary(true);
    return true;
 }

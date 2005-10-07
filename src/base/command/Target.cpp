@@ -458,8 +458,17 @@ bool Target::Initialize()
    for (node = branch.begin(); node != branch.end(); ++node)
    {
       current = *node;
+
+      #ifdef DEBUG_TARGET_COMMANDS
+         Integer nodeNum = 0;
+      #endif
       while ((current != NULL) && (current != this))
       {
+         #ifdef DEBUG_TARGET_COMMANDS
+            MessageInterface::ShowMessage(
+               "   Target Command %d:  %s\n", ++nodeNum, 
+               current->GetTypeName().c_str());       
+         #endif
          if ((current->GetTypeName() == "Vary") || 
              (current->GetTypeName() == "Achieve"))
             current->SetRefObject(targeter, Gmat::SOLVER, targeterName);
@@ -503,17 +512,40 @@ bool Target::Execute()
 {
    bool retval = true;
 
-   if (!commandExecuting)
-      retval = BranchCommand::Execute();
-    
    // Drive through the state machine.
    Solver::SolverState state = targeter->GetState();
+   
+   #ifdef DEBUG_TARGET_COMMANDS
+      MessageInterface::ShowMessage("TargetExecute(%c%c%d)\n",
+         (commandExecuting?'Y':'N'),
+         (commandComplete?'Y':'N'),
+         state);
+   #endif
+   
+   if (!commandExecuting) 
+   {
+	   #ifdef DEBUG_TARGET_COMMANDS
+   	   MessageInterface::ShowMessage(
+      	   "Entered Targeter while command is not executing\n");
+      #endif
+      retval = BranchCommand::Execute();
+//      if (state == Solver::FINISHED)
+//      {
+//         state = Solver::INITIALIZING;
+//targeter->TakeAction("Reset");
+//commandComplete = false;
+//Initialize();
+//      }
+   }
    
    if (branchExecuting)
    {
       retval = ExecuteBranch();
       if (!branchExecuting && (state == Solver::FINISHED))
+      {
          commandComplete = true;
+//commandExecuting = false;
+      }  
    }
    else
    {

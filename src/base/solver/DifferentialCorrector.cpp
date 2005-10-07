@@ -454,6 +454,11 @@ bool DifferentialCorrector::TakeAction(const std::string &action,
       return true;
    }
  
+   if (action == "Reset")
+   {
+      currentState = INITIALIZING;
+   }
+
    return Solver::TakeAction(action, actionData);
 }
 
