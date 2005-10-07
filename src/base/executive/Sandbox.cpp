@@ -1025,6 +1025,11 @@ bool Sandbox::Execute()
    }
    
    sequence->RunComplete();
+
+   // notify subscribers end of run
+   currentState = Gmat::IDLE;
+   publisher->SetRunState(currentState);
+   publisher->NotifyEndOfRun();
    
    return rv;
 }
