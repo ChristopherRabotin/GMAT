@@ -62,10 +62,13 @@ public:
    static void SetGlShowObjectFlag(const std::string &plotName,
                                    const std::vector<bool> &showArray);
    
+   static void SetGlUpdateFrequency(const std::string &plotName, Integer updFreq);
+   
    static bool IsThere(const std::string &plotName);
    
    static bool DeleteGlPlot();
    static bool RefreshGlPlot(const std::string &plotName);
+   static bool SetGlEndOfRun(const std::string &plotName);
    
    static bool UpdateGlPlot(const std::string &plotName,
                             const std::string &oldName,

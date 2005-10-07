@@ -386,6 +386,31 @@ void PlotInterface::SetGlShowObjectFlag(const std::string &plotName,
 
 
 //------------------------------------------------------------------------------
+// void SetGlUpdateFrequency(const std::string &plotName, Integer updFreq)
+//------------------------------------------------------------------------------
+void PlotInterface::SetGlUpdateFrequency(const std::string &plotName,
+                                         Integer updFreq)
+{
+#if defined __CONSOLE_APP__
+   return true;
+#else
+   wxString owner = wxString(plotName.c_str());
+   MdiChildTrajFrame *frame = NULL;
+   
+   for (int i=0; i<MdiGlPlot::numChildren; i++)
+   {
+      frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
+      
+      if (frame->GetPlotName().IsSameAs(owner.c_str()))
+      {
+         frame->SetGlUpdateFrequency(updFreq);
+      }
+   }
+#endif
+}
+
+
+//------------------------------------------------------------------------------
 //  bool IsThere(const std::string &plotName)
 //------------------------------------------------------------------------------
 /*
@@ -453,7 +478,7 @@ bool PlotInterface::DeleteGlPlot()
 
 
 //------------------------------------------------------------------------------
-//  delete RefreshGlPlot(const std::string &plotName)
+//  bool RefreshGlPlot(const std::string &plotName)
 //------------------------------------------------------------------------------
 /*
  * Refreshes OpenGlPlot.
@@ -481,6 +506,44 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
          if (frame->GetPlotName().IsSameAs(owner.c_str()))
          {
             frame->RefreshPlot();
+         }
+      }
+   }
+   
+   return true;
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetGlEndOfRun(const std::string &plotName)
+//------------------------------------------------------------------------------
+/*
+ * Sets end of run flag to OpenGlPlot.
+ */
+//------------------------------------------------------------------------------
+bool PlotInterface::SetGlEndOfRun(const std::string &plotName)
+{    
+#if defined __CONSOLE_APP__
+   return true;
+#else
+   
+   if (GmatAppData::GetMainFrame() != NULL)
+   {
+      #if DEBUG_PLOTIF_GL
+         MessageInterface::ShowMessage
+            ("PlotInterface::SetGlEndOfRun() plotName=%s\n",plotName.c_str());
+      #endif
+      wxString owner = wxString(plotName.c_str());
+      
+      MdiChildTrajFrame *frame = NULL;
+      for (int i=0; i<MdiGlPlot::numChildren; i++)
+      {
+         frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
+            
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         {
+            frame->SetEndOfRun();
          }
       }
    }
