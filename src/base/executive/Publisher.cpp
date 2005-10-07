@@ -22,7 +22,7 @@
 #include <string>
 #include "MessageInterface.hpp"
 
-#define DEBUG_SUBSCRIBER 0
+//#define DEBUG_SUBSCRIBER 1
 
 // Initialize the singleton
 Publisher* Publisher::instance = NULL;
@@ -60,10 +60,10 @@ Publisher::~Publisher(void)
 //------------------------------------------------------------------------------
 bool Publisher::Subscribe(Subscriber *s)
 {
-#if DEBUG_SUBSCRIBER
+   #if DEBUG_SUBSCRIBER
    MessageInterface::ShowMessage
       ("Publisher::Subscribe() sub = %s\n", s->GetName().c_str());
-#endif
+   #endif
    
    if (!s)
       return false;
@@ -125,19 +125,20 @@ bool Publisher::Publish(Integer id, Real *data, Integer count)
    }
 
 
-#if DEBUG_SUBSCRIBER
+   #if DEBUG_SUBSCRIBER
    MessageInterface::ShowMessage
       ("Publisher::Publish() calling ReceiveData() number of sub = %d\n",
        subs.size());
-#endif
+   #endif
 
    std::list<Subscriber*>::iterator current = subs.begin();
    while (current != subs.end())
    {
-#if DEBUG_SUBSCRIBER
+      #if DEBUG_SUBSCRIBER
       MessageInterface::ShowMessage("Publisher::Publish() sub = %s\n",
                                     (*current)->GetName().c_str());
-#endif
+      #endif
+      
       if (!(*current)->ReceiveData(stream))
          return false;
       if (!(*current)->ReceiveData(data, count))
@@ -254,6 +255,31 @@ bool Publisher::FlushBuffers()
 }
 
 
+//------------------------------------------------------------------------------
+// bool NotifyEndOfRun()
+//------------------------------------------------------------------------------
+bool Publisher::NotifyEndOfRun()
+{
+   // No subscribers
+   if (subs.empty())
+      return false;
+   
+   std::list<Subscriber*>::iterator current = subs.begin();
+   while (current != subs.end())
+   {
+      if (!(*current)->SetEndOfRun())
+         return false;
+      current++;
+   }
+   
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// Integer RegisterPublishedData(const StringArray& owners, 
+//                               const StringArray& elements)
+//------------------------------------------------------------------------------
 Integer Publisher::RegisterPublishedData(const StringArray& owners, 
                                          const StringArray& elements)
 {
@@ -265,6 +291,9 @@ Integer Publisher::RegisterPublishedData(const StringArray& owners,
 }
 
 
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const std::string& type)
+//------------------------------------------------------------------------------
 const StringArray& Publisher::GetStringArrayParameter(const std::string& type)
 {
    if ((currentProvider < 0) || (currentProvider >= providerCount))
@@ -280,12 +309,18 @@ const StringArray& Publisher::GetStringArrayParameter(const std::string& type)
 }
 
 
+//------------------------------------------------------------------------------
+// void SetRunState(const Gmat::RunState state)
+//------------------------------------------------------------------------------
 void Publisher::SetRunState(const Gmat::RunState state)
 {
    runState = state;
 }
 
 
+//------------------------------------------------------------------------------
+// void UpdateProviderID(Integer newId)
+//------------------------------------------------------------------------------
 void Publisher::UpdateProviderID(Integer newId)
 {
    std::list<Subscriber*>::iterator current = subs.begin();

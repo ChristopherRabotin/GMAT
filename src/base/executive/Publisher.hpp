@@ -38,7 +38,8 @@ public:
    bool Publish(Integer id, char *data, Integer count = 0);
    bool Publish(Integer id, Integer *data, Integer count);
 
-   bool FlushBuffers(); //loj: 6/22/04 added
+   bool FlushBuffers();
+   bool NotifyEndOfRun();
    
    // Interface methods used to identify the data sent to the publisher and
    // subscribers
