@@ -976,6 +976,18 @@ void MdiChildTrajFrame::SetGlShowObjectFlag(const std::vector<bool> &showArray)
 
 
 //------------------------------------------------------------------------------
+// void SetGlUpdateFrequency(Integer updFreq)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetGlUpdateFrequency(Integer updFreq)
+{
+   if (mCanvas)
+   {
+      mCanvas->SetUpdateFrequency(updFreq);
+   }
+}
+
+
+//------------------------------------------------------------------------------
 // void UpdatePlot(const StringArray &scNames, ...
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::UpdatePlot(const StringArray &scNames, const Real &time,
@@ -1023,8 +1035,26 @@ void MdiChildTrajFrame::RefreshPlot()
 {
    if (mCanvas)
    {
+      mCanvas->SetEndOfData(true);
+      mCanvas->Refresh(false);
+      Update();
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetEndOfRun()
+//------------------------------------------------------------------------------
+/*
+ * Sets end of run flag.
+ */
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetEndOfRun()
+{
+   if (mCanvas)
+   {
       mCanvas->SetEndOfRun(true);
-      mCanvas->Refresh(false); //loj: 9/8/05 Added
+      mCanvas->Refresh(false);
       Update();
    }
 }

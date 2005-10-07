@@ -51,6 +51,7 @@ public:
    virtual bool ReceiveData(const char * datastream, const Integer len);
    virtual bool ReceiveData(const Real * datastream, const Integer len = 0);
    virtual bool FlushData();
+   virtual bool SetEndOfRun();
    
    Subscriber*  Next(void);
    bool Add(Subscriber *s);
@@ -75,6 +76,7 @@ protected:
    
    bool        active;
    bool        isEndOfReceive;
+   bool        isEndOfRun;
    Integer     currentProvider;
    
    virtual bool Distribute(Integer len) = 0;

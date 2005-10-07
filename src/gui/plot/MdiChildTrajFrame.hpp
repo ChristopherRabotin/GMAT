@@ -137,6 +137,7 @@ public:
    
    void SetGlDrawOrbitFlag(const std::vector<bool> &drawArray);
    void SetGlShowObjectFlag(const std::vector<bool> &showArray);
+   void SetGlUpdateFrequency(Integer updFreq);
    
    void UpdatePlot(const StringArray &scNames, const Real &time,
                    const RealArray &posX, const RealArray &posY,
@@ -145,6 +146,7 @@ public:
                    const UnsignedIntArray &scColors, bool updateCanvas);
    
    void RefreshPlot();
+   void SetEndOfRun();
    void DeletePlot();
    
 protected:

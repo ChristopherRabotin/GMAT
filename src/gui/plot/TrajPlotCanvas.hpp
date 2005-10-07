@@ -60,7 +60,8 @@ public:
    wxString GetGotoObjectName();
    
    // setters
-   void SetEndOfRun(bool flag) {mIsEndOfRun = flag;}
+   void SetEndOfRun(bool flag = true) {mIsEndOfRun = flag; mIsEndOfData = flag;}
+   void SetEndOfData(bool flag = true) {mIsEndOfData = flag;}
    void SetDistance(float dist) {mAxisLength = dist;}
    void SetUseViewPointInfo(bool flag) {mUseInitialViewPoint = flag;}
    void SetAnimationUpdateInterval(int interval) {mUpdateInterval = interval;}
@@ -117,6 +118,7 @@ public:
    void SetGlShowObjectFlag(const std::vector<bool> &showArray);
    
    // performance
+   void SetUpdateFrequency(Integer updFreq);
    void SetNumPointsToRedraw(Integer numPoints);
    
    // update
@@ -181,9 +183,9 @@ private:
    bool mUseGluLookAt;
 
    // performance
-   bool mViewPointChanged;
    bool mRedrawLastPointsOnly;
    int  mNumPointsToRedraw;
+   int  mUpdateFrequency;
    
    // draw option
    float mAxisLength;
@@ -256,6 +258,7 @@ private:
    
    // data count
    int  mNumData;
+   bool mIsEndOfData;
    bool mIsEndOfRun;
    
    // time

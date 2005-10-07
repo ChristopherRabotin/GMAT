@@ -569,6 +569,8 @@ bool OpenGlPlot::Initialize()
                 (mViewPointRefName == "Vector"), (mViewPointVectorName == "Vector"),
                 (mViewDirectionName == "Vector"), (mUseFixedFov == "On"),
                 mFixedFovAngle);
+
+            PlotInterface::SetGlUpdateFrequency(instanceName, mUpdatePlotFrequency);
             
             //--------------------------------------------------------
             // set drawing object flag
@@ -1928,16 +1930,19 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
       ("OpenGlPlot::Distribute() isEndOfReceive=%d, mAllSpCount=%d, mScCount=%d, "
        "len=%d\n", isEndOfReceive, mAllSpCount, mScCount, len);
    #endif
-   
-   if (isEndOfReceive)
-   {
-      if (active)
-         return PlotInterface::RefreshGlPlot(instanceName);
-   }
+
+   if (!active)
+      return true;
    
    Publisher *thePublisher = Publisher::Instance();
    
-   // if targetting and draw target is off, just return
+   if (isEndOfRun)
+      return PlotInterface::SetGlEndOfRun(instanceName);
+   
+   if (isEndOfReceive)
+      return PlotInterface::RefreshGlPlot(instanceName);
+   
+   // if targeting and draw target is off, just return
    if ((mTargetStatus == "Off") && (thePublisher->GetRunState() == Gmat::TARGETING))
    {
       #if DEBUG_OPENGL_UPDATE > 1
@@ -1947,7 +1952,7 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
       
       return true;
    }
-   
+
    if (mScCount > 0)
    {
       if (len > 0)

@@ -50,6 +50,7 @@ Subscriber::Subscriber(std::string typeStr, std::string nomme) :
    next (NULL),
    active (true),
    isEndOfReceive(false),
+   isEndOfRun(false),
    currentProvider(0)
 {
    objectTypes.push_back(Gmat::SUBSCRIBER);
@@ -63,8 +64,11 @@ Subscriber::Subscriber(const Subscriber &copy) :
    GmatBase (copy),
    data (NULL),
    next (NULL),
-   active (copy.active), //loj: 4/21/05 Changed from true
-   isEndOfReceive(false),
+   active (copy.active),
+//    isEndOfReceive(false),
+//    isEndOfRun(false),
+   isEndOfReceive(copy.isEndOfReceive),
+   isEndOfRun(copy.isEndOfRun),
    currentProvider(copy.currentProvider)
 {
 }
@@ -86,10 +90,14 @@ Subscriber& Subscriber::operator=(const Subscriber& sub)
     // is this right?
     data = sub.data;
     next = sub.next;
-    active = true;
-    isEndOfReceive = false;
+//     active = true;
+//     isEndOfReceive = false;
+//     isEndOfRun = false;
+    active = sub.active;
+    isEndOfReceive = sub.isEndOfReceive;
+    isEndOfRun = sub.isEndOfRun;
     currentProvider = sub.currentProvider;
-
+    
     return *this;
 }
 
@@ -106,6 +114,7 @@ Subscriber::~Subscriber(void)
 bool Subscriber::Initialize()
 {
    isEndOfReceive = false;
+   isEndOfRun = false;
    return true;
 }
 
@@ -159,6 +168,7 @@ bool Subscriber::ReceiveData(const double *datastream, const int len)
    return true;
 }
 
+
 //------------------------------------------------------------------------------
 // bool FlushData()
 //------------------------------------------------------------------------------
@@ -170,6 +180,22 @@ bool Subscriber::FlushData()
    isEndOfReceive = false;
    return true;
 }
+
+
+//------------------------------------------------------------------------------
+// bool SetEndOfRun()
+//------------------------------------------------------------------------------
+bool Subscriber::SetEndOfRun()
+{
+   isEndOfReceive = true;
+   isEndOfRun = true;
+   Distribute(0);
+   Distribute(NULL, 0);
+   isEndOfReceive = false;
+   isEndOfRun = false;
+   return true;
+}
+
 
 //------------------------------------------------------------------------------
 // Subscriber* Next(void)

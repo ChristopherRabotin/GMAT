@@ -133,6 +133,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mTextTrajFile = NULL;
    mGlList = 0;
    mNumData = 0;
+   mIsEndOfData = false;
    mIsEndOfRun = false;
    
    // projection
@@ -179,9 +180,9 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    // performance
    // if mNumPointsToRedraw =  0 It redraws whole plot
    // if mNumPointsToRedraw = -1 It does not clear GL_COLOR_BUFFER
-   mViewPointChanged = false;
    mNumPointsToRedraw = 0;
    mRedrawLastPointsOnly = false;
+   mUpdateFrequency = 50;
    
    mAxisLength = mCurrViewDist;
    
@@ -338,6 +339,7 @@ bool TrajPlotCanvas::InitGL()
    mShowMaxWarning = true;
    mNumData = 0;
    mOverCounter = 0;
+   mIsEndOfData = false;
    mIsEndOfRun = false;
    mViewAnimation = false;
 
@@ -1073,6 +1075,15 @@ void TrajPlotCanvas::SetNumPointsToRedraw(Integer numPoints)
 
 
 //------------------------------------------------------------------------------
+// void SetUpdateFrequency(Integer updFreq)
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::SetUpdateFrequency(Integer updFreq)
+{
+   mUpdateFrequency = updFreq;
+}
+
+
+//------------------------------------------------------------------------------
 // void UpdatePlot(const StringArray &scNames, const Real &time,
 //                 const RealArray &posX, const RealArray &posY,
 //                 const RealArray &posZ, const RealArray &velX,
@@ -1113,7 +1124,8 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    
    if (mNumData < MAX_DATA)
    {
-      mIsEndOfRun = false;
+      //mIsEndOfData = false;
+      
       mTime[mNumData] = time;
       
       //-------------------------------------------------------
@@ -1171,9 +1183,12 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             
             #if DEBUG_TRAJCANVAS_UPDATE
             MessageInterface::ShowMessage
-               ("TrajPlotCanvas::UpdatePlot() Sc%d pos = %f, %f, %f, color=%d\n", objId,
+               ("TrajPlotCanvas::UpdatePlot() SC:%d pos = %f, %f, %f, color=%d\n", objId,
                 mObjectTempPos[objId][mNumData][0], mObjectTempPos[objId][mNumData][1],
                 mObjectTempPos[objId][mNumData][2], mObjectOrbitColor[objId][mNumData]);
+            #endif
+            
+            #if DEBUG_TRAJCANVAS_UPDATE > 1
             MessageInterface::ShowMessage
                ("TrajPlotCanvas::UpdatePlot() Sc%d vel = %f, %f, %f\n", objId,
                 mObjectTempVel[objId][mNumData][0], mObjectTempVel[objId][mNumData][1],
@@ -1277,7 +1292,6 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
       }
       
       mNumData++;
-      mViewPointChanged = false;
       
       //} // if (mNumData < MAX_DATA)
       
@@ -1525,11 +1539,11 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
    // when run ended if using initial viewpoint
 
    //MessageInterface::ShowMessage
-   //   ("===> OnMouse() mUseInitialViewPoint=%d, mIsEndOfRun=%d\n",
-   //    mUseInitialViewPoint, mIsEndOfRun);
+   //   ("===> OnMouse() mUseInitialViewPoint=%d, mIsEndOfData=%d\n",
+   //    mUseInitialViewPoint, mIsEndOfData);
 
    //loj: 9/29/05 commented out to allow mouse movement even in locked-view mode
-   //if (mUseInitialViewPoint && !mIsEndOfRun)
+   //if (mUseInitialViewPoint && !mIsEndOfData)
    //   return;
    
    int flippedY;
@@ -1537,7 +1551,6 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
    int mouseX, mouseY;
    
    mViewAnimation = false;
-   mViewPointChanged = true;
    
    GetClientSize(&clientWidth, &clientHeight);
    ChangeProjection(clientWidth, clientHeight, mAxisLength);
@@ -1555,6 +1568,7 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
    
    if (mUseSingleRotAngle)
    {
+      //if (mIsEndOfData)
       if (mIsEndOfRun)
          mUseSingleRotAngle = false;
       
@@ -1610,6 +1624,7 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
          //    mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
          
          // if end-of-run compute new mfCamRotXYZAngle by calling ChangeView()
+         //loj:10/7/05 if (mIsEndOfData)
          if (mIsEndOfRun)
             ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
          
@@ -2292,7 +2307,8 @@ void TrajPlotCanvas::ComputeProjection(int frame)
 
       //loj: 9/29/05
       //Initially use mVpLocVec and later use changed value by mouse zoom-in/out
-      if (mNumData < 51)
+      //if (mNumData < 51)      
+      if (mNumData <= mUpdateFrequency)
          mAxisLength = mVpLocVec.GetMagnitude();
       
       // if mAxisLength is too small, set to max zoom in value
@@ -2508,8 +2524,8 @@ void TrajPlotCanvas::DrawFrame()
    }
    
    int numberOfData = mNumData;
+   mIsEndOfData = false;
    mIsEndOfRun = false;
-   mViewPointChanged = false;
    
    for (int frame=1; frame<numberOfData; frame++)
    {
@@ -2535,11 +2551,11 @@ void TrajPlotCanvas::DrawFrame()
       
       ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
       
-      mViewPointChanged = false;
       Refresh(false);
    }
    
    mNumData = numberOfData;
+   mIsEndOfData = true;
    mIsEndOfRun = true;
    
 } // end DrawFrame()
@@ -2565,15 +2581,19 @@ void TrajPlotCanvas::DrawPlot()
        mAxisLength);
    #endif
    
-   if (mViewPointChanged || mRedrawLastPointsOnly || mNumPointsToRedraw == 0)
+   if (mRedrawLastPointsOnly || mNumPointsToRedraw == 0)
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    else
       glClear(GL_DEPTH_BUFFER_BIT);
    
    DrawStatus("Frame#: ", mNumData-1, mTime[mNumData-1]);
    
+   //MessageInterface::ShowMessage
+   //   ("===> TrajPlotCanvas::DrawPlot() mIsEndOfData=%d, mIsEndOfRun=%d\n",
+   //    mIsEndOfData, mIsEndOfRun);
+   
    // compute projection if not using initial viewpoint and not end of run
-   //if (mUseInitialViewPoint) (loj: 9/6/05 added !mIsEndOfRun)
+   //loj:10/7/05 if (mUseInitialViewPoint && !mIsEndOfData)
    if (mUseInitialViewPoint && !mIsEndOfRun)
       ComputeProjection(mNumData-1);
    
@@ -2711,20 +2731,27 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
       
       int beginFrame = 1;
       
-      if (mRedrawLastPointsOnly && !mIsEndOfRun && !mViewPointChanged)
+      //---------------------------------------------------------
+      // compute begin frame
+      //---------------------------------------------------------
+      //loj: 10/7/05 if (mRedrawLastPointsOnly && !mIsEndOfData)
+      if (mRedrawLastPointsOnly && !mIsEndOfRun)
       {
          beginFrame = frame - mNumPointsToRedraw;
          if (beginFrame < 1)
             beginFrame = 1;
       }
+      //loj: 10/7/05 else if (!mIsEndOfData && mNumPointsToRedraw == -1)
       else if (!mIsEndOfRun && mNumPointsToRedraw == -1)
       {
          beginFrame = frame - 2;
          if (beginFrame < 1)
             beginFrame = 1;
       }
-      
-      //for (int i=1; i<=frame; i++)
+
+      //---------------------------------------------------------
+      // draw lines
+      //---------------------------------------------------------
       for (int i=beginFrame; i<=frame; i++)
       {
          // Draw object orbit line based on points
@@ -2740,6 +2767,18 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
             // if object position magnitude is 0, skip
             if (r1.GetMagnitude() == 0.0 || r2.GetMagnitude() == 0.0)
                continue;
+
+            // if difference is more than 10000 skip
+            if ((Abs(r2[0]- r1[0]) > 10000.0 && (SignOf(r2[0]) != SignOf(r1[0]))) ||
+                (Abs(r2[1]- r1[1]) > 10000.0 && (SignOf(r2[1]) != SignOf(r1[1]))) ||
+                (Abs(r2[2]- r1[2]) > 10000.0 && (SignOf(r2[2]) != SignOf(r1[2]))))
+            {
+               //MessageInterface::ShowMessage
+               //   ("===> i=%d, time1=%f, time2=%f\n   r1=%s, r2=%s\n",
+               //    i, mTime[i-1], mTime[i], r1.ToString().c_str(),
+               //    r2.ToString().c_str());
+               continue;
+            }
             
             if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT))
                *sIntColor = mObjectOrbitColor[objId][i];
@@ -2764,10 +2803,10 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
       glEnd();
       glPopMatrix();
       
-      //-------------------------------------------------------
+      //---------------------------------------------------------
       // draw object orbit normal vector
       // (loj: 6/13/05 Fow now it only draws spacecraft orbit normal vector.)
-      //-------------------------------------------------------
+      //---------------------------------------------------------
       if (mShowOrbitNormalMap[objName])
       {
          int numSkip = frame/12;
@@ -2811,9 +2850,9 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
          }
       }
       
-      //-------------------------------------------------------
+      //---------------------------------------------------------
       //draw object with texture
-      //-------------------------------------------------------
+      //---------------------------------------------------------
       //loj: 4/25/05 Why is spcacecraft rotaing itself?
       
       if (frame > 0)
