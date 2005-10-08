@@ -194,85 +194,119 @@ Real PlanetData::GetReal(const std::string &dataType)
       
       return longitude;
    }
-   //--------------------------------------------------
-   // Altitude
-   //--------------------------------------------------
-   else if (dataType == "Altitude")
-   {
-      Rvector6 state = mSpacecraft->GetCartesianState();      
-      
-      if (mOrigin->GetName() != "Earth")
-      {
-         // Get current time
-         Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
-         state = state - mOrigin->GetMJ2000State(a1mjd);
-      }
-      
-      // get flattening for the body
-      Real flatteningFactor =
-         mOrigin->GetRealParameter(mOrigin->GetParameterID("Flattening"));
-      Real equatorialRadius =
-         mOrigin->GetRealParameter(mOrigin->GetParameterID("EquatorialRadius"));
-      
-      Real geodesicFactor = equatorialRadius * (1.0 - flatteningFactor);
-      
-      Real rad = Sqrt(state[0]*state[0] + state[1]*state[1] + state[2]*state[2]);
-      
-      Real arg = state[2] / rad;
-      arg = ((Abs(arg) <= 1.0) ? arg : arg / Abs(arg));
-      Real radlat = PI / 2.0 - ACos(arg);
-      
-      // Convert to geodetic latitude, in degrees
-      radlat = flatteningFactor * Sin(2.0 * radlat);
-      
-      // Geodetic altitude
-      Real geoRad =
-         geodesicFactor / Sqrt(1.0 - (2.0 - flatteningFactor) * flatteningFactor *
-                               Cos(radlat) *  Cos(radlat));
-      
-      Real geoalt = rad - geoRad;
-      
-      #ifdef DEBUG_PLANETDATA_RUN
-      MessageInterface::ShowMessage
-         ("PlanetData::GetReal() radlat=%f, geolat=%f\n", radlat, geoalt);
-      #endif
-      
-      return geoalt;
-   }
+//   //--------------------------------------------------
+//   // Altitude
+//   //--------------------------------------------------
+//   else if (dataType == "Altitude")
+//   {
+//      Rvector6 state = mSpacecraft->GetCartesianState();
+//
+//      if (mOrigin->GetName() != "Earth")
+//      {
+//         // Get current time
+//         Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
+//         state = state - mOrigin->GetMJ2000State(a1mjd);
+//      }
+//
+//      // get flattening for the body
+//      Real flatteningFactor =
+//         mOrigin->GetRealParameter(mOrigin->GetParameterID("Flattening"));
+//      Real equatorialRadius =
+//         mOrigin->GetRealParameter(mOrigin->GetParameterID("EquatorialRadius"));
+//
+//      Real geodesicFactor = equatorialRadius * (1.0 - flatteningFactor);
+//
+//      Real rad = Sqrt(state[0]*state[0] + state[1]*state[1] + state[2]*state[2]);
+//
+//      Real arg = state[2] / rad;
+//      arg = ((Abs(arg) <= 1.0) ? arg : arg / Abs(arg));
+//      Real radlat = PI / 2.0 - ACos(arg);
+//
+//      // Convert to geodetic latitude, in degrees
+//      radlat = flatteningFactor * Sin(2.0 * radlat);
+//
+//      // Geodetic altitude
+//      Real geoRad =
+//         geodesicFactor / Sqrt(1.0 - (2.0 - flatteningFactor) * flatteningFactor *
+//                               Cos(radlat) *  Cos(radlat));
+//
+//      Real geoalt = rad - geoRad;
+//
+//      #ifdef DEBUG_PLANETDATA_RUN
+//      MessageInterface::ShowMessage
+//         ("PlanetData::GetReal() radlat=%f, geolat=%f\n", radlat, geoalt);
+//      #endif
+//
+//      return geoalt;
+//   }
    //--------------------------------------------------
    // Latitude
    //--------------------------------------------------
-   else if (dataType == "Latitude")
+   else if ((dataType == "Latitude") || (dataType == "Altitude"))
    {
       Rvector6 state = mSpacecraft->GetCartesianState();
-      
       if (mOrigin->GetName() != "Earth")
       {
          // Get current time
          Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
          state = state - mOrigin->GetMJ2000State(a1mjd);
       }
-      
       // get flattening for the body
       Real flatteningFactor =
          mOrigin->GetRealParameter(mOrigin->GetParameterID("Flattening"));
-      
-      Real rad = Sqrt(state[0]*state[0] + state[1]*state[1] + state[2]*state[2]);
-      
-      Real arg = state[2] / rad;
-      arg = ((Abs(arg) <= 1.0) ? arg : arg / Abs(arg));
-      Real radlat = PI / 2.0 - ACos(arg);
-      
-      // Convert to geodetic latitude, in degrees
-      radlat = flatteningFactor * Sin(2.0 * radlat);
-      Real geolat = radlat * 180.0 / PI;
-      
+      // Reworked to match Vallado algorithm 12 (Vallado, 2nd ed, p. 177)
+      // Old code:
+//      Real rad = Sqrt(state[0]*state[0] + state[1]*state[1] + state[2]*state[2]);
+//
+//      Real arg = state[2] / rad;
+//      arg = ((Abs(arg) <= 1.0) ? arg : arg / Abs(arg));
+//      Real radlat = PI / 2.0 - ACos(arg);
+//
+//      // Convert to geodetic latitude, in degrees
+//      radlat = flatteningFactor * Sin(2.0 * radlat);
+//      Real geolat = radlat * 180.0 / PI;
+//
+//      #ifdef DEBUG_PLANETDATA_RUN
+//      MessageInterface::ShowMessage
+//         ("PlanetData::GetReal() radlat=%f, geolat=%f\n", radlat, geolat);
+//      #endif
+//
+//      return geolat;
+
+      // Note -- using cmath here because I know it better -- may want to change
+      // to GmatMath
+      Real equatorialRadius =
+         mOrigin->GetRealParameter(mOrigin->GetParameterID("EquatorialRadius"));
+
+      Real rxy = sqrt(state[0]*state[0] + state[1]*state[1]);
+      Real geolat = atan2(state[2], rxy);
+      Real delta = 1.0;
+      Real geodeticTolerance = 1.0e-7;    // Better than 0.0001 degrees
+      Real ecc2 = 2.0 * flatteningFactor - flatteningFactor*flatteningFactor;
+
+      Real cFactor, oldlat, sinlat;
+      while (delta > geodeticTolerance)
+      {
+         oldlat = geolat;
+         sinlat = sin(oldlat);
+         cFactor = equatorialRadius / sqrt(1.0 - ecc2 * sinlat * sinlat);
+         geolat = atan2(state[2] + cFactor*ecc2*sinlat, rxy);
+         delta = fabs(geolat - oldlat);
+      }
+
       #ifdef DEBUG_PLANETDATA_RUN
-      MessageInterface::ShowMessage
-         ("PlanetData::GetReal() radlat=%f, geolat=%f\n", radlat, geolat);
+         MessageInterface::ShowMessage
+            ("PlanetData::GetReal() geolat=%lf rad = %lf deg\n", geolat, geolat * 180.0 / PI);
       #endif
-      
-      return geolat;
+
+      if (dataType == "Latitude")
+         return geolat * 180.0 / PI;
+      else  // dataType == "Altitude"
+      {
+         sinlat = sin(geolat);
+         cFactor = equatorialRadius / sqrt(1.0 - ecc2 * sinlat * sinlat);
+         return rxy / cos(geolat) - cFactor;
+      }
    }
    //--------------------------------------------------
    // LST
