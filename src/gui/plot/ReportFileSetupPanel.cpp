@@ -22,6 +22,12 @@
 #include "ParameterInfo.hpp"            // for GetDepObjectType()
 #include "MessageInterface.hpp"
 
+#include "bitmaps/up.xpm"
+#include "bitmaps/down.xpm"
+#include "bitmaps/back.xpm"
+#include "bitmaps/forward.xpm"
+#include "bitmaps/backall.xpm"
+
 //------------------------------
 // event tables for wxWindows
 //------------------------------
@@ -35,6 +41,8 @@ BEGIN_EVENT_TABLE(ReportFileSetupPanel, GmatPanel)
    EVT_TEXT(ID_TEXT_CTRL, ReportFileSetupPanel::OnTextChange)
    EVT_TEXT(ID_TEXT, ReportFileSetupPanel::OnTextChange)
    EVT_BUTTON(ID_BROWSE_BUTTON, ReportFileSetupPanel::OnBrowseButton)
+   EVT_BUTTON(UP_VAR_BUTTON, ReportFileSetupPanel::OnMoveUpVariable)
+   EVT_BUTTON(DOWN_VAR_BUTTON, ReportFileSetupPanel::OnMoveDownVariable)
    EVT_BUTTON(ADD_VAR_BUTTON, ReportFileSetupPanel::OnAddVariable)
    EVT_BUTTON(REMOVE_VAR_BUTTON, ReportFileSetupPanel::OnRemoveVariable)
    EVT_BUTTON(CLEAR_VAR_BUTTON, ReportFileSetupPanel::OnClearVariable)
@@ -43,7 +51,6 @@ BEGIN_EVENT_TABLE(ReportFileSetupPanel, GmatPanel)
    EVT_LISTBOX(USER_PARAM_LISTBOX, ReportFileSetupPanel::OnSelectUserParam)
    EVT_LISTBOX(PROPERTY_LISTBOX, ReportFileSetupPanel::OnSelectProperty)
    EVT_COMBOBOX(ID_COMBOBOX, ReportFileSetupPanel::OnComboBoxChange)
-
 END_EVENT_TABLE()
 
 //------------------------------
@@ -87,7 +94,7 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
 ReportFileSetupPanel::~ReportFileSetupPanel()
 {
    theGuiManager->UnregisterComboBox("Spacecraft", mObjectComboBox);   
-   theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);   
+   theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
 }
 
 
@@ -119,9 +126,14 @@ void ReportFileSetupPanel::OnWriteCheckBoxChange(wxCommandEvent& event)
 void ReportFileSetupPanel::Create()
 {
    //MessageInterface::ShowMessage("ReportFileSetupPanel::Create() entering...\n");
-   
+      
    Integer bsize = 2; // border size
    wxString emptyList[] = {};
+   wxBitmap upBitmap = wxBitmap(up_xpm);
+   wxBitmap downBitmap = wxBitmap(down_xpm);
+   wxBitmap backBitmap = wxBitmap(back_xpm);
+   wxBitmap forwardBitmap = wxBitmap(forward_xpm);
+   wxBitmap backAllBitmap = wxBitmap(backall_xpm);
    
    //------------------------------------------------------
    // available variables list (1st column)
@@ -142,20 +154,44 @@ void ReportFileSetupPanel::Create()
    //-------------------------------------------------------
    // add, remove, clear parameter buttons (2nd column)
    //-------------------------------------------------------
-   wxButton *addScButton = new wxButton(this, ADD_VAR_BUTTON, wxT("-->"),
-                              wxDefaultPosition, wxSize(20,20), 0);
 
-   wxButton *removeScButton = new wxButton(this, REMOVE_VAR_BUTTON, wxT("<--"),
-                                 wxDefaultPosition, wxSize(20,20), 0);
-    
-   wxButton *clearScButton = new wxButton(this, CLEAR_VAR_BUTTON, wxT("<="),
-                                wxDefaultPosition, wxSize(20,20), 0);
-    
+   wxBitmapButton *upVarButton =
+      new wxBitmapButton(this, UP_VAR_BUTTON, upBitmap, wxDefaultPosition,
+                         wxSize(20,20));//, wxBU_AUTODRAW);
+   wxBitmapButton *downVarButton =
+      new wxBitmapButton(this, DOWN_VAR_BUTTON, downBitmap, wxDefaultPosition,
+                         wxSize(20,20));//, wxBU_AUTODRAW);
+
+   wxBitmapButton *addVarButton =
+      new wxBitmapButton(this, ADD_VAR_BUTTON, forwardBitmap, wxDefaultPosition,
+                         wxSize(20,20));//, wxBU_AUTODRAW);
+   wxBitmapButton *removeVarButton =
+      new wxBitmapButton(this, REMOVE_VAR_BUTTON, backBitmap, wxDefaultPosition,
+                         wxSize(20,20));//, wxBU_AUTODRAW);
+
+   wxBitmapButton *clearVarButton =
+      new wxBitmapButton(this, CLEAR_VAR_BUTTON, backAllBitmap, wxDefaultPosition,
+                         wxSize(20,20));//, wxBU_AUTODRAW);
+   
+   clearVarButton->SetToolTip("Remove All");
+   
+//    wxButton *addVarButton = new wxButton(this, ADD_VAR_BUTTON, wxT("-->"),
+//                                 wxDefaultPosition, wxSize(20,20), 0);
+   
+//    wxButton *removeVarButton = new wxButton(this, REMOVE_VAR_BUTTON, wxT("<--"),
+//                                    wxDefaultPosition, wxSize(20,20), 0);
+   
+//    wxButton *clearVarButton = new wxButton(this, CLEAR_VAR_BUTTON, wxT("<="),
+//                                   wxDefaultPosition, wxSize(20,20), 0);
+   
    wxBoxSizer *arrowButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
-   arrowButtonsBoxSizer->Add(addScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arrowButtonsBoxSizer->Add(removeScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arrowButtonsBoxSizer->Add(clearScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-    
+   arrowButtonsBoxSizer->Add(upVarButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arrowButtonsBoxSizer->Add(downVarButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arrowButtonsBoxSizer->Add(20,20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arrowButtonsBoxSizer->Add(addVarButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arrowButtonsBoxSizer->Add(removeVarButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arrowButtonsBoxSizer->Add(clearVarButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
    //-------------------------------------------------------
    // selected parameter list (3rd column)
    //-------------------------------------------------------
@@ -231,7 +267,6 @@ void ReportFileSetupPanel::Create()
    // put in the order
    //-------------------------------------------------------
    wxFlexGridSizer *paramGridSizer = new wxFlexGridSizer(3, 0, 0);
-   //loj: 8/9/05 Changed from wxALIGN_CENTRE TO wxALIGN_TOP for Layout()
    paramGridSizer->Add(mParamBoxSizer, 0, wxALIGN_TOP|wxALL, bsize);
    paramGridSizer->Add(arrowButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    paramGridSizer->Add(mVarSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -244,6 +279,7 @@ void ReportFileSetupPanel::Create()
    //-------------------------------------------------------
    theMiddleSizer->Add(variablesBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    theMiddleSizer->Add(optionBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+
 }
 
 
@@ -315,46 +351,45 @@ void ReportFileSetupPanel::LoadData()
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::SaveData()
 {
-    // save data to core engine
-    reportFile->Activate(writeCheckBox->IsChecked());
+   // save data to core engine
+   reportFile->Activate(writeCheckBox->IsChecked());
 //    if (theSubscriber->IsActive())
 //      MessageInterface::ShowMessage("\nReportFileSetupPanel:: The subscriber was activiated\n");
 //    else
 //      MessageInterface::ShowMessage("\nReportFileSetupPanel:: The subscriber was NOT activiated\n");
     
-    int writeHeadersId = reportFile->GetParameterID("WriteHeaders");
-    if (showHeaderCheckBox->IsChecked())
+   int writeHeadersId = reportFile->GetParameterID("WriteHeaders");
+   if (showHeaderCheckBox->IsChecked())
       reportFile->SetStringParameter(writeHeadersId, "On");
-    else
+   else
       reportFile->SetStringParameter(writeHeadersId, "Off");
                   
-    int spacesId = reportFile->GetParameterID("ColumnWidth");
-    reportFile->SetIntegerParameter(spacesId,
-                  atoi(colWidthTextCtrl->GetValue()));
+   int spacesId = reportFile->GetParameterID("ColumnWidth");
+   reportFile->SetIntegerParameter(spacesId,
+                                   atoi(colWidthTextCtrl->GetValue()));
 
-    int precisionId = reportFile->GetParameterID("Precision");
-    reportFile->SetIntegerParameter(precisionId,
-                  atoi(precisionTextCtrl->GetValue()));
+   int precisionId = reportFile->GetParameterID("Precision");
+   reportFile->SetIntegerParameter(precisionId,
+                                   atoi(precisionTextCtrl->GetValue()));
 
-    // save file name data to core engine
-    wxString filename = fileTextCtrl->GetValue();
-    int filenameId = reportFile->GetParameterID("Filename");
-    reportFile->SetStringParameter(filenameId,
-                  std::string (filename.c_str()));
-                 
-            
-    mNumVarParams = mVarSelectedListBox->GetCount();
+   // save file name data to core engine
+   wxString filename = fileTextCtrl->GetValue();
+   int filenameId = reportFile->GetParameterID("Filename");
+   reportFile->SetStringParameter(filenameId,
+                                  std::string (filename.c_str()));
+   
+   
+   mNumVarParams = mVarSelectedListBox->GetCount();
     
-    if (mNumVarParams >= 0) // >=0 because the list needs to be cleared
-    {
-         reportFile->TakeAction("Clear");
-         for (int i=0; i<mNumVarParams; i++)
-         {
-            std::string selYName = std::string(mVarSelectedListBox->GetString(i).c_str());
-            reportFile->SetStringParameter("Add", selYName, i); //arg: 11/17/04 added index
-         }
+   if (mNumVarParams >= 0) // >=0 because the list needs to be cleared
+   {
+      reportFile->TakeAction("Clear");
+      for (int i=0; i<mNumVarParams; i++)
+      {
+         std::string selYName = std::string(mVarSelectedListBox->GetString(i).c_str());
+         reportFile->SetStringParameter("Add", selYName, i); //arg: 11/17/04 added index
       }
-
+   }
 }
 
 
@@ -389,6 +424,44 @@ void ReportFileSetupPanel::OnTextChange(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
+// void OnMoveUpVariable(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ReportFileSetupPanel::OnMoveUpVariable(wxCommandEvent& event)
+{
+   int sel = mVarSelectedListBox->GetSelection();
+
+   if (sel-1 >= 0)
+   {
+      wxString frontString = mVarSelectedListBox->GetString(sel-1);
+      mVarSelectedListBox->SetString(sel-1, mVarSelectedListBox->GetStringSelection());
+      mVarSelectedListBox->SetString(sel, frontString);
+      mVarSelectedListBox->SetSelection(sel-1);
+   }
+
+   theApplyButton->Enable();
+}
+
+
+//------------------------------------------------------------------------------
+// void OnMoveDownVariable(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ReportFileSetupPanel::OnMoveDownVariable(wxCommandEvent& event)
+{
+   int sel = mVarSelectedListBox->GetSelection();
+
+   if (sel+1 >= 1 && (sel+1) < mVarSelectedListBox->GetCount())
+   {
+      wxString rearString = mVarSelectedListBox->GetString(sel+1);
+      mVarSelectedListBox->SetString(sel+1, mVarSelectedListBox->GetStringSelection());
+      mVarSelectedListBox->SetString(sel, rearString);      
+      mVarSelectedListBox->SetSelection(sel+1);
+   }
+   
+   theApplyButton->Enable();
+}
+
+
+//------------------------------------------------------------------------------
 // void OnAddVariable(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::OnAddVariable(wxCommandEvent& event)
@@ -407,7 +480,7 @@ void ReportFileSetupPanel::OnAddVariable(wxCommandEvent& event)
       {
          mVarSelectedListBox->Append(newParam);
          mVarSelectedListBox->SetStringSelection(newParam);
-         //Show next parameter (loj: 8/9/05 Added)
+         //Show next parameter
          mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
          OnSelectProperty(event);
          theApplyButton->Enable();
@@ -417,14 +490,14 @@ void ReportFileSetupPanel::OnAddVariable(wxCommandEvent& event)
          wxLogMessage("Selected  parameter:%s is not reportable.\nPlease select "
                       "another parameter.\n", newParam.c_str());
          
-         //Show next parameter (loj: 8/9/05 Added)
+         //Show next parameter
          mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
          OnSelectProperty(event);
       }
    }
    else
    {
-      //Show next parameter (loj: 8/9/05 Added)
+      //Show next parameter
       mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
       OnSelectProperty(event);
    }
@@ -515,8 +588,6 @@ void ReportFileSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 {
    if (event.GetEventObject() == mObjectComboBox)
    {
-      //loj: 8/19/05 commented out so it won't cause crash when it is added
-      //mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
       mUseUserParam = false;
    }
    else if(event.GetEventObject() == mCoordSysComboBox)
@@ -540,8 +611,7 @@ void ReportFileSetupPanel::ShowCoordSystem()
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Coordinate System");
       
-      //loj: 8/9/05 Set CoordSystem to last one selected
-      //mCoordSysComboBox->SetSelection(0);
+      //Set CoordSystem to last one selected
       mCoordSysComboBox->SetStringSelection(mLastCoordSysName);
       mCoordSysSizer->Remove(mCoordSysComboBox);
       mCoordSysSizer->Remove(mCentralBodyComboBox);
@@ -555,7 +625,9 @@ void ReportFileSetupPanel::ShowCoordSystem()
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Central Body");
       
-      mCentralBodyComboBox->SetStringSelection("Earth");
+      //Set Origin to last one selected
+      //mCentralBodyComboBox->SetStringSelection("Earth");
+      //mCentralBodyComboBox->SetStringSelection("mLastOriginName");
       
       mCoordSysSizer->Remove(mCentralBodyComboBox);
       mCoordSysSizer->Remove(mCoordSysComboBox);

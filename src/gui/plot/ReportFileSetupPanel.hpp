@@ -43,9 +43,9 @@ protected:
    wxTextCtrl *colWidthTextCtrl;
    wxTextCtrl *precisionTextCtrl;
    wxTextCtrl *fileTextCtrl;
-
+   
    wxButton *browseButton; 
-    
+   
    wxCheckBox *writeCheckBox;
    wxCheckBox *showHeaderCheckBox;
     
@@ -60,11 +60,14 @@ protected:
    
    wxBoxSizer *mCoordSysSizer;
    wxBoxSizer *mParamBoxSizer;
-
+   
    void OnWriteCheckBoxChange(wxCommandEvent& event);
    void OnBrowseButton(wxCommandEvent& event);
    void OnTextChange(wxCommandEvent &event);
     
+   void OnMoveUpVariable(wxCommandEvent& event);
+   void OnMoveDownVariable(wxCommandEvent& event);
+   
    void OnAddVariable(wxCommandEvent& event);
    void OnRemoveVariable(wxCommandEvent& event);
    void OnClearVariable(wxCommandEvent& event);
@@ -73,7 +76,7 @@ protected:
    void OnSelectProperty(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent& event);
    void OnCreateVariable(wxCommandEvent& event);
-
+   
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
@@ -91,6 +94,9 @@ protected:
       ID_TEXT_CTRL,
       ID_BROWSE_BUTTON,
         
+      UP_VAR_BUTTON,
+      DOWN_VAR_BUTTON,
+      
       ADD_VAR_BUTTON,
       REMOVE_VAR_BUTTON,
       CLEAR_VAR_BUTTON,
