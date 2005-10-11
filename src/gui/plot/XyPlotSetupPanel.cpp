@@ -26,6 +26,7 @@
 
 #include "wx/colordlg.h"                // for wxColourDialog
 
+
 //#define DEBUG_XYPLOT_PANEL 1
 
 //------------------------------
@@ -292,8 +293,6 @@ void XyPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 {    
    if (event.GetEventObject() == mObjectComboBox)
    {
-      //loj: 8/19/05 commented out so it won't cause crash when it is added
-      //mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
       mUseUserParam = false;
    }
    else if(event.GetEventObject() == mCoordSysComboBox)
@@ -369,7 +368,6 @@ void XyPlotSetupPanel::Create()
    wxString emptyList[] = {};
    Integer bsize = 1; // border size
    
-
    // empty text for spacing line
    wxStaticText *emptyText =
       new wxStaticText(this, -1, wxT(""),
@@ -444,6 +442,8 @@ void XyPlotSetupPanel::Create()
    
    wxButton *clearYButton =
       new wxButton(this, CLEAR_Y, wxT("<="), wxDefaultPosition, wxSize(20,20), 0);
+   
+   clearYButton->SetToolTip("Remove All");
    
    wxBoxSizer *yButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
    yButtonsBoxSizer->Add(mAddYButton, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -796,8 +796,7 @@ void XyPlotSetupPanel::ShowCoordSystem()
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Coordinate System");
       
-      //loj: 8/9/05 Set CoordSystem to last one selected
-      //mCoordSysComboBox->SetSelection(0);
+      //Set CoordSystem to last one selected
       mCoordSysComboBox->SetStringSelection(mLastCoordSysName);
       mCoordSysSizer->Remove(mCoordSysComboBox);
       mCoordSysSizer->Remove(mCentralBodyComboBox);
@@ -811,7 +810,8 @@ void XyPlotSetupPanel::ShowCoordSystem()
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Central Body");
       
-      mCentralBodyComboBox->SetStringSelection("Earth");
+      //Set Origin to last one selected
+      //mCentralBodyComboBox->SetStringSelection("Earth");
       
       mCoordSysSizer->Remove(mCentralBodyComboBox);
       mCoordSysSizer->Remove(mCoordSysComboBox);
