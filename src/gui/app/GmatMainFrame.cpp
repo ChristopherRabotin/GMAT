@@ -78,6 +78,7 @@
 #include "CelestialBodyPanel.hpp"
 
 #include <wx/gdicmn.h>
+#include <wx/toolbar.h>
 #include "ddesetup.hpp"   // for IPC_SERVICE, IPC_TOPIC
 
 #include "bitmaps/new.xpm"
@@ -264,6 +265,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
 
    mServer = NULL;
    mRunPaused = false;
+   mRunCompleted = true;
    
 #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() exiting\n");
@@ -967,6 +969,8 @@ void GmatMainFrame::RunCurrentMission()
    
    wxYield();
    SetFocus();
+
+   mRunCompleted = false;
    
    if (mRunPaused)
    {
@@ -999,7 +1003,7 @@ void GmatMainFrame::RunCurrentMission()
 //------------------------------------------------------------------------------
 void GmatMainFrame::NotifyRunCompleted()
 {
-   // do nothing for now.
+   mRunCompleted = true;
 }
 
 
@@ -1065,6 +1069,15 @@ void GmatMainFrame::StopServer()
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnClose(wxCloseEvent& event)
 {
+   if (!mRunCompleted)
+   {
+      wxMessageBox(wxT("GMAT is still running the mission.\n"
+                       "Please STOP the run before closing."),
+                   wxT("GMAT Warning"));
+      ProcessCommand(TOOL_PAUSE);
+      return;
+   }
+   
    CloseAllChildren(true, true);
    
    // prompt save
@@ -1102,7 +1115,7 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
          event.Skip();
       }
    }
-   
+
    event.Skip();
 }
 
@@ -1425,11 +1438,11 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
 //------------------------------------------------------------------------------
 void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
 {
-#if DEBUG_MAINFRAME
+   #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::InitToolBar() entered\n");
-#endif
+   #endif
    wxBitmap* bitmaps[14];
-
+   
    bitmaps[0] = new wxBitmap(new_xpm);
    bitmaps[1] = new wxBitmap(open_xpm);
    bitmaps[2] = new wxBitmap(save_xpm);
@@ -1444,66 +1457,49 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    bitmaps[11] = new wxBitmap(close_xpm);
    bitmaps[12] = new wxBitmap(script_xpm);
    bitmaps[13] = new wxBitmap(build_xpm);
-
-   int width = 24;
-   int currentX = 5;
    
-//   toolBar->AddTool(MENU_PROJECT_NEW, *(bitmaps[0]), wxNullBitmap, FALSE, currentX, -1,
-//                     (wxObject *) NULL, _T("New project"));
-   toolBar->AddTool(MENU_FILE_NEW_SCRIPT, *(bitmaps[0]), 
-                     wxNullBitmap, FALSE, currentX, -1,
-                     (wxObject *) NULL, _T("New Script"));
-   currentX += width + 5;
-   toolBar->AddTool(MENU_FILE_OPEN_SCRIPT, *bitmaps[1], wxNullBitmap, 
-                     FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Open Script"));
-   currentX += width + 5;
-   toolBar->AddTool(MENU_FILE_SAVE_SCRIPT, *bitmaps[2], wxNullBitmap, 
-                     FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Save to Script"));
-   currentX += width + 5;
+   // add project tools
+   toolBar->AddTool(MENU_FILE_NEW_SCRIPT, _T("New"), *(bitmaps[0]), _T("New Script"));
+   toolBar->AddTool(MENU_FILE_OPEN_SCRIPT, _T("Open"), *bitmaps[1], _T("Open Script"));
+   toolBar->AddTool(MENU_FILE_SAVE_SCRIPT, _T("Save"), *bitmaps[2], _T("Save to Script"));
    toolBar->AddSeparator();
 
-   toolBar->AddTool(MENU_PROJECT_LOAD_DEFAULT_MISSION, *bitmaps[12], 
-                    wxNullBitmap, FALSE,
-                    currentX, -1, (wxObject *) NULL, _T("Default Project"));
-   currentX += width + 5;
+   toolBar->AddTool(MENU_PROJECT_LOAD_DEFAULT_MISSION, _T("Default"), *bitmaps[12], 
+                    _T("Default Project"));
    toolBar->AddSeparator();
-
    
-   toolBar->AddTool(3, *bitmaps[3], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Copy"));
-   currentX += width + 5;
-   toolBar->AddTool(4, *bitmaps[4], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Cut"));
-   currentX += width + 5;
-   toolBar->AddTool(5, *bitmaps[5], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Paste"));
-   currentX += width + 5;
+   // add edit tools
+   toolBar->AddTool(3, _T("Copy"), *bitmaps[3], _T("Copy"));
+   toolBar->AddTool(4, _T("Cut"), *bitmaps[4], _T("Cut"));
+   toolBar->AddTool(5, _T("Paste"), *bitmaps[5], _T("Paste"));
    toolBar->AddSeparator();
-   toolBar->AddTool(6, *bitmaps[6], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Print"));
-   currentX += width + 5;
+   
+   // add print tool
+   toolBar->AddTool(6, _T("Print"), *bitmaps[6], _T("Print"));
    toolBar->AddSeparator();
-//   toolBar->AddTool(TOOL_BUILD, *bitmaps[13], wxNullBitmap, FALSE, currentX, -1,
-//                    (wxObject *) NULL, _T("Build"));
-//   toolBar->AddSeparator();
-   toolBar->AddTool(TOOL_RUN, *bitmaps[8], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Run"));
-   toolBar->AddTool(TOOL_PAUSE, *bitmaps[9], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Pause"));
-   toolBar->AddTool(TOOL_STOP, *bitmaps[10], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Stop"));
-
+   
+   // add run tools
+   toolBar->AddTool(TOOL_RUN, _T("Run"), *bitmaps[8], _T("Run"));
+   toolBar->AddTool(TOOL_PAUSE, _T("Pause"), *bitmaps[9], _T("Pause"));
+   toolBar->AddTool(TOOL_STOP, _T("Stop"), *bitmaps[10], _T("Stop"));
    toolBar->AddSeparator();
-   toolBar->AddTool(TOOL_CLOSE_CHILDREN, *bitmaps[11], wxNullBitmap, FALSE,
-                    currentX, -1, (wxObject *) NULL, _T("Close All"));
+   
+   // add close window tool
+   toolBar->AddTool(TOOL_CLOSE_CHILDREN, _T("Close"), *bitmaps[11], _T("Close All"));
    toolBar->AddSeparator();
-   toolBar->AddTool(MENU_HELP_ABOUT, *bitmaps[7], wxNullBitmap, FALSE,
-                    currentX, -1, (wxObject *) NULL, _T("Help"));
-
+   
+   // add help tool
+   toolBar->AddTool(MENU_HELP_ABOUT, _T("Help"), *bitmaps[7], _T("Help"));
+   toolBar->AddSeparator();
+   toolBar->AddSeparator();
+   toolBar->AddSeparator();
+   
+   // now realize to make tools appear
    toolBar->Realize();
+   
+   //loj: Why separators are not showing on Windows?
 
+   // disable tools
    toolBar->EnableTool(3, FALSE); // copy
    toolBar->EnableTool(4, FALSE); // cut
    toolBar->EnableTool(5, FALSE); // paste
@@ -1512,18 +1508,14 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    toolBar->EnableTool(TOOL_PAUSE, FALSE);
    toolBar->EnableTool(TOOL_STOP, FALSE);
    
-//   wxColour toolBarBackground = *wxLIGHT_GREY;
-//   toolBar->SetBackgroundColour(toolBarBackground);
-
-   int i;
-   for (i = 0; i < 13; i++)
+   for (int i = 0; i < 13; i++)
    {
       delete bitmaps[i];
    }
    
-#if DEBUG_MAINFRAME
+   #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::InitToolBar() exiting\n");
-#endif
+   #endif
 }
 
 

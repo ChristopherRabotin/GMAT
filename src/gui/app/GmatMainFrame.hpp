@@ -89,6 +89,7 @@ protected:
 private:
    int scriptCounter;
    bool mRunPaused;
+   bool mRunCompleted;
    
    GmatServer *mServer;
    std::string scriptFilename;
