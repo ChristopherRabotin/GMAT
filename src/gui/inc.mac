@@ -9,7 +9,8 @@
 #             2004/12/23 - J. Gurgnaus - included coordsystem directory
 #             2005/06/29 - J. Gurgnaus - Added hardware, function, and 
 #                                        output directories
-
+#             2005/10/13 - J. Gurgnaus - Added target for non-matlab 
+################################################################################
 #
 # Program to make (library)
 LIBDIR = $(PROJECT_ROOT)/lib
@@ -108,3 +109,6 @@ bare: clean
 	rm -f $(LIB)
 
 testing: all
+
+non-matlab:
+	${MAKE} -f Makefile.mac "TESTFLAGS = "
