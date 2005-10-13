@@ -392,7 +392,7 @@ void PlotInterface::SetGlUpdateFrequency(const std::string &plotName,
                                          Integer updFreq)
 {
 #if defined __CONSOLE_APP__
-   return true;
+   return;
 #else
    wxString owner = wxString(plotName.c_str());
    MdiChildTrajFrame *frame = NULL;
