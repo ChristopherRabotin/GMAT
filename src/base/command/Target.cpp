@@ -521,21 +521,34 @@ bool Target::Execute()
          (commandComplete?'Y':'N'),
          state);
    #endif
-   
+
+   // Attempt to reset if recalled   
+   if (commandComplete)
+   {
+      commandComplete = false;
+      commandExecuting = false;
+   }  
+
    if (!commandExecuting) 
    {
 	   #ifdef DEBUG_TARGET_COMMANDS
    	   MessageInterface::ShowMessage(
       	   "Entered Targeter while command is not executing\n");
       #endif
+
+      FreeLoopData();
+      StoreLoopData();
+
+
       retval = BranchCommand::Execute();
-//      if (state == Solver::FINISHED)
-//      {
-//         state = Solver::INITIALIZING;
-//targeter->TakeAction("Reset");
-//commandComplete = false;
-//Initialize();
-//      }
+
+      #ifdef DEBUG_TARGETER
+         MessageInterface::ShowMessage("Resetting the Differential Corrector\n");
+      #endif
+
+      targeter->TakeAction("Reset");
+      state = targeter->GetState();
+      
    }
    
    if (branchExecuting)
@@ -544,7 +557,6 @@ bool Target::Execute()
       if (!branchExecuting && (state == Solver::FINISHED))
       {
          commandComplete = true;
-//commandExecuting = false;
       }  
    }
    else

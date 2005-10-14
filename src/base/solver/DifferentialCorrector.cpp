@@ -28,6 +28,8 @@
 #include <cmath>
 #include <sstream>
 
+// #define DEBUG_STATE_MACHINE
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -457,6 +459,12 @@ bool DifferentialCorrector::TakeAction(const std::string &action,
    if (action == "Reset")
    {
       currentState = INITIALIZING;
+      // initialized = false;
+      // Set nominal out of range to force retarget when in a loop
+      for (Integer i = 0; i < goalCount; ++i)
+      {
+         nominal[i] = goal[i] + 10.0 * tolerance[i];
+      }
    }
 
    return Solver::TakeAction(action, actionData);
@@ -703,31 +711,44 @@ Solver::SolverState DifferentialCorrector::AdvanceState()
    switch (currentState)
    {
       case INITIALIZING:
+         #ifdef DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage("Entered state machine; INITIALIZING\n");
+         #endif
          WriteToTextFile();
          ReportProgress();
          CompleteInitialization();
          break;
             
       case NOMINAL:
+         #ifdef DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage("Entered state machine; NOMINAL\n");
+         #endif
          ReportProgress();
          RunNominal();
          ReportProgress();
          break;
         
       case PERTURBING:
-//MessageInterface::ShowMessage("PERT\n");
+         #ifdef DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage("Entered state machine; PERTURBING\n");
+         #endif
          ReportProgress();
          RunPerturbation();
          break;
         
       case CALCULATING:
-//MessageInterface::ShowMessage("CALC\n");
+         #ifdef DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage("Entered state machine; CALCULATING\n");
+         #endif
          ReportProgress();
          CalculateParameters();
          break;
         
       case CHECKINGRUN:
-         CheckCompletion();
+          #ifdef DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage("Entered state machine; CHECKINGRUN\n");
+         #endif
+        CheckCompletion();
          ++iterationsTaken;
          if (iterationsTaken > maxIterations)
          {
@@ -739,13 +760,18 @@ Solver::SolverState DifferentialCorrector::AdvanceState()
          break;
         
       case FINISHED:
+         #ifdef DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage("Entered state machine; FINISHED\n");
+         #endif
          RunComplete();
-//MessageInterface::ShowMessage("FINIS\n");
          ReportProgress();
          break;
         
       case ITERATING:             // Intentional drop-through
       default:
+         #ifdef DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage("Entered state machine; Bad stste for a differential corrector.\n");
+         #endif
          throw SolverException("Solver state not supported for the targeter");
    }
      
@@ -816,20 +842,17 @@ void DifferentialCorrector::CalculateParameters()
         for (Integer j = 0; j < goalCount; j++)
             delta += inverseJacobian[j][i] * (goal[j] - nominal[j]);
 
-// New -- DJC, 05/03/2005
         // Ensure that delta is not larger than the max allowed step
         if (fabs(delta) > variableMaximumStep[i])
            delta = ((delta > 0.0) ? variableMaximumStep[i] :
                                    -variableMaximumStep[i]);
-// Old -- Better not delete this line if this doesn't work!
         variable[i] += delta;
-// New -- DJC, 05/03/2005
+
         // Ensure that variable[i] is in the allowed range
         if (variable[i] < variableMinimum[i])
            variable[i] = variableMinimum[i];
         if (variable[i] > variableMaximum[i])
            variable[i] = variableMaximum[i];
-// Old code continues here
     }
     
     WriteToTextFile();
