@@ -23,6 +23,7 @@
 #             2005/07/07 - J. Gurganus- added Report 
 #             2005/07/07 - J. Gurganus- added MATLAB flag 
 #             2005/09/07 - J. Gurganus- added BeginFunction and EndFunction 
+#             2005/10/13 - J. Gurganus- Renamed MATLABFLAGS from TESTFLAGS
 ################################################################################
 #
 #
@@ -41,9 +42,10 @@ SRC = Achieve.cpp Assignment.cpp BeginFiniteBurn.cpp BeginFunction.cpp \
 	Propagate.cpp Report.cpp Target.cpp Save.cpp Toggle.cpp Vary.cpp \
 	While.cpp
 #
-TESTFLAGS = -D__USE_MATLAB__ -I$(MATLAB_INCDIR)
+MATLABFLAGS = -D__USE_MATLAB__ -I$(MATLAB_INCDIR)
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
 include ${INCMK}
 #
+
