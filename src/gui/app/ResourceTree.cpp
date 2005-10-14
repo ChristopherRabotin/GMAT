@@ -57,6 +57,8 @@
 #include <sstream>
 #include <wx/dir.h>
 
+//define __ENABLE_CONSTELLATIONS__
+
 //#define DEBUG_RESOURCE_TREE 1
 //#define DEBUG_RENAME 1
 
@@ -337,7 +339,8 @@ void ResourceTree::AddDefaultResources()
    
    SetItemImage(mFormationItem, GmatTree::ICON_OPENFOLDER, 
                 wxTreeItemIcon_Expanded);
-   
+
+   #ifdef __ENABLE_CONSTELLATIONS__
    //----- Constellations
    wxTreeItemId constellationItem =
       AppendItem(resource,
@@ -347,6 +350,7 @@ void ResourceTree::AddDefaultResources()
    
    SetItemImage(constellationItem, GmatTree::ICON_OPENFOLDER, 
                 wxTreeItemIcon_Expanded);
+   #endif
    
    //----- Burns
    mBurnItem =
@@ -439,7 +443,7 @@ void ResourceTree::AddDefaultResources()
    SetItemImage(mCoordSysItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
 
-   //----- Matlab functions
+   //----- Functions
    mFunctItem =
       AppendItem(resource, wxT("Functions"), GmatTree::ICON_FOLDER,
               -1, new GmatTreeItemData(wxT("Functions"), GmatTree::FUNCT_FOLDER));
@@ -456,7 +460,11 @@ void ResourceTree::AddDefaultResources()
    AddDefaultSpacecraft(mSpacecraftItem);
    AddDefaultHardware(mHardwareItem);
    AddDefaultFormations(mFormationItem);
+
+   #ifdef __ENABLE__CONSTELLATIONS__
    AddDefaultConstellations(constellationItem);
+   #endif
+   
    AddDefaultPropagators(mPropagatorItem);
    AddDefaultSolvers(mSolverItem);
    AddDefaultSubscribers(mSubscriberItem);
@@ -813,6 +821,7 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId)
       Expand(itemId);
 }
 
+
 //------------------------------------------------------------------------------
 // void AddDefaultInterfaces(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
@@ -824,13 +833,16 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultInterfaces(wxTreeItemId itemId)
 {
+   #ifdef __USE_MATLAB__
    AppendItem(itemId, wxT("Matlab"), GmatTree::ICON_DEFAULT, -1,
               new GmatTreeItemData(wxT("Matlab"), GmatTree::INTERFACE));
    AppendItem(itemId, wxT("Matlab Server"), GmatTree::ICON_DEFAULT, -1,
               new GmatTreeItemData(wxT("Matlab Server"), GmatTree::INTERFACE));
-    
-   Expand(itemId); //loj: 9/22/05 Added
+   #endif
+   
+   Expand(itemId);
 }
+
 
 //------------------------------------------------------------------------------
 // void AddDefaultVariables(wxTreeItemId itemId)
@@ -891,14 +903,23 @@ void ResourceTree::AddDefaultFunctions(wxTreeItemId itemId)
       objTypeName = wxString(funct->GetTypeName().c_str());
 
       if (objTypeName == "MatlabFunction")
+      {
          AppendItem(itemId, wxT(objName), GmatTree::ICON_MATLAB_FUNCTION, -1,
                  new GmatTreeItemData(wxT(objName), GmatTree::MATLAB_FUNCTION));
+         
+         #ifndef __USE_MATLAB__
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "MATLAB Interface is disabled.  GMAT will not run\n"
+             "if any CallFunction uses MATLAB function: %s\n", objName.c_str());
+         #endif
+      }
       else if (objTypeName == "GmatFunction")
+      {
          AppendItem(itemId, wxT(objName), GmatTree::ICON_FUNCTION, -1,
                  new GmatTreeItemData(wxT(objName), GmatTree::GMAT_FUNCTION));
-
-   };
- 
+      }
+   }
+   
    //----- Predefined functions
    mPredefinedFunctItem =
       AppendItem(itemId, wxT("Predefined Functions"), GmatTree::ICON_FOLDER, -1,
@@ -1069,6 +1090,8 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       menu.Append(POPUP_ADD_BODY, wxT("Add Body"));
       menu.Enable(POPUP_ADD_BODY, false);
    }
+   
+   #ifdef __USE_MATLAB__
    else if (strcmp(title, wxT("Matlab")) == 0)
    {
       menu.Append(GmatMenu::MENU_TOOLS_MATLAB_OPEN, wxT("Open"));
@@ -1079,6 +1102,8 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       menu.Append(GmatMenu::MENU_START_SERVER, wxT("Start"));
       menu.Append(GmatMenu::MENU_STOP_SERVER, wxT("Stop"));
    }
+   #endif
+   
    else if (strcmp(title, wxT("Plots/Reports")) == 0)
       menu.Append(POPUP_ADD_SUBSCRIBER, _T("Add"), CreatePopupMenu(Gmat::SUBSCRIBER));
    else if (strcmp(title, wxT("Variables/Arrays")) == 0)
@@ -1102,17 +1127,14 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    else if (dataType == GmatTree::FUNCT_FOLDER)
    {
       wxMenu *fMenu = new wxMenu;
+      
+      #ifdef __USE_MATLAB__
       fMenu->Append(POPUP_ADD_MATLAB_FUNCT, wxT("MATLAB Function"));
+      #endif
+      
       fMenu->Append(POPUP_ADD_GMAT_FUNCT, wxT("GMAT Function"));
 
       menu.Append(POPUP_ADD_SOLVER, wxT("Add"), fMenu);
-
-//      menu.Enable(POPUP_ADD_GMAT_FUNCT, FALSE);
-//#if defined __USE_MATLAB__
-//      menu.Enable(POPUP_ADD_MATLAB_FUNCT, TRUE);
-//#else
-//      menu.Enable(POPUP_ADD_MATLAB_FUNCT, FALSE);
-//#endif
    }
    else if (strcmp(title, wxT("Scripts")) == 0)
    {
@@ -2114,7 +2136,6 @@ void ResourceTree::OnAddGmatFunction(wxCommandEvent &event)
    wxTreeItemId item = GetSelection();
 
    wxString withName;
-   //withName.Printf("MatlabFunction%d", ++mNumMatlabFunct);
 
    //Get name from the user first
    withName = wxGetTextFromUser(wxT("Name: "), wxT("GMAT function"),
