@@ -1214,7 +1214,7 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
                     << "        VY = " << newState[4] << " km/s\n"
                     << "        VZ = " << newState[5] << " km/s\n";
    
-               obj->SetStringParameter("StateType", "Keplerian");
+               //obj->SetStringParameter("StateType", "Keplerian");
                
                CartToKep(rawState, newState);
                                 
