@@ -74,8 +74,8 @@ private:
    Rvector6 mOutState;
    
    CoordinateConverter mCoordConverter;
-   wxString mFromCoordStr;
-   wxString mFromStateTypeStr;
+   std::string mFromCoordStr;
+   std::string mFromStateTypeStr;
    
    void Create();
    void AddElements(wxWindow *parent);
@@ -90,6 +90,8 @@ private:
    
    void UpdateEpoch();
    void DisplayState();
+   wxString ToString(Real rval);
+   
    Rvector6 ConvertState(CoordinateSystem *cs, const Rvector6 &state, 
                          const std::string &fromElementType, 
                          const std::string &toElementType);
