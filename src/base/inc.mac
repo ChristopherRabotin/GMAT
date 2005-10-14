@@ -51,7 +51,7 @@ OBJ = $(SRC:.cpp=.o)
 # Fortran source file(s)
 OBJ += $(FOR_SRC:.for=.o)
 #
-CXXFLAGS = $(INCS) $(TESTFLAGS) -dynamic -Wall
+CXXFLAGS = $(INCS) $(TESTFLAGS) $(MATLABFLAGS) -dynamic -Wall
 CPP = g++ $(CXXFLAGS)
 #
 # Fortran compiler
@@ -87,4 +87,5 @@ testing:
 	${MAKE} -f Makefile.mac "TESTFLAGS = -D__CONSOLE_APP__"
 
 non-matlab:
-	${MAKE} -f Makefile.mac "TESTFLAGS = "
+	${MAKE} -f Makefile.mac "MATLABFLAGS = "
+#	${MAKE} -f Makefile.mac "CXXFLAGS = $(INCS) $(TESTFLAGS) -dynamic -Wall"

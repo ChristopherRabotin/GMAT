@@ -1,15 +1,16 @@
+################################################################################
 # Project:    GMAT
 # Module:     inc.mac for gui directory 
-# Created:    Joey Gurgnaus 
+# Created:    Joey Gurganus 
 # Date:       2004/02/13
 # Modified:   2004/05/21 - Added controllogic directory
 #             2004/09/23 - W. Shoan - added function directory
-#             2004/09/24 - J. Gurgnaus - cleaned up
-#             2004/09/27 - J. Gurgnaus - removed WX_HOME and WXBASE 
-#             2004/12/23 - J. Gurgnaus - included coordsystem directory
+#             2004/09/24 - J. Gurganus - cleaned up
+#             2004/09/27 - J. Gurganus - removed WX_HOME and WXBASE 
+#             2004/12/23 - J. Gurganus - included coordsystem directory
 #             2005/06/29 - J. Gurgnaus - Added hardware, function, and 
 #                                        output directories
-#             2005/10/13 - J. Gurgnaus - Added target for non-matlab 
+#             2005/10/13 - J. Gurganus - Added target for non-matlab 
 ################################################################################
 #
 # Program to make (library)
@@ -83,7 +84,7 @@ OBJ = $(SRC:.cpp=.o)
 CXXFLAGS = $(BASE_INCS) $(GUI_INCS) $(WXFLAGS) \
 	`$(WX_HOME)/wx-config --cxxflags` -dynamic -Wall
 
-CPP = g++ $(CXXFLAGS) $(TESTFLAGS)
+CPP = g++ $(CXXFLAGS) $(TESTFLAGS) $(MATLABFLAGS)
 #
 # Default suffix rule
 .SUFFIXES: .o .cpp
@@ -111,4 +112,4 @@ bare: clean
 testing: all
 
 non-matlab:
-	${MAKE} -f Makefile.mac "TESTFLAGS = "
+	${MAKE} -f Makefile.mac "MATLABFLAGS = "
