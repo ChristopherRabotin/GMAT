@@ -202,6 +202,9 @@ protected:
    std::vector<IntegerArray> a, ap;
    Rvector                   A, B, C, D, E, F, Ap, Bp, Cp, Dp;
    
+   Integer                   *aVals[];
+   Integer                   *apVals[];
+   
    // internediate quantitied needed by more than one method
    
    virtual void      InitializeFK5();

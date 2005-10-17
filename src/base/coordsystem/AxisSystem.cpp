@@ -174,6 +174,10 @@ const AxisSystem& AxisSystem::operator=(const AxisSystem &axisSys)
 //---------------------------------------------------------------------------
 AxisSystem::~AxisSystem()
 {
+   for (Integer i = 0; i < 5; i++)
+      delete aVals[i];
+   for (Integer i = 0; i < 10; i++)
+      delete apVals[i];
 }
 
 GmatCoordinate::ParameterUsage AxisSystem::UsesEopFile() const
@@ -643,9 +647,22 @@ void AxisSystem::InitializeFK5()
       
       bool OK = itrf->GetNutationTerms(a, A, B, C, D, E, F);
       if (!OK) throw CoordinateSystemException("Error getting nutation data.");
+      
+      for (Integer i = 0; i < 5; i++)
+      {
+         aVals[i] = new Integer[numNut];
+         for (Integer j=0; j< numNut; j++)
+            aVals[i][j] = (a.at(i)).at(j);
+      }
       OK      = itrf->GetPlanetaryTerms(ap, Ap, Bp, Cp, Dp);
       if (!OK) throw CoordinateSystemException("Error getting planetary data.");
-   //}
+      for (Integer i = 0; i < 10; i++)
+      {
+         apVals[i] = new Integer[numPlan];
+         for (Integer j=0; j< numPlan; j++)
+            apVals[i][j] = (ap.at(i)).at(j);
+      }
+      //}
 }   
 
 //------------------------------------------------------------------------------
@@ -781,6 +798,7 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    Real cosAp = 0.0;
    Real sinAp = 0.0;
    Integer nut = itrf->GetNumberOfNutationTerms();
+   /*
    for (i = nut-1; i >= 0; i--)
    {
       apNut = (a.at(0)).at(i)*meanAnomalyMoon + (a.at(1)).at(i)*meanAnomalySun 
@@ -791,6 +809,18 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
       dPsi += (A[i] + B[i]*tTDB )*sinAp + E[i]*cosAp;
       dEps += (C[i] + D[i]*tTDB )*cosAp + F[i]*sinAp;
    }
+    */
+   for (i = nut-1; i >= 0; i--)
+   {
+      apNut = aVals[0][i]*meanAnomalyMoon + aVals[1][i]*meanAnomalySun 
+      + aVals[2][i]*argLatitudeMoon + aVals[3][i]*meanElongationSun 
+      + aVals[4][i]*longAscNodeLunar;
+      cosAp = Cos(apNut);
+      sinAp = Sin(apNut);
+      dPsi += (A[i] + B[i]*tTDB )*sinAp + E[i]*cosAp;
+      dEps += (C[i] + D[i]*tTDB )*cosAp + F[i]*sinAp;
+   }
+   
    dPsi *= RAD_PER_ARCSEC;
    dEps *= RAD_PER_ARCSEC;
    
@@ -800,7 +830,7 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    // First, compute the mean Heliocentric longitudes of the planets, and the
    // general precession in longitude
    
-   /*
+   
     Real longVenus   = (181.979800853  + 58517.8156748  * tTDB)* RAD_PER_DEG;
     Real longEarth   = (100.466448494  + 35999.3728521  * tTDB)* RAD_PER_DEG;
     Real longMars    = (355.433274605  + 19140.299314   * tTDB)* RAD_PER_DEG;
@@ -812,21 +842,35 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
     Real cosApP = 0.0;
     Real sinApP = 0.0;
     Integer nutpl = itrf->GetNumberOfPlanetaryTerms();
-    for (i = nutpl-1; i >= 0; i--)
+    //for (i = nutpl-1; i >= 0; i--)
+    //{
+    //   apPlan = (ap.at(0)).at(i)*longVenus + (ap.at(1)).at(i)*longEarth 
+    //   + (ap.at(2)).at(i)*longMars   + (ap.at(3)).at(i)*longJupiter 
+    //   + (ap.at(4)).at(i)*longSaturn + (ap.at(5)).at(i)*genPrec
+    //   + (ap.at(6)).at(i)*meanElongationSun*
+    //   + (ap.at(7)).at(i)*argLatitudeMoon
+    //   + (ap.at(8)).at(i)*meanAnomalyMoon
+    //   + (ap.at(9)).at(i)*longAscNodeLunar;
+    //   cosApP = Cos(apPlan);
+    //   sinApP = Sin(apPlan);
+    //   dPsi += (( Ap[i] + Bp[i]*tTDB )*sinApP) * RAD_PER_ARCSEC;
+    //   dEps += (( Cp[i] + Dp[i]*tTDB )*cosApP) * RAD_PER_ARCSEC;
+    //}
+       for (i = nutpl-1; i >= 0; i--)
     {
-       apPlan = (ap.at(0)).at(i)*longVenus + (ap.at(1)).at(i)*longEarth 
-       + (ap.at(2)).at(i)*longMars   + (ap.at(3)).at(i)*longJupiter 
-       + (ap.at(4)).at(i)*longSaturn + (ap.at(5)).at(i)*genPrec
-       + (ap.at(6)).at(i)*meanElongationSun*
-       + (ap.at(7)).at(i)*argLatitudeMoon
-       + (ap.at(8)).at(i)*meanAnomalyMoon
-       + (ap.at(9)).at(i)*longAscNodeLunar;
-       cosApP = Cos(apPlan);
-       sinApP = Sin(apPlan);
-       dPsi += (( Ap[i] + Bp[i]*tTDB )*sinApP) * RAD_PER_ARCSEC;
-       dEps += (( Cp[i] + Dp[i]*tTDB )*cosApP) * RAD_PER_ARCSEC;
+          apPlan = apVals[0][i]*longVenus + apVals[1][i]*longEarth 
+          + apVals[2][i]*longMars   + apVals[3][i]*longJupiter 
+          + apVals[4][i]*longSaturn + apVals[5][i]*genPrec
+          + apVals[6][i]*meanElongationSun*
+          + apVals[7][i]*argLatitudeMoon
+          + apVals[8][i]*meanAnomalyMoon
+          + apVals[9][i]*longAscNodeLunar;
+          cosApP = Cos(apPlan);
+          sinApP = Sin(apPlan);
+          dPsi += (( Ap[i] + Bp[i]*tTDB )*sinApP) * RAD_PER_ARCSEC;
+          dEps += (( Cp[i] + Dp[i]*tTDB )*cosApP) * RAD_PER_ARCSEC;
     }
-     */
+    
     
    // FOR NOW, SQ's code to approximate GSRF frame
    // NOTE - do we delete this when we put in the planetary stuff above?
