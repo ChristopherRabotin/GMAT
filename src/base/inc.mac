@@ -8,6 +8,7 @@
 #             2004/09/24 - J. Gurganus - cleaned up and added 'testing' target 
 #             2005/07/19 - J. Gurganus - added Fortan compiler (g77) 
 #             2005/10/13 - J. Gurganus - added target for non-matlab 
+#             2005/10/17 - J. Gurganus - corrected 'testing' problem
 ###############################################################################
 #
 # Program to make (library)
@@ -84,7 +85,7 @@ bare: clean
 	rm -f $(LIB)
 
 testing:
-	${MAKE} -f Makefile.mac "TESTFLAGS = -D__CONSOLE_APP__"
+	${MAKE} -f Makefile.mac "TESTFLAGS = -D__CONSOLE_APP__" "MATLABFLAGS ="
 
 non-matlab:
 	${MAKE} -f Makefile.mac "MATLABFLAGS = "
