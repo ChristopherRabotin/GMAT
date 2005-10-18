@@ -27,7 +27,7 @@
 #include "EopFile.hpp"
 #include "TimeTypes.hpp"
 #include "UtilityException.hpp"
-
+#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 // public methods
@@ -100,6 +100,8 @@ const EopFile& EopFile::operator=(const EopFile &eopF)
    isInitialized = eopF.isInitialized;
    return *this;
 }
+
+
 //---------------------------------------------------------------------------
 //  ~EopFile()
 //---------------------------------------------------------------------------
@@ -242,30 +244,62 @@ std::string EopFile::GetFileName() const
 //---------------------------------------------------------------------------
 Real EopFile::GetUt1UtcOffset(const Real utcMjd)
 {
+   //MessageInterface::ShowMessage("===> GetUt1UtcOffset() utcMjd=%f\n", utcMjd);
+   
    if (!isInitialized)  Initialize();
    
    Integer i = 0;
    Real    utcJD = utcMjd + GmatTimeUtil::JD_NOV_17_1858;
+   const Real* data = ut1UtcOffsets->GetDataVector();
+   Integer col = ut1UtcOffsets->GetNumColumns();
+   
+   //MessageInterface::ShowMessage
+   //   ("===> after ut1UtcOffsets->GetData() tableSz=%d, row=%d, col=%d\n",
+   //    tableSz, row, col);
+   
    for (i = (tableSz - 1); i >= 0; i--)
    {
-      if (utcJD >= ut1UtcOffsets->GetElement(i,0))
+      //MessageInterface::ShowMessage("===> data[data[i*col + 0]=%f\n",
+      //                              data[i*col + 0]);
+      if (utcJD >= data[i*col + 0])
       {
          // if it's greater than the last entry in the table, then return the 
          // last value
-         if (i == (tableSz -1))  return ut1UtcOffsets->GetElement(i,1);
+         if (i == (tableSz -1))  return data[i*col + 1];
          // otherwise, interpolate between values
-         Real diffJD  = ut1UtcOffsets->GetElement(i+1,0) - 
-                        ut1UtcOffsets->GetElement(i,0);
-         Real whereJD = utcJD - ut1UtcOffsets->GetElement(i,0);
+         Real diffJD  = data[(i+1)*col + 0] - 
+                        data[i*col + 0];
+         Real whereJD = utcJD - data[i*col + 0];
          Real ratio   = whereJD / diffJD;
-         Real diffOff = ut1UtcOffsets->GetElement(i+1,1) -
-                        ut1UtcOffsets->GetElement(i,1);
-         Real off     = ut1UtcOffsets->GetElement(i,1) + ratio * diffOff;
+         Real diffOff = data[(i+1)*col + 1] -
+                        data[i*col + 1];
+         Real off     = data[i*col + 1] + ratio * diffOff;
          return off;
       }
    }
+   
+//    for (i = (tableSz - 1); i >= 0; i--)
+//    {
+//       if (utcJD >= ut1UtcOffsets->GetElement(i,0))
+//       {
+//          // if it's greater than the last entry in the table, then return the 
+//          // last value
+//          if (i == (tableSz -1))  return ut1UtcOffsets->GetElement(i,1);
+//          // otherwise, interpolate between values
+//          Real diffJD  = ut1UtcOffsets->GetElement(i+1,0) - 
+//                         ut1UtcOffsets->GetElement(i,0);
+//          Real whereJD = utcJD - ut1UtcOffsets->GetElement(i,0);
+//          Real ratio   = whereJD / diffJD;
+//          Real diffOff = ut1UtcOffsets->GetElement(i+1,1) -
+//                         ut1UtcOffsets->GetElement(i,1);
+//          Real off     = ut1UtcOffsets->GetElement(i,1) + ratio * diffOff;
+//          return off;
+//       }
+//    }
+   
    // if it's before the time on the file, return the first value
-   return ut1UtcOffsets->GetElement(0,1);
+   //return ut1UtcOffsets->GetElement(0,1);
+   return data[1];
 }
 
 //---------------------------------------------------------------------------
@@ -304,45 +338,74 @@ bool EopFile::GetPolarMotionAndLod(Real forUtcMjd, Real &xval, Real  &yval,
    
    Integer i = 0;
    Real    utcJD = forUtcMjd + GmatTimeUtil::JD_NOV_17_1858;
+   Integer col = polarMotion->GetNumColumns();
+   const Real *data = polarMotion->GetDataVector();
+   
    // if it's before the time on the file, return the first values
-   if (utcJD <= polarMotion->GetElement(0,0))
+   
+   //if (utcJD <= polarMotion->GetElement(0,0))
+   if (utcJD <= data[0])
    {
-      xval   = polarMotion->GetElement(0,1);
-      yval   = polarMotion->GetElement(0,2);
-      lodval = polarMotion->GetElement(0,3);
+      xval   = data[1];
+      yval   = data[2];
+      lodval = data[3];
+//       xval   = polarMotion->GetElement(0,1);
+//       yval   = polarMotion->GetElement(0,2);
+//       lodval = polarMotion->GetElement(0,3);
    }
    else
    {
       for (i = (tableSz - 1); i >= 0; i--)
       {
-         if (utcJD >= polarMotion->GetElement(i,0))
+         //if (utcJD >= polarMotion->GetElement(i,0))
+         if (utcJD >= data[i*col + 0])
          {
             // if it's greater than the last entry in the table, then return the 
             // last value
             if (i == (tableSz -1))
             {
-               xval   = polarMotion->GetElement(i,1);
-               yval   = polarMotion->GetElement(i,2);
-               lodval = polarMotion->GetElement(i,3);
+               xval   = data[i*col + 1];
+               yval   = data[i*col + 2];
+               lodval = data[i*col + 3];
+//                xval   = polarMotion->GetElement(i,1);
+//                yval   = polarMotion->GetElement(i,2);
+//                lodval = polarMotion->GetElement(i,3);
             }
             else
             {
                // otherwise, interpolate between values
-               Real diffJD  = polarMotion->GetElement(i+1,0) - 
-                              polarMotion->GetElement(i,0);
-               Real whereJD = utcJD - polarMotion->GetElement(i,0);
+               Real diffJD  = data[(i+1)*col + 0] - 
+                              data[i*col + 0];
+               Real whereJD = utcJD - data[i*col + 0];
                Real ratio   = whereJD / diffJD;
-               Real diffX   = polarMotion->GetElement(i+1,1) -
-                              polarMotion->GetElement(i,1);
-               Real diffY   = polarMotion->GetElement(i+1,2) -
-                              polarMotion->GetElement(i,2);
+               Real diffX   = data[(i+1)*col + 1] -
+                              data[i*col + 1];
+               Real diffY   = data[(i+1)*col + 2] -
+                              data[i*col + 2];
                //Real diffLOD = polarMotion->GetElement(i+1,3) -
                //               polarMotion->GetElement(i,3);
-               xval   = polarMotion->GetElement(i,1) + ratio * diffX;
-               yval   = polarMotion->GetElement(i,2) + ratio * diffY;
+               xval   = data[i*col + 1] + ratio * diffX;
+               yval   = data[i*col + 2] + ratio * diffY;
                // 2005.02.23 - Steve says not to interpolate lod
                //lodval = polarMotion->GetElement(i,3) + ratio * diffLOD;
-               lodval = polarMotion->GetElement(i,3);
+               lodval = data[i*col + 3];
+               
+//                // otherwise, interpolate between values
+//                Real diffJD  = polarMotion->GetElement(i+1,0) - 
+//                               polarMotion->GetElement(i,0);
+//                Real whereJD = utcJD - polarMotion->GetElement(i,0);
+//                Real ratio   = whereJD / diffJD;
+//                Real diffX   = polarMotion->GetElement(i+1,1) -
+//                               polarMotion->GetElement(i,1);
+//                Real diffY   = polarMotion->GetElement(i+1,2) -
+//                               polarMotion->GetElement(i,2);
+//                //Real diffLOD = polarMotion->GetElement(i+1,3) -
+//                //               polarMotion->GetElement(i,3);
+//                xval   = polarMotion->GetElement(i,1) + ratio * diffX;
+//                yval   = polarMotion->GetElement(i,2) + ratio * diffY;
+//                // 2005.02.23 - Steve says not to interpolate lod
+//                //lodval = polarMotion->GetElement(i,3) + ratio * diffLOD;
+//                lodval = polarMotion->GetElement(i,3);
             }
             break;
          }
