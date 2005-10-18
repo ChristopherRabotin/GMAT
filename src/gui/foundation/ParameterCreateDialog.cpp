@@ -585,6 +585,7 @@ Parameter* ParameterCreateDialog::CreateParameter(const wxString &name)
    return param;
 }
 
+
 //------------------------------------------------------------------------------
 // wxString GetParamName()
 //------------------------------------------------------------------------------
@@ -597,11 +598,22 @@ wxString ParameterCreateDialog::GetParamName()
    else if (mCoordSysComboBox->IsShown())
       depObj = mCoordSysComboBox->GetStringSelection();
    
-   wxString paramName = mObjectListBox->GetStringSelection() + "." + depObj + "." +
-      mPropertyListBox->GetStringSelection();
+   wxString paramName;
+   
+   if (depObj == "")
+   {
+      paramName = mObjectListBox->GetStringSelection() + "." + 
+         mPropertyListBox->GetStringSelection();
+   }
+   else
+   {
+      paramName = mObjectListBox->GetStringSelection() + "." + depObj + "." +
+         mPropertyListBox->GetStringSelection();
+   }
    
    return paramName;
 }
+
 
 //------------------------------------------------------------------------------
 // void CreateVariable()
