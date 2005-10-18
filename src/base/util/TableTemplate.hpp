@@ -89,6 +89,8 @@ public:
     virtual Integer  GetNumColumns() const;
     virtual Integer  GetNumRows() const;
     
+    const T* GetDataVector() {return elementD;}
+   
 protected:
     T   *elementD;
     Integer rowsD, colsD;
