@@ -52,7 +52,7 @@ OBJ = $(SRC:.cpp=.o)
 # Fortran source file(s)
 OBJ += $(FOR_SRC:.for=.o)
 #
-CXXFLAGS = $(INCS) $(TESTFLAGS) $(MATLABFLAGS) -dynamic -Wall
+CXXFLAGS = $(INCS) $(TESTFLAGS) $(MATLABFLAGS) -O2 -dynamic -Wall
 CPP = g++ $(CXXFLAGS)
 #
 # Fortran compiler
