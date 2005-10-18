@@ -174,10 +174,13 @@ const AxisSystem& AxisSystem::operator=(const AxisSystem &axisSys)
 //---------------------------------------------------------------------------
 AxisSystem::~AxisSystem()
 {
-   for (Integer i = 0; i < 5; i++)
-      delete aVals[i];
-   for (Integer i = 0; i < 10; i++)
-      delete apVals[i];
+//    for (Integer i = 0; i < 5; i++)
+//       delete aVals[i];
+//    for (Integer i = 0; i < 10; i++)
+//       delete apVals[i];
+   
+   delete aVals;
+   delete apVals;
 }
 
 GmatCoordinate::ParameterUsage AxisSystem::UsesEopFile() const
@@ -648,20 +651,45 @@ void AxisSystem::InitializeFK5()
       bool OK = itrf->GetNutationTerms(a, A, B, C, D, E, F);
       if (!OK) throw CoordinateSystemException("Error getting nutation data.");
       
+      aVals = new Integer[numNut * 5];
       for (Integer i = 0; i < 5; i++)
       {
-         aVals[i] = new Integer[numNut];
          for (Integer j=0; j< numNut; j++)
-            aVals[i][j] = (a.at(i)).at(j);
+         {
+            aVals[i*5+j] = (a.at(i)).at(j);
+         }
       }
+      
       OK      = itrf->GetPlanetaryTerms(ap, Ap, Bp, Cp, Dp);
       if (!OK) throw CoordinateSystemException("Error getting planetary data.");
+      
+      apVals = new Integer[numPlan*10];
       for (Integer i = 0; i < 10; i++)
       {
-         apVals[i] = new Integer[numPlan];
          for (Integer j=0; j< numPlan; j++)
-            apVals[i][j] = (ap.at(i)).at(j);
+         {
+            apVals[i*10+j] = (ap.at(i)).at(j);
+         }
       }
+      
+//       for (Integer i = 0; i < 5; i++)
+//       {
+//          aVals[i] = new Integer[numNut];
+//          for (Integer j=0; j< numNut; j++)
+//          {
+//             aVals[i][j] = (a.at(i)).at(j);
+//          }
+//       }
+//       OK      = itrf->GetPlanetaryTerms(ap, Ap, Bp, Cp, Dp);
+//       if (!OK) throw CoordinateSystemException("Error getting planetary data.");
+//       for (Integer i = 0; i < 10; i++)
+//       {
+//          apVals[i] = new Integer[numPlan];
+//          for (Integer j=0; j< numPlan; j++)
+//          {
+//             apVals[i][j] = (ap.at(i)).at(j);
+//          }
+//       }
       //}
 }   
 
@@ -812,9 +840,14 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
     */
    for (i = nut-1; i >= 0; i--)
    {
-      apNut = aVals[0][i]*meanAnomalyMoon + aVals[1][i]*meanAnomalySun 
-      + aVals[2][i]*argLatitudeMoon + aVals[3][i]*meanElongationSun 
-      + aVals[4][i]*longAscNodeLunar;
+      //apNut = aVals[0][i]*meanAnomalyMoon + aVals[1][i]*meanAnomalySun 
+      //+ aVals[2][i]*argLatitudeMoon + aVals[3][i]*meanElongationSun 
+      //+ aVals[4][i]*longAscNodeLunar;
+
+      apNut = aVals[i]*meanAnomalyMoon + aVals[nut*1+i]*meanAnomalySun 
+      + aVals[nut*2+i]*argLatitudeMoon + aVals[nut*3+i]*meanElongationSun 
+      + aVals[nut*4+i]*longAscNodeLunar;
+      
       cosAp = Cos(apNut);
       sinAp = Sin(apNut);
       dPsi += (A[i] + B[i]*tTDB )*sinAp + E[i]*cosAp;
@@ -842,6 +875,7 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
     Real cosApP = 0.0;
     Real sinApP = 0.0;
     Integer nutpl = itrf->GetNumberOfPlanetaryTerms();
+    
     //for (i = nutpl-1; i >= 0; i--)
     //{
     //   apPlan = (ap.at(0)).at(i)*longVenus + (ap.at(1)).at(i)*longEarth 
@@ -856,15 +890,16 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
     //   dPsi += (( Ap[i] + Bp[i]*tTDB )*sinApP) * RAD_PER_ARCSEC;
     //   dEps += (( Cp[i] + Dp[i]*tTDB )*cosApP) * RAD_PER_ARCSEC;
     //}
-       for (i = nutpl-1; i >= 0; i--)
+    
+    for (i = nutpl-1; i >= 0; i--)
     {
-          apPlan = apVals[0][i]*longVenus + apVals[1][i]*longEarth 
-          + apVals[2][i]*longMars   + apVals[3][i]*longJupiter 
-          + apVals[4][i]*longSaturn + apVals[5][i]*genPrec
-          + apVals[6][i]*meanElongationSun*
-          + apVals[7][i]*argLatitudeMoon
-          + apVals[8][i]*meanAnomalyMoon
-          + apVals[9][i]*longAscNodeLunar;
+          apPlan = apVals[0+i]*longVenus + apVals[nutpl*1+i]*longEarth 
+          + apVals[nutpl*2+i]*longMars   + apVals[nutpl*3+i]*longJupiter 
+          + apVals[nutpl*4+i]*longSaturn + apVals[nutpl*5+i]*genPrec
+          + apVals[nutpl*6+i]*meanElongationSun*
+          + apVals[nutpl*7+i]*argLatitudeMoon
+          + apVals[nutpl*8+i]*meanAnomalyMoon
+          + apVals[nutpl*9+i]*longAscNodeLunar;
           cosApP = Cos(apPlan);
           sinApP = Sin(apPlan);
           dPsi += (( Ap[i] + Bp[i]*tTDB )*sinApP) * RAD_PER_ARCSEC;
