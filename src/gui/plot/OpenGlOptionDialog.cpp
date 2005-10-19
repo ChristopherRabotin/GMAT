@@ -129,6 +129,15 @@ OpenGlOptionDialog::OpenGlOptionDialog(wxWindow *parent, const wxString &title,
 
 
 //------------------------------------------------------------------------------
+// ~OpenGlOptionDialog()
+//------------------------------------------------------------------------------
+OpenGlOptionDialog::~OpenGlOptionDialog()
+{
+   theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
+}
+
+
+//------------------------------------------------------------------------------
 // void SetDistance(float dist)
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::SetDistance(float dist)

@@ -40,6 +40,7 @@ public:
    OpenGlOptionDialog(wxWindow *parent, const wxString &title,
                       const wxArrayString &objectNames,
                       const UnsignedIntArray &objectColors);
+   ~OpenGlOptionDialog();
    
    wxArrayString& GetObjectNames()
       { return mObjectNames; }
@@ -122,7 +123,6 @@ protected:
    wxCheckBox *mShowOrbitNormalCheckBox;
 
    wxButton *mViewAnimationButton;
-   //wxButton *mCreateCoordSysButton;
    wxButton *mXyPlaneColorButton;
    wxButton *mEcPlaneColorButton;
    wxButton *mESLinesColorButton;
@@ -159,7 +159,6 @@ protected:
    void OnColorButtonClick(wxCommandEvent& event);
    void OnObjectColorButtonClick(wxCommandEvent& event);
    void OnSatColorButtonClick(wxCommandEvent& event);
-//    void OnAddObjectButtonClick(wxCommandEvent& event);
    void OnApplyButtonClick(wxCommandEvent& event);
    void OnButtonClick(wxCommandEvent& event);
    void OnSelectObject(wxCommandEvent& event);
@@ -177,7 +176,6 @@ protected:
       ID_COMBOBOX,
       ID_LISTBOX,
       ID_BUTTON,
-//       ID_ADD_OBJECT_BUTTON,
       ID_EQPLANE_COLOR_BUTTON,
       ID_ECPLANE_COLOR_BUTTON,
       ID_SUNLINE_COLOR_BUTTON,
