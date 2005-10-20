@@ -2412,20 +2412,21 @@ bool CelestialBody::IsBlank(char* aLine)
 Real CelestialBody::GetJulianDaysFromTCBEpoch(const A1Mjd &forTime) const
 {
    Real jdTime = 0.0;
-   if (overrideTime)
-   {
+   // use TT time always with the IAU data, per Steve Hughes October 2005
+   //if (overrideTime)
+   //{
 	   Real mjdTT  = TimeConverterUtil::Convert(forTime.Get(),
 					 "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941); 
 	   jdTime      = mjdTT + GmatTimeUtil::JD_JAN_5_1941; 
-       return (jdTime - JD_EPOCH_2000_TT);
-   }
-   else
-   {
-	   Real mjdTCB = TimeConverterUtil::Convert(forTime.Get(),
-					 "A1Mjd", "TcbMjd", GmatTimeUtil::JD_JAN_5_1941); 
-	   jdTime      = mjdTCB + GmatTimeUtil::JD_JAN_5_1941; 
-       return (jdTime - JD_EPOCH_2000_TCB);
-   }
+      return (jdTime - JD_EPOCH_2000_TT);
+   //}
+   //else
+   //{
+	//   Real mjdTCB = TimeConverterUtil::Convert(forTime.Get(),
+	//				 "A1Mjd", "TcbMjd", GmatTimeUtil::JD_JAN_5_1941); 
+	//   jdTime      = mjdTCB + GmatTimeUtil::JD_JAN_5_1941; 
+   //    return (jdTime - JD_EPOCH_2000_TCB);
+   //}
 }
 
 //------------------------------------------------------------------------------
