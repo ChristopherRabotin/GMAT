@@ -402,6 +402,8 @@ private:
    void CopyVector3(float to[3], float from[3]);
    void CopyVector3(Real to[3], Real from[3]);
    void CopyVector3(Real to[3], float from[3]);
+
+   bool LoadImage(char *fileName);
    
 };
 

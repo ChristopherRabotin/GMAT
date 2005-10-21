@@ -37,6 +37,7 @@
 //#  include <GL/glut.h>
 #endif
 
+//#define SKIP_DEVIL
 
 #ifndef SKIP_DEVIL
 #  include <IL/il.h>
@@ -97,10 +98,9 @@ struct GlColorType
 };
 
 
-// texture
+// color
 static int *sIntColor = new int;
 static GlColorType *sGlColor = (GlColorType*)sIntColor;
-
 
 //------------------------------------------------------------------------------
 // TrajPlotCanvas(wxWindow *parent, wxWindowID id,
@@ -316,16 +316,16 @@ bool TrajPlotCanvas::InitGL()
    glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
    
 #ifdef __WXMSW__
+#ifndef SKIP_DEVIL
+   
    // initalize devIL library
    ilInit();
    ilutRenderer(ILUT_OPENGL);
    
-   // try to load textures
-   //5/17:commented out, it is called from AddObjectList()
+#endif
    
    if (!LoadGLTextures())
       return false;
-   
 #endif
 
    //loj: 3/10/05 Actually I don't need this
@@ -1355,7 +1355,7 @@ void TrajPlotCanvas::AddObjectList(const wxArrayString &objNames,
              objNames[i].c_str());
          #endif
          
-         mObjectTextureIdMap[objNames[i]] = UNINIT_TEXTURE;
+         mObjectTextureIdMap[objNames[i]] = GmatPlot::UNINIT_TEXTURE;
       }
       
       // initialize show object
@@ -1643,6 +1643,10 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
       //------------------------------
       else if (event.RightIsDown())
       {            
+         // if end-of-run compute new mfCamRotXYZAngle by calling ChangeView()
+         if (mIsEndOfRun)
+            ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
+         
          // find the length
          Real x2 = pow(mouseX - mLastMouseX, 2);
          Real y2 = pow(mouseY - mLastMouseY, 2);
@@ -1818,7 +1822,7 @@ bool TrajPlotCanvas::LoadGLTextures()
       if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT))
          continue;
       
-      if (mObjectTextureIdMap[mObjectNames[i]] == UNINIT_TEXTURE)
+      if (mObjectTextureIdMap[mObjectNames[i]] == GmatPlot::UNINIT_TEXTURE)
       {
          #if DEBUG_TRAJCANVAS_TEXTURE > 1
          MessageInterface::ShowMessage
@@ -1845,15 +1849,12 @@ bool TrajPlotCanvas::LoadGLTextures()
 //------------------------------------------------------------------------------
 GLuint TrajPlotCanvas::BindTexture(const wxString &objName)
 {
-   GLuint ret = UNINIT_TEXTURE;
+   GLuint ret = GmatPlot::UNINIT_TEXTURE;
+
+   //MessageInterface::ShowMessage("===> TrajPlotCanvas::BindTexture() ret = %d\n", ret);
    
    FileManager *fm = FileManager::Instance();
-   std::string textureFile;
-   
-   //#ifndef SKIP_DEVIL
-   //ILboolean status;
-   //#endif
-   
+   std::string textureFile;  
    std::string name = std::string(objName.Upper().c_str());
    std::string filename = name + "_TEXTURE_FILE";
    
@@ -1875,6 +1876,15 @@ GLuint TrajPlotCanvas::BindTexture(const wxString &objName)
             ret = ilutGLBindTexImage();
             //glBindTexture(GL_TEXTURE_2D, ret);
          }
+      #else
+         
+         glGenTextures(1, &ret);
+         glBindTexture(GL_TEXTURE_2D, ret);
+
+         // load image file
+         if (!LoadImage((char*)textureFile.c_str()))
+            ret = GmatPlot::UNINIT_TEXTURE;
+         
       #endif
    }
    catch (BaseException &e)
@@ -1996,7 +2006,7 @@ void TrajPlotCanvas::SetupWorld()
       
       //gluPerspective(mFovDeg, aspect, 1.0, mAxisLength * mFovDeg);
       gluPerspective(mFovDeg, aspect, mAxisLength/(mFovDeg*10), mAxisLength * mFovDeg);
-      //gluPerspective(mFovDeg, aspect, 3000, 6000000);
+      //gluPerspective(60.0, aspect, 1.0, 6000000.0);
    }
    else
    {
@@ -2667,7 +2677,7 @@ void TrajPlotCanvas::DrawObject(const wxString &objName)
        objName.c_str(), mObjectTextureIdMap[objName]);
    #endif
    
-   if (mObjectTextureIdMap[objName] != UNINIT_TEXTURE)
+   if (mObjectTextureIdMap[objName] != GmatPlot::UNINIT_TEXTURE)
    {
       //glColor4f(1.0, 1.0, 1.0, 1.0);
       glColor3f(1.0, 1.0, 1.0);
@@ -2774,8 +2784,8 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
                 (Abs(r2[2]- r1[2]) > 10000.0 && (SignOf(r2[2]) != SignOf(r1[2]))))
             {
                //MessageInterface::ShowMessage
-               //   ("===> i=%d, time1=%f, time2=%f\n   r1=%s, r2=%s\n",
-               //    i, mTime[i-1], mTime[i], r1.ToString().c_str(),
+               //   ("===> i1=%d, i2=%d, time1=%f, time2=%f\n   r1=%s, r2=%s\n",
+               //    i-1, i, mTime[i-1], mTime[i], r1.ToString().c_str(),
                //    r2.ToString().c_str());
                continue;
             }
@@ -3887,5 +3897,52 @@ void TrajPlotCanvas::CopyVector3(Real to[3], float from[3])
    to[0] = from[0];
    to[1] = from[1];
    to[2] = from[2];
+}
+
+
+//---------------------------------------------------------------------------
+// bool LoadImage(char *fileName)
+//---------------------------------------------------------------------------
+bool TrajPlotCanvas::LoadImage(char *fileName)
+{
+#ifndef SKIP_DEVIL
+   return false;
+   
+#else
+   #if DEBUG_TRAJCANVAS_INIT
+   MessageInterface::ShowMessage("===> TrajPlotCanvas::LoadImage()\n");
+   #endif
+   
+   ::wxInitAllImageHandlers();
+   wxImage image = wxImage(fileName);
+   int width = image.GetWidth();
+   int height = image.GetHeight();
+   
+   GLubyte *data = image.GetData();
+   
+   if (data == NULL)
+      return false;
+   
+   #if DEBUG_TRAJCANVAS_INIT
+   int size = width * height * 3;
+   MessageInterface::ShowMessage("===> width=%d, height=%d, size=%d\n",
+                                 width, height, size);
+   #endif
+   
+   // Why is image upside down?
+   // Get vertial mirror
+   wxImage mirror = image.Mirror(false);
+   GLubyte *data1 = mirror.GetData();
+   
+   //used for min and magnifying texture
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   
+   //pass image to opengl
+   gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB,
+                     GL_UNSIGNED_BYTE, data1);
+   
+   return true;
+#endif
 }
 
