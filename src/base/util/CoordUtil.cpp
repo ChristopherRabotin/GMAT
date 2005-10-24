@@ -26,6 +26,10 @@
 
 using namespace GmatMathUtil;
 
+
+const Real CoordUtil::ORBIT_TOL = 1.0E-10;
+const Real CoordUtil::ORBIT_TOL_SQ = 1.0E-20;
+
 //---------------------------------
 // public static functions
 //---------------------------------

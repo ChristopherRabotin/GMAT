@@ -66,6 +66,8 @@ const Integer SlpFile::MAX_POTENTIAL_NAME  = 72;
 // The number of bodies normally found on the SLP file
 const Integer SlpFile::NUM_STANDARD_BODIES = 11;
 
+const Real    SlpFile::JD_MJD_OFFSET = 2430000.0;
+
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------

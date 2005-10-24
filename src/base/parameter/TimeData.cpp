@@ -28,6 +28,9 @@
 // static data
 //---------------------------------
 
+const Real TimeData::MJD_OFFSET = 2430000.0; 
+const Real TimeData::TIME_REAL_UNDEFINED = -9876543210.1234;
+
 const std::string
 TimeData::VALID_OBJECT_TYPE_LIST[TimeDataObjectCount] =
 {

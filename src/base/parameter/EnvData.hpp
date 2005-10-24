@@ -41,7 +41,7 @@ public:
    virtual bool ValidateRefObjects(GmatBase *param);
    virtual const std::string* GetValidObjectList() const;
    
-   const static Real ENV_REAL_UNDEFINED = -9876543210.1234;
+   const static Real ENV_REAL_UNDEFINED;// = -9876543210.1234;
    
 protected:
    

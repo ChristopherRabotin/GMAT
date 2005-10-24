@@ -64,7 +64,7 @@ public:
 
 protected:
     // Constant value for orbit tolerance
-    static const Real ORBIT_TOLERANCE = 1.0E-10;
+    static const Real ORBIT_TOLERANCE;// = 1.0E-10;
 
     Real     positionMagnitude;    //  Position vector magnitude
     Real     rightAscension;       //  RA measured of vernal equinox 

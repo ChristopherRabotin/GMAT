@@ -66,7 +66,7 @@ public:
    Rvector6 Convert(const Real *state, const std::string &toElementType);
    
    // Constant variable
-   static const Real DEFAULT_MU = 0.3986004415e+06;  // km^3/s^2
+   static const Real DEFAULT_MU;// = 0.3986004415e+06;  // km^3/s^2
  
 protected:
    // Declare protetced method data 

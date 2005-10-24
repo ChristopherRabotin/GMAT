@@ -111,10 +111,10 @@ protected:
       StarParamCount - CelestialBodyParamCount];
 
    // constants for cartographic coordinates
-   static const Real alpha = 286.13;      // deg
-   static const Real delta = 63.87;       // deg
-   static const Real w1    = 84.10;       // deg
-   static const Real w2    = 14.1844000;  //
+   static const Real alpha;// = 286.13;      // deg
+   static const Real delta;// = 63.87;       // deg
+   static const Real w1;//    = 84.10;       // deg
+   static const Real w2;//    = 14.1844000;  //
 
       // radiant power and reference distance
    Real      radiantPower;

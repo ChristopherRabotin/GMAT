@@ -79,17 +79,17 @@ protected:
 
    // additional protected data
    // (NOTE - static const strings are initialized in source file)
-   static const Integer MAX_1996_NUT_TERMS         = 263;
-   static const Real    MULT_1996_NUT              = 1.0e-06;
+   static const Integer MAX_1996_NUT_TERMS;//         = 263;
+   static const Real    MULT_1996_NUT;//              = 1.0e-06;
    static const std::string FIRST_NUT_PHRASE_1996;
-   static const Integer MAX_2000_NUT_TERMS         = 106;
-   static const Real    MULT_2000_NUT              = 1.0e-04;
+   static const Integer MAX_2000_NUT_TERMS;//         = 106;
+   static const Real    MULT_2000_NUT;//              = 1.0e-04;
    static const std::string FIRST_NUT_PHRASE_2000;
-   static const Integer MAX_1996_PLANET_TERMS      = 112;
-   static const Real    MULT_1996_PLANET           = 1.0e-04;
+   static const Integer MAX_1996_PLANET_TERMS;//      = 112;
+   static const Real    MULT_1996_PLANET;//           = 1.0e-04;
    static const std::string FIRST_PLAN_PHRASE_1996;
-   static const Integer MAX_2000_PLANET_TERMS = 112;            // ????
-   static const Real    MULT_2000_PLANET      = 1.0e-04;        // ????
+   static const Integer MAX_2000_PLANET_TERMS;// = 112;            // ????
+   static const Real    MULT_2000_PLANET;//      = 1.0e-04;        // ????
    static const std::string FIRST_PLAN_PHRASE_2000; // ????
    
    

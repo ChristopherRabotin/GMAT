@@ -40,6 +40,15 @@ const std::string ItrfCoefficientsFile::FIRST_NUT_PHRASE_2000  = "2000 IAU";
 const std::string ItrfCoefficientsFile::FIRST_PLAN_PHRASE_1996 = "1996 IAU";
 const std::string ItrfCoefficientsFile::FIRST_PLAN_PHRASE_2000 = "unknown"; // ????
 
+const Integer ItrfCoefficientsFile::MAX_1996_NUT_TERMS         = 263;
+const Real    ItrfCoefficientsFile::MULT_1996_NUT              = 1.0e-06;
+const Integer ItrfCoefficientsFile::MAX_2000_NUT_TERMS         = 106;
+const Real    ItrfCoefficientsFile::MULT_2000_NUT              = 1.0e-04;
+const Integer ItrfCoefficientsFile::MAX_1996_PLANET_TERMS      = 112;
+const Real    ItrfCoefficientsFile::MULT_1996_PLANET           = 1.0e-04;
+const Integer ItrfCoefficientsFile::MAX_2000_PLANET_TERMS = 112;            // ????
+const Real    ItrfCoefficientsFile::MULT_2000_PLANET      = 1.0e-04;        // ????
+
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------

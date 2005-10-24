@@ -32,6 +32,8 @@ using namespace GmatMathUtil;
 // static data
 //---------------------------------
 
+const Real EnvData::ENV_REAL_UNDEFINED = -9876543210.1234;
+
 const std::string
 EnvData::VALID_OBJECT_TYPE_LIST[EnvDataObjectCount] =
 {

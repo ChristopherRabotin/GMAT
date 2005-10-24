@@ -47,6 +47,8 @@ using namespace GmatTimeUtil;      // for SECS_PER_DAY
 // static data
 //---------------------------------
 
+const Real AxisSystem::DETERMINANT_TOLERANCE = 1.0e-14;
+
 const std::string
 AxisSystem::PARAMETER_TEXT[AxisSystemParamCount - CoordinateBaseParamCount] =
 {

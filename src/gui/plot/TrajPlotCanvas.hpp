@@ -150,13 +150,13 @@ private:
    
    static const int MAX_DATA = 20000;
    static const int MAX_OBJECT = 50;
-   static const int LAST_STD_BODY_ID = 10;
-   static const int MAX_COORD_SYS = 10;
+   static const int LAST_STD_BODY_ID;// = 10;
+   static const int MAX_COORD_SYS;// = 10;
    static const std::string BODY_NAME[GmatPlot::MAX_BODIES];
-   static const float MAX_ZOOM_IN = 3700.0;
-   static const float RADIUS_ZOOM_RATIO = 2.2;
-   static const float DEFAULT_DIST = 30000.0;
-   static const int UNKNOWN_OBJ_ID = -999;
+   static const float MAX_ZOOM_IN;// = 3700.0;
+   static const float RADIUS_ZOOM_RATIO;// = 2.2;
+   static const float DEFAULT_DIST;// = 30000.0;
+   static const int UNKNOWN_OBJ_ID;// = -999;
    
    GuiInterpreter *theGuiInterpreter;
    TextTrajectoryFile *mTextTrajFile;

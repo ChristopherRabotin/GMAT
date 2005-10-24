@@ -94,8 +94,8 @@ protected:
    static const std::string PARAMETER_TEXT[LibrationPointParamCount - CalculatedPointParamCount];
    static const Gmat::ParameterType PARAMETER_TYPE[LibrationPointParamCount - CalculatedPointParamCount];
 
-   static const Real CONVERGENCE_TOLERANCE = 1.0e-8;
-   static const Real MAX_ITERATIONS        = 2000;
+   static const Real CONVERGENCE_TOLERANCE;// = 1.0e-8;
+   static const Real MAX_ITERATIONS;//        = 2000;
    
    std::string primaryBodyName;
    std::string secondaryBodyName;

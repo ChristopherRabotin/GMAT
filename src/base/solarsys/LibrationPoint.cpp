@@ -32,6 +32,9 @@ using namespace std;
 //---------------------------------
 // static data
 //---------------------------------
+const Real LibrationPoint::CONVERGENCE_TOLERANCE = 1.0e-8;
+const Real LibrationPoint::MAX_ITERATIONS        = 2000;
+   
 const std::string
 LibrationPoint::PARAMETER_TEXT[LibrationPointParamCount - CalculatedPointParamCount] =
 {

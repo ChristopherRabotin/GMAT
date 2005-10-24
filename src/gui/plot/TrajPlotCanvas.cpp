@@ -89,6 +89,15 @@ using namespace GmatMathUtil;
 // static data
 //---------------------------------
 
+//const int TrajPlotCanvas::MAX_DATA = 20000;
+//const int TrajPlotCanvas::MAX_OBJECT = 50;
+const int TrajPlotCanvas::LAST_STD_BODY_ID = 10;
+const int TrajPlotCanvas::MAX_COORD_SYS = 10;
+const float TrajPlotCanvas::MAX_ZOOM_IN = 3700.0;
+const float TrajPlotCanvas::RADIUS_ZOOM_RATIO = 2.2;
+const float TrajPlotCanvas::DEFAULT_DIST = 30000.0;
+const int TrajPlotCanvas::UNKNOWN_OBJ_ID = -999;
+
 struct GlColorType
 {
    Byte red;

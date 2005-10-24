@@ -76,7 +76,7 @@ public:
    static const Integer NEPTUNE_ID;
    static const Integer PLUTO_ID;
 
-   static const Real    JD_MJD_OFFSET = 2430000.0;  // NOTE - SLP code uses this as a long int!!!!
+   static const Real    JD_MJD_OFFSET;// = 2430000.0;  // NOTE - SLP code uses this as a long int!!!!
 
    // maximum length of path name
    static const Integer MAX_PATH_LEN;

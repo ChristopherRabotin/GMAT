@@ -79,6 +79,10 @@ const Integer DeFile::LIBRATIONS_ID       = 14;
 //const Integer DeFile::ARRAY_SIZE_405      = 1018;
 //const Integer DeFile::MAX_ARRAY_SIZE      = 1018;
 
+
+const Real DeFile::JD_MJD_OFFSET = 2430000.0;
+const Real DeFile::TT_OFFSET     = 32.184;
+
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------

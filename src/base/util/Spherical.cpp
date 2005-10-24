@@ -25,6 +25,8 @@
 //---------------------------------
 //  static data
 //---------------------------------
+const Real Spherical::ORBIT_TOLERANCE = 1.0E-10;
+
 const std::string Spherical::DATA_DESCRIPTIONS[NUM_DATA] =
 {
    "Position Magnitude",

@@ -27,6 +27,7 @@
 
 // Forward declarations
 class Rvector;
+class Rvector3;
 
 class Rmatrix :  public TableTemplate<Real>
 {

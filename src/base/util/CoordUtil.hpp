@@ -30,8 +30,8 @@ class Anomaly;
 class CoordUtil
 {
 public:
-   static const Real ORBIT_TOL = 1.0E-10;
-   static const Real ORBIT_TOL_SQ = 1.0E-20;
+   static const Real ORBIT_TOL;// = 1.0E-10;
+   static const Real ORBIT_TOL_SQ;// = 1.0E-20;
    static const Integer MAX_ITERATIONS = 75;
 
    enum AnomalyType

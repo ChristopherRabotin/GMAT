@@ -78,6 +78,10 @@ Star::PARAMETER_TYPE[StarParamCount - CelestialBodyParamCount] =
    Gmat::REAL_TYPE
 };
 
+const Real Star::alpha = 286.13;      // deg
+const Real Star::delta = 63.87;       // deg
+const Real Star::w1    = 84.10;       // deg
+const Real Star::w2    = 14.1844000;
 
 //------------------------------------------------------------------------------
 // public methods

@@ -58,8 +58,8 @@ protected:
    bool mIsInitialEpochSet;
    Spacecraft *mSpacecraft;
     
-   const static Real MJD_OFFSET = 2430000.0; //loj: check the value
-   const static Real TIME_REAL_UNDEFINED = -9876543210.1234;
+   const static Real MJD_OFFSET;// = 2430000.0; //loj: check the value
+   const static Real TIME_REAL_UNDEFINED;// = -9876543210.1234;
    
    enum
    {

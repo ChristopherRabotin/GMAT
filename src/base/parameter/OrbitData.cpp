@@ -45,6 +45,10 @@ using namespace GmatMathUtil;
 // static data
 //---------------------------------
 
+const Real OrbitData::ORBIT_REAL_UNDEFINED = -9876543210.1234;
+const Real OrbitData::ORBIT_TOL = 1.0e-6; //1.0e-10;
+const Real OrbitData::ORBIT_ZERO_TOL = 1.0e-30;
+
 const std::string
 OrbitData::VALID_OBJECT_TYPE_LIST[OrbitDataObjectCount] =
 {

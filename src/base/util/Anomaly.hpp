@@ -62,7 +62,7 @@ public:
     bool IsInvalid(const std::string &inputType) const;
 
 protected:
-    static const Real    ANOMALY_TOL = 1.0e-30;
+    static const Real    ANOMALY_TOL;// = 1.0e-30;
     static const Integer MAX_ITERATIONS = 75;
 
 private:
