@@ -93,8 +93,9 @@ CurrA1MJD::~CurrA1MJD()
 //------------------------------------------------------------------------------
 bool CurrA1MJD::Evaluate()
 {
-   mRealValue = GetCurrentTimeReal("A1MJD");
-    
+   //mRealValue = GetCurrentTimeReal("A1MJD");
+   mRealValue = GetCurrentTimeReal(GmatParam::A1MJD);
+   
    if (mRealValue == TIME_REAL_UNDEFINED)
       return false;
    else
@@ -216,8 +217,9 @@ ElapsedDays::~ElapsedDays()
 //------------------------------------------------------------------------------
 bool ElapsedDays::Evaluate()
 {
-   mRealValue = GetElapsedTimeReal("Days");
-    
+   //mRealValue = GetElapsedTimeReal("Days");
+   mRealValue = GetElapsedTimeReal(GmatParam::DAYS);
+   
    if (mRealValue == TIME_REAL_UNDEFINED)
       return false;
    else
@@ -510,8 +512,9 @@ ElapsedSecs::~ElapsedSecs()
 //------------------------------------------------------------------------------
 bool ElapsedSecs::Evaluate()
 {
-   mRealValue = GetElapsedTimeReal("Secs");
-    
+   //mRealValue = GetElapsedTimeReal("Secs");
+   mRealValue = GetElapsedTimeReal(GmatParam::SECS);
+   
    if (mRealValue == TIME_REAL_UNDEFINED)
       return false;
    else

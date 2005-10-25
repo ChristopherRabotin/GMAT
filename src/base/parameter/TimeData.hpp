@@ -24,6 +24,15 @@
 #include "RefData.hpp"
 #include "Spacecraft.hpp"
 
+namespace GmatParam
+{
+   enum TimeDataID
+   {
+      A1MJD, JD,
+      YEARS, MONTHS, DAYS, HOURS, MINS, SECS
+   };
+};
+
 class GMAT_API TimeData : public RefData
 {
 public:
@@ -37,7 +46,9 @@ public:
    Real GetInitialEpoch() const;
    void SetInitialEpoch(const Real &initialEpoch);
    
+   Real GetCurrentTimeReal(GmatParam::TimeDataID id);
    Real GetCurrentTimeReal(const std::string &str);
+   Real GetElapsedTimeReal(GmatParam::TimeDataID id);
    Real GetElapsedTimeReal(const std::string &str);
    
    //loj: future build
@@ -57,7 +68,8 @@ protected:
    Real mInitialEpoch;
    bool mIsInitialEpochSet;
    Spacecraft *mSpacecraft;
-    
+   Integer mEpochId;
+   
    const static Real MJD_OFFSET;// = 2430000.0; //loj: check the value
    const static Real TIME_REAL_UNDEFINED;// = -9876543210.1234;
    

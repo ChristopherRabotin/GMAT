@@ -55,6 +55,7 @@ TimeData::TimeData()
    mInitialEpoch = 0.0;
    mIsInitialEpochSet = false;
    mSpacecraft = NULL;
+   mEpochId = -1;
 }
 
 
@@ -165,6 +166,41 @@ void TimeData::SetInitialEpoch(const Real &initialEpoch)
 
 
 //------------------------------------------------------------------------------
+// Real GetCurrentTimeReal(Integer id)
+//------------------------------------------------------------------------------
+/**
+ * Retrives current time.
+ */
+//------------------------------------------------------------------------------
+Real TimeData::GetCurrentTimeReal(GmatParam::TimeDataID id)
+{
+   //loj: where do I get current time? - from Spacecraft (loj: for now)
+   //GmatBase *obj = FindFirstObject("Spacecraft");
+   if (mSpacecraft == NULL)
+      InitializeRefObjects();
+
+   //Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
+   Real a1mjd = mSpacecraft->GetRealParameter(mEpochId);
+
+   #if DEBUG_TIMEDATA
+   MessageInterface::ShowMessage("TimeData::GetCurrentTimeReal() time = %f\n",
+                                 a1mjd);
+   #endif
+
+   switch (id)
+   {
+   case GmatParam::A1MJD:
+      return a1mjd;
+   case GmatParam::JD:
+      return a1mjd + MJD_OFFSET;
+   default:
+      throw ParameterException("TimeData::GetCurrentTimeReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(id));
+   }
+}
+
+
+//------------------------------------------------------------------------------
 // Real GetCurrentTimeReal(const std::string &str)
 //------------------------------------------------------------------------------
 /**
@@ -178,7 +214,8 @@ Real TimeData::GetCurrentTimeReal(const std::string &str)
    if (mSpacecraft == NULL)
       InitializeRefObjects();
 
-   Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
+   //Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
+   Real a1mjd = mSpacecraft->GetRealParameter(mEpochId);
 
    #if DEBUG_TIMEDATA
    MessageInterface::ShowMessage("TimeData::GetCurrentTimeReal() time = %f\n",
@@ -196,6 +233,35 @@ Real TimeData::GetCurrentTimeReal(const std::string &str)
 
 
 //------------------------------------------------------------------------------
+// Real GetElapsedTimeReal(GmatParam::TimeDataID id)
+//------------------------------------------------------------------------------
+/**
+ * Retrives elapsed time from Spacecraft (loj: for now)
+ */
+//------------------------------------------------------------------------------
+Real TimeData::GetElapsedTimeReal(GmatParam::TimeDataID id)
+{
+   //Real a1mjd = GetCurrentTimeReal("A1MJD");
+   Real a1mjd = GetCurrentTimeReal(GmatParam::A1MJD);
+   
+   switch (id)
+   {
+   //case GmatParam::YEARS:
+   //case GmatParam::MONTHS:
+   case GmatParam::DAYS:
+      return a1mjd - mInitialEpoch;
+   //case GmatParam::HOURS:
+   //case GmatParam::MINS:
+   case GmatParam::SECS:
+      return (a1mjd - mInitialEpoch)* 86400;
+   default:
+      throw ParameterException("TimeData::GetElapsedTimeReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(id));
+   }
+}
+
+
+//------------------------------------------------------------------------------
 // Real GetElapsedTimeReal(const std::string &str)
 //------------------------------------------------------------------------------
 /**
@@ -204,9 +270,9 @@ Real TimeData::GetCurrentTimeReal(const std::string &str)
 //------------------------------------------------------------------------------
 Real TimeData::GetElapsedTimeReal(const std::string &str)
 {
-   Real a1mjd = GetCurrentTimeReal("A1MJD");
-    
-   //loj: future build
+   //Real a1mjd = GetCurrentTimeReal("A1MJD");
+   Real a1mjd = GetCurrentTimeReal(GmatParam::A1MJD);
+
    //if (str == "Years")
    //if (str == "Months")
    if (str == "Days")
@@ -278,11 +344,14 @@ void TimeData::InitializeRefObjects()
 {
    mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
    if (mSpacecraft == NULL)
-      throw ParameterException("TimeData::InitializeRefObjects() Cannot find Spacecraft object");
+      throw ParameterException("TimeData::InitializeRefObjects() Cannot find "
+                               "Spacecraft object");
    else
       if (!mIsInitialEpochSet)
       {
-         mInitialEpoch = mSpacecraft->GetRealParameter("Epoch");
+         mEpochId = mSpacecraft->GetParameterID("Epoch");
+         //mInitialEpoch = mSpacecraft->GetRealParameter("Epoch");
+         mInitialEpoch = mSpacecraft->GetRealParameter(mEpochId);
          mIsInitialEpochSet = true;
          //MessageInterface::ShowMessage
          //   ("TimeData::InitializeRefObjects() set mInitialEpoch to %f\n", mInitialEpoch);
