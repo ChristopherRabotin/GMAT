@@ -1524,6 +1524,7 @@ GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
                   if (parmSystem == "")
                      parmSystem = "Earth";
                   parm->SetStringParameter("DepObject", parmSystem);
+                  parm->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
                   /// @todo Set a better CS choice when appropriate
                   if (parm->NeedCoordSystem())
                      parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, 
