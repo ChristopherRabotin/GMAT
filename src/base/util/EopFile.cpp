@@ -27,7 +27,13 @@
 #include "EopFile.hpp"
 #include "TimeTypes.hpp"
 #include "UtilityException.hpp"
+#include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
+
+//------------------------------------------------------------------------------
+// static data
+//------------------------------------------------------------------------------
+const Integer EopFile::MAX_TABLE_SIZE = 50405;  // up to year >= 2100
 
 //------------------------------------------------------------------------------
 // public methods
@@ -50,6 +56,9 @@ eopFileName     (fileName),
 tableSz         (0),
 polarMotion     (new Rmatrix(MAX_TABLE_SIZE,4)),
 ut1UtcOffsets   (new Rmatrix(MAX_TABLE_SIZE,2)),
+lastUtcMjd      (0.0),
+lastOffset      (0.0),
+lastIndex       (0),
 isInitialized   (false)
 {
 }
@@ -71,6 +80,9 @@ eopFileName     (eopF.eopFileName),
 tableSz         (eopF.tableSz),
 polarMotion     (new Rmatrix(*(eopF.polarMotion))),
 ut1UtcOffsets   (new Rmatrix(*(eopF.ut1UtcOffsets))),
+lastUtcMjd      (eopF.lastUtcMjd),
+lastOffset      (eopF.lastOffset),
+lastIndex       (eopF.lastIndex),
 isInitialized   (eopF.isInitialized)
 {
 }
@@ -97,6 +109,9 @@ const EopFile& EopFile::operator=(const EopFile &eopF)
    delete ut1UtcOffsets;
    polarMotion   = new Rmatrix(*(eopF.polarMotion));
    ut1UtcOffsets = new Rmatrix(*(eopF.ut1UtcOffsets));
+   lastUtcMjd    = eopF.lastUtcMjd;
+   lastOffset    = eopF.lastOffset;
+   lastIndex     = eopF.lastIndex;
    isInitialized = eopF.isInitialized;
    return *this;
 }
@@ -212,6 +227,11 @@ void EopFile::Initialize()
       throw UtilityException("Error In EopFile - file type unknown.");
    }
    if (eopFile.is_open())  eopFile.close();
+   // set the last value to the end of the file (since we search from back 
+   // to front)
+   lastUtcMjd = ut1UtcOffsets->GetElement((tableSz-1), 0);
+   lastOffset = ut1UtcOffsets->GetElement((tableSz-1), 1);
+   lastIndex  = tableSz - 1;
    isInitialized = true;
 }
 
@@ -248,58 +268,77 @@ Real EopFile::GetUt1UtcOffset(const Real utcMjd)
    
    if (!isInitialized)  Initialize();
    
-   Integer i = 0;
-   Real    utcJD = utcMjd + GmatTimeUtil::JD_NOV_17_1858;
-   const Real* data = ut1UtcOffsets->GetDataVector();
-   Integer col = ut1UtcOffsets->GetNumColumns();
+   if (lastUtcMjd == utcMjd) return lastOffset;
    
-   //MessageInterface::ShowMessage
-   //   ("===> after ut1UtcOffsets->GetData() tableSz=%d, row=%d, col=%d\n",
-   //    tableSz, row, col);
-   
-   for (i = (tableSz - 1); i >= 0; i--)
+   Integer         i = 0;
+   Real        utcJD = utcMjd + GmatTimeUtil::JD_NOV_17_1858;
+   const Real* data  = ut1UtcOffsets->GetDataVector();
+   Integer col     = ut1UtcOffsets->GetNumColumns();
+   Real    off     = 0.0;
+   /*
+   Integer row     = ut1UtcOffsets->GetNumRows();
+   MessageInterface::ShowMessage
+      ("===> after ut1UtcOffsets->GetData() tableSz=%d, row=%d, col=%d\n",
+       tableSz, row, col);
+   */
+   if (utcJD >= data[(tableSz - 1)*col])
    {
-      //MessageInterface::ShowMessage("===> data[data[i*col + 0]=%f\n",
-      //                              data[i*col + 0]);
-      if (utcJD >= data[i*col + 0])
+      off = data[((tableSz - 1) * col) + 1];
+      lastIndex = tableSz - 1;
+   }
+   else if (utcJD <= data[0])
+   {
+      off = data[1];
+      lastIndex = 0;
+   }
+   else
+   {
+      if (utcJD < lastUtcMjd)
       {
-         // if it's greater than the last entry in the table, then return the 
-         // last value
-         if (i == (tableSz -1))  return data[i*col + 1];
-         // otherwise, interpolate between values
-         Real diffJD  = data[(i+1)*col + 0] - 
-                        data[i*col + 0];
-         Real whereJD = utcJD - data[i*col + 0];
-         Real ratio   = whereJD / diffJD;
-         Real diffOff = data[(i+1)*col + 1] -
-                        data[i*col + 1];
-         Real off     = data[i*col + 1] + ratio * diffOff;
-         return off;
+         if (lastIndex > (tableSz-2)) i = tableSz - 2;
+         else                         i = lastIndex;
+         for (; i >=0; i--)
+         {
+            if (utcJD >= data[i*col]) 
+            {
+               Real diffJD  = data[(i+1)*col] - 
+                              data[i*col];
+               Real whereJD = utcJD - data[i*col];
+               Real ratio   = whereJD / diffJD;
+               Real diffOff = data[(i+1)*col + 1] -
+                              data[i*col + 1];
+               off          = data[i*col + 1] + ratio * diffOff;
+               lastIndex    = i;
+               break;
+            }
+         }
+      }
+      else
+      {
+         for (i = lastIndex; i <= tableSz-2; i++)
+         {
+            if ((utcJD >= data[i*col]) &&
+                (utcJD <  data[(i+1)*col]))
+            {
+               Real diffJD  = data[(i+1)*col] - 
+                              data[i*col];
+               Real whereJD = utcJD - data[i*col];
+               Real ratio   = whereJD / diffJD;
+               Real diffOff = data[(i+1)*col + 1] -
+                              data[i*col + 1];
+               off          = data[i*col + 1] + ratio * diffOff;
+               lastIndex    = i;
+               break;
+            }
+         }
       }
    }
-   
-//    for (i = (tableSz - 1); i >= 0; i--)
-//    {
-//       if (utcJD >= ut1UtcOffsets->GetElement(i,0))
-//       {
-//          // if it's greater than the last entry in the table, then return the 
-//          // last value
-//          if (i == (tableSz -1))  return ut1UtcOffsets->GetElement(i,1);
-//          // otherwise, interpolate between values
-//          Real diffJD  = ut1UtcOffsets->GetElement(i+1,0) - 
-//                         ut1UtcOffsets->GetElement(i,0);
-//          Real whereJD = utcJD - ut1UtcOffsets->GetElement(i,0);
-//          Real ratio   = whereJD / diffJD;
-//          Real diffOff = ut1UtcOffsets->GetElement(i+1,1) -
-//                         ut1UtcOffsets->GetElement(i,1);
-//          Real off     = ut1UtcOffsets->GetElement(i,1) + ratio * diffOff;
-//          return off;
-//       }
-//    }
-   
-   // if it's before the time on the file, return the first value
-   //return ut1UtcOffsets->GetElement(0,1);
-   return data[1];
+   lastUtcMjd = utcMjd;
+   lastOffset = off;
+   //MessageInterface::ShowMessage
+   //   ("===> after completion off=%d, lastUtcMjd=%d, lastOffset=%d\n",
+   //    off, lastUtcMjd, lastOffset);
+   return off;
 }
 
 //---------------------------------------------------------------------------

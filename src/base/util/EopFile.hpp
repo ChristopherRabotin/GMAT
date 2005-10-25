@@ -65,7 +65,7 @@ public:
   
 protected:
 
-   static const Integer MAX_TABLE_SIZE = 50405;  // up to year >= 2100
+   static const Integer MAX_TABLE_SIZE;
 
    GmatEop::EopFileType eopFType;
    std::string          eopFileName;
@@ -75,6 +75,10 @@ protected:
    Rmatrix*             polarMotion;
    /// vector of UT1-UTC offsets : MJD, offset
    Rmatrix*             ut1UtcOffsets;
+   
+   Real                 lastUtcMjd;
+   Real                 lastOffset;
+   Integer              lastIndex;
    
    bool isInitialized;
    
