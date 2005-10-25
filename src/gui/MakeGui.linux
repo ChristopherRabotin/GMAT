@@ -16,9 +16,10 @@ MATLAB_LIBRARIES = -leng -lmx -lut -lmat -lpthread \
 #DEBUG_FLAGS = -pg
 DEBUG_FLAGS = 
 
-LINK_FLAGS = `wx-config --libs --static=no` -lwx_gtk2_gl-2.6 -lg2c $(DEBUG_FLAGS)
+LINK_FLAGS = `wx-config --libs --static=no` -lwx_gtk2_gl-2.6 -lg2c \
+              $(DEBUG_FLAGS) \
+             -lIL -lILU -lILUT 
 #             -L/usr/local/matlab704/bin/glnx86 \
-#             -lIL -lILU -lILUT 
  
 STATIC_LINK_FLAGS = `wx-config --libs --static=yes` -lwx_gtk2_gl-2.6 -lg2c
 #             -L/usr/local/matlab704/bin/glnx86 \
@@ -86,7 +87,7 @@ HEADERS = -I../base/include \
 #           -I/usr/local/matlab704/extern/include 
 
 # Uncomment this section to build without Matlab
-CPPFLAGS = $(OPTIMIZATIONS) -Wall `wx-config --cppflags` -DSKIP_DEVIL $(DEBUG_FLAGS)
+CPPFLAGS = $(OPTIMIZATIONS) -Wall `wx-config --cppflags` $(DEBUG_FLAGS)
 
 
 export CPPFLAGS
