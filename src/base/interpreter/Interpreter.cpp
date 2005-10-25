@@ -938,8 +938,12 @@ bool Interpreter::AssembleCommand(const std::string& scriptline,
                   throw;
             }
          }
-         else {
-            throw InterpreterException("Cannot find object named " + *i);
+         else 
+         {
+            if (!cmd->SetRefObjectName(Gmat::UNKNOWN_OBJECT, *i))
+               throw InterpreterException("Cannot find object named " + *i +
+                  " for command '" + 
+                  cmd->GetGeneratingString(Gmat::SCRIPTING) + "'");
          }
       }
       else {
@@ -1063,7 +1067,9 @@ bool Interpreter::AssembleReportCommand(const StringArray topLevel,
                   " for command " + (cmd->GetTypeName()));
          }
          else 
-            throw InterpreterException("Cannot find object named " + *i);
+            throw InterpreterException("Cannot find object named " + *i +
+               " for Report command '" + 
+               cmd->GetGeneratingString(Gmat::SCRIPTING) + "'");
       }
       else 
       {
@@ -3385,8 +3391,10 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
               i != refParms.end(); ++i)
          {
             GmatBase *obj = moderator->GetConfiguredItem(*i);
-            if (obj != NULL)
+            if (obj != NULL) 
+            {
                cmd->SetRefObject(obj, obj->GetType(), obj->GetName());
+            }
          }
       }
 

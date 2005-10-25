@@ -312,8 +312,13 @@ bool Assignment::InterpretAction()
    component = lhs.substr(loc);
    if (component == "")
       throw CommandException("Assignment string does not identify parameter");
-   parmName = component;
-
+      
+   /// @todo A hack for variables -- needs testing!
+   if (ownerName != component)
+      parmName = component;
+   else
+      parmName = "";
+      
    // Strip off trailing white space, if any
    unsigned n = parmName.length() - 1;
    while ((parmName[n] == ' ') || (parmName[n] == '\t'))
@@ -528,8 +533,17 @@ bool Assignment::Execute()
          MessageInterface::ShowMessage("   Executing parameter setting\n");
       #endif
 
-      parmID    = parmOwner->GetParameterID(parmName);
-      parmType  = parmOwner->GetParameterType(parmID);
+      bool isVariable = false;
+      if (parmOwner->GetTypeName() == "Variable")
+      {
+         isVariable = true;
+         parmType = Gmat::REAL_TYPE;
+      }
+      else
+      {
+            parmID    = parmOwner->GetParameterID(parmName);
+            parmType  = parmOwner->GetParameterType(parmID);
+      }
 
       #ifdef DEBUG_PARM_ASSIGNMENT
          MessageInterface::ShowMessage("Assignment::Execute Parameter %s has "
@@ -550,7 +564,10 @@ bool Assignment::Execute()
                   parmOwner->GetParameterText(parmID).c_str(), 
                   parmOwner->GetName().c_str(), EvaluateRHS());
             #endif
-            parmOwner->SetRealParameter(parmID, EvaluateRHS());
+            if (isVariable)
+               ((Variable *)parmOwner)->SetReal(EvaluateRHS());
+            else
+               parmOwner->SetRealParameter(parmID, EvaluateRHS());
             retval = true;
             break;
                
