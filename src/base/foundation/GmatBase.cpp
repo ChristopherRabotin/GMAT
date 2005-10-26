@@ -239,12 +239,12 @@ Gmat::ObjectType GmatBase::GetType(void) const
  *
  * @return The string used in the scripting for this type of object.
  */
-std::string GmatBase::GetTypeName(void) const
+/*std::string GmatBase::GetTypeName(void) const
 {
    return typeName;
 }
 
-
+*/
 //---------------------------------------------------------------------------
 //  std::string GetName(void) const
 //---------------------------------------------------------------------------
@@ -255,10 +255,11 @@ std::string GmatBase::GetTypeName(void) const
  *
  * @note Some classes are unnamed.
  */
-std::string GmatBase::GetName(void) const
+/*std::string GmatBase::GetName(void) const
 {
    return instanceName;
 }
+*/
 
 //---------------------------------------------------------------------------
 //  bool SetName(std::string &who)
@@ -296,7 +297,7 @@ Integer GmatBase::GetParameterCount(void) const
 //  bool IsOfType(Gmat::ObjectType ofType)
 //---------------------------------------------------------------------------
 /**
- * Detects if the object is a specified type.
+* Detects if the object is a specified type.
  *
  * @param <ofType> The type that is being checked.
  *
@@ -305,34 +306,34 @@ Integer GmatBase::GetParameterCount(void) const
 //---------------------------------------------------------------------------
 bool GmatBase::IsOfType(Gmat::ObjectType ofType)
 {
-   #ifdef DEBUG_OBJECT_TYPE_CHECKING
-      MessageInterface::ShowMessage(
-         "Checking to see if %s is of type %d (Actual type is %d)\n",
-         instanceName.c_str(), ofType, type);
-   #endif
-
+#ifdef DEBUG_OBJECT_TYPE_CHECKING
+   MessageInterface::ShowMessage(
+                                 "Checking to see if %s is of type %d (Actual type is %d)\n",
+                                 instanceName.c_str(), ofType, type);
+#endif
+   
    if (std::find(objectTypes.begin(), objectTypes.end(), ofType) !=
-                                                             objectTypes.end())
+       objectTypes.end())
    {
-      #ifdef DEBUG_OBJECT_TYPE_CHECKING
-         MessageInterface::ShowMessage("   Object %s is the requested type\n",
-            instanceName.c_str());
-      #endif
+#ifdef DEBUG_OBJECT_TYPE_CHECKING
+      MessageInterface::ShowMessage("   Object %s is the requested type\n",
+                                    instanceName.c_str());
+#endif
       return true;
    }
    
-   #ifdef DEBUG_OBJECT_TYPE_CHECKING
-      MessageInterface::ShowMessage(
-         "   Not the requested type; current types are [");
-      for (std::vector<Gmat::ObjectType>::iterator i = objectTypes.begin();
-           i != objectTypes.end(); ++i)
-      {
-         if (i != objectTypes.begin())
-            MessageInterface::ShowMessage(", ");
-         MessageInterface::ShowMessage("%d", *i);
-      }
-      MessageInterface::ShowMessage("]\n");
-   #endif
+#ifdef DEBUG_OBJECT_TYPE_CHECKING
+   MessageInterface::ShowMessage(
+                                 "   Not the requested type; current types are [");
+   for (std::vector<Gmat::ObjectType>::iterator i = objectTypes.begin();
+        i != objectTypes.end(); ++i)
+   {
+      if (i != objectTypes.begin())
+         MessageInterface::ShowMessage(", ");
+      MessageInterface::ShowMessage("%d", *i);
+   }
+   MessageInterface::ShowMessage("]\n");
+#endif
    
    return false;
 }
@@ -342,7 +343,7 @@ bool GmatBase::IsOfType(Gmat::ObjectType ofType)
 //  bool IsOfType(std::string typeDescription)
 //---------------------------------------------------------------------------
 /**
- * Detects if the object is a specified type.
+* Detects if the object is a specified type.
  *
  * @param <typeDescription> The string describing the type.
  *
@@ -351,38 +352,37 @@ bool GmatBase::IsOfType(Gmat::ObjectType ofType)
 //---------------------------------------------------------------------------
 bool GmatBase::IsOfType(std::string typeDescription)
 {
-   #ifdef DEBUG_OBJECT_TYPE_CHECKING
-      MessageInterface::ShowMessage(
-         "Checking to see if %s is of type %s (Actual type is %s)\n",
-         instanceName.c_str(), typeDescription.c_str(), typeName.c_str());
-   #endif
+#ifdef DEBUG_OBJECT_TYPE_CHECKING
+   MessageInterface::ShowMessage(
+                                 "Checking to see if %s is of type %s (Actual type is %s)\n",
+                                 instanceName.c_str(), typeDescription.c_str(), typeName.c_str());
+#endif
    
    if (std::find(objectTypeNames.begin(), objectTypeNames.end(),
                  typeDescription) != objectTypeNames.end())
    {
-      #ifdef DEBUG_OBJECT_TYPE_CHECKING
-         MessageInterface::ShowMessage("   Object %s is the requested type\n",
-            instanceName.c_str());
-      #endif
+#ifdef DEBUG_OBJECT_TYPE_CHECKING
+      MessageInterface::ShowMessage("   Object %s is the requested type\n",
+                                    instanceName.c_str());
+#endif
       return true;
    }
-
-   #ifdef DEBUG_OBJECT_TYPE_CHECKING
-      MessageInterface::ShowMessage(
-         "   Not the requested type; current types are [");
-      for (StringArray::iterator i = objectTypeNames.begin();
-           i != objectTypeNames.end(); ++i)
-      {
-         if (i != objectTypeNames.begin())
-            MessageInterface::ShowMessage(", ");
-         MessageInterface::ShowMessage("%s", i->c_str());
-      }
-      MessageInterface::ShowMessage("]\n");
-   #endif
-
+   
+#ifdef DEBUG_OBJECT_TYPE_CHECKING
+   MessageInterface::ShowMessage(
+                                 "   Not the requested type; current types are [");
+   for (StringArray::iterator i = objectTypeNames.begin();
+        i != objectTypeNames.end(); ++i)
+   {
+      if (i != objectTypeNames.begin())
+         MessageInterface::ShowMessage(", ");
+      MessageInterface::ShowMessage("%s", i->c_str());
+   }
+   MessageInterface::ShowMessage("]\n");
+#endif
+   
    return false;
 }
-
 
 //---------------------------------------------------------------------------
 //  std::string GetRefObjectName(const Gmat::ObjectType type) const

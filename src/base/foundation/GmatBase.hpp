@@ -70,8 +70,8 @@ public:
    // Access methods called on the base class
    virtual Gmat::ObjectType
                        GetType() const;
-   std::string         GetTypeName() const;
-   std::string         GetName() const;
+   inline std::string         GetTypeName() const;
+   inline std::string         GetName() const;
    virtual bool        SetName(const std::string &who);
    virtual Integer     GetParameterCount() const;
 
@@ -332,6 +332,13 @@ protected:
 
 };
 
-
+std::string GmatBase::GetTypeName() const
+{
+   return typeName;
+}
+std::string GmatBase::GetName() const
+{
+   return instanceName;
+}
 #endif // GmatBase_hpp
 
