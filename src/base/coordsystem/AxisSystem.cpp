@@ -181,8 +181,8 @@ AxisSystem::~AxisSystem()
 //    for (Integer i = 0; i < 10; i++)
 //       delete apVals[i];
    
-   delete aVals;
-   delete apVals;
+   delete [] aVals;
+   delete [] apVals;
 }
 
 GmatCoordinate::ParameterUsage AxisSystem::UsesEopFile() const
