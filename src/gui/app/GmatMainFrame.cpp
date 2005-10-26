@@ -59,7 +59,7 @@
 #include "ParameterSetupPanel.hpp"
 #include "ArraySetupPanel.hpp"
 #include "IfPanel.hpp"
-#include "ForLoopPanel.hpp"
+#include "ForPanel.hpp"
 #include "WhilePanel.hpp"
 #include "DoWhilePanel.hpp"
 #include "GmatMdiChildFrame.hpp"
@@ -612,7 +612,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add(new ForLoopPanel(panel, item->GetCommand()), 0, wxGROW|wxALL, 0);
+         sizer->Add(new ForPanel(panel, item->GetCommand()), 0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::CALL_FUNCTION_COMMAND)
       {
