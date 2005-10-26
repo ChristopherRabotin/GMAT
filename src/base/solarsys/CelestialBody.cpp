@@ -1184,6 +1184,7 @@ bool CelestialBody::AddValidModelName(Gmat::ModelType m,
    // first, make sure it is not already on the list
    if (find(models[(Integer)m].begin(), models[(Integer)m].end(), newModel) == models[(Integer)m].end())
       models[(Integer)m].push_back(newModel);
+   // @todo modify it so it adds it before an 'Other' in the list
    
    return true;
    
