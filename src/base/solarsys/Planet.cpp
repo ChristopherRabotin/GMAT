@@ -672,7 +672,18 @@ void Planet::InitializePlanet(const std::string &cBody)
       errMsg            +=  "potential file or physical parameter values\n";
       MessageInterface::ShowMessage(errMsg);
    }
-   if (bodyIndex == EARTH)
+   if (bodyIndex == MERCURY)
+   {
+      models[Gmat::GRAVITY_FIELD].push_back("mercury2x0");
+      models[Gmat::GRAVITY_FIELD].push_back("Other");
+   }
+   else if (bodyIndex == VENUS)
+   {
+      models[Gmat::GRAVITY_FIELD].push_back("mgn75hsaap");
+      models[Gmat::GRAVITY_FIELD].push_back("shg120");
+      models[Gmat::GRAVITY_FIELD].push_back("Other");
+   }
+   else if (bodyIndex == EARTH)
    {
       models[Gmat::ATMOSPHERE_MODEL].push_back("Exponential");
       models[Gmat::ATMOSPHERE_MODEL].push_back("MSISE90");
@@ -690,7 +701,31 @@ void Planet::InitializePlanet(const std::string &cBody)
       models[Gmat::GRAVITY_FIELD].push_back("GMM-1");
       models[Gmat::GRAVITY_FIELD].push_back("Other");
    }
-      
+   else if (bodyIndex == JUPITER)
+   {
+      models[Gmat::GRAVITY_FIELD].push_back("jupiter6x2");
+      models[Gmat::GRAVITY_FIELD].push_back("Other");
+   }
+   else if (bodyIndex == SATURN)
+   {
+      models[Gmat::GRAVITY_FIELD].push_back("saturn8x0");
+      models[Gmat::GRAVITY_FIELD].push_back("Other");
+   }
+   else if (bodyIndex == URANUS)
+   {
+      models[Gmat::GRAVITY_FIELD].push_back("uranus4x0");
+      models[Gmat::GRAVITY_FIELD].push_back("Other");
+   }
+   else if (bodyIndex == NEPTUNE)
+   {
+      models[Gmat::GRAVITY_FIELD].push_back("neptune4x0");
+      models[Gmat::GRAVITY_FIELD].push_back("Other");
+   }
+   else if (bodyIndex == PLUTO)
+   {
+      models[Gmat::GRAVITY_FIELD].push_back("Other");
+   }
+   
    
    mu                  = Planet::MU[bodyIndex];
    mass                = mu / 
