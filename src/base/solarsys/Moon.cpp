@@ -356,7 +356,32 @@ void Moon::InitializeMoon(const std::string &cBody)
       models[Gmat::GRAVITY_FIELD].push_back("LP100");
       models[Gmat::GRAVITY_FIELD].push_back("Other");
    }
-
+   else if (instanceName == SolarSystem::AMALTHEA_NAME)
+   {
+      models[Gmat::GRAVITY_FIELD].push_back("amalthea6x6");
+      models[Gmat::GRAVITY_FIELD].push_back("Other");
+   }
+   else if (instanceName == SolarSystem::CALLISTO_NAME)
+   {
+      models[Gmat::GRAVITY_FIELD].push_back("callisto2x2");
+      models[Gmat::GRAVITY_FIELD].push_back("Other");
+   }
+   else if (instanceName == SolarSystem::EUROPA_NAME)
+   {
+      models[Gmat::GRAVITY_FIELD].push_back("europa2x2");
+      models[Gmat::GRAVITY_FIELD].push_back("Other");
+   }
+   else if (instanceName == SolarSystem::GANYMEDE_NAME)
+   {
+      models[Gmat::GRAVITY_FIELD].push_back("ganymede2x2");
+      models[Gmat::GRAVITY_FIELD].push_back("Other");
+   }
+   else if (instanceName == SolarSystem::IO_NAME)
+   {
+      models[Gmat::GRAVITY_FIELD].push_back("io2x2");
+      models[Gmat::GRAVITY_FIELD].push_back("Other");
+   }
+   
    // NEED values for other moons in here!!!!
    // And how do I get position and velocity for the other moons?
    
