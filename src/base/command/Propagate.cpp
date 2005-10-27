@@ -591,6 +591,11 @@ bool Propagate::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                      "Propagate::SetRefObject() stopSatNames=%s\n",
                      stopSatNames[j].c_str());
             #endif
+            
+            stopCondEpochID = obj->GetParameterID("Epoch");
+            stopCondBaseEpochID = obj->GetParameterID("BaseEpoch");
+            stopCondStopVarID = obj->GetParameterID("StopVar");
+            
             return true;
          }
          
