@@ -49,6 +49,16 @@ const Gmat::ParameterType
       Gmat::STRING_TYPE
    };
 
+Integer GmatCommand::satEpochID = -1;
+Integer GmatCommand::satCdID;
+Integer GmatCommand::satDragAreaID;
+Integer GmatCommand::satCrID;
+Integer GmatCommand::satSRPAreaID;
+Integer GmatCommand::satTankID;
+Integer GmatCommand::satThrusterID;
+Integer GmatCommand::satDryMassID;
+Integer GmatCommand::satTotalMassID;
+
 
 //---------------------------------
 //  public methods
@@ -73,7 +83,11 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    depthChange          (0),
    commandChangedState  (false),
    comment              (""),
-   commandChanged       (false)
+   commandChanged       (false),
+   epochData            (NULL),
+   stateData            (NULL),
+   parmData             (NULL)
+
 {
    generatingString = "";
    parameterCount = GmatCommandParamCount;
@@ -151,7 +165,10 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    depthChange          (c.depthChange),
    commandChangedState  (c.commandChangedState),
    comment              (c.comment),
-   commandChanged       (c.commandChanged)
+   commandChanged       (c.commandChanged),
+   epochData            (NULL),
+   stateData            (NULL),
+   parmData             (NULL)
 {
    generatingString = c.generatingString;
    parameterCount = GmatCommandParamCount;
@@ -579,6 +596,8 @@ std::string GmatCommand::GetStringParameter(const Integer id) const
          
    if (id == SUMMARY)
    {
+      // This call is not const, so need to break const-ness here:
+      ((GmatCommand*)this)->BuildCommandSummaryString();
       return commandSummary;
    }
          
@@ -1163,7 +1182,7 @@ void GmatCommand::RunComplete()
 //  void BuildCommandSummary(bool commandCompleted)
 //------------------------------------------------------------------------------
 /**
- * Generates the summary string for the command
+ * Stores the data used for the summary string for the command
  *
  * Inherited commands override this method for specialized summary data.
  * 
@@ -1172,10 +1191,75 @@ void GmatCommand::RunComplete()
 //------------------------------------------------------------------------------
 void GmatCommand::BuildCommandSummary(bool commandCompleted)
 {
+   if (epochData == NULL)
+   {
+      satsInSandbox = 0;
+      if (objectMap != NULL)
+      {
+         // Build summary data for each spacecraft in the object list
+         GmatBase *obj;
+         for (std::map<std::string, GmatBase *>::iterator i = objectMap->begin();
+              i != objectMap->end(); ++i)
+         {
+            obj = i->second;
+            if (obj->GetTypeName() == "Spacecraft")
+            {
+               satVector.push_back((SpaceObject*)obj);
+               if (satEpochID == -1)
+               {
+                  satEpochID = obj->GetParameterID("Epoch");
+                  satCdID = obj->GetParameterID("Cd");
+                  satDragAreaID = obj->GetParameterID("DragArea");
+                  satCrID = obj->GetParameterID("Cr");
+                  satSRPAreaID = obj->GetParameterID("SRPArea");
+                  satTankID = obj->GetParameterID("Tanks");
+                  satThrusterID = obj->GetParameterID("Thrusters");
+                  satDryMassID = obj->GetParameterID("DryMass");
+                  satTotalMassID = obj->GetParameterID("TotalMass");
+               }
+
+               ++satsInSandbox;
+            }
+         }
+         epochData = new Real[satsInSandbox];
+         stateData = new Real[6*satsInSandbox];
+         parmData = new Real[6*satsInSandbox];
+      }
+   }
+
+   Integer i6;
+   for (Integer i = 0; i < satsInSandbox; ++i)
+   {
+      i6 = i * 6;
+      epochData[i] = satVector[i]->GetRealParameter(satEpochID);
+      memcpy(&stateData[i6], satVector[i]->GetState().GetState(), 6*sizeof(Real));
+      parmData[i6] = satVector[i]->GetRealParameter(satCdID);
+      parmData[i6+1] = satVector[i]->GetRealParameter(satDragAreaID);
+      parmData[i6+2] = satVector[i]->GetRealParameter(satCrID);
+      parmData[i6+3] = satVector[i]->GetRealParameter(satSRPAreaID);
+      parmData[i6+4] = satVector[i]->GetRealParameter(satDryMassID);
+      parmData[i6+5] = satVector[i]->GetRealParameter(satTotalMassID);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+//  void BuildCommandSummaryString(bool commandCompleted)
+//------------------------------------------------------------------------------
+/**
+ * Generates the summary string for the command from the buffered data.
+ *
+ * Inherited commands override this method for specialized summary data.
+ *
+ * @param <commandCompleted> True if the command ran successfully.
+ */
+//------------------------------------------------------------------------------
+void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
+{
    std::stringstream data;
    StateConverter    stateConverter;
-   
-   if (objectMap == NULL)
+
+   if ((objectMap == NULL) || (satVector.size() == 0))
    {
       data << "Command Summary: " << typeName << " Command\n"
            << "Execute the script to generate command summary data\n";
@@ -1190,69 +1274,67 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
          data << "-------------------------------------------"
               << "-------------------------------------------\n";
    
-         // Build summary data for each spacecraft in the object list
          GmatBase *obj;
-         for (std::map<std::string, GmatBase *>::iterator i = objectMap->begin();
-              i != objectMap->end(); ++i)
+         // Build summary data for each spacecraft in the object list
+         for (Integer i = 0; i < satsInSandbox; ++i)
          {
-            obj = i->second;
-            if (obj->GetTypeName() == "Spacecraft")
-            {
-               Rvector6 rawState = ((Spacecraft*)obj)->GetState().GetState();
-               Rvector6 newState = rawState;
+            obj = satVector[i];
+
+            Rvector6 rawState = &stateData[i*6];
+            Rvector6 newState = rawState;
                                    
-               data.precision(16);                 
-               data << "  Spacecraft " << obj->GetName() << "\n"
-                    << "     A.1 Modified Julian Epoch: " 
-                    << obj->GetRealParameter("Epoch") << "\n\n"
-                    << "    Coordinate System: EarthMJ2000Eq \n\n"
-                    << "    Cartesian State:\n"
-                    << "        X  = " << newState[0] << " km\n"
-                    << "        Y  = " << newState[1] << " km\n"
-                    << "        Z  = " << newState[2] << " km\n"
-                    << "        VX = " << newState[3] << " km/s\n"
-                    << "        VY = " << newState[4] << " km/s\n"
-                    << "        VZ = " << newState[5] << " km/s\n";
+            data.precision(16);
+            data << "  Spacecraft " << obj->GetName() << "\n"
+                 << "     A.1 Modified Julian Epoch: "
+                 << epochData[i] << "\n\n"
+                 << "    Coordinate System: EarthMJ2000Eq \n\n"
+                 << "    Cartesian State:\n"
+                 << "        X  = " << newState[0] << " km\n"
+                 << "        Y  = " << newState[1] << " km\n"
+                 << "        Z  = " << newState[2] << " km\n"
+                 << "        VX = " << newState[3] << " km/s\n"
+                 << "        VY = " << newState[4] << " km/s\n"
+                 << "        VZ = " << newState[5] << " km/s\n";
    
-               //obj->SetStringParameter("StateType", "Keplerian");
+            //obj->SetStringParameter("StateType", "Keplerian");
                
-               CartToKep(rawState, newState);
-                                
-               data << "\n    Keplerian State:\n"
-                    << "        SMA  = " << newState[0] << " km\n"
-                    << "        ECC  = " << newState[1] << "\n"
-                    << "        INC  = " << newState[2] << " deg\n"
-                    << "        RAAN = " << newState[3] << " deg\n"
-                    << "        AOP  = " << newState[4] << " deg\n"
-                    << "        TA   = " << newState[5] << " deg\n";
-                    
-               data << "\n\n    Spacecraft properties:\n"
-                    << "        Cd = " 
-                    << obj->GetRealParameter("Cd") << "\n"
-                    << "        Drag area = " 
-                    << obj->GetRealParameter("DragArea") << " m^2\n"
-                    << "        Cr = " 
-                    << obj->GetRealParameter("Cr") << "\n"
-                    << "        Reflective (SRP) area = " 
-                    << obj->GetRealParameter("SRPArea") << " m^2\n";
-                    
-               StringArray tanks = obj->GetStringArrayParameter("Tanks");
-               if (tanks.size() > 0)
-               {
-                  data << "        Dry mass = "
-                       << obj->GetRealParameter("DryMass") << " kg\n";
-                  data << "        Tanks:\n";
-                  for (StringArray::iterator i = tanks.begin();
-                       i != tanks.end(); ++i)
-                     data << "           " << (*i) << "\n";
-               }
-                    
-               data << "        Total mass = " 
-                    << obj->GetRealParameter("TotalMass") << " kg\n";
-   
-               data << "-------------------------------------------"
-                    << "-------------------------------------------\n";
+            CartToKep(rawState, newState);
+
+            data << "\n    Keplerian State:\n"
+                 << "        SMA  = " << newState[0] << " km\n"
+                 << "        ECC  = " << newState[1] << "\n"
+                 << "        INC  = " << newState[2] << " deg\n"
+                 << "        RAAN = " << newState[3] << " deg\n"
+                 << "        AOP  = " << newState[4] << " deg\n"
+                 << "        TA   = " << newState[5] << " deg\n";
+
+            data << "\n\n    Spacecraft properties:\n"
+                 << "        Cd = " 
+                 << parmData[i*6] << "\n"
+                 << "        Drag area = " 
+                 << parmData[i*6+1] << " m^2\n"
+                 << "        Cr = " 
+                 << parmData[i*6+2] << "\n"
+                 << "        Reflective (SRP) area = " 
+                 << parmData[i*6+3] << " m^2\n";
+                 
+            data << "        Dry mass = "
+                 << parmData[i*6+4] << " kg\n";
+
+            StringArray tanks = obj->GetStringArrayParameter(satTankID);
+            if (tanks.size() > 0)
+            {
+               data << "        Tanks:\n";
+               for (StringArray::iterator i = tanks.begin();
+                    i != tanks.end(); ++i)
+                  data << "           " << (*i) << "\n";
             }
+                 
+            data << "        Total mass = " 
+                 << parmData[i*6+5] << " kg\n";
+
+            data << "-------------------------------------------"
+                 << "-------------------------------------------\n";
          }
       }
    }

@@ -33,6 +33,7 @@
 #include "SolarSystem.hpp"   // for SolarSystem
 #include "Publisher.hpp"     // For the Publisher and ...
 #include "Subscriber.hpp"    // ... base of the Subscribers
+#include "SpaceObject.hpp"   // for SpaceObjects
 
 // Forward reference for the transient force vector
 class PhysicalModel;
@@ -210,7 +211,27 @@ protected:
    virtual bool         AssignObjects();
    virtual bool         ClearObjects();
    virtual void         BuildCommandSummary(bool commandCompleted = true);
+   virtual void         BuildCommandSummaryString(bool commandCompleted = true);
    
+   // IDs used to buffer the command summary data
+   static Integer       satEpochID;
+   static Integer       satCdID;
+   static Integer       satDragAreaID;
+   static Integer       satCrID;
+   static Integer       satSRPAreaID;
+   static Integer       satTankID;
+   static Integer       satThrusterID;
+   static Integer       satDryMassID;
+   static Integer       satTotalMassID;
+   
+   // Command summary data buffers
+   Real                 *epochData;
+   Real                 *stateData;
+   Real                 *parmData;
+   std::vector <SpaceObject*>
+                        satVector;
+   Integer              satsInSandbox;
+
    // Temporary -- replace when convenient
    void CartToKep(const Rvector6 in, Rvector6 &out);
 };

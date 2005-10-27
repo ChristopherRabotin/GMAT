@@ -161,7 +161,7 @@ bool StopCondition::Evaluate()
             throw StopConditionException
                ("StopCondition::Evaluate()::Unknown stop time param type:" +
                 stopParamType + "\n");
-         
+
          goalMet = true;
       }
    }

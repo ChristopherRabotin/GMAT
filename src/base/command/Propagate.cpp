@@ -67,6 +67,9 @@ Propagate::Propagate() :
    dim                         (0),
    singleStepMode              (false),
    currentMode                 (INDEPENDENT),
+   stopCondEpochID             (-1),
+   stopCondBaseEpochID         (-1),
+   stopCondStopVarID           (-1),
    // Set the parameter IDs
    availablePropModesID        (parameterCount),
    propCoupledID               (parameterCount+1),
@@ -120,6 +123,9 @@ Propagate::Propagate(const Propagate &p) :
    dim                         (p.dim),
    singleStepMode              (p.singleStepMode),
    currentMode                 (p.currentMode),
+   stopCondEpochID             (p.stopCondEpochID),
+   stopCondBaseEpochID         (p.stopCondBaseEpochID),
+   stopCondStopVarID           (p.stopCondStopVarID),
    // Set the parameter IDs
    availablePropModesID        (p.availablePropModesID),
    propCoupledID               (p.propCoupledID),
@@ -233,6 +239,9 @@ bool Propagate::SetObject(GmatBase *obj, const Gmat::ObjectType type)
    {
    case Gmat::STOP_CONDITION:
       stopWhen.push_back((StopCondition *)obj);
+      stopCondEpochID = obj->GetParameterID("Epoch");
+      stopCondBaseEpochID = obj->GetParameterID("BaseEpoch");
+      stopCondStopVarID = obj->GetParameterID("StopVar");
       return true;
             
    default:
@@ -368,7 +377,7 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
 
          std::stringstream stopCondDesc;
 
-         std::string stopName = stopWhen[index]->GetStringParameter("StopVar");
+         std::string stopName = stopWhen[index]->GetStringParameter(stopCondStopVarID);
          stopCondDesc << stopName;
 
          if ((stopName.find("Periapsis") == std::string::npos) &&
@@ -1345,11 +1354,18 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          StopCondition *stopCond =
             theModerator->CreateStopCondition("StopCondition", "StopOn" +
                              paramName);
-         
+
+         if (stopCondEpochID == -1)
+         {
+            stopCondEpochID = stopCond->GetParameterID("Epoch");
+            stopCondBaseEpochID = stopCond->GetParameterID("BaseEpoch");
+            stopCondStopVarID = stopCond->GetParameterID("StopVar");
+         }
+
          // Set backwards propagation
          stopCond->SetPropDirection(direction[dirIndex]);
          
-         stopCond->SetStringParameter("StopVar", paramName);
+         stopCond->SetStringParameter(stopCondStopVarID, paramName);
          
          SetObject(stopCond, Gmat::STOP_CONDITION);
          // Store the spacecraft name for use when setting the epoch data
@@ -1586,7 +1602,8 @@ bool Propagate::Initialize()
    std::string pName;
    Real dir;
 
-   for (StringArray::iterator i = propName.begin(); i != propName.end(); ++i) {
+   for (StringArray::iterator i = propName.begin(); i != propName.end(); ++i)
+   {
       if (satName.size() <= index)
          throw CommandException("Size mismatch for SpaceObject names\n");
          
@@ -1834,7 +1851,7 @@ void Propagate::PrepareToPropagate()
    
    if (hasFired == true) 
    {
-      for (Integer n = 0; n < (Integer)prop.size(); ++n) 
+      for (Integer n = 0; n < (Integer)prop.size(); ++n)
       {
          elapsedTime[n] = 0.0;
          currEpoch[n]   = 0.0;
@@ -1922,10 +1939,10 @@ void Propagate::PrepareToPropagate()
             stopEpochBase = stopSats[i]->GetRealParameter(epochID);
             
             // StopCondition need new base epoch
-            stopWhen[i]->SetRealParameter("BaseEpoch", stopEpochBase);
+            stopWhen[i]->SetRealParameter(stopCondBaseEpochID, stopEpochBase);
       
             // ElapsedTime parameters need new initial epoch
-            stopVar = stopWhen[i]->GetStringParameter("StopVar");
+            stopVar = stopWhen[i]->GetStringParameter(stopCondStopVarID);
             if (stopVar.find("Elapsed") != stopVar.npos)
             {
                stopWhen[i]->GetStopParameter()->
@@ -2050,10 +2067,10 @@ void Propagate::PrepareToPropagate()
          stopEpochBase = stopSats[i]->GetRealParameter(epochID);
          
          // StopCondition need new base epoch
-         stopWhen[i]->SetRealParameter("BaseEpoch", stopEpochBase);
+         stopWhen[i]->SetRealParameter(stopCondBaseEpochID, stopEpochBase);
    
          // ElapsedTime parameters need new initial epoch
-         stopVar = stopWhen[i]->GetStringParameter("StopVar");
+         stopVar = stopWhen[i]->GetStringParameter(stopCondStopVarID);
          if (stopVar.find("Elapsed") != stopVar.npos)
          {
             stopWhen[i]->GetStopParameter()->
@@ -2099,7 +2116,7 @@ void Propagate::CheckStopConditions(Integer epochID)
       for (UnsignedInt i=0; i<stopWhen.size(); i++)
       {
          // StopCondition need epoch for the Interpolator
-         stopWhen[i]->SetRealParameter("Epoch", 
+         stopWhen[i]->SetRealParameter(stopCondEpochID,
             stopSats[i]->GetRealParameter(epochID));
          
          #ifdef DEBUG_STOPPING_CONDITIONS

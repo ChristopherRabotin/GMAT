@@ -758,7 +758,7 @@ ObjectArray& Spacecraft::GetRefObjectArray(const std::string& typeString)
 Integer Spacecraft::GetParameterID(const std::string &str) const
 {
    #ifdef DEBUG_PARM_PERFORMANCE
-      MessageInterface::ShowMessage("%s ", str.c_str());
+      MessageInterface::ShowMessage("Spacecraft::GetParameterID(%s)\n", str.c_str());
    #endif
 
 //    if (str == "Epoch") return epochID;

@@ -188,6 +188,14 @@ protected:
    /// Variable that tracks the current propagation mode
    PropModes               currentMode;
    
+   // Stopping condition paramter IDs
+   /// Epoch on the stopping condition
+   Integer                 stopCondEpochID;
+   /// Epoch on the stopping condition
+   Integer                 stopCondBaseEpochID;
+   /// Epoch on the stopping condition
+   Integer                 stopCondStopVarID;
+
    // For convenience, set variables for the parameter IDs
    /// @todo Replace these ID's with the newer ID setting scheme
    
