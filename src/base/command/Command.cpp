@@ -87,7 +87,6 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    epochData            (NULL),
    stateData            (NULL),
    parmData             (NULL)
-
 {
    generatingString = "";
    parameterCount = GmatCommandParamCount;
@@ -135,6 +134,14 @@ GmatCommand::~GmatCommand()
       #endif
       delete next;   
    }
+
+   // Clean up the summary buffers
+   if (epochData)
+      delete [] epochData;
+   if (stateData)
+      delete [] stateData;
+   if (parmData)
+      delete [] parmData;
 }
 
 
