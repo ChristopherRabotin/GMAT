@@ -2270,7 +2270,8 @@ void Spacecraft::DefineDefaultSpacecraft()
 void Spacecraft::InitializeDataMethod(const Spacecraft &s)
 {
    #if DEBUG_SPACECRAFT_INIT
-   MessageInterface::ShowMessage("Spacecraft::InitializeDataMethod() entered\n");
+	   MessageInterface::ShowMessage(
+	      "Spacecraft::InitializeDataMethod() entered\n");
    #endif
    
    // Duplicate the member data
@@ -2369,8 +2370,6 @@ const std::string& Spacecraft::GetGeneratingString(Gmat::WriteMode mode,
    WriteParameters(mode, preface, data);
    
    generatingString = data.str();
-   
-MessageInterface::ShowMessage("\nSpacecraftGenString:\n\n%s\n\n", generatingString.c_str());
    
    return generatingString;
 }

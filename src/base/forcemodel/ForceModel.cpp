@@ -677,7 +677,9 @@ bool ForceModel::Initialize()
    std::vector<SpaceObject *>::iterator sat;
 
    if (!solarSystem)
-      throw ForceModelException("Cannot initialize force model; no solar system");
+      throw ForceModelException(
+         "Cannot initialize force model; no solar system on '" + 
+         instanceName + "'");
 
    j2kBody = solarSystem->GetBody(j2kBodyName);
    if (j2kBody == NULL) 
@@ -1490,6 +1492,10 @@ const StringArray&
 void ForceModel::SetSolarSystem(SolarSystem *ss)
 {
    PhysicalModel::SetSolarSystem(ss);
+
+   if (ss == NULL)
+      MessageInterface::ShowMessage("Setting NULL solar system on %s\n", 
+         instanceName.c_str());
    
    if (solarSystem != NULL)
    {

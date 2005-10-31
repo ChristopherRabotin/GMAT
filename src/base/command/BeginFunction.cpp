@@ -17,13 +17,16 @@
  * commands in a GMAT function.
  */
 //------------------------------------------------------------------------------
- 
+
 
 #include "BeginFunction.hpp"
 #include "MessageInterface.hpp"
+#include "BaseStopCondition.hpp"
+#include "ForceModel.hpp"
+#include "PropSetup.hpp"
 
 
-const std::string 
+const std::string
 BeginFunction::PARAMETER_TEXT[BeginFunctionParamCount - GmatCommandParamCount] =
 {
    "FunctionName",
@@ -33,7 +36,8 @@ BeginFunction::PARAMETER_TEXT[BeginFunctionParamCount - GmatCommandParamCount] =
    "CallFunctionOutput"
 };
 
-const Gmat::ParameterType 
+
+const Gmat::ParameterType
 BeginFunction::PARAMETER_TYPE[BeginFunctionParamCount - GmatCommandParamCount] =
 {
    Gmat::STRING_TYPE,
@@ -45,13 +49,16 @@ BeginFunction::PARAMETER_TYPE[BeginFunctionParamCount - GmatCommandParamCount] =
 
 
 
+
 BeginFunction::BeginFunction() :
    GmatCommand          ("BeginFunction"),
    functionName         (""),
    gfun                 (NULL),
-   transientForces      (NULL)
+   transientForces      (NULL),
+   internalCoordSys     (NULL)
 {
 }
+
 
 
 BeginFunction::~BeginFunction()
@@ -60,13 +67,16 @@ BeginFunction::~BeginFunction()
 }
 
 
+
 BeginFunction::BeginFunction(const BeginFunction& bf) :
    GmatCommand          (bf),
    functionName         (bf.functionName),
    gfun                 (NULL),
-   transientForces      (NULL)
+   transientForces      (NULL),
+   internalCoordSys     (NULL)
 {
 }
+
 
 
 BeginFunction& BeginFunction::operator=(const BeginFunction& bf)
@@ -76,15 +86,38 @@ BeginFunction& BeginFunction::operator=(const BeginFunction& bf)
       functionName = bf.functionName;
       transientForces = bf.transientForces;
    }
-   
+
    return *this;
 }
- 
-   
+
+
 GmatBase* BeginFunction::Clone() const
 {
    return new BeginFunction(*this);
 }
+
+
+GmatBase* BeginFunction::GetRefObject(const Gmat::ObjectType type,
+                                    const std::string &name)
+{
+   if (type == Gmat::UNKNOWN_OBJECT)  // Just find it by name
+   {
+      /// @todo Look up return object based on the name used in function call
+         for (unsigned int i=0; i<outputObjects.size(); i++)
+         {
+            if (outputObjects[i] == name)
+            {
+//               MessageInterface::ShowMessage("\nFound output object %s in position %d.  Return Object size is %d\n",
+//                  name.c_str(), i, returnObjects.size());
+               return returnObjects[i];
+            }
+         }
+   }
+
+
+   return GmatCommand::GetRefObject(type, name);
+}
+
 
 // Function used to put objects in the local onject map
 bool BeginFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
@@ -102,10 +135,9 @@ bool BeginFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          "Attempted to add the object %s which is already in the "
          "GmatFunction %s\n", name.c_str(), functionName.c_str());
    }
-   
+
    return retval;
 }
-
 
 bool BeginFunction::RenameRefObject(const Gmat::ObjectType type,
                                     const std::string &oldName,
@@ -115,14 +147,15 @@ bool BeginFunction::RenameRefObject(const Gmat::ObjectType type,
 }
 
 
+
 //------------------------------------------------------------------------------
 //  std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 /**
  * Gets the name of the parameter with the input id.
- * 
+ *
  * @param <id> Integer id for the parameter.
- * 
+ *
  * @return The string name of the parameter.
  */
 //------------------------------------------------------------------------------
@@ -134,14 +167,15 @@ std::string BeginFunction::GetParameterText(const Integer id) const
 }
 
 
+
 //------------------------------------------------------------------------------
 //  Integer GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 /**
  * Gets the id corresponding to a named parameter.
- * 
+ *
  * @param <str> Name of the parameter.
- * 
+ *
  * @return The ID.
  */
 //------------------------------------------------------------------------------
@@ -150,9 +184,10 @@ Integer BeginFunction::GetParameterID(const std::string &str) const
    for (int i = 0; i < BeginFunctionParamCount - GmatCommandParamCount; ++i)
       if (PARAMETER_TEXT[i] == str)
          return i+GmatCommandParamCount;
-         
+
    return GmatCommand::GetParameterID(str);
 }
+
 
 
 //------------------------------------------------------------------------------
@@ -160,9 +195,9 @@ Integer BeginFunction::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 /**
  * Gets the type of a parameter.
- * 
+ *
  * @param <id> Integer ID of the parameter.
- * 
+ *
  * @return The type of the parameter.
  */
 //------------------------------------------------------------------------------
@@ -174,14 +209,15 @@ Gmat::ParameterType BeginFunction::GetParameterType(const Integer id) const
 }
 
 
+
 //------------------------------------------------------------------------------
 //  std::string GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 /**
  * Gets the text description for the type of a parameter.
- * 
+ *
  * @param <id> Integer ID of the parameter.
- * 
+ *
  * @return The text description of the type of the parameter.
  */
 //------------------------------------------------------------------------------
@@ -189,6 +225,7 @@ std::string BeginFunction::GetParameterTypeString(const Integer id) const
 {
    return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
+
 
 
 //---------------------------------------------------------------------------
@@ -211,6 +248,7 @@ bool BeginFunction::IsParameterReadOnly(const Integer id) const
 }
 
 
+
 //---------------------------------------------------------------------------
 //  bool IsParameterReadOnly(const std::string &label) const
 //---------------------------------------------------------------------------
@@ -229,14 +267,15 @@ bool BeginFunction::IsParameterReadOnly(const std::string &label) const
 }
 
 
+
 //------------------------------------------------------------------------------
 //  std::string GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
  * Gets the value for a std::string parameter.
- * 
+ *
  * @param <id> Integer ID of the parameter.
- * 
+ *
  * @return The value of the parameter.
  */
 //------------------------------------------------------------------------------
@@ -246,9 +285,10 @@ std::string BeginFunction::GetStringParameter(const Integer id) const
    {
       return functionName;
    }
-   
+
    return GmatCommand::GetStringParameter(id);
 }
+
 
 
 //------------------------------------------------------------------------------
@@ -256,18 +296,19 @@ std::string BeginFunction::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
  * Gets the value for a std::string parameter.
- * 
+ *
  * @param <id>    Integer ID of the parameter.
  * @param <index> Index for array parameter values.
- * 
+ *
  * @return The value of the parameter.
  */
 //------------------------------------------------------------------------------
-std::string BeginFunction::GetStringParameter(const Integer id, 
+std::string BeginFunction::GetStringParameter(const Integer id,
                                               const Integer index) const
 {
    return GmatCommand::GetStringParameter(id, index);
 }
+
 
 
 //------------------------------------------------------------------------------
@@ -275,34 +316,35 @@ std::string BeginFunction::GetStringParameter(const Integer id,
 //------------------------------------------------------------------------------
 /**
  * Gets an array do std::strings.
- * 
+ *
  * @param <id> Integer ID of the array.
- * 
+ *
  * @return A reference to the array.
  */
 //------------------------------------------------------------------------------
 const StringArray& BeginFunction::GetStringArrayParameter(const Integer id) const
 {
    switch (id)
-   {      
+   {
       case INPUTS:
          return inputs;
-      
+
       case OUTPUTS:
          return outputs;
-      
+
       case INPUT_OBJECT_NAMES:
          return inputObjects;
-      
+
       case OUTPUT_OBJECT_NAMES:
          return outputObjects;
-      
+
       default:
          ;     // Do nothing if it isn't a BeginFunction parameter
    }
-   
+
    return GmatCommand::GetStringArrayParameter(id);
 }
+
 
 
 //------------------------------------------------------------------------------
@@ -310,18 +352,18 @@ const StringArray& BeginFunction::GetStringArrayParameter(const Integer id) cons
 //------------------------------------------------------------------------------
 /**
  * Sets the value for a std::string parameter.
- * 
+ *
  * @param <id>    Integer ID of the parameter.
  * @param <value> New value for the parameter.
- * 
+ *
  * @return The value of the parameter.
  */
 //------------------------------------------------------------------------------
-bool BeginFunction::SetStringParameter(const Integer id, 
+bool BeginFunction::SetStringParameter(const Integer id,
                                        const std::string &value)
 {
    bool retval = false;
-   
+
    switch (id)
    {
       case FUNCTION_NAME:
@@ -331,76 +373,78 @@ bool BeginFunction::SetStringParameter(const Integer id,
             retval = true;
          }
          break;
-      
+
       case INPUTS:
-         if ((value != "") && 
+         if ((value != "") &&
              (find(inputs.begin(), inputs.end(), value) == inputs.end()))
          {
             inputs.push_back(value);
             retval = true;
          }
          break;
-      
+
       case OUTPUTS:
-         if ((value != "") && 
+         if ((value != "") &&
              (find(outputs.begin(), outputs.end(), value) == outputs.end()))
          {
             outputs.push_back(value);
             retval = true;
          }
          break;
-      
+
       case INPUT_OBJECT_NAMES:
-         if ((value != "") && 
-             (find(inputObjects.begin(), inputObjects.end(), value) == 
+         if ((value != "") &&
+             (find(inputObjects.begin(), inputObjects.end(), value) ==
               inputObjects.end()))
          {
             inputObjects.push_back(value);
             retval = true;
          }
          break;
-      
+
       case OUTPUT_OBJECT_NAMES:
-         if ((value != "") && 
-             (find(outputObjects.begin(), outputObjects.end(), value) == 
+         if ((value != "") &&
+             (find(outputObjects.begin(), outputObjects.end(), value) ==
               outputObjects.end()))
          {
             outputObjects.push_back(value);
             retval = true;
          }
          break;
-      
+
       default:
          ;     // Do nothing if it isn't a BeginFunction parameter
    }
-   
+
    if (retval)
       return true;
-   
+
    return GmatCommand::SetStringParameter(id, value);
 }
 
 
+
 //------------------------------------------------------------------------------
-//  bool SetStringParameter(const Integer id, const Real value, 
+//  bool SetStringParameter(const Integer id, const Real value,
 //                          const Integer index)
 //------------------------------------------------------------------------------
 /**
  * Sets the value for a std::string parameter in an array.
- * 
+ *
  * @param <id>    Integer ID of the parameter.
  * @param <value> New value for the parameter.
  * @param <index> Index into the array for the parameter.
- * 
+ *
  * @return The value of the parameter.
  */
 //------------------------------------------------------------------------------
-bool BeginFunction::SetStringParameter(const Integer id, 
-                                       const std::string &value, 
+bool BeginFunction::SetStringParameter(const Integer id,
+                                       const std::string &value,
                                        const Integer index)
 {
    return GmatCommand::SetStringParameter(id, value, index);
 }
+
 
 
 //------------------------------------------------------------------------------
@@ -408,9 +452,9 @@ bool BeginFunction::SetStringParameter(const Integer id,
 //------------------------------------------------------------------------------
 /**
  * Gets the value for a std::string parameter.
- * 
+ *
  * @param <label> String identifier for the parameter.
- * 
+ *
  * @return The value of the parameter.
  */
 //------------------------------------------------------------------------------
@@ -420,23 +464,25 @@ std::string BeginFunction::GetStringParameter(const std::string &label) const
 }
 
 
+
 //------------------------------------------------------------------------------
 //  std::string GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 /**
  * Gets the value for a std::string parameter in an array.
- * 
+ *
  * @param <label> String identifier for the parameter.
  * @param <index> Index into the array for the parameter.
- * 
+ *
  * @return The value of the parameter.
  */
 //------------------------------------------------------------------------------
-std::string BeginFunction::GetStringParameter(const std::string &label, 
+std::string BeginFunction::GetStringParameter(const std::string &label,
                                               const Integer index) const
 {
    return GetStringParameter(GetParameterID(label), index);
 }
+
 
 
 //------------------------------------------------------------------------------
@@ -444,76 +490,127 @@ std::string BeginFunction::GetStringParameter(const std::string &label,
 //------------------------------------------------------------------------------
 /**
  * Gets an array do std::strings.
- * 
+ *
  * @param <label> Text name for the array.
- * 
+ *
  * @return A reference to the array.
  */
 //------------------------------------------------------------------------------
-const StringArray& 
+const StringArray&
          BeginFunction::GetStringArrayParameter(const std::string &label) const
 {
    return BeginFunction::GetStringArrayParameter(GetParameterID(label));
 }
+
 
 //------------------------------------------------------------------------------
 //  bool SetStringParameter(const std::string &label, const std::string &value)
 //------------------------------------------------------------------------------
 /**
  * Sets the value for a std::string parameter.
- * 
+ *
  * @param <label> String identifier for the parameter.
  * @param <value> New value for the parameter.
- * 
+ *
  * @return The value of the parameter.
  */
 //------------------------------------------------------------------------------
-bool BeginFunction::SetStringParameter(const std::string &label, 
+bool BeginFunction::SetStringParameter(const std::string &label,
                                        const std::string &value)
 {
    return SetStringParameter(GetParameterID(label), value);
 }
 
 
+
 //------------------------------------------------------------------------------
-//  bool SetStringParameter(const std::string &label, const Real value, 
+//  bool SetStringParameter(const std::string &label, const Real value,
 //                          const Integer index)
 //------------------------------------------------------------------------------
 /**
  * Sets the value for a std::string parameter in an array.
- * 
+ *
  * @param <label> String identifier for the parameter.
  * @param <value> New value for the parameter.
  * @param <index> Index into the array for the parameter.
- * 
+ *
  * @return The value of the parameter.
  */
 //------------------------------------------------------------------------------
-bool BeginFunction::SetStringParameter(const std::string &label, 
-                                       const std::string &value, 
+bool BeginFunction::SetStringParameter(const std::string &label,
+                                       const std::string &value,
                                        const Integer index)
 {
    return SetStringParameter(GetParameterID(label), value, index);
 }
 
 
-bool BeginFunction::TakeAction(const std::string &action, 
+
+bool BeginFunction::TakeAction(const std::string &action,
                                const std::string &actionData)
 {
    if (action == "ClearLocalData")
    {
       inputObjects.clear();
       outputObjects.clear();
-      ClearInputMap();
+//      ClearInputMap();
    }
-   
+   else if (action == "SetReturnObjects")
+   {
+      ClearReturnObjects();
+//      GmatBase *obj;
+//      std::map<std::string, GmatBase *>::iterator omi;
+//
+////      for (StringArray::iterator i = outputs.begin();
+////           i != outputs.end(); ++i)
+//      for (unsigned int i=0; i< outputs.size(); ++i)
+//      {
+//         std::string tmpStr = outputs[i];
+//         tmpStr = trimIt(tmpStr);
+//         MessageInterface::ShowMessage("******i = '%s'\n", tmpStr.c_str());
+//         for (omi = localMap.begin(); omi != localMap.end(); ++omi)
+//         {
+//            obj = omi->second;
+//            MessageInterface::ShowMessage("obj = '%s'\n", obj->GetName().c_str());
+////            if (strcmp(obj->GetName().c_str(), tmpStr.c_str()) == 0)
+//            if (obj->GetName() == tmpStr)
+//            {
+//               MessageInterface::ShowMessage("object name and *i match '%s'\n", tmpStr.c_str());
+//            }
+//            else
+//            {
+//            }
+//         }
+//      }
+      int index = 0;
+
+
+      for (StringArray::iterator i = outputs.begin();
+           i != outputs.end(); ++i)
+      {
+         (*i) = trimIt(*i);
+         if (localMap.find(*i) != localMap.end())
+         {
+            MessageInterface::ShowMessage("Found %s \n", (*i).c_str());
+            MessageInterface::ShowMessage("Found %s with value %f\n", (*i).c_str(),
+                  ((Variable *)localMap[(*i).c_str()])->EvaluateReal() );
+            GmatBase *outObj = localMap[(*i).c_str()];
+            outObj->SetName(outputObjects[index]);
+            returnObjects.push_back(outObj);
+         }
+         index++;
+      }
+   }
+
+
    return true;
 }
 
 
+
 void BeginFunction::ClearInputMap()
 {
-   for (std::map <std::string, GmatBase *>::iterator i = localMap.begin(); 
+   for (std::map <std::string, GmatBase *>::iterator i = localMap.begin();
         i != localMap.end(); ++i)
    {
       delete i->second;
@@ -522,9 +619,10 @@ void BeginFunction::ClearInputMap()
 }
 
 
+
 void BeginFunction::ClearReturnObjects()
 {
-   for (ObjectArray::iterator i = returnObjects.begin(); 
+   for (ObjectArray::iterator i = returnObjects.begin();
         i != returnObjects.end(); ++i)
    {
       delete *i;
@@ -533,10 +631,12 @@ void BeginFunction::ClearReturnObjects()
 }
 
 
+
 void BeginFunction::SetTransientForces(std::vector<PhysicalModel*> *tf)
 {
    transientForces = tf;
 }
+
 
 
 //------------------------------------------------------------------------------
@@ -544,32 +644,48 @@ void BeginFunction::SetTransientForces(std::vector<PhysicalModel*> *tf)
 //------------------------------------------------------------------------------
 /**
  * Initializes the command stream for a GmatCommand.
- * 
+ *
  * This method maps the objects in the function call to the names used in the
- * function definition, and initializes the commands in the command stream using 
- * these objects.  The objects are cloned; hence copy constructors must be 
+ * function definition, and initializes the commands in the command stream using
+ * these objects.  The objects are cloned; hence copy constructors must be
  * correct for successful initialization.
- * 
+ *
  * @return true always.
  */
 //------------------------------------------------------------------------------
 bool BeginFunction::Initialize()
 {
+   #ifdef DEBUG_OBJECT_MAPPING
+      MessageInterface::ShowMessage("Initializing function '%s'\n", 
+         functionName.c_str());
+   #endif
+   
    // Find the GmatFunction
    if (objectMap->find(functionName) == objectMap->end())
+   {
+      std::string names;
+      for (std::map<std::string, GmatBase*>::iterator i = objectMap->begin();
+           i != objectMap->end(); ++i)
+      {
+         names += "\n   '";
+         names += i->first;
+         names += "'";
+      }
       throw CommandException("Error setting up GMAT function '" + functionName +
-         "'; there is no GmatFunction object with that name.");
+         "'; there is no GmatFunction object with that name.\nHere's the list:" +
+         names);
+   }
    
    gfun = (GmatFunction *)((*objectMap)[functionName]);
-   
+
    if (gfun->GetTypeName() != "GmatFunction")
-      throw CommandException("Object type Error: The object named '" + 
+      throw CommandException("Object type Error: The object named '" +
          functionName +
          "' is a " + gfun->GetTypeName() + ", but a GmatFunction is required.");
-   
+
    if (inputObjects.size() != inputs.size())
    {
-      std::string errmsg = 
+      std::string errmsg =
          "Size mismatch between the inputs and expected inputs to the Gmat "
          "function '";
       errmsg += functionName + "'; \n  Inputs: (";
@@ -581,13 +697,23 @@ bool BeginFunction::Initialize()
            i != inputs.end(); ++i)
          errmsg += (*i) + ", ";
       errmsg += ")";
-            
+
+
       throw CommandException(errmsg);
    }
-   
+
+   if (!internalCoordSys)
+      throw CommandException(
+         "No reference (internal) coordinate system defined in BeginFunction!");
+
+
+
    // Fill in the local object array with clones of the expected inputs
    for (UnsignedInt i = 0; i < inputObjects.size(); ++i)
    {
+      MessageInterface::ShowMessage("Cloning object %s, setting name to %s\n",
+               inputObjects[i].c_str(), inputs[i].c_str());
+
       if (objectMap->find(inputObjects[i]) == objectMap->end())
       {
          std::string errmsg = "Error initializing GmatFunction '";
@@ -595,21 +721,28 @@ bool BeginFunction::Initialize()
             "an object named '" + (inputObjects[i]) + "'");
       }
       GmatBase *inobj = (*objectMap)[inputObjects[i]]->Clone();
+               
       // Give the clone the local variable name
       inobj->SetName(inputs[i]);
       SetRefObject(inobj, Gmat::UNKNOWN_OBJECT, inputs[i]);
    }
-   
+
+
    // Now pretend like we're a Sandbox!
    GmatBase *obj;
    GmatCommand *cmd;
    std::map<std::string, GmatBase *>::iterator omi;
-
+   
    // Init local objects
    for (omi = localMap.begin(); omi != localMap.end(); ++omi)
    {
       obj = omi->second;
       obj->SetSolarSystem(solarSys);
+      
+      #ifdef DEBUG_OBJECT_MAPPING
+         MessageInterface::ShowMessage("Solar system set on '%s'\n", 
+            obj->GetName().c_str());
+      #endif
       
       // Set J2000 Body for all SpacePoint derivatives before anything else
       if (obj->IsOfType(Gmat::SPACE_POINT))
@@ -629,7 +762,8 @@ bool BeginFunction::Initialize()
                spObj->GetJ2000BodyName() + "\"");
       }
    }
-   
+
+
    // Add the parameters and global coordinate systems from the Sandbox
    for (omi = objectMap->begin(); omi != objectMap->end(); ++omi)
    {
@@ -642,18 +776,160 @@ bool BeginFunction::Initialize()
       if (obj->IsOfType(Gmat::COORDINATE_SYSTEM))
       {
          std::string csName = obj->GetName();
-         if ((csName == "EarthMJ2000Eq") || 
-             (csName == "EarthMJ2000Ec") || 
-             (csName == "EarthFixed")) 
+         if ((csName == "EarthMJ2000Eq") ||
+             (csName == "EarthMJ2000Ec") ||
+             (csName == "EarthFixed"))
             SetRefObject(obj, obj->GetType(), obj->GetName());
       }
    }
-   
+
+   ObjectArray newObj;
+   ObjectArray newParam;
+
+
+//   MessageInterface::ShowMessage("*****LOCAL MAP*****\n");
+   // Add the parameters and global coordinate systems from the Sandbox
+   for (omi = localMap.begin(); omi != localMap.end(); ++omi)
+   {
+      obj = omi->second;
+//      MessageInterface::ShowMessage("obj name is %s and type is %s\n",
+//      obj->GetName().c_str(), obj->GetTypeName().c_str());
+
+
+      if ((objectMap->find(obj->GetName()) == objectMap->end()) &&
+         (obj->GetType() != Gmat::PARAMETER))
+      {
+//        MessageInterface::ShowMessage("adding obj to obj array\n");
+        newObj.push_back(obj);
+      }
+      else if ((objectMap->find(obj->GetName()) == objectMap->end()) &&
+         (obj->GetType() == Gmat::PARAMETER))
+      {
+//        MessageInterface::ShowMessage("adding obj to param array\n");
+        newParam.push_back(obj);
+      }
+//      else if (obj->GetType() == Gmat::COORDINATE_SYSTEM)
+//      {
+//         newObj.push_back(obj);
+//      }
+
+
+//      if (obj->GetType() == Gmat::PARAMETER)
+//      {
+//         MessageInterface::ShowMessage("initializing...\n");
+//         obj->Initialize();
+//      }
+
+
+   }
+//    MessageInterface::ShowMessage("*****LOCAL MAP********\n");
+
+
+    for (unsigned int i=0; i<newParam.size(); i++)
+    {
+       obj = newParam[i];
+obj->SetSolarSystem(solarSys);
+
+
+//      MessageInterface::ShowMessage("initializing...%s\n", obj->GetName().c_str());
+      Parameter *param = (Parameter *)obj;
+      param->SetSolarSystem(solarSys);
+
+
+      // add all new objects
+         for (unsigned int j=0; j<newObj.size(); j++)
+         {
+//            if (newObj[j]->GetType() == Gmat::COORDINATE_SYSTEM)
+//            {
+               param->SetInternalCoordSystem(internalCoordSys);
+//               MessageInterface::ShowMessage("set internal cs %s\n", newObj[j]
+//                           ->GetName().c_str());
+//            }
+//            else
+//            {
+                if (param->GetKey() == GmatParam::SYSTEM_PARAM)
+                {
+                   obj->SetRefObject(newObj[j], newObj[j]->GetType(),
+                   newObj[j]->GetName());
+                }
+//            }
+         }
+
+
+      BuildReferences(obj);
+      obj->Initialize();
+//      MessageInterface::ShowMessage("finished initializing...%s, value = %f\n",
+//         obj->GetName().c_str(), param->EvaluateReal());
+
+
+    }
+
+//    throw CommandException("hold on");
+
+
+//      // Init local objects
+//   for (omi = localMap.begin(); omi != localMap.end(); ++omi)
+//   {
+//      obj = omi->second;
+//
+//      if (obj->GetType() == Gmat::PARAMETER)
+//      {
+//         MessageInterface::ShowMessage("initializing...%s\n", obj->GetName().c_str());
+//         //initialize
+//         Parameter *param = (Parameter *)obj;
+//         param->SetSolarSystem(solarSys);
+//
+//         // add all new objects
+//            for (unsigned int j=0; j<newObj.size(); j++)
+//            {
+//               if (newObj[j]->GetType() == Gmat::COORDINATE_SYSTEM)
+//                  param->SetInternalCoordSystem((CoordinateSystem *)newObj[j]
+//                              ->GetType());
+//               else
+//               {
+//                  obj->SetRefObject(newObj[j], newObj[j]->GetType(),
+//                  newObj[j]->GetName());
+//               }
+//            }
+//
+//
+//
+//         BuildReferences(obj);
+//         obj->Initialize();
+//      }
+//
+//   }
+
+
    cmd = next;
    while (cmd)
    {
       cmd->SetObjectMap(&localMap);
       cmd->SetSolarSystem(solarSys);
+
+
+//      if (cmd->GetTypeName() == "Propagate")
+//      {
+//         // set object map and solar sys for all stopping conditions
+//         ObjectArray stopCond = cmd->GetRefObjectArray(Gmat::STOP_CONDITION);
+//
+//         for (unsigned int i=0; i<stopCond.size(); i++)
+//         {
+////            ((BaseStopCondition *)stopCond[i])->SetObjectMap(&localMap);
+//            stopCond[i]->SetSolarSystem(solarSys);
+//
+////            for (unsigned int j=0; j<newParam.size(); j++)
+////            {
+////               if (newParam[j]->GetType() != Gmat::COORDINATE_SYSTEM)
+////               {
+////                  stopCond[i]->SetRefObject(newParam[j], newParam[j]->GetType(),
+////                  newParam[j]->GetName());
+////               }
+////            }
+//         }
+//
+//      }
+
 
       // Handle nested GmatFunctions
       if (cmd->GetTypeName() == "CallFunction")
@@ -662,18 +938,18 @@ bool BeginFunction::Initialize()
          std::string funName = cmd->GetStringParameter("FunctionName");
          if (objectMap->find(funName) == objectMap->end())
             throw CommandException("The GmatFunction '" + functionName +
-               "' references the function '" + funName + 
+               "' references the function '" + funName +
                "', which cannot be found.");
          GmatFunction *fun = (GmatFunction*)(*objectMap)[funName];
          if (fun->GetTypeName() == "GmatFunction")
          {
 //            /// @todo Make the GmatFunction file name handling more robust
-//            std::string pathAndName = 
+//            std::string pathAndName =
 //               fun->GetStringParameter(fun->GetParameterID("FunctionPath"));
 //            if (pathAndName == "")
 //               pathAndName = funName + ".gmf";
-//            
-//            GmatCommand *funStream = 
+//
+//            GmatCommand *funStream =
 //               moderator->InterpretGmatFunction(pathAndName);
 //            if (!current->SetRefObject(funStream, Gmat::COMMAND, ""))
 //            {
@@ -686,17 +962,46 @@ bool BeginFunction::Initialize()
                "Nesting is currently disabled for GmatFunctions");
          }
       }
-      
+
+      if (cmd->GetTypeName() == "EndFunction")
+      {
+//         MessageInterface::ShowMessage("End function - outputs:\n");
+         // print output and output objects
+         for (StringArray::iterator i = outputs.begin();
+           i != outputs.end(); ++i)
+            MessageInterface::ShowMessage(*i);
+
+
+//         MessageInterface::ShowMessage("\n\nOutput Objects:\n");
+         for (StringArray::iterator i = outputObjects.begin();
+           i != outputObjects.end(); ++i)
+            MessageInterface::ShowMessage(*i);
+
+
+
+//         MessageInterface::ShowMessage("\n\nReturn Objects:\n");
+//         for (StringArray::iterator i = outputObjects.begin();
+//           i != outputObjects.end(); ++i)
+//            MessageInterface::ShowMessage(*i);
+
+
+      }
+
+
       bool rv = cmd->Initialize();
       if (!rv)
          return false;
+
 
       cmd->SetTransientForces(transientForces);
       cmd = cmd->GetNext();
    }
 
+
+//   MessageInterface::ShowMessage("\nreturning from begin function initialize\n");
    return true;
 }
+
 
 
 //------------------------------------------------------------------------------
@@ -704,14 +1009,42 @@ bool BeginFunction::Initialize()
 //------------------------------------------------------------------------------
 /**
  * Runs the command.  This is a NoOp for the BeginFunction command
- * 
+ *
  * @return true always.
  */
 //------------------------------------------------------------------------------
 bool BeginFunction::Execute()
 {
-   return true;
+   bool rv = true;
+   
+   // Refresh input objects
+   for (UnsignedInt i = 0; i < inputObjects.size(); ++i)
+   {
+      #ifdef DEBUG_OBJECT_MAPPING
+         MessageInterface::ShowMessage("Mapping %s to %s\n", 
+            inputObjects[i].c_str(), inputs[i].c_str());
+      #endif
+      GmatBase *inObj, *localObj;
+      
+      inObj = (*objectMap)[inputObjects[i]];
+      localObj = localMap[inputs[i]];
+
+      // For now just copy select objects
+      if ( (localObj->IsOfType(Gmat::SPACECRAFT))
+           // Add others here, using ||
+         )
+      {
+         localObj->Copy(inObj); 
+      }
+   }
+
+   #ifdef DEBUG_OBJECT_MAPPING
+      MessageInterface::ShowMessage("reset the objects\n");
+   #endif
+
+   return rv;
 }
+
 
 
 //------------------------------------------------------------------------------
@@ -730,6 +1063,7 @@ SpacePoint* BeginFunction::FindSpacePoint(const std::string &spName)
 {
    SpacePoint *sp = solarSys->GetBody(spName);
 
+
    if (sp == NULL)
    {
       if (objectMap->find(spName) != objectMap->end())
@@ -739,6 +1073,302 @@ SpacePoint* BeginFunction::FindSpacePoint(const std::string &spName)
       }
    }
 
+
    return sp;
 }
 
+
+//------------------------------------------------------------------------------
+// void BuildReferences()
+//------------------------------------------------------------------------------
+/**
+ *  Sets all refence objects for the input object.
+ */
+//------------------------------------------------------------------------------
+void BeginFunction::BuildReferences(GmatBase *obj)
+{
+   std::string oName;
+
+
+   obj->SetSolarSystem(solarSys);
+   // PropSetup probably should do this...
+   if ((obj->GetType() == Gmat::PROP_SETUP) ||
+       (obj->GetType() == Gmat::FORCE_MODEL))
+   {
+      ForceModel *fm = ((PropSetup *)obj)->GetForceModel();
+      fm->SetSolarSystem(solarSys);
+
+
+      #ifdef DEBUG_FM_INITIALIZATION
+         MessageInterface::ShowMessage(
+            "Initializing force model references for '%s'\n",
+            (fm->GetName() == "" ? obj->GetName().c_str() :
+                                   fm->GetName().c_str()) );
+      #endif
+
+
+      try
+      {
+         StringArray fmRefs = fm->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
+         for (StringArray::iterator i = fmRefs.begin();
+              i != fmRefs.end(); ++i)
+         {
+            oName = *i;
+            try
+            {
+               SetRefFromName(fm, oName);
+            }
+            catch (CommandException &ex)
+            {
+               // Handle SandboxExceptions first.
+               #ifdef DEBUG_SANDBOX_INIT
+                  MessageInterface::ShowMessage(
+                     "RefObjectName " + oName + " not found; ignoring " +
+                     ex.GetMessage() + "\n");
+               #endif
+               //throw ex;
+            }
+            catch (BaseException &ex)
+            {
+               // Post a message and -- otherwise -- ignore the exceptions
+               // Handle SandboxExceptions first.
+               #ifdef DEBUG_SANDBOX_INIT
+                  MessageInterface::ShowMessage(
+                     "RefObjectName not found; ignoring " +
+                     ex.GetMessage() + "\n");
+               #endif
+            }
+         }
+      }
+      catch (CommandException &ex)
+      {
+         // Handle SandboxExceptions first.
+         #ifdef DEBUG_SANDBOX_INIT
+            MessageInterface::ShowMessage(
+               "RefObjectNameArray not found; ignoring " +
+               ex.GetMessage() + "\n");
+         #endif
+         //throw ex;
+      }
+      catch (BaseException &ex) // Handles no refObject array
+      {
+         // Post a message and -- otherwise -- ignore the exceptions
+         #ifdef DEBUG_SANDBOX_INIT
+            MessageInterface::ShowMessage(
+               "RefObjectNameArray not found; ignoring " +
+               ex.GetMessage() + "\n");
+         #endif
+      }
+
+
+      if (obj->GetType() == Gmat::FORCE_MODEL)
+         return;
+   }
+
+
+   try
+   {
+      // First set the individual reference objects
+      oName = obj->GetRefObjectName(Gmat::UNKNOWN_OBJECT);
+      SetRefFromName(obj, oName);
+   }
+   catch (CommandException &ex)
+   {
+      // Handle SandboxExceptions first.
+      // For now, post a message and -- otherwise -- ignore exceptions
+      #ifdef DEBUG_SANDBOX_INIT
+         MessageInterface::ShowMessage("RefObjectName not found; ignoring " +
+            ex.GetMessage() + "\n");
+      #endif
+      //throw ex;
+   }
+   catch (BaseException &ex)
+   {
+      // Post a message and -- otherwise -- ignore the exceptions
+      #ifdef DEBUG_SANDBOX_INIT
+         MessageInterface::ShowMessage("RefObjectName not found; ignoring " +
+            ex.GetMessage() + "\n");
+      #endif
+   }
+
+
+   // Next handle the array version
+   try
+   {
+      StringArray oNameArray =
+         obj->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
+      for (StringArray::iterator i = oNameArray.begin();
+           i != oNameArray.end(); ++i)
+      {
+         oName = *i;
+         try
+         {
+            SetRefFromName(obj, oName);
+         }
+         catch (CommandException &ex)
+         {
+            // Handle SandboxExceptions first.
+            #ifdef DEBUG_SANDBOX_INIT
+               MessageInterface::ShowMessage(
+                  "RefObjectName " + oName + " not found; ignoring " +
+                  ex.GetMessage() + "\n");
+            #endif
+            //throw ex;
+         }
+         catch (BaseException &ex)
+         {
+            // Post a message and -- otherwise -- ignore the exceptions
+            // Handle SandboxExceptions first.
+            #ifdef DEBUG_SANDBOX_INIT
+               MessageInterface::ShowMessage(
+                  "RefObjectName not found; ignoring " +
+                  ex.GetMessage() + "\n");
+            #endif
+         }
+      }
+   }
+   catch (CommandException &ex)
+   {
+      // Handle SandboxExceptions first.
+      #ifdef DEBUG_SANDBOX_INIT
+         MessageInterface::ShowMessage(
+            "RefObjectNameArray not found; ignoring " +
+            ex.GetMessage() + "\n");
+      #endif
+      //throw ex;
+   }
+   catch (BaseException &ex) // Handles no refObject array
+   {
+      // Post a message and -- otherwise -- ignore the exceptions
+      #ifdef DEBUG_SANDBOX_INIT
+         MessageInterface::ShowMessage(
+            "RefObjectNameArray not found; ignoring " +
+            ex.GetMessage() + "\n");
+      #endif
+   }
+}
+
+
+
+//------------------------------------------------------------------------------
+// void InitializeInternalObjects()
+//------------------------------------------------------------------------------
+/**
+ *  Initializes internal objects in the sandbox.
+ */
+//------------------------------------------------------------------------------
+void BeginFunction::InitializeInternalObjects()
+{
+//   SpacePoint *sp, *j2kBod;
+//   std::string j2kName, oName;
+//
+//   // Set J2000 bodies for solar system objects -- should this happen here?
+//   const StringArray biu = solarSys->GetBodiesInUse();
+//   for (StringArray::const_iterator i = biu.begin(); i != biu.end(); ++i)
+//   {
+//      sp = solarSys->GetBody(*i);
+//      j2kName = sp->GetStringParameter("J2000BodyName");
+//      j2kBod = FindSpacePoint(j2kName);
+//      sp->SetJ2000Body(j2kBod);
+//   }
+//
+//   // set ref object for internal coordinate system
+//   internalCoordSys->SetSolarSystem(solarSys);
+//
+//   BuildReferences(internalCoordSys);
+//
+//   // Set reference origin for internal coordinate system.
+//   oName = internalCoordSys->GetStringParameter("Origin");
+//   sp = FindSpacePoint(oName);
+//   if (sp == NULL)
+//      throw SandboxException("Cannot find SpacePoint named \"" +
+//         oName + "\" used for the internal coordinate system origin");
+//   internalCoordSys->SetRefObject(sp, Gmat::SPACE_POINT, oName);
+//
+//   // Set J2000 body for internal coordinate system
+//   oName = internalCoordSys->GetStringParameter("J2000Body");
+//   sp = FindSpacePoint(oName);
+//   if (sp == NULL)
+//      throw SandboxException("Cannot find SpacePoint named \"" +
+//         oName + "\" used for the internal coordinate system J2000 body");
+//   internalCoordSys->SetRefObject(sp, Gmat::SPACE_POINT, oName);
+//
+//   internalCoordSys->Initialize();
+}
+
+
+//------------------------------------------------------------------------------
+// void SetRefFromName(GmatBase *obj, const std::string &oName)
+//------------------------------------------------------------------------------
+/**
+ *  Sets a reference object on an object.
+ *
+ *  @param <obj>   The object that needs to set the reference.
+ *  @param <oName> The name of the reference object.
+ */
+//------------------------------------------------------------------------------
+void BeginFunction::SetRefFromName(GmatBase *obj, const std::string &oName)
+{
+   if (objectMap->find(oName) != objectMap->end())
+   {
+      GmatBase *refObj = (*objectMap)[oName];
+      obj->SetRefObject(refObj, refObj->GetType(), refObj->GetName());
+   }
+   else
+   {
+      // look SolarSystem
+      GmatBase *refObj = FindSpacePoint(oName);
+
+
+      if (refObj == NULL)
+         throw CommandException("Unknown object " + oName + " requested by " +
+                                obj->GetName());
+
+
+      obj->SetRefObject(refObj, refObj->GetType(), refObj->GetName());
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetInternalCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+/**
+ *  Sets the internal coordinate system used by the Sandbox.
+ *
+ *  @param <cs> The internal coordinate system.
+ *
+ *  @return true if the command was added to the sequence, false if not.
+ */
+//------------------------------------------------------------------------------
+bool BeginFunction::SetInternalCoordSystem(CoordinateSystem *cs)
+{
+
+
+//   MessageInterface::ShowMessage("BeginFunction::SetInternalCoordSystem entered\n");
+
+
+   if (!cs)
+      return false;
+
+
+//   MessageInterface::ShowMessage("Set internal coord sys to %s\n", cs->GetTypeName().c_str());
+   /// @todo Check initialization and cloning for the internal CoordinateSystem.
+   //internalCoordSys = (CoordinateSystem*)(cs->Clone());
+   internalCoordSys = cs;
+   return true;
+}
+
+
+std::string BeginFunction::trimIt( std::string s ) {
+        size_t offset = s.length();
+        // Trim leading spaces ???
+        s.erase( 0, s.find_first_not_of( " \t\n" ) );
+        // Trim trailing spaces ???
+        s.erase( s.find_last_not_of( " \t\n" ) + 1);
+        // This line is always displayed
+        if(s.length() == offset){ std::cout << "No Changes" << std::endl;}
+        return s;
+
+
+}

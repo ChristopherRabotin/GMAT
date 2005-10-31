@@ -18,29 +18,34 @@
 //------------------------------------------------------------------------------
 
 
+
 #ifndef CallFunction_hpp
 #define CallFunction_hpp
 
+
 #include "Command.hpp"
 #include "Function.hpp"
+
 
 #include "Parameter.hpp"
 #include "Array.hpp"
 #include "StringVar.hpp"
 
+
 //#include <map>
 #include <iostream>
 #include <iomanip>
+
 
 class CallFunction : public GmatCommand
 {
 public:
    CallFunction();
    virtual ~CallFunction();
-    
+
    CallFunction(const CallFunction& cf);
    CallFunction&               operator=(const CallFunction& cf);
-    
+
    // inherited from GmatBase
    virtual GmatBase* Clone() const;
    virtual const std::string&
@@ -48,15 +53,19 @@ public:
                                            const std::string &prefix = "",
                                            const std::string &useName = "");
 
+
    virtual bool TakeAction(const std::string &action,
                           const std::string &actionData = "");
+
 
    // Methods used for configuration
    StringArray         GetRefObjectNameArray(const Gmat::ObjectType type) const;
 
+
    virtual bool        RenameRefObject(const Gmat::ObjectType type,
                                        const std::string &oldName,
                                        const std::string &newName);
+
 
    // Reference object accessor methods
    virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
@@ -65,12 +74,14 @@ public:
                                     const std::string &name = "");
    virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
 
+
    // Parameter accessor methods -- overridden from GmatBase
    virtual std::string     GetParameterText(const Integer id) const;
    virtual Integer         GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
                            GetParameterType(const Integer id) const;
    virtual std::string     GetParameterTypeString(const Integer id) const;
+
 
    virtual std::string GetStringParameter(const Integer id) const;
    virtual std::string GetStringParameter(const std::string &label) const;
@@ -84,19 +95,23 @@ public:
                                    const Integer index);
    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
-   
+
    // Methods used to run the command
    virtual bool            InterpretAction();
-    
+
    virtual bool            Initialize();
    virtual bool            Execute();
 
+
    std::string FormEvalString();
-   
+
    bool AddInputParameter(const std::string &paramName, Integer index);
    bool AddOutputParameter(const std::string &paramName, Integer index);
+   bool SetInternalCoordSystem(CoordinateSystem *ss);
+
 
 protected:
+
 
 private:
    ObjectArray objectArray;
@@ -105,15 +120,20 @@ private:
    // Changed 8/31/05, DJC
    //   ObjectArray callcmds;
    GmatCommand *callcmds;
-   
+
    StringArray mInputListNames;
    StringArray mOutputListNames;
+
 
    Integer mNumInputParams;
    Integer mNumOutputParams;
 
+
    Function *mFunction;
    std::string mFunctionName;
+
+   /// CoordinateSystem used internally
+   CoordinateSystem *internalCoordSys;
 
    bool ExecuteMatlabFunction();
    void SendInParam(Parameter *param);
@@ -121,6 +141,7 @@ private:
    void EvalMatlabString(std::string evalString);
    void ClearInputParameters();
    void ClearOutputParameters();
+
 
    enum
    {
@@ -131,11 +152,14 @@ private:
       CallFunctionParamCount  /// Count of the parameters for this class
    };
 
+
    static const std::string PARAMETER_TEXT[
             CallFunctionParamCount - GmatCommandParamCount];
    static const Gmat::ParameterType PARAMETER_TYPE[
             CallFunctionParamCount - GmatCommandParamCount];
 
+
 };
+
 
 #endif // CallFunction_hpp

@@ -129,7 +129,8 @@ OBJECTS = \
     command/TogglePanel.o \
     command/VaryPanel.o \
     controllogic/DoWhilePanel.o \
-    controllogic/ForLoopPanel.o \
+    controllogic/ForDialog.o \
+    controllogic/ForPanel.o \
     controllogic/IfPanel.o \
     controllogic/WhilePanel.o \
     coordsystem/CoordPanel.o \
