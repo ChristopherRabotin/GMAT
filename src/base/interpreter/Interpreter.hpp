@@ -149,8 +149,13 @@ protected:
    SolarSystem*                  CreateSolarSystem(std::string ssname);
    CelestialBody*                CreateCelestialBody(std::string cbname, 
                                                      std::string type);
-   Parameter*                    CreateParameter(std::string name, 
-                                                 std::string type);
+//    Parameter*                    CreateParameter(std::string name, 
+//                                                  std::string type);
+   Parameter*                    CreateParameter(const std::string &name, 
+                                                 const std::string &type,
+                                                 const std::string &depname = "",
+                                                 const std::string &obj = "");
+   
 //   StoppingCondition*            CreateStopCond(std::string conditiontype);
    Subscriber*                   CreateSubscriber(std::string name, 
                                                   std::string type);

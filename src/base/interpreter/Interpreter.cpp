@@ -306,26 +306,28 @@ bool Interpreter::InterpretObject(std::string objecttype,
    if (find(parametermap.begin(), parametermap.end(), objecttype) != 
        parametermap.end())
    {
-      Parameter *parm = moderator->CreateParameter(objecttype, objectname);
+      Parameter *parm = CreateParameter(objectname, objecttype);
+      
+//       Parameter *parm = moderator->CreateParameter(objecttype, objectname);
       obj = parm;
-        
-      if (parm) 
-      {
-         /// @todo: "Raw" objects are set to default body or C.S.; update?
-         if (parm->IsCoordSysDependent()) 
-         {
-            parm->SetStringParameter("DepObject", "EarthMJ2000Eq");
-            parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
-         }
+      
+//       if (parm) 
+//       {
+//          /// @todo: "Raw" objects are set to default body or C.S.; update?
+//          if (parm->IsCoordSysDependent()) 
+//          {
+//             parm->SetStringParameter("DepObject", "EarthMJ2000Eq");
+//             parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+//          }
             
-         if (parm->IsOriginDependent()) 
-         {
-            parm->SetStringParameter("DepObject", "Earth");
-            if (parm->NeedCoordSystem())
-               parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
-                  "EarthMJ2000Eq");
-         }
-      }        
+//          if (parm->IsOriginDependent()) 
+//          {
+//             parm->SetStringParameter("DepObject", "Earth");
+//             if (parm->NeedCoordSystem())
+//                parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
+//                   "EarthMJ2000Eq");
+//          }
+//       }        
       retval = true;
    }
     
@@ -1173,44 +1175,48 @@ bool Interpreter::InterpretFunctionCall()
                      "Attempting to build parameter \"", paramType.c_str(),
                      str->c_str());
                #endif
-               Parameter *parm = CreateParameter(*str, paramType);
-               if (parm != NULL)
-               {
-                  //GmatBase *parmObj = FindObject(sar[0]);
-                  std::string parmtype = "Object";
-                  #ifdef DEBUG_TOKEN_PARSING
-                     MessageInterface::ShowMessage("%s%s%s%s%s%s\"\n",
-                                                   "Assigning \"",
-                                                   paramObj.c_str(),
-                                                   "\" to parameter \"",
-                                                   parm->GetName().c_str(),
-                                                   "\" with descriptor \"",
-                                                   parmtype.c_str());
-                  #endif
-                  parm->SetStringParameter(parmtype, paramObj);
 
-                  if (parm->IsCoordSysDependent())
-                  {
-                     if (parmSystem == "")
-                        parmSystem = "EarthMJ2000Eq";
-                     // Which is correct here???
-                     parm->SetStringParameter("DepObject", parmSystem);
-                     parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
 
-                  }
+               CreateParameter(*str, paramType, parmSystem, parmObj->GetName());
+                  
+//                Parameter *parm = CreateParameter(*str, paramType);
+//                if (parm != NULL)
+//                {
+//                   //GmatBase *parmObj = FindObject(sar[0]);
+//                   std::string parmtype = "Object";
+//                   #ifdef DEBUG_TOKEN_PARSING
+//                      MessageInterface::ShowMessage("%s%s%s%s%s%s\"\n",
+//                                                    "Assigning \"",
+//                                                    paramObj.c_str(),
+//                                                    "\" to parameter \"",
+//                                                    parm->GetName().c_str(),
+//                                                    "\" with descriptor \"",
+//                                                    parmtype.c_str());
+//                   #endif
+//                   parm->SetStringParameter(parmtype, paramObj);
 
-                  if (parm->IsOriginDependent())
-                  {
-                     if (parmSystem == "")
-                        parmSystem = "Earth";
-                     parm->SetStringParameter("DepObject", parmSystem);
-                     parm->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
-                     if (parm->NeedCoordSystem())
-                        /// @todo Update coordinate system to better body parms
-                        parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
-                           "EarthMJ2000Eq");
-                  }
-               }
+//                   if (parm->IsCoordSysDependent())
+//                   {
+//                      if (parmSystem == "")
+//                         parmSystem = "EarthMJ2000Eq";
+//                      // Which is correct here???
+//                      parm->SetStringParameter("DepObject", parmSystem);
+//                      parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
+
+//                   }
+
+//                   if (parm->IsOriginDependent())
+//                   {
+//                      if (parmSystem == "")
+//                         parmSystem = "Earth";
+//                      parm->SetStringParameter("DepObject", parmSystem);
+//                      parm->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
+//                      if (parm->NeedCoordSystem())
+//                         /// @todo Update coordinate system to better body parms
+//                         parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
+//                            "EarthMJ2000Eq");
+//                   }
+//                }
             }
          }
       }
@@ -1499,7 +1505,10 @@ GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
             }
             name += ".";
             name += parmType;
-            ref = moderator->CreateParameter(parmType, name);
+
+            ref = CreateParameter(name, parmType, parmSystem);
+            
+            //ref = moderator->CreateParameter(parmType, name);
             if (ref) {
                Parameter *parm = (Parameter*)ref;
 
@@ -1512,24 +1521,24 @@ GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
                Gmat::ObjectType ot = refobj->GetType();
                parm->SetRefObjectName(ot, parmObj);
                
-               // Set body and/or cs on it
-               if (parm->IsCoordSysDependent()) {
-                  if (parmSystem == "")
-                     parmSystem = "EarthMJ2000Eq";
-                  parm->SetStringParameter("DepObject", parmSystem);
-                  parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
-               }
+//                // Set body and/or cs on it
+//                if (parm->IsCoordSysDependent()) {
+//                   if (parmSystem == "")
+//                      parmSystem = "EarthMJ2000Eq";
+//                   parm->SetStringParameter("DepObject", parmSystem);
+//                   parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
+//                }
             
-               if (parm->IsOriginDependent()) {
-                  if (parmSystem == "")
-                     parmSystem = "Earth";
-                  parm->SetStringParameter("DepObject", parmSystem);
-                  parm->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
-                  /// @todo Set a better CS choice when appropriate
-                  if (parm->NeedCoordSystem())
-                     parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, 
-                                           "EarthMJ2000Eq");
-               }
+//                if (parm->IsOriginDependent()) {
+//                   if (parmSystem == "")
+//                      parmSystem = "Earth";
+//                   parm->SetStringParameter("DepObject", parmSystem);
+//                   parm->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
+//                   /// @todo Set a better CS choice when appropriate
+//                   if (parm->NeedCoordSystem())
+//                      parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, 
+//                                            "EarthMJ2000Eq");
+//                }
             }
          }
          else // NOT a Parameter
@@ -1664,21 +1673,76 @@ CelestialBody* Interpreter::CreateCelestialBody(std::string cbname,
 }
 
 
+// //------------------------------------------------------------------------------
+// // Parameter* CreateParameter(std::string name, std::string type)
+// //------------------------------------------------------------------------------
+// /**
+//  * Calls the Moderator to create a Parameter.
+//  * 
+//  * @param name Name for the parameter.
+//  * @param type Type of parameter requested
+//  * 
+//  * @return Pointer to the constructed Parameter.
+//  */
+// //------------------------------------------------------------------------------
+// Parameter* Interpreter::CreateParameter(std::string name, std::string type)
+// {
+//     return moderator->CreateParameter(type, name);
+// }
+
+
 //------------------------------------------------------------------------------
-// Parameter* CreateParameter(std::string name, std::string type)
+// Parameter* CreateParameter(const std::string &name, const std::string &type,
+//                            const std::string &depname, const std::string &obj)
 //------------------------------------------------------------------------------
 /**
  * Calls the Moderator to create a Parameter.
  * 
  * @param name Name for the parameter.
  * @param type Type of parameter requested
+ * @param depname Dependent object name of parameter requested
+ * @param obj object name of parameter requested
  * 
  * @return Pointer to the constructed Parameter.
  */
 //------------------------------------------------------------------------------
-Parameter* Interpreter::CreateParameter(std::string name, std::string type)
+Parameter* Interpreter::CreateParameter(const std::string &name, 
+                                        const std::string &type,
+                                        const std::string &depname,
+                                        const std::string &obj)
 {
-    return moderator->CreateParameter(type, name);
+   Parameter *parm = moderator->CreateParameter(type, name);
+   
+   if (parm != NULL)
+   {
+      std::string dep = depname;
+
+      if (obj != "")
+         parm->SetStringParameter("Object", obj);
+      
+      if (parm->IsCoordSysDependent())
+      {
+         if (dep == "")
+            dep = "EarthMJ2000Eq";
+         
+         parm->SetStringParameter("DepObject", dep);
+         parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, dep);
+      }
+      else if (parm->IsOriginDependent())
+      {
+         if (dep == "")
+            dep = "Earth";
+         
+         parm->SetStringParameter("DepObject", dep);
+         parm->SetRefObjectName(Gmat::SPACE_POINT, dep);
+         if (parm->NeedCoordSystem())
+            /// @todo Update coordinate system to better body parms
+            parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
+                                   "EarthMJ2000Eq");
+      }
+   }
+
+   return parm;
 }
 
 
@@ -2013,7 +2077,7 @@ bool Interpreter::InterpretSolarSetting(const StringArray &sar,
          for (StringArray::iterator i = ephems.begin(); i != ephems.end(); ++i)
             MessageInterface::ShowMessage("   %s\n", i->c_str());
       #endif
-      //loj: 8/18/05 moderator->SetPlanetaryFileTypesInUse(ephems);
+
       moderator->SetPlanetarySourceTypesInUse(ephems);
       return true;
    }
@@ -2317,7 +2381,27 @@ bool Interpreter::SetVariable(GmatBase *obj, const std::string &val,
       return true;
    }
 
-MessageInterface::ShowMessage("It's an assignment\n");
+   //MessageInterface::ShowMessage("It's an assignment\n");
+   std::string paramType, paramObj, paramDepObj;
+
+   if (InterpretParameter(other, paramType, paramObj, paramDepObj))
+   {
+      if (moderator->IsParameter(paramType))
+      {
+         //MessageInterface::ShowMessage
+         //   ("==> Interpreter::SetVariable() other=%s, paramType=%s, paramObj=%s, "
+         //    "parmDepObj=%s\n", other.c_str(), paramType.c_str(), paramObj.c_str(),
+         //    paramDepObj.c_str());
+         
+         Parameter *parm = CreateParameter(other, paramType, paramDepObj, paramObj);
+         if (parm != NULL)
+         {
+            parm->SetStringParameter("Object", paramObj);
+         }
+      }
+   }
+   
+   obj->SetRefObjectName(Gmat::PARAMETER, other);   
    return obj->SetStringParameter("Expression", other);
 }
 
@@ -3100,7 +3184,9 @@ bool Interpreter::ConstructRHS(GmatBase *lhsObject, const std::string& rhs,
    for (StringArray::iterator i = sar.begin(); i != sar.end(); ++i)
    {
       temp = Decompose(*i);
-      if ((temp.size() > 1) && isalpha(sar[0][0]))
+      //loj: 10/31/05 why temp.size() > 1?
+      //if ((temp.size() > 1) && isalpha(sar[0][0]))
+      if ((temp.size() > 0) && isalpha(sar[0][0]))
       {
          #ifdef DEBUG_RHS_PARSING_DETAILS
             MessageInterface::ShowMessage("   Working with %s\n", i->c_str());
@@ -3123,54 +3209,70 @@ bool Interpreter::ConstructRHS(GmatBase *lhsObject, const std::string& rhs,
                                                 "Attempting to build parameter \"",
                                                 paramType.c_str(), name.c_str());
                #endif
-               Parameter *parm = CreateParameter(name, paramType);
-               if (parm != NULL)
-               {
-                  //GmatBase *parmObj = FindObject(sar[0]);
-                  std::string parmtype = "Object";
-                  #ifdef DEBUG_RHS_PARSING
-                     MessageInterface::ShowMessage("%s%s%s%s%s%s\"\n",
-                                                   "Assigning \"",
-                                                   paramObj.c_str(),
-                                                   "\" to parameter \"",
-                                                   parm->GetName().c_str(),
-                                                   "\" with descriptor \"",
-                                                   parmtype.c_str());
-                  #endif
-                  parm->SetStringParameter(parmtype, paramObj);
+                  
+               CreateParameter(name, paramType, parmSystem, paramObj);
+               
+//                Parameter *parm = CreateParameter(name, paramType);
+//                if (parm != NULL)
+//                {
+//                   //GmatBase *parmObj = FindObject(sar[0]);
+//                   std::string parmtype = "Object";
+//                   #ifdef DEBUG_RHS_PARSING
+//                      MessageInterface::ShowMessage("%s%s%s%s%s%s\"\n",
+//                                                    "Assigning \"",
+//                                                    paramObj.c_str(),
+//                                                    "\" to parameter \"",
+//                                                    parm->GetName().c_str(),
+//                                                    "\" with descriptor \"",
+//                                                    parmtype.c_str());
+//                   #endif
+//                   parm->SetStringParameter(parmtype, paramObj);
 
-                  if (parm->IsCoordSysDependent())
-                  {
-                     if (parmSystem == "")
-                        parmSystem = "EarthMJ2000Eq";
-                     // Which is correct here???
-                     parm->SetStringParameter("DepObject", parmSystem);
-                     parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
+//                   if (parm->IsCoordSysDependent())
+//                   {
+//                      if (parmSystem == "")
+//                         parmSystem = "EarthMJ2000Eq";
+//                      // Which is correct here???
+//                      parm->SetStringParameter("DepObject", parmSystem);
+//                      parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
 
-                  }
+//                   }
 
-                  if (parm->IsOriginDependent())
-                  {
-                     if (parmSystem == "")
-                        parmSystem = "Earth";
-                     parm->SetStringParameter("DepObject", parmSystem);
-                     parm->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
-                     if (parm->NeedCoordSystem())
-                        /// @todo Update coordinate system to better body parms
-                        parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
-                           "EarthMJ2000Eq");
-                  }
+//                   if (parm->IsOriginDependent())
+//                   {
+//                      if (parmSystem == "")
+//                         parmSystem = "Earth";
+//                      parm->SetStringParameter("DepObject", parmSystem);
+//                      parm->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
+//                      if (parm->NeedCoordSystem())
+//                         /// @todo Update coordinate system to better body parms
+//                         parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
+//                            "EarthMJ2000Eq");
+//                   }
 
                   lhsObject->SetStringParameter(label, name);
                   retval = true;
-               }
+                  //            }
             }
          }
          else
          {
-            // InterpretParameter failed; store the string for later use
-            elements.push_back(name);
-            ///@todo Figure out how to handle combos of parameters & other stuff
+            // subscribers can have variables (loj: 10/31/05)
+            if (lhsObject->IsOfType(Gmat::SUBSCRIBER))
+            {
+               //MessageInterface::ShowMessage
+               //   ("==> lhsObject->GetName()=%s subscriber=%d\n",
+               //    lhsObject->GetName().c_str(), lhsObject->IsOfType(Gmat::SUBSCRIBER));
+               
+               lhsObject->SetStringParameter(label, name);
+               retval = true;
+            }
+            else
+            {
+               // InterpretParameter failed; store the string for later use
+               elements.push_back(name);
+               ///@todo Figure out how to handle combos of parameters & other stuff
+            }
          }
       }
    }
@@ -3226,6 +3328,10 @@ bool Interpreter::InterpretParameter(const std::string text,
          paramObj.c_str(), parmSystem.c_str());
    #endif
 
+      //MessageInterface::ShowMessage
+      //("==> InterpretParameter() text=%s, paramType=%s, paramObj=%s, parmSystem=%s\n",
+      // text.c_str(), paramType.c_str(), paramObj.c_str(), parmSystem.c_str());
+   
    return true;
 }
 
