@@ -28,6 +28,8 @@ class ForDialog : public GmatDialog
 public:
    ForDialog(wxWindow *parent, For *forCommand, Integer col);
    ~ForDialog();
+   
+   bool IsUpdated();
 private:   
    wxStaticText *forStaticText;
     
@@ -37,6 +39,8 @@ private:
     
    Integer forID;
    Integer whichParameter;
+   
+   bool madeUpdate;
    
    static const int START_COL = 1;
    static const int INCR_COL = 2;

@@ -24,7 +24,7 @@
 BEGIN_EVENT_TABLE(ForDialog, GmatDialog)
    EVT_BUTTON(ID_BUTTON_OK, GmatDialog::OnOK)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
-   EVT_TEXT(ID_TEXTCTRL, ForDialog::OnTextChange)
+   EVT_TEXT_ENTER(ID_TEXTCTRL, ForDialog::OnTextChange)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -49,6 +49,8 @@ ForDialog::ForDialog(wxWindow *parent, For *forCommand, Integer col)
 
     whichParameter = col;
     
+    madeUpdate = false;
+    
     Create();
     ShowData();
 }
@@ -58,6 +60,14 @@ ForDialog::ForDialog(wxWindow *parent, For *forCommand, Integer col)
 //------------------------------------------------------------------------------
 ForDialog::~ForDialog()
 {
+}
+
+//------------------------------------------------------------------------------
+// void IsUpdated()
+//------------------------------------------------------------------------------
+bool ForDialog::IsUpdated()
+{
+    return madeUpdate;
 }
 
 //-------------------------------
@@ -74,6 +84,8 @@ void ForDialog::Initialize()
         MessageInterface::ShowMessage("Error: The For Command is NULL.\n");
         Close();
     }
+    
+    madeUpdate = false;
 }
 
 //------------------------------------------------------------------------------
@@ -85,7 +97,7 @@ void ForDialog::Create()
     forStaticText = new wxStaticText( this, ID_TEXT, wxT("For Parameter"), wxDefaultPosition, wxDefaultSize, 0 );
  
     // wxTextCtrl
-    forTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1), 0 );
+    forTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1), wxTE_PROCESS_ENTER );
  
     // wxSizer
     wxBoxSizer *mainPageSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -145,5 +157,5 @@ void ForDialog::ResetData()
 void ForDialog::OnTextChange(wxCommandEvent &event)
 {
     theOkButton->Enable(true);
+    madeUpdate = true;
 }
-
