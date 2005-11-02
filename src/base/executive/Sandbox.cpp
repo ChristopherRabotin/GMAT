@@ -1164,7 +1164,7 @@ bool Sandbox::Interrupt()
 //------------------------------------------------------------------------------
 void Sandbox::Clear()
 {
-   solarSys  = NULL;
+   //solarSys  = NULL; //loj: moved down
    sequence  = NULL;
    current   = NULL;
    state     = IDLE;
@@ -1200,19 +1200,18 @@ void Sandbox::Clear()
                (omi->second)->GetName().c_str());
          #endif
          delete omi->second;
-         // objectMap.erase(omi);
+         //objectMap.erase(omi);
       }
       /// @todo Subscribers are cloned; where are they deleted?
    }
 
    publisher = NULL;
 
-
    if (solarSys != NULL)
       delete solarSys;
 
+   solarSys = NULL;
    objectMap.clear();
-
    transientForces.clear();
 }
 
