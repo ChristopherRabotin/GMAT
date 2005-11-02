@@ -288,6 +288,11 @@ void ForPanel::OnCellLeftClick(wxGridEvent& event)
    ForDialog setupDlg(this, theForCommand, col);
    setupDlg.ShowModal();
    
+   if (setupDlg.IsUpdated())
+      theApplyButton->Enable(true);
+   else
+      return;
+   
    Integer paramId;
    wxString s1, s2, s3;
    
@@ -321,8 +326,6 @@ void ForPanel::OnCellLeftClick(wxGridEvent& event)
       mEndIsParam = false;
       mEndString = conditionGrid->GetCellValue(row, END_COL);
    }
-
-   theApplyButton->Enable(true);
 }
 
 //------------------------------------------------------------------------------
