@@ -239,9 +239,18 @@ bool Propagate::SetObject(GmatBase *obj, const Gmat::ObjectType type)
    {
    case Gmat::STOP_CONDITION:
       stopWhen.push_back((StopCondition *)obj);
+      #ifdef DEBUG_STOPPING_CONDITIONS
+         MessageInterface::ShowMessage("Adding stopping condition named %s\n",
+            obj->GetName().c_str());
+      #endif
       stopCondEpochID = obj->GetParameterID("Epoch");
       stopCondBaseEpochID = obj->GetParameterID("BaseEpoch");
       stopCondStopVarID = obj->GetParameterID("StopVar");
+      #ifdef DEBUG_STOPPING_CONDITIONS
+         MessageInterface::ShowMessage(
+            "Stopping condition IDs are [%d, %d, %d]\n",
+            stopCondEpochID, stopCondBaseEpochID, stopCondStopVarID);
+      #endif
       return true;
             
    default:
@@ -592,9 +601,19 @@ bool Propagate::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                      stopSatNames[j].c_str());
             #endif
             
+            #ifdef DEBUG_STOPPING_CONDITIONS
+               MessageInterface::ShowMessage(
+                  "Adding stopping condition named %s\n",
+                  obj->GetName().c_str());
+            #endif
             stopCondEpochID = obj->GetParameterID("Epoch");
             stopCondBaseEpochID = obj->GetParameterID("BaseEpoch");
             stopCondStopVarID = obj->GetParameterID("StopVar");
+            #ifdef DEBUG_STOPPING_CONDITIONS
+               MessageInterface::ShowMessage(
+                  "Stopping condition IDs are [%d, %d, %d]\n",
+                  stopCondEpochID, stopCondBaseEpochID, stopCondStopVarID);
+            #endif
             
             return true;
          }
@@ -1915,6 +1934,7 @@ void Propagate::PrepareToPropagate()
          Integer stopCondCount = stopWhen.size();
          MessageInterface::ShowMessage
             ("Propagate::Execute() stopCondCount = %d\n", stopCondCount);
+            
          for (Integer i=0; i<stopCondCount; i++)
          {
             MessageInterface::ShowMessage
@@ -1927,6 +1947,14 @@ void Propagate::PrepareToPropagate()
       stopEpoch = 0.0;
       std::string stopVar;
       Real stopEpochBase;
+      
+      #ifdef DEBUG_STOPPING_CONDITIONS
+         if (!singleStepMode)
+            MessageInterface::ShowMessage(
+               "Stopping condition IDs are [%d, %d, %d]\n",
+               stopCondEpochID, stopCondBaseEpochID, stopCondStopVarID);
+      #endif
+      
       
       try {
          for (UnsignedInt i = 0; i<stopWhen.size(); i++)
