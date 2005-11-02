@@ -212,6 +212,7 @@ private:
    bool mRotateAboutZaxis;
    bool mRotateEarthToEnd;
    Real lastLongitudeD;
+   float mQuat[4];     // orientation of object
    
    // zooming
    int   mLastMouseX;
@@ -263,7 +264,8 @@ private:
    
    // time
    Real mTime[MAX_DATA];
-
+   Real mLastEarthRotTime;
+   
    // spacecraft
    int   mScCount;
    float mScRadius;
@@ -368,7 +370,7 @@ private:
    // drawing objects
    void DrawFrame();
    void DrawPlot();
-   void DrawObject(const wxString &objName);
+   void DrawObject(const wxString &objName, int frame);
    void DrawObjectOrbit(int frame);
    void DrawObjectOrbitNormal(int objId, int frame, UnsignedInt color);
    void DrawSpacecraft(UnsignedInt scColor);

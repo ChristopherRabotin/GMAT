@@ -38,13 +38,19 @@
 #endif
 
 //#define SKIP_DEVIL
-
 #ifndef SKIP_DEVIL
 #  include <IL/il.h>
 #  include <IL/ilu.h>
 #  include <IL/ilut.h>
 #endif
 
+#define USE_TRACKBALL
+#ifdef USE_TRACKBALL
+extern "C"
+{
+#include "trackball.h"
+}
+#endif
 
 // If Sleep in not defined (on unix boxes)
 #ifndef Sleep 
@@ -359,6 +365,10 @@ bool TrajPlotCanvas::InitGL()
       mfCamRotYAngle = 0;
       mfCamRotZAngle = 0;
    }
+
+   #ifdef USE_TRACKBALL
+   trackball(mQuat, 0.0f, 0.0f, 0.0f, 0.0);
+   #endif
    
    return true;
 }
@@ -1141,6 +1151,8 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
       //mIsEndOfData = false;
       
       mTime[mNumData] = time;
+      if (mNumData == 0)
+         mLastEarthRotTime = time;
       
       //-------------------------------------------------------
       // update spacecraft position
@@ -1561,23 +1573,23 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
    //   return;
    
    int flippedY;
-   int clientWidth, clientHeight;
+   int width, height;
    int mouseX, mouseY;
    
    mViewAnimation = false;
    
-   GetClientSize(&clientWidth, &clientHeight);
-   ChangeProjection(clientWidth, clientHeight, mAxisLength);
+   GetClientSize(&width, &height);
+   ChangeProjection(width, height, mAxisLength);
    
    mouseX = event.GetX();
    mouseY = event.GetY();
    
    // First, flip the mouseY value so it is oriented right (bottom left is 0,0)
-   flippedY = clientHeight - mouseY;
+   flippedY = height - mouseY;
    
-   GLfloat fEndX = mfLeftPos + ((GLfloat)mouseX /(GLfloat)clientWidth) *
+   GLfloat fEndX = mfLeftPos + ((GLfloat)mouseX /(GLfloat)width) *
       (mfRightPos - mfLeftPos);
-   GLfloat fEndY = mfBottomPos + ((GLfloat)flippedY /(GLfloat)clientHeight)*
+   GLfloat fEndY = mfBottomPos + ((GLfloat)flippedY /(GLfloat)height)*
       (mfTopPos - mfBottomPos);
    
    if (mUseSingleRotAngle)
@@ -1632,7 +1644,25 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
       // rotating
       //------------------------------
       else if (event.LeftIsDown())
-      {        
+      {
+         #ifdef USE_TRACKBALL
+         
+         // drag in progress, simulate trackball
+         float spin_quat[4];
+         //float speed = 2.0;
+         float speed = 4.0;
+         trackball(spin_quat,
+                   (speed*mLastMouseX - width) / width,
+                   (     height - speed*mLastMouseY) / height,
+                   (     speed*mouseX - width) / width,
+                   (     height - speed*mouseY) / height);
+         
+         add_quats(spin_quat, mQuat, mQuat);
+         //MessageInterface::ShowMessage
+         //   ("===> mQuat=%f, %f, %f, %f\n", mQuat[0], mQuat[1], mQuat[2], mQuat[2]);
+         
+         #else
+         
          //MessageInterface::ShowMessage
          //   ("===> event.LeftIsDown() mCurrRotXYZAngle=%f, %f, %f\n",
          //    mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
@@ -1648,6 +1678,8 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
          //MessageInterface::ShowMessage
          //   ("===> after ChangeView() mfCamRotXYZAngle=%f, %f, %f\n",
          //    mfCamRotXAngle, mfCamRotYAngle, mfCamRotZAngle);
+         
+         #endif
          
          // repaint
          Refresh(false);
@@ -2033,6 +2065,16 @@ void TrajPlotCanvas::SetupWorld()
    if (!mUseSingleRotAngle)
    {
       
+      #ifdef USE_TRACKBALL
+         
+      //MessageInterface::ShowMessage
+      //   ("===> mQuat=%f, %f, %f, %f\n", mQuat[0], mQuat[1], mQuat[2], mQuat[2]);
+      GLfloat m[4][4];
+      build_rotmatrix( m, mQuat );
+      glMultMatrixf( &m[0][0] );
+      
+      #else
+      
       //Translate Camera
       glTranslatef(mfCamTransX, mfCamTransY, mfCamTransZ);
       
@@ -2054,6 +2096,8 @@ void TrajPlotCanvas::SetupWorld()
          glRotatef(mfCamRotYAngle, 0.0, 1.0, 0.0);
          glRotatef(mfCamRotZAngle, 0.0, 0.0, 1.0);
       }
+      
+      #endif
    }
    
    //camera moves opposite direction to center on object
@@ -2078,7 +2122,7 @@ void TrajPlotCanvas::ComputeView(GLfloat fEndX, GLfloat fEndY)
 {
    float fYAmnt = 360*(fEndX - mfStartX)/(mfRightPos - mfLeftPos);
    float fXAmnt = 360*(fEndY - mfStartY)/(mfBottomPos - mfTopPos);
-
+   
    
    // always rotate the y axis
    mCurrRotYAngle = mfCamRotYAngle + fYAmnt;
@@ -2360,7 +2404,7 @@ void TrajPlotCanvas::ComputeProjection(int frame)
           mfCamTransZ, mfCamSingleRotAngle, mfCamRotXAxis, mfCamRotYAxis,
           mfCamRotZAxis, mAxisLength);
    #endif
-}
+} // end ComputeProjection(int frame)
 
 
 //------------------------------------------------------------------------------
@@ -2469,8 +2513,17 @@ void TrajPlotCanvas::TransformView(int frame)
          
          // DJC added for Up
          glRotatef(-mfUpAngle, mfUpXAxis, mfUpYAxis, -mfUpZAxis);
-         //loj:glRotatef(mfUpAngle, mfUpXAxis, mfUpYAxis, mfUpZAxis);
-
+         
+         #ifdef USE_TRACKBALL
+         
+         //MessageInterface::ShowMessage
+         //   ("===> mQuat=%f, %f, %f, %f\n", mQuat[0], mQuat[1], mQuat[2], mQuat[2]);
+         GLfloat m[4][4];
+         build_rotmatrix( m, mQuat );
+         glMultMatrixf( &m[0][0] );
+         
+         #else
+         
          //-------------------------------------------------
          // add current user mouse rotation
          //-------------------------------------------------
@@ -2492,6 +2545,8 @@ void TrajPlotCanvas::TransformView(int frame)
             glRotatef(mfCamRotYAngle, 0.0, 1.0, 0.0);
             glRotatef(mfCamRotZAngle, 0.0, 0.0, 1.0);
          }
+         
+         #endif
          
       } //if (mUseGluLookAt)
    } //if (mUseSingleRotAngle)
@@ -2612,9 +2667,11 @@ void TrajPlotCanvas::DrawPlot()
    
    DrawStatus("Frame#: ", mNumData-1, mTime[mNumData-1]);
    
-   //MessageInterface::ShowMessage
-   //   ("===> TrajPlotCanvas::DrawPlot() mIsEndOfData=%d, mIsEndOfRun=%d\n",
-   //    mIsEndOfData, mIsEndOfRun);
+   #if DEBUG_TRAJCANVAS_DRAW
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::DrawPlot() mIsEndOfData=%d, mIsEndOfRun=%d\n",
+      mIsEndOfData, mIsEndOfRun);
+   #endif
    
    // compute projection if not using initial viewpoint and not end of run
    //loj:10/7/05 if (mUseInitialViewPoint && !mIsEndOfData)
@@ -2640,8 +2697,9 @@ void TrajPlotCanvas::DrawPlot()
       DrawEquatorialPlane(mXyPlaneColor);
    
    // draw axes
-   if (mDrawAxes)
-      DrawAxes();
+   //loj: 11/2/05 moved to DrawObject()
+   //    if (mDrawAxes)
+   //       DrawAxes();
    
    // draw ecliptic plane
    if (mDrawEcPlane)
@@ -2666,20 +2724,20 @@ void TrajPlotCanvas::DrawPlot()
 
 
 //------------------------------------------------------------------------------
-//  void DrawObject(const wxString &objName)
+//  void DrawObject(const wxString &objName, int frame)
 //------------------------------------------------------------------------------
 /**
  * Draws object sphere and maps texture image.
  */
 //------------------------------------------------------------------------------
-void TrajPlotCanvas::DrawObject(const wxString &objName)
+void TrajPlotCanvas::DrawObject(const wxString &objName, int frame)
 {
    int objId = GetObjectId(objName);
    
    #if DEBUG_TRAJCANVAS_DRAW > 1
    MessageInterface::ShowMessage
-         ("TrajPlotCanvas::DrawObject() drawing:%s, objId:%d\n",
-          objName.c_str(), objId);
+         ("TrajPlotCanvas::DrawObject() drawing:%s, objId:%d, frame=%d\n",
+          objName.c_str(), objId, frame);
    #endif
    
    //-------------------------------------------------------
@@ -2690,6 +2748,21 @@ void TrajPlotCanvas::DrawObject(const wxString &objName)
       ("TrajPlotCanvas::DrawObject() mObjectTextureIdMap[%s]=%d\n",
        objName.c_str(), mObjectTextureIdMap[objName]);
    #endif
+   
+   // rotate Earth
+   if (objName == "Earth")
+   {
+      //MessageInterface::ShowMessage("===> mTime[frame]=%f, mLastEarthRotTime=%f\n",
+      //                              mTime[frame], mLastEarthRotTime);
+      float earthRotAngle = (mTime[frame] - mLastEarthRotTime) * 360.0;
+      earthRotAngle = Mod(earthRotAngle, 360.0);
+      glRotatef(earthRotAngle, 0.0, 0.0, 1.0);
+      //mLastEarthRotTime = mTime[frame];
+      //MessageInterface::ShowMessage("===> earthOwnAngle=%f\n", earthRotAngle);
+   }
+   
+   if (mDrawAxes && objId == mOriginId)
+      DrawAxes();
    
    if (mObjectTextureIdMap[objName] != GmatPlot::UNINIT_TEXTURE)
    {
@@ -2726,7 +2799,7 @@ void TrajPlotCanvas::DrawObject(const wxString &objName)
       
       glDisable(GL_TEXTURE_2D);
    }
-   
+      
 } // end DrawObject(const wxString &objName)
 
 
@@ -2903,7 +2976,7 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
             if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT))
                DrawSpacecraft(mObjectOrbitColor[objId][mObjLastFrame[obj]]);
             else
-               DrawObject(objName);
+               DrawObject(objName, frame);
             
             glPopMatrix();
             
@@ -3322,6 +3395,8 @@ void TrajPlotCanvas::DrawAxes()
 {
    wxString axisLabel;
    GLfloat viewDist;
+
+   glLineWidth(2.0); //loj: 11/2/05 Fix for L57
    
    //-----------------------------------
    // draw axes
@@ -3358,7 +3433,10 @@ void TrajPlotCanvas::DrawAxes()
    
    glColor3f(1, 1, 0);   // yellow
    axisLabel = "+Z " + mViewCoordSysName;
-   DrawStringAt(axisLabel, 0.0, 0.0, viewDist);   
+   DrawStringAt(axisLabel, 0.0, 0.0, viewDist);
+   
+   glLineWidth(1.0);
+   
 }
 
 
