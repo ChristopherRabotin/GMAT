@@ -840,7 +840,7 @@ void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
    mViewUpCoordSysName = wxString(viewUpCs->GetName().c_str());
    
    // set view center object
-   mOriginName = wxString(viewCs->GetOriginName().c_str());
+   mOriginName = wxString(viewCs->GetOriginName().c_str());   
    mOriginId = GetObjectId(mOriginName);
    
    mViewObjName = mOriginName;
@@ -851,16 +851,18 @@ void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
    if (!mUseViewDirectionVector && mViewDirectionObj != NULL)
    {
       mViewObjName = wxString(mViewDirectionObj->GetName().c_str());
-      mViewObjId = GetObjectId(mViewObjName);
+      //mViewObjId = GetObjectId(mViewObjName);
+      //loj: 11/2/05 commented out because when solar system is deleted in the
+      //Sandbox it crashes when rerunning the default mission
    }
    
    mMaxZoomIn = mObjMaxZoomIn[mOriginId];
-
+   
    if (mUseInitialViewPoint)
    {
       mAxisLength = mMaxZoomIn;
    }
-      
+   
    #if DEBUG_TRAJCANVAS_OBJECT
    MessageInterface::ShowMessage
       ("TrajPlotCanvas::SetGlCoordSystem() mViewCoordSystem=%s, originName=%s, "
@@ -927,11 +929,14 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
    
    #if DEBUG_TRAJCANVAS_PROJ
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::SetGlViewOption() vpRefObj=%d, vpVecObj=%d, "
-       "vdObj=%d, vsFactor=%f\nvpRefVec=%s, vpVec=%s, vdVec=%s, upAxis=%s, "
-       "usevpRefVec=%d, usevpVec=%d, usevdVec=%d\n",  vpRefObj, vpVecObj, vdObj,
-       vsFactor, lvpRefVec.ToString().c_str(), lvpVec.ToString().c_str(),
-       lvdVec.ToString().c_str(), upAxis.c_str(), usevpRefVec, usevpVec, usevdVec);
+      ("TrajPlotCanvas::SetGlViewOption() mViewPointRefObj=%d, "
+       "mViewPointVectorObj=%d\n   mViewDirectionObj=%d, mViewScaleFactor=%f   "
+       "mViewPointRefVector=%s\n   mViewPointVector=%s, mViewDirectionVector=%s, "
+       "mViewUpAxisName=%s\n   mUseViewPointRefVector=%d, mUseViewDirectionVector=%d, "
+       "mUseFixedFov=%d, mFixedFovAngle=%f\n",  mViewPointRefObj, mViewPointVectorObj,
+       mViewDirectionObj, mViewScaleFactor, lvpRefVec.ToString().c_str(),
+       lvpVec.ToString().c_str(), lvdVec.ToString().c_str(), mViewUpAxisName.c_str(),
+       mUseViewPointRefVector, mUseViewDirectionVector, mUseFixedFov, mFixedFovAngle);
    #endif
    
    // Set viewpoint ref. object id
