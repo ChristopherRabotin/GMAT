@@ -1116,6 +1116,10 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
       }
    }
 
+   //loj: 11/1/05 Added
+   theGuiInterpreter->ClearResource();
+   theGuiInterpreter->ClearCommandSeq();
+   
    event.Skip();
 }
 
@@ -1295,6 +1299,7 @@ void GmatMainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
    wxYield();
    
    theGuiInterpreter->ChangeRunState("Stop");
+   mRunPaused = false;
    
    toolBar->EnableTool(TOOL_RUN, TRUE);
 }
@@ -1917,7 +1922,8 @@ void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
-   GmatAppData::GetMainFrame()->RunCurrentMission();
+   //GmatAppData::GetMainFrame()->RunCurrentMission();
+   RunCurrentMission();
 }
 
 //------------------------------------------------------------------------------
