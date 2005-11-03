@@ -80,6 +80,7 @@ GUI_INCS = -I$(APP) -I$(BURN) -I$(COMMAND) -I$(CTRLLOGIC) -I$(COORDSYS) \
 
 # Object modules for library
 OBJ = $(SRC:.cpp=.o)
+OBJ += $(SRC:.c=.o)
 #
 CXXFLAGS = $(BASE_INCS) $(GUI_INCS) $(WXFLAGS) -O2 \
 	`$(WX_HOME)/wx-config --cxxflags` -dynamic -Wall
@@ -87,7 +88,7 @@ CXXFLAGS = $(BASE_INCS) $(GUI_INCS) $(WXFLAGS) -O2 \
 CPP = g++ $(CXXFLAGS) $(TESTFLAGS) $(MATLABFLAGS)
 #
 # Default suffix rule
-.SUFFIXES: .o .cpp
+.SUFFIXES: .o .cpp .c
 #
 ###############################################################################
 # Target definitions
@@ -101,6 +102,9 @@ $(LIB): $(OBJ)
 	@chmod -R 755 $(LIBDIR)
 
 .cpp.o:
+	$(CPP) -c $<
+
+..o:
 	$(CPP) -c $<
 
 clean:
