@@ -17,8 +17,9 @@ TESTFLAGS = -DSKIP_DEVIL
 SRC = MdiChildTrajFrame.cpp MdiChildTsFrame.cpp MdiGlPlotData.cpp \
 	MdiTsPlotData.cpp OpenGlOptionDialog.cpp OpenGlPlotSetupPanel.cpp \
 	ReportFileSetupPanel.cpp TrajPlotCanvas.cpp TsPlotCanvas.cpp \
-	TsPlotCurve.cpp XyPlotSetupPanel.cpp trackball.c
+	TsPlotCurve.cpp XyPlotSetupPanel.cpp
 # 
+C_SRC = trackball.c
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/gui/inc.mac
