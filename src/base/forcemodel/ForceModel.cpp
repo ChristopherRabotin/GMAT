@@ -672,6 +672,9 @@ void ForceModel::RevertSpaceObject()
 //------------------------------------------------------------------------------
 bool ForceModel::Initialize()
 {
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("ForceModel::Initialize() entered\n");
+   #endif
    Integer stateSize = 6;      // Will change if we integrate more variables
    Integer satCount = 1;
    std::vector<SpaceObject *>::iterator sat;
@@ -705,13 +708,28 @@ bool ForceModel::Initialize()
       stateSize = state->GetSize();
       dimension += stateSize;  
    }
-    
+
+   if (dimension == 0)
+      throw ForceModelException("Attempting to initialize force model '" +
+         instanceName + "' with dimension 0 -- No referenced spacecraft?");
+
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage(
+         "Calling PhysicalModel::Initialize(); dimension = %d\n", dimension);
+   #endif
+
    if (!PhysicalModel::Initialize())
       return false;
-   rawState = new Real[dimension];
+
+   rawState = new Real[stateSize];
 
    if (spacecraft.size() == 0) 
    {
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Setting state data; dimension = %d\n", 
+            dimension);
+      #endif
+      
       modelState[0] = 7000.0;
       modelState[1] =    0.0;
       modelState[2] = 1000.0;

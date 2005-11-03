@@ -607,52 +607,57 @@ bool PropSetup::SetStringParameter(const std::string &label, const std::string &
 //------------------------------------------------------------------------------
 bool PropSetup::Initialize()
 {
-   //MessageInterface::ShowMessage("PropSetup::Initialize() entered \n");
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("PropSetup::Initialize() entered \n");
+   #endif
    mInitialized = true;
 
    if (mPropagator == NULL)
    {
-      MessageInterface::ShowMessage("PropSetup::Initialize() mPropagator is NULL\n");
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage(
+            "PropSetup::Initialize() mPropagator is NULL\n");
+      #endif
       mInitialized = false;
    }
    
    if (mForceModel == NULL)
    {
-      MessageInterface::ShowMessage("PropSetup::Initialize() mForceModel is NULL\n");
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage(
+            "PropSetup::Initialize() mForceModel is NULL\n");
+      #endif
       mInitialized = false;
    }
    else if (mForceModel->GetNumForces() == 0)
    {
-      MessageInterface::ShowMessage("PropSetup::Initialize() NumForces is 0\n");
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage(
+            "PropSetup::Initialize() NumForces is 0\n");
+      #endif
       mInitialized = false;
    }
    
-   //MessageInterface::ShowMessage("PropSetup::Initialize() initialized = %d\n",
-   //                              mInitialized);
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage(
+         "PropSetup::Initialize() initialized = %d\n", mInitialized);
+   #endif
    
    if (mInitialized == true)
    {
-// DJC 8/13/04: These are now part of the ForceModel
-//      if (usedrag)
-//      {
-//         DragForce *dragForce = new DragForce;
-//         mForceModel->AddForce(dragForce);
-//         Integer id = dragForce->GetParameterID("AtmosphereModel");
-//         dragForce->SetStringParameter(id, dragType);
-//      }
-//      
-//      if (useSRP)
-//      {
-//         SolarRadiationPressure *srp = new SolarRadiationPressure("srp");
-//         mForceModel->AddForce(srp);
-//      }
-      
       mPropagator->SetPhysicalModel(mForceModel);
-      //MessageInterface::ShowMessage("PropSetup::Initialize() after SetPhysicalModel(%s) \n",
-      //                              mForceModel->GetName().c_str());
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage(
+            "PropSetup::Initialize() after SetPhysicalModel(%s) \n",
+            mForceModel->GetName().c_str());
+      #endif
 
       mPropagator->Initialize();
-      //MessageInterface::ShowMessage("PropSetup::Initialize() after mPropagator->Initialize() \n");
+      
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage(
+            "PropSetup::Initialize() after mPropagator->Initialize() \n");
+      #endif
    }
    
    return true;

@@ -1,6 +1,8 @@
 # Linux makefile for a single GMAT base library for the Linux GUI
 # Initial Version - D. Conway - 2005/06/17
 
+include ../BuildEnv.mk
+
 WXTARGET = lib/libGmatGui.a
 
 TARGETS = $(WXTARGET)
@@ -53,6 +55,7 @@ HEADERS = -Iinclude \
 # Uncomment this section (and edit the path) to build with Matlab
 CPPFLAGS = $(OPTIMIZATIONS) -Wall -D__USE_MATLAB__=1 \
            -DSKIP_DEVIL `/usr/local/bin/wx-config --cppflags` \
+           $(MATLAB_INCLUDE) \
            -IC:/Program\ Files/MATLAB71/extern/include 
 
 # Uncomment this section to build without Matlab

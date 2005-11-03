@@ -1297,15 +1297,19 @@ GmatCommand* Interpreter::InterpretGMATFunction(const std::string &pathAndName)
    // Set the start of the command stream
    GmatCommand *commands = NULL;
    
+   bool commandNotEncountered = true;
+   
    // Parse the file
-   funFile.getline(buffer, 4095);
+   funFile.getline(buffer, 4094);
    while (!funFile.eof())
    {
       ++lineNum;
       currentLine = buffer;
 
+      #ifdef DEBUG_FUNCTION_PARSING
          MessageInterface::ShowMessage("%d: %s\n", lineNum, 
             currentLine.c_str());
+      #endif
       
       // Truncate the line at the comment character, if there is one
       loc = currentLine.find('%', 0);
@@ -1381,12 +1385,13 @@ GmatCommand* Interpreter::InterpretGMATFunction(const std::string &pathAndName)
       }
       else  // Toss the remaining lines into the buffer for parsing
       {
+         // Creation of local objects is handled first
          loc = currentLine.find("Create ", 0);
          if (loc != std::string::npos)
          {
             // Handle Create lines
             std::string type, name;
-            StringArray createLine = this->SeparateSpaces(currentLine);
+            StringArray createLine = SeparateSpaces(currentLine);
             if (createLine[0] != "Create")
             {
                std::string errstr = 
@@ -1405,6 +1410,12 @@ GmatCommand* Interpreter::InterpretGMATFunction(const std::string &pathAndName)
                                            "\nFunction text: \"" + 
                                            currentLine + "\"");
             obj->SetName(name);
+
+            //#ifdef DEBUG_FUNCTION_PARSING
+               MessageInterface::ShowMessage("Created a %s named '%s'\n", 
+                  obj->GetTypeName().c_str(), obj->GetName().c_str());
+            //#endif
+
             if (commands == NULL)
                throw InterpreterException(
                   "Did not create BeginFunction command");
@@ -1412,8 +1423,57 @@ GmatCommand* Interpreter::InterpretGMATFunction(const std::string &pathAndName)
          }
          else
          {
-            // Add all others to the block of commands that are parsed
-            block += currentLine + "\n";
+            if (commandNotEncountered)
+            {
+               StringArray paramLine = SeparateSpaces(currentLine);
+               if ((paramLine.size() > 3) && (paramLine[0] == "GMAT"))
+               {
+                  MessageInterface::ShowMessage("GMAT line:  '%s'\n", 
+                     currentLine.c_str());
+                  
+                  // Format should be "GMAT obj.parm = val;"
+                  if (paramLine[2] == "=")
+                  {
+                     GmatBase *obj = NULL;
+                     Integer parmID;
+                     std::string value;
+
+                     StringArray objectData = SeparateDots(paramLine[1]);
+                     if (objectData.size() >= 2)
+                     {
+                        obj = commands->GetRefObject(Gmat::UNKNOWN_OBJECT, 
+                                 objectData[0]);
+                                 
+                        parmID = obj->GetParameterID(objectData[1]);                              
+                        if (obj != NULL)
+                        {
+                           MessageInterface::ShowMessage("Setting %s on %s\n",
+                              objectData[1].c_str(), obj->GetName().c_str());
+                           SetParameter(obj, parmID, paramLine[3]);
+                        }
+                     }
+                  }
+               }
+               else
+               {
+                  block += currentLine + "\n";
+                  if (paramLine.size() > 0)
+                  {
+                     if (find(cmdmap.begin(),cmdmap.end(),paramLine[0]) != 
+                         cmdmap.end())
+                     {
+                        MessageInterface::ShowMessage("Command found:  '%s'\n",
+                           paramLine[0].c_str()); 
+                        commandNotEncountered = false;
+                     }
+                  }
+               }
+            }
+            else
+            {
+               // Add all others to the block of commands that are parsed
+               block += currentLine + "\n";
+            }
          }
       }
       
@@ -3439,10 +3499,10 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
 
          // Create the command
          if (find(cmdList.begin(), cmdList.end(), cmdType) == cmdList.end()) {
-            MessageInterface::PopupMessage(Gmat::WARNING_, 
-               "Cannot create a command from the command line\n  " +
-               (*i) + "\nUnknown command " + cmdType + 
-               "\nAttempting to continue...");
+//            MessageInterface::PopupMessage(Gmat::WARNING_, 
+//               "Cannot create a command from the command line\n  " +
+//               (*i) + "\nUnknown command " + cmdType + 
+//               "\nAttempting to continue...");
             continue;
          }
          subsequent = moderator->CreateCommand(cmdType);
@@ -3546,12 +3606,12 @@ StringArray Interpreter::SeparateLines(const std::string block)
       ++end;
    }
    
-//   #ifdef DEBUG_TOKEN_PARSING
+   #ifdef DEBUG_TOKEN_PARSING
       MessageInterface::ShowMessage(
          "Broke this text:\n  '%s'\ninto these lines:\n", block.c_str());
       for (StringArray::iterator i = sar.begin(); i != sar.end(); ++i)
          MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
-//   #endif
+   #endif
    
    return sar;
 }

@@ -191,9 +191,12 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
    dimension                   (pm.dimension),
    initialized                 (pm.initialized),
    stateChanged                (pm.stateChanged),
+   modelState                  (NULL),
+   rawState                    (NULL),
    epoch                       (pm.epoch),
    elapsedTime                 (pm.elapsedTime),
    prevElapsedTime             (pm.prevElapsedTime),
+   deriv                       (NULL),
    relativeErrorThreshold      (pm.relativeErrorThreshold),
    solarSystem                 (pm.solarSystem)
 {
@@ -347,7 +350,9 @@ void PhysicalModel::SetForceOrigin(CelestialBody* toBody)
 //------------------------------------------------------------------------------
 bool PhysicalModel::Initialize(void)
 { 
-   //MessageInterface::ShowMessage("PhysicalModel::Initialize() entered\n");
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("PhysicalModel::Initialize() entered\n");
+   #endif
    
    if (modelState) {
       delete [] modelState;

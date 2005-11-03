@@ -25,6 +25,8 @@
 #include "ForceModel.hpp"
 #include "PropSetup.hpp"
 
+#define DEBUG_OBJECT_MAPPING
+
 
 const std::string
 BeginFunction::PARAMETER_TEXT[BeginFunctionParamCount - GmatCommandParamCount] =
@@ -103,15 +105,19 @@ GmatBase* BeginFunction::GetRefObject(const Gmat::ObjectType type,
    if (type == Gmat::UNKNOWN_OBJECT)  // Just find it by name
    {
       /// @todo Look up return object based on the name used in function call
-         for (unsigned int i=0; i<outputObjects.size(); i++)
+      for (unsigned int i=0; i<outputObjects.size(); i++)
+      {
+         if (outputObjects[i] == name)
          {
-            if (outputObjects[i] == name)
-            {
 //               MessageInterface::ShowMessage("\nFound output object %s in position %d.  Return Object size is %d\n",
 //                  name.c_str(), i, returnObjects.size());
-               return returnObjects[i];
-            }
+            return returnObjects[i];
          }
+      }
+      
+      // Check local object map in case we are setting a local object parameter
+      if (localMap.find(name) != localMap.end())
+         return localMap[name];
    }
 
 
@@ -711,7 +717,7 @@ bool BeginFunction::Initialize()
    // Fill in the local object array with clones of the expected inputs
    for (UnsignedInt i = 0; i < inputObjects.size(); ++i)
    {
-      MessageInterface::ShowMessage("Cloning object %s, setting name to %s\n",
+      MessageInterface::ShowMessage("Copying object %s to %s\n",
                inputObjects[i].c_str(), inputs[i].c_str());
 
       if (objectMap->find(inputObjects[i]) == objectMap->end())
@@ -825,10 +831,10 @@ bool BeginFunction::Initialize()
 //    MessageInterface::ShowMessage("*****LOCAL MAP********\n");
 
 
-    for (unsigned int i=0; i<newParam.size(); i++)
-    {
-       obj = newParam[i];
-obj->SetSolarSystem(solarSys);
+   for (unsigned int i=0; i<newParam.size(); i++)
+   {
+      obj = newParam[i];
+      obj->SetSolarSystem(solarSys);
 
 
 //      MessageInterface::ShowMessage("initializing...%s\n", obj->GetName().c_str());
@@ -857,6 +863,9 @@ obj->SetSolarSystem(solarSys);
 
 
       BuildReferences(obj);
+      
+      MessageInterface::ShowMessage("Initializing %s\n", obj->GetName().c_str());
+      
       obj->Initialize();
 //      MessageInterface::ShowMessage("finished initializing...%s, value = %f\n",
 //         obj->GetName().c_str(), param->EvaluateReal());
@@ -867,38 +876,20 @@ obj->SetSolarSystem(solarSys);
 //    throw CommandException("hold on");
 
 
-//      // Init local objects
-//   for (omi = localMap.begin(); omi != localMap.end(); ++omi)
-//   {
-//      obj = omi->second;
-//
-//      if (obj->GetType() == Gmat::PARAMETER)
-//      {
-//         MessageInterface::ShowMessage("initializing...%s\n", obj->GetName().c_str());
-//         //initialize
-//         Parameter *param = (Parameter *)obj;
-//         param->SetSolarSystem(solarSys);
-//
-//         // add all new objects
-//            for (unsigned int j=0; j<newObj.size(); j++)
-//            {
-//               if (newObj[j]->GetType() == Gmat::COORDINATE_SYSTEM)
-//                  param->SetInternalCoordSystem((CoordinateSystem *)newObj[j]
-//                              ->GetType());
-//               else
-//               {
-//                  obj->SetRefObject(newObj[j], newObj[j]->GetType(),
-//                  newObj[j]->GetName());
-//               }
-//            }
-//
-//
-//
-//         BuildReferences(obj);
-//         obj->Initialize();
-//      }
-//
-//   }
+   // Init local objects
+   for (omi = localMap.begin(); omi != localMap.end(); ++omi)
+   {
+      obj = omi->second;
+
+      if (obj->GetType() != Gmat::PARAMETER)
+      {
+         //initialize
+         obj->SetSolarSystem(solarSys);
+         BuildReferences(obj);
+         MessageInterface::ShowMessage("Initializing %s\n", obj->GetName().c_str());
+         obj->Initialize();
+      }
+   }
 
 
    cmd = next;
