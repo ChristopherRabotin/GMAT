@@ -52,6 +52,6 @@ private:
    std::stringstream mStringStream;
    std::istringstream *mInStringStream;
    static GmatInterface *instance;
-
+   static bool mPassedInterpreter;
 };
 #endif

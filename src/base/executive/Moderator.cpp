@@ -87,6 +87,8 @@ Moderator* Moderator::Instance()
 //------------------------------------------------------------------------------
 bool Moderator::Initialize(bool fromGui)
 {
+   isFromGui = fromGui;
+   
    try
    {
       // Read startup file, Set Log file
@@ -163,9 +165,7 @@ bool Moderator::Initialize(bool fromGui)
       theInternalCoordSystem = CreateCoordinateSystem("", true);
       theInternalCoordSystem->SetName("EarthMJ2000Eq");
       
-      //loj: 9/16/05 Added
       // Set object pointers so that it can be used in CS conversion in the GUI
-      //SpacePoint *earth = (SpacePoint*)GetConfiguredItem("Earth");
       SpacePoint *origin =
          (SpacePoint*)GetConfiguredItem(theInternalCoordSystem->GetOriginName());
       origin->SetJ2000Body(earth);
@@ -1579,7 +1579,7 @@ ForceModel* Moderator::CreateForceModel(const std::string &name)
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage("Moderator::CreateForceModel()\n" +
-                                    e.GetMessage());
+                                    e.GetMessage() + "\n");
    }
    
    return fm;
@@ -2907,6 +2907,10 @@ Integer Moderator::RunMission(Integer sandboxNum)
       if (sandboxNum > 0 && sandboxNum <= Gmat::MAX_SANDBOX)
       {
          sandboxes[sandboxNum-1]->Clear();
+         #if DEBUG_RUN
+         MessageInterface::ShowMessage
+            ("Moderator::RunMission() after sandboxes[%d]->Clear()\n", sandboxNum-1);
+         #endif
       }
       else
       {
@@ -2959,13 +2963,6 @@ Integer Moderator::RunMission(Integer sandboxNum)
          MessageInterface::ShowMessage
             ("Moderator::RunMission() after ExecuteSandbox() \n");
          #endif
-
-         //-----------------------------------------------------------
-         //loj: 3/2/05 comment the line so that MATLAB can get the
-         // internal object.
-         // Move this to ClearResource()
-         //sandboxes[sandboxNum-1]->Clear();
-         //-----------------------------------------------------------
       
       }
       catch (BaseException &e)
@@ -2986,7 +2983,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
    else
    {
       MessageInterface::PopupMessage
-         (Gmat::ERROR_, "Mission not Complete. Cannot Run Mission");
+         (Gmat::ERROR_, "Mission not Complete. Cannot Run Mission.\n");
       status = -3;
    }
    
@@ -3001,7 +2998,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
    clock_t t2 = clock();
    MessageInterface::ShowMessage
       ("===> Total Run Time: %f seconds\n", (Real)(t2-t1)/CLOCKS_PER_SEC);
-   
+
    MessageInterface::ShowMessage("\n========================================\n");
    
    return status;
@@ -3077,8 +3074,15 @@ Gmat::RunState Moderator::GetUserInterrupt()
 //------------------------------------------------------------------------------
 Gmat::RunState Moderator::GetRunState()
 {
-   if (!isRunReady)
-      runState = Gmat::RUNNING;
+   #if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::GetRunsState() isRunReady=%d, endOfInterpreter=%d\n",
+       isRunReady, endOfInterpreter);
+   #endif
+   
+   // return RUNNING so that Matlab can wait for building objects
+   if (!isRunReady && !endOfInterpreter)
+      return Gmat::RUNNING;
    
    #if DEBUG_RUN
    MessageInterface::ShowMessage
@@ -3105,6 +3109,8 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
 {
    bool status = false;
    isRunReady = false;
+   endOfInterpreter = false;
+   runState = Gmat::IDLE;
    
    //MessageInterface::ShowMessage("========================================\n");
    //MessageInterface::ShowMessage("Moderator::InterpretScript() entered\n"
@@ -3113,6 +3119,10 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
       ("Interpreting scripts from the file.\n***** file: " + scriptFileName + "\n");
    
    //clear both resource and command sequence
+   #if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::InterpretScript() clearing both resource and command sequence...\n");
+   #endif
    ClearResource();
    ClearCommandSeq();
    
@@ -3186,8 +3196,11 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::ShowMessage(e.GetMessage());
       isRunReady = false;
    }
+   
+   endOfInterpreter = true;
 
    return status;
 }
@@ -3207,7 +3220,9 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
 {
    bool status = false;
    isRunReady = false;
-    
+   endOfInterpreter = false;
+   runState = Gmat::IDLE;
+   
    //MessageInterface::ShowMessage("========================================\n");
    //MessageInterface::ShowMessage("Moderator::InterpretScript(ss) entered\n");
    MessageInterface::ShowMessage
@@ -3251,8 +3266,11 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::ShowMessage(e.GetMessage());
       isRunReady = false;
    }
+
+   endOfInterpreter = true;
 
    return status;
 }
@@ -3354,7 +3372,7 @@ void Moderator::InitializePlanetarySource()
                                      GetFullPathname("DE405_FILE"));
    
    // initialize planetary file types/names in use
-   // Set DE405 as default (loj: 9/12/05)
+   // Set DE405 as default
    thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE405]);
    thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[ANALYTIC]); 
    thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[SLP]);

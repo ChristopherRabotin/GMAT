@@ -329,6 +329,8 @@ private:
    // member data
    bool isSlpAlreadyInUse;
    bool isRunReady;
+   bool isFromGui;
+   bool endOfInterpreter;
    std::vector<Sandbox*> sandboxes;
    std::vector<GmatCommand*> commands;
    

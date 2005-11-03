@@ -22,6 +22,7 @@
 #include "MessageInterface.hpp"
 
 GmatInterface* GmatInterface::instance = NULL;
+bool GmatInterface::mPassedInterpreter = false;
 
 //#define DEBUG_GMAT_INTERFACE 1
 
@@ -90,7 +91,7 @@ void GmatInterface::BuildObject()
 {
   
    Moderator *moderator = Moderator::Instance();
-   
+   mPassedInterpreter = false;
    std::streambuf *streamBuf = mStringStream.rdbuf();
 
    // redirect mInStringStream into mStringStream
@@ -105,11 +106,11 @@ void GmatInterface::BuildObject()
    #endif
    
    // flag to clear objects and mission sequence
-   moderator->InterpretScript(mInStringStream, true);
-  
+   mPassedInterpreter = moderator->InterpretScript(mInStringStream, true);
+   
    Moderator::GetGuiInterpreter()->UpdateResourceTree();
    Moderator::GetGuiInterpreter()->UpdateMissionTree();
-
+   
    // empty the buffer, once objects are created
    mStringStream.str("");
 }
@@ -161,13 +162,16 @@ void GmatInterface::UpdateObject()
 void GmatInterface::RunScript()
 {
    #if DEBUG_GMAT_INTERFACE
-   MessageInterface::ShowMessage("GmatInterface::RunScript() entered\n");
+   MessageInterface::ShowMessage
+      ("GmatInterface::RunScript() entered. mPassedInterpreter=%d\n",
+       mPassedInterpreter);
    #endif
-   
-   Moderator::Instance()->RunScript();
+
+   if (mPassedInterpreter)
+      Moderator::Instance()->RunScript();
 }
 
-//loj: 8/2/05 Added
+
 //------------------------------------------------------------------------------
 // char* GetRunState()
 //------------------------------------------------------------------------------
