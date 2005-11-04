@@ -3,7 +3,12 @@
 
 include ../BuildEnv.mk
 
+ifeq ($(USE_MATLAB),1)
 WXTARGET = gmat.exe
+else
+WXTARGET = gmatNoMatlab.exe
+endif
+
 TARGETS = $(WXTARGET)
 LIBS = ../base/lib/libGmatGui.a
 
@@ -156,7 +161,6 @@ OBJECTS = \
     spacecraft/ThrusterPanel.o \
     view/ViewTextFrame.o 
 
-# Uncomment to build with MATLAB
 $(WXTARGET) : $(OBJECTS) $(LIBS)
 	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
 	cp -f $(WXTARGET) ../bin/.
