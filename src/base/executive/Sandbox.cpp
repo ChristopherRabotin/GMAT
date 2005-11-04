@@ -622,8 +622,10 @@ bool Sandbox::Initialize()
                "Sandbox::Initialize objTypeName = %s, objName = %s\n",
                obj->GetTypeName().c_str(), obj->GetName().c_str());
          #endif
-
+            
          BuildReferences(obj);
+         if (obj->IsOfType("OpenGLPlot"))
+            obj->SetRefObject(solarSys, Gmat::SOLAR_SYSTEM, "");
          obj->Initialize();
       }
    }
