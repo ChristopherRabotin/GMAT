@@ -92,7 +92,7 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
    // status bar
    //CreateStatusBar();
    //SetStatusText(title);
-   
+      
    // Create GLCanvas
    int width, height;
    GetClientSize(&width, &height);
@@ -225,6 +225,18 @@ bool MdiChildTrajFrame::GetDrawAxes()
 }
 
 //------------------------------------------------------------------------------
+// bool GetDrawGrid()
+//------------------------------------------------------------------------------
+bool MdiChildTrajFrame::GetDrawGrid()
+{
+   if (mCanvas)
+      return mCanvas->GetDrawGrid();
+
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 // UnsignedInt GetXyPlaneColor()
 //------------------------------------------------------------------------------
 UnsignedInt MdiChildTrajFrame::GetXyPlaneColor()
@@ -234,6 +246,7 @@ UnsignedInt MdiChildTrajFrame::GetXyPlaneColor()
 
    return 0;
 }
+
 
 //------------------------------------------------------------------------------
 // UnsignedInt GetEcPlaneColor()
@@ -489,6 +502,20 @@ void MdiChildTrajFrame::SetDrawAxes(bool flag)
       //loj: the event ID is not in the GmatPlot yet
       //mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_AXES, flag);
       mCanvas->SetDrawAxes(flag);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetDrawGrid(bool flag)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetDrawGrid(bool flag)
+{
+   if (mCanvas)
+   {
+      //loj: the event ID is not in the GmatPlot yet
+      //mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_GRID, flag);
+      mCanvas->SetDrawGrid(flag);
    }
 }
 

@@ -58,6 +58,7 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
    "WireFrame",
    "TargetStatus",
    "Axes",
+   "Grid",
    "EarthSunLines",
    "Overlap",
    "UseInitialView",
@@ -92,6 +93,7 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
    Gmat::STRING_TYPE,            //"WireFrame"
    Gmat::STRING_TYPE,            //"TargetStatus"
    Gmat::STRING_TYPE,            //"Axes"
+   Gmat::STRING_TYPE,            //"Grid"
    Gmat::STRING_TYPE,            //"EarthSunLines"
    
    Gmat::STRING_TYPE,            //"Overlap"
@@ -127,12 +129,14 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
 {
    // GmatBase data
    parameterCount = OpenGlPlotParamCount;
+   objectTypeNames.push_back("OpenGLPlot");
 
    mEclipticPlane = "Off";
    mXYPlane = "On";
    mWireFrame = "Off";
    mTargetStatus = "Off";
    mAxes = "Off";
+   mGrid = "Off";
    mEarthSunLines = "Off";
    mOverlapPlot = "Off";
    mUseInitialView = "On";
@@ -223,6 +227,7 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mWireFrame = ogl.mWireFrame;
    mTargetStatus = ogl.mTargetStatus;
    mAxes = ogl.mAxes;
+   mGrid = ogl.mGrid;
    mEarthSunLines = ogl.mEarthSunLines;
    mOverlapPlot = ogl.mOverlapPlot;
    mUseInitialView = ogl.mUseInitialView;
@@ -437,13 +442,14 @@ bool OpenGlPlot::Initialize()
       {
          #if DEBUG_OPENGL_INIT
          MessageInterface::ShowMessage
-            ("OpenGlPlot::Initialize() CreateGlPlotWindow()\n");
+            ("OpenGlPlot::Initialize() CreateGlPlotWindow() mSolarSystem=%d\n",
+             mSolarSystem);
          #endif
          
          if (PlotInterface::CreateGlPlotWindow
              (instanceName, mOldName, mViewCoordSysName, mSolarSystem,
               (mEclipticPlane == "On"), (mXYPlane == "On"),
-              (mWireFrame == "On"), (mAxes == "On"),
+              (mWireFrame == "On"), (mAxes == "On"), (mGrid == "On"),
               (mEarthSunLines == "On"), (mOverlapPlot == "On"),
               (mUseInitialView == "On"), (mPerspectiveMode == "On"),
               mNumPointsToRedraw))
@@ -1069,6 +1075,8 @@ std::string OpenGlPlot::GetStringParameter(const Integer id) const
       return mTargetStatus;
    case AXES:
       return mAxes;
+   case GRID:
+      return mGrid;
    case EARTH_SUN_LINES:
       return mEarthSunLines;
    case OVERLAP_PLOT:
@@ -1145,6 +1153,9 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
       return true;
    case AXES:
       mAxes = value;
+      return true;
+   case GRID:
+      mGrid = value;
       return true;
    case EARTH_SUN_LINES:
       mEarthSunLines = value;
@@ -1326,7 +1337,10 @@ std::string OpenGlPlot::GetRefObjectName(const Gmat::ObjectType type) const
    
    if (type == Gmat::SOLAR_SYSTEM)
    {
-      return mSolarSystem->GetName();
+      if (mSolarSystem)
+         return mSolarSystem->GetName();
+      else
+         return "";
    }
    else if (type == Gmat::COORDINATE_SYSTEM)
    {
@@ -1360,7 +1374,8 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
    
    if (type == Gmat::SOLAR_SYSTEM)
    {
-      mAllRefObjectNames.push_back(mSolarSystem->GetName());
+      if (mSolarSystem)
+         mAllRefObjectNames.push_back(mSolarSystem->GetName());
    }
    else if (type == Gmat::COORDINATE_SYSTEM)
    {

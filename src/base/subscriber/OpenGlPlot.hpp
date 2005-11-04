@@ -150,6 +150,7 @@ protected:
    std::string mPerspectiveMode;
    std::string mUseFixedFov;
    std::string mAxes;
+   std::string mGrid;
    std::string mEarthSunLines;
    
    std::string mOldName;
@@ -217,6 +218,7 @@ protected:
       WIRE_FRAME,
       TARGET_STATUS,
       AXES,
+      GRID,
       EARTH_SUN_LINES,
       OVERLAP_PLOT,
       USE_INITIAL_VIEW,

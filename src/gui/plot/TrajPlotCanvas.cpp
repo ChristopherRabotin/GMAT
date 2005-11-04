@@ -37,12 +37,13 @@
 //#  include <GL/glut.h>
 #endif
 
-//#define SKIP_DEVIL
+#define SKIP_DEVIL
 #ifndef SKIP_DEVIL
 #  include <IL/il.h>
 #  include <IL/ilu.h>
 #  include <IL/ilut.h>
 #endif
+
 
 #define USE_TRACKBALL
 #ifdef USE_TRACKBALL
@@ -51,6 +52,8 @@ extern "C"
 #include "trackball.h"
 }
 #endif
+
+//#define ENABLE_LIGHT_SOURCE
 
 // If Sleep in not defined (on unix boxes)
 #ifndef Sleep 
@@ -223,11 +226,16 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mEarthRadius = 6378.14; //km
    mScRadius = 200;        //km: make big enough to see
    
+   // light source
+   mSunPresent = false;
+   mEnableLightSource = false;
+   
    // drawing options
    mDrawWireFrame = false;
    mDrawXyPlane = false;
    mDrawEcPlane = false;
    mDrawAxes = false;
+   mDrawGrid = false;
    mDrawOrbitNormal = true;
    //mXyPlaneColor = GmatColor::GRAY32; //loj:9/27/05
    mXyPlaneColor = GmatColor::SKYBLUE;
@@ -247,7 +255,9 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    
    // solar system
    mSolarSystem = solarSys;
-      
+   //MessageInterface::ShowMessage
+   //   ("TrajPlotCanvas::TrajPlotCanvas() mSolarSystem=%d\n", mSolarSystem);
+   
    for (int i=0; i<MAX_BODIES; i++)
    {
       mObjMaxZoomIn[i] = MAX_ZOOM_IN;
@@ -318,15 +328,54 @@ bool TrajPlotCanvas::InitGL()
 {
    // remove back faces
    glDisable(GL_CULL_FACE);
+   
+   // enable depth testing, so that objects further away from the
+   // viewer aren't drawn over closer objects
    glEnable(GL_DEPTH_TEST);
    
    glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
    glDepthFunc(GL_LESS);
    //glDepthRange(0.0, 100.0); //loj: just tried - made no difference
+
+   //loj: 11/4/05 Added
+   #ifdef ENABLE_LIGHT_SOURCE
+   if (mEnableLightSource)
+   {
+      //----------------------------------------------------------------------
+      // set OpenGL to recognise the counter clockwise defined side of a polygon
+      // as its 'front' for lighting and culling purposes
+      glFrontFace(GL_CCW);
+      
+      // enable face culling, so that polygons facing away (defines by front face)
+      // from the viewer aren't drawn (for efficieny).
+      glEnable(GL_CULL_FACE);
+      
+      // create a light:
+      float lightColor[4]={1.0f, 1.0f, 1.0f, 1.0f};
+      
+      glLightfv(GL_LIGHT0, GL_AMBIENT_AND_DIFFUSE, lightColor);
+      glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
+      
+      // enable the light
+      glEnable(GL_LIGHTING);
+      glEnable(GL_LIGHT0);
+      
+      // tell OpenGL to use glColor() to get material properties for..
+      glEnable(GL_COLOR_MATERIAL);
+      
+      // ..the front face's ambient and diffuse components
+      glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+      //----------------------------------------------------------------------
+   }
+   #endif
    
    // speedups
    glEnable(GL_DITHER);
+   
+   // set polygons to be smoothly shaded (i.e. interpolate lighting equations
+   // between points on polygons).
    glShadeModel(GL_SMOOTH);
+   
    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
    glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
    
@@ -663,6 +712,20 @@ void TrajPlotCanvas::OnDrawAxes(bool flag)
 
 
 //------------------------------------------------------------------------------
+// void OnDrawGrid(bool flag)
+//------------------------------------------------------------------------------
+/**
+ * Draws axes.
+ */
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::OnDrawGrid(bool flag)
+{
+   mDrawGrid = flag;
+   Refresh(false);
+}
+
+
+//------------------------------------------------------------------------------
 // void DrawInOtherCoordSystem(const wxString &csName)
 //------------------------------------------------------------------------------
 /**
@@ -873,6 +936,27 @@ void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
       mAxisLength = mMaxZoomIn;
    }
    
+   // find out if coordinate system is body fixed
+   AxisSystem *axis =
+      (AxisSystem*)mViewCoordSystem->GetRefObject(Gmat::AXIS_SYSTEM, "");
+
+   if (axis->IsOfType("BodyFixedAxes") &&
+       (mOriginName.IsSameAs(axis->GetStringParameter("Origin").c_str())))
+   {
+      mCanRotateBody = false;
+      mCanRotateAxes = false;
+   }
+   else if (axis->IsOfType("InertialAxes"))
+   {
+      mCanRotateBody = true;
+      mCanRotateAxes = false;
+   }
+   else
+   {
+      mCanRotateBody = false;
+      mCanRotateAxes = false;
+   }
+   
    #if DEBUG_TRAJCANVAS_OBJECT
    MessageInterface::ShowMessage
       ("TrajPlotCanvas::SetGlCoordSystem() mViewCoordSystem=%s, originName=%s, "
@@ -1073,13 +1157,18 @@ void TrajPlotCanvas::SetGlShowObjectFlag(const std::vector<bool> &showArray)
    {
       show = mShowObjectArray[i] ? true : false;
       mShowObjectMap[mObjectNames[i]] = show;
-      
+
       #if DEBUG_TRAJCANVAS_OBJECT
       MessageInterface::ShowMessage
          ("TrajPlotCanvas::SetGlShowObjectFlag() mShowObjectMap[%s]=%d\n",
           mObjectNames[i].c_str(), show);
       #endif
    }
+   
+   mSunPresent = false;
+   // if Sun is present, set Sun present to enable light source
+   if (mShowObjectMap["Sun"] == true)
+      mSunPresent = true;
 }
 
 
@@ -1853,7 +1942,7 @@ void TrajPlotCanvas::SetDefaultGLFont()
 bool TrajPlotCanvas::LoadGLTextures()
 {
    
-#ifdef __WXMSW__
+// #ifdef __WXMSW__
 
    #if DEBUG_TRAJCANVAS_TEXTURE
    MessageInterface::ShowMessage
@@ -1880,9 +1969,9 @@ bool TrajPlotCanvas::LoadGLTextures()
    }
    
    return true;
-#else
-   return false;
-#endif
+// #else
+//    return false;
+// #endif
 } //end LoadGLTextures()
 
 
@@ -2684,7 +2773,7 @@ void TrajPlotCanvas::DrawPlot()
    SetProjection();
    
    TransformView(mNumData-1);
-   
+
    // tilt Origin rotation axis if needed
    if (mNeedOriginConversion)
    {
@@ -2697,9 +2786,11 @@ void TrajPlotCanvas::DrawPlot()
       DrawEquatorialPlane(mXyPlaneColor);
    
    // draw axes
-   //loj: 11/2/05 moved to DrawObject()
-   //    if (mDrawAxes)
-   //       DrawAxes();
+   if (mDrawAxes)
+   {
+      if (!mCanRotateAxes)
+         DrawAxes();
+   }
    
    // draw ecliptic plane
    if (mDrawEcPlane)
@@ -2740,6 +2831,29 @@ void TrajPlotCanvas::DrawObject(const wxString &objName, int frame)
           objName.c_str(), objId, frame);
    #endif
    
+   //loj: 11/4/05 Added for light
+   #ifdef ENABLE_LIGHT_SOURCE
+   //-------------------------------------------------------
+   // enable light source on option
+   //-------------------------------------------------------
+   if (mEnableLightSource && mSunPresent)
+   {
+      int sunId = GetObjectId("Sun");
+      //float lightPos[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+      float lightPos[4];
+      lightPos[0] = mObjectTempPos[sunId][frame][0];
+      lightPos[1] = mObjectTempPos[sunId][frame][1];
+      lightPos[2] = mObjectTempPos[sunId][frame][2];
+      lightPos[3] = 0.0;
+      
+      // reset the light position to reflect the transformations
+      glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+      
+      // enable the lighting
+      glEnable(GL_LIGHTING);
+   }
+   #endif
+   
    //-------------------------------------------------------
    // draw object with texture on option
    //-------------------------------------------------------
@@ -2748,20 +2862,31 @@ void TrajPlotCanvas::DrawObject(const wxString &objName, int frame)
       ("TrajPlotCanvas::DrawObject() mObjectTextureIdMap[%s]=%d\n",
        objName.c_str(), mObjectTextureIdMap[objName]);
    #endif
-   
+
    // rotate Earth
-   if (objName == "Earth")
+   if (objName == "Earth" && mCanRotateBody)
    {
       //MessageInterface::ShowMessage("===> mTime[frame]=%f, mLastEarthRotTime=%f\n",
       //                              mTime[frame], mLastEarthRotTime);
-      float earthRotAngle = (mTime[frame] - mLastEarthRotTime) * 360.0;
-      earthRotAngle = Mod(earthRotAngle, 360.0);
+
+      float earthRotAngle = 0.0;
+
+      if (mSolarSystem)
+      {
+         CelestialBody *earth = mSolarSystem->GetBody("Earth");
+         if (earth)
+            earthRotAngle = earth->GetHourAngle(mTime[frame]);
+      }
+      
+      //float earthRotAngle = (mTime[frame] - mLastEarthRotTime) * 360.0;
+      //earthRotAngle = Mod(earthRotAngle, 360.0);
+      
       glRotatef(earthRotAngle, 0.0, 0.0, 1.0);
-      //mLastEarthRotTime = mTime[frame];
+      
       //MessageInterface::ShowMessage("===> earthOwnAngle=%f\n", earthRotAngle);
    }
    
-   if (mDrawAxes && objId == mOriginId)
+   if (mDrawAxes && objId == mOriginId && mCanRotateAxes)
       DrawAxes();
    
    if (mObjectTextureIdMap[objName] != GmatPlot::UNINIT_TEXTURE)
@@ -2776,7 +2901,39 @@ void TrajPlotCanvas::DrawObject(const wxString &objName, int frame)
       gluQuadricNormals  (qobj, GLU_SMOOTH);
       gluQuadricTexture  (qobj, GL_TRUE   );
       gluSphere(qobj, mObjectRadius[objId], 50, 50);
+      
+      // if enable light source
+      #ifdef ENABLE_LIGHT_SOURCE
+      if (mEnableLightSource && mSunPresent)
+      {
+         if (objName == "Sun")
+         {
+            // if object is the sun then the light is going to be inside,
+            // therefore, if normals point outwards, then the sun will appear
+            // unlit and hence dark, so make them point inwards
+            gluQuadricOrientation(qobj, GLU_INSIDE);
+         }
+         else
+         {
+            gluQuadricOrientation(qobj, GLU_OUTSIDE);
+         }
+      }
+      #endif
+      
       gluDeleteQuadric(qobj);
+
+      // draw grid
+      if (mDrawGrid && objName == "Earth")
+      {
+         // Just draw a wireframe sphere little bigger to show grids(loj: 11/3/05)
+         glColor3f(0.20, 0.20, 0.50);
+         GLUquadricObj* qobj2 = gluNewQuadric();
+         gluQuadricDrawStyle(qobj2, GLU_LINE  );
+         gluQuadricNormals  (qobj2, GLU_SMOOTH);
+         gluQuadricTexture  (qobj2, GL_TRUE   );
+         gluSphere(qobj2, mObjectRadius[objId]+50, 36, 18);
+         gluDeleteQuadric(qobj2);
+      }
       
       glDisable(GL_TEXTURE_2D);
    }
@@ -2799,7 +2956,14 @@ void TrajPlotCanvas::DrawObject(const wxString &objName, int frame)
       
       glDisable(GL_TEXTURE_2D);
    }
-      
+
+   #ifdef ENABLE_LIGHT_SOURCE
+   if (mEnableLightSource && mSunPresent)
+   {
+      glDisable(GL_LIGHTING);
+   }
+   #endif
+   
 } // end DrawObject(const wxString &objName)
 
 
@@ -2814,6 +2978,14 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
 {
    int objId;
    wxString objName;
+
+   #ifdef ENABLE_LIGHT_SOURCE
+   if (mEnableLightSource && mSunPresent)
+   {
+      // we don't want the orbit paths lit
+      glDisable(GL_LIGHTING);
+   }
+   #endif
    
    for (int obj=0; obj<mObjectCount; obj++)
    {

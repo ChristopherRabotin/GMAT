@@ -71,7 +71,7 @@ PlotInterface::~PlotInterface()
 //  bool CreateGlPlotWindow(const std::string &plotName, const std::string &oldName,
 //                          const std::string &csName, SolarSystem *ssPtr,
 //                          bool drawEcPlane, bool drawXyPlane, bool drawWireFrame,
-//                          bool drawAxes, bool drawEarthSunLines,
+//                          bool drawAxes, bool drawGrid, bool drawEarthSunLines,
 //                          bool overlapPlot, bool usevpInfo, bool usepm,
 //                          bool Integer numPtsToRedraw)
 //------------------------------------------------------------------------------
@@ -86,6 +86,7 @@ PlotInterface::~PlotInterface()
  * @param <drawXyPlane>  true if draw XY plane
  * @param <drawWirePlane>  true if draw wire frame
  * @param <drawAxes>  true if draw axes
+ * @param <drawGrid>  true if draw grid
  * @param <drawESLine>  true if draw earth sun lines
  * @param <overlapPlot>  true if overlap plot without clearing the plot
  * @param <usevpInfo>  true if use viewpoint info to draw plot
@@ -99,8 +100,8 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                        SolarSystem *ssPtr,
                                        bool drawEcPlane, bool drawXyPlane,
                                        bool drawWireFrame, bool drawAxes,
-                                       bool drawESLines, bool overlapPlot,
-                                       bool usevpInfo, bool usepm,
+                                       bool drawGrid, bool drawESLines,
+                                       bool overlapPlot, bool usevpInfo, bool usepm,
                                        Integer numPtsToRedraw)
 {    
 #if defined __CONSOLE_APP__
@@ -194,6 +195,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    currPlotFrame->SetDrawEcPlane(drawEcPlane);
    currPlotFrame->SetDrawWireFrame(drawWireFrame);
    currPlotFrame->SetDrawAxes(drawAxes);
+   currPlotFrame->SetDrawGrid(drawGrid);
    currPlotFrame->SetDrawESLines(drawESLines);
    
    currPlotFrame->SetOverlapPlot(overlapPlot);

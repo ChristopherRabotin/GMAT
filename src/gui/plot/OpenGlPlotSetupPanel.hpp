@@ -75,6 +75,7 @@ protected:
    wxCheckBox *mPerspectiveModeCheckBox;
    wxCheckBox *mUseFixedFovCheckBox;
    wxCheckBox *mAxesCheckBox;
+   wxCheckBox *mGridCheckBox;
    wxCheckBox *mEarthSunLinesCheckBox;
    wxCheckBox *mShowObjectCheckBox;
    

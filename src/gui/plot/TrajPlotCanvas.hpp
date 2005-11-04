@@ -47,6 +47,7 @@ public:
    bool  GetDrawEcPlane() {return mDrawEcPlane;}
    bool  GetDrawESLines() {return mDrawESLines;}
    bool  GetDrawAxes() {return mDrawAxes;}
+   bool  GetDrawGrid() {return mDrawGrid;}
    bool  GetRotateAboutXY() {return mRotateXy;}
    unsigned int GetXyPlaneColor() {return mXyPlaneColor;}
    unsigned int GetEcPlaneColor() {return mEcPlaneColor;}
@@ -70,6 +71,7 @@ public:
    void SetDrawEcPlane(bool flag) {mDrawEcPlane = flag;}
    void SetDrawESLines(bool flag) {mDrawESLines = flag;}
    void SetDrawAxes(bool flag) {mDrawAxes = flag;}
+   void SetDrawGrid(bool flag) {mDrawGrid = flag;}
    void SetRotateAboutXY(bool flag) {mRotateXy = flag;}
    void SetXyPlaneColor(unsigned int color) {mXyPlaneColor = color;}
    void SetEcPlaneColor(unsigned int color) {mEcPlaneColor = color;}
@@ -92,6 +94,7 @@ public:
    void DrawXyPlane(bool flag);
    void DrawEcPlane(bool flag);
    void OnDrawAxes(bool flag);
+   void OnDrawGrid(bool flag);
    void DrawInOtherCoordSystem(const wxString &csName);
    void GotoObject(const wxString &objName);
    void GotoOtherBody(const wxString &bodyName);
@@ -195,6 +198,7 @@ private:
    bool mDrawEclipticPlane;
    bool mDrawESLines;
    bool mDrawAxes;
+   bool mDrawGrid;
    bool mDrawOrbitNormal;
    
    // color
@@ -204,6 +208,10 @@ private:
 
    // texture
    std::map<wxString, GLuint> mObjectTextureIdMap;
+
+   // light source
+   bool mSunPresent;
+   bool mEnableLightSource;
    
    // rotating
    bool mRotateXy;
@@ -242,6 +250,9 @@ private:
    bool mUseViewPointRefVector;
    bool mUseViewPointVector;
    bool mUseViewDirectionVector;
+   bool mCanRotateBody;
+   bool mCanRotateAxes;
+   
    int mVpRefObjId;
    int mVpVecObjId;
    int mVdirObjId;

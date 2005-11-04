@@ -34,7 +34,7 @@ public:
                                   const std::string &csName,
                                   SolarSystem *ssPtr,
                                   bool drawEcPlane, bool drawEqPlane,
-                                  bool drawWireFrame, bool drawAxes,
+                                  bool drawWireFrame, bool drawAxes, bool drawGrid,
                                   bool drawESLines, bool overlapPlot,
                                   bool usevpInfo, bool usepm,
                                   Integer numPtsToRedraw);

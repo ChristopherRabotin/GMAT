@@ -273,22 +273,30 @@ void OpenGlPlotSetupPanel::Create()
       new wxCheckBox(this, CHECKBOX, wxT("Draw Axes"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
    
+   mGridCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Draw Grid"),
+                     wxDefaultPosition, wxSize(-1, -1), 0);
+   
    mEarthSunLinesCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Draw Earth Sun Lines"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
    
    wxBoxSizer *drawOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
+   drawOptionBoxSizer->Add(20, 2, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionBoxSizer->Add(mWireFrameCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
+   //drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionBoxSizer->Add(mTargetStatusCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
+   // drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionBoxSizer->Add(mEclipticPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
+   //drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionBoxSizer->Add(mXYPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
+   //drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionBoxSizer->Add(mAxesCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
+   //drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionBoxSizer->Add(mGridCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   //drawOptionBoxSizer->Add(20, 1, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionBoxSizer->Add(mEarthSunLinesCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionBoxSizer->Add(20, 2, 0, wxALIGN_LEFT|wxALL, bsize);
    
    wxStaticBox *drawOptionStaticBox = new wxStaticBox(this, -1, wxT("Drawing Option"));
    wxStaticBoxSizer *drawOptionStaticSizer =
@@ -609,6 +617,8 @@ void OpenGlPlotSetupPanel::LoadData()
          SetValue(mOpenGlPlot->GetStringParameter("TargetStatus") == "On");
       mAxesCheckBox->
          SetValue(mOpenGlPlot->GetStringParameter("Axes") == "On");
+      mGridCheckBox->
+         SetValue(mOpenGlPlot->GetStringParameter("Grid") == "On");
       mEarthSunLinesCheckBox->
          SetValue(mOpenGlPlot->GetStringParameter("EarthSunLines") == "On");
       //mOverlapCheckBox->
@@ -910,6 +920,11 @@ void OpenGlPlotSetupPanel::SaveData()
          mOpenGlPlot->SetStringParameter("Axes", "On");
       else
          mOpenGlPlot->SetStringParameter("Axes", "Off");
+      
+      if (mGridCheckBox->IsChecked())
+         mOpenGlPlot->SetStringParameter("Grid", "On");
+      else
+         mOpenGlPlot->SetStringParameter("Grid", "Off");
       
       if (mEarthSunLinesCheckBox->IsChecked())
          mOpenGlPlot->SetStringParameter("EarthSunLines", "On");
