@@ -1,24 +1,16 @@
-# Linux makefile for a single GMAT base library for the Linux GUI
+# Windows makefile for single GMAT base libraries
 # Initial Version - D. Conway - 2005/06/17
 
 include ../BuildEnv.mk
 
 WXTARGET = lib/libGmatGui.a
+CONSOLETARGET = lib/libGmatConsole.a
 
 TARGETS = $(WXTARGET)
 
 all: $(TARGETS)
-
 gui: $(WXTARGET)
-
-#DEBUG_FLAGS = -pg
-DEBUG_FLAGS = 
-
-CPP = g++
-
-FORTRAN = g77
-
-OPTIMIZATIONS = -O2
+console: $(CONSOLETARGET)
 
 HEADERS = -Iinclude \
           -Ifoundation \
@@ -51,18 +43,6 @@ HEADERS = -Iinclude \
           -I../gui/plot \
           -I../gui/mission
 
-
-# Uncomment this section (and edit the path) to build with Matlab
-CPPFLAGS = $(OPTIMIZATIONS) -Wall -D__USE_MATLAB__=1 \
-           -DSKIP_DEVIL `/usr/local/bin/wx-config --cppflags` \
-           $(MATLAB_INCLUDE) \
-           -IC:/Program\ Files/MATLAB71/extern/include 
-
-# Uncomment this section to build without Matlab
-#CPPFLAGS = $(OPTIMIZATIONS) -Wall `wx-config --cppflags` $(DEBUG_FLAGS)
-
-export CPPFLAGS
-export CPP
 
 clean : archclean
 
@@ -309,14 +289,7 @@ OBJECTS = \
     util/StringTokenizer.o \
     util/TimeSystemConverter.o \
     util/UtcDate.o \
-    \
-    \
     solarsys/msise90_sub.o
-
-#    spacecraft/Satellite.o \
-
-#    refframe/MeanJ2000Equatorial.o \
-#    refframe/RefFrame.o \
 
 
 $(WXTARGET) : $(OBJECTS)
@@ -327,10 +300,7 @@ $(WXTARGET) : $(OBJECTS)
 .cpp.o:
 	$(CPP) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
 
-#.for.o:
-#	$(FORTRAN) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
-
+# Specific instructions for the fortran code
 solarsys/msise90_sub.o: solarsys/msise90_sub.for
-	$(FORTRAN) -c solarsys/msise90_sub.for -o solarsys/msise90_sub.o $(CPPFLAGS) 
-	
+	$(FORTRAN) -c solarsys/msise90_sub.for -o solarsys/msise90_sub.o $(F77_FLAGS) 
 	

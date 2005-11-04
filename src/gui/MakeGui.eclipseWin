@@ -4,38 +4,15 @@
 include ../BuildEnv.mk
 
 WXTARGET = gmat.exe
-
-WXSTATICTARGET = gmatStatic.exe
-
 TARGETS = $(WXTARGET)
-
 LIBS = ../base/lib/libGmatGui.a
 
-MATLAB_LIBRARIES = -leng -lmx -lmat
-
-#DEBUG_FLAGS = -pg
-DEBUG_FLAGS = 
-
-LINK_FLAGS = `/usr/local/bin/wx-config --libs --static=yes` -lwx_msw_gl-2.6 \
-             -lg2c $(DEBUG_FLAGS) \
-             -L../devIL -lilu -lilut -lDevIL
- 
-#STATIC_LINK_FLAGS = `/usr/local/bin/wx-config --libs --static=yes` -lwx_gtk2_gl-2.6 -lg2c
-#             -L/usr/local/matlab704/bin/glnx86 \
-#             -lIL -lILU -lILUT 
- 
 all: prep $(TARGETS)
 
 gui: $(WXTARGET)
 
-static : $(WXSTATICTARGET)
-
 prep:
 	mkdir -p ../bin
-
-CPP = g++
-
-OPTIMIZATIONS = -O2
 
 HEADERS = -I../base/include \
           -I../base/foundation \
@@ -79,18 +56,6 @@ HEADERS = -I../base/include \
           -Ispacecraft \
           -Iview
 
-
-# Uncomment this section (and edit the path) to build with Matlab
-CPPFLAGS = $(OPTIMIZATIONS) -Wall -D__USE_MATLAB__=1 \
-            `/usr/local/bin/wx-config --cppflags` \
-            $(MATLAB_INCLUDE) 
-
-# Uncomment this section to build without Matlab
-#CPPFLAGS = $(OPTIMIZATIONS) -Wall `/usr/local/bin/wx-config --cppflags` -DSKIP_DEVIL $(DEBUG_FLAGS)
-
-
-export CPPFLAGS
-export CPP
 
 clean : archclean
 
@@ -191,26 +156,13 @@ OBJECTS = \
     spacecraft/ThrusterPanel.o \
     view/ViewTextFrame.o 
 
-
-# Unused:    plot/glcanvas.o \
-# Unused:    solver/VariableCreatePanel.o \
-
 # Uncomment to build with MATLAB
 $(WXTARGET) : $(OBJECTS) $(LIBS)
-	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) -lopengl32 -lglu32 \
-	$(MATLAB_LIB) $(MATLAB_LIBRARIES)
+	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
 	cp -f $(WXTARGET) ../bin/.
-
-#$(WXTARGET) : $(OBJECTS) $(LIBS)
-#	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) -lGL -lGLU
-#	cp -f $(WXTARGET) ../bin/.
-
-#$(WXSTATICTARGET) : $(OBJECTS) $(LIBS)
-#	$(CPP) $(OBJECTS) $(LIBS) -o $(WXSTATICTARGET) $(STATIC_LINK_FLAGS) -lGL -lGLU
-#	cp -f $(WXSTATICTARGET) ../bin/.
 
 .cpp.o:
 	$(CPP) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
 
 .c.o:
-	gcc $(CPPFLAGS) $(HEADERS) -c -o $@ $<
+	$(C) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
