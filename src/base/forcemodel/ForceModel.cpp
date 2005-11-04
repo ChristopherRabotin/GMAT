@@ -721,7 +721,7 @@ bool ForceModel::Initialize()
    if (!PhysicalModel::Initialize())
       return false;
 
-   rawState = new Real[stateSize];
+   rawState = new Real[dimension];
 
    if (spacecraft.size() == 0) 
    {
