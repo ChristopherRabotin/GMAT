@@ -2503,8 +2503,7 @@ void ResourceTree::OnAddScriptFolder(wxCommandEvent &event)
       bool cont = dir.GetFirst(&filename);
       while (cont)
       {
-         if (filename.Contains(".script") != -1 ||
-             filename.Contains(".m") != -1)
+         if (filename.Contains(".script") || filename.Contains(".m"))
          {
             // remove any backup files
             if (filename.Last() == 't' || filename.Last() == 'm')
