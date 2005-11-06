@@ -3,10 +3,16 @@
 
 include ../BuildEnv.mk
 
-ifeq ($(USE_MATLAB),1)
-WXTARGET = gmat.exe
+ifdef LINUX_MAC
+EXTENSION =
 else
-WXTARGET = gmatNoMatlab.exe
+EXTENSION = .exe
+endif
+
+ifeq ($(USE_MATLAB),1)
+WXTARGET = gmat$(EXTENSION)
+else
+WXTARGET = gmatNoMatlab$(EXTENSION)
 endif
 
 TARGETS = $(WXTARGET)
