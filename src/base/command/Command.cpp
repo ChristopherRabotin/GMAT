@@ -890,6 +890,27 @@ bool GmatCommand::Initialize()
    initialized = AssignObjects();
    if (publisher == NULL)
       publisher = Publisher::Instance();
+      
+   if (epochData != NULL)
+   {
+      delete [] epochData;
+      epochData = NULL;
+   }
+   
+   if (stateData != NULL)
+   {
+      delete [] stateData;
+      stateData = NULL;
+   }
+   
+   if (parmData != NULL)
+   {
+      delete [] parmData;
+      parmData = NULL;
+   }
+   
+   satVector.clear();
+   
    return initialized;
 }
 
