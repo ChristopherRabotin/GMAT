@@ -940,6 +940,10 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
     //   dEps += (( Cp[i] + Dp[i]*tTDB )*cosApP) * RAD_PER_ARCSEC;
     //}
     
+    const Real  *ApVals = Ap.GetDataVector();
+    const Real  *BpVals = Bp.GetDataVector();
+    const Real  *CpVals = Cp.GetDataVector();
+    const Real  *DpVals = Dp.GetDataVector();
     for (i = nutpl-1; i >= 0; i--)
     {
           apPlan = apVals[0+i]*longVenus + apVals[nutpl*1+i]*longEarth 
@@ -951,8 +955,10 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
           + apVals[nutpl*9+i]*longAscNodeLunar;
           cosApP = Cos(apPlan);
           sinApP = Sin(apPlan);
-          dPsi += (( Ap[i] + Bp[i]*tTDB )*sinApP) * RAD_PER_ARCSEC;
-          dEps += (( Cp[i] + Dp[i]*tTDB )*cosApP) * RAD_PER_ARCSEC;
+          //dPsi += (( Ap[i] + Bp[i]*tTDB )*sinApP) * RAD_PER_ARCSEC;
+          //dEps += (( Cp[i] + Dp[i]*tTDB )*cosApP) * RAD_PER_ARCSEC;
+          dPsi += (( ApVals[i] + BpVals[i]*tTDB )*sinApP) * RAD_PER_ARCSEC;
+          dEps += (( CpVals[i] + DpVals[i]*tTDB )*cosApP) * RAD_PER_ARCSEC;
     }
     
     
