@@ -25,6 +25,7 @@
 #include "CoordinateSystemException.hpp"
 #include "SolarSystem.hpp"
 #include "SpacePoint.hpp"
+#include "MessageInterface.hpp"
 
 //---------------------------------
 // static data
@@ -382,6 +383,45 @@ std::string CoordinateBase::GetParameterTypeString(const Integer id) const
    return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool CoordinateBase::IsParameterReadOnly(const Integer id) const
+{
+   if (id == J2000_BODY_NAME)
+      return true;
+
+   return GmatBase::IsParameterReadOnly(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <label> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not.
+ */
+//---------------------------------------------------------------------------
+bool CoordinateBase::IsParameterReadOnly(const std::string &label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
+
 //------------------------------------------------------------------------------
 //  std::string  GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
@@ -436,7 +476,12 @@ std::string CoordinateBase::GetStringParameter(const Integer id) const
     }
     else if (id == J2000_BODY_NAME) 
     {
-       j2000BodyName = value; 
+       // Disabled for now -- just post a warning message if the user tries to 
+       // set the J2000 body.
+       MessageInterface::ShowMessage(
+          "Warning: Attempting to set the read-only parameter 'J2000Body' "
+          "on the coordinate system '%s'\n", instanceName.c_str());
+       // j2000BodyName = value; 
        return true;
     }
     
