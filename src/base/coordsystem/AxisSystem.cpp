@@ -878,6 +878,13 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
       dEps += (C[i] + D[i]*tTDB )*cosAp + F[i]*sinAp;
    }
     */
+   
+   const Real  *AVals = A.GetDataVector();
+   const Real  *BVals = B.GetDataVector();
+   const Real  *CVals = C.GetDataVector();
+   const Real  *DVals = D.GetDataVector();
+   const Real  *EVals = E.GetDataVector();
+   const Real  *FVals = F.GetDataVector();
    for (i = nut-1; i >= 0; i--)
    {
       //apNut = aVals[0][i]*meanAnomalyMoon + aVals[1][i]*meanAnomalySun 
@@ -885,13 +892,15 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
       //+ aVals[4][i]*longAscNodeLunar;
 
       apNut = aVals[i]*meanAnomalyMoon + aVals[nut*1+i]*meanAnomalySun 
-      + aVals[nut*2+i]*argLatitudeMoon + aVals[nut*3+i]*meanElongationSun 
-      + aVals[nut*4+i]*longAscNodeLunar;
+         + aVals[nut*2+i]*argLatitudeMoon + aVals[nut*3+i]*meanElongationSun 
+         + aVals[nut*4+i]*longAscNodeLunar;
       
       cosAp = Cos(apNut);
       sinAp = Sin(apNut);
-      dPsi += (A[i] + B[i]*tTDB )*sinAp + E[i]*cosAp;
-      dEps += (C[i] + D[i]*tTDB )*cosAp + F[i]*sinAp;
+      //dPsi += (A[i] + B[i]*tTDB )*sinAp + E[i]*cosAp;
+      //dEps += (C[i] + D[i]*tTDB )*cosAp + F[i]*sinAp;
+      dPsi += (AVals[i] + BVals[i]*tTDB )*sinAp + EVals[i]*cosAp;
+      dEps += (CVals[i] + DVals[i]*tTDB )*cosAp + FVals[i]*sinAp;
    }
    
    dPsi *= RAD_PER_ARCSEC;
