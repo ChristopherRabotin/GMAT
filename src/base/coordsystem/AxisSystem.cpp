@@ -29,6 +29,7 @@
 #include "RealTypes.hpp"
 #include "TimeTypes.hpp"
 #include "Rvector3.hpp"
+#include "MessageInterface.hpp"
 #include "CoordinateSystemException.hpp"
 #include "SolarSystem.hpp"
 
@@ -54,6 +55,7 @@ AxisSystem::PARAMETER_TEXT[AxisSystemParamCount - CoordinateBaseParamCount] =
 {
    "Epoch",
    "UpdateInterval",
+   "OverrideOriginInterval",
 };
 
 const Gmat::ParameterType
@@ -61,6 +63,7 @@ AxisSystem::PARAMETER_TYPE[AxisSystemParamCount - CoordinateBaseParamCount] =
 {
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
+   Gmat::BOOLEAN_TYPE,
 };
 
 
@@ -90,6 +93,8 @@ eop              (NULL),
 itrf             (NULL),
 epochFormat      (""),
 updateInterval   (60.0), 
+updateIntervalToUse    (60.0), 
+overrideOriginInterval (false),
 lastDPsi         (0.0)
 {
    objectTypes.push_back(Gmat::AXIS_SYSTEM);
@@ -123,6 +128,8 @@ eop               (axisSys.eop),
 itrf              (axisSys.itrf),
 epochFormat       (axisSys.epochFormat),
 updateInterval    (axisSys.updateInterval),
+updateIntervalToUse    (axisSys.updateIntervalToUse),
+overrideOriginInterval (axisSys.overrideOriginInterval),
 lastDPsi          (0.0)
 {
    lastPRECEpoch    = A1Mjd(0.0);
@@ -154,6 +161,8 @@ const AxisSystem& AxisSystem::operator=(const AxisSystem &axisSys)
    itrf           = axisSys.itrf;
    epochFormat    = axisSys.epochFormat;
    updateInterval = axisSys.updateInterval;
+   updateIntervalToUse = axisSys.updateIntervalToUse;
+   overrideOriginInterval = axisSys.overrideOriginInterval;
    lastPRECEpoch     = axisSys.lastPRECEpoch;
    lastNUTEpoch      = axisSys.lastNUTEpoch;
    lastSTDerivEpoch  = axisSys.lastSTDerivEpoch;
@@ -585,6 +594,7 @@ Real AxisSystem::SetRealParameter(const Integer id, const Real value)
    if (id == UPDATE_INTERVAL)
    {
       updateInterval = value;
+      //MessageInterface::ShowMessage("In AS, interval set to %f\n", value);
       return true;
    }
    return CoordinateBase::SetRealParameter(id,value);
@@ -623,6 +633,34 @@ Real AxisSystem::GetRealParameter(const std::string &label) const
 Real AxisSystem::SetRealParameter(const std::string &label, const Real value)
 {
    return SetRealParameter(GetParameterID(label), value);
+}
+
+bool AxisSystem::GetBooleanParameter(const Integer id) const
+{
+   if (id == OVERRIDE_ORIGIN_INTERVAL) return overrideOriginInterval;
+   return CoordinateBase::GetBooleanParameter(id); 
+}
+
+bool AxisSystem::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
+}
+
+bool AxisSystem::SetBooleanParameter(const Integer id,
+                                     const bool value)
+{
+   if (id == OVERRIDE_ORIGIN_INTERVAL)
+   {
+      overrideOriginInterval = value;
+      return true;
+   }
+   return CoordinateBase::SetBooleanParameter(id, value);
+}
+
+bool AxisSystem::SetBooleanParameter(const std::string &label,
+                                     const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
 }
 
 
@@ -711,7 +749,7 @@ void AxisSystem::InitializeFK5()
 Rmatrix33 AxisSystem::ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch)
 {
    Real dt = Abs(atEpoch.Subtract(lastPRECEpoch)) * SECS_PER_DAY;
-   if ( dt < updateInterval)
+   if ( dt < updateIntervalToUse)
    {
       #ifdef DEBUG_UPDATE
          cout << ">>> Using previous saved PREC values ......" << endl;
@@ -792,7 +830,7 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
       cout << "longAscNodeLunar = "  << longAscNodeLunar << endl;
       cout << "cosEpsbar = "  << cosEpsbar << endl;
    #endif
-   if ( dt < updateInterval)
+   if ( dt < updateIntervalToUse)
    {
       #ifdef DEBUG_UPDATE
          cout << ">>> Using previous saved values ......" << endl;
@@ -1019,7 +1057,7 @@ Rmatrix33 AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC,
                                                      Real cosAst, Real sinAst)
 {
    Real dt = Abs(atEpoch.Subtract(lastSTDerivEpoch)) * SECS_PER_DAY;
-   if ( dt < updateInterval)
+   if ( dt < updateIntervalToUse)
    {
       #ifdef DEBUG_UPDATE
          cout << ">>> Using previous saved STDeriv values ......" << endl;
@@ -1061,7 +1099,7 @@ Rmatrix33 AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC,
 Rmatrix33 AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch)
 {
    Real dt = Abs(atEpoch.Subtract(lastPMEpoch)) * SECS_PER_DAY;
-   if ( dt < updateInterval)
+   if ( dt < updateIntervalToUse)
    {
       #ifdef DEBUG_UPDATE
          cout << ">>> Using previous saved PM values ......" << endl;

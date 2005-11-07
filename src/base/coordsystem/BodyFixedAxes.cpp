@@ -25,6 +25,7 @@
 #include "DynamicAxes.hpp"
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
+#include "Planet.hpp"
 #include "RealUtilities.hpp"
 #include "Linear.hpp"
 #include "RealTypes.hpp"
@@ -32,6 +33,7 @@
 #include "Rvector3.hpp"
 #include "TimeSystemConverter.hpp"
 #include "CoordinateSystemException.hpp"
+#include "MessageInterface.hpp"
 
 using namespace GmatMathUtil;      // for trig functions, etc.
 using namespace GmatTimeUtil;      // for JD offsets, etc.
@@ -365,6 +367,19 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       // NOTE - this is really TT, an approximation of TDB *********
       Real tTDB    = (jdTT - 2451545.0) / 36525.0;
  
+      if (overrideOriginInterval) 
+      {
+         updateIntervalToUse = updateInterval;
+         //MessageInterface::ShowMessage("Overriding origin interval .....\n");
+      }
+      else 
+      {
+         updateIntervalToUse = 
+                                  ((Planet*) origin)->GetUpdateInterval();
+         //MessageInterface::ShowMessage("Using origin interval .....\n");
+      }
+      //MessageInterface::ShowMessage("Setting %4.3f as interval \n",
+      //                              updateIntervalToUse);
       Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
       Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
                              longAscNodeLunar, cosEpsbar);

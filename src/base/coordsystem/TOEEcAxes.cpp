@@ -20,6 +20,7 @@
 
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
+#include "Planet.hpp"
 #include "TOEEcAxes.hpp"
 #include "InertialAxes.hpp"
 #include "TimeTypes.hpp"
@@ -146,6 +147,9 @@ bool TOEEcAxes::Initialize()
                     0.0, -GmatMathUtil::Sin(Epsbar), GmatMathUtil::Cos(Epsbar));
    
    
+   if (overrideOriginInterval) updateIntervalToUse = 
+                               ((Planet*) origin)->GetUpdateInterval();
+   else                        updateIntervalToUse = updateInterval;
    Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, epoch);
    Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, epoch, dPsi,
                                                 longAscNodeLunar, cosEpsbar);

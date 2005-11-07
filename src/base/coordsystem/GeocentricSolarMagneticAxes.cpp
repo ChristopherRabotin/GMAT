@@ -27,6 +27,7 @@
 #include "DynamicAxes.hpp"
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
+#include "Planet.hpp"
 #include "RealUtilities.hpp"
 #include "Linear.hpp"
 #include "RealTypes.hpp"
@@ -257,6 +258,9 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
                                           // NOTE - this is really TT, an approximation of TDB *********
    Real tTDB    = (jdTT - 2451545.0) / 36525.0;
 
+   if (overrideOriginInterval) updateIntervalToUse = 
+                               ((Planet*) origin)->GetUpdateInterval();
+   else                        updateIntervalToUse = updateInterval;
    Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
    Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
                                                 longAscNodeLunar, cosEpsbar);

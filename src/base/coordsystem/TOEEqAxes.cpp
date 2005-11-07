@@ -20,6 +20,7 @@
 
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
+#include "Planet.hpp"
 #include "TOEEqAxes.hpp"
 #include "InertialAxes.hpp"
 #include "TimeTypes.hpp"
@@ -135,6 +136,9 @@ bool TOEEqAxes::Initialize()
    // Compute Julian centuries of TDB from the base epoch (J2000) 
    Real tTDB  = (jdTT - 2451545.0) / 36525.0;
    
+   if (overrideOriginInterval) updateIntervalToUse = 
+                               ((Planet*) origin)->GetUpdateInterval();
+   else                        updateIntervalToUse = updateInterval;
    Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, epoch);
    Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, epoch, dPsi,
                                                 longAscNodeLunar, cosEpsbar);

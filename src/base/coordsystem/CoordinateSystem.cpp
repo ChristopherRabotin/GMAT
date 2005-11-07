@@ -39,6 +39,8 @@ const std::string
 CoordinateSystem::PARAMETER_TEXT[CoordinateSystemParamCount - CoordinateBaseParamCount] =
 {
    "Axes",
+   "UpdateInterval",
+   "OverrideOriginInterval",
    //"InternalState",
 };
 
@@ -46,6 +48,8 @@ const Gmat::ParameterType
 CoordinateSystem::PARAMETER_TYPE[CoordinateSystemParamCount - CoordinateBaseParamCount] =
 {
    Gmat::OBJECT_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::BOOLEAN_TYPE,
    //Gmat::RVECTOR_TYPE,
 };
 
@@ -202,6 +206,7 @@ GmatCoordinate::ParameterUsage CoordinateSystem::UsesZAxis() const
    if (axes) return axes->UsesZAxis();
    return GmatCoordinate::NOT_USED;
 }
+
 
 // methods to set parameters for the AxisSystems
 void CoordinateSystem::SetPrimaryObject(SpacePoint *prim)
@@ -530,6 +535,85 @@ std::string CoordinateSystem::GetParameterTypeString(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
+//  Real  GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the real value, given the input parameter ID.
+ *
+ * @param id ID for the requested parameter.
+ *
+ * @return real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real CoordinateSystem::GetRealParameter(const Integer id) const
+{
+   if (id == UPDATE_INTERVAL) 
+   {
+      if (axes) return axes->GetRealParameter("UpdateInterval");
+   }
+   return CoordinateBase::GetRealParameter(id);
+}
+
+//------------------------------------------------------------------------------
+//  Real  SetRealParameter(const Integer id, const Real value) 
+//------------------------------------------------------------------------------
+/**
+ * This method sets the real value, given the input parameter ID.
+ *
+ * @param id ID for the requested parameter.
+ * @param value to use to set the parameter.
+ *
+ * @return real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real CoordinateSystem::SetRealParameter(const Integer id, const Real value)
+{
+   if (id == UPDATE_INTERVAL) 
+   {
+      if (axes) return axes->SetRealParameter("UpdateInterval", value);
+   }
+   return CoordinateBase::SetRealParameter(id,value);
+}
+
+//------------------------------------------------------------------------------
+//  Real  GetRealParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the real value, given the input parameter label.
+ *
+ * @param label label for the requested parameter.
+ *
+ * @return real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real CoordinateSystem::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+//  Real  SetRealParameter(const std::string &label, const Real value) 
+//------------------------------------------------------------------------------
+/**
+ * This method sets the real value, given the input parameter label.
+ *
+ * @param label label for the requested parameter.
+ * @param value to use to set the parameter.
+ *
+ * @return real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real CoordinateSystem::SetRealParameter(const std::string &label, const Real value)
+{
+   return SetRealParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
 //  std::string GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
@@ -570,6 +654,41 @@ std::string CoordinateSystem::GetStringParameter(const std::string &label) const
 {
    return GetStringParameter(GetParameterID(label));
 }
+
+bool CoordinateSystem::GetBooleanParameter(const Integer id) const
+{
+   if (id == OVERRIDE_ORIGIN_INTERVAL) 
+   {
+      if (axes) return axes->GetBooleanParameter("OverrideOriginInterval");
+      else      return false;  // or throw an exception here?
+   }
+   return CoordinateBase::GetBooleanParameter(id); 
+}
+
+bool CoordinateSystem::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
+}
+
+bool CoordinateSystem::SetBooleanParameter(const Integer id,
+                                     const bool value)
+{
+   if (id == OVERRIDE_ORIGIN_INTERVAL)
+   {
+      if (axes)
+         return axes->SetBooleanParameter("OverrideOriginInterval", value);
+      else  
+         return false;  // or throw an exception here?
+   }
+   return CoordinateBase::SetBooleanParameter(id, value);
+}
+
+bool CoordinateSystem::SetBooleanParameter(const std::string &label,
+                                     const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
+}
+
 
 
 //------------------------------------------------------------------------------

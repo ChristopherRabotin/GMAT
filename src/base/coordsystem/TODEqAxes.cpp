@@ -20,6 +20,7 @@
 
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
+#include "Planet.hpp"
 #include "TODEqAxes.hpp"
 #include "TrueOfDateAxes.hpp"
 #include "TimeTypes.hpp"
@@ -254,6 +255,9 @@ void TODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    // Compute Julian centuries of TDB from the base epoch (J2000) 
    Real tTDB  = (jdTT - 2451545.0) / 36525.0;
    
+   if (overrideOriginInterval) updateIntervalToUse = 
+                               ((Planet*) origin)->GetUpdateInterval();
+   else                        updateIntervalToUse = updateInterval;
    Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
    Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
                           longAscNodeLunar, cosEpsbar);

@@ -141,6 +141,12 @@ public:
    virtual Real            GetRealParameter(const std::string &label) const;
    virtual Real            SetRealParameter(const std::string &label,
                                             const Real value);
+   virtual bool            GetBooleanParameter(const Integer id) const; 
+   virtual bool            GetBooleanParameter(const std::string &label) const; 
+   virtual bool            SetBooleanParameter(const Integer id,
+                                               const bool value); 
+   virtual bool            SetBooleanParameter(const std::string &label,
+                                               const bool value);
    
    // currently, no access to RotMatrix and RotDotMatrix allowed
    
@@ -149,7 +155,8 @@ protected:
    enum
    {
       EPOCH = CoordinateBaseParamCount,
-      UPDATE_INTERVAL, // for nutation
+      UPDATE_INTERVAL, 
+      OVERRIDE_ORIGIN_INTERVAL,
       AxisSystemParamCount
    };
    
@@ -189,6 +196,8 @@ protected:
    std::string               epochFormat;
    
    Real                      updateInterval;
+   Real                      updateIntervalToUse;
+   bool                      overrideOriginInterval;
    A1Mjd                     lastPRECEpoch;
    A1Mjd                     lastNUTEpoch;
    A1Mjd                     lastSTDerivEpoch;

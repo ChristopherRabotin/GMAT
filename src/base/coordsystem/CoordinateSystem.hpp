@@ -99,9 +99,21 @@ public:
    virtual Gmat::ParameterType
                            GetParameterType(const Integer id) const;
    virtual std::string     GetParameterTypeString(const Integer id) const;
+   virtual Real            GetRealParameter(const Integer id) const;
+   virtual Real            SetRealParameter(const Integer id,
+                                            const Real value);
+   virtual Real            GetRealParameter(const std::string &label) const;
+   virtual Real            SetRealParameter(const std::string &label,
+                                            const Real value);
    std::string             GetStringParameter(const Integer id) const;
    std::string             GetStringParameter(const std::string &label) const;
-
+   virtual bool            GetBooleanParameter(const Integer id) const; 
+   virtual bool            GetBooleanParameter(const std::string &label) const; 
+   virtual bool            SetBooleanParameter(const Integer id,
+                                               const bool value); 
+   virtual bool            SetBooleanParameter(const std::string &label,
+                                               const bool value);
+   
    virtual GmatBase*       GetRefObject(const Gmat::ObjectType type,
                                         const std::string &name);
    virtual GmatBase*       GetOwnedObject(Integer whichOne);
@@ -114,6 +126,8 @@ protected:
    enum
    {
       AXES = CoordinateBaseParamCount,
+      UPDATE_INTERVAL,
+      OVERRIDE_ORIGIN_INTERVAL,
       //INTERNAL_STATE,   // currently, no access allowed
       CoordinateSystemParamCount
    };

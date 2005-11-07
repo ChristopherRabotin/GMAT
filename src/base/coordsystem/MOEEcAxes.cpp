@@ -20,6 +20,7 @@
 
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
+#include "Planet.hpp"
 #include "MOEEcAxes.hpp"
 #include "InertialAxes.hpp"
 #include "TimeTypes.hpp"
@@ -143,6 +144,9 @@ bool MOEEcAxes::Initialize()
                     0.0, -GmatMathUtil::Sin(Epsbar), GmatMathUtil::Cos(Epsbar));
    
    
+   if (overrideOriginInterval) updateIntervalToUse = 
+                               ((Planet*) origin)->GetUpdateInterval();
+   else                        updateIntervalToUse = updateInterval;
    Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, epoch);
    
    rotMatrix = PREC.Transpose() * R1Eps.Transpose();
