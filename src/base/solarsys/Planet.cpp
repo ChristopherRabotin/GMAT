@@ -276,6 +276,24 @@ const Rvector6              Planet::LF_ELEMENTS[NumberOfPlanets]         =
    Rvector6(5909627293.567856,    0.24928777871911536, 23.4740184346088,
             43.998303104440304, 183.03164997859696,    25.513664216653164)
 };
+
+//---------------------------------
+// static data
+//---------------------------------
+const std::string
+Planet::PARAMETER_TEXT[PlanetParamCount - CelestialBodyParamCount] =
+{
+   "UpdateInterval",
+};
+
+const Gmat::ParameterType
+Planet::PARAMETER_TYPE[PlanetParamCount - CelestialBodyParamCount] =
+{
+   Gmat::REAL_TYPE,
+};
+
+
+
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
@@ -291,8 +309,8 @@ const Rvector6              Planet::LF_ELEMENTS[NumberOfPlanets]         =
  */
 //------------------------------------------------------------------------------
 Planet::Planet(std::string name) :
-CelestialBody     ("Planet",name)
-
+   CelestialBody     ("Planet",name),
+   updateInterval    (60.0)
 {   
    objectTypeNames.push_back("Planet");
    InitializePlanet(SolarSystem::SUN_NAME);  
@@ -311,7 +329,8 @@ CelestialBody     ("Planet",name)
  */
 //------------------------------------------------------------------------------
 Planet::Planet(std::string name, const std::string &cBody) :
-CelestialBody     ("Planet",name)
+   CelestialBody     ("Planet",name),
+   updateInterval    (60.0)
 {
    objectTypeNames.push_back("Planet");
    InitializePlanet(cBody); 
@@ -328,7 +347,8 @@ CelestialBody     ("Planet",name)
  */
 //------------------------------------------------------------------------------
 Planet::Planet(const Planet &pl) :
-CelestialBody (pl)
+   CelestialBody  (pl),
+   updateInterval (pl.updateInterval)
 {
 }
 
@@ -350,6 +370,7 @@ Planet& Planet::operator=(const Planet &pl)
       return *this;
 
    CelestialBody::operator=(pl);
+   updateInterval = pl.updateInterval;
    return *this;
 }
 
@@ -611,6 +632,18 @@ bool Planet::SetLowFidelityElements(const Rvector6 &kepl)
    return CelestialBody::SetLowFidelityElements(kepl);
 }
 
+Real Planet::GetUpdateInterval() const 
+{
+   return updateInterval;
+}
+
+bool Planet::SetUpdateInterval(Real val)
+{
+   if (val < 0.0) return false;
+   updateInterval = val;
+   return true;
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -627,6 +660,173 @@ GmatBase* Planet::Clone(void) const
 {
    return (new Planet(*this));
 }
+
+//------------------------------------------------------------------------------
+// public methods inherited from GmatBase
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//  std::string  GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+* This method returns the parameter text, given the input parameter ID.
+ *
+ * @param id Id for the requested parameter text.
+ *
+ * @return parameter text for the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string Planet::GetParameterText(const Integer id) const
+{
+   if (id >= CelestialBodyParamCount && id < PlanetParamCount)
+      return PARAMETER_TEXT[id - CelestialBodyParamCount];
+   return CelestialBody::GetParameterText(id);
+}
+
+//------------------------------------------------------------------------------
+//  Integer  GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+* This method returns the parameter ID, given the input parameter string.
+ *
+ * @param str string for the requested parameter.
+ *
+ * @return ID for the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer Planet::GetParameterID(const std::string &str) const
+{
+   for (Integer i = CelestialBodyParamCount; i < PlanetParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - CelestialBodyParamCount])
+         return i;
+   }
+   
+   return CelestialBody::GetParameterID(str);
+}
+
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType  GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+* This method returns the parameter type, given the input parameter ID.
+ *
+ * @param id ID for the requested parameter.
+ *
+ * @return parameter type of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType Planet::GetParameterType(const Integer id) const
+{
+   if (id >= CelestialBodyParamCount && id < PlanetParamCount)
+      return PARAMETER_TYPE[id - CelestialBodyParamCount];
+   
+   return CelestialBody::GetParameterType(id);
+}
+
+//------------------------------------------------------------------------------
+//  std::string  GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+* This method returns the parameter type string, given the input parameter ID.
+ *
+ * @param id ID for the requested parameter.
+ *
+ * @return parameter type string of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string Planet::GetParameterTypeString(const Integer id) const
+{
+   return CelestialBody::PARAM_TYPE_STRING[GetParameterType(id)];
+}
+
+
+bool Planet::IsParameterReadOnly(const Integer id) const
+{
+   if (id == UPDATE_INTERVAL)
+      return false;
+   return CelestialBody::IsParameterReadOnly(id);
+}
+
+//------------------------------------------------------------------------------
+//  Real  GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+* This method returns the real value, given the input parameter ID.
+ *
+ * @param id ID for the requested parameter.
+ *
+ * @return real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real Planet::GetRealParameter(const Integer id) const
+{
+   if (id == UPDATE_INTERVAL) return updateInterval;
+   return CelestialBody::GetRealParameter(id);
+}
+
+//------------------------------------------------------------------------------
+//  Real  SetRealParameter(const Integer id, const Real value) 
+//------------------------------------------------------------------------------
+/**
+* This method sets the real value, given the input parameter ID.
+ *
+ * @param id ID for the requested parameter.
+ * @param value to use to set the parameter.
+ *
+ * @return real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real Planet::SetRealParameter(const Integer id, const Real value)
+{
+   if (id == UPDATE_INTERVAL)
+   {
+      updateInterval = value;
+      return true;
+   }
+   return CelestialBody::SetRealParameter(id,value);
+}
+
+//------------------------------------------------------------------------------
+//  Real  GetRealParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+* This method returns the real value, given the input parameter label.
+ *
+ * @param label label for the requested parameter.
+ *
+ * @return real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real Planet::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+//  Real  SetRealParameter(const std::string &label, const Real value) 
+//------------------------------------------------------------------------------
+/**
+* This method sets the real value, given the input parameter label.
+ *
+ * @param label label for the requested parameter.
+ * @param value to use to set the parameter.
+ *
+ * @return real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real Planet::SetRealParameter(const std::string &label, const Real value)
+{
+   return SetRealParameter(GetParameterID(label), value);
+}
+
 
 //------------------------------------------------------------------------------
 // protected methods

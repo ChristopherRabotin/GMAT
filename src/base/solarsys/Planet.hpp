@@ -70,11 +70,27 @@ public:
    // to be set and stored differently
    virtual bool          SetLowFidelityEpoch(const A1Mjd &toTime);
    virtual bool          SetLowFidelityElements(const Rvector6 &kepl);
+   
+   virtual Real          GetUpdateInterval() const;
+   virtual bool          SetUpdateInterval(Real val);
 
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
 
-
+   // Parameter access methods - overridden from GmatBase - may need these later??
+   virtual std::string     GetParameterText(const Integer id) const;     
+   virtual Integer         GetParameterID(const std::string &str) const; 
+   virtual Gmat::ParameterType
+                           GetParameterType(const Integer id) const;
+   virtual std::string     GetParameterTypeString(const Integer id) const;
+   virtual bool            IsParameterReadOnly(const Integer id) const;
+   virtual Real            GetRealParameter(const Integer id) const;
+   virtual Real            SetRealParameter(const Integer id,
+                                            const Real value);
+   virtual Real            GetRealParameter(const std::string &label) const;
+   virtual Real            SetRealParameter(const std::string &label,
+                                            const Real value);
+                                            
 protected:
 
    enum
@@ -92,6 +108,16 @@ protected:
       /// @todo  add Sedna later??
    };
 
+   enum
+   {
+      UPDATE_INTERVAL = CelestialBodyParamCount,
+      PlanetParamCount
+   };
+   
+   static const std::string PARAMETER_TEXT[PlanetParamCount - CelestialBodyParamCount];
+   
+   static const Gmat::ParameterType PARAMETER_TYPE[PlanetParamCount - CelestialBodyParamCount];
+   
    // default values for CelestialBody data
    static const Gmat::BodyType        DEFAULT_BODY_TYPE;
    static const Gmat::PosVelSource    DEFAULT_POS_VEL_SOURCE;
@@ -109,9 +135,12 @@ protected:
    
    static const Real                  LF_EPOCH[NumberOfPlanets];
    static const Rvector6              LF_ELEMENTS[NumberOfPlanets];
+                                            
+   Real                               updateInterval;
    /// @todo add other ones as needed
 
    void             InitializePlanet(const std::string &cBody);
+                                          
 
 private:
 
