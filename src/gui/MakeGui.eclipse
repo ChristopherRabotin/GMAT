@@ -1,0 +1,178 @@
+# Linux makefile for a single GMAT base library for the Linux GUI
+# Initial Version - D. Conway - 2005/06/17
+
+include ../BuildEnv.mk
+
+ifdef LINUX_MAC
+EXTENSION =
+else
+EXTENSION = .exe
+endif
+
+ifeq ($(USE_MATLAB),1)
+WXTARGET = gmat$(EXTENSION)
+else
+WXTARGET = gmatNoMatlab$(EXTENSION)
+endif
+
+TARGETS = $(WXTARGET)
+LIBS = ../base/lib/libGmatGui.a
+
+all: prep $(TARGETS)
+
+gui: $(WXTARGET)
+
+prep:
+	mkdir -p ../bin
+
+HEADERS = -I../base/include \
+          -I../base/foundation \
+          -I../base/executive \
+          -I../base/spacecraft \
+          -I../base/forcemodel \
+          -I../base/propagator \
+          -I../base/subscriber \
+          -I../base/command \
+          -I../base/solarsys \
+          -I../base/factory \
+          -I../base/stopcond \
+          -I../base/interpreter \
+          -I../base/util \
+          -I../base/interpolator \
+          -I../base/interface \
+          -I../base/parameter \
+          -I../base/configs \
+          -I../base/refframe \
+          -I../base/burn \
+          -I../base/solver \
+          -I../base/function \
+          -I../base/coordsystem \
+          -Iinclude \
+          -Iinclude/bitmaps \
+          -Iapp \
+          -Iburn \
+          -Icommand \
+          -Icontrollogic \
+          -Icoordsystem \
+          -Iforcemodel \
+          -Ifoundation \
+          -Ifunction \
+          -Ihardware \
+          -Imission \
+          -Ioutput \
+          -Iplot \
+          -Ipropagator \
+          -Isolarsys \
+          -Isolver \
+          -Ispacecraft \
+          -Iview
+
+
+clean : archclean
+
+archclean :
+	rm -rf */*.o
+	rm -rf */*.a
+	rm -rf */*~
+	rm -rf core
+	rm -rf */core
+	rm -rf bin/*
+	rm -rf obj/*
+
+OBJECTS = \
+    app/GmatApp.o \
+    app/GmatAppData.o \
+    app/GmatConnection.o \
+    app/GmatMainFrame.o \
+    app/GmatNotebook.o \
+    app/GmatServer.o \
+    app/GmatTreeItemData.o \
+    app/InteractiveMatlabDialog.o \
+    app/MissionTreeItemData.o \
+    app/ResourceTree.o \
+    app/ScriptPanel.o \
+    burn/FiniteBurnSetupPanel.o \
+    burn/ImpulsiveBurnSetupPanel.o \
+    command/AchievePanel.o \
+    command/AssignmentPanel.o \
+    command/CallFunctionPanel.o \
+    command/ManeuverPanel.o \
+    command/PropagatePanel.o \
+    command/SavePanel.o \
+    command/ScriptEventPanel.o \
+    command/TargetPanel.o \
+    command/TogglePanel.o \
+    command/VaryPanel.o \
+    controllogic/DoWhilePanel.o \
+    controllogic/ForDialog.o \
+    controllogic/ForPanel.o \
+    controllogic/IfPanel.o \
+    controllogic/WhilePanel.o \
+    coordsystem/CoordPanel.o \
+    coordsystem/CoordSysCreateDialog.o \
+    coordsystem/CoordSystemConfigPanel.o \
+    forcemodel/ExponentialDragDialog.o \
+    forcemodel/JacchiaRobertsDialog.o \
+    forcemodel/MSISE90Dialog.o \
+    foundation/ArraySetupPanel.o \
+    foundation/GmatDialog.o \
+    foundation/GmatMdiChildFrame.o \
+    foundation/GmatPanel.o \
+    foundation/GmatSavePanel.o \
+    foundation/GuiItemManager.o \
+    foundation/ParameterCreateDialog.o \
+    foundation/ParameterSelectDialog.o \
+    foundation/ParameterSetupPanel.o \
+    foundation/ShowScriptDialog.o \
+    foundation/ShowSummaryDialog.o \
+    function/FunctionSetupPanel.o \
+    function/MatlabFunctionSetupPanel.o \
+    hardware/TankConfigPanel.o \
+    hardware/ThrusterCoefficientDialog.o \
+    hardware/ThrusterConfigPanel.o \
+    mission/DecoratedTree.o \
+    mission/MissionTree.o \
+    output/OutputTree.o \
+    output/ReportFilePanel.o \
+    plot/MdiChildTrajFrame.o \
+    plot/MdiChildTsFrame.o \
+    plot/MdiGlPlotData.o \
+    plot/MdiTsPlotData.o \
+    plot/OpenGlOptionDialog.o \
+    plot/OpenGlPlotSetupPanel.o \
+    plot/ReportFileSetupPanel.o \
+    plot/trackball.o \
+    plot/TrajPlotCanvas.o \
+    plot/TsPlotCanvas.o \
+    plot/TsPlotCurve.o \
+    plot/XyPlotSetupPanel.o \
+    propagator/PropagationConfigPanel.o \
+    propagator/PropagatorSelectDialog.o \
+    solarsys/BarycenterPanel.o \
+    solarsys/CelesBodySelectDialog.o \
+    solarsys/CelestialBodyPanel.o \
+    solarsys/LibrationPointPanel.o \
+    solarsys/SolarSystemWindow.o \
+    solarsys/UniversePanel.o \
+    solver/DCSetupPanel.o \
+    solver/SolverCreatePanel.o \
+    solver/SolverGoalsPanel.o \
+    solver/SolverVariablesPanel.o \
+    spacecraft/BallisticsMassPanel.o \
+    spacecraft/FormationSetupPanel.o \
+    spacecraft/OrbitPanel.o \
+    spacecraft/SpacecraftPanel.o \
+    spacecraft/SpaceObjectSelectDialog.o \
+    spacecraft/TankPanel.o \
+    spacecraft/ThrusterPanel.o \
+    view/ViewTextFrame.o 
+
+$(WXTARGET) : $(OBJECTS) $(LIBS)
+	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
+	cp -f $(WXTARGET) ../bin/.
+
+.cpp.o:
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
+
+.c.o:
+	$(C) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
