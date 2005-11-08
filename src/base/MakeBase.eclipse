@@ -1,5 +1,8 @@
-# Windows makefile for single GMAT base libraries
+# Eclipse makefile for GMAT base library
 # Initial Version - D. Conway - 2005/06/17
+
+# Updated 2005/08/11.  
+# This file now requires the file BuildEnv.mk in the top level folder.
 
 include ../BuildEnv.mk
 

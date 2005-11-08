@@ -1,5 +1,8 @@
-# Linux makefile for a single GMAT base library for the Linux GUI
+# Eclipse makefile for the GMAT GUI
 # Initial Version - D. Conway - 2005/06/17
+
+# Updated 2005/08/11.  
+# This file now requires the file BuildEnv.mk in the top level folder.
 
 include ../BuildEnv.mk
 
