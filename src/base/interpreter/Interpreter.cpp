@@ -3846,7 +3846,8 @@ bool Interpreter::FinalPass()
    for (StringArray::iterator i = csList.begin(); i != csList.end(); ++i)
    {
       #ifdef DEBUG_PASS_TWO
-         MessageInterface::ShowMessage("Setting up %s\n", i->c_str());
+         MessageInterface::ShowMessage("Setting up CoordinateSystem '%s'\n",
+            i->c_str());
       #endif
       cs = moderator->GetCoordinateSystem(*i);
       cs->SetSolarSystem(solar);
@@ -3886,16 +3887,15 @@ bool Interpreter::FinalPass()
    for (StringArray::iterator i = satNames.begin(); i != satNames.end(); ++i)
    {
       #ifdef DEBUG_PASS_TWO
-         MessageInterface::ShowMessage("Setting up %s\n", i->c_str());
+         MessageInterface::ShowMessage("Setting up Spacecraft %s\n", 
+            i->c_str());
       #endif
       
       sat = (Spacecraft *)moderator->GetConfiguredItem(*i);
       
       #ifdef DEBUG_PASS_TWO
-         std::string gen = sat->GetGeneratingString(Gmat::SCRIPTING);
          MessageInterface::ShowMessage(
-            "Prior to setting coordinate system on %s\n%s\n", i->c_str(), 
-            gen.c_str());
+            "Prior to setting coordinate system on %s\n", i->c_str());
       #endif
       
       if (sat == NULL)
@@ -3920,6 +3920,7 @@ bool Interpreter::FinalPass()
       sat->SetRefObject(configuredCs, Gmat::COORDINATE_SYSTEM, configuredCsName);
       
       #ifdef DEBUG_PASS_TWO
+         std::string gen = sat->GetGeneratingString(Gmat::SCRIPTING);
          MessageInterface::ShowMessage(
             "After setting coordinate system on %s\n%s\n", i->c_str(), 
             gen.c_str());
