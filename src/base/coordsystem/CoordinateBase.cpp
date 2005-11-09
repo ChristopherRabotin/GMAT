@@ -439,13 +439,15 @@ std::string CoordinateBase::GetStringParameter(const Integer id) const
 {
    if (id == ORIGIN_NAME)   
    {
-      if (origin)    return origin->GetName();
-      else           return originName;
+      return originName;
+//      if (origin)    return origin->GetName();
+//      else           return originName;
    }
    else if (id == J2000_BODY_NAME)   
    {
-      if (j2000Body) return j2000Body->GetName();
-      else           return j2000BodyName;
+      return j2000BodyName;
+//      if (j2000Body) return j2000Body->GetName();
+//      else           return j2000BodyName;
    }
    
    return GmatBase::GetStringParameter(id);
@@ -478,10 +480,10 @@ std::string CoordinateBase::GetStringParameter(const Integer id) const
     {
        // Disabled for now -- just post a warning message if the user tries to 
        // set the J2000 body.
-       MessageInterface::ShowMessage(
-          "Warning: Attempting to set the read-only parameter 'J2000Body' "
-          "on the coordinate system '%s'\n", instanceName.c_str());
-       // j2000BodyName = value; 
+//       MessageInterface::ShowMessage(
+//          "Warning: Attempting to set the read-only parameter 'J2000Body' "
+//          "on the coordinate system '%s'\n", instanceName.c_str());
+//       // j2000BodyName = value; 
        return true;
     }
     

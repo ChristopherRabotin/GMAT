@@ -3550,7 +3550,7 @@ void Moderator::CreateDefaultMission()
       orAxis->SetStringParameter("Primary", "Earth");
       orAxis->SetStringParameter("Secondary", "DefaultSC");
       vnb->SetStringParameter("Origin", "Earth");
-      vnb->SetStringParameter("J2000Body", "Earth");
+//      vnb->SetStringParameter("J2000Body", "Earth");
       vnb->SetRefObject(orAxis, Gmat::AXIS_SYSTEM, orAxis->GetName());
       
       // Burn parameters
