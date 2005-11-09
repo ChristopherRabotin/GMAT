@@ -1891,7 +1891,7 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
          AxisSystem *axis = CreateAxisSystem("MJ2000Eq", "");
          cs->SetStringParameter("Origin", "Earth");
          cs->SetRefObject(GetConfiguredItem("Earth"), Gmat::SPACE_POINT, "Earth");
-         cs->SetStringParameter("J2000Body", "Earth");
+//         cs->SetStringParameter("J2000Body", "Earth");
          cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
          cs->SetSolarSystem(theDefaultSolarSystem);
          cs->Initialize();
@@ -3457,7 +3457,7 @@ void Moderator::CreateDefaultCoordSystems()
          CoordinateSystem *eccs = CreateCoordinateSystem("EarthMJ2000Ec", false);
          AxisSystem *ecAxis = CreateAxisSystem("MJ2000Ec", "EarthMJ2000Ec");
          eccs->SetStringParameter("Origin", "Earth");
-         eccs->SetStringParameter("J2000Body", "Earth");
+//         eccs->SetStringParameter("J2000Body", "Earth");
          eccs->SetRefObject(ecAxis, Gmat::AXIS_SYSTEM, ecAxis->GetName());
          eccs->SetOrigin(earth);
          eccs->SetJ2000Body(earth);
@@ -3474,7 +3474,7 @@ void Moderator::CreateDefaultCoordSystems()
          bfecAxis->SetEopFile(theEopFile);
          bfecAxis->SetCoefficientsFile(theItrfFile);
          bfcs->SetStringParameter("Origin", "Earth");
-         bfcs->SetStringParameter("J2000Body", "Earth");
+//         bfcs->SetStringParameter("J2000Body", "Earth");
          bfcs->SetRefObject(bfecAxis, Gmat::AXIS_SYSTEM, bfecAxis->GetName());
          bfcs->SetOrigin(earth);
          bfcs->SetJ2000Body(earth);
