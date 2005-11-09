@@ -570,7 +570,7 @@ void XyPlotSetupPanel::LoadData()
       //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() mNumYParams = %d\n",
       //                              mNumYParams);
       
-      delete xParamNames;
+      delete [] xParamNames;
       
       if (mNumYParams > 0)
       {
@@ -600,7 +600,7 @@ void XyPlotSetupPanel::LoadData()
          
          mYSelectedListBox->Set(mNumYParams, yParamNames);
          mYSelectedListBox->SetSelection(0);
-         delete yParamNames;
+         delete [] yParamNames;
 
          // show parameter option
          ShowParameterOption(mYSelectedListBox->GetStringSelection(), true);
