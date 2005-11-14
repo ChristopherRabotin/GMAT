@@ -26,6 +26,9 @@ using namespace GmatMathUtil;
 // public static functions
 //---------------------------------
 
+const Real AngleUtil::TWO_PI_DEG = 360.0;
+const Real AngleUtil::PI_DEG = 180.0;
+
 //------------------------------------------------------------------------------
 // static Real AngleUtil::PutAngleInDegRange(Real angleInDeg, Real minAngleInDeg,
 //                                           Real maxAngleInDeg)

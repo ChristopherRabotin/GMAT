@@ -187,8 +187,8 @@ protected:
 
    // data and methods for those AxisSystems that need all or part of the FK5 
    // reduction
-   static const Real  JD_OF_JANUARY_1_1997  = 2450449.5;  // correct????
-   static const Real  DETERMINANT_TOLERANCE;// = 1.0e-14;
+   static const Real  JD_OF_JANUARY_1_1997;
+   static const Real  DETERMINANT_TOLERANCE;
 
    EopFile                   *eop;
    ItrfCoefficientsFile      *itrf;

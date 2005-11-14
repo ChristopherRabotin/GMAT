@@ -25,6 +25,9 @@
 //---------------------------------
 //  static data
 //---------------------------------
+const Real Rvector6::UTIL_REAL_UNDEFINED = -987654321.0123e-45;
+const Integer Rvector6::NUM_DATA = NUM_DATA_INIT;
+
 const Rvector6
 Rvector6::RVECTOR6_UNDEFINED = Rvector6(UTIL_REAL_UNDEFINED, UTIL_REAL_UNDEFINED,
                                         UTIL_REAL_UNDEFINED, UTIL_REAL_UNDEFINED,

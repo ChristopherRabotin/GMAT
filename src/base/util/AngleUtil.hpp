@@ -26,8 +26,8 @@ class AngleUtil
 {
 public:
    
-   static const Real TWO_PI_DEG = 360.0;
-   static const Real PI_DEG = 180.0;
+   static const Real TWO_PI_DEG;
+   static const Real PI_DEG;
    
    // static functions
    static Real PutAngleInDegRange(Real angleInDeg, Real minAngleInDeg,

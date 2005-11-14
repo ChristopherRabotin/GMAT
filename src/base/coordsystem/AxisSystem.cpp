@@ -49,6 +49,8 @@ using namespace GmatTimeUtil;      // for SECS_PER_DAY
 //---------------------------------
 
 const Real AxisSystem::DETERMINANT_TOLERANCE = 1.0e-14;
+const Real AxisSystem::JD_OF_JANUARY_1_1997  = 2450449.5;  // correct????
+
 
 const std::string
 AxisSystem::PARAMETER_TEXT[AxisSystemParamCount - CoordinateBaseParamCount] =

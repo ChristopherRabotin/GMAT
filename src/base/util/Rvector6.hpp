@@ -25,6 +25,8 @@
 
 class Rvector3;
 
+#define NUM_DATA_INIT 6
+
 class Rvector6 : public Rvector
 {
 public:
@@ -68,13 +70,13 @@ public:
    std::string ToString();
    
    bool IsValid(const Real val);
-   static const Real UTIL_REAL_UNDEFINED = -987654321.0123e-45;
+   static const Real UTIL_REAL_UNDEFINED;
    static const Rvector6 RVECTOR6_UNDEFINED;
     
 protected:
 private:
-   static const Integer NUM_DATA = 6;
-   static const std::string DATA_DESCRIPTIONS[NUM_DATA];
-   std::string stringValues[NUM_DATA];
+   static const Integer NUM_DATA;
+   static const std::string DATA_DESCRIPTIONS[NUM_DATA_INIT];
+   std::string stringValues[NUM_DATA_INIT];
 };
 #endif // Rvector6_hpp
