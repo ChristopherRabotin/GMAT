@@ -750,15 +750,15 @@ void AxisSystem::InitializeFK5()
 //------------------------------------------------------------------------------
 Rmatrix33 AxisSystem::ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch)
 {
-   Real dt = Abs(atEpoch.Subtract(lastPRECEpoch)) * SECS_PER_DAY;
-   if ( dt < updateIntervalToUse)
-   {
-      #ifdef DEBUG_UPDATE
-         cout << ">>> Using previous saved PREC values ......" << endl;
-         cout << "lastPREC = "  << lastPREC << endl;
-      #endif
-      return lastPREC; 
-   }
+   //Real dt = Abs(atEpoch.Subtract(lastPRECEpoch)) * SECS_PER_DAY;
+   //if ( dt < updateIntervalToUse)
+   //{
+   //   #ifdef DEBUG_UPDATE
+   //      cout << ">>> Using previous saved PREC values ......" << endl;
+   //      cout << "lastPREC = "  << lastPREC << endl;
+   //   #endif
+   //   return lastPREC; 
+   //}
    
    #ifdef DEBUG_ROT_MATRIX
       cout << "**** tTDB = " << tTDB << endl;
