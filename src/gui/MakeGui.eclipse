@@ -1,5 +1,6 @@
 # Eclipse makefile for the GMAT GUI
 # Initial Version - D. Conway - 2005/06/17
+# Modifed for Mac OS 10.3  W. Shoan - 2005.11.10
 
 # Updated 2005/08/11.  
 # This file now requires the file BuildEnv.mk in the top level folder.
@@ -18,10 +19,16 @@ else
 WXTARGET = gmatNoMatlab$(EXTENSION)
 endif
 
+ifdef MAC_SPECIFIC
+TARGETS = $(WXTARGET) macrez macosx
+CLEANTARGET = archclean cleanmacosx
+else
 TARGETS = $(WXTARGET)
+CLEANTARGET = archclean
+endif
 LIBS = ../base/lib/libGmatGui.a
 
-all: prep $(TARGETS)
+all: prep $(TARGETS) 
 
 gui: $(WXTARGET)
 
@@ -70,8 +77,7 @@ HEADERS = -I../base/include \
           -Ispacecraft \
           -Iview
 
-
-clean : archclean
+clean : $(CLEANTARGET)
 
 archclean :
 	rm -rf */*.o
@@ -81,6 +87,10 @@ archclean :
 	rm -rf */core
 	rm -rf bin/*
 	rm -rf obj/*
+
+cleanmacosx :
+	echo 'cleaning macosx apps .......'
+	rm -rf $(TOP_DIR)/bin/GMAT.app
 
 OBJECTS = \
     app/GmatApp.o \
@@ -173,6 +183,26 @@ OBJECTS = \
 $(WXTARGET) : $(OBJECTS) $(LIBS)
 	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
 	cp -f $(WXTARGET) ../bin/.
+
+macrez:
+	echo "linking Carbon and wx resource files ......."
+	$(REZ) -o $(WXTARGET)
+	cp -f $(WXTARGET) ../bin/.
+	@chmod -R 755 ../bin
+
+macosx:
+	echo "creating macosx application ......."
+	/Developer/Tools/SetFile -a C $(TOP_DIR)/bin/$(WXTARGET)
+	mkdir -p $(CONTENTS_DIR)
+	mkdir -p $(MACOS_DIR)
+	mkdir -p $(RES_DIR)
+	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
+	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/GMAT/" \
+	-e "s/VERSION/$(WX_VERSION)/" $(WX_MAC_PKG) >$(MAC_PKG)
+	echo -n "APPL????" > $(MAC_PKGINFO)
+	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
+	cp -f $(WX_MAC_ICONS) $(MAC_ICONS) 
+
 
 .cpp.o:
 	$(CPP) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
