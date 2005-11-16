@@ -52,18 +52,18 @@ public:
    const A1Mjd& operator+= (const Real &right);
    const A1Mjd& operator-= (const Real &right);
 
-   bool operator< (const A1Mjd &right) const;
-   bool operator> (const A1Mjd &right) const;
+   bool operator< (const A1Mjd &right) const { return mMjd < right.mMjd; }
+   bool operator> (const A1Mjd &right) const { return mMjd > right.mMjd; }
    bool operator== (const A1Mjd &right) const;
    bool operator!= (const A1Mjd &right) const;
-   bool operator>= (const A1Mjd &right) const;
-   bool operator<= (const A1Mjd &right) const;
+   bool operator>= (const A1Mjd &right) const { return mMjd >= right.mMjd; }
+   bool operator<= (const A1Mjd &right) const { return mMjd <= right.mMjd; }
 
-   Real Subtract(const A1Mjd &right) const;
-   Real Subtract(const Real &right) const;
+   Real Subtract(const A1Mjd &right) const { return (mMjd - right.mMjd); }
+   Real Subtract(const Real &right) const { return (mMjd - right); }
 
-   Real Get() const;
-   void Set(Real secs);
+   Real Get() const { return mMjd; }
+   void Set(Real val) { mMjd = val; }
 
    UtcDate ToUtcDate();
    A1Date ToA1Date();

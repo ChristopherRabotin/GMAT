@@ -241,10 +241,10 @@ const A1Mjd& A1Mjd::operator-= (const Real &right)
  * @return true if this object value is less than other object value; false otherwise.
  */
 //------------------------------------------------------------------------------
-bool A1Mjd::operator< (const A1Mjd &right) const
-{
-   return mMjd < right.mMjd;
-}
+// bool A1Mjd::operator< (const A1Mjd &right) const
+// {
+//    return mMjd < right.mMjd;
+// }
 
 //------------------------------------------------------------------------------
 // bool operator> (const A1Mjd &right) const
@@ -257,10 +257,10 @@ bool A1Mjd::operator< (const A1Mjd &right) const
  * @return true if this object value is greater than other object value; false otherwise.
  */
 //------------------------------------------------------------------------------
-bool A1Mjd::operator> (const A1Mjd &right) const
-{
-   return mMjd > right.mMjd;
-}
+// bool A1Mjd::operator> (const A1Mjd &right) const
+// {
+//    return mMjd > right.mMjd;
+// }
 
 //------------------------------------------------------------------------------
 // bool operator== (const A1Mjd &right) const
@@ -308,10 +308,10 @@ bool A1Mjd::operator!= (const A1Mjd &right) const
  *         false otherwise.
  */
 //------------------------------------------------------------------------------
-bool A1Mjd::operator>= (const A1Mjd &right) const
-{
-   return mMjd >= right.mMjd;
-}
+// bool A1Mjd::operator>= (const A1Mjd &right) const
+// {
+//    return mMjd >= right.mMjd;
+// }
 
 //------------------------------------------------------------------------------
 // bool operator<= (const A1Mjd &right) const
@@ -325,46 +325,46 @@ bool A1Mjd::operator>= (const A1Mjd &right) const
  *         false otherwise.
  */
 //------------------------------------------------------------------------------
-bool A1Mjd::operator<= (const A1Mjd &right) const
-{
-   return mMjd <= right.mMjd;
-}
+// bool A1Mjd::operator<= (const A1Mjd &right) const
+// {
+//    return mMjd <= right.mMjd;
+// }
 
-//------------------------------------------------------------------------------
-// Real Subtract(const A1Mjd &right) const
-//------------------------------------------------------------------------------
-/**
- * Subtracts a object and return a Real value.
- */
-//------------------------------------------------------------------------------
-Real A1Mjd::Subtract(const A1Mjd &right) const
-{
-   return (mMjd - right.mMjd);
-}
+// //------------------------------------------------------------------------------
+// // Real Subtract(const A1Mjd &right) const
+// //------------------------------------------------------------------------------
+// /**
+//  * Subtracts a object and return a Real value.
+//  */
+// //------------------------------------------------------------------------------
+// Real A1Mjd::Subtract(const A1Mjd &right) const
+// {
+//    return (mMjd - right.mMjd);
+// }
 
-//------------------------------------------------------------------------------
-// Real Subtract(const Real &right) const
-//------------------------------------------------------------------------------
-Real A1Mjd::Subtract(const Real &right) const
-{
-   return (mMjd - right);
-}
+// //------------------------------------------------------------------------------
+// // Real Subtract(const Real &right) const
+// //------------------------------------------------------------------------------
+// Real A1Mjd::Subtract(const Real &right) const
+// {
+//    return (mMjd - right);
+// }
 
-//------------------------------------------------------------------------------
-// Real Get() const
-//------------------------------------------------------------------------------
-Real A1Mjd::Get() const
-{
-   return mMjd;
-}
+// //------------------------------------------------------------------------------
+// // Real Get() const
+// //------------------------------------------------------------------------------
+// Real A1Mjd::Get() const
+// {
+//    return mMjd;
+// }
 
-//------------------------------------------------------------------------------
-// void Set(Real val)
-//------------------------------------------------------------------------------
-void A1Mjd::Set(Real val)
-{
-   mMjd = val;
-}
+// //------------------------------------------------------------------------------
+// // void Set(Real val)
+// //------------------------------------------------------------------------------
+// void A1Mjd::Set(Real val)
+// {
+//    mMjd = val;
+// }
 
 //------------------------------------------------------------------------------
 // UtcDate ToUtcDate()
