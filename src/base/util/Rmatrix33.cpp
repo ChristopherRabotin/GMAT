@@ -119,6 +119,26 @@ bool Rmatrix33::operator!=(const Rmatrix33 &m)const
 }
 
 //------------------------------------------------------------------------------
+// void Set(Real a00, Real a01, Real a02,
+//          Real a10, Real a11, Real a12,
+//          Real a20, Real a21, Real a22)
+//------------------------------------------------------------------------------
+void Rmatrix33::Set(Real a00, Real a01, Real a02,
+                    Real a10, Real a11, Real a12,
+                    Real a20, Real a21, Real a22)
+{
+    elementD[0] = a00;
+    elementD[1] = a01;
+    elementD[2] = a02;
+    elementD[3] = a10;
+    elementD[4] = a11;
+    elementD[5] = a12;
+    elementD[6] = a20;
+    elementD[7] = a21;
+    elementD[8] = a22;
+}
+
+//------------------------------------------------------------------------------
 //  bool IsOrthogonal(Real accuracyRequired = Real_Constants::REAL_EPSILON)
 //       const
 //------------------------------------------------------------------------------

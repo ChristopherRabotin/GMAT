@@ -46,6 +46,8 @@ public:
    Rvector(const Rvector &v); 
    virtual ~Rvector();
 
+   void Set(int numElem, Real a1, ...);
+   
    virtual Real GetMagnitude() const;          
    Rvector GetUnitRvector() const; 
    const Rvector& Normalize();

@@ -40,6 +40,10 @@ public:
    const Rmatrix33& operator=(const Rmatrix33 &m);
    bool operator==(const Rmatrix33 &m)const;
    bool operator!=(const Rmatrix33 &m)const;
+
+   void Set(Real a00, Real a01, Real a02,
+            Real a10, Real a11, Real a12,
+            Real a20, Real a21, Real a22);
    
    bool IsOrthogonal(Real accuracyRequired = 
                      GmatRealConst::REAL_EPSILON) const;
