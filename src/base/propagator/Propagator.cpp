@@ -114,6 +114,7 @@ Propagator::Propagator(const std::string &typeStr,
       stepSize            (60.0),
       stepSizeBuffer      (60.0),
       initialized         (false),
+      reset               (true),
       inState             (NULL),
       outState            (NULL),
       dimension           (0),
@@ -149,6 +150,7 @@ Propagator::Propagator(const Propagator& p)
       stepSize            (p.stepSize),
       stepSizeBuffer      (p.stepSizeBuffer),
       initialized         (false),
+      reset               (true),
       inState             (NULL),
       outState            (NULL),
       dimension           (p.dimension),
@@ -178,6 +180,7 @@ Propagator& Propagator::operator=(const Propagator& p)
     physicalModel = NULL;
 
     initialized = false;
+    reset = true;
 
     return *this;
 }
@@ -282,6 +285,7 @@ Real Propagator::SetRealParameter(const Integer id, const Real value)
     if (id == STEP_SIZE)
     {
         stepSizeBuffer = value;
+//        stepSizeBuffer = stepSize = value;
         return stepSize;
     }
     return GmatBase::SetRealParameter(id, value);
@@ -325,8 +329,12 @@ bool Propagator::Initialize()
 
        inState  = physicalModel->GetState();
        outState = physicalModel->GetState();
-        
-       stepSize = stepSizeBuffer;
+       
+       if (reset)
+       {
+          stepSize = stepSizeBuffer;
+          reset = false;
+       }
     }
     else
        throw PropagatorException("Propagator::Initialize -- Force model is not defined");
@@ -365,7 +373,23 @@ void Propagator::Update()
       MessageInterface::ShowMessage(
          "Propagator::Update() called (iteration %d)\n", ++count);
    #endif
-   stepSize = stepSizeBuffer;
+   if (reset)
+   {
+      stepSize = stepSizeBuffer;
+      reset = false;
+   }
+}
+
+//------------------------------------------------------------------------------
+// void Propagator::ResetInitialData()
+//------------------------------------------------------------------------------
+/**
+ * Sets the propagator for the first call in a run.
+ */
+//------------------------------------------------------------------------------
+void Propagator::ResetInitialData()
+{
+   reset = true;
 }
 
 //------------------------------------------------------------------------------

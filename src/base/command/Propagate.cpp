@@ -2396,6 +2396,11 @@ void Propagate::RunComplete()
    
    inProgress = false;
    hasFired = false;
+   
+   for (std::vector<Propagator*>::iterator prop = p.begin(); prop != p.end(); 
+        ++prop)
+      (*prop)->ResetInitialData();
+   
    GmatCommand::RunComplete();
 }
 

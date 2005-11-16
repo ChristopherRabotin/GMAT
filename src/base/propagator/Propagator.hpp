@@ -98,6 +98,7 @@ public:
     virtual bool Step(Real dt);
 
     virtual void Update();
+    virtual void ResetInitialData();
     const Real* AccessOutState();
 
     virtual Integer GetPropagatorOrder(void) const;    
@@ -145,7 +146,6 @@ public:
      */
     virtual Real                GetStepTaken() = 0;
     
-
     virtual bool RawStep(Real dt);
     
     enum
@@ -166,6 +166,8 @@ protected:
     Real stepSizeBuffer;
     /// Flag used to determine if the propagator has been initialized
     bool initialized;
+    /// Flag used to determine if the propagator need to reset the initial step
+    bool reset;
     /// Pointer to the input state vector
     Real *inState;
     /// Pointer to the location for the propagated state
