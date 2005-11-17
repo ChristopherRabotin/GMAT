@@ -61,7 +61,7 @@ public:
    wxString GetGotoObjectName();
    
    // setters
-   void SetEndOfRun(bool flag = true) {mIsEndOfRun = flag; mIsEndOfData = flag;}
+   void SetEndOfRun(bool flag = true);
    void SetEndOfData(bool flag = true) {mIsEndOfData = flag;}
    void SetDistance(float dist) {mAxisLength = dist;}
    void SetUseViewPointInfo(bool flag) {mUseInitialViewPoint = flag;}
@@ -213,7 +213,7 @@ private:
    bool mSunPresent;
    bool mEnableLightSource;
    
-   // rotating
+   // mouse rotating
    bool mRotateXy;
    bool mRotateAboutXaxis;
    bool mRotateAboutYaxis;
@@ -275,7 +275,12 @@ private:
    
    // time
    Real mTime[MAX_DATA];
-   Real mLastEarthRotTime;
+
+   // object rotation
+   Real mInitialLongitude;
+   Real mFinalLongitude;
+   Real mFinalMha;
+   Real mFinalLst;
    
    // spacecraft
    int   mScCount;
@@ -381,6 +386,8 @@ private:
    // drawing objects
    void DrawFrame();
    void DrawPlot();
+   void DrawSphere(GLdouble radius, GLint slices, GLint stacks, GLenum style,
+                   GLenum orientation = GLU_OUTSIDE);
    void DrawObject(const wxString &objName, int frame);
    void DrawObjectOrbit(int frame);
    void DrawObjectOrbitNormal(int objId, int frame, UnsignedInt color);
@@ -389,7 +396,6 @@ private:
    void DrawEclipticPlane(UnsignedInt color);
    void DrawESLines(int frame);
    void DrawAxes();
-   //void DrawAxes(int frame);
    void DrawStatus(const wxString &label, int frame, double time);
    
    // drawing primative objects
@@ -407,15 +413,17 @@ private:
    bool ConvertObjectData();
    void ConvertObject(int objId, int index);
 
-   // for attitude
+   // for utility
    Rvector3 ComputeEulerAngles();
+   void ComputeLongitudeLst(Real time, Real x, Real y, Real *meanHourAngle,
+                            Real *longitude, Real *localSiderealTime);
    
    // for copy
    void CopyVector3(float to[3], Real from[3]);
    void CopyVector3(float to[3], float from[3]);
    void CopyVector3(Real to[3], Real from[3]);
    void CopyVector3(Real to[3], float from[3]);
-
+   
    bool LoadImage(char *fileName);
    
 };
