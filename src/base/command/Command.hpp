@@ -166,6 +166,7 @@ protected:
    {
       COMMENT = GmatBaseParamCount,
       SUMMARY,
+      MISSION_SUMMARY,
       GmatCommandParamCount
    };
    
@@ -212,6 +213,8 @@ protected:
    virtual bool         ClearObjects();
    virtual void         BuildCommandSummary(bool commandCompleted = true);
    virtual void         BuildCommandSummaryString(bool commandCompleted = true);
+   virtual const std::string 
+                        BuildMissionSummaryString(const GmatCommand* head = NULL);
    
    // IDs used to buffer the command summary data
    static Integer       satEpochID;

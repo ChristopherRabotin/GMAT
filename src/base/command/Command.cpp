@@ -38,7 +38,8 @@ const std::string
    GmatCommand::PARAMETER_TEXT[GmatCommandParamCount - GmatBaseParamCount] =
    {
       "Comment",
-      "Summary"
+      "Summary",
+      "MissionSummary"
    };
 
 
@@ -607,6 +608,14 @@ std::string GmatCommand::GetStringParameter(const Integer id) const
       ((GmatCommand*)this)->BuildCommandSummaryString();
       return commandSummary;
    }
+   
+   if (id == MISSION_SUMMARY)
+   {
+      // This call is not const, so need to break const-ness here:
+      std::string missionSummary =
+         ((GmatCommand*)this)->BuildMissionSummaryString(this);
+      return missionSummary;
+   }
          
    return GmatBase::GetStringParameter(id);
 }
@@ -652,6 +661,11 @@ bool GmatCommand::SetStringParameter(const Integer id, const std::string &value)
    }
          
    if (id == SUMMARY)
+   {
+      return false;
+   }
+         
+   if (id == MISSION_SUMMARY)
    {
       return false;
    }
@@ -1368,6 +1382,33 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
    }
 
    commandSummary = data.str();
+}
+
+
+//------------------------------------------------------------------------------
+//  void BuildMissionSummaryString()
+//------------------------------------------------------------------------------
+/**
+ * Generates the summary string for a Mission by building the summary string for 
+ * this command, and then tacking on the summary for subsequent commands.
+ *
+ * Inherited commands can override this method to handle branching or other 
+ * special cases.
+ * 
+ * @param <head> The first command in the summary
+ */
+//------------------------------------------------------------------------------
+const std::string GmatCommand::BuildMissionSummaryString(const GmatCommand* head)
+{
+   BuildCommandSummaryString();
+   std::string missionSummary = commandSummary;
+
+   if (next && (next != head))
+   {
+      missionSummary += next->GetStringParameter("MissionSummary");
+   }
+   
+   return missionSummary;
 }
 
 
