@@ -33,6 +33,30 @@ namespace GmatAttUtil
                           Integer seq2, Integer seq3);
    Rmatrix33 ToCosineMatrix(const Rvector3 &qVec, Real qScalar);
    Rmatrix33 ToCosineMatrix(Real rotAngle, const Rvector3 &rotAxis);
+
+}
+
+namespace FloatAttUtil
+{
+   // for float quaternion
+   void ToQuat(float q[4], float p1x, float p1y, float p2x, float p2y);
+   void AddQuats(float *q1, float *q2, float *dest);
+   void NormalizeQuat(float q[4]);
+   void BuildRotMatrix(float m[4][4], float q[4]);
+   void AxisToQuat(float a[3], float phi, float q[4]);
+   float ToSphereProjection(float r, float x, float y);
+
+   // for float vector util
+   void SetZero(float *v);
+   void Set(float *v, float x, float y, float z);
+   void Subtract(const float *src1, const float *src2, float *dst);
+   void Copy(const float *v1, float *v2);
+   void Cross(const float *v1, const float *v2, float *cross);
+   void Scale(float *v, float div);
+   void Normal(float *v);
+   void Add(const float *src1, const float *src2, float *dst);
+   float Length(const float *v);
+   float Dot(const float *v1, const float *v2);
 }
 
 #endif // AttitudeUtil_hpp
