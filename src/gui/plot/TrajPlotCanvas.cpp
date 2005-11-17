@@ -4254,10 +4254,10 @@ bool TrajPlotCanvas::LoadImage(char *fileName)
    return false;
    
 #else
-   //#if DEBUG_TRAJCANVAS_INIT
+   #if DEBUG_TRAJCANVAS_INIT
    MessageInterface::ShowMessage
-      ("===>TrajPlotCanvas::LoadImage() Not using DevIL. file=%s\n", fileName);
-   //#endif
+      ("TrajPlotCanvas::LoadImage() Not using DevIL. file=%s\n", fileName);
+   #endif
    
    ::wxInitAllImageHandlers();
    wxImage image = wxImage(fileName);
@@ -4275,20 +4275,18 @@ bool TrajPlotCanvas::LoadImage(char *fileName)
                                  width, height, size);
    #endif
    
-//    // Why is image upside down?
-//    // Get vertial mirror
-//    wxImage mirror = image.Mirror(false);
-//    GLubyte *data1 = mirror.GetData();
+   // Why is image upside down?
+   // Get vertial mirror
+   wxImage mirror = image.Mirror(false);
+   GLubyte *data1 = mirror.GetData();
    
    //used for min and magnifying texture
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
    
    //pass image to opengl
-//    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB,
-//                      GL_UNSIGNED_BYTE, data1);
    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB,
-                     GL_UNSIGNED_BYTE, data);
+                     GL_UNSIGNED_BYTE, data1);
    
    return true;
 #endif
