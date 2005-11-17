@@ -114,7 +114,7 @@ Propagator::Propagator(const std::string &typeStr,
       stepSize            (60.0),
       stepSizeBuffer      (60.0),
       initialized         (false),
-      reset               (true),
+      resetInitialData    (true),
       inState             (NULL),
       outState            (NULL),
       dimension           (0),
@@ -150,7 +150,7 @@ Propagator::Propagator(const Propagator& p)
       stepSize            (p.stepSize),
       stepSizeBuffer      (p.stepSizeBuffer),
       initialized         (false),
-      reset               (true),
+      resetInitialData    (true),
       inState             (NULL),
       outState            (NULL),
       dimension           (p.dimension),
@@ -180,7 +180,7 @@ Propagator& Propagator::operator=(const Propagator& p)
     physicalModel = NULL;
 
     initialized = false;
-    reset = true;
+    resetInitialData = true;
 
     return *this;
 }
@@ -285,7 +285,6 @@ Real Propagator::SetRealParameter(const Integer id, const Real value)
     if (id == STEP_SIZE)
     {
         stepSizeBuffer = value;
-//        stepSizeBuffer = stepSize = value;
         return stepSize;
     }
     return GmatBase::SetRealParameter(id, value);
@@ -330,10 +329,10 @@ bool Propagator::Initialize()
        inState  = physicalModel->GetState();
        outState = physicalModel->GetState();
        
-       if (reset)
+       if (resetInitialData)
        {
           stepSize = stepSizeBuffer;
-          reset = false;
+          resetInitialData = false;
        }
     }
     else
@@ -341,7 +340,7 @@ bool Propagator::Initialize()
     
     if (!initialized)
        throw PropagatorException("Propagator failed to initialize");
-       
+
     return true;
 }
 
@@ -366,18 +365,27 @@ void Propagator::SetPhysicalModel(PhysicalModel *pPhysicalModel)
  * Envoked to force a propagator reset if the PhysicalModel changes
  */
 //------------------------------------------------------------------------------
-void Propagator::Update()
+void Propagator::Update(bool forwards)
 {
    #ifdef DEBUG_PROP_RERUN
       static int count = 0;
       MessageInterface::ShowMessage(
          "Propagator::Update() called (iteration %d)\n", ++count);
    #endif
-   if (reset)
+   if (resetInitialData)
    {
       stepSize = stepSizeBuffer;
-      reset = false;
+      resetInitialData = false;
    }
+   else
+   {
+      stepSize = (forwards ? fabs(stepSize) : -fabs(stepSize));
+   }
+
+   #ifdef DEBUG_PROP_RERUN
+      MessageInterface::ShowMessage(
+         "Propagator::Update() step size = %lf\n", stepSize);
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -389,7 +397,7 @@ void Propagator::Update()
 //------------------------------------------------------------------------------
 void Propagator::ResetInitialData()
 {
-   reset = true;
+   resetInitialData = true;
 }
 
 //------------------------------------------------------------------------------

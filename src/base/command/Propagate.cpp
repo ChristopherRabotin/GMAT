@@ -1883,7 +1883,7 @@ void Propagate::PrepareToPropagate()
          fm[n]->UpdateInitialData();
       
          p[n]->Initialize();
-         p[n]->Update();
+         p[n]->Update(direction[n] > 0.0);
          state = fm[n]->GetState();
       }   
 
@@ -2016,7 +2016,7 @@ void Propagate::PrepareToPropagate()
       fm[n]->UpdateInitialData();
    
       p[n]->Initialize();
-      p[n]->Update();
+      p[n]->Update(direction[n] > 0.0);
       state = fm[n]->GetState();
       dim += fm[n]->GetDimension();
    }   
@@ -2396,11 +2396,11 @@ void Propagate::RunComplete()
    
    inProgress = false;
    hasFired = false;
-   
-   for (std::vector<Propagator*>::iterator prop = p.begin(); prop != p.end(); 
-        ++prop)
-      (*prop)->ResetInitialData();
-   
+//   
+//   for (std::vector<Propagator*>::iterator prop = p.begin(); prop != p.end(); 
+//        ++prop)
+//      (*prop)->ResetInitialData();
+//   
    GmatCommand::RunComplete();
 }
 

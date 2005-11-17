@@ -97,7 +97,7 @@ public:
     virtual void SetPhysicalModel(PhysicalModel *pPhysicalModel);
     virtual bool Step(Real dt);
 
-    virtual void Update();
+    virtual void Update(bool forwards = true);
     virtual void ResetInitialData();
     const Real* AccessOutState();
 
@@ -167,7 +167,7 @@ protected:
     /// Flag used to determine if the propagator has been initialized
     bool initialized;
     /// Flag used to determine if the propagator need to reset the initial step
-    bool reset;
+    bool resetInitialData;
     /// Pointer to the input state vector
     Real *inState;
     /// Pointer to the location for the propagated state
