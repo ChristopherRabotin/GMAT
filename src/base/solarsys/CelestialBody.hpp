@@ -155,6 +155,7 @@ public:
    virtual Gmat::AnalyticMethod GetAnalyticMethod() const;
    virtual bool                 GetUsePotentialFile() const;
    virtual bool                 GetOverrideTimeSystem() const;
+   virtual Real                 GetEphemUpdateInterval() const;
    virtual StringArray          GetValidModelList(Gmat::ModelType m) const;
    virtual const Rvector3&      GetAngularVelocity();             // rad/sec
 
@@ -189,6 +190,7 @@ public:
    virtual bool           SetUsePotentialFile(bool useIt);
    
    virtual bool           SetOverrideTimeSystem(bool overrideIt);
+   virtual bool           SetEphemUpdateInterval(Real intvl);
    virtual bool           AddValidModelName(Gmat::ModelType m, 
                                             const std::string &newModel);
    virtual bool           RemoveValidModelName(Gmat::ModelType m, 
@@ -411,6 +413,12 @@ protected:
    bool                   newLF;
    /// flag indicating whether or not to override the TDB/TCB tiems with TT
    bool                   overrideTime;
+   /// update interval for the ephemeris calsulations (file-reading)
+   Real                   ephemUpdateInterval;
+   /// last time that the state was calculated
+   A1Mjd                  lastEphemTime;
+   /// last state value calculated
+   Rvector6               lastState;
    
    /// lists of valid models
    StringArray            models[Gmat::ModelTypeCount];

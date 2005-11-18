@@ -74,6 +74,7 @@ public:
    Gmat::AnalyticMethod GetAnalyticMethod() const;
    std::string          GetSourceFileName() const;
    bool                 GetOverrideTimeSystem() const;
+   Real                 GetEphemUpdateInterval() const;
    StringArray          GetValidModelList(Gmat::ModelType m, 
                                           const std::string &forBody);
 
@@ -86,6 +87,7 @@ public:
    bool SetAnalyticMethod(const std::string &aM);
    
    bool SetOverrideTimeSystem(bool overrideIt);
+   bool SetEphemUpdateInterval(Real intvl);
    bool AddValidModelName(Gmat::ModelType m, const std::string &forBody,
                           const std::string &theModel);
    bool RemoveValidModelName(Gmat::ModelType m, const std::string &forBody,
@@ -110,6 +112,12 @@ public:
    //virtual std::string    GetStringParameter(const Integer id) const; // const?
    //virtual bool           SetStringParameter(const Integer id,
    //                                          const std::string &value); // const?
+   virtual Real           GetRealParameter(const Integer id) const;
+   virtual Real           GetRealParameter(const std::string &label) const;
+   virtual Real           SetRealParameter(const Integer id,
+                                           const Real value);
+   virtual Real           SetRealParameter(const std::string &label,
+                                           const Real value);
    virtual bool           GetBooleanParameter(const Integer id) const; 
    virtual bool           GetBooleanParameter(const std::string &label) const; 
    virtual bool           SetBooleanParameter(const Integer id,
@@ -204,6 +212,7 @@ protected:
       BODIES_IN_USE = GmatBaseParamCount,
       NUMBER_OF_BODIES,
       OVERRIDE_TIME_SYSTEM,
+      EPHEM_UPDATE_INTERVAL,
       SolarSystemParamCount
    };
    
@@ -217,6 +226,7 @@ protected:
    Gmat::AnalyticMethod  anMethodForAll;
    PlanetaryEphem*       pE;
    bool                  overrideTimeForAll;
+   Real                  ephemUpdateInterval;
 
 private:
 

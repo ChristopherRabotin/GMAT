@@ -34,6 +34,7 @@ SolarSystem::PARAMETER_TEXT[SolarSystemParamCount - GmatBaseParamCount] =
    "BodiesInUse",
    "NumberOfBodies",
    "OverrideTimeSystem",
+   "EphemUpdateInterval",
 };
 
 const Gmat::ParameterType
@@ -42,6 +43,7 @@ SolarSystem::PARAMETER_TYPE[SolarSystemParamCount - GmatBaseParamCount] =
    Gmat::STRINGARRAY_TYPE,
    Gmat::INTEGER_TYPE,
    Gmat::BOOLEAN_TYPE,
+   Gmat::REAL_TYPE,
 };
 
 
@@ -142,7 +144,8 @@ SolarSystem::SolarSystem(std::string withName)
    pvSrcForAll      = Gmat::DE_405;
    anMethodForAll   = Gmat::LOW_FIDELITY;
    pE               = NULL;
-   overrideTimeForAll = false;
+   overrideTimeForAll  = false;
+   ephemUpdateInterval = 60.0;
    
    // create and add the default bodies
    Star* theSun     = new Star(SUN_NAME);
@@ -200,6 +203,7 @@ pvSrcForAll     (ss.pvSrcForAll),
 anMethodForAll  (ss.anMethodForAll),
 pE              (NULL),
 overrideTimeForAll (ss.overrideTimeForAll),
+ephemUpdateInterval (ss.ephemUpdateInterval),
 bodiesInUse     (ss.bodiesInUse), // copy it first
 bodyStrings     (ss.bodyStrings)
 {
@@ -234,6 +238,7 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
    anMethodForAll = ss.anMethodForAll;
    pE             = NULL;
    overrideTimeForAll      = ss.overrideTimeForAll;
+   ephemUpdateInterval     = ss.ephemUpdateInterval;
    bodiesInUse.clear();
    bodyStrings.clear();
    bodiesInUse    = ss.bodiesInUse;
@@ -400,6 +405,12 @@ bool SolarSystem::GetOverrideTimeSystem() const
 {
    return overrideTimeForAll;
 }
+
+Real SolarSystem::GetEphemUpdateInterval() const
+{
+   return ephemUpdateInterval;
+}
+ 
 
 StringArray SolarSystem::GetValidModelList(Gmat::ModelType m, 
                          const std::string &forBody)
@@ -587,6 +598,22 @@ bool SolarSystem::SetOverrideTimeSystem(bool overrideIt)
    return true;
 }
 
+bool SolarSystem::SetEphemUpdateInterval(Real intvl)
+{
+   if (intvl < 0.0)
+   throw SolarSystemException("SolarSystem - ephem update interval must be > 0.0");
+   // Set it for each of the bodies
+   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   while (cbi != bodiesInUse.end())
+   {
+      if ((*cbi)->SetEphemUpdateInterval(intvl) == false)  return false;
+      ++cbi;
+   }
+   ephemUpdateInterval = intvl;
+   return true;
+}
+
+
 bool SolarSystem::AddValidModelName(Gmat::ModelType m, 
                   const std::string &forBody,
                   const std::string &theModel)
@@ -763,6 +790,36 @@ Integer SolarSystem::GetIntegerParameter(const std::string &label) const
 {
    return GetIntegerParameter(GetParameterID(label));
 }
+
+Real SolarSystem::GetRealParameter(const Integer id) const
+{
+   if (id == EPHEM_UPDATE_INTERVAL) return ephemUpdateInterval;
+   return GmatBase::GetRealParameter(id);
+}
+
+
+Real SolarSystem::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+Real SolarSystem::SetRealParameter(const Integer id,
+                                   const Real value)
+{
+   if (id == EPHEM_UPDATE_INTERVAL)
+   {
+      SetEphemUpdateInterval(value);
+      return true;
+   }
+   return GmatBase::SetRealParameter(id, value);
+}
+                                   
+Real SolarSystem::SetRealParameter(const std::string &label,
+                                  const Real value)
+{
+   return SetRealParameter(GetParameterID(label),value);
+}
+
 
 bool SolarSystem::GetBooleanParameter(const Integer id) const
 {

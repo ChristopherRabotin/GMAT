@@ -178,7 +178,9 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    order              (4),
    degree             (4),
    newLF              (true),
-   overrideTime       (false)
+   overrideTime       (false),
+   ephemUpdateInterval (60.0),
+   lastEphemTime      (0.0)
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
    objectTypeNames.push_back("CelestialBody");
@@ -230,7 +232,9 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    order              (0),
    degree             (0),
    newLF              (true),
-   overrideTime       (false)
+   overrideTime       (false),
+   ephemUpdateInterval (60.0),
+   lastEphemTime      (0.0)
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
    objectTypeNames.push_back("CelestialBody");
@@ -284,7 +288,10 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    prevLFEpoch         (cBody.prevLFEpoch),
    prevLFState         (cBody.prevLFState),
    newLF               (cBody.newLF),
-   overrideTime        (cBody.overrideTime)
+   overrideTime        (cBody.overrideTime),
+   ephemUpdateInterval (cBody.ephemUpdateInterval),
+   lastEphemTime       (cBody.lastEphemTime),
+   lastState           (cBody.lastState) 
 {
    state                  = cBody.state;
    stateTime              = cBody.stateTime;
@@ -377,12 +384,15 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    for (Integer i = 0; i < Gmat::ModelTypeCount; i++)
       models[i] = cBody.models[i];
 
-   lfEpoch      = cBody.lfEpoch;
-   lfKepler     = cBody.lfKepler;
-   prevLFEpoch  = cBody.prevLFEpoch;
-   prevLFState  = cBody.prevLFState;
-   newLF        = cBody.newLF;
-   overrideTime = cBody.overrideTime;
+   lfEpoch             = cBody.lfEpoch;
+   lfKepler            = cBody.lfKepler;
+   prevLFEpoch         = cBody.prevLFEpoch;
+   prevLFState         = cBody.prevLFState;
+   newLF               = cBody.newLF;
+   overrideTime        = cBody.overrideTime;
+   ephemUpdateInterval = cBody.ephemUpdateInterval;
+   lastEphemTime       = cBody.lastEphemTime;
+   lastState           = cBody.lastState;
       
    return *this;
 }
@@ -418,6 +428,12 @@ CelestialBody::~CelestialBody()
 //------------------------------------------------------------------------------
 const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
 {
+   Real dt = Abs(atTime.Subtract(lastEphemTime)) * GmatTimeUtil::SECS_PER_DAY;
+   if ( dt < ephemUpdateInterval)
+   {
+       return lastState;
+   }
+   
    Real*     posVel = NULL;
    switch (posVelSrc)
    {
@@ -464,7 +480,9 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
                                     + instanceName);
          break;
    }
-   stateTime  = atTime;
+   stateTime     = atTime;
+   lastEphemTime = atTime;
+   lastState     = state;
    return state;
 }
 
@@ -709,6 +727,12 @@ bool CelestialBody::GetOverrideTimeSystem() const
 {
    return overrideTime;
 }
+
+Real CelestialBody::GetEphemUpdateInterval() const
+{
+   return ephemUpdateInterval;
+}
+
 
 StringArray CelestialBody::GetValidModelList(Gmat::ModelType m) const
 {
@@ -1177,6 +1201,13 @@ bool CelestialBody::SetOverrideTimeSystem(bool overrideIt)
    overrideTime = overrideIt;
    return true;
 }
+
+bool CelestialBody::SetEphemUpdateInterval(Real intvl)
+{
+   ephemUpdateInterval = intvl;
+   return true;
+}
+
 
 bool CelestialBody::AddValidModelName(Gmat::ModelType m, 
                                       const std::string &newModel)
