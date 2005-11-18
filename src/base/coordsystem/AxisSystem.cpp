@@ -415,12 +415,14 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
    Rvector3 tmpVel(inState[3],inState[4], inState[5]);
    Rvector3 outPos = rotMatrix    * tmpPos;
    Rvector3 outVel = (rotDotMatrix * tmpPos) + (rotMatrix * tmpVel);
-   outState[0] = outPos[0];
-   outState[1] = outPos[1];
-   outState[2] = outPos[2];
-   outState[3] = outVel[0];
-   outState[4] = outVel[1];
-   outState[5] = outVel[2];
+   outState.Set(6,outPos[0], outPos[1], outPos[2], 
+                  outVel[0], outVel[1], outVel[2]);
+   //outState[0] = outPos[0];
+   //outState[1] = outPos[1];
+   //outState[2] = outPos[2];
+   //outState[3] = outVel[0];
+   //outState[4] = outVel[1];
+   //outState[5] = outVel[2];
    return true;
 }
 
@@ -453,12 +455,14 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
    Rmatrix33 tmpRotDot = rotDotMatrix.Transpose();
    Rvector3 outPos     = tmpRot    * tmpPos ;
    Rvector3 outVel     = (tmpRotDot * tmpPos) + (tmpRot * tmpVel);
-   outState[0] = outPos[0];
-   outState[1] = outPos[1];
-   outState[2] = outPos[2];
-   outState[3] = outVel[0];
-   outState[4] = outVel[1];
-   outState[5] = outVel[2];
+   outState.Set(6,outPos[0], outPos[1], outPos[2], 
+                  outVel[0], outVel[1], outVel[2]);
+   //outState[0] = outPos[0];
+   //outState[1] = outPos[1];
+   //outState[2] = outPos[2];
+   //outState[3] = outVel[0];
+   //outState[4] = outVel[1];
+   //outState[5] = outVel[2];
    return true;
 }
 
@@ -785,15 +789,24 @@ Rmatrix33 AxisSystem::ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch)
    // Compute Rotation matrix for transformations from FK5 to MOD
    // (Vallado Eq. 3-57)
    Rmatrix33  PREC;
-   PREC(0,0) =  cosTheta*cosz*coszeta - sinz*sinzeta;
-   PREC(0,1) = -sinzeta*cosTheta*cosz - sinz*coszeta;
-   PREC(0,2) = -sinTheta*cosz;
-   PREC(1,0) =  sinz*cosTheta*coszeta + sinzeta*cosz;
-   PREC(1,1) = -sinz*sinzeta*cosTheta + cosz*coszeta;
-   PREC(1,2) = -sinTheta*sinz;
-   PREC(2,0) =  sinTheta*coszeta;
-   PREC(2,1) = -sinTheta*sinzeta;
-   PREC(2,2) =  cosTheta;
+   PREC.Set( cosTheta*cosz*coszeta - sinz*sinzeta,
+            -sinzeta*cosTheta*cosz - sinz*coszeta,
+            -sinTheta*cosz,
+             sinz*cosTheta*coszeta + sinzeta*cosz,
+            -sinz*sinzeta*cosTheta + cosz*coszeta,
+            -sinTheta*sinz,
+             sinTheta*coszeta,
+            -sinTheta*sinzeta,
+             cosTheta);
+   //PREC(0,0) =  cosTheta*cosz*coszeta - sinz*sinzeta;
+   //PREC(0,1) = -sinzeta*cosTheta*cosz - sinz*coszeta;
+   //PREC(0,2) = -sinTheta*cosz;
+   //PREC(1,0) =  sinz*cosTheta*coszeta + sinzeta*cosz;
+   //PREC(1,1) = -sinz*sinzeta*cosTheta + cosz*coszeta;
+   //PREC(1,2) = -sinTheta*sinz;
+   //PREC(2,0) =  sinTheta*coszeta;
+   //PREC(2,1) = -sinTheta*sinzeta;
+   //PREC(2,2) =  cosTheta;
    #ifdef DEBUG_ROT_MATRIX
       cout << "PREC = " << endl << PREC << endl;
    #endif
@@ -807,14 +820,20 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
                                             Real &longAscNodeLunar,
                                             Real &cosEpsbar)
 {
-   Real tTDB2   = tTDB  * tTDB;
-   Real tTDB3   = tTDB2 * tTDB;
-   Real tTDB4   = tTDB3 * tTDB;
+   static const Real const125 = 125.04455501*RAD_PER_DEG;
+   static const Real const134 = 134.96340251*RAD_PER_DEG;
+   static const Real const357 = 357.52910918*RAD_PER_DEG;
+   static const Real const93  =  93.27209062*RAD_PER_DEG;
+   static const Real const297 = 297.85019547*RAD_PER_DEG;
+
+   register Real tTDB2   = tTDB  * tTDB;
+   register Real tTDB3   = tTDB2 * tTDB;
+   register Real tTDB4   = tTDB3 * tTDB;
    // Compute nutation - NOTE: this algorithm is bsased on the IERS 1996
    // Theory of Precession and Nutation. 
 
    // Compute values to be passed out first ... 
-   longAscNodeLunar  = 125.04455501*RAD_PER_DEG + (  -6962890.2665*tTDB 
+   longAscNodeLunar  = const125 + (  -6962890.2665*tTDB 
                        + 7.4722*tTDB2 + 0.007702*tTDB3 - 0.00005939*tTDB4)
                        * RAD_PER_ARCSEC;
    Real Epsbar       = (84381.448 - 46.8150*tTDB - 0.00059*tTDB2 
@@ -853,13 +872,13 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    // NOTE - taken from Steve Queen's code - he has apparently converted
    // the values in degrees (from Vallado Eq. 3-54) to arcsec before
    // performing these computations
-   Real meanAnomalyMoon   = 134.96340251*RAD_PER_DEG + (1717915923.2178*tTDB 
+   register Real meanAnomalyMoon   = const134 + (1717915923.2178*tTDB 
         + 31.8792*tTDB2 + 0.051635*tTDB3 - 0.00024470*tTDB4)*RAD_PER_ARCSEC;
-   Real meanAnomalySun    = 357.52910918*RAD_PER_DEG + ( 129596581.0481*tTDB 
+   register Real meanAnomalySun    = const357 + ( 129596581.0481*tTDB 
         +  0.5532*tTDB2 + 0.000136*tTDB3 - 0.00001149*tTDB4)*RAD_PER_ARCSEC;
-   Real argLatitudeMoon   =  93.27209062*RAD_PER_DEG + (1739527262.8478*tTDB 
+   register Real argLatitudeMoon   =  const93 + (1739527262.8478*tTDB 
         - 12.7512*tTDB2 - 0.001037*tTDB3 + 0.00000417*tTDB4)*RAD_PER_ARCSEC;
-   Real meanElongationSun = 297.85019547*RAD_PER_DEG + (1602961601.2090*tTDB 
+   register Real meanElongationSun = const297 + (1602961601.2090*tTDB 
         -  6.3706*tTDB2 + 0.006593*tTDB3 - 0.00003169*tTDB4)*RAD_PER_ARCSEC;
    
    // Now, sum using nutation coefficients  (Vallado Eq. 3-60)
@@ -915,17 +934,17 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    // general precession in longitude
    
    
-    Real longVenus   = (181.979800853  + 58517.8156748  * tTDB)* RAD_PER_DEG;
-    Real longEarth   = (100.466448494  + 35999.3728521  * tTDB)* RAD_PER_DEG;
-    Real longMars    = (355.433274605  + 19140.299314   * tTDB)* RAD_PER_DEG;
-    Real longJupiter = ( 34.351483900  +  3034.90567464 * tTDB)* RAD_PER_DEG;
-    Real longSaturn  = ( 50.0774713998 +  1222.11379404 * tTDB)* RAD_PER_DEG;
-    Real genPrec     = (1.39697137214 * tTDB + 0.0003086 * tTDB2)
-                       * RAD_PER_DEG;
-    Real apPlan = 0.0;
-    Real cosApP = 0.0;
-    Real sinApP = 0.0;
-    Integer nutpl = itrf->GetNumberOfPlanetaryTerms();
+    register Real longVenus   = (181.979800853  + 58517.8156748  * tTDB)* RAD_PER_DEG;
+    register Real longEarth   = (100.466448494  + 35999.3728521  * tTDB)* RAD_PER_DEG;
+    register Real longMars    = (355.433274605  + 19140.299314   * tTDB)* RAD_PER_DEG;
+    register Real longJupiter = ( 34.351483900  +  3034.90567464 * tTDB)* RAD_PER_DEG;
+    register Real longSaturn  = ( 50.0774713998 +  1222.11379404 * tTDB)* RAD_PER_DEG;
+    register Real genPrec     = (1.39697137214 * tTDB + 0.0003086 * tTDB2)
+                                 * RAD_PER_DEG;
+    register Real apPlan = 0.0;
+    register Real cosApP = 0.0;
+    register Real sinApP = 0.0;
+    register Integer nutpl = itrf->GetNumberOfPlanetaryTerms();
     
     //for (i = nutpl-1; i >= 0; i--)
     //{
@@ -951,7 +970,7 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
           apPlan = apVals[0+i]*longVenus + apVals[nutpl*1+i]*longEarth 
           + apVals[nutpl*2+i]*longMars   + apVals[nutpl*3+i]*longJupiter 
           + apVals[nutpl*4+i]*longSaturn + apVals[nutpl*5+i]*genPrec
-          + apVals[nutpl*6+i]*meanElongationSun*
+          + apVals[nutpl*6+i]*meanElongationSun
           + apVals[nutpl*7+i]*argLatitudeMoon
           + apVals[nutpl*8+i]*meanAnomalyMoon
           + apVals[nutpl*9+i]*longAscNodeLunar;
@@ -983,15 +1002,24 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    // Compute Rotation matrix for transformations from MOD to TOD
    // (Vallado Eq. 3-64)
    Rmatrix33  NUT;
-   NUT(0,0) =  cosdPsi;
-   NUT(0,1) = -sindPsi*cosEpsbar;
-   NUT(0,2) = -sindPsi*sinEpsbar;
-   NUT(1,0) =  sindPsi*cosTEoE;
-   NUT(1,1) =  cosTEoE*cosdPsi*cosEpsbar + sinTEoE*sinEpsbar;
-   NUT(1,2) =  sinEpsbar*cosTEoE*cosdPsi - sinTEoE*cosEpsbar;
-   NUT(2,0) =  sinTEoE*sindPsi;
-   NUT(2,1) =  sinTEoE*cosdPsi*cosEpsbar - sinEpsbar*cosTEoE;
-   NUT(2,2) =  sinTEoE*sinEpsbar*cosdPsi + cosTEoE*cosEpsbar;
+   NUT.Set( cosdPsi,
+           -sindPsi*cosEpsbar,
+           -sindPsi*sinEpsbar,
+            sindPsi*cosTEoE, 
+            cosTEoE*cosdPsi*cosEpsbar + sinTEoE*sinEpsbar,
+            sinEpsbar*cosTEoE*cosdPsi - sinTEoE*cosEpsbar,
+            sinTEoE*sindPsi,
+            sinTEoE*cosdPsi*cosEpsbar - sinEpsbar*cosTEoE,
+            sinTEoE*sinEpsbar*cosdPsi + cosTEoE*cosEpsbar);
+   //NUT(0,0) =  cosdPsi;
+   //NUT(0,1) = -sindPsi*cosEpsbar;
+   //NUT(0,2) = -sindPsi*sinEpsbar;
+   //NUT(1,0) =  sindPsi*cosTEoE;
+   //NUT(1,1) =  cosTEoE*cosdPsi*cosEpsbar + sinTEoE*sinEpsbar;
+   //NUT(1,2) =  sinEpsbar*cosTEoE*cosdPsi - sinTEoE*cosEpsbar;
+   //NUT(2,0) =  sinTEoE*sindPsi;
+   //NUT(2,1) =  sinTEoE*cosdPsi*cosEpsbar - sinEpsbar*cosTEoE;
+   //NUT(2,2) =  sinTEoE*sinEpsbar*cosdPsi + cosTEoE*cosEpsbar;
    
    lastNUTEpoch = atEpoch;
    lastNUT      = NUT;
@@ -1052,15 +1080,18 @@ Rmatrix33 AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
    // Compute Rotation matrix for Sidereal Time
    // (Vallado Eq. 3-64)
    Rmatrix33  ST;
-   ST(0,0) =  cosAst;
-   ST(0,1) =  sinAst;
-   ST(0,2) =  0.0;
-   ST(1,0) = -sinAst;
-   ST(1,1) =  cosAst;
-   ST(1,2) =  0.0;
-   ST(2,0) =  0.0;
-   ST(2,1) =  0.0;
-   ST(2,2) =  1.0;
+   ST.Set( cosAst, sinAst, 0.0,
+          -sinAst, cosAst, 0.0,
+              0.0,    0.0, 1.0);
+   //ST(0,0) =  cosAst;
+   //ST(0,1) =  sinAst;
+   //ST(0,2) =  0.0;
+   //ST(1,0) = -sinAst;
+   //ST(1,1) =  cosAst;
+   //ST(1,2) =  0.0;
+   //ST(2,0) =  0.0;
+   //ST(2,1) =  0.0;
+   //ST(2,2) =  1.0;
    
    #ifdef DEBUG_ROT_MATRIX
       cout << "ST = " << endl << ST << endl;
@@ -1092,15 +1123,18 @@ Rmatrix33 AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC,
    // Compute the portion that has a significant time derivative
    Real omegaE = 7.29211514670698e-05 * (1.0 - (lod / SECS_PER_DAY));
    Rmatrix33 STderiv;
-   STderiv(0,0) = -omegaE * sinAst;
-   STderiv(0,1) =  omegaE * cosAst;
-   STderiv(0,2) =  0.0;
-   STderiv(1,0) = -omegaE * cosAst;
-   STderiv(1,1) = -omegaE * sinAst;
-   STderiv(1,2) =  0.0;
-   STderiv(2,0) =  0.0;
-   STderiv(2,1) =  0.0;
-   STderiv(2,2) =  0.0;
+   STderiv.Set(-omegaE * sinAst,  omegaE * cosAst, 0.0,
+               -omegaE * cosAst, -omegaE * sinAst, 0.0,
+                            0.0,              0.0, 0.0);
+   //STderiv(0,0) = -omegaE * sinAst;
+   //STderiv(0,1) =  omegaE * cosAst;
+   //STderiv(0,2) =  0.0;
+   //STderiv(1,0) = -omegaE * cosAst;
+   //STderiv(1,1) = -omegaE * sinAst;
+   //STderiv(1,2) =  0.0;
+   //STderiv(2,0) =  0.0;
+   //STderiv(2,1) =  0.0;
+   //STderiv(2,2) =  0.0;
    
    #ifdef DEBUG_ROT_MATRIX
       cout << "lod = " << lod << endl;
@@ -1137,15 +1171,18 @@ Rmatrix33 AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoc
    
    // Compute the polar motion rotation matrix
    Rmatrix33 PM;
-   PM(0,0) =  cosX;
-   PM(0,1) =  sinX*sinY;
-   PM(0,2) = -sinX*cosY;
-   PM(1,0) =  0.0;
-   PM(1,1) =  cosY;
-   PM(1,2) =  sinY;
-   PM(2,0) =  sinX;
-   PM(2,1) = -cosX*sinY;
-   PM(2,2) =  cosX*cosY;
+   PM.Set( cosX,  sinX*sinY, -sinX*cosY,
+            0.0,       cosY,       sinY,
+           sinX, -cosX*sinY,  cosX*cosY); 
+   //PM(0,0) =  cosX;
+   //PM(0,1) =  sinX*sinY;
+   //PM(0,2) = -sinX*cosY;
+   //PM(1,0) =  0.0;
+   //PM(1,1) =  cosY;
+   //PM(1,2) =  sinY;
+   //PM(2,0) =  sinX;
+   //PM(2,1) = -cosX*sinY;
+   //PM(2,2) =  cosX*cosY;
 
    #ifdef DEBUG_ROT_MATRIX
       cout << "x = " << x << " and y = " << y << endl;

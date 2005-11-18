@@ -355,24 +355,48 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
    Interpolate_State(absJD,(int)DeFile::MOON_ID, &mrv);
 
    // compute Earth state in Solar System barycenter coordinates
-   Rvector6 earthMoonRv(emrv.Position[0],emrv.Position[1],emrv.Position[2],
-                        emrv.Velocity[0],emrv.Velocity[1],emrv.Velocity[2]);
-   Rvector6 moonRv(mrv.Position[0],mrv.Position[1],mrv.Position[2],
-                   mrv.Velocity[0],mrv.Velocity[1],mrv.Velocity[2]);
-   Rvector6 earthRv = earthMoonRv - (moonRv / (R1.EMRAT + 1.0));
+   //Rvector6 earthMoonRv(emrv.Position[0],emrv.Position[1],emrv.Position[2],
+   //                     emrv.Velocity[0],emrv.Velocity[1],emrv.Velocity[2]);
+   //Rvector6 moonRv(mrv.Position[0],mrv.Position[1],mrv.Position[2],
+   //                mrv.Velocity[0],mrv.Velocity[1],mrv.Velocity[2]);
+   //Rvector6 earthRv = earthMoonRv - (moonRv / (R1.EMRAT + 1.0));
 
    // now compute the state of the requested body wrt the Earth
-   Rvector6 bodyRv(rv.Position[0],rv.Position[1],rv.Position[2],
-                   rv.Velocity[0],rv.Velocity[1],rv.Velocity[2]);
-   Rvector6 bodyWrtEarth = bodyRv - earthRv;
+   //Rvector6 bodyRv(rv.Position[0],rv.Position[1],rv.Position[2],
+   //                rv.Velocity[0],rv.Velocity[1],rv.Velocity[2]);
+   //Rvector6 bodyWrtEarth = bodyRv - earthRv;
 
-   result[0] = bodyWrtEarth.Get(0);
-   result[1] = bodyWrtEarth.Get(1);
-   result[2] = bodyWrtEarth.Get(2);
-   result[3] = bodyWrtEarth.Get(3) ; //* GmatTimeUtil::SECS_PER_DAY;
-   result[4] = bodyWrtEarth.Get(4) ; //* GmatTimeUtil::SECS_PER_DAY;
-   result[5] = bodyWrtEarth.Get(5) ; //* GmatTimeUtil::SECS_PER_DAY;
+   stateType bwe;
+   
+   for (int i=0; i<3; i++)
+   {
+      bwe.Position[i] = rv.Position[i] -
+         (emrv.Position[i] - (mrv.Position[i] / (R1.EMRAT + 1.0)));
+      bwe.Velocity[i] = rv.Velocity[i] -
+         (emrv.Velocity[i] - (mrv.Velocity[i] / (R1.EMRAT + 1.0)));
+   }
 
+//    result[0] = bodyWrtEarth.Get(0);
+//    result[1] = bodyWrtEarth.Get(1);
+//    result[2] = bodyWrtEarth.Get(2);
+//    result[3] = bodyWrtEarth.Get(3) ; //* GmatTimeUtil::SECS_PER_DAY;
+//    result[4] = bodyWrtEarth.Get(4) ; //* GmatTimeUtil::SECS_PER_DAY;
+//    result[5] = bodyWrtEarth.Get(5) ; //* GmatTimeUtil::SECS_PER_DAY;
+
+//    static Real result2[6];
+   result[0] = bwe.Position[0];
+   result[1] = bwe.Position[1];
+   result[2] = bwe.Position[2];
+   result[3] = bwe.Velocity[0];
+   result[4] = bwe.Velocity[1];
+   result[5] = bwe.Velocity[2];
+
+//    MessageInterface::ShowMessage
+//       ("==> result1=%f, %f, %f, %f, %f, %f\n", result[0], result[1], result[2],
+//        result[3], result[4], result[5]);
+//    MessageInterface::ShowMessage
+//       ("==> result2=%f, %f, %f, %f, %f, %f\n", result2[0], result2[1], result2[2],
+//        result2[3], result2[4], result2[5]);
    return result;
 }
 
@@ -1177,11 +1201,11 @@ void DeFile::Interpolate_Position( double Time , int Target , double Position[3]
 
 void DeFile::Interpolate_State(double Time , int Target, stateType *p)
 {
-  double    A[50]   , B[50] , Cp[50] , P_Sum[3] , V_Sum[3] , Up[50] ,
+  register double    A[50]   , B[50] , Cp[50] , P_Sum[3] , V_Sum[3] , Up[50] ,
             T_break , T_seg = 0.0 , T_sub  , Tc = 0.0;
-  int       i , j;
-  long int  C , G , N , offset = 0;
-  stateType X;
+  register int       i , j;
+  register long int  C , G , N , offset = 0;
+  register stateType X;
 
   /*--------------------------------------------------------------------------*/
   /* This function doesn't "do" nutations or librations.                      */
