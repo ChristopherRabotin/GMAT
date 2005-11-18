@@ -11,6 +11,8 @@
 #             2005/06/29 - J. Gurgnaus - Added hardware, function, and 
 #                                        output directories
 #             2005/10/13 - J. Gurganus - Added target for non-matlab 
+#             2005/11/03 - J. Gurganus - Added C source target 
+#             2005/11/18 - J. Gurganus - Removed C source target 
 ################################################################################
 #
 # Program to make (library)
@@ -81,7 +83,6 @@ GUI_INCS = -I$(APP) -I$(BURN) -I$(COMMAND) -I$(CTRLLOGIC) -I$(COORDSYS) \
 # Object modules for library
 OBJ = $(SRC:.cpp=.o)
 #
-OBJ += $(C_SRC:.c=.o)
 #
 CXXFLAGS = $(BASE_INCS) $(GUI_INCS) $(WXFLAGS) -O2 \
 	`$(WX_HOME)/wx-config --cxxflags` -dynamic -Wall
@@ -89,7 +90,7 @@ CXXFLAGS = $(BASE_INCS) $(GUI_INCS) $(WXFLAGS) -O2 \
 CPP = g++ $(CXXFLAGS) $(TESTFLAGS) $(MATLABFLAGS)
 #
 # Default suffix rule
-.SUFFIXES: .o .cpp .c
+.SUFFIXES: .o .cpp
 #
 ###############################################################################
 # Target definitions
@@ -103,9 +104,6 @@ $(LIB): $(OBJ)
 	@chmod -R 755 $(LIBDIR)
 
 .cpp.o:
-	$(CPP) -c $<
-
-..o:
 	$(CPP) -c $<
 
 clean:
