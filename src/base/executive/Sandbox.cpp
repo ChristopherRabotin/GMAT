@@ -28,9 +28,9 @@
 #include "CallFunction.hpp"
 #include "MessageInterface.hpp"
 
-
 #include <algorithm>       // for find
 
+#define DISABLE_SOLAR_SYSTEM_CLONING
 
 //#define DEBUG_SANDBOX_OBJ 1
 //#define DEBUG_SANDBOX_INIT 1
@@ -103,8 +103,10 @@ Sandbox::Sandbox() :
 //------------------------------------------------------------------------------
 Sandbox::~Sandbox()
 {
+#ifndef DISABLE_SOLAR_SYSTEM_CLONING   
    if (solarSys)
       delete solarSys;
+#endif
    if (sequence)
       delete sequence;
 
@@ -250,8 +252,12 @@ bool Sandbox::AddSolarSystem(SolarSystem *ss)
    if (!ss)
       return false;
 
-
+#ifdef DISABLE_SOLAR_SYSTEM_CLONING
+   solarSys = ss;
+#else
+   MessageInterface::ShowMessage("Cloning the solar system\n");
    solarSys = (SolarSystem*)(ss->Clone());
+#endif
    return true;
 }
 
@@ -1166,7 +1172,6 @@ bool Sandbox::Interrupt()
 //------------------------------------------------------------------------------
 void Sandbox::Clear()
 {
-   //solarSys  = NULL; //loj: moved down
    sequence  = NULL;
    current   = NULL;
    state     = IDLE;
@@ -1209,10 +1214,15 @@ void Sandbox::Clear()
 
    publisher = NULL;
 
+#ifndef DISABLE_SOLAR_SYSTEM_CLONING
+   MessageInterface::ShowMessage(
+      "Deleting the solar system clone in the Sandbox\n");
    if (solarSys != NULL)
       delete solarSys;
 
    solarSys = NULL;
+#endif
+
    objectMap.clear();
    transientForces.clear();
 }

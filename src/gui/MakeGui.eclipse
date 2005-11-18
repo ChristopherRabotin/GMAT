@@ -154,7 +154,6 @@ OBJECTS = \
     plot/OpenGlOptionDialog.o \
     plot/OpenGlPlotSetupPanel.o \
     plot/ReportFileSetupPanel.o \
-    plot/trackball.o \
     plot/TrajPlotCanvas.o \
     plot/TsPlotCanvas.o \
     plot/TsPlotCurve.o \
