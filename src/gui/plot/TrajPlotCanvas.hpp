@@ -278,6 +278,7 @@ private:
 
    // object rotation
    Real mInitialLongitude;
+   Real mInitialMha;
    Real mFinalLongitude;
    Real mFinalMha;
    Real mFinalLst;

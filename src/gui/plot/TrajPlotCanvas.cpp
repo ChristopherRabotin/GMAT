@@ -52,6 +52,7 @@ using namespace FloatAttUtil;
 #endif
 
 //#define ENABLE_LIGHT_SOURCE
+#define USE_MHA_TO_ROTATE_EARTH
 
 // If Sleep in not defined (on unix boxes)
 #ifndef Sleep 
@@ -424,8 +425,9 @@ void TrajPlotCanvas::SetEndOfRun(bool flag)
       
       #if DEBUG_TRAJCANVAS_LONGITUDE
       MessageInterface::ShowMessage
-         ("TrajPlotCanvas::SetEndOfRun() time=%f, x=%f, y=%f\n   mFinalMha=%f, "
-          "mFinalLongitude=%f, mFinalLst=%f\n", time, x, y, mha, longitude, lst);
+         ("TrajPlotCanvas::SetEndOfRun() mInitialLongitude=%f, time=%f, x=%f,\n   "
+          "y=%f, mFinalMha=%f, mFinalLongitude=%f, mFinalLst=%f\n",
+          mInitialLongitude, time, x, y, mha, longitude, lst);
       #endif
    }
 }
@@ -1289,9 +1291,11 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
       if (mNumData == 0)
       {
          mInitialLongitude = longitude;
+         mInitialMha = mha;
          #if DEBUG_TRAJCANVAS_LONGITUDE
          MessageInterface::ShowMessage
-            ("TrajPlotCanvas::UpdatePlot() mInitialLongitude = %f\n", mInitialLongitude);
+            ("TrajPlotCanvas::UpdatePlot() mInitialLongitude = %f, mInitialMha = %f\n",
+             mInitialLongitude, mInitialMha);
          #endif
       }
       
@@ -2945,32 +2949,62 @@ void TrajPlotCanvas::DrawObject(const wxString &objName, int frame)
       ("TrajPlotCanvas::DrawObject() mObjectTextureIdMap[%s]=%d\n",
        objName.c_str(), mObjectTextureIdMap[objName]);
    #endif
-
+   
    //-------------------------------------------------------
    // rotate Earth, need to rotate before texture mapping
    //-------------------------------------------------------
    if (objName == "Earth" && mCanRotateBody)
    {
       Real earthRotAngle = 0.0;
-      Real mha = 0.0;
+      Real initialLong = mInitialLongitude;
+      Real offset = 40.0; // need this to line up earth texture with longitude
+            
+      //========== #ifdef
+      #ifdef USE_MHA_TO_ROTATE_EARTH
       
       if (mSolarSystem)
       {         
+         Real mha = 0.0;
+         
+         if (initialLong < 180.0)
+            initialLong = -initialLong - offset;
+
          CelestialBody *earth = mSolarSystem->GetBody("Earth");
          if (earth)
             mha = earth->GetHourAngle(mTime[frame]);
          
-         earthRotAngle = mha - mInitialLongitude;
-         earthRotAngle =
-            AngleUtil::PutAngleInDegRange(earthRotAngle, 0.0, 360.0);
+         earthRotAngle = mha + initialLong + offset;
+      
+         #if DEBUG_TRAJCANVAS_DRAW > 1
+         if (!mIsEndOfRun)
+            MessageInterface::ShowMessage
+               ("===> mha=%f, earthRotAngle=%f\n", mha, earthRotAngle);
+         #endif
+         
       }
       
-      //if (!mIsEndOfRun)
-      //   MessageInterface::ShowMessage
-      //      ("===> mha=%f, earthRotAngle=%f\n", mha, earthRotAngle);
+      //========== #else
+      #else
       
+      if (initialLong < 180.0)
+         initialLong = -initialLong - offset;
+      
+      earthRotAngle = (Abs(mTime[frame] - mTime[0])) * 361.0 + mInitialMha +
+         initialLong + offset;
+      
+      #endif
+      //========== #endif
+
+      earthRotAngle =
+         AngleUtil::PutAngleInDegRange(earthRotAngle, 0.0, 360.0);
+      
+      #if DEBUG_TRAJCANVAS_DRAW > 1
+      if (!mIsEndOfRun)
+         MessageInterface::ShowMessage
+            ("===> backwards=%d, earthRotAngle=%f\n", backwards, earthRotAngle);
+      #endif
+
       glRotatef(earthRotAngle, 0.0, 0.0, 1.0);
-      
    }
    
    //-------------------------------------------------------
