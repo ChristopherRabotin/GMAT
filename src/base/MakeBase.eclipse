@@ -1,5 +1,6 @@
 # Eclipse makefile for GMAT base library
 # Initial Version - D. Conway - 2005/06/17
+# Modifed for Mac OS 10.3  W. Shoan - 2005.11.10
 
 # Updated 2005/08/11.  
 # This file now requires the file BuildEnv.mk in the top level folder.
@@ -70,6 +71,8 @@ archclean :
 	rm -rf */core
 	rm -rf bin/*
 	rm -rf obj/*
+	rm -rf $(WXTARGET)
+	rm -rf $(CONSOLETARGET)
 
 OBJECTS = \
     burn/BurnException.o \
