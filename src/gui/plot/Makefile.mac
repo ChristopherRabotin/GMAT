@@ -6,6 +6,7 @@
 # Modified:   2005/06/29 - Cleaned up including removing and adding new sources.
 #             2005/07/22 - Removed glcanvas_mac.cpp
 #             2005/11/03 - Added trackball.c
+#             2005/11/18 - Removed trackball.c
 ################################################################################
 #
 # Define the marco for the top-level directories
@@ -19,8 +20,6 @@ SRC = MdiChildTrajFrame.cpp MdiChildTsFrame.cpp MdiGlPlotData.cpp \
 	ReportFileSetupPanel.cpp TrajPlotCanvas.cpp TsPlotCanvas.cpp \
 	TsPlotCurve.cpp XyPlotSetupPanel.cpp
 # 
-C_SRC = trackball.c
-#
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/gui/inc.mac
 include ${INCMK}
