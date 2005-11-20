@@ -2142,6 +2142,26 @@ bool Interpreter::InterpretSolarSetting(const StringArray &sar,
       return true;
    }
    
+   if (sar[1] == "UpdateInterval")
+   {
+      Real interval;
+      std::stringstream data;
+      data << rhs;
+      data >> interval;
+      
+      #ifdef DEBUG_GLOBAL_INTERPRETING
+         MessageInterface::ShowMessage("   interval = %lf\n", interval);
+      #endif
+      
+      if (interval >= 0.0)
+      {
+         SolarSystem *sol = moderator->GetSolarSystemInUse();
+         sol->SetEphemUpdateInterval(interval);
+      }
+
+      return true;
+   }
+   
    return false;
 }
 
