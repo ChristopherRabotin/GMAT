@@ -28,14 +28,13 @@
 
 struct RealUtilitiesExceptions
 {
-    class ArgumentError : public BaseException
-          {public : ArgumentError(const std::string& message =
-          "Real Utilities error : argument error.")
-          : BaseException(message) {};  };
-    class IllegalTime   : public BaseException
-          {public : IllegalTime(const std::string& message =
-          "Real Utilities error : illegal time.")
-          : BaseException(message) {};  };
+   class ArgumentError : public BaseException
+   {public : ArgumentError(const std::string& message = "")
+       : BaseException("Real Utilities Argument Error: ", message) {};  };
+   
+   class IllegalTime   : public BaseException
+   {public : IllegalTime(const std::string& message = "")
+       : BaseException("Real Utilities Illegal Time: ", message) {};  };
 };
 
 namespace GmatMathUtil

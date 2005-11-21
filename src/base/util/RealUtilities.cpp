@@ -93,7 +93,7 @@ Real GmatMathUtil::Mod (Real left, Real right)
 {
    if (right == 0.0)  
    {
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("Mod(x, 0.0)");
    };
    return (left - Real(floor(left/right)*right));
 }
@@ -105,7 +105,7 @@ Real GmatMathUtil::Rem (Real left, Real right)
 {
    if (right == 0.0) 
    {
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("Rem(x, 0.0)");
    }; 
    return((left-Real(Integer(left/right))*right));
 }
@@ -117,7 +117,7 @@ void GmatMathUtil::Quotient (Real top, Real bottom, Integer &result)
 { 
     if (bottom == 0.0) 
     {
-        throw RealUtilitiesExceptions::ArgumentError();
+        throw RealUtilitiesExceptions::ArgumentError("Quotient(x, 0.0, Integer)");
     }; 
     result=Integer(top/bottom);
 }
@@ -129,7 +129,7 @@ void GmatMathUtil::Quotient (Real top, Real bottom, Real &result)
 {
    if (bottom == 0.0) 
    {
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("Quotient(x, 0.0, Real)");
    }; 
 
    result= Real(Integer(top/bottom));
@@ -269,7 +269,7 @@ Real GmatMathUtil::ArcsecToRad (Real asec, bool modBy2Pi)
 Real GmatMathUtil::Sin (Real angleInRad, Real cycleInRad)
 {
    if (cycleInRad<=0.0) 
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("Sin(angle, cycle <= 0.0)");
 
    return sin( (TWO_PI/cycleInRad)*angleInRad);
 }
@@ -295,7 +295,7 @@ Real GmatMathUtil::SinXOverX (Real angleInRad, Real cycleInRad)
 Real GmatMathUtil::Cos (Real angleInRad, Real cycleInRad)
 {
    if (cycleInRad<=0.0) 
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("Cos(angle, cycle <= 0.0)");
    
    return cos( (TWO_PI/cycleInRad)*angleInRad);
 }
@@ -306,7 +306,7 @@ Real GmatMathUtil::Cos (Real angleInRad, Real cycleInRad)
 Real GmatMathUtil::Tan (Real angleInRad, Real cycleInRad)
 {
    if (cycleInRad<=0.0) 
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("Tan(angle, cycle <= 0.0)");
 
    //loj: 2/14/05 commented out
    //else if (IsEqual(GmatMathUtil::Cos(angleInRad,cycleInRad),0.0))
@@ -321,7 +321,7 @@ Real GmatMathUtil::Tan (Real angleInRad, Real cycleInRad)
 Real GmatMathUtil::Cosh (Real angleInRad, Real cycleInRad)
 {
    if (cycleInRad<=0.0) 
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("Cosh(angle, cycle <= 0.0)");
    else if (IsEqual(GmatMathUtil::Cos(angleInRad,cycleInRad),0.0)) 
       throw RealUtilitiesExceptions::ArgumentError();
    
@@ -334,7 +334,7 @@ Real GmatMathUtil::Cosh (Real angleInRad, Real cycleInRad)
 Real GmatMathUtil::Sinh (Real angleInRad, Real cycleInRad)
 {
    if (cycleInRad<=0.0) 
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("Sinh(angle, cycle <= 0.0)");
    else if (IsEqual(GmatMathUtil::Cos(angleInRad,cycleInRad),0.0)) 
       throw RealUtilitiesExceptions::ArgumentError();
    
@@ -347,7 +347,7 @@ Real GmatMathUtil::Sinh (Real angleInRad, Real cycleInRad)
 Real GmatMathUtil::Tanh (Real angleInRad, Real cycleInRad)
 {
    if (cycleInRad<=0.0) 
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("Tanh(angle, cycle <= 0.0)");
    else if (IsEqual(GmatMathUtil::Cos(angleInRad,cycleInRad),0.0)) 
       throw RealUtilitiesExceptions::ArgumentError();
    
@@ -360,9 +360,9 @@ Real GmatMathUtil::Tanh (Real angleInRad, Real cycleInRad)
 Real GmatMathUtil::ASin (Real x, Real cycleInRad)
 {
    if (cycleInRad<=0.0) 
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("ASin(angle, cycle <= 0.0)");
    else if (fabs(x)>1.0) 
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("ASin(angle > 1.0, cycle)");
    
    return (cycleInRad/TWO_PI)*asin(x);
 }
@@ -373,9 +373,9 @@ Real GmatMathUtil::ASin (Real x, Real cycleInRad)
 Real GmatMathUtil::ACos (Real x, Real cycleInRad)
 {
    if (cycleInRad<=0.0) 
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("ACos(angle, cycle <= 0.0)");
    else if (fabs(x)>1.0) 
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("ACos(angle > 1.0, cycle)");
    
    return (cycleInRad/TWO_PI)*acos(x);
 }
@@ -386,9 +386,9 @@ Real GmatMathUtil::ACos (Real x, Real cycleInRad)
 Real GmatMathUtil::ATan (Real y, Real x , Real cycleInRad)
 {
    if (cycleInRad<=0.0) 
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("ATan(angle, cycle <= 0.0)");
    else if ((x==0.0)&&(y==0.0)) 
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("ATan(x = 0.0, y = 0.0)");
    
    return (cycleInRad/TWO_PI)*atan2(y,x);
 }
@@ -404,7 +404,7 @@ Real GmatMathUtil::ATan (Real y, Real x , Real cycleInRad)
 Real GmatMathUtil::Ln(Real x)
 {
    if (x <= 0.0)
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("Ln(x <= 0.0)");
 
    return (log(x));
 }
@@ -420,7 +420,7 @@ Real GmatMathUtil::Ln(Real x)
 Real GmatMathUtil::Log(Real x)
 {
    if (x <= 0.0)
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("Log(x <= 0.0)");
 
    return (log(x));
 }
@@ -436,7 +436,7 @@ Real GmatMathUtil::Log(Real x)
 Real GmatMathUtil::Log10(Real x)
 {
    if (x <= 0.0)
-      throw RealUtilitiesExceptions::ArgumentError();
+      throw RealUtilitiesExceptions::ArgumentError("Log10(x <= 0.0)");
 
    return (log10(x));
 }
@@ -771,7 +771,7 @@ Real GmatMathUtil::Cbrt(Real x)
 Real GmatMathUtil::Sqrt(Real x) 
 {
    if (x < 0.0)
-        throw RealUtilitiesExceptions::ArgumentError();
+        throw RealUtilitiesExceptions::ArgumentError("Sqrt(x < 0.0)");
 
    return sqrt(x);
 }
