@@ -4213,6 +4213,12 @@ void TrajPlotCanvas::ComputeLongitudeLst(Real time, Real x, Real y,
    Real mha = 0.0;
    Real lon = 0.0;
    Real lst = 0.0;
+   *meanHourAngle = mha;
+   *longitude = lon;
+   *localSiderealTime = lst;
+
+   if (mViewObjName != "Earth")
+      return;
    
    // compute longitude of the first spacecraft
    if (mSolarSystem)
@@ -4226,7 +4232,7 @@ void TrajPlotCanvas::ComputeLongitudeLst(Real time, Real x, Real y,
       lon = raDeg - mha;
       lon = AngleUtil::PutAngleInDegRange(lon, 0.0, 360.0);
    }
-
+   
    lst = mha + lon;
    lst = AngleUtil::PutAngleInDegRange(lst, 0.0, 360.0);
    *meanHourAngle = mha;
