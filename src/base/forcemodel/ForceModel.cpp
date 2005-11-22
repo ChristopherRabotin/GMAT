@@ -59,11 +59,16 @@
 //#define FORCE_REFERENCE_OBJECTS
 //#define DEBUG_FORCE_EPOCHS
 //#define DEBUG_SATELLITE_PARAMETERS
+//#define DEBUG_FIRST_CALL
 
 
 //---------------------------------
 // static data
 //---------------------------------
+
+#ifdef DEBUG_FIRST_CALL
+static bool firstCallFired = false;
+#endif
 
 const std::string
 ForceModel::PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount] =
@@ -826,6 +831,10 @@ bool ForceModel::Initialize()
       }
    #endif
 
+   #ifdef DEBUG_FIRST_CALL
+   firstCallFired = false;
+   #endif
+
    return true;
 }
 
@@ -1262,11 +1271,34 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
                                           deriv[4], deriv[5]);
          #endif
       }
+
+      #ifdef DEBUG_FIRST_CALL
+         if (firstCallFired == false)
+         {
+            MessageInterface::ShowMessage(
+               "   %s(%s)::GetDerivatives --> "
+               "[%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+               current->GetTypeName().c_str(), current->GetName().c_str(), 
+               ddt[0], ddt[1], ddt[2], ddt[3], ddt[4], ddt[5]);
+         }
+      #endif
+
       ++cf;
       current = GetForce(cf);
    }
    #ifdef DEBUG_FORCEMODEL_EXE
       MessageInterface::ShowMessage("  ===============================\n");
+   #endif
+
+   #ifdef DEBUG_FIRST_CALL
+      if (firstCallFired == false)
+      {
+         MessageInterface::ShowMessage(
+            "GetDerivatives: [%.16lf %.16lf %.16lf %.16lf %.16lf %.16lf]\n",
+            deriv[0], deriv[1], deriv[2], deriv[3], deriv[4], deriv[5]);
+      }
+
+      firstCallFired = true;
    #endif
 
    return true;

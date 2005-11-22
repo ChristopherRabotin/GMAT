@@ -68,13 +68,18 @@
 
 // #define DEBUG_GRAVITY_FIELD
 // #define DEBUG_GRAVITY_FIELD_DETAILS
-
+//#define DEBUG_FIRST_CALL
 
 using namespace GmatMathUtil;
 
 //---------------------------------
 // static data
 //---------------------------------
+
+#ifdef DEBUG_FIRST_CALL
+static bool firstCallFired = false;
+#endif
+
 const std::string
 GravityField::PARAMETER_TEXT[GravityFieldParamCount - HarmonicFieldParamCount] =
 {
@@ -268,6 +273,10 @@ bool GravityField::Initialize(void)
    degreeTruncateReported = false;
    orderTruncateReported  = false;
 
+   #ifdef DEBUG_FIRST_CALL
+      firstCallFired = false;
+   #endif
+
    return gravity_init();
 }
 
@@ -331,7 +340,7 @@ bool GravityField::gravity_rtq(Real jday, Real F[] )
          return false;
 
    Integer            n, m;
-   Real               p, summ[4], D, dT, Cbar_nm, Sbar_nm;
+   Real               p, summ[4] = {0.0, 0.0, 0.0, 0.0}, D, dT, Cbar_nm, Sbar_nm;
 
    Real               arr[4] = {0.0, 0.0, 0.0, 0.0};
    static const Real  sqrt2 = Sqrt(2.0);
@@ -437,6 +446,18 @@ bool GravityField::gravity_rtq(Real jday, Real F[] )
 //------------------------------------------------------------------------------
 bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
 {   
+   #ifdef DEBUG_FIRST_CALL
+      if (firstCallFired == false)
+      {
+         MessageInterface::ShowMessage(
+            "GravityField(%s) inputs:\n"
+            "   state = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n"
+            "   dt = %.10lf\n   dvorder = %d\n",
+            instanceName.c_str(), state[0], state[1], state[2], state[3], 
+            state[4], state[5], dt, dvorder);
+      }
+   #endif
+
    if ((dvorder > 2) || (dvorder < 1))
       return false;
       
@@ -473,7 +494,7 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
    //         "Incorrect central body for Body Fixed coordinate system in "
    //         + instanceName);
    if (targetCS == inputCS)   sameCS = true;
-   
+
    CelestialBody *targetBody = (CelestialBody*) targetCS->GetOrigin();
    CelestialBody *fixedBody  = (CelestialBody*) fixedCS->GetOrigin();
    //SpacePoint *targetBody = targetCS->GetOrigin();
@@ -484,6 +505,17 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
    //   targetBody->GetState(now);
    //Rvector frv = ((CelestialBody*) fixedBody)->GetState(now);
    //Rvector trv = ((CelestialBody*) targetBody)->GetState(now);
+
+   #ifdef DEBUG_FIRST_CALL
+      if (firstCallFired == false)
+      {
+         MessageInterface::ShowMessage(
+            "   Epoch = %.12lf\n   targetBody = %s\n   fixedBody = %s\n", 
+            now.Get(), targetBody->GetName().c_str(), 
+            fixedBody->GetName().c_str());
+      }
+   #endif
+
    if (body->GetName() != targetCS->GetOriginName())  // or fixed?????
    //if (rbb3 != 0.0) 
    {
@@ -535,10 +567,40 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
                         satState[3], satState[4], satState[5]);
       //cc.Convert(a1Now, theState, inputCS, outState, fixedCS);
       cc.Convert(now, theState, inputCS, outState, fixedCS);
+
+      #ifdef DEBUG_FIRST_CALL
+         if (firstCallFired == false)
+         {
+            MessageInterface::ShowMessage(
+               "   State conversion check:\n      %s --> %s\n", 
+               inputCS->GetName().c_str(), fixedCS->GetName().c_str());
+            MessageInterface::ShowMessage(
+               "      Epoch: %.12lf\n", now.Get());
+            MessageInterface::ShowMessage(
+               "      input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+               theState[0], theState[1], theState[2], theState[3], theState[4], 
+               theState[5]);
+            MessageInterface::ShowMessage(
+               "      outpt State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+               outState[0], outState[1], outState[2], outState[3], outState[4], 
+               outState[5]);
+         }
+      #endif
+
       if (sameCS) rotMatrix = cc.GetLastRotationMatrix();
       outState.GetR(tmpState);
       outState.GetV(tmpState + 3);
-    
+
+      #ifdef DEBUG_FIRST_CALL
+         if (firstCallFired == false)
+         {
+            MessageInterface::ShowMessage(
+               "   tmpState = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+               tmpState[0], tmpState[1], tmpState[2], tmpState[3], tmpState[4], 
+               tmpState[5]);
+         }
+      #endif
+
       //if (!legendreP_rtq(satState))
       if (!legendreP_rtq(tmpState))
          throw ForceModelException("GravityField::legendreP_rtq failed");
@@ -613,6 +675,18 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
             throw ForceModelException("GravityField::GetDerivatives requires order = 1 or 2");
       } // end switch
    }  // end for
+
+   #ifdef DEBUG_FIRST_CALL
+      if (firstCallFired == false)
+      {
+         MessageInterface::ShowMessage(
+            "   GravityField[%s] --> [%.10lf %.10lf %.10lf %.16lf"
+            " %.16lf %.16lf]\n",
+            instanceName.c_str(), deriv[0], deriv[1], deriv[2], deriv[3], 
+            deriv[4], deriv[5]);
+         firstCallFired = true;
+      }
+   #endif
 
    return true;
 }

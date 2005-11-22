@@ -38,6 +38,13 @@
 using namespace GmatMathUtil;      // for trig functions, etc.
 using namespace GmatTimeUtil;      // for JD offsets, etc.
 
+//#define DEBUG_FIRST_CALL
+
+#ifdef DEBUG_FIRST_CALL
+   static bool firstCallFired = false;
+#endif
+
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -141,6 +148,10 @@ bool BodyFixedAxes::Initialize()
 {
    DynamicAxes::Initialize();
    if (originName == SolarSystem::EARTH_NAME) InitializeFK5();
+   
+   #ifdef DEBUG_FIRST_CALL
+      firstCallFired = false;
+   #endif
    
    return true;
 }
@@ -334,9 +345,19 @@ GmatBase* BodyFixedAxes::Clone() const
 //------------------------------------------------------------------------------
 void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch) 
 {
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage(
+            "Calling CalculateRotationMatrix at epoch %lf; ", atEpoch.Get());
+   #endif
+   
    // compute rotMatrix and rotDotMatrix
    if (originName == SolarSystem::EARTH_NAME)
    {
+      #ifdef DEBUG_FIRST_CALL
+         if (!firstCallFired)
+            MessageInterface::ShowMessage("Body is the Earth\n");
+      #endif
       Real dPsi             = 0.0;
       Real longAscNodeLunar = 0.0;
       Real cosEpsbar        = 0.0;
@@ -367,17 +388,38 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       // NOTE - this is really TT, an approximation of TDB *********
       Real tTDB    = (jdTT - 2451545.0) / 36525.0;
  
+      #ifdef DEBUG_FIRST_CALL
+         if (!firstCallFired)
+            MessageInterface::ShowMessage(
+               "   Epoch data[mjdUTC, mjdUT1, jdUT1, tUT1, mjdTT1, jdTT, tTDB] "
+               "=\n        [%.10lf %.10lf %.10lf %.10lf %.10lf %.10lf %.10lf ]\n",
+               mjdUTC, mjdUT1, jdUT1, tUT1, mjdTT, jdTT, tTDB);
+      #endif
+
       if (overrideOriginInterval) 
       {
          updateIntervalToUse = updateInterval;
          //MessageInterface::ShowMessage("Overriding origin interval .....\n");
+         #ifdef DEBUG_FIRST_CALL
+            if (!firstCallFired)
+               MessageInterface::ShowMessage(
+                  "   Overrode origin interval; set to %.12lf\n", 
+                  updateIntervalToUse);
+         #endif
       }
       else 
       {
-         updateIntervalToUse = 
-                                  ((Planet*) origin)->GetUpdateInterval();
+         updateIntervalToUse = 60.0;
+//                                  ((Planet*) origin)->GetUpdateInterval();
          //MessageInterface::ShowMessage("Using origin interval .....\n");
+         #ifdef DEBUG_FIRST_CALL
+            if (!firstCallFired)
+               MessageInterface::ShowMessage(
+                  "   Using body's origin interval, %.12lf\n", 
+                  updateIntervalToUse);
+         #endif
       }
+      
       //MessageInterface::ShowMessage("Setting %4.3f as interval \n",
       //                              updateIntervalToUse);
       Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
@@ -398,9 +440,50 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
                "Computed rotation matrix has a determinant not equal to 1.0");
       rotDotMatrix    = PREC.Transpose() * (NUT.Transpose() * 
                         (STderiv.Transpose() * PM.Transpose()));
+
+      #ifdef DEBUG_FIRST_CALL
+         if (!firstCallFired) 
+         {
+            MessageInterface::ShowMessage("FK5 Components\n   PREC = \n");
+            for (Integer m = 0; m < 3; ++m)
+               MessageInterface::ShowMessage(
+                  "          %20.12le %20.12le %20.12le \n", PREC(m,0), 
+                  PREC(m,1), PREC(m,2));
+            MessageInterface::ShowMessage("\n   NUT = \n");
+            for (Integer m = 0; m < 3; ++m)
+               MessageInterface::ShowMessage(
+                  "          %20.12le %20.12le %20.12le \n", NUT(m,0), 
+                  NUT(m,1), NUT(m,2));
+            MessageInterface::ShowMessage("\n   ST = \n");
+            for (Integer m = 0; m < 3; ++m)
+               MessageInterface::ShowMessage(
+                  "          %20.12le %20.12le %20.12le \n", ST(m,0), 
+                  ST(m,1), ST(m,2));
+            MessageInterface::ShowMessage("\n   STderiv = \n");
+            for (Integer m = 0; m < 3; ++m)
+               MessageInterface::ShowMessage(
+                  "          %20.12le %20.12le %20.12le \n", STderiv(m,0), 
+                  STderiv(m,1), STderiv(m,2));
+            MessageInterface::ShowMessage("\n   PM = \n");
+            for (Integer m = 0; m < 3; ++m)
+               MessageInterface::ShowMessage(
+                  "          %20.12le %20.12le %20.12le \n", PM(m,0), 
+                  PM(m,1), PM(m,2));
+            MessageInterface::ShowMessage("\n   rotMatrix = \n");
+            for (Integer m = 0; m < 3; ++m)
+               MessageInterface::ShowMessage(
+                  "          %20.12le %20.12le %20.12le \n", rotMatrix(m,0), 
+                  rotMatrix(m,1), rotMatrix(m,2));
+         }
+      #endif
+
    }
    else
    {
+      #ifdef DEBUG_FIRST_CALL
+         if (!firstCallFired)
+            MessageInterface::ShowMessage("Body is %s\n", originName.c_str());
+      #endif
       // this method will return alpha (deg), delta (deg), 
       // W (deg), and Wdot (deg/day)
       Rvector cartCoord   = ((CelestialBody*)origin)->
@@ -427,6 +510,11 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       rotDotMatrix = R3left.Transpose() * 
          (R1middle.Transpose() * Wderiv);
    }
+   
+   #ifdef DEBUG_FIRST_CALL
+      firstCallFired = true;
+   #endif
+
 }
 
 

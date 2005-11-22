@@ -43,6 +43,11 @@ using namespace GmatTimeUtil;      // for SECS_PER_DAY
 //static Integer visitCount = 0;
 
 //#define DEBUG_UPDATE
+//#define DEBUG_FIRST_CALL
+
+#ifdef DEBUG_FIRST_CALL
+   static bool firstCallFired = false;
+#endif
 
 //---------------------------------
 // static data
@@ -166,7 +171,7 @@ const AxisSystem& AxisSystem::operator=(const AxisSystem &axisSys)
    updateIntervalToUse = axisSys.updateIntervalToUse;
    overrideOriginInterval = axisSys.overrideOriginInterval;
    lastPRECEpoch     = axisSys.lastPRECEpoch;
-   lastNUTEpoch      = axisSys.lastNUTEpoch;
+   lastNUTEpoch      = axisSys.lastNUTEpoch;   
    lastSTDerivEpoch  = axisSys.lastSTDerivEpoch;
    lastPMEpoch       = axisSys.lastPMEpoch;
    lastPREC          = axisSys.lastPREC;
@@ -388,6 +393,10 @@ Rmatrix33 AxisSystem::GetLastRotationMatrix() const
 bool AxisSystem::Initialize()
 {
    CoordinateBase::Initialize();
+   #ifdef DEBUG_FIRST_CALL
+      firstCallFired = false;
+   #endif
+   
    return true;
 }
 
@@ -423,6 +432,32 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
    //outState[3] = outVel[0];
    //outState[4] = outVel[1];
    //outState[5] = outVel[2];
+
+   #ifdef DEBUG_FIRST_CALL
+      if ((firstCallFired == false) || (epoch.Get() == 21545.0))
+      {
+         MessageInterface::ShowMessage(
+            "RotateToMJ2000Eq check for %s\n", typeName.c_str());
+         MessageInterface::ShowMessage(
+            "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n",
+            rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2),
+            rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2),
+            rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
+         MessageInterface::ShowMessage(
+            "   Epoch: %.12lf\n", epoch.Get());
+         MessageInterface::ShowMessage(
+            "   input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], 
+            inState[5]);
+         MessageInterface::ShowMessage(
+            "   outpt State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], 
+            outVel[2]);
+      }
+   #endif
+
    return true;
 }
 
@@ -463,6 +498,33 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
    //outState[3] = outVel[0];
    //outState[4] = outVel[1];
    //outState[5] = outVel[2];
+
+   #ifdef DEBUG_FIRST_CALL
+      if ((firstCallFired == false) || (epoch.Get() == 21545.0))
+      {
+         MessageInterface::ShowMessage(
+            "RotateFromMJ2000Eq check for %s\n", typeName.c_str());
+         MessageInterface::ShowMessage(
+            "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n",
+            rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2),
+            rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2),
+            rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
+         MessageInterface::ShowMessage(
+            "   Epoch: %.12lf\n", epoch.Get());
+         MessageInterface::ShowMessage(
+            "   input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], 
+            inState[5]);
+         MessageInterface::ShowMessage(
+            "   outpt State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], 
+            outVel[2]);
+         firstCallFired = true;
+      }
+   #endif
+
    return true;
 }
 
@@ -702,9 +764,19 @@ void AxisSystem::InitializeFK5()
       {
          for (Integer j=0; j< numNut; j++)
          {
-            aVals[i*5+j] = (a.at(i)).at(j);
+            // DJC changed; was this: 
+            //aVals[i*5+j] = (a.at(i)).at(j);
+            aVals[i*numNut+j] = (a.at(i)).at(j);
          }
       }
+      
+      #ifdef DEBUG_a_MATRIX
+         MessageInterface::ShowMessage("aVals = \n");
+         for (Integer q = 0; q < numNut; ++q)
+         MessageInterface::ShowMessage("         %3d: %8d %8d %8d %8d %8d\n",
+            q+1, aVals[q], aVals[q+numNut], aVals[q+2*numNut], 
+            aVals[q+3*numNut], aVals[q+4*numNut]);
+      #endif
       
       OK      = itrf->GetPlanetaryTerms(ap, Ap, Bp, Cp, Dp);
       if (!OK) throw CoordinateSystemException("Error getting planetary data.");
@@ -764,6 +836,16 @@ Rmatrix33 AxisSystem::ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch)
    //   return lastPREC; 
    //}
    
+   //#define DEBUG_FIRST_CALL
+
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage(
+            "   AxisSystem::ComputePrecessionMatrix(%.12lf, %.12lf)\n", tTDB, 
+            atEpoch.Get());
+//         InitializeFK5();
+   #endif
+   
    #ifdef DEBUG_ROT_MATRIX
       cout << "**** tTDB = " << tTDB << endl;
    #endif
@@ -820,6 +902,14 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
                                             Real &longAscNodeLunar,
                                             Real &cosEpsbar)
 {
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage(
+            "   AxisSystem::ComputeNutationMatrix(%.12lf, %.12lf, %.12lf, "
+            "%.12lf, %.12lf)\n", tTDB, atEpoch.Get(), dPsi, longAscNodeLunar, 
+            cosEpsbar);
+   #endif
+
    static const Real const125 = 125.04455501*RAD_PER_DEG;
    static const Real const134 = 134.96340251*RAD_PER_DEG;
    static const Real const357 = 357.52910918*RAD_PER_DEG;
@@ -859,6 +949,14 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
          cout << "lastNUT = "  << lastNUT << endl;
       #endif
       dPsi = lastDPsi;
+
+      #ifdef DEBUG_FIRST_CALL
+         if (!firstCallFired)
+            MessageInterface::ShowMessage(
+               "   Using buffered nutation data: %.13lf = 86400*(%.12lf - %.12lf)\n",
+               dt, atEpoch.Get(), lastNUTEpoch.Get());
+      #endif
+      
       return lastNUT; 
    }
 
@@ -899,6 +997,26 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
       dEps += (C[i] + D[i]*tTDB )*cosAp + F[i]*sinAp;
    }
     */
+
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage(
+            "   Nutation data:\n"
+            "      nut               = %d\n"
+            "      meanAnomalyMoon   = %.13lf\n"
+            "      meanAnomalySun    = %.13lf\n"
+            "      argLatitudeMoon   = %.13lf\n"
+            "      meanElongationSun = %.13lf\n"
+            "      longAscNodeLunar  = %.13lf\n"
+            "      cosEpsbar         = %.13lf\n"
+            "      tTDB              = %.13le\n"
+            "      tTDB2             = %.13le\n"
+            "      tTDB3             = %.13le\n"
+            "      tTDB4             = %.13le\n",
+            nut, meanAnomalyMoon, meanAnomalySun, argLatitudeMoon,
+            meanElongationSun, longAscNodeLunar, cosEpsbar, tTDB, tTDB2, tTDB3,
+            tTDB4);
+   #endif
    
    const Real  *AVals = A.GetDataVector();
    const Real  *BVals = B.GetDataVector();
@@ -906,6 +1024,108 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    const Real  *DVals = D.GetDataVector();
    const Real  *EVals = E.GetDataVector();
    const Real  *FVals = F.GetDataVector();
+
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired) 
+      {
+         MessageInterface::ShowMessage(
+            "      a[0](1st 12 els)   = [%d %d %d %d %d %d %d %d %d %d %d %d]\n",
+            aVals[0], aVals[1], aVals[2], aVals[3], aVals[4], aVals[5], 
+            aVals[6], aVals[7], aVals[8], aVals[9], aVals[10], aVals[11]);
+         MessageInterface::ShowMessage(
+            "      a[1](1st 12 els)   = [%d %d %d %d %d %d %d %d %d %d %d %d]\n",
+            aVals[nut*1+0], aVals[nut*1+1], aVals[nut*1+2], aVals[nut*1+3], 
+            aVals[nut*1+4], aVals[nut*1+5], aVals[nut*1+6], aVals[nut*1+7], 
+            aVals[nut*1+8], aVals[nut*1+9], aVals[nut*1+10], aVals[nut*1+11]);
+         MessageInterface::ShowMessage(
+            "      a[2](1st 12 els)   = [%d %d %d %d %d %d %d %d %d %d %d %d]\n",
+            aVals[nut*2+0], aVals[nut*2+1], aVals[nut*2+2], aVals[nut*2+3], 
+            aVals[nut*2+4], aVals[nut*2+5], aVals[nut*2+6], aVals[nut*2+7], 
+            aVals[nut*2+8], aVals[nut*2+9], aVals[nut*2+10], aVals[nut*2+11]);
+         MessageInterface::ShowMessage(
+            "      a[3](1st 12 els)   = [%d %d %d %d %d %d %d %d %d %d %d %d]\n",
+            aVals[nut*3+0], aVals[nut*3+1], aVals[nut*3+2], aVals[nut*3+3], 
+            aVals[nut*3+4], aVals[nut*3+5], aVals[nut*3+6], aVals[nut*3+7], 
+            aVals[nut*3+8], aVals[nut*3+9], aVals[nut*3+10], aVals[nut*3+11]);
+         MessageInterface::ShowMessage(
+            "      a[4](1st 12 els)   = [%d %d %d %d %d %d %d %d %d %d %d %d]\n",
+            aVals[nut*4+0], aVals[nut*4+1], aVals[nut*4+2], aVals[nut*4+3], 
+            aVals[nut*4+4], aVals[nut*4+5], aVals[nut*4+6], aVals[nut*4+7], 
+            aVals[nut*4+8], aVals[nut*4+9], aVals[nut*4+10], aVals[nut*4+11]);
+         MessageInterface::ShowMessage(
+            "      a[*](Last els)     = [%d %d %d %d %d]\n",
+            aVals[nut-1], aVals[nut+nut-1], aVals[nut*2+nut-1], 
+            aVals[nut*3+nut-1], aVals[nut*4+nut-1]);
+            
+         MessageInterface::ShowMessage(
+            "      a[0](els 51-62)    = [%d %d %d %d %d %d %d %d %d %d %d %d]\n",
+            aVals[51], aVals[52], aVals[53], aVals[54], aVals[55], aVals[56], 
+            aVals[57], aVals[58], aVals[59], aVals[60], aVals[61], aVals[62]);
+         MessageInterface::ShowMessage(
+            "      a[1](els 51-62)    = [%d %d %d %d %d %d %d %d %d %d %d %d]\n",
+            aVals[nut*1+51], aVals[nut*1+52], aVals[nut*1+53], aVals[nut*1+54], 
+            aVals[nut*1+55], aVals[nut*1+56], aVals[nut*1+57], aVals[nut*1+58], 
+            aVals[nut*1+59], aVals[nut*1+60], aVals[nut*1+61], aVals[nut*1+62]);
+         MessageInterface::ShowMessage(
+            "      a[2](els 51-62)    = [%d %d %d %d %d %d %d %d %d %d %d %d]\n",
+            aVals[nut*2+51], aVals[nut*2+52], aVals[nut*2+53], aVals[nut*2+54], 
+            aVals[nut*2+55], aVals[nut*2+56], aVals[nut*2+57], aVals[nut*2+58], 
+            aVals[nut*2+59], aVals[nut*2+60], aVals[nut*2+61], aVals[nut*2+62]);
+         MessageInterface::ShowMessage(
+            "      a[3](els 51-62)    = [%d %d %d %d %d %d %d %d %d %d %d %d]\n",
+            aVals[nut*3+51], aVals[nut*3+52], aVals[nut*3+53], aVals[nut*3+54], 
+            aVals[nut*3+55], aVals[nut*3+56], aVals[nut*3+57], aVals[nut*3+58], 
+            aVals[nut*3+59], aVals[nut*3+60], aVals[nut*3+61], aVals[nut*3+62]);
+         MessageInterface::ShowMessage(
+            "      a[4](els 51-62)    = [%d %d %d %d %d %d %d %d %d %d %d %d]\n",
+            aVals[nut*4+51], aVals[nut*4+52], aVals[nut*4+53], aVals[nut*4+54], 
+            aVals[nut*4+55], aVals[nut*4+56], aVals[nut*4+57], aVals[nut*4+58], 
+            aVals[nut*4+59], aVals[nut*4+60], aVals[nut*4+61], aVals[nut*4+62]);
+         MessageInterface::ShowMessage(
+            "      a[*](Last els)    = [%d %d %d %d %d]\n",
+            aVals[nut-1], aVals[nut+nut-1], aVals[nut*2+nut-1], 
+            aVals[nut*3+nut-1], aVals[nut*4+nut-1]);
+            
+         MessageInterface::ShowMessage(
+            "      A(1st 12 els)     = [%.13lf %.13lf %.13lf %.13lf\n"
+            "                           %.13lf %.13lf %.13lf %.13lf\n"
+            "                           %.13lf %.13lf %.13lf %.13lf]\n",
+            AVals[0], AVals[1], AVals[2], AVals[3], 
+            AVals[4], AVals[5], AVals[6], AVals[7], 
+            AVals[8], AVals[9], AVals[10], AVals[11]);
+         MessageInterface::ShowMessage(
+            "      B(1st 12 els)     = [%.13lf %.13lf %.13lf %.13lf\n"
+            "                           %.13lf %.13lf %.13lf %.13lf\n"
+            "                           %.13lf %.13lf %.13lf %.13lf]\n",
+            BVals[0], BVals[1], BVals[2], BVals[3], BVals[4], BVals[5], 
+            BVals[6], BVals[7], BVals[8], BVals[9], BVals[10], BVals[11]);
+         MessageInterface::ShowMessage(
+            "      C(1st 12 els)     = [%.13lf %.13lf %.13lf %.13lf\n"
+            "                           %.13lf %.13lf %.13lf %.13lf\n"
+            "                           %.13lf %.13lf %.13lf %.13lf]\n",
+            CVals[0], CVals[1], CVals[2], CVals[3], CVals[4], CVals[5], 
+            CVals[6], CVals[7], CVals[8], CVals[9], CVals[10], CVals[11]);
+         MessageInterface::ShowMessage(
+            "      D(1st 12 els)     = [%.13lf %.13lf %.13lf %.13lf\n"
+            "                           %.13lf %.13lf %.13lf %.13lf\n"
+            "                           %.13lf %.13lf %.13lf %.13lf]\n",
+            DVals[0], DVals[1], DVals[2], DVals[3], DVals[4], DVals[5], 
+            DVals[6], DVals[7], DVals[8], DVals[9], DVals[10], DVals[11]);
+         MessageInterface::ShowMessage(
+            "      E(1st 12 els)     = [%.13lf %.13lf %.13lf %.13lf\n"
+            "                           %.13lf %.13lf %.13lf %.13lf\n"
+            "                           %.13lf %.13lf %.13lf %.13lf]\n",
+            EVals[0], EVals[1], EVals[2], EVals[3], EVals[4], EVals[5], 
+            EVals[6], EVals[7], EVals[8], EVals[9], EVals[10], EVals[11]);
+         MessageInterface::ShowMessage(
+            "      F(1st 12 els)     = [%.13lf %.13lf %.13lf %.13lf\n"
+            "                           %.13lf %.13lf %.13lf %.13lf\n"
+            "                           %.13lf %.13lf %.13lf %.13lf]\n",
+            FVals[0], FVals[1], FVals[2], FVals[3], FVals[4], FVals[5], 
+            FVals[6], FVals[7], FVals[8], FVals[9], FVals[10], FVals[11]);
+      }
+   #endif
+
    for (i = nut-1; i >= 0; i--)
    {
       //apNut = aVals[0][i]*meanAnomalyMoon + aVals[1][i]*meanAnomalySun 
@@ -922,11 +1142,25 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
       //dEps += (C[i] + D[i]*tTDB )*cosAp + F[i]*sinAp;
       dPsi += (AVals[i] + BVals[i]*tTDB )*sinAp + EVals[i]*cosAp;
       dEps += (CVals[i] + DVals[i]*tTDB )*cosAp + FVals[i]*sinAp;
+
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage(
+            "      apNut(%3d) dPsi(%3d) dEps(%3d) = %.13le %.13le %.13le\n", i, 
+            i, i, apNut, dPsi, dEps);
+   #endif
    }
    
    dPsi *= RAD_PER_ARCSEC;
    dEps *= RAD_PER_ARCSEC;
    
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage(
+            "      dPsi              = %.13lf\n"
+            "      dEps              = %.13lf\n", dPsi, dEps);
+   #endif
+
    // Compute the corrections for planetary effects on the nutation and
    // the obliquity of the ecliptic 
    // NOTE - this part is commented out for now, per Steve Hughes
@@ -934,18 +1168,31 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    // general precession in longitude
    
    
-    register Real longVenus   = (181.979800853  + 58517.8156748  * tTDB)* RAD_PER_DEG;
-    register Real longEarth   = (100.466448494  + 35999.3728521  * tTDB)* RAD_PER_DEG;
-    register Real longMars    = (355.433274605  + 19140.299314   * tTDB)* RAD_PER_DEG;
-    register Real longJupiter = ( 34.351483900  +  3034.90567464 * tTDB)* RAD_PER_DEG;
-    register Real longSaturn  = ( 50.0774713998 +  1222.11379404 * tTDB)* RAD_PER_DEG;
-    register Real genPrec     = (1.39697137214 * tTDB + 0.0003086 * tTDB2)
+   register Real longVenus   = (181.979800853  + 58517.8156748  * tTDB)* RAD_PER_DEG;
+   register Real longEarth   = (100.466448494  + 35999.3728521  * tTDB)* RAD_PER_DEG;
+   register Real longMars    = (355.433274605  + 19140.299314   * tTDB)* RAD_PER_DEG;
+   register Real longJupiter = ( 34.351483900  +  3034.90567464 * tTDB)* RAD_PER_DEG;
+   register Real longSaturn  = ( 50.0774713998 +  1222.11379404 * tTDB)* RAD_PER_DEG;
+   register Real genPrec     = (1.39697137214 * tTDB + 0.0003086 * tTDB2)
                                  * RAD_PER_DEG;
-    register Real apPlan = 0.0;
-    register Real cosApP = 0.0;
-    register Real sinApP = 0.0;
-    register Integer nutpl = itrf->GetNumberOfPlanetaryTerms();
+   register Real apPlan = 0.0;
+   register Real cosApP = 0.0;
+   register Real sinApP = 0.0;
+   register Integer nutpl = itrf->GetNumberOfPlanetaryTerms();
     
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage(
+            "      longVenus         = %.13lf\n"
+            "      longEarth         = %.13lf\n"
+            "      longMars          = %.13lf\n"
+            "      longJupiter       = %.13lf\n"
+            "      longSaturn        = %.13lf\n"
+            "      genPrec           = %.13lf\n"
+            "      nutpl             = %d\n",
+            longVenus, longEarth, longMars, longJupiter, longSaturn, genPrec, 
+            nutpl);
+   #endif
     //for (i = nutpl-1; i >= 0; i--)
     //{
     //   apPlan = (ap.at(0)).at(i)*longVenus + (ap.at(1)).at(i)*longEarth 
@@ -982,6 +1229,13 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
           dEps += (( CpVals[i] + DpVals[i]*tTDB )*cosApP) * RAD_PER_ARCSEC;
     }
     
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage(
+            "      dPsi(0)           = %.13lf\n"
+            "      dEps(0)           = %.13lf\n",
+            dPsi, dEps);
+   #endif
     
    // FOR NOW, SQ's code to approximate GSRF frame
    // NOTE - do we delete this when we put in the planetary stuff above?
@@ -989,6 +1243,14 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    dPsi += (-0.0431 - 0.2957*tTDB )*RAD_PER_ARCSEC;
    dEps += (-0.0051 - 0.0277*tTDB )*RAD_PER_ARCSEC;
    
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage(
+            "      dPsi(1)           = %.13lf\n"
+            "      dEps(1)           = %.13lf\n",
+            dPsi, dEps);
+   #endif
+    
    // Compute obliquity of the ecliptic (Vallado Eq. 3-52)
    Real TrueOoE = Epsbar + dEps;
    
@@ -1043,6 +1305,14 @@ Rmatrix33 AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
                                                   Real &cosAst,
                                                   Real &sinAst)
 {
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage(
+            "   AxisSystem::ComputeSiderealTimeRotation(%.12lf, %.12lf, %.12lf,"
+            " %.12lf, %.12lf, %.12lf, %.12lf)\n", jdTT, tUT1, dPsi, 
+            longAscNodeLunar, cosEpsbar, cosAst, sinAst);
+   #endif
+
    Real tUT12    = tUT1  * tUT1;
    Real tUT13    = tUT12 * tUT1;
    
@@ -1104,6 +1374,14 @@ Rmatrix33 AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC,
                                                      A1Mjd atEpoch,
                                                      Real cosAst, Real sinAst)
 {
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage(
+            "   AxisSystem::ComputeSiderealTimeDotRotation(%.12lf, %.12lf,"
+            " %.12lf, %.12lf)\n", mjdUTC, atEpoch.Get(),
+            cosAst, sinAst);
+   #endif
+
    Real dt = Abs(atEpoch.Subtract(lastSTDerivEpoch)) * SECS_PER_DAY;
    if ( dt < updateIntervalToUse)
    {
@@ -1149,6 +1427,13 @@ Rmatrix33 AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC,
 
 Rmatrix33 AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch)
 {
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage(
+            "   AxisSystem::ComputePolarMotionRotation(%.12lf, %.12lf)\n", 
+            mjdUTC, atEpoch.Get());
+   #endif
+
    Real dt = Abs(atEpoch.Subtract(lastPMEpoch)) * SECS_PER_DAY;
    if ( dt < updateIntervalToUse)
    {
@@ -1191,6 +1476,10 @@ Rmatrix33 AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoc
       
    lastPM      = PM;
    lastPMEpoch = atEpoch;
+
+   #ifdef DEBUG_FIRST_CALL
+      firstCallFired = true;
+   #endif
 
    return PM;
 }

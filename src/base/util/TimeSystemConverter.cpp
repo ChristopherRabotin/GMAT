@@ -19,6 +19,17 @@
 
 #include "TimeSystemConverter.hpp"
 
+
+//#define DEBUG_FIRST_CALL
+
+#ifdef DEBUG_FIRST_CALL
+   #include "MessageInterface.hpp"
+   
+   static bool firstCallFired = false;
+   static Real lastValue = -9999999.999999e99;
+#endif
+
+
 using namespace GmatMathUtil;
 
 static EopFile *theEopFile;
@@ -42,11 +53,29 @@ Real TimeConverterUtil::Convert(const Real origValue,
                         const std::string &fromType,
                         const std::string &toType,
                         Real refJd)
-{      
+{
+   #ifdef DEBUG_FIRST_CALL
+      if ((firstCallFired == true) && (origValue < (lastValue-0.25)))
+      {
+         firstCallFired = false;
+         MessageInterface::ShowMessage(
+            "Reset firstCallFired, orig == '%.12lf', last = '%.12lf'\n",
+            origValue, lastValue);
+      }
+      lastValue = origValue;
+   #endif
+
+      
    Real newTime =
       TimeConverterUtil::ConvertToTaiMjd(fromType, origValue, refJd);
    Real returnTime =
       TimeConverterUtil::ConvertFromTaiMjd(toType, newTime, refJd);
+
+   #ifdef DEBUG_FIRST_CALL
+      if (toType == "TtMjd")
+         firstCallFired = true;
+   #endif
+
    return returnTime;
 }
 
@@ -56,6 +85,12 @@ Real TimeConverterUtil::Convert(const Real origValue,
 Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
                                         Real refJd)
 {
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage(
+            "   Converting to TAI from %s\n", fromType.c_str());
+   #endif
+
    // a1mjd
    if (fromType == TIME_SYSTEM_TEXT[0])
    {
@@ -141,6 +176,12 @@ Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
 Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
                                           Real refJd)
 {
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage(
+            "   Converting from TAI to %s\n", toType.c_str());
+   #endif
+
    // a1
    if (toType == TIME_SYSTEM_TEXT[0])
    {
@@ -196,6 +237,12 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
       Real numOffset = 0;
 
       numOffset = theEopFile->GetUt1UtcOffset(utcMjd + offsetValue);
+
+      #ifdef DEBUG_FIRST_CALL
+         if (!firstCallFired || (numOffset == 0.0))
+            MessageInterface::ShowMessage(
+               "   utcMjd = %lf, numOffset = %lf\n", utcMjd, numOffset);
+      #endif
 
       // add delta ut1 read from eop file
       //return (utcMjd + numOffset);

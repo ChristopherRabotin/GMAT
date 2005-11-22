@@ -32,6 +32,7 @@
 //#define DEBUG_STOPPING_CONDITIONS 1
 //#define DEBUG_RENAME 1
 //#define DEBUG_PROP_PERFORMANCE
+//#define DEBUG_FIRST_CALL
 
 //---------------------------------
 // static data
@@ -41,6 +42,9 @@ std::string Propagate::PropModeList[PropModeCount] =
    "", "Synchronized"
 };
 
+#ifdef DEBUG_FIRST_CALL
+static bool firstStepFired = false;
+#endif
 
 //---------------------------------
 // public members
@@ -2126,6 +2130,22 @@ void Propagate::PrepareToPropagate()
 
    hasFired = true;
    inProgress = true;
+
+   #ifdef DEBUG_FIRST_CALL
+   if (state)
+   {
+      MessageInterface::ShowMessage("Debugging first step\n");
+      MessageInterface::ShowMessage(
+         "State = [%16.9lf %16.9lf %16.9lf %16.14lf %16.14lf %16.14lf]\n",
+         state[0], state[1], state[2], state[3], state[4], state[5]);
+      MessageInterface::ShowMessage(
+         "Propagator = \n%s\n", 
+         prop[0]->GetGeneratingString(Gmat::SCRIPTING, "   ").c_str());
+   }
+   else
+      MessageInterface::ShowMessage("Debugging first step: State not set\n");
+   firstStepFired = true;
+   #endif
 }
 
 
@@ -2401,6 +2421,11 @@ void Propagate::RunComplete()
 //        ++prop)
 //      (*prop)->ResetInitialData();
 //   
+
+   #ifdef DEBUG_FIRST_CALL
+   firstStepFired = false;
+   #endif
+
    GmatCommand::RunComplete();
 }
 

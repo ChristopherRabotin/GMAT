@@ -27,6 +27,13 @@
 #include "CoordinateSystemException.hpp"
 #include "Rvector.hpp"
 
+//#define DEBUG_FIRST_CALL
+
+
+#ifdef DEBUG_FIRST_CALL
+   #include "MessageInterface.hpp"
+   static bool firstCallFired = false;
+#endif
 
 //---------------------------------
 // static data
@@ -114,6 +121,9 @@ void CoordinateConverter::Initialize()
    //if (!j2000Body)
    //   throw CoordinateSystemException(
    //         "j2000Body has not been defined for CoordinateConverter object");
+   #ifdef DEBUG_FIRST_CALL
+      firstCallFired = false;
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -217,6 +227,27 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
    Rmatrix33 toMJ2000RotMatrix   = inCoord->GetLastRotationMatrix();
    Rmatrix33 fromMJ2000Matrix    = outCoord->GetLastRotationMatrix();
    lastRotMatrix = (fromMJ2000Matrix.Transpose()) * toMJ2000RotMatrix;
+   
+   #ifdef DEBUG_FIRST_CALL
+      if ((firstCallFired == false) || (epoch.Get() == 21545.0))
+      {
+         MessageInterface::ShowMessage(
+            "Coordinate conversion check:\n      %s --> %s\n", 
+            inCoord->GetName().c_str(), outCoord->GetName().c_str());
+         MessageInterface::ShowMessage(
+            "      Epoch: %.12lf\n", epoch.Get());
+         MessageInterface::ShowMessage(
+            "      input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], 
+            inState[5]);
+         MessageInterface::ShowMessage(
+            "      outpt State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            outState[0], outState[1], outState[2], outState[3], outState[4], 
+            outState[5]);
+         firstCallFired = true;
+      }
+   #endif
+   
    return true;
 }
 
