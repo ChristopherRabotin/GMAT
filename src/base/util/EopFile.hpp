@@ -76,7 +76,7 @@ protected:
    /// vector of UT1-UTC offsets : MJD, offset
    Rmatrix*             ut1UtcOffsets;
    
-   Real                 lastUtcMjd;
+   Real                 lastUtcJd;
    Real                 lastOffset;
    Integer              lastIndex;
    

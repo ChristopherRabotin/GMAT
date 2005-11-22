@@ -56,7 +56,7 @@ eopFileName     (fileName),
 tableSz         (0),
 polarMotion     (new Rmatrix(MAX_TABLE_SIZE,4)),
 ut1UtcOffsets   (new Rmatrix(MAX_TABLE_SIZE,2)),
-lastUtcMjd      (0.0),
+lastUtcJd       (0.0),
 lastOffset      (0.0),
 lastIndex       (0),
 isInitialized   (false)
@@ -80,7 +80,7 @@ eopFileName     (eopF.eopFileName),
 tableSz         (eopF.tableSz),
 polarMotion     (new Rmatrix(*(eopF.polarMotion))),
 ut1UtcOffsets   (new Rmatrix(*(eopF.ut1UtcOffsets))),
-lastUtcMjd      (eopF.lastUtcMjd),
+lastUtcJd       (eopF.lastUtcJd),
 lastOffset      (eopF.lastOffset),
 lastIndex       (eopF.lastIndex),
 isInitialized   (eopF.isInitialized)
@@ -109,7 +109,7 @@ const EopFile& EopFile::operator=(const EopFile &eopF)
    delete ut1UtcOffsets;
    polarMotion   = new Rmatrix(*(eopF.polarMotion));
    ut1UtcOffsets = new Rmatrix(*(eopF.ut1UtcOffsets));
-   lastUtcMjd    = eopF.lastUtcMjd;
+   lastUtcJd     = eopF.lastUtcJd;
    lastOffset    = eopF.lastOffset;
    lastIndex     = eopF.lastIndex;
    isInitialized = eopF.isInitialized;
@@ -229,7 +229,7 @@ void EopFile::Initialize()
    if (eopFile.is_open())  eopFile.close();
    // set the last value to the end of the file (since we search from back 
    // to front)
-   lastUtcMjd = ut1UtcOffsets->GetElement((tableSz-1), 0);
+   lastUtcJd  = ut1UtcOffsets->GetElement((tableSz-1), 0);
    lastOffset = ut1UtcOffsets->GetElement((tableSz-1), 1);
    lastIndex  = tableSz - 1;
    isInitialized = true;
@@ -268,7 +268,7 @@ Real EopFile::GetUt1UtcOffset(const Real utcMjd)
    
    if (!isInitialized)  Initialize();
    
-   if (lastUtcMjd == utcMjd) return lastOffset;
+   if (lastUtcJd == (utcMjd + GmatTimeUtil::JD_NOV_17_1858)) return lastOffset;
    
    Integer         i = 0;
    Real        utcJD = utcMjd + GmatTimeUtil::JD_NOV_17_1858;
@@ -293,7 +293,7 @@ Real EopFile::GetUt1UtcOffset(const Real utcMjd)
    }
    else
    {
-      if (utcJD < lastUtcMjd)
+      if (utcJD  < lastUtcJd)
       {
          if (lastIndex > (tableSz-2)) i = tableSz - 2;
          else                         i = lastIndex;
@@ -333,11 +333,11 @@ Real EopFile::GetUt1UtcOffset(const Real utcMjd)
          }
       }
    }
-   lastUtcMjd = utcMjd;
+   lastUtcJd = utcMjd + GmatTimeUtil::JD_NOV_17_1858;
    lastOffset = off;
    //MessageInterface::ShowMessage
-   //   ("===> after completion off=%d, lastUtcMjd=%d, lastOffset=%d\n",
-   //    off, lastUtcMjd, lastOffset);
+   //   ("===> after completion off=%d, lastUtcJd=%d, lastOffset=%d\n",
+   //    off, lastUtcJd, lastOffset);
    return off;
 }
 
