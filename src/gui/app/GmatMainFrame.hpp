@@ -56,7 +56,7 @@ public:
    void RemoveChild(wxString item, int dataType);
    void CloseActiveChild();
    void CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
-                         wxString title = "");
+                         wxString excludeTitle = "");
    void MinimizeChildren();
    void CloseCurrentProject();
    void RunCurrentMission();

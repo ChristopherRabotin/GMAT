@@ -189,9 +189,9 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
                              const wxSize& size, long style)
    : wxMDIParentFrame(parent, id, title, pos, size, style)
 {
-#if DEBUG_MAINFRAME
+   #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() entered\n");
-#endif
+   #endif
    
    // set the script name
    scriptFilename = "$gmattempscript$.script";
@@ -214,10 +214,10 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    SetStatusText(_T("Welcome to GMAT!"));
 #endif // wxUSE_STATUSBAR
 
-#if DEBUG_MAINFRAME
+   #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage
       ("GmatMainFrame::GmatMainFrame() creating ToolBar...\n");
-#endif
+   #endif
    
    CreateToolBar(wxNO_BORDER | wxTB_HORIZONTAL);
    InitToolBar(GetToolBar());
@@ -267,9 +267,9 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    mRunPaused = false;
    mRunCompleted = true;
    
-#if DEBUG_MAINFRAME
+   #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() exiting\n");
-#endif
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -338,7 +338,6 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
          sizer->Add(new CelestialBodyPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
       }
-
       else if (dataType == GmatTree::FUELTANK)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
@@ -761,11 +760,11 @@ bool GmatMainFrame::RenameChild(GmatTreeItemData *item, wxString newName)
    {
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
 
-#if DEBUG_MAINFRAME
+      #if DEBUG_MAINFRAME
       MessageInterface::ShowMessage
          ("GmatMainFrame::GetChild() child %s  this %s\n",
           theChild->GetTitle().c_str(), item->GetDesc().c_str());
-#endif
+      #endif
     
       if ((theChild->GetTitle().IsSameAs(item->GetDesc().c_str()))&&
           (theChild->GetDataType() == item->GetDataType()))
@@ -794,8 +793,8 @@ bool GmatMainFrame::RenameChild(wxString oldName, wxString newName)
 
 #if DEBUG_MAINFRAME
       MessageInterface::ShowMessage
-         ("GmatMainFrame::GetChild() child %s  this %s\n",
-          theChild->GetTitle().c_str(), item->GetDesc().c_str());
+         ("GmatMainFrame::RenameChild() oldName=%s, newName=%s\n",
+          oldName.c_str(), newName.c_str());
 #endif
 
       if (theChild->GetTitle().IsSameAs(oldName))
@@ -824,7 +823,7 @@ void GmatMainFrame::RemoveChild(wxString item, int dataType)
       
       #if DEBUG_MAINFRAME
       MessageInterface::ShowMessage
-         ("GmatMainFrame::RemoveChild() child %s  this %s\n",
+         ("GmatMainFrame::RemoveChild() child:%s  item:%s\n",
           theChild->GetTitle().c_str(), item.c_str());
       #endif
       
@@ -850,21 +849,46 @@ void GmatMainFrame::CloseActiveChild()
 }
 
 //------------------------------------------------------------------------------
-// void CloseAllChildren(bool closeScriptWindow, bool closePlots,
-//                       wxString title)
+// void CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
+//                       wxString excludeTitle = "")
 //------------------------------------------------------------------------------
 void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
-                                     wxString title)
-{
+                                     wxString excludeTitle)
+{   
+   #if DEBUG_MAINFRAME
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::CloseAllChildren() closeScriptWindow=%d, closePlots=%d\n   "
+       "title=%s\n", closeScriptWindow, closePlots, excludeTitle.c_str());
+   #endif
+   
    if (closeScriptWindow)
    {
+      wxString title;
+      
       // do not need to check if script window is open
       wxNode *node = mdiChildren->GetFirst();
       while (node)
       {
          GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-         delete theChild;
-         delete node;
+
+         title = theChild->GetTitle();
+         
+         #if DEBUG_MAINFRAME
+         MessageInterface::ShowMessage("    theChild=%s\n", title.c_str());
+         #endif
+            
+         // delete only scripts
+         if (title.Contains(".script") || title.Contains(".m"))
+         {
+            #if DEBUG_MAINFRAME
+            MessageInterface::ShowMessage
+               ("   Deleting theChild=%s\n", title.c_str());
+            #endif
+               
+            delete theChild;
+            delete node;
+         }
+         
          node = node->GetNext();
       }
    }
@@ -874,49 +898,89 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       while (node)
       {
          GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-
-         if (theChild->GetTitle() != title)
+         
+         #if DEBUG_MAINFRAME
+         MessageInterface::ShowMessage
+            ("GmatMainFrame::CloseAllChildren() theChild=%s\n",
+             theChild->GetTitle().c_str());
+         #endif
+         
+         if (theChild->GetTitle() != excludeTitle)
          {
             delete theChild;
             delete node;
          }
-
+         
          node = node->GetNext();
       }
    }
 
    if (closePlots)
    {      
-      // close ts plots
-      int count = MdiTsPlot::numChildren;
-      for (int i=0; i<count; ++i)
-      {
-         #if DEBUG_MAINFRAME
-            MessageInterface::ShowMessage
-               ("CloseAllChildren() MdiTsPlot::numChildren=%d\n",
-                MdiTsPlot::numChildren);
-         #endif
-         MdiChildTsFrame *frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren[i]);
-         frame->Close(TRUE);
-      }
-      
-      // close gl plots
       #if DEBUG_MAINFRAME
       MessageInterface::ShowMessage
-         ("CloseAllChildren() MdiGlPlot::numChildren=%d\n", MdiGlPlot::numChildren);
+         ("GmatMainFrame::CloseAllChildren() Deleting plots\n   MdiTsPlot::numChildren=%d, "
+          "MdiGlPlot::numChildren=%d\n", MdiTsPlot::numChildren,
+          MdiGlPlot::numChildren);
       #endif
       
-      for (int i=0; i<MdiGlPlot::numChildren; i++)
+      wxString title;
+      wxNode *node = mdiChildren->GetFirst();
+      
+      while (node)
       {
-         MdiChildTrajFrame *frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
+         GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+         title = theChild->GetTitle();
          
          #if DEBUG_MAINFRAME
-         MessageInterface::ShowMessage
-            ("CloseAllChildren() frame[%d]=%s\n", i, frame->GetPlotName().c_str());
+         MessageInterface::ShowMessage("   theChild=%s\n", title.c_str());
          #endif
+            
+         // delete only non-scripts
+         if (theChild->GetDataType() == GmatTree::OUTPUT_XY_PLOT ||
+             theChild->GetDataType() == GmatTree::OUTPUT_OPENGL_PLOT)
+         {
+            #if DEBUG_MAINFRAME
+            MessageInterface::ShowMessage
+               ("GmatMainFrame::CloseAllChildren() deleting theChild=%s\n",
+                title.c_str());
+            #endif
+               
+            delete theChild;
+            delete node;
+         }
          
-         frame->Close(TRUE);
+         node = node->GetNext();
       }
+
+      //loj: 11/23/05 commented out
+//       // close XY plots
+//       for (int i=0; i<MdiTsPlot::numChildren; ++i)
+//       {
+//          MdiChildTsFrame *frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren[i]);
+         
+//          #if DEBUG_MAINFRAME
+//          MessageInterface::ShowMessage
+//             ("   xyframe[%d]=%s\n", i, frame->GetPlotName().c_str());
+//          #endif
+         
+//          //frame->Close(TRUE);
+//          frame->DeletePlot();
+//       }
+      
+//       // close GL plots
+//       for (int i=0; i<MdiGlPlot::numChildren; i++)
+//       {
+//          MdiChildTrajFrame *frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
+         
+//          #if DEBUG_MAINFRAME
+//          MessageInterface::ShowMessage
+//             ("   glframe[%d]=%s\n", i, frame->GetPlotName().c_str());
+//          #endif
+         
+//          //frame->Close(TRUE);
+//          frame->DeletePlot();
+//       }
    }
 }
 
@@ -944,6 +1008,10 @@ void GmatMainFrame::MinimizeChildren()
 //------------------------------------------------------------------------------
 void GmatMainFrame::CloseCurrentProject()
 {
+   //#if DEBUG_MAINFRAME
+   MessageInterface::ShowMessage("GmatMainFrame::CloseCurrentProject()\n");
+   //#endif
+   
    //close all windows
    CloseAllChildren();
    
@@ -961,6 +1029,11 @@ void GmatMainFrame::CloseCurrentProject()
 //------------------------------------------------------------------------------
 void GmatMainFrame::RunCurrentMission()
 {
+   #if DEBUG_MAINFRAME
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::RunCurrentMission() mRunPaused=%d\n", mRunPaused);
+   #endif
+   
    wxToolBar* toolBar = GetToolBar();
    
    toolBar->EnableTool(TOOL_RUN, FALSE);
@@ -1069,6 +1142,8 @@ void GmatMainFrame::StopServer()
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnClose(wxCloseEvent& event)
 {
+   MessageInterface::ShowMessage("===> GmatMainFrame::OnClose()\n");
+   
    if (!mRunCompleted)
    {
       wxMessageBox(wxT("GMAT is still running the mission.\n"
@@ -1331,7 +1406,7 @@ void GmatMainFrame::OnCloseChildren(wxCommandEvent& WXUNUSED(event))
 void GmatMainFrame::OnHelpAbout(wxCommandEvent& WXUNUSED(event))
 {
    wxString msg;
-   msg.Printf(_T("Goddard Mission Analysis Tool.\n")
+   msg.Printf(_T("General Mission Analysis Tool.\n")
                _T("Uses %s\n\nBuild Date: %s %s"), wxVERSION_STRING,
                __DATE__, __TIME__);      
 
@@ -1536,9 +1611,9 @@ bool GmatMainFrame::InterpretScript(const wxString &filename)
       if (GmatAppData::GetGuiInterpreter()->
           InterpretScript(std::string(filename.c_str())))
       {
-   
-         GmatAppData::GetMainFrame()->CloseAllChildren(false, true, filename);
-   
+         
+         CloseAllChildren(false, true, filename);
+         
          // Update ResourceTree and MissionTree
          GmatAppData::GetResourceTree()->UpdateResource(true);
          GmatAppData::GetMissionTree()->UpdateMission(true);
@@ -1877,24 +1952,6 @@ void GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 {
    wxString filename = ((GmatMdiChildFrame *)GetActiveChild())->GetTitle();
    InterpretScript(filename);
-   
-//    try
-//    {
-//       if (GmatAppData::GetGuiInterpreter()->
-//           InterpretScript(std::string(filename.c_str())))
-//       {
-   
-//          GmatAppData::GetMainFrame()->CloseAllChildren(false, true, filename);
-   
-//          // Update ResourceTree and MissionTree
-//          GmatAppData::GetResourceTree()->UpdateResource(true);
-//          GmatAppData::GetMissionTree()->UpdateMission(true);
-//       }
-//    }
-//    catch (BaseException &e)
-//    {
-//       MessageInterface::ShowMessage("*** Error: %s\n", e.GetMessage().c_str());
-//    }
 }
 
 //------------------------------------------------------------------------------
@@ -1906,9 +1963,6 @@ void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
    
    if (InterpretScript(filename))
       OnRun(event);
-   
-   //OnScriptBuildObject(event);
-   //OnRun(event);
 }
 
 //------------------------------------------------------------------------------
@@ -1922,7 +1976,6 @@ void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
-   //GmatAppData::GetMainFrame()->RunCurrentMission();
    RunCurrentMission();
 }
 
