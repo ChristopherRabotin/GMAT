@@ -112,7 +112,7 @@ bool GmatApp::OnInit()
         
         theMainFrame =
             new GmatMainFrame((wxFrame *)NULL, -1,
-                              _T("GMAT - Goddard Mission Analysis Tool"),
+                              _T("GMAT - General Mission Analysis Tool"),
                               wxDefaultPosition, size,
                               wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
         
