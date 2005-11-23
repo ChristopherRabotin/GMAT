@@ -91,5 +91,7 @@ protected:
    
    virtual void CalculateRotationMatrix(const A1Mjd &atEpoch);
    
+   Rmatrix33      precT, nutT, stT, stDerivT, pmT;
+   
 };
 #endif // BodyFixedAxes_hpp

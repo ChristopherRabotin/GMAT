@@ -870,7 +870,6 @@ Rmatrix33 AxisSystem::ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch)
    
    // Compute Rotation matrix for transformations from FK5 to MOD
    // (Vallado Eq. 3-57)
-   Rmatrix33  PREC;
    PREC.Set( cosTheta*cosz*coszeta - sinz*sinzeta,
             -sinzeta*cosTheta*cosz - sinz*coszeta,
             -sinTheta*cosz,
@@ -1263,7 +1262,6 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    
    // Compute Rotation matrix for transformations from MOD to TOD
    // (Vallado Eq. 3-64)
-   Rmatrix33  NUT;
    NUT.Set( cosdPsi,
            -sindPsi*cosEpsbar,
            -sindPsi*sinEpsbar,
@@ -1349,7 +1347,6 @@ Rmatrix33 AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
    
    // Compute Rotation matrix for Sidereal Time
    // (Vallado Eq. 3-64)
-   Rmatrix33  ST;
    ST.Set( cosAst, sinAst, 0.0,
           -sinAst, cosAst, 0.0,
               0.0,    0.0, 1.0);
@@ -1400,7 +1397,6 @@ Rmatrix33 AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC,
    
    // Compute the portion that has a significant time derivative
    Real omegaE = 7.29211514670698e-05 * (1.0 - (lod / SECS_PER_DAY));
-   Rmatrix33 STderiv;
    STderiv.Set(-omegaE * sinAst,  omegaE * cosAst, 0.0,
                -omegaE * cosAst, -omegaE * sinAst, 0.0,
                             0.0,              0.0, 0.0);
@@ -1455,7 +1451,6 @@ Rmatrix33 AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoc
    Real sinY = Sin(-y * RAD_PER_ARCSEC);
    
    // Compute the polar motion rotation matrix
-   Rmatrix33 PM;
    PM.Set( cosX,  sinX*sinY, -sinX*cosY,
             0.0,       cosY,       sinY,
            sinX, -cosX*sinY,  cosX*cosY); 

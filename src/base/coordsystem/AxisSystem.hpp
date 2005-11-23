@@ -216,7 +216,14 @@ protected:
    Integer                   *aVals;
    Integer                   *apVals;
    
-   // internediate quantitied needed by more than one method
+   // Performance enhancements
+   Rmatrix33  PREC;
+   Rmatrix33  NUT;
+   Rmatrix33  ST;
+   Rmatrix33 STderiv;
+   Rmatrix33 PM;
+   
+   // intermediate quantities needed by more than one method
    
    virtual void      InitializeFK5();
 

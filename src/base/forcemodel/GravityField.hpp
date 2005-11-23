@@ -173,7 +173,10 @@ protected:
    A1Mjd    now;
    Integer satcount;
    
-
+   CoordinateConverter cc;
+   Rmatrix33           rotMatrix;
+   Rvector6            outState;
+   Rvector6            theState;
 };
 
 

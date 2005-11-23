@@ -950,7 +950,6 @@ void HarmonicField::SetForceOrigin(CelestialBody* toBody)
 //------------------------------------------------------------------------------
 bool HarmonicField::legendreP_rtq(Real *R )
 {
-
    if (!hMinitialized)
       if (!Initialize())
       {
@@ -958,10 +957,10 @@ bool HarmonicField::legendreP_rtq(Real *R )
      }
  
    Integer  n, m;
-   Real     sqrt3 = Sqrt(3.0);
+   static const Real sqrt3 = Sqrt(3.0);
 
    /* coordinate transformation, Ref.[3], Eqs.(7),(40) */
-   r = Sqrt( R[0]*R[0] + R[1]*R[1] + R[2]*R[2] );
+   r = sqrt( R[0]*R[0] + R[1]*R[1] + R[2]*R[2] );
    if (r == 0.0) {
       throw ForceModelException (
                    "In HarmonicField::legendreP_rtq,  Radial distance is zero");
@@ -975,14 +974,17 @@ bool HarmonicField::legendreP_rtq(Real *R )
    /* generate the off-diagonal elements */
    Abar[1][0] = u * sqrt3;
    for (n = 1; n <= degree; ++n) {
-      Abar[n+1][n] = u*Sqrt( (Real)(2*n+3) ) * Abar[n][n];
+      Abar[n+1][n] = u*sqrt( (Real)(2*n+3) ) * Abar[n][n];
    }
    
+   Real nmnm, n2;
    /* apply column-fill recursion formula (Table 2, Row I, Ref.[1]) */
    for (m = 0 ; m <= order+1; m++) {
       for (n = m+2; n <= degree+1; n++) {
-         Abar[n][m] = u*Sqrt((Real)((2*n+1)*(2*n-1))/(Real)((n-m)*(n+m)))*Abar[n-1][m]
-         - Sqrt((Real)((2*n+1)*(n-m-1)*(n+m-1))/(Real)((2*n-3)*(n+m)*(n-m)))*Abar[n-2][m];
+         n2 = 2*n;
+         nmnm = (n-m)*(n+m);
+         Abar[n][m] = u * sqrt((Real)((n2+1)*(n2-1))/(Real)(nmnm)) * Abar[n-1][m] -
+            sqrt((Real)((n2+1)*(n-m-1)*(n+m-1))/(Real)((n2-3)*nmnm)) * Abar[n-2][m];
       }
       if ( m > 0 ) {
          /* Ref.[2], Eq.(24) */

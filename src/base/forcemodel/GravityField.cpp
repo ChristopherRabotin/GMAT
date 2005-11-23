@@ -345,16 +345,17 @@ bool GravityField::gravity_rtq(Real jday, Real F[] )
    Real               arr[4] = {0.0, 0.0, 0.0, 0.0};
    static const Real  sqrt2 = Sqrt(2.0);
 
-   dT = (jday - (Real)2.4464305e+06)/(Real)365.25; /* years since Jan 1, 1986 */
+   dT = (jday - 2.4464305e+06)/365.25; /* years since Jan 1, 1986 */
 
    if (r == 0.0)  // (should I) check for hFinitialized here?
    {
       throw ForceModelException("gravity_rtq: Spherical representation not initialized!");
    }
 
-   p = (a/r)*mu/r; /* Ref.[2], Eq.(26), n = 1 */
+   Real aOverR = a/r;
+   p = (aOverR)*mu/r; /* Ref.[2], Eq.(26), n = 1 */
    arr[3] = -mu/r/r;
-   p *= a/r;
+   p *= aOverR;
 
    #ifdef DEBUG_GRAVITY_FIELD
       MessageInterface::ShowMessage("  Calculated p = %le\n", p);
@@ -362,11 +363,13 @@ bool GravityField::gravity_rtq(Real jday, Real F[] )
          degree, order);
    #endif
 
+   Integer np1;
+   Real pOverA, aBarMsqrt2;
 //   for (n=2;n<=min(G->degree,LP->degree);n++) {
    for (n = 2; n <= degree; ++n)
    {
-
-      p *= a/r; /* Ref.[2], Eq.(26), rho_n+1 */
+      np1 = n+1;
+      p *= aOverR; /* Ref.[2], Eq.(26), rho_n+1 */
 
 //      for (m = 0;( m <= n && m <= min(G->order,LP->order) );m++) {
       for (m = 0;(m <= n && m <= order); ++m)
@@ -400,18 +403,19 @@ bool GravityField::gravity_rtq(Real jday, Real F[] )
          {
             summ[0] = (Real)0.0;
             summ[1] = (Real)0.0;
-            summ[2] = Sqrt( (Real)( n*(n+1) ) )*Abar[n][1]*Cbar_nm;
-            summ[3] = Sqrt( (Real)( (2*n+1)*(n+2)*(n+1) )/
-                            (Real)( 2*n+3 ) )*Abar[n+1][1]*Cbar_nm;
+            summ[2] = sqrt( (Real)( n*(np1) ) )*Abar[n][1]*Cbar_nm;
+            summ[3] = sqrt( (Real)( (2*n+1)*(n+2)*(np1) )/
+                            (Real)( 2*n+3 ) )*Abar[np1][1]*Cbar_nm;
          }
          else
          {
-            summ[0] += Abar[n][m]*m*( Cbar_nm*re[m-1] + Sbar_nm*im[m-1] )*sqrt2;
-            summ[1] += Abar[n][m]*m*( Sbar_nm*re[m-1] - Cbar_nm*im[m-1] )*sqrt2;
+            aBarMsqrt2 = Abar[n][m]*m*sqrt2;
+            summ[0] += aBarMsqrt2*( Cbar_nm*re[m-1] + Sbar_nm*im[m-1] );
+            summ[1] += aBarMsqrt2*( Sbar_nm*re[m-1] - Cbar_nm*im[m-1] );
             D = (Cbar_nm*re[m] + Sbar_nm*im[m])*sqrt2;
-            summ[2] += Sqrt( (Real)((n-m)*(n+m+1)) )*Abar[n][m+1]*D;
-            summ[3] += Sqrt( (Real)( (2*n+1)*(n+m+2)*(n+m+1) )/
-                             (Real)( 2*n+3 ) )*Abar[n+1][m+1]*D;
+            summ[2] += sqrt( (Real)((n-m)*(np1+m)) )*Abar[n][m+1]*D;
+            summ[3] += sqrt( (Real)( (2*n+1)*(n+m+2)*(np1+m) )/
+                             (Real)( 2*n+3 ) )*Abar[np1][m+1]*D;
          }
       } /* end m summation */
       
@@ -420,10 +424,11 @@ bool GravityField::gravity_rtq(Real jday, Real F[] )
             summ[0], summ[1], summ[2], summ[3]);
       #endif
 
-      arr[0] += p/a*summ[0];
-      arr[1] += p/a*summ[1];
-      arr[2] += p/a*summ[2];
-      arr[3] -= p/a*summ[3];
+      pOverA = p/a;
+      arr[0] += pOverA*summ[0];
+      arr[1] += pOverA*summ[1];
+      arr[2] += pOverA*summ[2];
+      arr[3] -= pOverA*summ[3];
 
    } /* end n summation */
 
@@ -483,9 +488,7 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
    Real* satState;
    Real f[3], rbb3, mu_rbb, aIndirect[3]; // , now;
    Integer nOffset;
-   CoordinateConverter cc;
    bool sameCS = false;
-   Rmatrix33 rotMatrix;
    
    now = epoch + dt/GmatTimeUtil::SECS_PER_DAY;
    //const Rvector6 *rv = &(body->GetState(now));
@@ -560,11 +563,9 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
       satState = state + nOffset;
       
       // convert to body fixed coordinate system
-      Rvector6            outState;
       //A1Mjd               a1Now(now);
       Real                tmpState[6];
-      Rvector6 theState(satState[0], satState[1], satState[2],
-                        satState[3], satState[4], satState[5]);
+      theState.Set(satState);
       //cc.Convert(a1Now, theState, inputCS, outState, fixedCS);
       cc.Convert(now, theState, inputCS, outState, fixedCS);
 

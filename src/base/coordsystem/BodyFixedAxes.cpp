@@ -422,24 +422,25 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       
       //MessageInterface::ShowMessage("Setting %4.3f as interval \n",
       //                              updateIntervalToUse);
-      Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
-      Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
-                             longAscNodeLunar, cosEpsbar);
-      Rmatrix33  ST        = ComputeSiderealTimeRotation(jdTT, tUT1,
-                             dPsi, longAscNodeLunar, cosEpsbar,
+      ComputePrecessionMatrix(tTDB, atEpoch);
+      ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar);
+      ComputeSiderealTimeRotation(jdTT, tUT1, dPsi, longAscNodeLunar, cosEpsbar,
                              cosAst, sinAst);
-      Rmatrix33  STderiv   = ComputeSiderealTimeDotRotation(mjdUTC, 
-                             atEpoch, cosAst, sinAst);
-      Rmatrix33  PM        = ComputePolarMotionRotation(mjdUTC, atEpoch);
+      ComputeSiderealTimeDotRotation(mjdUTC, atEpoch, cosAst, sinAst);
+      ComputePolarMotionRotation(mjdUTC, atEpoch);
+      
+      precT    = PREC.Transpose();
+      nutT     = NUT.Transpose();
+      stT      = ST.Transpose();
+      stDerivT = STderiv.Transpose();
+      pmT      = PM.Transpose();
      
-      rotMatrix    = PREC.Transpose() * (NUT.Transpose() * 
-                     (ST.Transpose() * PM.Transpose()));
+      rotMatrix    = precT * (nutT * (stT * pmT));
       Real determinant = rotMatrix.Determinant();
       if (Abs(determinant - 1.0) > DETERMINANT_TOLERANCE)
          throw CoordinateSystemException(
                "Computed rotation matrix has a determinant not equal to 1.0");
-      rotDotMatrix    = PREC.Transpose() * (NUT.Transpose() * 
-                        (STderiv.Transpose() * PM.Transpose()));
+      rotDotMatrix    = precT * (nutT * (stDerivT * pmT));
 
       #ifdef DEBUG_FIRST_CALL
          if (!firstCallFired) 
