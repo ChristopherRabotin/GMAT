@@ -55,6 +55,7 @@
 #include "GmatMainFrame.hpp"
 
 #include <sstream>
+#include <fstream>
 #include <wx/dir.h>
 
 //define __ENABLE_CONSTELLATIONS__
@@ -2497,7 +2498,8 @@ void ResourceTree::OnAddScriptFolder(wxCommandEvent &event)
       // add files under script diretory
       wxDir dir(dirname);
       wxString filename;
-
+      wxString filepath;
+      
       //How do I specify multiple file ext?
       //bool cont = dir.GetFirst(&filename, "*.script, *.m");
       bool cont = dir.GetFirst(&filename);
@@ -2505,12 +2507,23 @@ void ResourceTree::OnAddScriptFolder(wxCommandEvent &event)
       {
          if (filename.Contains(".script") || filename.Contains(".m"))
          {
+            filepath = dirname + "/" + filename;
+            
             // remove any backup files
             if (filename.Last() == 't' || filename.Last() == 'm')
             {
-               AppendItem(newItem, filename, GmatTree::ICON_DEFAULT, -1,
-                          new GmatTreeItemData(dirname + "/" + filename,
-                                               GmatTree::SCRIPT_FILE));
+               // read fist item to elliminate Matlab/Gmat function
+               std::ifstream ifs(filepath.c_str());
+               std::string item;
+               ifs >> item;
+
+               if (item != "function")
+               {
+                  AppendItem(newItem, filename, GmatTree::ICON_DEFAULT, -1,
+                             new GmatTreeItemData(filepath, GmatTree::SCRIPT_FILE));
+               }
+               
+               ifs.close();
             }
          }
          
