@@ -50,7 +50,7 @@ BEGIN_EVENT_TABLE(MdiChildTsFrame, wxMDIChildFrame)
    EVT_ACTIVATE(MdiChildTsFrame::OnActivate)
    EVT_SIZE(MdiChildTsFrame::OnSize)
    EVT_MOVE(MdiChildTsFrame::OnMove)
-   EVT_CLOSE(MdiChildTsFrame::OnClose)
+//    EVT_CLOSE(MdiChildTsFrame::OnClose)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -63,8 +63,11 @@ MdiChildTsFrame::MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
                                  const wxString &plotName, const wxString& plotTitle,
                                  const wxString& xAxisTitle, const wxString& yAxisTitle,
                                  const wxPoint& pos, const wxSize& size, const long style)
-   : wxMDIChildFrame(parent, -1, plotName, pos, size,
-                     style | wxNO_FULL_REPAINT_ON_RESIZE)
+//    : wxMDIChildFrame(parent, -1, plotName, pos, size,
+//                      style | wxNO_FULL_REPAINT_ON_RESIZE)
+   : GmatMdiChildFrame(parent, -1, plotTitle, pos, size,
+                       style | wxNO_FULL_REPAINT_ON_RESIZE, plotName,
+                       GmatTree::OUTPUT_XY_PLOT)
 {
    mXyPlot = (TsPlotCanvas *) NULL;
    mIsMainFrame = isMainFrame;
@@ -95,7 +98,6 @@ MdiChildTsFrame::MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
    wxMenu *fileMenu = new wxMenu;
 
    fileMenu->Append(GmatPlot::MDI_TS_OPEN_PLOT_FILE, _T("&Open XY Plot File"));
-//   fileMenu->Append(GmatPlot::MDI_XY_QUIT, _T("&Exit"));
    fileMenu->Append(GmatPlot::MDI_TS_CHILD_QUIT, _T("&Close"),
          _T("Close this window"));
 
@@ -143,10 +145,6 @@ MdiChildTsFrame::MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
    // Associate the menu bar with the frame
    SetMenuBar(menuBar);
 
-   // status bar
-   //CreateStatusBar();
-   //SetStatusText(title);
-
    // Create XyPlotFrame
    int width, height;
    GetClientSize(&width, &height);
@@ -155,53 +153,34 @@ MdiChildTsFrame::MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
                        plotTitle);
 
    mXyPlot = frame;
-
-   // Set units per X value
-//   mXyPlot->SetUnitsPerValue(0.001); //loj: use this for A1Mjd time only. how about others?
-
-   // Create log window
-   //loj: 2/24/04 MdiChildTsFrame::OnPlotClick() calls wxLogMessage(),
-   // so used wxLogStatus() instead
-   // If I don't have this, it doesn't scroll
-   //mLogTextCtrl = new wxTextCtrl( this, -1, "",
-   //                               wxPoint(0,0), wxSize(100,20), wxTE_MULTILINE );
-   //loj: 2/23/04 wxLog *oldLog = wxLog::SetActiveTarget( new wxLogTextCtrl( mLogTextCtrl ) );
-   //delete oldLog;
-
-   //      //loj: 3/11/04 moved to XyPlotWindow constructor
-   //      //================================================================
-   //      wxPanel *panel = new wxPanel(this, -1, wxPoint(0,0), wxSize(100,30));
-   //      panel->SetBackgroundColour(*wxLIGHT_GREY);
-    
-   //      wxStaticText *titleText = new wxStaticText(panel, -1, plotTitle);
-    
-   //      wxBoxSizer *panelSizer = new wxBoxSizer(wxVERTICAL);
-   //      panelSizer->Add(titleText, 0, wxALIGN_CENTER | wxALL, 5);
-   //      panel->SetSizer(panelSizer);
-   //      //================================================================
     
    wxBoxSizer *topSizer = new wxBoxSizer( wxVERTICAL );
     
-   //loj: If mLogTextCtrl or panel is not added, I had to resize the frame to see the plot
-   //topSizer->Add( mLogTextCtrl, 0, wxEXPAND );
-   //      topSizer->Add(panel, 0, wxALIGN_CENTER | wxEXPAND);
    topSizer->Add(mXyPlot, 1, wxALIGN_CENTER |wxEXPAND);
-
+   
    SetAutoLayout( TRUE ); //loj: this is called implicitly by SetSizer()
    SetSizer( topSizer );
-            
+   
    // this should work for MDI frames as well as for normal ones
    SetSizeHints(100, 100);
+   GmatAppData::GetMainFrame()->mdiChildren->Append(this);
 }
+
 
 //------------------------------------------------------------------------------
 // ~MdiChildTsFrame()
 //------------------------------------------------------------------------------
 MdiChildTsFrame::~MdiChildTsFrame()
 {
+   #if DEBUG_MDI_TS_FRAME
+   MessageInterface::ShowMessage
+      ("~MdiChildTsFrame() mPlotName=%s\n", mPlotName.c_str());
+   #endif
+   
    MdiTsPlot::mdiChildren.DeleteObject(this);
    MdiTsPlot::numChildren--;
 }
+
 
 //------------------------------------------------------------------------------   
 // int ReadXyPlotFile(const wxString &filename)
@@ -260,6 +239,7 @@ int MdiChildTsFrame::ReadXyPlotFile(const wxString &filename)
 //------------------------------------------------------------------------------
 bool MdiChildTsFrame::DeletePlot()
 {
+   MessageInterface::ShowMessage("MdiChildTsFrame::DeletePlot()\n");
    Close(TRUE);
 
    return true;
@@ -651,21 +631,21 @@ void MdiChildTsFrame::OnSize(wxSizeEvent& event)
    event.Skip();
 }
 
-//------------------------------------------------------------------------------
-// void OnClose(wxCloseEvent& event)
-//------------------------------------------------------------------------------
-void MdiChildTsFrame::OnClose(wxCloseEvent& event)
-{
-//   MdiTsPlot::numChildren--;
+// //------------------------------------------------------------------------------
+// // void OnClose(wxCloseEvent& event)
+// //------------------------------------------------------------------------------
+// void MdiChildTsFrame::OnClose(wxCloseEvent& event)
+// {
+// //   MdiTsPlot::numChildren--;
    
-//   if (mIsMainFrame)
-//      GmatAppData::GetMainFrame()->xyMainSubframe = NULL;
+// //   if (mIsMainFrame)
+// //      GmatAppData::GetMainFrame()->xyMainSubframe = NULL;
     
-//   if (MdiTsPlot::numChildren == 0)
-//      GmatAppData::GetMainFrame()->tsSubframe = NULL;
+// //   if (MdiTsPlot::numChildren == 0)
+// //      GmatAppData::GetMainFrame()->tsSubframe = NULL;
     
-   event.Skip();
-}
+//    event.Skip();
+// }
 
 //---------------------------------
 // protected methods

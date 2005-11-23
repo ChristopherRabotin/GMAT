@@ -15,22 +15,25 @@
 #ifndef MdiChildTsFrame_hpp
 #define MdiChildTsFrame_hpp
 
-// For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+#include "GmatMdiChildFrame.hpp"
+#include "TsPlotCanvas.hpp"
 
-#ifdef __BORLANDC__
-#pragma hdrstop
-#endif
+// // For compilers that support precompilation, includes "wx/wx.h".
+// #include "wx/wxprec.h"
 
-#ifndef WX_PRECOMP
-#include "wx/wx.h"
-#include "wx/mdi.h"
-#endif
+// #ifdef __BORLANDC__
+// #pragma hdrstop
+// #endif
+
+// #ifndef WX_PRECOMP
+// #include "wx/wx.h"
+// #include "wx/mdi.h"
+// #endif
 
 #include "gmatdefs.hpp"     // for UnsignedInt
-#include "TsPlotCanvas.hpp" // for TsPlotCanvas
 
-class MdiChildTsFrame: public wxMDIChildFrame
+//class MdiChildTsFrame: public wxMDIChildFrame
+class MdiChildTsFrame: public GmatMdiChildFrame
 {
 public:
    TsPlotCanvas   *mXyPlot;
@@ -84,11 +87,11 @@ public:
    void OnOpenXyPlotFile(wxCommandEvent& event);
 
    // window events
-//   void OnPlotClick(wxPlotEvent &event);
+   //void OnPlotClick(wxPlotEvent &event);
    void OnActivate(wxActivateEvent& event);
    void OnSize(wxSizeEvent& event);
    void OnMove(wxMoveEvent& event);
-   void OnClose(wxCloseEvent& event);
+   //void OnClose(wxCloseEvent& event);
 
     
 protected:
