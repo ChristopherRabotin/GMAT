@@ -1142,7 +1142,7 @@ void GmatMainFrame::StopServer()
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnClose(wxCloseEvent& event)
 {
-   MessageInterface::ShowMessage("===> GmatMainFrame::OnClose()\n");
+   //MessageInterface::ShowMessage("===> GmatMainFrame::OnClose()\n");
    
    if (!mRunCompleted)
    {
