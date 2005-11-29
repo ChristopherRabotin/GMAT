@@ -24,6 +24,7 @@
 #include "BodyFixedAxes.hpp"       // for SetEopFile(), SetCoefficientsFile()
 #include "ObjectReferencedAxes.hpp"
 #include "MessageInterface.hpp"
+#include "CommandUtil.hpp"         // for GetCommandSeq()
 #include <ctime>                   // for clock()
 
 //#define DEBUG_INIT 1
@@ -42,7 +43,9 @@
 
 //#define DEBUG_CREATE_VAR 1
 //#define DEBUG_CREATE_BURN_PARAM 1
-//#define TEST_SPACECRAFT_CS 1
+
+//#define TEST_SPACECRAFT_CS
+//#define __SHOW_FINAL_STATE__
 
 //---------------------------------
 // static data
@@ -2945,14 +2948,14 @@ Integer Moderator::RunMission(Integer sandboxNum)
          
          #if DEBUG_RUN
          MessageInterface::ShowMessage
-            ("Moderator::RunMission() after AddCommandToSandbox() \n");
+            ("Moderator::RunMission() after AddCommandToSandbox()\n");
          #endif
          
          InitializeSandbox(sandboxNum-1);
          
          #if DEBUG_RUN
          MessageInterface::ShowMessage
-            ("Moderator::RunMission() after InitializeSanbox() \n");
+            ("Moderator::RunMission() after InitializeSandbox()\n");
          #endif
 
          // execute sandbox
@@ -2961,7 +2964,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
          
          #if DEBUG_RUN
          MessageInterface::ShowMessage
-            ("Moderator::RunMission() after ExecuteSandbox() \n");
+            ("Moderator::RunMission() after ExecuteSandbox()\n");
          #endif
       
       }
@@ -2999,7 +3002,25 @@ Integer Moderator::RunMission(Integer sandboxNum)
    MessageInterface::ShowMessage
       ("===> Total Run Time: %f seconds\n", (Real)(t2-t1)/CLOCKS_PER_SEC);
 
-   MessageInterface::ShowMessage("\n========================================\n");
+   // show final state
+   #ifdef __SHOW_FINAL_STATE__
+   showFinalState = true;
+   #endif
+   
+   if (showFinalState)
+   {
+      GmatCommand *cmd = GetNextCommand();
+      //MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
+      GmatCommand *lastCmd = GmatCommandUtil::GetLastCommand(cmd);
+      
+      MessageInterface::ShowMessage("\n========== Final State ==========\n");
+      MessageInterface::ShowMessage(lastCmd->GetStringParameter("MissionSummary"));
+      MessageInterface::ShowMessage("\n\n");      
+   }
+   else
+   {
+      MessageInterface::ShowMessage("\n========================================\n");
+   }
    
    return status;
 }
@@ -3150,7 +3171,7 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
          isRunReady = true;
          
          //========== begin of TEST_SPACECRAFT_CS ================================
-         #if TEST_SPACECRAFT_CS
+         #ifdef TEST_SPACECRAFT_CS
          // Get CoordinateSystem and set origin pointer
          StringArray &items = GetListOfConfiguredItems(Gmat::COORDINATE_SYSTEM);
          CoordinateSystem *cs;
@@ -4372,6 +4393,7 @@ Moderator::Moderator()
 {
 //    isInitialized = false;
    isRunReady = false;
+   showFinalState = false;
    theDefaultSolarSystem = NULL;
    theInternalCoordSystem = NULL;
    theDefaultSlpFile = NULL;

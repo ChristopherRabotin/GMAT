@@ -88,7 +88,8 @@ public:
    bool Initialize(bool isFromGui = false);
    void Finalize();
    void SetRunReady(bool flag = true);
-
+   void SetShowFinalState(bool flag = true);
+   
    //----- ObjectType
    std::string GetObjectTypeString(Gmat::ObjectType type);  
 
@@ -331,6 +332,7 @@ private:
    bool isRunReady;
    bool isFromGui;
    bool endOfInterpreter;
+   bool showFinalState;
    std::vector<Sandbox*> sandboxes;
    std::vector<GmatCommand*> commands;
    
