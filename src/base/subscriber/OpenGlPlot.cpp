@@ -1368,8 +1368,8 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
    // if Draw Earth-Sun lines is on (loj: 7/27/05 Added)
    if (mEarthSunLines == "On")
    {
-      AddSpacePoint("Earth", mAllSpCount);
-      AddSpacePoint("Sun", mAllSpCount);
+      AddSpacePoint("Earth", mAllSpCount, false);
+      AddSpacePoint("Sun", mAllSpCount, false);
    }
    
    if (type == Gmat::SOLAR_SYSTEM)
@@ -1550,9 +1550,9 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// bool AddSpacePoint(const std::string &name, Integer index)
+// bool AddSpacePoint(const std::string &name, Integer index, bool show = true)
 //------------------------------------------------------------------------------
-bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index)
+bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index, bool show)
 {
    #if DEBUG_OPENGL_ADD
    MessageInterface::ShowMessage
@@ -1571,8 +1571,10 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index)
          mAllSpArray.push_back(NULL);
          mAllSpCount = mAllSpNameArray.size();
          
-         mDrawOrbitMap[name] = true;
-         mShowObjectMap[name] = true;
+         //mDrawOrbitMap[name] = true;
+         //mShowObjectMap[name] = true;
+         mDrawOrbitMap[name] = show;
+         mShowObjectMap[name] = show;
          
          if (mAllSpCount < MAX_SP_COLOR)
          {
@@ -1880,13 +1882,13 @@ void OpenGlPlot::ClearDynamicArrays()
 
 
 //------------------------------------------------------------------------------
-// void UpdateObjectList(SpacePoint *sp)
+// void UpdateObjectList(SpacePoint *sp, bool show = false)
 //------------------------------------------------------------------------------
 /**
  * Add non-spacecraft object to the list.
  */
 //------------------------------------------------------------------------------
-void OpenGlPlot::UpdateObjectList(SpacePoint *sp)
+void OpenGlPlot::UpdateObjectList(SpacePoint *sp, bool show)
 {
    // Add all spacepoint objects
    std::string name = sp->GetName();
@@ -1899,10 +1901,14 @@ void OpenGlPlot::UpdateObjectList(SpacePoint *sp)
       mObjectNameArray.push_back(name);
       mOrbitColorArray.push_back(mOrbitColorMap[name]);
       mObjectArray.push_back(sp);
-      mDrawOrbitMap[name] = true; //loj: 9/8/05
-      mShowObjectMap[name] = true; //loj: 9/8/05
-      mDrawOrbitArray.push_back(true);
-      mShowObjectArray.push_back(true);
+//       mDrawOrbitMap[name] = true; //loj: 9/8/05
+//       mShowObjectMap[name] = true; //loj: 9/8/05
+//       mDrawOrbitArray.push_back(true);
+//       mShowObjectArray.push_back(true);
+      mDrawOrbitMap[name] = show;
+      mShowObjectMap[name] = show;
+      mDrawOrbitArray.push_back(show);
+      mShowObjectArray.push_back(show);
       mObjectCount = mObjectNameArray.size();
    }
    

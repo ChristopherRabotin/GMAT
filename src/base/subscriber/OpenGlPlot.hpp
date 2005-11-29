@@ -120,14 +120,14 @@ public:
    
 protected:
    
-   bool AddSpacePoint(const std::string &name, Integer index);
+   bool AddSpacePoint(const std::string &name, Integer index, bool show = true);
    bool ClearSpacePointList();
    bool RemoveSpacePoint(const std::string &name);
    Integer FindIndexOfElement(StringArray &labelArray,
                               const std::string &label);
    
    void ClearDynamicArrays();
-   void UpdateObjectList(SpacePoint *sp);
+   void UpdateObjectList(SpacePoint *sp, bool show = false);
    
    SolarSystem *mSolarSystem;
    CoordinateSystem *mViewCoordSystem;
