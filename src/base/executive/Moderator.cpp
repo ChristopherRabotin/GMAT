@@ -3702,6 +3702,7 @@ void Moderator::CreateDefaultMission()
       Subscriber *sub;
       sub = CreateSubscriber("OpenGLPlot", "DefaultOpenGL");
       sub->SetStringParameter("Add", "DefaultSC");
+      sub->SetStringParameter("Add", "Earth");
       sub->SetStringParameter("CoordinateSystem", "EarthMJ2000Eq");
       
       #if DEBUG_ACTION_REMOVE
