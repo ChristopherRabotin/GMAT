@@ -248,6 +248,8 @@ void OrbitPanel::SaveData()
       ("OrbitPanel::SaveData() entered\n   mCartState=%s\n   mTempCartState=%s\n   "
        "mOutState=%s\n", mCartState.ToString().c_str(), mTempCartState.ToString().c_str(),
        mOutState.ToString().c_str());
+   MessageInterface::ShowMessage("===> mIsCoordSysChanged=%d\n", mIsCoordSysChanged);
+   MessageInterface::ShowMessage("===> mIsStateTypeChanged=%d\n", mIsStateTypeChanged);
    MessageInterface::ShowMessage("===> mIsStateChanged=%d\n", mIsStateChanged);
    #endif
    
@@ -266,6 +268,12 @@ void OrbitPanel::SaveData()
    // save coordinate system
    wxString coordSystemStr = mCoordSysComboBox->GetStringSelection();
    theSpacecraft->SetRefObjectName(Gmat::COORDINATE_SYSTEM, coordSystemStr.c_str());
+
+   // if coordinate system is NULL, set it to avoid crash when show script(loj: 11/28/05)
+   if (theSpacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, "") == NULL)
+      theSpacecraft->SetRefObject(mOutCoord, Gmat::COORDINATE_SYSTEM);
+   if (theSpacecraft->GetInternalCoordSystem() == NULL)
+      theSpacecraft->SetInternalCoordSystem(mInternalCoord);
    
    // save state type
    wxString stateTypeStr = stateTypeComboBox->GetStringSelection();
@@ -368,6 +376,7 @@ void OrbitPanel::SaveData()
 //         (Gmat::WARNING_, "SMA < 0 and ECC < 1, so multipled SMA by -1\n");
 //      }          
 //   }    
+
    
    // save cooridnate system name if changed
    if (mIsCoordSysChanged)
@@ -379,6 +388,7 @@ void OrbitPanel::SaveData()
    }
    
    // save state type name if changed
+   
    if (mIsStateTypeChanged)
    {
       mIsStateTypeChanged = false;
@@ -422,7 +432,10 @@ void OrbitPanel::SaveData()
       else
       {
          // convert to cartesian state
-         cartState = ConvertState(mInternalCoord, displayState, 
+         //loj: 11/28/05
+         //cartState = ConvertState(mInternalCoord, displayState, 
+         //                         stateTypeStr.c_str(), "Cartesian");
+         cartState = ConvertState(mOutCoord, displayState, 
                                   stateTypeStr.c_str(), "Cartesian");
       }
       
@@ -441,7 +454,7 @@ void OrbitPanel::SaveData()
       
       // save outState
       mCartState = outState;       
-      mTempCartState = outState; //loj: 10.13
+      mTempCartState = outState;
       
       // save to spacecraft
       theSpacecraft->SetState(mCartState);
@@ -1045,23 +1058,33 @@ void OrbitPanel::DisplayState()
       inState[3] = atof(textCtrl4->GetValue());
       inState[4] = atof(textCtrl5->GetValue());
       inState[5] = atof(textCtrl6->GetValue());
+      outState = inState;
       
-      #if DEBUG_ORBIT_PANEL_CONVERT
-      MessageInterface::ShowMessage("===> First, convert to %s\n", stateTypeStr.c_str());
-      MessageInterface::ShowMessage("===> Second, convert to %s\n", coordSysStr.c_str());
-      #endif
       
       // first convert to desired state type
       stateConverter.SetMu(mOutCoord);
-      //loj: 10/13/05 commented out
-      //outState = stateConverter.Convert(inState, stateTypeStr,
-      //                                  "Cartesian", anomaly);
       outState = stateConverter.Convert(inState, mFromStateTypeStr,
                                         stateTypeStr, anomaly);
+      #if DEBUG_ORBIT_PANEL_CONVERT
+      MessageInterface::ShowMessage("===> First, convert to %s\n", stateTypeStr.c_str());
+      MessageInterface::ShowMessage("===> inState=%s\n", inState.ToString().c_str());
+      MessageInterface::ShowMessage("===> outState=%s\n", outState.ToString().c_str());
+      #endif
       
       // next convert to desired coordinate system
-      mCoordConverter.Convert(A1Mjd(mEpoch), outState, mInternalCoord,
-                              outState, mOutCoord);
+      if (coordSysStr != mFromCoordStr)
+      {
+         //loj: 11/28/05
+         //mCoordConverter.Convert(A1Mjd(mEpoch), outState, mInternalCoord,
+         //                        outState, mOutCoord);
+         mCoordConverter.Convert(A1Mjd(mEpoch), outState, mFromCoord,
+                                 outState, mOutCoord);
+         
+         #if DEBUG_ORBIT_PANEL_CONVERT
+         MessageInterface::ShowMessage("===> Second, convert to %s\n", coordSysStr.c_str());
+         MessageInterface::ShowMessage("===> outState=%s\n", outState.ToString().c_str());
+         #endif
+      }
    }
    else
    {
@@ -1098,20 +1121,24 @@ void OrbitPanel::DisplayState()
                                            stateTypeStr, anomaly);
       }
       else
-      {
-         #if DEBUG_ORBIT_PANEL_CONVERT
-         MessageInterface::ShowMessage("===> First, convert to internal CS\n");
-         MessageInterface::ShowMessage("===> Second, convert to %s\n", stateTypeStr.c_str());
-         #endif
-         
+      {         
          // first convert to desired coordinate system
          mCoordConverter.Convert(A1Mjd(mEpoch), mTempCartState, mInternalCoord,
                                  outState, mOutCoord);
+         
+         #if DEBUG_ORBIT_PANEL_CONVERT
+         MessageInterface::ShowMessage("===> First, convert to outCS\n");
+         MessageInterface::ShowMessage("===> outState=%s\n", outState.ToString().c_str());
+         #endif
          
          // next convert to desired state type
          stateConverter.SetMu(mOutCoord);
          outState = stateConverter.Convert(outState, "Cartesian",
                                            stateTypeStr, anomaly);
+         #if DEBUG_ORBIT_PANEL_CONVERT
+         MessageInterface::ShowMessage("===> Second, convert to %s\n", stateTypeStr.c_str());
+         MessageInterface::ShowMessage("===> outState=%s\n", outState.ToString().c_str());
+         #endif         
       }
    }
 
