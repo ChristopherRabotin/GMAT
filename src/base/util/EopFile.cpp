@@ -232,6 +232,9 @@ void EopFile::Initialize()
    lastUtcJd  = ut1UtcOffsets->GetElement((tableSz-1), 0);
    lastOffset = ut1UtcOffsets->GetElement((tableSz-1), 1);
    lastIndex  = tableSz - 1;
+   
+   previousIndex = lastIndex;
+   
    isInitialized = true;
 }
 
@@ -394,59 +397,87 @@ bool EopFile::GetPolarMotionAndLod(Real forUtcMjd, Real &xval, Real  &yval,
    }
    else
    {
-      for (i = (tableSz - 1); i >= 0; i--)
+      // First try to use the index from the last call
+      if ((previousIndex < tableSz - 1) && 
+          (utcJD <= data[(previousIndex+1)*col]) &&
+          (utcJD >= data[previousIndex*col]))
       {
-         //if (utcJD >= polarMotion->GetElement(i,0))
-         if (utcJD >= data[i*col + 0])
+         Integer leftIndex  = previousIndex*col, 
+                 rightIndex = (previousIndex+1)*col;
+         // otherwise, interpolate between values
+         Real diffJD  = data[rightIndex] - data[leftIndex];
+         Real whereJD = utcJD - data[leftIndex];
+         Real ratio   = whereJD / diffJD;
+         Real diffX   = data[rightIndex + 1] - data[leftIndex + 1];
+         Real diffY   = data[rightIndex + 2] - data[leftIndex + 2];
+
+         //Real diffLOD = polarMotion->GetElement(i+1,3) -
+         //               polarMotion->GetElement(i,3);
+         xval   = data[leftIndex + 1] + ratio * diffX;
+         yval   = data[leftIndex + 2] + ratio * diffY;
+
+         // 2005.02.23 - Steve says not to interpolate lod
+         //lodval = polarMotion->GetElement(i,3) + ratio * diffLOD;
+         lodval = data[leftIndex + 3];
+      }
+      else
+      {
+         for (i = (tableSz - 1); i >= 0; i--)
          {
-            // if it's greater than the last entry in the table, then return the 
-            // last value
-            if (i == (tableSz -1))
+            //if (utcJD >= polarMotion->GetElement(i,0))
+            if (utcJD >= data[i*col + 0])
             {
-               xval   = data[i*col + 1];
-               yval   = data[i*col + 2];
-               lodval = data[i*col + 3];
-//                xval   = polarMotion->GetElement(i,1);
-//                yval   = polarMotion->GetElement(i,2);
-//                lodval = polarMotion->GetElement(i,3);
+               // if it's greater than the last entry in the table, then return the 
+               // last value
+               if (i == (tableSz -1))
+               {
+                  xval   = data[i*col + 1];
+                  yval   = data[i*col + 2];
+                  lodval = data[i*col + 3];
+   //                xval   = polarMotion->GetElement(i,1);
+   //                yval   = polarMotion->GetElement(i,2);
+   //                lodval = polarMotion->GetElement(i,3);
+               }
+               else
+               {
+                  // otherwise, interpolate between values
+                  Real diffJD  = data[(i+1)*col + 0] - 
+                                 data[i*col + 0];
+                  Real whereJD = utcJD - data[i*col + 0];
+                  Real ratio   = whereJD / diffJD;
+                  Real diffX   = data[(i+1)*col + 1] -
+                                 data[i*col + 1];
+                  Real diffY   = data[(i+1)*col + 2] -
+                                 data[i*col + 2];
+                  //Real diffLOD = polarMotion->GetElement(i+1,3) -
+                  //               polarMotion->GetElement(i,3);
+                  xval   = data[i*col + 1] + ratio * diffX;
+                  yval   = data[i*col + 2] + ratio * diffY;
+                  // 2005.02.23 - Steve says not to interpolate lod
+                  //lodval = polarMotion->GetElement(i,3) + ratio * diffLOD;
+                  lodval = data[i*col + 3];
+                  
+   //                // otherwise, interpolate between values
+   //                Real diffJD  = polarMotion->GetElement(i+1,0) - 
+   //                               polarMotion->GetElement(i,0);
+   //                Real whereJD = utcJD - polarMotion->GetElement(i,0);
+   //                Real ratio   = whereJD / diffJD;
+   //                Real diffX   = polarMotion->GetElement(i+1,1) -
+   //                               polarMotion->GetElement(i,1);
+   //                Real diffY   = polarMotion->GetElement(i+1,2) -
+   //                               polarMotion->GetElement(i,2);
+   //                //Real diffLOD = polarMotion->GetElement(i+1,3) -
+   //                //               polarMotion->GetElement(i,3);
+   //                xval   = polarMotion->GetElement(i,1) + ratio * diffX;
+   //                yval   = polarMotion->GetElement(i,2) + ratio * diffY;
+   //                // 2005.02.23 - Steve says not to interpolate lod
+   //                //lodval = polarMotion->GetElement(i,3) + ratio * diffLOD;
+   //                lodval = polarMotion->GetElement(i,3);
+               }
+               // Buffer the index for performance
+               previousIndex = i;
+               break;
             }
-            else
-            {
-               // otherwise, interpolate between values
-               Real diffJD  = data[(i+1)*col + 0] - 
-                              data[i*col + 0];
-               Real whereJD = utcJD - data[i*col + 0];
-               Real ratio   = whereJD / diffJD;
-               Real diffX   = data[(i+1)*col + 1] -
-                              data[i*col + 1];
-               Real diffY   = data[(i+1)*col + 2] -
-                              data[i*col + 2];
-               //Real diffLOD = polarMotion->GetElement(i+1,3) -
-               //               polarMotion->GetElement(i,3);
-               xval   = data[i*col + 1] + ratio * diffX;
-               yval   = data[i*col + 2] + ratio * diffY;
-               // 2005.02.23 - Steve says not to interpolate lod
-               //lodval = polarMotion->GetElement(i,3) + ratio * diffLOD;
-               lodval = data[i*col + 3];
-               
-//                // otherwise, interpolate between values
-//                Real diffJD  = polarMotion->GetElement(i+1,0) - 
-//                               polarMotion->GetElement(i,0);
-//                Real whereJD = utcJD - polarMotion->GetElement(i,0);
-//                Real ratio   = whereJD / diffJD;
-//                Real diffX   = polarMotion->GetElement(i+1,1) -
-//                               polarMotion->GetElement(i,1);
-//                Real diffY   = polarMotion->GetElement(i+1,2) -
-//                               polarMotion->GetElement(i,2);
-//                //Real diffLOD = polarMotion->GetElement(i+1,3) -
-//                //               polarMotion->GetElement(i,3);
-//                xval   = polarMotion->GetElement(i,1) + ratio * diffX;
-//                yval   = polarMotion->GetElement(i,2) + ratio * diffY;
-//                // 2005.02.23 - Steve says not to interpolate lod
-//                //lodval = polarMotion->GetElement(i,3) + ratio * diffLOD;
-//                lodval = polarMotion->GetElement(i,3);
-            }
-            break;
          }
       }
    }

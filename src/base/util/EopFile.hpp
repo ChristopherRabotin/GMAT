@@ -83,6 +83,9 @@ protected:
    bool isInitialized;
    
    bool IsBlank(const char* aLine);
-
+   
+   // Performance code
+   Integer              previousIndex;
+   
 };
 #endif // EopFile_hpp
