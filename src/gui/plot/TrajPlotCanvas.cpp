@@ -148,6 +148,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
 {    
    // initalize data members
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theStatusBar = GmatAppData::GetMainFrame()->GetStatusBar();
    mTextTrajFile = NULL;
    mGlList = 0;
    mNumData = 0;
@@ -1604,8 +1605,11 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
       }
       
       mTextTrajFile->Close();
-      wxLogStatus(GmatAppData::GetMainFrame(),
-                  wxT("Number of data points: %d"), numDataPoints);
+      wxString text;
+      text.Printf("Number of data points: %d", numDataPoints);
+      theStatusBar->SetStatusText(text, 2);
+      //wxLogStatus(GmatAppData::GetMainFrame(),
+      //            wxT("Number of data points: %d"), numDataPoints);
    }
    else
    {
@@ -1872,15 +1876,11 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
    mfStartX = fEndX;
    mfStartY = fEndY;
    
-   //wxLogStatus(MdiGlPlot::mdiParentGlFrame,
-   //            wxT("X = %d Y = %d"), event.GetX(), event.GetY());
+   wxString mousePosStr;
+   mousePosStr.Printf("X = %g Y = %g", fEndX, fEndY);
+   //wxStatusBar *statusBar = GmatAppData::GetMainFrame()->GetStatusBar();
+   theStatusBar->SetStatusText(mousePosStr, 2);
    
-   //wxLogStatus(MdiGlPlot::mdiParentGlFrame,
-   //            wxT("distance=%f"), mAxisLength);
-
-   wxLogStatus(GmatAppData::GetMainFrame(),
-               wxT("X = %g Y = %g"), fEndX, fEndY);
-
    //wxLogStatus(MdiGlPlot::mdiParentGlFrame,
    //            wxT("X = %d Y = %d lastX = %f lastY = %f Zoom amount = %f Distance = %f"),
    //            event.GetX(), event.GetY(), mfStartX, mfStartY, mZoomAmount, mAxisLength);

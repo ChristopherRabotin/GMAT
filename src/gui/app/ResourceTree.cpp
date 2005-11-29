@@ -2612,10 +2612,13 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       filename = ((GmatTreeItemData*)GetItemData(scriptId))->GetDesc();
       MessageInterface::ShowMessage
          ("Starting script %d out of %d: %s\n", count, numScripts, filename.c_str());
-      wxLogStatus(GmatAppData::GetMainFrame(),
-                  "Running script %d out of %d: %s\n", count, numScripts,
+      //wxLogStatus(GmatAppData::GetMainFrame(),
+      //            "Running script %d out of %d: %s\n", count, numScripts,
+      //            filename.c_str());
+      wxString text;
+      text.Printf("Running script %d out of %d: %s\n", count, numScripts,
                   filename.c_str());
-      
+      GmatAppData::GetMainFrame()->SetStatusText(text, 1);
       for (int i=0; i<repeatCount; i++)
       {
          MessageInterface::ShowMessage

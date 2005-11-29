@@ -210,7 +210,10 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
 
 #if wxUSE_STATUSBAR
    // create a status bar
-   CreateStatusBar(2);
+   //theStatusBar = CreateStatusBar(2);
+   int widths[] = {150, 500, 200};
+   theStatusBar = CreateStatusBar(3, wxBORDER);
+   SetStatusWidths(3, widths);
    SetStatusText(_T("Welcome to GMAT!"));
 #endif // wxUSE_STATUSBAR
 
@@ -721,11 +724,11 @@ bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item)
    {
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
 
-#if DEBUG_MAINFRAME
+      #if DEBUG_MAINFRAME
       MessageInterface::ShowMessage
          ("GmatMainFrame::IsChildOpen() child %s  this %s\n",
           theChild->GetTitle().c_str(), item->GetDesc().c_str());
-#endif
+      #endif
     
       if ((theChild->GetTitle().IsSameAs(item->GetDesc().c_str())) &&
           (theChild->GetDataType() == item->GetDataType()))
@@ -791,11 +794,11 @@ bool GmatMainFrame::RenameChild(wxString oldName, wxString newName)
    {
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
 
-#if DEBUG_MAINFRAME
+      #if DEBUG_MAINFRAME
       MessageInterface::ShowMessage
          ("GmatMainFrame::RenameChild() oldName=%s, newName=%s\n",
           oldName.c_str(), newName.c_str());
-#endif
+      #endif
 
       if (theChild->GetTitle().IsSameAs(oldName))
       {
@@ -995,7 +998,8 @@ void GmatMainFrame::MinimizeChildren()
    while (node)
    {
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-      if (theChild->GetDataType() != GmatTree::OUTPUT_OPENGL_PLOT)
+      if (theChild->GetDataType() != GmatTree::OUTPUT_OPENGL_PLOT &&
+          theChild->GetDataType() != GmatTree::OUTPUT_XY_PLOT)
          theChild->Iconize(TRUE);
       node = node->GetNext();
    }
@@ -1008,9 +1012,9 @@ void GmatMainFrame::MinimizeChildren()
 //------------------------------------------------------------------------------
 void GmatMainFrame::CloseCurrentProject()
 {
-   //#if DEBUG_MAINFRAME
+   #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::CloseCurrentProject()\n");
-   //#endif
+   #endif
    
    //close all windows
    CloseAllChildren();
@@ -1207,6 +1211,14 @@ wxToolBar* GmatMainFrame::GetMainFrameToolBar()
    return GetToolBar();
 }
 
+//------------------------------------------------------------------------------
+// wxStatusBar* GmatMainFrame::GetMainFrameStatusBar()
+//------------------------------------------------------------------------------
+wxStatusBar* GmatMainFrame::GetMainFrameStatusBar()
+{
+   return GetStatusBar();
+}
+
 //-------------------------------
 // private methods
 //-------------------------------
@@ -1319,6 +1331,7 @@ void GmatMainFrame::OnProjectExit(wxCommandEvent& WXUNUSED(event))
    // true is to force the frame to close
    Close(true);
 }
+
 
 //------------------------------------------------------------------------------
 // void OnRun(wxCommandEvent& WXUNUSED(event))
@@ -1539,7 +1552,7 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    bitmaps[13] = new wxBitmap(build_xpm);
    
    // add project tools
-   toolBar->AddTool(MENU_FILE_NEW_SCRIPT, _T("New"), *(bitmaps[0]), _T("New Script"));
+   toolBar->AddTool(MENU_FILE_NEW_SCRIPT, _T("New"), *bitmaps[0], _T("New Script"));
    toolBar->AddTool(MENU_FILE_OPEN_SCRIPT, _T("Open"), *bitmaps[1], _T("Open Script"));
    toolBar->AddTool(MENU_FILE_SAVE_SCRIPT, _T("Save"), *bitmaps[2], _T("Save to Script"));
    toolBar->AddSeparator();
@@ -1951,6 +1964,8 @@ void GmatMainFrame::OnSetFocus(wxFocusEvent& event)
 void GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 {
    wxString filename = ((GmatMdiChildFrame *)GetActiveChild())->GetTitle();
+   //wxLogStatus(GmatAppData::GetMainFrame(), "script:%s", filename.c_str());
+   SetStatusText("script: " + filename, 1);
    InterpretScript(filename);
 }
 
@@ -1960,6 +1975,8 @@ void GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 {
    wxString filename = ((GmatMdiChildFrame *)GetActiveChild())->GetTitle();
+   //wxLogStatus(GmatAppData::GetMainFrame(), "script:%s", filename.c_str());
+   SetStatusText("script: " + filename, 1);
    
    if (InterpretScript(filename))
       OnRun(event);

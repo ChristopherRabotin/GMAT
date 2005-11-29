@@ -162,6 +162,7 @@ private:
    static const int UNKNOWN_OBJ_ID;// = -999;
    
    GuiInterpreter *theGuiInterpreter;
+   wxStatusBar *theStatusBar;
    TextTrajectoryFile *mTextTrajFile;
    TrajectoryArray mTrajectoryData;
 

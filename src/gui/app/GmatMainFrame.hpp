@@ -65,8 +65,9 @@ public:
    void StartServer();
    void StopServer();
    wxToolBar* GetMainFrameToolBar();
+   wxStatusBar* GetMainFrameStatusBar();
+   
    MdiChildTrajFrame *trajSubframe;
-
    MdiChildTsFrame *tsSubframe;
 
 
@@ -101,8 +102,10 @@ private:
 
    ViewTextFrame *mTextFrame;
    wxMenu *mServerMenu;
+   wxStatusBar *theStatusBar;
    
    wxMenuBar* CreateMainMenu();
+   
    void InitToolBar(wxToolBar* toolBar);
    bool InterpretScript(const wxString &filename);
    
