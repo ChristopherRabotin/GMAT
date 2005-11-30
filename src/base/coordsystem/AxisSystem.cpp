@@ -786,7 +786,8 @@ void AxisSystem::InitializeFK5()
       {
          for (Integer j=0; j< numPlan; j++)
          {
-            apVals[i*10+j] = (ap.at(i)).at(j);
+            //apVals[i*10+j] = (ap.at(i)).at(j);
+            apVals[i*numPlan+j] = (ap.at(i)).at(j);
          }
       }
       

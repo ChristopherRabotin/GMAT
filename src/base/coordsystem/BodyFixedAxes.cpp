@@ -409,8 +409,8 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       }
       else 
       {
-         updateIntervalToUse = 60.0;
-//                                  ((Planet*) origin)->GetUpdateInterval();
+         updateIntervalToUse = 
+                              ((Planet*) origin)->GetUpdateInterval();
          //MessageInterface::ShowMessage("Using origin interval .....\n");
          #ifdef DEBUG_FIRST_CALL
             if (!firstCallFired)
