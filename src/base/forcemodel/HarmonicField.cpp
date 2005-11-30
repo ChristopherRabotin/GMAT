@@ -486,8 +486,6 @@ bool HarmonicField::legendreP_init()
    re[0] = (Real)1.0;  /* real part of (s + i*t)^m       */
    im[0] = (Real)0.0;  /* imaginary part of (s + i*t)^m  */
    
-   if (degree <= 0)
-      MessageInterface::ShowMessage("Degree is %d\n", degree);
    offDiags = new Real[degree+2];
    abarCoeff1 = new Real*[degree+2];
    abarCoeff2 = new Real*[degree+2];
