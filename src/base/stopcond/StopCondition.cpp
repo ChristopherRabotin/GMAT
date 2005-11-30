@@ -46,10 +46,9 @@ using namespace GmatMathUtil;
 StopCondition::StopCondition(const std::string &name, const std::string &desc,
                              Parameter *epochParam, Parameter *stopParam,
                              const Real &goal, const Real &tol,
-                             const Integer repeatCount, //RefFrame *refFrame,
+                             const Integer repeatCount,
                              Interpolator *interp)
    : BaseStopCondition(name, desc, epochParam, stopParam, goal, tol,
-                       //repeatCount, refFrame, interp)
                        repeatCount, interp)
 {
    objectTypeNames.push_back("StopCondition");
@@ -119,11 +118,9 @@ bool StopCondition::Evaluate()
    Real rval;
    Real stopEpoch; //in A1Mjd
    
-   if (mStopParam == NULL ||
-       (mAllowGoalParam && mGoalParam == NULL))
+   if (mStopParam == NULL || (mAllowGoalParam && mGoalParam == NULL))
       Initialize();
    
-   //loj: 7/15/05 Added evaulating goal
    // evaluate goal
    if (mAllowGoalParam)
       mGoal = mGoalParam->EvaluateReal();
@@ -147,7 +144,18 @@ bool StopCondition::Evaluate()
       
       // handler for time based stopping for backwards prop
       Real mult = (mGoal >= 0.0 ? 1.0 : -1.0);
-      if (mult*rval >= mult*mGoal)
+
+      #if DEBUG_STOPCOND > 1
+      MessageInterface::ShowMessage
+         ("StopCondition::Evaluate() mult*rval=%g, mult*mGoal=%g, diff=%g, "
+          "mTolerance=%g\n",  mult*rval, mult*mGoal, Abs(mult*rval - mult*mGoal),
+          mTolerance);
+      #endif
+
+      // use time tolerance = 1.0e-6 for equality test
+      //if (mult*rval >= mult*mGoal)
+      if ((Abs(mult*rval - mult*mGoal) <= 1.0e-6) ||
+          (mult*rval >= mult*mGoal))
       {
          std::string stopParamType = mStopParam->GetTypeName();
          
@@ -164,6 +172,12 @@ bool StopCondition::Evaluate()
 
          goalMet = true;
       }
+
+      #if DEBUG_STOPCOND > 1
+      MessageInterface::ShowMessage
+         ("StopCondition::Evaluate() time goalMet = %d\n", goalMet);
+      #endif
+      
    }
    else
    {
@@ -284,7 +298,6 @@ GmatBase* StopCondition::Clone(void) const
 //------------------------------------------------------------------------------
 bool StopCondition::CheckOnPeriapsis()
 {   
-   //bool backwards = false; //loj: from Propagator?
    Real ecc = mEccParam->EvaluateReal();
    Real rmag = mRmagParam->EvaluateReal();
    
@@ -303,11 +316,9 @@ bool StopCondition::CheckOnPeriapsis()
    if ((rmag <= mRange) && (ecc >= mEccTol))
    {
       if (mNumValidPoints >= mBufferSize &&
-          //((backwards && //loj: 7/20/04 use memeber data
           ((mBackwardsProp &&
             mValueBuffer[mBufferSize-2] >= mGoal  &&
             mValueBuffer[mBufferSize-1] <= mGoal) ||  
-           //(!backwards &&
            (!mBackwardsProp &&
             mValueBuffer[mBufferSize-2] <= mGoal  &&
             mValueBuffer[mBufferSize-1] >= mGoal)))
@@ -338,7 +349,6 @@ bool StopCondition::CheckOnPeriapsis()
 //------------------------------------------------------------------------------
 bool StopCondition::CheckOnApoapsis()
 {
-   //bool backwards = false; //loj: from Propagator?
    Real ecc = mEccParam->EvaluateReal();
    
    //----------------------------------------------------------------------
@@ -350,11 +360,9 @@ bool StopCondition::CheckOnApoapsis()
    if (ecc >= mEccTol)
    {
       if (mNumValidPoints >= mBufferSize &&
-          //((backwards &&
           ((mBackwardsProp &&
             mValueBuffer[mBufferSize-2] <= mGoal  &&
             mValueBuffer[mBufferSize-1] >= mGoal) ||  
-           //(!backwards &&
            (!mBackwardsProp &&
             mValueBuffer[mBufferSize-2] >= mGoal  &&
             mValueBuffer[mBufferSize-1] <= mGoal)))
