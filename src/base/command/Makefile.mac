@@ -24,6 +24,7 @@
 #             2005/07/07 - J. Gurganus- added MATLAB flag 
 #             2005/09/07 - J. Gurganus- added BeginFunction and EndFunction 
 #             2005/10/13 - J. Gurganus- Renamed MATLABFLAGS from TESTFLAGS
+#             2005/11/30 - J. Gurganus- Added CommandUtil
 ################################################################################
 #
 #
@@ -36,11 +37,11 @@ MATLAB_INCDIR = ${MATLAB}/extern/include
 # Source file for creating new library
 SRC = Achieve.cpp Assignment.cpp BeginFiniteBurn.cpp BeginFunction.cpp \
 	BeginScript.cpp BranchCommand.cpp CallFunction.cpp Command.cpp \
-	CommandException.cpp ConditionalBranch.cpp Else.cpp ElseIf.cpp \
-	EndIf.cpp  EndFor.cpp EndFiniteBurn.cpp EndFunction.cpp EndScript.cpp \
-	EndTarget.cpp EndWhile.cpp For.cpp If.cpp Maneuver.cpp NoOp.cpp \
-	Propagate.cpp Report.cpp Target.cpp Save.cpp Toggle.cpp Vary.cpp \
-	While.cpp
+	CommandException.cpp CommandUtil.cpp ConditionalBranch.cpp Else.cpp \
+	ElseIf.cpp EndIf.cpp  EndFor.cpp EndFiniteBurn.cpp EndFunction.cpp \
+	EndScript.cpp EndTarget.cpp EndWhile.cpp For.cpp If.cpp Maneuver.cpp \
+	NoOp.cpp Propagate.cpp Report.cpp Target.cpp Save.cpp Toggle.cpp \
+	Vary.cpp While.cpp
 #
 MATLABFLAGS = -D__USE_MATLAB__ -I$(MATLAB_INCDIR)
 #
