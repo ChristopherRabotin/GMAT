@@ -515,7 +515,12 @@ bool OpenGlPlot::Initialize()
             if (mViewCoordSystem == NULL)
                throw GmatBaseException
                   ("OpenGlPlot::Initialize() CoordinateSystem: " + mViewCoordSysName +
-                   "not set\n");
+                   " not set\n");
+            
+            if (mViewUpCoordSystem == NULL)
+               throw GmatBaseException
+                  ("OpenGlPlot::Initialize() CoordinateSystem: " + mViewUpCoordSysName +
+                   " not set\n");               
             
             // get CoordinateSystem Origin pointer
             mViewCoordSysOrigin = mViewCoordSystem->GetOrigin();
@@ -556,18 +561,33 @@ bool OpenGlPlot::Initialize()
             
             // set all object array and pointers
             
+            #if DEBUG_OPENGL_INIT
+            MessageInterface::ShowMessage
+               ("OpenGlPlot::Initialize() calling PlotInterface::SetGlObject()\n");
+            #endif
+            
             PlotInterface::SetGlObject(instanceName, mObjectNameArray,
                                        mOrbitColorArray, mObjectArray);
             
             //--------------------------------------------------------
             // set CoordinateSystem
             //--------------------------------------------------------
+            #if DEBUG_OPENGL_INIT
+            MessageInterface::ShowMessage
+               ("OpenGlPlot::Initialize() calling PlotInterface::SetGlCoordSystem()\n");
+            #endif
+
             PlotInterface::SetGlCoordSystem(instanceName, mViewCoordSystem,
                                             mViewUpCoordSystem);
             
             //--------------------------------------------------------
             // set viewpoint info
             //--------------------------------------------------------
+            #if DEBUG_OPENGL_INIT
+            MessageInterface::ShowMessage
+               ("OpenGlPlot::Initialize() calling PlotInterface::SetGlViewOption()\n");
+            #endif
+            
             PlotInterface::SetGlViewOption
                (instanceName, mViewPointRefObj, mViewPointVectorObj,
                 mViewDirectionObj, mViewScaleFactor, mViewPointRefVector,
@@ -608,6 +628,10 @@ bool OpenGlPlot::Initialize()
           "has been added to OpenGlPlot\n");
       return false;
    }
+
+   #if DEBUG_OPENGL_INIT
+   MessageInterface::ShowMessage("OpenGlPlot::Initialize() exiting\n");
+   #endif
 }
 
 
@@ -1901,10 +1925,10 @@ void OpenGlPlot::UpdateObjectList(SpacePoint *sp, bool show)
       mObjectNameArray.push_back(name);
       mOrbitColorArray.push_back(mOrbitColorMap[name]);
       mObjectArray.push_back(sp);
-//       mDrawOrbitMap[name] = true; //loj: 9/8/05
-//       mShowObjectMap[name] = true; //loj: 9/8/05
-//       mDrawOrbitArray.push_back(true);
-//       mShowObjectArray.push_back(true);
+      //mDrawOrbitMap[name] = true;
+      //mShowObjectMap[name] = true;
+      //mDrawOrbitArray.push_back(true);
+      //mShowObjectArray.push_back(true);
       mDrawOrbitMap[name] = show;
       mShowObjectMap[name] = show;
       mDrawOrbitArray.push_back(show);
@@ -1913,14 +1937,14 @@ void OpenGlPlot::UpdateObjectList(SpacePoint *sp, bool show)
    }
    
    #if DEBUG_OPENGL_INIT
-   Integer draw, show;
+   Integer draw, showObj;
    for (int i=0; i<mObjectCount; i++)
    {
       draw = mDrawOrbitArray[i] ? 1 : 0;
-      show = mShowObjectArray[i] ? 1 : 0;
+      showObj = mShowObjectArray[i] ? 1 : 0;
       MessageInterface::ShowMessage
          ("OpenGlPlot::UpdateObjectList() mObjectNameArray[%d]=%s, draw=%d, "
-          "show=%d, color=%d\n", i, mObjectNameArray[i].c_str(), draw, show,
+          "show=%d, color=%d\n", i, mObjectNameArray[i].c_str(), draw, showObj,
           mOrbitColorArray[i]);
    }
    #endif
