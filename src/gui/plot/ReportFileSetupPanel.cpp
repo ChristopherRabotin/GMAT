@@ -230,23 +230,56 @@ void ReportFileSetupPanel::Create()
    // options
    //-------------------------------------------------------
 
+//    writeCheckBox = new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Write Report"),
+//                                   wxDefaultPosition, wxSize(100, -1), 0);
+   
+//    showHeaderCheckBox =
+//       new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Show Headers"),
+//                      wxDefaultPosition, wxSize(100, -1), 0);
+   
+//    wxStaticText *colWidthText =
+//       new wxStaticText(this, -1, wxT("Column Width  "),
+//                        wxDefaultPosition, wxSize(-1,-1), 0);
+   
+//    colWidthTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
+//                                      wxDefaultPosition, wxSize(35, -1),  0);
+
+//    wxStaticText *precisionText =
+//       new wxStaticText(this, -1, wxT("  Precision  "),
+//                        wxDefaultPosition, wxSize(-1,-1), 0);
+
+//    precisionTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""),
+//                                      wxDefaultPosition, wxSize(35, -1),  0);
+
+//    leftJustifyCheckBox =
+//       new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Left Justify"),
+//                      wxDefaultPosition, wxSize(100, -1), 0);
+   
    writeCheckBox = new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Write Report"),
-                                  wxDefaultPosition, wxSize(100, -1), 0);
+                                  wxDefaultPosition, wxDefaultSize, 0);
    
    showHeaderCheckBox =
       new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Show Headers"),
-                     wxDefaultPosition, wxSize(100, -1), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
+   
+   leftJustifyCheckBox =
+      new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Left Justify"),
+                     wxDefaultPosition, wxDefaultSize, 0);
+   
+   zeroFillCheckBox =
+      new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Zero Fill"),
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *colWidthText =
-      new wxStaticText(this, -1, wxT("Column Width  "),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
+      new wxStaticText(this, -1, wxT("Column Width"),
+                       wxDefaultPosition, wxDefaultSize, 0);
    
    colWidthTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
                                      wxDefaultPosition, wxSize(35, -1),  0);
 
    wxStaticText *precisionText =
-      new wxStaticText(this, -1, wxT("  Precision  "),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
+      new wxStaticText(this, -1, wxT("  Precision"),
+                       wxDefaultPosition, wxDefaultSize, 0);
 
    precisionTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""),
                                      wxDefaultPosition, wxSize(35, -1),  0);
@@ -254,6 +287,8 @@ void ReportFileSetupPanel::Create()
    wxBoxSizer *reportOptionSizer = new wxBoxSizer(wxHORIZONTAL);
    reportOptionSizer->Add(writeCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(showHeaderCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   reportOptionSizer->Add(leftJustifyCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   reportOptionSizer->Add(zeroFillCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(colWidthText, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(colWidthTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(precisionText, 0, wxALIGN_CENTER|wxALL, bsize);
@@ -305,6 +340,18 @@ void ReportFileSetupPanel::LoadData()
       showHeaderCheckBox->SetValue(true);
    else
       showHeaderCheckBox->SetValue(false);                     
+   
+   int leftJustifyId = reportFile->GetParameterID("LeftJustify");
+   if (strcmp(reportFile->GetStringParameter(leftJustifyId).c_str(), "On") == 0)
+      leftJustifyCheckBox->SetValue(true);
+   else
+      leftJustifyCheckBox->SetValue(false);                     
+   
+   int zeroFillId = reportFile->GetParameterID("ZeroFill");
+   if (strcmp(reportFile->GetStringParameter(zeroFillId).c_str(), "On") == 0)
+      zeroFillCheckBox->SetValue(true);
+   else
+      zeroFillCheckBox->SetValue(false);                     
    
    int spacesId = reportFile->GetParameterID("ColumnWidth");
    wxString numSpacesValue;
@@ -364,6 +411,18 @@ void ReportFileSetupPanel::SaveData()
    else
       reportFile->SetStringParameter(writeHeadersId, "Off");
                   
+   int leftJustifyId = reportFile->GetParameterID("LeftJustify");
+   if (leftJustifyCheckBox->IsChecked())
+      reportFile->SetStringParameter(leftJustifyId, "On");
+   else
+      reportFile->SetStringParameter(leftJustifyId, "Off");
+   
+   int zeroFillId = reportFile->GetParameterID("ZeroFill");
+   if (zeroFillCheckBox->IsChecked())
+      reportFile->SetStringParameter(zeroFillId, "On");
+   else
+      reportFile->SetStringParameter(zeroFillId, "Off");
+   
    int spacesId = reportFile->GetParameterID("ColumnWidth");
    reportFile->SetIntegerParameter(spacesId,
                                    atoi(colWidthTextCtrl->GetValue()));

@@ -190,6 +190,7 @@ GmatBase* Report::Clone() const
 //------------------------------------------------------------------------------
 bool Report::Initialize()
 {
+   parms.clear();
    GmatBase *object;
    
    if (objectMap->find(rfName) == objectMap->end())
@@ -203,6 +204,9 @@ bool Report::Initialize()
          "Object named \"" + rfName +
          "\" is not a ReportFile; Report command cannot execute\n");
 
+   if (reporter->GetStringParameter(reporter->GetParameterID("WriteHeaders")) == "On")
+      needsHeaders = true;
+   
    for (StringArray::iterator i = parmNames.begin(); i != parmNames.end(); ++i)
    {
       object = ((*objectMap)[*i]);
@@ -235,6 +239,15 @@ bool Report::Execute()
    // Note that this is done here, rather than during initialization, in case
    // the user has changed the values during the run.
    datastream.precision(reporter->GetIntegerParameter(reporter->GetParameterID("Precision")));
+
+   datastream.fill(' ');         
+   if (reporter->GetStringParameter(reporter->GetParameterID("LeftJustify")) == "On")
+   {
+      datastream.setf(std::ios::left);
+      if (reporter->GetStringParameter(reporter->GetParameterID("ZeroFill")) == "On")
+         datastream.fill('0');
+   }
+   
    int colWidth = reporter->GetIntegerParameter(reporter->GetParameterID("ColumnWidth"));
 
    if (needsHeaders && 
@@ -245,7 +258,7 @@ bool Report::Execute()
       {
          datastream.width(colWidth);
          datastream << (*i);
-         datastream << " ";
+         datastream << "   ";
       }
       std::string header = datastream.str();
       reporter->ReceiveData(header.c_str(), header.length());
@@ -256,7 +269,7 @@ bool Report::Execute()
    for (std::vector<Parameter*>::iterator i = parms.begin(); i != parms.end(); ++i)
    {
       datastream.width(colWidth);
-      datastream << (*i)->EvaluateReal() << " ";
+      datastream << (*i)->EvaluateReal() << "   ";
    }
 
    // Publish it

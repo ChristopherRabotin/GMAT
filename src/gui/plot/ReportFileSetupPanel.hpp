@@ -48,7 +48,9 @@ protected:
    
    wxCheckBox *writeCheckBox;
    wxCheckBox *showHeaderCheckBox;
-    
+   wxCheckBox *leftJustifyCheckBox;
+   wxCheckBox *zeroFillCheckBox;
+   
    wxComboBox *mObjectComboBox;
    wxComboBox *mCoordSysComboBox;
    wxComboBox *mCentralBodyComboBox;
