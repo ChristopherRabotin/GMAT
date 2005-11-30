@@ -101,6 +101,10 @@ protected:
    Integer        columnWidth;   
    /// Write the headers on the top of the column
    bool           writeHeaders;
+   /// Left justify
+   bool           leftJustify;
+   /// Fill right field with 0
+   bool           zeroFill;
    
    /// output data stream
    std::ofstream       dstream;
@@ -128,6 +132,8 @@ private:
       PRECISION,
       ADD,
       WRITE_HEADERS,
+      LEFT_JUSTIFY,
+      ZERO_FILL,
       COL_WIDTH,
       ReportFileParamCount  /// Count of the parameters for this class
     };

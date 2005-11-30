@@ -37,6 +37,8 @@ ReportFile::PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount] =
    "Precision",
    "Add",
    "WriteHeaders",
+   "LeftJustify",
+   "ZeroFill",
    "ColumnWidth",
 };
 
@@ -47,6 +49,8 @@ ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
    Gmat::INTEGER_TYPE,
    Gmat::STRINGARRAY_TYPE,
    Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
 };
 
@@ -55,12 +59,15 @@ ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
 // ReportFile(const std::string &name, const std::string &fileName)
 //------------------------------------------------------------------------------
 ReportFile::ReportFile(const std::string &name, const std::string &fileName,
-                        Parameter *firstVarParam) :
+                       Parameter *firstVarParam) :
    Subscriber      ("ReportFile", name),
    filename        (fileName),
-   precision       (12),
+   //precision       (12),
+   precision       (16),
    columnWidth     (20),
    writeHeaders    (true),
+   leftJustify     (true),
+   zeroFill        (true),
    lastUsedProvider(-1),
    usedByReport    (false)
 {
@@ -96,6 +103,8 @@ ReportFile::ReportFile(const ReportFile &rf) :
    precision       (rf.precision),
    columnWidth     (rf.columnWidth),
    writeHeaders    (rf.writeHeaders),
+   leftJustify     (rf.leftJustify),
+   zeroFill        (rf.zeroFill),
    lastUsedProvider (-1),
    usedByReport    (rf.usedByReport)
 {
@@ -131,6 +140,8 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
    precision = rf.precision;
    columnWidth = rf.columnWidth;
    writeHeaders = rf.writeHeaders;
+   leftJustify = rf.leftJustify;
+   zeroFill = rf.zeroFill;
    mVarParams = rf.mVarParams; 
    mNumVarParams = rf.mNumVarParams;
    mVarParamNames = rf.mVarParamNames;
@@ -385,7 +396,21 @@ std::string ReportFile::GetStringParameter(const Integer id) const
       else
          return "Off";
    }
-
+   else if (id == LEFT_JUSTIFY)
+   {
+      if (leftJustify)
+         return "On";
+      else
+         return "Off";
+   }
+   else if (id == ZERO_FILL)
+   {
+      if (zeroFill)
+         return "On";
+      else
+         return "Off";
+   }
+   
    return Subscriber::GetStringParameter(id);
 }
 
@@ -441,7 +466,37 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
       else
          return false;   
    }   
-      
+   else if (id == LEFT_JUSTIFY)
+   {
+      if (strcmp(value.c_str(), "On") == 0)
+      {
+         leftJustify = true;
+         return true;
+      }   
+      else if (strcmp(value.c_str(), "Off") == 0)
+      {
+         leftJustify = false;
+         return true;
+      }
+      else
+         return false;   
+   }   
+   else if (id == ZERO_FILL)
+   {
+      if (strcmp(value.c_str(), "On") == 0)
+      {
+         zeroFill = true;
+         return true;
+      }   
+      else if (strcmp(value.c_str(), "Off") == 0)
+      {
+         zeroFill = false;
+         return true;
+      }
+      else
+         return false;   
+   }   
+   
    return Subscriber::SetStringParameter(id, value);
 }
 
@@ -633,7 +688,16 @@ bool ReportFile::OpenReportFile(void)
    dstream.precision(precision);
    dstream.width(columnWidth);
    dstream.setf(std::ios::showpoint);
+   dstream.fill(' ');
 
+   if (leftJustify)
+   {
+      dstream.setf(std::ios::left);
+   
+      if (zeroFill)
+         dstream.fill('0');
+   }
+   
    return true;
 }
 
@@ -705,13 +769,22 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
            varvals[i] = mVarParams[i]->EvaluateReal();
            dstream.width(columnWidth);
            dstream.precision(precision);
-           dstream.setf(std::ios::showpoint);
-           dstream << varvals[i];
+           //dstream.setf(std::ios::showpoint);
+           dstream.fill(' ');
+           
+           if (leftJustify)
+           {
+              dstream.setf(std::ios::left);
+              if (zeroFill)
+                 dstream.fill('0');                 
+           }
+           
+           //dstream << varvals[i];
+           dstream << varvals[i] << "   "; // give space between columns
        }
    
        dstream << std::endl;
    
-       //loj: 4/18/05 Added debug
        #if DEBUG_REPORTFILE_DATA
           MessageInterface::ShowMessage
              ("ReportFile::Distribute() dat=%f %f %f %f %g %g %g\n", dat[0], dat[1],
@@ -756,8 +829,14 @@ void ReportFile::WriteHeaders()
       {
           if (!dstream.good())
              dstream.clear();
+          
           dstream.width(columnWidth);
-          dstream << mVarParamNames[i];
+          dstream.fill(' ');
+          
+          if (leftJustify)
+             dstream.setf(std::ios::left);
+          
+          dstream << mVarParamNames[i] << "   ";
       }
       
       dstream << std::endl;
