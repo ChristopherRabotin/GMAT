@@ -127,7 +127,10 @@ filename                (""),
 fileRead                (false),
 inputCSName             ("EarthMJ2000Eq"),
 fixedCSName             ("EarthFixed"),
-targetCSName            ("EarthMJ2000Eq")
+targetCSName            ("EarthMJ2000Eq"),
+offDiags                (NULL),
+abarCoeff1              (NULL),
+abarCoeff2              (NULL)
 //epoch                   (21545.0)
 {
    objectTypeNames.push_back("HarmonicField");
@@ -160,6 +163,25 @@ HarmonicField::~HarmonicField(void)
 
    if (im)
       delete [] im;
+
+   if (offDiags)
+      delete [] offDiags;
+
+   if (abarCoeff1)
+   {
+      for (Integer i = 0; i <= degree+1; ++i)
+         delete [] abarCoeff1[i];
+      
+      delete [] abarCoeff1;
+   }
+
+   if (abarCoeff2)
+   {
+      for (Integer i = 0; i <= degree+1; ++i)
+         delete [] abarCoeff2[i];
+      
+      delete [] abarCoeff2;
+   }
 }
 
 
@@ -191,7 +213,10 @@ filename                (hf.filename),
 fileRead                (false),
 inputCSName             (hf.inputCSName),
 fixedCSName             (hf.fixedCSName),
-targetCSName            (hf.targetCSName)
+targetCSName            (hf.targetCSName),
+offDiags                (NULL),
+abarCoeff1              (NULL),
+abarCoeff2              (NULL)
 {
 }
 
@@ -228,6 +253,9 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
    inputCSName    = hf.inputCSName;
    fixedCSName    = hf.fixedCSName;
    targetCSName   = hf.targetCSName;
+   offDiags       = NULL;
+   abarCoeff1     = NULL;
+   abarCoeff2     = NULL;
 
    return *this;
 }
@@ -241,7 +269,7 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
  * @return flag indicating success of initialization.
  */
 //------------------------------------------------------------------------------
-bool HarmonicField::Initialize(void)
+bool HarmonicField::Initialize()
 {
     if (!PhysicalModel::Initialize())
         return false;
@@ -361,9 +389,9 @@ bool HarmonicField::SetFilename(const std::string &fn)
  * @return flag indicating success of the operation.
  */
 //------------------------------------------------------------------------------
-bool HarmonicField::legendreP_init(void)
+bool HarmonicField::legendreP_init()
 {
-   Integer  n;
+   Integer  m, n;
    Integer  cc;
    Integer  i;
 
@@ -381,6 +409,23 @@ bool HarmonicField::legendreP_init(void)
    
    if (im)
       delete [] im;
+
+   if (offDiags)
+      delete [] offDiags;
+   if (abarCoeff1)
+   {
+      for (i = 0; i <= degree+1; ++i)
+         delete [] abarCoeff1[i];
+      
+      delete [] abarCoeff1;
+   }
+   if (abarCoeff2)
+   {
+      for (i = 0; i <= degree+1; ++i)
+         delete [] abarCoeff2[i];
+      
+      delete [] abarCoeff2;
+   }
    
    Abar = new Real*[maxDegree+3];
    if ( !Abar ) {
@@ -423,10 +468,10 @@ bool HarmonicField::legendreP_init(void)
       }
    }
 
-
    /* initialize the diagonal elements (not a function of the input) */
    Abar[0][0] = (Real)1.0;
-   for (n = 1;n <= maxDegree+1; ++n){
+   for (n = 1;n <= maxDegree+1; ++n)
+   {
       Abar[n][n] = Sqrt((Real)(2*n+1)/(Real)(2*n)) * Abar[n-1][n-1];
    }
    
@@ -440,6 +485,36 @@ bool HarmonicField::legendreP_init(void)
    /* initalize recursion, Ref.[1] */
    re[0] = (Real)1.0;  /* real part of (s + i*t)^m       */
    im[0] = (Real)0.0;  /* imaginary part of (s + i*t)^m  */
+   
+   if (degree <= 0)
+      MessageInterface::ShowMessage("Degree is %d\n", degree);
+   offDiags = new Real[degree+2];
+   abarCoeff1 = new Real*[degree+2];
+   abarCoeff2 = new Real*[degree+2];
+   
+   for (n = 1; n <= degree+1; ++n) 
+   {
+      offDiags[n] = sqrt((Real)(2*n+3));
+      abarCoeff1[n] = new Real[degree+2];
+      abarCoeff2[n] = new Real[degree+2];
+   }
+   offDiags[0] = 0.0; 
+   abarCoeff1[0] = new Real[degree+2];
+   abarCoeff2[0] = new Real[degree+2];
+   
+   Real nmnm, n2;
+   /* apply column-fill recursion formula (Table 2, Row I, Ref.[1]) */
+   for (m = 0 ; m <= order+1; m++) 
+   {
+      for (n = m+2; n <= degree+1; n++) 
+      {
+         nmnm = (n-m)*(n+m);
+         n2 = 2*n;
+         abarCoeff1[n][m] = Sqrt((Real)((n2+1)*(n2-1))/(Real)(nmnm));
+         abarCoeff2[n][m] = Sqrt((Real)((n2+1)*(n-m-1)*(n+m-1))/
+                                 (Real)((n2-3)*nmnm));
+      }
+   }
 
    hMinitialized = true;
    return true;
@@ -973,18 +1048,27 @@ bool HarmonicField::legendreP_rtq(Real *R )
 
    /* generate the off-diagonal elements */
    Abar[1][0] = u * sqrt3;
-   for (n = 1; n <= degree; ++n) {
-      Abar[n+1][n] = u*sqrt( (Real)(2*n+3) ) * Abar[n][n];
+   for (n = 1; n <= degree; ++n) 
+   {
+//      if (offDiags[n] != sqrt( (Real)(2*n+3) ))
+//         MessageInterface::ShowMessage("%d %le ", n,
+//                                       offDiags[n] - sqrt( (Real)(2*n+3) ));
+      Abar[n+1][n] = u * offDiags[n] * Abar[n][n];
+//      Abar[n+1][n] = u*sqrt( (Real)(2*n+3) ) * Abar[n][n];
    }
    
-   Real nmnm, n2;
+//   Real nmnm, n2;
    /* apply column-fill recursion formula (Table 2, Row I, Ref.[1]) */
-   for (m = 0 ; m <= order+1; m++) {
-      for (n = m+2; n <= degree+1; n++) {
-         n2 = 2*n;
-         nmnm = (n-m)*(n+m);
-         Abar[n][m] = u * sqrt((Real)((n2+1)*(n2-1))/(Real)(nmnm)) * Abar[n-1][m] -
-            sqrt((Real)((n2+1)*(n-m-1)*(n+m-1))/(Real)((n2-3)*nmnm)) * Abar[n-2][m];
+   for (m = 0 ; m <= order+1; m++) 
+   {
+      for (n = m+2; n <= degree+1; n++) 
+      {
+         Abar[n][m] = u * abarCoeff1[n][m] * Abar[n-1][m] -
+                      abarCoeff2[n][m] * Abar[n-2][m];
+//         n2 = 2*n;
+//         nmnm = (n-m)*(n+m);
+//         Abar[n][m] = u * sqrt((Real)((n2+1)*(n2-1))/(Real)(nmnm)) * Abar[n-1][m] -
+//            sqrt((Real)((n2+1)*(n-m-1)*(n+m-1))/(Real)((n2-3)*nmnm)) * Abar[n-2][m];
       }
       if ( m > 0 ) {
          /* Ref.[2], Eq.(24) */

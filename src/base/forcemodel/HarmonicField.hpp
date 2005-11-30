@@ -168,8 +168,13 @@ protected:
    CoordinateSystem        *inputCS;
    CoordinateSystem        *fixedCS;
    CoordinateSystem        *targetCS;
+   
+   // Buffers for performance
+   Real                    *offDiags;
+   Real                    **abarCoeff1;
+   Real                    **abarCoeff2;
 
-   bool                    legendreP_init(void);
+   bool                    legendreP_init();
 
 };
 

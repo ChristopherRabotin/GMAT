@@ -861,12 +861,12 @@ Rmatrix33 AxisSystem::ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch)
       *RAD_PER_ARCSEC;
    
    // Compute trigonometric quantities
-   Real cosTheta = Cos(Theta);
-   Real cosz     = Cos(z);
-   Real coszeta  = Cos(zeta);
-   Real sinTheta = Sin(Theta);
-   Real sinz     = Sin(z);
-   Real sinzeta  = Sin(zeta);
+   Real cosTheta = cos(Theta);
+   Real cosz     = cos(z);
+   Real coszeta  = cos(zeta);
+   Real sinTheta = sin(Theta);
+   Real sinz     = sin(z);
+   Real sinzeta  = sin(zeta);
    
    // Compute Rotation matrix for transformations from FK5 to MOD
    // (Vallado Eq. 3-57)
@@ -930,7 +930,7 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    cosEpsbar         = Cos(Epsbar);
    
    // if not enough time has passed, just return the last value
-   Real dt = Abs(atEpoch.Subtract(lastNUTEpoch)) * SECS_PER_DAY;
+   Real dt = fabs(atEpoch.Subtract(lastNUTEpoch)) * SECS_PER_DAY;
    #ifdef DEBUG_UPDATE
       cout.precision(30);
       cout << "ENTERED ComputeNutation ....." << endl;
@@ -1135,8 +1135,8 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
          + aVals[nut*2+i]*argLatitudeMoon + aVals[nut*3+i]*meanElongationSun 
          + aVals[nut*4+i]*longAscNodeLunar;
       
-      cosAp = Cos(apNut);
-      sinAp = Sin(apNut);
+      cosAp = cos(apNut);
+      sinAp = sin(apNut);
       //dPsi += (A[i] + B[i]*tTDB )*sinAp + E[i]*cosAp;
       //dEps += (C[i] + D[i]*tTDB )*cosAp + F[i]*sinAp;
       dPsi += (AVals[i] + BVals[i]*tTDB )*sinAp + EVals[i]*cosAp;
@@ -1220,8 +1220,8 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
           + apVals[nutpl*7+i]*argLatitudeMoon
           + apVals[nutpl*8+i]*meanAnomalyMoon
           + apVals[nutpl*9+i]*longAscNodeLunar;
-          cosApP = Cos(apPlan);
-          sinApP = Sin(apPlan);
+          cosApP = cos(apPlan);
+          sinApP = sin(apPlan);
           //dPsi += (( Ap[i] + Bp[i]*tTDB )*sinApP) * RAD_PER_ARCSEC;
           //dEps += (( Cp[i] + Dp[i]*tTDB )*cosApP) * RAD_PER_ARCSEC;
           dPsi += (( ApVals[i] + BpVals[i]*tTDB )*sinApP) * RAD_PER_ARCSEC;
@@ -1254,11 +1254,11 @@ Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    Real TrueOoE = Epsbar + dEps;
    
    // Compute useful trigonometric quantities
-   Real cosdPsi   = Cos(dPsi);
-   Real cosTEoE   = Cos(TrueOoE);
-   Real sindPsi   = Sin(dPsi);
-   Real sinEpsbar = Sin(Epsbar);
-   Real sinTEoE   = Sin(TrueOoE);   
+   Real cosdPsi   = cos(dPsi);
+   Real cosTEoE   = cos(TrueOoE);
+   Real sindPsi   = sin(dPsi);
+   Real sinEpsbar = sin(Epsbar);
+   Real sinTEoE   = sin(TrueOoE);   
    
    // Compute Rotation matrix for transformations from MOD to TOD
    // (Vallado Eq. 3-64)
@@ -1320,8 +1320,8 @@ Rmatrix33 AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
    Real term3 = 0.0;
    if (jdTT > JD_OF_JANUARY_1_1997)
    {
-      term2 = (0.00264 * Sin(longAscNodeLunar))        * RAD_PER_ARCSEC;
-      term3 = (0.000063 * Sin(2.0 * longAscNodeLunar)) * RAD_PER_ARCSEC;
+      term2 = (0.00264 * sin(longAscNodeLunar))        * RAD_PER_ARCSEC;
+      term3 = (0.000063 * sin(2.0 * longAscNodeLunar)) * RAD_PER_ARCSEC;
    }
    //Real EQequinox = (dPsi * cosTEoE) + term2 + term3; 
    Real EQequinox = (dPsi * cosEpsbar) + term2 + term3;
@@ -1342,8 +1342,8 @@ Rmatrix33 AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
    Real ThetaAst = ThetaGmst + EQequinox;
    
    //Compute useful trignonometric quantities
-   cosAst = Cos(ThetaAst);
-   sinAst = Sin(ThetaAst);
+   cosAst = cos(ThetaAst);
+   sinAst = sin(ThetaAst);
    
    // Compute Rotation matrix for Sidereal Time
    // (Vallado Eq. 3-64)
@@ -1379,7 +1379,7 @@ Rmatrix33 AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC,
             cosAst, sinAst);
    #endif
 
-   Real dt = Abs(atEpoch.Subtract(lastSTDerivEpoch)) * SECS_PER_DAY;
+   Real dt = fabs(atEpoch.Subtract(lastSTDerivEpoch)) * SECS_PER_DAY;
    if ( dt < updateIntervalToUse)
    {
       #ifdef DEBUG_UPDATE
@@ -1430,7 +1430,7 @@ Rmatrix33 AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoc
             mjdUTC, atEpoch.Get());
    #endif
 
-   Real dt = Abs(atEpoch.Subtract(lastPMEpoch)) * SECS_PER_DAY;
+   Real dt = fabs(atEpoch.Subtract(lastPMEpoch)) * SECS_PER_DAY;
    if ( dt < updateIntervalToUse)
    {
       #ifdef DEBUG_UPDATE
@@ -1445,10 +1445,10 @@ Rmatrix33 AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoc
    eop->GetPolarMotionAndLod(mjdUTC,x,y,lod);
    
    // Compute useful trigonometric quantities
-   Real cosX = Cos(-x * RAD_PER_ARCSEC);
-   Real sinX = Sin(-x * RAD_PER_ARCSEC);
-   Real cosY = Cos(-y * RAD_PER_ARCSEC);
-   Real sinY = Sin(-y * RAD_PER_ARCSEC);
+   Real cosX = cos(-x * RAD_PER_ARCSEC);
+   Real sinX = sin(-x * RAD_PER_ARCSEC);
+   Real cosY = cos(-y * RAD_PER_ARCSEC);
+   Real sinY = sin(-y * RAD_PER_ARCSEC);
    
    // Compute the polar motion rotation matrix
    PM.Set( cosX,  sinX*sinY, -sinX*cosY,

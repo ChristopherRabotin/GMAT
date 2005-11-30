@@ -173,6 +173,11 @@ protected:
    A1Mjd    now;
    Integer satcount;
    
+   Real     *sum2Diag;
+   Real     *sum3Diag;
+   Real     **sum2OffDiag;
+   Real     **sum3OffDiag;
+   
    CoordinateConverter cc;
    Rmatrix33           rotMatrix;
    Rvector6            outState;

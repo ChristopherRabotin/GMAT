@@ -106,8 +106,8 @@ Gmat::REAL_TYPE
  * (default constructor).
  *
  * @param <name> parameter indicating the name of the object.
- * @param <deg>  maximum degree of he polynomials.
- * @param <ord>  maximum order of he polynomials.
+ * @param <deg>  maximum degree of the polynomials.
+ * @param <ord>  maximum order of the polynomials.
  */
 //------------------------------------------------------------------------------
 GravityField::GravityField(const std::string &name, const std::string &forBodyName,
@@ -121,7 +121,12 @@ GravityField::GravityField(const std::string &name, const std::string &forBodyNa
 //    Sbar            (NULL),
 //    dCbar           (NULL),
 //    dSbar           (NULL),
-    gfInitialized   (false)
+    gfInitialized   (false),
+    sum2Diag        (NULL),
+    sum3Diag        (NULL),
+    sum2OffDiag     (NULL),
+    sum3OffDiag     (NULL)
+    
 {
    objectTypeNames.push_back("GravityField");
    bodyName = forBodyName;
@@ -138,7 +143,7 @@ GravityField::GravityField(const std::string &name, const std::string &forBodyNa
  *
  */
 //------------------------------------------------------------------------------
-GravityField::~GravityField(void)
+GravityField::~GravityField()
 {
 //   int cc;
 //
@@ -165,6 +170,26 @@ GravityField::~GravityField(void)
 //         delete [] dSbar[cc];
 //      delete dSbar;
 //   }
+
+   if (sum2Diag)
+      delete [] sum2Diag; 
+
+   if (sum3Diag)
+      delete [] sum3Diag; 
+
+   if (sum2OffDiag)
+   {
+      for (Integer i = 0; i <= degree; ++i)  
+         delete [] sum2OffDiag[i];
+      delete [] sum2OffDiag;
+   }
+    
+   if (sum3OffDiag)
+   {
+      for (Integer i = 0; i <= degree; ++i)  
+         delete [] sum3OffDiag[i];
+      delete [] sum3OffDiag;
+   }
 }
 
 
@@ -189,7 +214,11 @@ GravityField::GravityField(const GravityField &gf) :
 //    Sbar            (NULL),  // or (gf.Sbar),
 //    dCbar           (NULL),  // or (gf.dCbar),
 //    dSbar           (NULL),  // or (gf.dSbar)
-    gfInitialized   (false)
+    gfInitialized   (false),
+    sum2Diag        (NULL),
+    sum3Diag        (NULL),
+    sum2OffDiag     (NULL),
+    sum3OffDiag     (NULL)
 {
    objectTypeNames.push_back("GravityField");
    bodyName = gf.bodyName;
@@ -403,19 +432,24 @@ bool GravityField::gravity_rtq(Real jday, Real F[] )
          {
             summ[0] = (Real)0.0;
             summ[1] = (Real)0.0;
-            summ[2] = sqrt( (Real)( n*(np1) ) )*Abar[n][1]*Cbar_nm;
-            summ[3] = sqrt( (Real)( (2*n+1)*(n+2)*(np1) )/
-                            (Real)( 2*n+3 ) )*Abar[np1][1]*Cbar_nm;
+            summ[2] = sum2Diag[n]*Abar[n][1]*Cbar_nm;
+            summ[3] = sum3Diag[n]*Abar[np1][1]*Cbar_nm;
+//            summ[2] = Sqrt( (Real)( n*(np1) ) )*Abar[n][1]*Cbar_nm;
+//            summ[3] = Sqrt( (Real)( (2*n+1)*(n+2)*(np1) )/
+//                            (Real)( 2*n+3 ) )*Abar[np1][1]*Cbar_nm;
          }
          else
          {
             aBarMsqrt2 = Abar[n][m]*m*sqrt2;
             summ[0] += aBarMsqrt2*( Cbar_nm*re[m-1] + Sbar_nm*im[m-1] );
             summ[1] += aBarMsqrt2*( Sbar_nm*re[m-1] - Cbar_nm*im[m-1] );
-            D = (Cbar_nm*re[m] + Sbar_nm*im[m])*sqrt2;
-            summ[2] += sqrt( (Real)((n-m)*(np1+m)) )*Abar[n][m+1]*D;
-            summ[3] += sqrt( (Real)( (2*n+1)*(n+m+2)*(np1+m) )/
-                             (Real)( 2*n+3 ) )*Abar[np1][m+1]*D;
+            D = Cbar_nm*re[m] + Sbar_nm*im[m];
+            summ[2] += sum2OffDiag[n][m]*Abar[n][m+1]*D;
+            summ[3] += sum3OffDiag[n][m]*Abar[np1][m+1]*D;
+//            D = (Cbar_nm*re[m] + Sbar_nm*im[m])*sqrt2;
+//            summ[2] += Sqrt( (Real)((n-m)*(np1+m)) )*Abar[n][m+1]*D;
+//            summ[3] += Sqrt( (Real)( (2*n+1)*(n+m+2)*(np1+m) )/
+//                             (Real)( 2*n+3 ) )*Abar[np1][m+1]*D;
          }
       } /* end m summation */
       
@@ -1045,6 +1079,56 @@ bool GravityField::gravity_init(void)
    /* G.Cbar[2][0] += (Real)3.11080e-8 * 0.3 / Sqrt((Real)5.0); */
 
    gfInitialized = true;
+   
+   if (sum2Diag) 
+   {
+      delete [] sum2Diag; 
+      sum2Diag = NULL;
+   }
+
+   if (sum3Diag)
+   {
+      delete [] sum3Diag; 
+      sum3Diag = NULL;
+   }
+
+   if (sum2OffDiag)
+   {
+      for (Integer i = 0; i <= degree; ++i)  
+         delete [] sum2OffDiag[i];
+      delete [] sum2OffDiag;
+      sum2OffDiag = NULL;
+   }
+    
+   if (sum3OffDiag)
+   {
+      for (Integer i = 0; i <= degree; ++i)  
+         delete [] sum3OffDiag[i];
+      delete [] sum3OffDiag;
+      sum3OffDiag = NULL;
+   }
+      
+   sum2Diag = new Real[degree+1];
+   sum3Diag = new Real[degree+1];
+   sum2OffDiag = new Real*[degree+1];
+   sum3OffDiag = new Real*[degree+1];
+   
+   for (Integer i = 0; i <= degree; ++i)  
+   {
+      sum2OffDiag[i] = new Real[order+1];
+      sum3OffDiag[i] = new Real[order+1];
+
+      sum2Diag[i] = Sqrt((Real)(i*(i+1)));
+      sum3Diag[i] = Sqrt(((Real)((2*i+1)*(i+2)*(i+1)))/((Real)(2*i+3)));
+      for (Integer j = 0; j <= order; ++j)
+      {
+         if (j > i)
+            continue;
+         sum2OffDiag[i][j] = Sqrt(2.0*(i-j)*(i+1+j));
+         sum3OffDiag[i][j] = Sqrt(2.0*(2*i+1)*(i+j+2)*(i+1+j)/(2*i+3));
+      }
+   }
+   
 
    #ifdef DEBUG_GRAVITY_FIELD
       MessageInterface::ShowMessage("%s%lf%s%lf\n",
