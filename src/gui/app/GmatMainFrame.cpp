@@ -254,7 +254,11 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
                            wxDefaultPosition, wxSize(200, 30),
                            wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
 
+#ifdef __WXMAC__
+   win->SetDefaultSize(wxSize(275, h));
+#else
    win->SetDefaultSize(wxSize(200, h));
+#endif
    win->SetOrientation(wxLAYOUT_VERTICAL);
    win->SetAlignment(wxLAYOUT_LEFT);
    win->SetSashVisible(wxSASH_RIGHT, TRUE);
