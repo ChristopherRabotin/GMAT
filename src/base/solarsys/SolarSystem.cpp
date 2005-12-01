@@ -34,7 +34,7 @@ SolarSystem::PARAMETER_TEXT[SolarSystemParamCount - GmatBaseParamCount] =
    "BodiesInUse",
    "NumberOfBodies",
    "OverrideTimeSystem",
-   "EphemUpdateInterval",
+   "EphemerisUpdateInterval",
 };
 
 const Gmat::ParameterType
@@ -145,7 +145,7 @@ SolarSystem::SolarSystem(std::string withName)
    anMethodForAll   = Gmat::LOW_FIDELITY;
    pE               = NULL;
    overrideTimeForAll  = false;
-   ephemUpdateInterval = 60.0;
+   ephemUpdateInterval = 0.0;
    
    // create and add the default bodies
    Star* theSun     = new Star(SUN_NAME);

@@ -2142,7 +2142,7 @@ bool Interpreter::InterpretSolarSetting(const StringArray &sar,
       return true;
    }
    
-   if (sar[1] == "UpdateInterval")
+   if (sar[1] == "EphemerisUpdateInterval")
    {
       Real interval;
       std::stringstream data;
@@ -2160,6 +2160,29 @@ bool Interpreter::InterpretSolarSetting(const StringArray &sar,
       }
 
       return true;
+   }
+   
+   if (sar.size() == 3)
+   {
+      if (sar[2] == "NutationUpdateInterval")
+      {
+         SolarSystem *sol = moderator->GetSolarSystemInUse();
+         CelestialBody *body = sol->GetBody(sar[1]);
+         if (body == NULL)
+            return false;
+         if (body->IsOfType("Planet"))
+         {
+            Real interval;
+            std::stringstream data;
+            data << rhs;
+            data >> interval;
+            Integer id = body->GetParameterID("NutationUpdateInterval");
+MessageInterface::ShowMessage("Setting nutation update interval on %s to %lf\n",
+   sar[1].c_str(), interval);
+            body->SetRealParameter(id, interval);
+            return true;
+         }
+      }
    }
    
    return false;

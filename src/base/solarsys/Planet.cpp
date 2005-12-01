@@ -283,7 +283,7 @@ const Rvector6              Planet::LF_ELEMENTS[NumberOfPlanets]         =
 const std::string
 Planet::PARAMETER_TEXT[PlanetParamCount - CelestialBodyParamCount] =
 {
-   "UpdateInterval",
+   "NutationUpdateInterval",
 };
 
 const Gmat::ParameterType
