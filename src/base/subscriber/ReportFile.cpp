@@ -67,7 +67,7 @@ ReportFile::ReportFile(const std::string &name, const std::string &fileName,
    columnWidth     (20),
    writeHeaders    (true),
    leftJustify     (true),
-   zeroFill        (true),
+   zeroFill        (false),
    lastUsedProvider(-1),
    usedByReport    (false)
 {
