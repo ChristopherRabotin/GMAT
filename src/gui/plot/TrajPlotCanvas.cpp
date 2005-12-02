@@ -808,9 +808,8 @@ void TrajPlotCanvas::GotoObject(const wxString &objName)
    
    #ifdef DEBUG_TRAJCANVAS_OBJECT
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::GotoObject() objName=%s, objId=%d, mMaxZoomIn=%f\n"
-       "                             mAxisLength=%f\n", objName.c_str(),
-       objId, mMaxZoomIn, mAxisLength);
+      ("TrajPlotCanvas::GotoObject() objName=%s, mViewObjId=%d, mMaxZoomIn=%f\n"
+       "   mAxisLength=%f\n", objName.c_str(), mViewObjId, mMaxZoomIn, mAxisLength);
    #endif
 
    if (mUsePerspectiveMode)
@@ -920,6 +919,13 @@ void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
    
    mViewObjName = mOriginName;
    mViewObjId = mOriginId;
+   
+   //loj: 12/2/05
+   // if view coordinate system origin is spacecraft, make spacecraft radius smaller.
+   // So that spapcecraft won't overlap each other.
+   //@todo: need better way to scale spacecraft size. (Issue L54)
+   if (viewCs->GetOrigin()->IsOfType(Gmat::SPACECRAFT))
+      mScRadius = 50;
    
    // set center view object as origin of the CoordinateSystem if view direction
    // is not an object
@@ -2247,14 +2253,10 @@ void TrajPlotCanvas::SetupWorld()
    //camera moves opposite direction to center on object
    //this is the point of rotation
 
-//    glTranslatef(mObjectTempPos[mViewObjId][mNumData-1][0],
-//                 mObjectTempPos[mViewObjId][mNumData-1][1],
-//                 -mObjectTempPos[mViewObjId][mNumData-1][2]);
-   
-   glTranslatef(-mObjectTempPos[mViewObjId][mNumData-1][0],
-                -mObjectTempPos[mViewObjId][mNumData-1][1],
+   glTranslatef(mObjectTempPos[mViewObjId][mNumData-1][0],
+                mObjectTempPos[mViewObjId][mNumData-1][1],
                 -mObjectTempPos[mViewObjId][mNumData-1][2]);
-   
+      
 } // end SetupWorld()
 
 
