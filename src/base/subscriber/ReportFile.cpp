@@ -169,6 +169,7 @@ bool ReportFile::Initialize()
          MessageInterface::PopupMessage
             (Gmat::WARNING_, "ReportFile::Initialize() Report will not be written."
              "No parameters selected for ReportFile.\n");
+         active = false;
          return false;
       }
 
@@ -446,8 +447,8 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
    {
       #ifdef DEBUG_REPORTFILE
          MessageInterface::ShowMessage(
-            "Adding parameter '%s' to ReportFile '%s'\n", value.c_str(),
-            instanceName.c_str());
+            "ReportFile::SetStringParameter() Adding parameter '%s' to\n    "
+            "ReportFile '%s'\n", value.c_str(), instanceName.c_str());
       #endif
       return AddVarParameter(value, mNumVarParams);
    }
@@ -643,8 +644,8 @@ bool ReportFile::AddVarParameter(const std::string &paramName, Integer index)
 {
    #ifdef DEBUG_REPORTFILE
       MessageInterface::ShowMessage(
-         "Adding parameter '%s' to ReportFile '%s'\n", paramName.c_str(),
-         instanceName.c_str());
+         "ReportFile::AddVarParameter() Adding parameter '%s' to \n   "
+         "ReportFile '%s'\n", paramName.c_str(), instanceName.c_str());
    #endif
    
    if (paramName != "" && index == mNumVarParams)
@@ -745,7 +746,10 @@ bool ReportFile::Distribute(int len)
 // bool Distribute(const Real * dat, Integer len)
 //------------------------------------------------------------------------------
 bool ReportFile::Distribute(const Real * dat, Integer len)
-{   
+{
+   if (!active)
+      return true;
+   
    if (mNumVarParams > 0)
    {
       Rvector varvals = Rvector(mNumVarParams);
