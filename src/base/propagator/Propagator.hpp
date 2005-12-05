@@ -96,6 +96,7 @@ public:
     virtual bool Initialize();
     virtual void SetPhysicalModel(PhysicalModel *pPhysicalModel);
     virtual bool Step(Real dt);
+    virtual void SetAsFinalStep(bool fs);
 
     virtual void Update(bool forwards = true);
     virtual void ResetInitialData();
@@ -176,6 +177,8 @@ protected:
     Integer dimension;
     /// Pointer to the information related to the physics of the system
     PhysicalModel *physicalModel;
+    /// Flag used to detect if the code is taking the last Propagate step
+    bool finalStep; 
 };
 
 #endif // Propagator_hpp

@@ -118,7 +118,8 @@ Propagator::Propagator(const std::string &typeStr,
       inState             (NULL),
       outState            (NULL),
       dimension           (0),
-      physicalModel       (NULL)
+      physicalModel       (NULL),
+      finalStep           (false)
 {
     // GmatBase data
    objectTypes.push_back(Gmat::PROPAGATOR);
@@ -154,7 +155,8 @@ Propagator::Propagator(const Propagator& p)
       inState             (NULL),
       outState            (NULL),
       dimension           (p.dimension),
-      physicalModel       (NULL)
+      physicalModel       (NULL),
+      finalStep           (false)
 {
     // GmatBase data
     parameterCount = PropagatorParamCount;
@@ -181,6 +183,7 @@ Propagator& Propagator::operator=(const Propagator& p)
 
     initialized = false;
     resetInitialData = true;
+    finalStep = false;    
 
     return *this;
 }
@@ -451,8 +454,29 @@ bool Propagator::Step(Real dt)
     return false;
 }
 
+
 //------------------------------------------------------------------------------
-// bool Propagator::RawStep(Real dt)
+// void SetAsFinalStep(bool fs)
+//------------------------------------------------------------------------------
+/**
+ * Method used to toggle the finalStep flag.
+ * 
+ * @param fs The setting for the flag.
+ */
+//------------------------------------------------------------------------------
+void Propagator::SetAsFinalStep(bool fs)
+{
+   #ifdef DEBUG_PROPAGATOR_FLOW
+      MessageInterface::ShowMessage("Turning final step flag %s\n",
+         (fs ? "On" : "Off"));
+   #endif
+   
+   finalStep = fs;
+}
+
+
+//------------------------------------------------------------------------------
+// bool RawStep(Real dt)
 //------------------------------------------------------------------------------
 /**
  * Method used to take an uncontrolled step of a specified size

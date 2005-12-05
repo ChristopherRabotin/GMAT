@@ -254,7 +254,7 @@ bool RungeKutta::Initialize()
 }
 
 //------------------------------------------------------------------------------
-// bool RungeKutta::Step(void)
+// bool RungeKutta::Step()
 //------------------------------------------------------------------------------
 /**
  * The RK propagation method
@@ -266,7 +266,7 @@ bool RungeKutta::Initialize()
  *      	example)
  */
 //------------------------------------------------------------------------------
-bool RungeKutta::Step(void)
+bool RungeKutta::Step()
 {
     #ifdef DEBUG_PROPAGATOR_FLOW
        MessageInterface::ShowMessage(".");
@@ -278,7 +278,7 @@ bool RungeKutta::Step(void)
 
     if (!initialized)
         return false;
-    if (fabs(stepSize) < minimumStep)
+    if ((fabs(stepSize) < minimumStep) && !finalStep)
         stepSize = ((stepSize > 0.0) ? minimumStep : -minimumStep);
     if (fabs(stepSize) > maximumStep)
         stepSize = ((stepSize > 0.0) ? maximumStep : -maximumStep);
@@ -305,13 +305,13 @@ bool RungeKutta::Step(void)
 }
 
 //------------------------------------------------------------------------------
-// bool RungeKutta::RawStep(void)
+// bool RungeKutta::RawStep()
 //------------------------------------------------------------------------------
 /**
  * Take a raw prop step without any error control
  */
 //------------------------------------------------------------------------------
-bool RungeKutta::RawStep(void)
+bool RungeKutta::RawStep()
 {
     #ifdef DEBUG_PROPAGATOR_FLOW
        MessageInterface::ShowMessage("*");
@@ -368,13 +368,21 @@ bool RungeKutta::Step(Real dt)
 {
     bool stepFinished = false;
     timeleft = dt;
+    Integer attemptsTaken = 0;
     do 
     {
+        if (attemptsTaken > stepAttempts)
+        {
+           MessageInterface::ShowMessage(
+              "Integrator attempted too many steps!\n");
+           return false;
+        }
         if (!Propagator::Step(timeleft))
             return false;
         if (fabs(timeleft - stepTaken) <= smallestTime)
             stepFinished = true;
         timeleft -= stepTaken;
+        ++attemptsTaken;
     } while (stepFinished == false);
 
     return true;

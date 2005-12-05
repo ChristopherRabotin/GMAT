@@ -1522,8 +1522,10 @@ bool Propagate::TakeAStep(Real propStep)
    Real stepToTake;
  
    std::vector<Propagator*>::iterator current = p.begin();
-   if (propStep == 0.0) {
-      switch (currentMode) {
+   if (propStep == 0.0) 
+   {
+      switch (currentMode) 
+      {
          case INDEPENDENT:
             // Advance each propagator individually, without regard for the
             // epochs of the others
@@ -1531,7 +1533,8 @@ bool Propagate::TakeAStep(Real propStep)
                MessageInterface::ShowMessage
                   ("Propagate::TakeAStep() running in INDEPENDENT mode\n");
             #endif
-            while (current != p.end()) { 
+            while (current != p.end()) 
+            { 
                if (!(*current)->Step())
                   throw CommandException(
                      "Propagator failed to take a good step\n");
@@ -1552,7 +1555,8 @@ bool Propagate::TakeAStep(Real propStep)
                                       "to take a good step\n");
             stepToTake = (*current)->GetStepTaken();
             ++current;
-            while (current != p.end()) {
+            while (current != p.end()) 
+            {
                if (!(*current)->Step(stepToTake))
                   throw CommandException("Propagator failed to take a good "
                                          "synchronized step\n");
@@ -1570,9 +1574,15 @@ bool Propagate::TakeAStep(Real propStep)
             retval = false;
       }
    }
-   else {
+   else 
+   {
       // Step all of the propagators by the input amount
-      while (current != p.end()) {
+      while (current != p.end()) 
+      {
+         #ifdef DEBUG_FIXED_STEP
+            MessageInterface::ShowMessage("Stepping '%s' by %le seconds\n", 
+               (*current)->GetName().c_str(), propStep);
+         #endif
          if (!(*current)->Step(propStep))
             throw CommandException("Propagator failed to take a good final "
                                    "step\n");
@@ -2217,7 +2227,8 @@ void Propagate::CheckStopConditions(Integer epochID)
 void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
 {
    // Update the epoch on the force models
-   for (UnsignedInt i = 0; i < fm.size(); ++i) {
+   for (UnsignedInt i = 0; i < fm.size(); ++i) 
+   {
       fm[i]->UpdateInitialData();
    }
 
@@ -2237,6 +2248,11 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
          ("   stopEpoch = %16.10lf\n   currEpoch = %16.10lf\n",
           stopEpoch, currEpoch[trigger]);
    #endif
+
+   // Toggle propagators into final step mode
+   for (std::vector<Propagator*>::iterator current = p.begin(); 
+        current != p.end(); ++current)
+      (*current)->SetAsFinalStep(true);
    
    if (secsToStep * direction[trigger] > 0.0)
    {
@@ -2249,7 +2265,8 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
       if (!TakeAStep(secsToStep))
          throw CommandException("Propagator Failed to Step fixed interval\n");
 
-      for (UnsignedInt i = 0; i < fm.size(); ++i) {
+      for (UnsignedInt i = 0; i < fm.size(); ++i) 
+      {
          fm[i]->UpdateSpaceObject(
             baseEpoch[i] + fm[i]->GetTime() / GmatTimeUtil::SECS_PER_DAY);
       }
@@ -2283,6 +2300,11 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
              (baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY));
       #endif
    }
+
+   // Toggle propagators out of final step mode
+   for (std::vector<Propagator*>::iterator current = p.begin(); 
+        current != p.end(); ++current)
+      (*current)->SetAsFinalStep(false);
 }
 
 //------------------------------------------------------------------------------
