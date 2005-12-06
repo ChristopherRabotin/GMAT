@@ -48,6 +48,7 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame* parent,
                        const int type)
                  :wxMDIChildFrame(parent, id, title, pos, size, style, name)
 {
+   mDirty = false;
    dataType = type;
 #ifdef __WXMAC__
    this->title.Printf("%s", title.c_str());
@@ -64,7 +65,16 @@ GmatMdiChildFrame::~GmatMdiChildFrame()
 void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
 {
    // check if window is dirty?
-  
+   if (mDirty)
+   {
+        if ( wxMessageBox(_T("Changes will be lost. \nReally close?"), _T("Please confirm"),
+                          wxICON_QUESTION | wxYES_NO) != wxYES )
+        {
+            event.Veto();
+            return;
+        }
+   }
+   
    // remove from list of frames
    GmatAppData::GetMainFrame()->RemoveChild(GetTitle(), dataType);
 
@@ -88,6 +98,17 @@ int GmatMdiChildFrame::GetDataType()
 {
    return dataType;
 }
+
+void GmatMdiChildFrame::SetDirty(bool dirty)
+{
+    mDirty = dirty;
+}
+
+bool GmatMdiChildFrame::IsDirty()
+{
+    return mDirty;
+}
+
 
 //------------------------------------------------------------------------------
 // wxMenuBar *CreateMenu(int dataType)

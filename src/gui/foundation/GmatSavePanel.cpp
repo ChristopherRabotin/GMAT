@@ -197,9 +197,28 @@ void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
 //      wxString filename = dialog.GetFilename().c_str();
       wxString path = dialog.GetPath().c_str();
 
-      // just for now
-      mFilename = path;
-      SaveData();
+      if(FileExists(path.c_str()))
+      {
+           if (wxMessageBox(_T("File already exists.\nDo you want to overwrite?"), 
+               _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxYES)
+           {
+              // just for now
+              mFilename = path;
+              SaveData();
+           }
+           else
+           {
+                return;
+           }
+      }
+      else
+      {
+          // just for now
+          mFilename = path;
+          SaveData();
+      }
+
+
    }
 
 
@@ -234,5 +253,19 @@ void GmatSavePanel::OnScript(wxCommandEvent &event)
    }
    ShowScriptDialog ssd(this, -1, title, mObject);
    ssd.ShowModal();
+}
+
+bool GmatSavePanel::FileExists(std::string scriptFilename)
+{
+  FILE * pFile;
+  pFile = fopen (scriptFilename.c_str(),"rt+");
+  if (pFile!=NULL)
+  {
+    fclose (pFile);
+    return true;
+  }
+  else
+    return false;
+
 }
 

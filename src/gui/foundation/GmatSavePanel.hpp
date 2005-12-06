@@ -52,6 +52,8 @@ protected:
    virtual void LoadData() = 0;
    virtual void SaveData() = 0;
     
+   bool FileExists(std::string scriptFilename);
+      
    // member data
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;

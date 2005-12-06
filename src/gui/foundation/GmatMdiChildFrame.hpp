@@ -40,12 +40,15 @@ public:
     wxMenuBar *CreateMenu(int dataType);
     void SetScriptTextCtrl(wxTextCtrl *scriptTC) {theScriptTextCtrl = scriptTC;};
     wxTextCtrl *GetScriptTextCtrl(){return theScriptTextCtrl;};
+    void SetDirty(bool dirty);
+    bool IsDirty();
 
 protected:
 #ifdef __WXMAC__
     wxString title;
 #endif
 
+    bool mDirty;
     int dataType;
     wxTextCtrl *theScriptTextCtrl;
     wxMenu *mViewMenu;
