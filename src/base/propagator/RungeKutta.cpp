@@ -371,7 +371,7 @@ bool RungeKutta::Step(Real dt)
     Integer attemptsTaken = 0;
     do 
     {
-        if (attemptsTaken > stepAttempts)
+        if (attemptsTaken > maxStepAttempts)
         {
            MessageInterface::ShowMessage(
               "Integrator attempted too many steps!\n");
