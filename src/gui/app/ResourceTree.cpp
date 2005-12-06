@@ -2336,6 +2336,9 @@ void ResourceTree::OnAddScript(wxCommandEvent &event)
       // open item
       GmatAppData::GetMainFrame()->
          CreateChild((GmatTreeItemData *)GetItemData(scriptId));
+         
+      // need to set the filename mainframe, so first save has a filename
+      GmatAppData::GetMainFrame()->SetScriptFileName(path.c_str());
       
       Expand(mScriptItem);
    }

@@ -27,6 +27,8 @@
 
 #include "gmatwxdefs.hpp"
 
+#include <stdio.h>
+
 #include "ViewTextFrame.hpp"
 #include "GuiInterpreter.hpp"
 #include "GmatTreeItemData.hpp"
@@ -53,11 +55,13 @@ public:
    bool IsChildOpen(GmatTreeItemData *item);
    bool RenameChild(GmatTreeItemData *item, wxString newName);
    bool RenameChild(wxString oldName, wxString newName);
+   bool RenameActiveChild(wxString newName);
    void RemoveChild(wxString item, int dataType);
    void CloseActiveChild();
    void CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
                          wxString excludeTitle = "");
    void MinimizeChildren();
+   void SetActiveChildDirty(bool dirty);
    void CloseCurrentProject();
    void RunCurrentMission();
    void NotifyRunCompleted();
@@ -83,11 +87,15 @@ public:
    void OnScriptBuildAndRun(wxCommandEvent& event);
    void OnScriptRun(wxCommandEvent& WXUNUSED(event));
 
+   void SetScriptFileName(std::string filename);
+
    wxList *mdiChildren;
 
 protected:
 
 private:
+   bool FileExists(std::string scriptFilename);
+
    int scriptCounter;
    bool mRunPaused;
    bool mRunCompleted;

@@ -114,6 +114,7 @@ void ScriptPanel::LoadData()
 
    theSaveAsButton->Enable(true);
    theSaveButton->Enable(false);
+   GmatAppData::GetMainFrame()->SetActiveChildDirty(false);
 }
 
 //------------------------------------------------------------------------------
@@ -126,12 +127,13 @@ void ScriptPanel::SaveData()
       // add new script to tree
       GmatAppData::GetResourceTree()->AddScriptItem(mFilename);
       // rename this child window
-      GmatAppData::GetMainFrame()->RenameChild(mScriptFilename, mFilename);
+      GmatAppData::GetMainFrame()->RenameActiveChild(mFilename);
       mScriptFilename = mFilename;
    }
 
    mFileContentsTextCtrl->SaveFile(mScriptFilename);
    theSaveButton->Enable(false);
+   GmatAppData::GetMainFrame()->SetActiveChildDirty(false);
 }
 
 //------------------------------------------------------------------------------
@@ -140,6 +142,7 @@ void ScriptPanel::SaveData()
 void ScriptPanel::OnTextUpdate(wxCommandEvent& event)
 {
    theSaveButton->Enable(true);
+   GmatAppData::GetMainFrame()->SetActiveChildDirty(true);
 }
 
 //------------------------------------------------------------------------------
@@ -159,10 +162,21 @@ void ScriptPanel::OnButton(wxCommandEvent& event)
 
          if (result == wxID_YES)
          {
-            SaveData();
+            OnSave(event);
+//            SaveData();
          }
       }
-      GmatAppData::GetMainFrame()->OnScriptBuildObject(event);
+      
+      if ( mFileContentsTextCtrl->GetValue() != "")
+          GmatAppData::GetMainFrame()->OnScriptBuildObject(event);
+      else
+      {
+         wxMessageDialog *msgDlg = new wxMessageDialog(this,
+            "Can not build an empty file ", "Can not build...", wxOK | wxICON_INFORMATION ,
+            wxDefaultPosition);
+         msgDlg->ShowModal();
+      }
+      
    }
    else if (event.GetEventObject() == mBuildRunButton)
    {
@@ -176,10 +190,21 @@ void ScriptPanel::OnButton(wxCommandEvent& event)
 
          if (result == wxID_YES)
          {
-            SaveData();
+            OnSave(event);
+//            SaveData();
          }
       }
-      GmatAppData::GetMainFrame()->OnScriptBuildAndRun(event);
+      
+      if ( mFileContentsTextCtrl->GetValue() != "")
+         GmatAppData::GetMainFrame()->OnScriptBuildAndRun(event);
+      else
+      {
+         wxMessageDialog *msgDlg = new wxMessageDialog(this,
+            "Can not build an empty file ", "Can not build...", wxOK | wxICON_INFORMATION ,
+            wxDefaultPosition);
+         msgDlg->ShowModal();
+      }
+      
    }
 //   else if (event.GetEventObject() == mFontButton)
 //   {

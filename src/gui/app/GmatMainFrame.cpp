@@ -565,8 +565,10 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           style, item->GetDesc(), dataType);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add(new FunctionSetupPanel(panel, item->GetDesc()),
-                    0, wxGROW|wxALL, 0);
+         FunctionSetupPanel *functPanel = new FunctionSetupPanel(panel, item->GetDesc());
+         sizer->Add(functPanel, 0, wxGROW|wxALL, 0);
+         newChild->SetScriptTextCtrl(functPanel->mFileContentsTextCtrl);
+                    
       }
       else if (dataType == GmatTree::MATLAB_FUNCTION)
       {
@@ -817,6 +819,25 @@ bool GmatMainFrame::RenameChild(wxString oldName, wxString newName)
    return FALSE;
 }
 
+//------------------------------------------------------------------------------
+// bool RenameActiveChild(wxString newName)
+//------------------------------------------------------------------------------
+/**
+ *
+ */
+//------------------------------------------------------------------------------
+bool GmatMainFrame::RenameActiveChild(wxString newName)
+{
+    GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)GetActiveChild();
+    
+    if (theChild != NULL)
+    {
+       theChild->SetTitle(newName);
+       return TRUE;
+    }
+    
+    return FALSE;    
+}
 
 //------------------------------------------------------------------------------
 // void GmatMainFrame::RemoveChild(wxString *item, int dataTpe)
@@ -1010,6 +1031,18 @@ void GmatMainFrame::MinimizeChildren()
 
 }
 
+//------------------------------------------------------------------------------
+// void GmatMainFrame::SetActiveChildDirty()
+//------------------------------------------------------------------------------
+void GmatMainFrame::SetActiveChildDirty(bool dirty)
+{
+   GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)GetActiveChild();
+   
+   if (theChild != NULL)
+      theChild->SetDirty(dirty); 
+}
+
+
 
 //------------------------------------------------------------------------------
 // void CloseCurrentProject()
@@ -1173,6 +1206,7 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
                              wxYES_NO |wxICON_QUESTION, wxDefaultPosition);
       
       int result = msgDlg->ShowModal();
+      std::string oldScriptName = scriptFilename;
       
       if (result == wxID_YES)
       {
@@ -1185,7 +1219,25 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
             if (dialog.ShowModal() == wxID_OK)
             {
                scriptFilename = dialog.GetPath().c_str();
-               GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+
+		      if(FileExists(scriptFilename))
+		      {
+                  MessageInterface::ShowMessage("File DE 2 - prompt");
+		           if (wxMessageBox(_T("File already exists.\nDo you want to overwrite?"), 
+		               _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxYES)
+		                GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+		           else
+                   {
+                        scriptFilename = oldScriptName;
+		                return;
+                   }
+		      }
+		      else
+              {
+                  MessageInterface::ShowMessage("File DNE 2 - just save");
+		          GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+              }
+           
                GmatAppData::GetResourceTree()->AddScriptItem(scriptFilename.c_str());
                GmatAppData::GetResourceTree()->UpdateResource(false);
             }
@@ -1280,6 +1332,8 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnSaveScript(wxCommandEvent& WXUNUSED(event))
 {
+   std::string oldScriptName = scriptFilename;
+   
    if (strcmp(scriptFilename.c_str(), "$gmattempscript$.script") == 0)
    {
       //open up dialog box to get the script name
@@ -1288,7 +1342,24 @@ void GmatMainFrame::OnSaveScript(wxCommandEvent& WXUNUSED(event))
       if (dialog.ShowModal() == wxID_OK)
       {
         scriptFilename = dialog.GetPath().c_str();
-        GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+	    if(FileExists(scriptFilename))
+	    {
+           MessageInterface::ShowMessage("File DE 3 - prompt");
+	       if (wxMessageBox(_T("File already exists.\nDo you want to overwrite?"), 
+	           _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxYES)
+	          GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+	       else
+           {
+              scriptFilename = oldScriptName;
+	          return;
+           }
+	    }
+	    else
+        {
+           MessageInterface::ShowMessage("File DNE 3 - just save");
+	       GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+        }
+           
         GmatAppData::GetResourceTree()->AddScriptItem(scriptFilename.c_str());
         GmatAppData::GetResourceTree()->UpdateResource(false);
       }
@@ -1312,12 +1383,43 @@ void GmatMainFrame::OnSaveScriptAs(wxCommandEvent& WXUNUSED(event))
 {
    //open up dialog box to get the script name
    wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.script"), wxSAVE );
+   std::string oldScriptName = scriptFilename;
     
    if (dialog.ShowModal() == wxID_OK)
    {
       scriptFilename = dialog.GetPath().c_str();
-      GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+      
+      if(FileExists(scriptFilename))
+      {
+           MessageInterface::ShowMessage("File DE - prompt");
+           if (wxMessageBox(_T("File already exists.\nDo you want to overwrite?"), 
+               _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxYES)
+		   {
+		      GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+		   }
+           else
+              scriptFilename = oldScriptName;
+      }
+      else
+      {
+          MessageInterface::ShowMessage("File DNE - just save");
+          GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+      }
    }
+}
+
+bool GmatMainFrame::FileExists(std::string scriptFilename)
+{
+  FILE * pFile;
+  pFile = fopen (scriptFilename.c_str(),"rt+");
+  if (pFile!=NULL)
+  {
+    fclose (pFile);
+    return true;
+  }
+  else
+    return false;
+
 }
 
 
@@ -2118,8 +2220,9 @@ void GmatMainFrame::OnFont(wxCommandEvent& event)
     while (node)
     {
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-      if ((theChild->GetDataType() == GmatTree::SCRIPT_FILE) ||
-         (theChild->GetDataType() == GmatTree::OUTPUT_REPORT))
+      if ((theChild->GetDataType() == GmatTree::SCRIPT_FILE)   ||
+         (theChild->GetDataType() == GmatTree::OUTPUT_REPORT)  ||
+         (theChild->GetDataType() == GmatTree::GMAT_FUNCTION))
       {
          theChild->GetScriptTextCtrl()->SetFont(newFont);
       }
@@ -2128,5 +2231,13 @@ void GmatMainFrame::OnFont(wxCommandEvent& event)
 
     GmatAppData::SetFont(newFont);
   }
+}
+
+//------------------------------------------------------------------------------
+// void SetScriptFileName(std::string filename)
+//------------------------------------------------------------------------------
+void GmatMainFrame::SetScriptFileName(std::string filename)
+{
+    scriptFilename = filename;
 }
 
