@@ -23,6 +23,7 @@ class FunctionSetupPanel: public GmatPanel
 public:
    // constructors
    FunctionSetupPanel(wxWindow *parent, const wxString &name); 
+   wxTextCtrl *mFileContentsTextCtrl;
     
 private:
    GmatFunction *theGmatFunction;
@@ -37,7 +38,6 @@ private:
    wxBoxSizer *mPageSizer;
 
    wxTextCtrl *mFileNameTextCtrl;
-   wxTextCtrl *mFileContentsTextCtrl;
    
    wxButton *mBrowseButton;
    wxButton *mLoadButton;
