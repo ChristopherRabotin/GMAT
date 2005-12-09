@@ -139,9 +139,12 @@ bool TOEEqAxes::Initialize()
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
-   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, epoch);
-   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, epoch, dPsi,
-                                                longAscNodeLunar, cosEpsbar);
+//   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, epoch);
+//   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, epoch, dPsi,
+//                                                longAscNodeLunar, cosEpsbar);
+   
+   ComputePrecessionMatrix(tTDB, epoch);
+   ComputeNutationMatrix(tTDB, epoch, dPsi, longAscNodeLunar, cosEpsbar);
    
    rotMatrix = PREC.Transpose() * NUT.Transpose();
    //rotMatrix = PREC * NUT;

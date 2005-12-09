@@ -268,9 +268,12 @@ void TODEcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
-   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
-   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
-                          longAscNodeLunar, cosEpsbar);
+//   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
+//   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
+//                          longAscNodeLunar, cosEpsbar);
+//   
+   ComputePrecessionMatrix(tTDB, atEpoch);
+   ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar);
    
    
    Rmatrix33 R3Psi( GmatMathUtil::Cos(-dPsi),  GmatMathUtil::Sin(-dPsi),  0.0, 

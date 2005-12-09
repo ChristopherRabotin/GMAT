@@ -217,31 +217,57 @@ protected:
    Integer                   *apVals;
    
    // Performance enhancements
-   Rmatrix33  PREC;
-   Rmatrix33  NUT;
-   Rmatrix33  ST;
+   Rmatrix33 PREC;
+   Rmatrix33 NUT;
+   Rmatrix33 ST;
    Rmatrix33 STderiv;
    Rmatrix33 PM;
+   
+   
+   const Real  *AVals;
+   const Real  *BVals;
+   const Real  *CVals;
+   const Real  *DVals;
+   const Real  *EVals;
+   const Real  *FVals;
+   const Real  *ApVals;
+   const Real  *BpVals;
+   const Real  *CpVals;
+   const Real  *DpVals;
    
    // intermediate quantities needed by more than one method
    
    virtual void      InitializeFK5();
 
-   virtual Rmatrix33 ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch);
-   virtual Rmatrix33 ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch, 
+//   virtual Rmatrix33 ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch);
+//   virtual Rmatrix33 ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch, 
+//                                           Real &dPsi,
+//                                           Real &longAscNodeLunar,
+//                                           Real &cosEpsbar);
+//   virtual Rmatrix33 ComputeSiderealTimeRotation(const Real jdTT,
+//                                                 const Real tUT1,
+//                                                 Real dPsi,
+//                                                 Real longAscNodeLunar,
+//                                                 Real cosEpsbar,
+//                                                 Real &cosAst,
+//                                                 Real &sinAst);
+//   virtual Rmatrix33 ComputeSiderealTimeDotRotation(const Real mjdUTC, A1Mjd atEpoch,
+//                                                    Real cosAst, Real sinAst);
+//   virtual Rmatrix33 ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch);
+   virtual void ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch);
+   virtual void ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch, 
                                            Real &dPsi,
                                            Real &longAscNodeLunar,
                                            Real &cosEpsbar);
-   virtual Rmatrix33 ComputeSiderealTimeRotation(const Real jdTT,
+   virtual void ComputeSiderealTimeRotation(const Real jdTT,
                                                  const Real tUT1,
                                                  Real dPsi,
                                                  Real longAscNodeLunar,
                                                  Real cosEpsbar,
                                                  Real &cosAst,
                                                  Real &sinAst);
-   virtual Rmatrix33 ComputeSiderealTimeDotRotation(const Real mjdUTC, A1Mjd atEpoch,
+   virtual void ComputeSiderealTimeDotRotation(const Real mjdUTC, A1Mjd atEpoch,
                                                     Real cosAst, Real sinAst);
-   virtual Rmatrix33 ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch);
-   
+   virtual void ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch);
 };
 #endif // AxisSystem_hpp

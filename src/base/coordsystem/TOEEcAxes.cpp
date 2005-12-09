@@ -150,9 +150,12 @@ bool TOEEcAxes::Initialize()
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
-   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, epoch);
-   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, epoch, dPsi,
-                                                longAscNodeLunar, cosEpsbar);
+//   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, epoch);
+//   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, epoch, dPsi,
+//                                                longAscNodeLunar, cosEpsbar);
+
+   ComputePrecessionMatrix(tTDB, epoch);
+   ComputeNutationMatrix(tTDB, epoch, dPsi, longAscNodeLunar, cosEpsbar);
 
    Rmatrix33 R3Psi( GmatMathUtil::Cos(-dPsi),  GmatMathUtil::Sin(-dPsi),  0.0, 
                     -GmatMathUtil::Sin(-dPsi),  GmatMathUtil::Cos(-dPsi),  0.0,

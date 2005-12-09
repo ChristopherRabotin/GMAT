@@ -93,5 +93,10 @@ protected:
    
    Rmatrix33      precT, nutT, stT, stDerivT, pmT;
    
+   const Real *precData;
+   const Real *nutData;
+   const Real *stData;
+   const Real *stDerivData;
+   const Real *pmData;
 };
 #endif // BodyFixedAxes_hpp

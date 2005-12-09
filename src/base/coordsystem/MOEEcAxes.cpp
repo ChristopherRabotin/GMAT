@@ -147,7 +147,8 @@ bool MOEEcAxes::Initialize()
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
-   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, epoch);
+//   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, epoch);
+   ComputePrecessionMatrix(tTDB, epoch);
    
    rotMatrix = PREC.Transpose() * R1Eps.Transpose();
 

@@ -261,16 +261,23 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
-   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
-   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
-                                                longAscNodeLunar, cosEpsbar);
-   Rmatrix33  ST        = ComputeSiderealTimeRotation(jdTT, tUT1,
-                                                      dPsi, longAscNodeLunar, 
-                                                      cosEpsbar,
-                                                      cosAst, sinAst);
-   Rmatrix33  STderiv   = ComputeSiderealTimeDotRotation(mjdUTC, atEpoch,
-                                                         cosAst, sinAst);
-   Rmatrix33  PM        = ComputePolarMotionRotation(mjdUTC, atEpoch);
+//   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
+//   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
+//                                                longAscNodeLunar, cosEpsbar);
+//   Rmatrix33  ST        = ComputeSiderealTimeRotation(jdTT, tUT1,
+//                                                      dPsi, longAscNodeLunar, 
+//                                                      cosEpsbar,
+//                                                      cosAst, sinAst);
+//   Rmatrix33  STderiv   = ComputeSiderealTimeDotRotation(mjdUTC, atEpoch,
+//                                                         cosAst, sinAst);
+//   Rmatrix33  PM        = ComputePolarMotionRotation(mjdUTC, atEpoch);
+
+   ComputePrecessionMatrix(tTDB, atEpoch);
+   ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar);
+   ComputeSiderealTimeRotation(jdTT, tUT1, dPsi, longAscNodeLunar, cosEpsbar,
+                               cosAst, sinAst);
+   ComputeSiderealTimeDotRotation(mjdUTC, atEpoch, cosAst, sinAst);
+   ComputePolarMotionRotation(mjdUTC, atEpoch);
 
    Rmatrix33 fixedToMJ2000    = PREC.Transpose() * (NUT.Transpose() *
                                  (ST.Transpose() * PM.Transpose()));

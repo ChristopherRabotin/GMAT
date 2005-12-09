@@ -264,7 +264,8 @@ void MODEcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
-   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
+//   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
+   ComputePrecessionMatrix(tTDB, atEpoch);
    
    rotMatrix = PREC.Transpose() * R1Eps.Transpose();
    // rotDotMatrix is still the default zero matrix

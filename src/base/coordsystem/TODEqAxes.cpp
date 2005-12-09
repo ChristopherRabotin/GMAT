@@ -258,9 +258,12 @@ void TODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
-   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
-   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
-                          longAscNodeLunar, cosEpsbar);
+//   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
+//   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
+//                          longAscNodeLunar, cosEpsbar);
+   
+   ComputePrecessionMatrix(tTDB, atEpoch);
+   ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar);
    
    rotMatrix = PREC.Transpose() * NUT.Transpose();
     
