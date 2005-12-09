@@ -129,15 +129,15 @@ private:
    wxStaticText *setting5StaticText;
    wxStaticText *setting6StaticText;
    wxStaticText *setting7StaticText;
+   wxStaticText *centralBodyStaticText;
    wxStaticText *degree1StaticText;
    wxStaticText *order1StaticText;
+   wxStaticText *potFileStaticText;
    wxStaticText *type1StaticText;
    wxStaticText *type2StaticText;
+   wxStaticText *type3StaticText;
    wxStaticText *degree2StaticText;
    wxStaticText *order2StaticText;
-   wxStaticText *type3StaticText;
-   wxStaticText *potFileStaticText;
-   wxStaticText *originStaticText;
    
    wxTextCtrl *setting1TextCtrl;
    wxTextCtrl *setting2TextCtrl;
@@ -155,20 +155,19 @@ private:
    wxTextCtrl *pmEditTextCtrl;
    
    wxComboBox *integratorComboBox;
-   wxComboBox *bodyComboBox;
-   wxComboBox *atmosComboBox;
-   wxComboBox *gravComboBox;
-   wxComboBox *magfComboBox;
    wxComboBox *originComboBox;
-   
-   wxCheckBox *srpCheckBox;
+   wxComboBox *bodyComboBox;
+   wxComboBox *gravComboBox;
+   wxComboBox *atmosComboBox;
+   wxComboBox *magfComboBox;
    
    wxButton *bodyButton;
    wxButton *searchGravityButton;
    wxButton *dragSetupButton;
    wxButton *searchMagneticButton;
    wxButton *editPmfButton;
-   wxButton *editSrpButton;
+   
+   wxCheckBox *srpCheckBox;
    
    wxString integratorString;
    wxString primaryBodyString;

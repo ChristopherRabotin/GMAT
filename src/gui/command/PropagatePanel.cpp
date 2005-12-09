@@ -1,4 +1,5 @@
 //$Header$
+//$Header$
 //------------------------------------------------------------------------------
 //                              PropagatePanel
 //------------------------------------------------------------------------------
@@ -164,7 +165,6 @@ void PropagatePanel::Create()
    
    stopCondGrid->CreateGrid(MAX_STOPCOND_ROW, 2, wxGrid::wxGridSelectCells);
    stopCondGrid->SetColSize(0, 200);
-   //stopCondGrid->SetColSize(1, 500);
    stopCondGrid->SetColSize(1, 480);
    stopCondGrid->SetMargins(0, 0);
    stopCondGrid->SetColLabelValue(0, _T("Name"));
@@ -173,10 +173,41 @@ void PropagatePanel::Create()
    stopCondGrid->SetScrollbars(5, 14, 15, 15);
    stopCondGrid->EnableEditing(false);
    
+   //wxTextCtrl
+   stopNameTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                      wxDefaultPosition, wxSize(180,-1), 0);
+   varNameTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                     wxDefaultPosition, wxSize(180,-1), 0);
+   goalTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                     wxDefaultPosition, wxSize(180,-1), 0);
+   toleranceTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                     wxDefaultPosition, wxSize(100,-1), 0);
+                
+   //wxButton
+   updateButton =
+      new wxButton(this, ID_BUTTON, wxT("Update"),
+                    wxDefaultPosition, wxDefaultSize, 0);
+   deleteButton =
+      new wxButton(this, ID_BUTTON, wxT("Delete"),
+                    wxDefaultPosition, wxDefaultSize, 0);
+   mStopViewButton =
+      new wxButton(this, ID_BUTTON, wxT("View"),
+                   wxDefaultPosition, wxSize(75, -1), 0);
+   mGoalViewButton =
+      new wxButton(this, ID_BUTTON, wxT("View"),
+                   wxDefaultPosition, wxSize(75, -1), 0);
+               
+   //StringArray
    StringArray propModes = thePropCmd->GetStringArrayParameter
       (thePropCmd->GetParameterID("AvailablePropModes"));
    
    mPropModeCount = propModes.size();
+
+   //wxString
    wxString *propModeList = new wxString[mPropModeCount];
    for (Integer i=0; i<mPropModeCount; i++)
    {
@@ -195,84 +226,132 @@ void PropagatePanel::Create()
       wxT("<="),
       wxT("!=")
    };
-   
-   //-------------------------------------------------------
-   // prop mode, prop grid
-   //-------------------------------------------------------
-   wxStaticText *synchStaticText =
-      new wxStaticText(this, -1, wxT("Propagate Mode:  "),
-                        wxDefaultPosition, wxDefaultSize, 0);
-
+                  
+   //wxComboBox
    mPropModeComboBox =
       new wxComboBox(this, ID_COMBOBOX, wxT(propModeList[0].c_str()), wxDefaultPosition,
                       wxSize(150,-1), mPropModeCount, propModeList,
                       wxCB_DROPDOWN|wxCB_READONLY);
-
-   //loj: 3/10/05 Added propModeSizer
-   wxBoxSizer *propModeSizer = new wxBoxSizer(wxHORIZONTAL);
-   propModeSizer->Add(synchStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   propModeSizer->Add(mPropModeComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   wxStaticBox *propStaticBox =
-      new wxStaticBox(this, -1, wxT("Propagators and Spacecraft"));
-   wxStaticBoxSizer *propSizer =
-      new wxStaticBoxSizer(propStaticBox, wxVERTICAL);
-   propSizer->Add(propModeSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   propSizer->Add(propGrid, 0, wxALIGN_CENTER|wxALL, bsize);
-
-   //-------------------------------------------------------
-   // stop name, update, delete
-   //-------------------------------------------------------
-   wxStaticText *nameStaticText =
-      new wxStaticText(this, -1, wxT("Name"), 
-                        wxDefaultPosition, wxSize(40, -1), wxALIGN_RIGHT);
-   stopNameTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                      wxDefaultPosition, wxSize(180,-1), 0);
-   updateButton =
-      new wxButton(this, ID_BUTTON, wxT("Update"),
-                    wxDefaultPosition, wxDefaultSize, 0);
-   deleteButton =
-      new wxButton(this, ID_BUTTON, wxT("Delete"),
-                    wxDefaultPosition, wxDefaultSize, 0);
-   
-   wxBoxSizer *stopNameSizer = new wxBoxSizer(wxHORIZONTAL);
-   stopNameSizer->Add(nameStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   stopNameSizer->Add(stopNameTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   stopNameSizer->Add(updateButton, 0, wxALIGN_LEFT|wxALL, bsize);
-   stopNameSizer->Add(deleteButton, 0, wxALIGN_LEFT|wxALL, bsize);
-   //stopNameSizer->Add(75, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-
-   //-------------------------------------------------------
-   // stop parameter, view, equality, goal, tolerance
-   //-------------------------------------------------------
-   wxStaticText *varStaticText =
-      new wxStaticText(this, -1, wxT("Variable"), 
-                       wxDefaultPosition, wxSize(40, -1), wxALIGN_RIGHT);
-   varNameTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(180,-1), 0);
-   mStopViewButton =
-      new wxButton(this, ID_BUTTON, wxT("View"),
-                   wxDefaultPosition, wxSize(75, -1), 0);
    equalityComboBox =
       new wxComboBox(this, ID_COMBOBOX, wxT(logicalOpArray[0]), wxDefaultPosition,
                      wxSize(40,-1), numOfEqualities, logicalOpArray,
                      wxCB_DROPDOWN|wxCB_READONLY);
-   goalTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(180,-1), 0);
-   mGoalViewButton =
-      new wxButton(this, ID_BUTTON, wxT("View"),
-                   wxDefaultPosition, wxSize(75, -1), 0);
+
+   //wxStaticText
+   wxStaticText *synchStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Propagate Mode:  "),
+                        wxDefaultPosition, wxDefaultSize, 0);
+   wxStaticText *nameStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Name"), 
+                        wxDefaultPosition, wxSize(80, -1), wxALIGN_RIGHT);
+   wxStaticText *varStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Variable"), 
+                       wxDefaultPosition, wxSize(80, -1), wxALIGN_RIGHT);
    wxStaticText *tolStaticText =
-      new wxStaticText(this, -1, wxT("Tolerance"), 
+      new wxStaticText(this, ID_TEXT, wxT("Tolerance"), 
                        wxDefaultPosition, wxDefaultSize, 0);
-   toleranceTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(100,-1), 0);
+      
+   #if __WXMAC__
+   // wxStaticText
+   wxStaticText *title1StaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Propagators and Spacecraft"),
+                        wxDefaultPosition, wxSize(120,20),
+                        wxBOLD);
+   title1StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
+                                             false, _T(""), wxFONTENCODING_SYSTEM));
+   wxStaticText *title2StaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Stopping Conditions"),
+                        wxDefaultPosition, wxSize(120,20),
+                        wxBOLD);
+   title2StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
+                                             false, _T(""), wxFONTENCODING_SYSTEM));
+   wxStaticText *title3StaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Stopping Conditions Details"),
+                        wxDefaultPosition, wxSize(120,20),
+                        wxST_NO_AUTORESIZE);
+   title3StaticText->SetFont(wxFont(12, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL,
+                                             true, _T(""), wxFONTENCODING_SYSTEM));
+                                  
+   //wxSizers
+   wxBoxSizer *boxSizer1 = new wxBoxSizer(wxVERTICAL);
+   wxBoxSizer *boxSizer2 = new wxBoxSizer(wxVERTICAL);
+   wxBoxSizer *boxSizer3 = new wxBoxSizer(wxVERTICAL);
+   wxBoxSizer *boxSizer4 = new wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer *boxSizer5 = new wxBoxSizer(wxVERTICAL);
+   wxBoxSizer *boxSizer6 = new wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer *boxSizer7 = new wxBoxSizer(wxHORIZONTAL);
    
+   //Adding objects to sizers
+   boxSizer1->Add(title1StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer1->Add(boxSizer2, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer1->Add(title2StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer1->Add(boxSizer3, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   
+   //Adding the spacecraft objects
+   boxSizer4->Add(synchStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer4->Add(mPropModeComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   
+   boxSizer2->Add(boxSizer4, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer2->Add(propGrid, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   
+   //Adding the stopping condition objects
+   boxSizer6->Add(nameStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer6->Add(stopNameTextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer6->Add(updateButton, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer6->Add(deleteButton, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   
+   boxSizer7->Add(varStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer7->Add(varNameTextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer7->Add(mStopViewButton, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer7->Add(equalityComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer7->Add(goalTextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer7->Add(mGoalViewButton, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer7->Add(tolStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer7->Add(toleranceTextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   
+   boxSizer5->Add(boxSizer6, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer5->Add(boxSizer7, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   
+   boxSizer3->Add(stopCondGrid, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer3->Add(title3StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer3->Add(boxSizer5, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   
+   theMiddleSizer->Add(boxSizer1, 0, wxGROW, bsize);
+   #else
+   //wxSizers
+   wxBoxSizer *propModeSizer = new wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer *stopNameSizer = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer *varSizer = new wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer *stopDetailSizer = new wxBoxSizer(wxVERTICAL);
+   wxBoxSizer *panelSizer = new wxBoxSizer(wxVERTICAL);
+   
+   mMiddleBoxSizer = new wxBoxSizer(wxVERTICAL);
+   
+   wxStaticBox *propStaticBox =
+      new wxStaticBox(this, -1, wxT("Propagators and Spacecraft"));
+   wxStaticBox *stopDetailStaticBox =
+      new wxStaticBox(this, -1, wxT("Stopping Condition Details"));
+   wxStaticBox *stopCondStaticBox =
+      new wxStaticBox(this, -1, wxT("Stopping Conditions"));
+   
+   wxStaticBoxSizer *propSizer =
+      new wxStaticBoxSizer(propStaticBox, wxVERTICAL);
+   wxStaticBoxSizer *detailSizer =
+      new wxStaticBoxSizer(stopDetailStaticBox, wxVERTICAL); 
+   mStopSizer = new wxStaticBoxSizer(stopCondStaticBox, wxVERTICAL);
+   
+   //Adding objects to sizers
+   propModeSizer->Add(synchStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   propModeSizer->Add(mPropModeComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   propSizer->Add(propModeSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   propSizer->Add(propGrid, 0, wxALIGN_CENTER|wxALL, bsize);
+   
+   stopNameSizer->Add(nameStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   stopNameSizer->Add(stopNameTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   stopNameSizer->Add(updateButton, 0, wxALIGN_LEFT|wxALL, bsize);
+   stopNameSizer->Add(deleteButton, 0, wxALIGN_LEFT|wxALL, bsize);
+   
    varSizer->Add(varStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    varSizer->Add(varNameTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
    varSizer->Add(mStopViewButton, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -282,34 +361,21 @@ void PropagatePanel::Create()
    varSizer->Add(tolStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    varSizer->Add(toleranceTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    
-   wxBoxSizer *stopDetailSizer = new wxBoxSizer(wxVERTICAL);
    stopDetailSizer->Add(stopNameSizer, 0, wxALIGN_LEFT|wxALL, bsize);    
    stopDetailSizer->Add(varSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   wxStaticBox *stopDetailStaticBox =
-      new wxStaticBox(this, -1, wxT("Stopping Condition Details"));
-   wxStaticBoxSizer *detailSizer =
-      new wxStaticBoxSizer(stopDetailStaticBox, wxVERTICAL);    
    detailSizer->Add(stopDetailSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   wxStaticBox *stopCondStaticBox =
-      new wxStaticBox(this, -1, wxT("Stopping Conditions"));
-   mStopSizer = new wxStaticBoxSizer(stopCondStaticBox, wxVERTICAL);
    mStopSizer->Add(stopCondGrid, 0, wxALIGN_CENTER|wxALL, bsize);
    mStopSizer->Add(detailSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-
-   //-------------------------------------------------------
-   // add to panel sizer
-   //-------------------------------------------------------
-   mMiddleBoxSizer = new wxBoxSizer(wxVERTICAL);
    
    mMiddleBoxSizer->Add(propSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    mMiddleBoxSizer->Add(mStopSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
-   wxBoxSizer *panelSizer = new wxBoxSizer(wxVERTICAL);
    panelSizer->Add(mMiddleBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
    theMiddleSizer->Add(panelSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   #endif
    
    mPropModeComboBox->Enable(true);
    deleteButton->Enable(true);

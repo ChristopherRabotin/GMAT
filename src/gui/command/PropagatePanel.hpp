@@ -67,11 +67,13 @@ private:
       StopCondition *stopCondPtr;
    };
    
+   wxGrid *propGrid;
+   wxGrid *stopCondGrid;
+   
    wxTextCtrl *stopNameTextCtrl;
    wxTextCtrl *varNameTextCtrl;
    wxTextCtrl *goalTextCtrl;
    wxTextCtrl *toleranceTextCtrl;
-   wxTextCtrl *repeatTextCtrl;
    
    wxButton *updateButton;
    wxButton *deleteButton;
@@ -80,9 +82,6 @@ private:
    
    wxComboBox *mPropModeComboBox;
    wxComboBox *equalityComboBox;
-   
-   wxGrid *propGrid;
-   wxGrid *stopCondGrid;
    
    wxBoxSizer *mMiddleBoxSizer;
    wxStaticBoxSizer *mStopSizer;
@@ -143,6 +142,7 @@ private:
       ID_BUTTON,
       ID_CHECKBOX,
       ID_GRID,
+     ID_TEXT,
    };
 };
 
