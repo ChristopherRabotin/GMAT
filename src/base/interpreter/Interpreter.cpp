@@ -33,8 +33,10 @@
 //#define DEBUG_INTERPRET_OBJECTEQUATES 1
 //#define DEBUG_FUNCTION_PARSING
 //#define DEBUG_PASS_TWO
+#define DEBUG_PREINITIALIZE
 
 #include "MessageInterface.hpp"
+#include "Barycenter.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -3960,6 +3962,7 @@ bool Interpreter::FinalPass()
          throw InterpreterException("The object named '" +
             configuredCsName + "' was expected to be a coordinate system, "
             "but it is a '" + configuredCs->GetTypeName() + "' instead.");
+      PreinitializeCoordinateSystem(configuredCs);
       sat->SetRefObject(configuredCs, Gmat::COORDINATE_SYSTEM, configuredCsName);
       
       #ifdef DEBUG_PASS_TWO
@@ -3977,3 +3980,82 @@ bool Interpreter::FinalPass()
    
    return retval;
 }
+
+void Interpreter::PreinitializeCoordinateSystem(CoordinateSystem *cs)
+{
+   #ifdef DEBUG_PREINITIALIZE   
+      MessageInterface::ShowMessage(
+         "Preinitializing coordinate system %s\n", (cs->GetName()).c_str());
+   #endif
+
+   SolarSystem *ss = moderator->GetSolarSystemInUse();
+   if (!ss) throw InterpreterException("Cannot access solar system in use");
+   CelestialBody   *b  = NULL;
+   CalculatedPoint *c  = NULL;
+   Barycenter      *bc = NULL;
+   SpacePoint      *sp = NULL;
+   //SpaceObject     *so = NULL;  // worry about this later
+   
+   // check for reference objects for the coordinate system
+   StringArray objs = cs->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
+   for (StringArray::iterator i = objs.begin(); i != objs.end(); ++i)
+   {
+      #ifdef DEBUG_PREINITIALIZE   
+         MessageInterface::ShowMessage(
+            "Now trying to get object %s\n", i->c_str());
+      #endif
+      //for now, assume referenced objects are SpacePoints
+      // deal with Spacecraft later
+      try
+      {
+         sp = (SpacePoint*) cs->GetRefObject(Gmat::SPACE_POINT, (*i));
+      }
+      // if it's not set already, try to get the pointer and set it
+      catch (BaseException& be)
+      {
+         sp = (SpacePoint*) ss->GetBody((*i));
+         if (!sp) throw InterpreterException(
+               "Unknown reference object " + (*i) + " in coordinate system");
+         cs->SetRefObject(sp,Gmat::SPACE_POINT, (*i)); 
+      }
+      // if it's a LibrationPoint or Barycenter, give it pointers
+      // to its reference obejcts
+      if (sp->IsOfType("CalculatedPoint"))
+      {
+         c = (CalculatedPoint*) sp;
+         StringArray itsObjs = c->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
+         for (StringArray::iterator j = itsObjs.begin();
+              j != itsObjs.end(); ++j)
+         {
+            // all calculated points reference
+            // celestial bodies or barycenters
+            b = ss->GetBody(*j);
+            if (b)
+            {
+               c->SetRefObject(b, Gmat::SPACE_POINT, (*j));
+            }
+            else // if it's not a body, it should be a barycenter
+            {
+               bc = (Barycenter*) moderator->GetCalculatedPoint(*j);
+               if (!bc) throw InterpreterException(
+                        "Unknown reference object in calculated point");
+               c->SetRefObject(bc, Gmat::SPACE_POINT, (*j));
+            }
+            
+         }
+      }
+   }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

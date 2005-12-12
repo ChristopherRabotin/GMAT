@@ -255,6 +255,8 @@ protected:
    bool                          ValidateBlock(StringArray &sar);
 
    bool                          FinalPass();
+   
+   void                          PreinitializeCoordinateSystem(CoordinateSystem *cs);
 };
 
 #endif // INTERPRETER_HPP
