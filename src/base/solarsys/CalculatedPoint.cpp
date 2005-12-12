@@ -216,6 +216,45 @@ std::string CalculatedPoint::GetParameterTypeString(const Integer id) const
    return SpacePoint::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool CalculatedPoint::IsParameterReadOnly(const Integer id) const
+{
+   if (id == NUMBER_OF_BODIES)
+      return true;
+
+   return SpacePoint::IsParameterReadOnly(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <label> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not.
+ */
+//---------------------------------------------------------------------------
+bool CalculatedPoint::IsParameterReadOnly(const std::string &label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
+
 //------------------------------------------------------------------------------
 //  Integer  GetIntegerParameter(const Integer id) const
 //------------------------------------------------------------------------------
