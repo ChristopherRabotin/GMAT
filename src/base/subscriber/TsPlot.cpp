@@ -45,6 +45,7 @@ TsPlot::PARAMETER_TEXT[TsPlotParamCount - SubscriberParamCount] =
    "TargetStatus",
    "DataCollectFrequency",
    "UpdatePlotFrequency",
+   "ShowPlot",
 }; 
 
 const Gmat::ParameterType
@@ -59,6 +60,7 @@ TsPlot::PARAMETER_TYPE[TsPlotParamCount - SubscriberParamCount] =
    Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
    Gmat::INTEGER_TYPE,
+   Gmat::BOOLEAN_TYPE,
 };
 
 //---------------------------------
@@ -707,6 +709,33 @@ const StringArray& TsPlot::GetStringArrayParameter(const std::string &label) con
    return GetStringArrayParameter(GetParameterID(label));
 }
 
+
+bool TsPlot::GetBooleanParameter(const Integer id) const
+{
+   if (id == SHOW_PLOT)
+      return active;
+   return Subscriber::GetBooleanParameter(id);
+}
+
+bool TsPlot::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
+}
+
+bool TsPlot::SetBooleanParameter(const std::string &label, const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
+}
+
+bool TsPlot::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == SHOW_PLOT)
+   {
+      active = value;
+      return active;
+   }
+   return Subscriber::SetBooleanParameter(id, value);
+}
 
 //------------------------------------------------------------------------------
 // virtual GmatBase* GetRefObject(const Gmat::ObjectType type,

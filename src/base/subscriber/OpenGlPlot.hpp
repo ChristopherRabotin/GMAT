@@ -110,6 +110,13 @@ public:
    virtual const StringArray&
                  GetStringArrayParameter(const std::string &label) const;
    
+   virtual bool  GetBooleanParameter(const Integer id) const;
+   virtual bool  GetBooleanParameter(const std::string &label) const;
+   virtual bool  SetBooleanParameter(const Integer id,
+                                     const bool value);
+   virtual bool  SetBooleanParameter(const std::string &label,
+                                     const bool value);
+
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
    virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
    
@@ -229,6 +236,7 @@ protected:
       NUM_POINTS_TO_REDRAW,
       ORBIT_COLOR,
       //TARGET_COLOR,
+      SHOW_PLOT,
       OpenGlPlotParamCount
    };
    

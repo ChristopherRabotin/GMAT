@@ -69,6 +69,7 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
    "NumPointsToRedraw",
    "OrbitColor",
    //"TargetColor",
+   "ShowPlot",
 }; 
 
 
@@ -106,7 +107,7 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
    
    Gmat::UNSIGNED_INTARRAY_TYPE, //"OrbitColor",
    //Gmat::UNSIGNED_INTARRAY_TYPE, //"TargetColor",
-
+   Gmat::BOOLEAN_TYPE,           //"ShowPlot"
 };
 
 
@@ -1346,6 +1347,35 @@ const StringArray& OpenGlPlot::GetStringArrayParameter(const std::string &label)
 {
    return GetStringArrayParameter(GetParameterID(label));
 }
+
+
+bool OpenGlPlot::GetBooleanParameter(const Integer id) const
+{
+   if (id == SHOW_PLOT)
+      return active;
+   return Subscriber::GetBooleanParameter(id);
+}
+
+bool OpenGlPlot::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
+}
+
+bool OpenGlPlot::SetBooleanParameter(const std::string &label, const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
+}
+
+bool OpenGlPlot::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == SHOW_PLOT)
+   {
+      active = value;
+      return active;
+   }
+   return Subscriber::SetBooleanParameter(id, value);
+}
+
 
 
 //------------------------------------------------------------------------------

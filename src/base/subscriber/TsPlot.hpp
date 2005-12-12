@@ -57,6 +57,13 @@ public:
    virtual Integer SetIntegerParameter(const Integer id, const Integer value);
    virtual Integer SetIntegerParameter(const std::string &label,
                                        const Integer value);
+                                       
+   virtual bool        GetBooleanParameter(const Integer id) const;
+   virtual bool        GetBooleanParameter(const std::string &label) const;
+   virtual bool        SetBooleanParameter(const Integer id,
+                                           const bool value);
+   virtual bool        SetBooleanParameter(const std::string &label,
+                                           const bool value);
       
    virtual std::string GetStringParameter(const Integer id) const;
    virtual std::string GetStringParameter(const std::string &label) const;
@@ -125,6 +132,7 @@ protected:
       TARGET_STATUS,
       DATA_COLLECT_FREQUENCY,
       UPDATE_PLOT_FREQUENCY,
+      SHOW_PLOT,
       TsPlotParamCount
    };
    
