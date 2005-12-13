@@ -435,6 +435,10 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value)
       /// @todo validate the input value when the CS code is incorporated.
       // if (!IsValidFrame(value))
       //    return false;
+
+      if (value != "Inertial" && value != "VNB")
+         throw BurnException("Burn Axes has to be 'Inertial' or 'VNB'.\n");
+      
       coordAxes = value;
       frame = frameman->GetFrameInstance(coordAxes);
 
