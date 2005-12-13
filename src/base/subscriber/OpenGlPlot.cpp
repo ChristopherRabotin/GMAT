@@ -436,198 +436,225 @@ bool OpenGlPlot::Initialize()
       ("OpenGlPlot::Initialize() isEndOfReceive = %d, mAllSpCount = %d\n",
        isEndOfReceive, mAllSpCount);
    #endif
+
+   bool foundSc = false;
    
    if (mAllSpCount > 0)
    {
-      if (active)
+
+      // check for spacecaft is included in the plot
+      for (int i=0; i<mAllSpCount; i++)
       {
          #if DEBUG_OPENGL_INIT
          MessageInterface::ShowMessage
-            ("OpenGlPlot::Initialize() CreateGlPlotWindow() mSolarSystem=%d\n",
-             mSolarSystem);
+            ("OpenGlPlot::Initialize() mAllSpNameArray[%d]=%s, addr=%d\n",
+             i, mAllSpNameArray[i].c_str(), mAllSpArray[i]);
          #endif
          
-         if (PlotInterface::CreateGlPlotWindow
-             (instanceName, mOldName, mViewCoordSysName, mSolarSystem,
-              (mEclipticPlane == "On"), (mXYPlane == "On"),
-              (mWireFrame == "On"), (mAxes == "On"), (mGrid == "On"),
-              (mEarthSunLines == "On"), (mOverlapPlot == "On"),
-              (mUseInitialView == "On"), (mPerspectiveMode == "On"),
-              mNumPointsToRedraw))
-         {
-            #if DEBUG_OPENGL_INIT
-            MessageInterface::ShowMessage
-               ("OpenGlPlot::Initialize()) mViewPointRefObj=%d, mViewScaleFactor=%f\n",
-                mViewPointRefObj, mViewScaleFactor);
-            #endif
-            
-            //--------------------------------------------------------
-            // Set Spacecraft and non-Spacecraft objects.
-            // If non-Spacecraft, position has to be computed in the
-            // TrajPlotCanvas, so need to pass those object pointers.
-            //--------------------------------------------------------
-            
-            ClearDynamicArrays();
-            
-            // add non-spacecraft plot objects to the list
-            for (int i=0; i<mAllSpCount; i++)
+         if (mAllSpArray[i])
+         {                  
+            if (mAllSpArray[i]->IsOfType(Gmat::SPACECRAFT))
             {
-               #if DEBUG_OPENGL_INIT
-               MessageInterface::ShowMessage
-                  ("OpenGlPlot::Initialize() mAllSpNameArray[%d]=%s, addr=%d\n",
-                   i, mAllSpNameArray[i].c_str(), mAllSpArray[i]);
-               #endif
-               
-               if (mAllSpArray[i])
-               {
-                  //add all objects to object list
-                  mObjectNameArray.push_back(mAllSpNameArray[i]);                  
-                  mDrawOrbitArray.push_back(mDrawOrbitMap[mAllSpNameArray[i]]);
-                  mShowObjectArray.push_back(mShowObjectMap[mAllSpNameArray[i]]);
-                  mOrbitColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
-                  mObjectArray.push_back(mAllSpArray[i]);
+               foundSc = true;
+               break;
+            }
+         }
+      }
+   }
+   
+   if (!foundSc)
+   {
+      active = false;
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "OpenGL plot will be turned off. No spacecraft is "
+          "added to OpenGL plot\n");
+      return false;
+   }
+
+   
+   //--------------------------------------------------------
+   // start initializing for OpenGL plot
+   //--------------------------------------------------------
+   if (active)
+   {
+      #if DEBUG_OPENGL_INIT
+      MessageInterface::ShowMessage
+         ("OpenGlPlot::Initialize() CreateGlPlotWindow() mSolarSystem=%d\n",
+          mSolarSystem);
+      #endif
+      
+      if (PlotInterface::CreateGlPlotWindow
+          (instanceName, mOldName, mViewCoordSysName, mSolarSystem,
+           (mEclipticPlane == "On"), (mXYPlane == "On"),
+           (mWireFrame == "On"), (mAxes == "On"), (mGrid == "On"),
+           (mEarthSunLines == "On"), (mOverlapPlot == "On"),
+           (mUseInitialView == "On"), (mPerspectiveMode == "On"),
+           mNumPointsToRedraw))
+      {
+         #if DEBUG_OPENGL_INIT
+         MessageInterface::ShowMessage
+            ("OpenGlPlot::Initialize()) mViewPointRefObj=%d, mViewScaleFactor=%f\n",
+             mViewPointRefObj, mViewScaleFactor);
+         #endif
+         
+         //--------------------------------------------------------
+         // Set Spacecraft and non-Spacecraft objects.
+         // If non-Spacecraft, position has to be computed in the
+         // TrajPlotCanvas, so need to pass those object pointers.
+         //--------------------------------------------------------
+         
+         ClearDynamicArrays();
+         
+         // add non-spacecraft plot objects to the list
+         for (int i=0; i<mAllSpCount; i++)
+         {
+            //#if DEBUG_OPENGL_INIT
+            //MessageInterface::ShowMessage
+            //   ("OpenGlPlot::Initialize() mAllSpNameArray[%d]=%s, addr=%d\n",
+            //    i, mAllSpNameArray[i].c_str(), mAllSpArray[i]);
+            //#endif
+            
+            if (mAllSpArray[i])
+            {
+               //add all objects to object list
+               mObjectNameArray.push_back(mAllSpNameArray[i]);                  
+               mDrawOrbitArray.push_back(mDrawOrbitMap[mAllSpNameArray[i]]);
+               mShowObjectArray.push_back(mShowObjectMap[mAllSpNameArray[i]]);
+               mOrbitColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
+               mObjectArray.push_back(mAllSpArray[i]);
                   
-                  if (mAllSpArray[i]->IsOfType(Gmat::SPACECRAFT))
-                  {
-                     mScNameArray.push_back(mAllSpNameArray[i]);
-                     mScOrbitColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
-                     mScTargetColorArray.push_back(mTargetColorMap[mAllSpNameArray[i]]);
-                     mScXArray.push_back(0.0);
-                     mScYArray.push_back(0.0);
-                     mScZArray.push_back(0.0);
-                     mScVxArray.push_back(0.0);
-                     mScVyArray.push_back(0.0);
-                     mScVzArray.push_back(0.0);
-                  }
-               }
-               else
+               if (mAllSpArray[i]->IsOfType(Gmat::SPACECRAFT))
                {
-                  MessageInterface::PopupMessage
-                     (Gmat::WARNING_, "The SpacePoint name: %s has NULL pointer.\nIt will be "
-                      "removed from the OpenGL plot.\n", mAllSpNameArray[i].c_str());
+                  mScNameArray.push_back(mAllSpNameArray[i]);
+                  mScOrbitColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
+                  mScTargetColorArray.push_back(mTargetColorMap[mAllSpNameArray[i]]);
+                  mScXArray.push_back(0.0);
+                  mScYArray.push_back(0.0);
+                  mScZArray.push_back(0.0);
+                  mScVxArray.push_back(0.0);
+                  mScVyArray.push_back(0.0);
+                  mScVzArray.push_back(0.0);
                }
             }
-            
-            mScCount = mScNameArray.size();
-            mObjectCount = mObjectNameArray.size();
-            
-            // check ViewPoint info to see if any objects need to be
-            // included in the non-spacecraft list
-            if (mViewCoordSystem == NULL)
-               throw GmatBaseException
-                  ("OpenGlPlot::Initialize() CoordinateSystem: " + mViewCoordSysName +
-                   " not set\n");
-            
-            if (mViewUpCoordSystem == NULL)
-               throw GmatBaseException
-                  ("OpenGlPlot::Initialize() CoordinateSystem: " + mViewUpCoordSysName +
-                   " not set\n");               
-            
-            // get CoordinateSystem Origin pointer
-            mViewCoordSysOrigin = mViewCoordSystem->GetOrigin();
-            
-            if (mViewCoordSysOrigin != NULL)
-               UpdateObjectList(mViewCoordSysOrigin);
-            
-            if (mViewPointRefObj != NULL)
-               UpdateObjectList(mViewPointRefObj);
-            
-            if (mViewPointVectorObj != NULL)
-               UpdateObjectList(mViewPointVectorObj);
-            
-            if (mViewDirectionObj != NULL)
-               UpdateObjectList(mViewDirectionObj);
-            
-            #if DEBUG_OPENGL_INIT
-            MessageInterface::ShowMessage
-               ("OpenGlPlot::Initialize() mScNameArray.size=%d, "
-                "mScOrbitColorArray.size=%d\n", mScNameArray.size(),
-                mScOrbitColorArray.size());
-            MessageInterface::ShowMessage
-               ("OpenGlPlot::Initialize() mObjectNameArray.size=%d, "
-                "mOrbitColorArray.size=%d\n", mObjectNameArray.size(),
-                mOrbitColorArray.size());
-            
-            bool draw, show;
-            for (int i=0; i<mObjectCount; i++)
+            else
             {
-               draw = mDrawOrbitArray[i] ? true : false;
-               show = mShowObjectArray[i] ? true : false;
-               MessageInterface::ShowMessage
-                  ("OpenGlPlot::Initialize() mObjectNameArray[%d]=%s, draw=%d, "
-                   "show=%d, color=%d\n", i, mObjectNameArray[i].c_str(), draw,
-                   show, mOrbitColorArray[i]);
+               MessageInterface::PopupMessage
+                  (Gmat::WARNING_, "The SpacePoint name: %s has NULL pointer.\nIt will be "
+                   "removed from the OpenGL plot.\n", mAllSpNameArray[i].c_str());
             }
-            #endif
-            
-            // set all object array and pointers
-            
-            #if DEBUG_OPENGL_INIT
-            MessageInterface::ShowMessage
-               ("OpenGlPlot::Initialize() calling PlotInterface::SetGlObject()\n");
-            #endif
-            
-            PlotInterface::SetGlObject(instanceName, mObjectNameArray,
-                                       mOrbitColorArray, mObjectArray);
-            
-            //--------------------------------------------------------
-            // set CoordinateSystem
-            //--------------------------------------------------------
-            #if DEBUG_OPENGL_INIT
-            MessageInterface::ShowMessage
-               ("OpenGlPlot::Initialize() calling PlotInterface::SetGlCoordSystem()\n");
-            #endif
-
-            PlotInterface::SetGlCoordSystem(instanceName, mViewCoordSystem,
-                                            mViewUpCoordSystem);
-            
-            //--------------------------------------------------------
-            // set viewpoint info
-            //--------------------------------------------------------
-            #if DEBUG_OPENGL_INIT
-            MessageInterface::ShowMessage
-               ("OpenGlPlot::Initialize() calling PlotInterface::SetGlViewOption()\n");
-            #endif
-            
-            PlotInterface::SetGlViewOption
-               (instanceName, mViewPointRefObj, mViewPointVectorObj,
-                mViewDirectionObj, mViewScaleFactor, mViewPointRefVector,
-                mViewPointVector, mViewDirectionVector, mViewUpAxisName,
-                (mViewPointRefName == "Vector"), (mViewPointVectorName == "Vector"),
-                (mViewDirectionName == "Vector"), (mUseFixedFov == "On"),
-                mFixedFovAngle);
-
-            PlotInterface::SetGlUpdateFrequency(instanceName, mUpdatePlotFrequency);
-            
-            //--------------------------------------------------------
-            // set drawing object flag
-            //--------------------------------------------------------
-            PlotInterface::SetGlDrawOrbitFlag(instanceName, mDrawOrbitArray);
-            PlotInterface::SetGlShowObjectFlag(instanceName, mShowObjectArray);
-            
-            return true;
          }
-         else
+            
+         mScCount = mScNameArray.size();
+         mObjectCount = mObjectNameArray.size();
+            
+         // check ViewPoint info to see if any objects need to be
+         // included in the non-spacecraft list
+         if (mViewCoordSystem == NULL)
+            throw GmatBaseException
+               ("OpenGlPlot::Initialize() CoordinateSystem: " + mViewCoordSysName +
+                " not set\n");
+            
+         if (mViewUpCoordSystem == NULL)
+            throw GmatBaseException
+               ("OpenGlPlot::Initialize() CoordinateSystem: " + mViewUpCoordSysName +
+                " not set\n");               
+            
+         // get CoordinateSystem Origin pointer
+         mViewCoordSysOrigin = mViewCoordSystem->GetOrigin();
+            
+         if (mViewCoordSysOrigin != NULL)
+            UpdateObjectList(mViewCoordSysOrigin);
+            
+         if (mViewPointRefObj != NULL)
+            UpdateObjectList(mViewPointRefObj);
+            
+         if (mViewPointVectorObj != NULL)
+            UpdateObjectList(mViewPointVectorObj);
+            
+         if (mViewDirectionObj != NULL)
+            UpdateObjectList(mViewDirectionObj);
+            
+         #if DEBUG_OPENGL_INIT
+         MessageInterface::ShowMessage
+            ("OpenGlPlot::Initialize() mScNameArray.size=%d, "
+             "mScOrbitColorArray.size=%d\n", mScNameArray.size(),
+             mScOrbitColorArray.size());
+         MessageInterface::ShowMessage
+            ("OpenGlPlot::Initialize() mObjectNameArray.size=%d, "
+             "mOrbitColorArray.size=%d\n", mObjectNameArray.size(),
+             mOrbitColorArray.size());
+            
+         bool draw, show;
+         for (int i=0; i<mObjectCount; i++)
          {
-            return false;
+            draw = mDrawOrbitArray[i] ? true : false;
+            show = mShowObjectArray[i] ? true : false;
+            MessageInterface::ShowMessage
+               ("OpenGlPlot::Initialize() mObjectNameArray[%d]=%s, draw=%d, "
+                "show=%d, color=%d\n", i, mObjectNameArray[i].c_str(), draw,
+                show, mOrbitColorArray[i]);
          }
+         #endif
+            
+         // set all object array and pointers
+            
+         #if DEBUG_OPENGL_INIT
+         MessageInterface::ShowMessage
+            ("OpenGlPlot::Initialize() calling PlotInterface::SetGlObject()\n");
+         #endif
+            
+         PlotInterface::SetGlObject(instanceName, mObjectNameArray,
+                                    mOrbitColorArray, mObjectArray);
+            
+         //--------------------------------------------------------
+         // set CoordinateSystem
+         //--------------------------------------------------------
+         #if DEBUG_OPENGL_INIT
+         MessageInterface::ShowMessage
+            ("OpenGlPlot::Initialize() calling PlotInterface::SetGlCoordSystem()\n");
+         #endif
+
+         PlotInterface::SetGlCoordSystem(instanceName, mViewCoordSystem,
+                                         mViewUpCoordSystem);
+            
+         //--------------------------------------------------------
+         // set viewpoint info
+         //--------------------------------------------------------
+         #if DEBUG_OPENGL_INIT
+         MessageInterface::ShowMessage
+            ("OpenGlPlot::Initialize() calling PlotInterface::SetGlViewOption()\n");
+         #endif
+            
+         PlotInterface::SetGlViewOption
+            (instanceName, mViewPointRefObj, mViewPointVectorObj,
+             mViewDirectionObj, mViewScaleFactor, mViewPointRefVector,
+             mViewPointVector, mViewDirectionVector, mViewUpAxisName,
+             (mViewPointRefName == "Vector"), (mViewPointVectorName == "Vector"),
+             (mViewDirectionName == "Vector"), (mUseFixedFov == "On"),
+             mFixedFovAngle);
+
+         PlotInterface::SetGlUpdateFrequency(instanceName, mUpdatePlotFrequency);
+            
+         //--------------------------------------------------------
+         // set drawing object flag
+         //--------------------------------------------------------
+         PlotInterface::SetGlDrawOrbitFlag(instanceName, mDrawOrbitArray);
+         PlotInterface::SetGlShowObjectFlag(instanceName, mShowObjectArray);
+            
+         return true;
       }
       else
       {
-         #if DEBUG_OPENGL_INIT
-         MessageInterface::ShowMessage("OpenGlPlot::Initialize() DeleteGlPlot()\n");
-         #endif
-         
-         return PlotInterface::DeleteGlPlot();
+         return false;
       }
    }
    else
    {
-      active = false;
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "OpenGlPlot is turned off. No spacecraft "
-          "has been added to OpenGlPlot\n");
-      return false;
+      #if DEBUG_OPENGL_INIT
+      MessageInterface::ShowMessage("OpenGlPlot::Initialize() DeleteGlPlot()\n");
+      #endif
+         
+      return PlotInterface::DeleteGlPlot();
    }
 
    #if DEBUG_OPENGL_INIT
