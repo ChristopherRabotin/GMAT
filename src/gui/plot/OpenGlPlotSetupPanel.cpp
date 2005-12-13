@@ -958,7 +958,7 @@ void OpenGlPlotSetupPanel::LoadData()
          }
          
          mSelectedScListBox->Set(mScCount, scNames);
-         delete scNames;
+         delete [] scNames;
       }
       
       if (mNonScCount > 0)
@@ -977,7 +977,7 @@ void OpenGlPlotSetupPanel::LoadData()
          }
          
          mSelectedObjListBox->Set(mNonScCount, nonScNames);
-         delete nonScNames;
+         delete [] nonScNames;
       }
       
       // show spacecraft option
