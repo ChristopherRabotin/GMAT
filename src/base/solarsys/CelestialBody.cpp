@@ -179,7 +179,7 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    degree             (4),
    newLF              (true),
    overrideTime       (false),
-   ephemUpdateInterval (60.0),
+   ephemUpdateInterval (0.0),
    lastEphemTime      (0.0)
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
@@ -233,7 +233,7 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    degree             (0),
    newLF              (true),
    overrideTime       (false),
-   ephemUpdateInterval (60.0),
+   ephemUpdateInterval (0.0),
    lastEphemTime      (0.0)
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
