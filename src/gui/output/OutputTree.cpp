@@ -34,6 +34,8 @@
 #include "GmatMainFrame.hpp"
 
 #include "Subscriber.hpp"
+#include "ReportFile.hpp"
+#include "FileUtil.hpp"    // for GmatFileUtil::Compare()
 
 //#define DEBUG_RESOURCE_TREE 1
 
@@ -47,6 +49,8 @@ BEGIN_EVENT_TABLE(OutputTree, wxTreeCtrl)
    EVT_TREE_ITEM_ACTIVATED(-1, OutputTree::OnItemActivated)
    EVT_TREE_BEGIN_LABEL_EDIT(-1, OutputTree::OnBeginLabelEdit)
    EVT_TREE_END_LABEL_EDIT(-1, OutputTree::OnEndLabelEdit)
+   EVT_MENU(POPUP_COMPARE_REPORT, OutputTree::OnCompareReport)
+   
 //   EVT_MENU(POPUP_OPEN, OutputTree::OnOpen)
 //   EVT_MENU(POPUP_CLOSE, OutputTree::OnClose)
 //   EVT_MENU(POPUP_RENAME, OutputTree::OnRename)
@@ -198,12 +202,16 @@ void OutputTree::OnItemRightClick(wxTreeEvent& event)
 void OutputTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 {
    GmatTreeItemData *treeItem = (GmatTreeItemData *)GetItemData(itemId);
-   wxString title = treeItem->GetDesc();
-//   int dataType = treeItem->GetDataType();
-    
+   //wxString title = treeItem->GetDesc();
+   theSubscriberName = treeItem->GetDesc();
+   int dataType = treeItem->GetDataType();
+
+   //MessageInterface::ShowMessage
+   //   ("===> OutputTree::ShowMenu() theSubscriberName=%s\n", theSubscriberName.c_str());
+   
 #if wxUSE_MENUS
    wxMenu menu;
-    
+   
 //      menu.Append(POPUP_OPEN, wxT("Open"));
 //      menu.Append(POPUP_CLOSE, wxT("Close"));
 //      menu.AppendSeparator();
@@ -211,7 +219,10 @@ void OutputTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 //      menu.Append(POPUP_DELETE, wxT("Delete"));
 //
 //      menu.Enable(POPUP_DELETE, FALSE);
-
+   
+   if (dataType == GmatTree::OUTPUT_REPORT)
+      menu.Append(POPUP_COMPARE_REPORT, wxT("Compare"));
+   
    PopupMenu(&menu, pt);
 #endif // wxUSE_MENUS
 }
@@ -510,3 +521,39 @@ void OutputTree::OnAddOpenGlPlot(wxCommandEvent &event)
    }
 }
 
+
+//------------------------------------------------------------------------------
+// void OnCompareReport(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Compare reports.
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void OutputTree::OnCompareReport(wxCommandEvent &event)
+{
+   //MessageInterface::ShowMessage("OutputTree::OnCompareReport() entered\n");
+
+   ReportFile *theReport =
+      (ReportFile*) theGuiInterpreter->GetSubscriber(std::string(theSubscriberName.c_str()));
+
+   if (!theReport)
+   {
+      MessageInterface::ShowMessage
+         ("OutputTree::OnCompareReport() The ReportFile: %s is NULL.\n",
+          theSubscriberName.c_str());
+      return;
+   }
+   
+   std::string filename1 = theReport->GetStringParameter("Filename");
+   
+   wxString filename2 =
+      wxFileSelector("Choose a file to open", "", "", "txt",
+                     "text files (*.txt)|*.txt|Report files (*.report)|*.report");
+
+   if (filename2.empty())
+      return;
+
+   GmatFileUtil::Compare(filename1.c_str(), filename2.c_str());
+}

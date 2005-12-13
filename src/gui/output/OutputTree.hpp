@@ -37,7 +37,8 @@ public:
 private:
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
-
+   wxString theSubscriberName;
+   
    //GmatMainNotebook *mainNotebook;
    //GmatMainFrame *mainFrame;
 
@@ -65,11 +66,14 @@ private:
    void OnAddOpenGlPlot(wxCommandEvent &event);
 
 
+   void OnCompareReport(wxCommandEvent &event);
+   
    DECLARE_EVENT_TABLE();
 
    // for popup menu
    enum
    {
+      POPUP_COMPARE_REPORT = 200
    };
 };
 
