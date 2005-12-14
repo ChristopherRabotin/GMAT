@@ -15,6 +15,7 @@
 #             2005/02/09 - W. Shoan - added TimeSystemConverter
 #             2005/02/17 - Added Anomaly
 #             2005/10/03 - Added AttitudeUtil 
+#             2005/10/03 - Added FileUtil 
 #
 #
 # Define the marco for the top-level directories
@@ -23,11 +24,12 @@ PROJECT_ROOT    = ../..
 # Source file for creating new library
 SRC = A1Date.cpp A1Mjd.cpp AngleUtil.cpp Anomaly.cpp AttitudeUtil.cpp \
 	Cartesian.cpp CoordUtil.cpp Date.cpp DateUtil.cpp ElapsedTime.cpp \
-	EopFile.cpp EphemerisUtil.cpp GregorianDate.cpp Keplerian.cpp \
-	LeapSecsFileReader.cpp Linear.cpp ModKeplerian.cpp RgbColor.cpp \
-	RealUtilities.cpp Rmatrix.cpp Rmatrix33.cpp Rvector.cpp Rvector3.cpp \
-	Rvector6.cpp Spherical.cpp SphericalAZFPA.cpp SphericalRADEC.cpp \
-	StringTokenizer.cpp TimeSystemConverter.cpp UtcDate.cpp
+	EopFile.cpp EphemerisUtil.cpp FileUtil.cpp GregorianDate.cpp \
+	Keplerian.cpp LeapSecsFileReader.cpp Linear.cpp ModKeplerian.cpp \
+	RgbColor.cpp RealUtilities.cpp Rmatrix.cpp Rmatrix33.cpp Rvector.cpp \
+	Rvector3.cpp Rvector6.cpp Spherical.cpp SphericalAZFPA.cpp \
+	SphericalRADEC.cpp StringTokenizer.cpp TimeSystemConverter.cpp \
+	UtcDate.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
