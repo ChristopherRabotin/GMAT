@@ -33,7 +33,7 @@
 //#define DEBUG_INTERPRET_OBJECTEQUATES 1
 //#define DEBUG_FUNCTION_PARSING
 //#define DEBUG_PASS_TWO
-#define DEBUG_PREINITIALIZE
+//#define DEBUG_PREINITIALIZE
 
 #include "MessageInterface.hpp"
 #include "Barycenter.hpp"
