@@ -4014,9 +4014,9 @@ void Interpreter::PreinitializeCoordinateSystem(CoordinateSystem *cs)
       catch (BaseException& be)
       {
          sp = (SpacePoint*) ss->GetBody((*i));
-         if (!sp) throw InterpreterException(
-               "Unknown reference object " + (*i) + " in coordinate system");
-         cs->SetRefObject(sp,Gmat::SPACE_POINT, (*i)); 
+         //if (!sp) throw InterpreterException(
+          //     "Unknown reference object " + (*i) + " in coordinate system");
+         if (sp) cs->SetRefObject(sp,Gmat::SPACE_POINT, (*i)); 
       }
       // if it's a LibrationPoint or Barycenter, give it pointers
       // to its reference obejcts
