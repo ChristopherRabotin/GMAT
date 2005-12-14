@@ -80,7 +80,6 @@ void ParameterCreateDialog::Create()
 {
    int bsize = 2;
    
-
    //wxStaticText
    wxStaticText *varNameStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Name"),
@@ -106,7 +105,6 @@ void ParameterCreateDialog::Create()
    wxStaticText *varEqualSignStaticText =
       new wxStaticText(this, ID_TEXT, wxT("="),
                        wxDefaultPosition, wxDefaultSize, 0);
-   
    wxStaticText *arrNameStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Name"),
                         wxDefaultPosition, wxDefaultSize, 0);
@@ -128,7 +126,36 @@ void ParameterCreateDialog::Create()
    wxStaticText *configArrStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Arrays"),
                        wxDefaultPosition, wxDefaultSize, 0);
-   
+      wxStaticText *stringNameLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Name"),
+                        wxDefaultPosition, wxDefaultSize, 0);
+   wxStaticText *stringValueLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Value"),
+                        wxDefaultPosition, wxDefaultSize, 0);
+   wxStaticText *configStringLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Strings"),
+                        wxDefaultPosition, wxDefaultSize, 0);
+   #if __WXMAC__
+   wxStaticText *title1StaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Variable"),
+                        wxDefaultPosition, wxSize(120,20),
+                        wxBOLD);
+   title1StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
+									true, _T(""), wxFONTENCODING_SYSTEM));
+   wxStaticText *title2StaticText =
+      new wxStaticText( this, ID_TEXT, wxT("String"),
+                        wxDefaultPosition, wxSize(120,20),
+                        wxBOLD);
+   title2StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
+									true, _T(""), wxFONTENCODING_SYSTEM));
+   wxStaticText *title3StaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Array"),
+                        wxDefaultPosition, wxSize(120,20),
+                        wxBOLD);
+   title3StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
+									true, _T(""), wxFONTENCODING_SYSTEM));
+   #endif
+						
    // wxTextCtrl
    mVarNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                                      wxDefaultPosition, wxSize(130,20), 0);
@@ -141,6 +168,10 @@ void ParameterCreateDialog::Create()
                                     wxDefaultPosition, wxSize(35,20), 0);
    mArrColTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                                     wxDefaultPosition, wxSize(35,20), 0);
+   mStringNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                                        wxDefaultPosition, wxSize(80,20), 0);
+   mStringValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                                     wxDefaultPosition, wxSize(110,20), 0);
    
    // wxButton
    mCreateVariableButton = new wxButton(this, ID_BUTTON, wxT("Create"),
@@ -155,38 +186,43 @@ void ParameterCreateDialog::Create()
    
    mCreateArrayButton = new wxButton(this, ID_BUTTON, wxT("Create"),
                                      wxDefaultPosition, wxDefaultSize, 0);
+   mCreateStringButton = new wxButton(this, ID_BUTTON, wxT("Create"),
+                                      wxDefaultPosition, wxDefaultSize, 0);
+   
+   //wxArrayString
+   wxArrayString emptyArray;
    
    // wxListBox
-   wxArrayString emptyArray;
    mObjectListBox = 
       theGuiManager->GetSpacecraftListBox(this, -1, wxSize(135, 85), &mExcludedScList);
-   
    mPropertyListBox = 
-      theGuiManager->GetPropertyListBox(this, ID_PROPERTY_LISTBOX,
-                                        wxSize(135, 85), "Spacecraft");
-   
+      theGuiManager->GetPropertyListBox(this, ID_PROPERTY_LISTBOX, wxSize(135, 85), "Spacecraft");
    mUserVarListBox =
       theGuiManager->GetUserVariableListBox(this, -1, wxSize(170, 85), "");
-   
    mUserArrayListBox =
       theGuiManager->GetUserArrayListBox(this, -1, wxSize(170, 50), "");
-   
-
+   mUserStringListBox =
+      theGuiManager->GetUserStringListBox(this, -1, wxSize(170, 50), "");
+	  
    // wxComboBox
    mCoordSysComboBox = theGuiManager->GetCoordSysComboBox(this, ID_COMBO, wxSize(120,-1));
-   
-   // wxComboBox
    mCentralBodyComboBox = theGuiManager->GetConfigBodyComboBox(this, ID_COMBO, wxSize(100,-1));
    //mCentralBodyComboBox->SetStringSelection("Earth"); // Earth is the default
    
    // wxSizers
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
-   wxFlexGridSizer *top1FlexGridSizer = new wxFlexGridSizer(3, 0, 0);
-   wxFlexGridSizer *objPropertyFlexGridSizer = new wxFlexGridSizer(4, 0, 0);
    mDetailsBoxSizer = new wxBoxSizer(wxHORIZONTAL);   
    
+   wxFlexGridSizer *top1FlexGridSizer = new wxFlexGridSizer(3, 0, 0);
+   wxFlexGridSizer *objPropertyFlexGridSizer = new wxFlexGridSizer(4, 0, 0);
    wxFlexGridSizer *arr1FlexGridSizer = new wxFlexGridSizer(7, 0, 0);
+   wxFlexGridSizer *stringFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
    
+   #if __WXMAC__
+   wxBoxSizer *variableBoxSizer = new wxBoxSizer(wxVERTICAL);
+   wxBoxSizer *arrayBoxSizer = new wxBoxSizer(wxVERTICAL);
+   wxBoxSizer *stringBoxSizer = new wxBoxSizer(wxVERTICAL);
+   #else
    wxStaticBox *variableStaticBox = new wxStaticBox(this, -1, wxT("Variable"));
    wxStaticBoxSizer *variableStaticBoxSizer =
       new wxStaticBoxSizer(variableStaticBox, wxVERTICAL);
@@ -194,7 +230,11 @@ void ParameterCreateDialog::Create()
    wxStaticBox *arrayStaticBox = new wxStaticBox(this, -1, wxT("Array"));
    wxStaticBoxSizer *arrayStaticBoxSizer =
       new wxStaticBoxSizer(arrayStaticBox, wxVERTICAL);
-
+	  
+   wxStaticBox *stringStaticBox = new wxStaticBox(this, -1, wxT("String"));
+   wxStaticBoxSizer *stringStaticBoxSizer =
+      new wxStaticBoxSizer(stringStaticBox, wxHORIZONTAL);
+   #endif
    
    // Add to wx*Sizers
    //-------------------------------------------------------
@@ -233,39 +273,17 @@ void ParameterCreateDialog::Create()
    mDetailsBoxSizer->Add(mCoordSysComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    mDetailsBoxSizer->Add(mCentralBodyComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    
+   #if __WXMAC__
+   variableBoxSizer->Add(title1StaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   variableBoxSizer->Add(top1FlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
+   variableBoxSizer->Add(objPropertyFlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
+   variableBoxSizer->Add(mDetailsBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   #else
    variableStaticBoxSizer->Add(top1FlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
    variableStaticBoxSizer->Add(objPropertyFlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
    variableStaticBoxSizer->Add(mDetailsBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-
-   //-------------------------------------------------------
-   // for String Creation
-   //-------------------------------------------------------
-   wxStaticText *stringNameLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Name"),
-                        wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *stringValueLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Value"),
-                        wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *configStringLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Strings"),
-                        wxDefaultPosition, wxDefaultSize, 0);
+   #endif
    
-   mStringNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                        wxDefaultPosition, wxSize(80,20), 0);
-   mStringValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                     wxDefaultPosition, wxSize(110,20), 0);
-   mCreateStringButton = new wxButton(this, ID_BUTTON, wxT("Create"),
-                                      wxDefaultPosition, wxDefaultSize, 0);
-
-   mUserStringListBox =
-      theGuiManager->GetUserStringListBox(this, -1, wxSize(170, 50), "");
-   
-   wxStaticBox *stringStaticBox = new wxStaticBox(this, -1, wxT("String"));
-   wxStaticBoxSizer *stringStaticBoxSizer =
-      new wxStaticBoxSizer(stringStaticBox, wxHORIZONTAL);
-   
-   wxFlexGridSizer *stringFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
-
    stringFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    stringFlexGridSizer->Add(stringNameLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
    stringFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -278,7 +296,12 @@ void ParameterCreateDialog::Create()
    stringFlexGridSizer->Add(mStringValueTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
    stringFlexGridSizer->Add(mUserStringListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
 
+   #if __WXMAC__ 
+   stringBoxSizer->Add(title2StaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   stringBoxSizer->Add(stringFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   #else
    stringStaticBoxSizer->Add(stringFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   #endif
    
    //-------------------------------------------------------
    // for Array Creation
@@ -301,17 +324,27 @@ void ParameterCreateDialog::Create()
    arr1FlexGridSizer->Add(mArrColTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
    arr1FlexGridSizer->Add(mUserArrayListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
 
+   #if __WXMAC__ 
+   arrayBoxSizer->Add(title3StaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   arrayBoxSizer->Add(arr1FlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
+   #else
    arrayStaticBoxSizer->Add(arr1FlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
+   #endif
    
+   #if __WXMAC__ 
+   pageBoxSizer->Add(variableBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageBoxSizer->Add(stringBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageBoxSizer->Add(arrayBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   #else
    pageBoxSizer->Add(variableStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    pageBoxSizer->Add(stringStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    pageBoxSizer->Add(arrayStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   #endif
    
    //-------------------------------------------------------
    // add to parent sizer
    //-------------------------------------------------------
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-
 }
 
 //------------------------------------------------------------------------------
