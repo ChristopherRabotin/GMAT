@@ -592,6 +592,15 @@ void CoordPanel::Setup( wxWindow *parent)
       wxDefaultPosition, wxDefaultSize, 0 );
    zStaticText = new wxStaticText( parent, ID_TEXT, wxT("Z: "),
       wxDefaultPosition, wxDefaultSize, 0 );
+	  
+   #if __WXMAC__
+   wxStaticText *title1StaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Axes"),
+                        wxDefaultPosition, wxSize(120,20),
+                        wxBOLD);
+   title1StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
+									true, _T(""), wxFONTENCODING_SYSTEM));
+   #endif
 
    // wxTextCtrl
    wxString emptyList[] = {};
@@ -622,9 +631,13 @@ void CoordPanel::Setup( wxWindow *parent)
 
    // wx*Sizers
    wxBoxSizer *theMainSizer = new wxBoxSizer( wxVERTICAL );
+   #if __WXMAC__
+   wxBoxSizer *boxsizer4 = new wxBoxSizer( wxVERTICAL );
+   #else
    wxStaticBox *staticbox1 = new wxStaticBox( parent, -1, wxT("Axes") );
    wxStaticBoxSizer *staticboxsizer1 = new wxStaticBoxSizer( staticbox1,
       wxVERTICAL );
+   #endif
    wxFlexGridSizer *flexgridsizer1 = new wxFlexGridSizer( 3, 4, 0, 0 );
    wxBoxSizer *boxsizer1 = new wxBoxSizer( wxHORIZONTAL );
    wxBoxSizer *boxsizer2 = new wxBoxSizer( wxHORIZONTAL );
@@ -662,12 +675,22 @@ void CoordPanel::Setup( wxWindow *parent)
    boxsizer3->Add(intervalTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
    boxsizer3->Add(secStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
 
+   #if __WXMAC__
+   boxsizer4->Add( flexgridsizer1, 0, wxALIGN_CENTER|wxALL, 5 );
+   boxsizer4->Add( boxsizer2, 0, wxALIGN_CENTER|wxALL, 5 );
+   boxsizer4->Add( boxsizer3, 0, wxALIGN_CENTER|wxALL, 5 );
+   
+   theMainSizer->Add(boxsizer1, 0, wxALIGN_CENTRE|wxALL, 5);
+   theMainSizer->Add(title1StaticText, 0, wxALIGN_LEFT|wxALL, 5);
+   theMainSizer->Add(boxsizer4, 0, wxALIGN_CENTRE|wxALL, 5);
+   #else
    staticboxsizer1->Add( flexgridsizer1, 0, wxALIGN_CENTER|wxALL, 5 );
    staticboxsizer1->Add( boxsizer2, 0, wxALIGN_CENTER|wxALL, 5 );
    staticboxsizer1->Add( boxsizer3, 0, wxALIGN_CENTER|wxALL, 5 );
 
    theMainSizer->Add(boxsizer1, 0, wxALIGN_CENTRE|wxALL, 5);
    theMainSizer->Add(staticboxsizer1, 0, wxALIGN_CENTRE|wxALL, 5);
+   #endif
    
    if (!mEnableAll)
    {

@@ -47,17 +47,22 @@ GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title)
     
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
+   
    theParent = parent;
     
+   theDialogSizer = new wxBoxSizer(wxVERTICAL);
+   theButtonSizer = new wxBoxSizer(wxHORIZONTAL); //loj: 10/19/04 Made theButtonSizer member data
+   
+   #if __WXMAC__
+   theMiddleSizer = new wxBoxSizer(wxVERTICAL);
+   theBottomSizer = new wxBoxSizer(wxVERTICAL);
+   #else
    wxStaticBox *middleStaticBox = new wxStaticBox(this, -1, wxT(""));
    wxStaticBox *bottomStaticBox = new wxStaticBox(this, -1, wxT(""));
-    
-    // create sizers
-   theDialogSizer = new wxBoxSizer(wxVERTICAL);
    theMiddleSizer = new wxStaticBoxSizer(middleStaticBox, wxVERTICAL);
    theBottomSizer = new wxStaticBoxSizer(bottomStaticBox, wxVERTICAL);
-   theButtonSizer = new wxBoxSizer(wxHORIZONTAL); //loj: 10/19/04 Made theButtonSizer member data
-  
+   #endif
+   
     // create bottom buttons
    theOkButton =
       new wxButton(this, ID_BUTTON_OK, "OK", wxDefaultPosition, wxDefaultSize, 0);

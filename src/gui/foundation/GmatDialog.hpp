@@ -51,13 +51,20 @@ protected:
     // member data
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
+   
    wxWindow *theParent;
     
    wxBoxSizer *theDialogSizer;
+   wxBoxSizer *theButtonSizer;
+   
+   #if __WXMAC__
+   wxBoxSizer *theMiddleSizer;
+   wxBoxSizer *theBottomSizer;
+   #else
    wxStaticBoxSizer *theMiddleSizer;
    wxStaticBoxSizer *theBottomSizer;
-   wxBoxSizer *theButtonSizer;
-
+   #endif
+   
    wxButton *theOkButton;
    wxButton *theCancelButton;
    wxButton *theHelpButton;
