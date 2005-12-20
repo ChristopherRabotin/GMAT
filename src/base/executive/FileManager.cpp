@@ -24,6 +24,8 @@
 #include <sstream>
 #include <iomanip>
 
+//#define FM_CREATE_DEFAULT_INPUT
+
 //#define DEBUG_FILE_MANAGER 1
 
 //---------------------------------
@@ -43,6 +45,8 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "TEXTURE_PATH",
    
    // file name
+   "LOG_FILE",
+   "REPORT_FILE",
    "SPLASH_FILE",
    "TIME_COEFF_FILE",
    "SLP_FILE",
@@ -187,7 +191,10 @@ void FileManager::ReadStartupFile(const std::string &fileName)
              "It no longer can read old startup file.\n");
       
    } // end While()
-   
+
+   // now use log file from the startup file
+   MessageInterface::SetLogFile(GetFullPathname("LOG_FILE"));
+   MessageInterface::logEnabled = true;
    mInStream.close();
 }
 
@@ -322,27 +329,32 @@ std::string FileManager::GetPathname(const FileType type)
 //------------------------------------------------------------------------------
 std::string FileManager::GetPathname(const std::string &typeName)
 {
-   if (mFileMap.find(typeName) != mFileMap.end())
+   // typeName contains _PATH
+   if (typeName.find("_PATH") != typeName.npos)
    {
-      // Replace ROOT_PATH with abs path (loj: 7/14/05)
-      std::string pathname = mPathMap[mFileMap[typeName]->mPath];
-      if (pathname.find("ROOT_PATH") != pathname.npos)
+      if (mPathMap.find(typeName) != mPathMap.end())
+         return mPathMap[typeName];
+   }
+   else
+   {
+      if (mFileMap.find(typeName) != mFileMap.end())
       {
-         std::string pathname2 = mPathMap["ROOT_PATH"] + mPathMap[mFileMap[typeName]->mPath];
-         std::string::size_type pos1 = pathname2.find("ROOT_PATH");
-         pathname2.replace(pos1, 10, "");
-         return pathname2;
-      }
-      else
-      {
-         return mPathMap[mFileMap[typeName]->mPath];
+         // Replace ROOT_PATH with abs path (loj: 7/14/05)
+         std::string pathname = mPathMap[mFileMap[typeName]->mPath];
+         if (pathname.find("ROOT_PATH") != pathname.npos)
+         {
+            std::string pathname2 = mPathMap["ROOT_PATH"] +
+               mPathMap[mFileMap[typeName]->mPath];
+            std::string::size_type pos1 = pathname2.find("ROOT_PATH");
+            pathname2.replace(pos1, 10, "");
+            return pathname2;
+         }
+         else
+         {
+            return mPathMap[mFileMap[typeName]->mPath];
+         }
       }
    }
-   
-   //MessageInterface::ShowMessage
-   //   ("FileManager::GetPathname() file type: %s is unknown\n", typeName.c_str());
-   
-   //return "UNKNOWN_FILE_TYPE";
    
    throw GmatBaseException("FileManager::GetPathname() file type: " + typeName +
                            " is unknown\n");
@@ -536,19 +548,30 @@ void FileManager::AddFileType(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
 FileManager::FileManager()
 {
+   MessageInterface::logEnabled = false; // so that debug can be written from here
+   MessageInterface::ShowMessage("FileManager::FileManager() entered\n");
+   
    AddFileType("ROOT_PATH", "./");
    mStartupFileName = "gmat_startup_file.txt";
    
-   //loj: Should we create defaults?
-   //#define FM_CREATE_DEFAULT
-   
-#ifdef FM_CREATE_DEFAULT
-   
    //-------------------------------------------------------
-   // create default paths and files
+   // create default output paths and files
    //-------------------------------------------------------
    // output file path
    AddFileType("OUTPUT_PATH", "./files/output/");
+   AddFileType("LOG_FILE", "OUTPUT_PATH/GmatLog.txt");
+   AddFileType("REPORT_FILE", "OUTPUT_PATH/ReportFile.txt");
+
+   //loj: Should we create default input files?
+#ifdef FM_CREATE_DEFAULT_INPUT
+   
+   //-------------------------------------------------------
+   // create default input paths and files
+   //-------------------------------------------------------
+   // output file path
+   AddFileType("OUTPUT_PATH", "./files/output/");
+   AddFileType("LOG_FILE", "OUTPUT_PATH/GmatLog.txt");
+   AddFileType("REPORT_FILE", "OUTPUT_PATH/ReportFile.txt");
    
    // texture file path
    AddFileType("TEXTURE_PATH", "./files/plot/texture/");

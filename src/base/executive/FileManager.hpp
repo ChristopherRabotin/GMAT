@@ -47,6 +47,8 @@ public:
       TEXTURE_PATH,
       
       // file name
+      LOG_FILE,
+      REPORT_FILE,
       SPLASH_FILE,
       TIME_COEFF_FILE,
       SLP_FILE,
