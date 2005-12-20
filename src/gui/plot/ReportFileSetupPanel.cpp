@@ -217,8 +217,11 @@ void ReportFileSetupPanel::Create()
    wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
    fileStaticText = new wxStaticText(this, ID_TEXT, wxT("File: "), 
                                      wxDefaultPosition, wxDefaultSize, 0 );
+   //loj: 12/16/05 made 250 to 300 to show path
+   //fileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
+   //                              wxDefaultPosition, wxSize(250, -1),  0);
    fileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
-                                 wxDefaultPosition, wxSize(250, -1),  0);
+                                 wxDefaultPosition, wxSize(300, -1),  0);
    browseButton = new wxButton( this, ID_BROWSE_BUTTON, wxT("Browse"), 
                                 wxDefaultPosition, wxDefaultSize, 0 );
    
@@ -334,7 +337,10 @@ void ReportFileSetupPanel::LoadData()
    int filenameId = reportFile->GetParameterID("Filename");
    std::string filename = reportFile->GetStringParameter(filenameId);
    fileTextCtrl->SetValue(wxT(filename.c_str()));
-    
+
+   //MessageInterface::ShowMessage("ReportFileSetupPanel::LoadData() filename=%s\n",
+   //                              filename.c_str());
+   
    int writeHeadersId = reportFile->GetParameterID("WriteHeaders");
    if (strcmp(reportFile->GetStringParameter(writeHeadersId).c_str(), "On") == 0)
       showHeaderCheckBox->SetValue(true);

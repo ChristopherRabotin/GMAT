@@ -93,6 +93,8 @@ public:
    bool AddVarParameter(const std::string &paramName, Integer index);
    
 protected:
+   /// Name of the output path
+   std::string    outputPath;
    /// Name of the report file
    std::string    filename;
    /// Precision for output of real data

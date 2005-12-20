@@ -22,6 +22,7 @@
 #include "ReportFile.hpp"
 #include "MessageInterface.hpp"
 #include "Publisher.hpp"         // for Instance()
+#include "FileManager.hpp"       // for GetPathname()
 
 //#define DEBUG_REPORTFILE 1
 //#define DEBUG_REPORTFILE_DATA 1
@@ -61,6 +62,7 @@ ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
 ReportFile::ReportFile(const std::string &name, const std::string &fileName,
                        Parameter *firstVarParam) :
    Subscriber      ("ReportFile", name),
+   outputPath      (""),
    filename        (fileName),
    //precision       (12),
    precision       (16),
@@ -71,9 +73,33 @@ ReportFile::ReportFile(const std::string &name, const std::string &fileName,
    lastUsedProvider(-1),
    usedByReport    (false)
 {
-   if (filename == "")
-    filename = "ReportFile.txt";
-
+   try
+   {
+      FileManager *fm = FileManager::Instance();
+      outputPath = fm->GetPathname(FileManager::REPORT_FILE);
+      
+      if (filename == "")
+      {
+         filename = fm->GetFullPathname(FileManager::REPORT_FILE);
+      }
+      else
+      {
+         // add output path if there is no path
+         if (filename.find("/") == filename.npos &&
+             filename.find("\\") == filename.npos)
+         {
+            filename = outputPath + filename;
+         }
+      }
+   }
+   catch (GmatBaseException &e)
+   {
+      if (filename == "")
+         filename = "ReportFile.txt";
+      
+      MessageInterface::ShowMessage(e.GetMessage());
+   }
+   
    mNumVarParams = 0;
 
    if (firstVarParam != NULL)
@@ -108,9 +134,10 @@ ReportFile::ReportFile(const ReportFile &rf) :
    lastUsedProvider (-1),
    usedByReport    (rf.usedByReport)
 {
-   if (filename == "")
-    filename = "ReportFile.txt";
-    
+   //if (filename == "")
+   //   filename = "ReportFile.txt";
+
+   filename = rf.filename;
    mVarParams = rf.mVarParams; 
    mNumVarParams = rf.mNumVarParams;
    mVarParamNames = rf.mVarParamNames;
@@ -389,7 +416,9 @@ Integer ReportFile::SetIntegerParameter(const Integer id, const Integer value)
 std::string ReportFile::GetStringParameter(const Integer id) const
 {
    if (id == FILENAME)
+   {
       return filename;
+   }
    else if (id == WRITE_HEADERS)
    {
       if (writeHeaders)
@@ -440,6 +469,10 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
       }
 
       filename = value;
+      
+      if (filename.find("/") == filename.npos &&
+          filename.find("\\") == filename.npos)
+         filename = outputPath + filename;
       
       return true;
    }
