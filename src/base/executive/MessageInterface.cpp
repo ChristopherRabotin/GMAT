@@ -48,6 +48,7 @@ int MessageInterface::showIntervalInMilSec = 2000;
 short MessageInterface::messageExist = 0;
 std::string MessageInterface::logFileName = "GmatLog.txt";
 bool MessageInterface::logEnabled = true;
+bool MessageInterface::logFileSet = false;
 FILE* MessageInterface::logFile = NULL;
 
 //---------------------------------
@@ -308,19 +309,29 @@ void MessageInterface::LogMessage(const std::string &msg)
          {
             std::string filename = fm->GetFullPathname("LOG_FILE");
             logFile = fopen(filename.c_str(), "w");
+            logFileSet = true;
          }
          catch (BaseException &e)
          {
             logFile = fopen(logFileName.c_str(), "w");
          }
       }
-      
-      if (logFile)
-      {
-         fprintf(logFile, "%s", msg.c_str());
-         fflush(logFile);
-      }
    }
+   else if (!logFileSet)
+   {
+      if (logFile)
+         fclose(logFile);
+      
+      logFile = fopen(logFileName.c_str(), "w");
+      logFileSet = true;
+   }
+   
+   if (logFile)
+   {
+      fprintf(logFile, "%s", msg.c_str());
+      fflush(logFile);
+   }
+   
 }
 
 
@@ -337,6 +348,7 @@ void MessageInterface::SetLogFile(const std::string &filename)
    logFile = fopen(logFileName.c_str(), "w");
    fprintf(logFile, "MessageInterface::SetLogFile() Log file set to %s\n",
            logFileName.c_str());
+   logFileSet = true;
 }
 
 

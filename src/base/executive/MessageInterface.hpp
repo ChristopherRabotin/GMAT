@@ -67,6 +67,7 @@ public:
    static std::string logFileName;
    static FILE *logFile;
    static bool logEnabled;
+   static bool logFileSet;
    static std::ostream *msgStream;
    
    MessageInterface();
