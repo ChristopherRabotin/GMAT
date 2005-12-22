@@ -463,26 +463,32 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &a)
    return output;
 }
 
-//loj: 9/21/04 added width and precision
+
 //------------------------------------------------------------------------------
-// std::string ToString(const Real &val, Integer width=10, Integer precision=9)
+// std::string ToString(const Real &val, bool scientific=false,
+//                      Integer width=10, Integer precision=9)
 //------------------------------------------------------------------------------
-std::string GmatRealUtil::ToString(const Real &val, Integer width,
-                                   Integer precision)
+std::string GmatRealUtil::ToString(const Real &val, bool scientific,
+                                   Integer width, Integer precision)
 {
    std::stringstream ss("");
    ss.width(width);
    ss.precision(precision);
+   if (scientific)
+      ss.setf(std::ios::scientific);
+   
    ss << val;
    return std::string(ss.str());
 }
 
+
 //------------------------------------------------------------------------------
-// std::string ToString(const Integer &val)
+// std::string ToString(const Integer &val, Integer width=3)
 //------------------------------------------------------------------------------
-std::string GmatRealUtil::ToString(const Integer &val)
+std::string GmatRealUtil::ToString(const Integer &val, Integer width)
 {
    std::stringstream ss("");
+   ss.width(width);
    ss << val;
    return std::string(ss.str());
 }

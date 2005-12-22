@@ -104,9 +104,9 @@ namespace GmatRealUtil
    std::istream& operator>> (std::istream &input, Rmatrix &a);
    std::ostream& operator<< (std::ostream &output, const Rmatrix &a); 
 
-   //loj: 9/21/04 added width and precision
-   std::string ToString(const Real &val, Integer width=10, Integer precision=9);
-   std::string ToString(const Integer &val);
+   std::string ToString(const Real &val, bool scientific=false,
+                        Integer width=10, Integer precision=9);
+   std::string ToString(const Integer &val, Integer width=4);
 }
 #endif // Linear_hpp
 
