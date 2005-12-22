@@ -327,9 +327,11 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item)
    
    int dataType = item->GetDataType();
 
+   #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage
       ("GmatMainFrame::CreateChild() name=%s, dataType=%d\n",
        item->GetDesc().c_str(), dataType);
+   #endif
    
    //----------------------------------------------------------------------
    // create a mdi child
