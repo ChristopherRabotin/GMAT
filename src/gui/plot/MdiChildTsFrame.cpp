@@ -63,11 +63,11 @@ MdiChildTsFrame::MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
                                  const wxString &plotName, const wxString& plotTitle,
                                  const wxString& xAxisTitle, const wxString& yAxisTitle,
                                  const wxPoint& pos, const wxSize& size, const long style)
-//    : wxMDIChildFrame(parent, -1, plotName, pos, size,
-//                      style | wxNO_FULL_REPAINT_ON_RESIZE)
-   : GmatMdiChildFrame(parent, -1, plotTitle, pos, size,
-                       style | wxNO_FULL_REPAINT_ON_RESIZE, plotName,
-                       GmatTree::OUTPUT_XY_PLOT)
+//    : GmatMdiChildFrame(parent, -1, plotTitle, pos, size,
+//                        style | wxNO_FULL_REPAINT_ON_RESIZE, plotName,
+//                        GmatTree::OUTPUT_XY_PLOT)
+   : GmatMdiChildFrame(parent, plotName, plotTitle, GmatTree::OUTPUT_XY_PLOT, -1,
+                       pos, size, style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
    mXyPlot = (TsPlotCanvas *) NULL;
    mIsMainFrame = isMainFrame;

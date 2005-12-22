@@ -38,15 +38,18 @@ BEGIN_EVENT_TABLE(GmatMdiChildFrame, wxMDIChildFrame)
    EVT_CLOSE(GmatMdiChildFrame::OnClose) 
 END_EVENT_TABLE()
 
+//------------------------------------------------------------------------------
+// GmatMdiChildFrame::GmatMdiChildFrame(...)
+//------------------------------------------------------------------------------
 GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame* parent, 
-                       wxWindowID id, 
-                       const wxString& title, 
-                       const wxPoint& pos, 
-                       const wxSize& size, 
-                       long style, 
-                       const wxString& name,
-                       const int type)
-                 :wxMDIChildFrame(parent, id, title, pos, size, style, name)
+                                     const wxString& name,
+                                     const wxString& title, 
+                                     const int type,
+                                     wxWindowID id, 
+                                     const wxPoint& pos, 
+                                     const wxSize& size, 
+                                     long style)
+   : wxMDIChildFrame(parent, id, title, pos, size, style, name)
 {
    mDirty = false;
    dataType = type;
@@ -57,11 +60,18 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame* parent,
    SetMenuBar(CreateMenu(dataType));
 }
 
+
+//------------------------------------------------------------------------------
+// ~GmatMdiChildFrame()
+//------------------------------------------------------------------------------
 GmatMdiChildFrame::~GmatMdiChildFrame()
 {
 }
 
 
+//------------------------------------------------------------------------------
+// void OnClose(wxCloseEvent &event)
+//------------------------------------------------------------------------------
 void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
 {
    // check if window is dirty?
@@ -82,28 +92,47 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
 }
 
 #ifdef __WXMAC__
+//------------------------------------------------------------------------------
+// void SetTitle(wxString newTitle)
+//------------------------------------------------------------------------------
 void GmatMdiChildFrame::SetTitle(wxString newTitle)
 {
 //   SetTitle(newTitle);
    title = newTitle;
 }
 
+
+//------------------------------------------------------------------------------
+// wxString GetTitle()
+//------------------------------------------------------------------------------
 wxString GmatMdiChildFrame::GetTitle()
 {
    return title;
 }
 #endif
 
+
+//------------------------------------------------------------------------------
+// int GetDataType()
+//------------------------------------------------------------------------------
 int GmatMdiChildFrame::GetDataType()
 {
    return dataType;
 }
 
+
+//------------------------------------------------------------------------------
+// void SetDirty(bool dirty)
+//------------------------------------------------------------------------------
 void GmatMdiChildFrame::SetDirty(bool dirty)
 {
     mDirty = dirty;
 }
 
+
+//------------------------------------------------------------------------------
+// bool IsDirty()
+//------------------------------------------------------------------------------
 bool GmatMdiChildFrame::IsDirty()
 {
     return mDirty;

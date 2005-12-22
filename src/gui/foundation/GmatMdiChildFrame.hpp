@@ -21,15 +21,16 @@ class GmatMdiChildFrame : public wxMDIChildFrame
 {
 public:
     // constructors
-    GmatMdiChildFrame( wxMDIParentFrame* parent, 
-                        wxWindowID id = -1, 
-                        const wxString& title = "", 
-                        const wxPoint& pos = wxDefaultPosition, 
-                        const wxSize& size = wxDefaultSize, 
-                        long style = wxDEFAULT_FRAME_STYLE, 
-                        const wxString& name = "",
-                        const int type = 20000);
+    GmatMdiChildFrame(wxMDIParentFrame* parent, 
+                      const wxString& name = "",
+                      const wxString& title = "", 
+                      const int type = 20000,
+                      wxWindowID id = -1, 
+                      const wxPoint& pos = wxDefaultPosition, 
+                      const wxSize& size = wxDefaultSize, 
+                      long style = wxDEFAULT_FRAME_STYLE);
     ~GmatMdiChildFrame();
+   
 #ifdef __WXMAC__
     wxString GetTitle();
     void SetTitle(wxString newTitle);

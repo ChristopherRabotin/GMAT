@@ -55,9 +55,11 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
                                      const wxPoint& pos, const wxSize& size,
                                      const long style, const wxString &csName,
                                      SolarSystem *solarSys)
-   : GmatMdiChildFrame(parent, -1, title, pos, size,
-                       style | wxNO_FULL_REPAINT_ON_RESIZE, plotName,
-                       GmatTree::OUTPUT_OPENGL_PLOT)
+//    : GmatMdiChildFrame(parent, -1, title, pos, size,
+//                        style | wxNO_FULL_REPAINT_ON_RESIZE, plotName,
+//                        GmatTree::OUTPUT_OPENGL_PLOT)
+   : GmatMdiChildFrame(parent, plotName, title, GmatTree::OUTPUT_OPENGL_PLOT, -1,
+                       pos, size, style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
    mCanvas = (TrajPlotCanvas *) NULL;
    mIsMainFrame = isMainFrame;
