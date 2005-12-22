@@ -51,7 +51,8 @@ public:
    GmatMainFrame(wxWindow *parent, const wxWindowID id, const wxString& title,
                  const wxPoint& pos, const wxSize& size, const long style);
    ~GmatMainFrame();
-   void CreateChild(GmatTreeItemData *item);
+   
+   GmatMdiChildFrame* CreateChild(GmatTreeItemData *item);
    bool IsChildOpen(GmatTreeItemData *item);
    bool RenameChild(GmatTreeItemData *item, wxString newName);
    bool RenameChild(wxString oldName, wxString newName);
@@ -106,13 +107,24 @@ private:
    
    wxSashLayoutWindow* win;
    wxSashLayoutWindow* msgWin;
-   wxScrolledWindow *panel;
+   wxScrolledWindow *mScrolledWin;
 
    ViewTextFrame *mTextFrame;
    wxMenu *mServerMenu;
    wxStatusBar *theStatusBar;
    
    wxMenuBar* CreateMainMenu();
+   
+   GmatMdiChildFrame* CreateNewResource(const wxString &title,
+                                        const wxString &name, int dataType);
+   GmatMdiChildFrame* CreateNewCommand(const wxString &title,
+                                       const wxString &name, int dataType,
+                                       GmatCommand *cmd);
+   GmatMdiChildFrame* CreateNewControl(const wxString &title,
+                                       const wxString &name, int dataType,
+                                       GmatCommand *cmd);
+   GmatMdiChildFrame* CreateNewOutput(const wxString &title,
+                                      const wxString &name, int dataType);
    
    void InitToolBar(wxToolBar* toolBar);
    bool InterpretScript(const wxString &filename);
