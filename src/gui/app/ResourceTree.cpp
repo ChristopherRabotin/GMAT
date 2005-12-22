@@ -53,10 +53,13 @@
 #include "ParameterCreateDialog.hpp"
 #include "CoordSysCreateDialog.hpp"
 #include "GmatMainFrame.hpp"
-
+#include "RunScriptFolderDialog.hpp"
+#include "ReportFile.hpp"
+#include "FileUtil.hpp"               // for Compare()
 #include <sstream>
 #include <fstream>
 #include <wx/dir.h>
+#include <wx/filename.h>
 
 //define __ENABLE_CONSTELLATIONS__
 
@@ -2567,34 +2570,45 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       scriptId = GetNextChild(item, cookie);
    }
    
-   //int numScripts = GetChildrenCount(item, false);
-   wxString strRunCount;
-   wxString strRepeatCount = "1";
-   strRunCount.Printf("%d", numScripts);
    long runCount = numScripts;
    long repeatCount = 1;
    
-   //loj: 8/5/05 wxGetNumberFromUser() doesn't ruturn -1 when invalid number has
-   //entered as it is documented.
-   //runCount = wxGetNumberFromUser("", "Enter number of scripts to run:",
-   //                               "Run Scripts", runCount, 1, numScripts, this);
-   //if (runCount < 0)
-   //   return;
-   
-   strRunCount = wxGetTextFromUser("Enter number of scripts to run: ",
-                                   "Run Scripts", strRunCount, this);
-   strRepeatCount = wxGetTextFromUser("Enter number of times to run each script: ",
-                                      "Repeat Count", strRepeatCount, this);
-   
-   if (!strRunCount.ToLong(&runCount))
+   Real absTol = GmatFileUtil::CompareAbsTol;
+   wxString compareDir1  = ((GmatTreeItemData*)GetItemData(item))->GetDesc();
+
+   RunScriptFolderDialog dlg(this, numScripts, absTol, compareDir1);
+   dlg.ShowModal();
+
+   if (!dlg.RunScripts())
       return;
-   
-   if (!strRepeatCount.ToLong(&repeatCount))
-      repeatCount = 1;
+
+   runCount = dlg.GetNumScriptsToRun();
+   repeatCount = dlg.GetNumTimesToRun();
+   bool compare = dlg.CompareResults();
+   bool saveCompareResults = dlg.SaveCompareResults();
    
    int count = 0;
    mHasUserInterrupted = false;
    scriptId = GetFirstChild(item, cookie);
+
+   wxTextCtrl *textCtrl = NULL;
+   wxString tempStr;
+   
+   // create CompareReport Panel
+   if (compare)
+   {
+      GmatTreeItemData *compareItem =
+         new GmatTreeItemData("CompareReport", GmatTree::COMPARE_REPORT);
+      GmatMdiChildFrame *textFrame = GmatAppData::GetMainFrame()->CreateChild(compareItem);
+      textCtrl = textFrame->GetScriptTextCtrl();
+      textFrame->Show();
+
+      //loj: Why Do I need to do this to show whole TextCtrl?
+      // textFrame->Layout() didn't work.
+      int w, h;
+      textFrame->GetSize(&w, &h);
+      textFrame->SetSize(w+1, h+1);
+   }
    
    while (scriptId.IsOk())
    {     
@@ -2615,22 +2629,37 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       filename = ((GmatTreeItemData*)GetItemData(scriptId))->GetDesc();
       MessageInterface::ShowMessage
          ("Starting script %d out of %d: %s\n", count, numScripts, filename.c_str());
-      //wxLogStatus(GmatAppData::GetMainFrame(),
-      //            "Running script %d out of %d: %s\n", count, numScripts,
-      //            filename.c_str());
       wxString text;
       text.Printf("Running script %d out of %d: %s\n", count, numScripts,
                   filename.c_str());
       GmatAppData::GetMainFrame()->SetStatusText(text, 1);
+      
+      if (compare)
+         textCtrl->AppendText(text);
+      
       for (int i=0; i<repeatCount; i++)
       {
          MessageInterface::ShowMessage
             ("====> Run Count: %d\n", i+1);
          
+         if (compare)
+         {
+            tempStr.Printf("%d", i+1);
+            textCtrl->AppendText("====> Run Count: " + tempStr);
+         }
+         
          try
          {
             if (BuildScript(filename))
+            {
                GmatAppData::GetMainFrame()->OnScriptRun(event);
+               if (compare)
+               {
+                  absTol = dlg.GetAbsTolerance();
+                  CompareScriptRunResult(absTol, dlg.GetReplaceString(), compareDir1,
+                                         dlg.GetCompareDirectory(), textCtrl);
+               }
+            }
          }
          catch(BaseException &e)
          {
@@ -2641,6 +2670,10 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    
       scriptId = GetNextChild(item, cookie);
    }
+
+   // save compare results to a file
+   if (compare && saveCompareResults)
+      textCtrl->SaveFile(dlg.GetSaveFilename());
 }
 
 
@@ -2838,4 +2871,97 @@ Gmat::ObjectType ResourceTree::GetObjectType(int itemType)
    
    return objType;
    
+}
+
+
+//------------------------------------------------------------------------------
+// void CompareScriptRunResult(Real absTol, const wxString &replaceStr.
+//                             const wxString &dir1, const wxString &dir2,
+//                             wxTextCtrl *textCtrl)
+//------------------------------------------------------------------------------
+void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceStr,
+                                          const wxString &dir1, const wxString &dir2,
+                                          wxTextCtrl *textCtrl)
+{
+   #if DEBUG_COMPARE_REPORT
+   MessageInterface::ShowMessage
+      ("ResourceTree::CompareScriptRunResult() absTol=%g, replaceStr=%s\n"
+       "   dir1=%s\n   dir2=%s\n   textCtrl=%d\n", absTol, replaceStr.c_str(),
+       dir1.c_str(), dir2.c_str(), textCtrl);
+   #endif
+   
+   if (textCtrl == NULL)
+      MessageInterface::ShowMessage
+         ("ResourceTree::CompareScriptRunResult() textCtrl is NULL\n");
+   
+   StringArray itemNames =
+      theGuiInterpreter->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+   int size = itemNames.size();
+   std::string objName;
+   ReportFile *theReport;
+   
+   for (int i = 0; i<size; i++)
+   {
+      Subscriber *sub = theGuiInterpreter->GetSubscriber(itemNames[i]);
+      objName = itemNames[i];
+
+      if (sub->GetTypeName() == "ReportFile")
+      {
+         theReport = (ReportFile*) theGuiInterpreter->GetSubscriber(objName);
+
+         if (!theReport)
+         {
+            MessageInterface::ShowMessage
+               ("ResourceTree::CompareScriptRunResult The ReportFile: %s is NULL.\n",
+                objName.c_str());
+            return;
+         }
+         
+         std::string filename1 = theReport->GetStringParameter("Filename");
+         
+         #if DEBUG_COMPARE_REPORT
+         MessageInterface::ShowMessage("   filename1=%s\n", filename1.c_str());
+         #endif
+         
+         wxString filename2 = filename1.c_str();
+         size_t numReplaced = filename2.Replace("GMAT", replaceStr.c_str());
+         
+         if (numReplaced == 0)
+         {
+            MessageInterface::ShowMessage
+               ("ResourceTree::CompareScriptRunResult() Cannot compare results.\n"
+                "The report file doesn't contain GMAT.\n");
+            return;
+         }
+         
+         if (numReplaced > 1)
+         {
+            MessageInterface::ShowMessage
+               ("ResourceTree::CompareScriptRunResult() Cannot compare results.\n"
+                "The report file name contains more than 1 GMAT string.\n");
+            return;
+         }
+         
+         // replace compare dir path
+         if (dir1 != dir2)
+         {
+            wxFileName fname(filename2);
+            wxString name = fname.GetName();
+            filename2 = dir2 + "/" + name;
+         }
+
+         #if DEBUG_COMPARE_REPORT
+         MessageInterface::ShowMessage("   filename2=%s\n", filename2.c_str());
+         #endif
+         
+         StringArray output =
+            GmatFileUtil::Compare(filename1.c_str(), filename2.c_str(), absTol);
+         
+         // append text
+         for (unsigned int i=0; i<output.size(); i++)
+            textCtrl->AppendText(wxString(output[i].c_str()));
+
+         textCtrl->Show();
+      }
+   }
 }

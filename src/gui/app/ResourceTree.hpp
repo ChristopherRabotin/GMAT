@@ -157,6 +157,10 @@ private:
    
    wxMenu* CreatePopupMenu(Gmat::ObjectType type);
    Gmat::ObjectType GetObjectType(int itemType);
+
+   void CompareScriptRunResult(Real absTol, const wxString &replaceStr,
+                               const wxString &dir1, const wxString &dir2,
+                               wxTextCtrl *textCtrl);
    
    DECLARE_EVENT_TABLE();
 
