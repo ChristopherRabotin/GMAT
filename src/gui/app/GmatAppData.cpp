@@ -23,6 +23,7 @@ GuiInterpreter* GmatAppData::theGuiInterpreter = NULL;
 
 #if !defined __CONSOLE_APP__
 ViewTextFrame* GmatAppData::theMessageWindow = NULL;
+ViewTextFrame* GmatAppData::theCompareWindow = NULL;
 wxTextCtrl* GmatAppData::theMessageTextCtrl = NULL;
 ResourceTree* GmatAppData::theResourceTree = NULL;
 MissionTree* GmatAppData::theMissionTree = NULL;
