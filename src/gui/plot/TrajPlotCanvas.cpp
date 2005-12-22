@@ -63,8 +63,8 @@ using namespace FloatAttUtil;
 #endif
 
 // if test Euler angle on mouse event
-#define TEST_EULER_ANGLE
-#ifdef TEST_EULER_ANGLE
+#define COMPUTE_EULER_ANGLE
+#ifdef COMPUTE_EULER_ANGLE
 #include "AttitudeUtil.hpp"
 //#define USE_MODELVIEW_MAT
 //#define DEBUG_TRAJCANVAS_EULER 1
@@ -79,7 +79,8 @@ using namespace FloatAttUtil;
 //#define DEBUG_TRAJCANVAS_ZOOM 1
 //#define DEBUG_TRAJCANVAS_OBJECT 1
 //#define DEBUG_TRAJCANVAS_TEXTURE 2
-//#define DEBUG_TRAJCANVAS_PROJ 1
+//#define DEBUG_TRAJCANVAS_PERSPECTIVE 1
+//#define DEBUG_TRAJCANVAS_PROJ 2
 //#define DEBUG_TRAJCANVAS_ANIMATION 1
 //#define DEBUG_TRAJCANVAS_LONGITUDE 1
 
@@ -164,9 +165,9 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mViewPointVectorObj = NULL;
    mViewDirectionObj = NULL;
    mViewPointRefVector.Set(0.0, 0.0, 0.0);
-   mViewPointVector.Set(0.0, 0.0, 30000);
+   mViewPointVector.Set(0.0, 0.0, 30000.0);
    mViewDirectionVector.Set(0.0, 0.0, -1.0);
-   mVpLocVec.Set(0.0, 0.0, 30000);
+   mVpLocVec.Set(0.0, 0.0, 30000.0);
    mViewScaleFactor = 1.0;
    mUseInitialViewPoint = false;
    mUseViewPointRefVector = true;
@@ -238,11 +239,8 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mDrawAxes = false;
    mDrawGrid = false;
    mDrawOrbitNormal = true;
-   //mXyPlaneColor = GmatColor::GRAY32; //loj:9/27/05
    mXyPlaneColor = GmatColor::SKYBLUE;
-   //mEcPlaneColor = GmatColor::TEAL32;
    mEcPlaneColor = GmatColor::CHESTNUT;
-   //mESLinecolor = GmatColor::D_BROWN32;
    mESLinecolor = GmatColor::GOLDTAN;
    
    // animation
@@ -362,10 +360,9 @@ bool TrajPlotCanvas::InitGL()
       return false;
 //#endif
 
-   //loj: 3/10/05 Actually I don't need this
    // pixel format
-   //if (!SetPixelFormatDescriptor())
-   //   return false;
+   if (!SetPixelFormatDescriptor())
+      return false;
    
    // font
    SetDefaultGLFont();
@@ -376,8 +373,7 @@ bool TrajPlotCanvas::InitGL()
    mIsEndOfData = false;
    mIsEndOfRun = false;
    mViewAnimation = false;
-
-   //loj: 9/29/05 Added
+   
    if (mUseInitialViewPoint)
    {
       mfCamRotXAngle = 0;
@@ -430,6 +426,18 @@ void TrajPlotCanvas::SetEndOfRun(bool flag)
           "y=%f, mFinalMha=%f, mFinalLongitude=%f, mFinalLst=%f\n",
           mInitialLongitude, time, x, y, mha, longitude, lst);
       #endif
+
+      //-------------------------------------------------------------------
+      // Process mouse left click event to avoid flipping back to default
+      // view when OnPaint() is called via the GmatMainFrame. This only
+      // happens when opening a new script file for the first time after
+      // the run. After the second time, it doesn't flip the view.
+      // I don't know why this is happening.
+      // This causes to keep adding rotation angle, so comment out.
+      //-------------------------------------------------------------------
+      //wxMouseEvent event(wxEVT_LEFT_DOWN);
+      //event.SetEventObject(this);
+      //GetEventHandler()->ProcessEvent(event);
    }
 }
 
@@ -485,12 +493,14 @@ void TrajPlotCanvas::SetUsePerspectiveMode(bool perspMode)
       mfCamTransX = -mVpLocVec[0];
       mfCamTransY = -mVpLocVec[1];
       mfCamTransZ = -mVpLocVec[2];
+      mUseGluLookAt = true; //loj: 12/7/05 try gluLookAt()
    }
    else
    {
       mfCamTransX = 0;
       mfCamTransY = 0;
-      mfCamTransZ = 0;
+      mfCamTransZ = 0;      
+      mUseGluLookAt = false;
    }
 }
 
@@ -812,13 +822,14 @@ void TrajPlotCanvas::GotoObject(const wxString &objName)
        "   mAxisLength=%f\n", objName.c_str(), mViewObjId, mMaxZoomIn, mAxisLength);
    #endif
 
-   if (mUsePerspectiveMode)
-   {
-      // move camera position to object
-      mfCamTransX = -mObjectTempPos[objId][mNumData-1][0];
-      mfCamTransY = -mObjectTempPos[objId][mNumData-1][1];
-      mfCamTransZ = -mObjectTempPos[objId][mNumData-1][2];
-   }
+   //loj: 12/7/05 Don't need this
+//    if (mUsePerspectiveMode)
+//    {
+//       // move camera position to object
+//       mfCamTransX = mObjectTempPos[objId][mNumData-1][0];
+//       mfCamTransY = mObjectTempPos[objId][mNumData-1][1];
+//       mfCamTransZ = mObjectTempPos[objId][mNumData-1][2];
+//    }
    
    Refresh(false);
 }
@@ -1118,6 +1129,20 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
              "ViewDirectionObject is NULL,"
              "so will use default Vector instead.\n");
    }
+   
+   // Set view up direction
+   if (mViewUpAxisName == "X")
+      mUpState.Set(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+   else if (mViewUpAxisName == "-X")
+      mUpState.Set(-1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+   else if (mViewUpAxisName == "Y")
+      mUpState.Set(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+   else if (mViewUpAxisName == "-Y")
+      mUpState.Set(0.0, -1.0, 0.0, 0.0, 0.0, 0.0);
+   else if (mViewUpAxisName == "Z")
+      mUpState.Set(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
+   else if (mViewUpAxisName == "-Z")
+      mUpState.Set(0.0, 0.0, -1.0, 0.0, 0.0, 0.0);
    
 } //end SetGlViewOption()
 
@@ -1652,6 +1677,7 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
 void TrajPlotCanvas::OnPaint(wxPaintEvent& event)
 {
    //MessageInterface::ShowMessage("===> TrajPlotCanvas::OnPaint() called\n");
+   
    // must always be here
    wxPaintDC dc(this);
    
@@ -1749,7 +1775,6 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
    
    if (mUseSingleRotAngle)
    {
-      //if (mIsEndOfData)
       if (mIsEndOfRun)
          mUseSingleRotAngle = false;
       
@@ -1757,7 +1782,7 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
       // This code is trying to compute Euler angle of last plot transformation
       // so that the plot can stay in the same orientation when user clicks it.
       // But it is not working yet.
-      #ifdef TEST_EULER_ANGLE
+      #ifdef COMPUTE_EULER_ANGLE
       if (mfCamSingleRotAngle != 0.0 || mfUpAngle != 0.0)
       {
          //compute Euler angles of viewpoint and up axis
@@ -1775,10 +1800,33 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
             ("TrajPlotCanvas::OnMouse() mfCamRotXYZAngle=%f, %f, %f\n",
              mfCamRotXAngle, mfCamRotYAngle, mfCamRotZAngle);
          #endif
-         
+
+         //loj: 12/7/05 added
+         if (mUsePerspectiveMode)
+         {
+            // always look at from Z for rotation and zooming
+            mfCamTransX = 0.0;
+            mfCamTransY = 0.0;
+            mfCamTransZ = -mVpLocVec.GetMagnitude();
+         }
       }
       #endif
    }
+   
+   //-------------------------------------------------------------------
+   // see comment in SetEndOfRun()
+   //-------------------------------------------------------------------
+   ////if left mouse clicked
+   //if (event.LeftDown())
+   //{
+   //   MessageInterface::ShowMessage("event.LeftDown())\n");
+   //   if (mIsEndOfRun)
+   //      ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
+   //   
+   //   ComputeView(fEndX, fEndY);
+   //   ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
+   //}
+   //-------------------------------------------------------------------
    
    //if mouse dragging
    if (event.Dragging())
@@ -1823,7 +1871,6 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
          //    mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
          
          // if end-of-run compute new mfCamRotXYZAngle by calling ChangeView()
-         //loj:10/7/05 if (mIsEndOfData)
          if (mIsEndOfRun)
             ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
          
@@ -2151,29 +2198,39 @@ void TrajPlotCanvas::SetProjection()
 void TrajPlotCanvas::SetupWorld()
 {
 
-   #if DEBUG_TRAJCANVAS_PROJ
+   #if DEBUG_TRAJCANVAS_PROJ > 2
    MessageInterface::ShowMessage
       ("TrajPlotCanvas::SetupWorld() mUsePerspectiveMode=%d, mUseSingleRotAngle=%d\n",
        mUsePerspectiveMode, mUseSingleRotAngle);
    #endif
    
-   #if DEBUG_PERSPECTIVE > 1
-   MessageInterface::ShowMessage
-      ("mfLeftPos=%f, mfRightPos=%f, mfBottomPos=%f, mfTopPos=%f, "
-       "mfViewNear=%f, mfViewFar=%f\n", mfLeftPos, mfRightPos, mfBottomPos,
-       mfTopPos, mfViewNear, mfViewFar);
+   #if DEBUG_TRAJCANVAS_PERSPECTIVE
+   if (mUseSingleRotAngle)
+   {
+      MessageInterface::ShowMessage
+         ("TrajPlotCanvas::SetupWorld() mfLeftPos=%f, mfRightPos=%f, mfBottomPos=%f, "
+          "mfTopPos=%f, mfViewNear=%f, mfViewFar=%f\n", mfLeftPos, mfRightPos,
+          mfBottomPos, mfTopPos, mfViewNear, mfViewFar);
+   }
    #endif
    
    if (mUsePerspectiveMode)
    {      
       // Setup how we view the world
       GLfloat aspect = (GLfloat)mCanvasSize.x / (GLfloat)mCanvasSize.y;
+
+      //loj: 12/7/05 commented out, need only x and y size.
+      //Real size = GmatMathUtil::Sqrt(mfRightPos * mfRightPos +
+      //                               mfTopPos   * mfTopPos +
+      //                               mfViewFar  * mfViewFar);
+      
       Real size = GmatMathUtil::Sqrt(mfRightPos * mfRightPos +
-                                     mfTopPos   * mfTopPos +
-                                     mfViewFar  * mfViewFar);
+                                     mfTopPos   * mfTopPos);
       
       Real dist = mVpLocVec.GetMagnitude();
-      mViewObjRadius = mObjectDefaultRadius*50;
+      
+      //loj: 12/7/05 mViewObjRadius = mObjectDefaultRadius*50;
+      mViewObjRadius = mObjectDefaultRadius;
       
       if (mUseFixedFov && mUseSingleRotAngle)
       {
@@ -2183,26 +2240,37 @@ void TrajPlotCanvas::SetupWorld()
       {
          if (!mUseViewDirectionVector && mViewDirectionObj != NULL)
          {
-            int objId = GetObjectId(mViewDirectionObj->GetName().c_str());
-            mViewObjRadius = mObjectRadius[objId];
+            // if showing view object (loj: 12/7/05 added)
+            if (mShowObjectMap[mViewObjName])
+            {
+               //loj: 12/7/05 use mViewObjId
+               //int objId = GetObjectId(mViewDirectionObj->GetName().c_str());
+               //mViewObjRadius = mObjectRadius[objId];
+               mViewObjRadius = mObjectRadius[mViewObjId];
+            }
          }
-         
+                  
          // compute fov angle
-         mFovDeg = 2.0 * ATan(size/2.0, dist - mViewObjRadius) * DEG_PER_RAD;
+         //loj: 12/7/05 add mViewObjRadius to dist
+         //mFovDeg = 2.0 * ATan(size/2.0, dist - mViewObjRadius) * DEG_PER_RAD;
+         mFovDeg = 2.0 * ATan(size/2.0, dist + mViewObjRadius) * DEG_PER_RAD;
       }
+
+      Real ratio = dist / mAxisLength;
       
-      #if DEBUG_PERSPECTIVE
-      MessageInterface::ShowMessage
-         ("TrajPlotCanvas::SetupWorld() size=%f, dist=%f, mViewObjRadius=%f\n",
-          size, dist, mViewObjRadius);
-      MessageInterface::ShowMessage
-         ("TrajPlotCanvas::SetupWorld() mAxisLength=%f, fov=%f\n",
-          mAxisLength, mFovDeg);
+      #if DEBUG_TRAJCANVAS_PERSPECTIVE
+      if (mUseSingleRotAngle)
+      {
+         MessageInterface::ShowMessage
+            ("   mAxisLength=%f, size=%f, dist=%f, mViewObjRadius=%f\n   "
+             "mFovDeg=%f, ratio=%f, \n", mAxisLength, size, dist, mViewObjRadius,
+             mFovDeg, ratio);
+      }
       #endif
-      
-      //gluPerspective(mFovDeg, aspect, 1.0, mAxisLength * mFovDeg);
-      gluPerspective(mFovDeg, aspect, mAxisLength/(mFovDeg*10), mAxisLength * mFovDeg);
-      //gluPerspective(60.0, aspect, 1.0, 6000000.0);
+
+      //loj: 12/7/05 Added ratio to prevent near side clipping
+      //orig:gluPerspective(mFovDeg, aspect, mAxisLength/(mFovDeg*10), mAxisLength * mFovDeg);
+      gluPerspective(mFovDeg, aspect, mAxisLength/(mFovDeg*15), mAxisLength * mFovDeg * ratio);
    }
    else
    {
@@ -2246,17 +2314,17 @@ void TrajPlotCanvas::SetupWorld()
          glRotatef(mfCamRotYAngle, 0.0, 1.0, 0.0);
          glRotatef(mfCamRotZAngle, 0.0, 0.0, 1.0);
       }
-            
+      
       #endif
    }
    
    //camera moves opposite direction to center on object
    //this is the point of rotation
-
+   
    glTranslatef(mObjectTempPos[mViewObjId][mNumData-1][0],
                 mObjectTempPos[mViewObjId][mNumData-1][1],
                 -mObjectTempPos[mViewObjId][mNumData-1][2]);
-      
+   
 } // end SetupWorld()
 
 
@@ -2463,7 +2531,7 @@ void TrajPlotCanvas::ComputeProjection(int frame)
    // get view direction and view center vector
    //-----------------------------------------------------------------
    mVdVec = mViewDirectionVector;
-   mVcVec = mVdVec;
+//    mVcVec = mVdVec; //loj: 12/7/05
    
    if (!mUseViewDirectionVector && mViewDirectionObj != NULL)
    {
@@ -2475,8 +2543,10 @@ void TrajPlotCanvas::ComputeProjection(int frame)
       
       // if viewpoint ref object is same as view direction object
       // just look opposite side
-      if (!mUsePerspectiveMode &&
-          mViewDirectionObj->GetName() == mViewPointRefObjName)
+      //loj: 12/7/05
+//       if (!mUsePerspectiveMode &&
+//           mViewDirectionObj->GetName() == mViewPointRefObjName)
+      if (mViewDirectionObj->GetName() == mViewPointRefObjName)
       {
          mVdVec = -mVpLocVec;
       }
@@ -2487,8 +2557,8 @@ void TrajPlotCanvas::ComputeProjection(int frame)
                     mObjectTempPos[mVdirObjId][frame][1],
                     mObjectTempPos[mVdirObjId][frame][2]);
 
-         // view center vector
-         mVcVec = mVdVec;
+//          // view center vector
+//          mVcVec = mVdVec;
          
          // check for 0.0 direction 
          if (mVdVec.GetMagnitude() == 0.0)
@@ -2501,6 +2571,11 @@ void TrajPlotCanvas::ComputeProjection(int frame)
              "mVdirObjId=%d\n", mVdirObjId);
       }
    }
+
+   //loj: 12/7/05
+   // view center vector
+   mVcVec = mVdVec;
+   
    
    #if DEBUG_TRAJCANVAS_PROJ
    MessageInterface::ShowMessage
@@ -2518,7 +2593,14 @@ void TrajPlotCanvas::ComputeProjection(int frame)
    if (mUsePerspectiveMode)
    {
       // set camera location
-      if (!mUseGluLookAt)
+      if (mUseGluLookAt)
+      {
+         //loj: 12/7/05
+         mfCamTransX = -mVpLocVec[0];
+         mfCamTransY = -mVpLocVec[1];
+         mfCamTransZ = -mVpLocVec[2];         
+      }
+      else
       {
          mfCamTransX = -mVpLocVec[0];
          mfCamTransY = -mVpLocVec[1];
@@ -2570,22 +2652,9 @@ void TrajPlotCanvas::ComputeUpAngleAxis(int frame)
 {
    // calculate view up direction
    
-   Rvector6 upState, upOutState;
+   Rvector6 upOutState;
    
-   if (mViewUpAxisName == "X")
-      upState.Set(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-   else if (mViewUpAxisName == "-X")
-      upState.Set(-1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-   else if (mViewUpAxisName == "Y")
-      upState.Set(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
-   else if (mViewUpAxisName == "-Y")
-      upState.Set(0.0, -1.0, 0.0, 0.0, 0.0, 0.0);
-   else if (mViewUpAxisName == "Z")
-      upState.Set(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
-   else if (mViewUpAxisName == "-Z")
-      upState.Set(0.0, 0.0, -1.0, 0.0, 0.0, 0.0);
-   
-   upOutState = upState;
+   upOutState = mUpState;
    
    if (mViewUpCoordSystem->GetName() != mViewCoordSystem->GetName())
    {
@@ -2593,7 +2662,7 @@ void TrajPlotCanvas::ComputeUpAngleAxis(int frame)
       Rvector6 originIn;
       Rvector6 originOut;
       
-      mCoordConverter.Convert(mTime[frame], upState, mViewUpCoordSystem,
+      mCoordConverter.Convert(mTime[frame], mUpState, mViewUpCoordSystem,
                               upOutState, mInternalCoordSystem);
       
       mCoordConverter.Convert(mTime[frame], originIn, mViewUpCoordSystem,
@@ -2613,25 +2682,48 @@ void TrajPlotCanvas::ComputeUpAngleAxis(int frame)
    }
    
    mUpVec.Set(upOutState(0), upOutState(1), upOutState(2));
+
+   //loj: 12/7/05 Added
+   // If view up and view direction is the same axis, change view direction,
+   // so it can show up direction correctly even for gluLookAt.
+   
+   Rvector3 vdUnit = mVdVec.GetUnitVector();
+   Real upDotView = mUpVec * vdUnit;
+   //MessageInterface::ShowMessage("===> upDotView = %f\n", upDotView);
+   
+   if (Abs(upDotView) == 1.0)
+   {
+      //MessageInterface::ShowMessage("===> mUpVec and mVdVec are on the same axis.\n");
+      
+      if (Abs(mUpVec[0]) > 0.0)
+         mVcVec = Cross(mUpVec, Rvector3(0.0, -1.0, 0.0));
+      else if (Abs(mUpVec[1]) > 0.0)
+         mVcVec = Cross(mUpVec, Rvector3(0.0, 0.0, -1.0));
+      else
+         mVcVec = Cross(mUpVec, Rvector3(-1.0, 0.0, 0.0));
+
+      mVdVec = Cross(mVdVec, mVcVec);
+
+      // if using gluLookAt, we don't want view point and view up direction line up
+      if (mUseGluLookAt)
+         mVpLocVec = -mVdVec;
+   }
    
    // DJC added for "Up"   
    mfUpAngle = atan2(mVdVec[1],mVdVec[0]) * DEG_PER_RAD + 90.0;
    mfUpXAxis = mVdVec[0];
    mfUpYAxis = mVdVec[1];
    mfUpZAxis = mVdVec[2];
-
-   //loj:
-//    mfUpAngle = -(atan2(mVdVec[1],mVdVec[0]) * DEG_PER_RAD + 90.0);
-//    mfUpXAxis = mVdVec[0];
-//    mfUpYAxis = mVdVec[1];
-//    mfUpZAxis = -mVdVec[2];
    
    #if DEBUG_TRAJCANVAS_PROJ
    MessageInterface::ShowMessage
-      ("===> mVpLocVec=%s, mVcVec=%s\n", mVpLocVec.ToString().c_str(),
-       mVcVec.ToString().c_str());
+      ("TrajPlotCanvas::ComputeUpAngleAxis() mVpLocVec=%s, mVdVec=%s\n   "
+       "mVcVec=%s, mUpVec=%s\n", mVpLocVec.ToString().c_str(),
+       mVdVec.ToString().c_str(), mVcVec.ToString().c_str(),
+       mUpVec.ToString().c_str());
    MessageInterface::ShowMessage
-      ("===> mUpVec=%s\n", mUpVec.ToString().c_str());
+      ("   atan2(mVdVec[y],mVdVec[x])=%f, mfUpAngle=%f, mfUpXYZAxis=%f, %f, %f\n",
+       atan2(mVdVec[1],mVdVec[0]), mfUpAngle, mfUpXAxis, mfUpYAxis, mfUpZAxis);
    #endif
 }
 
@@ -3518,9 +3610,17 @@ void TrajPlotCanvas::DrawEquatorialPlane(UnsignedInt color)
    //color.Green *=factor;
    //color.Blue *=factor;
    //SetCelestialColor (color);
+
+   GLubyte ubfactor = (GLubyte)(factor * 255);
+   //MessageInterface::ShowMessage("===> ubfactor=%d, factor=%f\n", ubfactor, factor);
+
+   // Why does alpha value have no effects?
+   glColor4ub(sGlColor->red, sGlColor->green, sGlColor->blue, ubfactor);
+   
    for (int i=1; i<=(int)imax; ++i)
       //if (i%10!=0 && (GlOptions.DrawDarkLines || factor > 0.5))
-      if (i%10!=0 && (factor > 0.5))
+      //if (i%10!=0 && (factor > 0.5)) // why i%10!=0? not every 10th?
+      if (i%10 == 0 || (factor > 0.5))
          DrawCircle(qobj, i*size);
    
    gluDeleteQuadric(qobj);
@@ -4026,7 +4126,7 @@ Rvector3 TrajPlotCanvas::ComputeEulerAngles()
 {
    Rvector3 modAngle;
 
-   #ifndef TEST_EULER_ANGLE
+   #ifndef COMPUTE_EULER_ANGLE
    return modAngle;
 
    
@@ -4041,18 +4141,27 @@ Rvector3 TrajPlotCanvas::ComputeEulerAngles()
       // model view matrix
       static GLfloat sProjectionMat[16];
       static GLfloat sModelViewMat[16];
-   
+
+      //loj: Is this really the current Matirx since model view matrix is popuped
+      // after drawing?
       glGetFloatv(GL_PROJECTION_MATRIX, sProjectionMat);
       glGetFloatv(GL_MODELVIEW_MATRIX, sModelViewMat);
+
+      // OpenGL stores matrix in column major: ith column, jth row.
+      //   m[16]               m[j][i]          m[i][j]
+      // m1 m5 m9  m13    m11 m21 m31 m41    m11 m12 m13 m14
+      // m2 m6 m10 m14    m12 m22 m32 m42    m21 m22 m23 m24
+      // m3 m7 m11 m15    m13 m23 m33 m43    m31 m32 m33 m34
+      // m4 m8 m12 m16    m14 m24 m34 m44    m41 m42 m43 m44
       
       Rmatrix33 pjmat(sProjectionMat[0], sProjectionMat[1], sProjectionMat[2],
-                      sProjectionMat[3], sProjectionMat[4], sProjectionMat[5],
-                      sProjectionMat[6], sProjectionMat[7], sProjectionMat[8]);
+                      sProjectionMat[4], sProjectionMat[5], sProjectionMat[6],
+                      sProjectionMat[8], sProjectionMat[9], sProjectionMat[10]);
       
       Rmatrix33 mvmat(sModelViewMat[0], sModelViewMat[1], sModelViewMat[2],
-                      sModelViewMat[3], sModelViewMat[4], sModelViewMat[5],
-                      sModelViewMat[6], sModelViewMat[7], sModelViewMat[8]);
-      
+                      sModelViewMat[4], sModelViewMat[5], sModelViewMat[6],
+                      sModelViewMat[8], sModelViewMat[9], sModelViewMat[10]);
+            
       finalMat = pjmat * mvmat;
       
       #ifdef DEBUG_TRAJCANVAS_EULER
@@ -4072,7 +4181,7 @@ Rvector3 TrajPlotCanvas::ComputeEulerAngles()
       Rvector3 upAxis((Real)mfUpXAxis, (Real)mfUpYAxis, (Real)mfUpZAxis);
       Rvector3 rotAxis = Rvector3((Real)mfCamRotXAxis, (Real)mfCamRotYAxis,
                                   (Real)mfCamRotZAxis);
-      
+
       #ifdef DEBUG_TRAJCANVAS_EULER
       MessageInterface::ShowMessage
          ("TrajPlotCanvas::ComputeEulerAngles() mfUpAngle=%f, upAxis=%s\n",
@@ -4129,6 +4238,13 @@ Rvector3 TrajPlotCanvas::ComputeEulerAngles()
       else
          eulerAngle = GmatAttUtil::ToEulerAngles(finalMat, 1, 2, 3);
       
+//       if (mRotateAboutXaxis)
+//          eulerAngle = GmatAttUtil::ToEulerAngles(mvmat, 2, 3, 1);
+//       else if (mRotateAboutYaxis)
+//          eulerAngle = GmatAttUtil::ToEulerAngles(mvmat, 3, 1, 2);
+//       else
+//          eulerAngle = GmatAttUtil::ToEulerAngles(mvmat, 1, 2, 3);
+      
       eulerAngle = eulerAngle * DEG_PER_RAD;
       
       #ifdef DEBUG_TRAJCANVAS_EULER
@@ -4137,59 +4253,74 @@ Rvector3 TrajPlotCanvas::ComputeEulerAngles()
           eulerAngle.ToString().c_str());
       #endif
       
-      modAngle = eulerAngle;
-
-      //loj: 9/29/05
-      // How can I compute rotation angle in general way?
-      
-      if (eulerAngle.GetMagnitude() == 0.0)
-      {
-         if (mRotateAboutXaxis) // 2-3-1
-         {
-            modAngle[0] = -90 - 270;
-            modAngle[1] = 90;
-            modAngle[2] = 0;
-         }
-      }
-      else
-      {
-         if (mRotateAboutXaxis) // 2-3-1
-         {
-            if (eulerAngle(2) == 0.0)
-            {
-               modAngle[0] = eulerAngle(0) - 270;
-               modAngle[1] = eulerAngle(2);
-               modAngle[2] = eulerAngle(1);
-            }
-            else
-            {
-               modAngle[0] = eulerAngle(0);
-               modAngle[1] = eulerAngle(2);
-               modAngle[2] = eulerAngle(1);
-            }
-         }
-//          else if (mRotateAboutZaxis) // 1-2-3
-//          {
-//             if (eulerAngle(2) == 0.0)
-//             {
-//                modAngle[0] = eulerAngle(0);
-//                modAngle[1] = eulerAngle(1) - 90;
-//                modAngle[2] = eulerAngle(2) + 90;
-//             }
-//             else
-//             {
-//                modAngle[0] = eulerAngle(0) - 180;
-//                modAngle[1] = eulerAngle(1);
-//                modAngle[2] = eulerAngle(2) - 90;
-//             }
-//          }
-      }
    }
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
          ("*** ERROR *** TrajPlotCanvas::ComputeEulerAngles() %s\n",
           e.GetMessage().c_str());
+   }
+   
+   modAngle = eulerAngle;
+   
+   //loj: 9/29/05
+   // How can I compute modified rotation angle in general way?
+
+   // in Orthographics mode
+   //mfCamRotXAxis =  mVdVec[1];
+   //mfCamRotYAxis = -mVdVec[0];
+   //mfCamRotZAxis = 0.0;
+   
+   // in Perspective mode
+   //if (mUsePerspectiveMode)
+   //{
+   //   // always look at from Z for rotation and zooming
+   //   mfCamTransX = 0.0;
+   //   mfCamTransY = 0.0;
+   //   mfCamTransZ = -mVpLocVec.GetMagnitude();
+   //}
+   
+   if (eulerAngle.GetMagnitude() == 0.0)
+   {
+      if (mRotateAboutXaxis) // 2-3-1 (Default)
+      {
+         modAngle[0] = -90 - 270;
+         modAngle[1] = 90;
+         modAngle[2] = 0;
+      }
+   }
+   else
+   {
+      if (mRotateAboutXaxis) // 2-3-1 (Default)
+      {
+         if (eulerAngle(2) == 0.0)
+         {
+            modAngle[0] = eulerAngle(0) - 270;
+            modAngle[1] = eulerAngle(2);
+            modAngle[2] = eulerAngle(1);
+         }
+         else
+         {
+            modAngle[0] = eulerAngle(0);
+            modAngle[1] = eulerAngle(2) -90;
+            modAngle[2] = eulerAngle(1);
+         }
+      }
+      else if (mRotateAboutZaxis) // 1-2-3
+      {
+         if (eulerAngle(2) == 0.0)
+         {
+            modAngle[0] = eulerAngle(0);
+            modAngle[1] = eulerAngle(1) - 90;
+            modAngle[2] = eulerAngle(2) + 90;
+         }
+         else
+         {
+            modAngle[0] = eulerAngle(0) - 180;
+            modAngle[1] = eulerAngle(1);
+            modAngle[2] = eulerAngle(2) - 90;
+         }
+      }
    }
    
    #ifdef DEBUG_TRAJCANVAS_EULER

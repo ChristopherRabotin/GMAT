@@ -23,6 +23,7 @@
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
 #include "Rvector3.hpp"
+#include "Rvector6.hpp"
 
 #include <map>
 
@@ -243,6 +244,7 @@ private:
    Rvector3 mViewPointRefVector;
    Rvector3 mViewPointVector;
    Rvector3 mViewDirectionVector;
+   Rvector6 mUpState;
    Real mViewScaleFactor;
    Real mFixedFovAngle;
    
