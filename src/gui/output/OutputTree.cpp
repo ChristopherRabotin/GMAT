@@ -26,16 +26,17 @@
 #include "bitmaps/default.xpm"
 #include <wx/string.h> // for wxArrayString
 
-#include "GuiInterpreter.hpp"
-#include "OutputTree.hpp"
 #include "GmatAppData.hpp"
-#include "MessageInterface.hpp"
+#include "OutputTree.hpp"
 #include "GmatTreeItemData.hpp"
-#include "GmatMainFrame.hpp"
+//#include "GmatMainFrame.hpp"
+#include "ViewTextFrame.hpp"
 
+#include "GuiInterpreter.hpp"
 #include "Subscriber.hpp"
 #include "ReportFile.hpp"
 #include "FileUtil.hpp"    // for GmatFileUtil::Compare()
+#include "MessageInterface.hpp"
 
 //#define DEBUG_RESOURCE_TREE 1
 
@@ -549,11 +550,38 @@ void OutputTree::OnCompareReport(wxCommandEvent &event)
    std::string filename1 = theReport->GetStringParameter("Filename");
    
    wxString filename2 =
-      wxFileSelector("Choose a file to open", "", "", "txt",
-                     "text files (*.txt)|*.txt|Report files (*.report)|*.report");
+      wxFileSelector("Choose a file to open", "", "", "report",
+                     "Report files (*.report)|*.report|Text files (*.txt)|*.txt");
 
    if (filename2.empty())
       return;
 
-   GmatFileUtil::Compare(filename1.c_str(), filename2.c_str());
+   Real tol = GmatFileUtil::CompareAbsTol;
+   wxString tolStr;
+   tolStr.Printf("%e", tol);
+   tolStr = wxGetTextFromUser("Enter absolute tolerance to be used in flagging: ",
+                              "Tolerance", tolStr, this);
+   
+   if (!tolStr.ToDouble(&tol))
+   {
+      wxMessageBox("Entered Invalid Tolerance", "Error", wxOK, this);
+      return;
+   }
+   
+   StringArray output = GmatFileUtil::Compare(filename1.c_str(), filename2.c_str(), tol);
+
+   if (GmatAppData::theCompareWindow == NULL)
+   {
+      //ViewTextFrame *textFrame =
+      GmatAppData::theCompareWindow =
+         new ViewTextFrame(GmatAppData::GetMainFrame(), _T("Compare Utility"),
+                           50, 50, 800, 500, "Permanent");
+   }
+   
+   //textFrame->Show(true);
+   GmatAppData::theCompareWindow->Show(true);
+   
+   for (unsigned int i=0; i<output.size(); i++)
+      //textFrame->AppendText(wxString(output[i].c_str()));
+      GmatAppData::theCompareWindow->AppendText(wxString(output[i].c_str()));
 }
