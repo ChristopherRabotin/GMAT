@@ -21,23 +21,31 @@
 #include "FileUtil.hpp"
 #include "StringTokenizer.hpp"
 #include "MessageInterface.hpp"
-#include "RealUtilities.hpp"       // for GmatMathUtil::
+#include "RealUtilities.hpp"       // for Abs()
+#include "Linear.hpp"              // for ToString()
 
 using namespace std;
+using namespace GmatRealUtil;
 
 //#define DEBUG_COMPARE_REPORT 1
 
 //------------------------------------------------------------------------------
-// void Compare(const std::string &filename1, const std::string &filename2,
-//              Real tol = 1.0e-5))
+// StringArray& Compare(const std::string &filename1, const std::string &filename2,
+//                      Real tol = 1.0e-4)
 //------------------------------------------------------------------------------
-void GmatFileUtil::Compare(const std::string &filename1,
-                           const std::string &filename2, Real tol)
+StringArray& GmatFileUtil::Compare(const std::string &filename1,
+                                   const std::string &filename2, Real tol)
 {
-   
+   textBuffer.clear();
+   textBuffer.push_back("\n======================================== Compare Utility\n");
+   textBuffer.push_back("filename1=" + filename1 + "\n");
+   textBuffer.push_back("filename2=" + filename2 + "\n");
+
+   #if DEBUG_COMPARE_REPORT
    MessageInterface::ShowMessage("\n======================================== Compare Utility\n");
-   MessageInterface::ShowMessage("filename1=%s\n", filename1.c_str());
-   MessageInterface::ShowMessage("filename2=%s\n", filename2.c_str());
+   MessageInterface::ShowMessage("filename1=%s\n");
+   MessageInterface::ShowMessage("filename2=%s\n");
+   #endif
    
    // open file
    ifstream in1(filename1.c_str());
@@ -45,14 +53,14 @@ void GmatFileUtil::Compare(const std::string &filename1,
    
    if (!in1)
    {
-      MessageInterface::ShowMessage("Cannot open first file: %s. \n", filename1.c_str());
-      return;
+      textBuffer.push_back("Cannot open first file: " +  filename1 + "\n\n");
+      return textBuffer;
    }
    
    if (!in2)
    {
-      MessageInterface::ShowMessage("Cannot open second file: %s. \n", filename2.c_str());
-      return;
+      textBuffer.push_back("Cannot open second file: " + filename2 + "\n\n");
+      return textBuffer;
    }
    
    char buffer[BUFFER_SIZE];
@@ -68,14 +76,14 @@ void GmatFileUtil::Compare(const std::string &filename1,
    //------------------------------------------
    if (!GmatFileUtil::SkipHeaderLines(in1, tokens1))
    {
-      MessageInterface::ShowMessage("Cannot compare files: Data record not found on file 1.");
-      return;
+      textBuffer.push_back("Cannot compare files: Data record not found on file 1.\n");
+      return textBuffer;
    }
    
    if (!GmatFileUtil::SkipHeaderLines(in2, tokens2))
    {
-      MessageInterface::ShowMessage("Cannot compare files: Data record not found on file 2.");
-      return;
+      textBuffer.push_back("Cannot compare files: Data record not found on file 2.\n");
+      return textBuffer;
    }
    
    //------------------------------------------
@@ -86,11 +94,10 @@ void GmatFileUtil::Compare(const std::string &filename1,
    
    if (file1Cols != file2Cols)
    {
-      MessageInterface::ShowMessage
-         ("OutputTree::OnCompareReport() Cannot compare outputs. "
-          "Number of colmuns are different.\n   file1=%d, file2=%d\n",
-          file1Cols, file2Cols);
-      return;
+      textBuffer.push_back
+         ("Cannot compare outputs. Number of colmuns are different. file1: " +
+          ToString(file1Cols) + ",  file2: " + ToString(file2Cols) + "\n");
+      return textBuffer;
    }
 
    // compare first data line
@@ -117,7 +124,7 @@ void GmatFileUtil::Compare(const std::string &filename1,
    //------------------------------------------
    // now start compare
    //------------------------------------------
-   #if DEBUG_COMPARE_REPORT
+   #if DEBUG_COMPARE_REPORT > 2
    for (int i=0; i<10; i++)
    {
       if (in1.eof() || in2.eof())
@@ -126,7 +133,7 @@ void GmatFileUtil::Compare(const std::string &filename1,
    while (!in1.eof() && !in2.eof())
    {
    #endif
-      
+
       count++;
       
       #if DEBUG_COMPARE_REPORT > 1
@@ -143,7 +150,11 @@ void GmatFileUtil::Compare(const std::string &filename1,
       
       stk.Set(line);
       tokens1 = stk.GetAllTokens();
-         
+
+      // check for blank lines in file1
+      if ((Integer)(tokens1.size()) != file1Cols)
+         break;
+      
       #if DEBUG_COMPARE_REPORT > 2
       for (int i=0; i<file1Cols; i++)
          MessageInterface::ShowMessage("tokens1[%d] = %s\n", i, tokens1[i].c_str());
@@ -159,7 +170,11 @@ void GmatFileUtil::Compare(const std::string &filename1,
       
       stk.Set(line);
       tokens2 = stk.GetAllTokens();
-         
+      
+      // check for blank lines in file1
+      if ((Integer)(tokens2.size()) != file1Cols)
+         break;
+      
       #if DEBUG_COMPARE_REPORT > 2
       for (int i=0; i<file1Cols; i++)
          MessageInterface::ShowMessage("tokens2[%d] = %s\n", i, tokens2[i].c_str());
@@ -193,11 +208,23 @@ void GmatFileUtil::Compare(const std::string &filename1,
    }
    
    // report the difference summary
-   MessageInterface::ShowMessage
-       ("Total lines compared: %d    Tolerance: %e\n\n"
-       "Column \tMinimum Diff.  Line# \tMaximum Diff.  Line#  Min>Tol  Max>Tol\n"
-       "------ \t-------------  ----- \t-------------  -----  -------  -------\n",
-        count, tol);
+   std::string outLine;
+   outLine = "Total lines compared: " + ToString(count) + ",   Tolerance: " +
+      ToString(tol, true, 7, 6) + "\n\n";
+   textBuffer.push_back(outLine);
+
+   #if DEBUG_COMPARE_REPORT
+   MessageInterface::ShowMessage("%s", outLine.c_str());
+   #endif
+
+   outLine = "Column   Minimum Diff.   Line#   Maximum Diff.   Line#   Min>Tol   Max>Tol\n"
+      "------   -------------   -----   -------------   -----   -------   -------\n";
+   
+   textBuffer.push_back(outLine);
+   
+   #if DEBUG_COMPARE_REPORT
+   MessageInterface::ShowMessage("%s", outLine.c_str());
+   #endif
    
    char minGtTol, maxGtTol;
    
@@ -211,18 +238,25 @@ void GmatFileUtil::Compare(const std::string &filename1,
       
       if (maxDiffs[i] > tol)
          maxGtTol = '*';
+
+      outLine = ToString(i+1) + "     " + ToString(minDiffs[i], true, 7, 6) +
+         "   " + ToString(minLines[i]) + "    " +
+         ToString(maxDiffs[i], true, 7, 6) + "   " + ToString(maxLines[i]) +
+         "       " + minGtTol + "         " + maxGtTol + "\n";
       
-      MessageInterface::ShowMessage
-         ("%3d \t%e  %3d \t%e  %3d       %c        %c\n",
-          i+1, minDiffs[i], minLines[i], maxDiffs[i], maxLines[i], minGtTol,
-          maxGtTol);
+      textBuffer.push_back(outLine);
+      
+      #if DEBUG_COMPARE_REPORT
+      MessageInterface::ShowMessage("%s", outLine.c_str());
+      #endif
    }
    
-   MessageInterface::ShowMessage("\n");
+   textBuffer.push_back("\n");
    
    in1.close();
    in2.close();
-   
+
+   return textBuffer;
 }
    
    
