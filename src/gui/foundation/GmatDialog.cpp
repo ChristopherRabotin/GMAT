@@ -43,6 +43,7 @@ END_EVENT_TABLE()
 GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title)
    : wxDialog(parent, id, title)
 {
+   canClose = true;
    int borderSize = 2;
     
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
@@ -51,7 +52,7 @@ GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title)
    theParent = parent;
     
    theDialogSizer = new wxBoxSizer(wxVERTICAL);
-   theButtonSizer = new wxBoxSizer(wxHORIZONTAL); //loj: 10/19/04 Made theButtonSizer member data
+   theButtonSizer = new wxBoxSizer(wxHORIZONTAL);
    
    #if __WXMAC__
    theMiddleSizer = new wxBoxSizer(wxVERTICAL);
@@ -107,10 +108,11 @@ void GmatDialog::ShowData()
 
    CenterOnScreen(wxBOTH);
    
-   LoadData();
-
    theOkButton->Disable();
    theHelpButton->Disable(); //loj: for future build
+   
+   LoadData();
+
 }
 
 //------------------------------------------------------------------------------
@@ -123,7 +125,9 @@ void GmatDialog::ShowData()
 void GmatDialog::OnOK(wxCommandEvent &event)
 {
    SaveData();
-   Close();
+
+   if (canClose)
+      Close();
 }
 
 //------------------------------------------------------------------------------

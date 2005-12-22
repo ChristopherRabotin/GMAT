@@ -68,7 +68,9 @@ protected:
    wxButton *theOkButton;
    wxButton *theCancelButton;
    wxButton *theHelpButton;
-    
+
+   bool canClose;
+   
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
     
