@@ -408,8 +408,24 @@ void TrajPlotCanvas::SetEndOfRun(bool flag)
 
    if (mIsEndOfRun)
    {
-      // assuming objId = 0  is the first spacecraft id
-      int objId = 0;
+      #if DEBUG_TRAJCANVAS_LONGITUDE
+      MessageInterface::ShowMessage
+         ("===> TrajPlotCanvas::SetEndOfRun() mIsEndOfRun=%d, mNumData=%d\n",
+          mIsEndOfRun, mNumData);
+      #endif
+      
+      //-------------------------------------------------------
+      // get first spacecraft id
+      //-------------------------------------------------------
+      int objId = UNKNOWN_OBJ_ID;
+      for (int sc=0; sc<mScCount; sc++)
+      {
+         objId = GetObjectId(mScNameArray[sc].c_str());
+         
+         if (objId != UNKNOWN_OBJ_ID)
+            break;
+      }
+      
       Real time = mTime[mNumData-1];
       Real x = mObjectGciPos[objId][mNumData-1][0];
       Real y = mObjectGciPos[objId][mNumData-1][1];
@@ -1316,8 +1332,8 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
       
       #if DEBUG_TRAJCANVAS_LONGITUDE
       MessageInterface::ShowMessage
-         ("===> time=%f, mha=%f, longitude=%f, lst = %f\n", mTime[mNumData],
-          mha, longitude, lst);
+         ("===> time=%f, mNumData=%d, mha=%f, longitude=%f, lst = %f\n",
+          mTime[mNumData], mNumData, mha, longitude, lst);
       #endif
       
       if (mNumData == 0)
