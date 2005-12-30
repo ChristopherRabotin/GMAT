@@ -559,6 +559,9 @@ bool ScriptInterpreter::Parse()
                          #ifdef DEBUG_PARAMETER_PARSING
                             std::cout << "Calling SetParameter with \"" << *i 
                                       << "\" on object \""<< obj->GetName() << "\"\n";
+                            MessageInterface::ShowMessage
+                               ("Calling SetParameter with %s on object %s\n", (*i).c_str(),
+                                obj->GetName().c_str());
                          #endif
                          if (!SetParameter(obj, id, *i)) {
                             if (obj->GetType() == Gmat::FORCE_MODEL)

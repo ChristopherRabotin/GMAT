@@ -2001,10 +2001,12 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
                                         const std::string &fileName,
                                         bool createDefault)
 {
+   //loj: 12/16/05 added fileName
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
-      ("Moderator::CreateSubscriber() entered: type = " +
-       type + ", name = " + name + "\n");
+      ("Moderator::CreateSubscriber() entered: type=%s, name=%s, fileName=%s\n"
+       "createDefault=%d\n", type.c_str(), name.c_str(), fileName.c_str(),
+       createDefault);
    #endif
    
    if (GetSubscriber(name) == NULL)

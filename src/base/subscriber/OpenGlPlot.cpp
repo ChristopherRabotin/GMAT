@@ -830,6 +830,7 @@ Integer OpenGlPlot::GetParameterID(const std::string &str) const
    return Subscriber::GetParameterID(str);
 }
 
+
 //------------------------------------------------------------------------------
 // Gmat::ParameterType GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
@@ -1376,6 +1377,8 @@ const StringArray& OpenGlPlot::GetStringArrayParameter(const std::string &label)
 }
 
 
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool OpenGlPlot::GetBooleanParameter(const Integer id) const
 {
    if (id == SHOW_PLOT)
@@ -1383,18 +1386,37 @@ bool OpenGlPlot::GetBooleanParameter(const Integer id) const
    return Subscriber::GetBooleanParameter(id);
 }
 
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool OpenGlPlot::GetBooleanParameter(const std::string &label) const
 {
    return GetBooleanParameter(GetParameterID(label));
 }
 
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool OpenGlPlot::SetBooleanParameter(const std::string &label, const bool value)
 {
+   #if DEBUG_OPENGL_PARAM
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::SetBooleanParameter() label=%s, value=%d\n", label.c_str(), value);
+   #endif
+   
    return SetBooleanParameter(GetParameterID(label), value);
 }
 
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool OpenGlPlot::SetBooleanParameter(const Integer id, const bool value)
 {
+   #if DEBUG_OPENGL_PARAM
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::SetBooleanParameter() id=%d, value=%d\n", id, value);
+   #endif
+   
    if (id == SHOW_PLOT)
    {
       active = value;
@@ -1402,7 +1424,6 @@ bool OpenGlPlot::SetBooleanParameter(const Integer id, const bool value)
    }
    return Subscriber::SetBooleanParameter(id, value);
 }
-
 
 
 //------------------------------------------------------------------------------
