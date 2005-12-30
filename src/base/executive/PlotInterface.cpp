@@ -199,7 +199,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    currPlotFrame->SetDrawESLines(drawESLines);
    
    currPlotFrame->SetOverlapPlot(overlapPlot);
-   currPlotFrame->SetUseViewPointInfo(usevpInfo);
+   currPlotFrame->SetUseInitialViewDef(usevpInfo);
    currPlotFrame->SetUsePerspectiveMode(usepm);
    currPlotFrame->SetViewCoordSystem(wxString(csName.c_str()));
    currPlotFrame->SetNumPointsToRedraw(numPtsToRedraw);
