@@ -102,6 +102,7 @@ OBJECTS = \
     app/GmatTreeItemData.o \
     app/InteractiveMatlabDialog.o \
     app/MissionTreeItemData.o \
+	app/RunScriptFolderDialog.o \
     app/ResourceTree.o \
     app/ScriptPanel.o \
     burn/FiniteBurnSetupPanel.o \
@@ -145,6 +146,7 @@ OBJECTS = \
     hardware/ThrusterConfigPanel.o \
     mission/DecoratedTree.o \
     mission/MissionTree.o \
+	output/CompareReportPanel.o \
     output/OutputTree.o \
     output/ReportFilePanel.o \
     plot/MdiChildTrajFrame.o \
