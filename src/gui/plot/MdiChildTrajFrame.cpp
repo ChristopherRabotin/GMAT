@@ -69,12 +69,12 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
    mOverlapPlot = false;
    
    // add Sun, Earth, Luan as default body
-   mBodyNames.Add("Sun");
+   //mBodyNames.Add("Sun");
    mBodyNames.Add("Earth");
-   mBodyNames.Add("Luna");
-   mBodyColors.push_back(GmatColor::YELLOW32);
+   //mBodyNames.Add("Luna");
+   //mBodyColors.push_back(GmatColor::YELLOW32);
    mBodyColors.push_back(GmatColor::GREEN32);
-   mBodyColors.push_back(GmatColor::L_BROWN32);
+   //mBodyColors.push_back(GmatColor::L_BROWN32);
    
    MdiGlPlot::mdiChildren.Append(this);
    
@@ -396,13 +396,13 @@ void MdiChildTrajFrame::SetOverlapPlot(bool overlap)
 
 
 //------------------------------------------------------------------------------
-// void SetUseViewPointInfo(bool flag)
+// void SetUseInitialViewDef(bool flag)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetUseViewPointInfo(bool flag)
+void MdiChildTrajFrame::SetUseInitialViewDef(bool flag)
 {
    if (mCanvas)
    {
-      mCanvas->SetUseViewPointInfo(flag);
+      mCanvas->SetUseInitialViewDef(flag);
    }
 }
 
@@ -755,6 +755,7 @@ void MdiChildTrajFrame::OnShowOptionDialog(wxCommandEvent& event)
                                                 mBodyColors);
 
       mOptionDialog->UpdateObjectList(mCanvas->GetObjectNames(),
+                                      mCanvas->GetShowObjectMap(),
                                       mCanvas->GetObjectColorMap());
       
       int x, y, newX;

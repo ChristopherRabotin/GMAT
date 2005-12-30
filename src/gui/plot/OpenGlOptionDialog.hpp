@@ -58,6 +58,7 @@ public:
    void UpdateObject(const wxArrayString &objectNames,
                      const UnsignedIntArray &objectColors);
    void UpdateObjectList(const wxArrayString &objectNames,
+                         const wxStringBoolMap &showObjects,
                          const wxStringColorMap &objectColors);
    
 protected:
@@ -98,6 +99,7 @@ protected:
    int mObjectCount;
    
    wxStringColorMap mObjectColorMap;
+   wxStringBoolMap  mInitialShowObjectMap;
    wxStringBoolMap  mShowObjectMap;
    wxStringBoolMap  mShowOrbitNormalMap;
    
@@ -109,7 +111,7 @@ protected:
    
    wxListBox *mObjectListBox;
    
-   wxCheckBox *mUseInitialViewPointCheckBox;
+   wxCheckBox *mUseInitialViewDefCheckBox;
    wxCheckBox *mUsePerspModeCheckBox;
    
    wxCheckBox *mRotateAboutXYCheckBox;
@@ -150,7 +152,7 @@ protected:
    void UpdateObjectComboBox();
    void UpdateObjectListBox();
    bool ShowColorDialog(wxColor &oldColor, wxButton *button);
-   void ShowSpacePointOption(const wxString &name, bool show = true);
+   void ShowSpacePointOption(const wxString &name);
    
    // event handlers
    void OnTextChange(wxCommandEvent& event);

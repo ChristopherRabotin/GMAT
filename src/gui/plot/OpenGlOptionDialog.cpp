@@ -192,7 +192,8 @@ void OpenGlOptionDialog::SetDrawEarthSunLines(bool flag)
 void OpenGlOptionDialog::SetGotoObjectName(const wxString &objName)
 {
    mGotoObjectComboBox->SetStringSelection(objName);
-
+   mGotoObjectName = objName;
+   
    // We don't want to enable this
    theApplyButton->Disable();
 }
@@ -204,7 +205,8 @@ void OpenGlOptionDialog::SetGotoObjectName(const wxString &objName)
 void OpenGlOptionDialog::SetCoordSysName(const wxString &csName)
 {
    mCoordSysComboBox->SetStringSelection(csName);
-
+   mCoordSysName = csName;
+   
    // We don't want to enable this
    theApplyButton->Disable();
 }
@@ -245,6 +247,7 @@ void OpenGlOptionDialog::UpdateObject(const wxArrayString &objectNames,
 // void UpdateObjectList(const wxArrayString &objNames, ...
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::UpdateObjectList(const wxArrayString &objNames,
+                                          const wxStringBoolMap &showObjects,
                                           const wxStringColorMap &objColors)
 {
    #ifdef DEBUG_GLOPTION_OBJECT
@@ -255,6 +258,8 @@ void OpenGlOptionDialog::UpdateObjectList(const wxArrayString &objNames,
    
    mObjectCount = objNames.GetCount();
    mObjectNames = objNames;
+   mInitialShowObjectMap = showObjects;
+   mShowObjectMap = showObjects;
    mObjectColorMap = objColors;
    mObjectIntColors.clear();
    int intColor;
@@ -263,7 +268,6 @@ void OpenGlOptionDialog::UpdateObjectList(const wxArrayString &objNames,
    {
       intColor = mObjectColorMap[mObjectNames[i]].GetIntColor();
       mObjectIntColors.push_back(intColor);
-      mShowObjectMap[mObjectNames[i]] = true;
       
       #ifdef DEBUG_GLOPTION_OBJECT
       MessageInterface::ShowMessage
@@ -302,8 +306,8 @@ void OpenGlOptionDialog::Create()
    // animation
    //-----------------------------------------------------------------
    
-   mUseInitialViewPointCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, wxT("Use Initial Viewpoint"),
+   mUseInitialViewDefCheckBox =
+      new wxCheckBox(this, ID_CHECKBOX, wxT("Use Initial View Definition"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
    
    wxStaticText *animationStaticText =
@@ -323,7 +327,7 @@ void OpenGlOptionDialog::Create()
    updateSizer->Add(mAnimationUpdIntTextCtrl, 0, wxALIGN_LEFT|wxALL, borderSize);
    
    wxBoxSizer *animationBoxSizer = new wxBoxSizer(wxVERTICAL);
-   animationBoxSizer->Add(mUseInitialViewPointCheckBox, 0, wxALIGN_LEFT|wxALL, borderSize);
+   animationBoxSizer->Add(mUseInitialViewDefCheckBox, 0, wxALIGN_LEFT|wxALL, borderSize);
    animationBoxSizer->Add(updateSizer, 0, wxALIGN_LEFT|wxALL, borderSize);
    animationBoxSizer->Add(mViewAnimationButton, 0, wxALIGN_CENTER|wxALL, borderSize);
    
@@ -360,7 +364,6 @@ void OpenGlOptionDialog::Create()
       new wxStaticText(this, -1, wxT("Go To"),
                        wxDefaultPosition, wxSize(-1, -1), 0);
 
-   //wxString strObjectArray[] = { wxT("Sun"), wxT("Earth"), wxT("Luna") };
    wxString strObjectArray[mObjectCount];
    for (int i=0; i<mObjectCount; i++)
       strObjectArray[i] = mObjectNames[i];
@@ -375,9 +378,6 @@ void OpenGlOptionDialog::Create()
                        wxDefaultPosition, wxSize(-1, -1), 0);
    mCoordSysComboBox =
       theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(105, -1));
-   
-//    mCreateCoordSysButton =
-//       new wxButton(this, ID_BUTTON, "Create", wxDefaultPosition, wxSize(-1, -1), 0);
    
    wxFlexGridSizer *viewGridSizer = new wxFlexGridSizer(2, 0, 0);
    viewGridSizer->Add(distanceStaticText, 0, wxALIGN_LEFT|wxALL, borderSize);
@@ -399,7 +399,6 @@ void OpenGlOptionDialog::Create()
    
    viewOptionSizer->Add(mUsePerspModeCheckBox, 0, wxALIGN_LEFT|wxALL, borderSize);
    viewOptionSizer->Add(viewGridSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-//    viewOptionSizer->Add(mCreateCoordSysButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
    
    #if DEBUG_GLOPTION_CREATE
    MessageInterface::ShowMessage
@@ -513,12 +512,6 @@ void OpenGlOptionDialog::Create()
    wxBoxSizer *objectSizer = new wxBoxSizer(wxHORIZONTAL);
    objectSizer->Add(mObjectListBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
    objectSizer->Add(colorSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-
-   //Note: only standared bodies can be added since CalculatedPoint objects
-   // are not contained in the SolarSystem
-//    mAddObjectButton = 
-//       new wxButton(this, ID_ADD_OBJECT_BUTTON, "Add/Remove Object", wxDefaultPosition,
-//                    wxSize(130, -1), 0);
    
    wxStaticBox *viewObjectStaticBox =
       new wxStaticBox(this, -1, wxT("View Object"));
@@ -528,9 +521,7 @@ void OpenGlOptionDialog::Create()
    //-----------------------------------------------------------------
    mViewObjectSizer = new wxStaticBoxSizer(viewObjectStaticBox, wxVERTICAL);
 
-   mViewObjectSizer->Add(objectSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-//    mViewObjectSizer->Add(mAddObjectButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   
+   mViewObjectSizer->Add(objectSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);   
    
    //-----------------------------------------------------------------
    // create page sizers
@@ -578,7 +569,7 @@ void OpenGlOptionDialog::LoadData()
    wxString strVal;
    
    // view mode
-   mUseInitialViewPointCheckBox->SetValue(mTrajFrame->GetUseViewPointInfo());
+   mUseInitialViewDefCheckBox->SetValue(mTrajFrame->GetUseViewPointInfo());
    mUsePerspModeCheckBox->SetValue(mTrajFrame->GetUsePerspectiveMode());
 
    #if DEBUG_GLOPTION_LOAD
@@ -640,10 +631,8 @@ void OpenGlOptionDialog::LoadData()
    
    // view object
    mObjectListBox->SetSelection(0);
-   ShowSpacePointOption(mObjectListBox->GetStringSelection(), true);
+   ShowSpacePointOption(mObjectListBox->GetStringSelection());
 
-//    mCreateCoordSysButton->Disable();
-//    mAddObjectButton->Enable();
    mEcPlaneCheckBox->Enable();
    mEcPlaneColorButton->Enable();
    mUsePerspModeCheckBox->Enable();
@@ -699,7 +688,7 @@ void OpenGlOptionDialog::SaveData()
    if (mHasUseViewPointSpecChanged)
    {
       mHasUseViewPointSpecChanged = false;
-      mTrajFrame->SetUseViewPointInfo(mUseInitialViewPointCheckBox->GetValue());
+      mTrajFrame->SetUseInitialViewDef(mUseInitialViewDefCheckBox->GetValue());
    }
    
    if (mHasUsePerspModeChanged)
@@ -824,14 +813,11 @@ void OpenGlOptionDialog::UpdateObjectComboBox()
       ("OpenGlOptionDialog::UpdateObjectComboBox() mObjectCount=%d\n", mObjectCount);
    #endif
    
-   //wxString objectSel = mGotoObjectComboBox->GetStringSelection();
-   
    mGotoObjectComboBox->Clear();
    
    for (int i=0; i<mObjectCount; i++)
       mGotoObjectComboBox->Append(mObjectNames[i]);
 
-   //mGotoObjectComboBox->SetStringSelection(objectSel);
    mGotoObjectComboBox->SetStringSelection(mTrajFrame->GetGotoObjectName());
 }
 
@@ -846,15 +832,13 @@ void OpenGlOptionDialog::UpdateObjectListBox()
       ("OpenGlOptionDialog::UpdateObjectListBox() mObjectCount=%d\n", mObjectCount);
    #endif
    
-//    wxString objSel = mObjectListBox->GetStringSelection();
-   
    mObjectListBox->Clear();
    
    for (int i=0; i<mObjectCount; i++)
       mObjectListBox->Append(mObjectNames[i]);
 
    mObjectListBox->SetStringSelection(mGotoObjectComboBox->GetStringSelection());
-   ShowSpacePointOption(mObjectListBox->GetStringSelection(), true);
+   ShowSpacePointOption(mObjectListBox->GetStringSelection());
 
 }
 
@@ -929,7 +913,7 @@ void OpenGlOptionDialog::OnTextChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::OnCheckBoxChange(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == mUseInitialViewPointCheckBox)
+   if (event.GetEventObject() == mUseInitialViewDefCheckBox)
       mHasUseViewPointSpecChanged = true;
    else if (event.GetEventObject() == mUsePerspModeCheckBox)
       mHasUsePerspModeChanged = true;
@@ -958,7 +942,7 @@ void OpenGlOptionDialog::OnCheckBoxChange(wxCommandEvent& event)
       mHasShowOrbitNormalChanged = true;
    }
    
-   if (event.GetEventObject() != mUseInitialViewPointCheckBox)
+   if (event.GetEventObject() != mUseInitialViewDefCheckBox)
       theApplyButton->Enable();
 }
 
@@ -1045,39 +1029,6 @@ void OpenGlOptionDialog::OnObjectColorButtonClick(wxCommandEvent& event)
 }
 
 
-// //------------------------------------------------------------------------------
-// // void OnAddObjectButtonClick(wxCommandEvent& event)
-// //------------------------------------------------------------------------------
-// /**
-//  * Handles button click event.
-//  */
-// //------------------------------------------------------------------------------
-// void OpenGlOptionDialog::OnAddObjectButtonClick(wxCommandEvent& event)
-// {
-//    wxArrayString emptyBodies;
-   
-//    CelesObjectSelectDialog objectDlg(this, mObjectNames, emptyBodies, false);
-//    objectDlg.SetObjectColors(mObjectNames, mObjectIntColors);
-//    objectDlg.ShowModal();
-   
-//    //--------------------------------------------------
-//    // update object list
-//    //--------------------------------------------------
-//    if (objectDlg.IsObjectSelected())
-//    {
-//       wxArrayString bodies = objectDlg.GetObjectNames();
-//       UnsignedIntArray colors = objectDlg.GetObjectColors();
-
-//       UpdateObject(bodies, colors);
-
-//       mHasShowObjectChanged = true;
-//       mHasObjectColorChanged = true;
-
-//       theApplyButton->Enable();
-//    }
-// }
-
-
 //------------------------------------------------------------------------------
 // void OnApplyButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -1093,16 +1044,9 @@ void OpenGlOptionDialog::OnApplyButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::OnButtonClick(wxCommandEvent& event)
 {
-//    if (event.GetEventObject() == mCreateCoordSysButton)
-//    {
-//       // show dialog to create CoordinateSystem
-//       // assuming the dialog will create and configure the CoordinateSystem
-
-//       // add CoordinateSystem to ComboBox
-//    }
    if (event.GetEventObject() == mViewAnimationButton)
    {
-      mTrajFrame->SetUseViewPointInfo(mUseInitialViewPointCheckBox->GetValue());
+      mTrajFrame->SetUseInitialViewDef(mUseInitialViewDefCheckBox->GetValue());
       mAnimationUpdInt = atoi(mAnimationUpdIntTextCtrl->GetValue());
       mTrajFrame->SetAnimationUpdateInterval(mAnimationUpdInt);
       mTrajFrame->RedrawPlot(true);
@@ -1115,7 +1059,7 @@ void OpenGlOptionDialog::OnButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::OnSelectObject(wxCommandEvent& event)
 {
-   ShowSpacePointOption(mObjectListBox->GetStringSelection(), true);
+   ShowSpacePointOption(mObjectListBox->GetStringSelection());
 }
 
 
@@ -1145,9 +1089,9 @@ void OpenGlOptionDialog::OnClose(wxCloseEvent& event)
 
 
 //------------------------------------------------------------------------------
-// void ShowSpacePointOption(const wxString &name, bool show = true)
+// void ShowSpacePointOption(const wxString &name)
 //------------------------------------------------------------------------------
-void OpenGlOptionDialog::ShowSpacePointOption(const wxString &name, bool show)
+void OpenGlOptionDialog::ShowSpacePointOption(const wxString &name)
 {
    
    // if object name not found, insert
@@ -1160,13 +1104,27 @@ void OpenGlOptionDialog::ShowSpacePointOption(const wxString &name, bool show)
    
    #if DEBUG_GLOPTION
    MessageInterface::ShowMessage
-      ("OpenGlOptionDialog::ShowSpacePointOption() name=%s, orbColor=%08x\n",
-       name.c_str(), orbColor.GetIntColor());
+      ("OpenGlOptionDialog::ShowSpacePointOption() name=%s, initialshow=%d, "
+       "show=%d, orbColor=%08x\n", name.c_str(), mInitialShowObjectMap[name],
+       mShowObjectMap[name], orbColor.GetIntColor());
    #endif
    
    mObjectColor.Set(orbColor.Red(), orbColor.Green(), orbColor.Blue());
    mObjectColorButton->SetBackgroundColour(mObjectColor);
    mShowObjectCheckBox->SetValue(mShowObjectMap[name]);
    mShowOrbitNormalCheckBox->SetValue(mShowOrbitNormalMap[name]);
+
+   if (mInitialShowObjectMap[name])
+   {
+      mObjectColorButton->Enable();
+      mShowObjectCheckBox->Enable();
+      mShowOrbitNormalCheckBox->Enable();
+   }
+   else
+   {
+      mObjectColorButton->Disable();
+      mShowObjectCheckBox->Disable();
+      mShowOrbitNormalCheckBox->Disable();
+   }
 }
 

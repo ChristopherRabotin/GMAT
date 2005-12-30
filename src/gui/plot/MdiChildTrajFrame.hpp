@@ -73,7 +73,7 @@ public:
    void SetPlotName(const wxString &name);
    void ResetShowViewOption();
    void SetOverlapPlot(bool overlap);
-   void SetUseViewPointInfo(bool flag);
+   void SetUseInitialViewDef(bool flag);
    void SetUsePerspectiveMode(bool flag);
    void SetAnimationUpdateInterval(Integer interval);
    void SetDrawWireFrame(bool flag);

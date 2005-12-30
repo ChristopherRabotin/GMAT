@@ -56,16 +56,17 @@ public:
    float GetDistance() {return mAxisLength;}
    int GetAnimationUpdateInterval() {return mUpdateInterval;}
    wxString GetViewCoordSysName() {return mViewCoordSysName;}
-   CoordinateSystem* GetViewCoordSystem() { return mViewCoordSystem;}
-   const wxArrayString& GetObjectNames() { return mObjectNames;}
-   const wxStringColorMap& GetObjectColorMap() { return mObjectColorMap;}
+   CoordinateSystem* GetViewCoordSystem() {return mViewCoordSystem;}
+   const wxArrayString& GetObjectNames() {return mObjectNames;}
+   const wxStringBoolMap& GetShowObjectMap() {return mShowObjectMap;}
+   const wxStringColorMap& GetObjectColorMap() {return mObjectColorMap;}
    wxString GetGotoObjectName();
    
    // setters
    void SetEndOfRun(bool flag = true);
    void SetEndOfData(bool flag = true) {mIsEndOfData = flag;}
    void SetDistance(float dist) {mAxisLength = dist;}
-   void SetUseViewPointInfo(bool flag) {mUseInitialViewPoint = flag;}
+   void SetUseInitialViewDef(bool flag) {mUseInitialViewPoint = flag;}
    void SetAnimationUpdateInterval(int interval) {mUpdateInterval = interval;}
    void SetDrawWireFrame(bool flag) {mDrawWireFrame = flag;}
    void SetDrawXyPlane(bool flag) {mDrawXyPlane = flag;}
@@ -299,6 +300,7 @@ private:
 
    // objects
    wxArrayString mObjectNames;
+   wxArrayString mShowObjectNames;
    wxStringColorMap mObjectColorMap;
    wxStringBoolMap  mShowObjectMap;
    wxStringBoolMap  mShowOrbitNormalMap;
@@ -383,7 +385,7 @@ private:
    void ComputeView(GLfloat fEndX, GLfloat fEndY);
    void ChangeView(float viewX, float viewY, float viewZ);
    void ChangeProjection(int width, int height, float axisLength);
-   void ComputeProjection(int frame);
+   void ComputeViewVectors(int frame);
    void ComputeUpAngleAxis(int frame);
    void TransformView(int frame);
    
@@ -401,6 +403,9 @@ private:
    void DrawESLines(int frame);
    void DrawAxes();
    void DrawStatus(const wxString &label, int frame, double time);
+
+   // for rotation
+   void ApplyEulerAngles();
    
    // drawing primative objects
    //void DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z);
@@ -412,11 +417,10 @@ private:
    
    // for coordinate system
    bool TiltOriginZAxis();
-   bool ConvertSpacecraftData();
-   bool ConvertSpacecraftData(int frame);
    bool ConvertObjectData();
    void ConvertObject(int objId, int index);
-
+   void UpdateRotateFlags();
+   
    // for utility
    Rvector3 ComputeEulerAngles();
    void ComputeLongitudeLst(Real time, Real x, Real y, Real *meanHourAngle,
