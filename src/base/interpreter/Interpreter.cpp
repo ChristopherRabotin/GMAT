@@ -1177,48 +1177,10 @@ bool Interpreter::InterpretFunctionCall()
                      "Attempting to build parameter \"", paramType.c_str(),
                      str->c_str());
                #endif
-
-
-               CreateParameter(*str, paramType, parmSystem, parmObj->GetName());
                   
-//                Parameter *parm = CreateParameter(*str, paramType);
-//                if (parm != NULL)
-//                {
-//                   //GmatBase *parmObj = FindObject(sar[0]);
-//                   std::string parmtype = "Object";
-//                   #ifdef DEBUG_TOKEN_PARSING
-//                      MessageInterface::ShowMessage("%s%s%s%s%s%s\"\n",
-//                                                    "Assigning \"",
-//                                                    paramObj.c_str(),
-//                                                    "\" to parameter \"",
-//                                                    parm->GetName().c_str(),
-//                                                    "\" with descriptor \"",
-//                                                    parmtype.c_str());
-//                   #endif
-//                   parm->SetStringParameter(parmtype, paramObj);
-
-//                   if (parm->IsCoordSysDependent())
-//                   {
-//                      if (parmSystem == "")
-//                         parmSystem = "EarthMJ2000Eq";
-//                      // Which is correct here???
-//                      parm->SetStringParameter("DepObject", parmSystem);
-//                      parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
-
-//                   }
-
-//                   if (parm->IsOriginDependent())
-//                   {
-//                      if (parmSystem == "")
-//                         parmSystem = "Earth";
-//                      parm->SetStringParameter("DepObject", parmSystem);
-//                      parm->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
-//                      if (parm->NeedCoordSystem())
-//                         /// @todo Update coordinate system to better body parms
-//                         parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
-//                            "EarthMJ2000Eq");
-//                   }
-//                }
+                  
+               CreateParameter(*str, paramType, parmSystem, parmObj->GetName());
+               
             }
          }
       }
@@ -3317,60 +3279,25 @@ bool Interpreter::ConstructRHS(GmatBase *lhsObject, const std::string& rhs,
                   
                CreateParameter(name, paramType, parmSystem, paramObj);
                
-//                Parameter *parm = CreateParameter(name, paramType);
-//                if (parm != NULL)
-//                {
-//                   //GmatBase *parmObj = FindObject(sar[0]);
-//                   std::string parmtype = "Object";
-//                   #ifdef DEBUG_RHS_PARSING
-//                      MessageInterface::ShowMessage("%s%s%s%s%s%s\"\n",
-//                                                    "Assigning \"",
-//                                                    paramObj.c_str(),
-//                                                    "\" to parameter \"",
-//                                                    parm->GetName().c_str(),
-//                                                    "\" with descriptor \"",
-//                                                    parmtype.c_str());
-//                   #endif
-//                   parm->SetStringParameter(parmtype, paramObj);
-
-//                   if (parm->IsCoordSysDependent())
-//                   {
-//                      if (parmSystem == "")
-//                         parmSystem = "EarthMJ2000Eq";
-//                      // Which is correct here???
-//                      parm->SetStringParameter("DepObject", parmSystem);
-//                      parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
-
-//                   }
-
-//                   if (parm->IsOriginDependent())
-//                   {
-//                      if (parmSystem == "")
-//                         parmSystem = "Earth";
-//                      parm->SetStringParameter("DepObject", parmSystem);
-//                      parm->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
-//                      if (parm->NeedCoordSystem())
-//                         /// @todo Update coordinate system to better body parms
-//                         parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
-//                            "EarthMJ2000Eq");
-//                   }
-
-                  lhsObject->SetStringParameter(label, name);
-                  retval = true;
-                  //            }
+               lhsObject->SetStringParameter(label, name);
+               retval = true;
             }
          }
          else
          {
-            // subscribers can have variables (loj: 10/31/05)
-            if (lhsObject->IsOfType(Gmat::SUBSCRIBER))
+            // if rhs is not boolean type (loj: 12/28/05)
+            if (name != "true" && name != "false")
             {
-               //MessageInterface::ShowMessage
-               //   ("==> lhsObject->GetName()=%s subscriber=%d\n",
-               //    lhsObject->GetName().c_str(), lhsObject->IsOfType(Gmat::SUBSCRIBER));
-               
-               lhsObject->SetStringParameter(label, name);
-               retval = true;
+               // subscribers can have variables (loj: 10/31/05)
+               if (lhsObject->IsOfType(Gmat::SUBSCRIBER))
+               {
+                  //MessageInterface::ShowMessage
+                  //   ("==> lhsObject->GetName()=%s subscriber=%d\n",
+                  //    lhsObject->GetName().c_str(), lhsObject->IsOfType(Gmat::SUBSCRIBER));
+                  
+                  lhsObject->SetStringParameter(label, name);
+                  retval = true;
+               }
             }
             else
             {
@@ -3929,6 +3856,8 @@ bool Interpreter::FinalPass()
    StringArray satNames = moderator->GetListOfConfiguredItems(Gmat::SPACECRAFT);
    Spacecraft *sat;
    cs = moderator->GetInternalCoordinateSystem();
+   StringArray preInitCsNames;
+   
    for (StringArray::iterator i = satNames.begin(); i != satNames.end(); ++i)
    {
       #ifdef DEBUG_PASS_TWO
@@ -3946,23 +3875,35 @@ bool Interpreter::FinalPass()
       if (sat == NULL)
          throw InterpreterException("Unable to locate the spacecraft named '" 
             + (*i) + "'");
+      
       if (sat->IsOfType("Spacecraft") == false)
          throw InterpreterException("The object named '" +
             (*i) + "' was expected to be a spacecraft, but it is a '" +
             sat->GetTypeName() + "' instead.");
+      
       sat->SetInternalCoordSystem(cs);
       configuredCsName = sat->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
       configuredCs = moderator->GetCoordinateSystem(configuredCsName);
+      
       if (configuredCs == NULL)
          throw InterpreterException(
             "Unable to locate the coordinate system named '" +
             configuredCsName + "', referenced in the spacecraft named " +
             (*i));
+      
       if (configuredCs->IsOfType("CoordinateSystem") == false)
          throw InterpreterException("The object named '" +
             configuredCsName + "' was expected to be a coordinate system, "
             "but it is a '" + configuredCs->GetTypeName() + "' instead.");
-      PreinitializeCoordinateSystem(configuredCs);
+
+      // if CoordinateSystem not preinitialized
+      if (find(preInitCsNames.begin(), preInitCsNames.end(), configuredCsName)
+          == preInitCsNames.end())
+      {
+         PreinitializeCoordinateSystem(configuredCs);
+         preInitCsNames.push_back(configuredCsName);
+      }
+      
       sat->SetRefObject(configuredCs, Gmat::COORDINATE_SYSTEM, configuredCsName);
       
       #ifdef DEBUG_PASS_TWO
@@ -3981,6 +3922,9 @@ bool Interpreter::FinalPass()
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// void PreinitializeCoordinateSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
 void Interpreter::PreinitializeCoordinateSystem(CoordinateSystem *cs)
 {
    #ifdef DEBUG_PREINITIALIZE   
@@ -4014,8 +3958,8 @@ void Interpreter::PreinitializeCoordinateSystem(CoordinateSystem *cs)
       catch (BaseException& be)
       {
          sp = (SpacePoint*) ss->GetBody((*i));
-         //if (!sp) throw InterpreterException(
-          //     "Unknown reference object " + (*i) + " in coordinate system");
+         if (!sp) throw InterpreterException(
+            "Unknown reference object " + (*i) + " in coordinate system\n");
          if (sp) cs->SetRefObject(sp,Gmat::SPACE_POINT, (*i)); 
       }
       // if it's a LibrationPoint or Barycenter, give it pointers
