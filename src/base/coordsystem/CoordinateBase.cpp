@@ -574,9 +574,15 @@ const StringArray& CoordinateBase::GetRefObjectNameArray(const Gmat::ObjectType 
    if (type == Gmat::UNKNOWN_OBJECT)
    {
       static StringArray refs;
+      refs.clear();
+   
       refs.push_back(originName);
       if (j2000BodyName != originName)
          refs.push_back(j2000BodyName);
+      
+      //for (unsigned int i=0; i<refs.size(); i++)
+      //   MessageInterface::ShowMessage("======> cb obj[%d]=%s\n", i, refs[i].c_str());
+      
       return refs;
    }
 

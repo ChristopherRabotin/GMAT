@@ -638,8 +638,9 @@ const StringArray& ObjectReferencedAxes::GetRefObjectNameArray(const Gmat::Objec
 {
    if (type == Gmat::UNKNOWN_OBJECT)
    {
-      static StringArray refs = DynamicAxes::GetRefObjectNameArray(type);
-      //refs.clear(); // huh?
+      static StringArray refs;
+      refs.clear();
+      refs = DynamicAxes::GetRefObjectNameArray(type);
 
       if (find(refs.begin(), refs.end(), primaryName) == refs.end())
          refs.push_back(primaryName);
@@ -946,6 +947,10 @@ void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    rotDotMatrix(2,0) = xDot(2);
    rotDotMatrix(2,1) = yDot(2);
    rotDotMatrix(2,2) = zDot(2);
+
+   //loj: 12/29/05 just debug
+//    MessageInterface::ShowMessage
+//       ("===> rotMatrix=%s\n", rotMatrix.ToString().c_str());
    
 #ifdef DEBUG_ROT_MATRIX
    cout.setf(ios::fixed);

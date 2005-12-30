@@ -766,14 +766,31 @@ const StringArray& CoordinateSystem::GetRefObjectNameArray(const Gmat::ObjectTyp
       // Here we want the names of all named refence objects used in this
       // coordinate system.  (The axis system is not named, so we do not return
       // anything for it.)
-      static StringArray refs = CoordinateBase::GetRefObjectNameArray(type);
+      static StringArray refs;
+      refs.clear();
+      
+      refs = CoordinateBase::GetRefObjectNameArray(type);
+
+      //for (unsigned int i=0; i<refs.size(); i++)
+      //   MessageInterface::ShowMessage("======> cs obj=%s\n", refs[i].c_str());
+      
       if (axes)
       {
-         StringArray axisRefs = axes->GetRefObjectNameArray(type);
-         for (StringArray::iterator i = axisRefs.begin();
-              i != axisRefs.end(); ++i)
+         static StringArray axisRefs;
+         axisRefs.clear();
+         
+         axisRefs = axes->GetRefObjectNameArray(type);
+         
+         //for (unsigned int i=0; i<axisRefs.size(); i++)
+         //   MessageInterface::ShowMessage("======> axisRef obj=%s\n", axisRefs[i].c_str());
+         
+         for (StringArray::iterator i = axisRefs.begin(); i != axisRefs.end(); ++i)
             if (find(refs.begin(), refs.end(), *i) == refs.end())
-               refs.push_back(*i);
+               if( (*i) != "")
+               {
+                  //MessageInterface::ShowMessage("===> axis obj=%s\n", (*i).c_str());
+                  refs.push_back(*i);
+               }
       }
       return refs;
    }
