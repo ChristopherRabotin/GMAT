@@ -308,19 +308,23 @@ private:
    std::vector<bool> mDrawOrbitArray;
    std::vector<bool> mShowObjectArray;
    int mObjectCount;
-   float mObjectDefaultRadius;
-   float mObjectRadius[MAX_OBJECT];
-   float mObjMaxZoomIn[MAX_OBJECT];
+   
+   Real mObjectDefaultRadius;
+   Real mObjectRadius[MAX_OBJECT];
+   Real mObjMaxZoomIn[MAX_OBJECT];
+   
    int   mObjLastFrame[MAX_OBJECT];
    bool  mShowObjectFlag[MAX_OBJECT];
    
    bool  mDrawOrbitFlag[MAX_OBJECT][MAX_DATA];
    UnsignedInt mObjectOrbitColor[MAX_OBJECT][MAX_DATA];
    
-   float mObjectGciPos[MAX_OBJECT][MAX_DATA][3];
-   float mObjectTempPos[MAX_OBJECT][MAX_DATA][3];
-   float mObjectGciVel[MAX_OBJECT][MAX_DATA][3];
-   float mObjectTempVel[MAX_OBJECT][MAX_DATA][3];
+   Real mObjectGciPos[MAX_OBJECT][MAX_DATA][3];
+   Real mObjectInitialPos[MAX_OBJECT][MAX_DATA][3];
+   Real mObjectTempPos[MAX_OBJECT][MAX_DATA][3];
+   Real mObjectGciVel[MAX_OBJECT][MAX_DATA][3];
+   Real mObjectInitialVel[MAX_OBJECT][MAX_DATA][3];
+   Real mObjectTempVel[MAX_OBJECT][MAX_DATA][3];
    
    // coordinate system
    wxString mInternalCoordSysName;
@@ -350,6 +354,7 @@ private:
    GLfloat mfViewBottom;
    GLfloat mfViewNear;
    GLfloat mfViewFar;
+   
    float mDefaultRotXAngle;
    float mDefaultRotYAngle;
    float mDefaultRotZAngle;
@@ -427,10 +432,7 @@ private:
                             Real *longitude, Real *localSiderealTime);
    
    // for copy
-   void CopyVector3(float to[3], Real from[3]);
-   void CopyVector3(float to[3], float from[3]);
    void CopyVector3(Real to[3], Real from[3]);
-   void CopyVector3(Real to[3], float from[3]);
    
    bool LoadImage(char *fileName);
    

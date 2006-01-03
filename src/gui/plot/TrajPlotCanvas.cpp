@@ -346,7 +346,6 @@ bool TrajPlotCanvas::InitGL()
    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
    glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
    
-//#ifdef __WXMSW__
 #ifndef SKIP_DEVIL
    
    // initalize devIL library
@@ -358,7 +357,6 @@ bool TrajPlotCanvas::InitGL()
    
    if (!LoadGLTextures())
       return false;
-//#endif
 
    // pixel format
    if (!SetPixelFormatDescriptor())
@@ -767,7 +765,7 @@ void TrajPlotCanvas::DrawInOtherCoordSystem(const wxString &csName)
 {
    #if DEBUG_TRAJCANVAS_ACTION
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::DrawInNewCoordSysName() viewCS=%s, newCS=%s\n",
+      ("TrajPlotCanvas::DrawInOtherCoordSysName() viewCS=%s, newCS=%s\n",
        mViewCoordSysName.c_str(), csName.c_str());
    #endif
    
@@ -843,15 +841,6 @@ void TrajPlotCanvas::GotoObject(const wxString &objName)
       ("TrajPlotCanvas::GotoObject() objName=%s, mViewObjId=%d, mMaxZoomIn=%f\n"
        "   mAxisLength=%f\n", objName.c_str(), mViewObjId, mMaxZoomIn, mAxisLength);
    #endif
-
-   //loj: 12/7/05 Don't need this
-//    if (mUsePerspectiveMode)
-//    {
-//       // move camera position to object
-//       mfCamTransX = mObjectTempPos[objId][mNumData-1][0];
-//       mfCamTransY = mObjectTempPos[objId][mNumData-1][1];
-//       mfCamTransZ = mObjectTempPos[objId][mNumData-1][2];
-//    }
    
    Refresh(false);
 }
@@ -1358,14 +1347,17 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             mObjectGciVel[objId][mNumData][2] = velZ[sc];
             
             #if DEBUG_TRAJCANVAS_UPDATE
-            MessageInterface::ShowMessage
-               ("TrajPlotCanvas::UpdatePlot() object=%s, objId=%d, color=%d\n",
-                mObjectNames[sc].c_str(), objId, mObjectOrbitColor[objId][mNumData]);
-            MessageInterface::ShowMessage
-               ("   objId:%d gcipos = %f, %f, %f, color=%d\n", objId,
-                mObjectGciPos[objId][mNumData][0],
-                mObjectGciPos[objId][mNumData][1],
-                mObjectGciPos[objId][mNumData][2]);
+            if (mNumData < 10)
+            {
+               MessageInterface::ShowMessage
+                  ("TrajPlotCanvas::UpdatePlot() object=%s, objId=%d, color=%d\n",
+                   mObjectNames[sc].c_str(), objId, mObjectOrbitColor[objId][mNumData]);
+               MessageInterface::ShowMessage
+                  ("   objId:%d gcipos = %f, %f, %f, color=%d\n", objId,
+                   mObjectGciPos[objId][mNumData][0],
+                   mObjectGciPos[objId][mNumData][1],
+                   mObjectGciPos[objId][mNumData][2]);
+            }
             #endif
             
             if (mNeedInitialConversion)
@@ -1385,7 +1377,13 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
                
                mObjectTempVel[objId][mNumData][0] = outState[3];
                mObjectTempVel[objId][mNumData][1] = outState[4];
-               mObjectTempVel[objId][mNumData][2] = outState[5];               
+               mObjectTempVel[objId][mNumData][2] = outState[5];
+
+               // copy to initial view coordinate system array
+               CopyVector3(mObjectInitialPos[objId][mNumData],
+                           mObjectTempPos[objId][mNumData]);
+               CopyVector3(mObjectInitialVel[objId][mNumData],
+                           mObjectTempVel[objId][mNumData]);               
             }
             else
             {
@@ -1396,19 +1394,25 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             }
             
             #if DEBUG_TRAJCANVAS_UPDATE
-            MessageInterface::ShowMessage
-               ("   objId:%d tmppos = %f, %f, %f\n", objId,
-                mObjectTempPos[objId][mNumData][0],
-                mObjectTempPos[objId][mNumData][1],
-                mObjectTempPos[objId][mNumData][2]);
+            if (mNumData < 10)
+            {
+               MessageInterface::ShowMessage
+                  ("   objId:%d tmppos = %f, %f, %f\n", objId,
+                   mObjectTempPos[objId][mNumData][0],
+                   mObjectTempPos[objId][mNumData][1],
+                   mObjectTempPos[objId][mNumData][2]);
+            }
             #endif
             
             #if DEBUG_TRAJCANVAS_UPDATE > 1
-            MessageInterface::ShowMessage
-               ("   objId:%d tmpvel = %f, %f, %f\n", objId,
-                mObjectTempVel[objId][mNumData][0],
-                mObjectTempVel[objId][mNumData][1],
-                mObjectTempVel[objId][mNumData][2]);
+            if (mNumData < 10)
+            {
+               MessageInterface::ShowMessage
+                  ("   objId:%d tmpvel = %f, %f, %f\n", objId,
+                   mObjectTempVel[objId][mNumData][0],
+                   mObjectTempVel[objId][mNumData][1],
+                   mObjectTempVel[objId][mNumData][2]);
+            }
             #endif
          }
       }
@@ -1475,6 +1479,12 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
                   mObjectTempVel[objId][mNumData][0] = outState[3];
                   mObjectTempVel[objId][mNumData][1] = outState[4];
                   mObjectTempVel[objId][mNumData][2] = outState[5];
+                  
+                  // copy to initial view coordinate system array
+                  CopyVector3(mObjectInitialPos[objId][mNumData],
+                              mObjectTempPos[objId][mNumData]);
+                  CopyVector3(mObjectInitialVel[objId][mNumData],
+                              mObjectTempVel[objId][mNumData]);          
                }
                else
                {
@@ -2770,6 +2780,7 @@ void TrajPlotCanvas::TransformView(int frame)
          gluLookAt(mVpLocVec[0], mVpLocVec[1], mVpLocVec[2],
                    mVcVec[0], mVcVec[1], mVcVec[2],
                    mUpVec[0], mUpVec[1], mUpVec[2]);
+
       }
       else
       {
@@ -2794,7 +2805,7 @@ void TrajPlotCanvas::TransformView(int frame)
       #else      
          ApplyEulerAngles();      
       #endif
-      
+
    } //if (mUseSingleRotAngle)
    
 } // end TransformView()
@@ -3950,129 +3961,6 @@ bool TrajPlotCanvas::TiltOriginZAxis()
 }
 
 
-// //---------------------------------------------------------------------------
-// // bool ConvertSpacecraftData()
-// //---------------------------------------------------------------------------
-// bool TrajPlotCanvas::ConvertSpacecraftData()
-// {
-//    if (mInternalCoordSystem == NULL || mViewCoordSystem == NULL)
-//       return false;
-   
-//    Rvector6 inState, outState;
-   
-//    #if DEBUG_TRAJCANVAS_CONVERT
-//    MessageInterface::ShowMessage
-//       ("TrajPlotCanvas::ConvertSpacecraftData() internalCS=%s, viewCS=%s\n",
-//        mInternalCoordSystem->GetName().c_str(), mViewCoordSystem->GetName().c_str());
-//    #endif
-   
-//    int objId;
-   
-//    // do not convert if view CS is internal CS
-//    if (mIsInternalCoordSystem)
-//    {
-//       for (int sc=0; sc<mScCount; sc++)
-//       {
-//          objId = GetObjectId(mScNameArray[sc].c_str());
-         
-//          for (int i=0; i<mNumData; i++)
-//          {
-//             mObjectTempPos[objId][i][0] = mObjectGciPos[objId][i][0];
-//             mObjectTempPos[objId][i][1] = mObjectGciPos[objId][i][1];
-//             mObjectTempPos[objId][i][2] = mObjectGciPos[objId][i][2];
-//          }
-//       }
-//    }
-//    else
-//    {
-//       for (int sc=0; sc<mScCount; sc++)
-//       {
-//          objId = GetObjectId(mScNameArray[sc].c_str());
-         
-//          for (int i=0; i<mNumData; i++)
-//          {
-//             inState.Set(mObjectGciPos[objId][i][0], mObjectGciPos[objId][i][1],
-//                         mObjectGciPos[objId][i][2], 0.0, 0.0, 0.0);
-                        
-//             mCoordConverter.Convert(mTime[i], inState, mInternalCoordSystem,
-//                                     outState, mViewCoordSystem);
-            
-//             mObjectTempPos[objId][i][0] = outState[0];
-//             mObjectTempPos[objId][i][1] = outState[1];
-//             mObjectTempPos[objId][i][2] = outState[2];
-            
-//             #if DEBUG_TRAJCANVAS_CONVERT > 1
-//             MessageInterface::ShowMessage
-//                ("TrajPlotCanvas::ConvertSpacecraftData() in=%g, %g, %g, "
-//                 "out=%g, %g, %g\n", inState[0], inState[1], inState[2],
-//                 outState[0], outState[1], outState[2]);
-//             #endif
-//          }
-//       }
-//    }
-//    return true;
-// }
-
-
-// //---------------------------------------------------------------------------
-// // bool ConvertSpacecraftData(int frame)
-// //---------------------------------------------------------------------------
-// bool TrajPlotCanvas::ConvertSpacecraftData(int frame)
-// {
-//    if (mInternalCoordSystem == NULL || mViewCoordSystem == NULL)
-//       return false;
-   
-//    Rvector6 inState, outState;
-   
-//    #if DEBUG_TRAJCANVAS_CONVERT
-//    MessageInterface::ShowMessage
-//       ("TrajPlotCanvas::ConvertSpacecraftData() internalCS=%s, viewCS=%s\n",
-//        mInternalCoordSystem->GetName().c_str(), mViewCoordSystem->GetName().c_str());
-//    #endif
-
-//    int objId;
-   
-//    // do not convert if view CS is internal CS
-//    if (mIsInternalCoordSystem)
-//    {
-//       for (int sc=0; sc<mScCount; sc++)
-//       {
-//          objId = GetObjectId(mScNameArray[sc].c_str());
-         
-//          mObjectTempPos[objId][frame][0] = mObjectGciPos[objId][frame][0];
-//          mObjectTempPos[objId][frame][1] = mObjectGciPos[objId][frame][1];
-//          mObjectTempPos[objId][frame][2] = mObjectGciPos[objId][frame][2];
-//       }
-//    }
-//    else
-//    {
-//       for (int sc=0; sc<mScCount; sc++)
-//       {
-//          objId = GetObjectId(mScNameArray[sc].c_str());
-                  
-//          inState.Set(mObjectGciPos[objId][frame][0], mObjectGciPos[objId][frame][1],
-//                      mObjectGciPos[objId][frame][2],
-//                      0.0, 0.0, 0.0);
-         
-//          mCoordConverter.Convert(mTime[frame], inState, mInternalCoordSystem,
-//                                  outState, mViewCoordSystem);
-         
-//          mObjectTempPos[objId][frame][0] = outState[0];
-//          mObjectTempPos[objId][frame][1] = outState[1];
-//          mObjectTempPos[objId][frame][2] = outState[2];
-         
-//          #if DEBUG_TRAJCANVAS_CONVERT > 1
-//          MessageInterface::ShowMessage
-//             ("TrajPlotCanvas::ConvertSpacecraftData() in=%g, %g, %g, "
-//              "out=%g, %g, %g\n",inState[0], inState[1], inState[2], outState[0],
-//              outState[1], outState[2]);
-//          #endif
-//       }
-//    }
-//    return true;
-// }
-
-
 //---------------------------------------------------------------------------
 // bool ConvertObjectData()
 //---------------------------------------------------------------------------
@@ -4091,12 +3979,12 @@ bool TrajPlotCanvas::ConvertObjectData()
    #endif
    
    // do not convert if view CS is internal CS
-   //if (mViewCoordSystem->GetName() == mInternalCoordSystem->GetName())
    if (mIsInternalCoordSystem)
    {
       #if DEBUG_TRAJCANVAS_CONVERT
       MessageInterface::ShowMessage
-         ("TrajPlotCanvas::ConvertObjectData() No conversion is needed. Just copy MJ2000 pos\n");
+         ("TrajPlotCanvas::ConvertObjectData() No conversion is needed. "
+          "Just copy MJ2000 pos\n");
       #endif
       for (int i=0; i<mObjectCount; i++)
       {
@@ -4104,6 +3992,21 @@ bool TrajPlotCanvas::ConvertObjectData()
          
          for (int i=0; i<mNumData; i++)
             CopyVector3(mObjectTempPos[objId][i], mObjectGciPos[objId][i]);
+      }
+   }
+   else if (mViewCoordSysName == mInitialCoordSysName)
+   {
+      #if DEBUG_TRAJCANVAS_CONVERT
+      MessageInterface::ShowMessage
+         ("TrajPlotCanvas::ConvertObjectData() No conversion is needed. "
+          "Just copy Initial View CS pos\n");
+      #endif
+      for (int i=0; i<mObjectCount; i++)
+      {
+         int objId = GetObjectId(mObjectNames[i]);
+         
+         for (int i=0; i<mNumData; i++)
+            CopyVector3(mObjectTempPos[objId][i], mObjectInitialPos[objId][i]);
       }
    }
    else
@@ -4149,7 +4052,7 @@ void TrajPlotCanvas::ConvertObject(int objId, int index)
    mObjectTempVel[objId][index][1] = outState[4];
    mObjectTempVel[objId][index][2] = outState[5];
    
-   #if DEBUG_TRAJCANVAS_CONVERT > 1
+   #if DEBUG_TRAJCANVAS_CONVERT
    if (index < 10)
    {
       MessageInterface::ShowMessage
@@ -4216,42 +4119,45 @@ Rvector3 TrajPlotCanvas::ComputeEulerAngles()
    //if (mUseGluLookAt)
    {   
       // model view matrix
-      static GLfloat sProjectionMat[16];
-      static GLfloat sModelViewMat[16];
+      static GLfloat sProjMat[16];
+      static GLfloat sViewMat[16];
       
-      //loj: Is this really the current Matirx since model view matrix is popped
-      // after drawing?
-      glGetFloatv(GL_PROJECTION_MATRIX, sProjectionMat);
-      glGetFloatv(GL_MODELVIEW_MATRIX, sModelViewMat);
+      glGetFloatv(GL_PROJECTION_MATRIX, sProjMat);
+      glGetFloatv(GL_MODELVIEW_MATRIX, sViewMat);
       
       // OpenGL stores matrix in column major: ith column, jth row.
-      //   m[16]               m[j][i]          m[i][j]
-      // m1 m5 m9  m13    m11 m21 m31 m41    m11 m12 m13 m14
-      // m2 m6 m10 m14    m12 m22 m32 m42    m21 m22 m23 m24
-      // m3 m7 m11 m15    m13 m23 m33 m43    m31 m32 m33 m34
-      // m4 m8 m12 m16    m14 m24 m34 m44    m41 m42 m43 m44
       
-      Rmatrix33 pjmat(sProjectionMat[0], sProjectionMat[1], sProjectionMat[2],
-                      sProjectionMat[4], sProjectionMat[5], sProjectionMat[6],
-                      sProjectionMat[8], sProjectionMat[9], sProjectionMat[10]);
+      Rmatrix33 pjmat(sProjMat[0], sProjMat[1], sProjMat[2],
+                      sProjMat[4], sProjMat[5], sProjMat[6],
+                      sProjMat[8], sProjMat[9], sProjMat[10]);
       
-      Rmatrix33 mvmat(sModelViewMat[0], sModelViewMat[1], sModelViewMat[2],
-                      sModelViewMat[4], sModelViewMat[5], sModelViewMat[6],
-                      sModelViewMat[8], sModelViewMat[9], sModelViewMat[10]);
+      Rmatrix33 mvmat(sViewMat[0], sViewMat[1], sViewMat[2],
+                      sViewMat[4], sViewMat[5], sViewMat[6],
+                      sViewMat[8], sViewMat[9], sViewMat[10]);
       
       //org:finalMat = pjmat * mvmat;
-      finalMat = mvmat * pjmat;
+      //finalMat = mvmat * pjmat;
+      finalMat = mvmat;
       
+            
       #ifdef DEBUG_TRAJCANVAS_EULER
+      MessageInterface::ShowMessage
+         ("TrajPlotCanvas::ComputeEulerAngles() sViewMat=\n"
+          "   %f, %f, %f, %f\n   %f, %f, %f, %f\n"
+          "   %f, %f, %f, %f\n   %f, %f, %f, %f\n",
+          sViewMat[0], sViewMat[1], sViewMat[2], sViewMat[3],
+          sViewMat[4], sViewMat[5], sViewMat[6], sViewMat[7],
+          sViewMat[8], sViewMat[9], sViewMat[10], sViewMat[11],
+          sViewMat[12], sViewMat[13], sViewMat[14], sViewMat[15]);
       MessageInterface::ShowMessage
          ("TrajPlotCanvas::ComputeEulerAngles() pjmat=%s\n",
           pjmat.ToString().c_str());
       MessageInterface::ShowMessage
          ("TrajPlotCanvas::ComputeEulerAngles() mvmat=%s\n",
           mvmat.ToString().c_str());
-      MessageInterface::ShowMessage
-         ("TrajPlotCanvas::ComputeEulerAngles() finalMat=%s\n",
-          finalMat.ToString().c_str());
+       MessageInterface::ShowMessage
+          ("TrajPlotCanvas::ComputeEulerAngles() finalMat=%s\n",
+           finalMat.ToString().c_str());
       #endif
    }
    #else
@@ -4283,7 +4189,8 @@ Rvector3 TrajPlotCanvas::ComputeEulerAngles()
          if (rotAxis.GetMagnitude() > 0.0)
             rotMat = GmatAttUtil::ToCosineMatrix(mfCamSingleRotAngle * RAD_PER_DEG, rotAxis);
          
-         finalMat = rotMat * upMat;
+         //finalMat = rotMat * upMat;
+         finalMat = upMat * rotMat;
          
          #ifdef DEBUG_TRAJCANVAS_EULER
          MessageInterface::ShowMessage
@@ -4316,14 +4223,7 @@ Rvector3 TrajPlotCanvas::ComputeEulerAngles()
          eulerAngle = GmatAttUtil::ToEulerAngles(finalMat, 3, 1, 2);
       else
          eulerAngle = GmatAttUtil::ToEulerAngles(finalMat, 1, 2, 3);
-      
-//       if (mRotateAboutXaxis)
-//          eulerAngle = GmatAttUtil::ToEulerAngles(mvmat, 2, 3, 1);
-//       else if (mRotateAboutYaxis)
-//          eulerAngle = GmatAttUtil::ToEulerAngles(mvmat, 3, 1, 2);
-//       else
-//          eulerAngle = GmatAttUtil::ToEulerAngles(mvmat, 1, 2, 3);
-      
+            
       eulerAngle = eulerAngle * DEG_PER_RAD;
       
       #ifdef DEBUG_TRAJCANVAS_EULER
@@ -4344,20 +4244,6 @@ Rvector3 TrajPlotCanvas::ComputeEulerAngles()
    
    //loj: 9/29/05
    // How can I compute modified rotation angle in general way?
-
-   // in Orthographics mode
-   //mfCamRotXAxis =  mVdVec[1];
-   //mfCamRotYAxis = -mVdVec[0];
-   //mfCamRotZAxis = 0.0;
-   
-   // in Perspective mode
-   //if (mUsePerspectiveMode)
-   //{
-   //   // always look at from Z for rotation and zooming
-   //   mfCamTransX = 0.0;
-   //   mfCamTransY = 0.0;
-   //   mfCamTransZ = -mVpLocVec.GetMagnitude();
-   //}
    
    if (eulerAngle.GetMagnitude() == 0.0)
    {
@@ -4374,15 +4260,33 @@ Rvector3 TrajPlotCanvas::ComputeEulerAngles()
       {
          if (eulerAngle(2) == 0.0)
          {
-            modAngle[0] = eulerAngle(0) - 270;
-            modAngle[1] = eulerAngle(2);
-            modAngle[2] = eulerAngle(1);
+            if (mUseGluLookAt)
+            {
+               modAngle[0] = eulerAngle(0) + 90;
+               modAngle[1] = eulerAngle(2);
+               modAngle[2] = eulerAngle(1) + 180;
+            }
+            else
+            {
+               modAngle[0] = eulerAngle(0) - 270;
+               modAngle[1] = eulerAngle(2);
+               modAngle[2] = eulerAngle(1);
+            }
          }
          else
          {
-            modAngle[0] = eulerAngle(0);
-            modAngle[1] = eulerAngle(2) -90;
-            modAngle[2] = eulerAngle(1);
+            if (mUseGluLookAt)
+            {
+               modAngle[0] = eulerAngle(0);
+               modAngle[1] = eulerAngle(2) - 180;;
+               modAngle[2] = eulerAngle(1);
+            }
+            else
+            {
+               modAngle[0] = eulerAngle(0);
+               modAngle[1] = eulerAngle(2) - 90;
+               modAngle[2] = eulerAngle(1);
+            }
          }
       }
       else if (mRotateAboutZaxis) // 1-2-3
@@ -4454,42 +4358,9 @@ void TrajPlotCanvas::ComputeLongitudeLst(Real time, Real x, Real y,
 
 
 //---------------------------------------------------------------------------
-//  void CopyVector3(float to[3], Real from[3])
-//---------------------------------------------------------------------------
-void TrajPlotCanvas::CopyVector3(float to[3], Real from[3])
-{
-   to[0] = from[0];
-   to[1] = from[1];
-   to[2] = from[2];
-}
-
-
-//---------------------------------------------------------------------------
-//  void CopyVector3(float to[3], float from[3])
-//---------------------------------------------------------------------------
-void TrajPlotCanvas::CopyVector3(float to[3], float from[3])
-{
-   to[0] = from[0];
-   to[1] = from[1];
-   to[2] = from[2];
-}
-
-
-//---------------------------------------------------------------------------
 //  void CopyVector3(Real to[3], Real from[3])
 //---------------------------------------------------------------------------
 void TrajPlotCanvas::CopyVector3(Real to[3], Real from[3])
-{
-   to[0] = from[0];
-   to[1] = from[1];
-   to[2] = from[2];
-}
-
-
-//---------------------------------------------------------------------------
-//  void CopyVector3(Real to[3], float from[3])
-//---------------------------------------------------------------------------
-void TrajPlotCanvas::CopyVector3(Real to[3], float from[3])
 {
    to[0] = from[0];
    to[1] = from[1];
