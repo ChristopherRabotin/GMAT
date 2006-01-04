@@ -392,7 +392,7 @@ bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item)
 
       #if DEBUG_MAINFRAME
       MessageInterface::ShowMessage
-         ("GmatMainFrame::IsChildOpen() child %s  this %s\n",
+         ("GmatMainFrame::IsChildOpen() title=%s\n   desc=%s\n",
           theChild->GetTitle().c_str(), item->GetDesc().c_str());
       #endif
     
@@ -511,7 +511,7 @@ void GmatMainFrame::RemoveChild(wxString item, int dataType)
       
       #if DEBUG_MAINFRAME
       MessageInterface::ShowMessage
-         ("GmatMainFrame::RemoveChild() child:%s  item:%s\n",
+         ("GmatMainFrame::RemoveChild() title:%s\n   item:%s\n",
           theChild->GetTitle().c_str(), item.c_str());
       #endif
       
@@ -1512,6 +1512,9 @@ GmatMainFrame::CreateNewCommand(const wxString &title,
       break;
    case GmatTree::CALL_FUNCTION_COMMAND:
       sizer->Add(new CallFunctionPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
+      break;
+   case GmatTree::SCRIPT_COMMAND:
+      sizer->Add(new ScriptEventPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
       //case GmatTree::ASSIGNMENT_COMMAND:
       //sizer->Add(new AssignmentPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
