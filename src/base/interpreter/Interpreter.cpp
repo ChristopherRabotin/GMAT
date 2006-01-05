@@ -2263,6 +2263,9 @@ Integer Interpreter::SkipWhiteSpace(Integer start, const std::string &text)
     if (str[0] == '%')  // Comment line
         return -1;
         
+    if (str[finish] == '%')  // in-line comment
+        return -1;
+        
     while ((str[finish] == ' ') || (str[finish] == '\t')) {
         ++finish;
         if ((str[finish] == '\r') || (str[finish] == '\n') ||
