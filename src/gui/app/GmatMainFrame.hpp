@@ -91,12 +91,11 @@ public:
    void SetScriptFileName(std::string filename);
 
    wxList *mdiChildren;
+   bool FileExists(std::string scriptFilename);
 
 protected:
 
 private:
-   bool FileExists(std::string scriptFilename);
-
    int scriptCounter;
    bool mRunPaused;
    bool mRunCompleted;

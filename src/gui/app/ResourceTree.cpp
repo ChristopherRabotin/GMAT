@@ -377,8 +377,8 @@ void ResourceTree::AddDefaultResources()
    
    //----- Universe
    mUniverseItem =
-      AppendItem(resource, wxT("Universe"), GmatTree::ICON_FOLDER, -1,
-                 new GmatTreeItemData(wxT("Universe"),
+      AppendItem(resource, wxT("Solar System"), GmatTree::ICON_FOLDER, -1,
+                 new GmatTreeItemData(wxT("Solar System"),
                                       GmatTree::UNIVERSE_FOLDER));
    
    SetItemImage(mUniverseItem, GmatTree::ICON_OPENFOLDER, 
