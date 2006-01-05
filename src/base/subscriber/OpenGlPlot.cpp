@@ -441,7 +441,6 @@ bool OpenGlPlot::Initialize()
    
    if (mAllSpCount > 0)
    {
-
       // check for spacecaft is included in the plot
       for (int i=0; i<mAllSpCount; i++)
       {
@@ -493,7 +492,7 @@ bool OpenGlPlot::Initialize()
       {
          #if DEBUG_OPENGL_INIT
          MessageInterface::ShowMessage
-            ("OpenGlPlot::Initialize()) mViewPointRefObj=%d, mViewScaleFactor=%f\n",
+            ("   mViewPointRefObj=%d, mViewScaleFactor=%f\n",
              mViewPointRefObj, mViewScaleFactor);
          #endif
          
@@ -576,13 +575,11 @@ bool OpenGlPlot::Initialize()
             
          #if DEBUG_OPENGL_INIT
          MessageInterface::ShowMessage
-            ("OpenGlPlot::Initialize() mScNameArray.size=%d, "
-             "mScOrbitColorArray.size=%d\n", mScNameArray.size(),
-             mScOrbitColorArray.size());
+            ("   mScNameArray.size=%d, mScOrbitColorArray.size=%d\n",
+             mScNameArray.size(), mScOrbitColorArray.size());
          MessageInterface::ShowMessage
-            ("OpenGlPlot::Initialize() mObjectNameArray.size=%d, "
-             "mOrbitColorArray.size=%d\n", mObjectNameArray.size(),
-             mOrbitColorArray.size());
+            ("   mObjectNameArray.size=%d, mOrbitColorArray.size=%d\n",
+             mObjectNameArray.size(), mOrbitColorArray.size());
             
          bool draw, show;
          for (int i=0; i<mObjectCount; i++)
@@ -590,9 +587,8 @@ bool OpenGlPlot::Initialize()
             draw = mDrawOrbitArray[i] ? true : false;
             show = mShowObjectArray[i] ? true : false;
             MessageInterface::ShowMessage
-               ("OpenGlPlot::Initialize() mObjectNameArray[%d]=%s, draw=%d, "
-                "show=%d, color=%d\n", i, mObjectNameArray[i].c_str(), draw,
-                show, mOrbitColorArray[i]);
+               ("   mObjectNameArray[%d]=%s, draw=%d, show=%d, color=%d\n",
+                i, mObjectNameArray[i].c_str(), draw, show, mOrbitColorArray[i]);
          }
          #endif
             
@@ -600,31 +596,31 @@ bool OpenGlPlot::Initialize()
             
          #if DEBUG_OPENGL_INIT
          MessageInterface::ShowMessage
-            ("OpenGlPlot::Initialize() calling PlotInterface::SetGlObject()\n");
+            ("   calling PlotInterface::SetGlObject()\n");
          #endif
-            
+         
          PlotInterface::SetGlObject(instanceName, mObjectNameArray,
                                     mOrbitColorArray, mObjectArray);
-            
+         
          //--------------------------------------------------------
          // set CoordinateSystem
          //--------------------------------------------------------
          #if DEBUG_OPENGL_INIT
          MessageInterface::ShowMessage
-            ("OpenGlPlot::Initialize() calling PlotInterface::SetGlCoordSystem()\n");
+            ("   calling PlotInterface::SetGlCoordSystem()\n");
          #endif
-
+         
          PlotInterface::SetGlCoordSystem(instanceName, mViewCoordSystem,
                                          mViewUpCoordSystem);
-            
+         
          //--------------------------------------------------------
          // set viewpoint info
          //--------------------------------------------------------
          #if DEBUG_OPENGL_INIT
          MessageInterface::ShowMessage
-            ("OpenGlPlot::Initialize() calling PlotInterface::SetGlViewOption()\n");
+            ("   calling PlotInterface::SetGlViewOption()\n");
          #endif
-            
+         
          PlotInterface::SetGlViewOption
             (instanceName, mViewPointRefObj, mViewPointVectorObj,
              mViewDirectionObj, mViewScaleFactor, mViewPointRefVector,
@@ -653,7 +649,7 @@ bool OpenGlPlot::Initialize()
       #if DEBUG_OPENGL_INIT
       MessageInterface::ShowMessage("OpenGlPlot::Initialize() DeleteGlPlot()\n");
       #endif
-         
+      
       return PlotInterface::DeleteGlPlot();
    }
 
@@ -918,7 +914,9 @@ Integer OpenGlPlot::SetIntegerParameter(const Integer id, const Integer value)
    {
    case DATA_COLLECT_FREQUENCY:
       mDataCollectFrequency = value;
-      return value;
+      if (mDataCollectFrequency <= 0)
+         mDataCollectFrequency = 1;
+      return mDataCollectFrequency;
    case UPDATE_PLOT_FREQUENCY:
       mUpdatePlotFrequency = value;
       return value;
@@ -1538,7 +1536,7 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
    MessageInterface::ShowMessage
       ("OpenGlPlot::GetRefObjectNameArray() returning for type:%d\n", type);
    for (unsigned int i=0; i<mAllRefObjectNames.size(); i++)
-      MessageInterface::ShowMessage("%s\n", mAllRefObjectNames[i].c_str());
+      MessageInterface::ShowMessage("   %s\n", mAllRefObjectNames[i].c_str());
    #endif
    
    return mAllRefObjectNames;
@@ -1623,7 +1621,7 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          {
             #if DEBUG_OPENGL_OBJ > 1
             MessageInterface::ShowMessage
-               ("Setting name=%s\n", mAllSpNameArray[i].c_str());
+               ("   Setting name=%s\n", mAllSpNameArray[i].c_str());
             #endif
             
             mAllSpArray[i] = (SpacePoint*)(obj);
@@ -2016,14 +2014,15 @@ void OpenGlPlot::UpdateObjectList(SpacePoint *sp, bool show)
    
    #if DEBUG_OPENGL_INIT
    Integer draw, showObj;
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::UpdateObjectList() instanceName=%s\n", instanceName.c_str());
    for (int i=0; i<mObjectCount; i++)
    {
       draw = mDrawOrbitArray[i] ? 1 : 0;
       showObj = mShowObjectArray[i] ? 1 : 0;
       MessageInterface::ShowMessage
-         ("OpenGlPlot::UpdateObjectList() mObjectNameArray[%d]=%s, draw=%d, "
-          "show=%d, color=%d\n", i, mObjectNameArray[i].c_str(), draw, showObj,
-          mOrbitColorArray[i]);
+         ("   mObjectNameArray[%d]=%s, draw=%d, show=%d, color=%d\n", i,
+          mObjectNameArray[i].c_str(), draw, showObj, mOrbitColorArray[i]);
    }
    #endif
 }
@@ -2050,120 +2049,123 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
 {
    #if DEBUG_OPENGL_UPDATE
    MessageInterface::ShowMessage
-      ("OpenGlPlot::Distribute() isEndOfReceive=%d, mAllSpCount=%d, mScCount=%d, "
-       "len=%d\n", isEndOfReceive, mAllSpCount, mScCount, len);
+      ("OpenGlPlot::Distribute() instanceName=%s, active=%d, isEndOfRun=%d, "
+       "isEndOfReceive=%d\n   mAllSpCount=%d, mScCount=%d, len=%d\n",
+       instanceName.c_str(), active, isEndOfRun, isEndOfReceive, mAllSpCount,
+       mScCount, len);
    #endif
 
-   if (!active)
+   if (!active || mScCount <= 0 || len <= 0)
       return true;
-   
-   Publisher *thePublisher = Publisher::Instance();
-   
+
    if (isEndOfRun)
       return PlotInterface::SetGlEndOfRun(instanceName);
    
    if (isEndOfReceive)
       return PlotInterface::RefreshGlPlot(instanceName);
    
+   Publisher *thePublisher = Publisher::Instance();
+   
    // if targeting and draw target is off, just return
    if ((mTargetStatus == "Off") && (thePublisher->GetRunState() == Gmat::TARGETING))
    {
       #if DEBUG_OPENGL_UPDATE > 1
-      MessageInterface::ShowMessage
-         ("OpenGlPlot::Distribute() TargetStatus is off and TARGETING\n");
+      MessageInterface::ShowMessage("   TargetStatus is off and TARGETING\n");
       #endif
       
       return true;
    }
 
-   if (mScCount > 0)
+   //------------------------------------------------------------
+   // update plot data
+   //------------------------------------------------------------
+   
+   mNumData++;
+   
+   #if DEBUG_OPENGL_UPDATE > 1
+   MessageInterface::ShowMessage
+      ("   mNumData=%d, mDataCollectFrequency=%d\n", mNumData, mDataCollectFrequency);
+   #endif
+   
+   if ((mNumData % mDataCollectFrequency) == 0)
    {
-      if (len > 0)
+      mNumData = 0;
+      mNumCollected++;
+      bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
+      
+      //get data being published
+      StringArray labelArray =
+         thePublisher->GetStringArrayParameter("PublishedDataMap");
+      
+      #if DEBUG_OPENGL_UPDATE > 1
+      MessageInterface::ShowMessage("   labelArray=\n   ");
+      for (int j=0; j<(int)labelArray.size(); j++)
       {
-         mNumData++;
-         
-         if ((mNumData % mDataCollectFrequency) == 0)
-         {
-            mNumData = 0;
-            mNumCollected++;
-            bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
-            
-            //get data being published
-            StringArray labelArray =
-               thePublisher->GetStringArrayParameter("PublishedDataMap");
-            
-            #if DEBUG_OPENGL_UPDATE > 1
-            MessageInterface::ShowMessage("OpenGlPlot::Distribute() labelArray=\n");
-            for (int j=0; j<(int)labelArray.size(); j++)
-            {
-               MessageInterface::ShowMessage("%s ", labelArray[j].c_str());
-            }
-            MessageInterface::ShowMessage("\n");
-            #endif
-            
-            Integer idX, idY, idZ;
-            Integer idVx, idVy, idVz;
-            Integer scIndex = -1;
-            
-            for (int i=0; i<mScCount; i++)
-            {
-               idX = FindIndexOfElement(labelArray, mScNameArray[i]+".X");
-               idY = FindIndexOfElement(labelArray, mScNameArray[i]+".Y");
-               idZ = FindIndexOfElement(labelArray, mScNameArray[i]+".Z");
-               
-               idVx = FindIndexOfElement(labelArray, mScNameArray[i]+".Vx");
-               idVy = FindIndexOfElement(labelArray, mScNameArray[i]+".Vy");
-               idVz = FindIndexOfElement(labelArray, mScNameArray[i]+".Vz");
-               
-               #if DEBUG_OPENGL_UPDATE > 1
-               MessageInterface::ShowMessage
-                  ("OpenGlPlot::Distribute() i=%d, idX=%d, idY=%d, idZ=%d, "
-                   "idVx=%d, idVy=%d, idVz=%d\n", i, idX, idY, idZ,
-                   idVx, idVy, idVz);
-               #endif
-               
-               scIndex++;
-               mScXArray[scIndex] = dat[idX];
-               mScYArray[scIndex] = dat[idY];
-               mScZArray[scIndex] = dat[idZ];
-               
-               mScVxArray[scIndex] = dat[idVx];
-               mScVyArray[scIndex] = dat[idVy];
-               mScVzArray[scIndex] = dat[idVz];
-               
-               #if DEBUG_OPENGL_UPDATE
-               MessageInterface::ShowMessage
-                  ("OpenGlPlot::Distribute() scNo=%d X=%f Y=%f Z=%f\n",
-                   i, mScXArray[scIndex], mScYArray[scIndex], mScZArray[scIndex]);
-               MessageInterface::ShowMessage
-                  ("OpenGlPlot::Distribute() scNo=%d Vx=%f Vy=%f Vz=%f\n",
-                   i, mScVxArray[scIndex], mScVyArray[scIndex], mScVzArray[scIndex]);
-               #endif
-               
-            }
-            
-            // If targeting, use targeting color
-            if (thePublisher->GetRunState() == Gmat::TARGETING)
-            {
-               PlotInterface::
-                  UpdateGlPlot(instanceName, mOldName, mViewCoordSysName,
-                               mScNameArray, dat[0], mScXArray, mScYArray,
-                               mScZArray, mScVxArray, mScVyArray, mScVzArray,
-                               mScTargetColorArray, update);
-            }
-            else
-            {
-               PlotInterface::
-                  UpdateGlPlot(instanceName, mOldName, mViewCoordSysName,
-                               mScNameArray, dat[0], mScXArray, mScYArray,
-                               mScZArray, mScVxArray, mScVyArray, mScVzArray,
-                               mScOrbitColorArray, update);
-            }
-            
-            if (update)
-               mNumCollected = 0;
-         }
+         MessageInterface::ShowMessage("%s ", labelArray[j].c_str());
       }
+      MessageInterface::ShowMessage("\n");
+      #endif
+      
+      Integer idX, idY, idZ;
+      Integer idVx, idVy, idVz;
+      Integer scIndex = -1;
+      
+      for (int i=0; i<mScCount; i++)
+      {
+         idX = FindIndexOfElement(labelArray, mScNameArray[i]+".X");
+         idY = FindIndexOfElement(labelArray, mScNameArray[i]+".Y");
+         idZ = FindIndexOfElement(labelArray, mScNameArray[i]+".Z");
+         
+         idVx = FindIndexOfElement(labelArray, mScNameArray[i]+".Vx");
+         idVy = FindIndexOfElement(labelArray, mScNameArray[i]+".Vy");
+         idVz = FindIndexOfElement(labelArray, mScNameArray[i]+".Vz");
+         
+         #if DEBUG_OPENGL_UPDATE > 1
+         MessageInterface::ShowMessage
+            ("   i=%d, idX=%d, idY=%d, idZ=%d, idVx=%d, idVy=%d, idVz=%d\n",
+             i, idX, idY, idZ, idVx, idVy, idVz);
+         #endif
+         
+         scIndex++;
+         mScXArray[scIndex] = dat[idX];
+         mScYArray[scIndex] = dat[idY];
+         mScZArray[scIndex] = dat[idZ];
+         
+         mScVxArray[scIndex] = dat[idVx];
+         mScVyArray[scIndex] = dat[idVy];
+         mScVzArray[scIndex] = dat[idVz];
+         
+         #if DEBUG_OPENGL_UPDATE
+         MessageInterface::ShowMessage
+            ("   scNo=%d X=%f Y=%f Z=%f\n",
+             i, mScXArray[scIndex], mScYArray[scIndex], mScZArray[scIndex]);
+         MessageInterface::ShowMessage
+            ("   scNo=%d Vx=%f Vy=%f Vz=%f\n",
+             i, mScVxArray[scIndex], mScVyArray[scIndex], mScVzArray[scIndex]);
+         #endif
+         
+      }
+      
+      // If targeting, use targeting color
+      if (thePublisher->GetRunState() == Gmat::TARGETING)
+      {
+         PlotInterface::
+            UpdateGlPlot(instanceName, mOldName, mViewCoordSysName,
+                         mScNameArray, dat[0], mScXArray, mScYArray,
+                         mScZArray, mScVxArray, mScVyArray, mScVzArray,
+                         mScTargetColorArray, update);
+      }
+      else
+      {
+         PlotInterface::
+            UpdateGlPlot(instanceName, mOldName, mViewCoordSysName,
+                         mScNameArray, dat[0], mScXArray, mScYArray,
+                         mScZArray, mScVxArray, mScVyArray, mScVzArray,
+                         mScOrbitColorArray, update);
+      }
+      
+      if (update)
+         mNumCollected = 0;
    }
 
    //loj: always return true otherwise next subscriber will not call ReceiveData()
