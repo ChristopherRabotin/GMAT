@@ -27,6 +27,8 @@
 #include "CommandUtil.hpp"         // for GetCommandSeq()
 #include <ctime>                   // for clock()
 
+//loj: 1/4/06 debug
+
 //#define DEBUG_INIT 1
 //#define DEBUG_RUN 1
 //#define DEBUG_CREATE_RESOURCE 1
@@ -774,13 +776,13 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
       
       if (cp == NULL)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, "Cannot create a CreateCalculatedPoint type: %s.\n"
-             "Make sure %s is correct type and registered to CalculatedPointFactory.\n",
-             type.c_str(), type.c_str());
+         //MessageInterface::PopupMessage
+         //   (Gmat::ERROR_, "Cannot create a CreateCalculatedPoint type: %s.\n"
+         //    "Make sure %s is correct type and registered to CalculatedPointFactory.\n",
+         //    type.c_str(), type.c_str());
          
-         return NULL;
-         //throw GmatBaseException("Error Creating CalculatedPoint:" + type);
+         //return NULL;
+         throw GmatBaseException("Error Creating CalculatedPoint: " + type + "\n");
       }
       
       // add default bodies
@@ -892,13 +894,13 @@ CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
     
       if (body == NULL)
       {
-         MessageInterface::ShowMessage
-            ("Moderator::CreateCelestialBody() Error Creating %s.  Make sure "
-             "CelestialBodyFactory is registered and has correct type. \n",
-             type.c_str());
+         //MessageInterface::ShowMessage
+         //   ("Moderator::CreateCelestialBody() Error Creating %s.  Make sure "
+         //    "CelestialBodyFactory is registered and has correct type. \n",
+         //    type.c_str());
          
-         return NULL;
-         //throw GmatBaseException("Error Creating CelestialBody: " + type);
+         //return NULL;
+         throw GmatBaseException("Error Creating CelestialBody: " + type + "\n");
       }
       
       // Manage it if it is a named body
@@ -976,13 +978,13 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type,
 
       if (sc == NULL)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, "Cannot create a Spacecraft type: %s.\n"
-             "Make sure %s is correct type and registered to SpacecraftFactory.\n",
-             type.c_str(), type.c_str());
+         //MessageInterface::PopupMessage
+         //   (Gmat::ERROR_, "Cannot create a Spacecraft type: %s.\n"
+         //    "Make sure %s is correct type and registered to SpacecraftFactory.\n",
+         //    type.c_str(), type.c_str());
          
-         return NULL;
-         //throw GmatBaseException("Error Creating Spacecraft");
+         //return NULL;
+         throw GmatBaseException("Error Creating Spacecraft: " + type + "\n");
       }
       
       if (type == "Spacecraft")
@@ -1061,13 +1063,13 @@ Hardware* Moderator::CreateHardware(const std::string &type, const std::string &
       
       if (hw == NULL)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, "Cannot create a Hardware type: %s.\n"
-             "Make sure %s is correct type and registered to HardwareFactory.\n",
-             type.c_str(), type.c_str());
+         //MessageInterface::PopupMessage
+         //   (Gmat::ERROR_, "Cannot create a Hardware type: %s.\n"
+         //    "Make sure %s is correct type and registered to HardwareFactory.\n",
+         //    type.c_str(), type.c_str());
          
-         return NULL;
-         //throw GmatBaseException("Error Creating Hardware");
+         //return NULL;
+         throw GmatBaseException("Error Creating Hardware: " + type + "\n");
       }
       
       // Manage it if it is a named Hardware
@@ -1144,13 +1146,13 @@ Propagator* Moderator::CreatePropagator(const std::string &type,
     
       if (prop ==  NULL)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, "Cannot create a Propagator type: %s.\n"
-             "Make sure %s is correct type and registered to PropagatorFactory.\n",
-             type.c_str(), type.c_str());
+         //MessageInterface::PopupMessage
+         //   (Gmat::ERROR_, "Cannot create a Propagator type: %s.\n"
+         //    "Make sure %s is correct type and registered to PropagatorFactory.\n",
+         //   type.c_str(), type.c_str());
          
-         return NULL;
-         //throw GmatBaseException("Error Creating Propagator");
+         //return NULL;
+         throw GmatBaseException("Error Creating Propagator: " + type + "\n");
       }
       
       // Manage it if it is a named Propagator
@@ -1221,15 +1223,15 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
     
       if (physicalModel ==  NULL)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, "Cannot create a PhysicalModel type: %s.\n"
-             "Make sure %s is correct type and registered to PhysicalModelFactory.\n",
-             type.c_str(), type.c_str());
+         //MessageInterface::PopupMessage
+         //   (Gmat::ERROR_, "Cannot create a PhysicalModel type: %s.\n"
+         //    "Make sure %s is correct type and registered to PhysicalModelFactory.\n",
+         //    type.c_str(), type.c_str());
          
-         return NULL;         
-         //throw GmatBaseException("Error Creating PhysicalModel");
+         //return NULL;         
+         throw GmatBaseException("Error Creating PhysicalModel: " + type + "\n");
       }
-    
+      
       // Manage it if it is a named PhysicalModel
       try
       {
@@ -1309,13 +1311,13 @@ AtmosphereModel* Moderator::CreateAtmosphereModel(const std::string &type,
 
       if (atmosphereModel ==  NULL)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, "Cannot create a AtmosphereModel type: %s.\n"
-             "Make sure %s is correct type and registered to AtmosphereFactory.\n",
-             type.c_str(), type.c_str());
+         //MessageInterface::PopupMessage
+         //   (Gmat::ERROR_, "Cannot create a AtmosphereModel type: %s.\n"
+         //    "Make sure %s is correct type and registered to AtmosphereFactory.\n",
+         //    type.c_str(), type.c_str());
          
-         return NULL;
-         //throw GmatBaseException("Error Creating AtmosphereModel: " + type);
+         //return NULL;
+         throw GmatBaseException("Error Creating AtmosphereModel: " + type + "\n");
       }
       
       // Manage it if it is a named AtmosphereModel
@@ -1390,13 +1392,13 @@ Burn* Moderator::CreateBurn(const std::string &type,
 
       if (burn ==  NULL)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, "Cannot create a Burn type: %s.\n"
-             "Make sure %s is correct type and registered to BurnFactory.\n",
-             type.c_str(), type.c_str());
+         //MessageInterface::PopupMessage
+         //   (Gmat::ERROR_, "Cannot create a Burn type: %s.\n"
+         //    "Make sure %s is correct type and registered to BurnFactory.\n",
+         //    type.c_str(), type.c_str());
          
-         return NULL;
-         //throw GmatBaseException("Error Creating Burn: " + type);
+         //return NULL;
+         throw GmatBaseException("Error Creating Burn: " + type + "\n");
       }
     
       // Manage it if it is a named burn
@@ -1502,13 +1504,13 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       
       if (parameter == NULL)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, "Cannot create a Parameter type: %s.\n"
-             "Make sure %s is correct type and registered to ParameterFactory.\n",
-             type.c_str(), type.c_str());
+         //MessageInterface::PopupMessage
+         //   (Gmat::ERROR_, "Cannot create a Parameter type: %s.\n"
+         //    "Make sure %s is correct type and registered to ParameterFactory.\n",
+         //    type.c_str(), type.c_str());
          
-         return NULL;
-         //throw GmatBaseException("Error Creating Parameter: " + type);
+         //return NULL;
+         throw GmatBaseException("Error Creating Parameter: " + type + "\n");
       }
       
       // Manage it if it is a named parameter
@@ -1565,12 +1567,12 @@ ForceModel* Moderator::CreateForceModel(const std::string &name)
    
    if (fm == NULL)
    {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, "Cannot create a ForceModel.\n"
-          "Make sure ForceModel is correct type and registered to ForceModelFactory.\n");
+      //MessageInterface::PopupMessage
+      //   (Gmat::ERROR_, "Cannot create a ForceModel.\n"
+      //    "Make sure ForceModel is correct type and registered to ForceModelFactory.\n");
       
-      return NULL;
-      //throw GmatBaseException("Error Creating ForceModel");
+      //return NULL;
+      throw GmatBaseException("Error Creating ForceModel\n");
    }
    
    // Manage it if it is a named ForceModel
@@ -1636,13 +1638,13 @@ StopCondition* Moderator::CreateStopCondition(const std::string &type,
     
    if (stopCond ==  NULL)
    {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, "Cannot create a StopCondition type: %s.\n"
-          "Make sure %s is correct type and registered to StopConditionFactory.\n",
-          type.c_str(), type.c_str());
+      //MessageInterface::PopupMessage
+      //   (Gmat::ERROR_, "Cannot create a StopCondition type: %s.\n"
+      //    "Make sure %s is correct type and registered to StopConditionFactory.\n",
+      //    type.c_str(), type.c_str());
       
-      return NULL;
-      //throw GmatBaseException("Error Creating StopCondition: " + type);
+      //return NULL;
+      throw GmatBaseException("Error Creating StopCondition: " + type + "\n");
    }
    
    return stopCond;
@@ -1685,13 +1687,13 @@ Solver* Moderator::CreateSolver(const std::string &type, const std::string &name
 
       if (solver == NULL)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, "Cannot create a Solver type: %s.\n"
-             "Make sure %s is correct type and registered to SolverFactory.\n",
-             type.c_str(), type.c_str());
+         //MessageInterface::PopupMessage
+         //   (Gmat::ERROR_, "Cannot create a Solver type: %s.\n"
+         //    "Make sure %s is correct type and registered to SolverFactory.\n",
+         //    type.c_str(), type.c_str());
          
-         return NULL;
-         //throw GmatBaseException("Error Creating Solver: " + type);
+         //return NULL;
+         throw GmatBaseException("Error Creating Solver: " + type + "\n");
       }
       
       // Manage it if it is a named solver
