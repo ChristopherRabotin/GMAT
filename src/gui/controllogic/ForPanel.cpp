@@ -73,8 +73,13 @@ void ForPanel::Create()
 void ForPanel::Setup( wxWindow *parent)
 {
    // wxGrid
+#if __WXMAC__
+   conditionGrid =
+      new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(630,65), wxWANTS_CHARS);
+#else
    conditionGrid =
       new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(503,50), wxWANTS_CHARS);
+#endif
    
    conditionGrid->CreateGrid(1,4,wxGrid::wxGridSelectCells);
    conditionGrid->SetSelectionMode(wxGrid::wxGridSelectCells);
@@ -88,12 +93,19 @@ void ForPanel::Setup( wxWindow *parent)
    conditionGrid->EnableDragColSize(false);
    conditionGrid->EnableDragRowSize(false);
    conditionGrid->EnableDragGridSize(false);
-   
+ 
+ #if __WXMAC__  
+   conditionGrid->SetColSize(0, 155);
+   conditionGrid->SetColSize(1, 155);
+   conditionGrid->SetColSize(2, 155);
+   conditionGrid->SetColSize(3, 155);
+#else
    conditionGrid->SetColSize(0, 125);
    conditionGrid->SetColSize(1, 125);
    conditionGrid->SetColSize(2, 125);
    conditionGrid->SetColSize(3, 125);
-   
+#endif
+
    conditionGrid->SetColLabelValue(0, _T("Index"));
    conditionGrid->SetColLabelValue(1, _T("Start"));
    conditionGrid->SetColLabelValue(2, _T("Increment"));
