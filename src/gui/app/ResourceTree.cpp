@@ -65,6 +65,7 @@
 
 //#define DEBUG_RESOURCE_TREE 1
 //#define DEBUG_RENAME 1
+//#define DEBUG_COMPARE_REPORT 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -2640,12 +2641,12 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       for (int i=0; i<repeatCount; i++)
       {
          MessageInterface::ShowMessage
-            ("====> Run Count: %d\n", i+1);
+            ("==> Run Count: %d\n", i+1);
          
          if (compare)
          {
             tempStr.Printf("%d", i+1);
-            textCtrl->AppendText("====> Run Count: " + tempStr);
+            textCtrl->AppendText("==> Run Count: " + tempStr + "\n");
          }
          
          try
@@ -2891,14 +2892,18 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
    #endif
    
    if (textCtrl == NULL)
+   {
       MessageInterface::ShowMessage
          ("ResourceTree::CompareScriptRunResult() textCtrl is NULL\n");
+      return;
+   }
    
    StringArray itemNames =
       theGuiInterpreter->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
    int size = itemNames.size();
    std::string objName;
    ReportFile *theReport;
+   int reportCount = 0;
    
    for (int i = 0; i<size; i++)
    {
@@ -2912,7 +2917,7 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
          if (!theReport)
          {
             MessageInterface::ShowMessage
-               ("ResourceTree::CompareScriptRunResult The ReportFile: %s is NULL.\n",
+               ("ResourceTree::CompareScriptRunResult() The ReportFile: %s is NULL.\n",
                 objName.c_str());
             return;
          }
@@ -2962,6 +2967,14 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
             textCtrl->AppendText(wxString(output[i].c_str()));
 
          textCtrl->Show();
+
+         reportCount++;
       }
+   }
+
+   if (reportCount == 0)
+   {
+      textCtrl->AppendText("** There is no report file to compare.\n");
+      MessageInterface::ShowMessage("** There is no report file to compare.\n");
    }
 }
