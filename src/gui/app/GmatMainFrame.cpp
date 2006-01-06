@@ -339,25 +339,25 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item)
    // Note: Do not change the order of ItemType in GmatTreeItemData.hpp.
    // The wrong order of dataType will not work propery.
    //----------------------------------------------------------------------
-   if (dataType >= GmatTree::SPACECRAFT &&
-       dataType <= GmatTree::LIBRATION_POINT)
+   if (dataType >= GmatTree::BEGIN_OF_RESOURCE &&
+       dataType <= GmatTree::END_OF_RESOURCE)
    {
       newChild = CreateNewResource(item->GetDesc(), item->GetDesc(), dataType);
    }
-   else if (dataType >= GmatTree::PROPAGATE_COMMAND &&
-            dataType <= GmatTree::SCRIPT_COMMAND)
+   else if (dataType >= GmatTree::BEGIN_OF_COMMAND &&
+            dataType <= GmatTree::END_OF_COMMAND)
    {
       newChild = CreateNewCommand(item->GetDesc(), item->GetDesc(), dataType,
                                   item->GetCommand());
    }
-   else if (dataType >= GmatTree::IF_CONTROL &&
-            dataType <= GmatTree::SWITCH_CONTROL)
+   else if (dataType >= GmatTree::BEGIN_OF_CONTROL &&
+            dataType <= GmatTree::END_OF_CONTROL)
    {
       newChild = CreateNewControl(item->GetDesc(), item->GetDesc(), dataType,
                                   item->GetCommand());
    }
-   else if (dataType >= GmatTree::OUTPUT_REPORT &&
-            dataType <= GmatTree::COMPARE_REPORT)
+   else if (dataType >= GmatTree::BEGIN_OF_OUTPUT &&
+            dataType <= GmatTree::END_OF_OUTPUT)
    {
       newChild = CreateNewOutput(item->GetDesc(), item->GetDesc(), dataType);
    }
@@ -556,10 +556,12 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
    
    wxString title;
    int type;
+   bool canDelete;
    
    wxNode *node = mdiChildren->GetFirst();
    while (node)
    {
+      canDelete = false;
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
       
       title = theChild->GetTitle();
@@ -569,159 +571,41 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       MessageInterface::ShowMessage("   title=%s, type=%d\n", title.c_str(), type);
       #endif
       
-      // delete resource child
-      if ((type >= GmatTree::SPACECRAFT && type <= GmatTree::LIBRATION_POINT) ||
-          (type >= GmatTree::PROPAGATE_COMMAND && type <= GmatTree::SWITCH_CONTROL))
+      if ((type >= GmatTree::BEGIN_OF_RESOURCE && type <= GmatTree::END_OF_RESOURCE) ||
+          (type >= GmatTree::BEGIN_OF_COMMAND && type <= GmatTree::END_OF_CONTROL))
+      {
+         // delete resource child
+         if (type == GmatTree::SCRIPT_FILE)
+         {
+            if (closeScriptWindow)
+               canDelete = true;
+            else if (theChild->GetTitle() != excludeTitle)
+               canDelete = true;
+         }
+         else
+         {
+            canDelete = true;
+         }
+      }
+      else if (type >= GmatTree::BEGIN_OF_OUTPUT && type <= GmatTree::END_OF_OUTPUT)
+      {
+         // delete output child except compare
+         if (closePlots && type != GmatTree::COMPARE_REPORT)
+            canDelete = true;
+      }
+      
+      if (canDelete)
       {
          #if DEBUG_MAINFRAME_CLOSE
-         MessageInterface::ShowMessage
-            ("   deleting resource child=%s\n", title.c_str());
+         MessageInterface::ShowMessage("   ==>deleting child=%s\n", title.c_str());
          #endif
          
          delete theChild;
          delete node;
       }
       
-      if (closeScriptWindow)
-      {
-         // delete only scripts
-         if (title.Contains(".script") || title.Contains(".m"))
-         {
-            #if DEBUG_MAINFRAME_CLOSE
-            MessageInterface::ShowMessage
-               ("   deleting script child=%s\n", title.c_str());
-            #endif
-            
-            delete theChild;
-            delete node;
-         }
-      }
-      else
-      {
-         if (theChild->GetTitle() != excludeTitle)
-         {
-            #if DEBUG_MAINFRAME_CLOSE
-            MessageInterface::ShowMessage
-               ("   deleting script child=%s\n", title.c_str());
-            #endif
-            
-            delete theChild;
-            delete node;
-         }
-      }
-      
-      if (closePlots)
-      {
-         // delete only non-scripts
-         if (type == GmatTree::OUTPUT_XY_PLOT ||
-             type == GmatTree::OUTPUT_OPENGL_PLOT)
-         {
-            #if DEBUG_MAINFRAME_CLOSE
-            MessageInterface::ShowMessage
-               ("   deleting plot child=%s\n", title.c_str());
-            #endif
-            
-            delete theChild;
-            delete node;
-         }
-      }
-      
       node = node->GetNext();
    }
-   
-   
-//    if (closeScriptWindow)
-//    {
-//       wxString title;
-      
-//       // do not need to check if script window is open
-//       wxNode *node = mdiChildren->GetFirst();
-//       while (node)
-//       {
-//          GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-
-//          title = theChild->GetTitle();
-         
-//          #if DEBUG_MAINFRAME_CLOSE
-//          MessageInterface::ShowMessage("    theChild=%s\n", title.c_str());
-//          #endif
-         
-//          // delete only scripts
-//          if (title.Contains(".script") || title.Contains(".m"))
-//          {
-//             #if DEBUG_MAINFRAME_CLOSE
-//             MessageInterface::ShowMessage
-//                ("   Deleting theChild=%s\n", title.c_str());
-//             #endif
-            
-//             delete theChild;
-//             delete node;
-//          }
-         
-//          node = node->GetNext();
-//       }
-//    }
-//    else
-//    {
-//       wxNode *node = mdiChildren->GetFirst();
-//       while (node)
-//       {
-//          GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-         
-//          #if DEBUG_MAINFRAME_CLOSE
-//          MessageInterface::ShowMessage
-//             ("GmatMainFrame::CloseAllChildren() theChild=%s\n",
-//              theChild->GetTitle().c_str());
-//          #endif
-         
-//          if (theChild->GetTitle() != excludeTitle)
-//          {
-//             delete theChild;
-//             delete node;
-//          }
-         
-//          node = node->GetNext();
-//       }
-//    }
-
-//    if (closePlots)
-//    {      
-//       #if DEBUG_MAINFRAME_CLOSE
-//       MessageInterface::ShowMessage
-//          ("GmatMainFrame::CloseAllChildren() Deleting plots\n   MdiTsPlot::numChildren=%d, "
-//           "MdiGlPlot::numChildren=%d\n", MdiTsPlot::numChildren,
-//           MdiGlPlot::numChildren);
-//       #endif
-      
-//       wxString title;
-//       wxNode *node = mdiChildren->GetFirst();
-      
-//       while (node)
-//       {
-//          GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-//          title = theChild->GetTitle();
-         
-//          #if DEBUG_MAINFRAME_CLOSE
-//          MessageInterface::ShowMessage("   theChild=%s\n", title.c_str());
-//          #endif
-            
-//          // delete only non-scripts
-//          if (theChild->GetDataType() == GmatTree::OUTPUT_XY_PLOT ||
-//              theChild->GetDataType() == GmatTree::OUTPUT_OPENGL_PLOT)
-//             //theChild->GetDataType() == GmatTree::COMPARE_REPORT)
-//          {
-//             #if DEBUG_MAINFRAME_CLOSE
-//             MessageInterface::ShowMessage
-//                ("   deleting theChild=%s\n", title.c_str());
-//             #endif
-            
-//             delete theChild;
-//             delete node;
-//          }
-         
-//          node = node->GetNext();
-//       }
-//    }
 }
 
 
@@ -1488,8 +1372,6 @@ GmatMainFrame::CreateNewResource(const wxString &title,
    case GmatTree::OPENGL_PLOT:
       sizer->Add(new OpenGlPlotSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::MISSION_SEQ_COMMAND:
-      return NULL;
    case GmatTree::VARIABLE:
       if (theGuiInterpreter->GetParameter(name.c_str())->GetTypeName() == "Variable" ||
           theGuiInterpreter->GetParameter(name.c_str())->GetTypeName() == "String")

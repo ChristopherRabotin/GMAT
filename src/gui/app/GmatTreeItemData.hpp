@@ -104,7 +104,7 @@ namespace GmatTree
    //----------------------------------------------------------------------
    enum ItemType
    {
-      // Resource Tree
+      //---------- Resource Tree
       RESOURCES_FOLDER = 20000,
       SPACECRAFT_FOLDER,
       HARDWARE_FOLDER,
@@ -126,25 +126,36 @@ namespace GmatTree
       SPECIAL_POINTS_FOLDER,
       PREDEFINED_FUNCTIONS_FOLDER,
       SCRIPTS_FOLDER,
-      SAMPLE_SCRIPTS_FOLDER,
 
+      // not openable
+      INTERFACE,
+      
+      // Temporary to show the panel
+      // loj: Do we want to delete this? It is used in MissionTree.cpp
+      VIEW_SOLVER_VARIABLES,
+      VIEW_SOLVER_GOALS,
+      
       // resource
+      BEGIN_OF_RESOURCE,
       SPACECRAFT,
-
       FUELTANK,
       THRUSTER,
-
+      
       FORMATION_FOLDER,
       FORMATION_SPACECRAFT,
-
+      
       CONSTELLATION_FOLDER,
       CONSTELLATION_SATELLITE,
-
+      
       PROPAGATOR,
+      
       IMPULSIVE_BURN,
       FINITE_BURN,
+      
       CELESTIAL_BODY,
-        
+      BARYCENTER,
+      LIBRATION_POINT,
+      
       DIFF_CORR,
       BROYDEN,
       QUASI_NEWTON,
@@ -153,7 +164,7 @@ namespace GmatTree
       REPORT_FILE,
       XY_PLOT,
       OPENGL_PLOT,
-      INTERFACE,
+      
       SUBSCRIPT,
       VARIABLE,
       MATLAB_FUNCTION,
@@ -161,18 +172,20 @@ namespace GmatTree
       COORD_SYSTEM,
       USER_COORD_SYSTEM,
       GROUNDSTATION,
-      SCRIPT_FILE,
-      SCRIPT_FOLDER,
-      BARYCENTER,
-      LIBRATION_POINT,
       
-      //Mission Tree
+      // scripts
+      SCRIPT_FOLDER,
+      SCRIPT_FILE,
+      END_OF_RESOURCE,
+      
+      //---------- Mission Tree
       MISSIONS_FOLDER,
       MISSION_SEQ_TOP_FOLDER,
       MISSION_SEQ_SUB_FOLDER,
       MISSION_SEQ_COMMAND,
-
+      
       // command
+      BEGIN_OF_COMMAND,
       PROPAGATE_COMMAND,
       MANEUVER_COMMAND,
       TARGET_COMMAND,
@@ -183,41 +196,40 @@ namespace GmatTree
       TOGGLE_COMMAND,
       CALL_FUNCTION_COMMAND,
       ASSIGNMENT_COMMAND,
-      FREE_FORM_SCRIPT_COMMAND, //arg: 1/12/05 added FREE_FORM_SCRIPT
+      FREE_FORM_SCRIPT_COMMAND,
       SCRIPT_COMMAND,
+      END_OF_COMMAND,
       
-      // Temporary to show the panel
-      VIEW_SOLVER_VARIABLES,
-      VIEW_SOLVER_GOALS, 
-      
-      // Instead of Variable_Folder
-      VARIABLES,
-
       // control logic
+      BEGIN_OF_CONTROL,
       IF_CONTROL,
       ELSE_IF_CONTROL,
+      FOR_CONTROL,
+      WHILE_CONTROL,
+      DO_CONTROL,
+      SWITCH_CONTROL,
+      END_OF_CONTROL,
+      
       ELSE_CONTROL,
       END_IF_CONTROL,
-      FOR_CONTROL,
       END_FOR_CONTROL,
-      WHILE_CONTROL,
-      END_WHILE_CONTROL,
-      DO_CONTROL,
       END_DO_CONTROL,
-      SWITCH_CONTROL,
+      END_WHILE_CONTROL,
       END_SWITCH_CONTROL,
       
-      // for the output tree
+      //---------- Output Tree
       OUTPUT_FOLDER,
       REPORTS_FOLDER,
       OPENGL_PLOTS_FOLDER,
       XY_PLOTS_FOLDER,
 
       // for output
+      BEGIN_OF_OUTPUT,
       OUTPUT_REPORT,
       OUTPUT_OPENGL_PLOT,
       OUTPUT_XY_PLOT,
       COMPARE_REPORT,
+      END_OF_OUTPUT,
    };
 }
 #endif // GmatTreeItemData_hpp
