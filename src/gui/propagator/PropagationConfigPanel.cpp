@@ -727,11 +727,11 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                         wxST_NO_AUTORESIZE );
    setting6StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Min Integration Error: "),
-                        wxDefaultPosition, wxSize(120,20),
+                        wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting7StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Nominal Integration Error: "),
-                        wxDefaultPosition, wxSize(120,20),
+                        wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );  
    degree1StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Degree"),
@@ -1272,6 +1272,64 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
       newProp = thePropSetup->GetPropagator();
    }
    
+#if __WXMAC__
+   if (integratorString.IsSameAs(integratorArray[RKV89]))
+   {
+         setting6StaticText->Enable(false);
+         setting7StaticText->Enable(false);
+         setting6TextCtrl->Enable(false);
+         setting7TextCtrl->Enable(false);
+   }
+   else if (integratorString.IsSameAs(integratorArray[RKN68]))
+   {
+         setting6StaticText->Enable(false);
+         setting7StaticText->Enable(false);
+         setting6TextCtrl->Enable(false);
+         setting7TextCtrl->Enable(false);
+   }
+   else if (integratorString.IsSameAs(integratorArray[RKF56]))
+   {   
+         setting6StaticText->Enable(false);
+         setting7StaticText->Enable(false);
+         setting6TextCtrl->Enable(false);
+         setting7TextCtrl->Enable(false);
+   }
+   else if (integratorString.IsSameAs(integratorArray[PD45]))
+   {   
+         setting6StaticText->Enable(false);
+         setting7StaticText->Enable(false);
+         setting6TextCtrl->Enable(false);
+         setting7TextCtrl->Enable(false);
+   }
+   else if (integratorString.IsSameAs(integratorArray[PD78]))
+   {   
+         setting6StaticText->Enable(false);
+         setting7StaticText->Enable(false);
+         setting6TextCtrl->Enable(false);
+         setting7TextCtrl->Enable(false);
+   }
+   else if (integratorString.IsSameAs(integratorArray[BS]))
+   {   
+         setting6StaticText->Enable(false);
+         setting7StaticText->Enable(false);
+         setting6TextCtrl->Enable(false);
+         setting7TextCtrl->Enable(false);
+   }
+   else if (integratorString.IsSameAs(integratorArray[ABM]))
+   {   
+         setting6StaticText->Enable(true);
+         setting7StaticText->Enable(true);
+         setting6TextCtrl->Enable(true);
+         setting7TextCtrl->Enable(true);
+   }
+   else if (integratorString.IsSameAs(integratorArray[CW]))
+   {   
+         setting6StaticText->Enable(false);
+         setting7StaticText->Enable(false);
+         setting6TextCtrl->Enable(false);
+         setting7TextCtrl->Enable(false);
+   }
+#else
    if (integratorString.IsSameAs(integratorArray[RKV89]))
    {
          setting6StaticText->Show(false);
@@ -1328,6 +1386,7 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
          setting6TextCtrl->Show(false);
          setting7TextCtrl->Show(false);
    }
+#endif
     
     // fill in data     
     // waw: Changed to show all digits
