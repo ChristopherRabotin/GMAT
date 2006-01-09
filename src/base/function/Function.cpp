@@ -19,6 +19,12 @@
 
 
 #include "Function.hpp"
+#include "FileManager.hpp"       // for GetPathname()
+
+//#define #DEBUG_FUNCTION 1
+#if DEBUG_FUNCTION
+#include "MessageInterface.hpp"
+#endif
 
 //---------------------------------
 // static data
@@ -32,7 +38,7 @@ Function::PARAMETER_TEXT[FunctionParamCount - GmatBaseParamCount] =
 const Gmat::ParameterType
 Function::PARAMETER_TYPE[FunctionParamCount - GmatBaseParamCount] =
 {
-	Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
 };
 
 
@@ -53,6 +59,42 @@ Function::Function(const std::string &typeStr, const std::string &nomme) :
    objectTypes.push_back(Gmat::FUNCTION);
    objectTypeNames.push_back("Function");
    parameterCount = FunctionParamCount;
+
+   // function path
+   FileManager *fm = FileManager::Instance();
+   std::string pathname;
+   
+   try
+   {
+      if (functionPath == "")
+      {         
+         if (typeStr == "MatlabFunction")
+            pathname = fm->GetFullPathname("MATLAB_FUNCTION_PATH");
+         else if (typeStr == "GmatFunction")
+            pathname = fm->GetFullPathname("GMAT_FUNCTION_PATH");
+         
+         functionPath = pathname;
+      }
+   }
+   catch (GmatBaseException &e)
+   {
+      #if DEBUG_FUNCTION
+      MessageInterface::ShowMessage(e.GetMessage());
+      #endif
+      
+      try
+      {
+         // see if there is FUNCTION_PATH
+         pathname = fm->GetFullPathname("FUNCTION_PATH");
+         functionPath = pathname;
+      }
+      catch (GmatBaseException &e)
+      {
+         #if DEBUG_FUNCTION
+         MessageInterface::ShowMessage(e.GetMessage());
+         #endif
+      }
+   }
 }
 
 
