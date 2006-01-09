@@ -722,7 +722,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                         wxDefaultPosition, wxSize(120,20),
                         wxST_NO_AUTORESIZE );
    setting5StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Max failed steps: "),
+      new wxStaticText( parent, ID_TEXT, wxT("Max Step Attempts: "),
                         wxDefaultPosition, wxSize(120,20),
                         wxST_NO_AUTORESIZE );
    setting6StaticText =
