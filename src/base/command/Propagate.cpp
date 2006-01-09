@@ -21,6 +21,7 @@
 #include "Publisher.hpp"
 #include "Moderator.hpp"
 #include "Parameter.hpp"
+#include "StringUtil.hpp" // for Trim()
 #include "MessageInterface.hpp"
 
 #include <sstream>
@@ -1398,6 +1399,8 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          SetObject(stopCond, Gmat::STOP_CONDITION);
          // Store the spacecraft name for use when setting the epoch data
          TakeAction("SetStopSpacecraft", paramObj);
+
+         //MessageInterface::ShowMessage("==> paramType=%s\n", paramType.c_str());
          
          if (paramType != "Apoapsis" && paramType != "Periapsis")
          {
@@ -1406,14 +1409,15 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
             endchar = i->find("}", loc);
             component = i->substr(loc, endchar-loc);
             
+            #ifdef DEBUG_PROPAGATE_EXE
+               MessageInterface::ShowMessage("Propagate::AssemblePropagators()"
+                  " component = <%s>\n", component.c_str());
+            #endif
+               
             // create goal parameter
             component = CreateParameter(component);
             stopCond->SetStringParameter("Goal", component);
             
-            #ifdef DEBUG_PROPAGATE_EXE
-               MessageInterface::ShowMessage("Propagate::AssemblePropagators()"
-                  " propStopVal = %f\n", propStopVal);
-            #endif
                
             loc = end + 1;
             end = i->find(",", loc);
@@ -2589,12 +2593,15 @@ std::string Propagate::CreateParameter(const std::string &name)
    Moderator *theModerator = Moderator::Instance();
    std::string str = name;
    std::string owner, dep, type;
-   
-   // remove blanks
-   for (std::string::iterator i = str.begin(); i != str.end(); ++i)
-      if (*i == ' ')
-         str.erase(i);
 
+   //loj: this caused crash
+   // remove blanks
+   //    for (std::string::iterator i = str.begin(); i != str.end(); ++i)
+   //       if (*i == ' ')
+   //          str.erase(i);
+   
+   str = GmatStringUtil::Trim(name, GmatStringUtil::BOTH);
+   
    #if DEBUG_PROPAGATE_OBJ
       MessageInterface::ShowMessage
          ("Propagate::CreateParameter() name=<%s>, str=<%s>\n",
