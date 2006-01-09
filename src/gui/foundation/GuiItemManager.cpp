@@ -1437,10 +1437,6 @@ CreateParameterSizer(wxWindow *parent,
    
    Integer borderSize = 1;
    
-   //wxStaticBox
-   wxStaticBox *userParamStaticBox = new wxStaticBox(parent, -1, wxT(""));
-   wxStaticBox *systemParamStaticBox = new wxStaticBox(parent, -1, wxT(""));
-   
    //wxStaticText
    wxStaticText *userVarStaticText =
       new wxStaticText(parent, -1, wxT("Variables"),
@@ -1497,12 +1493,57 @@ CreateParameterSizer(wxWindow *parent,
    //loj: 5/31/05 Added property owner
    *propertyListBox = 
       GetPropertyListBox(parent, propertyListBoxId, wxSize(170, 80), owner);
+      
+   #if __WXMAC__
+   //wxBoxSizer
+   wxBoxSizer *userParamBoxSizer = new wxBoxSizer(wxVERTICAL);
+   wxBoxSizer *systemParamBoxSizer = new wxBoxSizer(wxVERTICAL); 
+   wxBoxSizer *paramBoxSizer = new wxBoxSizer(wxVERTICAL);
+   
+   *coordSysBoxSizer = new wxBoxSizer(wxVERTICAL);
+
+   (*coordSysBoxSizer)->Add(*coordSysLabel, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   
+   userParamBoxSizer->Add
+      (userVarStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   userParamBoxSizer->Add
+      (*userParamListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   userParamBoxSizer->Add
+      (*createVarButton, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   
+   systemParamBoxSizer->Add
+      (objectStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   systemParamBoxSizer->Add
+        (*objectComboBox, 0, wxGROW|wxALIGN_CENTER|wxBOTTOM|wxALL, borderSize);
+      //(*objectComboBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+      
+   systemParamBoxSizer->Add(30, 20, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   
+   systemParamBoxSizer->Add
+      (propertyStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   systemParamBoxSizer->Add
+      (*propertyListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   systemParamBoxSizer->Add
+      (*coordSysBoxSizer, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   
+   paramBoxSizer->Add(userParamBoxSizer, 0,
+                      wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+                      
+   paramBoxSizer->Add(30, 20, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   
+   paramBoxSizer->Add(systemParamBoxSizer, 0,
+                      wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   #else
+   //wxStaticBox
+   wxStaticBox *userParamStaticBox = new wxStaticBox(parent, -1, wxT(""));
+   wxStaticBox *systemParamStaticBox = new wxStaticBox(parent, -1, wxT(""));
    
    // wx*Sizer
    wxStaticBoxSizer *userParamBoxSizer =
       new wxStaticBoxSizer(userParamStaticBox, wxVERTICAL);
    wxStaticBoxSizer *systemParamBoxSizer =
       new wxStaticBoxSizer(systemParamStaticBox, wxVERTICAL);
+      
    wxBoxSizer *paramBoxSizer = new wxBoxSizer(wxVERTICAL);
    *coordSysBoxSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -1530,7 +1571,8 @@ CreateParameterSizer(wxWindow *parent,
                       wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
    paramBoxSizer->Add(systemParamBoxSizer, 0,
                       wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-
+   #endif
+   
    return paramBoxSizer;
 }
 
