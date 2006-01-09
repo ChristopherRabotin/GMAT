@@ -339,7 +339,7 @@ std::string FileManager::GetPathname(const std::string &typeName)
    {
       if (mFileMap.find(typeName) != mFileMap.end())
       {
-         // Replace ROOT_PATH with abs path (loj: 7/14/05)
+         // Replace ROOT_PATH with abs path
          std::string pathname = mPathMap[mFileMap[typeName]->mPath];
          if (pathname.find("ROOT_PATH") != pathname.npos)
          {
@@ -452,10 +452,33 @@ std::string FileManager::GetFullPathname(const FileType type)
 //------------------------------------------------------------------------------
 std::string FileManager::GetFullPathname(const std::string &typeName)
 {
-   if (mFileMap.find(typeName) != mFileMap.end())
+   // typeName contains _PATH (loj: 1/9/06)
+   if (typeName.find("_PATH") != typeName.npos)
    {
-      std::string path = GetPathname(typeName);
-      return path + mFileMap[typeName]->mFile;
+      if (mPathMap.find(typeName) != mPathMap.end())
+      {
+         // Replace ROOT_PATH with abs path
+         std::string pathname = mPathMap[typeName];
+         if (pathname.find("ROOT_PATH") != pathname.npos)
+         {
+            std::string pathname2 = mPathMap["ROOT_PATH"] + pathname;
+            std::string::size_type pos1 = pathname2.find("ROOT_PATH");
+            pathname2.replace(pos1, 10, "");
+            return pathname2;
+         }
+         else
+         {
+            return pathname;
+         }
+      }
+   }
+   else
+   {
+      if (mFileMap.find(typeName) != mFileMap.end())
+      {
+         std::string path = GetPathname(typeName);
+         return path + mFileMap[typeName]->mFile;
+      }
    }
    
    //MessageInterface::ShowMessage
