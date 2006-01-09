@@ -1348,6 +1348,7 @@ GmatMainFrame::CreateNewResource(const wxString &title,
       break;
    case GmatTree::UNIVERSE_FOLDER:
       sizer->Add(new UniversePanel(scrolledWin), 0, wxGROW|wxALL, 0);
+      break;
       //case dataType == GmatTree::BODY:
       //sizer->Add(new SolarSystemWindow(scrolledWin), 0, wxGROW|wxALL, 0);      
       //break;

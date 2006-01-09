@@ -112,7 +112,6 @@ namespace GmatTree
       CONSTELLATIONS_FOLDER,
       BURNS_FOLDER,
       PROPAGATORS_FOLDER,
-      UNIVERSE_FOLDER,
       SOLVERS_FOLDER,
       BOUNDARY_SOLVERS_FOLDER,
       OPTIMIZERS_FOLDER,
@@ -146,6 +145,8 @@ namespace GmatTree
       
       CONSTELLATION_FOLDER,
       CONSTELLATION_SATELLITE,
+      
+      UNIVERSE_FOLDER,
       
       PROPAGATOR,
       
