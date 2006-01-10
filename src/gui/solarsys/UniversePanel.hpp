@@ -18,6 +18,7 @@
 #include "gmatwxdefs.hpp"
 #include "GmatPanel.hpp"
 #include "GuiInterpreter.hpp"
+#include "SolarSystem.hpp"
 #include <map>
 
 class UniversePanel: public GmatPanel
@@ -33,6 +34,7 @@ private:
    StringArray mAnalyticModels;
    
    std::map<wxString, wxString> mFileTypeNameMap;
+   
    bool mHasFileTypesInUseChanged;
    bool mHasFileNameChanged;
    bool mHasAnaModelChanged;
@@ -40,21 +42,24 @@ private:
    wxComboBox *mFileTypeComboBox;
    wxComboBox *mAnalyticModelComboBox;
    
+   wxTextCtrl *mIntervalTextCtrl;
    wxTextCtrl *mFileNameTextCtrl;
+   
    wxButton   *mBrowseButton;
-   
-   wxListBox *availableListBox;
-   wxListBox *selectedListBox;
-   
    wxButton *addButton;
    wxButton *removeButton;
    wxButton *clearButton;
    wxButton *prioritizeButton;
    
+   wxListBox *availableListBox;
+   wxListBox *selectedListBox;
+   
    wxCheckBox *mOverrideCheckBox;
 
    wxBoxSizer *mAnaModelSizer;
    wxBoxSizer *mPageSizer;
+   
+   SolarSystem *theSolarSystem;
    
    void OnAddButton(wxCommandEvent& event);
    void OnSortButton(wxCommandEvent& event);
@@ -64,6 +69,7 @@ private:
    void OnListBoxSelect(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent& event);
    void OnCheckBoxChange(wxCommandEvent& event);
+   void OnTextCtrlChange(wxCommandEvent& event);
 
    // methods inherited from GmatPanel
    virtual void Create();

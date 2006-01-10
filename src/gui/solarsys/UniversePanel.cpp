@@ -44,6 +44,8 @@ BEGIN_EVENT_TABLE(UniversePanel, GmatPanel)
    EVT_COMBOBOX(ID_COMBOBOX, UniversePanel::OnComboBoxChange)
 
    EVT_CHECKBOX(CHECKBOX, UniversePanel::OnCheckBoxChange)
+   
+   EVT_TEXT(ID_TEXT_CTRL, UniversePanel::OnTextCtrlChange)
 
 END_EVENT_TABLE()
    
@@ -104,6 +106,24 @@ void UniversePanel::Create()
 
    int bsize = 3;
    wxString emptyArray[] = { };
+   
+   //-------------------------------------------------------
+   // EphemerisUpdateInterval
+   //-------------------------------------------------------
+   wxStaticText *intervalStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Ephemeris Update Interval"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   mIntervalTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""),
+                                 wxDefaultPosition, wxSize(150,-1), 0);
+                                 
+   wxBoxSizer *intervalSizer = new wxBoxSizer(wxHORIZONTAL);
+   intervalSizer->Add(intervalStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   intervalSizer->Add(mIntervalTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   #if DEBUG_UNIV_PANEL
+   MessageInterface::ShowMessage
+      ("UniversePanel::Create() created intervalSizer\n");
+   #endif
    
    //-------------------------------------------------------
    // 1st column (Available file types)
@@ -238,8 +258,9 @@ void UniversePanel::Create()
    
    //-------------------------------------------------------
    // Add to pageSizer
-   //-------------------------------------------------------
+   //------------------------------------------------------- 
    mPageSizer = new wxBoxSizer(wxVERTICAL);
+   mPageSizer->Add(intervalSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    mPageSizer->Add(topGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    mPageSizer->Add(bottomGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    mPageSizer->Add(mAnaModelSizer, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -254,11 +275,17 @@ void UniversePanel::Create()
 void UniversePanel::LoadData()
 {
    // load data from the core engine
-   
+   theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
    mAllFileTypes = theGuiInterpreter->GetPlanetarySourceTypes();
    mAnalyticModels = theGuiInterpreter->GetAnalyticModelNames();
    StringArray fileTypesInUse = theGuiInterpreter->GetPlanetarySourceTypesInUse();
    
+   // Loading EphemerisUpdateInterval
+   Real interval = theSolarSystem->GetEphemUpdateInterval();
+   wxString intervalStr;
+   intervalStr.Printf("%f", interval);
+   mIntervalTextCtrl->SetValue(intervalStr);
+      
    // available source
    for (unsigned int i=0; i<mAllFileTypes.size(); i++)
    {
@@ -326,8 +353,10 @@ void UniversePanel::LoadData()
    
    mFileNameTextCtrl->
       SetValue(mFileTypeNameMap[mFileTypeComboBox->GetStringSelection()]);
-
-   SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
+      
+  // waw 01/10/05: Changed to use a global solar system pointer.
+  // SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
+   
    mOverrideCheckBox->SetValue(theSolarSystem->GetBooleanParameter(
       "OverrideTimeSystem"));
 
@@ -400,10 +429,15 @@ void UniversePanel::SaveData()
          SetAnalyticModelToUse(mAnalyticModelComboBox->GetStringSelection().c_str());
    }
    
-   SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
+   // waw 01/10/05: Changed to using a global solar system pointern   
+   // SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
+
    theSolarSystem->SetBooleanParameter("OverrideTimeSystem",
       mOverrideCheckBox->IsChecked());
-
+      
+   // Saving EphemerisUpdateInterval
+   theSolarSystem->SetEphemUpdateInterval(atof(mIntervalTextCtrl->GetValue()));
+   
    theApplyButton->Enable(false);
    
 }// end SaveData()
@@ -612,6 +646,14 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
 // void OnCheckBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void UniversePanel::OnCheckBoxChange(wxCommandEvent& event)
+{
+   theApplyButton->Enable();
+}
+
+//------------------------------------------------------------------------------
+// void OnTextCtrlChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void UniversePanel::OnTextCtrlChange(wxCommandEvent& event)
 {
    theApplyButton->Enable();
 }
