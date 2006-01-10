@@ -100,7 +100,7 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
    GetClientSize(&width, &height);
    TrajPlotCanvas *canvas =
       new TrajPlotCanvas(this, -1, wxPoint(0, 0), wxSize(width, height),
-                         csName, solarSys);
+                         csName, solarSys, plotName); //loj: 1/9/06 added plotName
    
    mCanvas = canvas;
    

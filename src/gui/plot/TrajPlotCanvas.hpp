@@ -34,7 +34,7 @@ public:
                   const wxPoint& pos = wxDefaultPosition,
                   const wxSize& size = wxDefaultSize, 
                   const wxString &csName = "", SolarSystem *solarSys = NULL,
-                  long style = 0, const wxString& name = wxT("TrajPlotCanvas"));
+                  const wxString& name = wxT("TrajPlotCanvas"), long style = 0);
    ~TrajPlotCanvas();
    
    // initialization
