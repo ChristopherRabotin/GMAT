@@ -70,6 +70,10 @@ using namespace FloatAttUtil;
 //#define DEBUG_TRAJCANVAS_EULER 1
 #endif
 
+// skip over limit data (loj: 1/9/06 added)
+//#define SKIP_OVER_LIMIT_DATA
+
+//loj: 1/4/06 debug
 //#define DEBUG_TRAJCANVAS_INIT 1
 //#define DEBUG_TRAJCANVAS_UPDATE 1
 //#define DEBUG_TRAJCANVAS_UPDATE_OBJECT 2
@@ -83,7 +87,7 @@ using namespace FloatAttUtil;
 //#define DEBUG_TRAJCANVAS_PROJ 2
 //#define DEBUG_TRAJCANVAS_ANIMATION 1
 //#define DEBUG_TRAJCANVAS_LONGITUDE 1
-
+//#define DEBUG_SHOW_SKIP 1
 
 BEGIN_EVENT_TABLE(TrajPlotCanvas, wxGLCanvas)
    EVT_SIZE(TrajPlotCanvas::OnTrajSize)
@@ -124,7 +128,7 @@ static GlColorType *sGlColor = (GlColorType*)sIntColor;
 //------------------------------------------------------------------------------
 // TrajPlotCanvas(wxWindow *parent, wxWindowID id,
 //                const wxPoint& pos, const wxSize& size, const wxString &csName,
-//                SolarSystem *solarSys, long style, const wxString& name)
+//                SolarSystem *solarSys, const wxString& name, long style)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -136,15 +140,15 @@ static GlColorType *sGlColor = (GlColorType*)sIntColor;
  * @param <size>     size of the window
  * @param <csName>   coordinate system name for data to be plotted in
  * @param <solarSys> solar system pointer to retrieve body information
- * @param <style>    style of window
  * @param <name>     title of window
+ * @param <style>    style of window
  *
  */
 //------------------------------------------------------------------------------
 TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
                                const wxPoint& pos, const wxSize& size,
                                const wxString &csName, SolarSystem *solarSys,
-                               long style, const wxString& name)
+                               const wxString& name, long style)
    : wxGLCanvas(parent, id, pos, size, style, name)
 {    
    // initalize data members
@@ -1290,9 +1294,10 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
       mScCount = MAX_SCS;
    
    #if DEBUG_TRAJCANVAS_UPDATE
+   static int sNumDebugOutput = 100;
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::UpdatePlot() time=%f, mNumData=%d, mScCount=%d\n",
-       time, mNumData, mScCount);
+      ("TrajPlotCanvas::UpdatePlot() plot=%s, time=%f, mNumData=%d, mScCount=%d\n",
+       GetName().c_str(), time, mNumData, mScCount);
    #endif
    
    mScNameArray = scNames;
@@ -1347,10 +1352,10 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             mObjectGciVel[objId][mNumData][2] = velZ[sc];
             
             #if DEBUG_TRAJCANVAS_UPDATE
-            if (mNumData < 10)
+            if (mNumData < sNumDebugOutput)
             {
                MessageInterface::ShowMessage
-                  ("TrajPlotCanvas::UpdatePlot() object=%s, objId=%d, color=%d\n",
+                  ("   object=%s, objId=%d, color=%d\n",
                    mObjectNames[sc].c_str(), objId, mObjectOrbitColor[objId][mNumData]);
                MessageInterface::ShowMessage
                   ("   objId:%d gcipos = %f, %f, %f, color=%d\n", objId,
@@ -1394,7 +1399,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             }
             
             #if DEBUG_TRAJCANVAS_UPDATE
-            if (mNumData < 10)
+            if (mNumData < sNumDebugOutput)
             {
                MessageInterface::ShowMessage
                   ("   objId:%d tmppos = %f, %f, %f\n", objId,
@@ -1405,7 +1410,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             #endif
             
             #if DEBUG_TRAJCANVAS_UPDATE > 1
-            if (mNumData < 10)
+            if (mNumData < sNumDebugOutput)
             {
                MessageInterface::ShowMessage
                   ("   objId:%d tmpvel = %f, %f, %f\n", objId,
@@ -2232,12 +2237,12 @@ void TrajPlotCanvas::SetupWorld()
        mUsePerspectiveMode, mUseSingleRotAngle);
    #endif
    
-   #if DEBUG_TRAJCANVAS_PERSPECTIVE
+   #if DEBUG_TRAJCANVAS_PROJ > 2
    if (mUseSingleRotAngle)
    {
       MessageInterface::ShowMessage
-         ("TrajPlotCanvas::SetupWorld() mfLeftPos=%f, mfRightPos=%f, mfBottomPos=%f, "
-          "mfTopPos=%f, mfViewNear=%f, mfViewFar=%f\n", mfLeftPos, mfRightPos,
+         ("TrajPlotCanvas::SetupWorld() mfLeftPos=%f, mfRightPos=%f\n   mfBottomPos=%f, "
+          "mfTopPos=%f\n   mfViewNear=%f, mfViewFar=%f\n", mfLeftPos, mfRightPos,
           mfBottomPos, mfTopPos, mfViewNear, mfViewFar);
    }
    #endif
@@ -2433,14 +2438,18 @@ void TrajPlotCanvas::ChangeProjection(int width, int height, float axisLength)
    //texture maps upside down
    //mfViewTop    = -axisLength/2;
    //mfViewBottom =  axisLength/2;
-   
-   //mfViewNear   = -axisLength/2;
-   //mfViewFar    =  axisLength/2;
-   
-   // loj: 12/28/05 -- this makes gluLookAt to work in orthographics mode
-   
-   mfViewNear   = -axisLength * 2.0;
-   mfViewFar    =  axisLength * 2.0;
+
+   if (mUseGluLookAt)
+   {
+      //loj: 1/10/06 changed *2 to * 10000 to fix near/far clipping
+      mfViewNear = -axisLength * 10000.0;
+      mfViewFar  =  axisLength * 10000.0;
+   }
+   else
+   {
+      mfViewNear = -axisLength/2;
+      mfViewFar  =  axisLength/2;
+   }
    
    // save the size we are setting the projection for later use
    if (width <= height)
@@ -3244,17 +3253,23 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
             if (r1.GetMagnitude() == 0.0 || r2.GetMagnitude() == 0.0)
                continue;
 
-            // if difference is more than 10000 skip
-            if ((Abs(r2[0]- r1[0]) > 10000.0 && (SignOf(r2[0]) != SignOf(r1[0]))) ||
-                (Abs(r2[1]- r1[1]) > 10000.0 && (SignOf(r2[1]) != SignOf(r1[1]))) ||
-                (Abs(r2[2]- r1[2]) > 10000.0 && (SignOf(r2[2]) != SignOf(r1[2]))))
+            // if object position diff is over limit, skip (ScriptEx_TargetHohmann)
+            #ifdef SKIP_OVER_LIMIT_DATA
+            static Real sMaxDiffDist = 100000.0;
+            // if difference is more than sMaxDiffDist skip
+            if ((Abs(r2[0]- r1[0]) > sMaxDiffDist && (SignOf(r2[0]) != SignOf(r1[0]))) ||
+                (Abs(r2[1]- r1[1]) > sMaxDiffDist && (SignOf(r2[1]) != SignOf(r1[1]))) ||
+                (Abs(r2[2]- r1[2]) > sMaxDiffDist && (SignOf(r2[2]) != SignOf(r1[2]))))
             {
-               //MessageInterface::ShowMessage
-               //   ("===> i1=%d, i2=%d, time1=%f, time2=%f\n   r1=%s, r2=%s\n",
-               //    i-1, i, mTime[i-1], mTime[i], r1.ToString().c_str(),
-               //    r2.ToString().c_str());
+               #if DEBUG_SHOW_SKIP
+               MessageInterface::ShowMessage
+                  ("===> plot=%s, i1=%d, i2=%d, time1=%f, time2=%f\n   r1=%s, r2=%s\n",
+                   GetName().c_str(), i-1, i, mTime[i-1], mTime[i], r1.ToString().c_str(),
+                   r2.ToString().c_str());
+               #endif
                continue;
             }
+            #endif
             
             if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT))
                *sIntColor = mObjectOrbitColor[objId][i];
