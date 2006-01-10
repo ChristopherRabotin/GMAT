@@ -17,6 +17,7 @@
 
 #include "GmatPanel.hpp"
 #include "CelestialBody.hpp"
+#include "Planet.hpp"
 
 class CelestialBodyPanel: public GmatPanel
 {
@@ -26,16 +27,22 @@ public:
     
 private:
    CelestialBody *theCelestialBody;
+   Planet *thePlanet;
+   
+   wxString bodyName;
    
    wxTextCtrl *mEpochTextCtrl;
+   wxTextCtrl *mIntervalTextCtrl;
    wxTextCtrl *mElement1TextCtrl;
    wxTextCtrl *mElement2TextCtrl;
    wxTextCtrl *mElement3TextCtrl;
    wxTextCtrl *mElement4TextCtrl;
    wxTextCtrl *mElement5TextCtrl;
    wxTextCtrl *mElement6TextCtrl;
+   wxTextCtrl *mElement7TextCtrl;
 
    wxStaticText *epochStaticText;
+   wxStaticText *intervalStaticText;
    wxStaticText *initialStaticText;
    wxStaticText *centralBodyText;
    wxStaticText *noCentralBodyText;

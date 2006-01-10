@@ -63,6 +63,9 @@ CelestialBodyPanel::CelestialBodyPanel(wxWindow *parent, const wxString &name)
 {
    theCelestialBody = (CelestialBody*)
             theGuiInterpreter->GetConfiguredItem(std::string(name.c_str()));
+   
+   thePlanet = (Planet*)theCelestialBody;         
+   bodyName = name.c_str();
 
    Create();
    Show();
@@ -87,6 +90,8 @@ void CelestialBodyPanel::Create()
 
    mEpochTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                                  wxDefaultPosition, wxSize(150,-1), 0);
+   mIntervalTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                                 wxDefaultPosition, wxSize(150,-1), 0);
    mElement1TextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                                  wxDefaultPosition, wxSize(150,-1), 0);
    mElement2TextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
@@ -99,9 +104,12 @@ void CelestialBodyPanel::Create()
                                  wxDefaultPosition, wxSize(150,-1), 0);
    mElement6TextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                                  wxDefaultPosition, wxSize(150,-1), 0);
-
+                                 
    epochStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Initial Epoch: "),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   intervalStaticText =
+      new wxStaticText(this, ID_TEXT, "Nutation Update Interval",
                        wxDefaultPosition, wxDefaultSize, 0);
    initialStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Initial State with Respect to Central Body: "),
@@ -156,9 +164,10 @@ void CelestialBodyPanel::Create()
       new wxStaticText(this, ID_TEXT, KEP_ELEMENT_UNITS[5].c_str(),
                        wxDefaultPosition, wxDefaultSize, 0);
 
-
    flexGridSizer1->Add( epochStaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    flexGridSizer1->Add( mEpochTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   flexGridSizer1->Add( intervalStaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   flexGridSizer1->Add( mIntervalTextCtrl, 20, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 
    horizontalBoxSizer->Add( initialStaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    horizontalBoxSizer->Add( centralBodyText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
@@ -196,6 +205,17 @@ void CelestialBodyPanel::Create()
 
    analyticBoxSizer->Add(pageBoxSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
    theMiddleSizer->Add(analyticBoxSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
+   
+   if (bodyName == "Earth")
+   {
+      intervalStaticText->Show(true);
+      mIntervalTextCtrl->Show(true);
+   }
+   else
+   {
+      intervalStaticText->Show(false);
+      mIntervalTextCtrl->Show(false);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -207,6 +227,7 @@ void CelestialBodyPanel::LoadData()
    {
       std::string centralBody;
       Real epoch;
+      Real intervalUpdate;
       Rvector6 elements;
       
       if (theCelestialBody->GetBodyType() != Gmat::STAR)
@@ -230,12 +251,16 @@ void CelestialBodyPanel::LoadData()
          initialStaticText->Show(false);
       }
       
-      wxString epochStr, elementStr;
+      intervalUpdate = thePlanet->GetUpdateInterval();
+      
+      wxString epochStr, intervalStr, elementStr;
 
       epochStr.Printf("%f", epoch);
       mEpochTextCtrl->SetValue(epochStr);
 
-
+      intervalStr.Printf("%f", intervalUpdate);
+      mIntervalTextCtrl->SetValue(intervalStr);
+      
       elementStr.Printf("%f", elements.Get(0));
       mElement1TextCtrl->SetValue(elementStr);
 
@@ -274,7 +299,9 @@ void CelestialBodyPanel::SaveData()
 {
    try
    {
-
+      thePlanet->SetUpdateInterval(atof(mIntervalTextCtrl->GetValue()));
+      theCelestialBody = thePlanet;
+      
       A1Mjd a1mjd =  A1Mjd(atof(mEpochTextCtrl->GetValue()));
       theCelestialBody->SetLowFidelityEpoch(a1mjd);
 
