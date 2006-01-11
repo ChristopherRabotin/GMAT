@@ -141,7 +141,7 @@ Real EnvData::GetEnvReal(const std::string &str)
    {
       Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
       // Rvector6 cartState = mSpacecraft->GetStateVector("Cartesian");
-      Rvector6 cartState = mSpacecraft->GetCartesianState();
+      Rvector6 cartState = mSpacecraft->GetState(0);
       Real state[6];
       for (int i=0; i<6; i++)
          state[i] = cartState[i];

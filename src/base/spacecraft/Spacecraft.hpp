@@ -9,7 +9,7 @@
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
 //
-// Author:  Joey Gurganus
+// Author:  Joey Gurganus, Reworked by D. Conway
 // Created: 2003/10/22
 //
 /**
@@ -32,136 +32,170 @@
 #include "TimeConverter.hpp"
 #include "StateConverter.hpp"
 
+#include <map>
+
 class GMAT_API Spacecraft : public SpaceObject
 {
 public:
-   // Default constructor
-   Spacecraft();
-   Spacecraft(const std::string &name);
-   Spacecraft(const std::string &typeStr, const std::string &name);
-   // Copy constructor
+   Spacecraft(const std::string &name, 
+      const std::string &typeStr = "Spacecraft");
    Spacecraft(const Spacecraft &a);
-   // Assignment operator
-   Spacecraft& operator=(const Spacecraft &a);
+   Spacecraft&       operator=(const Spacecraft &a);
 
    // Destructor
-   virtual ~Spacecraft(void);
+   virtual           ~Spacecraft();
 
    CoordinateSystem* GetInternalCoordSystem();
-   void SetInternalCoordSystem(CoordinateSystem *cs);
+   void              SetInternalCoordSystem(CoordinateSystem *cs);
    
-   //    virtual PropState& GetState(void); 
-   // @todo will work on GetStateVector()
-   // Rvector6 GetStateVector(const std::string &elementType);
+   void              SetState(const Rvector6 &cartState);
+   void              SetState(const std::string &elementType, Real *instate);
+   void              SetState(const Real s1, const Real s2, const Real s3, 
+                        const Real s4, const Real s5, const Real s6);
    
-   void SetState(const Rvector6 &cartState);
-   void SetState(const std::string &elementType, Real *instate);
-   void SetState(const Real s1, const Real s2, const Real s3, 
-                 const Real s4, const Real s5, const Real s6);
-   
-   Rvector6 GetCartesianState();
-   Rvector6 GetKeplerianState();
-   Rvector6 GetModifiedKeplerianState();
-   // Will add more methods below later
-   // Rvector6 GetSphericalOneState() const;
-   // Rvector6 GetSphericalTwoState() const;
+   virtual PropState& 
+                     GetState();
+   virtual Rvector6  GetState(std::string rep);
+   virtual Rvector6  GetState(Integer rep);
+   Rvector6          GetCartesianState();
+   Rvector6          GetKeplerianState();
+   Rvector6          GetModifiedKeplerianState();
 
+   Anomaly           GetAnomaly() const;
 
-   Anomaly GetAnomaly() const;
+   bool              GetDisplay() const;
+   void              SetDisplay(const bool displayFlag);
 
-   bool GetDisplay() const;
-   void SetDisplay(const bool displayFlag);
+   std::string       GetDisplayDateFormat() const;
+   void              SetDisplayDateFormat(const std::string &dateType);
+   std::string       GetDisplayEpoch();
+   bool              SetDisplayEpoch(const std::string &value);
 
-   std::string GetDisplayDateFormat() const;
-   void SetDisplayDateFormat(const std::string &dateType);
-   std::string GetDisplayEpoch();
-   bool SetDisplayEpoch(const std::string &value);
+   std::string       GetDisplayCoordType() const;
+   void              SetDisplayCoordType(const std::string &coordType);
 
-   std::string GetDisplayCoordType() const;
-   void SetDisplayCoordType(const std::string &coordType);
-
-   Real* GetDisplayState();
-   void SetDisplayState(const Real *s);
-   void SetDisplayState(const Rvector6 s);
-   void SaveDisplay();
+   Real*             GetDisplayState();
+   void              SetDisplayState(const Real *s);
+   void              SetDisplayState(const Rvector6 s);
+   void              SaveDisplay();
    
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
-   virtual void Copy(const GmatBase* orig);
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
-                                const std::string &oldName,
-                                const std::string &newName);
+   virtual void      Copy(const GmatBase* orig);
+   virtual bool      RenameRefObject(const Gmat::ObjectType type,
+                        const std::string &oldName, const std::string &newName);
    
-   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual std::string 
+                     GetRefObjectName(const Gmat::ObjectType type) const;
 
-   //  Tanks and thrusters (and, eventually, other hardware) are owned objects,
-   // and therefore need these methods from GmatBase
    virtual const StringArray&
-                       GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool        SetRefObjectName(const Gmat::ObjectType type,
-                                        const std::string &name);
-   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
-                                    const std::string &name);
-   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                                    const std::string &name = "");
-//   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-//                                    const std::string &name,
-//                                    const Integer index);
-   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
-   virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
+                     GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool      SetRefObjectName(const Gmat::ObjectType type,
+                        const std::string &name);
+   virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+                        const std::string &name);
+   virtual bool      SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                        const std::string &name = "");
+
+   virtual ObjectArray& 
+                     GetRefObjectArray(const Gmat::ObjectType type);
+   virtual ObjectArray& 
+                     GetRefObjectArray(const std::string& typeString);
 
    // Parameter accessor methods -- overridden from GmatBase
-   virtual Integer GetParameterID(const std::string &str) const;
-   virtual Real GetRealParameter(const Integer id) const;
-   virtual Real GetRealParameter(const std::string &label) const;
-   virtual Real SetRealParameter(const Integer id, const Real value);
-   virtual Real SetRealParameter(const std::string &label, const Real value);
-
-   virtual std::string GetStringParameter(const Integer id) const;
-   virtual std::string GetStringParameter(const std::string &label) const;
-   virtual bool SetStringParameter(const Integer id, const std::string &value);
-   virtual bool SetStringParameter(const std::string &label, 
-                                   const std::string &value);
-
-   const StringArray& GetStringArrayParameter(const Integer id) const;
-    
-   virtual std::string GetParameterText(const Integer id) const;
-   virtual Gmat::ParameterType
-   GetParameterType(const Integer id) const;
-   virtual std::string GetParameterTypeString(const Integer id) const;
+   virtual Integer   GetParameterID(const std::string &str) const;
    
-   virtual bool Initialize();
+   virtual bool      IsParameterReadOnly(const Integer id) const;
+   virtual bool      IsParameterReadOnly(const std::string &label) const;
+   
+   virtual Real      GetRealParameter(const Integer id) const;
+   virtual Real      GetRealParameter(const std::string &label) const;
+   virtual Real      SetRealParameter(const Integer id, const Real value);
+   virtual Real      SetRealParameter(const std::string &label, const Real value);
 
-   virtual bool TakeAction(const std::string &action, 
-                           const std::string &actionData = "");
+   virtual std::string 
+                     GetStringParameter(const Integer id) const;
+   virtual std::string 
+                     GetStringParameter(const std::string &label) const;
+   virtual bool      SetStringParameter(const Integer id, const std::string &value);
+   virtual bool      SetStringParameter(const std::string &label, 
+                        const std::string &value);
+
+   const StringArray& 
+                     GetStringArrayParameter(const Integer id) const;
+    
+   virtual std::string 
+                     GetParameterText(const Integer id) const;
+   virtual Gmat::ParameterType
+                     GetParameterType(const Integer id) const;
+   virtual std::string 
+                     GetParameterTypeString(const Integer id) const;
+   
+   virtual bool      Initialize();
+
+   virtual bool      TakeAction(const std::string &action, 
+                        const std::string &actionData = "");
 
 
    virtual const std::string&  
-                GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
-                                    const std::string &prefix = "",
-                                    const std::string &useName = "");
+                     GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                        const std::string &prefix = "",
+                        const std::string &useName = "");
    
 protected:
    enum SC_Param_ID 
    {
-      // EPOCH_ID = SpaceObjectParamCount, 
-      ELEMENT1_ID = SpaceObjectParamCount, ELEMENT2_ID, ELEMENT3_ID, 
-      ELEMENT4_ID, ELEMENT5_ID, ELEMENT6_ID, 
-      STATE_TYPE_ID, ANOMALY_ID, COORD_SYS_ID,
-      DRY_MASS_ID,DATE_FORMAT_ID, CD_ID, CR_ID, DRAG_AREA_ID, SRP_AREA_ID,
-      FUEL_TANK_ID, THRUSTER_ID, TOTAL_MASS_ID, 
-      SC_ParamCount
+      ELEMENT1_ID = SpaceObjectParamCount, 
+      ELEMENT2_ID, 
+      ELEMENT3_ID, 
+      ELEMENT4_ID, 
+      ELEMENT5_ID, 
+      ELEMENT6_ID, 
+      ELEMENT1UNIT_ID, 
+      ELEMENT2UNIT_ID, 
+      ELEMENT3UNIT_ID, 
+      ELEMENT4UNIT_ID, 
+      ELEMENT5UNIT_ID, 
+      ELEMENT6UNIT_ID, 
+      STATE_TYPE_ID, 
+      ANOMALY_ID, 
+      COORD_SYS_ID,
+      DRY_MASS_ID,
+      DATE_FORMAT_ID, 
+      CD_ID, 
+      CR_ID, 
+      DRAG_AREA_ID, 
+      SRP_AREA_ID,
+      FUEL_TANK_ID, 
+      THRUSTER_ID, 
+      TOTAL_MASS_ID, 
+      SpacecraftParamCount
    };
 
-   // Spacecraft parameter types
+   /// Spacecraft parameter types
    static const Gmat::ParameterType 
-          PARAMETER_TYPE[SC_ParamCount - SpaceObjectParamCount];
+                  PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount];
+   /// Spacecraft parameter labels
+   static const std::string 
+                  PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount];
+
+   enum STATE_REPS
+   {
+      CARTESIAN_ID = 0,
+      KEPLERIAN_ID,
+      MODIFIED_KEPLERIAN_ID,
+      SPHERICAL_AZFPA_ID,
+      SPHERICAL_RADEC_ID
+   };
+
+   std::map <std::string, std::string> 
+                     elementLabelMap;
+
+   /// State element labels
+   StringArray       stateElementLabel;
+   StringArray       stateElementUnits;
+   StringArray       representations;
    
-   // Declare protetced method data of internal spacecraft information
-   // Real           epoch;      // Moved to SpaceObject  
-   // DJC:  7/21/04 Update for the state vector used in propagation
-   // Real           state[6];
-   // PropState      state;      // Moved to SpaceObject
    Real              dryMass;
    Real              coeffDrag;
    Real              dragArea;
@@ -169,66 +203,60 @@ protected:
    Real              reflectCoeff;
    std::string       dateFormat;
    std::string       stateType;
+   std::string       anomalyType;
    Anomaly           anomaly;
-   CoordinateSystem  *coordinateSystem;
-   CoordinateSystem  *internalCoordSystem;
-   std::string       coordSysName;
 
+   /// Base coordinate system for the Spacecraft
+   CoordinateSystem  *internalCoordSystem;
+   /// Coordinate system used for the input and output to the GUI
+   CoordinateSystem  *coordinateSystem;
+
+   std::string       coordSysName;
+   
    // for non-internal spacecraft information
-   StateConverter stateConverter;
-   TimeConverter  timeConverter;
+   StateConverter    stateConverter;
+   TimeConverter     timeConverter;
    CoordinateConverter coordConverter;
    
-   Rvector6       cartesianState;
-   Rvector6       keplerianState;
-   Rvector6       modifiedKeplerianState;
-   Rvector6       sphericalOneState;
-   Rvector6       sphericalTwoState;
-   bool           isForDisplay;
-   std::string    displayEpoch;
-   Real           displayState[6];
+//   bool           isForDisplay;
+   std::string    displayEpoch;   
    std::string    displayDateFormat;
-   std::string    displayCoordType; 
-   std::string    displaySubType;
    
    // Lists of hardware elements added 11/12/04, djc
    /// Fuel tank names
-   StringArray    tankNames;
+   StringArray       tankNames;
    /// Thruster names
-   StringArray    thrusterNames;
+   StringArray       thrusterNames;
    /// Pointers to the fuel tanks
-   ObjectArray    tanks;
+   ObjectArray       tanks;
    /// Pointers to the spacecraft thrusters
-   ObjectArray    thrusters;
-   
+   ObjectArray       thrusters;
    /// Dry mass plus fuel masses, a calculated parameter
-   Real           totalMass;
+   Real              totalMass;
    
+   // New constructs needed to preserve interfaces
+   Rvector6          rvState;
+
    // protected methods
-   Real           UpdateTotalMass();
-   Real           UpdateTotalMass() const;
+   Real              UpdateTotalMass();
+   Real              UpdateTotalMass() const;
    
-   void SetCoordinateSystem(CoordinateSystem *cs);
+   bool              initialDisplay;
+
+   virtual void      WriteParameters(Gmat::WriteMode mode, std::string &prefix, 
+                        std::stringstream &stream);
+                                
+   virtual void      UpdateElementLabels();
+   Rvector6          GetStateInRepresentation(std::string rep = "");
+   Rvector6          GetStateInRepresentation(Integer rep = CARTESIAN_ID);
+   void              SetStateFromRepresentation(std::string rep, Rvector6 &st);
    
-private:
-   bool        initialDisplay;
-   bool        hasElements[6];
-   CoordinateSystem *interalCoordSys;
+   Real              GetElement(const std::string &label);
+   bool              SetElement(const std::string &label, const Real &value);
+   Integer           LookUpLabel(const std::string &label, std::string &rep);
+   void              BuildElementLabelMap();
    
-   // private methods
-   void        SetEpoch();
-   void        SetState();
-   std::string GetElementName(const Integer id) const; 
-   std::string GetLocalCoordType() const;
-   void        SetInitialDisplay();
-   std::string ToString(const Real value);
-       
-   void        SetInitialState();
-   void        DefineDefaultSpacecraft(); //loj: 4/28/05 Added
-   void        InitializeDataMethod(const Spacecraft &s);
-   virtual void WriteParameters(Gmat::WriteMode mode,
-                                       std::string &prefix, 
-                                       std::stringstream &stream);
+   void        		SetEpoch();
 };
 
 #endif // Spacecraft_hpp

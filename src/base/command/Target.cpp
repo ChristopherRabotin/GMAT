@@ -655,7 +655,24 @@ void Target::StoreLoopData()
       obj = (*pair).second;
       // Save copies of all of the spacecraft
       if (obj->GetType() == Gmat::SPACECRAFT)
-         localStore.push_back(new Spacecraft((Spacecraft&)(*obj)));
+      {
+         Spacecraft *orig = (Spacecraft*)(obj);
+         Spacecraft *sc = new Spacecraft(*orig);
+         // Handle CoordinateSystems
+         if (orig->GetInternalCoordSystem() == NULL)
+   			MessageInterface::ShowMessage(
+      			"Internal CS is NULL on spacecraft %s prior to targeter cloning\n",
+      			orig->GetName().c_str());
+			if (orig->GetRefObject(Gmat::COORDINATE_SYSTEM, "") == NULL)
+   			MessageInterface::ShowMessage(
+      			"Coordinate system is NULL on spacecraft %s prior to targeter cloning\n",
+    			   orig->GetName().c_str());
+         sc->SetInternalCoordSystem(orig->GetInternalCoordSystem());
+         sc->SetRefObject(orig->GetRefObject(Gmat::COORDINATE_SYSTEM, ""),
+            Gmat::COORDINATE_SYSTEM, "");
+         
+         localStore.push_back(sc);
+      }
       ++pair;
    }
 }
@@ -679,7 +696,7 @@ void Target::ResetLoopData()
       GmatBase *gb = (*objectMap)[name];
       if (gb != NULL) {
          sc = (Spacecraft*)gb;
-          *sc = *((Spacecraft*)(*i));
+         *sc = *((Spacecraft*)(*i));
       }
    }
 }

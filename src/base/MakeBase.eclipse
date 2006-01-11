@@ -290,7 +290,7 @@ OBJECTS = \
     util/ElapsedTime.o \
     util/EopFile.o \
     util/EphemerisUtil.o \
-	util/FileUtil.o \
+    util/FileUtil.o \
     util/GregorianDate.o \
     util/Keplerian.o \
     util/LeapSecsFileReader.o \
@@ -307,6 +307,7 @@ OBJECTS = \
     util/Spherical.o \
     util/SphericalRADEC.o \
     util/StringTokenizer.o \
+    util/StringUtil.o \
     util/TimeSystemConverter.o \
     util/UtcDate.o \
     solarsys/msise90_sub.o \

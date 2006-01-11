@@ -170,7 +170,7 @@ Real PlanetData::GetReal(const std::string &dataType)
    else if (dataType == "Longitude")
    {
       // Get spacecraft RightAscension
-      Rvector6 state = mSpacecraft->GetCartesianState();
+      Rvector6 state = mSpacecraft->GetState(0);
       
       if (mOrigin->GetName() != "Earth")
       {
@@ -246,7 +246,7 @@ Real PlanetData::GetReal(const std::string &dataType)
    //--------------------------------------------------
    else if ((dataType == "Latitude") || (dataType == "Altitude"))
    {
-      Rvector6 state = mSpacecraft->GetCartesianState();
+      Rvector6 state = mSpacecraft->GetState(0);
       if (mOrigin->GetName() != "Earth")
       {
          // Get current time

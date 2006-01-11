@@ -188,35 +188,27 @@ Rvector6 OrbitData::GetCartState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   std::string elemType = mSpacecraft->GetStringParameter(stateTypeId);
    mCartEpoch = mSpacecraft->GetRealParameter("Epoch");
-   
+   mCartState.Set(mSpacecraft->GetState().GetState());
+
    #if DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
-      ("OrbitData::GetCartState() stateType=%s, internalCoordName=%s, outCoordName=%s\n",
-       elemType.c_str(), mInternalCoordSystem->GetName().c_str(),
-       mOutCoordSystem->GetName().c_str());
+      ("OrbitData::GetCartState() mCartState=\n   %s\n", mCartState.ToString().c_str());
    #endif
-   
-   if (elemType == "Cartesian")
+
+   if (mInternalCoordSystem == NULL || mOutCoordSystem == NULL)
    {
-      PropState ps = mSpacecraft->GetState(); // should be cartesian state
-      for (int i=0; i<6; i++)
-         mCartState[i] = ps[i];
+      MessageInterface::ShowMessage
+         ("OrbitData::GetCartState() Internal CoordSystem or Output CoordSystem is NULL.\n");
       
-      if (mInternalCoordSystem == NULL || mOutCoordSystem == NULL)
-      {
-         MessageInterface::ShowMessage
-            ("OrbitData::GetCartState() Internal CoordSystem or Output CoordSystem is NULL.\n");
-         
-         throw ParameterException
-            ("OrbitData::GetCartState() internal or output CoordinateSystem is NULL.\n");
-      }
-      
-      // convert to output CoordinateSystem
-      if (mInternalCoordSystem->GetName() != mOutCoordSystem->GetName())
-      {
-         #if DEBUG_ORBITDATA_CONVERT
+      throw ParameterException
+         ("OrbitData::GetCartState() internal or output CoordinateSystem is NULL.\n");
+   }
+
+   // convert to output CoordinateSystem
+   if (mInternalCoordSystem->GetName() != mOutCoordSystem->GetName())
+   {
+      #if DEBUG_ORBITDATA_CONVERT
          MessageInterface::ShowMessage
             ("OrbitData::GetCartState() mOutCoordSystem:%s, Axis addr=%d\n",
              mOutCoordSystem->GetName().c_str(),
@@ -224,52 +216,23 @@ Rvector6 OrbitData::GetCartState()
          MessageInterface::ShowMessage
             ("OrbitData::GetCartState() <-- Before convert: mCartEpoch=%f\nstate = %s\n", 
              mCartEpoch, mCartState.ToString().c_str());
-         #endif
-         
-         try
-         {
-            mCoordConverter.Convert(A1Mjd(mCartEpoch), mCartState, mInternalCoordSystem,
-                                    mCartState, mOutCoordSystem);
-            #if DEBUG_ORBITDATA_CONVERT
-               MessageInterface::ShowMessage
-                  ("OrbitData::GetCartState() --> After  convert: mCartEpoch=%f\n"
-                   "state = %s\n", mCartEpoch, mCartState.ToString().c_str());
-            #endif
-         }
-         catch (BaseException &e)
-         {
-            MessageInterface::ShowMessage(e.GetMessage());
-         }
-      }
-   }
-   else if (elemType == "Keplerian")
-   {
-      Real grav = mGravConst;
-      
-      PropState ps = mSpacecraft->GetState(); // should be keplerian state
-      Real kepl[6];
-      memcpy(kepl, ps.GetState(), 6*sizeof(Real));
-      
-      Rvector6 keplState = Rvector6(kepl);
-      
-      #if DEBUG_ORBITDATA_RUN
-      MessageInterface::ShowMessage("OrbitData::GetCartState() keplState=%s\n",
-                                    keplState.ToString().c_str());
       #endif
       
-      mCartState = KeplerianToCartesian(keplState, grav, CoordUtil::TA);
+      try
+      {
+         mCoordConverter.Convert(A1Mjd(mCartEpoch), mCartState, mInternalCoordSystem,
+                                 mCartState, mOutCoordSystem);
+         #if DEBUG_ORBITDATA_CONVERT
+            MessageInterface::ShowMessage
+               ("OrbitData::GetCartState() --> After  convert: mCartEpoch=%f\n"
+                "state = %s\n", mCartEpoch, mCartState.ToString().c_str());
+         #endif
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::ShowMessage(e.GetMessage());
+      }
    }
-   else
-   {
-      throw ParameterException
-         ("OrbitData::GetCartState() input state types other than Cartesian "
-          "and Keplerian are not supported at this time." + elemType + "\n");
-   }
-   
-   #if DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage
-      ("OrbitData::GetCartState() mCartState=\n   %s\n", mCartState.ToString().c_str());
-   #endif
    
    return mCartState;
 }
@@ -283,53 +246,14 @@ Rvector6 OrbitData::GetKepState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   std::string elemType = mSpacecraft->GetStringParameter(stateTypeId);
-   
-   #ifdef DEBUG_ORBITDATA_RUN
-   PropState ps = mSpacecraft->GetState(); // should be cartesian state
-   std::cout << "OrbitData::GetKepState for spacecraft " << mSpacecraft->GetName() <<"\n";
-   std::cout << "   elemType == " << elemType <<"\n";
-   for (int i=0; i<6; i++)
-   {
-      std::cout << "  el[" << i << "] = " << ps[i] << "\n";
-   }            
-   #endif
-   
-   if (elemType == "Keplerian")
-   {
-      PropState ps = mSpacecraft->GetState(); // should be keplerian state
-            
-      for (int i=0; i<6; i++)
-      {
-         #ifdef DEBUG_ORBITDATA_RUN
-         std::cout << "  el[" << i << "] = " << ps[i] << "\n";
-         #endif
-         mKepState[i] = ps[i];
-      }            
-   }
-   else if (elemType == "Cartesian")
-   {
-      // call GetCartState() since it provides the Coord Sys conversion
-      Rvector6 cartState = GetCartState();
-      
-      Real grav = mGravConst;
-      
-      #if DEBUG_ORBITDATA_RUN
-      MessageInterface::ShowMessage("OrbitData::GetKepState() cartState=%s\n",
-                                    cartState.ToString().c_str());
-      #endif
-      
-      Real ma;
-      mKepState = CartesianToKeplerian(cartState, grav, &ma);
-      mMA = ma;
-   }
-   else
-   {
-      throw ParameterException
-         ("OrbitData::GetKepState() input state types other than Cartesian "
-          "and Keplerian are not supported at this time.\n");
-   }
-   
+   mKepState = mSpacecraft->GetState("Keplerian");
+   Real ta = DegToRad(mKepState[5]);
+   Real costa = cos(ta);
+   Real ea = acos((mKepState[1] + costa)/(1.0 + mKepState[1]*costa));
+   mMA = RadToDeg(ea - mKepState[1] * sin(ea));
+   if (mKepState[5] > 180.0)
+      mMA = 360.0 - mMA;
+
    return mKepState;
 }
 
@@ -342,56 +266,14 @@ Rvector6 OrbitData::GetModKepState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   std::string elemType = mSpacecraft->GetStringParameter(stateTypeId);
-   
-   #ifdef DEBUG_ORBITDATA_RUN
-   PropState ps = mSpacecraft->GetState(); // should be cartesian state
-   std::cout << "OrbitData::GetModKepState for spacecraft " << mSpacecraft->GetName() <<"\n";
-   std::cout << "   elemType == " << elemType <<"\n";
-   for (int i=0; i<6; i++)
-   {
-      std::cout << "  el[" << i << "] = " << ps[i] << "\n";
-   }            
-   #endif
-   
-   if (elemType == "Keplerian")
-   {
-      PropState ps = mSpacecraft->GetState(); // should be keplerian state
-      
-      for (int i=0; i<6; i++)
-      {
-         #ifdef DEBUG_ORBITDATA_RUN
-         std::cout << "  el[" << i << "] = " << ps[i] << "\n";
-         #endif
-         mKepState[i] = ps[i];
-      }
+   mKepState = mSpacecraft->GetState("ModifiedKeplerian");
+   Real ta = DegToRad(mKepState[5]);
+   Real costa = cos(ta);
+   Real ea = acos((mKepState[1] + costa)/(1.0 + mKepState[1]*costa));
+   mMA = RadToDeg(ea - mKepState[1] * sin(ea));
+   if (mKepState[5] > 180.0)
+      mMA = 360.0 - mMA;
 
-      mModKepState = KeplerianToModKeplerian(mKepState);
-   }
-   else if (elemType == "Cartesian")
-   {
-      // call GetCartState() since it provides the Coord Sys conversion
-      Rvector6 cartState = GetCartState();
-      
-      Real grav = mGravConst;
-      
-      #if DEBUG_ORBITDATA_RUN
-      MessageInterface::ShowMessage("OrbitData::GetModKepState() cartState=%s\n",
-                                    cartState.ToString().c_str());
-      #endif
-      
-      Real ma;
-      mKepState = CartesianToKeplerian(cartState, grav, &ma);
-      mModKepState = KeplerianToModKeplerian(mKepState);
-      mMA = ma;
-   }
-   else
-   {
-      throw ParameterException
-         ("OrbitData::GetModKepState() input state types other than Cartesian "
-          "and Keplerian are not supported at this time.\n");
-   }
-   
    return mModKepState;
 }
 
@@ -404,46 +286,7 @@ Rvector6 OrbitData::GetSphRaDecState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   std::string elemType = mSpacecraft->GetStringParameter(stateTypeId);
-
-   if (elemType == "Cartesian")
-   {
-      //Call GetCartState() since it provides the Coord System conversion
-      Rvector6 cartState = GetCartState();
-      
-      #if DEBUG_ORBITDATA_RUN
-      MessageInterface::ShowMessage
-         ("OrbitData::GetSphRaDecState() cartState=%s\n",
-          cartState.ToString().c_str());
-      #endif
-      
-      try
-      {
-         // update SphericalRADEC state
-         mSphRaDecState = CartesianToSphericalRADEC(cartState);
-      }
-      catch (BaseException &e)
-      {
-         MessageInterface::ShowMessage
-            ("*** ERROR *** OrbitData::GetSphRaDecState() %s\n   Possible Cause: "
-             "Divide by Zero, Continue processing...\n   state = %s\n",
-             e.GetMessage().c_str(), cartState.ToString().c_str());
-      }
-      
-      #if DEBUG_ORBITDATA_RUN
-      MessageInterface::ShowMessage
-         ("OrbitData::GetSphRaDecState() mSphRaDecState=%s\n",
-          mSphRaDecState.ToString().c_str());
-      #endif
-      
-   }
-   else
-   {
-      throw ParameterException
-         ("OrbitData::GetSphRaDecState() input state types other than Cartesian "
-          "are not supported at this time\n");
-   }
-
+   mSphRaDecState = mSpacecraft->GetState("SphericalRADEC");
    return mSphRaDecState;
 }
 
@@ -456,36 +299,7 @@ Rvector6 OrbitData::GetSphAzFpaState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   std::string elemType = mSpacecraft->GetStringParameter(stateTypeId);
-
-   if (elemType == "Cartesian")
-   {
-      // call GetCartState() since it provides the Coord. System conversion
-      Rvector6 cartState = GetCartState();
-      
-      #if DEBUG_ORBITDATA_RUN
-      MessageInterface::ShowMessage
-         ("OrbitData::GetSphAzFpaState() cartState=%s\n",
-          cartState.ToString().c_str());
-      #endif
-      
-      // update SphericalAZFPA state
-      mSphAzFpaState = CartesianToSphericalAZFPA(cartState);
-      
-      #if DEBUG_ORBITDATA_RUN
-      MessageInterface::ShowMessage
-         ("OrbitData::GetSphAzFpaState() mSphAzFpaState=%s\n",
-          mSphAzFpaState.ToString().c_str());
-      #endif
-      
-   }
-   else
-   {
-      throw ParameterException
-         ("OrbitData::GetSphAzFpaState() input state types other than Cartesian "
-          "are not supported at this time\n");
-   }
-
+   mSphAzFpaState = mSpacecraft->GetState("SphericalAZFPA");
    return mSphAzFpaState;
 }
 
@@ -533,7 +347,7 @@ Real OrbitData::GetKepReal(const std::string &str)
 {
 
    Rvector6 state = GetCartState();
-   
+
    if (mOrigin->GetName() != "Earth")
    {
       state = state - mOrigin->GetMJ2000State(mCartEpoch);
@@ -1231,14 +1045,14 @@ void OrbitData::InitializeRefObjects()
    mSpacecraft =
       (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
    
-   if (stateTypeId == -1)
-      stateTypeId = mSpacecraft->GetParameterID("StateType");
-   
    if (mSpacecraft == NULL)
       throw ParameterException
          ("OrbitData::InitializeRefObjects() Cannot find Spacecraft object: " +
           GetRefObjectName(Gmat::SPACECRAFT) + ".\n" +
           "Make sure Spacecraft is set to any internal parameters.\n");
+   
+   if (stateTypeId == -1)
+      stateTypeId = mSpacecraft->GetParameterID("StateType");
    
    mSolarSystem =
       (SolarSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SOLAR_SYSTEM]);

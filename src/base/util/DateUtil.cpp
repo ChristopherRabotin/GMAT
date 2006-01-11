@@ -271,11 +271,9 @@ Real ToSecondsOfDayFromHMS (Integer hour, Integer minute, Real second)
    {
       throw Date::TimeRangeError();
    }        
-   else
-   {
-      secondsOfDay = (Real)hour * 3600.0 + (Real)minute * 60.0 + second;
-      return secondsOfDay.Get();
-   }
+
+   secondsOfDay = (Real)hour * 3600.0 + (Real)minute * 60.0 + second;
+   return secondsOfDay.Get();
 }
 
 //------------------------------------------------------------------------------

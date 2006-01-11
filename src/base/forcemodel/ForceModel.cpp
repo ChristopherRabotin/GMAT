@@ -1110,7 +1110,13 @@ Integer ForceModel::SetupSpacecraftData(GmatBase *sat, PhysicalModel *pm,
             (CoordinateSystem*)(sat->GetRefObject(Gmat::COORDINATE_SYSTEM, 
                                 stringParm));
          if (!cs)
-            throw ForceModelException("CoordinateSystem is NULL\n");
+         {
+            char sataddr[20];
+            std::sprintf(sataddr, "%x", (unsigned)sat);
+            throw ForceModelException(
+               "CoordinateSystem is NULL on Spacecraft " + sat->GetName() +
+               " at address " + sataddr);
+         }
          pm->SetSatelliteParameter(i, "ReferenceBody", cs->GetOriginName());
          
          // ... Mass ...

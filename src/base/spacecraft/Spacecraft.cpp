@@ -9,12 +9,12 @@
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
 //
-// Author:  Joey Gurganus
+// Author:  Joey Gurganus, Reworked by D. Conway
 // Created: 2003/10/22
-//
+// 
 /**
  * Implements the Spacecraft base class. 
- */
+ */ 
 //------------------------------------------------------------------------------
 
 #include "Spacecraft.hpp"
@@ -32,34 +32,67 @@
 
 // Spacecraft parameter types
 const Gmat::ParameterType   
-   Spacecraft::PARAMETER_TYPE[SC_ParamCount - SpaceObjectParamCount] = 
+   Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] = 
    {
-      Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE,
-      Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::STRING_TYPE, Gmat::STRING_TYPE,
-      Gmat::STRING_TYPE, Gmat::REAL_TYPE, Gmat::STRING_TYPE, Gmat::REAL_TYPE, 
-      Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::STRINGARRAY_TYPE,
-      Gmat::STRINGARRAY_TYPE, Gmat::REAL_TYPE
+      Gmat::REAL_TYPE, 
+      Gmat::REAL_TYPE, 
+      Gmat::REAL_TYPE, 
+      Gmat::REAL_TYPE,
+      Gmat::REAL_TYPE, 
+      Gmat::REAL_TYPE, 
+      Gmat::STRING_TYPE, 
+      Gmat::STRING_TYPE,
+      Gmat::STRING_TYPE, 
+      Gmat::STRING_TYPE, 
+      Gmat::STRING_TYPE,
+      Gmat::STRING_TYPE, 
+      Gmat::STRING_TYPE, 
+      Gmat::STRING_TYPE,
+      Gmat::STRING_TYPE, 
+      Gmat::REAL_TYPE, 
+      Gmat::STRING_TYPE, 
+      Gmat::REAL_TYPE, 
+      Gmat::REAL_TYPE, 
+      Gmat::REAL_TYPE, 
+      Gmat::REAL_TYPE, 
+      Gmat::STRINGARRAY_TYPE,
+      Gmat::STRINGARRAY_TYPE, 
+      Gmat::REAL_TYPE
    };
+   
+const std::string 
+Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] = 
+   {
+      "Element1", 
+      "Element2", 
+      "Element3", 
+      "Element4", 
+      "Element5", 
+      "Element6", 
+      "Element1Units", 
+      "Element2Units", 
+      "Element3Units", 
+      "Element4Units", 
+      "Element5Units", 
+      "Element6Units", 
+      "StateType", 
+      "AnomalyType", 
+      "CoordinateSystem",
+      "DryMass",
+      "DateFormat", 
+      "Cd", 
+      "Cr", 
+      "DragArea", 
+      "SRPArea",
+      "Tanks", 
+      "Thrusters", 
+      "TotalMass", 
+   };
+
 
 //-------------------------------------
 // public methods
 //-------------------------------------
-
-//---------------------------------------------------------------------------
-//  Spacecraft()
-//---------------------------------------------------------------------------
-/**
- * Creates default constructor.
- *
- */
-Spacecraft::Spacecraft() : 
-    SpaceObject(Gmat::SPACECRAFT, "Spacecraft", "")
-{
-    objectTypes.push_back(Gmat::SPACECRAFT);
-    objectTypeNames.push_back("Spacecraft");
-    DefineDefaultSpacecraft();
-    parameterCount = SC_ParamCount;
-}
 
 //---------------------------------------------------------------------------
 //  Spacecraft(const std::string &name)
@@ -70,32 +103,75 @@ Spacecraft::Spacecraft() :
  * @param <name> Optional name for the object.  Defaults to "".
  *
  */
-Spacecraft::Spacecraft(const std::string &name) :
-    SpaceObject(Gmat::SPACECRAFT, "Spacecraft", name)
+Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
+   SpaceObject          (Gmat::SPACECRAFT, typeStr, name),
+   dryMass              (850.0),
+   coeffDrag            (2.2),
+   dragArea             (15.0),
+   srpArea              (1.0),
+   reflectCoeff         (1.8),
+   dateFormat           ("TAIModJulian"),  // Should be A1ModJulian
+   stateType            ("Cartesian"),
+   anomalyType          ("TA"),
+   internalCoordSystem  (NULL),
+   coordinateSystem     (NULL),
+   coordSysName         ("EarthMJ2000Eq"),
+   displayEpoch         ("21545.000000000"),   
+   displayDateFormat    ("TAIModJulian"),  // Should be A1ModJulian
+   totalMass            (850.0),
+   initialDisplay       (false)
 {
-    objectTypes.push_back(Gmat::SPACECRAFT);
-    objectTypeNames.push_back("Spacecraft");
-    DefineDefaultSpacecraft();
-    parameterCount = SC_ParamCount;
+   objectTypes.push_back(Gmat::SPACECRAFT);
+   objectTypeNames.push_back("Spacecraft");
+
+   state.SetEpoch(21545.0);
+   
+   state[0] = 7100.0;
+   state[1] = 0.0;
+   state[2] = 1300.0;
+   state[3] = 0.0;
+   state[4] = 7.35;
+   state[5] = 1.0;
+
+   stateElementLabel.push_back("X");
+   stateElementLabel.push_back("Y");
+   stateElementLabel.push_back("Z");
+   stateElementLabel.push_back("VX");
+   stateElementLabel.push_back("VY");
+   stateElementLabel.push_back("VZ");
+   
+   stateElementUnits.push_back("km");
+   stateElementUnits.push_back("km");
+   stateElementUnits.push_back("km");
+   stateElementUnits.push_back("km/s");
+   stateElementUnits.push_back("km/s");
+   stateElementUnits.push_back("km/s");
+
+   representations.push_back("Cartesian");
+   representations.push_back("Keplerian");
+   representations.push_back("ModifiedKeplerian");
+   representations.push_back("SphericalAZFPA");
+   representations.push_back("SphericalRADEC");
+   
+   parameterCount = SpacecraftParamCount;
+   
+   BuildElementLabelMap();
 }
 
+
 //---------------------------------------------------------------------------
-//  Spacecraft(const std::string &typeStr, const std::string &name)
+//  ~Spacecraft()
 //---------------------------------------------------------------------------
 /**
- * Creates constructors with parameters.
- *
- * @param <typeStr> GMAT script string associated with this type of object.
- * @param <name> Optional name for the object.  Defaults to "".
- *
+ * Destructor.
  */
-Spacecraft::Spacecraft(const std::string &typeStr, const std::string &name) :
-    SpaceObject(Gmat::SPACECRAFT, typeStr, name)
+Spacecraft::~Spacecraft()
 {
-    objectTypes.push_back(Gmat::SPACECRAFT);
-    objectTypeNames.push_back("Spacecraft");
-    DefineDefaultSpacecraft();
-    parameterCount = SC_ParamCount;
+   // Delete the attached hardware (it was set as clones)
+   for (ObjectArray::iterator i = tanks.begin(); i < tanks.end(); ++i)
+      delete *i;
+   for (ObjectArray::iterator i = thrusters.begin(); i < thrusters.end(); ++i)
+      delete *i;
 }
 
 
@@ -108,10 +184,43 @@ Spacecraft::Spacecraft(const std::string &typeStr, const std::string &name) :
  * @param <a> The original that is being copied.
  */
 Spacecraft::Spacecraft(const Spacecraft &a) :
-    SpaceObject    (a)
+   SpaceObject          (a),
+   dryMass              (a.dryMass),
+   coeffDrag            (a.coeffDrag),
+   dragArea             (a.dragArea),
+   srpArea              (a.srpArea),
+   reflectCoeff         (a.reflectCoeff),
+   dateFormat           (a.dateFormat),
+   stateType            (a.stateType),
+   anomalyType          (a.anomalyType),
+   internalCoordSystem  (NULL),
+   coordinateSystem     (NULL),
+   coordSysName         (a.coordSysName),
+   displayEpoch         (a.displayEpoch),   
+   displayDateFormat    (a.displayDateFormat),
+   totalMass            (a.totalMass),
+   initialDisplay       (false)
 {
-    parameterCount = a.parameterCount;
-    InitializeDataMethod(a);
+   objectTypes.push_back(Gmat::SPACECRAFT);
+   objectTypeNames.push_back("Spacecraft");
+   parameterCount = a.parameterCount;
+
+   state.SetEpoch(a.state.GetEpoch());
+   
+   state[0] = a.state[0];
+   state[1] = a.state[1];
+   state[2] = a.state[2];
+   state[3] = a.state[3];
+   state[4] = a.state[4];
+   state[5] = a.state[5];
+   
+   stateElementLabel = a.stateElementLabel;
+   stateElementUnits = a.stateElementUnits;
+   representations  = a.representations;
+   tankNames         = a.tankNames;
+   thrusterNames     = a.thrusterNames;
+
+   BuildElementLabelMap();
 }
 
 
@@ -120,6 +229,8 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
 //---------------------------------------------------------------------------
 /**
  * Assignment operator for Spacecraft structures.
+ * 
+ * @note: Coordinate systems are not copied here.
  *
  * @param <a> The original that is being copied.
  *
@@ -129,31 +240,41 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
  */
 Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 {
-    SpaceObject::operator=(a);
-    // Don't do anything if copying self
-    if (&a == this)
-        return *this;
+   // Don't do anything if copying self
+   if (&a == this)
+      return *this;
 
-    // Duplicate the member data        
-    InitializeDataMethod(a);
+   SpaceObject::operator=(a);
 
-    return *this;
-}
+   dryMass              = a.dryMass;
+   coeffDrag            = a.coeffDrag;
+   dragArea             = a.dragArea;
+   srpArea              = a.srpArea;
+   reflectCoeff         = a.reflectCoeff;
+   dateFormat           = a.dateFormat;
+   stateType            = a.stateType;
+   anomalyType          = a.anomalyType;
+   coordSysName         = a.coordSysName;
+   displayEpoch         = a.displayEpoch;   
+   displayDateFormat    = a.displayDateFormat;
+   totalMass            = a.totalMass;
+   initialDisplay       = false;
 
+   state.SetEpoch(a.state.GetEpoch());
+   
+   state[0] = a.state[0];
+   state[1] = a.state[1];
+   state[2] = a.state[2];
+   state[3] = a.state[3];
+   state[4] = a.state[4];
+   state[5] = a.state[5];
 
-//---------------------------------------------------------------------------
-//  ~Spacecraft(void)
-//---------------------------------------------------------------------------
-/**
- * Destructor.
- */
-Spacecraft::~Spacecraft(void)
-{
-   // Delete the attached hardware (it was set as clones)
-   for (ObjectArray::iterator i = tanks.begin(); i < tanks.end(); ++i)
-      delete *i;
-   for (ObjectArray::iterator i = thrusters.begin(); i < thrusters.end(); ++i)
-      delete *i;
+   stateElementLabel = a.stateElementLabel;
+   stateElementUnits = a.stateElementUnits;
+   tankNames         = a.tankNames;
+   thrusterNames     = a.thrusterNames;
+   
+   return *this;
 }
 
 
@@ -172,20 +293,16 @@ CoordinateSystem* Spacecraft::GetInternalCoordSystem()
 void Spacecraft::SetInternalCoordSystem(CoordinateSystem *cs)
 {
    #if DEBUG_SPACECRAFT_CS
-   MessageInterface::ShowMessage
-      ("Spacecraft::SetInternalCoordSystem() cs=%d\n", cs);
+      MessageInterface::ShowMessage
+         ("Spacecraft::SetInternalCoordSystem() cs=%d on %s\n", cs, 
+         instanceName.c_str());
    #endif
    
    if (internalCoordSystem != cs)
    {
       internalCoordSystem = cs;
-   
-      #if DEBUG_SPACECRAFT_CS
-      MessageInterface::ShowMessage
-         ("Spacecraft::SetInternalCoordSystem() calling SetInitialState()\n");
-      #endif
-   
-      SetInitialState();
+      if (coordinateSystem == NULL)
+         coordinateSystem = cs;
    }
 }
 
@@ -202,12 +319,10 @@ void Spacecraft::SetInternalCoordSystem(CoordinateSystem *cs)
 //---------------------------------------------------------------------------
 void Spacecraft::SetState(const Rvector6 &cartState)
 {
-   cartesianState = cartState;
-   
    #if DEBUG_SPACECRAFT_SET
-   MessageInterface::ShowMessage
-      ("Spacecraft::SetState(Rvector6) cartesianState=%s\n",
-       cartesianState.ToString().c_str());
+      MessageInterface::ShowMessage
+         ("Spacecraft::SetState(Rvector6) cartesianState=%s\n",
+          cartesianState.ToString().c_str());
    #endif
    
    SetState(cartState[0], cartState[1], cartState[2],
@@ -227,12 +342,13 @@ void Spacecraft::SetState(const Rvector6 &cartState)
  */
 void Spacecraft::SetState(const std::string &elementType, Real *instate)
 {
-#if DEBUG_SPACECRAFT
-   MessageInterface::ShowMessage
-      ("Spacecraft::SetState() elementType=%s, instate=\n%f, %f, %f, %f, %f, %f\n",
-       elementType.c_str(), instate[0], instate[1], instate[2], instate[3],
-       instate[4], instate[5]);
-#endif
+   #if DEBUG_SPACECRAFT
+      MessageInterface::ShowMessage(
+         "Spacecraft::SetState() elementType = %s, instate =\n"
+         "   %.9lf, %.9lf, %.9lf, %.14lf, %.14lf, %.14lf\n",
+         elementType.c_str(), instate[0], instate[1], instate[2], instate[3],
+         instate[4], instate[5]);
+   #endif
    
    Rvector6 newState;
 
@@ -243,22 +359,20 @@ void Spacecraft::SetState(const std::string &elementType, Real *instate)
    {
       stateType = "Cartesian";
       newState = stateConverter.Convert(instate, elementType, 
-                                        stateType, anomaly);
+         stateType, anomaly);
    }
    
-   cartesianState = newState;
-
    SetState(newState.Get(0),newState.Get(1),newState.Get(2),
             newState.Get(3),newState.Get(4),newState.Get(5));
 }
 
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  void SetState(const Real s1, const Real s2, const Real s3, 
 //                const Real s4, const Real s5, const Real s6)
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
- * Set the elements.
+ * Set the elements of a Cartesian state.
  * 
  * @param <s1>  First element
  * @param <s2>  Second element
@@ -266,8 +380,8 @@ void Spacecraft::SetState(const std::string &elementType, Real *instate)
  * @param <s4>  Fourth element
  * @param <s5>  Fifth element
  * @param <s6>  Sixth element  
- *
  */
+//------------------------------------------------------------------------------
 void Spacecraft::SetState(const Real s1, const Real s2, const Real s3, 
                           const Real s4, const Real s5, const Real s6)
 {
@@ -279,91 +393,121 @@ void Spacecraft::SetState(const Real s1, const Real s2, const Real s3,
     state[5] = s6;
 }
 
-//---------------------------------------------------------------------------
-//  Rvector6 GetCartesianState() 
-//---------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//  PropState& GetState() 
+//------------------------------------------------------------------------------
+/**
+ * "Unhide" the SpaceObject method.
+ * 
+ * @return the core PropState.   
+ */
+//------------------------------------------------------------------------------
+PropState& Spacecraft::GetState()
+{
+   return SpaceObject::GetState();
+}
+
+//------------------------------------------------------------------------------
+//  Rvector6 GetState(std::string &rep) 
+//------------------------------------------------------------------------------
 /**
  * Get the converted Cartesian states from states in different coordinate type.
  * 
  * @return converted Cartesian states   
- *
  */
-Rvector6 Spacecraft::GetCartesianState() 
-{   
-   Real *tempState = state.GetState();
-
-   for (int i=0; i<6; i++)
-      cartesianState[i] = tempState[i];
-   
-   return cartesianState;
+//------------------------------------------------------------------------------
+Rvector6 Spacecraft::GetState(std::string rep) 
+{
+   rvState = GetStateInRepresentation(rep);
+   return rvState;
 }
 
-//---------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//  Rvector6 GetState(std::string &rep) 
+//------------------------------------------------------------------------------
+/**
+ * Get the converted Cartesian states from states in different coordinate type.
+ * 
+ * @return converted Cartesian states   
+ */
+//------------------------------------------------------------------------------
+Rvector6 Spacecraft::GetState(Integer rep) 
+{
+   rvState = GetStateInRepresentation(rep);
+   return rvState;
+}
+
+
+//------------------------------------------------------------------------------
+//  Rvector6 GetCartesianState() 
+//------------------------------------------------------------------------------
+/**
+ * Get the converted Cartesian states from states in different coordinate type.
+ * 
+ * @return converted Cartesian states   
+ */
+//------------------------------------------------------------------------------
+Rvector6 Spacecraft::GetCartesianState() 
+{   
+//   Real *tempState = state.GetState();
+//
+//   for (int i=0; i<6; i++)
+//      rvState[i] = tempState[i];
+//   
+   MessageInterface::ShowMessage("GetCartesianState() is obsolete; "
+      "use GetState(\"Cartesian\") or GetState(%d) instead.\n", CARTESIAN_ID);
+   return GetState("Cartesian");//rvState;
+}
+
+//------------------------------------------------------------------------------
 //  Rvector6 GetKeplerianState() 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Get the converted Keplerian states from states in different coordinate type.
  * 
  * @return converted Keplerain states   
- *
  */
+//------------------------------------------------------------------------------
 Rvector6 Spacecraft::GetKeplerianState() 
 {
-   keplerianState = stateConverter.Convert(state.GetState(), stateType,
-                                           "Keplerian",anomaly);
-
-   return keplerianState;
+//   rvState = stateConverter.Convert(state.GetState(), stateType,
+//                "Keplerian",anomaly);
+//
+//   return rvState;
+   MessageInterface::ShowMessage("GetKeplerianState() is obsolete; "
+      "use GetState(\"Keplerian\") or GetState(%d) instead.\n", KEPLERIAN_ID);
+   return GetState("Keplerian");
 }
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  Rvector6 GetModifiedKeplerianState() 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Get the converted Modified Keplerian states from states in different 
  * coordinate type.
  * 
  * @return converted Modified Keplerain states   
- *
  */
+//------------------------------------------------------------------------------
 Rvector6 Spacecraft::GetModifiedKeplerianState() 
 {
-   modifiedKeplerianState = stateConverter.Convert(state.GetState(),stateType,
-                                                   "ModifiedKeplerian",anomaly);
-   return (modifiedKeplerianState);
+//   rvState = stateConverter.Convert(state.GetState(),stateType,
+//                "ModifiedKeplerian",anomaly);
+//   return (rvState);
+   MessageInterface::ShowMessage("GetModifiedKeplerianState() is obsolete; "
+      "use GetState(\"ModifiedKeplerian\") or GetState(%d) instead.\n",
+      MODIFIED_KEPLERIAN_ID);
+   return GetState("ModifiedKeplerian");
 }
+
 
 Anomaly Spacecraft::GetAnomaly() const
 {
    return anomaly;
 }
 
-//---------------------------------------------------------------------------
-//  bool GetDisplay() const
-//---------------------------------------------------------------------------
-/**
- * Get the display indicator 
- * 
- * @return display indicator 
- *
- */
-bool Spacecraft::GetDisplay() const
-{
-   return isForDisplay;
-}
- 
-//---------------------------------------------------------------------------
-//  void SetDisplay(const bool displayFlag)
-//---------------------------------------------------------------------------
-/**
- * Set the display indicator 
- * 
- * @param  <displayFlag> display indicator 
- *
- */
-void Spacecraft::SetDisplay(const bool displayFlag)
-{
-   isForDisplay = displayFlag;
-}
 
 //---------------------------------------------------------------------------
 //  std::string GetDisplayDateFormat() const 
@@ -376,7 +520,8 @@ void Spacecraft::SetDisplay(const bool displayFlag)
  */
 std::string Spacecraft::GetDisplayDateFormat() const 
 {
-   return displayDateFormat; 
+   MessageInterface::ShowMessage("GetDisplayDateFormat() is deprecated\n");
+   return displayDateFormat; //"TAIModJulian";
 }
 
 //---------------------------------------------------------------------------
@@ -390,23 +535,21 @@ std::string Spacecraft::GetDisplayDateFormat() const
  */
 void Spacecraft::SetDisplayDateFormat(const std::string &dateType) 
 {
+   MessageInterface::ShowMessage("SetDisplayDateFormat(const std::string &) is deprecated\n");
+
   // Check invalid date type then throw exception
   if (dateType != "TAIModJulian" && dateType != "UTCModJulian" &&
       dateType != "TAIGregorian" && dateType != "UTCGregorian")
   {
      std::string msg = "Invalid Epoch's parameter is \"" + dateType + "\"";
      throw SpaceObjectException(msg);
-
-//     @todo:   May use this code below later???
-//     Integer id = GetParameterID("Epoch");
-//     return (void)GmatBase::SetStringParameter(id, dateType);
   }
 
    std::string tempType  = dateType;
    std::string tempEpoch = displayEpoch;
 
-   if (initialDisplay)
-      SetInitialDisplay();
+//   if (initialDisplay)
+//      SetInitialDisplay();
 
    // Check if different coordinate type then convert the state
    if (displayDateFormat != dateType)
@@ -428,11 +571,11 @@ void Spacecraft::SetDisplayDateFormat(const std::string &dateType)
    }
 
    displayDateFormat = tempType;
-
 }
 
+
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Spacecraft.
@@ -441,9 +584,16 @@ void Spacecraft::SetDisplayDateFormat(const std::string &dateType)
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* Spacecraft::Clone(void) const
+GmatBase* Spacecraft::Clone() const
 {
-   return (new Spacecraft(*this));
+   Spacecraft *clone = new Spacecraft(*this);
+   
+   #ifdef DEBUG_SPACECRAFT
+      MessageInterface::ShowMessage("Cloning %s (%x) to %x\n", 
+         instanceName.c_str(), this, clone);
+   #endif
+
+   return (clone);
 }
 
 
@@ -594,15 +744,18 @@ bool Spacecraft::SetRefObjectName(const Gmat::ObjectType type, const std::string
 GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type, 
                                    const std::string &name)
 {
+//MessageInterface::ShowMessage("Accessing ref object on %s of type ", instanceName.c_str());
    // This switch statement intentionally drops through without breaks, so that
    // the search in the tank and thruster name lists only need to be coded once. 
    switch (type)
    {
       case Gmat::COORDINATE_SYSTEM:
+//MessageInterface::ShowMessage("CoordinateSystem named %s\n", name.c_str());
          return coordinateSystem;
          
       case Gmat::HARDWARE:
       case Gmat::FUEL_TANK:
+//MessageInterface::ShowMessage("FuelTank named %s\n", name.c_str());
          for (ObjectArray::iterator i = tanks.begin(); 
               i < tanks.end(); ++i) {
             if ((*i)->GetName() == name)
@@ -610,6 +763,7 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
          }
       
       case Gmat::THRUSTER:
+//MessageInterface::ShowMessage("Thruster named %s\n", name.c_str());
          for (ObjectArray::iterator i = thrusters.begin(); 
               i < thrusters.end(); ++i) {
             if ((*i)->GetName() == name)
@@ -624,6 +778,7 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
          break;
    }
 
+//MessageInterface::ShowMessage("Unknown named %s\n", name.c_str());
    return SpaceObject::GetRefObject(type, name);
 }
 
@@ -661,48 +816,19 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       CoordinateSystem *cs = (CoordinateSystem*)obj;
       
       #if DEBUG_SPACECRAFT_CS
-      MessageInterface::ShowMessage
-         ("Spacecraft::SetRefObject() coordinateSystem=%d, cs=%d\n",
-          coordinateSystem, cs);
+         MessageInterface::ShowMessage
+            ("Spacecraft::SetRefObject() coordinateSystem=%d, cs=%d on %s\n",
+             coordinateSystem, cs, instanceName.c_str());
       #endif
       
-      #if DEBUG_SPACECRAFT_TEST
-      MessageInterface::ShowMessage("\nAfter assigning to CS in SetRefObject, "
-                                    "is it still NULL (%d) and obj == NULL(%d)\n",
-                                    (cs == NULL),(obj == NULL));
-      #endif
+      if (coordinateSystem != cs)
+         coordinateSystem = cs;
 
-      SetCoordinateSystem(cs);
-      
-//       if (cs != NULL)
-//       {
-//          if (cs != coordinateSystem)
-//          {
-//             #if DEBUG_SPACECRAFT_CS
-//             MessageInterface::ShowMessage
-//                ("Spacecraft::SetRefObject() calling SetInitialState()\n");
-//             #endif
-            
-//             coordinateSystem = cs;
-//             SetInitialState(); //loj: 9/15/05 Added
-//          }
-//       }
-      
       return true;
    }
    
    return SpaceObject::SetRefObject(obj, type, name);
 }
-
-//bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
-//                              const std::string &name, const Integer index)
-//{
-////   if (type == Gmat::FUEL_TANK)
-////      return tankNames;
-////   if (type == Gmat::THRUSTER)
-////      return thrusterNames;
-//   return SpaceObject::SetRefObject(obj, type, name, index);
-//}
 
 
 //---------------------------------------------------------------------------
@@ -761,100 +887,94 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
       MessageInterface::ShowMessage("Spacecraft::GetParameterID(%s)\n", str.c_str());
    #endif
 
-//    if (str == "Epoch") return epochID;
+   if (str == "Element1" || str == "X" || str == "SMA" || str == "RadPer" ||
+       str == "RMAG")  
+      return ELEMENT1_ID;
 
-    if (str == "DateFormat") return DATE_FORMAT_ID;
+   if (str == "Element2" || str == "Y" || str == "ECC" || str == "RadApo" ||
+       str == "RA") 
+      return ELEMENT2_ID;
 
-    if (str == "Element1" || str == "X" || str == "SMA" || str == "RadPer" ||
-        str == "RMAG")  
-       return ELEMENT1_ID;
+   if (str == "Element3" || str == "Z" || str == "INC" || str == "DEC")
+      return ELEMENT3_ID;
 
-    if (str == "Element2" || str == "Y" || str == "ECC" || str == "RadApo" ||
-        str == "RA") 
-       return ELEMENT2_ID;
+   if (str == "Element4" || str == "VX" || str == "RAAN" || str == "VMAG") 
+      return ELEMENT4_ID;
 
-    if (str == "Element3" || str == "Z" || str == "INC" || str == "DEC")
-       return ELEMENT3_ID;
+   if (str == "Element5" || str == "VY" || str == "AOP" || str == "AZI" 
+       || str == "RAV")
+      return ELEMENT5_ID;
 
-    if (str == "Element4" || str == "VX" || str == "RAAN" || str == "VMAG") 
-       return ELEMENT4_ID;
+   if (str == "Element6" || str == "VZ" || str == "TA" || str == "MA" ||
+       str == "EA" || str == "FPA" || str == "DECV") 
+      return ELEMENT6_ID;
 
-    if (str == "Element5" || str == "VY" || str == "AOP" || str == "AZI" 
-        || str == "RAV")
-       return ELEMENT5_ID;
-
-    if (str == "Element6" || str == "VZ" || str == "TA" || str == "MA" ||
-        str == "EA" || str == "FPA" || str == "DECV") 
-       return ELEMENT6_ID;
-
-    if (str == "StateType") return STATE_TYPE_ID;
-    if (str == "AnomalyType") return ANOMALY_ID; 
-    if (str == "CoordinateSystem") return COORD_SYS_ID;
-
-    // Drag Coefficient  
-    if (str == "Cd") return CD_ID;    
-
-    // Reflectivity Coefficient
-    if (str == "Cr") return CR_ID;
-
-    if (str == "DragArea") return DRAG_AREA_ID;
-
-    if (str == "DryMass") return DRY_MASS_ID;
-
-    if (str == "SRPArea") return SRP_AREA_ID;
-
-    // Representation specific values
-    if (str == "Position") {
-        /// @todo: Force the representation to Cartesian -- later build 
-        return ELEMENT1_ID;
-    }
-    if (str == "Velocity") {
-        /// @todo: Force the representation to Cartesian -- later build 
-        return ELEMENT4_ID;
-    }
-
-    // Added for hardware support 9/13/04, djc
-    if (str == "Tanks") return FUEL_TANK_ID;
-
-    if (str == "Thrusters") return THRUSTER_ID;
+   for (Integer i = SpaceObjectParamCount; i < SpacecraftParamCount; i++)
+   {
+      if (str == PARAMETER_LABEL[i - SpaceObjectParamCount])
+         return i;
+   }
     
-    if (str == "TotalMass") return TOTAL_MASS_ID;
-    
-    return SpaceObject::GetParameterID(str);
+   return SpaceObject::GetParameterID(str);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool Spacecraft::IsParameterReadOnly(const Integer id) const
+{
+   if ((id >= ELEMENT1UNIT_ID) && (id <= ELEMENT6UNIT_ID))
+   {
+      return true;
+   }
+   
+   if (id == TOTAL_MASS_ID)
+   {
+      return true;
+   }
+   
+   return SpaceObject::IsParameterReadOnly(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <label> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not.
+ */
+//---------------------------------------------------------------------------
+bool Spacecraft::IsParameterReadOnly(const std::string &label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
 }
 
 
 std::string Spacecraft::GetParameterText(const Integer id) const
 {
-    if (id == DATE_FORMAT_ID) return "DateFormat";
-  
-    if (id == ELEMENT1_ID || id == ELEMENT2_ID || id == ELEMENT3_ID 
-        || id == ELEMENT4_ID || id == ELEMENT5_ID || id == ELEMENT6_ID)
-        return GetElementName(id);
+   // Handle the dynamic labels for teh elements first
+   if (id == ELEMENT1_ID || id == ELEMENT2_ID || id == ELEMENT3_ID 
+       || id == ELEMENT4_ID || id == ELEMENT5_ID || id == ELEMENT6_ID)
+      return stateElementLabel[id - ELEMENT1_ID];
 
-    if (id == STATE_TYPE_ID) return "StateType";
-    if (id == ANOMALY_ID) return "AnomalyType";
+   if ((id >= SpaceObjectParamCount) && (id < SpacecraftParamCount))
+      return PARAMETER_LABEL[id - SpaceObjectParamCount];
 
-    if (id == COORD_SYS_ID) return "CoordinateSystem";
-
-    if (id == DRY_MASS_ID) return "DryMass";
-    
-    if (id == CD_ID) return "Cd" ;
-
-    if (id == CR_ID) return "Cr";
-
-    if (id == DRAG_AREA_ID) return "DragArea";
-
-    if (id == SRP_AREA_ID) return "SRPArea";
-
-    // Added for hardware support 9/13/04, djc
-    if (id == FUEL_TANK_ID) return "Tanks";
-
-    if (id == THRUSTER_ID) return "Thrusters";
-    
-    if (id == TOTAL_MASS_ID) return "TotalMass";
-
-    return SpaceObject::GetParameterText(id);
+   return SpaceObject::GetParameterText(id);
 }
 
 //------------------------------------------------------------------------------
@@ -870,7 +990,7 @@ std::string Spacecraft::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType Spacecraft::GetParameterType(const Integer id) const
 {
-   if (id >= SpaceObjectParamCount && id < SC_ParamCount)
+   if ((id >= SpaceObjectParamCount) && (id < SpacecraftParamCount))
       return PARAMETER_TYPE[id - SpaceObjectParamCount];
 
     return SpaceObject::GetParameterType(id);
@@ -964,103 +1084,44 @@ Real Spacecraft::GetRealParameter(const std::string &label) const
  */
 Real Spacecraft::SetRealParameter(const Integer id, const Real value)
 {
-#if DEBUG_SPACECRAFT
-   MessageInterface::ShowMessage(
-       "\nSpacecraft::SetRealParameter(%d,%f) enters...\n\t"
-       "stateType = %s, displayStateType = %s\n", id, value,
-       stateType.c_str(), displayCoordType.c_str());
-#endif
+   if (id == ELEMENT1_ID) return SetRealParameter(stateElementLabel[0],value); 
+   if (id == ELEMENT2_ID) return SetRealParameter(stateElementLabel[1],value); 
+   if (id == ELEMENT3_ID) return SetRealParameter(stateElementLabel[2],value); 
+   if (id == ELEMENT4_ID) return SetRealParameter(stateElementLabel[3],value); 
+   if (id == ELEMENT5_ID) return SetRealParameter(stateElementLabel[4],value); 
+   if (id == ELEMENT6_ID) return SetRealParameter(stateElementLabel[5],value); 
 
-//    if (id == epochID) return SetRealParameter("Epoch", value);
+   if (id == DRY_MASS_ID)
+   {
+      parmsChanged = true;
+      return SetRealParameter("DryMass", value);
+   }
 
-    // Check for the coordinate representation then set the value
-    if (displayCoordType == "Cartesian")
-    {
-       if (id == ELEMENT1_ID) return SetRealParameter("X",value); 
-       if (id == ELEMENT2_ID) return SetRealParameter("Y",value); 
-       if (id == ELEMENT3_ID) return SetRealParameter("Z",value); 
-       if (id == ELEMENT4_ID) return SetRealParameter("VX",value); 
-       if (id == ELEMENT5_ID) return SetRealParameter("VY",value); 
-       if (id == ELEMENT6_ID) return SetRealParameter("VZ",value); 
-    }
-    else if (displayCoordType == "Keplerian" 
-             || displayCoordType == "ModifiedKeplerian")
-    {
-       if (id == ELEMENT1_ID)
-       {
-          if (displayCoordType == "Keplerian")
-             return SetRealParameter("SMA",value); 
-          else
-             return SetRealParameter("RadPer",value); 
-       }
-
-       if (id == ELEMENT2_ID) 
-       {
-          if (displayCoordType == "Keplerian")
-             return SetRealParameter("ECC",value); 
-          else
-             return SetRealParameter("RadApo",value); 
-       }
-
-       if (id == ELEMENT3_ID) return SetRealParameter("INC",value); 
-       if (id == ELEMENT4_ID) return SetRealParameter("RAAN",value); 
-       if (id == ELEMENT5_ID) return SetRealParameter("AOP",value); 
-       if (id == ELEMENT6_ID) return SetRealParameter(anomaly.GetType(),value);
-    }
-    else if (displayCoordType == "SphericalAZFPA" 
-             || displayCoordType == "SphericalRADEC")
-    {
-       if (id == ELEMENT1_ID) return SetRealParameter("RMAG",value);
-       if (id == ELEMENT2_ID) return SetRealParameter("RA",value); 
-       if (id == ELEMENT3_ID) return SetRealParameter("DEC",value); 
-       if (id == ELEMENT4_ID) return SetRealParameter("VMAG",value); 
-       if (id == ELEMENT5_ID) 
-       {
-          if (displayCoordType == "SphericalAZFPA")
-             return SetRealParameter("AZI",value); 
-          else 
-             return SetRealParameter("RAV",value); 
-       }   
-       if (id == ELEMENT6_ID) 
-       {
-          if (displayCoordType == "SphericalAZFPA")
-             return SetRealParameter("FPA",value); 
-          else 
-             return SetRealParameter("DECV",value); 
-       }   
-    }
-
-    if (id == DRY_MASS_ID)
-    {
-       parmsChanged = true;
-       return SetRealParameter("DryMass", value);
-    }
-
-    if (id == CD_ID)
-    {
-       parmsChanged = true;
-       return SetRealParameter("Cd",value);
-    }
-    if (id == CR_ID)
-    {
-       parmsChanged = true;
-       return SetRealParameter("Cr",value);
-    }
-    if (id == DRAG_AREA_ID)
-    {
-       parmsChanged = true;
-       return SetRealParameter("DragArea",value);
-    }
-    if (id == SRP_AREA_ID)
-    {
-       parmsChanged = true;
-       return SetRealParameter("SRPArea",value);
-    }
+   if (id == CD_ID)
+   {
+      parmsChanged = true;
+      return SetRealParameter("Cd",value);
+   }
+   if (id == CR_ID)
+   {
+      parmsChanged = true;
+      return SetRealParameter("Cr",value);
+   }
+   if (id == DRAG_AREA_ID)
+   {
+      parmsChanged = true;
+      return SetRealParameter("DragArea",value);
+   }
+   if (id == SRP_AREA_ID)
+   {
+      parmsChanged = true;
+      return SetRealParameter("SRPArea",value);
+   }
     
-    // WE should not allow users to set this one -- it's a calculated parameter
-    if (id == TOTAL_MASS_ID) return SetRealParameter("TotalMass",value);
+   // We should not allow users to set this one -- it's a calculated parameter
+   if (id == TOTAL_MASS_ID) return SetRealParameter("TotalMass",value);
 
-    return SpaceObject::SetRealParameter(id, value);
+   return SpaceObject::SetRealParameter(id, value);
 }
 
 //---------------------------------------------------------------------------
@@ -1078,239 +1139,39 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
  */
 Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
 {
-//    if (label == "Epoch") 
-////       return epoch = value;
-//       return state.SetEpoch(value);
-    if (label == "X" || label == "SMA" || label == "RadPer" || label == "RMAG")
-    {
-       displayState[0] = value;
-       
-       //---------------------------------------------------
-       //loj: The following is a fix assuming
-       // StateType does not mix with other types.
-       hasElements[0] = true;
-       // incase StateType is not specified
-       if (label == "SMA") 
-          displayCoordType = "Keplerian"; 
-       else if (label == "RadPer")   
-          displayCoordType = "ModifiedKeplerian"; 
-       else if (label == "RMAG")   
-           // @todo - be careful.. need to check more with stateType (RADEC)
-            displayCoordType = "SphericalAZFPA"; 
-          
-       #if DEBUG_SPACECRAFT_CS
-       MessageInterface::ShowMessage
-          ("Spacecraft::SetRealParameter() calling SetInitialState()\n");
-       #endif
-       SetInitialState();
-       //---------------------------------------------------
-       
-       return value;
-       //return state[0] = value;
-    }
+   // First try to set as a state element
+   if (SetElement(label, value))
+      return value;
 
-    if (label == "Y" || label == "ECC" || label == "RadApo" || label == "RA")
-    {
-       displayState[1] = value;
+   if (label == "DryMass")
+   {
+      parmsChanged = true;
+      return dryMass = value;
+   }
+   if (label == "Cd")
+   {
+      parmsChanged = true;
+      return coeffDrag = value;
+   }
+   if (label == "DragArea")
+   {
+      parmsChanged = true;
+      return dragArea = value;
+   }
+   if (label == "SRPArea")
+   {
+      parmsChanged = true;
+      return srpArea = value;
+   }
+   if (label == "Cr")
+   {
+      parmsChanged = true;
+      return reflectCoeff = value;
+   }
 
-       //---------------------------------------------------
-       //loj: The following is a fix assuming
-       // StateType does not mix with other types.
-       hasElements[1] = true;
-       // incase StateType is not specified
-       if (label == "ECC")
-          displayCoordType = "Keplerian"; 
-       else if (label == "RadApo")   
-          displayCoordType = "ModifiedKeplerian"; 
-       else if (label == "RA")   
-           // @todo - be careful.. need to check more with stateType (RADEC)
-            displayCoordType = "SphericalAZFPA"; 
+   if (label == "TotalMass") return totalMass;    // Don't change the total mass
 
-       #if DEBUG_SPACECRAFT_CS
-       MessageInterface::ShowMessage
-          ("Spacecraft::SetRealParameter() calling SetInitialState()\n");
-       #endif
-       SetInitialState();
-       //---------------------------------------------------
-       
-       return value;
-       //return state[1] = value;
-    }
-
-    if (label == "Z" || label == "INC" || label == "DEC")  
-    {
-       displayState[2] = value;
-
-       //---------------------------------------------------
-       //loj: The following is a fix assuming
-       // StateType does not mix with other types.
-       hasElements[2] = true;
-       // incase StateType is not specified
-       if (label == "INC")
-          if (displayCoordType != "Keplerian" 
-                        && displayCoordType != "ModifiedKeplerian")
-             displayCoordType = "Keplerian"; 
-       else if (label == "DEC")  
-           // @todo - be careful.. need to check more with stateType (RADEC)
-            displayCoordType = "SphericalAZFPA";
-
-       //SetInitialState();
-       //---------------------------------------------------
-       
-       hasElements[2] = true;
-       
-       #if DEBUG_SPACECRAFT_CS
-       MessageInterface::ShowMessage
-          ("Spacecraft::SetRealParameter() calling SetInitialState()\n");
-       #endif
-       
-       SetInitialState();
-       
-       return value;
-       //return state[2] = value;
-    }
-
-    if (label == "VX" || label == "RAAN" || label == "VMAG")  
-    {
-       displayState[3] = value;
-
-       //---------------------------------------------------
-       //loj: The following is a fix assuming
-       // StateType does not mix with other types.
-       hasElements[3] = true;
-       // incase StateType is not specified
-       if (label == "RAAN")
-       { 
-          if (displayCoordType != "Keplerian" 
-                        && displayCoordType != "ModifiedKeplerian")
-             displayCoordType = "Keplerian"; 
-       }
-       else if (label == "VMAG")  
-           // @todo - be careful.. need to check more with stateType (RADEC)
-            displayCoordType = "SphericalAZFPA";
-
-       #if DEBUG_SPACECRAFT_CS
-       MessageInterface::ShowMessage
-          ("Spacecraft::SetRealParameter() calling SetInitialState()\n");
-       #endif
-       SetInitialState();
-       //---------------------------------------------------
-       
-       return value;
-       //return state[3] = value;
-    }
-
-    if (label == "VY" || label == "AOP" || label == "AZI" || label == "RAV")  
-    {
-       displayState[4] = value;
-
-       //---------------------------------------------------
-       //loj: The following is a fix assuming
-       // StateType does not mix with other types.
-       hasElements[4] = true;
-       // incase StateType is not specified
-       if (label == "AOP")
-       { 
-          if (displayCoordType != "Keplerian" 
-                        && displayCoordType != "ModifiedKeplerian")
-             displayCoordType = "Keplerian"; 
-       }
-       else if (label == "AZI")  
-            displayCoordType = "SphericalAZFPA";
-       else if (label == "RAV")  
-            displayCoordType = "SphericalRADEC";
-
-       #if DEBUG_SPACECRAFT_CS
-       MessageInterface::ShowMessage
-          ("Spacecraft::SetRealParameter() calling SetInitialState()\n");
-       #endif
-       SetInitialState();
-       //---------------------------------------------------
-       
-       return value;
-       //return state[4] = value;
-    }
-
-    if (label == "VZ" || !anomaly.IsInvalid(label) ||
-        label == "FPA" || label == "DECV")  
-    {
-       displayState[5] = value;
-
-       //---------------------------------------------------
-       //loj: The following is a fix assuming
-       // StateType does not mix with other types.
-       hasElements[5] = true;
-       // incase StateType is not specified
-       if (!anomaly.IsInvalid(label))
-       { 
-          if (displayCoordType != "Keplerian" 
-                        && displayCoordType != "ModifiedKeplerian")
-             displayCoordType = "Keplerian"; 
-          
-          // @todo:  need to figure out this based on stateType/displayCoordType
-          #if DEBUG_SPACECRAFT
-          std::cout << "\nSpacecraft::SetRealParameter()..."
-                    << "\n......hasElements[0] = " << hasElements[0]
-                    << ", [1] = " << hasElements[1]
-                    << "\n......displayState[0] = " <<  displayState[0]
-                    << ", [1] = " <<  displayState[1];
-          #endif
-          // Set new data to for anomaly
-          anomaly.Set(displayState[0],displayState[1],value,label);
-
-          #if DEBUG_SPACECRAFT
-          MessageInterface::ShowMessage
-             ("\n......Anomaly info -> a: %f, e: %f, "
-              "%s: %f\nSpacecraft::SetRealParameter() is about exiting\n",
-              anomaly.GetSMA(), anomaly.GetECC(), anomaly.GetType().c_str(), 
-              anomaly.GetValue());
-          #endif
-       }
-       else if (label == "FPA")  
-            displayCoordType = "SphericalAZFPA";
-       else if (label == "DECV")  
-            displayCoordType = "SphericalRADEC";
-
-       #if DEBUG_SPACECRAFT_CS
-       MessageInterface::ShowMessage
-          ("Spacecraft::SetRealParameter() calling SetInitialState()\n");
-       #endif
-       SetInitialState();
-       //---------------------------------------------------
-       
-       return value;
-       //return state[5] = value;
-    }
-
-    if (label == "DryMass")
-    {
-       parmsChanged = true;
-       return dryMass = value;
-    }
-    if (label == "Cd")
-    {
-       parmsChanged = true;
-       return coeffDrag = value;
-    }
-    if (label == "DragArea")
-    {
-       parmsChanged = true;
-       return dragArea = value;
-    }
-    if (label == "SRPArea")
-    {
-       parmsChanged = true;
-       return srpArea = value;
-    }
-    if (label == "Cr")
-    {
-       parmsChanged = true;
-       return reflectCoeff = value;
-    }
-
-    if (label == "TotalMass") return totalMass;    // Don't change the total mass
-
-    return SpaceObject::SetRealParameter(label, value);
+   return SpaceObject::SetRealParameter(label, value);
 }
 
 //---------------------------------------------------------------------------
@@ -1337,6 +1198,9 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
     
     if (id == COORD_SYS_ID)
        return coordSysName; 
+
+    if ((id >= ELEMENT1UNIT_ID) && (id <= ELEMENT6UNIT_ID))
+       return stateElementUnits[id - ELEMENT1UNIT_ID];
 
     return SpaceObject::GetStringParameter(id);
 }
@@ -1395,79 +1259,84 @@ const StringArray& Spacecraft::GetStringArrayParameter(const Integer id) const
  */
 bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 {
-    if (id != DATE_FORMAT_ID && id != STATE_TYPE_ID && id != ANOMALY_ID
-        && id != COORD_SYS_ID && id != FUEL_TANK_ID && id != THRUSTER_ID)
-       return SpaceObject::SetStringParameter(id, value);
+   if (id != DATE_FORMAT_ID && id != STATE_TYPE_ID && id != ANOMALY_ID
+       && id != COORD_SYS_ID && id != FUEL_TANK_ID && id != THRUSTER_ID)
+      return SpaceObject::SetStringParameter(id, value);
 
-    if (id == DATE_FORMAT_ID)
-    {
-       if (value != "TAIModJulian" && value != "UTCModJulian" && 
-           value != "TAIGregorian" && value != "UTCGregorian")
-       {
-          return GmatBase::SetStringParameter(id, value);
-       }
-       displayDateFormat = value;
-       //loj: dateFormat = value;
-    }
-    else if (id == STATE_TYPE_ID)
-    {  
-       // Check for invalid input then return unknown value from GmatBase 
-       if (value != "Cartesian" && value != "Keplerian" && 
-           value != "ModifiedKeplerian" && value != "SphericalAZFPA" && 
-           value != "SphericalRADEC")
-       {   
-          return GmatBase::SetStringParameter(id, value);
-       }
-  
-//       stateType = value;
-       displayCoordType = value;   //ag: so reading from a script displays properly in GUI
-    }
-    else if (id == ANOMALY_ID)
-    {
-       // Check for invalid input then return unknown value from GmatBase 
-       if (anomaly.IsInvalid(value))
-       {   
-          return GmatBase::SetStringParameter(id, value);
-       }
-#if DEBUG_SPACECRAFT
-    MessageInterface::ShowMessage("\nSpacecraft::SetStringParamter()..."
-       "\n   After change, Anomaly info -> a: %f, e: %f, %s: %f\n", 
-       anomaly.GetSMA(),anomaly.GetECC(),anomaly.GetType().c_str(),
-       anomaly.GetValue());   
-#endif
 
-       anomaly.SetType(value);
+   if (id == DATE_FORMAT_ID)
+   {
+      if (value != "TAIModJulian" && value != "UTCModJulian" && 
+          value != "TAIGregorian" && value != "UTCGregorian")
+      {
+         return GmatBase::SetStringParameter(id, value);
+      }
+      dateFormat = value;
+      displayDateFormat = value;
+   }
+   else if (id == STATE_TYPE_ID)
+   {  
+      // Check for invalid input then return unknown value from GmatBase 
+      if (value != "Cartesian" && value != "Keplerian" && 
+          value != "ModifiedKeplerian" && value != "SphericalAZFPA" && 
+          value != "SphericalRADEC")
+      {   
+         throw SpaceObjectException("Unknown state element representation: " + 
+            value);
+      }
+      stateType = value;
+      UpdateElementLabels();
+   }
+   else if (id == ANOMALY_ID)
+   {
+      // Check for invalid input then return unknown value from GmatBase 
+      if (anomaly.IsInvalid(value))
+      {   
+         return GmatBase::SetStringParameter(id, value);
+      }
+      #if DEBUG_SPACECRAFT
+          MessageInterface::ShowMessage("\nSpacecraft::SetStringParamter()..."
+             "\n   After change, Anomaly info -> a: %f, e: %f, %s: %f\n", 
+             anomaly.GetSMA(),anomaly.GetECC(),anomaly.GetType().c_str(),
+             anomaly.GetValue());   
+      #endif
 
-#if DEBUG_SPACECRAFT
-    MessageInterface::ShowMessage(
-       "\n   After change, Anomaly info -> a: %f, e: %f, %s: %f\n", 
-       anomaly.GetSMA(),anomaly.GetECC(),anomaly.GetType().c_str(),
-       anomaly.GetValue());   
-#endif
-       if (displayCoordType == "Keplerian" || 
-           displayCoordType == "ModifiedKeplerian")
-          displayState[5] = anomaly.GetValue();   // @todo: add state[5]?
-    }
-    else if (id == COORD_SYS_ID) 
-    {
-       parmsChanged = true;
-       coordSysName = value;
-    }
-    else if (id == FUEL_TANK_ID) {
-       // Only add the tank if it is not in the list already
-       if (find(tankNames.begin(), tankNames.end(), value) == tankNames.end()) {
+      anomaly.SetType(value);
+
+      #if DEBUG_SPACECRAFT
+          MessageInterface::ShowMessage(
+             "\n   After change, Anomaly info -> a: %f, e: %f, %s: %f\n", 
+             anomaly.GetSMA(),anomaly.GetECC(),anomaly.GetType().c_str(),
+             anomaly.GetValue());   
+      #endif
+      if ((stateType == "Keplerian") || 
+          (stateType == "ModifiedKeplerian"))
+         rvState[5] = anomaly.GetValue();   // @todo: add state[5]?
+   }
+   else if (id == COORD_SYS_ID) 
+   {
+      parmsChanged = true;
+      coordSysName = value;
+   }
+   else if (id == FUEL_TANK_ID) 
+   {
+      // Only add the tank if it is not in the list already
+      if (find(tankNames.begin(), tankNames.end(), value) == tankNames.end()) 
+      {
           tankNames.push_back(value);
-       }
-    }
-    else { // id == THRUSTER_ID
-       // Only add the tank if it is not in the list already
-       if (find(thrusterNames.begin(), thrusterNames.end(), 
-           value) == thrusterNames.end()) {
-          thrusterNames.push_back(value);
-       }
-    }
+      }
+   }
+   else // id == THRUSTER_ID 
+   { 
+      // Only add the tank if it is not in the list already
+      if (find(thrusterNames.begin(), thrusterNames.end(), value) == 
+          thrusterNames.end()) 
+      {
+         thrusterNames.push_back(value);
+      }
+   }
 
-    return true;
+   return true;
 }
 
 //---------------------------------------------------------------------------
@@ -1597,10 +1466,11 @@ bool Spacecraft::TakeAction(const std::string &action,
  */
 std::string Spacecraft::GetDisplayEpoch()
 {
-    if (initialDisplay)
-       SetInitialDisplay();
+   MessageInterface::ShowMessage("Spacecraft::GetDisplayEpoch is deprecated.\n");
+//   if (initialDisplay)
+//      SetInitialDisplay();
 
-    return displayEpoch;
+   return displayEpoch;
 }
 
 //---------------------------------------------------------------------------
@@ -1616,21 +1486,23 @@ std::string Spacecraft::GetDisplayEpoch()
  */
 bool Spacecraft::SetDisplayEpoch(const std::string &value) 
 {
-    if (displayDateFormat == "TAIGregorian" || 
-        displayDateFormat == "UTCGregorian")
-    {
-       GregorianDate gregorianDate(value);
-       if (gregorianDate.IsValid())
-          displayEpoch = gregorianDate.GetDate(); 
-       else
-          return false;
-    }
-    else
-    { 
-       displayEpoch = value;
-    }
+   MessageInterface::ShowMessage("Spacecraft::SetDisplayEpoch is deprecated.\n");
 
-    return true;
+   if (displayDateFormat == "TAIGregorian" || 
+      displayDateFormat == "UTCGregorian")
+   {
+      GregorianDate gregorianDate(value);
+      if (gregorianDate.IsValid())
+         displayEpoch = gregorianDate.GetDate(); 
+      else
+         return false;
+   }
+   else
+   { 
+      displayEpoch = value;
+   }
+   
+   return true;
 }
 
 //---------------------------------------------------------------------------
@@ -1644,7 +1516,8 @@ bool Spacecraft::SetDisplayEpoch(const std::string &value)
  */
 std::string Spacecraft::GetDisplayCoordType() const
 {
-   return displayCoordType;
+//MessageInterface::ShowMessage("Spacecraft::GetDisplayCoordType not implemented yet.\n");
+   return stateType;
 }
 
 //---------------------------------------------------------------------------
@@ -1658,18 +1531,19 @@ std::string Spacecraft::GetDisplayCoordType() const
  */
 void Spacecraft::SetDisplayCoordType(const std::string &coordType) 
 {
-   if (initialDisplay)
-      SetInitialDisplay();
-
-   // Check if different coordinate type then convert the state
-   if (displayCoordType != coordType)
-   {
-      Rvector6 newState = stateConverter.Convert(displayState,displayCoordType,
-                                                 coordType,anomaly);
-      SetDisplayState(newState);
-   }
-
-   displayCoordType = coordType;
+//   if (initialDisplay)
+//      SetInitialDisplay();
+//
+//   // Check if different coordinate type then convert the state
+//   if (displayCoordType != coordType)
+//   {
+//      Rvector6 newState = stateConverter.Convert(displayState,displayCoordType,
+//                                                 coordType,anomaly);
+//      SetDisplayState(newState);
+//   }
+//
+//   displayCoordType = coordType;
+MessageInterface::ShowMessage("Spacecraft::SetDisplayCoordType not implemented yet.\n");
 }
 
 //---------------------------------------------------------------------------
@@ -1681,12 +1555,14 @@ void Spacecraft::SetDisplayCoordType(const std::string &coordType)
  * @return display's state. 
  *
  */
-Real* Spacecraft::GetDisplayState() 
+Real* Spacecraft::GetDisplayState()
 {
-    if (initialDisplay)
-       SetInitialDisplay();
-
-    return displayState;
+//    if (initialDisplay)
+//       SetInitialDisplay();
+//
+//    return displayState;
+MessageInterface::ShowMessage("Spacecraft::GetDisplayState not fully implemented yet.\n");
+   return state.GetState();
 }
 
 //---------------------------------------------------------------------------
@@ -1700,7 +1576,16 @@ Real* Spacecraft::GetDisplayState()
  */
 void Spacecraft::SetDisplayState(const Real *s) 
 {
-    SetDisplayState(Rvector6(s[0],s[1],s[2],s[3],s[4],s[5]));
+//    SetDisplayState(Rvector6(s[0],s[1],s[2],s[3],s[4],s[5]));
+   MessageInterface::ShowMessage("Spacecraft::SetDisplayState not fully implemented yet.\n");
+
+   Real *posvel = state.GetState();
+   posvel[0] = s[0];
+   posvel[1] = s[1];
+   posvel[2] = s[2];
+   posvel[3] = s[3];
+   posvel[4] = s[4];
+   posvel[5] = s[5];
 }
 
 //---------------------------------------------------------------------------
@@ -1714,8 +1599,14 @@ void Spacecraft::SetDisplayState(const Real *s)
  */
 void Spacecraft::SetDisplayState(const Rvector6 s) 
 {
-    for (int i=0; i < 6; i++)
-         displayState[i] = s.Get(i);
+MessageInterface::ShowMessage("Spacecraft::SetDisplayState not fully implemented yet.\n");
+   Real *posvel = state.GetState();
+   posvel[0] = s[0];
+   posvel[1] = s[1];
+   posvel[2] = s[2];
+   posvel[3] = s[3];
+   posvel[4] = s[4];
+   posvel[5] = s[5];
 }
 
 //---------------------------------------------------------------------------
@@ -1728,23 +1619,24 @@ void Spacecraft::SetDisplayState(const Rvector6 s)
  */
 void Spacecraft::SaveDisplay()
 {
-   #if DEBUG_SPACECRAFT
-   MessageInterface::ShowMessage
-      ("Spacecraft::SaveDisplay() displayCoordType=%s, displayState=\n"
-       "%f %f %f %f %f %f\n", displayCoordType.c_str(),
-       displayState[0], displayState[1], displayState[2],
-       displayState[3], displayState[4], displayState[5]);
-   #endif
-   
-   SetEpoch();
-   //SetState(displayCoordType, displayState); //loj
-
-   #if DEBUG_SPACECRAFT_SET
-   MessageInterface::ShowMessage
-      ("===> Spacecraft::SaveDisplay() calling SetState()\n");
-   #endif
-   
-   SetState(); //loj: 9/19/05 Added
+   MessageInterface::ShowMessage("SaveDisplay is deprecated\n");
+//   #if DEBUG_SPACECRAFT
+//   MessageInterface::ShowMessage
+//      ("Spacecraft::SaveDisplay() displayCoordType=%s, displayState=\n"
+//       "%f %f %f %f %f %f\n", displayCoordType.c_str(),
+//       displayState[0], displayState[1], displayState[2],
+//       displayState[3], displayState[4], displayState[5]);
+//   #endif
+//   
+//   SetEpoch();
+//   //SetState(displayCoordType, displayState); //loj
+//
+//   #if DEBUG_SPACECRAFT_SET
+//   MessageInterface::ShowMessage
+//      ("===> Spacecraft::SaveDisplay() calling SetState()\n");
+//   #endif
+//   
+//   SetState(); //loj: 9/19/05 Added
 }
 
 //---------------------------------------------------------------------------
@@ -1784,34 +1676,6 @@ bool Spacecraft::Initialize()
 // protected methods
 //-------------------------------------
 
-//---------------------------------------------------------------------------
-// void SetCoordinateSystem(CoordinateSystem *cs)
-//---------------------------------------------------------------------------
-void Spacecraft::SetCoordinateSystem(CoordinateSystem *cs)
-{
-   #if DEBUG_SPACECRAFT_CS
-   MessageInterface::ShowMessage
-      ("Spacecraft::SetCoordSystem() cs=%d\n", cs);
-   #endif
-   
-   if (coordinateSystem != cs)
-   {
-      coordinateSystem = cs;
-   
-      #if DEBUG_SPACECRAFT_CS
-      MessageInterface::ShowMessage
-         ("Spacecraft::SetCoordSystem() calling SetInitialState()\n");
-      #endif
-   
-      SetInitialState();
-   }
-}
-
-
-//-------------------------------------
-// private methods
-//-------------------------------------
-
 
 //---------------------------------------------------------------------------
 //  void SetEpoch()
@@ -1822,6 +1686,7 @@ void Spacecraft::SetCoordinateSystem(CoordinateSystem *cs)
  */
 void Spacecraft::SetEpoch()
 {
+	MessageInterface::ShowMessage("SetEpoch is deprecated\n");
    // Check if date format is not TAIModJulian, then convert it
    if (displayDateFormat != "TAIModJulian")
    {
@@ -1847,28 +1712,8 @@ void Spacecraft::SetEpoch()
 }
 
 
-//---------------------------------------------------------------------------
-//  void SetState()
-//---------------------------------------------------------------------------
-/**
- * Set spacecraft internal state.
- * 
- */
-void Spacecraft::SetState()
-{
-   #if DEBUG_SPACECRAFT_SET
-   MessageInterface::ShowMessage
-      ("===> Spacecraft::SetState() cartesianState=%s\n",
-       cartesianState.ToString().c_str());
-   #endif
-   
-   state[0] = cartesianState[0];
-   state[1] = cartesianState[1];
-   state[2] = cartesianState[2];
-   state[3] = cartesianState[3];
-   state[4] = cartesianState[4];
-   state[5] = cartesianState[5];
-}
+
+
 
 
 //------------------------------------------------------------------------------
@@ -1912,411 +1757,6 @@ Real Spacecraft::UpdateTotalMass() const
 }
 
 
-//---------------------------------------------------------------------------
-//  std::string GetElementName(const Integer id) const
-//---------------------------------------------------------------------------
-/**
- * Get the string of element name 
- *
- * @param <id>   State id
- */
-std::string Spacecraft::GetElementName(const Integer id) const
-{
-    // Get the local coordinate type
-    std::string localCoordType = GetLocalCoordType();
-
-    if (localCoordType == "Cartesian")
-    {
-       if (id == ELEMENT1_ID) return("X");  
-       if (id == ELEMENT2_ID) return("Y");  
-       if (id == ELEMENT3_ID) return("Z");  
-       if (id == ELEMENT4_ID) return("VX");  
-       if (id == ELEMENT5_ID) return("VY");  
-       if (id == ELEMENT6_ID) return("VZ");  
-    }
-    else if (localCoordType == "Keplerian" || 
-             localCoordType == "ModifiedKeplerian")
-    {
-       if (id == ELEMENT1_ID) 
-       {
-          if (localCoordType == "Keplerian")
-             return("SMA");  
-          else
-             return("RadPer");
-       }
-       if (id == ELEMENT2_ID) 
-       {
-          if (localCoordType == "Keplerian")
-             return("ECC");  
-          else
-             return("RadApo");
-       }
-       if (id == ELEMENT3_ID) return("INC");  
-       if (id == ELEMENT4_ID) return("RAAN");  
-       if (id == ELEMENT5_ID) return("AOP");  
-       if (id == ELEMENT6_ID) 
-           return anomaly.GetType();  
-    }
-    else if (localCoordType == "SphericalAZFPA" 
-            || localCoordType == "SphericalRADEC")
-    {
-       if (id == ELEMENT1_ID) return("RMAG");  
-       if (id == ELEMENT2_ID) return("RA");  
-       if (id == ELEMENT3_ID) return("DEC");  
-       if (id == ELEMENT4_ID) return("VMAG");  
-       if (id == ELEMENT5_ID) 
-       {
-          if (localCoordType == "SphericalAZFPA")
-             return("AZI");  
-          else
-             return("RAV");
-       }
-       if (id == ELEMENT6_ID) 
-       {
-          if (localCoordType == "SphericalAZFPA")
-             return("FPA");  
-          else
-             return("DECV");
-       }
-    }
-    else
-    {
-       if (id == ELEMENT1_ID) return("Element1");  
-       if (id == ELEMENT2_ID) return("Element2");  
-       if (id == ELEMENT3_ID) return("Element3");  
-       if (id == ELEMENT4_ID) return("Element4");  
-       if (id == ELEMENT5_ID) return("Element5");  
-       if (id == ELEMENT6_ID) return("Element6");  
-    }
-    return("Unknown");
-}
-
-//---------------------------------------------------------------------------
-//  std::string GetLocalCoordType() const
-//---------------------------------------------------------------------------
-/**
- * Get the local coordinate type based on the display indicator
- *
- * @return local coordinate type 
- */
-std::string Spacecraft::GetLocalCoordType() const
-{
-    if (isForDisplay)
-       return displayCoordType;
-    else 
-       return stateType;
-}
-
-//---------------------------------------------------------------------------
-//  void SetInitialDisplay() 
-//---------------------------------------------------------------------------
-/**
- * Set the initial display's states from the internal epoch and states.
- * 
- *
- */
-void Spacecraft::SetInitialDisplay() 
-{
-    for (int i=0; i < 6; i++)
-         displayState[i] = state[i];
-
-//    displayEpoch = ToString(epoch);
-    displayEpoch = ToString(state.GetEpoch());
-    displayDateFormat = dateFormat;
-//    displayCoordType = stateType;          // ag: resets to default value
-    initialDisplay = false;
-}
-
-
-//---------------------------------------------------------------------------
-//  std::string ToString(const Real value) 
-//---------------------------------------------------------------------------
-/**
- * Set the initial display's states from the internal epoch and states.
- * 
- *
- */
-std::string Spacecraft::ToString(const Real value)
-{
-    std::ostringstream valueBuffer;
-    valueBuffer.precision(9);
-    valueBuffer.setf(std::ios::fixed);
-    valueBuffer << value;
-
-    return valueBuffer.str();
-}
-
-//---------------------------------------------------------------------------
-// void SetInitialState()
-//---------------------------------------------------------------------------
-void Spacecraft::SetInitialState()
-{
-   #if DEBUG_SPACECRAFT_CS
-   MessageInterface::ShowMessage
-      ("Spacecraft::SetInitialState() internalCoordSystem=%d, "
-       "coordinateSystem=%d\n", internalCoordSystem, coordinateSystem);
-   #endif
-   
-   if (hasElements[0] && hasElements[1] && hasElements[2] &&
-       hasElements[3] && hasElements[4] && hasElements[5])
-   {
-      #if DEBUG_SPACECRAFT_CS
-      MessageInterface::ShowMessage
-         ("\nSpacecraft::SetInitialState() It has all elements.\n");
-      #endif
-      
-      if (internalCoordSystem == NULL || coordinateSystem == NULL)
-      {
-         #if DEBUG_SPACECRAFT_CS
-         MessageInterface::ShowMessage
-            ("Spacecraft::SetInitialState() internalCoordSystem or "
-             "coordinateSystem is NULL\n");
-         #endif
-         
-         return;
-      }
-      
-      #if DEBUG_SPACECRAFT_CS
-      MessageInterface::ShowMessage
-         ("Spacecraft::SetInitialState() displayStateType=%s\n",
-          displayCoordType.c_str());
-      MessageInterface::ShowMessage
-         ("Spacecraft::SetInitialState() internal CS Name=%s, "
-          "CS Name=%s\n", internalCoordSystem->GetName().c_str(),
-          coordinateSystem->GetName().c_str());
-      #endif
-      
-      //----------------------------------------------------
-      // convert to Cartesian state
-      //----------------------------------------------------
-      if (displayCoordType == "Cartesian")
-      {
-         stateType = "Cartesian";
-         cartesianState = displayState;
-         
-         // No conversion is needed
-         for (int i=0; i<6; i++)
-            state[i] = displayState[i];
-      }
-      else if (displayCoordType == "Keplerian" ||
-               displayCoordType == "ModifiedKeplerian" ||
-               displayCoordType == "SphericalAZFPA" ||
-               displayCoordType == "SphericalRADEC")
-      {
-         stateType = "Cartesian";
-         
-         // Set Mu to StateConverter
-         if (coordinateSystem->GetOrigin()->IsOfType(Gmat::CELESTIAL_BODY))
-         {
-            #if DEBUG_SPACECRAFT_CS
-            Rvector6 initialState(displayState);
-            CelestialBody *origin = (CelestialBody*)coordinateSystem->GetOrigin();
-            MessageInterface::ShowMessage
-               ("Spacecraft::SetInitialState() --- Before convert to Cartesian\n"
-                "   state = %s\n", initialState.ToString().c_str());
-            MessageInterface::ShowMessage
-               ("   Setting Mu=%f of %s to StateConverter.\n",
-                origin->GetGravitationalConstant(),
-                origin->GetName().c_str());
-            #endif
-            
-            stateConverter.SetMu(coordinateSystem);
-            
-            // Convert elements to Cartesian
-            cartesianState =
-               stateConverter.Convert(displayState, displayCoordType, 
-                                      stateType, anomaly);
-            
-            // set internal state
-            for (int i=0; i<6; i++)
-               state[i] = cartesianState[i];
-            
-            #if DEBUG_SPACECRAFT_CS
-            MessageInterface::ShowMessage
-               ("Spacecraft::SetInitialState() --- After convert to Cartesian\n"
-                "   state = %s\n", cartesianState.ToString().c_str());
-            #endif
-         }
-         else
-         {
-            throw SpaceObjectException
-               ("Spacecraft::SetInitialState() Cannot convert initial state "
-                "in: " + displayCoordType + " to Cartesian \nbecause the "
-                "CoordinateSystem: " + coordinateSystem->GetName() +
-                " has non-celestial body as origin");
-         }
-      }
-      
-      //----------------------------------------------------
-      // convert to internal CoordinateSystem (loj: 9/15/05)
-      //----------------------------------------------------
-      if (coordinateSystem->GetName() != internalCoordSystem->GetName())
-      {
-         Real epoch = GetEpoch();
-         
-         #if DEBUG_SPACECRAFT_CS
-         MessageInterface::ShowMessage
-            ("Spacecraft::SetInitialState() --- Before convert to internal CS: epoch=%f\n"
-             "   state = %s\n", epoch, cartesianState.ToString().c_str());
-         #endif
-         
-         coordConverter.Convert(A1Mjd(epoch), cartesianState, coordinateSystem,
-                                cartesianState, internalCoordSystem);
-         
-         // set internal state
-         for (int i=0; i<6; i++)
-            state[i] = cartesianState[i];
-         
-         #if DEBUG_SPACECRAFT_CS
-         MessageInterface::ShowMessage
-            ("Spacecraft::SetInitialState() --- After  convert to internal CS: epoch=%f\n"
-             "   state = %s\n", epoch, cartesianState.ToString().c_str());
-         #endif
-      }
-      
-      #if DEBUG_SPACECRAFT_CS
-      MessageInterface::ShowMessage
-         ("displayStateType=%s, displaystate=\n   %f, %f, %f, %f, %f, %f\n",
-          displayCoordType.c_str(), displayState[0], displayState[1],
-          displayState[2], displayState[3], displayState[4], displayState[5]);
-      MessageInterface::ShowMessage
-         ("stateType=%s, state=\n   %f, %f, %f, %f, %f, %f\n",
-          stateType.c_str(), state[0], state[1], state[2], state[3],
-          state[4], state[5]);
-      MessageInterface::ShowMessage
-         ("cartesianState=%s\n", cartesianState.ToString().c_str());
-      MessageInterface::ShowMessage
-         ("\nAnomaly info-> a: %f, e: %f, %s: %f\n",
-          anomaly.GetSMA(),anomaly.GetECC(),anomaly.GetType().c_str(),
-          anomaly.GetValue()); 
-      MessageInterface::ShowMessage("\nSpacecraft::SetInitialState() exits\n\n");
-      #endif
-   }
-   else
-   {
-      #if DEBUG_SPACECRAFT_CS > 1
-      MessageInterface::ShowMessage
-         ("Spacecraft::SetInitialState() Doesn't have all elements: ");
-      for (int i=0; i<6; i++)
-         MessageInterface::ShowMessage("%d  ", hasElements[i]);
-      MessageInterface::ShowMessage("\n");
-      #endif
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// void DefineDefaultSpacecraft()
-//------------------------------------------------------------------------------
-void Spacecraft::DefineDefaultSpacecraft()
-{
-   state.SetEpoch(21545.0);
-   
-   state[0] = 7100.0;
-   state[1] = 0.0;
-   state[2] = 1300.0;
-   state[3] = 0.0;
-   state[4] = 7.35;
-   state[5] = 1.0;
-
-   // @todo: will add it later  
-   // Initialize state vector 
-   //  stateVector.Set(state.GetState());
-   
-   dateFormat = "TAIModJulian";
-   stateType = "Cartesian";
-   
-   // Get the keplerian state and then initialize anomaly
-   Rvector6 tempKepl = GetKeplerianState();  // @todo: need fix this later
-   anomaly.Set(tempKepl[0],tempKepl[1],tempKepl[5],"TA");
-
-   coordSysName = "EarthMJ2000Eq";
-
-   dryMass = 850.0;
-   coeffDrag = 2.2;
-   dragArea = 15.0;
-   srpArea = 1.0;
-   reflectCoeff = 1.8;
-
-   // Initialize non-internal states for display purpose
-   initialDisplay = true;
-   isForDisplay = false;
-
-   for (int i=0; i < 6; i++)
-   {
-       displayState[i] = state[i];
-       hasElements[i] = false;
-   }
-   
-   cartesianState.Set(state.GetState()); //loj: 9/19/05 Added
-   
-   displayEpoch = ToString(state.GetEpoch());
-   displayDateFormat = dateFormat;
-   displayCoordType = stateType;
-
-   internalCoordSystem = NULL;
-   coordinateSystem = NULL;
-}
-
-//---------------------------------------------------------------------------
-//  void InitializeDataMethod(const Spacecraft &s)
-//---------------------------------------------------------------------------
-/**
- * Initialize data method from the parameter for copying spacecraft structures.
- *
- * @param <s> The original that is being copied.
- */
-//---------------------------------------------------------------------------
-void Spacecraft::InitializeDataMethod(const Spacecraft &s)
-{
-   #if DEBUG_SPACECRAFT_INIT
-	   MessageInterface::ShowMessage(
-	      "Spacecraft::InitializeDataMethod() entered\n");
-   #endif
-   
-   // Duplicate the member data
-   dateFormat = s.dateFormat;
-   stateType = s.stateType;
-   anomaly = s.anomaly;
-   coordSysName = s.coordSysName;
-   
-   for (int i = 0; i < 6; ++i)
-   {
-      state[i] = s.state[i];
-      //stateVector[i] = s.stateVector[i];
-      displayState[i] = s.displayState[i];
-      hasElements[i] = s.hasElements[i]; //loj: 9/16/05 Added
-   }
-   
-   cartesianState = s.cartesianState; //loj: 9/19/05 Added
-   
-   displayEpoch = s.displayEpoch;
-   displayDateFormat = s.displayDateFormat;
-   displayCoordType = s.displayCoordType;
-   initialDisplay = s.initialDisplay;
-   isForDisplay = s.isForDisplay;
-    
-   dryMass = s.dryMass;
-   coeffDrag = s.coeffDrag;
-   dragArea = s.dragArea;
-   srpArea = s.srpArea;
-   reflectCoeff = s.reflectCoeff;
-    
-   tankNames = s.tankNames;
-   thrusterNames = s.thrusterNames;
-
-   internalCoordSystem = s.internalCoordSystem;
-   coordinateSystem = s.coordinateSystem;
-}
-
-
-
-
-
-
-
-
-
 //------------------------------------------------------------------------------
 // const std::string&  GetGeneratingString(Gmat::WriteMode mode,
 //                const std::string &prefix, const std::string &useName)
@@ -2338,7 +1778,7 @@ const std::string& Spacecraft::GetGeneratingString(Gmat::WriteMode mode,
 {
    std::stringstream data;
 
-   data.precision(18);   // Crank up data precision so we don't lose anything
+   data.precision(15);   // Crank up data precision so we don't lose anything
    std::string preface = "", nomme;
    
    if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
@@ -2375,8 +1815,6 @@ const std::string& Spacecraft::GetGeneratingString(Gmat::WriteMode mode,
 }
 
 
-
-
 //------------------------------------------------------------------------------
 // void WriteParameters(std::string &prefix, GmatBase *obj)
 //------------------------------------------------------------------------------
@@ -2393,10 +1831,9 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    Integer i;
    Gmat::ParameterType parmType;
    std::stringstream value;
-   value.precision(18);
+   value.precision(15); 
    
-   bool coordType = isForDisplay, showAnomaly = false;
-   isForDisplay = true;
+   bool showAnomaly = false;
    
    // Set the parameter order for output
    Integer parmOrder[parameterCount], parmIndex = 0;
@@ -2418,6 +1855,12 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    parmOrder[parmIndex++] = SRP_AREA_ID;
    parmOrder[parmIndex++] = FUEL_TANK_ID;
    parmOrder[parmIndex++] = THRUSTER_ID;
+   parmOrder[parmIndex++] = ELEMENT1UNIT_ID;
+   parmOrder[parmIndex++] = ELEMENT2UNIT_ID;
+   parmOrder[parmIndex++] = ELEMENT3UNIT_ID;
+   parmOrder[parmIndex++] = ELEMENT4UNIT_ID;
+   parmOrder[parmIndex++] = ELEMENT5UNIT_ID;
+   parmOrder[parmIndex++] = ELEMENT6UNIT_ID;
    
    bool registered;
    for (i = 0; i < parameterCount; ++i)
@@ -2434,29 +1877,14 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
       if (!registered)
          parmOrder[parmIndex++] = i;
    }
-   
-   Rvector6 genState;
+
+   Rvector6 genState; 
    coordConverter.Convert(A1Mjd(GetEpoch()), Rvector6(GetState().GetState()), 
                           internalCoordSystem, 
                           genState, coordinateSystem);
-
-   if ((displayCoordType == "Keplerian") || (displayCoordType == "ModifiedKeplerian"))
-   {
-      if (coordinateSystem->GetOrigin()->IsOfType("CelestialBody"))
-         stateConverter.SetMu(coordinateSystem);
-      else
-         throw SpaceObjectException(
-            "When generating output for the spacecraft '" + instanceName +
-            "', GMAT cannot set up Keplerian element conversion for the "
-            "coordinate system '" + coordinateSystem->GetName() + 
-            "' because the oribin is not a celestial body.");
-      showAnomaly = true;
-   }
    
-   if (displayCoordType != "Cartesian")
-      genState = stateConverter.Convert(genState, "Cartesian",
-                                        displayCoordType, anomaly);
-   
+   Rvector6 repState = GetStateInRepresentation(stateType);
+      
    for (i = 0; i < parameterCount; ++i)
    {
       if ((IsParameterReadOnly(parmOrder[i]) == false) &&
@@ -2479,13 +1907,17 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                value.str("");
                if ((parmOrder[i] >= ELEMENT1_ID) && 
                    (parmOrder[i] <= ELEMENT6_ID))
-                  value << genState[parmOrder[i] - ELEMENT1_ID];
+               {
+                  value.precision(18); 
+                  value << repState[parmOrder[i] - ELEMENT1_ID]; // genState[parmOrder[i] - ELEMENT1_ID];
+                  value.precision(15); 
+               }
                else if (parmOrder[i] == STATE_TYPE_ID)
                {
                   if (mode != Gmat::MATLAB_STRUCT)
-                     value << displayCoordType;
+                     value << stateType;
                   else
-                     value << "'" << displayCoordType << "'";
+                     value << "'" << stateType << "'"; 
                }
                else
                   WriteParameterValue(parmOrder[i], value);
@@ -2550,7 +1982,353 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
       stream << ownedObject->GetGeneratingString(Gmat::OWNED_OBJECT, newprefix);
    }
    
-   isForDisplay = coordType;
+//   isForDisplay = coordType;
 }
 
 
+//------------------------------------------------------------------------------
+// void UpdateElementLabels()
+//------------------------------------------------------------------------------
+/**
+ * Code used to set the element labels. 
+ */
+//------------------------------------------------------------------------------
+void Spacecraft::UpdateElementLabels()
+{
+   if (stateType == "Cartesian")
+   {
+      stateElementLabel[0] = "X";
+      stateElementLabel[1] = "Y";
+      stateElementLabel[2] = "Z";
+      stateElementLabel[3] = "VX";
+      stateElementLabel[4] = "VY";
+      stateElementLabel[5] = "VZ";
+      
+      stateElementUnits[0] = "km";
+      stateElementUnits[1] = "km";
+      stateElementUnits[2] = "km";
+      stateElementUnits[3] = "km/s";
+      stateElementUnits[4] = "km/s";
+      stateElementUnits[5] = "km/s";
+      
+      return;
+   }
+
+   if (stateType == "Keplerian")
+   {
+      stateElementLabel[0] = "SMA";
+      stateElementLabel[1] = "ECC";
+      stateElementLabel[2] = "INC";
+      stateElementLabel[3] = "RAAN";
+      stateElementLabel[4] = "AOP";
+      stateElementLabel[5] = anomalyType;
+
+      stateElementUnits[0] = "km";
+      stateElementUnits[1] = "";
+      stateElementUnits[2] = "deg";
+      stateElementUnits[3] = "deg";
+      stateElementUnits[4] = "deg";
+      stateElementUnits[5] = "deg";
+
+      return;
+   }
+
+   if (stateType == "ModifiedKeplerian")
+   {
+      stateElementLabel[0] = "RadPer";
+      stateElementLabel[1] = "RadApo";
+      stateElementLabel[2] = "INC";
+      stateElementLabel[3] = "RAAN";
+      stateElementLabel[4] = "AOP";
+      stateElementLabel[5] = anomalyType;
+
+      stateElementUnits[0] = "km";
+      stateElementUnits[1] = "km";
+      stateElementUnits[2] = "deg";
+      stateElementUnits[3] = "deg";
+      stateElementUnits[4] = "deg";
+      stateElementUnits[5] = "deg";
+
+      return;
+   }
+
+   if (stateType == "SphericalAZFPA")
+   {
+      stateElementLabel[0] = "RMAG";
+      stateElementLabel[1] = "RA";
+      stateElementLabel[2] = "DEC";
+      stateElementLabel[3] = "VMAG";
+      stateElementLabel[4] = "AZI";
+      stateElementLabel[5] = "FPA";
+
+      stateElementUnits[0] = "km";
+      stateElementUnits[1] = "deg";
+      stateElementUnits[2] = "deg";
+      stateElementUnits[3] = "km/s";
+      stateElementUnits[4] = "deg";
+      stateElementUnits[5] = "deg";
+
+      return;
+   }
+    
+   if (stateType == "SphericalRADEC")
+   {
+      stateElementLabel[0] = "RMAG";
+      stateElementLabel[1] = "RA";
+      stateElementLabel[2] = "DEC";
+      stateElementLabel[3] = "VMAG";
+      stateElementLabel[4] = "RAV";
+      stateElementLabel[5] = "DECV";
+
+      stateElementUnits[0] = "km";
+      stateElementUnits[1] = "deg";
+      stateElementUnits[2] = "deg";
+      stateElementUnits[3] = "km/s";
+      stateElementUnits[4] = "deg";
+      stateElementUnits[5] = "deg";
+
+      return;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Rvector6 GetStateInRepresentation(std::string rep)
+//------------------------------------------------------------------------------
+/**
+ * Code used to obtain a state in a non-Cartesian representation.
+ */
+//------------------------------------------------------------------------------
+Rvector6 Spacecraft::GetStateInRepresentation(std::string rep)
+{
+   Rvector6 finalState;
+   
+   if (rep == "")
+      rep = stateType;
+   
+   if (rep == "Cartesian")
+   {
+      finalState.Set(state.GetState());
+   }
+   else
+   {
+      rvState.Set(state.GetState());
+      finalState = stateConverter.Convert(rvState, "Cartesian", rep, anomaly);
+   }
+   
+   return finalState;
+}
+
+
+//------------------------------------------------------------------------------
+// Rvector6 GetStateInRepresentation(Integer rep)
+//------------------------------------------------------------------------------
+/**
+ * Code used to obtain a state in a non-Cartesian representation.
+ */
+//------------------------------------------------------------------------------
+Rvector6 Spacecraft::GetStateInRepresentation(Integer rep)
+{
+   Rvector6 finalState;
+   
+   if (rep == CARTESIAN_ID)
+   {
+      finalState.Set(state.GetState());
+   }
+   else
+   {
+      std::string strrep = representations[rep];
+      rvState.Set(state.GetState());
+      finalState = stateConverter.Convert(rvState, "Cartesian", 
+         representations[rep], anomaly);
+   }
+   
+   return finalState;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetStateFromRepresentation(std::string rep, Rvector6 &st)
+//------------------------------------------------------------------------------
+/**
+ * Code used to obtain a state in a non-Cartesian representation.
+ */
+//------------------------------------------------------------------------------
+void Spacecraft::SetStateFromRepresentation(std::string rep, Rvector6 &st)
+{
+   #ifdef DEBUG_STATE_INTERFACE
+      MessageInterface::ShowMessage(
+         "Spacecraft::SetStateFromRepresentation: Setting %s state to %s\n", 
+         rep.c_str(), st.ToString().c_str());
+   #endif
+   
+   static Rvector6 finalState;
+   
+   if (rep == "Cartesian")
+   {
+      state[0] = st[0];
+      state[1] = st[1];
+      state[2] = st[2];
+      state[3] = st[3];
+      state[4] = st[4];
+      state[5] = st[5];
+   }
+   else
+   {
+      finalState = stateConverter.Convert(st, rep, "Cartesian", anomaly);
+      
+      state[0] = finalState[0];
+      state[1] = finalState[1];
+      state[2] = finalState[2];
+      state[3] = finalState[3];
+      state[4] = finalState[4];
+      state[5] = finalState[5];
+   }
+   
+   #ifdef DEBUG_STATE_INTERFACE
+      MessageInterface::ShowMessage(
+         "Spacecraft::SetStateFromRepresentation: State is now "
+         "%.9lf %.9lf %.9lf %.14lf %.14lf %.14lf\n", state[0], state[1], 
+         state[2], state[3], state[4], state[5]);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// Real Spacecraft::GetElement(const std::string &label)
+//------------------------------------------------------------------------------
+/**
+ * Code used to obtain a state element.
+ * 
+ * @param <label> The test label for the element.
+ * 
+ * @return The element's value, or -9999999999.999999 on failure.
+ */
+//------------------------------------------------------------------------------
+Real Spacecraft::GetElement(const std::string &label)
+{
+   std::string rep = "";
+   Integer id = LookUpLabel(label, rep);
+   Real retval = -9999999999.999999;
+
+   if (id != -1) 
+   {  
+      Rvector6 tempState = GetStateInRepresentation(rep);
+      retval = tempState[id];
+   }
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetElement(const std::string &label, const Real &value)
+//------------------------------------------------------------------------------
+/**
+ * Set a state element.
+ * 
+ * @param <label> Label for the element -- 'X', 'Y', 'SMA', etc.
+ * @param <value> New value for the element.
+ * 
+ * @return true on success, false on failure.
+ */
+//------------------------------------------------------------------------------
+bool Spacecraft::SetElement(const std::string &label, const Real &value)
+{
+   std::string rep = "";
+   Integer id = LookUpLabel(label, rep) - ELEMENT1_ID;
+   
+   if (id >= 0)
+   {
+      Rvector6 tempState = GetStateInRepresentation(rep);
+      tempState[id] = value;
+      SetStateFromRepresentation(rep, tempState);
+      return true;
+   }
+   
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetStateFromRepresentation(std::string rep, Rvector6 &st)
+//------------------------------------------------------------------------------
+/**
+ * Code used to obtain a state in a non-Cartesian representation.
+ */
+//------------------------------------------------------------------------------
+Integer Spacecraft::LookUpLabel(const std::string &label, std::string &rep)
+{
+   Integer retval = -1;
+   
+   if (label == "X" || label == "SMA" || label == "RadPer" || label == "RMAG")
+      retval = ELEMENT1_ID;
+
+   if (label == "Y" || label == "ECC" || label == "RadApo" || label == "RA")
+      retval = ELEMENT2_ID;
+
+   if (label == "Z" || label == "INC" || label == "DEC")  
+      retval = ELEMENT3_ID;
+
+   if (label == "VX" || label == "RAAN" || label == "VMAG")  
+      retval = ELEMENT4_ID;
+
+   if (label == "VY" || label == "AOP" || label == "AZI" || label == "RAV")  
+      retval = ELEMENT5_ID;
+
+   if (label == "VZ" || !anomaly.IsInvalid(label) ||
+        label == "FPA" || label == "DECV")  
+      retval = ELEMENT6_ID;
+   
+   rep = elementLabelMap[label];
+   
+   #ifdef DEBUG_STATE_INTERFACE
+      MessageInterface::ShowMessage("Spacecraft::LookUpLabel(%s..) gives rep %s\n",
+         label.c_str(), rep.c_str());
+   #endif
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// void BuildElementLabelMap()
+//------------------------------------------------------------------------------
+/**
+ * Set the mapping between elements and representations.
+ */
+//------------------------------------------------------------------------------
+void Spacecraft::BuildElementLabelMap()
+{
+   if (elementLabelMap.size() == 0)
+   {
+      elementLabelMap["X"] = "Cartesian";
+      elementLabelMap["Y"] = "Cartesian";
+      elementLabelMap["Z"] = "Cartesian";
+      elementLabelMap["VX"] = "Cartesian";
+      elementLabelMap["VY"] = "Cartesian";
+      elementLabelMap["VZ"] = "Cartesian";
+
+      elementLabelMap["SMA"]  = "Keplerian";
+      elementLabelMap["ECC"]  = "Keplerian";
+      elementLabelMap["INC"]  = "Keplerian";
+      elementLabelMap["RAAN"] = "Keplerian";
+      elementLabelMap["AOP"]  = "Keplerian";
+      elementLabelMap["TA"]   = "Keplerian";
+      elementLabelMap["EA"]   = "Keplerian";
+      elementLabelMap["MA"]   = "Keplerian";
+
+      elementLabelMap["RadPer"] = "ModifiedKeplerian";
+      elementLabelMap["RadApo"] = "ModifiedKeplerian";
+
+      elementLabelMap["RMAG"] = "SphericalAZFPA";
+      elementLabelMap["RA"]   = "SphericalAZFPA";
+      elementLabelMap["DEC"]  = "SphericalAZFPA";
+      elementLabelMap["VMAG"] = "SphericalAZFPA";
+      elementLabelMap["AZI"]  = "SphericalAZFPA";
+      elementLabelMap["FPA"]  = "SphericalAZFPA";
+
+      elementLabelMap["RAV"]  = "SphericalRADEC";
+      elementLabelMap["DECV"] = "SphericalRADEC";
+   }
+}

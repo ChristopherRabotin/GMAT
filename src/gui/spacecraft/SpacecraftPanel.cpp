@@ -81,7 +81,13 @@ void SpacecraftPanel::Create()
 {
     SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
     currentSpacecraft = new Spacecraft(*theSpacecraft);
-
+    
+    currentSpacecraft->SetInternalCoordSystem(
+       theSpacecraft->GetInternalCoordSystem());    
+    currentSpacecraft->SetRefObject( 
+       theSpacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, ""), 
+       Gmat::COORDINATE_SYSTEM, "");
+    
     // Set object pointer for "Show Script"
     mObject = currentSpacecraft;
 

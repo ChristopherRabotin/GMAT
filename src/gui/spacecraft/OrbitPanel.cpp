@@ -137,7 +137,7 @@ void OrbitPanel::LoadData()
       std::string epochStr = theSpacecraft->GetDisplayEpoch();
       epochValue->SetValue(epochStr.c_str());
       
-      // load the coordiante system
+      // load the coordinate system
       std::string coordSystemStr =
          theSpacecraft->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
       mCoordSysComboBox->SetValue(coordSystemStr.c_str());
@@ -220,11 +220,11 @@ void OrbitPanel::LoadData()
          anomalyComboBox->Append(wxString(anomalyList[i].c_str()));
       
       // Get Spacecraft initial state and display
-      mCartState = theSpacecraft->GetCartesianState();
+      mCartState = theSpacecraft->GetState(stType);
       mTempCartState = mCartState;
       mOutState = mCartState;
       DisplayState();
-      
+      SetLabelsUnits(stType);
    }
    catch (BaseException &e)
    {
@@ -831,61 +831,36 @@ void OrbitPanel::OnTextChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OrbitPanel::SetLabelsUnits(const std::string &stateType)
 {
-   // labels for elements, anomaly and units
-   if ( strcmp(stateType.c_str(), "Cartesian") == 0 )
-   {
-      // set the labels for the elements
-      description1->SetLabel("X");
-      description2->SetLabel("Y");
-      description3->SetLabel("Z");
-      description4->SetLabel("VX");
-      description5->SetLabel("VY");
-      description6->SetLabel("VZ");
+   Integer baseLabel = theSpacecraft->GetParameterID("Element1"),
+           baseUnit  = theSpacecraft->GetParameterID("Element1Units");
+           
+   std::string st = theSpacecraft->GetStringParameter("StateType");
+   theSpacecraft->SetStringParameter("StateType", stateType);
+   
+   description1->SetLabel(theSpacecraft->GetParameterText(baseLabel).c_str());
+   label1->SetLabel(theSpacecraft->GetStringParameter(baseUnit).c_str());
 
-      // set the labels for the units
-      label1->SetLabel("Km");
-      label2->SetLabel("Km");
-      label3->SetLabel("Km");
-      label4->SetLabel("Km/s");
-      label5->SetLabel("Km/s");
-      label6->SetLabel("Km/s");
-        
-      anomalyStaticText->Show(false);
-      anomalyComboBox->Show(false);
-   }
-   else if ( (strcmp(stateType.c_str(), "Keplerian") == 0) || 
-             (strcmp(stateType.c_str(), "ModifiedKeplerian") == 0) )
-   {
-      // set the labels for the elements
-      if ( strcmp(stateType.c_str(), "Keplerian") == 0 )
-      {
-         description1->SetLabel("SMA");
-         description2->SetLabel("ECC");
-      }
-      else
-      {
-         description1->SetLabel("RadPer");
-         description2->SetLabel("RadApo");
-      }
-      description3->SetLabel("INC");
-      description4->SetLabel("RAAN");
-      description5->SetLabel("AOP");
+   description2->SetLabel(theSpacecraft->GetParameterText(baseLabel+1).c_str());
+   label2->SetLabel(theSpacecraft->GetStringParameter(baseUnit+1).c_str());
 
+   description3->SetLabel(theSpacecraft->GetParameterText(baseLabel+2).c_str());
+   label3->SetLabel(theSpacecraft->GetStringParameter(baseUnit+2).c_str());
+
+   description4->SetLabel(theSpacecraft->GetParameterText(baseLabel+3).c_str());
+   label4->SetLabel(theSpacecraft->GetStringParameter(baseUnit+3).c_str());
+
+   description5->SetLabel(theSpacecraft->GetParameterText(baseLabel+4).c_str());
+   label5->SetLabel(theSpacecraft->GetStringParameter(baseUnit+4).c_str());
+
+   description6->SetLabel(theSpacecraft->GetParameterText(baseLabel+5).c_str());
+   label6->SetLabel(theSpacecraft->GetStringParameter(baseUnit+5).c_str());
+
+   if ( (strcmp(stateType.c_str(), "Keplerian") == 0) || 
+        (strcmp(stateType.c_str(), "ModifiedKeplerian") == 0) )
+   {
       int anomalyID = theSpacecraft->GetParameterID("AnomalyType");
       wxString description = (theSpacecraft->GetStringParameter(anomalyID)).c_str();
-      description6->SetLabel(description);
 
-      // set the labels for the units
-      label1->SetLabel("Km");
-      if (strcmp(stateType.c_str(), "Keplerian") == 0)
-         label2->SetLabel("");
-      else
-         label2->SetLabel("Km");
-      label3->SetLabel("deg");
-      label4->SetLabel("deg");
-      label5->SetLabel("deg");
-      label6->SetLabel("deg");
-      
       // set the labels for the anomaly
       anomalyStaticText->Show(true);
       anomalyComboBox->Show(true);
@@ -897,36 +872,13 @@ void OrbitPanel::SetLabelsUnits(const std::string &stateType)
       else if (strcmp(description.c_str(), "EA") == 0)
          anomalyComboBox->SetSelection(2);
    }
-   else if ( (strcmp(stateType.c_str(), "SphericalAZFPA") == 0) || 
-             (strcmp(stateType.c_str(), "SphericalRADEC") == 0) )
+   else
    {
-      // set the labels for the elements
-      description1->SetLabel("RMAG");
-      description2->SetLabel("RA");
-      description3->SetLabel("DEC");
-      description4->SetLabel("VMAG");
-      if (strcmp(stateType.c_str(), "SphericalAZFPA") == 0)
-      {
-         description5->SetLabel("AZI");
-         description6->SetLabel("FPA");
-      }
-      else
-      {
-         description5->SetLabel("RAV");
-         description6->SetLabel("DECV");
-      }
-
-      // set the labels for the units
-      label1->SetLabel("Km");
-      label2->SetLabel("deg");
-      label3->SetLabel("deg");
-      label4->SetLabel("Km/s");
-      label5->SetLabel("deg");
-      label6->SetLabel("deg");
-     
       anomalyStaticText->Show(false);
       anomalyComboBox->Show(false);
    }
+
+   theSpacecraft->SetStringParameter("StateType", st);
 }
 
 //------------------------------------------------------------------------------
@@ -1041,7 +993,7 @@ void OrbitPanel::DisplayState()
    
    #if DEBUG_ORBIT_PANEL_CONVERT
    MessageInterface::ShowMessage
-      ("OrbitPanel::DisplayState() --- before converstion, mOutState=\n   %s\n",
+      ("OrbitPanel::DisplayState() --- before conversion, mOutState=\n   %s\n",
        mOutState.ToString().c_str());
    MessageInterface::ShowMessage("===> mIsStateChanged=%d\n", mIsStateChanged);
    #endif
@@ -1189,9 +1141,9 @@ Rvector6 OrbitPanel::ConvertState(CoordinateSystem *cs, const Rvector6 &state,
    
    try
    {
-       stateConverter.SetMu(cs);
+      stateConverter.SetMu(cs);
       newState = stateConverter.Convert(state, fromElementType, toElementType, 
-                                        anomaly);      
+                                        anomaly);
    }
    catch (BaseException &e)
    {
