@@ -288,8 +288,7 @@ void CelestialBodyPanel::LoadData()
    }
 
    // Activate "ShowScript"
-//   mObject = theCelestialBody;
-
+   mObject = theCelestialBody;
 }
 
 //------------------------------------------------------------------------------

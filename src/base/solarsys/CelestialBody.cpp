@@ -1671,6 +1671,7 @@ std::string CelestialBody::GetStringParameter(const Integer id) const
    if (id == POS_VEL_SOURCE)        return POS_VEL_STRINGS[posVelSrc];
    if (id == ANALYTIC_METHOD)       return ANALYTIC_METHOD_STRINGS[analyticMethod];
    if (id == SOURCE_FILENAME)       return sourceFilename;
+   if (id == SOURCE_FILE)           return sourceFilename;
    if (id == POTENTIAL_FILE_NAME)   return potentialFileName;
    if (id == ATMOS_MODEL_NAME)
    {

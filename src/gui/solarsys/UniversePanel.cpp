@@ -361,6 +361,8 @@ void UniversePanel::LoadData()
       "OverrideTimeSystem"));
 
    mPageSizer->Layout();
+   
+   mObject = theSolarSystem;
 }
 
 
