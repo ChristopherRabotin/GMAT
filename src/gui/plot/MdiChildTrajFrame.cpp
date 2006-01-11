@@ -755,6 +755,7 @@ void MdiChildTrajFrame::OnShowOptionDialog(wxCommandEvent& event)
                                                 mBodyColors);
 
       mOptionDialog->UpdateObjectList(mCanvas->GetObjectNames(),
+                                      mCanvas->GetValidCSNames(),
                                       mCanvas->GetShowObjectMap(),
                                       mCanvas->GetObjectColorMap());
       

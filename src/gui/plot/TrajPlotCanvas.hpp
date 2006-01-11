@@ -58,6 +58,7 @@ public:
    wxString GetViewCoordSysName() {return mViewCoordSysName;}
    CoordinateSystem* GetViewCoordSystem() {return mViewCoordSystem;}
    const wxArrayString& GetObjectNames() {return mObjectNames;}
+   const wxArrayString& GetValidCSNames() {return mValidCSNames;}
    const wxStringBoolMap& GetShowObjectMap() {return mShowObjectMap;}
    const wxStringColorMap& GetObjectColorMap() {return mObjectColorMap;}
    wxString GetGotoObjectName();
@@ -301,6 +302,7 @@ private:
    // objects
    wxArrayString mObjectNames;
    wxArrayString mShowObjectNames;
+   wxArrayString mValidCSNames;
    wxStringColorMap mObjectColorMap;
    wxStringBoolMap  mShowObjectMap;
    wxStringBoolMap  mShowOrbitNormalMap;
@@ -425,6 +427,7 @@ private:
    bool ConvertObjectData();
    void ConvertObject(int objId, int index);
    void UpdateRotateFlags();
+   void MakeValidCoordSysList();
    
    // for utility
    Rvector3 ComputeEulerAngles();

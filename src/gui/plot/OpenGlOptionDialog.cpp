@@ -213,40 +213,10 @@ void OpenGlOptionDialog::SetCoordSysName(const wxString &csName)
 
 
 //------------------------------------------------------------------------------
-// void UpdateObject(const wxArrayString &objectNames,
-//                   const UnsignedIntArray &objectColors)
-//------------------------------------------------------------------------------
-void OpenGlOptionDialog::UpdateObject(const wxArrayString &objectNames,
-                                      const UnsignedIntArray &objectColors)
-{
-   
-   mObjectCount = objectNames.GetCount();
-   mObjectNames.Empty();
-   
-   for (int i=0; i<mObjectCount; i++)
-   {
-      mObjectNames.Add(objectNames[i]);
-      mObjectIntColors.push_back(objectColors[i]);
-      
-      mObjectColorMap[objectNames[i]] = RgbColor(objectColors[i]);
-      mShowObjectMap[objectNames[i]] = true;
-      
-      #ifdef DEBUG_GLOPTION_OBJECT
-      MessageInterface::ShowMessage
-         ("OpenGlOptionDialog::UpdateObject() object=%s, color=%d\n",
-          mObjectNames[i].c_str(), mObjectIntColors[i]);
-      #endif
-   }
-   
-   UpdateObjectComboBox();
-   UpdateObjectListBox();
-}
-
-
-//------------------------------------------------------------------------------
 // void UpdateObjectList(const wxArrayString &objNames, ...
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::UpdateObjectList(const wxArrayString &objNames,
+                                          const wxArrayString &validCSNames,
                                           const wxStringBoolMap &showObjects,
                                           const wxStringColorMap &objColors)
 {
@@ -256,8 +226,10 @@ void OpenGlOptionDialog::UpdateObjectList(const wxArrayString &objNames,
        "mObjectIntColors.size=%d\n", mObjectNames.GetCount(), mObjectIntColors.size());
    #endif
    
-   mObjectCount = objNames.GetCount();
    mObjectNames = objNames;
+   mObjectCount = objNames.GetCount();
+   mValidCSNames = validCSNames;
+   mValidCSCount = validCSNames.GetCount();
    mInitialShowObjectMap = showObjects;
    mShowObjectMap = showObjects;
    mObjectColorMap = objColors;
@@ -275,7 +247,8 @@ void OpenGlOptionDialog::UpdateObjectList(const wxArrayString &objNames,
           mObjectNames[i].c_str(), mObjectIntColors[i]);
       #endif
    }
-   
+
+   UpdateCoordSysComboBox();
    UpdateObjectComboBox();
    UpdateObjectListBox();
 }
@@ -804,6 +777,26 @@ void OpenGlOptionDialog::ResetData()
 
 
 //------------------------------------------------------------------------------
+// void UpdateCoordSysComboBox()
+//------------------------------------------------------------------------------
+void OpenGlOptionDialog::UpdateCoordSysComboBox()
+{
+   #ifdef DEBUG_GLOPTION_OBJECT
+   MessageInterface::ShowMessage
+      ("OpenGlOptionDialog::UpdateCoordSysComboBox() mObjectCount=%d\n", mObjectCount);
+   #endif
+   
+   mCoordSysComboBox->Clear();
+   
+   for (int i=0; i<mValidCSCount; i++)
+      mCoordSysComboBox->Append(mValidCSNames[i]);
+
+   mCoordSysComboBox->SetStringSelection(mTrajFrame->GetViewCoordSysName());
+
+}
+
+
+//------------------------------------------------------------------------------
 // void UpdateObjectComboBox()
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::UpdateObjectComboBox()
@@ -958,9 +951,12 @@ void OpenGlOptionDialog::OnComboBoxChange(wxCommandEvent& event)
 {
    if (event.GetEventObject() == mGotoObjectComboBox)
    {
-      mHasGotoObjectChanged = true;
-      mGotoObjectName = mGotoObjectComboBox->GetStringSelection();
-      theApplyButton->Enable();
+      if (!mCoordSysName.IsSameAs(mGotoObjectComboBox->GetStringSelection()))
+      {
+         mHasGotoObjectChanged = true;
+         mGotoObjectName = mGotoObjectComboBox->GetStringSelection();
+         theApplyButton->Enable();
+      }
    }
    else if (event.GetEventObject() == mCoordSysComboBox)
    {

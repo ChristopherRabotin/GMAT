@@ -55,9 +55,8 @@ public:
    void SetGotoObjectName(const wxString &objName);
    void SetCoordSysName(const wxString &csName);
    
-   void UpdateObject(const wxArrayString &objectNames,
-                     const UnsignedIntArray &objectColors);
    void UpdateObjectList(const wxArrayString &objectNames,
+                         const wxArrayString &validCSNames,
                          const wxStringBoolMap &showObjects,
                          const wxStringColorMap &objectColors);
    
@@ -95,8 +94,10 @@ protected:
    wxString mCoordSysName;
    
    wxArrayString mObjectNames;
+   wxArrayString mValidCSNames;
    UnsignedIntArray mObjectIntColors;
    int mObjectCount;
+   int mValidCSCount;
    
    wxStringColorMap mObjectColorMap;
    wxStringBoolMap  mInitialShowObjectMap;
@@ -149,6 +150,7 @@ protected:
    virtual void SaveData();
    virtual void ResetData();
    
+   void UpdateCoordSysComboBox();
    void UpdateObjectComboBox();
    void UpdateObjectListBox();
    bool ShowColorDialog(wxColor &oldColor, wxButton *button);

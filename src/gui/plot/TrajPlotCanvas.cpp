@@ -589,12 +589,13 @@ void TrajPlotCanvas::RedrawPlot(bool viewAnimation)
          ("TrajPlotCanvas::RedrawPlot() distance < max zoom in. distance set to %f\n",
           mAxisLength);
    }
-   
+
+   //loj: 1/11/06 commented out. It seems to work without resetting.
    //loj: 5/23/05 Why mVpVecObjId changed?, so need to reset.
-   if (!mUseViewPointVector && mViewPointVectorObj != NULL)
-      mVpVecObjId = GetObjectId(mViewPointVectorObj->GetName().c_str());
+   //    if (!mUseViewPointVector && mViewPointVectorObj != NULL)
+   //       mVpVecObjId = GetObjectId(mViewPointVectorObj->GetName().c_str());
    
-   ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
+   //    ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
    
    if (viewAnimation)
       ViewAnimation(mUpdateInterval);
@@ -801,7 +802,6 @@ void TrajPlotCanvas::DrawInOtherCoordSystem(const wxString &csName)
       
       ConvertObjectData();
       Refresh(false);
-      
    }
    else
    {
@@ -830,6 +830,7 @@ void TrajPlotCanvas::GotoObject(const wxString &objName)
    }
    else
    {
+      // compute mAxisLength
       Rvector3 pos(mObjectTempPos[objId][mNumData-1][0],
                    mObjectTempPos[objId][mNumData-1][1],
                    mObjectTempPos[objId][mNumData-1][2]);
@@ -845,8 +846,11 @@ void TrajPlotCanvas::GotoObject(const wxString &objName)
       ("TrajPlotCanvas::GotoObject() objName=%s, mViewObjId=%d, mMaxZoomIn=%f\n"
        "   mAxisLength=%f\n", objName.c_str(), mViewObjId, mMaxZoomIn, mAxisLength);
    #endif
-   
-   Refresh(false);
+
+   //loj: 1/11/06 adde to make GotoObject to work
+   mIsEndOfData = true;
+   mIsEndOfRun = true;
+   //Refresh(false); //loj: 1/11/06 commented out
 }
 
 
@@ -971,7 +975,12 @@ void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
    }
    
    UpdateRotateFlags();
-   
+   MakeValidCoordSysList();
+
+   // add initial view coord. system if not added already
+   if (mValidCSNames.Index(mInitialCoordSysName) == wxNOT_FOUND)
+      mValidCSNames.Add(mInitialCoordSysName);
+
    #if DEBUG_TRAJCANVAS_OBJECT
    MessageInterface::ShowMessage
       ("   viewCSName=%s, mViewCoordSystem=%d, originName=%s, "
@@ -2442,8 +2451,10 @@ void TrajPlotCanvas::ChangeProjection(int width, int height, float axisLength)
    if (mUseGluLookAt)
    {
       //loj: 1/10/06 changed *2 to * 10000 to fix near/far clipping
-      mfViewNear = -axisLength * 10000.0;
-      mfViewFar  =  axisLength * 10000.0;
+      //mfViewNear = -axisLength * 10000.0;
+      //mfViewFar  =  axisLength * 10000.0;
+      mfViewNear = -axisLength * 100000.0;
+      mfViewFar  =  axisLength * 100000.0;
    }
    else
    {
@@ -2854,20 +2865,17 @@ void TrajPlotCanvas::DrawFrame()
             mViewCoordSysName = mInitialCoordSysName;
             mIsInternalCoordSystem = false;
          }
-         
-         // set view center object
-         mOriginName = wxString(mViewCoordSystem->GetOriginName().c_str());
-         mOriginId = GetObjectId(mOriginName);
-         
-         mViewObjName = mOriginName;
-         mViewObjId = mOriginId;
-         
-         mMaxZoomIn = mObjMaxZoomIn[mOriginId];
-         mAxisLength = mMaxZoomIn;
-
-         UpdateRotateFlags();
-         ConvertObjectData();
       }
+      
+      UpdateRotateFlags();
+      ConvertObjectData();
+      
+      // set view center object
+      mOriginName = wxString(mViewCoordSystem->GetOriginName().c_str());
+      mOriginId = GetObjectId(mOriginName);
+      
+      mViewObjName = mOriginName;
+      GotoObject(mViewObjName); //loj: 1/11/06 added
    }
    
    int numberOfData = mNumData;
@@ -3914,10 +3922,12 @@ int TrajPlotCanvas::GetObjectId(const wxString &name)
    for (int i=0; i<mObjectCount; i++)
       if (mObjectNames[i] == name)
          return i;
-   
+
+   #if DEBUG_TRAJCANVAS_OBJECT
    MessageInterface::ShowMessage
-      ("*** ERROR *** TrajPlotCanvas::GetObjectId() obj name: " + name +
+      ("TrajPlotCanvas::GetObjectId() obj name: " + name +
        " not found in the object list\n");
+   #endif
    
    return UNKNOWN_OBJ_ID;
 }
@@ -4110,6 +4120,102 @@ void TrajPlotCanvas::UpdateRotateFlags()
       ("TrajPlotCanvas::UpdateRotateFlags() mCanRotateBody=%d, "
        "mCanRotateAxes=%d\n", mCanRotateBody, mCanRotateAxes);
    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void MakeValidCoordSysList()
+//------------------------------------------------------------------------------
+/*
+ * Make a list of coordinate system that can be converted from and to.
+ */
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::MakeValidCoordSysList()
+{
+   StringArray csList =
+      theGuiInterpreter->GetListOfConfiguredItems(Gmat::COORDINATE_SYSTEM);
+   CoordinateSystem *cs;
+   SpacePoint *sp;
+   wxString csName;
+   wxString origin;
+   wxString primary;
+   wxString secondary;
+   
+   mValidCSNames.Empty();
+   
+   for (unsigned int i=0; i<csList.size(); i++)
+   {
+      origin = "None";
+      primary = "None";
+      secondary = "None";
+      
+      cs = theGuiInterpreter->GetCoordinateSystem(csList[i]);
+      csName = cs->GetName().c_str();
+      
+      //MessageInterface::ShowMessage("==> csName=%s\n", csName.c_str());
+      
+      sp = cs->GetOrigin();
+      // cannot convert to CS with spacecraft as origin
+      if (sp->IsOfType("Spacecraft"))
+         continue;
+      else
+         origin = cs->GetOriginName().c_str();
+      
+      sp = cs->GetPrimaryObject();
+      if (sp != NULL)
+      {
+         // cannot convert to CS with spacecraft as primary
+         if (sp->IsOfType("Spacecraft"))
+            continue;
+         
+         primary = sp->GetName().c_str();
+      }
+      
+      sp = cs->GetSecondaryObject();
+      if (sp != NULL)
+      {
+         // cannot convert to CS with spacecraft as secondary
+         if (sp->IsOfType("Spacecraft"))
+            continue;
+         
+         secondary = sp->GetName().c_str();
+      }
+
+      //MessageInterface::ShowMessage
+      //   ("==> origin=%s, primary=%s, secondary=%s\n",
+      //    origin.c_str(), primary.c_str(), secondary.c_str());
+
+      if (origin == "None")
+         continue;
+      
+      if (GetObjectId(origin) != UNKNOWN_OBJ_ID)
+      {
+         if (primary == "None" && secondary == "None")
+         {
+            mValidCSNames.Add(csName);
+            continue;
+         }
+
+         if (primary != "None" && GetObjectId(primary) != UNKNOWN_OBJ_ID)
+         {
+            if (secondary == "None")
+            {
+               mValidCSNames.Add(csName);
+               continue;
+            }
+            else if (GetObjectId(secondary) != UNKNOWN_OBJ_ID)
+            {
+               mValidCSNames.Add(csName);
+               continue;               
+            }
+         }
+      }
+   }
+
+   //for (unsigned int i=0; i<mValidCSNames.GetCount(); i++)
+   //{
+   //   MessageInterface::ShowMessage("==> validCSName=%s\n", mValidCSNames[i].c_str());
+   //}
 }
 
 
