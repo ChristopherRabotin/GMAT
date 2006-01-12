@@ -132,6 +132,20 @@ void FunctionSetupPanel::LoadData()
       path = theGmatFunction->GetName() + ".script";
 
    mFileNameTextCtrl->SetValue(path.c_str());
+   
+   wxString filename = mFileNameTextCtrl->GetValue();
+
+   if (filename != "")
+   {
+        // need to add default path...
+   }
+
+   if (GmatAppData::GetMainFrame()->FileExists(filename.c_str()))
+   {
+       mFileContentsTextCtrl->LoadFile(filename);
+       mEnableSave = false;
+   }
+
 }
 
 //------------------------------------------------------------------------------
