@@ -1,12 +1,20 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                             MatlabInterface
+//                               MatlabInterface
 //------------------------------------------------------------------------------
-//  Purpose:
-//     Implements MatlabInterface.hpp class.
+// GMAT: Goddard Mission Analysis Tool.
 //
-//  Modifications:
-//     11/04/02  L. Jun - Created.
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number NNG04CC06P
+//
+// Author: Linda Jun (NASA/GSFC)
+// Created: 2002/11/04
+//
+/**
+ * Implements MatlabInterface functions.
+ */
 //------------------------------------------------------------------------------
 #include <stdlib.h>         // for NULL
 #include <string.h>         // for memcpy()
@@ -18,8 +26,10 @@
 #include <stdlib.h>         // for system() to launch X11 application
 #endif
 
-#include "MatlabInterface.hpp" // for MatlabInterface methods
+#include "MatlabInterface.hpp"
 #include "MessageInterface.hpp"
+
+//#define DEBUG_MATLAB_IF 1
 
 //--------------------------------------
 //  initialize static variables
@@ -187,9 +197,15 @@ int MatlabInterface::GetVariable(const std::string &matlabVarName, int numElemen
 int MatlabInterface::EvalString(const std::string &evalString)
 {
 #if defined __USE_MATLAB__
-//   printf("MatlabInterface::EvalString() evalString = %s\n", evalString.c_str());
+   
+   #if DEBUG_MATLAB_IF
+   MessageInterface::ShowMessage
+      ("MatlabInterface::EvalString() evalString = \n%s\n\n", evalString.c_str());
+   #endif
+   
    engEvalString(enginePtrD, evalString.c_str());
    return 1;
+   
 #endif
    return 0;
 }
