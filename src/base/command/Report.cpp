@@ -210,6 +210,10 @@ bool Report::Initialize()
    for (StringArray::iterator i = parmNames.begin(); i != parmNames.end(); ++i)
    {
       object = ((*objectMap)[*i]);
+      if (object == NULL)
+         throw CommandException("Object named " + (*i) + 
+            " cannot be found for the Report command '" +
+            GetGeneratingString() + "'"); 
       if (!object->IsOfType("Parameter"))
          throw CommandException("Parameter type mismatch for " + 
             object->GetName());

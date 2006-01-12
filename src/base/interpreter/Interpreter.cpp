@@ -1478,28 +1478,36 @@ GmatCommand* Interpreter::InterpretGMATFunction(const std::string &pathAndName)
 GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
 {
    #ifdef DEBUG_TOKEN_PARSING
-      std::cout << "Entered Interpreter::AssemblePhrase\n";
+      MessageInterface::ShowMessage(
+         "Entered Interpreter::AssemblePhrase with phrase\n");
+      for (Integer i = 0; i < (Integer)phrase.size(); ++i)
+         MessageInterface::ShowMessage("   '%s'\n", phrase[i].c_str());
    #endif
+   
    StringArray breakdown;
    GmatBase *ref = NULL;
    ObjectArray objectlist;
-   if (phrase.size() == 1) {
-
+   if (phrase.size() == 1) 
+   {
       breakdown = Decompose(phrase[0]);
-      if (breakdown.size() == 1) {
+      if (breakdown.size() == 1) 
+      {
          ref = moderator->GetConfiguredItem(phrase[0]);
       }
-      else {
+      else 
+      {
          for (StringArray::iterator i = phrase.begin(); i != phrase.end(); ++i)
          {
             #ifdef DEBUG_TOKEN_PARSING
                std::cout << "   Breaking down subphrase " << *i << "\n";
             #endif
             breakdown = Decompose(*i);
-            if (breakdown.size() == 1) {
+            if (breakdown.size() == 1) 
+            {
                ref = moderator->GetConfiguredItem(*i);
             }
-            else {
+            else 
+            {
                #ifdef DEBUG_TOKEN_PARSING
                   std::cout << "   Size != 1\n";
                #endif
@@ -1508,22 +1516,27 @@ GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
       }
    }
    // Not an object reference -- check the other options
-   else {
+   else 
+   {
       // Is it a Parameter?
-      if ((phrase.size() == 2) || (phrase.size() == 3)) {
+      if ((phrase.size() == 2) || (phrase.size() == 3)) 
+      {
          std::string parmObj = phrase[0], parmType, parmSystem = "";
          
          if (phrase.size() == 2)
             parmType = phrase[1];
-         else {
+         else 
+         {
             parmSystem = phrase[1];
             parmType = phrase[2];
          }
             
          ref = moderator->GetParameter(parmType);
-         if (ref == NULL) {
+         if (ref == NULL) 
+         {
             std::string name = parmObj;
-            if (phrase.size() == 3) {
+            if (phrase.size() == 3) 
+            {
                name += ".";
                name += parmSystem;
             }
@@ -1533,7 +1546,8 @@ GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
             ref = CreateParameter(name, parmType, parmSystem);
             
             //ref = moderator->CreateParameter(parmType, name);
-            if (ref) {
+            if (ref) 
+            {
                Parameter *parm = (Parameter*)ref;
 
                #ifdef DEBUG_TOKEN_PARSING
@@ -1542,6 +1556,10 @@ GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
                             << parmObj << std::endl; 
                #endif
                GmatBase *refobj = moderator->GetConfiguredItem(parmObj);
+               if (refobj == NULL)
+                  throw CommandException(
+                     "Interpreter could not find the object " + parmObj +
+                     " needed to configure the parameter " + name);
                Gmat::ObjectType ot = refobj->GetType();
                parm->SetRefObjectName(ot, parmObj);
                
