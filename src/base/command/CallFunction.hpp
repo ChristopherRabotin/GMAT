@@ -141,7 +141,7 @@ private:
    void EvalMatlabString(std::string evalString);
    void ClearInputParameters();
    void ClearOutputParameters();
-
+   void UpdateObject(GmatBase *obj, char *buffer);
 
    enum
    {

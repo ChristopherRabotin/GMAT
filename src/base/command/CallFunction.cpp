@@ -20,16 +20,16 @@
 #include "Moderator.hpp"         // for GetParameter()
 #include "BeginFunction.hpp"
 
-
 #if defined __USE_MATLAB__
 #include "MatlabInterface.hpp"   // for Matlab Engine functions
 #endif
 
-
 //#define DEBUG_CALL_FUNCTION 1
 //#define DEBUG_UPDATE_VAR 1
+//#define DEBUG_UPDATE_OBJECT 1
 //#define DEBUG_USE_ARRAY 1
 //#define DEBUG_GMAT_FUNCTION_INIT
+//#define DEBUG_GET_OUTPUT 1
 
 
 //---------------------------------
@@ -70,6 +70,9 @@ CallFunction::CallFunction() :
 }
 
 
+//------------------------------------------------------------------------------
+// ~CallFunction()
+//------------------------------------------------------------------------------
 CallFunction::~CallFunction()
 {
    // Changed 8/31/05, DJC
@@ -82,6 +85,9 @@ CallFunction::~CallFunction()
 }
 
 
+//------------------------------------------------------------------------------
+// CallFunction(const CallFunction& cf) :
+//------------------------------------------------------------------------------
 CallFunction::CallFunction(const CallFunction& cf) :
    GmatCommand     (cf),
    callcmds        (NULL),
@@ -108,6 +114,9 @@ CallFunction::CallFunction(const CallFunction& cf) :
 
 
 
+//------------------------------------------------------------------------------
+// CallFunction& operator=(const CallFunction& cf)
+//------------------------------------------------------------------------------
 CallFunction& CallFunction::operator=(const CallFunction& cf)
 {
    if (this == &cf)
@@ -459,6 +468,9 @@ bool CallFunction::TakeAction(const std::string &action,
 }
 
 
+//------------------------------------------------------------------------------
+// StringArray GetRefObjectNameArray(const Gmat::ObjectType type) const
+//------------------------------------------------------------------------------
 StringArray CallFunction::GetRefObjectNameArray(const Gmat::ObjectType type) const
 {
    StringArray result;
@@ -667,6 +679,9 @@ ObjectArray& CallFunction::GetRefObjectArray(const Gmat::ObjectType type)
 
 
 
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
 bool CallFunction::Initialize()
 {
    #if DEBUG_CALL_FUNCTION
@@ -839,6 +854,9 @@ bool CallFunction::AddOutputParameter(const std::string &paramName, Integer inde
 
 
 
+//------------------------------------------------------------------------------
+// bool Execute()
+//------------------------------------------------------------------------------
 bool CallFunction::Execute()
 {
    bool status = false;
@@ -958,6 +976,8 @@ bool CallFunction::ExecuteMatlabFunction()
    #if defined __USE_MATLAB__
        MatlabInterface::Open();
 
+       // set format long so that we don't loose precision between string transmission
+       MatlabInterface::EvalString("format long");
 
        // add path to matlab workspace
        // send string to matlab - path(path ,'a:\')
@@ -1004,6 +1024,9 @@ bool CallFunction::ExecuteMatlabFunction()
 }
 
 
+//------------------------------------------------------------------------------
+// void SendInParam(Parameter *param)
+//------------------------------------------------------------------------------
 void CallFunction::SendInParam(Parameter *param)
 {
    #if DEBUG_CALL_FUNCTION
@@ -1019,11 +1042,11 @@ void CallFunction::SendInParam(Parameter *param)
       }
 
 
-      #if DEBUG_CALL_FUNCTION
-         MessageInterface::ShowMessage("Parameter %s, type is: %s",
+     #if DEBUG_CALL_FUNCTION
+         MessageInterface::ShowMessage("Parameter name=%s, type=%s\n",
                param->GetName().c_str(),
                param->GetTypeName().c_str());
-      #endif
+     #endif
 
 
       if (param->GetTypeName() == "Array")
@@ -1101,140 +1124,155 @@ void CallFunction::SendInParam(Parameter *param)
 }
 
 
+//------------------------------------------------------------------------------
+// void GetOutParams()
+//------------------------------------------------------------------------------
 void CallFunction::GetOutParams()
 {
-   #if defined __USE_MATLAB__
-      for (unsigned int i=0; i<mOutputList.size(); i++)
-      {
-         Parameter *param = (Parameter *)mOutputList[i];
+#if defined __USE_MATLAB__
+   for (unsigned int i=0; i<mOutputList.size(); i++)
+   {
+      Parameter *param = (Parameter *)mOutputList[i];
+      std::string varName = param->GetName();
 
-
-         if (param->GetTypeName() == "Array")
-         {
-            std::string varName = param->GetName();
-            Array *array = (Array *)param;
-            int numRows = array->GetIntegerParameter("NumRows");
-            int numCols = array->GetIntegerParameter("NumCols");
-            int totalCells = numRows * numCols;
-
-
-            double outArray[totalCells];
-            //status =
-            MatlabInterface::GetVariable(varName, totalCells, outArray);
-
-
-            // create rmatrix
-            Rmatrix rmatrix = Rmatrix (numRows, numCols);
-
-
-            for (int j=0; j<numCols; j++)
-               for (int k=0; k<numRows; k++)
-                  rmatrix(k, j) = outArray[(j*numRows) + k];
-
-
-            #if DEBUG_USE_ARRAY
-               for (int j=0; j<numRows; j++)
-               {
-                  for (int k=0; k<numCols; k++)
-                     MessageInterface::ShowMessage("%f\t", rmatrix(j, k));
-                  MessageInterface::ShowMessage("\n");
-               }
-            #endif
-
-
-            // assign rmatrix to array
-            array->SetRmatrixParameter("RmatValue", rmatrix);
-         }
-         else if (param->GetTypeName() == "String")
-         {
-            std::string varName = param->GetName();
-            double buffer[128];
-
-
-            // need to output string value to buffer
-            MatlabInterface::OutputBuffer((char *)buffer, 128);
-            EvalMatlabString(varName);
-
-
-            // get rid of "var ="
-            char *ptr = strtok((char *)buffer, "=");
-            ptr = strtok(NULL, "\n");
-
-
-            param->SetStringParameter("Expression", ptr);
-         }
-         else
-         {
-            std::string varName = param->GetName();
-            double outArray[500];   // array size???
-
-
-            MatlabInterface::GetVariable(varName, 1, outArray);
-            //loj: 1/26/05 "Param1" has been removed
-            //param->SetRealParameter("Param1", outArray[0]);
-            param->SetReal(outArray[0]);
-            std::ostringstream ss;
-            ss << outArray[0];
-            param->SetStringParameter("Expression", ss.str());
-
-
-            #if DEBUG_UPDATE_VAR
-               MessageInterface::ShowMessage("The EvaluateReal is %f\n",
-                           param->EvaluateReal());
-               MessageInterface::ShowMessage("The GetReal is %f\n",
-                           param->GetReal());
-               //loj: 1/26/05 "Param1" has been removed
-               //MessageInterface::ShowMessage("The GetRealParameter is %f\n",
-               //          param->GetRealParameter("Param1"));
-               MessageInterface::ShowMessage("The GetRealParameter is %f\n",
-                           param->GetReal());
-            #endif
-         }
-      }
-   #endif  //__USE_MATLAB__
-}
-
-
-
-void CallFunction::EvalMatlabString(std::string evalString)
-{
-   #if defined __USE_MATLAB__
-
-
-      #if DEBUG_UPDATE_VAR
-         MessageInterface::ShowMessage("Eval string is %s\n", evalString.c_str());
+      #if DEBUG_GET_OUTPUT
+      MessageInterface::ShowMessage
+         ("CallFunction::GetOutParams() OutParamType=%s, name=%s\n",
+          param->GetTypeName().c_str(), varName.c_str());
       #endif
-
-
-      // try to call the function
-      evalString = "try,\n" + evalString + "catch\n errormsg = lasterr;\n end";
-      MatlabInterface::EvalString(evalString);
-
-
-      double errormsg[128];
-      // if there was an error throw an exception
-      if (MatlabInterface::GetVariable("errormsg", 1, errormsg))
+      
+      if (param->GetTypeName() == "Array")
       {
-         double buffer[128];
+         Array *array = (Array *)param;
+         int numRows = array->GetIntegerParameter("NumRows");
+         int numCols = array->GetIntegerParameter("NumCols");
+         int totalCells = numRows * numCols;
 
 
-         MatlabInterface::OutputBuffer((char *)buffer, 128);
-         MatlabInterface::EvalString("errormsg");
+         double outArray[totalCells];
+         //status =
+         MatlabInterface::GetVariable(varName, totalCells, outArray);
 
 
-         // get rid of "errormsg ="
+         // create rmatrix
+         Rmatrix rmatrix = Rmatrix (numRows, numCols);
+
+
+         for (int j=0; j<numCols; j++)
+            for (int k=0; k<numRows; k++)
+               rmatrix(k, j) = outArray[(j*numRows) + k];
+
+
+         #if DEBUG_USE_ARRAY
+            for (int j=0; j<numRows; j++)
+            {
+               for (int k=0; k<numCols; k++)
+                  MessageInterface::ShowMessage("%f\t", rmatrix(j, k));
+               MessageInterface::ShowMessage("\n");
+            }
+         #endif
+
+
+         // assign rmatrix to array
+         array->SetRmatrixParameter("RmatValue", rmatrix);
+      }
+      else if (param->GetTypeName() == "String")
+      {
+         // need to output string value to buffer
+         //double buffer[128];
+         //MatlabInterface::OutputBuffer((char *)buffer, 128);
+         
+         char buffer[512];
+         MatlabInterface::OutputBuffer(buffer, 512);
+         EvalMatlabString(varName);
+
+         // get rid of "var ="
          char *ptr = strtok((char *)buffer, "=");
          ptr = strtok(NULL, "\n");
 
-         std::stringstream errorStr;
-         errorStr << "Error from Matlab\n"<< ptr;
-
-
-         throw CommandException(errorStr.str());
+         param->SetStringParameter("Expression", ptr);
       }
+      else if (param->GetTypeName() == "Variable")
+      {
+         //double outArray[500];   // array size???
+         double outArray[1];   // array size???
+
+         MatlabInterface::GetVariable(varName, 1, outArray);
+         //MessageInterface::ShowMessage("==> outArray[0]=%f\n", outArray[0]);
+         param->SetReal(outArray[0]);
+         std::ostringstream ss;
+         ss << outArray[0];
+         param->SetStringParameter("Expression", ss.str());
+
+         #if DEBUG_UPDATE_VAR
+            MessageInterface::ShowMessage
+               ("The EvaluateReal is %f\n",  param->EvaluateReal());
+            MessageInterface::ShowMessage
+               ("The GetReal is %f\n", param->GetReal());
+         #endif
+      }
+      else // objects
+      {
+         //MessageInterface::ShowMessage("==>Handle Object\n");
+         
+         char buffer[8192];
+         MatlabInterface::OutputBuffer(buffer, 8192);
+         
+         // need to output string value to buffer
+         EvalMatlabString(varName);
+         
+         //MessageInterface::ShowMessage("==>buffer=\n%s\n", buffer);
+
+         // assign new value to object
+         UpdateObject(param, buffer);
+         
+      }
+   }
+#endif  //__USE_MATLAB__
+}
 
 
+//------------------------------------------------------------------------------
+// void EvalMatlabString(std::string evalString)
+//------------------------------------------------------------------------------
+void CallFunction::EvalMatlabString(std::string evalString)
+{
+#if defined __USE_MATLAB__
+
+   // try to call the function
+   evalString = "try,\n  " + evalString + "\ncatch\n  errormsg = lasterr;\nend";
+   MatlabInterface::EvalString(evalString);
+
+   #if DEBUG_UPDATE_VAR
+   MessageInterface::ShowMessage
+      ("CallFunction::EvalMatlabString() evalString =\n%s\n\n", evalString.c_str());
    #endif
+
+
+   double errormsg[128];
+   // if there was an error throw an exception
+   if (MatlabInterface::GetVariable("errormsg", 1, errormsg))
+   {
+      double buffer[128];
+
+
+      MatlabInterface::OutputBuffer((char *)buffer, 128);
+      MatlabInterface::EvalString("errormsg");
+
+
+      // get rid of "errormsg ="
+      char *ptr = strtok((char *)buffer, "=");
+      ptr = strtok(NULL, "\n");
+
+      std::stringstream errorStr;
+      errorStr << "Error from Matlab\n"<< ptr;
+
+
+      throw CommandException(errorStr.str());
+   }
+
+
+#endif
 }
 
 
@@ -1362,3 +1400,56 @@ bool CallFunction::SetInternalCoordSystem(CoordinateSystem *cs)
    internalCoordSys = cs;
    return true;
 }
+
+
+//------------------------------------------------------------------------------
+// void UpdateObject(GmatBase *obj, char *buffer)
+//------------------------------------------------------------------------------
+void CallFunction::UpdateObject(GmatBase *obj, char *buffer)
+{
+   StringTokenizer st(buffer, ": \n");
+   StringArray tokens = st.GetAllTokens();
+
+   #if DEBUG_UPDATE_OBJECT
+   for (unsigned int i=0; i<tokens.size(); i++)
+      MessageInterface::ShowMessage("tokens[%d]=<%s>\n", i, tokens[i].c_str());
+   #endif
+   
+   int id;
+   Gmat::ParameterType type;
+   std::string newstr;
+
+   // actual parameter starts at 2
+   for (unsigned int i=2; i<tokens.size(); i+=2)
+   {
+      //MessageInterface::ShowMessage("tokens[%d]=<%s>\n", i, tokens[i].c_str());
+      id = obj->GetParameterID(tokens[i]);
+      type = obj->GetParameterType(id);
+      
+      switch (type)
+      {
+      case Gmat::STRING_TYPE:
+         //MessageInterface::ShowMessage
+         //   ("tokens[i+1]=<%s>, length=%d\n", tokens[i+1].c_str(),
+         //    tokens[i+1].length());
+         newstr = tokens[i+1].substr(1, tokens[i+1].length()-2);
+         //MessageInterface::ShowMessage("newstr=<%s>\n", newstr.c_str());
+         obj->SetStringParameter(id, newstr);
+         break;
+      case Gmat::REAL_TYPE:
+         obj->SetRealParameter(id, atof(tokens[i+1].c_str()));
+         break;
+      default:
+         throw CommandException
+            ("\nCurrently CallFunction cannot update output object for "
+             "parameter type: " + GmatBase::PARAM_TYPE_STRING[type] + "\n");
+      }
+   }
+
+   #if DEBUG_UPDATE_OBJECT
+   MessageInterface::ShowMessage
+      ("new %s=\n%s\n", obj->GetName().c_str(),
+       obj->GetGeneratingString(Gmat::MATLAB_STRUCT).c_str());
+   #endif
+}
+
