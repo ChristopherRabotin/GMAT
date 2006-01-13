@@ -672,6 +672,7 @@ bool Moderator::HasConfigurationChanged(Integer sandboxNum)
 //------------------------------------------------------------------------------
 void Moderator::ConfigurationChanged(GmatBase *obj, bool tf)
 {
+   MessageInterface::ShowMessage("==>Moderator::ConfigurationChanged() called\n");
    if (obj != NULL)
    {
       if (obj->IsOfType(Gmat::COMMAND))
@@ -3221,7 +3222,8 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
-      MessageInterface::ShowMessage(e.GetMessage());
+      //MessageInterface::ShowMessage(e.GetMessage());
+      ResetConfigurationChanged(); //loj: 1/12/06 added
       isRunReady = false;
    }
    
@@ -3291,7 +3293,8 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
-      MessageInterface::ShowMessage(e.GetMessage());
+      //MessageInterface::ShowMessage(e.GetMessage());
+      ResetConfigurationChanged(); //loj: 1/12/06 added
       isRunReady = false;
    }
 
