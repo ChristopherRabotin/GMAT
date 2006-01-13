@@ -24,6 +24,7 @@
 
 #ifdef __WXMAC__
 #include <stdlib.h>         // for system() to launch X11 application
+#include <unistd.h>         // for gethostname()
 #endif
 
 #include "MatlabInterface.hpp"
@@ -67,10 +68,21 @@ int MatlabInterface::Open()
 
    // open the X11 application before launching the matlab
    system("open -a X11");
-   if ((enginePtrD = engOpen("\0")))
+   // need to get IP address or hostname here
+   char hName[128];
+   std::string hNameStr = hName;
+   int OK = gethostname(hName, 128);
+   std::string runString = "matlab -display " + hNameStr + ":0.0";
+   if ((enginePtrD = engOpen(runString.c_str())))
+   {
+      MessageInterface::ShowMessage("Successfully opened MATLAB engine ...\n");
       return 1;
+   }
    else
+   {
+      MessageInterface::ShowMessage("Failed to open MATLAB engine ...\n");
       return 0;
+   }
 #else
    if ((enginePtrD = engOpen(NULL)))
       return 1;
@@ -100,12 +112,20 @@ int MatlabInterface::Close()
    // Check if MATLAB is still running then close it.
    if (enginePtrD != NULL)
    {
-      engClose(enginePtrD);
+      //MessageInterface::ShowMessage("Please wait while MATLAB closes ...\n");
+      #ifdef __WXMAC__
+         // need to close X11 here ------------
+      #endif
+      if (engClose(enginePtrD) != 0)
+               MessageInterface::ShowMessage("\nError closing MATLAB\n");    
+      //engClose(enginePtrD);
       enginePtrD = NULL;      // set to NULL, so it can be reopened
+      MessageInterface::ShowMessage("MATLAB has been closed ...\n");
    }
    else
    {
-      MessageInterface::ShowMessage("\nMATLAB can't close due to no MATLAB\n");
+      MessageInterface::ShowMessage(
+             "\nUnable to close MATLAB because it is not currently running\n");
       return 0;
    }
 
