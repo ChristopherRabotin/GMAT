@@ -509,19 +509,19 @@ Anomaly Spacecraft::GetAnomaly() const
 }
 
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  std::string GetDisplayDateFormat() const 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Get the display's dateformat of epoch.
  * 
  * @return date format. 
- *
  */
+//------------------------------------------------------------------------------
 std::string Spacecraft::GetDisplayDateFormat() const 
 {
    MessageInterface::ShowMessage("GetDisplayDateFormat() is deprecated\n");
-   return displayDateFormat; //"TAIModJulian";
+   return displayDateFormat;
 }
 
 //---------------------------------------------------------------------------

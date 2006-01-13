@@ -38,7 +38,8 @@ Target::Target() :
    targeter           (NULL),
    targeterConverged  (false),
    targeterNameID     (parameterCount),
-   TargeterConvergedID(parameterCount+1)
+   TargeterConvergedID(parameterCount+1),
+   targeterInDebugMode(false)
 {
    parameterCount += 2;
 }
@@ -73,7 +74,8 @@ Target::Target(const Target& t) :
    targeter            (NULL),
    targeterConverged   (false),
    targeterNameID      (t.targeterNameID),
-   TargeterConvergedID (t.TargeterConvergedID)
+   TargeterConvergedID (t.TargeterConvergedID),
+   targeterInDebugMode (t.targeterInDebugMode)
 {
    parameterCount = t.parameterCount;
 }
@@ -97,9 +99,10 @@ Target& Target::operator=(const Target& t)
     
    GmatCommand::operator=(t);
 
-   targeterName      = t.targeterName;
-   targeter          = NULL;
-   targeterConverged = false;
+   targeterName        = t.targeterName;
+   targeter            = NULL;
+   targeterConverged   = false;
+   targeterInDebugMode = t.targeterInDebugMode;
 
    return *this;
 }
@@ -450,6 +453,9 @@ bool Target::Initialize()
    targeter = (Solver *)((*objectMap)[targeterName])->Clone();
    targeter->TakeAction("IncrementInstanceCount");
    ((*objectMap)[targeterName])->TakeAction("IncrementInstanceCount");
+   
+   if (targeter->GetStringParameter("ReportStyle") == "Debug")
+      targeterInDebugMode = true;      
     
    // Set the local copy of the targeter on each node
    std::vector<GmatCommand*>::iterator node;
@@ -630,6 +636,16 @@ bool Target::Execute()
       }
    }
 
+   // Pass spacecraft data to the targeter for reporting in debug mode
+   if (targeterInDebugMode)
+   {
+      std::string dbgData = "";
+      for (ObjectArray::iterator i = localStore.begin(); i < localStore.end(); ++i)
+      {
+         dbgData += (*i)->GetGeneratingString() + "\n---\n";
+      }
+      targeter->SetDebugString(dbgData);
+   }
    BuildCommandSummary(true);
    return retval;
 }

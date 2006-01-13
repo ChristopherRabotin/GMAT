@@ -91,11 +91,12 @@ protected:
    /// ID for the burn object
    Integer             targeterNameID;
    Integer             TargeterConvergedID;
+   bool                targeterInDebugMode;
     
    // Methods used to save the starting point for the loops
-   virtual void        StoreLoopData(void);
-   virtual void        ResetLoopData(void);
-   virtual void        FreeLoopData(void);
+   virtual void        StoreLoopData();
+   virtual void        ResetLoopData();
+   virtual void        FreeLoopData();
 };
 
 

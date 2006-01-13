@@ -50,6 +50,16 @@ public:
       CHECKINGRUN,
       FINISHED            // This one should stay at the end of the list.
    };
+   
+   /// Enumeration for solver progress report formats
+   enum ReportStyle
+   {
+      NORMAL_STYLE = 11001,
+      CONCISE_STYLE,
+      VERBOSE_STYLE,
+      DEBUG_STYLE,
+      MaxStyle
+   };
     
 public:
    Solver(const std::string &type, const std::string &name);
@@ -68,11 +78,19 @@ public:
                        GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
 
+   virtual std::string GetStringParameter(const Integer id) const;
+   virtual std::string GetStringParameter(const std::string &label) const;
+   virtual bool        SetStringParameter(const Integer id, 
+                                          const std::string &value);
+   virtual bool        SetStringParameter(const std::string &label, 
+                                          const std::string &value);
+
    virtual bool        GetBooleanParameter(const Integer id) const;
    virtual bool        SetBooleanParameter(const Integer id,
                                            const bool value);
                                            
    virtual void        ReportProgress();
+   virtual void        SetDebugString(const std::string &str);
     
    //---------------------------------------------------------------------------
    //  bool Initialize()
@@ -154,11 +172,16 @@ protected:
    std::string         textFileMode;
    /// Toggle for showing solver status
    bool                showProgress;
-
+   /// Flag used to adjust targeter progress reports 
+   Integer             progressStyle;
+   /// String for debug information in debug mode
+   std::string         debugString;
+   
    /// Generic solver parameters.
    enum
    {
       ShowProgressID   = GmatBaseParamCount,
+      ReportStyle,
       SolverParamCount
    };
    
@@ -167,6 +190,7 @@ protected:
    static const Gmat::ParameterType
                                PARAMETER_TYPE[SolverParamCount -
                                               GmatBaseParamCount];
+   static const std::string    STYLE_TEXT[MaxStyle - NORMAL_STYLE];
 
 
    // Methods that correspond to the solver states.  Derived classes should

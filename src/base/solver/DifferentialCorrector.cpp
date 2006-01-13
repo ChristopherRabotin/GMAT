@@ -770,7 +770,8 @@ Solver::SolverState DifferentialCorrector::AdvanceState()
       case ITERATING:             // Intentional drop-through
       default:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered state machine; Bad stste for a differential corrector.\n");
+            MessageInterface::ShowMessage("Entered state machine; "
+               "Bad state for a differential corrector.\n");
          #endif
          throw SolverException("Solver state not supported for the targeter");
    }
@@ -1263,7 +1264,7 @@ void DifferentialCorrector::WriteToTextFile()
             break;
             
          case PERTURBING:
-            if (textFileMode == "Verbose")
+            if ((textFileMode == "Verbose") || (textFileMode == "Debug"))
             {
                if (pertNumber != 0)
                {
@@ -1287,6 +1288,14 @@ void DifferentialCorrector::WriteToTextFile()
                   textFile << *current << " = " << variable[i++] << "\n   ";
                }
                textFile << std::endl;
+            }
+            
+            if (textFileMode == "Debug")
+            {
+               textFile << "------------------------------------------------\n"
+                        << "Command stream data:\n"
+                        << debugString << "\n"
+                        << "------------------------------------------------\n";
             }
                 
             break;

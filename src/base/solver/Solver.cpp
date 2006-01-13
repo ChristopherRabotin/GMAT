@@ -30,12 +30,23 @@ const std::string
 Solver::PARAMETER_TEXT[SolverParamCount - GmatBaseParamCount] =
 {
    "ShowProgress",
+   "ReportStyle",
 };
 
 const Gmat::ParameterType
 Solver::PARAMETER_TYPE[SolverParamCount - GmatBaseParamCount] =
 {
-   Gmat::BOOLEAN_TYPE
+   Gmat::BOOLEAN_TYPE,
+   Gmat::STRING_TYPE
+};
+
+const std::string    
+Solver::STYLE_TEXT[MaxStyle - NORMAL_STYLE] =
+{
+   "Normal",
+   "Concise",
+   "Verbose",
+   "Debug"
 };
 
 
@@ -58,7 +69,8 @@ Solver::Solver(const std::string &type, const std::string &name) :
    GmatBase        (Gmat::SOLVER, type, name),
    currentState    (INITIALIZING),
    textFileMode    ("Normal"),
-   showProgress    (true)
+   showProgress    (true),
+   progressStyle   (NORMAL_STYLE)
 {
    objectTypes.push_back(Gmat::SOLVER);
    objectTypeNames.push_back("Solver");
@@ -90,7 +102,8 @@ Solver::Solver(const Solver &sol) :
     GmatBase        (sol),
     currentState    (sol.currentState),
     textFileMode    (sol.textFileMode),
-    showProgress    (sol.showProgress)
+    showProgress    (sol.showProgress),
+    progressStyle   (sol.progressStyle)
 {
 }
 
@@ -112,6 +125,7 @@ Solver& Solver::operator=(const Solver &sol)
     currentState = sol.currentState;
     textFileMode = sol.textFileMode;
     showProgress = sol.showProgress;
+    progressStyle = sol.progressStyle;
 
     return *this;
 }
@@ -168,7 +182,11 @@ bool Solver::UpdateSolverGoal(Integer id, Real newValue)
 std::string Solver::GetParameterText(const Integer id) const
 {
    if ((id >= GmatBaseParamCount) && (id < SolverParamCount))
+   {
+      MessageInterface::ShowMessage("'%s':\n", 
+         PARAMETER_TEXT[id - GmatBaseParamCount].c_str());
       return PARAMETER_TEXT[id - GmatBaseParamCount];
+   }
    return GmatBase::GetParameterText(id);
 }
 
@@ -280,6 +298,91 @@ bool Solver::SetBooleanParameter(const Integer id, const bool value)
 }
 
 
+//---------------------------------------------------------------------------
+//  std::string GetStringParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The string stored for this parameter, or throw ab=n exception if 
+ *         there is no string association.
+ */
+std::string Solver::GetStringParameter(const Integer id) const
+{
+   if (id == ReportStyle)
+      return textFileMode;
+
+   return GmatBase::GetStringParameter(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  std::string GetStringParameter(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The string stored for this parameter, or throw ab=n exception if 
+ *         there is no string association.
+ */
+std::string Solver::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const std::string &value)
+//---------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored, throw if the parameter is not stored.
+ */
+bool Solver::SetStringParameter(const Integer id, const std::string &value)
+{
+   if (id == ReportStyle)
+   {
+      for (Integer i = NORMAL_STYLE; i < MaxStyle; ++i)
+      {
+         if (value == STYLE_TEXT[i-NORMAL_STYLE])
+         {
+            textFileMode = value;
+            progressStyle = i;
+            return true;
+         }
+      }
+      throw SolverException("Requested solver report style, " + value + 
+         ", is nor supported for " + typeName + " solvers.");
+   }
+
+   return GmatBase::SetStringParameter(id, value);
+}
+//---------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const std::string &value)
+//---------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored, throw if the parameter is not stored.
+ */
+bool Solver::SetStringParameter(const std::string &label, 
+                                const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+
 //------------------------------------------------------------------------------
 //  void ReportProgress()
 //------------------------------------------------------------------------------
@@ -295,6 +398,20 @@ void Solver::ReportProgress()
    {
       MessageInterface::ShowMessage("%s\n", GetProgressString().c_str());
    }
+}
+
+//------------------------------------------------------------------------------
+//  void ReportProgress()
+//------------------------------------------------------------------------------
+/**
+ * Fills the buffer with run data for (user space) debug mode in the Solvers.
+ *
+ * @param <str> The data passed from the command stream.
+ */
+//------------------------------------------------------------------------------
+void Solver::SetDebugString(const std::string &str)
+{
+   debugString = str;
 }
 
 
