@@ -18,11 +18,10 @@
 
 #include "Interpreter.hpp" // class's header file
 #include "Moderator.hpp"
-
+#include "StringUtil.hpp"  // for ToDouble()
 #include <ctype.h>         // for isalpha
 #include <sstream>         // for std::stringstream
 #include <fstream>         // for std::ifstream used bt GMAT functions
-
 
 //#define DEBUG_INTERPRETER 1
 //#define DEBUG_TOKEN_PARSING 1
@@ -755,7 +754,7 @@ Hardware* Interpreter::CreateHardware(std::string hwname, std::string type)
 
 
 //------------------------------------------------------------------------------
-// bool AssembleCommand(const std::string& scriptline)
+// bool AssembleCommand(const std::string& scriptline, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
  * Builds a command and sets the internal data based on the script test.
@@ -819,7 +818,7 @@ bool Interpreter::AssembleCommand(const std::string& scriptline,
 
    if (cmd->InterpretAction())
       return true;
-
+   
    Integer condNumber = 1, index = 0;
    if ((cmdCase == "If") || (cmdCase == "While")) {
       // chain through the conditions
@@ -887,9 +886,18 @@ bool Interpreter::AssembleCommand(const std::string& scriptline,
 
       return true;
    }
-   
-   if (cmdCase == "For") 
-      return AssembleForCommand(topLevel, cmd);
+
+   try
+   {
+      if (cmdCase == "For") 
+         return AssembleForCommand(topLevel, cmd);
+   }
+   catch (InterpreterException &e)
+   {
+      // create EndFor so that it can be deleted later without crash
+      moderator->AppendCommand("EndFor", "");
+      throw;
+   }
    
    if (cmdCase == "Report") 
       return AssembleReportCommand(topLevel, cmd);
@@ -964,6 +972,20 @@ bool Interpreter::AssembleCommand(const std::string& scriptline,
 }
 
 
+//------------------------------------------------------------------------------
+// bool AssembleForCommand(const StringArray topLevel, GmatCommand *cmd)
+//------------------------------------------------------------------------------
+/**
+ * Builds a For command (For variable = start:increment:stop)
+ * Example: For I = 1:100
+ *          For I = 1:5:100
+ * 
+ * @param topLevel The line of For command
+ * @param cmd The command pointer
+ * 
+ * @return true on success, false on failure.
+ */
+//------------------------------------------------------------------------------
 bool Interpreter::AssembleForCommand(const StringArray topLevel,
                                      GmatCommand *cmd)
 {
@@ -990,22 +1012,35 @@ bool Interpreter::AssembleForCommand(const StringArray topLevel,
       cmd->SetRefObject(parm, parm->GetType(), parm->GetName());    // Should be SetRefObjectName
 
    ++w;
-   if (*w != "=")
-      throw InterpreterException("For loop missing \"=\" character");
-   ++w;
-   start = atof(w->c_str());
-   ++w;
-   if (*w != ":")
-      throw InterpreterException("For loop missing first \":\" character");
-   ++w;
-   stop = atof(w->c_str());
-   ++w;
+   if (w == topLevel.end() || *w != "=")
+      throw InterpreterException("For loop missing \"=\" character\n   \"" +
+                                 line + "\"\n");
    
+   ++w;
+   //start = atof(w->c_str());
+   if (w == topLevel.end() || !GmatStringUtil::ToDouble(*w, &start))
+      throw InterpreterException("For loop has missing or invalid start index\n   \"" +
+                                 line + "\"\n");
+   
+   ++w;
+   if (w == topLevel.end() || *w != ":")
+      throw InterpreterException("For loop missing first \":\" character\n   \"" +
+                                 line + "\"\n");
+   
+   ++w;
+   if (w == topLevel.end() || !GmatStringUtil::ToDouble(*w, &stop))
+      throw InterpreterException("For loop has missing or invalid stop index\n   \"" +
+                                 line + "\"\n");
+   
+   ++w;
    if (w != topLevel.end()) {
       if (*w == ":") {
          step = stop;   
          ++w;
-         stop = atof(w->c_str());
+         //stop = atof(w->c_str());
+         if (w == topLevel.end() || !GmatStringUtil::ToDouble(*w, &stop))
+            throw InterpreterException("For loop has missing or invalid stop index\n   \"" +
+                                       line + "\"\n");
       }
       // Commented out because of the possibility of trailing white space
       //else
@@ -1017,6 +1052,8 @@ bool Interpreter::AssembleForCommand(const StringArray topLevel,
                 << "\n   step  = " << step 
                 << "\n   stop  = " << stop 
                 << std::endl;
+      MessageInterface::ShowMessage
+         ("Setting values: start=%f, step=%f, stop=%f\n", start, step, stop);
    #endif
    
    cmd->SetRealParameter("StartValue", start);
@@ -1025,6 +1062,10 @@ bool Interpreter::AssembleForCommand(const StringArray topLevel,
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// bool AssembleReportCommand(const StringArray topLevel, GmatCommand *cmd)
+//------------------------------------------------------------------------------
 bool Interpreter::AssembleReportCommand(const StringArray topLevel, 
                                         GmatCommand *cmd)
 {
@@ -2235,6 +2276,8 @@ void Interpreter::ChunkLine()
 
         start = SkipWhiteSpace(end);
         semicolonLocation = 0;
+
+        //MessageInterface::ShowMessage("==> start=%d\n", start);
     }
     
     #ifdef DEBUG_TOKEN_PARSING
