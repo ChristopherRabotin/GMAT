@@ -64,3 +64,29 @@ std::string GmatStringUtil::Strip(const std::string &str, StripType stype)
    return Trim(str, stype);
 }
 
+
+//------------------------------------------------------------------------------
+// bool ToDouble(const std::string &str, Real *value)
+//------------------------------------------------------------------------------
+bool GmatStringUtil::ToDouble(const std::string &str, Real *value)
+{
+   std::string str2 = Trim(str, BOTH);
+
+   if (str2.length() == 0)
+      return false;
+
+   if (str2[0] != '-' && !isdigit(str2[0]))
+      return false;
+
+   for (unsigned int i=0; i<str2.length(); i++)
+   {
+      if (i == 0 && str2[0] == '-')
+         continue;
+      
+      if (!isdigit(str2[i]))
+         return false;
+   }
+   
+   *value = atof(str2.c_str());
+   return true;
+}
