@@ -456,9 +456,9 @@ void ResourceTree::AddDefaultResources()
                 wxTreeItemIcon_Expanded);
                 
    //----- GroundStations
-   AppendItem(resource, wxT("Ground Stations"), GmatTree::ICON_FOLDER, 
-              -1, new GmatTreeItemData(wxT("Ground Stations"),
-                                       GmatTree::GROUNDSTATIONS_FOLDER));
+//   AppendItem(resource, wxT("Ground Stations"), GmatTree::ICON_FOLDER, 
+//              -1, new GmatTreeItemData(wxT("Ground Stations"),
+//                                       GmatTree::GROUNDSTATIONS_FOLDER));
 
    AddDefaultBodies(mUniverseItem);
    AddDefaultSpecialPoints(mSpecialPointsItem);
