@@ -44,7 +44,7 @@ public:
       EARTH_POT_PATH,
       PLANETARY_COEFF_PATH,
       TIME_PATH,
-      TEXTURE_PATH,
+      TEXTURE_PATH, //Notes: TEXTURE_PATH is used in SetPathname()
       
       // file name
       LOG_FILE,
@@ -82,6 +82,9 @@ public:
    // I'm getting unresolved ref on GetFullPathNameA()
    std::string GetFullPathname(const FileType type);
    std::string GetFullPathname(const std::string &typeName);
+
+   void SetAbsPathname(const FileType type, const std::string &newpath);
+   void SetAbsPathname(const std::string &type, const std::string &newpath);
    
 private:
 

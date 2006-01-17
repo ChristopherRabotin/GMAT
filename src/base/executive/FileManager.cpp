@@ -492,12 +492,79 @@ std::string FileManager::GetFullPathname(const std::string &typeName)
 }
 
 
+//------------------------------------------------------------------------------
+// void SetAbsPathname(const FileType type, const std::string &newpath)
+//------------------------------------------------------------------------------
+/**
+ * Sets absoulute pathname for the type.
+ *
+ * @param <type> file type of which path to be set.
+ * @param <newpath> new pathname.
+ *
+ * @exception thrown if enum type is out of bounds
+ */
+//------------------------------------------------------------------------------
+void FileManager::SetAbsPathname(const FileType type, const std::string &newpath)
+{
+   if (type >=0 && type <= TEXTURE_PATH)
+   {
+      SetAbsPathname(FILE_TYPE_STRING[type], newpath);
+   }
+   else
+   {
+      std::stringstream ss("");
+      ss << "FileManager::GetFullPathname() enum type: " << type <<
+         " is out of bounds of file path\n";
+   
+      throw GmatBaseException(ss.str());
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetAbsPathname(const std::string &type, const std::string &newpath)
+//------------------------------------------------------------------------------
+/**
+ * Sets absolute pathname for the type.
+ *
+ * @param <type> type name of which path to be set.
+ * @param <newpath> new pathname.
+ *
+ * @exception thrown if enum type is out of bounds
+ */
+//------------------------------------------------------------------------------
+void FileManager::SetAbsPathname(const std::string &type, const std::string &newpath)
+{
+   if (mPathMap.find(type) != mPathMap.end())
+   {
+      if (type.find("_PATH") != type.npos)
+      {
+         std::string str2 = newpath;
+
+         // append '/' if not there
+         if (str2.find_last_of('/') != str2.length()-1)
+            str2 = str2 + "/";
+         
+         mPathMap[type] = str2;
+         //MessageInterface::ShowMessage
+         //   ("==>FileManager::SetAbsPathname() %s set to %s\n", type.c_str(),
+         //    str2.c_str());
+      }
+      else
+      {
+         throw GmatBaseException
+            ("FileManager::SetAbsPathname() type doesn't contain _PATH");
+      }
+   }
+}
+
+
 //---------------------------------
 // private methods
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// void AddFileType(const std::string &typeName, const std::string &name)
+// void AddFileType(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Adds file type, path, name to the list. If typeName ends with _PATH, it is
