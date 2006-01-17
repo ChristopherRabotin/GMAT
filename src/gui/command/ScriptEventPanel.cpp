@@ -44,7 +44,7 @@ ScriptEventPanel::ScriptEventPanel(wxWindow *parent, GmatCommand *cmd)
    : GmatPanel(parent)
 {
    theCommand = cmd;
-   
+  
    if (theCommand != NULL)
    {
      Create();
@@ -106,10 +106,9 @@ void ScriptEventPanel::LoadData()
 //   }
 //   else
       text << theCommand->GetGeneratingString();
-
+   
    wxString scriptText = text.str().c_str();
    mFileContentsTextCtrl->AppendText(scriptText);
-   
    theApplyButton->Disable();
 }
 
@@ -118,6 +117,7 @@ void ScriptEventPanel::LoadData()
 //------------------------------------------------------------------------------
 void ScriptEventPanel::SaveData()
 {
+   canClose = false;
    std::stringstream scriptText;
    scriptText << mFileContentsTextCtrl->GetValue().c_str();
    std::string firstBlock;
@@ -139,12 +139,13 @@ void ScriptEventPanel::SaveData()
    
    try
    {
-      theGuiInterpreter->Interpret(theCommand, scriptText.str());
+     canClose = theGuiInterpreter->Interpret(theCommand, scriptText.str());
    }
    catch (BaseException &ex)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_,
          "Error parsing the ScriptEvent; please correct the text");
+      canClose = false;
    }
 }
 
