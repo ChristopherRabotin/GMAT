@@ -76,13 +76,13 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
    //------------------------------------------
    if (!GmatFileUtil::SkipHeaderLines(in1, tokens1))
    {
-      textBuffer.push_back("Cannot compare files: Data record not found on file 1.\n");
+      textBuffer.push_back("***Cannot compare files: Data record not found on file 1.\n");
       return textBuffer;
    }
    
    if (!GmatFileUtil::SkipHeaderLines(in2, tokens2))
    {
-      textBuffer.push_back("Cannot compare files: Data record not found on file 2.\n");
+      textBuffer.push_back("***Cannot compare files: Data record not found on file 2.\n");
       return textBuffer;
    }
    
@@ -95,7 +95,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
    if (file1Cols != file2Cols)
    {
       textBuffer.push_back
-         ("Cannot compare outputs. Number of colmuns are different. file1: " +
+         ("***Cannot compare outputs. Number of colmuns are different. file1: " +
           ToString(file1Cols) + ",  file2: " + ToString(file2Cols) + "\n");
       return textBuffer;
    }
@@ -251,7 +251,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
       #endif
    }
    
-   textBuffer.push_back("\n");
+   //textBuffer.push_back("\n");
    
    in1.close();
    in2.close();
