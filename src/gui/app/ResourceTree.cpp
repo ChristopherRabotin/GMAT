@@ -55,6 +55,7 @@
 #include "GmatMainFrame.hpp"
 #include "RunScriptFolderDialog.hpp"
 #include "ReportFile.hpp"
+#include "FileManager.hpp"            // for GetPathname()
 #include "FileUtil.hpp"               // for Compare()
 #include <sstream>
 #include <fstream>
@@ -2587,6 +2588,13 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    repeatCount = dlg.GetNumTimesToRun();
    bool compare = dlg.CompareResults();
    bool saveCompareResults = dlg.SaveCompareResults();
+
+   // for current output path
+   FileManager *fm = FileManager::Instance();
+   std::string oldOutPath = fm->GetFullPathname(FileManager::OUTPUT_PATH);
+   bool hasOutDirChanged = dlg.HasOutDirChanged();
+   if (hasOutDirChanged)
+      fm->SetAbsPathname(FileManager::OUTPUT_PATH, dlg.GetCurrentOutDir().c_str());
    
    int count = 0;
    mHasUserInterrupted = false;
@@ -2598,9 +2606,17 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    // create CompareReport Panel
    if (compare)
    {
-      GmatTreeItemData *compareItem =
-         new GmatTreeItemData("CompareReport", GmatTree::COMPARE_REPORT);
-      GmatMdiChildFrame *textFrame = GmatAppData::GetMainFrame()->CreateChild(compareItem);
+      GmatMdiChildFrame *textFrame =
+         GmatAppData::GetMainFrame()->GetChild("CompareReport");
+      
+      if (textFrame == NULL)
+      {
+         GmatTreeItemData *compareItem =
+            new GmatTreeItemData("CompareReport", GmatTree::COMPARE_REPORT);
+      
+         textFrame = GmatAppData::GetMainFrame()->CreateChild(compareItem);
+      }
+      
       textCtrl = textFrame->GetScriptTextCtrl();
       textFrame->Show();
 
@@ -2666,6 +2682,9 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
          {
             MessageInterface::ShowMessage
                ("*** Error running: %s\n   %s\n", e.GetMessage().c_str());
+            
+            if (compare)
+               textCtrl->AppendText(e.GetMessage().c_str());
          }
       }
    
@@ -2675,6 +2694,11 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    // save compare results to a file
    if (compare && saveCompareResults)
       textCtrl->SaveFile(dlg.GetSaveFilename());
+
+   // reset output path
+   if (hasOutDirChanged)
+      fm->SetAbsPathname(FileManager::OUTPUT_PATH, oldOutPath);
+
 }
 
 
@@ -2929,31 +2953,33 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
          #endif
          
          wxString filename2 = filename1.c_str();
-         size_t numReplaced = filename2.Replace("GMAT", replaceStr.c_str());
+         wxFileName fname(filename2);
+         wxString name2 = fname.GetFullName();
+         size_t numReplaced = name2.Replace("GMAT", replaceStr.c_str());
          
          if (numReplaced == 0)
          {
+            textCtrl->AppendText
+               ("***Cannot compare results. The report file doesn't contain GMAT.\n");
             MessageInterface::ShowMessage
                ("ResourceTree::CompareScriptRunResult() Cannot compare results.\n"
-                "The report file doesn't contain GMAT.\n");
+                "The report file doesn't contain GMAT.\n\n");
             return;
          }
          
          if (numReplaced > 1)
          {
+            textCtrl->AppendText
+               ("***Cannot compare results. The report file name contains more "
+                "than 1 GMAT string.\n");
             MessageInterface::ShowMessage
                ("ResourceTree::CompareScriptRunResult() Cannot compare results.\n"
-                "The report file name contains more than 1 GMAT string.\n");
+                "The report file name contains more than 1 GMAT string.\n\n");
             return;
          }
          
-         // replace compare dir path
-         if (dir1 != dir2)
-         {
-            wxFileName fname(filename2);
-            wxString name = fname.GetName();
-            filename2 = dir2 + "/" + name;
-         }
+         // set filename2
+         filename2 = dir2 + "/" + name2;
 
          #if DEBUG_COMPARE_REPORT
          MessageInterface::ShowMessage("   filename2=%s\n", filename2.c_str());
@@ -2974,7 +3000,12 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
 
    if (reportCount == 0)
    {
-      textCtrl->AppendText("** There is no report file to compare.\n");
+      textCtrl->AppendText("** There is no report file to compare.\n\n");
       MessageInterface::ShowMessage("** There is no report file to compare.\n");
+   }
+   else
+   {
+      textCtrl->AppendText
+         ("========================================================\n\n");
    }
 }
