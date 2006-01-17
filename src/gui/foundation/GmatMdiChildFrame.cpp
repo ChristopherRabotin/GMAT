@@ -16,6 +16,7 @@
 
 #include "GmatAppData.hpp"
 #include "GuiInterpreter.hpp"
+#include "FileManager.hpp"
 
 #include "GuiItemManager.hpp"
 
@@ -58,6 +59,11 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame* parent,
 #endif
 
    SetMenuBar(CreateMenu(dataType));
+
+   // set icon
+   FileManager *fm = FileManager::Instance();
+   wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
+   SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
 }
 
 
