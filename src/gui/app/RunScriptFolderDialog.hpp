@@ -29,13 +29,14 @@ public:
    bool RunScripts() { return mRunScripts; }
    bool CompareResults() { return mCompareResults; }
    bool SaveCompareResults() { return mSaveCompareResults; }
+   bool HasOutDirChanged() { return mOutDirChanged; }
    Integer GetNumScriptsToRun() { return mNumScriptsToRun; }
    Integer GetNumTimesToRun() { return mNumTimesToRun; }
    Real GetAbsTolerance() { return mAbsTol; }
    wxString GetReplaceString() { return mReplaceString; }
    wxString GetCompareDirectory() { return mCompareDir; }
    wxString GetSaveFilename() { return mSaveFilename; }
-   
+   wxString GetCurrentOutDir() { return mCurrOutDir; }
 protected:
    
    // override methods from GmatDialog
@@ -50,12 +51,14 @@ protected:
    wxTextCtrl *mReplaceTextCtrl;
    wxTextCtrl *mAbsTolTextCtrl;
    wxTextCtrl *mSaveFileTextCtrl;
+   wxTextCtrl *mCurrOutDirTextCtrl;
    
    wxCheckBox *mCompareCheckBox;
    wxCheckBox *mSaveResultCheckBox;
 
    wxButton *mDirBrowseButton;
    wxButton *mSaveBrowseButton;
+   wxButton *mChangeCurrOutDirButton;
    
    // event handling
    void OnButtonClick(wxCommandEvent& event);   
@@ -77,10 +80,12 @@ private:
    bool mRunScripts;
    bool mCompareResults;
    bool mSaveCompareResults;
+   bool mOutDirChanged;
    Integer mNumScriptsToRun;
    Integer mNumTimesToRun;
    Real mAbsTol;
    wxString mReplaceString;
+   wxString mCurrOutDir;
    wxString mCompareDir;
    wxString mSaveFilename;
 };

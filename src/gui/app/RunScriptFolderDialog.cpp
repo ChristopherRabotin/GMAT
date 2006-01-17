@@ -13,6 +13,7 @@
 //------------------------------------------------------------------------------
 
 #include "RunScriptFolderDialog.hpp"
+#include "FileManager.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_RUN_SCRIPT_FOLDER_DIALOG 1
@@ -40,6 +41,7 @@ RunScriptFolderDialog::RunScriptFolderDialog(wxWindow *parent, int numScripts,
    mRunScripts = false;
    mCompareResults = false;
    mSaveCompareResults = false;
+   mOutDirChanged = false;
    
    mNumScriptsToRun = numScripts;
    mNumTimesToRun = 1;
@@ -91,6 +93,22 @@ void RunScriptFolderDialog::Create()
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("1"),
                      wxDefaultPosition, wxSize(80,20), 0);
    
+   wxStaticText *currOutDir1 =
+      new wxStaticText(this, ID_TEXT, wxT("Current GMAT output directory:"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   wxStaticText *currOutDir2 =
+      new wxStaticText(this, ID_TEXT, wxT("(ReportFile will use this path if "
+                                          "it doesn't contain path)"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
+   mCurrOutDirTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                     wxDefaultPosition, wxSize(320,20), 0);
+   
+   mChangeCurrOutDirButton =
+      new wxButton(this, ID_BUTTON, wxT("Change for this Run"),
+                    wxDefaultPosition, wxDefaultSize, 0);
+   
    //---------- sizer
    wxFlexGridSizer *runSizer = new wxFlexGridSizer(2, 0, 0);
    runSizer->Add(numScriptsLabel, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -102,6 +120,10 @@ void RunScriptFolderDialog::Create()
       new wxStaticBoxSizer(wxVERTICAL, this, "Run Scripts");
    
    runStaticSizer->Add(runSizer, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
+   runStaticSizer->Add(currOutDir1, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   runStaticSizer->Add(currOutDir2, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   runStaticSizer->Add(mCurrOutDirTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   runStaticSizer->Add(mChangeCurrOutDirButton, 0, wxALIGN_CENTER|wxALL, bsize);
 
    //------------------------------------------------------
    // compare results
@@ -201,7 +223,10 @@ void RunScriptFolderDialog::LoadData()
 
    str.Printf("%g", mAbsTol);
    mAbsTolTextCtrl->SetValue(str);
-   
+
+   FileManager *fm = FileManager::Instance();
+   mCurrOutDir = fm->GetFullPathname(FileManager::OUTPUT_PATH).c_str();
+   mCurrOutDirTextCtrl->SetValue(mCurrOutDir);
    mCompareDirTextCtrl->SetValue(mCompareDir);
    mSaveResultCheckBox->Disable();
    mSaveFileTextCtrl->Disable();
@@ -219,7 +244,7 @@ void RunScriptFolderDialog::SaveData()
    long numScriptsToRun;
    long numTimesToRun;
    canClose = true;
-   
+      
    if (!mNumScriptsToRunTextCtrl->GetValue().ToLong(&numScriptsToRun))
    {
       wxMessageBox("Invalid number of scripts to run entered.");
@@ -273,6 +298,7 @@ void RunScriptFolderDialog::ResetData()
    canClose = true;
    mRunScripts = false;
    mCompareResults = false;
+   mOutDirChanged = false;
 }
 
 
@@ -281,18 +307,37 @@ void RunScriptFolderDialog::ResetData()
 //------------------------------------------------------------------------------
 void RunScriptFolderDialog::OnButtonClick(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == mDirBrowseButton)
+   if (event.GetEventObject() == mChangeCurrOutDirButton)
+   {
+      //wxDirDialog dialog(this, "Select a new output directory", wxGetCwd());
+      wxDirDialog dialog(this, "Select a new output directory", mCompareDir);
+   
+      if (dialog.ShowModal() == wxID_OK)
+      {
+         mCurrOutDir = dialog.GetPath();
+         mCurrOutDirTextCtrl->SetValue(mCurrOutDir);
+         mOutDirChanged = true;
+         
+         #if DEBUG_RUN_SCRIPT_FOLDER_DIALOG
+         MessageInterface::ShowMessage
+            ("RunScriptFolderDialog::OnButtonClick() mCurrOutDir=%s\n",
+             dirname.c_str());
+         #endif
+      }
+   }
+   else if (event.GetEventObject() == mDirBrowseButton)
    {
       wxDirDialog dialog(this, "Select a directory to compare", wxGetCwd());
-   
+      
       if (dialog.ShowModal() == wxID_OK)
       {
          wxString dirname = dialog.GetPath();
          mCompareDirTextCtrl->SetValue(dirname);
-      
+         
          #if DEBUG_RUN_SCRIPT_FOLDER_DIALOG
          MessageInterface::ShowMessage
-            ("RunScriptFolderDialog::OnButtonClick() dirname=%s\n", dirname.c_str());
+            ("RunScriptFolderDialog::OnButtonClick() dirname=%s\n",
+             mCurrOutDir.c_str());
          #endif
       }
    }
