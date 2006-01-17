@@ -53,11 +53,12 @@ public:
    ~GmatMainFrame();
    
    GmatMdiChildFrame* CreateChild(GmatTreeItemData *item);
+   GmatMdiChildFrame* GetChild(const wxString &name);
    bool IsChildOpen(GmatTreeItemData *item);
    bool RenameChild(GmatTreeItemData *item, wxString newName);
-   bool RenameChild(wxString oldName, wxString newName);
-   bool RenameActiveChild(wxString newName);
-   void RemoveChild(wxString item, int dataType);
+   bool RenameChild(const wxString &oldName, const wxString &newName);
+   bool RenameActiveChild(const wxString &newName);
+   void RemoveChild(const wxString &item, int dataType);
    void CloseActiveChild();
    void CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
                          wxString excludeTitle = "");

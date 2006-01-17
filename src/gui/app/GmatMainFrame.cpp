@@ -77,6 +77,7 @@
 #include "LibrationPointPanel.hpp"
 #include "CelestialBodyPanel.hpp"
 #include "CompareReportPanel.hpp"
+#include "FileManager.hpp"
 
 #include <wx/gdicmn.h>
 #include <wx/toolbar.h>
@@ -275,11 +276,21 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    mServer = NULL;
    mRunPaused = false;
    mRunCompleted = true;
-   
+
+   //Note: The following files should be in the gmat_startup_file.txt
+   // Windows:GMAT32.ico
+   // Linux:GMAT48.ico
+   // Mac:GMAT.icns
+
+   FileManager *fm = FileManager::Instance();
+   wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
+   SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
+
    #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() exiting\n");
    #endif
 }
+
 
 //------------------------------------------------------------------------------
 // ~GmatMainFrame()
@@ -370,7 +381,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item)
           item->GetDesc().c_str(), dataType);
       #endif
    }
-   
+
    return newChild;
 }
 
@@ -414,83 +425,133 @@ bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item)
    return FALSE;
 }
 
+
+//------------------------------------------------------------------------------
+// GmatMdiChildFrame* GetChild(const wxString &name)
+//------------------------------------------------------------------------------
+/**
+ */
+//------------------------------------------------------------------------------
+GmatMdiChildFrame* GmatMainFrame::GetChild(const wxString &name)
+{
+   #if DEBUG_MAINFRAME
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::GetChild() name=%s\n", name.c_str());
+   #endif
+   
+   GmatMdiChildFrame *theChild = NULL;
+   wxNode *node = mdiChildren->GetFirst();
+   while (node)
+   {
+      theChild = (GmatMdiChildFrame *)node->GetData();
+
+      #if DEBUG_MAINFRAME
+      MessageInterface::ShowMessage
+         ("   theChild=%s\n", theChild->GetTitle().c_str());
+      #endif
+
+      if (theChild->GetTitle().IsSameAs(name))
+      {
+         return theChild;
+      }
+      node = node->GetNext();
+   }
+
+   return NULL;
+}
+
+
 //------------------------------------------------------------------------------
 // bool RenameChild(GmatTreeItemData *item, wxString newName)
 //------------------------------------------------------------------------------
 /**
- * Determines if page should be opened.  If the page is already opened, sets that
- * page as the selected page.
- *
- * @param <item> input GmatTreeItemData.
- *
- * @return True if page should be opened, false if it should not be opened.
  */
 //------------------------------------------------------------------------------
 bool GmatMainFrame::RenameChild(GmatTreeItemData *item, wxString newName)
 {
-   wxNode *node = mdiChildren->GetFirst();
-   while (node)
-   {
-      GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+   wxString oldName = item->GetDesc();
+   return RenameChild(oldName, newName);
 
-      #if DEBUG_MAINFRAME
-      MessageInterface::ShowMessage
-         ("GmatMainFrame::GetChild() child %s  this %s\n",
-          theChild->GetTitle().c_str(), item->GetDesc().c_str());
-      #endif
+   //loj: 1/17/06 commented out because the code is replaced by
+   // RenameChild(wxString oldName, wxString newName)
+   
+//    wxNode *node = mdiChildren->GetFirst();
+//    while (node)
+//    {
+//       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+
+//       #if DEBUG_MAINFRAME
+//       MessageInterface::ShowMessage
+//          ("GmatMainFrame::RenameChild() child %s  this %s\n",
+//           theChild->GetTitle().c_str(), item->GetDesc().c_str());
+//       #endif
     
-      if ((theChild->GetTitle().IsSameAs(item->GetDesc().c_str()))&&
-          (theChild->GetDataType() == item->GetDataType()))
-      {
-         theChild->SetTitle(newName);
-         return TRUE;
-      }
-      node = node->GetNext();
-   }
+//       if ((theChild->GetTitle().IsSameAs(item->GetDesc().c_str()))&&
+//           (theChild->GetDataType() == item->GetDataType()))
+//       {
+//          theChild->SetTitle(newName);
+//          return TRUE;
+//       }
+//       node = node->GetNext();
+//    }
  
-   return FALSE;
+//    return FALSE;
 }
 
+
 //------------------------------------------------------------------------------
-// bool RenameChild(wxString oldName, wxString newName)
+// bool RenameChild(const wxString &oldName, const wxString &newName)
 //------------------------------------------------------------------------------
 /**
  */
 //------------------------------------------------------------------------------
-bool GmatMainFrame::RenameChild(wxString oldName, wxString newName)
+bool GmatMainFrame::RenameChild(const wxString &oldName, const wxString &newName)
 {
-   wxNode *node = mdiChildren->GetFirst();
-   while (node)
+   GmatMdiChildFrame *theChild = GetChild(oldName);
+   
+   if (theChild != NULL)
    {
-      GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-
-      #if DEBUG_MAINFRAME
-      MessageInterface::ShowMessage
-         ("GmatMainFrame::RenameChild() oldName=%s, newName=%s\n",
-          oldName.c_str(), newName.c_str());
-      #endif
-
       if (theChild->GetTitle().IsSameAs(oldName))
       {
          theChild->SetTitle(newName);
          return TRUE;
       }
-      node = node->GetNext();
    }
 
-   /// @todo: need to rename item in tree?
-
    return FALSE;
+   
+//    wxNode *node = mdiChildren->GetFirst();
+//    while (node)
+//    {
+//       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+
+//       #if DEBUG_MAINFRAME
+//       MessageInterface::ShowMessage
+//          ("GmatMainFrame::RenameChild() oldName=%s, newName=%s\n",
+//           oldName.c_str(), newName.c_str());
+//       #endif
+
+//       if (theChild->GetTitle().IsSameAs(oldName))
+//       {
+//          theChild->SetTitle(newName);
+//          return TRUE;
+//       }
+//       node = node->GetNext();
+//    }
+
+//    /// @todo: need to rename item in tree?
+
+//    return FALSE;
 }
 
 //------------------------------------------------------------------------------
-// bool RenameActiveChild(wxString newName)
+// bool RenameActiveChild(const wxString &newName)
 //------------------------------------------------------------------------------
 /**
  *
  */
 //------------------------------------------------------------------------------
-bool GmatMainFrame::RenameActiveChild(wxString newName)
+bool GmatMainFrame::RenameActiveChild(const wxString &newName)
 {
     GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)GetActiveChild();
     
@@ -504,9 +565,9 @@ bool GmatMainFrame::RenameActiveChild(wxString newName)
 }
 
 //------------------------------------------------------------------------------
-// void GmatMainFrame::RemoveChild(wxString *item, int dataTpe)
+// void GmatMainFrame::RemoveChild(const wxString &item, int dataTpe)
 //------------------------------------------------------------------------------
-void GmatMainFrame::RemoveChild(wxString item, int dataType)
+void GmatMainFrame::RemoveChild(const wxString &item, int dataType)
 {
    wxNode *node = mdiChildren->GetFirst();
    while (node)
@@ -1570,9 +1631,9 @@ GmatMdiChildFrame*
 GmatMainFrame::CreateNewOutput(const wxString &title,
                                const wxString &name, int dataType)
 {
-   MessageInterface::ShowMessage
-      ("GmatMainFrame::CreateNewOutput() title=%s, name=%s, dataType=%d\n",
-       title.c_str(), name.c_str(), dataType);
+   //MessageInterface::ShowMessage
+   //   ("GmatMainFrame::CreateNewOutput() title=%s, name=%s, dataType=%d\n",
+   //    title.c_str(), name.c_str(), dataType);
    
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
    
