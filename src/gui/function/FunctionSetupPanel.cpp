@@ -217,7 +217,8 @@ void FunctionSetupPanel::OnButton(wxCommandEvent& event)
       // ag: should all files be included in thid dialog?
       wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""),
             _T("Text files (*.txt, *.text)|*.txt;*.text|"\
-               "Script files (*.script, *.m)|*.script;*.m"));
+               "Script files (*.script, *.m)|*.script;*.m|"\
+               "GMAT Function files (*.gmf)|*.gmf"));
 
       if (dialog.ShowModal() == wxID_OK)
       {
