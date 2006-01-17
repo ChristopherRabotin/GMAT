@@ -69,9 +69,11 @@ Function::Function(const std::string &typeStr, const std::string &nomme) :
       if (functionPath == "")
       {         
          if (typeStr == "MatlabFunction")
+            // matlab uses directory path
             pathname = fm->GetFullPathname("MATLAB_FUNCTION_PATH");
          else if (typeStr == "GmatFunction")
-            pathname = fm->GetFullPathname("GMAT_FUNCTION_PATH");
+            // gmat function uses whole path name
+            pathname = fm->GetFullPathname("GMAT_FUNCTION_PATH") +nomme +".gmf";
          
          functionPath = pathname;
       }
