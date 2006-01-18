@@ -63,7 +63,9 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame* parent,
    // set icon
    FileManager *fm = FileManager::Instance();
    wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
-   SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
+   #ifndef __WXMAC__   // SetIcon does not appear to work properly on the Mac
+      SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
+   #endif
 }
 
 
