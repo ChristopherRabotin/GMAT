@@ -101,7 +101,7 @@ private:
    void AddDefaultFunctions(wxTreeItemId itemId);
    void AddDefaultCoordSys(wxTreeItemId itemId);
    void AddDefaultScripts(wxTreeItemId itemId);
-   void AddDefaultSpecialPoints(wxTreeItemId itemId);
+   void AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCounter = true);
 
    // event handlers
    void OnItemRightClick(wxTreeEvent& event);
