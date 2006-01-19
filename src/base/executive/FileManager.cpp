@@ -586,7 +586,13 @@ void FileManager::AddFileType(const std::string &type, const std::string &name)
    
    if (type.find("_PATH") != type.npos)
    {
-      mPathMap[type] = name;
+      std::string str2 = name;
+      
+      // append '/' if not there
+      if (str2.find_last_of('/') != str2.length()-1)
+         str2 = str2 + "/";
+      
+      mPathMap[type] = str2;
    }
    else if (type.find("_FILE") != type.npos)
    {
