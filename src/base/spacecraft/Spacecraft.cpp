@@ -1389,7 +1389,6 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == SC_EPOCH_ID)
    {
-MessageInterface::ShowMessage("Setting date to %s\n", value.c_str());
       // Validate first...
 
       // and set the epoch value in the state
@@ -1397,7 +1396,6 @@ MessageInterface::ShowMessage("Setting date to %s\n", value.c_str());
    }   
    else if (id == DATE_FORMAT_ID)
    {
-MessageInterface::ShowMessage("Setting date format to %s\n", value.c_str());
       SetDateFormat(value);
 //      if (value != "TAIModJulian" && value != "UTCModJulian" && 
 //          value != "TAIGregorian" && value != "UTCGregorian")
@@ -1784,9 +1782,9 @@ bool Spacecraft::Initialize()
 //------------------------------------------------------------------------------
 void Spacecraft::SetEpoch(const std::string &ep)
 {
-//   #ifdef DEBUG_DATE_FORMAT
+   #ifdef DEBUG_DATE_FORMAT
       MessageInterface::ShowMessage("Setting epoch to %s\n", ep.c_str());
-//   #endif
+   #endif
 
    // 1. Validate that the input string is the correct format.
    if (epochFormat == "ModJulian")
