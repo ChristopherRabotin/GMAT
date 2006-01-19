@@ -950,7 +950,8 @@ void OrbitPanel::UpdateEpoch()
    {
       theSpacecraft->SetEpoch(newEpoch);
       theSpacecraft->SetStringParameter("DateFormat", toEpochFormat);
-      epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch"));
+      //epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch"));
+      epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch").c_str());
       mEpoch = theSpacecraft->GetEpoch();
    }   
    
