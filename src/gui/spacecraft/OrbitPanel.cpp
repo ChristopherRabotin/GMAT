@@ -52,16 +52,16 @@ END_EVENT_TABLE()
 OrbitPanel::OrbitPanel(wxWindow *parent,
                         Spacecraft *spacecraft,
                         SolarSystem *solarsystem,
-                        wxButton *theApplyButton)
-                       :wxPanel(parent)
+                        wxButton *theApplyButton) : 
+   wxPanel           (parent),
+   theApplyButton    (theApplyButton)
 {
    // initalize data members
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
 
-   this->theSpacecraft = spacecraft;
-   this->theSolarSystem = solarsystem;
-   this->theApplyButton = theApplyButton;
+   theSpacecraft = spacecraft;
+   theSolarSystem = solarsystem;
 
    mIsCoordSysChanged = false;
    mIsStateChanged = false;
@@ -116,26 +116,31 @@ void OrbitPanel::LoadData()
    {
       Rvector6 outState, displayState;
 
-      // load the epoch format - hard coded for now
-      wxString epochFormatList[] =
-      {
-         wxT("TAIModJulian"),
-         wxT("UTCModJulian"),
-         wxT("TAIGregorian"),
-         wxT("UTCGregorian")
-      };
+      StringArray reps = TimeConverterUtil::GetValidTimeRepresentations();
 
-      for (unsigned int i = 0; i<4; i++)
-         epochFormatComboBox->Append(wxString(epochFormatList[i].c_str()));
+      // load the epoch format - hard coded for now
+//      wxString epochFormatList[] =
+//      {
+//         wxT("TAIModJulian"),
+//         wxT("UTCModJulian"),
+//         wxT("TAIGregorian"),
+//         wxT("UTCGregorian")
+//      };
+//
+//      for (unsigned int i = 0; i<4; i++)
+//         epochFormatComboBox->Append(wxString(epochFormatList[i].c_str()));
+
+      for (unsigned int i = 0; i < reps.size(); i++)
+         epochFormatComboBox->Append(reps[i].c_str());
       
       // load the epoch
-      std::string epochFormat = theSpacecraft->GetDisplayDateFormat();
-      mEpoch = theSpacecraft->GetRealParameter("Epoch");
+      std::string epochFormat = theSpacecraft->GetStringParameter("DateFormat"); //GetDisplayDateFormat();
+      mEpoch = theSpacecraft->GetRealParameter("A1Epoch");
       epochFormatComboBox->SetValue(wxT(epochFormat.c_str()));
-      fromEpochFormat = epochFormat.c_str();
+      fromEpochFormat = epochFormat;
       
-      std::string epochStr = theSpacecraft->GetDisplayEpoch();
-      epochValue->SetValue(epochStr.c_str());
+      std::string epochStr = theSpacecraft->GetStringParameter("Epoch"); //GetDisplayEpoch();
+      epochValue->SetValue(wxT(epochStr.c_str()));
       
       // load the coordinate system
       std::string coordSystemStr =
@@ -708,16 +713,11 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
    // -------------------- epoch format change --------------------
    if (event.GetEventObject() == epochFormatComboBox)
    {
-      wxString toEpochFormat = epochFormatComboBox->GetStringSelection();    
-      wxString epochStr = epochValue->GetValue();
-    
-      // convert to new epoch format
-      std::string newEpoch = timeConverter.Convert(epochStr.c_str(), fromEpochFormat,
-                                                   toEpochFormat.c_str());
-    
-      epochValue->SetValue(newEpoch.c_str());
-    
-      fromEpochFormat = toEpochFormat.c_str();
+      std::string toEpochFormat = epochFormatComboBox->GetStringSelection().c_str();    
+      std::string epochStr = epochValue->GetValue().c_str();
+      theSpacecraft->SetDateFormat(toEpochFormat);
+      epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch").c_str());
+      fromEpochFormat = toEpochFormat;
    }
 
    // -------------------- coordinate system or state type change --------------------
@@ -786,7 +786,8 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       #endif
    }
    
-   theApplyButton->Enable();
+   if (theApplyButton != NULL)
+      theApplyButton->Enable();
 }
 
 
@@ -816,7 +817,8 @@ void OrbitPanel::OnTextChange(wxCommandEvent& event)
       mIsEpochChanged = true;
    }
    
-   theApplyButton->Enable();
+   if (theApplyButton != NULL)
+      theApplyButton->Enable();
 }
 
 
@@ -926,19 +928,32 @@ void OrbitPanel::InitializeCoordinateSystem(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
 void OrbitPanel::UpdateEpoch()
 {
-   wxString coordSysStr = mCoordSysComboBox->GetStringSelection().c_str();
-   wxString toEpochFormat = epochFormatComboBox->GetStringSelection();
-   wxString epochStr = epochValue->GetValue();
-   std::string newEpoch = epochStr.c_str();
-   
-   if (epochStr != "TAIModJulian")
+//   wxString coordSysStr = mCoordSysComboBox->GetStringSelection().c_str();
+//   wxString toEpochFormat = epochFormatComboBox->GetStringSelection();
+//   wxString epochStr = epochValue->GetValue();
+//   std::string newEpoch = epochStr.c_str();
+//   
+//   if (epochStr != "TAIModJulian")
+//   {
+//      // convert to TAIModJulian
+//      newEpoch = timeConverter.Convert(epochStr.c_str(), fromEpochFormat,
+//                                       "TAIModJulian");
+//   }
+//   
+//   mEpoch = atof(newEpoch.c_str());
+
+   std::string newEpoch = epochValue->GetValue().c_str();
+   std::string toEpochFormat = 
+      epochFormatComboBox->GetStringSelection().c_str();
+      
+   if (toEpochFormat != fromEpochFormat)
    {
-      // convert to TAIModJulian
-      newEpoch = timeConverter.Convert(epochStr.c_str(), fromEpochFormat,
-                                       "TAIModJulian");
-   }
+      theSpacecraft->SetEpoch(newEpoch);
+      theSpacecraft->SetStringParameter("DateFormat", toEpochFormat);
+      epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch"));
+      mEpoch = theSpacecraft->GetEpoch();
+   }   
    
-   mEpoch = atof(newEpoch.c_str());
 
    Rvector6 outState;
    

@@ -179,7 +179,7 @@ Real TimeData::GetCurrentTimeReal(GmatParam::TimeDataID id)
    if (mSpacecraft == NULL)
       InitializeRefObjects();
 
-   //Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
+   //Real a1mjd = mSpacecraft->GetRealParameter("A1Epoch");
    Real a1mjd = mSpacecraft->GetRealParameter(mEpochId);
 
    #if DEBUG_TIMEDATA
@@ -214,7 +214,7 @@ Real TimeData::GetCurrentTimeReal(const std::string &str)
    if (mSpacecraft == NULL)
       InitializeRefObjects();
 
-   //Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
+   //Real a1mjd = mSpacecraft->GetRealParameter("A1Epoch");
    Real a1mjd = mSpacecraft->GetRealParameter(mEpochId);
 
    #if DEBUG_TIMEDATA
@@ -322,11 +322,11 @@ bool TimeData::ValidateRefObjects(GmatBase *param)
       else
       {
          Spacecraft *sc = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
-         Real rval = sc->GetRealParameter("Epoch");
+         Real rval = sc->GetRealParameter("A1Epoch");
 
          if (rval != GmatBase::REAL_PARAMETER_UNDEFINED)
          {
-            mInitialEpoch = sc->GetRealParameter("Epoch");
+            mInitialEpoch = sc->GetRealParameter("A1Epoch");
             mIsInitialEpochSet = true;
             status = true;
          }
@@ -349,8 +349,8 @@ void TimeData::InitializeRefObjects()
    else
       if (!mIsInitialEpochSet)
       {
-         mEpochId = mSpacecraft->GetParameterID("Epoch");
-         //mInitialEpoch = mSpacecraft->GetRealParameter("Epoch");
+         mEpochId = mSpacecraft->GetParameterID("A1Epoch");
+         //mInitialEpoch = mSpacecraft->GetRealParameter("A1Epoch");
          mInitialEpoch = mSpacecraft->GetRealParameter(mEpochId);
          mIsInitialEpochSet = true;
          //MessageInterface::ShowMessage

@@ -32,7 +32,7 @@
 const std::string SpaceObject::PARAMETER_TEXT[SpaceObjectParamCount -
                                               SpacePointParamCount] =
    {
-      "Epoch"
+      "A1Epoch"
    };
 
 
@@ -497,7 +497,7 @@ Real SpaceObject::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real SpaceObject::GetRealParameter(const std::string &label) const
 {
-   if (label == "Epoch")
+   if (label == "A1Epoch")
       return state.GetEpoch();
    return GetRealParameter(GetParameterID(label));
 }

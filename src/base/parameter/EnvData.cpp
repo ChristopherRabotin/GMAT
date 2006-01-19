@@ -139,7 +139,7 @@ Real EnvData::GetEnvReal(const std::string &str)
 
    if (str == "AtmosDensity")
    {
-      Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
+      Real a1mjd = mSpacecraft->GetRealParameter("A1Epoch");
       // Rvector6 cartState = mSpacecraft->GetStateVector("Cartesian");
       Rvector6 cartState = mSpacecraft->GetState(0);
       Real state[6];

@@ -456,9 +456,10 @@ bool ScriptInterpreter::Parse()
                    if ((objParm == "Epoch") && 
                        (obj->GetType() == Gmat::SPACECRAFT)) 
                    {
-                       if (sar.size() > 2) {
+                       if (sar.size() > 2) 
+                       {
                          // obj->SetStringParameter("DateFormat", sar[2]);
-                         ((Spacecraft*)obj)->SetDisplayDateFormat(sar[2].c_str());
+                         ((Spacecraft*)obj)->SetDateFormat(sar[2].c_str());
                          unsigned int start, end;
                          start = line.find("=") + 1;
                          const char* linestr = line.c_str();
@@ -472,33 +473,32 @@ bool ScriptInterpreter::Parse()
    
                          std::string epstr;
                          epstr.assign(line, start, end-start);
-                         
-                         ((Spacecraft*)obj)->SetDisplayEpoch(epstr);
+                         ((Spacecraft*)obj)->SetEpoch(epstr);
                          // Force the epoch into the spacecraft data
-                         ((Spacecraft*)obj)->SaveDisplay();
+//                         ((Spacecraft*)obj)->SaveDisplay();
                          chunks.clear();
                          return true;
                       }
-                      else {
-                         // Treat it as a ModJulian format epoch
+                      else 
+                      {
+                         // Treat it as an epoch formated in current DateFormat
                          unsigned int start = line.find("=") + 1, stop;
                          const char* linestr = line.c_str();
                          std::string displayEp;
                          while (linestr[start] == ' ')
                             ++start;
                          stop = start;
-                         while ((linestr[stop] != ' ') &&
+                         while (/*(linestr[stop] != ' ') &&*/
                                 (linestr[stop] != '%') &&
                                 (linestr[stop] != ';') &&
                                 (stop < strlen(linestr)))
                             ++stop;
-                         displayEp = line.substr(start, stop-start);
-                         ((Spacecraft*)obj)->SetDisplayDateFormat("TAIModJulian");
-                         ((Spacecraft*)obj)->SetDisplayEpoch(displayEp.c_str());
+                         std::string epstr = line.substr(start, stop-start);
+                         displayEp = epstr;
+                         ((Spacecraft*)obj)->SetEpoch(epstr);
                          
-                         // Force the epoch into the spacecraft data
-                         ((Spacecraft*)obj)->SaveDisplay();
-                         // obj->SetRealParameter(objParm, &(linestr[start]));
+                         chunks.clear();
+                         return true;
                       }
                    }  // Completes epoch parse
                    

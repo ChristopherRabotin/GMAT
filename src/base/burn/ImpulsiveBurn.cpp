@@ -124,7 +124,7 @@ bool ImpulsiveBurn::Fire(Real *burnData, Real epoch)
    Real state[6];
 
    if (epoch == 21545.0)
-      epoch = sc->GetRealParameter("Epoch");
+      epoch = sc->GetRealParameter("A1Epoch");
    
    TransformJ2kToBurnOrigin(satState, state, epoch);
 

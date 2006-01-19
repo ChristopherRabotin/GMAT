@@ -1706,7 +1706,7 @@ bool Propagate::Initialize()
          }
          so = (SpaceObject*)(*objectMap)[*scName];
          if (epochID == -1)
-            epochID = so->GetParameterID("Epoch");
+            epochID = so->GetParameterID("A1Epoch");
          if (so->IsManeuvering())
             finiteBurnActive = true;
          sats.push_back(so);
@@ -2062,7 +2062,7 @@ void Propagate::PrepareToPropagate()
             "Propagator has no associated space objects.");
       GmatBase* sat1 = (*objectMap)[*(satName[n]->begin())];
 //      if (n == 0)
-//         epochID = sat1->GetParameterID("Epoch");
+//         epochID = sat1->GetParameterID("A1Epoch");
       baseEpoch.push_back(sat1->GetRealParameter(epochID));
       elapsedTime[n] = fm[n]->GetTime();
       currEpoch[n] = baseEpoch[n] + elapsedTime[n] /

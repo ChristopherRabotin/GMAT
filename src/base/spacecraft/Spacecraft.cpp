@@ -19,21 +19,27 @@
 
 #include "Spacecraft.hpp"
 #include "MessageInterface.hpp"
+#include <sstream>
 
 //#define DEBUG_SPACECRAFT 1 
 //#define DEBUG_SPACECRAFT_SET 1 
 //#define DEBUG_SPACECRAFT_CS 1 
 //#define DEBUG_RENAME 1
+//#define DEBUG_DATE_FORMAT
 
 #if DEBUG_SPACECRAFT
 #include <iostream>
 #include <sstream> 
 #endif
 
+
+#define TIME_PRECISION 18
+
 // Spacecraft parameter types
 const Gmat::ParameterType   
    Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] = 
    {
+      Gmat::STRING_TYPE, 
       Gmat::REAL_TYPE, 
       Gmat::REAL_TYPE, 
       Gmat::REAL_TYPE, 
@@ -63,6 +69,7 @@ const Gmat::ParameterType
 const std::string 
 Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] = 
    {
+      "Epoch",
       "Element1", 
       "Element2", 
       "Element3", 
@@ -105,11 +112,14 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
  */
 Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    SpaceObject          (Gmat::SPACECRAFT, typeStr, name),
+   scEpoch              ("21545.000000000"),
    dryMass              (850.0),
    coeffDrag            (2.2),
    dragArea             (15.0),
    srpArea              (1.0),
    reflectCoeff         (1.8),
+   epochSystem          ("TAI"),
+   epochFormat          ("ModJulian"),
    dateFormat           ("TAIModJulian"),  // Should be A1ModJulian
    stateType            ("Cartesian"),
    anomalyType          ("TA"),
@@ -185,11 +195,14 @@ Spacecraft::~Spacecraft()
  */
 Spacecraft::Spacecraft(const Spacecraft &a) :
    SpaceObject          (a),
+   scEpoch              (a.scEpoch),
    dryMass              (a.dryMass),
    coeffDrag            (a.coeffDrag),
    dragArea             (a.dragArea),
    srpArea              (a.srpArea),
    reflectCoeff         (a.reflectCoeff),
+   epochSystem          (a.epochSystem),
+   epochFormat          (a.epochFormat),
    dateFormat           (a.dateFormat),
    stateType            (a.stateType),
    anomalyType          (a.anomalyType),
@@ -246,11 +259,14 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 
    SpaceObject::operator=(a);
 
+   scEpoch              = a.scEpoch;
    dryMass              = a.dryMass;
    coeffDrag            = a.coeffDrag;
    dragArea             = a.dragArea;
    srpArea              = a.srpArea;
    reflectCoeff         = a.reflectCoeff;
+   epochSystem          = a.epochSystem;
+   epochFormat          = a.epochFormat;
    dateFormat           = a.dateFormat;
    stateType            = a.stateType;
    anomalyType          = a.anomalyType;
@@ -520,8 +536,10 @@ Anomaly Spacecraft::GetAnomaly() const
 //------------------------------------------------------------------------------
 std::string Spacecraft::GetDisplayDateFormat() const 
 {
-   MessageInterface::ShowMessage("GetDisplayDateFormat() is deprecated\n");
-   return displayDateFormat;
+   MessageInterface::ShowMessage("GetDisplayDateFormat() is deprecated; "
+      "use GetStringParameter(\"DateFormat\") instead.\n");
+//   return displayDateFormat;
+   return GetStringParameter("DateFormat");
 }
 
 //---------------------------------------------------------------------------
@@ -531,46 +549,128 @@ std::string Spacecraft::GetDisplayDateFormat() const
  * Set the display's dateformat of epoch.
  * 
  * @param <dateType> date type given. 
- *
  */
 void Spacecraft::SetDisplayDateFormat(const std::string &dateType) 
 {
-   MessageInterface::ShowMessage("SetDisplayDateFormat(const std::string &) is deprecated\n");
+   MessageInterface::ShowMessage(
+      "SetDisplayDateFormat(const std::string &) is deprecated; "
+      "use SetDateFormat(const std::string &dateType) instead\n");
+      
+   SetDateFormat(dateType);
+}
 
-  // Check invalid date type then throw exception
-  if (dateType != "TAIModJulian" && dateType != "UTCModJulian" &&
-      dateType != "TAIGregorian" && dateType != "UTCGregorian")
-  {
-     std::string msg = "Invalid Epoch's parameter is \"" + dateType + "\"";
-     throw SpaceObjectException(msg);
-  }
 
-   std::string tempType  = dateType;
-   std::string tempEpoch = displayEpoch;
-
-//   if (initialDisplay)
-//      SetInitialDisplay();
-
-   // Check if different coordinate type then convert the state
-   if (displayDateFormat != dateType)
+//------------------------------------------------------------------------------
+// void SetDisplayDateFormat(const std::string &dateType) 
+//------------------------------------------------------------------------------
+/**
+ * Set the display's date format of epoch.
+ * 
+ * @param <dateType> date type given. 
+ */
+//------------------------------------------------------------------------------
+void Spacecraft::SetDateFormat(const std::string &dateType) 
+{
+   #ifdef DEBUG_DATE_FORMAT
+      MessageInterface::ShowMessage(
+         "Setting date format to %s; initial epoch is %s\n", 
+         dateType.c_str(), scEpoch.c_str());
+   #endif
+   
+   // 1. Save old data
+   std::string oldEpochSystem = epochSystem;
+   std::string oldEpochFormat = epochFormat;
+   
+   // 2. Break apart into time type and string format
+   Integer loc = dateType.find("ModJulian", 0);
+   if (loc == -1)
+      loc = dateType.find("Gregorian", 0);
+   if (loc == 0)
+      throw SpaceObjectException("Error parsing time format '" +
+         dateType + "'; could not find 'Gregorian' or 'ModJulian' substring.");
+   epochSystem = dateType.substr(0, loc);
+   epochFormat = dateType.substr(loc);
+   
+   #ifdef DEBUG_DATE_FORMAT
+      MessageInterface::ShowMessage("%s breaks into system %s and format %s\n",
+         dateType.c_str(), epochSystem.c_str(), epochFormat.c_str());
+   #endif
+   
+   if (!TimeConverterUtil::ValidateTimeSystem(epochSystem))
    {
-      try
-      {
-         std::string newEpoch = timeConverter.Convert(displayEpoch,
-                                displayDateFormat,dateType);
-
-         displayDateFormat = tempType;
-         SetDisplayEpoch(newEpoch);
-         return;
-      }
-      catch (TimeConverter::TimeConverterException e)
-      {
-         // Stay with the original date format due to failure of conversion
-         tempType = displayDateFormat;
-      }
+      epochSystem = oldEpochSystem;
+      epochFormat = oldEpochFormat;
+      throw SpaceObjectException("'" + epochSystem + 
+         "' is not a valid time system");
    }
+   dateFormat = epochSystem + epochFormat;
+   
+   // 3. Generate converted string
+   Real startEpoch, finalEpoch;
+   std::stringstream str;
+   str.precision(TIME_PRECISION);
+   
+   if (oldEpochFormat == "ModJulian")
+   {
+      str.str(scEpoch);
+      str >> startEpoch;
+   }
+   else
+   {
+      startEpoch = TimeConverterUtil::ConvertGregorianToMjd(scEpoch);
+   }
+   
+   #ifdef DEBUG_DATE_FORMAT
+      MessageInterface::ShowMessage(
+         "     Converting %s from %s to %s gives ", scEpoch.c_str(),
+         oldEpochSystem.c_str(), epochSystem.c_str());
+   #endif
 
-   displayDateFormat = tempType;
+   if (oldEpochSystem != epochSystem)
+   {
+      #ifdef DEBUG_DATE_FORMAT
+         MessageInterface::ShowMessage("(%s != %s) ", oldEpochSystem.c_str(), 
+            epochSystem.c_str());
+      #endif
+
+      finalEpoch = TimeConverterUtil::Convert(startEpoch, oldEpochSystem, 
+         epochSystem, GmatTimeUtil::JD_JAN_5_1941);
+   }
+   else
+   {
+      #ifdef DEBUG_DATE_FORMAT
+         MessageInterface::ShowMessage("(%s == %s) ", oldEpochSystem.c_str(), 
+            epochSystem.c_str());
+      #endif
+
+      finalEpoch = startEpoch;
+   }
+   
+   #ifdef DEBUG_DATE_FORMAT
+      MessageInterface::ShowMessage(
+         "final epoch (MJD) = %.10lf;", finalEpoch);
+   #endif
+
+   if (epochFormat == "ModJulian")
+   {
+      std::stringstream epstr("");
+      epstr.precision(TIME_PRECISION);
+      epstr << finalEpoch;
+      
+      #ifdef DEBUG_DATE_FORMAT
+         MessageInterface::ShowMessage(
+            "epoch stream (MJD) = %s;", epstr.str().c_str());
+      #endif
+
+      epstr >> scEpoch;
+   }
+   else
+      scEpoch = TimeConverterUtil::ConvertMjdToGregorian(finalEpoch);
+
+   #ifdef DEBUG_DATE_FORMAT
+      MessageInterface::ShowMessage(
+         " resulting epoch is %s\n", scEpoch.c_str());
+   #endif
 }
 
 
@@ -941,6 +1041,12 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
    if (id == TOTAL_MASS_ID)
    {
       return true;
+   } 
+
+   // Hide SpaceObject epoch so spacecraft can treat it as a string   
+   if (id == EPOCH_PARAM)
+   {
+      return true;
    }
    
    return SpaceObject::IsParameterReadOnly(id);
@@ -1025,25 +1131,25 @@ std::string Spacecraft::GetParameterTypeString(const Integer id) const
  */
 Real Spacecraft::GetRealParameter(const Integer id) const
 {
-    if (id == ELEMENT1_ID) return state[0];
-    if (id == ELEMENT2_ID) return state[1];
-    if (id == ELEMENT3_ID) return state[2];
-    if (id == ELEMENT4_ID) return state[3];
-    if (id == ELEMENT5_ID) return state[4];
-    if (id == ELEMENT6_ID) return state[5];
+   if (id == ELEMENT1_ID) return state[0];
+   if (id == ELEMENT2_ID) return state[1];
+   if (id == ELEMENT3_ID) return state[2];
+   if (id == ELEMENT4_ID) return state[3];
+   if (id == ELEMENT5_ID) return state[4];
+   if (id == ELEMENT6_ID) return state[5];
           
-    if (id == DRY_MASS_ID) return dryMass;
-
-    if (id == CD_ID) return coeffDrag;
-    if (id == CR_ID) return reflectCoeff;
-    if (id == DRAG_AREA_ID) return dragArea;
-    if (id == SRP_AREA_ID) return srpArea;
+   if (id == DRY_MASS_ID) return dryMass;
+   if (id == CD_ID) return coeffDrag;
+   if (id == CR_ID) return reflectCoeff;
+   if (id == DRAG_AREA_ID) return dragArea;
+   if (id == SRP_AREA_ID) return srpArea;
     
-    if (id == TOTAL_MASS_ID) { 
-       return UpdateTotalMass();
-    }
+   if (id == TOTAL_MASS_ID) 
+   { 
+      return UpdateTotalMass();
+   }
     
-    return SpaceObject::GetRealParameter(id);
+   return SpaceObject::GetRealParameter(id);
 }
 
 //---------------------------------------------------------------------------
@@ -1059,7 +1165,7 @@ Real Spacecraft::GetRealParameter(const Integer id) const
 Real Spacecraft::GetRealParameter(const std::string &label) const
 {
    // Performance!
-    if (label == "Epoch")
+    if (label == "A1Epoch")
        return state.GetEpoch();
    
     // First check with anomaly
@@ -1142,6 +1248,12 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
    // First try to set as a state element
    if (SetElement(label, value))
       return value;
+      
+   if (label == "A1Epoch")
+   {
+      state.SetEpoch(value);
+      return value;
+   }
 
    if (label == "DryMass")
    {
@@ -1187,6 +1299,9 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
  */
 std::string Spacecraft::GetStringParameter(const Integer id) const
 {
+    if (id == SC_EPOCH_ID)
+       return scEpoch;
+
     if (id == DATE_FORMAT_ID)
        return dateFormat;
 
@@ -1202,7 +1317,7 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
     if ((id >= ELEMENT1UNIT_ID) && (id <= ELEMENT6UNIT_ID))
        return stateElementUnits[id - ELEMENT1UNIT_ID];
 
-    return SpaceObject::GetStringParameter(id);
+    return SpaceObject::GetStringParameter(id); 
 }
 
 //---------------------------------------------------------------------------
@@ -1218,9 +1333,9 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
  */
 std::string Spacecraft::GetStringParameter(const std::string &label) const
 {
-   if (label == "StateType")
-      return stateType;
-   
+//   if (label == "StateType")
+//      return stateType;
+//   
    return GetStringParameter(GetParameterID(label));
 }
 
@@ -1259,20 +1374,39 @@ const StringArray& Spacecraft::GetStringArrayParameter(const Integer id) const
  */
 bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 {
-   if (id != DATE_FORMAT_ID && id != STATE_TYPE_ID && id != ANOMALY_ID
-       && id != COORD_SYS_ID && id != FUEL_TANK_ID && id != THRUSTER_ID)
+   #ifdef DEBUG_SPACECRAFT_STRINGS
+      MessageInterface::ShowMessage("Setting string parameter %d (%s) to %s\n", 
+         id, GetParameterText(id).c_str(), value.c_str());
+   #endif
+
+   if ((id < SpaceObjectParamCount) || (id >= SpacecraftParamCount))
       return SpaceObject::SetStringParameter(id, value);
+      
+   if (GetParameterType(id) != Gmat::STRING_TYPE)
+      throw SpaceObjectException("Parameter " + GetParameterText(id) +
+         " is being accessed as a string, but it is of type " +
+         GetParameterTypeString(GetParameterType(id)));
 
-
-   if (id == DATE_FORMAT_ID)
+   if (id == SC_EPOCH_ID)
    {
-      if (value != "TAIModJulian" && value != "UTCModJulian" && 
-          value != "TAIGregorian" && value != "UTCGregorian")
-      {
-         return GmatBase::SetStringParameter(id, value);
-      }
-      dateFormat = value;
-      displayDateFormat = value;
+MessageInterface::ShowMessage("Setting date to %s\n", value.c_str());
+      // Validate first...
+
+      // and set the epoch value in the state
+      SetEpoch(value);
+   }   
+   else if (id == DATE_FORMAT_ID)
+   {
+MessageInterface::ShowMessage("Setting date format to %s\n", value.c_str());
+      SetDateFormat(value);
+//      if (value != "TAIModJulian" && value != "UTCModJulian" && 
+//          value != "TAIGregorian" && value != "UTCGregorian")
+//      {
+//         return GmatBase::SetStringParameter(id, value);
+//      }
+//      dateFormat = value;
+//      displayDateFormat = value;
+
    }
    else if (id == STATE_TYPE_ID)
    {  
@@ -1353,14 +1487,15 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 bool Spacecraft::SetStringParameter(const std::string &label, 
                                     const std::string &value)
 {
-#if DEBUG_SPACECRAFT
-    std::cout << "\nSpacecraft::SetStringParameter(\"" << label
-              << "\", \"" << value << "\") enters...\n"; 
-    Integer id = GetParameterID(label);
-    std::cout << "\nGetParameterText: " << GetParameterText(id);
-    std::cout << "\nSpacecraft::SetStringParameter exits sooner\n"; 
-#endif
-    return SetStringParameter(GetParameterID(label),value);
+   #if DEBUG_SPACECRAFT
+       std::cout << "\nSpacecraft::SetStringParameter(\"" << label
+                 << "\", \"" << value << "\") enters...\n"; 
+       Integer id = GetParameterID(label);
+       std::cout << "\nGetParameterText: " << GetParameterText(id);
+       std::cout << "\nSpacecraft::SetStringParameter exits sooner\n"; 
+   #endif
+
+   return SetStringParameter(GetParameterID(label),value);
 }
 
 //---------------------------------------------------------------------------
@@ -1466,11 +1601,13 @@ bool Spacecraft::TakeAction(const std::string &action,
  */
 std::string Spacecraft::GetDisplayEpoch()
 {
-   MessageInterface::ShowMessage("Spacecraft::GetDisplayEpoch is deprecated.\n");
+   MessageInterface::ShowMessage("Spacecraft::GetDisplayEpoch is deprecated; "
+   "use GetStringParameter(\"Epoch\") instead.\n");
 //   if (initialDisplay)
 //      SetInitialDisplay();
 
-   return displayEpoch;
+//   return displayEpoch;
+   return GetStringParameter("Epoch");
 }
 
 //---------------------------------------------------------------------------
@@ -1486,22 +1623,11 @@ std::string Spacecraft::GetDisplayEpoch()
  */
 bool Spacecraft::SetDisplayEpoch(const std::string &value) 
 {
-   MessageInterface::ShowMessage("Spacecraft::SetDisplayEpoch is deprecated.\n");
-
-   if (displayDateFormat == "TAIGregorian" || 
-      displayDateFormat == "UTCGregorian")
-   {
-      GregorianDate gregorianDate(value);
-      if (gregorianDate.IsValid())
-         displayEpoch = gregorianDate.GetDate(); 
-      else
-         return false;
-   }
-   else
-   { 
-      displayEpoch = value;
-   }
-   
+   MessageInterface::ShowMessage(
+      "Spacecraft::SetDisplayEpoch is deprecated; "
+      "use SetEpoch(const std::string &value) instead.\n");
+      
+   SetEpoch(value);
    return true;
 }
 
@@ -1531,19 +1657,9 @@ std::string Spacecraft::GetDisplayCoordType() const
  */
 void Spacecraft::SetDisplayCoordType(const std::string &coordType) 
 {
-//   if (initialDisplay)
-//      SetInitialDisplay();
-//
-//   // Check if different coordinate type then convert the state
-//   if (displayCoordType != coordType)
-//   {
-//      Rvector6 newState = stateConverter.Convert(displayState,displayCoordType,
-//                                                 coordType,anomaly);
-//      SetDisplayState(newState);
-//   }
-//
-//   displayCoordType = coordType;
-MessageInterface::ShowMessage("Spacecraft::SetDisplayCoordType not implemented yet.\n");
+   MessageInterface::ShowMessage(
+      "Spacecraft::SetDisplayCoordType is deprecated; "
+      "use SetStringParameter(\"StateType\") instead.\n");
 }
 
 //---------------------------------------------------------------------------
@@ -1561,7 +1677,8 @@ Real* Spacecraft::GetDisplayState()
 //       SetInitialDisplay();
 //
 //    return displayState;
-MessageInterface::ShowMessage("Spacecraft::GetDisplayState not fully implemented yet.\n");
+   MessageInterface::ShowMessage(
+      "Spacecraft::GetDisplayState not fully implemented yet.\n");
    return state.GetState();
 }
 
@@ -1619,24 +1736,8 @@ MessageInterface::ShowMessage("Spacecraft::SetDisplayState not fully implemented
  */
 void Spacecraft::SaveDisplay()
 {
-   MessageInterface::ShowMessage("SaveDisplay is deprecated\n");
-//   #if DEBUG_SPACECRAFT
-//   MessageInterface::ShowMessage
-//      ("Spacecraft::SaveDisplay() displayCoordType=%s, displayState=\n"
-//       "%f %f %f %f %f %f\n", displayCoordType.c_str(),
-//       displayState[0], displayState[1], displayState[2],
-//       displayState[3], displayState[4], displayState[5]);
-//   #endif
-//   
-//   SetEpoch();
-//   //SetState(displayCoordType, displayState); //loj
-//
-//   #if DEBUG_SPACECRAFT_SET
-//   MessageInterface::ShowMessage
-//      ("===> Spacecraft::SaveDisplay() calling SetState()\n");
-//   #endif
-//   
-//   SetState(); //loj: 9/19/05 Added
+   MessageInterface::ShowMessage("SaveDisplay is deprecated; "
+      "you can safely remove all calls to it.\n");
 }
 
 //---------------------------------------------------------------------------
@@ -1672,48 +1773,64 @@ bool Spacecraft::Initialize()
    return true;
 }
 
-//-------------------------------------
-// protected methods
-//-------------------------------------
-
-
-//---------------------------------------------------------------------------
-//  void SetEpoch()
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//  void SetEpoch(std::string ep)
+//------------------------------------------------------------------------------
 /**
  * Set the epoch.
- * 
+ *
+ * @param <ep> The new epoch. 
  */
-void Spacecraft::SetEpoch()
+//------------------------------------------------------------------------------
+void Spacecraft::SetEpoch(const std::string &ep)
 {
-	MessageInterface::ShowMessage("SetEpoch is deprecated\n");
-   // Check if date format is not TAIModJulian, then convert it
-   if (displayDateFormat != "TAIModJulian")
-   {
-      try
-      {
-         std::string newEpoch = timeConverter.Convert(displayEpoch,
-                                displayDateFormat,"TAIModJulian");
+//   #ifdef DEBUG_DATE_FORMAT
+      MessageInterface::ShowMessage("Setting epoch to %s\n", ep.c_str());
+//   #endif
 
-//         epoch = atof(newEpoch.c_str());
-         state.SetEpoch(atof(newEpoch.c_str()));
-      }
-      catch (TimeConverter::TimeConverterException& e)
-      {
-         // do  nothing - retain with epoch
-      }
+   // 1. Validate that the input string is the correct format.
+   if (epochFormat == "ModJulian")
+   {
    }
    else
    {
-//      epoch = atof(displayEpoch.c_str());
-      state.SetEpoch(atof(displayEpoch.c_str()));
+   }
+   
+   // 2. Construct the Real epoch data and set it on the PropState.
+   Real now;
+   std::stringstream timestream;
+   timestream.precision(TIME_PRECISION);
+   if (epochFormat == "ModJulian")
+   {
+      timestream.str(ep);
+      timestream >> now;
+   }
+   else
+   {
+      now = TimeConverterUtil::ConvertGregorianToMjd(ep);
    }
 
+   // PropState epoch is a.1
+   state.SetEpoch(TimeConverterUtil::Convert(now, epochSystem, "A1",
+      GmatTimeUtil::JD_JAN_5_1941));
+   
+   // 3. Save the string.
+   if (epochFormat == "ModJulian")
+   {
+      timestream.str("");
+      timestream << now;
+      timestream >> scEpoch;
+   }
+   else
+   {
+      scEpoch = TimeConverterUtil::ConvertMjdToGregorian(now);
+   }
 }
 
 
-
-
+//-------------------------------------
+// protected methods
+//-------------------------------------
 
 
 //------------------------------------------------------------------------------
@@ -1838,7 +1955,7 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    // Set the parameter order for output
    Integer parmOrder[parameterCount], parmIndex = 0;
    parmOrder[parmIndex++] = DATE_FORMAT_ID;
-   parmOrder[parmIndex++] = EPOCH_PARAM;
+   parmOrder[parmIndex++] = SC_EPOCH_ID;
    parmOrder[parmIndex++] = COORD_SYS_ID;
    parmOrder[parmIndex++] = STATE_TYPE_ID;
    parmOrder[parmIndex++] = ANOMALY_ID;

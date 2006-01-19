@@ -20,6 +20,7 @@
 #include "GuiItemManager.hpp"
 #include "GmatAppData.hpp"
 #include "CoordinateSystem.hpp"
+#include "TimeConverter.hpp"        // Should replace with TimeSystemConverter
 
 class CoordPanel : public wxPanel
 {

@@ -27,7 +27,8 @@
 #include "GuiItemManager.hpp"
 #include "GmatAppData.hpp"
 #include "Spacecraft.hpp"
-#include "TimeConverter.hpp"
+#include "TimeSystemConverter.hpp"     // No longer TimeConverter.hpp
+#include "TimeConverter.hpp"           // <-- Remove
 #include "StateConverter.hpp"
 #include "CoordinateConverter.hpp"
 #include "CoordinateSystem.hpp"

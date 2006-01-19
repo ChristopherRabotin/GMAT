@@ -188,7 +188,7 @@ Rvector6 OrbitData::GetCartState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   mCartEpoch = mSpacecraft->GetRealParameter("Epoch");
+   mCartEpoch = mSpacecraft->GetRealParameter("A1Epoch");
    mCartState.Set(mSpacecraft->GetState().GetState());
 
    #if DEBUG_ORBITDATA_RUN

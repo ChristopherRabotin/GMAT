@@ -151,7 +151,7 @@ Real PlanetData::GetReal(const std::string &dataType)
    if (dataType == "MHA")
    {
       // Get current time
-      Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
+      Real a1mjd = mSpacecraft->GetRealParameter("A1Epoch");
       
       // Call GetHourAngle() on origin
       Real gha = mOrigin->GetHourAngle(a1mjd);
@@ -175,7 +175,7 @@ Real PlanetData::GetReal(const std::string &dataType)
       if (mOrigin->GetName() != "Earth")
       {
          // Get current time
-         Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
+         Real a1mjd = mSpacecraft->GetRealParameter("A1Epoch");
          state = state - mOrigin->GetMJ2000State(a1mjd);
       }
       
@@ -206,7 +206,7 @@ Real PlanetData::GetReal(const std::string &dataType)
 //      if (mOrigin->GetName() != "Earth")
 //      {
 //         // Get current time
-//         Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
+//         Real a1mjd = mSpacecraft->GetRealParameter("A1Epoch");
 //         state = state - mOrigin->GetMJ2000State(a1mjd);
 //      }
 //
@@ -250,7 +250,7 @@ Real PlanetData::GetReal(const std::string &dataType)
       if (mOrigin->GetName() != "Earth")
       {
          // Get current time
-         Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
+         Real a1mjd = mSpacecraft->GetRealParameter("A1Epoch");
          state = state - mOrigin->GetMJ2000State(a1mjd);
       }
       // get flattening for the body

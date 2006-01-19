@@ -552,7 +552,7 @@ bool ForceModel::AddSpaceObject(SpaceObject *so)
     spacecraft.push_back(so);
 
     // Quick fix for the epoch update
-    satIds[0] = so->GetParameterID("Epoch");
+    satIds[0] = so->GetParameterID("A1Epoch");
     epoch = so->GetRealParameter(satIds[0]);
     parametersSetOnce = false;
     return true;
@@ -1030,7 +1030,7 @@ Integer ForceModel::SetupSpacecraftData(GmatBase *sat, PhysicalModel *pm,
    // Only retrieve the parameter IDs once
    if ((satIds[1] < 0) && sat->IsOfType("Spacecraft"))
    {
-      satIds[0] = sat->GetParameterID("Epoch");
+      satIds[0] = sat->GetParameterID("A1Epoch");
       if (satIds[0] < 0)
          throw ForceModelException("Epoch parameter undefined on object " +
                                    sat->GetName());

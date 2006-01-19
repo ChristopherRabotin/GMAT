@@ -29,7 +29,8 @@
 #include "Anomaly.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
-#include "TimeConverter.hpp"
+//#include "TimeConverter.hpp"
+#include "TimeSystemConverter.hpp"
 #include "StateConverter.hpp"
 
 #include <map>
@@ -68,6 +69,7 @@ public:
 
    std::string       GetDisplayDateFormat() const;
    void              SetDisplayDateFormat(const std::string &dateType);
+   void              SetDateFormat(const std::string &dateType);
    std::string       GetDisplayEpoch();
    bool              SetDisplayEpoch(const std::string &value);
 
@@ -142,10 +144,13 @@ public:
                         const std::string &prefix = "",
                         const std::string &useName = "");
    
+   void              SetEpoch(const std::string &ep);
+
 protected:
    enum SC_Param_ID 
    {
-      ELEMENT1_ID = SpaceObjectParamCount, 
+      SC_EPOCH_ID = SpaceObjectParamCount,
+      ELEMENT1_ID, 
       ELEMENT2_ID, 
       ELEMENT3_ID, 
       ELEMENT4_ID, 
@@ -193,14 +198,23 @@ protected:
 
    /// State element labels
    StringArray       stateElementLabel;
+   /// State element units
    StringArray       stateElementUnits;
+   /// Possible state representations
    StringArray       representations;
    
+   /// Epoch string, specifying the text form of the epoch
+   std::string       scEpoch;
    Real              dryMass;
    Real              coeffDrag;
    Real              dragArea;
    Real              srpArea;
    Real              reflectCoeff;
+   /// String specifying the epoch time system
+   std::string       epochSystem;
+   /// String specifying the epoch time format (Gregorian or ModJulian)
+   std::string       epochFormat;
+   /// String specifying the epoch system used for scEpoch
    std::string       dateFormat;
    std::string       stateType;
    std::string       anomalyType;
@@ -215,7 +229,7 @@ protected:
    
    // for non-internal spacecraft information
    StateConverter    stateConverter;
-   TimeConverter     timeConverter;
+//   TimeConverter     timeConverter;
    CoordinateConverter coordConverter;
    
 //   bool           isForDisplay;
@@ -255,8 +269,6 @@ protected:
    bool              SetElement(const std::string &label, const Real &value);
    Integer           LookUpLabel(const std::string &label, std::string &rep);
    void              BuildElementLabelMap();
-   
-   void        		SetEpoch();
 };
 
 #endif // Spacecraft_hpp

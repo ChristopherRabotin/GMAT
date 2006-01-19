@@ -19,6 +19,8 @@
 #include "CallFunction.hpp"
 #include "Moderator.hpp"         // for GetParameter()
 #include "BeginFunction.hpp"
+#include "StringTokenizer.hpp"
+
 
 #if defined __USE_MATLAB__
 #include "MatlabInterface.hpp"   // for Matlab Engine functions

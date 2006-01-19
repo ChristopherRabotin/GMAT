@@ -416,7 +416,7 @@ Rvector6 BplaneData::GetCartState()
    
    Integer id = mSpacecraft->GetParameterID("StateType"); 
    std::string elemType = mSpacecraft->GetStringParameter(id);
-   mCartEpoch = mSpacecraft->GetRealParameter("Epoch");
+   mCartEpoch = mSpacecraft->GetRealParameter("A1Epoch");
    
    #if DEBUG_BPLANE_DATA_RUN
    MessageInterface::ShowMessage

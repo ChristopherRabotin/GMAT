@@ -33,7 +33,7 @@ struct TimeSystemConverterExceptions
    {
       public:
          ImplementationException(const std::string &message =
-         "TimeSystemConverter: Converstion not implemented: ")
+         "TimeSystemConverter: Conversion not implemented: ")
          : BaseException(message) {};
    };
    class FileException : public BaseException
@@ -41,6 +41,13 @@ struct TimeSystemConverterExceptions
       public:
          FileException(const std::string &message =
          "TimeSystemConverter: File is unknown: ")
+         : BaseException(message) {};
+   };
+   class TimeFormatException : public BaseException
+   {
+      public:
+         TimeFormatException(const std::string &message =
+         "TimeSystemConverter: Requested format not implemented: ")
          : BaseException(message) {};
    };
 
@@ -59,7 +66,25 @@ namespace TimeConverterUtil
    static const Real TCB_JD_MJD_OFFSET             = 2443144.5;
    static const Real NUM_SECS                      = 86400;
 
-   static const std::string TIME_SYSTEM_TEXT[6] =
+   enum TimeSystemTypes
+   {
+      A1MJD = 0,
+      UTCMJD,
+      UT1MJD,
+      TDBMJD,
+      TCBMJD,
+      TTMJD,
+      A1,
+      TAI,
+      UTC,
+      UT1,
+      TDB,
+      TCB,
+      TTM,
+      TimeSystemCount
+   };
+
+   static const std::string TIME_SYSTEM_TEXT[TimeSystemCount] =
          {
             "A1Mjd",
             "UtcMjd",
@@ -67,6 +92,14 @@ namespace TimeConverterUtil
             "TdbMjd",
             "TcbMjd",
             "TtMjd",
+            // New entried added by DJC
+            "A1",
+            "TAI",
+            "UTC",
+            "UT1",
+            "TDB",
+            "TCB",
+            "TT",
          };
 
    Real Convert(const Real origValue,
@@ -81,6 +114,12 @@ namespace TimeConverterUtil
 
    void SetEopFile(EopFile *eopFile);
    void SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileReader);
+
+   std::string ConvertMjdToGregorian(const Real mjd);
+   Real ConvertGregorianToMjd(const std::string &greg);
+   bool ValidateTimeSystem(std::string sys);
+   
+   StringArray GetValidTimeRepresentations();
 }
 
 #endif // TimeSystemConverter_hpp

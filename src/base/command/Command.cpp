@@ -1249,7 +1249,7 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
                satVector.push_back((SpaceObject*)obj);
                if (satEpochID == -1)
                {
-                  satEpochID = obj->GetParameterID("Epoch");
+                  satEpochID = obj->GetParameterID("A1Epoch");
                   satCdID = obj->GetParameterID("Cd");
                   satDragAreaID = obj->GetParameterID("DragArea");
                   satCrID = obj->GetParameterID("Cr");

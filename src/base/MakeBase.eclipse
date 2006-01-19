@@ -191,8 +191,8 @@ OBJECTS = \
     interpolator/LinearInterpolator.o \
     interpreter/InterpreterException.o \
     interpreter/Interpreter.o \
-	interpreter/MathParser.o \
-	interpreter/MathTree.o \
+    interpreter/MathParser.o \
+    interpreter/MathTree.o \
     interpreter/ScriptInterpreter.o \
     parameter/AngularParameters.o \
     parameter/Array.o \

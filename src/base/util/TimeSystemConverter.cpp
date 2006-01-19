@@ -18,13 +18,14 @@
 //------------------------------------------------------------------------------
 
 #include "TimeSystemConverter.hpp"
-
+#include "A1Mjd.hpp"
+#include "GregorianDate.hpp"
+#include "MessageInterface.hpp"
 
 //#define DEBUG_FIRST_CALL
+//#define DEBUG_TIMECONVERTER_DETAILS
 
 #ifdef DEBUG_FIRST_CALL
-   #include "MessageInterface.hpp"
-   
    static bool firstCallFired = false;
    static Real lastValue = -9999999.999999e99;
 #endif
@@ -64,16 +65,31 @@ Real TimeConverterUtil::Convert(const Real origValue,
       }
       lastValue = origValue;
    #endif
-
+   
+   #ifdef DEBUG_TIMECONVERTER_DETAILS
+      MessageInterface::ShowMessage(
+         "      Converting %.10lf in %s to %s; refJD = %.9lf\n", origValue, 
+         fromType.c_str(), toType.c_str(), refJd);
+   #endif
       
    Real newTime =
       TimeConverterUtil::ConvertToTaiMjd(fromType, origValue, refJd);
+
+   #ifdef DEBUG_TIMECONVERTER_DETAILS
+      MessageInterface::ShowMessage("      TAI time =  %.10lf\n", newTime);
+   #endif
+   
    Real returnTime =
       TimeConverterUtil::ConvertFromTaiMjd(toType, newTime, refJd);
 
    #ifdef DEBUG_FIRST_CALL
       if (toType == "TtMjd")
          firstCallFired = true;
+   #endif
+
+   #ifdef DEBUG_TIMECONVERTER_DETAILS
+      MessageInterface::ShowMessage("      %s time =  %.10lf\n", toType.c_str(), 
+         returnTime);
    #endif
 
    return returnTime;
@@ -88,17 +104,28 @@ Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
          MessageInterface::ShowMessage(
-            "   Converting to TAI from %s\n", fromType.c_str());
+            "   Converting %.10lf to TAI from %s\n", origValue, fromType.c_str());
    #endif
 
+   #ifdef DEBUG_TIMECONVERTER_DETAILS
+      MessageInterface::ShowMessage( 
+         "      ***Converting %.10lf to TAI from %s\n", origValue, 
+         fromType.c_str());
+   #endif
+   
    // a1mjd
-   if (fromType == TIME_SYSTEM_TEXT[0])
+   if ((fromType == TIME_SYSTEM_TEXT[0]) || (fromType == TIME_SYSTEM_TEXT[6]))
    {
       return (origValue -
              (GmatTimeUtil::A1_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
    }
+   // tai
+   else if (fromType == TIME_SYSTEM_TEXT[7])
+   {
+      return origValue;
+   }
    // utc
-   else if (fromType == TIME_SYSTEM_TEXT[1])
+   else if ((fromType == TIME_SYSTEM_TEXT[1]) || (fromType == TIME_SYSTEM_TEXT[8]))
    {
       Real offsetValue = 0;
 
@@ -118,10 +145,15 @@ Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
       Real numLeapSecs =
          theLeapSecsFileReader->NumberOfLeapSecondsFrom(origValue + offsetValue);
 
+      #ifdef DEBUG_TIMECONVERTER_DETAILS
+         MessageInterface::ShowMessage(
+            "      CVT to TAI, Leap secs count = %.14lf\n", numLeapSecs);
+      #endif
+
       return (origValue + (numLeapSecs/GmatTimeUtil::SECS_PER_DAY));
    }
    // ut1
-   else if (fromType == TIME_SYSTEM_TEXT[2])
+   else if ((fromType == TIME_SYSTEM_TEXT[2]) || (fromType == TIME_SYSTEM_TEXT[9]))
    {
       if (theEopFile == NULL)
          throw TimeSystemConverterExceptions::FileException(
@@ -142,7 +174,7 @@ Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
                (utcOffset/GmatTimeUtil::SECS_PER_DAY)), refJd));
    }
    // tdb
-   else if (fromType == TIME_SYSTEM_TEXT[3])
+   else if ((fromType == TIME_SYSTEM_TEXT[3]) || (fromType == TIME_SYSTEM_TEXT[10]))
    {
       throw TimeSystemConverterExceptions::ImplementationException(
                "Not Implement - TDB to TAI");
@@ -152,7 +184,7 @@ Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
 //      return (taiJd - jdOffset);
    }
    // tcb
-   else if (fromType == TIME_SYSTEM_TEXT[4])
+   else if ((fromType == TIME_SYSTEM_TEXT[4]) || (fromType == TIME_SYSTEM_TEXT[11]))
    {
       throw TimeSystemConverterExceptions::ImplementationException(
                "Not Implement - TCB to TAI");
@@ -160,13 +192,13 @@ Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
 //      return ConvertToTaiMjd("TdbMjd", tdbMjd);
    }
    // tt
-   else if (fromType == TIME_SYSTEM_TEXT[5])
+   else if ((fromType == TIME_SYSTEM_TEXT[5]) || (fromType == TIME_SYSTEM_TEXT[12]))
    {
       return (origValue -
              (GmatTimeUtil::TT_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
    }
 
-   return 0;
+   return 0.0;
 }
 
 
@@ -179,18 +211,37 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
          MessageInterface::ShowMessage(
-            "   Converting from TAI to %s\n", toType.c_str());
+            "   Converting %.10lf from TAI to %s\n", origValue, toType.c_str());
    #endif
-
+   #ifdef DEBUG_TIMECONVERTER_DETAILS
+      MessageInterface::ShowMessage(
+         "      ** Converting %.10lf from TAI to %s\n", origValue, 
+         toType.c_str());
+   #endif
    // a1
-   if (toType == TIME_SYSTEM_TEXT[0])
+   if ((toType == TIME_SYSTEM_TEXT[0]) || (toType == TIME_SYSTEM_TEXT[6])) 
    {
+      #ifdef DEBUG_TIMECONVERTER_DETAILS
+         MessageInterface::ShowMessage("      In the 'a1' block\n");
+      #endif
       return (origValue +
              (GmatTimeUtil::A1_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
    }
-   // utc
-   else if (toType == TIME_SYSTEM_TEXT[1])
+   // tai 
+   else if (toType == TIME_SYSTEM_TEXT[7])
    {
+      #ifdef DEBUG_TIMECONVERTER_DETAILS
+         MessageInterface::ShowMessage("      In the 'tai' block\n");
+      #endif
+      // already in tai
+      return origValue;
+   }
+   // utc
+   else if ((toType == TIME_SYSTEM_TEXT[1]) || (toType == TIME_SYSTEM_TEXT[8]))
+   {
+      #ifdef DEBUG_TIMECONVERTER_DETAILS
+         MessageInterface::ShowMessage("      In the 'utc' block\n");
+      #endif
       Real offsetValue = 0;
 
       if (refJd != GmatTimeUtil::JD_NOV_17_1858)
@@ -212,14 +263,22 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
          NumberOfLeapSecondsFrom((origValue + offsetValue)
                                  - (taiLeapSecs/GmatTimeUtil::SECS_PER_DAY));
 
+      #ifdef DEBUG_TIMECONVERTER_DETAILS
+         MessageInterface::ShowMessage("      Leap secs: tai = %.14lf, utc = %.14lf\n",
+            taiLeapSecs, utcLeapSecs);
+      #endif
+
       if (utcLeapSecs == taiLeapSecs)
          return (origValue - (taiLeapSecs/GmatTimeUtil::SECS_PER_DAY));
       else
          return (origValue - (utcLeapSecs/GmatTimeUtil::SECS_PER_DAY));
    }
    // ut1
-   else if (toType == TIME_SYSTEM_TEXT[2])
+   else if ((toType == TIME_SYSTEM_TEXT[2]) || (toType == TIME_SYSTEM_TEXT[9]))
    {
+      #ifdef DEBUG_TIMECONVERTER_DETAILS
+         MessageInterface::ShowMessage("      In the 'ut1' block\n");
+      #endif
       if (theEopFile == NULL)
          throw TimeSystemConverterExceptions::FileException(
                "EopFile is unknown");
@@ -249,8 +308,11 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
       return (utcMjd + (numOffset/GmatTimeUtil::SECS_PER_DAY));
    }
    // tdb
-   else if (toType == TIME_SYSTEM_TEXT[3])
+   else if ((toType == TIME_SYSTEM_TEXT[3]) || (toType == TIME_SYSTEM_TEXT[10]))
    {
+      #ifdef DEBUG_TIMECONVERTER_DETAILS
+         MessageInterface::ShowMessage("      In the 'tdb' block\n");
+      #endif
       // convert time to tt
       Real ttJd = TimeConverterUtil::ConvertFromTaiMjd("TtMjd", origValue, refJd);
       // convert to ttJD
@@ -266,8 +328,11 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
       return tdbJd - refJd;
    }
    // tcb
-   else if (toType == TIME_SYSTEM_TEXT[4])
+   else if ((toType == TIME_SYSTEM_TEXT[4]) || (toType == TIME_SYSTEM_TEXT[11]))
    {
+      #ifdef DEBUG_TIMECONVERTER_DETAILS
+         MessageInterface::ShowMessage("      In the 'tcb' block\n");
+      #endif
       // convert time to tdb
       Real tdbMjd = TimeConverterUtil::ConvertFromTaiMjd("TdbMjd", origValue,
          refJd);
@@ -280,8 +345,11 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
       return (offset + tdbMjd);
    }
    // tt
-   else if (toType == TIME_SYSTEM_TEXT[5])
+   else if ((toType == TIME_SYSTEM_TEXT[5]) || (toType == TIME_SYSTEM_TEXT[12]))
    {
+      #ifdef DEBUG_TIMECONVERTER_DETAILS
+         MessageInterface::ShowMessage("      In the 'tt' block\n");
+      #endif
       return (origValue +
              (GmatTimeUtil::TT_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
    }
@@ -308,4 +376,63 @@ void TimeConverterUtil::SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileRe
 }
 
 
+std::string TimeConverterUtil::ConvertMjdToGregorian(const Real mjd)
+{
+   A1Mjd a1Mjd(mjd);
+   A1Date a1Date = a1Mjd.ToA1Date();
+   GregorianDate gregorianDate(&a1Date);
+   return gregorianDate.GetDate();
+}
 
+
+Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
+{
+   GregorianDate gregorianDate(greg);
+   Real jules;
+
+   if (!gregorianDate.IsValid())
+      throw TimeSystemConverterExceptions::TimeFormatException(
+         "Gregorian date '" + greg + "' is not valid.");
+
+   try
+   {
+      A1Date a1Date(gregorianDate.GetYMDHMS());
+      jules = ModifiedJulianDate(a1Date.GetYear(),a1Date.GetMonth(),
+                                 a1Date.GetDay(),a1Date.GetHour(),
+                                 a1Date.GetMinute(),a1Date.GetSecond());
+   }
+   catch (Date::TimeRangeError& e)
+   {
+      throw TimeSystemConverterExceptions::TimeFormatException(
+         "Gregorian date '" + greg +"' appears to be out of range.");
+   }
+
+   return jules;
+}
+
+
+bool TimeConverterUtil::ValidateTimeSystem(std::string sys)
+{
+   for (Integer i = 0; i < 13; ++i)
+      if (TIME_SYSTEM_TEXT[i] == sys)
+         return true;
+         
+   return false;
+}
+
+
+StringArray TimeConverterUtil::GetValidTimeRepresentations()
+{
+   StringArray systems;
+   for (Integer i = A1; i < TimeSystemCount; ++i)
+   {
+      if ((i != UT1) && (i != TDB) && (i != TCB))
+         systems.push_back(TIME_SYSTEM_TEXT[i] + "ModJulian");
+   }
+   for (Integer i = A1; i < TimeSystemCount; ++i)
+   {
+      if ((i != UT1) && (i != TDB) && (i != TCB))
+         systems.push_back(TIME_SYSTEM_TEXT[i] + "Gregorian");
+   }
+   return systems;
+}
