@@ -70,10 +70,15 @@ int MatlabInterface::Open()
    system("open -a X11");
    // need to get IP address or hostname here
    char hName[128];
-   std::string hNameStr = hName;
    int OK = gethostname(hName, 128);
+   if (OK != 0) MessageInterface::ShowMessage("Error getting host name\n");
+   std::string hNameStr(hName);
+   //std::string runString = "matlab -display " + hNameStr + ":0.0 -desktop";
    std::string runString = "matlab -display " + hNameStr + ":0.0";
-   if ((enginePtrD = engOpen(runString.c_str())))
+   //MessageInterface::ShowMessage("MATLAB being opened with the command: " 
+   //                  + runString + "\n");
+   if ((enginePtrD = engOpen("\0")))
+   //if ((enginePtrD = engOpen(runString.c_str())))
    {
       MessageInterface::ShowMessage("Successfully opened MATLAB engine ...\n");
       return 1;
