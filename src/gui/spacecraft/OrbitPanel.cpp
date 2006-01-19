@@ -268,7 +268,23 @@ void OrbitPanel::SaveData()
    
    // save epoch
    wxString epochStr = epochValue->GetValue();
-   theSpacecraft->SetDisplayEpoch(epochStr.c_str());
+   
+   std::string epochDateFormat =
+      (epochFormatStr.Contains("ModJulian") ? "ModJulian" : "Gregorian" );
+   
+   if (TimeConverterUtil::ValidateTimeFormat(epochDateFormat, epochStr.c_str()))
+      theSpacecraft->SetDisplayEpoch(epochStr.c_str());
+   else
+   {
+      std::string message = "Epoch '";
+      message += epochStr.c_str();
+      message += "' is not formatted correctly as a ";
+      message += epochFormatStr.c_str();
+      message += " epoch, and not saved to the Spacecraft object.";
+      
+      MessageInterface::PopupMessage(Gmat::WARNING_, message);   
+      epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch").c_str());
+   }
    
    // save coordinate system
    wxString coordSystemStr = mCoordSysComboBox->GetStringSelection();

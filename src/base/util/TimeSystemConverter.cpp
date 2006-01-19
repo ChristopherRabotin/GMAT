@@ -421,6 +421,38 @@ bool TimeConverterUtil::ValidateTimeSystem(std::string sys)
 }
 
 
+bool TimeConverterUtil::ValidateTimeFormat(const std::string &format, 
+        const std::string &value)
+{
+   if (format == "Gregorian")
+   {
+      // Gregorian formats should contain the month
+      std::string months[12] = {
+                                 "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+                               };
+      Integer loc = -1;
+      for (Integer i = 0; i < 12; ++i)
+      {
+         loc = value.find(months[i], 0);
+         if (loc >= 0)
+            return true;
+      }
+      return false;         
+   }
+   
+   if (format == "ModJulian")
+   {
+      // Sputnik launched Oct 4, 1957 = 6116 MJ; don't accept earlier epochs.
+      if (atof(value.c_str()) < 6116)
+         return false;
+      return true;
+   }
+   
+   return false;
+}
+
+
 StringArray TimeConverterUtil::GetValidTimeRepresentations()
 {
    StringArray systems;

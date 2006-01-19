@@ -1787,11 +1787,11 @@ void Spacecraft::SetEpoch(const std::string &ep)
    #endif
 
    // 1. Validate that the input string is the correct format.
-   if (epochFormat == "ModJulian")
+   if (TimeConverterUtil::ValidateTimeFormat(epochFormat, ep) == false)
    {
-   }
-   else
-   {
+      throw SpaceObjectException("Invalid epoch, '" + ep + 
+         "', specified; this value is not a valid " + epochFormat +
+         " epoch.");
    }
    
    // 2. Construct the Real epoch data and set it on the PropState.

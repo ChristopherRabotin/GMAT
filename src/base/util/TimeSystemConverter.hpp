@@ -119,6 +119,7 @@ namespace TimeConverterUtil
    Real ConvertGregorianToMjd(const std::string &greg);
    bool ValidateTimeSystem(std::string sys);
    
+   bool ValidateTimeFormat(const std::string &format, const std::string &value);
    StringArray GetValidTimeRepresentations();
 }
 
