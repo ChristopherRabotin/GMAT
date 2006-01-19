@@ -65,8 +65,12 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame* parent,
    try
    {
       wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
-      #ifndef __WXMAC__   // SetIcon does not appear to work properly on the Mac
+      #if defined __WXMSW__
          SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
+      #elif defined __WXGTK__
+         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_XPM));
+      #elif defined __WXMAX__
+         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_PICT_RESOURCE));
       #endif
    }
    catch (GmatBaseException &e)
