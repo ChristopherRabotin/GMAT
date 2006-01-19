@@ -60,12 +60,20 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame* parent,
 
    SetMenuBar(CreateMenu(dataType));
 
-   // set icon
+   // Set icon if icon file is in the start up file
    FileManager *fm = FileManager::Instance();
-   wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
-   #ifndef __WXMAC__   // SetIcon does not appear to work properly on the Mac
-      SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
-   #endif
+   try
+   {
+      wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
+      #ifndef __WXMAC__   // SetIcon does not appear to work properly on the Mac
+         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
+      #endif
+   }
+   catch (GmatBaseException &e)
+   {
+      //MessageInterface::ShowMessage(e.GetMessage());
+   }
+   
 }
 
 

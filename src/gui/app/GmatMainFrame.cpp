@@ -268,7 +268,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
 
    /*GmatNotebook *projectTree =*/ new GmatNotebook(win, -1, wxDefaultPosition,
                                 wxDefaultSize, wxCLIP_CHILDREN);          
-//   new wxNotebookSizer(projectTree);
+   //   new wxNotebookSizer(projectTree);
   
    // set the main frame, because there will no longer be right notebook
    GmatAppData::SetMainFrame(this);
@@ -277,17 +277,20 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    mRunPaused = false;
    mRunCompleted = true;
 
-   //Note: The following files should be in the gmat_startup_file.txt
-   // Windows:GMAT32.ico
-   // Linux:GMAT48.ico
-   // Mac:GMAT.icns
-
+   // Set icon if icon file is in the start up file
    FileManager *fm = FileManager::Instance();
-   wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
-   #ifndef __WXMAC__   // SetIcon does not appear to work properly on the Mac
-      SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
-   #endif
-
+   try
+   {
+      wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
+      #ifndef __WXMAC__   // SetIcon does not appear to work properly on the Mac
+         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
+      #endif
+   }
+   catch (GmatBaseException &e)
+   {
+      MessageInterface::ShowMessage(e.GetMessage());
+   }
+   
    #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() exiting\n");
    #endif
