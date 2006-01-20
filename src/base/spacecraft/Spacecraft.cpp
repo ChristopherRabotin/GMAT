@@ -1796,11 +1796,11 @@ void Spacecraft::SetEpoch(const std::string &ep)
    
    // 2. Construct the Real epoch data and set it on the PropState.
    Real now;
-   std::stringstream timestream;
-   timestream.precision(TIME_PRECISION);
    if (epochFormat == "ModJulian")
    {
-      timestream.str(ep);
+      std::stringstream timestream;
+      timestream.precision(TIME_PRECISION);
+      timestream << ep;
       timestream >> now;
    }
    else
@@ -1815,7 +1815,8 @@ void Spacecraft::SetEpoch(const std::string &ep)
    // 3. Save the string.
    if (epochFormat == "ModJulian")
    {
-      timestream.str("");
+      std::stringstream timestream;
+      timestream.precision(TIME_PRECISION);
       timestream << now;
       timestream >> scEpoch;
    }
