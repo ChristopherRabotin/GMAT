@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include "GregorianDate.hpp"
+#include "MessageInterface.hpp"
 #include <algorithm>
 
 //-------------------------------------
@@ -249,8 +250,10 @@ void GregorianDate::ParseOut(const std::string &str)
          monthNum = (Integer) distance(monthName.begin(),pos) + 1;
 
          std::string tempYMD;
-         tempYMD = dateToken.GetToken(2) + NumToString(monthNum) + 
-                   dateToken.GetToken(0) + "."; 
+         tempYMD = dateToken.GetToken(2) + NumToString(monthNum); 
+         if (dateToken.GetToken(0).length() == 1)
+            tempYMD += "0";
+         tempYMD += dateToken.GetToken(0) + "."; 
 
          // Start with time
          StringTokenizer timeToken(dateToken.GetToken(3),":");  

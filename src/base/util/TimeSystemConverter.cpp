@@ -397,6 +397,15 @@ Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
    try
    {
       A1Date a1Date(gregorianDate.GetYMDHMS());
+      
+      #ifdef DEBUG_TIMECONVERTER_DETAILS
+         MessageInterface::ShowMessage("Gregorian: %s\n", 
+            gregorianDate.GetYMDHMS().c_str());
+         MessageInterface::ShowMessage("YMDHMS:    %d  %d  %d  %d  %d  %lf\n", 
+            a1Date.GetYear(),a1Date.GetMonth(), a1Date.GetDay(),
+            a1Date.GetHour(), a1Date.GetMinute(),a1Date.GetSecond());
+      #endif
+      
       jules = ModifiedJulianDate(a1Date.GetYear(),a1Date.GetMonth(),
                                  a1Date.GetDay(),a1Date.GetHour(),
                                  a1Date.GetMinute(),a1Date.GetSecond());
