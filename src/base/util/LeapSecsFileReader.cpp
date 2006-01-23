@@ -22,6 +22,7 @@
 #include "LeapSecsFileReader.hpp"
 #include "MessageInterface.hpp"
 #include "StringTokenizer.hpp"
+#include "UtilityException.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -77,7 +78,11 @@ bool LeapSecsFileReader::Initialize()
          instream.open(withFileName.c_str());
 
          if (instream == NULL)
-            return false;
+         {
+            std::string errMsg = "Unable to locate leap second file "
+                                 + withFileName + "\n";
+            throw UtilityException(errMsg);
+         }
 
          while (!instream.eof())
          {
@@ -91,8 +96,10 @@ bool LeapSecsFileReader::Initialize()
    }
    catch (...)
    {
-      MessageInterface::PopupMessage(Gmat::WARNING_,
-                                     "Unknown Error");
+      //MessageInterface::PopupMessage(Gmat::WARNING_,
+      //                               "Unknown Error in LeapSecondFileReader");
+      // re-throw the exception
+      throw;
    }
 
    isInitialized = true;
