@@ -32,7 +32,7 @@
 #include "MessageInterface.hpp"
 
 #define USE_COORDUTIL_FOR_AOP 1
-#define USE_COORDUTIL_FOR_TA  1
+//#define USE_COORDUTIL_FOR_TA  1
 
 //#define DEBUG_ORBITDATA_INIT 1
 //#define DEBUG_ORBITDATA_CONVERT 1
@@ -247,13 +247,19 @@ Rvector6 OrbitData::GetKepState()
       InitializeRefObjects();
    
    mKepState = mSpacecraft->GetState("Keplerian");
-   Real ta = DegToRad(mKepState[5]);
-   Real costa = cos(ta);
-   Real ea = acos((mKepState[1] + costa)/(1.0 + mKepState[1]*costa));
-   mMA = RadToDeg(ea - mKepState[1] * sin(ea));
-   if (mKepState[5] > 180.0)
+
+   //MessageInterface::ShowMessage("==>OrbitData::GetKepState() mKepState=%s\n",
+   //                              mKepState.ToString().c_str());
+   
+   Real ta = DegToRad(mKepState[TA]);
+   //MessageInterface::ShowMessage("==>OrbitData::GetKepState() ta=%f\n", ta);
+   Real costa = Cos(ta);
+   Real ea = ACos((mKepState[1] + costa)/(1.0 + mKepState[1]*costa));
+   mMA = RadToDeg(ea - mKepState[1] * Sin(ea));
+   if (mKepState[TA] > 180.0)
       mMA = 360.0 - mMA;
 
+   //MessageInterface::ShowMessage("==>OrbitData::GetKepState() mMA=%f\n\n", mMA);
    return mKepState;
 }
 
@@ -268,9 +274,9 @@ Rvector6 OrbitData::GetModKepState()
    
    mKepState = mSpacecraft->GetState("ModifiedKeplerian");
    Real ta = DegToRad(mKepState[5]);
-   Real costa = cos(ta);
-   Real ea = acos((mKepState[1] + costa)/(1.0 + mKepState[1]*costa));
-   mMA = RadToDeg(ea - mKepState[1] * sin(ea));
+   Real costa = Cos(ta);
+   Real ea = ACos((mKepState[1] + costa)/(1.0 + mKepState[1]*costa));
+   mMA = RadToDeg(ea - mKepState[1] * Sin(ea));
    if (mKepState[5] > 180.0)
       mMA = 360.0 - mMA;
 
@@ -376,12 +382,19 @@ Real OrbitData::GetKepReal(const std::string &str)
       Real incDeg = ACos(hVec[2]) * DEG_PER_RAD;
       return incDeg;
    }
-   else if (str == "KepTA")
+   else if (str == "KepTA" || str == "KepMA")
    {
       #if USE_COORDUTIL_FOR_TA
       
       Rvector6 state = GetKepState();
-      return mKepState[TA];
+      MessageInterface::ShowMessage("==>OrbitData::GetKepReal() str=%s\n", str.c_str());
+      MessageInterface::ShowMessage("==>OrbitData::GetKepReal() taDeg=%f\n", mKepState[TA]);
+      MessageInterface::ShowMessage("==>OrbitData::GetKepReal() mMA=%f\n", mMA);
+
+      if (str == "KepTA")
+         return mKepState[TA];
+      else
+         return mMA;
       
       #else
       
@@ -389,21 +402,21 @@ Real OrbitData::GetKepReal(const std::string &str)
       // than computing keplerian state and return TA.
       
       // find cos ta and sind ta
-      Real a = GetSemiMajorAxis(pos, vel);
+      Real sma = GetSemiMajorAxis(pos, vel);
       Rvector6 hVec = GetAngularMomentum(pos, vel);
       Real hMag = hVec[3];
       Real orbParam = hVec[5];
-      Real e = Sqrt(Abs(1.0 - orbParam/a));
+      Real ecc = Sqrt(Abs(1.0 - orbParam/sma));
       Real inc = ACos(hVec[2]);
       Real cosTa = 0.0;
       Real sinTa = 0.0;
       
-      if (e >= ORBIT_TOL)
+      if (ecc >= ORBIT_TOL)
       {
          // for elliptic orbit
-         Real er = e * rMag;
+         Real er = ecc * rMag;
          cosTa = (orbParam - rMag) / er;
-         //loj: 6/22/05 Spec 2.21 does not give correct results
+         //Spec 2.21 does not give correct results
          //sinTa = (pos*vel) / (mGravConst * er); // GMAT Spec 2.11
          sinTa = (pos*vel)*hMag / (mGravConst * er); // Swingby CoordUtil
       }
@@ -434,8 +447,25 @@ Real OrbitData::GetKepReal(const std::string &str)
       
       if (taDeg < 0.0)
          taDeg = taDeg + 360.0;
-      
-      return taDeg;
+
+      if (str == "KepTA")
+      {
+         //MessageInterface::ShowMessage("==>OrbitData::GetKepReal() taDeg=%f\n\n", taDeg);
+         return taDeg;
+      }
+      else
+      {
+         Real ta = DegToRad(taDeg);
+         Real costa = Cos(ta);
+         Real ea = ACos((ecc + costa)/(1.0 + ecc*costa));
+         mMA = RadToDeg(ea - ecc * Sin(ea));
+         if (taDeg > 180.0)
+            mMA = 360.0 - mMA;
+         
+         //MessageInterface::ShowMessage("==>OrbitData::GetKepReal() taDeg=%f\n", taDeg);
+         //MessageInterface::ShowMessage("==>OrbitData::GetKepReal() mMA=%f\n\n", mMA);
+         return mMA;
+      }
       
       #endif // USE_COORDUTIL_FOR_TA
    }
@@ -460,15 +490,15 @@ Real OrbitData::GetKepReal(const std::string &str)
       // I don't know how much efficient it will be just computing AOP here
       // than computing keplerian state and return AOP.
       
-      Real a = GetSemiMajorAxis(pos, vel);
+      Real sma = GetSemiMajorAxis(pos, vel);
       Rvector6 hVec = GetAngularMomentum(pos, vel);
       Real vMagSq = hVec[4];
       Real orbParam = hVec[5];
-      Real e = Sqrt(Abs(1.0 - orbParam/a));
+      Real ecc = Sqrt(Abs(1.0 - orbParam/sma));
       Real inc = ACos(hVec[2]);
       Real aopDeg;
       
-      if (e < ORBIT_TOL)
+      if (ecc < ORBIT_TOL)
       {
          aopDeg = 0.0;
       }
@@ -486,7 +516,7 @@ Real OrbitData::GetKepReal(const std::string &str)
          
          if (Abs(inc) >= ORBIT_TOL)
          {
-            //loj: 6/22/05 Spec 2.23 does not give correct results
+            //Spec 2.23 does not give correct results
             //aopDeg = ACos((nVec*xVec) / (nMag*xMag)) * DEG_PER_RAD; //Spec 2.23)
             aopDeg = ACos(hyxX / (hxySqrt*xMag)) * DEG_PER_RAD; //Swingby CoordUtil
             
@@ -506,11 +536,6 @@ Real OrbitData::GetKepReal(const std::string &str)
       return aopDeg;
       
       #endif
-   }
-   else if (str == "KepMA")
-   {
-      Rvector6 state = GetKepState();
-      return mMA;
    }
    else
       throw ParameterException("OrbitData::GetCartReal() Unknown parameter name: " +
@@ -888,16 +913,16 @@ Real OrbitData::GetSemiMajorAxis(const Rvector3 &pos, const Rvector3 &vel)
          ("OrbitData::GetSemiMajorAxis() divide-by-zero occurred. pos: " +
           r.ToString() + " vel: " + v.ToString());
    
-   Real a = rMag / denom;
+   Real sma = rMag / denom;
 
    #if DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
       ("OrbitData::GetSemiMajorAxis() mOrigin=%s, mGravConst=%f\n   r=%s, "
        "v=%s, sma=%f\n", mOrigin->GetName().c_str(), mGravConst,
-       r.ToString().c_str(), v.ToString().c_str(), a);
+       r.ToString().c_str(), v.ToString().c_str(), sma);
    #endif
    
-   return a;
+   return sma;
 }
 
 
@@ -906,11 +931,11 @@ Real OrbitData::GetSemiMajorAxis(const Rvector3 &pos, const Rvector3 &vel)
 //------------------------------------------------------------------------------
 Real OrbitData::GetEccentricity(const Rvector3 &pos, const Rvector3 &vel)
 {
-   Real a = GetSemiMajorAxis(pos, vel);
+   Real sma = GetSemiMajorAxis(pos, vel);
    Rvector6 hVec = GetAngularMomentum(pos, vel);
    Real orbParam = hVec[5];
-   Real e = Sqrt(Abs(1.0 - orbParam/a));
-   return e;
+   Real ecc = Sqrt(Abs(1.0 - orbParam/sma));
+   return ecc;
 }
 
 
