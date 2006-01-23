@@ -21,6 +21,7 @@
 //------------------------------------------------------------------------------
 
 #include "SphericalRADEC.hpp"
+#include "AngleUtil.hpp"         // for PutAngleInRadRange()
 #include "UtilityException.hpp"
 
 //---------------------------------
@@ -189,10 +190,6 @@ Rvector6 SphericalRADEC::GetCartesian()
    Real vX = GetVelocityMagnitude() * GmatMathUtil::Cos(decV) * 
       GmatMathUtil::Cos(raV);
 
-   //Real vY = vX * tan(raV);
-   //@todo:  below looks like the problem... should use Tan() or tan()?
-   //loj: 4/1/05 Changed to use GmatMathUtil::Tan()
-   //GmatMathUtil::Tan() has been changed not to throw exception when angle is 0.0
    Real vY = vX * GmatMathUtil::Tan(raV);
 
    Real vZ = GetVelocityMagnitude() * GmatMathUtil::Sin(decV);
@@ -285,7 +282,6 @@ Rvector6 CartesianToSphericalRADEC(const Rvector6& cartesian)
 {
    SphericalRADEC newSpherical;
 
-//   if (!Spherical::ToSpherical(cartesian,false))
    if (!newSpherical.CartesianToSpherical(cartesian,false))
    {
       throw UtilityException("SphericalAZFPA::CartesianToSphericalAZFPA(): "
@@ -299,11 +295,22 @@ Rvector6 CartesianToSphericalRADEC(const Rvector6& cartesian)
    Real  vZ = cartesian[5];
 
    // Calculate right ascension of velocity which is measured east of vernal
-   // equinox using atan2() which returns an angle between 0.0 and TWO_PI 
-   newSpherical.SetVelocityRA( newSpherical.GetDegree(
-                               GmatMathUtil::ATan(vY,vX), 0.0, 
-                               GmatMathUtil::TWO_PI ));
-  
+   // equinox using atan2() which returns an angle between 0.0 and TWO_PI
+   Real raV = GmatMathUtil::ATan(vY, vX);
+   
+   // Do we want to put angle between 0.0 and TWO_PI?
+   // raV = AngleUtil::PutAngleInRadRange(raV, 0.0, GmatMathUtil::TWO_PI);
+   
+   // convert to degree
+   raV = raV * GmatMathUtil::DEG_PER_RAD;
+   
+   newSpherical.SetVelocityRA(raV);
+   
+   //loj: 1/23/06 replaced by above
+   //newSpherical.SetVelocityRA( newSpherical.GetDegree(
+   //                            GmatMathUtil::ATan(vY,vX), 0.0, 
+   //                            GmatMathUtil::TWO_PI ));
+   
    // Calculate declination of Velocity which is measured north from the 
    // equator using atan2() which will return an angle between -PI/2..PI/2 
    // radians since the second argument will be greater than or equal to zero.
