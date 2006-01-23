@@ -232,9 +232,9 @@ protected:
 //   TimeConverter     timeConverter;
    CoordinateConverter coordConverter;
    
-//   bool           isForDisplay;
-   std::string    displayEpoch;   
-   std::string    displayDateFormat;
+//   bool              isForDisplay;
+   std::string       displayEpoch;   
+   std::string       displayDateFormat;
    
    // Lists of hardware elements added 11/12/04, djc
    /// Fuel tank names
@@ -256,6 +256,7 @@ protected:
    Real              UpdateTotalMass() const;
    
    bool              initialDisplay;
+   bool              csSet;
 
    virtual void      WriteParameters(Gmat::WriteMode mode, std::string &prefix, 
                         std::stringstream &stream);

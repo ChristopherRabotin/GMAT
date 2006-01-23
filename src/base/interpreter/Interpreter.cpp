@@ -3975,6 +3975,19 @@ bool Interpreter::FinalPass()
          MessageInterface::ShowMessage(
             "After setting coordinate system on %s\n%s\n", i->c_str(), 
             gen.c_str());
+         Real *st = sat->GetState().GetState();
+         MessageInterface::ShowMessage(
+            "Before init state is [%.6lf %.6lf %.6lf %.9lf %.9lf %.9lf]\n",
+            st[0], st[1], st[2], st[3], st[4], st[5]);
+      #endif
+      
+      sat->Initialize();
+      
+      #ifdef DEBUG_PASS_TWO
+         st = sat->GetState().GetState();
+         MessageInterface::ShowMessage(
+            "After init state is  [%.6lf %.6lf %.6lf %.9lf %.9lf %.9lf]\n",
+            st[0], st[1], st[2], st[3], st[4], st[5]);
       #endif
    }
    

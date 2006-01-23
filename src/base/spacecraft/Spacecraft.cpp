@@ -26,6 +26,7 @@
 //#define DEBUG_SPACECRAFT_CS 1 
 //#define DEBUG_RENAME 1
 //#define DEBUG_DATE_FORMAT
+//#define DEBUG_STATE_INTERFACE
 
 #if DEBUG_SPACECRAFT
 #include <iostream>
@@ -129,7 +130,8 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    displayEpoch         ("21545.000000000"),   
    displayDateFormat    ("TAIModJulian"),  // Should be A1ModJulian
    totalMass            (850.0),
-   initialDisplay       (false)
+   initialDisplay       (false),
+   csSet                (false)
 {
    objectTypes.push_back(Gmat::SPACECRAFT);
    objectTypeNames.push_back("Spacecraft");
@@ -207,12 +209,13 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    stateType            (a.stateType),
    anomalyType          (a.anomalyType),
    internalCoordSystem  (NULL),
-   coordinateSystem     (NULL),
+   coordinateSystem     (a.coordinateSystem),      // Check this one...
    coordSysName         (a.coordSysName),
    displayEpoch         (a.displayEpoch),   
    displayDateFormat    (a.displayDateFormat),
    totalMass            (a.totalMass),
-   initialDisplay       (false)
+   initialDisplay       (false),
+   csSet                (a.csSet)
 {
    objectTypes.push_back(Gmat::SPACECRAFT);
    objectTypeNames.push_back("Spacecraft");
@@ -284,6 +287,12 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    state[3] = a.state[3];
    state[4] = a.state[4];
    state[5] = a.state[5];
+   
+   if (a.csSet)
+   {
+      coordinateSystem = a.coordinateSystem;
+      csSet = true;
+   }
 
    stateElementLabel = a.stateElementLabel;
    stateElementUnits = a.stateElementUnits;
@@ -435,6 +444,10 @@ PropState& Spacecraft::GetState()
 //------------------------------------------------------------------------------
 Rvector6 Spacecraft::GetState(std::string rep) 
 {
+   #ifdef DEGUG_STATE_INTERFACE
+      MessageInterface::ShowMessage("Getting state in representation %s", 
+         rep.c_str());
+   #endif
    rvState = GetStateInRepresentation(rep);
    return rvState;
 }
@@ -923,6 +936,8 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       
       if (coordinateSystem != cs)
          coordinateSystem = cs;
+         
+      TakeAction("ApplyCoordinateSystem");
 
       return true;
    }
@@ -1506,7 +1521,8 @@ bool Spacecraft::SetStringParameter(const std::string &label,
 bool Spacecraft::TakeAction(const std::string &action, 
                             const std::string &actionData)
 {
-   if (action == "SetupHardware") {
+   if (action == "SetupHardware") 
+   {
       // Attach tanks to thrusters
       StringArray tankNommes;
       GmatBase *tank;
@@ -1538,8 +1554,8 @@ bool Spacecraft::TakeAction(const std::string &action,
    }
    
    if ((action == "RemoveHardware") || (action == "RemoveTank") ||
-       (action == "RemoveThruster")) {
-
+       (action == "RemoveThruster")) 
+   {
       bool removeTank = true, removeThruster = true, removeAll = false;
       if (action == "RemoveTank")
          removeThruster = false;
@@ -1548,12 +1564,15 @@ bool Spacecraft::TakeAction(const std::string &action,
       if (actionData == "")
          removeAll = true;
          
-      if (removeThruster) {
-         if (removeAll) {
+      if (removeThruster) 
+      {
+         if (removeAll) 
+         {
             thrusters.clear();
             thrusterNames.clear();
          }
-         else {
+         else 
+         {
             for (StringArray::iterator i = thrusterNames.begin();
                  i != thrusterNames.end(); ++i)
                if (*i == actionData)
@@ -1565,12 +1584,15 @@ bool Spacecraft::TakeAction(const std::string &action,
          }
       }
 
-      if (removeTank) {
-         if (removeAll) {
+      if (removeTank) 
+      {
+         if (removeAll) 
+         {
             tanks.clear();
             tankNames.clear();
          }
-         else {
+         else 
+         {
             for (StringArray::iterator i = tankNames.begin();
                  i != tankNames.end(); ++i)
                if (*i == actionData)
@@ -1583,6 +1605,22 @@ bool Spacecraft::TakeAction(const std::string &action,
       }
 
       return true;
+   }
+
+   if (action == "ApplyCoordinateSystem")
+   {
+      if (!stateConverter.SetMu(coordinateSystem))
+      {      throw SpaceObjectException(
+                   "\nError:  Spacecraft has empty coordinate system\n");
+      }
+      
+      if (csSet == false)
+      {
+         Rvector6 st(state.GetState());
+         SetStateFromRepresentation(stateType, st);
+         
+         csSet = true;
+      }
    }
    
    return SpaceObject::TakeAction(action, actionData);
@@ -1750,15 +1788,21 @@ void Spacecraft::SaveDisplay()
 bool Spacecraft::Initialize()
 {
    #if DEBUG_SPACECRAFT_CS
-   MessageInterface::ShowMessage
-      ("Spacecraft::Initialize() internalCoordSystem=%d, coordinateSystem=%d\n",
-       internalCoordSystem, coordinateSystem);
-   MessageInterface::ShowMessage
-      ("   cartesianState=\n   %s\n", cartesianState.ToString().c_str());
-   MessageInterface::ShowMessage
-      ("   stateType=%s, state=\n   %f, %f, %f, %f, %f, %f\n",
-       stateType.c_str(), state[0], state[1], state[2], state[3],
-       state[4], state[5]);
+      MessageInterface::ShowMessage("Spacecraft::Initialize() "
+         "internalCoordSystem=%d, coordinateSystem=%d\n", internalCoordSystem, 
+         coordinateSystem);
+   
+      if (internalCoordSystem)
+         MessageInterface::ShowMessage("   internalCoordSystem is '%s'\n", 
+            internalCoordSystem->GetName().c_str());
+      if (coordinateSystem)
+         MessageInterface::ShowMessage("   coordinateSystem is '%s'\n", 
+            coordinateSystem->GetName().c_str());
+          
+      MessageInterface::ShowMessage
+         ("   stateType=%s, state=\n   %.9f, %.9f, %.9f, %.14f, %.14f, %f.14\n",
+          stateType.c_str(), state[0], state[1], state[2], state[3],
+          state[4], state[5]);
    #endif
    
    // Set the mu if CelestialBody is there thru coordinate system's origin;   
@@ -2217,21 +2261,45 @@ void Spacecraft::UpdateElementLabels()
 //------------------------------------------------------------------------------
 Rvector6 Spacecraft::GetStateInRepresentation(std::string rep)
 {
+   #ifdef DEBUG_STATE_INTERFACE
+      MessageInterface::ShowMessage(
+         "Spacecraft::GetStateInRepresentation(string): Constructing %s state\n", 
+         rep.c_str());
+   #endif
+
+   Rvector6 csState;
    Rvector6 finalState;
    
+   // First convert from the internal CS to the state CS
+   if (internalCoordSystem != coordinateSystem)
+   {
+      Rvector6 inState(state.GetState());
+      coordConverter.Convert(GetEpoch(), inState, internalCoordSystem, csState, 
+         coordinateSystem);
+   }
+   else
+   {
+      csState.Set(state.GetState());
+   }
+   
+   // Then convert to the desired representation
    if (rep == "")
       rep = stateType;
    
    if (rep == "Cartesian")
-   {
-      finalState.Set(state.GetState());
-   }
+      finalState = csState;
    else
-   {
-      rvState.Set(state.GetState());
-      finalState = stateConverter.Convert(rvState, "Cartesian", rep, anomaly);
-   }
+      finalState = stateConverter.Convert(csState, "Cartesian", rep, anomaly);
    
+   #ifdef DEBUG_STATE_INTERFACE
+      MessageInterface::ShowMessage(
+         "Spacecraft::GetStateInRepresentation(string): %s state is "
+         "[%.9lf %.9lf %.9lf %.14lf %.14lf %.14lf]\n", 
+         rep.c_str(), finalState[0], finalState[1], 
+         finalState[2], finalState[3], finalState[4], 
+         finalState[5]);
+   #endif
+
    return finalState;
 }
 
@@ -2245,20 +2313,42 @@ Rvector6 Spacecraft::GetStateInRepresentation(std::string rep)
 //------------------------------------------------------------------------------
 Rvector6 Spacecraft::GetStateInRepresentation(Integer rep)
 {
+   #ifdef DEBUG_STATE_INTERFACE
+      MessageInterface::ShowMessage(
+         "Spacecraft::GetStateInRepresentation(int): Constructing %s state\n", 
+         representations[rep].c_str());
+   #endif
+   Rvector6 csState;
    Rvector6 finalState;
    
-   if (rep == CARTESIAN_ID)
+   // First convert from the internal CS to the state CS
+   if (internalCoordSystem != coordinateSystem)
    {
-      finalState.Set(state.GetState());
+      Rvector6 inState(state.GetState());
+      coordConverter.Convert(GetEpoch(), inState, internalCoordSystem, csState, 
+         coordinateSystem);
    }
    else
    {
-      std::string strrep = representations[rep];
-      rvState.Set(state.GetState());
-      finalState = stateConverter.Convert(rvState, "Cartesian", 
-         representations[rep], anomaly);
+      csState.Set(state.GetState());
    }
    
+   // Then convert to the desired representation
+   if (rep == CARTESIAN_ID)
+      finalState = csState;
+   else
+      finalState = stateConverter.Convert(csState, "Cartesian", 
+         representations[rep], anomaly);
+   
+   #ifdef DEBUG_STATE_INTERFACE
+      MessageInterface::ShowMessage(
+         "Spacecraft::GetStateInRepresentation(int): %s state is "
+         "[%.9lf %.9lf %.9lf %.14lf %.14lf %.14lf]\n", 
+         representations[rep].c_str(), finalState[0], finalState[1], 
+         finalState[2], finalState[3], finalState[4], 
+         finalState[5]);
+   #endif
+
    return finalState;
 }
 
@@ -2277,29 +2367,28 @@ void Spacecraft::SetStateFromRepresentation(std::string rep, Rvector6 &st)
          "Spacecraft::SetStateFromRepresentation: Setting %s state to %s\n", 
          rep.c_str(), st.ToString().c_str());
    #endif
-   
-   static Rvector6 finalState;
+
+   // First convert from the representation to Cartesian   
+   static Rvector6 csState, finalState;
    
    if (rep == "Cartesian")
-   {
-      state[0] = st[0];
-      state[1] = st[1];
-      state[2] = st[2];
-      state[3] = st[3];
-      state[4] = st[4];
-      state[5] = st[5];
-   }
+      csState = st;
    else
-   {
-      finalState = stateConverter.Convert(st, rep, "Cartesian", anomaly);
+      csState = stateConverter.Convert(st, rep, "Cartesian", anomaly);
       
-      state[0] = finalState[0];
-      state[1] = finalState[1];
-      state[2] = finalState[2];
-      state[3] = finalState[3];
-      state[4] = finalState[4];
-      state[5] = finalState[5];
-   }
+   // Then convert to the internal CS
+   if (internalCoordSystem != coordinateSystem)
+      coordConverter.Convert(GetEpoch(), csState, coordinateSystem, finalState, 
+         internalCoordSystem);
+   else
+      finalState = csState;
+
+   state[0] = finalState[0];
+   state[1] = finalState[1];
+   state[2] = finalState[2];
+   state[3] = finalState[3];
+   state[4] = finalState[4];
+   state[5] = finalState[5];
    
    #ifdef DEBUG_STATE_INTERFACE
       MessageInterface::ShowMessage(
@@ -2356,9 +2445,18 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
    
    if (id >= 0)
    {
-      Rvector6 tempState = GetStateInRepresentation(rep);
-      tempState[id] = value;
-      SetStateFromRepresentation(rep, tempState);
+      if (csSet)
+      {
+         Rvector6 tempState = GetStateInRepresentation(rep);
+         tempState[id] = value;
+         SetStateFromRepresentation(rep, tempState);
+      }
+      else
+      {
+         Real *tempState = state.GetState();
+         tempState[id] = value;
+      }
+      
       return true;
    }
    

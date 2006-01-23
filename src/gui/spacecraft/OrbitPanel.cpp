@@ -161,7 +161,7 @@ void OrbitPanel::LoadData()
       else
       {
          #if DEBUG_ORBIT_PANEL
-         MessageInterface::ShowMessage("   mOutCoord=%s, addr=%d\n",
+            MessageInterface::ShowMessage("   mOutCoord=%s, addr=%d\n",
                                        mOutCoord->GetName().c_str(), mOutCoord);
          #endif
       }
@@ -225,7 +225,8 @@ void OrbitPanel::LoadData()
          anomalyComboBox->Append(wxString(anomalyList[i].c_str()));
       
       // Get Spacecraft initial state and display
-      mCartState = theSpacecraft->GetState(stType);
+//      mCartState = theSpacecraft->GetState(stType);
+      mCartState.Set(theSpacecraft->GetState().GetState());
       mTempCartState = mCartState;
       mOutState = mCartState;
       DisplayState();
