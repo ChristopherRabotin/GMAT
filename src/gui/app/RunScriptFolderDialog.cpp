@@ -115,7 +115,24 @@ void RunScriptFolderDialog::Create()
    runSizer->Add(mNumScriptsToRunTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
    runSizer->Add(numTimesLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    runSizer->Add(mNumTimesToRunTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+ 
+ #if __WXMAC__
+   wxStaticText *title1StaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Run Scripts"),
+                        wxDefaultPosition, wxSize(220,20),
+                        wxBOLD);
+   title1StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
+                                             false, _T(""), wxFONTENCODING_SYSTEM));
+                                             
+   wxBoxSizer *runBoxSizer = new wxBoxSizer( wxVERTICAL );
    
+   runBoxSizer->Add(title1StaticText, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
+   runBoxSizer->Add(runSizer, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
+   runBoxSizer->Add(currOutDir1, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   runBoxSizer->Add(currOutDir2, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   runBoxSizer->Add(mCurrOutDirTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   runBoxSizer->Add(mChangeCurrOutDirButton, 0, wxALIGN_CENTER|wxALL, bsize);
+#else  
    wxStaticBoxSizer *runStaticSizer =
       new wxStaticBoxSizer(wxVERTICAL, this, "Run Scripts");
    
@@ -124,6 +141,7 @@ void RunScriptFolderDialog::Create()
    runStaticSizer->Add(currOutDir2, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
    runStaticSizer->Add(mCurrOutDirTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
    runStaticSizer->Add(mChangeCurrOutDirButton, 0, wxALIGN_CENTER|wxALL, bsize);
+#endif
 
    //------------------------------------------------------
    // compare results
@@ -185,7 +203,28 @@ void RunScriptFolderDialog::Create()
    mSaveBrowseButton =
       new wxButton(this, ID_BUTTON, wxT("Browse"),
                     wxDefaultPosition, wxDefaultSize, 0);
+
+ #if __WXMAC__
+   wxStaticText *title2StaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Compare Results"),
+                        wxDefaultPosition, wxSize(220,20),
+                        wxBOLD);
+   title2StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
+                                             false, _T(""), wxFONTENCODING_SYSTEM));
+                                             
+   wxBoxSizer *compareBoxSizer = new wxBoxSizer( wxVERTICAL );
    
+   compareBoxSizer->Add(title2StaticText, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
+   compareBoxSizer->Add(compareSizer, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
+   compareBoxSizer->Add(dirLabel, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize+2);
+   compareBoxSizer->Add(mCompareDirTextCtrl, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize+2);
+   compareBoxSizer->Add(mDirBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   compareBoxSizer->Add(20,3, 0, wxALIGN_CENTRE|wxALL, bsize);
+   compareBoxSizer->Add(mSaveResultCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   compareBoxSizer->Add(saveFileLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   compareBoxSizer->Add(mSaveFileTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   compareBoxSizer->Add(mSaveBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+#else   
    wxStaticBoxSizer *compareStaticSizer =
       new wxStaticBoxSizer(wxVERTICAL, this, "Compare Results");
 
@@ -198,17 +237,20 @@ void RunScriptFolderDialog::Create()
    compareStaticSizer->Add(saveFileLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    compareStaticSizer->Add(mSaveFileTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    compareStaticSizer->Add(mSaveBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+#endif
    
    //------------------------------------------------------
    // add to page sizer
    //------------------------------------------------------
-   
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
+ #if __WXMAC__
+   pageBoxSizer->Add(runBoxSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
+   pageBoxSizer->Add(compareBoxSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
+ #else  
    pageBoxSizer->Add(runStaticSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
    pageBoxSizer->Add(compareStaticSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
-   
+ #endif  
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-
 }
 
 
