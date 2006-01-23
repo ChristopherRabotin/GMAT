@@ -40,31 +40,31 @@
 const Gmat::ParameterType   
    Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] = 
    {
-      Gmat::STRING_TYPE, 
-      Gmat::REAL_TYPE, 
-      Gmat::REAL_TYPE, 
-      Gmat::REAL_TYPE, 
-      Gmat::REAL_TYPE,
-      Gmat::REAL_TYPE, 
-      Gmat::REAL_TYPE, 
-      Gmat::STRING_TYPE, 
-      Gmat::STRING_TYPE,
-      Gmat::STRING_TYPE, 
-      Gmat::STRING_TYPE, 
-      Gmat::STRING_TYPE,
-      Gmat::STRING_TYPE, 
-      Gmat::STRING_TYPE, 
-      Gmat::STRING_TYPE,
-      Gmat::STRING_TYPE, 
-      Gmat::REAL_TYPE, 
-      Gmat::STRING_TYPE, 
-      Gmat::REAL_TYPE, 
-      Gmat::REAL_TYPE, 
-      Gmat::REAL_TYPE, 
-      Gmat::REAL_TYPE, 
-      Gmat::STRINGARRAY_TYPE,
-      Gmat::STRINGARRAY_TYPE, 
-      Gmat::REAL_TYPE
+      Gmat::STRING_TYPE,      // Epoch 
+      Gmat::REAL_TYPE,        // Element1
+      Gmat::REAL_TYPE,        // Element2
+      Gmat::REAL_TYPE,        // Element3
+      Gmat::REAL_TYPE,        // Element4
+      Gmat::REAL_TYPE,        // Element5
+      Gmat::REAL_TYPE,        // Element6
+      Gmat::STRING_TYPE,      // Element1Units
+      Gmat::STRING_TYPE,      // Element2Units
+      Gmat::STRING_TYPE,      // Element3Units
+      Gmat::STRING_TYPE,      // Element4Units
+      Gmat::STRING_TYPE,      // Element5Units
+      Gmat::STRING_TYPE,      // Element6Units
+      Gmat::STRING_TYPE,      // StateType
+      Gmat::STRING_TYPE,      // AnomalyType
+      Gmat::STRING_TYPE,      // CoordinateSystem
+      Gmat::REAL_TYPE,        // DryMass
+      Gmat::STRING_TYPE,      // DateFormat
+      Gmat::REAL_TYPE,        // Cd
+      Gmat::REAL_TYPE,        // Cr
+      Gmat::REAL_TYPE,        // DragArea
+      Gmat::REAL_TYPE,        // SRPArea
+      Gmat::STRINGARRAY_TYPE, // Tanks
+      Gmat::STRINGARRAY_TYPE, // Thrusters
+      Gmat::REAL_TYPE         // TotalMass
    };
    
 const std::string 
@@ -1024,7 +1024,7 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
        str == "EA" || str == "FPA" || str == "DECV") 
       return ELEMENT6_ID;
 
-   for (Integer i = SpaceObjectParamCount; i < SpacecraftParamCount; i++)
+   for (Integer i = SpaceObjectParamCount; i < SpacecraftParamCount; ++i)
    {
       if (str == PARAMETER_LABEL[i - SpaceObjectParamCount])
          return i;
@@ -1397,7 +1397,8 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
    if ((id < SpaceObjectParamCount) || (id >= SpacecraftParamCount))
       return SpaceObject::SetStringParameter(id, value);
       
-   if (GetParameterType(id) != Gmat::STRING_TYPE)
+   if ((GetParameterType(id) != Gmat::STRING_TYPE) && 
+       (GetParameterType(id) != Gmat::STRINGARRAY_TYPE))
       throw SpaceObjectException("Parameter " + GetParameterText(id) +
          " is being accessed as a string, but it is of type " +
          GetParameterTypeString(GetParameterType(id)));
