@@ -183,6 +183,7 @@ bool GmatMathUtil::IsZero (Real theNumber, Real accuracy)
    return bool(fabs(theNumber) < accuracy);
 }
 
+
 //------------------------------------------------------------------------------
 //  bool IsEqual (Real left, Real right, Real accuracy)
 //------------------------------------------------------------------------------
@@ -385,8 +386,9 @@ Real GmatMathUtil::ATan (Real y, Real x , Real cycleInRad)
 {
    if (cycleInRad <= 0.0) 
       throw RealUtilitiesExceptions::ArgumentError("ATan(angle, cycle <= 0.0)");
-   else if ((x == 0.0) && (y == 0.0)) 
-      throw RealUtilitiesExceptions::ArgumentError("ATan(x = 0.0, y = 0.0)");
+   //loj: 1/24/06 commented out throw
+   //else if ((x == 0.0) && (y == 0.0))
+   //   throw RealUtilitiesExceptions::ArgumentError("ATan(x = 0.0, y = 0.0)");
    
    return (cycleInRad/TWO_PI)*atan2(y,x);
 }
