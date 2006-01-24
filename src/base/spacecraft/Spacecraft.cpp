@@ -1806,11 +1806,11 @@ bool Spacecraft::Initialize()
           state[4], state[5]);
    #endif
    
-   // Set the mu if CelestialBody is there thru coordinate system's origin;   
+   // Set the mu if CelestialBody is there through coordinate system's origin;   
    // Otherwise, discontine process and send the error message   
    if (!stateConverter.SetMu(coordinateSystem))
-   {      throw SpaceObjectException(
-                "\nError:  Spacecraft has empty coordinate system\n");
+   {      
+      throw SpaceObjectException("Spacecraft has empty coordinate system");
    }   
    
    return true;

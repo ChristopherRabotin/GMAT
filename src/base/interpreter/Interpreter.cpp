@@ -419,7 +419,7 @@ bool Interpreter::Interpret(GmatBase *obj, const std::string generator)
 // bool BuildObject(std::string &objectname)
 //------------------------------------------------------------------------------
 /**
- * Calls the Moderator to build core objects and place them in the ConfigManager.
+ * Calls the Moderator to serialize core objects for text output.
  *
  * @param objectname Name of the object that gets serialized.
  *
@@ -448,7 +448,7 @@ bool Interpreter::BuildObject(std::string &objectname)
 // bool BuildObject(std::string &objectname)
 //------------------------------------------------------------------------------
 /**
- * Pulls the variables and arrays out of the collection of paramters, and
+ * Pulls the variables and arrays out of the collection of parameters, and
  * serializes them.
  *
  * @param objectname Name of the object that gets serialized.

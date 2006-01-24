@@ -148,9 +148,9 @@ Real StateConverter::GetMu() const
  */
 bool StateConverter::SetMu(const CoordinateSystem *coordSys)
 {
-#if DEBUG_STATE_CONVERTER
+   #if DEBUG_STATE_CONVERTER
       MessageInterface::ShowMessage("\nStateConverter::SetMu(cs) enters...\n");
-#endif
+   #endif
 
    // Check for empty coordinate system then stop process
    if (coordSys == NULL)
@@ -159,27 +159,29 @@ bool StateConverter::SetMu(const CoordinateSystem *coordSys)
    // Get the coordinate system's origin
    SpacePoint *origin = coordSys->GetOrigin();
 
-#if DEBUG_STATE_CONVERTER
-   std::string typeName = origin->GetTypeName();
-   MessageInterface::ShowMessage("\n...Type name is %s.\n ",typeName.c_str());
-
-   if (origin->IsOfType(Gmat::CELESTIAL_BODY))
-      MessageInterface::ShowMessage("\n...It is CelestialBody.\n ");
-   else
-      MessageInterface::ShowMessage("\n...It is others than CB.\n ");
-#endif
+   #if DEBUG_STATE_CONVERTER
+      std::string typeName = origin->GetTypeName();
+      MessageInterface::ShowMessage("\n...Type name is '%s'.\n ",
+         typeName.c_str());
+   
+      if (origin->IsOfType(Gmat::CELESTIAL_BODY))
+         MessageInterface::ShowMessage("\n...It is CelestialBody.");
+      else
+         MessageInterface::ShowMessage(
+            "\n...CoordSys origin is not a CelestialBody.\n ");
+   #endif
 
    // Check if it is Celestial Body then get the mu; 
-   // Otherwise, it sets zero to mu
+   // Otherwise, it sets mu to zero
    if (origin->IsOfType(Gmat::CELESTIAL_BODY))
       mu = ((CelestialBody *)origin)->GetGravitationalConstant(); 
    else
       mu = 0.0;
 
-#if DEBUG_STATE_CONVERTER
+   #if DEBUG_STATE_CONVERTER
       MessageInterface::ShowMessage("\n...mu = %f before "
         "StateConverter::SetMu() exits\n\n",mu);
-#endif
+   #endif
 
    return true;
 }

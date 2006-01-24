@@ -22,7 +22,7 @@
 #include <fstream>
 
 // Maybe put something like this in the Gmat namespace?
-#define REV_STRING "Build 5.0, August 2005"
+#define REV_STRING "Build 6.0, February 2006"
 
 
 //#define DEBUG_SCRIPTINTERPRETER
@@ -681,8 +681,8 @@ bool ScriptInterpreter::Parse()
                // commands are moved to the new format
                if (!cmd->InterpretAction()) {
                   if (!AssembleCommand(line, cmd))
-                     throw InterpreterException("Could not construct command \"" +
-                                                line + "\"");
+                     throw InterpreterException(
+                        "Could not construct command \"" + line + "\"");
                }
                sequenceStarted = true;
                branchDepth += cmd->DepthIncrement();
@@ -722,7 +722,7 @@ bool ScriptInterpreter::Parse()
 bool ScriptInterpreter::WriteScript()
 {
    *outstream << "% GMAT Script File\n% GMAT Release " << REV_STRING << "\n\n";
-     
+   
    // First write out the objects, one type at a time
    StringArray::iterator current;
    StringArray objs;
@@ -751,13 +751,26 @@ bool ScriptInterpreter::WriteScript()
    // Spacecraft
    objs = moderator->GetListOfConfiguredItems(Gmat::SPACECRAFT);
 
+   // Setup the coordinate systems on Spacecraft so they can perform conversions
+   CoordinateSystem *ics = moderator->GetInternalCoordinateSystem(), *sccs;
+
    #ifdef DEBUG_SCRIPT_READING_AND_WRITING
       std::cout << "Found " << objs.size() << " Spacecraft\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      Spacecraft *sc = (Spacecraft*)(moderator->GetConfiguredItem(*current));
+      sc->SetInternalCoordSystem(ics);
+      sccs = (CoordinateSystem*)(moderator->
+         GetConfiguredItem(sc->GetRefObjectName(Gmat::COORDINATE_SYSTEM)));
+      if (sccs)
+         sc->SetRefObject(sccs, Gmat::COORDINATE_SYSTEM);
+      sc->Initialize();
+      
       if (!BuildObject(*current))
          return false;
-
+   }
+   
    // Formations
    objs = moderator->GetListOfConfiguredItems(Gmat::FORMATION);
 

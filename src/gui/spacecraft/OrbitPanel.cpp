@@ -162,8 +162,13 @@ void OrbitPanel::LoadData()
       {
          #if DEBUG_ORBIT_PANEL
             MessageInterface::ShowMessage("   mOutCoord=%s, addr=%d\n",
-                                       mOutCoord->GetName().c_str(), mOutCoord);
+               mOutCoord->GetName().c_str(), mOutCoord);
          #endif
+         
+         // Set the CS's on the spacecraft
+         theSpacecraft->SetInternalCoordSystem(mInternalCoord);
+         theSpacecraft->SetRefObject(mOutCoord, Gmat::COORDINATE_SYSTEM);
+         theSpacecraft->Initialize();
       }
       
       // get the origin for the output coordinate system
