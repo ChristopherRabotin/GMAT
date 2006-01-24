@@ -27,8 +27,7 @@
 #include "CommandUtil.hpp"         // for GetCommandSeq()
 #include <ctime>                   // for clock()
 
-//loj: 1/4/06 debug
-
+//loj: 1/18/06 debug
 //#define DEBUG_INIT 1
 //#define DEBUG_RUN 1
 //#define DEBUG_CREATE_RESOURCE 1
@@ -150,7 +149,10 @@ bool Moderator::Initialize(bool fromGui)
       theFactoryManager->RegisterFactory(theSubscriberFactory);
       
       // Create default SolarSystem
-      theDefaultSolarSystem = new SolarSystem("DefaultSolarSystem");
+      /// @note: If the solar system is configured, add it to the ConfigManager
+      ///        by calling CreateSolarSystem(). The ConfigManager also needs to
+      ///        handle multiple SolarSystem.
+      theDefaultSolarSystem = new SolarSystem("SolarSystem");
       StringArray bodies = theDefaultSolarSystem->GetBodiesInUse();
       SpacePoint *sp;
       SpacePoint *earth = theDefaultSolarSystem->GetBody("Earth");
@@ -672,7 +674,11 @@ bool Moderator::HasConfigurationChanged(Integer sandboxNum)
 //------------------------------------------------------------------------------
 void Moderator::ConfigurationChanged(GmatBase *obj, bool tf)
 {
-   MessageInterface::ShowMessage("==>Moderator::ConfigurationChanged() called\n");
+   //loj: 1/17/06 debug
+   #if DEBUG_CONFIG
+   MessageInterface::ShowMessage("Moderator::ConfigurationChanged() called\n");
+   #endif
+   
    if (obj != NULL)
    {
       if (obj->IsOfType(Gmat::COMMAND))
@@ -975,7 +981,8 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type,
    
    if (GetSpacecraft(name) == NULL)
    {
-      SpaceObject *sc = theFactoryManager->CreateSpacecraft(type, name);
+      //SpaceObject *sc = theFactoryManager->CreateSpacecraft(type, name);
+      Spacecraft *sc = (Spacecraft*)(theFactoryManager->CreateSpacecraft(type, name));
 
       if (sc == NULL)
       {
@@ -989,8 +996,11 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type,
       }
       
       if (type == "Spacecraft")
-         // Set default CoordinateSystem
+      {
+         // Set internal and default CoordinateSystem
+         sc->SetInternalCoordSystem(theInternalCoordSystem);
          sc->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+      }
       
       // Manage it if it is a named Spacecraft
       try
@@ -2907,7 +2917,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
    MessageInterface::ShowMessage("Running mission...\n");
    Integer status = 0;
 
-   clock_t t1 = clock();
+   clock_t t1 = clock(); // Should I clock after initilization?
    
    if (isRunReady)
    {
