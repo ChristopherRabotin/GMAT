@@ -40,6 +40,8 @@ CoordPanel::CoordPanel(wxWindow *parent, bool enableAll)
    
    mEnableAll = enableAll;
    
+   epochValue = "21545";
+      
    Create();
 }
 
@@ -65,6 +67,9 @@ void CoordPanel::EnableOptions()
       MessageInterface::ShowMessage("CoordPanel::EnableOptions() type =%s\n",
       typeComboBox->GetStringSelection().c_str());
    #endif
+   
+   // save epoch value locally
+   epochValue = epochTextCtrl->GetValue();
 
    wxString typeStr = typeComboBox->GetStringSelection();
    
@@ -154,7 +159,8 @@ void CoordPanel::EnableOptions()
       secondaryStaticText->Enable(mShowSecondaryBody);
       secondaryComboBox->Enable(mShowSecondaryBody);
       formatStaticText->Enable(mShowEpoch);
-      formatComboBox->Enable(mShowEpoch);
+      // arg: 1/23/05 - for now never enable
+      formatComboBox->Enable(false);
       epochStaticText->Enable(mShowEpoch);
       epochTextCtrl->Enable(mShowEpoch);
       xStaticText->Enable(mShowXyz);
@@ -217,7 +223,8 @@ void CoordPanel::SetDefaultAxis()
    primaryComboBox->SetValue("Earth");
    secondaryComboBox->SetValue("Luna");
    formatComboBox->SetValue("TAIModJulian");
-   epochTextCtrl->SetValue("21545");
+//   epochTextCtrl->SetValue("21545");
+   epochTextCtrl->SetValue(epochValue);
    xComboBox->SetValue("R");
    yComboBox->SetValue("");;
    zComboBox->SetValue("N");
@@ -232,7 +239,8 @@ void CoordPanel::SetDefaultEpochRefAxis()
 {
    // default settings
    formatComboBox->SetValue("TAIModJulian");
-   epochTextCtrl->SetValue("21545");
+//   epochTextCtrl->SetValue("21545");
+    epochTextCtrl->SetValue(epochValue);
 }
 
 
@@ -284,13 +292,14 @@ void CoordPanel::ShowAxisData(AxisSystem *axis)
       
       if (GetShowEpoch())
       {
-         Real epoch = axis->GetEpoch().Get();
          std::string epochFormat = axis->GetEpochFormat();
-         
          formatComboBox->SetStringSelection(epochFormat.c_str());
+         
+         // arg: 1/23/06 commented out because epoch conversion isn't needed
+         Real epoch = axis->GetEpoch().Get();
          wxString wxEpochStr;
          wxEpochStr.Printf("%9.9f", epoch);
-         std::string epochString = wxEpochStr.c_str();
+/*         std::string epochString = wxEpochStr.c_str();
          
          // convert if epoch is not in TAIModJulian
          if (epochFormat != "TAIModJulian")
@@ -305,7 +314,8 @@ void CoordPanel::ShowAxisData(AxisSystem *axis)
                                       epochFormat);
          }
          
-         epochTextCtrl->SetValue(epochString.c_str());
+         epochTextCtrl->SetValue(epochString.c_str());*/
+         epochTextCtrl->SetValue(wxEpochStr);
       }
       
       if (GetShowXyz())
@@ -417,7 +427,7 @@ AxisSystem* CoordPanel::CreateAxis()
 //------------------------------------------------------------------------------
 void CoordPanel::ChangeEpoch(wxString &oldFormat)
 {
-   wxString newFormat = formatComboBox->GetStringSelection().Trim();
+/*   wxString newFormat = formatComboBox->GetStringSelection().Trim();
 
    #if DEBUG_COORD_PANEL
    MessageInterface::ShowMessage
@@ -432,7 +442,13 @@ void CoordPanel::ChangeEpoch(wxString &oldFormat)
                                 oldFormat.c_str(), newFormat.c_str());
       epochTextCtrl->SetValue(newEpoch.c_str());
       oldFormat = newFormat;
-   }
+   }*/
+   
+//      std::string toEpochFormat = formatComboBox->GetStringSelection().c_str();    
+//      std::string epochStr = epochTextCtrl->GetValue().c_str();
+//      theSpacecraft->SetDateFormat(toEpochFormat);
+//      epochTextCtrl->SetValue(theSpacecraft->GetStringParameter("Epoch").c_str());
+//      oldFormat = toEpochFormat;
 }
 
 
@@ -726,7 +742,9 @@ void CoordPanel::LoadData()
       // insert a blank option for secondary
       secondaryComboBox->Append("");
       
-      // Load epoch types - hard coded for now
+      StringArray reps = TimeConverterUtil::GetValidTimeRepresentations();
+      
+/*      // Load epoch types - hard coded for now
       wxString epochStrs[] =
       {
          wxT("TAIModJulian"),
@@ -736,7 +754,10 @@ void CoordPanel::LoadData()
       };
       
       for (unsigned int i = 0; i<4; i++)
-         formatComboBox->Append(wxString(epochStrs[i].c_str()));
+         formatComboBox->Append(wxString(epochStrs[i].c_str()));*/
+      
+      for (unsigned int i = 0; i < reps.size(); i++)
+         formatComboBox->Append(reps[i].c_str());
       
       wxString xyzStrs[] =
       {
@@ -870,6 +891,7 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
          
          if (epochTextCtrl->GetValue().ToDouble(&epoch))
          {
+            epochValue = epochTextCtrl->GetValue();
             if (epochFormat != newEpochFormat)
             {
                axis->SetEpochFormat(newEpochFormat.c_str());

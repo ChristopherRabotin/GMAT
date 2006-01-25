@@ -28,6 +28,8 @@ public:
     // constructors
     CoordPanel(wxWindow *parent, bool enableAll);
     ~CoordPanel();
+    
+   wxString epochValue;
    
    wxComboBox *GetOriginComboBox() {return originComboBox;}
    wxComboBox *GetTypeComboBox() {return typeComboBox;}
@@ -57,7 +59,7 @@ public:
    void ChangeEpoch(wxString &oldFormat);
    bool SaveData(const std::string &coordName, AxisSystem *axis,
                  wxString &epochFormat);
-   
+
 private:
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;

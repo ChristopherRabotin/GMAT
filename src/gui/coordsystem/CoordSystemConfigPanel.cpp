@@ -94,7 +94,7 @@ void CoordSystemConfigPanel::LoadData()
 {
    epochTextCtrl = mCoordPanel->GetEpochTextCtrl();
    intervalTextCtrl = mCoordPanel->GetIntervalTextCtrl();
-
+   
    originComboBox = mCoordPanel->GetOriginComboBox();
    typeComboBox = mCoordPanel->GetTypeComboBox();
    primaryComboBox = mCoordPanel->GetPrimaryComboBox();
@@ -116,6 +116,9 @@ void CoordSystemConfigPanel::LoadData()
    {
       mCoordPanel->ShowAxisData(axis);
       mEpochFormat = wxString(axis->GetEpochFormat().c_str());
+      
+      if (mEpochFormat == "")
+        mEpochFormat = "TAIModJulian";
    }
    else
    {
