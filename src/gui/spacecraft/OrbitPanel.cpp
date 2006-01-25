@@ -35,9 +35,9 @@
 #include "MessageInterface.hpp"
 #include <sstream>
 
-#define DEBUG_ORBIT_PANEL 1
-#define DEBUG_ORBIT_PANEL_CONVERT 1
-#define DEBUG_ORBIT_PANEL_SAVE 1
+//#define DEBUG_ORBIT_PANEL 1
+//#define DEBUG_ORBIT_PANEL_CONVERT 1
+//#define DEBUG_ORBIT_PANEL_SAVE 1
 
 //------------------------------
 // event tables for wxWindows
@@ -239,9 +239,6 @@ void OrbitPanel::LoadData()
       textCtrl4->SetValue(ToString(mOutState[3]));
       textCtrl5->SetValue(ToString(mOutState[4]));
       textCtrl6->SetValue(ToString(mOutState[5]));
-      
-      MessageInterface::ShowMessage("In LoadData(), State type is %s\n", 
-         stateTypeComboBox->GetValue().c_str());
       
       mIsStateChanged = false;
       DisplayState();
@@ -926,9 +923,9 @@ void OrbitPanel::UpdateEpoch()
 //------------------------------------------------------------------------------
 void OrbitPanel::DisplayState()
 {
+   std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
    #if DEBUG_ORBIT_PANEL
       std::string coordSysStr  = mCoordSysComboBox->GetValue().c_str();
-      std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
 
       MessageInterface::ShowMessage(
          "OrbitPanel::DisplayState() coordSysStr = '%s', stateTypeStr='%s', "
