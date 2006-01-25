@@ -17,15 +17,27 @@
  * This class contains information needed to setup users spacecraft orbit
  * through GUI
  * 
+ * The basic design for state handling on this panel is that the spacecraft is
+ * the repository for the state information.  When the panel is displayed, a 
+ * clone of the spacecraft is made and the state information for that spacecraft
+ * clone is accessed to populate the data on the panel.  This population is done
+ * by accessing the spacecraft state from the spacecraft's internal PropState,
+ * which is a Cartesian MJ2000 equatorial state expressed in terns of the 
+ * current GMAT internal CoordinateSystem.  When the panel is populated, that 
+ * state is converted to the coordinate system and representation desired for
+ * display, and then used to fill in the elements on the panel.  The OrbitPanel
+ * maintains the state in the internal MJ2000 equatorial Cartesian coordinates,
+ * in the mCartState member.  All conversiona and transformations return to this 
+ * representation internally.
  */
 //------------------------------------------------------------------------------
 #include "OrbitPanel.hpp"
 #include "MessageInterface.hpp"
 #include <sstream>
 
-//#define DEBUG_ORBIT_PANEL 1
-//#define DEBUG_ORBIT_PANEL_CONVERT 1
-//#define DEBUG_ORBIT_PANEL_SAVE 1
+#define DEBUG_ORBIT_PANEL 1
+#define DEBUG_ORBIT_PANEL_CONVERT 1
+#define DEBUG_ORBIT_PANEL_SAVE 1
 
 //------------------------------
 // event tables for wxWindows
@@ -105,9 +117,9 @@ void OrbitPanel::LoadData()
    else
    {
       #if DEBUG_ORBIT_PANEL
-      MessageInterface::ShowMessage
-         ("   mInternalCoord=%s, addr=%d\n",
-          mInternalCoord->GetName().c_str(), mInternalCoord);
+         MessageInterface::ShowMessage(
+            "   mInternalCoord=%s, addr=%d\n",
+            mInternalCoord->GetName().c_str(), mInternalCoord);
       #endif
    }
    
@@ -116,20 +128,8 @@ void OrbitPanel::LoadData()
    {
       Rvector6 outState, displayState;
 
+      // Load the epoch formats
       StringArray reps = TimeConverterUtil::GetValidTimeRepresentations();
-
-      // load the epoch format - hard coded for now
-//      wxString epochFormatList[] =
-//      {
-//         wxT("TAIModJulian"),
-//         wxT("UTCModJulian"),
-//         wxT("TAIGregorian"),
-//         wxT("UTCGregorian")
-//      };
-//
-//      for (unsigned int i = 0; i<4; i++)
-//         epochFormatComboBox->Append(wxString(epochFormatList[i].c_str()));
-
       for (unsigned int i = 0; i < reps.size(); i++)
          epochFormatComboBox->Append(reps[i].c_str());
       
@@ -139,14 +139,13 @@ void OrbitPanel::LoadData()
       epochFormatComboBox->SetValue(wxT(epochFormat.c_str()));
       fromEpochFormat = epochFormat;
       
-      std::string epochStr = theSpacecraft->GetStringParameter("Epoch"); //GetDisplayEpoch();
+      std::string epochStr = theSpacecraft->GetStringParameter("Epoch"); 
       epochValue->SetValue(wxT(epochStr.c_str()));
       
       // load the coordinate system
       std::string coordSystemStr =
          theSpacecraft->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
       mCoordSysComboBox->SetValue(coordSystemStr.c_str());
-      //mFromCoordStr = coordSystemStr.c_str();
       mFromCoordStr = coordSystemStr;
       
       mOutCoord = (CoordinateSystem*)theGuiInterpreter->
@@ -176,8 +175,8 @@ void OrbitPanel::LoadData()
       SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetConfiguredItem(originName);
 
       #if DEBUG_ORBIT_PANEL
-      MessageInterface::ShowMessage
-         ("   origin=%s, addr=%d\n", originName.c_str(), origin);
+         MessageInterface::ShowMessage
+            ("   origin=%s, addr=%d\n", originName.c_str(), origin);
       #endif
       
       // load the state type - hard coded for now
@@ -216,7 +215,7 @@ void OrbitPanel::LoadData()
       
       stateTypeComboBox->SetValue(wxT(stType.c_str()));
       //mFromStateTypeStr = stType.c_str();
-      mFromStateTypeStr = stType;;
+      mFromStateTypeStr = stType;
 
       // anomaly types - hard coded for now
       wxString anomalyList[] =
@@ -230,10 +229,21 @@ void OrbitPanel::LoadData()
          anomalyComboBox->Append(wxString(anomalyList[i].c_str()));
       
       // Get Spacecraft initial state and display
-//      mCartState = theSpacecraft->GetState(stType);
       mCartState.Set(theSpacecraft->GetState().GetState());
       mTempCartState = mCartState;
       mOutState = mCartState;
+      
+      textCtrl1->SetValue(ToString(mOutState[0]));
+      textCtrl2->SetValue(ToString(mOutState[1]));
+      textCtrl3->SetValue(ToString(mOutState[2]));
+      textCtrl4->SetValue(ToString(mOutState[3]));
+      textCtrl5->SetValue(ToString(mOutState[4]));
+      textCtrl6->SetValue(ToString(mOutState[5]));
+      
+      MessageInterface::ShowMessage("In LoadData(), State type is %s\n", 
+         stateTypeComboBox->GetValue().c_str());
+      
+      mIsStateChanged = false;
       DisplayState();
       SetLabelsUnits(stType);
    }
@@ -255,17 +265,19 @@ void OrbitPanel::LoadData()
 void OrbitPanel::SaveData()
 {
    #if DEBUG_ORBIT_PANEL_SAVE
-   MessageInterface::ShowMessage
-      ("OrbitPanel::SaveData() entered\n   mCartState=%s\n   mTempCartState=%s\n   "
-       "mOutState=%s\n", mCartState.ToString().c_str(), mTempCartState.ToString().c_str(),
-       mOutState.ToString().c_str());
-   MessageInterface::ShowMessage("===> mIsCoordSysChanged=%d\n", mIsCoordSysChanged);
-   MessageInterface::ShowMessage("===> mIsStateTypeChanged=%d\n", mIsStateTypeChanged);
-   MessageInterface::ShowMessage("===> mIsStateChanged=%d\n", mIsStateChanged);
+      MessageInterface::ShowMessage(
+         "OrbitPanel::SaveData() entered\n   mCartState=%s\n   "
+         "mTempCartState=%s\n   mOutState=%s\n", mCartState.ToString().c_str(), 
+         mTempCartState.ToString().c_str(), mOutState.ToString().c_str());
+      MessageInterface::ShowMessage("===> mIsCoordSysChanged=%d\n", 
+         mIsCoordSysChanged);
+      MessageInterface::ShowMessage("===> mIsStateTypeChanged=%d\n", 
+         mIsStateTypeChanged);
+      MessageInterface::ShowMessage("===> mIsStateChanged=%d\n", 
+         mIsStateChanged);
    #endif
    
    Rvector6 outState, cartState, displayState;
-   
    canClose = true;
    
    // save epoch format
@@ -380,32 +392,7 @@ void OrbitPanel::SaveData()
       }
    }
 
-//   // Check to make sure that the Keplerian values 
-//   // are acceptable for the spacecraft
-//   if (strcmp(stateTypeStr.c_str(), "Keplerian") == 0)
-//   {
-//      if(displayState[1] < 0.0)
-//      {
-//         displayState[1] *= -1.0;
-//         MessageInterface::PopupMessage
-//         (Gmat::WARNING_, "ECC < 0, so multipled ECC by -1\n");
-//      }
-//      else if((displayState[0] > 0.0) && (displayState[1] > 1.0))
-//      {
-//         displayState[0] *= -1.0;
-//         MessageInterface::PopupMessage
-//         (Gmat::WARNING_, "SMA > 0 and ECC > 1, so multipled SMA by -1\n");
-//      }
-//      else if((displayState[0] < 0.0) && (displayState[1] < 1.0))
-//      {
-//         displayState[0] *= -1.0;
-//         MessageInterface::PopupMessage
-//         (Gmat::WARNING_, "SMA < 0 and ECC < 1, so multipled SMA by -1\n");
-//      }          
-//   }    
-
-   
-   // save cooridnate system name if changed
+   // save coordinate system name if changed
    if (mIsCoordSysChanged)
    {
       mIsCoordSysChanged = false;
@@ -415,7 +402,6 @@ void OrbitPanel::SaveData()
    }
    
    // save state type name if changed
-   
    if (mIsStateTypeChanged)
    {
       mIsStateTypeChanged = false;
@@ -429,68 +415,8 @@ void OrbitPanel::SaveData()
       theSpacecraft->SetStringParameter("StateType", stateTypeStr.c_str());
    }
    
-   // Check to see if state needs to be converted to Cartesian before save
-   if (mIsStateChanged)
-   {
-      mIsStateChanged = false;
-      
-      // turn off modified flag
-      textCtrl1->DiscardEdits();
-      textCtrl2->DiscardEdits();
-      textCtrl3->DiscardEdits();
-      textCtrl4->DiscardEdits();
-      textCtrl5->DiscardEdits();
-      textCtrl6->DiscardEdits();
-      
-      #if DEBUG_ORBIT_PANEL
-         MessageInterface::ShowMessage
-            ("OrbitPanel::SaveData() text changed. displayState =\n   %s\n",
-             displayState.ToString().c_str());
-      #endif
-         
-      outState = displayState;
-      
-      // Make sure the saved state is cartesian
-      if (strcmp(stateTypeStr.c_str(), "Cartesian") == 0)
-      {
-         // already cartesian state
-         cartState = displayState;
-      }
-      else
-      {
-         // convert to cartesian state
-         //loj: 11/28/05
-         //cartState = ConvertState(mInternalCoord, displayState, 
-         //                         stateTypeStr.c_str(), "Cartesian");
-         cartState = ConvertState(mOutCoord, displayState, 
-                                  stateTypeStr.c_str(), "Cartesian");
-      }
-      
-      // Make sure the saved state is earth mean J2000 equatorial
-      if (strcmp(coordSystemStr.c_str(), "EarthMJ2000Eq") == 0)
-      {
-         // already earth mean J2000 equatorial
-         outState = cartState;
-      }         
-      else
-      {
-         // convert to Internal CoordinateSystem (Earth Mean J2000 Equatorial)
-         mCoordConverter.Convert(A1Mjd(mEpoch), cartState, mOutCoord, outState,
-                                 mInternalCoord);
-      }
-      
-      // save outState
-      mCartState = outState;       
-      mTempCartState = outState;
-      
-      // save to spacecraft
-      theSpacecraft->SetState(mCartState);
-   }
-   else
-   {
-      mCartState = mTempCartState;
-      //outState = mCartState;
-   }
+   BuildState(displayState);
+   theSpacecraft->SetState(mCartState);
    
    #if DEBUG_ORBIT_PANEL
       MessageInterface::ShowMessage( "epoch format      = %s\n",epochFormatStr.c_str() );
@@ -508,7 +434,6 @@ void OrbitPanel::SaveData()
           mOutState.ToString().c_str());
    MessageInterface::ShowMessage("===> mIsStateChanged=%d\n", mIsStateChanged);
    #endif
-
 }
 
 
@@ -725,12 +650,11 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
    wxString stateTypeStr = stateTypeComboBox->GetStringSelection();
 
    #if DEBUG_ORBIT_PANEL
-   MessageInterface::ShowMessage
-      ("OrbitPanel::OnComboBoxChange() mFromCoordStr=%s, coordSysStr=%s\n"
-       "   mFromStateTypeStr=%s, stateTypeStr=%s\n", mFromCoordStr.c_str(),
-       coordSysStr.c_str(), mFromStateTypeStr.c_str(), stateTypeStr.c_str());
+      MessageInterface::ShowMessage
+         ("OrbitPanel::OnComboBoxChange() mFromCoordStr=%s, coordSysStr=%s\n"
+          "   mFromStateTypeStr=%s, stateTypeStr=%s\n", mFromCoordStr.c_str(),
+          coordSysStr.c_str(), mFromStateTypeStr.c_str(), stateTypeStr.c_str());
    #endif
-   
 
    // -------------------- epoch format change --------------------
    if (event.GetEventObject() == epochFormatComboBox)
@@ -950,20 +874,6 @@ void OrbitPanel::InitializeCoordinateSystem(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
 void OrbitPanel::UpdateEpoch()
 {
-//   wxString coordSysStr = mCoordSysComboBox->GetStringSelection().c_str();
-//   wxString toEpochFormat = epochFormatComboBox->GetStringSelection();
-//   wxString epochStr = epochValue->GetValue();
-//   std::string newEpoch = epochStr.c_str();
-//   
-//   if (epochStr != "TAIModJulian")
-//   {
-//      // convert to TAIModJulian
-//      newEpoch = timeConverter.Convert(epochStr.c_str(), fromEpochFormat,
-//                                       "TAIModJulian");
-//   }
-//   
-//   mEpoch = atof(newEpoch.c_str());
-
    std::string newEpoch = epochValue->GetValue().c_str();
    std::string toEpochFormat = 
       epochFormatComboBox->GetStringSelection().c_str();
@@ -972,7 +882,6 @@ void OrbitPanel::UpdateEpoch()
    {
       theSpacecraft->SetEpoch(newEpoch);
       theSpacecraft->SetStringParameter("DateFormat", toEpochFormat);
-      //epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch"));
       epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch").c_str());
       mEpoch = theSpacecraft->GetEpoch();
    }   
@@ -995,8 +904,6 @@ void OrbitPanel::UpdateEpoch()
                               mTempCartState, mInternalCoord);
       
       Rmatrix33 rmat = mCoordConverter.GetLastRotationMatrix();
-      //MessageInterface::ShowMessage
-      //   ("===> Spacecraft::UpdateEpoch() rmat=%s\n", rmat.ToString().c_str());
    }
    
    
@@ -1019,136 +926,110 @@ void OrbitPanel::UpdateEpoch()
 //------------------------------------------------------------------------------
 void OrbitPanel::DisplayState()
 {
-   std::string coordSysStr = mCoordSysComboBox->GetStringSelection().c_str();
-   std::string stateTypeStr = stateTypeComboBox->GetStringSelection().c_str();
-
    #if DEBUG_ORBIT_PANEL
-   MessageInterface::ShowMessage
-      ("OrbitPanel::DisplayState() coordSysStr=%s, stateTypeStr=%s, mEpoch=%f\n",
-       coordSysStr.c_str(), stateTypeStr.c_str(), mEpoch);
+      std::string coordSysStr  = mCoordSysComboBox->GetValue().c_str();
+      std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
+
+      MessageInterface::ShowMessage(
+         "OrbitPanel::DisplayState() coordSysStr = '%s', stateTypeStr='%s', "
+         "mEpoch=%.11lf\n", coordSysStr.c_str(), stateTypeStr.c_str(), mEpoch);
    #endif
 
-   
-   #if DEBUG_ORBIT_PANEL_CONVERT
-   MessageInterface::ShowMessage
-      ("OrbitPanel::DisplayState() --- before conversion, mOutState=\n   %s\n",
-       mOutState.ToString().c_str());
-   MessageInterface::ShowMessage("===> mIsStateChanged=%d\n", mIsStateChanged);
-   #endif
-   
-   Rvector6 outState;
+   Rvector6 midState;
+   bool isInternal = false;
    
    if (mIsStateChanged)
    {
-      Rvector6 inState;
-      
-      inState[0] = atof(textCtrl1->GetValue());
-      inState[1] = atof(textCtrl2->GetValue());
-      inState[2] = atof(textCtrl3->GetValue());
-      inState[3] = atof(textCtrl4->GetValue());
-      inState[4] = atof(textCtrl5->GetValue());
-      inState[5] = atof(textCtrl6->GetValue());
-      outState = inState;
-      
-      
-      // first convert to desired state type
-      stateConverter.SetMu(mOutCoord);
-      outState = stateConverter.Convert(inState, mFromStateTypeStr,
-                                        stateTypeStr, anomaly);
-      #if DEBUG_ORBIT_PANEL_CONVERT
-      MessageInterface::ShowMessage("===> First, convert to %s\n", stateTypeStr.c_str());
-      MessageInterface::ShowMessage("===> inState=%s\n", inState.ToString().c_str());
-      MessageInterface::ShowMessage("===> outState=%s\n", outState.ToString().c_str());
-      #endif
-      
-      // next convert to desired coordinate system
-      if (coordSysStr != mFromCoordStr)
-      {
-         //loj: 11/28/05
-         //mCoordConverter.Convert(A1Mjd(mEpoch), outState, mInternalCoord,
-         //                        outState, mOutCoord);
-         mCoordConverter.Convert(A1Mjd(mEpoch), outState, mFromCoord,
-                                 outState, mOutCoord);
-         
-         #if DEBUG_ORBIT_PANEL_CONVERT
-         MessageInterface::ShowMessage("===> Second, convert to %s\n", coordSysStr.c_str());
-         MessageInterface::ShowMessage("===> outState=%s\n", outState.ToString().c_str());
-         #endif
-      }
+      // User has typed in new state data
+      midState[0] = atof(textCtrl1->GetValue());
+      midState[1] = atof(textCtrl2->GetValue());
+      midState[2] = atof(textCtrl3->GetValue());
+      midState[3] = atof(textCtrl4->GetValue());
+      midState[4] = atof(textCtrl5->GetValue());
+      midState[5] = atof(textCtrl6->GetValue());
    }
    else
    {
-      if (coordSysStr == "EarthMJ2000Eq" &&
-          stateTypeStr == "Cartesian")
-      {
-         #if DEBUG_ORBIT_PANEL_CONVERT
-         MessageInterface::ShowMessage("===> No conversion necessary\n");
-         #endif
-         
-         outState = mTempCartState;
-      }
-      else if (coordSysStr != "EarthMJ2000Eq" &&
-               stateTypeStr == "Cartesian")
-      {
-         #if DEBUG_ORBIT_PANEL_CONVERT
-         MessageInterface::ShowMessage("===> Just convert to %s\n", coordSysStr.c_str());
-         #endif
-         
-         // just convert to desired coordinate system
-         mCoordConverter.Convert(A1Mjd(mEpoch), mTempCartState, mInternalCoord,
-                                 outState, mOutCoord);
-      }
-      else if (coordSysStr == "EarthMJ2000Eq" &&
-               stateTypeStr != "Cartesian")
-      {
-         #if DEBUG_ORBIT_PANEL_CONVERT
-         MessageInterface::ShowMessage("===> Just convert to %s\n", stateTypeStr.c_str());
-         #endif
-         
-         // just convert to desired state type
-         stateConverter.SetMu(mOutCoord);
-         outState = stateConverter.Convert(mTempCartState, "Cartesian",
-                                           stateTypeStr, anomaly);
-      }
-      else
-      {         
-         // first convert to desired coordinate system
-         mCoordConverter.Convert(A1Mjd(mEpoch), mTempCartState, mInternalCoord,
-                                 outState, mOutCoord);
-         
-         #if DEBUG_ORBIT_PANEL_CONVERT
-         MessageInterface::ShowMessage("===> First, convert to outCS\n");
-         MessageInterface::ShowMessage("===> outState=%s\n", outState.ToString().c_str());
-         #endif
-         
-         // next convert to desired state type
-         stateConverter.SetMu(mOutCoord);
-         outState = stateConverter.Convert(outState, "Cartesian",
-                                           stateTypeStr, anomaly);
-         #if DEBUG_ORBIT_PANEL_CONVERT
-         MessageInterface::ShowMessage("===> Second, convert to %s\n", stateTypeStr.c_str());
-         MessageInterface::ShowMessage("===> outState=%s\n", outState.ToString().c_str());
-         #endif         
-      }
+      // Load midState with Cartesian spacecraft state in internal coordinates
+      midState = mCartState;
+      isInternal = true;
    }
-
-   mOutState = outState;
+   
+   BuildState(midState, isInternal);
    
    #if DEBUG_ORBIT_PANEL_CONVERT
-   MessageInterface::ShowMessage
-      ("OrbitPanel::DisplayState() ---  after converstion, mOutState=\n   %s\n",
-       mOutState.ToString().c_str());
+      MessageInterface::ShowMessage(
+         "OrbitPanel::DisplayState()--- after conversion, mOutState= %s\n",
+         mOutState.ToString().c_str());
    #endif
 
-   textCtrl1->SetValue(ToString(outState[0]));
-   textCtrl2->SetValue(ToString(outState[1]));
-   textCtrl3->SetValue(ToString(outState[2]));
-   textCtrl4->SetValue(ToString(outState[3]));
-   textCtrl5->SetValue(ToString(outState[4]));
-   textCtrl6->SetValue(ToString(outState[5]));
+   textCtrl1->SetValue(ToString(mOutState[0]));
+   textCtrl2->SetValue(ToString(mOutState[1]));
+   textCtrl3->SetValue(ToString(mOutState[2]));
+   textCtrl4->SetValue(ToString(mOutState[3]));
+   textCtrl5->SetValue(ToString(mOutState[4]));
+   textCtrl6->SetValue(ToString(mOutState[5]));
    
    // labels for elements, anomaly and units
    SetLabelsUnits(stateTypeStr);
+}
+
+//------------------------------------------------------------------------------
+// void BuildState(const Rvector6 &inputState, bool isInternal)
+//------------------------------------------------------------------------------
+/**
+ * This method takes the input state and converts it to match the state settings
+ * on the GUI panel.
+ * 
+ * @param <inputState>  The state that gets converted.
+ * @param <isInternal>  true if the input state is a Cartesian state in internal 
+ *                      coordinates. 
+ */
+//------------------------------------------------------------------------------ 
+void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
+{
+   #if DEBUG_ORBIT_PANEL_CONVERT
+      Rvector6 tempState = inputState;
+      MessageInterface::ShowMessage(
+         "OrbitPanel::BuildState()--- The input state (%s %s coordinates)"
+         " is [%s]\n",
+         (isInternal ? "Internal" : mFromCoord->GetName().c_str()),
+         (isInternal ? "Cartesian" : mFromStateTypeStr.c_str()),
+         tempState.ToString().c_str());
+   #endif
+
+   Rvector6 midState;
+   std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
+   
+   if (isInternal)
+      // Input state is Cartesian expressed in internal coordinates
+      mCartState = inputState;
+   else
+   {
+      // Convert input state to the Cartesian representation
+      stateConverter.SetMu(mFromCoord);
+      midState = stateConverter.Convert(inputState, mFromStateTypeStr, 
+         "Cartesian", anomaly);
+         
+      // Transform to internal coordinates
+      mCoordConverter.Convert(A1Mjd(mEpoch), midState, mFromCoord, mCartState, 
+         mInternalCoord);
+   }
+   
+   #if DEBUG_ORBIT_PANEL_CONVERT
+      MessageInterface::ShowMessage(
+         "OrbitPanel::BuildState()--- The internal CS representation is [%s]\n",
+         mCartState.ToString().c_str());
+   #endif
+   
+   // Transform to the desired coordinate system
+   mCoordConverter.Convert(A1Mjd(mEpoch), mCartState, mInternalCoord, midState, 
+      mOutCoord);
+   
+   // and convert to the desired representation
+   stateConverter.SetMu(mOutCoord);
+   mOutState = stateConverter.Convert(midState, "Cartesian", stateTypeStr,
+      anomaly);
 }
 
 

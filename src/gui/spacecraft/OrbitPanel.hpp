@@ -70,8 +70,10 @@ private:
    bool mIsStateTypeChanged;
    bool mIsEpochChanged;
 
+   /// The spacecraft state in the internal coordinate system
    Rvector6 mCartState;
    Rvector6 mTempCartState;
+   /// The spacecraft state on the display
    Rvector6 mOutState;
    
    CoordinateConverter mCoordConverter;
@@ -91,6 +93,8 @@ private:
    
    void UpdateEpoch();
    void DisplayState();
+   void BuildState(const Rvector6 &inputState, bool isInternal = false);
+
    wxString ToString(Real rval);
    
    Rvector6 ConvertState(CoordinateSystem *cs, const Rvector6 &state, 
