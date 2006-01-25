@@ -227,16 +227,22 @@ void CelestialBodyPanel::LoadData()
    {
       std::string centralBody;
       Real epoch;
-      Real intervalUpdate;
       Rvector6 elements;
       
       if (theCelestialBody->GetBodyType() != Gmat::STAR)
       {
+         Real intervalUpdate;
+         wxString intervalStr;
+
          centralBody = theCelestialBody->GetCentralBody();
          epoch = theCelestialBody->GetLowFidelityEpoch().Get();
          elements = theCelestialBody->GetLowFidelityElements();
 
          centralBodyText->SetLabel(centralBody.c_str());
+         
+         intervalUpdate = thePlanet->GetUpdateInterval();
+         intervalStr.Printf("%f", intervalUpdate);
+         mIntervalTextCtrl->SetValue(intervalStr);
       }
       else
       {
@@ -251,16 +257,12 @@ void CelestialBodyPanel::LoadData()
          initialStaticText->Show(false);
       }
       
-      intervalUpdate = thePlanet->GetUpdateInterval();
       
-      wxString epochStr, intervalStr, elementStr;
+      wxString epochStr, elementStr;
 
       epochStr.Printf("%f", epoch);
       mEpochTextCtrl->SetValue(epochStr);
 
-      intervalStr.Printf("%f", intervalUpdate);
-      mIntervalTextCtrl->SetValue(intervalStr);
-      
       elementStr.Printf("%f", elements.Get(0));
       mElement1TextCtrl->SetValue(elementStr);
 
@@ -289,6 +291,7 @@ void CelestialBodyPanel::LoadData()
 
    // Activate "ShowScript"
    mObject = theCelestialBody;
+   theApplyButton->Enable(false);
 }
 
 //------------------------------------------------------------------------------
@@ -298,7 +301,11 @@ void CelestialBodyPanel::SaveData()
 {
    try
    {
-      thePlanet->SetUpdateInterval(atof(mIntervalTextCtrl->GetValue()));
+      if (theCelestialBody->GetBodyType() != Gmat::STAR)
+      {
+          thePlanet->SetUpdateInterval(atof(mIntervalTextCtrl->GetValue()));
+      }
+      
       theCelestialBody = thePlanet;
       
       A1Mjd a1mjd =  A1Mjd(atof(mEpochTextCtrl->GetValue()));
