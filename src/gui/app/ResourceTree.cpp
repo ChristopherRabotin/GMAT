@@ -1760,8 +1760,7 @@ void ResourceTree::OnAddSpacecraft(wxCommandEvent &event)
   
    const std::string stdWithName = withName.c_str();
 
-   Spacecraft *sc = theGuiInterpreter->
-      CreateSpacecraft("Spacecraft", stdWithName);
+   Spacecraft *sc = theGuiInterpreter->CreateSpacecraft("Spacecraft", stdWithName);
 
    if (sc != NULL)
    {
@@ -2654,7 +2653,10 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       
       textCtrl = textFrame->GetScriptTextCtrl();
       textFrame->Show();
-
+      wxString msg;
+      msg.Printf(_T("GMAT Build Date: %s %s\n\n"),  __DATE__, __TIME__);      
+      textCtrl->AppendText(msg);
+      
       //loj: Why Do I need to do this to show whole TextCtrl?
       // textFrame->Layout() didn't work.
       int w, h;
@@ -2982,6 +2984,8 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
          }
          
          std::string filename1 = theReport->GetStringParameter("Filename");
+         StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
+         //MessageInterface::ShowMessage("===> colTitles.size=%d\n", colTitles.size());
          
          #if DEBUG_COMPARE_REPORT
          MessageInterface::ShowMessage("   filename1=%s\n", filename1.c_str());
@@ -3021,7 +3025,7 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
          #endif
          
          StringArray output =
-            GmatFileUtil::Compare(filename1.c_str(), filename2.c_str(), absTol);
+            GmatFileUtil::Compare(filename1.c_str(), filename2.c_str(), colTitles, absTol);
          
          // append text
          for (unsigned int i=0; i<output.size(); i++)

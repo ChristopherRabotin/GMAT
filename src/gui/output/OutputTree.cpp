@@ -548,7 +548,7 @@ void OutputTree::OnCompareReport(wxCommandEvent &event)
    }
    
    std::string filename1 = theReport->GetStringParameter("Filename");
-   
+   StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
    wxString filename2 =
       wxFileSelector("Choose a file to open", "", "", "report",
                      "Report files (*.report)|*.report|Text files (*.txt)|*.txt");
@@ -568,17 +568,19 @@ void OutputTree::OnCompareReport(wxCommandEvent &event)
       return;
    }
    
-   StringArray output = GmatFileUtil::Compare(filename1.c_str(), filename2.c_str(), tol);
+   StringArray output =
+      GmatFileUtil::Compare(filename1.c_str(), filename2.c_str(), colTitles, tol);
 
    if (GmatAppData::theCompareWindow == NULL)
    {
-      //ViewTextFrame *textFrame =
       GmatAppData::theCompareWindow =
          new ViewTextFrame(GmatAppData::GetMainFrame(), _T("Compare Utility"),
                            50, 50, 800, 500, "Permanent");
+      wxString msg;
+      msg.Printf(_T("GMAT Build Date: %s %s\n\n"),  __DATE__, __TIME__);      
+      GmatAppData:: theCompareWindow->AppendText(msg);
    }
    
-   //textFrame->Show(true);
    GmatAppData::theCompareWindow->Show(true);
    
    for (unsigned int i=0; i<output.size(); i++)

@@ -369,7 +369,8 @@ void RunScriptFolderDialog::OnButtonClick(wxCommandEvent& event)
    }
    else if (event.GetEventObject() == mDirBrowseButton)
    {
-      wxDirDialog dialog(this, "Select a directory to compare", wxGetCwd());
+      //wxDirDialog dialog(this, "Select a directory to compare", wxGetCwd());
+      wxDirDialog dialog(this, "Select a directory to compare", mCompareDir);
       
       if (dialog.ShowModal() == wxID_OK)
       {
