@@ -113,7 +113,8 @@ VelApoapsis::~VelApoapsis()
 //------------------------------------------------------------------------------
 bool VelApoapsis::Evaluate()
 {
-   mRealValue = OrbitData::GetOtherKepReal("VelApoapsis");    
+   //mRealValue = OrbitData::GetOtherKepReal("VelApoapsis");    
+   mRealValue = OrbitData::GetOtherKepReal(VEL_APOAPSIS);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -232,7 +233,8 @@ VelPeriapsis::~VelPeriapsis()
 //------------------------------------------------------------------------------
 bool VelPeriapsis::Evaluate()
 {
-   mRealValue = OrbitData::GetOtherKepReal("VelPeriapsis");    
+   //mRealValue = OrbitData::GetOtherKepReal("VelPeriapsis");    
+   mRealValue = OrbitData::GetOtherKepReal(VEL_PERIAPSIS);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -617,7 +619,8 @@ OrbitPeriod::~OrbitPeriod()
 //------------------------------------------------------------------------------
 bool OrbitPeriod::Evaluate()
 {
-   mRealValue = OrbitData::GetOtherKepReal("OrbitPeriod");    
+   //mRealValue = OrbitData::GetOtherKepReal("OrbitPeriod");    
+   mRealValue = OrbitData::GetOtherKepReal(ORBIT_PERIOD);    
 
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -731,7 +734,8 @@ RadApoapsis::~RadApoapsis()
 //------------------------------------------------------------------------------
 bool RadApoapsis::Evaluate()
 {
-   mRealValue = OrbitData::GetOtherKepReal("RadApoapsis");    
+   //mRealValue = OrbitData::GetOtherKepReal("RadApoapsis");    
+   mRealValue = OrbitData::GetOtherKepReal(RAD_APOAPSIS);    
    
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -845,7 +849,8 @@ RadPeriapsis::~RadPeriapsis()
 //------------------------------------------------------------------------------
 bool RadPeriapsis::Evaluate()
 {
-   mRealValue = OrbitData::GetOtherKepReal("RadPeriapsis");    
+   //mRealValue = OrbitData::GetOtherKepReal("RadPeriapsis");    
+   mRealValue = OrbitData::GetOtherKepReal(RAD_PERIAPSIS);    
    
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -959,7 +964,8 @@ C3Energy::~C3Energy()
 //------------------------------------------------------------------------------
 bool C3Energy::Evaluate()
 {
-   mRealValue = OrbitData::GetOtherKepReal("C3Energy");    
+   //mRealValue = OrbitData::GetOtherKepReal("C3Energy");    
+   mRealValue = OrbitData::GetOtherKepReal(C3_ENERGY);    
    
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -1073,7 +1079,8 @@ Energy::~Energy()
 //------------------------------------------------------------------------------
 bool Energy::Evaluate()
 {
-   mRealValue = OrbitData::GetOtherKepReal("Energy");    
+   //mRealValue = OrbitData::GetOtherKepReal("Energy");    
+   mRealValue = OrbitData::GetOtherKepReal(ENERGY);    
    
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;

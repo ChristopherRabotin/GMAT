@@ -63,7 +63,6 @@ BplaneData::BplaneData()
    mCartState = Rvector6::RVECTOR6_UNDEFINED;
    mSpacecraft = NULL;
    mSolarSystem = NULL;
-   mScOrigin = NULL;
    mOrigin = NULL;
    mInternalCoordSystem = NULL;
    mOutCoordSystem = NULL;
@@ -87,7 +86,6 @@ BplaneData::BplaneData(const BplaneData &copy)
    mCartState = copy.mCartState;
    mSpacecraft = copy.mSpacecraft;
    mSolarSystem = copy.mSolarSystem;
-   mScOrigin = copy.mScOrigin;
    mOrigin = copy.mOrigin;
    mInternalCoordSystem = copy.mInternalCoordSystem;
    mOutCoordSystem = copy.mOutCoordSystem;
@@ -117,7 +115,6 @@ BplaneData& BplaneData::operator= (const BplaneData &right)
    mCartState = right.mCartState;
    mSpacecraft = right.mSpacecraft;
    mSolarSystem = right.mSolarSystem;
-   mScOrigin = right.mScOrigin;
    mOrigin = right.mOrigin;
    mInternalCoordSystem = right.mInternalCoordSystem;
    mOutCoordSystem = right.mOutCoordSystem;
@@ -141,7 +138,7 @@ BplaneData::~BplaneData()
 
 
 //------------------------------------------------------------------------------
-// Real GetBplaneReal(const std::string &str)
+// Real GetBplaneReal(Integer item)
 //------------------------------------------------------------------------------
 /**
  * Computes B-Plane related paramters.
@@ -149,8 +146,13 @@ BplaneData::~BplaneData()
  * @note - Implements GMAT math Spec 2.11 B-Plane Coordinates
  */
 //------------------------------------------------------------------------------
-Real BplaneData::GetBplaneReal(const std::string &str)
+Real BplaneData::GetBplaneReal(Integer item)
 {
+   if (item != B_DOT_T && item != B_DOT_R)
+      throw ParameterException
+         ("BplaneData::GetBplaneReal() Unknown parameter ID: " +
+          GmatRealUtil::ToString(item));
+   
    if (mOutCoordSystem == NULL || mOrigin == NULL)
       InitializeRefObjects();
    
@@ -232,11 +234,36 @@ Real BplaneData::GetBplaneReal(const std::string &str)
       ("BplaneData::GetBplaneReal()\n     sVec1 = %s\n     tVec = %s\n     rVec = %s\n",
        sVec1.ToString().c_str(), tVec.ToString().c_str(), rVec.ToString().c_str());
    #endif
-   
-   if (str == "BdotT")
+
+   switch (item)
+   {
+   case B_DOT_T:
       return bVec * tVec;
-   else if (str == "BdotR")
+   case B_DOT_R:
       return bVec * rVec;
+   default:
+      throw ParameterException
+         ("BplaneData::GetBplaneReal() Unknown parameter ID: " +
+          GmatRealUtil::ToString(item));
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetBplaneReal(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Computes B-Plane related paramters.
+ *
+ * @note - Implements GMAT math Spec 2.11 B-Plane Coordinates
+ */
+//------------------------------------------------------------------------------
+Real BplaneData::GetBplaneReal(const std::string &str)
+{
+   if (str == "BdotT")
+      return GetBplaneReal(B_DOT_T);
+   else if (str == "BdotR")
+      return GetBplaneReal(B_DOT_R);
    else
    {
       throw ParameterException
@@ -332,23 +359,21 @@ void BplaneData::InitializeRefObjects()
          ("BplaneData::InitializeRefObjects() spacecraft CoordinateSystem not "
           "found: " + csName + "\n");
    
-   mScOrigin = cs->GetOrigin();
+   mOrigin = mOutCoordSystem->GetOrigin();
    
-   if (!mScOrigin)
+   if (!mOrigin)
       throw ParameterException
-         ("BplaneData::InitializeRefObjects() spacecraft origin not found: " +
+         ("BplaneData::InitializeRefObjects() origin not found: " +
           cs->GetOriginName() + "\n");
    
-   // get gravity constant if spacecraft origin is CelestialBody
-   if (mScOrigin->IsOfType(Gmat::CELESTIAL_BODY))
-      mGravConst = ((CelestialBody*)mScOrigin)->GetGravitationalConstant();
-
-   mOrigin = mOutCoordSystem->GetOrigin();
-         
+   // get gravity constant if out coord system origin is CelestialBody
+   if (mOrigin->IsOfType(Gmat::CELESTIAL_BODY))
+      mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
+   
    #if DEBUG_BPLANE_DATA_INIT
    MessageInterface::ShowMessage
-      ("BplaneData::InitializeRefObjects() mScOrignName=%s, mOriginName=%s\n",
-       mScOrigin->GetName().c_str(), mOrigin->GetName().c_str());
+      ("BplaneData::InitializeRefObjects() mOriginName=%s\n",
+       mOrigin->GetName().c_str());
    #endif
 }
 
@@ -414,9 +439,8 @@ Rvector6 BplaneData::GetCartState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   Integer id = mSpacecraft->GetParameterID("StateType"); 
-   std::string elemType = mSpacecraft->GetStringParameter(id);
    mCartEpoch = mSpacecraft->GetRealParameter("A1Epoch");
+   mCartState.Set(mSpacecraft->GetState().GetState());
    
    #if DEBUG_BPLANE_DATA_RUN
    MessageInterface::ShowMessage
@@ -426,76 +450,47 @@ Rvector6 BplaneData::GetCartState()
        mOutCoordSystem->GetName().c_str());
    #endif
    
-   if (elemType == "Cartesian")
+   
+   if (mInternalCoordSystem == NULL || mOutCoordSystem == NULL)
    {
-      PropState ps = mSpacecraft->GetState(); // should be cartesian state
-      for (int i=0; i<6; i++)
-         mCartState[i] = ps[i];
-      
-      if (mInternalCoordSystem == NULL || mOutCoordSystem == NULL)
-      {
-         MessageInterface::ShowMessage
-            ("BplaneData::GetCartState() Internal CoordSystem or Output "
-             "CoordSystem is NULL.\n");
+      MessageInterface::ShowMessage
+         ("BplaneData::GetCartState() Internal CoordSystem or Output "
+          "CoordSystem is NULL.\n");
          
-         throw ParameterException
-            ("BplaneData::GetCartState() internal or output CoordinateSystem "
-             "is NULL.\n");
-      }
-      
-      // convert to output CoordinateSystem
-      if (mInternalCoordSystem->GetName() != mOutCoordSystem->GetName())
-      {
-         #if DEBUG_BPLANE_DATA_CONVERT
-         MessageInterface::ShowMessage
-            ("BplaneData::GetCartState() ===> mOutCoordSystem:%s Axis=%s\n",
-             mOutCoordSystem->GetName().c_str(),
-             mOutCoordSystem->GetRefObject(Gmat::AXIS_SYSTEM, "")->GetName().c_str());
-         MessageInterface::ShowMessage
-            ("BplaneData::GetCartState() Before convert: mCartEpoch=%f\n"
-             "state = %s\n", mCartEpoch, mCartState.ToString().c_str());
-         #endif
-         
-         try
-         {
-            mCoordConverter.Convert(A1Mjd(mCartEpoch), mCartState,
-                                    mInternalCoordSystem,
-                                    mCartState, mOutCoordSystem);
-            
-            #if DEBUG_BPLANE_DATA_CONVERT
-               MessageInterface::ShowMessage
-                  ("BplaneData::GetCartState() --After convert: mCartEpoch=%f\n"
-                   "     state = %s\n", mCartEpoch, mCartState.ToString().c_str());
-            #endif
-         }
-         catch (BaseException &e)
-         {
-            MessageInterface::ShowMessage(e.GetMessage());
-         }
-      }
+      throw ParameterException
+         ("BplaneData::GetCartState() internal or output CoordinateSystem "
+          "is NULL.\n");
    }
-   else if (elemType == "Keplerian")
+   
+   // convert to output CoordinateSystem
+   if (mInternalCoordSystem->GetName() != mOutCoordSystem->GetName())
    {
-      Real grav = mGravConst;
-      
-      PropState ps = mSpacecraft->GetState(); // should be keplerian state
-      Real kepl[6];
-      memcpy(kepl, ps.GetState(), 6*sizeof(Real));
-
-      Rvector6 keplState = Rvector6(kepl);
-
-      #if DEBUG_BPLANE_DATA_RUN
-      MessageInterface::ShowMessage("BplaneData::GetCartState() keplState=%s\n",
-                                    keplState.ToString().c_str());
+      #if DEBUG_BPLANE_DATA_CONVERT
+      MessageInterface::ShowMessage
+         ("BplaneData::GetCartState() ===> mOutCoordSystem:%s Axis=%s\n",
+          mOutCoordSystem->GetName().c_str(),
+          mOutCoordSystem->GetRefObject(Gmat::AXIS_SYSTEM, "")->GetName().c_str());
+      MessageInterface::ShowMessage
+         ("BplaneData::GetCartState() Before convert: mCartEpoch=%f\n"
+          "state = %s\n", mCartEpoch, mCartState.ToString().c_str());
       #endif
       
-      mCartState = KeplerianToCartesian(keplState, grav, CoordUtil::TA);
-   }
-   else
-   {
-      throw ParameterException
-         ("BplaneData::GetCartState() input state types other than Cartesian "
-          "and Keplerian are not supported at this time." + elemType + "\n");
+      try
+      {
+         mCoordConverter.Convert(A1Mjd(mCartEpoch), mCartState,
+                                 mInternalCoordSystem,
+                                 mCartState, mOutCoordSystem);
+            
+         #if DEBUG_BPLANE_DATA_CONVERT
+         MessageInterface::ShowMessage
+            ("BplaneData::GetCartState() --After convert: mCartEpoch=%f\n"
+             "     state = %s\n", mCartEpoch, mCartState.ToString().c_str());
+         #endif
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::ShowMessage(e.GetMessage());
+      }
    }
    
    return mCartState;

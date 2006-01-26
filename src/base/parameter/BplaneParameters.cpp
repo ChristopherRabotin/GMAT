@@ -112,7 +112,8 @@ bool BdotT::Evaluate()
 {
    try
    {
-      mRealValue = BplaneData::GetBplaneReal("BdotT");
+      //mRealValue = BplaneData::GetBplaneReal("BdotT");
+      mRealValue = BplaneData::GetBplaneReal(B_DOT_T);
    }
    catch (BaseException &e)
    {
@@ -239,7 +240,8 @@ bool BdotR::Evaluate()
 {
    try
    {
-      mRealValue = BplaneData::GetBplaneReal("BdotR");
+      //mRealValue = BplaneData::GetBplaneReal("BdotR");
+      mRealValue = BplaneData::GetBplaneReal(B_DOT_R);
    }
    catch (BaseException &e)
    {

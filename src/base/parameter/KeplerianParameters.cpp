@@ -108,8 +108,9 @@ KepSMA::~KepSMA()
 //------------------------------------------------------------------------------
 bool KepSMA::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal("KepSMA");    
-    
+   //mRealValue = OrbitData::GetKepReal("KepSMA");    
+   mRealValue = OrbitData::GetKepReal(SMA);    
+   
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
    else
@@ -221,8 +222,9 @@ KepEcc::~KepEcc()
 //------------------------------------------------------------------------------
 bool KepEcc::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal("KepEcc");
-    
+   //mRealValue = OrbitData::GetKepReal("KepEcc");
+   mRealValue = OrbitData::GetKepReal(ECC);
+   
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
    else
@@ -333,7 +335,8 @@ KepInc::~KepInc()
 //------------------------------------------------------------------------------
 bool KepInc::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal("KepInc");    
+   //mRealValue = OrbitData::GetKepReal("KepInc");    
+   mRealValue = OrbitData::GetKepReal(INC);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -446,7 +449,8 @@ KepAOP::~KepAOP()
 //------------------------------------------------------------------------------
 bool KepAOP::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal("KepAOP");    
+   //mRealValue = OrbitData::GetKepReal("KepAOP");    
+   mRealValue = OrbitData::GetKepReal(AOP);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -558,7 +562,8 @@ KepRAAN::~KepRAAN()
 //------------------------------------------------------------------------------
 bool KepRAAN::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal("KepRAAN");    
+   //mRealValue = OrbitData::GetKepReal("KepRAAN");    
+   mRealValue = OrbitData::GetKepReal(RAAN);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -670,8 +675,9 @@ KepRADN::~KepRADN()
 //------------------------------------------------------------------------------
 bool KepRADN::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal("KepRADN");    
-    
+   //mRealValue = OrbitData::GetKepReal("KepRADN");    
+   mRealValue = OrbitData::GetKepReal(RADN);    
+   
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
    else
@@ -783,7 +789,8 @@ KepTA::~KepTA()
 //------------------------------------------------------------------------------
 bool KepTA::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal("KepTA");    
+   //mRealValue = OrbitData::GetKepReal("KepTA");    
+   mRealValue = OrbitData::GetKepReal(TA);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -896,7 +903,8 @@ KepMA::~KepMA()
 //------------------------------------------------------------------------------
 bool KepMA::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal("KepMA");    
+   //mRealValue = OrbitData::GetKepReal("KepMA");    
+   mRealValue = OrbitData::GetKepReal(MA);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -1008,7 +1016,8 @@ KepMM::~KepMM()
 //------------------------------------------------------------------------------
 bool KepMM::Evaluate()
 {
-   mRealValue = OrbitData::GetOtherKepReal("KepMM");
+   //mRealValue = OrbitData::GetOtherKepReal("KepMM");
+   mRealValue = OrbitData::GetOtherKepReal(MM);
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;

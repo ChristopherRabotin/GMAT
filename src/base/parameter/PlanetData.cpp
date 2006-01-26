@@ -154,15 +154,15 @@ Real PlanetData::GetReal(const std::string &dataType)
       Real a1mjd = mSpacecraft->GetRealParameter("A1Epoch");
       
       // Call GetHourAngle() on origin
-      Real gha = mOrigin->GetHourAngle(a1mjd);
+      Real mha = mOrigin->GetHourAngle(a1mjd);
       
       #ifdef DEBUG_PLANETDATA_RUN
          MessageInterface::ShowMessage
-            ("PlanetData::GetReal() a1mdj=%f, origin=%s, gha=%f\n", a1mjd,
-             mOrigin->GetName().c_str(), gha);
+            ("PlanetData::GetReal() a1mdj=%f, origin=%s, mha=%f\n", a1mjd,
+             mOrigin->GetName().c_str(), mha);
       #endif
       
-      return gha;
+      return mha;
    }
    //--------------------------------------------------
    // Longitude
@@ -170,110 +170,61 @@ Real PlanetData::GetReal(const std::string &dataType)
    else if (dataType == "Longitude")
    {
       // Get spacecraft RightAscension
-      Rvector6 state = mSpacecraft->GetState(0);
+      //Rvector6 state = mSpacecraft->GetState(0);
+      Rvector6 state = mSpacecraft->GetState().GetState();
+      Real a1mjd = mSpacecraft->GetRealParameter("A1Epoch");
       
       if (mOrigin->GetName() != "Earth")
       {
          // Get current time
-         Real a1mjd = mSpacecraft->GetRealParameter("A1Epoch");
+         //Real a1mjd = mSpacecraft->GetRealParameter("A1Epoch");
          state = state - mOrigin->GetMJ2000State(a1mjd);
       }
       
-      Real raRad = GmatMathUtil::ATan(state[1], state[0]);
-      Real raDeg = GmatMathUtil::RadToDeg(raRad, true);
-      Real gha = GetReal("MHA");
+      Real raDeg = GmatMathUtil::ATan(state[1], state[0]) * DEG_PER_RAD;
+      //raDeg = AngleUtil::PutAngleInDegRange(raDeg, 0.0, 360.0);
+      //Real raDeg = GmatMathUtil::RadToDeg(raRad, true);
+      Real mha = mOrigin->GetHourAngle(a1mjd);
+      //Real gha = GetReal("MHA");
       
       // Compute east longitude
-      // Longitude is measured positive to east from Greenwich
+      // Longitude is measured positive to east from prime meridian.
+      // (Greenwich for Earth)
       // Reference: Valado 3.2.1 Location Parameters
-      Real longitude = raDeg - gha;
-      longitude = AngleUtil::PutAngleInDegRange(longitude, 0.0, 360.0);
+      Real longitude = raDeg - mha;
+      //longitude = AngleUtil::PutAngleInDegRange(longitude, 0.0, 360.0);
+      longitude = AngleUtil::PutAngleInDegRange(longitude, -180.0, 180.0);
 
       #ifdef DEBUG_PLANETDATA_RUN
          MessageInterface::ShowMessage
-            ("PlanetData::GetReal() longitude=%f\n", longitude);
-      #endif
+            ("PlanetData::GetReal(%s) raDeg=%f, mha=%f, longitude=%f\n", dataType.c_str(),
+             raDeg, mha, longitude);
+         #endif
       
       return longitude;
    }
-//   //--------------------------------------------------
-//   // Altitude
-//   //--------------------------------------------------
-//   else if (dataType == "Altitude")
-//   {
-//      Rvector6 state = mSpacecraft->GetCartesianState();
-//
-//      if (mOrigin->GetName() != "Earth")
-//      {
-//         // Get current time
-//         Real a1mjd = mSpacecraft->GetRealParameter("A1Epoch");
-//         state = state - mOrigin->GetMJ2000State(a1mjd);
-//      }
-//
-//      // get flattening for the body
-//      Real flatteningFactor =
-//         mOrigin->GetRealParameter(mOrigin->GetParameterID("Flattening"));
-//      Real equatorialRadius =
-//         mOrigin->GetRealParameter(mOrigin->GetParameterID("EquatorialRadius"));
-//
-//      Real geodesicFactor = equatorialRadius * (1.0 - flatteningFactor);
-//
-//      Real rad = Sqrt(state[0]*state[0] + state[1]*state[1] + state[2]*state[2]);
-//
-//      Real arg = state[2] / rad;
-//      arg = ((Abs(arg) <= 1.0) ? arg : arg / Abs(arg));
-//      Real radlat = PI / 2.0 - ACos(arg);
-//
-//      // Convert to geodetic latitude, in degrees
-//      radlat = flatteningFactor * Sin(2.0 * radlat);
-//
-//      // Geodetic altitude
-//      Real geoRad =
-//         geodesicFactor / Sqrt(1.0 - (2.0 - flatteningFactor) * flatteningFactor *
-//                               Cos(radlat) *  Cos(radlat));
-//
-//      Real geoalt = rad - geoRad;
-//
-//      #ifdef DEBUG_PLANETDATA_RUN
-//      MessageInterface::ShowMessage
-//         ("PlanetData::GetReal() radlat=%f, geolat=%f\n", radlat, geoalt);
-//      #endif
-//
-//      return geoalt;
-//   }
    //--------------------------------------------------
    // Latitude
    //--------------------------------------------------
    else if ((dataType == "Latitude") || (dataType == "Altitude"))
    {
-      Rvector6 state = mSpacecraft->GetState(0);
+      //Rvector6 state = mSpacecraft->GetState(0);
+      Rvector6 state = mSpacecraft->GetState().GetState();
+      //MessageInterface::ShowMessage("==>PlanetData::GetReal(%s) state=%s\n",
+      //                              dataType.c_str(), state.ToString().c_str());
+      
       if (mOrigin->GetName() != "Earth")
       {
          // Get current time
          Real a1mjd = mSpacecraft->GetRealParameter("A1Epoch");
          state = state - mOrigin->GetMJ2000State(a1mjd);
       }
+      
       // get flattening for the body
       Real flatteningFactor =
          mOrigin->GetRealParameter(mOrigin->GetParameterID("Flattening"));
+      
       // Reworked to match Vallado algorithm 12 (Vallado, 2nd ed, p. 177)
-      // Old code:
-//      Real rad = Sqrt(state[0]*state[0] + state[1]*state[1] + state[2]*state[2]);
-//
-//      Real arg = state[2] / rad;
-//      arg = ((Abs(arg) <= 1.0) ? arg : arg / Abs(arg));
-//      Real radlat = PI / 2.0 - ACos(arg);
-//
-//      // Convert to geodetic latitude, in degrees
-//      radlat = flatteningFactor * Sin(2.0 * radlat);
-//      Real geolat = radlat * 180.0 / PI;
-//
-//      #ifdef DEBUG_PLANETDATA_RUN
-//      MessageInterface::ShowMessage
-//         ("PlanetData::GetReal() radlat=%f, geolat=%f\n", radlat, geolat);
-//      #endif
-//
-//      return geolat;
 
       // Note -- using cmath here because I know it better -- may want to change
       // to GmatMath
@@ -302,7 +253,13 @@ Real PlanetData::GetReal(const std::string &dataType)
       #endif
 
       if (dataType == "Latitude")
-         return geolat * 180.0 / PI;
+      {
+         //return geolat * 180.0 / PI;
+         // put latitude between -90 and 90
+         geolat = geolat * 180.0 / PI;
+         geolat = AngleUtil::PutAngleInDegRange(geolat, -90.0, 90.0);
+         return geolat;
+      }
       else  // dataType == "Altitude"
       {
          sinlat = sin(geolat);

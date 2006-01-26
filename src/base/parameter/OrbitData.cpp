@@ -23,7 +23,7 @@
 #include "ParameterException.hpp"
 #include "Rvector3.hpp"
 #include "RealUtilities.hpp"
-#include "CoordUtil.hpp"         // for Cartesian to Keplerian conversion
+#include "CoordUtil.hpp"         // for friend CartesianToKeplerian()
 #include "AngleUtil.hpp"
 #include "UtilityException.hpp"
 #include "SphericalRADEC.hpp"    // for friend CartesianToSphericalRADEC/AZFPA()
@@ -31,7 +31,7 @@
 #include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
 
-#define USE_COORDUTIL_FOR_AOP 1
+//#define USE_COORDUTIL_FOR_AOP 1
 //#define USE_COORDUTIL_FOR_TA  1
 
 //#define DEBUG_ORBITDATA_INIT 1
@@ -85,7 +85,6 @@ OrbitData::OrbitData()
    
    mSpacecraft = NULL;
    mSolarSystem = NULL;
-   mScOrigin = NULL;
    mOrigin = NULL;
    mInternalCoordSystem = NULL;
    mOutCoordSystem = NULL;
@@ -121,7 +120,6 @@ OrbitData::OrbitData(const OrbitData &data)
    
    mSpacecraft = data.mSpacecraft;
    mSolarSystem = data.mSolarSystem;
-   mScOrigin = data.mScOrigin;
    mOrigin = data.mOrigin;
    mInternalCoordSystem = data.mInternalCoordSystem;
    mOutCoordSystem = data.mOutCoordSystem;
@@ -157,7 +155,6 @@ OrbitData& OrbitData::operator= (const OrbitData &right)
    
    mSpacecraft = right.mSpacecraft;
    mSolarSystem = right.mSolarSystem;
-   mScOrigin = right.mScOrigin;
    mOrigin = right.mOrigin;
    mInternalCoordSystem = right.mInternalCoordSystem;
    mOutCoordSystem = right.mOutCoordSystem;
@@ -205,6 +202,9 @@ Rvector6 OrbitData::GetCartState()
          ("OrbitData::GetCartState() internal or output CoordinateSystem is NULL.\n");
    }
 
+   if (mOriginDep)
+      return mCartState;
+   
    // convert to output CoordinateSystem
    if (mInternalCoordSystem->GetName() != mOutCoordSystem->GetName())
    {
@@ -245,19 +245,31 @@ Rvector6 OrbitData::GetKepState()
 {
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
-   
-   mKepState = mSpacecraft->GetState("Keplerian");
 
+//    mKepState = mSpacecraft->GetState("Keplerian");
+//    MessageInterface::ShowMessage("==>OrbitData::GetKepState() from SC mKepState=%s\n",
+//                                  mKepState.ToString().c_str());
+   
+   //loj: 1/25/06 we want to convert to parameter coord system first
+   Rvector6 state = GetCartState();
+   Anomaly anomaly;
+   mKepState = CartesianToKeplerian(state, mGravConst, anomaly);
+   
    //MessageInterface::ShowMessage("==>OrbitData::GetKepState() mKepState=%s\n",
    //                              mKepState.ToString().c_str());
    
-   Real ta = DegToRad(mKepState[TA]);
-   //MessageInterface::ShowMessage("==>OrbitData::GetKepState() ta=%f\n", ta);
-   Real costa = Cos(ta);
-   Real ea = ACos((mKepState[1] + costa)/(1.0 + mKepState[1]*costa));
-   mMA = RadToDeg(ea - mKepState[1] * Sin(ea));
-   if (mKepState[TA] > 180.0)
-      mMA = 360.0 - mMA;
+   mMA = anomaly.GetMeanAnomaly();
+
+   //loj: 1/25/06 replaced by anomaly.GetMeanAnomaly();
+//    //-------------------------------------------------------
+//    Real ta = DegToRad(mKepState[TA]);
+//    //MessageInterface::ShowMessage("==>OrbitData::GetKepState() ta=%f\n", ta);
+//    Real costa = Cos(ta);
+//    Real ea = ACos((mKepState[1] + costa)/(1.0 + mKepState[1]*costa));
+//    mMA = RadToDeg(ea - mKepState[1] * Sin(ea));
+//    if (mKepState[TA] > 180.0)
+//       mMA = 360.0 - mMA;
+//    //-------------------------------------------------------
 
    //MessageInterface::ShowMessage("==>OrbitData::GetKepState() mMA=%f\n\n", mMA);
    return mKepState;
@@ -272,13 +284,25 @@ Rvector6 OrbitData::GetModKepState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   mKepState = mSpacecraft->GetState("ModifiedKeplerian");
-   Real ta = DegToRad(mKepState[5]);
-   Real costa = Cos(ta);
-   Real ea = ACos((mKepState[1] + costa)/(1.0 + mKepState[1]*costa));
-   mMA = RadToDeg(ea - mKepState[1] * Sin(ea));
-   if (mKepState[5] > 180.0)
-      mMA = 360.0 - mMA;
+   //mKepState = mSpacecraft->GetState("ModifiedKeplerian");
+   
+   //loj: 1/25/06 we want to convert to parameter coord system first
+   Rvector6 state = GetCartState();
+   Anomaly anomaly;
+   Rvector6 kepState = CartesianToKeplerian(state, mGravConst, anomaly);
+   mModKepState = KeplerianToModKeplerian(kepState);
+
+   mMA = anomaly.GetMeanAnomaly();
+
+   //loj: 1/25/06 replaced by anomaly.GetMeanAnomaly();
+//    //-------------------------------------------------------
+//    Real ta = DegToRad(mModKepState[5]);
+//    Real costa = Cos(ta);
+//    Real ea = ACos((mModKepState[1] + costa)/(1.0 + mModKepState[1]*costa));
+//    mMA = RadToDeg(ea - mKepState[1] * Sin(ea));
+//    if (mModKepState[5] > 180.0)
+//       mMA = 360.0 - mMA;
+//    //-------------------------------------------------------
 
    return mModKepState;
 }
@@ -292,7 +316,16 @@ Rvector6 OrbitData::GetSphRaDecState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   mSphRaDecState = mSpacecraft->GetState("SphericalRADEC");
+//    mSphRaDecState = mSpacecraft->GetState("SphericalRADEC");
+   
+   //loj: 1/25/06 we want to convert to parameter coord system first
+   Rvector6 state = GetCartState();
+   mSphRaDecState = CartesianToSphericalRADEC(state);
+   
+//    MessageInterface::ShowMessage
+//       ("==>OrbitData::GetKepState() GetCartState() mSphRaDecState=\n   %s\n",
+//        mSphRaDecState.ToString().c_str());
+
    return mSphRaDecState;
 }
 
@@ -305,8 +338,32 @@ Rvector6 OrbitData::GetSphAzFpaState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   mSphAzFpaState = mSpacecraft->GetState("SphericalAZFPA");
+   //mSphAzFpaState = mSpacecraft->GetState("SphericalAZFPA");
+
+   //loj: 1/25/06 we want to convert to parameter coord system first
+   Rvector6 state = GetCartState();
+   mSphAzFpaState = CartesianToSphericalAZFPA(state);
+   
    return mSphAzFpaState;
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetCartReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrives Cartesian element
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetCartReal(Integer item)
+{
+   Rvector6 state = GetCartState();
+   
+   if (item >= PX && item <= VZ)
+      return mCartState[item];
+   else
+      throw ParameterException("OrbitData::GetCartReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(item));
 }
 
 
@@ -343,15 +400,14 @@ Real OrbitData::GetCartReal(const std::string &str)
 
 
 //------------------------------------------------------------------------------
-// Real GetKepReal(const std::string &str)
+// Real GetKepReal(Integer item)
 //------------------------------------------------------------------------------
 /**
- * Retrives Keplerian element.
+ * Retrives Keplerian element
  */
 //------------------------------------------------------------------------------
-Real OrbitData::GetKepReal(const std::string &str)
+Real OrbitData::GetKepReal(Integer item)
 {
-
    Rvector6 state = GetCartState();
 
    if (mOrigin->GetName() != "Earth")
@@ -365,196 +421,226 @@ Real OrbitData::GetKepReal(const std::string &str)
    
    if (rMag < ORBIT_ZERO_TOL)
       throw ParameterException
-         ("OrbitData::GetKepReal(" + str + ") position vector is zero. pos: " +
-          pos.ToString() + " vel: " + vel.ToString());
-
-   if (str == "KepSMA")
+         ("OrbitData::GetKepReal(" + GmatRealUtil::ToString(item) +
+          ") position vector is zero. pos: " + pos.ToString() + " vel: " +
+          vel.ToString());
+   
+   switch (item)
    {
+   case SMA:
       return GetSemiMajorAxis(pos, vel);
-   }
-   else if (str == "KepEcc")
-   {
+   case ECC:
       return GetEccentricity(pos, vel);
-   }
-   else if (str == "KepInc")
-   {
-      Rvector6 hVec = GetAngularMomentum(pos, vel);
-      Real incDeg = ACos(hVec[2]) * DEG_PER_RAD;
-      return incDeg;
-   }
-   else if (str == "KepTA" || str == "KepMA")
-   {
-      #if USE_COORDUTIL_FOR_TA
-      
-      Rvector6 state = GetKepState();
-      MessageInterface::ShowMessage("==>OrbitData::GetKepReal() str=%s\n", str.c_str());
-      MessageInterface::ShowMessage("==>OrbitData::GetKepReal() taDeg=%f\n", mKepState[TA]);
-      MessageInterface::ShowMessage("==>OrbitData::GetKepReal() mMA=%f\n", mMA);
-
-      if (str == "KepTA")
-         return mKepState[TA];
-      else
-         return mMA;
-      
-      #else
-      
-      // I don't know how much efficient it will be just computing TA here
-      // than computing keplerian state and return TA.
-      
-      // find cos ta and sind ta
-      Real sma = GetSemiMajorAxis(pos, vel);
-      Rvector6 hVec = GetAngularMomentum(pos, vel);
-      Real hMag = hVec[3];
-      Real orbParam = hVec[5];
-      Real ecc = Sqrt(Abs(1.0 - orbParam/sma));
-      Real inc = ACos(hVec[2]);
-      Real cosTa = 0.0;
-      Real sinTa = 0.0;
-      
-      if (ecc >= ORBIT_TOL)
+   case INC:
       {
-         // for elliptic orbit
-         Real er = ecc * rMag;
-         cosTa = (orbParam - rMag) / er;
-         //Spec 2.21 does not give correct results
-         //sinTa = (pos*vel) / (mGravConst * er); // GMAT Spec 2.11
-         sinTa = (pos*vel)*hMag / (mGravConst * er); // Swingby CoordUtil
+         Rvector6 hVec = GetAngularMomentum(pos, vel);
+         Real incDeg = ACos(hVec[2]) * DEG_PER_RAD;
+         return incDeg;
       }
-      else
+   case TA:
+   case MA:
       {
-         // for circular orbit
-         Real hzx = hVec[2] * hVec[0];
-         Real hzy = hVec[2] * hVec[1];
-         Real hxySq = hVec[0]*hVec[0] + hVec[1]*hVec[1];
-         
-         if (inc >= ORBIT_TOL)
+         #if USE_COORDUTIL_FOR_TA
+      
+         Rvector6 state = GetKepState();
+
+         if (item == TA)
+            return mKepState[TA];
+         else
+            return mMA;
+      
+         #else
+      
+         // I don't know how much efficient it will be just computing TA here
+         // than computing keplerian state and return TA.
+      
+         // find cos ta and sind ta
+         Real sma = GetSemiMajorAxis(pos, vel);
+         Rvector6 hVec = GetAngularMomentum(pos, vel);
+         Real hMag = hVec[3];
+         Real orbParam = hVec[5];
+         Real ecc = Sqrt(Abs(1.0 - orbParam/sma));
+         Real inc = ACos(hVec[2]);
+         Real cosTa = 0.0;
+         Real sinTa = 0.0;
+      
+         if (ecc >= ORBIT_TOL)
          {
-            // for circular inclined case
-            Rvector3 nVec(-hzx, -hzy, hxySq);
-            Real nMag = nVec.GetMagnitude();
-            cosTa = (-hzx*pos[0] - hzy*pos[1]) / (rMag * hxySq);
-            sinTa = (-hzx*pos[0] - hzy*pos[1] + hxySq*pos[2]) / (rMag*nMag);
+            // for elliptic orbit
+            Real er = ecc * rMag;
+            cosTa = (orbParam - rMag) / er;
+            //Spec 2.21 does not give correct results
+            //sinTa = (pos*vel) / (mGravConst * er); // GMAT Spec 2.11
+            sinTa = (pos*vel)*hMag / (mGravConst * er); // Swingby CoordUtil
          }
          else
          {
-            // for circular equatorial case
-            cosTa = pos[0] / rMag;
-            sinTa = pos[1] / rMag;
-         }
-      }
-      
-      Real taDeg = ATan(sinTa, cosTa) * DEG_PER_RAD;
-      
-      if (taDeg < 0.0)
-         taDeg = taDeg + 360.0;
-
-      if (str == "KepTA")
-      {
-         //MessageInterface::ShowMessage("==>OrbitData::GetKepReal() taDeg=%f\n\n", taDeg);
-         return taDeg;
-      }
-      else
-      {
-         Real ta = DegToRad(taDeg);
-         Real costa = Cos(ta);
-         Real ea = ACos((ecc + costa)/(1.0 + ecc*costa));
-         mMA = RadToDeg(ea - ecc * Sin(ea));
-         if (taDeg > 180.0)
-            mMA = 360.0 - mMA;
+            // for circular orbit
+            Real hzx = hVec[2] * hVec[0];
+            Real hzy = hVec[2] * hVec[1];
+            Real hxySq = hVec[0]*hVec[0] + hVec[1]*hVec[1];
          
-         //MessageInterface::ShowMessage("==>OrbitData::GetKepReal() taDeg=%f\n", taDeg);
-         //MessageInterface::ShowMessage("==>OrbitData::GetKepReal() mMA=%f\n\n", mMA);
-         return mMA;
-      }
+            if (inc >= ORBIT_TOL)
+            {
+               // for circular inclined case
+               Rvector3 nVec(-hzx, -hzy, hxySq);
+               Real nMag = nVec.GetMagnitude();
+               cosTa = (-hzx*pos[0] - hzy*pos[1]) / (rMag * hxySq);
+               sinTa = (-hzx*pos[0] - hzy*pos[1] + hxySq*pos[2]) / (rMag*nMag);
+            }
+            else
+            {
+               // for circular equatorial case
+               cosTa = pos[0] / rMag;
+               sinTa = pos[1] / rMag;
+            }
+         }
       
-      #endif // USE_COORDUTIL_FOR_TA
-   }
-   else if (str == "KepRAAN")
-   {
+         Real taDeg = ATan(sinTa, cosTa) * DEG_PER_RAD;
+      
+         if (taDeg < 0.0)
+            taDeg = taDeg + 360.0;
+
+         if (item == TA)
+         {
+            //MessageInterface::ShowMessage("==>OrbitData::GetKepReal() taDeg=%f\n\n", taDeg);
+            return taDeg;
+         }
+         else
+         {
+            Real ta = DegToRad(taDeg);
+            Real costa = Cos(ta);
+            Real ea = ACos((ecc + costa)/(1.0 + ecc*costa));
+            mMA = RadToDeg(ea - ecc * Sin(ea));
+            if (taDeg > 180.0)
+               mMA = 360.0 - mMA;
+         
+            //MessageInterface::ShowMessage("==>OrbitData::GetKepReal() taDeg=%f\n", taDeg);
+            //MessageInterface::ShowMessage("==>OrbitData::GetKepReal() mMA=%f\n\n", mMA);
+            return mMA;
+         }
+      
+         #endif // USE_COORDUTIL_FOR_TA
+      }
+   case RAAN:
       return GetRAofAN(pos, vel);
-   }
-   else if (str == "KepRADN")
-   {
-      Real raanDeg = GetRAofAN(pos, vel);
-      return AngleUtil::PutAngleInDegRange(raanDeg + 180, 0.0, 360.0);
-   }
-   else if (str == "KepAOP")
-   {
-      #if USE_COORDUTIL_FOR_AOP
-      
-      Rvector6 state = GetKepState();
-      return mKepState[AOP];
-      
-      #else
-      
-      // I don't know how much efficient it will be just computing AOP here
-      // than computing keplerian state and return AOP.
-      
-      Real sma = GetSemiMajorAxis(pos, vel);
-      Rvector6 hVec = GetAngularMomentum(pos, vel);
-      Real vMagSq = hVec[4];
-      Real orbParam = hVec[5];
-      Real ecc = Sqrt(Abs(1.0 - orbParam/sma));
-      Real inc = ACos(hVec[2]);
-      Real aopDeg;
-      
-      if (ecc < ORBIT_TOL)
+   case RADN:
       {
-         aopDeg = 0.0;
+         Real raanDeg = GetRAofAN(pos, vel);
+         return AngleUtil::PutAngleInDegRange(raanDeg + 180, 0.0, 360.0);
       }
-      else
+   case AOP:
       {
-         Real hzx = hVec[2] * hVec[0];
-         Real hzy = hVec[2] * hVec[1];
-         Real hxySq = hVec[0]*hVec[0] + hVec[1]*hVec[1];
-         Real hxySqrt = Sqrt(hxySq);
-         Rvector3 nVec(-hzx, -hzy, hxySq);
-         Rvector3 xVec = (vMagSq - mGravConst/rMag)*pos - (pos*vel)*vel;
-         Real hyxX = -hVec[1]*xVec[0] + hVec[0]*xVec[1]; //Swingby CoordUtil
-         Real nMag = nVec.GetMagnitude();
-         Real xMag = xVec.GetMagnitude();
-         
-         if (Abs(inc) >= ORBIT_TOL)
+         #if USE_COORDUTIL_FOR_AOP
+      
+         Rvector6 state = GetKepState();
+         return mKepState[AOP];
+      
+         #else
+      
+         // I don't know how much efficient it will be just computing AOP here
+         // than computing keplerian state and return AOP.
+      
+         Real sma = GetSemiMajorAxis(pos, vel);
+         Rvector6 hVec = GetAngularMomentum(pos, vel);
+         Real vMagSq = hVec[4];
+         Real orbParam = hVec[5];
+         Real ecc = Sqrt(Abs(1.0 - orbParam/sma));
+         Real inc = ACos(hVec[2]);
+         Real aopDeg;
+      
+         if (ecc < ORBIT_TOL)
          {
-            //Spec 2.23 does not give correct results
-            //aopDeg = ACos((nVec*xVec) / (nMag*xMag)) * DEG_PER_RAD; //Spec 2.23)
-            aopDeg = ACos(hyxX / (hxySqrt*xMag)) * DEG_PER_RAD; //Swingby CoordUtil
-            
-            if (xVec[2] < 0.0)
-               aopDeg = -aopDeg;
+            aopDeg = 0.0;
          }
          else
          {
-            xVec.Normalize();
-            aopDeg = ATan(xVec[1], xVec[0]) * DEG_PER_RAD;
+            Real hzx = hVec[2] * hVec[0];
+            Real hzy = hVec[2] * hVec[1];
+            Real hxySq = hVec[0]*hVec[0] + hVec[1]*hVec[1];
+            Real hxySqrt = Sqrt(hxySq);
+            Rvector3 nVec(-hzx, -hzy, hxySq);
+            Rvector3 xVec = (vMagSq - mGravConst/rMag)*pos - (pos*vel)*vel;
+            Real hyxX = -hVec[1]*xVec[0] + hVec[0]*xVec[1]; //Swingby CoordUtil
+            Real xMag = xVec.GetMagnitude();
+         
+            //if (Abs(inc) >= ORBIT_TOL)
+            if (ecc >= ORBIT_TOL && Abs(inc) >= ORBIT_TOL)
+            {
+               //Spec 2.23 does not give correct results
+               //Real nMag = nVec.GetMagnitude();
+               //aopDeg = ACos((nVec*xVec) / (nMag*xMag)) * DEG_PER_RAD; //Spec 2.23)
+            
+               aopDeg = ACos(hyxX / (hxySqrt*xMag)) * DEG_PER_RAD; //Swingby CoordUtil
+            
+               if (xVec[2] < 0.0)
+                  aopDeg = -aopDeg;
+            }
+            else
+            {
+               xVec.Normalize();
+               aopDeg = ATan(xVec[1], xVec[0]) * DEG_PER_RAD;
+            }
          }
+      
+         if (aopDeg < 0.0)
+            aopDeg = aopDeg + 360.0;
+      
+         return aopDeg;
+      
+         #endif
       }
-      
-      if (aopDeg < 0.0)
-         aopDeg = aopDeg + 360.0;
-      
-      return aopDeg;
-      
-      #endif
+
+   default:
+      throw ParameterException("OrbitData::GetKepReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(item));
    }
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetKepReal(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Retrives Keplerian element.
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetKepReal(const std::string &str)
+{
+   if (str == "KepSMA")
+      return GetKepReal(SMA);
+   else if (str == "KepEcc")
+      return GetKepReal(ECC);
+   else if (str == "KepInc")
+      return GetKepReal(INC);
+   else if (str == "KepTA")
+      return GetKepReal(TA);
+   else if (str == "KepMA")
+      return GetKepReal(MA);
+   else if (str == "KepRAAN")
+      return GetKepReal(RAAN);
+   else if (str == "KepRADN")
+      return GetKepReal(RADN);
+   else if (str == "KepAOP")
+      return GetKepReal(AOP);
    else
-      throw ParameterException("OrbitData::GetCartReal() Unknown parameter name: " +
+      throw ParameterException("OrbitData::GetKepReal() Unknown parameter name: " +
                                str);
 }
 
 
 //------------------------------------------------------------------------------
-// Real GetOtherKepReal(const std::string &str)
+// Real GetOtherKepReal(Integer item)
 //------------------------------------------------------------------------------
 /**
  * Retrives other Keplerian element.
  */
 //------------------------------------------------------------------------------
-Real OrbitData::GetOtherKepReal(const std::string &str)
+Real OrbitData::GetOtherKepReal(Integer item)
 {
    Rvector6 state = GetCartState();
    
-   if (mOrigin->GetName() != "Earth")
+   if (mOriginDep && mOrigin->GetName() != "Earth")
    {
       state = state - mOrigin->GetMJ2000State(mCartEpoch);
    }
@@ -567,59 +653,125 @@ Real OrbitData::GetOtherKepReal(const std::string &str)
    
    Real grav = mGravConst;
    Real E, R;
-   
-   if (str == "KepMM")
+
+   switch (item)
    {
-      Real mm;
-      if (ecc < (1.0 - ORBIT_TOL))          // Ellipse
+   case MM:
       {
-         mm = Sqrt((grav / sma ) / (sma * sma));
+         Real mm;
+         if (ecc < (1.0 - ORBIT_TOL))          // Ellipse
+         {
+            mm = Sqrt((grav / sma ) / (sma * sma));
+         }
+         else
+         {
+            if (ecc > (1.0 + ORBIT_TOL))       // Hyperbola (See B M W; eq's 4.2-19 to 4.2-21)
+               mm = sqrt(-(grav / sma)/(sma * sma));
+            else                               // Parabola (See B M W 4.2-17 and 4.2-18)
+               mm = 2.0 * sqrt(grav);
+         }
+         return mm;
       }
-      else
+   case VEL_APOAPSIS:
       {
-         if (ecc > (1.0 + ORBIT_TOL))       // Hyperbola (See B M W; eq's 4.2-19 to 4.2-21)
-            mm = sqrt(-(grav / sma)/(sma * sma));
-         else                               // Parabola (See B M W 4.2-17 and 4.2-18)
-            mm = 2.0 * sqrt(grav);
+         E = -grav / (2.0 * sma);
+         R = sma * (1.0 + ecc);
+         return Sqrt (2.0 * (E + grav/R));
       }
-      return mm;
-   }
-   else if (str == "VelApoapsis")
-   {
-      E = -grav / (2.0 * sma);
-      R = sma * (1.0 + ecc);
-      return Sqrt (2.0 * (E + grav/R));
-   }
-   else if (str == "VelPeriapsis")
-   {
-      E = -grav / (2.0 * sma);
-      R = sma * (1.0 - ecc);
-      return Sqrt (2.0 * (E + grav/R));
-   }
-   else if (str == "OrbitPeriod")
-   {
+   case VEL_PERIAPSIS:
+      {
+         E = -grav / (2.0 * sma);
+         R = sma * (1.0 - ecc);
+         return Sqrt (2.0 * (E + grav/R));
+      }
+   case ORBIT_PERIOD:
       return GmatMathUtil::TWO_PI * Sqrt((sma * sma * sma)/ grav);
-   }
-   else if (str == "RadApoapsis")
-   {
+   case RAD_APOAPSIS:
       return sma * (1.0 + ecc);
-   }
-   else if (str == "RadPeriapsis")
-   {
+   case RAD_PERIAPSIS:
       return sma * (1.0 - ecc);
-   }
-   else if (str == "C3Energy")
-   {
+   case C3_ENERGY:
       return -grav / sma;
-   }
-   else if (str == "Energy")
-   {
+   case ENERGY:
       return -grav / (2.0 * sma);
+   default:
+      throw ParameterException
+         ("OrbitData::GetOtherKepReal() Unknown parameter ID: " +
+          GmatRealUtil::ToString(item));
    }
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetOtherKepReal(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Retrives other Keplerian element.
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetOtherKepReal(const std::string &str)
+{
+   if (str == "KepMM")
+      return GetOtherKepReal(MM);
+   else if (str == "VelApoapsis")
+      return GetOtherKepReal(VEL_APOAPSIS);
+   else if (str == "VelPeriapsis")
+      return GetOtherKepReal(VEL_PERIAPSIS);
+   else if (str == "OrbitPeriod")
+      return GetOtherKepReal(ORBIT_PERIOD);
+   else if (str == "RadApoapsis")
+      return GetOtherKepReal(RAD_APOAPSIS);
+   else if (str == "RadPeriapsis")
+      return GetOtherKepReal(RAD_PERIAPSIS);
+   else if (str == "C3Energy")
+      return GetOtherKepReal(C3_ENERGY);
+   else if (str == "Energy")
+      return GetOtherKepReal(ENERGY);
    else
    {
       throw ParameterException
          ("OrbitData::GetOtherKepReal() Unknown parameter name: " + str);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetSphRaDecReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrives Spherical element.
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetSphRaDecReal(Integer item)
+{
+   Rvector6 state = GetSphRaDecState();
+
+   #if DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage
+      ("OrbitData::GetSphRaDecReal() str=%s state=%s\n",
+       str.c_str(), state.ToString().c_str());
+   #endif
+   
+   switch (item)
+   {
+   case RD_RMAG:
+      {
+         // if orgin is "Earth" just return default
+         if (mOrigin->GetName() == "Earth")
+            return mSphRaDecState[RD_RMAG];
+         else
+            return GetPositionMagnitude(mOrigin);
+      }
+   case RD_RRA:
+   case RD_RDEC:
+   case RD_VMAG:
+   case RD_RAV:
+   case RD_DECV:
+      return mSphRaDecState[item];
+   default:
+      throw ParameterException
+         ("OrbitData::GetSphRaDecReal() Unknown parameter name: " +
+          GmatRealUtil::ToString(item));
    }
 }
 
@@ -633,36 +785,49 @@ Real OrbitData::GetOtherKepReal(const std::string &str)
 //------------------------------------------------------------------------------
 Real OrbitData::GetSphRaDecReal(const std::string &str)
 {
-   Rvector6 state = GetSphRaDecState();
-
-   #if DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage
-      ("OrbitData::GetSphRaDecReal() str=%s state=%s\n",
-       str.c_str(), state.ToString().c_str());
-   #endif
-   
    if (str == "SphRMag")
-   {
-      // if orgin is "Earth" just return default
-      if (mOrigin->GetName() == "Earth")
-         return mSphRaDecState[RD_RMAG];
-      else
-         return GetPositionMagnitude(mOrigin);
-   }
+      return GetSphRaDecReal(RD_RMAG);
    else if (str == "SphRA")
-      return mSphRaDecState[RD_RRA];
+      return GetSphRaDecReal(RD_RRA);
    else if (str == "SphDec")
-      return mSphRaDecState[RD_RDEC];
+      return GetSphRaDecReal(RD_RDEC);
    else if (str == "SphVMag")
-      return mSphRaDecState[RD_VMAG];
+      return GetSphRaDecReal(RD_VMAG);
    else if (str == "SphRAV")
-      return mSphRaDecState[RD_RAV];
+      return GetSphRaDecReal(RD_RAV);
    else if (str == "SphDecV")
-      return mSphRaDecState[RD_DECV];
+      return GetSphRaDecReal(RD_DECV);
    else
    {
       throw ParameterException
          ("OrbitData::GetSphRaDecReal() Unknown parameter name: " + str);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetSphAzFpaReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrives Spherical element.
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetSphAzFpaReal(Integer item)
+{
+   Rvector6 state = GetSphAzFpaState();
+
+   #if DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage
+      ("OrbitData::GetSphAzFpaReal() str=%s state=%s\n",
+       str.c_str(), state.ToString().c_str());
+   #endif
+
+   if (item >= AF_RMAG && item <= AF_FPA)
+      return mSphAzFpaState[item];
+   else
+   {
+      throw ParameterException("OrbitData::GetSphAzFpaReal() Unknown parameter ID: " +
+                               GmatRealUtil::ToString(item));
    }
 }
 
@@ -676,30 +841,95 @@ Real OrbitData::GetSphRaDecReal(const std::string &str)
 //------------------------------------------------------------------------------
 Real OrbitData::GetSphAzFpaReal(const std::string &str)
 {
-   Rvector6 state = GetSphAzFpaState();
-
-   #if DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage
-      ("OrbitData::GetSphAzFpaReal() str=%s state=%s\n",
-       str.c_str(), state.ToString().c_str());
-   #endif
-   
    if (str == "SphRMag")
-      return mSphAzFpaState[AF_RMAG];
+      return GetSphAzFpaReal(AF_RMAG);
    else if (str == "SphRA")
-      return mSphAzFpaState[AF_RRA];
+      return GetSphAzFpaReal(AF_RRA);
    else if (str == "SphDec")
-      return mSphAzFpaState[AF_RDEC];
+      return GetSphAzFpaReal(AF_RDEC);
    else if (str == "SphVMag")
-      return mSphAzFpaState[AF_VMAG];
+      return GetSphAzFpaReal(AF_VMAG);
    else if (str == "SphAzi")
-      return mSphAzFpaState[AF_AZI];
+      return GetSphAzFpaReal(AF_AZI);
    else if (str == "SphFPA")
-      return mSphAzFpaState[AF_FPA];
+      return GetSphAzFpaReal(AF_FPA);
    else
    {
       throw ParameterException("OrbitData::GetSphAzFpaReal() Unknown parameter name: " +
                                str);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetAngularReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Computes angular related parameter.
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetAngularReal(Integer item)
+{
+   Rvector6 state = GetCartState();
+
+   #if DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage
+      ("OrbitData::GetAngularReal() item=%d state=%s\n",
+       item, state.ToString().c_str());
+   #endif
+   
+   Rvector3 pos;
+   Rvector3 vel;
+
+   pos = Rvector3(state[0], state[1], state[2]);
+   vel = Rvector3(state[3], state[4], state[5]);
+   
+   Rvector3 hVec3 = Cross(pos, vel);
+   Real h = Sqrt(hVec3 * hVec3);
+   
+   Real grav = mGravConst;
+
+   switch (item)
+   {
+   case SEMILATUS_RECTUM:
+      {
+         if (mOrigin->GetName() != "Earth")
+         {
+            state = GetRelativeCartState(mOrigin);
+            pos = Rvector3(state[0], state[1], state[2]);
+            vel = Rvector3(state[3], state[4], state[5]);
+            hVec3 = Cross(pos, vel);
+            h = Sqrt(hVec3 * hVec3);
+         }
+      
+         if (h < ORBIT_TOL)
+            return 0.0;
+         else
+            return (h / grav) * h;      // B M W; eq. 1.6-1
+      }
+   case HMAG:
+      {
+         if (mOrigin->GetName() != "Earth")
+         {
+            state = GetRelativeCartState(mOrigin);
+            pos = Rvector3(state[0], state[1], state[2]);
+            vel = Rvector3(state[3], state[4], state[5]);
+            hVec3 = Cross(pos, vel);
+            h = Sqrt(hVec3 * hVec3);
+         }
+      
+         return h; 
+      }
+   case HX:
+      return hVec3[0];
+   case HY:
+      return hVec3[1];
+   case HZ:
+      return hVec3[2];
+   default:
+      throw ParameterException
+         ("OrbitData::GetAngularReal() Unknown parameter ID: " +
+          GmatRealUtil::ToString(item));
    }
 }
 
@@ -713,70 +943,62 @@ Real OrbitData::GetSphAzFpaReal(const std::string &str)
 //------------------------------------------------------------------------------
 Real OrbitData::GetAngularReal(const std::string &str)
 {
-   Rvector6 state = GetCartState();
-
-   #if DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage
-      ("OrbitData::GetAngularReal() str=%s state=%s\n",
-       str.c_str(), state.ToString().c_str());
-   #endif
-   
-   Rvector3 pos;
-   Rvector3 vel;
-
-   pos = Rvector3(state[0], state[1], state[2]);
-   vel = Rvector3(state[3], state[4], state[5]);
-   
-   Rvector3 hVec3 = Cross(pos, vel);
-   Real h = Sqrt(hVec3 * hVec3);
-   
-   Real grav = mGravConst;
-   
    if (str == "SemilatusRectum")
-   {
-      if (mOrigin->GetName() != mScOrigin->GetName())
-      {
-         state = GetRelativeCartState(mOrigin);
-         pos = Rvector3(state[0], state[1], state[2]);
-         vel = Rvector3(state[3], state[4], state[5]);
-         hVec3 = Cross(pos, vel);
-         h = Sqrt(hVec3 * hVec3);
-      }
-      
-      if (h < ORBIT_TOL)
-         return 0.0;
-      else
-         return (h / grav) * h;      // B M W; eq. 1.6-1
-   }
+      return GetAngularReal(SEMILATUS_RECTUM);
    else if (str == "HMAG")
-   {
-      if (mOrigin->GetName() != mScOrigin->GetName())
-      {
-         state = GetRelativeCartState(mOrigin);
-         pos = Rvector3(state[0], state[1], state[2]);
-         vel = Rvector3(state[3], state[4], state[5]);
-         hVec3 = Cross(pos, vel);
-         h = Sqrt(hVec3 * hVec3);
-      }
-      
-      return h; 
-   }
+      return GetAngularReal(HMAG);
    else if (str == "HX")
-   {
-      return hVec3[0];
-   }
+      return GetAngularReal(HX);
    else if (str == "HY")
-   {
-      return hVec3[1];
-   }
+      return GetAngularReal(HY);
    else if (str == "HZ")
-   {
-      return hVec3[2];
-   }
+      return GetAngularReal(HZ);
    else
    {
       throw ParameterException
          ("OrbitData::GetAngularReal() Unknown parameter name: " + str);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetOtherAngleReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Computes other angle related parameters.
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetOtherAngleReal(Integer item)
+{
+   Rvector6 state = GetCartState();
+
+   switch (item)
+   {
+   case BETA_ANGLE:
+      {
+         if (mOrigin->GetName() != "Earth")
+            state = GetRelativeCartState(mOrigin);
+      
+         // compute orbit normal unit vector
+         Rvector3 pos = Rvector3(state[0], state[1], state[2]);
+         Rvector3 vel = Rvector3(state[3], state[4], state[5]);
+         Rvector3 hVec3 = Cross(pos, vel);
+         hVec3.Normalize();
+      
+         // compute sun unit vector from the origin
+         Rvector3 sunPos = (mSolarSystem->GetBody(SolarSystem::SUN_NAME))->
+            GetMJ2000Position(mCartEpoch);
+         Rvector3 originPos = mOrigin->GetMJ2000Position(mCartEpoch);
+         Rvector3 originToSun = sunPos - originPos;
+         originToSun.Normalize();
+      
+         Real betaAngle = ACos(hVec3*originToSun) * DEG_PER_RAD;
+         return betaAngle;
+      }
+   default:
+      throw ParameterException
+         ("OrbitData::GetOtherAngleReal() Unknown parameter ID: " +
+          GmatRealUtil::ToString(item));
    }
 }
 
@@ -790,29 +1012,8 @@ Real OrbitData::GetAngularReal(const std::string &str)
 //------------------------------------------------------------------------------
 Real OrbitData::GetOtherAngleReal(const std::string &str)
 {
-   Rvector6 state = GetCartState();
-   
    if (str == "BetaAngle")
-   {
-      if (mOrigin->GetName() != mScOrigin->GetName())
-         state = GetRelativeCartState(mOrigin);
-      
-      // compute orbit normal unit vector
-      Rvector3 pos = Rvector3(state[0], state[1], state[2]);
-      Rvector3 vel = Rvector3(state[3], state[4], state[5]);
-      Rvector3 hVec3 = Cross(pos, vel);
-      hVec3.Normalize();
-      
-      // compute sun unit vector from the origin
-      Rvector3 sunPos = (mSolarSystem->GetBody(SolarSystem::SUN_NAME))->
-         GetMJ2000Position(mCartEpoch);
-      Rvector3 originPos = mOrigin->GetMJ2000Position(mCartEpoch);
-      Rvector3 originToSun = sunPos - originPos;
-      originToSun.Normalize();
-      
-      Real betaAngle = ACos(hVec3*originToSun) * DEG_PER_RAD;
-      return betaAngle;
-   }
+      return GetOtherAngleReal(BETA_ANGLE);
    else
    {
       throw ParameterException
@@ -1062,10 +1263,9 @@ Real OrbitData::GetPositionMagnitude(SpacePoint *origin)
 //------------------------------------------------------------------------------
 void OrbitData::InitializeRefObjects()
 {
-   #if DEBUG_ORBITDATA_INIT
-   MessageInterface::ShowMessage
-      ("OrbitData::InitializeRefObjects() entered.\n");
-   #endif
+   //#if DEBUG_ORBITDATA_INIT
+   //MessageInterface::ShowMessage("OrbitData::InitializeRefObjects() entered.\n");
+   //#endif
    
    mSpacecraft =
       (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
@@ -1109,19 +1309,18 @@ void OrbitData::InitializeRefObjects()
          ("OrbitData::InitializeRefObjects() spacecraft CoordinateSystem not "
           "found: " + csName + "\n");
 
-   // Always set to default origin to Earth
-   //loj: 9/22/05 mScOrigin = cs->GetOrigin();
-   mScOrigin = mSolarSystem->GetBody("Earth");
+   // Set origin to out coord system origin
+   mOrigin = mOutCoordSystem->GetOrigin();
    
-   if (!mScOrigin)
+   if (!mOrigin)
       throw ParameterException
-         ("OrbitData::InitializeRefObjects() spacecraft origin not found: " +
+         ("OrbitData::InitializeRefObjects() origin not found: " +
           cs->GetOriginName() + "\n");
    
-   // get gravity constant if spacecraft origin is CelestialBody
-   if (mScOrigin->IsOfType(Gmat::CELESTIAL_BODY))
-      mGravConst = ((CelestialBody*)mScOrigin)->GetGravitationalConstant();
-
+   // get gravity constant if out coord system origin is CelestialBody
+   if (mOrigin->IsOfType(Gmat::CELESTIAL_BODY))
+      mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
+   
    //-----------------------------------------------------------------
    // if dependent body name exist and it is a CelestialBody,
    // set new gravity constant
@@ -1129,6 +1328,8 @@ void OrbitData::InitializeRefObjects()
    std::string originName =
       FindFirstObjectName(GmatBase::GetObjectType(VALID_OBJECT_TYPE_LIST[SPACE_POINT]));
 
+   mOriginDep = false;
+   
    if (originName != "")
    {
       #if DEBUG_ORBITDATA_INIT
@@ -1148,16 +1349,14 @@ void OrbitData::InitializeRefObjects()
       // override gravity constant if origin is CelestialBody
       if (mOrigin->IsOfType(Gmat::CELESTIAL_BODY))
          mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
-   }
-   else
-   {
-      mOrigin = mScOrigin;
+
+      mOriginDep = true;
    }
    
    #if DEBUG_ORBITDATA_INIT
    MessageInterface::ShowMessage
-      ("OrbitData::InitializeRefObjects() mScOrign.Name=%s, mOrigin.Name=%s\n",
-       mScOrigin->GetName().c_str(), mOrigin->GetName().c_str());
+      ("OrbitData::InitializeRefObjects() mOrigin.Name=%s, mGravConst=%f, "
+       "mOriginDep=%d\n",  mOrigin->GetName().c_str(), mGravConst, mOriginDep);
    #endif
 }
 

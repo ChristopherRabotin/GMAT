@@ -112,7 +112,8 @@ CartX::~CartX()
 //------------------------------------------------------------------------------
 bool CartX::Evaluate()
 {
-   mRealValue = OrbitData::GetCartReal("CartX");
+   //mRealValue = OrbitData::GetCartReal("CartX");
+   mRealValue = OrbitData::GetCartReal(PX);
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -225,7 +226,8 @@ CartY::~CartY()
 //------------------------------------------------------------------------------
 bool CartY::Evaluate()
 {
-   mRealValue = OrbitData::GetCartReal("CartY");
+   //mRealValue = OrbitData::GetCartReal("CartY");
+   mRealValue = OrbitData::GetCartReal(PY);
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -337,7 +339,8 @@ CartZ::~CartZ()
 //------------------------------------------------------------------------------
 bool CartZ::Evaluate()
 {
-   mRealValue = OrbitData::GetCartReal("CartZ");    
+   //mRealValue = OrbitData::GetCartReal("CartZ");    
+   mRealValue = OrbitData::GetCartReal(PZ);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -450,7 +453,8 @@ CartVx::~CartVx()
 //------------------------------------------------------------------------------
 bool CartVx::Evaluate()
 {
-   mRealValue = OrbitData::GetCartReal("CartVx");    
+   //mRealValue = OrbitData::GetCartReal("CartVx");    
+   mRealValue = OrbitData::GetCartReal(VX);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -563,7 +567,8 @@ CartVy::~CartVy()
 //------------------------------------------------------------------------------
 bool CartVy::Evaluate()
 {
-   mRealValue = OrbitData::GetCartReal("CartVy");    
+   //mRealValue = OrbitData::GetCartReal("CartVy");    
+   mRealValue = OrbitData::GetCartReal(VY);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -676,7 +681,8 @@ CartVz::~CartVz()
 //------------------------------------------------------------------------------
 bool CartVz::Evaluate()
 {
-   mRealValue = OrbitData::GetCartReal("CartVz");    
+   //mRealValue = OrbitData::GetCartReal("CartVz");    
+   mRealValue = OrbitData::GetCartReal(VZ);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;

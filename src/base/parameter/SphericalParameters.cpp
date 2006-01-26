@@ -109,7 +109,8 @@ SphRMag::~SphRMag()
 //------------------------------------------------------------------------------
 bool SphRMag::Evaluate()
 {
-   mRealValue = OrbitData::GetSphRaDecReal("SphRMag");    
+   //mRealValue = OrbitData::GetSphRaDecReal("SphRMag");    
+   mRealValue = OrbitData::GetSphRaDecReal(RD_RMAG);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -221,7 +222,8 @@ SphRA::~SphRA()
 //------------------------------------------------------------------------------
 bool SphRA::Evaluate()
 {
-   mRealValue = OrbitData::GetSphRaDecReal("SphRA");    
+   //mRealValue = OrbitData::GetSphRaDecReal("SphRA");    
+   mRealValue = OrbitData::GetSphRaDecReal(RD_RRA);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -333,7 +335,8 @@ SphDec::~SphDec()
 //------------------------------------------------------------------------------
 bool SphDec::Evaluate()
 {
-   mRealValue = OrbitData::GetSphRaDecReal("SphDec");    
+   //mRealValue = OrbitData::GetSphRaDecReal("SphDec");    
+   mRealValue = OrbitData::GetSphRaDecReal(RD_RDEC);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -445,7 +448,8 @@ SphVMag::~SphVMag()
 //------------------------------------------------------------------------------
 bool SphVMag::Evaluate()
 {
-   mRealValue = OrbitData::GetSphRaDecReal("SphVMag");    
+   //mRealValue = OrbitData::GetSphRaDecReal("SphVMag");    
+   mRealValue = OrbitData::GetSphRaDecReal(RD_VMAG);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -557,8 +561,9 @@ SphRAV::~SphRAV()
 //------------------------------------------------------------------------------
 bool SphRAV::Evaluate()
 {
-   mRealValue = OrbitData::GetSphRaDecReal("SphRAV");    
-    
+   //mRealValue = OrbitData::GetSphRaDecReal("SphRAV");    
+   mRealValue = OrbitData::GetSphRaDecReal(RD_RAV);    
+   
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
    else
@@ -667,7 +672,8 @@ SphDecV::~SphDecV()
 //------------------------------------------------------------------------------
 bool SphDecV::Evaluate()
 {
-   mRealValue = OrbitData::GetSphRaDecReal("SphDecV");    
+   //mRealValue = OrbitData::GetSphRaDecReal("SphDecV");    
+   mRealValue = OrbitData::GetSphRaDecReal(RD_DECV);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -780,7 +786,8 @@ SphAzi::~SphAzi()
 //------------------------------------------------------------------------------
 bool SphAzi::Evaluate()
 {
-   mRealValue = OrbitData::GetSphAzFpaReal("SphAzi");    
+   //mRealValue = OrbitData::GetSphAzFpaReal("SphAzi");    
+   mRealValue = OrbitData::GetSphAzFpaReal(AF_AZI);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -892,7 +899,8 @@ SphFPA::~SphFPA()
 //------------------------------------------------------------------------------
 bool SphFPA::Evaluate()
 {
-   mRealValue = OrbitData::GetSphAzFpaReal("SphFPA");    
+   //mRealValue = OrbitData::GetSphAzFpaReal("SphFPA");    
+   mRealValue = OrbitData::GetSphAzFpaReal(AF_FPA);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;

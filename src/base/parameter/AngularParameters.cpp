@@ -109,7 +109,8 @@ SemilatusRectum::~SemilatusRectum()
 //------------------------------------------------------------------------------
 bool SemilatusRectum::Evaluate()
 {
-   mRealValue = OrbitData::GetAngularReal("SemilatusRectum");    
+   //mRealValue = OrbitData::GetAngularReal("SemilatusRectum");    
+   mRealValue = OrbitData::GetAngularReal(SEMILATUS_RECTUM);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -222,8 +223,9 @@ AngularMomentumMag::~AngularMomentumMag()
 //------------------------------------------------------------------------------
 bool AngularMomentumMag::Evaluate()
 {
-   mRealValue = OrbitData::GetAngularReal("HMAG");    
-    
+   //mRealValue = OrbitData::GetAngularReal("HMAG");    
+   mRealValue = OrbitData::GetAngularReal(HMAG);    
+   
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
    else
@@ -335,8 +337,9 @@ AngularMomentumX::~AngularMomentumX()
 //------------------------------------------------------------------------------
 bool AngularMomentumX::Evaluate()
 {
-   mRealValue = OrbitData::GetAngularReal("HX");    
-    
+   //mRealValue = OrbitData::GetAngularReal("HX");    
+   mRealValue = OrbitData::GetAngularReal(HX);    
+   
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
    else
@@ -448,8 +451,9 @@ AngularMomentumY::~AngularMomentumY()
 //------------------------------------------------------------------------------
 bool AngularMomentumY::Evaluate()
 {
-   mRealValue = OrbitData::GetAngularReal("HY");    
-    
+   //mRealValue = OrbitData::GetAngularReal("HY");    
+   mRealValue = OrbitData::GetAngularReal(HY);    
+   
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
    else
@@ -560,8 +564,9 @@ AngularMomentumZ::~AngularMomentumZ()
 //------------------------------------------------------------------------------
 bool AngularMomentumZ::Evaluate()
 {
-   mRealValue = OrbitData::GetAngularReal("HZ");    
-    
+   //mRealValue = OrbitData::GetAngularReal("HZ");    
+   mRealValue = OrbitData::GetAngularReal(HZ);    
+   
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
    else
@@ -674,7 +679,8 @@ BetaAngle::~BetaAngle()
 //------------------------------------------------------------------------------
 bool BetaAngle::Evaluate()
 {
-   mRealValue = OrbitData::GetOtherAngleReal("BetaAngle");
+   //mRealValue = OrbitData::GetOtherAngleReal("BetaAngle");
+   mRealValue = OrbitData::GetOtherAngleReal(BETA_ANGLE);
    
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;

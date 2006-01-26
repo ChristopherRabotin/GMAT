@@ -36,6 +36,7 @@ public:
    BplaneData& operator= (const BplaneData& right);
    virtual ~BplaneData();
    
+   Real GetBplaneReal(Integer item);
    Real GetBplaneReal(const std::string &str);
    
    // The inherited methods from RefData
@@ -61,12 +62,13 @@ protected:
    
    Spacecraft *mSpacecraft;
    SolarSystem *mSolarSystem;
-   SpacePoint *mScOrigin;
    SpacePoint *mOrigin;
    CoordinateSystem *mInternalCoordSystem;
    CoordinateSystem *mOutCoordSystem;
    
    CoordinateConverter mCoordConverter;
+
+   enum {B_DOT_T, B_DOT_R};
    
    enum
    {
