@@ -28,7 +28,7 @@ namespace GmatFileUtil
    const Integer BUFFER_SIZE = 4096;
    static Real CompareAbsTol = 1.0e-4;
    StringArray& Compare(const std::string &filename1, const std::string &filename2,
-                        Real tol = CompareAbsTol);
+                        const StringArray &colTitles, Real tol = CompareAbsTol);
    bool SkipHeaderLines(std::ifstream &in, StringArray &tokens);
    static StringArray textBuffer;
 }

@@ -34,7 +34,9 @@ using namespace GmatRealUtil;
 //                      Real tol = 1.0e-4)
 //------------------------------------------------------------------------------
 StringArray& GmatFileUtil::Compare(const std::string &filename1,
-                                   const std::string &filename2, Real tol)
+                                   const std::string &filename2,
+                                   const StringArray &colTitles,
+                                   Real tol)
 {
    textBuffer.clear();
    textBuffer.push_back("\n======================================== Compare Utility\n");
@@ -217,9 +219,22 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
    MessageInterface::ShowMessage("%s", outLine.c_str());
    #endif
 
-   outLine = "Column   Minimum Diff.   Line#   Maximum Diff.   Line#   Min>Tol   Max>Tol\n"
-      "------   -------------   -----   -------------   -----   -------   -------\n";
-   
+   if (colTitles.size() == 0)
+   {
+      outLine =
+         "Column   Minimum Diff.   Line#   Maximum Diff.   Line#   Min>Tol   "
+         "Max>Tol\n"
+         "------   -------------   -----   -------------   -----   -------   "
+         "-------\n";
+   }
+   else
+   {
+      outLine =
+         "Column   Column Title                     Minimum Diff.   Line#   "
+         "Maximum Diff.   Line#   Min>Tol   Max>Tol\n"
+         "------   ------------                     -------------   -----   "
+         "-------------   -----   -------   -------\n";
+   }
    textBuffer.push_back(outLine);
    
    #if DEBUG_COMPARE_REPORT
@@ -227,6 +242,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
    #endif
    
    char minGtTol, maxGtTol;
+   char title[30] = "";
    
    for (int i=0; i<file1Cols; i++)
    {
@@ -239,10 +255,22 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
       if (maxDiffs[i] > tol)
          maxGtTol = '*';
 
-      outLine = ToString(i+1) + "     " + ToString(minDiffs[i], true, 7, 6) +
-         "   " + ToString(minLines[i]) + "    " +
-         ToString(maxDiffs[i], true, 7, 6) + "   " + ToString(maxLines[i]) +
-         "       " + minGtTol + "         " + maxGtTol + "\n";
+      if (colTitles.size() == 0)
+      {
+         outLine = ToString(i+1) + "     " + ToString(minDiffs[i], true, 7, 6) +
+            "   " + ToString(minLines[i]) + "    " +
+            ToString(maxDiffs[i], true, 7, 6) + "   " + ToString(maxLines[i]) +
+            "       " + minGtTol + "         " + maxGtTol + "\n";
+      }
+      else
+      {
+         sprintf(title, "%-30.30s", colTitles[i].c_str());
+         outLine = ToString(i+1) + "     " + title + "   " +
+            ToString(minDiffs[i], true, 7, 6) + "   " + ToString(minLines[i]) +
+            "    " + ToString(maxDiffs[i], true, 7, 6) + "   " +
+            ToString(maxLines[i]) + "       " + minGtTol + "         " +
+            maxGtTol + "\n";
+      }
       
       textBuffer.push_back(outLine);
       
