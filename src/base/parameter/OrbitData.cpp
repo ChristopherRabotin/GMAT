@@ -15,7 +15,7 @@
 /**
  * Implements Orbit related data class.
  *   VelApoapsis, VelPeriapsis, Apoapsis, Periapsis, OrbitPeriod,
- *   RadApoapsis, RadPeriapais, C3Energy, Energy, Altitude(Geodetic)
+ *   RadApoapsis, RadPeriapais, C3Energy, Energy
  */
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
@@ -558,21 +558,22 @@ Real OrbitData::GetKepReal(Integer item)
             Real hzx = hVec[2] * hVec[0];
             Real hzy = hVec[2] * hVec[1];
             Real hxySq = hVec[0]*hVec[0] + hVec[1]*hVec[1];
-            Real hxySqrt = Sqrt(hxySq);
             Rvector3 nVec(-hzx, -hzy, hxySq);
             Rvector3 xVec = (vMagSq - mGravConst/rMag)*pos - (pos*vel)*vel;
-            Real hyxX = -hVec[1]*xVec[0] + hVec[0]*xVec[1]; //Swingby CoordUtil
             Real xMag = xVec.GetMagnitude();
-         
+            
             //if (Abs(inc) >= ORBIT_TOL)
             if (ecc >= ORBIT_TOL && Abs(inc) >= ORBIT_TOL)
             {
-               //Spec 2.23 does not give correct results
+               // Spec 2.23 (It does not give correct results)
                //Real nMag = nVec.GetMagnitude();
-               //aopDeg = ACos((nVec*xVec) / (nMag*xMag)) * DEG_PER_RAD; //Spec 2.23)
-            
-               aopDeg = ACos(hyxX / (hxySqrt*xMag)) * DEG_PER_RAD; //Swingby CoordUtil
-            
+               //aopDeg = ACos((nVec*xVec) / (nMag*xMag)) * DEG_PER_RAD; 
+               
+               // Swingby CoordUtil
+               Real hyxX = -hVec[1]*xVec[0] + hVec[0]*xVec[1]; 
+               Real hxySqrt = Sqrt(hxySq);
+               aopDeg = ACos(hyxX / (hxySqrt*xMag)) * DEG_PER_RAD;
+               
                if (xVec[2] < 0.0)
                   aopDeg = -aopDeg;
             }
@@ -582,7 +583,7 @@ Real OrbitData::GetKepReal(Integer item)
                aopDeg = ATan(xVec[1], xVec[0]) * DEG_PER_RAD;
             }
          }
-      
+         
          if (aopDeg < 0.0)
             aopDeg = aopDeg + 360.0;
       
@@ -1351,6 +1352,11 @@ void OrbitData::InitializeRefObjects()
          mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
 
       mOriginDep = true;
+   }
+   else
+   {
+      // set Earth as origin for non-origin dependent parameters
+      mOrigin = mSolarSystem->GetBody("Earth");
    }
    
    #if DEBUG_ORBITDATA_INIT
