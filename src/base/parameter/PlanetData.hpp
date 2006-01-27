@@ -24,6 +24,8 @@
 #include "RefData.hpp"
 #include "Spacecraft.hpp"
 #include "SolarSystem.hpp"
+#include "CoordinateSystem.hpp"
+#include "CoordinateConverter.hpp"
 
 class GMAT_API PlanetData : public RefData
 {
@@ -34,7 +36,9 @@ public:
    PlanetData& operator= (const PlanetData& right);
    virtual ~PlanetData();
    
-   Real GetReal(const std::string &dataType);
+   Real GetPlanetReal(Integer item);
+   Real GetPlanetReal(const std::string &str);
+   void SetInternalCoordSystem(CoordinateSystem *cs);
    
    // The inherited methods from RefData
    virtual bool ValidateRefObjects(GmatBase *param);
@@ -54,12 +58,19 @@ protected:
    SolarSystem *mSolarSystem;
    CelestialBody *mCentralBody;
    CelestialBody *mOrigin;
+   CoordinateSystem *mInternalCoordSystem;
+   CoordinateSystem *mOutCoordSystem;
+   
+   CoordinateConverter mCoordConverter;
+
+   enum {LATITUDE, LONGITUDE, ALTITUDE, MHA_ID, LST_ID};
    
    enum
    {
       SPACECRAFT = 0,
       SOLAR_SYSTEM,
-      SPACE_POINT, //loj: 4/11/05 Changed CELESTIAL_BODY to SPACE_POINT
+      COORD_SYSTEM,
+      SPACE_POINT,
       PlanetDataObjectCount
    };
    

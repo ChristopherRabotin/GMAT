@@ -145,6 +145,27 @@ void PlanetReal::SetSolarSystem(SolarSystem *ss)
    
 }
 
+
+//------------------------------------------------------------------------------
+// virtual void SetInternalCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+/**
+ * Sets internal CoordinateSystem pointer. Assumes parameter data is in
+ * this internal CoordinateSystem.
+ */
+//------------------------------------------------------------------------------
+void PlanetReal::SetInternalCoordSystem(CoordinateSystem *cs)
+{
+   #if DEBUG_PLANET_REAL
+   MessageInterface::ShowMessage
+      ("PlanetReal::SetInternalCoordSystem() cs=%s to %s\n", cs->GetTypeName().c_str(),
+       this->GetName().c_str());
+   #endif
+   
+   PlanetData::SetInternalCoordSystem(cs);
+}
+
+
 //------------------------------------------------------------------------------
 // virtual Integer GetNumRefObjects() const
 //------------------------------------------------------------------------------
@@ -237,7 +258,7 @@ std::string PlanetReal::GetRefObjectName(const Gmat::ObjectType type) const
    if (objName == "INVALID_OBJECT_TYPE")
    {
       throw ParameterException
-         ("OrbitReal::GetRefObjectName() " + GmatBase::GetObjectTypeString(type) +
+         ("PlanetReal::GetRefObjectName() " + GmatBase::GetObjectTypeString(type) +
           " is not valid object type of " + this->GetTypeName() + "\n");
    }
    

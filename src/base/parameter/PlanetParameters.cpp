@@ -25,7 +25,7 @@
 //                              MHA
 //==============================================================================
 /**
- * Implements Greenwich Hour Angle parameter class.
+ * Implements Mean Hour Angle parameter class.
  */
 //------------------------------------------------------------------------------
 
@@ -46,6 +46,7 @@ MHA::MHA(const std::string &name, GmatBase *obj)
    mDepObjectName = "Earth";
    PlanetData::mCentralBodyName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthFixed");
 }
 
 
@@ -78,7 +79,7 @@ MHA::operator=(const MHA &right)
 {
    if (this != &right)
       PlanetReal::operator=(right);
-
+   
    return *this;
 }
 
@@ -110,7 +111,8 @@ MHA::~MHA()
 //------------------------------------------------------------------------------
 bool MHA::Evaluate()
 {
-   mRealValue = PlanetData::GetReal("MHA");    
+   //mRealValue = PlanetData::GetPlanetReal("MHA");    
+   mRealValue = PlanetData::GetPlanetReal(MHA_ID);
    
    if (mRealValue == PlanetData::PLANET_REAL_UNDEFINED)
       return false;
@@ -159,8 +161,9 @@ Longitude::Longitude(const std::string &name, GmatBase *obj)
                 Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    PlanetData::mCentralBodyName = "Earth";
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthFixed");
 }
 
 
@@ -225,7 +228,8 @@ Longitude::~Longitude()
 //------------------------------------------------------------------------------
 bool Longitude::Evaluate()
 {
-   mRealValue = PlanetData::GetReal("Longitude");    
+   //mRealValue = PlanetData::GetPlanetReal("Longitude");    
+   mRealValue = PlanetData::GetPlanetReal(LONGITUDE);    
    
    if (mRealValue == PlanetData::PLANET_REAL_UNDEFINED)
       return false;
@@ -274,8 +278,9 @@ Altitude::Altitude(const std::string &name, GmatBase *obj)
                 Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    PlanetData::mCentralBodyName = "Earth";
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthFixed");
 }
 
 
@@ -340,7 +345,8 @@ Altitude::~Altitude()
 //------------------------------------------------------------------------------
 bool Altitude::Evaluate()
 {
-   mRealValue = PlanetData::GetReal("Altitude");
+   //mRealValue = PlanetData::GetPlanetReal("Altitude");
+   mRealValue = PlanetData::GetPlanetReal(ALTITUDE);
    
    if (mRealValue == PlanetData::PLANET_REAL_UNDEFINED)
       return false;
@@ -389,8 +395,9 @@ Latitude::Latitude(const std::string &name, GmatBase *obj)
                 Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    PlanetData::mCentralBodyName = "Earth";
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthFixed");
 }
 
 
@@ -455,7 +462,8 @@ Latitude::~Latitude()
 //------------------------------------------------------------------------------
 bool Latitude::Evaluate()
 {
-   mRealValue = PlanetData::GetReal("Latitude");    
+   //mRealValue = PlanetData::GetPlanetReal("Latitude");    
+   mRealValue = PlanetData::GetPlanetReal(LATITUDE);    
    
    if (mRealValue == PlanetData::PLANET_REAL_UNDEFINED)
       return false;
@@ -504,8 +512,9 @@ LST::LST(const std::string &name, GmatBase *obj)
                 Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    PlanetData::mCentralBodyName = "Earth";
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthFixed");
 }
 
 
@@ -570,7 +579,8 @@ LST::~LST()
 //------------------------------------------------------------------------------
 bool LST::Evaluate()
 {
-   mRealValue = PlanetData::GetReal("LST");    
+   //mRealValue = PlanetData::GetPlanetReal("LST");    
+   mRealValue = PlanetData::GetPlanetReal(LST_ID);    
    
    if (mRealValue == PlanetData::PLANET_REAL_UNDEFINED)
       return false;

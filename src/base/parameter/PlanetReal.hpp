@@ -43,6 +43,7 @@ public:
    virtual Integer GetNumRefObjects() const;
    virtual bool AddRefObject(GmatBase *obj, bool replaceName = false);
    virtual void SetSolarSystem(SolarSystem *ss);
+   virtual void SetInternalCoordSystem(CoordinateSystem *ss);
    virtual bool Validate();
    virtual bool Initialize();
    
