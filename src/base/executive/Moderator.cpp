@@ -25,6 +25,7 @@
 #include "ObjectReferencedAxes.hpp"
 #include "MessageInterface.hpp"
 #include "CommandUtil.hpp"         // for GetCommandSeq()
+#include "StringTokenizer.hpp"
 #include <ctime>                   // for clock()
 
 //loj: 1/18/06 debug
@@ -1512,16 +1513,54 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    if (GetParameter(name) == NULL)
    {
       Parameter *parameter = theFactoryManager->CreateParameter(type, name);
+
+      // create parameter dependent coordinate system (loj: 1/27/06)
+      if (type == "Longitude" || type == "Latitude" || type == "Altitude" ||
+          type == "MHA" || type == "LST")
+      {
+         // need body-fixed CS
+         StringTokenizer st(name, ".");
+         StringArray tokens = st.GetAllTokens();
+         
+         if (tokens.size() == 2 || (tokens.size() == 3 && tokens[1] == "Earth"))
+         {
+            //MessageInterface::ShowMessage("==> Create EarthFixed\n");
+            
+            // default EarthFixed
+            CreateCoordinateSystem("EarthFixed");
+            parameter->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthFixed");
+         }
+         else if (tokens.size() == 3)
+         {
+            std::string origin = tokens[1];
+            std::string axisName = origin + "Fixed";
+            
+            //MessageInterface::ShowMessage("==> Create %s\n", axisName.c_str());
+            
+            CoordinateSystem *cs = CreateCoordinateSystem(axisName);
+            
+            // create BodyFixedAxis with origin
+            AxisSystem *axis = CreateAxisSystem("BodyFixed", "");
+            cs->SetStringParameter("Origin", origin);
+            cs->SetRefObject(GetConfiguredItem(origin), Gmat::SPACE_POINT, origin);
+            cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
+            //cs->SetStringParameter("J2000Body", "Earth"); // Default is Earth
+            cs->SetRefObject(GetConfiguredItem("Earth"), Gmat::SPACE_POINT, "Earth");
+            cs->SetSolarSystem(theDefaultSolarSystem);
+            cs->Initialize();
+            
+            parameter->SetRefObjectName(Gmat::COORDINATE_SYSTEM, axisName);
+         }
+         else
+         {
+            MessageInterface::ShowMessage("===> Invalid parameter name: %s\n",
+                                          name.c_str());
+         }
+      }
       
       if (parameter == NULL)
       {
-         //MessageInterface::PopupMessage
-         //   (Gmat::ERROR_, "Cannot create a Parameter type: %s.\n"
-         //    "Make sure %s is correct type and registered to ParameterFactory.\n",
-         //    type.c_str(), type.c_str());
-         
-         //return NULL;
-         throw GmatBaseException("Error Creating Parameter: " + type + "\n");
+        throw GmatBaseException("Error Creating Parameter: " + type + "\n");
       }
       
       // Manage it if it is a named parameter
@@ -1907,7 +1946,7 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
          AxisSystem *axis = CreateAxisSystem("MJ2000Eq", "");
          cs->SetStringParameter("Origin", "Earth");
          cs->SetRefObject(GetConfiguredItem("Earth"), Gmat::SPACE_POINT, "Earth");
-//         cs->SetStringParameter("J2000Body", "Earth");
+         //cs->SetStringParameter("J2000Body", "Earth"); // Default is Earth
          cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
          cs->SetSolarSystem(theDefaultSolarSystem);
          cs->Initialize();
@@ -1935,6 +1974,7 @@ CoordinateSystem* Moderator::GetCoordinateSystem(const std::string &name)
    else
       return theConfigManager->GetCoordinateSystem(name);
 }
+
 
 //------------------------------------------------------------------------------
 // AxisSystem* CreateAxisSystem(const std::string &type,
@@ -3631,7 +3671,6 @@ void Moderator::CreateDefaultMission()
       CreateParameter("RadPer", "DefaultSC.Earth.RadPer");
       CreateParameter("C3Energy", "DefaultSC.Earth.C3Energy");
       CreateParameter("Energy", "DefaultSC.Earth.Energy");
-      CreateParameter("Altitude", "DefaultSC.Earth.Altitude");
       
       // Spherical parameters
       CreateParameter("RMAG", "DefaultSC.Earth.RMAG");
@@ -3652,6 +3691,7 @@ void Moderator::CreateDefaultMission()
       CreateParameter("AtmosDensity", "DefaultSC.Earth.AtmosDensity");
       
       // Planet parameters
+      CreateParameter("Altitude", "DefaultSC.Earth.Altitude");
       CreateParameter("MHA", "DefaultSC.Earth.MHA");
       CreateParameter("Longitude", "DefaultSC.Earth.Longitude");
       CreateParameter("Latitude", "DefaultSC.Earth.Latitude");
