@@ -2652,6 +2652,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       }
       
       textCtrl = textFrame->GetScriptTextCtrl();
+      textCtrl->SetMaxLength(320000); // make long enough
       textFrame->Show();
       wxString msg;
       msg.Printf(_T("GMAT Build Date: %s %s\n\n"),  __DATE__, __TIME__);      
