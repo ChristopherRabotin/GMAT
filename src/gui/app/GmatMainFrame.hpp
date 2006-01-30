@@ -140,6 +140,7 @@ private:
    void OnPause(wxCommandEvent &event);
    void OnStop(wxCommandEvent &event);
    void OnCloseChildren(wxCommandEvent &event);
+   void OnCloseCurrent(wxCommandEvent &event);
    void OnHelpAbout(wxCommandEvent &event);
 
    void OnNewScript(wxCommandEvent &event);
@@ -244,6 +245,7 @@ namespace GmatMenu
       TOOL_BUILD,
 
       TOOL_CLOSE_CHILDREN,
+      TOOL_CLOSE_CURRENT,
       TOOL_SCRIPT,
 
       MENU_START_SERVER,

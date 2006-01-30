@@ -95,6 +95,7 @@
 #include "bitmaps/pause.xpm"
 #include "bitmaps/stop.xpm"
 #include "bitmaps/close.xpm"
+#include "bitmaps/tabclose.xpm"
 #include "bitmaps/script.xpm"
 #include "bitmaps/build.xpm"
 
@@ -127,6 +128,8 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(TOOL_PAUSE, GmatMainFrame::OnPause)
    EVT_MENU(TOOL_STOP, GmatMainFrame::OnStop)
    EVT_MENU(TOOL_CLOSE_CHILDREN, GmatMainFrame::OnCloseChildren)
+   EVT_MENU(TOOL_CLOSE_CURRENT, GmatMainFrame::OnCloseCurrent)
+   
    EVT_MENU(MENU_HELP_ABOUT, GmatMainFrame::OnHelpAbout)
    EVT_MENU(MENU_SCRIPT_BUILD, GmatMainFrame::OnScriptBuild)    
 //   EVT_MENU(MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE, GmatMainFrame::OnGlPlotTrajectoryFile)
@@ -162,8 +165,6 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(MENU_SCRIPT_BUILD_AND_RUN, GmatMainFrame::OnScriptBuildAndRun)
    EVT_MENU(MENU_SCRIPT_RUN, GmatMainFrame::OnScriptRun)
    
-   EVT_TOOL_RCLICKED(TOOL_CLOSE_CHILDREN, GmatMainFrame::OnNewScript)
-
 END_EVENT_TABLE()
 
 //------------------------------
@@ -608,9 +609,13 @@ void GmatMainFrame::RemoveChild(const wxString &item, int dataType)
 void GmatMainFrame::CloseActiveChild()
 {
    GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)GetActiveChild();
-   wxCloseEvent event;
-   theChild->OnClose(event);
-   wxSafeYield();
+   
+   if (theChild != NULL)
+   {
+      wxCloseEvent event;
+      theChild->OnClose(event);
+      wxSafeYield();
+   }
 }
 
 
@@ -1186,6 +1191,22 @@ void GmatMainFrame::OnCloseChildren(wxCommandEvent& WXUNUSED(event))
 }
 
 //------------------------------------------------------------------------------
+// void OnCloseCurrent(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles closing all open children.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnCloseCurrent(wxCommandEvent& WXUNUSED(event))
+{
+   CloseActiveChild();
+   wxSafeYield();
+}
+
+
+//------------------------------------------------------------------------------
 // void OnHelpAbout(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 /**
@@ -1230,6 +1251,9 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    fileMenu->AppendSeparator();
    fileMenu->Append(TOOL_CLOSE_CHILDREN, wxT("Close All"),
                      wxT(""), FALSE);
+   fileMenu->Append(TOOL_CLOSE_CURRENT, wxT("Close this Child"),
+                     wxT(""), FALSE);
+                     
 
    fileMenu->AppendSeparator();
    fileMenu->Append(MENU_PROJECT_LOAD_DEFAULT_MISSION, wxT("Default Project"), 
@@ -1312,7 +1336,7 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::InitToolBar() entered\n");
    #endif
-   wxBitmap* bitmaps[14];
+   wxBitmap* bitmaps[15];
    
    bitmaps[0] = new wxBitmap(new_xpm);
    bitmaps[1] = new wxBitmap(open_xpm);
@@ -1326,8 +1350,9 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    bitmaps[9] = new wxBitmap(pause_xpm);
    bitmaps[10] = new wxBitmap(stop_xpm);
    bitmaps[11] = new wxBitmap(close_xpm);
-   bitmaps[12] = new wxBitmap(script_xpm);
-   bitmaps[13] = new wxBitmap(build_xpm);
+   bitmaps[12] = new wxBitmap(tabclose_xpm);
+   bitmaps[13] = new wxBitmap(script_xpm);
+   bitmaps[14] = new wxBitmap(build_xpm);
    
    // add project tools
    toolBar->AddTool(MENU_FILE_NEW_SCRIPT, _T("New"), *bitmaps[0], _T("New Script"));
@@ -1335,7 +1360,7 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    toolBar->AddTool(MENU_FILE_SAVE_SCRIPT, _T("Save"), *bitmaps[2], _T("Save to Script"));
    toolBar->AddSeparator();
 
-   toolBar->AddTool(MENU_PROJECT_LOAD_DEFAULT_MISSION, _T("Default"), *bitmaps[12], 
+   toolBar->AddTool(MENU_PROJECT_LOAD_DEFAULT_MISSION, _T("Default"), *bitmaps[13], 
                     _T("Default Project"));
    toolBar->AddSeparator();
    
@@ -1357,13 +1382,14 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    
    // add close window tool
    toolBar->AddTool(TOOL_CLOSE_CHILDREN, _T("Close"), *bitmaps[11], _T("Close All"));
+   toolBar->AddTool(TOOL_CLOSE_CURRENT, _T("Close this Child"), *bitmaps[12], _T("Close this Child"));
    toolBar->AddSeparator();
    
    // add help tool
    toolBar->AddTool(MENU_HELP_ABOUT, _T("Help"), *bitmaps[7], _T("Help"));
-   toolBar->AddSeparator();
-   toolBar->AddSeparator();
-   toolBar->AddSeparator();
+//   toolBar->AddSeparator();
+//   toolBar->AddSeparator();
+//   toolBar->AddSeparator();
    
    // now realize to make tools appear
    toolBar->Realize();
@@ -1379,7 +1405,7 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    toolBar->EnableTool(TOOL_PAUSE, FALSE);
    toolBar->EnableTool(TOOL_STOP, FALSE);
    
-   for (int i = 0; i < 13; i++)
+   for (int i = 0; i < 15; i++)
    {
       delete bitmaps[i];
    }
@@ -1703,15 +1729,18 @@ bool GmatMainFrame::InterpretScript(const wxString &filename)
    bool status = false;
    try
    {
-      // If not successfully interpreted, show error
+      // If successfully interpreted, set status to true
       if (!GmatAppData::GetGuiInterpreter()->
           InterpretScript(std::string(filename.c_str())))
       {
-         
-         wxLogError
+         status = true;
+      }  
+      else
+      {
+        wxLogError
             ("Error occurred during parsing.\nPlease check the syntax and try again\n");
          wxLog::FlushActive();
-      }   
+      } 
       
       // Always refresh the gui      
       CloseAllChildren(false, true, filename);

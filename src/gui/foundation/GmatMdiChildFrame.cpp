@@ -198,6 +198,10 @@ wxMenuBar *GmatMdiChildFrame::CreateMenu(int dataType)
 
    if (dataType == GmatTree::OUTPUT_OPENGL_PLOT)
       fileMenu->Append(GmatPlot::MDI_GL_CHILD_QUIT, _T("&Close Plot"), _T("Close this window"));
+   else
+      fileMenu->Append(TOOL_CLOSE_CURRENT, wxT("Close this Child"),
+                     wxT(""), FALSE);
+   
 //   if (dataType == GmatTree::OUTPUT_XY_PLOT)
 //      fileMenu->Append(GmatPlot::MDI_TS_CHILD_QUIT, _T("&Close Plot"),
 //         _T("Close this window"));
