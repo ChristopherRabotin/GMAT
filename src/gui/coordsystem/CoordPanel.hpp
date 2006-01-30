@@ -30,6 +30,7 @@ public:
     ~CoordPanel();
     
    wxString epochValue;
+   wxString epochFormatValue;
    
    wxComboBox *GetOriginComboBox() {return originComboBox;}
    wxComboBox *GetTypeComboBox() {return typeComboBox;}

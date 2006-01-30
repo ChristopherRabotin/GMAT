@@ -41,7 +41,7 @@ CoordSystemConfigPanel::CoordSystemConfigPanel(wxWindow *parent,
 {
    theCoordSys = (CoordinateSystem*) theGuiInterpreter->GetCoordinateSystem(
                   coordName.c_str());
-   mEpochFormat = "TAIModJulian";
+   mEpochFormat = "A1ModJulian";
    mOriginChanged = false;
    mObjRefChanged = false;
    
@@ -118,7 +118,7 @@ void CoordSystemConfigPanel::LoadData()
       mEpochFormat = wxString(axis->GetEpochFormat().c_str());
       
       if (mEpochFormat == "")
-        mEpochFormat = "TAIModJulian";
+        mEpochFormat = "A1ModJulian";
    }
    else
    {

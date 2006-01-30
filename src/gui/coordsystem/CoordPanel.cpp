@@ -41,6 +41,7 @@ CoordPanel::CoordPanel(wxWindow *parent, bool enableAll)
    mEnableAll = enableAll;
    
    epochValue = "21545";
+   epochFormatValue = "A1ModJulian";
       
    Create();
 }
@@ -222,7 +223,7 @@ void CoordPanel::SetDefaultAxis()
    originComboBox->SetValue("Earth");
    primaryComboBox->SetValue("Earth");
    secondaryComboBox->SetValue("Luna");
-   formatComboBox->SetValue("TAIModJulian");
+   formatComboBox->SetValue(epochFormatValue);
 //   epochTextCtrl->SetValue("21545");
    epochTextCtrl->SetValue(epochValue);
    xComboBox->SetValue("R");
@@ -238,7 +239,7 @@ void CoordPanel::SetDefaultAxis()
 void CoordPanel::SetDefaultEpochRefAxis()
 {
    // default settings
-   formatComboBox->SetValue("TAIModJulian");
+   formatComboBox->SetValue(epochFormatValue);
 //   epochTextCtrl->SetValue("21545");
     epochTextCtrl->SetValue(epochValue);
 }
