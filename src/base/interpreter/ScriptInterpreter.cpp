@@ -259,7 +259,20 @@ bool ScriptInterpreter::ReadLine()
 bool ScriptInterpreter::Parse()
 {
     // Determine what kind of line we have
-    ChunkLine();
+    try
+    {
+       ChunkLine();
+    }
+    catch (BaseException &e)
+    {
+       MessageInterface::ShowMessage(
+          "The line '%s' failed to parse; the error is \n   '%s'", line.c_str(),
+          e.GetMessage().c_str());
+       
+       // Clear the command stream
+       
+       return false;
+    }
     
     // Process accordingly
     if (!chunks.empty())
@@ -672,25 +685,42 @@ bool ScriptInterpreter::Parse()
                // Reset phrase and continue
                phrase = chunks.begin();
             }
-
+            
+            #ifdef DEBUG_COMMAND_PARSING
+               MessageInterface::ShowMessage("Line '%s' is a command\n", 
+                  line.c_str());
+            #endif
             GmatCommand *cmd = moderator->AppendCommand(**phrase, "");
             try
             {
                cmd->SetGeneratingString(line);
                // Temporarily continue to support InterpretAction until all 
                // commands are moved to the new format
-               if (!cmd->InterpretAction()) {
+               if (!cmd->InterpretAction()) 
+               {
                   if (!AssembleCommand(line, cmd))
+                  {
                      throw InterpreterException(
                         "Could not construct command \"" + line + "\"");
+                  }
                }
                sequenceStarted = true;
                branchDepth += cmd->DepthIncrement();
             }
             catch (BaseException &e)
             {
-                chunks.clear();
-                throw;
+               #ifdef DEBUG_COMMAND_PARSING
+                  MessageInterface::ShowMessage(
+                     "Caught an exception '%s' from command of type '%s'\n",
+                     e.GetMessage().c_str(), cmd->GetTypeName().c_str());
+               #endif
+                                 
+               /// Clean up the resulting mess
+               chunks.clear();
+               
+               throw InterpreterException("The command line '" + line + 
+                  "' did not parse correctly; it threw the message \n   '"
+                  + e.GetMessage() +"'");
             }
         }
         // Looks like the line was not understood

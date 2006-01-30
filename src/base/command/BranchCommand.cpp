@@ -74,36 +74,41 @@ BranchCommand::~BranchCommand()
 
    for (node = branch.begin(); node != branch.end(); ++node)
    {
-      // Find the end for each branch and disconnect it fron the start
+      // Find the end for each branch and disconnect it from the start
       current = *node;
-      
-      #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
-         MessageInterface::ShowMessage("current=%s\n", current->GetTypeName().c_str());
-      #endif
-         
-      while (current->GetNext() != this)
-      {
-         current = current->GetNext();
-         if (current == NULL)
-         {
-            break;
-         }
-      }
-      
-      // Calling Remove this way just sets the next pointer to NULL
-      if (current)
+      if (current != NULL)
       {
          #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
-            MessageInterface::ShowMessage("Removing %s\n", 
-                                       current->GetTypeName().c_str());
+            MessageInterface::ShowMessage("current=%s\n", current->GetTypeName().c_str());
          #endif
             
-         current->Remove(current);
+         while (current->GetNext() != this)
+         {
+            current = current->GetNext();
+            if (current == NULL)
+            {
+               break;
+            }
+         }
+         
+         // Calling Remove this way just sets the next pointer to NULL
+         if (current)
+         {
+            #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
+               MessageInterface::ShowMessage("Removing %s\n", 
+                                          current->GetTypeName().c_str());
+            #endif
+               
+            current->Remove(current);
+         }
+         
+         if (*node)
+            delete *node;
       }
-      
-      if (*node)
-         delete *node;
+      else
+         break;
    }
+   
    #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
       MessageInterface::ShowMessage("Finished BranchCommand::~BranchCommand()\n");
    #endif
