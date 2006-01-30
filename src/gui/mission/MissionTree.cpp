@@ -837,17 +837,19 @@ void MissionTree::AddIcons()
    icons[10]= wxIcon ( callfunction_xpm );
    icons[11]= wxIcon ( nestreturn_xpm );
 
-   int sizeOrig = icons[0].GetWidth();
+//   int sizeOrig = icons[0].GetWidth();
    for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
    {
-      if ( size == sizeOrig )
-      {
-         images->Add(icons[i]);
-      }
-      else
-      {
+   	  // 30/01/06 - arg - always resize because linux is not showing unscaled
+   	  // icons correctly
+//      if ( size == sizeOrig )
+//      {
+//         images->Add(icons[i]);
+//      }
+//      else
+//      {
          images->Add(wxBitmap(wxBitmap(icons[i]).ConvertToImage().Rescale(size, size)));
-      }
+//      }
    }
 
    AssignImageList(images);
