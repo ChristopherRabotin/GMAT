@@ -161,6 +161,8 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(MENU_SCRIPT_BUILD_OBJECT, GmatMainFrame::OnScriptBuildObject)
    EVT_MENU(MENU_SCRIPT_BUILD_AND_RUN, GmatMainFrame::OnScriptBuildAndRun)
    EVT_MENU(MENU_SCRIPT_RUN, GmatMainFrame::OnScriptRun)
+   
+   EVT_TOOL_RCLICKED(TOOL_CLOSE_CHILDREN, GmatMainFrame::OnNewScript)
 
 END_EVENT_TABLE()
 
@@ -608,6 +610,7 @@ void GmatMainFrame::CloseActiveChild()
    GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)GetActiveChild();
    wxCloseEvent event;
    theChild->OnClose(event);
+   wxSafeYield();
 }
 
 
@@ -675,7 +678,9 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       }
       
       node = node->GetNext();
+      wxSafeYield();
    }
+   wxSafeYield();
 }
 
 
@@ -748,7 +753,7 @@ void GmatMainFrame::RunCurrentMission()
    toolBar->EnableTool(TOOL_PAUSE, TRUE);
    toolBar->EnableTool(TOOL_STOP, TRUE);
    
-   wxYield();
+   wxSafeYield();
    SetFocus();
 
    mRunCompleted = false;
@@ -1177,6 +1182,7 @@ void GmatMainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
 void GmatMainFrame::OnCloseChildren(wxCommandEvent& WXUNUSED(event))
 {
    CloseAllChildren();
+   wxSafeYield();
 }
 
 //------------------------------------------------------------------------------
@@ -2024,7 +2030,7 @@ void GmatMainFrame::OnSetFocus(wxFocusEvent& event)
 
    //loj: GmatMainFrame is not getting Focus when iconized
    
-   wxYield();
+   wxSafeYield();
    
 //    MessageInterface::ShowMessage
 //       ("GmatMainFrame::OnSetFocus()  IsIconized=%d, IsEnabled=%d\n",

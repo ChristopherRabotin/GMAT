@@ -109,6 +109,7 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
    GmatAppData::GetMainFrame()->RemoveChild(GetTitle(), dataType);
 
 //   event.Skip();
+   wxSafeYield();
 }
 
 #ifdef __WXMAC__
