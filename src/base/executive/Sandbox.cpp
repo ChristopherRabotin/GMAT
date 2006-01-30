@@ -179,10 +179,6 @@ bool Sandbox::AddObject(GmatBase *obj)
          {
             if (solarSys)
                ((Spacecraft*)(obj))->SetSolarSystem(solarSys);
-
-            // Finalize the state data -- this call moves the display state data
-            // into the internal state.
-            ((Spacecraft*)(obj))->SaveDisplay();
          }
       }
       else
@@ -514,7 +510,6 @@ bool Sandbox::Initialize()
       if (obj->GetType() == Gmat::SPACECRAFT)
       {
          obj->SetSolarSystem(solarSys);
-         ((Spacecraft *)obj)->SaveDisplay();
          ((Spacecraft *)obj)->SetInternalCoordSystem(internalCoordSys);
 
          BuildReferences(obj);

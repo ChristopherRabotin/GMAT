@@ -269,8 +269,6 @@ bool ScriptInterpreter::Parse()
           "The line '%s' failed to parse; the error is \n   '%s'", line.c_str(),
           e.GetMessage().c_str());
        
-       // Clear the command stream
-       
        return false;
     }
     
