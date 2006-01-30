@@ -758,7 +758,7 @@ void GmatMainFrame::RunCurrentMission()
    toolBar->EnableTool(TOOL_PAUSE, TRUE);
    toolBar->EnableTool(TOOL_STOP, TRUE);
    
-   wxSafeYield();
+   wxYield();
    SetFocus();
 
    mRunCompleted = false;
@@ -1730,7 +1730,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename)
    try
    {
       // If successfully interpreted, set status to true
-      if (!GmatAppData::GetGuiInterpreter()->
+      if (GmatAppData::GetGuiInterpreter()->
           InterpretScript(std::string(filename.c_str())))
       {
          status = true;
@@ -2059,7 +2059,7 @@ void GmatMainFrame::OnSetFocus(wxFocusEvent& event)
 
    //loj: GmatMainFrame is not getting Focus when iconized
    
-   wxSafeYield();
+   wxYield();
    
 //    MessageInterface::ShowMessage
 //       ("GmatMainFrame::OnSetFocus()  IsIconized=%d, IsEnabled=%d\n",
