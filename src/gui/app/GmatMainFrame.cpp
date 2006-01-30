@@ -1697,24 +1697,23 @@ bool GmatMainFrame::InterpretScript(const wxString &filename)
    bool status = false;
    try
    {
-      // If successfully interpreted the script
-      if (GmatAppData::GetGuiInterpreter()->
+      // If not successfully interpreted, show error
+      if (!GmatAppData::GetGuiInterpreter()->
           InterpretScript(std::string(filename.c_str())))
       {
          
-         CloseAllChildren(false, true, filename);
-         
-         // Update ResourceTree and MissionTree
-         GmatAppData::GetResourceTree()->UpdateResource(true);
-         GmatAppData::GetMissionTree()->UpdateMission(true);
-         status = true;
-      }
-      else
-      {
          wxLogError
             ("Error occurred during parsing.\nPlease check the syntax and try again\n");
          wxLog::FlushActive();
-      }
+      }   
+      
+      // Always refresh the gui      
+      CloseAllChildren(false, true, filename);
+     
+      // Update ResourceTree and MissionTree
+      GmatAppData::GetResourceTree()->UpdateResource(true);
+      GmatAppData::GetMissionTree()->UpdateMission(true);
+      
    }
    catch (BaseException &e)
    {
