@@ -2242,11 +2242,11 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
          "elapsedTime = %f\n", currEpoch[0], stopEpoch, elapsedTime[0]);
    #endif
    
-   Real secsToStep = (
-      stopEpoch - currEpoch[trigger]) * GmatTimeUtil::SECS_PER_DAY;
+   Real secsToStep = 
+      (stopEpoch - currEpoch[trigger]) * GmatTimeUtil::SECS_PER_DAY;
    #ifdef DEBUG_PROPAGATE_DIRECTION
       MessageInterface::ShowMessage
-         ("Propagate::Execute() secsToStep at stop = %16.10lf\n",
+         ("Propagate::Execute() secsToStep at stop = %16.10le\n",
           secsToStep);
       MessageInterface::ShowMessage
          ("   stopEpoch = %16.10lf\n   currEpoch = %16.10lf\n",
@@ -2262,7 +2262,8 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
    {
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage(
-            "Propagate::Execute() before Step(%f) epoch = %f\n", secsToStep,
+            "Propagate::Execute() before Step(%16.13le) epoch = %16.10lf\n", 
+            secsToStep, 
             (baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY));
       #endif
 
@@ -2281,7 +2282,8 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
          
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage
-            ("Propagate::Execute() after Step(%f) epoch = %f\n", secsToStep,
+            ("Propagate::Execute() after Step(%16.13le) epoch = %16.10lf\n", 
+            secsToStep,
             (baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY));
       #endif
    
@@ -2300,7 +2302,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
       
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage
-            ("Propagate::Execute() complete; epoch = %f\n",
+            ("Propagate::Execute() complete; epoch = %16.10lf\n",
              (baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY));
       #endif
    }
