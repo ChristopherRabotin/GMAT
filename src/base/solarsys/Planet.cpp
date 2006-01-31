@@ -48,7 +48,7 @@ const Real                  Planet::EQUATORIAL_RADIUS[NumberOfPlanets]         =
    60368.0,
    25559.0,
    24764.0,
-   1195.0
+   1162.0 // changed to match with STK. old:1195.0
 };
 const Real                  Planet::FLATTENING[NumberOfPlanets]         =   
 {
