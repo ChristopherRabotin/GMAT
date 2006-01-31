@@ -25,15 +25,20 @@
 #include "MessageInterface.hpp"
 
 #include <sstream>
+#include <cmath>
 
 //#define DEBUG_PROPAGATE_OBJ 1
 //#define DEBUG_PROPAGATE_INIT 1
 //#define DEBUG_PROPAGATE_DIRECTION 1
+//#define DEBUG_PROPAGATE_STEPSIZE 1
 //#define DEBUG_PROPAGATE_EXE 1
 //#define DEBUG_STOPPING_CONDITIONS 1
 //#define DEBUG_RENAME 1
 //#define DEBUG_PROP_PERFORMANCE
 //#define DEBUG_FIRST_CALL
+
+
+#define TIME_ROUNDOFF 1.0e-6
 
 //---------------------------------
 // static data
@@ -1595,6 +1600,11 @@ bool Propagate::TakeAStep(Real propStep)
       retval = true;
    }
    
+   #ifdef DEBUG_PROPAGATE_STEPSIZE
+      MessageInterface::ShowMessage("Prop step = %16.13lf\n", 
+         p[0]->GetStepTaken());
+   #endif
+   
    return retval;
 }
 
@@ -2244,10 +2254,19 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
    
    Real secsToStep = 
       (stopEpoch - currEpoch[trigger]) * GmatTimeUtil::SECS_PER_DAY;
-   #ifdef DEBUG_PROPAGATE_DIRECTION
+      
+   // Perform stepsize rounding.  Note that the rounding precision can be set
+   // by redefining the macro TIME_ROUNDOFF at the top of this file.  Set it to
+   // 0.0 to prevent rounding.
+   if (TIME_ROUNDOFF != 0.0)
+      secsToStep = std::floor(secsToStep / TIME_ROUNDOFF + 0.5) * TIME_ROUNDOFF;
+
+   #if defined DEBUG_PROPAGATE_STEPSIZE or defined DEBUG_PROPAGATE_DIRECTION
       MessageInterface::ShowMessage
          ("Propagate::Execute() secsToStep at stop = %16.10le\n",
           secsToStep);
+   #endif
+   #ifdef DEBUG_PROPAGATE_DIRECTION
       MessageInterface::ShowMessage
          ("   stopEpoch = %16.10lf\n   currEpoch = %16.10lf\n",
           stopEpoch, currEpoch[trigger]);
@@ -2312,6 +2331,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
         current != p.end(); ++current)
       (*current)->SetAsFinalStep(false);
 }
+
 
 //------------------------------------------------------------------------------
 // bool Execute()
