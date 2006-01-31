@@ -40,26 +40,26 @@ const Integer               Planet::DEFAULT_REF_BODY_NUMBER   = 3;
 // Units for Equatorial radius are km
 const Real                  Planet::EQUATORIAL_RADIUS[NumberOfPlanets]         =
 {
-   2439.7,
-   6051.8,
-   6378.1363,
-   3396.200,
-   71492.00,
-   60368.0,
-   25559.0,
-   24764.0,
+   2.43970000000000e+003, // to match STK 2006.01.31 - was 2439.7,
+   6.05190000000000e+003, // match to STK 2006.01.31 - was 6051.8,
+   6.3781363E3, // to match STK 2006.01.31 - was 6378.1363,
+   3.39700000000000e+003, // to match STK 2006.01.31 - was 3396.200,
+   7.14920000000000e+004, // to match STK 2006.01.31 - was 71492.00,
+   6.02680000000000e+004, // to match STK 2006.01.31 - was 60368.0,
+   2.55590000000000e+004, // to match STK 2006.01.31 - was 25559.0,
+   2.52690000000000e+004, // to match STK 2006.01.31 - was 24764.0,
    1162.0 // changed to match with STK. old:1195.0
 };
 const Real                  Planet::FLATTENING[NumberOfPlanets]         =   
 {
    0.0,
    0.0,
-   0.0033528,
-   0.0064763,
-   0.0648744,
-   0.0979624,
-   0.0229273,
-   0.0171,
+   0.00335270, // match to STK 2006.01.31 - was 0.0033528,
+   0.00647630, // match to STK 2006.01.31 - was 0.0064763,
+   0.06487439, // match to STK 2006.01.31 - was 0.0648744,
+   0.09796243, // match to STK 2006.01.31 - was 0.0979624,
+   0.02292734, // match to STK 2006.01.31 - was 0.0229273,
+   0.01856029, // match to STK 2006.01.31 - was 0.0171,
    0.0
 };
 // Units for Mu are km^3/s^2

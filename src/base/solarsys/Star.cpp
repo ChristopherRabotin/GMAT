@@ -26,7 +26,8 @@
 // initialize static default values
 // default values for CelesitalBody data
 const Gmat::BodyType        Star::BODY_TYPE           = Gmat::STAR;
-const Real                  Star::EQUATORIAL_RADIUS   = 6.97E5;      // km
+ // 2006.01.31 Equatorial radius - to match STK; was 6.97E5;    
+const Real                  Star::EQUATORIAL_RADIUS   = 695990.0000;  // km
 const Real                  Star::FLATTENING          = 0.0; 
 // Units for MU are km^3/s^2
 const Real                  Star::MU                  = 132712440017.99;

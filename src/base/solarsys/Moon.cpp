@@ -33,7 +33,8 @@ const Gmat::PosVelSource    Moon::POS_VEL_SOURCE      = Gmat::DE_405;
 const Gmat::AnalyticMethod  Moon::ANALYTIC_METHOD     = Gmat::LOW_FIDELITY; 
 const Integer               Moon::ORDER               = 0; 
 const Integer               Moon::DEGREE              = 0;  
-const Real                  Moon::LUNA_EQUATORIAL_RADIUS   = 1738.1; // km
+ // 2006.01.31 Equatorial radius - to match STK; was 1738.1; 
+const Real                  Moon::LUNA_EQUATORIAL_RADIUS   = 1738.2000;// km
 const Real                  Moon::LUNA_FLATTENING          = 0.0;
 // Units for mu are km^3 / s^2
 const Real                  Moon::LUNA_MU                  = 4902.8005821478;
