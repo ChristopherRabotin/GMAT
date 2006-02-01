@@ -1222,7 +1222,12 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
           "  Input state = %le %le %le %le %le %le\n", state[0], state[1], 
           state[2], state[3], state[4], state[5]);
    #endif
-    
+
+   #ifdef DEBUG_FORCEMODEL_EPOCHS
+      MessageInterface::ShowMessage(
+         "Input time offset = %16.14le; epoch = %16.10lf\n", dt, epoch);
+   #endif
+   
    // Initialize the derivative array
    for (i = 0; i < satCount; ++i) {
       iOffset = i*stateSize;

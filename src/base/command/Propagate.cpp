@@ -2240,11 +2240,11 @@ void Propagate::CheckStopConditions(Integer epochID)
 //------------------------------------------------------------------------------
 void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
 {
-   // Update the epoch on the force models
-   for (UnsignedInt i = 0; i < fm.size(); ++i) 
-   {
-      fm[i]->UpdateInitialData();
-   }
+//   // Update the epoch on the force models
+//   for (UnsignedInt i = 0; i < fm.size(); ++i) 
+//   {
+//      fm[i]->UpdateInitialData();
+//   }
 
    #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage(
