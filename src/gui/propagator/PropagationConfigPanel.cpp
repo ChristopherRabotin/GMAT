@@ -1507,10 +1507,6 @@ void PropagationConfigPanel::DisplayGravityFieldData()
       gravComboBox->SetSelection(NONE_GM);
       
       potFileTextCtrl->SetValue("");
-      //loj: 7/7/05 Commented out
-      //gravityDegreeTextCtrl->SetValue("");
-      //gravityOrderTextCtrl->SetValue("");
-      
       gravityDegreeTextCtrl->Enable(false);
       gravityOrderTextCtrl->Enable(false);
    }
@@ -1580,31 +1576,6 @@ void PropagationConfigPanel::DisplaySRPData()
 {
    srpCheckBox->SetValue(forceList[currentBodyId]->useSrp);
 }
-
-//------------------------------------------------------------------------------
-// bool ParseGravityFile(std::string line)
-//------------------------------------------------------------------------------
-bool PropagationConfigPanel::ParseGravityFile(std::string line)
-{
-   StringTokenizer stringToken(line," ");
-   
-   Integer count = stringToken.CountTokens();
-   
-   std::string tempString = "";
-   
-   for (Integer i = 0; i < count; i++)
-   {
-      tempString = stringToken.GetToken(i);
-      
-      if (strcmp(tempString.c_str(), "POTFIELD") == 0)
-      {
-         forceList[currentBodyId]->gravDegree = stringToken.GetToken(i+1).c_str();
-         forceList[currentBodyId]->gravOrder = stringToken.GetToken(i+2).c_str();
-         return true;
-      }    
-   }  
-   return false;  
-} 
 
 //------------------------------------------------------------------------------
 // void OnIntegratorSelection(wxCommandEvent &event)
@@ -1830,41 +1801,40 @@ void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
     
    if (dialog.ShowModal() == wxID_OK)
    {
-      wxString filename;
+      std::string filename;
         
       filename = dialog.GetPath();
+	  
+	  // Determine the type of file
+	  
+//@todo: Not tested from GUI so did not include in Release 1.0, finish complete testing
+//      if ((filename.find(".dat",0) != std::string::npos) ||
+//          (filename.find(".DAT",0) != std::string::npos) )
+//      {
+//          ParseDATGravityFile(filename);
+//      }
       
-      std::ifstream instream;
-      instream.open(filename.c_str());
-      
-      bool done = false;
-      
-      if (instream == NULL)
+      if ((filename.find(".grv",0) != std::string::npos) ||
+            (filename.find(".GRV",0) != std::string::npos) )
       {
-         MessageInterface::PopupMessage
-         (Gmat::WARNING_, "Gravity field file can not be opened.\n");
+          ParseGRVGravityFile(filename);
+      }
+      else if ((filename.find(".cof",0) != std::string::npos) ||
+            (filename.find(".COF",0) != std::string::npos) )
+      {
+	       ParseCOFGravityFile(filename);  
+	  }
+	  else
+	  {
+	     MessageInterface::PopupMessage
+         (Gmat::WARNING_, "Gravity file \"" + filename + "\" is of unknown format.");
          return;
-      }    
-      else
-      {
-         while (!done)
-         {
-            std::string line;
-            getline(instream,line);
-            done = ParseGravityFile(line);
-         }
-         instream.close();
-      }    
+	  }
 
-      gravityDegreeTextCtrl->SetValue(forceList[currentBodyId]->gravDegree.c_str());
-      gravityOrderTextCtrl->SetValue(forceList[currentBodyId]->gravOrder.c_str());
-      
-      potFileTextCtrl->SetValue(filename);
       forceList[currentBodyId]->potFilename = std::string(filename.c_str());
-      
-      gravityDegreeTextCtrl->Enable(true);
-      gravityOrderTextCtrl->Enable(true);
-      
+      forceList[currentBodyId]->gravType = gravModelArray[OTHER];
+	  
+      DisplayGravityFieldData();      
       theApplyButton->Enable(true);
    }
 }
@@ -1986,18 +1956,6 @@ void PropagationConfigPanel::OnSRPEditButton(wxCommandEvent &event)
 void PropagationConfigPanel::OnIntegratorTextUpdate(wxCommandEvent &event)
 {
    isIntegratorChanged = true;
-    
-//   wxString set1 = setting1TextCtrl->GetValue();
-//   wxString set2 = setting2TextCtrl->GetValue();
-//   wxString set3 = setting3TextCtrl->GetValue();
-//   wxString set4 = setting4TextCtrl->GetValue();
-//   wxString set5 = setting5TextCtrl->GetValue();
-//   
-//   if (integratorString.IsSameAs(integratorArray[ABM]))
-//   {
-//      wxString set6 = setting6TextCtrl->GetValue();
-//      wxString set7 = setting7TextCtrl->GetValue();
-//   }  
 
    theApplyButton->Enable(true);
 }
@@ -2115,3 +2073,207 @@ void PropagationConfigPanel::ShowForceList(const std::string &header)
    MessageInterface::ShowMessage("============================================\n");
    #endif
 }   
+
+//------------------------------------------------------------------------------
+// bool ParseDATGravityFile(std::string fname)
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::ParseDATGravityFile(std::string fname)
+{  
+//   Integer      cc, dd, sz=0;
+//   Integer      iscomment, rtn;
+//   Integer      n=0, m=0;
+//   Integer      fileDegree, fileOrder;
+//   Real         Cnm=0.0, Snm=0.0, dCnm=0.0, dSnm=0.0;
+//   char         buf[CelestialBody::BUFSIZE];
+//   FILE        *fp;
+//
+//   for (cc = 2;cc <= HF_MAX_DEGREE; ++cc)
+//   {
+//      for (dd = 0; dd <= cc; ++dd)
+//      {
+//         sz++;
+//      }
+//   }
+//   
+//   /* read coefficients from file */
+//   fp = fopen( fname.c_str(), "r");
+//   if (!fp)
+//   {
+//      MessageInterface::PopupMessage
+//         (Gmat::WARNING_, "Error reading gravity potential file.");
+//         return;
+//   }
+//   
+//   PrepareGravityArrays();
+//   iscomment = 1;
+//   
+//   while ( iscomment )
+//   {
+//      rtn = fgetc( fp );
+//	  
+//      if ( (char)rtn == '#' )
+//      {
+//         fgets( buf, CelestialBody::BUFSIZE, fp );
+//      }
+//      else
+//      {
+//         ungetc( rtn, fp );
+//         iscomment = 0;
+//      }
+//   }
+//
+//   fscanf(fp, "%lg\n", &mu ); mu = (Real)mu / 1.0e09;      // -> Km^3/sec^2
+//   fscanf(fp, "%lg\n", &a ); a = (Real)a / 1000.0;         // -> Km
+//   fgets( buf, CelestialBody::BUFSIZE, fp );
+//   
+//   while ( ( (char)(rtn=fgetc(fp)) != '#' ) && (rtn != EOF) )
+//   {
+//      ungetc( rtn, fp );
+//      fscanf( fp, "%i %i %le %le\n", &n, &m, &dCnm, &dSnm );
+//      if ( n <= GRAV_MAX_DRIFT_DEGREE  && m <= n )
+//      {
+//         dCbar[n][m] = (Real)dCnm;
+//         dSbar[n][m] = (Real)dSnm;
+//      }
+//   }
+//
+//   fgets( buf, CelestialBody::BUFSIZE, fp );
+//
+//   fileDegree = 0;
+//   fileOrder  = 0;
+//   cc=0;n=0;m=0;
+//   
+//   do
+//   {
+//      if ( n <= HF_MAX_DEGREE && m <= HF_MAX_ORDER )
+//      {
+//         Cbar[n][m] = (Real)Cnm;
+//         Sbar[n][m] = (Real)Snm;
+//      }
+//      if (n > fileDegree) fileDegree = n;
+//      if (n > fileOrder)  fileOrder  = n;
+//      
+//      cc++;
+//   } while ( ( cc<=sz ) && ( fscanf( fp, "%i %i %le %le\n", &n, &m, &Cnm, &Snm ) > 0 ));
+//   
+//   // Save as string
+//   forceList[currentBodyId]->gravDegree.Printf("%d", fileDegree);
+//   forceList[currentBodyId]->gravOrder.Printf("%d", fileOrder);
+   return;
+}
+
+//------------------------------------------------------------------------------
+// bool ParseGRVGravityFile(std::string fname)
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::ParseGRVGravityFile(std::string fname)
+{
+   Integer       fileOrder, fileDegree;
+
+   std::ifstream inFile;
+   
+   inFile.open(fname.c_str());
+   
+   if (!inFile)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "Error reading gravity potential file.");
+         return;
+   }
+
+   std::string s;
+   std::string firstStr;
+   
+   while (!inFile.eof())
+   {
+      getline(inFile,s);
+      std::istringstream lineStr;
+      lineStr.str(s);
+	  
+      // ignore comment lines
+      if (s[0] != '#')
+      {
+         lineStr >> firstStr;
+         
+		 if (strcasecmp(firstStr.c_str(),"Degree") == 0)
+            lineStr >> fileDegree;
+         else if (strcasecmp(firstStr.c_str(),"Order") == 0)
+            lineStr >> fileOrder;
+      }
+   }
+
+   // Save as string
+   forceList[currentBodyId]->gravDegree.Printf("%d", fileDegree);
+   forceList[currentBodyId]->gravOrder.Printf("%d", fileOrder);
+}
+
+//------------------------------------------------------------------------------
+// bool ParseCOFGravityFile(std::string fname)
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::ParseCOFGravityFile(std::string fname)
+{
+   Integer       fileOrder, fileDegree;
+   Integer       int1;
+   Real          real1, real2, real3;
+
+   std::ifstream inFile;
+   inFile.open(fname.c_str());
+   
+   bool done = false;
+      
+   if (!inFile)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "Error reading gravity potential file.");
+         return;
+   }
+
+   std::string s;
+   std::string firstStr;
+   
+   while (!done)
+   {
+      getline(inFile,s);
+	  
+      std::istringstream lineStr;
+	  
+      lineStr.str(s);
+	  
+      // ignore comment lines
+      if (s[0] != 'C')
+      {
+         lineStr >> firstStr;
+		 
+         if (firstStr == "POTFIELD")
+		 {
+            lineStr >> fileDegree >> fileOrder >> int1 >> real1 >> real2 >> real3;
+			done = true;
+		 }
+      }
+   }
+
+   // Save as string    
+   forceList[currentBodyId]->gravDegree.Printf("%d", fileDegree);
+   forceList[currentBodyId]->gravOrder.Printf("%d", fileOrder);
+}
+
+//------------------------------------------------------------------------------
+// void PrepareGravityArrays()
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::PrepareGravityArrays()
+{
+   Integer m, n;
+   
+   for (n=0; n <= HarmonicField::HF_MAX_DEGREE; ++n)
+      for ( m=0; m <= HarmonicField::HF_MAX_ORDER; ++m)
+      {
+         Cbar[n][m] = 0.0;
+         Sbar[n][m] = 0.0;
+      }
+      
+   for (n = 0; n <= GRAV_MAX_DRIFT_DEGREE; ++n) {
+      for (m = 0; m <= GRAV_MAX_DRIFT_DEGREE; ++m) {
+         dCbar[n][m] = 0.0;
+         dSbar[n][m] = 0.0;
+      }
+   }   
+}

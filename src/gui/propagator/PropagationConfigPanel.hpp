@@ -25,6 +25,7 @@
 #include "ForceModel.hpp"
 #include "DragForce.hpp"
 #include "GravityField.hpp"
+#include "HarmonicField.hpp"
 #include "PointMassForce.hpp"
 #include "SolarRadiationPressure.hpp"
 #include "SolarSystem.hpp"
@@ -192,6 +193,15 @@ private:
    Integer numOfBodies;
    Integer numOfForces;
    Integer currentBodyId;
+   
+   /// normalized harmonic coefficients
+   Real               Cbar[361][361];
+   /// normalized harmonic coefficients
+   Real               Sbar[361][361];
+   /// coefficient drifts per year
+   Real               dCbar[17][17];
+   /// coefficient drifts per year
+   Real               dSbar[17][17];
       
    bool useDragForce;
    bool isForceModelChanged;
@@ -234,7 +244,6 @@ private:
    void DisplayPointMassData();
    void DisplayMagneticFieldData();
    void DisplaySRPData();
-   bool ParseGravityFile(std::string line);
    
    // Text control event method
    void OnIntegratorTextUpdate(wxCommandEvent &event);
@@ -263,6 +272,15 @@ private:
    // for Debug
    void ShowPropData(const std::string &header);
    void ShowForceList(const std::string &header);
+   
+   // for reading gravity files
+   void ParseDATGravityFile(std::string fname);
+   void ParseGRVGravityFile(std::string fname);
+   void ParseCOFGravityFile(std::string fname);
+   void PrepareGravityArrays();
+   
+   // Strictly for reading gravity files
+   static const Integer GRAV_MAX_DRIFT_DEGREE = 2;
    
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
