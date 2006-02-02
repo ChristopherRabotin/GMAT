@@ -513,6 +513,15 @@ bool ScriptInterpreter::Parse()
                       }
                    }  // Completes epoch parse
                    
+                   // Special anomaly handling.  Sigh.
+                   if ((obj->GetType() == Gmat::SPACECRAFT) && 
+                       (id == obj->GetParameterID("TA")))
+                   {
+                      if ((objParm == "TA") || (objParm == "MA") || 
+                          (objParm == "EA"))
+                         obj->SetStringParameter("AnomalyType", objParm);
+                   }
+                   
                    // Look for owned objects if the list is deeper than 2
                    if (sar.size() > 2) 
                    {

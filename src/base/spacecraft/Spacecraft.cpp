@@ -229,10 +229,11 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    state[3] = a.state[3];
    state[4] = a.state[4];
    state[5] = a.state[5];
+   anomaly  = a.anomaly;
    
    stateElementLabel = a.stateElementLabel;
    stateElementUnits = a.stateElementUnits;
-   representations  = a.representations;
+   representations   = a.representations;
    tankNames         = a.tankNames;
    thrusterNames     = a.thrusterNames;
 
@@ -278,6 +279,10 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    displayDateFormat    = a.displayDateFormat;
    totalMass            = a.totalMass;
    initialDisplay       = false;
+   anomaly              = a.anomaly;
+
+//   MessageInterface::ShowMessage("Anomaly has type %s, copied from %s\n", 
+//      anomaly.GetType().c_str(), a.anomaly.GetType().c_str());
 
    state.SetEpoch(a.state.GetEpoch());
    
@@ -1185,8 +1190,10 @@ Real Spacecraft::GetRealParameter(const std::string &label) const
    
     // First check with anomaly
     if (label == "TA" || label == "MA" || label == "EA")
+    {
        return anomaly.GetValue();
-  
+    }
+      
     return GetRealParameter(GetParameterID(label));
 }
 
@@ -1432,6 +1439,16 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          throw SpaceObjectException("Unknown state element representation: " + 
             value);
       }
+
+      if ((value == "Keplerian") || (value == "ModifiedKeplerian"))
+      {
+         // Load anomaly with the state data
+         Rvector6 kep = GetStateInRepresentation("Keplerian");
+         anomaly.SetSMA(kep[0]);
+         anomaly.SetECC(kep[1]);
+         anomaly.SetValue(kep[5]);
+      }
+      
       stateType = value;
       UpdateElementLabels();
    }
@@ -1450,11 +1467,12 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       #endif
 
       anomaly.SetType(value);
-
+      UpdateElementLabels();
+      
       #if DEBUG_SPACECRAFT
           MessageInterface::ShowMessage(
-             "\n   After change, Anomaly info -> a: %f, e: %f, %s: %f\n", 
-             anomaly.GetSMA(),anomaly.GetECC(),anomaly.GetType().c_str(),
+             "\n   After change, Anomaly info -> a: %lf, e: %lf, %s: %lf\n", 
+             anomaly.GetSMA(), anomaly.GetECC(), anomaly.GetType().c_str(),
              anomaly.GetValue());   
       #endif
       if ((stateType == "Keplerian") || 
@@ -2182,7 +2200,7 @@ void Spacecraft::UpdateElementLabels()
       stateElementLabel[2] = "INC";
       stateElementLabel[3] = "RAAN";
       stateElementLabel[4] = "AOP";
-      stateElementLabel[5] = anomalyType;
+      stateElementLabel[5] = anomaly.GetType();
 
       stateElementUnits[0] = "km";
       stateElementUnits[1] = "";
@@ -2201,7 +2219,7 @@ void Spacecraft::UpdateElementLabels()
       stateElementLabel[2] = "INC";
       stateElementLabel[3] = "RAAN";
       stateElementLabel[4] = "AOP";
-      stateElementLabel[5] = anomalyType;
+      stateElementLabel[5] = anomaly.GetType();
 
       stateElementUnits[0] = "km";
       stateElementUnits[1] = "km";
@@ -2338,8 +2356,10 @@ Rvector6 Spacecraft::GetStateInRepresentation(Integer rep)
    if (rep == CARTESIAN_ID)
       finalState = csState;
    else
+   {
       finalState = stateConverter.Convert(csState, "Cartesian", 
          representations[rep], anomaly);
+   }
    
    #ifdef DEBUG_STATE_INTERFACE
       MessageInterface::ShowMessage(
@@ -2443,6 +2463,9 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
 {
    std::string rep = "";
    Integer id = LookUpLabel(label, rep) - ELEMENT1_ID;
+
+   if ((id == 5) && (!anomaly.IsInvalid(label)))
+      anomaly.SetType(label);
    
    if (id >= 0)
    {
