@@ -91,6 +91,7 @@ public:
 
    Integer GetNumVarParameters();
    bool AddVarParameter(const std::string &paramName, Integer index);
+   bool AddParameterForTitleOnly(const std::string &paramName);
    
 protected:
    /// Name of the output path

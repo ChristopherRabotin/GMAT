@@ -646,8 +646,7 @@ bool ReportFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 const StringArray& ReportFile::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    mAllRefObjectNames.clear();
-   
-   //loj: 4/29/05 Added UNKNOWN_OBJECT
+
    switch (type)
    {
    case Gmat::UNKNOWN_OBJECT:
@@ -692,6 +691,27 @@ bool ReportFile::AddVarParameter(const std::string &paramName, Integer index)
          mVarParams.push_back(NULL);
          return true;
       }
+   }
+   
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool AddParameterForTitleOnly(const std::string &paramName)
+//------------------------------------------------------------------------------
+bool ReportFile::AddParameterForTitleOnly(const std::string &paramName)
+{
+   #ifdef DEBUG_REPORTFILE
+      MessageInterface::ShowMessage(
+         "ReportFile::AddParameterForTitle() Adding parameter '%s' to \n   "
+         "ReportFile '%s'\n", paramName.c_str(), instanceName.c_str());
+   #endif
+   
+   if (paramName != "")
+   {
+      mVarParamNames.push_back(paramName);
+      return true;
    }
    
    return false;
@@ -844,6 +864,8 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
 //------------------------------------------------------------------------------
 void ReportFile::ClearVarParameters()
 {
+   MessageInterface::ShowMessage("==> ReportFile::ClearVarParameters() entered\n");
+   
    mVarParams.clear();
    mVarParamNames.clear();
    mNumVarParams = 0;

@@ -146,6 +146,7 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       rfName = name;
       // Tell the ReportFile object that a command has requested its services
       obj->TakeAction("PassedToReport");
+      reporter = (ReportFile*)obj;
    }
    else 
    {
@@ -157,6 +158,9 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          throw CommandException("Report command can only have Parameters "
             "in the list of reported values.");
       parmNames.push_back(name);
+
+      // For compare report column header
+      reporter->AddParameterForTitleOnly(name);
    }
    
    return true;
@@ -206,7 +210,7 @@ bool Report::Initialize()
 
    if (reporter->GetStringParameter(reporter->GetParameterID("WriteHeaders")) == "On")
       needsHeaders = true;
-   
+
    for (StringArray::iterator i = parmNames.begin(); i != parmNames.end(); ++i)
    {
       object = ((*objectMap)[*i]);
