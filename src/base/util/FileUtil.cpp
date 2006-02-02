@@ -93,20 +93,21 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
    //------------------------------------------
    file1Cols = tokens1.size();
    file2Cols = tokens2.size();
+   Integer numCols = file1Cols<file2Cols ? file1Cols : file2Cols;
    
    if (file1Cols != file2Cols)
    {
       textBuffer.push_back
-         ("***Cannot compare outputs. Number of colmuns are different. file1: " +
-          ToString(file1Cols) + ",  file2: " + ToString(file2Cols) + "\n");
-      return textBuffer;
+         ("*** Number of colmuns are different. file1:" + ToString(file1Cols) +
+          ",  file2:" + ToString(file2Cols) + "\n*** Will compare up to" +
+          ToString(numCols) + " columns\n");
    }
 
    // compare first data line
    RealArray minDiffs, maxDiffs;
    IntegerArray minLines, maxLines;
    
-   for (int i=0; i<file1Cols; i++)
+   for (int i=0; i<numCols; i++)
    {
       item1 = atof(tokens1[i].c_str());
       item2 = atof(tokens2[i].c_str());
@@ -158,7 +159,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
          break;
       
       #if DEBUG_COMPARE_REPORT > 2
-      for (int i=0; i<file1Cols; i++)
+      for (int i=0; i<numCols; i++)
          MessageInterface::ShowMessage("tokens1[%d] = %s\n", i, tokens1[i].c_str());
       #endif
       
@@ -182,7 +183,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
          MessageInterface::ShowMessage("tokens2[%d] = %s\n", i, tokens2[i].c_str());
       #endif
       
-      for (int i=0; i<file1Cols; i++)
+      for (int i=0; i<numCols; i++)
       {
          item1 = atof(tokens1[i].c_str());
          item2 = atof(tokens2[i].c_str());
@@ -244,7 +245,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
    char minGtTol, maxGtTol;
    char title[30] = "";
    
-   for (int i=0; i<file1Cols; i++)
+   for (int i=0; i<numCols; i++)
    {
       minGtTol = ' ';
       maxGtTol = ' ';
@@ -278,8 +279,6 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
       MessageInterface::ShowMessage("%s", outLine.c_str());
       #endif
    }
-   
-   //textBuffer.push_back("\n");
    
    in1.close();
    in2.close();
