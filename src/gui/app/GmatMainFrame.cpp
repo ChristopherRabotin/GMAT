@@ -77,8 +77,12 @@
 #include "LibrationPointPanel.hpp"
 #include "CelestialBodyPanel.hpp"
 #include "CompareReportPanel.hpp"
+#include "CompareFilesDialog.hpp"
 #include "FileManager.hpp"
+#include "FileUtil.hpp"               // for Compare()
 
+#include <wx/dir.h>
+#include <wx/filename.h>
 #include <wx/gdicmn.h>
 #include <wx/toolbar.h>
 #include "ddesetup.hpp"   // for IPC_SERVICE, IPC_TOPIC
@@ -152,6 +156,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
 
    EVT_MENU(MENU_TOOLS_MATLAB_OPEN, GmatMainFrame::OnOpenMatlab)
    EVT_MENU(MENU_TOOLS_MATLAB_CLOSE, GmatMainFrame::OnCloseMatlab)
+   EVT_MENU(MENU_TOOLS_FILE_COMPARE, GmatMainFrame::OnFileCompare)
 //   EVT_MENU(MENU_TOOLS_MATLAB_INTERACTIVE, GmatMainFrame::OnMatlabInteractive)
 
    EVT_SASH_DRAGGED(ID_SASH_WINDOW, GmatMainFrame::OnSashDrag) 
@@ -164,7 +169,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(MENU_SCRIPT_BUILD_OBJECT, GmatMainFrame::OnScriptBuildObject)
    EVT_MENU(MENU_SCRIPT_BUILD_AND_RUN, GmatMainFrame::OnScriptBuildAndRun)
    EVT_MENU(MENU_SCRIPT_RUN, GmatMainFrame::OnScriptRun)
-   
+
 END_EVENT_TABLE()
 
 //------------------------------
@@ -1225,6 +1230,7 @@ void GmatMainFrame::OnHelpAbout(wxCommandEvent& WXUNUSED(event))
    wxMessageBox(msg, _T("About GMAT"), wxOK | wxICON_INFORMATION, this);
 }
 
+
 //------------------------------------------------------------------------------
 // wxMenuBar *CreateMainMenu(int dataType)
 //------------------------------------------------------------------------------
@@ -1237,11 +1243,11 @@ void GmatMainFrame::OnHelpAbout(wxCommandEvent& WXUNUSED(event))
 wxMenuBar *GmatMainFrame::CreateMainMenu()
 {
    wxMenuBar *menuBar = new wxMenuBar;
+
+   //-------------------------------------------------------
+   // File menu
+   //-------------------------------------------------------
    wxMenu *fileMenu = new wxMenu;
-   wxMenu *editMenu = new wxMenu;
-//   wxMenu *toolsMenu = new wxMenu;
-   wxMenu *helpMenu = new wxMenu;
- 
    fileMenu->Append(MENU_FILE_NEW_SCRIPT, wxT("&New Script"));  
    fileMenu->Append(MENU_FILE_OPEN_SCRIPT, wxT("&Open Script"), wxT(""), FALSE);  
    fileMenu->Append(MENU_FILE_SAVE_SCRIPT, wxT("&Save to Script"), wxT(""), FALSE);
@@ -1280,6 +1286,11 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    fileMenu->Enable(MENU_PROJECT_PRINT, FALSE);
    menuBar->Append(fileMenu, wxT("&File"));
 
+   //-------------------------------------------------------
+   // Edit menu
+   //-------------------------------------------------------
+   wxMenu *editMenu = new wxMenu;
+
    editMenu->Append(MENU_EDIT_RESOURCES, wxT("Resources"), wxT(""), FALSE);
    editMenu->Append(MENU_EDIT_MISSION, wxT("Mission"), wxT(""), FALSE);
 
@@ -1287,7 +1298,12 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    editMenu->Enable(MENU_EDIT_MISSION, FALSE);
    menuBar->Append(editMenu, wxT("Edit"));
    
-   // Tools
+   //-------------------------------------------------------
+   // Tools menu
+   //-------------------------------------------------------
+   wxMenu *toolsMenu = new wxMenu;
+   toolsMenu->Append(MENU_TOOLS_FILE_COMPARE, wxT("Compare Files"), wxT(""));
+   
 //   toolsMenu->Append(MENU_TOOLS_SWINGBY, wxT("Swingby"), wxT(""), FALSE);
 //   toolsMenu->Enable(MENU_TOOLS_SWINGBY, FALSE);
 
@@ -1303,7 +1319,7 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
 
 
 //   toolsMenu->Append(MENU_TOOLS_MATLAB, wxT("Matlab"), matlabMenu, wxT(""));
-//   menuBar->Append(toolsMenu, wxT("Tools"));
+   menuBar->Append(toolsMenu, wxT("Tools"));
 
    // Server
 //   mServerMenu = new wxMenu;
@@ -1311,7 +1327,10 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
 //   mServerMenu->Append(MENU_STOP_SERVER, _T("Stop"), _T("Stop server"));
 //   menuBar->Append(mServerMenu, wxT("Server"));
 
-   // Help
+   //-------------------------------------------------------
+   // Help menu
+   //-------------------------------------------------------
+   wxMenu *helpMenu = new wxMenu;
    helpMenu->Append(MENU_HELP_TOPICS, wxT("Topics"), wxT(""), FALSE);
    helpMenu->AppendSeparator();
    helpMenu->Append(MENU_HELP_ABOUT, wxT("About"), wxT(""), FALSE);
@@ -1737,7 +1756,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename)
       }  
       else
       {
-        wxLogError
+         wxLogError
             ("Error occurred during parsing.\nPlease check the syntax and try again\n");
          wxLog::FlushActive();
       } 
@@ -1964,9 +1983,160 @@ void GmatMainFrame::OnCloseMatlab(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnMatlabInteractive(wxCommandEvent& event)
 {
-      InteractiveMatlabDialog interactiveMatlabDlg(this);
-      interactiveMatlabDlg.ShowModal();
+   InteractiveMatlabDialog interactiveMatlabDlg(this);
+   interactiveMatlabDlg.ShowModal();
 }
+
+
+//------------------------------------------------------------------------------
+// void OnFileCompare(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles comparing two files
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnFileCompare(wxCommandEvent& event)
+{
+   CompareFilesDialog dlg(this);
+   dlg.ShowModal();
+
+   if (!dlg.CompareFiles())
+      return;
+   
+   Integer numFilesToCompare = dlg.GetNumFilesToCompare();
+   if (numFilesToCompare <= 0)
+      return;
+   
+   wxString dir1 = dlg.GetDirectory1();
+   wxString dir2 = dlg.GetDirectory2();
+   wxString fromStr = dlg.GetReplaceStringFrom();
+   wxString toStr = dlg.GetReplaceStringTo();
+   Real absTol = dlg.GetAbsTolerance();
+   bool saveCompareResults = dlg.SaveCompareResults();
+   wxString saveFileName = dlg.GetSaveFilename();
+   
+   wxTextCtrl *textCtrl = NULL;
+   
+   GmatMdiChildFrame *textFrame = GetChild("CompareReport");
+   
+   if (textFrame == NULL)
+   {
+      GmatTreeItemData *compareItem =
+         new GmatTreeItemData("CompareReport", GmatTree::COMPARE_REPORT);
+      
+      textFrame = GmatAppData::GetMainFrame()->CreateChild(compareItem);
+   }
+   
+   textCtrl = textFrame->GetScriptTextCtrl();
+   textCtrl->SetMaxLength(320000); // make long enough
+   textFrame->Show();
+   wxString msg;
+   msg.Printf(_T("GMAT Build Date: %s %s\n\n"),  __DATE__, __TIME__);      
+   textCtrl->AppendText(msg);
+   
+   //loj: Why Do I need to do this to show whole TextCtrl?
+   // textFrame->Layout() didn't work.
+   int w, h;
+   textFrame->GetSize(&w, &h);
+   textFrame->SetSize(w+1, h+1);
+
+   // Get files in the directory 1
+   wxDir dir(dir1);
+   wxString filename;
+   wxString filepath;
+   StringArray filenames;
+   
+   //How do I specify multiple file ext?
+   bool cont = dir.GetFirst(&filename);
+   while (cont)
+   {
+      if (filename.Contains(".report") || filename.Contains(".txt"))
+      {
+         filepath = dir1 + "/" + filename;
+         
+         // remove any backup files
+         if (filename.Last() == 't')
+         {
+            filenames.push_back(filepath.c_str());
+         }
+      }
+      
+      cont = dir.GetNext(&filename);
+   }
+
+   StringArray colTitles;
+   std::string filename1;
+   std::string filename2;
+   wxString tempStr;
+   int fileCount = 0;
+   
+   // Now call compare utility
+   for (UnsignedInt i=0; i<filenames.size(); i++)
+   {
+      if (fileCount > numFilesToCompare)
+         break;
+      
+      filename1 = filenames[i];
+      
+      wxString filename2 = filename1.c_str();
+      wxFileName fname(filename2);
+      wxString name2 = fname.GetFullName();
+      size_t numReplaced = name2.Replace(fromStr, toStr.c_str());
+      
+      if (numReplaced == 0)
+      {
+         textCtrl->AppendText
+            ("***Cannot compare results. The report file doesn't contain " + fromStr + "\n");
+         MessageInterface::ShowMessage
+            ("ResourceTree::CompareScriptRunResult() Cannot compare results.\n"
+             "The report file doesn't contain %s.\n\n", fromStr.c_str());
+         return;
+      }
+      
+      if (numReplaced > 1)
+      {
+         textCtrl->AppendText
+            ("***Cannot compare results. The report file name contains more "
+             "than 1 " + fromStr + " string.\n");
+         MessageInterface::ShowMessage
+            ("ResourceTree::CompareScriptRunResult() Cannot compare results.\n"
+             "The report file name contains more than 1 %s string.\n\n", fromStr.c_str());
+         return;
+      }
+      
+      // set filename2
+      filename2 = dir2 + "/" + name2;
+      
+      StringArray output =
+         GmatFileUtil::Compare(filename1.c_str(), filename2.c_str(), colTitles, absTol);
+      
+      tempStr.Printf("%d", i+1);
+      textCtrl->AppendText("==> File Compare Count: " + tempStr + "\n");
+      
+      // append text
+      for (unsigned int i=0; i<output.size(); i++)
+         textCtrl->AppendText(wxString(output[i].c_str()));
+
+      textCtrl->AppendText
+         ("========================================================\n\n");
+
+      fileCount++;
+   }
+   
+   if (fileCount == 0)
+   {
+      textCtrl->AppendText("** There is no report file to compare.\n\n");
+      MessageInterface::ShowMessage("** There is no report file to compare.\n");
+   }
+   else
+   {
+      if (saveCompareResults)
+         textCtrl->SaveFile(saveFileName);
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // void OnSashDrag(wxSashEvent& event)

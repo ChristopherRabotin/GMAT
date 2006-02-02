@@ -169,6 +169,7 @@ private:
    void OnOpenMatlab(wxCommandEvent& event);
    void OnCloseMatlab(wxCommandEvent& event);
    void OnMatlabInteractive(wxCommandEvent& WXUNUSED(event));
+   void OnFileCompare(wxCommandEvent& event);
    
    void OnSashDrag(wxSashEvent &event);
    void OnMsgSashDrag(wxSashEvent &event);
@@ -235,7 +236,8 @@ namespace GmatMenu
       MENU_TOOLS_MATLAB_OPEN,
       MENU_TOOLS_MATLAB_INTERACTIVE,
       MENU_TOOLS_MATLAB_CLOSE,
-
+      MENU_TOOLS_FILE_COMPARE,
+      
       MENU_HELP_TOPICS,
 
       TOOL_RUN,
