@@ -95,6 +95,7 @@ cleanmacosx :
 OBJECTS = \
     app/GmatApp.o \
     app/GmatAppData.o \
+    app/CompareFilesDialog.o \
     app/GmatConnection.o \
     app/GmatMainFrame.o \
     app/GmatNotebook.o \
