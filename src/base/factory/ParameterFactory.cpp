@@ -180,6 +180,10 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new BdotT(withName);
    if (ofType == "BdotR")
       return new BdotR(withName);
+   if (ofType == "BVectorMag")
+      return new BVectorMag(withName);
+   if (ofType == "BVectorAngle")
+      return new BVectorAngle(withName);
    
    // add others here
    else
@@ -276,6 +280,8 @@ ParameterFactory::ParameterFactory()
       // B-Plane parameters
       creatables.push_back("BdotT");
       creatables.push_back("BdotR");
+      creatables.push_back("BVectorMag");
+      creatables.push_back("BVectorAngle");
    }
 }
 

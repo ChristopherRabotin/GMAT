@@ -37,7 +37,6 @@ public:
    virtual ~BplaneData();
    
    Real GetBplaneReal(Integer item);
-   Real GetBplaneReal(const std::string &str);
    
    // The inherited methods from RefData
    virtual bool ValidateRefObjects(GmatBase *param);
@@ -68,7 +67,15 @@ protected:
    
    CoordinateConverter mCoordConverter;
 
-   enum {B_DOT_T, B_DOT_R};
+   enum
+   {
+      BplaneParamBegin,
+      B_DOT_T,
+      B_DOT_R,
+      B_VECTOR_MAG,
+      B_VECTOR_ANGLE,
+      BplaneParamEnd,
+   };
    
    enum
    {

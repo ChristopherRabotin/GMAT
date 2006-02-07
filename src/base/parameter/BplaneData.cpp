@@ -148,10 +148,11 @@ BplaneData::~BplaneData()
 //------------------------------------------------------------------------------
 Real BplaneData::GetBplaneReal(Integer item)
 {
-   if (item != B_DOT_T && item != B_DOT_R)
+   // Check item range
+   if (item <= BplaneParamBegin || item >= BplaneParamEnd)
       throw ParameterException
          ("BplaneData::GetBplaneReal() Unknown parameter ID: " +
-          GmatRealUtil::ToString(item));
+          GmatRealUtil::ToString(item, 2));
    
    if (mOutCoordSystem == NULL || mOrigin == NULL)
       InitializeRefObjects();
@@ -169,10 +170,10 @@ Real BplaneData::GetBplaneReal(Integer item)
    
    Rvector6 state = GetCartState();
    
-   #if DEBUG_BPLANE_DATA_RUN
+   #if DEBUG_BPLANE_DATA_RUN > 1
    MessageInterface::ShowMessage
-      ("BplaneData::GetBplaneReal() str = %s, mGravConst = %f\n     state = %s\n",
-       str.c_str(), mGravConst, state.ToString().c_str());
+      ("BplaneData::GetBplaneReal() item = %d, mGravConst = %f\n     state = %s\n",
+       item, mGravConst, state.ToString().c_str());
    #endif
    
    Rvector3 pos(state[0], state[1], state[2]);
@@ -190,8 +191,9 @@ Real BplaneData::GetBplaneReal(Integer item)
    // if eMag <= 1, then the method fails, orbit should be hyperbolic
    if (eMag <= 1.0)
       throw ParameterException
-         ("BplaneData::GetBplaneReal() eccentricity magnitude is <= 1.0. "
-          "eMag: " + GmatRealUtil::ToString(eMag));
+         ("BplaneData::GetBplaneReal() ParamID: " + GmatRealUtil::ToString(item, 2) +
+          "\n     eccentricity magnitude is <= 1.0. eMag: " +
+          GmatRealUtil::ToString(eMag));
    
    eVec.Normalize();
    
@@ -201,7 +203,7 @@ Real BplaneData::GetBplaneReal(Integer item)
    hVec.Normalize();
    Rvector3 nVec = Cross(hVec, eVec);
    
-   #if DEBUG_BPLANE_DATA_RUN
+   #if DEBUG_BPLANE_DATA_RUN > 1
    MessageInterface::ShowMessage
       ("BplaneData::GetBplaneReal()\n     eVec = %s\n     hVec = %s\n     nVec = %s\n",
        eVec.ToString().c_str(), hVec.ToString().c_str(), nVec.ToString().c_str());
@@ -218,7 +220,7 @@ Real BplaneData::GetBplaneReal(Integer item)
    // Compute the B-vector
    Rvector3 bVec = b * (temp * eVec - oneOverEmag*nVec);
    
-   #if DEBUG_BPLANE_DATA_RUN
+   #if DEBUG_BPLANE_DATA_RUN > 1
    MessageInterface::ShowMessage
       ("BplaneData::GetBplaneReal() b = %f\n     sVec = %s\n     bVec = %s\n",
        b, sVec.ToString().c_str(), bVec.ToString().c_str());
@@ -229,45 +231,36 @@ Real BplaneData::GetBplaneReal(Integer item)
    Rvector3 tVec = sVec1 / Sqrt(sVec[0]*sVec[0] + sVec[1]*sVec[1]);
    Rvector3 rVec = Cross(sVec, tVec);
 
-   #if DEBUG_BPLANE_DATA_RUN
+   #if DEBUG_BPLANE_DATA_RUN > 1
    MessageInterface::ShowMessage
       ("BplaneData::GetBplaneReal()\n     sVec1 = %s\n     tVec = %s\n     rVec = %s\n",
        sVec1.ToString().c_str(), tVec.ToString().c_str(), rVec.ToString().c_str());
    #endif
 
+   Real bDotT = bVec * tVec;
+   Real bDotR = bVec * rVec;
+   
+   #if DEBUG_BPLANE_DATA_RUN
+   MessageInterface::ShowMessage
+      ("==>BplaneData::GetBplaneReal() B_DOT_T=%f, B_DOT_R=%f\n   B_VECTOR_MAG=%f, "
+       "B_VECTOR_ANGLE=%f\n", bDotT, bDotR, Sqrt(bDotT*bDotT + bDotR*bDotR),
+       ATan(bDotR, bDotT));
+   #endif
+   
    switch (item)
    {
    case B_DOT_T:
-      return bVec * tVec;
+      return bDotT;
    case B_DOT_R:
-      return bVec * rVec;
+      return bDotR;
+   case B_VECTOR_MAG:
+      return Sqrt(bDotT*bDotT + bDotR*bDotR);
+   case B_VECTOR_ANGLE:
+      return ATan(bDotR, bDotT);
    default:
       throw ParameterException
          ("BplaneData::GetBplaneReal() Unknown parameter ID: " +
-          GmatRealUtil::ToString(item));
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// Real GetBplaneReal(const std::string &str)
-//------------------------------------------------------------------------------
-/**
- * Computes B-Plane related paramters.
- *
- * @note - Implements GMAT math Spec 2.11 B-Plane Coordinates
- */
-//------------------------------------------------------------------------------
-Real BplaneData::GetBplaneReal(const std::string &str)
-{
-   if (str == "BdotT")
-      return GetBplaneReal(B_DOT_T);
-   else if (str == "BdotR")
-      return GetBplaneReal(B_DOT_R);
-   else
-   {
-      throw ParameterException
-         ("BplaneData::GetBplaneReal() Unknown parameter name: " + str);
+          GmatRealUtil::ToString(item, 2));
    }
 }
 

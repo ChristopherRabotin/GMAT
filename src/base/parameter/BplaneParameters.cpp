@@ -112,7 +112,6 @@ bool BdotT::Evaluate()
 {
    try
    {
-      //mRealValue = BplaneData::GetBplaneReal("BdotT");
       mRealValue = BplaneData::GetBplaneReal(B_DOT_T);
    }
    catch (BaseException &e)
@@ -240,7 +239,6 @@ bool BdotR::Evaluate()
 {
    try
    {
-      //mRealValue = BplaneData::GetBplaneReal("BdotR");
       mRealValue = BplaneData::GetBplaneReal(B_DOT_R);
    }
    catch (BaseException &e)
@@ -272,5 +270,259 @@ bool BdotR::Evaluate()
 GmatBase* BdotR::Clone(void) const
 {
    return new BdotR(*this);
+}
+
+
+//==============================================================================
+//                              BVectorMag
+//==============================================================================
+/**
+ * Implements Velocity at Periapsis class.
+ */
+//------------------------------------------------------------------------------
+
+//---------------------------------
+// public methods
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// BVectorMag(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+BVectorMag::BVectorMag(const std::string &name, GmatBase *obj)
+   : BplaneReal(name, "BVectorMag", obj, "B Vector Magnitude", "", GmatParam::COORD_SYS)
+{
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+}
+
+
+//------------------------------------------------------------------------------
+// BVectorMag(const BVectorMag &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+BVectorMag::BVectorMag(const BVectorMag &copy)
+   : BplaneReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// const BVectorMag& operator=(const BVectorMag &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const BVectorMag&
+BVectorMag::operator=(const BVectorMag &right)
+{
+   if (this != &right)
+      BplaneReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~BVectorMag()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+BVectorMag::~BVectorMag()
+{
+}
+
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool BVectorMag::Evaluate()
+{
+   try
+   {
+      mRealValue = BplaneData::GetBplaneReal(B_VECTOR_MAG);
+   }
+   catch (BaseException &e)
+   {
+      mRealValue = REAL_PARAMETER_UNDEFINED;
+      MessageInterface::ShowMessage
+         (e.GetMessage() + ",\n     so settting BVectorMag parameter value to: " +
+          GmatRealUtil::ToString(REAL_PARAMETER_UNDEFINED) + "\n");
+   }
+   
+   if (mRealValue == REAL_PARAMETER_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* BVectorMag::Clone(void) const
+{
+   return new BVectorMag(*this);
+}
+
+
+//==============================================================================
+//                              BVectorAngle
+//==============================================================================
+/**
+ * Implements Velocity at Periapsis class.
+ */
+//------------------------------------------------------------------------------
+
+//---------------------------------
+// public methods
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// BVectorAngle(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+BVectorAngle::BVectorAngle(const std::string &name, GmatBase *obj)
+   : BplaneReal(name, "BVectorAngle", obj, "B Vector Angle", "", GmatParam::COORD_SYS)
+{
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+}
+
+
+//------------------------------------------------------------------------------
+// BVectorAngle(const BVectorAngle &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+BVectorAngle::BVectorAngle(const BVectorAngle &copy)
+   : BplaneReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// const BVectorAngle& operator=(const BVectorAngle &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const BVectorAngle&
+BVectorAngle::operator=(const BVectorAngle &right)
+{
+   if (this != &right)
+      BplaneReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~BVectorAngle()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+BVectorAngle::~BVectorAngle()
+{
+}
+
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool BVectorAngle::Evaluate()
+{
+   try
+   {
+      mRealValue = BplaneData::GetBplaneReal(B_VECTOR_ANGLE);
+   }
+   catch (BaseException &e)
+   {
+      mRealValue = REAL_PARAMETER_UNDEFINED;
+      MessageInterface::ShowMessage
+         (e.GetMessage() + ",\n     so settting BVectorAngle parameter value to: " +
+          GmatRealUtil::ToString(REAL_PARAMETER_UNDEFINED) + "\n");
+   }
+   
+   if (mRealValue == REAL_PARAMETER_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* BVectorAngle::Clone(void) const
+{
+   return new BVectorAngle(*this);
 }
 

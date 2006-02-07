@@ -3701,6 +3701,8 @@ void Moderator::CreateDefaultMission()
       // B-Plane parameters
       CreateParameter("BdotT", "DefaultSC.Earth.BdotT");
       CreateParameter("BdotR", "DefaultSC.Earth.BdotR");
+      CreateParameter("BVectorMag", "DefaultSC.Earth.BVectorMag");
+      CreateParameter("BVectorAngle", "DefaultSC.Earth.BVectorAngle");
       
       #ifdef DEBUG_CREATE_VAR
       // User variable

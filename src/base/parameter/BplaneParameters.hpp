@@ -14,7 +14,7 @@
 //
 /**
  * Declares B-Plane related parameter classes.
- *   BdotT, BdotR
+ *   BdotT, BdotR, BVectorMag, BVectorAngle
  *
  */
 //------------------------------------------------------------------------------
@@ -68,6 +68,62 @@ public:
    BdotR(const BdotR &copy);
    const BdotR& operator=(const BdotR &right);
    virtual ~BdotR();
+   
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
+
+//==============================================================================
+//                              BVectorMag
+//==============================================================================
+/**
+ * Declares BVectorMag class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API BVectorMag : public BplaneReal
+{
+public:
+
+   BVectorMag(const std::string &name = "", GmatBase *obj = NULL);
+   BVectorMag(const BVectorMag &copy);
+   const BVectorMag& operator=(const BVectorMag &right);
+   virtual ~BVectorMag();
+   
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
+
+//==============================================================================
+//                              BVectorAngle
+//==============================================================================
+/**
+ * Declares BVectorAngle class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API BVectorAngle : public BplaneReal
+{
+public:
+
+   BVectorAngle(const std::string &name = "", GmatBase *obj = NULL);
+   BVectorAngle(const BVectorAngle &copy);
+   const BVectorAngle& operator=(const BVectorAngle &right);
+   virtual ~BVectorAngle();
    
    // The inherited methods from Parameter
    virtual bool Evaluate();
