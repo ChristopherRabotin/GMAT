@@ -226,7 +226,7 @@ void UniversePanel::Create()
                    wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
                    
    mOverrideCheckBox =
-      new wxCheckBox(this, CHECKBOX, wxT("Override Time System"),
+      new wxCheckBox(this, CHECKBOX, wxT("Use TT for Ephemeris"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
 
    
@@ -275,7 +275,7 @@ void UniversePanel::Create()
 void UniversePanel::LoadData()
 {
    // load data from the core engine
-   theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
+   theSolarSystem = theGuiInterpreter->GetSolarSystemInUse();
    mAllFileTypes = theGuiInterpreter->GetPlanetarySourceTypes();
    mAnalyticModels = theGuiInterpreter->GetAnalyticModelNames();
    StringArray fileTypesInUse = theGuiInterpreter->GetPlanetarySourceTypesInUse();
@@ -353,16 +353,15 @@ void UniversePanel::LoadData()
    
    mFileNameTextCtrl->
       SetValue(mFileTypeNameMap[mFileTypeComboBox->GetStringSelection()]);
-      
-  // waw 01/10/05: Changed to use a global solar system pointer.
-  // SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
-   
+
    mOverrideCheckBox->SetValue(theSolarSystem->GetBooleanParameter(
       "UseTTForEphemeris"));
 
    mPageSizer->Layout();
    
    mObject = theSolarSystem;
+
+   theApplyButton->Disable();
 }
 
 
@@ -379,7 +378,7 @@ void UniversePanel::SaveData()
          (Gmat::WARNING_, "Need to select at least one planetary source file.\n"
           "Added SLP file as default\n");
       
-      selectedListBox->Insert("DE405", 0); //loj: 5/26/05 changed SLP to DE405
+      selectedListBox->Insert("DE405", 0);
       selectedListBox->SetSelection(0);
    }
    else
@@ -431,9 +430,6 @@ void UniversePanel::SaveData()
          SetAnalyticModelToUse(mAnalyticModelComboBox->GetStringSelection().c_str());
    }
    
-   // waw 01/10/05: Changed to using a global solar system pointern   
-   // SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
-
    theSolarSystem->SetBooleanParameter("UseTTForEphemeris",
       mOverrideCheckBox->IsChecked());
       
@@ -464,7 +460,7 @@ void UniversePanel::OnAddButton(wxCommandEvent& event)
    if (found == wxNOT_FOUND)
    {
       selectedListBox->Insert(str, 0);
-      availableListBox->Delete(sel); //loj: 5/25/05 Added
+      availableListBox->Delete(sel);
       selectedListBox->SetSelection(0);
       
       if (sel-1 < 0)
@@ -566,6 +562,18 @@ void UniversePanel::OnSortButton(wxCommandEvent& event)
       selectedListBox->Insert(str, 0);
       selectedListBox->SetSelection(0);
       
+      if (str == "Analytic")
+      {
+         mPageSizer->Show(mAnaModelSizer, true);
+         mBrowseButton->Disable();
+      }
+      else
+      {
+         mPageSizer->Show(mAnaModelSizer, false);
+         mBrowseButton->Enable();
+      }
+      
+      mPageSizer->Layout();
       mHasFileTypesInUseChanged = true;
       theApplyButton->Enable(true);
    }
