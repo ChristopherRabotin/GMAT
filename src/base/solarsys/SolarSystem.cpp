@@ -136,7 +136,7 @@ const std::string SolarSystem::CHARON_NAME     = "Charon";
  */
 //------------------------------------------------------------------------------
 SolarSystem::SolarSystem(std::string withName)
-   : GmatBase(Gmat::SOLAR_SYSTEM, "SolarSystem", withName)//, //loj: 4/22/04 added "SolarSystem" as typeSt
+   : GmatBase(Gmat::SOLAR_SYSTEM, "SolarSystem", withName)
 {
    objectTypes.push_back(Gmat::SOLAR_SYSTEM);
    objectTypeNames.push_back("SolarSystem");
@@ -254,6 +254,20 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
    }
    return *this;
 }
+
+
+//------------------------------------------------------------------------------
+// void ResetToDefaults()
+//------------------------------------------------------------------------------
+void SolarSystem::ResetToDefaults()
+{
+   pvSrcForAll      = Gmat::DE_405;
+   anMethodForAll   = Gmat::LOW_FIDELITY;
+   pE               = NULL;
+   overrideTimeForAll  = false;
+   ephemUpdateInterval = 0.0;
+}
+
 
 //------------------------------------------------------------------------------
 //  ~SolarSystem()

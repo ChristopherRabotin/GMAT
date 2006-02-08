@@ -57,6 +57,8 @@ public:
    // class destructor
    ~SolarSystem();
 
+   void ResetToDefaults();
+   
    // method to add a body to the solar system
    bool           AddBody(CelestialBody* cb);
    // method to return a body of the solar system, given its name
