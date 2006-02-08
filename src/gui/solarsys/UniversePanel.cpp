@@ -358,7 +358,7 @@ void UniversePanel::LoadData()
   // SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
    
    mOverrideCheckBox->SetValue(theSolarSystem->GetBooleanParameter(
-      "OverrideTimeSystem"));
+      "UseTTForEphemeris"));
 
    mPageSizer->Layout();
    
@@ -434,7 +434,7 @@ void UniversePanel::SaveData()
    // waw 01/10/05: Changed to using a global solar system pointern   
    // SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
 
-   theSolarSystem->SetBooleanParameter("OverrideTimeSystem",
+   theSolarSystem->SetBooleanParameter("UseTTForEphemeris",
       mOverrideCheckBox->IsChecked());
       
    // Saving EphemerisUpdateInterval

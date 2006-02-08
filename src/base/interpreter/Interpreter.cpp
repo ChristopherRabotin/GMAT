@@ -2185,6 +2185,31 @@ bool Interpreter::InterpretSolarSetting(const StringArray &sar,
       return true;
    }
    
+   if (sar[1] == "UseTTForEphemeris")
+   {
+      if ((rhs != "true") && (rhs != "false"))
+         throw InterpreterException(
+            "The boolean parameter setting for 'SolarSystem.UseTTForEphemeris' "
+            "must be either 'true' or 'false'; you used '" + rhs + "'");
+
+      bool useTT = (rhs == "true" ? true : false);
+      
+      SolarSystem *sol = moderator->GetSolarSystemInUse();
+      if (sol == NULL)
+         throw InterpreterException(
+            "Attempting to set the ephemeris time system on the solar system,"
+            " but the solar system has not yet been created.");
+
+      sol->SetBooleanParameter("UseTTForEphemeris", useTT);
+
+      #ifdef DEBUG_GLOBAL_INTERPRETING
+         MessageInterface::ShowMessage("   Ephemeris time is %s\n", 
+            (sol->GetBooleanParameter("UseTTForEphemeris") ? "TT" : "TDB"));
+      #endif
+
+      return true;
+   }
+
    if (sar.size() == 3)
    {
       if (sar[2] == "NutationUpdateInterval")
@@ -2200,8 +2225,11 @@ bool Interpreter::InterpretSolarSetting(const StringArray &sar,
             data << rhs;
             data >> interval;
             Integer id = body->GetParameterID("NutationUpdateInterval");
-MessageInterface::ShowMessage("Setting nutation update interval on %s to %lf\n",
-   sar[1].c_str(), interval);
+
+               MessageInterface::ShowMessage(
+                  "Setting nutation update interval on %s to %lf\n",
+                  sar[1].c_str(), interval);
+
             body->SetRealParameter(id, interval);
             return true;
          }

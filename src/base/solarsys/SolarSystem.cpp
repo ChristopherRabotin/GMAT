@@ -33,7 +33,7 @@ SolarSystem::PARAMETER_TEXT[SolarSystemParamCount - GmatBaseParamCount] =
 {
    "BodiesInUse",
    "NumberOfBodies",
-   "OverrideTimeSystem",
+   "UseTTForEphemeris",
    "EphemerisUpdateInterval",
 };
 
