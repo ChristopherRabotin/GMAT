@@ -609,14 +609,14 @@ void CoordPanel::Setup( wxWindow *parent)
       wxDefaultPosition, wxDefaultSize, 0 );
    zStaticText = new wxStaticText( parent, ID_TEXT, wxT("Z: "),
       wxDefaultPosition, wxDefaultSize, 0 );
-	  
+          
    #if __WXMAC__
    wxStaticText *title1StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Axes"),
                         wxDefaultPosition, wxSize(120,20),
                         wxBOLD);
    title1StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-									true, _T(""), wxFONTENCODING_SYSTEM));
+                                                                        true, _T(""), wxFONTENCODING_SYSTEM));
    #endif
 
    // wxTextCtrl
@@ -934,7 +934,8 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
          }
       }
       
-      coordSys->SetSolarSystem(theGuiInterpreter->GetDefaultSolarSystem());
+      //loj: 2/8/06 coordSys->SetSolarSystem(theGuiInterpreter->GetDefaultSolarSystem());
+      coordSys->SetSolarSystem(theGuiInterpreter->GetSolarSystemInUse());
       coordSys->Initialize();
 
    }

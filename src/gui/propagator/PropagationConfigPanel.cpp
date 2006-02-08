@@ -475,7 +475,8 @@ void PropagationConfigPanel::Initialize()
    MessageInterface::ShowMessage("PropagationConfigPanel::Initialize() entered\n");
    #endif
    
-   theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
+   //loj: 2/8/06 theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
+   theSolarSystem = theGuiInterpreter->GetSolarSystemInUse();
    thePropSetup = theGuiInterpreter->GetPropSetup(propSetupName);
 
    // initialize integrator type array
@@ -1804,9 +1805,9 @@ void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
       std::string filename;
         
       filename = dialog.GetPath();
-	  
-	  // Determine the type of file
-	  
+          
+          // Determine the type of file
+          
 //@todo: Not tested from GUI so did not include in Release 1.0, finish complete testing
 //      if ((filename.find(".dat",0) != std::string::npos) ||
 //          (filename.find(".DAT",0) != std::string::npos) )
@@ -1822,18 +1823,18 @@ void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
       else if ((filename.find(".cof",0) != std::string::npos) ||
             (filename.find(".COF",0) != std::string::npos) )
       {
-	       ParseCOFGravityFile(filename);  
-	  }
-	  else
-	  {
-	     MessageInterface::PopupMessage
+               ParseCOFGravityFile(filename);  
+          }
+          else
+          {
+             MessageInterface::PopupMessage
          (Gmat::WARNING_, "Gravity file \"" + filename + "\" is of unknown format.");
          return;
-	  }
+          }
 
       forceList[currentBodyId]->potFilename = std::string(filename.c_str());
       forceList[currentBodyId]->gravType = gravModelArray[OTHER];
-	  
+          
       DisplayGravityFieldData();      
       theApplyButton->Enable(true);
    }
@@ -2110,7 +2111,7 @@ void PropagationConfigPanel::ParseDATGravityFile(std::string fname)
 //   while ( iscomment )
 //   {
 //      rtn = fgetc( fp );
-//	  
+//        
 //      if ( (char)rtn == '#' )
 //      {
 //         fgets( buf, CelestialBody::BUFSIZE, fp );
@@ -2188,13 +2189,13 @@ void PropagationConfigPanel::ParseGRVGravityFile(std::string fname)
       getline(inFile,s);
       std::istringstream lineStr;
       lineStr.str(s);
-	  
+          
       // ignore comment lines
       if (s[0] != '#')
       {
          lineStr >> firstStr;
          
-		 if (strcasecmp(firstStr.c_str(),"Degree") == 0)
+                 if (strcasecmp(firstStr.c_str(),"Degree") == 0)
             lineStr >> fileDegree;
          else if (strcasecmp(firstStr.c_str(),"Order") == 0)
             lineStr >> fileOrder;
@@ -2233,21 +2234,21 @@ void PropagationConfigPanel::ParseCOFGravityFile(std::string fname)
    while (!done)
    {
       getline(inFile,s);
-	  
+          
       std::istringstream lineStr;
-	  
+          
       lineStr.str(s);
-	  
+          
       // ignore comment lines
       if (s[0] != 'C')
       {
          lineStr >> firstStr;
-		 
+                 
          if (firstStr == "POTFIELD")
-		 {
+                 {
             lineStr >> fileDegree >> fileOrder >> int1 >> real1 >> real2 >> real3;
-			done = true;
-		 }
+                        done = true;
+                 }
       }
    }
 

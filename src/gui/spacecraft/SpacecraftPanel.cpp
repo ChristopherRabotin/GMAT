@@ -79,7 +79,8 @@ SpacecraftPanel::~SpacecraftPanel()
 //------------------------------------------------------------------------------
 void SpacecraftPanel::Create()
 {
-    SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
+    //loj: 2/8/06 SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
+    SolarSystem *theSolarSystem = theGuiInterpreter->GetSolarSystemInUse();
     currentSpacecraft = new Spacecraft(*theSpacecraft);
     
     currentSpacecraft->SetInternalCoordSystem(

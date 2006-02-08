@@ -2669,7 +2669,8 @@ GuiItemManager::GuiItemManager()
    #endif
    
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-   theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
+   //loj: 2/8/06 theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
+   theSolarSystem = theGuiInterpreter->GetSolarSystemInUse();
    
    theNumScProperty = 0;
    theNumImpBurnProperty = 0;
