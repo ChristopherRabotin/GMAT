@@ -66,6 +66,8 @@ public:
    void                AddCoordinateSystem(CoordinateSystem *cs);
    void                AddCalculatedPoint(CalculatedPoint *cp);
    
+   void                SetDefaultSolarSystem(SolarSystem *ss);
+   void                SetSolarSystemInUse(SolarSystem *ss);
    bool                SetSolarSystemInUse(const std::string &name);
    
    StringArray&        GetListOfAllItems();
@@ -125,6 +127,14 @@ private:
    std::map<std::string, GmatBase *>   mapping;
    /// Flag indicating that a managed object has been changed by a user
    bool                                objectChanged;
+
+   // Treat default and in use separately until we can manage solar system by name.
+   // All sollar system names are "SolarSystem" for now.
+   
+   /// Default Solar Systems 
+   SolarSystem *defaultSolarSystem;
+   /// Solar Systems in use
+   SolarSystem *solarSystemInUse;
 };
 
 

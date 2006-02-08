@@ -73,6 +73,7 @@ public:
    
    // SolarSystem
    SolarSystem* GetDefaultSolarSystem();
+   SolarSystem* GetSolarSystemInUse();
    
    // CalculatedPoint
    CalculatedPoint* CreateCalculatedPoint(const std::string &type,

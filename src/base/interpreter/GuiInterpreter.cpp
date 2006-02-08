@@ -77,7 +77,7 @@ bool GuiInterpreter::IsInitialized()
 //------------------------------------------------------------------------------
 void GuiInterpreter::Initialize()
 {
-   //loj: Is there anything to initialize?
+   // Is there anything to initialize?
    isInitialized = true;
 }
 
@@ -241,7 +241,21 @@ SolarSystem* GuiInterpreter::GetDefaultSolarSystem()
 }
 
 
-//loj: 4/22/05 Added
+//------------------------------------------------------------------------------
+// SolarSystem* GetSolarSystemInUse()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a current solar system object pointer.
+ *
+ * @return a default solar system object pointer
+ */
+//------------------------------------------------------------------------------
+SolarSystem* GuiInterpreter::GetSolarSystemInUse()
+{
+   return moderator->GetSolarSystemInUse();
+}
+
+
 //------------------------------------------------------------------------------
 // CalculatedPoint* CreateCalculatedPoint(const std::string &type,
 //                                        const std::string &name)
@@ -312,7 +326,7 @@ CelestialBody* GuiInterpreter::CreateCelestialBody(const std::string &type,
 //------------------------------------------------------------------------------
 CelestialBody* GuiInterpreter::GetCelestialBody(const std::string &name)
 {
-   //loj: assumes body type from SolarSystem container
+   // Assumes body type from SolarSystem container
    return moderator->GetCelestialBody(name);
 }
 
@@ -741,7 +755,6 @@ CoordinateSystem* GuiInterpreter::GetInternalCoordinateSystem()
 }
 
 
-//loj: 6/20/05 Added
 //------------------------------------------------------------------------------
 // bool IsDefaultCoordinateSystem(const std::string &name)
 //------------------------------------------------------------------------------

@@ -120,6 +120,7 @@ public:
    SolarSystem* CreateSolarSystem(const std::string &name);
    SolarSystem* GetSolarSystemInUse();
    bool SetSolarSystemInUse(const std::string &name);
+   void SetSolarSystemInUse(SolarSystem *ss);
    
    // CalculatedPoint
    CalculatedPoint* CreateCalculatedPoint(const std::string &type,
@@ -287,6 +288,8 @@ private:
    void InitializePlanetaryCoeffFile();
    void InitializeTimeFile();
    
+   void SetDefaultPlanetarySource();
+   void CreateSolarSystemInUse();
    void CreateDefaultCoordSystems();
    void CreateDefaultMission();
    bool CreateSlpFile(const std::string &fileName);
@@ -363,6 +366,7 @@ private:
    CalculatedPointFactory *theCalculatedPointFactory;
    
    SolarSystem *theDefaultSolarSystem;
+   SolarSystem *theSolarSystemInUse;
    CoordinateSystem *theInternalCoordSystem;
    SlpFile *theDefaultSlpFile;
    DeFile *theDefaultDeFile;

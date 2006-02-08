@@ -21,6 +21,7 @@
 
 //#define DEBUG_RENAME 1
 //#define DEBUG_CONFIG 1
+//#define DEBUG_CONFIG_SS 1
 //#define DEBUG_CONFIG_MEMORY
 
 //---------------------------------
@@ -452,6 +453,44 @@ void ConfigManager::AddObject(GmatBase *obj)
    objectChanged = true;
 }
 
+
+//------------------------------------------------------------------------------
+// void SetDefaultSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+/**
+ * Sets the default SolarSystem.
+ *
+ * @param ss The SolarSystem object pointer.
+ *
+ */
+//------------------------------------------------------------------------------
+void ConfigManager::SetDefaultSolarSystem(SolarSystem *ss)
+{
+   defaultSolarSystem = ss;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetSolarSystemInUse(SolarSystem *ss)
+//------------------------------------------------------------------------------
+/**
+ * Sets the current SolarSystem.
+ *
+ * @param ss The SolarSystem object pointer.
+ *
+ */
+//------------------------------------------------------------------------------
+void ConfigManager::SetSolarSystemInUse(SolarSystem *ss)
+{
+   #if DEBUG_CONFIG_SS
+   MessageInterface::ShowMessage
+      ("ConfigManager::SetSolarSystemInUse() name=%s\n", ss->GetName().c_str());
+   #endif
+   
+   solarSystemInUse = ss;
+}
+
+
 //------------------------------------------------------------------------------
 // bool SetSolarSystemInUse(const std::string &name)
 //------------------------------------------------------------------------------
@@ -465,8 +504,11 @@ void ConfigManager::AddObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 bool ConfigManager::SetSolarSystemInUse(const std::string &name)
 {
-   return false;
+   throw ConfigManagerException
+      ("ConfigManager::SetSolarSystemInUse(string) has not been implemented.\n");
+   //return false;
 }
+
 
 //------------------------------------------------------------------------------
 // StringArray& GetListOfAllItems()
@@ -740,7 +782,7 @@ bool ConfigManager::RemoveAllItems()
 
    objects.clear();
    mapping.clear();
-
+   
    return true;
 }
 
@@ -1071,8 +1113,9 @@ Subscriber* ConfigManager::GetSubscriber(const std::string &name)
 //------------------------------------------------------------------------------
 SolarSystem* ConfigManager::GetDefaultSolarSystem()
 {
-   throw ConfigManagerException
-      ("ConfigManager::GetDefaultSolarSystem() has not been implemented.\n");
+   return defaultSolarSystem;
+   //throw ConfigManagerException
+   //   ("ConfigManager::GetDefaultSolarSystem() has not been implemented.\n");
 }
 
 
@@ -1089,8 +1132,15 @@ SolarSystem* ConfigManager::GetDefaultSolarSystem()
 //------------------------------------------------------------------------------
 SolarSystem* ConfigManager::GetSolarSystemInUse()
 {
-   throw ConfigManagerException
-      ("ConfigManager::GetSolarSystemInUse() has not been implemented.\n");
+   #if DEBUG_CONFIG_SS
+   MessageInterface::ShowMessage
+      ("ConfigManager::GetSolarSystemInUse() name=%s\n",
+       solarSystemInUse->GetName().c_str());
+   #endif
+   
+   return solarSystemInUse;
+   //throw ConfigManagerException
+   //   ("ConfigManager::GetSolarSystemInUse() has not been implemented.\n");
 }
 
 
