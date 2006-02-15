@@ -872,11 +872,11 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
       wxMessageBox(wxT("GMAT is still running the mission.\n"
                        "Please STOP the run before closing."),
                    wxT("GMAT Warning"));
-      ProcessCommand(TOOL_PAUSE);
+      //ProcessCommand(TOOL_PAUSE); (loj: We don't need OnPause() here)
       return;
    }
    
-   CloseAllChildren(true, true);
+   //CloseAllChildren(true, true); (loj: moved below)
    
    // prompt save
    
@@ -885,12 +885,16 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
       wxMessageDialog *msgDlg =
          new wxMessageDialog(this,
                              "Would you like to save changes?", "Save...",
-                             wxYES_NO |wxICON_QUESTION, wxDefaultPosition);
+                             wxYES_NO | wxCANCEL |wxICON_QUESTION, wxDefaultPosition);
       
       int result = msgDlg->ShowModal();
       std::string oldScriptName = scriptFilename;
-      
-      if (result == wxID_YES)
+
+      if (result == wxID_CANCEL)
+      {
+         return;
+      }
+      else if (result == wxID_YES)
       {
          if (strcmp(scriptFilename.c_str(), "$gmattempscript$.script") == 0)
          {
@@ -902,37 +906,51 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
             {
                scriptFilename = dialog.GetPath().c_str();
 
-                      if(FileExists(scriptFilename))
-                      {
+               if(FileExists(scriptFilename))
+               {
                   MessageInterface::ShowMessage("File DE 2 - prompt");
-                           if (wxMessageBox(_T("File already exists.\nDo you want to overwrite?"), 
-                               _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxYES)
-                                GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
-                           else
-                   {
-                        scriptFilename = oldScriptName;
-                                return;
-                   }
-                      }
-                      else
-              {
-                  MessageInterface::ShowMessage("File DNE 2 - just save");
-                          GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
-              }
+                  if (wxMessageBox(_T("File already exists.\nDo you want to overwrite?"), 
+                                   _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxYES)
+                     GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+                  else
+                  {
+                     scriptFilename = oldScriptName;
+                     return;
+                  }
+               }
+               else
+               {
+                  //MessageInterface::ShowMessage("File DNE 2 - just save");
+                  GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+               }
            
                GmatAppData::GetResourceTree()->AddScriptItem(scriptFilename.c_str());
                GmatAppData::GetResourceTree()->UpdateResource(false);
             }
          }
-         else
+         else if (result == wxID_NO)
          {
             GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
          }
          
-         event.Skip();
+         //event.Skip();
       }
    }
+   else
+   {
+      wxMessageDialog *msgDlg =
+         new wxMessageDialog(this,
+                             "Do you really want to exit?", "Exiting...",
+                             wxYES_NO |wxICON_QUESTION, wxDefaultPosition);
+      
+      int result = msgDlg->ShowModal();
+      
+      if (result == wxID_NO)
+         return;
+   }
 
+   CloseAllChildren(true, true);
+   
    theGuiInterpreter->ClearResource();
    theGuiInterpreter->ClearCommandSeq();
    
@@ -1022,27 +1040,27 @@ void GmatMainFrame::OnSaveScript(wxCommandEvent& WXUNUSED(event))
     
       if (dialog.ShowModal() == wxID_OK)
       {
-        scriptFilename = dialog.GetPath().c_str();
-            if(FileExists(scriptFilename))
-            {
-           MessageInterface::ShowMessage("File DE 3 - prompt");
-               if (wxMessageBox(_T("File already exists.\nDo you want to overwrite?"), 
-                   _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxYES)
-                  GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
-               else
-           {
-              scriptFilename = oldScriptName;
-                  return;
-           }
-            }
-            else
-        {
-           MessageInterface::ShowMessage("File DNE 3 - just save");
+         scriptFilename = dialog.GetPath().c_str();
+         if(FileExists(scriptFilename))
+         {
+            MessageInterface::ShowMessage("File DE 3 - prompt");
+            if (wxMessageBox(_T("File already exists.\nDo you want to overwrite?"), 
+                             _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxYES)
                GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
-        }
-           
-        GmatAppData::GetResourceTree()->AddScriptItem(scriptFilename.c_str());
-        GmatAppData::GetResourceTree()->UpdateResource(false);
+            else
+            {
+               scriptFilename = oldScriptName;
+               return;
+            }
+         }
+         else
+         {
+            //MessageInterface::ShowMessage("File DNE 3 - just save");
+            GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+         }
+         
+         GmatAppData::GetResourceTree()->AddScriptItem(scriptFilename.c_str());
+         GmatAppData::GetResourceTree()->UpdateResource(false);
       }
    }
    else
