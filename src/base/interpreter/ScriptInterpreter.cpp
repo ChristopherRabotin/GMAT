@@ -818,6 +818,16 @@ bool ScriptInterpreter::WriteScript()
       if (!BuildObject(*current))
          return false;
 
+   // Libration Points and Barycenters
+   objs = moderator->GetListOfConfiguredItems(Gmat::CALCULATED_POINT);
+
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+      MessageInterface::ShowMessage("Found %d calculated points\n", objs.size());
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+      if (!BuildObject(*current))
+         return false;
+            
    // Force Models
    objs = moderator->GetListOfConfiguredItems(Gmat::FORCE_MODEL);
 
