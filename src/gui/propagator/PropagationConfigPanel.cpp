@@ -1806,16 +1806,13 @@ void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
         
       filename = dialog.GetPath();
           
-          // Determine the type of file
-          
-//@todo: Not tested from GUI so did not include in Release 1.0, finish complete testing
-//      if ((filename.find(".dat",0) != std::string::npos) ||
-//          (filename.find(".DAT",0) != std::string::npos) )
-//      {
-//          ParseDATGravityFile(filename);
-//      }
-      
-      if ((filename.find(".grv",0) != std::string::npos) ||
+      // Determine the type of file
+      if ((filename.find(".dat",0) != std::string::npos) ||
+          (filename.find(".DAT",0) != std::string::npos) )
+      {
+          ParseDATGravityFile(filename);
+      }
+      else if ((filename.find(".grv",0) != std::string::npos) ||
             (filename.find(".GRV",0) != std::string::npos) )
       {
           ParseGRVGravityFile(filename);
@@ -2080,87 +2077,89 @@ void PropagationConfigPanel::ShowForceList(const std::string &header)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::ParseDATGravityFile(std::string fname)
 {  
-//   Integer      cc, dd, sz=0;
-//   Integer      iscomment, rtn;
-//   Integer      n=0, m=0;
-//   Integer      fileDegree, fileOrder;
-//   Real         Cnm=0.0, Snm=0.0, dCnm=0.0, dSnm=0.0;
-//   char         buf[CelestialBody::BUFSIZE];
-//   FILE        *fp;
-//
-//   for (cc = 2;cc <= HF_MAX_DEGREE; ++cc)
-//   {
-//      for (dd = 0; dd <= cc; ++dd)
-//      {
-//         sz++;
-//      }
-//   }
-//   
-//   /* read coefficients from file */
-//   fp = fopen( fname.c_str(), "r");
-//   if (!fp)
-//   {
-//      MessageInterface::PopupMessage
-//         (Gmat::WARNING_, "Error reading gravity potential file.");
-//         return;
-//   }
-//   
-//   PrepareGravityArrays();
-//   iscomment = 1;
-//   
-//   while ( iscomment )
-//   {
-//      rtn = fgetc( fp );
-//        
-//      if ( (char)rtn == '#' )
-//      {
-//         fgets( buf, CelestialBody::BUFSIZE, fp );
-//      }
-//      else
-//      {
-//         ungetc( rtn, fp );
-//         iscomment = 0;
-//      }
-//   }
-//
-//   fscanf(fp, "%lg\n", &mu ); mu = (Real)mu / 1.0e09;      // -> Km^3/sec^2
-//   fscanf(fp, "%lg\n", &a ); a = (Real)a / 1000.0;         // -> Km
-//   fgets( buf, CelestialBody::BUFSIZE, fp );
-//   
-//   while ( ( (char)(rtn=fgetc(fp)) != '#' ) && (rtn != EOF) )
-//   {
-//      ungetc( rtn, fp );
-//      fscanf( fp, "%i %i %le %le\n", &n, &m, &dCnm, &dSnm );
-//      if ( n <= GRAV_MAX_DRIFT_DEGREE  && m <= n )
-//      {
-//         dCbar[n][m] = (Real)dCnm;
-//         dSbar[n][m] = (Real)dSnm;
-//      }
-//   }
-//
-//   fgets( buf, CelestialBody::BUFSIZE, fp );
-//
-//   fileDegree = 0;
-//   fileOrder  = 0;
-//   cc=0;n=0;m=0;
-//   
-//   do
-//   {
-//      if ( n <= HF_MAX_DEGREE && m <= HF_MAX_ORDER )
-//      {
-//         Cbar[n][m] = (Real)Cnm;
-//         Sbar[n][m] = (Real)Snm;
-//      }
-//      if (n > fileDegree) fileDegree = n;
-//      if (n > fileOrder)  fileOrder  = n;
-//      
-//      cc++;
-//   } while ( ( cc<=sz ) && ( fscanf( fp, "%i %i %le %le\n", &n, &m, &Cnm, &Snm ) > 0 ));
-//   
-//   // Save as string
-//   forceList[currentBodyId]->gravDegree.Printf("%d", fileDegree);
-//   forceList[currentBodyId]->gravOrder.Printf("%d", fileOrder);
-   return;
+   Integer      cc, dd, sz=0;
+   Integer      iscomment, rtn;
+   Integer      n=0, m=0;
+   Integer      fileDegree, fileOrder;
+   Real         Cnm=0.0, Snm=0.0, dCnm=0.0, dSnm=0.0;
+   // @to do should mu & radius be constant?? - waw
+   Real         mu=398600.4415; // gravity parameter of central body
+   Real         a=6378.1363;  // radius of central body ( mean equatorial )
+   char         buf[CelestialBody::BUFSIZE];
+   FILE        *fp;
+
+   for (cc = 2;cc <= HarmonicField::HF_MAX_DEGREE; ++cc)
+   {
+      for (dd = 0; dd <= cc; ++dd)
+      {
+         sz++;
+      }
+   }
+   
+   /* read coefficients from file */
+   fp = fopen( fname.c_str(), "r");
+   if (!fp)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "Error reading gravity potential file.");
+         return;
+   }
+   
+   PrepareGravityArrays();
+   iscomment = 1;
+   
+   while ( iscomment )
+   {
+      rtn = fgetc( fp );
+        
+      if ( (char)rtn == '#' )
+      {
+         fgets( buf, CelestialBody::BUFSIZE, fp );
+      }
+      else
+      {
+         ungetc( rtn, fp );
+         iscomment = 0;
+      }
+   }
+
+   fscanf(fp, "%lg\n", &mu ); mu = (Real)mu / 1.0e09;      // -> Km^3/sec^2
+   fscanf(fp, "%lg\n", &a ); a = (Real)a / 1000.0;         // -> Km
+   fgets( buf, CelestialBody::BUFSIZE, fp );
+   
+   while ( ( (char)(rtn=fgetc(fp)) != '#' ) && (rtn != EOF) )
+   {
+      ungetc( rtn, fp );
+      fscanf( fp, "%i %i %le %le\n", &n, &m, &dCnm, &dSnm );
+      if ( n <= GRAV_MAX_DRIFT_DEGREE  && m <= n )
+      {
+         dCbar[n][m] = (Real)dCnm;
+         dSbar[n][m] = (Real)dSnm;
+      }
+   }
+
+   fgets( buf, CelestialBody::BUFSIZE, fp );
+
+   fileDegree = 0;
+   fileOrder  = 0;
+   cc=0;n=0;m=0;
+   
+   do
+   {
+      if ( n <= HarmonicField::HF_MAX_DEGREE && m <= HarmonicField::HF_MAX_ORDER )
+      {
+         Cbar[n][m] = (Real)Cnm;
+         Sbar[n][m] = (Real)Snm;
+      }
+      if (n > fileDegree) fileDegree = n;
+      if (n > fileOrder)  fileOrder  = n;
+      
+      cc++;
+   } while ( ( cc<=sz ) && ( fscanf( fp, "%i %i %le %le\n", &n, &m, &Cnm, &Snm ) > 0 ));
+   
+   // Save as string
+   forceList[currentBodyId]->gravDegree.Printf("%d", fileDegree);
+   forceList[currentBodyId]->gravOrder.Printf("%d", fileOrder);
 }
 
 //------------------------------------------------------------------------------
@@ -2271,8 +2270,10 @@ void PropagationConfigPanel::PrepareGravityArrays()
          Sbar[n][m] = 0.0;
       }
       
-   for (n = 0; n <= GRAV_MAX_DRIFT_DEGREE; ++n) {
-      for (m = 0; m <= GRAV_MAX_DRIFT_DEGREE; ++m) {
+   for (n = 0; n <= GRAV_MAX_DRIFT_DEGREE; ++n) 
+   {
+      for (m = 0; m <= GRAV_MAX_DRIFT_DEGREE; ++m) 
+      {
          dCbar[n][m] = 0.0;
          dSbar[n][m] = 0.0;
       }
