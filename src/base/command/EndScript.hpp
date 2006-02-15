@@ -28,17 +28,19 @@
  */
 class GMAT_API EndScript : public GmatCommand
 {
-	public:
-		EndScript();
-		virtual ~EndScript();
-		EndScript(const EndScript& noop);
-      EndScript&                    operator=(const EndScript&);
+public:
+   EndScript();
+   virtual ~EndScript();
+   EndScript(const EndScript& noop);
+   EndScript&          operator=(const EndScript&);
+   
+   bool                Execute();
 
-		
-		bool                          Execute();
-
-      // inherited from GmatBase
-      virtual GmatBase*             Clone() const;
+   // inherited from GmatBase
+   virtual GmatBase*   Clone() const;
+   virtual bool        RenameRefObject(const Gmat::ObjectType type,
+                                       const std::string &oldName,
+                                       const std::string &newName);
 
 };
 

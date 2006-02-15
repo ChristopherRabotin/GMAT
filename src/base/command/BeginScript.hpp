@@ -29,23 +29,27 @@
  */
 class GMAT_API BeginScript : public GmatCommand
 {
-	public:
-		BeginScript();
-		virtual ~BeginScript();
-		BeginScript(const BeginScript& noop);
-      BeginScript&                  operator=(const BeginScript&);
+public:
+   BeginScript();
+   virtual ~BeginScript();
+   BeginScript(const BeginScript& noop);
+   BeginScript&                  operator=(const BeginScript&);
 
-		bool                          Execute();
+   bool                          Execute();
 
-      // inherited from GmatBase
-      virtual GmatBase*             Clone() const;
-      virtual const std::string&    GetGeneratingString(
+   // inherited from GmatBase
+   virtual GmatBase*             Clone() const;
+   virtual const std::string&    GetGeneratingString(
                                        Gmat::WriteMode mode = Gmat::SCRIPTING,
                                        const std::string &prefix = "",
                                        const std::string &useName = "");
 
-      const std::string GetChildString(const std::string &prefix,
-                                       GmatCommand *child, GmatCommand *parent);
+   const std::string GetChildString(const std::string &prefix,
+                                    GmatCommand *child, GmatCommand *parent);
+   
+   virtual bool        RenameRefObject(const Gmat::ObjectType type,
+                                       const std::string &oldName,
+                                       const std::string &newName);
 };
 
 #endif // BeginScript_hpp

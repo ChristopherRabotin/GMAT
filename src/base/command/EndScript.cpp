@@ -110,3 +110,24 @@ GmatBase* EndScript::Clone() const
    return (new EndScript(*this));
 }
 
+
+//------------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//------------------------------------------------------------------------------
+/**
+ * Renames referenced objects.
+ *
+ * @param type Type of the object that is renamed.
+ * @param oldName The current name for the object.
+ * @param newName The name the object has when this operation is complete.
+ *
+ * @return true on success.
+ */
+//------------------------------------------------------------------------------
+bool EndScript::RenameRefObject(const Gmat::ObjectType type,
+                                  const std::string &oldName,
+                                  const std::string &newName)
+{
+   return true;
+}
