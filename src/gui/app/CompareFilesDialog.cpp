@@ -19,7 +19,7 @@
 #include <wx/dir.h>
 #include <wx/filename.h>
 
-//#define DEBUG_RUN_SCRIPT_FOLDER_DIALOG 1
+//#define DEBUG_COMPARE_FILES_DIALOG 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -68,7 +68,7 @@ CompareFilesDialog::~CompareFilesDialog()
 //------------------------------------------------------------------------------
 void CompareFilesDialog::Create()
 {
-   #if DEBUG_RUN_SCRIPT_FOLDER_DIALOG
+   #if DEBUG_COMPARE_FILES_DIALOG
    MessageInterface::ShowMessage("CompareFilesDialog::Create() entered.\n");
    #endif
    
@@ -368,13 +368,13 @@ void CompareFilesDialog::SaveData()
    
    mSaveCompareResults = mSaveResultCheckBox->GetValue();
    
-   #if DEBUG_RUN_SCRIPT_FOLDER_DIALOG
+   #if DEBUG_COMPARE_FILES_DIALOG
    MessageInterface::ShowMessage
       ("CompareFilesDialog::SaveData() mNumFilesToCompare=%d, "
-       "mCompareFiles=%d, mAbsTol=%e\n   mDirectory2=%s, mDirectory2=%s, "
-       "mFromString=%s, mToString=%s\n", mNumFilesToCompare, CompareFiles,
+       "mCompareFiles=%d, mAbsTol=%e\n   mDirectory1=%s, mDirectory2=%s, "
+       "mFromString=%s, mToString=%s\n", mNumFilesToCompare, mCompareFiles,
        mAbsTol, mDirectory1.c_str(), mDirectory2.c_str(), mFromString.c_str(),
-       mFromString.c_str());
+       mToString.c_str());
    #endif
 }
 
@@ -404,10 +404,10 @@ void CompareFilesDialog::OnButtonClick(wxCommandEvent& event)
          mDir1TextCtrl->SetValue(mDirectory1);
          UpdateFileInfo(1);
          
-         #if DEBUG_RUN_SCRIPT_FOLDER_DIALOG
+         #if DEBUG_COMPARE_FILES_DIALOG
          MessageInterface::ShowMessage
             ("CompareFilesDialog::OnButtonClick() mDirectory1=%s\n",
-             dirname.c_str());
+             mDirectory1.c_str());
          #endif
       }
    }
@@ -421,7 +421,7 @@ void CompareFilesDialog::OnButtonClick(wxCommandEvent& event)
          mDir2TextCtrl->SetValue(mDirectory2);
          UpdateFileInfo(2);
          
-         #if DEBUG_RUN_SCRIPT_FOLDER_DIALOG
+         #if DEBUG_COMPARE_FILES_DIALOG
          MessageInterface::ShowMessage
             ("CompareFilesDialog::OnButtonClick() mDirectory2=%s\n",
              mDirectory2.c_str());
@@ -438,8 +438,11 @@ void CompareFilesDialog::OnButtonClick(wxCommandEvent& event)
       if (!filename.empty())
       {
          mSaveFileTextCtrl->SetValue(filename);
+         
+         #if DEBUG_COMPARE_FILES_DIALOG
          MessageInterface::ShowMessage
             ("CompareFilesDialog::OnButtonClick() savefile=%s\n", filename.c_str());
+         #endif
       }
       
    }
