@@ -66,6 +66,7 @@
 
 //#define DEBUG_RESOURCE_TREE 1
 //#define DEBUG_RENAME 1
+//#define DEBUG_DELETE 1
 //#define DEBUG_COMPARE_REPORT 1
 
 //------------------------------------------------------------------------------
@@ -147,25 +148,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    AddIcons();
    AddDefaultResources();
    
-   // set the counters to 0
-   mNumSpacecraft = 0;
-   mNumFuelTank = 0;
-   mNumThruster = 0;
-   mNumFormation = 0;
-   mNumPropagator = 0;
-   mNumImpulsiveBurn = 0;
-   mNumFiniteBurn = 0;
-   mNumReportFile = 0;
-   mNumXyPlot = 0;
-   mNumOpenGlPlot = 0;
-   mNumDiffCorr = 0;
-   mNumVariable = 0;
-   mNumFunct = 0;
-   mNumCoordSys = 0;
-   mNumScripts = 0;
-   mNumBarycenter = 0;
-   mNumLibration = 0;
-
+   ResetResourceCounter();
    theGuiManager->UpdateAll();
 }
 
@@ -213,23 +196,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
    
    if (resetCounter)
    {
-      mNumSpacecraft = 0;
-      mNumFuelTank = 0;
-      mNumThruster = 0;
-      mNumFormation = 0;
-      mNumPropagator = 0;
-      mNumImpulsiveBurn = 0;
-      mNumFiniteBurn = 0;
-      mNumReportFile = 0;
-      mNumXyPlot = 0;
-      mNumOpenGlPlot = 0;
-      mNumDiffCorr = 0;
-      mNumVariable = 0;
-      mNumFunct = 0;
-      mNumCoordSys = 0;
-      mNumBarycenter = 0;
-      mNumLibration = 0;
-
+      ResetResourceCounter();
       theGuiInterpreter->ResetConfigurationChanged();
    }
    
@@ -300,13 +267,13 @@ void ResourceTree::UpdateResource(bool resetCounter)
 
    AddDefaultBodies(mUniverseItem);
    AddDefaultSpecialPoints(mSpecialPointsItem);
-   AddDefaultSpacecraft(mSpacecraftItem);
-   AddDefaultHardware(mHardwareItem);
-   AddDefaultFormations(mFormationItem);
-   AddDefaultPropagators(mPropagatorItem);
-   AddDefaultBurns(mBurnItem);
-   AddDefaultSolvers(mSolverItem);
-   AddDefaultSubscribers(mSubscriberItem);
+   AddDefaultSpacecraft(mSpacecraftItem, resetCounter);
+   AddDefaultHardware(mHardwareItem, resetCounter);
+   AddDefaultFormations(mFormationItem, resetCounter);
+   AddDefaultPropagators(mPropagatorItem, resetCounter);
+   AddDefaultBurns(mBurnItem, resetCounter);
+   AddDefaultSolvers(mSolverItem, resetCounter);
+   AddDefaultSubscribers(mSubscriberItem, resetCounter);
    AddDefaultVariables(mVariableItem);
    AddDefaultFunctions(mFunctItem);
    AddDefaultCoordSys(mCoordSysItem);
@@ -314,6 +281,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
    theGuiManager->UpdateAll();
    ScrollTo(mSpacecraftItem);
 }
+
 
 //------------------------------------------------------------------------------
 //  void AddDefaultResources()
@@ -528,12 +496,11 @@ void ResourceTree::AddDefaultBodies(wxTreeItemId itemId)
 //    SetItemImage(mSpecialPointsItem, GmatTree::ICON_OPENFOLDER,
 //                 wxTreeItemIcon_Expanded);
 
-
-
 }
 
+
 //------------------------------------------------------------------------------
-// void AddDefaultSpacecraft(wxTreeItemId itemId)
+// void AddDefaultSpacecraft(wxTreeItemId itemId, bool resetCounter = true)
 //------------------------------------------------------------------------------
 /**
  * Add the default spacecraft
@@ -541,26 +508,32 @@ void ResourceTree::AddDefaultBodies(wxTreeItemId itemId)
  * @param <itemId> tree item for the spacecraft folder
  */
 //------------------------------------------------------------------------------
-void ResourceTree::AddDefaultSpacecraft(wxTreeItemId itemId)
+void ResourceTree::AddDefaultSpacecraft(wxTreeItemId itemId, bool resetCounter)
 {
    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
    int size = itemNames.size();
    wxString objName;
-    
+   
    for (int i = 0; i<size; i++)
    {
-      ++mNumSpacecraft;
+      if (resetCounter)
+         ++mNumSpacecraft;
+      
       objName = wxString(itemNames[i].c_str());
       AppendItem(itemId, wxT(objName), GmatTree::ICON_SPACECRAFT, -1,
                  new GmatTreeItemData(wxT(objName), GmatTree::SPACECRAFT));
    };
 
+   if (size == 0)
+      mNumSpacecraft = 0;
+   
    if (size > 0)
       Expand(itemId);
 }
 
+
 //------------------------------------------------------------------------------
-// void AddDefaultHardware(wxTreeItemId itemId)
+// void AddDefaultHardware(wxTreeItemId itemId, bool resetCounter = true)
 //------------------------------------------------------------------------------
 /**
  * Add the default hardware
@@ -568,13 +541,15 @@ void ResourceTree::AddDefaultSpacecraft(wxTreeItemId itemId)
  * @param <itemId> tree item for the hardware folder
  */
 //------------------------------------------------------------------------------
-void ResourceTree::AddDefaultHardware(wxTreeItemId itemId)
+void ResourceTree::AddDefaultHardware(wxTreeItemId itemId, bool resetCounter)
 {
    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::HARDWARE);
    int size = itemNames.size();
    wxString objName;
    wxString objTypeName;
-    
+   int numFuelTank = 0;
+   int numThruster = 0;
+   
    for (int i = 0; i<size; i++)
    {
       Hardware *hw = theGuiInterpreter->GetHardware(itemNames[i]);
@@ -583,18 +558,32 @@ void ResourceTree::AddDefaultHardware(wxTreeItemId itemId)
 
       if (objTypeName == "FuelTank")
       {
-         ++mNumFuelTank;
+         numFuelTank++;
+
+         if (resetCounter)
+            ++mNumFuelTank;
+         
          AppendItem(itemId, wxT(objName), GmatTree::ICON_TANK, -1,
                     new GmatTreeItemData(wxT(objName), GmatTree::FUELTANK));
       }
       else if (objTypeName == "Thruster")
       {
-         ++mNumThruster;
+         numThruster++;
+
+         if (resetCounter)
+            ++mNumThruster;
+         
          AppendItem(itemId, wxT(objName), GmatTree::ICON_THRUSTER, -1,
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::THRUSTER));
       }
    };
+
+   if (numFuelTank == 0)
+      mNumFuelTank = 0;
+
+   if (numThruster == 0)
+      mNumThruster = 0;
 
    if (size > 0)
       Expand(itemId);
@@ -602,7 +591,7 @@ void ResourceTree::AddDefaultHardware(wxTreeItemId itemId)
 
 
 //------------------------------------------------------------------------------
-// void AddDefaultFormations(wxTreeItemId itemId)
+// void AddDefaultFormations(wxTreeItemId itemId, bool resetCounter = true)
 //------------------------------------------------------------------------------
 /**
  * Add the default formations
@@ -610,15 +599,17 @@ void ResourceTree::AddDefaultHardware(wxTreeItemId itemId)
  * @param <itemId> tree item for the formation folder
  */
 //------------------------------------------------------------------------------
-void ResourceTree::AddDefaultFormations(wxTreeItemId itemId)
+void ResourceTree::AddDefaultFormations(wxTreeItemId itemId, bool resetCounter)
 {
    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::FORMATION);
    int size = itemNames.size();
    wxString objName;
-    
+   
    for (int i = 0; i<size; i++)
    {
-      ++mNumFormation;
+      if (resetCounter)
+         ++mNumFormation;
+      
       objName = wxString(itemNames[i].c_str());
       
       wxTreeItemId formationItem =
@@ -644,6 +635,9 @@ void ResourceTree::AddDefaultFormations(wxTreeItemId itemId)
       Expand(formationItem);
    };
 
+   if (size == 0)
+      mNumFormation = 0;
+   
    if (size > 0)
       Expand(itemId);
 }
@@ -675,7 +669,7 @@ void ResourceTree::AddDefaultConstellations(wxTreeItemId itemId)
 }
 
 //------------------------------------------------------------------------------
-// void AddDefaultPropagators(wxTreeItemId itemId)
+// void AddDefaultPropagators(wxTreeItemId itemId, bool resetCounter = true)
 //------------------------------------------------------------------------------
 /**
  * Add the default propagator
@@ -683,26 +677,31 @@ void ResourceTree::AddDefaultConstellations(wxTreeItemId itemId)
  * @param <itemId> tree item for the propagators folder
  */
 //------------------------------------------------------------------------------
-void ResourceTree::AddDefaultPropagators(wxTreeItemId itemId)
+void ResourceTree::AddDefaultPropagators(wxTreeItemId itemId, bool resetCounter)
 {
    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
    int size = itemNames.size();
    wxString objName;
-    
+   
    for (int i = 0; i<size; i++)
    {
-      ++mNumPropagator;
+      if (resetCounter)
+         ++mNumPropagator;
+      
       objName = wxString(itemNames[i].c_str());
       AppendItem(itemId, wxT(objName), GmatTree::ICON_PROPAGATOR, -1,
                  new GmatTreeItemData(wxT(objName), GmatTree::PROPAGATOR));
    };
 
+   if (size == 0)
+      mNumPropagator = 0;
+   
    if (size > 0)
       Expand(itemId);
 }
 
 //------------------------------------------------------------------------------
-// void AddDefaultBurns(wxTreeItemId itemId)
+// void AddDefaultBurns(wxTreeItemId itemId, bool resetCounter = true)
 //------------------------------------------------------------------------------
 /**
  * Add the default burns
@@ -710,14 +709,16 @@ void ResourceTree::AddDefaultPropagators(wxTreeItemId itemId)
  * @param <itemId> tree item for the burn folder
  */
 //------------------------------------------------------------------------------
-void ResourceTree::AddDefaultBurns(wxTreeItemId itemId)
+void ResourceTree::AddDefaultBurns(wxTreeItemId itemId, bool resetCounter)
 {
    //MessageInterface::ShowMessage("ResourceTree::AddDefaultBurns() entered\n");
    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::BURN);
    int size = itemNames.size();
    wxString objName;
    wxString objTypeName;
-    
+   int numImpBurn = 0;
+   int numFiniteBurn = 0;
+   
    for (int i = 0; i<size; i++)
    {
       Burn *burn = theGuiInterpreter->GetBurn(itemNames[i]);
@@ -726,7 +727,10 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId)
 
       if (objTypeName == "ImpulsiveBurn")
       {
-         ++mNumImpulsiveBurn;
+         numImpBurn++;
+
+         if (resetCounter)
+            ++mNumImpulsiveBurn;
          
          //MessageInterface::ShowMessage
          //   ("ResourceTree::AddDefaultBurns() objTypeName = ImpulsiveBurn\n");
@@ -737,7 +741,10 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId)
       }
       else if (objTypeName == "FiniteBurn")
       {
-         ++mNumFiniteBurn;
+         numFiniteBurn++;
+
+         if (resetCounter)
+            ++mNumFiniteBurn;
          
          //MessageInterface::ShowMessage
          //   ("ResourceTree::AddDefaultBurns() objTypeName = ImpulsiveBurn\n");
@@ -748,12 +755,18 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId)
       }
    };
 
+   if (numImpBurn == 0)
+      mNumImpulsiveBurn = 0;
+   
+   if (numFiniteBurn == 0)
+      mNumFiniteBurn = 0;
+   
    if (size > 0)
       Expand(itemId);
 }
 
 //------------------------------------------------------------------------------
-// void AddDefaultSolvers(wxTreeItemId itemId)
+// void AddDefaultSolvers(wxTreeItemId itemId, bool resetCounter = true)
 //------------------------------------------------------------------------------
 /**
  * Add the default solvers
@@ -761,12 +774,13 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId)
  * @param <itemId> tree item for the solvers folder
  */
 //------------------------------------------------------------------------------
-void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId)
+void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId, bool resetCounter)
 {
    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SOLVER);
    int size = itemNames.size();
    wxString objName;
    wxString objTypeName;
+   int numDiffCorr = 0;
    
    for (int i = 0; i<size; i++)
    {
@@ -777,7 +791,11 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId)
       /// @todo:  need to create different types for the solvers and check strings
       if (objTypeName == "DifferentialCorrector")
       {
-         ++mNumDiffCorr;
+         numDiffCorr++;
+
+         if (resetCounter)
+            ++mNumDiffCorr;
+         
          AppendItem(mBoundarySolverItem, wxT(objName), GmatTree::ICON_DEFAULT, -1,
                     new GmatTreeItemData(wxT(objName), GmatTree::DIFF_CORR));
       }
@@ -798,6 +816,9 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId)
       }
    };
 
+   if (numDiffCorr == 0)
+      mNumDiffCorr = 0;
+   
    if (size > 0)
    {
       Expand(mBoundarySolverItem);
@@ -805,8 +826,9 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId)
    }
 }
 
+
 //------------------------------------------------------------------------------
-// void AddDefaultSubscribers(wxTreeItemId itemId)
+// void AddDefaultSubscribers(wxTreeItemId itemId, bool resetCounter)
 //------------------------------------------------------------------------------
 /**
  * Add the default subscribers
@@ -814,13 +836,16 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId)
  * @param <itemId> tree item for the subscribers folder
  */
 //------------------------------------------------------------------------------
-void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId)
+void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId, bool resetCounter)
 {
    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
    int size = itemNames.size();
    wxString objName;
    wxString objTypeName;
-    
+   int numReportFile = 0;
+   int numXyPlot = 0;
+   int numGlPlot = 0;
+   
    for (int i = 0; i<size; i++)
    {
       Subscriber *sub = theGuiInterpreter->GetSubscriber(itemNames[i]);
@@ -829,27 +854,48 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId)
 
       if (objTypeName == "ReportFile")
       {
-         ++mNumReportFile;
+         numReportFile++;
+         
+         if (resetCounter)
+            ++mNumReportFile;
+         
          AppendItem(itemId, wxT(objName), GmatTree::ICON_REPORT, -1,
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::REPORT_FILE));
       }
       else if (objTypeName == "XYPlot")
       {
-         ++mNumXyPlot;
+         numXyPlot++;
+         
+         if (resetCounter)
+             ++mNumXyPlot;
+         
          AppendItem(itemId, wxT(objName), GmatTree::ICON_XY_PLOT, -1,
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::XY_PLOT));
       }
       else if (objTypeName == "OpenGLPlot")
       {
-         ++mNumOpenGlPlot;
+         numGlPlot++;
+         
+         if (resetCounter)
+            ++mNumOpenGlPlot;
+         
          AppendItem(itemId, wxT(objName), GmatTree::ICON_OPEN_GL_PLOT, -1,
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::OPENGL_PLOT));
       }
    }
 
+   if (numReportFile == 0)
+      mNumReportFile = 0;
+
+   if (numXyPlot == 0)
+      mNumXyPlot = 0;
+
+   if (numGlPlot == 0)
+      mNumOpenGlPlot = 0;
+   
    if (size > 0)
       Expand(itemId);
 }
@@ -1005,7 +1051,8 @@ void ResourceTree::AddDefaultCoordSys(wxTreeItemId itemId)
 }
 
 //------------------------------------------------------------------------------
-// void AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCounter = true)
+// void AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCounter = true,
+//                              bool resetCounter = true)
 //------------------------------------------------------------------------------
 /**
  * Add the default special points
@@ -1013,15 +1060,17 @@ void ResourceTree::AddDefaultCoordSys(wxTreeItemId itemId)
  * @param <itemId> tree item for the special points folder
  */
 //------------------------------------------------------------------------------
-void ResourceTree::AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCounter)
+void ResourceTree::AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCounter,
+                                           bool resetCounter)
 {
-   /// @todo:  need to wait for method in gui interpreter
    StringArray itemNames = GmatAppData::GetGuiInterpreter()->
       GetListOfConfiguredItems(Gmat::CALCULATED_POINT);
    int size = itemNames.size();
    wxString objName;
    wxString objTypeName;
-
+   int numBary = 0;
+   int numLib = 0;
+   
    for (int i = 0; i<size; i++)
    {
       CalculatedPoint *cp = theGuiInterpreter->GetCalculatedPoint(itemNames[i]);
@@ -1030,19 +1079,35 @@ void ResourceTree::AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCount
 
       if (objTypeName == "Barycenter")
       {
-         ++mNumBarycenter;
+         numBary++;
+
+         if (resetCounter)
+            ++mNumBarycenter;
+         
          AppendItem(itemId, wxT(objName), GmatTree::ICON_DEFAULT, -1,
                     new GmatTreeItemData(wxT(objName), GmatTree::BARYCENTER));
       }
       else if (objTypeName == "LibrationPoint")
       {
          if (incLibCounter)
-            ++mNumBarycenter;
+         {
+            numLib++;
+
+            if (resetCounter)
+               //++mNumBarycenter;
+               ++mNumLibration;
+         }
          
          AppendItem(itemId, wxT(objName), GmatTree::ICON_DEFAULT, -1,
                     new GmatTreeItemData(wxT(objName), GmatTree::LIBRATION_POINT));
       }
    };
+
+   if (numBary == 0)
+      mNumBarycenter = 0;
+
+   if (numLib == 0)
+      mNumLibration = 0;
    
    if (size > 0)
       Expand(itemId);
@@ -1339,8 +1404,10 @@ void ResourceTree::OnClose(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnRename(wxCommandEvent &event)
 {
-   //MessageInterface::ShowMessage("ResourceTree::OnRename() entered\n");
-
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage("ResourceTree::OnRename() entered\n");
+   #endif
+   
    wxTreeItemId item = GetSelection();
    GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
    wxString oldName = selItem->GetDesc();
@@ -1388,8 +1455,8 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          Collapse(mVariableItem);
          DeleteChildren(mVariableItem);
          AddDefaultVariables(mVariableItem);
-         UpdateResource(false);
          
+         UpdateResource(false);
       }
       else
       {
@@ -1422,16 +1489,25 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
    Gmat::ObjectType objType = GetObjectType(itemType);
    if (objType == Gmat::UNKNOWN_OBJECT)
       return;
+
+   #if DEBUG_DELETE
+   MessageInterface::ShowMessage
+      ("ResourceTree::OnDelete() name=%s\n", selItem->GetDesc().c_str());
+   #endif
    
    // delete item if object successfully deleted
    if (theGuiInterpreter->RemoveItemIfNotUsed(objType, selItem->GetDesc().c_str()))
    {
-      wxTreeItemId parentId = GetPrevVisible(item);
-      this->Collapse(parentId);
+      //wxTreeItemId parentId = GetPrevVisible(item);
+      wxTreeItemId parentId = GetItemParent(item);
+      //this->Collapse(parentId);
       this->Delete(item);
       
       theGuiManager->UpdateAll();
-      UpdateResource(false);
+      UpdateResourceCounter(parentId);
+      
+      //loj: 2/14/06 I think we can just delete a node without updating the tree.
+      //UpdateResource(false);
    }
    else
    {
@@ -2800,6 +2876,196 @@ bool ResourceTree::BuildScript(const wxString &filename)
          ("Error occurred during parsing.\nPlease check the syntax and try again\n");
       wxLog::FlushActive();
       return false;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void ResetResourceCounter()
+//------------------------------------------------------------------------------
+void ResourceTree::ResetResourceCounter()
+{
+   // set the counters to 0
+   mNumSpacecraft = 0;
+   mNumFuelTank = 0;
+   mNumThruster = 0;
+   mNumFormation = 0;
+   mNumPropagator = 0;
+   mNumImpulsiveBurn = 0;
+   mNumFiniteBurn = 0;
+   mNumReportFile = 0;
+   mNumXyPlot = 0;
+   mNumOpenGlPlot = 0;
+   mNumDiffCorr = 0;
+   mNumVariable = 0;
+   mNumFunct = 0;
+   mNumCoordSys = 0;
+   mNumScripts = 0;
+   mNumBarycenter = 0;
+   mNumLibration = 0;
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateResourceCounter(wxTreeItemId itemId)
+//------------------------------------------------------------------------------
+void ResourceTree::UpdateResourceCounter(wxTreeItemId itemId)
+{
+   GmatTreeItemData *item = (GmatTreeItemData *)GetItemData(itemId);
+   wxString name = item->GetDesc();
+
+   #if DEBUG_DELETE
+   MessageInterface::ShowMessage
+      ("ResourceTree::UpdateResourceCounter() item=%s\n", name.c_str());
+   #endif
+   
+   StringArray itemNames;
+   int size;
+   wxString objTypeName;
+   
+   if (itemId == mSpacecraftItem)
+   {
+      itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+      size = itemNames.size();
+      
+      if (size == 0)
+         mNumSpacecraft = 0;
+   }
+   else if (itemId == mHardwareItem)
+   {
+      int numFuelTank = 0;
+      int numThruster = 0;
+      itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::HARDWARE);
+      size = itemNames.size();
+      
+      for (int i = 0; i<size; i++)
+      {
+         Hardware *hw = theGuiInterpreter->GetHardware(itemNames[i]);
+         objTypeName = wxString(hw->GetTypeName().c_str());
+
+         if (objTypeName == "FuelTank")
+            numFuelTank++;
+
+         else if (objTypeName == "Thruster")
+            numThruster++;
+      }
+      
+      if (numFuelTank == 0)
+         mNumFuelTank = 0;
+      
+      if (numThruster == 0)
+         mNumThruster = 0;
+   }
+   else if (itemId == mBurnItem)
+   {
+      int numImpBurn = 0;
+      int numFiniteBurn = 0;
+      itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::BURN);
+      size = itemNames.size();
+         
+      for (int i = 0; i<size; i++)
+      {
+         Burn *burn = theGuiInterpreter->GetBurn(itemNames[i]);
+         objTypeName = wxString(burn->GetTypeName().c_str());
+
+         if (objTypeName == "ImpulsiveBurn")
+            numImpBurn++;
+         else if (objTypeName == "FiniteBurn")
+            numFiniteBurn++;
+      };
+
+      if (numImpBurn == 0)
+         mNumImpulsiveBurn = 0;
+   
+      if (numFiniteBurn == 0)
+         mNumFiniteBurn = 0;
+   }
+   else if (itemId == mPropagatorItem)
+   {
+      itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
+      size = itemNames.size();
+      
+      if (size == 0)
+         mNumPropagator = 0;
+   }
+   else if (itemId == mBoundarySolverItem)
+   {
+      itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SOLVER);
+      size = itemNames.size();
+      
+      int numDiffCorr = 0;
+   
+      for (int i = 0; i<size; i++)
+      {
+         Solver *solver = theGuiInterpreter->GetSolver(itemNames[i]);
+         objTypeName = wxString(solver->GetTypeName().c_str());
+
+         if (objTypeName == "DifferentialCorrector")
+            numDiffCorr++;
+      }
+      
+      if (numDiffCorr == 0)
+         mNumDiffCorr = 0;
+   }
+   else if (itemId == mOptimizerItem)
+   {
+      ; // future implementation
+   }
+   else if (itemId == mSubscriberItem)
+   {
+      itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+      size = itemNames.size();
+      int numReportFile = 0;
+      int numXyPlot = 0;
+      int numGlPlot = 0;
+      
+      for (int i=0; i<size; i++)
+      {
+         Subscriber *sub = theGuiInterpreter->GetSubscriber(itemNames[i]);
+         objTypeName = wxString(sub->GetTypeName().c_str());
+
+         if (objTypeName == "ReportFile")
+            numReportFile++;
+         else if (objTypeName == "XYPlot")
+            numXyPlot++;
+         else if (objTypeName == "OpenGLPlot")
+            numGlPlot++;
+      }
+
+      if (numReportFile == 0)
+         mNumReportFile = 0;
+
+      if (numXyPlot == 0)
+         mNumXyPlot = 0;
+
+      if (numGlPlot == 0)
+         mNumOpenGlPlot = 0;
+   }
+   else if (itemId == mSpecialPointsItem)
+   {
+      itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::CALCULATED_POINT);
+      size = itemNames.size();
+      int numBary = 0;
+      int numLib = 0;
+      
+      for (int i=0; i<size; i++)
+      {
+         CalculatedPoint *cp = theGuiInterpreter->GetCalculatedPoint(itemNames[i]);
+         objTypeName = wxString(cp->GetTypeName().c_str());
+
+         if (objTypeName == "Barycenter")
+            numBary++;
+         
+         else if (objTypeName == "LibrationPoint")
+            numLib++;
+
+      }
+
+      if (numBary == 0)
+         mNumBarycenter = 0;
+
+      if (numLib == 0)
+         mNumLibration = 0;
    }
 }
 

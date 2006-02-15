@@ -88,20 +88,21 @@ private:
    
    void AddDefaultResources();
    void AddDefaultBodies(wxTreeItemId itemId);
-   void AddDefaultSpacecraft(wxTreeItemId itemId);
-   void AddDefaultHardware(wxTreeItemId itemId);
-   void AddDefaultFormations(wxTreeItemId itemId);
+   void AddDefaultSpacecraft(wxTreeItemId itemId, bool resetCounter = true);
+   void AddDefaultHardware(wxTreeItemId itemId, bool resetCounter = true);
+   void AddDefaultFormations(wxTreeItemId itemId, bool resetCounter = true);
    void AddDefaultConstellations(wxTreeItemId itemId);
-   void AddDefaultPropagators(wxTreeItemId itemId);
-   void AddDefaultBurns(wxTreeItemId itemId);
-   void AddDefaultSolvers(wxTreeItemId itemId);
-   void AddDefaultSubscribers(wxTreeItemId itemId);
+   void AddDefaultPropagators(wxTreeItemId itemId, bool resetCounter = true);
+   void AddDefaultBurns(wxTreeItemId itemId, bool resetCounter = true);
+   void AddDefaultSolvers(wxTreeItemId itemId, bool resetCounter = true);
+   void AddDefaultSubscribers(wxTreeItemId itemId, bool resetCounter = true);
    void AddDefaultInterfaces(wxTreeItemId itemId);
    void AddDefaultVariables(wxTreeItemId itemId);
    void AddDefaultFunctions(wxTreeItemId itemId);
    void AddDefaultCoordSys(wxTreeItemId itemId);
    void AddDefaultScripts(wxTreeItemId itemId);
-   void AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCounter = true);
+   void AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCounter = true,
+                                bool resetCounter = true);
 
    // event handlers
    void OnItemRightClick(wxTreeEvent& event);
@@ -152,12 +153,18 @@ private:
    void OnRunScriptsFromFolder(wxCommandEvent& event);
    void OnQuitRunScriptsFromFolder(wxCommandEvent& event);
    void OnRemoveScriptFolder(wxCommandEvent& event);
-   
+
    bool BuildScript(const wxString &filename);
-   
+
+   // resource counter
+   void ResetResourceCounter();
+   void UpdateResourceCounter(wxTreeItemId itemId);
+
+   // menu
    wxMenu* CreatePopupMenu(Gmat::ObjectType type);
    Gmat::ObjectType GetObjectType(int itemType);
 
+   // compare
    void CompareScriptRunResult(Real absTol, const wxString &replaceStr,
                                const wxString &dir1, const wxString &dir2,
                                wxTextCtrl *textCtrl);
