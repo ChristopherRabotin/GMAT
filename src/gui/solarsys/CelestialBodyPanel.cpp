@@ -240,9 +240,12 @@ void CelestialBodyPanel::LoadData()
 
          centralBodyText->SetLabel(centralBody.c_str());
          
-         intervalUpdate = thePlanet->GetUpdateInterval();
-         intervalStr.Printf("%f", intervalUpdate);
-         mIntervalTextCtrl->SetValue(intervalStr);
+         if (theCelestialBody->GetBodyType() == Gmat::PLANET)
+         {
+             intervalUpdate = thePlanet->GetUpdateInterval();
+             intervalStr.Printf("%f", intervalUpdate);
+             mIntervalTextCtrl->SetValue(intervalStr);
+         }
       }
       else
       {
