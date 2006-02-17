@@ -1698,6 +1698,18 @@ void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 {    
    if (event.GetEventObject() == mCoordSysComboBox)
    {
+      // if coordinate system is other than EarthMJ2000Eq,
+      // uncheck and disable draw ecliptic plane CheckBox
+      if (mCoordSysComboBox->GetValue() == "EarthMJ2000Eq")
+      {
+         mEclipticPlaneCheckBox->Enable();
+      }
+      else
+      {
+         mEclipticPlaneCheckBox->SetValue(false);
+         mEclipticPlaneCheckBox->Disable();
+      }
+      
       mHasCoordSysChanged = true;
    }
    else if (event.GetEventObject() == mViewUpCsComboBox ||

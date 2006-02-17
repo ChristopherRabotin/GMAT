@@ -963,6 +963,20 @@ void OpenGlOptionDialog::OnComboBoxChange(wxCommandEvent& event)
       if (!mCoordSysName.IsSameAs(mCoordSysComboBox->GetStringSelection()))
       {
          mHasCoordSysChanged = true;
+         mHasDrawEcPlaneChanged = true;
+         
+         // if coordinate system is other than EarthMJ2000Eq,
+         // uncheck and disable draw ecliptic plane CheckBox
+         if (mCoordSysComboBox->GetValue() == "EarthMJ2000Eq")
+         {
+            mEcPlaneCheckBox->Enable();
+         }
+         else
+         {
+            mEcPlaneCheckBox->SetValue(false);
+            mEcPlaneCheckBox->Disable();
+         }
+         
          mCoordSysName = mCoordSysComboBox->GetStringSelection();
          theApplyButton->Enable();
       }
