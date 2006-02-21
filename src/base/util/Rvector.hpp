@@ -72,6 +72,7 @@ public:
    const Rvector& operator/=(const Rmatrix &m);
     
    std::string ToString(); //loj: 4/19/05 Added
+   virtual bool MakeZeroVector();  // wcs   2006.02.17
    
    friend Rvector operator*(Real s, const Rvector &v);
    friend Rmatrix Outerproduct(const Rvector &v1, const Rvector &v2);

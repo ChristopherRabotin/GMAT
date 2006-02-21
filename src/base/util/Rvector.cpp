@@ -582,6 +582,14 @@ std::string Rvector::ToString()
    return ss.str();
 }
 
+bool Rvector::MakeZeroVector()
+{
+   for (Integer i=0; i<sizeD; i++)
+      elementD[i] = 0.0;
+   return true;
+}
+
+
 //---------------------------------
 // friend function
 //---------------------------------
