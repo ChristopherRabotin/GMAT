@@ -45,6 +45,9 @@ using namespace GmatTimeUtil;      // for SECS_PER_DAY
 //#define DEBUG_UPDATE
 //#define DEBUG_FIRST_CALL
 
+//#define DEBUG_ITRF_UPDATES
+
+
 #ifdef DEBUG_FIRST_CALL
    static bool firstCallFired = false;
 #endif
@@ -102,7 +105,9 @@ epochFormat      (""),
 updateInterval   (60.0), 
 updateIntervalToUse    (60.0), 
 overrideOriginInterval (false),
-lastDPsi         (0.0)
+lastDPsi         (0.0),
+nutationSrc      (GmatItrf::NUTATION_1980),
+planetarySrc     (GmatItrf::PLANETARY_1980)
 {
    objectTypes.push_back(Gmat::AXIS_SYSTEM);
    objectTypeNames.push_back("AxisSystem");
@@ -137,7 +142,9 @@ epochFormat       (axisSys.epochFormat),
 updateInterval    (axisSys.updateInterval),
 updateIntervalToUse    (axisSys.updateIntervalToUse),
 overrideOriginInterval (axisSys.overrideOriginInterval),
-lastDPsi          (0.0)
+lastDPsi          (0.0),
+nutationSrc       (GmatItrf::NUTATION_1980),
+planetarySrc      (GmatItrf::PLANETARY_1980)
 {
    lastPRECEpoch    = A1Mjd(0.0);
    lastNUTEpoch     = A1Mjd(0.0);
@@ -179,6 +186,8 @@ const AxisSystem& AxisSystem::operator=(const AxisSystem &axisSys)
    lastSTDeriv       = axisSys.lastSTDeriv;
    lastPM            = axisSys.lastPM;
    lastDPsi          = axisSys.lastDPsi;
+   nutationSrc       = axisSys.nutationSrc;
+   planetarySrc      = axisSys.planetarySrc;
    Initialize();
    
    return *this;
@@ -742,22 +751,35 @@ void AxisSystem::InitializeFK5()
       if (itrf == NULL)
          throw CoordinateSystemException(
                "Coefficient file has not been set for " + instanceName);
+      
+      nutationSrc    = itrf->GetNutationTermsSource();
+      planetarySrc   = itrf->GetPlanetaryTermsSource();
       Integer numNut = itrf->GetNumberOfNutationTerms();
-      A.SetSize(numNut);
-      B.SetSize(numNut);
-      C.SetSize(numNut);
-      D.SetSize(numNut);
-      E.SetSize(numNut);
-      F.SetSize(numNut);
+      A.SetSize(numNut);   A.MakeZeroVector();
+      #ifdef DEBUG_ITRF_UPDATES
+      MessageInterface::ShowMessage("In Axis System, nutation source is %d\n",
+                        (Integer) nutationSrc);
+      //for (Integer ii = 0; ii < A.GetSize(); ii++)
+      //   MessageInterface::ShowMessage("In AxisSystem, A(%d) = %f\n", ii, A(ii));
+      #endif
+      B.SetSize(numNut);   B.MakeZeroVector();
+      C.SetSize(numNut);   C.MakeZeroVector();
+      D.SetSize(numNut);   D.MakeZeroVector();
+      E.SetSize(numNut);   E.MakeZeroVector();
+      F.SetSize(numNut);   F.MakeZeroVector();
       
       Integer numPlan = itrf->GetNumberOfPlanetaryTerms();
-      Ap.SetSize(numPlan);
-      Bp.SetSize(numPlan);
-      Cp.SetSize(numPlan);
-      Dp.SetSize(numPlan);
+      Ap.SetSize(numPlan);   Ap.MakeZeroVector();
+      Bp.SetSize(numPlan);   Bp.MakeZeroVector();
+      Cp.SetSize(numPlan);   Cp.MakeZeroVector();
+      Dp.SetSize(numPlan);   Dp.MakeZeroVector();
       
       bool OK = itrf->GetNutationTerms(a, A, B, C, D, E, F);
       if (!OK) throw CoordinateSystemException("Error getting nutation data.");
+      #ifdef DEBUG_ITRF_UPDATES
+      for (Integer ii = 0; ii < A.GetSize(); ii++)
+         MessageInterface::ShowMessage("In AxisSystem, after getting nutation data, A(%d) = %f\n", ii, A(ii));
+      #endif
       
       aVals = new Integer[numNut * 5];
       for (Integer i = 0; i < 5; i++)
@@ -778,60 +800,47 @@ void AxisSystem::InitializeFK5()
                aVals[q+3*numNut], aVals[q+4*numNut]);
       #endif
       
-      OK      = itrf->GetPlanetaryTerms(ap, Ap, Bp, Cp, Dp);
-      if (!OK) throw CoordinateSystemException("Error getting planetary data.");
-      
-      apVals = new Integer[numPlan*10];
-      for (Integer i = 0; i < 10; i++)
+      if (nutationSrc == GmatItrf::NUTATION_1996)
       {
-         for (Integer j=0; j< numPlan; j++)
-         {
-            //apVals[i*10+j] = (ap.at(i)).at(j);
-            apVals[i*numPlan+j] = (ap.at(i)).at(j);
-         }
-      }
-
-      #ifdef DEBUG_Ap_MATRIX
-         MessageInterface::ShowMessage("ApVals = \n");
-         for (Integer q = 0; q < numPlan; ++q)
-            MessageInterface::ShowMessage(
-               "         %3d: %8d %8d %8d %8d %8d   %8d %8d %8d %8d %8d\n",
-               q+1, apVals[q], apVals[q+numPlan], apVals[q+2*numPlan], 
-               apVals[q+3*numPlan], apVals[q+4*numPlan], apVals[q+5*numPlan], 
-               apVals[q+6*numPlan], apVals[q+7*numPlan], apVals[q+8*numPlan], 
-               apVals[q+9*numPlan]);
-      #endif
+         OK      = itrf->GetPlanetaryTerms(ap, Ap, Bp, Cp, Dp);
+         if (!OK) throw CoordinateSystemException("Error getting planetary data.");
       
-   AVals = A.GetDataVector();
-   BVals = B.GetDataVector();
-   CVals = C.GetDataVector();
-   DVals = D.GetDataVector();
-   EVals = E.GetDataVector();
-   FVals = F.GetDataVector();
-   ApVals = Ap.GetDataVector();
-   BpVals = Bp.GetDataVector();
-   CpVals = Cp.GetDataVector();
-   DpVals = Dp.GetDataVector();
-   
-//       for (Integer i = 0; i < 5; i++)
-//       {
-//          aVals[i] = new Integer[numNut];
-//          for (Integer j=0; j< numNut; j++)
-//          {
-//             aVals[i][j] = (a.at(i)).at(j);
-//          }
-//       }
-//       OK      = itrf->GetPlanetaryTerms(ap, Ap, Bp, Cp, Dp);
-//       if (!OK) throw CoordinateSystemException("Error getting planetary data.");
-//       for (Integer i = 0; i < 10; i++)
-//       {
-//          apVals[i] = new Integer[numPlan];
-//          for (Integer j=0; j< numPlan; j++)
-//          {
-//             apVals[i][j] = (ap.at(i)).at(j);
-//          }
-//       }
-      //}
+         apVals = new Integer[numPlan*10];
+         for (Integer i = 0; i < 10; i++)
+         {
+            for (Integer j=0; j< numPlan; j++)
+            {
+               //apVals[i*10+j] = (ap.at(i)).at(j);
+               apVals[i*numPlan+j] = (ap.at(i)).at(j);
+            }
+         }
+
+         #ifdef DEBUG_Ap_MATRIX
+             MessageInterface::ShowMessage("apVals = \n");
+            for (Integer q = 0; q < numPlan; ++q)
+                MessageInterface::ShowMessage(
+                  "         %3d: %8d %8d %8d %8d %8d   %8d %8d %8d %8d %8d\n",
+                  q+1, apVals[q], apVals[q+numPlan], apVals[q+2*numPlan], 
+                  apVals[q+3*numPlan], apVals[q+4*numPlan], apVals[q+5*numPlan], 
+                  apVals[q+6*numPlan], apVals[q+7*numPlan], apVals[q+8*numPlan], 
+                  apVals[q+9*numPlan]);
+         #endif
+       }
+      
+         AVals = A.GetDataVector();
+         #ifdef DEBUG_ITRF_UPDATES
+         for (Integer ii = 0; ii < A.GetSize(); ii++)
+            MessageInterface::ShowMessage("AVals(%d) = %f\n", ii, AVals[ii]);
+         #endif
+         BVals = B.GetDataVector();
+         CVals = C.GetDataVector();
+         DVals = D.GetDataVector();
+         EVals = E.GetDataVector();
+         FVals = F.GetDataVector();
+         ApVals = Ap.GetDataVector();
+         BpVals = Bp.GetDataVector();
+         CpVals = Cp.GetDataVector();
+         DpVals = Dp.GetDataVector();
 }   
 
 //------------------------------------------------------------------------------
@@ -944,7 +953,11 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    register Real tTDB3   = tTDB2 * tTDB;
    register Real tTDB4   = tTDB3 * tTDB;
    // Compute nutation - NOTE: this algorithm is based on the IERS 1996
-   // Theory of Precession and Nutation. 
+   // Theory of Precession and Nutation. This can also be used with the 
+   // 1980 Theory - the E and F terms are zero, and will fall out on the 
+   // floor, roll around and under the door, down the stairs and into
+   // the neighbor's yard.  It can also be used, but is not tested, 
+   // with the 2000 Theory.
 
    // Compute values to be passed out first ... 
    longAscNodeLunar  = const125 + (  -6962890.2665*tTDB 
@@ -1161,8 +1174,16 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
       sinAp = sin(apNut);
       //dPsi += (A[i] + B[i]*tTDB )*sinAp + E[i]*cosAp;
       //dEps += (C[i] + D[i]*tTDB )*cosAp + F[i]*sinAp;
-      dPsi += (AVals[i] + BVals[i]*tTDB )*sinAp + EVals[i]*cosAp;
-      dEps += (CVals[i] + DVals[i]*tTDB )*cosAp + FVals[i]*sinAp;
+      if (nutationSrc == GmatItrf::NUTATION_1980)
+      {
+         dPsi += (AVals[i] + BVals[i]*tTDB )*sinAp;
+         dEps += (CVals[i] + DVals[i]*tTDB )*cosAp;
+      }
+      else // 1996 amd 200 have E and F terms
+      {
+         dPsi += (AVals[i] + BVals[i]*tTDB )*sinAp + EVals[i]*cosAp;
+         dEps += (CVals[i] + DVals[i]*tTDB )*cosAp + FVals[i]*sinAp;
+      }
 
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
@@ -1187,69 +1208,55 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    // NOTE - this part is commented out for now, per Steve Hughes
    // First, compute the mean Heliocentric longitudes of the planets, and the
    // general precession in longitude
-   
-   
-   register Real longVenus   = (181.979800853  + 58517.8156748  * tTDB)* RAD_PER_DEG;
-   register Real longEarth   = (100.466448494  + 35999.3728521  * tTDB)* RAD_PER_DEG;
-   register Real longMars    = (355.433274605  + 19140.299314   * tTDB)* RAD_PER_DEG;
-   register Real longJupiter = ( 34.351483900  +  3034.90567464 * tTDB)* RAD_PER_DEG;
-   register Real longSaturn  = ( 50.0774713998 +  1222.11379404 * tTDB)* RAD_PER_DEG;
-   register Real genPrec     = (1.39697137214 * tTDB + 0.0003086 * tTDB2)
-                                 * RAD_PER_DEG;
-   register Real apPlan = 0.0;
-   register Real cosApP = 0.0;
-   register Real sinApP = 0.0;
-   register Integer nutpl = itrf->GetNumberOfPlanetaryTerms();
-    
-   #ifdef DEBUG_FIRST_CALL
-      if (!firstCallFired)
-         MessageInterface::ShowMessage(
-            "      longVenus         = %.13lf\n"
-            "      longEarth         = %.13lf\n"
-            "      longMars          = %.13lf\n"
-            "      longJupiter       = %.13lf\n"
-            "      longSaturn        = %.13lf\n"
-            "      genPrec           = %.13lf\n"
-            "      nutpl             = %d\n",
-            longVenus, longEarth, longMars, longJupiter, longSaturn, genPrec, 
-            nutpl);
-   #endif
-    //for (i = nutpl-1; i >= 0; i--)
-    //{
-    //   apPlan = (ap.at(0)).at(i)*longVenus + (ap.at(1)).at(i)*longEarth 
-    //   + (ap.at(2)).at(i)*longMars   + (ap.at(3)).at(i)*longJupiter 
-    //   + (ap.at(4)).at(i)*longSaturn + (ap.at(5)).at(i)*genPrec
-    //   + (ap.at(6)).at(i)*meanElongationSun*
-    //   + (ap.at(7)).at(i)*argLatitudeMoon
-    //   + (ap.at(8)).at(i)*meanAnomalyMoon
-    //   + (ap.at(9)).at(i)*longAscNodeLunar;
-    //   cosApP = Cos(apPlan);
-    //   sinApP = Sin(apPlan);
-    //   dPsi += (( Ap[i] + Bp[i]*tTDB )*sinApP) * RAD_PER_ARCSEC;
-    //   dEps += (( Cp[i] + Dp[i]*tTDB )*cosApP) * RAD_PER_ARCSEC;
-    //}
-    
     Real dPsiAddend = 0.0, dEpsAddend = 0.0;
-    for (i = nutpl-1; i >= 0; i--)
-    {
-          apPlan = apVals[0+i]*longVenus + apVals[nutpl*1+i]*longEarth 
-          + apVals[nutpl*2+i]*longMars   + apVals[nutpl*3+i]*longJupiter 
-          + apVals[nutpl*4+i]*longSaturn + apVals[nutpl*5+i]*genPrec
-          + apVals[nutpl*6+i]*meanElongationSun
-          + apVals[nutpl*7+i]*argLatitudeMoon
-          + apVals[nutpl*8+i]*meanAnomalyMoon
-          + apVals[nutpl*9+i]*longAscNodeLunar;
-          cosApP = cos(apPlan);
-          sinApP = sin(apPlan);
-          //dPsi += (( Ap[i] + Bp[i]*tTDB )*sinApP) * RAD_PER_ARCSEC;
-          //dEps += (( Cp[i] + Dp[i]*tTDB )*cosApP) * RAD_PER_ARCSEC;
-//          dPsi += (( ApVals[i] + BpVals[i]*tTDB )*sinApP) * RAD_PER_ARCSEC;
-//          dEps += (( CpVals[i] + DpVals[i]*tTDB )*cosApP) * RAD_PER_ARCSEC;
-          dPsiAddend += (( ApVals[i] + BpVals[i]*tTDB )*sinApP);
-          dEpsAddend += (( CpVals[i] + DpVals[i]*tTDB )*cosApP);
-    }
+   if (nutationSrc == GmatItrf::NUTATION_1996)
+   {   
+   
+      register Real longVenus   = (181.979800853  + 58517.8156748  * tTDB)* RAD_PER_DEG;
+      register Real longEarth   = (100.466448494  + 35999.3728521  * tTDB)* RAD_PER_DEG;
+      register Real longMars    = (355.433274605  + 19140.299314   * tTDB)* RAD_PER_DEG;
+      register Real longJupiter = ( 34.351483900  +  3034.90567464 * tTDB)* RAD_PER_DEG;
+      register Real longSaturn  = ( 50.0774713998 +  1222.11379404 * tTDB)* RAD_PER_DEG;
+      register Real genPrec     = (1.39697137214 * tTDB + 0.0003086 * tTDB2)
+                                 * RAD_PER_DEG;
+      register Real apPlan = 0.0;
+      register Real cosApP = 0.0;
+      register Real sinApP = 0.0;
+      register Integer nutpl = itrf->GetNumberOfPlanetaryTerms();
+    
+      #ifdef DEBUG_FIRST_CALL
+         if (!firstCallFired)
+            MessageInterface::ShowMessage(
+               "      longVenus         = %.13lf\n"
+               "      longEarth         = %.13lf\n"
+               "      longMars          = %.13lf\n"
+               "      longJupiter       = %.13lf\n"
+               "      longSaturn        = %.13lf\n"
+               "      genPrec           = %.13lf\n"
+               "      nutpl             = %d\n",
+               longVenus, longEarth, longMars, longJupiter, longSaturn, genPrec, 
+               nutpl);
+      #endif
+     
+      for (i = nutpl-1; i >= 0; i--)
+      {
+             apPlan = apVals[0+i]*longVenus + apVals[nutpl*1+i]*longEarth 
+             + apVals[nutpl*2+i]*longMars   + apVals[nutpl*3+i]*longJupiter 
+             + apVals[nutpl*4+i]*longSaturn + apVals[nutpl*5+i]*genPrec
+             + apVals[nutpl*6+i]*meanElongationSun
+             + apVals[nutpl*7+i]*argLatitudeMoon
+             + apVals[nutpl*8+i]*meanAnomalyMoon
+             + apVals[nutpl*9+i]*longAscNodeLunar;
+             cosApP = cos(apPlan);
+             sinApP = sin(apPlan);
+             dPsiAddend += (( ApVals[i] + BpVals[i]*tTDB )*sinApP);
+             dEpsAddend += (( CpVals[i] + DpVals[i]*tTDB )*cosApP);
+      }
+   } // end if nutationSrc == NUTATION_1996
+   
     dPsi += dPsiAddend * RAD_PER_ARCSEC;
-    dEps += dPsiAddend * RAD_PER_ARCSEC;
+    //dEps += dPsiAddend * RAD_PER_ARCSEC;
+    dEps += dEpsAddend * RAD_PER_ARCSEC;
     
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
@@ -1262,6 +1269,7 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    // FOR NOW, SQ's code to approximate GSRF frame
    // NOTE - do we delete this when we put in the planetary stuff above?
    // offset and rate correction to approximate GCRF, Ref.[1], Eq (3-63)  - SQ
+   // This is Vallado Eq. 3-62 - WCS
    dPsi += (-0.0431 - 0.2957*tTDB )*RAD_PER_ARCSEC;
    dEps += (-0.0051 - 0.0277*tTDB )*RAD_PER_ARCSEC;
    
@@ -1273,7 +1281,7 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
             dPsi, dEps);
    #endif
     
-   // Compute obliquity of the ecliptic (Vallado Eq. 3-52)
+   // Compute obliquity of the ecliptic (Vallado Eq. 3-52 & Eq. 3-63)
    Real TrueOoE = Epsbar + dEps;
    
    // Compute useful trigonometric quantities
@@ -1294,15 +1302,6 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
             sinTEoE*sindPsi,
             sinTEoE*cosdPsi*cosEpsbar - sinEpsbar*cosTEoE,
             sinTEoE*sinEpsbar*cosdPsi + cosTEoE*cosEpsbar);
-   //NUT(0,0) =  cosdPsi;
-   //NUT(0,1) = -sindPsi*cosEpsbar;
-   //NUT(0,2) = -sindPsi*sinEpsbar;
-   //NUT(1,0) =  sindPsi*cosTEoE;
-   //NUT(1,1) =  cosTEoE*cosdPsi*cosEpsbar + sinTEoE*sinEpsbar;
-   //NUT(1,2) =  sinEpsbar*cosTEoE*cosdPsi - sinTEoE*cosEpsbar;
-   //NUT(2,0) =  sinTEoE*sindPsi;
-   //NUT(2,1) =  sinTEoE*cosdPsi*cosEpsbar - sinEpsbar*cosTEoE;
-   //NUT(2,2) =  sinTEoE*sinEpsbar*cosdPsi + cosTEoE*cosEpsbar;
    
    lastNUTEpoch = atEpoch;
    lastNUT      = NUT;

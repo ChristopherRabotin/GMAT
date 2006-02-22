@@ -206,7 +206,10 @@ protected:
    Rmatrix33                 lastNUT;
    Rmatrix33                 lastSTDeriv;
    Rmatrix33                 lastPM;
-   Real                      lastDPsi;  
+   Real                      lastDPsi; 
+   
+   GmatItrf::NutationTerms   nutationSrc;
+   GmatItrf::PlanetaryTerms  planetarySrc; 
    
    std::vector<IntegerArray> a, ap;
    Rvector                   A, B, C, D, E, F, Ap, Bp, Cp, Dp;

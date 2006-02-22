@@ -32,12 +32,15 @@ namespace GmatItrf
 {
    enum NutationTerms
    {
+      NUTATION_1980,
       NUTATION_1996,
       NUTATION_2000
    };
    enum PlanetaryTerms
    {
+      PLANETARY_1980,
       PLANETARY_1996
+      // not available for 2000?
    };
 };
 
@@ -48,8 +51,8 @@ public:
    // default constructor
    ItrfCoefficientsFile(const std::string &nutFileName = "NUTATION.DAT", 
                const std::string planFileName = "NUT85.DAT",
-               GmatItrf::NutationTerms  nutTerms  = GmatItrf::NUTATION_1996,
-               GmatItrf::PlanetaryTerms planTerms = GmatItrf::PLANETARY_1996);
+               GmatItrf::NutationTerms  nutTerms  = GmatItrf::NUTATION_1980,
+               GmatItrf::PlanetaryTerms planTerms = GmatItrf::PLANETARY_1980);
    // copy constructor
    ItrfCoefficientsFile(const ItrfCoefficientsFile &itrfF);
    // operator = 
@@ -62,6 +65,8 @@ public:
    virtual void Initialize();
 
    // method to return the name of the coefficients file
+   virtual GmatItrf::NutationTerms  GetNutationTermsSource() const;
+   virtual GmatItrf::PlanetaryTerms GetPlanetaryTermsSource() const;
    virtual std::string GetNutationFileName() const;
    virtual std::string GetPlanetaryFileName() const;
       
@@ -79,15 +84,26 @@ protected:
 
    // additional protected data
    // (NOTE - static const strings are initialized in source file)
+   static const Integer MAX_1980_NUT_TERMS;//         = 106;
+   static const Real    MULT_1980_NUT;//              = 1.0e-04;
+   static const std::string FIRST_NUT_PHRASE_1980;
+   
    static const Integer MAX_1996_NUT_TERMS;//         = 263;
    static const Real    MULT_1996_NUT;//              = 1.0e-06;
    static const std::string FIRST_NUT_PHRASE_1996;
+   
    static const Integer MAX_2000_NUT_TERMS;//         = 106;
    static const Real    MULT_2000_NUT;//              = 1.0e-04;
    static const std::string FIRST_NUT_PHRASE_2000;
+   
+   static const Integer MAX_1980_PLANET_TERMS;//      = 85;
+   static const Real    MULT_1980_PLANET;//           = 1.0e-04;
+   static const std::string FIRST_PLAN_PHRASE_1980;
+   
    static const Integer MAX_1996_PLANET_TERMS;//      = 112;
    static const Real    MULT_1996_PLANET;//           = 1.0e-04;
    static const std::string FIRST_PLAN_PHRASE_1996;
+   
    static const Integer MAX_2000_PLANET_TERMS;// = 112;            // ????
    static const Real    MULT_2000_PLANET;//      = 1.0e-04;        // ????
    static const std::string FIRST_PLAN_PHRASE_2000; // ????

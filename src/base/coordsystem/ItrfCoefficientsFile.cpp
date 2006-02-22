@@ -27,6 +27,9 @@
 #include "ItrfCoefficientsFile.hpp"
 #include "RealUtilities.hpp"   // for GmatMathUtil
 #include "UtilityException.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_ITRF_FILE
 
 
 using namespace GmatMathUtil; // for trig functions, angle conversions
@@ -35,15 +38,21 @@ using namespace GmatMathUtil; // for trig functions, angle conversions
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
+const std::string ItrfCoefficientsFile::FIRST_NUT_PHRASE_1980  = "1980 IAU";
 const std::string ItrfCoefficientsFile::FIRST_NUT_PHRASE_1996  = "1996 IAU";
 const std::string ItrfCoefficientsFile::FIRST_NUT_PHRASE_2000  = "2000 IAU";
+const std::string ItrfCoefficientsFile::FIRST_PLAN_PHRASE_1980 = "1980 IAU";
 const std::string ItrfCoefficientsFile::FIRST_PLAN_PHRASE_1996 = "1996 IAU";
 const std::string ItrfCoefficientsFile::FIRST_PLAN_PHRASE_2000 = "unknown"; // ????
 
+const Integer ItrfCoefficientsFile::MAX_1980_NUT_TERMS         = 106;
+const Real    ItrfCoefficientsFile::MULT_1980_NUT              = 1.0e-04;
 const Integer ItrfCoefficientsFile::MAX_1996_NUT_TERMS         = 263;
 const Real    ItrfCoefficientsFile::MULT_1996_NUT              = 1.0e-06;
 const Integer ItrfCoefficientsFile::MAX_2000_NUT_TERMS         = 106;
 const Real    ItrfCoefficientsFile::MULT_2000_NUT              = 1.0e-04;
+const Integer ItrfCoefficientsFile::MAX_1980_PLANET_TERMS      = 85;
+const Real    ItrfCoefficientsFile::MULT_1980_PLANET           = 1.0e-04;
 const Integer ItrfCoefficientsFile::MAX_1996_PLANET_TERMS      = 112;
 const Real    ItrfCoefficientsFile::MULT_1996_PLANET           = 1.0e-04;
 const Integer ItrfCoefficientsFile::MAX_2000_PLANET_TERMS = 112;            // ????
@@ -232,12 +241,18 @@ void ItrfCoefficientsFile::Initialize()
    while ((!startNow) && (!itrfNutFile.eof()))
    {
       getline(itrfNutFile,line);
+      #ifdef DEBUG_ITRF_FILE
+         MessageInterface::ShowMessage("Itrf Line (0): " + line + "\n");
+      #endif
       if (line.find(firstNutPhrase) != std::string::npos)   startNow = true;
    }
    if (startNow == false)
       throw UtilityException("Unable to read nutation ItrfCoefficientsFile.");
    // skip line with column headings
    getline(itrfNutFile, line);
+   #ifdef DEBUG_ITRF_FILE
+      MessageInterface::ShowMessage("Itrf Line(1): " + line + "\n");
+   #endif
    if (line.find("a2") == std::string::npos)
       throw UtilityException("Itrf nutation file not in expected format.");
    Integer i;
@@ -247,12 +262,25 @@ void ItrfCoefficientsFile::Initialize()
           throw UtilityException(
                "Itrf nutation file does not contain all expected values.");
       getline(itrfNutFile,line);
+      #ifdef DEBUG_ITRF_FILE
+         MessageInterface::ShowMessage("Itrf Line(n): " + line + "\n");
+      #endif
       std::istringstream lineStr;
       lineStr.str(line);
       lineStr >> (a.at(0)).at(i) >> (a.at(1)).at(i) >> (a.at(2)).at(i) 
               >> (a.at(3)).at(i) >> (a.at(4)).at(i);
-      lineStr >> (*A)(i) >> (*B)(i) >> (*C)(i) >> (*D)(i) 
-              >> (*E)(i) >> (*F)(i);
+      if (nutation == GmatItrf::NUTATION_1980)  // no E or F terms
+      {
+          lineStr >> (*A)(i) >> (*B)(i) >> (*C)(i) >> (*D)(i);
+      }
+      else
+      {
+         lineStr >> (*A)(i) >> (*B)(i) >> (*C)(i) >> (*D)(i) 
+                 >> (*E)(i) >> (*F)(i);
+      }        
+      #ifdef DEBUG_ITRF_FILE
+         MessageInterface::ShowMessage("A(%d) = %f\n", i, (*A)(i));
+      #endif
    }
    (*A) *= nutMult;
    (*B) *= nutMult;
@@ -260,50 +288,64 @@ void ItrfCoefficientsFile::Initialize()
    (*D) *= nutMult;
    (*E) *= nutMult;
    (*F) *= nutMult;
-   
-   // read the planetary file and put the coefficient data into the arrays
-   std::ifstream itrfPlanFile(planetaryFileName.c_str());
-   if (!itrfPlanFile)
-      throw UtilityException("Error opening ItrfCoefficientsFile (planetary) " + 
-                             planetaryFileName);
-   itrfPlanFile.setf(std::ios::skipws);
-   // read until the requested data set is found
-   startNow = false;
-   while ((!startNow) && (!itrfPlanFile.eof()))
-   {
-      getline(itrfPlanFile,line);
-      if (line.find(firstPlanPhrase) != std::string::npos)   startNow = true;
-   }
-   if (startNow == false)
-      throw UtilityException("Unable to read planetary ItrfCoefficientsFile.");
-   // skip line with column headings
-   getline(itrfPlanFile, line);
-   if (line.find("a2") == std::string::npos)
-      throw UtilityException("Itrf planetary file not in expected format.");
-   for (i = 0; i < nutpl; i++)
-   {
-      if (itrfPlanFile.eof())
-         throw UtilityException(
-               "Itrf planetary file does not contain all expected values.");
-      getline(itrfPlanFile,line);
-      std::istringstream lineStr;
-      lineStr.str(line);
-      lineStr >> (ap.at(0)).at(i) >> (ap.at(1)).at(i) >> (ap.at(2)).at(i) 
-              >> (ap.at(3)).at(i) >> (ap.at(4)).at(i) >> (ap.at(5)).at(i)
-              >> (ap.at(6)).at(i) >> (ap.at(7)).at(i) >> (ap.at(8)).at(i) 
-              >> (ap.at(9)).at(i);
-      lineStr >> (*Ap)(i) >> (*Bp)(i) >> (*Cp)(i) >> (*Dp)(i);
-   }
-   (*Ap) *= planMult;
-   (*Bp) *= planMult;
-   (*Cp) *= planMult;
-   (*Dp) *= planMult;
-   
+ 
    if (itrfNutFile.is_open())  itrfNutFile.close();
-   if (itrfPlanFile.is_open()) itrfPlanFile.close();
-   filesAreInitialized = true;
+   
+   if (planetary == GmatItrf::PLANETARY_1996)
+   {
+      // read the planetary file and put the coefficient data into the arrays
+      std::ifstream itrfPlanFile(planetaryFileName.c_str());
+      if (!itrfPlanFile)
+         throw UtilityException("Error opening ItrfCoefficientsFile (planetary) " + 
+                                planetaryFileName);
+      itrfPlanFile.setf(std::ios::skipws);
+      // read until the requested data set is found
+      startNow = false;
+      while ((!startNow) && (!itrfPlanFile.eof()))
+      {
+         getline(itrfPlanFile,line);
+         if (line.find(firstPlanPhrase) != std::string::npos)   startNow = true;
+      }
+      if (startNow == false)
+         throw UtilityException("Unable to read planetary ItrfCoefficientsFile.");
+      // skip line with column headings
+      getline(itrfPlanFile, line);
+      if (line.find("a2") == std::string::npos)
+         throw UtilityException("Itrf planetary file not in expected format.");
+      for (i = 0; i < nutpl; i++)
+      {
+         if (itrfPlanFile.eof())
+            throw UtilityException(
+                  "Itrf planetary file does not contain all expected values.");
+         getline(itrfPlanFile,line);
+         std::istringstream lineStr;
+         lineStr.str(line);
+         lineStr >> (ap.at(0)).at(i) >> (ap.at(1)).at(i) >> (ap.at(2)).at(i) 
+                 >> (ap.at(3)).at(i) >> (ap.at(4)).at(i) >> (ap.at(5)).at(i)
+                 >> (ap.at(6)).at(i) >> (ap.at(7)).at(i) >> (ap.at(8)).at(i) 
+                 >> (ap.at(9)).at(i);
+         lineStr >> (*Ap)(i) >> (*Bp)(i) >> (*Cp)(i) >> (*Dp)(i);
+      }
+      (*Ap) *= planMult;
+      (*Bp) *= planMult;
+      (*Cp) *= planMult;
+      (*Dp) *= planMult;
+      if (itrfPlanFile.is_open()) itrfPlanFile.close();
+   }
+   
+    filesAreInitialized = true;
 }
 
+
+GmatItrf::NutationTerms ItrfCoefficientsFile::GetNutationTermsSource() const
+{
+    return nutation;
+}
+
+GmatItrf::PlanetaryTerms ItrfCoefficientsFile::GetPlanetaryTermsSource() const
+{
+    return planetary;
+}
 
 std::string ItrfCoefficientsFile::GetNutationFileName() const
 {
@@ -415,7 +457,13 @@ bool ItrfCoefficientsFile::GetPlanetaryTerms(
 bool ItrfCoefficientsFile::InitializeArrays(GmatItrf::NutationTerms nutT,
                                             GmatItrf::PlanetaryTerms planT)
 {
-   if (nutT == GmatItrf::NUTATION_1996)  
+    if (nutT == GmatItrf::NUTATION_1980)  
+   {
+      nut            = MAX_1980_NUT_TERMS;
+      nutMult        = MULT_1980_NUT;
+      firstNutPhrase = FIRST_NUT_PHRASE_1980;
+   }
+   else if (nutT == GmatItrf::NUTATION_1996)  
    {
       nut            = MAX_1996_NUT_TERMS;
       nutMult        = MULT_1996_NUT;
@@ -428,7 +476,13 @@ bool ItrfCoefficientsFile::InitializeArrays(GmatItrf::NutationTerms nutT,
       firstNutPhrase = FIRST_NUT_PHRASE_2000;
    }
    
-   if (planT == GmatItrf::PLANETARY_1996)  
+   if (planT == GmatItrf::PLANETARY_1980)  
+   {
+      nutpl           = MAX_1980_PLANET_TERMS;
+      planMult        = MULT_1980_PLANET;
+      firstPlanPhrase = FIRST_PLAN_PHRASE_1980;
+   }
+   else if (planT == GmatItrf::PLANETARY_1996)  
    {
       nutpl           = MAX_1996_PLANET_TERMS;
       planMult        = MULT_1996_PLANET;
@@ -440,6 +494,12 @@ bool ItrfCoefficientsFile::InitializeArrays(GmatItrf::NutationTerms nutT,
       planMult        = MULT_2000_PLANET;
       firstPlanPhrase = FIRST_PLAN_PHRASE_2000;
    }
+    
+   #ifdef DEBUG_ITRF_FILE
+      MessageInterface::ShowMessage(
+      "In ITRF::InitializeArrays, nut terms = %d, plan terms = %d\n",
+      nut, nutpl);
+   #endif
       
    if (a.size() != 5)     a.resize(5);
    if (ap.size() != 10)   ap.resize(10);
@@ -476,6 +536,11 @@ bool ItrfCoefficientsFile::InitializeArrays(GmatItrf::NutationTerms nutT,
    if (Dp && (Dp->GetSize() != nutpl))  delete Dp;
    if (!Dp) Dp = new Rvector(nutpl);
 
+     
+   #ifdef DEBUG_ITRF_FILE
+      MessageInterface::ShowMessage(
+      "In ITRF::InitializeArrays, initialization is complete\n");
+   #endif
    return true;
 }
 
