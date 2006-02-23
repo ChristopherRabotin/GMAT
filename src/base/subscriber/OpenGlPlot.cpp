@@ -1465,7 +1465,7 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
 {
    mAllRefObjectNames.clear();
 
-   // if Draw Earth-Sun lines is on (loj: 7/27/05 Added)
+   // if Draw Earth-Sun lines is on, add Earth and Sun
    if (mEarthSunLines == "On")
    {
       AddSpacePoint("Earth", mAllSpCount, false);
@@ -1684,7 +1684,6 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index, bool show
             {
                mOrbitColorMap[name] = DEFAULT_ORBIT_COLOR[mNonStdBodyCount];
                mNonStdBodyCount++;
-               //mOrbitColorMap[name] = DEFAULT_ORBIT_COLOR[mAllSpCount-1]; //loj:9/19/05
             }
             
             mTargetColorMap[name] = GmatColor::TEAL32;
@@ -2055,14 +2054,18 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
        mScCount, len);
    #endif
 
-   if (!active || mScCount <= 0 || len <= 0)
+   //if (!active || mScCount <= 0 || len <= 0) //loj: 2/23/06
+   if (!active || mScCount <= 0)
       return true;
 
-   if (isEndOfRun)
-      return PlotInterface::SetGlEndOfRun(instanceName);
-   
    if (isEndOfReceive)
       return PlotInterface::RefreshGlPlot(instanceName);
+   
+   if (isEndOfRun)
+      return PlotInterface::SetGlEndOfRun(instanceName);
+
+   if (len <= 0)
+      return true;
    
    Publisher *thePublisher = Publisher::Instance();
    
