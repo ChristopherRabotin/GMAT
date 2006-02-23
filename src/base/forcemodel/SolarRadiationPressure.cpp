@@ -1,4 +1,24 @@
 //$Header$
+//------------------------------------------------------------------------------
+//                              SolarRadiationPressure
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool.
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
+//
+// Author: D.Conway
+// Created: 2003/03/14
+// Modified: 2003/03/30 Waka Waktola GSFC Code 583
+//           Updated for GMAT style, standards.
+///
+/**
+ * This is the SolarRadiationPressure class.
+ *
+ * @note original prolog information included at end of file prolog.
+ */
 // *** File Name : SolarRadiationPressure.cpp
 // *** Created   : February 27, 2003
 // **************************************************************************
@@ -21,32 +41,6 @@
 // **************************************************************************
 // Module Type               : ANSI C++ Source
 // Development Environment   : Visual C++ 7.0
-// Modification History      : 2/27/2003 - D. Conway, Thinking Systems, Inc.
-//                             Added class to test discontinuities in the
-//                             force model
-//
-//                           : 03/30/2004 - W. Waktola, Missions Applications Branch
-//                              Changes:
-//                                - Updated style using GMAT cpp style guide
-//                                - All double types to Real types
-//                                - All primitive int types to Integer types
-//
-//                           : 04/16/2004 - W. Waktola, Missions Applications Branch
-//                              Additions:
-//                                - GetParameterText()
-//                                - GetParameterID()
-//                                - GetParameterType()
-//                                - GetParameterTypeString()
-//                                - GetRealParameter()
-//                                - SetRealParameter()
-//                                - GetBooleanParameter()
-//                                - SetBooleanParameter()
-//                                - GetIntegerParameter()
-//                                - SetIntegerParameter()
-//
-//                           : 04/19/2004 - W. Waktola, Missions Applications Branch
-//                              Changes:
-//                                - Modified code to use the GMAT SolarSystem model
 // **************************************************************************
 
 #include "SolarRadiationPressure.hpp"
@@ -227,7 +221,8 @@ GmatBase* SolarRadiationPressure::Clone(void) const
 //------------------------------------------------------------------------------
 std::string SolarRadiationPressure::GetParameterText(const Integer id) const
 {
-MessageInterface::ShowMessage("SRP index %d\n", id);
+   MessageInterface::ShowMessage("SRP index %d\n", id);
+   
    if (id >= USE_ANALYTIC && id < SRPParamCount)
       return SolarRadiationPressure::PARAMETER_TEXT[id - PhysicalModelParamCount];
    else
@@ -281,7 +276,6 @@ std::string SolarRadiationPressure::GetParameterTypeString(const Integer id) con
       return PhysicalModel::GetParameterTypeString(id);
 }
 
-
 // All read only for now
 bool SolarRadiationPressure::IsParameterReadOnly(const Integer id) const
 {
@@ -290,7 +284,6 @@ bool SolarRadiationPressure::IsParameterReadOnly(const Integer id) const
    
    return true;
 }
-
 
 //------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id) const
