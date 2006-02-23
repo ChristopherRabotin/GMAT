@@ -20,7 +20,7 @@
 #ifndef Report_hpp
 #define Report_hpp
 
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include "ReportFile.hpp"
 #include "Parameter.hpp"
 

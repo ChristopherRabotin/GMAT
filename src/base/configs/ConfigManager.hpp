@@ -31,7 +31,7 @@
 #include "PhysicalModel.hpp"
 #include "Propagator.hpp"
 #include "Parameter.hpp"
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include "Burn.hpp"
 #include "Solver.hpp"
 #include "AtmosphereModel.hpp"

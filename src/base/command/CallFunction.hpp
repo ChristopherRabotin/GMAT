@@ -23,7 +23,7 @@
 #define CallFunction_hpp
 
 
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include "Function.hpp"
 
 

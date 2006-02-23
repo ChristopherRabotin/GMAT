@@ -18,7 +18,7 @@
 //------------------------------------------------------------------------------
 
 
-#include "Command.hpp"          // class's header file
+#include "GmatCommand.hpp"          // class's header file
 #include "MessageInterface.hpp" // MessageInterface
 #include "Spacecraft.hpp"
 

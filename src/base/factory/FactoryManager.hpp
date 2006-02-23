@@ -37,7 +37,7 @@
 #include "SolarSystem.hpp"
 #include "Solver.hpp"
 #include "Subscriber.hpp"
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include "Burn.hpp"
 #include "AtmosphereModel.hpp"
 #include "Function.hpp"

@@ -32,7 +32,7 @@
 #include "AtmosphereModel.hpp"
 #include "AxisSystem.hpp"
 #include "Burn.hpp"
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include "CoordinateSystem.hpp"
 #include "Function.hpp"
 #include "Hardware.hpp"

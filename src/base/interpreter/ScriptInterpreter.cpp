@@ -18,7 +18,7 @@
 
 #include "ScriptInterpreter.hpp" // class's header file
 #include "Moderator.hpp" // class's header file
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include <fstream>
 
 // Maybe put something like this in the Gmat namespace?

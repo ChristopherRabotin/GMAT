@@ -22,7 +22,7 @@
 #define EndIf_hpp
 
 
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 
 
 class GMAT_API EndIf : public GmatCommand

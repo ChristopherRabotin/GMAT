@@ -21,7 +21,7 @@
 #ifndef ElseIf_hpp
 #define ElseIf_hpp
  
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 
 /**
  * Command that manages processing for entry to the ElseIf statement 

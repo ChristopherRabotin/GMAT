@@ -19,7 +19,7 @@
 #include "gmatwxdefs.hpp"
 #include "GmatAppData.hpp"
 #include "GmatPanel.hpp"
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include "GuiItemManager.hpp"
 
 class ManeuverPanel : public GmatPanel

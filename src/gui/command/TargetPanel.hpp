@@ -17,7 +17,7 @@
 #define TargetPanel_hpp
 
 #include "gmatwxdefs.hpp"
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include "GmatPanel.hpp"
 
 class TargetPanel : public GmatPanel

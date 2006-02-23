@@ -28,7 +28,7 @@
 #ifndef Assignment_hpp
 #define Assignment_hpp
 
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 
 class GMAT_API Assignment : public GmatCommand
 {

@@ -91,7 +91,7 @@ OBJECTS = \
     command/BranchCommand.o \
     command/CallFunction.o \
     command/CommandException.o \
-    command/Command.o \
+    command/GmatCommand.o \
     command/CommandUtil.o \
     command/ConditionalBranch.o \
     command/Else.o \

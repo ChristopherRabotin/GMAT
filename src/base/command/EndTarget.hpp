@@ -22,7 +22,7 @@
 #define EndTarget_hpp
 
 
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 
 
 class GMAT_API EndTarget : public GmatCommand

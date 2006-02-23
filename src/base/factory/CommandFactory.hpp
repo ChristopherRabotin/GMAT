@@ -21,7 +21,7 @@
 
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 
 class GMAT_API CommandFactory : public Factory
 {

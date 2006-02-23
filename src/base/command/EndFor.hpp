@@ -23,7 +23,7 @@
 #define EndFor_hpp
 
 
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 
 
 class GMAT_API EndFor : public GmatCommand

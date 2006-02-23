@@ -23,7 +23,7 @@
 #define EndFunction_hpp
 
 
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 
 
 class EndFunction : public GmatCommand

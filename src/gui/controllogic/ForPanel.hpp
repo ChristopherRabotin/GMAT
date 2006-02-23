@@ -22,7 +22,7 @@
 
 // base includes
 #include "gmatdefs.hpp"
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include "For.hpp"
 
 class ForPanel : public GmatPanel

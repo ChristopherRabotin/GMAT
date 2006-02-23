@@ -22,7 +22,7 @@
 #define EndWhile_hpp
 
 
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 
 
 class EndWhile : public GmatCommand

@@ -23,7 +23,7 @@
 #ifndef TOGGLE_HPP
 #define TOGGLE_HPP
 
-#include "Command.hpp" // inheriting class's header file
+#include "GmatCommand.hpp" // inheriting class's header file
 #include <list>
 
 

@@ -21,7 +21,7 @@
 #ifndef BeginScript_hpp
 #define BeginScript_hpp
 
-#include "Command.hpp" // inheriting class's header file
+#include "GmatCommand.hpp" // inheriting class's header file
 
 /**
  * Default command used to initialize the command sequence lists in the 

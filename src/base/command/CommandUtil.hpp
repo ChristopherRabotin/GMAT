@@ -20,7 +20,7 @@
 #define CommandUtil_hpp
 
 #include "gmatdefs.hpp"
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 
 namespace GmatCommandUtil
 {

@@ -21,7 +21,7 @@
 #ifndef Propagate_hpp
 #define Propagate_hpp
 
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include <list>
 
 

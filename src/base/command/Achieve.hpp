@@ -22,7 +22,7 @@
 #define Achieve_hpp
  
 
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include "Solver.hpp"
 #include "Parameter.hpp"
 

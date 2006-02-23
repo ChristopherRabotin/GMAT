@@ -21,7 +21,7 @@
 #ifndef Maneuver_hpp
 #define Maneuver_hpp
 
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include "Burn.hpp"
 #include "Spacecraft.hpp"
 

@@ -32,7 +32,7 @@
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
 #include "PropSetup.hpp"
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include "Subscriber.hpp"
 #include "Burn.hpp"
 #include "Solver.hpp"

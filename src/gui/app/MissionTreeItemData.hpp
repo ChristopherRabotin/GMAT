@@ -18,7 +18,7 @@
 #include "gmatwxdefs.hpp"
 #include "GmatTreeItemData.hpp"
 
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 
 class MissionTreeItemData : public GmatTreeItemData
 {

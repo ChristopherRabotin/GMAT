@@ -25,7 +25,7 @@
 
 // Core classes
 #include "GmatBase.hpp"
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include "Publisher.hpp"
 
 #include "Spacecraft.hpp"

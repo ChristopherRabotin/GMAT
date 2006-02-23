@@ -18,7 +18,7 @@
 #include "gmatwxdefs.hpp"
 #include "wx/treectrl.h"
 
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 
 class GmatTreeItemData : public wxTreeItemData
 {

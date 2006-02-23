@@ -21,7 +21,7 @@
 #define BeginFiniteBurn_hpp
 
 
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include "FiniteBurn.hpp"
 #include "FiniteThrust.hpp"
 #include "Spacecraft.hpp"

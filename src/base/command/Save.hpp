@@ -19,7 +19,7 @@
 #ifndef Save_hpp
 #define Save_hpp
 
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include <fstream>
 
 /**

@@ -23,7 +23,7 @@
 
 
 
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include "GmatFunction.hpp"
 
 

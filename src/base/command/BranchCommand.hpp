@@ -22,7 +22,7 @@
 #define BranchCommand_hpp
 
 
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include <vector>
 
 

@@ -22,7 +22,7 @@
 
 // base includes
 #include "gmatdefs.hpp"
-#include "Command.hpp"
+#include "GmatCommand.hpp"
 #include "Propagate.hpp"
 #include "StopCondition.hpp"
 #include "PropSetup.hpp"
