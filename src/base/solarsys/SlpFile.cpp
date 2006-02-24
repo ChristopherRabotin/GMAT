@@ -1177,15 +1177,24 @@ int SlpFile::a1_utc_offset(double refmjd, double *a1utc, double *ut1utc, double 
 
  
    // interpolations
-   
+   // 20.02.06 - arg: changed to use enum types instead of strings
+//   Real mjdA1  = TimeConverterUtil::Convert(refmjd,
+//                 "UtcMjd", "A1Mjd", GmatTimeUtil::JD_JAN_5_1941);
    Real mjdA1  = TimeConverterUtil::Convert(refmjd,
-                 "UtcMjd", "A1Mjd", GmatTimeUtil::JD_JAN_5_1941);
+                 TimeConverterUtil::UTCMJD, TimeConverterUtil::A1MJD, 
+                 GmatTimeUtil::JD_JAN_5_1941);
    *a1utc      = (mjdA1 - refmjd) * GmatTimeUtil::SECS_PER_DAY;
+//   Real mjdUT1 = TimeConverterUtil::Convert(refmjd,
+//                 "UtcMjd", "Ut1Mjd", GmatTimeUtil::JD_JAN_5_1941);
    Real mjdUT1 = TimeConverterUtil::Convert(refmjd,
-                 "UtcMjd", "Ut1Mjd", GmatTimeUtil::JD_JAN_5_1941);
+                 TimeConverterUtil::UTCMJD, TimeConverterUtil::UT1MJD, 
+                 GmatTimeUtil::JD_JAN_5_1941);
    *ut1utc     = (mjdUT1 - refmjd) * GmatTimeUtil::SECS_PER_DAY;
+//   Real mjdTT  = TimeConverterUtil::Convert(refmjd,
+//                 "UtcMjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941);
    Real mjdTT  = TimeConverterUtil::Convert(refmjd,
-                 "UtcMjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941);
+                 TimeConverterUtil::UTCMJD, TimeConverterUtil::TTMJD, 
+                 GmatTimeUtil::JD_JAN_5_1941);
    *tdtutc     = (mjdTT - refmjd) * GmatTimeUtil::SECS_PER_DAY;
    return 0;
 

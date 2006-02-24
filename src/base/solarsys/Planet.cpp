@@ -504,8 +504,12 @@ Real  Planet::GetHourAngle(A1Mjd atTime)
    if (instanceName == SolarSystem::EARTH_NAME)
    {
       // Convert the time to a UT1 MJD
+      // 20.02.06 - arg: changed to use enum types instead of strings
+//      Real mjdUT1 = TimeConverterUtil::Convert(atTime.Get(),
+//                                               "A1Mjd", "Ut1Mjd", GmatTimeUtil::JD_JAN_5_1941);
       Real mjdUT1 = TimeConverterUtil::Convert(atTime.Get(),
-                                               "A1Mjd", "Ut1Mjd", GmatTimeUtil::JD_JAN_5_1941);
+                                 TimeConverterUtil::A1MJD, TimeConverterUtil::UT1MJD,
+                                 GmatTimeUtil::JD_JAN_5_1941);
       Real jdUT1    = mjdUT1 + GmatTimeUtil::JD_JAN_5_1941; // right?
                                                             // Compute elapsed Julian centuries (UT1)
       Real tUT1     = (jdUT1 - 2451545.0) / 36525.0;

@@ -2448,8 +2448,12 @@ Real CelestialBody::GetJulianDaysFromTCBEpoch(const A1Mjd &forTime) const
    // use TT time always with the IAU data, per Steve Hughes October 2005
    //if (overrideTime)
    //{
-	   Real mjdTT  = TimeConverterUtil::Convert(forTime.Get(),
-					 "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941); 
+      // 20.02.06 - arg: changed to use enum types instead of strings
+//	   Real mjdTT  = TimeConverterUtil::Convert(forTime.Get(),
+//					 "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941); 
+       Real mjdTT  = TimeConverterUtil::Convert(forTime.Get(),
+                     TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
+                     GmatTimeUtil::JD_JAN_5_1941); 
 	   jdTime      = mjdTT + GmatTimeUtil::JD_JAN_5_1941; 
       return (jdTime - JD_EPOCH_2000_TT);
    //}

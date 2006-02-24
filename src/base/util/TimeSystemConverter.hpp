@@ -102,7 +102,7 @@ namespace TimeConverterUtil
             "TT",
          };
 
-   Real Convert(const Real origValue,
+/*   Real Convert(const Real origValue,
                       const std::string &fromType,
                       const std::string &toType,
                       Real refJd = GmatTimeUtil::JD_NOV_17_1858);
@@ -111,6 +111,19 @@ namespace TimeConverterUtil
       Real refJd= GmatTimeUtil::JD_NOV_17_1858);
    Real ConvertFromTaiMjd(std::string toType, Real origValue,
       Real refJd= GmatTimeUtil::JD_NOV_17_1858);
+ */
+   
+   Integer GetTimeTypeID(std::string &str);
+      
+   Real Convert(const Real origValue,
+                      const Integer fromType,
+                      const Integer toType,
+                      Real refJd = GmatTimeUtil::JD_NOV_17_1858);
+
+   Real ConvertToTaiMjd(Integer fromType, Real origValue,
+      Real refJd= GmatTimeUtil::JD_NOV_17_1858);
+   Real ConvertFromTaiMjd(Integer toType, Real origValue,
+      Real refJd= GmatTimeUtil::JD_NOV_17_1858);   
 
    void SetEopFile(EopFile *eopFile);
    void SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileReader);

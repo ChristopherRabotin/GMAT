@@ -36,13 +36,27 @@ using namespace GmatMathUtil;
 static EopFile *theEopFile;
 static LeapSecsFileReader *theLeapSecsFileReader;
 
+//------------------------------------------------------------------------------
+// Integer GetTimeTypeID(std::string &str) 
+//------------------------------------------------------------------------------
+Integer TimeConverterUtil::GetTimeTypeID(std::string &str) 
+{
+    for (Integer i = 0; i < TimeSystemCount; i++)
+    {
+        if (str == TIME_SYSTEM_TEXT[i])
+            return i;
+    }
+
+    return -1;
+}
+
 //---------------------------------------------------------------------------
 //  Real TimeConverterUtil::Convert(const Real origValue,
 //                              const std::string &fromType,
 //                              const std::string &toType)
 //---------------------------------------------------------------------------
 /**
- * Assignment operator for TimeSystemConverter structures.
+ * Assignment operator for TimeConverter structures.
  *
  * @param <origValue>            Given Time
  * @param <fromType>  Time which is converted from date format
@@ -51,8 +65,8 @@ static LeapSecsFileReader *theLeapSecsFileReader;
  * @return Converted time from the specific data format 
  */
 Real TimeConverterUtil::Convert(const Real origValue,
-                        const std::string &fromType,
-                        const std::string &toType,
+                        const Integer fromType,
+                        const Integer toType,
                         Real refJd)
 {
    #ifdef DEBUG_FIRST_CALL
@@ -98,7 +112,7 @@ Real TimeConverterUtil::Convert(const Real origValue,
 //---------------------------------------------------------------------------
 // Real ConvertToTaiMjd(std::string fromType, Real origValue, Real refJd)
 //---------------------------------------------------------------------------
-Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
+Real TimeConverterUtil::ConvertToTaiMjd(Integer fromType, Real origValue,
                                         Real refJd)
 {
    #ifdef DEBUG_FIRST_CALL
@@ -113,99 +127,93 @@ Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
          fromType.c_str());
    #endif
    
-   // a1mjd
-   if ((fromType == TIME_SYSTEM_TEXT[0]) || (fromType == TIME_SYSTEM_TEXT[6]))
+   switch(fromType)
    {
-      return (origValue -
+    case TimeConverterUtil::A1MJD:
+    case TimeConverterUtil::A1:
+        return (origValue -
              (GmatTimeUtil::A1_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
-   }
-   // tai
-   else if (fromType == TIME_SYSTEM_TEXT[7])
-   {
-      return origValue;
-   }
-   // utc
-   else if ((fromType == TIME_SYSTEM_TEXT[1]) || (fromType == TIME_SYSTEM_TEXT[8]))
-   {
-      Real offsetValue = 0;
-
-      if (refJd != GmatTimeUtil::JD_NOV_17_1858)
-      {
-         // DJC: 6/16/05 Reversed order of difference so future times are positive
-         // offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
-         offsetValue = refJd - GmatTimeUtil::JD_NOV_17_1858;
-      }
-
-      //loj: 4/12/05 Added
-      if (theLeapSecsFileReader == NULL)
-         throw TimeSystemConverterExceptions::FileException
-            ("theLeapSecsFileReader is unknown\n");
-      
-      // look up leap secs from file
-      Real numLeapSecs =
-         theLeapSecsFileReader->NumberOfLeapSecondsFrom(origValue + offsetValue);
-
-      #ifdef DEBUG_TIMECONVERTER_DETAILS
-         MessageInterface::ShowMessage(
-            "      CVT to TAI, Leap secs count = %.14lf\n", numLeapSecs);
-      #endif
-
-      return (origValue + (numLeapSecs/GmatTimeUtil::SECS_PER_DAY));
-   }
-   // ut1
-   else if ((fromType == TIME_SYSTEM_TEXT[2]) || (fromType == TIME_SYSTEM_TEXT[9]))
-   {
-      if (theEopFile == NULL)
-         throw TimeSystemConverterExceptions::FileException(
-               "EopFile is unknown\n");
-
-      Real offsetValue = 0;
-
-      if (refJd != GmatTimeUtil::JD_NOV_17_1858)
-      {
-         offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
-      }
-
-      Real ut1Offset = theEopFile->GetUt1UtcOffset(origValue + offsetValue);
-      Real utcOffset = theEopFile->GetUt1UtcOffset((origValue + offsetValue)
-          - (ut1Offset/GmatTimeUtil::SECS_PER_DAY));
-
-      return (TimeConverterUtil::ConvertToTaiMjd("UtcMjd", (origValue -
-               (utcOffset/GmatTimeUtil::SECS_PER_DAY)), refJd));
-   }
-   // tdb
-   else if ((fromType == TIME_SYSTEM_TEXT[3]) || (fromType == TIME_SYSTEM_TEXT[10]))
-   {
-      throw TimeSystemConverterExceptions::ImplementationException(
+    case TimeConverterUtil::TAI:
+        return origValue;
+    case TimeConverterUtil::UTCMJD:
+    case TimeConverterUtil::UTC:
+    {
+        Real offsetValue = 0;
+    
+        if (refJd != GmatTimeUtil::JD_NOV_17_1858)
+        {
+           // DJC: 6/16/05 Reversed order of difference so future times are positive
+           // offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
+           offsetValue = refJd - GmatTimeUtil::JD_NOV_17_1858;
+        }
+    
+        //loj: 4/12/05 Added
+        if (theLeapSecsFileReader == NULL)
+           throw TimeSystemConverterExceptions::FileException
+              ("theLeapSecsFileReader is unknown\n");
+          
+        // look up leap secs from file
+        Real numLeapSecs =
+           theLeapSecsFileReader->NumberOfLeapSecondsFrom(origValue + offsetValue);
+  
+        #ifdef DEBUG_TIMECONVERTER_DETAILS
+           MessageInterface::ShowMessage(
+              "      CVT to TAI, Leap secs count = %.14lf\n", numLeapSecs);
+        #endif
+    
+        return (origValue + (numLeapSecs/GmatTimeUtil::SECS_PER_DAY));
+    }
+    case TimeConverterUtil::UT1MJD:
+    case TimeConverterUtil::UT1:
+    {
+        if (theEopFile == NULL)
+           throw TimeSystemConverterExceptions::FileException(
+                 "EopFile is unknown\n");
+   
+        Real offsetValue = 0;
+  
+        if (refJd != GmatTimeUtil::JD_NOV_17_1858)
+        {
+           offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
+        }
+    
+        Real ut1Offset = theEopFile->GetUt1UtcOffset(origValue + offsetValue);
+        Real utcOffset = theEopFile->GetUt1UtcOffset((origValue + offsetValue)
+            - (ut1Offset/GmatTimeUtil::SECS_PER_DAY));
+    
+        return (TimeConverterUtil::ConvertToTaiMjd(TimeConverterUtil::UTCMJD,
+                 (origValue - (utcOffset/GmatTimeUtil::SECS_PER_DAY)), refJd));
+    }
+    case TimeConverterUtil::TDBMJD:
+    case TimeConverterUtil::TDB:
+          throw TimeSystemConverterExceptions::ImplementationException(
                "Not Implement - TDB to TAI");
 //      Real tdbJd = origValue + jdOffset;
 //      Real taiJd = ((tdbJd - ((TDB_COEFF1 *sin(m_E)) +
 //                    (TDB_COEFF2 * sin(2 * m_E)))) * T_TT_COEFF1) - T_TT_OFFSET;
 //      return (taiJd - jdOffset);
-   }
-   // tcb
-   else if ((fromType == TIME_SYSTEM_TEXT[4]) || (fromType == TIME_SYSTEM_TEXT[11]))
-   {
-      throw TimeSystemConverterExceptions::ImplementationException(
+    case TimeConverterUtil::TCBMJD:
+    case TimeConverterUtil::TCB:
+          throw TimeSystemConverterExceptions::ImplementationException(
                "Not Implement - TCB to TAI");
 //      Real tdbMjd;
-//      return ConvertToTaiMjd("TdbMjd", tdbMjd);
-   }
-   // tt
-   else if ((fromType == TIME_SYSTEM_TEXT[5]) || (fromType == TIME_SYSTEM_TEXT[12]))
-   {
-      return (origValue -
+//      return ConvertToTaiMjd("TdbMjd", tdbMjd);    
+    case TimeConverterUtil::TTMJD:
+    case TimeConverterUtil::TTM:
+          return (origValue -
              (GmatTimeUtil::TT_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
+    default:
+         ;
    }
-
    return 0.0;
+
 }
 
 
 //---------------------------------------------------------------------------
 // Real ConvertFromTaiMjd(std::string toType, Real origValue, Real refJd)
 //---------------------------------------------------------------------------
-Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
+Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
                                           Real refJd)
 {
    #ifdef DEBUG_FIRST_CALL
@@ -218,140 +226,146 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
          "      ** Converting %.10lf from TAI to %s\n", origValue, 
          toType.c_str());
    #endif
-   // a1
-   if ((toType == TIME_SYSTEM_TEXT[0]) || (toType == TIME_SYSTEM_TEXT[6])) 
+   
+   switch (toType)
    {
-      #ifdef DEBUG_TIMECONVERTER_DETAILS
-         MessageInterface::ShowMessage("      In the 'a1' block\n");
-      #endif
-      return (origValue +
-             (GmatTimeUtil::A1_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
-   }
-   // tai 
-   else if (toType == TIME_SYSTEM_TEXT[7])
-   {
-      #ifdef DEBUG_TIMECONVERTER_DETAILS
-         MessageInterface::ShowMessage("      In the 'tai' block\n");
-      #endif
-      // already in tai
-      return origValue;
-   }
-   // utc
-   else if ((toType == TIME_SYSTEM_TEXT[1]) || (toType == TIME_SYSTEM_TEXT[8]))
-   {
-      #ifdef DEBUG_TIMECONVERTER_DETAILS
-         MessageInterface::ShowMessage("      In the 'utc' block\n");
-      #endif
-      Real offsetValue = 0;
-
-      if (refJd != GmatTimeUtil::JD_NOV_17_1858)
+      case TimeConverterUtil::A1MJD:
+      case TimeConverterUtil::A1:
       {
-         //offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
-         offsetValue = refJd - GmatTimeUtil::JD_NOV_17_1858;
+          #ifdef DEBUG_TIMECONVERTER_DETAILS
+             MessageInterface::ShowMessage("      In the 'a1' block\n");
+          #endif
+          return (origValue +
+                 (GmatTimeUtil::A1_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));      
       }
-
-      //loj: 4/12/05 Added
-      if (theLeapSecsFileReader == NULL)
-         throw TimeSystemConverterExceptions::FileException
-            ("theLeapSecsFileReader is unknown\n");
-      
-      Real taiLeapSecs =
-         theLeapSecsFileReader->NumberOfLeapSecondsFrom(origValue + offsetValue);
-      
-      Real utcLeapSecs =
-         theLeapSecsFileReader->
-         NumberOfLeapSecondsFrom((origValue + offsetValue)
-                                 - (taiLeapSecs/GmatTimeUtil::SECS_PER_DAY));
-
-      #ifdef DEBUG_TIMECONVERTER_DETAILS
-         MessageInterface::ShowMessage("      Leap secs: tai = %.14lf, utc = %.14lf\n",
-            taiLeapSecs, utcLeapSecs);
-      #endif
-
-      if (utcLeapSecs == taiLeapSecs)
-         return (origValue - (taiLeapSecs/GmatTimeUtil::SECS_PER_DAY));
-      else
-         return (origValue - (utcLeapSecs/GmatTimeUtil::SECS_PER_DAY));
-   }
-   // ut1
-   else if ((toType == TIME_SYSTEM_TEXT[2]) || (toType == TIME_SYSTEM_TEXT[9]))
-   {
-      #ifdef DEBUG_TIMECONVERTER_DETAILS
-         MessageInterface::ShowMessage("      In the 'ut1' block\n");
-      #endif
-      if (theEopFile == NULL)
-         throw TimeSystemConverterExceptions::FileException(
-               "EopFile is unknown");
-
-      Real offsetValue = 0;
-
-      if (refJd != GmatTimeUtil::JD_NOV_17_1858)
+      case TimeConverterUtil::TAI:
       {
-         //offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
-         offsetValue = refJd - GmatTimeUtil::JD_NOV_17_1858;
+          #ifdef DEBUG_TIMECONVERTER_DETAILS
+             MessageInterface::ShowMessage("      In the 'tai' block\n");
+          #endif
+          // already in tai
+          return origValue;
       }
-      // convert origValue to utc
-      Real utcMjd = TimeConverterUtil::ConvertFromTaiMjd("UtcMjd", origValue,
-            refJd);
-      Real numOffset = 0;
-
-      numOffset = theEopFile->GetUt1UtcOffset(utcMjd + offsetValue);
-
-      #ifdef DEBUG_FIRST_CALL
-         if (!firstCallFired || (numOffset == 0.0))
-            MessageInterface::ShowMessage(
-               "   utcMjd = %lf, numOffset = %lf\n", utcMjd, numOffset);
-      #endif
-
-      // add delta ut1 read from eop file
-      //return (utcMjd + numOffset);
-      return (utcMjd + (numOffset/GmatTimeUtil::SECS_PER_DAY));
-   }
-   // tdb
-   else if ((toType == TIME_SYSTEM_TEXT[3]) || (toType == TIME_SYSTEM_TEXT[10]))
-   {
-      #ifdef DEBUG_TIMECONVERTER_DETAILS
-         MessageInterface::ShowMessage("      In the 'tdb' block\n");
-      #endif
-      // convert time to tt
-      Real ttJd = TimeConverterUtil::ConvertFromTaiMjd("TtMjd", origValue, refJd);
-      // convert to ttJD
-      ttJd += refJd;
-
-      // compute T_TT
-      Real t_TT = (ttJd - T_TT_OFFSET) / T_TT_COEFF1;
-      // compute M_E
-      Real m_E = (M_E_OFFSET + (M_E_COEFF1 * t_TT)) * GmatMathUtil::RAD_PER_DEG;
-      Real offset = ((TDB_COEFF1 *Sin(m_E)) + (TDB_COEFF2 * Sin(2 * m_E))) / 
-                    GmatTimeUtil::SECS_PER_DAY ;
-      Real tdbJd = ttJd + offset;
-      return tdbJd - refJd;
-   }
-   // tcb
-   else if ((toType == TIME_SYSTEM_TEXT[4]) || (toType == TIME_SYSTEM_TEXT[11]))
-   {
-      #ifdef DEBUG_TIMECONVERTER_DETAILS
-         MessageInterface::ShowMessage("      In the 'tcb' block\n");
-      #endif
-      // convert time to tdb
-      Real tdbMjd = TimeConverterUtil::ConvertFromTaiMjd("TdbMjd", origValue,
-         refJd);
-      //Real jdValue = origValue;  // but this is TAI
-      Real jdValue = tdbMjd;
-      //Real offset = L_B * ((jdValue + refJd) - TCB_JD_MJD_OFFSET) * GmatTimeUtil::SECS_PER_DAY;
-      Real offset = L_B * ((jdValue + refJd) - TCB_JD_MJD_OFFSET);
-      // units of offset are in seconds, so convert to fraction of days
-      //return ((offset / GmatTimeUtil::SECS_PER_DAY) + tdbMjd);
-      return (offset + tdbMjd);
-   }
-   // tt
-   else if ((toType == TIME_SYSTEM_TEXT[5]) || (toType == TIME_SYSTEM_TEXT[12]))
-   {
-      #ifdef DEBUG_TIMECONVERTER_DETAILS
-         MessageInterface::ShowMessage("      In the 'tt' block\n");
-      #endif
-      return (origValue +
-             (GmatTimeUtil::TT_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
+      case TimeConverterUtil::UTCMJD:
+      case TimeConverterUtil::UTC:
+       {
+          #ifdef DEBUG_TIMECONVERTER_DETAILS
+             MessageInterface::ShowMessage("      In the 'utc' block\n");
+          #endif
+          Real offsetValue = 0;
+    
+          if (refJd != GmatTimeUtil::JD_NOV_17_1858)
+          {
+             //offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
+             offsetValue = refJd - GmatTimeUtil::JD_NOV_17_1858;
+          }
+    
+          //loj: 4/12/05 Added
+          if (theLeapSecsFileReader == NULL)
+             throw TimeSystemConverterExceptions::FileException
+                ("theLeapSecsFileReader is unknown\n");
+          
+          Real taiLeapSecs =
+             theLeapSecsFileReader->NumberOfLeapSecondsFrom(origValue + offsetValue);
+          
+          Real utcLeapSecs =
+             theLeapSecsFileReader->
+             NumberOfLeapSecondsFrom((origValue + offsetValue)
+                                     - (taiLeapSecs/GmatTimeUtil::SECS_PER_DAY));
+    
+          #ifdef DEBUG_TIMECONVERTER_DETAILS
+             MessageInterface::ShowMessage("      Leap secs: tai = %.14lf, utc = %.14lf\n",
+                taiLeapSecs, utcLeapSecs);
+          #endif
+    
+          if (utcLeapSecs == taiLeapSecs)
+             return (origValue - (taiLeapSecs/GmatTimeUtil::SECS_PER_DAY));
+          else
+             return (origValue - (utcLeapSecs/GmatTimeUtil::SECS_PER_DAY));
+       }
+      case TimeConverterUtil::UT1MJD:
+      case TimeConverterUtil::UT1:
+       {
+          #ifdef DEBUG_TIMECONVERTER_DETAILS
+             MessageInterface::ShowMessage("      In the 'ut1' block\n");
+          #endif
+          if (theEopFile == NULL)
+             throw TimeSystemConverterExceptions::FileException(
+                   "EopFile is unknown");
+    
+          Real offsetValue = 0;
+    
+          if (refJd != GmatTimeUtil::JD_NOV_17_1858)
+          {
+             //offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
+             offsetValue = refJd - GmatTimeUtil::JD_NOV_17_1858;
+          }
+          // convert origValue to utc
+          Real utcMjd = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::UTCMJD, 
+                    origValue, refJd);
+          Real numOffset = 0;
+    
+          numOffset = theEopFile->GetUt1UtcOffset(utcMjd + offsetValue);
+    
+          #ifdef DEBUG_FIRST_CALL
+             if (!firstCallFired || (numOffset == 0.0))
+                MessageInterface::ShowMessage(
+                   "   utcMjd = %lf, numOffset = %lf\n", utcMjd, numOffset);
+          #endif
+    
+          // add delta ut1 read from eop file
+          //return (utcMjd + numOffset);
+          return (utcMjd + (numOffset/GmatTimeUtil::SECS_PER_DAY));
+       }
+      case TimeConverterUtil::TDBMJD:
+      case TimeConverterUtil::TDB:      
+       {
+          #ifdef DEBUG_TIMECONVERTER_DETAILS
+             MessageInterface::ShowMessage("      In the 'tdb' block\n");
+          #endif
+          // convert time to tt
+          Real ttJd = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::TTMJD, 
+                origValue, refJd);
+          // convert to ttJD
+          ttJd += refJd;
+    
+          // compute T_TT
+          Real t_TT = (ttJd - T_TT_OFFSET) / T_TT_COEFF1;
+          // compute M_E
+          Real m_E = (M_E_OFFSET + (M_E_COEFF1 * t_TT)) * GmatMathUtil::RAD_PER_DEG;
+          Real offset = ((TDB_COEFF1 *Sin(m_E)) + (TDB_COEFF2 * Sin(2 * m_E))) / 
+                        GmatTimeUtil::SECS_PER_DAY ;
+          Real tdbJd = ttJd + offset;
+          return tdbJd - refJd;
+       }      
+       case TimeConverterUtil::TCBMJD:
+       case TimeConverterUtil::TCB:
+       {
+          #ifdef DEBUG_TIMECONVERTER_DETAILS
+             MessageInterface::ShowMessage("      In the 'tcb' block\n");
+          #endif
+          // convert time to tdb
+          Real tdbMjd = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::TDBMJD, 
+                origValue, refJd);
+          //Real jdValue = origValue;  // but this is TAI
+          Real jdValue = tdbMjd;
+          //Real offset = L_B * ((jdValue + refJd) - TCB_JD_MJD_OFFSET) * GmatTimeUtil::SECS_PER_DAY;
+          Real offset = L_B * ((jdValue + refJd) - TCB_JD_MJD_OFFSET);
+          // units of offset are in seconds, so convert to fraction of days
+          //return ((offset / GmatTimeUtil::SECS_PER_DAY) + tdbMjd);
+          return (offset + tdbMjd);
+       }
+       case TimeConverterUtil::TTMJD:
+       case TimeConverterUtil::TTM:
+       {
+          #ifdef DEBUG_TIMECONVERTER_DETAILS
+             MessageInterface::ShowMessage("      In the 'tt' block\n");
+          #endif
+          return (origValue +
+                 (GmatTimeUtil::TT_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
+       }       
+       default:
+        ;
    }
 
    return 0;

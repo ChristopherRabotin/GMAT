@@ -249,8 +249,12 @@ void TODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    Real cosEpsbar        = 0.0;
    
    // convert epoch (A1 MJD) to TT MJD (for calculations)
+   // 20.02.06 - arg: changed to use enum types instead of strings
+//   Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
+//                "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941);      
    Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
-                "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941);      
+                TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
+                GmatTimeUtil::JD_JAN_5_1941);      
    Real jdTT  = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
    // Compute Julian centuries of TDB from the base epoch (J2000) 
    Real tTDB  = (jdTT - 2451545.0) / 36525.0;

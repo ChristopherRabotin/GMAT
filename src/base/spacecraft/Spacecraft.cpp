@@ -651,8 +651,15 @@ void Spacecraft::SetDateFormat(const std::string &dateType)
             epochSystem.c_str());
       #endif
 
-      finalEpoch = TimeConverterUtil::Convert(startEpoch, oldEpochSystem, 
-         epochSystem, GmatTimeUtil::JD_JAN_5_1941);
+      // 20.02.06 - arg: changed to use enum types instead of strings
+//      finalEpoch = TimeConverterUtil::Convert(startEpoch, oldEpochSystem, 
+//         epochSystem, GmatTimeUtil::JD_JAN_5_1941);
+    
+      Integer oldEpochSysID = TimeConverterUtil::GetTimeTypeID(oldEpochSystem);
+      Integer epochSysID = TimeConverterUtil::GetTimeTypeID(epochSystem);
+      finalEpoch = TimeConverterUtil::Convert(startEpoch, oldEpochSysID, 
+         epochSysID, GmatTimeUtil::JD_JAN_5_1941);
+
    }
    else
    {
@@ -1872,8 +1879,12 @@ void Spacecraft::SetEpoch(const std::string &ep)
    }
 
    // PropState epoch is a.1
-   state.SetEpoch(TimeConverterUtil::Convert(now, epochSystem, "A1",
-      GmatTimeUtil::JD_JAN_5_1941));
+   // 20.02.06 - arg: changed to use enum types instead of strings
+//   state.SetEpoch(TimeConverterUtil::Convert(now, epochSystem, "A1",
+//      GmatTimeUtil::JD_JAN_5_1941));
+   state.SetEpoch(TimeConverterUtil::Convert(now, 
+      TimeConverterUtil::GetTimeTypeID(epochSystem), 
+      TimeConverterUtil::A1,  GmatTimeUtil::JD_JAN_5_1941));
    
    // 3. Save the string.
    if (epochFormat == "ModJulian")

@@ -275,14 +275,22 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
    double absJD = 0.0;
    if (overrideTimeSystem)
    {
-	   double mjdTT = (double) TimeConverterUtil::Convert(atTime.Get(),
-					   "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941);
+      // 20.02.06 - arg: changed to use enum types instead of strings
+//	   double mjdTT = (double) TimeConverterUtil::Convert(atTime.Get(),
+//					   "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941);
+       double mjdTT = (double) TimeConverterUtil::Convert(atTime.Get(),
+                       TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
+                       GmatTimeUtil::JD_JAN_5_1941);
 	   absJD        = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
 	}
 	else
     {
-	   double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
-					   "A1Mjd", "TdbMjd", GmatTimeUtil::JD_JAN_5_1941);
+      // 20.02.06 - arg: changed to use enum types instead of strings
+//	   double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
+//					   "A1Mjd", "TdbMjd", GmatTimeUtil::JD_JAN_5_1941);
+       double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
+                       TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD, 
+                       GmatTimeUtil::JD_JAN_5_1941);
 	   absJD         = mjdTDB + GmatTimeUtil::JD_JAN_5_1941;
     }
    

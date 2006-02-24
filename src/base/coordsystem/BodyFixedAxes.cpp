@@ -373,22 +373,37 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       //Real y                = 0.0;
       // Convert to MJD UTC to use for polar motion  and LOD 
       // interpolations
+      
+      // 20.02.06 - arg: changed to use enum types instead of strings
+//      Real mjdUTC = TimeConverterUtil::Convert(atEpoch.Get(),
+//                    "A1Mjd", "UtcMjd", JD_JAN_5_1941);
+
       Real mjdUTC = TimeConverterUtil::Convert(atEpoch.Get(),
-                    "A1Mjd", "UtcMjd", JD_JAN_5_1941);
+                    TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD, 
+                    JD_JAN_5_1941);
       // convert to MJD referenced from time used in EOP file
       mjdUTC = mjdUTC + JD_JAN_5_1941 - JD_NOV_17_1858;
 
 
       // convert input time to UT1 for later use (for AST calculation)
+      // 20.02.06 - arg: changed to use enum types instead of strings
+//      Real mjdUT1 = TimeConverterUtil::Convert(atEpoch.Get(),
+//                    "A1Mjd", "Ut1Mjd", JD_JAN_5_1941);
       Real mjdUT1 = TimeConverterUtil::Convert(atEpoch.Get(),
-                    "A1Mjd", "Ut1Mjd", JD_JAN_5_1941);
+                    TimeConverterUtil::A1MJD, TimeConverterUtil::UT1, 
+                    JD_JAN_5_1941);
+      
       Real jdUT1    = mjdUT1 + JD_JAN_5_1941; // right?
       // Compute elapsed Julian centuries (UT1)
       Real tUT1     = (jdUT1 - 2451545.0) / 36525.0;
       
       // convert input A1 MJD to TT MJD (for most calculations)
+      // 20.02.06 - arg: changed to use enum types instead of strings
+//      Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
+//                   "A1Mjd", "TtMjd", JD_JAN_5_1941);      
       Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
-                   "A1Mjd", "TtMjd", JD_JAN_5_1941);      
+                   TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
+                   JD_JAN_5_1941);      
       Real jdTT    = mjdTT + JD_JAN_5_1941; // right? 
       // Compute Julian centuries of TDB from the base epoch (J2000) 
       // NOTE - this is really TT, an approximation of TDB *********

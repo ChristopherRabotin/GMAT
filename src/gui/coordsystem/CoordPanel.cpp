@@ -402,8 +402,14 @@ AxisSystem* CoordPanel::CreateAxis()
             std::string taiEpochStr = mTimeConverter.Convert
                (std::string(epochStr.c_str()), std::string(epochFormat.c_str()),
                 "TAIModJulian");
+                
+            // 20.02.06 - arg: changed to use enum types instead of strings
+//            Real epoch = TimeConverterUtil::ConvertFromTaiMjd
+//               ("A1Mjd", atof(taiEpochStr.c_str()), GmatTimeUtil::JD_JAN_5_1941);
+
             Real epoch = TimeConverterUtil::ConvertFromTaiMjd
-               ("A1Mjd", atof(taiEpochStr.c_str()), GmatTimeUtil::JD_JAN_5_1941);
+               (TimeConverterUtil::A1MJD, atof(taiEpochStr.c_str()), 
+               GmatTimeUtil::JD_JAN_5_1941);
             axis->SetEpoch(epoch);
             
          }
@@ -903,8 +909,12 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
                {
                   std::string taiEpochStr = mTimeConverter.Convert
                      (epochStr, newEpochFormat.c_str(), "TAIModJulian");
+                  // 20.02.06 - arg: changed to use enum types instead of strings
+//                  epoch = TimeConverterUtil::ConvertFromTaiMjd
+//                     ("A1Mjd", atof(taiEpochStr.c_str()), GmatTimeUtil::JD_JAN_5_1941);
+                                          
                   epoch = TimeConverterUtil::ConvertFromTaiMjd
-                     ("A1Mjd", atof(taiEpochStr.c_str()), GmatTimeUtil::JD_JAN_5_1941);
+                     (TimeConverterUtil::A1MJD, atof(taiEpochStr.c_str()), GmatTimeUtil::JD_JAN_5_1941);
                }
             }
             
