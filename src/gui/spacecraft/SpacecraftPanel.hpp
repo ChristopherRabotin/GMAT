@@ -27,6 +27,7 @@
 #include "BallisticsMassPanel.hpp"
 #include "OrbitPanel.hpp"
 #include "TankPanel.hpp"
+#include "AttitudePanel.hpp"
 #include "ThrusterPanel.hpp"
 #include "GuiInterpreter.hpp"
 
@@ -82,7 +83,6 @@ private:
     wxNotebookSizer *spacecraftSizer;
     wxNotebookSizer *actuatorSizer;
     
-    wxPanel *attitude;
     wxPanel *actuators;
     wxPanel *sensors;
     wxPanel *visuals;
@@ -91,6 +91,7 @@ private:
     OrbitPanel *theOrbitPanel;
     TankPanel *theTankPanel;
     ThrusterPanel *theThrusterPanel;
+    AttitudePanel *theAttitudePanel;
        
     // IDs for the controls and the menu commands
     enum
