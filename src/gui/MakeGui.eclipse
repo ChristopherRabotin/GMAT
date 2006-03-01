@@ -180,6 +180,7 @@ OBJECTS = \
     spacecraft/SpaceObjectSelectDialog.o \
     spacecraft/TankPanel.o \
     spacecraft/ThrusterPanel.o \
+    spacecraft/AttitudePanel.o \
     view/ViewTextFrame.o 
 
 $(WXTARGET) : $(OBJECTS) $(LIBS)
