@@ -30,6 +30,8 @@
 
 #include <stdlib.h>
 
+//#define DEBUG_SPACECRAFT_PANEL 1
+
 //------------------------------
 // public methods
 //------------------------------
@@ -49,6 +51,10 @@
 SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
     :GmatPanel(parent)
 {
+	#if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("SpacecraftPanel::SpacecraftPanel() entered\n");
+   #endif
+   
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
     theSpacecraft = theGuiInterpreter->GetSpacecraft(std::string(scName.c_str()));
     
@@ -64,6 +70,9 @@ SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
 //------------------------------------------------------------------------------
 SpacecraftPanel::~SpacecraftPanel()
 {
+	#if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("SpacecraftPanel::~SpacecraftPanel() entered\n");
+   #endif
 // need to delete child from list in mainFrame
 //    delete(theBallisticMassPanel);
 //    delete(theOrbitPanel);
@@ -79,6 +88,10 @@ SpacecraftPanel::~SpacecraftPanel()
 //------------------------------------------------------------------------------
 void SpacecraftPanel::Create()
 {
+	#if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("SpacecraftPanel::Create() entered\n");
+   #endif
+   
     //loj: 2/8/06 SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
     SolarSystem *theSolarSystem = theGuiInterpreter->GetSolarSystemInUse();
     currentSpacecraft = new Spacecraft(*theSpacecraft);
@@ -112,7 +125,6 @@ void SpacecraftPanel::Create()
 //    wxGridSizer *theGridSizer = new wxGridSizer( 1, 0, 0 );
 
     //wx*Panel
-    attitude = new wxPanel( spacecraftNotebook, -1 );
     sensors = new wxPanel( spacecraftNotebook, -1 );
 
     theOrbitPanel = new OrbitPanel(spacecraftNotebook, currentSpacecraft,
@@ -123,12 +135,14 @@ void SpacecraftPanel::Create()
                        theApplyButton);
     theThrusterPanel = new ThrusterPanel(actuatorNotebook, currentSpacecraft,
                        theApplyButton);
+    theAttitudePanel = new AttitudePanel(spacecraftNotebook, currentSpacecraft,
+                       theApplyButton);
     // visuals = new wxPanel( mainNotebook, -1 );
 
     // Adding panels to notebook
     actuatorNotebook->AddPage( theThrusterPanel, wxT("Thruster") );
     spacecraftNotebook->AddPage( theOrbitPanel, wxT("Orbit") );
-    spacecraftNotebook->AddPage( attitude, wxT("Attitude") );
+    spacecraftNotebook->AddPage( theAttitudePanel, wxT("Attitude") );
     spacecraftNotebook->AddPage( theBallisticMassPanel, wxT("Ballistic/Mass") );
     spacecraftNotebook->AddPage( sensors, wxT("Sensors") );
     spacecraftNotebook->AddPage( theTankPanel, wxT("Tanks") );
@@ -144,10 +158,15 @@ void SpacecraftPanel::Create()
 //------------------------------------------------------------------------------
 void SpacecraftPanel::LoadData()
 {
+    #if DEBUG_SPACECRAFT_PANEL
+    MessageInterface::ShowMessage("SpacecraftPanel::LoadData() entered\n");
+    #endif
+    
     theOrbitPanel->LoadData();
     theBallisticMassPanel->LoadData();
     theTankPanel->LoadData();
     theThrusterPanel->LoadData();
+    theAttitudePanel->LoadData();
     
     // explicitly disable apply button
     // it is turned on in each of the panels
@@ -159,10 +178,16 @@ void SpacecraftPanel::LoadData()
 //------------------------------------------------------------------------------
 void SpacecraftPanel::SaveData()
 {
+    #if DEBUG_SPACECRAFT_PANEL
+    MessageInterface::ShowMessage("SpacecraftPanel::SaveData() entered\n");
+    #endif
+    
     theBallisticMassPanel->SaveData();
     canClose = theBallisticMassPanel->canClose;
+    
     theOrbitPanel->SaveData();
     canClose = canClose && theOrbitPanel->canClose;
+    
     enableApply=true;
 
     if (!canClose)
@@ -173,6 +198,7 @@ void SpacecraftPanel::SaveData()
       
     theTankPanel->SaveData(); 
     theThrusterPanel->SaveData();
+    theAttitudePanel->SaveData();
       
     // what's wrong with this?
     // copy the current info into theSpacecraft
@@ -192,4 +218,5 @@ void SpacecraftPanel::OnPageChange(wxCommandEvent &event)
 {
     theTankPanel->LoadData();
     theThrusterPanel->LoadData();
+    theAttitudePanel->LoadData();
 }    
