@@ -32,6 +32,7 @@ console: $(CONSOLETARGET)
 HEADERS = -Iinclude \
           -Ifoundation \
           -Iexecutive \
+          -Iattitude \
           -Ispacecraft \
           -Iforcemodel \
           -Ipropagator \
@@ -75,6 +76,7 @@ archclean :
 	rm -rf $(CONSOLETARGET)
 
 OBJECTS = \
+	attitude/AttitudeException.o \
     burn/BurnException.o \
     burn/Burn.o \
     burn/FiniteBurn.o \
