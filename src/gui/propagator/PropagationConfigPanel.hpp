@@ -9,7 +9,7 @@
 // Copyright: (c) 2003 NASA/GSFC. All rights reserved.
 //
 /**
- * This class contains the Propagation Configuration window.
+ * This class contains the Propagation configuration window.
  */
 //------------------------------------------------------------------------------
 #ifndef PropagationConfigPanel_hpp

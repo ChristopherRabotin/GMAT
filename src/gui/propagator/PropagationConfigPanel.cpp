@@ -8,7 +8,7 @@
 // Created: 2003/08/29
 //
 /**
- * This class contains the Propagation Configuration window.
+ * This class contains the Propagation configuration window.
  */
 //------------------------------------------------------------------------------
 
@@ -114,7 +114,6 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
    isPotFileChanged = false;
    isMagfTextChanged = false;
    isIntegratorChanged = false;
-   isOriginChanged = false;
    
    theApplyButton->Disable();
 }
@@ -213,15 +212,15 @@ void PropagationConfigPanel::LoadData()
    {
       gravComboBox->Enable(false);
       atmosComboBox->Enable(false);
-      magfComboBox->Enable(false);
-      srpCheckBox->Enable(false);
+      //magfComboBox->Enable(false);
+      //srpCheckBox->Enable(false);
    }
    else
    {
       gravComboBox->Enable(true);
       atmosComboBox->Enable(true);
-      magfComboBox->Enable(true);
-      srpCheckBox->Enable(true);       
+      //magfComboBox->Enable(true);
+      //srpCheckBox->Enable(true);       
    } 
 }
 
@@ -249,10 +248,10 @@ void PropagationConfigPanel::SaveData()
       Real min = atof(setting3TextCtrl->GetValue());
       Real max = atof(setting4TextCtrl->GetValue());
       
-      if (max < min)
+      if (max <= min)
       {
          MessageInterface::PopupMessage
-         (Gmat::WARNING_, "Maximum Step can not be less than Minimum Step.\n"
+         (Gmat::WARNING_, "Maximum Step can not be less than or equal to Minimum Step.\n"
          "Propagation updates have not been saved");
          return;
       }    
@@ -421,11 +420,7 @@ void PropagationConfigPanel::SaveData()
          //-------------------------------------------------------
          // Saving the Origin (Central Body)
          //-------------------------------------------------------
-         if (isOriginChanged)
-         {
-            isOriginChanged = false;
-            newFm->SetStringParameter("CentralBody", propOriginName.c_str());
-         }
+         newFm->SetStringParameter("CentralBody", propOriginName.c_str());
       }
       
       // save forces to the prop setup
@@ -475,7 +470,6 @@ void PropagationConfigPanel::Initialize()
    MessageInterface::ShowMessage("PropagationConfigPanel::Initialize() entered\n");
    #endif
    
-   //loj: 2/8/06 theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
    theSolarSystem = theGuiInterpreter->GetSolarSystemInUse();
    thePropSetup = theGuiInterpreter->GetPropSetup(propSetupName);
 
@@ -501,6 +495,10 @@ void PropagationConfigPanel::Initialize()
    dragModelArray.push_back("MSISE90");
    dragModelArray.push_back("JacchiaRoberts");
    
+   #if DEBUG_PROP_PANEL
+   MessageInterface::ShowMessage("PropagationConfigPanel::Initialize() Initialized local arrays.\n");
+   #endif
+   
    // initialize mag. filed model type array
    magfModelArray.push_back("None");
       
@@ -521,14 +519,13 @@ void PropagationConfigPanel::Initialize()
       paramId = theForceModel->GetParameterID("SRP");
       useSRP = theForceModel->GetStringParameter(paramId).c_str();
       
-      //@todo: Earth only implemented for Build 3
-      if (useSRP.CmpNoCase("On") == 0)
-      {                                   
-         currentBodyId = FindBody(SolarSystem::EARTH_NAME);
-         forceList[currentBodyId]->bodyName = SolarSystem::EARTH_NAME;
-         forceList[currentBodyId]->useSrp = true;
-         forceList[currentBodyId]->srpf = theSRP;
-      }
+//      if (useSRP.CmpNoCase("On") == 0)
+//      {                                   
+//         currentBodyId = FindBody(SolarSystem::EARTH_NAME);
+//         forceList[currentBodyId]->bodyName = SolarSystem::EARTH_NAME;
+//         forceList[currentBodyId]->useSrp = true;
+//         forceList[currentBodyId]->srpf = theSRP;
+//      }
               
       for (Integer i = 0; i < numOfForces; i++)
       {
@@ -536,13 +533,16 @@ void PropagationConfigPanel::Initialize()
          
          if (force->GetTypeName() == "PointMassForce")
          {
+         	   #if DEBUG_PROP_PANEL
+            MessageInterface::ShowMessage("PropagationConfigPanel::Initialize() Initializing PointMassForce\n");
+            #endif
+            
             thePMF = (PointMassForce *)force;
             bodyName = thePMF->GetStringParameter("BodyName");
             secondaryBodiesArray.Add(bodyName.c_str());    
             pmForceList.push_back(new ForceType(bodyName, gravModelArray[NONE_GM], 
                dragModelArray[NONE_DM], magfModelArray[NONE_MM])); 
                
-            //waw: Added 09/28/05
             //Warn user about bodies already added as Primary body
             Integer fmSize = (Integer)forceList.size();
             Integer last = (Integer)pmForceList.size() - 1;
@@ -560,6 +560,10 @@ void PropagationConfigPanel::Initialize()
          }
          else if (force->GetTypeName() == "GravityField")
          {
+            #if DEBUG_PROP_PANEL
+            MessageInterface::ShowMessage("PropagationConfigPanel::Initialize() Initializing GravityField force.\n");
+            #endif
+            
             theGravForce = (GravityField*)force;
             bodyName = theGravForce->GetStringParameter("BodyName");
             std::string potFilename = theGravForce->GetStringParameter("PotentialFile");                 
@@ -578,7 +582,6 @@ void PropagationConfigPanel::Initialize()
             forceList[currentBodyId]->gravf = theGravForce;
             forceList[currentBodyId]->potFilename = potFilename;
             
-            //waw: Added 09/28/05
             //Warn user about bodies already added as Primary body
             Integer pmSize = (Integer)pmForceList.size();
             Integer last = (Integer)forceList.size() - 1;
@@ -619,6 +622,10 @@ void PropagationConfigPanel::Initialize()
          }
          else if (force->GetTypeName() == "DragForce")
          {
+         	  #if DEBUG_PROP_PANEL
+            MessageInterface::ShowMessage("PropagationConfigPanel::Initialize() Initializing DragForce.\n");
+            #endif
+            
             theDragForce = (DragForce*)force;  
             paramId = theDragForce->GetParameterID("AtmosphereModel");
             atmosModelString = theDragForce->GetStringParameter(paramId).c_str();
@@ -630,7 +637,6 @@ void PropagationConfigPanel::Initialize()
             forceList[currentBodyId]->dragType = atmosModelString;
             forceList[currentBodyId]->dragf = theDragForce;
             
-            //waw: Added 09/28/05
             //Warn user about bodies already added as Primary body
             Integer pmSize = (Integer)pmForceList.size();
             Integer last = (Integer)forceList.size() - 1;
@@ -655,8 +661,49 @@ void PropagationConfigPanel::Initialize()
             if (!found)
                primaryBodiesArray.Add(bodyName.c_str());
          }
+         else if (force->GetTypeName() == "SolarRadiationPressure")
+         {
+         	   #if DEBUG_PROP_PANEL
+            MessageInterface::ShowMessage("PropagationConfigPanel::Initialize() Initializing SRP force.\n");
+            #endif
+                           
+            #if DEBUG_PROP_PANEL
+            MessageInterface::ShowMessage("PropagationConfigPanel::Initialize() First check if Earth is set as primary body.\n");
+            #endif
+            
+            bool foundEarth = false;
+            
+            for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
+            {
+               if ( primaryBodiesArray[i].CmpNoCase(SolarSystem::EARTH_NAME.c_str()) == 0 )
+                  foundEarth = true;
+            } 
+               
+            #if DEBUG_PROP_PANEL
+            MessageInterface::ShowMessage("PropagationConfigPanel::Initialize() Checking if SRP is set for earth only.\n");
+            #endif
+            
+            if ( strcmp(bodyName.c_str(), SolarSystem::EARTH_NAME.c_str()) == 0 )
+            {
+            	  currentBodyId = FindBody(bodyName);
+               forceList[currentBodyId]->useSrp = true;
+               forceList[currentBodyId]->bodyName = SolarSystem::EARTH_NAME;
+               forceList[currentBodyId]->srpf = theSRP;
+            }
+            else
+            {
+            	  forceList[currentBodyId]->useSrp = false;
+            	  forceList[currentBodyId]->srpf = NULL;
+               MessageInterface::PopupMessage
+                  (Gmat::WARNING_, "GMAT currently supports SRP for Earth only.  SRP for other bodies will be turned off."); 
+            }   
+         }
       }
- 
+           
+      #if DEBUG_PROP_PANEL
+      MessageInterface::ShowMessage("PropagationConfigPanel::Initialize() Initializing Primary bodies array.\n");
+      #endif
+               
       if (!primaryBodiesArray.IsEmpty())  
       { 
          primaryBodyString = primaryBodiesArray.Item(0).c_str();
@@ -945,6 +992,8 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                         wxST_NO_AUTORESIZE);
    title7StaticText->SetFont(wxFont(12, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL,
                                              true, _T(""), wxFONTENCODING_SYSTEM));
+   title7StaticText->Enable(false);
+   
    wxStaticText *title8StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Point Masses"),
                         wxDefaultPosition, wxSize(120,20),
@@ -1175,20 +1224,19 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    
    theMiddleSizer->Add(boxSizer1, 0, wxGROW, bsize);
 #endif
+
+   atmosComboBox->Enable(true);
    
    //------------------------------
-   //waw: Future implementations
-   //------------------------------    
-   gravComboBox->Enable(true);
-   searchGravityButton->Enable(false);
-   magfComboBox->Enable(true);
+   //@todo: Future implementations
+   //------------------------------ 
+   magfComboBox->Enable(false);
    magneticDegreeTextCtrl->Enable(false);
    magneticOrderTextCtrl->Enable(false);
    searchMagneticButton->Enable(false);
-   
-   bodyButton->Enable(true);
-   srpCheckBox->Enable(true);
-   dragSetupButton->Enable(false);
+   type3StaticText->Enable(false);
+   degree2StaticText->Enable(false);
+   order2StaticText->Enable(false);
    
    #if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage("PropagationConfigPanel::Setup() exiting\n");
@@ -1575,7 +1623,10 @@ void PropagationConfigPanel::DisplayMagneticFieldData()
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::DisplaySRPData()
 {
-   srpCheckBox->SetValue(forceList[currentBodyId]->useSrp);
+	if ( strcmp(bodyComboBox->GetStringSelection().c_str(), SolarSystem::EARTH_NAME.c_str()) == 0 )
+      srpCheckBox->SetValue(forceList[currentBodyId]->useSrp);
+   else
+      srpCheckBox->SetValue(false);
 }
 
 //------------------------------------------------------------------------------
@@ -1609,7 +1660,6 @@ void PropagationConfigPanel::OnOriginComboBoxChange(wxCommandEvent &event)
 {
    propOriginName = originComboBox->GetValue().c_str();
    
-   isOriginChanged = true;
    isForceModelChanged = true;
    
    theApplyButton->Enable(true);
@@ -1635,17 +1685,20 @@ void PropagationConfigPanel::OnBodySelection(wxCommandEvent &event)
       DisplayGravityFieldData();
       DisplayAtmosphereModelData();
       DisplayMagneticFieldData();
+      DisplaySRPData();
    }
    
    if (strcmp(selBody.c_str(), "Earth") == 0)
    {
       atmosComboBox->Enable(true);
       dragSetupButton->Enable(true);
+      srpCheckBox->Enable(true);
    }
    else
    {
       atmosComboBox->Enable(false);
       dragSetupButton->Enable(false);
+      srpCheckBox->Enable(false);
    }
 }
 
@@ -1730,7 +1783,7 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
          
          gravComboBox->Enable(false);
          atmosComboBox->Enable(false);
-         magfComboBox->Enable(false);
+         //magfComboBox->Enable(false);
          srpCheckBox->Enable(false);
          gravityDegreeTextCtrl->Enable(false);
          gravityOrderTextCtrl->Enable(false);
@@ -1743,7 +1796,7 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
       {
          gravComboBox->Enable(true);
          atmosComboBox->Enable(true);
-         magfComboBox->Enable(true);
+         //magfComboBox->Enable(true);
          srpCheckBox->Enable(true);
          gravityDegreeTextCtrl->Enable(true);
          gravityOrderTextCtrl->Enable(true);
@@ -1996,13 +2049,8 @@ void PropagationConfigPanel::OnMagneticTextUpdate(wxCommandEvent& event)
 // void OnSRPCheckBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnSRPCheckBoxChange(wxCommandEvent &event)
-{
-   if (primaryBodiesArray.IsEmpty())
-      return;
-      
-   Integer id = FindBody(SolarSystem::EARTH_NAME);
-   forceList[id]->useSrp = srpCheckBox->GetValue();
-   
+{   
+   forceList[currentBodyId]->useSrp = srpCheckBox->GetValue();
    isForceModelChanged = true;
    theApplyButton->Enable(true);
 }
