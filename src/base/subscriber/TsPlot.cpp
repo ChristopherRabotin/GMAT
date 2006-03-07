@@ -25,7 +25,7 @@
 //#define DEBUG_TSPLOT_INIT 1
 //#define DEBUG_TSPLOT_PARAM 1
 //#define DEBUG_TSPLOT_OBJECT 1 
-//#define DEBUG_TSPLOT_UPDATE 1
+//#define DEBUG_TSPLOT_UPDATE 2
 //#define DEBUG_ACTION_REMOVE 1
 //#define DEBUG_RENAME 1
 
@@ -772,8 +772,7 @@ bool TsPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 {
    if (type == Gmat::PARAMETER)
    {
-      //loj: 6/15/05
-      // Allow same parameter can be set to X and Y
+      // X parameter
       if (name == mXParamName)
       {
          mXParam = (Parameter*)obj;
@@ -783,12 +782,9 @@ bool TsPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             ("TsPlot::SetRefObject() mXParam:%s successfully set\n",
              obj->GetName().c_str());
          #endif
-         
-         //return true;
       }
       
-      //else
-      //{
+      // Y parameters
       for (int i=0; i<mNumYParams; i++)
       {
          if (mYParamNames[i] == name)
@@ -804,7 +800,6 @@ bool TsPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             return true;
          }
       }
-      //}
    }
    
    return false;
@@ -818,7 +813,6 @@ const StringArray& TsPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    mAllParamNames.clear();
 
-   //loj: 4/29/05 Added UNKNOWN_OBJECT
    switch (type)
    {
    case Gmat::UNKNOWN_OBJECT:
@@ -990,16 +984,21 @@ bool TsPlot::Distribute(int len)
 bool TsPlot::Distribute(const Real * dat, Integer len)
 {
    #if DEBUG_TSPLOT_UPDATE > 1
-   MessageInterface::ShowMessage("TsPlot::Distribute() entered. isEndOfReceive=%d\n",
-                                 isEndOfReceive);
+   MessageInterface::ShowMessage
+      ("TsPlot::Distribute() entered. isEndOfReceive=%d, active=%d, runState=%d\n",
+       isEndOfReceive, active, Publisher::Instance()->GetRunState());
    #endif
    
    if (isEndOfReceive)
    {
-      if (active) //loj: 5/2/05 Added
+      // if targetting and draw target is off, just return
+      if (!mDrawTarget && (Publisher::Instance()->GetRunState() == Gmat::TARGETING))
+         return true;
+      
+      if (active)
          return PlotInterface::RefreshTsPlot(instanceName);
    }
-
+   
    // if targetting and draw target is off, just return
    if (!mDrawTarget && (Publisher::Instance()->GetRunState() == Gmat::TARGETING))
       return true;
