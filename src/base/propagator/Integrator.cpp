@@ -375,9 +375,12 @@ Real Integrator::SetRealParameter(const Integer id, const Real value)
       minimumStep = fabs(value);
       return value;
    case MAX_STEP:
-      if (fabs(value) <= minimumStep)
+      // @todo waw: temporarily commented out, to be uncommented 
+      // once Edwin updates his scripts to support this
+      // if (fabs(value) <= minimumStep)
+      if (fabs(value) < minimumStep)
          throw PropagatorException(
-      "Integrator::SetRealParameter -- Maximum step is set less than or equal to minimum step.");
+      "Integrator::SetRealParameter -- Maximum step is set less than minimum step.");
       maximumStep = fabs(value);
       return value;
    case ERROR_THRESHOLD:

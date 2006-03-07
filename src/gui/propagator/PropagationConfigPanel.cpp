@@ -248,10 +248,13 @@ void PropagationConfigPanel::SaveData()
       Real min = atof(setting3TextCtrl->GetValue());
       Real max = atof(setting4TextCtrl->GetValue());
       
-      if (max <= min)
+      // @todo waw: temporarily commented out, to be uncommented 
+      // once Edwin updates his scripts to support this
+      // if (max <= min) 
+      if (max < min)
       {
          MessageInterface::PopupMessage
-         (Gmat::WARNING_, "Maximum Step can not be less than or equal to Minimum Step.\n"
+         (Gmat::WARNING_, "Maximum Step can not be less than Minimum Step.\n"
          "Propagation updates have not been saved");
          return;
       }    
