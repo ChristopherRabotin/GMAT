@@ -14,6 +14,10 @@
 //
 /**
  * Implements StopCondition class.
+ * It stores last five points of integration epoch and values. When desired
+ * stopping condition is fallen between forth and fifth value, it feeds all five
+ * points to CubicSplineInterpolator to estimate the epoch of desired stopping
+ * condition.
  */
 //------------------------------------------------------------------------------
 
