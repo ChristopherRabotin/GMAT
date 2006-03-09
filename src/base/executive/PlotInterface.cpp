@@ -156,7 +156,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
          ("PlotInterface::CreateGlPlotWindow() Creating MdiChildTrajFrame "
           "%s\n", plotName.c_str());
       #endif
-      
+
       currPlotFrame =
          new MdiChildTrajFrame(GmatAppData::GetMainFrame(), true,
                                wxString(plotName.c_str()),
@@ -164,7 +164,12 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                wxPoint(-1, -1), wxSize(-1, -1),
                                wxDEFAULT_FRAME_STYLE, wxString(csName.c_str()),
                                ssPtr);
+      
       currPlotFrame->Show();
+      
+      #if __WXMAC__  
+      currPlotFrame->SetSize(499, 349);
+      #endif
       
       #if DEBUG_PLOTIF_GL
       MessageInterface::ShowMessage
