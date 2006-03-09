@@ -173,6 +173,7 @@ OBJECTS = \
     solver/SolverCreatePanel.o \
     solver/SolverGoalsPanel.o \
     solver/SolverVariablesPanel.o \
+    spacecraft/AttitudePanel.o \
     spacecraft/BallisticsMassPanel.o \
     spacecraft/FormationSetupPanel.o \
     spacecraft/OrbitPanel.o \
@@ -180,7 +181,6 @@ OBJECTS = \
     spacecraft/SpaceObjectSelectDialog.o \
     spacecraft/TankPanel.o \
     spacecraft/ThrusterPanel.o \
-    spacecraft/AttitudePanel.o \
     view/ViewTextFrame.o 
 
 $(WXTARGET) : $(OBJECTS) $(LIBS)
