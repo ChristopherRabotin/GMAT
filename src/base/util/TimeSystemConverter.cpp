@@ -458,7 +458,11 @@ bool TimeConverterUtil::ValidateTimeFormat(const std::string &format,
       for (Integer i = 0; i < 12; ++i)
       {
          loc = value.find(months[i], 0);
-         if (loc >= 0)
+
+//         if (loc >= 0)
+		 // The month should be the second parameter in the string
+		 // 01 Jun 2004 ...
+         if (loc == 3)		 
             return true;
       }
       return false;         
