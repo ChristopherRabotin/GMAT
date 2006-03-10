@@ -929,7 +929,7 @@ wxListBox* GuiItemManager::GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
 
 //------------------------------------------------------------------------------
 // wxListBox* GetPropertyListBox(wxWindow *parent, wxWindowID id, const wxSize &size,
-//                               const wxString &objType)
+//                               const wxString &objType, int showOption)
 //------------------------------------------------------------------------------
 /**
  * @return Available Parameter ListBox pointer
@@ -937,15 +937,40 @@ wxListBox* GuiItemManager::GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
 //------------------------------------------------------------------------------
 wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
                                               const wxSize &size,
-                                              const wxString &objType)
+                                              const wxString &objType,
+                                              int showOption)
 {   
-   wxListBox *propertyListBox = NULL;
+   //wxListBox *propertyListBox = NULL;
+   
+   ParameterInfo *theParamInfo = ParameterInfo::Instance();
+   wxString emptyList[] = {};
+   
+   wxListBox *propertyListBox =
+      new wxListBox(parent, id, wxDefaultPosition, size, 0,
+                    emptyList, wxLB_SINGLE|wxLB_SORT);
    
    if (objType == "Spacecraft")
    {
-      propertyListBox =
-         new wxListBox(parent, id, wxDefaultPosition, size, theNumScProperty,
-                       theScPropertyList, wxLB_SINGLE|wxLB_SORT);
+      if (showOption == SHOW_PLOTTABLE)
+      {
+         for (int i=0; i<theNumScProperty; i++)
+         {
+            if (theParamInfo->IsPlottable(theScPropertyList[i].c_str()))
+               propertyListBox->Append(theScPropertyList[i]);
+         }
+      }
+      else if (showOption == SHOW_REPORTABLE)
+      {
+         for (int i=0; i<theNumScProperty; i++)
+         {
+            if (theParamInfo->IsReportable(theScPropertyList[i].c_str()))
+               propertyListBox->Append(theScPropertyList[i]);
+         }
+      }
+      
+      //propertyListBox =
+      //new wxListBox(parent, id, wxDefaultPosition, size, theNumScProperty,
+      //              theScPropertyList, wxLB_SINGLE|wxLB_SORT);
    }
    else if (objType == "Burn")
    {
@@ -1000,63 +1025,30 @@ wxListBox* GuiItemManager::GetPlottableParameterListBox(wxWindow *parent,
    return plottableParamListBox;
    
    
-//    wxString emptyList[] = {};
-//    wxString *newPlottableParamList;
-//    int numParams = 0;
-//    wxListBox *plottableParamListBox = NULL;
-   
-//    if (nameToExclude != "" && theNumPlottableParam >= 2)
-//    {
-//       newPlottableParamList = new wxString[theNumPlottableParam-1];
-      
-//       for (int i=0; i<theNumPlottableParam; i++)
-//       {
-//          if (thePlottableParamList[i] != nameToExclude)
-//             newPlottableParamList[numParams++] = thePlottableParamList[i];
-//       }
-      
-//       plottableParamListBox =
-//          new wxListBox(parent, id, wxDefaultPosition, size, theNumPlottableParam,
-//                        newPlottableParamList, wxLB_SINGLE|wxLB_SORT);
-      
-//       delete newPlottableParamList;
-//    }
-//    else
-//    {
-//       if (theNumPlottableParam > 0)
-//       {       
-//          plottableParamListBox =
-//             new wxListBox(parent, id, wxDefaultPosition, size, theNumPlottableParam,
-//                           thePlottableParamList, wxLB_SINGLE|wxLB_SORT);
-//       }
-//       else
-//       {       
-//          plottableParamListBox =
-//             new wxListBox(parent, id, wxDefaultPosition, size, 0,
-//                           emptyList, wxLB_SINGLE|wxLB_SORT);
-//       }
-//    }
-   
-//    return plottableParamListBox;
 }
 
 //------------------------------------------------------------------------------
 // wxListBox* GetAllUserParameterListBox(wxWindow *parent, wxWindowID id,
-//                                   const wxSize &size)
+//                                   const wxSize &size, bool showArray)
 //------------------------------------------------------------------------------
 /**
  * @return Configured all user parameter (Varialbe, Array, String) ListBox pointer
  */
 //------------------------------------------------------------------------------
 wxListBox* GuiItemManager::GetAllUserParameterListBox(wxWindow *parent, wxWindowID id,
-                                                      const wxSize &size)
+                                                      const wxSize &size, bool showArray)
 {
    wxString emptyList[] = {};
    wxString *allUserParamList;
    int numParams = 0;
-   int allUserParamCount = theNumUserVariable + theNumUserArray + theNumUserString;
+   int allUserParamCount = 0;
    wxListBox *allUserParamListBox = NULL;
-   
+
+   if (showArray)
+      allUserParamCount = theNumUserVariable + theNumUserArray + theNumUserString;
+   else
+      allUserParamCount = theNumUserVariable + theNumUserString;
+      
    // 5/16/05 - arg:  moved create and delete allUserParamList into the if-stmt
    // to prevent crashing when trying to delete an empty array
    if (allUserParamCount > 0)
@@ -1069,9 +1061,12 @@ wxListBox* GuiItemManager::GetAllUserParameterListBox(wxWindow *parent, wxWindow
       for (int i=0; i<theNumUserString; i++)
          allUserParamList[numParams++] = theUserStringList[i];
 
-      for (int i=0; i<theNumUserArray; i++)
-         allUserParamList[numParams++] = theUserArrayList[i];
-
+      if (showArray)
+      {
+         for (int i=0; i<theNumUserArray; i++)
+            allUserParamList[numParams++] = theUserArrayList[i];
+      }
+      
       allUserParamListBox =
          new wxListBox(parent, id, wxDefaultPosition, size, allUserParamCount,
                        allUserParamList, wxLB_SINGLE|wxLB_SORT);
@@ -1323,7 +1318,7 @@ wxListBox* GuiItemManager::GetFuelTankListBox(wxWindow *parent, wxWindowID id,
 //    //-------------------------------------------------------
 //    Spacecraft *sc = NULL;
 //    StringArray tankNames, allTankNames;
-//    Integer paramID;
+//    int paramID;
    
 //    for (int i=0; i<theNumSpacecraft; i++)
 //    {
@@ -1429,13 +1424,13 @@ CreateParameterSizer(wxWindow *parent,
                      wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
                      wxComboBox **originComboBox, wxWindowID originComboBoxId,
                      wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer,
-                     bool showArrayAndString, const wxString &owner)
+                     int showOption, bool showArray, const wxString &owner)
 {
    #if DEBUG_GUI_ITEM
    MessageInterface::ShowMessage("GuiItemManager::CreateParameterSizer() entered\n");
    #endif
    
-   Integer borderSize = 1;
+   int borderSize = 1;
    
    //wxStaticText
    wxStaticText *userVarStaticText =
@@ -1479,21 +1474,23 @@ CreateParameterSizer(wxWindow *parent,
    
    // wxListBox
    wxArrayString emptyArray;
-   if (showArrayAndString)
+   // user parameter
+   if (showOption == SHOW_REPORTABLE)
    {
       *userParamListBox =
-         GetAllUserParameterListBox(parent, userParamListBoxId, wxSize(170, 50));
+         GetAllUserParameterListBox(parent, userParamListBoxId, wxSize(170, 50), showArray);
    }
-   else
+   else if (showOption == SHOW_PLOTTABLE)
    {
       *userParamListBox =
          GetUserVariableListBox(parent, userParamListBoxId, wxSize(170, 50), "");
    }
    
-   //loj: 5/31/05 Added property owner
+   // property
    *propertyListBox = 
-      GetPropertyListBox(parent, propertyListBoxId, wxSize(170, 80), owner);
-      
+      GetPropertyListBox(parent, propertyListBoxId, wxSize(170, 80), owner, showOption);
+   
+   
    #if __WXMAC__
    //wxBoxSizer
    wxBoxSizer *userParamBoxSizer = new wxBoxSizer(wxVERTICAL);
@@ -1587,13 +1584,13 @@ wxBoxSizer* GuiItemManager::
 CreateUserVarSizer(wxWindow *parent,
                    wxListBox **userParamListBox, wxWindowID userParamListBoxId,
                    wxButton **createVarButton, wxWindowID createVarButtonId,
-                   bool showArrayAndString)
+                   int showOption, bool showArray)
 {
    #if DEBUG_GUI_ITEM
    MessageInterface::ShowMessage("GuiItemManager::CreateUserVarSizer() entered\n");
    #endif
    
-   Integer borderSize = 1;
+   int borderSize = 1;
    
    //wxStaticBox
    wxStaticBox *userParamStaticBox = new wxStaticBox(parent, -1, wxT(""));
@@ -1611,10 +1608,10 @@ CreateUserVarSizer(wxWindow *parent,
    // wxListBox
    wxArrayString emptyArray;
 
-   if (showArrayAndString)
+   if (showOption == SHOW_REPORTABLE)
    {
       *userParamListBox =
-         GetAllUserParameterListBox(parent, userParamListBoxId, wxSize(170, 50));
+         GetAllUserParameterListBox(parent, userParamListBoxId, wxSize(170, 50), showArray);
    }
    else
    {
@@ -1676,15 +1673,17 @@ void GuiItemManager::UpdatePropertyList()
    
    for (int i=0; i<numParams; i++)
    {
-      // add to list only system parameters returning single value
-      if (items[i].find("CartState") == std::string::npos &&
-          items[i].find("KepElem") == std::string::npos &&
-          items[i].find("SphElem") == std::string::npos &&
-          //items[i].find("Apoapsis") == std::string::npos &&  //loj: 7/15/05 Commented
-          //items[i].find("Periapsis") == std::string::npos && //loj: 7/15/05 Commented
-          items[i].find("Variable") == std::string::npos &&
-          items[i].find("Array") == std::string::npos &&
-          items[i].find("String") == std::string::npos)
+//       // add to list only system parameters returning single value
+//       if (items[i].find("CartState") == std::string::npos &&
+//           items[i].find("KepElem") == std::string::npos &&
+//           items[i].find("SphElem") == std::string::npos &&
+//           items[i].find("Variable") == std::string::npos &&
+//           items[i].find("Array") == std::string::npos &&
+//           items[i].find("String") == std::string::npos)
+
+      // add only reportable parameters (Real, String for now) to list
+      // we may want add Rvector6 later, then Rvec6Var needs to be set reportable true
+      if (theParamInfo->IsReportable(items[i]))
       {
          ownerType = theParamInfo->GetOwnerType(items[i]);
          
@@ -1819,7 +1818,8 @@ void GuiItemManager::UpdateParameterList()
       else // not plottable parameters
       {
          // user String
-         if (param->GetTypeName() == "String")
+         if (param->GetTypeName() == "StringVar")
+         //if (param->GetReturnType() == Gmat::STRING_TYPE)
          {
             if (userArrayCount < MAX_USER_STRING &&
                 userParamCount < MAX_USER_PARAM)

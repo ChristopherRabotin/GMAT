@@ -34,6 +34,12 @@ class GuiItemManager
 {
 public:
 
+   enum ShowParamOption
+   {
+      SHOW_REPORTABLE, // Real, Array, String
+      SHOW_PLOTTABLE,  // Real
+   };
+   
    // for SpacePoint
    static const int MAX_SPACE_POINT = 60;  // CELES_POINT + SPACE_OBJECT
    static const int MAX_CELES_POINT = 20;  // CELES_BODY + CAL_POINT
@@ -190,14 +196,14 @@ public:
    
    wxListBox* GetPropertyListBox(wxWindow *parent, wxWindowID id,
                                  const wxSize &size,
-                                 const wxString &objType);
+                                 const wxString &objType, int showOption = SHOW_PLOTTABLE);
    
    wxListBox* GetPlottableParameterListBox(wxWindow *parent, wxWindowID id,
-                                        const wxSize &size,
-                                        const wxString &nameToExclude = "");
+                                           const wxSize &size,
+                                           const wxString &nameToExclude = "");
    
    wxListBox* GetAllUserParameterListBox(wxWindow *parent, wxWindowID id,
-                                         const wxSize &size);
+                                         const wxSize &size, bool showArray);
    
    wxListBox* GetUserVariableListBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size,
@@ -234,13 +240,13 @@ public:
                         wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
                         wxComboBox **originComboBox, wxWindowID originComboBoxId,
                         wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer,
-                        bool showArrayAndString = false,
+                        int showOption = SHOW_PLOTTABLE, bool showArray = false,
                         const wxString &onwer = "Spacecraft");
    wxBoxSizer*
    CreateUserVarSizer(wxWindow *parent,
                       wxListBox **userParamListBox, wxWindowID userParamListBoxId,
                       wxButton **createVarButton, wxWindowID createVarButtonId,
-                      bool showArrayAndString = false);
+                      int showOption = SHOW_REPORTABLE, bool showArray = false);
    
 private:
    
