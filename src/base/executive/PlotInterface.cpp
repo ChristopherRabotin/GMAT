@@ -1013,8 +1013,6 @@ bool PlotInterface::RefreshTsPlot(const std::string &plotName)
       for (int i=0; i<MdiTsPlot::numChildren; i++)
       {
          frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
-         frame->SetSize(500, 350);
-         frame->Update();
          if (frame)            
             if (frame->GetPlotName().IsSameAs(owner.c_str()))
             {
