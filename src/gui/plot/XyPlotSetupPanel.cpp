@@ -420,7 +420,8 @@ void XyPlotSetupPanel::Create()
                            &mPropertyListBox, PROPERTY_LISTBOX,
                            &mCoordSysComboBox, ID_COMBOBOX,
                            &mCentralBodyComboBox, ID_COMBOBOX,
-                           &mCoordSysLabel, &mCoordSysSizer);
+                           &mCoordSysLabel, &mCoordSysSizer,
+                           GuiItemManager::SHOW_PLOTTABLE);
 
    #if DEBUG_XYPLOT_PANEL
       MessageInterface::ShowMessage

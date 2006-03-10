@@ -138,7 +138,6 @@ void ReportFileSetupPanel::Create()
    //------------------------------------------------------
    // available variables list (1st column)
    //------------------------------------------------------
-   //mVarBoxSizer = new wxBoxSizer(wxVERTICAL);
    
    wxButton *createVarButton;
    
@@ -149,7 +148,8 @@ void ReportFileSetupPanel::Create()
                            &mPropertyListBox, PROPERTY_LISTBOX,
                            &mCoordSysComboBox, ID_COMBOBOX,
                            &mCentralBodyComboBox, ID_COMBOBOX,
-                           &mCoordSysLabel, &mCoordSysSizer);
+                           &mCoordSysLabel, &mCoordSysSizer,
+                           GuiItemManager::SHOW_REPORTABLE);
    
    //-------------------------------------------------------
    // add, remove, clear parameter buttons (2nd column)
@@ -217,9 +217,6 @@ void ReportFileSetupPanel::Create()
    wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
    fileStaticText = new wxStaticText(this, ID_TEXT, wxT("File: "), 
                                      wxDefaultPosition, wxDefaultSize, 0 );
-   //loj: 12/16/05 made 250 to 300 to show path
-   //fileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
-   //                              wxDefaultPosition, wxSize(250, -1),  0);
    fileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
                                  wxDefaultPosition, wxSize(300, -1),  0);
    browseButton = new wxButton( this, ID_BROWSE_BUTTON, wxT("Browse"), 
@@ -232,31 +229,6 @@ void ReportFileSetupPanel::Create()
    //-------------------------------------------------------
    // options
    //-------------------------------------------------------
-
-//    writeCheckBox = new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Write Report"),
-//                                   wxDefaultPosition, wxSize(100, -1), 0);
-   
-//    showHeaderCheckBox =
-//       new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Show Headers"),
-//                      wxDefaultPosition, wxSize(100, -1), 0);
-   
-//    wxStaticText *colWidthText =
-//       new wxStaticText(this, -1, wxT("Column Width  "),
-//                        wxDefaultPosition, wxSize(-1,-1), 0);
-   
-//    colWidthTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
-//                                      wxDefaultPosition, wxSize(35, -1),  0);
-
-//    wxStaticText *precisionText =
-//       new wxStaticText(this, -1, wxT("  Precision  "),
-//                        wxDefaultPosition, wxSize(-1,-1), 0);
-
-//    precisionTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""),
-//                                      wxDefaultPosition, wxSize(35, -1),  0);
-
-//    leftJustifyCheckBox =
-//       new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Left Justify"),
-//                      wxDefaultPosition, wxSize(100, -1), 0);
    
    writeCheckBox = new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Write Report"),
                                   wxDefaultPosition, wxDefaultSize, 0);
@@ -406,10 +378,13 @@ void ReportFileSetupPanel::SaveData()
 {
    // save data to core engine
    reportFile->Activate(writeCheckBox->IsChecked());
-//    if (theSubscriber->IsActive())
-//      MessageInterface::ShowMessage("\nReportFileSetupPanel:: The subscriber was activiated\n");
-//    else
-//      MessageInterface::ShowMessage("\nReportFileSetupPanel:: The subscriber was NOT activiated\n");
+   
+   //if (theSubscriber->IsActive())
+   //   MessageInterface::ShowMessage("\nReportFileSetupPanel:: "
+   //                                 "The subscriber was activiated\n");
+   // else
+   //   MessageInterface::ShowMessage("\nReportFileSetupPanel:: "
+   //                                 "The subscriber was NOT activiated\n");
     
    int writeHeadersId = reportFile->GetParameterID("WriteHeaders");
    if (showHeaderCheckBox->IsChecked())
@@ -452,7 +427,7 @@ void ReportFileSetupPanel::SaveData()
       for (int i=0; i<mNumVarParams; i++)
       {
          std::string selYName = std::string(mVarSelectedListBox->GetString(i).c_str());
-         reportFile->SetStringParameter("Add", selYName, i); //arg: 11/17/04 added index
+         reportFile->SetStringParameter("Add", selYName, i);
       }
    }
 }
@@ -541,7 +516,8 @@ void ReportFileSetupPanel::OnAddVariable(wxCommandEvent& event)
       // Create a paramete if it does not exist
       Parameter *param = GetParameter(newParam);
       
-      if (param->IsPlottable())
+      //if (param->IsPlottable())
+      if (param->IsReportable())
       {
          mVarSelectedListBox->Append(newParam);
          mVarSelectedListBox->SetStringSelection(newParam);
@@ -598,6 +574,7 @@ void ReportFileSetupPanel::OnClearVariable(wxCommandEvent& event)
    mVarSelectedListBox->Clear();
    theApplyButton->Enable();
 }
+
 
 //------------------------------------------------------------------------------
 // void OnCreateVariable(wxCommandEvent& event)

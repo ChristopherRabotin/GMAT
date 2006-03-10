@@ -31,7 +31,7 @@ class PropagatePanel : public GmatPanel
 {
 public:
    // constructors
-   PropagatePanel(wxWindow *parent, GmatCommand *cmd); //loj: 10/6/04 removed propName
+   PropagatePanel(wxWindow *parent, GmatCommand *cmd);
    ~PropagatePanel();  
    
 private:
@@ -73,7 +73,7 @@ private:
    wxTextCtrl *stopNameTextCtrl;
    wxTextCtrl *varNameTextCtrl;
    wxTextCtrl *goalTextCtrl;
-   wxTextCtrl *toleranceTextCtrl;
+   //wxTextCtrl *toleranceTextCtrl;
    
    wxButton *updateButton;
    wxButton *deleteButton;
@@ -127,7 +127,6 @@ private:
 
    wxString FormatStopCondDesc(const wxString &varName,
                                const wxString &relOpStr,
-                               //Real &goal);
                                const wxString &goalStr);
    void MoveUpPropData();
    

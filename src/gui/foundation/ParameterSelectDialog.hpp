@@ -18,13 +18,16 @@
 
 #include "gmatwxdefs.hpp"
 #include "GmatDialog.hpp"
+#include "GuiItemManager.hpp"
 
 class ParameterSelectDialog : public GmatDialog
 {
 public:
    
    ParameterSelectDialog(wxWindow *parent,
-                         bool showArrayAndString = false,
+                         int showOption = GuiItemManager::SHOW_PLOTTABLE,
+                         bool showArray = false,
+                         //bool showArrayAndString = false,
                          bool showSysParams = true,
                          bool canSelectMultiVars = false,
                          bool canSelectWholeObject = false,
@@ -48,11 +51,12 @@ protected:
    wxString mOwnerType;
    wxString mLastCoordSysName;
    wxArrayString mParamNameArray;
-   
+   int  mShowOption;
    bool mIsParamSelected;
    bool mCanClose;
    bool mUseUserParam;
-   bool mShowArrayAndString;
+   bool mShowArray;
+   //bool mShowArrayAndString;
    bool mShowSysVars;
    bool mCanSelectMultiVars;
    bool mCanSelectWholeObject;

@@ -47,7 +47,9 @@ END_EVENT_TABLE()
 //                       const wxString &ownerType = "Spacecraft")
 //------------------------------------------------------------------------------
 ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent,
-                                             bool showArrayAndString,
+                                             int showOption,
+                                             bool showArray,
+                                             //bool showArrayAndString,
                                              bool showSysVars,
                                              bool canSelectMultiVars,
                                              bool canSelectWholeObject,
@@ -58,7 +60,9 @@ ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent,
    mIsParamSelected = false;
    mCanClose = true;
    mUseUserParam = false;
-   mShowArrayAndString = showArrayAndString;
+   mShowOption = showOption;
+   mShowArray = showArray;
+   //mShowArrayAndString = showArrayAndString;
    mShowSysVars = showSysVars;
    mCanSelectMultiVars = canSelectMultiVars;
    mCanSelectWholeObject = canSelectWholeObject;
@@ -155,13 +159,16 @@ void ParameterSelectDialog::Create()
                               &mCoordSysComboBox, ID_COMBOBOX,
                               &mCentralBodyComboBox, ID_COMBOBOX,
                               &mCoordSysLabel, &mCoordSysSizer,
-                              mShowArrayAndString, mOwnerType);
+                              mShowOption, mShowArray, mOwnerType);
+                              //mShowArrayAndString, mOwnerType);
    }
    else
    {
       mParamBoxSizer = theGuiManager->
          CreateUserVarSizer(this, &mUserParamListBox, USER_PARAM_LISTBOX,
-                            &createVarButton, CREATE_VARIABLE, mShowArrayAndString);
+                            &createVarButton, CREATE_VARIABLE,
+                            mShowOption, mShowArray);
+                            //mShowArrayAndString);
    }
    
    //-------------------------------------------------------
@@ -374,7 +381,8 @@ void ParameterSelectDialog::OnCreateVariable(wxCommandEvent& event)
 
    if (paramDlg.IsParamCreated())
    {
-      if (mShowArrayAndString)
+      //if (mShowArrayAndString)
+      if (mShowOption == GuiItemManager::SHOW_REPORTABLE && mShowArray)
       {
          mUserParamListBox->Set(theGuiManager->GetNumUserParameter(),
                                 theGuiManager->GetUserParameterList());

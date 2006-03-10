@@ -1,5 +1,4 @@
 //$Header$
-//$Header$
 //------------------------------------------------------------------------------
 //                              PropagatePanel
 //------------------------------------------------------------------------------
@@ -183,10 +182,10 @@ void PropagatePanel::Create()
    goalTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                      wxDefaultPosition, wxSize(180,-1), 0);
-   toleranceTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(100,-1), 0);
-                
+   //toleranceTextCtrl =
+   //   new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+   //                  wxDefaultPosition, wxSize(100,-1), 0);
+   
    //wxButton
    updateButton =
       new wxButton(this, ID_BUTTON, wxT("Update"),
@@ -247,9 +246,10 @@ void PropagatePanel::Create()
    wxStaticText *varStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Variable"), 
                        wxDefaultPosition, wxSize(80, -1), wxALIGN_RIGHT);
-   wxStaticText *tolStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Tolerance"), 
-                       wxDefaultPosition, wxDefaultSize, 0);
+
+   //wxStaticText *tolStaticText =
+   //   new wxStaticText(this, ID_TEXT, wxT("Tolerance"), 
+   //                       wxDefaultPosition, wxDefaultSize, 0);
       
    #if __WXMAC__
    // wxStaticText
@@ -306,8 +306,8 @@ void PropagatePanel::Create()
    boxSizer7->Add(equalityComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    boxSizer7->Add(goalTextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    boxSizer7->Add(mGoalViewButton, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   boxSizer7->Add(tolStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   boxSizer7->Add(toleranceTextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   //boxSizer7->Add(tolStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   //boxSizer7->Add(toleranceTextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    
    boxSizer5->Add(boxSizer6, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    boxSizer5->Add(boxSizer7, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
@@ -358,8 +358,8 @@ void PropagatePanel::Create()
    varSizer->Add(equalityComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    varSizer->Add(goalTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
    varSizer->Add(mGoalViewButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   varSizer->Add(tolStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-   varSizer->Add(toleranceTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   //varSizer->Add(tolStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   //varSizer->Add(toleranceTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    
    stopDetailSizer->Add(stopNameSizer, 0, wxALIGN_LEFT|wxALL, bsize);    
    stopDetailSizer->Add(varSizer, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -770,9 +770,9 @@ void PropagatePanel::DisplayStopCondition(Integer selRow)
 
    goalTextCtrl->SetValue(wxVariant(mTempStopCond[selRow].goalStr));
 
-   wxString strVal;
-   strVal.Printf("%le", mTempStopCond[selRow].tol);
-   toleranceTextCtrl->SetValue(strVal);
+   //wxString strVal;
+   //strVal.Printf("%le", mTempStopCond[selRow].tol);
+   //toleranceTextCtrl->SetValue(strVal);
    
    stopCondGrid->SelectRow(selRow);
    varNameTextCtrl->Disable();
@@ -801,7 +801,7 @@ void PropagatePanel::UpdateStopCondition()
    mTempStopCond[stopRow].name = stopNameTextCtrl->GetValue();
    mTempStopCond[stopRow].varName = varNameTextCtrl->GetValue();
    mTempStopCond[stopRow].goalStr = goalTextCtrl->GetValue();
-   mTempStopCond[stopRow].tol = atof(toleranceTextCtrl->GetValue().c_str());
+   //mTempStopCond[stopRow].tol = atof(toleranceTextCtrl->GetValue().c_str());
             
    wxString str = FormatStopCondDesc(mTempStopCond[stopRow].varName,
                                      mTempStopCond[stopRow].relOpStr,
@@ -853,10 +853,7 @@ void PropagatePanel::RemoveStopCondition()
       ("PropagatePanel::RemoveStopCondition() mCurrStopRow=%d\n",
        mCurrStopRow);
    #endif
-
-   //loj: 10/6/05
-   //moved the deleting code to SaveData() in order for Cancel to work
-   
+  
    // Add deleted StopCondition pointer to list so it can be removed
    // later in SaveData()
    if (mTempStopCond[mCurrStopRow].stopCondPtr != NULL)
@@ -934,8 +931,7 @@ void PropagatePanel::ClearStopCondition(Integer selRow)
 void PropagatePanel::OnTextChange(wxCommandEvent& event)
 {
    if (stopNameTextCtrl->IsModified() || varNameTextCtrl->IsModified() ||
-       goalTextCtrl->IsModified()     || //repeatTextCtrl->IsModified()  ||
-       toleranceTextCtrl->IsModified())
+       goalTextCtrl->IsModified())//    || toleranceTextCtrl->IsModified())
    {
       ActivateUpdateButton();
    }
@@ -1035,7 +1031,7 @@ void PropagatePanel::OnButtonClick(wxCommandEvent& event)
 }
 
 
-//loj: 3/10/05 Do not remove this code
+//Note: Do not remove this code. It is used in showing stopping condition
 //------------------------------------------------------------------------------
 // void OnCellLeftClick(wxGridEvent& event)
 //------------------------------------------------------------------------------
@@ -1237,7 +1233,7 @@ void PropagatePanel::ShowDetailedStopCond(Integer stopRow)
    
    wxString strVal;
    strVal.Printf("%le", mTempStopCond[stopRow].tol);
-   toleranceTextCtrl->SetValue(strVal);
+   //toleranceTextCtrl->SetValue(strVal);
    
    // if param name containes Apoapsis or Periapsis, disable goal
    if (mTempStopCond[stopRow].varName.Contains(".Periapsis") ||

@@ -414,7 +414,9 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
    {
       //loj: 2/7/05 Changed to use ParameterSelectDialog()
       //ParameterMultiSelectDialog paramDlg(this, inputStrings, true, true);
-      ParameterSelectDialog paramDlg(this, true, true, true, true);
+      //ParameterSelectDialog paramDlg(this, true, true, true, true);
+      ParameterSelectDialog paramDlg(this, GuiItemManager::SHOW_REPORTABLE, true,
+                                     true, true);
       paramDlg.SetParamNameArray(inputStrings);
       paramDlg.ShowModal();
       
@@ -432,17 +434,20 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
          }
 
          inputGrid->SetCellValue(row, col, cellValue);
+         theApplyButton->Enable();
       }
       else     // no selections
          inputGrid->SetCellValue(row, col, "");
 
-      theApplyButton->Enable();
+      //theApplyButton->Enable();
    }
    else if (event.GetEventObject() == outputGrid)
    {
       //loj: 2/7/05 Changed to use ParameterSelectDialog()
       //ParameterMultiSelectDialog paramDlg(this, outputStrings, true, false);
-      ParameterSelectDialog paramDlg(this, true, false, true);
+      //ParameterSelectDialog paramDlg(this, true, false, true);
+      ParameterSelectDialog paramDlg(this, GuiItemManager::SHOW_REPORTABLE, true,
+                                     false, true);
       paramDlg.SetParamNameArray(outputStrings);
       paramDlg.ShowModal();
       
@@ -460,11 +465,12 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
          }
 
          outputGrid->SetCellValue(row, col, cellValue);
+         theApplyButton->Enable();
       }
       else     // no selections
          outputGrid->SetCellValue(row, col, "");
 
-      theApplyButton->Enable();
+      //theApplyButton->Enable();
    }
 }
 
