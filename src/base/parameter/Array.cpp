@@ -69,14 +69,11 @@ Array::PARAMETER_TYPE[ArrayParamCount - ParameterParamCount] =
 Array::Array(const std::string &name, const std::string &desc,
              const std::string &unit)
    : Parameter(name, "Array", GmatParam::USER_PARAM, NULL, desc, unit,
-               GmatParam::NO_DEP, Gmat::UNKNOWN_OBJECT, false)
+               GmatParam::NO_DEP, Gmat::UNKNOWN_OBJECT, false, false, false)
 {
    mNumRows = 0;
    mNumCols = 0;
    mSizeSet = false;
-   
-   // Parameter data
-   mIsPlottable = false;
    
    // GmatBase data
    parameterCount = ArrayParamCount;

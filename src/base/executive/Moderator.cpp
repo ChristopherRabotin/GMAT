@@ -3662,9 +3662,22 @@ void Moderator::CreateDefaultMission()
       //--------------------------------------------------------------
       
       // Time parameters
-      CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD");
       CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
       CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");
+      
+      CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD");
+      CreateParameter("A1ModJulian", "DefaultSC.A1ModJulian");
+      CreateParameter("A1Gregorian", "DefaultSC.A1Gregorian");
+      CreateParameter("TAIModJulian", "DefaultSC.TAIModJulian");
+      CreateParameter("TAIGregorian", "DefaultSC.TAIGregorian");
+      CreateParameter("TTModJulian", "DefaultSC.TTModJulian");
+      CreateParameter("TTGregorian", "DefaultSC.TTGregorian");
+      CreateParameter("TDBModJulian", "DefaultSC.TDBModJulian");
+      CreateParameter("TDBGregorian", "DefaultSC.TDBGregorian");
+      CreateParameter("TCBModJulian", "DefaultSC.TCBModJulian");
+      CreateParameter("TCBGregorian", "DefaultSC.TCBGregorian");
+      CreateParameter("UTCModJulian", "DefaultSC.UTCModJulian");
+      CreateParameter("UTCGregorian", "DefaultSC.UTCGregorian");
       
       // Cartesian parameters
       CreateParameter("X", "DefaultSC.EarthMJ2000Eq.X");
@@ -3771,7 +3784,7 @@ void Moderator::CreateDefaultMission()
       // StopCondition
       StopCondition *stopOnElapsedSecs =
          CreateStopCondition("StopCondition", "StopOnDefaultSC.ElapsedSecs");
-      stopOnElapsedSecs->SetStringParameter("EpochVar", "DefaultSC.CurrA1MJD");
+      stopOnElapsedSecs->SetStringParameter("EpochVar", "DefaultSC.A1ModJulian");
       stopOnElapsedSecs->SetStringParameter("StopVar", "DefaultSC.ElapsedSecs");
       stopOnElapsedSecs->SetStringParameter("Goal", "8640.0");
       
@@ -3797,7 +3810,7 @@ void Moderator::CreateDefaultMission()
       #if DEBUG_ACTION_REMOVE
       // XYPlot
       sub = CreateSubscriber("XYPlot", "DefaultXYPlot"); 
-      sub->SetStringParameter("IndVar", "DefaultSC.CurrA1MJD");
+      sub->SetStringParameter("IndVar", "DefaultSC.A1ModJulian");
       sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.X", 0);
       
       sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Y", 1);
@@ -3828,7 +3841,7 @@ void Moderator::CreateDefaultMission()
       //----- StopCondition 2
       StopCondition *stopOnX =
          CreateStopCondition("StopCondition", "StopOnDefaultSC.EarthMJ2000Eq.X");
-      stopOnX->SetStringParameter("EpochVar", "DefaultSC.CurrA1MJD");
+      stopOnX->SetStringParameter("EpochVar", "DefaultSC.A1ModJulian");
       stopOnX->SetStringParameter("StopVar", "DefaultSC.EarthMJ2000Eq.X");
       //stopOnX->SetRealParameter("Goal", 5000.0);
       stopOnX->SetStringParameter("Goal", "5000.0");
@@ -3838,7 +3851,7 @@ void Moderator::CreateDefaultMission()
       #if DEBUG_MULTI_STOP > 1
       StopCondition *stopOnPeriapsis =
          CreateStopCondition("StopCondition", "StopOnDefaultSC.Earth.Periapsis");
-      stopOnPeriapsis->SetStringParameter("EpochVar", "DefaultSC.CurrA1MJD");
+      stopOnPeriapsis->SetStringParameter("EpochVar", "DefaultSC.A1ModJulian");
       stopOnPeriapsis->SetStringParameter("StopVar", "DefaultSC.Earth.Periapsis");
       propCommand->SetRefObject(stopOnPeriapsis, Gmat::STOP_CONDITION, "", 2);
       //----------------------------------------------------
@@ -4045,7 +4058,7 @@ Subscriber* Moderator::GetDefaultSubscriber()
       std::string scName = GetDefaultSpacecraft()->GetName();
       sub->SetStringParameter(sub->GetParameterID("Filename"),
                               "DefaultReportFile.txt");
-      sub->SetStringParameter("Add", scName + ".CurrA1MJD");
+      sub->SetStringParameter("Add", scName + ".A1ModJulian");
       sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.X");
       sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.Y");
       sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.Z");
@@ -4087,7 +4100,7 @@ StopCondition* Moderator::CreateDefaultStopCondition()
    Spacecraft *sc = GetDefaultSpacecraft();
    std::string scName = sc->GetName();
    
-   std::string epochVar = scName + ".CurrA1MJD";
+   std::string epochVar = scName + ".A1ModJulian";
    std::string stopVar = scName + ".ElapsedSecs";
 
    #ifdef DEBUG_DEFAULT_MISSION
@@ -4098,7 +4111,7 @@ StopCondition* Moderator::CreateDefaultStopCondition()
    
    if (GetParameter(epochVar) == NULL)
    {
-      param = CreateParameter("CurrA1MJD", epochVar);
+      param = CreateParameter("A1ModJulian", epochVar);
       param->SetRefObjectName(Gmat::SPACECRAFT, scName);
    }
    
@@ -4118,22 +4131,24 @@ StopCondition* Moderator::CreateDefaultStopCondition()
    return stopCond;
 }
 
+
 //------------------------------------------------------------------------------
 // Parameter* GetDefaultX()
 //------------------------------------------------------------------------------
 Parameter* Moderator::GetDefaultX()
 {
    Spacecraft *sc = GetDefaultSpacecraft();
-   Parameter* param = GetParameter(sc->GetName() + ".CurrA1MJD");
+   Parameter* param = GetParameter(sc->GetName() + ".A1ModJulian");
 
    if (param == NULL)
    {
-      param = CreateParameter("CurrA1MJD", sc->GetName() + ".CurrA1MJD");
+      param = CreateParameter("A1ModJulian", sc->GetName() + ".A1ModJulian");
       param->SetRefObjectName(Gmat::SPACECRAFT, sc->GetName());
    }
    
    return param;
 }
+
 
 //------------------------------------------------------------------------------
 // Parameter* GetDefaultY()

@@ -24,14 +24,14 @@
 #include "RefData.hpp"
 #include "Spacecraft.hpp"
 
-namespace GmatParam
-{
-   enum TimeDataID
-   {
-      A1MJD, JD,
-      YEARS, MONTHS, DAYS, HOURS, MINS, SECS
-   };
-};
+// namespace GmatParam
+// {
+//    enum TimeDataID
+//    {
+//       A1MJD, JD,
+//       YEARS, MONTHS, DAYS, HOURS, MINS, SECS
+//    };
+// };
 
 class GMAT_API TimeData : public RefData
 {
@@ -46,14 +46,11 @@ public:
    Real GetInitialEpoch() const;
    void SetInitialEpoch(const Real &initialEpoch);
    
-   Real GetCurrentTimeReal(GmatParam::TimeDataID id);
-   Real GetCurrentTimeReal(const std::string &str);
-   Real GetElapsedTimeReal(GmatParam::TimeDataID id);
-   Real GetElapsedTimeReal(const std::string &str);
+   Real GetCurrentTimeReal(Integer id);
+   std::string GetCurrentTimeString(Integer id);
    
-   //loj: future build
-   //std::string GetCurrentTimeString(const std::string &str);
-   //std::string GetElapsedTimeString(const std::string &str);
+   Real GetElapsedTimeReal(Integer id);
+   
    
    // The inherited methods from RefData
    virtual bool ValidateRefObjects(GmatBase *param);
@@ -70,8 +67,15 @@ protected:
    Spacecraft *mSpacecraft;
    Integer mEpochId;
    
-   const static Real MJD_OFFSET;// = 2430000.0; //loj: check the value
-   const static Real TIME_REAL_UNDEFINED;// = -9876543210.1234;
+//    const static Real MJD_OFFSET;// = 2430000.0; //loj: check the value
+   const static Real TIME_REAL_UNDEFINED;
+   const static std::string TIME_STRING_UNDEFINED;
+   
+   enum TimeDataID
+   {
+      A1_MJD, TAI_MJD, TT_MJD, TDB_MJD, TCB_MJD, UTC_MJD,
+      JD, YEARS, MONTHS, DAYS, HOURS, MINS, SECS
+   };
    
    enum
    {

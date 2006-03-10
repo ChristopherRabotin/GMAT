@@ -32,7 +32,7 @@
 #include "Variable.hpp"
 #include "StringVar.hpp"
 #include "Array.hpp"
-#include "BplaneParameters.hpp" //loj: 6/15/05 Added
+#include "BplaneParameters.hpp"
 
 //---------------------------------
 //  public methods
@@ -66,6 +66,30 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new ElapsedSecs(withName);
    if (ofType == "CurrA1MJD")
       return new CurrA1MJD(withName);
+   if (ofType == "A1ModJulian")
+      return new A1ModJulian(withName);
+   if (ofType == "A1Gregorian")
+      return new A1Gregorian(withName);
+   if (ofType == "TAIModJulian")
+      return new TAIModJulian(withName);
+   if (ofType == "TAIGregorian")
+      return new TAIGregorian(withName);
+   if (ofType == "TTModJulian")
+      return new TTModJulian(withName);
+   if (ofType == "TTGregorian")
+      return new TTGregorian(withName);
+   if (ofType == "TDBModJulian")
+      return new TDBModJulian(withName);
+   if (ofType == "TDBGregorian")
+      return new TDBGregorian(withName);
+   if (ofType == "TCBModJulian")
+      return new TCBModJulian(withName);
+   if (ofType == "TCBGregorian")
+      return new TCBGregorian(withName);
+   if (ofType == "UTCModJulian")
+      return new UTCModJulian(withName);
+   if (ofType == "UTCGregorian")
+      return new UTCGregorian(withName);
 
    // Cartesian parameters
    if (ofType == "X")
@@ -215,6 +239,18 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("ElapsedDays");
       creatables.push_back("ElapsedSecs");
       creatables.push_back("CurrA1MJD");
+      creatables.push_back("A1ModJulian");
+      creatables.push_back("A1Gregorian");
+      creatables.push_back("TAIModJulian");
+      creatables.push_back("TAIGregorian");
+      creatables.push_back("TTModJulian");
+      creatables.push_back("TTGregorian");
+      creatables.push_back("TDBModJulian");
+      creatables.push_back("TDBGregorian");
+      creatables.push_back("TCBModJulian");
+      creatables.push_back("TCBGregorian");
+      creatables.push_back("UTCModJulian");
+      creatables.push_back("UTCGregorian");
 
       // Cartesian parameters
       creatables.push_back("X");

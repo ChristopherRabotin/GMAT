@@ -28,22 +28,34 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// StringVar(const std::string &name = "", const std::string &desc = "")
+// StringVar(const std::string &name, const std::string &typeStr, 
+//         GmatParam::ParameterKey key, GmatBase *obj, const std::string &desc,
+//         const std::string &unit, GmatParam::DepObject depObj, Gmat::ObjectType,
+//         bool isTimeParam)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> parameter name
+ * @param <typeStr>  parameter type string
+ * @param <key>  parameter key (SYSTEM_PARAM, USER_PARAM, etc)
+ * @param <obj>  reference object pointer
  * @param <desc> parameter description
- *
+ * @param <unit> parameter unit
+ * @param <depObj> object which parameter is dependent on (COORD_SYS, ORIGIN, NONE)
+ * @param <ownerType> object type who owns this parameter as property
+ * @param <isTimeParam> true if parameter is time related, false otherwise
  */
 //------------------------------------------------------------------------------
-StringVar::StringVar(const std::string &name, const std::string &desc)
-   : Parameter(name, "String", GmatParam::USER_PARAM, NULL, desc, "",
-               GmatParam::NO_DEP, Gmat::UNKNOWN_OBJECT, false)
-{   
-   // Parameter data
-   mIsPlottable = false;
+StringVar::StringVar(const std::string &name, const std::string &typeStr, 
+                     GmatParam::ParameterKey key, GmatBase *obj, const std::string &desc,
+                     const std::string &unit, GmatParam::DepObject depObj,
+                     Gmat::ObjectType ownerType, bool isTimeParam)
+   : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, isTimeParam,
+               false, true)
+{  
+   mStringValue = STRING_PARAMETER_UNDEFINED;
+   mReturnType = Gmat::STRING_TYPE;
 }
 
 
@@ -146,7 +158,7 @@ std::string StringVar::ToString()
 
 
 //------------------------------------------------------------------------------
-// const std::string& GetString() const
+// std::string GetString() const
 //------------------------------------------------------------------------------
 /**
  * Retrieves string value of parameter.
@@ -154,7 +166,22 @@ std::string StringVar::ToString()
  * @return string value.
  */
 //------------------------------------------------------------------------------
-const std::string& StringVar::GetString() const
+std::string StringVar::GetString() const
+{
+   return mExpr;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string EvaluateString()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves string value of parameter.
+ *
+ * @return string value.
+ */
+//------------------------------------------------------------------------------
+std::string StringVar::EvaluateString()
 {
    return mExpr;
 }

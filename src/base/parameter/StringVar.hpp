@@ -27,23 +27,33 @@ class GMAT_API StringVar : public Parameter
 {
 public:
 
-   StringVar(const std::string &name = "", const std::string &desc = "");
+   StringVar(const std::string &name = "",
+             const std::string &typeStr = "StringVar",
+             GmatParam::ParameterKey key = GmatParam::USER_PARAM,
+             GmatBase *obj = NULL, const std::string &desc = "",
+             const std::string &unit = "",
+             GmatParam::DepObject depObj = GmatParam::NO_DEP,
+             Gmat::ObjectType ownerType = Gmat::UNKNOWN_OBJECT,
+             bool isTimeParam = false);
    StringVar(const StringVar &copy);
    StringVar& operator= (const StringVar& right);
    virtual ~StringVar();
-
+   
    bool operator==(const StringVar &right) const;
    bool operator!=(const StringVar &right) const;
 
    // methods inherited from Parameter
    virtual std::string ToString();
-   virtual const std::string& GetString() const;
+   virtual std::string GetString() const;
+   virtual std::string EvaluateString();
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone() const;
    
 protected:
-    
+   
+   std::string mStringValue;
+   
 private:
 
 };

@@ -46,15 +46,17 @@ public:
              GmatParam::ParameterKey key, GmatBase *obj,
              const std::string &desc, const std::string &unit,
              GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
-             bool isTimeParam);
+             bool isTimeParam, bool isPlottable, bool isReportable);
    Parameter(const Parameter &copy);
    Parameter& operator= (const Parameter& right);
    virtual ~Parameter();
    
    GmatParam::ParameterKey GetKey() const;
    Gmat::ObjectType GetOwnerType() const;
+   Gmat::ParameterType GetReturnType() const;
    bool IsTimeParameter() const;
    bool IsPlottable() const;
+   bool IsReportable() const;
    bool IsCoordSysDependent() const;
    bool IsOriginDependent() const;
    bool NeedCoordSystem() const;
@@ -68,16 +70,18 @@ public:
    
    virtual Real GetReal() const;
    virtual Rvector6 GetRvector6() const;
+   virtual std::string GetString() const;
    
    virtual void SetReal(Real val);
    virtual void SetRvector6(const Rvector6 &val);
+   virtual void SetString(const std::string &val);
    
    virtual Real EvaluateReal();
    virtual Rvector6 EvaluateRvector6();
+   virtual std::string EvaluateString();
    
    virtual const std::string* GetParameterList() const;
    
-   //loj: 1/26/05 Added GetInternalCoordSystem(), SetInternalCoordSystem()
    virtual CoordinateSystem* GetInternalCoordSystem();
    
    virtual void SetInternalCoordSystem(CoordinateSystem *cs);
@@ -116,7 +120,7 @@ public:
    virtual bool SetStringParameter(const std::string &label,
                                    const std::string &value);
 protected:
-   
+
    static const std::string PARAMETER_KEY_STRING[GmatParam::KeyCount];
 
    GmatParam::ParameterKey  mKey;
@@ -126,11 +130,13 @@ protected:
    std::string   mDepObjectName;
    
    Gmat::ObjectType   mOwnerType;
+   Gmat::ParameterType mReturnType;
    GmatParam::DepObject mDepObj;
    UnsignedInt   mColor;
    
    bool mIsTimeParam;
    bool mIsPlottable;
+   bool mIsReportable;
    bool mIsCoordSysDependent;
    bool mIsOriginDependent;
    bool mNeedCoordSystem;

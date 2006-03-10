@@ -125,7 +125,7 @@ const StringArray& ParameterInfo::GetNamesOfParameters()
    return mParamNames;
 }
 
-//loj: 6/7/05 Added
+
 //------------------------------------------------------------------------------
 // Gmat::ObjectType GetOwnerType(const std::string &type)
 //------------------------------------------------------------------------------
@@ -145,11 +145,31 @@ GmatParam::DepObject ParameterInfo::GetDepObjectType(const std::string &name)
 
 
 //------------------------------------------------------------------------------
+// bool ParameterInfo::IsPlottable(const std::string &type)
+//------------------------------------------------------------------------------
+bool ParameterInfo::IsPlottable(const std::string &type)
+{
+   return mParamPlottableMap[type];
+}
+
+
+//------------------------------------------------------------------------------
+// bool ParameterInfo::IsReportable(const std::string &type)
+//------------------------------------------------------------------------------
+bool ParameterInfo::IsReportable(const std::string &type)
+{
+   return mParamReportableMap[type];
+}
+
+
+//------------------------------------------------------------------------------
 // void Add(const std::string type, Gmat::ObjectType owner,
-//          const std::string &name, GmatParam::DepObject depType)
+//          const std::string &name, GmatParam::DepObject depType,
+//          bool isPlottable, bool isReportable)
 //------------------------------------------------------------------------------
 void ParameterInfo::Add(const std::string type, Gmat::ObjectType owner,
-                        const std::string &name, GmatParam::DepObject depType)
+                        const std::string &name, GmatParam::DepObject depType,
+                        bool isPlottable, bool isReportable)
 {
    // add property owner
    mParamOwnerMap[type] = owner;
@@ -159,6 +179,12 @@ void ParameterInfo::Add(const std::string type, Gmat::ObjectType owner,
    std::string propertyName = name.substr(pos+1, name.npos-pos);
    
    mParamDepObjMap[propertyName] = depType;
+
+   // add plottable
+   mParamPlottableMap[type] = isPlottable;
+
+   // add reportable
+   mParamReportableMap[type] = isReportable;
    
    #if DEBUG_PARAM_INFO
    MessageInterface::ShowMessage

@@ -52,10 +52,13 @@ RealVar::RealVar(const std::string &name, const std::string &typeStr,
                  GmatParam::ParameterKey key, GmatBase *obj, const std::string &desc,
                  const std::string &unit, GmatParam::DepObject depObj,
                  Gmat::ObjectType ownerType, bool isTimeParam)
-   : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, isTimeParam)
+   : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, isTimeParam,
+               true, true)
 {  
    mRealValue = REAL_PARAMETER_UNDEFINED;
+   mReturnType = Gmat::REAL_TYPE;
 }
+
 
 //------------------------------------------------------------------------------
 // RealVar(const RealVar &copy)

@@ -65,7 +65,8 @@ Parameter::PARAMETER_TYPE[ParameterParamCount] =
 // Parameter(const std::string &name, const std::string &typeStr,
 //           GmatParam::ParameterKey key, GmatBase *obj, const std::string &desc,
 //           const std::string &unit, GmatParam::DepObject depObj,
-//           Gmat::ObjectType ownerType, bool isTimeParam)
+//           Gmat::ObjectType ownerType, bool isTimeParam, bool isPlottable,
+//           bool isReportable)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -79,6 +80,8 @@ Parameter::PARAMETER_TYPE[ParameterParamCount] =
  * @param <ownerType> object type who owns this parameter as property
  * @param <depObj> object which parameter is dependent on (COORD_SYS, ORIGIN, NONE)
  * @param <isTimeParam> true if parameter is time related, false otherwise
+ * @param <isPlottable> true if parameter is plottable (Real), false otherwise
+ * @param <isReportable> true if parameter is reportable (Real, String), false otherwise
  *
  * @exception <ParameterException> thrown if parameter name has blank spaces
  */
@@ -87,7 +90,7 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
                      GmatParam::ParameterKey key, GmatBase *obj,
                      const std::string &desc, const std::string &unit,
                      GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
-                     bool isTimeParam)
+                     bool isTimeParam, bool isPlottable, bool isReportable)
    : GmatBase(Gmat::PARAMETER, typeStr, name)
 {  
    objectTypes.push_back(Gmat::PARAMETER);
@@ -135,10 +138,12 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    else if (depObj == GmatParam::ORIGIN)
       mIsOriginDependent = true;
    
-   mIsPlottable = true;
+   mIsPlottable = isPlottable;
+   mIsReportable = isReportable;
 
    // register parameter names with info
-   ParameterInfo::Instance()->Add(typeName, mOwnerType, instanceName, mDepObj);
+   ParameterInfo::Instance()->Add(typeName, mOwnerType, instanceName, mDepObj,
+                                  isPlottable, isReportable);
 
    // set parameter count
    parameterCount = ParameterParamCount;
@@ -172,7 +177,8 @@ Parameter::Parameter(const Parameter &copy)
    mIsOriginDependent = copy.mIsOriginDependent;
    mNeedCoordSystem = copy.mNeedCoordSystem;
    
-   ParameterInfo::Instance()->Add(typeName, mOwnerType, instanceName, mDepObj);
+   //loj: 3/9/06 we need to register only once for type in the constructor
+   //ParameterInfo::Instance()->Add(typeName, mOwnerType, instanceName, mDepObj);
 }
 
 
@@ -207,8 +213,9 @@ Parameter& Parameter::operator= (const Parameter& right)
    mIsCoordSysDependent = right.mIsCoordSysDependent;
    mIsOriginDependent = right.mIsOriginDependent;
    mNeedCoordSystem = right.mNeedCoordSystem;
-   
-   ParameterInfo::Instance()->Add(typeName, mOwnerType, instanceName, mDepObj);
+
+   //loj: 3/9/06 we need to register only once for type in the constructor
+   //ParameterInfo::Instance()->Add(typeName, mOwnerType, instanceName, mDepObj);
    
    return *this;
 }
@@ -236,6 +243,7 @@ GmatParam::ParameterKey Parameter::GetKey() const
    return mKey;
 }
 
+
 //------------------------------------------------------------------------------
 // Gmat::ObjectType GetOwnerType() const
 //------------------------------------------------------------------------------
@@ -247,6 +255,20 @@ Gmat::ObjectType Parameter::GetOwnerType() const
 {
    return mOwnerType;
 }
+
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetReturnType() const
+//------------------------------------------------------------------------------
+/**
+ * @return enumeration value of return parameter type.
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType Parameter::GetReturnType() const
+{
+   return mReturnType;
+}
+
 
 //------------------------------------------------------------------------------
 // bool IsTimeParameter() const
@@ -260,6 +282,7 @@ bool Parameter::IsTimeParameter() const
    return mIsTimeParam;
 }
 
+
 //------------------------------------------------------------------------------
 // bool IsPlottable() const
 //------------------------------------------------------------------------------
@@ -271,6 +294,20 @@ bool Parameter::IsPlottable() const
 {
    return mIsPlottable;
 }
+
+
+//------------------------------------------------------------------------------
+// bool IsReportable() const
+//------------------------------------------------------------------------------
+/**
+ * @return true if parameter is plottble.
+ */
+//------------------------------------------------------------------------------
+bool Parameter::IsReportable() const
+{
+   return mIsReportable;
+}
+
 
 //------------------------------------------------------------------------------
 // bool IsCoordSysDependent() const
@@ -402,6 +439,25 @@ Rvector6 Parameter::GetRvector6() const
        "function.\n");
 }
 
+
+//------------------------------------------------------------------------------
+// std::string GetString() const
+//------------------------------------------------------------------------------
+/**
+ * @return parameter value without evaluating.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+std::string Parameter::GetString() const
+{
+   throw ParameterException
+      ("Parameter: GetString(): " + this->GetTypeName() + " has no "
+       "implementation of GetString().\nMay be an invalid call to this "
+       "function.\n");
+}
+
+
 //------------------------------------------------------------------------------
 // void SetReal(Real val)
 //------------------------------------------------------------------------------
@@ -418,6 +474,7 @@ void Parameter::SetReal(Real val)
        "implementation of SetReal().\nMay be an invalid call to this "
        "function.\n");
 }
+
 
 //------------------------------------------------------------------------------
 // void SetRvector6(const Rvector6 &val)
@@ -436,6 +493,25 @@ void Parameter::SetRvector6(const Rvector6 &val)
        "function.\n");
 }
 
+
+//------------------------------------------------------------------------------
+// void SetString(const std::string &val)
+//------------------------------------------------------------------------------
+/**
+ * Sets string value of parameter.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+void Parameter::SetString(const std::string &val)
+{
+   throw ParameterException
+      ("Parameter: SetString(): " + this->GetTypeName() + " has no "
+       "implementation of SetString().\nMay be an invalid call to this "
+       "function.\n");
+}
+
+
 //------------------------------------------------------------------------------
 // Real EvaluateReal()
 //------------------------------------------------------------------------------
@@ -453,6 +529,7 @@ Real Parameter::EvaluateReal()
        "function.\n");
 }
 
+
 //------------------------------------------------------------------------------
 // Rvector6 EvaluateRvector6()
 //------------------------------------------------------------------------------
@@ -469,6 +546,25 @@ Rvector6 Parameter::EvaluateRvector6()
        "implementation of EvaluateRvector6().\nMay be an invalid call to this "
        "function.\n");
 }
+
+
+//------------------------------------------------------------------------------
+// std::string EvaluateString()
+//------------------------------------------------------------------------------
+/**
+ * @return newly evaluated parameter value.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+std::string Parameter::EvaluateString()
+{
+   throw ParameterException
+      ("Parameter: EvaluateString(): " + this->GetTypeName() + " has no "
+       "implementation of EvaluateString().\nMay be an invalid call to this "
+       "function.\n");
+}
+
 
 //------------------------------------------------------------------------------
 // virtual const std::string* GetParameterList() const
