@@ -26,6 +26,7 @@
 #include "FiniteThrust.hpp"
 #include "GmatFunction.hpp"
 #include "CallFunction.hpp"
+#include "SubscriberException.hpp"
 #include "MessageInterface.hpp"
 
 #include <algorithm>       // for find
@@ -795,6 +796,10 @@ void Sandbox::BuildReferences(GmatBase *obj)
       oName = obj->GetRefObjectName(Gmat::UNKNOWN_OBJECT);
       SetRefFromName(obj, oName);
    }
+   catch (SubscriberException &ex)
+   {
+      throw ex;
+   }
    catch (SandboxException &ex)
    {
       // Handle SandboxExceptions first.
@@ -838,6 +843,10 @@ void Sandbox::BuildReferences(GmatBase *obj)
             #endif
             //throw ex;
          }
+         catch (SubscriberException &ex)
+         {
+            throw ex;
+         }
          catch (BaseException &ex)
          {
             // Post a message and -- otherwise -- ignore the exceptions
@@ -859,6 +868,10 @@ void Sandbox::BuildReferences(GmatBase *obj)
             ex.GetMessage() + "\n");
       #endif
       //throw ex;
+   }
+   catch (SubscriberException &ex)
+   {
+      throw ex;
    }
    catch (BaseException &ex) // Handles no refObject array
    {
@@ -996,6 +1009,7 @@ void Sandbox::SetRefFromName(GmatBase *obj, const std::string &oName)
    if (objectMap.find(oName) != objectMap.end())
    {
       GmatBase *refObj = objectMap[oName];
+
       obj->SetRefObject(refObj, refObj->GetType(), refObj->GetName());
    }
    else
