@@ -20,6 +20,7 @@
 #include "TsPlot.hpp"
 #include "Publisher.hpp"         // for GetRunState()
 #include "PlotInterface.hpp"     // for XY plot
+#include "SubscriberException.hpp"
 #include "MessageInterface.hpp"  // for ShowMessage()
 
 //#define DEBUG_TSPLOT_INIT 1
@@ -763,6 +764,7 @@ GmatBase* TsPlot::GetRefObject(const Gmat::ObjectType type,
                            "not found\n");
 }
 
+
 //------------------------------------------------------------------------------
 // virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //                           const std::string &name = "")
@@ -776,7 +778,12 @@ bool TsPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       if (name == mXParamName)
       {
          mXParam = (Parameter*)obj;
-      
+         
+         if (!mXParam->IsPlottable())
+               throw SubscriberException
+                  ("The X parameter: " + name + " of " + instanceName +
+                   " is not plottable\n");
+         
          #if DEBUG_TSPLOT_OBJECT
          MessageInterface::ShowMessage
             ("TsPlot::SetRefObject() mXParam:%s successfully set\n",
@@ -790,7 +797,14 @@ bool TsPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          if (mYParamNames[i] == name)
          {
             mYParams[i] = (Parameter*)obj;
-               
+            
+            if (!mYParams[i]->IsPlottable())
+            {
+               throw SubscriberException
+                  ("The Y parameter: " + name + " of " + instanceName +
+                   " is not plottable\n");
+            }
+            
             #if DEBUG_TSPLOT_OBJECT
             MessageInterface::ShowMessage
                ("TsPlot::SetRefObject() mYParams[%s] successfully set\n",
