@@ -133,6 +133,7 @@ Real TimeConverterUtil::ConvertToTaiMjd(Integer fromType, Real origValue,
     case TimeConverterUtil::A1:
         return (origValue -
              (GmatTimeUtil::A1_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
+    case TimeConverterUtil::TAIMJD:
     case TimeConverterUtil::TAI:
         return origValue;
     case TimeConverterUtil::UTCMJD:
@@ -238,6 +239,7 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
           return (origValue +
                  (GmatTimeUtil::A1_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));      
       }
+      case TimeConverterUtil::TAIMJD:
       case TimeConverterUtil::TAI:
       {
           #ifdef DEBUG_TIMECONVERTER_DETAILS

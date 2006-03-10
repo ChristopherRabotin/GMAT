@@ -69,6 +69,7 @@ namespace TimeConverterUtil
    enum TimeSystemTypes
    {
       A1MJD = 0,
+      TAIMJD,
       UTCMJD,
       UT1MJD,
       TDBMJD,
@@ -87,6 +88,7 @@ namespace TimeConverterUtil
    static const std::string TIME_SYSTEM_TEXT[TimeSystemCount] =
          {
             "A1Mjd",
+            "TaiMjd",
             "UtcMjd",
             "Ut1Mjd",
             "TdbMjd",
