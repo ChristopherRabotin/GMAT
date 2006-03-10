@@ -23,6 +23,7 @@
 #include "MessageInterface.hpp"
 #include "Publisher.hpp"         // for Instance()
 #include "FileManager.hpp"       // for GetPathname()
+#include <iomanip>
 
 //#define DEBUG_REPORTFILE 1
 //#define DEBUG_REPORTFILE_DATA 1
@@ -625,13 +626,24 @@ GmatBase* ReportFile::GetRefObject(const Gmat::ObjectType type,
 bool ReportFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                               const std::string &name)
 {
-   if (type == Gmat::PARAMETER) //loj: 4/22/04 Added
+   if (type == Gmat::PARAMETER)
    {
       for (int i=0; i<mNumVarParams; i++)
       {
          if (mVarParamNames[i] == name)
          {
             mVarParams[i] = (Parameter*)obj;
+
+            // Test see if it is reportable.
+            // Cannot test in AddVarParameter(), because it just addes
+            // the name.
+            if (!mVarParams[i]->IsReportable())
+            {
+               MessageInterface::ShowMessage
+                  ("*** WARNING *** The parameter:%s is not reportable so it "
+                   "is removed from ReportFile.", name.c_str());
+            }
+            
             return true;
          }
       }
@@ -802,55 +814,73 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
 {
    if (!active)
       return true;
+
+   if (len == 0)
+      return false;
    
    if (mNumVarParams > 0)
    {
-      Rvector varvals = Rvector(mNumVarParams);
-   
-      if (len == 0)
-         return false;
-      else {
-   
-        if (!dstream.is_open())
-           if (!OpenReportFile())
-              return false;
-   
-        if (initial)
-           WriteHeaders();
-           
-        if (!dstream.good())
-           dstream.clear();
-   
-       for (int i=0; i < mNumVarParams; i++)
-       {
-           varvals[i] = mVarParams[i]->EvaluateReal();
-           dstream.width(columnWidth);
-           dstream.precision(precision);
-           //dstream.setf(std::ios::showpoint);
-           dstream.fill(' ');
-           
-           if (leftJustify)
-           {
-              dstream.setf(std::ios::left);
-              if (zeroFill)
-                 dstream.fill('0');                 
-           }
-           
-           //dstream << varvals[i];
-           dstream << varvals[i] << "   "; // give space between columns
-       }
-   
-       dstream << std::endl;
-   
-       #if DEBUG_REPORTFILE_DATA
-          MessageInterface::ShowMessage
-             ("ReportFile::Distribute() dat=%f %f %f %f %g %g %g\n", dat[0], dat[1],
-              dat[2], dat[3], dat[4], dat[5], dat[6]);
-       #endif
-          
+      // we don't need to save data, so comment it out
+      //Rvector varvals = Rvector(mNumVarParams);
+      Real rval = -9999.999;
+      std::string sval;
+      
+      if (!dstream.is_open())
+         if (!OpenReportFile())
+            return false;
+      
+      if (initial)
+         WriteHeaders();
+      
+      if (!dstream.good())
+         dstream.clear();
+      
+      for (int i=0; i < mNumVarParams; i++)
+      {
+         if (!mVarParams[i]->IsReportable())
+            continue;
+         
+         // set longer width of param names or columnWidth
+         Integer width = (Integer)mVarParamNames[i].length() > columnWidth ?
+            mVarParamNames[i].length() : columnWidth;
+         
+         //dstream.width(columnWidth);
+         dstream.width(width);
+         dstream.fill(' ');
+            
+         if (leftJustify)
+         {
+            dstream.setf(std::ios::left);
+            if (zeroFill)
+               dstream.fill('0');                 
+         }
+         
+         if (mVarParams[i]->GetReturnType() == Gmat::REAL_TYPE)
+         {
+            //varvals[i] = mVarParams[i]->EvaluateReal();
+            rval = mVarParams[i]->EvaluateReal();
+            dstream.precision(precision);
+            //dstream << varvals[i] << "   "; // give space between columns
+            dstream << rval << "   "; // give space between columns
+         }
+         else if (mVarParams[i]->GetReturnType() == Gmat::STRING_TYPE)
+         {
+            sval = mVarParams[i]->EvaluateString();
+            width = (Integer)sval.length() > width ? sval.length() : width;
+            dstream.width(width);
+            dstream << sval << "   "; // give space between columns
+         }
       }
+      
+      dstream << std::endl;
+      
+      #if DEBUG_REPORTFILE_DATA
+      MessageInterface::ShowMessage
+         ("ReportFile::Distribute() dat=%f %f %f %f %g %g %g\n", dat[0], dat[1],
+          dat[2], dat[3], dat[4], dat[5], dat[6]);
+      #endif
    }
-
+   
    return true;
 }
 
@@ -882,19 +912,30 @@ void ReportFile::WriteHeaders()
    {
       if (!dstream.is_open())
          return;
-         
+
       // write heading for each item
       for (int i=0; i < mNumVarParams; i++)
       {
           if (!dstream.good())
              dstream.clear();
           
-          dstream.width(columnWidth);
+          // set longer width of param names or columnWidth
+          Integer width = (Integer)mVarParamNames[i].length() > columnWidth ?
+             mVarParamNames[i].length() : columnWidth;
+
+          // parameter name has Gregorian, minimum width is 24
+          if (mVarParamNames[i].find("Gregorian") != mVarParamNames[i].npos)
+             if (width < 24)
+                width = 24;
+          
+          dstream.width(width); // sets miminum field width
+          
+          //dstream.width(columnWidth);
           dstream.fill(' ');
           
           if (leftJustify)
              dstream.setf(std::ios::left);
-          
+
           dstream << mVarParamNames[i] << "   ";
       }
       
