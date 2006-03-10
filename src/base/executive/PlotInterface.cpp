@@ -165,7 +165,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                wxDEFAULT_FRAME_STYLE, wxString(csName.c_str()),
                                ssPtr);
       
-      currPlotFrame->Show();
+      currPlotFrame->Show(); 
       
       #if __WXMAC__  
       currPlotFrame->SetSize(499, 349);
@@ -1013,10 +1013,15 @@ bool PlotInterface::RefreshTsPlot(const std::string &plotName)
       for (int i=0; i<MdiTsPlot::numChildren; i++)
       {
          frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
-         if (frame)
+         frame->SetSize(500, 350);
+         frame->Update();
+         if (frame)            
             if (frame->GetPlotName().IsSameAs(owner.c_str()))
             {
                frame->RedrawCurve();
+               #if __WXMAC__  
+                  frame->Refresh(true,NULL);
+               #endif
             }
       }
    }
