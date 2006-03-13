@@ -225,6 +225,7 @@ OBJECTS = \
     parameter/TimeData.o \
     parameter/TimeParameters.o \
     parameter/TimeReal.o \
+    parameter/TimeString.o \
     parameter/Variable.o \
     propagator/AdamsBashforthMoulton.o \
     propagator/BulirschStoer.o \
