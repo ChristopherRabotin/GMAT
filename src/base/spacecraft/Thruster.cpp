@@ -867,11 +867,11 @@ bool Thruster::RenameRefObject(const Gmat::ObjectType type,
  * expressed in metric units. The thrust, in Newtons, applied by a spacecraft
  * engine is given by
  * 
-   \f[\begin{eqnarray}
-    F_{T}(P,T) & = & \left\{ C_{1}+C_{2}P+C_{3}P^{2}+C_{4}P^{C_{5}}+
-                   C_{6}P^{C_{7}}+C_{8}P^{C_{9}}\right. \\
-    &  & \left.+C_{10}C_{11}^{C_{12}P}\right\} \left(\frac{T}{T_{ref}}
-         \right)^{1+C_{13}+C_{14}P}\end{eqnarray} \f]
+   \f[
+    F_{T}(P,T) = \left\{ C_{1}+C_{2}P+C_{3}P^{2}+C_{4}P^{C_{5}}+
+                   C_{6}P^{C_{7}}+C_{8}P^{C_{9}}+
+                   C_{10}C_{11}^{C_{12}P}\right\} \left(\frac{T}{T_{ref}}
+                   \right)^{1+C_{13}+C_{14}P}\f]
  *
  * Pressures are expressed in kilopascals, and temperatures in degrees
  * centigrade. The coefficients C1 - C14 are set by the user. Each coefficient
@@ -882,11 +882,10 @@ bool Thruster::RenameRefObject(const Gmat::ObjectType type,
  * Specific Impulse, measured in m/s (or, equivalently, Newton Seconds/kilogram)
  * is expressed using a similar equation:
  * 
-   \f[\begin{eqnarray}
-    I_{sp}(P,T) & = & \left\{ K_{1}+K_{2}P+K_{3}P^{2}+K_{4}P^{K_{5}}+
-                    K_{6}P^{K_{7}}+K_{8}P^{K_{9}}\right. \\
-    &  & \left.+K_{10}K_{11}^{K_{12}P}\right\} \left(\frac{T}{T_{ref}}
-         \right)^{1+K_{13}+K_{14}P}\end{eqnarray}\f]
+   \f[
+    I_{sp}(P,T) = \left\{ K_{1}+K_{2}P+K_{3}P^{2}+K_{4}P^{K_{5}}+
+                    K_{6}P^{K_{7}}+K_{8}P^{K_{9}}+K_{10}K_{11}^{K_{12}P}\right\} 
+         \left(\frac{T}{T_{ref}}\right)^{1+K_{13}+K_{14}P}\f]
  * 
  * @return true on successful evaluation.
  */

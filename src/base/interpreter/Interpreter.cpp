@@ -4095,16 +4095,3 @@ void Interpreter::PreinitializeCoordinateSystem(CoordinateSystem *cs)
       }
    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
