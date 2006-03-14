@@ -163,7 +163,8 @@ GmatCoordinate::ParameterUsage GeocentricSolarMagneticAxes::UsesItrfFile() const
 bool GeocentricSolarMagneticAxes::Initialize()
 {
    ObjectReferencedAxes::Initialize();
-   if (originName == SolarSystem::EARTH_NAME) InitializeFK5();
+   //if (originName == SolarSystem::EARTH_NAME) // 2006.03.14 WCS 
+   InitializeFK5();
 
    return true;
 }
