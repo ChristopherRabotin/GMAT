@@ -116,6 +116,7 @@ namespace Gmat
       HARDWARE,            // Tanks, Thrusters, Antennae, Sensors, etc.
       COORDINATE_SYSTEM,
       AXIS_SYSTEM,
+      ATTITUDE,
       UNKNOWN_OBJECT
    };
 

@@ -83,7 +83,7 @@ GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    "Barycenter",    "Atmosphere",    "Parameter",     "StopCondition", 
    "Solver",        "Subscriber",    "PropSetup",     "RefFrame",      
    "Function",      "FuelTank",      "Thruster",      "Hardware",      
-   "CoordinateSystem","AxisSystem",  "UnknownObject"
+   "CoordinateSystem","AxisSystem",  "Attitude",      "UnknownObject"
 };
 
 
