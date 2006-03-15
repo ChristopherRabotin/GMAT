@@ -280,14 +280,22 @@ bool Report::Execute()
    
    for (std::vector<Parameter*>::iterator i = parms.begin(); i != parms.end(); ++i)
    {
+      if (!(*i)->IsReportable())
+         continue;
+            
       if (leftJustify)
+      {
          datastream.setf(std::ios::left);
-
-      if (fillZero)
-         datastream.fill('0');
+         if (fillZero)
+            datastream.fill('0');
+      }
       
       datastream.width(colWidth);
-      datastream << (*i)->EvaluateReal() << "   ";
+
+      if ((*i)->GetReturnType() == Gmat::REAL_TYPE)
+         datastream << (*i)->EvaluateReal() << "   ";
+      else if ((*i)->GetReturnType() == Gmat::STRING_TYPE)
+         datastream << (*i)->EvaluateString() << "   ";
    }
 
    // Publish it
