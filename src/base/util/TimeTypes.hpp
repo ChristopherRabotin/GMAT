@@ -82,7 +82,7 @@ namespace GmatTimeUtil
    const Real JD_MJD_OFFSET = 2400000.5;        // Vallado page 187
    const Real TT_TAI_OFFSET = 32.184;           // GMAT Math Spec section 2.3
    const Real A1_TAI_OFFSET = 0.0343817;        // GMAT Math Spec section 2.1
-   const Real JD_JAN_5_1941 = 2430000.0;       // old name JULIAN_DATE_OF_010541
+   const Real JD_JAN_5_1941 = 2430000.0;        // old name JULIAN_DATE_OF_010541
    const Real JD_NOV_17_1858 = 2400000.5;       // old name JD_MJD_OFFSET
 
    const Integer DAYS_BEFORE_MONTH[12] =
@@ -96,10 +96,16 @@ namespace GmatTimeUtil
    const Integer JULIAN_DATE_OF_010541 = 2430000;
    
    enum DayName {SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY};
-
+   
    enum MonthName {JANUARY = 1, FEBRUARY, MARCH, APRIL, MAY, JUNE, JULY, AUGUST,  
                    SEPTEMBER, OCTOBER, NOVEMBER, DECEMBER};
-          
+   
+   static const std::string MONTH_NAME_TEXT[12] =
+   {
+      "Jan",  "Feb",  "Mar",  "Apr",  "May",  "Jun",
+      "Jul",  "Aug",  "Sep",  "Oct",  "Nov",  "Dec"
+   };
+
    enum SIGN {PLUS = 1, MINUS = -1 };
    
 }

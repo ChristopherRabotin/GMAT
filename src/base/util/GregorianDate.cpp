@@ -18,6 +18,8 @@
 //------------------------------------------------------------------------------
 
 #include "GregorianDate.hpp"
+#include "TimeTypes.hpp"
+#include "DateUtil.hpp"         // for IsValidTime()
 #include "MessageInterface.hpp"
 #include <algorithm>
 
@@ -191,20 +193,21 @@ void GregorianDate::Initialize(const std::string &str)
    type = "Gregorian";
    isValid = false;
 
-   // Initialize the month name
-   monthName.push_back("Jan");
-   monthName.push_back("Feb");
-   monthName.push_back("Mar");
-   monthName.push_back("Apr");
-   monthName.push_back("May");
-   monthName.push_back("Jun");
-   monthName.push_back("Jul");
-   monthName.push_back("Aug");
-   monthName.push_back("Sep");
-   monthName.push_back("Oct");
-   monthName.push_back("Nov");
-   monthName.push_back("Dec");
+//    // Initialize the month name
+//    monthName.push_back("Jan");
+//    monthName.push_back("Feb");
+//    monthName.push_back("Mar");
+//    monthName.push_back("Apr");
+//    monthName.push_back("May");
+//    monthName.push_back("Jun");
+//    monthName.push_back("Jul");
+//    monthName.push_back("Aug");
+//    monthName.push_back("Sep");
+//    monthName.push_back("Oct");
+//    monthName.push_back("Nov");
+//    monthName.push_back("Dec");
 }
+
 
 //---------------------------------------------------------------------------
 //  void ParseOut(const std::string &str) 
@@ -215,6 +218,8 @@ void GregorianDate::Initialize(const std::string &str)
  */
 void GregorianDate::ParseOut(const std::string &str) 
 {
+   //MessageInterface::ShowMessage("==> GregorianDate::ParseOut() str=%s\n", str.c_str());
+   
    // Check if non-empty string then parse out; otherwise, nothing. 
    if (str != "")
    {
@@ -238,16 +243,31 @@ void GregorianDate::ParseOut(const std::string &str)
 //            throw GregorianDateException();
 
          // Check validity for month 
-         std::vector<std::string>::iterator pos;
-         pos = find(monthName.begin(),monthName.end(),
-                    dateToken.GetToken(1));
+//          std::vector<std::string>::iterator pos;
+//          pos = find(monthName.begin(),monthName.end(),
+//                     dateToken.GetToken(1));
 
-         if (pos == monthName.end())
+//          if (pos == monthName.end())
+//             return;
+// //            throw GregorianDateException();
+
+         bool monthFound = false;
+         bool monthNum = 0;
+         for (int i=0; i<12; i++)
+         {
+            if (GmatTimeUtil::MONTH_NAME_TEXT[i] == dateToken.GetToken(1))
+            {
+               monthFound = true;
+               monthNum = i+1;
+               break;
+            }
+         }
+         
+         if (!monthFound)
             return;
-//            throw GregorianDateException();
 
-         Integer monthNum;
-         monthNum = (Integer) distance(monthName.begin(),pos) + 1;
+//          Integer monthNum;
+//          monthNum = (Integer) distance(monthName.begin(),pos) + 1;
 
          std::string tempYMD;
          tempYMD = dateToken.GetToken(2) + NumToString(monthNum); 
@@ -295,7 +315,9 @@ void GregorianDate::ParseOut(const std::string &str)
 
             // Get real number in seconds
             Real second = ToReal(strSeconds); 
-
+            //MessageInterface::ShowMessage
+            //   ("==> GregorianDate::ParseOut() second=%.10f\n", second);
+            
             // Finally check validity for the date  
             if (!IsValidTime(yearNum,monthNum,dayNum,hour,minute,second))
             {
@@ -303,8 +325,11 @@ void GregorianDate::ParseOut(const std::string &str)
                   "\nWarning: invalid Gregorian format from DateUtil"); 
                return;
             } 
- 
+            
             stringYMDHMS = tempYMD;
+            //MessageInterface::ShowMessage
+            //   ("==> GregorianDate::ParseOut() stringYMDHMS=%s\n",
+            //    stringYMDHMS.c_str());
          }                    
          isValid = true;
       }
@@ -439,5 +464,6 @@ std::string GregorianDate::GetMonthName(const Integer month)
       return "";
    }
 
-   return monthName[month-1];
+//    return monthName[month-1];
+   return GmatTimeUtil::MONTH_NAME_TEXT[month-1];
 }
