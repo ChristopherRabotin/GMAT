@@ -668,9 +668,19 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
    {
       std::string toEpochFormat = epochFormatComboBox->GetStringSelection().c_str();    
       std::string epochStr = epochValue->GetValue().c_str();
-      theSpacecraft->SetDateFormat(toEpochFormat);
-      epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch").c_str());
-      fromEpochFormat = toEpochFormat;
+      try
+      {
+         theSpacecraft->SetDateFormat(toEpochFormat);
+         epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch").c_str());
+         fromEpochFormat = toEpochFormat;
+      }
+      catch (BaseException &e)
+      {
+         epochFormatComboBox->SetValue(fromEpochFormat.c_str());
+         MessageInterface::ShowMessage
+            ("*** ERROR *** OrbitPanel:OnComboBoxChange() error occurred!\n%s\n",
+             e.GetMessage().c_str());
+      }
    }
 
    // ------------------- coordinate system or state type change ---------------
