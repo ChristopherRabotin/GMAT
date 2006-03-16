@@ -133,6 +133,9 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    initialDisplay       (false),
    csSet                (false)
 {
+   //MessageInterface::ShowMessage("=====> Spacecraft::Spacecraft(%s) entered\n",
+   //                              name.c_str());
+   
    objectTypes.push_back(Gmat::SPACECRAFT);
    objectTypeNames.push_back("Spacecraft");
 
@@ -168,6 +171,9 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    parameterCount = SpacecraftParamCount;
    
    BuildElementLabelMap();
+   
+   //MessageInterface::ShowMessage("=====> Spacecraft::Spacecraft(%s) exiting\n",
+   //                              name.c_str());
 }
 
 
@@ -590,7 +596,7 @@ void Spacecraft::SetDisplayDateFormat(const std::string &dateType)
 void Spacecraft::SetDateFormat(const std::string &dateType) 
 {
    #ifdef DEBUG_DATE_FORMAT
-      MessageInterface::ShowMessage(
+      MessageInterface::ShowMessage("Spacecraft::SetDateFormat() "
          "Setting date format to %s; initial epoch is %s\n", 
          dateType.c_str(), scEpoch.c_str());
    #endif
@@ -598,6 +604,10 @@ void Spacecraft::SetDateFormat(const std::string &dateType)
    // 1. Save old data
    std::string oldEpochSystem = epochSystem;
    std::string oldEpochFormat = epochFormat;
+   
+   //MessageInterface::ShowMessage
+   //   ("==> dateType=%s, epochSystem=%s, oldEpochFormat=%s\n",
+   //    dateType.c_str(), epochSystem.c_str(), oldEpochFormat.c_str());
    
    // 2. Break apart into time type and string format
    Integer loc = dateType.find("ModJulian", 0);
@@ -610,23 +620,31 @@ void Spacecraft::SetDateFormat(const std::string &dateType)
    epochFormat = dateType.substr(loc);
    
    #ifdef DEBUG_DATE_FORMAT
-      MessageInterface::ShowMessage("%s breaks into system %s and format %s\n",
+      MessageInterface::ShowMessage
+         ("Spacecraft::SetDateFormat() %s breaks into system %s and format %s\n",
          dateType.c_str(), epochSystem.c_str(), epochFormat.c_str());
    #endif
    
    if (!TimeConverterUtil::ValidateTimeSystem(epochSystem))
    {
+      std::string badEpochSystem = epochSystem;
       epochSystem = oldEpochSystem;
       epochFormat = oldEpochFormat;
-      throw SpaceObjectException("'" + epochSystem + 
+      MessageInterface::ShowMessage("Invalid epoch system:%s\n", badEpochSystem.c_str());
+      throw SpaceObjectException("'" + badEpochSystem + 
          "' is not a valid time system");
    }
+   
    dateFormat = epochSystem + epochFormat;
+   //MessageInterface::ShowMessage("==> dateFormat=%s\n", dateFormat.c_str());
    
    // 3. Generate converted string
-   Real startEpoch, finalEpoch;
+   Real startEpoch=-999.999, finalEpoch=-999.999;
    std::stringstream str;
    str.precision(TIME_PRECISION);
+   
+   //MessageInterface::ShowMessage("==> BEFORE scEpoch=%s, startEpoch=%.10f\n",
+   //                              scEpoch.c_str(), startEpoch);
    
    if (oldEpochFormat == "ModJulian")
    {
@@ -638,16 +656,19 @@ void Spacecraft::SetDateFormat(const std::string &dateType)
       startEpoch = TimeConverterUtil::ConvertGregorianToMjd(scEpoch);
    }
    
+   //MessageInterface::ShowMessage("==> AFTER  scEpoch=%s, startEpoch=%.10f\n",
+   //                              scEpoch.c_str(), startEpoch);
+   
    #ifdef DEBUG_DATE_FORMAT
       MessageInterface::ShowMessage(
-         "     Converting %s from %s to %s gives ", scEpoch.c_str(),
+         "     Converting %s from oldEpochSystem:%s to epochSystem:%s gives", scEpoch.c_str(),
          oldEpochSystem.c_str(), epochSystem.c_str());
    #endif
 
    if (oldEpochSystem != epochSystem)
    {
       #ifdef DEBUG_DATE_FORMAT
-         MessageInterface::ShowMessage("(%s != %s) ", oldEpochSystem.c_str(), 
+         MessageInterface::ShowMessage("(%s != %s)\n", oldEpochSystem.c_str(), 
             epochSystem.c_str());
       #endif
 
@@ -664,16 +685,16 @@ void Spacecraft::SetDateFormat(const std::string &dateType)
    else
    {
       #ifdef DEBUG_DATE_FORMAT
-         MessageInterface::ShowMessage("(%s == %s) ", oldEpochSystem.c_str(), 
+         MessageInterface::ShowMessage("(%s == %s)\n", oldEpochSystem.c_str(), 
             epochSystem.c_str());
       #endif
 
       finalEpoch = startEpoch;
    }
-   
+
    #ifdef DEBUG_DATE_FORMAT
       MessageInterface::ShowMessage(
-         "final epoch (MJD) = %.10lf;", finalEpoch);
+         "\nfinal epoch (MJD) = %.10lf;", finalEpoch);
    #endif
 
    if (epochFormat == "ModJulian")
@@ -694,7 +715,7 @@ void Spacecraft::SetDateFormat(const std::string &dateType)
 
    #ifdef DEBUG_DATE_FORMAT
       MessageInterface::ShowMessage(
-         " resulting epoch is %s\n", scEpoch.c_str());
+         "  resulting epoch is %s\n", scEpoch.c_str());
    #endif
 }
 
@@ -1404,7 +1425,8 @@ const StringArray& Spacecraft::GetStringArrayParameter(const Integer id) const
 bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 {
    #ifdef DEBUG_SPACECRAFT_STRINGS
-      MessageInterface::ShowMessage("Setting string parameter %d (%s) to %s\n", 
+      MessageInterface::ShowMessage
+         ("Spacecraft::SetStringParameter() string parameter %d (%s) to %s\n", 
          id, GetParameterText(id).c_str(), value.c_str());
    #endif
 
@@ -1853,7 +1875,8 @@ bool Spacecraft::Initialize()
 void Spacecraft::SetEpoch(const std::string &ep)
 {
    #ifdef DEBUG_DATE_FORMAT
-      MessageInterface::ShowMessage("Setting epoch to %s\n", ep.c_str());
+      MessageInterface::ShowMessage("Spacecraft::SetEpoch() Setting epoch to %s\n",
+                                    ep.c_str());
    #endif
 
    // 1. Validate that the input string is the correct format.
@@ -1882,9 +1905,21 @@ void Spacecraft::SetEpoch(const std::string &ep)
    // 20.02.06 - arg: changed to use enum types instead of strings
 //   state.SetEpoch(TimeConverterUtil::Convert(now, epochSystem, "A1",
 //      GmatTimeUtil::JD_JAN_5_1941));
-   state.SetEpoch(TimeConverterUtil::Convert(now, 
-      TimeConverterUtil::GetTimeTypeID(epochSystem), 
-      TimeConverterUtil::A1,  GmatTimeUtil::JD_JAN_5_1941));
+   
+   //MessageInterface::ShowMessage("==> Spacecraft::SetEpoch() now=%.11f, scEpoch=%s\n",
+   //                              now, scEpoch.c_str());
+
+   Real newEpoch =
+      TimeConverterUtil::Convert(now, 
+                                 TimeConverterUtil::GetTimeTypeID(epochSystem), 
+                                 TimeConverterUtil::A1,  GmatTimeUtil::JD_JAN_5_1941);
+   //TimeConverterUtil::A1,  GmatTimeUtil::JD_NOV_17_1858);
+
+   state.SetEpoch(newEpoch);
+   
+//    state.SetEpoch(TimeConverterUtil::Convert(now, 
+//       TimeConverterUtil::GetTimeTypeID(epochSystem), 
+//       TimeConverterUtil::A1,  GmatTimeUtil::JD_JAN_5_1941));
    
    // 3. Save the string.
    if (epochFormat == "ModJulian")
@@ -1898,6 +1933,9 @@ void Spacecraft::SetEpoch(const std::string &ep)
    {
       scEpoch = TimeConverterUtil::ConvertMjdToGregorian(now);
    }
+
+   //MessageInterface::ShowMessage("==> Spacecraft::SetEpoch() newEpoch=%.11f, scEpoch=%s\n",
+   //                              newEpoch, scEpoch.c_str());
 }
 
 
