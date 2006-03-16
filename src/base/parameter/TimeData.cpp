@@ -182,37 +182,53 @@ Real TimeData::GetCurrentTimeReal(Integer id)
 
    Real a1mjd = mSpacecraft->GetRealParameter(mEpochId);
 
-   #if DEBUG_TIMEDATA
-   MessageInterface::ShowMessage("TimeData::GetCurrentTimeReal() time = %f\n",
-                                 a1mjd);
-   #endif
-
+   Real time = -9999.999;
+   
    switch (id)
    {
    case A1_MJD:
-      return a1mjd;
+      time = a1mjd;
+      break;
    case TAI_MJD:
-      return TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
-                                        TimeConverterUtil::TAIMJD);
+      time = TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
+                                        TimeConverterUtil::TAIMJD,
+                                        GmatTimeUtil::JD_JAN_5_1941);
+      break;
    case TT_MJD:
-      return TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
-                                        TimeConverterUtil::TTMJD);
+      time = TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
+                                        TimeConverterUtil::TTMJD,
+                                        GmatTimeUtil::JD_JAN_5_1941);
+      break;
    case TDB_MJD:
-      return TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
-                                        TimeConverterUtil::TDBMJD);
+      time = TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
+                                        TimeConverterUtil::TDBMJD,
+                                        GmatTimeUtil::JD_JAN_5_1941);
+      break;
    case TCB_MJD:
-      return TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
-                                        TimeConverterUtil::TCBMJD);
+      time = TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
+                                        TimeConverterUtil::TCBMJD,
+                                        GmatTimeUtil::JD_JAN_5_1941);
+      break;
    case UTC_MJD:
-      return TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
-                                        TimeConverterUtil::UTCMJD);
+      time = TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
+                                        TimeConverterUtil::UTCMJD,
+                                        GmatTimeUtil::JD_JAN_5_1941);
+      break;
    case JD:
-      //loj: 3/8/06 return a1mjd + MJD_OFFSET;
-      return a1mjd + GmatTimeUtil::JD_NOV_17_1858;
+      time = a1mjd + GmatTimeUtil::JD_JAN_5_1941;
+      break;
    default:
       throw ParameterException("TimeData::GetCurrentTimeReal() Unknown parameter id: " +
                                GmatRealUtil::ToString(id));
    }
+
+   #if DEBUG_TIMEDATA
+   MessageInterface::ShowMessage
+      ("TimeData::GetCurrentTimeReal() id=%d, a1mjd=%.10f, return time=%.10f\n",
+       id, a1mjd, time);
+   #endif
+
+   return time;
 }
 
 
@@ -227,11 +243,6 @@ std::string TimeData::GetCurrentTimeString(Integer id)
 {
    Real time = GetCurrentTimeReal(id);
    
-   #if DEBUG_TIMEDATA
-   MessageInterface::ShowMessage("TimeData::GetCurrentTimeString() time = %f\n",
-                                 time);
-   #endif
-
    switch (id)
    {
    case A1_MJD:
@@ -240,6 +251,11 @@ std::string TimeData::GetCurrentTimeString(Integer id)
    case TDB_MJD:
    case TCB_MJD:
    case UTC_MJD:
+      #if DEBUG_TIMEDATA
+      MessageInterface::ShowMessage
+         ("TimeData::GetCurrentTimeString() id=%d, timeStr = %s\n", id,
+          TimeConverterUtil::ConvertMjdToGregorian(time).c_str());
+      #endif
       return TimeConverterUtil::ConvertMjdToGregorian(time);
    default:
       throw ParameterException("TimeData::GetCurrentTimeString() Unknown parameter id: " +
