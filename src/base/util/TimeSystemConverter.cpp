@@ -426,13 +426,13 @@ Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
    {
       A1Date a1Date(gregorianDate.GetYMDHMS());
       
-      //#ifdef DEBUG_TIMECONVERTER_DETAILS
+      #ifdef DEBUG_TIMECONVERTER_DETAILS
          MessageInterface::ShowMessage("Gregorian: %s\n", 
             gregorianDate.GetYMDHMS().c_str());
          MessageInterface::ShowMessage("YMDHMS:    %d  %d  %d  %d  %d  %.11lf\n", 
             a1Date.GetYear(),a1Date.GetMonth(), a1Date.GetDay(),
             a1Date.GetHour(), a1Date.GetMinute(),a1Date.GetSecond());
-         //#endif
+      #endif
       
       jules = ModifiedJulianDate(a1Date.GetYear(),a1Date.GetMonth(),
                                  a1Date.GetDay(),a1Date.GetHour(),
