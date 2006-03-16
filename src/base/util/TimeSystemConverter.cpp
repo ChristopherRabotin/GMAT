@@ -20,6 +20,7 @@
 #include "TimeSystemConverter.hpp"
 #include "A1Mjd.hpp"
 #include "GregorianDate.hpp"
+#include "DateUtil.hpp"            // for ModifiedJulianDate()
 #include "MessageInterface.hpp"
 
 //#define DEBUG_FIRST_CALL
@@ -68,7 +69,7 @@ Real TimeConverterUtil::Convert(const Real origValue,
                         const Integer fromType,
                         const Integer toType,
                         Real refJd)
-{
+{   
    #ifdef DEBUG_FIRST_CALL
       if ((firstCallFired == true) && (origValue < (lastValue-0.25)))
       {
@@ -82,27 +83,28 @@ Real TimeConverterUtil::Convert(const Real origValue,
    
    #ifdef DEBUG_TIMECONVERTER_DETAILS
       MessageInterface::ShowMessage(
-         "      Converting %.10lf in %s to %s; refJD = %.9lf\n", origValue, 
-         fromType.c_str(), toType.c_str(), refJd);
+         "      TimeConverterUtil::Converting %.11lf in %s to %s; refJD = %.11lf\n", origValue, 
+         TIME_SYSTEM_TEXT[fromType].c_str(), TIME_SYSTEM_TEXT[toType].c_str(), refJd);
    #endif
       
    Real newTime =
       TimeConverterUtil::ConvertToTaiMjd(fromType, origValue, refJd);
 
    #ifdef DEBUG_TIMECONVERTER_DETAILS
-      MessageInterface::ShowMessage("      TAI time =  %.10lf\n", newTime);
+      MessageInterface::ShowMessage("      TAI time =  %.11lf\n", newTime);
    #endif
    
    Real returnTime =
       TimeConverterUtil::ConvertFromTaiMjd(toType, newTime, refJd);
 
    #ifdef DEBUG_FIRST_CALL
-      if (toType == "TtMjd")
+//       if (toType == "TtMjd")
+      if (toType == TTMJD)
          firstCallFired = true;
    #endif
 
    #ifdef DEBUG_TIMECONVERTER_DETAILS
-      MessageInterface::ShowMessage("      %s time =  %.10lf\n", toType.c_str(), 
+      MessageInterface::ShowMessage("      %s time =  %.11lf\n", TIME_SYSTEM_TEXT[toType].c_str(), 
          returnTime);
    #endif
 
@@ -118,13 +120,13 @@ Real TimeConverterUtil::ConvertToTaiMjd(Integer fromType, Real origValue,
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
          MessageInterface::ShowMessage(
-            "   Converting %.10lf to TAI from %s\n", origValue, fromType.c_str());
+            "   Converting %.11lf to TAI from %s\n", origValue, TIME_SYSTEM_TEXT[fromType].c_str());
    #endif
 
    #ifdef DEBUG_TIMECONVERTER_DETAILS
       MessageInterface::ShowMessage( 
-         "      ***Converting %.10lf to TAI from %s\n", origValue, 
-         fromType.c_str());
+         "      ***Converting %.11lf to TAI from %s\n", origValue, 
+         TIME_SYSTEM_TEXT[fromType].c_str());
    #endif
    
    switch(fromType)
@@ -200,7 +202,7 @@ Real TimeConverterUtil::ConvertToTaiMjd(Integer fromType, Real origValue,
 //      Real tdbMjd;
 //      return ConvertToTaiMjd("TdbMjd", tdbMjd);    
     case TimeConverterUtil::TTMJD:
-    case TimeConverterUtil::TTM:
+    case TimeConverterUtil::TT:
           return (origValue -
              (GmatTimeUtil::TT_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
     default:
@@ -220,12 +222,13 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
          MessageInterface::ShowMessage(
-            "   Converting %.10lf from TAI to %s\n", origValue, toType.c_str());
+            "   Converting %.11lf from TAI to %s\n", origValue,
+            TIME_SYSTEM_TEXT[toType].c_str());
    #endif
    #ifdef DEBUG_TIMECONVERTER_DETAILS
       MessageInterface::ShowMessage(
-         "      ** Converting %.10lf from TAI to %s\n", origValue, 
-         toType.c_str());
+         "      ** Converting %.11lf from TAI to %s\n", origValue, 
+         TIME_SYSTEM_TEXT[toType].c_str());
    #endif
    
    switch (toType)
@@ -358,7 +361,7 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
           return (offset + tdbMjd);
        }
        case TimeConverterUtil::TTMJD:
-       case TimeConverterUtil::TTM:
+       case TimeConverterUtil::TT:
        {
           #ifdef DEBUG_TIMECONVERTER_DETAILS
              MessageInterface::ShowMessage("      In the 'tt' block\n");
@@ -392,6 +395,9 @@ void TimeConverterUtil::SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileRe
 }
 
 
+//---------------------------------------------------------------------------
+// std::string TimeConverterUtil::ConvertMjdToGregorian(const Real mjd)
+//---------------------------------------------------------------------------
 std::string TimeConverterUtil::ConvertMjdToGregorian(const Real mjd)
 {
    A1Mjd a1Mjd(mjd);
@@ -401,6 +407,9 @@ std::string TimeConverterUtil::ConvertMjdToGregorian(const Real mjd)
 }
 
 
+//---------------------------------------------------------------------------
+// Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
+//---------------------------------------------------------------------------
 Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
 {
    GregorianDate gregorianDate(greg);
@@ -410,17 +419,20 @@ Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
       throw TimeSystemConverterExceptions::TimeFormatException(
          "Gregorian date '" + greg + "' is not valid.");
 
+   //MessageInterface::ShowMessage
+   //   ("==> TimeConverterUtil::ConvertGregorianToMjd() greg=%s\n", greg.c_str());
+   
    try
    {
       A1Date a1Date(gregorianDate.GetYMDHMS());
       
-      #ifdef DEBUG_TIMECONVERTER_DETAILS
+      //#ifdef DEBUG_TIMECONVERTER_DETAILS
          MessageInterface::ShowMessage("Gregorian: %s\n", 
             gregorianDate.GetYMDHMS().c_str());
-         MessageInterface::ShowMessage("YMDHMS:    %d  %d  %d  %d  %d  %lf\n", 
+         MessageInterface::ShowMessage("YMDHMS:    %d  %d  %d  %d  %d  %.11lf\n", 
             a1Date.GetYear(),a1Date.GetMonth(), a1Date.GetDay(),
             a1Date.GetHour(), a1Date.GetMinute(),a1Date.GetSecond());
-      #endif
+         //#endif
       
       jules = ModifiedJulianDate(a1Date.GetYear(),a1Date.GetMonth(),
                                  a1Date.GetDay(),a1Date.GetHour(),
@@ -432,13 +444,20 @@ Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
          "Gregorian date '" + greg +"' appears to be out of range.");
    }
 
+   //MessageInterface::ShowMessage
+   //   ("==> TimeConverterUtil::ConvertGregorianToMjd() jules=%.11f\n", jules);
+   
    return jules;
 }
 
 
+//---------------------------------------------------------------------------
+// bool TimeConverterUtil::ValidateTimeSystem(std::string sys)
+//---------------------------------------------------------------------------
 bool TimeConverterUtil::ValidateTimeSystem(std::string sys)
 {
-   for (Integer i = 0; i < 13; ++i)
+   //for (Integer i = 0; i < 13; ++i)
+   for (Integer i = 0; i < TimeSystemCount; ++i)
       if (TIME_SYSTEM_TEXT[i] == sys)
          return true;
          
@@ -446,8 +465,12 @@ bool TimeConverterUtil::ValidateTimeSystem(std::string sys)
 }
 
 
+//---------------------------------------------------------------------------
+// bool TimeConverterUtil::ValidateTimeFormat(const std::string &format, 
+//                                            const std::string &value)
+//---------------------------------------------------------------------------
 bool TimeConverterUtil::ValidateTimeFormat(const std::string &format, 
-        const std::string &value)
+                                           const std::string &value)
 {
    if (format == "Gregorian")
    {
@@ -462,9 +485,9 @@ bool TimeConverterUtil::ValidateTimeFormat(const std::string &format,
          loc = value.find(months[i], 0);
 
 //         if (loc >= 0)
-		 // The month should be the second parameter in the string
-		 // 01 Jun 2004 ...
-         if (loc == 3)		 
+                 // The month should be the second parameter in the string
+                 // 01 Jun 2004 ...
+         if (loc == 3)           
             return true;
       }
       return false;         
@@ -482,6 +505,9 @@ bool TimeConverterUtil::ValidateTimeFormat(const std::string &format,
 }
 
 
+//---------------------------------------------------------------------------
+// StringArray TimeConverterUtil::GetValidTimeRepresentations()
+//---------------------------------------------------------------------------
 StringArray TimeConverterUtil::GetValidTimeRepresentations()
 {
    StringArray systems;

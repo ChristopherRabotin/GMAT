@@ -81,28 +81,28 @@ namespace TimeConverterUtil
       UT1,
       TDB,
       TCB,
-      TTM,
+      TT,
       TimeSystemCount
    };
 
    static const std::string TIME_SYSTEM_TEXT[TimeSystemCount] =
-         {
-            "A1Mjd",
-            "TaiMjd",
-            "UtcMjd",
-            "Ut1Mjd",
-            "TdbMjd",
-            "TcbMjd",
-            "TtMjd",
-            // New entried added by DJC
-            "A1",
-            "TAI",
-            "UTC",
-            "UT1",
-            "TDB",
-            "TCB",
-            "TT",
-         };
+   {
+      "A1Mjd",
+      "TaiMjd",
+      "UtcMjd",
+      "Ut1Mjd",
+      "TdbMjd",
+      "TcbMjd",
+      "TtMjd",
+      // New entried added by DJC
+      "A1",
+      "TAI",
+      "UTC",
+      "UT1",
+      "TDB",
+      "TCB",
+      "TT",
+   };
 
 /*   Real Convert(const Real origValue,
                       const std::string &fromType,
@@ -118,9 +118,10 @@ namespace TimeConverterUtil
    Integer GetTimeTypeID(std::string &str);
       
    Real Convert(const Real origValue,
-                      const Integer fromType,
-                      const Integer toType,
-                      Real refJd = GmatTimeUtil::JD_NOV_17_1858);
+                const Integer fromType,
+                const Integer toType,
+                Real refJd);
+                //loj: 3/16/06 Real refJd = GmatTimeUtil::JD_NOV_17_1858);
 
    Real ConvertToTaiMjd(Integer fromType, Real origValue,
       Real refJd= GmatTimeUtil::JD_NOV_17_1858);
