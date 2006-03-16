@@ -1,4 +1,4 @@
-//$Header: 
+//$Header$
 //------------------------------------------------------------------------------
 //                            AttitudePanel
 //------------------------------------------------------------------------------
@@ -603,3 +603,5 @@ void AttitudePanel::OnStateTypeRateSelection(wxCommandEvent &event)
 	else if (stateTypeRateStr == stateTypeRateArray[ANGULAR_VELOCITY])
 	   DisplayAngularVelocity();
 }
+
+
