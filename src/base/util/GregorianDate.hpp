@@ -72,7 +72,7 @@ private:
    std::string      stringDate;
    std::string      stringYMDHMS;
    std::string      type; 
-   StringArray      monthName; 
+   //StringArray      monthName; 
    bool             isValid;
    bool             initialized;
 };
