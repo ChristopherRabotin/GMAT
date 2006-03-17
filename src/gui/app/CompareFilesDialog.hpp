@@ -56,9 +56,11 @@ protected:
    
    wxCheckBox *mSaveResultCheckBox;
 
-   wxButton *mDirectory2Button;
-   wxButton *mSaveBrowseButton;
    wxButton *mDirectory1Button;
+   wxButton *mDirectory2Button;
+   wxButton *mUpdate1Button;
+   wxButton *mUpdate2Button;
+   wxButton *mSaveBrowseButton;
    
    // event handling
    void OnButtonClick(wxCommandEvent& event);   

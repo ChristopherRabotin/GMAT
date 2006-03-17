@@ -154,6 +154,10 @@ void CompareFilesDialog::Create()
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"),
                      wxDefaultPosition, wxSize(80,20), 0);
    
+   mUpdate1Button =
+      new wxButton(this, ID_BUTTON, wxT("Update"),
+                    wxDefaultPosition, wxSize(50,20), 0);
+   
    wxStaticText *numFilesFromDir2Label =
       new wxStaticText(this, ID_TEXT, wxT("Number of Files:"),
                        wxDefaultPosition, wxDefaultSize, 0);
@@ -161,6 +165,10 @@ void CompareFilesDialog::Create()
    mNumFilesFromDir2TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"),
                      wxDefaultPosition, wxSize(80,20), 0);
+   
+   mUpdate2Button =
+      new wxButton(this, ID_BUTTON, wxT("Update"),
+                    wxDefaultPosition, wxSize(50,20), 0);
    
    wxStaticText *replaceToLabel =
       new wxStaticText(this, ID_TEXT, wxT("With File Names Contain:"),
@@ -183,7 +191,8 @@ void CompareFilesDialog::Create()
    
    filesSizer->Add(numFilesFromDir1Label, 0, wxALIGN_LEFT|wxALL, bsize);
    filesSizer->Add(mNumFilesFromDir1TextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   filesSizer->Add(20, 20, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   //filesSizer->Add(20, 20, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   filesSizer->Add(mUpdate1Button, 0, wxALIGN_LEFT|wxALL, bsize);
    
    filesSizer->Add(replaceToLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    filesSizer->Add(mReplaceToTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
@@ -191,7 +200,8 @@ void CompareFilesDialog::Create()
    
    filesSizer->Add(numFilesFromDir2Label, 0, wxALIGN_LEFT|wxALL, bsize);
    filesSizer->Add(mNumFilesFromDir2TextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   filesSizer->Add(20, 20, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   //filesSizer->Add(20, 20, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   filesSizer->Add(mUpdate2Button, 0, wxALIGN_LEFT|wxALL, bsize);
    
 
  #if __WXMAC__
@@ -342,6 +352,12 @@ void CompareFilesDialog::SaveData()
    long numFilesToCompare;
    canClose = true;
       
+//    // update file info in directory 1 and 2
+//    mFromString = mReplaceFromTextCtrl->GetValue();
+//    mToString = mReplaceToTextCtrl->GetValue();
+//    UpdateFileInfo(1);
+//    UpdateFileInfo(2);
+   
    if (!mNumFilesToCompareTextCtrl->GetValue().ToLong(&numFilesToCompare))
    {
       wxMessageBox("Invalid number of scripts to run entered.");
@@ -364,7 +380,13 @@ void CompareFilesDialog::SaveData()
 
    mCompareFiles = true;
    if (mNumFilesToCompare <= 0)
+   {
+      wxMessageBox(wxT("There are no specific report files to compare.\n"
+                       "Please check file names to compare."),
+                   wxT("GMAT Warning"));
+      canClose = false;
       mCompareFiles = false;
+   }
    
    mSaveCompareResults = mSaveResultCheckBox->GetValue();
    
@@ -396,12 +418,13 @@ void CompareFilesDialog::OnButtonClick(wxCommandEvent& event)
 {
    if (event.GetEventObject() == mDirectory1Button)
    {
-      wxDirDialog dialog(this, "Select a first directory", mDirectory2);
+      wxDirDialog dialog(this, "Select a first directory", mDirectory1);
    
       if (dialog.ShowModal() == wxID_OK)
       {
          mDirectory1 = dialog.GetPath();
          mDir1TextCtrl->SetValue(mDirectory1);
+         mSaveFileTextCtrl->SetValue(mDirectory1 + "/CompareResults.txt");
          UpdateFileInfo(1);
          
          #if DEBUG_COMPARE_FILES_DIALOG
@@ -428,10 +451,22 @@ void CompareFilesDialog::OnButtonClick(wxCommandEvent& event)
          #endif
       }
    }
+   else if (event.GetEventObject() == mUpdate1Button)
+   {
+      // update file info in directory 1
+      mFromString = mReplaceFromTextCtrl->GetValue();
+      UpdateFileInfo(1);
+   }
+   else if (event.GetEventObject() == mUpdate2Button)
+   {
+      // update file info in directory 2
+      mToString = mReplaceToTextCtrl->GetValue();
+      UpdateFileInfo(2);
+   }
    else if (event.GetEventObject() == mSaveBrowseButton)
    {
       wxString filename =
-         wxFileSelector("Choose a file to save", "", "", "txt",
+         wxFileSelector("Choose a file to save", mDirectory1, "", "txt",
                         "Report files (*.report)|*.report|Text files (*.txt)|*.txt",
                         wxSAVE);
       
