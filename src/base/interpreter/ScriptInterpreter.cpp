@@ -17,8 +17,9 @@
 
 
 #include "ScriptInterpreter.hpp" // class's header file
-#include "Moderator.hpp" // class's header file
+#include "Moderator.hpp"         // class's header file
 #include "GmatCommand.hpp"
+#include "StringUtil.hpp"        // for ToDouble()
 #include <fstream>
 
 // Maybe put something like this in the Gmat namespace?
@@ -469,7 +470,7 @@ bool ScriptInterpreter::Parse()
                    {
                        if (sar.size() > 2) 
                        {
-                         // obj->SetStringParameter("DateFormat", sar[2]);
+                          // obj->SetStringParameter("DateFormat", sar[2]);
                          ((Spacecraft*)obj)->SetDateFormat(sar[2].c_str());
                          unsigned int start, end;
                          start = line.find("=") + 1;
@@ -635,7 +636,11 @@ bool ScriptInterpreter::Parse()
                {
                   // hasEquals == true, is a singlet, so a variable or object
                   GmatBase *obj = FindObject(**phrase);
-
+                  // Test if RHS object exist (loj: 3/17/06)
+                  if (obj == NULL)
+                     throw InterpreterException(
+                        "The object: " + **phrase + " was not defined " +
+                        "on line \"" + line + "\"");
 
                   if (!EquateObjects(obj))
                   {
@@ -665,8 +670,23 @@ bool ScriptInterpreter::Parse()
                               MessageInterface::ShowMessage("   %s\n",
                                  (*cstr)->c_str());
                         #endif
+                           
                         GmatCommand *cmd = moderator->AppendCommand("GMAT", "");
                         cmd->SetGeneratingString(line);
+
+                        // Test if RHS object exist (loj: 3/17/06)
+                        //MessageInterface::ShowMessage("==> RHS=%s\n", (*chunks.back()).c_str());
+                        Real rval = -9999.999;
+                        // If RHS is not a number
+                        if (!GmatStringUtil::ToDouble(*chunks.back(), &rval))
+                        {
+                           GmatBase *obj = FindObject(*chunks.back());
+                           if (obj == NULL)
+                              throw InterpreterException(
+                                  "The object: " + *chunks.back() + " was not defined " +
+                                  "on line \"" + line + "\"");
+                        }
+
                         if (SetArray(obj, cmd))
                         {
                            // Array set successfully
