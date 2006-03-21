@@ -13,6 +13,7 @@ int  TsPlotCanvas::ySensitivity = 5;
 int  TsPlotCanvas::defaultLineWidth = 1;
 bool TsPlotCanvas::defaultLabels = false;
 
+// #define DEBUG_TS_CANVAS 1  //waw: Added 03/21/06
 
 BEGIN_EVENT_TABLE(TsPlotCanvas, wxWindow)
    EVT_PAINT         (TsPlotCanvas::OnPaint)
@@ -108,10 +109,12 @@ void TsPlotCanvas::OnPaint(wxPaintEvent& ev)
 {
    // On linux, this line floods the processor with messages.  For now,
    // only call on Windows
-   #ifdef __WXMSW__
+   #if __WXMSW__
+      wxWindow::Refresh(false);   
+   #elif __WXMAC__  //waw: Added 03/21/06
       wxWindow::Refresh(false);
    #endif
-
+   
    wxPaintDC dc(this);
    wxCoord w, h;
    dc.GetSize(&w, &h);
