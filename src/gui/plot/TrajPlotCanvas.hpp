@@ -273,10 +273,11 @@ private:
    Rvector3 mVcVec;
    Rvector3 mUpVec;
    
-   // data count
+   // data
    int  mNumData;
    bool mIsEndOfData;
    bool mIsEndOfRun;
+   bool mIsFirstRun;
    
    // time
    Real mTime[MAX_DATA];
