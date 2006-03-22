@@ -73,6 +73,7 @@ public:
    virtual EopFile*              GetEopFile() const;
    virtual ItrfCoefficientsFile* GetItrfCoefficientsFile();
    virtual Rmatrix33             GetLastRotationMatrix() const;
+   virtual Rmatrix33             GetLastRotationDotMatrix() const;
    
    
    // initializes the CoordinateSystem

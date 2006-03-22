@@ -391,6 +391,11 @@ Rmatrix33 AxisSystem::GetLastRotationMatrix() const
    return rotMatrix;
 }
 
+Rmatrix33 AxisSystem::GetLastRotationDotMatrix() const
+{
+   return rotDotMatrix;
+}
+
 //---------------------------------------------------------------------------
 //  void AxisSystem::Initialize()
 //---------------------------------------------------------------------------

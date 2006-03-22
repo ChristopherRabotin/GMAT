@@ -74,6 +74,7 @@ public:
    virtual ItrfCoefficientsFile* GetItrfCoefficientsFile();
    virtual std::string           GetEpochFormat() const; // for GUI
    virtual Rmatrix33             GetLastRotationMatrix() const;
+   virtual Rmatrix33             GetLastRotationDotMatrix() const;
    
    // initializes the AxisSystem
    virtual bool Initialize();

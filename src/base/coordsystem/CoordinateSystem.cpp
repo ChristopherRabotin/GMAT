@@ -305,6 +305,13 @@ Rmatrix33 CoordinateSystem::GetLastRotationMatrix() const
    return axes->GetLastRotationMatrix();
 }
 
+Rmatrix33 CoordinateSystem::GetLastRotationDotMatrix() const
+{
+   if (!axes) 
+      throw CoordinateSystemException("No AxisSystem defined for " 
+            + instanceName);
+   return axes->GetLastRotationDotMatrix();
+}
 
 //---------------------------------------------------------------------------
 //  bool CoordinateSystem::Initialize()
