@@ -2054,16 +2054,16 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
        mScCount, len);
    #endif
 
-   //if (!active || mScCount <= 0 || len <= 0) //loj: 2/23/06
    if (!active || mScCount <= 0)
       return true;
 
-   if (isEndOfReceive)
-      return PlotInterface::RefreshGlPlot(instanceName);
-   
+   //loj: 3/22/06 test isEndOfRun first
    if (isEndOfRun)
       return PlotInterface::SetGlEndOfRun(instanceName);
 
+   if (isEndOfReceive)
+      return PlotInterface::RefreshGlPlot(instanceName);
+      
    if (len <= 0)
       return true;
    
