@@ -386,6 +386,8 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
             // if values read from file are not accurate.
             if (status != 0)
             {
+            	  throw AtmosphereException("Error loading in JacchiaRoberts data file."
+            	                            "Density has be set to 0.0\n");
                Real dValue = 0.0;
                return dValue; 
             }    
