@@ -40,6 +40,9 @@ namespace FloatAttUtil
 {
    // for float quaternion
    void ToQuat(float q[4], float p1x, float p1y, float p2x, float p2y);
+   void ToQuat(float q[4], float mat[16]);
+   void IdentityMat(float m[16]);
+   void MultMat(float mat1[16], float mat2[16], float mat3[16]);
    void AddQuats(float *q1, float *q2, float *dest);
    void NormalizeQuat(float q[4]);
    void BuildRotMatrix(float m[4][4], float q[4]);
