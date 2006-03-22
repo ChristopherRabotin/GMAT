@@ -68,10 +68,13 @@ std::string GmatStringUtil::Strip(const std::string &str, StripType stype)
 //------------------------------------------------------------------------------
 // bool ToDouble(const std::string &str, Real *value)
 //------------------------------------------------------------------------------
+// Note: atof() returns 100.00 for 100.00ABC, but we want it be an error
+//------------------------------------------------------------------------------
 bool GmatStringUtil::ToDouble(const std::string &str, Real *value)
 {
    std::string str2 = Trim(str, BOTH);
-
+   Integer numDot = 0;
+   
    if (str2.length() == 0)
       return false;
 
@@ -82,6 +85,16 @@ bool GmatStringUtil::ToDouble(const std::string &str, Real *value)
    {
       if (i == 0 && str2[0] == '-')
          continue;
+      
+      if (str2[i] == '.')
+      {
+         numDot++;
+
+         if (numDot > 1)
+            return false;
+         
+         continue;
+      }
       
       if (!isdigit(str2[i]))
          return false;
