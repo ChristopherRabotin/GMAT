@@ -596,19 +596,19 @@ Real CelestialBody::GetGravitationalConstant()
 Real CelestialBody::GetEquatorialRadius() 
 {
    //loj: 5/6/04 temp. code to show message only first time
-   static bool firstTimeRadius = true;
+   //static bool firstTimeRadius = true;
    
    if ((usePotentialFile == true) && (!potentialFileRead))
    {
       if (!ReadPotentialFile())
       {
-         if (firstTimeRadius)
-         {
+         //if (firstTimeRadius)
+         //{
              MessageInterface::ShowMessage(
               "For body %s, cannot read file \"%s\", so using default value (%lf) for radius\n",
                instanceName.c_str(), potentialFileName.c_str(), defaultEqRadius);
-            firstTimeRadius = false;
-         }
+         //   firstTimeRadius = false;
+         //}
          equatorialRadius = defaultEqRadius;
       }
       //throw SolarSystemException(
@@ -2385,6 +2385,7 @@ bool CelestialBody::ReadDatFile()
    fp = fopen( potentialFileName.c_str(), "r");
    if (!fp)
    {
+   	   throw SolarSystemException("Cannot open file " + potentialFileName);
       return false;
    }
 
