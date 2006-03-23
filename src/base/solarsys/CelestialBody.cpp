@@ -189,7 +189,7 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
       models[i].push_back("None");
    
    parameterCount = CelestialBodyParamCount;
-   Initialize(itsBodyType);
+   InitializeBody(itsBodyType);
 }
 
 //------------------------------------------------------------------------------
@@ -243,7 +243,7 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
       models[i].push_back("None");
 
    parameterCount = CelestialBodyParamCount;
-   Initialize(CelestialBody::BODY_TYPE_STRINGS[itsBodyType]);
+   InitializeBody(CelestialBody::BODY_TYPE_STRINGS[itsBodyType]);
 }
 
 //------------------------------------------------------------------------------
@@ -409,6 +409,18 @@ CelestialBody::~CelestialBody()
    delete atmModel;  
 }
 
+
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+bool CelestialBody::Initialize()
+{
+   isFirstTimeMu = true;
+   isFirstTimeRadius = true;
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 //  const Rvector6& GetState(A1Mjd atTime)
 //------------------------------------------------------------------------------
@@ -539,6 +551,7 @@ const std::string& CelestialBody::GetCentralBody() const
    return centralBody;
 }
 
+
 //------------------------------------------------------------------------------
 //  Real GetGravitationalConstant() 
 //------------------------------------------------------------------------------
@@ -551,8 +564,9 @@ const std::string& CelestialBody::GetCentralBody() const
 //------------------------------------------------------------------------------
 Real CelestialBody::GetGravitationalConstant() 
 {
-   //loj: 5/6/04 temp. code to show message only first time
-   static bool firstTimeMu = true;
+//    MessageInterface::ShowMessage
+//       ("==> CelestialBody::GetGravitationalConstant() usePotentialFile=%d\n",
+//        usePotentialFile);
    
    if (usePotentialFile == true)
    {
@@ -560,24 +574,43 @@ Real CelestialBody::GetGravitationalConstant()
       {
          if (!ReadPotentialFile())
          {
-            if (firstTimeMu)
+            if (isFirstTimeMu)
             {
-               MessageInterface::ShowMessage(
-               "For body %s, cannot read file \"%s\", so using default value (%lf) for mu\n",
-               instanceName.c_str(), potentialFileName.c_str(), defaultMu);
-               firstTimeMu = false;
+               MessageInterface::ShowMessage
+                  ("For body %s, cannot read file \"%s\", so using default mu"
+                   " (%lf)\n", instanceName.c_str(),
+                   potentialFileName.c_str(), defaultMu);
+               
+               isFirstTimeMu = false;
             }
-         
+            
             mu = defaultMu;
          }
-         //throw SolarSystemException(
-         //   "Cannot read potential file to get gravitational constant.");
+      }
+      else
+      {
+         if (isFirstTimeMu)
+         {
+            MessageInterface::ShowMessage
+               ("For body %s, using mu (%lf) from file \"%s\"\n",
+                instanceName.c_str(), mu, potentialFileName.c_str());
+            
+            isFirstTimeMu = false;
+         }
       }
    }
-   //else
-   //{
-   //   mu = defaultMu;
-   //}
+   else
+   {
+      if (isFirstTimeMu)
+      {
+         MessageInterface::ShowMessage
+            ("For body %s, not using potential file, so using default mu (%lf)\n",
+             instanceName.c_str(), mu, potentialFileName.c_str());
+            
+         isFirstTimeMu = false;
+      }
+   }
+   
    // recompute mass
    mass = mu / GmatPhysicalConst::UNIVERSAL_GRAVITATIONAL_CONSTANT;
    return mu;
@@ -594,26 +627,50 @@ Real CelestialBody::GetGravitationalConstant()
  */
 //------------------------------------------------------------------------------
 Real CelestialBody::GetEquatorialRadius() 
-{
-   //loj: 5/6/04 temp. code to show message only first time
-   //static bool firstTimeRadius = true;
-   
-   if ((usePotentialFile == true) && (!potentialFileRead))
+{   
+   if (usePotentialFile == true)
    {
-      if (!ReadPotentialFile())
+      if (!potentialFileRead)
       {
-         //if (firstTimeRadius)
-         //{
-             MessageInterface::ShowMessage(
-              "For body %s, cannot read file \"%s\", so using default value (%lf) for radius\n",
-               instanceName.c_str(), potentialFileName.c_str(), defaultEqRadius);
-         //   firstTimeRadius = false;
-         //}
-         equatorialRadius = defaultEqRadius;
+         if (!ReadPotentialFile())
+         {
+            if (isFirstTimeRadius)
+            {
+               MessageInterface::ShowMessage
+                  ("For body %s, cannot read file \"%s\", so using default eq. radius"
+                   " (%lf)\n", instanceName.c_str(),
+                   potentialFileName.c_str(), defaultEqRadius);
+               
+               isFirstTimeRadius = false;
+            }
+         
+            equatorialRadius = defaultEqRadius;
+         }
       }
-      //throw SolarSystemException(
-      //   "Cannot read potential file to get equatorial radius.");
+      else
+      {
+         if (isFirstTimeRadius)
+         {
+            MessageInterface::ShowMessage
+               ("For body %s, using eq. radius (%lf) from file \"%s\"\n",
+                instanceName.c_str(), equatorialRadius, potentialFileName.c_str());
+         
+            isFirstTimeRadius = false;
+         }
+      }
    }
+   else
+   {
+      if (isFirstTimeRadius)
+      {
+         MessageInterface::ShowMessage
+            ("For body %s, not using potential file, so using default eq. radius (%lf)\n",
+             instanceName.c_str(), equatorialRadius, potentialFileName.c_str());
+         
+         isFirstTimeRadius = false;
+      }
+   }
+   
    // recompute the polar radius
    polarRadius = (1.0 - flattening) * equatorialRadius;
    return equatorialRadius;
@@ -683,6 +740,9 @@ Gmat::PosVelSource  CelestialBody::GetPosVelSource() const
    return posVelSrc;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetSourceFileName() const
+//------------------------------------------------------------------------------
 std::string CelestialBody::GetSourceFileName() const
 {
    if (theSourceFile)
@@ -723,17 +783,28 @@ bool CelestialBody::GetUsePotentialFile() const
    return usePotentialFile;
 }
 
+
+//------------------------------------------------------------------------------
+// bool GetOverrideTimeSystem() const
+//------------------------------------------------------------------------------
 bool CelestialBody::GetOverrideTimeSystem() const
 {
    return overrideTime;
 }
 
+
+//------------------------------------------------------------------------------
+// Real GetEphemUpdateInterval() const
+//------------------------------------------------------------------------------
 Real CelestialBody::GetEphemUpdateInterval() const
 {
    return ephemUpdateInterval;
 }
 
 
+//------------------------------------------------------------------------------
+// StringArray GetValidModelList(Gmat::ModelType m) const
+//------------------------------------------------------------------------------
 StringArray CelestialBody::GetValidModelList(Gmat::ModelType m) const
 {
    return models[(Integer)m]; 
@@ -968,11 +1039,19 @@ bool CelestialBody::GetDensity(Real *position, Real *density, Real epoch,
    return atmModel->Density(position,density,epoch,count);
 }
 
+
+//------------------------------------------------------------------------------
+// A1Mjd GetLowFidelityEpoch() const
+//------------------------------------------------------------------------------
 A1Mjd CelestialBody::GetLowFidelityEpoch() const
 {
    return lfEpoch;
 }
 
+
+//------------------------------------------------------------------------------
+// Rvector6 GetLowFidelityElements() const
+//------------------------------------------------------------------------------
 Rvector6 CelestialBody::GetLowFidelityElements() const
 {
    return lfKepler;
@@ -1166,6 +1245,8 @@ bool CelestialBody::SetUsePotentialFile(bool useIt)
    if ((usePotentialFile == false) && (useIt == true))
    {
       potentialFileRead = false;
+      isFirstTimeMu = true;
+      isFirstTimeRadius = true;
    }
    else if ((usePotentialFile == true) && (useIt == false))
    {
@@ -1178,7 +1259,10 @@ bool CelestialBody::SetUsePotentialFile(bool useIt)
       //coefficientSize  = defaultCoefSize;
       //sij              = defaultSij;
       //cij              = defaultCij;
+      isFirstTimeMu = true;
+      isFirstTimeRadius = true;
    }
+   
    usePotentialFile = useIt;
    return true;
 }
@@ -1202,6 +1286,10 @@ bool CelestialBody::SetOverrideTimeSystem(bool overrideIt)
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetEphemUpdateInterval(Real intvl)
+//------------------------------------------------------------------------------
 bool CelestialBody::SetEphemUpdateInterval(Real intvl)
 {
    ephemUpdateInterval = intvl;
@@ -1209,11 +1297,15 @@ bool CelestialBody::SetEphemUpdateInterval(Real intvl)
 }
 
 
+//------------------------------------------------------------------------------
+// bool AddValidModelName(Gmat::ModelType m, const std::string &newModel)
+//------------------------------------------------------------------------------
 bool CelestialBody::AddValidModelName(Gmat::ModelType m, 
                                       const std::string &newModel)
 {
    // first, make sure it is not already on the list
-   if (find(models[(Integer)m].begin(), models[(Integer)m].end(), newModel) == models[(Integer)m].end())
+   if (find(models[(Integer)m].begin(), models[(Integer)m].end(),
+            newModel) == models[(Integer)m].end())
       models[(Integer)m].push_back(newModel);
    // @todo modify it so it adds it before an 'Other' in the list
    
@@ -1221,6 +1313,10 @@ bool CelestialBody::AddValidModelName(Gmat::ModelType m,
    
 }
 
+
+//------------------------------------------------------------------------------
+// bool RemoveValidModelName(Gmat::ModelType m, const std::string &modelName)
+//------------------------------------------------------------------------------
 bool CelestialBody::RemoveValidModelName(Gmat::ModelType m, 
                                          const std::string &modelName)
 {
@@ -1238,7 +1334,6 @@ bool CelestialBody::RemoveValidModelName(Gmat::ModelType m,
    }
    return true;  // found?
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -1261,6 +1356,7 @@ bool CelestialBody::SetAtmosphereModelType(std::string toAtmModelType)
    atmModelType = toAtmModelType;
    return true;
 }
+
 
 //------------------------------------------------------------------------------
 //  bool SetAtmosphereModel(AtmosphereModel *toAtmModel)
@@ -1295,11 +1391,21 @@ bool CelestialBody::SetAtmosphereModel(AtmosphereModel *toAtmModel)
 //------------------------------------------------------------------------------
 bool CelestialBody::SetPotentialFilename(const std::string &fn)
 {
-   if (potentialFileName != fn) potentialFileRead = false;
+   if (potentialFileName != fn)
+   {
+      potentialFileRead = false;
+      isFirstTimeMu = true;
+      isFirstTimeRadius = true;
+   }
+   
    potentialFileName = fn;
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetLowFidelityEpoch(const A1Mjd &toTime)
+//------------------------------------------------------------------------------
 bool CelestialBody::SetLowFidelityEpoch(const A1Mjd &toTime)
 {
    lfEpoch = toTime;
@@ -1307,6 +1413,10 @@ bool CelestialBody::SetLowFidelityEpoch(const A1Mjd &toTime)
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetLowFidelityElements(const Rvector6 &kepl)
+//------------------------------------------------------------------------------
 bool CelestialBody::SetLowFidelityElements(const Rvector6 &kepl)
 {
    lfKepler = kepl;
@@ -1315,6 +1425,9 @@ bool CelestialBody::SetLowFidelityElements(const Rvector6 &kepl)
 }
 
 
+//------------------------------------------------------------------------------
+// const Rvector6 GetMJ2000State(const A1Mjd &atTime)
+//------------------------------------------------------------------------------
 const Rvector6 CelestialBody::GetMJ2000State(const A1Mjd &atTime)
 {
    if (j2000Body == NULL)
@@ -1343,17 +1456,27 @@ const Rvector6 CelestialBody::GetMJ2000State(const A1Mjd &atTime)
    return (stateEphem - j2kEphemState);
    
 }
+
+
+//------------------------------------------------------------------------------
+// const Rvector3 GetMJ2000Position(const A1Mjd &atTime)
+//------------------------------------------------------------------------------
 const Rvector3 CelestialBody::GetMJ2000Position(const A1Mjd &atTime)
 {
    Rvector6 tmp = GetMJ2000State(atTime);
    return (tmp.GetR());
 }
 
+
+//------------------------------------------------------------------------------
+// const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime)
+//------------------------------------------------------------------------------
 const Rvector3 CelestialBody::GetMJ2000Velocity(const A1Mjd &atTime)
 {
    Rvector6 tmp = GetMJ2000State(atTime);
    return (tmp.GetV());
 }
+
 
 //------------------------------------------------------------------------------
 //  Rvector GetBodyCartographicCoordinates(const A1Mjd &forTime) const
@@ -2138,7 +2261,7 @@ bool CelestialBody::SetRefObject(GmatBase *obj,
 // protected methods
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-//  void  Initialize(std::string withBodyType)
+//  void  InitializeBody(std::string withBodyType)
 //------------------------------------------------------------------------------
 /**
  * This method initializes the data values for the body.
@@ -2147,11 +2270,11 @@ bool CelestialBody::SetRefObject(GmatBase *obj,
  *
  */
 //------------------------------------------------------------------------------
-void CelestialBody::Initialize(std::string withBodyType)
+void CelestialBody::InitializeBody(std::string withBodyType)
 {
    // assuming derived classes will fill in all the specific things with
    // appropriate default values
-   usePotentialFile  = true;
+   usePotentialFile  = false; //loj: 3/23/06 set to false
    potentialFileName = "";
    sourceFilename    = "";
    theSourceFile     = NULL;
@@ -2167,6 +2290,9 @@ void CelestialBody::Initialize(std::string withBodyType)
    angularVelocity(0) = 0.0;
    angularVelocity(1) = 0.0;
    angularVelocity(2) = 7.29211585530e-5;  // should I so this here or in Planet??
+
+   isFirstTimeMu = true;
+   isFirstTimeRadius = true;
 }
 
 //------------------------------------------------------------------------------
@@ -2267,6 +2393,7 @@ bool CelestialBody::ReadCofFile()
                equatorialRadius  = defaultEqRadius;
             else
                equatorialRadius = tmpA / 1000.0;  // -> km
+            
             break;  // stop after reading the mu and a
          }
          else
@@ -2335,6 +2462,7 @@ bool CelestialBody::ReadGrvFile()
                mu = defaultMu;
             else
                mu = tmpMu / 1.0e09;     // -> Km^3/sec^2
+            
             // break as soon as both mu and a are read
             if ((tmpMu != 0.0) && (tmpA != 0.0)) break;
          }
@@ -2385,7 +2513,7 @@ bool CelestialBody::ReadDatFile()
    fp = fopen( potentialFileName.c_str(), "r");
    if (!fp)
    {
-   	   throw SolarSystemException("Cannot open file " + potentialFileName);
+           throw SolarSystemException("Cannot open file " + potentialFileName);
       return false;
    }
 
@@ -2450,19 +2578,19 @@ Real CelestialBody::GetJulianDaysFromTCBEpoch(const A1Mjd &forTime) const
    //if (overrideTime)
    //{
       // 20.02.06 - arg: changed to use enum types instead of strings
-//	   Real mjdTT  = TimeConverterUtil::Convert(forTime.Get(),
-//					 "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941); 
+//         Real mjdTT  = TimeConverterUtil::Convert(forTime.Get(),
+//                                       "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941); 
        Real mjdTT  = TimeConverterUtil::Convert(forTime.Get(),
                      TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
                      GmatTimeUtil::JD_JAN_5_1941); 
-	   jdTime      = mjdTT + GmatTimeUtil::JD_JAN_5_1941; 
+           jdTime      = mjdTT + GmatTimeUtil::JD_JAN_5_1941; 
       return (jdTime - JD_EPOCH_2000_TT);
    //}
    //else
    //{
-	//   Real mjdTCB = TimeConverterUtil::Convert(forTime.Get(),
-	//				 "A1Mjd", "TcbMjd", GmatTimeUtil::JD_JAN_5_1941); 
-	//   jdTime      = mjdTCB + GmatTimeUtil::JD_JAN_5_1941; 
+        //   Real mjdTCB = TimeConverterUtil::Convert(forTime.Get(),
+        //                               "A1Mjd", "TcbMjd", GmatTimeUtil::JD_JAN_5_1941); 
+        //   jdTime      = mjdTCB + GmatTimeUtil::JD_JAN_5_1941; 
    //    return (jdTime - JD_EPOCH_2000_TCB);
    //}
 }

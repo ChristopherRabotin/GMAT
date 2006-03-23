@@ -136,6 +136,8 @@ public:
    // destructor
    virtual ~CelestialBody();
 
+   virtual bool Initialize();
+   
    // method to return the state (position and velocity) of the body at
    // the specified time, using the specified method
    virtual const Rvector6&      GetState(A1Mjd atTime);
@@ -437,7 +439,7 @@ protected:
 
    
    // initialze the body
-   void             Initialize(std::string withBodyType = "Planet");
+   void             InitializeBody(std::string withBodyType = "Planet");
    // methods to read the potential file, if requested
    bool             ReadPotentialFile();
    bool             ReadCofFile();
@@ -451,6 +453,8 @@ protected:
    
 private:
 
+   bool isFirstTimeMu;
+   bool isFirstTimeRadius;
 };
 #endif // CelestialBody_hpp
 
