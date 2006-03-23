@@ -911,7 +911,8 @@ void Sandbox::InitializeInternalObjects()
    SpacePoint *sp, *j2kBod;
    std::string j2kName, oName;
 
-
+   solarSys->Initialize();
+   
    // Set J2000 bodies for solar system objects -- should this happen here?
    const StringArray biu = solarSys->GetBodiesInUse();
    for (StringArray::const_iterator i = biu.begin(); i != biu.end(); ++i)
