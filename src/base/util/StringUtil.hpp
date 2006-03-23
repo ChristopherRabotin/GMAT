@@ -34,7 +34,7 @@ namespace GmatStringUtil
    std::string Strip(const std::string &str, StripType stype = TRAILING);
 
    bool ToDouble(const std::string &str, Real *value);
-   
+   std::string ToUpper(const std::string &str);
 }
 
 #endif // StringUtil_hpp

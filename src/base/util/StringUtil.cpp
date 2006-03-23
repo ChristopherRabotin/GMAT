@@ -103,3 +103,21 @@ bool GmatStringUtil::ToDouble(const std::string &str, Real *value)
    *value = atof(str2.c_str());
    return true;
 }
+
+
+//------------------------------------------------------------------------------
+// std::string ToUpper(const std::string &str)
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::ToUpper(const std::string &str)
+{
+   Integer len = str.length();
+   
+   if (len == 0)
+      return str;
+
+   std::string upper = str;
+   for (int i=0; i<len; i++)
+      upper[i] = toupper(str[i]);
+
+   return upper;
+}
