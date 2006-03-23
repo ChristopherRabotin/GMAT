@@ -420,7 +420,8 @@ Real        Star::SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 void Star::InitializeStar()
 {
-   CelestialBody::Initialize();
+   CelestialBody::InitializeBody();
+   
    // fill in with default values, for the Sun (all from CelestialBody)
    bodyType            = Star::BODY_TYPE;
    mu                  = Star::MU;
