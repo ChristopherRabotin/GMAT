@@ -257,6 +257,23 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
 
 
 //------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+bool SolarSystem::Initialize()
+{
+   // Initialize bodies in use
+   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   while (cbi != bodiesInUse.end())
+   {
+      (*cbi)->Initialize();      
+      ++cbi;
+   }
+
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
 // void ResetToDefaults()
 //------------------------------------------------------------------------------
 void SolarSystem::ResetToDefaults()
@@ -266,6 +283,18 @@ void SolarSystem::ResetToDefaults()
    pE               = NULL;
    overrideTimeForAll  = false;
    ephemUpdateInterval = 0.0;
+   
+   // Set it for each of the bodies
+   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   while (cbi != bodiesInUse.end())
+   {
+      (*cbi)->SetSource(pvSrcForAll);
+      (*cbi)->SetAnalyticMethod(anMethodForAll);
+      (*cbi)->SetOverrideTimeSystem(overrideTimeForAll);
+      (*cbi)->SetEphemUpdateInterval(ephemUpdateInterval);
+      
+      ++cbi;
+   }
 }
 
 

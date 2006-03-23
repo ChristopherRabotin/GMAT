@@ -57,6 +57,7 @@ public:
    // class destructor
    ~SolarSystem();
 
+   virtual bool Initialize();
    void ResetToDefaults();
    
    // method to add a body to the solar system
