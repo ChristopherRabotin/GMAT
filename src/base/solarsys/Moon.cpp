@@ -22,6 +22,10 @@
 #include "MessageInterface.hpp"
 #include "RealUtilities.hpp"
 #include "AngleUtil.hpp"
+#include "FileManager.hpp"
+#include "StringUtil.hpp"
+
+//#define DEBUG_MOON 1
 
 using namespace GmatMathUtil;
 
@@ -324,7 +328,8 @@ GmatBase* Moon::Clone(void) const
 //------------------------------------------------------------------------------
 void Moon::InitializeMoon(const std::string &cBody)
 {
-   CelestialBody::Initialize();
+   CelestialBody::InitializeBody();
+   
    // fill in with default values, for the Sun
    bodyType            = Moon::BODY_TYPE;
    posVelSrc           = Moon::POS_VEL_SOURCE;
@@ -386,6 +391,26 @@ void Moon::InitializeMoon(const std::string &cBody)
    // NEED values for other moons in here!!!!
    // And how do I get position and velocity for the other moons?
    
+   //loj: 3/23/06 set default potential file name from the startup file.
+   try
+   {
+      FileManager *fm = FileManager::Instance();
+      std::string potfile = GmatStringUtil::ToUpper(instanceName) + "_POT_FILE";
+      std::string filename = fm->GetFullPathname(potfile);
+
+      #if DEBUG_MOON
+      MessageInterface::ShowMessage
+         ("Moon::InitializeMoon() body=%s, potfilename=%s\n", instanceName.c_str(),
+          filename.c_str());
+      #endif
+      
+      potentialFileName = filename;
+   }
+   catch (GmatBaseException &e)
+   {
+      MessageInterface::ShowMessage(e.GetMessage());
+   }
+
    // write message for now
    if (instanceName != SolarSystem::MOON_NAME)
    MessageInterface::ShowMessage(

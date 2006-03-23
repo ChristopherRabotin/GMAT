@@ -26,6 +26,10 @@
 #include "TimeTypes.hpp"
 #include "TimeSystemConverter.hpp"
 #include "AngleUtil.hpp"
+#include "FileManager.hpp"
+#include "StringUtil.hpp"
+
+//#define DEBUG_PLANET 1
 
 using namespace GmatMathUtil;
 
@@ -847,9 +851,9 @@ Real Planet::SetRealParameter(const std::string &label, const Real value)
 //------------------------------------------------------------------------------
 void Planet::InitializePlanet(const std::string &cBody)
 {
-   CelestialBody::Initialize();
+   CelestialBody::InitializeBody();
 
-   Integer bodyIndex;
+   Integer bodyIndex = -1;
    
    // fill in with default values, use Earth values for Earth and unheard-of
    // planets
@@ -929,8 +933,33 @@ void Planet::InitializePlanet(const std::string &cBody)
    {
       models[Gmat::GRAVITY_FIELD].push_back("Other");
    }
-   
-   
+
+   //loj: 3/23/06 set default potential file name from the startup file.
+   try
+   {
+      FileManager *fm = FileManager::Instance();
+      std::string potfile = GmatStringUtil::ToUpper(instanceName) + "_POT_FILE";
+      std::string filename = fm->GetFullPathname(potfile);
+      
+      #if DEBUG_PLANET
+      MessageInterface::ShowMessage
+         ("Planet::InitializePlanet() body=%s, potfilename=%s\n", instanceName.c_str(),
+          filename.c_str());
+      #endif
+      
+      potentialFileName = filename;
+   }
+   catch (GmatBaseException &e)
+   {
+      MessageInterface::ShowMessage(e.GetMessage());
+   }
+
+   // Set use potential file to true if Earth
+   if (bodyIndex == EARTH)
+      usePotentialFile = true;
+   else
+      usePotentialFile = false;
+      
    mu                  = Planet::MU[bodyIndex];
    mass                = mu / 
                          GmatPhysicalConst::UNIVERSAL_GRAVITATIONAL_CONSTANT;
