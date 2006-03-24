@@ -20,6 +20,7 @@
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
 #include "GmatBaseException.hpp"
+#include "StringUtil.hpp"
 #include <fstream>
 #include <sstream>
 #include <iomanip>
@@ -193,7 +194,7 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    } // end While()
 
    // now use log file from the startup file
-   MessageInterface::SetLogFile(GetFullPathname("LOG_FILE"));
+   MessageInterface::SetLogFile(GetAbsPathname("LOG_FILE"));
    MessageInterface::logEnabled = true;
    mInStream.close();
 }
@@ -329,29 +330,31 @@ std::string FileManager::GetPathname(const FileType type)
 //------------------------------------------------------------------------------
 std::string FileManager::GetPathname(const std::string &typeName)
 {
+   std::string fileType = GmatStringUtil::ToUpper(typeName);
+   
    // typeName contains _PATH
-   if (typeName.find("_PATH") != typeName.npos)
+   if (fileType.find("_PATH") != fileType.npos)
    {
-      if (mPathMap.find(typeName) != mPathMap.end())
-         return mPathMap[typeName];
+      if (mPathMap.find(fileType) != mPathMap.end())
+         return mPathMap[fileType];
    }
    else
    {
-      if (mFileMap.find(typeName) != mFileMap.end())
+      if (mFileMap.find(fileType) != mFileMap.end())
       {
          // Replace ROOT_PATH with abs path
-         std::string pathname = mPathMap[mFileMap[typeName]->mPath];
+         std::string pathname = mPathMap[mFileMap[fileType]->mPath];
          if (pathname.find("ROOT_PATH") != pathname.npos)
          {
             std::string pathname2 = mPathMap["ROOT_PATH"] +
-               mPathMap[mFileMap[typeName]->mPath];
+               mPathMap[mFileMap[fileType]->mPath];
             std::string::size_type pos1 = pathname2.find("ROOT_PATH");
             pathname2.replace(pos1, 10, "");
             return pathname2;
          }
          else
          {
-            return mPathMap[mFileMap[typeName]->mPath];
+            return mPathMap[mFileMap[fileType]->mPath];
          }
       }
    }
@@ -416,6 +419,24 @@ std::string FileManager::GetFilename(const std::string &typeName)
 //------------------------------------------------------------------------------
 // std::string GetFullPathname(const FileType type)
 //------------------------------------------------------------------------------
+std::string FileManager::GetFullPathname(const FileType type)
+{
+   return GetAbsPathname(type);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetFullPathname(const std::string &typeName)
+//------------------------------------------------------------------------------
+std::string FileManager::GetFullPathname(const std::string &typeName)
+{
+   return GetAbsPathname(typeName);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetAbsPathname(const FileType type)
+//------------------------------------------------------------------------------
 /**
  * Retrives full pathname for the type.
  *
@@ -425,13 +446,13 @@ std::string FileManager::GetFilename(const std::string &typeName)
  * @exception thrown if enum type is out of bounds
  */
 //------------------------------------------------------------------------------
-std::string FileManager::GetFullPathname(const FileType type)
+std::string FileManager::GetAbsPathname(const FileType type)
 {
    if (type >=0 && type < FileTypeCount)
-      return GetFullPathname(FILE_TYPE_STRING[type]);
+      return GetAbsPathname(FILE_TYPE_STRING[type]);
    
    std::stringstream ss("");
-   ss << "FileManager::GetFullPathname() enum type: " << type <<
+   ss << "FileManager::GetAbsPathname() enum type: " << type <<
       " is out of bounds\n";
    
    throw GmatBaseException(ss.str());
@@ -439,7 +460,7 @@ std::string FileManager::GetFullPathname(const FileType type)
 
 
 //------------------------------------------------------------------------------
-// std::string GetFullPathname(const std::string &typeName)
+// std::string GetAbsPathname(const std::string &typeName)
 //------------------------------------------------------------------------------
 /**
  * Retrives full pathname for the type name.
@@ -450,15 +471,17 @@ std::string FileManager::GetFullPathname(const FileType type)
  * @exception thrown if type cannot be found.
  */
 //------------------------------------------------------------------------------
-std::string FileManager::GetFullPathname(const std::string &typeName)
+std::string FileManager::GetAbsPathname(const std::string &typeName)
 {
+   std::string fileType = GmatStringUtil::ToUpper(typeName);
+   
    // typeName contains _PATH (loj: 1/9/06)
-   if (typeName.find("_PATH") != typeName.npos)
+   if (fileType.find("_PATH") != fileType.npos)
    {
-      if (mPathMap.find(typeName) != mPathMap.end())
+      if (mPathMap.find(fileType) != mPathMap.end())
       {
          // Replace ROOT_PATH with abs path
-         std::string pathname = mPathMap[typeName];
+         std::string pathname = mPathMap[fileType];
          if (pathname.find("ROOT_PATH") != pathname.npos)
          {
             std::string pathname2 = mPathMap["ROOT_PATH"] + pathname;
@@ -474,20 +497,24 @@ std::string FileManager::GetFullPathname(const std::string &typeName)
    }
    else
    {
-      if (mFileMap.find(typeName) != mFileMap.end())
+      if (mFileMap.find(fileType) != mFileMap.end())
       {
-         std::string path = GetPathname(typeName);
-         return path + mFileMap[typeName]->mFile;
+         std::string path = GetPathname(fileType);
+         return path + mFileMap[fileType]->mFile;
+      }
+      else if (mFileMap.find(fileType + "_ABS") != mFileMap.end())
+      {
+         return mFileMap[typeName]->mFile;
       }
    }
    
    //MessageInterface::ShowMessage
-   //   ("FileManager::GetFullPathname() file type: %s is unknown\n",
+   //   ("FileManager::GetAbsPathname() file type: %s is unknown\n",
    //    typeName.c_str());
    
    //return "UNKNOWN_FILE_TYPE";
    
-   throw GmatBaseException("FileManager::GetFullPathname() file type: " +
+   throw GmatBaseException("FileManager::GetAbsPathname() file type: " +
                            typeName + " is unknown\n");
 }
 
@@ -513,7 +540,7 @@ void FileManager::SetAbsPathname(const FileType type, const std::string &newpath
    else
    {
       std::stringstream ss("");
-      ss << "FileManager::GetFullPathname() enum type: " << type <<
+      ss << "FileManager::GetAbsPathname() enum type: " << type <<
          " is out of bounds of file path\n";
    
       throw GmatBaseException(ss.str());
@@ -593,6 +620,10 @@ void FileManager::AddFileType(const std::string &type, const std::string &name)
          str2 = str2 + "/";
       
       mPathMap[type] = str2;
+   }
+   else if (type.find("_FILE_ABS") != type.npos)
+   {
+      mFileMap[type] = new FileInfo("", name);
    }
    else if (type.find("_FILE") != type.npos)
    {

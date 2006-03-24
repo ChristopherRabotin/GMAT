@@ -82,6 +82,8 @@ public:
    // I'm getting unresolved ref on GetFullPathNameA()
    std::string GetFullPathname(const FileType type);
    std::string GetFullPathname(const std::string &typeName);
+   std::string GetAbsPathname(const FileType type);
+   std::string GetAbsPathname(const std::string &typeName);
 
    void SetAbsPathname(const FileType type, const std::string &newpath);
    void SetAbsPathname(const std::string &type, const std::string &newpath);
