@@ -54,6 +54,7 @@
 #include "RealUtilities.hpp"
 #include "Rvector.hpp"
 #include "Rmatrix.hpp"
+#include "FileManager.hpp"
 #include "MessageInterface.hpp"
 
 /*
@@ -65,7 +66,7 @@
 
 using namespace GmatMathUtil;
 
-// #define DEBUG_HARMONIC_FIELD
+//#define DEBUG_HARMONIC_FIELD
 
 //---------------------------------
 // static data
@@ -271,8 +272,15 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
 //------------------------------------------------------------------------------
 bool HarmonicField::Initialize()
 {
-    if (!PhysicalModel::Initialize())
-        return false;
+   if (!PhysicalModel::Initialize())
+      return false;
+
+   //MessageInterface::ShowMessage("=====> HarmonicField::Initialize()\n");
+
+   // Set body to use the same potential file (loj: 3/24/06)
+   // if we want to use mu and radius from this file later
+   //body->SetPotentialFilename(filename);
+   
    if (solarSystem == NULL) throw ForceModelException(
                             "Solar System undefined for Harmonic Field " 
                              + instanceName);
@@ -351,13 +359,39 @@ bool HarmonicField::SetFilename(const std::string &fn)
        strcpy(str, fn.c_str());
        MessageInterface::ShowMessage("HarmonicField::SetFilename called with \"%s\"\n",
           str);
+       MessageInterface::ShowMessage("filename=%s, fn=%s\n", filename.c_str(),
+                                     fn.c_str());
    #endif
  
    if (filename != fn)
    {
-      fileRead = false;
-      filename = fn;
+      // Add default pathname if none specified
+      if (fn.find("/") == fn.npos && fn.find("\\") == fn.npos)
+      {
+         try
+         {
+            FileManager *fm = FileManager::Instance();
+            std::string potPath =
+               fm->GetAbsPathname(bodyName + "_POT_PATH");
+            filename = potPath + fn;
+         }
+         catch (GmatBaseException &e)
+         {
+            filename = fn;
+            MessageInterface::ShowMessage(e.GetMessage());
+         }
+      }
+      else
+      {
+         filename = fn;
+      }
    }
+   
+   #ifdef DEBUG_HARMONIC_FIELD
+   MessageInterface::ShowMessage("==> filename=%s\n", filename.c_str());
+   #endif
+   
+   fileRead = false;
    return true;
 }
 
@@ -717,19 +751,22 @@ bool HarmonicField::SetStringParameter(const Integer id,
 //>>>>>>> 1.6
    if (id == FILENAME)
    {
-      if (filename != value)
-      {
-         #ifdef DEBUG_HARMONIC_FIELD
-            char str[1024];
-            strcpy(str, value.c_str());
+      //loj: 3/24/06 just call SetFilename()
+      return SetFilename(value);
+  
+//       if (filename != value)
+//       {
+//          #ifdef DEBUG_HARMONIC_FIELD
+//             char str[1024];
+//             strcpy(str, value.c_str());
             
-            MessageInterface::ShowMessage("Setting file name to \"%s\"\n", str);
-         #endif
+//             MessageInterface::ShowMessage("Setting file name to \"%s\"\n", str);
+//          #endif
        
-         fileRead = false;
-         filename = value;
-      }
-      return true;
+//          fileRead = false;
+//          filename = value;
+//       }
+//       return true;
    }
    if (id == INPUT_COORD_SYSTEM)
    {
