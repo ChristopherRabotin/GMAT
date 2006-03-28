@@ -61,6 +61,8 @@
 #include <fstream>
 #include <wx/dir.h>
 #include <wx/filename.h>
+#include <wx/filedlg.h>
+#include <wx/dirdlg.h>
 
 //define __ENABLE_CONSTELLATIONS__
 
@@ -1247,7 +1249,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       menu.Append(POPUP_ADD_SCRIPT_FOLDER, wxT("Add Script Folder"));
       //menu.Append(POPUP_NEW_SCRIPT, wxT("New"));
 
-      // Show run script menu if node has script file (loj: 9/23/05 Added)
+      // Show run script menu if node has script file
       if (GetChildrenCount(itemId, false) > 0)
       {
          wxTreeItemIdValue cookie;
@@ -2374,11 +2376,25 @@ void ResourceTree::OnAddLibration(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnAddScript(wxCommandEvent &event)
 {
+   //OnAddScriptFolder(event);
+   //wxString cwd = wxGetCwd();
+
+   //---------------- debug
+//    //loj: 3/14/06 Why I need this to work same as script folder?
+//    wxDirDialog dirDialog(this, "Select a script directory", wxGetCwd());
+   
+//    if (dirDialog.ShowModal() == wxID_OK)
+//    {
+//    }
+   //---------------- debug
+
+   
    wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""),
          _T("Script files (*.script, *.m)|*.script;*.m|"\
             "Text files (*.txt, *.text)|*.txt;*.text|"\
             "All files (*.*)|*.*"));
-
+   
+   
    if (dialog.ShowModal() == wxID_OK)
    {
       wxString filename = dialog.GetFilename().c_str();
@@ -2448,15 +2464,17 @@ void ResourceTree::OnAddScript(wxCommandEvent &event)
          }
       }
       
+      
       // open item
       GmatAppData::GetMainFrame()->
          CreateChild((GmatTreeItemData *)GetItemData(scriptId));
-         
+      
       // need to set the filename mainframe, so first save has a filename
       GmatAppData::GetMainFrame()->SetScriptFileName(path.c_str());
       
       Expand(mScriptItem);
    }
+
 }
 
 
@@ -2562,11 +2580,14 @@ void ResourceTree::AddScriptItem(wxString path)
                     new GmatTreeItemData(path, GmatTree::SCRIPT_FILE));
 }
 
+
 //------------------------------------------------------------------------------
 // bool OnScriptBuildObject(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnScriptBuildObject(wxCommandEvent& event)
 {
+   MessageInterface::ShowMessage("====>OnScriptBuildObject()\n");
+   
    // Get info from selected item
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
    wxString filename = item->GetDesc();
@@ -2574,14 +2595,21 @@ void ResourceTree::OnScriptBuildObject(wxCommandEvent& event)
    BuildScript(filename);
 }
 
+
 //------------------------------------------------------------------------------
-// bool OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
+// bool OnScriptBuildAndRun(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnScriptBuildAndRun(wxCommandEvent& event)
 {
-   OnScriptBuildObject(event);
-   //close the open windows
-   GmatAppData::GetMainFrame()->OnScriptRun(event);
+   MessageInterface::ShowMessage("====>ResourceTree::OnScriptBuildAndRun()\n");
+   
+   // Set the filename to mainframe, so first save has a filename
+   // Get info from selected item
+   GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
+   wxString filename = item->GetDesc();
+   GmatAppData::GetMainFrame()->SetScriptFileName(filename.c_str());
+
+   GmatAppData::GetMainFrame()->OnScriptBuildAndRun(event);
 }
 
 
@@ -2630,7 +2658,7 @@ void ResourceTree::OnAddScriptFolder(wxCommandEvent &event)
             // remove any backup files
             if (filename.Last() == 't' || filename.Last() == 'm')
             {
-               // read fist item to elliminate Matlab/Gmat function
+               // read first item to elliminate Matlab/Gmat function
                std::ifstream ifs(filepath.c_str());
                std::string item;
                ifs >> item;
@@ -2858,6 +2886,11 @@ void ResourceTree::OnRemoveScriptFolder(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 bool ResourceTree::BuildScript(const wxString &filename)
 {
+   #if DEBUG_RESOURCE_TREE
+   MessageInterface::ShowMessage("ResourceTree::BuildScript() filename=%s\n",
+                                 filename.c_str());
+   #endif
+   
    // if successfuly interpreted the script
    if (GmatAppData::GetGuiInterpreter()->
        InterpretScript(std::string(filename.c_str())))
@@ -2868,6 +2901,9 @@ bool ResourceTree::BuildScript(const wxString &filename)
       // Update ResourceTree and MissionTree
       GmatAppData::GetResourceTree()->UpdateResource(true);
       GmatAppData::GetMissionTree()->UpdateMission(true);
+
+      // Set the filename mainframe, so first save has a filename
+      GmatAppData::GetMainFrame()->SetScriptFileName(filename.c_str());
       return true;
    }
    else
