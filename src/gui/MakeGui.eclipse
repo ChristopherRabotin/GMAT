@@ -36,6 +36,7 @@ prep:
 	mkdir -p ../bin
 
 HEADERS = -I../base/include \
+			-I../base/attitude \
           -I../base/foundation \
           -I../base/executive \
           -I../base/spacecraft \

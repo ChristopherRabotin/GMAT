@@ -127,6 +127,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    internalCoordSystem  (NULL),
    coordinateSystem     (NULL),
    coordSysName         ("EarthMJ2000Eq"),
+   attitude             (NULL),
    displayEpoch         ("21545.000000000"),   
    displayDateFormat    ("TAIModJulian"),  // Should be A1ModJulian
    totalMass            (850.0),
@@ -217,6 +218,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    internalCoordSystem  (NULL),
    coordinateSystem     (a.coordinateSystem),      // Check this one...
    coordSysName         (a.coordSysName),
+   attitude             (a.attitude),              // Check this one too ...
    displayEpoch         (a.displayEpoch),   
    displayDateFormat    (a.displayDateFormat),
    totalMass            (a.totalMass),
@@ -281,6 +283,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    stateType            = a.stateType;
    anomalyType          = a.anomalyType;
    coordSysName         = a.coordSysName;
+   attitude             = a.attitude,        // correct?
    displayEpoch         = a.displayEpoch;   
    displayDateFormat    = a.displayDateFormat;
    totalMass            = a.totalMass;
@@ -547,6 +550,24 @@ Anomaly Spacecraft::GetAnomaly() const
 {
    return anomaly;
 }
+
+Rmatrix33 Spacecraft::GetAttitude(Real a1mjdTime) const
+{
+   if (attitude) return attitude->GetCosineMatrix(a1mjdTime);
+   else 
+      return Rmatrix33();  // temporary - return identity matrix
+   //   throw SpaceObjectException("No attitude object set for spacecraft.");
+}
+
+Rvector3  Spacecraft::GetAngularVelocity(Real a1mjdTime) const
+{
+   if (attitude) return attitude->GetAngularVelocity(a1mjdTime);
+   else 
+      return Rvector3(); // temporary - return zero vector
+   //   throw SpaceObjectException("No attitude object set for spacecraft.");
+}
+
+
 
 
 //------------------------------------------------------------------------------
@@ -899,6 +920,10 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
 //MessageInterface::ShowMessage("CoordinateSystem named %s\n", name.c_str());
          return coordinateSystem;
          
+      case Gmat::ATTITUDE:
+//MessageInterface::ShowMessage("CoordinateSystem named %s\n", name.c_str());
+         return attitude;
+         
       case Gmat::HARDWARE:
       case Gmat::FUEL_TANK:
 //MessageInterface::ShowMessage("FuelTank named %s\n", name.c_str());
@@ -973,6 +998,10 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       TakeAction("ApplyCoordinateSystem");
 
       return true;
+   }
+   else if (type == Gmat::ATTITUDE)
+   {
+      attitude = (Attitude*) obj;
    }
    
    return SpaceObject::SetRefObject(obj, type, name);
@@ -1859,6 +1888,12 @@ bool Spacecraft::Initialize()
    {      
       throw SpaceObjectException("Spacecraft has empty coordinate system");
    }   
+   if (!attitude)
+   {
+      MessageInterface::ShowMessage("Spacecraft %s has no attitude set.\n",
+                     instanceName.c_str());
+      //throw SpaceObjectException("Spacecraft has no attitude set.");
+   }
    
    return true;
 }
@@ -1916,6 +1951,7 @@ void Spacecraft::SetEpoch(const std::string &ep)
    //TimeConverterUtil::A1,  GmatTimeUtil::JD_NOV_17_1858);
 
    state.SetEpoch(newEpoch);
+   if (attitude) attitude->SetEpoch(newEpoch);
    
 //    state.SetEpoch(TimeConverterUtil::Convert(now, 
 //       TimeConverterUtil::GetTimeTypeID(epochSystem), 

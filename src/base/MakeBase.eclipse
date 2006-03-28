@@ -76,7 +76,11 @@ archclean :
 	rm -rf $(CONSOLETARGET)
 
 OBJECTS = \
-	attitude/AttitudeException.o \
+	 attitude/Attitude.o \
+	 attitude/AttitudeException.o \
+	 attitude/CSFixed.o \
+	 attitude/Kinematic.o \
+	 attitude/Spinner.o \
     burn/BurnException.o \
     burn/Burn.o \
     burn/FiniteBurn.o \
@@ -149,6 +153,7 @@ OBJECTS = \
     executive/SandboxException.o \
     executive/Sandbox.o \
     factory/AtmosphereFactory.o \
+    factory/AttitudeFactory.o \
     factory/AxisSystemFactory.o \
     factory/BurnFactory.o \
     factory/CalculatedPointFactory.o \

@@ -32,6 +32,7 @@
 //#include "TimeConverter.hpp"
 #include "TimeSystemConverter.hpp"
 #include "StateConverter.hpp"
+#include "Attitude.hpp"
 
 #include <map>
 
@@ -63,6 +64,9 @@ public:
    Rvector6          GetModifiedKeplerianState();
 
    Anomaly           GetAnomaly() const;
+   
+   Rmatrix33         GetAttitude(Real a1mjdTime) const;
+   Rvector3          GetAngularVelocity(Real a1mjdTime) const;
 
    bool              GetDisplay() const;
    void              SetDisplay(const bool displayFlag);
@@ -226,6 +230,9 @@ protected:
    CoordinateSystem  *coordinateSystem;
 
    std::string       coordSysName;
+   
+   /// Pointer to the object that manages the attitude of the spacecraft
+   Attitude          *attitude;
    
    // for non-internal spacecraft information
    StateConverter    stateConverter;
