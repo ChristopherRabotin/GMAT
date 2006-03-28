@@ -27,12 +27,13 @@ public:
    
    bool CompareFiles() { return mCompareFiles; }
    bool SaveCompareResults() { return mSaveCompareResults; }
+   Integer GetNumDirsToCompare() { return mNumDirsToCompare; }
    Integer GetNumFilesToCompare() { return mNumFilesToCompare; }
    Real GetAbsTolerance() { return mAbsTol; }
-   wxString GetReplaceStringFrom() { return mFromString; }
-   wxString GetReplaceStringTo() { return mToString; }
-   wxString GetDirectory1() { return mDirectory1; }
-   wxString GetDirectory2() { return mDirectory2; }
+   wxString GetBaseString() { return mBaseString; }
+   wxString GetBaseDirectory() { return mBaseDirectory; }
+   wxArrayString GetCompareStrings() { return mCompareStrings; }
+   wxArrayString GetCompareDirectories() { return mCompareDirs; }
    wxString GetSaveFilename() { return mSaveFileName; }
 protected:
    
@@ -42,29 +43,30 @@ protected:
    virtual void SaveData();
    virtual void ResetData();
    
-   wxTextCtrl *mDir1TextCtrl;
-   wxTextCtrl *mDir2TextCtrl;
-   wxTextCtrl *mNumFilesFromDir1TextCtrl;
-   wxTextCtrl *mNumFilesFromDir2TextCtrl;
+   wxTextCtrl *mBaseDirTextCtrl;
+   wxTextCtrl *mCompareDirTextCtrl;
+   wxTextCtrl *mNumFilesInBaseDirTextCtrl;
+   wxTextCtrl *mNumFilesInCompareDirTextCtrl;
+   wxTextCtrl *mNumDirsToCompareTextCtrl;
    wxTextCtrl *mNumFilesToCompareTextCtrl;
-   wxTextCtrl *mNumFilesContainFromTextCtrl;
-   wxTextCtrl *mNumFilesContainToTextCtrl;
-   wxTextCtrl *mReplaceFromTextCtrl;
-   wxTextCtrl *mReplaceToTextCtrl;
+   wxTextCtrl *mBaseStrTextCtrl;
+   wxTextCtrl *mCompareStrTextCtrl;
    wxTextCtrl *mAbsTolTextCtrl;
    wxTextCtrl *mSaveFileTextCtrl;
    
+   wxComboBox *mCompareDirsComboBox;
    wxCheckBox *mSaveResultCheckBox;
 
-   wxButton *mDirectory1Button;
-   wxButton *mDirectory2Button;
-   wxButton *mUpdate1Button;
-   wxButton *mUpdate2Button;
+   wxButton *mBaseDirButton;
+   wxButton *mCompareDirButton;
+   wxButton *mBaseUpdateButton;
+   wxButton *mCompareUpdateButton;
    wxButton *mSaveBrowseButton;
    
    // event handling
    void OnButtonClick(wxCommandEvent& event);   
    void OnCheckBoxChange(wxCommandEvent& event);   
+   void OnComboBoxChange(wxCommandEvent& event);
    void OnTextEnterPress(wxCommandEvent& event);   
    
    DECLARE_EVENT_TABLE();
@@ -75,6 +77,7 @@ protected:
       ID_TEXT = 9300,
       ID_TEXTCTRL,
       ID_BUTTON,
+      ID_COMBOBOX,
       ID_CHECKBOX,
    };
    
@@ -82,19 +85,23 @@ private:
 
    bool mCompareFiles;
    bool mSaveCompareResults;
-   Integer mNumFilesInDir1;
-   Integer mNumFilesInDir2;
+   bool mHasDir1;
+   bool mHasDir2;
+   bool mHasDir3;
+   Integer mNumFilesInBaseDir;
+   Integer mNumFilesInCompareDir;
    Integer mNumFilesToCompare;
+   Integer mNumDirsToCompare;
    Real mAbsTol;
-   wxString mFromString;
-   wxString mToString;
-   wxString mDirectory1;
-   wxString mDirectory2;
+   wxString mBaseString;
+   wxString mBaseDirectory;
+   wxArrayString mCompareStrings;
+   wxArrayString mCompareDirs;
    wxString mSaveFileName;
-   wxArrayString mFileNamesInDir1;
-   wxArrayString mFileNamesInDir2;
+   wxArrayString mFileNamesInBaseDir;
+   wxArrayString mFileNamesInCompareDir;
 
-   void UpdateFileInfo(Integer dir);
+   void UpdateFileInfo(Integer dir, bool isBaseDir);
    wxArrayString GetFilenamesContain(const wxString &dirname,
                                      const wxString &str);
 };

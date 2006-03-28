@@ -30,6 +30,7 @@ BEGIN_EVENT_TABLE(CompareFilesDialog, GmatDialog)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
    EVT_BUTTON(ID_BUTTON, CompareFilesDialog::OnButtonClick)
    EVT_CHECKBOX(ID_CHECKBOX, CompareFilesDialog::OnCheckBoxChange)
+   EVT_COMBOBOX(ID_COMBOBOX, CompareFilesDialog::OnComboBoxChange)
    EVT_TEXT_ENTER(ID_TEXTCTRL, CompareFilesDialog::OnTextEnterPress)
 END_EVENT_TABLE()
 
@@ -42,13 +43,25 @@ CompareFilesDialog::CompareFilesDialog(wxWindow *parent)
 {
    mCompareFiles = false;
    mSaveCompareResults = false;
+   mHasDir1 = false;
+   mHasDir2 = false;
+   mHasDir3 = false;
    
    mNumFilesToCompare = 0;
+   mNumDirsToCompare = 1;
    mAbsTol = 1.0e-4;
-   mDirectory1 = "";
+   mBaseDirectory = "";
 
-   mFromString = "GMAT";
-   mToString = "STK";
+   mBaseString = "STK";
+
+   // we can have up to 3 directories to compare
+   mCompareStrings.Add("GMAT");
+   mCompareStrings.Add("GMAT");
+   mCompareStrings.Add("GMAT");
+   
+   mCompareDirs.Add("");
+   mCompareDirs.Add("");
+   mCompareDirs.Add("");
    
    Create();
    ShowData();
@@ -77,155 +90,156 @@ void CompareFilesDialog::Create()
    //------------------------------------------------------
    // compare directory
    //------------------------------------------------------
-   wxStaticText *dir1Label =
-      new wxStaticText(this, ID_TEXT, wxT("Directory 1:"),
+   wxStaticText *baseDirLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Base Directory:"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
-   mDir1TextCtrl =
+   mBaseDirTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                      wxDefaultPosition, wxSize(320,20), 0);
    
-   mDirectory1Button =
+   mBaseDirButton =
       new wxButton(this, ID_BUTTON, wxT("Browse"),
-                    wxDefaultPosition, wxDefaultSize, 0);
+                    wxDefaultPosition, wxSize(60,20), 0);
    
-   wxStaticText *dir2Label =
-      new wxStaticText(this, ID_TEXT, wxT("Directory 2:"),
+   wxStaticText *baseStringLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Compare File Names Contain:"),
                        wxDefaultPosition, wxDefaultSize, 0);
-
-   mDir2TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(320,20), 0);
    
-   mDirectory2Button =
-      new wxButton(this, ID_BUTTON, wxT("Browse"),
-                    wxDefaultPosition, wxDefaultSize, 0);
+   mBaseStrTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(mBaseString),
+                     wxDefaultPosition, wxSize(80,20), wxTE_PROCESS_ENTER);
    
+   wxStaticText *numFilesBaseDirLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Number of Files:"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
+   mNumFilesInBaseDirTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"),
+                     wxDefaultPosition, wxSize(80,20), 0);
+   
+   mBaseUpdateButton =
+      new wxButton(this, ID_BUTTON, wxT("Update"),
+                    wxDefaultPosition, wxSize(50,20), 0);
+   
+   wxFlexGridSizer *baseDirGridSizer = new wxFlexGridSizer(2, 0, 0);
+   baseDirGridSizer->Add(baseDirLabel, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   baseDirGridSizer->Add(20,20, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   baseDirGridSizer->Add(mBaseDirTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   baseDirGridSizer->Add(mBaseDirButton, 0, wxALIGN_CENTER|wxALL, bsize);
  
+   wxFlexGridSizer *baseFileGridSizer = new wxFlexGridSizer(3, 0, 0);
+   baseFileGridSizer->Add(baseStringLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   baseFileGridSizer->Add(mBaseStrTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   baseFileGridSizer->Add(20, 20, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   baseFileGridSizer->Add(numFilesBaseDirLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   baseFileGridSizer->Add(mNumFilesInBaseDirTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   baseFileGridSizer->Add(mBaseUpdateButton, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   
  #if __WXMAC__
    wxStaticText *title1StaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Compare Directory"),
+      new wxStaticText( this, ID_TEXT, wxT("Base Directory"),
                         wxDefaultPosition, wxSize(220,20),
                         wxBOLD);
    title1StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
                                     false, _T(""), wxFONTENCODING_SYSTEM));
                                              
-   wxBoxSizer *dirBoxSizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *baseDirSizer = new wxBoxSizer( wxVERTICAL );
+   baseDirSizer->Add(title1StaticText, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
    
-   dirBoxSizer->Add(title1StaticText, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
-   dirBoxSizer->Add(dir1Label, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   dirBoxSizer->Add(mDir1TextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   dirBoxSizer->Add(mDirectory1Button, 0, wxALIGN_CENTER|wxALL, bsize);
-   dirBoxSizer->Add(dir2Label, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   dirBoxSizer->Add(mDir2TextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   dirBoxSizer->Add(mDirectory2Button, 0, wxALIGN_CENTER|wxALL, bsize);
 #else  
-   wxStaticBoxSizer *dirStaticSizer =
-      new wxStaticBoxSizer(wxVERTICAL, this, "Compare Directory");
-   
-   dirStaticSizer->Add(dir1Label, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   dirStaticSizer->Add(mDir1TextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   dirStaticSizer->Add(mDirectory1Button, 0, wxALIGN_CENTER|wxALL, bsize);
-   dirStaticSizer->Add(dir2Label, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   dirStaticSizer->Add(mDir2TextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   dirStaticSizer->Add(mDirectory2Button, 0, wxALIGN_CENTER|wxALL, bsize);
+   wxStaticBoxSizer *baseDirSizer =
+      new wxStaticBoxSizer(wxVERTICAL, this, "Base Directory");
 #endif
 
+   baseDirSizer->Add(baseDirGridSizer, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   baseDirSizer->Add(baseFileGridSizer, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+
+   
+ 
    //------------------------------------------------------
    // compare file names
    //------------------------------------------------------
-   wxStaticText *replaceFromLabel =
+   wxString dirArray[] = {"Directory1", "Directory2", "Directory3"};
+   
+   mCompareDirsComboBox = 
+      new wxComboBox(this, ID_COMBOBOX, wxT("Compare Directories"), wxDefaultPosition,
+                     wxDefaultSize, 3, dirArray, wxCB_READONLY);
+   mCompareDirTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                     wxDefaultPosition, wxSize(320,20), 0);
+   
+   mCompareDirButton =
+      new wxButton(this, ID_BUTTON, wxT("Browse"),
+                    wxDefaultPosition, wxSize(60,20), 0);
+   
+   wxStaticText *compareStringLabel =
       new wxStaticText(this, ID_TEXT, wxT("Compare File Names Contain:"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
-   mReplaceFromTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(mFromString),
+   mCompareStrTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(mCompareStrings[0]),
                      wxDefaultPosition, wxSize(80,20), wxTE_PROCESS_ENTER);
    
-   wxStaticText *fromDirLabel =
-      new wxStaticText(this, ID_TEXT, wxT(" From Directory 1"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   
-   wxStaticText *numFilesFromDir1Label =
+   wxStaticText *numFilesInCompareDirLabel =
       new wxStaticText(this, ID_TEXT, wxT("Number of Files:"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
-   mNumFilesFromDir1TextCtrl =
+   mNumFilesInCompareDirTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"),
                      wxDefaultPosition, wxSize(80,20), 0);
    
-   mUpdate1Button =
+   mCompareUpdateButton =
       new wxButton(this, ID_BUTTON, wxT("Update"),
                     wxDefaultPosition, wxSize(50,20), 0);
    
-   wxStaticText *numFilesFromDir2Label =
-      new wxStaticText(this, ID_TEXT, wxT("Number of Files:"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   
-   mNumFilesFromDir2TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"),
-                     wxDefaultPosition, wxSize(80,20), 0);
-   
-   mUpdate2Button =
-      new wxButton(this, ID_BUTTON, wxT("Update"),
-                    wxDefaultPosition, wxSize(50,20), 0);
-   
-   wxStaticText *replaceToLabel =
-      new wxStaticText(this, ID_TEXT, wxT("With File Names Contain:"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   
-   mReplaceToTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(mToString),
-                     wxDefaultPosition, wxSize(80,20), wxTE_PROCESS_ENTER);
-   
-   wxStaticText *toDirLabel =
-      new wxStaticText(this, ID_TEXT, wxT(" From Directory 2"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-
 
    //---------- sizer
-   wxFlexGridSizer *filesSizer = new wxFlexGridSizer(3, 0, 0);
-   filesSizer->Add(replaceFromLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   filesSizer->Add(mReplaceFromTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   filesSizer->Add(fromDirLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   wxFlexGridSizer *compareDirGridSizer = new wxFlexGridSizer(2, 0, 0);   
+   compareDirGridSizer->Add(mCompareDirsComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   compareDirGridSizer->Add(20, 20, 0, wxALIGN_LEFT|wxALL, bsize);
+   compareDirGridSizer->Add(mCompareDirTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   compareDirGridSizer->Add(mCompareDirButton, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   filesSizer->Add(numFilesFromDir1Label, 0, wxALIGN_LEFT|wxALL, bsize);
-   filesSizer->Add(mNumFilesFromDir1TextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   //filesSizer->Add(20, 20, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   filesSizer->Add(mUpdate1Button, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   filesSizer->Add(replaceToLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   filesSizer->Add(mReplaceToTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   filesSizer->Add(toDirLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   filesSizer->Add(numFilesFromDir2Label, 0, wxALIGN_LEFT|wxALL, bsize);
-   filesSizer->Add(mNumFilesFromDir2TextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   //filesSizer->Add(20, 20, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   filesSizer->Add(mUpdate2Button, 0, wxALIGN_LEFT|wxALL, bsize);
+   wxFlexGridSizer *compareFileGridSizer = new wxFlexGridSizer(3, 0, 0);   
+   compareFileGridSizer->Add(compareStringLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   compareFileGridSizer->Add(mCompareStrTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   compareFileGridSizer->Add(20, 20, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   compareFileGridSizer->Add(numFilesInCompareDirLabel, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   compareFileGridSizer->Add(mNumFilesInCompareDirTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   compareFileGridSizer->Add(mCompareUpdateButton, 0, wxALIGN_LEFT|wxALL, bsize);
    
 
- #if __WXMAC__
+#if __WXMAC__
    wxStaticText *title2StaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Compare Files"),
+      new wxStaticText( this, ID_TEXT, wxT("Compare Directories"),
                         wxDefaultPosition, wxSize(220,20),
                         wxBOLD);
    title2StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
                                     false, _T(""), wxFONTENCODING_SYSTEM));
    
-   wxBoxSizer *filesBoxSizer = new wxBoxSizer( wxVERTICAL );
-   
-   filesBoxSizer->Add(title2StaticText, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
-   filesBoxSizer->Add(filesSizer, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
-#else   
-   wxStaticBoxSizer *filesStaticSizer =
-      new wxStaticBoxSizer(wxVERTICAL, this, "Compare Files");
-
-   filesStaticSizer->Add(filesSizer, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
+   wxBoxSizer *compareDirsSizer = new wxBoxSizer( wxVERTICAL );
+   compareDirsSizer->Add(title2StaticText, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
+#else
+   wxStaticBoxSizer *compareDirsSizer =
+      new wxStaticBoxSizer(wxVERTICAL, this, "Compare Directories");
 #endif
+   
+   compareDirsSizer->Add(compareDirGridSizer, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
+   compareDirsSizer->Add(compareFileGridSizer, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
    
    //------------------------------------------------------
    // compare results
    //------------------------------------------------------
+   wxStaticText *numDirsToCompareLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Number of Directories to Compare:"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
+   mNumDirsToCompareTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"),
+                     wxDefaultPosition, wxSize(80,20), 0);
+   
    wxStaticText *numFilesToCompareLabel =
       new wxStaticText(this, ID_TEXT, wxT("Number of Files to Compare:"),
                        wxDefaultPosition, wxDefaultSize, 0);
@@ -243,12 +257,13 @@ void CompareFilesDialog::Create()
                      wxDefaultPosition, wxSize(80,20), 0);
    
    //---------- sizer
-   wxFlexGridSizer *compareSizer = new wxFlexGridSizer(2, 0, 0);
-   compareSizer->Add(numFilesToCompareLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   compareSizer->Add(mNumFilesToCompareTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   
-   compareSizer->Add(tolLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   compareSizer->Add(mAbsTolTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   wxFlexGridSizer *numFilesGridSizer = new wxFlexGridSizer(2, 0, 0);
+   numFilesGridSizer->Add(numDirsToCompareLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   numFilesGridSizer->Add(mNumDirsToCompareTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   numFilesGridSizer->Add(numFilesToCompareLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   numFilesGridSizer->Add(mNumFilesToCompareTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);   
+   numFilesGridSizer->Add(tolLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   numFilesGridSizer->Add(mAbsTolTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
 
    mSaveResultCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT("Save Compare Results to File"),
@@ -264,9 +279,14 @@ void CompareFilesDialog::Create()
    
    mSaveBrowseButton =
       new wxButton(this, ID_BUTTON, wxT("Browse"),
-                    wxDefaultPosition, wxDefaultSize, 0);
+                    wxDefaultPosition, wxSize(60,20), 0);
 
- #if __WXMAC__
+   //---------- sizer
+   wxFlexGridSizer *saveGridSizer = new wxFlexGridSizer(2, 0, 0);
+   saveGridSizer->Add(mSaveFileTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   saveGridSizer->Add(mSaveBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+#if __WXMAC__
    wxStaticText *title3StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Compare"),
                         wxDefaultPosition, wxSize(220,20),
@@ -274,40 +294,28 @@ void CompareFilesDialog::Create()
    title3StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
                                     false, _T(""), wxFONTENCODING_SYSTEM));
    
-   wxBoxSizer *compareBoxSizer = new wxBoxSizer( wxVERTICAL );
-   
-   compareBoxSizer->Add(title3StaticText, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
-   compareBoxSizer->Add(compareSizer, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
-   compareBoxSizer->Add(20,5, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
-   compareBoxSizer->Add(mSaveResultCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   compareBoxSizer->Add(saveFileLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   compareBoxSizer->Add(mSaveFileTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   compareBoxSizer->Add(mSaveBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-#else   
-   wxStaticBoxSizer *compareStaticSizer =
+   wxBoxSizer *compareSizer = new wxBoxSizer( wxVERTICAL );
+   compareSizer->Add(title3StaticText, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
+#else
+   wxStaticBoxSizer *compareSizer =
       new wxStaticBoxSizer(wxVERTICAL, this, "Compare");
-
-   compareStaticSizer->Add(compareSizer, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
-   compareStaticSizer->Add(20,5, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
-   compareStaticSizer->Add(mSaveResultCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   compareStaticSizer->Add(saveFileLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   compareStaticSizer->Add(mSaveFileTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   compareStaticSizer->Add(mSaveBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
 #endif
+   
+   compareSizer->Add(numFilesGridSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   compareSizer->Add(mSaveResultCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   compareSizer->Add(20, 5, 0, wxALIGN_LEFT|wxALL, bsize);
+   compareSizer->Add(saveFileLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   compareSizer->Add(saveGridSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
    //------------------------------------------------------
    // add to page sizer
    //------------------------------------------------------
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
- #if __WXMAC__
-   pageBoxSizer->Add(dirBoxSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
-   pageBoxSizer->Add(filesBoxSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
-   pageBoxSizer->Add(compareBoxSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
- #else  
-   pageBoxSizer->Add(dirStaticSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
-   pageBoxSizer->Add(filesStaticSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
-   pageBoxSizer->Add(compareStaticSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
- #endif  
+   
+   pageBoxSizer->Add(baseDirSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
+   pageBoxSizer->Add(compareDirsSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
+   pageBoxSizer->Add(compareSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
+
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
 }
 
@@ -320,21 +328,27 @@ void CompareFilesDialog::LoadData()
    wxString str;
    str.Printf("%d", mNumFilesToCompare);
    mNumFilesToCompareTextCtrl->SetValue(str);
+   
+   str.Printf("%d", mNumDirsToCompare);
+   mNumDirsToCompareTextCtrl->SetValue(str);
 
    str.Printf("%g", mAbsTol);
    mAbsTolTextCtrl->SetValue(str);
 
    FileManager *fm = FileManager::Instance();
-   mDirectory1 = fm->GetFullPathname(FileManager::OUTPUT_PATH).c_str();
-   mDirectory2 = fm->GetFullPathname(FileManager::OUTPUT_PATH).c_str();
-   mSaveFileName = mDirectory1 + "CompareResults.txt";
-   mDir1TextCtrl->SetValue(mDirectory1);
-   mDir2TextCtrl->SetValue(mDirectory2);
+   mBaseDirectory = fm->GetFullPathname(FileManager::OUTPUT_PATH).c_str();
+   mCompareDirs[0] = fm->GetFullPathname(FileManager::OUTPUT_PATH).c_str();
+   mCompareDirs[1] = fm->GetFullPathname(FileManager::OUTPUT_PATH).c_str();
+   mCompareDirs[2] = fm->GetFullPathname(FileManager::OUTPUT_PATH).c_str();
+   mCompareDirsComboBox->SetSelection(0);
+   mSaveFileName = mBaseDirectory + "CompareResults.txt";
+   mBaseDirTextCtrl->SetValue(mBaseDirectory);
+   mCompareDirTextCtrl->SetValue(mCompareDirs[0]);
    mSaveFileTextCtrl->SetValue(mSaveFileName);
 
    // update file info in directory 1 and 2
-   UpdateFileInfo(1);
-   UpdateFileInfo(2);
+   UpdateFileInfo(0, true);
+   UpdateFileInfo(1, false);
    
    mSaveResultCheckBox->Enable();
    mSaveFileTextCtrl->Disable();
@@ -349,21 +363,26 @@ void CompareFilesDialog::LoadData()
 //------------------------------------------------------------------------------
 void CompareFilesDialog::SaveData()
 {
-   long numFilesToCompare;
+   long longNum;
    canClose = true;
       
-//    // update file info in directory 1 and 2
-//    mFromString = mReplaceFromTextCtrl->GetValue();
-//    mToString = mReplaceToTextCtrl->GetValue();
-//    UpdateFileInfo(1);
-//    UpdateFileInfo(2);
-   
-   if (!mNumFilesToCompareTextCtrl->GetValue().ToLong(&numFilesToCompare))
+   if (!mNumFilesToCompareTextCtrl->GetValue().ToLong(&longNum))
    {
       wxMessageBox("Invalid number of scripts to run entered.");
       canClose = false;
       return;
    }
+   
+   mNumFilesToCompare = longNum;
+   
+   if (!mNumDirsToCompareTextCtrl->GetValue().ToLong(&longNum))
+   {
+      wxMessageBox("Invalid number of scripts to run entered.");
+      canClose = false;
+      return;
+   }
+   
+   mNumDirsToCompare = longNum;
    
    if (!mAbsTolTextCtrl->GetValue().ToDouble(&mAbsTol))
    {
@@ -372,10 +391,7 @@ void CompareFilesDialog::SaveData()
       return;
    }
    
-   mNumFilesToCompare = numFilesToCompare;
    
-   //mFromString = mReplaceFromTextCtrl->GetValue();
-   //mToString = mReplaceToTextCtrl->GetValue();
    mSaveFileName = mSaveFileTextCtrl->GetValue();
 
    mCompareFiles = true;
@@ -393,10 +409,10 @@ void CompareFilesDialog::SaveData()
    #if DEBUG_COMPARE_FILES_DIALOG
    MessageInterface::ShowMessage
       ("CompareFilesDialog::SaveData() mNumFilesToCompare=%d, "
-       "mCompareFiles=%d, mAbsTol=%e\n   mDirectory1=%s, mDirectory2=%s, "
-       "mFromString=%s, mToString=%s\n", mNumFilesToCompare, mCompareFiles,
-       mAbsTol, mDirectory1.c_str(), mDirectory2.c_str(), mFromString.c_str(),
-       mToString.c_str());
+       "mCompareFiles=%d, mAbsTol=%e\n   mBaseDirectory=%s, mCompareDirs[0]=%s, "
+       "mBaseString=%s, mCompareStrings[0]=%s\n", mNumFilesToCompare, mCompareFiles,
+       mAbsTol, mBaseDirectory.c_str(), mCompareDirs[0].c_str(), mBaseString.c_str(),
+       mCompareStrings[0].c_str());
    #endif
 }
 
@@ -416,57 +432,78 @@ void CompareFilesDialog::ResetData()
 //------------------------------------------------------------------------------
 void CompareFilesDialog::OnButtonClick(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == mDirectory1Button)
+   if (event.GetEventObject() == mBaseDirButton)
    {
-      wxDirDialog dialog(this, "Select a first directory", mDirectory1);
+      wxDirDialog dialog(this, "Select a base directory", mBaseDirectory);
    
       if (dialog.ShowModal() == wxID_OK)
       {
-         mDirectory1 = dialog.GetPath();
-         mDir1TextCtrl->SetValue(mDirectory1);
-         mSaveFileTextCtrl->SetValue(mDirectory1 + "/CompareResults.txt");
-         UpdateFileInfo(1);
+         mBaseDirectory = dialog.GetPath();
+         mBaseDirTextCtrl->SetValue(mBaseDirectory);
+         mSaveFileTextCtrl->SetValue(mBaseDirectory + "/CompareResults.txt");
+         UpdateFileInfo(0, true);
          
          #if DEBUG_COMPARE_FILES_DIALOG
          MessageInterface::ShowMessage
-            ("CompareFilesDialog::OnButtonClick() mDirectory1=%s\n",
-             mDirectory1.c_str());
+            ("CompareFilesDialog::OnButtonClick() mBaseDirectory=%s\n",
+             mBaseDirectory.c_str());
          #endif
       }
    }
-   else if (event.GetEventObject() == mDirectory2Button)
+   else if (event.GetEventObject() == mCompareDirButton)
    {
-      wxDirDialog dialog(this, "Select a second dierctory", mDirectory2);
+      int dirIndex = mCompareDirsComboBox->GetSelection();
+      wxDirDialog dialog(this, "Select a compare dierctory", mCompareDirs[dirIndex]);
       
       if (dialog.ShowModal() == wxID_OK)
       {
-         mDirectory2 = dialog.GetPath();
-         mDir2TextCtrl->SetValue(mDirectory2);
-         UpdateFileInfo(2);
+         if (dirIndex == 0)
+            mHasDir1 = true;
+         else if (dirIndex == 1)
+            mHasDir2 = true;
+         else if (dirIndex == 2)
+            mHasDir3 = true;
+         
+         mCompareDirs[dirIndex] = dialog.GetPath();
+         mCompareDirTextCtrl->SetValue(mCompareDirs[dirIndex]);
+         UpdateFileInfo(dirIndex, false);
+
+         // update number of directories to compare
+         int numDirs = 0;
+         if (mHasDir1) numDirs++;
+         if (mHasDir2) numDirs++;
+         if (mHasDir3) numDirs++;
+         mNumDirsToCompare = numDirs;
+         
+         wxString str;
+         str.Printf("%d", mNumDirsToCompare);
+         mNumDirsToCompareTextCtrl->SetValue(str);
          
          #if DEBUG_COMPARE_FILES_DIALOG
          MessageInterface::ShowMessage
-            ("CompareFilesDialog::OnButtonClick() mDirectory2=%s\n",
-             mDirectory2.c_str());
+            ("CompareFilesDialog::OnButtonClick() mCompareDirs[%d]=%s\n",
+             dirIndex, mCompareDirs[dirIndex].c_str());
          #endif
       }
    }
-   else if (event.GetEventObject() == mUpdate1Button)
+   else if (event.GetEventObject() == mBaseUpdateButton)
    {
-      // update file info in directory 1
-      mFromString = mReplaceFromTextCtrl->GetValue();
-      UpdateFileInfo(1);
+      // update file info in base directory
+      mBaseString = mBaseStrTextCtrl->GetValue();
+      UpdateFileInfo(0, true);
    }
-   else if (event.GetEventObject() == mUpdate2Button)
+   else if (event.GetEventObject() == mCompareUpdateButton)
    {
-      // update file info in directory 2
-      mToString = mReplaceToTextCtrl->GetValue();
-      UpdateFileInfo(2);
+      int dirIndex = mCompareDirsComboBox->GetSelection();
+      
+      // update file info in compare directory
+      mCompareStrings[dirIndex] = mCompareStrTextCtrl->GetValue();
+      UpdateFileInfo(dirIndex, false);
    }
    else if (event.GetEventObject() == mSaveBrowseButton)
    {
       wxString filename =
-         wxFileSelector("Choose a file to save", mDirectory1, "", "txt",
+         wxFileSelector("Choose a file to save", mBaseDirectory, "", "txt",
                         "Report files (*.report)|*.report|Text files (*.txt)|*.txt",
                         wxSAVE);
       
@@ -502,20 +539,34 @@ void CompareFilesDialog::OnCheckBoxChange(wxCommandEvent& event)
 }
 
 
+// void OnComboBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void CompareFilesDialog::OnComboBoxChange(wxCommandEvent& event)
+{
+   if (event.GetEventObject() == mCompareDirsComboBox)
+   {
+      int currDir = mCompareDirsComboBox->GetSelection();
+      mCompareDirTextCtrl->SetValue(mCompareDirs[currDir]);
+   }
+}
+
+
 //------------------------------------------------------------------------------
 // void OnTextEnterPress(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void CompareFilesDialog::OnTextEnterPress(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == mReplaceFromTextCtrl)
+   int dirIndex = mCompareDirsComboBox->GetSelection();
+   
+   if (event.GetEventObject() == mBaseStrTextCtrl)
    {
-      mFromString = mReplaceFromTextCtrl->GetValue();
-      UpdateFileInfo(1);
+      mBaseString = mBaseStrTextCtrl->GetValue();
+      UpdateFileInfo(0, true);
    }
-   else if (event.GetEventObject() == mReplaceToTextCtrl)
+   else if (event.GetEventObject() == mCompareStrTextCtrl)
    {
-      mToString = mReplaceToTextCtrl->GetValue();
-      UpdateFileInfo(2);
+      mCompareStrings[dirIndex] = mCompareStrTextCtrl->GetValue();
+      UpdateFileInfo(dirIndex, false);
    }
 }
 
@@ -523,29 +574,29 @@ void CompareFilesDialog::OnTextEnterPress(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 // void UpdateFileInfo(Integer dir)
 //------------------------------------------------------------------------------
-void CompareFilesDialog::UpdateFileInfo(Integer dir)
+void CompareFilesDialog::UpdateFileInfo(Integer dir, bool isBaseDir)
 {
-   if (dir == 1)
+   if (isBaseDir)
    {
-      mFileNamesInDir1 = GetFilenamesContain(mDirectory1, mFromString);
-      mNumFilesInDir1 = mFileNamesInDir1.GetCount();
-      mNumFilesFromDir1TextCtrl->SetValue("");
-      *mNumFilesFromDir1TextCtrl << mNumFilesInDir1;
+      mFileNamesInBaseDir = GetFilenamesContain(mBaseDirectory, mBaseString);
+      mNumFilesInBaseDir = mFileNamesInBaseDir.GetCount();
+      mNumFilesInBaseDirTextCtrl->SetValue("");
+      *mNumFilesInBaseDirTextCtrl << mNumFilesInBaseDir;
    }
    else
    {
-      mFileNamesInDir2 = GetFilenamesContain(mDirectory2, mToString);
-      mNumFilesInDir2 = mFileNamesInDir2.GetCount();
-      mNumFilesFromDir2TextCtrl->SetValue("");
-      *mNumFilesFromDir2TextCtrl << mNumFilesInDir2;
+      mFileNamesInCompareDir = GetFilenamesContain(mCompareDirs[dir], mCompareStrings[dir]);
+      mNumFilesInCompareDir = mFileNamesInCompareDir.GetCount();
+      mNumFilesInCompareDirTextCtrl->SetValue("");
+      *mNumFilesInCompareDirTextCtrl << mNumFilesInCompareDir;
    }
    
    // number of files to compare
    mNumFilesToCompareTextCtrl->SetValue("");
-   if (mNumFilesInDir1 == 0 || mNumFilesInDir2 == 0)
+   if (mNumFilesInBaseDir == 0 || mNumFilesInCompareDir == 0)
       *mNumFilesToCompareTextCtrl << 0;
    else
-      *mNumFilesToCompareTextCtrl << mNumFilesInDir1;
+      *mNumFilesToCompareTextCtrl << mNumFilesInBaseDir;
    
 }
 

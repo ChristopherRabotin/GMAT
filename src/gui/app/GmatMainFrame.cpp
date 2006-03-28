@@ -222,7 +222,8 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
 #if wxUSE_STATUSBAR
    // create a status bar
    //theStatusBar = CreateStatusBar(2);
-   int widths[] = {150, 600, 200};
+   //loj: 3/20/06 int widths[] = {150, 600, 200};
+   int widths[] = {150, 600, 300};
    theStatusBar = CreateStatusBar(3, wxBORDER);
    SetStatusWidths(3, widths);
    SetStatusText(_T("Welcome to GMAT!"));
@@ -752,10 +753,10 @@ void GmatMainFrame::CloseCurrentProject()
 //------------------------------------------------------------------------------
 void GmatMainFrame::RunCurrentMission()
 {
-   #if DEBUG_MAINFRAME
+   //#if DEBUG_MAINFRAME
    MessageInterface::ShowMessage
       ("GmatMainFrame::RunCurrentMission() mRunPaused=%d\n", mRunPaused);
-   #endif
+   //#endif
    
    wxToolBar* toolBar = GetToolBar();
    
@@ -1391,12 +1392,13 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    bitmaps[13] = new wxBitmap(script_xpm);
    bitmaps[14] = new wxBitmap(build_xpm);
    
+  
    // add project tools
    toolBar->AddTool(MENU_FILE_NEW_SCRIPT, _T("New"), *bitmaps[0], _T("New Script"));
    toolBar->AddTool(MENU_FILE_OPEN_SCRIPT, _T("Open"), *bitmaps[1], _T("Open Script"));
    toolBar->AddTool(MENU_FILE_SAVE_SCRIPT, _T("Save"), *bitmaps[2], _T("Save to Script"));
    toolBar->AddSeparator();
-
+   
    toolBar->AddTool(MENU_PROJECT_LOAD_DEFAULT_MISSION, _T("Default"), *bitmaps[13], 
                     _T("Default Project"));
    toolBar->AddSeparator();
@@ -1424,9 +1426,7 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    
    // add help tool
    toolBar->AddTool(MENU_HELP_ABOUT, _T("Help"), *bitmaps[7], _T("Help"));
-//   toolBar->AddSeparator();
-//   toolBar->AddSeparator();
-//   toolBar->AddSeparator();
+   toolBar->AddSeparator();
    
    // now realize to make tools appear
    toolBar->Realize();
@@ -2023,19 +2023,35 @@ void GmatMainFrame::OnFileCompare(wxCommandEvent& event)
    if (!dlg.CompareFiles())
       return;
    
+   Integer numDirsToCompare = dlg.GetNumDirsToCompare();
+   if (numDirsToCompare <= 0)
+      return;
+   
    Integer numFilesToCompare = dlg.GetNumFilesToCompare();
    if (numFilesToCompare <= 0)
       return;
    
-   wxString dir1 = dlg.GetDirectory1();
-   wxString dir2 = dlg.GetDirectory2();
-   wxString fromStr = dlg.GetReplaceStringFrom();
-   wxString toStr = dlg.GetReplaceStringTo();
+   wxString baseDir = dlg.GetBaseDirectory();
+   wxArrayString compDirs = dlg.GetCompareDirectories();
+   wxString baseStr = dlg.GetBaseString();
+   wxArrayString compareStrs = dlg.GetCompareStrings();
    Real absTol = dlg.GetAbsTolerance();
    bool saveCompareResults = dlg.SaveCompareResults();
    wxString saveFileName = dlg.GetSaveFilename();
+
+   #if DEBUG_FILE_COMPARE
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::OnFileCompare() baseDir=%s, compareStrs[0]=%s\n   "
+       "compDirs[0]=%s\n", baseDir.c_str(), compareStrs[0].c_str(),
+       compDirs[0].c_str());
+   MessageInterface::ShowMessage
+      ("   numDirsToCompare=%d, numFilesToCompare=%d\n", numDirsToCompare,
+       numFilesToCompare);
+   #endif
    
    wxTextCtrl *textCtrl = NULL;
+   wxString compareStr = compareStrs[0];
+   wxString dir1 = compDirs[0];
    
    GmatMdiChildFrame *textFrame = GetChild("CompareReport");
    
@@ -2060,11 +2076,11 @@ void GmatMainFrame::OnFileCompare(wxCommandEvent& event)
    textFrame->GetSize(&w, &h);
    textFrame->SetSize(w+1, h+1);
 
-   // Get files in the directory 1
-   wxDir dir(dir1);
+   // Get files in the base directory
+   wxDir dir(baseDir);
    wxString filename;
    wxString filepath;
-   StringArray filenames;
+   wxArrayString baseFileNameArray;
    
    //How do I specify multiple file ext?
    bool cont = dir.GetFirst(&filename);
@@ -2072,66 +2088,98 @@ void GmatMainFrame::OnFileCompare(wxCommandEvent& event)
    {
       if (filename.Contains(".report") || filename.Contains(".txt"))
       {
-         filepath = dir1 + "/" + filename;
-         
-         // remove any backup files
-         if (filename.Last() == 't')
+         if (filename.Contains(baseStr))
          {
-            filenames.push_back(filepath.c_str());
+            filepath = baseDir + "/" + filename;
+         
+            // remove any backup files
+            if (filename.Last() == 't')
+            {
+               baseFileNameArray.push_back(filepath.c_str());
+            }
          }
+         
+         cont = dir.GetNext(&filename);
       }
-      
-      cont = dir.GetNext(&filename);
    }
-
+   
    StringArray colTitles;
-   std::string filename1;
-   std::string filename2;
    wxString tempStr;
    int fileCount = 0;
+   wxString baseFileName;
    
    // Now call compare utility
-   for (UnsignedInt i=0; i<filenames.size(); i++)
+   for (UnsignedInt i=0; i<baseFileNameArray.size(); i++)
    {
       if (fileCount > numFilesToCompare)
          break;
       
-      filename1 = filenames[i];
-      
-      wxString filename2 = filename1.c_str();
-      wxFileName fname(filename2);
-      wxString name2 = fname.GetFullName();
-      size_t numReplaced = name2.Replace(fromStr, toStr.c_str());
-      
-      if (numReplaced == 0)
-      {
-         textCtrl->AppendText
-            ("***Cannot compare results. The report file doesn't contain " + fromStr + "\n");
-         MessageInterface::ShowMessage
-            ("ResourceTree::CompareScriptRunResult() Cannot compare results.\n"
-             "The report file doesn't contain %s.\n\n", fromStr.c_str());
-         return;
-      }
-      
-      if (numReplaced > 1)
-      {
-         textCtrl->AppendText
-            ("***Cannot compare results. The report file name contains more "
-             "than 1 " + fromStr + " string.\n");
-         MessageInterface::ShowMessage
-            ("ResourceTree::CompareScriptRunResult() Cannot compare results.\n"
-             "The report file name contains more than 1 %s string.\n\n", fromStr.c_str());
-         return;
-      }
-      
-      // set filename2
-      filename2 = dir2 + "/" + name2;
-      
-      StringArray output =
-         GmatFileUtil::Compare(filename1.c_str(), filename2.c_str(), colTitles, absTol);
-      
       tempStr.Printf("%d", i+1);
       textCtrl->AppendText("==> File Compare Count: " + tempStr + "\n");
+
+      baseFileName = baseFileNameArray[i];
+      wxFileName filename(baseFileName);
+      
+      wxArrayString compareNames;
+      
+      for (int j=0; j<numDirsToCompare; j++)
+      {
+         compareNames.Add(filename.GetFullName());
+         compareStr = compareStrs[j];
+         size_t numReplaced = compareNames[j].Replace(baseStr, compareStr.c_str());
+         
+         if (numReplaced == 0)
+         {
+            textCtrl->AppendText
+               ("***Cannot compare results. The report file doesn't contain " +
+                baseStr + "\n");
+            MessageInterface::ShowMessage
+               ("ResourceTree::CompareScriptRunResult() Cannot compare results.\n"
+                "The report file doesn't contain %s.\n\n", baseStr.c_str());
+
+            fileCount++;
+            continue;
+         }
+         
+         if (numReplaced > 1)
+         {
+            textCtrl->AppendText
+               ("***Cannot compare results. The report file name contains more "
+                "than 1 " + baseStr + " string.\n");
+            MessageInterface::ShowMessage
+               ("ResourceTree::CompareScriptRunResult() Cannot compare results.\n"
+                "The report file name contains more than 1 %s string.\n\n",
+                baseStr.c_str());
+            //return;
+            fileCount++;
+            continue;
+         }
+      }
+      
+      // set compare file names
+      wxString filename1;
+      wxString filename2;
+      wxString filename3;
+      
+      if (numDirsToCompare >= 1)
+         filename1 = compDirs[0] + "/" + compareNames[0];
+      
+      if (numDirsToCompare >= 2)
+         filename2 = compDirs[1] + "/" + compareNames[1];
+      
+      if (numDirsToCompare >= 3)
+         filename3 = compDirs[2] + "/" + compareNames[2];
+
+      StringArray output;
+      
+      if (numDirsToCompare == 1)
+         output =
+            GmatFileUtil::Compare(baseFileName.c_str(), filename1.c_str(),
+                                  colTitles, absTol);
+      else
+         output =
+            GmatFileUtil::Compare(numDirsToCompare, baseFileName.c_str(), filename1.c_str(),
+                                  filename2.c_str(), filename3.c_str(), colTitles, absTol);
       
       // append text
       for (unsigned int i=0; i<output.size(); i++)
@@ -2268,18 +2316,22 @@ void GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
    InterpretScript(filename);
 }
 
+
 //------------------------------------------------------------------------------
 // void OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 {
-   wxString filename = ((GmatMdiChildFrame *)GetActiveChild())->GetTitle();
-   //wxLogStatus(GmatAppData::GetMainFrame(), "script:%s", filename.c_str());
+   //MessageInterface::ShowMessage("====> GmatMainFrame::OnScriptBuildAndRun()\n");
+   
+   //loj: 3/14 wxString filename = ((GmatMdiChildFrame *)GetActiveChild())->GetTitle();
+   wxString filename = scriptFilename.c_str();
    SetStatusText("script: " + filename, 1);
    
    if (InterpretScript(filename))
       OnRun(event);
 }
+
 
 //------------------------------------------------------------------------------
 // bool OnScriptRun(wxCommandEvent& WXUNUSED(event))
@@ -2292,8 +2344,10 @@ void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
+   //MessageInterface::ShowMessage("====> GmatMainFrame::OnScriptRun()\n");
    RunCurrentMission();
 }
+
 
 //------------------------------------------------------------------------------
 // void OnUndo(wxCommandEvent& event)

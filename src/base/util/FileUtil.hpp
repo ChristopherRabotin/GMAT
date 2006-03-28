@@ -29,6 +29,10 @@ namespace GmatFileUtil
    static Real CompareAbsTol = 1.0e-4;
    StringArray& Compare(const std::string &filename1, const std::string &filename2,
                         const StringArray &colTitles, Real tol = CompareAbsTol);
+   StringArray& Compare(Integer numDirsToCompare, const std::string &basefilename,
+                        const std::string &filename1, const std::string &filename2,
+                        const std::string &filename3,  const StringArray &colTitles,
+                        Real tol = CompareAbsTol);
    bool SkipHeaderLines(std::ifstream &in, StringArray &tokens);
    static StringArray textBuffer;
 }
