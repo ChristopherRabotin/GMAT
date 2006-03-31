@@ -21,9 +21,9 @@
 #include "Factory.hpp"
 #include "SubscriberFactory.hpp"
 #include "ReportFile.hpp"
+#include "TextEphemFile.hpp"
 #include "MessageWindow.hpp"
 #include "OpenGlPlot.hpp"
-//#include "XyPlot.hpp" //loj: 6/14/05 this will be removed
 #include "TsPlot.hpp"
 #include "MatlabWs.hpp"
 
@@ -49,18 +49,20 @@ Subscriber* SubscriberFactory::CreateSubscriber(const std::string &ofType,
                                                 const std::string &fileName)
 {
    if (ofType == "ReportFile")
-      return new ReportFile(withName, fileName);
+      return new ReportFile(ofType, withName, fileName);
+   else if (ofType == "TextEphemFile")
+      return new TextEphemFile(ofType, withName, fileName);
    else if (ofType == "MessageWindow")
       return new MessageWindow(withName);
    else if (ofType == "OpenGLPlot")
       return new OpenGlPlot(withName);
    else if (ofType == "XYPlot")
-      //return new XyPlot(withName); //loj: 6/14/05 XyPlot will be removed
       return new TsPlot(withName);
    else if (ofType == "TSPlot")
       return new TsPlot(withName);
    else if (ofType == "MatlabWS")
       return new MatlabWs(withName);
+   
    return NULL;
 }
 
@@ -81,13 +83,14 @@ Factory(Gmat::SUBSCRIBER)
    if (creatables.empty())
    {
       creatables.push_back("ReportFile");
+      creatables.push_back("TextEphemFile");
       creatables.push_back("MessageWindow");
       creatables.push_back("OpenGLPlot");
       creatables.push_back("XYPlot");
-      //creatables.push_back("TSPlot");
       creatables.push_back("MatlabWS");
    }
 }
+
 
 //------------------------------------------------------------------------------
 // SubscriberFactory(StringArray createList)
@@ -105,6 +108,7 @@ Factory(createList,Gmat::SUBSCRIBER)
 {
 }
 
+
 //------------------------------------------------------------------------------
 //  SubscriberFactory(const SubscriberFactory& fact)
 //------------------------------------------------------------------------------
@@ -119,6 +123,7 @@ SubscriberFactory::SubscriberFactory(const SubscriberFactory& fact) :
 Factory(fact)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // SubscriberFactory& operator= (const SubscriberFactory& fact)
@@ -138,6 +143,7 @@ SubscriberFactory& SubscriberFactory::operator= (const SubscriberFactory& fact)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~SubscriberFactory()
 //------------------------------------------------------------------------------
@@ -150,16 +156,4 @@ SubscriberFactory::~SubscriberFactory()
 {
    // deletes handled by Factory destructor
 }
-
-//---------------------------------
-//  protected methods
-//---------------------------------
-
-//---------------------------------
-//  private methods
-//---------------------------------
-
-
-
-
 
