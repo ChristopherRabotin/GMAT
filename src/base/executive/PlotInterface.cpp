@@ -124,8 +124,12 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    for (int i=0; i<MdiGlPlot::numChildren; i++)
    {
       currPlotFrame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
-      currPlotName = currPlotFrame->GetPlotName();
       
+      if (currPlotFrame)  //waw: Added null pointer check 03/23/06
+         currPlotName = currPlotFrame->GetPlotName();
+      else
+         break;
+         
       #if DEBUG_PLOTIF_GL
       MessageInterface::ShowMessage
          ("PlotInterface::CreateGlPlotWindow() currPlotName[%d]=%s, addr=%d\n",
@@ -164,11 +168,14 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                wxPoint(-1, -1), wxSize(-1, -1),
                                wxDEFAULT_FRAME_STYLE, wxString(csName.c_str()),
                                ssPtr);
-      
-      currPlotFrame->Show(); 
+                               
+      if (currPlotFrame)  //waw: Added null pointer check 03/23/06
+         currPlotFrame->Show(); 
+      else
+         return false;
       
       #if __WXMAC__  
-      currPlotFrame->SetSize(499, 349);
+         currPlotFrame->SetSize(499, 349);
       #endif
       
       #if DEBUG_PLOTIF_GL
@@ -608,16 +615,18 @@ bool PlotInterface::UpdateGlPlot(const std::string &plotName,
           "owner=%s\n", i, frame->GetPlotName().c_str(), owner.c_str());
       #endif
       
-      if (frame->GetPlotName().IsSameAs(owner.c_str()))
+      if (frame)  //waw: Added null pointer check 03/23/06
       {
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         {
+            //MessageInterface::ShowMessage
+            //   ("PlotInterface::UpdateGlPlot() now updating GL plot...\n");
          
-         //MessageInterface::ShowMessage
-         //   ("PlotInterface::UpdateGlPlot() now updating GL plot...\n");
-         
-         frame->UpdatePlot(scNames, time, posX, posY, posZ, velX, velY, velZ,
+            frame->UpdatePlot(scNames, time, posX, posY, posZ, velX, velY, velZ,
                            scColors, updateCanvas); //loj: 6/13/05 Added velocity
          
-         updated = true;
+            updated = true;
+         }
       }
    }
 
@@ -1010,17 +1019,25 @@ bool PlotInterface::RefreshTsPlot(const std::string &plotName)
       wxString owner = wxString(plotName.c_str());
 
       MdiChildTsFrame *frame = NULL;
+      //MessageInterface::ShowMessage("PlotInterface::RefreshTsPlot(1)\n");
+      
       for (int i=0; i<MdiTsPlot::numChildren; i++)
       {
+      	   //MessageInterface::ShowMessage("PlotInterface::RefreshTsPlot(2)\n");
          frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
-         if (frame)            
+         //MessageInterface::ShowMessage("PlotInterface::RefreshTsPlot(3)\n");
+         if (frame)   
+         {         
             if (frame->GetPlotName().IsSameAs(owner.c_str()))
             {
+            	   //MessageInterface::ShowMessage("PlotInterface::RefreshTsPlot(4)\n");
                frame->RedrawCurve();
+               //MessageInterface::ShowMessage("PlotInterface::RefreshTsPlot(5)\n");
                #if __WXMAC__  
                   frame->Refresh(true,NULL);
                #endif
             }
+         }
       }
    }
    
@@ -1067,33 +1084,36 @@ bool PlotInterface::UpdateTsPlot(const std::string &plotName,
    #endif
    
    MdiChildTsFrame *frame = NULL;
+   
    for (int i=0; i<MdiTsPlot::numChildren; i++)
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
       
-      if (frame->GetPlotName().IsSameAs(owner.c_str()))
+      if (frame)  //waw: Added null pointer check 03/23/06
       {
-         int numCurves = frame->GetCurveCount();
-            
-         #if DEBUG_PLOTIF_XY_UPDATE
-            MessageInterface::ShowMessage
-               ("PlotInterface::UpdateTsPlot() numCurves = %d\n", numCurves);
-         #endif
-            
-         for (int j=0; j<numCurves; j++)
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
          {
+            int numCurves = frame->GetCurveCount();
             #if DEBUG_PLOTIF_XY_UPDATE
                MessageInterface::ShowMessage
-                  ("PlotInterface::UpdateTsPlot() yvals[%d] = %f\n", j, yvals(j));
+               ("PlotInterface::UpdateTsPlot() numCurves = %d\n", numCurves);
             #endif
-               
-            frame->AddDataPoints(j, xval, yvals(j));
-         }
-
-         if (updateCanvas)
-            frame->RedrawCurve();
             
-         updated = true;
+            for (int j=0; j<numCurves; j++)
+            {
+               #if DEBUG_PLOTIF_XY_UPDATE
+                  MessageInterface::ShowMessage
+                  ("PlotInterface::UpdateTsPlot() yvals[%d] = %f\n", j, yvals(j));
+               #endif
+                
+               frame->AddDataPoints(j, xval, yvals(j));
+            }
+
+            if (updateCanvas)
+               frame->RedrawCurve();
+            
+            updated = true;
+         }
       }
    }
    
