@@ -35,6 +35,7 @@ public:
     wxString GetTitle();
     void SetTitle(wxString newTitle);
 #endif
+
     int GetDataType();
     void SetDataType(int type) {dataType = type;};
     void OnClose(wxCloseEvent &event);
@@ -45,8 +46,9 @@ public:
     bool IsDirty();
 
 protected:
+
 #ifdef __WXMAC__
-    wxString title;
+    wxString childTitle;
 #endif
 
     bool mDirty;

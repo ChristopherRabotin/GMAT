@@ -54,8 +54,10 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame* parent,
 {
    mDirty = false;
    dataType = type;
+   
 #ifdef __WXMAC__
-   this->title.Printf("%s", title.c_str());
+   //this->title.Printf("%s", title.c_str());
+   this->childTitle = title.c_str();
 #endif
 
    SetMenuBar(CreateMenu(dataType));
@@ -77,7 +79,6 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame* parent,
    {
       //MessageInterface::ShowMessage(e.GetMessage());
    }
-   
 }
 
 
@@ -119,7 +120,7 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
 void GmatMdiChildFrame::SetTitle(wxString newTitle)
 {
 //   SetTitle(newTitle);
-   title = newTitle;
+   childTitle = newTitle;
 }
 
 
@@ -128,7 +129,10 @@ void GmatMdiChildFrame::SetTitle(wxString newTitle)
 //------------------------------------------------------------------------------
 wxString GmatMdiChildFrame::GetTitle()
 {
-   return title;
+	if (childTitle.IsNull())
+      return "";
+   else
+      return childTitle;
 }
 #endif
 
