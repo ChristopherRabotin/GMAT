@@ -58,14 +58,14 @@ ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
 
 
 //------------------------------------------------------------------------------
-// ReportFile(const std::string &name, const std::string &fileName)
+// ReportFile(const std::string &type, const std::string &name,
+//            const std::string &fileName)
 //------------------------------------------------------------------------------
-ReportFile::ReportFile(const std::string &name, const std::string &fileName,
-                       Parameter *firstVarParam) :
-   Subscriber      ("ReportFile", name),
+ReportFile::ReportFile(const std::string &type, const std::string &name,
+                       const std::string &fileName, Parameter *firstVarParam) :
+   Subscriber      (type, name),
    outputPath      (""),
    filename        (fileName),
-   //precision       (12),
    precision       (16),
    columnWidth     (20),
    writeHeaders    (true),

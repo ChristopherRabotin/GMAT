@@ -36,11 +36,12 @@ class ReportFile :
     public Subscriber
 {
 public:
-   ReportFile(const std::string &name, const std::string &fileName = "", 
-               Parameter *firstVarParam = NULL);
-
+   ReportFile(const std::string &typeName, const std::string &name,
+              const std::string &fileName = "", 
+              Parameter *firstVarParam = NULL);
+   
    virtual ~ReportFile(void);
-
+   
    ReportFile(const ReportFile &);
    ReportFile& operator=(const ReportFile&);
     
@@ -119,18 +120,17 @@ protected:
    Integer lastUsedProvider;
    bool usedByReport;
    bool calledByReport;
+   bool initial;
    
-   virtual bool        Distribute(Integer len);
-   virtual bool        Distribute(const Real * dat, Integer len);
-   virtual bool        OpenReportFile(void);
+   void ClearVarParameters();
+   void WriteHeaders();
    
-private:
-    void ClearVarParameters();
-    void WriteHeaders();
-    bool initial;
-
-    enum
-    {
+   virtual bool Distribute(Integer len);
+   virtual bool Distribute(const Real * dat, Integer len);
+   virtual bool OpenReportFile(void);
+   
+   enum
+   {
       FILENAME = SubscriberParamCount,
       PRECISION,
       ADD,
@@ -139,10 +139,12 @@ private:
       ZERO_FILL,
       COL_WIDTH,
       ReportFileParamCount  /// Count of the parameters for this class
-    };
+   };
 
-    static const std::string PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount];
-         static const Gmat::ParameterType PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount];
+private:
+
+   static const std::string PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount];
+   static const Gmat::ParameterType PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount];
 
 };
 
