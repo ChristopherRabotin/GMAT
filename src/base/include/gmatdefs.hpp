@@ -161,6 +161,7 @@ namespace Gmat
       SHOW_SCRIPT,
       OWNED_OBJECT,
       MATLAB_STRUCT,
+      EPHEM_HEADER,
    };
 
 }
