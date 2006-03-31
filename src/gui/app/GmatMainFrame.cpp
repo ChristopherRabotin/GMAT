@@ -78,6 +78,7 @@
 #include "CelestialBodyPanel.hpp"
 #include "CompareReportPanel.hpp"
 #include "CompareFilesDialog.hpp"
+#include "TextEphemFileDialog.hpp"
 #include "FileManager.hpp"
 #include "FileUtil.hpp"               // for Compare()
 
@@ -157,6 +158,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(MENU_TOOLS_MATLAB_OPEN, GmatMainFrame::OnOpenMatlab)
    EVT_MENU(MENU_TOOLS_MATLAB_CLOSE, GmatMainFrame::OnCloseMatlab)
    EVT_MENU(MENU_TOOLS_FILE_COMPARE, GmatMainFrame::OnFileCompare)
+   EVT_MENU(MENU_TOOLS_GEN_TEXT_EPHEM_FILE, GmatMainFrame::OnGenerateTextEphemFile)
 //   EVT_MENU(MENU_TOOLS_MATLAB_INTERACTIVE, GmatMainFrame::OnMatlabInteractive)
 
    EVT_SASH_DRAGGED(ID_SASH_WINDOW, GmatMainFrame::OnSashDrag) 
@@ -753,10 +755,10 @@ void GmatMainFrame::CloseCurrentProject()
 //------------------------------------------------------------------------------
 void GmatMainFrame::RunCurrentMission()
 {
-   //#if DEBUG_MAINFRAME
+   #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage
       ("GmatMainFrame::RunCurrentMission() mRunPaused=%d\n", mRunPaused);
-   //#endif
+   #endif
    
    wxToolBar* toolBar = GetToolBar();
    
@@ -1322,6 +1324,7 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    //-------------------------------------------------------
    wxMenu *toolsMenu = new wxMenu;
    toolsMenu->Append(MENU_TOOLS_FILE_COMPARE, wxT("Compare Files"), wxT(""));
+   toolsMenu->Append(MENU_TOOLS_GEN_TEXT_EPHEM_FILE, wxT("Generate Text Ephemeris File"), wxT(""));
    
 //   toolsMenu->Append(MENU_TOOLS_SWINGBY, wxT("Swingby"), wxT(""), FALSE);
 //   toolsMenu->Enable(MENU_TOOLS_SWINGBY, FALSE);
@@ -2201,6 +2204,22 @@ void GmatMainFrame::OnFileCompare(wxCommandEvent& event)
       if (saveCompareResults)
          textCtrl->SaveFile(saveFileName);
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void OnGenerateTextEphemFile(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles comparing two files
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnGenerateTextEphemFile(wxCommandEvent& event)
+{
+   TextEphemFileDialog dlg(this);
+   dlg.ShowModal();
 }
 
 
