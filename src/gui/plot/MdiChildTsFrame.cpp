@@ -412,7 +412,7 @@ void MdiChildTsFrame::ClearPlotData()
  */
 //------------------------------------------------------------------------------
 void MdiChildTsFrame::RedrawCurve()
-{
+{    
    if (mXyPlot)
    {
       Update(); // need Update to show plot as it runs
@@ -423,7 +423,7 @@ void MdiChildTsFrame::RedrawCurve()
       mXyPlot->Update();
       
       // On linux, this call gives the GUI a time slice to update the plot
-      #ifndef __WXMSW__
+      #ifdef __WXGTK__
          ::wxYield();
       #endif
    }
