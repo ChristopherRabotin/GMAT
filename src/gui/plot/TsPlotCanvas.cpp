@@ -107,11 +107,9 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
 
 void TsPlotCanvas::OnPaint(wxPaintEvent& ev)
 {
-   // On linux, this line floods the processor with messages.  For now,
-   // only call on Windows
-   #if __WXMSW__
-      wxWindow::Refresh(false);   
-   #elif __WXMAC__  //waw: Added 03/21/06
+   // On linux, this line floods the processor with messages.  So for
+   // platforms that are not using GTK, refresh here
+   #ifndef __WXGTK__
       wxWindow::Refresh(false);
    #endif
    
