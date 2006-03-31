@@ -54,7 +54,7 @@ bool GuiInterpreter::Interpret(void)
    return false;
 }
 
-bool GuiInterpreter::Build(void)
+bool GuiInterpreter::Build(Gmat::WriteMode mode)
 {
    return false;
 }
@@ -1138,7 +1138,7 @@ bool GuiInterpreter::InterpretScript(const std::string &scriptFilename)
 
 
 //------------------------------------------------------------------------------
-// bool SaveScript(const std::string &scriptFilename)
+// bool SaveScript(const std::string &scriptFilename, Gmat::WriteMode mode)
 //------------------------------------------------------------------------------
 /**
  * Builds scripts from objects and write to a file.
@@ -1148,9 +1148,10 @@ bool GuiInterpreter::InterpretScript(const std::string &scriptFilename)
  * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
-bool GuiInterpreter::SaveScript(const std::string &scriptFilename)
+bool GuiInterpreter::SaveScript(const std::string &scriptFilename,
+                                Gmat::WriteMode mode)
 {
-   return moderator->SaveScript(scriptFilename);
+   return moderator->SaveScript(scriptFilename, mode);
 }
 
 

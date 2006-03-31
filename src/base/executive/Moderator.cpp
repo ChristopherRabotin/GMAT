@@ -2780,6 +2780,9 @@ Integer Moderator::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes)
       MessageInterface::ShowMessage
          ("Successfully set Planetary Source to use: %s\n",
           PLANETARY_SOURCE_STRING[sourceTypeInUse].c_str());
+
+   theCurrentPlanetarySource = PLANETARY_SOURCE_STRING[sourceTypeInUse];
+   
    return retCode;
 }
 
@@ -2796,6 +2799,16 @@ Integer Moderator::GetPlanetarySourceId(const std::string &sourceType)
    
    return -1;
 }
+
+
+//------------------------------------------------------------------------------
+// std::string GetPlanetarySourceNameInUse()
+//------------------------------------------------------------------------------
+std::string Moderator::GetCurrentPlanetarySource()
+{
+   return theCurrentPlanetarySource;
+}
+
 
 // Potential field files
 //------------------------------------------------------------------------------
@@ -3338,17 +3351,19 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
 }
 
 //------------------------------------------------------------------------------
-// bool SaveScript(const std::string &scriptFileName)
+// bool SaveScript(const std::string &scriptFileName,
+//                 Gmat::WriteMode mode = Gmat::SCRIPTING)
 //------------------------------------------------------------------------------
 /**
  * Builds scripts from objects and write to a file.
  *
  * @param <scriptFileName> output script file name
+ * @param <writeMode> write mode object(one of Gmat::SCRIPTING, Gmat::MATLAB_STRUCT)
  *
  * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
-bool Moderator::SaveScript(const std::string &scriptFileName)
+bool Moderator::SaveScript(const std::string &scriptFileName, Gmat::WriteMode mode)
 {
    //MessageInterface::ShowMessage("Moderator::SaveScript() entered\n"
    //                              "file: " + scriptFileName + "\n");
@@ -3360,7 +3375,7 @@ bool Moderator::SaveScript(const std::string &scriptFileName)
    
    try
    {
-      return theScriptInterpreter->Build(scriptFileName);
+      return theScriptInterpreter->Build(scriptFileName, mode);
    }
    catch (BaseException &e)
    {

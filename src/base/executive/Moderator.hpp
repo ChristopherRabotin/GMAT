@@ -242,6 +242,7 @@ public:
    Integer SetPlanetarySourceTypesInUse(const StringArray &sourceTypes); 
    Integer GetPlanetarySourceId(const std::string &sourceType);
    std::string GetPlanetarySourceName(const std::string &sourceType);
+   std::string GetCurrentPlanetarySource();
    
    // Potential field files
    std::string GetPotentialFileName(const std::string &fileType);
@@ -278,7 +279,8 @@ public:
    // Script
    bool InterpretScript(const std::string &scriptFileName);
    bool InterpretScript(std::istringstream *ss, bool clearObjs);
-   bool SaveScript(const std::string &scriptFileName);
+   bool SaveScript(const std::string &scriptFileName,
+                   Gmat::WriteMode mode = Gmat::SCRIPTING);
    Integer RunScript(Integer sandboxNum = 1);
    
 private:
@@ -395,7 +397,8 @@ private:
       LOW_FIDELITY = 0,
       AnalyticModelCount,
    };
-   
+
+   std::string theCurrentPlanetarySource;
    Integer thePlanetarySourcePriority[PlanetarySourceCount];
    bool isPlanetarySourceInUse[PlanetarySourceCount];
    static const std::string PLANETARY_SOURCE_STRING[PlanetarySourceCount];

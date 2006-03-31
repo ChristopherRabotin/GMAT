@@ -48,7 +48,7 @@ public:
    ~GuiInterpreter();
 
    virtual bool Interpret(void);
-   virtual bool Build(void);
+   virtual bool Build(Gmat::WriteMode mode);
    virtual bool Interpret(GmatBase *obj, const std::string generator);
 
    bool IsInitialized();
@@ -204,7 +204,8 @@ public:
 
    // Script
    bool InterpretScript(const std::string &scriptFilename);
-   bool SaveScript(const std::string &scriptFilename);
+   bool SaveScript(const std::string &scriptFilename,
+                   Gmat::WriteMode mode = Gmat::SCRIPTING);
    Integer RunScript(Integer sandboxNum = 1);
 
    // GUI control
