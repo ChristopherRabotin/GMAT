@@ -139,17 +139,17 @@ bool ScriptInterpreter::Interpret(const std::string &scriptfile)
  * @return true if the file parses successfully, false on failure.
  */
 //------------------------------------------------------------------------------
-bool ScriptInterpreter::Build()
+bool ScriptInterpreter::Build(Gmat::WriteMode mode)
 {
     if (!initialized)
         Initialize();
         
-    return WriteScript();
+    return WriteScript(mode);
 }
 
 
 //------------------------------------------------------------------------------
-// bool Build(const std::string &scriptfile)
+// bool Build(const std::string &scriptfile, Gmat::WriteMode mode)
 //------------------------------------------------------------------------------
 /**
  * Writes the currently configured data to a file.
@@ -159,7 +159,7 @@ bool ScriptInterpreter::Build()
  * @return true if the file parses successfully, false on failure.
  */
 //------------------------------------------------------------------------------
-bool ScriptInterpreter::Build(const std::string &scriptfile)
+bool ScriptInterpreter::Build(const std::string &scriptfile, Gmat::WriteMode mode)
 {
     bool retval = false;
     
@@ -168,7 +168,7 @@ bool ScriptInterpreter::Build(const std::string &scriptfile)
     std::ofstream outFile(scriptfile.c_str());
     outstream = &outFile;
 
-    retval = Build();
+    retval = Build(mode);
     
     outFile.close();
     outstream = NULL;
@@ -768,7 +768,7 @@ bool ScriptInterpreter::Parse()
 
 
 //------------------------------------------------------------------------------
-// bool WriteScript()
+// bool WriteScript(Gmat::WriteMode mode = Gmat::SCRIPTING)
 //------------------------------------------------------------------------------
 /**
  * Writes a script -- including all configured objects -- to the output stream.
@@ -776,14 +776,22 @@ bool ScriptInterpreter::Parse()
  * @return true if the file parses successfully, false on failure.
  */
 //------------------------------------------------------------------------------
-bool ScriptInterpreter::WriteScript()
+bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
 {
-   *outstream << "% GMAT Script File\n% GMAT Release " << REV_STRING << "\n\n";
+   if (mode == Gmat::EPHEM_HEADER)
+   {
+      *outstream << "% GMAT Ephemeris Header File\n";
+      *outstream << "% GMAT Build Date: " <<  __DATE__ << "\n\n";
+   }
+   else
+   {
+      *outstream << "% GMAT Script File\n% GMAT Release " << REV_STRING << "\n\n";
+   }
    
    // First write out the objects, one type at a time
    StringArray::iterator current;
    StringArray objs;
-    
+   
    // Hardware
    objs = moderator->GetListOfConfiguredItems(Gmat::HARDWARE);
    #ifdef DEBUG_SCRIPT_READING_AND_WRITING 
@@ -795,13 +803,13 @@ bool ScriptInterpreter::WriteScript()
    for (current = objs.begin(); current != objs.end(); ++current) {
       object = FindObject(*current);
       if (object->GetTypeName() == "FuelTank")
-         if (!BuildObject(*current))
+         if (!BuildObject(*current, mode))
             return false;
    }
    for (current = objs.begin(); current != objs.end(); ++current) {
       object = FindObject(*current);
       if (object->GetTypeName() == "Thruster")
-         if (!BuildObject(*current))
+         if (!BuildObject(*current, mode))
             return false;
    }
             
@@ -824,7 +832,7 @@ bool ScriptInterpreter::WriteScript()
          sc->SetRefObject(sccs, Gmat::COORDINATE_SYSTEM);
       sc->Initialize();
       
-      if (!BuildObject(*current))
+      if (!BuildObject(*current, mode))
          return false;
    }
    
@@ -835,7 +843,7 @@ bool ScriptInterpreter::WriteScript()
       std::cout << "Found " << objs.size() << " Spacecraft\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
-      if (!BuildObject(*current))
+      if (!BuildObject(*current, mode))
          return false;
 
    // Libration Points and Barycenters
@@ -845,7 +853,7 @@ bool ScriptInterpreter::WriteScript()
       MessageInterface::ShowMessage("Found %d calculated points\n", objs.size());
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
-      if (!BuildObject(*current))
+      if (!BuildObject(*current, mode))
          return false;
             
    // Force Models
@@ -855,9 +863,9 @@ bool ScriptInterpreter::WriteScript()
       std::cout << "Found " << objs.size() << " Force Models\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
-      if (!BuildObject(*current))
+      if (!BuildObject(*current, mode))
          return false;
-            
+   
    // Propagator setups
    objs = moderator->GetListOfConfiguredItems(Gmat::PROP_SETUP);
 
@@ -865,16 +873,16 @@ bool ScriptInterpreter::WriteScript()
       std::cout << "Found " << objs.size() << " Propagators\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
-      if (!BuildObject(*current))
+      if (!BuildObject(*current, mode))
          return false;
-            
+   
    // Burn objects
    objs = moderator->GetListOfConfiguredItems(Gmat::BURN);
    #ifdef DEBUG_SCRIPT_READING_AND_WRITING
       std::cout << "Found " << objs.size() << " Burns\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
-      if (!BuildObject(*current))
+      if (!BuildObject(*current, mode))
          return false;
     
    // Solver objects
@@ -883,50 +891,55 @@ bool ScriptInterpreter::WriteScript()
       std::cout << "Found " << objs.size() << " Solvers\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
-      if (!BuildObject(*current))
+      if (!BuildObject(*current, mode))
          return false;
-    
+   
+   // If mode is EPHEM_HEADER, skip this part
    // Subscriber setups
-   objs = moderator->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
-   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-      std::cout << "Found " << objs.size() << " Subscribers\n";
-   #endif
-   for (current = objs.begin(); current != objs.end(); ++current)
-      if (!BuildObject(*current))
-         return false;
-
-   // Array and Variable setups
-   objs = moderator->GetListOfConfiguredItems(Gmat::PARAMETER);
-   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-      std::cout << "Found " << objs.size() << " Parameters\n";
-   #endif
-   for (current = objs.begin(); current != objs.end(); ++current)
+   if (mode != Gmat::EPHEM_HEADER)
    {
-      if (!BuildUserObject(*current))
-         return false;
+      objs = moderator->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+         std::cout << "Found " << objs.size() << " Subscribers\n";
+      #endif
+      for (current = objs.begin(); current != objs.end(); ++current)
+         if (!BuildObject(*current, mode))
+            return false;
+   
+   
+      // Array and Variable setups
+      objs = moderator->GetListOfConfiguredItems(Gmat::PARAMETER);
+      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+         std::cout << "Found " << objs.size() << " Parameters\n";
+      #endif
+      for (current = objs.begin(); current != objs.end(); ++current)
+      {
+         if (!BuildUserObject(*current, mode))
+            return false;
+      }
+   
+      // Coordinate System setups
+      objs = moderator->GetListOfConfiguredItems(Gmat::COORDINATE_SYSTEM);
+      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+         std::cout << "Found " << objs.size() << " Coordinate Systems\n";
+      #endif
+      for (current = objs.begin(); current != objs.end(); ++current)
+      {
+         if (!BuildObject(*current, mode))
+            return false;
+      }
+
+      // Function setups
+      objs = moderator->GetListOfConfiguredItems(Gmat::FUNCTION);
+      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+         std::cout << "Found " << objs.size() << " Functions\n";
+      #endif
+      for (current = objs.begin(); current != objs.end(); ++current)
+         if (!BuildObject(*current, mode))
+            return false;
+
    }
-
-   // Coordinate System setups
-   objs = moderator->GetListOfConfiguredItems(Gmat::COORDINATE_SYSTEM);
-   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-      std::cout << "Found " << objs.size() << " Coordinate Systems\n";
-   #endif
-   for (current = objs.begin(); current != objs.end(); ++current)
-   {
-      if (!BuildObject(*current))
-         return false;
-   }
-
-   // Function setups
-   objs = moderator->GetListOfConfiguredItems(Gmat::FUNCTION);
-   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-      std::cout << "Found " << objs.size() << " Functions\n";
-   #endif
-   for (current = objs.begin(); current != objs.end(); ++current)
-      if (!BuildObject(*current))
-         return false;
-
-
+   
    // Command sequence
    GmatCommand *cmd = moderator->GetNextCommand();
    bool inTextMode = false;

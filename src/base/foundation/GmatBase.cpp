@@ -2178,8 +2178,8 @@ void GmatBase::CopyParameters(const GmatBase &a)
  */
 //------------------------------------------------------------------------------
 const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
-                                               const std::string &prefix,
-                                               const std::string &useName)
+                                                 const std::string &prefix,
+                                                 const std::string &useName)
 {
    std::stringstream data;
 
@@ -2189,7 +2189,7 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
    if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
        (mode == Gmat::SHOW_SCRIPT))
       inMatlabMode = false;
-   if (mode == Gmat::MATLAB_STRUCT)
+   if (mode == Gmat::MATLAB_STRUCT || Gmat::EPHEM_HEADER)
       inMatlabMode = true;
    
    if (useName != "")
@@ -2197,13 +2197,23 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
    else
       nomme = instanceName;
    
-   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT))
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT) ||
+       (mode == Gmat::EPHEM_HEADER))
    {
       std::string tname = typeName;
       if (tname == "PropSetup")
          tname = "Propagator";
-      data << "Create " << tname << " " << nomme << ";\n";
-      preface = "GMAT ";
+      
+      if (mode == Gmat::EPHEM_HEADER)
+      {
+         data << tname << " = " << "'" << nomme << "';\n";
+         preface = "";
+      }
+      else
+      {
+         data << "Create " << tname << " " << nomme << ";\n";
+         preface = "GMAT ";
+      }
    }
    
    nomme += ".";

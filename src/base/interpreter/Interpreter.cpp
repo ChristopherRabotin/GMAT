@@ -416,7 +416,7 @@ bool Interpreter::Interpret(GmatBase *obj, const std::string generator)
 // methods are invoked to write out scripts or subscripts).
 
 //------------------------------------------------------------------------------
-// bool BuildObject(std::string &objectname)
+// bool BuildObject(std::string &objectname, Gmat::WriteMode mode = Gmat::SCRIPTING)
 //------------------------------------------------------------------------------
 /**
  * Calls the Moderator to serialize core objects for text output.
@@ -426,7 +426,7 @@ bool Interpreter::Interpret(GmatBase *obj, const std::string generator)
  * @return true on success, false on failure.
  */
 //------------------------------------------------------------------------------
-bool Interpreter::BuildObject(std::string &objectname)
+bool Interpreter::BuildObject(std::string &objectname, Gmat::WriteMode mode)
 {
     GmatBase *obj = FindObject(objectname);
 
@@ -436,7 +436,8 @@ bool Interpreter::BuildObject(std::string &objectname)
 
     (*outstream).precision(18);        /// @todo Make output precision generic
 
-    std::string genstring = obj->GetGeneratingString(Gmat::SCRIPTING);
+    //std::string genstring = obj->GetGeneratingString(Gmat::SCRIPTING);
+    std::string genstring = obj->GetGeneratingString(mode);
     *outstream << genstring << "\n";
 
     *outstream << "\n";
@@ -445,7 +446,7 @@ bool Interpreter::BuildObject(std::string &objectname)
 
 
 //------------------------------------------------------------------------------
-// bool BuildObject(std::string &objectname)
+// bool BuildObject(std::string &objectname, Gmat::WriteMode mode = Gmat::SCRIPTING)
 //------------------------------------------------------------------------------
 /**
  * Pulls the variables and arrays out of the collection of parameters, and
@@ -456,7 +457,7 @@ bool Interpreter::BuildObject(std::string &objectname)
  * @return true on success, false on failure.
  */
 //------------------------------------------------------------------------------
-bool Interpreter::BuildUserObject(std::string &objectname)
+bool Interpreter::BuildUserObject(std::string &objectname, Gmat::WriteMode mode)
 {
     GmatBase *obj = FindObject(objectname);
 
@@ -464,7 +465,7 @@ bool Interpreter::BuildUserObject(std::string &objectname)
         return true;
     
     if ((obj->GetTypeName() == "Array") || (obj->GetTypeName() == "Variable"))
-       return BuildObject(objectname);
+       return BuildObject(objectname, mode);
        
     return true;
 }

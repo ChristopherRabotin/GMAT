@@ -78,9 +78,11 @@ public:
                                       const std::string &pathAndName);
 
    // The "Build" methods take GMAT objects and write out scripts or subscripts
-   virtual bool                    Build(void) = 0;
-   bool                            BuildObject(std::string &objectname);
-   bool                            BuildUserObject(std::string &objectname);
+   virtual bool                    Build(Gmat::WriteMode mode) = 0;
+   bool                            BuildObject(std::string &objectname,
+                                               Gmat::WriteMode mode = Gmat::SCRIPTING);
+   bool                            BuildUserObject(std::string &objectname,
+                                                   Gmat::WriteMode mode = Gmat::SCRIPTING);
    
 protected:
    /// The input stream processed by the interpreter

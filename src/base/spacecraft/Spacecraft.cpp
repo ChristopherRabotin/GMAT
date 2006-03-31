@@ -2048,7 +2048,7 @@ const std::string& Spacecraft::GetGeneratingString(Gmat::WriteMode mode,
    if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
        (mode == Gmat::SHOW_SCRIPT))
       inMatlabMode = false;
-   if (mode == Gmat::MATLAB_STRUCT)
+   if (mode == Gmat::MATLAB_STRUCT || Gmat::EPHEM_HEADER)
       inMatlabMode = true;
    
    if (useName != "")
@@ -2061,6 +2061,11 @@ const std::string& Spacecraft::GetGeneratingString(Gmat::WriteMode mode,
       std::string tname = typeName;
       data << "Create " << tname << " " << nomme << ";\n";
       preface = "GMAT ";
+   }
+   else if (mode == Gmat::EPHEM_HEADER)
+   {
+      data << typeName << " = " << "'" << nomme << "';\n";
+      preface = "";
    }
    
    nomme += ".";

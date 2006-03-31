@@ -864,8 +864,8 @@ void ForceModel::ClearInternalCoordinateSystems()
 /**
  * Manages the allocation of coordinate systems used internally.
  * 
- * @param <csId>			Parameter name for the coordinate system label.
- * @param <currentPm>	Force that needs the CoordinateSystem.
+ * @param <csId>                        Parameter name for the coordinate system label.
+ * @param <currentPm>   Force that needs the CoordinateSystem.
  */
 //------------------------------------------------------------------------------
 void ForceModel::SetInternalCoordinateSystem(const std::string csId, PhysicalModel *currentPm)
@@ -2080,7 +2080,7 @@ const std::string& ForceModel::GetGeneratingString(Gmat::WriteMode mode,
    if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
        (mode == Gmat::SHOW_SCRIPT))
       inMatlabMode = false;
-   if (mode == Gmat::MATLAB_STRUCT)
+   if (mode == Gmat::MATLAB_STRUCT || Gmat::EPHEM_HEADER)
       inMatlabMode = true;
 
    if (useName != "")
@@ -2088,13 +2088,26 @@ const std::string& ForceModel::GetGeneratingString(Gmat::WriteMode mode,
    else
       nomme = instanceName;
 
-   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT))
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT) ||
+       (mode == Gmat::EPHEM_HEADER))
    {
       std::string tname = typeName;
       if (tname == "PropSetup")
          tname = "Propagator";
-      data << "Create " << tname << " " << nomme << ";\n";
-      preface = "GMAT ";
+      
+      if (mode == Gmat::EPHEM_HEADER)
+      {
+         data << tname << " = " << "'" << nomme << "';\n";
+         preface = "";
+      }
+      else
+      {
+         data << "Create " << tname << " " << nomme << ";\n";
+         preface = "GMAT ";
+      }
+      
+      //data << "Create " << tname << " " << nomme << ";\n";
+      //preface = "GMAT ";
    }
 
    nomme += ".";

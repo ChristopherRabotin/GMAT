@@ -34,14 +34,15 @@
  */
 class ScriptInterpreter : public Interpreter
 {
-	public:
+        public:
         // class constructor
         static ScriptInterpreter*   Instance();
 
         virtual bool                Interpret();
         virtual bool                Interpret(const std::string &scriptfile);
-        virtual bool                Build();
-        virtual bool                Build(const std::string &scriptfile);
+        virtual bool                Build(Gmat::WriteMode mode);
+        virtual bool                Build(const std::string &scriptfile,
+                                          Gmat::WriteMode mode = Gmat::SCRIPTING);
         
     protected:
         /// The script interpreter singleton
@@ -55,7 +56,7 @@ class ScriptInterpreter : public Interpreter
         bool                        ReadLine();
         bool                        Parse();
         
-        bool                        WriteScript();
+        bool                        WriteScript(Gmat::WriteMode mode = Gmat::SCRIPTING);
 
         bool                        ConfigureCommand(GmatCommand *);
         bool                        ConfigureMathematics();
