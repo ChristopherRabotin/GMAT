@@ -282,6 +282,7 @@ OBJECTS = \
     stopcond/StopCondition.o \
     subscriber/MatlabWs.o \
     subscriber/MessageWindow.o \
+    subscriber/TextEphemFile.o \
     subscriber/OpenGlPlot.o \
     subscriber/ReportFile.o \
     subscriber/Subscriber.o \
