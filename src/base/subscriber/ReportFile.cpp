@@ -208,7 +208,8 @@ bool ReportFile::Initialize()
             MessageInterface::PopupMessage
                (Gmat::WARNING_,
                 "ReportFile::Initialize() ReportFile will not be created.\n"
-                "The first parameter selected for the report file is NULL\n");
+                "The first parameter:%s selected for the report file is NULL\n",
+                mVarParamNames[0].c_str());
             return false;
          }
    }
@@ -219,7 +220,7 @@ bool ReportFile::Initialize()
    { 
       if (!OpenReportFile())
          return false;
-         
+      
       initial = true;
    }
 
