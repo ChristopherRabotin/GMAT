@@ -117,6 +117,7 @@ namespace Gmat
       COORDINATE_SYSTEM,
       AXIS_SYSTEM,
       ATTITUDE,
+      MATH_NODE,
       UNKNOWN_OBJECT
    };
 
