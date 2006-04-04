@@ -76,6 +76,7 @@ protected:
 private:
 
    static const Integer BUFFER_SIZE = 10;
+   static const Real TIME_TOL = 1.0e-8;
    
    Interpolator *mInterpolator;
 
@@ -96,17 +97,21 @@ private:
    Real mXvelBuffer[BUFFER_SIZE];
    Real mYvelBuffer[BUFFER_SIZE];
    Real mZvelBuffer[BUFFER_SIZE];
+   Real mOutputVals[6]; // X, Y, Z, Vx, Vy, Vz for now
    Integer mNumValidPoints;
    Integer mBufferSize;
    Integer mColWidth[7];
-   Real mOutputVals[6]; // X, Y, Z, Vx, Vy, Vz for now
-
-   void WriteEphemHeader();
+   Integer mEpochSysId;
+   bool mIsGregorian;
+   
    void WriteColumnTitle();
    void WriteToBuffer();
    bool IsTimeToWrite();
+   void WriteTime(Real epoch);
    void WriteData();
    void WriteFirstData();
+   void WriteEphemHeader();
+   void SaveEpochType();
    
 };
 

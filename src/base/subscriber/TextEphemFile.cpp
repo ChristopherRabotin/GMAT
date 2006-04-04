@@ -25,6 +25,9 @@
 
 //#define DEBUG_EPHEMFILE 1
 //#define DEBUG_EPHEMFILE_DATA 1
+//#define DEBUG_EPHEMFILE_FIRST 1
+//#define DEBUG_EPHEMFILE_LAST 1
+//#define DEBUG_EPHEMFILE_WARNING 1
 //#define DEBUG_RENAME 1
 
 //---------------------------------
@@ -71,7 +74,9 @@ TextEphemFile::TextEphemFile(const std::string &type, const std::string &name,
    
    mNumValidPoints = 0;
    mBufferSize = mInterpolator->GetBufferSize();
-
+   mEpochSysId = 0;
+   mIsGregorian = false;
+   
    //MessageInterface::ShowMessage
    //   ("TextEphemFile() Constructor: mBufferSize=%d\n", mBufferSize);
 }
@@ -108,6 +113,8 @@ TextEphemFile::TextEphemFile(const TextEphemFile &copy) :
    
    mNumValidPoints = 0;
    mBufferSize = mInterpolator->GetBufferSize();
+   mEpochSysId = copy.mEpochSysId;
+   mIsGregorian = copy.mIsGregorian;
 
    //MessageInterface::ShowMessage
    //   ("TextEphemFile() Copy Constructor: mBufferSize=%d\n", mBufferSize);   
@@ -142,6 +149,8 @@ TextEphemFile& TextEphemFile::operator=(const TextEphemFile& right)
    
    mNumValidPoints = 0;
    mBufferSize = mInterpolator->GetBufferSize();
+   mEpochSysId = right.mEpochSysId;
+   mIsGregorian = right.mIsGregorian;
 
    //MessageInterface::ShowMessage
    //   ("TextEphemFile() = operator: mBufferSize=%d\n", mBufferSize);
@@ -308,6 +317,7 @@ bool TextEphemFile::SetStringParameter(const Integer id, const std::string &valu
       return true;
    case EPOCH_FORMAT:
       mEpochFormat = value;
+      SaveEpochType();
       return true;
    case COORD_SYSTEM:
       mCoordSysName = value;
@@ -346,10 +356,31 @@ bool TextEphemFile::Distribute(const Real * dat, Integer len)
       return true;
 
    if (isEndOfRun)
+   {
+      #if DEBUG_EPHEMFILE_LAST
+      MessageInterface::ShowMessage
+         ("==> TextEphemFile::Distribute() EndOfRun: mCurrA1Mjd=%f, mOutputA1Mjd=%f\n",
+          mCurrA1Mjd, mOutputA1Mjd);
+      #endif
+      
+      // Write final data
+      if (IsTimeToWrite() || GmatMathUtil::IsEqual(mOutputA1Mjd, mTimeBuffer[9], TIME_TOL))
+         WriteData();
+
+      // Write header file
       WriteEphemHeader();
+      return false;
+   }
    
    if (len == 0)
+   {
       return false;
+   }
+   
+   // Skip if targeting
+   Publisher *thePublisher = Publisher::Instance();
+   if (thePublisher->GetRunState() == Gmat::TARGETING)
+      return true;
    
    if (mNumVarParams > 0)
    {      
@@ -360,7 +391,6 @@ bool TextEphemFile::Distribute(const Real * dat, Integer len)
       if (initial)
       {
          WriteColumnTitle();
-         //ReportFile::WriteHeaders();
          
          // Compute next output time, first data is time
          mCurrA1Mjd = dat[0];
@@ -369,12 +399,13 @@ bool TextEphemFile::Distribute(const Real * dat, Integer len)
          // Write first data
          WriteFirstData();
          
-         #if DEBUG_EPHEMFILE_DATA
+         #if DEBUG_EPHEMFILE_FIRST
          MessageInterface::ShowMessage
          ("TextEphemFile::Distribute() first dat=%f %f %f %f %g %g %g\n", dat[0], dat[1],
           dat[2], dat[3], dat[4], dat[5], dat[6]);
          MessageInterface::ShowMessage
-            ("   mOutputA1Mjd=%f, mNumVarParams=%d\n", mOutputA1Mjd, mNumVarParams);
+            ("   mNumVarParams=%d, mOutputA1Mjd=%f, mIntervalInSec=%f\n",
+             mNumVarParams, mOutputA1Mjd, mIntervalInSec);
          #endif
       }
       
@@ -384,13 +415,9 @@ bool TextEphemFile::Distribute(const Real * dat, Integer len)
       mCurrA1Mjd = dat[0];
       WriteToBuffer();
       
-      if (IsTimeToWrite())
+      while(IsTimeToWrite())
       {
          WriteData();
-
-         // try one more time for step size > interval
-         if (IsTimeToWrite())
-            WriteData();
       }
       
       #if DEBUG_EPHEMFILE_DATA > 1
@@ -401,52 +428,6 @@ bool TextEphemFile::Distribute(const Real * dat, Integer len)
    }
    
    return true;
-}
-
-
-//------------------------------------------------------------------------------
-// void WriteEphemHeader()
-//------------------------------------------------------------------------------
-void TextEphemFile::WriteEphemHeader()
-{
-   #if DEBUG_EPHEMFILE_DATA
-   MessageInterface::ShowMessage
-      ("===> TextEphemFile::WriteEphemHeader() mHeaderFileName=%s\n",
-       mHeaderFileName.c_str());
-   #endif
-
-   // Need to write MATLAB format scripts for Spacecraft and PropSetup
-   // but subscriber doesn't know about these objects, so use the Moderator
-   Moderator *theModerator = Moderator::Instance();
-   theModerator->SaveScript(mHeaderFileName, Gmat::EPHEM_HEADER);
-
-   // Write additional parameters
-   std::ofstream ofs(mHeaderFileName.c_str(), std::ios::app);
-
-   std::string ephemSource = theModerator->GetCurrentPlanetarySource();
-   ofs << "\n\n";
-   ofs << "PlanetaryEphemerisSource = '" << ephemSource << "';\n";
-   ofs << "\n";
-   
-   ofs << "Output.EpochType = '" << mEpochFormat << "';\n";
-   ofs << "Output.StartEpoch = " << mStartA1Mjd << ";\n";
-   ofs << "Output.StopEpoch = " << mStartA1Mjd << ";\n";
-   ofs << "Output.IntervalType = 'Second';\n";
-   ofs << "Output.Interval = " << mIntervalInSec << ";\n";
-   ofs << "Output.CoordinateSystem = '" << mCoordSysName << "';\n";
-   ofs << "Output.StateType = 'Cartesian';\n";
-   ofs << "\n";
-   
-   ofs << "Time.Unit = 'Day';\n";
-   ofs << "X.Unit = 'Km';\n";
-   ofs << "Y.Unit = 'Km';\n";
-   ofs << "Z.Unit = 'Km';\n";
-   ofs << "VX.Unit = 'Km/Sec';\n";
-   ofs << "VY.Unit = 'Km/Sec';\n";
-   ofs << "VZ.Unit = 'Km/Sec';\n";
-   ofs << "\n";
-
-   ofs.close();
 }
 
 
@@ -533,6 +514,11 @@ void TextEphemFile::WriteToBuffer()
 
    mTimeBuffer[BUFFER_SIZE - 1] = mCurrA1Mjd;
    
+   #if DEBUG_EPHEMFILE_DATA
+   MessageInterface::ShowMessage
+      ("TextEphemFile::WriteToBuffer() mCurrA1Mjd=%f\n", mCurrA1Mjd);
+   #endif
+   
    for (int i=1; i < mNumVarParams; i++)
    {
       // assuming all real parameters
@@ -589,32 +575,58 @@ bool TextEphemFile::IsTimeToWrite()
       ("TextEphemFile::IsTimeToWrite() mNumValidPoints=%d, mCurrA1Mjd=%f, "
        "mOutputA1Mjd=%f\n", mNumValidPoints,  mCurrA1Mjd, mOutputA1Mjd);
    #endif
+
+   //if (mOutputA1Mjd > mCurrA1Mjd + 1.0e-6)
+   if (mOutputA1Mjd > mCurrA1Mjd)
+      return false;
    
    // if output time is between the points and has BUFFER_SIZE points
-   if (mNumValidPoints == BUFFER_SIZE)
+   if (mNumValidPoints >= mBufferSize)
    {
+      Integer startIndex = BUFFER_SIZE - mNumValidPoints;
+      //MessageInterface::ShowMessage("==> startIndex=%d\n", startIndex);
       // find mid point
       Integer midIndex = -1;
-      for (int i=1; i<BUFFER_SIZE-1; i++)
+      for (int i=startIndex; i<BUFFER_SIZE-1; i++)
       {
-         if (mOutputA1Mjd >= mTimeBuffer[i] && mOutputA1Mjd <= mTimeBuffer[i+1])
+         #if DEBUG_EPHEMFILE_DATA > 1
+         MessageInterface::ShowMessage
+            ("==> mTimeBuffer[%d]=%f\n", i, mTimeBuffer[i]);
+         #endif
+         
+         if (mOutputA1Mjd > mTimeBuffer[i] && mOutputA1Mjd <= mTimeBuffer[i+1])
          {
             midIndex = i;
             break;
          }
       }
 
-      if (midIndex < 1)
-         return false;
+      if (midIndex == -1)
+      {
+         #if DEBUG_EPHEMFILE_WARNING
+         MessageInterface::ShowMessage
+            ("*** Warning: TextEphemFile::IsTimeToWrite() Cannot find "
+             "midpoint for time: %f\n   mTimeBuffer[0]=%f, mTimeBuffer[9]=%f\n",
+             mOutputA1Mjd, mTimeBuffer[0], mTimeBuffer[9]);
+         #endif
 
+         return false;
+       }
+      
+      if (midIndex <= startIndex)
+         midIndex = startIndex+2;
+
+      if (midIndex > 7)
+         midIndex = 7;
       
       #if DEBUG_EPHEMFILE_DATA
       MessageInterface::ShowMessage
-         ("==> mTimeBuffer[%d]=%f\n", midIndex, mTimeBuffer[midIndex]);
+         ("==> midIndex=%d, mTimeBuffer[%d]=%f\n", midIndex, midIndex, mTimeBuffer[midIndex]);
       #endif
       
       Real vals[6];
       
+      mInterpolator->Clear();
       for (int i=midIndex-2; i<=midIndex+2; i++)
       {
          vals[0] = mXposBuffer[i];
@@ -628,12 +640,52 @@ bool TextEphemFile::IsTimeToWrite()
       }
       
       if (mInterpolator->Interpolate(mOutputA1Mjd, mOutputVals))
-      
-      //@todo: Do some value check here
-      return true;
+      {
+         return true;
+      }
+      else
+      {
+         #if DEBUG_EPHEMFILE_WARNING
+         MessageInterface::ShowMessage
+            ("*** Warning: TextEphemFile::IsTimeToWrite() Interpolate() returned false\n");
+         #endif
+      }
    }
 
    return false;
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteTime(Real epoch)
+//------------------------------------------------------------------------------
+void TextEphemFile::WriteTime(Real epoch)
+{
+   
+   Real time = TimeConverterUtil::Convert(epoch, TimeConverterUtil::A1MJD, 
+                                          mEpochSysId, GmatTimeUtil::JD_JAN_5_1941);
+
+   dstream.width(mColWidth[0]);
+   dstream.precision(precision);
+   dstream.fill(' ');
+         
+   if (leftJustify)
+   {
+      dstream.setf(std::ios::left);
+      if (zeroFill)
+         dstream.fill('0');                 
+   }
+   
+   if (mIsGregorian)
+   {
+      std::string timeStr = TimeConverterUtil::ConvertMjdToGregorian(time);
+      dstream << timeStr << "   ";
+   }
+   else
+   {
+      dstream << epoch << "   ";
+   }
+   
 }
 
 
@@ -642,39 +694,39 @@ bool TextEphemFile::IsTimeToWrite()
 //------------------------------------------------------------------------------
 void TextEphemFile::WriteData()
 {
-   // Write time
-   //@todo: Convert epoch to epoch format (mEpochStr)
-   //dstream << mOutputA1Mjd*86400.0 << "   ";
-   dstream.width(mColWidth[0]);
-   dstream << mOutputA1Mjd << "   ";
+   WriteTime(mOutputA1Mjd);
    
    for (int i=1; i<mNumVarParams; i++)
    {
       dstream.width(mColWidth[i]);
       dstream.fill(' ');
-      
+         
       if (leftJustify)
       {
          dstream.setf(std::ios::left);
          if (zeroFill)
             dstream.fill('0');                 
       }
-      
+         
       dstream.precision(precision);
       dstream << mOutputVals[i-1] << "   "; 
    }
    
    dstream << std::endl;
    
+   // Save ephem file stop time
+   mStopA1Mjd = mOutputA1Mjd;
+   
    // Compute new output time
    mOutputA1Mjd = mOutputA1Mjd + mIntervalInSec/86400.0;
-
-   #if #DEBUG_EPHEMFILE_DATA
-   MessageInterface::ShowMessage
-      ("TextEphemFile::WriteData() new mOutputA1Mjd=%f\n\n", mOutputA1Mjd);
-   #endif
    
+   #if DEBUG_EPHEMFILE_DATA
+   MessageInterface::ShowMessage
+      ("TextEphemFile::WriteData() new mOutputA1Mjd=%f, mCurrA1Mjd=%f\n\n",
+       mOutputA1Mjd, mCurrA1Mjd);
+   #endif
 }
+
 
 
 //------------------------------------------------------------------------------
@@ -684,11 +736,8 @@ void TextEphemFile::WriteFirstData()
 {
    Real rval = -999.999;
 
-   // Write time
-   //@todo: Convert epoch to epoch format (mEpochStr)
-   //dstream << mOutputA1Mjd*86400.0 << "   ";
-   dstream.width(mColWidth[0]);
-   dstream << mCurrA1Mjd << "   ";
+   // Write time in epoch format
+   WriteTime(mCurrA1Mjd);
    
    for (int i=1; i<mNumVarParams; i++)
    {
@@ -709,7 +758,86 @@ void TextEphemFile::WriteFirstData()
    }
    
    dstream << std::endl;
+
+   // Save ephem file start time
+   mStartA1Mjd = mCurrA1Mjd;
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteEphemHeader()
+//------------------------------------------------------------------------------
+void TextEphemFile::WriteEphemHeader()
+{
+   #if DEBUG_EPHEMFILE_DATA
+   MessageInterface::ShowMessage
+      ("===> TextEphemFile::WriteEphemHeader() mHeaderFileName=%s\n",
+       mHeaderFileName.c_str());
+   #endif
+
+   // Need to write MATLAB format scripts for Spacecraft and PropSetup
+   // but subscriber doesn't know about these objects, so use the Moderator
+   Moderator *theModerator = Moderator::Instance();
+   theModerator->SaveScript(mHeaderFileName, Gmat::EPHEM_HEADER);
+
+   // Write additional parameters
+   std::ofstream ofs(mHeaderFileName.c_str(), std::ios::app);
+   ofs.precision(precision);
    
+   std::string ephemSource = theModerator->GetCurrentPlanetarySource();
+   ofs << "\n\n";
+   ofs << "PlanetaryEphemerisSource = '" << ephemSource << "';\n";
+   ofs << "\n";
+   
+   ofs << "Output.EpochType = '" << mEpochFormat << "';\n";
+   ofs << "Output.StartEpoch = " << mStartA1Mjd << ";\n";
+   ofs << "Output.StopEpoch = " << mStopA1Mjd << ";\n";
+   ofs << "Output.IntervalType = 'Second';\n";
+   ofs << "Output.Interval = " << mIntervalInSec << ";\n";
+   ofs << "Output.CoordinateSystem = '" << mCoordSysName << "';\n";
+   ofs << "Output.StateType = 'Cartesian';\n";
+   ofs << "\n";
+   
+   ofs << "Time.Unit = 'Day';\n";
+   ofs << "X.Unit = 'Km';\n";
+   ofs << "Y.Unit = 'Km';\n";
+   ofs << "Z.Unit = 'Km';\n";
+   ofs << "VX.Unit = 'Km/Sec';\n";
+   ofs << "VY.Unit = 'Km/Sec';\n";
+   ofs << "VZ.Unit = 'Km/Sec';\n";
+   ofs << "\n";
+
+   ofs.close();
+}
+
+
+//------------------------------------------------------------------------------
+// void SaveEpochType()
+//------------------------------------------------------------------------------
+void TextEphemFile::SaveEpochType()
+{
+   Integer loc = mEpochFormat.find("ModJulian", 0);
+   
+   if (loc == -1)
+      loc = mEpochFormat.find("Gregorian", 0);
+   
+   if (loc == 0)
+      throw SpaceObjectException
+         ("TextEphemFile::SaveEpochType() Error parsing time format '" +
+          mEpochFormat + "'; could not find 'Gregorian' or 'ModJulian' substring.");
+   
+   std::string epochSys = mEpochFormat.substr(0, loc);
+   mEpochSysId = TimeConverterUtil::GetTimeTypeID(epochSys);
+   mIsGregorian = false;
+   
+   if (mEpochFormat.substr(loc) == "Gregorian")
+      mIsGregorian = true;
+
+   #if TEXT_EPHEMFILE_FIRST
+   MessageInterface::ShowMessage
+      ("TextEphemFile::SaveEpochType() epochSys=%S, mIsGregorian=%d, mIntervalInSec=%f\n",
+       epochSys.c_str(),  mIsGregorian, mIntervalInSec);
+   #endif
 }
 
 
