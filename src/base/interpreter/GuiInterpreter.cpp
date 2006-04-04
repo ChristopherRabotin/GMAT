@@ -680,20 +680,30 @@ Solver* GuiInterpreter::GetSolver(const std::string &name)
 
 //------------------------------------------------------------------------------
 // Parameter* CreateParameter(const std::string &type, const std::string &name)
+//                            const Gmat::ObjectType ownerType,
+//                            const std::string &ownerName = "",
+//                            const std::string &depName = "");
+//                            const std::string &depName = "");
 //------------------------------------------------------------------------------
 /**
  * Creates a parameter object by given type and name.
  *
- * @param <type> object type
- * @param <name> object name
+ * @param <type> parameter type
+ * @param <name> parameter name
+ * @param <ownerType> parameter owner type
+ * @param <ownerName> parameter owner name
+ * @param <depName> dependent object name
  *
  * @return a parameter object pointer
  */
 //------------------------------------------------------------------------------
 Parameter* GuiInterpreter::CreateParameter(const std::string &type,
-                                           const std::string &name)
+                                           const std::string &name,
+                                           const Gmat::ObjectType ownerType,
+                                           const std::string &ownerName,
+                                           const std::string &depName)
 {
-   return moderator->CreateParameter(type, name);
+   return moderator->CreateParameter(type, name, ownerType, ownerName, depName);
 }
 
 
