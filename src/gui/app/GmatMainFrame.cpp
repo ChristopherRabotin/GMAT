@@ -2220,6 +2220,9 @@ void GmatMainFrame::OnGenerateTextEphemFile(wxCommandEvent& event)
 {
    TextEphemFileDialog dlg(this);
    dlg.ShowModal();
+
+   if (dlg.CreateEphemFile())
+      RunCurrentMission();
 }
 
 

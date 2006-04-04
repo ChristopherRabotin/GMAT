@@ -24,6 +24,7 @@ public:
    
    TextEphemFileDialog(wxWindow *parent);
    ~TextEphemFileDialog();
+   bool CreateEphemFile() { return mCreateEphemFile; }
    
 protected:
    
@@ -39,7 +40,6 @@ protected:
    
    wxComboBox *mCoordSysComboBox;
    wxComboBox *mEpochFormatComboBox;
-   //wxCheckBox *mSeparateFilesCheckBox;
 
    wxListBox *mSpacecraftListBox;
    wxListBox *mSelectedScListBox;
@@ -49,12 +49,9 @@ protected:
    wxButton *mClearScButton;
    wxButton *mHeaderFileBrowseButton;
    wxButton *mDataFileBrowseButton;
-   wxButton *mRunButton;
    
    // event handling
    void OnButtonClick(wxCommandEvent& event);   
-   //void OnCheckBoxChange(wxCommandEvent& event);   
-   //void OnComboBoxChange(wxCommandEvent& event);
    
    DECLARE_EVENT_TABLE();
    
@@ -65,14 +62,14 @@ protected:
       ID_TEXTCTRL,
       ID_BUTTON,
       ID_COMBOBOX,
-      ID_CHECKBOX,
       ID_LISTBOX,
    };
    
 private:
 
    wxString mEphemDirectory;
-
+   bool mCreateEphemFile;
+   
    bool CreateTextEphem();
 };
 

@@ -39,6 +39,8 @@ END_EVENT_TABLE()
 TextEphemFileDialog::TextEphemFileDialog(wxWindow *parent)
    : GmatDialog(parent, -1, wxString(_T("TextEphemFileDialog")))
 {
+   mCreateEphemFile = false;
+   
    Create();
    ShowData();
 }
@@ -204,18 +206,8 @@ void TextEphemFileDialog::Create()
    // Run
    //------------------------------------------------------
    
-   //mSeparateFilesCheckBox =
-   //   new wxCheckBox(this, ID_CHECKBOX, wxT("Generate Separate Header and Data File"),
-   //                  wxDefaultPosition, wxDefaultSize, 0);
-   
-   mRunButton =
-      new wxButton(this, ID_BUTTON, wxT("Run and Create Ephemeris File"),
-                   wxDefaultPosition, wxDefaultSize, 0);
-   
    wxBoxSizer *runSizer = new wxBoxSizer(wxVERTICAL);
-   //runSizer->Add(mSeparateFilesCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    runSizer->Add(20, 5, 0, wxALIGN_LEFT|wxALL, bsize);
-   runSizer->Add(mRunButton, 0, wxALIGN_CENTER|wxALL, bsize);
    
    //------------------------------------------------------
    // add to page sizer
@@ -254,7 +246,7 @@ void TextEphemFileDialog::LoadData()
       fname = "/" + scName + "_EphemData.txt";
       mDataFileTextCtrl->SetValue(mEphemDirectory.c_str() + fname);
       
-      mRunButton->Enable();
+      theOkButton->Enable();
    }
    else
    {
@@ -263,7 +255,7 @@ void TextEphemFileDialog::LoadData()
       mDataFileTextCtrl->SetValue(mEphemDirectory.c_str() +
                                   wxString("/TextEphemData.txt"));
       
-      mRunButton->Disable();
+      theOkButton->Disable();
    }
 
    // Show last position
@@ -278,9 +270,9 @@ void TextEphemFileDialog::LoadData()
       mEpochFormatComboBox->Append(reps[i].c_str());
    
    mEpochFormatComboBox->SetSelection(0);
-   //mSeparateFilesCheckBox->Enable();
 
-   theOkButton->Enable();
+   // Change label
+   theOkButton->SetLabel("Run and Create Ephemeris File");
 }
 
 
@@ -289,6 +281,10 @@ void TextEphemFileDialog::LoadData()
 //------------------------------------------------------------------------------
 void TextEphemFileDialog::SaveData()
 {
+   if (CreateTextEphem())
+   {
+      mCreateEphemFile = true;
+   }
 }
 
 
@@ -298,6 +294,7 @@ void TextEphemFileDialog::SaveData()
 void TextEphemFileDialog::ResetData()
 {
    canClose = true;
+   mCreateEphemFile = false;
 }
 
 
@@ -353,18 +350,7 @@ void TextEphemFileDialog::OnButtonClick(wxCommandEvent& event)
          mSpacecraftListBox->
             SetSelection(mSpacecraftListBox->GetSelection()+1);
 
-         mRunButton->Enable();
-         
-         //if (mSelectedScListBox->GetCount() > 1)
-         //{
-         //   mSeparateFilesCheckBox->SetValue(true);
-         //   mSeparateFilesCheckBox->Disable();
-         //}
-         //else
-         //{
-         //   mSeparateFilesCheckBox->SetValue(false);
-         //   mSeparateFilesCheckBox->Enable();
-         //}
+         theOkButton->Enable();
       }
    }
    else if (event.GetEventObject() == mRemoveScButton)
@@ -377,36 +363,15 @@ void TextEphemFileDialog::OnButtonClick(wxCommandEvent& event)
       else
          mSelectedScListBox->SetSelection(sel-1);
 
-      //if (mSelectedScListBox->GetCount() > 1)
-      //{
-      //   mSeparateFilesCheckBox->SetValue(true);
-      //   mSeparateFilesCheckBox->Disable();
-      //}
-      //else
-      //{
-      //   mSeparateFilesCheckBox->SetValue(false);
-      //   mSeparateFilesCheckBox->Enable();
-      //}
-      
-      mRunButton->Enable();
+      theOkButton->Enable();
       if (mSelectedScListBox->GetCount() == 0)
-         mRunButton->Disable();
+         theOkButton->Disable();
 
    }
    else if (event.GetEventObject() == mClearScButton)
    {
       mSelectedScListBox->Clear();
-      //mSeparateFilesCheckBox->SetValue(false);
-      //mSeparateFilesCheckBox->Enable();
-      mRunButton->Disable();
-   }
-   else if (event.GetEventObject() == mRunButton)
-   {
-      if (CreateTextEphem())
-      {
-         // Run mission
-         GmatAppData::GetMainFrame()->OnScriptRun(event);
-      }
+      theOkButton->Disable();
    }
 }
 
@@ -444,6 +409,27 @@ bool TextEphemFileDialog::CreateTextEphem()
    std::string yvel = scName + "." + coordSys + ".VY";
    std::string zvel = scName + "." + coordSys + ".VZ";
 
+   // Create parameters
+   try
+   {
+      theGuiInterpreter->CreateParameter(epochFormat, time, Gmat::SPACECRAFT, scName);
+      theGuiInterpreter->CreateParameter("X", xpos, Gmat::SPACECRAFT, scName, coordSys);
+      theGuiInterpreter->CreateParameter("Y", ypos, Gmat::SPACECRAFT, scName, coordSys);
+      theGuiInterpreter->CreateParameter("Z", zpos, Gmat::SPACECRAFT, scName, coordSys);
+      theGuiInterpreter->CreateParameter("VX", xvel, Gmat::SPACECRAFT, scName, coordSys);
+      theGuiInterpreter->CreateParameter("VY", yvel, Gmat::SPACECRAFT, scName, coordSys);
+      theGuiInterpreter->CreateParameter("VZ", zvel, Gmat::SPACECRAFT, scName, coordSys);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("TextEphemFileDialog:CreateTextEphem() error occurred!\n%s\n",
+          e.GetMessage().c_str());
+
+      return false;
+   }
+
+   // Set parameters to ephemeris file
    try
    {
       ephemFile->SetStringParameter("HeaderFile", headerFileName);
