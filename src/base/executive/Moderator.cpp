@@ -1513,29 +1513,56 @@ bool Moderator::IsParameter(const std::string &type)
 
 //------------------------------------------------------------------------------
 // Parameter* CreateParameter(const std::string &type, const std::string &name)
+//                            const Gmat::ObjectType ownerType,
+//                            const std::string &ownerName = "",
+//                            const std::string &depName = "");
 //------------------------------------------------------------------------------
 /**
  * Creates a parameter object by given type and name and add to configuration.
  *
- * @param <type> object type
- * @param <name> object name
+ * @param <type> parameter type
+ * @param <name> parameter name
+ * @param <ownerType> parameter owner type
+ * @param <ownerName> parameter owner name
+ * @param <depName> dependent object name
  *
  * @return a parameter object pointer
  */
 //------------------------------------------------------------------------------
 Parameter* Moderator::CreateParameter(const std::string &type,
-                                      const std::string &name)
+                                      const std::string &name,
+                                      const Gmat::ObjectType ownerType,
+                                      const std::string &ownerName,
+                                      const std::string &depName)
 {
    #if DEBUG_CREATE_RESOURCE
-   MessageInterface::ShowMessage("Moderator::CreateParameter() type = %s, "
-                                 "name = %s\n", type.c_str(), name.c_str());
+   MessageInterface::ShowMessage
+      ("Moderator::CreateParameter() type=%s, name=%s, ownerName=%s, depName=%s\n",
+       type.c_str(), name.c_str(), ownerName.c_str(), depName.c_str());
    #endif
    
    // if Parameter name doesn't exist, create Parameter
    if (GetParameter(name) == NULL)
    {
-      Parameter *parameter = theFactoryManager->CreateParameter(type, name);
+      Parameter *param = theFactoryManager->CreateParameter(type, name);
+      param->SetStringParameter("Expression", name);
+      
+      // Set parameter owner and dependent object(loj: 4/4/06)
+      if (ownerType != Gmat::UNKNOWN_OBJECT || ownerName != "")
+         param->SetRefObjectName(ownerType, ownerName);
 
+      if (depName != "")
+      {
+         if (param->NeedCoordSystem())
+         {
+            param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depName);
+            if (param->IsOriginDependent())
+               param->SetStringParameter("DepObject", depName);
+            else if (param->IsCoordSysDependent())
+               param->SetStringParameter("DepObject", depName);
+         }
+      }
+      
       // create parameter dependent coordinate system (loj: 1/27/06)
       if (type == "Longitude" || type == "Latitude" || type == "Altitude" ||
           type == "MHA" || type == "LST")
@@ -1550,7 +1577,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
             
             // default EarthFixed
             CreateCoordinateSystem("EarthFixed");
-            parameter->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthFixed");
+            param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthFixed");
          }
          else if (tokens.size() == 3)
          {
@@ -1571,7 +1598,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
             cs->SetSolarSystem(theSolarSystemInUse);
             cs->Initialize();
             
-            parameter->SetRefObjectName(Gmat::COORDINATE_SYSTEM, axisName);
+            param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, axisName);
          }
          else
          {
@@ -1580,7 +1607,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
          }
       }
       
-      if (parameter == NULL)
+      if (param == NULL)
       {
         throw GmatBaseException("Error Creating Parameter: " + type + "\n");
       }
@@ -1588,8 +1615,8 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       // Manage it if it is a named parameter
       try
       {
-         if (parameter->GetName() != "")
-            theConfigManager->AddParameter(parameter);
+         if (param->GetName() != "")
+            theConfigManager->AddParameter(param);
       }
       catch (BaseException &e)
       {
@@ -1597,7 +1624,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
                                        e.GetMessage());
       }
       
-      return parameter;
+      return param;
    }
    else
    {

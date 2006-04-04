@@ -166,7 +166,10 @@ public:
    // Parameter
    bool IsParameter(const std::string &type);
    Parameter* CreateParameter(const std::string &type,
-                              const std::string &name);
+                              const std::string &name,
+                              const Gmat::ObjectType ownerType = Gmat::UNKNOWN_OBJECT,
+                              const std::string &ownerName = "",
+                              const std::string &depName = "");
    Parameter* GetParameter(const std::string &name);
 
    // ForceModel
