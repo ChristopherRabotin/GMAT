@@ -1066,7 +1066,6 @@ bool Sandbox::Execute()
          #endif
 
 
-         //loj: 10/4/05 Added PAUSED
          if (state == PAUSED)
          {
             continue;
@@ -1075,6 +1074,11 @@ bool Sandbox::Execute()
          {
             MessageInterface::ShowMessage("Sandbox::Execution interrupted.\n");
             sequence->RunComplete();
+            
+            // notify subscribers end of run
+            currentState = Gmat::IDLE;
+            publisher->SetRunState(currentState);
+            publisher->NotifyEndOfRun();
             return rv;
          }
       }
