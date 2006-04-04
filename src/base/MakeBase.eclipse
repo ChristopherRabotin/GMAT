@@ -52,6 +52,7 @@ HEADERS = -Iinclude \
           -Isolver \
           -Ifunction \
           -Icoordsystem \
+          -Imath \
           -I../gui/include \
           -I../gui/include/bitmaps \
           -I../gui/app \
@@ -201,6 +202,8 @@ OBJECTS = \
     interpreter/MathParser.o \
     interpreter/MathTree.o \
     interpreter/ScriptInterpreter.o \
+    math/MathException.o \
+    math/MathNode.o \
     parameter/AngularParameters.o \
     parameter/Array.o \
     parameter/BplaneData.o \
