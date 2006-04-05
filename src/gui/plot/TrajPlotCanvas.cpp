@@ -402,13 +402,19 @@ void TrajPlotCanvas::SetEndOfRun(bool flag)
 {
    #if DEBUG_TRAJCANVAS_UPDATE
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::SetEndOfRun() TrajPlotCanvas::SetEndOfRun() flag=%d\n",
-       flag);
+      ("TrajPlotCanvas::SetEndOfRun() TrajPlotCanvas::SetEndOfRun() flag=%d, "
+       "mNumData=%d\n",  flag, mNumData);
    #endif
    
    mIsEndOfRun = flag;
    mIsEndOfData = flag;
 
+   if (mNumData < 1)
+   {
+      Refresh(false);
+      return;
+   }
+   
    if (mIsEndOfRun)
    {
       #if DEBUG_TRAJCANVAS_LONGITUDE
@@ -2903,9 +2909,6 @@ void TrajPlotCanvas::DrawFrame()
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::DrawPlot()
 {
-   if (mNumData < 1) // to avoid 0.0 time
-      return;
-   
    #if DEBUG_TRAJCANVAS_DRAW
    MessageInterface::ShowMessage
       ("TrajPlotCanvas::DrawPlot() mNumData=%d, mNeedOriginConversion=%d, "
@@ -2926,6 +2929,15 @@ void TrajPlotCanvas::DrawPlot()
       ("TrajPlotCanvas::DrawPlot()mUseInitialViewPoint=%d, mIsEndOfData=%d, mIsEndOfRun=%d\n",
        mUseInitialViewPoint, mIsEndOfData, mIsEndOfRun);
    #endif
+   
+   // Plot is not refreshed when another panel is opened, so add glFlush()
+   // and SwapBuffers() (loj: 4/5/06)
+   if (mNumData < 1) // to avoid 0.0 time
+   {
+      glFlush();
+      SwapBuffers();
+      return;
+   }
    
    // compute projection if using initial viewpoint and not end of run or
    // if not using initial viewpoint and not first run.
