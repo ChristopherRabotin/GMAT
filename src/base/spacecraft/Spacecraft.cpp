@@ -1002,6 +1002,9 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    else if (type == Gmat::ATTITUDE)
    {
       attitude = (Attitude*) obj;
+      // set epoch ...
+      attitude->SetEpoch(state.GetEpoch());
+      return true;
    }
    
    return SpaceObject::SetRefObject(obj, type, name);

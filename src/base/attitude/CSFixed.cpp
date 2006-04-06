@@ -79,6 +79,19 @@ CSFixed& CSFixed::operator=(const CSFixed& att)
    return *this;
 }
 
+//------------------------------------------------------------------------------
+//  ~CSFixed()
+//------------------------------------------------------------------------------
+/**
+ * Destructor for the CSFixed class.
+ */
+//------------------------------------------------------------------------------
+CSFixed::~CSFixed()
+{
+   // nothing really to do here ... la la la la la
+}
+
+
 //---------------------------------------------------------------------------
 //  bool Initialize() 
 //---------------------------------------------------------------------------
@@ -139,12 +152,12 @@ void CSFixed::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    // Get the rotation matrix from the reference coordinate system
    Rvector bogus(6,100.0,200.0,300.0,400.0,500.0,600.0);
    Rvector bogus2 = refCS->FromMJ2000Eq(atTime, bogus, true);
-   Rmatrix33 RiI  = refCS->GetLastRotationMatrix();
+   Rmatrix33 RiI  = (refCS->GetLastRotationMatrix()).Transpose();
    // compute current attitude matrix
    currentRBI     = RBi * RiI;
    // Get the rotation dot matrix from the reference coordinate system
    // (it was computed on the last call to FromMJ2000Eq)
-   Rmatrix33 RiIDot = refCS->GetLastRotationDotMatrix();
+   Rmatrix33 RiIDot = (refCS->GetLastRotationDotMatrix()).Transpose();
    
    Rmatrix33 wxIBB  = - RBi * (RiIDot * (currentRBI.Transpose()));
    // set current angular velocity from this matrix

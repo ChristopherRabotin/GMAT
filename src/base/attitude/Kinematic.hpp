@@ -45,7 +45,8 @@ public:
    Kinematic(const Kinematic &kin);
    // operator =
    Kinematic& operator=(const Kinematic &kin);
-
+   // destructor
+   virtual ~Kinematic();
 protected:
    enum 
    {

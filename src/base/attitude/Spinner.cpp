@@ -80,6 +80,19 @@ Spinner& Spinner::operator=(const Spinner& att)
    return *this;
 }
 
+
+//------------------------------------------------------------------------------
+//  ~Spinner()
+//------------------------------------------------------------------------------
+/**
+ * Destructor for the Spinner class.
+ */
+//------------------------------------------------------------------------------
+Spinner::~Spinner()
+{
+   // nothing really to do here ... la la la la la
+}
+
 //---------------------------------------------------------------------------
 //  bool Initialize() 
 //---------------------------------------------------------------------------
@@ -96,9 +109,9 @@ bool Spinner::Initialize()
    // Compute the rotation matrix form inertial to Fi at the epoch time, t0
    Rvector bogus(6,100.0,200.0,300.0,400.0,500.0,600.0);
    Rvector bogus2 = refCS->FromMJ2000Eq(initialEpoch, bogus, true);
-   Rmatrix33 RiI  = refCS->GetLastRotationMatrix();
+   Rmatrix33 RiI  = (refCS->GetLastRotationMatrix()).Transpose();
    RB0I           = RBi * RiI;
-   currentwIBB    = RB0I * wIBi; // doesn't change
+   currentwIBB    = RBi * wIBi; // doesn't change  (spec mod per Steve 2006.04.05)
    initialwMag    = currentwIBB.GetMagnitude();
    initialeAxis   = currentwIBB / initialwMag;
    return true;

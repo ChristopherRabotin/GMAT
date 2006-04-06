@@ -197,7 +197,6 @@ public:
                        GetStringArrayParameter(const Integer id) const; 
    virtual const StringArray& 
                        GetStringArrayParameter(const std::string &label) const;
-   
 protected:
    enum 
    {
@@ -283,13 +282,14 @@ protected:
    Real      lastEulerAngleRatesTime;
    /// the last computed euler angle rates  (radians/second)
    Rvector3  lastEulerAngleRates;
-   
+ 
    // method to convert an euler axis and angle to a cosine matrix                     
    virtual Rmatrix33 EulerAxisAndAngleToDCM(
                         const Rvector3 &eAxis, Real eAngle);
-   // method to convert a cosine matrix to an eulre axis and angle
+   // method to convert a cosine matrix to an euler axis and angle
    virtual void      DCMToEulerAxisAndAngle(const Rmatrix33 &cosMat, 
                                             Rvector3 &eAxis, Real &eAngle);
+                                            
    // method to set the euler sequence string to match the input
    // euler sequence array                        
    bool  SetEulerSequenceString(const UnsignedIntArray &eulerArray);

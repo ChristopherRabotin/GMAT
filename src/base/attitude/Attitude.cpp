@@ -303,7 +303,7 @@ Rvector3 Attitude::ToEulerAngles(const Rmatrix33 &cosMat, Integer seq1,
       sin1   = GmatMathUtil::Sin(theta1);
       cos1   = GmatMathUtil::Cos(theta1);  
       return Rvector3(theta1, theta2, 
-            (GmatMathUtil::ATan(R13*sin1 + R12*cos1),(R23*sin1 + R22*cos1)));
+            GmatMathUtil::ATan((R13*sin1 + R12*cos1),(R23*sin1 + R22*cos1)));
    }
    else if ((seq1 == 1) && (seq2 == 3) && (seq3 == 2))     // 1-3-2
    {
@@ -312,7 +312,7 @@ Rvector3 Attitude::ToEulerAngles(const Rmatrix33 &cosMat, Integer seq1,
       sin1   = GmatMathUtil::Sin(theta1);
       cos1   = GmatMathUtil::Cos(theta1);  
       return Rvector3(theta1, theta2, 
-            (GmatMathUtil::ATan(R12*sin1 - R13*cos1),(-R32*sin1 + R33*cos1)));
+            GmatMathUtil::ATan((R12*sin1 - R13*cos1),(-R32*sin1 + R33*cos1)));
    }
    else if ((seq1 == 2) && (seq2 == 3) && (seq3 == 1))     // 2-3-1
    {
@@ -321,7 +321,7 @@ Rvector3 Attitude::ToEulerAngles(const Rmatrix33 &cosMat, Integer seq1,
       sin1   = GmatMathUtil::Sin(theta1);
       cos1   = GmatMathUtil::Cos(theta1);  
       return Rvector3(theta1, theta2, 
-            (GmatMathUtil::ATan(R21*sin1 + R23*cos1),(R31*sin1 + R33*cos1)));
+            GmatMathUtil::ATan((R21*sin1 + R23*cos1),(R31*sin1 + R33*cos1)));
    }
    else if ((seq1 == 2) && (seq2 == 1) && (seq3 == 3))     // 2-1-3
    {
@@ -330,7 +330,7 @@ Rvector3 Attitude::ToEulerAngles(const Rmatrix33 &cosMat, Integer seq1,
       sin1   = GmatMathUtil::Sin(theta1);
       cos1   = GmatMathUtil::Cos(theta1);  
       return Rvector3(theta1, theta2, 
-            ((R23*sin1 - R21*cos1)/(-R13*sin1 + R11*cos1)));
+            GmatMathUtil::ATan((R23*sin1 - R21*cos1)/(-R13*sin1 + R11*cos1)));
    }
    else if ((seq1 == 3) && (seq2 == 1) && (seq3 == 2))     // 3-1-2
    {
@@ -339,16 +339,16 @@ Rvector3 Attitude::ToEulerAngles(const Rmatrix33 &cosMat, Integer seq1,
       sin1   = GmatMathUtil::Sin(theta1);
       cos1   = GmatMathUtil::Cos(theta1);  
       return Rvector3(theta1, theta2, 
-            (GmatMathUtil::ATan(R32*sin1 + R31*cos1),(R12*sin1 + R11*cos1)));
+            GmatMathUtil::ATan((R32*sin1 + R31*cos1),(R12*sin1 + R11*cos1)));
    }
    else if ((seq1 == 3) && (seq2 == 2) && (seq3 == 1))     // 3-2-1
    {
-      theta1 = GmatMathUtil::ATan(-R12, R11);
+      theta1 = GmatMathUtil::ATan(R12, R11);
       theta2 = GmatMathUtil::ASin(-R13);
       sin1   = GmatMathUtil::Sin(theta1);
       cos1   = GmatMathUtil::Cos(theta1);  
       return Rvector3(theta1, theta2, 
-            (GmatMathUtil::ATan(R31*sin1 - R32*cos1),(-R21*sin1 + R22*cos1)));
+            GmatMathUtil::ATan((R31*sin1 - R32*cos1),(-R21*sin1 + R22*cos1)));
    }
    else if ((seq1 == 1) && (seq2 == 2) && (seq3 == 1))     // 1-2-1
    {
@@ -357,7 +357,7 @@ Rvector3 Attitude::ToEulerAngles(const Rmatrix33 &cosMat, Integer seq1,
       sin1   = GmatMathUtil::Sin(theta1);
       cos1   = GmatMathUtil::Cos(theta1);  
       return Rvector3(theta1, theta2, 
-            (GmatMathUtil::ATan(-R33*sin1 - R32*cos1),(R23*sin1 + R22*cos1)));
+            GmatMathUtil::ATan((-R33*sin1 - R32*cos1),(R23*sin1 + R22*cos1)));
    }
    else if ((seq1 == 1) && (seq2 == 3) && (seq3 == 1))     // 1-3-1
    {
@@ -366,7 +366,7 @@ Rvector3 Attitude::ToEulerAngles(const Rmatrix33 &cosMat, Integer seq1,
       sin1   = GmatMathUtil::Sin(theta1);
       cos1   = GmatMathUtil::Cos(theta1);  
       return Rvector3(theta1, theta2, 
-            (GmatMathUtil::ATan(-R22*sin1 + R23*cos1),(-R32*sin1 + R33*cos1)));
+            GmatMathUtil::ATan((-R22*sin1 + R23*cos1),(-R32*sin1 + R33*cos1)));
    }
    else if ((seq1 == 2) && (seq2 == 1) && (seq3 == 2))     // 2-1-2
    {
@@ -375,7 +375,7 @@ Rvector3 Attitude::ToEulerAngles(const Rmatrix33 &cosMat, Integer seq1,
       sin1   = GmatMathUtil::Sin(theta1);
       cos1   = GmatMathUtil::Cos(theta1);  
       return Rvector3(theta1, theta2, 
-            (GmatMathUtil::ATan(-R33*sin1 + R31*cos1),(-R13*sin1 + R11*cos1)));
+            GmatMathUtil::ATan((-R33*sin1 + R31*cos1),(-R13*sin1 + R11*cos1)));
    }
    else if ((seq1 == 2) && (seq2 == 3) && (seq3 == 2))     // 2-3-2
    {
@@ -384,7 +384,7 @@ Rvector3 Attitude::ToEulerAngles(const Rmatrix33 &cosMat, Integer seq1,
       sin1   = GmatMathUtil::Sin(theta1);
       cos1   = GmatMathUtil::Cos(theta1);  
       return Rvector3(theta1, theta2, 
-            (GmatMathUtil::ATan(-R11*sin1 - R13*cos1),(R31*sin1 + R33*cos1)));
+            GmatMathUtil::ATan((-R11*sin1 - R13*cos1),(R31*sin1 + R33*cos1)));
    }
    else if ((seq1 == 3) && (seq2 == 1) && (seq3 == 3))     // 3-1-3
    {
@@ -393,7 +393,7 @@ Rvector3 Attitude::ToEulerAngles(const Rmatrix33 &cosMat, Integer seq1,
       sin1   = GmatMathUtil::Sin(theta1);
       cos1   = GmatMathUtil::Cos(theta1);  
       return Rvector3(theta1, theta2, 
-            (GmatMathUtil::ATan(-R22*sin1 - R21*cos1),(R12*sin1 + R11*cos1)));
+            GmatMathUtil::ATan((-R22*sin1 - R21*cos1),(R12*sin1 + R11*cos1)));
    }
    else if ((seq1 == 3) && (seq2 == 2) && (seq3 == 3))     // 3-2-3
    {
@@ -402,7 +402,7 @@ Rvector3 Attitude::ToEulerAngles(const Rmatrix33 &cosMat, Integer seq1,
       sin1   = GmatMathUtil::Sin(theta1);
       cos1   = GmatMathUtil::Cos(theta1);  
       return Rvector3(theta1, theta2, 
-            (GmatMathUtil::ATan(-R11*sin1 + R12*cos1),(-R21*sin1 + R22*cos1)));
+            GmatMathUtil::ATan((-R11*sin1 + R12*cos1),(-R21*sin1 + R22*cos1)));
    }
    else
       throw AttitudeException(
@@ -414,7 +414,7 @@ Rvector3 Attitude::ToEulerAngles(const Rmatrix33 &cosMat, Integer seq1,
 //                         Integer seq2,                Integer seq3)
 //------------------------------------------------------------------------------
  /**
- * Converts the input quaternion to a set of euler angles, using the euler
+ * Converts the input set of euler angles to a quaternion, using the euler
  * sequence provided.
  *
  * @param eulerAngles  the input euler angles (radians)
@@ -925,11 +925,11 @@ bool Attitude::Initialize()
    // compute cosine matrix and angular velocity from inputs
    switch (inputAttType)
    {
-      case GmatAttitude::DIRECTION_COSINE_MATRIX_TYPE: 
-         RBi = initialDcm;
-         break;
       case GmatAttitude::QUATERNION_TYPE: 
          RBi = Attitude::ToCosineMatrix(initialQuaternion);
+         break;
+      case GmatAttitude::DIRECTION_COSINE_MATRIX_TYPE: 
+         RBi = initialDcm;
          break;
       case GmatAttitude::EULER_ANGLES_AND_SEQUENCE_TYPE:
          RBi = Attitude::ToCosineMatrix(
@@ -945,6 +945,7 @@ bool Attitude::Initialize()
    {
       case GmatAttitude::ANGULAR_VELOCITY_TYPE:
          wIBi = initialAngVel * GmatMathUtil::RAD_PER_DEG;
+         break;
       case GmatAttitude::EULER_ANGLE_RATES_TYPE:
          wIBi = Attitude::ToAngularVelocity(
                           initialEulerAngRates * GmatMathUtil::RAD_PER_DEG, 
@@ -2015,7 +2016,7 @@ Rmatrix33 Attitude::EulerAxisAndAngleToDCM(
    return Rmatrix33((c*I33) + ((1.0 - c)*Outerproduct(eAxis, eAxis))
                     - s*a_x);
 }
-                            
+
 //------------------------------------------------------------------------------
 //  void  DCMToEulerAxisAndAngle(const Rmatrix33 &cosmat, 
 //                               Rvector3 &eAxis, Real &eAngle)
