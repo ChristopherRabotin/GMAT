@@ -1920,7 +1920,7 @@ void Propagate::PrepareToPropagate()
       for (Integer n = 0; n < (Integer)prop.size(); ++n) {
          #if DEBUG_PROPAGATE_EXE
             MessageInterface::ShowMessage
-               ("Propagate::Execute() SpaceObject names\n");
+               ("Propagate::PrepareToPropagate() SpaceObject names\n");
             
             MessageInterface::ShowMessage
                ("SpaceObject Count = %d\n", satName[n]->size());
@@ -1942,7 +1942,7 @@ void Propagate::PrepareToPropagate()
             GmatTimeUtil::SECS_PER_DAY;
          #if DEBUG_PROPAGATE_DIRECTION
             MessageInterface::ShowMessage(
-               "Propagate::Execute() running %s %s.\n",
+               "Propagate::PrepareToPropagate() running %s %s.\n",
                prop[n]->GetName().c_str(),
                (prop[n]->GetPropagator()->GetRealParameter("InitialStepSize") > 0.0
                   ? "forwards" : "backwards"));
@@ -1954,19 +1954,19 @@ void Propagate::PrepareToPropagate()
       // Now setup the stopping condition elements
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage
-            ("Propagate::Execute() Propagate start; epoch = %f\n",
+            ("Propagate::PrepareToPropagate() Propagate start; epoch = %f\n",
           (baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY));
          MessageInterface::ShowMessage
-            ("Propagate::Execute() Propagate start; fm epoch = %f\n",
+            ("Propagate::PrepareToPropagate() Propagate start; fm epoch = %f\n",
             (fm[0]->GetRealParameter(fm[0]->GetParameterID("Epoch"))));
          Integer stopCondCount = stopWhen.size();
          MessageInterface::ShowMessage
-            ("Propagate::Execute() stopCondCount = %d\n", stopCondCount);
+            ("Propagate::PrepareToPropagate() stopCondCount = %d\n", stopCondCount);
             
          for (Integer i=0; i<stopCondCount; i++)
          {
             MessageInterface::ShowMessage
-               ("Propagate::Execute() stopCondName[%d]=%s\n", i,
+               ("Propagate::PrepareToPropagate() stopCondName[%d]=%s\n", i,
                       stopWhen[i]->GetName().c_str());
          }
       #endif
@@ -1993,7 +1993,7 @@ void Propagate::PrepareToPropagate()
       
             #if DEBUG_PROPAGATE_EXE
                MessageInterface::ShowMessage(
-                  "Propagate::Execute() stopSat = %s\n",
+                  "Propagate::PrepareToPropagate() stopSat = %s\n",
                   stopSats[i]->GetName().c_str());
             #endif
       
@@ -2013,7 +2013,7 @@ void Propagate::PrepareToPropagate()
       }
       catch (BaseException &ex) {
          MessageInterface::ShowMessage(
-            "Propagate::Execute() Exception while initializing stopping "
+            "Propagate::PrepareToPropagate() Exception while initializing stopping "
             "conditions\n");
          inProgress = false;
          throw;
@@ -2055,7 +2055,7 @@ void Propagate::PrepareToPropagate()
    for (Integer n = 0; n < (Integer)prop.size(); ++n) {
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage
-            ("Propagate::Execute() SpaceObject names\n");
+            ("Propagate::PrepareToPropagate() SpaceObject names\n");
          
          MessageInterface::ShowMessage
             ("SpaceObject Count = %d\n", satName[n]->size());
@@ -2079,7 +2079,7 @@ void Propagate::PrepareToPropagate()
          GmatTimeUtil::SECS_PER_DAY;
       #if DEBUG_PROPAGATE_DIRECTION
          MessageInterface::ShowMessage(
-            "Propagate::Execute() running %s %s.\n",
+            "Propagate::PrepareToPropagate() running %s %s.\n",
             prop[n]->GetName().c_str(),
             (prop[n]->GetPropagator()->GetRealParameter("InitialStepSize") > 0.0
                ? "forwards" : "backwards"));
@@ -2091,18 +2091,18 @@ void Propagate::PrepareToPropagate()
    // Now setup the stopping condition elements
    #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage
-         ("Propagate::Execute() Propagate start; epoch = %f\n",
+         ("Propagate::PrepareToPropagate() Propagate start; epoch = %f\n",
        (baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY));
       MessageInterface::ShowMessage
-         ("Propagate::Execute() Propagate start; fm epoch = %f\n",
+         ("Propagate::PrepareToPropagate() Propagate start; fm epoch = %f\n",
          (fm[0]->GetRealParameter(fm[0]->GetParameterID("Epoch"))));
       Integer stopCondCount = stopWhen.size();
       MessageInterface::ShowMessage
-         ("Propagate::Execute() stopCondCount = %d\n", stopCondCount);
+         ("Propagate::PrepareToPropagate() stopCondCount = %d\n", stopCondCount);
       for (Integer i=0; i<stopCondCount; i++)
       {
          MessageInterface::ShowMessage
-            ("Propagate::Execute() stopCondName[%d]=%s\n", i,
+            ("Propagate::PrepareToPropagate() stopCondName[%d]=%s\n", i,
                    stopWhen[i]->GetName().c_str());
       }
    #endif
@@ -2121,7 +2121,7 @@ void Propagate::PrepareToPropagate()
    
          #if DEBUG_PROPAGATE_EXE
             MessageInterface::ShowMessage(
-               "Propagate::Execute() stopSat = %s\n",
+               "Propagate::PrepareToPropagate() stopSat = %s\n",
                stopSats[i]->GetName().c_str());
          #endif
    
@@ -2141,7 +2141,7 @@ void Propagate::PrepareToPropagate()
    }
    catch (BaseException &ex) {
       MessageInterface::ShowMessage(
-         "Propagate::Execute() Exception while initializing stopping "
+         "Propagate::PrepareToPropagate() Exception while initializing stopping "
          "conditions\n");
       inProgress = false;
       throw;
@@ -2208,7 +2208,7 @@ void Propagate::CheckStopConditions(Integer epochID)
             stopEpoch = (stopWhen[i]->GetStopEpoch());
             #if DEBUG_PROPAGATE_EXE
                MessageInterface::ShowMessage
-                  ("Propagate::Execute() %s met\n", 
+                  ("Propagate::PrepareToPropagate() %s met\n", 
                    stopWhen[i]->GetName().c_str());
             #endif
             break; // exit if any stop condition met
@@ -2219,7 +2219,7 @@ void Propagate::CheckStopConditions(Integer epochID)
    }
    catch (BaseException &ex) {
       MessageInterface::ShowMessage(
-         "Propagate::Execute() Exception while evaluating stopping "
+         "Propagate::PrepareToPropagate() Exception while evaluating stopping "
          "conditions\n");
       inProgress = false;
       throw;
@@ -2248,7 +2248,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
 
    #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage(
-         "Propagate::Execute() currEpoch = %f, stopEpoch = %f, "
+         "Propagate::TakeFinalStep currEpoch = %f, stopEpoch = %f, "
          "elapsedTime = %f\n", currEpoch[0], stopEpoch, elapsedTime[0]);
    #endif
    
@@ -2263,7 +2263,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
 
    #if defined DEBUG_PROPAGATE_STEPSIZE or defined DEBUG_PROPAGATE_DIRECTION
       MessageInterface::ShowMessage
-         ("Propagate::Execute() secsToStep at stop = %16.10le\n",
+         ("Propagate::TakeFinalStep secsToStep at stop = %16.10le\n",
           secsToStep);
    #endif
    #ifdef DEBUG_PROPAGATE_DIRECTION
@@ -2281,7 +2281,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
    {
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage(
-            "Propagate::Execute() before Step(%16.13le) epoch = %16.10lf\n", 
+            "Propagate::TakeFinalStep before Step(%16.13le) epoch = %16.10lf\n", 
             secsToStep, 
             (baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY));
       #endif
@@ -2301,7 +2301,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
          
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage
-            ("Propagate::Execute() after Step(%16.13le) epoch = %16.10lf\n", 
+            ("Propagate::TakeFinalStep after Step(%16.13le) epoch = %16.10lf\n", 
             secsToStep,
             (baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY));
       #endif
@@ -2321,7 +2321,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
       
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage
-            ("Propagate::Execute() complete; epoch = %16.10lf\n",
+            ("Propagate::TakeFinalStep complete; epoch = %16.10lf\n",
              (baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY));
       #endif
    }
@@ -2346,7 +2346,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
 bool Propagate::Execute()
 {
    #if DEBUG_PROPAGATE_EXE
-         MessageInterface::ShowMessage("Propagate::Execute() entered.\n");
+      MessageInterface::ShowMessage("Propagate::Execute() entered.\n");
    #endif
 
    if (initialized == false)
@@ -2356,9 +2356,28 @@ bool Propagate::Execute()
    Integer checkCount = 0, trigger = 0;
 
    try {
-      if (!inProgress) 
+      if (!inProgress)
+      {
          PrepareToPropagate();
 
+         // Check for initial stop condition before first step in while loop
+         // eg) elapsed time of 0 (loj: 4/6/06 added)
+         for (UnsignedInt i=0; i<stopWhen.size(); i++)
+         {
+            if (stopWhen[i]->Evaluate())
+            {
+               stopCondMet = true;
+               stopEpoch = (stopWhen[i]->GetStopEpoch());
+               #if DEBUG_PROPAGATE_EXE
+                  MessageInterface::ShowMessage
+                     ("Propagate::Execute() %s met\n",
+                      stopWhen[i]->GetName().c_str());
+               #endif
+               break; // exit if any stop condition met
+            }
+         }
+      }
+      
       while (!stopCondMet)
       {
          // Update the epoch on the force models
