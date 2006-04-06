@@ -297,7 +297,7 @@ Real PlanetData::GetPlanetReal(Integer item)
             geolat = AngleUtil::PutAngleInDegRange(geolat, -90.0, 90.0);
             return geolat;
          }
-         else  // item == LATITUDE
+         else  // item == ALTITUDE
          {
             sinlat = sin(geolat);
             cFactor = equatorialRadius / sqrt(1.0 - ecc2 * sinlat * sinlat);
