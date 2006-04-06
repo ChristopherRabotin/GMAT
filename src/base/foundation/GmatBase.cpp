@@ -2189,7 +2189,7 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
    if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
        (mode == Gmat::SHOW_SCRIPT))
       inMatlabMode = false;
-   if (mode == Gmat::MATLAB_STRUCT || Gmat::EPHEM_HEADER)
+   if (mode == Gmat::MATLAB_STRUCT || mode == Gmat::EPHEM_HEADER)
       inMatlabMode = true;
    
    if (useName != "")
