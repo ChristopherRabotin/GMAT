@@ -202,7 +202,9 @@ OBJECTS = \
     interpreter/MathParser.o \
     interpreter/MathTree.o \
     interpreter/ScriptInterpreter.o \
+    math/MathElement.o \
     math/MathException.o \
+    math/MathFunction.o \
     math/MathNode.o \
     parameter/AngularParameters.o \
     parameter/Array.o \
