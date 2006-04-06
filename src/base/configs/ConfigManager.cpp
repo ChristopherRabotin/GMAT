@@ -449,8 +449,12 @@ void ConfigManager::AddObject(GmatBase *obj)
       objects.push_back(obj);
       mapping[name] = obj;
    }
-   
-   objectChanged = true;
+
+   //loj: 4/6/09 until we can add TextEphemFile to resource tree, we don't want to
+   // write to script file on save script.
+
+   if (obj->GetTypeName() != "TextEphemFile")
+      objectChanged = true;
 }
 
 

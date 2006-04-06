@@ -903,10 +903,14 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          std::cout << "Found " << objs.size() << " Subscribers\n";
       #endif
       for (current = objs.begin(); current != objs.end(); ++current)
-         if (!BuildObject(*current, mode))
-            return false;
-   
-   
+      {
+         // loj: 4/6/06 Skip TextEphemFile for now, because it is under Tools
+         GmatBase *obj = FindObject(*current);
+         if (obj != NULL && obj->GetTypeName() != "TextEphemFile")
+            if (!BuildObject(*current, mode))
+               return false;
+      }
+      
       // Array and Variable setups
       objs = moderator->GetListOfConfiguredItems(Gmat::PARAMETER);
       #ifdef DEBUG_SCRIPT_READING_AND_WRITING
