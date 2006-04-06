@@ -76,7 +76,6 @@ protected:
 private:
 
    static const Integer BUFFER_SIZE = 10;
-   static const Real TIME_TOL = 1.0e-8;
    
    Interpolator *mInterpolator;
 

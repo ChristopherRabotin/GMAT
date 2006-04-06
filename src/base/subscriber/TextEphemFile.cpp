@@ -51,7 +51,8 @@ TextEphemFile::PARAMETER_TYPE[TextEphemFileParamCount - ReportFileParamCount] =
    Gmat::STRING_TYPE,
 };
 
-
+static const Real TIME_TOL = 1.0e-8;
+   
 //------------------------------------------------------------------------------
 // TextEphemFile(const std::string &type, const std::string &name,
 //               const std::string &fileName)
