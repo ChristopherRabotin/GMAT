@@ -695,7 +695,7 @@ bool ReportFile::AddVarParameter(const std::string &paramName, Integer index)
    
    if (paramName != "" && index == mNumVarParams)
    {
-      // if paramName not found, add (loj: 6/9/05 Added)
+      // if paramName not found, add
       if (find(mVarParamNames.begin(), mVarParamNames.end(), paramName) ==
           mVarParamNames.end())
       {
@@ -716,15 +716,20 @@ bool ReportFile::AddVarParameter(const std::string &paramName, Integer index)
 bool ReportFile::AddParameterForTitleOnly(const std::string &paramName)
 {
    #ifdef DEBUG_REPORTFILE
-      MessageInterface::ShowMessage(
-         "ReportFile::AddParameterForTitle() Adding parameter '%s' to \n   "
-         "ReportFile '%s'\n", paramName.c_str(), instanceName.c_str());
+   MessageInterface::ShowMessage
+      ("ReportFile::AddParameterForTitle() Adding parameter '%s' to \n   "
+       "ReportFile '%s'\n", paramName.c_str(), instanceName.c_str());
    #endif
    
    if (paramName != "")
    {
-      mVarParamNames.push_back(paramName);
-      return true;
+      // if paramName not found, add (loj: 4/6/06 Added)
+      if (find(mVarParamNames.begin(), mVarParamNames.end(), paramName) ==
+          mVarParamNames.end())
+      {
+         mVarParamNames.push_back(paramName);
+         return true;
+      }
    }
    
    return false;
