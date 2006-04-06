@@ -163,19 +163,21 @@ bool StopCondition::Evaluate()
             mStopEpoch = mBaseEpoch + mGoal/86400.0;
          else if (stopParamType == "ElapsedDays")
             mStopEpoch = mBaseEpoch + mGoal;
-         else if (stopParamType == "CurrA1MJD")
+         //else if (stopParamType == "CurrA1MJD")
+         else if (stopParamType == "A1ModJulian")
             mStopEpoch = mGoal;
          else
             throw StopConditionException
                ("StopCondition::Evaluate()::Unknown stop time param type:" +
                 stopParamType + "\n");
-
+         
          goalMet = true;
       }
 
       #if DEBUG_STOPCOND > 1
       MessageInterface::ShowMessage
-         ("StopCondition::Evaluate() time goalMet = %d\n", goalMet);
+         ("StopCondition::Evaluate() time goalMet = %d, mStopEpoch=%f, \n",
+          goalMet, mStopEpoch);
       #endif
       
    }
