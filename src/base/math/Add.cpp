@@ -30,8 +30,8 @@
  * Constructor.
  */
 //------------------------------------------------------------------------------
-Add::Add(const std::string &typeStr, const std::string &nomme)
-   : MathFunction("Add", nomme)
+Add::Add(const std::string &nomme)
+   : MathFunction("", nomme)
 {
 }
 

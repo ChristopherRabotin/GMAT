@@ -23,7 +23,7 @@
 class GMAT_API Subtract : public MathFunction
 {
 public:
-   Subtract(const std::string &typeStr, const std::string &nomme);
+   Subtract(const std::string &nomme);
    virtual ~Subtract();
    Subtract(const Subtract &copy);
                  

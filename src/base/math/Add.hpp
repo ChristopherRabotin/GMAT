@@ -23,7 +23,7 @@
 class GMAT_API Add : public MathFunction
 {
 public:
-   Add(const std::string &typeStr, const std::string &nomme);
+   Add(const std::string &nomme);
    virtual ~Add();
    Add(const Add &copy);
                  
