@@ -36,10 +36,10 @@ public:
    virtual GmatBase* Clone(void) const; 
                                         
    // Inherited (MathNode) methods                                            
-   virtual Real Evaluate() const;
-   virtual bool EvaluateInputs() const; 
+   virtual Real Evaluate();
+   virtual bool EvaluateInputs(); 
    virtual void ReportOutputs(Integer &type, 
-            Integer &rowCount, Integer &colCount) const;
+            Integer &rowCount, Integer &colCount);
    
    Rmatrix MatrixEvaluate();
    bool SetChildren(MathNode *leftChild, MathNode *rightChild);

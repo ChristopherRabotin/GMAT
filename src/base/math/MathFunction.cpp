@@ -106,7 +106,7 @@ GmatBase* MathFunction::Clone(void) const
 //------------------------------------------------------------------------------
 // Real Evaluate()
 //------------------------------------------------------------------------------
-Real MathFunction::Evaluate() const
+Real MathFunction::Evaluate()
 {
     return MathNode::Evaluate();
 }
@@ -119,7 +119,7 @@ Real MathFunction::Evaluate() const
  * compatible data for the function.
  */
 //------------------------------------------------------------------------------
-bool MathFunction::EvaluateInputs() const
+bool MathFunction::EvaluateInputs()
 {
 	 // @todo: This section may need more implementation.
 	 if ( (leftNode) && (rightNode) )
@@ -132,7 +132,7 @@ bool MathFunction::EvaluateInputs() const
 // void ReportOutputs()
 //------------------------------------------------------------------------------
 void MathFunction::ReportOutputs(Integer &type, 
-                                Integer &rowCount, Integer &colCount) const
+                                Integer &rowCount, Integer &colCount)
 {
 }
 
