@@ -42,14 +42,14 @@ public:
                      GetRefObjectName(const Gmat::ObjectType type) const;
    virtual bool      SetRefObjectName(const Gmat::ObjectType type,
                                       const std::string &name);
-   virtual Real      GetRealParameter(const Integer id, const Integer index) const;
-   virtual Real      SetRealParameter(const Integer id, const Real value);
    
    // Inherited (MathNode) methods                                   
    virtual Real Evaluate() const;
    virtual bool EvaluateInputs() const; 
+   virtual void ReportOutputs(Integer &type, 
+            Integer &rowCount, Integer &colCount) const;
    
-   Rmatrix *MatrixEvaluate();
+   Rmatrix MatrixEvaluate();
 
 protected:
    
@@ -59,11 +59,6 @@ protected:
    
    /// Holds the name of the GMAT object that is accessed by this node
    std::string refObjectName; 
-
-   enum
-   {
-     MathElementParamCount = MathNodeParamCount
-   };
     
 };
 

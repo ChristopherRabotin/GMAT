@@ -66,7 +66,7 @@ MathElement::MathElement(const MathElement &me) :
              refObject     (me.refObject),
              refObjectName (me.refObjectName)
 {
-   parameterCount = MathElementParamCount;
+
 }
 
 //------------------------------------------------------------------------------
@@ -208,59 +208,6 @@ bool MathElement::SetRefObjectName(const Gmat::ObjectType type, const std::strin
    return GmatBase::SetRefObjectName(type, name);
 }
 
-//---------------------------------------------------------------------------
-//  Real GetRealParameter(const Integer id, Integer index) const
-//---------------------------------------------------------------------------
-/**
- * Retrieve the value for a Real parameter.
- *
- * @param id The integer ID for the parameter.
- * @param index Index for objecs in arrays.
- *
- * @return The parameter's value.
- */
- //---------------------------------------------------------------------------
-Real MathElement::GetRealParameter(const Integer id, const Integer index) const
-{
-	switch (id) 
-	{
-      case REAL_VAR:
-         return realValue;
-         
-      default:
-         break;   // Default just drops through
-   }
-   
-   return GmatBase::GetRealParameter(id);
-}
-
-//---------------------------------------------------------------------------
-//  Real SetRealParameter(const Integer id, const Real value)
-//---------------------------------------------------------------------------
-/**
- * Set the value for a Real parameter.
- *
- * @param id The integer ID for the parameter.
- * @param value The new parameter value.
- *
- * @return the parameter value at the end of this call.
- */
- //---------------------------------------------------------------------------
-Real MathElement::SetRealParameter(const Integer id, const Real value)
-{
-	   switch (id) 
-	   {
-         case REAL_VAR:
-            realValue = value;
-            return realValue;
-         
-         default:
-            break;   // Default just drops through
-   }
-
-   return GmatBase::SetRealParameter(id, value);
-}
-
 //------------------------------------------------------------------------------
 // Real Evaluate()
 //------------------------------------------------------------------------------
@@ -286,9 +233,17 @@ bool MathElement::EvaluateInputs() const
 }
 
 //------------------------------------------------------------------------------
+// void ReportOutputs()
+//------------------------------------------------------------------------------
+void MathElement::ReportOutputs(Integer &type, 
+                                Integer &rowCount, Integer &colCount) const
+{
+}
+
+//------------------------------------------------------------------------------
 // bool MatrixEvaluate()
 //------------------------------------------------------------------------------
-Rmatrix* MathElement::MatrixEvaluate()
+Rmatrix MathElement::MatrixEvaluate()
 {
 	return MathNode::MatrixEvaluate();
 }
