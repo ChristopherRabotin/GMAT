@@ -129,6 +129,14 @@ bool MathFunction::EvaluateInputs() const
 }
 
 //------------------------------------------------------------------------------
+// void ReportOutputs()
+//------------------------------------------------------------------------------
+void MathFunction::ReportOutputs(Integer &type, 
+                                Integer &rowCount, Integer &colCount) const
+{
+}
+
+//------------------------------------------------------------------------------
 // bool MatrixEvaluate()
 //------------------------------------------------------------------------------
 Rmatrix MathFunction::MatrixEvaluate()
