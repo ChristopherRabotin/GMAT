@@ -43,6 +43,7 @@
 #include "Function.hpp"
 #include "AxisSystem.hpp"
 #include "CoordinateSystem.hpp"
+#include "MathNode.hpp"
 
 /**
  * GMAT Factory Manager Class, the interface between the Moderator and the
@@ -69,17 +70,14 @@ public:
                                           const std::string &withName = "");
    Propagator*            CreatePropagator(const std::string &ofType,
                                            const std::string &withName = "");
-   ForceModel*            CreateForceModel(const std::string &withName = "");
    PhysicalModel*         CreatePhysicalModel(const std::string &ofType,
                                               const std::string &withName = "");
-   PropSetup*             CreatePropSetup(const std::string &withName = "");
    StopCondition*         CreateStopCondition(const std::string &ofType,
                                               const std::string &withName = "");
    CalculatedPoint*       CreateCalculatedPoint(const std::string &ofType,
                                                 const std::string &withName = "");
    CelestialBody*         CreateCelestialBody(const std::string &ofType,
                                               const std::string &withName = "");
-   SolarSystem*           CreateSolarSystem(const std::string &withName = "");
    Solver*                CreateSolver(const std::string &ofType,
                                        const std::string &withName = "");
    Subscriber*            CreateSubscriber(const std::string &ofType,
@@ -98,8 +96,14 @@ public:
                                          const std::string &withName = "");
    AxisSystem*            CreateAxisSystem(const std::string &ofType,
                                            const std::string &withName = "");
-   CoordinateSystem*      CreateCoordinateSystem(const std::string &withName = "");
+   MathNode*              CreateMathNode(const std::string &ofType,
+                                         const std::string &withName = "");
 
+   //----- Just container
+   SolarSystem*           CreateSolarSystem(const std::string &withName = "");
+   PropSetup*             CreatePropSetup(const std::string &withName = "");
+   ForceModel*            CreateForceModel(const std::string &withName = "");
+   CoordinateSystem*      CreateCoordinateSystem(const std::string &withName = "");
    
    // method to return a list of strings representing the objects of the input
    // type that may be created in the system
@@ -125,6 +129,7 @@ public:
    StringArray            GetListOfHardware();
    StringArray            GetListOfAxisSystem();
    StringArray            GetListOfCoordinateSystem();
+   StringArray            GetListOfMathNode();
 
    // class destructor
    ~FactoryManager();
@@ -136,10 +141,6 @@ private:
 
    // default constructor
    FactoryManager();
-   // copy constructor
-   FactoryManager(const FactoryManager& fact);
-   // assignment operator
-   FactoryManager& operator= (const FactoryManager& fact);
     
    // private class data
    /// the list of factories that have been registered and which are available

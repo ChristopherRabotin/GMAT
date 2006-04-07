@@ -478,7 +478,7 @@ Function* Factory::CreateFunction(const std::string &ofType,
       ("Factory::CreateFunction() must be implemented by FunctionFactory()\n");
 }
 
-//djc: 11/10/04 - added
+
 //------------------------------------------------------------------------------
 //  Hardware* CreateHardware(const std::string &ofType,
 //                           const std::string &withName)
@@ -504,10 +504,10 @@ Hardware* Factory::CreateHardware(const std::string &ofType,
                                   const std::string &withName)
 {
    throw FactoryException
-   ("Factory::CreateHardware() must be implemented by the Factory\n");
+   ("Factory::CreateHardware() must be implemented by the HardwareFactory\n");
 }
 
-//wcs: 2004.12.23 - added
+
 //------------------------------------------------------------------------------
 //  AxisSystem* CreateAxisSystem(const std::string &ofType,
 //                               const std::string &withName)
@@ -533,10 +533,10 @@ AxisSystem* Factory::CreateAxisSystem(const std::string &ofType,
                                       const std::string &withName)
 {
    throw FactoryException
-   ("Factory::CreateAxisSystem() must be implemented by the Factory\n");
+   ("Factory::CreateAxisSystem() must be implemented by the AxisSystemFactory\n");
 }
 
-//loj: 2005.01.18 - added
+
 //------------------------------------------------------------------------------
 //  CoordinateSystem* CreateCoordinateSystem(const std::string &ofType,
 //                                           const std::string &withName)
@@ -562,8 +562,39 @@ CoordinateSystem* Factory::CreateCoordinateSystem(const std::string &ofType,
                                                   const std::string &withName)
 {
    throw FactoryException
-   ("Factory::CreateCoordinateSystem() must be implemented by the Factory\n");
+   ("Factory::CreateCoordinateSystem() must be implemented by the "
+    "CoordinateSystemFactory\n");
 }
+
+
+//------------------------------------------------------------------------------
+//  MathNode* CreateMathNode(const std::string &ofType,
+//                           const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates as MathNode object.
+ * 
+ * Must be implemented by derived classes that create MathNode objects -
+ * in that case, it returns a new MathNode object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type MathNode.
+ *
+ * @param <ofType>   specific type of MathNode object to create.
+ * @param <withName> name to give to the newly created MathNode object.
+ *
+ * @return pointer to a new MathNode object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type MathNode.
+ */
+//------------------------------------------------------------------------------
+MathNode* Factory::CreateMathNode(const std::string &ofType,
+                                  const std::string &withName)
+{
+   throw FactoryException
+   ("Factory::CreateMathNode() must be implemented by the MathFactory\n");
+}
+
 
 //------------------------------------------------------------------------------
 //  StringArray GetListOfCreatableObjects(void) const
@@ -629,8 +660,9 @@ bool Factory::AddCreatableObjects(StringArray newList)
    return true;
 }
 
+
 //------------------------------------------------------------------------------
-//  Gmat::ObjectType GetFactoryType(void) const
+//  Gmat::ObjectType GetFactoryType() const
 //------------------------------------------------------------------------------
 /**
  * This method returns the type of objects created by this factory.
@@ -639,9 +671,25 @@ bool Factory::AddCreatableObjects(StringArray newList)
  *
  */
 //------------------------------------------------------------------------------
-Gmat::ObjectType Factory::GetFactoryType(void) const
+Gmat::ObjectType Factory::GetFactoryType() const
 {
    return itsType;
+}
+
+
+//------------------------------------------------------------------------------
+//  bool IsTypeCaseSensitive() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the type of objects created by this factory.
+ *
+ * @return type of objects created by this factory.
+ *
+ */
+//------------------------------------------------------------------------------
+bool Factory::IsTypeCaseSensitive() const
+{
+   return isCaseSensitive;
 }
 
 //---------------------------------
@@ -661,6 +709,7 @@ Gmat::ObjectType Factory::GetFactoryType(void) const
 Factory::Factory(Gmat::ObjectType ofType)
 {
    itsType = ofType;
+   isCaseSensitive = false;
    // creatables list is empty at this point
 }
 
@@ -679,6 +728,7 @@ Factory::Factory(Gmat::ObjectType ofType)
 Factory::Factory(StringArray createList, Gmat::ObjectType ofType)
 {
    itsType    = ofType;
+   isCaseSensitive = false;
    creatables = createList;
 }
 
@@ -693,7 +743,8 @@ Factory::Factory(StringArray createList, Gmat::ObjectType ofType)
  */
 //------------------------------------------------------------------------------
 Factory::Factory(const Factory& fact) :
-itsType (fact.itsType)
+   itsType (fact.itsType),
+   isCaseSensitive (fact.isCaseSensitive)
 {
    if (!creatables.empty())
       creatables.clear();
@@ -714,6 +765,7 @@ itsType (fact.itsType)
 Factory& Factory::operator= (const Factory& fact)
 {
    itsType    = fact.itsType;
+   isCaseSensitive = fact.isCaseSensitive;
    creatables = fact.creatables;
    return *this;
 }
@@ -728,7 +780,7 @@ Factory& Factory::operator= (const Factory& fact)
 //------------------------------------------------------------------------------
 Factory::~Factory()
 {
-//   delete creatables;
-   creatables.~vector<std::string>();
+   // delete creatables;
+   //creatables.~vector<std::string>(); //loj: 4/7/06 commented
 }
 

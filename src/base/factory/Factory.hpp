@@ -40,6 +40,7 @@
 #include "Hardware.hpp"
 #include "AxisSystem.hpp" 
 #include "CoordinateSystem.hpp"
+#include "MathNode.hpp"
 
 class GMAT_API Factory
 {
@@ -85,6 +86,8 @@ public:
                                              const std::string &withName = "");
    virtual CoordinateSystem* CreateCoordinateSystem(const std::string &ofType,
                                                     const std::string &withName = "");
+   virtual MathNode*        CreateMathNode(const std::string &ofType,
+                                           const std::string &withName = "");
 
    
    // method to return list of types of objects that this factory can create
@@ -95,8 +98,9 @@ public:
    bool                     AddCreatableObjects(StringArray newList);
 
    // method to return the type of factory this is
-   Gmat::ObjectType         GetFactoryType(void) const;  
-
+   Gmat::ObjectType         GetFactoryType() const;  
+   bool                     IsTypeCaseSensitive() const;
+   
    // destructor
    virtual ~Factory();
 
@@ -117,6 +121,8 @@ protected:
    // a list of all of the specific types of objects (of type itsType) that
    // can be created by this factory.
    StringArray              creatables;
+   // is type name case sensitive
+   bool                     isCaseSensitive;
 
 private:
     
