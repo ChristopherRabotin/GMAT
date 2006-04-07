@@ -83,7 +83,7 @@ GmatBase* Subtract::Clone() const
 // Real Evaluate()
 //------------------------------------------------------------------------------
 /**
- * @return the sum of left and right nodes
+ * @return the difference of left and right nodes
  *
  */
 //------------------------------------------------------------------------------
