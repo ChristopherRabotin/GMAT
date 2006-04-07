@@ -24,24 +24,6 @@
 #include "MessageInterface.hpp"
 #endif
 
-//---------------------------------
-// static data
-//---------------------------------
-const std::string
-MathNode::PARAMETER_TEXT[MathNodeParamCount - GmatBaseParamCount] =
-{
-   "RealVar",
-   "Matrix",
-};
-
-const Gmat::ParameterType
-MathNode::PARAMETER_TYPE[MathNodeParamCount - GmatBaseParamCount] =
-{
-   Gmat::REAL_TYPE,
-   Gmat::RMATRIX_TYPE,
-};
-
-
 //------------------------------------------------------------------------------
 //  MathNode(std::string typeStr, std::string nomme)
 //------------------------------------------------------------------------------
@@ -54,9 +36,9 @@ MathNode::PARAMETER_TYPE[MathNodeParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 MathNode::MathNode(const std::string &typeStr, const std::string &nomme) :
     GmatBase        (Gmat::MATH_NODE, typeStr, nomme),
-    realValue       (0.0),
-    matrix          (NULL)
+    realValue       (0.0)
 {
+    matrix = Rmatrix();
 }
 
 //------------------------------------------------------------------------------
@@ -85,7 +67,6 @@ MathNode::MathNode(const MathNode &mn) :
     realValue       (mn.realValue),
     matrix          (mn.matrix)
 {
-   parameterCount = MathNodeParamCount;
 }
 
 
@@ -126,71 +107,37 @@ GmatBase* MathNode::Clone(void) const
 }
 
 //------------------------------------------------------------------------------
-// std::string GetParameterText(const Integer id) const
-//------------------------------------------------------------------------------
-std::string MathNode::GetParameterText(const Integer id) const
-{
-    if (id >= REAL_VAR && id < MathNodeParamCount)
-        return PARAMETER_TEXT[id - GmatBaseParamCount];
-    else
-        return GmatBase::GetParameterText(id);
-}
-
-
-//------------------------------------------------------------------------------
-// Integer GetParameterID(const std::string &str) const
-//------------------------------------------------------------------------------
-Integer MathNode::GetParameterID(const std::string &str) const
-{
-    for (Integer i = REAL_VAR; i < MathNodeParamCount; i++)
-    {
-        if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
-            return i;
-    }
-
-    return GmatBase::GetParameterID(str);
-}
-
-
-//------------------------------------------------------------------------------
-// Gmat::ParameterType GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-Gmat::ParameterType MathNode::GetParameterType(const Integer id) const
-{
-    if (id >= REAL_VAR && id < MathNodeParamCount)
-        return PARAMETER_TYPE[id - GmatBaseParamCount];
-    else
-        return GmatBase::GetParameterType(id);
-
-}
-
-
-//------------------------------------------------------------------------------
-// std::string GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-std::string MathNode::GetParameterTypeString(const Integer id) const
-{
-   if (id >= REAL_VAR && id < MathNodeParamCount)
-      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
-   else
-      return GmatBase::GetParameterTypeString(id);
-
-}
-
-
-//------------------------------------------------------------------------------
 // Rmatrix *MatrixEvaluate()
 //------------------------------------------------------------------------------
-Rmatrix *MathNode::MatrixEvaluate()
+Rmatrix MathNode::MatrixEvaluate()
 {
-    return matrix;
+   return matrix;
 }
 
 //------------------------------------------------------------------------------
-// void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+// void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount) const
 //------------------------------------------------------------------------------
-void MathNode::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+void MathNode::ReportOutputs(Integer &type, 
+               Integer &rowCount, Integer &colCount) const
 {
-    
+   throw MathException("No implementation of ReportOutputs(...).\n");    
 }
+
+//------------------------------------------------------------------------------
+// void Evaluate() const
+//------------------------------------------------------------------------------
+Real MathNode::Evaluate() const
+{
+   throw MathException("No implementation of Evaluate().\n");
+}
+
+//------------------------------------------------------------------------------
+// void EvaluateInputs() const
+//------------------------------------------------------------------------------
+bool MathNode::EvaluateInputs() const
+{
+   throw MathException("No implementation of EvaluateInputs().\n");
+}
+
+
 
