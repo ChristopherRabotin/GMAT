@@ -2362,18 +2362,21 @@ bool Propagate::Execute()
 
          // Check for initial stop condition before first step in while loop
          // eg) elapsed time of 0 (loj: 4/6/06 added)
-         for (UnsignedInt i=0; i<stopWhen.size(); i++)
+         if (publisher->GetRunState() == Gmat::RUNNING)
          {
-            if (stopWhen[i]->Evaluate())
+            for (UnsignedInt i=0; i<stopWhen.size(); i++)
             {
-               stopCondMet = true;
-               stopEpoch = (stopWhen[i]->GetStopEpoch());
-               #if DEBUG_PROPAGATE_EXE
-                  MessageInterface::ShowMessage
-                     ("Propagate::Execute() %s met\n",
-                      stopWhen[i]->GetName().c_str());
-               #endif
-               break; // exit if any stop condition met
+               if (stopWhen[i]->Evaluate())
+               {
+                  stopCondMet = true;
+                  stopEpoch = (stopWhen[i]->GetStopEpoch());
+                  #if DEBUG_PROPAGATE_EXE
+                     MessageInterface::ShowMessage
+                        ("Propagate::Execute() %s met\n",
+                         stopWhen[i]->GetName().c_str());
+                  #endif
+                  break; // exit if any stop condition met
+               }
             }
          }
       }
