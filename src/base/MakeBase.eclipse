@@ -202,10 +202,12 @@ OBJECTS = \
     interpreter/MathParser.o \
     interpreter/MathTree.o \
     interpreter/ScriptInterpreter.o \
+    math/Add.o \
     math/MathElement.o \
     math/MathException.o \
     math/MathFunction.o \
     math/MathNode.o \
+    math/Subtract.o \
     parameter/AngularParameters.o \
     parameter/Array.o \
     parameter/BplaneData.o \
