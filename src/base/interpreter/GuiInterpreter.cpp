@@ -734,16 +734,6 @@ CoordinateSystem* GuiInterpreter::CreateCoordinateSystem(const std::string &name
 
 
 //------------------------------------------------------------------------------
-// AxisSystem* CreateAxisSystem(const std::string &name)
-//------------------------------------------------------------------------------
-AxisSystem*  GuiInterpreter::CreateAxisSystem(const std::string &type,
-                                              const std::string &name)
-{
-   return moderator->CreateAxisSystem(type, name);
-}
-
-
-//------------------------------------------------------------------------------
 // CoordinateSystem* GetCoordinateSystem(const std::string &name)
 //------------------------------------------------------------------------------
 CoordinateSystem* GuiInterpreter::GetCoordinateSystem(const std::string &name)
@@ -925,25 +915,6 @@ Subscriber* GuiInterpreter::GetSubscriber(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// StopCondition* CreateStopCondition(const std::string &type, const std::string &name)
-//------------------------------------------------------------------------------
-StopCondition* GuiInterpreter::CreateStopCondition(const std::string &type,
-                                                   const std::string &name)
-{
-   return moderator->CreateStopCondition(type, name);
-}
-
-
-//------------------------------------------------------------------------------
-// StopCondition* GetStopCondition(const std::string &name)
-//------------------------------------------------------------------------------
-StopCondition* GuiInterpreter::GetStopCondition(const std::string &name)
-{
-   return moderator->GetStopCondition(name);
-}
-
-
-//------------------------------------------------------------------------------
 // Function* CreateFunction(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
 Function* GuiInterpreter::CreateFunction(const std::string &type,
@@ -959,6 +930,27 @@ Function* GuiInterpreter::CreateFunction(const std::string &type,
 Function* GuiInterpreter::GetFunction(const std::string &name)
 {
    return moderator->GetFunction(name);
+}
+
+
+//----- Non-Configurable Items
+//------------------------------------------------------------------------------
+// StopCondition* CreateStopCondition(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+StopCondition* GuiInterpreter::CreateStopCondition(const std::string &type,
+                                                   const std::string &name)
+{
+   return moderator->CreateStopCondition(type, name);
+}
+
+
+//------------------------------------------------------------------------------
+// AxisSystem* CreateAxisSystem(const std::string &name)
+//------------------------------------------------------------------------------
+AxisSystem*  GuiInterpreter::CreateAxisSystem(const std::string &type,
+                                              const std::string &name)
+{
+   return moderator->CreateAxisSystem(type, name);
 }
 
 

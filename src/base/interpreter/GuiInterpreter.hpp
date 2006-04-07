@@ -130,7 +130,6 @@ public:
    Solver* GetSolver(const std::string &name);
 
    // Parameter
-   //Parameter* CreateParameter(const std::string &type, const std::string &name);
    Parameter* CreateParameter(const std::string &type,
                               const std::string &name,
                               const Gmat::ObjectType ownerType = Gmat::UNKNOWN_OBJECT,
@@ -144,9 +143,6 @@ public:
    CoordinateSystem* GetInternalCoordinateSystem();
    bool IsDefaultCoordinateSystem(const std::string &name);
    
-   // AxisSystem
-   AxisSystem* CreateAxisSystem(const std::string &type,
-                                const std::string &name);
    // Planetary source
    StringArray& GetPlanetarySourceTypes();
    StringArray& GetPlanetarySourceNames();
@@ -171,17 +167,20 @@ public:
                                 const std::string &filename = "",
                                 bool createDefault = true);
    Subscriber* GetSubscriber(const std::string &name);
-
-   // StopCondition
-   StopCondition* CreateStopCondition(const std::string &type,
-                                      const std::string &name);
-   StopCondition* GetStopCondition(const std::string &name);
-    
+   
    // Function
    Function* CreateFunction(const std::string &type,
                             const std::string &name);
    Function* GetFunction(const std::string &name);
    
+   //----- Non-Configurable Items
+   // StopCondition
+   StopCondition* CreateStopCondition(const std::string &type,
+                                      const std::string &name);
+   
+   // AxisSystem
+   AxisSystem* CreateAxisSystem(const std::string &type,
+                                const std::string &name);
    // GmatCommand
    GmatCommand* CreateCommand(const std::string &type,
                               const std::string &name = "");

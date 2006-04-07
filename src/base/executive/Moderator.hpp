@@ -13,7 +13,8 @@
 // Created: 2003/08/25
 //
 /**
- * Declares opeartions of the GMAT executive.
+ * Declares opeartions of the GMAT executive. It is a singleton class -
+ * only one instance of this class can be created.
  */
 //------------------------------------------------------------------------------
 #ifndef Moderator_hpp
@@ -50,24 +51,7 @@
 #include "Subscriber.hpp"
 #include "Interpolator.hpp"
 #include "CalculatedPoint.hpp"
-// factories
-#include "AtmosphereFactory.hpp"
-#include "AxisSystemFactory.hpp"
-#include "BurnFactory.hpp"
-#include "CommandFactory.hpp"
-#include "CoordinateSystemFactory.hpp"
-#include "ForceModelFactory.hpp"
-#include "FunctionFactory.hpp"
-#include "HardwareFactory.hpp"
-#include "ParameterFactory.hpp"
-#include "PhysicalModelFactory.hpp"
-#include "PropagatorFactory.hpp"
-#include "PropSetupFactory.hpp"
-#include "SolverFactory.hpp"
-#include "SpacecraftFactory.hpp"
-#include "StopConditionFactory.hpp"
-#include "SubscriberFactory.hpp"
-#include "CalculatedPointFactory.hpp"
+#include "MathNode.hpp"
 // files
 #include "SlpFile.hpp"
 #include "DeFile.hpp"
@@ -178,13 +162,6 @@ public:
    bool AddToForceModel(const std::string &forceModelName,
                         const std::string &forceName);
 
-   // StopCondition
-   StopCondition* CreateStopCondition(const std::string &type,
-                                      const std::string &name);
-   StopCondition* GetStopCondition(const std::string &name);
-   bool AddToStopCondition(const std::string &stopCondName,
-                           const std::string &paramName);
-
    // Solver
    Solver* CreateSolver(const std::string &type,
                         const std::string &name);
@@ -207,10 +184,6 @@ public:
                                             bool createDefault = false);
    CoordinateSystem* GetCoordinateSystem(const std::string &name);
    
-   // AxisSystem
-   AxisSystem* CreateAxisSystem(const std::string &type,
-                                const std::string &name);
-   
    // Subscriber
    Subscriber* CreateSubscriber(const std::string &type,
                                 const std::string &name,
@@ -222,9 +195,22 @@ public:
    Function* CreateFunction(const std::string &type,
                             const std::string &name);
    Function* GetFunction(const std::string &name);
-   GmatCommand* InterpretGmatFunction(const std::string &functionFilename);
+
+   //----- Non-Configurable Items
+   // StopCondition
+   StopCondition* CreateStopCondition(const std::string &type,
+                                      const std::string &name);
+
+   // AxisSystem
+   AxisSystem* CreateAxisSystem(const std::string &type,
+                                const std::string &name);
+   
+   // MathNode
+   MathNode* CreateMathNode(const std::string &type,
+                            const std::string &name = "");
    
    // GmatCommand
+   GmatCommand* InterpretGmatFunction(const std::string &functionFilename);
    GmatCommand* CreateCommand(const std::string &type,
                               const std::string &name = "");
    GmatCommand* CreateDefaultCommand(const std::string &type,
@@ -332,8 +318,6 @@ private:
    
    Moderator();
    virtual ~Moderator();
-   Moderator(const Moderator&);
-   Moderator& operator=(const Moderator&);
    
    // member data
    bool isSlpAlreadyInUse;
@@ -350,25 +334,7 @@ private:
    ConfigManager *theConfigManager;
    FactoryManager *theFactoryManager;
    FileManager *theFileManager;
-   
    Publisher *thePublisher;
-   BurnFactory *theBurnFactory;
-   CommandFactory *theCommandFactory;
-   ForceModelFactory *theForceModelFactory;
-   HardwareFactory *theHardwareFactory;
-   ParameterFactory *theParameterFactory;
-   PhysicalModelFactory *thePhysicalModelFactory;
-   PropSetupFactory *thePropSetupFactory;
-   PropagatorFactory *thePropagatorFactory;
-   SpacecraftFactory *theSpacecraftFactory;
-   StopConditionFactory *theStopConditionFactory;
-   SubscriberFactory *theSubscriberFactory;
-   SolverFactory *theSolverFactory;
-   AtmosphereFactory *theAtmosphereFactory;
-   FunctionFactory *theFunctionFactory;
-   AxisSystemFactory *theAxisSystemFactory;
-   CoordinateSystemFactory *theCoordinateSystemFactory;
-   CalculatedPointFactory *theCalculatedPointFactory;
    
    SolarSystem *theDefaultSolarSystem;
    SolarSystem *theSolarSystemInUse;

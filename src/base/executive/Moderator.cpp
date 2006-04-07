@@ -13,11 +13,33 @@
 // Created: 2003/08/25
 //
 /**
- * Implements operations of the GMAT executive.
+ * Implements operations of the GMAT executive.  It is a singleton class -
+ * only one instance of this class can be created.
  */
 //------------------------------------------------------------------------------
 
 #include "Moderator.hpp"
+
+// factories
+#include "AtmosphereFactory.hpp"
+#include "AxisSystemFactory.hpp"
+#include "BurnFactory.hpp"
+#include "CommandFactory.hpp"
+#include "CoordinateSystemFactory.hpp"
+#include "ForceModelFactory.hpp"
+#include "FunctionFactory.hpp"
+#include "HardwareFactory.hpp"
+#include "ParameterFactory.hpp"
+#include "PhysicalModelFactory.hpp"
+#include "PropagatorFactory.hpp"
+#include "PropSetupFactory.hpp"
+#include "SolverFactory.hpp"
+#include "SpacecraftFactory.hpp"
+#include "StopConditionFactory.hpp"
+#include "SubscriberFactory.hpp"
+#include "CalculatedPointFactory.hpp"
+#include "MathFactory.hpp"
+
 #include "NoOp.hpp"
 #include "GravityField.hpp"
 #include "TimeSystemConverter.hpp" // for SetLeapSecsFileReader(), SetEopFile()
@@ -28,7 +50,6 @@
 #include "StringTokenizer.hpp"
 #include <ctime>                   // for clock()
 
-//loj: 1/18/06 debug
 //#define DEBUG_INIT 1
 //#define DEBUG_RUN 1
 //#define DEBUG_CREATE_RESOURCE 1
@@ -110,43 +131,25 @@ bool Moderator::Initialize(bool fromGui)
       // Create publisher
       thePublisher = Publisher::Instance();
       
-      // Create factories
-      theAtmosphereFactory = new AtmosphereFactory();
-      theAxisSystemFactory = new AxisSystemFactory();
-      theBurnFactory = new BurnFactory();
-      theCalculatedPointFactory = new CalculatedPointFactory();
-      theCommandFactory = new CommandFactory();
-      theCoordinateSystemFactory = new CoordinateSystemFactory();
-      theForceModelFactory = new ForceModelFactory();
-      theFunctionFactory = new FunctionFactory();
-      theHardwareFactory = new HardwareFactory();
-      theParameterFactory = new ParameterFactory();
-      thePhysicalModelFactory = new PhysicalModelFactory();
-      thePropagatorFactory = new PropagatorFactory();
-      thePropSetupFactory = new PropSetupFactory();
-      theSolverFactory = new SolverFactory();
-      theSpacecraftFactory = new SpacecraftFactory();
-      theStopConditionFactory = new StopConditionFactory();
-      theSubscriberFactory = new SubscriberFactory();
-      
       // Register factories
-      theFactoryManager->RegisterFactory(theAtmosphereFactory);
-      theFactoryManager->RegisterFactory(theAxisSystemFactory);
-      theFactoryManager->RegisterFactory(theBurnFactory);
-      theFactoryManager->RegisterFactory(theCalculatedPointFactory);
-      theFactoryManager->RegisterFactory(theCommandFactory);
-      theFactoryManager->RegisterFactory(theCoordinateSystemFactory);
-      theFactoryManager->RegisterFactory(theForceModelFactory);
-      theFactoryManager->RegisterFactory(theFunctionFactory);
-      theFactoryManager->RegisterFactory(theHardwareFactory);
-      theFactoryManager->RegisterFactory(theParameterFactory);
-      theFactoryManager->RegisterFactory(thePhysicalModelFactory);
-      theFactoryManager->RegisterFactory(thePropagatorFactory);
-      theFactoryManager->RegisterFactory(thePropSetupFactory);
-      theFactoryManager->RegisterFactory(theSolverFactory);
-      theFactoryManager->RegisterFactory(theSpacecraftFactory);
-      theFactoryManager->RegisterFactory(theStopConditionFactory);
-      theFactoryManager->RegisterFactory(theSubscriberFactory);
+      theFactoryManager->RegisterFactory(new AtmosphereFactory());
+      theFactoryManager->RegisterFactory(new AxisSystemFactory());
+      theFactoryManager->RegisterFactory(new BurnFactory());
+      theFactoryManager->RegisterFactory(new CalculatedPointFactory());
+      theFactoryManager->RegisterFactory(new CommandFactory());
+      theFactoryManager->RegisterFactory(new CoordinateSystemFactory());
+      theFactoryManager->RegisterFactory(new ForceModelFactory());
+      theFactoryManager->RegisterFactory(new FunctionFactory());
+      theFactoryManager->RegisterFactory(new HardwareFactory());
+      theFactoryManager->RegisterFactory(new MathFactory());
+      theFactoryManager->RegisterFactory(new ParameterFactory());
+      theFactoryManager->RegisterFactory(new PhysicalModelFactory());
+      theFactoryManager->RegisterFactory(new PropagatorFactory());
+      theFactoryManager->RegisterFactory(new PropSetupFactory());
+      theFactoryManager->RegisterFactory(new SolverFactory());
+      theFactoryManager->RegisterFactory(new SpacecraftFactory());
+      theFactoryManager->RegisterFactory(new StopConditionFactory());
+      theFactoryManager->RegisterFactory(new SubscriberFactory());
       
       // Create default SolarSystem
       /// @note: If the solar system can be configured by name, add it to the
@@ -242,62 +245,16 @@ void Moderator::Finalize()
    ClearResource();
    ClearCommandSeq();
    
-   //MessageInterface::ShowMessage("deleting factories\n");
-   //delete theStopConditionFactory;
-   //delete theCalculatedPointFactory;
-   //delete theFunctionFactory;
-   //delete theAtmosphereFactory;
-   //delete theHardwareFactory;
-   //delete theSpacecraftFactory;
+   delete theFactoryManager;
+   delete theGuiInterpreter;
    
-   //MessageInterface::ShowMessage("deleting theCommandFactory\n");
-   //if (theCommandFactory)
-   //   delete theCommandFactory;
-   //MessageInterface::ShowMessage("deleting theSubscriberFactory\n");
-   //if (theSubscriberFactory)
-   //   delete theSubscriberFactory;
-   //MessageInterface::ShowMessage("deleting theForceModelFactory\n");
-   //if (theForceModelFactory)
-   //   delete theForceModelFactory;
-   //MessageInterface::ShowMessage("deleting theParameterFactory\n");
-   //if (theParameterFactory)
-   //   delete theParameterFactory;
-   //MessageInterface::ShowMessage("deleting thePhysicalModelFactory\n");
-   //if (thePhysicalModelFactory)
-   //   delete thePhysicalModelFactory;
-   //MessageInterface::ShowMessage("deleting thePropSetupFactory\n");
-   //if (thePropSetupFactory)
-   //   delete thePropSetupFactory;
-   //MessageInterface::ShowMessage("deleting thePropagatorFactory\n");
-   //if (thePropagatorFactory)
-   //   delete thePropagatorFactory;
-   //MessageInterface::ShowMessage("deleting theAxisSystemFactory\n");
-   //if (theAxisSystemFactory)
-   //   delete theAxisSystemFactory;
-   //MessageInterface::ShowMessage("deleting theCoordinateSystemFactory\n");
-   //if (theCoordinateSystemFactory)
-   //   delete theCoordinateSystemFactory;
-
-   //MessageInterface::ShowMessage("deleting theGuiInterpreter");
-   //if (theConfigManager)
-   //   delete theConfigManager;
-   //std::cout << "deleting theFactoryManager" << std::endl;
-   //if (theFactoryManager)
-   //   delete theFactoryManager;
-   //MessageInterface::ShowMessage("deleting theGuiInterpreter");
-   //if (theGuiInterpreter)
-   //   delete theGuiInterpreter;
-   //if (theScriptInterpreter)
-   //   delete theScriptInterpreter;
-   //if (thePublisher)
-   //   delete thePublisher;
+   //delete theConfigManager; (private)
+   //delete theScriptInterpreter; (private)
+   //delete thePublisher; (private)
    
    //MessageInterface::ShowMessage("deleting internal objects\n");
    //delete theDefaultSolarSystem;
    //delete theInternalCoordSystem;
-   
-   //if (instance)
-   //   delete instance;
    
    #if DEBUG_FINALIZE
    MessageInterface::ShowMessage("Moderator::Finalize() exiting\n");
@@ -1700,6 +1657,7 @@ ForceModel* Moderator::GetForceModel(const std::string &name)
       return theConfigManager->GetForceModel(name);
 }
 
+
 //------------------------------------------------------------------------------
 // bool AddToForceModel(const std::string &forceModelName,
 //                      const std::string &forceName)
@@ -1714,51 +1672,6 @@ bool Moderator::AddToForceModel(const std::string &forceModelName,
    return status;
 }
 
-// StopCondition
-//------------------------------------------------------------------------------
-// StopCondition* CreateStopCondition(const std::string &type,
-//                                    const std::string &name)
-//------------------------------------------------------------------------------
-StopCondition* Moderator::CreateStopCondition(const std::string &type,
-                                              const std::string &name)
-{
-   #if DEBUG_CREATE_RESOURCE
-   MessageInterface::ShowMessage("Moderator::CreateStopCondition() type = %s, "
-                                 "name = %s\n", type.c_str(), name.c_str());
-   #endif
-   
-   StopCondition *stopCond = theFactoryManager->CreateStopCondition(type, name);
-   
-   #if DEBUG_CREATE_RESOURCE
-   MessageInterface::ShowMessage
-      ("Moderator::CreateStopCondition() *stopCond type = %s\n",
-       stopCond->GetTypeName().c_str());
-   #endif
-    
-   if (stopCond ==  NULL)
-   {
-      //MessageInterface::PopupMessage
-      //   (Gmat::ERROR_, "Cannot create a StopCondition type: %s.\n"
-      //    "Make sure %s is correct type and registered to StopConditionFactory.\n",
-      //    type.c_str(), type.c_str());
-      
-      //return NULL;
-      throw GmatBaseException("Error Creating StopCondition: " + type + "\n");
-   }
-   
-   return stopCond;
-}
-
-//------------------------------------------------------------------------------
-// StopCondition* GetStopCondition(const std::string &name)
-//------------------------------------------------------------------------------
-StopCondition* Moderator::GetStopCondition(const std::string &name)
-{
-   if (name == "")
-      return NULL;
-   else
-      return theConfigManager->GetStopCondition(name);
-}
 
 // Solver
 //------------------------------------------------------------------------------
@@ -2024,63 +1937,6 @@ CoordinateSystem* Moderator::GetCoordinateSystem(const std::string &name)
       return theConfigManager->GetCoordinateSystem(name);
 }
 
-
-//------------------------------------------------------------------------------
-// AxisSystem* CreateAxisSystem(const std::string &type,
-//                              const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Creates a AxisSystem object by given type and name.
- *
- * @param <type> object type
- * @param <name> object name
- *
- * @return a AxisSystem object pointer
- */
-//------------------------------------------------------------------------------
-AxisSystem* Moderator::CreateAxisSystem(const std::string &type,
-                                        const std::string &name)
-{
-   #if DEBUG_CREATE_RESOURCE
-   MessageInterface::ShowMessage("Moderator::CreateAxisSystem() type = %s, "
-                                 "name = %s\n", type.c_str(), name.c_str());
-   #endif
-   
-   AxisSystem *axisSystem = theFactoryManager->CreateAxisSystem(type, name);
-   
-   if (axisSystem == NULL)
-   {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, "Cannot create a AxisSystem type: %s.\n"
-          "Make sure %s is correct type and registered to AxisSystemFactory.\n",
-          type.c_str(), type.c_str());
-      
-      return NULL;
-      //throw GmatBaseException("Error Creating AxisSystem: " + type);
-   }
-
-   // set origin and j2000body
-   axisSystem->SetOrigin((SpacePoint*)GetConfiguredItem(axisSystem->GetOriginName()));
-   axisSystem->SetJ2000Body((SpacePoint*)GetConfiguredItem(axisSystem->GetJ2000BodyName()));
-   
-   // Notes: AxisSystem is not configured. It is local to CoordinateSystem
-   // and gets deleted when CoordinateSystem is deleted.
-   
-   // DJC added 5/11/05.  The ScriptInterpreter does not have the parms needed
-   // to set these references, so defaults are set here.  This might need to be
-   // fixed later.
-
-   /// @todo Evaluate how the AxixSystem file usage really should be set
-   
-   // Set required internal references if they are used
-   if (axisSystem->UsesEopFile() == GmatCoordinate::REQUIRED)
-      axisSystem->SetEopFile(theEopFile);
-   if (axisSystem->UsesItrfFile() == GmatCoordinate::REQUIRED)
-      axisSystem->SetCoefficientsFile(theItrfFile);
-
-   return axisSystem;
-}
-
 // Subscriber
 //------------------------------------------------------------------------------
 // Subscriber* CreateSubscriber(const std::string &type, const std::string &name,
@@ -2263,6 +2119,7 @@ Function* Moderator::CreateFunction(const std::string &type,
    }
 }
 
+
 //------------------------------------------------------------------------------
 // Function* GetFunction(const std::string &name)
 //------------------------------------------------------------------------------
@@ -2283,6 +2140,127 @@ Function* Moderator::GetFunction(const std::string &name)
 }
 
 
+//----- Non-configurable Items
+
+// StopCondition
+//------------------------------------------------------------------------------
+// StopCondition* CreateStopCondition(const std::string &type,
+//                                    const std::string &name)
+//------------------------------------------------------------------------------
+StopCondition* Moderator::CreateStopCondition(const std::string &type,
+                                              const std::string &name)
+{
+   #if DEBUG_CREATE_RESOURCE
+   MessageInterface::ShowMessage("Moderator::CreateStopCondition() type = %s, "
+                                 "name = %s\n", type.c_str(), name.c_str());
+   #endif
+   
+   StopCondition *stopCond = theFactoryManager->CreateStopCondition(type, name);
+   
+   if (stopCond ==  NULL)
+      throw GmatBaseException("Error Creating StopCondition: " + type + "\n");
+   
+   return stopCond;
+}
+
+// //------------------------------------------------------------------------------
+// // StopCondition* GetStopCondition(const std::string &name)
+// //------------------------------------------------------------------------------
+// StopCondition* Moderator::GetStopCondition(const std::string &name)
+// {
+//    if (name == "")
+//       return NULL;
+//    else
+//       return theConfigManager->GetStopCondition(name);
+// }
+
+//------------------------------------------------------------------------------
+// AxisSystem* CreateAxisSystem(const std::string &type,
+//                              const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a AxisSystem object by given type and name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return a AxisSystem object pointer
+ */
+//------------------------------------------------------------------------------
+AxisSystem* Moderator::CreateAxisSystem(const std::string &type,
+                                        const std::string &name)
+{
+   #if DEBUG_CREATE_RESOURCE
+   MessageInterface::ShowMessage("Moderator::CreateAxisSystem() type = %s, "
+                                 "name = %s\n", type.c_str(), name.c_str());
+   #endif
+   
+   AxisSystem *axisSystem = theFactoryManager->CreateAxisSystem(type, name);
+   
+   if (axisSystem == NULL)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "Cannot create a AxisSystem type: %s.\n"
+          "Make sure %s is correct type and registered to AxisSystemFactory.\n",
+          type.c_str(), type.c_str());
+      
+      return NULL;
+      //throw GmatBaseException("Error Creating AxisSystem: " + type);
+   }
+
+   // set origin and j2000body
+   axisSystem->SetOrigin((SpacePoint*)GetConfiguredItem(axisSystem->GetOriginName()));
+   axisSystem->SetJ2000Body((SpacePoint*)GetConfiguredItem(axisSystem->GetJ2000BodyName()));
+   
+   // Notes: AxisSystem is not configured. It is local to CoordinateSystem
+   // and gets deleted when CoordinateSystem is deleted.
+   
+   // DJC added 5/11/05.  The ScriptInterpreter does not have the parms needed
+   // to set these references, so defaults are set here.  This might need to be
+   // fixed later.
+
+   /// @todo Evaluate how the AxixSystem file usage really should be set
+   
+   // Set required internal references if they are used
+   if (axisSystem->UsesEopFile() == GmatCoordinate::REQUIRED)
+      axisSystem->SetEopFile(theEopFile);
+   if (axisSystem->UsesItrfFile() == GmatCoordinate::REQUIRED)
+      axisSystem->SetCoefficientsFile(theItrfFile);
+
+   return axisSystem;
+}
+
+// MathNode
+//------------------------------------------------------------------------------
+// MathNode* CreateMathNode(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a MathNode object by given type and name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return a MathNode object pointer
+ */
+//------------------------------------------------------------------------------
+MathNode* Moderator::CreateMathNode(const std::string &type,
+                                    const std::string &name)
+{
+   #if DEBUG_CREATE_RESOURCE
+   MessageInterface::ShowMessage("Moderator::CreateMathNode() type = %s, "
+                                 "name = %s\n", type.c_str(), name.c_str());
+   #endif
+   
+   MathNode *mathNode = theFactoryManager->CreateMathNode(type, name);
+   
+   if (mathNode ==  NULL)
+      throw GmatBaseException("Error Creating MathNode: " + type + "\n");
+   
+   return mathNode;
+}
+
+
+// GmatCommand
 //------------------------------------------------------------------------------
 // GmatCommand* InterpretGmatFunction(const std::string functionFilename)
 //------------------------------------------------------------------------------
@@ -2303,7 +2281,6 @@ GmatCommand* Moderator::InterpretGmatFunction(const std::string &functionFilenam
 }
 
 
-// GmatCommand
 //------------------------------------------------------------------------------
 // GmatCommand* CreateCommand(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
@@ -3392,8 +3369,10 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
 //------------------------------------------------------------------------------
 bool Moderator::SaveScript(const std::string &scriptFileName, Gmat::WriteMode mode)
 {
-   //MessageInterface::ShowMessage("Moderator::SaveScript() entered\n"
-   //                              "file: " + scriptFileName + "\n");
+   //loj: 4/6/06
+   MessageInterface::ShowMessage
+      ("Moderator::SaveScript() entered\n   file: %s, mode: %d\n",
+       scriptFileName.c_str(), mode);
    //   MessageInterface::PopupMessage(Gmat::INFO_, "The Script is saved to " +
    //                                  scriptFileName);
    
@@ -3862,7 +3841,7 @@ void Moderator::CreateDefaultMission()
       #endif
       
       #if DEBUG_DEFAULT_MISSION
-         MessageInterface::ShowMessage("-->default Subscribers created\n");
+      MessageInterface::ShowMessage("-->default Subscribers created\n");
       #endif
       
       //----------------------------------------------------
@@ -3912,9 +3891,8 @@ void Moderator::CreateDefaultMission()
    {
       MessageInterface::PopupMessage
          (Gmat::ERROR_,
-          "Moderator::CreateDefaultMission() Error occurred during default "
-          "mission creation. Default mission will not run.\n Message: " +
-          e.GetMessage());
+          "*** Error occurred during default mission creation.\n    The default "
+          "mission will not run.\n    Message: " + e.GetMessage());
    }
 }
 
