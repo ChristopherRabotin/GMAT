@@ -23,24 +23,6 @@
 #include "MessageInterface.hpp"
 #endif
 
-//---------------------------------
-// static data
-//---------------------------------
-const std::string
-MathFunction::PARAMETER_TEXT[MathFunctionParamCount - MathNodeParamCount] =
-{
-   "LeftNode",
-   "RightNode",
-};
-
-const Gmat::ParameterType
-MathFunction::PARAMETER_TYPE[MathFunctionParamCount - MathNodeParamCount] =
-{
-   Gmat::OBJECT_TYPE,
-   Gmat::OBJECT_TYPE,
-};
-
-
 //------------------------------------------------------------------------------
 //  MathFunction(std::string typeStr, std::string nomme)
 //------------------------------------------------------------------------------
@@ -83,7 +65,6 @@ MathFunction::MathFunction(const MathFunction &mf) :
               leftNode   (mf.leftNode),
               rightNode  (mf.rightNode)
 {
-   parameterCount = MathFunctionParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -150,7 +131,7 @@ bool MathFunction::EvaluateInputs() const
 //------------------------------------------------------------------------------
 // bool MatrixEvaluate()
 //------------------------------------------------------------------------------
-Rmatrix* MathFunction::MatrixEvaluate()
+Rmatrix MathFunction::MatrixEvaluate()
 {
 	return MathNode::MatrixEvaluate();
 }

@@ -38,8 +38,10 @@ public:
    // Inherited (MathNode) methods                                            
    virtual Real Evaluate() const;
    virtual bool EvaluateInputs() const; 
+   virtual void ReportOutputs(Integer &type, 
+            Integer &rowCount, Integer &colCount) const;
    
-   Rmatrix *MatrixEvaluate();
+   Rmatrix MatrixEvaluate();
    bool SetChildren(MathNode *leftChild, MathNode *rightChild);
    MathNode* GetLeft();
    MathNode* GetRight();
@@ -48,16 +50,6 @@ protected:
 
    MathNode *leftNode;
    MathNode *rightNode;
-
-    enum
-    {
-      LEFT_NODE = MathNodeParamCount,
-      RIGHT_NODE,
-      MathFunctionParamCount
-    };
-    
-    static const std::string PARAMETER_TEXT[MathFunctionParamCount - MathNodeParamCount];
-    static const Gmat::ParameterType PARAMETER_TYPE[MathFunctionParamCount - MathNodeParamCount];
 
 };
 

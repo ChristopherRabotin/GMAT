@@ -38,35 +38,21 @@ public:
    
    // Inherited (GmatBase) methods
    virtual GmatBase*    Clone(void) const;
-   virtual std::string  GetParameterText(const Integer id) const;
-   virtual Integer      GetParameterID(const std::string &str) const;
-   virtual Gmat::ParameterType
-                        GetParameterType(const Integer id) const;
-   virtual std::string  GetParameterTypeString(const Integer id) const;
    
                                                
    virtual Real Evaluate() const;
    virtual bool EvaluateInputs() const;
-   Rmatrix *MatrixEvaluate();
-   void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount);
+   Rmatrix MatrixEvaluate();
+   virtual void ReportOutputs(Integer &type, 
+            Integer &rowCount, Integer &colCount) const;
    
 
 protected:
 
     Real realValue;
-    Rmatrix *matrix;
-
-    enum
-    {
-      REAL_VAR = GmatBaseParamCount,
-      MATRIX,
-      MathNodeParamCount  /// Count of the parameters for this class
-    };
-
-    static const std::string PARAMETER_TEXT[MathNodeParamCount - GmatBaseParamCount];
-    static const Gmat::ParameterType PARAMETER_TYPE[MathNodeParamCount - GmatBaseParamCount];
-
+    Rmatrix matrix;
 };
 
 
 #endif //MathNode_hpp
+
