@@ -709,7 +709,7 @@ bool Factory::IsTypeCaseSensitive() const
 Factory::Factory(Gmat::ObjectType ofType)
 {
    itsType = ofType;
-   isCaseSensitive = false;
+   isCaseSensitive = true;
    // creatables list is empty at this point
 }
 
@@ -728,7 +728,7 @@ Factory::Factory(Gmat::ObjectType ofType)
 Factory::Factory(StringArray createList, Gmat::ObjectType ofType)
 {
    itsType    = ofType;
-   isCaseSensitive = false;
+   isCaseSensitive = true;
    creatables = createList;
 }
 
