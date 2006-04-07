@@ -35,6 +35,8 @@ namespace GmatStringUtil
 
    bool ToDouble(const std::string &str, Real *value);
    std::string ToUpper(const std::string &str);
+   std::string ToLower(const std::string &str);
+   std::string Capitalize(const std::string &str);
 }
 
 #endif // StringUtil_hpp

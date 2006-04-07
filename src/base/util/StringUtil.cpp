@@ -121,3 +121,42 @@ std::string GmatStringUtil::ToUpper(const std::string &str)
 
    return upper;
 }
+
+
+//------------------------------------------------------------------------------
+// std::string ToLower(const std::string &str)
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::ToLower(const std::string &str)
+{
+   Integer len = str.length();
+   
+   if (len == 0)
+      return str;
+
+   std::string lower = str;
+   for (int i=0; i<len; i++)
+      lower[i] = tolower(str[i]);
+
+   return lower;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string Capitalize(const std::string &str)
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::Capitalize(const std::string &str)
+{
+   Integer len = str.length();
+   
+   if (len == 0)
+      return str;
+
+   std::string newstr = str;
+   if (newstr.length() == 0)
+      return str;
+   
+   newstr = Trim(newstr, BOTH);
+   newstr[0] = toupper(newstr[0]);
+
+   return newstr;
+}
