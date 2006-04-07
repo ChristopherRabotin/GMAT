@@ -125,7 +125,7 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
 MathFactory::MathFactory() :
    Factory(Gmat::MATH_NODE)
 {
-   isCaseSensitive = true;
+   isCaseSensitive = false;
    
    if (creatables.empty())
       BuildCreatables();
