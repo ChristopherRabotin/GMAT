@@ -38,19 +38,16 @@ public:
    
    // Inherited (GmatBase) methods
    virtual GmatBase*    Clone(void) const;
+                                    
+   virtual Real Evaluate();
+   virtual bool EvaluateInputs();
+   virtual void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount);
    
-                                               
-   virtual Real Evaluate() const;
-   virtual bool EvaluateInputs() const;
    Rmatrix MatrixEvaluate();
-   virtual void ReportOutputs(Integer &type, 
-            Integer &rowCount, Integer &colCount) const;
    
-
 protected:
-
-    Real realValue;
-    Rmatrix matrix;
+   Real realValue;
+   Rmatrix matrix;
 };
 
 

@@ -17,7 +17,6 @@
  */
 //------------------------------------------------------------------------------
 
-
 #include "MathNode.hpp"
 
 #if DEBUG_MATHNODE
@@ -115,26 +114,25 @@ Rmatrix MathNode::MatrixEvaluate()
 }
 
 //------------------------------------------------------------------------------
-// void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount) const
+// void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
-void MathNode::ReportOutputs(Integer &type, 
-               Integer &rowCount, Integer &colCount) const
+void MathNode::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
 {
    throw MathException("No implementation of ReportOutputs(...).\n");    
 }
 
 //------------------------------------------------------------------------------
-// void Evaluate() const
+// void Evaluate()
 //------------------------------------------------------------------------------
-Real MathNode::Evaluate() const
+Real MathNode::Evaluate()
 {
    throw MathException("No implementation of Evaluate().\n");
 }
 
 //------------------------------------------------------------------------------
-// void EvaluateInputs() const
+// void EvaluateInputs()
 //------------------------------------------------------------------------------
-bool MathNode::EvaluateInputs() const
+bool MathNode::EvaluateInputs()
 {
    throw MathException("No implementation of EvaluateInputs().\n");
 }
