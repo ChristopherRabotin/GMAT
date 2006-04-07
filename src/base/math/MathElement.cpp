@@ -282,8 +282,8 @@ void MathElement::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCo
 //------------------------------------------------------------------------------
 Rmatrix MathElement::MatrixEvaluate()
 {
-	if (matrix)
-	   return matrix;
+	//if (matrix)
+	//   return matrix;
 	   
 	return MathNode::MatrixEvaluate();
 }
