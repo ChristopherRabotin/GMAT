@@ -122,7 +122,7 @@ GmatBase* MathElement::GetRefObject(const Gmat::ObjectType type,
 {
    switch (type)
    {
-      case Gmat::MATH_NODE:
+      case Gmat::PARAMETER:
          return refObject;
          
       default:
@@ -150,8 +150,8 @@ bool MathElement::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 {
    switch (type)
    {
-      case Gmat::MATH_NODE:
-         refObject = (MathNode*) obj;
+      case Gmat::PARAMETER:
+         refObject = (Parameter*) obj;
          refObjectName = name;
          
       default:
@@ -174,7 +174,7 @@ std::string MathElement::GetRefObjectName(const Gmat::ObjectType type) const
 {
    switch (type)
    {
-      case Gmat::MATH_NODE:
+      case Gmat::PARAMETER:
          return refObjectName;
          
       default:
@@ -197,7 +197,7 @@ bool MathElement::SetRefObjectName(const Gmat::ObjectType type, const std::strin
 { 
    switch (type)
    {
-      case Gmat::MATH_NODE:
+      case Gmat::PARAMETER:
          refObjectName = name;
          return true;
          
@@ -209,12 +209,49 @@ bool MathElement::SetRefObjectName(const Gmat::ObjectType type, const std::strin
 }
 
 //------------------------------------------------------------------------------
+//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Returns the names of the reference object.
+ *
+ * @param <type> reference object type.  Gmat::UnknownObject returns all of the
+ *               ref objects.
+ *
+ * @return The names of the reference object.
+ */
+//------------------------------------------------------------------------------
+const StringArray& MathElement::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+	static StringArray refs;
+	
+   if (type == Gmat::PARAMETER)
+   {
+      refs.push_back(refObjectName);
+      return refs;
+   }
+   else if (type == Gmat::UNKNOWN_OBJECT)
+   {
+   	   refs.clear();
+   	   return refs;
+   }
+   
+   return GmatBase::GetRefObjectNameArray(type);
+}
+
+//------------------------------------------------------------------------------
 // Real Evaluate()
 //------------------------------------------------------------------------------
-Real MathElement::Evaluate() const
+Real MathElement::Evaluate()
 {
-	 // @todo: This section may need more implementation.
-    return MathNode::Evaluate();
+   if (refObject)
+   {
+   	   realValue = refObject->EvaluateReal();
+   	   return realValue;
+   }
+   else if (realValue != 0.0)
+      return realValue;
+   
+   return MathNode::Evaluate();
 }
 
 //------------------------------------------------------------------------------
@@ -224,20 +261,20 @@ Real MathElement::Evaluate() const
  * This method always returns true if the node was sucessfully initialized.
  */
  //------------------------------------------------------------------------------
-bool MathElement::EvaluateInputs() const
+bool MathElement::EvaluateInputs()
 {
 	if (refObject)
       return true;
-   else
-      return MathNode::EvaluateInputs();
+   
+   return MathNode::EvaluateInputs();
 }
 
 //------------------------------------------------------------------------------
 // void ReportOutputs()
 //------------------------------------------------------------------------------
-void MathElement::ReportOutputs(Integer &type, 
-                                Integer &rowCount, Integer &colCount) const
+void MathElement::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
 {
+	return MathNode::ReportOutputs(type, rowCount, colCount);
 }
 
 //------------------------------------------------------------------------------
@@ -245,6 +282,22 @@ void MathElement::ReportOutputs(Integer &type,
 //------------------------------------------------------------------------------
 Rmatrix MathElement::MatrixEvaluate()
 {
+	if (matrix)
+	   return matrix;
+	   
 	return MathNode::MatrixEvaluate();
+}
+
+//------------------------------------------------------------------------------
+// Real SetRealValue(Real value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value of the node when it contains a constant.
+ */
+ //------------------------------------------------------------------------------
+Real MathElement::SetRealValue(Real value)
+{	
+	realValue = value;
+	return realValue;
 }
 

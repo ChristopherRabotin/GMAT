@@ -23,6 +23,7 @@
 #include "GmatBase.hpp"
 #include "MathNode.hpp"
 #include "MathException.hpp"
+#include "Parameter.hpp"
 
 class MathElement : public MathNode
 {
@@ -42,20 +43,21 @@ public:
                      GetRefObjectName(const Gmat::ObjectType type) const;
    virtual bool      SetRefObjectName(const Gmat::ObjectType type,
                                       const std::string &name);
+   virtual const     StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
    
    // Inherited (MathNode) methods                                   
-   virtual Real Evaluate() const;
-   virtual bool EvaluateInputs() const; 
-   virtual void ReportOutputs(Integer &type, 
-            Integer &rowCount, Integer &colCount) const;
+   virtual Real Evaluate();
+   virtual bool EvaluateInputs(); 
+   virtual void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount);
    
    Rmatrix MatrixEvaluate();
+   Real SetRealValue(Real value);
 
 protected:
    
    /// A pointer to the referenced object (i.e. the leaf node or element).  
    /// This pointer is set when the MathTree is initialized in the Sandbox.
-   MathNode* refObject;
+   Parameter* refObject;
    
    /// Holds the name of the GMAT object that is accessed by this node
    std::string refObjectName; 
