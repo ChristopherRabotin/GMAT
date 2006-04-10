@@ -57,6 +57,7 @@ HEADERS = -I../base/include \
           -I../base/burn \
           -I../base/solver \
           -I../base/function \
+          -I../base/math \
           -I../base/coordsystem \
           -Iinclude \
           -Iinclude/bitmaps \
