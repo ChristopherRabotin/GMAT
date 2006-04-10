@@ -58,8 +58,11 @@ public:
     Real GetTrueAnomaly() const;
     Real GetMeanAnomaly() const;
     Real GetEccentricAnomaly() const;
+    Real GetHyperbolicAnomaly() const;
 
     bool IsInvalid(const std::string &inputType) const;
+
+    Real Convert(const std::string &fromType, const std::string &toType) const;
 
 protected:
     static const Real    ANOMALY_TOL;// = 1.0e-30;

@@ -20,14 +20,10 @@
 //------------------------------------------------------------------------------
 
 #include "Anomaly.hpp"
+#include "MessageInterface.hpp"
+#include <math.h>          // for atan2(double y, double x) & atanh(double)
 
-#define __DEBUG_ANOMALY__ 0
-
-#if __DEBUG_ANOMALY__
-#include <iostream>
-#include <iomanip>
-#endif
-
+//#define DEBUG_ANOMALY 1
 
 //---------------------------------
 //  static data
@@ -278,12 +274,12 @@ Real Anomaly::GetValue(const std::string &mType) const
 
    if (mType == "TA")
       return GetTrueAnomaly();
-
    else if (mType == "MA") 
       return GetMeanAnomaly();
-
-   else                             // Get EA value 
+   else if (mType == "EA")
       return GetEccentricAnomaly();
+   else // mType == "HA"
+      return GetHyperbolicAnomaly();
 
 }
 
@@ -327,6 +323,8 @@ std::string Anomaly::GetType() const
  */
 void Anomaly::SetType(const std::string &t)
 {
+/* Joey's code commented out(3/28/06) by LTR 
+ * Set type should only set the anomaly type NOT convert  	
    if (IsInvalid(t))
       throw UtilityException("Anomaly::SetType() - invalid input type");
 
@@ -347,7 +345,7 @@ void Anomaly::SetType(const std::string &t)
 
    else if (type == "EA" && t == "TA")
       anomalyValue = GetTrueAnomaly();   
- 
+*/ 
    type = t;
 }
 
@@ -376,7 +374,7 @@ Real Anomaly::GetTrueAnomaly() const
          throw UtilityException(msg); 
       }
    } 
-   else if (type == "EA")
+   else if (type == "EA" || type == "HA")
    {
       Real ma = GetMeanAnomaly();
       ta = CoordUtil::MeanToTrueAnomaly(ma, eccentricity);
@@ -396,88 +394,92 @@ Real Anomaly::GetTrueAnomaly() const
  */
 Real Anomaly::GetMeanAnomaly() const
 {
-#if __DEBUG_ANOMALY__
-    std::cout << "\nAnomaly::GetMeanAnomlay() with type = " << type 
-              << "\na = " << semiMajorAxis
-              << ", and e = " << eccentricity << std::endl;
+#if DEBUG_ANOMALY
+   MessageInterface::ShowMessage("\nAnomaly::GetMeanAnomaly()..."
+             "\n type = %s\n a    = %f\n e    = %f\n value = %f\n", 
+             type.c_str(), semiMajorAxis, eccentricity, anomalyValue);
 #endif
+   Real eccAnomaly, meanAnomaly, hyperAnomaly;
+   Real E; // Eccentric anomaly in radians
+   Real H; // Hyperbolic anomaly in radians
+   Real M; // Mean anomaly in radians
 
    if (type == "TA")
    {
-      Real q = GmatMathUtil::DegToRad(anomalyValue);
-
       // Determine it is ellipse or hyperbola for computing the mean anomaly
-      if (semiMajorAxis >= 0.0)
+      // Ellipse
+      if (eccentricity < (1.0 - 1.0e-12))
       {
          try
          {
-            Real div = 1.0 + eccentricity * GmatMathUtil::Cos(q);
-        
-            // Check if it is tolerance then send the message and discontinue
-            if (GmatMathUtil::Abs(div) < ANOMALY_TOL)
-              throw UtilityException("Anomaly::GetMeanAnomaly() - "
-                                    "unable to get the mean anomaly");
+			// Get the eccentric anamoly
+			eccAnomaly = GetEccentricAnomaly();
 
-             Real cosea, sinea, ea, ava;
-             cosea = (eccentricity + GmatMathUtil::Cos(q))/div;
-             sinea = GmatMathUtil::Sqrt(1.0 - eccentricity*eccentricity) * 
-                     GmatMathUtil::Sin(q)/div;
-             ea = GmatMathUtil::ATan(sinea,cosea); 
-             ava = ea - eccentricity * GmatMathUtil::Sin(ea);
+		 	// Convert the eccentric anomaly from degrees to radians
+         	E = GmatMathUtil::DegToRad(eccAnomaly);
 
-             if (ava < 0.0) 
-                ava = ava + GmatMathUtil::TWO_PI;
-
-             return (GmatMathUtil::RadToDeg(ava));
+			// Compute the mean anamoly
+            meanAnomaly = E - eccentricity * GmatMathUtil::Sin(E);
+			
+            if (meanAnomaly < 0.0) 
+            	meanAnomaly = meanAnomaly + GmatMathUtil::TWO_PI;
+			return (GmatMathUtil::RadToDeg(meanAnomaly));
          }
          catch(RealUtilitiesExceptions::ArgumentError &rue)
          {
             throw UtilityException("Anomaly::GetMeanAnomaly() - "
-                                    "unable to get the mean anomay due to "
-                                    "failure of use Cos, Sin, or ATan"); 
+                                   "unable to get the mean anomay due to "
+                                   "failure of use Sin"); 
          }
       }
-      else          // for hyperbolic orbit
+      // Hyperbola
+      else if (eccentricity > (1.0 + 1.0e-12))
       {
          try
          {
-            Real denom = GmatMathUtil::Cos(q/2.0);
-        
-            // Check if it is tolerance then send the message and discontinue
-            if (GmatMathUtil::Abs(denom) < ANOMALY_TOL)
-              throw UtilityException("Anomaly::GetMeanAnomaly() - "
-                                    "unable to get the mean anomaly");
+			// Get the hyperbolic anamoly
+			hyperAnomaly = GetHyperbolicAnomaly();
+			
+		 	// Convert the hyperbolic anomaly from degrees to radians
+         	H = GmatMathUtil::DegToRad(hyperAnomaly);
 
-            Real tang = GmatMathUtil::Sqrt((eccentricity - 1.0) / 
-                        (eccentricity + 1.0)) *
-                        GmatMathUtil::Sin(q/2.0) / denom;
-            denom = 1.0 - tang*tang;
+			// Compute the mean anamoly 
+			meanAnomaly = eccentricity * GmatMathUtil::Sinh(H) - H;
 
-            // Check if it is tolerance then send the message and discontinue
-            if (GmatMathUtil::Abs(denom) < ANOMALY_TOL)
-              throw UtilityException("Anomaly::GetMeanAnomaly() - "
-                                    "unable to get the mean anomaly");
-
-            Real sinhf, auxf;
-            sinhf = (2.0 * tang)/denom;
-            auxf = GmatMathUtil::Log(sinhf + 
-                   GmatMathUtil::Sqrt(sinhf * sinhf + 1.0));
-
-            return (GmatMathUtil::RadToDeg(eccentricity * sinhf - auxf));
+   			if ((meanAnomaly < 0.0) || (meanAnomaly > GmatMathUtil::TWO_PI))
+   			     meanAnomaly = GmatMathUtil::Mod(meanAnomaly,GmatMathUtil::TWO_PI);
+			return (GmatMathUtil::RadToDeg(meanAnomaly));
          } 
          catch(RealUtilitiesExceptions::ArgumentError &rue)
          {
             throw UtilityException("Anomaly::GetMeanAnomaly() - "
-                                    "unable to get the mean anomaly due to "
-                                    "failure of use Cos, Sin, or ATan"); 
+                                   "unable to get the mean anomaly due to "
+                                   "failure of use Sinh"); 
          }
       }
+      else
+      {
+         meanAnomaly = 0.0;	
+         MessageInterface::ShowMessage
+               ("Anomaly::GetMeanAnomaly() "
+                "Warning: Orbit is near parabolic in mean "
+                "anomaly calculation. Setting MA = 0.0\n");
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "Warning: Orbit is near parabolic in mean "
+                             " anomaly calculation. Setting MA = 0.0");
+         return (meanAnomaly);
+      }
    }
-   else if (type == "EA")
+   else if (type == "EA" || type == "HA")
    {
-      Real ea = GmatMathUtil::DegToRad(anomalyValue);
-      Real ma = ea - eccentricity * GmatMathUtil::Sin(ea);
-      return GmatMathUtil::RadToDeg(ma);
+      E = GmatMathUtil::DegToRad(anomalyValue);
+      H = E;
+      if (type == "EA")
+         M = E - eccentricity * GmatMathUtil::Sin(E);
+      else
+         M = eccentricity * sinh(H) - H;
+      
+      return GmatMathUtil::RadToDeg(M);
    }
    
    return anomalyValue; 
@@ -494,57 +496,107 @@ Real Anomaly::GetMeanAnomaly() const
  */
 Real Anomaly::GetEccentricAnomaly() const
 {
-#if __DEBUG_ANOMALY__
-   std::cout << std::setprecision(30);
-   std::cout << "\nAnomaly::GetEccentricAnomaly() enters...\n";
-#endif
+   Real eccAnomaly; // eccentric anomaly
+   Real nu;         // true anomaly in radians
+   Real ta;         // true anomaly in degrees
 
-   Real ma;     // Mean Anomaly
-
-   if (type == "TA")
-      ma = GetMeanAnomaly();
-   else if (type == "MA")
-      ma = anomalyValue;
-   else
-      return anomalyValue;
-
-   // Check if it is circular orbit then return the mean anomaly 
-   if (eccentricity == 0.0)
-      return ma;
-
-   // Covernt Mean anomaly to radians and initialize the eccentric anomaly 
-   ma = GmatMathUtil::DegToRad(ma);
-   
-   Real E0, E1;
-   E0 = ma;
-
-   try
+   if (eccentricity > (1.0 - 1.0e-12))
    {
-      for (Integer i = 0; i < MAX_ITERATIONS; i++)
+   		eccAnomaly = 0.0;
+   }
+   else
+   {
+      try
       {
-         E1 = E0 - (E0 - eccentricity * GmatMathUtil::Sin(E0) - ma) /
-              (1.0 - eccentricity * GmatMathUtil::Cos(E0));  
+         if (type == "MA" || type == "EA" || type == "HA")
+            ta = GetTrueAnomaly();
+         else 
+			ta = anomalyValue;
+			
+		 // Convert the true anomaly from degrees to radians
+         nu = GmatMathUtil::DegToRad(ta);
+         
+		 // Compute the eccentric anamoly
+         Real numerator1, numerator2, denominator, sinE, cosE;
+		 
+		 // sin(E)
+         numerator1 = GmatMathUtil::Sqrt(1.0 - eccentricity * eccentricity) *
+                      GmatMathUtil::Sin(nu);
+		 denominator = 1.0 + eccentricity * GmatMathUtil::Cos(nu);
+		 sinE = numerator1 / denominator;
 
-#if __DEBUG_ANOMALY__
-   std::cout << "\nE0 = " << E0 << ", E1 = " << E1 << std::endl;
-#endif
-        if (E0 == E1)
-            break;
+		 // cos(E)
+		 numerator2 = eccentricity + GmatMathUtil::Cos(nu);
+		 cosE = numerator2 / denominator;
 
-        E0 = E1;
+		 eccAnomaly = atan2(sinE, cosE);
+      }
+      catch(RealUtilitiesExceptions::ArgumentError &rue)
+      {
+         throw UtilityException("Anomaly::GetEccentricAnomaly() - "
+                                "unable to get the eccentric anomaly due to "
+                                "failure of use Cos, Sin or atan2");
       }
    }
-   catch(RealUtilitiesExceptions::ArgumentError &rue)
-   {
-      throw UtilityException("Anomaly::GetEccentricAnomaly() - "
-                             "unable to get the eccentric anomaly due to "
-                             "failure of use Cos or Sin");
-   }
 
-#if __DEBUG_ANOMALY__
-   std::cout << "\nAnomaly::GetEccentricAnomaly() exits\n";
-#endif
-   return GmatMathUtil::RadToDeg(E0);
+   return (GmatMathUtil::RadToDeg(eccAnomaly));
+}
+
+//------------------------------------------------------------------------------
+// Real Anomaly::GetHyperbolicAnomaly() const
+//------------------------------------------------------------------------------
+/** 
+ * Gets hyperbolic anomaly.
+ * 
+ * @return   value of hyperbolic anomaly.
+ *
+ */
+Real Anomaly::GetHyperbolicAnomaly() const
+{
+   Real hyperAnomaly; // hyperbolic anomaly
+   Real nu;           // true anomaly in radians
+   Real ta;           // true anomaly in degrees
+   
+   if (eccentricity < (1.0 + 1.0e-12))
+   {
+   		hyperAnomaly = 0.0;
+   }
+   else
+   {
+      try
+      {
+         if (type == "MA" || type == "EA" || type == "HA")
+            ta = GetTrueAnomaly();
+         else 
+			ta = anomalyValue;
+
+		 // Convert the true anomaly from degrees to radians
+         nu = GmatMathUtil::DegToRad(ta);
+         
+		 // Compute the hyperbolic anamoly
+         Real numerator1, numerator2, denominator, sinhH, coshH, tanhH;
+		 
+		 // Hyperbolic sin(H)
+		 numerator1 = GmatMathUtil::Sin(nu) * 
+		    GmatMathUtil::Sqrt(eccentricity * eccentricity - 1.0);
+		 denominator = 1.0 + eccentricity * GmatMathUtil::Cos(nu);
+		 sinhH = numerator1 / denominator;
+
+		 // Hyperbolic cos(H)
+		 numerator2 = eccentricity + GmatMathUtil::Cos(nu);
+		 coshH = numerator2 / denominator;
+
+         tanhH = sinhH / coshH;
+		 hyperAnomaly = atanh(tanhH);		
+      }
+      catch(RealUtilitiesExceptions::ArgumentError &rue)
+      {
+         throw UtilityException("Anomaly::GetHyperbolicAnomaly() - "
+                                "unable to get the eccentric anomaly due to "
+                                "failure of use Cos or atanh");
+      }
+   }
+   return (GmatMathUtil::RadToDeg(hyperAnomaly));
 }
 
 //------------------------------------------------------------------------------
@@ -558,8 +610,82 @@ Real Anomaly::GetEccentricAnomaly() const
  */
 bool Anomaly::IsInvalid(const std::string &inputType) const
 {
-   if (inputType != "EA" && inputType != "MA" && inputType != "TA")
+   if (inputType != "EA" && inputType != "HA" && 
+       inputType != "MA" && inputType != "TA")
       return true;
 
    return false;
 }
+
+//------------------------------------------------------------------------------
+// void Anomaly::Convert(const std::string &t) const
+//------------------------------------------------------------------------------
+/** 
+ * Converts anomaly value.
+ * 
+ * @param <fromType> Anomaly type to convert from.
+ * @param <toType>   Anomaly type to convert to.
+ *
+ * @return Converted anomaly type 
+ */
+Real Anomaly::Convert(const std::string &fromType, 
+                      const std::string &toType) const
+{
+   if (IsInvalid(toType))
+      throw UtilityException("Anomaly::Convert() - invalid input type");
+
+   Real value = GetValue();
+   
+   try
+   {
+      // Convert from TA to MA, EA or HA
+      if (fromType == "TA") 
+      {
+	     if (toType == "MA")
+	        value = GetMeanAnomaly();   
+	     else if (toType == "EA")
+	        value = GetEccentricAnomaly();   
+	     else if (toType == "HA")
+	        value = GetHyperbolicAnomaly(); 
+      }  
+      // Convert from MA to TA, EA or HA
+	  else if (fromType == "MA") 
+	  {
+	     if (toType == "TA")
+	        value = GetTrueAnomaly(); 
+	     else if (toType == "EA")
+	        value = GetEccentricAnomaly();   
+	     else if (toType == "HA")
+	        value = GetHyperbolicAnomaly();   
+	  }
+      // Convert from EA to MA, TA or HA
+	  else if (fromType == "EA") 
+	  {
+	     if (toType == "MA")
+	        value = GetMeanAnomaly(); 
+	     else if (toType == "TA")
+	        value = GetTrueAnomaly();   
+	     else if (toType == "HA")
+	        value = GetHyperbolicAnomaly();   
+	  }
+      // Convert from HA to MA, TA or EA
+	  else if (fromType == "HA") 
+	  {
+	     if (toType == "MA")
+	        value = GetMeanAnomaly(); 
+	     else if (toType == "TA")
+	        value = GetTrueAnomaly();   
+	     else if (toType == "EA")
+	        value = GetEccentricAnomaly();   
+	  }
+   }
+   catch(RealUtilitiesExceptions::ArgumentError &rue)
+   {
+      throw UtilityException("Anomaly::GetEccentricAnomaly() - "
+                             "unable to get the eccentric anomaly due to "
+                             "failure of use Cos, Sin or atan2");
+   }
+   
+   return value;
+}
+
