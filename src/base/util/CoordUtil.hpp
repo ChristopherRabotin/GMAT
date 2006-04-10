@@ -38,7 +38,8 @@ public:
    {
       TA,
       MA,
-      EA
+      EA,
+      HA
    };
 
    // static functions

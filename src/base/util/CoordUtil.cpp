@@ -23,6 +23,7 @@
 #include "UtilityException.hpp"
 #include "MessageInterface.hpp"
 #include <sstream>               // for stringstream
+#include <math.h>
 
 using namespace GmatMathUtil;
 
@@ -180,7 +181,7 @@ Integer CoordUtil::ComputeMeanToTrueAnomaly(Real ma, Real ecc, Real tol,
 
          if (Abs(temp) < ztol)
             return (7);
-
+ 
          f1 = f2 - (ecc * Sinh(f2) - f2 - rm) / temp;
 
          if (Abs(f2-f1) < tol)
@@ -201,6 +202,14 @@ Integer CoordUtil::ComputeMeanToTrueAnomaly(Real ma, Real ecc, Real tol,
 
             if ( Abs(f1-f2) < tol)
                done = 1;
+         }
+         
+         if (*iter > 1000)
+         {
+            throw UtilityException
+               ("CoordUtil::ComputeMeanToTrueAnomaly() "
+                "Caught in infinite loop numerical argument "
+                "out of domain for sinh() and cosh()\n");
          }
       }
 
@@ -723,7 +732,7 @@ Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, Real grav, Real *ma)
 Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, 
                               const Real grav, Anomaly anomaly)
 {
-   if (anomaly.GetType() == "EA")
+   if (anomaly.GetType() == "EA" || anomaly.GetType() == "HA")
    {
       Rvector6 temp = keplVec;
       temp[5] = anomaly.GetTrueAnomaly();
