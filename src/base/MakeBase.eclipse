@@ -167,6 +167,7 @@ OBJECTS = \
     factory/ForceModelFactory.o \
     factory/FunctionFactory.o \
     factory/HardwareFactory.o \
+    factory/MathFactory.o \
     factory/ParameterFactory.o \
     factory/PhysicalModelFactory.o \
     factory/PropagatorFactory.o \
@@ -202,14 +203,20 @@ OBJECTS = \
     interpreter/MathParser.o \
     interpreter/MathTree.o \
     interpreter/ScriptInterpreter.o \
+    math/ACos.o \
     math/Add.o \
+    math/ASin.o \
+    math/ATan.o \
+    math/Cos.o \
     math/Divide.o \
     math/MathElement.o \
     math/MathException.o \
     math/MathFunction.o \
     math/MathNode.o \
     math/Multiply.o \
+    math/Sin.o \
     math/Subtract.o \
+    math/Tan.o \
     parameter/AngularParameters.o \
     parameter/Array.o \
     parameter/BplaneData.o \
