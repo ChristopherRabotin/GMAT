@@ -81,6 +81,8 @@ OrbitPanel::OrbitPanel(wxWindow *parent,
    mIsEpochChanged = false;
    canClose = true;
 
+   anomaly = theSpacecraft->GetAnomaly();
+
    Create();
 }
 
@@ -217,18 +219,32 @@ void OrbitPanel::LoadData()
       //mFromStateTypeStr = stType.c_str();
       mFromStateTypeStr = stType;
 
+      // load the anomaly type - if state type is Keplerian or Modified Keplerian
+      std::string anType = theSpacecraft->GetStringParameter("AnomalyType");
+
       // anomaly types - hard coded for now
       wxString anomalyList[] =
       {
          wxT("Mean Anomaly"),
          wxT("True Anomaly"),
-         wxT("Eccentric Anomaly")
+         wxT("Eccentric Anomaly"),
+         wxT("Hyperbolic Anomaly")
       };
-      anomaly = theSpacecraft->GetAnomaly();
+//      anomaly = theSpacecraft->GetAnomaly();
 
-      for (unsigned int i = 0; i<3; i++)
+      for (unsigned int i = 0; i<4; i++)
          anomalyComboBox->Append(wxString(anomalyList[i].c_str()));
       
+      anomalyComboBox->SetValue(wxT(anType.c_str()));
+
+      mFromAnomalyTypeStr = anType;
+      #if DEBUG_ORBIT_PANEL
+          MessageInterface::ShowMessage("\nOrbitPanel::LoadData()...\n"
+             "Anomaly info -> a: %f, e: %f, %s: %f\n", 
+             anomaly.GetSMA(),anomaly.GetECC(),anomaly.GetType().c_str(),
+             anomaly.GetValue());   
+      #endif
+
       // Get Spacecraft initial state and display
       mCartState.Set(theSpacecraft->GetState().GetState());
       mTempCartState = mCartState;
@@ -243,7 +259,7 @@ void OrbitPanel::LoadData()
       
       mIsStateChanged = false;
       DisplayState();
-      SetLabelsUnits(stType);
+//LTR      SetLabelsUnits(stType);
    }
    catch (BaseException &e)
    {
@@ -275,13 +291,17 @@ void OrbitPanel::SaveData()
          mIsStateChanged);
    #endif
    
+   try
+   {
+   
    Rvector6 outState, cartState, displayState;
    canClose = true;
    
    // save epoch format
 //   wxString epochFormatStr = epochFormatComboBox->GetStringSelection();
    wxString epochFormatStr = epochFormatComboBox->GetValue();
-   theSpacecraft->SetDisplayDateFormat(epochFormatStr.c_str());
+//   theSpacecraft->SetDisplayDateFormat(epochFormatStr.c_str());
+   theSpacecraft->SetDateFormat(epochFormatStr.c_str());
    
    // save epoch
    wxString epochStr = epochValue->GetValue();
@@ -290,7 +310,8 @@ void OrbitPanel::SaveData()
       (epochFormatStr.Contains("ModJulian") ? "ModJulian" : "Gregorian" );
    
    if (TimeConverterUtil::ValidateTimeFormat(epochDateFormat, epochStr.c_str()))
-      theSpacecraft->SetDisplayEpoch(epochStr.c_str());
+//      theSpacecraft->SetDisplayEpoch(epochStr.c_str());
+      theSpacecraft->SetEpoch(epochStr.c_str());
    else
    {
       std::string message = "Epoch '";
@@ -315,7 +336,8 @@ void OrbitPanel::SaveData()
    
    // save state type
    wxString stateTypeStr = stateTypeComboBox->GetValue();
-   theSpacecraft->SetDisplayCoordType(std::string (stateTypeStr.c_str()));
+//   theSpacecraft->SetDisplayCoordType(std::string (stateTypeStr.c_str()));
+   theSpacecraft->SetStringParameter("StateType", stateTypeStr.c_str());
    /// @todo: need to correct in spacecraft code because this should
    /// only save display state type
 
@@ -327,13 +349,17 @@ void OrbitPanel::SaveData()
    displayState[4] = atof(textCtrl5->GetValue());
    displayState[5] = atof(textCtrl6->GetValue()); 
    
+   #if DEBUG_ORBIT_PANEL_SAVE
+      MessageInterface::ShowMessage("OrbitPanel::SaveData() display state =%s\n ", 
+         displayState.ToString().c_str());
+   #endif
+
    if (strcmp(stateTypeStr.c_str(), "Keplerian") == 0)
    {
       if(displayState[1] < 0.0)
       {
          MessageInterface::PopupMessage
             (Gmat::WARNING_, "ECC must be greater than or equal to zero.");
-         
          textCtrl2->SetValue(ToString(mOutState[1]));
          canClose = false;
          return;
@@ -341,7 +367,6 @@ void OrbitPanel::SaveData()
       else if((displayState[0] > 0.0) && (displayState[1] > 1.0))
       {
          MessageInterface::PopupMessage
-            //(Gmat::WARNING_, "SMA > 0 and ECC > 1, both can not be");
             (Gmat::WARNING_, "SMA cannot be positive and ECC greater than 1.");
          textCtrl1->SetValue(ToString(mOutState[0]));
          textCtrl2->SetValue(ToString(mOutState[1]));
@@ -351,7 +376,6 @@ void OrbitPanel::SaveData()
       else if((displayState[0] < 0.0) && (displayState[1] < 1.0))
       {
          MessageInterface::PopupMessage
-            //(Gmat::WARNING_, "SMA < 0 and ECC < 1, both can not be");
             (Gmat::WARNING_, "SMA cannot be negative and ECC less than 1.");
          textCtrl1->SetValue(ToString(mOutState[0]));
          textCtrl2->SetValue(ToString(mOutState[1]));
@@ -379,14 +403,6 @@ void OrbitPanel::SaveData()
       }
    }
 
-   if ((stateTypeStr.c_str() == "Keplerian") || 
-       (stateTypeStr.c_str() == "ModifiedKeplerian"))
-   {
-      // Set the anomaly type
-      std::string anomalyStr = description6->GetLabel().c_str();
-      theSpacecraft->SetStringParameter("AnomalyType", anomalyStr);
-   }
-
    if ( (strcmp(stateTypeStr.c_str(), "SphericalAZFPA") == 0) || 
         (strcmp(stateTypeStr.c_str(), "SphericalRADEC") == 0) )
    {
@@ -397,6 +413,21 @@ void OrbitPanel::SaveData()
          canClose = false;
          return;
       }
+   }
+
+   // Save the anomaly type
+   if ( (strcmp(stateTypeStr.c_str(), "Keplerian") == 0) || 
+        (strcmp(stateTypeStr.c_str(), "ModifiedKeplerian") == 0) )
+   {
+      std::string anomalyStr = description6->GetLabel().c_str();
+   anomaly.Set(displayState[0], displayState[1], displayState[5], anomalyStr);   
+//      theSpacecraft->SetStringParameter("AnomalyType", anomalyStr);
+   #if DEBUG_ORBIT_PANEL_SAVE
+      MessageInterface::ShowMessage( "SMA = %lf\n",anomaly.GetSMA() );
+      MessageInterface::ShowMessage( "ECC = %lf\n",anomaly.GetECC() );
+      MessageInterface::ShowMessage( "value = %lf\n",anomaly.GetValue() );
+      MessageInterface::ShowMessage( "anomaly type = %s\n",anomaly.GetType().c_str() );
+   #endif
    }
 
    // save coordinate system name if changed
@@ -424,7 +455,13 @@ void OrbitPanel::SaveData()
    
    BuildState(displayState);
    theSpacecraft->SetState(mCartState);
-   
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("OrbitPanel:SaveData() error occurred!\n%s\n", e.GetMessage().c_str());
+   }
+
    #if DEBUG_ORBIT_PANEL
       MessageInterface::ShowMessage( "epoch format      = %s\n",epochFormatStr.c_str() );
       MessageInterface::ShowMessage( "epoch             = %s\n",epochStr.c_str() );
@@ -687,6 +724,9 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
    if (event.GetEventObject() == mCoordSysComboBox ||
        event.GetEventObject() == stateTypeComboBox)
    {
+      if (event.GetEventObject() == mCoordSysComboBox)
+         mIsCoordSysChanged = true;
+
       if (event.GetEventObject() == stateTypeComboBox)
          mIsStateTypeChanged = true;
       
@@ -706,7 +746,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       
       mFromCoord = mOutCoord;
       theSpacecraft->SetRefObject(mOutCoord, Gmat::COORDINATE_SYSTEM);
-      anomaly = theSpacecraft->GetAnomaly();
+//      anomaly = theSpacecraft->GetAnomaly();
    }
    
    // -------------------------- anomaly type change ---------------------------
@@ -716,15 +756,6 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
     
       wxString description, stateValue;
        
-//      int anomalySelected = anomalyComboBox->GetSelection();
-//
-//      if (anomalySelected == 0) 
-//         anomalyType = "MA";
-//      else if (anomalySelected == 1) 
-//         anomalyType = "TA";
-//      else if (anomalySelected == 2)
-//         anomalyType = "EA";
-
       wxString anomalySelected = anomalyComboBox->GetValue();
 
       if (anomalySelected == "Mean Anomaly") 
@@ -733,24 +764,39 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
          anomalyType = "TA";
       else if (anomalySelected == "Eccentric Anomaly")
          anomalyType = "EA";
+      else if (anomalySelected == "Hyperbolic Anomaly")
+         anomalyType = "HA";
       
+      Real value = anomaly.Convert(mFromAnomalyTypeStr, anomalyType);
+
       int anomalyID = theSpacecraft->GetParameterID("AnomalyType");
-      
+      theSpacecraft->SetStringParameter(anomalyID, anomalyType);
+// std::string temp = theSpacecraft->GetStringParameter(anomalyID);
+// MessageInterface::ShowMessage("OrbitPanel::OnComboBoxChange()..."
+//                               "S/c anomaly type -> %s\n", temp.c_str());   
+//   anomaly.SetValue(value);   
+//MessageInterface::ShowMessage("Anomaly type = %s\n", anomalyType.c_str());
+//      #if DEBUG_ORBIT_PANEL
+//         MessageInterface::ShowMessage("\nOrbitPanel::OnComboBoxChange()..."
+//             "\nAnomaly info -> a: %f, e: %f, %s: %f\n", 
+//             anomaly.GetSMA(),anomaly.GetECC(),anomaly.GetType().c_str(),
+//             anomaly.GetValue());   
+//      #endif
+//      
       description.Printf("%s", anomalyType.c_str());
       description6->SetLabel(description);
-      
-      theSpacecraft->SetStringParameter(anomalyID, anomalyType);
-      anomaly = theSpacecraft->GetAnomaly(); 
       
       wxString element;
       std::stringstream buffer;
       buffer.precision(18);
-      Real an = theSpacecraft->GetRealParameter(anomalyType);
-      buffer << an;
+//      Real an = theSpacecraft->GetRealParameter(anomalyType);
+//      buffer << an;
+      buffer << value;
       element.Printf ("%s",buffer.str().c_str());
       textCtrl6->SetValue (element);
       buffer.str(std::string());
-      
+
+      mFromAnomalyTypeStr = anomalyType;
       #if DEBUG_ORBIT_PANEL
          MessageInterface::ShowMessage( "anomaly id = %d\n",anomalyID );
          MessageInterface::ShowMessage( "anomaly type = %s\n",anomalyType.c_str() );
@@ -845,6 +891,8 @@ void OrbitPanel::SetLabelsUnits(const std::string &stateType)
          anomalyComboBox->SetSelection(1);
       else if (strcmp(description.c_str(), "EA") == 0)
          anomalyComboBox->SetSelection(2);
+      else if (strcmp(description.c_str(), "HA") == 0)
+         anomalyComboBox->SetSelection(3);
    }
    else
    {

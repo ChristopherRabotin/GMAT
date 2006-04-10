@@ -38,14 +38,14 @@
 class OrbitPanel: public wxPanel
 {
 public:
-    OrbitPanel(wxWindow *parent, 
-               Spacecraft *spacecraft,
-               SolarSystem *solarsystem, 
-               wxButton *theApplyButton);
-    ~OrbitPanel();
+   OrbitPanel(wxWindow *parent, 
+              Spacecraft *spacecraft,
+              SolarSystem *solarsystem, 
+              wxButton *theApplyButton);
+   ~OrbitPanel();
    
-    void LoadData();
-    void SaveData();
+   void LoadData();
+   void SaveData();
    
    bool canClose;
    
@@ -79,6 +79,7 @@ private:
    CoordinateConverter mCoordConverter;
    std::string mFromCoordStr;
    std::string mFromStateTypeStr;
+   std::string mFromAnomalyTypeStr;
    
    void Create();
    void AddElements(wxWindow *parent);
