@@ -1249,7 +1249,7 @@ Real Spacecraft::GetRealParameter(const std::string &label) const
        return state.GetEpoch();
    
     // First check with anomaly
-    if (label == "TA" || label == "MA" || label == "EA")
+    if (label == "TA" || label == "MA" || label == "EA" || label == "HA")
     {
        return anomaly.GetValue();
     }
