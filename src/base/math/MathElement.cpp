@@ -35,9 +35,10 @@
  */
 //------------------------------------------------------------------------------
 MathElement::MathElement(const std::string &typeStr, const std::string &nomme) :
-             MathNode      (typeStr, nomme),
+             MathNode      ("MathElement", nomme),
              refObject     (NULL),
-             refObjectName ("")
+             refObjectName (""),
+             elementType   (Gmat::REAL_TYPE)
 {
 }
 
@@ -64,7 +65,8 @@ MathElement::~MathElement()
 MathElement::MathElement(const MathElement &me) :
              MathNode      (me),
              refObject     (me.refObject),
-             refObjectName (me.refObjectName)
+             refObjectName (me.refObjectName),
+             elementType   (me.elementType)
 {
 
 }
@@ -153,6 +155,7 @@ bool MathElement::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       case Gmat::PARAMETER:
          refObject = (Parameter*) obj;
          refObjectName = name;
+         elementType = Gmat::RMATRIX_TYPE;
          
       default:
          break;
@@ -199,6 +202,7 @@ bool MathElement::SetRefObjectName(const Gmat::ObjectType type, const std::strin
    {
       case Gmat::PARAMETER:
          refObjectName = name;
+         elementType = Gmat::RMATRIX_TYPE;
          return true;
          
       default:
@@ -274,7 +278,18 @@ bool MathElement::EvaluateInputs()
 //------------------------------------------------------------------------------
 void MathElement::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
 {
-	return MathNode::ReportOutputs(type, rowCount, colCount);
+	type = elementType;
+	
+	if (type == Gmat::RMATRIX_TYPE)
+	{
+	   rowCount = matrix.GetNumRows();
+	   colCount = matrix.GetNumColumns();
+	}
+	else if (type == Gmat::REAL_TYPE)
+	{
+		rowCount = 1;
+	   colCount = 1;
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -282,8 +297,8 @@ void MathElement::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCo
 //------------------------------------------------------------------------------
 Rmatrix MathElement::MatrixEvaluate()
 {
-	//if (matrix)
-	//   return matrix;
+   if (elementType == Gmat::RMATRIX_TYPE)
+      return matrix;
 	   
 	return MathNode::MatrixEvaluate();
 }
@@ -298,6 +313,7 @@ Rmatrix MathElement::MatrixEvaluate()
 Real MathElement::SetRealValue(Real value)
 {	
 	realValue = value;
+	elementType = Gmat::REAL_TYPE;
 	return realValue;
 }
 

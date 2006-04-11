@@ -121,7 +121,6 @@ Real MathFunction::Evaluate()
 //------------------------------------------------------------------------------
 bool MathFunction::EvaluateInputs()
 {
-	 // @todo: This section may need more implementation.
 	 if ( (leftNode) && (rightNode) )
        return true;
     else
@@ -129,11 +128,11 @@ bool MathFunction::EvaluateInputs()
 }
 
 //------------------------------------------------------------------------------
-// void ReportOutputs()
+// void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
-void MathFunction::ReportOutputs(Integer &type, 
-                                Integer &rowCount, Integer &colCount)
+void MathFunction::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
 {
+	return MathNode::ReportOutputs(type, rowCount, colCount);
 }
 
 //------------------------------------------------------------------------------

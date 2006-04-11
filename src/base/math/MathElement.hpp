@@ -61,6 +61,9 @@ protected:
    
    /// Holds the name of the GMAT object that is accessed by this node
    std::string refObjectName; 
+   
+   /// Element type (is the leaf node a real number or a matrix
+   Integer elementType;
     
 };
 

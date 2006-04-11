@@ -38,8 +38,7 @@ public:
    // Inherited (MathNode) methods                                            
    virtual Real Evaluate();
    virtual bool EvaluateInputs(); 
-   virtual void ReportOutputs(Integer &type, 
-            Integer &rowCount, Integer &colCount);
+   virtual void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount);
    
    Rmatrix MatrixEvaluate();
    bool SetChildren(MathNode *leftChild, MathNode *rightChild);
