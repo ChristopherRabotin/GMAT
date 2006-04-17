@@ -42,8 +42,7 @@ public:
    virtual Real Evaluate();
    virtual bool EvaluateInputs();
    virtual void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount);
-   
-   Rmatrix MatrixEvaluate();
+   virtual Rmatrix MatrixEvaluate();
    
 protected:
    Real realValue;

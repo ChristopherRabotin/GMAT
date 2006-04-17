@@ -110,7 +110,8 @@ GmatBase* MathNode::Clone(void) const
 //------------------------------------------------------------------------------
 Rmatrix MathNode::MatrixEvaluate()
 {
-   return matrix;
+//   return matrix;
+   throw MathException("No implementation of MatrixEvaluate()\n");    
 }
 
 //------------------------------------------------------------------------------
@@ -136,6 +137,4 @@ bool MathNode::EvaluateInputs()
 {
    throw MathException("No implementation of EvaluateInputs().\n");
 }
-
-
 
