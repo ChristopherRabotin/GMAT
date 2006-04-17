@@ -118,6 +118,7 @@ namespace Gmat
       AXIS_SYSTEM,
       ATTITUDE,
       MATH_NODE,
+      MATH_TREE,
       UNKNOWN_OBJECT
    };
 
