@@ -3917,6 +3917,16 @@ bool Interpreter::FinalPass()
       cs = moderator->GetCoordinateSystem(*i);
       cs->SetSolarSystem(solar);
     
+      // If AxisSystem is null, create and set default "MJ2000Eq" axis(loj: 4/18/06)
+      if (cs->GetRefObject(Gmat::AXIS_SYSTEM, "") == NULL)
+      {
+         #ifdef DEBUG_PASS_TWO
+            MessageInterface::ShowMessage
+               ("   Axis is NULL so create default axis (MJ2000Eq).\n");
+         #endif
+         CreateAxisSystem("MJ2000Eq", cs);
+      }
+      
       std::string ptName = cs->GetStringParameter("Origin");
       pt = (SpacePoint *)(moderator->GetConfiguredItem(ptName));
       if (pt == NULL)
@@ -4038,6 +4048,7 @@ void Interpreter::PreinitializeCoordinateSystem(CoordinateSystem *cs)
          "Preinitializing coordinate system %s\n", (cs->GetName()).c_str());
    #endif
 
+      
    SolarSystem *ss = moderator->GetSolarSystemInUse();
    if (!ss) throw InterpreterException("Cannot access solar system in use");
    CelestialBody   *b  = NULL;
