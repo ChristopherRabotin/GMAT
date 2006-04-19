@@ -299,7 +299,6 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
        mNumRefObjects, type, name.c_str(), obj);
    #endif
 
-   //loj: 9/8/05
    // Since Sandbox calls SetRefObject() with obj->GetType(), I need to
    // set type to SPACE_POINT if CELESTIAL_BODY
 
@@ -443,6 +442,10 @@ bool RefData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
          return true;
       }
    }
+   
+   #if DEBUG_REFDATA_OBJECT
+   MessageInterface::ShowMessage("RefData::AddRefObject() return false\n");
+   #endif
    
    return false;
 }
