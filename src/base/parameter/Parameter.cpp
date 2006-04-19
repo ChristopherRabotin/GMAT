@@ -853,24 +853,22 @@ std::string Parameter::GetStringParameter(const Integer id) const
    {
    case OBJECT:
       if (GetNumRefObjects() > 0)
-         //return GetRefObjectName(Gmat::SPACECRAFT);
          return GetRefObjectName(mOwnerType);
       else
-         // DJC Changed 1/5/05 to make parameter writing work
          return "";
-//         return GmatBase::GetStringParameter(id);
    case EXPRESSION:
       return mExpr;
    case DESCRIPTION:
       return mDesc;
    case UNIT:
       return mUnit;
-   case DEP_OBJECT: //loj: 12/8/04 added
+   case DEP_OBJECT:
       return mDepObjectName;
    default:
       return GmatBase::GetStringParameter(id);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const std::string &label) const
@@ -879,6 +877,7 @@ std::string Parameter::GetStringParameter(const std::string &label) const
 {
    return GetStringParameter(GetParameterID(label));
 }
+
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)
@@ -893,8 +892,6 @@ bool Parameter::SetStringParameter(const Integer id, const std::string &value)
    switch (id)
    {
    case OBJECT:
-      //return SetRefObjectName(Gmat::SPACECRAFT, value);
-      //loj: 12/10/04  Changed to use owner type
       return SetRefObjectName(mOwnerType, value);
    case EXPRESSION:
       mExpr = value;
@@ -905,15 +902,18 @@ bool Parameter::SetStringParameter(const Integer id, const std::string &value)
    case UNIT:
       mUnit = value;
       return true;
-   case DEP_OBJECT: //loj: 12/8/04 added
+   case DEP_OBJECT:
       mDepObjectName = value;
-      //if (mIsCoordSysDependent)
-      //   return SetRefObjectName(Gmat::COORDINATE_SYSTEM, value);
+      if (mIsCoordSysDependent)
+         return SetRefObjectName(Gmat::COORDINATE_SYSTEM, value);
+      else if (mIsOriginDependent)
+         return SetRefObjectName(Gmat::SPACE_POINT, value);
       return true;
    default:
       return GmatBase::SetStringParameter(id, value);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const std::string &label,
