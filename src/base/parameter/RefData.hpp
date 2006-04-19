@@ -53,7 +53,7 @@ public:
 
 protected:
 
-   static const int MAX_OBJ_COUNT = 10;
+   static const int MAX_OBJ_COUNT = 5;
    
    struct RefObjType
    {
