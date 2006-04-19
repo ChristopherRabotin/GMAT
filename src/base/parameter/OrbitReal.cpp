@@ -270,11 +270,28 @@ bool OrbitReal::Initialize()
       
       InitializeRefObjects();
    }
+   catch(InvalidDependencyException &e)
+   {
+      #if DEBUG_ORBITREAL
+      MessageInterface::ShowMessage
+         ("OrbitReal::Initialize() Fail to initialize Parameter:%s\n",
+          this->GetName().c_str());
+      #endif
+      
+      throw ParameterException
+         ("WARNING:  Incorrect parameter dependency: " + GetName() + ".\n" +
+          this->GetTypeName() + e.GetMessage() + "\n");
+   }
    catch(BaseException &e)
    {
+      #if DEBUG_ORBITREAL
+      MessageInterface::ShowMessage
+         ("OrbitReal::Initialize() Fail to initialize Parameter:%s\n",
+          this->GetName().c_str());
+      #endif
+      
       throw ParameterException
-         ("OrbitReal::Initialize() Fail to initialize Parameter:" +
-          this->GetTypeName() + "\n" + e.GetMessage());
+         ("WARNING:  " + e.GetMessage() + " in " + GetName() + "\n");
    }
    
    return true;
