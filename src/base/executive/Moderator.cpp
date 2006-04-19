@@ -1509,16 +1509,20 @@ Parameter* Moderator::CreateParameter(const std::string &type,
          param->SetRefObjectName(ownerType, ownerName);
 
       if (depName != "")
-      {
-         if (param->NeedCoordSystem())
-         {
-            param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depName);
-            if (param->IsOriginDependent())
-               param->SetStringParameter("DepObject", depName);
-            else if (param->IsCoordSysDependent())
-               param->SetStringParameter("DepObject", depName);
-         }
-      }
+         param->SetStringParameter("DepObject", depName);
+
+      //loj: 4/18/06 commented out - It is handled by SetStringParameter()
+      //if (depName != "")
+      //{
+      //   if (param->NeedCoordSystem())
+      //   {
+      //      param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depName);
+      //      if (param->IsOriginDependent())
+      //         param->SetStringParameter("DepObject", depName);
+      //      else if (param->IsCoordSysDependent())
+      //         param->SetStringParameter("DepObject", depName);
+      //   }
+      //}
       
       // create parameter dependent coordinate system (loj: 1/27/06)
       if (type == "Longitude" || type == "Latitude" || type == "Altitude" ||
@@ -3064,8 +3068,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage
-            ("Moderator::RunMission() %s\n", e.GetMessage().c_str());
+         MessageInterface::ShowMessage(e.GetMessage());
          MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
          // assign status
          status = -2;
@@ -4229,6 +4232,7 @@ void Moderator::AddInternalCoordSystemToSandbox(Integer index)
    
 }
 
+
 //------------------------------------------------------------------------------
 // void AddPublisherToSandbox(Integer index)
 //------------------------------------------------------------------------------
@@ -4242,6 +4246,7 @@ void Moderator::AddPublisherToSandbox(Integer index)
    thePublisher->UnsubscribeAll();
    sandboxes[index]->SetPublisher(thePublisher);
 }
+
 
 //------------------------------------------------------------------------------
 // void AddCoordSystemToSandbox(Integer index)
@@ -4257,6 +4262,7 @@ void Moderator::AddCoordSystemToSandbox(Integer index)
       sandboxes[index]->AddObject(cs);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void AddSpacecraftToSandbox(Integer index)
