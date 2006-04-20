@@ -24,6 +24,7 @@
 #include "MathNode.hpp"
 #include "MathException.hpp"
 #include "Parameter.hpp"
+#include "Array.hpp"
 
 class MathElement : public MathNode
 {
@@ -58,6 +59,7 @@ protected:
    /// A pointer to the referenced object (i.e. the leaf node or element).  
    /// This pointer is set when the MathTree is initialized in the Sandbox.
    Parameter* refObject;
+   Array *aRefObject;
    
    /// Holds the name of the GMAT object that is accessed by this node
    std::string refObjectName; 
