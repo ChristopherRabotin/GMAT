@@ -208,15 +208,19 @@ OBJECTS = \
     math/ASin.o \
     math/ATan.o \
     math/Cos.o \
+    math/DegToRad.o \
     math/Divide.o \
+    math/Inverse.o \
     math/MathElement.o \
     math/MathException.o \
     math/MathFunction.o \
     math/MathNode.o \
     math/Multiply.o \
+    math/RadToDeg.o \
     math/Sin.o \
     math/Subtract.o \
     math/Tan.o \
+    math/Transpose.o \
     parameter/AngularParameters.o \
     parameter/Array.o \
     parameter/BplaneData.o \
