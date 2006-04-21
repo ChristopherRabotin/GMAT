@@ -167,6 +167,12 @@ bool MathElement::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          if (refObjectType == "Parameter")
          {
          	  aRefObject = (Array*)refObject;
+         	  
+         	  Integer numRows = aRefObject->GetIntegerParameter("NumRows");
+            Integer numCols = aRefObject->GetIntegerParameter("NumCols");
+         	  
+         	  matrix.SetSize(numRows, numCols);
+         	  
             matrix = aRefObject->GetMatrix();
          }
          else
