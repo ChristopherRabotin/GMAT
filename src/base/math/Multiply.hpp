@@ -32,12 +32,6 @@ public:
 
    virtual Real Evaluate();
    virtual Rmatrix MatrixEvaluate();
-
-protected:
-
-  
-private:
-   
 };
 
 #endif // Multiply_hpp

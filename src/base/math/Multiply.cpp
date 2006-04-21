@@ -103,17 +103,24 @@ Real Multiply::Evaluate()
 //------------------------------------------------------------------------------
 Rmatrix Multiply::MatrixEvaluate()
 {
-   Integer type, row, col;
+   Integer type1, row1, col1; // Left node matrix
+   Integer type2, row2, col2; // Right node matrix
    Rmatrix prod;
    
-   // Get the type of the left node (Real or Matrix)
-   leftNode->ReportOutputs(type, row, col);
+   // Get the type(Real or Matrix), # rows and # columns of the left node
+   leftNode->ReportOutputs(type1, row1, col1);
    
-   if( type == Gmat::REAL_TYPE)           // Multipling scalar time matrix
-      prod = leftNode->Evaluate() * rightNode->MatrixEvaluate();
-   else if( type == Gmat::RMATRIX_TYPE)   // Multipling matrix time matrix
+   // Get the type(Real or Matrix), # rows and # columns of the right node
+   rightNode->ReportOutputs(type2, row2, col2);
+   
+   // Multiply matrix by matrix
+   if( type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::RMATRIX_TYPE)
       prod = leftNode->MatrixEvaluate() * rightNode->MatrixEvaluate();
-   else    								  // Multipling matrix time scalar
+   // Multiply scalar by matrix
+   else if( type1 == Gmat::REAL_TYPE && type2 == Gmat::RMATRIX_TYPE)
+      prod = leftNode->Evaluate() * rightNode->MatrixEvaluate();
+   // Multiply matrix by scalar
+   else if( type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::REAL_TYPE)
       prod = leftNode->MatrixEvaluate() * rightNode->Evaluate();
 
    return prod;
