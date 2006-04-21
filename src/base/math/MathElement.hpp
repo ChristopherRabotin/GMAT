@@ -20,6 +20,7 @@
 #ifndef MathElement_hpp
 #define MathElement_hpp
 
+#include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "MathNode.hpp"
 #include "MathException.hpp"
@@ -63,6 +64,8 @@ protected:
    
    /// Holds the name of the GMAT object that is accessed by this node
    std::string refObjectName; 
+   
+   std::string refObjectType; 
    
    /// Element type (is the leaf node a real number or a matrix
    Integer elementType;

@@ -155,14 +155,21 @@ bool MathElement::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       case Gmat::PARAMETER:
          refObject = (Parameter*) obj;
          refObjectName = name;
-         elementType = refObject->GetReturnType();
          
-         if (elementType == Gmat::RMATRIX_TYPE)
+         // @todo:  Use implementation of GetReturnType() for future
+         //elementType = refObject->GetReturnType(); 
+         
+         //if (elementType == Gmat::RMATRIX_TYPE)
+         //else if (elementType == Gmat::REAL_TYPE)
+             
+         refObjectType = refObject->GetTypeName().c_str();
+         
+         if (refObjectType == "Parameter")
          {
          	  aRefObject = (Array*)refObject;
             matrix = aRefObject->GetMatrix();
          }
-         else if (elementType == Gmat::REAL_TYPE)
+         else
          {
             realValue = refObject->GetReal();
          }
