@@ -18,6 +18,8 @@
 //------------------------------------------------------------------------------
 
 #include "MathElement.hpp"
+#include <iostream>
+using namespace std;
 
 #if DEBUG_MATHELEMENT
 #include "MessageInterface.hpp"
@@ -164,19 +166,21 @@ bool MathElement::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
              
          refObjectType = refObject->GetTypeName().c_str();
          
-         if (refObjectType == "Parameter")
+         if ((refObjectType == "Parameter") || (refObjectType == "Array"))
          {
+         	  elementType = Gmat::RMATRIX_TYPE;
          	  aRefObject = (Array*)refObject;
          	  
-         	  Integer numRows = aRefObject->GetIntegerParameter("NumRows");
-            Integer numCols = aRefObject->GetIntegerParameter("NumCols");
-         	  
-         	  matrix.SetSize(numRows, numCols);
+//         	  Integer numRows = aRefObject->GetIntegerParameter("NumRows");
+//            Integer numCols = aRefObject->GetIntegerParameter("NumCols");
+//         	  matrix.SetSize(numRows, numCols);
          	  
             matrix = aRefObject->GetMatrix();
+            
          }
          else
          {
+            elementType = Gmat::REAL_TYPE;
             realValue = refObject->GetReal();
          }
             
