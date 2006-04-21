@@ -91,3 +91,17 @@ Real Subtract::Evaluate()
 {
    return leftNode->Evaluate() - rightNode->Evaluate();
 }
+
+
+//------------------------------------------------------------------------------
+// Rmatrix MatrixEvaluate()
+//------------------------------------------------------------------------------
+/**
+ * @return the difference of left node(matrix) and right node(matrix)
+ *
+ */
+//------------------------------------------------------------------------------
+Rmatrix Subtract::MatrixEvaluate()
+{
+   return leftNode->MatrixEvaluate() - rightNode->MatrixEvaluate();
+}

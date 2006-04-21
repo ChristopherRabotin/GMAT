@@ -31,12 +31,7 @@ public:
    virtual GmatBase* Clone() const;
 
    virtual Real Evaluate();
-
-protected:
-
-  
-private:
-   
+   virtual Rmatrix MatrixEvaluate();  
 };
 
 #endif // Subtract_hpp

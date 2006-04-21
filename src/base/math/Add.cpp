@@ -83,7 +83,7 @@ GmatBase* Add::Clone() const
 // Real Evaluate()
 //------------------------------------------------------------------------------
 /**
- * @return the sum of left and right nodes
+ * @return the sum of left node(real) and right node(real)
  *
  */
 //------------------------------------------------------------------------------
@@ -91,3 +91,18 @@ Real Add::Evaluate()
 {
    return leftNode->Evaluate() + rightNode->Evaluate();
 }
+
+
+//------------------------------------------------------------------------------
+// Rmatrix MatrixEvaluate()
+//------------------------------------------------------------------------------
+/**
+ * @return the sum of left node(matrix) and right node(matrix)
+ *
+ */
+//------------------------------------------------------------------------------
+Rmatrix Add::MatrixEvaluate()
+{
+   return leftNode->MatrixEvaluate() + rightNode->MatrixEvaluate();
+}
+
