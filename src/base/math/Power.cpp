@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//                                  Divide
+//                                  Power
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -9,14 +9,14 @@
 // number S-67573-G
 //
 // Author: LaMont Ruley
-// Created: 2006/03/31
+// Created: 2006/04/20
 //
 /**
- * Implements Divide class.
+ * Implements Power class.
  */
 //------------------------------------------------------------------------------
 
-#include "Divide.hpp"
+#include "Power.hpp"
 #include "MessageInterface.hpp"
 
 //---------------------------------
@@ -24,40 +24,40 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// Divide()
+// Power()
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  */
 //------------------------------------------------------------------------------
-Divide::Divide(const std::string &nomme)
+Power::Power(const std::string &nomme)
    : MathFunction("", nomme)
 {
 }
 
 
 //------------------------------------------------------------------------------
-// ~Divide()
+// ~Power()
 //------------------------------------------------------------------------------
 /**
  * Destructor.
  */
 //------------------------------------------------------------------------------
-Divide::~Divide()
+Power::~Power()
 {
 }
 
 
 //------------------------------------------------------------------------------
-//  Divide(const Divide &copy)
+//  Power(const Power &copy)
 //------------------------------------------------------------------------------
 /**
- * Constructs the Divide object (copy constructor).
+ * Constructs the Power object (copy constructor).
  * 
  * @param <copy> Object that is copied
  */
 //------------------------------------------------------------------------------
-Divide::Divide(const Divide &copy) :
+Power::Power(const Power &copy) :
    MathFunction      (copy)
 {
 }
@@ -67,15 +67,15 @@ Divide::Divide(const Divide &copy) :
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
- * Clone of the Divide operation.
+ * Clone of the Power operation.
  *
- * @return clone of the Divide operation.
+ * @return clone of the Power operation.
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* Divide::Clone() const
+GmatBase* Power::Clone() const
 {
-   return (new Divide(*this));
+   return (new Power(*this));
 }
 
 
@@ -83,46 +83,12 @@ GmatBase* Divide::Clone() const
 // Real Evaluate()
 //------------------------------------------------------------------------------
 /**
- * @return the product of left and right nodes
+ * @return left node raised to the right node power
  *
  */
 //------------------------------------------------------------------------------
-Real Divide::Evaluate()
+Real Power::Evaluate()
 {
-   return leftNode->Evaluate() / rightNode->Evaluate();
-}
-
-
-//------------------------------------------------------------------------------
-// Rmatrix MatrixEvaluate()
-//------------------------------------------------------------------------------
-/**
- * @return the division of left node by the right node
- *
- */
-//------------------------------------------------------------------------------
-Rmatrix Divide::MatrixEvaluate()
-{
-   Integer type1, row1, col1; // Left node matrix
-   Integer type2, row2, col2; // Right node matrix
-   Rmatrix div;
-   
-   // Get the type(Real or Matrix), # rows and # columns of the left node
-   leftNode->ReportOutputs(type1, row1, col1);
-   
-   // Get the type(Real or Matrix), # rows and # columns of the right node
-   rightNode->ReportOutputs(type2, row2, col2);
-   
-   // Divide matrix by matrix
-   if( type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::RMATRIX_TYPE)
-      div = leftNode->MatrixEvaluate() / rightNode->MatrixEvaluate();
-   // Divide scalar by matrix
-//   else if( type1 == Gmat::REAL_TYPE && type2 == Gmat::RMATRIX_TYPE)
-//      div = leftNode->Evaluate() / rightNode->MatrixEvaluate();
-   // Divide matrix by scalar
-   else if( type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::REAL_TYPE)
-      div = leftNode->MatrixEvaluate() / rightNode->Evaluate();
-
-   return div;
+   return GmatMathUtil::Pow(leftNode->Evaluate(), rightNode->Evaluate());
 }
 

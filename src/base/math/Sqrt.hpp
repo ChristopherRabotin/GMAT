@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//                              Divide
+//                              Sqrt
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -9,29 +9,28 @@
 // number S-67573-G
 //
 // Author: LaMont Ruley
-// Created: 2006/04/07
+// Created: 2006/04/14
 //
 /**
- * Declares Divide class.
+ * Declares Sqrt class.
  */
 //------------------------------------------------------------------------------
-#ifndef Divide_hpp
-#define Divide_hpp
+#ifndef Sqrt_hpp
+#define Sqrt_hpp
 
 #include "MathFunction.hpp"
 
-class GMAT_API Divide : public MathFunction
+class GMAT_API Sqrt : public MathFunction
 {
 public:
-   Divide(const std::string &nomme);
-   virtual ~Divide();
-   Divide(const Divide &copy);
+   Sqrt(const std::string &nomme);
+   virtual ~Sqrt();
+   Sqrt(const Sqrt &copy);
                  
    // inherited from GmatBase
    virtual GmatBase* Clone() const;
 
    virtual Real Evaluate();
-   virtual Rmatrix MatrixEvaluate();  
 };
 
-#endif // Divide_hpp
+#endif // Sqrt_hpp

@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//                              Divide
+//                              Power
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -9,29 +9,28 @@
 // number S-67573-G
 //
 // Author: LaMont Ruley
-// Created: 2006/04/07
+// Created: 2006/04/20
 //
 /**
- * Declares Divide class.
+ * Declares Power class.
  */
 //------------------------------------------------------------------------------
-#ifndef Divide_hpp
-#define Divide_hpp
+#ifndef Power_hpp
+#define Power_hpp
 
 #include "MathFunction.hpp"
 
-class GMAT_API Divide : public MathFunction
+class GMAT_API Power : public MathFunction
 {
 public:
-   Divide(const std::string &nomme);
-   virtual ~Divide();
-   Divide(const Divide &copy);
+   Power(const std::string &nomme);
+   virtual ~Power();
+   Power(const Power &copy);
                  
    // inherited from GmatBase
    virtual GmatBase* Clone() const;
 
    virtual Real Evaluate();
-   virtual Rmatrix MatrixEvaluate();  
 };
 
-#endif // Divide_hpp
+#endif // Power_hpp

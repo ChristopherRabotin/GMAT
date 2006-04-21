@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//                              Divide
+//                              Log10
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -9,29 +9,28 @@
 // number S-67573-G
 //
 // Author: LaMont Ruley
-// Created: 2006/04/07
+// Created: 2006/04/14
 //
 /**
- * Declares Divide class.
+ * Declares Log10 class.
  */
 //------------------------------------------------------------------------------
-#ifndef Divide_hpp
-#define Divide_hpp
+#ifndef Log10_hpp
+#define Log10_hpp
 
 #include "MathFunction.hpp"
 
-class GMAT_API Divide : public MathFunction
+class GMAT_API Log10 : public MathFunction
 {
 public:
-   Divide(const std::string &nomme);
-   virtual ~Divide();
-   Divide(const Divide &copy);
+   Log10(const std::string &nomme);
+   virtual ~Log10();
+   Log10(const Log10 &copy);
                  
    // inherited from GmatBase
    virtual GmatBase* Clone() const;
 
    virtual Real Evaluate();
-   virtual Rmatrix MatrixEvaluate();  
 };
 
-#endif // Divide_hpp
+#endif // Log10_hpp

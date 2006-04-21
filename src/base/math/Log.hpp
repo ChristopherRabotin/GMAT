@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//                              Divide
+//                              ACos
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -9,29 +9,34 @@
 // number S-67573-G
 //
 // Author: LaMont Ruley
-// Created: 2006/04/07
+// Created: 2006/04/20
 //
 /**
- * Declares Divide class.
+ * Declares Log class.
  */
 //------------------------------------------------------------------------------
-#ifndef Divide_hpp
-#define Divide_hpp
+#ifndef Log_hpp
+#define Log_hpp
 
 #include "MathFunction.hpp"
+#include "RealUtilities.hpp"
 
-class GMAT_API Divide : public MathFunction
+class GMAT_API Log : public MathFunction
 {
 public:
-   Divide(const std::string &nomme);
-   virtual ~Divide();
-   Divide(const Divide &copy);
+   Log(const std::string &nomme);
+   virtual ~Log();
+   Log(const Log &copy);
                  
    // inherited from GmatBase
    virtual GmatBase* Clone() const;
 
    virtual Real Evaluate();
-   virtual Rmatrix MatrixEvaluate();  
+
+protected:
+
+private:
+   
 };
 
-#endif // Divide_hpp
+#endif // Log_hpp

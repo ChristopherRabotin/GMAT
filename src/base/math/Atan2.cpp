@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//                                  Divide
+//                                  Atan2
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -9,14 +9,15 @@
 // number S-67573-G
 //
 // Author: LaMont Ruley
-// Created: 2006/03/31
+// Created: 2006/04/20
 //
 /**
- * Implements Divide class.
+ * Implements Atan2 class.
  */
 //------------------------------------------------------------------------------
 
-#include "Divide.hpp"
+#include "Atan2.hpp"
+#include <math.h>          // for atan2(double y, double x)
 #include "MessageInterface.hpp"
 
 //---------------------------------
@@ -24,40 +25,40 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// Divide()
+// Atan2()
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  */
 //------------------------------------------------------------------------------
-Divide::Divide(const std::string &nomme)
+Atan2::Atan2(const std::string &nomme)
    : MathFunction("", nomme)
 {
 }
 
 
 //------------------------------------------------------------------------------
-// ~Divide()
+// ~Atan2()
 //------------------------------------------------------------------------------
 /**
  * Destructor.
  */
 //------------------------------------------------------------------------------
-Divide::~Divide()
+Atan2::~Atan2()
 {
 }
 
 
 //------------------------------------------------------------------------------
-//  Divide(const Divide &copy)
+//  Atan2(const Atan2 &copy)
 //------------------------------------------------------------------------------
 /**
- * Constructs the Divide object (copy constructor).
+ * Constructs the Atan2 object (copy constructor).
  * 
  * @param <copy> Object that is copied
  */
 //------------------------------------------------------------------------------
-Divide::Divide(const Divide &copy) :
+Atan2::Atan2(const Atan2 &copy) :
    MathFunction      (copy)
 {
 }
@@ -67,15 +68,15 @@ Divide::Divide(const Divide &copy) :
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
- * Clone of the Divide operation.
+ * Clone of the Atan2 operation.
  *
- * @return clone of the Divide operation.
+ * @return clone of the Atan2 operation.
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* Divide::Clone() const
+GmatBase* Atan2::Clone() const
 {
-   return (new Divide(*this));
+   return (new Atan2(*this));
 }
 
 
@@ -83,46 +84,12 @@ GmatBase* Divide::Clone() const
 // Real Evaluate()
 //------------------------------------------------------------------------------
 /**
- * @return the product of left and right nodes
+ * @return returns the arc tangent of right node / left node 
+ * in the range [-, ] radians
  *
  */
 //------------------------------------------------------------------------------
-Real Divide::Evaluate()
+Real Atan2::Evaluate()
 {
-   return leftNode->Evaluate() / rightNode->Evaluate();
+   return atan2(rightNode->Evaluate(), leftNode->Evaluate());
 }
-
-
-//------------------------------------------------------------------------------
-// Rmatrix MatrixEvaluate()
-//------------------------------------------------------------------------------
-/**
- * @return the division of left node by the right node
- *
- */
-//------------------------------------------------------------------------------
-Rmatrix Divide::MatrixEvaluate()
-{
-   Integer type1, row1, col1; // Left node matrix
-   Integer type2, row2, col2; // Right node matrix
-   Rmatrix div;
-   
-   // Get the type(Real or Matrix), # rows and # columns of the left node
-   leftNode->ReportOutputs(type1, row1, col1);
-   
-   // Get the type(Real or Matrix), # rows and # columns of the right node
-   rightNode->ReportOutputs(type2, row2, col2);
-   
-   // Divide matrix by matrix
-   if( type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::RMATRIX_TYPE)
-      div = leftNode->MatrixEvaluate() / rightNode->MatrixEvaluate();
-   // Divide scalar by matrix
-//   else if( type1 == Gmat::REAL_TYPE && type2 == Gmat::RMATRIX_TYPE)
-//      div = leftNode->Evaluate() / rightNode->MatrixEvaluate();
-   // Divide matrix by scalar
-   else if( type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::REAL_TYPE)
-      div = leftNode->MatrixEvaluate() / rightNode->Evaluate();
-
-   return div;
-}
-

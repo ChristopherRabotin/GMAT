@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//                              Divide
+//                              Atan2
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -9,29 +9,29 @@
 // number S-67573-G
 //
 // Author: LaMont Ruley
-// Created: 2006/04/07
+// Created: 2006/04/10
 //
 /**
- * Declares Divide class.
+ * Declares Atan2 class.
  */
 //------------------------------------------------------------------------------
-#ifndef Divide_hpp
-#define Divide_hpp
+#ifndef Atan2_hpp
+#define Atan2_hpp
 
 #include "MathFunction.hpp"
+#include "RealUtilities.hpp"
 
-class GMAT_API Divide : public MathFunction
+class GMAT_API Atan2 : public MathFunction
 {
 public:
-   Divide(const std::string &nomme);
-   virtual ~Divide();
-   Divide(const Divide &copy);
+   Atan2(const std::string &nomme);
+   virtual ~Atan2();
+   Atan2(const Atan2 &copy);
                  
    // inherited from GmatBase
    virtual GmatBase* Clone() const;
 
    virtual Real Evaluate();
-   virtual Rmatrix MatrixEvaluate();  
 };
 
-#endif // Divide_hpp
+#endif // Atan2_hpp

@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//                                  Divide
+//                                  Log10
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -9,14 +9,14 @@
 // number S-67573-G
 //
 // Author: LaMont Ruley
-// Created: 2006/03/31
+// Created: 2006/04/14
 //
 /**
- * Implements Divide class.
+ * Implements Log10 class.
  */
 //------------------------------------------------------------------------------
 
-#include "Divide.hpp"
+#include "Log10.hpp"
 #include "MessageInterface.hpp"
 
 //---------------------------------
@@ -24,40 +24,40 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// Divide()
+// Log10()
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  */
 //------------------------------------------------------------------------------
-Divide::Divide(const std::string &nomme)
+Log10::Log10(const std::string &nomme)
    : MathFunction("", nomme)
 {
 }
 
 
 //------------------------------------------------------------------------------
-// ~Divide()
+// ~Log10()
 //------------------------------------------------------------------------------
 /**
  * Destructor.
  */
 //------------------------------------------------------------------------------
-Divide::~Divide()
+Log10::~Log10()
 {
 }
 
 
 //------------------------------------------------------------------------------
-//  Divide(const Divide &copy)
+//  Log10(const Log10 &copy)
 //------------------------------------------------------------------------------
 /**
- * Constructs the Divide object (copy constructor).
+ * Constructs the Log10 object (copy constructor).
  * 
  * @param <copy> Object that is copied
  */
 //------------------------------------------------------------------------------
-Divide::Divide(const Divide &copy) :
+Log10::Log10(const Log10 &copy) :
    MathFunction      (copy)
 {
 }
@@ -67,15 +67,15 @@ Divide::Divide(const Divide &copy) :
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
- * Clone of the Divide operation.
+ * Clone of the Log10 operation.
  *
- * @return clone of the Divide operation.
+ * @return clone of the Log10 operation.
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* Divide::Clone() const
+GmatBase* Log10::Clone() const
 {
-   return (new Divide(*this));
+   return (new Log10(*this));
 }
 
 
@@ -83,46 +83,12 @@ GmatBase* Divide::Clone() const
 // Real Evaluate()
 //------------------------------------------------------------------------------
 /**
- * @return the product of left and right nodes
+ * @return the base 10 logarithm.
  *
  */
 //------------------------------------------------------------------------------
-Real Divide::Evaluate()
+Real Log10::Evaluate()
 {
-   return leftNode->Evaluate() / rightNode->Evaluate();
-}
-
-
-//------------------------------------------------------------------------------
-// Rmatrix MatrixEvaluate()
-//------------------------------------------------------------------------------
-/**
- * @return the division of left node by the right node
- *
- */
-//------------------------------------------------------------------------------
-Rmatrix Divide::MatrixEvaluate()
-{
-   Integer type1, row1, col1; // Left node matrix
-   Integer type2, row2, col2; // Right node matrix
-   Rmatrix div;
-   
-   // Get the type(Real or Matrix), # rows and # columns of the left node
-   leftNode->ReportOutputs(type1, row1, col1);
-   
-   // Get the type(Real or Matrix), # rows and # columns of the right node
-   rightNode->ReportOutputs(type2, row2, col2);
-   
-   // Divide matrix by matrix
-   if( type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::RMATRIX_TYPE)
-      div = leftNode->MatrixEvaluate() / rightNode->MatrixEvaluate();
-   // Divide scalar by matrix
-//   else if( type1 == Gmat::REAL_TYPE && type2 == Gmat::RMATRIX_TYPE)
-//      div = leftNode->Evaluate() / rightNode->MatrixEvaluate();
-   // Divide matrix by scalar
-   else if( type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::REAL_TYPE)
-      div = leftNode->MatrixEvaluate() / rightNode->Evaluate();
-
-   return div;
+   return GmatMathUtil::Log10(leftNode->Evaluate());
 }
 
