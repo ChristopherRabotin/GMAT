@@ -77,11 +77,11 @@ archclean :
 	rm -rf $(CONSOLETARGET)
 
 OBJECTS = \
-	 attitude/Attitude.o \
-	 attitude/AttitudeException.o \
-	 attitude/CSFixed.o \
-	 attitude/Kinematic.o \
-	 attitude/Spinner.o \
+	attitude/Attitude.o \
+	attitude/AttitudeException.o \
+	attitude/CSFixed.o \
+	attitude/Kinematic.o \
+	attitude/Spinner.o \
     burn/BurnException.o \
     burn/Burn.o \
     burn/FiniteBurn.o \
@@ -203,21 +203,26 @@ OBJECTS = \
     interpreter/MathParser.o \
     interpreter/MathTree.o \
     interpreter/ScriptInterpreter.o \
-    math/ACos.o \
+    math/Acos.o \
     math/Add.o \
-    math/ASin.o \
-    math/ATan.o \
+    math/Asin.o \
+    math/Atan.o \
     math/Cos.o \
     math/DegToRad.o \
     math/Divide.o \
+    math/Exp.o \
+    math/Log.o \
+    math/Log10.o \
     math/Inverse.o \
     math/MathElement.o \
     math/MathException.o \
     math/MathFunction.o \
     math/MathNode.o \
     math/Multiply.o \
+    math/Power.o \
     math/RadToDeg.o \
     math/Sin.o \
+    math/Sqrt.o \
     math/Subtract.o \
     math/Tan.o \
     math/Transpose.o \
