@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 Add::Add(const std::string &nomme)
-   : MathFunction("", nomme)
+   : MathFunction("Add", nomme)
 {
 }
 

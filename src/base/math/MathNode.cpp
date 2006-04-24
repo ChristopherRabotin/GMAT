@@ -37,7 +37,7 @@ MathNode::MathNode(const std::string &typeStr, const std::string &nomme) :
     GmatBase        (Gmat::MATH_NODE, typeStr, nomme),
     realValue       (0.0)
 {
-    matrix = Rmatrix(0, 0);
+    matrix = Rmatrix(3, 3);
 }
 
 //------------------------------------------------------------------------------

@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 Power::Power(const std::string &nomme)
-   : MathFunction("", nomme)
+   : MathFunction("Power", nomme)
 {
 }
 

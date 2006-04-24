@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 Exp::Exp(const std::string &nomme)
-   : MathFunction("", nomme)
+   : MathFunction("Exp", nomme)
 {
 }
 

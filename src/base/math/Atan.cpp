@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 Atan::Atan(const std::string &nomme)
-   : MathFunction("", nomme)
+   : MathFunction("Atan", nomme)
 {
 }
 

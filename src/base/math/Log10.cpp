@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 Log10::Log10(const std::string &nomme)
-   : MathFunction("", nomme)
+   : MathFunction("Log10", nomme)
 {
 }
 

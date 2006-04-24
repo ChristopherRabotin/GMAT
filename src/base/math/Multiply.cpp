@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 Multiply::Multiply(const std::string &nomme)
-   : MathFunction("", nomme)
+   : MathFunction("Multiply", nomme)
 {
 }
 

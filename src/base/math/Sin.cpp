@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 Sin::Sin(const std::string &nomme)
-   : MathFunction("", nomme)
+   : MathFunction("Sin", nomme)
 {
 }
 

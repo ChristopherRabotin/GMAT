@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 Tan::Tan(const std::string &nomme)
-   : MathFunction("", nomme)
+   : MathFunction("Tan", nomme)
 {
 }
 

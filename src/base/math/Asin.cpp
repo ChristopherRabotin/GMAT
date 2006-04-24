@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 Asin::Asin(const std::string &nomme)
-   : MathFunction("", nomme)
+   : MathFunction("Asin", nomme)
 {
 }
 

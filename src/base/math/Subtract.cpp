@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 Subtract::Subtract(const std::string &nomme)
-   : MathFunction("", nomme)
+   : MathFunction("Subtract", nomme)
 {
 }
 

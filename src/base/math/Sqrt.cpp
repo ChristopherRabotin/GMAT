@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 Sqrt::Sqrt(const std::string &nomme)
-   : MathFunction("", nomme)
+   : MathFunction("Sqrt", nomme)
 {
 }
 

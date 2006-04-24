@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 Cos::Cos(const std::string &nomme)
-   : MathFunction("", nomme)
+   : MathFunction("Cos", nomme)
 {
 }
 

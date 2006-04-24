@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 Divide::Divide(const std::string &nomme)
-   : MathFunction("", nomme)
+   : MathFunction("Divide", nomme)
 {
 }
 
