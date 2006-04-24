@@ -209,6 +209,7 @@ OBJECTS = \
     math/Atan.o \
     math/Cos.o \
     math/DegToRad.o \
+    math/Determinant.o \
     math/Divide.o \
     math/Exp.o \
     math/Log.o \
@@ -219,6 +220,7 @@ OBJECTS = \
     math/MathFunction.o \
     math/MathNode.o \
     math/Multiply.o \
+    math/Norm.o \
     math/Power.o \
     math/RadToDeg.o \
     math/Sin.o \
