@@ -589,6 +589,23 @@ bool Rvector::MakeZeroVector()
    return true;
 }
 
+//arg: 4/24/06 Added
+//------------------------------------------------------------------------------
+//  Real Norm()
+//------------------------------------------------------------------------------
+/**
+ * This method calls returns the square root of the sum of the squares.
+ */
+//------------------------------------------------------------------------------
+Real Rvector::Norm()
+{
+   Real sum = 0;
+       
+   for (Integer i=0; i<sizeD; i++)
+      sum += GmatMathUtil::Pow(elementD[i], 2);
+      
+   return GmatMathUtil::Sqrt(sum);
+}
 
 //---------------------------------
 // friend function
