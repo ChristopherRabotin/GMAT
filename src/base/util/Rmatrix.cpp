@@ -974,3 +974,31 @@ std::ostream& operator<< (std::ostream &output, const Rmatrix &a)
 {
    return GmatRealUtil::operator<< (output, a);
 }
+
+//------------------------------------------------------------------------------
+// Rvector GetRow(int r) const
+//------------------------------------------------------------------------------
+Rvector Rmatrix::GetRow(int r) const
+{
+   Rvector rvec(colsD);
+  
+   for (int i=0; i<colsD; i++)
+      rvec.SetElement(i, GetElement(r, i));
+
+   return rvec;
+}
+
+//------------------------------------------------------------------------------
+// Rvector GetColumn(int c) const
+//------------------------------------------------------------------------------
+Rvector Rmatrix::GetColumn(int c) const
+{
+   Rvector rvec(rowsD);
+
+   for (int i=0; i<rowsD; i++)
+      rvec.SetElement(i, GetElement(i, c));
+
+   return rvec;
+}
+
+

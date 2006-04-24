@@ -108,6 +108,9 @@ public:
    friend std::istream& operator>> (std::istream &input, Rmatrix &a);
    friend std::ostream& operator<< (std::ostream &output, const Rmatrix &a);
    
+   Rvector GetRow(int r) const;  //arg 4/24/06
+   Rvector GetColumn(int c) const; //arg 4/24/06   
+
 protected:   
 
 private:
