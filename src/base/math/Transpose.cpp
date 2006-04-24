@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 Transpose::Transpose(const std::string &nomme)
-   : MathFunction("", nomme)
+   : MathFunction("Transpose", nomme)
 {
 }
 
@@ -76,6 +76,55 @@ Transpose::Transpose(const Transpose &copy) :
 GmatBase* Transpose::Clone() const
 {
    return (new Transpose(*this));
+}
+
+//------------------------------------------------------------------------------
+// Real Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * @return the Transpose of left node
+ *
+ */
+//------------------------------------------------------------------------------
+Real Transpose::Evaluate()
+{
+   throw MathException("Evaluate()::Transpose returns a matrix value.\n");    
+}
+
+//------------------------------------------------------------------------------
+// bool EvaluateInputs()
+//------------------------------------------------------------------------------
+/**
+ * This method calls its subnodes and checks to be sure that the subnodes return
+ * compatible data for the function.
+ */
+//------------------------------------------------------------------------------
+bool Transpose::EvaluateInputs()
+{
+   if ( leftNode->EvaluateInputs() )
+   {
+      try
+      {
+         leftNode->MatrixEvaluate();
+         return true;
+      }
+      catch (MathException &e)
+      {
+         return false;
+      } 
+   }
+   else
+      return false;
+}
+
+//------------------------------------------------------------------------------
+// void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+//------------------------------------------------------------------------------
+void Transpose::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+{
+   type = Gmat::RMATRIX_TYPE;
+   rowCount = (leftNode->MatrixEvaluate()).GetNumRows();
+   colCount = (leftNode->MatrixEvaluate()).GetNumColumns();
 }
 
 //------------------------------------------------------------------------------

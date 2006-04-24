@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 DegToRad::DegToRad(const std::string &nomme)
-   : MathFunction("", nomme)
+   : MathFunction("DegToRad", nomme)
 {
 }
 
@@ -90,4 +90,48 @@ GmatBase* DegToRad::Clone() const
 Real DegToRad::Evaluate()
 {
    return GmatMathUtil::DegToRad(leftNode->Evaluate());
+}
+
+//------------------------------------------------------------------------------
+// bool EvaluateInputs()
+//------------------------------------------------------------------------------
+/**
+ * This method calls its subnodes and checks to be sure that the subnodes return
+ * compatible data for the function.
+ */
+//------------------------------------------------------------------------------
+bool DegToRad::EvaluateInputs()
+{
+   if ( leftNode->EvaluateInputs() )
+   {
+      try
+      {
+         leftNode->Evaluate();
+         return true;
+      }
+      catch (MathException &e)
+      {
+         return false;
+      } 
+   }
+   else
+      return false;
+}
+
+//------------------------------------------------------------------------------
+// void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+//------------------------------------------------------------------------------
+void DegToRad::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+{
+   type = Gmat::REAL_TYPE;
+   rowCount = 1;
+   colCount = 1;
+}
+
+//------------------------------------------------------------------------------
+// Rmatrix *MatrixEvaluate()
+//------------------------------------------------------------------------------
+Rmatrix DegToRad::MatrixEvaluate()
+{
+   throw MathException("MatrixEvaluate()::DegToRad returns a real value.\n");    
 }

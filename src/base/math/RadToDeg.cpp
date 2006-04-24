@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 RadToDeg::RadToDeg(const std::string &nomme)
-   : MathFunction("", nomme)
+   : MathFunction("RadToDeg", nomme)
 {
 }
 
@@ -90,4 +90,48 @@ GmatBase* RadToDeg::Clone() const
 Real RadToDeg::Evaluate()
 {
    return GmatMathUtil::RadToDeg(leftNode->Evaluate());
+}
+
+//------------------------------------------------------------------------------
+// bool EvaluateInputs()
+//------------------------------------------------------------------------------
+/**
+ * This method calls its subnodes and checks to be sure that the subnodes return
+ * compatible data for the function.
+ */
+//------------------------------------------------------------------------------
+bool RadToDeg::EvaluateInputs()
+{
+   if ( leftNode->EvaluateInputs() )
+   {
+      try
+      {
+         leftNode->Evaluate();
+         return true;
+      }
+      catch (MathException &e)
+      {
+         return false;
+      } 
+   }
+   else
+      return false;
+}
+
+//------------------------------------------------------------------------------
+// void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+//------------------------------------------------------------------------------
+void RadToDeg::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+{
+   type = Gmat::REAL_TYPE;
+   rowCount = 1;
+   colCount = 1;
+}
+
+//------------------------------------------------------------------------------
+// Rmatrix *MatrixEvaluate()
+//------------------------------------------------------------------------------
+Rmatrix RadToDeg::MatrixEvaluate()
+{
+   throw MathException("MatrixEvaluate()::RadToDeg returns a real value.\n");    
 }

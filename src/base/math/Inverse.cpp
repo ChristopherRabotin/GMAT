@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 Inverse::Inverse(const std::string &nomme)
-   : MathFunction("", nomme)
+   : MathFunction("Inverse", nomme)
 {
 }
 
@@ -76,6 +76,55 @@ Inverse::Inverse(const Inverse &copy) :
 GmatBase* Inverse::Clone() const
 {
    return (new Inverse(*this));
+}
+
+//------------------------------------------------------------------------------
+// Real Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * @return the Inverse of left node
+ *
+ */
+//------------------------------------------------------------------------------
+Real Inverse::Evaluate()
+{
+   throw MathException("Evaluate()::Inverse returns a matrix value.\n");    
+}
+
+//------------------------------------------------------------------------------
+// bool EvaluateInputs()
+//------------------------------------------------------------------------------
+/**
+ * This method calls its subnodes and checks to be sure that the subnodes return
+ * compatible data for the function.
+ */
+//------------------------------------------------------------------------------
+bool Inverse::EvaluateInputs()
+{
+   if ( leftNode->EvaluateInputs() )
+   {
+      try
+      {
+         leftNode->MatrixEvaluate();
+         return true;
+      }
+      catch (MathException &e)
+      {
+         return false;
+      } 
+   }
+   else
+      return false;
+}
+
+//------------------------------------------------------------------------------
+// void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+//------------------------------------------------------------------------------
+void Inverse::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+{
+   type = Gmat::RMATRIX_TYPE;
+   rowCount = (leftNode->MatrixEvaluate()).GetNumRows();;
+   colCount = (leftNode->MatrixEvaluate()).GetNumColumns();
 }
 
 //------------------------------------------------------------------------------
