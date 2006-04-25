@@ -30,6 +30,8 @@ public:
    ~ForDialog();
    
    bool IsUpdated();
+   Real GetRealValue() { return realVal; };
+   
 private:   
    wxStaticText *forStaticText;
     
@@ -41,6 +43,7 @@ private:
    Integer whichParameter;
    
    bool madeUpdate;
+   Real realVal;
    
    static const int START_COL = 1;
    static const int INCR_COL = 2;

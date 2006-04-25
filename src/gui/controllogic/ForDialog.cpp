@@ -24,6 +24,7 @@
 BEGIN_EVENT_TABLE(ForDialog, GmatDialog)
    EVT_BUTTON(ID_BUTTON_OK, GmatDialog::OnOK)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
+   EVT_TEXT(ID_TEXTCTRL, ForDialog::OnTextChange)
    EVT_TEXT_ENTER(ID_TEXTCTRL, ForDialog::OnTextChange)
 END_EVENT_TABLE()
 
@@ -50,6 +51,7 @@ ForDialog::ForDialog(wxWindow *parent, For *forCommand, Integer col)
     whichParameter = col;
     
     madeUpdate = false;
+    realVal = -999.0;
     
     Create();
     ShowData();
@@ -94,10 +96,12 @@ void ForDialog::Initialize()
 void ForDialog::Create()
 {
     // wxStaticText
-    forStaticText = new wxStaticText( this, ID_TEXT, wxT("For Parameter"), wxDefaultPosition, wxDefaultSize, 0 );
+    forStaticText = new wxStaticText( this, ID_TEXT, wxT("For Parameter"),
+                                      wxDefaultPosition, wxDefaultSize, 0 );
  
     // wxTextCtrl
-    forTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1), wxTE_PROCESS_ENTER );
+    forTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition,
+                                  wxSize(150,-1), wxTE_PROCESS_ENTER );
  
     // wxSizer
     wxBoxSizer *mainPageSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -123,6 +127,7 @@ void ForDialog::LoadData()
        forID = theForCommand->GetParameterID("EndValue");
        
     forTextCtrl->SetValue(wxVariant(theForCommand->GetRealParameter(forID)));
+    theOkButton->Enable(false);
 }
 
 //------------------------------------------------------------------------------
@@ -130,16 +135,35 @@ void ForDialog::LoadData()
 //------------------------------------------------------------------------------
 void ForDialog::SaveData()
 {
+   canClose = true;
+   
    if (theOkButton->IsEnabled())
-   {      
-      if (whichParameter == START_COL)
-         forID = theForCommand->GetParameterID("StartValue");
-      else if (whichParameter == INCR_COL)
-         forID = theForCommand->GetParameterID("Step");
-      else if (whichParameter == END_COL)
-         forID = theForCommand->GetParameterID("EndValue");
-       
-      theForCommand->SetRealParameter(forID, atof(forTextCtrl->GetValue().c_str()));
+   {
+      wxString valStr = forTextCtrl->GetValue();
+      
+      if (valStr.ToDouble(&realVal))
+      {
+         madeUpdate = true;
+
+         // loj: 4/25/06 Commented out so that Cancel from ForPanel will not
+         // save new values. Only ForPanel::SaveData() saves the new value to
+         // For command
+         
+         //if (whichParameter == START_COL)
+         //   forID = theForCommand->GetParameterID("StartValue");
+         //else if (whichParameter == INCR_COL)
+         //   forID = theForCommand->GetParameterID("Step");
+         //else if (whichParameter == END_COL)
+         //   forID = theForCommand->GetParameterID("EndValue");
+         
+         //theForCommand->SetRealParameter(forID, atof(forTextCtrl->GetValue().c_str()));
+      }
+      else
+      {
+         wxMessageBox("Invalid number entered!!", _T(""), wxOK, this);
+         madeUpdate = false;
+         canClose = false;
+      }
    }       
 }
 
@@ -157,5 +181,5 @@ void ForDialog::ResetData()
 void ForDialog::OnTextChange(wxCommandEvent &event)
 {
     theOkButton->Enable(true);
-    madeUpdate = true;
+    //madeUpdate = true;
 }
