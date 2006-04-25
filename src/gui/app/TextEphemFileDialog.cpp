@@ -72,29 +72,16 @@ void TextEphemFileDialog::Create()
    // Ephemeris file parameters
    //------------------------------------------------------
    
-   //----- Ephemeris header filename
+   //----- Ephemeris filename
    wxStaticText *headerFileLabel =
       new wxStaticText(this, ID_TEXT, wxT("Header File:"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
-   mHeaderFileTextCtrl =
+   mEphemFileTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                      wxDefaultPosition, wxSize(200,20), 0);
    
-   mHeaderFileBrowseButton =
-      new wxButton(this, ID_BUTTON, wxT("Browse"),
-                    wxDefaultPosition, wxSize(60,20), 0);
-
-   //----- Ephemeris data filename
-   wxStaticText *dataFileLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Data File:"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   
-   mDataFileTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(200,20), 0);
-   
-   mDataFileBrowseButton =
+   mEphemFileBrowseButton =
       new wxButton(this, ID_BUTTON, wxT("Browse"),
                     wxDefaultPosition, wxSize(60,20), 0);
 
@@ -131,12 +118,8 @@ void TextEphemFileDialog::Create()
 
    wxFlexGridSizer *fileSizer = new wxFlexGridSizer(3, 0, 0);
    fileSizer->Add(headerFileLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   fileSizer->Add(mHeaderFileTextCtrl, 0, wxALIGN_CENTER|wxALL|wxGROW, bsize);
-   fileSizer->Add(mHeaderFileBrowseButton, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   fileSizer->Add(dataFileLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   fileSizer->Add(mDataFileTextCtrl, 0, wxALIGN_CENTER|wxALL|wxGROW, bsize);
-   fileSizer->Add(mDataFileBrowseButton, 0, wxALIGN_LEFT|wxALL, bsize);
+   fileSizer->Add(mEphemFileTextCtrl, 0, wxALIGN_CENTER|wxALL|wxGROW, bsize);
+   fileSizer->Add(mEphemFileBrowseButton, 0, wxALIGN_LEFT|wxALL, bsize);
    
    fileSizer->Add(intervalLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
    fileSizer->Add(mIntervalTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
@@ -239,28 +222,22 @@ void TextEphemFileDialog::LoadData()
       mSelectedScListBox->Append(scName);
       mSelectedScListBox->SetStringSelection(scName);
 
-      // set default ephemeris headr/data file using spacecraft name
-      wxString fname = "/" + scName + "_EphemHeader.txt";
-      mHeaderFileTextCtrl->SetValue(mEphemDirectory.c_str() + fname);
-
-      fname = "/" + scName + "_EphemData.txt";
-      mDataFileTextCtrl->SetValue(mEphemDirectory.c_str() + fname);
+      // set default ephemeris  file using spacecraft name
+      wxString fname = scName + "_Ephem.txt";
+      mEphemFileTextCtrl->SetValue(mEphemDirectory.c_str() + fname);
       
       theOkButton->Enable();
    }
    else
    {
-      mHeaderFileTextCtrl->SetValue(mEphemDirectory.c_str() +
-                                    wxString("/TextEphemHeader.txt"));
-      mDataFileTextCtrl->SetValue(mEphemDirectory.c_str() +
-                                  wxString("/TextEphemData.txt"));
+      mEphemFileTextCtrl->SetValue(mEphemDirectory.c_str() +
+                                   wxString("/TextEphemHeader.txt"));
       
       theOkButton->Disable();
    }
 
    // Show last position
-   mHeaderFileTextCtrl->SetInsertionPointEnd();
-   mDataFileTextCtrl->SetInsertionPointEnd();
+   mEphemFileTextCtrl->SetInsertionPointEnd();
    
    mCoordSysComboBox->SetSelection(0);
    
@@ -303,32 +280,15 @@ void TextEphemFileDialog::ResetData()
 //------------------------------------------------------------------------------
 void TextEphemFileDialog::OnButtonClick(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == mHeaderFileBrowseButton)
+   if (event.GetEventObject() == mEphemFileBrowseButton)
    {
       wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
     
       if (dialog.ShowModal() == wxID_OK)
       {
          mEphemDirectory = dialog.GetPath();
-         mHeaderFileTextCtrl->SetValue(mEphemDirectory);
-         mHeaderFileTextCtrl->SetInsertionPointEnd();
-         #if DEBUG_EPHEM_FILE_DIALOG
-         MessageInterface::ShowMessage
-            ("TextEphemFileDialog::OnButtonClick() mEphemDirectory=%s\n",
-             mEphemDirectory.c_str());
-         #endif
-      }
-   }
-   else if (event.GetEventObject() == mDataFileBrowseButton)
-   {
-      wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
-    
-      if (dialog.ShowModal() == wxID_OK)
-      {
-         mEphemDirectory = dialog.GetPath();
-         mDataFileTextCtrl->SetValue(mEphemDirectory);
-         mDataFileTextCtrl->SetInsertionPointEnd();
-         
+         mEphemFileTextCtrl->SetValue(mEphemDirectory);
+         mEphemFileTextCtrl->SetInsertionPointEnd();
          #if DEBUG_EPHEM_FILE_DIALOG
          MessageInterface::ShowMessage
             ("TextEphemFileDialog::OnButtonClick() mEphemDirectory=%s\n",
@@ -381,11 +341,10 @@ void TextEphemFileDialog::OnButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 bool TextEphemFileDialog::CreateTextEphem()
 {
-   std::string headerFileName = mHeaderFileTextCtrl->GetValue().c_str();
-   std::string dataFileName = mDataFileTextCtrl->GetValue().c_str();
+   std::string ephemFileName = mEphemFileTextCtrl->GetValue().c_str();
    
    TextEphemFile *ephemFile = (TextEphemFile*)(theGuiInterpreter->
-      CreateSubscriber("TextEphemFile", "TextEphemFile", dataFileName, false));
+      CreateSubscriber("TextEphemFile", "TextEphemFile", ephemFileName, false));
 
    // get first spacecraft from the list
    std::string scName = mSelectedScListBox->GetString(0).c_str();
@@ -432,7 +391,7 @@ bool TextEphemFileDialog::CreateTextEphem()
    // Set parameters to ephemeris file
    try
    {
-      ephemFile->SetStringParameter("HeaderFile", headerFileName);
+      //ephemFile->SetStringParameter("filename", ephemFileName);
       ephemFile->SetStringParameter("Add", time);
       ephemFile->SetStringParameter("Add", xpos);
       ephemFile->SetStringParameter("Add", ypos);

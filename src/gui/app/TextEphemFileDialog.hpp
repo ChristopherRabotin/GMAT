@@ -34,8 +34,7 @@ protected:
    virtual void SaveData();
    virtual void ResetData();
    
-   wxTextCtrl *mHeaderFileTextCtrl;
-   wxTextCtrl *mDataFileTextCtrl;
+   wxTextCtrl *mEphemFileTextCtrl;
    wxTextCtrl *mIntervalTextCtrl;
    
    wxComboBox *mCoordSysComboBox;
@@ -47,8 +46,7 @@ protected:
    wxButton *mAddScButton;
    wxButton *mRemoveScButton;
    wxButton *mClearScButton;
-   wxButton *mHeaderFileBrowseButton;
-   wxButton *mDataFileBrowseButton;
+   wxButton *mEphemFileBrowseButton;
    
    // event handling
    void OnButtonClick(wxCommandEvent& event);   
