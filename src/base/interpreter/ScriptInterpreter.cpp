@@ -780,7 +780,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
 {
    if (mode == Gmat::EPHEM_HEADER)
    {
-      *outstream << "% GMAT Ephemeris Header File\n";
+      *outstream << "% GMAT Ephemeris File\n";
       *outstream << "% GMAT Build Date: " <<  __DATE__ << "\n\n";
    }
    else
