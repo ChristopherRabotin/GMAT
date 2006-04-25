@@ -30,9 +30,9 @@ namespace GmatStringUtil
       BOTH = 3,
    };
    
+   std::string RemoveAll(const std::string &str, char ch);
    std::string Trim(const std::string &str, StripType stype = TRAILING);
    std::string Strip(const std::string &str, StripType stype = TRAILING);
-
    bool ToDouble(const std::string &str, Real *value);
    std::string ToUpper(const std::string &str);
    std::string ToLower(const std::string &str);

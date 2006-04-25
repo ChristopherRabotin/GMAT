@@ -26,6 +26,27 @@
 
 using namespace std;
 
+
+//------------------------------------------------------------------------------
+// std::string RemoveAll(const std::string &str, char ch)
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::RemoveAll(const std::string &str, char ch)
+{
+   std::string str2 = str;
+
+   std::string::iterator iter = str2.begin();
+   while (iter != str2.end())
+   {
+      if (*iter == ' ')
+         str2.erase(iter);
+      
+      ++iter;
+   }
+
+   return str2;
+}
+
+
 //------------------------------------------------------------------------------
 // std::string Trim(const std::string &str, StripType stype = TRAILING)
 //------------------------------------------------------------------------------
