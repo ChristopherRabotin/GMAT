@@ -300,28 +300,33 @@ void ForPanel::OnCellLeftClick(wxGridEvent& event)
    ForDialog setupDlg(this, theForCommand, col);
    setupDlg.ShowModal();
    
-   if (setupDlg.IsUpdated())
-      theApplyButton->Enable(true);
-   else
+   if (!setupDlg.IsUpdated())
       return;
+
+   // got new value
    
-   Integer paramId;
+   Real realVal = setupDlg.GetRealValue();
+   theApplyButton->Enable(true);
+   
+   //Integer paramId;
    wxString s1, s2, s3;
    
    if (col == START_COL)
    {
-      paramId = theForCommand->GetParameterID("StartValue");
-      mStartValue = theForCommand->GetRealParameter(paramId);
+      //paramId = theForCommand->GetParameterID("StartValue");
+      //mStartValue = theForCommand->GetRealParameter(paramId);
+      mStartValue = realVal;
       s1.Printf("%.10f", mStartValue);
       conditionGrid->SetCellValue(row, START_COL, s1); 
-          
+      
       mStartIsParam = false;
       mStartString = conditionGrid->GetCellValue(row, START_COL);
    }
    else if (col == INCR_COL)
    {
-      paramId = theForCommand->GetParameterID("Step");
-      mIncrValue = theForCommand->GetRealParameter(paramId);
+      //paramId = theForCommand->GetParameterID("Step");
+      //mIncrValue = theForCommand->GetRealParameter(paramId);
+      mIncrValue = realVal;
       s2.Printf("%.10f", mIncrValue);
       conditionGrid->SetCellValue(row, INCR_COL, s2); 
       
@@ -330,8 +335,9 @@ void ForPanel::OnCellLeftClick(wxGridEvent& event)
    }
    else if (col == END_COL)
    {
-      paramId = theForCommand->GetParameterID("EndValue");
-      mEndValue = theForCommand->GetRealParameter(paramId);
+      //paramId = theForCommand->GetParameterID("EndValue");
+      //mEndValue = theForCommand->GetRealParameter(paramId);
+      mEndValue = realVal;
       s3.Printf("%.10f", mEndValue);
       conditionGrid->SetCellValue(row, END_COL, s3);
       
