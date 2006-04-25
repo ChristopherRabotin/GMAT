@@ -506,10 +506,15 @@ void ReportFileSetupPanel::OnMoveDownVariable(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::OnAddVariable(wxCommandEvent& event)
 {
-   // get string in first list and then search for it in the second list
    wxString newParam = GetParamName();
+
+   // if none selected just return (loj: 4/25/06)
+   if (newParam == "")
+      return;
+   
+   // get string in first list and then search for it in the second list
    int found = mVarSelectedListBox->FindString(newParam);
-    
+   
    // if the string wasn't found in the second list, insert it
    if (found == wxNOT_FOUND)
    {
@@ -696,6 +701,10 @@ void ReportFileSetupPanel::ShowCoordSystem()
 //------------------------------------------------------------------------------
 wxString ReportFileSetupPanel::GetParamName()
 {
+   if ((mUserParamListBox->GetSelection() == -1) &&
+       (mPropertyListBox->GetSelection() == -1))
+      return "";
+   
    if (mUseUserParam)
    {
       return mUserParamListBox->GetStringSelection();
