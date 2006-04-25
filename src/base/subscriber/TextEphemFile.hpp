@@ -30,12 +30,12 @@ public:
    TextEphemFile(const std::string &type, const std::string &name,
                  const std::string &fileName = "", 
                  Parameter *firstVarParam = NULL);
-
+   
    virtual ~TextEphemFile(void);
-
+   
    TextEphemFile(const TextEphemFile &);
    TextEphemFile& operator=(const TextEphemFile&);
-    
+   
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
 
@@ -54,15 +54,14 @@ public:
    virtual bool SetStringParameter(const Integer id, const std::string &value);
    virtual bool SetStringParameter(const std::string &label,
                                    const std::string &value);
-      
+   
 protected:
    
    virtual bool Distribute(const Real * dat, Integer len);
    
    enum
    {
-      HEADER_FILE = ReportFileParamCount,
-      EPOCH_FORMAT,
+      EPOCH_FORMAT = ReportFileParamCount,
       INTERVAL,
       COORD_SYSTEM,
       TextEphemFileParamCount  /// Count of the parameters for this class
@@ -75,6 +74,7 @@ protected:
    
 private:
 
+   static const Integer MAX_LINE_CHAR = 1024;
    static const Integer BUFFER_SIZE = 10;
    
    Interpolator *mInterpolator;

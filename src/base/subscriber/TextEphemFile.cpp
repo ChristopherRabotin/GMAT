@@ -22,6 +22,7 @@
 #include "Moderator.hpp"
 #include "MessageInterface.hpp"
 #include <iomanip>
+#include <cstdlib>
 
 //#define DEBUG_EPHEMFILE 1
 //#define DEBUG_EPHEMFILE_DATA 1
@@ -36,7 +37,6 @@
 const std::string
 TextEphemFile::PARAMETER_TEXT[TextEphemFileParamCount - ReportFileParamCount] =
 {
-   "HeaderFile",
    "EpochFormat",
    "Interval",
    "CoordinateSystem",
@@ -46,13 +46,12 @@ const Gmat::ParameterType
 TextEphemFile::PARAMETER_TYPE[TextEphemFileParamCount - ReportFileParamCount] =
 {
    Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
    Gmat::REAL_TYPE,
    Gmat::STRING_TYPE,
 };
 
 static const Real TIME_TOL = 1.0e-8;
-   
+
 //------------------------------------------------------------------------------
 // TextEphemFile(const std::string &type, const std::string &name,
 //               const std::string &fileName)
@@ -63,8 +62,10 @@ TextEphemFile::TextEphemFile(const std::string &type, const std::string &name,
 {
    // create Interpolator
    mInterpolator = new CubicSplineInterpolator("InternalInterpolator", 6);
-   
-   mHeaderFileName = "";
+
+   // rename data file name
+   filename = fileName + ".tempdata$$$";
+   mHeaderFileName = fileName;
    mEpochFormat = "";
    mCoordSysName = "";
    mIntervalInSec = 0.0;
@@ -285,8 +286,6 @@ std::string TextEphemFile::GetStringParameter(const Integer id) const
 {
    switch (id)
    {
-   case HEADER_FILE:
-      return mHeaderFileName;
    case EPOCH_FORMAT:
       return mEpochFormat;
    case COORD_SYSTEM:
@@ -313,9 +312,6 @@ bool TextEphemFile::SetStringParameter(const Integer id, const std::string &valu
 {
    switch (id)
    {
-   case HEADER_FILE:
-      mHeaderFileName = value;
-      return true;
    case EPOCH_FORMAT:
       mEpochFormat = value;
       SaveEpochType();
@@ -772,7 +768,7 @@ void TextEphemFile::WriteEphemHeader()
 {
    #if DEBUG_EPHEMFILE_DATA
    MessageInterface::ShowMessage
-      ("===> TextEphemFile::WriteEphemHeader() mHeaderFileName=%s\n",
+      ("TextEphemFile::WriteEphemHeader() mHeaderFileName=%s\n",
        mHeaderFileName.c_str());
    #endif
 
@@ -782,33 +778,73 @@ void TextEphemFile::WriteEphemHeader()
    theModerator->SaveScript(mHeaderFileName, Gmat::EPHEM_HEADER);
 
    // Write additional parameters
-   std::ofstream ofs(mHeaderFileName.c_str(), std::ios::app);
-   ofs.precision(precision);
+   std::ofstream headerStream(mHeaderFileName.c_str(), std::ios::app);
+   headerStream.precision(precision);
    
    std::string ephemSource = theModerator->GetCurrentPlanetarySource();
-   ofs << "\n\n";
-   ofs << "PlanetaryEphemerisSource = '" << ephemSource << "';\n";
-   ofs << "\n";
+   headerStream << "\n\n";
+   headerStream << "PlanetaryEphemerisSource = '" << ephemSource << "';\n";
+   headerStream << "\n";
    
-   ofs << "Output.EpochType = '" << mEpochFormat << "';\n";
-   ofs << "Output.StartEpoch = " << mStartA1Mjd << ";\n";
-   ofs << "Output.StopEpoch = " << mStopA1Mjd << ";\n";
-   ofs << "Output.IntervalType = 'Second';\n";
-   ofs << "Output.Interval = " << mIntervalInSec << ";\n";
-   ofs << "Output.CoordinateSystem = '" << mCoordSysName << "';\n";
-   ofs << "Output.StateType = 'Cartesian';\n";
-   ofs << "\n";
+   headerStream << "Output.EpochType = '" << mEpochFormat << "';\n";
+   headerStream << "Output.StartEpoch = " << mStartA1Mjd << ";\n";
+   headerStream << "Output.StopEpoch = " << mStopA1Mjd << ";\n";
+   headerStream << "Output.IntervalType = 'Second';\n";
+   headerStream << "Output.Interval = " << mIntervalInSec << ";\n";
+   headerStream << "Output.CoordinateSystem = '" << mCoordSysName << "';\n";
+   headerStream << "Output.StateType = 'Cartesian';\n";
+   headerStream << "\n";
    
-   ofs << "Time.Unit = 'Day';\n";
-   ofs << "X.Unit = 'Km';\n";
-   ofs << "Y.Unit = 'Km';\n";
-   ofs << "Z.Unit = 'Km';\n";
-   ofs << "VX.Unit = 'Km/Sec';\n";
-   ofs << "VY.Unit = 'Km/Sec';\n";
-   ofs << "VZ.Unit = 'Km/Sec';\n";
-   ofs << "\n";
+   headerStream << "Time.Unit = 'Day';\n";
+   headerStream << "X.Unit = 'Km';\n";
+   headerStream << "Y.Unit = 'Km';\n";
+   headerStream << "Z.Unit = 'Km';\n";
+   headerStream << "VX.Unit = 'Km/Sec';\n";
+   headerStream << "VY.Unit = 'Km/Sec';\n";
+   headerStream << "VZ.Unit = 'Km/Sec';\n";
+   headerStream << "\n";
+   headerStream << "\n";
 
-   ofs.close();
+   // Actually I want use cmd processor to append the file,
+   // but, I don't know how it will work on Mac and Linux.
+   
+   // Open data file
+   #if DEBUG_EPHEMFILE_DATA
+   MessageInterface::ShowMessage
+      ("TextEphemFile::WriteEphemHeader() filename=%s\n", filename.c_str());
+   #endif
+   
+   std::ifstream dataStream(filename.c_str());
+   if (!dataStream.is_open())
+   {
+      MessageInterface::ShowMessage
+         ("*** ERROR *** TextEphemFile::WriteEphemHeader() Fail to open %s\n",
+          filename.c_str());
+      headerStream.close();
+      return;
+   }
+
+   char buffer[MAX_LINE_CHAR];
+   
+   // Append the data
+   while (!dataStream.eof())
+   {
+      dataStream.getline(buffer, MAX_LINE_CHAR-1);
+      headerStream << buffer << "\n";
+      //MessageInterface::ShowMessage("buffer=%s\n", buffer);
+   }
+
+   dataStream.close();
+   headerStream.close();
+
+//    // It doesn't work!!!
+//    #ifdef __WINDOWS__
+//    // Delete data file
+//    if (system(("rm " + filename).c_str()) == 0)
+//       MessageInterface::ShowMessage("==> Sucessfully removed file:%s\n", filename.c_str());
+//    else
+//       MessageInterface::ShowMessage("==> Removing file:%s was Unsuccessful\n", filename.c_str());
+//    #endif
 }
 
 
