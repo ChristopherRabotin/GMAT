@@ -412,11 +412,9 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
 
    if (event.GetEventObject() == inputGrid)
    {
-      //loj: 2/7/05 Changed to use ParameterSelectDialog()
-      //ParameterMultiSelectDialog paramDlg(this, inputStrings, true, true);
-      //ParameterSelectDialog paramDlg(this, true, true, true, true);
+      //loj: 4/25/06 set canSelectWholeObject=true
       ParameterSelectDialog paramDlg(this, GuiItemManager::SHOW_REPORTABLE, true,
-                                     true, true);
+                                     true, true, true); 
       paramDlg.SetParamNameArray(inputStrings);
       paramDlg.ShowModal();
       
