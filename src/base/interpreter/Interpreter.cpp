@@ -2609,10 +2609,10 @@ bool Interpreter::SetArray(GmatBase *obj, GmatCommand *cmd)
    #endif
    
    Integer r, c;
-   
+      
    // Script values are 1-based; internals are 0-based
-   r = atoi(els[0].c_str()-1);
-   c = atoi(els[1].c_str()-1);
+   r = atoi(els[0].c_str()) - 1;
+   c = atoi(els[1].c_str()) - 1;
 
    if ((*chunks[3])[0] != '=')
       throw InterpreterException(
@@ -2626,6 +2626,7 @@ bool Interpreter::SetArray(GmatBase *obj, GmatCommand *cmd)
       MessageInterface::ShowMessage("   Chunk 4 has the value %lf\n", val);
    #endif
 
+   //MessageInterface::ShowMessage("==> Setting val=%f, r=%d, c=%d\n", val, r, c);
    obj->SetRealParameter("SingleValue", val, r, c);
    return true;
 }
