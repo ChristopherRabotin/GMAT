@@ -92,16 +92,16 @@ Real Determinant::Evaluate()
 }
 
 //------------------------------------------------------------------------------
-// bool EvaluateInputs()
+// bool ValidateInputs()
 //------------------------------------------------------------------------------
 /**
  * This method calls its subnodes and checks to be sure that the subnodes return
  * compatible data for the function.
  */
 //------------------------------------------------------------------------------
-bool Determinant::EvaluateInputs()
+bool Determinant::ValidateInputs()
 {
-   if ( leftNode->EvaluateInputs() )
+   if ( leftNode->ValidateInputs() )
    {
       try
       {
@@ -118,9 +118,9 @@ bool Determinant::EvaluateInputs()
 }
 
 //------------------------------------------------------------------------------
-// void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
-void Determinant::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+void Determinant::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
    type = Gmat::REAL_TYPE;
    rowCount = 1;

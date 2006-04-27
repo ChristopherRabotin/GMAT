@@ -288,24 +288,24 @@ Real MathElement::Evaluate()
 }
 
 //------------------------------------------------------------------------------
-// bool EvaluateInputs()
+// bool ValidateInputs()
 //------------------------------------------------------------------------------
 /**
  * This method always returns true if the node was sucessfully initialized.
  */
  //------------------------------------------------------------------------------
-bool MathElement::EvaluateInputs()
+bool MathElement::ValidateInputs()
 {
 	if (refObject)
       return true;
    
-   return MathNode::EvaluateInputs();
+   return MathNode::ValidateInputs();
 }
 
 //------------------------------------------------------------------------------
-// void ReportOutputs()
+// void GetOutputInfo()
 //------------------------------------------------------------------------------
-void MathElement::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+void MathElement::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
 	type = elementType;
 	

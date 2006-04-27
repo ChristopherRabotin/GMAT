@@ -112,27 +112,27 @@ Real MathFunction::Evaluate()
 }
 
 //------------------------------------------------------------------------------
-// bool EvaluateInputs()
+// bool ValidateInputs()
 //------------------------------------------------------------------------------
 /**
  * This method calls its subnodes and checks to be sure that the subnodes return
  * compatible data for the function.
  */
 //------------------------------------------------------------------------------
-bool MathFunction::EvaluateInputs()
+bool MathFunction::ValidateInputs()
 {
 	 if ( (leftNode) && (rightNode) )
        return true;
     else
-       return MathNode::EvaluateInputs();
+       return MathNode::ValidateInputs();
 }
 
 //------------------------------------------------------------------------------
-// void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
-void MathFunction::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+void MathFunction::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
-	return MathNode::ReportOutputs(type, rowCount, colCount);
+	return MathNode::GetOutputInfo(type, rowCount, colCount);
 }
 
 //------------------------------------------------------------------------------

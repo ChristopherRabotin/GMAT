@@ -115,11 +115,11 @@ Rmatrix MathNode::MatrixEvaluate()
 }
 
 //------------------------------------------------------------------------------
-// void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
-void MathNode::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+void MathNode::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
-   throw MathException("No implementation of ReportOutputs(...).\n");    
+   throw MathException("No implementation of GetOutputInfo(...).\n");    
 }
 
 //------------------------------------------------------------------------------
@@ -131,10 +131,10 @@ Real MathNode::Evaluate()
 }
 
 //------------------------------------------------------------------------------
-// void EvaluateInputs()
+// void ValidateInputs()
 //------------------------------------------------------------------------------
-bool MathNode::EvaluateInputs()
+bool MathNode::ValidateInputs()
 {
-   throw MathException("No implementation of EvaluateInputs().\n");
+   throw MathException("No implementation of ValidateInputs().\n");
 }
 

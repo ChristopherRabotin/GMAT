@@ -49,8 +49,8 @@ public:
    
    // Inherited (MathNode) methods                                   
    virtual Real Evaluate();
-   virtual bool EvaluateInputs(); 
-   virtual void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount);
+   virtual bool ValidateInputs(); 
+   virtual void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount);
    
    Rmatrix MatrixEvaluate();
    Real SetRealValue(Real value);

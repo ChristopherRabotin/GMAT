@@ -93,16 +93,16 @@ Real RadToDeg::Evaluate()
 }
 
 //------------------------------------------------------------------------------
-// bool EvaluateInputs()
+// bool ValidateInputs()
 //------------------------------------------------------------------------------
 /**
  * This method calls its subnodes and checks to be sure that the subnodes return
  * compatible data for the function.
  */
 //------------------------------------------------------------------------------
-bool RadToDeg::EvaluateInputs()
+bool RadToDeg::ValidateInputs()
 {
-   if ( leftNode->EvaluateInputs() )
+   if ( leftNode->ValidateInputs() )
    {
       try
       {
@@ -119,9 +119,9 @@ bool RadToDeg::EvaluateInputs()
 }
 
 //------------------------------------------------------------------------------
-// void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
-void RadToDeg::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+void RadToDeg::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
    type = Gmat::REAL_TYPE;
    rowCount = 1;

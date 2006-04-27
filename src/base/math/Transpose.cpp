@@ -92,16 +92,16 @@ Real Transpose::Evaluate()
 }
 
 //------------------------------------------------------------------------------
-// bool EvaluateInputs()
+// bool ValidateInputs()
 //------------------------------------------------------------------------------
 /**
  * This method calls its subnodes and checks to be sure that the subnodes return
  * compatible data for the function.
  */
 //------------------------------------------------------------------------------
-bool Transpose::EvaluateInputs()
+bool Transpose::ValidateInputs()
 {
-   if ( leftNode->EvaluateInputs() )
+   if ( leftNode->ValidateInputs() )
    {
       try
       {
@@ -118,9 +118,9 @@ bool Transpose::EvaluateInputs()
 }
 
 //------------------------------------------------------------------------------
-// void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
-void Transpose::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+void Transpose::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
    type = Gmat::RMATRIX_TYPE;
    rowCount = (leftNode->MatrixEvaluate()).GetNumRows();

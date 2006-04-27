@@ -108,10 +108,10 @@ Rmatrix Multiply::MatrixEvaluate()
    Rmatrix prod;
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
-   leftNode->ReportOutputs(type1, row1, col1);
+   leftNode->GetOutputInfo(type1, row1, col1);
    
    // Get the type(Real or Matrix), # rows and # columns of the right node
-   rightNode->ReportOutputs(type2, row2, col2);
+   rightNode->GetOutputInfo(type2, row2, col2);
    
    // Multiply matrix by matrix
    if( type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::RMATRIX_TYPE)

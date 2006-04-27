@@ -92,16 +92,16 @@ Real Inverse::Evaluate()
 }
 
 //------------------------------------------------------------------------------
-// bool EvaluateInputs()
+// bool ValidateInputs()
 //------------------------------------------------------------------------------
 /**
  * This method calls its subnodes and checks to be sure that the subnodes return
  * compatible data for the function.
  */
 //------------------------------------------------------------------------------
-bool Inverse::EvaluateInputs()
+bool Inverse::ValidateInputs()
 {
-   if ( leftNode->EvaluateInputs() )
+   if ( leftNode->ValidateInputs() )
    {
       try
       {
@@ -118,9 +118,9 @@ bool Inverse::EvaluateInputs()
 }
 
 //------------------------------------------------------------------------------
-// void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
-void Inverse::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+void Inverse::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
    type = Gmat::RMATRIX_TYPE;
    rowCount = (leftNode->MatrixEvaluate()).GetNumRows();;

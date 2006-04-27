@@ -90,7 +90,7 @@ Real Norm::Evaluate()
 {
 //   throw MathException("Evaluate()::Norm returns a matrix value.\n");
    Integer type, rowCount, colCount;
-   leftNode->ReportOutputs(type, rowCount, colCount);
+   leftNode->GetOutputInfo(type, rowCount, colCount);
 
    if(type == Gmat::RMATRIX_TYPE)
    {
@@ -113,16 +113,16 @@ Real Norm::Evaluate()
 }
 
 //------------------------------------------------------------------------------
-// bool EvaluateInputs()
+// bool ValidateInputs()
 //------------------------------------------------------------------------------
 /**
  * This method calls its subnodes and checks to be sure that the subnodes return
  * compatible data for the function.
  */
 //------------------------------------------------------------------------------
-bool Norm::EvaluateInputs()
+bool Norm::ValidateInputs()
 {
-   if ( leftNode->EvaluateInputs() )
+   if ( leftNode->ValidateInputs() )
    {
       try
       {
@@ -139,9 +139,9 @@ bool Norm::EvaluateInputs()
 }
 
 //------------------------------------------------------------------------------
-// void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
-void Norm::ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount)
+void Norm::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
    type = Gmat::REAL_TYPE;
    rowCount = 1;

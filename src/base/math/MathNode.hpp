@@ -40,8 +40,8 @@ public:
    virtual GmatBase*    Clone(void) const;
                                     
    virtual Real Evaluate();
-   virtual bool EvaluateInputs();
-   virtual void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount);
+   virtual bool ValidateInputs();
+   virtual void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount);
    virtual Rmatrix MatrixEvaluate();
    
 protected:
