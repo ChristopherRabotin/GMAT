@@ -168,7 +168,10 @@ void ScriptPanel::OnButton(wxCommandEvent& event)
       }
       
       if ( mFileContentsTextCtrl->GetValue() != "")
-          GmatAppData::GetMainFrame()->OnScriptBuildObject(event);
+      {
+         GmatAppData::GetMainFrame()->SetScriptFileName(mScriptFilename.c_str());
+         GmatAppData::GetMainFrame()->OnScriptBuildObject(event);
+      }
       else
       {
          wxMessageDialog *msgDlg = new wxMessageDialog(this,
@@ -196,7 +199,10 @@ void ScriptPanel::OnButton(wxCommandEvent& event)
       }
       
       if ( mFileContentsTextCtrl->GetValue() != "")
+      {
+         GmatAppData::GetMainFrame()->SetScriptFileName(mScriptFilename.c_str());
          GmatAppData::GetMainFrame()->OnScriptBuildAndRun(event);
+      }
       else
       {
          wxMessageDialog *msgDlg = new wxMessageDialog(this,
