@@ -155,7 +155,12 @@ BaseStopCondition::BaseStopCondition(const BaseStopCondition &copy)
    mEccTol = copy.mEccTol;
    mRange = copy.mRange;
    mRepeatCount = copy.mRepeatCount;
-   mInterpolator = copy.mInterpolator;
+   //mInterpolator = copy.mInterpolator;
+   
+   if (copy.mInterpolator != NULL)
+      if (copy.mInterpolator->GetName() == "InternalInterpolator")
+         mInterpolator = (Interpolator*)copy.mInterpolator->Clone();
+
    mSolarSystem = copy.mSolarSystem;
    mDescription = copy.mDescription;
    mStopParamType = copy.mStopParamType;
@@ -200,7 +205,12 @@ BaseStopCondition& BaseStopCondition::operator= (const BaseStopCondition &right)
    mEccTol = right.mEccTol;
    mRange = right.mRange;
    mRepeatCount = right.mRepeatCount;
-   mInterpolator = right.mInterpolator;
+   //mInterpolator = right.mInterpolator;
+
+   if (right.mInterpolator != NULL)
+      if (right.mInterpolator->GetName() == "InternalInterpolator")
+         mInterpolator = (Interpolator*)right.mInterpolator->Clone();
+
    mSolarSystem = right.mSolarSystem;
    mDescription = right.mDescription;
    mStopParamType = right.mStopParamType;
@@ -240,6 +250,19 @@ BaseStopCondition::~BaseStopCondition()
 
    if (mRmagParam != NULL)
       delete mRmagParam;
+
+   // loj:04/26/06 Set to NULL
+   mEccParam = NULL;
+   mRmagParam = NULL;
+
+   if (mInterpolator != NULL)
+   {
+      if (mInterpolator->GetName() == "InternalInterpolator")
+      {
+         delete mInterpolator;
+         mInterpolator = NULL;
+      }
+   }
 }
 
 
