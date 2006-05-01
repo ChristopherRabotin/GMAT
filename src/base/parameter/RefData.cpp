@@ -22,6 +22,9 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_REFDATA_OBJECT 1
+//#define DEBUG_REFDATA_OBJECT_GET 1
+//#define DEBUG_REFDATA_FIND 1
+//#define DEBUG_REFDATA_ADD 1
 //#define DEBUG_RENAME 1
 //#define DEBUG_CLONE 1
 
@@ -60,13 +63,6 @@ RefData::RefData()
 //------------------------------------------------------------------------------
 RefData::RefData(const RefData &copy)
 {
-   for (int i=0; i<MAX_OBJ_COUNT; i++)
-   {
-      mRefObjList[i].objType = copy.mRefObjList[i].objType;
-      mRefObjList[i].objName = copy.mRefObjList[i].objName;
-      mRefObjList[i].obj = copy.mRefObjList[i].obj;
-   }
-   
    mObjectTypeNames = copy.mObjectTypeNames;
    mAllRefObjectNames = copy.mAllRefObjectNames;
    mNumRefObjects = copy.mNumRefObjects;
@@ -76,6 +72,20 @@ RefData::RefData(const RefData &copy)
       ("RefData::RefData(const RefData &copy) mNumRefObjects=%d\n",
        mNumRefObjects);
    #endif
+   
+   for (int i=0; i<MAX_OBJ_COUNT; i++)
+   {
+      mRefObjList[i].objType = copy.mRefObjList[i].objType;
+      mRefObjList[i].objName = copy.mRefObjList[i].objName;
+      mRefObjList[i].obj = copy.mRefObjList[i].obj;
+      
+      #if DEBUG_CLONE > 1
+      MessageInterface::ShowMessage
+         ("i=%d, type=%d, name=%s, obj=%p\n", i, mRefObjList[i].objType,
+          mRefObjList[i].objName.c_str(), mRefObjList[i].obj);
+      #endif
+   }
+
 }
 
 
@@ -115,6 +125,7 @@ RefData& RefData::operator= (const RefData& right)
 //------------------------------------------------------------------------------
 RefData::~RefData()
 {
+   //MessageInterface::ShowMessage("==> RefData::~RefData()\n");
 }
 
 
@@ -178,7 +189,7 @@ const StringArray& RefData::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    mAllRefObjectNames.clear();
 
-   #if DEBUG_REFDATA_OBJECT
+   #if DEBUG_REFDATA_OBJECT_GET
    MessageInterface::ShowMessage
       ("RefData::GetRefObjectNameArray() type=%d\n", type);
    #endif
@@ -187,7 +198,7 @@ const StringArray& RefData::GetRefObjectNameArray(const Gmat::ObjectType type)
    {
       for (int i=0; i<mNumRefObjects; i++)
       {
-         #if DEBUG_REFDATA_OBJECT > 1
+         #if DEBUG_REFDATA_OBJECT_GET > 1
          MessageInterface::ShowMessage
             ("RefData::GetRefObjectNameArray() objType=%d name: %s\n",
              mRefObjList[i].objType, mRefObjList[i].objName.c_str());
@@ -202,7 +213,7 @@ const StringArray& RefData::GetRefObjectNameArray(const Gmat::ObjectType type)
       {
          if (mRefObjList[i].objType == type)
          {
-            #if DEBUG_REFDATA_OBJECT > 1
+            #if DEBUG_REFDATA_OBJECT_GET > 1
             MessageInterface::ShowMessage
                ("RefData::GetRefObjectNameArray() type=%d name: %s\n", type,
                 mRefObjList[i].objName.c_str());
@@ -293,31 +304,23 @@ GmatBase* RefData::GetRefObject(const Gmat::ObjectType type,
 bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                            const std::string &name)
 {
+   bool status = false;
    #if DEBUG_REFDATA_OBJECT
    MessageInterface::ShowMessage
-      ("RefData::SetRefObject() numRefObjects=%d, type=%d, name=%s obj addr=%d\n",
+      ("RefData::SetRefObject() numRefObjects=%d, type=%d, name=%s obj addr=%p\n",
        mNumRefObjects, type, name.c_str(), obj);
    #endif
 
    // Since Sandbox calls SetRefObject() with obj->GetType(), I need to
    // set type to SPACE_POINT if CELESTIAL_BODY
 
-   Gmat::ObjectType realType = type;
+   Gmat::ObjectType actualType = type;
    if (type == Gmat::CELESTIAL_BODY)
-      realType = Gmat::SPACE_POINT;
-   
-   #if DEBUG_REFDATA_OBJECT > 1
-   for (int i=0; i<mNumRefObjects; i++)
-   {
-      MessageInterface::ShowMessage
-         ("type=%d, name=%s, obj=%d\n", mRefObjList[i].objType,
-          mRefObjList[i].objName.c_str(), mRefObjList[i].obj);
-   }   
-   #endif
+      actualType = Gmat::SPACE_POINT;
    
    for (int i=0; i<mNumRefObjects; i++)
    {
-      if (mRefObjList[i].objType == realType)
+      if (mRefObjList[i].objType == actualType)
       {
          if (mRefObjList[i].objName == name)
          {
@@ -327,18 +330,28 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                ("RefData::SetRefObject() set %s to %d\n",
                 mRefObjList[i].objName.c_str(), obj);
             #endif
-            return true;
+            status = true;
+            break;
          }
       }
    }
 
+   #if DEBUG_REFDATA_OBJECT > 1
+   for (int i=0; i<mNumRefObjects; i++)
+   {
+      MessageInterface::ShowMessage
+         ("type=%d, name=%s, obj=%p\n", mRefObjList[i].objType,
+          mRefObjList[i].objName.c_str(), mRefObjList[i].obj);
+   }   
+   #endif
+   
    #if DEBUG_REFDATA_OBJECT
    MessageInterface::ShowMessage
       ("*** Warning *** RefData::SetRefObject() Cannot find type=%s\n",
-       GmatBase::GetObjectTypeString(realType).c_str());
+       GmatBase::GetObjectTypeString(actualType).c_str());
    #endif
    
-   return false;
+   return status;
 }
 
 
@@ -407,9 +420,10 @@ const std::string* RefData::GetValidObjectList() const
 bool RefData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
                            GmatBase *obj, bool replaceName)
 {
-   #if DEBUG_REFDATA_OBJECT
+   #if DEBUG_REFDATA_ADD
    MessageInterface::ShowMessage
-      ("RefData::AddRefObject() type=%d, name=%s\n", type, name.c_str());
+      ("==> RefData::AddRefObject() mNumRefObjects=%d, type=%d, name=%s, obj=%p, "
+       "replaceName=%d\n", mNumRefObjects, type, name.c_str(), obj, replaceName);
    #endif
    
    if (IsValidObjectType(type))
@@ -423,10 +437,10 @@ bool RefData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
             mRefObjList[mNumRefObjects].obj = obj;
             mNumRefObjects++;
             
-            #if DEBUG_REFDATA_OBJECT
+            #if DEBUG_REFDATA_ADD
             MessageInterface::ShowMessage
-               ("RefData::AddRefObject() object added. mNumRefObjects=%d\n",
-                mNumRefObjects);
+               ("==> RefData::AddRefObject() object type:%d name:%s added. mNumRefObjects=%d\n",
+                type, name.c_str(), mNumRefObjects);
             #endif
             
             return true;
@@ -443,7 +457,7 @@ bool RefData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
       }
    }
    
-   #if DEBUG_REFDATA_OBJECT
+   #if DEBUG_REFDATA_ADD
    MessageInterface::ShowMessage("RefData::AddRefObject() return false\n");
    #endif
    
@@ -467,7 +481,7 @@ bool RefData::SetRefObjectWithNewName(GmatBase *obj, const Gmat::ObjectType type
    #if DEBUG_REFDATA_OBJECT
    MessageInterface::ShowMessage
       ("RefData::SetRefObjectWithNewName() numRefObjects=%d, type=%d, name=%s "
-       "obj addr=%d\n", mNumRefObjects, type, name.c_str(), obj);
+       "obj addr=%p\n", mNumRefObjects, type, name.c_str(), obj);
    #endif
    
    #if DEBUG_REFDATA_OBJECT > 1
@@ -556,7 +570,7 @@ GmatBase* RefData::FindFirstObject(const std::string &typeName) const
 //------------------------------------------------------------------------------
 GmatBase* RefData::FindFirstObject(const Gmat::ObjectType type) const
 {
-   #if DEBUG_REFDATA_OBJECT
+   #if DEBUG_REFDATA_FIND
    MessageInterface::ShowMessage
       ("RefData::FindFirstObject() type=%d mNumRefObjects=%d\n",
        type, mNumRefObjects);
@@ -564,18 +578,24 @@ GmatBase* RefData::FindFirstObject(const Gmat::ObjectType type) const
    
    for (int i=0; i<mNumRefObjects; i++)
    {
+      #if DEBUG_REFDATA_FIND
+      MessageInterface::ShowMessage
+         ("RefData::FindFirstObject() i=%d, type=%d, name=%s, obj=%p\n", i,
+          mRefObjList[i].objType, mRefObjList[i].objName.c_str(), mRefObjList[i].obj);
+      #endif
+      
       if (mRefObjList[i].objType == type)
       {
-         #if DEBUG_REFDATA_OBJECT > 1
+         #if DEBUG_REFDATA_FIND
          MessageInterface::ShowMessage
-            ("RefData::FindFirstObject() returning %d\n", mRefObjList[i].obj);
+            ("RefData::FindFirstObject() returning %p\n", mRefObjList[i].obj);
          #endif
          
          return mRefObjList[i].obj;
       }
    }
    
-   #if DEBUG_REFDATA_OBJECT
+   #if DEBUG_REFDATA_FIND
    MessageInterface::ShowMessage
       ("RefData::FindFirstObject() returning NULL\n");
    #endif

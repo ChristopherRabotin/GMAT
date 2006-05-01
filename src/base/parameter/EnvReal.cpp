@@ -100,6 +100,7 @@ EnvReal& EnvReal::operator=(const EnvReal &right)
 //------------------------------------------------------------------------------
 EnvReal::~EnvReal()
 {
+   MessageInterface::ShowMessage("==> EnvReal::~EnvReal()\n");
 }
 
 

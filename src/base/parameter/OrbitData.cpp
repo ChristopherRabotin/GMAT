@@ -174,6 +174,7 @@ OrbitData& OrbitData::operator= (const OrbitData &right)
 //------------------------------------------------------------------------------
 OrbitData::~OrbitData()
 {
+   //MessageInterface::ShowMessage("==> OrbitData::~OrbitData()\n");
 }
 
 
@@ -187,12 +188,17 @@ Rvector6 OrbitData::GetCartState()
    
    mCartEpoch = mSpacecraft->GetRealParameter("A1Epoch");
    mCartState.Set(mSpacecraft->GetState().GetState());
-
+   
    #if DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
       ("OrbitData::GetCartState() mCartState=\n   %s\n", mCartState.ToString().c_str());
    #endif
-
+   
+   // if origin dependent parameter, the relative position/velocity is computed in
+   // the parameter calculation, so just return prop state.
+   if (mOriginDep)
+      return mCartState;
+   
    if (mInternalCoordSystem == NULL || mOutCoordSystem == NULL)
    {
       MessageInterface::ShowMessage
@@ -201,12 +207,7 @@ Rvector6 OrbitData::GetCartState()
       throw ParameterException
          ("OrbitData::GetCartState() internal or output CoordinateSystem is NULL.\n");
    }
-
-   // if origin dependent parameter, the relative position/velocity is computed in
-   // the parameter calculation, so just return prop state.
-   if (mOriginDep)
-      return mCartState;
-
+   
    //-----------------------------------------------------------------
    // convert to output CoordinateSystem
    //-----------------------------------------------------------------
@@ -1275,41 +1276,42 @@ void OrbitData::InitializeRefObjects()
          ("OrbitData::InitializeRefObjects() Cannot find internal "
           "CoordinateSystem object\n");
    
-   mOutCoordSystem =
-      (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
+//    mOutCoordSystem =
+//       (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
    
-   if (mOutCoordSystem == NULL)
-   {
-      #if DEBUG_ORBITDATA_INIT
-      MessageInterface::ShowMessage
-         ("OrbitData::InitializeRefObjects() Cannot find output "
-          "CoordinateSystem object\n");
-      #endif
+//    if (mOutCoordSystem == NULL)
+//    {
+//       #if DEBUG_ORBITDATA_INIT
+//       MessageInterface::ShowMessage
+//          ("OrbitData::InitializeRefObjects() Cannot find output "
+//           "CoordinateSystem object\n");
+//       #endif
       
-      throw ParameterException
-         ("Cannot find the parameter coordinate system.");
-   }
-      
-   // Set origin to out coordinate system origin for CoordinateSystem
-   // dependent parameter
-   mOrigin = mOutCoordSystem->GetOrigin();
+//       throw ParameterException
+//          ("OrbitData::InitializeRefObjects() Cannot find coordinate system.\n");
+//    }
+
    
-   if (!mOrigin)
-   {
-      #if DEBUG_ORBITDATA_INIT
-      MessageInterface::ShowMessage
-         ("OrbitData::InitializeRefObjects() origin not found: " +
-          mOutCoordSystem->GetOriginName() + "\n");
-      #endif
-      
-      throw ParameterException
-         ("Coordinate system origin: " + mOutCoordSystem->GetOriginName() +
-          " not found.");
-   }
+//    // Set origin to out coordinate system origin for CoordinateSystem
+//    // dependent parameter
+//    mOrigin = mOutCoordSystem->GetOrigin();
    
-   // get gravity constant if out coord system origin is CelestialBody
-   if (mOrigin->IsOfType(Gmat::CELESTIAL_BODY))
-      mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
+//    if (!mOrigin)
+//    {
+//       #if DEBUG_ORBITDATA_INIT
+//       MessageInterface::ShowMessage
+//          ("OrbitData::InitializeRefObjects() origin not found: " +
+//           mOutCoordSystem->GetOriginName() + "\n");
+//       #endif
+      
+//       throw ParameterException
+//          ("Coordinate system origin: " + mOutCoordSystem->GetOriginName() +
+//           " not found.");
+//    }
+   
+//    // get gravity constant if out coord system origin is CelestialBody
+//    if (mOrigin->IsOfType(Gmat::CELESTIAL_BODY))
+//       mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
    
    //-----------------------------------------------------------------
    // if dependent body name exist and it is a CelestialBody,
@@ -1340,6 +1342,49 @@ void OrbitData::InitializeRefObjects()
          mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
 
       mOriginDep = true;
+   }
+   //-----------------------------------------------------------------
+   // It is CoordinateSystem dependent parameter.
+   // Set Origin to CoordinateSystem origin and mu to origin mu.
+   //-----------------------------------------------------------------
+   else
+   {
+      mOutCoordSystem =
+         (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
+   
+      if (mOutCoordSystem == NULL)
+      {
+         #if DEBUG_ORBITDATA_INIT
+         MessageInterface::ShowMessage
+            ("OrbitData::InitializeRefObjects() Cannot find output "
+             "CoordinateSystem object\n");
+         #endif
+         
+         throw ParameterException
+            ("OrbitData::InitializeRefObjects() Cannot find coordinate system.\n");
+      }
+      
+      
+      // Set origin to out coordinate system origin for CoordinateSystem
+      // dependent parameter
+      mOrigin = mOutCoordSystem->GetOrigin();
+      
+      if (!mOrigin)
+      {
+         #if DEBUG_ORBITDATA_INIT
+         MessageInterface::ShowMessage
+            ("OrbitData::InitializeRefObjects() origin not found: " +
+             mOutCoordSystem->GetOriginName() + "\n");
+         #endif
+      
+         throw ParameterException
+            ("Coordinate system origin: " + mOutCoordSystem->GetOriginName() +
+             " not found.");
+      }
+      
+      // get gravity constant if out coord system origin is CelestialBody
+      if (mOrigin->IsOfType(Gmat::CELESTIAL_BODY))
+         mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
    }
    
    #if DEBUG_ORBITDATA_INIT

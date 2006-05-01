@@ -84,11 +84,19 @@ BplaneData::BplaneData(const BplaneData &copy)
    : RefData(copy)
 {
    mCartState = copy.mCartState;
+   
    mSpacecraft = copy.mSpacecraft;
    mSolarSystem = copy.mSolarSystem;
    mOrigin = copy.mOrigin;
    mInternalCoordSystem = copy.mInternalCoordSystem;
    mOutCoordSystem = copy.mOutCoordSystem;
+   
+//    mSpacecraft = NULL;
+//    mSolarSystem = NULL;
+//    mOrigin = NULL;
+//    mInternalCoordSystem = NULL;
+//    mOutCoordSystem = NULL;
+   
    mCartEpoch = copy.mCartEpoch;
    mGravConst = copy.mGravConst;
 }
@@ -113,11 +121,19 @@ BplaneData& BplaneData::operator= (const BplaneData &right)
    RefData::operator=(right);
    
    mCartState = right.mCartState;
+   
    mSpacecraft = right.mSpacecraft;
    mSolarSystem = right.mSolarSystem;
    mOrigin = right.mOrigin;
    mInternalCoordSystem = right.mInternalCoordSystem;
    mOutCoordSystem = right.mOutCoordSystem;
+   
+//    mSpacecraft = NULL;
+//    mSolarSystem = NULL;
+//    mOrigin = NULL;
+//    mInternalCoordSystem = NULL;
+//    mOutCoordSystem = NULL;
+   
    mCartEpoch = right.mCartEpoch;
    mGravConst = right.mGravConst;
    
@@ -154,7 +170,8 @@ Real BplaneData::GetBplaneReal(Integer item)
          ("BplaneData::GetBplaneReal() Unknown parameter ID: " +
           GmatRealUtil::ToString(item, 2));
    
-   if (mOutCoordSystem == NULL || mOrigin == NULL)
+   if (mSpacecraft == NULL || mSolarSystem == NULL || mOrigin == NULL ||
+       mInternalCoordSystem == NULL || mOutCoordSystem == NULL)
       InitializeRefObjects();
    
    // If the selected coordinate system does not have a celestial body as
@@ -388,6 +405,10 @@ bool BplaneData::IsValidObjectType(Gmat::ObjectType type)
          return true;
    }
    
+   MessageInterface::ShowMessage
+      ("==> BplaneData::IsValidObjectType() type=%d is not valid object type\n",
+       type);
+   
    return false;
 
 }
@@ -429,8 +450,8 @@ void BplaneData::SetInternalCoordSys(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
 Rvector6 BplaneData::GetCartState()
 {
-   if (mSpacecraft == NULL || mSolarSystem == NULL)
-      InitializeRefObjects();
+//    if (mSpacecraft == NULL || mSolarSystem == NULL)
+//       InitializeRefObjects();
    
    mCartEpoch = mSpacecraft->GetRealParameter("A1Epoch");
    mCartState.Set(mSpacecraft->GetState().GetState());
@@ -473,7 +494,7 @@ Rvector6 BplaneData::GetCartState()
          mCoordConverter.Convert(A1Mjd(mCartEpoch), mCartState,
                                  mInternalCoordSystem,
                                  mCartState, mOutCoordSystem);
-            
+         
          #if DEBUG_BPLANE_DATA_CONVERT
          MessageInterface::ShowMessage
             ("BplaneData::GetCartState() --After convert: mCartEpoch=%f\n"

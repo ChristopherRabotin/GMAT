@@ -113,9 +113,8 @@ VelApoapsis::~VelApoapsis()
 //------------------------------------------------------------------------------
 bool VelApoapsis::Evaluate()
 {
-   //mRealValue = OrbitData::GetOtherKepReal("VelApoapsis");    
    mRealValue = OrbitData::GetOtherKepReal(VEL_APOAPSIS);    
-    
+   
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
    else
@@ -468,6 +467,7 @@ Periapsis::operator=(const Periapsis &right)
 //------------------------------------------------------------------------------
 Periapsis::~Periapsis()
 {
+   MessageInterface::ShowMessage("==> Periapsis::~Periapsis()\n");
 }
 
 //-------------------------------------

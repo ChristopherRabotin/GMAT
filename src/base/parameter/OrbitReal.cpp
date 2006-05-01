@@ -105,6 +105,7 @@ OrbitReal& OrbitReal::operator=(const OrbitReal &right)
 //------------------------------------------------------------------------------
 OrbitReal::~OrbitReal()
 {
+   //MessageInterface::ShowMessage("==> OrbitReal::~OrbitReal()\n");
 }
 
 
@@ -121,16 +122,16 @@ OrbitReal::~OrbitReal()
 //------------------------------------------------------------------------------
 Real OrbitReal::EvaluateReal()
 {
-   try
-   {
+//    try
+//    {
       Evaluate();
-   }
-   catch (BaseException &e)
-   {
-      throw ParameterException
-         ("OrbitReal::EvaluateReal() for parameter " +  this->GetTypeName() + ":" +
-          instanceName + "\n" + e.GetDetails());
-   }
+//    }
+//    catch (BaseException &e)
+//    {
+//       throw ParameterException
+//          ("OrbitReal::EvaluateReal() for parameter " +  this->GetTypeName() + ":" +
+//           instanceName + "\n" + e.GetDetails());
+//    }
    
    return mRealValue;
 }
@@ -260,6 +261,8 @@ bool OrbitReal::Validate()
 //------------------------------------------------------------------------------
 bool OrbitReal::Initialize()
 {
+   RealVar::Initialize();
+   
    try
    {
       #if DEBUG_ORBITREAL

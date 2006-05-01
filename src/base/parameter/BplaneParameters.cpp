@@ -110,22 +110,25 @@ BdotT::~BdotT()
 //------------------------------------------------------------------------------
 bool BdotT::Evaluate()
 {
-   try
-   {
-      mRealValue = BplaneData::GetBplaneReal(B_DOT_T);
-   }
-   catch (BaseException &e)
-   {
-      mRealValue = REAL_PARAMETER_UNDEFINED;
-      MessageInterface::ShowMessage
-         (e.GetMessage() + ",\n     so setting BdotT parameter value to: " +
-          GmatRealUtil::ToString(REAL_PARAMETER_UNDEFINED) + "\n");
-   }
+   mRealValue = BplaneData::GetBplaneReal(B_DOT_T);
+   return true;
    
-   if (mRealValue == REAL_PARAMETER_UNDEFINED)
-      return false;
-   else
-      return true;
+//    try
+//    {
+//       mRealValue = BplaneData::GetBplaneReal(B_DOT_T);
+//    }
+//    catch (BaseException &e)
+//    {
+//       mRealValue = REAL_PARAMETER_UNDEFINED;
+//       MessageInterface::ShowMessage
+//          (e.GetMessage() + ",\n     so setting BdotT parameter value to: " +
+//           GmatRealUtil::ToString(REAL_PARAMETER_UNDEFINED) + "\n");
+//    }
+   
+//    if (mRealValue == REAL_PARAMETER_UNDEFINED)
+//       return false;
+//    else
+//       return true;
 }
 
 

@@ -90,6 +90,7 @@ AtmosDensity::operator=(const AtmosDensity &right)
 //------------------------------------------------------------------------------
 AtmosDensity::~AtmosDensity()
 {
+   MessageInterface::ShowMessage("==> AtmosDensity::~AtmosDensity()\n");
 }
 
 

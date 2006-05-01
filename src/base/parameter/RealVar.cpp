@@ -75,6 +75,7 @@ RealVar::RealVar(const RealVar &copy)
    mRealValue = copy.mRealValue;
 }
 
+
 //------------------------------------------------------------------------------
 // RealVar& operator= (const RealVar& right)
 //------------------------------------------------------------------------------
@@ -106,6 +107,7 @@ RealVar& RealVar::operator= (const RealVar& right)
 //------------------------------------------------------------------------------
 RealVar::~RealVar()
 {
+   //MessageInterface::ShowMessage("==> RealVar::~RealVar()\n");
 }
 
 //------------------------------------------------------------------------------
@@ -139,6 +141,16 @@ bool RealVar::operator!=(const RealVar &right) const
 //------------------------------------
 // methods inherited from Parameter
 //------------------------------------
+
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+bool RealVar::Initialize()
+{
+   mRealValue = REAL_PARAMETER_UNDEFINED;
+   return true;
+}
+
 
 //------------------------------------------------------------------------------
 // std::string ToString()

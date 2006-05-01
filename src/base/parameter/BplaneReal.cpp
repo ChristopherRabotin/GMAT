@@ -23,6 +23,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_BPLANE_REAL 1
+//#define DEBUG_BPLANE_REAL_INIT 1
 
 //---------------------------------
 // public methods
@@ -67,6 +68,11 @@ BplaneReal::BplaneReal(const std::string &name, const std::string &typeStr,
 BplaneReal::BplaneReal(const BplaneReal &copy)
    : RealVar(copy), BplaneData(copy)
 {
+   #if DEBUG_BPLANE_REAL
+   MessageInterface::ShowMessage
+      ("===> BplaneReal::BplaneReal() copy constructor called on %s\n",
+       instanceName.c_str());
+   #endif
 }
 
 
@@ -140,9 +146,9 @@ CoordinateSystem* BplaneReal::GetInternalCoordSystem()
 void BplaneReal::SetSolarSystem(SolarSystem *ss)
 {
    #if DEBUG_BPLANE_REAL
-      MessageInterface::ShowMessage
-         ("BplaneReal::SetSolarSystem() ss=%s to %s\n", ss->GetTypeName().c_str(),
-          this->GetName().c_str());
+   MessageInterface::ShowMessage
+      ("==> BplaneReal::SetSolarSystem() ss=%s addr=%p to %s\n", ss->GetTypeName().c_str(),
+       ss, this->GetName().c_str());
    #endif
    
    if (BplaneData::GetRefObject(Gmat::SOLAR_SYSTEM, ss->GetName()) == NULL)
@@ -245,6 +251,11 @@ bool BplaneReal::Validate()
 //------------------------------------------------------------------------------
 bool BplaneReal::Initialize()
 {
+   #if DEBUG_BPLANE_REAL_INIT
+   MessageInterface::ShowMessage
+      ("BplaneReal::Initialize() %s\n", this->GetTypeName().c_str());
+   #endif
+   
    try
    {
       InitializeRefObjects();

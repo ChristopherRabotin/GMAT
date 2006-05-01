@@ -42,6 +42,7 @@ public:
    bool operator!=(const RealVar &right) const;
 
    // methods inherited from Parameter
+   virtual bool Initialize();
    virtual std::string ToString();
    
    virtual Real GetReal() const;
