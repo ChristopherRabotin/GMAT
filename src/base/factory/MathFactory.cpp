@@ -45,6 +45,8 @@
 #include "Tan.hpp"
 #include "Transpose.hpp"
 
+//#define DEBUG_MATH_FACTORY 1
+
 //---------------------------------
 //  public methods
 //---------------------------------
@@ -71,10 +73,13 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
    // eg) cos, Cos, add, Add.
    
    std::string newType = GmatStringUtil::Capitalize(ofType);
-   MessageInterface::ShowMessage
-      ("==>MathFactory::CreateMathNode() ofType=%s, newType=%s, withName=%s\n",
-       ofType.c_str(), newType.c_str(), withName.c_str());
 
+   #if DEBUG_MATH_FACTORY
+   MessageInterface::ShowMessage
+      ("MathFactory::CreateMathNode() ofType=%s, newType=%s, withName=%s\n",
+       ofType.c_str(), newType.c_str(), withName.c_str());
+   #endif
+   
    // Leaf node
    if (ofType == "MathElement")
    {
