@@ -35,6 +35,7 @@
 
 //#define DEBUG_SANDBOX_OBJ 1
 //#define DEBUG_SANDBOX_INIT 1
+//#define DEBUG_SANDBOX_INIT_PARAM 1
 //#define DEBUG_SANDBOX_RUN 1
 //#define DEBUG_SANDBOX_OBJECT_MAPS
 //#define DEBUG_MODERATOR_CALLBACK
@@ -63,10 +64,10 @@ Sandbox::Sandbox() :
    clonable.push_back(Gmat::FORMATION);
    clonable.push_back(Gmat::SPACEOBJECT);
    clonable.push_back(Gmat::GROUND_STATION);
-//   clonable.push_back(Gmat::BURN);
+   clonable.push_back(Gmat::BURN);
    clonable.push_back(Gmat::COMMAND);
    clonable.push_back(Gmat::PROPAGATOR);
-//   clonable.push_back(Gmat::FORCE_MODEL);
+   clonable.push_back(Gmat::FORCE_MODEL);
    clonable.push_back(Gmat::PHYSICAL_MODEL);
    clonable.push_back(Gmat::TRANSIENT_FORCE);
    clonable.push_back(Gmat::INTERPOLATOR);
@@ -76,23 +77,22 @@ Sandbox::Sandbox() :
 //   clonable.push_back(Gmat::LIBRATION_POINT);
    clonable.push_back(Gmat::BARYCENTER);
    clonable.push_back(Gmat::ATMOSPHERE);
-//   clonable.push_back(Gmat::PARAMETER);
+//    clonable.push_back(Gmat::PARAMETER);
    clonable.push_back(Gmat::STOP_CONDITION);
    clonable.push_back(Gmat::SOLVER);
-//   clonable.push_back(Gmat::PROP_SETUP);
+   clonable.push_back(Gmat::PROP_SETUP);
    clonable.push_back(Gmat::REF_FRAME);
    clonable.push_back(Gmat::FUNCTION);
 //   clonable.push_back(Gmat::FUEL_TANK);
 //   clonable.push_back(Gmat::THRUSTER);
 //   clonable.push_back(Gmat::HARDWARE);
-//   clonable.push_back(Gmat::COORDINATE_SYSTEM);
+   clonable.push_back(Gmat::COORDINATE_SYSTEM);
    clonable.push_back(Gmat::AXIS_SYSTEM);
 
 
    // SolarSystem instances are handled separately from the other objects
    // clonable.push_back(Gmat::SOLAR_SYSTEM);
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -578,7 +578,7 @@ bool Sandbox::Initialize()
          // Make sure system parameters are configured before others
          if (param->GetKey() == GmatParam::SYSTEM_PARAM)
          {
-            #ifdef DEBUG_SANDBOX_INIT
+            #ifdef DEBUG_SANDBOX_INIT_PARAM
                MessageInterface::ShowMessage(
                   "Sandbox::Initialize objTypeName = %s, objName = %s\n",
                   obj->GetTypeName().c_str(), obj->GetName().c_str());
