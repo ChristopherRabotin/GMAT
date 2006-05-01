@@ -346,9 +346,12 @@ void MessageInterface::SetLogFile(const std::string &filename)
       fclose(logFile);
    
    logFile = fopen(logFileName.c_str(), "w");
-   fprintf(logFile, "MessageInterface::SetLogFile() Log file set to %s\n",
-           logFileName.c_str());
-   logFileSet = true;
+   if (logFile)
+   {
+      fprintf(logFile, "MessageInterface::SetLogFile() Log file set to %s\n",
+              logFileName.c_str());
+      logFileSet = true;
+   }
 }
 
 
