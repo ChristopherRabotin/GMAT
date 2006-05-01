@@ -205,9 +205,12 @@ AxisSystem::~AxisSystem()
 //       delete aVals[i];
 //    for (Integer i = 0; i < 10; i++)
 //       delete apVals[i];
-   
+
    delete [] aVals;
    delete [] apVals;
+   
+   aVals = NULL;
+   apVals = NULL;
 }
 
 GmatCoordinate::ParameterUsage AxisSystem::UsesEopFile() const
