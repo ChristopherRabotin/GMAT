@@ -1795,36 +1795,39 @@ Parameter* Interpreter::CreateParameter(const std::string &name,
                                         const std::string &depname,
                                         const std::string &obj)
 {
-   Parameter *parm = moderator->CreateParameter(type, name);
-   
-   if (parm != NULL)
-   {
-      std::string dep = depname;
+   Parameter *parm =
+      moderator->CreateParameter(type, name, Gmat::SPACECRAFT, obj, depname);
 
-      if (obj != "")
-         parm->SetStringParameter("Object", obj);
+   // All the setting is done in the Moderator
+//    Parameter *parm = moderator->CreateParameter(type, name);
+//    if (parm != NULL)
+//    {
+//       std::string dep = depname;
+
+//       if (obj != "")
+//          parm->SetStringParameter("Object", obj);
       
-      if (parm->IsCoordSysDependent())
-      {
-         if (dep == "")
-            dep = "EarthMJ2000Eq";
+//       if (parm->IsCoordSysDependent())
+//       {
+//          if (dep == "")
+//             dep = "EarthMJ2000Eq";
          
-         parm->SetStringParameter("DepObject", dep);
-         parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, dep);
-      }
-      else if (parm->IsOriginDependent())
-      {
-         if (dep == "")
-            dep = "Earth";
+//          parm->SetStringParameter("DepObject", dep);
+//          parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, dep);
+//       }
+//       else if (parm->IsOriginDependent())
+//       {
+//          if (dep == "")
+//             dep = "Earth";
          
-         parm->SetStringParameter("DepObject", dep);
-         parm->SetRefObjectName(Gmat::SPACE_POINT, dep);
-         if (parm->NeedCoordSystem())
-            /// @todo Update coordinate system to better body parms
-            parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
-                                   "EarthMJ2000Eq");
-      }
-   }
+//          parm->SetStringParameter("DepObject", dep);
+//          parm->SetRefObjectName(Gmat::SPACE_POINT, dep);
+//          if (parm->NeedCoordSystem())
+//             /// @todo Update coordinate system to better body parms
+//             parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
+//                                    "EarthMJ2000Eq");
+//       }
+//    }
 
    return parm;
 }

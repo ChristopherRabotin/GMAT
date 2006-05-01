@@ -507,33 +507,12 @@ bool Achieve::InterpretAction()
           parmType.c_str(), parmSystem.c_str());
    #endif
 
-   //loj: 4/18/06 now the Moderator can handle object and dependency
    goalParm = mod->CreateParameter(parmType, goalName, Gmat::SPACECRAFT,
                                    parmObj, parmSystem);
-   
-//    goalParm = mod->CreateParameter(parmType, goalName);
+
    if (!goalParm)
       throw CommandException("Unable to create parameter " + goalName);
-   
-//    goalParm->SetRefObjectName(Gmat::SPACECRAFT, parmObj);
-
-//    if (goalParm->IsCoordSysDependent()) {
-//       if (parmSystem == "")
-//          parmSystem = "EarthMJ2000Eq";
-//       goalParm->SetStringParameter("DepObject", parmSystem);
-//       //goalParm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
-//    }
-
-//    if (goalParm->IsOriginDependent()) {
-//       if (parmSystem == "")
-//          parmSystem = "Earth";
-//       goalParm->SetStringParameter("DepObject", parmSystem);
-//       //goalParm->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
-//       if (goalParm->NeedCoordSystem())
-//          /// @todo Update coordinate system to better value for body parms
-//          goalParm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
-
-//    }
+         
 
    // Find the value
    loc = end + 1;
@@ -619,27 +598,12 @@ bool Achieve::ConstructGoal(const char* str)
 
       if (mod->IsParameter(parmType))
       {
-         goalTarget = mod->CreateParameter(parmType, goalString);
+         goalTarget = mod->CreateParameter(parmType, goalString, Gmat::SPACECRAFT,
+                                           parmObj, parmSystem);
+        
          if (!goalTarget)
             throw CommandException("Unable to create parameter " + goalString);
-         goalTarget->SetRefObjectName(Gmat::SPACECRAFT, parmObj);
 
-         if (goalTarget->IsCoordSysDependent()) {
-            if (parmSystem == "")
-               parmSystem = "EarthMJ2000Eq";
-            goalTarget->SetStringParameter("DepObject", parmSystem);
-            goalTarget->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
-         }
-
-         if (goalTarget->IsOriginDependent()) {
-            if (parmSystem == "")
-               parmSystem = "Earth";
-            goalTarget->SetStringParameter("DepObject", parmSystem);
-            if (goalTarget->NeedCoordSystem())
-               /// @todo Update coordinate system to better value for body parms
-               goalTarget->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
-                  "EarthMJ2000Eq");
-         }
          return true;
       }
       #ifdef DEBUG_ACHIEVE
