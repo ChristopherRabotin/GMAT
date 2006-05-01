@@ -152,6 +152,8 @@ Burn::Burn(const Burn &b) :
    dvLabels[2] = b.dvLabels[2];
     
    parameterCount = b.parameterCount;
+   
+   frameman = new ManeuverFrameManager;
 }
 
 
@@ -189,6 +191,8 @@ Burn& Burn::operator=(const Burn &b)
       dvLabels[0]       = b.dvLabels[0];
       dvLabels[1]       = b.dvLabels[1];
       dvLabels[2]       = b.dvLabels[2];
+      
+      frameman = new ManeuverFrameManager;
    }
 
    return *this;

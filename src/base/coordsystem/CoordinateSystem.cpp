@@ -95,9 +95,13 @@ axes               (NULL)
  */
 //---------------------------------------------------------------------------
 CoordinateSystem::CoordinateSystem(const CoordinateSystem &coordSys) :
-CoordinateBase (coordSys),
-axes           (coordSys.axes)
+CoordinateBase (coordSys)
+//axes           (coordSys.axes)
 {
+   if (coordSys.axes)
+      axes = (AxisSystem*)coordSys.axes->Clone();
+   else
+      axes = NULL;
 }
 
 //---------------------------------------------------------------------------
@@ -117,7 +121,12 @@ const CoordinateSystem& CoordinateSystem::operator=(
    if (&coordSys == this)
       return *this;
    CoordinateBase::operator=(coordSys);
-   axes           = coordSys.axes;
+   //axes           = coordSys.axes;
+
+   if (coordSys.axes)
+      axes = (AxisSystem*)coordSys.axes->Clone();
+   else
+      axes = NULL;
    
    return *this;
 }
@@ -156,7 +165,8 @@ const bool CoordinateSystem::operator==(const CoordinateSystem &coordSys)
 //---------------------------------------------------------------------------
 CoordinateSystem::~CoordinateSystem()
 {
-   if (axes) delete axes; 
+   if (axes) delete axes;
+   axes = NULL;
 }
 
 GmatCoordinate::ParameterUsage CoordinateSystem::UsesEopFile() const
@@ -847,7 +857,15 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
    if (axes)
       retval |= axes->SetRefObject(obj, type, name);
-      
+
+   
+//    if (obj->IsOfType(Gmat::SPACE_POINT))
+//    {
+//       retval = CoordinateBase::SetRefObject(obj, type, name);
+//       if (axes)
+//          retval |= axes->SetRefObject(obj, type, name);
+//    }
+   
    if (retval)
       return true;
    
