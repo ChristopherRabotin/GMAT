@@ -104,12 +104,12 @@ Rmatrix MathTree::MatrixEvaluate()
 }
 
 //------------------------------------------------------------------------------
-// void ReportOutputs(Integer &type, Integer &rowCount, Integer &colCount) const
+// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount) const
 //------------------------------------------------------------------------------
-void MathTree::ReportOutputs(Integer &type, 
+void MathTree::GetOutputInfo(Integer &type, 
                Integer &rowCount, Integer &colCount) 
 {
-    topNode->ReportOutputs(type, rowCount, colCount);
+    topNode->GetOutputInfo(type, rowCount, colCount);
 }
 
 //------------------------------------------------------------------------------

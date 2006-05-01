@@ -37,7 +37,7 @@ public:
    Real              Evaluate();
    Rmatrix           MatrixEvaluate();
    bool              Initialize(std::map<std::string, GmatBase *> *objectMap);
-   void              ReportOutputs(Integer &type, Integer &rowCount,
+   void              GetOutputInfo(Integer &type, Integer &rowCount,
                             Integer &colCount);
    
 protected:
