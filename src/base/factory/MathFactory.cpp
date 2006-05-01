@@ -20,10 +20,30 @@
 
 #include "MathFactory.hpp"
 #include "StringUtil.hpp"  // for Capitalize()
+#include "MessageInterface.hpp"
 
 // include list of MathNode classes here
-//#include "Add.hpp"
-//#include "Subtract.hpp"
+#include "MathElement.hpp"
+#include "Acos.hpp"
+#include "Asin.hpp"
+#include "Atan.hpp"
+#include "Atan2.hpp"
+#include "Add.hpp"
+#include "Cos.hpp"
+#include "DegToRad.hpp"
+#include "Divide.hpp"
+#include "Exp.hpp"
+#include "Inverse.hpp"
+#include "Log.hpp"
+#include "Log10.hpp"
+#include "Multiply.hpp"
+#include "Power.hpp"
+#include "RadToDeg.hpp"
+#include "Sin.hpp"
+#include "Sqrt.hpp"
+#include "Subtract.hpp"
+#include "Tan.hpp"
+#include "Transpose.hpp"
 
 //---------------------------------
 //  public methods
@@ -52,62 +72,73 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
    
    std::string newType = GmatStringUtil::Capitalize(ofType);
    MessageInterface::ShowMessage
-      ("==>MathFactory::CreateMathNode() ofType=%s, newType=%s\n", ofType.c_str(),
-       newType.c_str());
+      ("==>MathFactory::CreateMathNode() ofType=%s, newType=%s, withName=%s\n",
+       ofType.c_str(), newType.c_str(), withName.c_str());
+
+   // Leaf node
+   if (ofType == "MathElement")
+   {
+      mathNode = new MathElement(ofType, withName);
+
+      // set value if single real value
+      Real rval;
+      if (GmatStringUtil::ToDouble(withName, &rval))
+         ((MathElement*)mathNode)->SetRealValue(rval);
+   }
    
    // Simple math operations
-//    if (ofType == "Add")         // Add(x,y) or x+y
-//       mathNode = new Add(withName);
-//    else if (ofType == "Subtract")    // Subtract(x,y) or x-y
-//       mathNode = new Subtract(withName);
-//    else if (ofType == "Multiply")    // Multiply(x,y) or x*y
-//       mathNode = new Multiply(withName);
-//    else if (ofType == "Divide")      // Divide(x,y) or x/y
-//       mathNode = new Divide(withName);
-//    else if (ofType == "Sqrt")        // Sqrt(x)
-//       mathNode = new Sqrt(withName);
+   if (newType == "Add")              // Add(x,y) or x+y
+      mathNode = new Add(withName);
+   else if (newType == "Subtract")    // Subtract(x,y) or x-y
+      mathNode = new Subtract(withName);
+   else if (newType == "Multiply")    // Multiply(x,y) or x*y
+      mathNode = new Multiply(withName);
+   else if (newType == "Divide")      // Divide(x,y) or x/y
+      mathNode = new Divide(withName);
+   else if (newType == "Sqrt")        // Sqrt(x)
+      mathNode = new Sqrt(withName);
 
-//    // Power, Log functions
-//    else if (ofType == "Power")       // power(x,y) or x^y
-//       mathNode = new Power(withName);
-//    else if (ofType == "Exp")         // exp(x)
-//       mathNode = new Exp(withName);
-//    else if (ofType == "Log")         // log(x)
-//       mathNode = new Log(withName);
-//    else if (ofType == "Log10")       // log10(x)
-//       mathNode = new Log10(withName);
+   // Power, Log functions
+   else if (newType == "Power")       // power(x,y) or x^y
+      mathNode = new Power(withName);
+   else if (newType == "Exp")         // exp(x)
+      mathNode = new Exp(withName);
+   else if (newType == "Log")         // log(x)
+      mathNode = new Log(withName);
+   else if (newType == "Log10")       // log10(x)
+      mathNode = new Log10(withName);
 
-//    // Matrix functions
-//    else if (ofType == "Transpose")   // transpose(m) or m'
-//       mathNode = new Transpose(withName);
-//    else if (ofType == "Det")         // det(m)
+   // Matrix functions
+   else if (newType == "Transpose")   // transpose(m) or m'
+      mathNode = new Transpose(withName);
+//    else if (newType == "Det")         // det(m)
 //       mathNode = new Det(withName);
-//    else if (ofType == "Inv")         // inv(m)
-//       mathNode = new Inv(withName);
-//    else if (ofType == "Norm")        // norm(m)
+   else if (newType == "Inv")         // inv(m)
+      mathNode = new Inverse(withName);
+//    else if (newType == "Norm")        // norm(m)
 //       mathNode = new Norm(withName);
 
-//    // Trigonometric functions
-//    else if (ofType == "Sin")         // sin(x)
-//       mathNode = new Sin(withName);
-//    else if (ofType == "Cos")         // cos(x)
-//       mathNode = new Cos(withName);
-//    else if (ofType == "Tan")         // tan(x)
-//       mathNode = new Tan(withName);
-//    else if (ofType == "Asin")        // asin(x)
-//       mathNode = new Asin(withName);
-//    else if (ofType == "Acos")        // acos(x)
-//       mathNode = new acos(withName);
-//    else if (ofType == "Atan")        // atan(x)
-//       mathNode = new Atan(withName);
-//    else if (ofType == "atan2")       // atan2(y,x)
-//       mathNode = new Atan2(withName);
+   // Trigonometric functions
+   else if (newType == "Sin")         // sin(x)
+      mathNode = new Sin(withName);
+   else if (newType == "Cos")         // cos(x)
+      mathNode = new Cos(withName);
+   else if (newType == "Tan")         // tan(x)
+      mathNode = new Tan(withName);
+   else if (newType == "Asin")        // asin(x)
+      mathNode = new Asin(withName);
+   else if (newType == "Acos")        // acos(x)
+      mathNode = new Acos(withName);
+   else if (newType == "Atan")        // atan(x)
+      mathNode = new Atan(withName);
+   else if (newType == "Atan2")       // atan2(y,x)
+      mathNode = new Atan2(withName);
    
-//    // Unit conversion functions
-//    else if (ofType == "DegToRad")
-//       mathNode = new DegToRad(withName);
-//    else if (ofType == "RadToDeg")
-//       mathNode = new RadToDeg(withName);
+   // Unit conversion functions
+   else if (newType == "DegToRad")
+      mathNode = new DegToRad(withName);
+   else if (newType == "RadToDeg")
+      mathNode = new RadToDeg(withName);
 
    
    return mathNode;
@@ -122,8 +153,10 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
  * (default constructor)
  */
 //------------------------------------------------------------------------------
-MathFactory::MathFactory() :
-   Factory(Gmat::MATH_NODE)
+MathFactory::MathFactory()
+   #ifndef __UNIT_TEST__
+   : Factory(Gmat::MATH_NODE)
+   #endif
 {
    isCaseSensitive = false;
    
@@ -141,8 +174,10 @@ MathFactory::MathFactory() :
  * @param <createList> list of creatable MathNode objects
  */
 //------------------------------------------------------------------------------
-MathFactory::MathFactory(StringArray createList) :
-   Factory(createList, Gmat::MATH_NODE)
+MathFactory::MathFactory(StringArray createList)
+   #ifndef __UNIT_TEST__
+   : Factory(createList, Gmat::MATH_NODE)
+   #endif
 {
    isCaseSensitive = true;
 }
@@ -158,8 +193,10 @@ MathFactory::MathFactory(StringArray createList) :
  * @param <fact> the factory object to copy to "this" factory.
  */
 //------------------------------------------------------------------------------
-MathFactory::MathFactory(const MathFactory &fact) :
-    Factory(fact)
+MathFactory::MathFactory(const MathFactory &fact)
+   #ifndef __UNIT_TEST__
+   : Factory(fact)
+   #endif
 {
    isCaseSensitive = true;
    
@@ -181,7 +218,9 @@ MathFactory::MathFactory(const MathFactory &fact) :
 //------------------------------------------------------------------------------
 MathFactory& MathFactory::operator=(const MathFactory &fact)
 {
+   #ifndef __UNIT_TEST__
    Factory::operator=(fact);
+   #endif
    isCaseSensitive = true;
    return *this;
 }

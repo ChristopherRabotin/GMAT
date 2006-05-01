@@ -20,10 +20,14 @@
 #ifndef MathFactory_hpp
 #define MathFactory_hpp
 
-#include "Factory.hpp"
 #include "MathNode.hpp"
 
+#ifdef __UNIT_TEST__
+class GMAT_API MathFactory
+#else
+#include "Factory.hpp"
 class GMAT_API MathFactory : public Factory
+#endif
 {
 public:
    MathNode* CreateMathNode(const std::string &ofType,
@@ -38,6 +42,10 @@ public:
 protected:
    void BuildCreatables();
    
+   #ifdef __UNIT_TEST__
+   StringArray creatables;
+   bool isCaseSensitive;
+   #endif
 };
 
 #endif // MathFactory_hpp
