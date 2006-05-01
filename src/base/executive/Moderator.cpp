@@ -1504,27 +1504,23 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       Parameter *param = theFactoryManager->CreateParameter(type, name);
       param->SetStringParameter("Expression", name);
       
-      // Set parameter owner and dependent object(loj: 4/4/06)
-      if (ownerType != Gmat::UNKNOWN_OBJECT || ownerName != "")
+      // Set parameter owner and dependent object
+      if (ownerType != Gmat::UNKNOWN_OBJECT && ownerName != "")
          param->SetRefObjectName(ownerType, ownerName);
-
+      
+      // Set dependent object name
       if (depName != "")
          param->SetStringParameter("DepObject", depName);
 
-      //loj: 4/18/06 commented out - It is handled by SetStringParameter()
-      //if (depName != "")
-      //{
-      //   if (param->NeedCoordSystem())
-      //   {
-      //      param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depName);
-      //      if (param->IsOriginDependent())
-      //         param->SetStringParameter("DepObject", depName);
-      //      else if (param->IsCoordSysDependent())
-      //         param->SetStringParameter("DepObject", depName);
-      //   }
-      //}
+      // Set SolarSystem
+      param->SetSolarSystem(theSolarSystemInUse);
+      param->SetInternalCoordSystem(theInternalCoordSystem);
       
-      // create parameter dependent coordinate system (loj: 1/27/06)
+      if (depName != "")
+         if (param->NeedCoordSystem())
+            param->AddRefObject(GetConfiguredItem(depName));
+      
+      // create parameter dependent coordinate system
       if (type == "Longitude" || type == "Latitude" || type == "Altitude" ||
           type == "MHA" || type == "LST")
       {
@@ -1597,6 +1593,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       return GetParameter(name);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // Parameter* GetParameter(const std::string &name)
@@ -3787,7 +3784,7 @@ void Moderator::CreateDefaultMission()
          if (param->GetKey() == GmatParam::SYSTEM_PARAM)
          {
             //MessageInterface::ShowMessage("name = %s\n", param->GetName().c_str());
-            param->SetStringParameter("Expression", param->GetName());
+            //param->SetStringParameter("Expression", param->GetName());
             param->SetRefObjectName(Gmat::SPACECRAFT, "DefaultSC");
 
             if (param->NeedCoordSystem())
