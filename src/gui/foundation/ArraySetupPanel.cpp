@@ -257,6 +257,12 @@ void ArraySetupPanel::LoadData()
             {
                mRmat.SetElement(row, col, arrParam->
                                 GetRealParameter("SingleValue", row, col));
+               
+               #ifdef DEBUG_ARRAY_PANEL
+               MessageInterface::ShowMessage
+                  ("==> val(%d,%d)=%f\n", row, col, mRmat.GetElement(row, col));
+               #endif
+               
                str.Printf("%g", mRmat.GetElement(row, col));
                mArrGrid->SetCellValue(row, col, str);
             }

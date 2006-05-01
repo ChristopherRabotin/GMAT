@@ -784,7 +784,7 @@ bool ReportFile::OpenReportFile(void)
 bool ReportFile::Distribute(int len)
 {
    #ifdef DEBUG_REPORTFILE_DATA
-      MessageInterface::ShowMessage("ReportFile::Distribute called\n");
+      MessageInterface::ShowMessage("ReportFile::Distribute called len=%d\n", len);
       MessageInterface::ShowMessage("   data = '%s'\n", data);
       MessageInterface::ShowMessage(
          "   usedByReport = %s, calledByReport = %s\n",
