@@ -46,8 +46,9 @@ using namespace GmatTimeUtil;      // for JD offsets, etc.
 //---------------------------------
 // static data
 //---------------------------------
-const Real GeocentricSolarMagneticAxes::lambdaD = 70.1;  // degrees West
-const Real GeocentricSolarMagneticAxes::phiD    = 78.6;  // degrees North
+// wcs - 2006.05.01 added negative sign per Bug 260
+const Real GeocentricSolarMagneticAxes::lambdaD = -70.1 * GmatMathUtil::RAD_PER_DEG;  // degrees West
+const Real GeocentricSolarMagneticAxes::phiD    = 78.6 * GmatMathUtil::RAD_PER_DEG;  // degrees North
 
 
 //------------------------------------------------------------------------------
@@ -208,8 +209,9 @@ GmatBase* GeocentricSolarMagneticAxes::Clone() const
 //------------------------------------------------------------------------------
 void GeocentricSolarMagneticAxes::ComputeDipoleEarthFixed()
 {
-   dipoleEF(0) = Cos(phiD) * Cos(-lambdaD);
-   dipoleEF(1) = Cos(phiD) * Sin(-lambdaD);
+   // wcs 2006.05.01 - removed negative signs on lambdaD per Bug 260
+   dipoleEF(0) = Cos(phiD) * Cos(lambdaD);
+   dipoleEF(1) = Cos(phiD) * Sin(lambdaD);
    dipoleEF(2) = Sin(phiD);
 }
 
