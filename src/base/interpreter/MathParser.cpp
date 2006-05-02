@@ -306,6 +306,7 @@ MathNode* MathParser::CreateNode(const std::string &type, const std::string &exp
    
    if (type == "MathElement")
    {
+      
       // just for testing
       if (exp.find("matA") != exp.npos)
       {
@@ -465,7 +466,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
    
    // find match closing parenthesis ')'
    UnsignedInt index2 = FindMatchingParen(str, index1);
-      
+   
    #if DEBUG_PARENTHESIS
    MessageInterface::ShowMessage
       ("MathParser::ParseParenthesis() index1=%d, index2=%d, str.size()=%d\n",
@@ -497,6 +498,15 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
    else
    {
       op = FindOperator(str, index2, left, right);
+
+      //loj:5/2/06
+      if (op == "")
+      {
+         op = GetOperatorName(str.substr(index1-1, 1));
+         left = str.substr(0, index1-1);
+         right = str.substr(index1, str.npos);
+      }
+      
    }
    
    FillItems(items, op, left, right);
@@ -602,11 +612,23 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
    std::string op = "";
    std::string left;
    std::string right;
-      
+
+   //loj: 5/2/06
+   // find double operator
+   if ((str.find("*-") != str.npos) || (str.find("/-") != str.npos) ||
+       (str.find("^-") != str.npos))
+   {
+      FillItems(items, "", "", "");
+      #if DEBUG_ADD_SUBTRACT
+      WriteItems("==> After ParseAddSubtract(): combined unary found", items);
+      #endif
+      return items;
+   }
+   
    // find first + or -
    UnsignedInt index1 = str.find('+');
    UnsignedInt index2 = str.find('-');
-
+   
    if (index1 == str.npos && index2 == str.npos)
    {
       FillItems(items, "", "", "");
@@ -615,31 +637,76 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
       #endif
       return items;
    }
-
    
-   UnsignedInt index;
-   if (index1 != str.npos)
+   UnsignedInt indexBeg, indexEnd;
+   
+   indexBeg = index1 > index2 ? index2 : index1;
+
+   // if double operator +- or -+
+   if (abs(index2 - index1) == 1)
+   {
+      op = "Subtract";
+      indexEnd = index1 > index2 ? index1 : index2;
+      indexEnd = indexEnd + 1;
+   }
+   else if (index1 != str.npos)
    {
       op = "Add";
-      index = index1;
+      if (str.substr(index1+1, 1) == "+") // ++
+         indexEnd = index1 + 2;
+      else
+         indexEnd = index1 + 1;
    }
    else if (index2 != str.npos)
    {
-      op = "Subtract";
-      index = index2;
+      if (str.substr(index2+1, 1) == "-") // --
+      {
+         op = "Add";
+         indexEnd = index2 + 2;
+      }
+      else
+      {
+         op = "Subtract";
+         indexEnd = index2 + 1;
+      }
    }
    
-   left = str.substr(0, index);
-   right = str.substr(index+1, str.npos);
+   #if DEBUG_ADD_SUBTRACT
+   MessageInterface::ShowMessage
+      ("ParseAddSubtract() index1=%d, index2=%d, indexBeg=%d, indexEnd=%d\n",
+       index1, index2, indexBeg, indexEnd);
+   #endif
+
+   if (indexBeg == 0) // unary operation
+   {
+      #if DEBUG_ADD_SUBTRACT
+      MessageInterface::ShowMessage("ParseAddSubtract() Found unary operator\n");
+      #endif
+      
+      FillItems(items, "", "", "");      
+      return items;
+   }
+   
+   left = str.substr(0, indexBeg);
+   //right = str.substr(indexEnd+1, str.npos);
+   right = str.substr(indexEnd, str.npos);
+   
+   #if DEBUG_ADD_SUBTRACT
+   MessageInterface::ShowMessage
+      ("ParseAddSubtract() op=%s, left=%s, right=%s\n", op.c_str(),
+       left.c_str(), right.c_str());
+   #endif
    
    if (right == "")
       throw MathException("*** ERROR *** Need right side in: " + str + "\n");
    
-   if (left == "") // unary operation
-      FillItems(items, "", "", "");      
-   else
-      FillItems(items, op, left, right);
+//    if (left == "") // unary operation
+//       FillItems(items, "", "", "");      
+//    else
+//       FillItems(items, op, left, right);
 
+   FillItems(items, op, left, right);
+   
    #if DEBUG_ADD_SUBTRACT
    WriteItems("==> After ParseAddSubtract()", items);
    #endif
@@ -764,16 +831,20 @@ StringArray MathParser::ParseUnary(const std::string &str)
    StringArray items;
    std::string op = "";
    
-   // find first -
+   // find  - or -
    UnsignedInt index1 = str.find('-');
+   UnsignedInt index2 = str.find('+');
    
-   if (index1 == str.npos)
+   if (index1 == str.npos && index2 == str.npos)
    {
       FillItems(items, "", "", "");
       return items;
    }
    
-   op = "Negate";
+   if (index1 != str.npos)
+      op = "Negate";
+   else
+      op = "None";
    
    //std::string left = str.substr(0, index1);
    std::string left = str.substr(index1+1, str.npos);
