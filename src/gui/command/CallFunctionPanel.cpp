@@ -412,9 +412,9 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
 
    if (event.GetEventObject() == inputGrid)
    {
-      //loj: 4/25/06 set canSelectWholeObject=true
-      ParameterSelectDialog paramDlg(this, GuiItemManager::SHOW_REPORTABLE, true,
-                                     true, true, true); 
+      //loj: 5/2/06 added "Spacecraft"
+      ParameterSelectDialog paramDlg(this, "Spacecraft", GuiItemManager::SHOW_REPORTABLE,
+                                     true, true, true, true, true); 
       paramDlg.SetParamNameArray(inputStrings);
       paramDlg.ShowModal();
       
@@ -441,11 +441,9 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
    }
    else if (event.GetEventObject() == outputGrid)
    {
-      //loj: 2/7/05 Changed to use ParameterSelectDialog()
-      //ParameterMultiSelectDialog paramDlg(this, outputStrings, true, false);
-      //ParameterSelectDialog paramDlg(this, true, false, true);
-      ParameterSelectDialog paramDlg(this, GuiItemManager::SHOW_REPORTABLE, true,
-                                     false, true);
+      //loj: 5/2/06 added "Spacecraft"
+      ParameterSelectDialog paramDlg(this, "Spacecraft", GuiItemManager::SHOW_REPORTABLE,
+                                     true, true, false, true);
       paramDlg.SetParamNameArray(outputStrings);
       paramDlg.ShowModal();
       

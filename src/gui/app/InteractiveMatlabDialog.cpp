@@ -255,9 +255,8 @@ void InteractiveMatlabDialog::OnCellClick(wxGridEvent& event)
 
    if (event.GetEventObject() == inputGrid)
    {
-      //loj: 2/7/05 Changed to use ParameterSelectDialog()
-      //ParameterMultiSelectDialog paramDlg(this, inputStrings, true, false);
-      ParameterSelectDialog paramDlg(this, true, false, true);
+      //loj: 5/2/06 Added "Spacecraft"
+      ParameterSelectDialog paramDlg(this, "Spacecraft", true, false, true);
       paramDlg.SetParamNameArray(inputStrings);
       paramDlg.ShowModal();
       
@@ -280,9 +279,8 @@ void InteractiveMatlabDialog::OnCellClick(wxGridEvent& event)
    }
    else if (event.GetEventObject() == outputGrid)
    {
-      //loj: 2/7/05 Changed to use ParameterSelectDialog()
-      //ParameterMultiSelectDialog paramDlg(this, outputStrings, true, false);
-      ParameterSelectDialog paramDlg(this, true, false, true);
+      //loj: 5/2/06 Added "Spacecraft"
+      ParameterSelectDialog paramDlg(this, "Spacecraft", true, false, true);
       paramDlg.SetParamNameArray(outputStrings);
       paramDlg.ShowModal();
 
