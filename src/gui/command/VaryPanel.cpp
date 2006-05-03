@@ -16,7 +16,8 @@
 #include "GmatAppData.hpp"
 #include "ParameterSelectDialog.hpp"
 #include "VaryPanel.hpp"
-
+#include "Solver.hpp"
+#include "GmatBaseException.hpp"
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
 
@@ -102,7 +103,7 @@ void VaryPanel::Create()
    
    // wxTextCtrl
    mVarNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(180,-1), 0);
+                                     wxDefaultPosition, wxSize(250,-1), 0);
    mInitialTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                                      wxDefaultPosition, wxSize(80,-1), 0);
    mPertTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
@@ -257,41 +258,67 @@ void VaryPanel::LoadData()
    ShowVariableSetup();
 }
 
+
 //------------------------------------------------------------------------------
 // void SaveData()
 //------------------------------------------------------------------------------
 void VaryPanel::SaveData()
 {   
-   #if DEBUG_VARY_PANEL
-   MessageInterface::ShowMessage("VaryPanel::SaveData() enteredd\n");
-   #endif
    
    //-------------------------------------------------------
    // Saving Solver Data
    //-------------------------------------------------------
-   mVaryCommand->SetStringParameter
-      (mVaryCommand->GetParameterID("TargeterName"),
-       std::string(mSolverData.solverName.c_str()));
+   std::string solverName = mSolverData.solverName.c_str();
+   std::string variableName = mSolverData.varName.c_str();
    
-   mVaryCommand->SetStringParameter
-      (mVaryCommand->GetParameterID("Variable"),
-       std::string(mSolverData.varName.c_str()));
+   #if DEBUG_VARY_PANEL
+   MessageInterface::ShowMessage
+      ("VaryPanel::SaveData() solverName=%s, variableName=%s\n",
+       solverName.c_str(), variableName.c_str());
+   #endif
    
-   mVaryCommand->SetRealParameter
-      (mVaryCommand->GetParameterID("InitialValue"),
-       mSolverData.initialValue);
-   mVaryCommand->SetRealParameter
-      (mVaryCommand->GetParameterID("Perturbation"),
-       mSolverData.pert);
-   mVaryCommand->SetRealParameter
-      (mVaryCommand->GetParameterID("MinimumValue"),
-       mSolverData.minValue);
-   mVaryCommand->SetRealParameter
-      (mVaryCommand->GetParameterID("MaximumValue"),
-       mSolverData.maxValue);
-   mVaryCommand->SetRealParameter
-      (mVaryCommand->GetParameterID("MaximumChange"),
-       mSolverData.maxStep);
+   Solver *solver = theGuiInterpreter->GetSolver(solverName);
+
+   if (solver == NULL)
+      throw GmatBaseException("Cannot find the solver: " + solverName);
+
+   try
+   {
+      solver->SetStringParameter
+         (solver->GetParameterID("Variables"), variableName);
+   
+      mVaryCommand->SetStringParameter
+         (mVaryCommand->GetParameterID("TargeterName"), solverName);
+   
+      mVaryCommand->SetStringParameter
+         (mVaryCommand->GetParameterID("Variable"), variableName);
+   
+      mVaryCommand->SetRealParameter
+         (mVaryCommand->GetParameterID("InitialValue"),
+          mSolverData.initialValue);
+   
+      mVaryCommand->SetRealParameter
+         (mVaryCommand->GetParameterID("Perturbation"),
+          mSolverData.pert);
+   
+      mVaryCommand->SetRealParameter
+         (mVaryCommand->GetParameterID("MinimumValue"),
+          mSolverData.minValue);
+   
+      mVaryCommand->SetRealParameter
+         (mVaryCommand->GetParameterID("MaximumValue"),
+          mSolverData.maxValue);
+   
+      mVaryCommand->SetRealParameter
+         (mVaryCommand->GetParameterID("MaximumChange"),
+          mSolverData.maxStep);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("VaryPanel:SaveData() error occurred!\n%s\n",
+          e.GetMessage().c_str());
+   }
    
    theApplyButton->Disable();
 }
@@ -350,6 +377,7 @@ void VaryPanel::OnTextChange(wxCommandEvent& event)
    theApplyButton->Enable();
 }
 
+
 //------------------------------------------------------------------------------
 // void VaryPanel::OnSolverSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -359,6 +387,7 @@ void VaryPanel::OnSolverSelection(wxCommandEvent &event)
    theApplyButton->Enable();
 }
 
+
 //------------------------------------------------------------------------------
 // void VaryPanel::OnButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -366,10 +395,9 @@ void VaryPanel::OnButton(wxCommandEvent& event)
 {
    if (event.GetEventObject() == mViewVarButton)  
    {
-      // show dialog to select parameter
-      //loj: 7/28/05 set flag not to create Parameter
-      ParameterSelectDialog paramDlg(this, false, true, false, false, false,
-                                     "Burn");
+      //loj: 05/02/06 Added "Burn"
+      ParameterSelectDialog paramDlg(this, "Burn", GuiItemManager::SHOW_PLOTTABLE,
+                                     false, false, true, false, false, false);
       paramDlg.ShowModal();
       
       if (paramDlg.IsParamSelected())
