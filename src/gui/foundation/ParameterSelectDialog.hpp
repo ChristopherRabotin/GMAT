@@ -25,14 +25,14 @@ class ParameterSelectDialog : public GmatDialog
 public:
    
    ParameterSelectDialog(wxWindow *parent,
+                         const wxString &ownerType = "Spacecraft",
                          int showOption = GuiItemManager::SHOW_PLOTTABLE,
+                         bool showVariable = true,
                          bool showArray = false,
-                         //bool showArrayAndString = false,
                          bool showSysParams = true,
                          bool canSelectMultiVars = false,
                          bool canSelectWholeObject = false,
-                         bool createParam = true,
-                         const wxString &ownerType = "Spacecraft");
+                         bool createParam = true);
    ~ParameterSelectDialog();
    
    bool IsParamSelected()
@@ -55,8 +55,8 @@ protected:
    bool mIsParamSelected;
    bool mCanClose;
    bool mUseUserParam;
+   bool mShowVariable;
    bool mShowArray;
-   //bool mShowArrayAndString;
    bool mShowSysVars;
    bool mCanSelectMultiVars;
    bool mCanSelectWholeObject;
@@ -77,7 +77,6 @@ protected:
    
    wxListBox *mUserParamListBox;
    wxListBox *mPropertyListBox;
-   wxListBox *mVarListBox;
    wxListBox *mVarSelectedListBox;
    
    wxBoxSizer *mVarBoxSizer;

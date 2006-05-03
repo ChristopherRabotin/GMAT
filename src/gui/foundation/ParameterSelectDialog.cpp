@@ -39,40 +39,51 @@ END_EVENT_TABLE()
    
 //------------------------------------------------------------------------------
 // ParameterSelectDialog(wxWindow *parent,
-//                       bool showArrayAndString = false,
-//                       bool showSysVars = true,
+//                       const wxString &ownerType = "Spacecraft",
+//                       int showOption = GuiItemManager::SHOW_PLOTTABLE,
+//                       bool showVariable = true,
+//                       bool showArray = false,
+//                       bool showSysParams = true,
 //                       bool canSelectMultiVars = false,
 //                       bool canSelectWholeObject = false,
-//                       bool createParam = true,
-//                       const wxString &ownerType = "Spacecraft")
+//                       bool createParam = true)
 //------------------------------------------------------------------------------
 ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent,
+                                             const wxString &ownerType,
                                              int showOption,
+                                             bool showVariable,
                                              bool showArray,
-                                             //bool showArrayAndString,
                                              bool showSysVars,
                                              bool canSelectMultiVars,
                                              bool canSelectWholeObject,
-                                             bool createParam,
-                                             const wxString &ownerType)
+                                             bool createParam)
    : GmatDialog(parent, -1, wxString(_T("ParameterSelectDialog")))
 {
    mIsParamSelected = false;
    mCanClose = true;
    mUseUserParam = false;
+   mOwnerType = ownerType;
    mShowOption = showOption;
+   mShowVariable = showVariable;
    mShowArray = showArray;
-   //mShowArrayAndString = showArrayAndString;
    mShowSysVars = showSysVars;
    mCanSelectMultiVars = canSelectMultiVars;
    mCanSelectWholeObject = canSelectWholeObject;
    mCreateParam = createParam;
-   mOwnerType = ownerType;
    mLastPropertySelection = wxNOT_FOUND;
    mLastUserParamSelection = wxNOT_FOUND;
    
    mParamNameArray.Clear();
 
+   #if DEBUG_PARAM_SELECT_DIALOG
+   MessageInterface::ShowMessage
+      ("ParameterSelectDialog() mOwnerType=%s, mShowOption=%d, mShowVariable=%d, "
+       "mShowArray=%d, mShowSysVars=%d, mCanSelectMultiVars=%d, mCanSelectWholeObject=%d, "
+       "mCreateParam=%d\n", mOwnerType.c_str(), mShowOption, mShowVariable,
+       mShowArray, mShowSysVars, mCanSelectMultiVars, mCanSelectWholeObject,
+       mCreateParam);
+   #endif
+   
    Create();
    ShowData();
 }
@@ -91,6 +102,7 @@ ParameterSelectDialog::~ParameterSelectDialog()
    
    theGuiManager->UnregisterComboBox(mOwnerType, mObjectComboBox);
    theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
+   theGuiManager->UnregisterComboBox("SpacePoint", mCentralBodyComboBox);
 }
 
 
@@ -144,7 +156,7 @@ void ParameterSelectDialog::Create()
    //------------------------------------------------------
    // available variables list (1st column)
    //------------------------------------------------------
-   mVarBoxSizer = new wxBoxSizer(wxVERTICAL);
+//    mVarBoxSizer = new wxBoxSizer(wxVERTICAL);
    
    wxButton *createVarButton;
    
@@ -159,8 +171,8 @@ void ParameterSelectDialog::Create()
                               &mCoordSysComboBox, ID_COMBOBOX,
                               &mCentralBodyComboBox, ID_COMBOBOX,
                               &mCoordSysLabel, &mCoordSysSizer,
-                              mShowOption, mShowArray, mOwnerType);
-                              //mShowArrayAndString, mOwnerType);
+                              mShowOption, mShowVariable, mShowArray,
+                              mOwnerType);
    }
    else
    {
@@ -168,20 +180,26 @@ void ParameterSelectDialog::Create()
          CreateUserVarSizer(this, &mUserParamListBox, USER_PARAM_LISTBOX,
                             &createVarButton, CREATE_VARIABLE,
                             mShowOption, mShowArray);
-                            //mShowArrayAndString);
    }
    
    //-------------------------------------------------------
    // add parameter button (2nd column)
    //-------------------------------------------------------
+
+   wxSize buttonSize(20, 20);
+   
+   #ifdef __WXMAC__
+   buttonSize.Set(40, 20);
+   #endif
+   
    mAddParamButton = new wxButton(this, ID_BUTTON, wxT("->"),
-                                  wxDefaultPosition, wxDefaultSize, 0);
+                                  wxDefaultPosition, buttonSize, 0);
    
    mRemoveParamButton = new wxButton(this, ID_BUTTON, wxT("<-"),
-                                      wxDefaultPosition, wxDefaultSize, 0);
+                                      wxDefaultPosition, buttonSize, 0);
    
    mRemoveAllParamButton = new wxButton(this, ID_BUTTON, wxT("<="),
-                                        wxDefaultPosition, wxDefaultSize, 0);
+                                        wxDefaultPosition, buttonSize, 0);
    
    wxBoxSizer *arrowButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
    arrowButtonsBoxSizer->Add(mAddParamButton, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -234,22 +252,46 @@ void ParameterSelectDialog::LoadData()
    #if DEBUG_PARAM_SELECT_DIALOG
    MessageInterface::ShowMessage("ParameterSelectDialog::LoadData() entered.\n");
    #endif
-   
+
    if (mShowSysVars)
    {
-      mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
+      //mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
       mObjectComboBox->SetSelection(0);
       mPropertyListBox->SetSelection(0);
-      mLastCoordSysName = mCoordSysComboBox->GetString(0);
+
+      if (mOwnerType == "Burn")
+      {
+         mCoordSysLabel->Hide();
+         mCoordSysComboBox->SetValue("");
+         mCentralBodyComboBox->SetValue("");
+         mCoordSysComboBox->Hide();
+         mCentralBodyComboBox->Hide();
+      }
+      else
+      {
+         mLastCoordSysName = mCoordSysComboBox->GetString(0);
       
-      // show coordinate system or central body
-      ShowCoordSystem();
+         // show coordinate system or central body
+         ShowCoordSystem();
+      }
    }
-   else
+
+   
+   if (mShowVariable || mShowArray)
    {
       mUserParamListBox->SetSelection(0);
       mUseUserParam = true;
    }
+   
+   if (mShowSysVars && (mShowVariable || mShowArray))
+   {
+      mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
+      mUseUserParam = false;
+   }
+   
+   #if DEBUG_PARAM_SELECT_DIALOG
+   MessageInterface::ShowMessage("ParameterSelectDialog::LoadData() exiting.\n");
+   #endif
 }
 
 
@@ -308,15 +350,15 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
          {
             mVarSelectedListBox->Append(newParam);
             mVarSelectedListBox->SetStringSelection(newParam);
-            theOkButton->Enable(); //loj: 8/31/05 Uncommented. Why commented out?
+            theOkButton->Enable();
          }
-         
+                  
          return;
       }
       
       // get string in first list
       wxString newParam = FormParamName();
-      
+
       // if newParam is properly created
       if (newParam != "")
       {
@@ -342,7 +384,7 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
          else
          {
             mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
-            OnSelectProperty(event);
+            //OnSelectProperty(event);
          }
       }
    }
@@ -431,20 +473,28 @@ void ParameterSelectDialog::OnSelectProperty(wxCommandEvent& event)
    // if click on selected item, deselect
    if (mPropertyListBox->GetSelection() == mLastPropertySelection)
    {
-      mPropertyListBox->Deselect(mLastPropertySelection);
       mLastPropertySelection = wxNOT_FOUND;
       
-      if (mUserParamListBox->GetSelection() == wxNOT_FOUND)
-         HighlightObject(event, true);
+      if (mShowVariable || mShowArray)
+      {
+         mPropertyListBox->Deselect(mLastPropertySelection);
+      
+         if (mUserParamListBox->GetSelection() == wxNOT_FOUND)
+            HighlightObject(event, true);
+      }
    }
    else
    {
       HighlightObject(event, false);
       mLastPropertySelection = mPropertyListBox->GetSelection();
+
       
-      // deselect user param
-      mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
-      mLastUserParamSelection = wxNOT_FOUND;
+      if (mShowVariable || mShowArray)
+      {
+         // deselect user param
+         mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
+         mLastUserParamSelection = wxNOT_FOUND;
+      }
       
       // show coordinate system or central body
       ShowCoordSystem();
@@ -487,7 +537,8 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
 {    
    if (event.GetEventObject() == mObjectComboBox)
    {
-      mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
+      //mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
+      mPropertyListBox->SetSelection(0);
       mUseUserParam = false;
    }
    else if(event.GetEventObject() == mCoordSysComboBox)
@@ -501,10 +552,12 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
 // wxString FormParamName()
 //------------------------------------------------------------------------------
 wxString ParameterSelectDialog::FormParamName()
-{
+{   
+   wxString paramName;
+   
    if (mUseUserParam)
    {
-      return mUserParamListBox->GetStringSelection();
+      paramName = mUserParamListBox->GetStringSelection();
    }
    else
    {
@@ -522,22 +575,27 @@ wxString ParameterSelectDialog::FormParamName()
          depObj = mCoordSysComboBox->GetStringSelection();
       else if (mCentralBodyComboBox->IsShown())
          depObj = mCentralBodyComboBox->GetStringSelection();
+
       
-      if (mCreateParam)
+      if (depObj == "")
       {
-         if (depObj == "")
-            return mObjectComboBox->GetStringSelection() + "." + 
-               mPropertyListBox->GetStringSelection();
-         else
-            return mObjectComboBox->GetStringSelection() + "." + depObj + "." +
-               mPropertyListBox->GetStringSelection();
+         paramName = mObjectComboBox->GetStringSelection() + "." + 
+            mPropertyListBox->GetStringSelection();
       }
       else
       {
-         return mObjectComboBox->GetStringSelection() + "." + depObj + "." +
+         paramName = mObjectComboBox->GetStringSelection() + "." + depObj + "." +
             mPropertyListBox->GetStringSelection();
       }
    }
+
+   #if DEBUG_PARAM_SELECT_DIALOG
+   MessageInterface::ShowMessage
+      ("ParameterSelectDialog::FormParamName() paramName=%s\n",
+       paramName.c_str());
+   #endif
+   
+   return paramName;
 }
 
 
@@ -591,6 +649,9 @@ Parameter* ParameterSelectDialog::GetParameter(const wxString &name)
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::ShowCoordSystem()
 {
+   if (mOwnerType == "Burn")
+      return;
+   
    std::string property = std::string(mPropertyListBox->GetStringSelection().c_str());
    GmatParam::DepObject depObj = ParameterInfo::Instance()->GetDepObjectType(property);
 

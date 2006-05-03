@@ -240,8 +240,8 @@ public:
                         wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
                         wxComboBox **originComboBox, wxWindowID originComboBoxId,
                         wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer,
-                        int showOption = SHOW_PLOTTABLE, bool showArray = false,
-                        const wxString &onwer = "Spacecraft");
+                        int showOption = SHOW_PLOTTABLE, bool showVariable = true,
+                        bool showArray = false, const wxString &onwer = "Spacecraft");
    wxBoxSizer*
    CreateUserVarSizer(wxWindow *parent,
                       wxListBox **userParamListBox, wxWindowID userParamListBoxId,

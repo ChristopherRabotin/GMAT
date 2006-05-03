@@ -456,7 +456,7 @@ wxComboBox* GuiItemManager::GetBurnComboBox(wxWindow *parent, wxWindowID id,
                                             const wxSize &size)
 {
    // combo box for avaliable burns
-
+   
    wxComboBox *burnComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
                      theNumBurn, theBurnList, wxCB_READONLY);
@@ -939,8 +939,7 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
                                               const wxSize &size,
                                               const wxString &objType,
                                               int showOption)
-{   
-   //wxListBox *propertyListBox = NULL;
+{
    
    ParameterInfo *theParamInfo = ParameterInfo::Instance();
    wxString emptyList[] = {};
@@ -967,16 +966,11 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
                propertyListBox->Append(theScPropertyList[i]);
          }
       }
-      
-      //propertyListBox =
-      //new wxListBox(parent, id, wxDefaultPosition, size, theNumScProperty,
-      //              theScPropertyList, wxLB_SINGLE|wxLB_SORT);
    }
    else if (objType == "Burn")
    {
-      propertyListBox =
-         new wxListBox(parent, id, wxDefaultPosition, size, theNumImpBurnProperty,
-                       theImpBurnPropertyList, wxLB_SINGLE|wxLB_SORT);
+      for (int i=0; i<theNumImpBurnProperty; i++)
+         propertyListBox->Append(theImpBurnPropertyList[i]);
    }
    else
    {
@@ -1097,6 +1091,7 @@ wxListBox* GuiItemManager::GetUserVariableListBox(wxWindow *parent, wxWindowID i
                                                   const wxSize &size,
                                                   const wxString &nameToExclude)
 {
+   
    wxString emptyList[] = {};
    
    wxListBox *userVariableListBox =
@@ -1424,19 +1419,25 @@ CreateParameterSizer(wxWindow *parent,
                      wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
                      wxComboBox **originComboBox, wxWindowID originComboBoxId,
                      wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer,
-                     int showOption, bool showArray, const wxString &owner)
+                     int showOption, bool showVariable, bool showArray,
+                     const wxString &owner)
 {
    #if DEBUG_GUI_ITEM
    MessageInterface::ShowMessage("GuiItemManager::CreateParameterSizer() entered\n");
    #endif
    
    int borderSize = 1;
-   
+
    //wxStaticText
-   wxStaticText *userVarStaticText =
-      new wxStaticText(parent, -1, wxT("Variables"),
-                       wxDefaultPosition, wxDefaultSize, 0);
+   wxStaticText *userVarStaticText = NULL;
    
+   if (showVariable || showArray)
+   {
+      userVarStaticText =
+         new wxStaticText(parent, -1, wxT("Variables"),
+                          wxDefaultPosition, wxDefaultSize, 0);
+   }
+
    wxStaticText *objectStaticText =
       new wxStaticText(parent, -1, wxT("Object"),
                        wxDefaultPosition, wxDefaultSize, 0);
@@ -1444,15 +1445,18 @@ CreateParameterSizer(wxWindow *parent,
    wxStaticText *propertyStaticText =
       new wxStaticText(parent, -1, wxT("Property"),
                        wxDefaultPosition, wxDefaultSize, 0);   
-     
+   
    *coordSysLabel =
       new wxStaticText(parent, -1, wxT("Coordinate System"),
                        wxDefaultPosition, wxDefaultSize, 0);   
    
    // wxButton
-   *createVarButton =
-      new wxButton(parent, createVarButtonId, wxT("Create"),
-                   wxDefaultPosition, wxSize(-1,-1), 0 );
+   if (showVariable || showArray)
+   {
+      *createVarButton =
+         new wxButton(parent, createVarButtonId, wxT("Create"),
+                      wxDefaultPosition, wxSize(-1,-1), 0 );
+   }
    
    //loj: 5/31/05 Added Burn parameter
    // wxComboBox
@@ -1470,108 +1474,99 @@ CreateParameterSizer(wxWindow *parent,
    *coordSysComboBox =
       GetCoordSysComboBox(parent, coordSysComboBoxId, wxSize(170, 20));
    *originComboBox =
-      GetConfigBodyComboBox(parent, coordSysComboBoxId, wxSize(170, 20));
+      GetConfigBodyComboBox(parent, originComboBoxId, wxSize(170, 20));
    
    // wxListBox
    wxArrayString emptyArray;
    // user parameter
-   if (showOption == SHOW_REPORTABLE)
+
+   *userParamListBox = NULL;
+   
+   if (showVariable || showArray)
    {
-      *userParamListBox =
-         GetAllUserParameterListBox(parent, userParamListBoxId, wxSize(170, 50), showArray);
-   }
-   else if (showOption == SHOW_PLOTTABLE)
-   {
-      *userParamListBox =
-         GetUserVariableListBox(parent, userParamListBoxId, wxSize(170, 50), "");
+      if (showOption == SHOW_REPORTABLE)
+      {
+         *userParamListBox =
+            GetAllUserParameterListBox(parent, userParamListBoxId, 
+                                       wxSize(170, 50), showArray);
+      }
+      else if (showOption == SHOW_PLOTTABLE)
+      {
+         *userParamListBox =
+            GetUserVariableListBox(parent, userParamListBoxId,
+                                   wxSize(170, 50), "");
+      }
    }
    
    // property
    *propertyListBox = 
       GetPropertyListBox(parent, propertyListBoxId, wxSize(170, 80), owner, showOption);
    
+   #ifdef __WXMAC__
+   //-------------------------------------------------------
+   wxBoxSizer *userParamBoxSizer = NULL;
+   if (showVariable || showArray)
+      userParamBoxSizer = new wxBoxSizer(wxVERTICAL);
+   wxBoxSizer *systemParamBoxSizer = new wxBoxSizer(wxVERTICAL);
+   #else
+   //-------------------------------------------------------
+   wxStaticBoxSizer *userParamBoxSizer = NULL;
+   if (showVariable || showArray)
+      userParamBoxSizer = new wxStaticBoxSizer(wxVERTICAL, parent, "");
+   wxStaticBoxSizer *systemParamBoxSizer =
+      new wxStaticBoxSizer(wxVERTICAL, parent, "");
+   #endif
+   //-------------------------------------------------------
    
-   #if __WXMAC__
-   //wxBoxSizer
-   wxBoxSizer *userParamBoxSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *systemParamBoxSizer = new wxBoxSizer(wxVERTICAL); 
    wxBoxSizer *paramBoxSizer = new wxBoxSizer(wxVERTICAL);
-   
    *coordSysBoxSizer = new wxBoxSizer(wxVERTICAL);
-
-   (*coordSysBoxSizer)->Add(*coordSysLabel, 0, wxALIGN_CENTRE|wxALL, borderSize);
    
-   userParamBoxSizer->Add
-      (userVarStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-   userParamBoxSizer->Add
-      (*userParamListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-   userParamBoxSizer->Add
-      (*createVarButton, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   (*coordSysBoxSizer)->Add(*coordSysLabel, 0, wxALIGN_CENTRE|wxALL, borderSize);
+
+   if (showVariable || showArray)
+   {
+      userParamBoxSizer->Add
+         (userVarStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+      userParamBoxSizer->Add
+         (*userParamListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+      userParamBoxSizer->Add
+         (*createVarButton, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   }
    
    systemParamBoxSizer->Add
       (objectStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
    systemParamBoxSizer->Add
         (*objectComboBox, 0, wxGROW|wxALIGN_CENTER|wxBOTTOM|wxALL, borderSize);
-      //(*objectComboBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-      
+   
+   #ifdef __WXMAC__
    systemParamBoxSizer->Add(30, 20, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   
-   systemParamBoxSizer->Add
-      (propertyStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-   systemParamBoxSizer->Add
-      (*propertyListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-   systemParamBoxSizer->Add
-      (*coordSysBoxSizer, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-   
-   paramBoxSizer->Add(userParamBoxSizer, 0,
-                      wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-                      
-   paramBoxSizer->Add(30, 20, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   
-   paramBoxSizer->Add(systemParamBoxSizer, 0,
-                      wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-   #else
-   //wxStaticBox
-   wxStaticBox *userParamStaticBox = new wxStaticBox(parent, -1, wxT(""));
-   wxStaticBox *systemParamStaticBox = new wxStaticBox(parent, -1, wxT(""));
-   
-   // wx*Sizer
-   wxStaticBoxSizer *userParamBoxSizer =
-      new wxStaticBoxSizer(userParamStaticBox, wxVERTICAL);
-   wxStaticBoxSizer *systemParamBoxSizer =
-      new wxStaticBoxSizer(systemParamStaticBox, wxVERTICAL);
-      
-   wxBoxSizer *paramBoxSizer = new wxBoxSizer(wxVERTICAL);
-   *coordSysBoxSizer = new wxBoxSizer(wxVERTICAL);
-
-   (*coordSysBoxSizer)->Add(*coordSysLabel, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   
-   userParamBoxSizer->Add
-      (userVarStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-   userParamBoxSizer->Add
-      (*userParamListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-   userParamBoxSizer->Add
-      (*createVarButton, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-   
-   systemParamBoxSizer->Add
-      (objectStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-   systemParamBoxSizer->Add
-      (*objectComboBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-   systemParamBoxSizer->Add
-      (propertyStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-   systemParamBoxSizer->Add
-      (*propertyListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-   systemParamBoxSizer->Add
-      (*coordSysBoxSizer, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-   
-   paramBoxSizer->Add(userParamBoxSizer, 0,
-                      wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-   paramBoxSizer->Add(systemParamBoxSizer, 0,
-                      wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
    #endif
    
+   systemParamBoxSizer->Add
+      (propertyStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   systemParamBoxSizer->Add
+      (*propertyListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   systemParamBoxSizer->Add
+      (*coordSysBoxSizer, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+
+   
+   if (showVariable || showArray)
+   {
+      paramBoxSizer->Add(userParamBoxSizer, 0,
+                         wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   }
+   
+   #ifdef __WXMAC__
+   paramBoxSizer->Add(30, 20, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   #endif
+   
+   paramBoxSizer->Add(systemParamBoxSizer, 0,
+                      wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+
+
    return paramBoxSizer;
 }
+
 
 //------------------------------------------------------------------------------
 // wxBoxSizer* CreateUserVarSizer(...)
@@ -1673,14 +1668,10 @@ void GuiItemManager::UpdatePropertyList()
    
    for (int i=0; i<numParams; i++)
    {
-//       // add to list only system parameters returning single value
-//       if (items[i].find("CartState") == std::string::npos &&
-//           items[i].find("KepElem") == std::string::npos &&
-//           items[i].find("SphElem") == std::string::npos &&
-//           items[i].find("Variable") == std::string::npos &&
-//           items[i].find("Array") == std::string::npos &&
-//           items[i].find("String") == std::string::npos)
-
+      // skip CurrA1Mjd from the GUI - The parameter CurrA1MJD will be removed (loj: 5/3/06)
+      if (items[i] == "CurrA1MJD")
+         continue;
+      
       // add only reportable parameters (Real, String for now) to list
       // we may want add Rvector6 later, then Rvec6Var needs to be set reportable true
       if (theParamInfo->IsReportable(items[i]))
@@ -2693,12 +2684,15 @@ GuiItemManager::GuiItemManager()
    theNumCalPoint = 0;
    theNumSpacePoint = 0;
    
-   //loj: 7/28/05
-   // Until Burn parameter is added to ParameterFactor, add V, B, N
+   //loj: 05/02/06 Added X, Y, Z
+   // Until Burn parameter is added to ParameterFactory, add V, N, B, X, Y, Z
    theImpBurnPropertyList[0] = "V";
-   theImpBurnPropertyList[1] = "B";
-   theImpBurnPropertyList[2] = "N";
-   theNumImpBurnProperty = 3;
+   theImpBurnPropertyList[1] = "N";
+   theImpBurnPropertyList[2] = "B";
+   theImpBurnPropertyList[3] = "X";
+   theImpBurnPropertyList[4] = "Y";
+   theImpBurnPropertyList[5] = "Z";
+   theNumImpBurnProperty = 6;
    
    // update property list
    UpdatePropertyList();
