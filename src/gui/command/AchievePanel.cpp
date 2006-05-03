@@ -96,7 +96,7 @@ void AchievePanel::Create()
    
    // wxTextCtrl
    mGoalNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(150,-1), 0);
+                                     wxDefaultPosition, wxSize(250,-1), 0);
    mGoalValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                                        wxDefaultPosition, wxSize(150,-1), 0);
    mToleranceTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
@@ -166,8 +166,8 @@ void AchievePanel::Create()
    valueGridSizer->Add(mViewGoalValueButton, 0, wxALIGN_CENTER|wxALL, bsize);
    valueGridSizer->Add(mToleranceTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
 
-   goalSetupSizer->Add(goalBoxSizer, 0, wxALIGN_CENTER|wxALL, bsize);
-   goalSetupSizer->Add(valueGridSizer, 0, wxALIGN_CENTER|wxALL, bsize);
+   goalSetupSizer->Add(goalBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   goalSetupSizer->Add(valueGridSizer, 0, wxALIGN_LEFT|wxALL, bsize);
 
    panelSizer->Add(solverBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    panelSizer->Add(goalSetupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
