@@ -36,6 +36,7 @@
 #include "Rvector6.hpp"
 #include "TimeSystemConverter.hpp"
 #include "CoordinateSystemException.hpp"
+#include "MessageInterface.hpp"
 
 #include <iostream>
 using namespace std; // *********************
@@ -43,6 +44,7 @@ using namespace std; // *********************
 using namespace GmatMathUtil;      // for trig functions, etc.
 using namespace GmatTimeUtil;      // for JD offsets, etc.
 
+//#define ROT_MAT_DEBUG
 //---------------------------------
 // static data
 //---------------------------------
@@ -296,7 +298,7 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
 
    Rmatrix33 fixedToMJ2000    = PREC.Transpose() * (NUT.Transpose() *
                                  (ST.Transpose() * PM.Transpose()));
-   Real determinant = fixedToMJ2000.Determinant();
+    Real determinant = fixedToMJ2000.Determinant();
    if (Abs(determinant - 1.0) > DETERMINANT_TOLERANCE)
       throw CoordinateSystemException(
             "Computed rotation matrix has a determinant not equal to 1.0");
@@ -349,6 +351,42 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    rotDotMatrix(2,0) = xDot(2);
    rotDotMatrix(2,1) = yDot(2);
    rotDotMatrix(2,2) = zDot(2);
+  
+   #ifdef ROT_MAT_DEBUG
+      static Integer num = 0;
+      if (num == 0)
+      {
+         MessageInterface::ShowMessage("****** BEGIN temporary debug ...........\n");
+         MessageInterface::ShowMessage("Sun vector(MJ2000) = %f %f %f\n", 
+         rvSun(0), rvSun(1), rvSun(2));
+         MessageInterface::ShowMessage("Dipole (fixed) = %f %f %f\n", 
+         dipoleEF(0), dipoleEF(1), dipoleEF(2));
+         MessageInterface::ShowMessage("Dipole (MJ2000) = %f %f %f\n", 
+         dipoleFK5(0), dipoleFK5(1), dipoleFK5(2));
+         MessageInterface::ShowMessage("x = %f %f %f\n", 
+         x(0), x(1), x(2));
+         MessageInterface::ShowMessage("y = %f %f %f\n", 
+         y(0), y(1), y(2));
+         MessageInterface::ShowMessage("z = %f %f %f\n", 
+         z(0), z(1), z(2));
+         MessageInterface::ShowMessage("xDot = %f %f %f\n", 
+         xDot(0), xDot(1), xDot(2));
+         MessageInterface::ShowMessage("yDot = %f %f %f\n", 
+         yDot(0), yDot(1), yDot(2));
+         MessageInterface::ShowMessage("zDot = %f %f %f\n", 
+         zDot(0), zDot(1), zDot(2));
+         MessageInterface::ShowMessage("rotation matrix = \n%f %f %f\n%f %f %f\n%f %f %f\n",
+         rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2), rotMatrix(1,0), 
+         rotMatrix(1,1), rotMatrix(1,2), rotMatrix(2,0), rotMatrix(2,1), 
+         rotMatrix(2,2));
+         MessageInterface::ShowMessage("rotation matrix (derivative) = \n%f %f %f\n%f %f %f\n%f %f %f\n",
+         rotDotMatrix(0,0), rotDotMatrix(0,1), rotDotMatrix(0,2), rotDotMatrix(1,0), 
+         rotDotMatrix(1,1), rotDotMatrix(1,2), rotDotMatrix(2,0), rotDotMatrix(2,1), 
+         rotDotMatrix(2,2));
+         MessageInterface::ShowMessage("****** END temporary debug ...........\n");
+         num++;
+      }
+   #endif
 
 }
 
