@@ -33,8 +33,8 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// Variable(const std::string &name, const std::string &desc = "",
-//          const std::string &unit = "")
+// Variable(const std::string &name, const std::string &valStr = "",
+//          const std::string &desc = "", const std::string &unit = "")
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -44,9 +44,9 @@
  * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-Variable::Variable(const std::string &name, const std::string &desc,
-                   const std::string &unit)
-   : RealVar(name, "Variable", GmatParam::USER_PARAM, NULL, desc, unit,
+Variable::Variable(const std::string &name, const std::string &valStr,
+                   const std::string &desc, const std::string &unit)
+   : RealVar(name, valStr, "Variable", GmatParam::USER_PARAM, NULL, desc, unit,
              GmatParam::NO_DEP, Gmat::UNKNOWN_OBJECT, false)
 {
    mParamDb = new ParameterDatabase();

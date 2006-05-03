@@ -23,7 +23,7 @@
 #include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_ENVDATA_INIT 1
+//#define DEBUG_ENVDATA_INIT 1
 //#define DEBUG_ENVDATA_RUN 1
 
 using namespace GmatMathUtil;
@@ -224,7 +224,7 @@ bool EnvData::ValidateRefObjects(GmatBase *param)
 void EnvData::InitializeRefObjects()
 {
    #if DEBUG_ENVDATA_INIT
-   MessageInterface::ShowMessage("OrbitData::InitializeRefObjects() entered.\n");
+   MessageInterface::ShowMessage("EnvData::InitializeRefObjects() entered.\n");
    #endif
    
    mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);

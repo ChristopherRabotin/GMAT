@@ -19,6 +19,7 @@
 
 #include "RealVar.hpp"
 #include "ParameterException.hpp"
+#include "StringUtil.hpp"          // for GmatStringUtil::ToDouble()
 #include "MessageInterface.hpp"
 #include <sstream>
 
@@ -29,15 +30,16 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// RealVar(const std::string &name, const std::string &typeStr, 
-//         GmatParam::ParameterKey key, GmatBase *obj, const std::string &desc,
-//         const std::string &unit, GmatParam::DepObject depObj, Gmat::ObjectType,
-//         bool isTimeParam)
+// RealVar(const std::string &name, const std::string &valStr,
+//         const std::string &typeStr, GmatParam::ParameterKey key, GmatBase *obj,
+//         const std::string &desc, const std::string &unit, GmatParam::DepObject depObj,
+//         Gmat::ObjectType, bool isTimeParam)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> parameter name
+ * @param <valStr>  value string of parameter
  * @param <typeStr>  parameter type string
  * @param <key>  parameter key (SYSTEM_PARAM, USER_PARAM, etc)
  * @param <obj>  reference object pointer
@@ -48,14 +50,23 @@
  * @param <isTimeParam> true if parameter is time related, false otherwise
  */
 //------------------------------------------------------------------------------
-RealVar::RealVar(const std::string &name, const std::string &typeStr, 
-                 GmatParam::ParameterKey key, GmatBase *obj, const std::string &desc,
-                 const std::string &unit, GmatParam::DepObject depObj,
-                 Gmat::ObjectType ownerType, bool isTimeParam)
+RealVar::RealVar(const std::string &name, const std::string &valStr,
+                 const std::string &typeStr, GmatParam::ParameterKey key,
+                 GmatBase *obj, const std::string &desc, const std::string &unit,
+                 GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
+                 bool isTimeParam)
    : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, isTimeParam,
                true, true)
 {  
    mRealValue = REAL_PARAMETER_UNDEFINED;
+   Real rval;
+   
+   if (GmatStringUtil::ToDouble(valStr, &rval))
+   {
+      mRealValue = rval;
+      mExpr = valStr;
+   }
+   
    mReturnType = Gmat::REAL_TYPE;
 }
 
@@ -224,9 +235,16 @@ bool RealVar::SetStringParameter(const Integer id, const std::string &value)
    case EXPRESSION:
       {
          // if expression is just a number set value to expression
-         double temp = atof(value.c_str());
-         mRealValue = temp;
-         return Parameter::SetStringParameter(id, value);
+         //double temp = atof(value.c_str());
+         //return Parameter::SetStringParameter(id, value);
+         
+         Real temp;
+         if (GmatStringUtil::ToDouble(value, &temp))
+         {
+            mRealValue = temp;
+            return true;
+         }
+         return false;
       }
    default:
       return Parameter::SetStringParameter(id, value);

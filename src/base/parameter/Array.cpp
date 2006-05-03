@@ -76,8 +76,10 @@ Array::Array(const std::string &name, const std::string &desc,
    mSizeSet = false;
    
    // GmatBase data
+   mReturnType = Gmat::RMATRIX_TYPE;
    parameterCount = ArrayParamCount;
 }
+
 
 //------------------------------------------------------------------------------
 // Array(const Array &copy)
@@ -96,6 +98,7 @@ Array::Array(const Array &copy)
    mSizeSet = copy.mSizeSet;
    mRmatValue = copy.mRmatValue;
 }
+
 
 //------------------------------------------------------------------------------
 // Array& operator= (const Array& right)
@@ -122,6 +125,7 @@ Array& Array::operator= (const Array& right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~Array()
 //------------------------------------------------------------------------------
@@ -132,6 +136,7 @@ Array& Array::operator= (const Array& right)
 Array::~Array()
 {
 }
+
 
 //------------------------------------------------------------------------------
 // bool operator==(const Array &right) const
@@ -145,6 +150,7 @@ bool Array::operator==(const Array &right) const
    return Parameter::operator==(right);
 }
 
+
 //------------------------------------------------------------------------------
 // bool operator!=(const Array &right) const
 //------------------------------------------------------------------------------
@@ -157,229 +163,19 @@ bool Array::operator!=(const Array &right) const
    return Parameter::operator!=(right);
 }
 
-//------------------------------------------------
-//----- Real parameter need be added to GmatBase
-//------------------------------------------------
-
 
 //------------------------------------------------------------------------------
-// Real GetRealParameter(const Integer id, const Integer row,
-//                       const Integer col) const
+// bool SetSize(const Integer row, const Integer col)
 //------------------------------------------------------------------------------
-Real Array::GetRealParameter(const Integer id, const Integer row,
-                             const Integer col) const
+bool Array::SetSize(const Integer row, const Integer col)
 {
-   switch (id)
-   {
-   case SINGLE_VALUE:
-      return mRmatValue.GetElement(row, col);
-   default:
-      throw ParameterException
-         ("Array::GetRealParameter() Unknown Parameter Name" + PARAMETER_TEXT[id]);
-      //return Parameter::GetRealParameter(id, row, col);
-   }
+   mNumRows = row;
+   mNumCols = col;
+   mRmatValue.SetSize(mNumRows, mNumCols);
+   mSizeSet = true;
+   return true;
 }
 
-//------------------------------------------------------------------------------
-// Real GetRealParameter(const std::string &label, const Integer row,
-//                       const Integer col) const
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-Real Array::GetRealParameter(const std::string &label, const Integer row,
-                             const Integer col) const
-{
-   return GetRealParameter(GetParameterID(label), row, col);
-}
-
-//------------------------------------------------------------------------------
-// Real SetRealParameter(const Integer id, const Real value, const Integer row,
-//                       const Integer col)
-//------------------------------------------------------------------------------
-Real Array::SetRealParameter(const Integer id, const Real value,
-                             const Integer row, const Integer col)
-{
-   switch (id)
-   {
-   case SINGLE_VALUE: //loj: 12/30/04 Changed from ROW_VALUE
-      mRmatValue.SetElement(row, col, value);
-      return value;
-   default:
-      throw ParameterException
-         ("Array::SetRealParameter() Unknown Parameter Name" + PARAMETER_TEXT[id]);
-      //return Parameter::SetRealParameter(id, value, row, col);
-   }
-}
-
-//------------------------------------------------------------------------------
-// Real SetRealParameter(const std:string &label, const Real value,
-//                       const Integer row, const Integer col)
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-Real Array::SetRealParameter(const std::string &label, const Real value,
-                             const Integer row, const Integer col)
-{
-   return SetRealParameter(GetParameterID(label), value, row, col);
-}
-
-//------------------------------------------------------------------------------
-// StringArray GetGeneratingString(Gmat::WriteMode mode,
-//                const std::string &prefix, const std::string &useName)
-//------------------------------------------------------------------------------
-/**
- * Produces a string, possibly multi-line, containing the text that produces an
- * object.
- * 
- * @param mode Specifies the type of serialization requested.
- * @param prefix Optional prefix appended to the object's name
- * @param useName Name that replaces the object's name.
- * 
- * @return A string containing the text.
- */
-//------------------------------------------------------------------------------
-const std::string& Array::GetGeneratingString(Gmat::WriteMode mode,
-                                              const std::string &prefix,
-                                              const std::string &useName)
-{
-   std::stringstream data;
-
-   data.precision(18);   // Crank up data precision so we don't lose anything
-   std::string preface = "", nomme;
-   
-   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
-       (mode == Gmat::SHOW_SCRIPT))
-      inMatlabMode = false;
-   if (mode == Gmat::MATLAB_STRUCT)
-      inMatlabMode = true;
-   
-   if (useName != "")
-      nomme = useName;
-   else
-      nomme = instanceName;
-   
-   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT))
-   {
-      std::string tname = typeName;
-      data << "Create " << tname << " " << nomme 
-           << "[" << mNumRows << ", " << mNumCols << "];\n";
-      preface = "GMAT ";
-   }
-   
-   nomme += ".";
-   
-   if (mode == Gmat::OWNED_OBJECT) {
-      preface = prefix;
-      nomme = "";
-   }
-   
-   preface += nomme;
-   WriteParameters(mode, preface, data);
-   
-   generatingString = data.str();
-   return generatingString;
-}
-
-
-//----- Rvector parameter
-
-//------------------------------------------------------------------------------
-// Rvector GetRvectorParameter(const Integer id, const Integer index) const
-//------------------------------------------------------------------------------
-Rvector Array::GetRvectorParameter(const Integer id, const Integer index) const
-{
-   switch (id)
-   {
-   case ROW_VALUE:
-      {
-         Rvector rvec(mNumCols);
-      
-         for (int i=0; i<mNumCols; i++)
-            rvec.SetElement(i, mRmatValue.GetElement(index, i));
-
-         return rvec;
-      }
-   case COL_VALUE:
-      {
-         Rvector rvec(mNumRows);
-      
-         for (int i=0; i<mNumRows; i++)
-            rvec.SetElement(i, mRmatValue.GetElement(i, index));
-
-         return rvec;
-      }
-   default:
-      throw ParameterException
-         ("Array::GetRvectorParameter() Unknown Parameter Name" + PARAMETER_TEXT[id]);
-      //return Parameter::GetRvectorParameter(id, index);
-   }
-}
-
-//------------------------------------------------------------------------------
-// Rvector GetRvectorParameter(const std::string &label,
-//                                    const Integer index) const
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-Rvector Array::GetRvectorParameter(const std::string &label,
-                                   const Integer index) const
-{
-   return GetRvectorParameter(GetParameterID(label), index);
-}
-
-//------------------------------------------------------------------------------
-// const Rvector& SetRvectorParameter(const Integer id, const Rvector &value,
-//                                    const Integer index)
-//------------------------------------------------------------------------------
-const Rvector& Array::SetRvectorParameter(const Integer id, const Rvector &value,
-                                          const Integer index)
-{
-   
-#if DEBUG_ARRAY
-   MessageInterface::ShowMessage
-      ("Array::SetRvectorParameter() index=%d, mNumRows=%d, mNumCols=%d\n",
-       index, mNumRows, mNumCols);
-#endif
-   
-   switch (id)
-   {
-   case ROW_VALUE:
-      for (int i=0; i<mNumCols; i++)
-         mRmatValue.SetElement(index, i, value(i));
-      
-      return value;
-   case COL_VALUE:
-      for (int i=0; i<mNumRows; i++)
-         mRmatValue.SetElement(i, index, value(i));
-      
-      return value;
-   default:
-      throw ParameterException
-         ("Array::GetRvectorParameter() Unknown Parameter Name" + PARAMETER_TEXT[id]);
-      //return Parameter::SetRvectorParameter(id, value, index);
-   }
-}
-
-//------------------------------------------------------------------------------
-// const Rvector& SetRvectorParameter(const std:string &label,
-//                                    const Rvector &value, const Integer index)
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-const Rvector& Array::SetRvectorParameter(const std::string &label,
-                                          const Rvector &value,
-                                          const Integer index)
-{
-   return SetRvectorParameter(GetParameterID(label), value, index);
-}
 
 //------------------------------------
 // methods inherited from Parameter
@@ -509,6 +305,65 @@ bool Array::IsParameterReadOnly(const Integer id) const
    return Parameter::IsParameterReadOnly(id);
 }
 
+
+//------------------------------------------------------------------------------
+// StringArray GetGeneratingString(Gmat::WriteMode mode,
+//                const std::string &prefix, const std::string &useName)
+//------------------------------------------------------------------------------
+/**
+ * Produces a string, possibly multi-line, containing the text that produces an
+ * object.
+ * 
+ * @param mode Specifies the type of serialization requested.
+ * @param prefix Optional prefix appended to the object's name
+ * @param useName Name that replaces the object's name.
+ * 
+ * @return A string containing the text.
+ */
+//------------------------------------------------------------------------------
+const std::string& Array::GetGeneratingString(Gmat::WriteMode mode,
+                                              const std::string &prefix,
+                                              const std::string &useName)
+{
+   std::stringstream data;
+
+   data.precision(18);   // Crank up data precision so we don't lose anything
+   std::string preface = "", nomme;
+   
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
+       (mode == Gmat::SHOW_SCRIPT))
+      inMatlabMode = false;
+   if (mode == Gmat::MATLAB_STRUCT)
+      inMatlabMode = true;
+   
+   if (useName != "")
+      nomme = useName;
+   else
+      nomme = instanceName;
+   
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT))
+   {
+      std::string tname = typeName;
+      data << "Create " << tname << " " << nomme 
+           << "[" << mNumRows << ", " << mNumCols << "];\n";
+      preface = "GMAT ";
+   }
+   
+   nomme += ".";
+   
+   if (mode == Gmat::OWNED_OBJECT) {
+      preface = prefix;
+      nomme = "";
+   }
+   
+   preface += nomme;
+   WriteParameters(mode, preface, data);
+   
+   generatingString = data.str();
+   return generatingString;
+}
+
+
 //----- Integer parameter
 
 //------------------------------------------------------------------------------
@@ -527,6 +382,7 @@ Integer Array::GetIntegerParameter(const Integer id) const
    }
 }
 
+
 //------------------------------------------------------------------------------
 // virtual Integer GetIntegerParameter(const std::string &label) const
 //------------------------------------------------------------------------------
@@ -538,6 +394,7 @@ Integer Array::GetIntegerParameter(const std::string &label) const
 {
    return GetIntegerParameter(GetParameterID(label));
 }
+
 
 //------------------------------------------------------------------------------
 // virtual Integer SetIntegerParameter(const Integer id, const Integer value)
@@ -581,6 +438,7 @@ Integer Array::SetIntegerParameter(const Integer id, const Integer value)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // virtual Integer SetIntegerParameter(std::string &label, const Integer value)
 //------------------------------------------------------------------------------
@@ -591,6 +449,102 @@ Integer Array::SetIntegerParameter(const Integer id, const Integer value)
 Integer Array::SetIntegerParameter(const std::string &label, const Integer value)
 {
    return SetIntegerParameter(GetParameterID(label), value);
+}
+
+//----- Rvector parameter
+
+//------------------------------------------------------------------------------
+// Rvector GetRvectorParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+Rvector Array::GetRvectorParameter(const Integer id, const Integer index) const
+{
+   switch (id)
+   {
+   case ROW_VALUE:
+      {
+         Rvector rvec(mNumCols);
+      
+         for (int i=0; i<mNumCols; i++)
+            rvec.SetElement(i, mRmatValue.GetElement(index, i));
+
+         return rvec;
+      }
+   case COL_VALUE:
+      {
+         Rvector rvec(mNumRows);
+      
+         for (int i=0; i<mNumRows; i++)
+            rvec.SetElement(i, mRmatValue.GetElement(i, index));
+
+         return rvec;
+      }
+   default:
+      throw ParameterException
+         ("Array::GetRvectorParameter() Unknown Parameter Name" + PARAMETER_TEXT[id]);
+      //return Parameter::GetRvectorParameter(id, index);
+   }
+}
+
+//------------------------------------------------------------------------------
+// Rvector GetRvectorParameter(const std::string &label,
+//                                    const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Rvector Array::GetRvectorParameter(const std::string &label,
+                                   const Integer index) const
+{
+   return GetRvectorParameter(GetParameterID(label), index);
+}
+
+//------------------------------------------------------------------------------
+// const Rvector& SetRvectorParameter(const Integer id, const Rvector &value,
+//                                    const Integer index)
+//------------------------------------------------------------------------------
+const Rvector& Array::SetRvectorParameter(const Integer id, const Rvector &value,
+                                          const Integer index)
+{
+   
+#if DEBUG_ARRAY
+   MessageInterface::ShowMessage
+      ("Array::SetRvectorParameter() index=%d, mNumRows=%d, mNumCols=%d\n",
+       index, mNumRows, mNumCols);
+#endif
+   
+   switch (id)
+   {
+   case ROW_VALUE:
+      for (int i=0; i<mNumCols; i++)
+         mRmatValue.SetElement(index, i, value(i));
+      
+      return value;
+   case COL_VALUE:
+      for (int i=0; i<mNumRows; i++)
+         mRmatValue.SetElement(i, index, value(i));
+      
+      return value;
+   default:
+      throw ParameterException
+         ("Array::GetRvectorParameter() Unknown Parameter Name" + PARAMETER_TEXT[id]);
+      //return Parameter::SetRvectorParameter(id, value, index);
+   }
+}
+
+//------------------------------------------------------------------------------
+// const Rvector& SetRvectorParameter(const std:string &label,
+//                                    const Rvector &value, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+const Rvector& Array::SetRvectorParameter(const std::string &label,
+                                          const Rvector &value,
+                                          const Integer index)
+{
+   return SetRvectorParameter(GetParameterID(label), value, index);
 }
 
 //----- Rmatrix parameter
@@ -680,4 +634,73 @@ const Rmatrix& Array::SetRmatrixParameter(const std::string &label,
 {
    return SetRmatrixParameter(GetParameterID(label), value);
 }
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const Integer id, const Integer row,
+//                       const Integer col) const
+//------------------------------------------------------------------------------
+Real Array::GetRealParameter(const Integer id, const Integer row,
+                             const Integer col) const
+{
+   switch (id)
+   {
+   case SINGLE_VALUE:
+      return mRmatValue.GetElement(row, col);
+   default:
+      throw ParameterException
+         ("Array::GetRealParameter() Unknown Parameter Name" + PARAMETER_TEXT[id]);
+      //return Parameter::GetRealParameter(id, row, col);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const std::string &label, const Integer row,
+//                       const Integer col) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Real Array::GetRealParameter(const std::string &label, const Integer row,
+                             const Integer col) const
+{
+   return GetRealParameter(GetParameterID(label), row, col);
+}
+
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const Integer id, const Real value, const Integer row,
+//                       const Integer col)
+//------------------------------------------------------------------------------
+Real Array::SetRealParameter(const Integer id, const Real value,
+                             const Integer row, const Integer col)
+{
+   switch (id)
+   {
+   case SINGLE_VALUE: //loj: 12/30/04 Changed from ROW_VALUE
+      mRmatValue.SetElement(row, col, value);
+      return value;
+   default:
+      throw ParameterException
+         ("Array::SetRealParameter() Unknown Parameter Name" + PARAMETER_TEXT[id]);
+      //return Parameter::SetRealParameter(id, value, row, col);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const std:string &label, const Real value,
+//                       const Integer row, const Integer col)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Real Array::SetRealParameter(const std::string &label, const Real value,
+                             const Integer row, const Integer col)
+{
+   return SetRealParameter(GetParameterID(label), value, row, col);
+}
+
 

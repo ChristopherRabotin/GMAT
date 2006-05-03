@@ -50,12 +50,13 @@ EnvReal::EnvReal(const std::string &name, const std::string &typeStr,
                  GmatBase *obj, const std::string &desc,
                  const std::string &unit, Gmat::ObjectType ownerType,
                  GmatParam::DepObject depObj)
-   : RealVar(name, typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit, depObj,
+   : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit, depObj,
              ownerType, false)
 {
    mNeedCoordSystem = false;
    AddRefObject(obj);
 }
+
 
 //------------------------------------------------------------------------------
 // EnvReal(const EnvReal &copy)
@@ -70,6 +71,7 @@ EnvReal::EnvReal(const EnvReal &copy)
    : RealVar(copy), EnvData(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // EnvReal& operator=(const EnvReal &right)
@@ -90,6 +92,7 @@ EnvReal& EnvReal::operator=(const EnvReal &right)
    
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~EnvReal()

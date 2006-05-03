@@ -41,7 +41,7 @@
 TimeReal::TimeReal(const std::string &name, const std::string &typeStr, 
                    GmatBase *obj, const std::string &desc,
                    const std::string &unit)
-   : RealVar(name, typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
+   : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
              GmatParam::NO_DEP, Gmat::SPACECRAFT, true)
 {
    AddRefObject(obj);

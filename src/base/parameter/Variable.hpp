@@ -31,8 +31,8 @@ class GMAT_API Variable : public RealVar
 {
 public:
 
-   Variable(const std::string &name, const std::string &desc = "",
-            const std::string &unit = "");
+   Variable(const std::string &name, const std::string &valStr = "",
+            const std::string &desc = "", const std::string &unit = "");
    Variable(const Variable &copy);
    Variable& operator=(const Variable &right);
    virtual ~Variable();

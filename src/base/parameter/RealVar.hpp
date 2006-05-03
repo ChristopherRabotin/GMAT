@@ -26,7 +26,7 @@ class GMAT_API RealVar : public Parameter
 {
 public:
 
-   RealVar(const std::string &name = "",
+   RealVar(const std::string &name = "", const std::string &valStr = "",
            const std::string &typeStr = "RealVar",
            GmatParam::ParameterKey key = GmatParam::USER_PARAM,
            GmatBase *obj = NULL, const std::string &desc = "",
