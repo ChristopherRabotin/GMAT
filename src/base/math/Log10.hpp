@@ -30,6 +30,8 @@ public:
    // inherited from GmatBase
    virtual GmatBase* Clone() const;
 
+   virtual void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount);
+   virtual bool ValidateInputs(); 
    virtual Real Evaluate();
 };
 

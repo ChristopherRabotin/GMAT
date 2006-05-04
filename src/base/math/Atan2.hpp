@@ -31,7 +31,9 @@ public:
    // inherited from GmatBase
    virtual GmatBase* Clone() const;
 
-   virtual Real Evaluate();
+   virtual void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount);
+   virtual bool ValidateInputs(); 
+   virtual Real Evaluate();   
 };
 
 #endif // Atan2_hpp
