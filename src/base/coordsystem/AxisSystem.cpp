@@ -25,6 +25,7 @@
 #include "CoordinateBase.hpp"
 #include "Rmatrix33.hpp"
 #include "RealUtilities.hpp"
+#include "AngleUtil.hpp"
 #include "Linear.hpp"
 #include "RealTypes.hpp"
 #include "TimeTypes.hpp"
@@ -1278,8 +1279,9 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    // NOTE - do we delete this when we put in the planetary stuff above?
    // offset and rate correction to approximate GCRF, Ref.[1], Eq (3-63)  - SQ
    // This is Vallado Eq. 3-62 - WCS
-   dPsi += (-0.0431 - 0.2957*tTDB )*RAD_PER_ARCSEC;
-   dEps += (-0.0051 - 0.0277*tTDB )*RAD_PER_ARCSEC;
+   // commented out per Steve Hughes 2006.05.03
+   //dPsi += (-0.0431 - 0.2957*tTDB )*RAD_PER_ARCSEC;
+   //dEps += (-0.0051 - 0.0277*tTDB )*RAD_PER_ARCSEC;
    
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
@@ -1336,6 +1338,8 @@ void AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
 {
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
+         MessageInterface::ShowMessage("AxisSystem::ConputeSiderealTimeRotation, "
+         "for object of type %s\n", typeName.c_str());
          MessageInterface::ShowMessage(
             "   AxisSystem::ComputeSiderealTimeRotation(%.12lf, %.12lf, %.12lf,"
             " %.12lf, %.12lf, %.12lf, %.12lf)\n", jdTT, tUT1, dPsi, 
@@ -1369,6 +1373,11 @@ void AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
                      ((876600 * hour2deg) + (8640184.812866 * sec2deg))*tUT1 +
                      (0.093104 * sec2deg)*tUT12 - (6.2e-06 * sec2deg)*tUT13 )
                      * RAD_PER_DEG;
+   //Real ThetaGmst = ((67310.54841) + 
+   //                  ((876600 * 3600.0) + (8640184.812866)*tUT1 +
+   //                  (0.093104)*tUT12 - (6.2e-06)*tUT13 )) * sec2deg
+   //                  * RAD_PER_DEG;
+   ThetaGmst = AngleUtil::PutAngleInRadRange(ThetaGmst,0.0,GmatMathUtil::TWO_PI);
    
    Real ThetaAst = ThetaGmst + EQequinox;
    
@@ -1391,6 +1400,14 @@ void AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
    //ST(2,1) =  0.0;
    //ST(2,2) =  1.0;
    
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage(
+            "      EQequinox           = %.13lf\n"
+            "      ThetaGmst           = %.13lf\n"
+            "      ThetaAst            = %.13lf\n",
+            EQequinox, ThetaGmst, ThetaAst);
+   #endif
    #ifdef DEBUG_ROT_MATRIX
       cout << "ST = " << endl << ST << endl;
    #endif
@@ -1507,6 +1524,14 @@ void AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch)
    lastPM      = PM;
    lastPMEpoch = atEpoch;
 
+   #ifdef DEBUG_FIRST_CALL
+      if (!firstCallFired)
+         MessageInterface::ShowMessage(
+            "      lod         = %.13lf\n"
+            "      x           = %.13lf\n"
+            "      y           = %.13lf\n",
+            lod, x * RAD_PER_ARCSEC, y * RAD_PER_ARCSEC);
+   #endif
    #ifdef DEBUG_FIRST_CALL
       firstCallFired = true;
    #endif

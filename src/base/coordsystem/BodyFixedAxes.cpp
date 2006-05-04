@@ -39,6 +39,7 @@ using namespace GmatMathUtil;      // for trig functions, etc.
 using namespace GmatTimeUtil;      // for JD offsets, etc.
 
 //#define DEBUG_FIRST_CALL
+//#define DEBUG_TIME_CALC
 
 #ifdef DEBUG_FIRST_CALL
    static bool firstCallFired = false;
@@ -53,7 +54,7 @@ using namespace GmatTimeUtil;      // for JD offsets, etc.
 //BodyFixedAxes::PARAMETER_TEXT[BodyFixedAxesParamCount - DynamicAxesParamCount] =
 //{
 //};
-
+//
 //const Gmat::ParameterType
 //BodyFixedAxes::PARAMETER_TYPE[BodyFixedAxesParamCount - DynamicAxesParamCount] =
 //{
@@ -396,6 +397,14 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       Real jdUT1    = mjdUT1 + JD_JAN_5_1941; // right?
       // Compute elapsed Julian centuries (UT1)
       Real tUT1     = (jdUT1 - 2451545.0) / 36525.0;
+ 
+    #ifdef DEBUG_TIME_CALC
+      MessageInterface::ShowMessage("******************** In BodyFixed, \n"
+      "    mjdUT1 =         %17.8lf\n"
+      "    jdUT1  =         %17.8lf\n"
+      "    tUT1   =         %17.8lf\n",
+      mjdUT1, jdUT1, tUT1);
+   #endif
       
       // convert input A1 MJD to TT MJD (for most calculations)
       // 20.02.06 - arg: changed to use enum types instead of strings

@@ -45,6 +45,7 @@ using namespace GmatMathUtil;      // for trig functions, etc.
 using namespace GmatTimeUtil;      // for JD offsets, etc.
 
 //#define ROT_MAT_DEBUG
+//#define DEBUG_TIME_CALC
 //---------------------------------
 // static data
 //---------------------------------
@@ -262,6 +263,7 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    Real jdUT1    = mjdUT1 + JD_JAN_5_1941; // right?
                                              // Compute elapsed Julian centuries (UT1)
    Real tUT1     = (jdUT1 - 2451545.0) / 36525.0;
+   
 
    // convert input A1 MJD to TT MJD (for most calculations)
    // 20.02.06 - arg: changed to use enum types instead of strings
