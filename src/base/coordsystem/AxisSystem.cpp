@@ -108,7 +108,19 @@ updateIntervalToUse    (60.0),
 overrideOriginInterval (false),
 lastDPsi         (0.0),
 nutationSrc      (GmatItrf::NUTATION_1980),
-planetarySrc     (GmatItrf::PLANETARY_1980)
+planetarySrc     (GmatItrf::PLANETARY_1980),
+aVals            (NULL), 
+apVals           (NULL),
+AVals            (NULL),
+BVals            (NULL),
+CVals            (NULL),
+DVals            (NULL),
+EVals            (NULL),
+FVals            (NULL),
+ApVals           (NULL),
+BpVals           (NULL),
+CpVals           (NULL),
+DpVals           (NULL)
 {
    objectTypes.push_back(Gmat::AXIS_SYSTEM);
    objectTypeNames.push_back("AxisSystem");
@@ -145,7 +157,19 @@ updateIntervalToUse    (axisSys.updateIntervalToUse),
 overrideOriginInterval (axisSys.overrideOriginInterval),
 lastDPsi          (0.0),
 nutationSrc       (GmatItrf::NUTATION_1980),
-planetarySrc      (GmatItrf::PLANETARY_1980)
+planetarySrc      (GmatItrf::PLANETARY_1980),
+aVals            (NULL), 
+apVals           (NULL),
+AVals            (NULL),
+BVals            (NULL),
+CVals            (NULL),
+DVals            (NULL),
+EVals            (NULL),
+FVals            (NULL),
+ApVals           (NULL),
+BpVals           (NULL),
+CpVals           (NULL),
+DpVals           (NULL)
 {
    lastPRECEpoch    = A1Mjd(0.0);
    lastNUTEpoch     = A1Mjd(0.0);
@@ -207,11 +231,13 @@ AxisSystem::~AxisSystem()
 //    for (Integer i = 0; i < 10; i++)
 //       delete apVals[i];
 
-   delete [] aVals;
-   delete [] apVals;
+   if (aVals != NULL)
+      delete [] aVals;
+   if (apVals != NULL)
+      delete [] apVals;
    
-   aVals = NULL;
-   apVals = NULL;
+//   aVals = NULL;
+//   apVals = NULL;
 }
 
 GmatCoordinate::ParameterUsage AxisSystem::UsesEopFile() const
