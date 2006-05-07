@@ -45,8 +45,8 @@ GuiInterpreter* GuiInterpreter::Instance()
 //------------------------------------------------------------------------------
 GuiInterpreter::~GuiInterpreter()
 {
-   if (instance != NULL)
-      delete instance;
+//   if (instance != NULL)
+//      delete instance;
 }
 
 bool GuiInterpreter::Interpret(void)
