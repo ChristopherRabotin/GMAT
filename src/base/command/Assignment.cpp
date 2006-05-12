@@ -29,10 +29,15 @@
 #include "MessageInterface.hpp"
 #include "Parameter.hpp"
 #include "Variable.hpp"
+#include "Array.hpp"
+#include "MathParser.hpp"
 
 //#define DEBUG_RENAME 1
 //#define DEBUG_PARM_ASSIGNMENT
 //#define DEBUG_ARRAY_INTERPRETING
+//#define DEBUG_ASSIGNMENT_INIT 1
+//#define DEBUG_EQUATION 1
+
 //------------------------------------------------------------------------------
 //  Assignment()
 //------------------------------------------------------------------------------
@@ -52,6 +57,7 @@ Assignment::Assignment  () :
    parmID               (-1),
    parmType             (Gmat::UNKNOWN_PARAMETER_TYPE),
    value                ("Not_Set"),
+   mathTree             (NULL),
    row                  (0),
    col                  (0),
    rowObj               (NULL),
@@ -76,6 +82,10 @@ Assignment::Assignment  () :
 //------------------------------------------------------------------------------
 Assignment::~Assignment()
 {
+   if (mathTree)
+      delete mathTree;
+
+   mathTree = NULL;
 }
 
 
@@ -99,6 +109,7 @@ Assignment::Assignment  (const Assignment& a) :
    parmID               (a.parmID),
    parmType             (a.parmType),
    value                (a.value),
+   mathTree             (a.mathTree),
    row                  (a.row),
    col                  (a.col),
    rowObj               (NULL),
@@ -140,6 +151,7 @@ Assignment& Assignment::operator=(const Assignment& a)
    parmID      = a.parmID;
    parmType    = a.parmType;
    value       = a.value;
+   mathTree    = a.mathTree;
    row         = a.row;
    col         = a.col;
    rowObj      = NULL;
@@ -203,8 +215,8 @@ bool Assignment::InterpretAction()
 
    // Check to be sure equal sign is in place
    if (eqloc == std::string::npos)
-      throw CommandException("Assignment string does not set value");
-      
+      throw CommandException("Assignment string does not set value\n");
+   
    lend = eqloc;
    rstart = eqloc;
    while ((str[lend] == '=') || (str[lend] == ' '))
@@ -214,7 +226,7 @@ bool Assignment::InterpretAction()
    lhs = genString.substr(loc, lend - loc + 1);
    rhs = genString.substr(rstart);
    isLhsArray = false;
-
+   
    if (lhs.find("(", 0) != std::string::npos)
       isLhsArray = true;
 
@@ -225,21 +237,53 @@ bool Assignment::InterpretAction()
    while (rhs[lend] == ' ')
       --lend;
    rhs = rhs.substr(0, lend + 1);
-
+   
    #ifdef DEBUG_ARRAY_INTERPRETING
       MessageInterface::ShowMessage(
          "Left side is \"%s\"\nRight side is \"%s\"\nLeft side %s an array\n",
          lhs.c_str(), rhs.c_str(), (isLhsArray ? "is" : "is not"));
    #endif
 
+
+   // Check if rhs is equation
+   MathParser mp = MathParser();
+   bool isRhsEquation = false;
+   if (mp.IsEquation(rhs))
+      isRhsEquation = true;
+   
    end = genString.find(".", loc);
-   if ((end == (Integer)std::string::npos) && !isLhsArray)
+   
+   //if ((end == (Integer)std::string::npos) && !isLhsArray)
+   if ((end == (Integer)std::string::npos) && !isLhsArray && !isRhsEquation)
    {
       // Script line is set to make one object the same as another, or to set a
       // value on a variable
       ownerName = lhs;
       value = rhs;
       objToObj = true;
+      return true;
+   }
+
+   
+   // Parse RHS if equation
+   if (isRhsEquation)
+   {
+      #if DEBUG_EQUATION
+      MessageInterface::ShowMessage
+         ("Assignment::InterpretAction() %s is an equation\n", rhs.c_str());
+      #endif
+      
+      MathNode *topNode = mp.Parse(rhs);
+      
+      #if DEBUG_EQUATION
+      if (topNode)
+         MessageInterface::ShowMessage
+            ("topNode=%s\n", topNode->GetTypeName().c_str());
+      #endif
+      
+      mathTree = new MathTree("MathTree", rhs);
+      mathTree->SetTopNode(topNode);
+      ownerName = lhs;
 
       return true;
    }
@@ -257,7 +301,7 @@ bool Assignment::InterpretAction()
          throw CommandException("Syntax error in the assignment \"" +
             generatingString +
             "\"\nArray assignments must specify row and column, separated by" +
-            " a comma, in parentheses.");
+            " a comma, in parentheses.\n");
 
       ownerName = lhs.substr(0, paren);
       lrow      = lhs.substr(paren + 1, comma - (paren + 1));
@@ -305,20 +349,21 @@ bool Assignment::InterpretAction()
    end = lhs.find(".", 0);
    std::string component = lhs.substr(0, end);
    if (component == "")
-      throw CommandException("Assignment string does not identify object");
+      throw CommandException("Assignment string does not identify object\n");
+   
    ownerName = component;
    loc = end + 1;
 
    component = lhs.substr(loc);
    if (component == "")
-      throw CommandException("Assignment string does not identify parameter");
+      throw CommandException("Assignment string does not identify parameter\n");
       
    /// @todo A hack for variables -- needs testing!
    if (ownerName != component)
       parmName = component;
    else
       parmName = "";
-      
+   
    // Strip off trailing white space, if any
    unsigned n = parmName.length() - 1;
    while ((parmName[n] == ' ') || (parmName[n] == '\t'))
@@ -348,16 +393,23 @@ bool Assignment::InterpretAction()
 //------------------------------------------------------------------------------
 bool Assignment::Initialize()
 {
-	#ifdef DEBUG_ASSIGNMENT
-      MessageInterface::ShowMessage("Assignment::Initialize() entered\n");
+   #ifdef DEBUG_ASSIGNMENT_INIT
+      MessageInterface::ShowMessage
+         ("Assignment::Initialize() entered. ownerName=%s\n", ownerName.c_str());
    #endif
-   
-   // Find the object
-   if (objectMap->find(ownerName) == objectMap->end())
-      throw CommandException("Assignment command cannot find object \"" +
-                             ownerName + "\" for line \n" + generatingString);
-
+      
+      
    parmOwner = (*objectMap)[ownerName];
+   
+   if (parmOwner)
+   {
+      #ifdef DEBUG_ASSIGNMENT_INIT
+      MessageInterface::ShowMessage
+         ("Assignment::Initialize() parmOwner=%s, %s, %p\n",
+          parmOwner->GetTypeName().c_str(), parmOwner->GetName().c_str(), parmOwner);
+      #endif
+   }
+
    if (objToObj)
    {
       if (objectMap->find(value) != objectMap->end())
@@ -379,16 +431,48 @@ bool Assignment::Initialize()
          }
          else
             throw CommandException("Assignment command cannot find object \"" +
-                     value + "\" for line \n" + generatingString);
+                     value + "\" for line \n" + generatingString + "\n");
       }
    }
+   
+   // Find the object
+   if (objectMap->find(ownerName) == objectMap->end())
+      throw CommandException("Assignment command cannot find object \"" +
+                             ownerName + "\" for line \n" + generatingString + "\n");
+
+   // Initialize RHS MathTree
+   if (mathTree != NULL)
+   {
+      MathNode *topNode = mathTree->GetTopNode();
+
+      #if DEBUG_EQUATION
+      MessageInterface::ShowMessage
+         ("Assignment::Initialize() Initializing topNode=%s, %s\n",
+          topNode->GetTypeName().c_str(), topNode->GetName().c_str());
+      #endif
+      
+      if (mathTree->Initialize(objectMap))
+      {
+         if (topNode->ValidateInputs())
+            return true;
+         else
+            throw CommandException("Failed to validate equation inputs: " +
+                                   generatingString + "\n");
+      }
+      else
+      {
+         throw CommandException("Failed to initialize equation: " +
+                                generatingString + "\n");
+      }
+   }
+   
    
    if (isLhsArray)
    {
       if (parmOwner->GetTypeName() != "Array")
          throw CommandException(
             "Attemping to treat " + parmOwner->GetTypeName() + " named " +
-            parmOwner->GetName() + " like an Array object.");\
+            parmOwner->GetName() + " like an Array object.\n");
 
       // Build row index
       if (lrow == ":")
@@ -401,11 +485,11 @@ bool Assignment::Initialize()
             if (rowIndex < 0)
                throw CommandException(
                   "Attempting to use an invalid (negative) row index for " +
-                  ownerName);
+                  ownerName + "\n");
             if (rowIndex == 0)
                throw CommandException(
                   "Attempting to use an invalid row index (0 -- arrays are "
-                  "indexed from 1) for " + ownerName);
+                  "indexed from 1) for " + ownerName + "\n");
          }
          else
             lrowObj = (*objectMap)[lrow];
@@ -422,11 +506,11 @@ bool Assignment::Initialize()
             if (colIndex < 0)
                throw CommandException(
                   "Attempting to use an invalid (negative) column index for " +
-                  ownerName);
+                  ownerName + "\n");
             if (colIndex == 0)
                throw CommandException(
                   "Attempting to use an invalid column index (0 -- arrays "
-                  "are indexed from 1) for " + ownerName);
+                  "are indexed from 1) for " + ownerName + "\n");
          }
          else
             lcolObj = (*objectMap)[lcol];
@@ -453,11 +537,84 @@ bool Assignment::Initialize()
 bool Assignment::Execute()
 {
    #ifdef DEBUG_ARRAY_INTERPRETING
-      MessageInterface::ShowMessage("Assignment::Execute entered for " +
+      MessageInterface::ShowMessage("\nAssignment::Execute entered for " +
          generatingString + "\n");
    #endif
    bool retval = false;
 
+   // if there is MathTree, evaluate
+   if (mathTree != NULL)
+   {      
+      Integer returnType;
+      Integer numRow;
+      Integer numCol;
+      Parameter *lhsParm = (Parameter*)parmOwner;
+      
+      MathNode *topNode = mathTree->GetTopNode();
+      
+      if (topNode)
+      {
+         #if DEBUG_EQUATION
+         MessageInterface::ShowMessage
+            ("Assignment::Execute() topNode=%s, %s\n", topNode->GetTypeName().c_str(),
+             topNode->GetName().c_str());
+         #endif
+         
+         topNode->GetOutputInfo(returnType, numRow, numCol);
+         
+         if (returnType == Gmat::REAL_TYPE)
+         {
+            Real rval = topNode->Evaluate();
+            
+            #if DEBUG_EQUATION
+            MessageInterface::ShowMessage("Assignment::Execute() rval=%f\n", rval);
+            #endif
+            
+            // set lhsParm here
+            if (lhsParm->GetTypeName() == "Variable")
+               lhsParm->SetReal(rval);
+            else
+               throw CommandException("Expects LHS type to be a Variable, but it's " +
+                                      lhsParm->GetTypeName());
+            
+         }
+         else
+         {
+            Rmatrix rmat(numRow, numCol);
+            rmat = topNode->MatrixEvaluate();
+
+            #if DEBUG_EQUATION
+            MessageInterface::ShowMessage
+               ("Assignment::Execute() numRow=%d, numCol=%d, rmat=\n%s\n",
+                numRow, numCol, rmat.ToString().c_str());
+            #endif
+            
+            // set lhsParm here
+            if (lhsParm->GetTypeName() == "Array")
+            {
+               #if DEBUG_EQUATION
+               Array *arr = (Array*)lhsParm;
+               MessageInterface::ShowMessage
+                  ("Assignment::Execute() LHS Array numRow=%d, numCol=%d\n",
+                   arr->GetRowCount(), arr->GetColCount());
+               #endif
+               
+               lhsParm->SetRmatrix(rmat);
+            }
+            else
+               throw CommandException("Expects LHS type to be an Array, but it's " +
+                                      lhsParm->GetTypeName());
+         }
+         
+         return true;
+      }
+      else
+      {
+         throw CommandException("RHS is a equation, but top node is NULL\n");
+      }
+   }
+
+   
    // Get the parameter ID and ID type
    try
    {
@@ -465,7 +622,7 @@ bool Assignment::Execute()
          MessageInterface::ShowMessage("   In the try clause\n");
       #endif
       if (parmOwner == NULL)
-         throw CommandException("Parameter Owner Not Initialized");
+         throw CommandException("Parameter Owner Not Initialized\n");
        
       if (isLhsArray)
       {

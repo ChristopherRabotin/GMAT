@@ -29,6 +29,7 @@
 #define Assignment_hpp
 
 #include "GmatCommand.hpp"
+#include "MathTree.hpp"
 
 class GMAT_API Assignment : public GmatCommand
 {
@@ -37,7 +38,8 @@ public:
    virtual ~Assignment();
    Assignment(const Assignment& a);
    Assignment&          operator=(const Assignment& a);
-    
+
+   MathTree*            GetMathTree() { return mathTree; }
    virtual bool         Initialize();
    virtual bool         InterpretAction();
    virtual bool         Execute();
@@ -77,6 +79,8 @@ protected:
    Gmat::ParameterType  parmType;
    /// The value that is assigned, or the name of the object providing the data
    std::string          value;
+   /// MathNode pointer for RHS equation
+   MathTree             *mathTree;
    
    // Array handlers for RHS
    /// Index into the array's row
