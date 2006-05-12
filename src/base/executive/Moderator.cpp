@@ -1488,7 +1488,7 @@ bool Moderator::IsParameter(const std::string &type)
 //------------------------------------------------------------------------------
 Parameter* Moderator::CreateParameter(const std::string &type,
                                       const std::string &name,
-                                      const Gmat::ObjectType ownerType,
+//                                       const Gmat::ObjectType ownerType,
                                       const std::string &ownerName,
                                       const std::string &depName)
 {
@@ -1505,8 +1505,12 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       param->SetStringParameter("Expression", name);
       
       // Set parameter owner and dependent object
-      if (ownerType != Gmat::UNKNOWN_OBJECT && ownerName != "")
-         param->SetRefObjectName(ownerType, ownerName);
+
+      //loj: parameter knows it's owner type, so just get it
+//       if (ownerType != Gmat::UNKNOWN_OBJECT && ownerName != "")
+//          param->SetRefObjectName(ownerType, ownerName);
+      if (ownerName != "")
+         param->SetRefObjectName(param->GetOwnerType(), ownerName);
       
       // Set dependent object name
       if (depName != "")
@@ -1587,8 +1591,8 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    {
       #if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
-         ("Moderator::CreateParameter() Unable to create Parameter "
-          "name: %s already exist\n", name.c_str());
+         ("*** WARNING *** Moderator::CreateParameter() Unable to create "
+          "Parameter name: %s already exist\n", name.c_str());
       #endif
       return GetParameter(name);
    }
