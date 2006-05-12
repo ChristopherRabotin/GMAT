@@ -116,6 +116,9 @@ public:
     virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;
+    
+    virtual bool        IsParameterReadOnly(const Integer id) const;
+    virtual bool        IsParameterReadOnly(const std::string &label) const;
 
     virtual std::string GetStringParameter(const Integer id) const;
     virtual std::string GetStringParameter(const std::string &value) const;
@@ -182,6 +185,8 @@ protected:
     
     /// Name of the force model origin; actual body is the inherited forceOrigin
     std::string               centralBodyName;
+    /// Flag used to prevent unnecessary initialization calls
+    bool                      forceMembersNotInitialized;
     
    Integer                    satIds[7];
    Integer                    modelEpochId;
@@ -191,6 +196,7 @@ protected:
     static std::map<std::string, std::string> scriptAliases;
     
     const StringArray&        BuildBodyList(std::string type) const;
+    const StringArray&        BuildCoordinateList() const;
     virtual Integer           SetupSpacecraftData(GmatBase *sat, 
                                                   PhysicalModel *pm, Integer i);
     void                      UpdateTransientForces();
@@ -231,6 +237,7 @@ protected:
         DRAG,
         SRP,
         NORM_TYPE,
+        COORDINATE_SYSTEM_LIST,
         ForceModelParamCount
     };
     

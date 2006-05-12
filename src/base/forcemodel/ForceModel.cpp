@@ -78,7 +78,8 @@ ForceModel::PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount] =
     "PointMasses",
     "Drag",
     "SRP",
-    "ErrorControl"
+    "ErrorControl",
+    "CoordinateSystemList"
 };
 
 
@@ -90,7 +91,8 @@ ForceModel::PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount] =
     Gmat::STRINGARRAY_TYPE,
     Gmat::STRING_TYPE,
     Gmat::STRING_TYPE,
-    Gmat::STRING_TYPE
+    Gmat::STRING_TYPE,
+    Gmat::STRINGARRAY_TYPE
 };
 
 
@@ -118,6 +120,7 @@ ForceModel::ForceModel(const std::string &nomme) :
    normType          (L2_DIFFERENCES),
    parametersSetOnce (false),
    centralBodyName   ("Earth"),
+   forceMembersNotInitialized (true),
    modelEpochId      (-1),
    j2kBodyName       ("Earth"),
    j2kBody           (NULL),
@@ -194,6 +197,7 @@ ForceModel::ForceModel(const ForceModel& fdf) :
    normType          (fdf.normType),
    parametersSetOnce (false),
    centralBodyName   (fdf.centralBodyName),
+   forceMembersNotInitialized (true),
    modelEpochId      (-1),
 //    rawState         (NULL),
    j2kBodyName       (fdf.j2kBodyName),
@@ -783,18 +787,24 @@ bool ForceModel::Initialize()
             ("ForceModel::Initialize() initializing object %s of type %s\n",
              name.c_str(), type.c_str());
       #endif
+      
       currentPm = current;  // waw: added 06/04/04 
       currentPm->SetDimension(dimension);
-      currentPm->SetSolarSystem(solarSystem);
       
-      // Handle missing coordinate system issues for GravityFields
-      if (currentPm->IsOfType("HarmonicField"))
+      // Only initialize the spacecraft independent pieces once
+      if (forceMembersNotInitialized)
       {
-         std::string csName;
- 
-         SetInternalCoordinateSystem("InputCoordinateSystem", currentPm);
-         SetInternalCoordinateSystem("FixedCoordinateSystem", currentPm);
-         SetInternalCoordinateSystem("TargetCoordinateSystem", currentPm);
+         currentPm->SetSolarSystem(solarSystem);
+         
+         // Handle missing coordinate system issues for GravityFields
+         if (currentPm->IsOfType("HarmonicField"))
+         {
+            SetInternalCoordinateSystem("InputCoordinateSystem", currentPm);
+            SetInternalCoordinateSystem("FixedCoordinateSystem", currentPm);
+            SetInternalCoordinateSystem("TargetCoordinateSystem", currentPm);
+         }
+         
+         forceMembersNotInitialized = false;
       }
 
       // Initialize the forces
@@ -864,7 +874,7 @@ void ForceModel::ClearInternalCoordinateSystems()
 /**
  * Manages the allocation of coordinate systems used internally.
  * 
- * @param <csId>                        Parameter name for the coordinate system label.
+ * @param <csId>        Parameter name for the coordinate system label.
  * @param <currentPm>   Force that needs the CoordinateSystem.
  */
 //------------------------------------------------------------------------------
@@ -872,7 +882,12 @@ void ForceModel::SetInternalCoordinateSystem(const std::string csId, PhysicalMod
 {
    std::string csName;
    CoordinateSystem *cs = NULL;
-   
+
+   #ifdef DEBUG_FORCEMODEL_INIT     
+      MessageInterface::ShowMessage(
+         "Setting internal CS with ID '%s' for force type '%s'\n",
+         csId.c_str(), currentPm->GetTypeName().c_str());
+   #endif
    csName = currentPm->GetStringParameter(csId);
 
    try
@@ -905,6 +920,14 @@ void ForceModel::SetInternalCoordinateSystem(const std::string csId, PhysicalMod
       cs->SetJ2000BodyName(j2kBody->GetName());
       cs->SetJ2000Body(j2kBody);
       cs->Initialize();
+
+      #ifdef DEBUG_FORCEMODEL_INIT     
+         MessageInterface::ShowMessage(
+            "New coordinate system named '%s' has definition\n%s\n",
+            csName.c_str(), 
+            cs->GetGeneratingString(Gmat::SCRIPTING, "   ").c_str());
+      #endif
+         
       currentPm->SetRefObject(cs, Gmat::COORDINATE_SYSTEM, csName);
    }
 }
@@ -1627,7 +1650,18 @@ bool ForceModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       try
       {
          if ((*i)->SetRefObject(obj, type, name))
+         {
             wasSet = true;
+            if (type == Gmat::COORDINATE_SYSTEM)
+            {
+               CoordinateSystem *cs = (CoordinateSystem*)obj;
+               if (cs->GetOriginName() == "")
+               {
+                  // Finish setting CS data
+                  cs->SetOriginName((*i)->GetBodyName());
+               }
+            }
+         } 
       }
       catch (BaseException &ex)
       {
@@ -1702,6 +1736,22 @@ std::string ForceModel::GetParameterTypeString(const Integer id) const
         return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - PhysicalModelParamCount)];
     else
         return PhysicalModel::GetParameterTypeString(id);
+}
+
+bool ForceModel::IsParameterReadOnly(const Integer id) const
+{
+   if (id == COORDINATE_SYSTEM_LIST)
+      return true;
+      
+   return PhysicalModel::IsParameterReadOnly(id);
+}
+
+bool ForceModel::IsParameterReadOnly(const std::string &label) const
+{
+   if (label == PARAMETER_TEXT[COORDINATE_SYSTEM_LIST-PhysicalModelParamCount])
+      return true;
+      
+   return PhysicalModel::IsParameterReadOnly(label);
 }
 
 //------------------------------------------------------------------------------
@@ -1837,14 +1887,16 @@ bool ForceModel::SetStringParameter(const std::string &label,
 //------------------------------------------------------------------------------
 const StringArray& ForceModel::GetStringArrayParameter(const Integer id) const
 {
-    switch (id)
-    {
-    case PRIMARY_BODIES:
-       return BuildBodyList("GravityField");
-    case POINT_MASSES:
-       return BuildBodyList("PointMassForce");
-    default:
-        return PhysicalModel::GetStringArrayParameter(id);
+   switch (id)
+   {
+   case PRIMARY_BODIES:
+      return BuildBodyList("GravityField");
+   case POINT_MASSES:
+      return BuildBodyList("PointMassForce");
+   case COORDINATE_SYSTEM_LIST:
+      return BuildCoordinateList();   
+   default:
+      return PhysicalModel::GetStringArrayParameter(id);
     }
 }
 
@@ -1876,6 +1928,31 @@ const StringArray& ForceModel::BuildBodyList(std::string type) const
        }
    }
    return bodylist;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& BuildCoordinateList() const
+//------------------------------------------------------------------------------
+const StringArray& ForceModel::BuildCoordinateList() const
+{
+   static StringArray cslist;
+   cslist.clear();
+   
+   // Run through list of forces, adding body names for GravityField instances
+   std::vector<PhysicalModel*>::const_iterator i;
+   
+   for (i = forceList.begin(); i != forceList.end(); ++i) 
+   {
+      if ((*i)->GetTypeName() == "GravityField") 
+      {
+// For now, only build the body fixed CS's in list because others already exist.
+//         cslist.push_back((*i)->GetStringParameter("InputCoordinateSystem"));
+         cslist.push_back((*i)->GetStringParameter("FixedCoordinateSystem"));
+//         cslist.push_back((*i)->GetStringParameter("TargetCoordinateSystem"));
+      }
+   }
+   return cslist;
 }
 
 

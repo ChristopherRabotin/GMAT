@@ -723,8 +723,54 @@ void Sandbox::BuildReferences(GmatBase *obj)
    {
       ForceModel *fm = ((PropSetup *)obj)->GetForceModel();
       fm->SetSolarSystem(solarSys);
+      
+      // Handle the coordinate systems
+      StringArray csList = fm->GetStringArrayParameter("CoordinateSystemList");
+      
+      #ifdef DEBUG_SANDBOX_INIT
+         MessageInterface::ShowMessage("Coordinate system list for '%s':\n",
+            fm->GetName().c_str());
+         for (StringArray::iterator i = csList.begin(); i != csList.end(); ++i)
+            MessageInterface::ShowMessage("   %s\n", i->c_str());
+      #endif
+      // Set CS's on the objects
+      for (StringArray::iterator i = csList.begin(); i != csList.end(); ++i)
+      {
+         CoordinateSystem *fixedCS = NULL;
+         
+         if (objectMap.find(*i) != objectMap.end())
+         {
+            GmatBase *ref = objectMap[*i];
+            if (ref->IsOfType("CoordinateSystem") == false)
+               throw SandboxException("Object named " + (*i) + 
+                  " was expected to be a Coordinate System, but it has type " +
+                  ref->GetTypeName());
+            fixedCS = (CoordinateSystem*)ref;
+            fm->SetRefObject(fixedCS, fixedCS->GetType(), *i);         
+         }
+         else
+         {
+            fixedCS = moderator->CreateCoordinateSystem("", false);
+            AxisSystem *axes = moderator->CreateAxisSystem("BodyFixed", "");
+            fixedCS->SetName(*i);
+            fixedCS->SetRefObject(axes, Gmat::AXIS_SYSTEM, "");
+            fixedCS->SetOriginName("");  // Used to flag as uninitialized
+         
+            fm->SetRefObject(fixedCS, fixedCS->GetType(), *i);         
 
-
+            fixedCS->SetSolarSystem(solarSys);
+            BuildReferences(fixedCS); 
+            InitializeCoordinateSystem(fixedCS);
+            fixedCS->Initialize();
+            
+            #ifdef DEBUG_SANDBOX_INIT
+               MessageInterface::ShowMessage(
+                  "Coordinate system %s has body %s\n",
+                  fixedCS->GetName().c_str(), fixedCS->GetOriginName().c_str());
+            #endif
+         }
+      }
+      
       #ifdef DEBUG_FM_INITIALIZATION
          MessageInterface::ShowMessage(
             "Initializing force model references for '%s'\n",
@@ -994,7 +1040,6 @@ void Sandbox::InitializeCoordinateSystem(CoordinateSystem *cs)
 }
 
 
-
 //------------------------------------------------------------------------------
 // void SetRefFromName(GmatBase *obj, const std::string &oName)
 //------------------------------------------------------------------------------
@@ -1007,10 +1052,14 @@ void Sandbox::InitializeCoordinateSystem(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
 void Sandbox::SetRefFromName(GmatBase *obj, const std::string &oName)
 {
+   #ifdef DEBUG_SANDBOX_INIT
+      MessageInterface::ShowMessage("Setting reference '%s' on '%s'\n", 
+         oName.c_str(), obj->GetName().c_str());
+   #endif
+   
    if (objectMap.find(oName) != objectMap.end())
    {
       GmatBase *refObj = objectMap[oName];
-
       obj->SetRefObject(refObj, refObj->GetType(), refObj->GetName());
    }
    else
@@ -1025,7 +1074,6 @@ void Sandbox::SetRefFromName(GmatBase *obj, const std::string &oName)
       obj->SetRefObject(refObj, refObj->GetType(), refObj->GetName());
    }
 }
-
 
 
 //------------------------------------------------------------------------------

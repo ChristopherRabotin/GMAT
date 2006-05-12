@@ -945,6 +945,28 @@ bool PhysicalModel::IsParameterReadOnly(const Integer id) const
    return GmatBase::IsParameterReadOnly(id);
 }
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <label> Text label for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool PhysicalModel::IsParameterReadOnly(const std::string &label) const
+{
+   if ((label == PARAMETER_TEXT[EPOCH - GmatBaseParamCount]) || 
+       (label == PARAMETER_TEXT[ELAPSED_SECS - GmatBaseParamCount]) || 
+       (label == PARAMETER_TEXT[BODY_NAME - GmatBaseParamCount]))
+      return true;
+
+   return GmatBase::IsParameterReadOnly(label);
+}
+
 //------------------------------------------------------------------------------
 // Real PhysicalModel::GetRealParameter(const Integer id)
 //------------------------------------------------------------------------------
