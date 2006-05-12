@@ -38,6 +38,7 @@
 //#define DEBUG_PARSE 1
 //#define DEBUG_FUNCTION 1
 //#define DEBUG_MATH_PARSER_PARAM 1
+//#define DEBUG_INVERSE_OP 1
 
 //---------------------------------
 // static data
@@ -462,7 +463,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
    // If it is ^(-1), handle it later in DecomposeMatrixOps()
    if (str.find("^(-1)") != str.npos)
    {
-      #if DEBUG_PARENTHESIS
+      #if DEBUG_INVERSE_OP
       MessageInterface::ShowMessage
          ("MathParser::ParseParenthesis() found ^(-1) str=%s\n", str.c_str());
       #endif
@@ -553,7 +554,7 @@ std::string MathParser::FindOperator(const std::string &str, UnsignedInt start,
 
       if (index1 != str.npos)
       {
-         #if DEBUG_OPERATOR
+         #if DEBUG_INVERSE_OP
          MessageInterface::ShowMessage
             ("MathParser::FindOperator() found ^ str=%s, index1=%d\n",
              str.c_str(), index1);
@@ -623,7 +624,7 @@ std::string MathParser::GetOperatorName(const std::string &op)
 //------------------------------------------------------------------------------
 UnsignedInt MathParser::FindSubtract(const std::string &str, UnsignedInt start)
 {
-   #if DEBUG_FIND_SUBTRACT
+   #if DEBUG_INVERSE_OP
    MessageInterface::ShowMessage
       ("==> MathParser::FindSubtract() str=%s, start=%d\n", str.c_str(), start);
    #endif
@@ -631,51 +632,84 @@ UnsignedInt MathParser::FindSubtract(const std::string &str, UnsignedInt start)
    UnsignedInt index2 = str.find('-', start);
    UnsignedInt index3 = str.find("^(-1)", start);
 
-   #if DEBUG_FIND_SUBTRACT
+   #if DEBUG_INVERSE_OP
    MessageInterface::ShowMessage
       ("==> MathParser::FindSubtract() index2=%d, index3=%d\n", index2, index3);
    #endif
-   
+
+   // found no ^(-1)
    if (index2 != str.npos && index3 == str.npos)
    {
-      #if DEBUG_FIND_SUBTRACT
+      #if DEBUG_INVERSE_OP
       MessageInterface::ShowMessage
-         ("==> MathParser::FindSubtract() returning index2=%d\n", index2);
+         ("==> MathParser::FindSubtract() found no ^(-1) returning index2=%d\n",
+          index2);
       #endif
       return index2;
    }
-   
-   if (index2 < index3 && index2 < index3 + 5)
+
+   // found - inside of ^(-1)
+   if (index2 > index3 && index3 + 5 == str.size())
    {
-      #if DEBUG_FIND_SUBTRACT
+      #if DEBUG_INVERSE_OP
       MessageInterface::ShowMessage
-         ("==> MathParser::FindSubtract() returning str.npos=%d\n", str.npos);
+         ("==> MathParser::FindSubtract() found - inside of ^(-1) "
+          "returning str.size()=%d\n", str.size());
       #endif
-      return str.npos;
+      return str.size();
    }
+
+   // found - and ^(-1)
+   //if (index2 < index3 && index3+5 == str.size())
+   if (index2 < index3)
+   {
+      #if DEBUG_INVERSE_OP
+      MessageInterface::ShowMessage
+         ("==> MathParser::FindSubtract() found - and ^(-1) "
+          "returning index2=%d\n", index2);
+      #endif
+      return index2;
+   }
+
    
    if (index3 != str.npos)
    {
       // If it has only "^(-1)", handle it later in DecomposeMatrixOps()
       if (index3+5 == str.size())
       {
-         #if DEBUG_FIND_SUBTRACT
+         #if DEBUG_INVERSE_OP
          MessageInterface::ShowMessage
             ("==> MathParser::FindSubtract() found ^(-1) str=%s\n",
              str.c_str());
          MessageInterface::ShowMessage
-            ("==> MathParser::FindSubtract() returning str.npos=%d\n", str.npos);
+            ("==> MathParser::FindSubtract() returning str.size()=%d\n", str.size());
          #endif
          
          return str.size();
       }
       else
       {
-         FindSubtract(str, index3+5);
+         UnsignedInt index = FindSubtract(str, index3+5);
+         
+         #if DEBUG_INVERSE_OP
+         MessageInterface::ShowMessage
+            ("==> MathParser::FindSubtract() index=%d, after FindSubtract()\n",
+             index);
+         #endif
+         
+         // if found first - not in ^(-1)
+         if (index != str.npos && index != str.size())
+            return index;
       }
    }
 
-   return index2;
+   #if DEBUG_INVERSE_OP
+   MessageInterface::ShowMessage
+      ("==> MathParser::FindSubtract() returning str.size()=%d\n", str.size());
+   #endif
+   
+   //return index2;
+   return str.size();
 }
 
 
@@ -726,7 +760,7 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
    if (index2 == str.size() && index1 == str.npos)
    {
       // If it is ^(-1), handle it later in DecomposeMatrixOps()
-      #if DEBUG_ADD_SUBTRACT
+      #if DEBUG_INVERSE_OP
       MessageInterface::ShowMessage
          ("==> MathParser::ParseAddSubtract() found ^(-1) str=%s\n", str.c_str());
       #endif
@@ -895,7 +929,7 @@ StringArray MathParser::ParsePower(const std::string &str)
    // If it is ^(-1), handle it later in DecomposeMatrixOps()
    if (str.find("^(-1)") != str.npos)
    {
-      #if DEBUG_POWER
+      #if DEBUG_INVERSE_OP
       MessageInterface::ShowMessage
          ("MathParser::ParsePower() found ^(-1) str=%s\n", str.c_str());
       #endif
@@ -946,7 +980,7 @@ StringArray MathParser::ParseUnary(const std::string &str)
    // If it is ^(-1), handle it later in DecomposeMatrixOps()
    if (str.find("^(-1)") != str.npos)
    {
-      #if DEBUG_UNARY
+      #if DEBUG_INVERSE_OP
       MessageInterface::ShowMessage
          ("MathParser::ParseUnary() found ^(-1) str=%s\n", str.c_str());
       FillItems(items, "", "", "");
