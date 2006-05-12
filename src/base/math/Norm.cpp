@@ -19,6 +19,8 @@
 #include "Norm.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_NORM 1
+
 //---------------------------------
 // public methods
 //---------------------------------
@@ -78,6 +80,53 @@ GmatBase* Norm::Clone() const
    return (new Norm(*this));
 }
 
+
+//------------------------------------------------------------------------------
+// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
+//------------------------------------------------------------------------------
+void Norm::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
+{
+   type = Gmat::REAL_TYPE;
+   rowCount = 1;
+   colCount = 1;
+
+   #if DEBUG_NORM
+   MessageInterface::ShowMessage
+      ("Norm::GetOutputInfo() type=%d, rowCount=%d, colCount=%d\n",
+       type, rowCount, colCount);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// bool ValidateInputs()
+//------------------------------------------------------------------------------
+/**
+ * This method calls its subnodes and checks to be sure that the subnodes return
+ * compatible data for the function.
+ */
+//------------------------------------------------------------------------------
+bool Norm::ValidateInputs()
+{
+   Integer type1, row1, col1; // Left node
+
+   #if DEBUG_NORM
+   MessageInterface::ShowMessage
+      ("Norm::ValidateInputs() left=%s, %s\n",
+       leftNode->GetTypeName().c_str(), leftNode->GetName().c_str());
+   #endif
+   
+   // Get the type(Real or Matrix), # rows and # columns of the left node
+   leftNode->GetOutputInfo(type1, row1, col1);
+   
+   if (type1 == Gmat::RMATRIX_TYPE)
+      return true;
+   else
+      return false;
+
+}
+
+
 //------------------------------------------------------------------------------
 // Real Evaluate()
 //------------------------------------------------------------------------------
@@ -88,7 +137,6 @@ GmatBase* Norm::Clone() const
 //------------------------------------------------------------------------------
 Real Norm::Evaluate()
 {
-//   throw MathException("Evaluate()::Norm returns a matrix value.\n");
    Integer type, rowCount, colCount;
    leftNode->GetOutputInfo(type, rowCount, colCount);
 
@@ -108,57 +156,5 @@ Real Norm::Evaluate()
    }
    else
       throw MathException("Norm::Evaluate()::Left Node is not RMatrix type.\n");
-   
-//   Rmatrix matrix = leftNode->EvaluateMatrix();
+
 }
-
-//------------------------------------------------------------------------------
-// bool ValidateInputs()
-//------------------------------------------------------------------------------
-/**
- * This method calls its subnodes and checks to be sure that the subnodes return
- * compatible data for the function.
- */
-//------------------------------------------------------------------------------
-bool Norm::ValidateInputs()
-{
-   if ( leftNode->ValidateInputs() )
-   {
-      try
-      {
-         leftNode->MatrixEvaluate();
-         return true;
-      }
-      catch (MathException &e)
-      {
-         return false;
-      } 
-   }
-   else
-      return false;
-}
-
-//------------------------------------------------------------------------------
-// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
-//------------------------------------------------------------------------------
-void Norm::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
-{
-   type = Gmat::REAL_TYPE;
-   rowCount = 1;
-   colCount = 1;
-}
-
-//------------------------------------------------------------------------------
-// Rmatrix MatrixEvaluate()
-//------------------------------------------------------------------------------
-/**
- * @return the product of left and right nodes
- *
- */
-//------------------------------------------------------------------------------
-Rmatrix Norm::MatrixEvaluate()
-{
-   throw MathException("MatrixEvaluate()::Norm returns a real value.\n");    
-}
-
-

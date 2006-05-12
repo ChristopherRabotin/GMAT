@@ -32,18 +32,12 @@ public:
    MathFunction(const MathFunction &mf);
    MathFunction& operator=(const MathFunction &mf);
    
-   // Inherited (GmatBase) methods
-   virtual GmatBase* Clone(void) const; 
-                                        
-   // Inherited (MathNode) methods                                            
    virtual Real Evaluate();
-   virtual bool ValidateInputs(); 
-   virtual void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount);
+   virtual Rmatrix MatrixEvaluate();
    
-   Rmatrix MatrixEvaluate();
-   bool SetChildren(MathNode *leftChild, MathNode *rightChild);
-   MathNode* GetLeft();
-   MathNode* GetRight();
+   virtual bool SetChildren(MathNode *leftChild, MathNode *rightChild);
+   virtual MathNode* GetLeft();
+   virtual MathNode* GetRight();
    
 protected:
 

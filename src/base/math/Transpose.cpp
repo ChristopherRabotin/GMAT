@@ -19,6 +19,8 @@
 #include "Transpose.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_TRANSPOSE 1
+
 //---------------------------------
 // public methods
 //---------------------------------
@@ -79,17 +81,32 @@ GmatBase* Transpose::Clone() const
 }
 
 //------------------------------------------------------------------------------
-// Real Evaluate()
+// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
-/**
- * @return the Transpose of left node
- *
- */
-//------------------------------------------------------------------------------
-Real Transpose::Evaluate()
+void Transpose::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
-   throw MathException("Evaluate()::Transpose returns a matrix value.\n");    
+   Integer type1, row1, col1; // Left node
+
+   // Get the type(Real or Matrix), # rows and # columns of the left node
+   leftNode->GetOutputInfo(type1, row1, col1);
+
+   if (type1 != Gmat::RMATRIX_TYPE)
+      throw MathException("Left is not a matrix, so cannot do Transpose().\n"); 
+   else
+   {
+      type = type1;
+      rowCount = row1;
+      colCount = col1;
+   }
+   
+   #if DEBUG_TRANSPOSE
+   MessageInterface::ShowMessage
+      ("Transpose::GetOutputInfo() type=%d, rowCount=%d, colCount=%d\n",
+       type, rowCount, colCount);
+   #endif
+   
 }
+
 
 //------------------------------------------------------------------------------
 // bool ValidateInputs()
@@ -101,31 +118,24 @@ Real Transpose::Evaluate()
 //------------------------------------------------------------------------------
 bool Transpose::ValidateInputs()
 {
-   if ( leftNode->ValidateInputs() )
-   {
-      try
-      {
-         leftNode->MatrixEvaluate();
-         return true;
-      }
-      catch (MathException &e)
-      {
-         return false;
-      } 
-   }
+   Integer type1, row1, col1; // Left node
+
+   #if DEBUG_TRANSPOSE
+   MessageInterface::ShowMessage
+      ("Transpose::ValidateInputs() left=%s, %s\n",
+       leftNode->GetTypeName().c_str(), leftNode->GetName().c_str());
+   #endif
+   
+   // Get the type(Real or Matrix), # rows and # columns of the left node
+   leftNode->GetOutputInfo(type1, row1, col1);
+   
+   if (type1 == Gmat::RMATRIX_TYPE)
+      return true;
    else
       return false;
+   
 }
 
-//------------------------------------------------------------------------------
-// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
-//------------------------------------------------------------------------------
-void Transpose::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
-{
-   type = Gmat::RMATRIX_TYPE;
-   rowCount = (leftNode->MatrixEvaluate()).GetNumRows();
-   colCount = (leftNode->MatrixEvaluate()).GetNumColumns();
-}
 
 //------------------------------------------------------------------------------
 // Rmatrix MatrixEvaluate()

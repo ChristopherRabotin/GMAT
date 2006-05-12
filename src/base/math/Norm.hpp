@@ -29,10 +29,11 @@ public:
                  
    // inherited from GmatBase
    virtual GmatBase* Clone() const;
-   virtual Real Evaluate();
-   virtual bool ValidateInputs(); 
+   
    virtual void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount);
-   virtual Rmatrix MatrixEvaluate();
+   virtual bool ValidateInputs(); 
+   virtual Real Evaluate();
+//    virtual Rmatrix MatrixEvaluate();
 
 protected:
 

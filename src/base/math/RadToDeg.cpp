@@ -135,3 +135,4 @@ Rmatrix RadToDeg::MatrixEvaluate()
 {
    throw MathException("MatrixEvaluate()::RadToDeg returns a real value.\n");    
 }
+

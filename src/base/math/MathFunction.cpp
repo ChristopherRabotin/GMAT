@@ -18,10 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include "MathFunction.hpp"
-
-#if DEBUG_MATHFUNCTION
 #include "MessageInterface.hpp"
-#endif
 
 //------------------------------------------------------------------------------
 //  MathFunction(std::string typeStr, std::string nomme)
@@ -38,6 +35,7 @@ MathFunction::MathFunction(const std::string &typeStr, const std::string &nomme)
               leftNode    (NULL),
               rightNode   (NULL)
 {
+   isFunction = true;
 }
 
 //------------------------------------------------------------------------------
@@ -49,6 +47,18 @@ MathFunction::MathFunction(const std::string &typeStr, const std::string &nomme)
 //------------------------------------------------------------------------------
 MathFunction::~MathFunction()
 {
+   //MessageInterface::ShowMessage
+   //   ("==> MathFunction::~MathFunction() deleting %s, %s\n", GetTypeName().c_str(),
+   //    GetName().c_str());
+
+   MathNode *left = GetLeft();
+   MathNode *right = GetRight();
+   
+   if (left != NULL)
+      delete left;
+
+   if (right != NULL)
+      delete right;
 }
 
 //------------------------------------------------------------------------------
@@ -88,92 +98,57 @@ MathFunction& MathFunction::operator=(const MathFunction &mf)
     return *this;
 }
 
-//------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
-//------------------------------------------------------------------------------
-/**
- * This method returns a clone of the MathFunction.
- *
- * @return clone of the MathFunction.
- *
- */
-//------------------------------------------------------------------------------
-GmatBase* MathFunction::Clone(void) const
-{
-   return (new MathFunction(*this));
-}
-
-//------------------------------------------------------------------------------
-// Real Evaluate()
-//------------------------------------------------------------------------------
-Real MathFunction::Evaluate()
-{
-    return MathNode::Evaluate();
-}
-
-//------------------------------------------------------------------------------
-// bool ValidateInputs()
-//------------------------------------------------------------------------------
-/**
- * This method calls its subnodes and checks to be sure that the subnodes return
- * compatible data for the function.
- */
-//------------------------------------------------------------------------------
-bool MathFunction::ValidateInputs()
-{
-	 if ( (leftNode) && (rightNode) )
-       return true;
-    else
-       return MathNode::ValidateInputs();
-}
-
-//------------------------------------------------------------------------------
-// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
-//------------------------------------------------------------------------------
-void MathFunction::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
-{
-	return MathNode::GetOutputInfo(type, rowCount, colCount);
-}
-
-//------------------------------------------------------------------------------
-// bool MatrixEvaluate()
-//------------------------------------------------------------------------------
-Rmatrix MathFunction::MatrixEvaluate()
-{
-	return MathNode::MatrixEvaluate();
-}
 
 //------------------------------------------------------------------------------
 // bool SetChildren(MathNode *leftChild, MathNode *rightChild)()
 //------------------------------------------------------------------------------
 bool MathFunction::SetChildren(MathNode *leftChild, MathNode *rightChild)
 {
-	if (leftChild)
-	   leftNode = leftChild;
-	else
-	   leftNode = NULL;
-	   
-	if (rightChild)
-	   rightNode = rightChild;
-	else
-	   rightNode = NULL;
-	   
-	return true;
+   if (leftChild)
+      leftNode = leftChild;
+   else
+      leftNode = NULL;
+           
+   if (rightChild)
+      rightNode = rightChild;
+   else
+      rightNode = NULL;
+           
+   return true;
 }
+
 
 //------------------------------------------------------------------------------
 // bool GetLeft()
 //------------------------------------------------------------------------------
 MathNode* MathFunction::GetLeft()
 {
-	return leftNode;
+   return leftNode;
 }
+
 
 //------------------------------------------------------------------------------
 // bool GetRight()
 //------------------------------------------------------------------------------
 MathNode* MathFunction::GetRight()
 {
-	return rightNode;
+   return rightNode;
 }
 
+
+//------------------------------------------------------------------------------
+// Real Evaluate()
+//------------------------------------------------------------------------------
+Real MathFunction::Evaluate()
+{
+   throw MathException(GetTypeName() + " cannot return Real");
+}
+
+
+//------------------------------------------------------------------------------
+// Rmatrix MatrixEvaluate()
+//------------------------------------------------------------------------------
+Rmatrix MathFunction::MatrixEvaluate()
+{
+   throw MathException(GetTypeName() + " cannot return Matrix");
+}

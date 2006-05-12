@@ -19,6 +19,8 @@
 #include "Determinant.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_DETERMINANT 1
+
 //---------------------------------
 // public methods
 //---------------------------------
@@ -78,18 +80,23 @@ GmatBase* Determinant::Clone() const
    return (new Determinant(*this));
 }
 
+
 //------------------------------------------------------------------------------
-// Real Evaluate()
+// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
-/**
- * @return the Determinant of left node
- *
- */
-//------------------------------------------------------------------------------
-Real Determinant::Evaluate()
+void Determinant::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
-   return (leftNode->MatrixEvaluate()).Determinant();
+   type = Gmat::REAL_TYPE;
+   rowCount = 1;
+   colCount = 1;
+
+   #if DEBUG_DETERMINANT
+   MessageInterface::ShowMessage
+      ("Determinant::GetOutputInfo() type=%d, rowCount=%d, colCount=%d\n",
+       type, rowCount, colCount);
+   #endif
 }
+
 
 //------------------------------------------------------------------------------
 // bool ValidateInputs()
@@ -101,37 +108,35 @@ Real Determinant::Evaluate()
 //------------------------------------------------------------------------------
 bool Determinant::ValidateInputs()
 {
-   if ( leftNode->ValidateInputs() )
-   {
-      try
-      {
-         leftNode->MatrixEvaluate();
-         return true;
-      }
-      catch (MathException &e)
-      {
-         return false;
-      } 
-   }
+   Integer type1, row1, col1; // Left node
+
+   #if DEBUG_DETERMINANT
+   MessageInterface::ShowMessage
+      ("Determinant::ValidateInputs() left=%s, %s\n",
+       leftNode->GetTypeName().c_str(), leftNode->GetName().c_str());
+   #endif
+   
+   // Get the type(Real or Matrix), # rows and # columns of the left node
+   leftNode->GetOutputInfo(type1, row1, col1);
+      
+   if (type1 == Gmat::RMATRIX_TYPE)
+      return true;
    else
       return false;
+   
 }
 
-//------------------------------------------------------------------------------
-// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
-//------------------------------------------------------------------------------
-void Determinant::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
-{
-   type = Gmat::REAL_TYPE;
-   rowCount = 1;
-   colCount = 1;
-}
 
 //------------------------------------------------------------------------------
-// Rmatrix *MatrixEvaluate()
+// Real Evaluate()
 //------------------------------------------------------------------------------
-Rmatrix Determinant::MatrixEvaluate()
+/**
+ * @return the Determinant of left node
+ *
+ */
+//------------------------------------------------------------------------------
+Real Determinant::Evaluate()
 {
-   throw MathException("MatrixEvaluate()::Determinant returns a real value.\n");    
+   return (leftNode->MatrixEvaluate()).Determinant();
 }
 

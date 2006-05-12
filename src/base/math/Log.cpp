@@ -85,16 +85,12 @@ GmatBase* Log::Clone() const
 void Log::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
    Integer type1, row1, col1; // Left node
-   Integer type2, row2, col2; // Right node
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
    leftNode->GetOutputInfo(type1, row1, col1);
    
-   // Get the type(Real or Matrix), # rows and # columns of the right node
-   rightNode->GetOutputInfo(type2, row2, col2);
-
-   if ((type1 != type2) || (row1 != row2) || (col1 != col2))
-      throw MathException("Matrixes are not the same can not add.\n");    
+   if (type1 != Gmat::REAL_TYPE)
+      throw MathException("Left is not scalar, so cannot do Log().\n");  
    else
    {
       type = type1;
@@ -115,15 +111,10 @@ void Log::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 bool Log::ValidateInputs()
 {
    Integer type1, row1, col1; // Left node
-//   Integer type2, row2, col2; // Right node
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
    leftNode->GetOutputInfo(type1, row1, col1);
    
-//   // Get the type(Real or Matrix), # rows and # columns of the right node
-//   rightNode->GetOutputInfo(type2, row2, col2);
-
-//   if ((type1 == Gmat::REAL_TYPE) && (type2 == Gmat::REAL_TYPE))
    if (type1 == Gmat::REAL_TYPE)
       return true;
    else

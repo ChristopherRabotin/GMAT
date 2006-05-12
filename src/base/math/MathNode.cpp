@@ -18,10 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include "MathNode.hpp"
-
-#if DEBUG_MATHNODE
 #include "MessageInterface.hpp"
-#endif
 
 //------------------------------------------------------------------------------
 //  MathNode(std::string typeStr, std::string nomme)
@@ -34,11 +31,14 @@
  */
 //------------------------------------------------------------------------------
 MathNode::MathNode(const std::string &typeStr, const std::string &nomme) :
-    GmatBase        (Gmat::MATH_NODE, typeStr, nomme),
-    realValue       (0.0)
+   GmatBase      (Gmat::MATH_NODE, typeStr, nomme),
+   isFunction    (false),
+   isNumber      (false),
+   elementType   (Gmat::REAL_TYPE),
+   realValue     (REAL_PARAMETER_UNDEFINED)
 {
-    matrix = Rmatrix(3, 3);
 }
+
 
 //------------------------------------------------------------------------------
 //  ~MathNode(void)
@@ -49,6 +49,9 @@ MathNode::MathNode(const std::string &typeStr, const std::string &nomme) :
 //------------------------------------------------------------------------------
 MathNode::~MathNode()
 {
+   //MessageInterface::ShowMessage
+   //   ("==> MathNode::~MathNode() deleting %s, %s\n", GetTypeName().c_str(),
+   //    GetName().c_str());
 }
 
 
@@ -62,9 +65,12 @@ MathNode::~MathNode()
  */
 //------------------------------------------------------------------------------
 MathNode::MathNode(const MathNode &mn) :
-    GmatBase        (mn),
-    realValue       (mn.realValue),
-    matrix          (mn.matrix)
+   GmatBase        (mn),
+   isFunction      (mn.isFunction),
+   isNumber        (mn.isNumber),
+   elementType     (mn.elementType),
+   realValue       (mn.realValue),
+   matrix          (mn.matrix)
 {
 }
 
@@ -82,59 +88,51 @@ MathNode::MathNode(const MathNode &mn) :
 //------------------------------------------------------------------------------
 MathNode& MathNode::operator=(const MathNode &mn)
 {
-    if (this == &mn)
-        return *this;
+   if (this == &mn)
+      return *this;
         
-    GmatBase::operator=(mn);
+   GmatBase::operator=(mn);
 
-    return *this;
+   isFunction = mn.isFunction;
+   isNumber = mn.isNumber;
+   elementType = mn.elementType;
+   realValue = mn.realValue;
+   matrix = mn.matrix;
+   
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetRealValue(Real val)
+//------------------------------------------------------------------------------
+void MathNode::SetRealValue(Real val)
+{
+   elementType = Gmat::REAL_TYPE;
+   realValue = val;
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+// void SetMatrixValue(const Rmatrix &mat)
 //------------------------------------------------------------------------------
-/**
- * This method returns a clone of the MathNode.
- *
- * @return clone of the MathNode.
- *
- */
-//------------------------------------------------------------------------------
-GmatBase* MathNode::Clone(void) const
+void MathNode::SetMatrixValue(const Rmatrix &mat)
 {
-   return (new MathNode(*this));
-}
-
-//------------------------------------------------------------------------------
-// Rmatrix *MatrixEvaluate()
-//------------------------------------------------------------------------------
-Rmatrix MathNode::MatrixEvaluate()
-{
-//   return matrix;
-   throw MathException("No implementation of MatrixEvaluate()\n");    
-}
-
-//------------------------------------------------------------------------------
-// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
-//------------------------------------------------------------------------------
-void MathNode::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
-{
-   throw MathException("No implementation of GetOutputInfo(...).\n");    
-}
-
-//------------------------------------------------------------------------------
-// void Evaluate()
-//------------------------------------------------------------------------------
-Real MathNode::Evaluate()
-{
-   throw MathException("No implementation of Evaluate().\n");
-}
-
-//------------------------------------------------------------------------------
-// void ValidateInputs()
-//------------------------------------------------------------------------------
-bool MathNode::ValidateInputs()
-{
-   throw MathException("No implementation of ValidateInputs().\n");
+   elementType = Gmat::RMATRIX_TYPE;
+   Integer theRowCount = mat.GetNumRows();
+   Integer theColCount = mat.GetNumColumns();
+   
+   if (!matrix.IsSized())
+      matrix.SetSize(theRowCount, theColCount);
+   
+   matrix = mat;
+   
+   #if DEBUG_MATRIX_NODE
+   std::stringstream ss("");
+   ss << matarix;
+   MessageInterface::ShowMessage
+      ("MathNode::SetMatrixValue() theReturnType=%d, theRowCount=%d, "
+       "theColCount=%d, matarix=\n%s\n", theReturnType, theRowCount, theColCount,
+       ss.str().c_str());
+   #endif
 }
 

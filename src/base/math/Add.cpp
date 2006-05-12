@@ -1,3 +1,4 @@
+//$Header$
 //------------------------------------------------------------------------------
 //                                  Add
 //------------------------------------------------------------------------------
@@ -18,6 +19,8 @@
 
 #include "Add.hpp"
 #include "MessageInterface.hpp"
+
+//#define DEBUG_ADD 1
 
 //---------------------------------
 // public methods
@@ -84,23 +87,46 @@ GmatBase* Add::Clone() const
 //------------------------------------------------------------------------------
 void Add::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
+   #if DEBUG_ADD
+   MessageInterface::ShowMessage
+      ("Add::GetOutputInfo() exp=%s\n", GetName().c_str());
+   #endif
+   
    Integer type1, row1, col1; // Left node
    Integer type2, row2, col2; // Right node
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
-   leftNode->GetOutputInfo(type1, row1, col1);
+   if (leftNode)
+      leftNode->GetOutputInfo(type1, row1, col1);
+   else
+      throw MathException("Left node is NULL in " + GetTypeName() +
+                          "::GetOutputInfo()\n");
    
    // Get the type(Real or Matrix), # rows and # columns of the right node
-   rightNode->GetOutputInfo(type2, row2, col2);
-
-   if ((type1 != type2) || (row1 != row2) || (col1 != col2))
-      throw MathException("Matrixes are not the same can not add.\n");    
+   if (rightNode)
+      rightNode->GetOutputInfo(type2, row2, col2);
    else
-   {
-      type = type1;
-      rowCount = row1;
-      colCount = col1;
-   }
+      throw MathException("Right node is NULL in " + GetTypeName() +
+                          "::GetOutputInfo()\n");
+
+   type = type1;
+   rowCount = row1;
+   colCount = col1;
+   
+   #if DEBUG_ADD
+   MessageInterface::ShowMessage
+      ("Add::GetOutputInfo() type1=%d, row1=%d, col1=%d, type2=%d, "
+       "row2=%d, col2=%d\n", type1, row1, col1, type2, row2, col2);
+   #endif
+   
+   if ((type1 != type2) || (row1 != row2) || (col1 != col2))
+      throw MathException("Dimentions are not the same, can not add.\n");    
+   
+   #if DEBUG_ADD
+   MessageInterface::ShowMessage
+      ("Add::GetOutputInfo() type=%d, rowCount=%d, colCount=%d\n",
+       type, rowCount, colCount);
+   #endif
 }
 
 
@@ -114,6 +140,10 @@ void Add::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
 bool Add::ValidateInputs()
 {
+   #if DEBUG_ADD
+   MessageInterface::ShowMessage("Add::ValidateInputs()\n");
+   #endif
+   
    Integer type1, row1, col1; // Left node
    Integer type2, row2, col2; // Right node
    
@@ -122,7 +152,7 @@ bool Add::ValidateInputs()
    
    // Get the type(Real or Matrix), # rows and # columns of the right node
    rightNode->GetOutputInfo(type2, row2, col2);
-
+   
    if ((type1 == Gmat::REAL_TYPE) && (type2 == Gmat::REAL_TYPE))
       return true;
    else if ((type1 == Gmat::RMATRIX_TYPE) && (type2 == Gmat::RMATRIX_TYPE))
@@ -145,10 +175,7 @@ bool Add::ValidateInputs()
 //------------------------------------------------------------------------------
 Real Add::Evaluate()
 {
-   if (ValidateInputs())
-      return leftNode->Evaluate() + rightNode->Evaluate();
-   else
-      throw MathException("Both operands should be of type Real.\n");    
+   return leftNode->Evaluate() + rightNode->Evaluate();
 }
 
 
@@ -162,9 +189,13 @@ Real Add::Evaluate()
 //------------------------------------------------------------------------------
 Rmatrix Add::MatrixEvaluate()
 {
-   if (ValidateInputs())
-      return leftNode->MatrixEvaluate() + rightNode->MatrixEvaluate();
-   else
-      throw MathException("Operands are not of the same type or same dimension.\n");    
+   #if DEBUG_ADD
+   MessageInterface::ShowMessage
+      ("Add::MatrixEvaluate() left=%s, right=%s\n",
+       leftNode->MatrixEvaluate().ToString().c_str(),
+       rightNode->MatrixEvaluate().ToString().c_str());
+   #endif
+   
+   return leftNode->MatrixEvaluate() + rightNode->MatrixEvaluate();
 }
 

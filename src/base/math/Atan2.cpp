@@ -94,8 +94,8 @@ void Atan2::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
    // Get the type(Real or Matrix), # rows and # columns of the right node
    rightNode->GetOutputInfo(type2, row2, col2);
 
-   if ((type1 != type2) || (row1 != row2) || (col1 != col2))
-      throw MathException("Matrixes are not the same can not add.\n");    
+   if ((type1 != Gmat::REAL_TYPE) && (type2 != Gmat::REAL_TYPE))
+      throw MathException("Left and Right is not scalar, so cannot do Atan2().\n");    
    else
    {
       type = type1;
@@ -116,16 +116,15 @@ void Atan2::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 bool Atan2::ValidateInputs()
 {
    Integer type1, row1, col1; // Left node
-//   Integer type2, row2, col2; // Right node
+   Integer type2, row2, col2; // Right node
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
    leftNode->GetOutputInfo(type1, row1, col1);
    
-//   // Get the type(Real or Matrix), # rows and # columns of the right node
-//   rightNode->GetOutputInfo(type2, row2, col2);
+   // Get the type(Real or Matrix), # rows and # columns of the right node
+   rightNode->GetOutputInfo(type2, row2, col2);
 
-//   if ((type1 == Gmat::REAL_TYPE) && (type2 == Gmat::REAL_TYPE))
-   if (type1 == Gmat::REAL_TYPE)
+   if ((type1 == Gmat::REAL_TYPE) && (type2 == Gmat::REAL_TYPE))
       return true;
    else
       return false;
@@ -143,5 +142,5 @@ bool Atan2::ValidateInputs()
 //------------------------------------------------------------------------------
 Real Atan2::Evaluate()
 {
-   return atan2(rightNode->Evaluate(), leftNode->Evaluate());
+   return atan2(leftNode->Evaluate(), rightNode->Evaluate());
 }

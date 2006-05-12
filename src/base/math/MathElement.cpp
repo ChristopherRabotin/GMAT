@@ -18,12 +18,11 @@
 //------------------------------------------------------------------------------
 
 #include "MathElement.hpp"
-#include <iostream>
-using namespace std;
-
-#if DEBUG_MATHELEMENT
+#include "StringUtil.hpp"  // for ToDouble()
 #include "MessageInterface.hpp"
-#endif
+#include <sstream>
+
+//#define DEBUG_MATH_ELEMENT 1
 
 
 //------------------------------------------------------------------------------
@@ -39,9 +38,20 @@ using namespace std;
 MathElement::MathElement(const std::string &typeStr, const std::string &nomme) :
              MathNode      ("MathElement", nomme),
              refObject     (NULL),
-             refObjectName (""),
-             elementType   (Gmat::REAL_TYPE)
+             refObjectName ("")
 {
+   isFunction = false;
+   
+   Real rval;
+   if (GmatStringUtil::ToDouble(nomme, &rval))
+   {
+      SetRealValue(rval);
+      SetNumberFlag(true);
+   }
+   else
+   {
+      SetRefObjectName(Gmat::PARAMETER, nomme);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -67,11 +77,10 @@ MathElement::~MathElement()
 MathElement::MathElement(const MathElement &me) :
              MathNode      (me),
              refObject     (me.refObject),
-             refObjectName (me.refObjectName),
-             elementType   (me.elementType)
+             refObjectName (me.refObjectName)
 {
-
 }
+
 
 //------------------------------------------------------------------------------
 //  MathElement& operator=(const MathElement &me)
@@ -86,13 +95,16 @@ MathElement::MathElement(const MathElement &me) :
 //------------------------------------------------------------------------------
 MathElement& MathElement::operator=(const MathElement &me)
 {
-    if (this == &me)
-        return *this;
+   if (this == &me)
+      return *this;
         
-    GmatBase::operator=(me);
+   MathNode::operator=(me);
+   refObject = me.refObject;
+   refObjectName = me.refObjectName;
 
-    return *this;
+   return *this;
 }
+
 
 //------------------------------------------------------------------------------
 //  GmatBase* Clone(void) const
@@ -136,6 +148,7 @@ GmatBase* MathElement::GetRefObject(const Gmat::ObjectType type,
    return GmatBase::GetRefObject(type, name);
 }
 
+
 //------------------------------------------------------------------------------
 // bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
 //                   const std::string &name)
@@ -155,43 +168,72 @@ bool MathElement::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    switch (type)
    {
       case Gmat::PARAMETER:
+
+         // Check if name is the same
+         if (refObjectName != name)
+            throw MathException
+               ("MathElement::SetRefObject() Cannot find parameter name:" +
+                name + "\n");
+         
          refObject = (Parameter*) obj;
-         refObjectName = name;
          
-         // @todo:  Use implementation of GetReturnType() for future
-         //elementType = refObject->GetReturnType(); 
-         
-         //if (elementType == Gmat::RMATRIX_TYPE)
-         //else if (elementType == Gmat::REAL_TYPE)
-             
-         refObjectType = refObject->GetTypeName().c_str();
-         
-         if ((refObjectType == "Parameter") || (refObjectType == "Array"))
+         if (refObject->GetReturnType() == Gmat::RMATRIX_TYPE)
          {
-         	  elementType = Gmat::RMATRIX_TYPE;
-         	  aRefObject = (Array*)refObject;
-         	  
-//         	  Integer numRows = aRefObject->GetIntegerParameter("NumRows");
-//            Integer numCols = aRefObject->GetIntegerParameter("NumCols");
-//         	  matrix.SetSize(numRows, numCols);
-         	  
-            matrix = aRefObject->GetMatrix();
+            Array *arr = (Array*)refObject;     
+            elementType = Gmat::RMATRIX_TYPE;
+            Integer theRowCount = arr->GetRowCount();
+            Integer theColCount = arr->GetColCount();
+
+            #if DEBUG_MATH_ELEMENT
+            MessageInterface::ShowMessage
+               ("MathElement::SetRefObject() elementType=%d, theRowCount=%d, "
+                "theColCount=%d\n", elementType, theRowCount, theColCount);
+            #endif
+            
+            
+            if (!matrix.IsSized())
+               matrix.SetSize(theRowCount, theColCount);
+            else
+            {
+               #if DEBUG_MATH_ELEMENT
+               MessageInterface::ShowMessage
+                  ("MathElement::SetRefObject() matrix already sized. "
+                   "matrix.size=%d, %d\n", matrix.GetNumRows(),
+                   matrix.GetNumColumns());
+               #endif
+            }
+            
+            matrix = arr->GetRmatrix(); // initial value
+            
+            #if DEBUG_MATH_ELEMENT
+            std::stringstream ss("");
+            ss << matrix;
+            MessageInterface::ShowMessage
+               ("MathElement::SetRefObject() matrix=\n%s\n", ss.str().c_str());
+            #endif
             
          }
-         else
+         else if (refObject->GetReturnType() == Gmat::REAL_TYPE)
          {
             elementType = Gmat::REAL_TYPE;
-            realValue = refObject->GetReal();
-         }
+            realValue = refObject->GetReal(); // initial value
             
+            #if DEBUG_MATH_ELEMENT
+            MessageInterface::ShowMessage
+               ("MathElement::SetRefObject() elementType=%d, realValue=%f\n",
+                elementType, realValue);
+            #endif
+         }
+         
          return true;
          
       default:
          break;
-   }	
+   }    
    
    return GmatBase::SetRefObject(obj, type, name);
 }
+
 
 //------------------------------------------------------------------------------
 // std::string GetRefObjectName(const Gmat::ObjectType type) const
@@ -216,6 +258,7 @@ std::string MathElement::GetRefObjectName(const Gmat::ObjectType type) const
    return GmatBase::GetRefObjectName(type);
 }
 
+
 //------------------------------------------------------------------------------
 // bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
 //------------------------------------------------------------------------------
@@ -226,12 +269,16 @@ std::string MathElement::GetRefObjectName(const Gmat::ObjectType type) const
  */
  //------------------------------------------------------------------------------
 bool MathElement::SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
-{ 
+{
+   #if DEBUG_MATH_ELEMENT
+   MessageInterface::ShowMessage
+      ("==> MathElement::SetRefObjectName() name=%s\n", name.c_str());
+   #endif
+   
    switch (type)
    {
       case Gmat::PARAMETER:
          refObjectName = name;
-         elementType = Gmat::RMATRIX_TYPE;
          return true;
          
       default:
@@ -240,6 +287,7 @@ bool MathElement::SetRefObjectName(const Gmat::ObjectType type, const std::strin
    
    return GmatBase::SetRefObjectName(type, name);
 }
+
 
 //------------------------------------------------------------------------------
 //  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
@@ -255,37 +303,86 @@ bool MathElement::SetRefObjectName(const Gmat::ObjectType type, const std::strin
 //------------------------------------------------------------------------------
 const StringArray& MathElement::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
-	static StringArray refs;
-	
-   if (type == Gmat::PARAMETER)
+   static StringArray refs;
+   refs.clear();
+   
+   if (type == Gmat::PARAMETER || Gmat::UNKNOWN_OBJECT)
    {
       refs.push_back(refObjectName);
       return refs;
-   }
-   else if (type == Gmat::UNKNOWN_OBJECT)
-   {
-   	   refs.clear();
-   	   return refs;
    }
    
    return GmatBase::GetRefObjectNameArray(type);
 }
 
+
+// Inherited MathNode methods
 //------------------------------------------------------------------------------
-// Real Evaluate()
+// virtual void SetMatrixValue(const Rmatrix &mat)
 //------------------------------------------------------------------------------
-Real MathElement::Evaluate()
+void MathElement::SetMatrixValue(const Rmatrix &mat)
 {
-   if (refObject)
-   {
-   	   realValue = refObject->EvaluateReal();
-   	   return realValue;
-   }
-   else if (realValue != 0.0)
-      return realValue;
-   
-   return MathNode::Evaluate();
+   // if we can set matrix value, it is not a parameter
+   isNumber = true;
+   refObjectName = "";
+
+   MathNode::SetMatrixValue(mat);
 }
+
+
+//------------------------------------------------------------------------------
+// void GetOutputInfo()
+//------------------------------------------------------------------------------
+void MathElement::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
+{
+   type = elementType;
+   rowCount = 1;
+   colCount = 1;
+   
+   #if DEBUG_MATH_ELEMENT
+   MessageInterface::ShowMessage
+      ("MathElement::GetOutputInfo() isNumber=%d, refObjectName=%s\n",
+       isNumber, refObjectName.c_str());
+   #endif
+   
+   if (refObjectName == "")
+   {
+      if (type == Gmat::RMATRIX_TYPE)
+      {
+         rowCount = matrix.GetNumRows();
+         colCount = matrix.GetNumColumns();
+      }
+   }
+   else
+   {
+      #if DEBUG_MATH_ELEMENT
+      MessageInterface::ShowMessage
+         ("MathElement::GetOutputInfo() %s is parameter. refObjectName=%s\n",
+          GetName().c_str(), refObjectName.c_str());
+      #endif
+      
+      if (refObject)
+      {
+         type = refObject->GetReturnType();
+         
+         if (type == Gmat::RMATRIX_TYPE)
+         {
+            rowCount = ((Array*)refObject)->GetRowCount();
+            colCount = ((Array*)refObject)->GetColCount();
+         }
+         
+         #if DEBUG_MATH_ELEMENT
+         MessageInterface::ShowMessage
+            ("MathElement::GetOutputInfo() row=%d, col=%d\n", rowCount, colCount);
+         #endif
+      }
+      else
+      {
+         throw MathException("The parameter: " + GetName() + " is NULL\n");
+      }
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // bool ValidateInputs()
@@ -296,30 +393,46 @@ Real MathElement::Evaluate()
  //------------------------------------------------------------------------------
 bool MathElement::ValidateInputs()
 {
-	if (refObject)
+   if (elementType == Gmat::REAL_TYPE && refObjectName == "")
       return true;
-   
-   return MathNode::ValidateInputs();
+
+   if (refObject)
+      return true;
+   else
+      return false;
 }
 
+
 //------------------------------------------------------------------------------
-// void GetOutputInfo()
+// Real Evaluate()
 //------------------------------------------------------------------------------
-void MathElement::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
+Real MathElement::Evaluate()
 {
-	type = elementType;
-	
-	if (type == Gmat::RMATRIX_TYPE)
-	{
-	   rowCount = matrix.GetNumRows();
-	   colCount = matrix.GetNumColumns();
-	}
-	else if (type == Gmat::REAL_TYPE)
-	{
-		rowCount = 1;
-	   colCount = 1;
-	}
+   if (refObject)
+   {
+      realValue = refObject->EvaluateReal();
+
+      #if DEBUG_MATH_ELEMENT
+      MessageInterface::ShowMessage
+         ("MathElement::Evaluate() It's a parameter: %s realValue = %f\n",
+          refObject->GetName().c_str(), realValue);
+      #endif
+      
+      return realValue;
+   }
+   else
+   {
+      #if DEBUG_MATH_ELEMENT
+      MessageInterface::ShowMessage
+         ("MathElement::Evaluate() It's a number: realValue = %f\n", realValue);
+      #endif
+      
+      return realValue;
+   }
+   
+   return MathNode::Evaluate();
 }
+
 
 //------------------------------------------------------------------------------
 // bool MatrixEvaluate()
@@ -327,22 +440,56 @@ void MathElement::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCo
 Rmatrix MathElement::MatrixEvaluate()
 {
    if (elementType == Gmat::RMATRIX_TYPE)
-      return matrix;
-	   
-	return MathNode::MatrixEvaluate();
+   {
+      if (refObject)
+      {
+         #if DEBUG_MATH_ELEMENT
+         Rmatrix rmat = refObject->GetRmatrix();
+         MessageInterface::ShowMessage
+            ("MathElement::Evaluate() It's an Array: %s matVal =\n%s\n",
+             refObject->GetName().c_str(), rmat.ToString().c_str());
+         #endif
+         
+         return refObject->GetRmatrix();
+      }
+      else
+      {
+         #if DEBUG_MATH_ELEMENT
+         MessageInterface::ShowMessage
+            ("MathElement::Evaluate() It's a Rmatrix. matVal =\n%s\n",
+             matrix.ToString().c_str());
+         #endif
+         
+         return matrix;
+      }
+   }
+   else
+      throw MathException("MathElement::MatrixEvaluate() Invalid matrix\n");
 }
 
+
 //------------------------------------------------------------------------------
-// Real SetRealValue(Real value)
+// bool SetChildren(MathNode *leftChild, MathNode *rightChild)
 //------------------------------------------------------------------------------
-/**
- * Sets the value of the node when it contains a constant.
- */
- //------------------------------------------------------------------------------
-Real MathElement::SetRealValue(Real value)
-{	
-	realValue = value;
-	elementType = Gmat::REAL_TYPE;
-	return realValue;
+bool MathElement::SetChildren(MathNode *leftChild, MathNode *rightChild)
+{
+   throw MathException("SetChildren() is not valid for MathElement\n");
 }
 
+
+//------------------------------------------------------------------------------
+// MathNode* GetLeft()
+//------------------------------------------------------------------------------
+MathNode* MathElement::GetLeft()
+{
+   return NULL;
+}
+
+
+//------------------------------------------------------------------------------
+// MathNode* GetRight()
+//------------------------------------------------------------------------------
+MathNode* MathElement::GetRight()
+{
+   return NULL;
+}

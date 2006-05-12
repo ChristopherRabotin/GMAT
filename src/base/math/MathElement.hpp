@@ -48,28 +48,26 @@ public:
    virtual const     StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
    
    // Inherited (MathNode) methods                                   
-   virtual Real Evaluate();
+   virtual void SetMatrixValue(const Rmatrix &mat);
    virtual bool ValidateInputs(); 
    virtual void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount);
    
-   Rmatrix MatrixEvaluate();
-   Real SetRealValue(Real value);
+   virtual bool SetChildren(MathNode *leftChild, MathNode *rightChild);
+   virtual MathNode* GetLeft();
+   virtual MathNode* GetRight();
+   
+   virtual Real Evaluate();
+   virtual Rmatrix MatrixEvaluate();
 
 protected:
    
    /// A pointer to the referenced object (i.e. the leaf node or element).  
    /// This pointer is set when the MathTree is initialized in the Sandbox.
    Parameter* refObject;
-   Array *aRefObject;
    
    /// Holds the name of the GMAT object that is accessed by this node
    std::string refObjectName; 
-   
-   std::string refObjectType; 
-   
-   /// Element type (is the leaf node a real number or a matrix
-   Integer elementType;
-    
+      
 };
 
 #endif //MathElement_hpp

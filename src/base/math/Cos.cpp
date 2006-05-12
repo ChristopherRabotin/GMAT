@@ -84,17 +84,20 @@ GmatBase* Cos::Clone() const
 //------------------------------------------------------------------------------
 void Cos::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
+   //loj: only left side is available
+   
    Integer type1, row1, col1; // Left node
-   Integer type2, row2, col2; // Right node
+//    Integer type2, row2, col2; // Right node
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
    leftNode->GetOutputInfo(type1, row1, col1);
    
-   // Get the type(Real or Matrix), # rows and # columns of the right node
-   rightNode->GetOutputInfo(type2, row2, col2);
+//    // Get the type(Real or Matrix), # rows and # columns of the right node
+//    rightNode->GetOutputInfo(type2, row2, col2);
 
-   if ((type1 != type2) || (row1 != row2) || (col1 != col2))
-      throw MathException("Matrixes are not the same can not add.\n");    
+   //if ((type1 != type2) || (row1 != row2) || (col1 != col2))
+   if (type1 != Gmat::REAL_TYPE)
+      throw MathException("Left is not scalar, so cannot do Cos().\n");    
    else
    {
       type = type1;
@@ -118,7 +121,11 @@ bool Cos::ValidateInputs()
 //   Integer type2, row2, col2; // Right node
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
-   leftNode->GetOutputInfo(type1, row1, col1);
+   if (leftNode)
+      leftNode->GetOutputInfo(type1, row1, col1);
+   else
+      throw MathException("Left node is NULL in " + GetTypeName() +
+                          "::ValidateInputs()\n");
    
 //   // Get the type(Real or Matrix), # rows and # columns of the right node
 //   rightNode->GetOutputInfo(type2, row2, col2);
