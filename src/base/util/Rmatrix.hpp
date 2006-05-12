@@ -24,6 +24,7 @@
 #include "RealUtilities.hpp"
 #include "TableTemplate.hpp"
 #include "BaseException.hpp"
+#include "gmatdefs.hpp"
 
 // Forward declarations
 class Rvector;
@@ -36,15 +37,15 @@ public:
    // exceptions
    class NotSquare : public BaseException 
    { public:  NotSquare(const std::string &message =
-                        "Rmatrix error: matrix not square")
+                        "Rmatrix error: matrix not square\n")
         : BaseException(message) {}; };
    class IsSingular : public BaseException
    { public:  IsSingular(const std::string &message =
-                         "Rmatrix error: matrix is singular")
+                         "Rmatrix error: matrix is singular\n")
         : BaseException(message) {}; };
    class DivideByZero : public BaseException
    { public:  DivideByZero(const std::string &message =
-                           "Rmatrix error: attempt to divide by zero")
+                           "Rmatrix error: attempt to divide by zero\n")
         : BaseException(message) {}; };
    
    Rmatrix();
@@ -109,10 +110,14 @@ public:
    friend std::ostream& operator<< (std::ostream &output, const Rmatrix &a);
    
    Rvector GetRow(int r) const;  //arg 4/24/06
-   Rvector GetColumn(int c) const; //arg 4/24/06   
-
+   Rvector GetColumn(int c) const; //arg 4/24/06
+   
+   const StringArray& GetStringVals(Integer w=12, Integer p=10);
+   virtual std::string ToString(Integer w=12, Integer p=10);
+   
 protected:   
-
+   StringArray stringVals;
+   
 private:
 };
 #endif // Rmatrix_hpp

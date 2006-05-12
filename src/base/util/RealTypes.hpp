@@ -83,7 +83,8 @@ namespace GmatRealConst
       const Integer REAL_MAX_10_EXP  = 308;
    #endif
    
-   const Real    REAL_TOL         = REAL_EPSILON;
+   //const Real    REAL_TOL         = REAL_EPSILON;
+   const Real    REAL_TOL         = 1.0e-15;
 };
 
 #endif // RealTypes_hpp

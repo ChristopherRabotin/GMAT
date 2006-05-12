@@ -31,23 +31,23 @@ public:
 
     class DimensionError : public BaseException 
           {public : DimensionError(const std::string &message =
-          "TableTemplate error : dimension error or mismatch.")
+          "TableTemplate error : dimension error or mismatch.\n")
           : BaseException(message) {};  };
     class OutOfBounds : public BaseException
           {public : OutOfBounds(const std::string &message =
-          "TableTemplate error : index out-of-bounds.")
+          "TableTemplate error : index out-of-bounds.\n")
           : BaseException(message) {};  };
     class UnsizedTable : public BaseException 
           {public : UnsizedTable(const std::string &message =
-          "TableTemplate error : unsized table.")
+          "TableTemplate error : unsized table.\n")
           : BaseException(message) {};  };
     class TableAlreadySized : public BaseException 
           {public : TableAlreadySized(const std::string &message =
-          "TableTemplate error : table already sized.")
+          "TableTemplate error : table already sized.\n")
           : BaseException(message) {};  };
     class IllegalSize : public BaseException 
           {public : IllegalSize(const std::string &message =
-          "TableTemplate error : illegal (negative) size.")
+          "TableTemplate error : illegal (negative) size.\n")
           : BaseException(message) {};  };
 
 private:

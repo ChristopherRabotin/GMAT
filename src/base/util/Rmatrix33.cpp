@@ -575,41 +575,48 @@ std::string* Rmatrix33::ToValueStrings(Integer w, Integer p)
    std::stringstream ss("");
    
    ss.setf(std::ios::right);
+
+   for (int i=0; i<rowsD*colsD; i++)
+   {
+      ss.str("");
+      ss << std::setw(w) << std::setprecision(p) << elementD[i];
+      stringValues[i] = ss.str();
+   }
    
-   ss << std::setw(w) << std::setprecision(p) << elementD[0];
-   stringValues[0] = ss.str();
+//    ss << std::setw(w) << std::setprecision(p) << elementD[0];
+//    stringValues[0] = ss.str();
    
-   ss.str("");
-   ss << std::setw(w) << std::setprecision(p) << elementD[1];
-   stringValues[1] = ss.str();
+//    ss.str("");
+//    ss << std::setw(w) << std::setprecision(p) << elementD[1];
+//    stringValues[1] = ss.str();
    
-   ss.str("");
-   ss << std::setw(w) << std::setprecision(p) << elementD[2];
-   stringValues[2] = ss.str();
+//    ss.str("");
+//    ss << std::setw(w) << std::setprecision(p) << elementD[2];
+//    stringValues[2] = ss.str();
    
-   ss.str("");
-   ss << std::setw(w) << std::setprecision(p) << elementD[3];
-   stringValues[3] = ss.str();
+//    ss.str("");
+//    ss << std::setw(w) << std::setprecision(p) << elementD[3];
+//    stringValues[3] = ss.str();
    
-   ss.str("");
-   ss << std::setw(w) << std::setprecision(p) << elementD[4];
-   stringValues[4] = ss.str();
+//    ss.str("");
+//    ss << std::setw(w) << std::setprecision(p) << elementD[4];
+//    stringValues[4] = ss.str();
    
-   ss.str("");
-   ss << std::setw(w) << std::setprecision(p) << elementD[5];
-   stringValues[5] = ss.str();
+//    ss.str("");
+//    ss << std::setw(w) << std::setprecision(p) << elementD[5];
+//    stringValues[5] = ss.str();
    
-   ss.str("");
-   ss << std::setw(w) << std::setprecision(p) << elementD[6];
-   stringValues[6] = ss.str();
+//    ss.str("");
+//    ss << std::setw(w) << std::setprecision(p) << elementD[6];
+//    stringValues[6] = ss.str();
    
-   ss.str("");
-   ss << std::setw(w) << std::setprecision(p) << elementD[7];
-   stringValues[7] = ss.str();
+//    ss.str("");
+//    ss << std::setw(w) << std::setprecision(p) << elementD[7];
+//    stringValues[7] = ss.str();
    
-   ss.str("");
-   ss << std::setw(w) << std::setprecision(p) << elementD[8];
-   stringValues[8] = ss.str();
+//    ss.str("");
+//    ss << std::setw(w) << std::setprecision(p) << elementD[8];
+//    stringValues[8] = ss.str();
    
    return stringValues;
 }

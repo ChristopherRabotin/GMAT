@@ -18,11 +18,9 @@
 //------------------------------------------------------------------------------
 
 #include "StringUtil.hpp"
+#include "MessageInterface.hpp"
 
 //#define DEBUG_STRING_UTIL 1
-#if DEBUG_STRING_UTIL
-#include "MessageInterface.hpp"
-#endif
 
 using namespace std;
 
@@ -181,3 +179,35 @@ std::string GmatStringUtil::Capitalize(const std::string &str)
 
    return newstr;
 }
+
+
+//------------------------------------------------------------------------------
+// void ParseParameter(const std::string str, std::string &type,
+//                     std::string &owner, std::string &depobj)
+//------------------------------------------------------------------------------
+void GmatStringUtil::ParseParameter(const std::string str, std::string &type,
+                                    std::string &owner, std::string &depObj)
+{
+   //find owner.depObj.type
+   std::string str1 = str;
+   std::string::size_type pos1 = str1.find(".");
+   std::string::size_type pos2 = str1.find_last_of(".");
+   
+   if (pos1 != str1.npos && pos2 != str1.npos)
+   {
+      owner = str1.substr(0, pos1);
+      type = str1.substr(pos2+1, str1.npos-pos2);
+
+      depObj = "";
+      if (pos2 > pos1)
+         depObj = str1.substr(pos1+1, pos2);
+   }
+
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::ParseParameter() str=%s, type=%s, owner=%s, depObj=%s\n",
+       str.c_str(), type.c_str(), owner.c_str(), depObj.c_str());
+   #endif
+   
+}
+

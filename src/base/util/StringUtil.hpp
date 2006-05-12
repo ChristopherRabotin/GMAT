@@ -37,6 +37,9 @@ namespace GmatStringUtil
    std::string ToUpper(const std::string &str);
    std::string ToLower(const std::string &str);
    std::string Capitalize(const std::string &str);
+
+   void ParseParameter(const std::string str, std::string &type,
+                       std::string &owner, std::string &depObj);
 }
 
 #endif // StringUtil_hpp

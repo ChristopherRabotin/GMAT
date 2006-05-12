@@ -99,12 +99,13 @@ namespace GmatTimeUtil
    
    enum MonthName {JANUARY = 1, FEBRUARY, MARCH, APRIL, MAY, JUNE, JULY, AUGUST,  
                    SEPTEMBER, OCTOBER, NOVEMBER, DECEMBER};
-   
+
    static const std::string MONTH_NAME_TEXT[12] =
    {
       "Jan",  "Feb",  "Mar",  "Apr",  "May",  "Jun",
       "Jul",  "Aug",  "Sep",  "Oct",  "Nov",  "Dec"
    };
+   
 
    enum SIGN {PLUS = 1, MINUS = -1 };
    

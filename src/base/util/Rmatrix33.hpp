@@ -91,6 +91,7 @@ public:
                                              const Rmatrix33& m2); 
    
    const std::string* GetDataDescriptions() const;
+
    std::string* ToValueStrings(Integer w=17, Integer p=10);
    virtual std::string ToString(Integer w=17, Integer p=10);
    
