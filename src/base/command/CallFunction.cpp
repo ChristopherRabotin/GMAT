@@ -1061,7 +1061,7 @@ void CallFunction::SendInParam(Parameter *param)
          os.precision(18);
 
 
-         Rmatrix rmatrix = array->GetMatrix();
+         Rmatrix rmatrix = array->GetRmatrix();
 
 
          for (int j=0; j<numRows; j++)

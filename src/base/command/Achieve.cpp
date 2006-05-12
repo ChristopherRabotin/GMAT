@@ -507,8 +507,9 @@ bool Achieve::InterpretAction()
           parmType.c_str(), parmSystem.c_str());
    #endif
 
-   goalParm = mod->CreateParameter(parmType, goalName, Gmat::SPACECRAFT,
-                                   parmObj, parmSystem);
+//    goalParm = mod->CreateParameter(parmType, goalName, Gmat::SPACECRAFT,
+//                                    parmObj, parmSystem);
+   goalParm = mod->CreateParameter(parmType, goalName, parmObj, parmSystem);
 
    if (!goalParm)
       throw CommandException("Unable to create parameter " + goalName);
@@ -598,8 +599,9 @@ bool Achieve::ConstructGoal(const char* str)
 
       if (mod->IsParameter(parmType))
       {
-         goalTarget = mod->CreateParameter(parmType, goalString, Gmat::SPACECRAFT,
-                                           parmObj, parmSystem);
+//          goalTarget = mod->CreateParameter(parmType, goalString, Gmat::SPACECRAFT,
+//                                            parmObj, parmSystem);
+         goalTarget = mod->CreateParameter(parmType, goalString, parmObj, parmSystem);
         
          if (!goalTarget)
             throw CommandException("Unable to create parameter " + goalString);
