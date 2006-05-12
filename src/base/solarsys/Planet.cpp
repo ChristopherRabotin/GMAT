@@ -955,10 +955,10 @@ void Planet::InitializePlanet(const std::string &cBody)
    }
 
    // Set use potential file to true if Earth
-   if (bodyIndex == EARTH)
+   //if (bodyIndex == EARTH)
       usePotentialFile = true;
-   else
-      usePotentialFile = false;
+   //else
+    //  usePotentialFile = false;
       
    mu                  = Planet::MU[bodyIndex];
    mass                = mu / 
