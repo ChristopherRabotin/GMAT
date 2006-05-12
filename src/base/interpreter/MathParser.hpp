@@ -31,12 +31,7 @@
 
 //#include "MathTree.hpp"
 
-#ifdef __USE_SIMPLE_NODE__
-#include "SimpleMathNode.hpp"
-#else
 #include "MathNode.hpp"
-#endif
-
 #include "MathException.hpp"
 
 class GMAT_API MathParser
@@ -48,24 +43,16 @@ public:
    MathParser& operator=(const MathParser &right);
    virtual ~MathParser();
    
-   //void Parse(MathTree *mathTree, const std::string &theEquation);
-   #ifdef __USE_SIMPLE_NODE__
-   SimpleMathNode* Parse(const std::string &theEquation);
-   #else
-   MathNode* Parse(const std::string &theEquation);
-   #endif
+   bool IsEquation(const std::string &str);
    
+   //void Parse(MathTree *mathTree, const std::string &theEquation);
+   MathNode* Parse(const std::string &theEquation);
+
 protected:
 
-   #ifdef __USE_SIMPLE_NODE__
-   SimpleMathNode* ParseNode(const std::string &str);
-   SimpleMathNode* CreateNode(const std::string &type,
-                              const std::string &exp);
-   #else
    MathNode* ParseNode(const std::string &str);
    MathNode* CreateNode(const std::string &type,
                         const std::string &exp);
-   #endif
    
    StringArray Decompose(const std::string &str);
    
@@ -81,31 +68,29 @@ private:
    StringArray ParseUnitConversion(const std::string &str);
 
    bool IsThisLastCharOfFunction(char ch, const std::string list[],
-                                 Integer count);
+                                 UnsignedInt count);
    bool IsParenPartOfFunction(char lastChar);
-   std::string GetFunction(Integer functionType, const std::string &str,
+   std::string GetFunction(UnsignedInt functionType, const std::string &str,
                            std::string &leftStr);
    std::string FindOperator(const std::string &str, UnsignedInt start,
                              std::string &left, std::string &right);
+   UnsignedInt FindSubtract(const std::string &str, UnsignedInt start);
    std::string GetOperatorName(const std::string &op);
    void BuildFunction(const std::string &str, const std::string list[],
-                      Integer count, std::string &fnName, std::string &leftStr);
-   Integer FindMatchingParen(const std::string &str, UnsignedInt start);
+                      UnsignedInt count, std::string &fnName, std::string &leftStr);
+   UnsignedInt FindMatchingParen(const std::string &str, UnsignedInt start);
    void FillItems(StringArray &items, const std::string &op,
                   const std::string &left, const std::string &right);
    
    void WriteItems(const std::string &msg, StringArray &items);
-
-   #ifdef __USE_SIMPLE_NODE__
-   void WriteNode(SimpleMathNode *node, Integer level);
-   #else
-   void WriteNode(MathNode *node, Integer level);
-   #endif
+   void WriteNode(MathNode *node, UnsignedInt level);
+   void CreateParameter(MathNode *node, UnsignedInt level);
    
    enum
    {
       MATH_FUNCTION,
-      MATRIX_OPS,
+      MATRIX_FUNC,
+      MATRIX_OP,
       UNIT_CONVERSION,
    };
    
@@ -114,14 +99,21 @@ private:
       SIN = 0,
       COS, TAN, ASIN, ACOS, ATAN2, ATAN,
       LOG, LOG10, EXP, SQRT,
-      MathFunctionCount,
+      MathFuncCount,
    };
    
    enum
    {
       TRANSPOSE = 0,
       DET, INV, NORM,
-      MatrixOpsCount,
+      MatrixFuncCount,
+   };
+   
+   enum
+   {
+      OP_TRANSPOSE = 0,
+      OP_INV,
+      MatrixOpCount,
    };
    
    enum
@@ -131,8 +123,9 @@ private:
       UnitConvCount,
    };
    
-   static const std::string MATH_FUNC_LIST[MathFunctionCount];
-   static const std::string MATRIX_OPS_LIST[MatrixOpsCount];
+   static const std::string MATH_FUNC_LIST[MathFuncCount];
+   static const std::string MATRIX_FUNC_LIST[MatrixFuncCount];
+   static const std::string MATRIX_OP_LIST[MatrixOpCount];
    static const std::string UNIT_CONV_LIST[UnitConvCount];
 };
 

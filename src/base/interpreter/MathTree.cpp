@@ -18,6 +18,9 @@
 //------------------------------------------------------------------------------
 #include "MathTree.hpp"
 #include "MathFunction.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_MATH_TREE 1
 
 //------------------------------------------------------------------------------
 //  MathTree()
@@ -28,9 +31,10 @@
 //------------------------------------------------------------------------------
 MathTree::MathTree(const std::string &typeStr, const std::string &nomme) :
    GmatBase        (Gmat::MATH_TREE, typeStr, nomme),
-   topNode(NULL)
+   theTopNode(NULL)
 {
 }
+
 
 //------------------------------------------------------------------------------
 //  ~MathTree(void)
@@ -41,7 +45,16 @@ MathTree::MathTree(const std::string &typeStr, const std::string &nomme) :
 //------------------------------------------------------------------------------
 MathTree::~MathTree()
 {
+   // Need to delete from the bottom nodes
+   if (theTopNode)
+   {
+      //MessageInterface::ShowMessage
+      //   ("==> MathTree::~MathTree() deleting theTopNode:%s, %s\n", GetTypeName().c_str(),
+      //    GetName().c_str());
+      delete theTopNode;
+   }
 }
+
 
 //------------------------------------------------------------------------------
 //  MathTree(const MathTree &mt)
@@ -54,7 +67,7 @@ MathTree::~MathTree()
 //------------------------------------------------------------------------------
 MathTree::MathTree(const MathTree &mt) :
     GmatBase        (mt),
-    topNode         (mt.topNode)
+    theTopNode         (mt.theTopNode)
 {
 }
 
@@ -74,9 +87,9 @@ MathTree& MathTree::operator=(const MathTree &mt)
 {
     if (this == &mt)
         return *this;
-        
+    
     GmatBase::operator=(mt);
-
+    
     return *this;
 }
 
@@ -100,7 +113,7 @@ GmatBase* MathTree::Clone(void) const
 //------------------------------------------------------------------------------
 Rmatrix MathTree::MatrixEvaluate()
 {
-   return topNode->MatrixEvaluate();
+   return theTopNode->MatrixEvaluate();
 }
 
 //------------------------------------------------------------------------------
@@ -109,7 +122,7 @@ Rmatrix MathTree::MatrixEvaluate()
 void MathTree::GetOutputInfo(Integer &type, 
                Integer &rowCount, Integer &colCount) 
 {
-    topNode->GetOutputInfo(type, rowCount, colCount);
+    theTopNode->GetOutputInfo(type, rowCount, colCount);
 }
 
 //------------------------------------------------------------------------------
@@ -117,7 +130,7 @@ void MathTree::GetOutputInfo(Integer &type,
 //------------------------------------------------------------------------------
 Real MathTree::Evaluate()
 {
-   return topNode->Evaluate();
+   return theTopNode->Evaluate();
 }
 
 //------------------------------------------------------------------------------
@@ -125,35 +138,73 @@ Real MathTree::Evaluate()
 //------------------------------------------------------------------------------
 bool MathTree::Initialize(std::map<std::string, GmatBase *> *objectMap)
 {
-    if (topNode == NULL)
-        return false;
-    
-    // if node is an element (or a leaf) set the ref object        
-    if (topNode->GetTypeName() == "MathElement")
-    {
-        std::string refName = topNode->GetRefObjectName(Gmat::PARAMETER);
-        if (objectMap->find(refName) != objectMap->end())
-        {
-           topNode->SetRefObject((*objectMap)[refName], Gmat::PARAMETER,
-               refName);
-           return true;
-        }
-        else
-           return false;
-    }
-    else 
-    {
-        // recursively calls initialize for the left and then the right
-        // children
-        bool result;
-        topNode = ((MathFunction *)topNode)->GetLeft();
-        result = Initialize(objectMap);
-        topNode = ((MathFunction *)topNode)->GetRight();
-        result = result & Initialize(objectMap);      
-        return result;
-    }
+   if (theTopNode == NULL)
+      return true;
 
-    return false;
+   theObjectMap = objectMap;
+
+   #if DEBUG_MATH_TREE
+   MessageInterface::ShowMessage
+      ("MathTree::Initialize() theTopNode=%s, %s\n", theTopNode->GetTypeName().c_str(),
+       theTopNode->GetName().c_str());
+   #endif
+   
+   return InitializeParameter(theTopNode);
 }
 
 
+//------------------------------------------------------------------------------
+// bool InitializeParameter(MathNode *node)
+//------------------------------------------------------------------------------
+bool MathTree::InitializeParameter(MathNode *node)
+{
+   if (node == NULL)
+      return true;
+
+   if (!node->IsFunction())
+   {
+      if (node->IsNumber())
+         return true;
+      
+      std::string refName = node->GetRefObjectName(Gmat::PARAMETER);
+
+      #if DEBUG_MATH_TREE
+      MessageInterface::ShowMessage
+         ("MathTree::InitializeParameter() refName=%s\n", refName.c_str());
+      #endif
+      
+      if (theObjectMap->find(refName) != theObjectMap->end())
+      {
+         node->SetRefObject((*theObjectMap)[refName], Gmat::PARAMETER,
+                            refName);
+
+         #if DEBUG_MATH_TREE
+         MessageInterface::ShowMessage
+            ("MathTree::InitializeParameter() Found %s from theObjectMap\n",
+             refName.c_str());
+         #endif
+         
+         return true;
+      }
+      else
+      {
+         #if DEBUG_MATH_TREE
+         MessageInterface::ShowMessage
+            ("MathTree::InitializeParameter() Unable to find %s from theObjectMap\n",
+             refName.c_str());
+         #endif
+         
+         return false;
+      }
+   }
+   else
+   {
+      MathNode *left = node->GetLeft();
+      bool result1 = InitializeParameter(left);
+      
+      MathNode *right = node->GetRight();
+      bool result2 = InitializeParameter(right);
+      
+      return (result1 && result2);
+   }
+}

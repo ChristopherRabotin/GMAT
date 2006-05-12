@@ -26,22 +26,33 @@
 class GMAT_API MathTree : public GmatBase
 {
 public:
+   
    MathTree(const std::string &typeStr, const std::string &nomme);
    virtual ~MathTree();
    MathTree(const MathTree& mt);
-   MathTree&         operator=(const MathTree& mt);
+   MathTree& operator=(const MathTree& mt);
+
+   MathNode* GetTopNode() { return theTopNode; }
+   void SetTopNode(MathNode *node) { theTopNode = node; }
    
    // Inherited (GmatBase) methods
-   virtual GmatBase*    Clone(void) const;
+   virtual GmatBase* Clone(void) const;
    
-   Real              Evaluate();
-   Rmatrix           MatrixEvaluate();
-   bool              Initialize(std::map<std::string, GmatBase *> *objectMap);
-   void              GetOutputInfo(Integer &type, Integer &rowCount,
-                            Integer &colCount);
+   Real Evaluate();
+   Rmatrix MatrixEvaluate();
+   bool Initialize(std::map<std::string, GmatBase *> *objectMap);
+   void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount);
    
 protected:
-   MathNode *topNode;
+   
+   /// Top node of the math tree
+   MathNode *theTopNode;
+   
+   /// Object store obtained from the Sandbox
+   std::map<std::string, GmatBase *> *theObjectMap;
+   
+   bool InitializeParameter(MathNode *node);
+   
 };
 
 #endif /*MATHTREE_HPP_*/

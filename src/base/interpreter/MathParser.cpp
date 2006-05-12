@@ -11,7 +11,7 @@
 //
 // Author: Darrel J. Conway
 // Created: 2006/03/16
-// Modified: 2006/04/10 Linda Jun /NASA/GSFC
+// Modified: 2006/04/10 Linda Jun, NASA/GSFC
 //   - Added actual code
 //
 /**
@@ -21,12 +21,8 @@
 
 #include "MathParser.hpp"
 #include "MathFunction.hpp"
-#include "StringUtil.hpp"
+#include "StringUtil.hpp"       // for ParseParameter()
 #include "MessageInterface.hpp"
-
-#ifdef __USE_SIMPLE_NODE__
-#include "SimpleMathNode.hpp"
-#endif
 
 #ifdef __UNIT_TEST__
 #include "MathFactory.hpp"
@@ -34,29 +30,37 @@
 #include "Moderator.hpp"
 #endif
 
-//#define DEBUG_MATH_PARSER 1
+//#define DEBUG_MATH_PARSER 2
 //#define DEBUG_DECOMPOSE 1
 //#define DEBUG_PARENTHESIS 1
 //#define DEBUG_ADD_SUBTRACT 1
+//#define DEBUG_MATRIX_OPS 1
 //#define DEBUG_PARSE 1
 //#define DEBUG_FUNCTION 1
-
+//#define DEBUG_MATH_PARSER_PARAM 1
 
 //---------------------------------
 // static data
 //---------------------------------
 const std::string
-MathParser::MATH_FUNC_LIST[MathFunctionCount] =
+MathParser::MATH_FUNC_LIST[MathFuncCount] =
 {
-   "sin",  "cos",   "tan",  "asin",  "acos",  "atan2",  "atan",
-   "log",  "log10", "exp",  "sqrt",
+   "asin",  "sin",  "acos",  "cos",  "atan2",  "atan",  "tan",  
+   "log10", "log",  "exp",  "sqrt",
 }; 
 
 
 const std::string
-MathParser::MATRIX_OPS_LIST[MatrixOpsCount] =
+MathParser::MATRIX_FUNC_LIST[MatrixFuncCount] =
 {
-   "transpose",  "det",   "inv",  "norm", 
+   "transpose",  "det",   "inv",  "norm",
+}; 
+
+
+const std::string
+MathParser::MATRIX_OP_LIST[MatrixOpCount] =
+{
+   "'",  "^(-1)",
 }; 
 
 
@@ -129,6 +133,37 @@ MathParser::~MathParser()
 
 
 //------------------------------------------------------------------------------
+// bool IsEquation(const std::string &str)
+//------------------------------------------------------------------------------
+bool MathParser::IsEquation(const std::string &str)
+{
+   bool isEq = false;
+   std::string left, right;
+   Real rval;
+
+   // If it is just a number, return false
+   if (GmatStringUtil::ToDouble(str, &rval))
+   {
+      isEq = false;
+   }
+   else if (GetFunction(MATH_FUNCTION, str, left) != "" ||
+            GetFunction(MATRIX_FUNC, str, left) != "" ||
+            GetFunction(UNIT_CONVERSION, str, left) != "" ||
+            FindOperator(str, 0, left, right) != "")
+   {
+      isEq = true;
+   }
+   
+   #if DEBUG_MATH_PARSER
+   MessageInterface::ShowMessage
+      ("MathParser::IsEquation(%s) returning %d\n", str.c_str(), isEq);
+   #endif
+   
+   return isEq;
+}
+
+
+//------------------------------------------------------------------------------
 // MathNode*  Parse(const std::string &theEquation)
 //------------------------------------------------------------------------------
 /**
@@ -138,11 +173,7 @@ MathParser::~MathParser()
  * @return constructed MathTree pointer
  */
 //------------------------------------------------------------------------------
-#ifdef __USE_SIMPLE_NODE__
-SimpleMathNode* MathParser::Parse(const std::string &theEquation)
-#else
 MathNode* MathParser::Parse(const std::string &theEquation)
-#endif
 {
    #if DEBUG_PARSE
    MessageInterface::ShowMessage
@@ -161,18 +192,12 @@ MathNode* MathParser::Parse(const std::string &theEquation)
       ("MathParser::Parse() newEq=%s\n", newEq.c_str());
    #endif
    
-   //Is this done in Assignment command?
-   //MathTree *mathTree = new MathTree();
-
-   //MathTree->SetTopNode(ParseNode(newEq));
-
-   // for testing
-   #ifdef __USE_SIMPLE_NODE__
-   SimpleMathNode *topNode = ParseNode(newEq);
-   #else
    MathNode *topNode = ParseNode(newEq);
-   #endif
-   
+
+   // Should parameters be created here?
+   if (topNode)
+      CreateParameter(topNode, 0);
+
    #if DEBUG_PARSE
    WriteNode(topNode, 0);
    #endif
@@ -184,11 +209,7 @@ MathNode* MathParser::Parse(const std::string &theEquation)
 //------------------------------------------------------------------------------
 // MathNode* ParseNode(const std::string &str)
 //------------------------------------------------------------------------------
-#ifdef __USE_SIMPLE_NODE__
-SimpleMathNode* MathParser::ParseNode(const std::string &str)
-#else
 MathNode* MathParser::ParseNode(const std::string &str)
-#endif
 {
    #if DEBUG_MATH_PARSER > 1
    MessageInterface::ShowMessage("MathParser::ParseNode() str=%s\n", str.c_str());
@@ -203,11 +224,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
    WriteItems("MathParser::ParseNode() After Decompose()", items);
    #endif
    
-   #ifdef __USE_SIMPLE_NODE__
-   SimpleMathNode *mathNode;
-   #else
    MathNode *mathNode;
-   #endif
    
    // If operator is empty, create MathElement, create MathFunction otherwise
    if (op == "")
@@ -232,13 +249,8 @@ MathNode* MathParser::ParseNode(const std::string &str)
 
       mathNode = CreateNode(op, operands);
       
-      #ifdef __USE_SIMPLE_NODE__
-      SimpleMathNode *leftNode = NULL;
-      SimpleMathNode *rightNode = NULL;
-      #else
       MathNode *leftNode = NULL;
       MathNode *rightNode = NULL;
-      #endif
       
       #if DEBUG_MATH_PARSER > 1
       MessageInterface::ShowMessage
@@ -255,12 +267,9 @@ MathNode* MathParser::ParseNode(const std::string &str)
       
       if (right != "")
          rightNode = ParseNode(right);
-
-      #ifdef __USE_SIMPLE_NODE__
-         mathNode->SetChildren(leftNode, rightNode);
-      #else
-         ((MathFunction*)mathNode)->SetChildren(leftNode, rightNode);
-      #endif
+      
+      //((MathFunction*)mathNode)->SetChildren(leftNode, rightNode);
+      mathNode->SetChildren(leftNode, rightNode);
    }
 
    return mathNode;
@@ -276,11 +285,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
  * @return StringArray of elements
  */
 //------------------------------------------------------------------------------
-#ifdef __USE_SIMPLE_NODE__
-SimpleMathNode* MathParser::CreateNode(const std::string &type, const std::string &exp)
-#else
 MathNode* MathParser::CreateNode(const std::string &type, const std::string &exp)
-#endif
 {
    #if DEBUG_MATH_PARSER > 1
    MessageInterface::ShowMessage
@@ -289,8 +294,6 @@ MathNode* MathParser::CreateNode(const std::string &type, const std::string &exp
    #endif
 
    
-   #ifndef __USE_SIMPLE_NODE__
-
    #ifdef __UNIT_TEST__
    static MathFactory mf;
    MathNode *node = mf.CreateMathNode(type, exp);
@@ -298,39 +301,10 @@ MathNode* MathParser::CreateNode(const std::string &type, const std::string &exp
    Moderator* theModerator = Moderator::Instance();
    MathNode *node = theModerator->CreateMathNode(type, exp);
    #endif
-
-   
-   #else
-   
-   SimpleMathNode *node = new SimpleMathNode(type, exp);
-   
-   if (type == "MathElement")
-   {
-      
-      // just for testing
-      if (exp.find("matA") != exp.npos)
-      {
-         Rmatrix matA(3, 3, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0);
-         node->SetMatrixValue(matA);
-      }
-      else if (exp.find("matB") != exp.npos)
-      {
-         Rmatrix matB(3, 3, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0);
-         node->SetMatrixValue(matB);
-      }
-      else
-      {
-         Real rval;
-         if (GmatStringUtil::ToDouble(exp, &rval))
-            ((SimpleMathNode*)node)->SetRealValue(rval);
-      }
-   }
-   
-   #endif
    
    if (node == NULL)
-      throw MathException("*** ERROR *** Cannot create MathNode" + type);
-
+      throw MathException("*** ERROR *** Cannot create MathNode: " + type);
+   
    return node;
 }
 
@@ -439,20 +413,41 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       return items;
    }
 
-   // if ( is part of fuction, just return
+   // if ( is part of fuction, just return first parenthesis
    if (IsParenPartOfFunction(str[index1-1]))
    {
       // find match closing parenthesis ')'
       UnsignedInt index2 = FindMatchingParen(str, index1);
 
+      #if DEBUG_PARENTHESIS > 1
+      MessageInterface::ShowMessage
+         ("==> str=%s, size=%d, index1=%d, index2=%d\n", str.c_str(), str.size(),
+          index1, index2);
+      #endif
+      
       // if char is ')'
       if (index2 == str.size()-1)
       {
-         // find first math function
+         // find math function
          op = GetFunction(MATH_FUNCTION, str, left);
+         if (op == "")
+            op = GetFunction(MATRIX_FUNC, str, left);
+         if (op == "")
+            op = GetFunction(UNIT_CONVERSION, str, left);
       }
-      
-      //left = str.substr(index1+1, index2-index1-1);
+
+      // handle special atan2(y,x) function
+      if (op == "atan2")
+      {
+         UnsignedInt comma = str.find(',', index1);
+         if (comma == str.npos)
+            throw MathException("Missing 2nd argument for atan2(y,x)\n");
+
+         left = str.substr(index1+1, comma-index1-1);
+         right = str.substr(comma+1, index2-comma-1);
+      }
+      else
+         left = str.substr(index1+1, index2-index1-1);
       
       FillItems(items, op, left, right);
       
@@ -461,6 +456,18 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
                  "of function. returning ", items);
       #endif
       
+      return items;
+   }
+
+   // If it is ^(-1), handle it later in DecomposeMatrixOps()
+   if (str.find("^(-1)") != str.npos)
+   {
+      #if DEBUG_PARENTHESIS
+      MessageInterface::ShowMessage
+         ("MathParser::ParseParenthesis() found ^(-1) str=%s\n", str.c_str());
+      #endif
+      
+      FillItems(items, op, left, right);
       return items;
    }
    
@@ -499,7 +506,6 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
    {
       op = FindOperator(str, index2, left, right);
 
-      //loj:5/2/06
       if (op == "")
       {
          op = GetOperatorName(str.substr(index1-1, 1));
@@ -520,11 +526,13 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
 
 
 //------------------------------------------------------------------------------
+// std::string FindOperator(const std::string &str, UnsignedInt start,
+//                          std::string &left, std::string &right)
 //------------------------------------------------------------------------------
 std::string MathParser::FindOperator(const std::string &str, UnsignedInt start,
                                      std::string &left, std::string &right)
 {
-   #if DEBUG_PARENTHESIS
+   #if DEBUG_OPERATOR
    MessageInterface::ShowMessage
       ("MathParser::FindOperator() str=%s, start=%d\n", str.c_str(), start);
    #endif
@@ -541,8 +549,19 @@ std::string MathParser::FindOperator(const std::string &str, UnsignedInt start,
       index2 = str.find("/", start);
       
       if (index1 == str.npos && index2 == str.npos)
-      {
          index1 = str.find("^", start);
+
+      if (index1 != str.npos)
+      {
+         #if DEBUG_OPERATOR
+         MessageInterface::ShowMessage
+            ("MathParser::FindOperator() found ^ str=%s, index1=%d\n",
+             str.c_str(), index1);
+         #endif
+         
+         // try for ^(-1) for inverse
+         if (str.substr(index1, 5) == "^(-1)")
+            return ""; // handle it later in DecomposeMatrixOps()
       }
    }
    
@@ -568,6 +587,7 @@ std::string MathParser::FindOperator(const std::string &str, UnsignedInt start,
 
 
 //------------------------------------------------------------------------------
+// std::string GetOperatorName(const std::string &op)
 //------------------------------------------------------------------------------
 std::string MathParser::GetOperatorName(const std::string &op)
 {
@@ -576,7 +596,7 @@ std::string MathParser::GetOperatorName(const std::string &op)
       ("MathParser::GetOperatorName() op=%s\n", op.c_str());
    #endif
    
-   std::string opName = "--Unknown Operator--";
+   std::string opName = "<" + op + "> :Unknown Operator";
    
    if (op == "+")
       opName = "Add";
@@ -588,13 +608,74 @@ std::string MathParser::GetOperatorName(const std::string &op)
       opName = "Divide";
    else if (op == "^")
       opName = "Power";
-
+   
    #if DEBUG_PARENTHESIS
    MessageInterface::ShowMessage
       ("MathParser::GetOperatorName() opName=%s\n", opName.c_str());
    #endif
    
    return opName;
+}
+
+
+//------------------------------------------------------------------------------
+// UnsignedInt FindSubtract(const std::string &str, UnsignedInt start)
+//------------------------------------------------------------------------------
+UnsignedInt MathParser::FindSubtract(const std::string &str, UnsignedInt start)
+{
+   #if DEBUG_FIND_SUBTRACT
+   MessageInterface::ShowMessage
+      ("==> MathParser::FindSubtract() str=%s, start=%d\n", str.c_str(), start);
+   #endif
+   
+   UnsignedInt index2 = str.find('-', start);
+   UnsignedInt index3 = str.find("^(-1)", start);
+
+   #if DEBUG_FIND_SUBTRACT
+   MessageInterface::ShowMessage
+      ("==> MathParser::FindSubtract() index2=%d, index3=%d\n", index2, index3);
+   #endif
+   
+   if (index2 != str.npos && index3 == str.npos)
+   {
+      #if DEBUG_FIND_SUBTRACT
+      MessageInterface::ShowMessage
+         ("==> MathParser::FindSubtract() returning index2=%d\n", index2);
+      #endif
+      return index2;
+   }
+   
+   if (index2 < index3 && index2 < index3 + 5)
+   {
+      #if DEBUG_FIND_SUBTRACT
+      MessageInterface::ShowMessage
+         ("==> MathParser::FindSubtract() returning str.npos=%d\n", str.npos);
+      #endif
+      return str.npos;
+   }
+   
+   if (index3 != str.npos)
+   {
+      // If it has only "^(-1)", handle it later in DecomposeMatrixOps()
+      if (index3+5 == str.size())
+      {
+         #if DEBUG_FIND_SUBTRACT
+         MessageInterface::ShowMessage
+            ("==> MathParser::FindSubtract() found ^(-1) str=%s\n",
+             str.c_str());
+         MessageInterface::ShowMessage
+            ("==> MathParser::FindSubtract() returning str.npos=%d\n", str.npos);
+         #endif
+         
+         return str.size();
+      }
+      else
+      {
+         FindSubtract(str, index3+5);
+      }
+   }
+
+   return index2;
 }
 
 
@@ -613,7 +694,6 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
    std::string left;
    std::string right;
 
-   //loj: 5/2/06
    // find double operator
    if ((str.find("*-") != str.npos) || (str.find("/-") != str.npos) ||
        (str.find("^-") != str.npos))
@@ -625,7 +705,7 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
       return items;
    }
    
-   // find first + or -
+   // find first -
    UnsignedInt index1 = str.find('+');
    UnsignedInt index2 = str.find('-');
    
@@ -635,6 +715,23 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
       #if DEBUG_ADD_SUBTRACT
       WriteItems("==> After ParseAddSubtract(): '+' or '-' not found", items);
       #endif
+      return items;
+   }
+
+   if (index2 != str.npos)
+      index2 = FindSubtract(str, 0);
+
+   //MessageInterface::ShowMessage("==> index2=%d, after FindSubtract()\n", index2);
+   
+   if (index2 == str.size() && index1 == str.npos)
+   {
+      // If it is ^(-1), handle it later in DecomposeMatrixOps()
+      #if DEBUG_ADD_SUBTRACT
+      MessageInterface::ShowMessage
+         ("==> MathParser::ParseAddSubtract() found ^(-1) str=%s\n", str.c_str());
+      #endif
+      
+      FillItems(items, op, left, right);
       return items;
    }
    
@@ -687,8 +784,16 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
       return items;
    }
    
+//    // If it is ^(-1), handle it later in DecomposeMatrixOps()
+//    if (str.find("^(-1)") != str.npos)
+//    {
+//       MessageInterface::ShowMessage
+//          ("==> MathParser::ParseAddSubtract() found ^(-1) str=%s\n", str.c_str());
+//       FillItems(items, op, left, right);
+//       return items;
+//    }
+   
    left = str.substr(0, indexBeg);
-   //right = str.substr(indexEnd+1, str.npos);
    right = str.substr(indexEnd, str.npos);
    
    #if DEBUG_ADD_SUBTRACT
@@ -700,11 +805,6 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
    if (right == "")
       throw MathException("*** ERROR *** Need right side in: " + str + "\n");
    
-//    if (left == "") // unary operation
-//       FillItems(items, "", "", "");      
-//    else
-//       FillItems(items, op, left, right);
-
    FillItems(items, op, left, right);
    
    #if DEBUG_ADD_SUBTRACT
@@ -739,7 +839,7 @@ StringArray MathParser::ParseMultDivide(const std::string &str)
       return items;
    }
 
-   UnsignedInt index;
+   UnsignedInt index = 0;
    if (index1 != str.npos)
    {
       op = "Multiply";
@@ -775,7 +875,7 @@ StringArray MathParser::ParseMultDivide(const std::string &str)
 //------------------------------------------------------------------------------
 StringArray MathParser::ParsePower(const std::string &str)
 {
-   #if DEBUG_MATH_PARSER > 1
+   #if DEBUG_POWER
    MessageInterface::ShowMessage
       ("MathParser::ParsePower() str=%s\n", str.c_str());
    #endif
@@ -788,6 +888,18 @@ StringArray MathParser::ParsePower(const std::string &str)
    
    if (index1 == str.npos)
    {
+      FillItems(items, "", "", "");
+      return items;
+   }
+   
+   // If it is ^(-1), handle it later in DecomposeMatrixOps()
+   if (str.find("^(-1)") != str.npos)
+   {
+      #if DEBUG_POWER
+      MessageInterface::ShowMessage
+         ("MathParser::ParsePower() found ^(-1) str=%s\n", str.c_str());
+      #endif
+      
       FillItems(items, "", "", "");
       return items;
    }
@@ -823,13 +935,25 @@ StringArray MathParser::ParsePower(const std::string &str)
 //------------------------------------------------------------------------------
 StringArray MathParser::ParseUnary(const std::string &str)
 {
-   #if DEBUG_MATH_PARSER > 1
+   #if DEBUG_UNARY
    MessageInterface::ShowMessage
       ("MathParser::ParseUnary() str=%s\n", str.c_str());
    #endif
    
    StringArray items;
    std::string op = "";
+   
+   // If it is ^(-1), handle it later in DecomposeMatrixOps()
+   if (str.find("^(-1)") != str.npos)
+   {
+      #if DEBUG_UNARY
+      MessageInterface::ShowMessage
+         ("MathParser::ParseUnary() found ^(-1) str=%s\n", str.c_str());
+      FillItems(items, "", "", "");
+      #endif
+      
+      return items;
+   }
    
    // find  - or -
    UnsignedInt index1 = str.find('-');
@@ -851,7 +975,7 @@ StringArray MathParser::ParseUnary(const std::string &str)
 
    FillItems(items, op, left, "");
    
-   #if DEBUG_MATH_PARSER > 1
+   #if DEBUG_UNARY
    WriteItems("==> After ParseUnary()", items);
    #endif
    
@@ -899,7 +1023,7 @@ StringArray MathParser::ParseMathFunctions(const std::string &str)
 //------------------------------------------------------------------------------
 StringArray MathParser::ParseMatrixOps(const std::string &str)
 {
-   #if DEBUG_MATH_PARSER > 1
+   #if DEBUG_MATRIX_OPS
    MessageInterface::ShowMessage
       ("MathParser::ParseMatrixOps() str=%s\n", str.c_str());
    #endif
@@ -907,15 +1031,48 @@ StringArray MathParser::ParseMatrixOps(const std::string &str)
    StringArray items;
    std::string left;
    
-   // find first math function
-   std::string fnName = GetFunction(MATRIX_OPS, str, left);
+   // find matrix function
+   std::string fnName = GetFunction(MATRIX_FUNC, str, left);
 
    if (fnName == "")
-      FillItems(items, "", "", "");
-   else
+   {
+      // try matrix op ' for transpose
+      UnsignedInt index1 = str.find("'");
+
+      #if DEBUG_MATRIX_OPS
+      MessageInterface::ShowMessage
+         ("MathParser::ParseMatrixOps() find ' index1=%d\n", index1);
+      #endif
+      
+      if (index1 == str.npos)
+      {
+         // try matrix op ^(-1) for inverse
+         index1 = str.find("^(-1)");
+         
+         if (index1 == str.npos)
+         {
+            FillItems(items, "", "", "");
+         }
+         else // ^(-1) found
+         {
+            left = str.substr(0, index1);
+            fnName = "inv";
+            FillItems(items, fnName, left, "");
+         }
+      }
+      else // ' found
+      {
+         left = str.substr(0, index1);
+         fnName = "transpose";
+         FillItems(items, fnName, left, "");
+      }
+   }
+   else // matrix function name found
+   {
       FillItems(items, fnName, left, "");
+   }
    
-   #if DEBUG_MATH_PARSER > 1
+   #if DEBUG_MATRIX_OPS
    WriteItems("==> After ParseMatrixOps()", items);
    #endif
    
@@ -954,12 +1111,12 @@ StringArray MathParser::ParseUnitConversion(const std::string &str)
 
 //------------------------------------------------------------------------------
 // bool IsThisLastCharOfFunction(char ch, const std::string list[],
-//                              Integer count)
+//                              UnsignedInt count)
 //------------------------------------------------------------------------------
 bool MathParser::IsThisLastCharOfFunction(char ch, const std::string list[],
-                                          Integer count)
+                                          UnsignedInt count)
 {
-   for (int i=0; i<count; i++)
+   for (UnsignedInt i=0; i<count; i++)
    {
       int last = list[i].size()-1;
       if (ch == list[i][last])
@@ -975,20 +1132,20 @@ bool MathParser::IsThisLastCharOfFunction(char ch, const std::string list[],
 //------------------------------------------------------------------------------
 bool MathParser::IsParenPartOfFunction(char lastChar)
 {
-   if (IsThisLastCharOfFunction(lastChar, MATH_FUNC_LIST, MathFunctionCount) ||
-       IsThisLastCharOfFunction(lastChar, MATRIX_OPS_LIST, MatrixOpsCount) ||
+   if (IsThisLastCharOfFunction(lastChar, MATH_FUNC_LIST, MathFuncCount) ||
+       IsThisLastCharOfFunction(lastChar, MATRIX_FUNC_LIST, MatrixFuncCount) ||
        IsThisLastCharOfFunction(lastChar, UNIT_CONV_LIST, UnitConvCount))
       return true;
-   
+
    return false;
 }
 
 
 //------------------------------------------------------------------------------
-// std::string GetFunction(Integer functionType, const std::string &str,
+// std::string GetFunction(UnsignedInt functionType, const std::string &str,
 //                         std::string &left)
 //------------------------------------------------------------------------------
-std::string MathParser::GetFunction(Integer functionType, const std::string &str,
+std::string MathParser::GetFunction(UnsignedInt functionType, const std::string &str,
                                     std::string &left)
 {
    #if DEBUG_FUNCTION
@@ -998,18 +1155,17 @@ std::string MathParser::GetFunction(Integer functionType, const std::string &str
    #endif
    
    std::string fnName = "";
-   UnsignedInt index1 = str.npos;
 
    switch (functionType)
    {
    case MATH_FUNCTION:
       {
-         BuildFunction(str, MATH_FUNC_LIST, MathFunctionCount, fnName, left);
+         BuildFunction(str, MATH_FUNC_LIST, MathFuncCount, fnName, left);
          break;
       }
-   case MATRIX_OPS:
+   case MATRIX_FUNC:
       {
-         BuildFunction(str, MATRIX_OPS_LIST, MatrixOpsCount, fnName, left);
+         BuildFunction(str, MATRIX_FUNC_LIST, MatrixFuncCount, fnName, left);
          break;
       }
    case UNIT_CONVERSION:
@@ -1033,10 +1189,10 @@ std::string MathParser::GetFunction(Integer functionType, const std::string &str
 
 //------------------------------------------------------------------------------
 // void BuildFunction(const std::string &str, std::string list[],
-//                     Integer count, std::string &fnName, std::string &left)
+//                     UnsignedInt count, std::string &fnName, std::string &left)
 //------------------------------------------------------------------------------
 void MathParser::BuildFunction(const std::string &str, const std::string list[],
-                               Integer count, std::string &fnName,
+                               UnsignedInt count, std::string &fnName,
                                std::string &left)
 {
    #if DEBUG_FUNCTION
@@ -1045,9 +1201,9 @@ void MathParser::BuildFunction(const std::string &str, const std::string list[],
    
    UnsignedInt functionIndex = str.npos;
    
-   for (int i=0; i<count; i++)
+   for (UnsignedInt i=0; i<count; i++)
    {
-      functionIndex = str.find(list[i]);
+      functionIndex = str.find(list[i] + "(");
       
       // Try Capitalized function name
       if (functionIndex == str.npos)
@@ -1062,10 +1218,6 @@ void MathParser::BuildFunction(const std::string &str, const std::string list[],
    
    if (fnName != "")
    {
-      //UnsignedInt index2 = str.find(")", index1);
-      //if (index2 == str.npos)
-      //   throw MathException("Need ) on " + fnName);
-      
       UnsignedInt index1 = str.find("(", functionIndex);
       UnsignedInt index2 = FindMatchingParen(str, index1);
 
@@ -1085,9 +1237,9 @@ void MathParser::BuildFunction(const std::string &str, const std::string list[],
 
 
 //------------------------------------------------------------------------------
-// Integer FindMatchingParen(const std::string &str, UnsignedInt start)
+// UnsignedInt FindMatchingParen(const std::string &str, UnsignedInt start)
 //------------------------------------------------------------------------------
-Integer MathParser::FindMatchingParen(const std::string &str, UnsignedInt start)
+UnsignedInt MathParser::FindMatchingParen(const std::string &str, UnsignedInt start)
 {
    #if DEBUG_MATH_PARSER > 1
    MessageInterface::ShowMessage
@@ -1096,9 +1248,8 @@ Integer MathParser::FindMatchingParen(const std::string &str, UnsignedInt start)
    
    int leftCounter = 0;
    int rightCounter = 0;
-   UnsignedInt index;
    
-   for (int i=start; i<str.size(); i++)
+   for (UnsignedInt i=start; i<str.size(); i++)
    {
       if (str[i] == '(')
          leftCounter++;
@@ -1139,13 +1290,9 @@ void MathParser::WriteItems(const std::string &msg, StringArray &items)
 
 
 //------------------------------------------------------------------------------
-// void WriteNode(MathNode *node, Integer level)
+// void WriteNode(MathNode *node, UnsignedInt level)
 //------------------------------------------------------------------------------
-#ifdef __USE_SIMPLE_NODE__
-void MathParser::WriteNode(SimpleMathNode *node, Integer level)
-#else
-void MathParser::WriteNode(MathNode *node, Integer level)
-#endif
+void MathParser::WriteNode(MathNode *node, UnsignedInt level)
 {
 #if DEBUG_PARSE
    
@@ -1154,61 +1301,94 @@ void MathParser::WriteNode(MathNode *node, Integer level)
 
    level++;
 
-   if (node->GetTypeName() != "MathElement")
+   if (!node->IsFunction())
    {
-      for (int i=0; i<level; i++)
+      for (UnsignedInt i=0; i<level; i++)
          MessageInterface::ShowMessage("....");
       
       MessageInterface::ShowMessage
          ("node=%s: %s\n", node->GetTypeName().c_str(), node->GetName().c_str());
    }
-
-   // Left node
-   if (node->GetTypeName() != "MathElement")
+   else
    {
-      #ifdef __USE_SIMPLE_NODE__
-      SimpleMathNode *funcNode = node;
-      #else
-      MathFunction *funcNode = (MathFunction*)node;
-      #endif
-
-      if (funcNode->GetLeft())
-      {
-         for (int i=0; i<level; i++)
-            MessageInterface::ShowMessage("....");
+      for (UnsignedInt i=0; i<level; i++)
+         MessageInterface::ShowMessage("....");
       
+      MessageInterface::ShowMessage
+         ("node=%s: %s\n", node->GetTypeName().c_str(), node->GetName().c_str());
+      
+      if (node->GetLeft())
+      {
+         for (UnsignedInt i=0; i<level; i++)
+            MessageInterface::ShowMessage("....");
+         
          MessageInterface::ShowMessage
-            ("left=%s: %s\n", funcNode->GetLeft()->GetTypeName().c_str(),
-             funcNode->GetLeft()->GetName().c_str());
-
-         WriteNode(funcNode->GetLeft(), level);
+            ("left=%s: %s\n", node->GetLeft()->GetTypeName().c_str(),
+             node->GetLeft()->GetName().c_str());
+         
+         WriteNode(node->GetLeft(), level);
+      }
+      
+      
+      if (node->GetRight())
+      {
+         for (UnsignedInt i=0; i<level; i++)
+            MessageInterface::ShowMessage("....");
+         
+         MessageInterface::ShowMessage
+            ("right=%s: %s\n", node->GetRight()->GetTypeName().c_str(),
+             node->GetRight()->GetName().c_str());
+         
+         WriteNode(node->GetRight(), level);
       }
    }
-
-   // Right node
-   if (node->GetTypeName() != "MathElement")
-   {
-      #ifdef __USE_SIMPLE_NODE__
-      SimpleMathNode *funcNode = node;
-      #else
-      MathFunction *funcNode = (MathFunction*)node;
-      #endif
-      
-      if (funcNode->GetRight())
-      {
-         for (int i=0; i<level; i++)
-            MessageInterface::ShowMessage("....");
-      
-         MessageInterface::ShowMessage
-            ("right=%s: %s\n", funcNode->GetRight()->GetTypeName().c_str(),
-             funcNode->GetRight()->GetName().c_str());
-
-         WriteNode(funcNode->GetRight(), level);
-      }
-   }
-   
 #endif
 }
-   
 
+
+//------------------------------------------------------------------------------
+// void CreateParameter(MathNode *node, UnsignedInt level))
+//------------------------------------------------------------------------------
+void MathParser::CreateParameter(MathNode *node, UnsignedInt level)
+{
+   #ifndef __UNIT_TEST__
+   if (node == NULL)
+      return;
+   
+   level++;
+   
+   if (!node->IsFunction())
+   {
+      if (!node->IsNumber())
+      {
+         Moderator* theModerator = Moderator::Instance();
+         std::string owner, type, depObj;
+         std::string name = node->GetName();
+         GmatStringUtil::ParseParameter(name, type, owner, depObj);
+
+         if (name != "" && type != "")
+         {
+            #if DEBUG_MATH_PARSER_PARAM
+            MessageInterface::ShowMessage
+               ("GmatStringUtil::ParseParameter() name=%s, type=%s, owner=%s, "
+                "depObj=%s\n", name.c_str(), type.c_str(), owner.c_str(),
+                depObj.c_str());
+            #endif
+            
+            theModerator->CreateParameter(type, name, owner, depObj);
+         }
+      }
+   }
+   else
+   {      
+      if (node->GetLeft())
+         CreateParameter(node->GetLeft(), level);
+
+      if (node->GetRight())
+         CreateParameter(node->GetRight(), level);
+   }
+
+   #endif
+   
+}
 

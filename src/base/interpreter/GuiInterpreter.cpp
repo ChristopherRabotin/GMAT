@@ -699,11 +699,12 @@ Solver* GuiInterpreter::GetSolver(const std::string &name)
 //------------------------------------------------------------------------------
 Parameter* GuiInterpreter::CreateParameter(const std::string &type,
                                            const std::string &name,
-                                           const Gmat::ObjectType ownerType,
+                                           //const Gmat::ObjectType ownerType,
                                            const std::string &ownerName,
                                            const std::string &depName)
 {
-   return moderator->CreateParameter(type, name, ownerType, ownerName, depName);
+   //return moderator->CreateParameter(type, name, ownerType, ownerName, depName);
+   return moderator->CreateParameter(type, name, ownerName, depName);
 }
 
 

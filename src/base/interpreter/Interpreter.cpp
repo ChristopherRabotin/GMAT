@@ -33,6 +33,7 @@
 //#define DEBUG_FUNCTION_PARSING
 //#define DEBUG_PASS_TWO
 //#define DEBUG_PREINITIALIZE
+//#define DEBUG_EQUATION 1
 
 #include "MessageInterface.hpp"
 #include "Barycenter.hpp"
@@ -295,7 +296,7 @@ bool Interpreter::InterpretObject(std::string objecttype,
       return CreateArray(objectname, objecttype);
    }
 
-    // Handle tanks, thrusters, etc.
+   // Handle tanks, thrusters, etc.
    if (find(hardwaremap.begin(), hardwaremap.end(), objecttype) != 
       hardwaremap.end()) 
    {
@@ -308,27 +309,7 @@ bool Interpreter::InterpretObject(std::string objecttype,
        parametermap.end())
    {
       Parameter *parm = CreateParameter(objectname, objecttype);
-      
-//       Parameter *parm = moderator->CreateParameter(objecttype, objectname);
       obj = parm;
-      
-//       if (parm) 
-//       {
-//          /// @todo: "Raw" objects are set to default body or C.S.; update?
-//          if (parm->IsCoordSysDependent()) 
-//          {
-//             parm->SetStringParameter("DepObject", "EarthMJ2000Eq");
-//             parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
-//          }
-            
-//          if (parm->IsOriginDependent()) 
-//          {
-//             parm->SetStringParameter("DepObject", "Earth");
-//             if (parm->NeedCoordSystem())
-//                parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
-//                   "EarthMJ2000Eq");
-//          }
-//       }        
       retval = true;
    }
     
@@ -642,7 +623,7 @@ Formation* Interpreter::CreateFormation(std::string formname)
 // Parameter* CreateArray(std::string arrname, std::string type)
 //------------------------------------------------------------------------------
 /**
- * Calls the Moderator to create a new Hardware object.
+ * Calls the Moderator to create a new Array object.
  * 
  * @param hwname Name of the object.
  * @param type Type of the hardware requested.
@@ -664,9 +645,13 @@ Parameter* Interpreter::CreateArray(std::string arrname, std::string type)
    Integer locLeft = arrname.find("[", 0);
    name = arrname.substr(0, locLeft);
    
-   locLeft = line.find("[", 0);
-   Integer locComma = line.find(",", 0);
-   Integer locRight = line.find("]", 0);
+//    locLeft = line.find("[", 0);
+//    Integer locComma = line.find(",", 0);
+//    Integer locRight = line.find("]", 0);
+   
+   locLeft = arrname.find("[", 0);
+   Integer locComma = arrname.find(",", 0);
+   Integer locRight = arrname.find("]", 0);
 
    #ifdef DEBUG_ARRAY_INTERPRETING
       MessageInterface::ShowMessage(
@@ -680,7 +665,8 @@ Parameter* Interpreter::CreateArray(std::string arrname, std::string type)
             "array dimensions for " + name + 
             "\nbut never finishes specification (missing ']'?)");
       std::stringstream rval, cval;
-      rval << line.substr(locLeft+1);
+      //rval << line.substr(locLeft+1);
+      rval << arrname.substr(locLeft+1);
 
       #ifdef DEBUG_ARRAY_INTERPRETING
             MessageInterface::ShowMessage(
@@ -689,7 +675,8 @@ Parameter* Interpreter::CreateArray(std::string arrname, std::string type)
 
       rval >> rows;
       if (locComma != (Integer)std::string::npos) {
-         cval << line.substr(locComma+1);
+         //cval << line.substr(locComma+1);
+         cval << arrname.substr(locComma+1);
       
          #ifdef DEBUG_ARRAY_INTERPRETING
             MessageInterface::ShowMessage(
@@ -817,6 +804,12 @@ bool Interpreter::AssembleCommand(const std::string& scriptline,
          cmdCase.c_str());
    #endif
 
+   #if DEBUG_EQUATION
+   MessageInterface::ShowMessage
+      ("=====> AssembleCommand() calling InterpretAction() line=%s\n",
+       line.c_str());
+   #endif
+   
    if (cmd->InterpretAction())
       return true;
    
@@ -1796,38 +1789,7 @@ Parameter* Interpreter::CreateParameter(const std::string &name,
                                         const std::string &obj)
 {
    Parameter *parm =
-      moderator->CreateParameter(type, name, Gmat::SPACECRAFT, obj, depname);
-
-   // All the setting is done in the Moderator
-//    Parameter *parm = moderator->CreateParameter(type, name);
-//    if (parm != NULL)
-//    {
-//       std::string dep = depname;
-
-//       if (obj != "")
-//          parm->SetStringParameter("Object", obj);
-      
-//       if (parm->IsCoordSysDependent())
-//       {
-//          if (dep == "")
-//             dep = "EarthMJ2000Eq";
-         
-//          parm->SetStringParameter("DepObject", dep);
-//          parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, dep);
-//       }
-//       else if (parm->IsOriginDependent())
-//       {
-//          if (dep == "")
-//             dep = "Earth";
-         
-//          parm->SetStringParameter("DepObject", dep);
-//          parm->SetRefObjectName(Gmat::SPACE_POINT, dep);
-//          if (parm->NeedCoordSystem())
-//             /// @todo Update coordinate system to better body parms
-//             parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
-//                                    "EarthMJ2000Eq");
-//       }
-//    }
+      moderator->CreateParameter(type, name, obj, depname);
 
    return parm;
 }
@@ -2000,10 +1962,12 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
          throw InterpreterException("Syntax error creating Propagator");
 
       Integer id = prop->GetParameterID(objParm);
-#ifdef DEBUG_INTERPRETER
+      
+      #ifdef DEBUG_INTERPRETER
       std::cout << "Setting " << objParm << " on " << prop->GetTypeName()
                 << " to " << **phrase << "\n";
-#endif
+      #endif
+      
       if (!SetParameter(prop, id, **phrase))
          throw;
    }
@@ -2479,12 +2443,17 @@ bool Interpreter::EquateObjects(GmatBase *obj, const std::string &obj2Name)
    GmatBase *orig = FindObject(other);
 
    if (orig != NULL) {
-      if (obj->GetTypeName() != orig->GetTypeName())
-         throw InterpreterException("Interpreter::EquateObjects: \"" + 
-            obj->GetName() + "\" and \"" + orig->GetName() + 
-            "\" have different types");
-      obj->Copy(orig);
+//       if (obj->GetTypeName() != orig->GetTypeName())
+//          throw InterpreterException("Interpreter::EquateObjects: \"" + 
+//             obj->GetName() + "\" and \"" + orig->GetName() + 
+//             "\" have different types on line:\n" + line + "\n");
+//       obj->Copy(orig);
 
+      if (obj->GetTypeName() == orig->GetTypeName() && obj->GetTypeName() != "Array")
+         obj->Copy(orig);
+      else
+         return false;
+         
       #ifdef DEBUG_INTERPRET_OBJECTEQUATES
          MessageInterface::ShowMessage(
             "Interpreter::EquateObjects succeeded\n");
@@ -2540,11 +2509,17 @@ bool Interpreter::SetVariable(GmatBase *obj, const std::string &val,
             "Interpreter::SetVariable attempting to set a value using a " +
             cmd->GetTypeName() + " command, which is not supported, on line\n" +
             line);
+
+      #if DEBUG_EQUATION
+      MessageInterface::ShowMessage
+         ("=====> SetVariable() calling InterpretAction() line=%s\n", line.c_str());
+      #endif
+      
       cmd->InterpretAction();
+      
       return true;
    }
 
-   //MessageInterface::ShowMessage("It's an assignment\n");
    std::string paramType, paramObj, paramDepObj;
 
    if (InterpretParameter(other, paramType, paramObj, paramDepObj))
@@ -2590,6 +2565,11 @@ bool Interpreter::SetArray(GmatBase *obj, GmatCommand *cmd)
             cmd->GetTypeName() + " command, which is not supported, on line\n" +
             line);
 
+      #if DEBUG_EQUATION
+      MessageInterface::ShowMessage
+         ("=====> SetArray() calling InterpretAction() line=%s\n", line.c_str());
+      #endif
+      
       return cmd->InterpretAction();
    }
 
@@ -2601,7 +2581,9 @@ bool Interpreter::SetArray(GmatBase *obj, GmatCommand *cmd)
 
    if ((*chunks[2])[0] != '(')
       throw InterpreterException(
-         "Cannot locate element to set in Interpreter::SetArray()");
+         "Cannot locate element to set in Interpreter::SetArray() in line:\n" +
+         line + "\n");
+   
    // Break apart the element descriptor
    StringArray els = Decompose(*chunks[2]);
    

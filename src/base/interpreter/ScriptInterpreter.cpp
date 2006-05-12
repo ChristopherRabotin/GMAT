@@ -19,6 +19,7 @@
 #include "ScriptInterpreter.hpp" // class's header file
 #include "Moderator.hpp"         // class's header file
 #include "GmatCommand.hpp"
+#include "Assignment.hpp"
 #include "StringUtil.hpp"        // for ToDouble()
 #include <fstream>
 
@@ -286,6 +287,8 @@ bool ScriptInterpreter::Parse()
             ++phrase;
             type = **phrase;
             ++phrase;
+            std::string arrayName;
+            Integer arrayPart = 0;
             
             while (phrase != chunks.end())
             {
@@ -296,25 +299,37 @@ bool ScriptInterpreter::Parse()
 
                 if (name[0] == '(')
                 {
-                   //loj: 10/4/05 Throw an exception
-                   //MessageInterface::ShowMessage(
-                   //   "Unknown characters found in Create line; please check %s"
-                   //   " in the line \n   \"%s\"\n"
-                   //   "(Perhaps you meant square braces to size an array?)\n",
-                   //   name.c_str(), line.c_str());
                    throw InterpreterException(
                       "Unknown characters found in Create line.\nPlease check " +
                       name + " in the line:\n" + line + "\n" + 
                       "(Perhaps you meant square braces to size an array?)\n");
-                   //++phrase;
-                   //continue;
                 }
 
+                // if type is Array append next phrase, the first part is array name,
+                // the second part is array dimension
+                if (type == "Array")
+                {
+                   arrayPart = arrayPart + 1;
+
+                   if (arrayPart == 1)
+                   {
+                      arrayName = name;
+                      ++phrase;
+                      continue;
+                   }
+                   else if (arrayPart == 2)
+                   {
+                      name = arrayName + name;
+                      arrayPart = 0;
+                   }
+                }
+                
+                
                 if (!InterpretObject(type, name))
                    throw InterpreterException("Unable to create object " +
                                               name + " of type " + type +
                                               "\nScript text: \"" + line +
-                                              "\"");
+                                              "\"\n");
                 ++phrase;
             }
         }
@@ -322,13 +337,13 @@ bool ScriptInterpreter::Parse()
         else if ((**phrase == "GMAT") && (!sequenceStarted))
         {
 
-            #ifdef DEBUG_GMAT_LINE
+           #ifdef DEBUG_GMAT_LINE
                MessageInterface::ShowMessage("Decomposing GMAT line\n\"%s\"\n",
                                              line.c_str());
                for (std::vector<std::string *>::iterator c = chunks.begin();
                     c != chunks.end(); ++c)
                   MessageInterface::ShowMessage("   \"%s\"\n", (*c)->c_str());
-            #endif
+           #endif
 
             // Look up related object(s)
             ++phrase;
@@ -388,7 +403,7 @@ bool ScriptInterpreter::Parse()
             {
                 if (!InterpretPropSetupParameter(obj, sar, phrase))
                     throw InterpreterException(
-                       "PropSetup Parameter was not recognized");
+                       "PropSetup Parameter was not recognized\n");
             }
             else if ((sar.size() > 1) &&
                      (obj->GetType() == Gmat::COORDINATE_SYSTEM))
@@ -396,7 +411,7 @@ bool ScriptInterpreter::Parse()
                 if (!InterpretCoordinateSystemParameter(obj, sar, phrase))
                     throw InterpreterException(
                        "Coordinate system parameter was not recognized in \"" +
-                       line + "\"");
+                       line + "\"\n");
             }
             else
             {
@@ -431,7 +446,7 @@ bool ScriptInterpreter::Parse()
                                     chunks.begin(); cstr != chunks.end(); ++cstr)
                                   MessageInterface::ShowMessage("   %s\n",
                                      (*cstr)->c_str());
-                            #endif
+                             #endif
 
                             if (SetArray(obj))
                             {
@@ -443,16 +458,18 @@ bool ScriptInterpreter::Parse()
                             chunks.clear();
                             throw InterpreterException(
                                "Failure while attempting to set an array element "
-                               " on line \"" + line + "\"");
+                               " on line \"" + line + "\"\n");
                          }
                          else
+                         {
                             chunks.clear();
                             throw InterpreterException(
                                "Attempting to set an object, type " +
                                obj->GetTypeName() + ", in an unknown context;" +
                                " see the line\n   \"" +
-                               line + "\"");
-                      }
+                               line + "\"\n");
+                         }
+                      } // if (!EquateObjects(obj))
                       // Objects equated
                       chunks.clear();
                       return true;
@@ -596,7 +613,8 @@ bool ScriptInterpreter::Parse()
                    throw;
                 }
             }
-        }
+        } //else if ((**phrase == "GMAT") && (!sequenceStarted))
+        
         // Then check to see if it's a command
         else if (find(cmdmap.begin(), cmdmap.end(), **phrase) != cmdmap.end())
         {
@@ -640,7 +658,7 @@ bool ScriptInterpreter::Parse()
                   if (obj == NULL)
                      throw InterpreterException(
                         "The object: " + **phrase + " was not defined " +
-                        "on line \"" + line + "\"");
+                        "on line \"" + line + "\"\n");
 
                   if (!EquateObjects(obj))
                   {
@@ -660,6 +678,8 @@ bool ScriptInterpreter::Parse()
                      else if (obj->GetTypeName() == "Array")
                      {
                         #ifdef DEBUG_ARRAY_ASSIGNMENT
+                        //MessageInterface::ShowMessage("=====> isSinglet = true\n");
+                                                      
                            MessageInterface::ShowMessage(
                               "Building array assignment for \"" +
                               line + "\"\n");
@@ -669,26 +689,32 @@ bool ScriptInterpreter::Parse()
                                 chunks.begin(); cstr != chunks.end(); ++cstr)
                               MessageInterface::ShowMessage("   %s\n",
                                  (*cstr)->c_str());
-                        #endif
+                         #endif
                            
                         GmatCommand *cmd = moderator->AppendCommand("GMAT", "");
                         cmd->SetGeneratingString(line);
 
-                        // Test if RHS object exist (loj: 3/17/06)
-                        //MessageInterface::ShowMessage("==> RHS=%s\n", (*chunks.back()).c_str());
-                        Real rval = -9999.999;
-                        // If RHS is not a number
-                        if (!GmatStringUtil::ToDouble(*chunks.back(), &rval))
-                        {
-                           GmatBase *obj = FindObject(*chunks.back());
-                           if (obj == NULL)
-                              throw InterpreterException(
-                                  "The object: " + *chunks.back() + " was not defined " +
-                                  "on line \"" + line + "\"");
-                        }
-
                         if (SetArray(obj, cmd))
                         {
+                           // if RHS is not a equation, check for undefined object
+                           if (((Assignment*)cmd)->GetMathTree() == NULL)
+                           {
+                              //MessageInterface::ShowMessage
+                              //   ("==> obj=%s, RHS=%s\n", obj->GetName().c_str(),
+                              //    (*chunks.back()).c_str());
+                              Real rval = -9999.999;
+                              
+                              // If RHS is not a number, find the object
+                              if (!GmatStringUtil::ToDouble(*chunks.back(), &rval))
+                              {
+                                 GmatBase *obj = FindObject(*chunks.back());
+                                 if (obj == NULL)
+                                    throw InterpreterException
+                                       ("The object: " + *chunks.back() + " was not defined " +
+                                        "on line \"" + line + "\"\n");
+                              }
+                           }
+                           
                            // Array set successfully
                            chunks.clear();
                            return true;
@@ -697,14 +723,14 @@ bool ScriptInterpreter::Parse()
                         chunks.clear();
                         throw InterpreterException(
                            "Failure while attempting to set an array element "
-                           " on line \"" + line + "\"");
+                           " on line \"" + line + "\"\n");
                      }
                      else
                      {
                         chunks.clear();
                         throw InterpreterException(
                            "Attempting to set an object, " + obj->GetName() +
-                           ", in an unknown context; see the line\n   \"" +
+                           ", in an unknown context; see the line\n   \"\n" +
                            line + "\"");
                      }
                   }
@@ -723,12 +749,16 @@ bool ScriptInterpreter::Parse()
                cmd->SetGeneratingString(line);
                // Temporarily continue to support InterpretAction until all 
                // commands are moved to the new format
+               
+               //MessageInterface::ShowMessage
+               //   ("=====> Parse() calling InterpretAction() line=%s\n", line.c_str());
+               
                if (!cmd->InterpretAction()) 
                {
                   if (!AssembleCommand(line, cmd))
                   {
                      throw InterpreterException(
-                        "Could not construct command \"" + line + "\"");
+                        "Could not construct command \"" + line + "\"\n");
                   }
                }
                sequenceStarted = true;
@@ -747,7 +777,7 @@ bool ScriptInterpreter::Parse()
                
                throw InterpreterException("The command line '" + line + 
                   "' did not parse correctly; it threw the message \n   '"
-                  + e.GetMessage() +"'");
+                  + e.GetMessage() +"'\n");
             }
         }
         // Looks like the line was not understood
@@ -957,7 +987,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          inTextMode = false;
          
       if (cmd == cmd->GetNext())
-         throw InterpreterException("Self-reference found in command stream during write.");
+         throw InterpreterException("Self-reference found in command stream during write.\n");
       cmd = cmd->GetNext();
    }
     
