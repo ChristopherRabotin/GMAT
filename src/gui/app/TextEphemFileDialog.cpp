@@ -371,13 +371,13 @@ bool TextEphemFileDialog::CreateTextEphem()
    // Create parameters
    try
    {
-      theGuiInterpreter->CreateParameter(epochFormat, time, Gmat::SPACECRAFT, scName);
-      theGuiInterpreter->CreateParameter("X", xpos, Gmat::SPACECRAFT, scName, coordSys);
-      theGuiInterpreter->CreateParameter("Y", ypos, Gmat::SPACECRAFT, scName, coordSys);
-      theGuiInterpreter->CreateParameter("Z", zpos, Gmat::SPACECRAFT, scName, coordSys);
-      theGuiInterpreter->CreateParameter("VX", xvel, Gmat::SPACECRAFT, scName, coordSys);
-      theGuiInterpreter->CreateParameter("VY", yvel, Gmat::SPACECRAFT, scName, coordSys);
-      theGuiInterpreter->CreateParameter("VZ", zvel, Gmat::SPACECRAFT, scName, coordSys);
+      theGuiInterpreter->CreateParameter(epochFormat, time, scName);
+      theGuiInterpreter->CreateParameter("X", xpos, scName, coordSys);
+      theGuiInterpreter->CreateParameter("Y", ypos, scName, coordSys);
+      theGuiInterpreter->CreateParameter("Z", zpos, scName, coordSys);
+      theGuiInterpreter->CreateParameter("VX", xvel, scName, coordSys);
+      theGuiInterpreter->CreateParameter("VY", yvel, scName, coordSys);
+      theGuiInterpreter->CreateParameter("VZ", zvel, scName, coordSys);
    }
    catch (BaseException &e)
    {
