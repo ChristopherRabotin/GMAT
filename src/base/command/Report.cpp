@@ -292,8 +292,14 @@ bool Report::Execute()
       
       datastream.width(colWidth);
 
+      //MessageInterface::ShowMessage
+      //   (">>>>> Report::Execute() parameter=%s, returnType=%d\n", (*i)->GetName().c_str(),
+      //    (*i)->GetReturnType());
+      
       if ((*i)->GetReturnType() == Gmat::REAL_TYPE)
          datastream << (*i)->EvaluateReal() << "   ";
+      else if ((*i)->GetReturnType() == Gmat::RMATRIX_TYPE)
+         datastream << (*i)->EvaluateRmatrix().ToString() << "   ";
       else if ((*i)->GetReturnType() == Gmat::STRING_TYPE)
          datastream << (*i)->EvaluateString() << "   ";
    }
