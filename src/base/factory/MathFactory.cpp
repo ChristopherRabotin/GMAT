@@ -31,12 +31,15 @@
 #include "Add.hpp"
 #include "Cos.hpp"
 #include "DegToRad.hpp"
+#include "Determinant.hpp"
 #include "Divide.hpp"
 #include "Exp.hpp"
 #include "Inverse.hpp"
 #include "Log.hpp"
 #include "Log10.hpp"
 #include "Multiply.hpp"
+#include "Negate.hpp"
+#include "Norm.hpp"
 #include "Power.hpp"
 #include "RadToDeg.hpp"
 #include "Sin.hpp"
@@ -82,17 +85,10 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
    
    // Leaf node
    if (ofType == "MathElement")
-   {
       mathNode = new MathElement(ofType, withName);
-
-      // set value if single real value
-      Real rval;
-      if (GmatStringUtil::ToDouble(withName, &rval))
-         ((MathElement*)mathNode)->SetRealValue(rval);
-   }
    
    // Simple math operations
-   if (newType == "Add")              // Add(x,y) or x+y
+   else if (newType == "Add")         // Add(x,y) or x+y
       mathNode = new Add(withName);
    else if (newType == "Subtract")    // Subtract(x,y) or x-y
       mathNode = new Subtract(withName);
@@ -100,6 +96,8 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
       mathNode = new Multiply(withName);
    else if (newType == "Divide")      // Divide(x,y) or x/y
       mathNode = new Divide(withName);
+   else if (newType == "Negate")        // Negate(x)
+      mathNode = new Negate(withName);
    else if (newType == "Sqrt")        // Sqrt(x)
       mathNode = new Sqrt(withName);
 
@@ -116,12 +114,12 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
    // Matrix functions
    else if (newType == "Transpose")   // transpose(m) or m'
       mathNode = new Transpose(withName);
-//    else if (newType == "Det")         // det(m)
-//       mathNode = new Det(withName);
+   else if (newType == "Det")         // det(m)
+      mathNode = new Determinant(withName);
    else if (newType == "Inv")         // inv(m)
       mathNode = new Inverse(withName);
-//    else if (newType == "Norm")        // norm(m)
-//       mathNode = new Norm(withName);
+   else if (newType == "Norm")        // norm(m)
+      mathNode = new Norm(withName);
 
    // Trigonometric functions
    else if (newType == "Sin")         // sin(x)
@@ -256,37 +254,41 @@ void MathFactory::BuildCreatables()
 {
    // The FIRST letter of function name can be either lower or upper case.
    
+   // Math element
+   creatables.push_back("MathElement");
+   
    // Simple math operations
-//    creatables.push_back("Add");
-//    creatables.push_back("Subtract");
-//    creatables.push_back("Multiply");
-//    creatables.push_back("Divide");
-//    creatables.push_back("sqrt");
+   creatables.push_back("Negate");
+   creatables.push_back("Add");
+   creatables.push_back("Subtract");
+   creatables.push_back("Multiply");
+   creatables.push_back("Divide");
+   creatables.push_back("sqrt");
    
    // Power, Log functions
-//    creatables.push_back("power");
-//    creatables.push_back("exp");
-//    creatables.push_back("log");
-//    creatables.push_back("log10");
+   creatables.push_back("Power");
+   creatables.push_back("exp");
+   creatables.push_back("log");
+   creatables.push_back("log10");
    
    // Matrix functions
-//    creatables.push_back("transpose");
-//    creatables.push_back("det");
-//    creatables.push_back("inv");
-//    creatables.push_back("norm");
+   creatables.push_back("transpose");
+   creatables.push_back("det");
+   creatables.push_back("inv");
+   creatables.push_back("norm");
    
    // Trigonometric functions
-//    creatables.push_back("sin");
-//    creatables.push_back("cos");
-//    creatables.push_back("tan");
-//    creatables.push_back("asin");
-//    creatables.push_back("acos");
-//    creatables.push_back("atan");
-//    creatables.push_back("atan2");
+   creatables.push_back("sin");
+   creatables.push_back("cos");
+   creatables.push_back("tan");
+   creatables.push_back("asin");
+   creatables.push_back("acos");
+   creatables.push_back("atan");
+   creatables.push_back("atan2");
    
    // Unit conversion functions
-//    creatables.push_back("DegToRad");  
-//    creatables.push_back("RadToDeg");
+   creatables.push_back("degToRad");  
+   creatables.push_back("radToDeg");
    
 }
 
