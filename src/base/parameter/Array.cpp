@@ -69,7 +69,8 @@ Array::PARAMETER_TYPE[ArrayParamCount - ParameterParamCount] =
 Array::Array(const std::string &name, const std::string &desc,
              const std::string &unit)
    : Parameter(name, "Array", GmatParam::USER_PARAM, NULL, desc, unit,
-               GmatParam::NO_DEP, Gmat::UNKNOWN_OBJECT, false, false, false)
+               //GmatParam::NO_DEP, Gmat::UNKNOWN_OBJECT, false, false, false)
+               GmatParam::NO_DEP, Gmat::UNKNOWN_OBJECT, false, false, true)
 {
    mNumRows = 0;
    mNumCols = 0;
@@ -169,6 +170,11 @@ bool Array::operator!=(const Array &right) const
 //------------------------------------------------------------------------------
 bool Array::SetSize(const Integer row, const Integer col)
 {
+   #if DEBUG_ARRAY
+   MessageInterface::ShowMessage
+      ("Array::SetSize() row=%d, col=%d\n", row, col);
+   #endif
+   
    mNumRows = row;
    mNumCols = col;
    mRmatValue.SetSize(mNumRows, mNumCols);
@@ -180,6 +186,28 @@ bool Array::SetSize(const Integer row, const Integer col)
 //------------------------------------
 // methods inherited from Parameter
 //------------------------------------
+
+//------------------------------------------------------------------------------
+// void SetRmatrix(const Rmatrix &mat)
+//------------------------------------------------------------------------------
+/**
+ * Sets Rmatrix value of parameter.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+void Array::SetRmatrix(const Rmatrix &mat)
+{
+   if (mSizeSet)
+   {
+      mRmatValue = mat;
+   }
+   else
+   {
+      throw ParameterException("The size has not been set for " + GetName());
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // std::string ToString()
@@ -196,22 +224,6 @@ std::string Array::ToString()
    return std::string(ss.str());
 }
 
-//------------------------------------------------------------------------------
-// const Rmatrix& GetMatrix() const
-//------------------------------------------------------------------------------
-/**
- * Retrieves Rmatrix value of parameter without evaluating.
- *
- * @exception <ParameterException> thrown if matrix size has not been set.
- */
-//------------------------------------------------------------------------------
-const Rmatrix& Array::GetMatrix() const
-{
-   if (mSizeSet)
-      return mRmatValue;
-   else
-      throw ParameterException("The size has not been set for " + GetName());      
-}
 
 //------------------------------------------------------------------------------
 // virtual const std::string* GetParameterList() const
@@ -507,11 +519,11 @@ const Rvector& Array::SetRvectorParameter(const Integer id, const Rvector &value
                                           const Integer index)
 {
    
-#if DEBUG_ARRAY
+   #if DEBUG_ARRAY
    MessageInterface::ShowMessage
       ("Array::SetRvectorParameter() index=%d, mNumRows=%d, mNumCols=%d\n",
        index, mNumRows, mNumCols);
-#endif
+   #endif
    
    switch (id)
    {
@@ -603,21 +615,30 @@ const Rmatrix& Array::GetRmatrixParameter(const std::string &label) const
 const Rmatrix& Array::SetRmatrixParameter(const Integer id,
                                           const Rmatrix &value)
 {
-   if (mSizeSet)
+   switch (id)
    {
-      switch (id)
-      {
-      case RMAT_VALUE:
-         mRmatValue = value;
-         return value;
-      default:
-         return Parameter::SetRmatrixParameter(id, value);
-      }
+   case RMAT_VALUE:
+      SetRmatrix(value);
+      return value;
+   default:
+      return Parameter::SetRmatrixParameter(id, value);
    }
-   else
-   {
-      throw ParameterException("The size has not been set for " + GetName());
-   }
+   
+//    if (mSizeSet)
+//    {
+//       switch (id)
+//       {
+//       case RMAT_VALUE:
+//          mRmatValue = value;
+//          return value;
+//       default:
+//          return Parameter::SetRmatrixParameter(id, value);
+//       }
+//    }
+//    else
+//    {
+//       throw ParameterException("The size has not been set for " + GetName());
+//    }
 }
 
 

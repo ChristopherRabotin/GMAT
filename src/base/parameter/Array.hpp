@@ -38,15 +38,17 @@ public:
    bool operator!=(const Array &right) const;
    
    bool SetSize(const Integer row, const Integer col);
+   void GetSize(Integer &row, Integer &col) { row = mNumRows; col = mNumCols; }
    Integer GetRowCount() { return mNumRows; }
    Integer GetColCount() { return mNumCols; }
-   const Rmatrix& GetRmatrix() const { return mRmatValue; }
    
    // methods inherited from Parameter
+   virtual void SetRmatrix(const Rmatrix &mat);
+   virtual const Rmatrix& GetRmatrix() const { return mRmatValue; }
+   virtual Rmatrix EvaluateRmatrix() { return mRmatValue; } /// assumes it has only numbers
    virtual std::string ToString();
-   virtual const Rmatrix& GetMatrix() const;
    virtual const std::string* GetParameterList() const;
-   
+
    // methods inherited from GmatBase
    virtual GmatBase* Clone() const;
    virtual std::string GetParameterText(const Integer id) const;

@@ -23,7 +23,7 @@
 #include "MessageInterface.hpp"
 #include <sstream>
 
-//#define DEBUG_REALVAR 1
+//#define DEBUG_REAL_VAR 1
 
 //---------------------------------
 // public methods
@@ -158,7 +158,7 @@ bool RealVar::operator!=(const RealVar &right) const
 //------------------------------------------------------------------------------
 bool RealVar::Initialize()
 {
-   mRealValue = REAL_PARAMETER_UNDEFINED;
+//    mRealValue = REAL_PARAMETER_UNDEFINED;
    return true;
 }
 
@@ -203,7 +203,21 @@ Real RealVar::GetReal() const
 //------------------------------------------------------------------------------
 void RealVar::SetReal(Real val)
 {
+   #if DEBUG_REAL_VAR
+   MessageInterface::ShowMessage
+      ("RealVar::SetReal(Real val) name=%s, val=%f\n", GetName().c_str(), val);
+   #endif
+   
    mRealValue = val;
+   std::stringstream ss("");
+   ss.precision(10);
+   ss << mRealValue;
+   mExpr = ss.str();
+   
+   #if DEBUG_REAL_VAR
+   MessageInterface::ShowMessage
+      ("RealVar::SetReal(Real val) mExpr=%s\n", mExpr.c_str());
+   #endif
 }
 
 //------------------------------------
@@ -225,26 +239,28 @@ void RealVar::SetReal(Real val)
 //------------------------------------------------------------------------------
 bool RealVar::SetStringParameter(const Integer id, const std::string &value)
 {
-#if DEBUG_REALVAR
-   MessageInterface::ShowMessage("RealVar::SetStringParameter() id=%d, value=%s\n",
-                                 id, value.c_str());
-#endif
+   #if DEBUG_REAL_VAR
+   MessageInterface::ShowMessage
+      ("RealVar::SetStringParameter() name:%s, id=%d, value=%s\n",
+       GetName().c_str(), id, value.c_str());
+   #endif
    
    switch (id)
    {
    case EXPRESSION:
       {
-         // if expression is just a number set value to expression
-         //double temp = atof(value.c_str());
-         //return Parameter::SetStringParameter(id, value);
-         
+         // if value is just a number, convert and set to real value
          Real temp;
          if (GmatStringUtil::ToDouble(value, &temp))
          {
             mRealValue = temp;
-            return true;
+
+            #if DEBUG_REAL_VAR
+            MessageInterface::ShowMessage("mRealValue set to %f\n", mRealValue);
+            #endif
          }
-         return false;
+         
+         return Parameter::SetStringParameter(id, value);
       }
    default:
       return Parameter::SetStringParameter(id, value);
@@ -267,10 +283,10 @@ bool RealVar::SetStringParameter(const Integer id, const std::string &value)
 bool RealVar::SetStringParameter(const std::string &label,
                                  const std::string &value)
 {
-#if DEBUG_REALVAR
+   #if DEBUG_REAL_VAR > 1
    MessageInterface::ShowMessage("RealVar::SetStringParameter() label=%s value=%s\n",
                                  label.c_str(), value.c_str());
-#endif
+   #endif
    
    return SetStringParameter(GetParameterID(label), value);
 }

@@ -22,6 +22,7 @@
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "Rvector6.hpp"
+#include "Rmatrix.hpp"
 #include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
 
@@ -70,14 +71,17 @@ public:
    
    virtual Real GetReal() const;
    virtual Rvector6 GetRvector6() const;
+   virtual const Rmatrix& GetRmatrix() const;
    virtual std::string GetString() const;
    
    virtual void SetReal(Real val);
    virtual void SetRvector6(const Rvector6 &val);
+   virtual void SetRmatrix(const Rmatrix &mat);
    virtual void SetString(const std::string &val);
    
    virtual Real EvaluateReal();
    virtual Rvector6 EvaluateRvector6();
+   virtual Rmatrix EvaluateRmatrix();
    virtual std::string EvaluateString();
    
    virtual const std::string* GetParameterList() const;

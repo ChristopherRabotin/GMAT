@@ -25,7 +25,6 @@
 #include "ExpressionParser.hpp"
 #include "MessageInterface.hpp"
 
-//loj: 1/10/06 debug
 //#define DEBUG_VARIABLE 1
 
 //---------------------------------
@@ -143,14 +142,15 @@ Real Variable::GetReal()
 //------------------------------------------------------------------------------
 Real Variable::EvaluateReal()
 {
-   //loj: 1/10/06 Bug 83 fix: added to check for -
-   // if expression is variable itself or empty or first char is digit or -
-   //if (this->GetName() == mExpr || mExpr == "" || isdigit(mExpr[0]))
    if (this->GetName() == mExpr || mExpr == "" || isdigit(mExpr[0]) ||
        mExpr[0] == '-')
    {
-      //MessageInterface::ShowMessage
-      //   ("==> Variable::EvaluateReal() 1st: mRealValue=%f\n", mRealValue);
+      #if DEBUG_VARIABLE
+      MessageInterface::ShowMessage
+         ("Variable::EvaluateReal() name:%s, 1st: mRealValue=%f, "
+          "mExpr=%s\n", GetName().c_str(), mRealValue, mExpr.c_str());
+      #endif
+      
       return mRealValue;
    }
    
