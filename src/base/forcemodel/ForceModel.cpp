@@ -803,8 +803,6 @@ bool ForceModel::Initialize()
             SetInternalCoordinateSystem("FixedCoordinateSystem", currentPm);
             SetInternalCoordinateSystem("TargetCoordinateSystem", currentPm);
          }
-         
-         forceMembersNotInitialized = false;
       }
 
       // Initialize the forces
@@ -828,7 +826,7 @@ bool ForceModel::Initialize()
       cf++;
       current = GetForce(cf);
    }
-
+   
    #ifdef DEBUG_FORCE_EPOCHS
       std::string epfile = "ForceEpochs.txt";
       if (instanceName != "")
@@ -845,6 +843,8 @@ bool ForceModel::Initialize()
    firstCallFired = false;
    #endif
 
+   // Set flag stating that Initialize was successful once
+   forceMembersNotInitialized = false;
    return true;
 }
 
