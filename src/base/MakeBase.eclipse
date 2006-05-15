@@ -221,6 +221,7 @@ OBJECTS = \
     math/MathFunction.o \
     math/MathNode.o \
     math/Multiply.o \
+    math/Negate.o \
     math/Norm.o \
     math/Power.o \
     math/RadToDeg.o \
