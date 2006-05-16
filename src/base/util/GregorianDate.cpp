@@ -280,13 +280,34 @@ void GregorianDate::ParseOut(const std::string &str)
 
          if (timeToken.CountTokens() == 3)
          {
-            // Check length of time format
-            if (timeToken.GetToken(0).length() != 2 ||
-                timeToken.GetToken(1).length() != 2 ||
-                timeToken.GetToken(2).length() != 6)
+//            // Check length of time format
+//            if (timeToken.GetToken(0).length() != 2 ||
+//                timeToken.GetToken(1).length() != 2 ||
+//                timeToken.GetToken(2).length() != 6)
+//            {
+//               MessageInterface::ShowMessage(
+//                  "\nWarning: invalid Gregorian format with time"); 
+//               return;
+//            }
+
+            // Check length of the hour format
+            if (timeToken.GetToken(0).length() != 2)
             {
                MessageInterface::ShowMessage(
-                  "\nWarning: invalid Gregorian format with time"); 
+                  "\nWarning: invalid Gregorian time for hours format(HH)\n"); 
+               return;
+            }
+            // Check length of the minute format
+            if (timeToken.GetToken(1).length() != 2)
+            {
+               MessageInterface::ShowMessage(
+                  "\nWarning: invalid Gregorian time for minutes format(MM)\n"); 
+               return;
+            }
+            if (timeToken.GetToken(2).length() != 6)
+            {
+               MessageInterface::ShowMessage(
+                  "\nWarning: invalid Gregorian time for seconds format(SS.mmm)\n"); 
                return;
             }
 
