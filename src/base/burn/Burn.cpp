@@ -19,7 +19,9 @@
 
 
 #include "Burn.hpp"
+#include "MessageInterface.hpp"
 
+//#define DEBUG_BURN_PARAM 1
 
 //---------------------------------
 // static data
@@ -231,6 +233,12 @@ std::string Burn::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Burn::GetParameterID(const std::string &str) const
 {
+   #if DEBUG_BURN_PARAM
+   MessageInterface::ShowMessage
+      ("Burn::GetParameterID() str=%s, dvLabels=%s, %s, %s\n", str.c_str(),
+       dvLabels[0].c_str(), dvLabels[0].c_str(), dvLabels[0].c_str());
+   #endif
+   
    // Let users ask for components (e.g. "V", "N", or "B" in VNB coordinates)
    // directly
    if (str == dvLabels[0])
