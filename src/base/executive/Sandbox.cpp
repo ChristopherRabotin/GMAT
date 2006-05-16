@@ -763,6 +763,8 @@ void Sandbox::BuildReferences(GmatBase *obj)
             InitializeCoordinateSystem(fixedCS);
             fixedCS->Initialize();
             
+            objectMap[*i] = fixedCS;
+            
             #ifdef DEBUG_SANDBOX_INIT
                MessageInterface::ShowMessage(
                   "Coordinate system %s has body %s\n",
