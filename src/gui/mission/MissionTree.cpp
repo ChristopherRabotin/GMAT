@@ -350,6 +350,13 @@ void MissionTree::AppendCommand(const wxString &cmdName)
          lastId = elseId;
    }
    
+   #if DEBUG_MISSION_TREE
+   MessageInterface::ShowMessage
+      ("MissionTree::AppendCommand(%s) after FindChild(Else) itemId=<%s>, "
+       " lastId=<%s>\n", cmdName.c_str(), GetItemText(itemId).c_str(),
+       GetItemText(lastId).c_str());
+   #endif
+   
    wxTreeItemId prevId = GetPrevVisible(lastId);
    MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
@@ -362,19 +369,28 @@ void MissionTree::AppendCommand(const wxString &cmdName)
    else
       prevCmd = currItem->GetCommand();
 
+   #if DEBUG_MISSION_TREE
+   MessageInterface::ShowMessage
+      ("MissionTree::AppendCommand(cmd) prevCmd=%s\n",
+       prevCmd->GetTypeName().c_str());
+   #endif
+   
    if (cmdName == "IfElse")
-   {
       cmd = theGuiInterpreter->CreateDefaultCommand("If");
-   }
    else
-   {
       cmd = theGuiInterpreter->CreateDefaultCommand(std::string(cmdName.c_str()));
-   }
    
    if (cmd != NULL)
    {
-      if (cmdName == "Maneuver")
-         theGuiManager->UpdateAll();
+      // if Maneuver or Vary, update burn to show default impulsive burn
+      // if it was not already created before (loj: 05/15/06)
+      if (cmdName == "Maneuver" || cmdName == "Vary")
+         theGuiManager->UpdateBurn();
+      
+      #if DEBUG_MISSION_TREE
+      MessageInterface::ShowMessage
+         ("MissionTree::AppendCommand(%s) calling InsertCommand()\n", cmdName.c_str());
+      #endif
       
       wxTreeItemId node =
          InsertCommand(itemId, itemId, prevId, GetIconId(cmdName),
@@ -840,8 +856,8 @@ void MissionTree::AddIcons()
 //   int sizeOrig = icons[0].GetWidth();
    for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
    {
-   	  // 30/01/06 - arg - always resize because linux is not showing unscaled
-   	  // icons correctly
+          // 30/01/06 - arg - always resize because linux is not showing unscaled
+          // icons correctly
 //      if ( size == sizeOrig )
 //      {
 //         images->Add(icons[i]);
