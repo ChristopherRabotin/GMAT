@@ -16,6 +16,7 @@
 #define GmatMdiChildFrame_hpp
 
 #include "gmatwxdefs.hpp"
+#include "GmatMenuBar.hpp"
 
 class GmatMdiChildFrame : public wxMDIChildFrame
 {
@@ -36,15 +37,15 @@ public:
     void SetTitle(wxString newTitle);
 #endif
 
+    GmatMenuBar *menuBar;
     int GetDataType();
     void SetDataType(int type) {dataType = type;};
     void OnClose(wxCloseEvent &event);
-    wxMenuBar *CreateMenu(int dataType);
     void SetScriptTextCtrl(wxTextCtrl *scriptTC) {theScriptTextCtrl = scriptTC;};
     wxTextCtrl *GetScriptTextCtrl(){return theScriptTextCtrl;};
     void SetDirty(bool dirty);
     bool IsDirty();
-
+   
 protected:
 
 #ifdef __WXMAC__
@@ -54,8 +55,6 @@ protected:
     bool mDirty;
     int dataType;
     wxTextCtrl *theScriptTextCtrl;
-    wxMenu *mViewMenu;
-    wxMenu *mViewOptionMenu;
     
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();
