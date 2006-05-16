@@ -38,11 +38,13 @@ public:
    void OnAddScript(wxCommandEvent &event);
    void OnNewScript();
    void AddScriptItem(wxString path);
+   bool wasChildAdded();
    
 private:
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
    bool mHasUserInterrupted;
+   bool mHasAddedChild;
    
    //GmatMainNotebook *mainNotebook;
    //GmatMainFrame *mainFrame;

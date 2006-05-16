@@ -146,6 +146,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    mHasUserInterrupted = false;
+   mHasAddedChild = false;
    
    AddIcons();
    AddDefaultResources();
@@ -2388,7 +2389,7 @@ void ResourceTree::OnAddScript(wxCommandEvent &event)
 //    }
    //---------------- debug
 
-   
+   mHasAddedChild = false;
    wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""),
          _T("Script files (*.script, *.m)|*.script;*.m|"\
             "Text files (*.txt, *.text)|*.txt;*.text|"\
@@ -2473,6 +2474,7 @@ void ResourceTree::OnAddScript(wxCommandEvent &event)
       GmatAppData::GetMainFrame()->SetScriptFileName(path.c_str());
       
       Expand(mScriptItem);
+      mHasAddedChild = true;
    }
 
 }
@@ -2591,7 +2593,9 @@ void ResourceTree::OnScriptBuildObject(wxCommandEvent& event)
    // Get info from selected item
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
    wxString filename = item->GetDesc();
-   
+
+   GmatAppData::GetMainFrame()->SetTitle(filename + " - General Mission Analysis Tool (GMAT)");
+   GmatAppData::GetMainFrame()->SetStatusText("", 1);
    BuildScript(filename);
 }
 
@@ -2608,6 +2612,8 @@ void ResourceTree::OnScriptBuildAndRun(wxCommandEvent& event)
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
    wxString filename = item->GetDesc();
    GmatAppData::GetMainFrame()->SetScriptFileName(filename.c_str());
+   GmatAppData::GetMainFrame()->SetTitle(filename + " - General Mission Analysis Tool (GMAT)");
+   GmatAppData::GetMainFrame()->SetStatusText("", 1);
 
    GmatAppData::GetMainFrame()->OnScriptBuildAndRun(event);
 }
@@ -2793,6 +2799,11 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
                   filename.c_str());
       GmatAppData::GetMainFrame()->SetStatusText(text, 1);
       
+      wxString titleText;
+      titleText.Printf("%s - General Mission Analysis Tool (GMAT)", filename.c_str());       
+      
+      GmatAppData::GetMainFrame()->SetTitle(titleText);
+                  
       if (compare)
          textCtrl->AppendText(text);
       
@@ -3350,4 +3361,12 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
       textCtrl->AppendText
          ("========================================================\n\n");
    }
+}
+
+//------------------------------------------------------------------------------
+// bool wasChildAdded()
+//------------------------------------------------------------------------------
+bool ResourceTree::wasChildAdded()
+{
+    return mHasAddedChild;
 }
