@@ -84,6 +84,7 @@ public:
 //    void OnOpenTrajectoryFile(wxCommandEvent& event);
 //    void OnZoomIn(wxCommandEvent& event);
 //    void OnZoomOut(wxCommandEvent& event);
+   void UpdateMenus(bool openOn);
 
    void OnScriptBuildObject(wxCommandEvent& WXUNUSED(event));
    void OnScriptBuildAndRun(wxCommandEvent& event);
@@ -112,8 +113,7 @@ private:
    ViewTextFrame *mTextFrame;
    wxMenu *mServerMenu;
    wxStatusBar *theStatusBar;
-   
-   wxMenuBar* CreateMainMenu();
+   GmatMenuBar *menuBar;   
    
    GmatMdiChildFrame* CreateNewResource(const wxString &title,
                                         const wxString &name, int dataType);
