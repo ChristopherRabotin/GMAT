@@ -28,7 +28,7 @@
 #include <cmath>
 #include <sstream>
 
-#define DEBUG_STATE_MACHINE
+//#define DEBUG_STATE_MACHINE
 //#define DEBUG_DC_INIT 1
 
 //---------------------------------
