@@ -41,13 +41,11 @@ END_EVENT_TABLE()
  *
  * @param <parent> input parent.
  * @param <burnName> input burn name.
- *
- * @note Creates the impulsive burn GUI
  */
 //------------------------------------------------------------------------------
-   ImpulsiveBurnSetupPanel::ImpulsiveBurnSetupPanel(wxWindow *parent,
-                                                    const wxString &burnName)
-      : GmatPanel(parent)
+ImpulsiveBurnSetupPanel::ImpulsiveBurnSetupPanel(wxWindow *parent,
+                                                 const wxString &burnName)
+   : GmatPanel(parent)
 {
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
 
@@ -56,6 +54,15 @@ END_EVENT_TABLE()
    Create();
    Show();
    theApplyButton->Disable();
+}
+
+
+//------------------------------------------------------------------------------
+// ~ImpulsiveBurnSetupPanel()
+//------------------------------------------------------------------------------
+ImpulsiveBurnSetupPanel::~ImpulsiveBurnSetupPanel()
+{
+   theGuiManager->UnregisterComboBox("SpacePoint", centralBodyCB);
 }
 
 //-------------------------------

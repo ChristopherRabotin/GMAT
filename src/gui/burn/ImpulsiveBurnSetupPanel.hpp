@@ -25,7 +25,8 @@ class ImpulsiveBurnSetupPanel : public GmatPanel
 {
 public:
     // constructors
-    ImpulsiveBurnSetupPanel( wxWindow *parent, const wxString &burnName);
+    ImpulsiveBurnSetupPanel(wxWindow *parent, const wxString &burnName);
+   ~ImpulsiveBurnSetupPanel();
     
 private:
     // member data
