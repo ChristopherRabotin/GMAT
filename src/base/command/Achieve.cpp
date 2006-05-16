@@ -21,6 +21,7 @@
 #include "Achieve.hpp"
 /// @todo Rework command so it doesn't need the Moderator!!!
 #include "Moderator.hpp" 
+#include "StringUtil.hpp"  // for ToDouble()
 
 //#define DEBUG_ACHIEVE 1
 
@@ -391,8 +392,8 @@ bool Achieve::SetStringParameter(const Integer id, const std::string &value)
          realValue = atof(goalString.c_str());
 
       #ifdef DEBUG_ACHIEVE
-         MessageInterface::ShowMessage("GoalString = '%s'\n",
-            goalString.c_str());
+         MessageInterface::ShowMessage("GoalString = '%s', realValue=%f\n",
+            goalString.c_str(), realValue);
       #endif
 
       goal = realValue;
@@ -507,8 +508,6 @@ bool Achieve::InterpretAction()
           parmType.c_str(), parmSystem.c_str());
    #endif
 
-//    goalParm = mod->CreateParameter(parmType, goalName, Gmat::SPACECRAFT,
-//                                    parmObj, parmSystem);
    goalParm = mod->CreateParameter(parmType, goalName, parmObj, parmSystem);
 
    if (!goalParm)
@@ -551,6 +550,7 @@ bool Achieve::InterpretAction()
  * script contents.
  * 
  * @return true on success, false on failure.
+ * @return true if it is a parameter, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool Achieve::ConstructGoal(const char* str)
@@ -558,6 +558,12 @@ bool Achieve::ConstructGoal(const char* str)
    #ifdef DEBUG_ACHIEVE
       MessageInterface::ShowMessage("ConstructGoal(%s) called\n", str);
    #endif
+
+   Real rval = 54321.12345;
+   // check to see if it is a number first
+   if (GmatStringUtil::ToDouble(str, &rval))
+      return false;
+   
    // Skip white space
    Integer start = 0, dot, end;
    while (str[start] == ' ')
@@ -570,6 +576,11 @@ bool Achieve::ConstructGoal(const char* str)
       ++end;
    }
 
+   #ifdef DEBUG_ACHIEVE
+      MessageInterface::ShowMessage
+         ("start=%d, dot=%d, end=%d\n", start, dot, end);
+   #endif
+      
    std::string sstr = str;
    goalString = sstr.substr(start, end-start);
 
@@ -599,9 +610,8 @@ bool Achieve::ConstructGoal(const char* str)
 
       if (mod->IsParameter(parmType))
       {
-//          goalTarget = mod->CreateParameter(parmType, goalString, Gmat::SPACECRAFT,
-//                                            parmObj, parmSystem);
-         goalTarget = mod->CreateParameter(parmType, goalString, parmObj, parmSystem);
+         goalTarget =
+            mod->CreateParameter(parmType, goalString, parmObj, parmSystem);
         
          if (!goalTarget)
             throw CommandException("Unable to create parameter " + goalString);
@@ -609,10 +619,10 @@ bool Achieve::ConstructGoal(const char* str)
          return true;
       }
       #ifdef DEBUG_ACHIEVE
-         else {
-            MessageInterface::ShowMessage("\"%s\" is not a parameter\n",
-                                          goalString.c_str());
-         }
+      else {
+         MessageInterface::ShowMessage("\"%s\" is not a parameter\n",
+                                       goalString.c_str());
+      }
       #endif
    }
    
