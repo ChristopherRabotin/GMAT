@@ -25,6 +25,7 @@
 
 
 //#define DEBUG_VARIABLE_RANGES
+//#define DEBUG_VARY_EXECUTE 1
 
 //------------------------------------------------------------------------------
 //  Vary(void)
@@ -71,7 +72,7 @@ Vary::~Vary()
  */
 //------------------------------------------------------------------------------
 Vary::Vary(const Vary& t) :
-    GmatCommand                 (t),
+    GmatCommand             (t),
     targeterName            (t.targeterName),
     targeter                (NULL),
     variableID              (-1),
@@ -104,7 +105,6 @@ Vary& Vary::operator=(const Vary& t)
     targeterName = t.targeterName;
     return *this;
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -193,7 +193,6 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
 }
 
 
-//loj: 11/22/04 added
 //---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
@@ -249,6 +248,9 @@ std::string Vary::GetParameterText(const Integer id) const
 }
 
 
+//---------------------------------------------------------------------------
+// Integer GetParameterID(const std::string &str) const
+//---------------------------------------------------------------------------
 Integer Vary::GetParameterID(const std::string &str) const
 {
     if (str == "TargeterName")
@@ -276,6 +278,9 @@ Integer Vary::GetParameterID(const std::string &str) const
 }
 
 
+//---------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//---------------------------------------------------------------------------
 Gmat::ParameterType Vary::GetParameterType(const Integer id) const
 {
     if (id == targeterNameID)
@@ -303,6 +308,9 @@ Gmat::ParameterType Vary::GetParameterType(const Integer id) const
 }
 
 
+//---------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//---------------------------------------------------------------------------
 std::string Vary::GetParameterTypeString(const Integer id) const
 {
     if (id == targeterNameID)
@@ -334,6 +342,9 @@ std::string Vary::GetParameterTypeString(const Integer id) const
 }
 
 
+//---------------------------------------------------------------------------
+// Real GetRealParameter(const Integer id) const
+//---------------------------------------------------------------------------
 Real Vary::GetRealParameter(const Integer id) const
 {
     if (id == initialValueID)
@@ -360,6 +371,9 @@ Real Vary::GetRealParameter(const Integer id) const
 }
 
 
+//---------------------------------------------------------------------------
+// Real SetRealParameter(const Integer id, const Real value)
+//---------------------------------------------------------------------------
 Real Vary::SetRealParameter(const Integer id, const Real value)
 {
     if (id == initialValueID) {
@@ -370,7 +384,6 @@ Real Vary::SetRealParameter(const Integer id, const Real value)
         return initialValue[0];
     }
             
-        
     if (id == perturbationID) {
         if (!perturbation.empty())
             perturbation[0] = value;
@@ -407,6 +420,9 @@ Real Vary::SetRealParameter(const Integer id, const Real value)
 }
 
 
+//---------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//---------------------------------------------------------------------------
 std::string Vary::GetStringParameter(const Integer id) const
 {
     if (id == targeterNameID)
@@ -420,6 +436,9 @@ std::string Vary::GetStringParameter(const Integer id) const
 }
 
 
+//---------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//---------------------------------------------------------------------------
 bool Vary::SetStringParameter(const Integer id, const std::string &value)
 {
     if (id == targeterNameID) {
@@ -637,11 +656,16 @@ bool Vary::Initialize()
 bool Vary::Execute(void)
 {
     bool retval = true;
+
+    #if DEBUG_VARY_EXECUTE
+    MessageInterface::ShowMessage
+       ("Vary::Execute() targeterDataFinalized=%d\n", targeterDataFinalized);
+    #endif
     
     if (!targeterDataFinalized) {
         // First time through, tell the targeter about the variables
         Real varData[5];
-//        for (Integer i = 0; i < variableName.size(); ++i) {
+        //for (Integer i = 0; i < variableName.size(); ++i) {
         Integer i = 0;
         {
             varData[0] = initialValue[i];           // Initial value
@@ -649,8 +673,13 @@ bool Vary::Execute(void)
             varData[2] = variableMinimum[i];        // minimum
             varData[3] = variableMaximum[i];        // maximum
             varData[4] = variableMaximumStep[i];    // largest allowed step
+            
+            if (variableId.empty())
+               variableId.push_back(-1);
+            
             variableId[i] = targeter->SetSolverVariables(varData, variableName[i]);
         }
+        
         // Break component into the object and its parameter
         std::string objectName, parmName, varName;
         varName = variableName[0];
@@ -658,12 +687,21 @@ bool Vary::Execute(void)
         objectName = varName.substr(0, loc);
         parmName = varName.substr(loc+1, varName.length() - (loc+1));
         GmatBase *obj = (*objectMap)[objectName];
+        
+        #if DEBUG_VARY_EXECUTE
+        MessageInterface::ShowMessage
+           ("Vary::Execute() varName=%s, objectName=%s, parmName=%s\n",
+            varName.c_str(), objectName.c_str(), parmName.c_str());
+        #endif
+        
         if (obj == NULL) {
             std::string errorstr = "Could not find object ";
             errorstr += objectName;
             throw CommandException(errorstr);
         }
+        
         Integer id = obj->GetParameterID(parmName);
+
         if (id == -1) {
             std::string errorstr = "Could not find parameter ";
             errorstr += parmName;
@@ -671,6 +709,7 @@ bool Vary::Execute(void)
             errorstr += objectName;
             throw CommandException(errorstr);
         }
+        
         Gmat::ParameterType type = obj->GetParameterType(id);
         if (type != Gmat::REAL_TYPE) {
             std::string errorstr = "The targeter variable ";
@@ -685,7 +724,6 @@ bool Vary::Execute(void)
         parmId.push_back(id);
 
         targeterDataFinalized = true;
-        
         BuildCommandSummary(true);
         return retval;
     }
