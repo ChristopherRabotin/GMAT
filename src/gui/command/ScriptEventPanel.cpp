@@ -68,7 +68,8 @@ void ScriptEventPanel::Create()
                             wxDefaultPosition, wxDefaultSize,
                             wxTE_MULTILINE | wxGROW);
 
-
+   mFileContentsTextCtrl->SetFont( GmatAppData::GetFont() );
+   
    //------------------------------------------------------
    // add to sizer
    //------------------------------------------------------

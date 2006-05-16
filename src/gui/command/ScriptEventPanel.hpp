@@ -23,6 +23,7 @@ class ScriptEventPanel: public GmatPanel
 public:
    // constructors
    ScriptEventPanel(wxWindow *parent, GmatCommand *cmd);
+   wxTextCtrl *mFileContentsTextCtrl;
     
 private:
    // member data
@@ -31,8 +32,6 @@ private:
    wxGridSizer *mBottomSizer;
    wxBoxSizer *mPageSizer;
 
-   wxTextCtrl *mFileContentsTextCtrl;
-    
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
