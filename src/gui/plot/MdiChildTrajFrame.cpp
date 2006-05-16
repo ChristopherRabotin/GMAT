@@ -374,9 +374,7 @@ void MdiChildTrajFrame::ResetShowViewOption()
       ("MdiChildTrajFrame::ResetShowViewOption()\n");
    #endif
 
-   /// @todo: ag: fix this
-//   wxMenu *mViewMenu = GmatAppData::GetMainFrame()->GetViewMenu();
-   mViewMenu->Check(GmatPlot::MDI_GL_SHOW_OPTION_PANEL, false);
+    menuBar->Check(GmatPlot::MDI_GL_SHOW_OPTION_PANEL, false);
 }
 
 
@@ -438,12 +436,8 @@ void MdiChildTrajFrame::SetDrawWireFrame(bool flag)
 {
    if (mCanvas)
    {
-      
       //loj: 5/18/05 Why this failing when this frame is closed?
-//       wxMenu *viewOptionMenu = GmatAppData::GetMainFrame()->GetViewOptionMenu();
-//       if (viewOptionMenu)
-      mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, flag);
-      
+      menuBar->Check(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, flag);
       mCanvas->SetDrawWireFrame(flag);
    }
 }
@@ -457,10 +451,7 @@ void MdiChildTrajFrame::SetDrawXyPlane(bool flag)
    if (mCanvas)
    {
       //loj: 5/18/05 Why this failing when this frame is closed?
-//       wxMenu *viewOptionMenu = GmatAppData::GetMainFrame()->GetViewOptionMenu();
-//       if (viewOptionMenu)
-      mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, flag);
-      
+      menuBar->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, flag);   
       mCanvas->SetDrawXyPlane(flag);
    }
 }
@@ -1101,4 +1092,3 @@ void MdiChildTrajFrame::DeletePlot()
    //if (mIsMainFrame)
    //   GmatAppData::GetMainFrame()->trajMainSubframe->Close();
 }
-
