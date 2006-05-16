@@ -35,7 +35,7 @@
 //#define DEBUG_MDI_TS_FRAME 1
 //#define DEBUG_RENAME 1
 
-BEGIN_EVENT_TABLE(MdiChildTsFrame, wxMDIChildFrame)
+BEGIN_EVENT_TABLE(MdiChildTsFrame, GmatMdiChildFrame)
    EVT_MENU(GmatPlot::MDI_TS_OPEN_PLOT_FILE, MdiChildTsFrame::OnOpenXyPlotFile)
    EVT_MENU(GmatPlot::MDI_TS_CHILD_QUIT, MdiChildTsFrame::OnQuit)
    EVT_MENU(GmatPlot::MDI_TS_CHANGE_TITLE, MdiChildTsFrame::OnChangeTitle)
@@ -93,57 +93,6 @@ MdiChildTsFrame::MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
 #else
    SetIcon(wxIcon( mondrian_xpm ));
 #endif
-
-   // File menu
-   wxMenu *fileMenu = new wxMenu;
-
-   fileMenu->Append(GmatPlot::MDI_TS_OPEN_PLOT_FILE, _T("&Open XY Plot File"));
-   fileMenu->Append(GmatPlot::MDI_TS_CHILD_QUIT, _T("&Close"),
-         _T("Close this window"));
-
-   // Plot menu
-   wxMenu *plotMenu = new wxMenu;
-
-   plotMenu->Append(GmatPlot::MDI_TS_CLEAR_PLOT, _T("Clear Plot"));
-   plotMenu->AppendSeparator();
-   plotMenu->Append(GmatPlot::MDI_TS_CHANGE_TITLE, _T("Change &title..."));
-
-   // View menu
-   wxMenu *viewMenu = new wxMenu;
-   viewMenu->Append(GmatPlot::MDI_TS_SHOW_DEFAULT_VIEW, _T("Reset\tCtrl-R"),
-                    _("Reset to default view"));
-   viewMenu->AppendSeparator();
-
-   // View Option submenu
-   mViewOptionMenu = new wxMenu;
-   wxMenuItem *item =
-      new wxMenuItem(viewMenu, GmatPlot::MDI_TS_VIEW_OPTION, _T("Option"),
-                     _T("view options"), wxITEM_NORMAL, mViewOptionMenu);
-   mViewOptionMenu->Append(GmatPlot::MDI_TS_DRAW_GRID,
-                          _T("Draw Grid"),
-                          _T("Draw Grid"), wxITEM_CHECK);
-   mViewOptionMenu->Append(GmatPlot::MDI_TS_DRAW_DOTTED_LINE,
-                          _T("Draw dotted line"),
-                          _T("Draw dotted line"), wxITEM_CHECK);
-
-   mViewOptionMenu->Check(GmatPlot::MDI_TS_DRAW_DOTTED_LINE, false);
-   
-   viewMenu->Append(item);
-
-   // Help menu
-   wxMenu *helpMenu = new wxMenu;
-   helpMenu->Append(GmatPlot::MDI_TS_HELP_VIEW, _T("View"), _T("View mouse control"));
-
-   // menu bar
-   wxMenuBar *menuBar = new wxMenuBar;
-
-   menuBar->Append(fileMenu, _T("&File"));
-   menuBar->Append(plotMenu, _T("&Plot"));
-   menuBar->Append(viewMenu, _T("&View"));
-   menuBar->Append(helpMenu, _T("&Help"));
-
-   // Associate the menu bar with the frame
-   SetMenuBar(menuBar);
 
    // Create XyPlotFrame
    int width, height;
@@ -453,7 +402,7 @@ void MdiChildTsFrame::SetShowGrid(bool show)
 {
    if (mXyPlot)
    {
-      mViewOptionMenu->Check(GmatPlot::MDI_TS_DRAW_GRID, show);
+      menuBar->Check(GmatPlot::MDI_TS_DRAW_GRID, show);
       mXyPlot->ShowGrid(show);
    }
 }
@@ -520,8 +469,8 @@ void MdiChildTsFrame::OnClearPlot(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void MdiChildTsFrame::OnShowDefaultView(wxCommandEvent& event)
 {
-   //if (mXyPlot)
-   //   mXyPlot->ShowDefaultView();
+//   if (mXyPlot)
+//      mXyPlot->ShowDefaultView();
 }
 
 //------------------------------------------------------------------------------
@@ -540,8 +489,8 @@ void MdiChildTsFrame::OnDrawGrid(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildTsFrame::OnDrawDottedLine(wxCommandEvent& event)
 {
-   //if (mXyPlot)
-   //   mXyPlot->DrawDottedLine(event.IsChecked());
+//   if (mXyPlot)
+//      mXyPlot->DrawDottedLine(event.IsChecked());
 }
 
 //------------------------------------------------------------------------------
