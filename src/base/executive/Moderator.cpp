@@ -53,6 +53,7 @@
 //#define DEBUG_INIT 1
 //#define DEBUG_RUN 1
 //#define DEBUG_CREATE_RESOURCE 1
+//#define DEBUG_DEFAULT_COMMAND 1
 //#define DEBUG_RENAME 1
 //#define DEBUG_DEFAULT_MISSION 1
 //#define DEBUG_PLANETARY_FILE 1
@@ -1382,16 +1383,11 @@ Burn* Moderator::CreateBurn(const std::string &type,
       Burn *burn = theFactoryManager->CreateBurn(type, name);
 
       if (burn ==  NULL)
-      {
-         //MessageInterface::PopupMessage
-         //   (Gmat::ERROR_, "Cannot create a Burn type: %s.\n"
-         //    "Make sure %s is correct type and registered to BurnFactory.\n",
-         //    type.c_str(), type.c_str());
-         
-         //return NULL;
          throw GmatBaseException("Error Creating Burn: " + type + "\n");
-      }
-    
+
+      // Set default Axes to VNB
+      burn->SetStringParameter(burn->GetParameterID("Axes"), "VNB");
+
       // Manage it if it is a named burn
       try
       {
@@ -2318,7 +2314,7 @@ GmatCommand* Moderator::CreateCommand(const std::string &type,
 GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
                                              const std::string &name)
 {
-   #if DEBUG_CREATE_RESOURCE
+   #if DEBUG_DEFAULT_COMMAND
    MessageInterface::ShowMessage
       ("Moderator::CreateDefaultCommand() entered: type = " +
        type + ", name = " + name + "\n");
@@ -2385,59 +2381,71 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       id = cmd->GetParameterID("TargeterName");
       cmd->SetStringParameter(id, solver->GetName());
       
-      // set variable parameter
-      id = cmd->GetParameterID("Variable");
-      //----------------------------------------------------
-      //@note loj: 10/6/04
-      // I should create a burn parameter of V.
-      // But use temp code for now.
-      //----------------------------------------------------
+      try
+      {
+         // set variable parameter
+         id = cmd->GetParameterID("Variable");
+         cmd->SetStringParameter(id, GetDefaultBurn()->GetName() + ".V");
+         
+         id = cmd->GetParameterID("InitialValue");
+         cmd->SetRealParameter(id, 0.5);
+         
+         id = cmd->GetParameterID("Perturbation");
+         cmd->SetRealParameter(id, 0.0001);
+         
+         id = cmd->GetParameterID("MinimumValue");
+         cmd->SetRealParameter(id, 0.0);
+         
+         id = cmd->GetParameterID("MaximumValue");
+         cmd->SetRealParameter(id, 3.14159);
       
-      cmd->SetStringParameter(id, GetDefaultBurn()->GetName() + ".V");
-      //cmd->SetStringParameter(id, GetDefaultBurn()->GetName() + ".N");
-      
-      id = cmd->GetParameterID("InitialValue");
-      cmd->SetRealParameter(id, 0.5);
-      //cmd->SetRealParameter(id, 0.5);
-      
-      id = cmd->GetParameterID("Perturbation");
-      cmd->SetRealParameter(id, 0.000001);
-      //cmd->SetRealParameter(id, 0.00001);
-
-      id = cmd->GetParameterID("MinimumValue");
-      cmd->SetRealParameter(id, -9.000e30);
-      //cmd->SetRealParameter(id, -9.000e30);
-      
-      id = cmd->GetParameterID("MaximumValue");
-      cmd->SetRealParameter(id, 9.000e30);
-      //cmd->SetRealParameter(id, 9.000e30);
-      
-      id = cmd->GetParameterID("MaximumChange");
-      cmd->SetRealParameter(id, 9.000e30);
-      //cmd->SetRealParameter(id, 9.000e30);
+         id = cmd->GetParameterID("MaximumChange");
+         cmd->SetRealParameter(id, 0.2);
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::ShowMessage(e.GetMessage());
+         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      }
    }
    else if (type == "Achieve")
    {
-      // set solver
-      Solver *solver = CreateSolver("DifferentialCorrector",
-                                    GetDefaultSolver()->GetName());
+      // Get default solver
+      Solver *solver = GetDefaultSolver();
 
-      id = cmd->GetParameterID("TargeterName");
-      cmd->SetStringParameter(id, solver->GetName());
+      #if DEBUG_DEFAULT_COMMAND
+      MessageInterface::ShowMessage
+         ("Moderator::CreateDefaultCommand() cmd=%s, solver=%s\n",
+          cmd->GetTypeName().c_str(), solver->GetTypeName().c_str());
+      #endif
       
-      // set goal parameter
-      id = cmd->GetParameterID("Goal");
-      cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName() + ".SMA");
-      //cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName() + ".INC");
-      
-      id = cmd->GetParameterID("GoalValue");
-      cmd->SetStringParameter(id, "8500.0"); 
-      //cmd->SetStringParameter(id, "30.0");
-      
-      id = cmd->GetParameterID("Tolerance");
-      cmd->SetRealParameter(id, 0.1);
-      //cmd->SetRealParameter(id, 0.1);
+      try
+      {
+         id = cmd->GetParameterID("TargeterName");
+         cmd->SetStringParameter(id, solver->GetName());
+         
+         // set goal parameter
+         id = cmd->GetParameterID("Goal");
+         cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName() + ".RMAG");
+         
+         id = cmd->GetParameterID("GoalValue");
+         cmd->SetStringParameter(id, "42165.0"); 
+         
+         id = cmd->GetParameterID("Tolerance");
+         cmd->SetRealParameter(id, 0.1);
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::ShowMessage(e.GetMessage());
+         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      }
    }
+   
+   #if DEBUG_DEFAULT_COMMAND
+   MessageInterface::ShowMessage
+      ("Moderator::CreateDefaultCommand() returning cmd=%s\n",
+       cmd->GetTypeName().c_str());
+   #endif
    
    return cmd;
 }
@@ -4059,7 +4067,9 @@ Burn* Moderator::GetDefaultBurn()
    }
    
    // create ImpulsiveBurn
-   return CreateBurn("ImpulsiveBurn", "DefaultIB");
+   Burn *burn = CreateBurn("ImpulsiveBurn", "DefaultIB");
+   burn->SetStringParameter(burn->GetParameterID("Axes"), "VNB");
+   return burn;
 }
 
 
