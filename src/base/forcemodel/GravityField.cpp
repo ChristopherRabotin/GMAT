@@ -66,9 +66,10 @@
 //#include "SolarSystemException.hpp"
 
 
-// #define DEBUG_GRAVITY_FIELD
+//#define DEBUG_GRAVITY_FIELD
 // #define DEBUG_GRAVITY_FIELD_DETAILS
 //#define DEBUG_FIRST_CALL
+//#define DEBUG_GRAV_COORD_SYSTEM
 
 using namespace GmatMathUtil;
 
@@ -532,6 +533,14 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
    //         + instanceName);
    if (targetCS == inputCS)   sameCS = true;
 
+   #ifdef DEBUG_GRAV_COORD_SYSTEM
+       MessageInterface::ShowMessage(
+         "------ body = %s\n------ inputCS = %s\n------ targetCS = %s\n------ fixedCS = %s\n", 
+         body->GetName().c_str(),     inputCS->GetName().c_str(), 
+         targetCS->GetName().c_str(), fixedCS->GetName().c_str());
+   #endif
+   
+   
    CelestialBody *targetBody = (CelestialBody*) targetCS->GetOrigin();
    CelestialBody *fixedBody  = (CelestialBody*) fixedCS->GetOrigin();
    //SpacePoint *targetBody = targetCS->GetOrigin();
@@ -550,6 +559,10 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
             "   Epoch = %.12lf\n   targetBody = %s\n   fixedBody = %s\n", 
             now.Get(), targetBody->GetName().c_str(), 
             fixedBody->GetName().c_str());
+       MessageInterface::ShowMessage(
+         "------ body = %s\n------ inputCS = %s\n------ targetCS = %s\n------ fixedCS = %s\n", 
+         body->GetName().c_str(),     inputCS->GetName().c_str(), 
+         targetCS->GetName().c_str(), fixedCS->GetName().c_str());
       }
    #endif
 
@@ -1174,6 +1187,12 @@ bool GravityField::ReadFile()
          "GravityField::ReadFile() called for file", str);
    #endif
    
+   #ifdef DEBUG_GRAVITY_FILE_READ
+      char str[1024];
+      strcpy(str, filename.c_str());
+      MessageInterface::ShowMessage("%s \"%s\"\n",
+         "GravityField::ReadFile() called for file", str);
+   #endif
 
    // Determine the type of file  --> add switch later!!!!!!!!!!
    if ((filename.find(".dat",0) != std::string::npos) ||
@@ -1190,6 +1209,9 @@ bool GravityField::ReadFile()
    else if ((filename.find(".grv",0) != std::string::npos) ||
             (filename.find(".GRV",0) != std::string::npos) )
    {
+      #ifdef DEBUG_GRAVITY_FIELD
+          MessageInterface::ShowMessage("About to read a .grv file\n");
+      #endif
       if (!ReadGrvFile(fileDegree, fileOrder))
       {
          errMsg = "Error reading coefficients, mu, and equatorial radius from "

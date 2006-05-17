@@ -185,6 +185,9 @@ protected:
    Rmatrix33   rotDotMatrix;
    /// epoch
    A1Mjd epoch;
+   
+   const Real *rotData;
+   const Real *rotDotData;
 
    // data and methods for those AxisSystems that need all or part of the FK5 
    // reduction

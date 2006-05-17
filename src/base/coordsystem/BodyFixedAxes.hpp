@@ -29,6 +29,7 @@
 #include "AxisSystem.hpp"
 #include "DynamicAxes.hpp"
 #include "EopFile.hpp"
+#include "DeFile.hpp"
 #include "ItrfCoefficientsFile.hpp"
 
 class GMAT_API BodyFixedAxes : public DynamicAxes
@@ -98,5 +99,7 @@ protected:
    const Real *stData;
    const Real *stDerivData;
    const Real *pmData;
+   
+   DeFile     *de;
 };
 #endif // BodyFixedAxes_hpp

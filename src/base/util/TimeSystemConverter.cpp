@@ -25,6 +25,7 @@
 
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_TIMECONVERTER_DETAILS
+//#define DEBUG_GREGORIAN
 
 #ifdef DEBUG_FIRST_CALL
    static bool firstCallFired = false;
@@ -83,7 +84,7 @@ Real TimeConverterUtil::Convert(const Real origValue,
    
    #ifdef DEBUG_TIMECONVERTER_DETAILS
       MessageInterface::ShowMessage(
-         "      TimeConverterUtil::Converting %.11lf in %s to %s; refJD = %.11lf\n", origValue, 
+         "      TimeConverterUtil::Converting %.18lf in %s to %s; refJD = %.18lf\n", origValue, 
          TIME_SYSTEM_TEXT[fromType].c_str(), TIME_SYSTEM_TEXT[toType].c_str(), refJd);
    #endif
       
@@ -91,7 +92,7 @@ Real TimeConverterUtil::Convert(const Real origValue,
       TimeConverterUtil::ConvertToTaiMjd(fromType, origValue, refJd);
 
    #ifdef DEBUG_TIMECONVERTER_DETAILS
-      MessageInterface::ShowMessage("      TAI time =  %.11lf\n", newTime);
+      MessageInterface::ShowMessage("      TAI time =  %.18lf\n", newTime);
    #endif
    
    Real returnTime =
@@ -104,7 +105,7 @@ Real TimeConverterUtil::Convert(const Real origValue,
    #endif
 
    #ifdef DEBUG_TIMECONVERTER_DETAILS
-      MessageInterface::ShowMessage("      %s time =  %.11lf\n", TIME_SYSTEM_TEXT[toType].c_str(), 
+      MessageInterface::ShowMessage("      %s time =  %.18lf\n", TIME_SYSTEM_TEXT[toType].c_str(), 
          returnTime);
    #endif
 
@@ -125,7 +126,7 @@ Real TimeConverterUtil::ConvertToTaiMjd(Integer fromType, Real origValue,
 
    #ifdef DEBUG_TIMECONVERTER_DETAILS
       MessageInterface::ShowMessage( 
-         "      ***Converting %.11lf to TAI from %s\n", origValue, 
+         "      ***Converting %.18lf to TAI from %s\n", origValue, 
          TIME_SYSTEM_TEXT[fromType].c_str());
    #endif
    
@@ -227,7 +228,7 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
    #endif
    #ifdef DEBUG_TIMECONVERTER_DETAILS
       MessageInterface::ShowMessage(
-         "      ** Converting %.11lf from TAI to %s\n", origValue, 
+         "      ** Converting %.18lf from TAI to %s\n", origValue, 
          TIME_SYSTEM_TEXT[toType].c_str());
    #endif
    
@@ -279,7 +280,9 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
                                      - (taiLeapSecs/GmatTimeUtil::SECS_PER_DAY));
     
           #ifdef DEBUG_TIMECONVERTER_DETAILS
-             MessageInterface::ShowMessage("      Leap secs: tai = %.14lf, utc = %.14lf\n",
+             MessageInterface::ShowMessage("      offsetValue = %.17lf\n",
+                offsetValue);
+             MessageInterface::ShowMessage("      Leap secs: tai = %.17lf, utc = %.17lf\n",
                 taiLeapSecs, utcLeapSecs);
           #endif
     
@@ -312,10 +315,16 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
     
           numOffset = theEopFile->GetUt1UtcOffset(utcMjd + offsetValue);
     
+          #ifdef DEBUG_TIMECONVERTER_DETAILS
+             MessageInterface::ShowMessage("   offsetValue = %.17lf\n",
+                offsetValue);
+             MessageInterface::ShowMessage(
+                "   utcMjd = %.20lf, numOffset = %.20lf\n", utcMjd, numOffset);
+          #endif
           #ifdef DEBUG_FIRST_CALL
              if (!firstCallFired || (numOffset == 0.0))
                 MessageInterface::ShowMessage(
-                   "   utcMjd = %lf, numOffset = %lf\n", utcMjd, numOffset);
+                   "   utcMjd = %.20lf, numOffset = %.20lf\n", utcMjd, numOffset);
           #endif
     
           // add delta ut1 read from eop file
@@ -403,6 +412,14 @@ std::string TimeConverterUtil::ConvertMjdToGregorian(const Real mjd)
    A1Mjd a1Mjd(mjd);
    A1Date a1Date = a1Mjd.ToA1Date();
    GregorianDate gregorianDate(&a1Date);
+    #ifdef DEBUG_GREGORIAN
+       MessageInterface::ShowMessage("------ In ConvertMjdToGregorian\n");
+       MessageInterface::ShowMessage("------ input mjd     = %.18lf\n", mjd);
+       MessageInterface::ShowMessage("------ A1Date        = %s\n", 
+          (a1Date.ToPackedCalendarString()).c_str());
+       MessageInterface::ShowMessage("------ GregorianDate = %s\n", 
+          (gregorianDate.GetDate()).c_str());
+    #endif
    return gregorianDate.GetDate();
 }
 
@@ -437,6 +454,19 @@ Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
       jules = ModifiedJulianDate(a1Date.GetYear(),a1Date.GetMonth(),
                                  a1Date.GetDay(),a1Date.GetHour(),
                                  a1Date.GetMinute(),a1Date.GetSecond());
+    #ifdef DEBUG_GREGORIAN
+       MessageInterface::ShowMessage("------ In ConvertGregorianToMjd\n");
+       MessageInterface::ShowMessage("------ input greg = %s\n", greg.c_str());
+       MessageInterface::ShowMessage("------ Gregorian  = %s\n", 
+            gregorianDate.GetYMDHMS().c_str());
+       MessageInterface::ShowMessage("------ A1Date     = %s\n", 
+          (a1Date.ToPackedCalendarString()).c_str());
+       MessageInterface::ShowMessage("------ YMDHMS:    =     %d  %d  %d  %d  %d  %.17lf\n", 
+            a1Date.GetYear(),a1Date.GetMonth(), a1Date.GetDay(),
+            a1Date.GetHour(), a1Date.GetMinute(),a1Date.GetSecond());
+       MessageInterface::ShowMessage("------ jules      = %s\n", 
+          (gregorianDate.GetDate()).c_str());
+    #endif
    }
    catch (Date::TimeRangeError& e)
    {

@@ -257,6 +257,7 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    // 20.02.06 - arg: changed to use enum types instead of strings
 //   Real mjdUT1 = TimeConverterUtil::Convert(atEpoch.Get(),
 //                  "A1Mjd", "Ut1Mjd", JD_JAN_5_1941);
+
    Real mjdUT1 = TimeConverterUtil::Convert(atEpoch.Get(),
                   TimeConverterUtil::A1MJD, TimeConverterUtil::UT1MJD,
                   JD_JAN_5_1941);

@@ -441,6 +441,9 @@ bool AxisSystem::Initialize()
       firstCallFired = false;
    #endif
    
+   rotData    = rotMatrix.GetDataVector();
+   rotDotData = rotDotMatrix.GetDataVector();
+   
    return true;
 }
 
@@ -464,18 +467,36 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
 {
    CalculateRotationMatrix(epoch);
    // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
-   Rvector3 tmpPos(inState[0],inState[1], inState[2]);
-   Rvector3 tmpVel(inState[3],inState[4], inState[5]);
-   Rvector3 outPos = rotMatrix    * tmpPos;
-   Rvector3 outVel = (rotDotMatrix * tmpPos) + (rotMatrix * tmpVel);
+   Rvector3 tmpPosVec(inState[0],inState[1], inState[2]);
+   Rvector3 tmpVelVec(inState[3],inState[4], inState[5]);
+   //const Real  *inData = inState.GetDataVector();
+   const Real  *tmpPos = tmpPosVec.GetDataVector();
+   const Real  *tmpVel = tmpVelVec.GetDataVector();
+   // rotMatrix * tmpPos;
+   // rotDotMatrix * tmpPos + rotMatrix * tmpVel
+   Real  outPos[3];
+   Real  outVel[3];
+   Integer p3 = 0;
+   for (Integer p = 0; p < 3; ++p)
+   {
+      p3 = 3*p;
+      outPos[p] = rotData[p3]   * tmpPos[0]   + 
+                  rotData[p3+1] * tmpPos[1] + 
+                  rotData[p3+2] * tmpPos[2];
+      outVel[p] = (rotDotData[p3]    * tmpPos[0]   + 
+                   rotDotData[p3+1]  * tmpPos[1] + 
+                   rotDotData[p3+2]  * tmpPos[2])
+                  +
+                  (rotData[p3]    * tmpVel[0]   + 
+                   rotData[p3+1]  * tmpVel[1] + 
+                   rotData[p3+2]  * tmpVel[2]);
+   }     
+ 
+   //Rvector3 outPos_2 = rotMatrix    * tmpPosVec; // old
+   //Rvector3 outVel_2 = (rotDotMatrix * tmpPosVec) + (rotMatrix * tmpVelVec);
+         
    outState.Set(6,outPos[0], outPos[1], outPos[2], 
                   outVel[0], outVel[1], outVel[2]);
-   //outState[0] = outPos[0];
-   //outState[1] = outPos[1];
-   //outState[2] = outPos[2];
-   //outState[3] = outVel[0];
-   //outState[4] = outVel[1];
-   //outState[5] = outVel[2];
 
    #ifdef DEBUG_FIRST_CALL
       if ((firstCallFired == false) || (epoch.Get() == 21545.0))
@@ -528,20 +549,45 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
 {
    CalculateRotationMatrix(epoch);
    // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
-   Rvector3 tmpPos(inState[0],inState[1], inState[2]);
-   Rvector3 tmpVel(inState[3],inState[4], inState[5]);
-   Rmatrix33 tmpRot    = rotMatrix.Transpose();
-   Rmatrix33 tmpRotDot = rotDotMatrix.Transpose();
-   Rvector3 outPos     = tmpRot    * tmpPos ;
-   Rvector3 outVel     = (tmpRotDot * tmpPos) + (tmpRot * tmpVel);
+   //Rvector3 tmpPos(inState[0],inState[1], inState[2]);
+   //Rvector3 tmpVel(inState[3],inState[4], inState[5]);
+   //Rmatrix33 tmpRot    = rotMatrix.Transpose();
+   //Rmatrix33 tmpRotDot = rotDotMatrix.Transpose();
+   //Rvector3 outPos     = tmpRot    * tmpPos ;
+   //Rvector3 outVel     = (tmpRotDot * tmpPos) + (tmpRot * tmpVel);
+
+
+   Rvector3 tmpPosVec(inState[0],inState[1], inState[2]);
+   Rvector3 tmpVelVec(inState[3],inState[4], inState[5]);
+   const Real  *tmpPos = tmpPosVec.GetDataVector();
+   const Real  *tmpVel = tmpVelVec.GetDataVector();
+   // rotMatrix-T * tmpPos;
+   // rotDotMatrix-T * tmpPos + rotMatrix-T * tmpVel
+   Real  outPos[3];
+   Real  outVel[3];
+   const Real  rotDataT[9] = {rotData[0], rotData[3], rotData[6],
+                              rotData[1], rotData[4], rotData[7],
+                              rotData[2], rotData[5], rotData[8]};
+   const Real  rotDotDataT[9] = {rotDotData[0], rotDotData[3], rotDotData[6],
+                                 rotDotData[1], rotDotData[4], rotDotData[7],
+                                 rotDotData[2], rotDotData[5], rotDotData[8]};
+   Integer p3 = 0;
+   for (Integer p = 0; p < 3; ++p)
+   {
+      p3 = 3*p;
+      outPos[p] = rotDataT[p3]   * tmpPos[0]   + 
+                  rotDataT[p3+1] * tmpPos[1] + 
+                  rotDataT[p3+2] * tmpPos[2];
+      outVel[p] = (rotDotDataT[p3]    * tmpPos[0]   + 
+                   rotDotDataT[p3+1]  * tmpPos[1] + 
+                   rotDotDataT[p3+2]  * tmpPos[2])
+                  +
+                  (rotDataT[p3]    * tmpVel[0]   + 
+                   rotDataT[p3+1]  * tmpVel[1] + 
+                   rotDataT[p3+2]  * tmpVel[2]);
+   }     
    outState.Set(6,outPos[0], outPos[1], outPos[2], 
                   outVel[0], outVel[1], outVel[2]);
-   //outState[0] = outPos[0];
-   //outState[1] = outPos[1];
-   //outState[2] = outPos[2];
-   //outState[3] = outVel[0];
-   //outState[4] = outVel[1];
-   //outState[5] = outVel[2];
 
    #ifdef DEBUG_FIRST_CALL
       if ((firstCallFired == false) || (epoch.Get() == 21545.0))

@@ -75,7 +75,8 @@ using namespace GmatTimeUtil;      // for JD offsets, etc.
  */
 //------------------------------------------------------------------------------
 BodyFixedAxes::BodyFixedAxes(const std::string &itsName) :
-DynamicAxes("BodyFixed",itsName)
+DynamicAxes("BodyFixed",itsName),
+de(NULL)
 {
    objectTypeNames.push_back("BodyFixedAxes");
    parameterCount = BodyFixedAxesParamCount;
@@ -93,7 +94,8 @@ DynamicAxes("BodyFixed",itsName)
  */
 //------------------------------------------------------------------------------
 BodyFixedAxes::BodyFixedAxes(const BodyFixedAxes &bfAxes) :
-DynamicAxes(bfAxes)
+DynamicAxes(bfAxes),
+de(NULL)
 {
 }
 
@@ -112,7 +114,8 @@ const BodyFixedAxes& BodyFixedAxes::operator=(const BodyFixedAxes &bfAxes)
 {
    if (&bfAxes == this)
       return *this;
-   DynamicAxes::operator=(bfAxes);  
+   DynamicAxes::operator=(bfAxes); 
+   de = bfAxes.de; 
    return *this;
 }
 //------------------------------------------------------------------------------
@@ -363,7 +366,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    {
       #ifdef DEBUG_FIRST_CALL
          if (!firstCallFired)
-            MessageInterface::ShowMessage("Body is the Earth\n");
+            MessageInterface::ShowMessage("In BFA, Body is the Earth\n");
       #endif
       Real dPsi             = 0.0;
       Real longAscNodeLunar = 0.0;
@@ -382,30 +385,26 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       Real mjdUTC = TimeConverterUtil::Convert(atEpoch.Get(),
                     TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD, 
                     JD_JAN_5_1941);
+      Real offset = JD_JAN_5_1941 - JD_NOV_17_1858;
       // convert to MJD referenced from time used in EOP file
-      mjdUTC = mjdUTC + JD_JAN_5_1941 - JD_NOV_17_1858;
+      mjdUTC = mjdUTC + offset;
 
 
       // convert input time to UT1 for later use (for AST calculation)
       // 20.02.06 - arg: changed to use enum types instead of strings
 //      Real mjdUT1 = TimeConverterUtil::Convert(atEpoch.Get(),
 //                    "A1Mjd", "Ut1Mjd", JD_JAN_5_1941);
+
       Real mjdUT1 = TimeConverterUtil::Convert(atEpoch.Get(),
                     TimeConverterUtil::A1MJD, TimeConverterUtil::UT1, 
                     JD_JAN_5_1941);
       
-      Real jdUT1    = mjdUT1 + JD_JAN_5_1941; // right?
+      //Real jdUT1    = mjdUT1 + JD_JAN_5_1941; // right?
       // Compute elapsed Julian centuries (UT1)
-      Real tUT1     = (jdUT1 - 2451545.0) / 36525.0;
- 
-    #ifdef DEBUG_TIME_CALC
-      MessageInterface::ShowMessage("******************** In BodyFixed, \n"
-      "    mjdUT1 =         %17.8lf\n"
-      "    jdUT1  =         %17.8lf\n"
-      "    tUT1   =         %17.8lf\n",
-      mjdUT1, jdUT1, tUT1);
-   #endif
-      
+      //Real tUT1     = (jdUT1 - 2451545.0) / 36525.0;
+      Real tDiff = JD_JAN_5_1941 - 2451545.0;
+      Real tUT1 = (mjdUT1 + tDiff) / 36525.0;
+       
       // convert input A1 MJD to TT MJD (for most calculations)
       // 20.02.06 - arg: changed to use enum types instead of strings
 //      Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
@@ -416,7 +415,8 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       Real jdTT    = mjdTT + JD_JAN_5_1941; // right? 
       // Compute Julian centuries of TDB from the base epoch (J2000) 
       // NOTE - this is really TT, an approximation of TDB *********
-      Real tTDB    = (jdTT - 2451545.0) / 36525.0;
+      //Real tTDB    = (jdTT - 2451545.0) / 36525.0;
+      Real tTDB    = (mjdTT + tDiff) / 36525.0;
  
       #ifdef DEBUG_FIRST_CALL
          if (!firstCallFired)
@@ -582,7 +582,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    {
       #ifdef DEBUG_FIRST_CALL
          if (!firstCallFired)
-            MessageInterface::ShowMessage("Body is %s\n", originName.c_str());
+            MessageInterface::ShowMessage("In BFA, Body is %s\n", originName.c_str());
       #endif
       // this method will return alpha (deg), delta (deg), 
       // W (deg), and Wdot (deg/day)
