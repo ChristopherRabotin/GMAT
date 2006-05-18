@@ -320,6 +320,10 @@ void PropagationConfigPanel::SaveData()
                //forceList[i]->potFilename = theGuiInterpreter->GetPotentialFileName("JGM3");
                forceList[i]->potFilename = theGuiInterpreter->GetFileName("JGM3_FILE");
             }
+            else
+            {
+               forceList[i]->potFilename = potFileTextCtrl->GetValue().c_str();
+            }
             
             if (isPotFileChanged)
                isPotFileChanged = false;
@@ -344,6 +348,9 @@ void PropagationConfigPanel::SaveData()
             theGravForce->SetIntegerParameter
                   ("Order",  atoi(forceList[i]->gravOrder.c_str()));
             
+            theGravForce->SetSolarSystem(theSolarSystem);
+            theGravForce->SetBody(forceList[i]->bodyName);
+            theGravForce->SetBodyName(forceList[i]->bodyName);
             theGravForce->SetStringParameter("PotentialFile", forceList[i]->potFilename);
             
             forceList[i]->gravf = theGravForce;
