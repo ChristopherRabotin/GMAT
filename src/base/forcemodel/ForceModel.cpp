@@ -802,6 +802,9 @@ bool ForceModel::Initialize()
             SetInternalCoordinateSystem("InputCoordinateSystem", currentPm);
             SetInternalCoordinateSystem("FixedCoordinateSystem", currentPm);
             SetInternalCoordinateSystem("TargetCoordinateSystem", currentPm);
+
+            if (body == NULL)
+               body = solarSystem->GetBody(centralBodyName); // or should we get bodyName?
          }
       }
 
