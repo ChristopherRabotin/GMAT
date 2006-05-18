@@ -23,6 +23,9 @@
 #include "BranchCommand.hpp"
 
 
+//------------------------------------------------------------------------------
+// EndFor::EndFor(void)
+//------------------------------------------------------------------------------
 EndFor::EndFor(void) :
     GmatCommand         ("EndFor")
 {
@@ -31,17 +34,26 @@ EndFor::EndFor(void) :
 }
 
 
+//------------------------------------------------------------------------------
+// ~EndFor(void)
+//------------------------------------------------------------------------------
 EndFor::~EndFor(void)
 {
 }
     
 
+//------------------------------------------------------------------------------
+// EndFor(const EndFor& ef) :
+//------------------------------------------------------------------------------
 EndFor::EndFor(const EndFor& ef) :
     GmatCommand         (ef)
 {
 }
 
 
+//------------------------------------------------------------------------------
+// EndFor& operator=(const EndFor& ef)
+//------------------------------------------------------------------------------
 EndFor& EndFor::operator=(const EndFor& ef)
 {
    if (this == &ef)
@@ -50,10 +62,15 @@ EndFor& EndFor::operator=(const EndFor& ef)
    GmatCommand::operator=(ef);
    return *this;
 }
-    
 
+
+//------------------------------------------------------------------------------
+// bool Initialize(void)
+//------------------------------------------------------------------------------
 bool EndFor::Initialize(void)
 {
+   GmatCommand::Initialize();
+   
    // Validate that next points to the owning for command
    if (!next)
      throw CommandException("EndFor Command not properly reconnected");
@@ -66,12 +83,19 @@ bool EndFor::Initialize(void)
 }
 
 
+//------------------------------------------------------------------------------
+// bool Execute(void)
+//------------------------------------------------------------------------------
 bool EndFor::Execute(void)
 {
    BuildCommandSummary(true);
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// bool Insert(GmatCommand *cmd, GmatCommand *prev)
+//------------------------------------------------------------------------------
 bool EndFor::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
    // if inserting after End statement for branch command, we want to 

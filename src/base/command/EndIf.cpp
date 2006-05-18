@@ -96,17 +96,19 @@ EndIf& EndIf::operator=(const EndIf& ic)
 //------------------------------------------------------------------------------
 bool EndIf::Initialize()
 {
-    // Validate that next points to the owning If command
-    if (!next)
-        throw CommandException("EndIf Command not properly reconnected");
-    
+   GmatCommand::Initialize();
+   
+   // Validate that next points to the owning If command
+   if (!next)
+      throw CommandException("EndIf Command not properly reconnected");
+   
    // @todo remove references to Else and ElseIf, if EndIf can only be commected 
    //       to If.
-    if (next->GetTypeName() != "If" && next->GetTypeName() != "Else" &&
-        next->GetTypeName() != "ElseIf")
-        throw CommandException("EndIf Command not connected to IF Command");
-                             
-    return true;    
+   if (next->GetTypeName() != "If" && next->GetTypeName() != "Else" &&
+       next->GetTypeName() != "ElseIf")
+      throw CommandException("EndIf Command not connected to IF Command");
+   
+   return true;    
 }
 
 

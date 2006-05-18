@@ -398,6 +398,8 @@ bool Assignment::Initialize()
          ("Assignment::Initialize() entered. ownerName=%s\n", ownerName.c_str());
    #endif
       
+   if (GmatCommand::Initialize() == false)
+      return false;
       
    parmOwner = (*objectMap)[ownerName];
    

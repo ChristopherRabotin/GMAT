@@ -22,6 +22,9 @@
 #include "BranchCommand.hpp"
 
 
+//------------------------------------------------------------------------------
+// EndWhile(void) :
+//------------------------------------------------------------------------------
 EndWhile::EndWhile(void) :
 GmatCommand         ("EndWhile")
 {
@@ -30,17 +33,26 @@ GmatCommand         ("EndWhile")
 }
 
 
+//------------------------------------------------------------------------------
+// ~EndWhile(void)
+//------------------------------------------------------------------------------
 EndWhile::~EndWhile(void)
 {
 }
 
 
+//------------------------------------------------------------------------------
+// EndWhile(const EndWhile& ew)
+//------------------------------------------------------------------------------
 EndWhile::EndWhile(const EndWhile& ew) :
 GmatCommand         (ew)
 {
 }
 
 
+//------------------------------------------------------------------------------
+// EndWhile& operator=(const EndWhile& ew)
+//------------------------------------------------------------------------------
 EndWhile& EndWhile::operator=(const EndWhile& ew)
 {
    if (this == &ew)
@@ -51,8 +63,13 @@ EndWhile& EndWhile::operator=(const EndWhile& ew)
 }
 
 
+//------------------------------------------------------------------------------
+// bool Initialize(void)
+//------------------------------------------------------------------------------
 bool EndWhile::Initialize(void)
 {
+   GmatCommand::Initialize();
+   
    // Validate that next points to the owning for command
    if (!next)
       throw CommandException("EndWhile Command not properly reconnected");
@@ -64,6 +81,9 @@ bool EndWhile::Initialize(void)
 }
 
 
+//------------------------------------------------------------------------------
+// bool Execute(void)
+//------------------------------------------------------------------------------
 bool EndWhile::Execute(void)
 {
    BuildCommandSummary(true);
@@ -71,6 +91,9 @@ bool EndWhile::Execute(void)
 }
 
 
+//------------------------------------------------------------------------------
+// bool Insert(GmatCommand *cmd, GmatCommand *prev)
+//------------------------------------------------------------------------------
 bool EndWhile::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
    // if inserting after End statement for branch command, we want to 

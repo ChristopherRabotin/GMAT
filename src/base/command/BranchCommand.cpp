@@ -213,6 +213,8 @@ GmatCommand* BranchCommand::GetChildCommand(Integer whichOne)
 //------------------------------------------------------------------------------
 bool BranchCommand::Initialize()
 {
+   GmatCommand::Initialize();
+   
    std::vector<GmatCommand*>::iterator node;
    GmatCommand *currentPtr;
    bool retval = true;

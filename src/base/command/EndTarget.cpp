@@ -96,6 +96,8 @@ EndTarget& EndTarget::operator=(const EndTarget& et)
 //------------------------------------------------------------------------------
 bool EndTarget::Initialize()
 {
+   GmatCommand::Initialize();
+   
    // Validate that next points to the owning Target command
    if (!next)
       throw CommandException("EndTarget Command not properly reconnected");

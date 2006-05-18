@@ -125,10 +125,12 @@ bool Toggle::Initialize()
    #ifdef DEBUG_TOGGLE
       MessageInterface::ShowMessage("Toggle::Initialize() entered\n");
    #endif
-   Subscriber *sub;
+      
+   GmatCommand::Initialize();
    
+   Subscriber *sub;
    subs.clear();
-    
+   
    for (StringArray::iterator s = subNames.begin(); s != subNames.end(); ++s) {
       if ((*objectMap).find(*s) != objectMap->end()) {
          sub = (Subscriber *)(*objectMap)[*s];
