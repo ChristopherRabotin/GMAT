@@ -1776,8 +1776,13 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
    
    // create default force model with Earth primary body
    ForceModel *newfm= CreateForceModel("");
+   
    GravityField *gravForce = new GravityField("", "Earth");
+   gravForce->SetSolarSystem(theSolarSystemInUse);
+   gravForce->SetBody("Earth");
+   gravForce->SetBodyName("Earth");
    gravForce->SetStringParameter("PotentialFile", GetFileName("JGM2_FILE"));
+   
    newfm->AddForce(gravForce);
    propSetup->SetForceModel(newfm);
    
