@@ -385,6 +385,9 @@ bool HarmonicField::SetFilename(const std::string &fn)
       {
          filename = fn;
       }
+      
+      if (body != NULL)
+         body->SetPotentialFilename(filename);
    }
    
    #ifdef DEBUG_HARMONIC_FIELD
