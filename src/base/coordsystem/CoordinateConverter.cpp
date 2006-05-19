@@ -121,6 +121,8 @@ void CoordinateConverter::Initialize()
    //if (!j2000Body)
    //   throw CoordinateSystemException(
    //         "j2000Body has not been defined for CoordinateConverter object");
+   //toData      = toMJ2000RotMatrix.GetDataVector();
+   //fromData    = fromMJ2000Matrix.GetDataVector();
    #ifdef DEBUG_FIRST_CALL
       firstCallFired = false;
    #endif
@@ -210,6 +212,13 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
                           CoordinateSystem *inCoord, Rvector &outState,
                           CoordinateSystem *outCoord, bool omitTranslation)
 {
+   static Rvector internalState;
+   static Rmatrix33 toMJ2000RotMatrix;
+   static Rmatrix33 fromMJ2000Matrix;
+   static const Real *toData;
+   static const Real *fromData;
+   toData      = toMJ2000RotMatrix.GetDataVector();
+   fromData    = fromMJ2000Matrix.GetDataVector();
    if (inState.GetSize() != outState.GetSize())
       throw CoordinateSystemException(
              "input and output states have different sizes - no conversion done");
@@ -218,15 +227,34 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
             "Undefined coordinate system - conversion not performed.");
    // call coordinate system methods to convert - allow exceptions to
    // percolate up (to be caught at a higher level)
-   Rvector internalState(inState.GetSize());
+   internalState.SetSize(inState.GetSize());
    bool coincident = (inCoord->GetOrigin() == outCoord->GetOrigin() ? 
                       true : false);
    bool translateFlag = coincident || omitTranslation;
    internalState = inCoord->ToMJ2000Eq(epoch, inState, translateFlag);
    outState      = outCoord->FromMJ2000Eq(epoch, internalState, translateFlag);
-   Rmatrix33 toMJ2000RotMatrix   = inCoord->GetLastRotationMatrix();
-   Rmatrix33 fromMJ2000Matrix    = outCoord->GetLastRotationMatrix();
-   lastRotMatrix = (fromMJ2000Matrix.Transpose()) * toMJ2000RotMatrix;
+   toMJ2000RotMatrix   = inCoord->GetLastRotationMatrix();
+   fromMJ2000Matrix    = outCoord->GetLastRotationMatrix();
+   const Real  fromDataT[9] = {fromData[0], fromData[3], fromData[6],
+                               fromData[1], fromData[4], fromData[7],
+                               fromData[2], fromData[5], fromData[8]};
+   Real lrm[3][3];
+   Integer p3;
+      
+   for (Integer p = 0; p < 3; ++p)
+   {
+      p3 = 3*p;
+      for (Integer q = 0; q < 3; ++q)
+      {
+         lrm[p][q] = fromDataT[p3]   * toData[q]   + 
+                     fromDataT[p3+1] * toData[q+3] + 
+                     fromDataT[p3+2] * toData[q+6];
+      }
+   }     
+   lastRotMatrix.Set(lrm[0][0],lrm[0][1],lrm[0][2],
+                     lrm[1][0],lrm[1][1],lrm[1][2],
+                     lrm[2][0],lrm[2][1],lrm[2][2]);
+   //lastRotMatrix = (fromMJ2000Matrix.Transpose()) * toMJ2000RotMatrix;
    
    #ifdef DEBUG_FIRST_CALL
       if ((firstCallFired == false) || (epoch.Get() == 21545.0))

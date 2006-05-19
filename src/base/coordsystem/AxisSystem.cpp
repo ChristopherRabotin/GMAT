@@ -465,10 +465,14 @@ bool AxisSystem::Initialize()
 bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
                                    Rvector &outState)
 {
+   static Rvector3 tmpPosVec;
+   static Rvector3 tmpVelVec;
    CalculateRotationMatrix(epoch);
    // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
-   Rvector3 tmpPosVec(inState[0],inState[1], inState[2]);
-   Rvector3 tmpVelVec(inState[3],inState[4], inState[5]);
+   //Rvector3 tmpPosVec(inState[0],inState[1], inState[2]);
+   //Rvector3 tmpVelVec(inState[3],inState[4], inState[5]);
+   tmpPosVec.Set(inState[0],inState[1], inState[2]);
+   tmpVelVec.Set(inState[3],inState[4], inState[5]);
    //const Real  *inData = inState.GetDataVector();
    const Real  *tmpPos = tmpPosVec.GetDataVector();
    const Real  *tmpVel = tmpVelVec.GetDataVector();
@@ -547,6 +551,8 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
                                      const Rvector &inState,
                                      Rvector &outState)
 {
+   static Rvector3 tmpPosVec;
+   static Rvector3 tmpVelVec;
    CalculateRotationMatrix(epoch);
    // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
    //Rvector3 tmpPos(inState[0],inState[1], inState[2]);
@@ -555,10 +561,11 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
    //Rmatrix33 tmpRotDot = rotDotMatrix.Transpose();
    //Rvector3 outPos     = tmpRot    * tmpPos ;
    //Rvector3 outVel     = (tmpRotDot * tmpPos) + (tmpRot * tmpVel);
+   tmpPosVec.Set(inState[0],inState[1], inState[2]);
+   tmpVelVec.Set(inState[3],inState[4], inState[5]);
 
-
-   Rvector3 tmpPosVec(inState[0],inState[1], inState[2]);
-   Rvector3 tmpVelVec(inState[3],inState[4], inState[5]);
+   //Rvector3 tmpPosVec(inState[0],inState[1], inState[2]);
+   //Rvector3 tmpVelVec(inState[3],inState[4], inState[5]);
    const Real  *tmpPos = tmpPosVec.GetDataVector();
    const Real  *tmpVel = tmpVelVec.GetDataVector();
    // rotMatrix-T * tmpPos;
