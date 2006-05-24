@@ -88,7 +88,12 @@ BaseStopCondition::BaseStopCondition(const std::string &name, const std::string 
                                      const Real &goal, const Real &tol,
                                      const Integer repeatCount, //RefFrame *refFrame,
                                      Interpolator *interp)
-   : GmatBase(Gmat::STOP_CONDITION, "StopCondition", name)
+   : GmatBase(Gmat::STOP_CONDITION, "StopCondition", name),
+     previousEpoch      (-999999.999999),
+     previousValue      (-999999.999999),
+     isAngleParameter   (false),
+     isPeriapse         (false),
+     isApoapse          (false)
 {
    objectTypes.push_back(Gmat::STOP_CONDITION);
    objectTypeNames.push_back("BaseStopCondition");
@@ -120,6 +125,7 @@ BaseStopCondition::BaseStopCondition(const std::string &name, const std::string 
    mNumValidPoints = 0;
    mBufferSize = 0;
    mStopEpoch = REAL_PARAMETER_UNDEFINED;
+   mStopInterval = 0.0;
    
    mInitialized = false;
    mUseInternalEpoch = false;
@@ -146,7 +152,12 @@ BaseStopCondition::BaseStopCondition(const std::string &name, const std::string 
  */
 //------------------------------------------------------------------------------
 BaseStopCondition::BaseStopCondition(const BaseStopCondition &copy)
-   : GmatBase(copy)
+   : GmatBase(copy),
+     previousEpoch      (-999999.999999),
+     previousValue      (-999999.999999),
+     isAngleParameter   (copy.isAngleParameter),
+     isPeriapse         (copy.isPeriapse),
+     isApoapse          (copy.isApoapse)
 {
    mBaseEpoch = copy.mBaseEpoch;
    mEpoch = copy.mEpoch;
@@ -168,6 +179,7 @@ BaseStopCondition::BaseStopCondition(const BaseStopCondition &copy)
    mGoalStr = copy.mGoalStr;
    
    mStopEpoch = copy.mStopEpoch;
+   mStopInterval = 0.0;
    mStopParam = copy.mStopParam;
    mEpochParam = copy.mEpochParam;
    mGoalParam = copy.mGoalParam;
@@ -218,6 +230,7 @@ BaseStopCondition& BaseStopCondition::operator= (const BaseStopCondition &right)
    mGoalStr = right.mGoalStr;
    
    mStopEpoch = right.mStopEpoch;
+   mStopInterval = right.mStopInterval;
    mStopParam = right.mStopParam;
    mEpochParam = right.mEpochParam;
    mGoalParam = right.mGoalParam;
@@ -229,6 +242,13 @@ BaseStopCondition& BaseStopCondition::operator= (const BaseStopCondition &right)
    mNeedInterpolator = right.mNeedInterpolator;
    mAllowGoalParam = right.mAllowGoalParam;
    mBackwardsProp = right.mBackwardsProp;
+   
+   previousEpoch = -999999.999999;
+   previousValue = -999999.999999;
+   
+   isAngleParameter = right.isAngleParameter;
+   isPeriapse       = right.isPeriapse;
+   isApoapse        = right.isApoapse;
    
    CopyDynamicData(right);
 
@@ -280,6 +300,16 @@ bool BaseStopCondition::Initialize()
       {
          mGoal = 0.0;
          mAllowGoalParam = false;
+         if (mStopParam->GetTypeName() == "Apoapsis")
+            isApoapse = true;
+         if (mStopParam->GetTypeName() == "Periapsis")
+            isPeriapse = true;
+      }
+      
+      if (mStopParamType == "TA" || mStopParamType == "MA" ||
+          mStopParamType == "EA")
+      {
+         isAngleParameter = true;
       }
       
       if (mNeedInterpolator)
@@ -450,6 +480,16 @@ bool BaseStopCondition::Validate()
    #endif
    
    return true;
+}
+
+void BaseStopCondition::Reset()
+{
+   mNumValidPoints = 0;
+}
+
+Real BaseStopCondition::GetStopInterval()
+{
+   return mStopInterval;
 }
 
 

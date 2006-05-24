@@ -29,6 +29,7 @@
 
 
 //#define DEBUG_COMMAND_DEALLOCATION
+//#define DEBUG_COMMAND_SUMMARY_LIST
 
 
 //---------------------------------
@@ -1243,6 +1244,9 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
          for (std::map<std::string, GmatBase *>::iterator i = objectMap->begin();
               i != objectMap->end(); ++i)
          {
+            #ifdef DEBUG_COMMAND_SUMMARY_LIST
+               MessageInterface::ShowMessage("Examining %s\n", i->first.c_str());
+            #endif
             obj = i->second;
             if (obj->GetTypeName() == "Spacecraft")
             {

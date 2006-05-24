@@ -27,6 +27,8 @@
 //#define DEBUG_STOPCOND 2
 //#define DEBUG_STOPCOND_PERIAPSIS 1
 
+//#define DEBUG_BUFFER_FILLING
+
 using namespace GmatMathUtil;
 
 //---------------------------------
@@ -113,33 +115,67 @@ StopCondition::~StopCondition()
 //------------------------------------------------------------------------------
 bool StopCondition::Evaluate()
 {
-   bool goalMet = false;
+   bool goalMet = false, readyToTest = true;
    Real epoch;
-   Real rval;
-   Real stopEpoch; //in A1Mjd
+   Real currentParmValue;
    
    if (mStopParam == NULL || (mAllowGoalParam && mGoalParam == NULL))
       Initialize();
+      
+   #ifdef DEBUG_BUFFER_FILLING
+      MessageInterface::ShowMessage(
+         "StopCondition::Evaluate called\n");
+   #endif
    
    // evaluate goal
    if (mAllowGoalParam)
       mGoal = mGoalParam->EvaluateReal();
+
    
    // set current epoch
    if (mUseInternalEpoch)
       epoch = mEpoch;
    else
       epoch = mEpochParam->EvaluateReal();
+      
+   currentParmValue = mStopParam->EvaluateReal();
+
+   if (isAngleParameter)
+      readyToTest = CheckOnAnomaly(currentParmValue);
    
+   if (isApoapse)
+   {
+      readyToTest = CheckOnApoapsis();
+      if (!readyToTest)
+         previousValue = currentParmValue;
+   }
+         
+   if (isPeriapse)
+   {
+      readyToTest = CheckOnPeriapsis();
+      if (!readyToTest)
+         previousValue = currentParmValue;
+   }
+
+   if (mNumValidPoints == 0)
+   {
+      previousValue = currentParmValue;
+      previousEpoch = epoch;
+      mNumValidPoints = 1;
+   }
+   
+  
+// *****************************************************************************
+// Ignore update to time params for now 
+// *****************************************************************************
    // for time data we don't need to interpolate
    if (mStopParam->IsTimeParameter())
    {
-      rval = mStopParam->EvaluateReal();
-      
       #if DEBUG_STOPCOND > 1
       MessageInterface::ShowMessage
          ("StopCondition::Evaluate() mUseInternalEpoch = %d, epoch = %f, "
-          "mGoal = %f, rval = %f\n",  mUseInternalEpoch, epoch, mGoal, rval);
+          "mGoal = %f, currentParmValue = %f\n",  mUseInternalEpoch, epoch, 
+          mGoal, currentParmValue);
       #endif
       
       // handler for time based stopping for backwards prop
@@ -147,15 +183,15 @@ bool StopCondition::Evaluate()
 
       #if DEBUG_STOPCOND > 1
       MessageInterface::ShowMessage
-         ("StopCondition::Evaluate() mult*rval=%g, mult*mGoal=%g, diff=%g, "
-          "mTolerance=%g\n",  mult*rval, mult*mGoal, Abs(mult*rval - mult*mGoal),
-          mTolerance);
+         ("StopCondition::Evaluate() mult*currentParmValue=%g, mult*mGoal=%g, "
+          "diff=%g, mTolerance=%g\n",  mult*currentParmValue, mult*mGoal, 
+          Abs(mult*currentParmValue - mult*mGoal), mTolerance);
       #endif
 
       // use time tolerance = 1.0e-6 for equality test
-      //if (mult*rval >= mult*mGoal)
-      if ((Abs(mult*rval - mult*mGoal) <= 1.0e-6) ||
-          (mult*rval >= mult*mGoal))
+      //if (mult*currentParmValue >= mult*mGoal)
+      if ((Abs(mult*currentParmValue - mult*mGoal) <= 1.0e-6) ||
+          (mult*currentParmValue >= mult*mGoal))
       {
          std::string stopParamType = mStopParam->GetTypeName();
          
@@ -173,6 +209,9 @@ bool StopCondition::Evaluate()
          
          goalMet = true;
       }
+      else
+         previousEpoch = epoch;
+      
 
       #if DEBUG_STOPCOND > 1
       MessageInterface::ShowMessage
@@ -181,93 +220,40 @@ bool StopCondition::Evaluate()
       #endif
       
    }
+// *****************************************************************************
+// End of time parameter block
+// *****************************************************************************
    else
    {
-      mNumValidPoints = (mNumValidPoints < mBufferSize) ?
-         mNumValidPoints + 1 : mNumValidPoints;
-      
-      #if DEBUG_STOPCOND > 1
-      MessageInterface::ShowMessage("StopCondition::Evaluate() mNumValidPoints=%d, "
-                                    "mBufferSize=%d\n", mNumValidPoints, mBufferSize);
+      Real min, max;
+      min = (currentParmValue<previousValue ? currentParmValue : previousValue);
+      max = (currentParmValue>previousValue ? currentParmValue : previousValue);
+
+      #ifdef DEBUG_STOP_COND
+         MessageInterface::ShowMessage(
+            "Evaluating: min = %lf, max = %lf, goal = %lf\n", min, max, mGoal);
       #endif
       
-      // shift values to make room for newest value
-      for (int i=0; i<mBufferSize-1; i++)
+      if ((min != max) && readyToTest)
       {
-         mEpochBuffer[i] = mEpochBuffer[i+1];
-         mValueBuffer[i] = mValueBuffer[i+1];
-      }
-      
-      rval = mStopParam->EvaluateReal();
-      
-      #if DEBUG_STOPCOND
-      MessageInterface::ShowMessage
-         ("StopCondition::Evaluate() epoch=%f, mStopParam=%s, rval=%f, mGoal=%f\n",
-          epoch, mStopParam->GetName().c_str(), rval, mGoal);
-      #endif
-      
-      mEpochBuffer[mBufferSize - 1] = epoch;
-      mValueBuffer[mBufferSize - 1] = rval;
-      
-      //------------------------------------------------------------
-      // Should handle Apoapsis, Periapsis parameters which need 
-      // additional parameters for checking for stopping condition
-      //------------------------------------------------------------
- 
-      if (mStopParamType == "Apoapsis")
-      {
-         goalMet = CheckOnApoapsis();
-      }
-      else if (mStopParamType == "Periapsis")
-      {
-         goalMet = CheckOnPeriapsis();
-      }
-      else
-      {
-         if (mStopParamType == "TA" || mStopParamType == "MA" ||
-             mStopParamType == "EA")
+         if ((mGoal >= min) && (mGoal <= max))
          {
-            goalMet = CheckOnAnomaly(rval);
+            goalMet = true;
+            mStopInterval = (epoch - previousEpoch) * 86400.0;
+      
+            #ifdef DEBUG_STOP_COND
+               MessageInterface::ShowMessage(
+                  "Previous Epoch = %.12lf, Value = %.12lf\n", previousEpoch,
+                  previousValue);
+            #endif
+
          }
          else
          {
-            // Stop if at least <mBufferSize> points set, and either
-            //   1) last value was more than goal, but current value is less,
-            //   2) last value was less than goal, but current value is more.
-            if (mNumValidPoints >= mBufferSize &&
-                ((mValueBuffer[mBufferSize-2] >= mGoal  &&
-                  mValueBuffer[mBufferSize-1] <= mGoal) ||  
-                 (mValueBuffer[mBufferSize-2] <= mGoal  &&
-                  mValueBuffer[mBufferSize-1] >= mGoal) ))
-            {
-               goalMet = true;
-            }
+            // Save the found values in for next time through
+            previousEpoch = epoch;
+            previousValue = currentParmValue;
          }
-      }
-      
-      if (goalMet)
-      {
-         // interpolate epoch
-         mInterpolator->Clear();
-         for (int i=0; i<mBufferSize; i++)
-         {
-            
-            #if DEBUG_STOPCOND
-            MessageInterface::ShowMessage
-               ("StopCondition::Evaluate() i=%d, mValueBuffer=%f, "
-                "mEpochBuffer=%f\n", i, mValueBuffer[i], mEpochBuffer[i]);
-            #endif
-            
-            mInterpolator->AddPoint(mValueBuffer[i], &mEpochBuffer[i]);
-         }
-         
-         if (mInterpolator->Interpolate(mGoal, &stopEpoch))
-            mStopEpoch = stopEpoch;
-         
-         #if DEBUG_STOPCOND
-         MessageInterface::ShowMessage
-            ("StopCondition::Evaluate() mStopEpoch=%f\n", mStopEpoch);
-         #endif
       }
    }
    
@@ -276,7 +262,215 @@ bool StopCondition::Evaluate()
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+// bool IsTimeCondition()
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if teh stopping condition is a time based condition.
+ * 
+ * @return true if this is a time based stopping condition, false otherwise.
+ */
+//------------------------------------------------------------------------------
+bool StopCondition::IsTimeCondition()
+{
+   return mStopParam->IsTimeParameter();
+}
+
+
+//------------------------------------------------------------------------------
+// bool AddToBuffer(bool isInitialPoint)
+//------------------------------------------------------------------------------
+/**
+ * Adds a data point to the ring buffer used for interpolation.
+ * 
+ * @param <isInitialPoint> Flag indicating if this is the first point for this 
+ * stop evaluation.
+ * 
+ * @return true if a stop epoch can be evaluated; false if more points are 
+ * required.
+ */
+//------------------------------------------------------------------------------
+bool StopCondition::AddToBuffer(bool isInitialPoint)
+{
+   #ifdef DEBUG_BUFFER_FILLING
+      MessageInterface::ShowMessage(
+         "StopCondition::AddToBuffer(%s) called, internalEpoch is %s\n",
+         (isInitialPoint ? "true" : "false"),
+         (mUseInternalEpoch ? "true" : "false"));
+   #endif
+   
+   // For now, skip time cases because they are already built
+   if (IsTimeCondition())
+      return true;
+   
+   // Flag indicating if both the ring buffer is full, and the stop condition 
+   // is bracketed
+   bool retval = false;
+
+   Real epoch;
+   Real currentParmValue;
+   Real stopEpoch; //in A1Mjd
+   
+   // evaluate goal
+   if (mAllowGoalParam)
+      mGoal = mGoalParam->EvaluateReal();
+   
+   // set current epoch
+   if (mUseInternalEpoch)
+      epoch = mEpoch;
+   else
+      epoch = mEpochParam->EvaluateReal();
+      
+   currentParmValue = mStopParam->EvaluateReal();
+
+   // Force anomalies to handle wrapping
+   if (isAngleParameter)
+   {
+      if (!CheckOnAnomaly(currentParmValue))
+         return false;
+   }
+
+   #ifdef DEBUG_BUFFER_FILLING
+      MessageInterface::ShowMessage(
+         "  New point: %.12lf, %.12lf\n",
+         epoch, currentParmValue);
+   #endif
+
+   // Actions taken to initialize the ring buffer
+   if (isInitialPoint)
+   {
+      // Reset the internal buffer and the point count
+      mNumValidPoints = 1;  // We always have the data for the initial point
+      
+      for (int i = 0; i < mBufferSize; ++i)
+      {
+         mValueBuffer[i] = 0.0;
+         mEpochBuffer[i] = 0.0;
+      }
+      
+      // Fill in the data for the first point
+      mValueBuffer[mBufferSize-1] = previousValue;
+      
+      if (mUseInternalEpoch)
+         mEpochBuffer[mBufferSize-1] = 0.0; 
+      else
+         mEpochBuffer[mBufferSize-1] = previousEpoch;
+   }
+
+   // Roll values in the ring buffer to make room for newest value
+   for (int i = 0; i < mBufferSize-1; ++i)
+   {
+      mEpochBuffer[i] = mEpochBuffer[i+1];
+      mValueBuffer[i] = mValueBuffer[i+1];
+   }
+
+   // To do: handle the special cases: apsides and angles
+
+   // Fill in the next data point
+   mValueBuffer[mBufferSize-1] = currentParmValue;
+   mEpochBuffer[mBufferSize-1] = epoch;
+   ++mNumValidPoints;
+   
+   // Only start looking for a solution when the ring buffer is full   
+   if (mNumValidPoints >= mBufferSize)
+   {
+      Real minVal = mValueBuffer[0], maxVal = mValueBuffer[mBufferSize - 1];
+      for (int i = 0; i < mBufferSize; ++i)
+      {
+         if (minVal > mValueBuffer[i])
+            minVal = mValueBuffer[i];
+         if (maxVal < mValueBuffer[i])
+            maxVal = mValueBuffer[i];
+      }
+      
+      #ifdef DEBUG_BUFFER_FILLING
+         MessageInterface::ShowMessage("Min value = %.12lf, Max = %.12lf\n",
+            minVal, maxVal);
+      #endif
+
+      // If -- and only if -- the goal is bracketed, then interpolate the epoch
+      if ((mGoal >= minVal) && (mGoal <= maxVal))
+      {
+         // Prep the interpolator
+         mInterpolator->Clear();
+         for (int i=0; i<mBufferSize; i++)
+         {
+            #if DEBUG_STOPCOND
+            MessageInterface::ShowMessage
+               ("StopCondition::Evaluate() i=%d, mValueBuffer=%f, "
+                "mEpochBuffer=%f\n", i, mValueBuffer[i], mEpochBuffer[i]);
+            #endif
+            mInterpolator->AddPoint(mValueBuffer[i], &mEpochBuffer[i]);
+         }
+         
+         // Finally, if we can interpolate an epoch, we have success!
+         if (mInterpolator->Interpolate(mGoal, &stopEpoch))
+         {
+            mStopEpoch = stopEpoch;
+            retval = true;
+         }
+         
+         #if DEBUG_STOPCOND
+         MessageInterface::ShowMessage
+            ("StopCondition::Evaluate() mStopEpoch=%f\n", mStopEpoch);
+         #endif
+      }
+   }
+
+   #ifdef DEBUG_BUFFER_FILLING
+      MessageInterface::ShowMessage("Valid points: %d, Buffer contents:\n",
+         mNumValidPoints);
+      for (int i=0; i<mBufferSize; i++)
+      {
+         MessageInterface::ShowMessage
+            ("   [%d]   %.12lf  %.12lf\n", i, mEpochBuffer[i], mValueBuffer[i]);
+      }
+   #endif
+
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetStopEpoch()
+//------------------------------------------------------------------------------
+/**
+ * Calculates the time to step (in seconds) needed to reach the stop epoch.
+ * 
+ * @return the time to step (in seconds)
+ */
+//------------------------------------------------------------------------------
+Real StopCondition::GetStopEpoch()
+{
+   if (IsTimeCondition())
+      return (BaseStopCondition::GetStopEpoch() - previousEpoch) * 86400.0;
+      
+   Real stopEpoch = 0.0;
+   
+   mInterpolator->Clear();
+   for (int i=0; i<mBufferSize; i++)
+   {
+      
+      #if DEBUG_STOPCOND
+      MessageInterface::ShowMessage
+         ("StopCondition::Evaluate() i=%d, mValueBuffer=%f, "
+          "mEpochBuffer=%f\n", i, mValueBuffer[i], mEpochBuffer[i]);
+      #endif
+      
+      mInterpolator->AddPoint(mValueBuffer[i], &mEpochBuffer[i]);
+   }
+   
+   if (mInterpolator->Interpolate(mGoal, &stopEpoch))
+      mStopEpoch = stopEpoch;
+   else
+      throw StopConditionException("Unable to interpolate a stop epoch");
+      
+   return mStopEpoch;
+}
+
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the StopCondition.
@@ -285,7 +479,7 @@ bool StopCondition::Evaluate()
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* StopCondition::Clone(void) const
+GmatBase* StopCondition::Clone() const
 {
    return (new StopCondition(*this));
 }
@@ -300,48 +494,23 @@ GmatBase* StopCondition::Clone(void) const
 //------------------------------------------------------------------------------
 bool StopCondition::CheckOnPeriapsis()
 {   
+   // Eccentricity must be large enough to keep asculations from masking the
+   // stop point
    Real ecc = mEccParam->EvaluateReal();
-   Real rmag = mRmagParam->EvaluateReal();
-   
-   #if DEBUG_STOPCOND_PERIAPSIS > 1
-   MessageInterface::ShowMessage
-      ("CheckOnPeriapsis() ecc=%f mEccTol=%f rmag=%f mRange=%f\n",
-       ecc, mEccTol, rmag, mRange);
-   #endif
+   Real rmag = mRmagParam->EvaluateReal();  // ???
    
    //----------------------------------------------------------------------
-   // stop if at least <mBufferSize> points set, and either
-   //   1) propagating backwards, and R*V goes + to -,
-   //   2) propagating forwards, and R*V goes - to +
+   // A necessary condition for periapse stop: when moving forward in time,
+   // R dot V must cross from negative to positive, so previous value must be 
+   // less than the goal value. 
    //----------------------------------------------------------------------
-   
    if ((rmag <= mRange) && (ecc >= mEccTol))
    {
-      if (mNumValidPoints >= mBufferSize &&
-          ((mBackwardsProp &&
-            mValueBuffer[mBufferSize-2] >= mGoal  &&
-            mValueBuffer[mBufferSize-1] <= mGoal) ||  
-           (!mBackwardsProp &&
-            mValueBuffer[mBufferSize-2] <= mGoal  &&
-            mValueBuffer[mBufferSize-1] >= mGoal)))
-      {
-         #if DEBUG_STOPCOND_PERIAPSIS
-         MessageInterface::ShowMessage
-            ("StopCondition::CheckOnPeriapsis() ===> Stopping condition met: "
-             "epoch=%f, mGoal=%f, ecc=%f, rmag=%f\n", mEpochBuffer[mBufferSize - 1],
-             mGoal, ecc, rmag);
-         #endif
-         
+      if (( mBackwardsProp && (previousValue >= mGoal))  ||  
+          (!mBackwardsProp && (previousValue <= mGoal)))
          return true;
-      }
    }
    
-   #if DEBUG_STOPCOND_PERIAPSIS > 1
-   MessageInterface::ShowMessage
-      ("CheckOnPeriapsis() mGoal=%f last=%f curr=%f\n",
-       mGoal, mValueBuffer[mBufferSize-2], mValueBuffer[mBufferSize-1]);
-   #endif
-
    return false;
 }
 
@@ -351,26 +520,21 @@ bool StopCondition::CheckOnPeriapsis()
 //------------------------------------------------------------------------------
 bool StopCondition::CheckOnApoapsis()
 {
+   // Eccentricity must be large enough to keep asculations from masking the
+   // stop point
    Real ecc = mEccParam->EvaluateReal();
    
    //----------------------------------------------------------------------
-   // Stop if at least <mBufferSize> points set and eccentricity flag set, and either
-   //   1) propagating backwards, and R*V goes - to +,
-   //   2) propagating forwards, and R*V goes + to -
+   // A necessary condition for apoapse stop: when moving forward in time,
+   // R dot V must cross from positive to negative, so previous value must be 
+   // greater than the goal value. 
    //----------------------------------------------------------------------
    
    if (ecc >= mEccTol)
    {
-      if (mNumValidPoints >= mBufferSize &&
-          ((mBackwardsProp &&
-            mValueBuffer[mBufferSize-2] <= mGoal  &&
-            mValueBuffer[mBufferSize-1] >= mGoal) ||  
-           (!mBackwardsProp &&
-            mValueBuffer[mBufferSize-2] >= mGoal  &&
-            mValueBuffer[mBufferSize-1] <= mGoal)))
-      {
+      if ((mBackwardsProp && (previousValue <= mGoal))  ||  
+          (!mBackwardsProp && (previousValue >= mGoal)))
          return true;
-      }
    }
    
    return false;
@@ -380,37 +544,25 @@ bool StopCondition::CheckOnApoapsis()
 //------------------------------------------------------------------------------
 // bool CheckOnAnomaly(Real anomaly)
 //------------------------------------------------------------------------------
-bool StopCondition::CheckOnAnomaly(Real anomaly)
+bool StopCondition::CheckOnAnomaly(Real &anomaly)
 {
    Real tempGoal = AngleUtil::PutAngleInDegRange(mGoal, 0.0, GmatMathUtil::TWO_PI_DEG);
+   
+   #ifdef DEBUG_STOP_COND
+      MessageInterface::ShowMessage(
+         "CheckOnAnomaly(%.12lf), tempGoal = %.12lf\n", anomaly, tempGoal);
+   #endif
+      
    // set current current history to be between goal - pi and goal + pi
-   mValueBuffer[mBufferSize-1] =
+   anomaly =
       AngleUtil::PutAngleInDegRange(anomaly, tempGoal - GmatMathUtil::PI_DEG, 
                                     tempGoal + GmatMathUtil::PI_DEG);
    Real diff = AngleUtil::PutAngleInDegRange
-      (GmatMathUtil::Abs(tempGoal - mValueBuffer[mBufferSize-1]),
+      (GmatMathUtil::Abs(tempGoal - anomaly),
        0.0, GmatMathUtil::TWO_PI_DEG);
    
-   #if DEBUG_STOPCOND
-   MessageInterface::ShowMessage
-      ("CheckOnAnomaly() mGoal=%f tempGoal=%f diff=%f last=%f curr=%f\n",
-       mGoal, tempGoal, diff, mValueBuffer[mBufferSize-2],
-       mValueBuffer[mBufferSize-1]);
-   #endif
-   
-   //----------------------------------------------------------------------   
-   // Stop if at least <mBufferSize> points set and difference is <= pi/2, and either
-   //   1) last TA was less than goal, and current TA is greater, or
-   //   2) last TA was greater than goal, and current TA is less 
-   //----------------------------------------------------------------------
-   if (mNumValidPoints >= mBufferSize && diff <= GmatMathUtil::PI_DEG/2.0 &&
-       ((mValueBuffer[mBufferSize-2] <= tempGoal  &&
-         mValueBuffer[mBufferSize-1] >= tempGoal) ||  
-        (mValueBuffer[mBufferSize-2] >= tempGoal  &&
-         mValueBuffer[mBufferSize-1] <= tempGoal) ))
-   {
+   if (diff <= GmatMathUtil::PI_DEG/2.0)
       return true;
-   }
    
    return false;
 }

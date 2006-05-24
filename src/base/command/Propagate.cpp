@@ -70,6 +70,10 @@ Propagate::Propagate() :
    inProgress                  (false),
    hasFired                    (false),
    epochID                     (-1),
+   stopInterval                (0.0),
+   stopTrigger                 (-1),
+   hasStoppedOnce              (false),
+   stepsTaken                  (0),
    state                       (NULL),
    pubdata                     (NULL),
    stopCondMet                 (false),
@@ -102,6 +106,8 @@ Propagate::Propagate() :
 Propagate::~Propagate()
 {
    /// @todo: clean memory for satName.push_back(new StringArray);
+   
+   EmptyBuffer();
  
    for (UnsignedInt i=0; i<stopWhen.size(); i++)
       delete stopWhen[i];
@@ -126,6 +132,10 @@ Propagate::Propagate(const Propagate &p) :
    inProgress                  (false),
    hasFired                    (false),
    epochID                     (p.epochID),
+   stopInterval                (0.0),
+   stopTrigger                 (-1),
+   hasStoppedOnce              (false),
+   stepsTaken                  (0),
    state                       (NULL),
    pubdata                     (NULL),
    stopCondMet                 (false),
@@ -180,8 +190,10 @@ Propagate& Propagate::operator=(const Propagate &p)
    dim                     = p.dim;
    singleStepMode          = p.singleStepMode;
    currentMode             = p.currentMode;
-   initialized = false;
-    
+   initialized             = false;
+   hasStoppedOnce          = false;
+   stepsTaken              = 0;
+       
    return *this;
 }
 
@@ -1720,6 +1732,7 @@ bool Propagate::Initialize()
          if (so->IsManeuvering())
             finiteBurnActive = true;
          sats.push_back(so);
+         AddToBuffer(so);
          fm->AddSpaceObject(so);
          if (so->GetType() == Gmat::FORMATION)
             FillFormation(so, owners, elements);
@@ -2204,11 +2217,17 @@ void Propagate::CheckStopConditions(Integer epochID)
          
          if (stopWhen[i]->Evaluate())
          {
+            stopInterval = stopWhen[i]->GetStopInterval();
+            if (stopInterval == 0.0)
+            {
+               stopEpoch = stopWhen[i]->GetStopEpoch();
+            }
             stopCondMet = true;
-            stopEpoch = (stopWhen[i]->GetStopEpoch());
+            stopTrigger = i;
+//            stopEpoch = (stopWhen[i]->GetStopEpoch());
             #if DEBUG_PROPAGATE_EXE
                MessageInterface::ShowMessage
-                  ("Propagate::PrepareToPropagate() %s met\n", 
+                  ("Propagate::CheckStopConditions() %s met\n", 
                    stopWhen[i]->GetName().c_str());
             #endif
             break; // exit if any stop condition met
@@ -2240,20 +2259,96 @@ void Propagate::CheckStopConditions(Integer epochID)
 //------------------------------------------------------------------------------
 void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
 {
-//   // Update the epoch on the force models
-//   for (UnsignedInt i = 0; i < fm.size(); ++i) 
-//   {
-//      fm[i]->UpdateInitialData();
-//   }
-
    #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage(
          "Propagate::TakeFinalStep currEpoch = %f, stopEpoch = %f, "
          "elapsedTime = %f\n", currEpoch[0], stopEpoch, elapsedTime[0]);
    #endif
    
-   Real secsToStep = 
-      (stopEpoch - currEpoch[trigger]) * GmatTimeUtil::SECS_PER_DAY;
+   // Interpolate to get the stop epoch
+   if (stopInterval != 0.0)
+   {
+      if (stopTrigger < 0)
+         throw CommandException(
+            "Stopping condition was not set for final step on the line \n" +
+            GetGeneratingString(Gmat::SCRIPTING));
+
+      // First save the spacecraft for later restoration
+      for (UnsignedInt i = 0; i < fm.size(); ++i) 
+      {
+         #if DEBUG_PROPAGATE_EXE
+            MessageInterface::ShowMessage("   CurrentEpoch[%d] = %.12lf\n", i,
+               currEpoch[i]);
+         #endif
+         fm[i]->UpdateSpaceObject(currEpoch[i]);
+      }
+      BufferSatelliteStates(true);
+      
+      // Now fill in the ring buffer
+      Real ringStep = stopInterval / 4.0;
+      Integer ringStepsTaken = 0;
+      bool firstRingStep = true;
+      bool stopIsBracketed = false;
+      Real elapsedSeconds = 0.0;
+
+      while ((!stopIsBracketed) && (ringStepsTaken < 8))
+      {
+         // Take a fixed prop step
+         if (!TakeAStep(ringStep))
+            throw CommandException("Propagator Failed to Step fixed interval "
+               "while filling ring buffer\n");
+         elapsedSeconds += ringStep;
+
+         // Update spacecraft for that step
+         for (UnsignedInt i = 0; i < fm.size(); ++i) 
+         {
+            fm[i]->UpdateSpaceObject(
+               baseEpoch[i] + fm[i]->GetTime() / GmatTimeUtil::SECS_PER_DAY);
+         }
+
+         // Update the data in the stop condition
+         stopWhen[stopTrigger]->SetRealParameter(stopCondEpochID,
+            elapsedSeconds);
+//            baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY);
+         stopIsBracketed = stopWhen[stopTrigger]->AddToBuffer(firstRingStep);
+         
+         ++ringStepsTaken;
+         firstRingStep = false;
+      }
+
+      // Now interpolate the epoch...
+      stopEpoch = stopWhen[stopTrigger]->GetStopEpoch();
+
+      #if DEBUG_PROPAGATE_EXE
+         MessageInterface::ShowMessage(
+            "Propagate::TakeFinalStep set the stopEpoch = %.12lf\n", stopEpoch);
+      #endif
+      
+      // ...and restore the spacecraft and force models
+      BufferSatelliteStates(false);
+      for (UnsignedInt i = 0; i < fm.size(); ++i) 
+      {
+         fm[i]->UpdateFromSpaceObject();
+         // Back out the steps talen to build the ring buffer
+         fm[i]->SetTime(fm[i]->GetTime() - ringStepsTaken * ringStep);
+
+         #if DEBUG_PROPAGATE_EXE
+            MessageInterface::ShowMessage(
+               "Force model base Epoch = %.12lf  elapsedTime = %.12lf  "
+               "net Epoch = %.12lf\n", baseEpoch[i], fm[i]->GetTime(), 
+               baseEpoch[i] + fm[i]->GetTime() / GmatTimeUtil::SECS_PER_DAY);
+         #endif
+      }
+   }
+   
+   Real secsToStep = stopEpoch;
+//      (stopEpoch - currEpoch[trigger]) * GmatTimeUtil::SECS_PER_DAY;
+
+   #if DEBUG_PROPAGATE_EXE
+      MessageInterface::ShowMessage(
+         "Step = %.12lf sec, calculated off of %.12lf and  %.12lf\n", 
+         secsToStep, stopEpoch, currEpoch[trigger]);
+   #endif
       
    // Perform stepsize rounding.  Note that the rounding precision can be set
    // by redefining the macro TIME_ROUNDOFF at the top of this file.  Set it to
@@ -2298,6 +2393,9 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
       pubdata[0] = baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY;
       memcpy(&pubdata[1], state, dim*sizeof(Real));
       publisher->Publish(streamID, pubdata, dim+1);
+      
+      hasStoppedOnce          = true;
+      stepsTaken              = 0;
          
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage
@@ -2368,6 +2466,8 @@ bool Propagate::Execute()
             {
                if (stopWhen[i]->Evaluate())
                {
+                  stopInterval = stopWhen[i]->GetStopInterval();
+                  stopTrigger = i;
                   stopCondMet = true;
                   stopEpoch = (stopWhen[i]->GetStopEpoch());
                   #if DEBUG_PROPAGATE_EXE
@@ -2410,6 +2510,10 @@ bool Propagate::Execute()
             break;
 
          CheckStopConditions(epochID);
+         ++stepsTaken;
+
+         if (hasStoppedOnce && (stepsTaken < 2))
+            stopCondMet = false;
          
          if (!stopCondMet)
          {
@@ -2458,6 +2562,9 @@ bool Propagate::Execute()
    if (!singleStepMode)
    {
       TakeFinalStep(epochID, trigger);
+      // reset the stopping conditions so that scanning starts over
+      for (UnsignedInt i=0; i<stopWhen.size(); i++)
+         stopWhen[i]->Reset(); 
    }
 
    #ifdef DEBUG_EPOCH_UPDATES
@@ -2718,4 +2825,103 @@ std::string Propagate::CreateParameter(const std::string &name)
    #endif
    
    return str;
+}
+
+
+//------------------------------------------------------------------------------
+// void AddToBuffer(SpaceObject *so)
+//------------------------------------------------------------------------------
+/**
+ * Adds satellites and formations to the state buffer.
+ * 
+ * @param <so> The SpaceObject that is added.
+ */
+//------------------------------------------------------------------------------
+void Propagate::AddToBuffer(SpaceObject *so)
+{
+   if (so->IsOfType(Gmat::SPACECRAFT))
+   {
+      satBuffer.push_back((Spacecraft *)(so->Clone()));
+   }
+   else if (so->IsOfType(Gmat::FORMATION))
+   {
+      Formation *form = (Formation*)so;
+      StringArray formSats = form->GetStringArrayParameter("Add");
+      
+      for (StringArray::iterator i = formSats.begin(); i != formSats.end(); ++i)
+         AddToBuffer((SpaceObject *)(*objectMap)[*i]);
+   }
+   else
+      throw CommandException("Object " + so->GetName() + " is not either a "
+         "Spacecraft or a Formation; cannot buffer the object for propagator "
+         "stopping conditions.");
+}
+
+
+//------------------------------------------------------------------------------
+// void EmptyBuffer()
+//------------------------------------------------------------------------------
+/**
+ * Cleans up the satellite state buffer.
+ */
+//------------------------------------------------------------------------------
+void Propagate::EmptyBuffer()
+{
+   for (std::vector<Spacecraft *>::iterator i = satBuffer.begin(); 
+        i != satBuffer.end(); ++i)
+   {
+      delete (*i);
+   }
+   satBuffer.clear();
+}
+
+//------------------------------------------------------------------------------
+// void BufferSatelliteStates(bool fillingBuffer)
+//------------------------------------------------------------------------------
+/**
+ * Preserves satellite state data so it can be restored after interpolating the 
+ * stopping condition propagation time.
+ * 
+ * @param <fillingBuffer> Flag used to indicate the fill direction.
+ */
+//------------------------------------------------------------------------------
+void Propagate::BufferSatelliteStates(bool fillingBuffer)
+{
+   Spacecraft *fromSat, *toSat;
+   std::string satName;
+   
+   for (std::vector<Spacecraft *>::iterator i = satBuffer.begin(); 
+        i != satBuffer.end(); ++i)
+   {
+      satName = (*i)->GetName();
+      if (fillingBuffer)
+      {
+         fromSat = (Spacecraft *)((*objectMap)[satName]);
+         toSat = *i;
+      }
+      else
+      {
+         fromSat = *i;
+         toSat = (Spacecraft *)((*objectMap)[satName]);
+      }
+
+      #ifdef DEBUG_STOPPING_CONDITIONS
+         MessageInterface::ShowMessage(
+            "   Sat is %s, fill direction is %s; fromSat epoch = %.12lf   "
+            "toSat epoch = %.12lf\n",
+            fromSat->GetName().c_str(),
+            (fillingBuffer ? "from propagator" : "from buffer"),
+            fromSat->GetRealParameter("A1Epoch"), 
+            toSat->GetRealParameter("A1Epoch"));
+      #endif
+      
+      (*toSat) = (*fromSat);
+      
+      #ifdef DEBUG_STOPPING_CONDITIONS
+         MessageInterface::ShowMessage(
+            "After copy, From epoch %.12lf to epoch %.12lf\n",
+            fromSat->GetRealParameter("A1Epoch"), 
+            toSat->GetRealParameter("A1Epoch"));
+      #endif      
+   }
 }

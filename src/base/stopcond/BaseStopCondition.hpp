@@ -49,7 +49,11 @@ public:
    
    bool Initialize();
    virtual bool Evaluate() = 0;
+   virtual bool IsTimeCondition() = 0;
+   virtual bool AddToBuffer(bool isInitialPoint) = 0;
    virtual bool Validate();
+   void Reset();
+   virtual Real GetStopInterval();
    
    bool IsInitialized();
    Integer GetBufferSize();
@@ -57,7 +61,7 @@ public:
    Parameter* GetEpochParameter();
    Parameter* GetStopParameter();
    Interpolator* GetInterpolator();
-   Real GetStopEpoch();
+   virtual Real GetStopEpoch();
    
    void SetDescription(const std::string &desc);
    void SetPropDirection(Real dir);
@@ -128,19 +132,30 @@ protected:
    Parameter *mEccParam;
    Parameter *mRmagParam;
    
-   /// ring buffer for epoches
+   /// ring buffer for epochs
    RealArray mEpochBuffer;
    /// ring buffer for associated values
    RealArray mValueBuffer;
    Integer mNumValidPoints;
    Integer mBufferSize;
    Real mStopEpoch;
+   Real mStopInterval;
+
+   // History data used instead of ring buffer for general propagation (before
+   // a stopping condition triggers
+   Real previousEpoch;
+   Real previousValue;
    
    bool mUseInternalEpoch;
    bool mInitialized;
    bool mNeedInterpolator;
    bool mAllowGoalParam;
    bool mBackwardsProp;
+   
+   // Flags used to mark special cases
+   bool isAngleParameter;
+   bool isPeriapse;
+   bool isApoapse;
    
    enum
    {

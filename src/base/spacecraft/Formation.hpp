@@ -69,6 +69,8 @@ public:
                                           const Integer index);
    virtual const StringArray& 
                         GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray& 
+                        GetStringArrayParameter(const std::string &label) const;
                        
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
                                     const std::string &name,

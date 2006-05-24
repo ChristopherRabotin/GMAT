@@ -140,10 +140,17 @@ protected:
    std::vector<SpaceObject *> sats;
    /// The stopping conditions
    std::vector<StopCondition *> stopWhen;
+   /// The time step that we need to unterpolate across
+   Real                    stopInterval;
+   /// Index to the Stopcondition that triggered the stop
+   Integer                 stopTrigger;
    /// Names of the spacecraft used in the stopping conditions
    StringArray             stopSatNames;
    /// The spacecraft used by the stopping conditions
    std::vector<SpaceObject *> stopSats;
+   /// Stopping condition evaluation requires propagation; the satBuffer lets us
+   /// restore the Spacecraft to the state needed for the last step 
+   std::vector<Spacecraft *> satBuffer;
    /// The object array used in GetRefObjectArray()
    ObjectArray             objectArray;
 
@@ -161,6 +168,12 @@ protected:
    std::vector<Propagator*> p;
    /// The ForceModel
    std::vector<ForceModel*> fm;
+   
+   // Members used to flag most recent detected stop, so we don't stop multiple 
+   // times at the same point
+   bool                     hasStoppedOnce;
+   Integer                  stepsTaken;
+   
 
    /// Allowed modes of propagation
    enum PropModes
@@ -235,6 +248,10 @@ protected:
    void                    AddTransientForce(StringArray *sats, ForceModel *p);
    void                    ClearTransientForces();
    std::string             CreateParameter(const std::string &name);
+   
+   void                    AddToBuffer(SpaceObject *so);
+   void                    EmptyBuffer();
+   void                    BufferSatelliteStates(bool fillingBuffer = true);
    
 private:
     

@@ -20,7 +20,9 @@
 
 
 #include "CubicSplineInterpolator.hpp"
+#include "MessageInterface.hpp"
 
+//#define DUMP_SPLINE_POINTS
 
 //---------------------------------
 //  public methods
@@ -134,6 +136,24 @@ bool CubicSplineInterpolator::Interpolate(const Real ind, Real *results)
    bool retval = BuildSplines();
    if (retval)
       retval = Estimate(ind, results);
+      
+   #ifdef DUMP_SPLINE_POINTS
+      MessageInterface::ShowMessage("Cubic spline data points:\n");
+      
+      Real increment = (x[bufferSize - 1] - x[0]) / 100.0, xval;
+      Real *dumpData = new Real[dimension];
+      for (Integer i = 0; i <= 100; ++i)
+      {
+         xval = x[0] + i * increment;
+         Estimate(xval, dumpData);
+         MessageInterface::ShowMessage("   %.12lf", xval);
+         for (Integer j = 0; j < dimension; ++j)
+            MessageInterface::ShowMessage("   %.12lf", dumpData[j]);
+         MessageInterface::ShowMessage("\n");
+      } 
+      
+      delete [] dumpData;   
+   #endif
 
    return retval;
 }
@@ -298,7 +318,8 @@ bool CubicSplineInterpolator::BuildSplines()
                 (y[i][j] - y[i-1][j]) / (x[i] - x[i-1]);
          u[i] = (6.0*u[i] / (x[i+1] - x[i-1]) - sig*u[i-1]) / p;
       }
-      // This implementation uses "natural" spline constaraints, so the second
+
+      // This implementation uses "natural" spline constraints, so the second
       // derivatives vanish at the endpoint;
       y2[4][j] = 0.0;
         

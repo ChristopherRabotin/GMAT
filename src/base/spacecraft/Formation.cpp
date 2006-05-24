@@ -655,6 +655,15 @@ const StringArray& Formation::GetStringArrayParameter(const Integer id) const
 }
 
 
+const StringArray& 
+         Formation::GetStringArrayParameter(const std::string &label) const
+{
+   if (label == "Add")
+      return componentNames;
+   return SpaceObject::GetStringArrayParameter(label);
+}
+
+
 //------------------------------------------------------------------------------
 // GmatBase* Formation::GetRefObject(const Gmat::ObjectType type,
 //                                   const std::string &name,

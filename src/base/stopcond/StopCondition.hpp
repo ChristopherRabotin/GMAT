@@ -41,6 +41,9 @@ public:
    virtual ~StopCondition();
 
    virtual bool Evaluate();
+   virtual bool IsTimeCondition();
+   virtual bool AddToBuffer(bool isInitialPoint);
+   virtual Real GetStopEpoch();
 
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -49,7 +52,7 @@ protected:
 
    bool CheckOnPeriapsis();
    bool CheckOnApoapsis();
-   bool CheckOnAnomaly(Real anomaly);
+   bool CheckOnAnomaly(Real &anomaly);
    
 private:
    
