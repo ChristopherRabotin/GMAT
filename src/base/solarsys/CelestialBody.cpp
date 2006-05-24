@@ -752,6 +752,14 @@ std::string CelestialBody::GetSourceFileName() const
 
 
 //------------------------------------------------------------------------------
+// PlanetaryEphem* GetSourceFile() const
+//------------------------------------------------------------------------------
+PlanetaryEphem*  CelestialBody::GetSourceFile() const
+{
+   return theSourceFile;
+}
+
+//------------------------------------------------------------------------------
 //  Gmat::AnalyticMethod GetAnalyticMethod() const
 //------------------------------------------------------------------------------
 /**

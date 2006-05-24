@@ -408,6 +408,29 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
    return result;
 }
 
+
+void  DeFile::GetAnglesAndRates(A1Mjd atTime, Real* angles, Real* rates, 
+                                bool overrideTimeSystem)
+{
+   // assume Luna for now - check for name later
+   double absJD = 0.0;
+   if (overrideTimeSystem)
+   {
+       double mjdTT = (double) TimeConverterUtil::Convert(atTime.Get(),
+                       TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
+                       GmatTimeUtil::JD_JAN_5_1941);
+      absJD        = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
+   }
+   else
+    {
+       double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
+                       TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD, 
+                       GmatTimeUtil::JD_JAN_5_1941);
+      absJD         = mjdTDB + GmatTimeUtil::JD_JAN_5_1941;
+    }
+   Interpolate_Libration(absJD, 12, angles, rates);
+}
+
 //------------------------------------------------------------------------------
 //  Integer* GetStartDayAndYear()
 //------------------------------------------------------------------------------
@@ -767,11 +790,16 @@ int DeFile::Initialize_Ephemeris( char *fileName )
 /**     Nutation -- Pointer to external array to receive the answer.         **/
 /**                                                                          **/
 /**  Returns: Nothing explicitly.                                            **/
+/**                                                                          **/
+/**  2006.05.19  W. Shoan/GSFC/MAB  added code to compute and return rates   **/
+/**              (cut-and-paste from Interpolate_State & modify )            **/
 /**==========================================================================**/
 
-void DeFile::Interpolate_Libration( double Time , int Target , double Libration[3] )
+void DeFile::Interpolate_Libration( double Time , int Target , 
+                                    double Libration[3], double rates[3] )
 {
-  double    A[50] , Cp[50]  , sum[3] , T_break , T_seg = 0.0 , T_sub , Tc = 0.0;
+  double    A[50] , Cp[50]  , Up[50], sum[3] , rateSum[3];
+  double    T_break , T_seg = 0.0 , T_sub , Tc = 0.0;
   int       i , j;
   long int  C , G , N , offset = 0;
 
@@ -878,22 +906,55 @@ void DeFile::Interpolate_Libration( double Time , int Target , double Libration[
   /*..........................................................................*/
 
   /*--------------------------------------------------------------------------*/
-  /* Compute interpolated the libration.                                      */
+  /* Compute interpolated the libration angles and rates                                     */
   /*--------------------------------------------------------------------------*/
   
   for ( i=0 ; i<3 ; i++ ) 
-      {                           
-        Cp[0]  = 1.0;                                 /* Begin polynomial sum */
+      {  
+         /*                         
+        Cp[0]  = 1.0;                                 // Begin polynomial sum 
         Cp[1]  = Tc;
         sum[i] = A[i*N] + A[1+i*N]*Tc;
 
-        for ( j=2 ; j<N ; j++ )                                  /* Finish it */
+        for ( j=2 ; j<N ; j++ )                                  // Finish it 
             {
               Cp[j]  = 2.0 * Tc * Cp[j-1] - Cp[j-2];
               sum[i] = sum[i] + A[j+i*N] * Cp[j];
             }
         Libration[i] = sum[i];
+        */
+
+        Cp[0] = 1.0;           
+        Cp[1] = Tc;
+        Cp[2] = 2.0 * Tc*Tc - 1.0;
+        
+        Up[0] = 0.0;
+        Up[1] = 1.0;
+        Up[2] = 4.0 * Tc;
+
+        for ( j=3 ; j<N ; j++ )
+            {
+              Cp[j] = 2.0 * Tc * Cp[j-1] - Cp[j-2];
+              Up[j] = 2.0 * Tc * Up[j-1] + 2.0 * Cp[j-1] - Up[j-2];
+            }
+
+        //P_Sum[i] = 0.0;           
+        //V_Sum[i] = 0.0;
+        sum[i]     = 0.0;           
+        rateSum[i] = 0.0;
+
+        //for ( j=N-1 ; j>-1 ; j-- )  P_Sum[i] = P_Sum[i] + A[j+i*N] * Cp[j];
+        //for ( j=N-1 ; j>0  ; j-- )  V_Sum[i] = V_Sum[i] + A[j+i*N] * Up[j];
+        for ( j=N-1 ; j>-1 ; j-- )  sum[i]     = sum[i] + A[j+i*N] * Cp[j];
+        for ( j=N-1 ; j>0  ; j-- )  rateSum[i] = rateSum[i] + A[j+i*N] * Up[j];
+        //X.Position[i] = P_Sum[i];
+        //X.Velocity[i] = V_Sum[i] * 2.0 * ((double) G) / (T_span * 86400.0);
+        Libration[i] = sum[i];
+        rates[i]     = rateSum[i] * 2.0 * ((double) G) / (T_span * 86400.0);
       }
+  /*--------------------------------------------------------------------------*/
+  /* Compute interpolated the rates.                                          */
+  /*--------------------------------------------------------------------------*/
       
   return;
 }

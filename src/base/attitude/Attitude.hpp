@@ -85,6 +85,9 @@ public:
    static Rmatrix33 ToCosineMatrix(const Rvector3 &eulerAngles, 
                                    Integer seq1, Integer seq2, 
                                    Integer seq3);
+   static Rmatrix33 ToCosineMatrix(const Real *eulerAngles, 
+                                   Integer seq1, Integer seq2, 
+                                   Integer seq3);
    static Rvector3  ToEulerAngles(const Rvector &quat1, Integer seq1,
                                   Integer seq2,         Integer seq3);
    static Rvector3  ToEulerAngles(const Rmatrix33 &cosMat, Integer seq1,

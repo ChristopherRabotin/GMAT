@@ -25,6 +25,7 @@
 #include "DynamicAxes.hpp"
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
+#include "DeFile.hpp"
 #include "Planet.hpp"
 #include "RealUtilities.hpp"
 #include "Linear.hpp"
@@ -34,12 +35,14 @@
 #include "TimeSystemConverter.hpp"
 #include "CoordinateSystemException.hpp"
 #include "MessageInterface.hpp"
+#include "Attitude.hpp"
 
 using namespace GmatMathUtil;      // for trig functions, etc.
 using namespace GmatTimeUtil;      // for JD offsets, etc.
 
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_TIME_CALC
+//#define DEBUG_MOON_MATRIX
 
 #ifdef DEBUG_FIRST_CALL
    static bool firstCallFired = false;
@@ -578,6 +581,78 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       #endif
 
    }
+   if ((originName == SolarSystem::MOON_NAME) &&
+      ((((CelestialBody*)origin)->GetPosVelSource() == Gmat::DE_200) ||
+       (((CelestialBody*)origin)->GetPosVelSource() == Gmat::DE_405)))
+   {
+      if (!de)
+      {
+         de = (DeFile*) ((CelestialBody*)origin)->GetSourceFile();
+         if (!de)
+         throw CoordinateSystemException(
+               "No DE file specified - cannot get Moon data");
+         // De file is initialized in its constructor
+      }
+      bool override = ((CelestialBody*)origin)->GetOverrideTimeSystem();
+      Real librationAngles[3], andRates[3];
+      de->GetAnglesAndRates(atEpoch, librationAngles, andRates, override);
+      // convert from rad/day to rad/second
+      //andRates[0] /= GmatTimeUtil::SECS_PER_DAY;
+      //andRates[1] /= GmatTimeUtil::SECS_PER_DAY;
+      //andRates[2] /= GmatTimeUtil::SECS_PER_DAY;
+      rotMatrix    = (Attitude::ToCosineMatrix(librationAngles, 3, 1, 3)).Transpose();
+      Real ca1    = cos(librationAngles[0]);
+      Real ca2    = cos(librationAngles[1]);
+      Real ca3    = cos(librationAngles[2]);
+      Real sa1    = sin(librationAngles[0]);
+      Real sa2    = sin(librationAngles[1]);
+      Real sa3    = sin(librationAngles[2]);
+      Real s1c2   = sa1*ca2;
+      Real s1c3   = sa1*ca3;
+      Real s2c3   = sa2*ca3; 
+      Real s3c1   = sa3*ca1;  
+      Real s3c2   = sa3*ca2;  
+      Real s1s2   = sa1*sa2;  
+      Real s1s3   = sa1*sa3;
+      Real c1c2   = ca1*ca2;  
+      Real c1c3   = ca1*ca3;  
+      Real c2c3   = ca2*ca3;  
+
+      Real s3c2s1 = s3c2*sa1;
+      Real c1c2c3 = ca1*c2c3;
+      Real s3c1c2 = s3c1*ca2;
+      Real s1c2c3 = c2c3*sa1;
+      
+      rotDotMatrix.Set(
+         -andRates[2]*(s3c1+s1c2c3) + andRates[1]*sa3*s1s2  - andRates[0]*(s1c3+s3c1c2),
+         -andRates[2]*(c1c3-s3c2s1) + andRates[1]*ca3*s1s2  + andRates[0]*(s1s3-c1c2c3),
+                                      andRates[1]*s1c2      + andRates[0]*sa2*ca1,
+         -andRates[2]*(s1s3-c1c2c3) - andRates[1]*s3c1*sa2  + andRates[0]*(c1c3-s3c2s1),
+         -andRates[2]*(s1c3+s3c1c2) - andRates[1]*s2c3*ca1  - andRates[0]*(s3c1+s1c2c3),
+                                    - andRates[1]*c1c2      + andRates[0]*s1s2,
+           andRates[2]*s2c3          + andRates[1]*s3c2,
+          -andRates[2]*sa2*sa3       + andRates[1]*c2c3,
+                                     - andRates[1]*sa2
+         );
+      
+       #ifdef DEBUG_MOON_MATRIX
+          MessageInterface::ShowMessage("angles are: %.17f  %.17f  %.17f\n",
+           librationAngles[0], librationAngles[1], librationAngles[2]);
+          MessageInterface::ShowMessage("rates are: %.17f  %.17f  %.17f\n",
+           andRates[0], andRates[1], andRates[2]);
+          MessageInterface::ShowMessage(
+          "rotMatrix = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f %.17f  %.17  %.17ff\n",
+           rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2), 
+           rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2), 
+           rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
+          MessageInterface::ShowMessage(
+          "rotDotMatrix = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f %.17f  %.17f %.17f\n",
+           rotDotMatrix(0,0), rotDotMatrix(0,1), rotDotMatrix(0,2), 
+           rotDotMatrix(1,0), rotDotMatrix(1,1), rotDotMatrix(1,2), 
+           rotDotMatrix(2,0), rotDotMatrix(2,1), rotDotMatrix(2,2));
+      #endif
+    }
+   
    else
    {
       #ifdef DEBUG_FIRST_CALL

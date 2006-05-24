@@ -154,6 +154,7 @@ public:
    virtual Real                 GetMass();
    virtual Gmat::PosVelSource   GetPosVelSource() const;
    virtual std::string          GetSourceFileName() const;
+   virtual PlanetaryEphem*      GetSourceFile() const;
    virtual Gmat::AnalyticMethod GetAnalyticMethod() const;
    virtual bool                 GetUsePotentialFile() const;
    virtual bool                 GetOverrideTimeSystem() const;

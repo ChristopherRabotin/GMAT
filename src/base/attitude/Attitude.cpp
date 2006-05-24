@@ -244,6 +244,141 @@ Rmatrix33 Attitude::ToCosineMatrix(const Rvector3 &eulerAngles,
 }  
                                           
 //------------------------------------------------------------------------------
+//  Rmatrix33   ToCosineMatrix(const Real *eulerAngles,   [static]
+//                             Integer seq1, Integer seq2, 
+ //                            Integer seq3)
+//------------------------------------------------------------------------------
+ /**
+ * Converts the input euler angles and sequence to a direction cosine matrix.
+ *
+ * @param eulerAngles  the input euler angles (radians)
+ * @param seq1         first entry of the euler sequence
+ * @param seq2         second entry of the euler sequence
+ * @param seq3         third entry of the euler sequence
+ *
+ * @return the cosine direction matrix representation of the input attitude.  
+ */
+//------------------------------------------------------------------------------
+Rmatrix33 Attitude::ToCosineMatrix(const Real *eulerAngles, 
+                                   Integer seq1, Integer seq2, 
+                                   Integer seq3)
+{
+   if ((seq1 == 0) | (seq2 == 0) | (seq3 == 0))
+      throw AttitudeException(
+         "Euler sequence ill-defined for conversion to cosine matrix.");
+   Real s1 = GmatMathUtil::Sin(eulerAngles[0]);
+   Real s2 = GmatMathUtil::Sin(eulerAngles[1]);
+   Real s3 = GmatMathUtil::Sin(eulerAngles[2]);
+   Real c1 = GmatMathUtil::Cos(eulerAngles[0]);
+   Real c2 = GmatMathUtil::Cos(eulerAngles[1]);
+   Real c3 = GmatMathUtil::Cos(eulerAngles[2]);
+   bool validSequence = true;
+   if (seq1 == 1)
+   {
+      if (seq2 == 2)
+      {
+         if (seq3 == 1)      //  1-2-1
+            return Rmatrix33(
+                      c2,          s2*s1,           -s2*c1,
+                   s3*s2, c3*c1-s3*c2*s1,   c3*s1+s3*c2*c1,
+                   c3*s2, -s3*c1-c3*c2*s1, -s3*s1+c3*c2*c1);
+         else if (seq3 == 3)  //  1-2-3
+            return Rmatrix33(
+                    c3*c2,  c3*s2*s1+s3*c1, -c3*s2*c1+s1*s3,
+                   -s3*c2, -s3*s2*s1+c3*c1,  s3*s2*c1+c3*s1,
+                       s2,          -c2*s1,           c2*c1);
+         else validSequence = false;
+      }  // seq2 == 2
+      else if (seq2 == 3)
+      {
+         if (seq3 == 1)      //  1-3-1
+            return Rmatrix33(
+                       c2,            s2*c1,            s2*s1,
+                   -c3*s2,   c3*c2*c1-s3*s1,   c3*c2*s1+s3*c1,
+                    s3*s2,  -s3*c2*c1-c3*s1,  -s3*c2*s1+c3*c1);
+         else if (seq3 == 2) //  1-3-2
+            return Rmatrix33(
+                   c3*c2, c3*s2*c1+s1*s3, c3*s2*s1-s3*c1,
+                     -s2,          c2*c1,          c2*s1,
+                   s3*c2, s3*s2*c1-c3*s1, s3*s2*s1+c3*c1);
+         else  validSequence = false;
+      } // seq2 == 3
+      else  validSequence = false;
+   }  // seq1 == 1
+   else if (seq1 == 2)
+   {
+      if (seq2 == 1)
+      {
+         if (seq3 == 2)      //  2-1-2
+            return Rmatrix33(
+                   c3*c1-s3*c2*s1,  s3*s2, -c3*s1-s3*c2*c1,
+                            s2*s1,     c2,           s2*c1,
+                   s3*c1+c3*c2*s1, -c3*s2, -s3*s1+c3*c2*c1);
+         else if (seq3 == 3) //  2-1-3
+            return Rmatrix33(
+                    c3*c1+s3*s2*s1, s3*c2, -c3*s1+s3*s2*c1,
+                   -s3*c1+c3*s2*s1, c3*c2,  s3*s1+c3*s2*c1,
+                             c2*s1,   -s2,           c2*c1);
+                   
+         else validSequence = false;
+      } // seq2 == 1
+      else if (seq2 == 3)
+      {
+         if (seq3 == 1)      //  2-3-1
+            return Rmatrix33(
+                             c2*c1,     s2,          -c2*s1,
+                   -c3*s2*c1+s3*s1,  c3*c2,  c3*s2*s1+s3*c1,
+                    s3*s2*c1+c3*s1, -s3*c2, -s3*s2*s1+c3*c1);
+         else if (seq3 == 2) //  2-3-2
+            return Rmatrix33(
+                   c3*c2*c1-s3*s1, c3*s2, -c3*c2*s1-s3*c1,
+                           -s2*c1,    c2,           s2*s1,
+                   s3*c2*c1+c3*s1, s3*s2, -s3*c2*s1+c3*c1);
+         else validSequence = false;
+      } // seq2 == 3
+      else validSequence = false;
+   } // seq1 == 2
+   else if (seq1 == 3)
+   {
+      if (seq2 == 1)
+      {
+         if (seq3 == 2)      //  3-1-2
+            return Rmatrix33(
+                   c3*c1-s3*s2*s1, c3*s1+s3*s2*c1, -s3*c2,
+                           -c2*s1,          c2*c1,     s2,
+                   s3*c1+c3*s2*s1, s3*s1-c3*s2*c1,  c3*c2);
+         else if (seq3 == 3) //  3-1-3
+            return Rmatrix33(
+                    c3*c1-s3*c2*s1,  c3*s1+s3*c2*c1, s3*s2,
+                   -s3*c1-c3*c2*s1, -s3*s1+c3*c2*c1, c3*s2,
+                             s2*s1,          -s2*c1,    c2);
+         else validSequence = false;
+      } // seq2 == 1
+      else if (seq2 == 2)
+      {
+         if (seq3 == 1)      //  3-2-1
+            return Rmatrix33(
+                             c2*c1,           c2*s1,   -s2,
+                   -c3*s1+s3*s2*c1,  c3*c1+s3*s2*s1, s3*c2,
+                    s3*s1+c3*s2*c1, -s3*c1+c3*s2*s1, c3*c2);
+         else if (seq3 == 3) //  3-2-3
+            return Rmatrix33(
+                    c3*c2*c1-s3*s1,  c3*c2*s1+s3*c1,   -c3*s2,
+                   -s3*c2*c1-c3*s1, -s3*c2*s1+c3*c1,    s3*s2,
+                             s2*c1,           s2*s1,       c2);
+         else validSequence = false;
+      } // seq2 == 2
+      else validSequence = false;
+   }  // seq1 == 3
+     
+   if (!validSequence) throw AttitudeException(
+      "Invalid euler sequence - cannot convert to cosine matrix.");
+   // return zero matrix - it should never reach this point, though
+   return Rmatrix33(false);
+         
+}  
+                                          
+//------------------------------------------------------------------------------
 //  Rvector3   ToEulerAngles(const Rvector &quat1, Integer seq1,  [static]
 //                           Integer seq2,         Integer seq3)
 //------------------------------------------------------------------------------

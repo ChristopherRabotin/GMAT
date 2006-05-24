@@ -73,6 +73,9 @@ public:
    // at the specified time
    Real* GetPosVel(Integer forBody, A1Mjd atTime, 
                    bool overrideTimeSystem = false);
+                   
+   void  GetAnglesAndRates(A1Mjd atTime, Real* angles, Real* rates, 
+                           bool overrideTimeSystem = false);
 
    // method to return the day-of-year and year of the start time of the
    // DE file.
@@ -282,7 +285,8 @@ private:
    /*-------------------------------------------------------------------------*/
    /*  Interpolate_Libration     - from JPL/JSC code (Hoffman)                */
    /*-------------------------------------------------------------------------*/
-   void Interpolate_Libration( double Time, int Target, double Libration[3] );
+   void Interpolate_Libration( double Time, int Target, 
+                               double Libration[3], double rates[3] );
 
    /*-------------------------------------------------------------------------*/
    /*  Interpolate_Nutation     - from JPL/JSC code (Hoffman)                 */
