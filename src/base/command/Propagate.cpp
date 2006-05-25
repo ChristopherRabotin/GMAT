@@ -1605,8 +1605,12 @@ bool Propagate::TakeAStep(Real propStep)
                (*current)->GetName().c_str(), propStep);
          #endif
          if (!(*current)->Step(propStep))
-            throw CommandException("Propagator failed to take a good final "
-                                   "step\n");
+         {
+            char size[32];
+            std::sprintf(size, "%.12lf", propStep);
+            throw CommandException("Propagator " + (*current)->GetName() + 
+               " failed to take a good final step (size = " + size + ")\n");
+         }
          ++current;
       }
       retval = true;
@@ -2512,8 +2516,13 @@ bool Propagate::Execute()
          CheckStopConditions(epochID);
          ++stepsTaken;
 
-         if (hasStoppedOnce && (stepsTaken < 2))
+//MessageInterface::ShowMessage("%s, steps taken = %d, stop cond %s\n", 
+//   (hasStoppedOnce ? "Has stopped once" : "Has not stopped once"),
+//   stepsTaken, (stopCondMet ? "met" : "not met"));
+         if (hasStoppedOnce && (stepsTaken < 5))
+         {
             stopCondMet = false;
+         }
          
          if (!stopCondMet)
          {

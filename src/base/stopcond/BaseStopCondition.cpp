@@ -24,6 +24,7 @@
 #include "StopCondition.hpp"
 #include "StopConditionException.hpp"
 #include "CubicSplineInterpolator.hpp"
+#include "NotAKnotInterpolator.hpp"
 #include "KeplerianParameters.hpp"     // for KepEcc()
 #include "SphericalParameters.hpp"     // for SphRMag()
 #include "MessageInterface.hpp"
@@ -138,7 +139,7 @@ BaseStopCondition::BaseStopCondition(const std::string &name, const std::string 
    
    // Create default Interpolator
    if (mInterpolator == NULL)
-      mInterpolator = new CubicSplineInterpolator("InternalInterpolator");
+      mInterpolator = new NotAKnotInterpolator("InternalInterpolator");
    
    mSolarSystem = NULL;
 }

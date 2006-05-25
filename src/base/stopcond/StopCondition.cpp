@@ -124,14 +124,13 @@ bool StopCondition::Evaluate()
       
    #ifdef DEBUG_BUFFER_FILLING
       MessageInterface::ShowMessage(
-         "StopCondition::Evaluate called\n");
+         "StopCondition::Evaluate called;");
    #endif
    
    // evaluate goal
    if (mAllowGoalParam)
       mGoal = mGoalParam->EvaluateReal();
 
-   
    // set current epoch
    if (mUseInternalEpoch)
       epoch = mEpoch;
@@ -141,27 +140,42 @@ bool StopCondition::Evaluate()
    currentParmValue = mStopParam->EvaluateReal();
 
    if (isAngleParameter)
+   {
+      mGoal = AngleUtil::PutAngleInDegRange(mGoal, 0.0, GmatMathUtil::TWO_PI_DEG);
+      
       readyToTest = CheckOnAnomaly(currentParmValue);
+      if (!readyToTest)
+      {
+         previousValue = currentParmValue;
+         previousEpoch = epoch;
+      }
+   }
    
    if (isApoapse)
    {
       readyToTest = CheckOnApoapsis();
       if (!readyToTest)
+      {
          previousValue = currentParmValue;
+         previousEpoch = epoch;
+      }
    }
          
    if (isPeriapse)
    {
       readyToTest = CheckOnPeriapsis();
       if (!readyToTest)
+      {
          previousValue = currentParmValue;
+         previousEpoch = epoch;
+      }
    }
 
-   if (mNumValidPoints == 0)
+   if (mNumValidPoints <= 2)
    {
       previousValue = currentParmValue;
       previousEpoch = epoch;
-      mNumValidPoints = 1;
+      ++mNumValidPoints;
    }
    
   
@@ -174,8 +188,9 @@ bool StopCondition::Evaluate()
       #if DEBUG_STOPCOND > 1
       MessageInterface::ShowMessage
          ("StopCondition::Evaluate() mUseInternalEpoch = %d, epoch = %f, "
-          "mGoal = %f, currentParmValue = %f\n",  mUseInternalEpoch, epoch, 
-          mGoal, currentParmValue);
+          "mGoal = %f, currentParmValue = %f, previousEpoch = %f\n",  
+          mUseInternalEpoch, epoch, 
+          mGoal, currentParmValue, previousEpoch);
       #endif
       
       // handler for time based stopping for backwards prop
@@ -257,6 +272,12 @@ bool StopCondition::Evaluate()
       }
    }
    
+   #ifdef DEBUG_BUFFER_FILLING
+      MessageInterface::ShowMessage(
+         "Value = %.12lf, Previous = %.12lf; Goal (%.12lf) %s\n", 
+         currentParmValue, previousValue, mGoal, (goalMet ? "met" : "not met"));
+   #endif
+   
    return goalMet;
 }
 
@@ -325,6 +346,7 @@ bool StopCondition::AddToBuffer(bool isInitialPoint)
    // Force anomalies to handle wrapping
    if (isAngleParameter)
    {
+      mGoal = AngleUtil::PutAngleInDegRange(mGoal, 0.0, GmatMathUtil::TWO_PI_DEG);
       if (!CheckOnAnomaly(currentParmValue))
          return false;
    }
@@ -443,7 +465,11 @@ bool StopCondition::AddToBuffer(bool isInitialPoint)
 Real StopCondition::GetStopEpoch()
 {
    if (IsTimeCondition())
+   {
+      if (previousEpoch == 0.0)
+         return 0.0;
       return (BaseStopCondition::GetStopEpoch() - previousEpoch) * 86400.0;
+   }
       
    Real stopEpoch = 0.0;
    

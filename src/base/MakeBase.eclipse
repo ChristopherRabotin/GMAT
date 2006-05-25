@@ -198,6 +198,7 @@ OBJECTS = \
     interpolator/CubicSplineInterpolator.o \
     interpolator/Interpolator.o \
     interpolator/LinearInterpolator.o \
+    interpolator/NotAKnotInterpolator.o \
     interpreter/InterpreterException.o \
     interpreter/Interpreter.o \
     interpreter/MathParser.o \
