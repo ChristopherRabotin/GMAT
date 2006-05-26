@@ -1,3 +1,4 @@
+//$Header$
 //------------------------------------------------------------------------------
 //                                  Multiply
 //------------------------------------------------------------------------------
@@ -116,7 +117,8 @@ void Multiply::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount
       }
       else
       {
-         throw MathException("Inner matrix dimensions must agree to multiply.");
+         throw MathException
+            (GetName() + ":Inner matrix dimensions must agree to multiply.\n");
       }
    }
    else if (type2 == Gmat::RMATRIX_TYPE)
