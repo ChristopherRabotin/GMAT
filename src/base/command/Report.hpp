@@ -39,8 +39,8 @@
 class GMAT_API Report : public GmatCommand
 {
 public:
-	Report();
-	virtual ~Report();
+   Report();
+   virtual ~Report();
    
    Report(const Report &rep);
    Report&           operator=(const Report &rep);
@@ -63,10 +63,17 @@ protected:
    Integer                    reportID;
    /// Array of parameter names
    StringArray                parmNames;
+   /// Array of actual parameter names including index
+   StringArray                actualParmNames;
    /// Array of parameters that get written to the report
    std::vector<Parameter*>    parms;
    /// Flag indicating whether the header data has been written
    bool                       needsHeaders;
+   /// Array of parameter row index
+   std::vector<Integer>       parmRows;
+   /// Array of parameter column index
+   std::vector<Integer>       parmCols;
+   
 };
 
 #endif      // Report_hpp

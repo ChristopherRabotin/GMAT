@@ -20,8 +20,10 @@
 
 #include "Report.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"       // for GetArrayIndex()
 #include <sstream>
 
+//#define DEBUG_REPORTING 1
 
 //---------------------------------
 // public members
@@ -73,6 +75,7 @@ Report::Report(const Report &rep) :
    needsHeaders   (rep.needsHeaders)
 {
    parmNames = rep.parmNames;
+   actualParmNames = rep.actualParmNames;
    parms.clear();
 }
 
@@ -98,6 +101,7 @@ Report& Report::operator=(const Report &rep)
       reportID = -1;
 
       parmNames = rep.parmNames;
+      actualParmNames = rep.actualParmNames;
       parms.clear();
       needsHeaders = rep.needsHeaders;
    }
@@ -134,8 +138,8 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 {
    #ifdef DEBUG_REPORTING
       MessageInterface::ShowMessage(
-         "Report::SetRefObject received a %s named '%s'\n", 
-         obj->GetTypeName().c_str(), obj->GetName().c_str());
+         "Report::SetRefObject received a %s named '%s', index=%d\n", 
+         obj->GetTypeName().c_str(), obj->GetName().c_str(), index);
    #endif
 
    if (index == 0)
@@ -157,11 +161,25 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       if (!obj->IsOfType("Parameter"))
          throw CommandException("Report command can only have Parameters "
             "in the list of reported values.");
-      parmNames.push_back(name);
-
+      
+      // Handle Array indexing
+      Integer row, col;
+      std::string newName;      
+      GmatStringUtil::GetArrayIndex(name, row, col, newName);
+      
+      parmNames.push_back(newName);
+      actualParmNames.push_back(name);
+      
+      parmRows.push_back(row);
+      parmCols.push_back(col);
+      
       // For compare report column header
       reporter->AddParameterForTitleOnly(name);
    }
+   
+   #ifdef DEBUG_REPORTING
+   MessageInterface::ShowMessage("Report::SetRefObject() returning true\n");
+   #endif
    
    return true;
 }
@@ -194,6 +212,9 @@ GmatBase* Report::Clone() const
 //------------------------------------------------------------------------------
 bool Report::Initialize()
 {
+   if (GmatCommand::Initialize() == false)
+      return false;
+   
    parms.clear();
    GmatBase *object;
    
@@ -263,7 +284,9 @@ bool Report::Execute()
        (reporter->GetStringParameter(reporter->GetParameterID("WriteHeaders")) == "On"))
    {
       reporter->TakeAction("ActivateForReport", "On");
-      for (StringArray::iterator i = parmNames.begin(); i != parmNames.end(); ++i)
+      //for (StringArray::iterator i = parmNames.begin(); i != parmNames.end(); ++i)
+      for (StringArray::iterator i = actualParmNames.begin();
+           i != actualParmNames.end(); ++i)
       {
          if (leftJustify)
             datastream.setf(std::ios::left);
@@ -297,11 +320,22 @@ bool Report::Execute()
       //    (*i)->GetReturnType());
       
       if ((*i)->GetReturnType() == Gmat::REAL_TYPE)
+      {
          datastream << (*i)->EvaluateReal() << "   ";
+      }
       else if ((*i)->GetReturnType() == Gmat::RMATRIX_TYPE)
-         datastream << (*i)->EvaluateRmatrix().ToString() << "   ";
+      {
+         Integer index = distance(parms.begin(), i);
+         if (parmRows[index] == -1 && parmCols[index] == -1)
+            datastream << (*i)->EvaluateRmatrix().ToString() << "   ";
+         else // do array indexing
+            datastream << (*i)->EvaluateRmatrix().GetElement
+               (parmRows[index], parmCols[index]) << "   ";
+      }
       else if ((*i)->GetReturnType() == Gmat::STRING_TYPE)
+      {
          datastream << (*i)->EvaluateString() << "   ";
+      }
    }
 
    // Publish it
@@ -321,3 +355,5 @@ bool Report::Execute()
    BuildCommandSummary(true);   
    return retval;
 }
+
+
