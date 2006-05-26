@@ -94,9 +94,10 @@ void Transpose::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCoun
       throw MathException("Left is not a matrix, so cannot do Transpose().\n"); 
    else
    {
+      // output row and col is transpose of leftNode's row and col
       type = type1;
-      rowCount = row1;
-      colCount = col1;
+      rowCount = col1;
+      colCount = row1;
    }
    
    #if DEBUG_TRANSPOSE
