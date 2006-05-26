@@ -559,6 +559,9 @@ bool PropSetup::SetStringParameter(const Integer id, const std::string &value)
                SetForceModel(fm);
                return true;
             }
+            else 
+               throw PropSetupException("Force model '" + value + 
+                  "' does not exist.");
          }
          return false;
       }

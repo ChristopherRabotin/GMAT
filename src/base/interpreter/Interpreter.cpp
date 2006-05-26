@@ -1959,7 +1959,9 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
       if (**phrase == "=")
          ++phrase;
       else
-         throw InterpreterException("Syntax error creating Propagator");
+         throw InterpreterException(
+            "Syntax error creating Propagator:\n" +
+            ex.GetMessage());
 
       Integer id = prop->GetParameterID(objParm);
       
