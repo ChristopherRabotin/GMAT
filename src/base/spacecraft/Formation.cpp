@@ -935,11 +935,13 @@ void Formation::UpdateState()
    {
       ps = &((*i)->GetState());
       size = ps->GetSize();
-
+      
+      #ifdef DEBUG_FORMATION_UPDATES
          MessageInterface::ShowMessage(
             "Formation: Updating(%d to %d) from %s::%s\n", 
             index, index + size - 1, instanceName.c_str(), (*i)->GetName().c_str());
-
+      #endif
+      
       memcpy(&((state.GetState())[index]), ps->GetState(), size*sizeof(Real));
       index += size;
       if ((*i)->GetType() == Gmat::FORMATION)
