@@ -30,6 +30,8 @@
 
 //#define DEBUG_COMMAND_DEALLOCATION
 //#define DEBUG_COMMAND_SUMMARY_LIST
+//#define DEBUG_COMMAND_INIT 1
+//#define DEBUG_BUILD_CMD_SUMMARY 1
 
 
 //---------------------------------
@@ -223,6 +225,10 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
    streamID = c.streamID;
    comment = c.comment;
    commandChanged = c.commandChanged;
+   
+   epochData = NULL;
+   stateData = NULL;
+   parmData = NULL;
    
    return *this;
 }
@@ -888,6 +894,13 @@ bool GmatCommand::RemoveConditionOperator(Integer atIndex)
 //------------------------------------------------------------------------------
 bool GmatCommand::Initialize()
 {
+   #if DEBUG_COMMAND_INIT
+   MessageInterface::ShowMessage
+      ("GmatCommand::Initialize() %s entering\n   epochData=%p, stateData=%p, "
+       "parmData=%p, satVector.size()=%d\n", GetTypeName().c_str(), epochData,
+       stateData, parmData, satVector.size());
+   #endif
+   
    // Check to be sure the basic infrastructure is in place
    if (objectMap == NULL)
    {
@@ -925,6 +938,14 @@ bool GmatCommand::Initialize()
    }
    
    satVector.clear();
+   satsInSandbox = 0;
+   
+   #if DEBUG_COMMAND_INIT
+   MessageInterface::ShowMessage
+      ("GmatCommand::Initialize() %s leaving\n   epochData=%p, stateData=%p, "
+       "parmData=%p, satVector.size()=%d\n", GetTypeName().c_str(), epochData,
+       stateData, parmData, satVector.size());
+   #endif
    
    return initialized;
 }
@@ -1234,6 +1255,14 @@ void GmatCommand::RunComplete()
 //------------------------------------------------------------------------------
 void GmatCommand::BuildCommandSummary(bool commandCompleted)
 {
+   #if DEBUG_BUILD_CMD_SUMMARY
+   MessageInterface::ShowMessage
+      ("GmatCommand::BuildCommandSummary() %s, commandCompleted=%d, "
+       "objectMap=%p\n    epochData=%p, stateData=%p, parmData=%p, "
+       "satVector.size()=%d\n", GetTypeName().c_str(), commandCompleted, objectMap,
+       epochData, stateData, parmData, satVector.size());
+   #endif
+   
    if (epochData == NULL)
    {
       satsInSandbox = 0;
@@ -1248,6 +1277,10 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
                MessageInterface::ShowMessage("Examining %s\n", i->first.c_str());
             #endif
             obj = i->second;
+
+            if (obj == NULL)
+               continue;
+            
             if (obj->GetTypeName() == "Spacecraft")
             {
                satVector.push_back((SpaceObject*)obj);
@@ -1273,6 +1306,13 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
       }
    }
 
+   #if DEBUG_BUILD_CMD_SUMMARY
+   MessageInterface::ShowMessage
+      ("GmatCommand::BuildCommandSummary() Now fill in data...\n   "
+       "satsInSandbox=%d, satVector.size()=%d\n", satsInSandbox,
+       satVector.size());
+   #endif
+   
    Integer i6;
    for (Integer i = 0; i < satsInSandbox; ++i)
    {
