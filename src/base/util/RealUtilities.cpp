@@ -20,9 +20,9 @@
  */
 //------------------------------------------------------------------------------
 #include <math.h>             // for fabs()
-//#include <time.h>
 #include "RealTypes.hpp"
 #include "RealUtilities.hpp"
+#include "Linear.hpp"         // for GmatRealUtil::
 
 using namespace GmatMathUtil;
 
@@ -771,8 +771,11 @@ Real GmatMathUtil::Cbrt(Real x)
 Real GmatMathUtil::Sqrt(Real x) 
 {
    if (x < 0.0)
-        throw RealUtilitiesExceptions::ArgumentError("Sqrt(x < 0.0)");
-
+   {      
+      throw RealUtilitiesExceptions::ArgumentError
+         ("Sqrt(x) x is less than 0.0.  x = " + GmatRealUtil::ToString(x) +"\n");
+   }
+   
    return sqrt(x);
 }
 
