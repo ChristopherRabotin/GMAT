@@ -18,6 +18,8 @@
 //------------------------------------------------------------------------------
 #include "MathTree.hpp"
 #include "MathFunction.hpp"
+#include "StringUtil.hpp"            // for GetArrayIndex()
+#include "InterpreterException.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_MATH_TREE 1
@@ -108,30 +110,34 @@ GmatBase* MathTree::Clone(void) const
    return (new MathTree(*this));
 }
 
-//------------------------------------------------------------------------------
-// Rmatrix *MatrixEvaluate()
-//------------------------------------------------------------------------------
-Rmatrix MathTree::MatrixEvaluate()
-{
-   return theTopNode->MatrixEvaluate();
-}
-
-//------------------------------------------------------------------------------
-// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount) const
-//------------------------------------------------------------------------------
-void MathTree::GetOutputInfo(Integer &type, 
-               Integer &rowCount, Integer &colCount) 
-{
-    theTopNode->GetOutputInfo(type, rowCount, colCount);
-}
 
 //------------------------------------------------------------------------------
 // void Evaluate() const
 //------------------------------------------------------------------------------
 Real MathTree::Evaluate()
 {
+   #if DEBUG_MATH_TREE
+   MessageInterface::ShowMessage
+      ("MathTree::Evaluate() theTopNode=%s, %s\n", theTopNode->GetTypeName().c_str(),
+       theTopNode->GetName().c_str());
+   #endif
    return theTopNode->Evaluate();
 }
+
+
+//------------------------------------------------------------------------------
+// Rmatrix *MatrixEvaluate()
+//------------------------------------------------------------------------------
+Rmatrix MathTree::MatrixEvaluate()
+{
+   #if DEBUG_MATH_TREE
+   MessageInterface::ShowMessage
+      ("MathTree::MatrixEvaluate() theTopNode=%s, %s\n", theTopNode->GetTypeName().c_str(),
+       theTopNode->GetName().c_str());
+   #endif
+   return theTopNode->MatrixEvaluate();
+}
+
 
 //------------------------------------------------------------------------------
 // bool Initialize(std::map<std::string, GmatBase *> *objectMap)
@@ -154,6 +160,16 @@ bool MathTree::Initialize(std::map<std::string, GmatBase *> *objectMap)
 
 
 //------------------------------------------------------------------------------
+// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount) const
+//------------------------------------------------------------------------------
+void MathTree::GetOutputInfo(Integer &type, 
+               Integer &rowCount, Integer &colCount) 
+{
+    theTopNode->GetOutputInfo(type, rowCount, colCount);
+}
+
+
+//------------------------------------------------------------------------------
 // bool InitializeParameter(MathNode *node)
 //------------------------------------------------------------------------------
 bool MathTree::InitializeParameter(MathNode *node)
@@ -172,11 +188,16 @@ bool MathTree::InitializeParameter(MathNode *node)
       MessageInterface::ShowMessage
          ("MathTree::InitializeParameter() refName=%s\n", refName.c_str());
       #endif
+
+      // Handle array index
+      Integer row, col;
+      std::string newName;
+      GmatStringUtil::GetArrayIndex(refName, row, col, newName);
       
-      if (theObjectMap->find(refName) != theObjectMap->end())
+      if (theObjectMap->find(newName) != theObjectMap->end())
       {
-         node->SetRefObject((*theObjectMap)[refName], Gmat::PARAMETER,
-                            refName);
+         node->SetRefObject((*theObjectMap)[newName], Gmat::PARAMETER,
+                            newName);
 
          #if DEBUG_MATH_TREE
          MessageInterface::ShowMessage
@@ -188,13 +209,10 @@ bool MathTree::InitializeParameter(MathNode *node)
       }
       else
       {
-         #if DEBUG_MATH_TREE
-         MessageInterface::ShowMessage
-            ("MathTree::InitializeParameter() Unable to find %s from theObjectMap\n",
-             refName.c_str());
-         #endif
-         
-         return false;
+         //loj: 5/25/06 throw an exception
+         throw InterpreterException
+            ("MathTree::InitializeParameter() Unable to find " + newName +
+             "from theObjectMap\n");
       }
    }
    else
@@ -207,4 +225,5 @@ bool MathTree::InitializeParameter(MathNode *node)
       
       return (result1 && result2);
    }
+
 }

@@ -123,9 +123,11 @@ protected:
       ConditionalBranchParamCount
    };
 
-   static const std::string PARAMETER_TEXT[ConditionalBranchParamCount - BranchCommandParamCount];
+   static const std::string
+   PARAMETER_TEXT[ConditionalBranchParamCount - BranchCommandParamCount];
    
-   static const Gmat::ParameterType PARAMETER_TYPE[ConditionalBranchParamCount - BranchCommandParamCount];
+   static const Gmat::ParameterType
+   PARAMETER_TYPE[ConditionalBranchParamCount - BranchCommandParamCount];
 
    enum OpType
    {
@@ -162,6 +164,14 @@ protected:
    /// list of parameter objects used by the conditions
    std::vector<Parameter*>    params;
    //StringArray                paramStrings;
+   /// Row of lhs Array parameter
+   std::vector<Integer>       lhsParamRows;
+   /// Col of lhs Array parameter
+   std::vector<Integer>       lhsParamCols;
+   /// Row of rhs Array parameter
+   std::vector<Integer>       rhsParamRows;
+   /// Col of rhs Array parameter
+   std::vector<Integer>       rhsParamCols;
    
 };
 #endif  // ConditionalBranch_hpp
