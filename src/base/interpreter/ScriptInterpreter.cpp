@@ -709,9 +709,17 @@ bool ScriptInterpreter::Parse()
                               {
                                  GmatBase *obj = FindObject(*chunks.back());
                                  if (obj == NULL)
-                                    throw InterpreterException
-                                       ("The object: " + *chunks.back() + " was not defined " +
-                                        "on line \"" + line + "\"\n");
+                                 {
+                                    std::string str = *chunks.back();
+                                    // Check for ' for matrix transpose and ^(-1) for inverse
+                                    if ((str.find("'") == str.npos) &&
+                                        (str.find("^(-1)") == str.npos))
+                                    {
+                                       throw InterpreterException
+                                          ("The object: " + *chunks.back() + " was not defined " +
+                                           "on line \"" + line + "\"\n");
+                                    }
+                                 }
                               }
                            }
                            
@@ -755,6 +763,9 @@ bool ScriptInterpreter::Parse()
                
                if (!cmd->InterpretAction()) 
                {
+                  //MessageInterface::ShowMessage
+                  //   ("=====> Parse() calling AssembleCommand()\n");
+                  
                   if (!AssembleCommand(line, cmd))
                   {
                      throw InterpreterException(
@@ -783,7 +794,8 @@ bool ScriptInterpreter::Parse()
         // Looks like the line was not understood
         else {
            MessageInterface::ShowMessage
-              ("ScriptInterpreter::Parse() cannot interpret the line\n   \"%s\"",
+              ("ScriptInterpreter::Parse() cannot interpret the line\n   \"%s\"\n"
+               "May there be missing GMAT keyword?",
               line.c_str());
            chunks.clear();
            return false;

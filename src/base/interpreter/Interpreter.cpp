@@ -18,6 +18,7 @@
 
 #include "Interpreter.hpp" // class's header file
 #include "Moderator.hpp"
+#include "StringTokenizer.hpp"
 #include "StringUtil.hpp"  // for ToDouble()
 #include <ctype.h>         // for isalpha
 #include <sstream>         // for std::stringstream
@@ -766,7 +767,7 @@ bool Interpreter::AssembleCommand(const std::string& scriptline,
    StringArray sublevel[10];  // Allow up to 10 deep for now
    Integer     cl = 0;        // Current level of decomposition
    GmatBase    *object[10];   // Up to 10 reference objects
-   GmatBase    *temp;
+   ////GmatBase    *temp;
    Integer     ol = 0;        // Current object level (depth when drilling into 
                               // owned objects)
    Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT;
@@ -804,7 +805,7 @@ bool Interpreter::AssembleCommand(const std::string& scriptline,
          cmdCase.c_str());
    #endif
 
-   #if DEBUG_EQUATION
+   #if DEBUG_TOKEN_PARSING
    MessageInterface::ShowMessage
       ("=====> AssembleCommand() calling InterpretAction() line=%s\n",
        line.c_str());
@@ -813,10 +814,63 @@ bool Interpreter::AssembleCommand(const std::string& scriptline,
    if (cmd->InterpretAction())
       return true;
    
-   Integer condNumber = 1, index = 0;
-   if ((cmdCase == "If") || (cmdCase == "While")) {
+   ////Integer condNumber = 1, index = 0;
+   Integer next = 0;
+   Integer begin = 0;
+   Integer lhsParamCount = 0;
+   Integer rhsParamCount = 0;
+   
+   if ((cmdCase == "If") || (cmdCase == "While"))
+   {
+
+      #if DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage
+         ("=====> AssembleCommand() parsing If or While. topLevel.size()=%d\n",
+          topLevel.size());
+      #endif
+
+      // Ignore parentheses around the condition
+      if (chunks[1]->find("(") != std::string::npos)
+      {
+         Integer openParen, closeParen;
+         bool isOuterParen;
+         std::string newLine =
+            GmatStringUtil::Trim(line, GmatStringUtil::BOTH, true);
+         GmatStringUtil::FindParenMatch(newLine, openParen, closeParen, isOuterParen);
+         if (isOuterParen)
+         {
+            
+            #if DEBUG_TOKEN_PARSING
+            MessageInterface::ShowMessage
+               ("===> openParen=%d, closeParen=%d, newLine=%s\n", openParen,
+                closeParen, newLine.c_str());
+            #endif
+            
+            newLine.erase(closeParen, 1);
+            newLine.erase(openParen, 1);
+            line = newLine;
+            chunks.clear();
+            ChunkLine();
+            topLevel = Decompose(line);
+            
+            #if DEBUG_TOKEN_PARSING
+            for (UnsignedInt i=0; i<topLevel.size(); i++)
+               MessageInterface::ShowMessage
+                  ("===> New topLevel[%d]=%s\n", i, topLevel[i].c_str());
+            #endif
+         }
+         else
+         {
+            throw InterpreterException
+               ("Mismatched parenthesis found in + \n\"" +  line + "\"\n");
+         }
+      }
+      
+
       // chain through the conditions
-      while (condNumber < (Integer)topLevel.size()) {
+      while (next < (Integer)topLevel.size())
+      {
+         /*
          #ifdef DEBUG_TOKEN_PARSING
             std::cout << "Setting " << cmdCase << " condition:\n   lhs = " 
                       << topLevel[condNumber]
@@ -824,20 +878,42 @@ bool Interpreter::AssembleCommand(const std::string& scriptline,
                       << "\n   rhs = " << topLevel[condNumber+2] 
                       << std::endl;
          #endif
-         if (!cmd->SetCondition(topLevel[condNumber], topLevel[condNumber+1], 
-                                topLevel[condNumber+2]))
+         */
+         
+         std::string lhs, op, rhs;
+         begin = next;
+         ParseCondition(topLevel, lhs, op, rhs, begin, next);
+         
+         if (!cmd->SetCondition(lhs, op, rhs))
                throw CommandException("Cannot set conditions on command " + 
-                                      scriptline);
-         if (condNumber+3 < (Integer)topLevel.size()) {
+                                      scriptline + "\n");
+         
+         if (next < (Integer)topLevel.size())
+         {
             #ifdef DEBUG_TOKEN_PARSING
                std::cout << "Setting If condition operator: "
-                         << topLevel[condNumber+3] << std::endl;
+                         << topLevel[next] << std::endl;
             #endif
-            if (!cmd->SetConditionOperator(topLevel[condNumber+3]))
-               throw CommandException(
-                  "Cannot set condition operator on command " + scriptline);
+            if (!cmd->SetConditionOperator(topLevel[next]))
+               throw CommandException("Cannot set condition operator on command " +
+                                      scriptline + "\n");
          }
-      
+         
+         // Set lhs is not a number, set as parameter
+         if (isalpha(lhs[0]))
+         {
+            SetRefParameter(cmd, lhs, lhsParamCount);
+            lhsParamCount++;
+         }
+         
+         // Set rhs is not a number, set as parameter
+         if (isalpha(rhs[0]))
+         {
+            SetRefParameter(cmd, rhs, rhsParamCount);
+            rhsParamCount++;
+         }
+         
+         /*
          sublevel[cl] = Decompose(topLevel[condNumber]);
          #ifdef DEBUG_TOKEN_PARSING
             std::cout << "Decomposing \"" << topLevel[condNumber] << "\"\n";
@@ -876,7 +952,8 @@ bool Interpreter::AssembleCommand(const std::string& scriptline,
          }
          condNumber += 4;
          ++index;
-      }
+         */
+      } // end while (condNumber < (Integer)topLevel.size())
 
       return true;
    }
@@ -895,6 +972,9 @@ bool Interpreter::AssembleCommand(const std::string& scriptline,
    
    if (cmdCase == "Report") 
       return AssembleReportCommand(topLevel, cmd);
+   
+   //MessageInterface::ShowMessage
+   //   ("=====> AssembleCommand() Handle all other commands\n");
    
    // Handle all other commands here
    for (StringArray::iterator i = topLevel.begin()+1; i != topLevel.end(); ++i)
@@ -1063,72 +1143,153 @@ bool Interpreter::AssembleForCommand(const StringArray topLevel,
 bool Interpreter::AssembleReportCommand(const StringArray topLevel, 
                                         GmatCommand *cmd)
 {
-   StringArray sublevel[10];  // Allow up to 10 deep for now
-   Integer     cl = 0;        // Current level of decomposition
-   GmatBase    *object;
-   Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT;
-   Integer parmNumber = 0;
-
-   for (StringArray::const_iterator i = topLevel.begin()+1; i != topLevel.end(); ++i)
-   {
-      // If we see a comment character, we're done
-      if ((*i)[0] == '%')
-         break;
-         
-      // Walk through the rest of the command, setting it up
-      sublevel[cl] = Decompose(*i);
-      #ifdef DEBUG_TOKEN_PARSING
-         MessageInterface::ShowMessage(
-            "Decomposing \"%s\"; found %d elements\n", i->c_str(),
-            sublevel[cl].size());
-         for (StringArray::iterator z = sublevel[cl].begin(); 
-              z != sublevel[cl].end(); ++z)
-            MessageInterface::ShowMessage("   \"%s\"\n", z->c_str());
-      #endif
-
-      if (sublevel[cl].size() == 1) 
-      {
-         // Size 1 implies an object reference or parm string
-         #ifdef DEBUG_TOKEN_PARSING
-            MessageInterface::ShowMessage("Looking for \"%s\"\n", 
-                                          sublevel[cl][0].c_str());
-         #endif
-         object = moderator->GetConfiguredItem(sublevel[cl][0]);
-         if (object) {
-            #ifdef DEBUG_TOKEN_PARSING
-               MessageInterface::ShowMessage("   Found a \"%s\"\n", 
-                                          (object->GetTypeName()).c_str());
-            #endif
-            type = object->GetType();
-            if (!cmd->SetRefObject(object, type, object->GetName(), 
-                parmNumber++))
-               throw InterpreterException("Cannot set object " + (*i) + 
-                  " for command " + (cmd->GetTypeName()));
-         }
-         else 
-            throw InterpreterException("Cannot find object named " + *i +
-               " for Report command '" + 
-               cmd->GetGeneratingString(Gmat::SCRIPTING) + "'");
-      }
-      else 
-      {
-         #ifdef DEBUG_TOKEN_PARSING
-            MessageInterface::ShowMessage("Assembling %s\n",sublevel[cl][0].c_str()); 
-         #endif
-         object = AssemblePhrase(sublevel[cl], cmd);
-         if (object == NULL)
-            return false;
-         #ifdef DEBUG_TOKEN_PARSING
-            MessageInterface::ShowMessage("Assembled a %s\n", object->GetTypeName().c_str());
-         #endif
-         if (!cmd->SetRefObject(object, type, object->GetName(), 
-             parmNumber++))
-            throw InterpreterException("Cannot set Parameter object " + (*i) + 
-                     " for command " + (cmd->GetTypeName()));
-      }
-   }
+   #ifdef DEBUG_TOKEN_PARSING
+   MessageInterface::ShowMessage
+      ("Interpreter::AssembleReportCommand()\n   line=%s\n", line.c_str());
+   #endif
    
+   GmatBase *object = NULL;
+   Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT;
+   StringTokenizer st(line, " ;");
+   StringArray params = st.GetAllTokens();
+   Integer parmNumber = 0;
+   
+   for (UnsignedInt i=1; i<params.size(); i++)
+   {
+      #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage("   params[%d]=<%s>\n", i, params[i].c_str());
+      #endif
+      
+      // If we see a comment character, we're done
+      if (params[i] == "%")
+         break;
+      
+      object = moderator->GetConfiguredItem(params[i]);
+      if (object)
+      {
+         #ifdef DEBUG_TOKEN_PARSING
+         MessageInterface::ShowMessage("   Found a \"%s\"\n", 
+                                       (object->GetTypeName()).c_str());
+         #endif
+         type = object->GetType();
+         if (!cmd->SetRefObject(object, type, params[i], parmNumber++))
+            throw InterpreterException
+               ("Cannot set object " + params[i] + " for command " + (cmd->GetTypeName()));
+      }
+      else
+      {
+         // Test if it is a system parameter
+         std::string ownerName, typeName, depObj;
+         GmatStringUtil::ParseParameter(params[i], typeName, ownerName, depObj);
+         
+         if (ownerName != "" && typeName != "")
+         {
+            #if DEBUG_TOKEN_PARSING
+            MessageInterface::ShowMessage
+               ("   It is a system parameter. name=%s, typeName=%s, ownerName=%s, "
+                "depObj=%s\n", params[i].c_str(), typeName.c_str(), ownerName.c_str(),
+                depObj.c_str());
+            #endif
+            
+            object = CreateParameter(params[i], typeName, depObj, ownerName);
+            type = object->GetType();
+            
+            if (object == NULL)
+               throw InterpreterException
+                  ("Cannot find object named " + params[i] + " for Report command '" + 
+                   cmd->GetGeneratingString(Gmat::SCRIPTING) + "'");
+            
+            if (!cmd->SetRefObject(object, type, params[i], parmNumber++))
+               throw InterpreterException
+                  ("Cannot set Parameter object " + params[i] + 
+                   " for Report command: " + (cmd->GetTypeName()));
+            
+            #ifdef DEBUG_TOKEN_PARSING
+            MessageInterface::ShowMessage
+               ("Assembled a %s\n", object->GetTypeName().c_str());
+            #endif
+         }
+         else
+         {
+            throw InterpreterException
+               ("Cannot parse the line\n" + line + "\n");
+         }
+      }
+      
+      parmNumber++;
+   }
+
    return true;
+
+
+   
+   //loj: Commented lines below (5/19/06)
+//    StringArray sublevel[10];  // Allow up to 10 deep for now
+//    Integer     cl = 0;        // Current level of decomposition
+//    GmatBase    *object;
+//    Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT;
+//    Integer parmNumber = 0;
+
+//    for (StringArray::const_iterator i = topLevel.begin()+1; i != topLevel.end(); ++i)
+//    {
+//       // If we see a comment character, we're done
+//       if ((*i)[0] == '%')
+//          break;
+         
+//       // Walk through the rest of the command, setting it up
+//       sublevel[cl] = Decompose(*i);
+//       #ifdef DEBUG_TOKEN_PARSING
+//          MessageInterface::ShowMessage(
+//             "Decomposing \"%s\"; found %d elements\n", i->c_str(),
+//             sublevel[cl].size());
+//          for (StringArray::iterator z = sublevel[cl].begin(); 
+//               z != sublevel[cl].end(); ++z)
+//             MessageInterface::ShowMessage("   \"%s\"\n", z->c_str());
+//       #endif
+
+//       if (sublevel[cl].size() == 1) 
+//       {
+//          // Size 1 implies an object reference or parm string
+//          #ifdef DEBUG_TOKEN_PARSING
+//             MessageInterface::ShowMessage("Looking for \"%s\"\n", 
+//                                           sublevel[cl][0].c_str());
+//          #endif
+//          object = moderator->GetConfiguredItem(sublevel[cl][0]);
+//          if (object) {
+//             #ifdef DEBUG_TOKEN_PARSING
+//                MessageInterface::ShowMessage("   Found a \"%s\"\n", 
+//                                           (object->GetTypeName()).c_str());
+//             #endif
+//             type = object->GetType();
+//             if (!cmd->SetRefObject(object, type, object->GetName(), 
+//                 parmNumber++))
+//                throw InterpreterException("Cannot set object " + (*i) + 
+//                   " for command " + (cmd->GetTypeName()));
+//          }
+//          else 
+//             throw InterpreterException("Cannot find object named " + *i +
+//                " for Report command '" + 
+//                cmd->GetGeneratingString(Gmat::SCRIPTING) + "'");
+//       }
+//       else 
+//       {
+//          #ifdef DEBUG_TOKEN_PARSING
+//             MessageInterface::ShowMessage("Assembling %s\n",sublevel[cl][0].c_str()); 
+//          #endif
+//          object = AssemblePhrase(sublevel[cl], cmd);
+//          if (object == NULL)
+//             return false;
+//          #ifdef DEBUG_TOKEN_PARSING
+//             MessageInterface::ShowMessage("Assembled a %s\n", object->GetTypeName().c_str());
+//          #endif
+//          if (!cmd->SetRefObject(object, type, object->GetName(), 
+//              parmNumber++))
+//             throw InterpreterException("Cannot set Parameter object " + (*i) + 
+//                      " for command " + (cmd->GetTypeName()));
+//       }
+//    }
+   
+//    return true;
 }
 
 
@@ -1508,8 +1669,9 @@ GmatCommand* Interpreter::InterpretGMATFunction(const std::string &pathAndName)
 }
 
 
-
-
+//------------------------------------------------------------------------------
+// GmatBase* AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
+//------------------------------------------------------------------------------
 GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
 {
    #ifdef DEBUG_TOKEN_PARSING
@@ -1565,7 +1727,7 @@ GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
             parmSystem = phrase[1];
             parmType = phrase[2];
          }
-            
+         
          ref = moderator->GetParameter(parmType);
          if (ref == NULL) 
          {
@@ -1598,24 +1760,6 @@ GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
                Gmat::ObjectType ot = refobj->GetType();
                parm->SetRefObjectName(ot, parmObj);
                
-//                // Set body and/or cs on it
-//                if (parm->IsCoordSysDependent()) {
-//                   if (parmSystem == "")
-//                      parmSystem = "EarthMJ2000Eq";
-//                   parm->SetStringParameter("DepObject", parmSystem);
-//                   parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
-//                }
-            
-//                if (parm->IsOriginDependent()) {
-//                   if (parmSystem == "")
-//                      parmSystem = "Earth";
-//                   parm->SetStringParameter("DepObject", parmSystem);
-//                   parm->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
-//                   /// @todo Set a better CS choice when appropriate
-//                   if (parm->NeedCoordSystem())
-//                      parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, 
-//                                            "EarthMJ2000Eq");
-//                }
             }
          }
          else // NOT a Parameter
@@ -1626,26 +1770,6 @@ GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
 }
 
 
-//GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
-//{
-//std::cout << "Entered Interpreter::AssemblePhrase\n";
-//   StringArray breakdown;
-//   GmatBase *ref = NULL;
-//   for (StringArray::iterator i = phrase.begin(); i != phrase.end(); ++i) {
-//std::cout << "   Breaking down subphrase " << *i << "\n";
-//      breakdown = Decompose(*i);
-//      if (breakdown.size() == 1) {
-//         ref = moderator->GetConfiguredItem(*i);
-//      }
-//      else {
-//std::cout << "   Size != 1\n";
-////         ref = BuildMultipartItem();
-//      }
-//   }
-//   return ref;
-//}
-//
-//
 //------------------------------------------------------------------------------
 // GmatCommand* CreateCommand(std::string commandtype)
 //------------------------------------------------------------------------------
@@ -1750,24 +1874,6 @@ CelestialBody* Interpreter::CreateCelestialBody(std::string cbname,
 }
 
 
-// //------------------------------------------------------------------------------
-// // Parameter* CreateParameter(std::string name, std::string type)
-// //------------------------------------------------------------------------------
-// /**
-//  * Calls the Moderator to create a Parameter.
-//  * 
-//  * @param name Name for the parameter.
-//  * @param type Type of parameter requested
-//  * 
-//  * @return Pointer to the constructed Parameter.
-//  */
-// //------------------------------------------------------------------------------
-// Parameter* Interpreter::CreateParameter(std::string name, std::string type)
-// {
-//     return moderator->CreateParameter(type, name);
-// }
-
-
 //------------------------------------------------------------------------------
 // Parameter* CreateParameter(const std::string &name, const std::string &type,
 //                            const std::string &depname, const std::string &obj)
@@ -1793,12 +1899,6 @@ Parameter* Interpreter::CreateParameter(const std::string &name,
 
    return parm;
 }
-
-
-//StoppingCondition* Interpreter::CreateStopCond(std::string conditiontype)
-//{
-//    return moderator->CreateStopCondition(conditiontype);
-//}
 
 
 //------------------------------------------------------------------------------
@@ -3164,6 +3264,142 @@ bool Interpreter::SetParameter(GmatBase *obj, Integer id, std::string value)
 
 
 //------------------------------------------------------------------------------
+// bool ParseCondition(const StringArray topLevel, std::string &lhs,
+//                     std::string &op, std::string &rhs, Integer begin,
+//                     Integer &next)
+//------------------------------------------------------------------------------
+bool Interpreter::ParseCondition(const StringArray topLevel, std::string &lhs,
+                                 std::string &op, std::string &rhs, Integer begin,
+                                 Integer &next)
+{
+   #ifdef DEBUG_TOKEN_PARSING
+   MessageInterface::ShowMessage
+      ("Interpreter::ParseCondition() begin=%d\n   line=%s\n", begin,
+       line.c_str());
+   for (UnsignedInt i=0; i<topLevel.size(); i++)
+      MessageInterface::ShowMessage
+         ("topLevel[%d] = %s\n", i, topLevel[i].c_str());
+   #endif
+
+   // Reassemble into lhs op rhs
+   int size = topLevel.size();
+   lhs = topLevel[begin + 1];
+
+   if (line.find('[') != std::string::npos ||
+       line.find(']') != std::string::npos)
+      throw InterpreterException
+         ("Found [ or ] in line: " + line + "\n    Did you mean ( or )?");
+   
+   // If lhs index not found
+   if (topLevel[begin + 2].find('(') == std::string::npos)
+   {
+      op = topLevel[begin + 2];
+      rhs = topLevel[begin + 3];
+      next = begin + 4;
+      if (size > begin + 4)
+      {
+         if (topLevel[begin + 4].find('(') != std::string::npos)
+         {
+            rhs = rhs + topLevel[begin + 4];
+            next = begin + 5;
+         }
+      }
+   }
+   else // lhs index found
+   {
+      op = topLevel[begin + 3];
+      lhs = lhs + topLevel[begin + 2];
+      rhs = topLevel[begin + 4];
+      next = begin + 5;
+      
+      if (size > begin + 5)
+      {
+         if (topLevel[begin + 5].find('(') != std::string::npos)
+         {
+            rhs = rhs + topLevel[begin + 5];
+            next = begin + 6;
+         }
+      }
+   }
+   
+   #ifdef DEBUG_TOKEN_PARSING
+   MessageInterface::ShowMessage
+      ("Interpreter::ParseCondition() lhs=%s, op=%s, rhs=%s, next=%d\n",
+       lhs.c_str(), op.c_str(), rhs.c_str(), next);
+   #endif
+
+   return true;
+   
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetRefParameter(GmatCommand *cmd, const std::string &paramName,
+//                      Integer index)
+//------------------------------------------------------------------------------
+bool Interpreter::SetRefParameter(GmatCommand *cmd, const std::string &paramName,
+                                  Integer index)
+{
+   #ifdef DEBUG_TOKEN_PARSING
+   MessageInterface::ShowMessage
+      ("Interpreter::SetRefParameter() cmd=%s, paramName=%s\n",
+       cmd->GetTypeName().c_str(), paramName.c_str());
+   #endif
+   
+   GmatBase *object = NULL;
+   Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT;
+   
+   // Ignore array indexing of Array parameter name
+   std::string newName = paramName;
+   UnsignedInt openParen = paramName.find('(');
+   
+   if (openParen != paramName.npos)
+      newName = paramName.substr(0, openParen);
+   
+   // If newName is not a number, set as a parameter
+   object = moderator->GetConfiguredItem(newName);
+   if (object)
+   {
+      #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage
+         ("Interpreter::SetRefParameter() Found a \"%s\"\n",
+          (object->GetTypeName()).c_str());
+      #endif
+      type = object->GetType();
+      if (!cmd->SetRefObject(object, type, paramName, index))
+         throw InterpreterException
+            ("Cannot set object " + newName + " for command: " +
+             (cmd->GetTypeName()));
+   }
+   else
+   {
+      // Test if it is a system parameter
+      StringTokenizer st(paramName, ".");
+      StringArray components = st.GetAllTokens();
+      object = AssemblePhrase(components, cmd);
+      
+      if (object == NULL)
+         throw InterpreterException
+            ("Cannot find object named " + paramName + " for command: " +
+             (cmd->GetTypeName()));
+      
+      #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage
+         ("Interpreter::SetRefParameter() Assembled a %s\n",
+          object->GetTypeName().c_str());
+      #endif
+      
+      if (!cmd->SetRefObject(object, type, paramName, index))
+         throw InterpreterException
+            ("Cannot set Parameter object " + paramName + 
+             " for command: " + (cmd->GetTypeName()));
+   }
+
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
 // void CheckForSpecialCase(GmatBase *obj, Integer id, std::string& value)
 //------------------------------------------------------------------------------
 void Interpreter::CheckForSpecialCase(GmatBase *obj, Integer id, 
@@ -3190,11 +3426,6 @@ void Interpreter::CheckForSpecialCase(GmatBase *obj, Integer id,
    #endif
 }
 
-
-//bool Interpreter::CheckMemberObject(GmatBase *obj, std::string memberID)
-//{
-//    return false;
-//}
 
 void Interpreter::RegisterAliases(void)
 {
@@ -3332,8 +3563,7 @@ bool Interpreter::ConstructRHS(GmatBase *lhsObject, const std::string& rhs,
    for (StringArray::iterator i = sar.begin(); i != sar.end(); ++i)
    {
       temp = Decompose(*i);
-      //loj: 10/31/05 why temp.size() > 1?
-      //if ((temp.size() > 1) && isalpha(sar[0][0]))
+
       if ((temp.size() > 0) && isalpha(sar[0][0]))
       {
          #ifdef DEBUG_RHS_PARSING_DETAILS
@@ -3366,10 +3596,10 @@ bool Interpreter::ConstructRHS(GmatBase *lhsObject, const std::string& rhs,
          }
          else
          {
-            // if rhs is not boolean type (loj: 12/28/05)
+            // if rhs is not boolean type
             if (name != "true" && name != "false")
             {
-               // subscribers can have variables (loj: 10/31/05)
+               // subscribers can have variables 
                if (lhsObject->IsOfType(Gmat::SUBSCRIBER))
                {
                   //MessageInterface::ShowMessage

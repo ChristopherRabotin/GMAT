@@ -154,7 +154,11 @@ bool MathParser::IsEquation(const std::string &str)
    {
       isEq = true;
    }
-   
+
+   // Check ' for matrix transpose and ^(-1) for inverse
+   if (str.find("'") != str.npos || str.find("^(-1)") != str.npos)
+      isEq = true;
+
    #if DEBUG_MATH_PARSER
    MessageInterface::ShowMessage
       ("MathParser::IsEquation(%s) returning %d\n", str.c_str(), isEq);
@@ -420,9 +424,10 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       // find match closing parenthesis ')'
       UnsignedInt index2 = FindMatchingParen(str, index1);
 
-      #if DEBUG_PARENTHESIS > 1
+      #if DEBUG_PARENTHESIS
       MessageInterface::ShowMessage
-         ("==> str=%s, size=%d, index1=%d, index2=%d\n", str.c_str(), str.size(),
+         ("==> Paren is Part of Function. str=%s, size=%d, index1=%d, index2=%d\n",
+          str.c_str(), str.size(),
           index1, index2);
       #endif
       
@@ -481,6 +486,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
        index1, index2, str.size());
    #endif
 
+   // if wrapped with parenthesis
    if (index1 == 0 && index2 == str.size()-1)
    {
       left = str.substr(1, str.size()-2);
@@ -494,27 +500,32 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       return items;
    }
    
-   // find opening parenthesis '('
+   // find opening next parenthesis '('
    UnsignedInt index3 = str.find('(', index2);
    if (index3 != str.npos)
    {
+      bool opFound;
       op = str.substr(index3-1, 1);
-      op = GetOperatorName(op);
-      left = str.substr(0, index2+1);
-      right = str.substr(index3, str.size()-index3+1);
-   }
-   else
-   {
-      op = FindOperator(str, index2, left, right);
-
-      if (op == "")
+      op = GetOperatorName(op, opFound);
+      if (opFound)
       {
-         op = GetOperatorName(str.substr(index1-1, 1));
-         left = str.substr(0, index1-1);
-         right = str.substr(index1, str.npos);
+         left = str.substr(0, index2+1);
+         right = str.substr(index3, str.size()-index3+1);
+         FillItems(items, op, left, right);
+         return items;
       }
-      
    }
+   
+   op = FindOperator(str, index2, left, right);
+
+   if (op == "")
+   {
+      bool opFound;
+      op = GetOperatorName(str.substr(index1-1, 1), opFound);
+      left = str.substr(0, index1-1);
+      right = str.substr(index1, str.npos);
+   }
+   
    
    FillItems(items, op, left, right);
    
@@ -570,8 +581,9 @@ std::string MathParser::FindOperator(const std::string &str, UnsignedInt start,
 
    if (index != str.npos)
    {
+      bool opFound;
       op = str.substr(index, 1);
-      op = GetOperatorName(op);
+      op = GetOperatorName(op, opFound);
       left = str.substr(0, index);
       right = str.substr(index+1, str.size()-index);
    }
@@ -588,9 +600,9 @@ std::string MathParser::FindOperator(const std::string &str, UnsignedInt start,
 
 
 //------------------------------------------------------------------------------
-// std::string GetOperatorName(const std::string &op)
+// std::string GetOperatorName(const std::string &op, bool &opFound)
 //------------------------------------------------------------------------------
-std::string MathParser::GetOperatorName(const std::string &op)
+std::string MathParser::GetOperatorName(const std::string &op, bool &opFound)
 {
    #if DEBUG_PARENTHESIS
    MessageInterface::ShowMessage
@@ -598,6 +610,7 @@ std::string MathParser::GetOperatorName(const std::string &op)
    #endif
    
    std::string opName = "<" + op + "> :Unknown Operator";
+   opFound = true;
    
    if (op == "+")
       opName = "Add";
@@ -609,10 +622,13 @@ std::string MathParser::GetOperatorName(const std::string &op)
       opName = "Divide";
    else if (op == "^")
       opName = "Power";
+   else
+      opFound = false;
    
    #if DEBUG_PARENTHESIS
    MessageInterface::ShowMessage
-      ("MathParser::GetOperatorName() opName=%s\n", opName.c_str());
+      ("MathParser::GetOperatorName() opFound=%d, opName=%s\n", opFound,
+       opName.c_str());
    #endif
    
    return opName;
@@ -1404,7 +1420,7 @@ void MathParser::CreateParameter(MathNode *node, UnsignedInt level)
          {
             #if DEBUG_MATH_PARSER_PARAM
             MessageInterface::ShowMessage
-               ("GmatStringUtil::ParseParameter() name=%s, type=%s, owner=%s, "
+               ("MathParser::CreateParameter() name=%s, type=%s, owner=%s, "
                 "depObj=%s\n", name.c_str(), type.c_str(), owner.c_str(),
                 depObj.c_str());
             #endif

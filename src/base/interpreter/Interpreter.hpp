@@ -151,14 +151,11 @@ protected:
    SolarSystem*                  CreateSolarSystem(std::string ssname);
    CelestialBody*                CreateCelestialBody(std::string cbname, 
                                                      std::string type);
-//    Parameter*                    CreateParameter(std::string name, 
-//                                                  std::string type);
    Parameter*                    CreateParameter(const std::string &name, 
                                                  const std::string &type,
                                                  const std::string &depname = "",
                                                  const std::string &obj = "");
    
-//   StoppingCondition*            CreateStopCond(std::string conditiontype);
    Subscriber*                   CreateSubscriber(std::string name, 
                                                   std::string type);
    Burn*                         CreateBurn(std::string satname, 
@@ -234,6 +231,13 @@ protected:
                                                  Integer index);
    bool                          SetParameter(GmatBase *obj, Integer id,
                                               std::string value);
+   bool                          ParseCondition(const StringArray topLevel,
+                                                std::string &lhs, std::string &op,
+                                                std::string &rhs, Integer begin,
+                                                Integer &next);
+   bool                          SetRefParameter(GmatCommand *cmd,
+                                                 const std::string &paramName,
+                                                 Integer index);
    void                          CheckForSpecialCase(GmatBase *obj, Integer id, 
                                                      std::string& value);
    void                          RegisterAliases();

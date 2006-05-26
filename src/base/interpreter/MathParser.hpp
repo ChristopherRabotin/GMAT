@@ -75,7 +75,7 @@ private:
    std::string FindOperator(const std::string &str, UnsignedInt start,
                              std::string &left, std::string &right);
    UnsignedInt FindSubtract(const std::string &str, UnsignedInt start);
-   std::string GetOperatorName(const std::string &op);
+   std::string GetOperatorName(const std::string &op, bool &opFound);
    void BuildFunction(const std::string &str, const std::string list[],
                       UnsignedInt count, std::string &fnName, std::string &leftStr);
    UnsignedInt FindMatchingParen(const std::string &str, UnsignedInt start);
