@@ -36,9 +36,9 @@
  */
 //------------------------------------------------------------------------------
 MathElement::MathElement(const std::string &typeStr, const std::string &nomme) :
-             MathNode      ("MathElement", nomme),
-             refObject     (NULL),
-             refObjectName ("")
+   MathNode      ("MathElement", nomme),
+   refObject     (NULL),
+   refObjectName ("")
 {
    isFunction = false;
    
@@ -52,7 +52,13 @@ MathElement::MathElement(const std::string &typeStr, const std::string &nomme) :
    {
       SetRefObjectName(Gmat::PARAMETER, nomme);
    }
+
+   #if DEBUG_MATH_ELEMENT
+   MessageInterface::ShowMessage
+      ("MathElement() type=%s, name=%s created\n", typeStr.c_str(), nomme.c_str());
+   #endif
 }
+
 
 //------------------------------------------------------------------------------
 //  ~MathElement(void)
@@ -168,9 +174,15 @@ bool MathElement::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    switch (type)
    {
       case Gmat::PARAMETER:
-
+      {
+         // Handle array index
+         Integer row, col;
+         std::string newName;
+         GmatStringUtil::GetArrayIndex(refObjectName, row, col, newName);
+         
          // Check if name is the same
-         if (refObjectName != name)
+         //if (refObjectName != name)
+         if (newName != name)
             throw MathException
                ("MathElement::SetRefObject() Cannot find parameter name:" +
                 name + "\n");
@@ -183,13 +195,12 @@ bool MathElement::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             elementType = Gmat::RMATRIX_TYPE;
             Integer theRowCount = arr->GetRowCount();
             Integer theColCount = arr->GetColCount();
-
+            
             #if DEBUG_MATH_ELEMENT
             MessageInterface::ShowMessage
                ("MathElement::SetRefObject() elementType=%d, theRowCount=%d, "
                 "theColCount=%d\n", elementType, theRowCount, theColCount);
             #endif
-            
             
             if (!matrix.IsSized())
                matrix.SetSize(theRowCount, theColCount);
@@ -209,7 +220,8 @@ bool MathElement::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             std::stringstream ss("");
             ss << matrix;
             MessageInterface::ShowMessage
-               ("MathElement::SetRefObject() matrix=\n%s\n", ss.str().c_str());
+               ("MathElement::SetRefObject() name=%s, matrix=\n%s\n", name.c_str(),
+                ss.str().c_str());
             #endif
             
          }
@@ -220,13 +232,13 @@ bool MathElement::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             
             #if DEBUG_MATH_ELEMENT
             MessageInterface::ShowMessage
-               ("MathElement::SetRefObject() elementType=%d, realValue=%f\n",
-                elementType, realValue);
+               ("MathElement::SetRefObject() name=%s, elementType=%d, "
+                "realValue=%f\n", GetName().c_str(), elementType, realValue);
             #endif
          }
          
          return true;
-         
+      }
       default:
          break;
    }    
@@ -308,7 +320,11 @@ const StringArray& MathElement::GetRefObjectNameArray(const Gmat::ObjectType typ
    
    if (type == Gmat::PARAMETER || Gmat::UNKNOWN_OBJECT)
    {
-      refs.push_back(refObjectName);
+      Integer row, col;
+      std::string newName;
+      GmatStringUtil::GetArrayIndex(refObjectName, row, col, newName);
+      
+      refs.push_back(newName);
       return refs;
    }
    
@@ -367,13 +383,28 @@ void MathElement::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCo
          
          if (type == Gmat::RMATRIX_TYPE)
          {
-            rowCount = ((Array*)refObject)->GetRowCount();
-            colCount = ((Array*)refObject)->GetColCount();
+            // Handle array index
+            Integer row, col;
+            std::string newName;
+            GmatStringUtil::GetArrayIndex(refObjectName, row, col, newName);
+
+            if (row != -1 && col != -1)
+            {
+               type = Gmat::REAL_TYPE;
+               rowCount = 1;
+               colCount = 1;
+            }
+            else
+            {
+               rowCount = ((Array*)refObject)->GetRowCount();
+               colCount = ((Array*)refObject)->GetColCount();
+            }
          }
          
          #if DEBUG_MATH_ELEMENT
          MessageInterface::ShowMessage
-            ("MathElement::GetOutputInfo() row=%d, col=%d\n", rowCount, colCount);
+            ("MathElement::GetOutputInfo() type=%d, row=%d, col=%d\n", type,
+             rowCount, colCount);
          #endif
       }
       else
@@ -410,8 +441,31 @@ Real MathElement::Evaluate()
 {
    if (refObject)
    {
-      realValue = refObject->EvaluateReal();
-
+      if (elementType == Gmat::REAL_TYPE)
+      {
+         realValue = refObject->EvaluateReal();
+      }
+      else if (elementType == Gmat::RMATRIX_TYPE)
+      {
+         // Handle array index
+         Integer row, col;
+         std::string newName;
+         GmatStringUtil::GetArrayIndex(refObjectName, row, col, newName);
+         
+         if (row != -1 && col!= -1)
+         {
+            realValue = refObject->EvaluateRmatrix().GetElement(row, col);
+         }
+         else
+         {
+            std::stringstream ss("");
+            ss << "MathElement::Evaluate() Array has invalid index. row=" << row
+               << " col=" << col << "\n";
+            
+            throw MathException(ss.str());
+         }
+      }
+      
       #if DEBUG_MATH_ELEMENT
       MessageInterface::ShowMessage
          ("MathElement::Evaluate() It's a parameter: %s realValue = %f\n",
