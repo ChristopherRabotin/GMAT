@@ -284,8 +284,8 @@ bool Assignment::InterpretAction()
       mathTree = new MathTree("MathTree", rhs);
       mathTree->SetTopNode(topNode);
       ownerName = lhs;
-
-      return true;
+      
+      //return true;
    }
 
    // Parse array handling elements
@@ -400,7 +400,7 @@ bool Assignment::Initialize()
       
    if (GmatCommand::Initialize() == false)
       return false;
-      
+   
    parmOwner = (*objectMap)[ownerName];
    
    if (parmOwner)
@@ -433,14 +433,14 @@ bool Assignment::Initialize()
          }
          else
             throw CommandException("Assignment command cannot find object \"" +
-                     value + "\" for line \n" + generatingString + "\n");
+                     value + "\" for line \n   " + generatingString + "\n");
       }
    }
    
    // Find the object
    if (objectMap->find(ownerName) == objectMap->end())
       throw CommandException("Assignment command cannot find object \"" +
-                             ownerName + "\" for line \n" + generatingString + "\n");
+                             ownerName + "\" for line \n   " + generatingString + "\n");
 
    // Initialize RHS MathTree
    if (mathTree != NULL)
@@ -455,9 +455,9 @@ bool Assignment::Initialize()
       
       if (mathTree->Initialize(objectMap))
       {
-         if (topNode->ValidateInputs())
-            return true;
-         else
+//          if (topNode->ValidateInputs())
+//             return true;
+         if (!topNode->ValidateInputs())
             throw CommandException("Failed to validate equation inputs: " +
                                    generatingString + "\n");
       }
@@ -471,6 +471,8 @@ bool Assignment::Initialize()
    
    if (isLhsArray)
    {
+      //MessageInterface::ShowMessage("=====> process isLhsArray part\n");
+      
       if (parmOwner->GetTypeName() != "Array")
          throw CommandException(
             "Attemping to treat " + parmOwner->GetTypeName() + " named " +
@@ -519,7 +521,11 @@ bool Assignment::Initialize()
       }
    }
 
-   return InitializeRHS(value);
+   // if RHS is not a equation, initialize
+   if (mathTree == NULL)
+      return InitializeRHS(value);
+   else
+      return true;
 }
 
 
@@ -539,7 +545,7 @@ bool Assignment::Initialize()
 bool Assignment::Execute()
 {
    #ifdef DEBUG_ARRAY_INTERPRETING
-      MessageInterface::ShowMessage("\nAssignment::Execute entered for " +
+      MessageInterface::ShowMessage("\nAssignment::Execute() entered for " +
          generatingString + "\n");
    #endif
    bool retval = false;
@@ -574,11 +580,20 @@ bool Assignment::Execute()
             
             // set lhsParm here
             if (lhsParm->GetTypeName() == "Variable")
+            {
                lhsParm->SetReal(rval);
+            }
+            else if (lhsParm->GetTypeName() == "Array")
+            {
+               parmOwner->SetRealParameter("SingleValue", rval, rowIndex-1,
+                                           colIndex-1);
+            }
             else
-               throw CommandException("Expects LHS type to be a Variable, but it's " +
-                                      lhsParm->GetTypeName());
-            
+            {
+               throw CommandException
+                  ("Expects LHS type to be a Variable or Array, but it's " +
+                   lhsParm->GetTypeName());
+            }
          }
          else
          {
@@ -608,6 +623,7 @@ bool Assignment::Execute()
                                       lhsParm->GetTypeName());
          }
          
+         BuildCommandSummary(true);
          return true;
       }
       else
