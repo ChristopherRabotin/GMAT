@@ -149,8 +149,10 @@ protected:
    /// The spacecraft used by the stopping conditions
    std::vector<SpaceObject *> stopSats;
    /// Stopping condition evaluation requires propagation; the satBuffer lets us
-   /// restore the Spacecraft to the state needed for the last step 
+   /// restore the Spacecraft and Formations to the state needed for the last 
+   /// step 
    std::vector<Spacecraft *> satBuffer;
+   std::vector<Formation *>  formBuffer;
    /// The object array used in GetRefObjectArray()
    ObjectArray             objectArray;
 

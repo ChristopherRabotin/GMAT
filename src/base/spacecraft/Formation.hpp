@@ -85,6 +85,7 @@ public:
 
    virtual void         BuildState();
    virtual void         UpdateElements();
+   virtual void         UpdateState();
    virtual bool         TakeAction(const std::string &action,
                                    const std::string &actionData = "");
 

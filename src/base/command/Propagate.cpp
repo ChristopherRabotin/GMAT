@@ -1597,13 +1597,29 @@ bool Propagate::TakeAStep(Real propStep)
    }
    else 
    {
+      #ifdef DEBUG_FIXED_STEP
+         std::vector<ForceModel *>::iterator fmod = fm.begin();
+      #endif
+      
       // Step all of the propagators by the input amount
       while (current != p.end()) 
       {
          #ifdef DEBUG_FIXED_STEP
             MessageInterface::ShowMessage("Stepping '%s' by %le seconds\n", 
                (*current)->GetName().c_str(), propStep);
+
+            Integer fmSize = (*fmod)->GetDimension();
+            MessageInterface::ShowMessage("Fmod has dim = %d\n", fmSize);
+            MessageInterface::ShowMessage("   Pre Prop:  ");
+           
+            Real *fmState = (*fmod)->GetState();
+            for (Integer q = 0; q < fmSize; ++q)
+               MessageInterface::ShowMessage(" %.12lf", fmState[q]);
+            MessageInterface::ShowMessage("\n");
+            
+            ++fmod;
          #endif
+
          if (!(*current)->Step(propStep))
          {
             char size[32];
@@ -1611,6 +1627,18 @@ bool Propagate::TakeAStep(Real propStep)
             throw CommandException("Propagator " + (*current)->GetName() + 
                " failed to take a good final step (size = " + size + ")\n");
          }
+         
+
+         #ifdef DEBUG_FIXED_STEP
+            MessageInterface::ShowMessage("   Post Prop: ");
+           
+            for (Integer q = 0; q < fmSize; ++q)
+               MessageInterface::ShowMessage(" %.12lf", fmState[q]);
+            MessageInterface::ShowMessage("\n");
+            
+            ++fmod;
+         #endif
+         
          ++current;
       }
       retval = true;
@@ -2313,7 +2341,6 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
          // Update the data in the stop condition
          stopWhen[stopTrigger]->SetRealParameter(stopCondEpochID,
             elapsedSeconds);
-//            baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY);
          stopIsBracketed = stopWhen[stopTrigger]->AddToBuffer(firstRingStep);
          
          ++ringStepsTaken;
@@ -2380,7 +2407,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
    {
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage(
-            "Propagate::TakeFinalStep before Step(%16.13le) epoch = %16.10lf\n", 
+            "Propagate::TakeFinalStep: Step(%16.13le) from epoch = %16.10lf\n", 
             secsToStep, 
             (baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY));
       #endif
@@ -2403,7 +2430,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
          
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage
-            ("Propagate::TakeFinalStep after Step(%16.13le) epoch = %16.10lf\n", 
+            ("Propagate::TakeFinalStep: Step(%16.13le) advanced to epoch = %16.10lf\n", 
             secsToStep,
             (baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY));
       #endif
@@ -2848,6 +2875,11 @@ std::string Propagate::CreateParameter(const std::string &name)
 //------------------------------------------------------------------------------
 void Propagate::AddToBuffer(SpaceObject *so)
 {
+   #ifdef DEBUG_STOPPING_CONDITIONS
+      MessageInterface::ShowMessage("Buffering states for '%s'\n", 
+         so->GetName().c_str());
+   #endif
+   
    if (so->IsOfType(Gmat::SPACECRAFT))
    {
       satBuffer.push_back((Spacecraft *)(so->Clone()));
@@ -2855,6 +2887,7 @@ void Propagate::AddToBuffer(SpaceObject *so)
    else if (so->IsOfType(Gmat::FORMATION))
    {
       Formation *form = (Formation*)so;
+      formBuffer.push_back((Formation *)(so->Clone()));
       StringArray formSats = form->GetStringArrayParameter("Add");
       
       for (StringArray::iterator i = formSats.begin(); i != formSats.end(); ++i)
@@ -2882,6 +2915,13 @@ void Propagate::EmptyBuffer()
       delete (*i);
    }
    satBuffer.clear();
+   
+   for (std::vector<Formation *>::iterator i = formBuffer.begin(); 
+        i != formBuffer.end(); ++i)
+   {
+      delete (*i);
+   }
+   formBuffer.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -2897,21 +2937,22 @@ void Propagate::EmptyBuffer()
 void Propagate::BufferSatelliteStates(bool fillingBuffer)
 {
    Spacecraft *fromSat, *toSat;
-   std::string satName;
+   Formation *fromForm, *toForm;
+   std::string soName;
    
    for (std::vector<Spacecraft *>::iterator i = satBuffer.begin(); 
         i != satBuffer.end(); ++i)
    {
-      satName = (*i)->GetName();
+      soName = (*i)->GetName();
       if (fillingBuffer)
       {
-         fromSat = (Spacecraft *)((*objectMap)[satName]);
+         fromSat = (Spacecraft *)((*objectMap)[soName]);
          toSat = *i;
       }
       else
       {
          fromSat = *i;
-         toSat = (Spacecraft *)((*objectMap)[satName]);
+         toSat = (Spacecraft *)((*objectMap)[soName]);
       }
 
       #ifdef DEBUG_STOPPING_CONDITIONS
@@ -2922,6 +2963,13 @@ void Propagate::BufferSatelliteStates(bool fillingBuffer)
             (fillingBuffer ? "from propagator" : "from buffer"),
             fromSat->GetRealParameter("A1Epoch"), 
             toSat->GetRealParameter("A1Epoch"));
+
+         MessageInterface::ShowMessage(
+            "   '%s' Satellite state:\n", fromSat->GetName().c_str());
+         Real *satrv = fromSat->GetState().GetState();
+         MessageInterface::ShowMessage(
+            "      %.12lf  %.12lf  %.12lf\n      %.12lf  %.12lf  %.12lf\n",
+            satrv[0], satrv[1], satrv[2], satrv[3], satrv[4], satrv[5]);
       #endif
       
       (*toSat) = (*fromSat);
@@ -2933,4 +2981,64 @@ void Propagate::BufferSatelliteStates(bool fillingBuffer)
             toSat->GetRealParameter("A1Epoch"));
       #endif      
    }
+
+   for (std::vector<Formation *>::iterator i = formBuffer.begin(); 
+        i != formBuffer.end(); ++i)
+   {
+      soName = (*i)->GetName();
+      if (fillingBuffer)
+      {
+         fromForm = (Formation *)((*objectMap)[soName]);
+         toForm = *i;
+      }
+      else
+      {
+         fromForm = *i;
+         toForm = (Formation *)((*objectMap)[soName]);
+      }
+
+      #ifdef DEBUG_STOPPING_CONDITIONS
+         MessageInterface::ShowMessage(
+            "   Formation is %s, fill direction is %s; fromForm epoch = %.12lf"
+            "   toForm epoch = %.12lf\n",
+            fromForm->GetName().c_str(),
+            (fillingBuffer ? "from propagator" : "from buffer"),
+            fromForm->GetRealParameter("A1Epoch"), 
+            toForm->GetRealParameter("A1Epoch"));
+      #endif
+      
+      (*toForm) = (*fromForm);
+      
+      toForm->UpdateState();
+      
+      #ifdef DEBUG_STOPPING_CONDITIONS
+         Integer count = fromForm->GetStringArrayParameter("Add").size();
+
+         MessageInterface::ShowMessage(
+            "After copy, From epoch %.12lf to epoch %.12lf\n",
+            fromForm->GetRealParameter("A1Epoch"), 
+            toForm->GetRealParameter("A1Epoch"));
+
+         MessageInterface::ShowMessage(
+            "   %s for '%s' Formation state:\n", 
+            (fillingBuffer ? "Filling buffer" : "Restoring states"),
+            fromForm->GetName().c_str());
+
+         Real *satrv = fromForm->GetState().GetState();
+         
+         for (Integer i = 0; i < count; ++i)
+            MessageInterface::ShowMessage(
+               "      %d:  %.12lf  %.12lf  %.12lf  %.12lf  %.12lf  %.12lf\n",
+               i, satrv[i*6], satrv[i*6+1], satrv[i*6+2], satrv[i*6+3], 
+               satrv[i*6+4], satrv[i*6+5]);
+      #endif      
+   }
+   
+   #ifdef DEBUG_STOPPING_CONDITIONS
+      for (std::vector<Spacecraft *>::iterator i = satBuffer.begin(); 
+           i != satBuffer.end(); ++i)
+         MessageInterface::ShowMessage(
+            "   Epoch of '%s' is %.12lf\n", (*i)->GetName().c_str(), 
+            (*i)->GetRealParameter("A1Epoch"));
+   #endif
 }

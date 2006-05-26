@@ -920,6 +920,37 @@ void Formation::UpdateElements()
 
 
 //------------------------------------------------------------------------------
+// void UpdateState()
+//------------------------------------------------------------------------------
+/**
+ * Updates the internal PropState data from the member SpaceObjects.
+ */
+//------------------------------------------------------------------------------
+void Formation::UpdateState()
+{
+   Integer size, index = 0;
+   PropState *ps;
+   for (std::vector<SpaceObject*>::iterator i = components.begin();
+        i != components.end(); ++i)
+   {
+      ps = &((*i)->GetState());
+      size = ps->GetSize();
+
+         MessageInterface::ShowMessage(
+            "Formation: Updating(%d to %d) from %s::%s\n", 
+            index, index + size - 1, instanceName.c_str(), (*i)->GetName().c_str());
+
+      memcpy(&((state.GetState())[index]), ps->GetState(), size*sizeof(Real));
+      index += size;
+      if ((*i)->GetType() == Gmat::FORMATION)
+         ((Formation*)(*i))->UpdateState();
+   }
+   
+   //SetEpoch((*(components.begin()))->GetEpoch());
+}
+
+
+//------------------------------------------------------------------------------
 // bool TakeAction(const std::string &action, const std::string &actionData)
 //------------------------------------------------------------------------------
 /**

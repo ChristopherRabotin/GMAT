@@ -630,12 +630,13 @@ void ForceModel::UpdateFromSpaceObject()
     if (spacecraft.size() > 0) 
     {
         Integer j = 0;
-        Integer stateSize = 6;
+        Integer stateSize;
         std::vector<SpaceObject *>::iterator sat;
         PropState *state;
         for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
         {
             state = &((*sat)->GetState());
+            stateSize = state->GetSize();
             memcpy(&rawState[j*stateSize], state->GetState(), 
                    stateSize * sizeof(Real));
             ++j;
