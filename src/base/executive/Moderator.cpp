@@ -419,16 +419,29 @@ StringArray& Moderator::GetListOfConfiguredItems(Gmat::ObjectType type)
 GmatBase* Moderator::GetConfiguredItem(const std::string &name)
 {
    #if DEBUG_CONFIG
-   MessageInterface::ShowMessage("Moderator::GetConfiguredItem() entered: "
-                                 "name = " + name + "\n");
+   MessageInterface::ShowMessage
+      ("Moderator::GetConfiguredItem() entered: name=%s\n", name.c_str());
    #endif
-
-   GmatBase *obj = theConfigManager->GetItem(name);
+   
+   std::string newName = name;
+   
+   // Ignore array indexing of Array
+   UnsignedInt index = name.find('(');
+   if (index != name.npos)
+   {
+      newName = name.substr(0, index);
+      
+      #if DEBUG_CONFIG
+      MessageInterface::ShowMessage
+         ("Moderator::GetConfiguredItem() entered: newName=%s\n", newName.c_str());
+      #endif
+   }
+   GmatBase *obj = theConfigManager->GetItem(newName);
 
    if (obj == NULL)
    {
       // try SolarSystem
-      return theSolarSystemInUse->GetBody(name);
+      return theSolarSystemInUse->GetBody(newName);
    }
    
    return obj;
@@ -1484,7 +1497,6 @@ bool Moderator::IsParameter(const std::string &type)
 //------------------------------------------------------------------------------
 Parameter* Moderator::CreateParameter(const std::string &type,
                                       const std::string &name,
-//                                       const Gmat::ObjectType ownerType,
                                       const std::string &ownerName,
                                       const std::string &depName)
 {
@@ -1501,10 +1513,6 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       param->SetStringParameter("Expression", name);
       
       // Set parameter owner and dependent object
-
-      //loj: parameter knows it's owner type, so just get it
-//       if (ownerType != Gmat::UNKNOWN_OBJECT && ownerName != "")
-//          param->SetRefObjectName(ownerType, ownerName);
       if (ownerName != "")
          param->SetRefObjectName(param->GetOwnerType(), ownerName);
       
