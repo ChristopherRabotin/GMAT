@@ -289,6 +289,8 @@ void OrbitPanel::SaveData()
          mIsStateTypeChanged);
       MessageInterface::ShowMessage("===> mIsStateChanged=%d\n", 
          mIsStateChanged);
+      MessageInterface::ShowMessage("===> mIsEpochChanged=%d\n", 
+         mIsEpochChanged);
    #endif
    
    try
@@ -299,12 +301,15 @@ void OrbitPanel::SaveData()
    
    // save epoch format
 //   wxString epochFormatStr = epochFormatComboBox->GetStringSelection();
-   wxString epochFormatStr = epochFormatComboBox->GetValue();
 //   theSpacecraft->SetDisplayDateFormat(epochFormatStr.c_str());
+   wxString epochFormatStr = epochFormatComboBox->GetValue();
    theSpacecraft->SetDateFormat(epochFormatStr.c_str());
    
    // save epoch
    wxString epochStr = epochValue->GetValue();
+   #if DEBUG_ORBIT_PANEL_SAVE
+      MessageInterface::ShowMessage( "epoch   = %s\n",epochStr.c_str() );
+   #endif
    
    std::string epochDateFormat =
       (epochFormatStr.Contains("ModJulian") ? "ModJulian" : "Gregorian" );
@@ -463,12 +468,12 @@ void OrbitPanel::SaveData()
    }
 
    #if DEBUG_ORBIT_PANEL
-      MessageInterface::ShowMessage( "epoch format      = %s\n",epochFormatStr.c_str() );
-      MessageInterface::ShowMessage( "epoch             = %s\n",epochStr.c_str() );
-      MessageInterface::ShowMessage( "coordinate system = %s\n",coordSystemStr.c_str() );
-      MessageInterface::ShowMessage( "state type        = %s\n",stateTypeStr.c_str() );
-      MessageInterface::ShowMessage( "anomaly type      = %s\n",anomaly.GetType().c_str() );
-      MessageInterface::ShowMessage( "mCartState        = %s\n",mCartState.ToString().c_str() );
+//      MessageInterface::ShowMessage( "epoch format      = %s\n",epochFormatStr.c_str() );
+//      MessageInterface::ShowMessage( "epoch             = %s\n",epochStr.c_str() );
+//      MessageInterface::ShowMessage( "coordinate system = %s\n",coordSystemStr.c_str() );
+//      MessageInterface::ShowMessage( "state type        = %s\n",stateTypeStr.c_str() );
+//      MessageInterface::ShowMessage( "anomaly type      = %s\n",anomaly.GetType().c_str() );
+//      MessageInterface::ShowMessage( "mCartState        = %s\n",mCartState.ToString().c_str() );
    #endif
       
    #if DEBUG_ORBIT_PANEL_SAVE
@@ -693,18 +698,23 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
    wxString coordSysStr  = mCoordSysComboBox->GetStringSelection();
    wxString stateTypeStr = stateTypeComboBox->GetStringSelection();
 
-   #if DEBUG_ORBIT_PANEL
-      MessageInterface::ShowMessage
-         ("OrbitPanel::OnComboBoxChange() mFromCoordStr=%s, coordSysStr=%s\n"
-          "   mFromStateTypeStr=%s, stateTypeStr=%s\n", mFromCoordStr.c_str(),
-          coordSysStr.c_str(), mFromStateTypeStr.c_str(), stateTypeStr.c_str());
-   #endif
+//   #if DEBUG_ORBIT_PANEL
+//      MessageInterface::ShowMessage
+//         ("OrbitPanel::OnComboBoxChange() mFromCoordStr=%s, coordSysStr=%s\n"
+//          "   mFromStateTypeStr=%s, stateTypeStr=%s\n", mFromCoordStr.c_str(),
+//          coordSysStr.c_str(), mFromStateTypeStr.c_str(), stateTypeStr.c_str());
+//   #endif
 
    // ---------------------------- epoch format change -------------------------
    if (event.GetEventObject() == epochFormatComboBox)
    {
       std::string toEpochFormat = epochFormatComboBox->GetStringSelection().c_str();    
       std::string epochStr = epochValue->GetValue().c_str();
+   #if DEBUG_ORBIT_PANEL
+      MessageInterface::ShowMessage
+         ("OrbitPanel::OnComboBoxChange() fromEpochFormat=%s, toEpochFormat=%s\n",
+          fromEpochFormat.c_str(), toEpochFormat.c_str());
+   #endif
       try
       {
          theSpacecraft->SetDateFormat(toEpochFormat);
@@ -724,6 +734,12 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
    if (event.GetEventObject() == mCoordSysComboBox ||
        event.GetEventObject() == stateTypeComboBox)
    {
+   #if DEBUG_ORBIT_PANEL
+      MessageInterface::ShowMessage
+         ("OrbitPanel::OnComboBoxChange() mFromCoordStr=%s, coordSysStr=%s\n"
+          "   mFromStateTypeStr=%s, stateTypeStr=%s\n", mFromCoordStr.c_str(),
+          coordSysStr.c_str(), mFromStateTypeStr.c_str(), stateTypeStr.c_str());
+   #endif
       if (event.GetEventObject() == mCoordSysComboBox)
          mIsCoordSysChanged = true;
 
@@ -952,15 +968,20 @@ void OrbitPanel::UpdateEpoch()
    std::string toEpochFormat = 
       epochFormatComboBox->GetStringSelection().c_str();
       
-   if (toEpochFormat != fromEpochFormat)
-   {
-      theSpacecraft->SetEpoch(newEpoch);
+   #if DEBUG_ORBIT_PANEL
+      MessageInterface::ShowMessage( "epoch = %s\n",newEpoch.c_str() );
+      MessageInterface::ShowMessage
+         ("OrbitPanel::UpdateEpoch() fromEpochFormat=%s, toEpochFormat=%s\n",
+          fromEpochFormat.c_str(), toEpochFormat.c_str());
+   #endif
+//   if (toEpochFormat != fromEpochFormat)
+//   {
       theSpacecraft->SetStringParameter("DateFormat", toEpochFormat);
+      theSpacecraft->SetEpoch(newEpoch);
       epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch").c_str());
       mEpoch = theSpacecraft->GetEpoch();
-   }   
+//   }   
    
-
    Rvector6 outState;
    
    if (mFromStateTypeStr != "Cartesian")
@@ -983,7 +1004,7 @@ void OrbitPanel::UpdateEpoch()
    
    #if DEBUG_ORBIT_PANEL
    MessageInterface::ShowMessage
-      ("Spacecraft::UpdateEpoch() new mEpoch=%f, mOutState=\n   %s\n"
+      ("OrbitPanel::UpdateEpoch() new mEpoch=%f, mOutState=\n   %s\n"
        "mTempCartState=\n   %s\n", mEpoch, mOutState.ToString().c_str(),
        mTempCartState.ToString().c_str());
    #endif
