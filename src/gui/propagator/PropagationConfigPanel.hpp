@@ -56,13 +56,45 @@ private:
       IntegratorCount,
    };
    
-   enum GravModelType
+   enum EarthGravModelType
    {
-      NONE_GM = 0,
-      JGM2,
-      JGM3,
-      OTHER,
-      GravModelCount,
+   	   E_NONE_GM = 0,
+   	   JGM2,
+   	   JGM3,
+   	   EGM96,
+   	   E_OTHER,
+   	   EarthGravModelCount,
+   };
+   
+   enum LunaGravModelType
+   {
+   	   L_NONE_GM = 0,
+   	   LP165,
+   	   L_OTHER,
+   	   LunaGravModelCount,
+   };
+   
+   enum VenusGravModelType
+   {
+   	   V_NONE_GM = 0,
+   	   MGNP180U,
+   	   V_OTHER,
+   	   VenusGravModelCount,
+   };
+   
+   enum MarsGravModelType
+   {
+   	   M_NONE_GM = 0,
+   	   MARS50C,
+   	   M_OTHER,
+   	   MarsGravModelCount,
+   };
+   
+   enum OthersGravModelType
+   {
+   	   O_NONE_GM = 0,
+   	   O_OTHER,
+   	   OthersGravModelCount,
    };
    
    enum DragModelType
@@ -182,7 +214,11 @@ private:
    std::string dragTypeName;
    std::string propOriginName;
    
-   StringArray gravModelArray;
+   StringArray earthGravModelArray;
+   StringArray lunaGravModelArray;
+   StringArray venusGravModelArray;
+   StringArray marsGravModelArray;
+   StringArray othersGravModelArray;
    StringArray dragModelArray;
    StringArray magfModelArray;
    
@@ -239,7 +275,7 @@ private:
    void DisplayIntegratorData(bool integratorChanged);
    void DisplayPrimaryBodyData();
    void DisplayForceData();
-   void DisplayGravityFieldData();
+   void DisplayGravityFieldData(std::string bodyName);
    void DisplayAtmosphereModelData();
    void DisplayPointMassData();
    void DisplayMagneticFieldData();
