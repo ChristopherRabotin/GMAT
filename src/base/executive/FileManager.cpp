@@ -41,10 +41,12 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "SLP_PATH",
    "DE_PATH",
    "EARTH_POT_PATH",
+   "LUNA_POT_PATH",
+   "VENUS_POT_PATH",
+   "MARS_POT_PATH",
    "PLANETARY_COEFF_PATH",
    "TIME_PATH",
-   "TEXTURE_PATH",
-   
+   "TEXTURE_PATH",  
    // file name
    "LOG_FILE",
    "REPORT_FILE",
@@ -56,6 +58,10 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "DE405_FILE",
    "JGM2_FILE",
    "JGM3_FILE",
+   "EGM_FILE",
+   "LP_FILE",
+   "MGN_FILE",
+   "MARS_FILE",
    "EOP_FILE",
    "PLANETARY_COEFF_FILE",
    "NUTATION_COEFF_FILE",
@@ -116,7 +122,7 @@ FileManager::~FileManager()
  */
 //------------------------------------------------------------------------------
 void FileManager::ReadStartupFile(const std::string &fileName)
-{
+{   
    char line[MAX_LENGTH] = "";
    bool correctVersionFound = false;
    
@@ -190,9 +196,8 @@ void FileManager::ReadStartupFile(const std::string &fileName)
          throw GmatBaseException
             ("FileManager::ReadStartupFile() the VERSION not found.\n"
              "It no longer can read old startup file.\n");
-      
    } // end While()
-
+   
    // now use log file from the startup file
    MessageInterface::SetLogFile(GetAbsPathname("LOG_FILE"));
    MessageInterface::logEnabled = true;
@@ -448,6 +453,7 @@ std::string FileManager::GetFullPathname(const std::string &typeName)
 //------------------------------------------------------------------------------
 std::string FileManager::GetAbsPathname(const FileType type)
 {
+   
    if (type >=0 && type < FileTypeCount)
       return GetAbsPathname(FILE_TYPE_STRING[type]);
    
@@ -605,7 +611,7 @@ void FileManager::SetAbsPathname(const std::string &type, const std::string &new
  */
 //------------------------------------------------------------------------------
 void FileManager::AddFileType(const std::string &type, const std::string &name)
-{
+{  
    #if DEBUG_FILE_MANAGER
    MessageInterface::ShowMessage
       ("FileManager::AddFileType() type=%s, name=%s\n", type.c_str(), name.c_str());
@@ -674,7 +680,7 @@ void FileManager::AddFileType(const std::string &type, const std::string &name)
  */
 //------------------------------------------------------------------------------
 FileManager::FileManager()
-{
+{  
    MessageInterface::logEnabled = false; // so that debug can be written from here
    MessageInterface::ShowMessage("FileManager::FileManager() entered\n");
    
@@ -718,6 +724,19 @@ FileManager::FileManager()
    AddFileType("EARTH_POT_PATH", "./files/gravity/earth/");
    AddFileType("JGM2_FILE", "EARTH_POT_PATH/JGM2.grv");
    AddFileType("JGM3_FILE", "EARTH_POT_PATH/JGM3.grv");
+   AddFileType("EGM_FILE", "EARTH_POT_PATH/EGM96.grv");
+   
+   // luna gravity files
+   AddFileType("LUNA_POT_PATH", "./files/gravity/luna/");
+   AddFileType("LP_FILE", "LUNA_POT_PATH/lp165p.grv");
+   
+   // venus gravity files
+   AddFileType("VENUS_POT_PATH", "./files/gravity/venus/");
+   AddFileType("MGN_FILE", "VENUS_POT_PATH/MGNP180U.grv");
+   
+   // mars gravity files
+   AddFileType("MARS_POT_PATH", "./files/gravity/mars/");
+   AddFileType("MARS_FILE", "MARS_POT_PATH/Mars50c.grv");
    
    // planetary coeff. fiels
    AddFileType("PLANETARY_COEFF_PATH", "./files/planetary_coeff/");
@@ -729,8 +748,7 @@ FileManager::FileManager()
    AddFileType("TIME_PATH", "./files/time/");
    AddFileType("LEAP_SECS_FILE", "TIME_PATH/tai-utc.dat");
    
-#endif
-      
+#endif  
 }
 
 
