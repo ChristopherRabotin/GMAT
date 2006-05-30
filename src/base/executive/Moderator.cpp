@@ -120,7 +120,6 @@ bool Moderator::Initialize(bool fromGui)
       // Read startup file, Set Log file
       theFileManager = FileManager::Instance();
       theFileManager->ReadStartupFile();
-      
       MessageInterface::ShowMessage("Moderator is creating core engine...\n");
       
       // Create interpreters and managers
@@ -128,7 +127,7 @@ bool Moderator::Initialize(bool fromGui)
       theScriptInterpreter = ScriptInterpreter::Instance();
       theFactoryManager = FactoryManager::Instance();
       theConfigManager = ConfigManager::Instance();
-      
+
       // Create publisher
       thePublisher = Publisher::Instance();
       
@@ -151,27 +150,24 @@ bool Moderator::Initialize(bool fromGui)
       theFactoryManager->RegisterFactory(new SpacecraftFactory());
       theFactoryManager->RegisterFactory(new StopConditionFactory());
       theFactoryManager->RegisterFactory(new SubscriberFactory());
-      
       // Create default SolarSystem
       /// @note: If the solar system can be configured by name, add it to the
       ///        ConfigManager by calling CreateSolarSystem().
       ///        Until then, just use solar system name as "SolarSystem"
-      
       theDefaultSolarSystem = new SolarSystem("SolarSystem");
       theConfigManager->SetDefaultSolarSystem(theDefaultSolarSystem);
       theSolarSystemInUse = new SolarSystem("SolarSystem");
-      
       StringArray bodies = theSolarSystemInUse->GetBodiesInUse();
       SpacePoint *sp;
       SpacePoint *earth = theSolarSystemInUse->GetBody("Earth");
-      
+
       // Set J2000Body to SolarSystem bodies
       for (UnsignedInt i=0; i<bodies.size(); i++)
       {
          sp = theSolarSystemInUse->GetBody(bodies[i]);
          sp->SetJ2000Body(earth);
       }
-      
+
       //MessageInterface::ShowMessage
       //   ("Moderator::Initialize() theDefaultSolarSystem created\n");
       
@@ -191,15 +187,13 @@ bool Moderator::Initialize(bool fromGui)
       theInternalCoordSystem->SetJ2000Body(j2000body);
       theInternalCoordSystem->SetSolarSystem(theSolarSystemInUse);
       theInternalCoordSystem->Initialize();
-      
+
       InitializePlanetarySource();
       InitializePlanetaryCoeffFile();
       InitializeTimeFile();
-      
+
       if (fromGui)
-      {
          CreateDefaultMission();
-      }
    }
    catch (BaseException &e)
    {
@@ -214,7 +208,6 @@ bool Moderator::Initialize(bool fromGui)
                                      "Unknown Error occured during initialization");
       return false;
    }
-   
    MessageInterface::ShowMessage("Moderator successfully created core engine\n");
    return true;;
 }
@@ -2850,6 +2843,14 @@ std::string Moderator::GetPotentialFileName(const std::string &fileType)
       return theFileManager->GetFullPathname("JGM2_FILE");
    else if (fileType == "JGM3")
       return theFileManager->GetFullPathname("JGM3_FILE");
+   else if (fileType == "EGM")
+      return theFileManager->GetFullPathname("EGM_FILE");
+   else if (fileType == "LP")
+      return theFileManager->GetFullPathname("LP_FILE");
+   else if (fileType == "MGN")
+      return theFileManager->GetFullPathname("MGN_FILE");
+   else if (fileType == "MARS")
+      return theFileManager->GetFullPathname("MARS_FILE");
    else
       return "Unknown Potential File Type:" + fileType;
 }
