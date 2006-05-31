@@ -402,7 +402,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
                     TimeConverterUtil::A1MJD, TimeConverterUtil::UT1, 
                     JD_JAN_5_1941);
       
-      //Real jdUT1    = mjdUT1 + JD_JAN_5_1941; // right?
+      Real jdUT1    = mjdUT1 + JD_JAN_5_1941; // right?
       // Compute elapsed Julian centuries (UT1)
       //Real tUT1     = (jdUT1 - 2451545.0) / 36525.0;
       Real tDiff = JD_JAN_5_1941 - 2451545.0;
@@ -581,7 +581,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       #endif
 
    }
-   if ((originName == SolarSystem::MOON_NAME) &&
+   else if ((originName == SolarSystem::MOON_NAME) &&
       ((((CelestialBody*)origin)->GetPosVelSource() == Gmat::DE_200) ||
        (((CelestialBody*)origin)->GetPosVelSource() == Gmat::DE_405)))
    {

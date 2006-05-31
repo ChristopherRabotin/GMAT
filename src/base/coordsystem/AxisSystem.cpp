@@ -47,6 +47,7 @@ using namespace GmatTimeUtil;      // for SECS_PER_DAY
 //#define DEBUG_FIRST_CALL
 
 //#define DEBUG_ITRF_UPDATES
+//#define DEBUG_CALCS
 
 
 #ifdef DEBUG_FIRST_CALL
@@ -465,35 +466,51 @@ bool AxisSystem::Initialize()
 bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
                                    Rvector &outState)
 {
-   static Rvector3 tmpPosVec;
-   static Rvector3 tmpVelVec;
+   static Rvector3 tmpPosVecTo;
+   static Rvector3 tmpVelVecTo;
+   static const Real  *tmpPosTo = tmpPosVecTo.GetDataVector();
+   static const Real  *tmpVelTo = tmpVelVecTo.GetDataVector();
    CalculateRotationMatrix(epoch);
    // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
    //Rvector3 tmpPosVec(inState[0],inState[1], inState[2]);
    //Rvector3 tmpVelVec(inState[3],inState[4], inState[5]);
-   tmpPosVec.Set(inState[0],inState[1], inState[2]);
-   tmpVelVec.Set(inState[3],inState[4], inState[5]);
+   tmpPosVecTo.Set(inState[0],inState[1], inState[2]);
+   tmpVelVecTo.Set(inState[3],inState[4], inState[5]);
    //const Real  *inData = inState.GetDataVector();
-   const Real  *tmpPos = tmpPosVec.GetDataVector();
-   const Real  *tmpVel = tmpVelVec.GetDataVector();
+   //const Real  *tmpPosTo = tmpPosVecTo.GetDataVector();
+   //const Real  *tmpVelTo = tmpVelVecTo.GetDataVector();
    // rotMatrix * tmpPos;
    // rotDotMatrix * tmpPos + rotMatrix * tmpVel
+   
+   #ifdef DEBUG_CALCSUTS
+      MessageInterface::ShowMessage(
+         "Input vector to ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         inState[0], inState[1], inState[2], inState[3], inState[4], inState[5]);
+      MessageInterface::ShowMessage(
+      "the rotation matrix is : %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f\n",
+      rotMatrix(0,0),rotMatrix(0,1),rotMatrix(0,2),
+      rotMatrix(1,0),rotMatrix(1,1),rotMatrix(1,2),
+      rotMatrix(2,0),rotMatrix(2,1),rotMatrix(2,2));
+      //MessageInterface::ShowMessage(
+      //   "Input vector as datavec = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      //   tmpPosTo[0], tmpPosTo[1], tmpPosTo[2], tmpVelTo[0], tmpVelTo[1], tmpVelTo[2]);
+   #endif
    Real  outPos[3];
    Real  outVel[3];
    Integer p3 = 0;
    for (Integer p = 0; p < 3; ++p)
    {
       p3 = 3*p;
-      outPos[p] = rotData[p3]   * tmpPos[0]   + 
-                  rotData[p3+1] * tmpPos[1] + 
-                  rotData[p3+2] * tmpPos[2];
-      outVel[p] = (rotDotData[p3]    * tmpPos[0]   + 
-                   rotDotData[p3+1]  * tmpPos[1] + 
-                   rotDotData[p3+2]  * tmpPos[2])
+      outPos[p] = rotData[p3]   * tmpPosTo[0]   + 
+                  rotData[p3+1] * tmpPosTo[1] + 
+                  rotData[p3+2] * tmpPosTo[2];
+      outVel[p] = (rotDotData[p3]    * tmpPosTo[0]   + 
+                   rotDotData[p3+1]  * tmpPosTo[1] + 
+                   rotDotData[p3+2]  * tmpPosTo[2])
                   +
-                  (rotData[p3]    * tmpVel[0]   + 
-                   rotData[p3+1]  * tmpVel[1] + 
-                   rotData[p3+2]  * tmpVel[2]);
+                  (rotData[p3]    * tmpVelTo[0]   + 
+                   rotData[p3+1]  * tmpVelTo[1] + 
+                   rotData[p3+2]  * tmpVelTo[2]);
    }     
  
    //Rvector3 outPos_2 = rotMatrix    * tmpPosVec; // old
@@ -501,6 +518,14 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
          
    outState.Set(6,outPos[0], outPos[1], outPos[2], 
                   outVel[0], outVel[1], outVel[2]);
+   #ifdef DEBUG_CALCS
+      MessageInterface::ShowMessage(
+         "Computed Output vector in ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], outVel[2]);
+      MessageInterface::ShowMessage(
+         "Output vector from ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         outState[0], outState[1], outState[2], outState[3], outState[4], outState[5]);
+   #endif
 
    #ifdef DEBUG_FIRST_CALL
       if ((firstCallFired == false) || (epoch.Get() == 21545.0))
@@ -553,23 +578,38 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
 {
    static Rvector3 tmpPosVec;
    static Rvector3 tmpVelVec;
+   static const Real  *tmpPos = tmpPosVec.GetDataVector();
+   static const Real  *tmpVel = tmpVelVec.GetDataVector();
    CalculateRotationMatrix(epoch);
    // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
-   //Rvector3 tmpPos(inState[0],inState[1], inState[2]);
-   //Rvector3 tmpVel(inState[3],inState[4], inState[5]);
-   //Rmatrix33 tmpRot    = rotMatrix.Transpose();
-   //Rmatrix33 tmpRotDot = rotDotMatrix.Transpose();
-   //Rvector3 outPos     = tmpRot    * tmpPos ;
-   //Rvector3 outVel     = (tmpRotDot * tmpPos) + (tmpRot * tmpVel);
+   ////Rvector3 tmpPos(inState[0],inState[1], inState[2]);
+   ////Rvector3 tmpVel(inState[3],inState[4], inState[5]);
+   ////Rmatrix33 tmpRot    = rotMatrix.Transpose();
+   ////Rmatrix33 tmpRotDot = rotDotMatrix.Transpose();
+   ////Rvector3 outPos     = tmpRot    * tmpPos ;
+   ////Rvector3 outVel     = (tmpRotDot * tmpPos) + (tmpRot * tmpVel);
    tmpPosVec.Set(inState[0],inState[1], inState[2]);
    tmpVelVec.Set(inState[3],inState[4], inState[5]);
 
-   //Rvector3 tmpPosVec(inState[0],inState[1], inState[2]);
-   //Rvector3 tmpVelVec(inState[3],inState[4], inState[5]);
-   const Real  *tmpPos = tmpPosVec.GetDataVector();
-   const Real  *tmpVel = tmpVelVec.GetDataVector();
+   ////Rvector3 tmpPosVec(inState[0],inState[1], inState[2]);
+   ////Rvector3 tmpVelVec(inState[3],inState[4], inState[5]);
+   //const Real tmpPos[3] = {inState[0], inState[1], inState[2]};
+   //const Real tmpVel[3] = {inState[3], inState[4], inState[5]};
    // rotMatrix-T * tmpPos;
    // rotDotMatrix-T * tmpPos + rotMatrix-T * tmpVel
+   #ifdef DEBUG_CALCS
+      MessageInterface::ShowMessage(
+         "Input vector to FromMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         inState[0], inState[1], inState[2], inState[3], inState[4], inState[5]);
+      MessageInterface::ShowMessage(
+      "the rotation matrix is : %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f\n",
+      rotMatrix(0,0),rotMatrix(0,1),rotMatrix(0,2),
+      rotMatrix(1,0),rotMatrix(1,1),rotMatrix(1,2),
+      rotMatrix(2,0),rotMatrix(2,1),rotMatrix(2,2));
+      //MessageInterface::ShowMessage(
+      //   "Input vector as datavec = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      //   tmpPos[0], tmpPos[1], tmpPos[2], tmpVel[0], tmpVel[1], tmpVel[2]);
+   #endif
    Real  outPos[3];
    Real  outVel[3];
    const Real  rotDataT[9] = {rotData[0], rotData[3], rotData[6],
@@ -596,6 +636,14 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
    outState.Set(6,outPos[0], outPos[1], outPos[2], 
                   outVel[0], outVel[1], outVel[2]);
 
+   #ifdef DEBUG_CALCS
+      MessageInterface::ShowMessage(
+         "Computed Output vector in ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], outVel[2]);
+      MessageInterface::ShowMessage(
+         "Output vector from ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         outState[0], outState[1], outState[2], outState[3], outState[4], outState[5]);
+   #endif
    #ifdef DEBUG_FIRST_CALL
       if ((firstCallFired == false) || (epoch.Get() == 21545.0))
       {
@@ -1417,12 +1465,14 @@ void AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
 {
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
-         MessageInterface::ShowMessage("AxisSystem::ConputeSiderealTimeRotation, "
+      {
+         MessageInterface::ShowMessage("AxisSystem::ComputeSiderealTimeRotation, "
          "for object of type %s\n", typeName.c_str());
          MessageInterface::ShowMessage(
             "   AxisSystem::ComputeSiderealTimeRotation(%.12lf, %.12lf, %.12lf,"
             " %.12lf, %.12lf, %.12lf, %.12lf)\n", jdTT, tUT1, dPsi, 
             longAscNodeLunar, cosEpsbar, cosAst, sinAst);
+      }
    #endif
 
    Real tUT12    = tUT1  * tUT1;

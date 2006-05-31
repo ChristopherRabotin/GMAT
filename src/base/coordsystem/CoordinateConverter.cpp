@@ -212,13 +212,31 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
                           CoordinateSystem *inCoord, Rvector &outState,
                           CoordinateSystem *outCoord, bool omitTranslation)
 {
+   if (inCoord->GetName() == outCoord->GetName())
+   {
+      outState = inState;
+      lastRotMatrix.Set(1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0);
+      return true;
+   }
+   #ifdef DEBUG_FIRST_CALL
+      if ((firstCallFired == false) || (epoch.Get() == 21545.0))
+      {
+         MessageInterface::ShowMessage(
+            "Coordinate conversion check:\n      %s --> %s\n", 
+            inCoord->GetName().c_str(), outCoord->GetName().c_str());
+         MessageInterface::ShowMessage(
+            "      Epoch: %.12lf\n", epoch.Get());
+         MessageInterface::ShowMessage(
+            "      input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], 
+            inState[5]);
+      }
+   #endif
    static Rvector internalState;
    static Rmatrix33 toMJ2000RotMatrix;
    static Rmatrix33 fromMJ2000Matrix;
    static const Real *toData;
    static const Real *fromData;
-   toData      = toMJ2000RotMatrix.GetDataVector();
-   fromData    = fromMJ2000Matrix.GetDataVector();
    if (inState.GetSize() != outState.GetSize())
       throw CoordinateSystemException(
              "input and output states have different sizes - no conversion done");
@@ -228,6 +246,7 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
    // call coordinate system methods to convert - allow exceptions to
    // percolate up (to be caught at a higher level)
    internalState.SetSize(inState.GetSize());
+   internalState.MakeZeroVector();
    bool coincident = (inCoord->GetOrigin() == outCoord->GetOrigin() ? 
                       true : false);
    bool translateFlag = coincident || omitTranslation;
@@ -235,6 +254,8 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
    outState      = outCoord->FromMJ2000Eq(epoch, internalState, translateFlag);
    toMJ2000RotMatrix   = inCoord->GetLastRotationMatrix();
    fromMJ2000Matrix    = outCoord->GetLastRotationMatrix();
+   toData      = toMJ2000RotMatrix.GetDataVector();
+   fromData    = fromMJ2000Matrix.GetDataVector();
    const Real  fromDataT[9] = {fromData[0], fromData[3], fromData[6],
                                fromData[1], fromData[4], fromData[7],
                                fromData[2], fromData[5], fromData[8]};
@@ -269,7 +290,11 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
             inState[0], inState[1], inState[2], inState[3], inState[4], 
             inState[5]);
          MessageInterface::ShowMessage(
-            "      outpt State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            "      internal State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            internalState[0], internalState[1], internalState[2], internalState[3], 
+            internalState[4], internalState[5]);
+         MessageInterface::ShowMessage(
+            "      output State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
             outState[0], outState[1], outState[2], outState[3], outState[4], 
             outState[5]);
          firstCallFired = true;

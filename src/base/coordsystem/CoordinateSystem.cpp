@@ -30,6 +30,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_RENAME 1
+//#define DEBUG_INPUTS_OUTPUTS
 
 //---------------------------------
 // static data
@@ -370,7 +371,13 @@ bool CoordinateSystem::Initialize()
 Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
                                      bool coincident)
 {
+    #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+      "In CS::ToMJ2000Eq, inState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      inState[0], inState[1], inState[2], inState[3],inState[4], inState[5]);
+    #endif
    Rvector internalState(inState.GetSize());
+   Rvector finalState(inState.GetSize());
    if (axes)
    {
       if (!axes->RotateToMJ2000Eq(epoch,inState,internalState))
@@ -378,16 +385,33 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
                                          + instanceName);
    }
    else // assume this is MJ2000Eq, so no rotation is necessary
+   {
       internalState = inState;
+   }
+   finalState    = inState;
 
    if (!coincident)
    {
-      if (!TranslateToMJ2000Eq(epoch,internalState, internalState))
+      //if (!TranslateToMJ2000Eq(epoch,internalState, internalState))
+      //   throw CoordinateSystemException("Error translating state to MJ2000Eq for "
+      //                                   + instanceName);
+      if (!TranslateToMJ2000Eq(epoch,internalState, finalState))
          throw CoordinateSystemException("Error translating state to MJ2000Eq for "
                                          + instanceName);
    }
 
-   return internalState; // implicit copy constructor
+   #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+      "In CS::ToMJ2000Eq, internalState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      internalState[0], internalState[1], internalState[2], 
+      internalState[3],internalState[4], internalState[5]);
+      MessageInterface::ShowMessage(
+      "In CS::ToMJ2000Eq, finalState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      finalState[0], finalState[1], finalState[2], 
+      finalState[3],finalState[4], finalState[5]);
+   #endif
+   return finalState; // implicit copy constructor
+   //return internalState; // implicit copy constructor
 }
 
 //------------------------------------------------------------------------------
@@ -409,7 +433,13 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
 Rvector CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
                                        bool coincident)
 {
+    #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+      "In CS::FromMJ2000Eq, inState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      inState[0], inState[1], inState[2], inState[3],inState[4], inState[5]);
+    #endif
    Rvector internalState(inState.GetSize());
+   Rvector finalState(inState.GetSize());
    if (!coincident)
    {
       if (!TranslateFromMJ2000Eq(epoch,inState, internalState))//,j2000Body))
@@ -417,15 +447,32 @@ Rvector CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inStat
                                          + instanceName);
    }
    else
+   {
       internalState = inState;
+   }
+   finalState    = inState;
       
 
    if (axes)
-      if (!axes->RotateFromMJ2000Eq(epoch,internalState,internalState))//,j2000Body))
+      //if (!axes->RotateFromMJ2000Eq(epoch,internalState,internalState))//,j2000Body))
+      //   throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
+      //                                   + instanceName);
+      if (!axes->RotateFromMJ2000Eq(epoch,internalState,finalState))//,j2000Body))
          throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
                                          + instanceName);
 
-   return internalState; // implicit copy constructor
+   #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+      "In CS::FromMJ2000Eq, internalState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      internalState[0], internalState[1], internalState[2], 
+      internalState[3],internalState[4], internalState[5]);
+      MessageInterface::ShowMessage(
+      "In CS::FromMJ2000Eq, finalState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      finalState[0], finalState[1], finalState[2], 
+      finalState[3], finalState[4], finalState[5]);
+   #endif
+   return finalState; // implicit copy constructor
+   //return internalState; // implicit copy constructor
 }
 
 
