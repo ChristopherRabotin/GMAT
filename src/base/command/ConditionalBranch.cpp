@@ -102,7 +102,7 @@ ConditionalBranch::ConditionalBranch(const ConditionalBranch &cb) :
 BranchCommand      (cb),
 numberOfConditions (cb.numberOfConditions),
 numberOfLogicalOps (cb.numberOfLogicalOps)
-{
+{   
    Integer i = 0;
    for (i=0; i < numberOfConditions; i++)
    {
@@ -111,6 +111,7 @@ numberOfLogicalOps (cb.numberOfLogicalOps)
       opList.push_back((cb.opList).at(i));
       rhsList.push_back((cb.rhsList).at(i));
    }
+   
    for (i=0; i < numberOfLogicalOps; i++)
    {
       logicalOpStrings.push_back((cb.logicalOpStrings).at(i));
@@ -150,6 +151,7 @@ ConditionalBranch& ConditionalBranch::operator=(const ConditionalBranch &cb)
 {
    if (this == &cb)
       return *this;
+   
    BranchCommand::operator=(cb);
    numberOfConditions = cb.numberOfConditions;
    numberOfLogicalOps = cb.numberOfLogicalOps;
@@ -157,6 +159,7 @@ ConditionalBranch& ConditionalBranch::operator=(const ConditionalBranch &cb)
    opList.clear();
    rhsList.clear();
    Integer i = 0;
+   
    for (i=0; i < numberOfConditions; i++)
    {
       lhsList.push_back((cb.lhsList).at(i));
@@ -164,6 +167,7 @@ ConditionalBranch& ConditionalBranch::operator=(const ConditionalBranch &cb)
       opList.push_back((cb.opList).at(i));
       rhsList.push_back((cb.rhsList).at(i));
    }
+   
    logicalOpList.clear();
    for (i=0; i < numberOfLogicalOps; i++)
    {
@@ -201,6 +205,9 @@ ConditionalBranch& ConditionalBranch::operator=(const ConditionalBranch &cb)
 //------------------------------------------------------------------------------
 ConditionalBranch::~ConditionalBranch()
 {
+   // Should delete cloned parameters here, when command is cloned
+   //for (UnsignedInt i=0; i < params.size(); i++)
+   //   delete params[i];
 }
 
 
@@ -218,6 +225,20 @@ bool ConditionalBranch::Initialize()
     bool retval = BranchCommand::Initialize();
 
     // specific initialization goes here
+    
+    // Reset parameter pointers here, because parameters are cloned in the Sandbox
+    
+    std::string paramName;
+    for (UnsignedInt i=0; i<params.size(); i++)
+    {
+       paramName = params[i]->GetName();
+       if (objectMap->find(paramName) != objectMap->end())
+          params[i] = (Parameter*)((*objectMap)[paramName]);
+       else
+          throw CommandException
+             ("ConditionalBranch::Initialize() parameter name: " + paramName +
+              " not found in the object map\n");
+    }
     
     return retval;
 }
@@ -429,6 +450,7 @@ bool ConditionalBranch::RemoveConditionOperator(Integer atIndex)
    numberOfLogicalOps--;
    return true;
 }
+
 
 //------------------------------------------------------------------------------
 //  GmatBase* GetRefObject(const Gmat::ObjectType type,
@@ -940,15 +962,13 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
 
    #ifdef DEBUG_CONDITIONS
       MessageInterface::ShowMessage(
-         "ConditionalBranch::EvaluateCondition entered; which = %d\n   "
-         "LHS conditions known:\n", which);
+         "ConditionalBranch::EvaluateCondition() entered; which = %d\n   "
+         "LHS conditions known:\n", which);      
       for (StringArray::iterator l = lhsList.begin(); l != lhsList.end(); ++l)
-         MessageInterface::ShowMessage("      \"%s\"\n", l->c_str());
-      MessageInterface::ShowMessage(
-         "\n   RHS conditions known:\n");
+         MessageInterface::ShowMessage("      \"%s\"\n", l->c_str());      
+      MessageInterface::ShowMessage("\n   RHS conditions known:\n");      
       for (StringArray::iterator r = rhsList.begin(); r != rhsList.end(); ++r)
-         MessageInterface::ShowMessage("      \"%s\"\n", r->c_str());
-
+         MessageInterface::ShowMessage("      \"%s\"\n", r->c_str());      
       MessageInterface::ShowMessage("\n   Actual parms known:\n");
       for (std::vector<Parameter*>::iterator p = params.begin(); 
            p != params.end(); ++p)
@@ -957,7 +977,7 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
    #endif
    
    char firstChar = (rhsList.at(which)).at(0);
-   if (isalpha(firstChar))  // if not a real, assume a Parameter  
+   if (isalpha(firstChar))  // if not a real, assume a Parameter. How about .789?
    {
       theRHSParmName = rhsList.at(which);
       rightIsParm    = true;
@@ -969,7 +989,7 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
    }
    
    firstChar = (lhsList.at(which)).at(0);
-   if (isalpha(firstChar))  // if not a real, assume a Parameter  
+   if (isalpha(firstChar))  // if not a real, assume a Parameter. How about .789?
    {
       theLHSParmName = lhsList.at(which);
       leftIsParm     = true;
@@ -979,7 +999,7 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
       std::istringstream lhsStr(lhsList.at(which)); 
       lhsStr >> lhsValue;
    }
-
+   
    
    // iterate over the list of reference objects to find the parameter
    if (rightIsParm || leftIsParm)
@@ -994,7 +1014,7 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
             {
                lhsValue = (*p)->EvaluateReal();
             }
-            else if ((*p)->GetReturnType() == Gmat::RMATRIX_TYPE) //loj: 5/19/06
+            else if ((*p)->GetReturnType() == Gmat::RMATRIX_TYPE)
             {
                // find position of lhs parameter
                std::vector<std::string>::iterator pos;
@@ -1020,7 +1040,7 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
             {
                rhsValue = (*p)->EvaluateReal();
             }
-            else if ((*p)->GetReturnType() == Gmat::RMATRIX_TYPE) //loj: 5/19/06
+            else if ((*p)->GetReturnType() == Gmat::RMATRIX_TYPE)
             {
                // find position of rhs parameter
                std::vector<std::string>::iterator pos;
@@ -1108,10 +1128,13 @@ bool ConditionalBranch::EvaluateAllConditions()
    if (numberOfConditions == 0)
       throw CommandException(
          "Error in conditional statement - no conditions specified.");
+   
    if (numberOfConditions != (numberOfLogicalOps + 1))
       throw CommandException(
          "conditional statement incorrect - too few/many logical operators");
+   
    bool soFar = EvaluateCondition(0);
+   
    Integer i = 1;
    for (i=1; i < numberOfConditions; i++)
    {
@@ -1129,12 +1152,14 @@ bool ConditionalBranch::EvaluateAllConditions()
             break;
       }
    }
+   
    #ifdef DEBUG_CONDITIONS
    if (soFar)
       MessageInterface::ShowMessage("   all are TRUE .......\n");
    else
       MessageInterface::ShowMessage("   some are FALSE .......\n");
    #endif
+   
    return soFar;
 }
 
