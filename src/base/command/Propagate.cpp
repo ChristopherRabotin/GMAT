@@ -2542,11 +2542,10 @@ bool Propagate::Execute()
 
          CheckStopConditions(epochID);
          ++stepsTaken;
-
-//MessageInterface::ShowMessage("%s, steps taken = %d, stop cond %s\n", 
-//   (hasStoppedOnce ? "Has stopped once" : "Has not stopped once"),
-//   stepsTaken, (stopCondMet ? "met" : "not met"));
-         if (hasStoppedOnce && (stepsTaken < 5))
+         
+         /// @todo Make stop triggering more robust when using hasStoppedOnce.
+         // Ensure a step across a stopping condition if we already stopped once
+         if (hasStoppedOnce && (stepsTaken < 2))
          {
             stopCondMet = false;
          }
