@@ -18,9 +18,9 @@
  * The assignment class is the Command class that handles commands of the form
  * 
  *     GMAT object.parameter = value;
- * 
- * Eventually (currently scheduled for build 4) this class will be extended to 
- * include numerical operators on the right side of the assignment line.
+ *     GMAT variable = parameter;
+ *     GMAT variable = equation;
+ *
  */
 //------------------------------------------------------------------------------
 
@@ -31,6 +31,9 @@
 #include "Variable.hpp"
 #include "Array.hpp"
 #include "MathParser.hpp"
+#include "StringUtil.hpp"
+/// @todo Rework command so it doesn't need the Moderator!!!
+#include "Moderator.hpp" 
 
 //#define DEBUG_RENAME 1
 //#define DEBUG_PARM_ASSIGNMENT
@@ -253,17 +256,16 @@ bool Assignment::InterpretAction()
    
    end = genString.find(".", loc);
    
-   //if ((end == (Integer)std::string::npos) && !isLhsArray)
    if ((end == (Integer)std::string::npos) && !isLhsArray && !isRhsEquation)
    {
       // Script line is set to make one object the same as another, or to set a
       // value on a variable
       ownerName = lhs;
       value = rhs;
-      objToObj = true;
+      objToObj = true;      
       return true;
    }
-
+   
    
    // Parse RHS if equation
    if (isRhsEquation)
@@ -285,9 +287,33 @@ bool Assignment::InterpretAction()
       mathTree->SetTopNode(topNode);
       ownerName = lhs;
       
-      //return true;
+      ////return true;
    }
+   else
+   {
+      UnsignedInt dot = rhs.find(".", 0);
+      // if rhs is a system parameter
+      if (dot != rhs.npos)
+      {
+         Real rval;
+         if (!GmatStringUtil::ToDouble(rhs, &rval))
+         {
+            // Get an instance if this is a Parameter
+            Moderator *mod = Moderator::Instance();
 
+            #ifdef DEBUG_PARM_ASSIGNMENT
+            MessageInterface::ShowMessage
+               ("=====> Assignment::InterpretAction() Creating RHS as parameter: %s\n",
+                rhs.c_str());
+            #endif
+            
+            std::string parmObj, parmType, parmDep;
+            GmatStringUtil::ParseParameter(rhs, parmType, parmObj, parmDep);
+            mod->CreateParameter(parmType, rhs, parmObj, parmDep);
+         }
+      }
+   }
+   
    // Parse array handling elements
    if (isLhsArray)
    {
@@ -346,6 +372,7 @@ bool Assignment::InterpretAction()
       return true;
    }
 
+   
    end = lhs.find(".", 0);
    std::string component = lhs.substr(0, end);
    if (component == "")
@@ -357,7 +384,7 @@ bool Assignment::InterpretAction()
    component = lhs.substr(loc);
    if (component == "")
       throw CommandException("Assignment string does not identify parameter\n");
-      
+   
    /// @todo A hack for variables -- needs testing!
    if (ownerName != component)
       parmName = component;
@@ -455,8 +482,6 @@ bool Assignment::Initialize()
       
       if (mathTree->Initialize(objectMap))
       {
-//          if (topNode->ValidateInputs())
-//             return true;
          if (!topNode->ValidateInputs())
             throw CommandException("Failed to validate equation inputs: " +
                                    generatingString + "\n");
@@ -929,7 +954,7 @@ bool Assignment::InitializeRHS(const std::string &rhs)
    
    std::string chunk, kind, subchunk;
    Integer start = 0, end;
-   
+
    // Skip leading spaces
    while (rhs[start] == ' ')
       ++start;
@@ -968,10 +993,17 @@ bool Assignment::InitializeRHS(const std::string &rhs)
    //    parmOwner->SetStringParameter("Expression", rhs);
    // }
    // else
+   
+   // Handle RHS system parameter
+   std::string name = chunk;
+   if (rhs.find('.') != rhs.npos)
+      name = rhs;
 
-   if (objectMap->find(chunk) != objectMap->end())
+   //if (objectMap->find(chunk) != objectMap->end())
+   if (objectMap->find(name) != objectMap->end())
    {
-      rhsObject = (*objectMap)[chunk];
+      //rhsObject = (*objectMap)[chunk];
+      rhsObject = (*objectMap)[name];
       kind = rhsObject->GetTypeName();
 
       #ifdef DEBUG_PARM_ASSIGNMENT
@@ -1051,8 +1083,9 @@ bool Assignment::InitializeRHS(const std::string &rhs)
       }
       else if (rhsObject->GetType() == Gmat::PARAMETER)
       {
-         throw CommandException(
-            "Assignment commands cannot handle Parameters yet.");
+         //throw CommandException(
+         //   "Assignment commands cannot handle Parameters yet.\n");
+         rhsType = PARAMETER;
       }
       else
       {
@@ -1100,7 +1133,7 @@ Real Assignment::EvaluateRHS()
       {
          Real value = ((Parameter*)rhsObject)->EvaluateReal();
 
-         #ifdef DEBUG_ASSIGNMENT
+         #ifdef DEBUG_PARM_ASSIGNMENT
             MessageInterface::ShowMessage("Evaluating: the %s named %s = %lf\n", 
                rhsObject->GetTypeName().c_str(), rhsObject->GetName().c_str(),
                value);
@@ -1128,8 +1161,7 @@ Real Assignment::EvaluateRHS()
                "   Getting '%s' for %s\n", rhsParmName.c_str(),
                rhsObject->GetName().c_str());
          #endif
-         return rhsObject->GetRealParameter(rhsParmName);
-
+            return rhsObject->GetRealParameter(rhsParmName);
       default:
          break;
    }
