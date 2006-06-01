@@ -108,7 +108,7 @@ bool GmatStringUtil::ToDouble(const std::string &str, Real *value)
    if (str2.length() == 0)
       return false;
 
-   if (str2[0] != '-' && !isdigit(str2[0]))
+   if (str2[0] != '-' && !isdigit(str2[0]) && str2[0] != '.')
       return false;
 
    for (unsigned int i=0; i<str2.length(); i++)
