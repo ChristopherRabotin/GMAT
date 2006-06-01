@@ -34,6 +34,7 @@
 //#define DEBUG_DECOMPOSE 1
 //#define DEBUG_PARENTHESIS 1
 //#define DEBUG_ADD_SUBTRACT 1
+//#define DEBUG_MULT_DIVIDE 1
 //#define DEBUG_MATRIX_OPS 1
 //#define DEBUG_PARSE 1
 //#define DEBUG_FUNCTION 1
@@ -524,6 +525,14 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       op = GetOperatorName(str.substr(index1-1, 1), opFound);
       left = str.substr(0, index1-1);
       right = str.substr(index1, str.npos);
+
+      // to handle -(...)
+      if (left == "" && op == "Subtract")
+      {
+         op = "Negate";
+         left = right;
+         right = "";
+      }
    }
    
    
@@ -785,7 +794,8 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
       return items;
    }
    
-   UnsignedInt indexBeg, indexEnd;
+   UnsignedInt indexBeg = 0;
+   UnsignedInt indexEnd = 0;
    
    indexBeg = index1 > index2 ? index2 : index1;
 
@@ -826,22 +836,41 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
 
    if (indexBeg == 0) // unary operation
    {
+      // See if there is subtractor operator after unary
+      UnsignedInt index3 = str.find('-', index2+1);
+
       #if DEBUG_ADD_SUBTRACT
-      MessageInterface::ShowMessage("ParseAddSubtract() Found unary operator\n");
+      MessageInterface::ShowMessage
+         ("ParseAddSubtract() Found unary operator. index3=%d\n", index3);
       #endif
       
-      FillItems(items, "", "", "");      
-      return items;
+      if (index1 == str.npos && index2 == 0 && index3 == str.npos)
+      {
+         FillItems(items, "", "", "");      
+         return items;
+      }
+      
+      if (index1 != 0 && index1 != str.npos)
+      {
+         op = "Add";
+         indexBeg = index1;
+      }
+      else if (index2 != 0 && index2 != str.npos)
+      {
+         op = "Subtract";
+         indexBeg = index2;
+      }
+      else if (index3 != 0 && index3 != str.npos)
+      {
+         op = "Subtract";
+         indexBeg = index3;
+         indexEnd = index3+1;
+      }
+      else 
+      {
+         throw MathException("*** ERROR *** Unhandled equation in: " + str + "\n");
+      }
    }
-   
-//    // If it is ^(-1), handle it later in DecomposeMatrixOps()
-//    if (str.find("^(-1)") != str.npos)
-//    {
-//       MessageInterface::ShowMessage
-//          ("==> MathParser::ParseAddSubtract() found ^(-1) str=%s\n", str.c_str());
-//       FillItems(items, op, left, right);
-//       return items;
-//    }
    
    left = str.substr(0, indexBeg);
    right = str.substr(indexEnd, str.npos);
@@ -871,7 +900,7 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
 //------------------------------------------------------------------------------
 StringArray MathParser::ParseMultDivide(const std::string &str)
 {
-   #if DEBUG_MATH_PARSER > 1
+   #if DEBUG_MULT_DIVIDE
    MessageInterface::ShowMessage
       ("MathParser::ParseMultDivide() str=%s\n", str.c_str());
    #endif
@@ -879,9 +908,9 @@ StringArray MathParser::ParseMultDivide(const std::string &str)
    StringArray items;
    std::string op = "";
    
-   // find first * or /
-   UnsignedInt index1 = str.find('*');
-   UnsignedInt index2 = str.find('/');
+   // find last * or /
+   UnsignedInt index1 = str.find_last_of('*');
+   UnsignedInt index2 = str.find_last_of('/');
 
    if (index1 == str.npos && index2 == str.npos)
    {
@@ -912,7 +941,7 @@ StringArray MathParser::ParseMultDivide(const std::string &str)
    
    FillItems(items, op, left, right);
 
-   #if DEBUG_MATH_PARSER > 1
+   #if DEBUG_MULT_DIVIDE > 1
    WriteItems("==> After ParseMultDivide()", items);
    #endif
    

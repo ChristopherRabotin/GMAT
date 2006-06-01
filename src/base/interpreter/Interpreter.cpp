@@ -3389,6 +3389,7 @@ bool Interpreter::SetRefParameter(GmatCommand *cmd, const std::string &paramName
           object->GetTypeName().c_str());
       #endif
       
+      type = object->GetType();
       if (!cmd->SetRefObject(object, type, paramName, index))
          throw InterpreterException
             ("Cannot set Parameter object " + paramName + 
