@@ -2425,7 +2425,8 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
       memcpy(&pubdata[1], state, dim*sizeof(Real));
       publisher->Publish(streamID, pubdata, dim+1);
       
-      hasStoppedOnce          = true;
+      if (!stopWhen[stopTrigger]->IsTimeCondition())
+         hasStoppedOnce       = true;     // Only set for interpolated stops
       stepsTaken              = 0;
          
       #if DEBUG_PROPAGATE_EXE
