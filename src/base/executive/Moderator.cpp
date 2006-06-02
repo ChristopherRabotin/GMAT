@@ -1472,7 +1472,6 @@ bool Moderator::IsParameter(const std::string &type)
 
 //------------------------------------------------------------------------------
 // Parameter* CreateParameter(const std::string &type, const std::string &name)
-//                            const Gmat::ObjectType ownerType,
 //                            const std::string &ownerName = "",
 //                            const std::string &depName = "");
 //------------------------------------------------------------------------------
@@ -1481,7 +1480,6 @@ bool Moderator::IsParameter(const std::string &type)
  *
  * @param <type> parameter type
  * @param <name> parameter name
- * @param <ownerType> parameter owner type
  * @param <ownerName> parameter owner name
  * @param <depName> dependent object name
  *
@@ -1503,6 +1501,10 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    if (GetParameter(name) == NULL)
    {
       Parameter *param = theFactoryManager->CreateParameter(type, name);
+      
+      if (param == NULL)
+        throw GmatBaseException("Error Creating Parameter: " + type);
+      
       param->SetStringParameter("Expression", name);
       
       // Set parameter owner and dependent object
@@ -1564,12 +1566,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
                                           name.c_str());
          }
       }
-      
-      if (param == NULL)
-      {
-        throw GmatBaseException("Error Creating Parameter: " + type + "\n");
-      }
-      
+            
       // Manage it if it is a named parameter
       try
       {
