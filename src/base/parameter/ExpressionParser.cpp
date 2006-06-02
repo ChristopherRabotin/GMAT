@@ -61,13 +61,15 @@ ExpressionParser::ExpressionParser()
       mVars[i] = 0.0;
 }
 
+
 //------------------------------------------------------------------------------
 // ~ExpressionParser()
 //------------------------------------------------------------------------------
 ExpressionParser::~ExpressionParser()
 {
 }
-   
+
+
 //------------------------------------------------------------------------------
 // Real EvalExp(const char *exp)
 //------------------------------------------------------------------------------
@@ -106,6 +108,7 @@ Real ExpressionParser::EvalExp(const char *exp)
    
    return result;
 }
+
 
 //------------------------------------------------------------------------------
 // void SetParameterDatabase(ParameterDatabase *pdb)
@@ -159,6 +162,7 @@ void ExpressionParser::EvalTwoTerms(Real &result)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void EvalTwoFactors(Real &result)
 //------------------------------------------------------------------------------
@@ -192,6 +196,7 @@ void ExpressionParser::EvalTwoFactors(Real &result)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void EvalExponent(Real &result)
 //------------------------------------------------------------------------------
@@ -201,7 +206,7 @@ void ExpressionParser::EvalTwoFactors(Real &result)
 //------------------------------------------------------------------------------
 void ExpressionParser::EvalExponent(Real &result)
 {
-   register int t;
+   //register int t;
    Real temp, ex;
 
    EvalUnary(result);
@@ -218,10 +223,16 @@ void ExpressionParser::EvalExponent(Real &result)
          return;
       }
 
-      for (t=(int)temp-1; t>0; --t)
-         result = result * (Real)ex;
+      // This will not work for 10^.5
+      //for (t=(int)temp-1; t>0; --t)
+      //   result = result * (Real)ex;
+      
+      result = pow(result, temp);
+      //MessageInterface::ShowMessage
+      //   ("===> result=%f, ex=%f, temp=%f\n", result, ex, temp);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void EvalUnary(Real &result)
@@ -248,6 +259,7 @@ void ExpressionParser::EvalUnary(Real &result)
       result = - result;
 }
 
+
 //------------------------------------------------------------------------------
 //void EvalParenExp(Real &result)
 //------------------------------------------------------------------------------
@@ -273,6 +285,7 @@ void ExpressionParser::EvalParenExp(Real &result)
       GetValue(result);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void GetValue(Real &result)
@@ -302,6 +315,7 @@ void ExpressionParser::GetValue(Real &result)
       HandleSyntaxError(SYNTAX_ERROR);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // Real EvalVariable(char *var)
@@ -343,6 +357,7 @@ Real ExpressionParser::EvalVariable(char *var)
    }
    
 }
+
 
 //------------------------------------------------------------------------------
 // void GetToken()
@@ -389,6 +404,7 @@ void ExpressionParser::GetToken()
    *temp = '\0';
 }
 
+
 //------------------------------------------------------------------------------
 // bool IsDelimiter(char c)
 //------------------------------------------------------------------------------
@@ -403,6 +419,7 @@ bool ExpressionParser::IsDelimiter(char c)
    else
       return false;
 }
+
 
 //------------------------------------------------------------------------------
 // void HandleSyntaxError(int error)

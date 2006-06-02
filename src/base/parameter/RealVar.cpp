@@ -60,11 +60,24 @@ RealVar::RealVar(const std::string &name, const std::string &valStr,
 {  
    mRealValue = REAL_PARAMETER_UNDEFINED;
    Real rval;
+   mIsNumberEquation = true;
    
    if (GmatStringUtil::ToDouble(valStr, &rval))
    {
       mRealValue = rval;
       mExpr = valStr;
+      mIsNumberEquation = false;
+   }
+   else
+   {
+      for (UnsignedInt i=0; i<mExpr.size(); i++)
+      {
+         if (isalpha(mExpr[i]))
+         {
+            mIsNumberEquation = false;
+            break;
+         }
+      }
    }
    
    mReturnType = Gmat::REAL_TYPE;
@@ -224,7 +237,6 @@ void RealVar::SetReal(Real val)
 // methods inherited from GmatBase
 //------------------------------------
 
-
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
@@ -250,22 +262,35 @@ bool RealVar::SetStringParameter(const Integer id, const std::string &value)
    case EXPRESSION:
       {
          // if value is just a number, convert and set to real value
+         mIsNumberEquation = true;
          Real temp;
          if (GmatStringUtil::ToDouble(value, &temp))
          {
             mRealValue = temp;
+            mIsNumberEquation = false;
 
             #if DEBUG_REAL_VAR
             MessageInterface::ShowMessage("mRealValue set to %f\n", mRealValue);
             #endif
          }
-         
+         else
+         {
+            for (UnsignedInt i=0; i<value.size(); i++)
+            {
+               if (isalpha(value[i]))
+               {
+                  mIsNumberEquation = false;
+                  break;
+               }
+            }
+         }
          return Parameter::SetStringParameter(id, value);
       }
    default:
       return Parameter::SetStringParameter(id, value);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const std::string &label,

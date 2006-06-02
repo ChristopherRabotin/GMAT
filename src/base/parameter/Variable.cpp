@@ -52,6 +52,12 @@ Variable::Variable(const std::string &name, const std::string &valStr,
    mExpParser = new ExpressionParser();
    // Set parameter database to be used
    mExpParser->SetParameterDatabase(mParamDb);
+   
+   #if DEBUG_VARIABLE
+   MessageInterface::ShowMessage("Variable::Variable() constructor\n");
+   MessageInterface::ShowMessage
+      ("   numDBParams = %d\n", mParamDb->GetNumParameters());
+   #endif
 }
 
 
@@ -67,15 +73,16 @@ Variable::Variable(const std::string &name, const std::string &valStr,
 Variable::Variable(const Variable &copy)
    : RealVar(copy)
 {
-   mParamDb = new ParameterDatabase();
-   *mParamDb = *copy.mParamDb;
+   mParamDb = new ParameterDatabase(*copy.mParamDb);
    mExpParser = new ExpressionParser();
    mExpParser->SetParameterDatabase(mParamDb);
-
+   
    #if DEBUG_VARIABLE
    MessageInterface::ShowMessage("Variable::Variable() copy constructor\n");
-   MessageInterface::ShowMessage("copy.numDBParams = %d\n", copy.mParamDb->GetNumParameters());
-   MessageInterface::ShowMessage("numDBParams = %d\n", mParamDb->GetNumParameters());
+   MessageInterface::ShowMessage
+      ("   copy.numDBParams = %d\n", copy.mParamDb->GetNumParameters());
+   MessageInterface::ShowMessage
+      ("   numDBParams = %d\n", mParamDb->GetNumParameters());
    #endif
 }
 
@@ -94,8 +101,7 @@ Variable& Variable::operator=(const Variable &right)
    if (this != &right)
    {
       RealVar::operator=(right);
-      mParamDb = new ParameterDatabase();
-      *mParamDb = *right.mParamDb;
+      mParamDb = new ParameterDatabase(*right.mParamDb);
       mExpParser = new ExpressionParser();
       mExpParser->SetParameterDatabase(mParamDb);   
    }
@@ -143,15 +149,18 @@ Real Variable::GetReal()
 Real Variable::EvaluateReal()
 {
    if (this->GetName() == mExpr || mExpr == "" || isdigit(mExpr[0]) ||
-       mExpr[0] == '-')
-   {
+       mExpr[0] == '-' || mExpr[0] == '.')
+   {      
       #if DEBUG_VARIABLE
       MessageInterface::ShowMessage
-         ("Variable::EvaluateReal() name:%s, 1st: mRealValue=%f, "
-          "mExpr=%s\n", GetName().c_str(), mRealValue, mExpr.c_str());
+         ("Variable::EvaluateReal() this=%p, name:%s, 1st: mRealValue=%f, "
+          "mExpr=%s\n", this, GetName().c_str(), mRealValue, mExpr.c_str());
       #endif
-      
       return mRealValue;
+   }
+   else if (mIsNumberEquation)
+   {
+      return mExpParser->EvalExp(mExpr.c_str());
    }
    
    #if DEBUG_VARIABLE
@@ -324,9 +333,13 @@ bool Variable::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 const StringArray& Variable::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
+   if (mParamDb == NULL)
+      throw ParameterException
+         ("Variable::GetRefObjectNameArray() mParamDb is NULL\n");
+   
    #if DEBUG_VARIABLE
    MessageInterface::ShowMessage
-      ("Variable::GetStringArrayParameter() type=%d\n", type);
+      ("Variable::GetRefObjectNameArray() type=%d\n", type);
    StringArray paramNames = mParamDb->GetNamesOfParameters();
    MessageInterface::ShowMessage
       ("Variable::GetStringArrayParameter() mParamDb->GetNamesOfParameters() "

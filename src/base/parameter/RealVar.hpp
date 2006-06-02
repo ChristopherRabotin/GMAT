@@ -53,6 +53,7 @@ public:
                                    const std::string &value);
 protected:
 
+   bool mIsNumberEquation;
    Real mRealValue;
        
 private:
