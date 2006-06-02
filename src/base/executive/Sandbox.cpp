@@ -77,7 +77,7 @@ Sandbox::Sandbox() :
 //   clonable.push_back(Gmat::LIBRATION_POINT);
    clonable.push_back(Gmat::BARYCENTER);
    clonable.push_back(Gmat::ATMOSPHERE);
-//    clonable.push_back(Gmat::PARAMETER);
+   clonable.push_back(Gmat::PARAMETER);
    clonable.push_back(Gmat::STOP_CONDITION);
    clonable.push_back(Gmat::SOLVER);
    clonable.push_back(Gmat::PROP_SETUP);
@@ -564,6 +564,7 @@ bool Sandbox::Initialize()
    }
 
 
+   //MessageInterface::ShowMessage("=====> Initialize System Parameters\n");
    // System Parameters
    for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
    {
@@ -592,6 +593,7 @@ bool Sandbox::Initialize()
    }
 
 
+   //MessageInterface::ShowMessage("=====> Initialize remaining parameters\n");
    // Do all remaining Parameters next
    for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
    {
@@ -612,6 +614,7 @@ bool Sandbox::Initialize()
    }
 
 
+   //MessageInterface::ShowMessage("=====> Initialize subscribers\n");
    // Now that the references are all set, handle the Subscribers
    for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
    {
@@ -639,6 +642,7 @@ bool Sandbox::Initialize()
    #endif
 
 
+   //MessageInterface::ShowMessage("=====> Initialize commands\n");
    // Initialize commands
    while (current)
    {
@@ -648,6 +652,7 @@ bool Sandbox::Initialize()
             current->GetTypeName().c_str(),
             current->GetGeneratingString(Gmat::SCRIPTING, "", "").c_str());
       #endif
+         
       current->SetObjectMap(&objectMap);
       current->SetSolarSystem(solarSys);
 
@@ -684,6 +689,9 @@ bool Sandbox::Initialize()
          }
       }
 
+      //MessageInterface::ShowMessage
+      //   ("=====> calling Initialize() on %s command\n", current->GetTypeName().c_str());
+      
       rv = current->Initialize();
       if (!rv)
          return false;
@@ -699,7 +707,7 @@ bool Sandbox::Initialize()
          "Sandbox::Initialize() Successfully initialized\n");
    #endif
 
-
+   //MessageInterface::ShowMessage("=====> Initialize successful\n");
    return rv;
 }
 
@@ -1168,7 +1176,7 @@ bool Sandbox::Execute()
       {
          std::string str = "\"" + current->GetTypeName() +
             "\" Command failed to run to completion\nCommand Text is \"" +
-            current->GetGeneratingString() + "\"";
+            current->GetGeneratingString() + "\"\n";
          throw SandboxException(str);
       }
       current = current->GetNext();
