@@ -348,9 +348,16 @@ void TimeData::InitializeRefObjects()
 {
    mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
    if (mSpacecraft == NULL)
-      throw ParameterException("TimeData::InitializeRefObjects() Cannot find "
-                               "Spacecraft object");
+   {
+      #if DEBUG_TIMEDATA
+      MessageInterface::ShowMessage
+         ("TimeData::InitializeRefObjects() Cannot find Spacecraft object\n");
+      #endif
+      
+      throw ParameterException("Cannot find Spacecraft object");
+   }
    else
+   {
       if (!mIsInitialEpochSet)
       {
          mEpochId = mSpacecraft->GetParameterID("A1Epoch");
@@ -360,6 +367,7 @@ void TimeData::InitializeRefObjects()
          //MessageInterface::ShowMessage
          //   ("TimeData::InitializeRefObjects() set mInitialEpoch to %f\n", mInitialEpoch);
       }
+   }
 }
 
 

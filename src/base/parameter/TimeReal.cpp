@@ -19,6 +19,9 @@
 //------------------------------------------------------------------------------
 
 #include "TimeReal.hpp"
+#include "ParameterException.hpp"
+
+//#define DEBUG_TIMEREAL 1
 
 //---------------------------------
 // public methods
@@ -176,7 +179,22 @@ bool TimeReal::Initialize()
 {
    mInitialEpoch = 0.0;
    mIsInitialEpochSet = false;
-   InitializeRefObjects();
+
+   try
+   {
+      InitializeRefObjects();
+   }
+   catch (BaseException &e)
+   {
+      #if DEBUG_TIMEREAL
+      MessageInterface::ShowMessage
+         ("TimeReal::Initialize() Fail to initialize Parameter:%s\n",
+          this->GetName().c_str());
+      #endif
+      
+      throw ParameterException
+         ("WARNING:  " + e.GetMessage() + " in " + GetName() + "\n");
+   }
    
    return true;
 }
