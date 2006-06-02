@@ -22,6 +22,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_RENAME 1
+//#define DEBUG_PARAM_DB 1
 
 //---------------------------------
 // public
@@ -38,11 +39,70 @@ ParameterDatabase::ParameterDatabase()
 {
    mNumParams = 0;
    mStringParamPtrMap = new StringParamPtrMap;
+   
+   #if DEBUG_PARAM_DB
+   MessageInterface::ShowMessage
+      ("ParameterDatabase(default) mStringParamPtrMap.size()=%d, "
+       "mNumParams=%d\n",  mStringParamPtrMap->size(), mNumParams);
+   #endif
 }
 
 
 //------------------------------------------------------------------------------
-// ~ParameterDatabase()
+// ParameterDatabase(const ParameterDatabase &copy)
+//------------------------------------------------------------------------------
+ParameterDatabase::ParameterDatabase(const ParameterDatabase &copy)
+{
+   mNumParams = copy.mNumParams;
+   mStringParamPtrMap = new StringParamPtrMap;
+
+   StringParamPtrMap::iterator pos;
+   
+   for (pos = copy.mStringParamPtrMap->begin();
+        pos != copy.mStringParamPtrMap->end(); ++pos)
+   {
+      Add(pos->first, pos->second);
+   }
+   
+   #if DEBUG_PARAM_DB
+   MessageInterface::ShowMessage
+      ("==> ParameterDatabase(copy) mStringParamPtrMap.size()=%d, "
+       "mNumParams=%d\n",  mStringParamPtrMap->size(), mNumParams);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// ParameterDatabase& operator=(const ParameterDatabase &right)
+//------------------------------------------------------------------------------
+ParameterDatabase& ParameterDatabase::operator=(const ParameterDatabase &right)
+{
+   if (this == &right)
+      return *this;
+   
+   mNumParams = right.mNumParams;
+   mStringParamPtrMap = new StringParamPtrMap;
+   
+   StringParamPtrMap::iterator pos;
+   
+   for (pos = right.mStringParamPtrMap->begin();
+        pos != right.mStringParamPtrMap->end(); ++pos)
+   {
+      Add(pos->first, pos->second);
+   }
+   
+   #if DEBUG_PARAM_DB
+   MessageInterface::ShowMessage
+      ("==> ParameterDatabase(=) mStringParamPtrMap.size()=%d, "
+       "mNumParams=%d\n",  mStringParamPtrMap->size(), mNumParams);
+   #endif
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual ~ParameterDatabase()
 //------------------------------------------------------------------------------
 /**
  * Destructor.
@@ -51,6 +111,7 @@ ParameterDatabase::ParameterDatabase()
 ParameterDatabase::~ParameterDatabase()
 {
    delete mStringParamPtrMap;
+   mStringParamPtrMap = NULL;
 }
 
 //---------------------------------
@@ -84,6 +145,16 @@ const StringArray& ParameterDatabase::GetNamesOfParameters()
    mParamNames.clear();
    StringParamPtrMap::iterator pos;
 
+   if (mStringParamPtrMap == NULL)
+      throw ParameterDatabaseException
+         ("ParameterDatabase::GetNamesOfParameters() mStringParamPtrMap is NULL\n");
+
+   #if DEBUG_PARAM_DB
+   MessageInterface::ShowMessage
+      ("==> ParameterDatabase::GetNamesOfParameters() mStringParamPtrMap.size()=%d, "
+       "mNumParams=%d\n",  mStringParamPtrMap->size(), mNumParams);
+   #endif
+   
    for (pos = mStringParamPtrMap->begin(); pos != mStringParamPtrMap->end(); ++pos)
    {
       mParamNames.push_back(pos->first);

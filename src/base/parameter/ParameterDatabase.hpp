@@ -29,7 +29,9 @@ class ParameterDatabase
 public:
    
    ParameterDatabase();
-   ~ParameterDatabase();
+   ParameterDatabase(const ParameterDatabase &copy);
+   ParameterDatabase& operator=(const ParameterDatabase &right);
+   virtual ~ParameterDatabase();
    
    Integer GetNumParameters() const;
    const StringArray& GetNamesOfParameters();

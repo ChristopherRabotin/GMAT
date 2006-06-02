@@ -293,7 +293,19 @@ BaseStopCondition::~BaseStopCondition()
 bool BaseStopCondition::Initialize()
 {
    mInitialized = false;
+
+   mStopInterval = 0.0; ///loj
    
+   // clear local parameters
+   if (mEccParam != NULL)
+      delete mEccParam;
+
+   if (mRmagParam != NULL)
+      delete mRmagParam;
+
+   mEccParam = NULL;
+   mRmagParam = NULL;
+
    if (Validate())
    {
       if (mStopParam->GetTypeName() == "Apoapsis" ||
