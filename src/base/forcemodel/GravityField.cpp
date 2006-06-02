@@ -677,7 +677,7 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
       Real fNew[3];
       if (sameCS)
       {
-         /*
+         
          const Real *rm = rotMatrix.GetDataVector();
          const Real  rmt[9] = {rm[0], rm[3], rm[6],
                                rm[1], rm[4], rm[7],
@@ -686,16 +686,16 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
          for (Integer p = 0; p < 3; ++p)
          {
             p3 = 3*p;
-            fNew[p] = rmt[p3]   * f[0]   + 
+            fNew[p] = rmt[p3]   * f[0] + 
                       rmt[p3+1] * f[1] + 
                       rmt[p3+2] * f[2];
         }  
-        */   
-         Rvector3 fAccel(f[0], f[1], f[2]);
-         Rvector3 fNewVector = rotMatrix.Transpose() * fAccel;
-         fNew[0] = fNewVector[0];
-         fNew[1] = fNewVector[1];
-         fNew[2] = fNewVector[2];
+          
+         //Rvector3 fAccel(f[0], f[1], f[2]);
+         //Rvector3 fNewVector = rotMatrix.Transpose() * fAccel;
+         //fNew[0] = fNewVector[0];
+         //fNew[1] = fNewVector[1];
+         //fNew[2] = fNewVector[2];
       }
       else
       {
