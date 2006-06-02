@@ -115,7 +115,7 @@ EnvData& EnvData::operator= (const EnvData &right)
 //------------------------------------------------------------------------------
 EnvData::~EnvData()
 {
-   MessageInterface::ShowMessage("==> EnvData::~EnvData()\n");
+   //MessageInterface::ShowMessage("==> EnvData::~EnvData()\n");
 }
 
 

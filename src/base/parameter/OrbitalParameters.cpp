@@ -467,7 +467,7 @@ Periapsis::operator=(const Periapsis &right)
 //------------------------------------------------------------------------------
 Periapsis::~Periapsis()
 {
-   MessageInterface::ShowMessage("==> Periapsis::~Periapsis()\n");
+   //MessageInterface::ShowMessage("==> Periapsis::~Periapsis()\n");
 }
 
 //-------------------------------------
