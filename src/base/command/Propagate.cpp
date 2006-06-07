@@ -2812,12 +2812,14 @@ std::string Propagate::CreateParameter(const std::string &name)
       ("Propagate::CreateParameter() name=%s, type=%s, owner=%s, dep=%s\n",
        name.c_str(), type.c_str(), owner.c_str(), dep.c_str());
    #endif
+
    
-   if (type != "")
-      param = theModerator->CreateParameter(type, str, owner, dep);
-   else
-      /// @todo Handle variable or array with index
-      return str;
+   param = theModerator->CreateParameter(type, str, owner, dep);
+   
+//    if (type != "")
+//       param = theModerator->CreateParameter(type, str, owner, dep);
+//    else
+//       return str;
    
 //    Moderator *theModerator = Moderator::Instance();
 //    std::string owner, dep, type;
