@@ -27,6 +27,7 @@
 #include <sstream>
 #include <cmath>
 
+//#define DEBUG_PROPAGATE_ASSEMBLE 1
 //#define DEBUG_PROPAGATE_OBJ 1
 //#define DEBUG_PROPAGATE_INIT 1
 //#define DEBUG_PROPAGATE_DIRECTION 1
@@ -1215,7 +1216,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
    StringArray pieces;
    const char *str = generatingString.c_str();
    
-   #ifdef DEBUG_PROPAGATE_EXE
+   #ifdef DEBUG_PROPAGATE_ASSEMBLE
       MessageInterface::ShowMessage("Propagate::AssemblePropagators: "
                                     "Breaking \"%s\" into pieces\n", 
                                     generatingString.c_str()+loc);
@@ -1230,7 +1231,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
 
       if (end == (Integer)std::string::npos)
          throw CommandException("Propagate::AssemblePropagators: Propagate"
-                                " string does not identify propagator\n");
+                                " string does not identify propagator");
       
       if (generatingString[currentLoc] == '-') {
          direction.push_back(-1.0);
@@ -1268,7 +1269,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
       end = i->find("(", loc);
       if (end == (Integer)std::string::npos)
          throw CommandException(
-            "Propagate string does not identify propagator\n");
+            "Propagate string does not identify propagator");
       
       std::string component = i->substr(loc, end-loc);
       SetObject(component, Gmat::PROP_SETUP);
@@ -1283,12 +1284,12 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          satEnd = i->find(")", loc);
       if (satEnd == (Integer)std::string::npos)
          throw CommandException(
-            "Propagate string terminating paren \")\" missing\n");
+            "Propagate string terminating paren \")\" missing");
 
       if (end == (Integer)std::string::npos)
          end = satEnd;
    
-      #ifdef DEBUG_PROPAGATE_EXE
+      #ifdef DEBUG_PROPAGATE_ASSEMBLE
          MessageInterface::ShowMessage("Building list of SpaceObjects:\n");
       #endif
       do {
@@ -1296,8 +1297,8 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
             ++loc;
          if (end == (Integer)std::string::npos)
             throw CommandException("Propagate string \"" + (*i) +
-                                   "\" does not identify spacecraft\n");
-         #ifdef DEBUG_PROPAGATE_EXE
+                                   "\" does not identify spacecraft");
+         #ifdef DEBUG_PROPAGATE_ASSEMBLE
             MessageInterface::ShowMessage("i = \"%s\", loc = %d and end = %d\n",
                                  i->c_str(), loc, end);
             MessageInterface::ShowMessage("Last char ((*i)[end]) is '%c'\n",
@@ -1310,7 +1311,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          
          component = i->substr(loc, endchar-loc+1);
          SetObject(component, Gmat::SPACECRAFT);
-         #ifdef DEBUG_PROPAGATE_EXE
+         #ifdef DEBUG_PROPAGATE_ASSEMBLE
             MessageInterface::ShowMessage("   \"%s\"\n", 
                                           component.c_str());
          #endif
@@ -1348,12 +1349,12 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
             end = i->find(",", loc);
             if (end != (Integer)std::string::npos)
                throw CommandException("Propagate does not yet support multiple "
-                  "stopping conditions\n");
-              
+                  "stopping conditions");
+            
             end = i->find("}", loc);
             if (end == (Integer)std::string::npos)
                throw CommandException("Propagate " + (*i) +
-                  " does not identify stopping condition: looking for }\n");
+                  " does not identify stopping condition: looking for }");
          }
          
          UnsignedInt start = 0;
@@ -1374,28 +1375,34 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
             paramName = paramObj + "." + paramType;
          else
             paramName = paramObj + "." + parmSystem + "." + paramType;
-         Parameter *stopParam = theModerator->CreateParameter(paramType,
-                                   paramName);
-         stopParam->SetRefObjectName(Gmat::SPACECRAFT, paramObj);
-         
-         if (stopParam->IsCoordSysDependent()) {
-            if (parmSystem == "")
-               parmSystem = "EarthMJ2000Eq";
 
-            stopParam->SetStringParameter("DepObject", parmSystem);
-            stopParam->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
-         }
+         theModerator->CreateParameter(paramType, paramName, paramObj,
+                                       parmSystem);
+
+
+         // Now Moderateor handles dep object
+//          Parameter *stopParam = theModerator->CreateParameter(paramType,
+//                                    paramName);
+//          stopParam->SetRefObjectName(Gmat::SPACECRAFT, paramObj);
          
-         if (stopParam->IsOriginDependent()) {
-            if (parmSystem == "")
-               parmSystem = "Earth";
-            stopParam->SetStringParameter("DepObject", parmSystem);
-            stopParam->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
-            if (stopParam->NeedCoordSystem())
-               /// @todo Update coordinate system to better value for body parms
-               stopParam->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
-                             "EarthMJ2000Eq");
-         }
+//          if (stopParam->IsCoordSysDependent()) {
+//             if (parmSystem == "")
+//                parmSystem = "EarthMJ2000Eq";
+
+//             stopParam->SetStringParameter("DepObject", parmSystem);
+//             stopParam->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
+//          }
+         
+//          if (stopParam->IsOriginDependent()) {
+//             if (parmSystem == "")
+//                parmSystem = "Earth";
+//             stopParam->SetStringParameter("DepObject", parmSystem);
+//             stopParam->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
+//             if (stopParam->NeedCoordSystem())
+//                /// @todo Update coordinate system to better value for body parms
+//                stopParam->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
+//                              "EarthMJ2000Eq");
+//          }
          
          StopCondition *stopCond =
             theModerator->CreateStopCondition("StopCondition", "StopOn" +
@@ -1417,16 +1424,26 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          // Store the spacecraft name for use when setting the epoch data
          TakeAction("SetStopSpacecraft", paramObj);
 
-         //MessageInterface::ShowMessage("==> paramType=%s\n", paramType.c_str());
+         #ifdef DEBUG_PROPAGATE_ASSEMBLE
+         MessageInterface::ShowMessage
+            ("   paramName=%s, parmSystem=%s, paramType=%s\n", paramName.c_str(),
+             parmSystem.c_str(), paramType.c_str());
+         #endif
          
          if (paramType != "Apoapsis" && paramType != "Periapsis")
          {
+            // test for =
+            loc = i->find("=", end);
+            if (loc == (Integer)std::string::npos)
+               throw CommandException("Propagate does not identify stopping "
+                  "condition: looking for =");
+            
             loc = end + 1;
-
+            
             endchar = i->find("}", loc);
             component = i->substr(loc, endchar-loc);
             
-            #ifdef DEBUG_PROPAGATE_EXE
+            #ifdef DEBUG_PROPAGATE_ASSEMBLE
                MessageInterface::ShowMessage("Propagate::AssemblePropagators()"
                   " component = <%s>\n", component.c_str());
             #endif
@@ -1440,14 +1457,14 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
             end = i->find(",", loc);
             if (end != (Integer)std::string::npos)
                throw CommandException("Propagate does not yet support multiple "
-                  "stopping condition\n");
+                  "stopping condition");
             
             loc = end + 1;
             end = i->find("}", loc);
             
             if (end == (Integer)std::string::npos)
                throw CommandException("Propagate does not identify stopping "
-                  "condition: looking for }\n");
+                  "condition: looking for }");
          }
          loc = end + 1;
       }
@@ -2777,9 +2794,33 @@ void Propagate::SetNames(const std::string& name, StringArray& owners,
 //------------------------------------------------------------------------------
 std::string Propagate::CreateParameter(const std::string &name)
 {
-   Moderator *theModerator = Moderator::Instance();
    std::string str = name;
+   Real rval;
+
+   if (GmatStringUtil::ToDouble(str, &rval))
+       return str;
+
+   Moderator *theModerator = Moderator::Instance();
    std::string owner, dep, type;
+   Parameter *param;
+   
+   str = GmatStringUtil::Trim(str, GmatStringUtil::BOTH);
+   GmatStringUtil::ParseParameter(str, type, owner, dep);
+   
+   #ifdef DEBUG_PROPAGATE_ASSEMBLE
+   MessageInterface::ShowMessage
+      ("Propagate::CreateParameter() name=%s, type=%s, owner=%s, dep=%s\n",
+       name.c_str(), type.c_str(), owner.c_str(), dep.c_str());
+   #endif
+   
+   if (type != "")
+      param = theModerator->CreateParameter(type, str, owner, dep);
+   else
+      /// @todo Handle variable or array with index
+      return str;
+   
+//    Moderator *theModerator = Moderator::Instance();
+//    std::string owner, dep, type;
 
    //loj: this caused crash
    // remove blanks
@@ -2787,70 +2828,71 @@ std::string Propagate::CreateParameter(const std::string &name)
    //       if (*i == ' ')
    //          str.erase(i);
    
-   str = GmatStringUtil::Trim(name, GmatStringUtil::BOTH);
+//    str = GmatStringUtil::Trim(name, GmatStringUtil::BOTH);
    
-   #if DEBUG_PROPAGATE_OBJ
-      MessageInterface::ShowMessage
-         ("Propagate::CreateParameter() name=<%s>, str=<%s>\n",
-          name.c_str(), str.c_str());
-   #endif
+//    #if DEBUG_PROPAGATE_OBJ
+//       MessageInterface::ShowMessage
+//          ("Propagate::CreateParameter() name=<%s>, str=<%s>\n",
+//           name.c_str(), str.c_str());
+//    #endif
 
-   // if string is a number
-   if (isdigit(str[0]) || str[0] == '.' || str[0] == '-')
-      return str;
+//    // if string is a number
+//    if (isdigit(str[0]) || str[0] == '.' || str[0] == '-')
+//       return str;
 
-   // if parameter exist
-   if (theModerator->GetParameter(str))
-      return str;
+//    // if parameter exist
+//    if (theModerator->GetParameter(str))
+//       return str;
    
-   std::string::size_type pos1 = str.find('.');
+//    std::string::size_type pos1 = str.find('.');
    
-   if (pos1 != str.npos)
-      owner = str.substr(0, pos1);
-   else
-      return str;
+//    if (pos1 != str.npos)
+//       owner = str.substr(0, pos1);
+//    else
+//       return str;
    
-   std::string::size_type pos2 = str.find(pos1);
-   if (pos2 != str.npos)
-   {
-      dep = str.substr(pos1, pos2-pos1);
-      type = str.substr(pos2+1);
-   }
-   else
-   {
-      type = str.substr(pos1+1, pos2-pos1);
-   }
+//    std::string::size_type pos2 = str.find(pos1);
+//    if (pos2 != str.npos)
+//    {
+//       dep = str.substr(pos1, pos2-pos1);
+//       type = str.substr(pos2+1);
+//    }
+//    else
+//    {
+//       type = str.substr(pos1+1, pos2-pos1);
+//    }
    
-   #if DEBUG_PROPAGATE_OBJ
-      MessageInterface::ShowMessage
-         ("Propagate::CreateParameter() str=%s, owner=%s, dep=%s, type=%s\n",
-          str.c_str(), owner.c_str(), dep.c_str(), type.c_str());
-   #endif
+//    #if DEBUG_PROPAGATE_OBJ
+//       MessageInterface::ShowMessage
+//          ("Propagate::CreateParameter() str=%s, owner=%s, dep=%s, type=%s\n",
+//           str.c_str(), owner.c_str(), dep.c_str(), type.c_str());
+//    #endif
+
+
+//    Parameter *param = theModerator->CreateParameter(type, str);
+//    param->SetRefObjectName(Gmat::SPACECRAFT, owner);
    
-   Parameter *param = theModerator->CreateParameter(type, str);
-   param->SetRefObjectName(Gmat::SPACECRAFT, owner);
-   
-   if (param->IsCoordSysDependent())
-   {
-      if (dep == "")
-         dep = "EarthMJ2000Eq";
+//    if (param->IsCoordSysDependent())
+//    {
+//       if (dep == "")
+//          dep = "EarthMJ2000Eq";
       
-      param->SetStringParameter("DepObject", dep);
-      param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, dep);
-   }
+//       param->SetStringParameter("DepObject", dep);
+//       param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, dep);
+//    }
    
-   if (param->IsOriginDependent())
-   {
-      if (dep == "")
-         dep = "Earth";
+//    if (param->IsOriginDependent())
+//    {
+//       if (dep == "")
+//          dep = "Earth";
       
-      param->SetStringParameter("DepObject", dep);
-      param->SetRefObjectName(Gmat::SPACE_POINT, dep);
+//       param->SetStringParameter("DepObject", dep);
+//       param->SetRefObjectName(Gmat::SPACE_POINT, dep);
       
-      if (param->NeedCoordSystem())
-         /// @todo Update coordinate system to better value for body parms
-         param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
-   }
+//       if (param->NeedCoordSystem())
+//          /// @todo Update coordinate system to better value for body parms
+//          param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+//    }
    
    #if DEBUG_PROPAGATE_OBJ
       MessageInterface::ShowMessage
