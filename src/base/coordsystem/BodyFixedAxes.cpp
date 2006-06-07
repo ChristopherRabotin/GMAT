@@ -402,7 +402,6 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
                     TimeConverterUtil::A1MJD, TimeConverterUtil::UT1, 
                     JD_JAN_5_1941);
       
-      Real jdUT1    = mjdUT1 + JD_JAN_5_1941; // right?
       // Compute elapsed Julian centuries (UT1)
       //Real tUT1     = (jdUT1 - 2451545.0) / 36525.0;
       Real tDiff = JD_JAN_5_1941 - 2451545.0;
@@ -423,6 +422,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
  
       #ifdef DEBUG_FIRST_CALL
          if (!firstCallFired)
+            Real jdUT1    = mjdUT1 + JD_JAN_5_1941; // right?
             MessageInterface::ShowMessage(
                "   Epoch data[mjdUTC, mjdUT1, jdUT1, tUT1, mjdTT1, jdTT, tTDB] "
                "=\n        [%.10lf %.10lf %.10lf %.10lf %.10lf %.10lf %.10lf ]\n",
@@ -462,7 +462,6 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       ComputeSiderealTimeDotRotation(mjdUTC, atEpoch, cosAst, sinAst);
       ComputePolarMotionRotation(mjdUTC, atEpoch);
       
-
       Real np[3][3], rot[3][3], tmp[3][3];
       Integer p3;
       
@@ -653,39 +652,144 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       #endif
     }
    
-   else
+   else // compute for other bodies, using IAU data
    {
+      //static Rmatrix33 R3left;
+      //static Rmatrix33 R1middle;
+      //static Rmatrix33 R3right;
+      //static Rmatrix33 Wderiv;
+      Real Wderiv[9];
+      Real R3leftT[9];
+      Real R1middleT[9];
+      Real R3rightT[9];
+      Real R13[3][3];
+      Real rotResult[3][3];
+      Real rotDotResult[3][3];
+      static Rvector cartCoord(4);  
+      const Real *cartC = cartCoord.GetDataVector();
       #ifdef DEBUG_FIRST_CALL
          if (!firstCallFired)
             MessageInterface::ShowMessage("In BFA, Body is %s\n", originName.c_str());
       #endif
       // this method will return alpha (deg), delta (deg), 
       // W (deg), and Wdot (deg/day)
-      Rvector cartCoord   = ((CelestialBody*)origin)->
-                              GetBodyCartographicCoordinates(atEpoch);
-      Real rot1           = GmatMathUtil::PI_OVER_TWO + Rad(cartCoord(0));
-      Real rot2           = GmatMathUtil::PI_OVER_TWO - Rad(cartCoord(1));
-      Real W              = Rad(cartCoord(2));
+      cartCoord   = ((CelestialBody*)origin)->
+                      GetBodyCartographicCoordinates(atEpoch);
+      //const Real *cartC = cartCoord.GetDataVector();
+      //Real rot1           = GmatMathUtil::PI_OVER_TWO + Rad(cartCoord(0));
+      //Real rot2           = GmatMathUtil::PI_OVER_TWO - Rad(cartCoord(1));
+      //Real W              = Rad(cartCoord(2));
+      //Real Wdot           = Rad(cartCoord(3)) / SECS_PER_DAY; 
+      Real rot1           = GmatMathUtil::PI_OVER_TWO + Rad(cartC[0]);
+      Real rot2           = GmatMathUtil::PI_OVER_TWO - Rad(cartC[1]);
+      Real W              = Rad(cartC[2]);
+      Real Wdot           = Rad(cartC[3]) / SECS_PER_DAY; 
       // Convert Wdot from deg/day to rad/sec
-      Real Wdot           = Rad(cartCoord(3)) / SECS_PER_DAY; 
-      Rmatrix33 R3left( Cos(rot1),  Sin(rot1),  0.0, 
-                       -Sin(rot1),  Cos(rot1),  0.0,
-                              0.0,        0.0,  1.0);
-      Rmatrix33 R1middle(     1.0,        0.0,       0.0,
-                              0.0,  Cos(rot2), Sin(rot2),
-                              0.0, -Sin(rot2), Cos(rot2));
-      Rmatrix33 R3right(   Cos(W),  Sin(W),  0.0,
-                          -Sin(W),  Cos(W),  0.0,
-                              0.0,     0.0,  1.0);
-      rotMatrix = R3left.Transpose() * 
-                 (R1middle.Transpose() * R3right.Transpose());
-      Rmatrix33 Wderiv(-Wdot*Sin(W), -Wdot*Cos(W), 0.0,
-                        Wdot*Cos(W), -Wdot*Sin(W), 0.0,
-                                0.0,          0.0, 0.0);
-      rotDotMatrix = R3left.Transpose() * 
-         (R1middle.Transpose() * Wderiv);
+      //R3left.Set( Cos(rot1),  Sin(rot1),  0.0, 
+      //           -Sin(rot1),  Cos(rot1),  0.0,
+      //                  0.0,        0.0,  1.0);
+      R3leftT[0] =  Cos(rot1);
+      R3leftT[1] = -Sin(rot1);
+      R3leftT[2] =  0.0;
+      R3leftT[3] =  Sin(rot1);
+      R3leftT[4] =  Cos(rot1);
+      R3leftT[5] =  0.0;
+      R3leftT[6] =  0.0;
+      R3leftT[7] =  0.0;
+      R3leftT[8] =  1.0;
+      //R1middle.Set(     1.0,        0.0,       0.0,
+      //                  0.0,  Cos(rot2), Sin(rot2),
+      //                  0.0, -Sin(rot2), Cos(rot2));
+      R1middleT[0] =  1.0;
+      R1middleT[1] =  0.0;
+      R1middleT[2] =  0.0;
+      R1middleT[3] =  0.0;
+      R1middleT[4] =  Cos(rot2);
+      R1middleT[5] = -Sin(rot2);
+      R1middleT[6] =  0.0;
+      R1middleT[7] =  Sin(rot2);
+      R1middleT[8] =  Cos(rot2);
+      
+      //R3right.Set(   Cos(W),  Sin(W),  0.0,
+      //              -Sin(W),  Cos(W),  0.0,
+      //                  0.0,     0.0,  1.0);
+      R3rightT[0] =  Cos(W);
+      R3rightT[1] = -Sin(W);
+      R3rightT[2] =  0.0;
+      R3rightT[3] =  Sin(W);
+      R3rightT[4] =  Cos(W);
+      R3rightT[5] =  0.0;
+      R3rightT[6] =  0.0;
+      R3rightT[7] =  0.0;
+      R3rightT[8] =  1.0;
+      
+      //rotMatrix = R3left.Transpose() * 
+      //           (R1middle.Transpose() * R3right.Transpose());
+      Integer p3 = 0;
+      for (Integer p = 0; p < 3; ++p)
+      {
+         p3 = 3*p;
+         for (Integer q = 0; q < 3; ++q)
+         {
+            R13[p][q] = R1middleT[p3]   * R3rightT[q]   + 
+                        R1middleT[p3+1] * R3rightT[q+3] + 
+                        R1middleT[p3+2] * R3rightT[q+6];
+         }
+      }     
+      for (Integer p = 0; p < 3; ++p)
+      {
+         p3 = 3*p;
+         for (Integer q = 0; q < 3; ++q)
+         {
+            rotResult[p][q] = R3leftT[p3]   * R13[0][q] + 
+                              R3leftT[p3+1] * R13[1][q] + 
+                              R3leftT[p3+2] * R13[2][q];
+         }
+      }   
+      rotMatrix.Set(rotResult[0][0],rotResult[0][1],rotResult[0][2],  
+                    rotResult[1][0],rotResult[1][1],rotResult[1][2],
+                    rotResult[2][0],rotResult[2][1],rotResult[2][2]); 
+                    
+      //Wderiv.Set(-Wdot*Sin(W), -Wdot*Cos(W), 0.0,
+      //            Wdot*Cos(W), -Wdot*Sin(W), 0.0,
+      //                    0.0,          0.0, 0.0);
+      Wderiv[0] = -Wdot*Sin(W);
+      Wderiv[1] = -Wdot*Cos(W);
+      Wderiv[2] =  0.0;
+      Wderiv[3] =  Wdot*Cos(W);
+      Wderiv[4] = -Wdot*Sin(W);
+      Wderiv[5] =  0.0;
+      Wderiv[6] =  0.0;
+      Wderiv[7] =  0.0;
+      Wderiv[8] =  0.0;  
+         
+      //rotDotMatrix = R3left.Transpose() * 
+      //   (R1middle.Transpose() * Wderiv);
+      for (Integer p = 0; p < 3; ++p)
+      {
+         p3 = 3*p;
+         for (Integer q = 0; q < 3; ++q)
+         {
+            R13[p][q] = R1middleT[p3]   * Wderiv[q]   + 
+                        R1middleT[p3+1] * Wderiv[q+3] + 
+                        R1middleT[p3+2] * Wderiv[q+6];
+         }
+      }     
+      for (Integer p = 0; p < 3; ++p)
+      {
+         p3 = 3*p;
+         for (Integer q = 0; q < 3; ++q)
+         {
+            rotDotResult[p][q] = R3leftT[p3]   * R13[0][q] + 
+                                 R3leftT[p3+1] * R13[1][q] + 
+                                 R3leftT[p3+2] * R13[2][q];
+         }
+      }   
+      rotDotMatrix.Set(rotDotResult[0][0],rotDotResult[0][1],rotDotResult[0][2],  
+                       rotDotResult[1][0],rotDotResult[1][1],rotDotResult[1][2],
+                       rotDotResult[2][0],rotDotResult[2][1],rotDotResult[2][2]); 
    }
-   
+      
    #ifdef DEBUG_FIRST_CALL
       firstCallFired = true;
    #endif
