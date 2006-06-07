@@ -129,6 +129,7 @@ BranchCommand::BranchCommand(const BranchCommand& bc) :
    branch            (1),
    commandComplete   (false),
    commandExecuting  (false),
+   branchExecuting   (false),
    branchToExecute   (0),
    branchToFill      (0),
    nestLevel         (bc.nestLevel),
@@ -237,6 +238,7 @@ bool BranchCommand::Initialize()
    
    commandComplete  = false;
    commandExecuting = false;
+   branchExecuting = false;
    current = NULL;
    
    return retval;
