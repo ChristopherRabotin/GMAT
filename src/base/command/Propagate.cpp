@@ -118,7 +118,7 @@ Propagate::~Propagate()
 
 
 //------------------------------------------------------------------------------
-//  Propagate(const Propagate &p)
+//  Propagate(const Propagate &prp)
 //------------------------------------------------------------------------------
 /**
  * Constructs a Propagate Command based on another instance (copy constructor).
@@ -126,42 +126,59 @@ Propagate::~Propagate()
  * @param <p> Original we are copying
  */
 //------------------------------------------------------------------------------
-Propagate::Propagate(const Propagate &p) :
-   GmatCommand                 (p),
-   currentPropMode             (p.currentPropMode),
-   interruptCheckFrequency     (p.interruptCheckFrequency),
+Propagate::Propagate(const Propagate &prp) :
+   GmatCommand                 (prp),
+   propName                    (prp.propName),
+   direction                   (prp.direction),
+   satName                     (prp.satName),
+   currentPropMode             (prp.currentPropMode),
+   interruptCheckFrequency     (prp.interruptCheckFrequency),
    inProgress                  (false),
    hasFired                    (false),
-   epochID                     (p.epochID),
+   epochID                     (prp.epochID),
    stopInterval                (0.0),
    stopTrigger                 (-1),
+   stopSatNames                (prp.stopSatNames),
+   objectArray                 (prp.objectArray),
+   elapsedTime                 (prp.elapsedTime),
+   currEpoch                   (prp.currEpoch),
    hasStoppedOnce              (false),
    stepsTaken                  (0),
    state                       (NULL),
    pubdata                     (NULL),
    stopCondMet                 (false),
-   stopEpoch                   (p.stopEpoch),
-   dim                         (p.dim),
-   singleStepMode              (p.singleStepMode),
-   currentMode                 (p.currentMode),
-   stopCondEpochID             (p.stopCondEpochID),
-   stopCondBaseEpochID         (p.stopCondBaseEpochID),
-   stopCondStopVarID           (p.stopCondStopVarID),
+   stopEpoch                   (prp.stopEpoch),
+   dim                         (prp.dim),
+   singleStepMode              (prp.singleStepMode),
+   transientForces             (NULL),
+   currentMode                 (prp.currentMode),
+   stopCondEpochID             (prp.stopCondEpochID),
+   stopCondBaseEpochID         (prp.stopCondBaseEpochID),
+   stopCondStopVarID           (prp.stopCondStopVarID),
    // Set the parameter IDs
-   availablePropModesID        (p.availablePropModesID),
-   propCoupledID               (p.propCoupledID),
-   interruptCheckFrequencyID   (p.interruptCheckFrequencyID),
-   satNameID                   (p.satNameID),
-   propNameID                  (p.propNameID),
-   stopWhenID                  (p.stopWhenID)
+   availablePropModesID        (prp.availablePropModesID),
+   propCoupledID               (prp.propCoupledID),
+   interruptCheckFrequencyID   (prp.interruptCheckFrequencyID),
+   satNameID                   (prp.satNameID),
+   propNameID                  (prp.propNameID),
+   stopWhenID                  (prp.stopWhenID)
 {
-   parameterCount = p.parameterCount;
+   parameterCount = prp.parameterCount;
    initialized = false;
+   baseEpoch.clear();
+   prop.clear();
+   sats.clear();
+   stopWhen.clear();
+   stopSats.clear();
+   satBuffer.clear();
+   formBuffer.clear();
+   p.clear();
+   fm.clear();
 }
 
 
 //------------------------------------------------------------------------------
-//  Propagate& operator=(const Propagate &p)
+//  Propagate& operator=(const Propagate &prp)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator for the Propagate Command.
@@ -171,30 +188,58 @@ Propagate::Propagate(const Propagate &p) :
  * @return reference to this copy
  */
 //------------------------------------------------------------------------------
-Propagate& Propagate::operator=(const Propagate &p)
+Propagate& Propagate::operator=(const Propagate &prp)
 {
-   if (&p == this)
+   if (&prp == this)
       return *this;
 
    // Call the base assignment operator
-   GmatCommand::operator=(p);
-
-   currentPropMode         = p.currentPropMode;
-   interruptCheckFrequency = p.interruptCheckFrequency;
+   GmatCommand::operator=(prp);
+   
+   propName                = prp.propName;
+   direction               = prp.direction;
+   satName                 = prp.satName;
+   currentPropMode         = prp.currentPropMode;
+   interruptCheckFrequency = prp.interruptCheckFrequency;
    inProgress              = false;
    hasFired                = false;   
-   epochID                 = p.epochID;   
+   epochID                 = prp.epochID;   
+   objectArray             = prp.objectArray;
+   elapsedTime             = prp.elapsedTime;
+   currEpoch               = prp.currEpoch;
    state                   = NULL;
    pubdata                 = NULL;
    stopCondMet             = false;
-   stopEpoch               = p.stopEpoch;
-   dim                     = p.dim;
-   singleStepMode          = p.singleStepMode;
-   currentMode             = p.currentMode;
+   stopEpoch               = prp.stopEpoch;
+   dim                     = prp.dim;
+   singleStepMode          = prp.singleStepMode;
+   currentMode             = prp.currentMode;
+   stopCondEpochID         = prp.stopCondEpochID;
+   stopCondBaseEpochID     = prp.stopCondBaseEpochID;
+   stopCondStopVarID       = prp.stopCondStopVarID;
+   
+   // Set the parameter IDs
+//   availablePropModesID      = prp.availablePropModesID;
+//   propCoupledID             = prp.propCoupledID;
+//   interruptCheckFrequencyID = prp.interruptCheckFrequencyID;
+//   satNameID                 = prp.satNameID;
+//   propNameID                = prp.propNameID;
+//   stopWhenID                = prp.stopWhenID;
+   
    initialized             = false;
    hasStoppedOnce          = false;
    stepsTaken              = 0;
        
+   baseEpoch.clear();
+   prop.clear();
+   sats.clear();
+   stopWhen.clear();
+   stopSats.clear();
+   satBuffer.clear();
+   formBuffer.clear();
+   p.clear();
+   fm.clear();
+   
    return *this;
 }
 

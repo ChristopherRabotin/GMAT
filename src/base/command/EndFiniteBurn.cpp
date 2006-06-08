@@ -79,6 +79,8 @@ EndFiniteBurn::EndFiniteBurn(const EndFiniteBurn& endman) :
    transientForces   (NULL),
    satNames          (endman.satNames)
 {
+	sats.clear();
+	thrusters.clear();
 }
 
 
@@ -106,6 +108,8 @@ EndFiniteBurn& EndFiniteBurn::operator=(const EndFiniteBurn& endman)
    maneuver = NULL;
    transientForces = NULL;
    satNames = endman.satNames;
+   sats.clear();
+   thrusters.clear();
    
    return *this;
 }

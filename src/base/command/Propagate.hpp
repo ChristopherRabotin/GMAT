@@ -37,8 +37,8 @@ class GMAT_API Propagate : public GmatCommand
 public:
    Propagate();
    virtual ~Propagate();
-   Propagate(const Propagate &p);
-   Propagate&          operator=(const Propagate &p);
+   Propagate(const Propagate &prp);
+   Propagate&          operator=(const Propagate &prp);
 
    // Methods used for configuration
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;

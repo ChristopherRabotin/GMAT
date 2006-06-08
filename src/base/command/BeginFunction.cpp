@@ -74,9 +74,15 @@ BeginFunction::BeginFunction(const BeginFunction& bf) :
    GmatCommand          (bf),
    functionName         (bf.functionName),
    gfun                 (NULL),
+   inputs               (bf.inputs),
+   outputs              (bf.outputs),
+   inputObjects         (bf.inputObjects),
+   outputObjects        (bf.outputObjects),
+   returnObjects        (bf.returnObjects),
    transientForces      (NULL),
    internalCoordSys     (NULL)
 {
+	localMap.clear();
 }
 
 
@@ -86,7 +92,15 @@ BeginFunction& BeginFunction::operator=(const BeginFunction& bf)
    if (this != &bf)
    {
       functionName = bf.functionName;
+      gfun = NULL;
+      inputs = bf.inputs;
+      outputs = bf.outputs;
+      inputObjects = bf.inputObjects;
+      outputObjects = bf.outputObjects;
+      localMap = bf.localMap;
+      returnObjects = bf.returnObjects;
       transientForces = bf.transientForces;
+      internalCoordSys = bf.internalCoordSys;
    }
 
    return *this;

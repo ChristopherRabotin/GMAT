@@ -105,6 +105,7 @@ Achieve::Achieve(const Achieve& t) :
    targeterName            (t.targeterName),
    goalName                (t.goalName),
    goal                    (t.goal),
+   goalString              (t.goalString),
    goalTarget              (NULL),
    tolerance               (t.tolerance),
    goalObject              (NULL),
@@ -138,6 +139,7 @@ Achieve& Achieve::operator=(const Achieve& t)
    targeterName = t.targeterName;
    goalName = t.goalName;
    goal = t.goal;
+   goalString = t.goalString;
    goalTarget = NULL;
    tolerance = t.tolerance;
    goalObject = NULL;

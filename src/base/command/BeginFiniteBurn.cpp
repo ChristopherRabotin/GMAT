@@ -77,6 +77,8 @@ BeginFiniteBurn::BeginFiniteBurn(const BeginFiniteBurn& begman) :
    transientForces   (NULL),
    satNames          (begman.satNames)
 {
+	sats.clear();
+	thrusters.clear();
 }
 
 
@@ -99,8 +101,12 @@ BeginFiniteBurn& BeginFiniteBurn::operator=(const BeginFiniteBurn& begman)
       
    GmatCommand::operator=(begman);
    burnName = begman.burnName;
-   satNames = begman.satNames;
+   maneuver = NULL;
+   burnForce = NULL;
    transientForces = NULL;
+   satNames = begman.satNames;
+   sats.clear();
+	thrusters.clear();
    
    return *this;
 }
