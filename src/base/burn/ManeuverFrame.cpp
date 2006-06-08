@@ -101,21 +101,6 @@ ManeuverFrame& ManeuverFrame::operator=(const ManeuverFrame& mf)
 
 
 //------------------------------------------------------------------------------
-//  ManeuverFrame* Clone() const
-//------------------------------------------------------------------------------
-/**
- * This method returns a clone of the ManeuverFrame.
- *
- * @return clone of the ManeuverFrame.
- */
-//------------------------------------------------------------------------------
-ManeuverFrame* ManeuverFrame::Clone() const
-{
-   return (new ManeuverFrame(*this));
-}
-
-
-//------------------------------------------------------------------------------
 //  void SetState(Real *pos, Real *vel)
 //------------------------------------------------------------------------------
 /**

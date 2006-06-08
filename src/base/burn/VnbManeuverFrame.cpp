@@ -81,19 +81,6 @@ VnbManeuverFrame& VnbManeuverFrame::operator=(const VnbManeuverFrame& vmf)
    return *this;
 }
 
-//------------------------------------------------------------------------------
-//  VnbManeuverFrame* Clone() const
-//------------------------------------------------------------------------------
-/**
- * This method returns a clone of the VnbManeuverFrame.
- *
- * @return clone of the VnbManeuverFrame.
- */
-//------------------------------------------------------------------------------
-VnbManeuverFrame* VnbManeuverFrame::Clone() const
-{
-   return (new VnbManeuverFrame(*this));
-}
 
 //------------------------------------------------------------------------------
 //  void CalculateBasis()

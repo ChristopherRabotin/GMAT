@@ -30,8 +30,6 @@ public:
    virtual ~InertialManeuverFrame();
    InertialManeuverFrame(const InertialManeuverFrame& imf);
    InertialManeuverFrame&  operator=(const InertialManeuverFrame& imf);
-   
-   InertialManeuverFrame* Clone() const;
  
 protected:
    void                    CalculateBasis();
