@@ -99,6 +99,8 @@ Maneuver& Maneuver::operator=(const Maneuver& m)
    burn     = NULL;
    satName  = m.satName;
    sat      = NULL;
+   burnNameID = m.burnNameID;
+   satNameID = m.satNameID;
 
    return *this;
 }

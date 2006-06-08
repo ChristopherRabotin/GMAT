@@ -83,6 +83,7 @@ If& If::operator=(const If &ic)
    if (this == &ic)
       return *this;
    ConditionalBranch::operator=(ic);
+   nestLevel = ic.nestLevel;
    // do I need to assign numberofConditions, all of the conditions, etc. here?
    return *this;
 }

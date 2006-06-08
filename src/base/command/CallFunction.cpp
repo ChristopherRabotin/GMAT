@@ -141,6 +141,7 @@ CallFunction& CallFunction::operator=(const CallFunction& cf)
    mOutputList = cf.mOutputList;
 //   callcmds = cf.callcmds;
    callcmds = NULL;           // Commands must be reinitialized
+   internalCoordSys = NULL;
 
 
    mInputListNames = cf.mInputListNames;
