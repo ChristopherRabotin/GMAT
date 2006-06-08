@@ -212,7 +212,7 @@ Burn& Burn::operator=(const Burn &b)
 
 
 //------------------------------------------------------------------------------
-//  Burn* Clone() const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Burn.
@@ -220,7 +220,7 @@ Burn& Burn::operator=(const Burn &b)
  * @return clone of the Burn.
  */
 //------------------------------------------------------------------------------
-Burn* Burn::Clone() const
+GmatBase* Burn::Clone() const
 {
    return (new Burn(*this));
 }
