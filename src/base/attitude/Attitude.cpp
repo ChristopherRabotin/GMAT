@@ -979,8 +979,11 @@ Attitude::Attitude(const Attitude& att) :
    currentwIBB             (att.currentwIBB),
    currentAttitudeTime     (0.0),
    lastQuaternionTime      (0.0),
+   lastQuaternion          (att.lastQuaternion),
    lastEulerAngleTime      (0.0),
-   lastEulerAngleRatesTime (0.0)
+   lastEulerAngles         (att.lastEulerAngles),
+   lastEulerAngleRatesTime (0.0),
+   lastEulerAngleRates     (att.lastEulerAngleRates)
 {
 
 }
@@ -1022,7 +1025,9 @@ Attitude& Attitude::operator=(const Attitude& att)
    lastQuaternionTime      = att.lastQuaternionTime;
    lastQuaternion          = att.lastQuaternion;
    lastEulerAngleTime      = att.lastEulerAngleTime;
+   lastEulerAngles         = att.lastEulerAngles;
    lastEulerAngleRatesTime = att.lastEulerAngleRatesTime;
+   lastEulerAngleRates     = att.lastEulerAngleRates;
    return *this;
 }
 
@@ -1095,7 +1100,6 @@ bool Attitude::Initialize()
    isInitialized = true;
    return true;
 }
-
 
 //---------------------------------------------------------------------------
 //  const Real GetEpoch() const
@@ -2245,4 +2249,37 @@ bool Attitude::SetEulerSequence(const std::string &seqStr)
    else
    throw AttitudeException("Invalid character in euler sequence string.");
    return true;
+}
+
+//------------------------------------------------------------------------------
+//  virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime)
+//------------------------------------------------------------------------------
+/**
+ * This mothod computes the current CosineMatrix at the input time atTime.
+ *
+ * @param atTime the A1Mjd time at which to compute the attitude.
+ *
+ * @note This method will update the currentRBI and currentwIBB members
+ *       if the class.
+ * @note This method is pure virtual and will need to be implemented in
+ *       the 'leaf' classes.
+ */
+//------------------------------------------------------------------------------
+void Attitude::ComputeCosineMatrixAndAngularVelocity(Real atTime)
+{
+	atTime = 0;
+}
+
+//------------------------------------------------------------------------------
+//  Attitude* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the Attitude.
+ *
+ * @return clone of the Achieve.
+ */
+//------------------------------------------------------------------------------
+Attitude* Attitude::Clone() const
+{
+   return (new Attitude(*this));
 }
