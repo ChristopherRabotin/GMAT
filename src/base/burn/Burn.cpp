@@ -138,6 +138,7 @@ Burn::Burn(const Burn &b) :
    coordAxes       (b.coordAxes),
    vectorFormat    (b.vectorFormat),
    coordinateSystem(b.coordinateSystem),
+   frame           (NULL),
    satName         (b.satName),
    sc              (NULL),
    solarSystem     (b.solarSystem),
@@ -153,6 +154,10 @@ Burn::Burn(const Burn &b) :
    dvLabels[1] = b.dvLabels[1];
    dvLabels[2] = b.dvLabels[2];
     
+   for (Integer i = 0; i < 3; i++)
+   	   for (Integer j = 0; j < 3; j++)
+   	      frameBasis[i][j]  = b.frameBasis[i][j];
+   	      
    parameterCount = b.parameterCount;
    
    frameman = new ManeuverFrameManager;
@@ -179,6 +184,7 @@ Burn& Burn::operator=(const Burn &b)
       coordAxes         = b.coordAxes;
       vectorFormat      = b.vectorFormat;
       coordinateSystem  = b.coordinateSystem;
+      frame             = NULL;
       satName           = b.satName;
       sc                = NULL;
       solarSystem       = b.solarSystem;
@@ -194,10 +200,29 @@ Burn& Burn::operator=(const Burn &b)
       dvLabels[1]       = b.dvLabels[1];
       dvLabels[2]       = b.dvLabels[2];
       
+      for (Integer i = 0; i < 3; i++)
+   	      for (Integer j = 0; j < 3; j++)
+   	         frameBasis[i][j]  = b.frameBasis[i][j];
+      
       frameman = new ManeuverFrameManager;
    }
 
    return *this;
+}
+
+
+//------------------------------------------------------------------------------
+//  Burn* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the Burn.
+ *
+ * @return clone of the Burn.
+ */
+//------------------------------------------------------------------------------
+Burn* Burn::Clone() const
+{
+   return (new Burn(*this));
 }
 
 
@@ -592,6 +617,30 @@ bool Burn::Initialize()
    }
          
    return retval;
+}
+
+
+//---------------------------------------------------------------------------
+// bool Fire(Real *burnData, Real epoch)
+//---------------------------------------------------------------------------
+/**
+ * Applies the burn.  
+ * 
+ * Derived classes implement this method to provide the mathematics that 
+ * model the burn.  The parameter is provided so that the derived classes 
+ * have an interface to pass in additional data as needed.
+ * 
+ * @param <burnData>    Array of data specific to the derived burn class. 
+ *
+ * @return true on success, false or throw on failure.
+ */
+//---------------------------------------------------------------------------
+bool Burn::Fire(Real *burnData, Real epoch)
+{
+	burnData = NULL;
+	epoch = 2145.0;
+	
+	return true;
 }
 
 
