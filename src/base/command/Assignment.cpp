@@ -109,6 +109,7 @@ Assignment::Assignment  (const Assignment& a) :
    rhsObject            (a.rhsObject),
    rhsType              (a.rhsType),
    rhsParmName          (a.rhsParmName),
+   objToObj             (a.objToObj),
    parmID               (a.parmID),
    parmType             (a.parmType),
    value                (a.value),

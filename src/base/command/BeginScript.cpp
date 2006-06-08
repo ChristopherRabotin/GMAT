@@ -57,8 +57,9 @@ BeginScript::~BeginScript()
  */
 //------------------------------------------------------------------------------
 BeginScript::BeginScript(const BeginScript& noop) :
-    GmatCommand (noop)
+    GmatCommand       (noop)
 {
+	generatingString = noop.generatingString;
 }
 
 
