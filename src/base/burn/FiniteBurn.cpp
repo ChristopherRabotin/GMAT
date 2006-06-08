@@ -66,6 +66,9 @@ FiniteBurn::FiniteBurn(const std::string &nomme) :
 {
    objectTypeNames.push_back("FiniteBurn");
    parameterCount = FiniteBurnParamCount;
+   
+   thrusters.clear();
+   tanks.clear();
 }
 
 
