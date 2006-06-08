@@ -35,6 +35,8 @@ class GMAT_API ManeuverFrameManager
 public:
 	ManeuverFrameManager();
 	virtual ~ManeuverFrameManager();
+	
+	ManeuverFrameManager* Clone() const;
 
    StringArray&                GetSupportedFrames();
    ManeuverFrame*              GetFrameInstance(const std::string &frameType);

@@ -31,6 +31,8 @@ public:
    virtual ~VnbManeuverFrame();
    VnbManeuverFrame(const VnbManeuverFrame& imf);
    VnbManeuverFrame&   operator=(const VnbManeuverFrame& imf);
+   
+   VnbManeuverFrame* Clone() const;
 
    virtual std::string GetFrameLabel(Integer id);
 

@@ -83,6 +83,20 @@ InertialManeuverFrame& InertialManeuverFrame::operator=(
    return *this;
 }
 
+//------------------------------------------------------------------------------
+//  InertialManeuverFrame* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the InertialManeuverFrame.
+ *
+ * @return clone of the InertialManeuverFrame.
+ */
+//------------------------------------------------------------------------------
+InertialManeuverFrame* InertialManeuverFrame::Clone() const
+{
+   return (new InertialManeuverFrame(*this));
+}
+
     
 //------------------------------------------------------------------------------
 // void CalculateBasis()
