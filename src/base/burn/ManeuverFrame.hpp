@@ -32,7 +32,8 @@ public:
 	ManeuverFrame();
 	virtual ~ManeuverFrame();
    ManeuverFrame(const ManeuverFrame& mf);
-   ManeuverFrame&      operator=(const ManeuverFrame& mf);
+   ManeuverFrame& operator=(const ManeuverFrame& mf);
+   ManeuverFrame* Clone() const;
 
    void                SetState(Real *pos, Real *vel = NULL);
    void                CalculateBasis(Real basis[3][3]);
@@ -65,7 +66,8 @@ protected:
     * with the default methods.
     */
    //---------------------------------------------------------------------------
-   virtual void        CalculateBasis() = 0;
+   //virtual void        CalculateBasis() = 0;
+   virtual void        CalculateBasis();
 };
 
 
