@@ -17,7 +17,6 @@
  */
 //------------------------------------------------------------------------------
 
-
 #include "ManeuverFrame.hpp"
 #include <math.h>
 
@@ -60,8 +59,15 @@ ManeuverFrame::~ManeuverFrame()
  * @param <mf> Object that is copied.
  */
 //------------------------------------------------------------------------------
-ManeuverFrame::ManeuverFrame(const ManeuverFrame& mf)
+ManeuverFrame::ManeuverFrame(const ManeuverFrame& mf) :
+   centralBody      (mf.centralBody),
+   referenceBody    (mf.referenceBody),
+   position         (NULL),
+   velocity         (NULL)
 {
+	for (Integer i = 0; i < 3; i++)
+	   for (Integer j = 0; j < 3; j++)
+	      basisMatrix[i][j] = mf.basisMatrix[i][j];
 }
 
 
@@ -78,10 +84,34 @@ ManeuverFrame::ManeuverFrame(const ManeuverFrame& mf)
 //------------------------------------------------------------------------------
 ManeuverFrame& ManeuverFrame::operator=(const ManeuverFrame& mf)
 {
+	centralBody      = mf.centralBody;
+   referenceBody    = mf.referenceBody;
+   position         = NULL;
+   velocity         = NULL;
+   
+   for (Integer i = 0; i < 3; i++)
+	   for (Integer j = 0; j < 3; j++)
+	      basisMatrix[i][j] = mf.basisMatrix[i][j];
+	      
    if (this == &mf)
       return *this;
         
    return *this;
+}
+
+
+//------------------------------------------------------------------------------
+//  ManeuverFrame* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the ManeuverFrame.
+ *
+ * @return clone of the ManeuverFrame.
+ */
+//------------------------------------------------------------------------------
+ManeuverFrame* ManeuverFrame::Clone() const
+{
+   return (new ManeuverFrame(*this));
 }
 
 
