@@ -73,7 +73,7 @@ bool EndFunction::RenameRefObject(const Gmat::ObjectType type,
 
 GmatBase* EndFunction::Clone() const
 {
-   return new EndFunction(*this);
+   return (new EndFunction(*this));
 }
 
 
