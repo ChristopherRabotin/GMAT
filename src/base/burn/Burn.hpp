@@ -39,6 +39,7 @@ public:
    virtual ~Burn();
    Burn(const Burn &b);
    Burn&                   operator=(const Burn &b);
+   Burn*                   Clone() const;
     
    // Inherited (GmatBase) methods
    virtual std::string     GetParameterText(const Integer id) const;
@@ -82,7 +83,8 @@ public:
     * @return true on success, false or throw on failure.
     */
    //---------------------------------------------------------------------------
-   virtual bool            Fire(Real *burnData = NULL, Real epoch = 21545.0) = 0;
+   //virtual bool            Fire(Real *burnData = NULL, Real epoch = 21545.0) = 0;
+   virtual bool            Fire(Real *burnData, Real epoch);
     
 protected:
    /// Text description of the (internal) coordinate axis type - VNB or inertial
