@@ -605,30 +605,6 @@ bool Burn::Initialize()
 }
 
 
-//---------------------------------------------------------------------------
-// bool Fire(Real *burnData, Real epoch)
-//---------------------------------------------------------------------------
-/**
- * Applies the burn.  
- * 
- * Derived classes implement this method to provide the mathematics that 
- * model the burn.  The parameter is provided so that the derived classes 
- * have an interface to pass in additional data as needed.
- * 
- * @param <burnData>    Array of data specific to the derived burn class. 
- *
- * @return true on success, false or throw on failure.
- */
-//---------------------------------------------------------------------------
-bool Burn::Fire(Real *burnData, Real epoch)
-{
-	burnData = NULL;
-	epoch = 2145.0;
-	
-	return true;
-}
-
-
 //------------------------------------------------------------------------------
 //  void TransformJ2kToBurnOrigin(const Real *scState, Real *state, Real epoch)
 //------------------------------------------------------------------------------
