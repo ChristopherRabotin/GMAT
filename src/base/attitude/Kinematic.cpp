@@ -101,7 +101,7 @@ Kinematic::~Kinematic()
  * @return clone of the Achieve.
  */
 //------------------------------------------------------------------------------
-Kinematic* Kinematic::Clone() const
+GmatBase* Kinematic::Clone() const
 {
    return (new Kinematic(*this));
 }

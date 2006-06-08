@@ -2271,15 +2271,15 @@ void Attitude::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 }
 
 //------------------------------------------------------------------------------
-//  Attitude* Clone() const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Attitude.
  *
- * @return clone of the Achieve.
+ * @return clone of the Attitude.
  */
 //------------------------------------------------------------------------------
-Attitude* Attitude::Clone() const
+GmatBase* Attitude::Clone() const
 {
    return (new Attitude(*this));
 }

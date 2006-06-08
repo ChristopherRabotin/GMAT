@@ -48,7 +48,7 @@ public:
    // destructor
    virtual ~Kinematic();
    // inherited from GmatBase
-   virtual Kinematic* Clone(void) const;
+   virtual GmatBase* Clone(void) const;
 protected:
    enum 
    {
