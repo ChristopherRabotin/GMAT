@@ -92,6 +92,20 @@ Kinematic::~Kinematic()
    // nothing really to do here ... la la la la la
 }
 
+//------------------------------------------------------------------------------
+//  Kinematic* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the Kinematic.
+ *
+ * @return clone of the Achieve.
+ */
+//------------------------------------------------------------------------------
+Kinematic* Kinematic::Clone() const
+{
+   return (new Kinematic(*this));
+}
+
 //---------------------------------
 //  protected methods
 //---------------------------------

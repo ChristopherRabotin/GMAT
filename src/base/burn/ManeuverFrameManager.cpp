@@ -62,6 +62,21 @@ ManeuverFrameManager::~ManeuverFrameManager()
 
 
 //------------------------------------------------------------------------------
+//  ManeuverFrameManager* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the ManeuverFrameManager.
+ *
+ * @return clone of the ManeuverFrameManager.
+ */
+//------------------------------------------------------------------------------
+ManeuverFrameManager* ManeuverFrameManager::Clone() const
+{
+   return (new ManeuverFrameManager(*this));
+}
+
+
+//------------------------------------------------------------------------------
 //  StringArray& GetSupportedFrames()
 //------------------------------------------------------------------------------
 /**

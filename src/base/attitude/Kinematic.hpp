@@ -47,6 +47,8 @@ public:
    Kinematic& operator=(const Kinematic &kin);
    // destructor
    virtual ~Kinematic();
+   // inherited from GmatBase
+   virtual Kinematic* Clone(void) const;
 protected:
    enum 
    {
