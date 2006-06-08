@@ -2250,36 +2250,3 @@ bool Attitude::SetEulerSequence(const std::string &seqStr)
    throw AttitudeException("Invalid character in euler sequence string.");
    return true;
 }
-
-//------------------------------------------------------------------------------
-//  virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime)
-//------------------------------------------------------------------------------
-/**
- * This mothod computes the current CosineMatrix at the input time atTime.
- *
- * @param atTime the A1Mjd time at which to compute the attitude.
- *
- * @note This method will update the currentRBI and currentwIBB members
- *       if the class.
- * @note This method is pure virtual and will need to be implemented in
- *       the 'leaf' classes.
- */
-//------------------------------------------------------------------------------
-void Attitude::ComputeCosineMatrixAndAngularVelocity(Real atTime)
-{
-	atTime = 0;
-}
-
-//------------------------------------------------------------------------------
-//  GmatBase* Clone() const
-//------------------------------------------------------------------------------
-/**
- * This method returns a clone of the Attitude.
- *
- * @return clone of the Attitude.
- */
-//------------------------------------------------------------------------------
-GmatBase* Attitude::Clone() const
-{
-   return (new Attitude(*this));
-}

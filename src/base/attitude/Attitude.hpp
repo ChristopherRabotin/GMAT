@@ -316,10 +316,8 @@ protected:
     *       the 'leaf' classes.
     */
    //------------------------------------------------------------------------------
-   virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime);
+   virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime) = 0;
    
-   // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
 private:
    // default constructor - not implemented
    Attitude(); 
