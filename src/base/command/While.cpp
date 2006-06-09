@@ -83,6 +83,7 @@ While& While::operator=(const While &wc)
    if (this == &wc)
       return *this;
    ConditionalBranch::operator=(wc);
+   nestLevel = 0;
    // do I need to assign numberofConditions, all of the conditions, etc. here?
    return *this;
 }
