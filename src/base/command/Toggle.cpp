@@ -31,10 +31,10 @@
 // Toggle()
 //------------------------------------------------------------------------------
 Toggle::Toggle() :
-   GmatCommand("Toggle"),
-   toggleState(true),
-   subscriberID(parameterCount),
-   toggleStateID(++parameterCount)
+   GmatCommand    ("Toggle"),
+   toggleState    (true),
+   subscriberID   (parameterCount),
+   toggleStateID  (++parameterCount)
 {
    ++parameterCount;
 }
@@ -53,11 +53,14 @@ Toggle::~Toggle()
 // Toggle(const Toggle& t)
 //------------------------------------------------------------------------------
 Toggle::Toggle(const Toggle& t) :
-   GmatCommand(t),
-   subscriberID(t.subscriberID),
-   toggleStateID(t.toggleStateID) //loj: 4/405 Added
+   GmatCommand        (t),
+   toggleState        (t.toggleState),
+   subscriberID       (t.subscriberID),
+   toggleStateID      (t.toggleStateID) //loj: 4/405 Added
 {
    parameterCount = t.parameterCount;
+   subNames.clear();
+   subs.clear();
 }
 
 
@@ -67,6 +70,14 @@ Toggle::Toggle(const Toggle& t) :
 Toggle& Toggle::operator=(const Toggle& t)
 {
    return *this;
+   
+   if (this == &t)
+      return *this;
+    
+   GmatCommand::operator=(t);
+   toggleState = t.toggleState;
+   subNames.clear();
+   subs.clear();
 }
 
 

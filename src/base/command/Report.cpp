@@ -77,6 +77,8 @@ Report::Report(const Report &rep) :
    parmNames = rep.parmNames;
    actualParmNames = rep.actualParmNames;
    parms.clear();
+   parmRows.clear();
+   parmCols.clear();
 }
 
 
@@ -103,6 +105,8 @@ Report& Report::operator=(const Report &rep)
       parmNames = rep.parmNames;
       actualParmNames = rep.actualParmNames;
       parms.clear();
+      parmRows.clear();
+      parmCols.clear();
       needsHeaders = rep.needsHeaders;
    }
    
@@ -196,7 +200,7 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 GmatBase* Report::Clone() const
 {
-   return new Report(*this);
+   return (new Report(*this));
 }
 
 

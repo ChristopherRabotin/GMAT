@@ -78,6 +78,7 @@ Target::Target(const Target& t) :
    targeterInDebugMode (t.targeterInDebugMode)
 {
    parameterCount = t.parameterCount;
+   localStore.clear();
 }
 
 
@@ -102,7 +103,10 @@ Target& Target::operator=(const Target& t)
    targeterName        = t.targeterName;
    targeter            = NULL;
    targeterConverged   = false;
+   targeterNameID      = t.targeterNameID;
+   TargeterConvergedID = t.TargeterConvergedID;
    targeterInDebugMode = t.targeterInDebugMode;
+   localStore.clear();
 
    return *this;
 }

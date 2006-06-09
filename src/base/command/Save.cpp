@@ -64,7 +64,8 @@ Save::Save(const Save& sv) :
    appendData    (sv.appendData),     // should be false...
    wasWritten    (sv.wasWritten),
    objName       (sv.objName),
-   writeVerbose  (sv.writeVerbose)
+   writeVerbose  (sv.writeVerbose),
+   file          (NULL)
 {
    obj.clear();
 }
