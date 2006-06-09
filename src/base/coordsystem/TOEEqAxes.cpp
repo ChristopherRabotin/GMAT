@@ -27,6 +27,12 @@
 #include "TimeSystemConverter.hpp"
 
 
+//#define DEBUG_TOEEQ
+
+#ifdef DEBUG_TOEEQ
+   #include "MessageInterface.hpp"
+#endif
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -122,8 +128,14 @@ TOEEqAxes::~TOEEqAxes()
 //---------------------------------------------------------------------------
 bool TOEEqAxes::Initialize()
 {
+   #ifdef DEBUG_TOEEQ
+      MessageInterface::ShowMessage("Entering TOEEq::Initialize ..........\n");
+   #endif
    InertialAxes::Initialize();
    InitializeFK5();
+   #ifdef DEBUG_TOEEQ
+      MessageInterface::ShowMessage("Completed IA:Init and InitFK5  ..........\n");
+   #endif
    
    Real dPsi             = 0.0;
    Real longAscNodeLunar = 0.0;
@@ -136,9 +148,11 @@ bool TOEEqAxes::Initialize()
    Real mjdTT = TimeConverterUtil::Convert(epoch.Get(),
                  TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
                  GmatTimeUtil::JD_JAN_5_1941);      
-   Real jdTT  = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
+   //Real jdTT  = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
    // Compute Julian centuries of TDB from the base epoch (J2000) 
-   Real tTDB  = (jdTT - 2451545.0) / 36525.0;
+   //Real tTDB  = (jdTT - 2451545.0) / 36525.0;
+   Real offset = GmatTimeUtil::JD_JAN_5_1941 - 2451545.0;
+   Real tTDB  = (mjdTT + offset) / 36525.0;
    
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetUpdateInterval();
@@ -147,14 +161,62 @@ bool TOEEqAxes::Initialize()
 //   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, epoch, dPsi,
 //                                                longAscNodeLunar, cosEpsbar);
    
+   #ifdef DEBUG_TOEEQ
+      MessageInterface::ShowMessage("About to call ComputePrecession/Nutation ..........\n");
+   #endif
    ComputePrecessionMatrix(tTDB, epoch);
+   #ifdef DEBUG_TOEEQ
+      MessageInterface::ShowMessage("Called ComputePrecession ..........\n");
+   #endif
    ComputeNutationMatrix(tTDB, epoch, dPsi, longAscNodeLunar, cosEpsbar);
+   #ifdef DEBUG_TOEEQ
+      MessageInterface::ShowMessage("Called ComputeNutation ..........\n");
+      if (precData == NULL)
+         MessageInterface::ShowMessage("precData is NULL!!!!\n");
+      if (nutData == NULL)
+         MessageInterface::ShowMessage("nutData is NULL!!!!\n");
+   #endif
    
-   rotMatrix = PREC.Transpose() * NUT.Transpose();
+   Real PrecT[9] = {precData[0], precData[3], precData[6],
+                    precData[1], precData[4], precData[7],
+                    precData[2], precData[5], precData[8]};
+   #ifdef DEBUG_TOEEQ
+      MessageInterface::ShowMessage("PrecT omputed  ..........\n");
+   #endif
+   Real NutT[9] =  {nutData[0], nutData[3], nutData[6],
+                    nutData[1], nutData[4], nutData[7],
+                    nutData[2], nutData[5], nutData[8]};
+   #ifdef DEBUG_TOEEQ
+      MessageInterface::ShowMessage("NutT computed  ..........\n");
+   #endif
+
+   Integer p3 = 0;
+   Real res[3][3];
+   for (Integer p = 0; p < 3; ++p)
+   {
+      p3 = 3*p;
+      for (Integer q = 0; q < 3; ++q)
+      {
+         res[p][q] = PrecT[p3]   * NutT[q]   + 
+                     PrecT[p3+1] * NutT[q+3] + 
+                     PrecT[p3+2] * NutT[q+6];
+      }
+   }     
+   #ifdef DEBUG_TOEEQ
+      MessageInterface::ShowMessage("About to set rotMatrix ..........\n");
+   #endif
+   rotMatrix.Set(res[0][0],res[0][1],res[0][2],
+                 res[1][0],res[1][1],res[1][2],
+                 res[2][0],res[2][1],res[2][2]); 
+   
+   //rotMatrix = PREC.Transpose() * NUT.Transpose();
    //rotMatrix = PREC * NUT;
 
    // rotDotMatrix is still the default zero matrix
    
+   #ifdef DEBUG_TOEEQ
+      MessageInterface::ShowMessage("EXITing TOEEq::Initialize ..........\n");
+   #endif
    return true;
 }
 

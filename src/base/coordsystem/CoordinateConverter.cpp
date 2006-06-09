@@ -28,9 +28,13 @@
 #include "Rvector.hpp"
 
 //#define DEBUG_FIRST_CALL
+//#define DEBUG_TO_FROM
 
+#ifdef DEBUG_TO_FROM
+   #include "MessageInterface.hpp"
+#endif
 
-#ifdef DEBUG_FIRST_CALL
+#ifdef DEBUG_FIRST_CALL 
    #include "MessageInterface.hpp"
    static bool firstCallFired = false;
 #endif
@@ -106,6 +110,7 @@ const CoordinateConverter& CoordinateConverter::operator=(
 CoordinateConverter::~CoordinateConverter()
 {
    // nothing to do ... hm ... hm ... hm ... hm ... la-de-da-de-da
+   
 }
 
 //------------------------------------------------------------------------------
@@ -121,6 +126,11 @@ void CoordinateConverter::Initialize()
    //if (!j2000Body)
    //   throw CoordinateSystemException(
    //         "j2000Body has not been defined for CoordinateConverter object");
+   //toData      = toMJ2000RotMatrix.GetDataVector();
+   //fromData    = fromMJ2000Matrix.GetDataVector();
+   //internalState.SetSize(6);
+   //toMJ2000RotMatrix = Rmatrix33();
+   //fromMJ2000Matrix  = Rmatrix33();
    //toData      = toMJ2000RotMatrix.GetDataVector();
    //fromData    = fromMJ2000Matrix.GetDataVector();
    #ifdef DEBUG_FIRST_CALL
@@ -212,6 +222,10 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
                           CoordinateSystem *inCoord, Rvector &outState,
                           CoordinateSystem *outCoord, bool omitTranslation)
 {
+   #ifdef DEBUG_TO_FROM
+      MessageInterface::ShowMessage("In Convert, inCoord is %s and outCoord is %s\n",
+         (inCoord->GetName()).c_str(), (outCoord->GetName()).c_str());
+   #endif
    if (inCoord->GetName() == outCoord->GetName())
    {
       outState = inState;
@@ -233,10 +247,10 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
       }
    #endif
    static Rvector internalState;
-   static Rmatrix33 toMJ2000RotMatrix;
-   static Rmatrix33 fromMJ2000Matrix;
-   static const Real *toData;
-   static const Real *fromData;
+   //static Rmatrix33 toMJ2000RotMatrix;
+   //static Rmatrix33 fromMJ2000Matrix;
+   //static const Real *toData;
+   //static const Real *fromData;
    if (inState.GetSize() != outState.GetSize())
       throw CoordinateSystemException(
              "input and output states have different sizes - no conversion done");
@@ -250,15 +264,31 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
    bool coincident = (inCoord->GetOrigin() == outCoord->GetOrigin() ? 
                       true : false);
    bool translateFlag = coincident || omitTranslation;
-   internalState = inCoord->ToMJ2000Eq(epoch, inState, translateFlag);
-   outState      = outCoord->FromMJ2000Eq(epoch, internalState, translateFlag);
-   toMJ2000RotMatrix   = inCoord->GetLastRotationMatrix();
-   fromMJ2000Matrix    = outCoord->GetLastRotationMatrix();
-   toData      = toMJ2000RotMatrix.GetDataVector();
-   fromData    = fromMJ2000Matrix.GetDataVector();
-   const Real  fromDataT[9] = {fromData[0], fromData[3], fromData[6],
-                               fromData[1], fromData[4], fromData[7],
-                               fromData[2], fromData[5], fromData[8]};
+   Real intState[6];  //
+   Rvector tmpState(inState);
+   const Real *inputState = tmpState.GetDataVector();
+
+   Real finalState[6];
+   inCoord->ToMJ2000Eq(epoch, inputState, intState, translateFlag);
+   outCoord->FromMJ2000Eq(epoch, intState, finalState, translateFlag);
+   //internalState = inCoord->ToMJ2000Eq(epoch, inState, translateFlag);
+   //outState      = outCoord->FromMJ2000Eq(epoch, internalState, translateFlag);
+   //toMJ2000RotMatrix   = inCoord->GetLastRotationMatrix();
+   //fromMJ2000Matrix    = outCoord->GetLastRotationMatrix();
+   //toData      = toMJ2000RotMatrix.GetDataVector();
+   //fromData    = fromMJ2000Matrix.GetDataVector();
+   outState.Set(6,finalState[0],finalState[1],finalState[2],
+                  finalState[3],finalState[4],finalState[5]);
+   Real lastToMat[9];
+   Real lastFromMat[9];
+   inCoord->GetLastRotationMatrix(lastToMat);
+   outCoord->GetLastRotationMatrix(lastFromMat);
+   //const Real  fromDataT[9] = {fromData[0], fromData[3], fromData[6],
+   //                            fromData[1], fromData[4], fromData[7],
+   //                            fromData[2], fromData[5], fromData[8]};
+   Real  fromDataT[9] = {lastFromMat[0], lastFromMat[3], lastFromMat[6],
+                         lastFromMat[1], lastFromMat[4], lastFromMat[7],
+                         lastFromMat[2], lastFromMat[5], lastFromMat[8]};
    Real lrm[3][3];
    Integer p3;
       
@@ -267,9 +297,12 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
       p3 = 3*p;
       for (Integer q = 0; q < 3; ++q)
       {
-         lrm[p][q] = fromDataT[p3]   * toData[q]   + 
-                     fromDataT[p3+1] * toData[q+3] + 
-                     fromDataT[p3+2] * toData[q+6];
+         //lrm[p][q] = fromDataT[p3]   * toData[q]   + 
+         //            fromDataT[p3+1] * toData[q+3] + 
+         //            fromDataT[p3+2] * toData[q+6];
+         lrm[p][q] = fromDataT[p3]   * lastToMat[q]   + 
+                     fromDataT[p3+1] * lastToMat[q+3] + 
+                     fromDataT[p3+2] * lastToMat[q+6];
       }
    }     
    lastRotMatrix.Set(lrm[0][0],lrm[0][1],lrm[0][2],
@@ -293,6 +326,127 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
             "      internal State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
             internalState[0], internalState[1], internalState[2], internalState[3], 
             internalState[4], internalState[5]);
+         MessageInterface::ShowMessage(
+            "      output State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            outState[0], outState[1], outState[2], outState[3], outState[4], 
+            outState[5]);
+         firstCallFired = true;
+      }
+   #endif
+   
+   return true;
+}
+
+bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
+                          CoordinateSystem *inCoord, Real *outState,
+                          CoordinateSystem *outCoord, bool omitTranslation)
+{
+   
+   #ifdef DEBUG_TO_FROM
+      MessageInterface::ShowMessage("In Convert, inCoord is %s and outCoord is %s\n",
+         (inCoord->GetName()).c_str(), (outCoord->GetName()).c_str());
+   #endif
+   if (inCoord->GetName() == outCoord->GetName())
+   {
+      // asssuming state is size 6 here!!!
+      for (Integer i=0;i<6;i++) outState[i] = inState[i];
+      lastRotMatrix.Set(1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0);
+      return true;
+   }
+   #ifdef DEBUG_FIRST_CALL
+      if ((firstCallFired == false) || (epoch.Get() == 21545.0))
+      {
+         MessageInterface::ShowMessage(
+            "Coordinate conversion check:\n      %s --> %s\n", 
+            inCoord->GetName().c_str(), outCoord->GetName().c_str());
+         MessageInterface::ShowMessage(
+            "      Epoch: %.12lf\n", epoch.Get());
+         MessageInterface::ShowMessage(
+            "      input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], 
+            inState[5]);
+      }
+   #endif
+   //static Rvector internalState;
+   //static Rmatrix33 toMJ2000RotMatrix;
+   //static Rmatrix33 fromMJ2000Matrix;
+   //static const Real *toData;
+   //static const Real *fromData;
+   //if (inState.GetSize() != outState.GetSize())
+   //   throw CoordinateSystemException(
+   //          "input and output states have different sizes - no conversion done");
+   if ((!inCoord) || (!outCoord))
+      throw CoordinateSystemException(
+            "Undefined coordinate system - conversion not performed.");
+   // call coordinate system methods to convert - allow exceptions to
+   // percolate up (to be caught at a higher level)
+   //internalState.SetSize(inState.GetSize());
+   //internalState.MakeZeroVector();
+   bool coincident = (inCoord->GetOrigin() == outCoord->GetOrigin() ? 
+                      true : false);
+   bool translateFlag = coincident || omitTranslation;
+   Real intState[6];  //
+   //Rvector tmpState(inState);
+   //const Real *inputState = tmpState.GetDataVector();
+
+   //Real finalState[6];
+   inCoord->ToMJ2000Eq(epoch, inState, intState, translateFlag);
+   outCoord->FromMJ2000Eq(epoch, intState, outState, translateFlag);
+   //internalState = inCoord->ToMJ2000Eq(epoch, inState, translateFlag);
+   //outState      = outCoord->FromMJ2000Eq(epoch, internalState, translateFlag);
+   //toMJ2000RotMatrix   = inCoord->GetLastRotationMatrix();
+   //fromMJ2000Matrix    = outCoord->GetLastRotationMatrix();
+   //toData      = toMJ2000RotMatrix.GetDataVector();
+   //fromData    = fromMJ2000Matrix.GetDataVector();
+   //outState.Set(6,finalState[0],finalState[1],finalState[2],
+   //               finalState[3],finalState[4],finalState[5]);
+   Real lastToMat[9];
+   Real lastFromMat[9];
+   inCoord->GetLastRotationMatrix(lastToMat);
+   outCoord->GetLastRotationMatrix(lastFromMat);
+   //const Real  fromDataT[9] = {fromData[0], fromData[3], fromData[6],
+   //                            fromData[1], fromData[4], fromData[7],
+   //                            fromData[2], fromData[5], fromData[8]};
+   Real  fromDataT[9] = {lastFromMat[0], lastFromMat[3], lastFromMat[6],
+                         lastFromMat[1], lastFromMat[4], lastFromMat[7],
+                         lastFromMat[2], lastFromMat[5], lastFromMat[8]};
+   Real lrm[3][3];
+   Integer p3;
+      
+   for (Integer p = 0; p < 3; ++p)
+   {
+      p3 = 3*p;
+      for (Integer q = 0; q < 3; ++q)
+      {
+         //lrm[p][q] = fromDataT[p3]   * toData[q]   + 
+         //            fromDataT[p3+1] * toData[q+3] + 
+         //            fromDataT[p3+2] * toData[q+6];
+         lrm[p][q] = fromDataT[p3]   * lastToMat[q]   + 
+                     fromDataT[p3+1] * lastToMat[q+3] + 
+                     fromDataT[p3+2] * lastToMat[q+6];
+      }
+   }     
+   lastRotMatrix.Set(lrm[0][0],lrm[0][1],lrm[0][2],
+                     lrm[1][0],lrm[1][1],lrm[1][2],
+                     lrm[2][0],lrm[2][1],lrm[2][2]);
+   //lastRotMatrix = (fromMJ2000Matrix.Transpose()) * toMJ2000RotMatrix;
+   
+   #ifdef DEBUG_FIRST_CALL
+      if ((firstCallFired == false) || (epoch.Get() == 21545.0))
+      {
+         MessageInterface::ShowMessage(
+            "Coordinate conversion check:\n      %s --> %s\n", 
+            inCoord->GetName().c_str(), outCoord->GetName().c_str());
+         MessageInterface::ShowMessage(
+            "      Epoch: %.12lf\n", epoch.Get());
+         MessageInterface::ShowMessage(
+            "      input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], 
+            inState[5]);
+         MessageInterface::ShowMessage(
+            "      internal State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            intState[0], intState[1], intState[2], intState[3], 
+            intState[4], intState[5]);
          MessageInterface::ShowMessage(
             "      output State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
             outState[0], outState[1], outState[2], outState[3], outState[4], 

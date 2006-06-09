@@ -31,6 +31,8 @@
 
 //#define DEBUG_RENAME 1
 //#define DEBUG_INPUTS_OUTPUTS
+//#define DEBUG_DESTRUCTION
+//#define DEBUG_CONSTRUCTION
 
 //---------------------------------
 // static data
@@ -83,6 +85,10 @@ axes               (NULL)
    objectTypes.push_back(Gmat::COORDINATE_SYSTEM);
    objectTypeNames.push_back("CoordinateSystem");
    parameterCount = CoordinateSystemParamCount;
+   #ifdef DEBUG_CONSTRUCTION
+      MessageInterface::ShowMessage("Now constructing CS %s of type %s\n",
+         itsName.c_str(), itsType.c_str());
+   #endif
 }
 
 //---------------------------------------------------------------------------
@@ -166,8 +172,17 @@ const bool CoordinateSystem::operator==(const CoordinateSystem &coordSys)
 //---------------------------------------------------------------------------
 CoordinateSystem::~CoordinateSystem()
 {
+   #ifdef DEBUG_DESTRUCTION
+   MessageInterface::ShowMessage("---> Entering CoordinateSystem destructor for %s\n",
+   instanceName.c_str());
+   #endif
+   
    if (axes) delete axes;
    axes = NULL;
+   #ifdef DEBUG_DESTRUCTION
+   MessageInterface::ShowMessage("---> LEAVING CoordinateSystem destructor for %s\n",
+   instanceName.c_str());
+   #endif
 }
 
 GmatCoordinate::ParameterUsage CoordinateSystem::UsesEopFile() const
@@ -316,12 +331,28 @@ Rmatrix33 CoordinateSystem::GetLastRotationMatrix() const
    return axes->GetLastRotationMatrix();
 }
 
+void CoordinateSystem::GetLastRotationMatrix(Real *mat) const
+{
+   if (!axes) 
+      throw CoordinateSystemException("No AxisSystem defined for " 
+            + instanceName);
+   axes->GetLastRotationMatrix(mat);
+}
+
 Rmatrix33 CoordinateSystem::GetLastRotationDotMatrix() const
 {
    if (!axes) 
       throw CoordinateSystemException("No AxisSystem defined for " 
             + instanceName);
    return axes->GetLastRotationDotMatrix();
+}
+
+void CoordinateSystem::GetLastRotationDotMatrix(Real *mat) const
+{
+   if (!axes) 
+      throw CoordinateSystemException("No AxisSystem defined for " 
+            + instanceName);
+   axes->GetLastRotationDotMatrix(mat);
 }
 
 //---------------------------------------------------------------------------
@@ -371,13 +402,16 @@ bool CoordinateSystem::Initialize()
 Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
                                      bool coincident)
 {
+   static Rvector internalState;
+   static Rvector finalState;
     #ifdef DEBUG_INPUTS_OUTPUTS
       MessageInterface::ShowMessage(
       "In CS::ToMJ2000Eq, inState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
       inState[0], inState[1], inState[2], inState[3],inState[4], inState[5]);
     #endif
-   Rvector internalState(inState.GetSize());
-   Rvector finalState(inState.GetSize());
+   internalState.SetSize(inState.GetSize());
+   finalState.SetSize(inState.GetSize());
+   
    if (axes)
    {
       if (!axes->RotateToMJ2000Eq(epoch,inState,internalState))
@@ -385,10 +419,7 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
                                          + instanceName);
    }
    else // assume this is MJ2000Eq, so no rotation is necessary
-   {
       internalState = inState;
-   }
-   finalState    = inState;
 
    if (!coincident)
    {
@@ -398,7 +429,13 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
       if (!TranslateToMJ2000Eq(epoch,internalState, finalState))
          throw CoordinateSystemException("Error translating state to MJ2000Eq for "
                                          + instanceName);
+    #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+      "In CS::ToMJ2000Eq, translation happening\n");
+    #endif
    }
+   else
+      finalState = internalState;
 
    #ifdef DEBUG_INPUTS_OUTPUTS
       MessageInterface::ShowMessage(
@@ -412,6 +449,36 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
    #endif
    return finalState; // implicit copy constructor
    //return internalState; // implicit copy constructor
+}
+
+void CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Real *inState, 
+                                  Real *outState,     bool coincident)
+{
+   Real internalState[6];
+   if (axes)
+   {
+      if (!axes->RotateToMJ2000Eq(epoch,inState,internalState))
+         throw CoordinateSystemException("Error rotating state to MJ2000Eq for "
+                                         + instanceName);
+   }
+   else // assume this is MJ2000Eq, so no rotation is necessary
+      for (Integer i=0; i<6;i++) internalState[i] = inState[i];
+
+   if (!coincident)
+   {
+      //if (!TranslateToMJ2000Eq(epoch,internalState, internalState))
+      //   throw CoordinateSystemException("Error translating state to MJ2000Eq for "
+      //                                   + instanceName);
+      if (!TranslateToMJ2000Eq(epoch,internalState, outState))
+         throw CoordinateSystemException("Error translating state to MJ2000Eq for "
+                                         + instanceName);
+    #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+      "In CS::ToMJ2000Eq, translation happening\n");
+    #endif
+   }
+   else
+      for (Integer i=0; i<6; i++)  outState[i] = internalState[i];
 }
 
 //------------------------------------------------------------------------------
@@ -431,35 +498,43 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
  */
 //------------------------------------------------------------------------------
 Rvector CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
-                                       bool coincident)
+                                         bool coincident)
 {
+   static Rvector internalState;
+   static Rvector finalState;
     #ifdef DEBUG_INPUTS_OUTPUTS
       MessageInterface::ShowMessage(
       "In CS::FromMJ2000Eq, inState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
       inState[0], inState[1], inState[2], inState[3],inState[4], inState[5]);
     #endif
-   Rvector internalState(inState.GetSize());
-   Rvector finalState(inState.GetSize());
+   internalState.SetSize(inState.GetSize());
+   finalState.SetSize(inState.GetSize());
    if (!coincident)
    {
       if (!TranslateFromMJ2000Eq(epoch,inState, internalState))//,j2000Body))
          throw CoordinateSystemException("Error translating from MJ2000Eq for "
                                          + instanceName);
+    #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+      "In CS::FromMJ2000Eq, translation happening\n");
+    #endif
    }
    else
-   {
       internalState = inState;
-   }
-   finalState    = inState;
       
 
    if (axes)
+   {
       //if (!axes->RotateFromMJ2000Eq(epoch,internalState,internalState))//,j2000Body))
       //   throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
       //                                   + instanceName);
       if (!axes->RotateFromMJ2000Eq(epoch,internalState,finalState))//,j2000Body))
          throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
                                          + instanceName);
+   }
+   else
+      finalState    = internalState;
+                                         
 
    #ifdef DEBUG_INPUTS_OUTPUTS
       MessageInterface::ShowMessage(
@@ -475,6 +550,38 @@ Rvector CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inStat
    //return internalState; // implicit copy constructor
 }
 
+
+void CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Real *inState, 
+                                    Real *outState,  bool coincident)
+{
+   Real internalState[6];
+   if (!coincident)
+   {
+      if (!TranslateFromMJ2000Eq(epoch,inState, internalState))//,j2000Body))
+         throw CoordinateSystemException("Error translating from MJ2000Eq for "
+                                         + instanceName);
+    #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+      "In CS::FromMJ2000Eq, translation happening\n");
+    #endif
+   }
+   else
+      for (Integer i=0; i<6; i++) internalState[i] = inState[i];
+      
+
+   if (axes)
+   {
+      //if (!axes->RotateFromMJ2000Eq(epoch,internalState,internalState))//,j2000Body))
+      //   throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
+      //                                   + instanceName);
+      if (!axes->RotateFromMJ2000Eq(epoch,internalState,outState))//,j2000Body))
+         throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
+                                         + instanceName);
+   }
+   else
+      for (Integer i=0; i<6; i++) outState[i]    = internalState[i];
+                                         
+}
 
 //------------------------------------------------------------------------------
 // public methods inherited from GmatBase
@@ -958,6 +1065,22 @@ bool CoordinateSystem::TranslateToMJ2000Eq(const A1Mjd &epoch,
    return true;
 }
 
+bool CoordinateSystem::TranslateToMJ2000Eq(const A1Mjd &epoch,
+                                           const Real *inState,
+                                           Real *outState)
+{
+   if (origin == j2000Body)  
+      for (Integer i=0; i<6; i++) outState[i] = inState[i];
+   else
+   {
+      Rvector6 rif =  origin->GetMJ2000State(epoch) - 
+                      (j2000Body->GetMJ2000State(epoch));
+      const Real *toRif = rif.GetDataVector();
+      for (Integer i=0; i<6; i++)  outState[i] = inState[i] + toRif[i];
+   }
+   return true;
+}
+
 //------------------------------------------------------------------------------
 //  bool  TranslateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
 //                              Rvector &outState//,SpacePoint *j2000Body)
@@ -989,6 +1112,23 @@ bool CoordinateSystem::TranslateFromMJ2000Eq(const A1Mjd &epoch,
       Rvector6 rif =  j2000Body->GetMJ2000State(epoch) - 
                       (origin->GetMJ2000State(epoch));
       outState = inState + rif;
+   }
+   return true;
+}
+
+bool CoordinateSystem::TranslateFromMJ2000Eq(const A1Mjd &epoch,
+                                             const Real *inState,
+                                             Real *outState) //,
+                                             //SpacePoint *j2000Body)
+{
+   if (origin == j2000Body)  
+      for (Integer i=0; i<6; i++) outState[i] = inState[i];
+   else
+   {
+      Rvector6 rif =  j2000Body->GetMJ2000State(epoch) - 
+                      (origin->GetMJ2000State(epoch));
+      const Real *toRif = rif.GetDataVector();
+      for (Integer i=0; i<6; i++) outState[i] = inState[i] + toRif[i];
    }
    return true;
 }

@@ -76,6 +76,21 @@ const Rvector6              Moon::LF_ELEMENTS              = Rvector6(
 
 /// @todo add other ones as needed
 
+//---------------------------------
+// static data
+//---------------------------------
+const std::string
+Moon::PARAMETER_TEXT[MoonParamCount - CelestialBodyParamCount] =
+{
+   "RotationDataSource",
+};
+
+const Gmat::ParameterType
+Moon::PARAMETER_TYPE[MoonParamCount - CelestialBodyParamCount] =
+{
+   Gmat::INTEGER_TYPE,
+};
+
 
 //------------------------------------------------------------------------------
 // public methods
@@ -92,10 +107,12 @@ const Rvector6              Moon::LF_ELEMENTS              = Rvector6(
  */
 //------------------------------------------------------------------------------
 Moon::Moon(std::string name) :
-CelestialBody     ("Moon",name)
+CelestialBody     ("Moon",name),
+rotationSrc       (Gmat::DE_FILE)
 {
    objectTypeNames.push_back("Moon");
    InitializeMoon(SolarSystem::EARTH_NAME);  
+   parameterCount = MoonParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -111,10 +128,12 @@ CelestialBody     ("Moon",name)
  */
 //------------------------------------------------------------------------------
 Moon::Moon(std::string name, const std::string &cBody) :
-CelestialBody     ("Moon",name)
+CelestialBody     ("Moon",name),
+rotationSrc       (Gmat::DE_FILE)
 {
    objectTypeNames.push_back("Moon");
    InitializeMoon(cBody); 
+   parameterCount = MoonParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -128,7 +147,9 @@ CelestialBody     ("Moon",name)
  */
 //------------------------------------------------------------------------------
 Moon::Moon(const Moon &m) :
-CelestialBody (m)
+CelestialBody (m),
+rotationSrc   (m.rotationSrc)
+
 {
 }
 
@@ -150,6 +171,7 @@ Moon& Moon::operator=(const Moon &m)
       return *this;
 
    CelestialBody::operator=(m);
+   rotationSrc = m.rotationSrc;
    return *this;
 }
 
@@ -298,6 +320,11 @@ Real  Moon::GetHourAngle(A1Mjd atTime)
    }
 }
 
+Gmat::LunaRotationDataSource Moon::GetRotationDataSource() const
+{
+   return rotationSrc;
+}
+
 //------------------------------------------------------------------------------
 //  GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
@@ -312,6 +339,103 @@ GmatBase* Moon::Clone(void) const
 {
    return (new Moon(*this));
 }
+
+//------------------------------------------------------------------------------
+//  std::string  GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter text, given the input parameter ID.
+ *
+ * @param <id> Id for the requested parameter text.
+ *
+ * @return parameter text for the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string Moon::GetParameterText(const Integer id) const
+{
+   if (id >= CelestialBodyParamCount && id < MoonParamCount)
+      return PARAMETER_TEXT[id - CelestialBodyParamCount];
+   return CelestialBody::GetParameterText(id);
+}
+
+//------------------------------------------------------------------------------
+//  Integer  GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter ID, given the input parameter string.
+ *
+ * @param <str> string for the requested parameter.
+ *
+ * @return ID for the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer     Moon::GetParameterID(const std::string &str) const
+{
+   for (Integer i = CelestialBodyParamCount; i < MoonParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - CelestialBodyParamCount])
+         return i;
+   }
+   
+   return CelestialBody::GetParameterID(str);
+}
+
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType  GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter type, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return parameter type of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType Moon::GetParameterType(const Integer id) const
+{
+   if (id >= CelestialBodyParamCount && id < MoonParamCount)
+      return PARAMETER_TYPE[id - CelestialBodyParamCount];
+      
+   return CelestialBody::GetParameterType(id);
+}
+
+//------------------------------------------------------------------------------
+//  std::string  GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter type string, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return parameter type string of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string Moon::GetParameterTypeString(const Integer id) const
+{
+   return CelestialBody::PARAM_TYPE_STRING[GetParameterType(id)];
+}
+
+Integer Moon::GetIntegerParameter(const Integer id) const
+{
+    if (id == ROTATION_DATA_SOURCE) return (Integer) rotationSrc;
+    return CelestialBody::GetIntegerParameter(id);
+}
+
+Integer Moon::SetIntegerParameter(const Integer id,
+                                  const Integer value)
+{
+    if (id == ROTATION_DATA_SOURCE)
+    {
+        rotationSrc = (Gmat::LunaRotationDataSource) value;
+        return (Integer) rotationSrc;
+    }
+    return CelestialBody::SetIntegerParameter(id, value);
+}
+
 
 //------------------------------------------------------------------------------
 // protected methods

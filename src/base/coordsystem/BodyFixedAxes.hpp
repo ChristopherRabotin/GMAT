@@ -92,13 +92,13 @@ protected:
    
    virtual void CalculateRotationMatrix(const A1Mjd &atEpoch);
    
-   Rmatrix33      precT, nutT, stT, stDerivT, pmT;
+   //Rmatrix33      precT, nutT, stT, stDerivT, pmT;
    
-   const Real *precData;
-   const Real *nutData;
-   const Real *stData;
-   const Real *stDerivData;
-   const Real *pmData;
+   //const Real *precData;  // moved to AxisSystem
+   //const Real *nutData;
+   //const Real *stData;
+   //const Real *stDerivData;
+   //const Real *pmData;
    
    DeFile     *de;
 };

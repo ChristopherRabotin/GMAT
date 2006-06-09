@@ -251,9 +251,11 @@ void MODEcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
                 TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
                 GmatTimeUtil::JD_JAN_5_1941);      
-   Real jdTT  = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
+   //Real jdTT  = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
+   //Real tTDB  = (jdTT - 2451545.0) / 36525.0;
    // Compute Julian centuries of TDB from the base epoch (J2000) 
-   Real tTDB  = (jdTT - 2451545.0) / 36525.0;
+   Real offset = GmatTimeUtil::JD_JAN_5_1941 - 2451545.0; 
+   Real tTDB  = (mjdTT + offset) / 36525.0;
    Real tTDB2 = tTDB * tTDB;
    Real tTDB3 = tTDB * tTDB2;
    
@@ -261,9 +263,12 @@ void MODEcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    Real Epsbar  = (84381.448 - 46.8150*tTDB - 0.00059*tTDB2 + 0.001813*tTDB3)
       * GmatMathUtil::RAD_PER_ARCSEC;
 
-   Rmatrix33 R1Eps( 1.0,                        0.0,                       0.0,
-                    0.0,  GmatMathUtil::Cos(Epsbar), GmatMathUtil::Sin(Epsbar),
-                    0.0, -GmatMathUtil::Sin(Epsbar), GmatMathUtil::Cos(Epsbar));
+   Real R1EpsT[3][3] = { {1.0,                      0.0,                       0.0},
+                         {0.0,GmatMathUtil::Cos(Epsbar),-GmatMathUtil::Sin(Epsbar)},
+                         {0.0,GmatMathUtil::Sin(Epsbar), GmatMathUtil::Cos(Epsbar)}};
+   //Rmatrix33 R1Eps( 1.0,                        0.0,                       0.0,
+   //                 0.0,  GmatMathUtil::Cos(Epsbar), GmatMathUtil::Sin(Epsbar),
+   //                 0.0, -GmatMathUtil::Sin(Epsbar), GmatMathUtil::Cos(Epsbar));
    
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetUpdateInterval();
@@ -271,7 +276,27 @@ void MODEcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
 //   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
    ComputePrecessionMatrix(tTDB, atEpoch);
    
-   rotMatrix = PREC.Transpose() * R1Eps.Transpose();
+   Real PrecT[9] = {precData[0], precData[3], precData[6],
+                    precData[1], precData[4], precData[7],
+                    precData[2], precData[5], precData[8]};
+   
+   //rotMatrix = PREC.Transpose() * R1Eps.Transpose();
+   Real res[3][3];
+   Integer p3 = 0;
+   for (Integer p = 0; p < 3; ++p)
+   {
+      p3 = 3*p;
+      for (Integer q = 0; q < 3; ++q)
+      {
+         res[p][q] = PrecT[p3]   * R1EpsT[0][q] + 
+                     PrecT[p3+1] * R1EpsT[1][q] + 
+                     PrecT[p3+2] * R1EpsT[2][q];
+      }
+   }     
+   
+   rotMatrix.Set(res[0][0],res[0][1],res[0][2],
+                 res[1][0],res[1][1],res[1][2],
+                 res[2][0],res[2][1],res[2][2]); 
    // rotDotMatrix is still the default zero matrix
    // (assume it is negligibly small)
    

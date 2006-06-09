@@ -70,6 +70,7 @@
 // #define DEBUG_GRAVITY_FIELD_DETAILS
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_GRAV_COORD_SYSTEM
+//#define DEBUG_BODY_STATE
 
 using namespace GmatMathUtil;
 
@@ -520,7 +521,8 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
    if (satcount < 1)
       throw ForceModelException("GravityField requires at least one spacecraft.");
       
-   Real* satState;
+   //Real* satState;
+   Real satState[6];
    Real f[3], rbb3, mu_rbb, aIndirect[3]; // , now;
    Integer nOffset;
    bool sameCS = false;
@@ -575,6 +577,18 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
       const Real *rvf = frv.GetDataVector();
       const Real *rvt = trv.GetDataVector();
       
+      //Real rvf[6];
+      //Real rvt[6];
+      
+      #ifdef DEBUG_BODY_STATE
+         MessageInterface::ShowMessage("*** About to call GetState ....\n");
+      #endif
+      //fixedBody->GetState(now, rvf);
+      //targetBody->GetState(now, rvt);
+      #ifdef DEBUG_BODY_STATE
+         MessageInterface::ShowMessage("*** DID call GetState ....\n");
+      #endif
+      
       Real rv[3];
       rv[0] = rvf[0] - rvt[0];
       rv[1] = rvf[1] - rvt[1];
@@ -607,14 +621,16 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
    for (Integer n = 0; n < satcount; ++n) 
    {
       nOffset = n * stateSize;
-      satState = state + nOffset;
+      //satState = state + nOffset;
+      for (Integer i=0;i<6;i++) satState[i] = state[i+nOffset];
       
       // convert to body fixed coordinate system
       //A1Mjd               a1Now(now);
       Real                tmpState[6];
-      theState.Set(satState);
+      //theState.Set(satState);
       //cc.Convert(a1Now, theState, inputCS, outState, fixedCS);
-      cc.Convert(now, theState, inputCS, outState, fixedCS);
+      //cc.Convert(now, theState, inputCS, outState, fixedCS);
+      cc.Convert(now, satState, inputCS, tmpState, fixedCS);
 
       #ifdef DEBUG_FIRST_CALL
          if (firstCallFired == false)
@@ -636,8 +652,8 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
       #endif
 
       if (sameCS) rotMatrix = cc.GetLastRotationMatrix();
-      outState.GetR(tmpState);
-      outState.GetV(tmpState + 3);
+      //outState.GetR(tmpState);
+      //outState.GetV(tmpState + 3);
 
       #ifdef DEBUG_FIRST_CALL
          if (firstCallFired == false)
@@ -690,12 +706,14 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
                       rmt[p3+1] * f[1] + 
                       rmt[p3+2] * f[2];
         }  
-          
-         //Rvector3 fAccel(f[0], f[1], f[2]);
-         //Rvector3 fNewVector = rotMatrix.Transpose() * fAccel;
-         //fNew[0] = fNewVector[0];
-         //fNew[1] = fNewVector[1];
-         //fNew[2] = fNewVector[2];
+        
+          /*
+         Rvector3 fAccel(f[0], f[1], f[2]);
+         Rvector3 fNewVector = rotMatrix.Transpose() * fAccel;
+         fNew[0] = fNewVector[0];
+         fNew[1] = fNewVector[1];
+         fNew[2] = fNewVector[2];
+         */
       }
       else
       {

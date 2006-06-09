@@ -23,6 +23,12 @@
 #include "MJ2000EqAxes.hpp"
 #include "InertialAxes.hpp"
 
+//#define DEBUG_CONSTRUCTION
+
+#ifdef DEBUG_CONSTRUCTION
+   #include "MessageInterface.hpp"
+#endif
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -62,6 +68,10 @@ InertialAxes("MJ2000Eq",itsName)
 {
    objectTypeNames.push_back("MJ2000EqAxes");
    parameterCount = MJ2000EqAxesParamCount;
+   #ifdef DEBUG_CONSTRUCTION
+      MessageInterface::ShowMessage("Now constructing MJ2000Eq with name %s\n",
+         itsName.c_str());
+   #endif
 }
 
 //---------------------------------------------------------------------------
@@ -118,12 +128,20 @@ MJ2000EqAxes::~MJ2000EqAxes()
 //---------------------------------------------------------------------------
 bool MJ2000EqAxes::Initialize()
 {
+   #ifdef DEBUG_CONSTRUCTION
+      MessageInterface::ShowMessage("Now entering MJ2000Eq INIT with name %s\n",
+         instanceName.c_str());
+   #endif
    InertialAxes::Initialize();
    // initialize the rotation matrix to be the identity matrix
    rotMatrix(0,0) = 1.0;
    rotMatrix(1,1) = 1.0;
    rotMatrix(2,2) = 1.0;
    // rotDotMatrix is still the default zero matrix
+   #ifdef DEBUG_CONSTRUCTION
+      MessageInterface::ShowMessage("Now LEAVING MJ2000Eq INIT with name %s\n",
+         instanceName.c_str());
+   #endif
    
    return true;
 }

@@ -160,11 +160,6 @@ bool BodyFixedAxes::Initialize()
       firstCallFired = false;
    #endif
    
-   precData    = PREC.GetDataVector();
-   nutData     = NUT.GetDataVector();
-   stData      = ST.GetDataVector();
-   stDerivData = STderiv.GetDataVector();
-   pmData      = PM.GetDataVector();
 
    return true;
 }

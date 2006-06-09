@@ -249,8 +249,9 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    Real mjdUTC = TimeConverterUtil::Convert(atEpoch.Get(),
                   TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD, 
                   JD_JAN_5_1941);
+   Real offset = JD_JAN_5_1941 - JD_NOV_17_1858;
    // convert to MJD referenced from time used in EOP file
-   mjdUTC = mjdUTC + JD_JAN_5_1941 - JD_NOV_17_1858;
+   mjdUTC = mjdUTC + offset;
 
 
    // convert input time to UT1 for later use (for AST calculation)
@@ -261,9 +262,11 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    Real mjdUT1 = TimeConverterUtil::Convert(atEpoch.Get(),
                   TimeConverterUtil::A1MJD, TimeConverterUtil::UT1MJD,
                   JD_JAN_5_1941);
-   Real jdUT1    = mjdUT1 + JD_JAN_5_1941; // right?
+   //Real jdUT1    = mjdUT1 + JD_JAN_5_1941; // right?
                                              // Compute elapsed Julian centuries (UT1)
-   Real tUT1     = (jdUT1 - 2451545.0) / 36525.0;
+   //Real tUT1     = (jdUT1 - 2451545.0) / 36525.0;
+   offset =  JD_JAN_5_1941 - 2451545.0;
+   Real tUT1     = (mjdUT1 + offset) / 36525.0;
    
 
    // convert input A1 MJD to TT MJD (for most calculations)
@@ -276,7 +279,8 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    Real jdTT    = mjdTT + JD_JAN_5_1941; // right?
                                           // Compute Julian centuries of TDB from the base epoch (J2000)
                                           // NOTE - this is really TT, an approximation of TDB *********
-   Real tTDB    = (jdTT - 2451545.0) / 36525.0;
+   //Real tTDB    = (jdTT - 2451545.0) / 36525.0;
+   Real tTDB    = (mjdTT + offset) / 36525.0;
 
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetUpdateInterval();
@@ -299,14 +303,101 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    ComputeSiderealTimeDotRotation(mjdUTC, atEpoch, cosAst, sinAst);
    ComputePolarMotionRotation(mjdUTC, atEpoch);
 
-   Rmatrix33 fixedToMJ2000    = PREC.Transpose() * (NUT.Transpose() *
-                                 (ST.Transpose() * PM.Transpose()));
-    Real determinant = fixedToMJ2000.Determinant();
+   Real np[3][3], rot[3][3], tmp[3][3];
+   Integer p3;
+   
+   // NUT * PREC
+   for (Integer p = 0; p < 3; ++p)
+   {
+      p3 = 3*p;
+      for (Integer q = 0; q < 3; ++q)
+      {
+         np[p][q] = nutData[p3]   * precData[q]   + 
+                    nutData[p3+1] * precData[q+3] + 
+                    nutData[p3+2] * precData[q+6];
+      }
+   }     
+   
+   // ST * (NUT * PREC)
+   for (Integer p = 0; p < 3; ++p)
+   {
+      p3 = 3*p;
+      for (Integer q = 0; q < 3; ++q)
+      {
+         tmp[p][q] = stData[p3]   * np[0][q] + 
+                     stData[p3+1] * np[1][q] + 
+                     stData[p3+2] * np[2][q];
+      }
+   }     
+   
+   // PM * (ST * (NUT * PREC))
+   for (Integer p = 0; p < 3; ++p)
+   {
+      p3 = 3*p;
+      for (Integer q = 0; q < 3; ++q)
+      {
+         rot[p][q] = pmData[p3]   * tmp[0][q] + 
+                     pmData[p3+1] * tmp[1][q] + 
+                     pmData[p3+2] * tmp[2][q];
+      }
+   }
+   
+//   rotMatrix.Set(rot[0][0], rot[1][0], rot[2][0],
+//                 rot[0][1], rot[1][1], rot[2][1],
+//                 rot[0][2], rot[1][2], rot[2][2]);
+   static Rmatrix33 fixedToMJ2000;
+   fixedToMJ2000.Set(rot[0][0], rot[1][0], rot[2][0],
+                     rot[0][1], rot[1][1], rot[2][1],
+                     rot[0][2], rot[1][2], rot[2][2]);
+
+   Real determinant = 
+           rot[0][0] * (rot[1][1] * rot[2][2] - rot[2][1]*rot[1][2]) +
+           rot[1][0] * (rot[2][1] * rot[0][2] - rot[0][1]*rot[2][2]) +
+           rot[2][0] * (rot[0][1] * rot[1][2] - rot[1][1]*rot[0][2]);
    if (Abs(determinant - 1.0) > DETERMINANT_TOLERANCE)
       throw CoordinateSystemException(
             "Computed rotation matrix has a determinant not equal to 1.0");
-   Rmatrix33 fixedToMJ2000Dot = PREC.Transpose() * (NUT.Transpose() *
-                                (STderiv.Transpose() * PM.Transpose()));
+
+   // NUT * PREC calculated above
+   // STderiv * (NUT * PREC)
+   for (Integer p = 0; p < 3; ++p)
+   {
+      p3 = 3*p;
+      for (Integer q = 0; q < 3; ++q)
+      {
+         tmp[p][q] = stDerivData[p3]   * np[0][q] + 
+                     stDerivData[p3+1] * np[1][q] + 
+                     stDerivData[p3+2] * np[2][q];
+      }
+   }     
+   
+   // PM * (STderiv * (NUT * PREC))
+   for (Integer p = 0; p < 3; ++p)
+   {
+      p3 = 3*p;
+      for (Integer q = 0; q < 3; ++q)
+      {
+         rot[p][q] = pmData[p3]   * tmp[0][q] + 
+                     pmData[p3+1] * tmp[1][q] + 
+                     pmData[p3+2] * tmp[2][q];
+      }
+   }
+   static Rmatrix33 fixedToMJ2000Dot;
+   fixedToMJ2000Dot.Set(rot[0][0], rot[1][0], rot[2][0],
+                        rot[0][1], rot[1][1], rot[2][1],
+                        rot[0][2], rot[1][2], rot[2][2]);
+   //rotDotMatrix.Set(rot[0][0], rot[1][0], rot[2][0],
+   //                 rot[0][1], rot[1][1], rot[2][1],
+   //                 rot[0][2], rot[1][2], rot[2][2]);
+
+   //Rmatrix33 fixedToMJ2000    = PREC.Transpose() * (NUT.Transpose() *
+   //                              (ST.Transpose() * PM.Transpose()));
+    //Real determinant = fixedToMJ2000.Determinant();
+   //if (Abs(determinant - 1.0) > DETERMINANT_TOLERANCE)
+   //   throw CoordinateSystemException(
+   //         "Computed rotation matrix has a determinant not equal to 1.0");
+   //Rmatrix33 fixedToMJ2000Dot = PREC.Transpose() * (NUT.Transpose() *
+   //                             (STderiv.Transpose() * PM.Transpose()));
 
 
    Rvector3 dipoleFK5 = fixedToMJ2000 * dipoleEF;
@@ -344,7 +435,7 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
                     Cross((fixedToMJ2000 * dipoleEF), xDot);
    Rvector3 yDot  = (yTmp / yMag) - y * (y * (yTmp / yMag));
    Rvector3 zDot  = Cross(xDot, y) + Cross(x, yDot);
-      
+   /*   
    rotDotMatrix(0,0) = xDot(0);
    rotDotMatrix(0,1) = yDot(0);
    rotDotMatrix(0,2) = zDot(0);
@@ -354,7 +445,10 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    rotDotMatrix(2,0) = xDot(2);
    rotDotMatrix(2,1) = yDot(2);
    rotDotMatrix(2,2) = zDot(2);
-  
+  */
+  rotDotMatrix.Set(xDot(0),yDot(0),zDot(0),
+                   xDot(1),yDot(1),zDot(1),
+                   xDot(2),yDot(2),zDot(2));
    #ifdef ROT_MAT_DEBUG
       static Integer num = 0;
       if (num == 0)

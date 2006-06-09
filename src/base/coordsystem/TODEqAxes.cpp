@@ -255,9 +255,11 @@ void TODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
                 TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
                 GmatTimeUtil::JD_JAN_5_1941);      
-   Real jdTT  = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
+   //Real jdTT  = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
    // Compute Julian centuries of TDB from the base epoch (J2000) 
-   Real tTDB  = (jdTT - 2451545.0) / 36525.0;
+   //Real tTDB  = (jdTT - 2451545.0) / 36525.0;
+   Real offset = GmatTimeUtil::JD_JAN_5_1941 - 2451545.0;
+   Real tTDB  = (mjdTT + offset) / 36525.0;
    
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetUpdateInterval();
@@ -269,7 +271,30 @@ void TODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    ComputePrecessionMatrix(tTDB, atEpoch);
    ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar);
    
-   rotMatrix = PREC.Transpose() * NUT.Transpose();
+   Real PrecT[9] = {precData[0], precData[3], precData[6],
+                    precData[1], precData[4], precData[7],
+                    precData[2], precData[5], precData[8]};
+   Real NutT[9] =  {nutData[0], nutData[3], nutData[6],
+                    nutData[1], nutData[4], nutData[7],
+                    nutData[2], nutData[5], nutData[8]};
+
+   Integer p3 = 0;
+   Real res[3][3];
+   for (Integer p = 0; p < 3; ++p)
+   {
+      p3 = 3*p;
+      for (Integer q = 0; q < 3; ++q)
+      {
+         res[p][q] = PrecT[p3]   * NutT[q]   + 
+                     PrecT[p3+1] * NutT[q+3] + 
+                     PrecT[p3+2] * NutT[q+6];
+      }
+   }     
+   rotMatrix.Set(res[0][0],res[0][1],res[0][2],
+                 res[1][0],res[1][1],res[1][2],
+                 res[2][0],res[2][1],res[2][2]); 
+   
+   //rotMatrix = PREC.Transpose() * NUT.Transpose();
     
    // rotDotMatrix is still the default zero matrix 
    // (assume it is negligibly small)

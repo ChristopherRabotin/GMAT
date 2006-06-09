@@ -48,6 +48,7 @@ using namespace GmatTimeUtil;      // for SECS_PER_DAY
 
 //#define DEBUG_ITRF_UPDATES
 //#define DEBUG_CALCS
+//#define DEBUG_DESTRUCTION
 
 
 #ifdef DEBUG_FIRST_CALL
@@ -231,6 +232,10 @@ AxisSystem::~AxisSystem()
 //       delete aVals[i];
 //    for (Integer i = 0; i < 10; i++)
 //       delete apVals[i];
+   #ifdef DEBUG_DESTRUCTION
+   MessageInterface::ShowMessage("---> Entering AxisSystem destructor for %s\n",
+   instanceName.c_str());
+   #endif
 
    if (aVals != NULL)
       delete [] aVals;
@@ -239,6 +244,10 @@ AxisSystem::~AxisSystem()
    
 //   aVals = NULL;
 //   apVals = NULL;
+   #ifdef DEBUG_DESTRUCTION
+   MessageInterface::ShowMessage("---> LEAVING AxisSystem destructor for %s\n",
+   instanceName.c_str());
+   #endif
 }
 
 GmatCoordinate::ParameterUsage AxisSystem::UsesEopFile() const
@@ -422,9 +431,23 @@ Rmatrix33 AxisSystem::GetLastRotationMatrix() const
    return rotMatrix;
 }
 
+void AxisSystem::GetLastRotationMatrix(Real *mat) const
+{
+   for (Integer i=0; i<9; i++)
+      mat[i] = rotData[i];
+   
+}
+
 Rmatrix33 AxisSystem::GetLastRotationDotMatrix() const
 {
    return rotDotMatrix;
+}
+
+void AxisSystem::GetLastRotationDotMatrix(Real *mat) const
+{
+   for (Integer i=0; i<9; i++)
+      mat[i] = rotDotData[i];
+   
 }
 
 //---------------------------------------------------------------------------
@@ -442,8 +465,14 @@ bool AxisSystem::Initialize()
       firstCallFired = false;
    #endif
    
-   rotData    = rotMatrix.GetDataVector();
-   rotDotData = rotDotMatrix.GetDataVector();
+   rotData     = rotMatrix.GetDataVector();
+   rotDotData  = rotDotMatrix.GetDataVector();
+   precData    = PREC.GetDataVector();
+   nutData     = NUT.GetDataVector();
+   stData      = ST.GetDataVector();
+   stDerivData = STderiv.GetDataVector();
+   pmData      = PM.GetDataVector();
+   
    
    return true;
 }
@@ -471,6 +500,7 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
    static const Real  *tmpPosTo = tmpPosVecTo.GetDataVector();
    static const Real  *tmpVelTo = tmpVelVecTo.GetDataVector();
    CalculateRotationMatrix(epoch);
+   
    // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
    //Rvector3 tmpPosVec(inState[0],inState[1], inState[2]);
    //Rvector3 tmpVelVec(inState[3],inState[4], inState[5]);
@@ -482,7 +512,7 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
    // rotMatrix * tmpPos;
    // rotDotMatrix * tmpPos + rotMatrix * tmpVel
    
-   #ifdef DEBUG_CALCSUTS
+   #ifdef DEBUG_CALCS
       MessageInterface::ShowMessage(
          "Input vector to ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          inState[0], inState[1], inState[2], inState[3], inState[4], inState[5]);
@@ -555,6 +585,106 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
    return true;
 }
 
+bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
+                                  Real *outState)
+{
+   CalculateRotationMatrix(epoch);
+   
+   Real pos[3] = {inState[0], inState[1], inState[2]};   
+   Real vel[3] = {inState[3], inState[4], inState[5]};   
+   #ifdef DEBUG_CALCS
+      MessageInterface::ShowMessage(
+         "Input vector to ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         inState[0], inState[1], inState[2], inState[3], inState[4], inState[5]);
+      MessageInterface::ShowMessage(
+      "the rotation matrix is : %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f\n",
+      rotMatrix(0,0),rotMatrix(0,1),rotMatrix(0,2),
+      rotMatrix(1,0),rotMatrix(1,1),rotMatrix(1,2),
+      rotMatrix(2,0),rotMatrix(2,1),rotMatrix(2,2));
+      MessageInterface::ShowMessage(
+      "the rotation matrix (as array) is : %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f\n",
+      rotData[0],rotData[1],rotData[2],rotData[3],rotData[4],
+      rotData[5],rotData[6],rotData[7],rotData[8]);
+      //MessageInterface::ShowMessage(
+      //   "Input vector as datavec = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      //   tmpPosTo[0], tmpPosTo[1], tmpPosTo[2], tmpVelTo[0], tmpVelTo[1], tmpVelTo[2]);
+   #endif
+   //Real  outPos[3];
+   //Real  outVel[3];
+   Integer p3 = 0;
+   for (Integer p = 0; p < 3; ++p)
+   {
+      p3 = 3*p;
+      /*
+      outPos[p] = rotData[p3]   * pos[0]   + 
+                  rotData[p3+1] * pos[1] + 
+                  rotData[p3+2] * pos[2];
+      outVel[p] = (rotDotData[p3]    * pos[0]   + 
+                   rotDotData[p3+1]  * pos[1] + 
+                   rotDotData[p3+2]  * pos[2])
+                  +
+                  (rotData[p3]    * vel[0]   + 
+                   rotData[p3+1]  * vel[1] + 
+                   rotData[p3+2]  * vel[2]);
+      */
+      outState[p] = rotData[p3]   * pos[0]   + 
+                    rotData[p3+1] * pos[1] + 
+                    rotData[p3+2] * pos[2];
+      outState[p+3] = (rotDotData[p3]    * pos[0]   + 
+                       rotDotData[p3+1]  * pos[1] + 
+                       rotDotData[p3+2]  * pos[2])
+                      +
+                      (rotData[p3]    * vel[0]   + 
+                       rotData[p3+1]  * vel[1] + 
+                       rotData[p3+2]  * vel[2]);
+   }    
+   
+   /*
+   outState[0] = outPos[0]; 
+   outState[1] = outPos[1]; 
+   outState[2] = outPos[2]; 
+   outState[3] = outVel[0]; 
+   outState[4] = outVel[1]; 
+   outState[5] = outVel[2]; 
+   */
+   
+ 
+   #ifdef DEBUG_CALCS
+      //MessageInterface::ShowMessage(
+      //   "Computed Output vector in ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      //   outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], outVel[2]);
+      MessageInterface::ShowMessage(
+         "Output vector from ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         outState[0], outState[1], outState[2], outState[3], outState[4], outState[5]);
+   #endif
+
+   #ifdef DEBUG_FIRST_CALL
+      if ((firstCallFired == false) || (epoch.Get() == 21545.0))
+      {
+         MessageInterface::ShowMessage(
+            "RotateToMJ2000Eq check for %s\n", typeName.c_str());
+         MessageInterface::ShowMessage(
+            "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n",
+            rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2),
+            rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2),
+            rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
+         MessageInterface::ShowMessage(
+            "   Epoch: %.12lf\n", epoch.Get());
+         MessageInterface::ShowMessage(
+            "   input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], 
+            inState[5]);
+         //MessageInterface::ShowMessage(
+         //   "   outpt State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+         //   outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], 
+         //   outVel[2]);
+      }
+   #endif
+
+   return true;
+}
 //------------------------------------------------------------------------------
 //  bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
 //                          Rvector &outState)
@@ -573,14 +703,15 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
  */
 //------------------------------------------------------------------------------
 bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch, 
-                                     const Rvector &inState,
-                                     Rvector &outState)
+                                    const Rvector &inState,
+                                    Rvector &outState)
 {
    static Rvector3 tmpPosVec;
    static Rvector3 tmpVelVec;
    static const Real  *tmpPos = tmpPosVec.GetDataVector();
    static const Real  *tmpVel = tmpVelVec.GetDataVector();
    CalculateRotationMatrix(epoch);
+   
    // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
    ////Rvector3 tmpPos(inState[0],inState[1], inState[2]);
    ////Rvector3 tmpVel(inState[3],inState[4], inState[5]);
@@ -638,10 +769,10 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
 
    #ifdef DEBUG_CALCS
       MessageInterface::ShowMessage(
-         "Computed Output vector in ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         "Computed Output vector in FromMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], outVel[2]);
       MessageInterface::ShowMessage(
-         "Output vector from ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         "Output vector from FromMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          outState[0], outState[1], outState[2], outState[3], outState[4], outState[5]);
    #endif
    #ifdef DEBUG_FIRST_CALL
@@ -673,7 +804,115 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
    return true;
 }
 
+bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch, 
+                                    const Real *inState,
+                                    Real *outState)
+{
+   CalculateRotationMatrix(epoch);
+   
+   Real pos[3] = {inState[0], inState[1], inState[2]};   
+   Real vel[3] = {inState[3], inState[4], inState[5]};   
+   #ifdef DEBUG_CALCS
+      MessageInterface::ShowMessage(
+         "Input vector to FromMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         inState[0], inState[1], inState[2], inState[3], inState[4], inState[5]);
+      MessageInterface::ShowMessage(
+      "the rotation matrix is : %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f\n",
+      rotMatrix(0,0),rotMatrix(0,1),rotMatrix(0,2),
+      rotMatrix(1,0),rotMatrix(1,1),rotMatrix(1,2),
+      rotMatrix(2,0),rotMatrix(2,1),rotMatrix(2,2));
+      MessageInterface::ShowMessage(
+      "the rotation matrix (as array) is : %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f\n",
+      rotData[0],rotData[1],rotData[2],rotData[3],rotData[4],
+      rotData[5],rotData[6],rotData[7],rotData[8]);
+      //MessageInterface::ShowMessage(
+      //   "Input vector as datavec = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      //   tmpPos[0], tmpPos[1], tmpPos[2], tmpVel[0], tmpVel[1], tmpVel[2]);
+   #endif
+   //Real  outPos[3];
+   //Real  outVel[3];
+   /*
+   const Real  rotDataT[9] = {rotData[0], rotData[3], rotData[6],
+                              rotData[1], rotData[4], rotData[7],
+                              rotData[2], rotData[5], rotData[8]};
+   const Real  rotDotDataT[9] = {rotDotData[0], rotDotData[3], rotDotData[6],
+                                 rotDotData[1], rotDotData[4], rotDotData[7],
+                                 rotDotData[2], rotDotData[5], rotDotData[8]};
+                                 */
+   const Real  rotDataT[9] = {rotData[0], rotData[3], rotData[6],
+                              rotData[1], rotData[4], rotData[7],
+                              rotData[2], rotData[5], rotData[8]};
+   const Real  rotDotDataT[9] = {rotDotData[0], rotDotData[3], rotDotData[6],
+                                 rotDotData[1], rotDotData[4], rotDotData[7],
+                                 rotDotData[2], rotDotData[5], rotDotData[8]};
+   Integer p3 = 0;
+   for (Integer p = 0; p < 3; ++p)
+   {
+      p3 = 3*p;
+      /*
+      outPos[p] = rotDataT[p3]   * pos[0]   + 
+                  rotDataT[p3+1] * pos[1] + 
+                  rotDataT[p3+2] * pos[2];
+      outVel[p] = (rotDotDataT[p3]    * pos[0]   + 
+                   rotDotDataT[p3+1]  * pos[1] + 
+                   rotDotDataT[p3+2]  * pos[2])
+                  +
+                  (rotDataT[p3]    * vel[0]   + 
+                   rotDataT[p3+1]  * vel[1] + 
+                   rotDataT[p3+2]  * vel[2]);
+                   */
+      outState[p]   = rotDataT[p3]   * pos[0]   + 
+                      rotDataT[p3+1] * pos[1] + 
+                      rotDataT[p3+2] * pos[2];
+      outState[p+3] = (rotDotDataT[p3]    * pos[0]   + 
+                       rotDotDataT[p3+1]  * pos[1] + 
+                       rotDotDataT[p3+2]  * pos[2])
+                      +
+                      (rotDataT[p3]    * vel[0]   + 
+                       rotDataT[p3+1]  * vel[1] + 
+                       rotDataT[p3+2]  * vel[2]);
+   }     
+   //outState[0] = outPos[0]; 
+   //outState[1] = outPos[1]; 
+   //outState[2] = outPos[2]; 
+   //outState[3] = outVel[0]; 
+   //outState[4] = outVel[1]; 
+   //outState[5] = outVel[2]; 
+   #ifdef DEBUG_CALCS
+      //MessageInterface::ShowMessage(
+      //   "Computed Output vector in ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      //   outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], outVel[2]);
+      MessageInterface::ShowMessage(
+         "Output vector from FromMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         outState[0], outState[1], outState[2], outState[3], outState[4], outState[5]);
+   #endif
+   #ifdef DEBUG_FIRST_CALL
+      if ((firstCallFired == false) || (epoch.Get() == 21545.0))
+      {
+         MessageInterface::ShowMessage(
+            "RotateFromMJ2000Eq check for %s\n", typeName.c_str());
+         MessageInterface::ShowMessage(
+            "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n",
+            rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2),
+            rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2),
+            rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
+         MessageInterface::ShowMessage(
+            "   Epoch: %.12lf\n", epoch.Get());
+         MessageInterface::ShowMessage(
+            "   input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], 
+            inState[5]);
+         //MessageInterface::ShowMessage(
+         //   outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], 
+         //   outVel[2]);
+         firstCallFired = true;
+      }
+   #endif
 
+   return true;   
+}
 
 //------------------------------------------------------------------------------
 // public methods inherited from GmatBase

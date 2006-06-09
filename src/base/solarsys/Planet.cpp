@@ -318,6 +318,7 @@ Planet::Planet(std::string name) :
 {   
    objectTypeNames.push_back("Planet");
    InitializePlanet(SolarSystem::SUN_NAME);  
+   parameterCount = PlanetParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -338,6 +339,7 @@ Planet::Planet(std::string name, const std::string &cBody) :
 {
    objectTypeNames.push_back("Planet");
    InitializePlanet(cBody); 
+   parameterCount = PlanetParamCount;
 }
 
 //------------------------------------------------------------------------------

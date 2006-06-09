@@ -44,6 +44,7 @@
 #include "TimeSystemConverter.hpp"
 
 //#define DEBUG_CELESTIAL_BODY 1
+//#define DEBUG_GET_STATE
 
 
 using namespace GmatMathUtil;
@@ -61,7 +62,7 @@ CelestialBody::PARAMETER_TEXT[CelestialBodyParamCount - SpacePointParamCount] =
    "Flattening",
    "PolarRadius",
    "Mu",
-   "PosVelSOurce",
+   "PosVelSource",
    "AnalyticMethod",
    "State",
    "StateTime",
@@ -187,6 +188,8 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    
    for (Integer i = 0; i < Gmat::ModelTypeCount; i++)
       models[i].push_back("None");
+      
+   for (Integer i=0;i<6;i++)  prevState[i] = 0.0;
    
    parameterCount = CelestialBodyParamCount;
    InitializeBody(itsBodyType);
@@ -241,6 +244,7 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    
    for (Integer i = 0; i < Gmat::ModelTypeCount; i++)
       models[i].push_back("None");
+   for (Integer i=0;i<6;i++)  prevState[i] = 0.0;
 
    parameterCount = CelestialBodyParamCount;
    InitializeBody(CelestialBody::BODY_TYPE_STRINGS[itsBodyType]);
@@ -315,6 +319,7 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    for (Integer i = 0; i < Gmat::ModelTypeCount; i++)
       models[i] = cBody.models[i];
    
+   for (Integer i=0;i<6;i++)  prevState[i] = cBody.prevState[i];
    //defaultCoefSize        = cb.defaultCoefSize;
    //defaultSij             = cb.defaultSij;
    //defaultCij             = cb.defaultCij;
@@ -393,6 +398,7 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    ephemUpdateInterval = cBody.ephemUpdateInterval;
    lastEphemTime       = cBody.lastEphemTime;
    lastState           = cBody.lastState;
+   for (Integer i=0;i<6;i++)  prevState[i] = cBody.prevState[i];
       
    return *this;
 }
@@ -495,6 +501,7 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
    stateTime     = atTime;
    lastEphemTime = atTime;
    lastState     = state;
+   for (Integer i=0;i<6;i++) prevState[i]     = lastState[i];
    return state;
 }
 
@@ -521,6 +528,73 @@ const Rvector6&  CelestialBody::GetState(Real atTime)
    return GetState(forTime);
 }
    
+   
+void CelestialBody::GetState(const A1Mjd &atTime, Real *outState)
+{
+   #ifdef DEBUG_GET_STATE
+      MessageInterface::ShowMessage("Entering GetState with time %.17f\n",
+      atTime.Get());
+   #endif
+   Real dt = Abs(atTime.Subtract(lastEphemTime)) * GmatTimeUtil::SECS_PER_DAY;
+   if ( dt < ephemUpdateInterval)
+   {
+       for (Integer i=0;i<6;i++) outState[i] = prevState[i];
+   }
+   
+   //Real*     posVel = NULL;
+   switch (posVelSrc)
+   {
+      case Gmat::ANALYTIC :
+         switch (analyticMethod)
+         {
+            case Gmat::NO_ANALYTIC_METHOD :
+               throw SolarSystemException(
+                      "No analytic method specified for body " +instanceName);
+            case Gmat::LOW_FIDELITY :
+            {
+               Rvector6 state;
+               state = ComputeLowFidelity(atTime);
+               for (Integer i=0;i<6;i++) outState[i] = state[i];
+               break;
+            }
+            default:
+               break;
+         }
+         break;
+      case Gmat::SLP :
+//      case Gmat::DE_102 :
+      case Gmat::DE_200 :
+//      case Gmat::DE_202 :
+//      case Gmat::DE_403 :
+      case Gmat::DE_405 :
+//      case Gmat::DE_406 :
+         if (!theSourceFile)
+         {
+            throw PlanetaryEphemException(
+                  "SLP or DE file requested, but no file specified");
+         }
+         // figure out the ID of the body
+         // Moved to SetSourceFile to improve performance
+         // bodyNumber = theSourceFile->GetBodyID(instanceName);
+         outState     = theSourceFile->GetPosVel(bodyNumber,atTime, overrideTime);
+         break;
+//      case Gmat::EPHEMERIS :  
+//         break; // other cases later <<<<<<<<<<<<<<<<
+      default:
+         throw SolarSystemException("Invalid data source defined for body "
+                                    + instanceName);
+         break;
+   }
+   stateTime     = atTime;
+   lastEphemTime = atTime;
+   lastState.Set(outState[0],outState[1],outState[2],outState[3],outState[4],outState[5]); 
+   for (Integer i=0;i<6;i++) prevState[i]     = outState[i];
+   //return state;
+   #ifdef DEBUG_GET_STATE
+      MessageInterface::ShowMessage("Exiting GetState -------------f\n");
+   #endif
+}
+
 //------------------------------------------------------------------------------
 //  Gmat::BodyType GetBodyType() const
 //------------------------------------------------------------------------------

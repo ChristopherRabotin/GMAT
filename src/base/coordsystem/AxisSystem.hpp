@@ -74,7 +74,9 @@ public:
    virtual ItrfCoefficientsFile* GetItrfCoefficientsFile();
    virtual std::string           GetEpochFormat() const; // for GUI
    virtual Rmatrix33             GetLastRotationMatrix() const;
+   virtual void                  GetLastRotationMatrix(Real *mat) const;
    virtual Rmatrix33             GetLastRotationDotMatrix() const;
+   virtual void                  GetLastRotationDotMatrix(Real *mat) const;
    
    // initializes the AxisSystem
    virtual bool Initialize();
@@ -82,47 +84,12 @@ public:
    // methods to convert to/from the MJ2000 Equatorial axis system
    virtual bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
                                  Rvector &outState); 
+   virtual bool RotateToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
+                                 Real *outState); 
    virtual bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
                                    Rvector &outState); 
-   
-   //---------------------------------------------------------------------------
-   //  bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-   //                        Rvector &outState//, SpacePoint *j2000Body)
-   //---------------------------------------------------------------------------
-   /**
-    * This method will rotate the input inState into the MJ2000Eq frame.
-    *
-    * @param epoch     the epoch at which to perform the rotation.
-    * @param inState   the input state (in this AxisSystem) to be rotated.
-    * @param iutState  the output state, in the MJ2000Eq AxisSystem, the result 
-    *                  of rotating the input inState.
-    * @param j2000Body the origin of the output MJ2000EqAxes frame.
-    *
-    * @return success or failure of the operation.
-    */
-   //---------------------------------------------------------------------------
-   //virtual bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-   //                              Rvector &outState) = 0; //, SpacePoint *j2000Body) = 0;
-
-   //---------------------------------------------------------------------------
-   //  bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-   //                          Rvector &outState//, SpacePoint *j2000Body)
-   //---------------------------------------------------------------------------
-   /**
-    * This method will rotate the input inState from the MJ2000Eq frame into
-    * this AxisSystem.
-    *
-    * @param epoch     the epoch at which to perform the rotation.
-    * @param inState   the input state (in MJ2000Eq AxisSystem) to be rotated.
-    * @param iutState  the output state, in this AxisSystem, the result 
-    *                  of rotating the input inState.
-    * @param j2000Body the origin of the input MJ2000EqAxes frame.
-    *
-    * @return success or failure of the operation.
-    */
-   //---------------------------------------------------------------------------
-   //virtual bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-   //                                Rvector &outState) = 0; //, SpacePoint *j2000Body) = 0;
+   virtual bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Real *inState,
+                                   Real *outState); 
    
    
    // all classes derived from GmatBase must supply this Clone method;
@@ -186,6 +153,7 @@ protected:
    /// epoch
    A1Mjd epoch;
    
+   
    const Real *rotData;
    const Real *rotDotData;
 
@@ -210,6 +178,7 @@ protected:
    Rmatrix33                 lastNUT;
    Rmatrix33                 lastSTDeriv;
    Rmatrix33                 lastPM;
+      
    Real                      lastDPsi; 
    
    GmatItrf::NutationTerms   nutationSrc;
@@ -229,6 +198,13 @@ protected:
    Rmatrix33 ST;
    Rmatrix33 STderiv;
    Rmatrix33 PM;
+   
+   // added for performance
+   const Real *precData;
+   const Real *nutData;
+   const Real *stData;
+   const Real *stDerivData;
+   const Real *pmData;
    
    
    const Real  *AVals;

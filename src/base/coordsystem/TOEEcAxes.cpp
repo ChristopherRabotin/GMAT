@@ -137,18 +137,23 @@ bool TOEEcAxes::Initialize()
    Real mjdTT = TimeConverterUtil::Convert(epoch.Get(),
                  TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
                  GmatTimeUtil::JD_JAN_5_1941);      
-   Real jdTT  = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
+   //Real jdTT  = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
    // Compute Julian centuries of TDB from the base epoch (J2000) 
-   Real tTDB  = (jdTT - 2451545.0) / 36525.0;
+   //Real tTDB  = (jdTT - 2451545.0) / 36525.0;
+   Real offset = GmatTimeUtil::JD_JAN_5_1941 - 2451545.0;
+   Real tTDB  = (mjdTT + offset) / 36525.0;
    Real tTDB2 = tTDB * tTDB;
    Real tTDB3 = tTDB * tTDB2;
    
    // Vallado Eq. 3-52
    Real Epsbar  = (84381.448 - 46.8150*tTDB - 0.00059*tTDB2 + 0.001813*tTDB3)
       * GmatMathUtil::RAD_PER_ARCSEC;       
-   Rmatrix33 R1Eps( 1.0,                        0.0,                       0.0,
-                    0.0,  GmatMathUtil::Cos(Epsbar), GmatMathUtil::Sin(Epsbar),
-                    0.0, -GmatMathUtil::Sin(Epsbar), GmatMathUtil::Cos(Epsbar));
+   //Rmatrix33 R1Eps( 1.0,                        0.0,                       0.0,
+   //                 0.0,  GmatMathUtil::Cos(Epsbar), GmatMathUtil::Sin(Epsbar),
+   //                 0.0, -GmatMathUtil::Sin(Epsbar), GmatMathUtil::Cos(Epsbar));
+   Real R1EpsT[9] = { 1.0,                      0.0,                       0.0,
+                      0.0,GmatMathUtil::Cos(Epsbar),-GmatMathUtil::Sin(Epsbar),
+                      0.0,GmatMathUtil::Sin(Epsbar), GmatMathUtil::Cos(Epsbar)};
    
    
    if (overrideOriginInterval) updateIntervalToUse = 
@@ -161,12 +166,43 @@ bool TOEEcAxes::Initialize()
    ComputePrecessionMatrix(tTDB, epoch);
    ComputeNutationMatrix(tTDB, epoch, dPsi, longAscNodeLunar, cosEpsbar);
 
-   Rmatrix33 R3Psi( GmatMathUtil::Cos(-dPsi),  GmatMathUtil::Sin(-dPsi),  0.0, 
-                    -GmatMathUtil::Sin(-dPsi),  GmatMathUtil::Cos(-dPsi),  0.0,
-                    0.0,                       0.0,  1.0);
+   //Rmatrix33 R3Psi( GmatMathUtil::Cos(-dPsi),  GmatMathUtil::Sin(-dPsi),  0.0, 
+   //                 -GmatMathUtil::Sin(-dPsi),  GmatMathUtil::Cos(-dPsi),  0.0,
+   //                 0.0,                       0.0,  1.0);
+   Real R3PsiT[3][3] = { { GmatMathUtil::Cos(-dPsi),-GmatMathUtil::Sin(-dPsi), 0.0},
+                         { GmatMathUtil::Sin(-dPsi), GmatMathUtil::Cos(-dPsi), 0.0},
+                         {                      0.0,                     0.0,  1.0}};
+   Real PrecT[9] = {precData[0], precData[3], precData[6],
+                    precData[1], precData[4], precData[7],
+                    precData[2], precData[5], precData[8]};
    
    
-   rotMatrix = PREC.Transpose() * R1Eps.Transpose() * R3Psi.Transpose();
+   Real res[3][3], tmp[3][3];
+   Integer p3 = 0;
+   for (Integer p = 0; p < 3; ++p)
+   {
+      p3 = 3*p;
+      for (Integer q = 0; q < 3; ++q)
+      {
+         tmp[p][q] = R1EpsT[p3]   * R3PsiT[0][q] + 
+                     R1EpsT[p3+1] * R3PsiT[1][q] + 
+                     R1EpsT[p3+2] * R3PsiT[2][q];
+      }
+   }     
+    for (Integer p = 0; p < 3; ++p)
+   {
+      p3 = 3*p;
+      for (Integer q = 0; q < 3; ++q)
+      {
+         res[p][q] = PrecT[p3]   * tmp[0][q] + 
+                     PrecT[p3+1] * tmp[1][q] + 
+                     PrecT[p3+2] * tmp[2][q];
+      }
+   }     
+   rotMatrix.Set(res[0][0],res[0][1],res[0][2],
+                 res[1][0],res[1][1],res[1][2],
+                 res[2][0],res[2][1],res[2][2]); 
+   //rotMatrix = PREC.Transpose() * R1Eps.Transpose() * R3Psi.Transpose();
 
    // rotDotMatrix is still the default zero matrix
    

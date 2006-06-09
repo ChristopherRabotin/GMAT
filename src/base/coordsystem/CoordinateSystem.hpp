@@ -73,7 +73,9 @@ public:
    virtual EopFile*              GetEopFile() const;
    virtual ItrfCoefficientsFile* GetItrfCoefficientsFile();
    virtual Rmatrix33             GetLastRotationMatrix() const;
+   virtual void                  GetLastRotationMatrix(Real *mat) const;
    virtual Rmatrix33             GetLastRotationDotMatrix() const;
+   virtual void                  GetLastRotationDotMatrix(Real *mat) const;
    
    
    // initializes the CoordinateSystem
@@ -82,9 +84,14 @@ public:
    // methods to convert between this CoordinateSystem and MJ2000Eq
    virtual Rvector ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
                               bool coincident = false);  // j2000Body?
+
+   virtual void    ToMJ2000Eq(const A1Mjd &epoch, const Real *inState, 
+                              Real *outState, bool coincident = false);  // j2000Body?
    
    virtual Rvector FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
                                 bool coincident = false);   // j2000Body?
+   virtual void    FromMJ2000Eq(const A1Mjd &epoch, const Real *inState, 
+                                Real *outState, bool coincident = false);   // j2000Body?
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
@@ -141,10 +148,14 @@ protected:
    
    virtual bool TranslateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
                                     Rvector &outState);
+   virtual bool TranslateToMJ2000Eq(const A1Mjd &epoch, const Real *inState, 
+                                    Real *outState);
    // Rvector &outState, SpacePoint *j2000Body);
    
    virtual bool TranslateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
                                       Rvector &outState);
+   virtual bool TranslateFromMJ2000Eq(const A1Mjd &epoch, const Real *inState, 
+                                      Real *outState);
    // Rvector &outState, SpacePoint *j2000Body);
    
    /// axis system

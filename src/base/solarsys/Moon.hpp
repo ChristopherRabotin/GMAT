@@ -30,6 +30,16 @@
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
 
+namespace Gmat
+{
+   // possible sources of position and velocity data for celestial bodies
+   enum LunaRotationDataSource
+   {
+      DE_FILE = 0,
+      IAU_DATA,
+   };
+};
+
 class GMAT_API Moon : public CelestialBody
 {
 public:
@@ -46,11 +56,23 @@ public:
 
    virtual Rvector GetBodyCartographicCoordinates(const A1Mjd &forTime) const;
    virtual Real    GetHourAngle(A1Mjd atTime); 
+   virtual Gmat::LunaRotationDataSource 
+                   GetRotationDataSource() const;
    
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
 
-   // default values for CelesitalBody data
+   // Parameter access methods - overridden from GmatBase - may need these later??
+   virtual std::string     GetParameterText(const Integer id) const;     
+   virtual Integer         GetParameterID(const std::string &str) const; 
+   virtual Gmat::ParameterType
+                           GetParameterType(const Integer id) const;
+   virtual std::string     GetParameterTypeString(const Integer id) const;
+   virtual Integer         GetIntegerParameter(const Integer id) const; // const?
+   virtual Integer         SetIntegerParameter(const Integer id,
+                                               const Integer value); // const?
+
+   // default values for CelestialBody data
    static const Gmat::BodyType        BODY_TYPE;
    static const Gmat::PosVelSource    POS_VEL_SOURCE;
    static const Gmat::AnalyticMethod  ANALYTIC_METHOD;
@@ -70,8 +92,21 @@ public:
    static const Rvector6              LF_ELEMENTS;
 
 protected:
+   enum
+   {
+      ROTATION_DATA_SOURCE = CelestialBodyParamCount,
+      MoonParamCount
+   };
+   
+   static const std::string PARAMETER_TEXT[MoonParamCount - CelestialBodyParamCount];
+   
+   static const Gmat::ParameterType 
+                            PARAMETER_TYPE[MoonParamCount - CelestialBodyParamCount];
 
    void             InitializeMoon(const std::string &cBody);
+   
+   /// source to use for computing rotation data
+   Gmat::LunaRotationDataSource rotationSrc;   // 0 -> DE405,  1 -> IAU (see above)
 
 private:
 

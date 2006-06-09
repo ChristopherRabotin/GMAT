@@ -132,9 +132,11 @@ bool MOEEqAxes::Initialize()
    Real mjdTT = TimeConverterUtil::Convert(epoch.Get(),
                  TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
                  GmatTimeUtil::JD_JAN_5_1941);      
-   Real jdTT  = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
+   //Real jdTT  = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
    // Compute Julian centuries of TDB from the base epoch (J2000) 
-   Real tTDB  = (jdTT - 2451545.0) / 36525.0;
+   //Real tTDB  = (jdTT - 2451545.0) / 36525.0;
+   Real offset = GmatTimeUtil::JD_JAN_5_1941 - 2451545.0;
+   Real tTDB  = (mjdTT + offset) / 36525.0;
    
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetUpdateInterval();
@@ -142,8 +144,11 @@ bool MOEEqAxes::Initialize()
 //   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, epoch);
    ComputePrecessionMatrix(tTDB, epoch);
    
-   rotMatrix = PREC.Transpose();
+   //rotMatrix = PREC.Transpose();
    //rotMatrix = PREC;
+   rotMatrix.Set(precData[0], precData[3], precData[6],
+                 precData[1], precData[4], precData[7],
+                 precData[2], precData[5], precData[8]);
 
    // rotDotMatrix is still the default zero matrix
    

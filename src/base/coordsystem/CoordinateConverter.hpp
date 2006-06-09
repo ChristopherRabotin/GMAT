@@ -52,11 +52,21 @@ public:
    bool Convert(const A1Mjd &epoch, const Rvector &inState,
                 CoordinateSystem *inCoord, Rvector &outState,
                 CoordinateSystem *outCoord, bool omitTranslation = false);
+   bool Convert(const A1Mjd &epoch, const Real *inState,
+                CoordinateSystem *inCoord, Real *outState,
+                CoordinateSystem *outCoord, bool omitTranslation = false);
    // method to return the rotation matrix used to do the last conversion
    Rmatrix33    GetLastRotationMatrix() const;
 
 protected:
    Rmatrix33 lastRotMatrix;
+   /*
+   Rvector internalState;
+   Rmatrix33 toMJ2000RotMatrix;
+   Rmatrix33 fromMJ2000Matrix;
+   const Real *toData;
+   const Real *fromData;
+   */
    
    /// Origin for the return coordinate system (aligned with the MJ2000 Earth
    /// Equatorial coordinate system)

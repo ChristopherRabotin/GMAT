@@ -142,6 +142,7 @@ public:
    // the specified time, using the specified method
    virtual const Rvector6&      GetState(A1Mjd atTime);
    virtual const Rvector6&      GetState(Real atTime); 
+   virtual void                 GetState(const A1Mjd &atTime, Real *outState);
    
    // methods to return the body type, central body, gravitational constant,
    // radius, mass, posvel source, and analytic method 
@@ -422,6 +423,8 @@ protected:
    A1Mjd                  lastEphemTime;
    /// last state value calculated
    Rvector6               lastState;
+   
+   Real                   prevState[6];
    
    /// lists of valid models
    StringArray            models[Gmat::ModelTypeCount];
