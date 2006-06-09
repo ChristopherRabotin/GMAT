@@ -74,8 +74,10 @@ Vary::~Vary()
 Vary::Vary(const Vary& t) :
     GmatCommand             (t),
     targeterName            (t.targeterName),
+    variableName            (t.variableName),
     targeter                (NULL),
     variableID              (-1),
+    targeterDataFinalized   (t.targeterDataFinalized),
     targeterNameID          (t.targeterNameID),
     variableNameID          (t.variableNameID),
     initialValueID          (t.initialValueID),
@@ -85,6 +87,16 @@ Vary::Vary(const Vary& t) :
     variableMaximumStepID   (t.variableMaximumStepID)
 {
     parameterCount = t.parameterCount;
+    
+    initialValue.clear();
+    currentValue.clear();
+    perturbation.clear();
+    variableMinimum.clear();
+    variableMaximum.clear();
+    variableMaximumStep.clear();
+    variableId.clear();
+    pobject.clear();
+    parmId.clear();
 }
 
 
@@ -103,6 +115,21 @@ Vary& Vary::operator=(const Vary& t)
         return *this;
         
     targeterName = t.targeterName;
+    variableName = t.variableName;
+    targeter = NULL;
+    variableID = -1;
+    targeterDataFinalized = t.targeterDataFinalized;
+    
+    initialValue.clear();
+    currentValue.clear();
+    perturbation.clear();
+    variableMinimum.clear();
+    variableMaximum.clear();
+    variableMaximumStep.clear();
+    variableId.clear();
+    pobject.clear();
+    parmId.clear();
+    
     return *this;
 }
 
