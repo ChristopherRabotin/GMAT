@@ -23,6 +23,7 @@
 #include "MessageInterface.hpp"
 #include "Publisher.hpp"         // for Instance()
 #include "FileManager.hpp"       // for GetPathname()
+#include "SubscriberException.hpp"
 #include <iomanip>
 
 //#define DEBUG_REPORTFILE 1
@@ -194,9 +195,11 @@ bool ReportFile::Initialize()
    {
       if ((mNumVarParams == 0) && !usedByReport)
       {
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_, "ReportFile::Initialize() Report will not be written."
+         //loj: 6/8/06 changed PopupMessage to ShowMessage
+         MessageInterface::ShowMessage
+            ("ReportFile::Initialize() Report will not be written.\n"
              "No parameters selected for ReportFile.\n");
+         
          active = false;
          return false;
       }
@@ -204,12 +207,13 @@ bool ReportFile::Initialize()
       if ((mNumVarParams > 0))
          if (mVarParams[0] == NULL)
          {
-            active = false;
-            MessageInterface::PopupMessage
-               (Gmat::WARNING_,
-                "ReportFile::Initialize() ReportFile will not be created.\n"
+            //loj: 6/8/06 changed PopupMessage to ShowMessage
+            MessageInterface::ShowMessage
+               ("ReportFile::Initialize() ReportFile will not be created.\n"
                 "The first parameter:%s selected for the report file is NULL\n",
                 mVarParamNames[0].c_str());
+            
+            active = false;
             return false;
          }
    }
@@ -615,8 +619,8 @@ GmatBase* ReportFile::GetRefObject(const Gmat::ObjectType type,
          return mVarParams[i];
    }
 
-   throw GmatBaseException("ReportFile::GetRefObject() the object name: " + name +
-                           "not found\n");
+   throw SubscriberException("ReportFile::GetRefObject() the object name: " + name +
+                             "not found\n");
 }
 
 
@@ -755,8 +759,16 @@ bool ReportFile::OpenReportFile(void)
 
    dstream.open(filename.c_str());
    if (!dstream.is_open())
-      return false;
-
+   {
+      #if DEBUG_REPORTFILE
+      MessageInterface::ShowMessage
+         ("ReportFile::OpenReportFile() Failed to open report file: %s\n",
+          filename.c_str());
+      #endif
+      
+      throw SubscriberException("Cannot open report file: " + filename + "\n");
+   }
+   
    dstream.precision(precision);
    dstream.width(columnWidth);
    dstream.setf(std::ios::showpoint);
