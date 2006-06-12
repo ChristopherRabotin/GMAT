@@ -169,6 +169,9 @@ bool GeocentricSolarMagneticAxes::Initialize()
    ObjectReferencedAxes::Initialize();
    //if (originName == SolarSystem::EARTH_NAME) // 2006.03.14 WCS 
    InitializeFK5();
+   
+   dipEF = dipoleEF.GetDataVector();
+   rvSun = rvSunVec.GetDataVector();
 
    return true;
 }
@@ -285,16 +288,6 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
-//   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
-//   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
-//                                                longAscNodeLunar, cosEpsbar);
-//   Rmatrix33  ST        = ComputeSiderealTimeRotation(jdTT, tUT1,
-//                                                      dPsi, longAscNodeLunar, 
-//                                                      cosEpsbar,
-//                                                      cosAst, sinAst);
-//   Rmatrix33  STderiv   = ComputeSiderealTimeDotRotation(mjdUTC, atEpoch,
-//                                                         cosAst, sinAst);
-//   Rmatrix33  PM        = ComputePolarMotionRotation(mjdUTC, atEpoch);
 
    ComputePrecessionMatrix(tTDB, atEpoch);
    ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar);
@@ -342,18 +335,23 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       }
    }
    
-//   rotMatrix.Set(rot[0][0], rot[1][0], rot[2][0],
-//                 rot[0][1], rot[1][1], rot[2][1],
-//                 rot[0][2], rot[1][2], rot[2][2]);
-   static Rmatrix33 fixedToMJ2000;
-   fixedToMJ2000.Set(rot[0][0], rot[1][0], rot[2][0],
-                     rot[0][1], rot[1][1], rot[2][1],
-                     rot[0][2], rot[1][2], rot[2][2]);
+   //static Rmatrix33 fixedToMJ2000;
+   
+   Real fixedToMJ2000[3][3];
+   for (Integer i=0;i<3;i++)
+      for (Integer j=0;j<3;j++)
+         fixedToMJ2000[i][j] = rot[j][i];
+   //fixedToMJ2000.Set(rot[0][0], rot[1][0], rot[2][0],
+   //                  rot[0][1], rot[1][1], rot[2][1],
+   //                  rot[0][2], rot[1][2], rot[2][2]);
 
    Real determinant = 
-           rot[0][0] * (rot[1][1] * rot[2][2] - rot[2][1]*rot[1][2]) +
-           rot[1][0] * (rot[2][1] * rot[0][2] - rot[0][1]*rot[2][2]) +
-           rot[2][0] * (rot[0][1] * rot[1][2] - rot[1][1]*rot[0][2]);
+           fixedToMJ2000[0][0] * (fixedToMJ2000[1][1] * fixedToMJ2000[2][2] 
+              - fixedToMJ2000[2][1]*fixedToMJ2000[1][2]) +
+           fixedToMJ2000[1][0] * (fixedToMJ2000[2][1] * fixedToMJ2000[0][2] 
+              - fixedToMJ2000[0][1]*fixedToMJ2000[2][2]) +
+           fixedToMJ2000[2][0] * (fixedToMJ2000[0][1] * fixedToMJ2000[1][2] 
+              - fixedToMJ2000[1][1]*fixedToMJ2000[0][2]);
    if (Abs(determinant - 1.0) > DETERMINANT_TOLERANCE)
       throw CoordinateSystemException(
             "Computed rotation matrix has a determinant not equal to 1.0");
@@ -382,10 +380,14 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
                      pmData[p3+2] * tmp[2][q];
       }
    }
-   static Rmatrix33 fixedToMJ2000Dot;
-   fixedToMJ2000Dot.Set(rot[0][0], rot[1][0], rot[2][0],
-                        rot[0][1], rot[1][1], rot[2][1],
-                        rot[0][2], rot[1][2], rot[2][2]);
+   Real fixedToMJ2000Dot[3][3];
+   for (Integer i=0;i<3;i++)
+      for (Integer j=0;j<3;j++)
+         fixedToMJ2000Dot[i][j] = rot[j][i];
+   //static Rmatrix33 fixedToMJ2000Dot;
+   //fixedToMJ2000Dot.Set(rot[0][0], rot[1][0], rot[2][0],
+   //                     rot[0][1], rot[1][1], rot[2][1],
+   //                     rot[0][2], rot[1][2], rot[2][2]);
    //rotDotMatrix.Set(rot[0][0], rot[1][0], rot[2][0],
    //                 rot[0][1], rot[1][1], rot[2][1],
    //                 rot[0][2], rot[1][2], rot[2][2]);
@@ -400,25 +402,59 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    //                             (STderiv.Transpose() * PM.Transpose()));
 
 
-   Rvector3 dipoleFK5 = fixedToMJ2000 * dipoleEF;
+   //Rvector3 dipoleFK5 = fixedToMJ2000 * dipoleEF;
+   Real dipoleFK5[3];
+   //Integer p3 = 0;
+   for (Integer p = 0; p < 3; ++p)
+   {
+      //p3 = 3*p;
+      dipoleFK5[p] = fixedToMJ2000[p][0]   * dipEF[0] + 
+                     fixedToMJ2000[p][1]   * dipEF[1] + 
+                     fixedToMJ2000[p][2]   * dipEF[2];
+  }  
    
-   Rvector6 rvSun = secondary->GetMJ2000State(atEpoch) -
-                    primary->GetMJ2000State(atEpoch);
-   Rvector3 rSun  = rvSun.GetR();
-   Rvector3 vSun  = rvSun.GetV();
+   
+   rvSunVec = secondary->GetMJ2000State(atEpoch) -
+              primary->GetMJ2000State(atEpoch);
 
-   Real     rMag  = rSun.GetMagnitude();
-   Real     vMag  = vSun.GetMagnitude();
+   //Rvector3 rSun  = rvSun.GetR();
+   //Rvector3 vSun  = rvSun.GetV();
+   Real rSun[3] = {rvSun[0], rvSun[1], rvSun[2]};
+   Real vSun[3] = {rvSun[3], rvSun[4], rvSun[5]};
 
-   Rvector3 rUnit = rSun / rMag;
-   Rvector3 vUnit = vSun / vMag;
+   //Real     rMag  = rSun.GetMagnitude();
+   //Real     vMag  = vSun.GetMagnitude();
+   Real rMag = GmatMathUtil::Sqrt((rSun[0] * rSun[0]) + (rSun[1] * rSun[1]) +
+                                  (rSun[2] * rSun[2]));
+   ////Real vMag = GmatMathUtil::Sqrt((vSun[0] * vSun[0]) + (vSun[1] * vSun[1]) +
+   ////                               (vSun[2] * vSun[2]));
 
-   Rvector3 x     = rUnit;
-   Rvector3 yFK5  = Cross(dipoleFK5,x);
-   Real     yMag  = yFK5.GetMagnitude();
-   Rvector3 y     = yFK5 / yMag;
-   Rvector3 z     = Cross(x,y);
+   //Rvector3 rUnit = rSun / rMag;
+   //Rvector3 vUnit = vSun / vMag;
+   // unitize vectors
+   Real x[3]     = {rSun[0] / rMag, rSun[1] / rMag, rSun[2] / rMag}; // was rUnit
+   ////Real vUnit[3] = {vSun[0] / vMag, vSun[1] / vMag, vSun[2] / vMag};
 
+   //Rvector3 x     = rUnit;
+   //Rvector3 yFK5  = Cross(dipoleFK5,x);
+   Real yFK5[3] = {dipoleFK5[1]*x[2] - dipoleFK5[2]*x[1],
+                   dipoleFK5[2]*x[0] - dipoleFK5[0]*x[2],
+                   dipoleFK5[0]*x[1] - dipoleFK5[1]*x[0]};
+   //Real     yMag  = yFK5.GetMagnitude();
+   Real     yMag  = GmatMathUtil::Sqrt((yFK5[0] * yFK5[0]) + (yFK5[1] * yFK5[1]) +
+                                       (yFK5[2] * yFK5[2]));
+   //Rvector3 y     = yFK5 / yMag;
+   Real y[3] = {yFK5[0] / yMag, yFK5[1] / yMag, yFK5[2] / yMag};
+   //Rvector3 z     = Cross(x,y);
+   Real z[3] = {x[1]*y[2] - x[2]*y[1],
+                x[2]*y[0] - x[0]*y[2],
+                x[0]*y[1] - x[1]*y[0]};
+                
+   rotMatrix.Set(x[0], y[0], z[0],
+                 x[1], y[1], z[1],
+                 x[2], y[2], z[2]);
+              
+   /*
    rotMatrix(0,0) = x(0);
    rotMatrix(0,1) = y(0);
    rotMatrix(0,2) = z(0);
@@ -428,13 +464,40 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    rotMatrix(2,0) = x(2);
    rotMatrix(2,1) = y(2);
    rotMatrix(2,2) = z(2);
-
-   Rvector3 vR    = vSun / rMag;
-   Rvector3 xDot  = vR - x * (x * vR);
-   Rvector3 yTmp  = Cross((fixedToMJ2000Dot * dipoleEF), x) +
-                    Cross((fixedToMJ2000 * dipoleEF), xDot);
-   Rvector3 yDot  = (yTmp / yMag) - y * (y * (yTmp / yMag));
-   Rvector3 zDot  = Cross(xDot, y) + Cross(x, yDot);
+   */
+   //Rvector3 vR    = vSun / rMag;
+   Real vR[3] = {vSun[0] / rMag, vSun[1] / rMag, vSun[2] / rMag};
+   Real product = x[0] * vR[0] + x[1] * vR[1] + x[2] * vR[2];
+   //Rvector3 xDot  = vR - x * (x * vR);
+   Real xDot[3] = {vR[0] - x[0] * product,
+                   vR[1] - x[1] * product,
+                   vR[2] - x[2] * product};
+   Real tmp1[3], tmp2[3];
+   //Rvector3 yTmp  = Cross((fixedToMJ2000Dot * dipoleEF), x) +
+   //                 Cross((fixedToMJ2000 * dipoleEF), xDot);
+   for (Integer p = 0; p < 3; ++p)
+   {
+      //p3 = 3*p;
+         tmp1[p] = fixedToMJ2000Dot[p][0]   * dipEF[0] + 
+                   fixedToMJ2000Dot[p][1]   * dipEF[1] + 
+                   fixedToMJ2000Dot[p][2]   * dipEF[2];
+         tmp2[p] = fixedToMJ2000[p][0]      * dipEF[0] + 
+                   fixedToMJ2000[p][1]      * dipEF[1] + 
+                   fixedToMJ2000[p][2]      * dipEF[2];
+   }  
+   // include division by yMag here
+   Real yTmp[3] = {((tmp1[1]*x[2] - tmp1[2]*x[1]) + (tmp2[1]*xDot[2] - tmp2[2]*xDot[1])) / yMag,
+                   ((tmp1[2]*x[0] - tmp1[0]*x[2]) + (tmp2[2]*xDot[0] - tmp2[0]*xDot[2])) / yMag,
+                   ((tmp1[0]*x[1] - tmp1[1]*x[0]) + (tmp2[0]*xDot[1] - tmp2[1]*xDot[0])) / yMag};
+   Real yVal = y[0] * yTmp[0] + y[1] * yTmp[1] + y[2] * yTmp[2];
+   //Rvector3 yDot  = (yTmp / yMag) - y * (y * (yTmp / yMag));
+   Real yDot[3] = {yTmp[0] - y[0] * yVal,
+                   yTmp[1] - y[1] * yVal,
+                   yTmp[2] - y[2] * yVal};
+   //Rvector3 zDot  = Cross(xDot, y) + Cross(x, yDot);
+   Real zDot[3] = {(xDot[1]*y[2] - xDot[2]*y[1]) + (x[1]*yDot[2] - x[2]*yDot[1]), 
+                   (xDot[2]*y[0] - xDot[0]*y[2]) + (x[2]*yDot[0] - x[0]*yDot[2]),
+                   (xDot[0]*y[1] - xDot[1]*y[0]) + (x[0]*yDot[1] - x[1]*yDot[0])};
    /*   
    rotDotMatrix(0,0) = xDot(0);
    rotDotMatrix(0,1) = yDot(0);
@@ -446,9 +509,10 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    rotDotMatrix(2,1) = yDot(2);
    rotDotMatrix(2,2) = zDot(2);
   */
-  rotDotMatrix.Set(xDot(0),yDot(0),zDot(0),
-                   xDot(1),yDot(1),zDot(1),
-                   xDot(2),yDot(2),zDot(2));
+  rotDotMatrix.Set(xDot[0],yDot[0],zDot[0],
+                   xDot[1],yDot[1],zDot[1],
+                   xDot[2],yDot[2],zDot[2]);
+                   
    #ifdef ROT_MAT_DEBUG
       static Integer num = 0;
       if (num == 0)

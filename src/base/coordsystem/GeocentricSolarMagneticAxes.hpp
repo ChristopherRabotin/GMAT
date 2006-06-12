@@ -63,7 +63,10 @@ protected:
    static const Real lambdaD;  // degrees West
    static const Real phiD;  // degrees North
 
-   Rvector3          dipoleEF;
+   Rvector3         dipoleEF;
+   const Real       *dipEF;
+   Rvector6         rvSunVec;
+   const Real       *rvSun;
 
    void         ComputeDipoleEarthFixed();
    
