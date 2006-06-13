@@ -1093,7 +1093,7 @@ void CallFunction::SendInParam(Parameter *param)
                      param->GetTypeName().c_str());
           #endif
 
-
+          param->TakeAction("UpdateEpoch");
           std::string inParamString =
                      param->GetGeneratingString(Gmat::MATLAB_STRUCT);
 
@@ -1432,13 +1432,50 @@ void CallFunction::UpdateObject(GmatBase *obj, char *buffer)
       switch (type)
       {
       case Gmat::STRING_TYPE:
+      {
          //MessageInterface::ShowMessage
          //   ("tokens[i+1]=<%s>, length=%d\n", tokens[i+1].c_str(),
          //    tokens[i+1].length());
-         newstr = tokens[i+1].substr(1, tokens[i+1].length()-2);
+                  
+         if (((tokens[i+1].c_str())[0] == '\'')&&
+            ((tokens[i+1].c_str())[tokens[i+1].length()-1] == '\''))
+            newstr = tokens[i+1].substr(1, tokens[i+1].length()-2);
+         else if ((tokens[i+1].c_str())[0] == '\'')
+         {
+            // assume it is a gregorian date then DD MMM YYYY hh:mm:ss.sss
+            // this probably isn't the best way, but it will do for now...
+            
+            // DD
+            newstr = tokens[i+1].substr(1, tokens[i+1].length()-1) + " ";
+            i++;
+            
+            // MMM
+            newstr = newstr + tokens[i+1].substr(0, tokens[i+1].length()) + " "; 
+            i++;
+            
+            // YYYY
+            newstr = newstr + tokens[i+1].substr(0, tokens[i+1].length()) + " "; 
+            i++;
+            
+            // hh:
+            newstr = newstr + tokens[i+1].substr(0, tokens[i+1].length()) + ":"; 
+            i++;
+            
+            // mm:                          
+            newstr = newstr + tokens[i+1].substr(0, tokens[i+1].length()) + ":"; 
+            i++;
+
+            // ss.sss
+            newstr = newstr + tokens[i+1].substr(0, tokens[i+1].length()-1); 
+
+         }
+         else
+            newstr = tokens[i+1].substr(1, tokens[i+1].length()-2);
+            
          //MessageInterface::ShowMessage("newstr=<%s>\n", newstr.c_str());
          obj->SetStringParameter(id, newstr);
          break;
+      }
       case Gmat::REAL_TYPE:
          obj->SetRealParameter(id, atof(tokens[i+1].c_str()));
          break;
