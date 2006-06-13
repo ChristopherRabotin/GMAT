@@ -98,16 +98,6 @@ de(NULL)
 //------------------------------------------------------------------------------
 BodyFixedAxes::BodyFixedAxes(const BodyFixedAxes &bfAxes) :
 DynamicAxes    (bfAxes),
-precT          (bfAxes.precT),
-nutT           (bfAxes.nutT),
-stT            (bfAxes.stT),
-stDerivT       (bfAxes.stDerivT),
-pmT            (bfAxes.pmT),
-precData       (NULL),
-nutData        (NULL),
-stData         (NULL),
-stDerivData    (NULL),
-pmData         (NULL),
 de             (NULL)
 {
 }
@@ -128,16 +118,6 @@ const BodyFixedAxes& BodyFixedAxes::operator=(const BodyFixedAxes &bfAxes)
    if (&bfAxes == this)
       return *this;
    DynamicAxes::operator=(bfAxes); 
-   precT = bfAxes.precT;
-   nutT = bfAxes.nutT;
-   stT = bfAxes.stT;
-   stDerivT = bfAxes.stDerivT;
-   pmT = bfAxes.pmT;
-   precData = NULL; 
-   nutData = NULL;
-   stData = NULL;
-   stDerivData = NULL;
-   pmData = NULL;
    de = bfAxes.de; 
    return *this;
 }
