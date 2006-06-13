@@ -1383,7 +1383,7 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
 {
     if (id == SC_EPOCH_ID)
        return scEpoch;
-
+    
     if (id == DATE_FORMAT_ID)
        return dateFormat;
 
@@ -1703,6 +1703,36 @@ bool Spacecraft::TakeAction(const std::string &action,
       }
    }
    
+   // 6/12/06 - arg: reset scEpoch to epoch from prop state
+   if (action == "UpdateEpoch")
+   {
+      Real currEpoch = state.GetEpoch();
+      
+      if (epochSystem != "")
+      {
+         if (epochSystem != "A1")
+            currEpoch = TimeConverterUtil::Convert(currEpoch, 
+                          TimeConverterUtil::A1,  
+                          TimeConverterUtil::GetTimeTypeID(epochSystem),
+                          GmatTimeUtil::JD_JAN_5_1941);
+      }
+      
+      if (epochFormat != "")
+      {  
+         if (epochFormat == "Gregorian")
+            scEpoch = TimeConverterUtil::ConvertMjdToGregorian(currEpoch);
+         else
+         {
+            std::stringstream timestream;
+            timestream.precision(TIME_PRECISION);
+            timestream << currEpoch;
+            scEpoch = timestream.str();
+         }
+      }
+
+      return true;
+   }
+      
    return SpaceObject::TakeAction(action, actionData);
 }
 
@@ -2164,6 +2194,7 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
           (parmOrder[i] != TOTAL_MASS_ID))
       {
          parmType = GetParameterType(parmOrder[i]);
+         
          // Handle StringArray parameters separately
          if (parmType != Gmat::STRINGARRAY_TYPE)
          {
@@ -2663,3 +2694,5 @@ void Spacecraft::BuildElementLabelMap()
       elementLabelMap["DECV"] = "SphericalRADEC";
    }
 }
+
+   
