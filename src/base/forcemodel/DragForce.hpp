@@ -32,8 +32,8 @@
 class DragForce : public PhysicalModel
 {
 public:
-        DragForce(const std::string &name = "");
-        virtual ~DragForce();
+    DragForce(const std::string &name = "");
+    virtual ~DragForce();
  
     DragForce(const DragForce& df); 
     DragForce&          operator=(const DragForce& df); 
