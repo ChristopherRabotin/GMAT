@@ -66,8 +66,12 @@ FiniteThrust::~FiniteThrust()
  */
 //------------------------------------------------------------------------------
 FiniteThrust::FiniteThrust(const FiniteThrust& ft) :
-   PhysicalModel        (ft)
+   PhysicalModel          (ft),
+   burnNames              (ft.burnNames),
+   mySpacecraft           (ft.mySpacecraft)
 {
+	burns.clear();
+	scIndices.clear();
 }
 
 
@@ -86,8 +90,14 @@ FiniteThrust& FiniteThrust::operator=(const FiniteThrust& ft)
 {
    if (this == &ft)
       return *this;
-      
+        
+   PhysicalModel::operator=(ft);
+   
+   burnNames    = ft.burnNames;
    mySpacecraft = ft.mySpacecraft;
+   mySpacecraft = ft.mySpacecraft;
+   burns.clear();
+	scIndices.clear();
    spacecraft->clear();
       
    return *this;
@@ -105,7 +115,7 @@ FiniteThrust& FiniteThrust::operator=(const FiniteThrust& ft)
 //------------------------------------------------------------------------------
 GmatBase* FiniteThrust::Clone() const
 {
-   return new FiniteThrust(*this);
+   return (new FiniteThrust(*this));
 }
 
 
