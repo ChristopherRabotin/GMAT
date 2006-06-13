@@ -145,6 +145,9 @@ DragForce::DragForce(const DragForce& df) :
    density                 (NULL),
    prefactor               (NULL),
    firedOnce               (false),
+   satCount                (df.satCount),
+   dragBody                (df.dragBody),
+   dragState               (NULL),
    //bodyName                (df.bodyName),
    dataType                (df.dataType),
    fluxFile                (df.fluxFile),
@@ -176,6 +179,10 @@ DragForce::DragForce(const DragForce& df) :
    angVel[2]      = 7.29211585530e-5;
 
    ap = CalculateAp(kp);
+   
+   area.clear();
+   mass.clear();
+   dragCoeff.clear();
 }
 
 
@@ -196,7 +203,6 @@ DragForce& DragForce::operator=(const DragForce& df)
       return *this;
         
    PhysicalModel::operator=(df);
-   firedOnce = false;
 
    sun                   = NULL;
    centralBody           = NULL;
@@ -208,12 +214,36 @@ DragForce& DragForce::operator=(const DragForce& df)
    prefactor             = NULL;
    firedOnce             = false;
    //bodyName              = df.bodyName;
+   satCount              = df.satCount;
+   dragBody              = df.dragBody;
+   dragState             = df.dragState;
    dataType              = df.dataType;
    fluxFile              = df.fluxFile;
    fluxF107              = df.fluxF107;
    fluxF107A             = df.fluxF107A;
    kp                    = df.kp;
    ap                    = CalculateAp(kp);
+   
+      dimension = df.dimension;
+
+   /// @todo Remove hard coded central body parms in DragForce
+   sunLoc[0] = 138276412034.25;
+   sunLoc[1] = -71626341186.98;
+   sunLoc[2] =    119832241.16;
+    
+   cbLoc[0]  = 0.0;
+   cbLoc[1]  = 0.0;
+   cbLoc[2]  = 0.0;
+    
+   angVel[0]      = 0.0;
+   angVel[1]      = 0.0;
+   angVel[2]      = 7.29211585530e-5;
+
+   ap = CalculateAp(kp);
+   
+   area.clear();
+   mass.clear();
+   dragCoeff.clear();
 
    return *this;
 }

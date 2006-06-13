@@ -191,28 +191,38 @@ ForceModel::~ForceModel()
  */
 //------------------------------------------------------------------------------
 ForceModel::ForceModel(const ForceModel& fdf) :
-   PhysicalModel     (fdf),
-   previousState     (fdf.previousState),
-   estimationMethod  (fdf.estimationMethod),
-   normType          (fdf.normType),
-   parametersSetOnce (false),
-   centralBodyName   (fdf.centralBodyName),
+   PhysicalModel              (fdf),
+   previousState              (fdf.previousState),
+   estimationMethod           (fdf.estimationMethod),
+   normType                   (fdf.normType),
+   parametersSetOnce          (false),
+   centralBodyName            (fdf.centralBodyName),
    forceMembersNotInitialized (true),
-   modelEpochId      (-1),
+   modelEpochId               (-1),
 //    rawState         (NULL),
-   j2kBodyName       (fdf.j2kBodyName),
-   j2kBody           (NULL),
-   earthEq           (NULL),
-   earthFixed        (NULL)
+   j2kBodyName                (fdf.j2kBodyName),
+   j2kBody                    (NULL),
+   earthEq                    (NULL),
+   earthFixed                 (NULL)
 {
    satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
    satIds[5] = satIds[6] = -1;
 
-   numForces = fdf.numForces;
-   stateSize = fdf.stateSize;
-   dimension = fdf.dimension;
-   currentForce = fdf.currentForce;
+   numForces           = fdf.numForces;
+   stateSize           = fdf.stateSize;
+   dimension           = fdf.dimension;
+   currentForce        = fdf.currentForce;
+   forceTypeNames      = fdf.forceTypeNames;
+   previousTime        = fdf.previousTime;
+   transientForceNames = fdf.transientForceNames;
+   forceReferenceNames = fdf.forceReferenceNames;
+   
    parameterCount = ForceModelParamCount;
+   
+   spacecraft.clear();
+   scriptAliases.clear();
+   forceList.clear();
+   InternalCoordinateSystems.clear();
 
    // Copy the forces.  May not work -- the copy constructors need to be checked
    for (std::vector<PhysicalModel *>::const_iterator pm = fdf.forceList.begin();
@@ -240,20 +250,32 @@ ForceModel& ForceModel::operator=(const ForceModel& fdf)
    satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
    satIds[5] = satIds[6] = -1;
 
-   numForces       = fdf.numForces;
-   stateSize       = fdf.stateSize;
-   dimension       = fdf.dimension;
-   currentForce    = fdf.currentForce;
-   parameterCount  = ForceModelParamCount;
-   centralBodyName = fdf.centralBodyName;
-   j2kBodyName     = fdf.j2kBodyName;
-   j2kBody         = NULL;
-   earthEq         = NULL;
-   earthFixed      = NULL; 
+   numForces           = fdf.numForces;
+   stateSize           = fdf.stateSize;
+   dimension           = fdf.dimension;
+   currentForce        = fdf.currentForce;
+   forceTypeNames      = fdf.forceTypeNames;
+   previousTime        = fdf.previousTime;
+   previousState       = fdf.previousState;
+   estimationMethod    = fdf.estimationMethod;
+   normType            = fdf.normType;
+   transientForceNames = fdf.transientForceNames;
+   forceReferenceNames = fdf.forceReferenceNames;
+   parametersSetOnce   = false;
+   modelEpochId        = -1;
    
-   estimationMethod  = fdf.estimationMethod;
-   normType          = fdf.normType;
-   parametersSetOnce = false;
+   parameterCount      = ForceModelParamCount;
+   centralBodyName     = fdf.centralBodyName;
+   j2kBodyName         = fdf.j2kBodyName;
+   j2kBody             = NULL;
+   earthEq             = NULL;
+   earthFixed          = NULL; 
+   forceMembersNotInitialized = fdf.forceMembersNotInitialized;
+   
+   spacecraft.clear();
+   scriptAliases.clear();
+   forceList.clear();
+   InternalCoordinateSystems.clear();
    
    // Copy the forces.  May not work -- the copy constructors need to be checked
    for (std::vector<PhysicalModel *>::const_iterator pm = fdf.forceList.begin();
