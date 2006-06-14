@@ -270,6 +270,7 @@ public:
    bool InterpretScript(std::istringstream *ss, bool clearObjs);
    bool SaveScript(const std::string &scriptFileName,
                    Gmat::WriteMode mode = Gmat::SCRIPTING);
+   std::string GetScript(Gmat::WriteMode mode = Gmat::SCRIPTING);
    Integer RunScript(Integer sandboxNum = 1);
    
 private:

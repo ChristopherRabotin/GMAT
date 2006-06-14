@@ -210,6 +210,8 @@ public:
    bool InterpretScript(const std::string &scriptFilename);
    bool SaveScript(const std::string &scriptFilename,
                    Gmat::WriteMode mode = Gmat::SCRIPTING);
+   std::string GetScript(Gmat::WriteMode mode = Gmat::SCRIPTING); //loj: 6/12/06 added
+   
    Integer RunScript(Integer sandboxNum = 1);
 
    // GUI control

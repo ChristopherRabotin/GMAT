@@ -225,6 +225,9 @@ void Moderator::Finalize()
    MessageInterface::ShowMessage("Moderator is deleting core engine...\n");
    
    #if DEBUG_FINALIZE
+   GmatCommand *cmd = GetNextCommand();
+   MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
+   MessageInterface::ShowMessage(GetScript().c_str());
    MessageInterface::ShowMessage("deleting files\n");
    #endif
    
@@ -3127,7 +3130,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
    if (showFinalState)
    {
       GmatCommand *cmd = GetNextCommand();
-      //MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
+      MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
       GmatCommand *lastCmd = GmatCommandUtil::GetLastCommand(cmd);
       
       MessageInterface::ShowMessage("\n========== Final State ==========\n");
@@ -3377,6 +3380,7 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
    return status;
 }
 
+
 //------------------------------------------------------------------------------
 // bool SaveScript(const std::string &scriptFileName,
 //                 Gmat::WriteMode mode = Gmat::SCRIPTING)
@@ -3412,6 +3416,46 @@ bool Moderator::SaveScript(const std::string &scriptFileName, Gmat::WriteMode mo
       return false;
    }
 }
+
+
+//------------------------------------------------------------------------------
+// std::string GetScript(Gmat::WriteMode mode = Gmat::SCRIPTING)
+//------------------------------------------------------------------------------
+/**
+ * Returns built scripts from objects
+ *
+ * @param <writeMode> write mode object(one of Gmat::SCRIPTING, Gmat::MATLAB_STRUCT)
+ *
+ * @return built scripts from objects
+ */
+//------------------------------------------------------------------------------
+std::string Moderator::GetScript(Gmat::WriteMode mode)
+{
+   //MessageInterface::ShowMessage("Moderator::GetScript() mode: %d\n", mode);
+   
+   try
+   {
+      std::stringstream os;
+      theScriptInterpreter->SetOutStream(&os);
+      
+      if (theScriptInterpreter->Build(mode))
+      {
+         return os.str();
+      }
+      else
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, "Unable to build script from objects\n");
+         return "";
+      }
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      return false;
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // Integer RunScript(Integer sandboxNum = 1)

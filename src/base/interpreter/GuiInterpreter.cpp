@@ -1159,6 +1159,21 @@ bool GuiInterpreter::SaveScript(const std::string &scriptFilename,
 
 
 //------------------------------------------------------------------------------
+// std::string SaveScript(Gmat::WriteMode mode)
+//------------------------------------------------------------------------------
+/**
+ * Returns Built scripts from objects
+ *
+ * @return built scripts from objects
+ */
+//------------------------------------------------------------------------------
+std::string GuiInterpreter::GetScript(Gmat::WriteMode mode)
+{
+   return moderator->GetScript(mode);
+}
+
+
+//------------------------------------------------------------------------------
 // Integer RunScript(Integer sandboxNum)
 //------------------------------------------------------------------------------
 /**
