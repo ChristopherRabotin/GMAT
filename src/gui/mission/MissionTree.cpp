@@ -27,11 +27,13 @@
 
 #include "MissionTree.hpp"
 #include "MissionTreeItemData.hpp"
+#include "ViewTextFrame.hpp"
 
 #include "GmatAppData.hpp"
 #include "GmatMainFrame.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_MISSION_TREE_SHOW_CMD 1
 //#define DEBUG_MISSION_TREE 1
 //#define DEBUG_MISSION_TREE_CHILD 1
 //#define DEBUG_MISSION_TREE_FIND 2
@@ -74,6 +76,7 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    
    EVT_MENU(POPUP_RUN, MissionTree::OnRun)
    EVT_MENU(POPUP_DELETE, MissionTree::OnDelete)
+   EVT_MENU(POPUP_SHOW_SCRIPT, MissionTree::OnShowScript)
 
 END_EVENT_TABLE()
 
@@ -191,7 +194,7 @@ void MissionTree::InitializeCounter()
 //------------------------------------------------------------------------------
 void MissionTree::UpdateCommand()
 {
-   #if DEBUG_MISSION_TREE
+   #if DEBUG_MISSION_TREE_SHOW_CMD
    MessageInterface::ShowMessage("MissionTree::UpdateCommand() entered\n");
    ShowCommands("InUpdateCommand()");
    #endif
@@ -326,7 +329,7 @@ void MissionTree::ExpandChildCommand(wxTreeItemId parent, GmatCommand *cmd,
 //------------------------------------------------------------------------------
 void MissionTree::AppendCommand(const wxString &cmdName)
 {
-   #if DEBUG_MISSION_TREE
+   #if DEBUG_MISSION_TREE_SHOW_CMD
    ShowCommands("Before Append: " + cmdName);
    #endif
    
@@ -403,7 +406,7 @@ void MissionTree::AppendCommand(const wxString &cmdName)
       Expand(node);
    }
    
-   #if DEBUG_MISSION_TREE
+   #if DEBUG_MISSION_TREE_SHOW_CMD
    ShowCommands("After Append: " + cmdName);
    #endif
 }
@@ -476,7 +479,7 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
 //------------------------------------------------------------------------------
 void MissionTree::InsertCommand(const wxString &cmdName)
 {
-   #if DEBUG_MISSION_TREE
+   #if DEBUG_MISSION_TREE_SHOW_CMD
    ShowCommands("Before Insert: " + cmdName);
    #endif
    
@@ -536,7 +539,7 @@ void MissionTree::InsertCommand(const wxString &cmdName)
       }
    }
    
-   #if DEBUG_MISSION_TREE
+   #if DEBUG_MISSION_TREE_SHOW_CMD
    ShowCommands("After Insert: " + cmdName);
    #endif
 }
@@ -982,6 +985,9 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       menu.Enable(POPUP_RENAME, FALSE);
       menu.AppendSeparator();
       menu.Append(POPUP_RUN, wxT("Run"));
+      //loj: 6/12/06 added to show script
+      menu.AppendSeparator();
+      menu.Append(POPUP_SHOW_SCRIPT, wxT("Show Script"));
    }
    else
    {
@@ -1342,6 +1348,23 @@ void MissionTree::OnDelete(wxCommandEvent &event)
 void MissionTree::OnRun(wxCommandEvent &event)
 {
    theGuiInterpreter->RunMission();
+}
+
+
+//---------------------------------------------------------------------------
+// void MissionTree::OnShowScript()
+//--------------------------------------------------------------------------
+void MissionTree::OnShowScript(wxCommandEvent &event)
+{
+   std::string str = theGuiInterpreter->GetScript();
+
+   ViewTextFrame *vtf =
+      new ViewTextFrame(GmatAppData::GetMainFrame(), _T("Show Script"),
+       50, 50, 800, 500, "Temporary");
+   
+   vtf->AppendText(str.c_str());
+   vtf->Show(true);
+   
 }
 
 

@@ -105,9 +105,9 @@ private:
    void OnAddCommand(wxCommandEvent &event);
    void OnInsertCommand(wxCommandEvent &event);
       
-   void OnRun(wxCommandEvent &event);
-   
    void OnDelete(wxCommandEvent &event);
+   void OnRun(wxCommandEvent &event);
+   void OnShowScript(wxCommandEvent &event);
    
    void OnOpen(wxCommandEvent &event);
    void OnClose(wxCommandEvent &event);
@@ -194,6 +194,7 @@ private:
       POPUP_VIEW_GOALS, 
       
       POPUP_RUN,
+      POPUP_SHOW_SCRIPT,
       
    };
 };
