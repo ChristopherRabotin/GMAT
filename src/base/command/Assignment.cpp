@@ -747,6 +747,7 @@ bool Assignment::Execute()
       }
 
       #ifdef DEBUG_PARM_ASSIGNMENT
+      if (!isVariable)
          MessageInterface::ShowMessage("Assignment::Execute Parameter %s has "
             "type %s\n", parmName.c_str(),
             parmOwner->GetParameterTypeString(parmID).c_str());
@@ -760,9 +761,13 @@ bool Assignment::Execute()
             break;
                
          case Gmat::REAL_TYPE:
-            #ifdef DEBUG_ASSIGNMENT
+            #ifdef DEBUG_PARM_ASSIGNMENT
+            if (!isVariable)
                MessageInterface::ShowMessage("Setting %s on %s to %lf\n", 
                   parmOwner->GetParameterText(parmID).c_str(), 
+                  parmOwner->GetName().c_str(), EvaluateRHS());
+            else
+               MessageInterface::ShowMessage("Setting %s to %lf\n", 
                   parmOwner->GetName().c_str(), EvaluateRHS());
             #endif
             if (isVariable)
