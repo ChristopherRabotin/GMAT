@@ -142,16 +142,17 @@ bool MathParser::IsEquation(const std::string &str)
    bool isEq = false;
    std::string left, right;
    Real rval;
-
+   UnsignedInt opIndex;
+   
    // If it is just a number, return false
    if (GmatStringUtil::ToDouble(str, &rval))
    {
       isEq = false;
    }
-   else if (GetFunction(MATH_FUNCTION, str, left) != "" ||
-            GetFunction(MATRIX_FUNC, str, left) != "" ||
-            GetFunction(UNIT_CONVERSION, str, left) != "" ||
-            FindOperator(str, 0, left, right) != "")
+   else if (GetFunctionName(MATH_FUNCTION, str, left) != "" ||
+            GetFunctionName(MATRIX_FUNC, str, left) != "" ||
+            GetFunctionName(UNIT_CONVERSION, str, left) != "" ||
+            FindOperator(str, 0, left, right, opIndex) != "")
    {
       isEq = true;
    }
@@ -420,7 +421,11 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
    }
 
    // if ( is part of fuction, just return first parenthesis
-   if (IsParenPartOfFunction(str[index1-1]))
+   //if (IsParenPartOfFunction(str[index1-1]))
+   std::string substr = str.substr(0, index1);
+   //MessageInterface::ShowMessage("===> substr=%s\n", substr.c_str());
+
+   if (IsParenPartOfFunction(substr))
    {
       // find match closing parenthesis ')'
       UnsignedInt index2 = FindMatchingParen(str, index1);
@@ -432,17 +437,35 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
           index1, index2);
       #endif
       
-      // if char is ')'
+      // if last char is ')'
       if (index2 == str.size()-1)
       {
          // find math function
-         op = GetFunction(MATH_FUNCTION, str, left);
+         op = GetFunctionName(MATH_FUNCTION, str, left);
          if (op == "")
-            op = GetFunction(MATRIX_FUNC, str, left);
+            op = GetFunctionName(MATRIX_FUNC, str, left);
          if (op == "")
-            op = GetFunction(UNIT_CONVERSION, str, left);
+            op = GetFunctionName(UNIT_CONVERSION, str, left);
       }
 
+      // See if there is an operator before this function
+      UnsignedInt opIndex;
+      std::string op1, left1, right1;
+      op1 = FindOperator(str, 0, left1, right1, opIndex);
+      if (op1 != "" && opIndex != str.npos)
+      {
+         if (opIndex < index1)
+         {
+            // return blank for next parse
+            #if DEBUG_PARENTHESIS
+            MessageInterface::ShowMessage("==> found operator before function\n");
+            #endif
+            
+            FillItems(items, "", "", "");
+            return items;
+         }
+      }
+      
       // handle special atan2(y,x) function
       if (op == "atan2")
       {
@@ -454,8 +477,10 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
          right = str.substr(comma+1, index2-comma-1);
       }
       else
+      {
          left = str.substr(index1+1, index2-index1-1);
-      
+      }
+            
       FillItems(items, op, left, right);
       
       #if DEBUG_PARENTHESIS
@@ -494,7 +519,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       FillItems(items, op, left, right);
       
       #if DEBUG_PARENTHESIS
-      WriteItems("==> MathParser::ParseParenthesis(): complete parenthesis found."
+      WriteItems("MathParser::ParseParenthesis() complete parenthesis found."
                  " returning ", items);
       #endif
       
@@ -516,21 +541,42 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
          return items;
       }
    }
-   
-   op = FindOperator(str, index2, left, right);
+
+   #if DEBUG_PARENTHESIS
+   MessageInterface::ShowMessage
+      ("MathParser::ParseParenthesis() str=%s, index2=%d, left=%s, right=%s\n",
+       str.c_str(), index2, left.c_str(), right.c_str());
+   #endif
+
+   UnsignedInt opIndex;
+   op = FindOperator(str, index2, left, right, opIndex);
 
    if (op == "")
    {
       bool opFound;
       op = GetOperatorName(str.substr(index1-1, 1), opFound);
-      left = str.substr(0, index1-1);
-      right = str.substr(index1, str.npos);
-
-      // to handle -(...)
-      if (left == "" && op == "Subtract")
+      if (opFound)
       {
-         op = "Negate";
-         left = right;
+         left = str.substr(0, index1-1);
+         right = str.substr(index1, str.npos);
+
+         // to handle -(...)
+         if (left == "" && op == "Subtract")
+         {
+            op = "Negate";
+            left = right;
+            right = "";
+         }
+      }
+      else
+      {
+         #if DEBUG_PARENTHESIS
+         MessageInterface::ShowMessage
+            ("MathParser::ParseParenthesis() operator not found\n");
+         #endif
+         
+         op = "";
+         left = "";
          right = "";
       }
    }
@@ -548,10 +594,12 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
 
 //------------------------------------------------------------------------------
 // std::string FindOperator(const std::string &str, UnsignedInt start,
-//                          std::string &left, std::string &right)
+//                          std::string &left, std::string &right,
+//                          UnsignedInt &opIndex)
 //------------------------------------------------------------------------------
 std::string MathParser::FindOperator(const std::string &str, UnsignedInt start,
-                                     std::string &left, std::string &right)
+                                     std::string &left, std::string &right,
+                                     UnsignedInt &opIndex)
 {
    #if DEBUG_OPERATOR
    MessageInterface::ShowMessage
@@ -597,12 +645,14 @@ std::string MathParser::FindOperator(const std::string &str, UnsignedInt start,
       right = str.substr(index+1, str.size()-index);
    }
    
+   opIndex = index;
+   
    #if DEBUG_PARENTHESIS
    MessageInterface::ShowMessage
-      ("MathParser::FindOperator() returning op=%s, left=%s, right=%s\n",
-       op.c_str(), left.c_str(), right.c_str());
+      ("MathParser::FindOperator() returning op=%s, left=%s, right=%s, opIndex=%d\n",
+       op.c_str(), left.c_str(), right.c_str(), opIndex);
    #endif
-   
+
    return op;
    
 }
@@ -1076,7 +1126,7 @@ StringArray MathParser::ParseMathFunctions(const std::string &str)
    std::string left;
    
    // find first math function
-   std::string fnName = GetFunction(MATH_FUNCTION, str, left);
+   std::string fnName = GetFunctionName(MATH_FUNCTION, str, left);
 
    if (fnName == "")
    {
@@ -1111,7 +1161,7 @@ StringArray MathParser::ParseMatrixOps(const std::string &str)
    std::string left;
    
    // find matrix function
-   std::string fnName = GetFunction(MATRIX_FUNC, str, left);
+   std::string fnName = GetFunctionName(MATRIX_FUNC, str, left);
 
    if (fnName == "")
    {
@@ -1173,7 +1223,7 @@ StringArray MathParser::ParseUnitConversion(const std::string &str)
    std::string left;
    
    // find first math function
-   std::string fnName = GetFunction(UNIT_CONVERSION, str, left);
+   std::string fnName = GetFunctionName(UNIT_CONVERSION, str, left);
 
    if (fnName == "")
       FillItems(items, "", "", "");
@@ -1188,32 +1238,70 @@ StringArray MathParser::ParseUnitConversion(const std::string &str)
 }
 
 
+// //------------------------------------------------------------------------------
+// // bool IsThisLastCharOfFunction(char ch, const std::string list[],
+// //                              UnsignedInt count)
+// //------------------------------------------------------------------------------
+// bool MathParser::IsThisLastCharOfFunction(char ch, const std::string list[],
+//                                           UnsignedInt count)
+// {
+//    for (UnsignedInt i=0; i<count; i++)
+//    {
+//       int last = list[i].size()-1;
+//       if (ch == list[i][last])
+//          return true;
+//    }
+
+//    return false;
+// }
+
+
 //------------------------------------------------------------------------------
-// bool IsThisLastCharOfFunction(char ch, const std::string list[],
-//                              UnsignedInt count)
+// bool HasFunctionName(const std::string &str, const std::string list[],
+//                      UnsignedInt count)
 //------------------------------------------------------------------------------
-bool MathParser::IsThisLastCharOfFunction(char ch, const std::string list[],
-                                          UnsignedInt count)
+bool MathParser::HasFunctionName(const std::string &str, const std::string list[],
+                                 UnsignedInt count)
 {
    for (UnsignedInt i=0; i<count; i++)
    {
-      int last = list[i].size()-1;
-      if (ch == list[i][last])
+      if (str.find(list[i]) != str.npos)
          return true;
    }
 
+   // Try Capitalized function name
+   for (UnsignedInt i=0; i<count; i++)
+   {
+      if (str.find(GmatStringUtil::Capitalize(list[i])) != str.npos)
+         return true;
+   }
+   
    return false;
 }
 
 
+// //------------------------------------------------------------------------------
+// // bool IsParenPartOfFunction(char lastChar)
+// //------------------------------------------------------------------------------
+// bool MathParser::IsParenPartOfFunction(char lastChar)
+// {
+//    if (IsThisLastCharOfFunction(lastChar, MATH_FUNC_LIST, MathFuncCount) ||
+//        IsThisLastCharOfFunction(lastChar, MATRIX_FUNC_LIST, MatrixFuncCount) ||
+//        IsThisLastCharOfFunction(lastChar, UNIT_CONV_LIST, UnitConvCount))
+//       return true;
+
+//    return false;
+// }
+
+
 //------------------------------------------------------------------------------
-// bool IsParenPartOfFunction(char lastChar)
+// bool IsParenPartOfFunction(const std::string &str)
 //------------------------------------------------------------------------------
-bool MathParser::IsParenPartOfFunction(char lastChar)
+bool MathParser::IsParenPartOfFunction(const std::string &str)
 {
-   if (IsThisLastCharOfFunction(lastChar, MATH_FUNC_LIST, MathFuncCount) ||
-       IsThisLastCharOfFunction(lastChar, MATRIX_FUNC_LIST, MatrixFuncCount) ||
-       IsThisLastCharOfFunction(lastChar, UNIT_CONV_LIST, UnitConvCount))
+   if (HasFunctionName(str, MATH_FUNC_LIST, MathFuncCount) ||
+       HasFunctionName(str, MATRIX_FUNC_LIST, MatrixFuncCount) ||
+       HasFunctionName(str, UNIT_CONV_LIST, UnitConvCount))
       return true;
 
    return false;
@@ -1221,15 +1309,16 @@ bool MathParser::IsParenPartOfFunction(char lastChar)
 
 
 //------------------------------------------------------------------------------
-// std::string GetFunction(UnsignedInt functionType, const std::string &str,
-//                         std::string &left)
+// std::string GetFunctionName(UnsignedInt functionType, const std::string &str,
+//                             std::string &left)
 //------------------------------------------------------------------------------
-std::string MathParser::GetFunction(UnsignedInt functionType, const std::string &str,
-                                    std::string &left)
+std::string MathParser::GetFunctionName(UnsignedInt functionType,
+                                        const std::string &str,
+                                        std::string &left)
 {
    #if DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("MathParser::GetFunction() functionType=%d, str=%s\n", functionType,
+      ("MathParser::GetFunctionName() functionType=%d, str=%s\n", functionType,
        str.c_str());
    #endif
    
@@ -1258,7 +1347,7 @@ std::string MathParser::GetFunction(UnsignedInt functionType, const std::string 
    
    #if DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("MathParser::GetFunction() fnName=%s, left=%s\n", fnName.c_str(),
+      ("MathParser::GetFunctionName() fnName=%s, left=%s\n", fnName.c_str(),
        left.c_str());
    #endif
    

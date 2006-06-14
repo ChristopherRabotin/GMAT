@@ -67,13 +67,16 @@ private:
    StringArray ParseMathFunctions(const std::string &str);
    StringArray ParseUnitConversion(const std::string &str);
 
-   bool IsThisLastCharOfFunction(char ch, const std::string list[],
-                                 UnsignedInt count);
-   bool IsParenPartOfFunction(char lastChar);
-   std::string GetFunction(UnsignedInt functionType, const std::string &str,
-                           std::string &leftStr);
+//    bool IsThisLastCharOfFunction(char ch, const std::string list[],
+//                                  UnsignedInt count);
+   bool HasFunctionName(const std::string &str, const std::string list[],
+                        UnsignedInt count);
+//    bool IsParenPartOfFunction(char lastChar);
+   bool IsParenPartOfFunction(const std::string &str);
+   std::string GetFunctionName(UnsignedInt functionType, const std::string &str,
+                               std::string &leftStr);
    std::string FindOperator(const std::string &str, UnsignedInt start,
-                             std::string &left, std::string &right);
+                            std::string &left, std::string &right, UnsignedInt &opIndex);
    UnsignedInt FindSubtract(const std::string &str, UnsignedInt start);
    std::string GetOperatorName(const std::string &op, bool &opFound);
    void BuildFunction(const std::string &str, const std::string list[],
