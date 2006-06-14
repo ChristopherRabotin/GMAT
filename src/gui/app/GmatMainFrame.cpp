@@ -963,9 +963,10 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
    }
 
    CloseAllChildren(true, true);
-   
-   theGuiInterpreter->ClearResource();
-   theGuiInterpreter->ClearCommandSeq();
+
+   // Let Moderator::Finalize() clear all resource and commands (loj: 6/13/06)
+//    theGuiInterpreter->ClearResource();
+//    theGuiInterpreter->ClearCommandSeq();
    
    event.Skip();
 }
