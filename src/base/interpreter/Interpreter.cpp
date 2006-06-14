@@ -1150,9 +1150,45 @@ bool Interpreter::AssembleReportCommand(const StringArray topLevel,
    
    GmatBase *object = NULL;
    Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT;
-   StringTokenizer st(line, " ;");
+   std::string line1;
+   UnsignedInt index1 = 0;
+   UnsignedInt closeParen;
+   UnsignedInt size = line.size();
+
+   // Removed extra space in the array indexing, between ()
+   while (index1 < size)
+   {
+      if (line[index1] == '(')
+      {
+         line1.push_back(line[index1]);
+         closeParen = line.find(')', index1);
+         // find close paren and copy non-blank char
+         for (UnsignedInt j=index1+1; j<=closeParen; j++)
+            if (line[j] != ' ')
+               line1.push_back(line[j]);
+         
+         index1 = closeParen+1;
+      }
+      else
+      {
+         line1.push_back(line[index1++]);
+      }
+   }
+   
+   #ifdef DEBUG_TOKEN_PARSING
+   MessageInterface::ShowMessage
+      ("Interpreter::AssembleReportCommand() line1.size=%d\n   line1=%s\n",
+       line1.size(), line1.c_str());
+   #endif
+   
+   StringTokenizer st(line1, " ;");
    StringArray params = st.GetAllTokens();
    Integer parmNumber = 0;
+   
+   #ifdef DEBUG_TOKEN_PARSING
+   MessageInterface::ShowMessage
+      ("Interpreter::AssembleReportCommand() params.size()=%d\n", params.size());
+   #endif
    
    for (UnsignedInt i=1; i<params.size(); i++)
    {
