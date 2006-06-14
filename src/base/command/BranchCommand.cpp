@@ -23,8 +23,8 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_BRANCHCOMMAND_DEALLOCATION
-
 //#define DEBUG_BRANCHCOMMAND_EXECUTION
+//#define DEBUG_BRANCHCOMMAND_GEN_STRING
 
 //------------------------------------------------------------------------------
 // public methods
@@ -611,21 +611,51 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
 
    std::string newPrefix = "   " + prefix;
 
+   #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
+   MessageInterface::ShowMessage
+      ("BranchCommand::GetGeneratingString() this=%s, mode=%d, prefix=%s, "
+       "newPrefix=%s, useName=%s\n", this->GetTypeName().c_str(), mode,
+       prefix.c_str(), newPrefix.c_str(), useName.c_str());
+   #endif
+   
+   bool inTextMode = false;
    // Loop through the branches, appending the strings from commands in each
    for (Integer which = 0; which < (Integer)branch.size(); ++which)
    {
       current = branch[which];
       while ((current != NULL) && (current != this))
       {
-         fullString += "\n";
-         if (current->GetNext() != this)
-            fullString += current->GetGeneratingString(mode, newPrefix, useName);
-         else // current is the End command for this branch command
-            fullString += current->GetGeneratingString(mode, prefix, useName);
+         #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
+         MessageInterface::ShowMessage
+            ("BranchCommand::GetGeneratingString() current=%s, mode=%d, "
+             "inTextMode=%d\n", current->GetTypeName().c_str(), mode, inTextMode);
+         #endif
+         
+         // BeginScript writes its own children, so write if not TextMode
+         if (!inTextMode)
+         {
+            fullString += "\n";            
+            if (current->GetNext() != this)
+               fullString += current->GetGeneratingString(mode, newPrefix, useName);
+            else // current is the End command for this branch command
+                  fullString += current->GetGeneratingString(mode, prefix, useName);
+         }
+         
+         if (current->GetTypeName() == "BeginScript")
+            inTextMode = true;
+         if (current->GetTypeName() == "EndScript")
+            inTextMode = false;
+         
          current = current->GetNext();
       }
    }
    
+   #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
+   MessageInterface::ShowMessage
+      ("BranchCommand::GetGeneratingString() return fullString=\n   %s\n",
+       fullString.c_str());
+   #endif
+
    return fullString;
 }
 
