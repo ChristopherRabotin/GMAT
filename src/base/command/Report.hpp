@@ -50,6 +50,10 @@ public:
                                   const Integer index);
 
    virtual GmatBase* Clone() const;
+   virtual const std::string&
+                     GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                                         const std::string &prefix = "",
+                                         const std::string &useName = "");
    
    bool              Initialize();
    virtual bool      Execute();

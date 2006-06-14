@@ -204,6 +204,21 @@ GmatBase* Report::Clone() const
 }
 
 
+//------------------------------------------------------------------------------
+// const std::string& GetGeneratingString(Gmat::WriteMode mode,
+//                                        const std::string &prefix,
+//                                        const std::string &useName)
+//------------------------------------------------------------------------------
+const std::string& Report::GetGeneratingString(Gmat::WriteMode mode,
+                                               const std::string &prefix,
+                                               const std::string &useName)
+{
+   std::string gen = prefix;
+   gen = gen + GmatStringUtil::Trim(generatingString, GmatStringUtil::BOTH);
+   generatingString = gen;
+   return generatingString;
+}
+
 
 //------------------------------------------------------------------------------
 // bool Initialize()
