@@ -1139,6 +1139,13 @@ Rvector6 CelestialBody::GetLowFidelityElements() const
    return lfKepler;
 }
 
+//------------------------------------------------------------------------------
+// Gmat::RotationDataSource GetRotationDataSource() const
+//------------------------------------------------------------------------------
+Gmat::RotationDataSource CelestialBody::GetRotationDataSource() const
+{
+   return rotationSrc;
+}
 
 //------------------------------------------------------------------------------
 //  bool SetBodyType(Gmat::BodyType bType)
@@ -2375,6 +2382,7 @@ void CelestialBody::InitializeBody(std::string withBodyType)
 
    isFirstTimeMu = true;
    isFirstTimeRadius = true;
+   rotationSrc = Gmat::NOT_APPLICABLE;
 }
 
 //------------------------------------------------------------------------------

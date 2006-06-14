@@ -112,6 +112,14 @@ namespace Gmat
       "GravityField",
       "MagneticField",
    };
+   
+   enum RotationDataSource
+   {
+      DE_FILE = 0,
+      IAU_DATA,
+      NOT_APPLICABLE
+   };
+   
 };
 
 /**
@@ -177,6 +185,8 @@ public:
    // methods to get the initial epoch and keplerian elements 
    virtual A1Mjd                GetLowFidelityEpoch() const;
    virtual Rvector6             GetLowFidelityElements() const; 
+   virtual Gmat::RotationDataSource 
+                                GetRotationDataSource() const;
    
 
    // methods to return the body type, central body,
@@ -428,6 +438,9 @@ protected:
    
    /// lists of valid models
    StringArray            models[Gmat::ModelTypeCount];
+
+   /// source to use for computing rotation data
+   Gmat::RotationDataSource rotationSrc;   // 0 -> DE405,  1 -> IAU (see above)
    
    /// date and time of start of source file
    //A1Mjd                  sourceStart;      // currently unused

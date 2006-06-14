@@ -865,6 +865,7 @@ void Planet::InitializePlanet(const std::string &cBody)
    analyticMethod      = Planet::DEFAULT_ANALYTIC_METHOD;
    bodyNumber          = Planet::DEFAULT_BODY_NUMBER;
    referenceBodyNumber = Planet::DEFAULT_REF_BODY_NUMBER;
+   rotationSrc         = Gmat::IAU_DATA;
 
    if (instanceName == SolarSystem::MERCURY_NAME)      bodyIndex = MERCURY;
    else if (instanceName == SolarSystem::VENUS_NAME)   bodyIndex = VENUS;
@@ -903,6 +904,7 @@ void Planet::InitializePlanet(const std::string &cBody)
       models[Gmat::GRAVITY_FIELD].push_back("JGM3");
       models[Gmat::GRAVITY_FIELD].push_back("EGM96");
       models[Gmat::GRAVITY_FIELD].push_back("Other");
+      rotationSrc   = Gmat::NOT_APPLICABLE;
       
       // for now, magnetic field remains empty
    }

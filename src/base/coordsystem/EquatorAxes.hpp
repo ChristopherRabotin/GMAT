@@ -25,6 +25,7 @@
 #include "GmatBase.hpp"
 #include "AxisSystem.hpp"
 #include "DynamicAxes.hpp"
+#include "DeFile.hpp"
 
 class GMAT_API EquatorAxes : public DynamicAxes
 {
@@ -42,6 +43,9 @@ public:
    // method to initialize the data
    virtual bool Initialize();
    
+   virtual GmatCoordinate::ParameterUsage UsesEopFile() const;
+   virtual GmatCoordinate::ParameterUsage UsesItrfFile() const;
+
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
    virtual GmatBase*       Clone(void) const;
@@ -67,6 +71,8 @@ protected:
    //                                                DynamicAxesParamCount];
    
    virtual void CalculateRotationMatrix(const A1Mjd &atEpoch);
+
+   DeFile     *de;
 
 };
 #endif // EquatorAxes_hpp

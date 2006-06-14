@@ -26,6 +26,11 @@
 #include "TimeTypes.hpp"
 #include "TimeSystemConverter.hpp"
 
+//#define DEBUG_TODEQ_AXES
+
+#ifdef DEBUG_TODEQ_AXES
+   #include "MessageInterface.hpp"
+#endif
 
 //---------------------------------
 // static data
@@ -244,32 +249,43 @@ GmatBase* TODEqAxes::Clone() const
 //---------------------------------------------------------------------------
 void TODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
 {
+   #ifdef DEBUG_TODEQ_AXES
+      MessageInterface::ShowMessage("Entering TODEQ::Calculate with epoch = %.12f\n",
+         (Real) atEpoch.Get());
+   #endif
    Real dPsi             = 0.0;
    Real longAscNodeLunar = 0.0;
    Real cosEpsbar        = 0.0;
    
    // convert epoch (A1 MJD) to TT MJD (for calculations)
-   // 20.02.06 - arg: changed to use enum types instead of strings
-//   Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
-//                "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941);      
    Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
                 TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
                 GmatTimeUtil::JD_JAN_5_1941);      
-   //Real jdTT  = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
-   // Compute Julian centuries of TDB from the base epoch (J2000) 
-   //Real tTDB  = (jdTT - 2451545.0) / 36525.0;
    Real offset = GmatTimeUtil::JD_JAN_5_1941 - 2451545.0;
    Real tTDB  = (mjdTT + offset) / 36525.0;
    
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
-//   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
-//   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
-//                          longAscNodeLunar, cosEpsbar);
+   #ifdef DEBUG_TODEQ_AXES
+      MessageInterface::ShowMessage(
+         "In TODEQ::Calculate tTDB = %.12f and updateIntervalToUse = %.12f\n",
+         tTDB, updateIntervalToUse);
+   #endif
    
    ComputePrecessionMatrix(tTDB, atEpoch);
    ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar);
+   
+   #ifdef DEBUG_TODEQ_AXES
+      MessageInterface::ShowMessage(
+         "In TODEQ::Calculate precData = \n%.12f %.12f %.12f\n%.12f %.12f %.12f\n%.12f %.12f %.12f\n",
+         precData[0],precData[1],precData[2],precData[3],precData[4],
+         precData[5],precData[6],precData[7],precData[8]);
+      MessageInterface::ShowMessage(
+         "In TODEQ::Calculate nutData = \n%.12f %.12f %.12f\n%.12f %.12f %.12f\n%.12f %.12f %.12f\n",
+         nutData[0],nutData[1],nutData[2],nutData[3],nutData[4],
+         nutData[5],nutData[6],nutData[7],nutData[8]);
+   #endif
    
    Real PrecT[9] = {precData[0], precData[3], precData[6],
                     precData[1], precData[4], precData[7],
