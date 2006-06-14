@@ -156,9 +156,11 @@ protected:
    Integer                    numberOfLogicalOps;
    /// Arrays representing conditions
    StringArray                lhsList;
+   StringArray                lhsParamList;
    StringArray                opStrings;
    std::vector<OpType>        opList;
    StringArray                rhsList;
+   StringArray                rhsParamList;
    StringArray                logicalOpStrings;
    std::vector<LogicalOpType> logicalOpList;
    /// list of parameter objects used by the conditions

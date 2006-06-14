@@ -107,9 +107,11 @@ numberOfLogicalOps (cb.numberOfLogicalOps)
    for (i=0; i < numberOfConditions; i++)
    {
       lhsList.push_back((cb.lhsList).at(i));
+      lhsParamList.push_back((cb.lhsParamList).at(i));
       opStrings.push_back((cb.opStrings).at(i));
       opList.push_back((cb.opList).at(i));
       rhsList.push_back((cb.rhsList).at(i));
+      rhsParamList.push_back((cb.rhsParamList).at(i));
    }
    
    for (i=0; i < numberOfLogicalOps; i++)
@@ -156,16 +158,20 @@ ConditionalBranch& ConditionalBranch::operator=(const ConditionalBranch &cb)
    numberOfConditions = cb.numberOfConditions;
    numberOfLogicalOps = cb.numberOfLogicalOps;
    lhsList.clear();
+   lhsParamList.clear();
    opList.clear();
    rhsList.clear();
+   rhsParamList.clear();
    Integer i = 0;
    
    for (i=0; i < numberOfConditions; i++)
    {
       lhsList.push_back((cb.lhsList).at(i));
+      lhsParamList.push_back((cb.lhsList).at(i));
       opStrings.push_back((cb.opStrings).at(i));
       opList.push_back((cb.opList).at(i));
       rhsList.push_back((cb.rhsList).at(i));
+      rhsParamList.push_back((cb.rhsList).at(i));
    }
    
    logicalOpList.clear();
@@ -308,14 +314,14 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
    {
       opStrings.push_back(operation);
       opList.push_back(ot);
-      lhsList.push_back(newLhs);
-      rhsList.push_back(newRhs);
+      lhsList.push_back(lhs);
+      rhsList.push_back(rhs);
+      lhsParamList.push_back(newLhs);
+      rhsParamList.push_back(newRhs);
       lhsParamRows.push_back(lhsRow);
       lhsParamCols.push_back(lhsCol);
       rhsParamRows.push_back(rhsRow);
       rhsParamCols.push_back(rhsCol);
-      ////lhsList.push_back(lhs);
-      ////rhsList.push_back(rhs);
       retVal = true;
       numberOfConditions++;
    }
@@ -330,10 +336,10 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
    {
       opStrings.at(atIndex) = operation;
       opList.at(atIndex)    = ot;
-      ////lhsList.at(atIndex)   = lhs;
-      ////rhsList.at(atIndex)   = rhs;
-      lhsList.at(atIndex)   = newLhs;
-      rhsList.at(atIndex)   = newRhs;
+      lhsList.at(atIndex)   = lhs;
+      rhsList.at(atIndex)   = rhs;
+      lhsParamList.at(atIndex)   = newLhs;
+      rhsParamList.at(atIndex)   = newRhs;
       lhsParamRows.at(atIndex) = lhsRow;
       lhsParamCols.at(atIndex) = lhsCol;
       rhsParamRows.at(atIndex) = rhsRow;
@@ -424,9 +430,11 @@ bool ConditionalBranch::RemoveCondition(Integer atIndex)
       throw CommandException(
             "RemoveCondition error - condition index out of bounds.");
    lhsList.erase(lhsList.begin() + atIndex);
+   lhsParamList.erase(lhsParamList.begin() + atIndex);
    opStrings.erase(opStrings.begin() + atIndex);
    opList.erase(opList.begin() + atIndex);
    rhsList.erase(rhsList.begin() + atIndex);
+   rhsParamList.erase(rhsParamList.begin() + atIndex);
    numberOfConditions--;
    return true;
 }
@@ -721,12 +729,12 @@ std::string ConditionalBranch::GetStringParameter(const Integer id,
    errorString += " is out of bounds for ";
    if (id == LEFT_HAND_STRINGS)
    {
-      if (index < 0 || index >= (Integer) lhsList.size())
+      if (index < 0 || index >= (Integer) lhsParamList.size())
       {
          errorString += "left hand side string list.";
          throw CommandException(errorString);
       }
-      return (lhsList.at(index));
+      return (lhsParamList.at(index));
    }
    if (id == OPERATOR_STRINGS)   
    {
@@ -739,12 +747,12 @@ std::string ConditionalBranch::GetStringParameter(const Integer id,
    }
    if (id == RIGHT_HAND_STRINGS) 
    {
-      if (index < 0 || index >= (Integer) rhsList.size())
+      if (index < 0 || index >= (Integer) rhsParamList.size())
       {
          errorString += "right hand side string list.";
          throw CommandException(errorString);
       }
-      return (rhsList.at(index));
+      return (rhsParamList.at(index));
    }
    if (id == LOGICAL_OPERATORS)  
    {
@@ -785,12 +793,12 @@ bool ConditionalBranch::SetStringParameter(const Integer id,
    errorString += " is out of bounds for ";
    if (id == LEFT_HAND_STRINGS)
    {
-      if (index < 0 || index >= (Integer) lhsList.size())
+      if (index < 0 || index >= (Integer) lhsParamList.size())
       {
          errorString += "left hand side string list.";
          throw CommandException(errorString);
       }
-      lhsList.at(index) = value;
+      lhsParamList.at(index) = value;
       return true;
       //return SetStringArrayValue(id, value, index);
    }
@@ -807,12 +815,12 @@ bool ConditionalBranch::SetStringParameter(const Integer id,
    }
    if (id == RIGHT_HAND_STRINGS) 
    {
-      if (index < 0 || index >= (Integer) rhsList.size())
+      if (index < 0 || index >= (Integer) rhsParamList.size())
       {
          errorString += "right hand side string list.";
          throw CommandException(errorString);
       }
-      rhsList.at(index) = value;
+      rhsParamList.at(index) = value;
       return true;
       //return SetStringArrayValue(id, value, index);
    }
@@ -893,9 +901,9 @@ bool ConditionalBranch::SetStringParameter(const std::string &label,
 const StringArray& 
 ConditionalBranch::GetStringArrayParameter(const Integer id) const
 {
-   if (id == LEFT_HAND_STRINGS)  return lhsList;
+   if (id == LEFT_HAND_STRINGS)  return lhsParamList;
    if (id == OPERATOR_STRINGS)   return opStrings;
-   if (id == RIGHT_HAND_STRINGS) return rhsList;
+   if (id == RIGHT_HAND_STRINGS) return rhsParamList;
    if (id == LOGICAL_OPERATORS)  return logicalOpStrings;
    //if (id == PARAMETER_NAMES)  return ??;
    
@@ -957,17 +965,17 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
    bool        rightIsParm = false;
    bool        leftIsParm  = false;
    std::string theLHSParmName = "";
-   //std::string theLHSParmName = lhsList.at(which);
+   //std::string theLHSParmName = lhsParamList.at(which);
    std::string theRHSParmName = "";
 
    #ifdef DEBUG_CONDITIONS
       MessageInterface::ShowMessage(
          "ConditionalBranch::EvaluateCondition() entered; which = %d\n   "
          "LHS conditions known:\n", which);      
-      for (StringArray::iterator l = lhsList.begin(); l != lhsList.end(); ++l)
+      for (StringArray::iterator l = lhsParamList.begin(); l != lhsParamList.end(); ++l)
          MessageInterface::ShowMessage("      \"%s\"\n", l->c_str());      
       MessageInterface::ShowMessage("\n   RHS conditions known:\n");      
-      for (StringArray::iterator r = rhsList.begin(); r != rhsList.end(); ++r)
+      for (StringArray::iterator r = rhsParamList.begin(); r != rhsParamList.end(); ++r)
          MessageInterface::ShowMessage("      \"%s\"\n", r->c_str());      
       MessageInterface::ShowMessage("\n   Actual parms known:\n");
       for (std::vector<Parameter*>::iterator p = params.begin(); 
@@ -976,27 +984,27 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
             (*p)->GetName().c_str());
    #endif
    
-   char firstChar = (rhsList.at(which)).at(0);
+   char firstChar = (rhsParamList.at(which)).at(0);
    if (isalpha(firstChar))  // if not a real, assume a Parameter. How about .789?
    {
-      theRHSParmName = rhsList.at(which);
+      theRHSParmName = rhsParamList.at(which);
       rightIsParm    = true;
    }
    else
    {
-      std::istringstream rhsStr(rhsList.at(which)); 
+      std::istringstream rhsStr(rhsParamList.at(which)); 
       rhsStr >> rhsValue;
    }
    
-   firstChar = (lhsList.at(which)).at(0);
+   firstChar = (lhsParamList.at(which)).at(0);
    if (isalpha(firstChar))  // if not a real, assume a Parameter. How about .789?
    {
-      theLHSParmName = lhsList.at(which);
+      theLHSParmName = lhsParamList.at(which);
       leftIsParm     = true;
    }
    else
    {
-      std::istringstream lhsStr(lhsList.at(which)); 
+      std::istringstream lhsStr(lhsParamList.at(which)); 
       lhsStr >> lhsValue;
    }
    
@@ -1018,8 +1026,8 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
             {
                // find position of lhs parameter
                std::vector<std::string>::iterator pos;
-               pos = find (lhsList.begin(), lhsList.end(),  theLHSParmName);
-               index = distance(lhsList.begin(), pos);
+               pos = find (lhsParamList.begin(), lhsParamList.end(),  theLHSParmName);
+               index = distance(lhsParamList.begin(), pos);
                
                if (lhsParamRows[index] == -1 && lhsParamCols[index] == -1)
                   throw CommandException
@@ -1044,8 +1052,8 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
             {
                // find position of rhs parameter
                std::vector<std::string>::iterator pos;
-               pos = find (rhsList.begin(), rhsList.end(),  theRHSParmName);
-               index = distance(rhsList.begin(), pos);
+               pos = find (rhsParamList.begin(), rhsParamList.end(),  theRHSParmName);
+               index = distance(rhsParamList.begin(), pos);
                
                if (rhsParamRows[index] == -1 && rhsParamCols[index] == -1)
                   throw CommandException
@@ -1191,7 +1199,7 @@ std::string ConditionalBranch::GetConditionalString()
    
    // The first condition
    cond = lhsList[0] + " " + opStrings[0] + " " + rhsList[0];
-
+   
    for (Integer i = 1; i < numberOfConditions; i++)
    {
       cond += " " + logicalOpStrings[i-1] + " ";
