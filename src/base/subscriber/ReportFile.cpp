@@ -822,7 +822,7 @@ bool ReportFile::Distribute(int len)
       return true;
    }
    
-   if (isEndOfReceive)  // close file
+   if (isEndOfRun)  // close file
    {
       if (dstream.is_open())
          dstream.close();
@@ -899,7 +899,7 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
       
       dstream << std::endl;
       
-      if (isEndOfReceive)  // close file
+      if (isEndOfRun)  // close file
       {
          if (dstream.is_open())
             dstream.close();
