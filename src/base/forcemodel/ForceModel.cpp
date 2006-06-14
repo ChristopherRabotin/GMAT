@@ -220,7 +220,6 @@ ForceModel::ForceModel(const ForceModel& fdf) :
    parameterCount = ForceModelParamCount;
    
    spacecraft.clear();
-   scriptAliases.clear();
    forceList.clear();
    InternalCoordinateSystems.clear();
 
@@ -273,7 +272,6 @@ ForceModel& ForceModel::operator=(const ForceModel& fdf)
    forceMembersNotInitialized = fdf.forceMembersNotInitialized;
    
    spacecraft.clear();
-   scriptAliases.clear();
    forceList.clear();
    InternalCoordinateSystems.clear();
    
