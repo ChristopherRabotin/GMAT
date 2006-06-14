@@ -22,6 +22,8 @@
 
 #include "MessageInterface.hpp"
 
+//#define DEBUG_BEGIN_SCRIPT
+//#define DEBUG_BEGIN_SCRIPT_GEN_STRING
 
 //------------------------------------------------------------------------------
 //  BeginScript()
@@ -59,7 +61,7 @@ BeginScript::~BeginScript()
 BeginScript::BeginScript(const BeginScript& noop) :
     GmatCommand       (noop)
 {
-	generatingString = noop.generatingString;
+        generatingString = noop.generatingString;
 }
 
 
@@ -144,15 +146,29 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
                                                     const std::string &prefix,
                                                     const std::string &useName)
 {
-   Integer whichOne, start;
    std::stringstream gen;
+   //Integer whichOne;
+   Integer start;
    std::string indent = "   ", cmdstr;
    
-   gen << "BeginScript\n";
+   gen << prefix << "BeginScript\n";
+
+   #ifdef DEBUG_BEGIN_SCRIPT_GEN_STRING
+   MessageInterface::ShowMessage
+      ("BeginScript::GetGeneratingString() this=%s, mode=%d, prefix=%s, "
+       "useName=%s\n", this->GetTypeName().c_str(), mode, prefix.c_str(),
+       useName.c_str());
+   #endif
    
    GmatCommand *current = next;
    while (current != NULL)
    {
+      #ifdef DEBUG_BEGIN_SCRIPT_GEN_STRING
+      MessageInterface::ShowMessage
+         ("   BeginScript::GetGeneratingString() current=%s\n",
+          current->GetTypeName().c_str());
+      #endif
+      
       if (current->GetTypeName() != "EndScript")
       {
          cmdstr = current->GetGeneratingString();
@@ -160,36 +176,56 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
          while (cmdstr[start] == ' ')
             ++start;
          cmdstr = cmdstr.substr(start);
-
-         gen << indent << cmdstr << "\n";
          
-         // Handle the branches for branch commands
-         whichOne = 0;
-         GmatCommand* child = current->GetChildCommand(whichOne);
-         #ifdef DEBUG_BEGIN_SCRIPT
-            MessageInterface::ShowMessage("Command %s %s a child command.\n",
-               current->GetTypeName().c_str(),
-               ((child == NULL) ? "does not have" : "has"));
+         #ifdef DEBUG_BEGIN_SCRIPT_GEN_STRING
+         MessageInterface::ShowMessage
+            ("   BeginScript::cmdstr=\n%s\n", cmdstr.c_str());
          #endif
-         while ((child != NULL) && (child != current))
-         {
-            gen << GetChildString(indent + "   ", child, current);
-            ++whichOne;
-            child = current->GetChildCommand(whichOne);
-         }
+         
+         gen << indent << prefix << cmdstr << "\n";
 
+         //=====================================================================
+         //loj: 6/13/06 This is duplicate, branch commands has its own loop
+         //=====================================================================
+//          // Handle the branches for branch commands
+//          whichOne = 0;
+//          GmatCommand* child = current->GetChildCommand(whichOne);
+//          #ifdef DEBUG_BEGIN_SCRIPT_GEN_STRING
+//             MessageInterface::ShowMessage("Command %s %s a child command.\n",
+//                current->GetTypeName().c_str(),
+//                ((child == NULL) ? "does not have" : "has"));
+//          #endif
+            
+//          while ((child != NULL) && (child != current))
+//          {
+//             MessageInterface::ShowMessage
+//                ("      ===> BeginScript::child=%s\n", child->GetTypeName().c_str());
+//             gen << GetChildString(indent + "   ", child, current);
+//             ++whichOne;
+//             child = current->GetChildCommand(whichOne);
+//          }
+
+         
          current = current->GetNext();
+         
          if (current == NULL)
-            gen << "EndScript;\n";
+            gen << prefix << "EndScript;\n";
       }
       else
       {
-         gen << "EndScript;\n";
+         gen << prefix << "EndScript;\n";
          current = NULL;
       }
    }
-   
+
    generatingString = gen.str();
+
+   #ifdef DEBUG_BEGIN_SCRIPT_GEN_STRING
+   MessageInterface::ShowMessage
+      ("BeginScript::GetGeneratingString() return generatingString=\n%s\n",
+       generatingString.c_str());
+   #endif
+   
    return generatingString;
 }
 
