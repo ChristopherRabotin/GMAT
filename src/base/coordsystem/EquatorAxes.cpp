@@ -330,6 +330,13 @@ void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
                     res[1][0],res[1][1],res[1][2],
                     res[2][0],res[2][1],res[2][2]); 
       
+      #ifdef DEBUG_EQUATOR_AXES
+         MessageInterface::ShowMessage(
+            "In Equator::rotMatrix is set to = \n%.12f %.12f %.12f\n%.12f %.12f %.12f\n%.12f %.12f %.12f\n",
+            rotMatrix(0,0),rotMatrix(0,1),rotMatrix(0,2),
+            rotMatrix(1,0),rotMatrix(1,1),rotMatrix(1,2),
+            rotMatrix(2,0),rotMatrix(2,1),rotMatrix(2,2));
+      #endif
       // rotDotMatrix is still the default zero matrix 
       // (assume it is negligibly small)
       

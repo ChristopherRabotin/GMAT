@@ -117,7 +117,8 @@ namespace Gmat
    {
       DE_FILE = 0,
       IAU_DATA,
-      NOT_APPLICABLE
+      NOT_APPLICABLE,
+      RotationDataSrcCount
    };
    
 };
@@ -216,6 +217,7 @@ public:
    virtual bool           SetPotentialFilename(const std::string &fn);
    virtual bool           SetLowFidelityEpoch(const A1Mjd &toTime);
    virtual bool           SetLowFidelityElements(const Rvector6 &kepl);
+   virtual bool           SetRotationDataSource(Gmat::RotationDataSource src);
 
    // methods inherited from SpacePoint, that must be implemented here (and/or
    // in the derived classes
@@ -337,6 +339,7 @@ protected:
       DEGREE,
       //SIJ,
       //CIJ,
+      ROTATION_DATA_SRC,
       CelestialBodyParamCount
    };
    static const std::string PARAMETER_TEXT[CelestialBodyParamCount - SpacePointParamCount];

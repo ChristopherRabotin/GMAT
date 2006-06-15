@@ -825,20 +825,7 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
       "the rotation matrix (as array) is : %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f\n",
       rotData[0],rotData[1],rotData[2],rotData[3],rotData[4],
       rotData[5],rotData[6],rotData[7],rotData[8]);
-      //MessageInterface::ShowMessage(
-      //   "Input vector as datavec = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
-      //   tmpPos[0], tmpPos[1], tmpPos[2], tmpVel[0], tmpVel[1], tmpVel[2]);
    #endif
-   //Real  outPos[3];
-   //Real  outVel[3];
-   /*
-   const Real  rotDataT[9] = {rotData[0], rotData[3], rotData[6],
-                              rotData[1], rotData[4], rotData[7],
-                              rotData[2], rotData[5], rotData[8]};
-   const Real  rotDotDataT[9] = {rotDotData[0], rotDotData[3], rotDotData[6],
-                                 rotDotData[1], rotDotData[4], rotDotData[7],
-                                 rotDotData[2], rotDotData[5], rotDotData[8]};
-                                 */
    const Real  rotDataT[9] = {rotData[0], rotData[3], rotData[6],
                               rotData[1], rotData[4], rotData[7],
                               rotData[2], rotData[5], rotData[8]};
@@ -849,18 +836,6 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
    for (Integer p = 0; p < 3; ++p)
    {
       p3 = 3*p;
-      /*
-      outPos[p] = rotDataT[p3]   * pos[0]   + 
-                  rotDataT[p3+1] * pos[1] + 
-                  rotDataT[p3+2] * pos[2];
-      outVel[p] = (rotDotDataT[p3]    * pos[0]   + 
-                   rotDotDataT[p3+1]  * pos[1] + 
-                   rotDotDataT[p3+2]  * pos[2])
-                  +
-                  (rotDataT[p3]    * vel[0]   + 
-                   rotDataT[p3+1]  * vel[1] + 
-                   rotDataT[p3+2]  * vel[2]);
-                   */
       outState[p]   = rotDataT[p3]   * pos[0]   + 
                       rotDataT[p3+1] * pos[1] + 
                       rotDataT[p3+2] * pos[2];
@@ -872,16 +847,7 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
                        rotDataT[p3+1]  * vel[1] + 
                        rotDataT[p3+2]  * vel[2]);
    }     
-   //outState[0] = outPos[0]; 
-   //outState[1] = outPos[1]; 
-   //outState[2] = outPos[2]; 
-   //outState[3] = outVel[0]; 
-   //outState[4] = outVel[1]; 
-   //outState[5] = outVel[2]; 
    #ifdef DEBUG_CALCS
-      //MessageInterface::ShowMessage(
-      //   "Computed Output vector in ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
-      //   outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], outVel[2]);
       MessageInterface::ShowMessage(
          "Output vector from FromMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          outState[0], outState[1], outState[2], outState[3], outState[4], outState[5]);

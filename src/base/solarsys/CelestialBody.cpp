@@ -82,6 +82,7 @@ CelestialBody::PARAMETER_TEXT[CelestialBodyParamCount - SpacePointParamCount] =
    "Order",
    "Degree",
    //"SupportedAtmosModels",
+   "RotationDataSource",
 };
 
 const Gmat::ParameterType
@@ -111,6 +112,7 @@ Gmat::RVECTOR_TYPE,
 Gmat::REAL_TYPE,
 Gmat::STRING_TYPE,
 //Gmat::STRINGARRAY_TYPE,
+Gmat::INTEGER_TYPE,
 Gmat::INTEGER_TYPE,
 Gmat::INTEGER_TYPE,
 };
@@ -1513,6 +1515,12 @@ bool CelestialBody::SetLowFidelityElements(const Rvector6 &kepl)
    return true;
 }
 
+bool CelestialBody::SetRotationDataSource(Gmat::RotationDataSource src)
+{
+   rotationSrc = src;
+   return true;
+}
+
 
 //------------------------------------------------------------------------------
 // const Rvector6 GetMJ2000State(const A1Mjd &atTime)
@@ -1817,6 +1825,7 @@ Integer     CelestialBody::GetIntegerParameter(const Integer id) const
    if (id == DEGREE)               return degree;
    if (id == BODY_NUMBER)          return bodyNumber;
    if (id == REF_BODY_NUMBER)      return referenceBodyNumber;
+   if (id == ROTATION_DATA_SRC)    return (Integer) rotationSrc;
   // if (id == COEFFICIENT_SIZE)     return coefficientSize;
    
    return SpacePoint::GetIntegerParameter(id); // add others in later?
@@ -1859,6 +1868,14 @@ Integer     CelestialBody::SetIntegerParameter(const Integer id,
       referenceBodyNumber = value;
       return true;
    }
+   if (id == ROTATION_DATA_SRC)
+   {
+      if ((value < 0) || (value >= Gmat::RotationDataSrcCount))
+         return false;
+      rotationSrc = (Gmat::RotationDataSource) value;
+      return true;
+   }
+   
    //if (id == COEFFICIENT_SIZE)     return (coefficientSize     = value);
    
    return SpacePoint::SetIntegerParameter(id,value);  // add others in later
