@@ -207,23 +207,48 @@ GravityField::~GravityField()
  */
 //------------------------------------------------------------------------------
 GravityField::GravityField(const GravityField &gf) :
-    HarmonicField   (gf),
-    mu              (gf.mu),
-    a               (gf.a),
-    defaultMu       (gf.defaultMu),
-    defaultA        (gf.defaultA),
-//    Cbar            (NULL),  // or (gf.Cbar),  
-//    Sbar            (NULL),  // or (gf.Sbar),
-//    dCbar           (NULL),  // or (gf.dCbar),
-//    dSbar           (NULL),  // or (gf.dSbar)
-    gfInitialized   (false),
-    sum2Diag        (NULL),
-    sum3Diag        (NULL),
-    sum2OffDiag     (NULL),
-    sum3OffDiag     (NULL)
+    HarmonicField          (gf),
+    mu                     (gf.mu),
+    a                      (gf.a),
+    defaultMu              (gf.defaultMu),
+    defaultA               (gf.defaultA),
+    gfInitialized          (false),
+    orderTruncateReported  (gf.orderTruncateReported),
+    degreeTruncateReported (gf.degreeTruncateReported),
+    frv                    (gf.frv),
+    trv                    (gf.trv),
+    now                    (gf.now),
+    satcount               (gf.satcount),
+    sum2Diag               (NULL),
+    sum3Diag               (NULL),
+    sum2OffDiag            (NULL),
+    sum3OffDiag            (NULL),
+    cc                     (gf.cc),
+    rotMatrix              (gf.rotMatrix),
+    outState               (gf.outState),
+    theState               (gf.theState)
 {
    objectTypeNames.push_back("GravityField");
    bodyName = gf.bodyName;
+   
+   for (Integer i = 0; i < 361; i++)
+   {
+   	   for (Integer j = 0; j < 361; j++)
+   	   {
+   	   	   Cbar[i][j] = gf.Cbar[i][j];
+   	   	   Sbar[i][j] = gf.Sbar[i][j];
+   	   }
+   }
+   
+   for (Integer i = 0; i < 17; i++)
+   {
+   	   for (Integer j = 0; j < 17; j++)
+   	   {
+   	   	   dCbar[i][j] = gf.dCbar[i][j];
+   	   	   dSbar[i][j] = gf.dSbar[i][j];
+   	   }
+   }
+  
    parameterCount = GravityFieldParamCount;
 }
 
@@ -245,11 +270,45 @@ GravityField& GravityField::operator=(const GravityField &gf)
    
 //   int cc;
    HarmonicField::operator=(gf);
-   mu               = gf.mu;
-   a                = gf.a;
-   defaultMu        = gf.defaultMu;
-   defaultA         = gf.defaultA;
-   bodyName         = gf.bodyName;
+   mu                     = gf.mu;
+   a                      = gf.a;
+   defaultMu              = gf.defaultMu;
+   defaultA               = gf.defaultA;
+   bodyName               = gf.bodyName;
+   gfInitialized          = false;  // is that what I want to do?
+   orderTruncateReported  = gf.orderTruncateReported;
+   degreeTruncateReported = gf.degreeTruncateReported;
+   frv                    = gf.frv;
+   trv                    = gf.trv;
+   now                    = gf.now;
+   satcount               = gf.satcount;
+   sum2Diag               = NULL;
+   sum3Diag               = NULL;
+   sum2OffDiag            = NULL;
+   sum3OffDiag            = NULL;
+   cc                     = gf.cc;
+   rotMatrix              = gf.rotMatrix;
+   outState               = gf.outState;
+   theState               = gf.theState;
+   
+   for (Integer i = 0; i < 361; i++)
+   {
+   	   for (Integer j = 0; j < 361; j++)
+   	   {
+   	   	   Cbar[i][j] = gf.Cbar[i][j];
+   	   	   Sbar[i][j] = gf.Sbar[i][j];
+   	   }
+   }
+   
+   for (Integer i = 0; i < 17; i++)
+   {
+   	   for (Integer j = 0; j < 17; j++)
+   	   {
+   	   	   dCbar[i][j] = gf.dCbar[i][j];
+   	   	   dSbar[i][j] = gf.dSbar[i][j];
+   	   }
+   }
+   
 //   if (Cbar) {
 //      for (cc = 0;cc <= maxDegree+1; ++cc)
 //         delete [] Cbar[cc];
@@ -277,7 +336,6 @@ GravityField& GravityField::operator=(const GravityField &gf)
 //      delete [] dSbar;
 //      dSbar = NULL;
 //   }
-   gfInitialized = false;  // is that what I want to do?
    
    return *this;
 }

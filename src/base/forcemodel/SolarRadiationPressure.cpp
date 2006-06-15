@@ -131,6 +131,7 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
 //------------------------------------------------------------------------------
 SolarRadiationPressure::SolarRadiationPressure(const SolarRadiationPressure &srp) :
    PhysicalModel       (srp),  
+   theSun              (NULL),
    useAnalytic         (srp.useAnalytic),
    shadowModel         (srp.shadowModel),
    vectorModel         (srp.vectorModel),
@@ -145,7 +146,11 @@ SolarRadiationPressure::SolarRadiationPressure(const SolarRadiationPressure &srp
    flux                (srp.flux),           // W/m^2, IERS 1996
    fluxPressure        (srp.fluxPressure),   // converted to N/m^2
    sunDistance         (srp.sunDistance),
-   nominalSun          (srp.nominalSun)
+   nominalSun          (srp.nominalSun),
+   psunrad             (srp.psunrad),
+   pcbrad              (srp.pcbrad),
+   percentSun          (srp.percentSun),
+   bodyID              (srp.bodyID)
 {
    parameterCount = SRPParamCount;
 }
@@ -163,6 +168,7 @@ SolarRadiationPressure& SolarRadiationPressure::operator=(const SolarRadiationPr
       return *this;
 
    PhysicalModel::operator=(srp);
+   theSun       = NULL;
    useAnalytic  = srp.useAnalytic;
    shadowModel  = srp.shadowModel;
    vectorModel  = srp.vectorModel;
@@ -178,6 +184,10 @@ SolarRadiationPressure& SolarRadiationPressure::operator=(const SolarRadiationPr
    fluxPressure = srp.fluxPressure;   // converted to N/m^2
    sunDistance  = srp.sunDistance;
    nominalSun   = srp.nominalSun;
+   psunrad      = srp.psunrad;
+   pcbrad       = srp.pcbrad;
+   percentSun   = srp.percentSun;
+   bodyID       = srp.bodyID;
    
    return *this;
 }

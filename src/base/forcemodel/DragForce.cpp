@@ -165,18 +165,17 @@ DragForce::DragForce(const DragForce& df) :
    parameterCount += 7;
    dimension = df.dimension;
 
-   /// @todo Remove hard coded central body parms in DragForce
-   sunLoc[0] = 138276412034.25;
-   sunLoc[1] = -71626341186.98;
-   sunLoc[2] =    119832241.16;
-    
-   cbLoc[0]  = 0.0;
-   cbLoc[1]  = 0.0;
-   cbLoc[2]  = 0.0;
-    
-   angVel[0]      = 0.0;
-   angVel[1]      = 0.0;
-   angVel[2]      = 7.29211585530e-5;
+   sunLoc[0] = df.sunLoc[0];
+   sunLoc[1] = df.sunLoc[1];
+   sunLoc[2] = df.sunLoc[2];
+   
+   cbLoc[0]  = df.cbLoc[0];
+   cbLoc[1]  = df.cbLoc[1];
+   cbLoc[2]  = df.cbLoc[2];
+   
+   angVel[0]      = df.angVel[0];
+   angVel[1]      = df.angVel[1];
+   angVel[2]      = df.angVel[2];
 
    ap = CalculateAp(kp);
    
@@ -224,20 +223,19 @@ DragForce& DragForce::operator=(const DragForce& df)
    kp                    = df.kp;
    ap                    = CalculateAp(kp);
    
-      dimension = df.dimension;
+   dimension = df.dimension;
 
-   /// @todo Remove hard coded central body parms in DragForce
-   sunLoc[0] = 138276412034.25;
-   sunLoc[1] = -71626341186.98;
-   sunLoc[2] =    119832241.16;
-    
-   cbLoc[0]  = 0.0;
-   cbLoc[1]  = 0.0;
-   cbLoc[2]  = 0.0;
-    
-   angVel[0]      = 0.0;
-   angVel[1]      = 0.0;
-   angVel[2]      = 7.29211585530e-5;
+   sunLoc[0] = df.sunLoc[0];
+   sunLoc[1] = df.sunLoc[1];
+   sunLoc[2] = df.sunLoc[2];
+   
+   cbLoc[0]  = df.cbLoc[0];
+   cbLoc[1]  = df.cbLoc[1];
+   cbLoc[2]  = df.cbLoc[2];
+   
+   angVel[0]      = df.angVel[0];
+   angVel[1]      = df.angVel[1];
+   angVel[2]      = df.angVel[2];
 
    ap = CalculateAp(kp);
    

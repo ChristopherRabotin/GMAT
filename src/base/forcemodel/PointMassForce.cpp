@@ -143,10 +143,16 @@ PointMassForce::PointMassForce(const PointMassForce& pmf) :
    PhysicalModel          (pmf),
    mu                     (pmf.mu),
    estimationMethod       (pmf.estimationMethod),
-   isPrimaryBody          (pmf.isPrimaryBody)
+   isPrimaryBody          (pmf.isPrimaryBody),
+   bodyrv                 (pmf.bodyrv),
+   orig                   (pmf.orig),
+   rv                     (pmf.rv),
+   now                    (pmf.now),
+   satCount               (pmf.satCount)
 {
    parameterCount = PointMassParamCount;
    dimension = pmf.dimension;
+   epoch = pmf.epoch;
    initialized = false;
 }
 
@@ -166,12 +172,18 @@ PointMassForce& PointMassForce::operator= (const PointMassForce& pmf)
       return *this;
       
    PhysicalModel::operator=(pmf);
-   epoch = pmf.epoch;
-   mu = pmf.mu;
-   dimension = pmf.dimension;
-   initialized = false;
-   elapsedTime = pmf.elapsedTime;
+   epoch            = pmf.epoch;
+   mu               = pmf.mu;
+   dimension        = pmf.dimension;
+   initialized      = false;
+   elapsedTime      = pmf.elapsedTime;
    estimationMethod = pmf.estimationMethod;
+   isPrimaryBody    = pmf.isPrimaryBody;
+   bodyrv           = pmf.bodyrv;
+   orig             = pmf.orig;
+   rv               = pmf.rv;
+   now              = pmf.now;
+   satCount         = pmf.satCount;
 
    return *this;
 }
