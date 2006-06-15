@@ -307,7 +307,7 @@ Real ExponentialAtmosphere::Smooth(Real height, Integer index)
 //------------------------------------------------------------------------------
 GmatBase* ExponentialAtmosphere::Clone() const
 {
-   return new ExponentialAtmosphere(*this);
+   return (new ExponentialAtmosphere(*this));
 }
 
 
@@ -329,4 +329,34 @@ altitudeBands        (atm.altitudeBands),
 smoothDensity        (false)
 {
    SetConstants();
+}
+
+//------------------------------------------------------------------------------
+//  ExponentialAtmosphere& operator= (const ExponentialAtmosphere& bary)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator for the ExponentialAtmosphere class.
+ *
+ * @param <bary> the ExponentialAtmosphere object whose data to assign to "this"
+ *             calculated point.
+ *
+ * @return "this" ExponentialAtmosphere with data of input ExponentialAtmosphere ea.
+ */
+//------------------------------------------------------------------------------
+ExponentialAtmosphere& ExponentialAtmosphere::operator=(const ExponentialAtmosphere &atm)
+{
+   if (&atm == this)
+      return *this;
+
+   AtmosphereModel::operator=(atm);
+   
+   scaleHeight   = NULL;
+   refHeight     = NULL;
+   refDensity    = NULL;
+   altitudeBands = atm.altitudeBands;
+   smoothDensity = false;
+   
+   SetConstants();
+   
+   return *this;
 }
