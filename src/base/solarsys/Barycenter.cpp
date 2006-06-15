@@ -90,6 +90,8 @@ Barycenter& Barycenter::operator=(const Barycenter &bary)
       return *this;
 
    CalculatedPoint::operator=(bary);
+   parameterCount = bary.parameterCount;
+   
    return *this;
 }
 
