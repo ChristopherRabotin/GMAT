@@ -108,6 +108,7 @@ CubicSplineInterpolator& CubicSplineInterpolator::operator=
       return *this;
         
    CopyArrays(csi);
+   lastX = csi.lastX;
    return *this;
 }
 
