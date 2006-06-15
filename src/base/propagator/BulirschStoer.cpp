@@ -175,7 +175,11 @@ BulirschStoer::BulirschStoer(const BulirschStoer& bs) :
     bs_safety2                      (0.70),
     minimumReduction                (0.7),
     maximumReduction                (1.0e-5),
-    scale_dt                        (0.1)
+    scale_dt                        (0.1),
+    kopt                            (bs.kopt),
+    kmax                            (bs.kmax),
+    kused                           (bs.kused),
+    first                           (bs.first)
 {
     parameterCount = BulirschStoerParamCount;
 }
@@ -193,14 +197,32 @@ BulirschStoer& BulirschStoer::operator=(const BulirschStoer& bs)
         return *this;
 
     Integrator::operator= (bs);
-    mintolerance = bs.mintolerance;
+    depth              = bs.depth;
+    depthInitialized   = bs.depthInitialized;
+    level              = bs.level;
+    levelError         = NULL;
+    ai                 = NULL;
+    alpha              = NULL;
+    intermediates      = NULL;
+    coeffC             = NULL;
+    intervals          = NULL;
+    estimates          = NULL;
+    mstate             = NULL;
+    nstate             = NULL;
+    estimatedState     = NULL;
+    subinterval        = NULL;
+    mintolerance       = bs.mintolerance;
+    bs_safety1         = bs.bs_safety1;
+    bs_safety2         = bs.bs_safety2;
+    minimumReduction   = bs.minimumReduction;
+    maximumReduction   = bs.maximumReduction;
+    scale_dt           = bs.scale_dt;
+    kopt               = bs.kopt;
+    kmax               = bs.kmax;
+    kused              = bs.kused;
+    first              = bs.first;
+    
     initialized = false;
-
-    bs_safety1 = bs.bs_safety1;
-    bs_safety2 = bs.bs_safety2;
-    minimumReduction = bs.minimumReduction;
-    maximumReduction = bs.maximumReduction;
-    scale_dt = bs.scale_dt;
 
     return *this;
 }
@@ -220,7 +242,7 @@ BulirschStoer& BulirschStoer::operator=(const BulirschStoer& bs)
 //------------------------------------------------------------------------------
 GmatBase* BulirschStoer::Clone(void) const
 {
-    return new BulirschStoer(*this);
+    return (new BulirschStoer(*this));
 }
 
 //------------------------------------------------------------------------------

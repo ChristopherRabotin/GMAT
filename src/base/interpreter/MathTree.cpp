@@ -69,7 +69,8 @@ MathTree::~MathTree()
 //------------------------------------------------------------------------------
 MathTree::MathTree(const MathTree &mt) :
     GmatBase        (mt),
-    theTopNode         (mt.theTopNode)
+    theTopNode      (mt.theTopNode),
+    theObjectMap    (NULL)
 {
 }
 
@@ -91,6 +92,9 @@ MathTree& MathTree::operator=(const MathTree &mt)
         return *this;
     
     GmatBase::operator=(mt);
+    
+    theTopNode   = mt.theTopNode;
+    theObjectMap = NULL;
     
     return *this;
 }

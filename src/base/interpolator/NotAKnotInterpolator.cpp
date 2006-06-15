@@ -87,11 +87,31 @@ NotAKnotInterpolator::NotAKnotInterpolator
    Interpolator       (csi),
    lastX              (csi.lastX)
 {
-   Integer i;
+	B[0]  = NULL;
+   B[1]  = NULL;
+   B[2]  = NULL;
+   s[0]  = NULL;
+   s[1]  = NULL;
+   s[2]  = NULL;
+   s[3]  = NULL;
+   s[4]  = NULL;
+   
+   CopyArrays(csi);
+   
+   Integer i, j;
    for (i = 0; i < bufferSize; ++i)
    {
       x[i]  = -9.9999e75;
       y[i]  = NULL;
+   }
+   
+   for (i = 0; i < 4; i++)
+      h[i] = csi.h[i];
+      
+   for (i = 0; i < 3; i++)
+   {
+   	   for (j = 0; j < 3; j++)
+   	      A[i][j] = csi.A[i][j];
    }
 }
 
@@ -113,7 +133,29 @@ NotAKnotInterpolator& NotAKnotInterpolator::operator=
    if (&csi == this)
       return *this;
         
+   B[0]  = NULL;
+   B[1]  = NULL;
+   B[2]  = NULL;
+   s[0]  = NULL;
+   s[1]  = NULL;
+   s[2]  = NULL;
+   s[3]  = NULL;
+   s[4]  = NULL;
+   lastX = csi.lastX;
+        
    CopyArrays(csi);
+   
+   Integer i, j;
+   
+   for (i = 0; i < 4; i++)
+      h[i] = csi.h[i];
+      
+   for (i = 0; i < 3; i++)
+   {
+   	   for (j = 0; j < 3; j++)
+   	      A[i][j] = csi.A[i][j];
+   }
+   
    return *this;
 }
 

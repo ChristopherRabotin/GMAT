@@ -119,6 +119,7 @@ PropSetup::PropSetup(const PropSetup &propSetup)
    ownedObjectCount = propSetup.ownedObjectCount;
 
 //   // PropSetup data
+   mInitialized = propSetup.mInitialized;
    mPropagator = propSetup.mPropagator;
    mForceModel = propSetup.mForceModel;
 //   //Initialize(); //loj: 5/11/04
@@ -143,6 +144,7 @@ PropSetup& PropSetup::operator= (const PropSetup &right)
       GmatBase::operator=(right);
 
       // PropSetup data
+      mInitialized = right.mInitialized;
       mPropagator = right.mPropagator;
       mForceModel = right.mForceModel;
 // DJC 8/13/04: These are now part of the ForceModel
