@@ -326,7 +326,7 @@ void Msise90Atmosphere::GetInputs(Real epoch)
 //------------------------------------------------------------------------------
 GmatBase* Msise90Atmosphere::Clone() const
 {
-   return new Msise90Atmosphere(*this);
+   return (new Msise90Atmosphere(*this));
 }
 
 //------------------------------------------------------------------------------
@@ -341,7 +341,35 @@ GmatBase* Msise90Atmosphere::Clone() const
 Msise90Atmosphere::Msise90Atmosphere(const Msise90Atmosphere& msise) :
 AtmosphereModel     (msise),
 fileData            (false),  // is this correct?
-fluxfilename        (msise.fluxfilename)
+fluxfilename        (msise.fluxfilename),
+sod                 (msise.sod),
+yd                  (msise.yd),
+f107                (msise.f107),
+f107a               (msise.f107a),
+mass                (msise.mass)
 {
+	for (Integer i = 0; i < 7; i++)
+      ap[i] = msise.ap[i];;
+}
+
+//------------------------------------------------------------------------------
+//  Msise90Atmosphere& operator= (const Msise90Atmosphere& m)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator for the Msise90Atmosphere class.
+ *
+ * @param <m> the Msise90Atmosphere object whose data to assign to "this"
+ *            AtmosphereModel.
+ *
+ * @return "this" Msise90Atmosphere with data of input Msise90Atmosphere st.
+ */
+//------------------------------------------------------------------------------
+Msise90Atmosphere& Msise90Atmosphere::operator=(const Msise90Atmosphere& msise)
+{
+   if (&msise == this)
+      return *this;
+
+   AtmosphereModel::operator=(msise);
+   return *this;
 }
 
