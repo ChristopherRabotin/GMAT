@@ -358,6 +358,7 @@ void RunScriptFolderDialog::OnButtonClick(wxCommandEvent& event)
       {
          mCurrOutDir = dialog.GetPath();
          mCurrOutDirTextCtrl->SetValue(mCurrOutDir);
+         mSaveFileTextCtrl->SetValue(mCurrOutDir + "/CompareResults.txt");
          mOutDirChanged = true;
          
          #if DEBUG_RUN_SCRIPT_FOLDER_DIALOG
