@@ -152,21 +152,6 @@ Function& Function::operator=(const Function &f)
     return *this;
 }
 
-//------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
-//------------------------------------------------------------------------------
-/**
- * This method returns a clone of the Function.
- *
- * @return clone of the Function.
- *
- */
-//------------------------------------------------------------------------------
-GmatBase* Function::Clone(void) const
-{
-   return (new Function(*this));
-}
-
 
 //------------------------------------------------------------------------------
 //  std::string GetParameterText(const Integer id) const
