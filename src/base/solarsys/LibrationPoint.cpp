@@ -133,7 +133,8 @@ LibrationPoint& LibrationPoint::operator=(const LibrationPoint &lp)
 //------------------------------------------------------------------------------
 LibrationPoint::~LibrationPoint()
 {
-   // nothing to do here ..... hm .. hm .. hm
+   delete primaryBody;
+   delete secondaryBody;
 }
 
 //---------------------------------------------------------------------------
