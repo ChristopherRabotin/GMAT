@@ -848,10 +848,10 @@ bool Achieve::Execute()
    Real val;
    // Evaluate the floating target (if there is one) and set it on the targeter
    if (goalTarget != NULL) {
-      MessageInterface::ShowMessage
-         ("   goalTarget=%s, %p\n", goalTarget->GetTypeName().c_str(), goalTarget);
       val = goalTarget->EvaluateReal();
       #ifdef DEBUG_ACHIEVE_EXEC
+         MessageInterface::ShowMessage
+            ("   goalTarget=%s, %p\n", goalTarget->GetTypeName().c_str(), goalTarget);
          MessageInterface::ShowMessage("Floating target: val = %lf\n", val);
       #endif
       targeter->UpdateSolverGoal(goalId, val);
