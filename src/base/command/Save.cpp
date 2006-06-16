@@ -238,6 +238,11 @@ bool Save::Execute()
 //------------------------------------------------------------------------------
 void Save::WriteObject(GmatBase *o)
 {
+   #ifdef DEBUG_SAVE_OUTPUT
+      MessageInterface::ShowMessage("Save: %s has %d parameters\n", 
+         o->GetName().c_str(), o->GetParameterCount());
+   #endif
+   
    std::string objectname = o->GetName();
 
    // "Create Propagator" creates a PropSetup.  This code handles
@@ -250,6 +255,12 @@ void Save::WriteObject(GmatBase *o)
    Integer i;
    for (i = 0; i < o->GetParameterCount(); ++i)
    {
+      #ifdef DEBUG_SAVE_OUTPUT
+         MessageInterface::ShowMessage("   %s has type %s\n", 
+            o->GetParameterText(i).c_str(), 
+            o->GetParameterTypeString(i).c_str());
+      #endif
+
       if (o->GetParameterType(i) != Gmat::UNKNOWN_PARAMETER_TYPE)
       {
          if (o->GetParameterType(i) != Gmat::STRINGARRAY_TYPE)

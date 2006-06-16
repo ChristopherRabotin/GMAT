@@ -332,7 +332,7 @@ Gmat::ParameterType Formation::GetParameterType(const Integer id) const
    if (id >= SpaceObjectParamCount && id < FormationParamCount)
       return PARAMETER_TYPE[id - SpaceObjectParamCount];
       
-   return GmatBase::GetParameterType(id);
+   return SpaceObject::GetParameterType(id);
 }
 
 //---------------------------------------------------------------------------
@@ -930,9 +930,27 @@ void Formation::UpdateState()
 {
    Integer size, index = 0;
    PropState *ps;
+   
+   Real ep0 = 0.0, ep;
    for (std::vector<SpaceObject*>::iterator i = components.begin();
         i != components.end(); ++i)
    {
+      if (i == components.begin())
+      {
+         ep0 = (*i)->GetEpoch();
+         #ifdef DEBUG_FORMATION
+            MessageInterface::ShowMessage("Base epoch is %.12lf\n", ep0);
+         #endif
+      }
+      else
+      {
+         ep = (*i)->GetEpoch();
+         if (ep != ep0)
+            MessageInterface::ShowMessage(
+               "WARNING!  Formation Member Epochs are not synchronized!\n"
+               "First spacecraft epoch is %.12lf, but %s has epoch %.12lf\n", 
+               ep0, (*i)->GetName().c_str(), ep);
+      }
       ps = &((*i)->GetState());
       size = ps->GetSize();
       
@@ -948,7 +966,7 @@ void Formation::UpdateState()
          ((Formation*)(*i))->UpdateState();
    }
    
-   //SetEpoch((*(components.begin()))->GetEpoch());
+   SetEpoch(ep0);
 }
 
 
