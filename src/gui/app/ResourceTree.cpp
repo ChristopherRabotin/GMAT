@@ -2732,7 +2732,8 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    repeatCount = dlg.GetNumTimesToRun();
    bool compare = dlg.CompareResults();
    bool saveCompareResults = dlg.SaveCompareResults();
-
+   bool builtOk = false;
+   
    // for current output path
    FileManager *fm = FileManager::Instance();
    std::string oldOutPath = fm->GetFullPathname(FileManager::OUTPUT_PATH);
@@ -2820,7 +2821,11 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
          
          try
          {
-            if (BuildScript(filename))
+            // Create objects from script only first time
+            if (i == 0)
+               builtOk = BuildScript(filename);
+            
+            if (builtOk)
             {
                GmatAppData::GetMainFrame()->OnScriptRun(event);
                if (compare)
