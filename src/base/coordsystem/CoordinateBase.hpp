@@ -76,6 +76,7 @@ public:
    virtual GmatCoordinate::ParameterUsage UsesXAxis() const     = 0;
    virtual GmatCoordinate::ParameterUsage UsesYAxis() const     = 0;
    virtual GmatCoordinate::ParameterUsage UsesZAxis() const     = 0;
+   virtual GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const = 0;
    
    // pure virtual methods to set parameters for the AxisSystems
    virtual void                  SetPrimaryObject(SpacePoint *prim)      = 0;

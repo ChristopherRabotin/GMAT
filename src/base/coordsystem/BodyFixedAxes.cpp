@@ -144,6 +144,13 @@ GmatCoordinate::ParameterUsage BodyFixedAxes::UsesItrfFile() const
    return GmatCoordinate::REQUIRED;
 }
 
+GmatCoordinate::ParameterUsage BodyFixedAxes::UsesNutationUpdateInterval() const
+{
+   if (originName == SolarSystem::EARTH_NAME) 
+      return GmatCoordinate::REQUIRED;
+   return DynamicAxes::UsesNutationUpdateInterval();
+}
+
 
 //------------------------------------------------------------------------------
 //  bool Initialize()

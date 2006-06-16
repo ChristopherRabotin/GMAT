@@ -290,6 +290,11 @@ GmatCoordinate::ParameterUsage AxisSystem::UsesZAxis() const
    return GmatCoordinate::NOT_USED;
 }
 
+GmatCoordinate::ParameterUsage AxisSystem::UsesNutationUpdateInterval() const
+{
+   return GmatCoordinate::NOT_USED;
+}
+
 // methods to set parameters for the AxisSystems - AxisSystems that need these
 // will need to override these implementations
 void AxisSystem::SetPrimaryObject(SpacePoint *prim)

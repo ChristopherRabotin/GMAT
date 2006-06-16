@@ -111,7 +111,10 @@ TrueOfDateAxes::~TrueOfDateAxes()
 //---------------------------------------------------------------------------
 bool TrueOfDateAxes::Initialize()
 {
-   return DynamicAxes::Initialize();
+   DynamicAxes::Initialize();
+   if (originName == SolarSystem::EARTH_NAME) 
+      InitializeFK5();
+   return true;
 }
 
 GmatCoordinate::ParameterUsage TrueOfDateAxes::UsesEopFile() const
@@ -124,6 +127,12 @@ GmatCoordinate::ParameterUsage TrueOfDateAxes::UsesItrfFile() const
    return GmatCoordinate::REQUIRED;
 }
 
+GmatCoordinate::ParameterUsage TrueOfDateAxes::UsesNutationUpdateInterval() const
+{
+   if (originName == SolarSystem::EARTH_NAME) 
+      return GmatCoordinate::REQUIRED;
+   return DynamicAxes::UsesNutationUpdateInterval();
+}
 
 
 //------------------------------------------------------------------------------

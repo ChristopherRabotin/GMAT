@@ -45,6 +45,7 @@ public:
    virtual GmatCoordinate::ParameterUsage UsesEpoch() const;
    virtual GmatCoordinate::ParameterUsage UsesEopFile() const;
    virtual GmatCoordinate::ParameterUsage UsesItrfFile() const;
+   virtual GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const;
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes

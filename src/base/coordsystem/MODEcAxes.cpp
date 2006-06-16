@@ -123,7 +123,7 @@ MODEcAxes::~MODEcAxes()
 bool MODEcAxes::Initialize()
 {
    MeanOfDateAxes::Initialize();
-   InitializeFK5();
+   // InitializeFK5(); // wcs - not needed just for precession
    return true;
 }
 

@@ -46,6 +46,7 @@ public:
 
    virtual GmatCoordinate::ParameterUsage UsesEopFile() const;
    virtual GmatCoordinate::ParameterUsage UsesItrfFile() const;
+   virtual GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const;
 
 protected:
 

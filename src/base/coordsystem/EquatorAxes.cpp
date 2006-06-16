@@ -135,6 +135,13 @@ GmatCoordinate::ParameterUsage EquatorAxes::UsesItrfFile() const
    return GmatCoordinate::NOT_USED;
 }
 
+GmatCoordinate::ParameterUsage EquatorAxes::UsesNutationUpdateInterval() const
+{
+   if (originName == SolarSystem::EARTH_NAME) 
+      return GmatCoordinate::REQUIRED;
+   return DynamicAxes::UsesNutationUpdateInterval();
+}
+
 //------------------------------------------------------------------------------
 //  bool EquatorAxes::Initialize()
 //------------------------------------------------------------------------------

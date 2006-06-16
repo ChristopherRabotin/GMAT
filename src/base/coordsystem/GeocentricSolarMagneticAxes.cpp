@@ -155,6 +155,13 @@ GmatCoordinate::ParameterUsage GeocentricSolarMagneticAxes::UsesItrfFile() const
    return GmatCoordinate::REQUIRED;
 }
 
+GmatCoordinate::ParameterUsage 
+GeocentricSolarMagneticAxes::UsesNutationUpdateInterval() const
+{
+   //if (originName == SolarSystem::EARTH_NAME) 
+      return GmatCoordinate::REQUIRED;
+   //return ObjectReferencedAxes::UsesNutationUpdateInterval();
+}
 
 //------------------------------------------------------------------------------
 //  bool Initialize()

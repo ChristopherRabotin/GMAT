@@ -233,6 +233,13 @@ GmatCoordinate::ParameterUsage CoordinateSystem::UsesZAxis() const
    return GmatCoordinate::NOT_USED;
 }
 
+GmatCoordinate::ParameterUsage CoordinateSystem::UsesNutationUpdateInterval() const
+{
+   if (axes) return axes->UsesNutationUpdateInterval();
+   return GmatCoordinate::NOT_USED;
+}
+
+
 
 // methods to set parameters for the AxisSystems
 void CoordinateSystem::SetPrimaryObject(SpacePoint *prim)

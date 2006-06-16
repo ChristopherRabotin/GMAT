@@ -45,6 +45,7 @@ public:
    virtual GmatCoordinate::ParameterUsage UsesZAxis() const;
    virtual GmatCoordinate::ParameterUsage UsesEopFile() const;
    virtual GmatCoordinate::ParameterUsage UsesItrfFile() const;
+   virtual GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const;
 
    // method to initialize the data
    virtual bool Initialize();

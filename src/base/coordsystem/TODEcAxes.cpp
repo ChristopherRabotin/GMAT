@@ -124,7 +124,7 @@ TODEcAxes::~TODEcAxes()
 bool TODEcAxes::Initialize()
 {
    TrueOfDateAxes::Initialize();
-   InitializeFK5();
+   //InitializeFK5();   //wcs - moved to TrueOfDateAxes
    
    return true;
 }

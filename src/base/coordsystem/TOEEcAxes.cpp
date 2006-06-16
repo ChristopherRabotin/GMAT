@@ -224,6 +224,12 @@ GmatCoordinate::ParameterUsage TOEEcAxes::UsesItrfFile() const
 {
    return GmatCoordinate::REQUIRED;
 }
+GmatCoordinate::ParameterUsage TOEEcAxes::UsesNutationUpdateInterval() const
+{
+   if (originName == SolarSystem::EARTH_NAME) 
+      return GmatCoordinate::REQUIRED;
+   return InertialAxes::UsesNutationUpdateInterval();
+}
 
 
 

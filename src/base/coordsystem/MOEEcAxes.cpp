@@ -124,7 +124,7 @@ MOEEcAxes::~MOEEcAxes()
 bool MOEEcAxes::Initialize()
 {
    InertialAxes::Initialize();
-   InitializeFK5();
+   //InitializeFK5(); // wcs - not needed just for precession
 
    // convert epoch (A1 MJD) to TT MJD (for calculations)
    // 20.02.06 - arg: changed to use enum types instead of strings
@@ -193,15 +193,15 @@ GmatCoordinate::ParameterUsage MOEEcAxes::UsesEpoch() const
    return GmatCoordinate::REQUIRED;
 }
 
-GmatCoordinate::ParameterUsage MOEEcAxes::UsesEopFile() const
-{
-   return GmatCoordinate::REQUIRED;
-}
+//GmatCoordinate::ParameterUsage MOEEcAxes::UsesEopFile() const
+//{
+//   return GmatCoordinate::REQUIRED;
+//}
 
-GmatCoordinate::ParameterUsage MOEEcAxes::UsesItrfFile() const
-{
-   return GmatCoordinate::REQUIRED;
-}
+//GmatCoordinate::ParameterUsage MOEEcAxes::UsesItrfFile() const
+//{
+//   return GmatCoordinate::REQUIRED;
+//}
 
 
 
