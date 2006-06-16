@@ -186,6 +186,7 @@ GmatBase::GmatBase(const GmatBase &a) :
     instanceName    (a.instanceName),
     type            (a.type),
     ownedObjectCount(a.ownedObjectCount),
+    generatingString(a.generatingString),
     objectTypes     (a.objectTypes),
     objectTypeNames (a.objectTypeNames)
 {
@@ -210,8 +211,14 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    if (&a == this)
       return *this;
    
-   // Currently nothing to do from the base class; this may change in a later
-   // build
+   parameterCount   = a.parameterCount;
+   typeName         = a.typeName;
+   instanceName     = a.instanceName;
+   type             = a.type;
+   ownedObjectCount = a.ownedObjectCount;
+   generatingString = a.generatingString;
+   objectTypes      = a.objectTypes;
+   objectTypeNames  = a.objectTypeNames;
 
    return *this;
 }
