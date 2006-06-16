@@ -24,6 +24,8 @@ class JacchiaRobertsAtmosphere : public AtmosphereModel
 public:
    JacchiaRobertsAtmosphere();
    virtual ~JacchiaRobertsAtmosphere();
+   JacchiaRobertsAtmosphere(const JacchiaRobertsAtmosphere& jr);
+   JacchiaRobertsAtmosphere& operator=(const JacchiaRobertsAtmosphere& jr);
     
    // inherited from GmatBase
    virtual GmatBase* Clone() const;
@@ -52,10 +54,6 @@ public:
    
    void GetEarth();                             
                                                                                                  
-protected:
-   JacchiaRobertsAtmosphere(const JacchiaRobertsAtmosphere& jr);
-   JacchiaRobertsAtmosphere& operator=(const JacchiaRobertsAtmosphere& jr);
-
 private:
    CelestialBody *earth;
    

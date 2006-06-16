@@ -234,6 +234,59 @@ JacchiaRobertsAtmosphere::~JacchiaRobertsAtmosphere()
 }
 
 //------------------------------------------------------------------------------
+// JacchiaRobertsAtmosphere(const JacchiaRobertsAtmosphere& jr)
+//------------------------------------------------------------------------------
+/**
+ * Copy Constructor.
+ * 
+ * @param jr The JacchiaRoberts instance used to set parameters for this clone.
+ */
+//------------------------------------------------------------------------------
+JacchiaRobertsAtmosphere::JacchiaRobertsAtmosphere(const JacchiaRobertsAtmosphere& jr) :
+    AtmosphereModel     (jr),
+    earth               (NULL),
+    root1               (jr.root1),
+    root2               (jr.root2),
+    x_root              (jr.x_root),
+    y_root              (jr.y_root),
+    t_infinity          (jr.t_infinity),
+    tx                  (jr.tx),
+    sum                 (jr.sum)
+{
+}
+
+//------------------------------------------------------------------------------
+// JacchiaRobertsAtmosphere& operator=(const JacchiaRobertsAtmosphere& jr)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ * 
+ * @param jr JacchiaRobertsAtmosphere instance used as a template for this copy.
+ * 
+ * @return A reference to this class, with members set to match the template.
+ */
+//------------------------------------------------------------------------------
+JacchiaRobertsAtmosphere& JacchiaRobertsAtmosphere::operator=
+                                            (const JacchiaRobertsAtmosphere& jr)
+{
+    if (this == &jr)
+        return *this;
+        
+    AtmosphereModel::operator=(jr);   
+    
+    earth       = NULL;
+    root1       = jr.root1;
+    root2       = jr.root2;
+    x_root      = jr.x_root;
+    y_root      = jr.y_root;
+    t_infinity  = jr.t_infinity;
+    tx          = jr.tx;
+    sum         = jr.sum;
+         
+    return *this;
+}
+
+//------------------------------------------------------------------------------
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
@@ -1195,61 +1248,4 @@ Real JacchiaRobertsAtmosphere::dot_product(Real a[3] , Real b[3])
 void JacchiaRobertsAtmosphere::GetEarth()
 { 
    earth = solarSystem->GetBody(SolarSystem::EARTH_NAME);
-}
-
-//---------------------------------
-// protected
-//---------------------------------
-
-//------------------------------------------------------------------------------
-// JacchiaRobertsAtmosphere(const JacchiaRobertsAtmosphere& jr)
-//------------------------------------------------------------------------------
-/**
- * Copy Constructor.
- * 
- * @param jr The JacchiaRoberts instance used to set parameters for this clone.
- */
-//------------------------------------------------------------------------------
-JacchiaRobertsAtmosphere::JacchiaRobertsAtmosphere(const JacchiaRobertsAtmosphere& jr) :
-    AtmosphereModel     (jr),
-    earth               (NULL),
-    root1               (jr.root1),
-    root2               (jr.root2),
-    x_root              (jr.x_root),
-    y_root              (jr.y_root),
-    t_infinity          (jr.t_infinity),
-    tx                  (jr.tx),
-    sum                 (jr.sum)
-{
-}
-
-//------------------------------------------------------------------------------
-// JacchiaRobertsAtmosphere& operator=(const JacchiaRobertsAtmosphere& jr)
-//------------------------------------------------------------------------------
-/**
- * Assignment operator.
- * 
- * @param jr JacchiaRobertsAtmosphere instance used as a template for this copy.
- * 
- * @return A reference to this class, with members set to match the template.
- */
-//------------------------------------------------------------------------------
-JacchiaRobertsAtmosphere& JacchiaRobertsAtmosphere::operator=
-                                            (const JacchiaRobertsAtmosphere& jr)
-{
-    if (this == &jr)
-        return *this;
-        
-    AtmosphereModel::operator=(jr);   
-    
-    earth       = NULL;
-    root1       = jr.root1;
-    root2       = jr.root2;
-    x_root      = jr.x_root;
-    y_root      = jr.y_root;
-    t_infinity  = jr.t_infinity;
-    tx          = jr.tx;
-    sum         = jr.sum;
-         
-    return *this;
 }

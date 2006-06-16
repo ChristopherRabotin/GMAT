@@ -31,6 +31,8 @@ class Msise90Atmosphere : public AtmosphereModel
 public:
    Msise90Atmosphere();
    virtual ~Msise90Atmosphere();
+   Msise90Atmosphere(const Msise90Atmosphere& msise);
+   Msise90Atmosphere&      operator=(const Msise90Atmosphere& msise);
     
    bool                    Density(Real *position, Real *density,
                                     Real epoch=21545.0,
@@ -56,10 +58,6 @@ protected:
    Integer                 mass;
 
    void                    GetInputs(Real epoch);
-
-private:
-   Msise90Atmosphere(const Msise90Atmosphere& msise);
-   Msise90Atmosphere&      operator=(const Msise90Atmosphere& msise);
 };
 
 #endif // Msise90Atmosphere_hpp

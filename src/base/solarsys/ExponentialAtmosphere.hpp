@@ -55,6 +55,8 @@ class GMAT_API ExponentialAtmosphere : public AtmosphereModel
 public:
    ExponentialAtmosphere();
    virtual ~ExponentialAtmosphere();
+   ExponentialAtmosphere(const ExponentialAtmosphere& atm);
+   ExponentialAtmosphere&  operator=(const ExponentialAtmosphere& atm);
     
    virtual bool            Density(Real *position, Real *density, 
                                    Real epoch=21545.0,
@@ -80,8 +82,7 @@ protected:
    virtual GmatBase*       Clone() const; // inherited from GmatBase
 
 private:
-   ExponentialAtmosphere(const ExponentialAtmosphere& atm);
-   ExponentialAtmosphere&  operator=(const ExponentialAtmosphere& atm);
+
 };
 
 
