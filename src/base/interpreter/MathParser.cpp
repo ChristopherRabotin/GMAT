@@ -526,16 +526,22 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       return items;
    }
    
-   // find opening next parenthesis '('
+   // find next open parenthesis '('
    UnsignedInt index3 = str.find('(', index2);
    if (index3 != str.npos)
    {
+      #if DEBUG_PARENTHESIS
+      MessageInterface::ShowMessage
+         ("MathParser::ParseParenthesis() Found 2nd open paran found. index3=%d\n",
+          index3);
+      #endif
+      
       bool opFound;
       op = str.substr(index3-1, 1);
       op = GetOperatorName(op, opFound);
       if (opFound)
       {
-         left = str.substr(0, index2+1);
+         left = str.substr(0, index3-1);
          right = str.substr(index3, str.size()-index3+1);
          FillItems(items, op, left, right);
          return items;
