@@ -36,10 +36,10 @@
 //------------------------------------------------------------------------------
 Vary::Vary() :
     GmatCommand             ("Vary"),
-    targeterName            (""),
-    targeter                (NULL),
+    solverName              (""),
+    solver                  (NULL),
     variableID              (-1),
-    targeterNameID          (parameterCount),
+    solverNameID            (parameterCount),
     variableNameID          (parameterCount+1),
     initialValueID          (parameterCount+2),
     perturbationID          (parameterCount+3),
@@ -73,12 +73,12 @@ Vary::~Vary()
 //------------------------------------------------------------------------------
 Vary::Vary(const Vary& t) :
     GmatCommand             (t),
-    targeterName            (t.targeterName),
+    solverName              (t.solverName),
     variableName            (t.variableName),
-    targeter                (NULL),
+    solver                  (NULL),
     variableID              (-1),
-    targeterDataFinalized   (t.targeterDataFinalized),
-    targeterNameID          (t.targeterNameID),
+    solverDataFinalized     (t.solverDataFinalized),
+    solverNameID            (t.solverNameID),
     variableNameID          (t.variableNameID),
     initialValueID          (t.initialValueID),
     perturbationID          (t.perturbationID),
@@ -114,11 +114,11 @@ Vary& Vary::operator=(const Vary& t)
     if (this == &t)
         return *this;
         
-    targeterName = t.targeterName;
+    solverName = t.solverName;
     variableName = t.variableName;
-    targeter = NULL;
+    solver = NULL;
     variableID = -1;
-    targeterDataFinalized = t.targeterDataFinalized;
+    solverDataFinalized = t.solverDataFinalized;
     
     initialValue.clear();
     currentValue.clear();
@@ -177,7 +177,7 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
 {
    // Build the local string
    std::stringstream details;
-   std::string gen = prefix + "Vary " + targeterName + "(";
+   std::string gen = prefix + "Vary " + solverName + "(";
 
    // Iterate through the variables
    for (UnsignedInt i = 0; i < variableName.size(); ++i)
@@ -230,8 +230,8 @@ bool Vary::RenameRefObject(const Gmat::ObjectType type,
 {
    if (type == Gmat::SOLVER)
    {
-      if (targeterName == oldName)
-         targeterName = newName;
+      if (solverName == oldName)
+         solverName = newName;
    }
    else if (type == Gmat::PARAMETER)
    {
@@ -250,8 +250,8 @@ bool Vary::RenameRefObject(const Gmat::ObjectType type,
 //---------------------------------------------------------------------------
 std::string Vary::GetParameterText(const Integer id) const
 {
-    if (id == targeterNameID)
-        return "TargeterName";
+    if (id == solverNameID)
+        return "solverName";
         
     if (id == variableNameID)
         return "Variable";
@@ -280,8 +280,8 @@ std::string Vary::GetParameterText(const Integer id) const
 //---------------------------------------------------------------------------
 Integer Vary::GetParameterID(const std::string &str) const
 {
-    if (str == "TargeterName")
-        return targeterNameID;
+    if (str == "solverName")
+        return solverNameID;
         
     if (str == "Variable")
         return variableNameID;
@@ -310,7 +310,7 @@ Integer Vary::GetParameterID(const std::string &str) const
 //---------------------------------------------------------------------------
 Gmat::ParameterType Vary::GetParameterType(const Integer id) const
 {
-    if (id == targeterNameID)
+    if (id == solverNameID)
         return Gmat::STRING_TYPE;
         
     if (id == variableNameID)
@@ -340,10 +340,10 @@ Gmat::ParameterType Vary::GetParameterType(const Integer id) const
 //---------------------------------------------------------------------------
 std::string Vary::GetParameterTypeString(const Integer id) const
 {
-    if (id == targeterNameID)
+    if (id == solverNameID)
         return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
         
-    if (id == targeterNameID)
+    if (id == solverNameID)
         return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
         
     if (id == variableNameID)
@@ -452,8 +452,8 @@ Real Vary::SetRealParameter(const Integer id, const Real value)
 //---------------------------------------------------------------------------
 std::string Vary::GetStringParameter(const Integer id) const
 {
-    if (id == targeterNameID)
-        return targeterName;
+    if (id == solverNameID)
+        return solverName;
         
     if (id == variableNameID)
         if (!variableName.empty())
@@ -468,8 +468,8 @@ std::string Vary::GetStringParameter(const Integer id) const
 //---------------------------------------------------------------------------
 bool Vary::SetStringParameter(const Integer id, const std::string &value)
 {
-    if (id == targeterNameID) {
-        targeterName = value;
+    if (id == solverNameID) {
+        solverName = value;
         return true;
     }
     
@@ -506,8 +506,8 @@ bool Vary::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                         const std::string &name)
 {
    if (type == Gmat::SOLVER) {
-      if (targeterName == obj->GetName()) {
-         targeter = (Solver*)obj;
+      if (solverName == obj->GetName()) {
+         solver = (Solver*)obj;
          return true;
       }
       return false;
@@ -551,8 +551,8 @@ bool Vary::InterpretAction()
 
     std::string component = generatingString.substr(loc, end-loc);
     if (component == "")
-        throw CommandException("Vary string does not identify the targeter");
-    SetStringParameter(targeterNameID, component);
+        throw CommandException("Vary string does not identify the solver");
+    SetStringParameter(solverNameID, component);
     
     // Find the variable
     loc = end + 1;
@@ -641,26 +641,26 @@ bool Vary::Initialize()
     bool retval = GmatCommand::Initialize();
 
 //    // Vary specific initialization (no pun intended) goes here:
-//    // Find the targeter
-//    if (objectMap->find(targeterName) == objectMap->end()) {
-//        std::string errorString = "Target command cannot find targeter \"";
-//        errorString += targeterName;
+//    // Find the solver
+//    if (objectMap->find(solverName) == objectMap->end()) {
+//        std::string errorString = "Target command cannot find solver \"";
+//        errorString += solverName;
 //        errorString += "\"";
 //        throw CommandException(errorString);
 //    }
 //
-//    targeter = (Solver *)((*objectMap)[targeterName]);
+//    solver = (Solver *)((*objectMap)[solverName]);
 
-    if (targeter == NULL)
-       throw CommandException("Targeter not initialized for Vary command\n  \""
+    if (solver == NULL)
+       throw CommandException("solver not initialized for Vary command\n  \""
                               + generatingString + "\"\n");
 
-    Integer id = targeter->GetParameterID("Variables");
+    Integer id = solver->GetParameterID("Variables");
     if (!variableName.empty())
-        targeter->SetStringParameter(id, variableName[0]);
+        solver->SetStringParameter(id, variableName[0]);
         
-    // The targeter cannot be finalized until all of the loop is initialized
-    targeterDataFinalized = false;
+    // The solver cannot be finalized until all of the loop is initialized
+    solverDataFinalized = false;
 
     return retval;
 }
@@ -686,11 +686,11 @@ bool Vary::Execute(void)
 
     #if DEBUG_VARY_EXECUTE
     MessageInterface::ShowMessage
-       ("Vary::Execute() targeterDataFinalized=%d\n", targeterDataFinalized);
+       ("Vary::Execute() solverDataFinalized=%d\n", solverDataFinalized);
     #endif
     
-    if (!targeterDataFinalized) {
-        // First time through, tell the targeter about the variables
+    if (!solverDataFinalized) {
+        // First time through, tell the solver about the variables
         Real varData[5];
         //for (Integer i = 0; i < variableName.size(); ++i) {
         Integer i = 0;
@@ -704,7 +704,7 @@ bool Vary::Execute(void)
             if (variableId.empty())
                variableId.push_back(-1);
             
-            variableId[i] = targeter->SetSolverVariables(varData, variableName[i]);
+            variableId[i] = solver->SetSolverVariables(varData, variableName[i]);
         }
         
         // Break component into the object and its parameter
@@ -739,7 +739,7 @@ bool Vary::Execute(void)
         
         Gmat::ParameterType type = obj->GetParameterType(id);
         if (type != Gmat::REAL_TYPE) {
-            std::string errorstr = "The targeter variable ";
+            std::string errorstr = "The solver variable ";
             errorstr += parmName;
             errorstr += " on object ";
             errorstr += objectName;
@@ -750,14 +750,14 @@ bool Vary::Execute(void)
         pobject.push_back(obj);
         parmId.push_back(id);
 
-        targeterDataFinalized = true;
+        solverDataFinalized = true;
         BuildCommandSummary(true);
         return retval;
     }
     
-    Real var = targeter->GetSolverVariable(variableId[0]);
+    Real var = solver->GetSolverVariable(variableId[0]);
     
-//    // Just a check here -- the targeter handles all of these now
+//    // Just a check here -- the solver handles all of these now
 //    if (variableMinimum[0] >= variableMaximum[0])
 //       throw CommandException("Invalid variable minimum and maximum for " +
 //          variableName[0]);
@@ -777,4 +777,13 @@ bool Vary::Execute(void)
 
     BuildCommandSummary(true);
     return retval;
+}
+
+
+void Vary::RunComplete()
+{
+   solverDataFinalized = false;
+   pobject.clear();
+   parmId.clear();
+   GmatCommand::RunComplete();
 }

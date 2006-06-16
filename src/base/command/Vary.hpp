@@ -89,10 +89,11 @@ public:
    virtual bool        InterpretAction();
    virtual bool        Initialize();
    virtual bool        Execute();
+   virtual void        RunComplete();
     
 protected:
    /// The name of the spacecraft that gets maneuvered
-   std::string         targeterName;
+   std::string         solverName;
    /// Name(s) of the variable(s)
    StringArray         variableName;
    /// Initial variable value(s)
@@ -107,22 +108,22 @@ protected:
    std::vector<Real>   variableMaximum;
    /// Maximum step allowed
    std::vector<Real>   variableMaximumStep;
-   /// Targeter ID for the parameters
+   /// solver ID for the parameters
    std::vector<Integer> variableId;
    /// Pointers to the objects that the variables affect
    std::vector<GmatBase*> pobject;
    /// Object ID for the parameters
    std::vector<Integer> parmId;
-   /// The Targeter instance used to manage the state machine
-   Solver              *targeter;
+   /// The solver instance used to manage the state machine
+   Solver              *solver;
    /// The integer ID assigned to the variable
    Integer             variableID;
-   /// Flag used to finalize the targeter data during execution
-   bool                targeterDataFinalized;
+   /// Flag used to finalize the solver data during execution
+   bool                solverDataFinalized;
     
     // Parameter IDs 
     /// ID for the burn object
-   const Integer       targeterNameID;
+   const Integer       solverNameID;
    /// ID for the burn object
    const Integer       variableNameID;
    /// ID for the burn object
