@@ -943,6 +943,11 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    objectTypes.push_back(Gmat::ATTITUDE);
    objectTypeNames.push_back("Attitude");
    
+   unsigned int defSeq = 0;
+   initialEulerSeq.push_back(defSeq);
+   initialEulerSeq.push_back(defSeq);
+   initialEulerSeq.push_back(defSeq);
+   
    for (Integer i = 0; i < 12; i++)
       eulerSequenceList.push_back(EULER_SEQ_LIST[i]);
  }
@@ -1072,6 +1077,9 @@ bool Attitude::Initialize()
          RBi = initialDcm;
          break;
       case GmatAttitude::EULER_ANGLES_AND_SEQUENCE_TYPE:
+         if (initialEulerSeq.size()  != 3)
+            throw AttitudeException(
+               "Euler Sequence ill-defined - cannot convert input\n");
          RBi = Attitude::ToCosineMatrix(
                          initialEulerAng * GmatMathUtil::RAD_PER_DEG, 
                          (Integer) initialEulerSeq.at(0),
