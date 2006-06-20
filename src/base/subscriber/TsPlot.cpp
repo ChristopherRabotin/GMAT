@@ -120,6 +120,8 @@ TsPlot::TsPlot(const TsPlot &copy) :
    mXParamName = copy.mXParamName;
    mYParamNames = copy.mYParamNames;
    
+   mAllParamNames = copy.mAllParamNames;
+   
    mOldName = copy.mOldName;
    mPlotTitle = copy.mPlotTitle;
    mXAxisTitle = copy.mXAxisTitle;
