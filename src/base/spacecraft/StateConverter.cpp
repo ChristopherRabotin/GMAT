@@ -118,7 +118,10 @@ StateConverter& StateConverter::operator=(const StateConverter &converter)
     // Don't do anything if copying self
     if (&converter == this)
         return *this;
-
+        
+    type = converter.type;
+    mu   = converter.mu; 
+   
     // Will fix it later
     return *this;
 }
