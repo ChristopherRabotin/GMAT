@@ -94,6 +94,8 @@ MathFunction& MathFunction::operator=(const MathFunction &mf)
         return *this;
         
     GmatBase::operator=(mf);
+    leftNode   = mf.leftNode;
+    rightNode  = mf.rightNode;
 
     return *this;
 }

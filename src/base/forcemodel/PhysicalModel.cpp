@@ -247,6 +247,8 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
    epoch       = pm.epoch;
    elapsedTime = pm.elapsedTime;
    prevElapsedTime = pm.prevElapsedTime;
+   relativeErrorThreshold = pm.relativeErrorThreshold;
+   solarSystem = pm.solarSystem;
    
    if (pm.modelState) 
    {
