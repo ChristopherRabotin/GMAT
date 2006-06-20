@@ -910,6 +910,18 @@ Rvector3 Attitude::ToAngularVelocity(const Rvector3 &eulerRates,
    return S * eulerRates;
 }
   
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+StringArray Attitude::GetEulerSequenceStrings()
+{
+   static StringArray eulerStrings;  // compiler didn't like this in the header
+   if (eulerStrings.size() == 0)  // set it, if it hasn't been already
+   {
+      for (Integer i = 0; i < 12; i++)
+         eulerStrings.push_back(EULER_SEQ_LIST[i]);
+   }
+   return eulerStrings;
+}
 
 //------------------------------------------------------------------------------
 // public methods

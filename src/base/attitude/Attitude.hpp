@@ -104,6 +104,8 @@ public:
                                       const Rvector3 &eulerAngles,
                                       Integer seq1, Integer seq2, 
                                       Integer seq3);
+                                      
+   static StringArray GetEulerSequenceStrings();
    
 
    // Constructor
@@ -221,6 +223,7 @@ protected:
    static const Gmat::ParameterType PARAMETER_TYPE[AttitudeParamCount - GmatBaseParamCount];
  
    static const std::string EULER_SEQ_LIST[12];
+   //static StringArray eulerStrings;
    
    static const Real TESTACCURACY;
    
