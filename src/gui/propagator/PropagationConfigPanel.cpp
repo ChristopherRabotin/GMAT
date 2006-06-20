@@ -381,7 +381,7 @@ void PropagationConfigPanel::SaveData()
          }
          else if (forceList[i]->bodyName == "Mars")
          {
-         	   #if DEBUG_GRAV_FIELD
+         	  #if DEBUG_GRAV_FIELD
             MessageInterface::ShowMessage("SaveData() Saving Gravity Field file for Mars\n");
             #endif
             
@@ -543,13 +543,30 @@ void PropagationConfigPanel::SaveData()
       
       // save forces to the prop setup
       thePropSetup->SetForceModel(newFm);
+      
+      #if DEBUG_GRAV_FIELD
+      ForceModel *tempFM = thePropSetup->GetForceModel();
+      MessageInterface::ShowMessage
+      ("PropagationConfigPanel::SaveData() ForceModel Name (Retrieved from PropSetup) %s\n", tempFM->GetName().c_str());
+      #endif   
+      
       numOfForces = thePropSetup->GetNumForces();
+      
+      #if DEBUG_GRAV_FIELD
+      MessageInterface::ShowMessage
+      ("PropagationConfigPanel::SaveData() ForceModel Count %d\n", numOfForces);
+      #endif   
 
       if (theForceModel->GetName() == "")
          delete theForceModel;
       
       theForceModel = newFm;
-     
+      
+      #if DEBUG_GRAV_FIELD
+      MessageInterface::ShowMessage
+      ("PropagationConfigPanel::SaveData() ForceModel Name %s\n", theForceModel->GetName().c_str());
+      #endif   
+      
       #if DEBUG_PROP_PANEL
       ShowForceList("SaveData() AFTER  saving ForceModel");
       #endif      
