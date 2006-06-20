@@ -75,6 +75,7 @@ MatlabWs::MatlabWs(const MatlabWs &copy) :
    mNumParams = copy.mNumParams;
    mParamNames = copy.mParamNames;
    mEvaluateFrequency = copy.mEvaluateFrequency;
+   mAllRefObjectNames = copy.mAllRefObjectNames;
 }
 
 
@@ -96,6 +97,7 @@ MatlabWs& MatlabWs::operator=(const MatlabWs& right)
    mNumParams = right.mNumParams;
    mParamNames = right.mParamNames;
    mEvaluateFrequency = right.mEvaluateFrequency;
+   mAllRefObjectNames = right.mAllRefObjectNames;
 
    return *this;
 }

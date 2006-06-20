@@ -127,6 +127,7 @@ ReportFile::~ReportFile(void)
 //------------------------------------------------------------------------------
 ReportFile::ReportFile(const ReportFile &rf) :
    Subscriber      (rf),
+   outputPath      (rf.outputPath),
    filename        (rf.filename),
    precision       (rf.precision),
    columnWidth     (rf.columnWidth),
@@ -134,7 +135,8 @@ ReportFile::ReportFile(const ReportFile &rf) :
    leftJustify     (rf.leftJustify),
    zeroFill        (rf.zeroFill),
    lastUsedProvider (-1),
-   usedByReport    (rf.usedByReport)
+   usedByReport    (rf.usedByReport),
+   calledByReport  (rf.calledByReport)
 {
    //if (filename == "")
    //   filename = "ReportFile.txt";
@@ -143,7 +145,8 @@ ReportFile::ReportFile(const ReportFile &rf) :
    mVarParams = rf.mVarParams; 
    mNumVarParams = rf.mNumVarParams;
    mVarParamNames = rf.mVarParamNames;
-
+   mAllRefObjectNames = rf.mAllRefObjectNames;
+   
    parameterCount = ReportFileParamCount;
    initial = true;
 }
@@ -165,6 +168,7 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
    lastUsedProvider = -1;
    usedByReport = rf.usedByReport;
    
+   outputPath = rf.outputPath;
    filename = rf.filename;
    precision = rf.precision;
    columnWidth = rf.columnWidth;
@@ -174,6 +178,10 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
    mVarParams = rf.mVarParams; 
    mNumVarParams = rf.mNumVarParams;
    mVarParamNames = rf.mVarParamNames;
+   mAllRefObjectNames = rf.mAllRefObjectNames;
+   lastUsedProvider = rf.lastUsedProvider;
+   usedByReport = rf.usedByReport;
+   calledByReport = rf.calledByReport;
 
    initial = true;
 

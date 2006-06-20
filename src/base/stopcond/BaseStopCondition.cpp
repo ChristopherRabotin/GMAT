@@ -160,6 +160,8 @@ BaseStopCondition::BaseStopCondition(const BaseStopCondition &copy)
      isPeriapse         (copy.isPeriapse),
      isApoapse          (copy.isApoapse)
 {
+   mAllRefObjectNames = copy.mAllRefObjectNames;  // Is this correct?
+   
    mBaseEpoch = copy.mBaseEpoch;
    mEpoch = copy.mEpoch;
    mGoal = copy.mGoal;
@@ -210,6 +212,8 @@ BaseStopCondition& BaseStopCondition::operator= (const BaseStopCondition &right)
       return *this;
    
    GmatBase::operator=(right);
+   
+   mAllRefObjectNames = right.mAllRefObjectNames; // Is this correct?
    
    mBaseEpoch = right.mBaseEpoch;
    mEpoch = right.mEpoch;

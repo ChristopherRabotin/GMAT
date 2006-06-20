@@ -219,6 +219,8 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    coordinateSystem     (a.coordinateSystem),      // Check this one...
    coordSysName         (a.coordSysName),
    attitude             (a.attitude),              // Check this one too ...
+   stateConverter       (a.stateConverter),
+   coordConverter       (a.coordConverter),
    displayEpoch         (a.displayEpoch),   
    displayDateFormat    (a.displayDateFormat),
    totalMass            (a.totalMass),
@@ -284,11 +286,16 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    anomalyType          = a.anomalyType;
    coordSysName         = a.coordSysName;
    attitude             = a.attitude,        // correct?
+   stateConverter       = a.stateConverter;
+   coordConverter       = a.coordConverter;
    displayEpoch         = a.displayEpoch;   
    displayDateFormat    = a.displayDateFormat;
    totalMass            = a.totalMass;
    initialDisplay       = false;
+   csSet                = a.csSet;
    anomaly              = a.anomaly;
+   tanks                = a.tanks;
+   thrusters            = a.thrusters;
 
 //   MessageInterface::ShowMessage("Anomaly has type %s, copied from %s\n", 
 //      anomaly.GetType().c_str(), a.anomaly.GetType().c_str());
@@ -307,11 +314,16 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
       coordinateSystem = a.coordinateSystem;
       csSet = true;
    }
+   
+   internalCoordSystem = a.internalCoordSystem;
 
    stateElementLabel = a.stateElementLabel;
    stateElementUnits = a.stateElementUnits;
+   representations   = a.representations;
    tankNames         = a.tankNames;
    thrusterNames     = a.thrusterNames;
+   
+   BuildElementLabelMap();
    
    return *this;
 }

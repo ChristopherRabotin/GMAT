@@ -45,8 +45,6 @@
 class SolarSystem : public GmatBase
 {
 public:
-   
-
    // class default constructor - creates default solar system
    // for Build 2 - this is Sun, Earth, Moon only
    SolarSystem(std::string withName = "");

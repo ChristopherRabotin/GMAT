@@ -83,7 +83,8 @@ MathElement::~MathElement()
 MathElement::MathElement(const MathElement &me) :
              MathNode      (me),
              refObject     (me.refObject),
-             refObjectName (me.refObjectName)
+             refObjectName (me.refObjectName),
+             refObjectType (me.refObjectType)
 {
 }
 
@@ -107,6 +108,7 @@ MathElement& MathElement::operator=(const MathElement &me)
    MathNode::operator=(me);
    refObject = me.refObject;
    refObjectName = me.refObjectName;
+   refObjectType = me.refObjectType;
 
    return *this;
 }
@@ -189,7 +191,11 @@ bool MathElement::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          
          refObject = (Parameter*) obj;
          
-         if (refObject->GetReturnType() == Gmat::RMATRIX_TYPE)
+         refObjectType = refObject->GetTypeName().c_str();
+         
+         //if (refObject->GetReturnType() == Gmat::RMATRIX_TYPE)
+         
+         if (refObjectType == "Array")
          {
             Array *arr = (Array*)refObject;     
             elementType = Gmat::RMATRIX_TYPE;
@@ -338,6 +344,23 @@ const StringArray& MathElement::GetRefObjectNameArray(const Gmat::ObjectType typ
 //------------------------------------------------------------------------------
 void MathElement::SetMatrixValue(const Rmatrix &mat)
 {
+//	if (refObject)
+//	{
+//	   refObjectType = refObject->GetTypeName().c_str();
+//	   
+//	   if (refObjectType == "Array")
+//	      return MathNode::Evaluate();
+//	   else
+//	   {
+//	      realValue = refObject->EvaluateReal();
+//   	      return realValue;
+//	   }
+//	}
+//   else if (realValue != 0.0)
+//      return realValue;
+//   
+//   return MathNode::Evaluate();
+
    // if we can set matrix value, it is not a parameter
    isNumber = true;
    refObjectName = "";

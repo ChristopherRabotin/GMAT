@@ -64,6 +64,7 @@ Subscriber::Subscriber(const Subscriber &copy) :
    GmatBase (copy),
    data (NULL),
    next (NULL),
+   internalCoordSystem (NULL),
    active (copy.active),
 //    isEndOfReceive(false),
 //    isEndOfRun(false),
@@ -97,6 +98,7 @@ Subscriber& Subscriber::operator=(const Subscriber& sub)
     isEndOfReceive = sub.isEndOfReceive;
     isEndOfRun = sub.isEndOfRun;
     currentProvider = sub.currentProvider;
+    internalCoordSystem = NULL;
     
     return *this;
 }

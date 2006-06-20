@@ -104,6 +104,7 @@ Formation::Formation(const Formation& orig) :
    satCount       (orig.satCount)
 {
    parameterCount = FormationParamCount;
+   components.clear();
 }
 
 
@@ -127,6 +128,7 @@ Formation& Formation::operator=(const Formation& orig)
       componentNames = orig.componentNames;
       dimension      = orig.dimension;
       satCount       = orig.satCount;
+      components.clear();
    }
 
    return *this;

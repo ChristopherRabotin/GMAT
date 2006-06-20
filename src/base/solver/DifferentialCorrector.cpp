@@ -118,6 +118,7 @@ DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
    achieved                (NULL),
    jacobian                (NULL),
    inverseJacobian         (NULL),
+   pertNumber              (dc.pertNumber),
    indx                    (NULL),
    b                       (NULL),
    ludMatrix               (NULL),
@@ -126,6 +127,9 @@ DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
    solverTextFile          (dc.solverTextFile),
    instanceNumber          (dc.instanceNumber)
 {
+  variableNames.clear();
+  goalNames.clear();
+  
    parameterCount = dc.parameterCount;
 }
 
@@ -137,7 +141,11 @@ DifferentialCorrector&
         return *this;
 
    Solver::operator=(dc);
+   
    FreeArrays();
+   
+   variableNames.clear();
+   goalNames.clear();
 
    variableCount         = dc.variableCount;
    goalCount             = dc.goalCount;
@@ -147,7 +155,8 @@ DifferentialCorrector&
    initialized           = false;
    solverTextFile        = dc.solverTextFile;
    instanceNumber        = dc.instanceNumber;
-
+   pertNumber            = dc.pertNumber;
+   
    return *this;
 }
 

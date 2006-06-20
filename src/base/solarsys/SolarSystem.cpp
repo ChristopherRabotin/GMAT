@@ -208,6 +208,7 @@ bodiesInUse     (ss.bodiesInUse), // copy it first
 bodyStrings     (ss.bodyStrings)
 {
    parameterCount   = SolarSystemParamCount;
+   
    // replace body pointers with clones
    Integer sz = bodiesInUse.size();
    Integer i;
@@ -243,6 +244,7 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
    bodyStrings.clear();
    bodiesInUse    = ss.bodiesInUse;
    bodyStrings    = ss.bodyStrings;
+   
    // replace body pointers with clones
    Integer sz = bodiesInUse.size();
    Integer i;

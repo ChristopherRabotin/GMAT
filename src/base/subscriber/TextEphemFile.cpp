@@ -117,6 +117,24 @@ TextEphemFile::TextEphemFile(const TextEphemFile &copy) :
    mBufferSize = mInterpolator->GetBufferSize();
    mEpochSysId = copy.mEpochSysId;
    mIsGregorian = copy.mIsGregorian;
+   
+   Integer i;
+   for (i = 0; i < 7; i++)
+      mColWidth[i] = copy.mColWidth[i];
+      
+   for (i = 0; i < 6; i++)
+      mOutputVals[i] = copy.mOutputVals[i];
+      
+   for (i = 0; i < BUFFER_SIZE; i++)
+   {
+   	   mTimeBuffer[i] = copy.mTimeBuffer[i];
+      mXposBuffer[i] = copy.mXposBuffer[i];
+      mYposBuffer[i] = copy.mYposBuffer[i];
+      mZposBuffer[i] = copy.mZposBuffer[i];
+      mXvelBuffer[i] = copy.mXvelBuffer[i];
+      mYvelBuffer[i] = copy.mYvelBuffer[i];
+      mZvelBuffer[i] = copy.mZvelBuffer[i];
+   }
 
    //MessageInterface::ShowMessage
    //   ("TextEphemFile() Copy Constructor: mBufferSize=%d\n", mBufferSize);   
@@ -153,6 +171,24 @@ TextEphemFile& TextEphemFile::operator=(const TextEphemFile& right)
    mBufferSize = mInterpolator->GetBufferSize();
    mEpochSysId = right.mEpochSysId;
    mIsGregorian = right.mIsGregorian;
+   
+   Integer i;
+   for (i = 0; i < 7; i++)
+      mColWidth[i] = right.mColWidth[i];
+      
+   for (i = 0; i < 6; i++)
+      mOutputVals[i] = right.mOutputVals[i];
+      
+   for (i = 0; i < BUFFER_SIZE; i++)
+   {
+   	   mTimeBuffer[i] = right.mTimeBuffer[i];
+      mXposBuffer[i] = right.mXposBuffer[i];
+      mYposBuffer[i] = right.mYposBuffer[i];
+      mZposBuffer[i] = right.mZposBuffer[i];
+      mXvelBuffer[i] = right.mXvelBuffer[i];
+      mYvelBuffer[i] = right.mYvelBuffer[i];
+      mZvelBuffer[i] = right.mZvelBuffer[i];
+   }
 
    //MessageInterface::ShowMessage
    //   ("TextEphemFile() = operator: mBufferSize=%d\n", mBufferSize);

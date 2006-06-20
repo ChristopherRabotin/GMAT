@@ -111,6 +111,8 @@ FuelTank::FuelTank(const FuelTank& ft) :
    volume               (ft.volume),
    density              (ft.density),
    pressureRegulated    (ft.pressureRegulated),
+   gasVolume            (ft.gasVolume),
+   pvBase               (ft.pvBase),
    initialized          (false)
 {
    parameterCount = ft.parameterCount;
@@ -142,6 +144,9 @@ FuelTank& FuelTank::operator=(const FuelTank& ft)
    volume = ft.volume;
    density = ft.density;
    pressureRegulated = ft.pressureRegulated;
+   gasVolume         = ft.gasVolume;
+   pvBase            = ft.pvBase;
+   initialized       = false;
    
    Initialize();
    
