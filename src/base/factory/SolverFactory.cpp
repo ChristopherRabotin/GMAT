@@ -18,11 +18,18 @@
  */
 //------------------------------------------------------------------------------
 
-
+#include "gmatdefs.hpp"
 #include "SolverFactory.hpp"
 
 // Headers for the supported Solvers
+//#include "QuasiNewton.hpp"
+//#include "SteepestDescent.hpp"
+//#include "FminconOptimizer.hpp"
 #include "DifferentialCorrector.hpp"
+//#include "Broyden.hpp"
+//#include "ParametricScanner.hpp"
+//#include "MonteCarlo.hpp"
+
 
 
 //---------------------------------
@@ -44,9 +51,21 @@
 Solver* SolverFactory::CreateSolver(const std::string &ofType,
                                     const std::string &withName)
 {
+   //if (ofType == "QuasiNewton") 
+   //   return new QuasiNewton(withName);
+   //else if (ofType == "SteepestDescent")
+   //   return new SteepestDescent(withName);
+   //else if (ofType == "FminconOptimizer")
+   //   return new FminconOptimizer(withName);
+   //else ... join lines ...
    if (ofType == "DifferentialCorrector")
       return new DifferentialCorrector(withName);
-   // Add other solvers here    
+   // else if (ofType == "Broyden")
+   //   return new Broyden(withName);
+   //else if (ofType == "ParametricScanner")
+   //   return new ParametricScanner(withName);
+   //else if (ofType == "MonteCarlo")
+   //   return new MonteCarlo(withName);
     
    return NULL;
 }
@@ -65,23 +84,15 @@ SolverFactory::SolverFactory() :
 {
    if (creatables.empty())
    {
+      //creatables.push_back("QuasiNewton");
+      //creatables.push_back("SteepestDescent");
+      //creatables.push_back("FminconOptimizer");
       creatables.push_back("DifferentialCorrector");
-      // Add new descriptors here
+      //creatables.push_back("Broyden");
+      //creatables.push_back("ParametricScanner");
+      //creatables.push_back("MonteCarlo");
    }
 }
-
-
-//------------------------------------------------------------------------------
-// ~SolverFactory()
-//------------------------------------------------------------------------------
-/**
- * Destructor for the SolverFactory base class.
- */
-//------------------------------------------------------------------------------
-SolverFactory::~SolverFactory()
-{
-}
-
 
 //------------------------------------------------------------------------------
 //  SolverFactory(StringArray createList)
@@ -93,7 +104,8 @@ SolverFactory::~SolverFactory()
  *
  */
 //------------------------------------------------------------------------------
-SolverFactory::SolverFactory(StringArray createList)
+SolverFactory::SolverFactory(StringArray createList) :
+Factory(createList, Gmat::SOLVER)
 {
 }
 
@@ -112,8 +124,13 @@ SolverFactory::SolverFactory(const SolverFactory& fact) :
 {
    if (creatables.empty())
    {
+      //creatables.push_back("QuasiNewton");
+      //creatables.push_back("SteepestDescent");
+      //creatables.push_back("FminconOptimizer");
       creatables.push_back("DifferentialCorrector");
-      // Add new descriptors here
+      //creatables.push_back("Broyden");
+      //creatables.push_back("ParametricScanner");
+      //creatables.push_back("MonteCarlo");
    }
 }
 
@@ -135,7 +152,17 @@ SolverFactory& SolverFactory::operator=(const SolverFactory& fact)
    return *this;
 }
     
-  
+
+//------------------------------------------------------------------------------
+// ~SolverFactory()
+//------------------------------------------------------------------------------
+/**
+ * Destructor for the SolverFactory base class.
+ */
+//------------------------------------------------------------------------------
+SolverFactory::~SolverFactory()
+{
+}
 
 //---------------------------------
 //  protected methods
