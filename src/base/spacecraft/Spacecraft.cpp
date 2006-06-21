@@ -294,8 +294,8 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    initialDisplay       = false;
    csSet                = a.csSet;
    anomaly              = a.anomaly;
-   tanks                = a.tanks;
-   thrusters            = a.thrusters;
+//   tanks                = a.tanks;
+//   thrusters            = a.thrusters;
 
 //   MessageInterface::ShowMessage("Anomaly has type %s, copied from %s\n", 
 //      anomaly.GetType().c_str(), a.anomaly.GetType().c_str());
