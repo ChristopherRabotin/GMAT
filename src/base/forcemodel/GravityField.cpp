@@ -581,7 +581,8 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
       
    //Real* satState;
    Real satState[6];
-   Real f[3], rbb3, mu_rbb, aIndirect[3]; // , now;
+   Real f[3], rbb3, mu_rbb;
+   Real aIndirect[3] = {0.0,0.0,0.0};
    Integer nOffset;
    bool sameCS = false;
    
@@ -655,22 +656,26 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
       // Precalculations for the indirect effect term
       //rbb3 = (*rv)[0] * (*rv)[0] + (*rv)[1] * (*rv)[1] + (*rv)[2] * (*rv)[2];
       rbb3 = (rv[0] * rv[0]) + (rv[1] * rv[1]) + (rv[2] * rv[2]);
-      rbb3 = rbb3 * sqrt(rbb3);
-      mu_rbb = mu / rbb3;
-      //aIndirect[0] = mu_rbb * (*rv)[0];
-      //aIndirect[1] = mu_rbb * (*rv)[1];
-      //aIndirect[2] = mu_rbb * (*rv)[2];
-      aIndirect[0] = mu_rbb * rv[0];
-      aIndirect[1] = mu_rbb * rv[1];
-      aIndirect[2] = mu_rbb * rv[2];
-
+      if (GmatMathUtil::Abs(rbb3) < 1.0e-14)
+         aIndirect[0] = aIndirect[1] = aIndirect[2] = 0.0;
+      else
+      {
+         rbb3 = rbb3 * sqrt(rbb3);
+         mu_rbb = mu / rbb3;
+         //aIndirect[0] = mu_rbb * (*rv)[0];
+         //aIndirect[1] = mu_rbb * (*rv)[1];
+         //aIndirect[2] = mu_rbb * (*rv)[2];
+         aIndirect[0] = mu_rbb * rv[0];
+         aIndirect[1] = mu_rbb * rv[1];
+         aIndirect[2] = mu_rbb * rv[2];
+      }
       #ifdef DEBUG_GRAVITY_FIELD
          MessageInterface::ShowMessage(
             "Indirect calcs for body %s, target %s, and fixed  %s\n"
-            "   rv = [%lf %lf %lf %lf %lf %lf]\n",
+            "   rv = [%lf %lf %lf]\n",
             body->GetName().c_str(), targetCS->GetOriginName().c_str(), 
             fixedCS->GetOriginName().c_str(), 
-            rv[0], rv[1], rv[2], rv[3], rv[4], rv[5]);
+            rv[0], rv[1], rv[2]);
       #endif
    }
    else
