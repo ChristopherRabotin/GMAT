@@ -338,9 +338,13 @@ const std::string& Array::GetGeneratingString(Gmat::WriteMode mode,
                                               const std::string &useName)
 {
    std::stringstream data;
+   std::stringstream value;
 
    data.precision(18);   // Crank up data precision so we don't lose anything
    std::string preface = "", nomme;
+
+   value.str("");
+   value.precision(18);
    
    if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
        (mode == Gmat::SHOW_SCRIPT))
@@ -360,7 +364,16 @@ const std::string& Array::GetGeneratingString(Gmat::WriteMode mode,
            << "[" << mNumRows << ", " << mNumCols << "];\n";
       preface = "GMAT ";
    }
-   
+
+   // set value before changing nomme
+   if (mRmatValue.IsSized())
+   {
+      for (Integer i=0; i<mNumRows; i++)
+         for (Integer j=0; j<mNumCols; j++)
+            value << "GMAT " << nomme << "(" <<i+1 <<", " <<j+1 <<") = " 
+            <<mRmatValue.GetElement(i, j)  <<";\n";
+   }
+  
    nomme += ".";
    
    if (mode == Gmat::OWNED_OBJECT) {
@@ -372,6 +385,8 @@ const std::string& Array::GetGeneratingString(Gmat::WriteMode mode,
    WriteParameters(mode, preface, data);
    
    generatingString = data.str();
+   generatingString = generatingString +value.str();
+   
    return generatingString;
 }
 
