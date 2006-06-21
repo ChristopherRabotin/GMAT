@@ -1939,6 +1939,8 @@ bool Spacecraft::Initialize()
                      instanceName.c_str());
       //throw SpaceObjectException("Spacecraft has no attitude set.");
    }
+   else
+      attitude->Initialize();
    
    return true;
 }

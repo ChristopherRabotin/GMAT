@@ -1074,6 +1074,7 @@ Attitude::~Attitude()
 //---------------------------------------------------------------------------
 bool Attitude::Initialize()
 { 
+   if (isInitialized) return true;
    GmatBase::Initialize();
    if (!refCS) throw AttitudeException(
       "Reference coordinate system not defined for attitude " + 
