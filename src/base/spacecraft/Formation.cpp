@@ -21,6 +21,7 @@
 #include "Formation.hpp"
 #include <algorithm>          // for find()
 
+//#define DEBUG_FORMATION
 //#define DEBUG_FORMATION_ACTIONS
 
 #include "MessageInterface.hpp"
@@ -104,7 +105,10 @@ Formation::Formation(const Formation& orig) :
    satCount       (orig.satCount)
 {
    parameterCount = FormationParamCount;
-   components.clear();
+   
+   // No need to clear components here because this is a fresh object, and 
+   // nothing has been loaded into it yet
+   //components.clear();
 }
 
 
@@ -128,9 +132,17 @@ Formation& Formation::operator=(const Formation& orig)
       componentNames = orig.componentNames;
       dimension      = orig.dimension;
       satCount       = orig.satCount;
-      components.clear();
+      
+      // Don't clear components here because the assignment operator is used 
+      // DURING propagation to evaluate stopping conditions 
+      // components.clear();
    }
-
+   #ifdef DEBUG_FORMATION
+      MessageInterface::ShowMessage(
+         "Formation::operator= : Formation '%s' has %d components\n", 
+         instanceName.c_str(), components.size());
+   #endif
+   
    return *this;
 }
 

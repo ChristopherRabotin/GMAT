@@ -1812,6 +1812,9 @@ bool Propagate::Initialize()
       
       bool finiteBurnActive = false;
       
+      // Ensure that we are using fresh objects
+		EmptyBuffer();
+      
       for (scName = satName[index]->begin(); scName != satName[index]->end(); 
            ++scName) {
          if (objectMap->find(*scName) == objectMap->end()) {
@@ -2698,9 +2701,9 @@ void Propagate::RunComplete()
 //   
 
    #ifdef DEBUG_FIRST_CALL
-   firstStepFired = false;
+      firstStepFired = false;
    #endif
-
+   
    GmatCommand::RunComplete();
 }
 
@@ -3075,6 +3078,10 @@ void Propagate::BufferSatelliteStates(bool fillingBuffer)
         i != formBuffer.end(); ++i)
    {
       soName = (*i)->GetName();
+      #ifdef DEBUG_STOPPING_CONDITIONS
+         MessageInterface::ShowMessage("Buffering formation %s, filling = %s\n", 
+            soName.c_str(), (fillingBuffer?"true":"false"));
+      #endif
       if (fillingBuffer)
       {
          fromForm = (Formation *)((*objectMap)[soName]);
