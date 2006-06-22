@@ -43,6 +43,7 @@ public:
 
 private:
    
+   // Integrator types
    enum IntegratorType
    {
       RKV89 = 0,
@@ -55,62 +56,70 @@ private:
       CW,
       IntegratorCount,
    };
-   
+
+   // Earth gravity field model
    enum EarthGravModelType
    {
-   	   E_NONE_GM = 0,
-   	   JGM2,
-   	   JGM3,
-   	   EGM96,
-   	   E_OTHER,
-   	   EarthGravModelCount,
-   };
+      E_NONE_GM = 0,
+      JGM2,
+      JGM3,
+      EGM96,
+      E_OTHER,
+      EarthGravModelCount,
+   };   
    
+   // Luna gravity field model
    enum LunaGravModelType
    {
-   	   L_NONE_GM = 0,
-   	   LP165,
-   	   L_OTHER,
-   	   LunaGravModelCount,
-   };
+      L_NONE_GM = 0,
+      LP165,
+      L_OTHER,
+      LunaGravModelCount,
+   };   
    
+   // Venus gravity field model
    enum VenusGravModelType
    {
-   	   V_NONE_GM = 0,
-   	   MGNP180U,
-   	   V_OTHER,
-   	   VenusGravModelCount,
-   };
+      V_NONE_GM = 0,
+      MGNP180U,
+      V_OTHER,
+      VenusGravModelCount,
+   };   
    
+   // Mars gravity field model
    enum MarsGravModelType
    {
-   	   M_NONE_GM = 0,
-   	   MARS50C,
-   	   M_OTHER,
-   	   MarsGravModelCount,
-   };
+      M_NONE_GM = 0,
+      MARS50C,
+      M_OTHER,
+      MarsGravModelCount,
+   };   
    
+   // Other gravity field model
    enum OthersGravModelType
    {
-   	   O_NONE_GM = 0,
-   	   O_OTHER,
-   	   OthersGravModelCount,
+      O_NONE_GM = 0,
+      O_OTHER,
+      OthersGravModelCount,
    };
    
-   enum DragModelType
+   // Earth drag model
+   enum EarthDragModelType
    {
       NONE_DM = 0,
       EXPONENTIAL,
       MSISE90,
       JR,
-      DragModelCount,
+      EarthDragModelCount,
    };
    
+   // Magnetic force drag model
    enum MagfModelType
    {
       NONE_MM = 0,
       MagfModelCount,
    };
+
    
    struct ForceType
    {
@@ -222,10 +231,12 @@ private:
    StringArray dragModelArray;
    StringArray magfModelArray;
    
+   std::map<std::string, std::string> theFileMap;
+   
    wxArrayString primaryBodiesArray;
    wxArrayString secondaryBodiesArray;
    wxArrayString integratorArray;
-    
+   
    Integer numOfBodies;
    Integer numOfForces;
    Integer currentBodyId;
@@ -241,6 +252,7 @@ private:
       
    bool useDragForce;
    bool isForceModelChanged;
+   bool isDegOrderChanged;
    bool isPotFileChanged;
    bool isMagfTextChanged;
    bool isIntegratorChanged;
@@ -280,6 +292,10 @@ private:
    void DisplayPointMassData();
    void DisplayMagneticFieldData();
    void DisplaySRPData();
+
+   // Saving data
+   void SaveDegOrder();
+   void SavePotFile();
    
    // Text control event method
    void OnIntegratorTextUpdate(wxCommandEvent &event);
@@ -308,6 +324,7 @@ private:
    // for Debug
    void ShowPropData(const std::string &header);
    void ShowForceList(const std::string &header);
+   void ShowForceModel(const std::string &header);
    
    // for reading gravity files
    void ParseDATGravityFile(std::string fname);
