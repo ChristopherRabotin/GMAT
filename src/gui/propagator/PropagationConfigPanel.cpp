@@ -1061,19 +1061,19 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                       wxDefaultPosition, wxSize(160,-1), wxTE_READONLY );
    gravityDegreeTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_GRAV, wxT(""), wxDefaultPosition,
-                      wxSize(25,-1), 0 );
+                      wxSize(30,-1), 0 );
    gravityOrderTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_GRAV, wxT(""), wxDefaultPosition,
-                      wxSize(25,-1), 0 );
+                      wxSize(30,-1), 0 );
    potFileTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_GRAV, wxT(""), wxDefaultPosition,
                       wxSize(165,-1), 0 );
    magneticDegreeTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_MAGF, wxT(""), wxDefaultPosition,
-                      wxSize(25,-1), 0 );
+                      wxSize(30,-1), 0 );
    magneticOrderTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_MAGF, wxT(""), wxDefaultPosition,
-                      wxSize(25,-1), 0 );
+                      wxSize(30,-1), 0 );
    pmEditTextCtrl =
       new wxTextCtrl( parent, -1, wxT(""), wxDefaultPosition,
                       wxSize(235,-1), wxTE_READONLY );
