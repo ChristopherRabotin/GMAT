@@ -2843,14 +2843,14 @@ std::string Moderator::GetPotentialFileName(const std::string &fileType)
       return theFileManager->GetFullPathname("JGM2_FILE");
    else if (fileType == "JGM3")
       return theFileManager->GetFullPathname("JGM3_FILE");
-   else if (fileType == "EGM")
-      return theFileManager->GetFullPathname("EGM_FILE");
-   else if (fileType == "LP")
-      return theFileManager->GetFullPathname("LP_FILE");
-   else if (fileType == "MGN")
-      return theFileManager->GetFullPathname("MGN_FILE");
-   else if (fileType == "MARS")
-      return theFileManager->GetFullPathname("MARS_FILE");
+   else if (fileType == "EGM96")
+      return theFileManager->GetFullPathname("EGM96_FILE");
+   else if (fileType == "LP165P")
+      return theFileManager->GetFullPathname("LP165P_FILE");
+   else if (fileType == "MGNP180U")
+      return theFileManager->GetFullPathname("MGNP180U_FILE");
+   else if (fileType == "MARS50C")
+      return theFileManager->GetFullPathname("MARS50C_FILE");
    else
       return "Unknown Potential File Type:" + fileType;
 }
