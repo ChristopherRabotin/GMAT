@@ -20,6 +20,7 @@
 
 #include "Vary.hpp"
 #include "DifferentialCorrector.hpp"
+#include "Parameter.hpp"
 #include "MessageInterface.hpp"
 #include <sstream>         // for std::stringstream
 
@@ -727,29 +728,38 @@ bool Vary::Execute(void)
             throw CommandException(errorstr);
         }
         
-        Integer id = obj->GetParameterID(parmName);
-
-        if (id == -1) {
-            std::string errorstr = "Could not find parameter ";
-            errorstr += parmName;
-            errorstr += " on object ";
-            errorstr += objectName;
-            throw CommandException(errorstr);
-        }
+        Integer id;
         
-        Gmat::ParameterType type = obj->GetParameterType(id);
-        if (type != Gmat::REAL_TYPE) {
-            std::string errorstr = "The solver variable ";
-            errorstr += parmName;
-            errorstr += " on object ";
-            errorstr += objectName;
-            errorstr += " is not Real.";
-            throw CommandException(errorstr);
+        if (obj->GetTypeName() == "Variable")
+        {
+            id = -1;
         }
+        else
+        {
+            id = obj->GetParameterID(parmName);
+    
+            if (id == -1) {
+                std::string errorstr = "Could not find parameter ";
+                errorstr += parmName;
+                errorstr += " on object ";
+                errorstr += objectName;
+                throw CommandException(errorstr);
+            } 
         
+            Gmat::ParameterType type = obj->GetParameterType(id);
+            if (type != Gmat::REAL_TYPE) {
+                std::string errorstr = "The solver variable ";
+                errorstr += parmName;
+                errorstr += " on object ";
+                errorstr += objectName;
+                errorstr += " is not Real.";
+                throw CommandException(errorstr);
+            }
+        }
+         
         pobject.push_back(obj);
         parmId.push_back(id);
-
+        
         solverDataFinalized = true;
         BuildCommandSummary(true);
         return retval;
@@ -773,7 +783,10 @@ bool Vary::Execute(void)
           variableName[0].c_str(), var, variableMinimum[0], variableMaximum[0]);
     #endif
 
-    pobject[0]->SetRealParameter(parmId[0], var);
+    if (pobject[0]->GetTypeName() == "Variable")
+       ((Parameter*)pobject[0])->SetReal(var);
+    else
+       pobject[0]->SetRealParameter(parmId[0], var);
 
     BuildCommandSummary(true);
     return retval;
