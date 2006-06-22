@@ -1801,7 +1801,8 @@ void GuiItemManager::UpdateParameterList()
                {
                   MessageInterface::ShowMessage
                      ("GuiItemManager::UpdateParameterList() % is ignored. GUI can "
-                      "handle up to %d user parameters.\n", MAX_USER_VAR);
+                      "handle up to %d Variables.\n", param->GetName().c_str(),
+                      MAX_USER_VAR);
                }
             }
          }
@@ -1825,7 +1826,8 @@ void GuiItemManager::UpdateParameterList()
             {
                MessageInterface::ShowMessage
                   ("GuiItemManager::UpdateParameterList() % is ignored. GUI can "
-                   "handle up to %d user parameters.\n", MAX_USER_STRING);
+                   "handle up to %d Strings.\n", param->GetName().c_str(),
+                   MAX_USER_STRING);
             }
          }
          // user Array
@@ -1844,7 +1846,8 @@ void GuiItemManager::UpdateParameterList()
             {
                MessageInterface::ShowMessage
                   ("GuiItemManager::UpdateParameterList() % is ignored. GUI can "
-                   "handle up to %d user parameters.\n", MAX_USER_ARRAY);
+                   "handle up to %d Arrays.\n", param->GetName().c_str(),
+                   MAX_USER_ARRAY);
             }
          }
       }

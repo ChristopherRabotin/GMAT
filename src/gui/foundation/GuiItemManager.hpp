@@ -53,11 +53,11 @@ public:
    static const int MAX_SC_PROPERTY = 100; // Max Spacecraft
    static const int MAX_IB_PROPERTY = 10;  // Max ImpulsiveBurn
    static const int MAX_PROPERTY = 110;
-   static const int MAX_USER_VAR = 20;
-   static const int MAX_USER_STRING = 20;
-   static const int MAX_USER_ARRAY = 20;
-   static const int MAX_USER_PARAM = 40;
-   static const int MAX_PLOT_PARAM = 140;
+   static const int MAX_USER_VAR = 50;
+   static const int MAX_USER_STRING = 50;
+   static const int MAX_USER_ARRAY = 50;
+   static const int MAX_USER_PARAM = 150;
+   static const int MAX_PLOT_PARAM = 250;
 
    // Other
    static const int MAX_COORD_SYS = 20;
