@@ -49,21 +49,25 @@ public:
       TIME_PATH,
       TEXTURE_PATH, //Notes: TEXTURE_PATH is used in SetPathname()
       
-      // file name
+      // general file name
       LOG_FILE,
       REPORT_FILE,
       SPLASH_FILE,
       TIME_COEFF_FILE,
+      
+      // specific file name
+      //    Notes: Don't add general planet potential files here. They are handled
+      //    when gmat_startup_file are read by following naming convention.
       SLP_FILE,
       DE200_FILE,
       DE202_FILE,
       DE405_FILE,
       JGM2_FILE,
       JGM3_FILE,
-      EGM_FILE,
-      LP_FILE,
-      MGN_FILE,
-      MARS_FILE,
+      EGM96_FILE,
+      LP165P_FILE,
+      MGNP180U_FILE,
+      MARS50C_FILE,
       EOP_FILE,
       PLANETARY_COEFF_FILE,
       NUTATION_COEFF_FILE,
@@ -115,6 +119,7 @@ private:
    std::map<std::string, FileInfo*> mFileMap;
    
    void AddFileType(const std::string &type, const std::string &name);
+   void AddAvailablePotentialFiles();
    
    static FileManager *theInstance;
    static const std::string FILE_TYPE_STRING[FileTypeCount];

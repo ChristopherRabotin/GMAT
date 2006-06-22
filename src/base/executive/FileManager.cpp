@@ -25,6 +25,7 @@
 #include <sstream>
 #include <iomanip>
 
+// If we want to create default input file names turn this on
 //#define FM_CREATE_DEFAULT_INPUT
 
 //#define DEBUG_FILE_MANAGER 1
@@ -52,16 +53,17 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "REPORT_FILE",
    "SPLASH_FILE",
    "TIME_COEFF_FILE",
+   // specific file name
    "SLP_FILE",
    "DE200_FILE",
    "DE202_FILE",
    "DE405_FILE",
    "JGM2_FILE",
    "JGM3_FILE",
-   "EGM_FILE",
-   "LP_FILE",
-   "MGN_FILE",
-   "MARS_FILE",
+   "EGM96_FILE",
+   "LP165P_FILE",
+   "MGNP180U_FILE",
+   "MARS50C_FILE",
    "EOP_FILE",
    "PLANETARY_COEFF_FILE",
    "NUTATION_COEFF_FILE",
@@ -197,6 +199,9 @@ void FileManager::ReadStartupFile(const std::string &fileName)
             ("FileManager::ReadStartupFile() the VERSION not found.\n"
              "It no longer can read old startup file.\n");
    } // end While()
+
+   // add potential files by type names
+   AddAvailablePotentialFiles();
    
    // now use log file from the startup file
    MessageInterface::SetLogFile(GetAbsPathname("LOG_FILE"));
@@ -480,6 +485,11 @@ std::string FileManager::GetAbsPathname(const FileType type)
 std::string FileManager::GetAbsPathname(const std::string &typeName)
 {
    std::string fileType = GmatStringUtil::ToUpper(typeName);
+
+   #if DEBUG_FILE_MANAGER
+   MessageInterface::ShowMessage
+      ("FileManager::GetAbsPathname() typeName=%s\n", typeName.c_str());
+   #endif
    
    // typeName contains _PATH (loj: 1/9/06)
    if (fileType.find("_PATH") != fileType.npos)
@@ -519,9 +529,11 @@ std::string FileManager::GetAbsPathname(const std::string &typeName)
    //    typeName.c_str());
    
    //return "UNKNOWN_FILE_TYPE";
-   
-   throw GmatBaseException("FileManager::GetAbsPathname() file type: " +
-                           typeName + " is unknown\n");
+
+   throw GmatBaseException(typeName + " not in the gmat_startup_file\n");
+   MessageInterface::ShowMessage
+      ("FileManager::GetAbsPathname() file type:%s is not in the gmat_startup_file\n",
+       typeName.c_str());
 }
 
 
@@ -673,6 +685,38 @@ void FileManager::AddFileType(const std::string &type, const std::string &name)
 
 
 //------------------------------------------------------------------------------
+// void AddAvailablePotentialFiles()
+//------------------------------------------------------------------------------
+void FileManager::AddAvailablePotentialFiles()
+{
+   // add available potential files
+   
+   // earth gravity files
+   if (mFileMap.find("JGM2_FILE") == mFileMap.end())
+      AddFileType("JGM2_FILE", "EARTH_POT_PATH/JGM2.grv");
+   
+   if (mFileMap.find("JGM3_FILE") == mFileMap.end())
+      AddFileType("JGM3_FILE", "EARTH_POT_PATH/JGM3.grv");
+   
+   if (mFileMap.find("EGM96_FILE") == mFileMap.end())
+      AddFileType("EGM96_FILE", "EARTH_POT_PATH/EGM96.grv");
+   
+   // luna gravity files
+   if (mFileMap.find("LP165P_FILE") == mFileMap.end())
+      AddFileType("LP165P_FILE", "LUNA_POT_PATH/lp165p.grv");
+   
+   // venus gravity files
+   if (mFileMap.find("MGNP180U_FILE") == mFileMap.end())
+      AddFileType("MGNP180U_FILE", "VENUS_POT_PATH/MGNP180U.grv");
+   
+   // mars gravity files
+   if (mFileMap.find("MARS50C_FILE") == mFileMap.end())
+      AddFileType("MARS50C_FILE", "MARS_POT_PATH/Mars50c.grv");
+   
+}
+
+
+//------------------------------------------------------------------------------
 // FileManager()
 //------------------------------------------------------------------------------
 /*
@@ -724,19 +768,19 @@ FileManager::FileManager()
    AddFileType("EARTH_POT_PATH", "./files/gravity/earth/");
    AddFileType("JGM2_FILE", "EARTH_POT_PATH/JGM2.grv");
    AddFileType("JGM3_FILE", "EARTH_POT_PATH/JGM3.grv");
-   AddFileType("EGM_FILE", "EARTH_POT_PATH/EGM96.grv");
+   AddFileType("EGM96_FILE", "EARTH_POT_PATH/EGM96.grv");
    
    // luna gravity files
    AddFileType("LUNA_POT_PATH", "./files/gravity/luna/");
-   AddFileType("LP_FILE", "LUNA_POT_PATH/lp165p.grv");
+   AddFileType("LP165P_FILE", "LUNA_POT_PATH/lp165p.grv");
    
    // venus gravity files
    AddFileType("VENUS_POT_PATH", "./files/gravity/venus/");
-   AddFileType("MGN_FILE", "VENUS_POT_PATH/MGNP180U.grv");
+   AddFileType("MGNP180U_FILE", "VENUS_POT_PATH/MGNP180U.grv");
    
    // mars gravity files
    AddFileType("MARS_POT_PATH", "./files/gravity/mars/");
-   AddFileType("MARS_FILE", "MARS_POT_PATH/Mars50c.grv");
+   AddFileType("MARS50C_FILE", "MARS_POT_PATH/Mars50c.grv");
    
    // planetary coeff. fiels
    AddFileType("PLANETARY_COEFF_PATH", "./files/planetary_coeff/");
