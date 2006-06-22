@@ -348,6 +348,7 @@ void MessageInterface::SetLogFile(const std::string &filename)
    logFile = fopen(logFileName.c_str(), "w");
    if (logFile)
    {
+      fprintf(logFile, "GMAT Build Date: %s %s\n\n",  __DATE__, __TIME__);
       fprintf(logFile, "MessageInterface::SetLogFile() Log file set to %s\n",
               logFileName.c_str());
       logFileSet = true;
