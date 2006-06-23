@@ -1760,6 +1760,9 @@ bool Propagate::Initialize()
    std::string pName;
    Real dir;
 
+   // Ensure that we are using fresh objects when buffering stops
+   EmptyBuffer();
+      
    for (StringArray::iterator i = propName.begin(); i != propName.end(); ++i)
    {
       if (satName.size() <= index)
@@ -1812,12 +1815,11 @@ bool Propagate::Initialize()
       
       bool finiteBurnActive = false;
       
-      // Ensure that we are using fresh objects
-		EmptyBuffer();
-      
       for (scName = satName[index]->begin(); scName != satName[index]->end(); 
-           ++scName) {
-         if (objectMap->find(*scName) == objectMap->end()) {
+           ++scName) 
+      {
+         if (objectMap->find(*scName) == objectMap->end()) 
+         {
             std::string errmsg = "Unknown SpaceObject \"";
             errmsg += *scName;
             errmsg += "\"";
@@ -1833,7 +1835,8 @@ bool Propagate::Initialize()
          fm->AddSpaceObject(so);
          if (so->GetType() == Gmat::FORMATION)
             FillFormation(so, owners, elements);
-         else {
+         else 
+         {
             SetNames(so->GetName(), owners, elements);
          }
       }
