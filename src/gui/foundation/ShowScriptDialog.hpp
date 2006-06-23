@@ -34,13 +34,15 @@ class ShowScriptDialog : public GmatDialog
 public:
    // constructors
    ShowScriptDialog(wxWindow *parent, wxWindowID id, const wxString& title, 
-                    GmatBase *obj);
+                    GmatBase *obj, bool isSingleton = false);
 
 protected:
    /// The object that provides the generating string for display.
    GmatBase *theObject;
    /// The component on the dialog that shows the scripting.
    wxTextCtrl *theScript;
+   /// Flag used to suppress the "Create" line
+   bool showAsSingleton;
           
    virtual void Create();
    virtual void LoadData();

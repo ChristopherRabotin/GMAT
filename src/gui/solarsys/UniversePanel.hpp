@@ -26,6 +26,8 @@ class UniversePanel: public GmatPanel
 public:
    UniversePanel(wxWindow *parent);
    ~UniversePanel();
+   
+   virtual void OnScript(wxCommandEvent &event);
     
    
 private:

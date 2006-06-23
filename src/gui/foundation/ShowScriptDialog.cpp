@@ -35,9 +35,11 @@
  */
 //------------------------------------------------------------------------------
 ShowScriptDialog::ShowScriptDialog(wxWindow *parent, wxWindowID id, 
-                                    const wxString& title, GmatBase *obj) :
+                                    const wxString& title, GmatBase *obj, 
+                                    bool isSingleton) :
    GmatDialog(parent, id, title),
-   theObject(obj)
+   theObject(obj),
+   showAsSingleton(isSingleton)
 {
    Create();
    ShowData();
@@ -62,7 +64,14 @@ void ShowScriptDialog::Create()
 
    wxSize scriptPanelSize(500, 32);
    if (theObject != NULL) {
-      text = theObject->GetGeneratingString(Gmat::SHOW_SCRIPT).c_str();
+      std::string genstring = theObject->GetGeneratingString(Gmat::SHOW_SCRIPT).c_str();
+      if (showAsSingleton)
+      {
+         // remove the "Create" line
+         Integer loc = genstring.find("\n");
+         genstring = genstring.substr(loc+1);
+      }
+      text = genstring.c_str();   
       StringArray sar = theObject->GetGeneratingStringArray(Gmat::SHOW_SCRIPT);
       Integer size = sar.size();
       scriptPanelSize.Set(500, 32 + (size+1) * h);

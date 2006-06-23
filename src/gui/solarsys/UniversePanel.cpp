@@ -21,6 +21,7 @@
 //------------------------------------------------------------------------------
 #include "UniversePanel.hpp"
 #include "MessageInterface.hpp"
+#include "ShowScriptDialog.hpp"
 
 //#define DEBUG_UNIV_PANEL 1
 
@@ -80,6 +81,27 @@ UniversePanel::UniversePanel(wxWindow *parent):GmatPanel(parent)
 UniversePanel::~UniversePanel()
 {
 }
+
+
+//------------------------------------------------------------------------------
+// void OnScript()
+//------------------------------------------------------------------------------
+/**
+ * Shows Scripts
+ */
+//------------------------------------------------------------------------------
+void UniversePanel::OnScript(wxCommandEvent &event)
+{
+   wxString title = "Object Script";
+   // open separate window to show scripts?
+   if (mObject != NULL) {
+      title = "Scripting for ";
+      title += mObject->GetName().c_str();
+   }
+   ShowScriptDialog ssd(this, -1, title, mObject, true);
+   ssd.ShowModal();
+}
+
 
 
 //---------------------------------
