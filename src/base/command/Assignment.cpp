@@ -310,7 +310,21 @@ bool Assignment::InterpretAction()
             
             std::string parmObj, parmType, parmDep;
             GmatStringUtil::ParseParameter(rhs, parmType, parmObj, parmDep);
-            mod->CreateParameter(parmType, rhs, parmObj, parmDep);
+            try
+            {
+               mod->CreateParameter(parmType, rhs, parmObj, parmDep);
+            }
+            catch (BaseException &ex)
+            {
+               #ifdef DEBUG_PARM_ASSIGNMENT
+                  MessageInterface::ShowMessage
+                     ("=====> Assignment::InterpretAction() Creating RHS not a "
+                     "parameter; trying object member data: '%s' on '%s'\n", 
+                     parmType.c_str(), parmObj.c_str());
+               #endif
+                             
+               //throw;
+            }
          }
       }
    }
@@ -832,6 +846,7 @@ bool Assignment::Execute()
    return retval;
 }
 
+
 //------------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
@@ -1003,8 +1018,15 @@ bool Assignment::InitializeRHS(const std::string &rhs)
    // Handle RHS system parameter
    std::string name = chunk;
    if (rhs.find('.') != rhs.npos)
-      name = rhs;
+   {
+      if (!isalpha(name[0]))
+         name = rhs;
+   }
 
+   #ifdef DEBUG_PARM_ASSIGNMENT
+      MessageInterface::ShowMessage("Locating the object %s\n", name.c_str());
+   #endif
+   
    //if (objectMap->find(chunk) != objectMap->end())
    if (objectMap->find(name) != objectMap->end())
    {
