@@ -192,10 +192,11 @@ void OrbitPanel::LoadData()
             wxT("Keplerian"),
             wxT("ModifiedKeplerian"),
             wxT("SphericalAZFPA"),
-            wxT("SphericalRADEC")
+            wxT("SphericalRADEC"),
+            wxT("Equinoctial")
          };
 
-         for (unsigned int i = 0; i<5; i++)
+         for (unsigned int i = 0; i<6; i++)
             stateTypeComboBox->Append(wxString(stateTypeList[i].c_str()));
 
          stType = theSpacecraft->GetDisplayCoordType();
@@ -420,6 +421,10 @@ void OrbitPanel::SaveData()
       }
    }
 
+   if ( strcmp(stateTypeStr.c_str(), "Equinoctial") == 0) {
+   	  // any restrictions on equinoctial coordinates
+   }
+   
    // Save the anomaly type
    if ( (strcmp(stateTypeStr.c_str(), "Keplerian") == 0) || 
         (strcmp(stateTypeStr.c_str(), "ModifiedKeplerian") == 0) )
@@ -867,9 +872,9 @@ void OrbitPanel::OnTextChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OrbitPanel::SetLabelsUnits(const std::string &stateType)
 {
-   Integer baseLabel = theSpacecraft->GetParameterID("Element1"),
+  Integer baseLabel = theSpacecraft->GetParameterID("Element1"),
            baseUnit  = theSpacecraft->GetParameterID("Element1Units");
-           
+
    std::string st = theSpacecraft->GetStringParameter("StateType");
    theSpacecraft->SetStringParameter("StateType", stateType);
    
@@ -1049,7 +1054,6 @@ void OrbitPanel::DisplayState()
       midState = mCartState;
       isInternal = true;
    }
-   
    BuildState(midState, isInternal);
    
    #if DEBUG_ORBIT_PANEL_CONVERT
@@ -1067,6 +1071,7 @@ void OrbitPanel::DisplayState()
    
    // labels for elements, anomaly and units
    SetLabelsUnits(stateTypeStr);
+   mIsStateChanged=false;
 }
 
 //------------------------------------------------------------------------------
@@ -1096,9 +1101,10 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
    Rvector6 midState;
    std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
    
-   if (isInternal)
+   if (isInternal) {
       // Input state is Cartesian expressed in internal coordinates
       mCartState = inputState;
+   }
    else
    {
       // Convert input state to the Cartesian representation
@@ -1164,6 +1170,5 @@ Rvector6 OrbitPanel::ConvertState(CoordinateSystem *cs, const Rvector6 &state,
       MessageInterface::ShowMessage
          ("OrbitPanel:ConvertState() error occurred!\n%s\n", e.GetMessage().c_str());
    }
-   
    return newState;
 }
