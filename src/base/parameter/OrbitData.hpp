@@ -42,6 +42,7 @@ public:
    Rvector6 GetModKepState();
    Rvector6 GetSphRaDecState();
    Rvector6 GetSphAzFpaState();
+   Rvector6 GetEquinState();
 
    Real GetCartReal(Integer item);
    Real GetCartReal(const std::string &str);
@@ -81,6 +82,7 @@ protected:
    Rvector6 GetAngularMomentum(const Rvector3 &pos, const Rvector3 &vel);
    Real GetSemiMajorAxis(const Rvector3 &pos, const Rvector3 &vel);
    Real GetEccentricity(const Rvector3 &pos, const Rvector3 &vel);
+   Real GetRightAscensionOfVelocity(const Rvector3 &vel);
    Real GetRAofAN(const Rvector3 &pos, const Rvector3 &vel);
    
    void SetInternalCoordSys(CoordinateSystem *cs);

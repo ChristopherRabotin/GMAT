@@ -28,6 +28,7 @@
 #include "UtilityException.hpp"
 #include "SphericalRADEC.hpp"    // for friend CartesianToSphericalRADEC/AZFPA()
 #include "ModKeplerian.hpp"      // for friend KeplerianToModKeplerian()
+#include "Equinoctial.hpp"
 #include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
 
@@ -324,6 +325,21 @@ Rvector6 OrbitData::GetSphAzFpaState()
    return mSphAzFpaState;
 }
 
+//------------------------------------------------------------------------------
+// Rvector6 OrbitData::GetEquinState()
+//------------------------------------------------------------------------------
+Rvector6 OrbitData::GetEquinState()
+{
+   if (mSpacecraft == NULL || mSolarSystem == NULL)
+      InitializeRefObjects();
+   
+   // Call GetCartState() to convert to parameter coord system first
+   Rvector6 state = GetCartState();
+   Rvector6 mEquinState = CartesianToEquinoctial(state, mGravConst);
+   
+   return mEquinState;
+}
+
 
 //------------------------------------------------------------------------------
 // Real GetCartReal(Integer item)
@@ -410,9 +426,25 @@ Real OrbitData::GetKepReal(Integer item)
       return GetEccentricity(pos, vel);
    case INC:
       {
-         Rvector6 hVec = GetAngularMomentum(pos, vel);
+       /*  Rvector6 hVec = GetAngularMomentum(pos, vel);
          Real incDeg = ACos(hVec[2]) * DEG_PER_RAD;
          return incDeg;
+         */
+         // Convert pos and vel to coord-sys F, if necessary
+         Rvector3 posOut, velOut; // vectors to be used in computation
+         if (mInternalCoordSystem != mOutCoordSystem) {
+            mCoordConverter.Convert(A1Mjd(mCartEpoch), pos, mInternalCoordSystem, posOut, mOutCoordSystem);
+   	        mCoordConverter.Convert(A1Mjd(mCartEpoch), vel, mInternalCoordSystem, velOut, mOutCoordSystem);
+         }
+         else {
+   	        posOut = pos;
+   	        velOut = vel;
+         }
+         Rvector3 h = Cross(posOut, velOut);
+         Real hMag = h.GetMagnitude();
+   
+         Real i = ACos(h.Get(2) / hMag);
+         return i;
       }
    case TA:
    case MA:
@@ -432,7 +464,7 @@ Real OrbitData::GetKepReal(Integer item)
          // than computing keplerian state and return TA.
       
          // find cos ta and sind ta
-         Real sma = GetSemiMajorAxis(pos, vel);
+/*         Real sma = GetSemiMajorAxis(pos, vel);
          Rvector6 hVec = GetAngularMomentum(pos, vel);
          Real hMag = hVec[3];
          Real orbParam = hVec[5];
@@ -477,7 +509,55 @@ Real OrbitData::GetKepReal(Integer item)
       
          if (taDeg < 0.0)
             taDeg = taDeg + 360.0;
+*/
+         // Convert pos and vel to coord-sys F, if necessary
+         Rvector3 posOut, velOut; // vectors to be used in computation
+         if (mInternalCoordSystem != mOutCoordSystem) {
+            mCoordConverter.Convert(A1Mjd(mCartEpoch), pos, mInternalCoordSystem, posOut, mOutCoordSystem);
+   	        mCoordConverter.Convert(A1Mjd(mCartEpoch), vel, mInternalCoordSystem, velOut, mOutCoordSystem);
+         }
+         else {
+            posOut = pos;
+            velOut = vel;
+         }
 
+         Rvector3 h = Cross(posOut, velOut);
+         Real hMag = h.GetMagnitude();
+         
+         Rvector3 n = Cross(Rvector3(0,0,1), h);
+         Real nMag = n.GetMagnitude();
+         
+         Real r = posOut.GetMagnitude();
+         Real v = velOut.GetMagnitude();
+         
+         Rvector3 eVec = (1/mGravConst)*((v*v - mGravConst/r)*posOut - (posOut*velOut)*velOut);
+         Real ecc = eVec.GetMagnitude();
+         
+         Real i = ACos(h.Get(2) / hMag);
+         
+         Real trueAnom;
+         if (ecc >= Exp10(-11)) {
+         	trueAnom = ACos((eVec*posOut)/(ecc*r));
+         	if (r*v < 0)
+               trueAnom = TWO_PI - trueAnom;
+         }
+         else {
+         	if (i >= Exp10(-11)) {
+         		trueAnom = ACos((n*posOut)/(nMag*r));
+         		if (pos.Get(2) < 0)
+         		   trueAnom = TWO_PI - trueAnom;
+         	}
+         	else {
+         		trueAnom = ACos(posOut.Get(0) / r);
+         		if (pos.Get(1) < 0)
+         		   trueAnom = TWO_PI - trueAnom;
+         	}
+         }
+         Real taDeg = trueAnom * DEG_PER_RAD;
+      
+         if (taDeg < 0.0)
+            taDeg = taDeg + 360.0;
+            
          if (item == TA)
          {
             //MessageInterface::ShowMessage("==>OrbitData::GetKepReal() taDeg=%f\n\n", taDeg);
@@ -517,7 +597,7 @@ Real OrbitData::GetKepReal(Integer item)
       
          // I don't know how much efficient it will be just computing AOP here
          // than computing keplerian state and return AOP.
-      
+      /*
          Real sma = GetSemiMajorAxis(pos, vel);
          Rvector6 hVec = GetAngularMomentum(pos, vel);
          Real vMagSq = hVec[4];
@@ -560,7 +640,35 @@ Real OrbitData::GetKepReal(Integer item)
                aopDeg = ATan(xVec[1], xVec[0]) * DEG_PER_RAD;
             }
          }
+        */
+         Real r = pos.GetMagnitude();
+         Real v = vel.GetMagnitude(); 
          
+         Rvector3 eVec = (1/mGravConst)*((v*v - mGravConst/r)*pos - (pos*vel)*vel);
+         Real ecc = eVec.GetMagnitude();
+         
+         if (ecc < Exp10(-11))
+         	return 0;
+         	
+         Rvector3 hVec = Cross(pos, vel);
+         Real h= hVec.GetMagnitude();
+         
+         Real i = ACos(hVec.Get(2) / h);
+         
+         Real aop;
+         if (i < Exp10(-11)) {
+         	aop = ACos(eVec.Get(0) / ecc);
+         	if (eVec.Get(1) < Exp10(-11))
+         	   aop = TWO_PI - aop;
+         }
+         else {
+         	Rvector3 n = Cross(Rvector3(0,0,1), hVec);
+         	aop = ACos((n*eVec)/(n.GetMagnitude() * ecc));
+         	if (eVec.Get(2) < Exp10(-11))
+         	   aop = TWO_PI - aop;
+         }
+         
+         Real aopDeg = aop * DEG_PER_RAD;
          if (aopDeg < 0.0)
             aopDeg = aopDeg + 360.0;
       
@@ -630,7 +738,7 @@ Real OrbitData::GetOtherKepReal(Integer item)
    Real ecc = GetEccentricity(pos, vel);
    
    Real grav = mGravConst;
-   Real E, R;
+//   Real E, R;
 
    switch (item)
    {
@@ -652,17 +760,29 @@ Real OrbitData::GetOtherKepReal(Integer item)
       }
    case VEL_APOAPSIS:
       {
-         E = -grav / (2.0 * sma);
+         /*E = -grav / (2.0 * sma);
          R = sma * (1.0 + ecc);
          return Sqrt (2.0 * (E + grav/R));
+         */
+         Real vA;
+         if (1-ecc < 1E-12)
+            vA = 0;
+         else
+            vA = Sqrt( (mGravConst/sma)*((1-ecc)/(1+ecc)) );
+         return vA;
       }
    case VEL_PERIAPSIS:
       {
-         E = -grav / (2.0 * sma);
+         /*E = -grav / (2.0 * sma);
          R = sma * (1.0 - ecc);
          return Sqrt (2.0 * (E + grav/R));
+         */
+         Real vP;
+         vP = Sqrt( (mGravConst/sma)*((1+ecc)/(1-ecc)) );
+         return vP;         
       }
    case ORBIT_PERIOD:
+      if (sma < 0) return 0;
       return GmatMathUtil::TWO_PI * Sqrt((sma * sma * sma)/ grav);
    case RAD_APOAPSIS:
       return sma * (1.0 + ecc);
@@ -1082,9 +1202,9 @@ Real OrbitData::GetSemiMajorAxis(const Rvector3 &pos, const Rvector3 &vel)
    Rvector3 r = pos;
    Rvector3 v = vel;
    
-   Real rMag = r.GetMagnitude();
-   Real vMag = v.GetMagnitude();
-   Real vMagSq = vMag*vMag;
+   Real rMag = r.GetMagnitude(); // ||r||
+   Real vMag = v.GetMagnitude(); // ||v||
+/*   Real vMagSq = vMag*vMag;
    Real denom = (2.0 - (rMag*vMagSq)/mGravConst);
    
    if (Abs(denom) < ORBIT_ZERO_TOL)
@@ -1093,7 +1213,12 @@ Real OrbitData::GetSemiMajorAxis(const Rvector3 &pos, const Rvector3 &vel)
           r.ToString() + " vel: " + v.ToString());
    
    Real sma = rMag / denom;
+*/
 
+   Real zeta = 0.5*(vMag*vMag) - mGravConst/rMag;
+   
+   Real sma = -mGravConst/(2*zeta);
+   
    #if DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
       ("OrbitData::GetSemiMajorAxis() mOrigin=%s, mGravConst=%f\n   r=%s, "
@@ -1110,11 +1235,40 @@ Real OrbitData::GetSemiMajorAxis(const Rvector3 &pos, const Rvector3 &vel)
 //------------------------------------------------------------------------------
 Real OrbitData::GetEccentricity(const Rvector3 &pos, const Rvector3 &vel)
 {
-   Real sma = GetSemiMajorAxis(pos, vel);
+/*   Real sma = GetSemiMajorAxis(pos, vel);
    Rvector6 hVec = GetAngularMomentum(pos, vel);
    Real orbParam = hVec[5];
    Real ecc = Sqrt(Abs(1.0 - orbParam/sma));
-   return ecc;
+   */
+   
+   Rvector3 r = pos;
+   Rvector3 v = vel;
+   
+   Real rMag = r.GetMagnitude(); // ||r||
+   Real vMag = v.GetMagnitude(); // ||v||
+   
+   Rvector3 e;  // eccentricity vector
+   e = (1/mGravConst)*((vMag*vMag - mGravConst/rMag)*r - (r*v)*r);
+   
+   Real eMag = e.GetMagnitude(); // ||e||
+   
+   return eMag;
+}
+
+Real OrbitData::GetRightAscensionOfVelocity(const Rvector3 &vel)
+{
+   // Convert velocity vector to coord-system F, if necessary
+   Rvector3 velOut; // vector to be used in computation
+   if (mInternalCoordSystem != mOutCoordSystem) {
+   	  mCoordConverter.Convert(A1Mjd(mCartEpoch), vel, mInternalCoordSystem, velOut, mOutCoordSystem);
+   }
+   else {
+   	  velOut = vel;
+   }
+   
+   Real rav = ATan(velOut.Get(1), velOut.Get(0));
+	
+   return rav;
 }
 
 
@@ -1123,7 +1277,7 @@ Real OrbitData::GetEccentricity(const Rvector3 &pos, const Rvector3 &vel)
 //------------------------------------------------------------------------------
 Real OrbitData::GetRAofAN(const Rvector3 &pos, const Rvector3 &vel)
 {
-   Rvector6 hVec = GetAngularMomentum(pos, vel);
+/*   Rvector6 hVec = GetAngularMomentum(pos, vel);
    Real inc = ACos(hVec[2]);
    Real raanDeg;
       
@@ -1136,6 +1290,37 @@ Real OrbitData::GetRAofAN(const Rvector3 &pos, const Rvector3 &vel)
       raanDeg = raanDeg + 360.0;
       
    return raanDeg;
+   */
+   
+   // Convert pos and vel to coord-sys F, if necessary
+   Rvector3 posOut, velOut; // vectors to be used in computation
+   if (mInternalCoordSystem != mOutCoordSystem) {
+   	  mCoordConverter.Convert(A1Mjd(mCartEpoch), pos, mInternalCoordSystem, posOut, mOutCoordSystem);
+   	  mCoordConverter.Convert(A1Mjd(mCartEpoch), vel, mInternalCoordSystem, velOut, mOutCoordSystem);
+   }
+   else {
+   	  posOut = pos;
+   	  velOut = vel;
+   }
+   
+   Rvector3 h = Cross(posOut, velOut);
+   Real hMag = h.GetMagnitude();
+   
+   Rvector3 n = Cross(Rvector3(0, 0, 1), h);
+   Real nMag = n.GetMagnitude();
+   
+   Real i = ACos(h.Get(2) / hMag);
+   
+   Real omega;
+   if (i >= Exp10(-11)) {
+      omega = ACos(n.Get(2) / nMag);
+      if (n.Get(1) < 0)
+         omega = TWO_PI - omega;
+   }
+   else
+      omega = 0;
+   
+   return omega;
 }
 
 

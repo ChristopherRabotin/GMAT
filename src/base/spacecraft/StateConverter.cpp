@@ -326,6 +326,9 @@ Rvector6 StateConverter::Convert(const Real *state,
          if (toElementType == "SphericalRADEC")
             return CartesianToSphericalRADEC(newState);
 
+         if (toElementType == "Equinoctial")
+		      return CartesianToEquinoctial(newState,mu);
+
       }
       else if (fromElementType == "Keplerian")
       {       
@@ -396,6 +399,30 @@ Rvector6 StateConverter::Convert(const Real *state,
 
          else if (toElementType == "SphericalAZFPA")
             return RADECV_To_AZFPA(newState);
+      }
+      else if (fromElementType == "Equinoctial")
+      {
+      	Rvector6 cartesianConversion = EquinoctialToCartesian(newState, mu);
+      	 if (toElementType == "Cartesian")
+      	 {
+      	    return cartesianConversion;
+      	 }
+         if (toElementType == "Keplerian" || 
+             toElementType == "ModifiedKeplerian") 
+         {
+            Rvector6 kepl = CartesianToKeplerian(cartesianConversion,mu,anomaly);
+                      
+            if (toElementType == "ModifiedKeplerian")
+                return KeplerianToModKeplerian(kepl);
+            else
+               return kepl; 
+         } 
+
+         if (toElementType == "SphericalAZFPA")
+            return CartesianToSphericalAZFPA(cartesianConversion);
+
+         if (toElementType == "SphericalRADEC")
+            return CartesianToSphericalRADEC(cartesianConversion);
       }
     }
     catch(UtilityException &ue)
