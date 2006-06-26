@@ -35,6 +35,13 @@ const std::string Spherical::DATA_DESCRIPTIONS[NUM_DATA] =
    "Velocity Magnitude"
 };
 
+
+Real Spherical::GetVerticalFlightPathAngle(const Rvector3& pos, const Rvector3& vel)
+{
+	Real fpa = GmatMathUtil::ACos( (pos*vel)/(pos.GetMagnitude()*vel.GetMagnitude()) );
+	return fpa;
+}
+
 //---------------------------------
 //  public methods
 //---------------------------------

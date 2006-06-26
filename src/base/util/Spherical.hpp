@@ -57,6 +57,9 @@ public:
     Real GetVelocityMagnitude() const;
     void SetVelocityMagnitude(const Real vMag);
 
+	// should this be a member function?
+	Real GetVerticalFlightPathAngle(const Rvector3& pos, const Rvector3& vel);
+
     Integer GetNumData() const;
     const std::string* GetDataDescriptions() const;
     std::string* ToValueStrings();
