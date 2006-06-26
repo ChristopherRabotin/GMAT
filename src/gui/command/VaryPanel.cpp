@@ -53,6 +53,9 @@ VaryPanel::VaryPanel(wxWindow *parent, GmatCommand *cmd)
    mSolverData.maxValue = 9.999e30;
    mSolverData.maxStep = 9.999e30;
    
+   mObjectTypeList.Add("Spacecraft");
+   mObjectTypeList.Add("ImpulsiveBurn");
+   
    Create();
    Show();
    
@@ -64,6 +67,7 @@ VaryPanel::VaryPanel(wxWindow *parent, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 VaryPanel::~VaryPanel()
 {
+   mObjectTypeList.Clear();
 }
 
 //-------------------------------
@@ -209,7 +213,7 @@ void VaryPanel::LoadData()
       mObject = mVaryCommand;
 
       std::string solverName =
-         mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("TargeterName"));
+         mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("SolverName"));
 
       #if DEBUG_VARY_PANEL
       MessageInterface::ShowMessage("solverName=%s\n", solverName.c_str());
@@ -288,7 +292,7 @@ void VaryPanel::SaveData()
          (solver->GetParameterID("Variables"), variableName);
    
       mVaryCommand->SetStringParameter
-         (mVaryCommand->GetParameterID("TargeterName"), solverName);
+         (mVaryCommand->GetParameterID("SolverName"), solverName);
    
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("Variable"), variableName);
@@ -395,8 +399,8 @@ void VaryPanel::OnButton(wxCommandEvent& event)
 {
    if (event.GetEventObject() == mViewVarButton)  
    {
-      //loj: 05/02/06 Added "Burn"
-      ParameterSelectDialog paramDlg(this, "Burn", GuiItemManager::SHOW_PLOTTABLE,
+      ParameterSelectDialog paramDlg(this, mObjectTypeList, "ImpulsiveBurn",
+                                     GuiItemManager::SHOW_SETTABLE,
                                      false, false, true, false, false, false);
       paramDlg.ShowModal();
       

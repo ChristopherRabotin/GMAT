@@ -52,11 +52,10 @@ private:
    wxTextCtrl *mMaxValueTextCtrl;
    
    wxButton *mViewVarButton;
-   
    wxComboBox *mSolverComboBox;
 
+   wxArrayString mObjectTypeList;
    SolverType mSolverData;
-      
    Vary *mVaryCommand;
    
    // methods inherited from GmatPanel
