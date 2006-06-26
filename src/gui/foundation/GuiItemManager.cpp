@@ -382,8 +382,10 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
 //------------------------------------------------------------------------------
 wxArrayString GuiItemManager::GetSettablePropertyList(const wxString &objType)
 {
+   #if DEBUG_GUI_ITEM_PROPERTY
    MessageInterface::ShowMessage
-      ("===> GuiItemManager::GetSettablePropertyList() objType=%s\n", objType.c_str());
+      ("GuiItemManager::GetSettablePropertyList() objType=%s\n", objType.c_str());
+   #endif
    
    wxArrayString array;
    
@@ -394,9 +396,11 @@ wxArrayString GuiItemManager::GetSettablePropertyList(const wxString &objType)
       {
          if (theParamInfo->IsSettable(theScPropertyList[i].c_str()))
          {
+            #if DEBUG_GUI_ITEM_PROPERTY > 1
             MessageInterface::ShowMessage
-               ("===> GetSettablePropertyList() Adding %s\n",
+               ("GetSettablePropertyList() Adding %s\n",
                 theScPropertyList[i].c_str());
+            #endif
             
             array.Add(theScPropertyList[i]);
          }

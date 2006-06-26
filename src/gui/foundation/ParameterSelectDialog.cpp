@@ -188,9 +188,12 @@ void ParameterSelectDialog::Create()
          mNumImpBurn = theGuiManager->GetNumImpulsiveBurn();
          mNumScProperty = theGuiManager->GetNumProperty("Spacecraft");
          mNumImpBurnProperty = theGuiManager->GetNumProperty("ImpulsiveBurn");
+         
+         #if DEBUG_PARAM_SELECT_DIALOG
          MessageInterface::ShowMessage
             ("===> mNumSc=%d, mNumImpBurn=%d, mNumScProperty=%d, mNumImpBurnProperty=%d\n",
              mNumSc, mNumImpBurn, mNumScProperty, mNumImpBurnProperty);
+         #endif
       }
    }
    else
