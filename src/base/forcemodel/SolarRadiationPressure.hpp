@@ -156,6 +156,8 @@ protected:
    Real sunDistance;
    /// Nominal distance to the Sun used in the model: 1 AU
    Real nominalSun;
+   /// Flag used to detect if the central body is Sol
+   bool bodyIsTheSun;
 
    // Conical shadow model parameters that are used in multiple methods
    /// Conical model: projected sun radius
