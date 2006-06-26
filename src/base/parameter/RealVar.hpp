@@ -33,7 +33,7 @@ public:
            const std::string &unit = "",
            GmatParam::DepObject depObj = GmatParam::NO_DEP,
            Gmat::ObjectType ownerType = Gmat::UNKNOWN_OBJECT,
-           bool isTimeParam = false);
+           bool isTimeParam = false, bool isSettable = false);
    RealVar(const RealVar &copy);
    RealVar& operator= (const RealVar& right);
    virtual ~RealVar();

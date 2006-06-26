@@ -31,7 +31,8 @@
 //------------------------------------------------------------------------------
 // OrbitReal(const std::string &name, const std::string &typeStr, 
 //           GmatBase *obj, const std::string &desc,
-//           const std::string &unit, GmatParam::DepObject depObj)
+//           const std::string &unit, GmatParam::DepObject depObj,
+//           bool isSettable)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -42,13 +43,15 @@
  * @param <desc> description of the parameter
  * @param <unit> unit of the parameter
  * @param <depObj> object which parameter is dependent on (COORD_SYS, ORIGIN, NO_DEP)
+ * @param <isSettable> true if parameter is settable, false otherwise
  */
 //------------------------------------------------------------------------------
 OrbitReal::OrbitReal(const std::string &name, const std::string &typeStr, 
                      GmatBase *obj, const std::string &desc,
-                     const std::string &unit, GmatParam::DepObject depObj)
+                     const std::string &unit, GmatParam::DepObject depObj,
+                     bool isSettable)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
-             depObj, Gmat::SPACECRAFT, false)
+             depObj, Gmat::SPACECRAFT, false, isSettable)
 {
    mNeedCoordSystem = true;
    AddRefObject(obj);

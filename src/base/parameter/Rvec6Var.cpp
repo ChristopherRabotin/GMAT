@@ -28,9 +28,10 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// Rvec6Var(const std::string &name, const std::string &typeStr,
-//          GmatParam:;ParameterKey key, GmatBase *obj, const std::string &desc,
-//          const std::string &unit, bool isTimeParam)
+// Rvec6Var::Rvec6Var(const std::string &name, const std::string &typeStr,
+//                    GmatParam::ParameterKey key, GmatBase *obj,
+//                    const std::string &desc, const std::string &unit,
+//                    GmatParam::DepObject depObj, Gmat::ObjectType ownerType)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -50,7 +51,7 @@ Rvec6Var::Rvec6Var(const std::string &name, const std::string &typeStr,
                    const std::string &desc, const std::string &unit,
                    GmatParam::DepObject depObj, Gmat::ObjectType ownerType)
    : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, false,
-               false, false)
+               false, false, false)
 {
    mRvec6Value = Rvector6::RVECTOR6_UNDEFINED;
 }

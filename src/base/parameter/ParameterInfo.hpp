@@ -33,14 +33,15 @@ public:
    Integer GetNumParameters() const;
    const StringArray& GetTypesOfParameters();
    const StringArray& GetNamesOfParameters();
-   Gmat::ObjectType GetOwnerType(const std::string &type);
+   Gmat::ObjectType GetObjectType(const std::string &type);
    GmatParam::DepObject GetDepObjectType(const std::string &name);
    bool IsPlottable(const std::string &type);
    bool IsReportable(const std::string &type);
-      
-   void Add(const std::string type, Gmat::ObjectType owner,
+   bool IsSettable(const std::string &type);
+   
+   void Add(const std::string type, Gmat::ObjectType objectType,
             const std::string &name, GmatParam::DepObject depType,
-            bool isPlottable, bool isReportable);
+            bool isPlottable, bool isReportable, bool isSettable);
    void Remove(const std::string &name);
    
 protected:
@@ -49,9 +50,10 @@ private:
    static ParameterInfo *theInstance;
    
    std::map<std::string, GmatParam::DepObject> mParamDepObjMap;
-   std::map<std::string, Gmat::ObjectType> mParamOwnerMap;
+   std::map<std::string, Gmat::ObjectType> mParamObjectTypeMap;
    std::map<std::string, bool> mParamPlottableMap;
    std::map<std::string, bool> mParamReportableMap;
+   std::map<std::string, bool> mParamSettableMap;
    StringArray mParamTypes;
    StringArray mParamNames;
    Integer mNumParams;

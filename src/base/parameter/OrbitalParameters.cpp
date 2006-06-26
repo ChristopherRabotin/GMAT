@@ -665,7 +665,8 @@ GmatBase* OrbitPeriod::Clone(void) const
  */
 //------------------------------------------------------------------------------
 RadApoapsis::RadApoapsis(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "RadApo", obj, "Radius at Apoapsis", "Km", GmatParam::ORIGIN)
+   : OrbitReal(name, "RadApo", obj, "Radius at Apoapsis", "Km",
+               GmatParam::ORIGIN, true)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -780,7 +781,8 @@ GmatBase* RadApoapsis::Clone(void) const
  */
 //------------------------------------------------------------------------------
 RadPeriapsis::RadPeriapsis(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "RadPer", obj, "Radius at Periapsis", "Km", GmatParam::ORIGIN)
+   : OrbitReal(name, "RadPer", obj, "Radius at Periapsis", "Km",
+               GmatParam::ORIGIN, true)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");

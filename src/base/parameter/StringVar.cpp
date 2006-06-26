@@ -52,7 +52,7 @@ StringVar::StringVar(const std::string &name, const std::string &typeStr,
                      const std::string &unit, GmatParam::DepObject depObj,
                      Gmat::ObjectType ownerType, bool isTimeParam)
    : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, isTimeParam,
-               false, true)
+               false, false, true)
 {  
    mStringValue = STRING_PARAMETER_UNDEFINED;
    mReturnType = Gmat::STRING_TYPE;

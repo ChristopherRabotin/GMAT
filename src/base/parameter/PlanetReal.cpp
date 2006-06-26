@@ -51,7 +51,7 @@ PlanetReal::PlanetReal(const std::string &name, const std::string &typeStr,
                        const std::string &unit, Gmat::ObjectType ownerType,
                        GmatParam::DepObject depObj)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit, depObj,
-             ownerType, false)
+             ownerType, false, false)
 {
    mNeedCoordSystem = false;
    AddRefObject(obj);

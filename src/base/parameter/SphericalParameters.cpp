@@ -41,7 +41,8 @@
  */
 //------------------------------------------------------------------------------
 SphRMag::SphRMag(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "RMAG", obj, "Spherical R mag", "Km", GmatParam::ORIGIN)
+   : OrbitReal(name, "RMAG", obj, "Spherical R mag", "Km",
+               GmatParam::ORIGIN, true)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
@@ -155,7 +156,8 @@ GmatBase* SphRMag::Clone(void) const
  */
 //------------------------------------------------------------------------------
 SphRA::SphRA(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "RA", obj, "Sph. Right Ascension", "Deg", GmatParam::COORD_SYS)
+   : OrbitReal(name, "RA", obj, "Sph. Right Ascension", "Deg",
+               GmatParam::COORD_SYS, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -268,7 +270,8 @@ GmatBase* SphRA::Clone(void) const
  */
 //------------------------------------------------------------------------------
 SphDec::SphDec(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "DEC", obj, "Sph. Declination", "Deg", GmatParam::COORD_SYS)
+   : OrbitReal(name, "DEC", obj, "Sph. Declination", "Deg",
+               GmatParam::COORD_SYS, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -335,7 +338,6 @@ SphDec::~SphDec()
 //------------------------------------------------------------------------------
 bool SphDec::Evaluate()
 {
-   //mRealValue = OrbitData::GetSphRaDecReal("SphDec");    
    mRealValue = OrbitData::GetSphRaDecReal(RD_RDEC);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
@@ -381,7 +383,8 @@ GmatBase* SphDec::Clone(void) const
  */
 //------------------------------------------------------------------------------
 SphVMag::SphVMag(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "VMAG", obj, "Sph. Mag of Velocity", "Km/s", GmatParam::COORD_SYS)
+   : OrbitReal(name, "VMAG", obj, "Sph. Mag of Velocity", "Km/s",
+               GmatParam::COORD_SYS, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -494,7 +497,8 @@ GmatBase* SphVMag::Clone(void) const
  */
 //------------------------------------------------------------------------------
 SphRAV::SphRAV(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "RAV", obj, "Sph. RA of Velocity", "Deg", GmatParam::COORD_SYS)
+   : OrbitReal(name, "RAV", obj, "Sph. RA of Velocity", "Deg",
+               GmatParam::COORD_SYS, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -607,7 +611,8 @@ GmatBase* SphRAV::Clone(void) const
  */
 //------------------------------------------------------------------------------
 SphDecV::SphDecV(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "DECV", obj, "Sph. Dec of Velocity", "Deg", GmatParam::COORD_SYS)
+   : OrbitReal(name, "DECV", obj, "Sph. Dec of Velocity", "Deg",
+               GmatParam::COORD_SYS, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -699,7 +704,6 @@ GmatBase* SphDecV::Clone(void) const
 }
 
 
-//loj: 2/15/05 Added
 //==============================================================================
 //                              SphAzi
 //==============================================================================
@@ -719,7 +723,8 @@ GmatBase* SphDecV::Clone(void) const
  */
 //------------------------------------------------------------------------------
 SphAzi::SphAzi(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "AZI", obj, "Sph. RA of Velocity", "Deg", GmatParam::COORD_SYS)
+   : OrbitReal(name, "AZI", obj, "Sph. RA of Velocity", "Deg",
+               GmatParam::COORD_SYS, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -786,7 +791,6 @@ SphAzi::~SphAzi()
 //------------------------------------------------------------------------------
 bool SphAzi::Evaluate()
 {
-   //mRealValue = OrbitData::GetSphAzFpaReal("SphAzi");    
    mRealValue = OrbitData::GetSphAzFpaReal(AF_AZI);    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
@@ -813,7 +817,6 @@ GmatBase* SphAzi::Clone(void) const
 }
 
 
-//loj: 2/15/05 Added
 //==============================================================================
 //                              SphFPA
 //==============================================================================
@@ -833,7 +836,8 @@ GmatBase* SphAzi::Clone(void) const
  */
 //------------------------------------------------------------------------------
 SphFPA::SphFPA(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "FPA", obj, "Sph. Dec of Velocity", "Deg", GmatParam::COORD_SYS)
+   : OrbitReal(name, "FPA", obj, "Sph. Dec of Velocity", "Deg",
+               GmatParam::COORD_SYS, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -926,7 +930,6 @@ GmatBase* SphFPA::Clone(void) const
 }
 
 
-//loj: 2/15/05 Changed from SphElem
 //==============================================================================
 //                              SphRaDecElem
 //==============================================================================
@@ -1018,12 +1021,6 @@ SphRaDecElem::~SphRaDecElem()
 bool SphRaDecElem::Evaluate()
 {
    mRvec6Value = GetSphRaDecState();
-//     mRvec6Value.Set(GetSphReal("SphRMag"),
-//                     GetSphReal("SphRA"),
-//                     GetSphReal("SphDec"),
-//                     GetSphReal("SphVMag"),
-//                     GetSphReal("SphRAV"),
-//                     GetSphReal("SphDecV"));
 
    return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
 }
@@ -1046,7 +1043,6 @@ GmatBase* SphRaDecElem::Clone(void) const
 }
 
 
-//loj: 2/15/05 Added
 //==============================================================================
 //                              SphAzFpaElem
 //==============================================================================
@@ -1138,12 +1134,6 @@ SphAzFpaElem::~SphAzFpaElem()
 bool SphAzFpaElem::Evaluate()
 {
    mRvec6Value = GetSphAzFpaState();
-//     mRvec6Value.Set(GetSphAzFpaReal("SphRMag"),
-//                     GetSphAzFpaReal("SphRA"),
-//                     GetSphAzFpaReal("SphDec"),
-//                     GetSphAzFpaReal("SphVMag"),
-//                     GetSphAzFpaReal("SphAzi"),
-//                     GetSphAzFpaReal("SphFPA"));
 
    return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
 }

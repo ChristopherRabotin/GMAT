@@ -49,7 +49,7 @@ BplaneReal::BplaneReal(const std::string &name, const std::string &typeStr,
                        GmatBase *obj, const std::string &desc,
                        const std::string &unit, GmatParam::DepObject depObj)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
-             depObj, Gmat::SPACECRAFT, false)
+             depObj, Gmat::SPACECRAFT, false, false)
 {
    mNeedCoordSystem = true;
    AddRefObject(obj);

@@ -47,7 +47,8 @@ public:
              GmatParam::ParameterKey key, GmatBase *obj,
              const std::string &desc, const std::string &unit,
              GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
-             bool isTimeParam, bool isPlottable, bool isReportable);
+             bool isTimeParam, bool isSettable, bool isPlottable,
+             bool isReportable);
    Parameter(const Parameter &copy);
    Parameter& operator= (const Parameter& right);
    virtual ~Parameter();
@@ -58,6 +59,7 @@ public:
    bool IsTimeParameter() const;
    bool IsPlottable() const;
    bool IsReportable() const;
+   bool IsSettable() const;
    bool IsCoordSysDependent() const;
    bool IsOriginDependent() const;
    bool NeedCoordSystem() const;
@@ -141,6 +143,7 @@ protected:
    bool mIsTimeParam;
    bool mIsPlottable;
    bool mIsReportable;
+   bool mIsSettable;
    bool mIsCoordSysDependent;
    bool mIsOriginDependent;
    bool mNeedCoordSystem;

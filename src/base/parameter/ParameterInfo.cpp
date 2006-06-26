@@ -96,7 +96,7 @@ const StringArray& ParameterInfo::GetTypesOfParameters()
    mParamTypes.clear();
    std::map<std::string, Gmat::ObjectType>::iterator pos;
    
-   for (pos = mParamOwnerMap.begin(); pos != mParamOwnerMap.end(); ++pos)
+   for (pos = mParamObjectTypeMap.begin(); pos != mParamObjectTypeMap.end(); ++pos)
    {
       mParamTypes.push_back(pos->first);
    }
@@ -127,11 +127,11 @@ const StringArray& ParameterInfo::GetNamesOfParameters()
 
 
 //------------------------------------------------------------------------------
-// Gmat::ObjectType GetOwnerType(const std::string &type)
+// Gmat::ObjectType GetObjectType(const std::string &type)
 //------------------------------------------------------------------------------
-Gmat::ObjectType ParameterInfo::GetOwnerType(const std::string &type)
+Gmat::ObjectType ParameterInfo::GetObjectType(const std::string &type)
 {
-   return mParamOwnerMap[type];
+   return mParamObjectTypeMap[type];
 }
 
 
@@ -163,16 +163,25 @@ bool ParameterInfo::IsReportable(const std::string &type)
 
 
 //------------------------------------------------------------------------------
-// void Add(const std::string type, Gmat::ObjectType owner,
-//          const std::string &name, GmatParam::DepObject depType,
-//          bool isPlottable, bool isReportable)
+// bool ParameterInfo::IsSettable(const std::string &type)
 //------------------------------------------------------------------------------
-void ParameterInfo::Add(const std::string type, Gmat::ObjectType owner,
-                        const std::string &name, GmatParam::DepObject depType,
-                        bool isPlottable, bool isReportable)
+bool ParameterInfo::IsSettable(const std::string &type)
 {
-   // add property owner
-   mParamOwnerMap[type] = owner;
+   return mParamSettableMap[type];
+}
+
+
+//------------------------------------------------------------------------------
+// void Add(const std::string type, Gmat::ObjectType objectType,
+//          const std::string &name, GmatParam::DepObject depType,
+//          bool isPlottable, bool isReportable, bool isSettable)
+//------------------------------------------------------------------------------
+void ParameterInfo::Add(const std::string type, Gmat::ObjectType objectType,
+                        const std::string &name, GmatParam::DepObject depType,
+                        bool isPlottable, bool isReportable, bool isSettable)
+{
+   // add property objectType
+   mParamObjectTypeMap[type] = objectType;
    
    // add property name
    std::string::size_type pos = name.find_last_of(".");
@@ -185,11 +194,16 @@ void ParameterInfo::Add(const std::string type, Gmat::ObjectType owner,
 
    // add reportable
    mParamReportableMap[type] = isReportable;
+
+   // add settable
+   mParamSettableMap[type] = isSettable;
    
    #if DEBUG_PARAM_INFO
    MessageInterface::ShowMessage
-      ("ParameterInfo::Add() propertyName:%s with owner=%d, depType:%d added\n",
-       propertyName.c_str(), owner, depType);
+      ("ParameterInfo::Add() propertyName:%s with objectType=%d, depType:%d\n"
+       "isPlottable=%d, isReportable=%d, isSettable=%d\n",
+       propertyName.c_str(), objectType, depType, isPlottable, isReportable,
+       isSettable);
    #endif
    
    mNumParams = mParamDepObjMap.size();

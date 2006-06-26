@@ -54,9 +54,9 @@ RealVar::RealVar(const std::string &name, const std::string &valStr,
                  const std::string &typeStr, GmatParam::ParameterKey key,
                  GmatBase *obj, const std::string &desc, const std::string &unit,
                  GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
-                 bool isTimeParam)
+                 bool isTimeParam, bool isSettable)
    : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, isTimeParam,
-               true, true)
+               isSettable, true, true)
 {  
    mRealValue = REAL_PARAMETER_UNDEFINED;
    Real rval;

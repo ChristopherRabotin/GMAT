@@ -65,8 +65,8 @@ Parameter::PARAMETER_TYPE[ParameterParamCount] =
 // Parameter(const std::string &name, const std::string &typeStr,
 //           GmatParam::ParameterKey key, GmatBase *obj, const std::string &desc,
 //           const std::string &unit, GmatParam::DepObject depObj,
-//           Gmat::ObjectType ownerType, bool isTimeParam, bool isPlottable,
-//           bool isReportable)
+//           Gmat::ObjectType ownerType, bool isTimeParam, bool isSettable,
+//           bool isPlottable, bool isReportable)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -80,6 +80,7 @@ Parameter::PARAMETER_TYPE[ParameterParamCount] =
  * @param <ownerType> object type who owns this parameter as property
  * @param <depObj> object which parameter is dependent on (COORD_SYS, ORIGIN, NONE)
  * @param <isTimeParam> true if parameter is time related, false otherwise
+ * @param <isSettable> true if parameter is settable, false otherwise
  * @param <isPlottable> true if parameter is plottable (Real), false otherwise
  * @param <isReportable> true if parameter is reportable (Real, String), false otherwise
  *
@@ -90,7 +91,8 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
                      GmatParam::ParameterKey key, GmatBase *obj,
                      const std::string &desc, const std::string &unit,
                      GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
-                     bool isTimeParam, bool isPlottable, bool isReportable)
+                     bool isTimeParam, bool isSettable, bool isPlottable,
+                     bool isReportable)
    : GmatBase(Gmat::PARAMETER, typeStr, name)
 {  
    objectTypes.push_back(Gmat::PARAMETER);
@@ -128,7 +130,6 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    mDepObj = depObj;
    mColor = 0; // black
    
-   mIsTimeParam = isTimeParam;
    mNeedCoordSystem = false;
    mIsCoordSysDependent = false;
    mIsOriginDependent = false;
@@ -138,12 +139,14 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    else if (depObj == GmatParam::ORIGIN)
       mIsOriginDependent = true;
    
+   mIsTimeParam = isTimeParam;
+   mIsSettable = isSettable;
    mIsPlottable = isPlottable;
    mIsReportable = isReportable;
-
+   
    // register parameter names with info
    ParameterInfo::Instance()->Add(typeName, mOwnerType, instanceName, mDepObj,
-                                  isPlottable, isReportable);
+                                  isPlottable, isReportable, isSettable);
 
    // set parameter count
    parameterCount = ParameterParamCount;
@@ -173,14 +176,13 @@ Parameter::Parameter(const Parameter &copy)
    mDepObj = copy.mDepObj;
    mColor = copy.mColor;
    mIsTimeParam = copy.mIsTimeParam;
+   mIsSettable = copy.mIsSettable;
    mIsPlottable = copy.mIsPlottable;
    mIsReportable = copy.mIsReportable;
    mIsCoordSysDependent = copy.mIsCoordSysDependent;
    mIsOriginDependent = copy.mIsOriginDependent;
    mNeedCoordSystem = copy.mNeedCoordSystem;
    
-   //loj: 3/9/06 we need to register only once for type in the constructor
-   //ParameterInfo::Instance()->Add(typeName, mOwnerType, instanceName, mDepObj);
 }
 
 
@@ -212,15 +214,13 @@ Parameter& Parameter::operator= (const Parameter& right)
    mDepObj = right.mDepObj;
    mColor = right.mColor;
    mIsTimeParam = right.mIsTimeParam;
+   mIsSettable = right.mIsSettable;
    mIsPlottable = right.mIsPlottable;
    mIsReportable = right.mIsReportable;
    mIsCoordSysDependent = right.mIsCoordSysDependent;
    mIsOriginDependent = right.mIsOriginDependent;
    mNeedCoordSystem = right.mNeedCoordSystem;
 
-   //loj: 3/9/06 we need to register only once for type in the constructor
-   //ParameterInfo::Instance()->Add(typeName, mOwnerType, instanceName, mDepObj);
-   
    return *this;
 }
 
@@ -314,6 +314,19 @@ bool Parameter::IsReportable() const
 
 
 //------------------------------------------------------------------------------
+// bool IsSettable() const
+//------------------------------------------------------------------------------
+/**
+ * @return true if parameter is plottble.
+ */
+//------------------------------------------------------------------------------
+bool Parameter::IsSettable() const
+{
+   return mIsSettable;
+}
+
+
+//------------------------------------------------------------------------------
 // bool IsCoordSysDependent() const
 //------------------------------------------------------------------------------
 /**
@@ -324,6 +337,7 @@ bool Parameter::IsCoordSysDependent() const
 {
    return mIsCoordSysDependent;
 }
+
 
 //------------------------------------------------------------------------------
 // bool IsOriginDependent() const

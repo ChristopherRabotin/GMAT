@@ -31,7 +31,8 @@ public:
 
    OrbitReal(const std::string &name, const std::string &typeStr, 
              GmatBase *obj, const std::string &desc,
-             const std::string &unit,  GmatParam::DepObject depObj);
+             const std::string &unit,  GmatParam::DepObject depObj,
+             bool isSettable = false);
    OrbitReal(const OrbitReal &copy);
    OrbitReal& operator=(const OrbitReal &right);
    virtual ~OrbitReal();
