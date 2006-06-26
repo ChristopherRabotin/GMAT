@@ -36,6 +36,7 @@ protected:
    int  mNumVarParams;
    bool mUseUserParam;
    wxString mLastCoordSysName;
+   wxArrayString mObjectTypeList;
    
    wxStaticText *mCoordSysLabel;
    wxStaticText *fileStaticText;
@@ -51,6 +52,7 @@ protected:
    wxCheckBox *leftJustifyCheckBox;
    wxCheckBox *zeroFillCheckBox;
    
+   wxComboBox *mObjectTypeComboBox;
    wxComboBox *mObjectComboBox;
    wxComboBox *mCoordSysComboBox;
    wxComboBox *mCentralBodyComboBox;
@@ -66,7 +68,7 @@ protected:
    void OnWriteCheckBoxChange(wxCommandEvent& event);
    void OnBrowseButton(wxCommandEvent& event);
    void OnTextChange(wxCommandEvent &event);
-    
+   
    void OnMoveUpVariable(wxCommandEvent& event);
    void OnMoveDownVariable(wxCommandEvent& event);
    

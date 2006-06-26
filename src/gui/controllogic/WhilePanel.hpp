@@ -74,7 +74,8 @@ private:
    
    std::vector<bool> mLhsIsParam;
    std::vector<bool> mRhsIsParam;
-   
+
+   wxArrayString mObjectTypeList;
    StringArray mLogicalOpStrings;
    StringArray mLhsList;
    StringArray mEqualityOpStrings;

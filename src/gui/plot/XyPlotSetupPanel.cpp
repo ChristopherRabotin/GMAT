@@ -90,6 +90,8 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
    mLineColor.Set(0,0,0); //black for now
    mColorMap.clear();
    
+   mObjectTypeList.Add("Spacecraft");
+   
    Create();
    Show();
 
@@ -108,6 +110,7 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
 //------------------------------------------------------------------------------
 XyPlotSetupPanel::~XyPlotSetupPanel()
 {
+   mObjectTypeList.Clear();
    theGuiManager->UnregisterComboBox("Spacecraft", mObjectComboBox);   
    theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);   
 }
@@ -416,12 +419,13 @@ void XyPlotSetupPanel::Create()
    mParamBoxSizer = theGuiManager->
       CreateParameterSizer(this, &mUserParamListBox, USER_PARAM_LISTBOX,
                            &createVarButton, CREATE_VARIABLE,
+                           &mObjectTypeComboBox, ID_COMBOBOX,
                            &mObjectComboBox, ID_COMBOBOX,
                            &mPropertyListBox, PROPERTY_LISTBOX,
                            &mCoordSysComboBox, ID_COMBOBOX,
                            &mCentralBodyComboBox, ID_COMBOBOX,
                            &mCoordSysLabel, &mCoordSysSizer,
-                           GuiItemManager::SHOW_PLOTTABLE);
+                           mObjectTypeList, GuiItemManager::SHOW_PLOTTABLE);
 
    #if DEBUG_XYPLOT_PANEL
       MessageInterface::ShowMessage

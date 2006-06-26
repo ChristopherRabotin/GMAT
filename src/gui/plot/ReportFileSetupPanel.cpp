@@ -81,6 +81,8 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
    
    reportFile = (ReportFile*)subscriber;
    
+   mObjectTypeList.Add("Spacecraft");
+   
    Create();
    Show();
    mUseUserParam = false;
@@ -93,6 +95,7 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
 //------------------------------------------------------------------------------
 ReportFileSetupPanel::~ReportFileSetupPanel()
 {
+   mObjectTypeList.Clear();
    theGuiManager->UnregisterComboBox("Spacecraft", mObjectComboBox);   
    theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
 }
@@ -144,12 +147,13 @@ void ReportFileSetupPanel::Create()
    mParamBoxSizer = theGuiManager->
       CreateParameterSizer(this, &mUserParamListBox, USER_PARAM_LISTBOX,
                            &createVarButton, CREATE_VARIABLE,
+                           &mObjectTypeComboBox, ID_COMBOBOX,
                            &mObjectComboBox, ID_COMBOBOX,
                            &mPropertyListBox, PROPERTY_LISTBOX,
                            &mCoordSysComboBox, ID_COMBOBOX,
                            &mCentralBodyComboBox, ID_COMBOBOX,
                            &mCoordSysLabel, &mCoordSysSizer,
-                           GuiItemManager::SHOW_REPORTABLE);
+                           mObjectTypeList, GuiItemManager::SHOW_REPORTABLE);
    
    //-------------------------------------------------------
    // add, remove, clear parameter buttons (2nd column)

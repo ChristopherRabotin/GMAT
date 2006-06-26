@@ -43,12 +43,14 @@ protected:
    bool mUseUserParam;
    
    std::string mSelYName;
+   wxArrayString mObjectTypeList;
    std::map<std::string, RgbColor> mColorMap;
    
    wxStaticText *mCoordSysLabel;
    
    wxColour mLineColor;
    
+   wxComboBox *mObjectTypeComboBox;
    wxComboBox *mObjectComboBox;
    wxComboBox *mCoordSysComboBox;
    wxComboBox *mCentralBodyComboBox;

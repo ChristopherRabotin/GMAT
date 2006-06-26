@@ -44,6 +44,8 @@ ForPanel::ForPanel(wxWindow *parent, GmatCommand *cmd)
    mEndIsParam = false;
    mIncrIsParam = false;
    
+   mObjectTypeList.Add("Spacecraft");
+   
    Create();
    Show();
 }
@@ -57,6 +59,7 @@ ForPanel::ForPanel(wxWindow *parent, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 ForPanel::~ForPanel()
 {
+   mObjectTypeList.Clear();
 }
 
 //-------------------------------
@@ -354,7 +357,7 @@ void ForPanel::OnCellRightClick(wxGridEvent& event)
    Integer row = event.GetRow();
    Integer col = event.GetCol();
     
-   ParameterSelectDialog paramDlg(this);
+   ParameterSelectDialog paramDlg(this, mObjectTypeList);
    paramDlg.ShowModal();
 
    if (paramDlg.IsParamSelected())

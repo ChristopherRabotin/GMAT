@@ -41,7 +41,8 @@ WhilePanel::WhilePanel(wxWindow *parent, GmatCommand *cmd) : GmatPanel(parent)
    
    mNumberOfConditions = 0;
    mNumberOfLogicalOps = 0;
-   
+
+   mObjectTypeList.Add("Spacecraft");
    mLhsList.clear();
    mEqualityOpStrings.clear();
    mRhsList.clear();
@@ -54,7 +55,7 @@ WhilePanel::WhilePanel(wxWindow *parent, GmatCommand *cmd) : GmatPanel(parent)
 }
 
 //------------------------------------------------------------------------------
-// WhilePanel()
+// ~WhilePanel()
 //------------------------------------------------------------------------------
 /**
  * A destructor.
@@ -62,6 +63,7 @@ WhilePanel::WhilePanel(wxWindow *parent, GmatCommand *cmd) : GmatPanel(parent)
 //------------------------------------------------------------------------------
 WhilePanel::~WhilePanel()
 {
+   mObjectTypeList.Clear();
 }
 
 //-------------------------------
@@ -363,7 +365,7 @@ void WhilePanel::OnCellRightClick(wxGridEvent& event)
    else if (col == LHS_COL)
    {
       wxString oldStr = conditionGrid->GetCellValue(row, col);
-      ParameterSelectDialog paramDlg(this);
+      ParameterSelectDialog paramDlg(this, mObjectTypeList);
       paramDlg.ShowModal();
       
       if (paramDlg.IsParamSelected())
@@ -447,7 +449,7 @@ void WhilePanel::OnCellRightClick(wxGridEvent& event)
    else if (col == RHS_COL)
    {
       wxString oldStr = conditionGrid->GetCellValue(row, col);
-      ParameterSelectDialog paramDlg(this);
+      ParameterSelectDialog paramDlg(this, mObjectTypeList);
       paramDlg.ShowModal();
 
       if (paramDlg.IsParamSelected())

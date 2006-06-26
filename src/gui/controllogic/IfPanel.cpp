@@ -42,6 +42,7 @@ IfPanel::IfPanel(wxWindow *parent, GmatCommand *cmd) : GmatPanel(parent)
    mNumberOfConditions = 0;
    mNumberOfLogicalOps = 0;
    
+   mObjectTypeList.Add("Spacecraft");
    mLhsList.clear();
    mEqualityOpStrings.clear();
    mRhsList.clear();
@@ -62,6 +63,7 @@ IfPanel::IfPanel(wxWindow *parent, GmatCommand *cmd) : GmatPanel(parent)
 //------------------------------------------------------------------------------
 IfPanel::~IfPanel()
 {
+   mObjectTypeList.Clear();
 }
 
 //-------------------------------
@@ -362,7 +364,7 @@ void IfPanel::OnCellRightClick(wxGridEvent& event)
    else if (col == LHS_COL)
    {
       wxString oldStr = conditionGrid->GetCellValue(row, col);
-      ParameterSelectDialog paramDlg(this);
+      ParameterSelectDialog paramDlg(this, mObjectTypeList);
       paramDlg.ShowModal();
       
       if (paramDlg.IsParamSelected())
@@ -446,7 +448,7 @@ void IfPanel::OnCellRightClick(wxGridEvent& event)
    else if (col == RHS_COL)
    {
       wxString oldStr = conditionGrid->GetCellValue(row, col);
-      ParameterSelectDialog paramDlg(this);
+      ParameterSelectDialog paramDlg(this, mObjectTypeList);
       paramDlg.ShowModal();
 
       if (paramDlg.IsParamSelected())
