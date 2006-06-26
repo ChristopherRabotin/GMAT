@@ -329,6 +329,7 @@ OBJECTS = \
     util/ElapsedTime.o \
     util/EopFile.o \
     util/EphemerisUtil.o \
+    util/Equinoctial.o \
     util/FileUtil.o \
     util/GregorianDate.o \
     util/Keplerian.o \
