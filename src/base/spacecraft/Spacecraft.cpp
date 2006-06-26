@@ -1084,21 +1084,23 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
       return ELEMENT1_ID;
 
    if (str == "Element2" || str == "Y" || str == "ECC" || str == "RadApo" ||
-       str == "RA") 
+       str == "RA" || str == "PECCY") 
       return ELEMENT2_ID;
 
-   if (str == "Element3" || str == "Z" || str == "INC" || str == "DEC")
+   if (str == "Element3" || str == "Z" || str == "INC" || str == "DEC" ||
+       str == "PECCX")
       return ELEMENT3_ID;
 
-   if (str == "Element4" || str == "VX" || str == "RAAN" || str == "VMAG") 
+   if (str == "Element4" || str == "VX" || str == "RAAN" || str == "VMAG" ||
+       str == "PNY") 
       return ELEMENT4_ID;
 
    if (str == "Element5" || str == "VY" || str == "AOP" || str == "AZI" 
-       || str == "RAV")
+       || str == "RAV" || str == "PNX")
       return ELEMENT5_ID;
 
    if (str == "Element6" || str == "VZ" || str == "TA" || str == "MA" ||
-       str == "EA" || str == "FPA" || str == "DECV") 
+       str == "EA" || str == "FPA" || str == "DECV" || str == "MLONG") 
       return ELEMENT6_ID;
 
    for (Integer i = SpaceObjectParamCount; i < SpacecraftParamCount; ++i)
@@ -2406,6 +2408,27 @@ void Spacecraft::UpdateElementLabels()
 
       return;
    }
+      
+   if (stateType == "Equinoctial")
+   {
+      stateElementLabel[0] = "SMA";
+   	stateElementLabel[1] = "PEY";
+   	stateElementLabel[2] = "PEX";
+   	stateElementLabel[3] = "PNY";
+   	stateElementLabel[4] = "PNX";
+   	stateElementLabel[5] = "MLONG";
+   	  
+      stateElementUnits[0] = "km";
+      stateElementUnits[1] = "?";
+      stateElementUnits[2] = "?";
+      stateElementUnits[3] = "?";
+      stateElementUnits[4] = "?";
+      stateElementUnits[5] = "?";   	  
+      
+      return;
+   }
+   
+   
 }
 
 
