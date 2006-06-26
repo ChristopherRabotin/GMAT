@@ -40,6 +40,7 @@ private:
    wxTextCtrl *inputTextCtrl;
    wxTextCtrl *outputTextCtrl;
 
+   wxArrayString mObjectTypeList;
    int  mNumInput;
    int  mNumOutput;
 

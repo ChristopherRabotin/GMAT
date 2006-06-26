@@ -93,6 +93,8 @@ PropagatePanel::PropagatePanel(wxWindow *parent, GmatCommand *cmd)
       mTempStopCond[i].stopCondPtr = NULL;
    }
    
+   mObjectTypeList.Add("Spacecraft");
+   
    Create();
    Show();
    updateButton->Disable();
@@ -119,6 +121,7 @@ void PropagatePanel::OnCancel(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 PropagatePanel::~PropagatePanel()
 {
+   mObjectTypeList.Clear();
 }
 
 //---------------------------------
@@ -975,7 +978,7 @@ void PropagatePanel::OnButtonClick(wxCommandEvent& event)
    if (event.GetEventObject() == mStopViewButton)
    {
       // show dialog to select parameter
-      ParameterSelectDialog paramDlg(this);
+      ParameterSelectDialog paramDlg(this, mObjectTypeList);
       paramDlg.ShowModal();
       
       if (paramDlg.IsParamSelected())
@@ -1004,7 +1007,7 @@ void PropagatePanel::OnButtonClick(wxCommandEvent& event)
    else if (event.GetEventObject() == mGoalViewButton)
    {
       // show dialog to select parameter
-      ParameterSelectDialog paramDlg(this);
+      ParameterSelectDialog paramDlg(this, mObjectTypeList);
       paramDlg.ShowModal();
       
       if (paramDlg.IsParamSelected())

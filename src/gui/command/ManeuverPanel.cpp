@@ -125,11 +125,11 @@ void ManeuverPanel::Create()
    
    #if DEBUG_MANEUVER_PANEL
    MessageInterface::ShowMessage
-      ("ManeuverPanel::Create() Calling theGuiManager->GetBurnComboBox()\n");
+      ("ManeuverPanel::Create() Calling theGuiManager->GetImpBurnComboBox()\n");
    #endif
    
    // create burn combo box
-   burnCB = theGuiManager->GetBurnComboBox(this, ID_BURN_COMBOBOX, wxSize(150,-1));
+   burnCB = theGuiManager->GetImpBurnComboBox(this, ID_BURN_COMBOBOX, wxSize(150,-1));
    
    // add burn label and combobox to burn sizer
    burnSizer->Add(burnLabel, 0, wxALIGN_CENTER | wxALL, 5);

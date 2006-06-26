@@ -54,6 +54,8 @@ AchievePanel::AchievePanel(wxWindow *parent, GmatCommand *cmd)
    mSolverData.tolerance = 1.0e-6;
    mSolverData.goalParam = NULL;
    
+   mObjectTypeList.Add("Spacecraft");
+   
    Create();
    Show();
    
@@ -66,6 +68,7 @@ AchievePanel::AchievePanel(wxWindow *parent, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 AchievePanel::~AchievePanel()
 {
+   mObjectTypeList.Clear();
 }
 
 
@@ -334,7 +337,7 @@ void AchievePanel::OnButtonClick(wxCommandEvent& event)
        event.GetEventObject() == mViewGoalValueButton)
    {      
       // show dialog to select parameter
-      ParameterSelectDialog paramDlg(this);
+      ParameterSelectDialog paramDlg(this, mObjectTypeList);
       paramDlg.ShowModal();
 
       if (paramDlg.IsParamSelected())

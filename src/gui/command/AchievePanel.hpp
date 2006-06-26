@@ -51,8 +51,8 @@ private:
    
    wxComboBox *mSolverComboBox;
    
+   wxArrayString mObjectTypeList;
    SolverType mSolverData;
-   
    Achieve *mAchieveCommand;
    
    // methods inherited from GmatPanel

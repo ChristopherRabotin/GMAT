@@ -28,11 +28,14 @@ class InteractiveMatlabDialog : public wxDialog
 public:
     
    InteractiveMatlabDialog(wxWindow *parent);
+   ~InteractiveMatlabDialog();
 
 protected:
     // member data
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
+   wxArrayString mObjectTypeList;
+   
    wxWindow *theParent;
 
    wxBoxSizer *theDialogSizer;

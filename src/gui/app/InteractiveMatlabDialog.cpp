@@ -39,6 +39,8 @@ InteractiveMatlabDialog::InteractiveMatlabDialog(wxWindow *parent)
    theGuiManager = GuiItemManager::GetInstance();
    theParent = parent;
 
+   mObjectTypeList.Add("Spacecraft");
+   
    // reset array of strings
    inputStrings.Clear();
    outputStrings.Clear();
@@ -49,6 +51,20 @@ InteractiveMatlabDialog::InteractiveMatlabDialog(wxWindow *parent)
    Create();
    Show();
 }
+
+
+//------------------------------------------------------------------------------
+// ~InteractiveMatlabDialog()
+//------------------------------------------------------------------------------
+/**
+ * A destructor.
+ */
+//------------------------------------------------------------------------------
+InteractiveMatlabDialog::~InteractiveMatlabDialog()
+{
+   mObjectTypeList.Clear();
+}
+
 
 //------------------------------------------------------------------------------
 // virtual void Create()
@@ -256,7 +272,8 @@ void InteractiveMatlabDialog::OnCellClick(wxGridEvent& event)
    if (event.GetEventObject() == inputGrid)
    {
       //loj: 5/2/06 Added "Spacecraft"
-      ParameterSelectDialog paramDlg(this, "Spacecraft", true, false, true);
+      ParameterSelectDialog paramDlg(this, mObjectTypeList, "Spacecraft", true,
+                                     false, true);
       paramDlg.SetParamNameArray(inputStrings);
       paramDlg.ShowModal();
       
@@ -280,7 +297,8 @@ void InteractiveMatlabDialog::OnCellClick(wxGridEvent& event)
    else if (event.GetEventObject() == outputGrid)
    {
       //loj: 5/2/06 Added "Spacecraft"
-      ParameterSelectDialog paramDlg(this, "Spacecraft", true, false, true);
+      ParameterSelectDialog paramDlg(this, mObjectTypeList, "Spacecraft", true,
+                                     false, true);
       paramDlg.SetParamNameArray(outputStrings);
       paramDlg.ShowModal();
 

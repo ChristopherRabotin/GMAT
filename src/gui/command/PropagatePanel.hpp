@@ -101,6 +101,8 @@ private:
    StopCondType mTempStopCond[MAX_STOPCOND_ROW];
    
    Propagate *thePropCmd;
+   
+   wxArrayString mObjectTypeList;
    std::vector<StopCondition*> mRemovedStopCondList;
    
    // methods inherited from GmatPanel

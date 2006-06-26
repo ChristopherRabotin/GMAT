@@ -49,6 +49,8 @@ CallFunctionPanel::CallFunctionPanel( wxWindow *parent, GmatCommand *cmd)
    theCommand = (CallFunction *)cmd;
 //   theCommand = cmd;
 
+   mObjectTypeList.Add("Spacecraft");
+   
    if (theCommand != NULL)
    {
       Create();
@@ -62,6 +64,7 @@ CallFunctionPanel::CallFunctionPanel( wxWindow *parent, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 CallFunctionPanel::~CallFunctionPanel()
 {
+   mObjectTypeList.Clear();
    theGuiManager->UnregisterComboBox("Function", functionComboBox);   
 }
 
@@ -413,7 +416,8 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
    if (event.GetEventObject() == inputGrid)
    {
       //loj: 5/2/06 added "Spacecraft"
-      ParameterSelectDialog paramDlg(this, "Spacecraft", GuiItemManager::SHOW_REPORTABLE,
+      ParameterSelectDialog paramDlg(this, mObjectTypeList, "Spacecraft",
+                                     GuiItemManager::SHOW_REPORTABLE,
                                      true, true, true, true, true); 
       paramDlg.SetParamNameArray(inputStrings);
       paramDlg.ShowModal();
@@ -442,7 +446,8 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
    else if (event.GetEventObject() == outputGrid)
    {
       //loj: 5/2/06 added "Spacecraft"
-      ParameterSelectDialog paramDlg(this, "Spacecraft", GuiItemManager::SHOW_REPORTABLE,
+      ParameterSelectDialog paramDlg(this, mObjectTypeList, "Spacecraft",
+                                     GuiItemManager::SHOW_REPORTABLE,
                                      true, true, false, true);
       paramDlg.SetParamNameArray(outputStrings);
       paramDlg.ShowModal();
