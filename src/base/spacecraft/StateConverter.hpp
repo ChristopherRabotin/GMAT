@@ -29,6 +29,7 @@
 // #include "Keplerian.hpp"
 #include "CoordUtil.hpp" 
 #include "ModKeplerian.hpp"
+#include "Equinoctial.hpp"
 #include "SphericalAZFPA.hpp"
 #include "SphericalRADEC.hpp"
 #include "Rvector6.hpp"
