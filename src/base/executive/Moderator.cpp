@@ -2384,7 +2384,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       // set solver
       Solver *solver = CreateSolver("DifferentialCorrector",
                                     GetDefaultSolver()->GetName());
-      id = cmd->GetParameterID("TargeterName");
+      id = cmd->GetParameterID("SolverName");
       cmd->SetStringParameter(id, solver->GetName());
       
       try
