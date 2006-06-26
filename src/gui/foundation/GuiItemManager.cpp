@@ -334,13 +334,13 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
       if (pos != mSpacecraftCBList.end())
          mSpacecraftCBList.erase(pos);
    }
-   else if (type == "Burn")
+   else if (type == "ImpulsiveBurn")
    {
       std::vector<wxComboBox*>::iterator pos =
-         find(mBurnCBList.begin(), mBurnCBList.end(), cb);
+         find(mImpBurnCBList.begin(), mImpBurnCBList.end(), cb);
       
-      if (pos != mBurnCBList.end())
-         mBurnCBList.erase(pos);
+      if (pos != mImpBurnCBList.end())
+         mImpBurnCBList.erase(pos);
    }
    else if (type == "CoordinateSystem")
    {
@@ -378,6 +378,41 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
 
 
 //------------------------------------------------------------------------------
+// wxArrayString GetSettablePropertyList(const wxString &objType)
+//------------------------------------------------------------------------------
+wxArrayString GuiItemManager::GetSettablePropertyList(const wxString &objType)
+{
+   MessageInterface::ShowMessage
+      ("===> GuiItemManager::GetSettablePropertyList() objType=%s\n", objType.c_str());
+   
+   wxArrayString array;
+   
+   if (objType == "Spacecraft")
+   {
+      ParameterInfo *theParamInfo = ParameterInfo::Instance();
+      for (int i=0; i<theNumScProperty; i++)
+      {
+         if (theParamInfo->IsSettable(theScPropertyList[i].c_str()))
+         {
+            MessageInterface::ShowMessage
+               ("===> GetSettablePropertyList() Adding %s\n",
+                theScPropertyList[i].c_str());
+            
+            array.Add(theScPropertyList[i]);
+         }
+      }
+      return array;
+   }
+   else
+   {
+      return wxArrayString(theNumImpBurnProperty, GetPropertyList(objType));
+   }
+
+   return array;
+}
+
+
+//------------------------------------------------------------------------------
 // int GetNumProperty(const wxString &objType)
 //------------------------------------------------------------------------------
 /*
@@ -404,11 +439,46 @@ int GuiItemManager::GetNumProperty(const wxString &objType)
 //------------------------------------------------------------------------------
 wxString* GuiItemManager::GetPropertyList(const wxString &objType)
 {
-   if (objType != "Spacecraft")
+   if (objType == "Spacecraft")
+      return theScPropertyList;
+   else if (objType == "ImpulsiveBurn")
+      return theImpBurnPropertyList;
+   else
       throw GmatBaseException("There are no properties associated with " +
                               std::string(objType.c_str()));
+
+//    if (objType != "Spacecraft")
+//       throw GmatBaseException("There are no properties associated with " +
+//                               std::string(objType.c_str()));
    
-   return theScPropertyList;
+//    return theScPropertyList;
+}
+
+
+//------------------------------------------------------------------------------
+//  wxComboBox* GetObjectTypeComboBox(wxWindow *parent, const wxSize &size, ...)
+//------------------------------------------------------------------------------
+/**
+ * @return object type combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox* GuiItemManager::GetObjectTypeComboBox(wxWindow *parent, wxWindowID id,
+                                                  const wxSize &size,
+                                                  const wxArrayString objectTypeList)
+{
+   // combo box for avaliable object types
+   
+   wxString emptyList[] = {};
+   wxComboBox *cb =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                     0, emptyList, wxCB_READONLY);
+   
+   for (unsigned int i=0; i<objectTypeList.size(); i++)
+      cb->Append(objectTypeList[i]);
+   
+   cb->SetSelection(0);
+   
+   return cb;
 }
 
 
@@ -446,20 +516,20 @@ wxComboBox* GuiItemManager::GetSpacecraftComboBox(wxWindow *parent, wxWindowID i
 
 
 //------------------------------------------------------------------------------
-//  wxComboBox* GetBurnComboBox(wxWindow *parent, wxWindowID id, const wxSize &size)
+//  wxComboBox* GetImpBurnComboBox(wxWindow *parent, wxWindowID id, const wxSize &size)
 //------------------------------------------------------------------------------
 /**
  * @return burn combo box pointer
  */
 //------------------------------------------------------------------------------
-wxComboBox* GuiItemManager::GetBurnComboBox(wxWindow *parent, wxWindowID id,
-                                            const wxSize &size)
+wxComboBox* GuiItemManager::GetImpBurnComboBox(wxWindow *parent, wxWindowID id,
+                                               const wxSize &size)
 {
    // combo box for avaliable burns
    
    wxComboBox *burnComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
-                     theNumBurn, theBurnList, wxCB_READONLY);
+                     theNumImpBurn, theImpBurnList, wxCB_READONLY);
    
    // show first burn
    burnComboBox->SetSelection(0);
@@ -467,7 +537,7 @@ wxComboBox* GuiItemManager::GetBurnComboBox(wxWindow *parent, wxWindowID id,
    //---------------------------------------------
    // register for update
    //---------------------------------------------
-   mBurnCBList.push_back(burnComboBox);
+   mImpBurnCBList.push_back(burnComboBox);
    
    return burnComboBox;
 }
@@ -944,9 +1014,18 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
    ParameterInfo *theParamInfo = ParameterInfo::Instance();
    wxString emptyList[] = {};
    
-   wxListBox *propertyListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size, 0,
-                    emptyList, wxLB_SINGLE|wxLB_SORT);
+   wxListBox *propertyListBox;
+
+   if (objType == "ImpulsiveBurn")
+   {
+      propertyListBox = new wxListBox(parent, id, wxDefaultPosition, size, 0,
+                                      emptyList, wxLB_SINGLE);
+   }
+   else
+   {
+      propertyListBox = new wxListBox(parent, id, wxDefaultPosition, size, 0,
+                                      emptyList, wxLB_SINGLE|wxLB_SORT);
+   }
    
    if (objType == "Spacecraft")
    {
@@ -966,8 +1045,16 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
                propertyListBox->Append(theScPropertyList[i]);
          }
       }
+      else if (showOption == SHOW_SETTABLE)
+      {
+         for (int i=0; i<theNumScProperty; i++)
+         {
+            if (theParamInfo->IsSettable(theScPropertyList[i].c_str()))
+               propertyListBox->Append(theScPropertyList[i]);
+         }
+      }
    }
-   else if (objType == "Burn")
+   else if (objType == "ImpulsiveBurn")
    {
       for (int i=0; i<theNumImpBurnProperty; i++)
          propertyListBox->Append(theImpBurnPropertyList[i]);
@@ -1414,13 +1501,14 @@ wxBoxSizer* GuiItemManager::
 CreateParameterSizer(wxWindow *parent,
                      wxListBox **userParamListBox, wxWindowID userParamListBoxId,
                      wxButton **createVarButton, wxWindowID createVarButtonId,
+                     wxComboBox **objectTypeComboBox, wxWindowID objectTypeComboBoxId, 
                      wxComboBox **objectComboBox, wxWindowID objectComboBoxId,
                      wxListBox **propertyListBox, wxWindowID propertyListBoxId,
                      wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
-                     wxComboBox **originComboBox, wxWindowID originComboBoxId,
+                     wxComboBox **originComboBox, wxWindowID originComboBoxId,                     
                      wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer,
-                     int showOption, bool showVariable, bool showArray,
-                     const wxString &owner)
+                     const wxArrayString &objectTypeList, int showOption,
+                     bool showVariable, bool showArray, const wxString &objectType)
 {
    #if DEBUG_GUI_ITEM
    MessageInterface::ShowMessage("GuiItemManager::CreateParameterSizer() entered\n");
@@ -1438,6 +1526,10 @@ CreateParameterSizer(wxWindow *parent,
                           wxDefaultPosition, wxDefaultSize, 0);
    }
 
+   wxStaticText *objectTypeStaticText =
+      new wxStaticText(parent, -1, wxT("Object Type"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
    wxStaticText *objectStaticText =
       new wxStaticText(parent, -1, wxT("Object"),
                        wxDefaultPosition, wxDefaultSize, 0);
@@ -1457,13 +1549,18 @@ CreateParameterSizer(wxWindow *parent,
          new wxButton(parent, createVarButtonId, wxT("Create"),
                       wxDefaultPosition, wxSize(-1,-1), 0 );
    }
+
+   // Object type ComboBox (loj: 6/22/06)
+   *objectTypeComboBox =
+      GetObjectTypeComboBox(parent, objectTypeComboBoxId, wxSize(170, 20),
+                            objectTypeList);
+   (*objectTypeComboBox)->SetValue(objectType);
    
-   //loj: 5/31/05 Added Burn parameter
    // wxComboBox
-   if (owner == "Burn")
+   if (objectType == "ImpulsiveBurn")
    {
       *objectComboBox =
-         GetBurnComboBox(parent, objectComboBoxId, wxSize(170, 20));
+         GetImpBurnComboBox(parent, objectComboBoxId, wxSize(170, 20));
    }
    else
    {
@@ -1478,8 +1575,10 @@ CreateParameterSizer(wxWindow *parent,
    
    // wxListBox
    wxArrayString emptyArray;
+   
+   //-----------------------------------------------------------------
    // user parameter
-
+   //-----------------------------------------------------------------
    *userParamListBox = NULL;
    
    if (showVariable || showArray)
@@ -1497,10 +1596,13 @@ CreateParameterSizer(wxWindow *parent,
                                    wxSize(170, 50), "");
       }
    }
-   
+
+   //-----------------------------------------------------------------
    // property
+   //-----------------------------------------------------------------
    *propertyListBox = 
-      GetPropertyListBox(parent, propertyListBoxId, wxSize(170, 80), owner, showOption);
+      GetPropertyListBox(parent, propertyListBoxId, wxSize(170, 80), objectType,
+                         showOption);
    
    #ifdef __WXMAC__
    //-------------------------------------------------------
@@ -1533,6 +1635,10 @@ CreateParameterSizer(wxWindow *parent,
          (*createVarButton, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
    }
    
+   systemParamBoxSizer->Add
+      (objectTypeStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   systemParamBoxSizer->Add
+        (*objectTypeComboBox, 0, wxGROW|wxALIGN_CENTER|wxBOTTOM|wxALL, borderSize);
    systemParamBoxSizer->Add
       (objectStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
    systemParamBoxSizer->Add
@@ -1663,7 +1769,7 @@ void GuiItemManager::UpdatePropertyList()
    
    theNumScProperty = 0;
    //theNumImpBurnProperty = 0; //loj: 7/28/05 Until BurnParameter is added to Factory
-   Gmat::ObjectType ownerType;
+   Gmat::ObjectType objectType;
    ParameterInfo *theParamInfo = ParameterInfo::Instance();
    
    for (int i=0; i<numParams; i++)
@@ -1676,14 +1782,14 @@ void GuiItemManager::UpdatePropertyList()
       // we may want add Rvector6 later, then Rvec6Var needs to be set reportable true
       if (theParamInfo->IsReportable(items[i]))
       {
-         ownerType = theParamInfo->GetOwnerType(items[i]);
+         objectType = theParamInfo->GetObjectType(items[i]);
          
          #if DEBUG_GUI_ITEM_PROPERTY > 1
          MessageInterface::ShowMessage
-            ("===> param name=%s, ownerType=%d\n",  items[i].c_str(), ownerType);
+            ("===> param name=%s, objectType=%d\n",  items[i].c_str(), objectType);
          #endif
          
-         if (ownerType == Gmat::SPACECRAFT)
+         if (objectType == Gmat::SPACECRAFT)
          {
             // update Spacecraft property list
             if (theNumScProperty < MAX_SC_PROPERTY)
@@ -1698,7 +1804,7 @@ void GuiItemManager::UpdatePropertyList()
                    "the maximum: %d", MAX_SC_PROPERTY);
             }
          }
-         else if (ownerType == Gmat::BURN)
+         else if (objectType == Gmat::BURN)
          {
             // update ImpulsiveBurn property list
             if (theNumImpBurnProperty < MAX_IB_PROPERTY)
@@ -2342,44 +2448,50 @@ void GuiItemManager::UpdateBurnList()
 {
    StringArray items =
       theGuiInterpreter->GetListOfConfiguredItems(Gmat::BURN);
-   theNumBurn = items.size();
+   int numBurn = items.size();
    
    #if DEBUG_GUI_ITEM_BURN
    MessageInterface::ShowMessage
-      ("GuiItemManager::UpdateBurnList() theNumBurn=%d\n", theNumBurn);
+      ("GuiItemManager::UpdateBurnList() numBurn=%d\n", numBurn);
    #endif
    
-   if (theNumBurn > MAX_BURN)
+   if (numBurn > MAX_BURN)
    {
       MessageInterface::ShowMessage
          ("GuiItemManager::UpdateBurnList() GUI will handle up to %d burns."
-          "The number of burns configured: %d\n", MAX_BURN, theNumBurn);
-      theNumBurn = MAX_BURN;
+          "The number of burns configured: %d\n", MAX_BURN, numBurn);
+      numBurn = MAX_BURN;
    }
    
    wxArrayString burnNames;
+   theNumImpBurn = 0;
+   GmatBase *obj;
    
-   for (int i=0; i<theNumBurn; i++)
+   for (int i=0; i<numBurn; i++)
    {
-      theBurnList[i] = items[i].c_str();
-      burnNames.Add(items[i].c_str());
-      
-      #if DEBUG_GUI_ITEM_BURN > 1
-      MessageInterface::ShowMessage("GuiItemManager::UpdateBurnList() " +
-                                    std::string(theBurnList[i].c_str()) + "\n");
-      #endif
+      obj = theGuiInterpreter->GetConfiguredItem(items[i]);
+      if (obj->GetTypeName() == "ImpulsiveBurn")
+      {
+         theImpBurnList[i] = items[i].c_str();
+         burnNames.Add(items[i].c_str());
+         theNumImpBurn++;
+         #if DEBUG_GUI_ITEM_BURN > 1
+         MessageInterface::ShowMessage("GuiItemManager::UpdateBurnList() " +
+                                       std::string(theImpBurnList[i].c_str()) + "\n");
+         #endif
+      }
    }
    
    //-------------------------------------------------------
-   // update registered Burn ComboBox
+   // update registered ImpulsiveBurn ComboBox
    //-------------------------------------------------------
-   for (std::vector<wxComboBox*>::iterator pos = mBurnCBList.begin();
-        pos != mBurnCBList.end(); ++pos)
+   for (std::vector<wxComboBox*>::iterator pos = mImpBurnCBList.begin();
+        pos != mImpBurnCBList.end(); ++pos)
    {      
       (*pos)->Clear();
       (*pos)->Append(burnNames);
       
-      (*pos)->SetSelection(theNumBurn-1);
+      (*pos)->SetSelection(theNumImpBurn-1);
    }
 }
 
@@ -2671,7 +2783,7 @@ GuiItemManager::GuiItemManager()
    theNumSpaceObject = 0;
    theNumFormation = 0;
    theNumSpacecraft = 0;
-   theNumBurn = 0;
+   theNumImpBurn = 0;
    theNumCoordSys = 0;
    theNumFunction = 0;
    theNumFuelTank = 0;
@@ -2695,7 +2807,10 @@ GuiItemManager::GuiItemManager()
    theImpBurnPropertyList[3] = "X";
    theImpBurnPropertyList[4] = "Y";
    theImpBurnPropertyList[5] = "Z";
-   theNumImpBurnProperty = 6;
+   theImpBurnPropertyList[6] = "Element1";
+   theImpBurnPropertyList[7] = "Element2";
+   theImpBurnPropertyList[8] = "Element3";
+   theNumImpBurnProperty = 9;
    
    // update property list
    UpdatePropertyList();

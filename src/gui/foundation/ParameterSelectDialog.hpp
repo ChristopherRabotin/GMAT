@@ -25,7 +25,8 @@ class ParameterSelectDialog : public GmatDialog
 public:
    
    ParameterSelectDialog(wxWindow *parent,
-                         const wxString &ownerType = "Spacecraft",
+                         const wxArrayString &objectTypeList,
+                         const wxString &objectType = "Spacecraft",
                          int showOption = GuiItemManager::SHOW_PLOTTABLE,
                          bool showVariable = true,
                          bool showArray = false,
@@ -48,10 +49,11 @@ protected:
    virtual void OnOK(wxCommandEvent &event);
 
    wxString mParamName;
-   wxString mOwnerType;
+   wxArrayString mObjectTypeList;
+   wxString mObjectType;
    wxString mLastCoordSysName;
    wxArrayString mParamNameArray;
-   int  mShowOption;
+
    bool mIsParamSelected;
    bool mCanClose;
    bool mUseUserParam;
@@ -61,8 +63,20 @@ protected:
    bool mCanSelectMultiVars;
    bool mCanSelectWholeObject;
    bool mCreateParam;
+   bool mShowMultObjTypes;
+   
+   int  mNumSc;
+   int  mNumImpBurn;
+   int  mNumScProperty;
+   int  mNumImpBurnProperty;
+   int  mShowOption;
    int  mLastUserParamSelection;
    int  mLastPropertySelection;
+
+   wxString *mSpacecraftList;
+   wxString *mImpBurnList;
+   wxArrayString mSpacecraftPropertyList;
+   wxArrayString mImpBurnPropertyList;
    
    wxStaticText *mCoordSysLabel;
    
@@ -71,6 +85,7 @@ protected:
    wxButton *mRemoveAllParamButton;
    wxButton *mCreateVarButton;
    
+   wxComboBox *mObjectTypeComboBox;
    wxComboBox *mObjectComboBox;
    wxComboBox *mCoordSysComboBox;
    wxComboBox *mCentralBodyComboBox;

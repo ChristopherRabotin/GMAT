@@ -49,7 +49,8 @@ END_EVENT_TABLE()
 //                       bool createParam = true)
 //------------------------------------------------------------------------------
 ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent,
-                                             const wxString &ownerType,
+                                             const wxArrayString &objectTypeList,
+                                             const wxString &objectType,
                                              int showOption,
                                              bool showVariable,
                                              bool showArray,
@@ -62,7 +63,8 @@ ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent,
    mIsParamSelected = false;
    mCanClose = true;
    mUseUserParam = false;
-   mOwnerType = ownerType;
+   mObjectTypeList = objectTypeList;
+   mObjectType = objectType;
    mShowOption = showOption;
    mShowVariable = showVariable;
    mShowArray = showArray;
@@ -77,9 +79,9 @@ ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent,
 
    #if DEBUG_PARAM_SELECT_DIALOG
    MessageInterface::ShowMessage
-      ("ParameterSelectDialog() mOwnerType=%s, mShowOption=%d, mShowVariable=%d, "
+      ("ParameterSelectDialog() mObjectType=%s, mShowOption=%d, mShowVariable=%d, "
        "mShowArray=%d, mShowSysVars=%d, mCanSelectMultiVars=%d, mCanSelectWholeObject=%d, "
-       "mCreateParam=%d\n", mOwnerType.c_str(), mShowOption, mShowVariable,
+       "mCreateParam=%d\n", mObjectType.c_str(), mShowOption, mShowVariable,
        mShowArray, mShowSysVars, mCanSelectMultiVars, mCanSelectWholeObject,
        mCreateParam);
    #endif
@@ -100,7 +102,7 @@ ParameterSelectDialog::~ParameterSelectDialog()
        "mObjectComboBox:%d\n", mObjectComboBox);
    #endif
    
-   theGuiManager->UnregisterComboBox(mOwnerType, mObjectComboBox);
+   theGuiManager->UnregisterComboBox(mObjectType, mObjectComboBox);
    theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
    theGuiManager->UnregisterComboBox("SpacePoint", mCentralBodyComboBox);
 }
@@ -166,13 +168,30 @@ void ParameterSelectDialog::Create()
          CreateParameterSizer(this,
                               &mUserParamListBox, USER_PARAM_LISTBOX,
                               &createVarButton, CREATE_VARIABLE,
+                              &mObjectTypeComboBox, ID_COMBOBOX,
                               &mObjectComboBox, ID_COMBOBOX,
                               &mPropertyListBox, PROPERTY_LISTBOX,
                               &mCoordSysComboBox, ID_COMBOBOX,
                               &mCentralBodyComboBox, ID_COMBOBOX,
                               &mCoordSysLabel, &mCoordSysSizer,
-                              mShowOption, mShowVariable, mShowArray,
-                              mOwnerType);
+                              mObjectTypeList, mShowOption, mShowVariable,
+                              mShowArray, mObjectType);
+
+      // If showing multiple object types
+      if (mObjectTypeList.Count() > 1)
+      {
+         mSpacecraftList = theGuiManager->GetSpacecraftList();
+         mImpBurnList = theGuiManager->GetImpulsiveBurnList();         
+         mSpacecraftPropertyList = theGuiManager->GetSettablePropertyList("Spacecraft");
+         mImpBurnPropertyList = theGuiManager->GetSettablePropertyList("ImpulsiveBurn");
+         mNumSc = theGuiManager->GetNumSpacecraft();
+         mNumImpBurn = theGuiManager->GetNumImpulsiveBurn();
+         mNumScProperty = theGuiManager->GetNumProperty("Spacecraft");
+         mNumImpBurnProperty = theGuiManager->GetNumProperty("ImpulsiveBurn");
+         MessageInterface::ShowMessage
+            ("===> mNumSc=%d, mNumImpBurn=%d, mNumScProperty=%d, mNumImpBurnProperty=%d\n",
+             mNumSc, mNumImpBurn, mNumScProperty, mNumImpBurnProperty);
+      }
    }
    else
    {
@@ -259,7 +278,7 @@ void ParameterSelectDialog::LoadData()
       mObjectComboBox->SetSelection(0);
       mPropertyListBox->SetSelection(0);
 
-      if (mOwnerType == "Burn")
+      if (mObjectType == "ImpulsiveBurn")
       {
          mCoordSysLabel->Hide();
          mCoordSysComboBox->SetValue("");
@@ -535,7 +554,32 @@ void ParameterSelectDialog::OnDoubleClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
 {    
-   if (event.GetEventObject() == mObjectComboBox)
+   if (event.GetEventObject() == mObjectTypeComboBox)
+   {
+      if (mObjectTypeComboBox->GetValue() == "Spacecraft")
+      {
+         // Append Spacecraft objects
+         mObjectComboBox->Clear();
+         for (int i=0; i<mNumSc; i++)
+            mObjectComboBox->Append(mSpacecraftList[i]);
+         mObjectComboBox->SetSelection(0);
+
+         // Set Spacecraft property
+         mPropertyListBox->Set(mSpacecraftPropertyList);
+      }
+      else if (mObjectTypeComboBox->GetValue() == "ImpulsiveBurn")
+      {
+         // Append ImpulsiveBurn objects
+         mObjectComboBox->Clear();
+         for (int i=0; i<mNumImpBurn; i++)
+            mObjectComboBox->Append(mImpBurnList[i]);
+         mObjectComboBox->SetSelection(0);
+
+         // Set ImpulsiveBurn property
+         mPropertyListBox->Set(mImpBurnPropertyList);
+      }
+   }
+   else if (event.GetEventObject() == mObjectComboBox)
    {
       //mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
       mPropertyListBox->SetSelection(0);
@@ -649,7 +693,7 @@ Parameter* ParameterSelectDialog::GetParameter(const wxString &name)
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::ShowCoordSystem()
 {
-   if (mOwnerType == "Burn")
+   if (mObjectType == "ImpulsiveBurn")
       return;
    
    std::string property = std::string(mPropertyListBox->GetStringSelection().c_str());

@@ -38,6 +38,7 @@ public:
    {
       SHOW_REPORTABLE, // Real, Array, String
       SHOW_PLOTTABLE,  // Real
+      SHOW_SETTABLE,   // for Vary command
    };
    
    // for SpacePoint
@@ -84,6 +85,9 @@ public:
    
    int GetNumSpacecraft()
       { return theNumSpacecraft; }
+   
+   int GetNumImpulsiveBurn()
+      { return theNumImpBurn; }
    
    int GetNumFuelTank()
       { return theNumFuelTank; }
@@ -139,15 +143,27 @@ public:
    wxString* GetConfigBodyList()
       { return theCelesBodyList; }
    
+   wxString* GetSpacecraftList()
+      { return theSpacecraftList; }
+   
+   wxString* GetImpulsiveBurnList()
+      { return theImpBurnList; }
+
+   wxArrayString GetSettablePropertyList(const wxString &objType);
+   
    int GetNumProperty(const wxString &objType);
    wxString* GetPropertyList(const wxString &objType);
 
    // ComboBox
+   wxComboBox* GetObjectTypeComboBox(wxWindow *parent, wxWindowID id,
+                                     const wxSize &size,
+                                     const wxArrayString objectTypeList);
+   
    wxComboBox* GetSpacecraftComboBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size);
    
-   wxComboBox* GetBurnComboBox(wxWindow *parent, wxWindowID id,
-                               const wxSize &size);
+   wxComboBox* GetImpBurnComboBox(wxWindow *parent, wxWindowID id,
+                                  const wxSize &size);
    
    wxComboBox* GetCoordSysComboBox(wxWindow *parent, wxWindowID id,
                                    const wxSize &size);
@@ -230,18 +246,20 @@ public:
                                  const wxSize &size,
                                  wxArrayString *excList);
    
-   // BoxSizer
    wxBoxSizer*
    CreateParameterSizer(wxWindow *parent,
                         wxListBox **userParamListBox, wxWindowID userParamListBoxId,
                         wxButton **createVarButton, wxWindowID createVarButtonId,
+                        wxComboBox **objTypeComboBox, wxWindowID objectTypeComboBoxId,
                         wxComboBox **objectComboBox, wxWindowID objectComboBoxId,
                         wxListBox **propertyListBox, wxWindowID propertyListBoxId,
                         wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
                         wxComboBox **originComboBox, wxWindowID originComboBoxId,
                         wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer,
+                        const wxArrayString &objectTypeList,
                         int showOption = SHOW_PLOTTABLE, bool showVariable = true,
                         bool showArray = false, const wxString &onwer = "Spacecraft");
+   
    wxBoxSizer*
    CreateUserVarSizer(wxWindow *parent,
                       wxListBox **userParamListBox, wxWindowID userParamListBoxId,
@@ -280,7 +298,7 @@ private:
    
    std::vector<wxComboBox*> mSpacePointCBList;
    std::vector<wxComboBox*> mSpacecraftCBList;
-   std::vector<wxComboBox*> mBurnCBList;
+   std::vector<wxComboBox*> mImpBurnCBList;
    std::vector<wxComboBox*> mCoordSysCBList;
    std::vector<wxComboBox*> mFunctionCBList;
    std::vector<wxComboBox*> mFuelTankCBList;
@@ -296,7 +314,7 @@ private:
    int theNumSpaceObject;
    int theNumFormation;
    int theNumSpacecraft;
-   int theNumBurn;
+   int theNumImpBurn;
    int theNumCoordSys;
    int theNumFunction;
    int theNumFuelTank;
@@ -320,7 +338,7 @@ private:
    wxString theSpaceObjectList[MAX_SPACE_OBJECT];
    wxString theFormationList[MAX_FORMATION];
    wxString theSpacecraftList[MAX_SPACECRAFT];
-   wxString theBurnList[MAX_BURN];
+   wxString theImpBurnList[MAX_BURN];
    wxString theCoordSysList[MAX_COORD_SYS];
    wxString theFunctionList[MAX_FUNCTION];
    wxString theFuelTankList[MAX_HARDWARE];
