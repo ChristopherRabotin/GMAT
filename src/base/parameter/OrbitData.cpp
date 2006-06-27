@@ -1369,8 +1369,8 @@ Real OrbitData::GetRightAscensionOfVelocity(const Rvector3 &vel)
 // Real GetRAofAN(const Rvector3 &pos, const Rvector3 &vel)
 //------------------------------------------------------------------------------
 Real OrbitData::GetRAofAN(const Rvector3 &pos, const Rvector3 &vel)
-{
-/*   Rvector6 hVec = GetAngularMomentum(pos, vel);
+{/*
+   Rvector6 hVec = GetAngularMomentum(pos, vel);
    Real inc = ACos(hVec[2]);
    Real raanDeg;
       
@@ -1405,8 +1405,8 @@ Real OrbitData::GetRAofAN(const Rvector3 &pos, const Rvector3 &vel)
    Real i = ACos(h.Get(2) / hMag);
    
    Real omega;
-   if (i >= Exp10(-11)) {
-      omega = ACos(n.Get(2) / nMag);
+   if (i >= 1E-11) {
+      omega = ACos(n.Get(0) / nMag);
       if (n.Get(1) < 0)
          omega = TWO_PI - omega;
    }
