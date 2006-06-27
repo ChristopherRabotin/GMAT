@@ -65,6 +65,9 @@ public:
    Real GetOtherAngleReal(Integer item);
    Real GetOtherAngleReal(const std::string &str);
 
+   Real GetEquinReal(Integer item);
+   Real GetEquinReal(const std::string &str);
+
    // The inherited methods from RefData
    virtual bool ValidateRefObjects(GmatBase *param);
    virtual const std::string* GetValidObjectList() const;
@@ -120,7 +123,8 @@ protected:
    enum {MM, VEL_APOAPSIS, VEL_PERIAPSIS, ORBIT_PERIOD, RAD_APOAPSIS,
          RAD_PERIAPSIS, C3_ENERGY, ENERGY};
    enum {SEMILATUS_RECTUM, HMAG, HX, HY, HZ, BETA_ANGLE};
-
+   enum {EQ_SMA, EY, EX, NY, NX, MLONG};
+   
    enum
    {
       SPACECRAFT = 0,

@@ -1120,6 +1120,99 @@ Real OrbitData::GetOtherAngleReal(const std::string &str)
 }
 
 
+//------------------------------------------------------------------------------
+// Real GetEquiReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrives Equinoctial element
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetEquinReal(Integer item)
+{
+   Rvector6 state = GetCartState();
+
+   if (mOriginDep && mOrigin->GetName() != "Earth")
+   {
+      state = state - mOrigin->GetMJ2000State(mCartEpoch);
+   }
+   
+   Rvector3 pos(state[0], state[1], state[2]);
+   Rvector3 vel(state[3], state[4], state[5]);   
+   Real rMag = pos.GetMagnitude();
+   
+   if (rMag < ORBIT_ZERO_TOL)
+      throw ParameterException
+         ("OrbitData::GetEquiReal(" + GmatRealUtil::ToString(item) +
+          ") position vector is zero. pos: " + pos.ToString() + " vel: " +
+          vel.ToString());
+   
+   switch (item)
+   {
+   case EQ_SMA:
+      return GetSemiMajorAxis(pos, vel);
+   case EY:
+      {
+      	Rvector6 equiState = GetEquinState();
+         return equiState[1];
+      }
+   case EX:
+      {
+      	Rvector6 equiState = GetEquinState();
+         return equiState[2];
+      }
+   case NY:
+      {
+      	Rvector6 equiState = GetEquinState();
+         return equiState[3];
+      }
+   case NX:
+      {
+      	Rvector6 equiState = GetEquinState();
+         return equiState[4];
+      }
+   case MLONG:
+      {
+      	Rvector6 equiState = GetEquinState();
+         return equiState[5];
+      }
+
+   default:
+      throw ParameterException("OrbitData::GetKepReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(item));
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetEquiReal(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Retrives Equinoctial element
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetEquinReal(const std::string &str)
+{
+   Rvector6 state = GetCartState();
+
+   if (str == "EquiSma")
+      return GetEquinReal(EQ_SMA);
+   else if (str == "EquiEy")
+      return GetEquinReal(EY);
+   else if (str == "EquiEx")
+      return GetEquinReal(EX);
+   else if (str == "EquiNy")
+      return GetEquinReal(NY);
+   else if (str == "EquiNx")
+      return GetEquinReal(NX);
+   else if (str == "EquiMlong")
+      return GetEquinReal(MLONG);
+   else
+      throw ParameterException("OrbitData::GetEquiReal() Unknown parameter name: " +
+                               str);
+    
+}
+
+
 //-------------------------------------
 // Inherited methods from RefData
 //-------------------------------------
