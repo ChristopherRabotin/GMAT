@@ -14,7 +14,7 @@
 //
 /**
  * Declares Equinoctial related parameter classes.
- *   EquiSma, EquiEy, EquiEx, EquiNy, EquiNx, EquiMlong, EquiState
+ *   EquinSma, EquinEy, EquinEx, EquinNy, EquinNx, EquinMlong, EquinState
  */
 //------------------------------------------------------------------------------
 #ifndef EQUINOCTIALPARAMETERS_HPP_
@@ -24,14 +24,14 @@
 #include "OrbitReal.hpp"
 #include "OrbitRvec6.hpp"
 
-class GMAT_API EquiSma : public OrbitReal
+class GMAT_API EquinSma : public OrbitReal
 {
 public:
 
-   EquiSma(const std::string &name = "", GmatBase *obj = NULL);
-   EquiSma(const EquiSma &copy);
-   EquiSma& operator=(const EquiSma &right);
-   virtual ~EquiSma();
+   EquinSma(const std::string &name = "", GmatBase *obj = NULL);
+   EquinSma(const EquinSma &copy);
+   EquinSma& operator=(const EquinSma &right);
+   virtual ~EquinSma();
    
    // methods inherited from Parameter
    virtual bool Evaluate();
@@ -44,14 +44,14 @@ protected:
 };
 
 
-class GMAT_API EquiEy : public OrbitReal
+class GMAT_API EquinEy : public OrbitReal
 {
 public:
 
-   EquiEy(const std::string &name = "", GmatBase *obj = NULL);
-   EquiEy(const EquiEy &copy);
-   EquiEy& operator=(const EquiEy &right);
-   virtual ~EquiEy();
+   EquinEy(const std::string &name = "", GmatBase *obj = NULL);
+   EquinEy(const EquinEy &copy);
+   EquinEy& operator=(const EquinEy &right);
+   virtual ~EquinEy();
    
    // methods inherited from Parameter
    virtual bool Evaluate();
@@ -64,14 +64,14 @@ protected:
 };
 
 
-class GMAT_API EquiEx : public OrbitReal
+class GMAT_API EquinEx : public OrbitReal
 {
 public:
 
-   EquiEx(const std::string &name = "", GmatBase *obj = NULL);
-   EquiEx(const EquiEx &copy);
-   EquiEx& operator=(const EquiEx &right);
-   virtual ~EquiEx();
+   EquinEx(const std::string &name = "", GmatBase *obj = NULL);
+   EquinEx(const EquinEx &copy);
+   EquinEx& operator=(const EquinEx &right);
+   virtual ~EquinEx();
    
    // methods inherited from Parameter
    virtual bool Evaluate();
@@ -84,14 +84,14 @@ protected:
 };
 
 
-class GMAT_API EquiNy : public OrbitReal
+class GMAT_API EquinNy : public OrbitReal
 {
 public:
 
-   EquiNy(const std::string &name = "", GmatBase *obj = NULL);
-   EquiNy(const EquiNy &copy);
-   EquiNy& operator=(const EquiNy &right);
-   virtual ~EquiNy();
+   EquinNy(const std::string &name = "", GmatBase *obj = NULL);
+   EquinNy(const EquinNy &copy);
+   EquinNy& operator=(const EquinNy &right);
+   virtual ~EquinNy();
    
    // methods inherited from Parameter
    virtual bool Evaluate();
@@ -104,14 +104,14 @@ protected:
 };
 
 
-class GMAT_API EquiNx : public OrbitReal
+class GMAT_API EquinNx : public OrbitReal
 {
 public:
 
-   EquiNx(const std::string &name = "", GmatBase *obj = NULL);
-   EquiNx(const EquiNx &copy);
-   EquiNx& operator=(const EquiNx &right);
-   virtual ~EquiNx();
+   EquinNx(const std::string &name = "", GmatBase *obj = NULL);
+   EquinNx(const EquinNx &copy);
+   EquinNx& operator=(const EquinNx &right);
+   virtual ~EquinNx();
    
    // methods inherited from Parameter
    virtual bool Evaluate();
@@ -124,14 +124,14 @@ protected:
 };
 
 
-class GMAT_API EquiMlong : public OrbitReal
+class GMAT_API EquinMlong : public OrbitReal
 {
 public:
 
-   EquiMlong(const std::string &name = "", GmatBase *obj = NULL);
-   EquiMlong(const EquiMlong &copy);
-   EquiMlong& operator=(const EquiMlong &right);
-   virtual ~EquiMlong();
+   EquinMlong(const std::string &name = "", GmatBase *obj = NULL);
+   EquinMlong(const EquinMlong &copy);
+   EquinMlong& operator=(const EquinMlong &right);
+   virtual ~EquinMlong();
    
    // methods inherited from Parameter
    virtual bool Evaluate();
@@ -144,14 +144,14 @@ protected:
 };
 
 
-class GMAT_API EquiState : public OrbitRvec6
+class GMAT_API EquinState : public OrbitRvec6
 {
 public:
 
-   EquiState(const std::string &name = "", GmatBase *obj = NULL);
-   EquiState(const EquiState &copy);
-   EquiState& operator=(const EquiState &right);
-   virtual ~EquiState();
+   EquinState(const std::string &name = "", GmatBase *obj = NULL);
+   EquinState(const EquinState &copy);
+   EquinState& operator=(const EquinState &right);
+   virtual ~EquinState();
 
    // methods inherited from Parameter
    virtual bool Evaluate();

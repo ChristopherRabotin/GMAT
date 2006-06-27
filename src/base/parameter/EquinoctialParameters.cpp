@@ -14,7 +14,7 @@
 //
 /**
  * Implements Equinoctial related parameter classes.
- *   EquiSma, EquiEy, EquiEx, EquiNy, EquiNx, EquiMlong, EquiState
+ *   EquinSma, EquinEy, EquinEx, EquinNy, EquinNx, EquinMlong, EquinState
  */
 //------------------------------------------------------------------------------
 
@@ -23,7 +23,7 @@
 
 //#define DEBUG_CARTESIAN_PARAM 1
 
-EquiSma::EquiSma(const std::string &name, GmatBase *obj)
+EquinSma::EquinSma(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Sma", obj, "Equinoctial Sma", "?", GmatParam::COORD_SYS, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
@@ -31,12 +31,12 @@ EquiSma::EquiSma(const std::string &name, GmatBase *obj)
    mColor = GmatColor::RED32;
 }
 
-EquiSma::EquiSma(const EquiSma &copy)
+EquinSma::EquinSma(const EquinSma &copy)
    : OrbitReal(copy)
 {
 }
 
-EquiSma& EquiSma::operator=(const EquiSma&right)
+EquinSma& EquinSma::operator=(const EquinSma&right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
@@ -44,14 +44,14 @@ EquiSma& EquiSma::operator=(const EquiSma&right)
    return *this;
 }
 
-EquiSma::~EquiSma()
+EquinSma::~EquinSma()
 {
 }
 
-bool EquiSma::Evaluate()
+bool EquinSma::Evaluate()
 {
-   //mRealValue = OrbitData::GetEquiReal("EquiSma");
-   mRealValue = OrbitData::GetEquiReal(SMA);
+   //mRealValue = OrbitData::GetEquinReal("EquinSma");
+   mRealValue = OrbitData::GetEquinReal(SMA);
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -59,14 +59,14 @@ bool EquiSma::Evaluate()
       return true;
 }
 
-GmatBase* EquiSma::Clone(void) const
+GmatBase* EquinSma::Clone(void) const
 {
-   return new EquiSma(*this);
+   return new EquinSma(*this);
 }
 
 
 
-EquiEy::EquiEy(const std::string &name, GmatBase *obj)
+EquinEy::EquinEy(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Ey", obj, "Equinoctial Ey", "?", GmatParam::COORD_SYS, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
@@ -74,12 +74,12 @@ EquiEy::EquiEy(const std::string &name, GmatBase *obj)
    mColor = GmatColor::GREEN32;
 }
 
-EquiEy::EquiEy(const EquiEy&copy)
+EquinEy::EquinEy(const EquinEy&copy)
    : OrbitReal(copy)
 {
 }
 
-EquiEy& EquiEy::operator=(const EquiEy&right)
+EquinEy& EquinEy::operator=(const EquinEy&right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
@@ -87,14 +87,14 @@ EquiEy& EquiEy::operator=(const EquiEy&right)
    return *this;
 }
 
-EquiEy::~EquiEy()
+EquinEy::~EquinEy()
 {
 }
 
-bool EquiEy::Evaluate()
+bool EquinEy::Evaluate()
 {
-   //mRealValue = OrbitData::GetEquiReal("EquiEy");
-   mRealValue = OrbitData::GetEquiReal(EY);
+   //mRealValue = OrbitData::GetEquinReal("EquinEy");
+   mRealValue = OrbitData::GetEquinReal(EY);
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -102,14 +102,14 @@ bool EquiEy::Evaluate()
       return true;
 }
 
-GmatBase* EquiEy::Clone(void) const
+GmatBase* EquinEy::Clone(void) const
 {
-   return new EquiEy(*this);
+   return new EquinEy(*this);
 }
 
 
 
-EquiEx::EquiEx(const std::string &name, GmatBase *obj)
+EquinEx::EquinEx(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Ex", obj, "Equinoctial Ex", "?", GmatParam::COORD_SYS, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
@@ -117,12 +117,12 @@ EquiEx::EquiEx(const std::string &name, GmatBase *obj)
    mColor = GmatColor::BLUE32;
 }
 
-EquiEx::EquiEx(const EquiEx &copy)
+EquinEx::EquinEx(const EquinEx &copy)
    : OrbitReal(copy)
 {
 }
 
-EquiEx& EquiEx::operator=(const EquiEx&right)
+EquinEx& EquinEx::operator=(const EquinEx&right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
@@ -130,14 +130,14 @@ EquiEx& EquiEx::operator=(const EquiEx&right)
    return *this;
 }
 
-EquiEx::~EquiEx()
+EquinEx::~EquinEx()
 {
 }
 
-bool EquiEx::Evaluate()
+bool EquinEx::Evaluate()
 {
-   //mRealValue = OrbitData::GetEquiReal("EquiEx");
-   mRealValue = OrbitData::GetEquiReal(EX);
+   //mRealValue = OrbitData::GetEquinReal("EquinEx");
+   mRealValue = OrbitData::GetEquinReal(EX);
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -145,14 +145,14 @@ bool EquiEx::Evaluate()
       return true;
 }
 
-GmatBase* EquiEx::Clone(void) const
+GmatBase* EquinEx::Clone(void) const
 {
-   return new EquiEx(*this);
+   return new EquinEx(*this);
 }
 
 
 
-EquiNy::EquiNy(const std::string &name, GmatBase *obj)
+EquinNy::EquinNy(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Ny", obj, "Equinoctial Ny", "?", GmatParam::COORD_SYS, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
@@ -160,12 +160,12 @@ EquiNy::EquiNy(const std::string &name, GmatBase *obj)
    mColor = GmatColor::YELLOW32;
 }
 
-EquiNy::EquiNy(const EquiNy &copy)
+EquinNy::EquinNy(const EquinNy &copy)
    : OrbitReal(copy)
 {
 }
 
-EquiNy& EquiNy::operator=(const EquiNy&right)
+EquinNy& EquinNy::operator=(const EquinNy&right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
@@ -173,14 +173,14 @@ EquiNy& EquiNy::operator=(const EquiNy&right)
    return *this;
 }
 
-EquiNy::~EquiNy()
+EquinNy::~EquinNy()
 {
 }
 
-bool EquiNy::Evaluate()
+bool EquinNy::Evaluate()
 {
-   //mRealValue = OrbitData::GetEquiReal("EquiNy");
-   mRealValue = OrbitData::GetEquiReal(NY);
+   //mRealValue = OrbitData::GetEquinReal("EquinNy");
+   mRealValue = OrbitData::GetEquinReal(NY);
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -188,14 +188,14 @@ bool EquiNy::Evaluate()
       return true;
 }
 
-GmatBase* EquiNy::Clone(void) const
+GmatBase* EquinNy::Clone(void) const
 {
-   return new EquiNy(*this);
+   return new EquinNy(*this);
 }
 
 
 
-EquiNx::EquiNx(const std::string &name, GmatBase *obj)
+EquinNx::EquinNx(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Nx", obj, "Equinoctial Nx", "?", GmatParam::COORD_SYS, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
@@ -203,12 +203,12 @@ EquiNx::EquiNx(const std::string &name, GmatBase *obj)
    mColor = GmatColor::GREEN32;
 }
 
-EquiNx::EquiNx(const EquiNx &copy)
+EquinNx::EquinNx(const EquinNx &copy)
    : OrbitReal(copy)
 {
 }
 
-EquiNx& EquiNx::operator=(const EquiNx&right)
+EquinNx& EquinNx::operator=(const EquinNx&right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
@@ -216,14 +216,14 @@ EquiNx& EquiNx::operator=(const EquiNx&right)
    return *this;
 }
 
-EquiNx::~EquiNx()
+EquinNx::~EquinNx()
 {
 }
 
-bool EquiNx::Evaluate()
+bool EquinNx::Evaluate()
 {
-   //mRealValue = OrbitData::GetEquiReal("EquiNx");
-   mRealValue = OrbitData::GetEquiReal(NX);
+   //mRealValue = OrbitData::GetEquinReal("EquinNx");
+   mRealValue = OrbitData::GetEquinReal(NX);
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -231,14 +231,14 @@ bool EquiNx::Evaluate()
       return true;
 }
 
-GmatBase* EquiNx::Clone(void) const
+GmatBase* EquinNx::Clone(void) const
 {
-   return new EquiSma(*this);
+   return new EquinNx(*this);
 }
 
 
 
-EquiMlong::EquiMlong(const std::string &name, GmatBase *obj)
+EquinMlong::EquinMlong(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Mlong", obj, "Equinoctial Mlong", "?", GmatParam::COORD_SYS, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
@@ -246,12 +246,12 @@ EquiMlong::EquiMlong(const std::string &name, GmatBase *obj)
    mColor = GmatColor::BLUE32;
 }
 
-EquiMlong::EquiMlong(const EquiMlong &copy)
+EquinMlong::EquinMlong(const EquinMlong &copy)
    : OrbitReal(copy)
 {
 }
 
-EquiMlong& EquiMlong::operator=(const EquiMlong&right)
+EquinMlong& EquinMlong::operator=(const EquinMlong&right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
@@ -259,14 +259,14 @@ EquiMlong& EquiMlong::operator=(const EquiMlong&right)
    return *this;
 }
 
-EquiMlong::~EquiMlong()
+EquinMlong::~EquinMlong()
 {
 }
 
-bool EquiMlong::Evaluate()
+bool EquinMlong::Evaluate()
 {
-   //mRealValue = OrbitData::GetEquiReal("EquiMlong");
-   mRealValue = OrbitData::GetEquiReal(MLONG);
+   //mRealValue = OrbitData::GetEquinReal("EquinMlong");
+   mRealValue = OrbitData::GetEquinReal(MLONG);
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -274,14 +274,14 @@ bool EquiMlong::Evaluate()
       return true;
 }
 
-GmatBase* EquiMlong::Clone(void) const
+GmatBase* EquinMlong::Clone(void) const
 {
-   return new EquiMlong(*this);
+   return new EquinMlong(*this);
 }
 
 
 
-EquiState::EquiState(const std::string &name, GmatBase *obj)
+EquinState::EquinState(const std::string &name, GmatBase *obj)
    : OrbitRvec6(name, "Equinoctial", obj, "Equinoctial State Vector",
                 "Km/s", GmatParam::COORD_SYS)
 {
@@ -292,13 +292,13 @@ EquiState::EquiState(const std::string &name, GmatBase *obj)
 }
 
 
-EquiState::EquiState(const EquiState &copy)
+EquinState::EquinState(const EquinState &copy)
    : OrbitRvec6(copy)
 {
 }
 
 
-EquiState& EquiState::operator=(const EquiState &right)
+EquinState& EquinState::operator=(const EquinState &right)
 {
    if (this != &right)
       OrbitRvec6::operator=(right);
@@ -307,18 +307,18 @@ EquiState& EquiState::operator=(const EquiState &right)
 }
 
 
-EquiState::~EquiState()
+EquinState::~EquinState()
 {
 }
 
 
-bool EquiState::Evaluate()
+bool EquinState::Evaluate()
 {
-   mRvec6Value = GetEquiState();
+   mRvec6Value = GetEquinState();
    
    #if DEBUG_CARTESIAN_PARAM
    MessageInterface::ShowMessage
-      ("EquiState::Evaluate() mRvec6Value =\n%s\n",
+      ("EquinState::Evaluate() mRvec6Value =\n%s\n",
        mRvec6Value.ToString().c_str());
    #endif
    
@@ -326,8 +326,8 @@ bool EquiState::Evaluate()
 }
 
 
-GmatBase* EquiState::Clone(void) const
+GmatBase* EquinState::Clone(void) const
 {
-   return new EquiState(*this);
+   return new EquinState(*this);
 }
 
