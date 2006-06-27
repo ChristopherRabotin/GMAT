@@ -5,11 +5,12 @@ using namespace GmatMathUtil;
 
 const std::string Equinoctial::DATA_DESCRIPTIONS[NUM_DATA] =
 {
-	"SemiMajor"
-	"Projection of eccentricity onto y_ep axis"
-	"Projection of eccentricity onto x_ep axis"
-	"Projection of N onto y_ep axis"
-	"Projection of N onto y_ep axis"
+	"SemiMajor",
+	"Projection of eccentricity onto y_ep axis",
+	"Projection of eccentricity onto x_ep axis",
+	"Projection of N onto y_ep axis",
+	"Projection of N onto y_ep axis",
+	"Mean Longitude"
 };
 
 Equinoctial::Equinoctial() :
