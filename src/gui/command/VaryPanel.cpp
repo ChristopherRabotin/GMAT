@@ -399,7 +399,11 @@ void VaryPanel::OnButton(wxCommandEvent& event)
 {
    if (event.GetEventObject() == mViewVarButton)  
    {
-      ParameterSelectDialog paramDlg(this, mObjectTypeList, "ImpulsiveBurn",
+      wxString objType = "ImpulsiveBurn";
+      if (theGuiManager->GetNumImpulsiveBurn() == 0)
+          objType = "Spacecraft";
+      
+      ParameterSelectDialog paramDlg(this, mObjectTypeList, objType,
                                      GuiItemManager::SHOW_SETTABLE,
                                      false, false, true, false, false, false);
       paramDlg.ShowModal();

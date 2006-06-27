@@ -478,7 +478,12 @@ wxComboBox* GuiItemManager::GetObjectTypeComboBox(wxWindow *parent, wxWindowID i
                      0, emptyList, wxCB_READONLY);
    
    for (unsigned int i=0; i<objectTypeList.size(); i++)
-      cb->Append(objectTypeList[i]);
+   {
+      if (objectTypeList[i] == "Spacecraft" && theNumSpacecraft > 0)
+         cb->Append(objectTypeList[i]);
+      else if (objectTypeList[i] == "ImpulsiveBurn" && theNumImpBurn > 0)
+         cb->Append(objectTypeList[i]);
+   }
    
    cb->SetSelection(0);
    
@@ -1018,18 +1023,8 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
    ParameterInfo *theParamInfo = ParameterInfo::Instance();
    wxString emptyList[] = {};
    
-   wxListBox *propertyListBox;
-
-   if (objType == "ImpulsiveBurn")
-   {
-      propertyListBox = new wxListBox(parent, id, wxDefaultPosition, size, 0,
-                                      emptyList, wxLB_SINGLE);
-   }
-   else
-   {
-      propertyListBox = new wxListBox(parent, id, wxDefaultPosition, size, 0,
-                                      emptyList, wxLB_SINGLE|wxLB_SORT);
-   }
+   wxListBox *propertyListBox = new wxListBox(parent, id, wxDefaultPosition, size, 0,
+                                              emptyList, wxLB_SINGLE|wxLB_SORT);
    
    if (objType == "Spacecraft")
    {
