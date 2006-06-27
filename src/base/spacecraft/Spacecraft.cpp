@@ -371,9 +371,9 @@ void Spacecraft::SetInternalCoordSystem(CoordinateSystem *cs)
 void Spacecraft::SetState(const Rvector6 &cartState)
 {
    #if DEBUG_SPACECRAFT_SET
-      MessageInterface::ShowMessage
-         ("Spacecraft::SetState(Rvector6) cartesianState=%s\n",
-          cartesianState.ToString().c_str());
+      MessageInterface::ShowMessage("Spacecraft::SetState(Rvector6)\n");
+    /*     ("Spacecraft::SetState(Rvector6) cartesianState=%s\n",
+          cartState.ToString().c_str());*/
    #endif
    
    SetState(cartState[0], cartState[1], cartState[2],
@@ -1509,7 +1509,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       // Check for invalid input then return unknown value from GmatBase 
       if (value != "Cartesian" && value != "Keplerian" && 
           value != "ModifiedKeplerian" && value != "SphericalAZFPA" && 
-          value != "SphericalRADEC")
+          value != "SphericalRADEC" && value != "Equinoctial")
       {   
          throw SpaceObjectException("Unknown state element representation: " + 
             value);
@@ -1595,11 +1595,10 @@ bool Spacecraft::SetStringParameter(const std::string &label,
                                     const std::string &value)
 {
    #if DEBUG_SPACECRAFT
-       std::cout << "\nSpacecraft::SetStringParameter(\"" << label
-                 << "\", \"" << value << "\") enters...\n"; 
+       MessageInterface::ShowMessage("\nSpacecraft::SetStringParameter(\"%s\", \"%s\") enters\n", label.c_str(), value.c_str() ); 
        Integer id = GetParameterID(label);
-       std::cout << "\nGetParameterText: " << GetParameterText(id);
-       std::cout << "\nSpacecraft::SetStringParameter exits sooner\n"; 
+       MessageInterface::ShowMessage("GetParameterText: %s\n", GetParameterText(id).c_str());
+       MessageInterface::ShowMessage("Spacecraft::SetStringParameter exits sooner\n\n"); 
    #endif
 
    return SetStringParameter(GetParameterID(label),value);
