@@ -258,251 +258,108 @@ Integer CoordUtil::ComputeMeanToTrueAnomaly(Real ma, Real ecc, Real tol,
 Integer CoordUtil::ComputeCartToKepl(Real grav, Real r[3], Real v[3], Real *tfp,
                                      Real elem[6], Real *ma)
 {
-   Real ww[3], xl[3], xnu[2], xnup[3], rm, vm;
-   Real denom, c,     xnum,   p,       rd;
+if (Abs(grav) < 1E-30)
+   return(2);
    
-   const Real TOL = 1.0e-30;
-   
-   Real cta, sta,   xnupm, f,  dnul, xlm,  cw,    sw;
-   Real div, cosea, sinea, ea, ava,  tang, sinhf, auxf;
-   Real q,   z;
-   
-   long i;
+ Rvector3 pos(r[0], r[1], r[2]);
+ Rvector3 vel(v[0], v[1], v[2]);
+ 
+ // eqn 4.1
+ Rvector3 angMomentum = Cross(pos, vel);
+ 
+ // eqn 4.2
+ Real h = angMomentum.GetMagnitude();
+ 
+ if (h < 1E-30) {
+   return 1;
+ }
+ 
+ // eqn 4.3
+ Rvector3 nodeVec = Cross(Rvector3(0,0,1), angMomentum);
+ 
+ // eqn 4.4
+ Real n = nodeVec.GetMagnitude();
+ 
+ // eqn 4.5 - 4.6
+ Real posMag = pos.GetMagnitude();
+ Real velMag = vel.GetMagnitude();
+ 
+ // eqn 4.7 - 4.8
+ Rvector3 eccVec = (1/grav)*((velMag*velMag - grav/posMag)*pos - (pos * vel) * vel);
+ Real e = eccVec.GetMagnitude();
+ 
+ // eqn 4.9
+ Real zeta = 0.5*velMag*velMag - grav/posMag;
+ 
+ if (Abs(1 - e) < 1E-30)
+ {
+ 	throw UtilityException
+               ("CoordUtil::CartesianToKeplerian() "
+                "Radius is near infinite in keplarian to cartesian conversion\n");
+ }
 
-   Real pow3;
-   
-   ww[0] = r[1] * v[2] - r[2] * v[1];
-   ww[1] = r[2] * v[0] - r[0] * v[2];
-   ww[2] = r[0] * v[1] - r[1] * v[0];
-   
-   c = Sqrt(ww[0]*ww[0] + ww[1]*ww[1] + ww[2]*ww[2]);
+ // eqn 4.10
+ Real sma = -grav/(2*zeta);
+ 
+ // eqn 4.11
+ Real i = ACos( angMomentum.Get(2)/h );
 
-   if (Abs(c) < TOL)
-      return(1); 
-
-   ww[0] = ww[0] / c;
-   ww[1] = ww[1] / c;
-   ww[2] = ww[2] / c;
-
-   xnu[0] = -ww[1];
-   xnu[1] =  ww[0];
-
-   xnum =Sqrt(ww[1]*ww[1] + ww[0]*ww[0]);
-
-   if (Abs(grav) < TOL)
-      return(2);
-
-   p = c * c /(grav);
-   rm = Sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
-   vm = Sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
-   rd = (r[0]*v[0] + r[1]*v[1] + r[2]*v[2]);
-
-   // solve for elem[0]
-
-   denom = 2.0 - rm * vm * vm / (grav);
-
-   if (Abs(denom) < TOL)
-      return(3);
-
-   elem[0] = rm / denom;
-
-   // solve for elem[1]
-
-   if (Abs(elem[0]) < TOL)
-      return (4);
-
-   elem[1]= Sqrt(Abs(1.0 - p/elem[0]));
-
-   // solve for elem[2]
-   
-   elem[2] = RadToDeg(ACos(ww[2]));
-   
-   // solve for elem[5]
-
-   if (elem[1] >= 1.0e-06) 
-   {
-      denom = elem[1] * rm;
-
-      if (Abs(denom) < TOL)
-         return(5);
-
-      cta = (p-rm)/denom;
-      denom = elem[1] * (grav) * rm;
-
-      if (Abs(denom) < TOL)
-         return(6); 
-
-      sta = rd * c / denom;
-
-   }
-   else
-   {
-      elem[1] = 0.0;
-
-      if( Abs(elem[2]) >=  1.0e-06) 
-      {
-         xnup[0] = -ww[2] * ww[0];
-         xnup[1] = -ww[2] * ww[1];
-         xnup[2] =  ww[0]*ww[0] + ww[1]*ww[1];
-
-         xnupm = Sqrt(xnup[0]*xnup[0] + xnup[1]*xnup[1] + xnup[2]*xnup[2]);
-         denom = rm * xnum;
-
-         if (Abs(denom) < TOL)
-            return(7);
-
-         cta = (r[0] * xnu[0] + r[1] * xnu[1])/denom;
-         denom = rm * xnupm;
-
-         if (Abs(denom) < TOL)
-            return(8);
-
-         sta = (r[0]*xnup[0] + r[1]*xnup[1] + r[2]*xnup[2]) / denom;
-      }
-      else
-      {
-         if (Abs(rm) < TOL)
-            return(9);
-
-         cta = r[0] / rm;
-         sta = r[1] / rm;
-      }
-   }
-
-   elem[5] = RadToDeg(ATan(sta,cta));
-
-   if( elem[5] < 0.0)
-      elem[5] = elem[5] + 360.0;
-
-   // solve for elem[3],   if elem[2]=0, elem[3]=0
-
-   elem[3] = 0.0;
-
-   if(Abs(elem[2]) >= 1.0e-06)
-   {
-      elem[3] = RadToDeg(ATan(ww[0],-ww[1]));
-
-      if (elem[3] < 0.0)
-         elem[3] = elem[3] + 360.0;
-   }
-   
-   // solve for elem(5), if elem(2)=0, elem(5)=0
-
-   elem[4] = 0.0;
-      
-   if (elem[1] >= 1.0e-06) 
-   {
-      if (Abs(rm) < TOL)
-         return(10); 
-
-      f = vm * vm - (grav) / rm;
-
-      for (i=0; i<3; i++)
-         xl[i] = f * r[i] - rd * v[i];
-
-      dnul = xnu[0] * xl[0] + xnu[1] * xl[1];
-      xlm = Sqrt(xl[0]*xl[0] + xl[1]*xl[1] + xl[2]*xl[2]);
-
-      if(Abs(elem[2]) >= 1.0e-06) 
-      {
-         denom = xnum * xlm;
-
-         if (Abs(denom) < TOL)
-            return (11);
-
-         elem[4] = dnul / denom;
-
-         if( Abs(elem[4]) >=  1.0 ) 
-         {
-            if( elem[4] > 0.0) 
-               elem[4] = 0.0;
-            else
-               elem[4] = 180.0;
-         }    
-         else
-         {
-            elem[4] = RadToDeg(ACos(elem[4]));
-         }
-
-
-         elem[4] = (xl[2] >= 0.0) ? Abs(elem[4]) : -Abs(elem[4]);
-
-      }
-      else
-      {
-         if (Abs(xlm) < TOL)
-            return (12);
-
-         cw = xl[0] / xlm;
-         sw = xl[1] / xlm;
-
-         elem[4] = RadToDeg(ATan(sw,cw));
-      }
-   }
-
-   if (elem[4] < 0.0)
-      elem[4] = elem[4] + 360.0;
-
-   q = DegToRad(elem[5]);
-   
-   pow3 = Pow(elem[0],3);
-   
-   if (elem[0] >= 0.0)
-   {
-      // solve for tfp on an elliptic orbit
-
-      div = 1.0  + elem[1] * Cos(q);
-
-      if (Abs(div) < TOL)
-         return (13);
-
-      cosea = (elem[1] + Cos(q)) / div;
-      sinea = Sqrt(1.0 - elem[1]*elem[1]) * Sin(q)/div;
-      ea = ATan(sinea,cosea);
-      ava = ea - elem[1] * Sin(ea);
-
-      if (ava < 0.0) ava = ava + TWO_PI;
-
-      *ma = RadToDeg(ava);
-
-      //dos:if (Abs(Pow(elem[0],3)) < TOL) 
-      if (Abs(pow3) < TOL) 
-         return (13);
-      
-      denom = Sqrt((grav)/pow3);
-
-      if (Abs(denom) < TOL)
-         return (14);
-
-      *tfp = ava / denom;
-
-   }
-   else
-   {
-      // solve for tfp on a hyperbolic orbit
-      denom = Cos(q/2.0);
-
-      if (Abs(denom) < TOL)
-         return (15);
-                    
-      tang = Sqrt((elem[1] - 1.0)/(elem[1] + 1.0)) * Sin(q/2.0)/denom;
-      denom = 1.0 - tang * tang;
-
-      if (Abs(denom) < TOL)
-         return (16);
-
-      sinhf = (2.0 * tang) / denom;
-      auxf = Log(sinhf + Sqrt(sinhf * sinhf + 1.0));
-      z = elem[1] * sinhf - auxf;
-      *ma = RadToDeg(z);
-
-      if (Abs(grav) < TOL)
-         return (2);
-      
-      *tfp = Sqrt(-pow3 / (grav)) * z;
-   }
-   
-   return (0);
+ Real raan, argPeriapsis, trueAnom;
+ raan=argPeriapsis=trueAnom=0;
+ if ( e >= 1E-11 && i >= 1E-11 )  // CASE 1: Non-circular, Inclined Orbit
+ {
+	raan = ACos( nodeVec.Get(0)/n );
+ 	if (nodeVec.Get(1) < 0)
+ 	   raan = TWO_PI - raan;
+ 	   
+ 	argPeriapsis = ACos( (nodeVec*eccVec)/(n*e) );
+ 	if (eccVec.Get(2) < 0)
+ 	   argPeriapsis = TWO_PI - argPeriapsis;
+ 	
+ 	trueAnom = ACos( (eccVec*pos)/(e*posMag) );
+ 	if (pos*vel < 0)
+ 	   trueAnom = TWO_PI - trueAnom;
+ }
+ if ( e >= 1E-11 && i < 1E-11 )  // CASE 2: Non-circular, Equatorial Orbit
+ {
+ 	raan = 0;
+ 	argPeriapsis = ACos(eccVec.Get(0)/e);
+ 	if (eccVec.Get(1) < 0)
+ 	   argPeriapsis = TWO_PI - argPeriapsis;
+ 	   
+ 	trueAnom = ACos( (eccVec*pos)/(e*posMag) );
+ 	if (pos*vel < 0)
+ 	   trueAnom = TWO_PI - trueAnom;
+  	}
+ if ( e < 1E-11 && i >= 1E-11 )  // CASE 3: Circular, Inclined Orbit
+ {
+ 	raan = ACos( nodeVec.Get(0)/n );
+ 	if (nodeVec.Get(1) < 0)
+ 	   raan = TWO_PI - raan;
+ 	   
+ 	argPeriapsis = 0;
+ 	
+ 	trueAnom = ACos( (nodeVec*pos)/(n*posMag) );
+ 	if (pos.Get(2) < 0)
+ 	   trueAnom = TWO_PI - trueAnom;
+ }
+ if ( e < 1E-11 && i < 1E-11 )  // CASE 4: Circular, Equatorial Orbit
+ {
+ 	raan = 0;
+ 	argPeriapsis = 0;
+ 	trueAnom = ACos(pos.Get(0)/posMag);
+ 	if (pos.Get(1) < 0)
+ 	   trueAnom = TWO_PI - trueAnom;
+  	}
+ 
+ elem[0] = sma;
+ elem[1] = e;
+ elem[2] = i*DEG_PER_RAD;
+ elem[3] = raan*DEG_PER_RAD;
+ elem[4] = argPeriapsis*DEG_PER_RAD;
+ elem[5] = trueAnom*DEG_PER_RAD;
+ 
+ return 0;  
 }
 
 //------------------------------------------------------------------------------
@@ -512,121 +369,61 @@ Integer CoordUtil::ComputeCartToKepl(Real grav, Real r[3], Real v[3], Real *tfp,
 Integer CoordUtil::ComputeKeplToCart(Real grav, Real elem[6], Real r[3],
                                      Real v[3], CoordUtil::AnomalyType anomalyType)
 {
-   Integer ret, iter;
-
-   Real temp, a,  b,  c,  q,  ecc, ma, ta;
-   Real ci,   si, cn, sn, cw, sw,  ct, st;
-   Real p,    x,  ck;
-   Real rmag;
-   
-   Real ztol = 1.0e-30;
-   Real tol = 1.0e-08;
-   
-   ret = 0;
-   
+   Real sma = elem[0],
+        ecc = elem[1],
+        inc = elem[2]*RAD_PER_DEG,
+       raan = elem[3]*RAD_PER_DEG,
+        per = elem[4]*RAD_PER_DEG,
+       anom = elem[5]*RAD_PER_DEG;
+   	   
+   // **************
+   // taken from old code above; necessary to avoid crash, but not in spec
    if (anomalyType == CoordUtil::MA) //loj: 6/23/04 changed from TA
    {
-      ma = elem[5]; 
+      Real ma = elem[5]; 
       ecc = elem[1];
 
-      ret = CoordUtil::ComputeMeanToTrueAnomaly(ma, ecc, tol, &ta, &iter);
+	  Real ta;
+	  Integer iter;
+      Integer ret = CoordUtil::ComputeMeanToTrueAnomaly(ma, ecc, 1E-8, &ta, &iter);
       
       if (ret > 0)
       {
          return ret;
       }
    }
-
-   if (elem[2] < 0.0)
-   {
-      elem[2] = elem[2] + 180.0;
+   // ***************
+   
+   // radius near infinite
+   if (1-ecc*Cos(anom) < 1E-30) {
+   	return 1;
    }
    
-   a = DegToRad(elem[2]);
-   b = DegToRad(elem[3]);
-   c = DegToRad(elem[4]);
-   q = DegToRad(elem[5]);
+   // eqn 4.24; semilatus rectum
+   Real p = sma*(1 - ecc*ecc);
    
-   if (anomalyType == CoordUtil::MA) //loj: 6/23/04 changed from TA
-   {
-      q = DegToRad(ta);
+   // orbit parabolic
+   if (Abs(p) < 1E-30) {
+   	return 2;
    }
    
-   if (Abs(elem[2]) < 1.e-06)
-   {
-      b = 0.0;
-   }
-
-   if(elem[1] < 1.e-06)
-   {
-      c=0.0;
-   }
-
-   ci = Cos(a);
-   si = Sin(a);
+   // eqn 4.25; radius
+   Real rad = p/(1 + ecc*Cos(anom));
    
-   cn = Cos(b);
-   sn = Sin(b);
-
-   cw = Cos(c+q);
-   sw = Sin(c+q);
-     
-   p = elem[0] * (1.0 - elem[1] * elem[1]);
+   // eqn 4.26 - 4.28
+   r[0] = rad*(Cos(per + anom) * Cos(raan) - Cos(inc) * Sin(per + anom) * Sin(raan)),
+   r[1] = rad*(Cos(per + anom) * Sin(raan) + Cos(inc) * Sin(per + anom) * Cos(raan)),
+   r[2] = rad*Sin(per + anom)*Sin(inc);
+   		
+   v[0] = Sqrt(grav/p)*(Cos(anom)+ecc)*(-Sin(per)*Cos(raan)-Cos(inc)*Sin(raan)*Cos(per))
+   			- Sqrt(grav/p)*Sin(anom)*(Cos(per)*Cos(raan)-Cos(inc)*Sin(raan)*Sin(per));
+   			
+   v[1] = Sqrt(grav/p)*(Cos(anom)+ecc)*(-Sin(per)*Sin(raan)+Cos(inc)*Cos(raan)*Cos(per))
+   			- Sqrt(grav/p)*Sin(anom)*(Cos(per)*Sin(raan)+Cos(inc)*Cos(raan)*Sin(per));
+   			
+   v[2] = Sqrt(grav/p)*((Cos(anom)+ecc)*Sin(inc)*Cos(per) - Sin(anom)*Sin(inc)*Sin(per));
    
-   //    compute the radius vector and its magnitude
-
-   temp = 1.0 + elem[1] * Cos(q);
-
-   if (Abs(temp) < ztol)
-   {
-      return (1);
-   }
-   
-   rmag = p / temp;
-   
-   r[0] = (rmag) * (cw * cn - ci * sw * sn);
-   r[1] = (rmag) * (cw * sn + ci * sw * cn);
-   r[2] = (rmag) * sw * si;
-   
-   cw = Cos(c);
-   sw = Sin(c);
-
-   ct = Cos(q);
-   st = Sin(q);
-   
-   if (Abs(p) < ztol)
-   {
-      return (2); 
-   }
-   
-   ck = Sqrt((grav)/p);
-   x = ct + elem[1];
-   
-   //    compute the velocity vector and its magnitude
-   Real swxcn = sw*cn;
-   Real swxsn = sw*sn;
-   Real cwxcn = cw*cn;
-   Real cwxsn = cw*sn;
-   
-   Real cixsnxcw = ci*sn*cw;
-   Real cixsnxsw = ci*sn*sw;
-   Real cixcnxcw = ci*cn*cw;
-   Real cixcnxsw = ci*cn*sw;
-
-   Real temp0 = ck * (x * (-swxcn-cixsnxcw) - st * (cwxcn-cixsnxsw));
-   Real temp1 = ck * (x * (-swxsn+cixcnxcw) - st * (cwxsn+cixcnxsw));
-   Real temp2 = ck * (x * si * cw - st * si * sw);
-
-   
-//     v[0] = ck * (x * (-sw*cn-ci*sn*cw) - st * (cw*cn-ci*sn*sw));
-//     v[1] = ck * (x * (-sw*sn+ci*cn*cw) - st * (cw*sn+ci*cn*sw));
-//     v[2] = ck * (x * si * cw - st * si * sw);
-
-   v[0] = temp0;
-   v[1] = temp1;
-   v[2] = temp2;
-   
-   return ret;
+   return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -676,7 +473,7 @@ Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, Real grav, Real *ma)
    
    if(grav < 1.0)
    {
-      throw UtilityException("CoordUtil::CartesianToKeplerian() ravity constant "
+      throw UtilityException("CoordUtil::CartesianToKeplerian() gravity constant "
                              "too small for conversion to Keplerian elements\n");
    }
    else
@@ -718,7 +515,7 @@ Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, Real grav, Real *ma)
 
    Rvector6 keplVec = Rvector6(kepl[0], kepl[1], kepl[2], kepl[3], kepl[4], kepl[5]);
    return keplVec;
- 
+
 }
 
 //---------------------------------
