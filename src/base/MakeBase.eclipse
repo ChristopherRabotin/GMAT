@@ -240,6 +240,7 @@ OBJECTS = \
     parameter/EnvData.o \
     parameter/EnvParameters.o \
     parameter/EnvReal.o \
+    parameter/EquinoctialParameters.o \
     parameter/ExpressionParser.o \
     parameter/KeplerianParameters.o \
     parameter/OrbitalParameters.o \
