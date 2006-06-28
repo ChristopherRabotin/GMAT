@@ -22,10 +22,10 @@
 #include "StringTokenizer.hpp"
 #include "MessageInterface.hpp"
 #include "RealUtilities.hpp"       // for Abs()
-#include "Linear.hpp"              // for ToString()
+#include "StringUtil.hpp"          // for ToString()
 
 using namespace std;
-using namespace GmatRealUtil;
+using namespace GmatStringUtil;
 
 //#define DEBUG_COMPARE_REPORT 1
 
@@ -453,7 +453,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
    #endif
 
       if (numDirsToCompare == 3)
-         if (in2.eof())
+         if (in3.eof())
             break;
       
       count++;
@@ -647,6 +647,199 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
    in2.close();
    in3.close();
 
+   return textBuffer;
+}
+   
+   
+//------------------------------------------------------------------------------
+// StringArray& Compare(Integer numDirsToCompare, const std::string &basefilename,
+//                      const std::string &filename1, const std::string &filename2,
+//------------------------------------------------------------------------------
+StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
+                                        const std::string &basefilename,
+                                        const std::string &filename1,
+                                        const std::string &filename2,
+                                        const std::string &filename3)
+{
+   textBuffer.clear();
+   textBuffer.push_back("\n======================================== Compare Utility\n");
+   textBuffer.push_back("basefile =" + basefilename + "\n");
+   
+   textBuffer.push_back("filename1=" + filename1 + "\n");
+   
+   if (numDirsToCompare >= 2)
+      textBuffer.push_back("filename2=" + filename2 + "\n");
+   
+   if (numDirsToCompare >= 3)
+      textBuffer.push_back("filename3=" + filename3 + "\n");
+   
+   #if DEBUG_COMPARE_REPORT
+   MessageInterface::ShowMessage("\n======================================== Compare Utility\n");
+   MessageInterface::ShowMessage("numDirsToCompare=%3\n", numDirsToCompare);
+   MessageInterface::ShowMessage("basefile =%s\n", basefilename.c_str());
+   MessageInterface::ShowMessage("filename1=%s\nfilename2=%s\nfilename3=%s\n",
+                                 filename1.c_str(), filename2.c_str(), filename3.c_str());
+   #endif
+   
+   // open base file
+   ifstream baseIn(basefilename.c_str());
+
+   // open compare files
+   ifstream in1(filename1.c_str());
+   ifstream in2(filename2.c_str());
+   ifstream in3(filename3.c_str());
+   
+   if (!baseIn)
+   {
+      textBuffer.push_back("Cannot open base file: " +  basefilename + "\n\n");
+      return textBuffer;
+   }
+   
+   if (!in1)
+   {
+      textBuffer.push_back("Cannot open first file: " + filename1 + "\n\n");
+      return textBuffer;
+   }
+   
+   if (numDirsToCompare >= 2)
+      if (!in2)
+      {
+         textBuffer.push_back("Cannot open second file: " + filename2 + "\n\n");
+         return textBuffer;
+      }
+   
+   if (numDirsToCompare >= 3)
+      if (!in3)
+      {
+         textBuffer.push_back("Cannot open third file: " + filename3 + "\n\n");
+         return textBuffer;
+      }
+
+   
+   char buffer[BUFFER_SIZE];
+   std::string line0, line1, line2, line3;
+   int diff1Count = 0, diff2Count = 0, diff3Count = 0;
+   int count = 1;
+   
+   
+   //------------------------------------------
+   // now start compare
+   //------------------------------------------
+   while (!baseIn.eof() && !in1.eof())
+   {
+      if (numDirsToCompare >= 2)
+         if (in2.eof())
+            break;
+      
+      if (numDirsToCompare >= 3)
+         if (in3.eof())
+            break;
+      
+      count++;
+      
+      #if DEBUG_COMPARE_REPORT > 1
+      MessageInterface::ShowMessage("============================== line # = %d\n", count);
+      #endif
+      
+      //----------------------------------------------------
+      // base file
+      //----------------------------------------------------
+      baseIn.getline(buffer, BUFFER_SIZE-1);
+      line0 = buffer;
+      
+      #if DEBUG_COMPARE_REPORT > 2
+      MessageInterface::ShowMessage("===> base file: buffer = %s\n", buffer);
+      #endif
+      
+      //----------------------------------------------------
+      // file 1
+      //----------------------------------------------------
+      in1.getline(buffer, BUFFER_SIZE-1);
+      line1 = buffer;
+      
+      #if DEBUG_COMPARE_REPORT > 2
+      MessageInterface::ShowMessage("===> file 1: buffer = %s\n", buffer);
+      #endif
+
+      if (line0 != line1)
+         diff1Count++;
+      
+      //----------------------------------------------------
+      // file 2
+      //----------------------------------------------------      
+      if (numDirsToCompare >= 2)
+      {
+         in2.getline(buffer, BUFFER_SIZE-1);
+         line2 = buffer;
+      
+         #if DEBUG_COMPARE_REPORT > 2
+         MessageInterface::ShowMessage("===> file 2: buffer = %s\n", buffer);
+         #endif
+
+         if (line0 != line2)
+            diff2Count++;
+      }
+      
+      //----------------------------------------------------
+      // file 3
+      //----------------------------------------------------      
+      if (numDirsToCompare >= 3)
+      {
+         in3.getline(buffer, BUFFER_SIZE-1);
+         line3 = buffer;
+      
+         #if DEBUG_COMPARE_REPORT > 2
+         MessageInterface::ShowMessage("===> file 3: buffer = %s\n", buffer);
+         #endif
+         
+         if (line0 != line3)
+            diff3Count++;
+      }
+   }
+   
+   // report the difference summary
+   std::string outLine;
+   outLine = "Total lines compared: " + ToString(count) + "\n\n";
+   textBuffer.push_back(outLine);
+
+   #if DEBUG_COMPARE_REPORT
+   MessageInterface::ShowMessage("%s", outLine.c_str());
+   #endif
+   
+   outLine = "File1 - Number of Lines different: " + ToString(diff1Count) + "\n";
+   textBuffer.push_back(outLine);
+   
+   #if DEBUG_COMPARE_REPORT
+   MessageInterface::ShowMessage("%s", outLine.c_str());
+   #endif
+   
+   if (numDirsToCompare >= 2)
+   {
+      outLine = "File2 - Number of Lines different: " + ToString(diff2Count) + "\n";
+      textBuffer.push_back(outLine);
+      
+      #if DEBUG_COMPARE_REPORT
+      MessageInterface::ShowMessage("%s", outLine.c_str());
+      #endif
+   }
+   
+   if (numDirsToCompare >= 3)
+   {
+      outLine = "File3 - Number of Lines different: " + ToString(diff3Count) + "\n";
+      textBuffer.push_back(outLine);
+      
+      #if DEBUG_COMPARE_REPORT
+      MessageInterface::ShowMessage("%s", outLine.c_str());
+      #endif
+   }
+
+   textBuffer.push_back("\n");
+   
+   baseIn.close();
+   in1.close();
+   in2.close();
+   in3.close();
+   
    return textBuffer;
 }
    
