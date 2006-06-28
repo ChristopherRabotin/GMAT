@@ -525,26 +525,51 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       
       return items;
    }
-   
+
    // find next open parenthesis '('
    UnsignedInt index3 = str.find('(', index2);
+   UnsignedInt opIndex;
+   
    if (index3 != str.npos)
    {
       #if DEBUG_PARENTHESIS
       MessageInterface::ShowMessage
-         ("MathParser::ParseParenthesis() Found 2nd open paran found. index3=%d\n",
+         ("MathParser::ParseParenthesis() Found 2nd open parenthesis found. index3=%d\n",
           index3);
       #endif
       
-      bool opFound;
-      op = str.substr(index3-1, 1);
-      op = GetOperatorName(op, opFound);
-      if (opFound)
+      // find next match closing parenthesis ')'
+      UnsignedInt index4 = FindMatchingParen(str, index3);
+      if (index4 < str.size()-1)
       {
-         left = str.substr(0, index3-1);
-         right = str.substr(index3, str.size()-index3+1);
-         FillItems(items, op, left, right);
-         return items;
+         // If array index found, just return for next parse
+         if (str.find(',', 0) != str.npos)
+         {
+            FillItems(items, "", "", "");
+            
+            #if DEBUG_PARENTHESIS
+            WriteItems("MathParser::ParseParenthesis() Array found. returning ", items);
+            #endif
+            
+            return items;
+         }
+      }
+      
+      bool opFound;
+
+      // Get an operator between 1st close paren and 2nd open paren
+      op = FindOperator(str.substr(index2, index3-index2+1), 0, left, right, opIndex);
+      
+      if (op != "")
+      {
+         op = GetOperatorName(str.substr(index2+opIndex, 1), opFound);
+         if (opFound)
+         {
+            left = str.substr(0, index2+opIndex);
+            right = str.substr(index2+opIndex+1, str.npos);
+            FillItems(items, op, left, right);
+            return items;
+         }
       }
    }
 
@@ -554,39 +579,53 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
        str.c_str(), index2, left.c_str(), right.c_str());
    #endif
 
-   UnsignedInt opIndex;
+   // Find a operator after closing parenthesis
    op = FindOperator(str, index2, left, right, opIndex);
-
+   
    if (op == "")
    {
       bool opFound;
-      op = GetOperatorName(str.substr(index1-1, 1), opFound);
-      if (opFound)
-      {
-         left = str.substr(0, index1-1);
-         right = str.substr(index1, str.npos);
-
-         // to handle -(...)
-         if (left == "" && op == "Subtract")
-         {
-            op = "Negate";
-            left = right;
-            right = "";
-         }
-      }
-      else
+      
+      // if parenthesis is at end, find operator from the begining (6/26/06)
+      if (index2 == str.size()-1)
       {
          #if DEBUG_PARENTHESIS
          MessageInterface::ShowMessage
-            ("MathParser::ParseParenthesis() operator not found\n");
+            ("MathParser::ParseParenthesis() found parenthesis at end\n");
          #endif
          
-         op = "";
-         left = "";
-         right = "";
+         op = FindOperator(str.substr(0, index1), 0, left, right, opIndex);
+         
+         if (op != "")
+         {
+            op = GetOperatorName(str.substr(opIndex, 1), opFound);
+            if (opFound)
+            {
+               left = str.substr(0, opIndex);
+               right = str.substr(opIndex+1, str.npos);
+               
+               // to handle -(...)
+               if (left == "" && op == "Subtract")
+               {
+                  op = "Negate";
+                  left = right;
+                  right = "";
+               }
+            }
+            else
+            {
+               #if DEBUG_PARENTHESIS
+               MessageInterface::ShowMessage
+                  ("MathParser::ParseParenthesis() operator not found\n");
+               #endif
+               
+               op = "";
+               left = "";
+               right = "";
+            }
+         }
       }
    }
-   
    
    FillItems(items, op, left, right);
    
