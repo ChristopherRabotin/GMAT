@@ -20,7 +20,7 @@
 #include "StringUtil.hpp"
 #include "MessageInterface.hpp"
 #include "GmatBaseException.hpp"
-
+#include "Linear.hpp"            // for ToString()
 //#define DEBUG_STRING_UTIL 1
 
 using namespace std;
@@ -96,46 +96,6 @@ std::string GmatStringUtil::Strip(const std::string &str, StripType stype)
 
 
 //------------------------------------------------------------------------------
-// bool ToDouble(const std::string &str, Real *value)
-//------------------------------------------------------------------------------
-// Note: atof() returns 100.00 for 100.00ABC, but we want it be an error
-//------------------------------------------------------------------------------
-bool GmatStringUtil::ToDouble(const std::string &str, Real *value)
-{
-   std::string str2 = Trim(str, BOTH);
-   Integer numDot = 0;
-   
-   if (str2.length() == 0)
-      return false;
-
-   if (str2[0] != '-' && !isdigit(str2[0]) && str2[0] != '.')
-      return false;
-
-   for (unsigned int i=0; i<str2.length(); i++)
-   {
-      if (i == 0 && str2[0] == '-')
-         continue;
-      
-      if (str2[i] == '.')
-      {
-         numDot++;
-
-         if (numDot > 1)
-            return false;
-         
-         continue;
-      }
-      
-      if (!isdigit(str2[i]))
-         return false;
-   }
-   
-   *value = atof(str2.c_str());
-   return true;
-}
-
-
-//------------------------------------------------------------------------------
 // std::string ToUpper(const std::string &str)
 //------------------------------------------------------------------------------
 std::string GmatStringUtil::ToUpper(const std::string &str)
@@ -189,6 +149,78 @@ std::string GmatStringUtil::Capitalize(const std::string &str)
    newstr[0] = toupper(newstr[0]);
 
    return newstr;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string ToString(const Integer &val, Integer width=3)
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::ToString(const Integer &val, Integer width)
+{
+   return GmatRealUtil::ToString(val, width);
+//    std::stringstream ss("");
+//    ss.width(width);
+//    ss << val;
+//    return std::string(ss.str());
+}
+
+
+//------------------------------------------------------------------------------
+// std::string ToString(const Real &val, bool scientific=false,
+//                      Integer width=10, Integer precision=9)
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::ToString(const Real &val, bool scientific,
+                                     Integer width, Integer precision)
+{
+   return GmatRealUtil::ToString(val, scientific, width, precision);
+//    std::stringstream ss("");
+//    ss.width(width);
+//    ss.precision(precision);
+//    if (scientific)
+//       ss.setf(std::ios::scientific);
+   
+//    ss << val;
+//    return std::string(ss.str());
+}
+
+
+//------------------------------------------------------------------------------
+// bool ToDouble(const std::string &str, Real *value)
+//------------------------------------------------------------------------------
+// Note: atof() returns 100.00 for 100.00ABC, but we want it be an error
+//------------------------------------------------------------------------------
+bool GmatStringUtil::ToDouble(const std::string &str, Real *value)
+{
+   std::string str2 = Trim(str, BOTH);
+   Integer numDot = 0;
+   
+   if (str2.length() == 0)
+      return false;
+
+   if (str2[0] != '-' && !isdigit(str2[0]) && str2[0] != '.')
+      return false;
+
+   for (unsigned int i=0; i<str2.length(); i++)
+   {
+      if (i == 0 && str2[0] == '-')
+         continue;
+      
+      if (str2[i] == '.')
+      {
+         numDot++;
+
+         if (numDot > 1)
+            return false;
+         
+         continue;
+      }
+      
+      if (!isdigit(str2[i]))
+         return false;
+   }
+   
+   *value = atof(str2.c_str());
+   return true;
 }
 
 
