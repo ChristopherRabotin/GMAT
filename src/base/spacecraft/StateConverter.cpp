@@ -19,6 +19,7 @@
 
 #include "StateConverter.hpp"
 #include "SpacePoint.hpp"
+#include "Equinoctial.hpp"
 #include "MessageInterface.hpp"
 
 // #define DEBUG_STATE_CONVERTER 1
@@ -327,7 +328,7 @@ Rvector6 StateConverter::Convert(const Real *state,
             return CartesianToSphericalRADEC(newState);
 
          if (toElementType == "Equinoctial")
-		      return CartesianToEquinoctial(newState,mu);
+                      return CartesianToEquinoctial(newState,mu);
 
       }
       else if (fromElementType == "Keplerian")
@@ -402,11 +403,11 @@ Rvector6 StateConverter::Convert(const Real *state,
       }
       else if (fromElementType == "Equinoctial")
       {
-      	Rvector6 cartesianConversion = EquinoctialToCartesian(newState, mu);
-      	 if (toElementType == "Cartesian")
-      	 {
-      	    return cartesianConversion;
-      	 }
+        Rvector6 cartesianConversion = EquinoctialToCartesian(newState, mu);
+         if (toElementType == "Cartesian")
+         {
+            return cartesianConversion;
+         }
          if (toElementType == "Keplerian" || 
              toElementType == "ModifiedKeplerian") 
          {
