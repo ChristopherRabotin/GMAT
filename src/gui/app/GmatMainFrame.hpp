@@ -169,7 +169,8 @@ private:
    void OnOpenMatlab(wxCommandEvent& event);
    void OnCloseMatlab(wxCommandEvent& event);
    void OnMatlabInteractive(wxCommandEvent& WXUNUSED(event));
-   void OnFileCompare(wxCommandEvent& event);
+   void OnFileCompareNumeric(wxCommandEvent& event);
+   void OnFileCompareText(wxCommandEvent& event);
    void OnGenerateTextEphemFile(wxCommandEvent& event);
    
    void OnSashDrag(wxSashEvent &event);
@@ -237,7 +238,8 @@ namespace GmatMenu
       MENU_TOOLS_MATLAB_OPEN,
       MENU_TOOLS_MATLAB_INTERACTIVE,
       MENU_TOOLS_MATLAB_CLOSE,
-      MENU_TOOLS_FILE_COMPARE,
+      MENU_TOOLS_FILE_COMPARE_NUMERIC,
+      MENU_TOOLS_FILE_COMPARE_TEXT,
       MENU_TOOLS_GEN_TEXT_EPHEM_FILE,
       
       MENU_HELP_TOPICS,

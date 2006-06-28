@@ -18,7 +18,7 @@
 #include "MdiTsPlotData.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_MENUBAR 0
+//#define DEBUG_MENUBAR 1
 
 using namespace GmatMenu;
 //------------------------------------------------------------------------------
@@ -246,7 +246,8 @@ void GmatMenuBar::CreateMenu(int dataType)
    // Tools menu
    //-------------------------------------------------------
    wxMenu *toolsMenu = new wxMenu;
-   toolsMenu->Append(MENU_TOOLS_FILE_COMPARE, wxT("Compare Files"), wxT(""));
+   toolsMenu->Append(MENU_TOOLS_FILE_COMPARE_NUMERIC, wxT("Compare Numeric Valus"), wxT(""));
+   toolsMenu->Append(MENU_TOOLS_FILE_COMPARE_TEXT, wxT("Compare Text Lines"), wxT(""));
    toolsMenu->Append(MENU_TOOLS_GEN_TEXT_EPHEM_FILE, wxT("Generate Text Ephemeris File"), wxT(""));
    
    this->Append(toolsMenu, wxT("Tools"));

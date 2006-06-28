@@ -79,6 +79,7 @@
 #include "CelestialBodyPanel.hpp"
 #include "CompareReportPanel.hpp"
 #include "CompareFilesDialog.hpp"
+#include "CompareTextDialog.hpp"
 #include "TextEphemFileDialog.hpp"
 #include "FileManager.hpp"
 #include "FileUtil.hpp"               // for Compare()
@@ -158,7 +159,8 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
 
    EVT_MENU(MENU_TOOLS_MATLAB_OPEN, GmatMainFrame::OnOpenMatlab)
    EVT_MENU(MENU_TOOLS_MATLAB_CLOSE, GmatMainFrame::OnCloseMatlab)
-   EVT_MENU(MENU_TOOLS_FILE_COMPARE, GmatMainFrame::OnFileCompare)
+   EVT_MENU(MENU_TOOLS_FILE_COMPARE_NUMERIC, GmatMainFrame::OnFileCompareNumeric)
+   EVT_MENU(MENU_TOOLS_FILE_COMPARE_TEXT, GmatMainFrame::OnFileCompareText)
    EVT_MENU(MENU_TOOLS_GEN_TEXT_EPHEM_FILE, GmatMainFrame::OnGenerateTextEphemFile)
 //   EVT_MENU(MENU_TOOLS_MATLAB_INTERACTIVE, GmatMainFrame::OnMatlabInteractive)
 
@@ -1947,15 +1949,15 @@ void GmatMainFrame::OnMatlabInteractive(wxCommandEvent& event)
 
 
 //------------------------------------------------------------------------------
-// void OnFileCompare(wxCommandEvent& WXUNUSED(event))
+// void OnFileCompareNumeric(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 /**
- * Handles comparing two files
+ * Handles comparing two files numerically
  *
  * @param <event> input event.
  */
 //------------------------------------------------------------------------------
-void GmatMainFrame::OnFileCompare(wxCommandEvent& event)
+void GmatMainFrame::OnFileCompareNumeric(wxCommandEvent& event)
 {
    CompareFilesDialog dlg(this);
    dlg.ShowModal();
@@ -2120,6 +2122,158 @@ void GmatMainFrame::OnFileCompare(wxCommandEvent& event)
          output =
             GmatFileUtil::Compare(numDirsToCompare, baseFileName.c_str(), filename1.c_str(),
                                   filename2.c_str(), filename3.c_str(), colTitles, absTol);
+      
+      // append text
+      for (unsigned int i=0; i<output.size(); i++)
+         textCtrl->AppendText(wxString(output[i].c_str()));
+
+      textCtrl->AppendText
+         ("========================================================\n\n");
+
+      fileCount++;
+   }
+   
+   if (fileCount == 0)
+   {
+      textCtrl->AppendText("** There is no report file to compare.\n\n");
+      MessageInterface::ShowMessage("** There is no report file to compare.\n");
+   }
+   else
+   {
+      if (saveCompareResults)
+         textCtrl->SaveFile(saveFileName);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void OnFileCompareText(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles comparing two files line by line.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
+{
+   CompareTextDialog dlg(this);
+   dlg.ShowModal();
+
+   if (!dlg.CompareFiles())
+      return;
+   
+   Integer numDirsToCompare = dlg.GetNumDirsToCompare();
+   if (numDirsToCompare <= 0)
+      return;
+   
+   Integer numFilesToCompare = dlg.GetNumFilesToCompare();
+   if (numFilesToCompare <= 0)
+      return;
+   
+   wxString baseDir = dlg.GetBaseDirectory();
+   wxArrayString compDirs = dlg.GetCompareDirectories();
+   bool saveCompareResults = dlg.SaveCompareResults();
+   wxString saveFileName = dlg.GetSaveFilename();
+
+   #if DEBUG_FILE_COMPARE
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::OnFileCompare() baseDir=%s\n   "
+       "compDirs[0]=%s\n", baseDir.c_str(), compDirs[0].c_str());
+   MessageInterface::ShowMessage
+      ("   numDirsToCompare=%d, numFilesToCompare=%d\n", numDirsToCompare,
+       numFilesToCompare);
+   #endif
+   
+   wxTextCtrl *textCtrl = NULL;
+   wxString dir1 = compDirs[0];
+   
+   GmatMdiChildFrame *textFrame = GetChild("CompareReport");
+   
+   if (textFrame == NULL)
+   {
+      GmatTreeItemData *compareItem =
+         new GmatTreeItemData("CompareReport", GmatTree::COMPARE_REPORT);
+      
+      textFrame = GmatAppData::GetMainFrame()->CreateChild(compareItem);
+   }
+   
+   textCtrl = textFrame->GetScriptTextCtrl();
+   textCtrl->SetMaxLength(320000); // make long enough
+   textFrame->Show();
+   wxString msg;
+   msg.Printf(_T("GMAT Build Date: %s %s\n\n"),  __DATE__, __TIME__);      
+   textCtrl->AppendText(msg);
+   
+   //loj: Why Do I need to do this to show whole TextCtrl?
+   // textFrame->Layout() didn't work.
+   int w, h;
+   textFrame->GetSize(&w, &h);
+   textFrame->SetSize(w+1, h+1);
+
+   // Get files in the base directory
+   wxDir dir(baseDir);
+   wxString filename;
+   wxString filepath;
+   wxArrayString baseFileNameArray;
+   
+   //How do I specify multiple file ext?
+   bool cont = dir.GetFirst(&filename);
+   while (cont)
+   {
+      if (filename.Contains(".report") || filename.Contains(".txt"))
+      {
+         filepath = baseDir + "/" + filename;
+         
+         // remove any backup files
+         if (filename.Last() == 't')
+            baseFileNameArray.push_back(filepath.c_str());
+         
+         cont = dir.GetNext(&filename);
+      }
+   }
+   
+   StringArray colTitles;
+   wxString tempStr;
+   int fileCount = 0;
+   wxString baseFileName;
+   
+   // Now call compare utility
+   for (UnsignedInt i=0; i<baseFileNameArray.size(); i++)
+   {
+      if (fileCount > numFilesToCompare)
+         break;
+      
+      tempStr.Printf("%d", i+1);
+      textCtrl->AppendText("==> File Compare Count: " + tempStr + "\n");
+
+      baseFileName = baseFileNameArray[i];
+      wxFileName filename(baseFileName);
+      
+      wxArrayString compareNames;
+      
+      for (int j=0; j<numDirsToCompare; j++)
+         compareNames.Add(filename.GetFullName());
+      
+      // set compare file names
+      wxString filename1;
+      wxString filename2;
+      wxString filename3;
+      
+      if (numDirsToCompare >= 1)
+         filename1 = compDirs[0] + "/" + compareNames[0];
+      
+      if (numDirsToCompare >= 2)
+         filename2 = compDirs[1] + "/" + compareNames[1];
+      
+      if (numDirsToCompare >= 3)
+         filename3 = compDirs[2] + "/" + compareNames[2];
+
+      StringArray output;
+      
+      output =
+         GmatFileUtil::CompareLines(numDirsToCompare, baseFileName.c_str(), filename1.c_str(),
+                                    filename2.c_str(), filename3.c_str());
       
       // append text
       for (unsigned int i=0; i<output.size(); i++)
