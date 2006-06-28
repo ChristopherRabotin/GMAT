@@ -658,6 +658,11 @@ Real OrbitData::GetKepReal(Integer item)
             }
          }
 
+         if (aopDeg < 0.0)
+            aopDeg = aopDeg + 360.0;
+      
+         return aopDeg;
+      
          #else
          
          Real r = pos.GetMagnitude();
@@ -691,9 +696,9 @@ Real OrbitData::GetKepReal(Integer item)
          if (aopDeg < 0.0)
             aopDeg = aopDeg + 360.0;
 
-         #endif // __USE_NEW_AOP_CODE
          return aopDeg;
       
+         #endif // __USE_NEW_AOP_CODE
          #endif // __USE_COORDUTIL_FOR_AOP__
       }
 
