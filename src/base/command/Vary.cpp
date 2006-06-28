@@ -252,7 +252,7 @@ bool Vary::RenameRefObject(const Gmat::ObjectType type,
 std::string Vary::GetParameterText(const Integer id) const
 {
     if (id == solverNameID)
-        return "solverName";
+        return "SolverName";
         
     if (id == variableNameID)
         return "Variable";
@@ -281,7 +281,7 @@ std::string Vary::GetParameterText(const Integer id) const
 //---------------------------------------------------------------------------
 Integer Vary::GetParameterID(const std::string &str) const
 {
-    if (str == "solverName")
+    if (str == "SolverName")
         return solverNameID;
         
     if (str == "Variable")
