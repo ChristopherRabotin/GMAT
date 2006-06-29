@@ -238,7 +238,8 @@ void ParameterSelectDialog::Create()
                        wxDefaultPosition, wxSize(80,-1), 0);
    
    mVarSelectedListBox = new wxListBox(this, VAR_SEL_LISTBOX, wxDefaultPosition,
-                                       wxSize(170,260), 0, emptyList, wxLB_SINGLE);
+                                       //wxSize(170,260), 0, emptyList, wxLB_SINGLE);
+                                       wxSize(170,284), 0, emptyList, wxLB_SINGLE);
    
    wxStaticBoxSizer *mVarSelectedBoxSizer =
       new wxStaticBoxSizer(selectedStaticBox, wxVERTICAL);
@@ -510,7 +511,6 @@ void ParameterSelectDialog::OnSelectProperty(wxCommandEvent& event)
       HighlightObject(event, false);
       mLastPropertySelection = mPropertyListBox->GetSelection();
 
-      
       if (mShowVariable || mShowArray)
       {
          // deselect user param
@@ -569,6 +569,8 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
 
          // Set Spacecraft property
          mPropertyListBox->Set(mSpacecraftPropertyList);
+
+         ShowCoordSystem();
       }
       else if (mObjectTypeComboBox->GetValue() == "ImpulsiveBurn")
       {
@@ -696,12 +698,12 @@ Parameter* ParameterSelectDialog::GetParameter(const wxString &name)
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::ShowCoordSystem()
 {
-   if (mObjectType == "ImpulsiveBurn")
-      return;
-   
    std::string property = std::string(mPropertyListBox->GetStringSelection().c_str());
    GmatParam::DepObject depObj = ParameterInfo::Instance()->GetDepObjectType(property);
 
+   //MessageInterface::ShowMessage
+   //   ("===> ShowCoordSystem() property=%s, depObj=%d\n", property.c_str(), depObj);
+   
    if (depObj == GmatParam::COORD_SYS)
    {
       mCoordSysLabel->Show();
