@@ -26,6 +26,7 @@
 
 //#define DEBUG_IF
 
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -160,10 +161,10 @@ bool If::Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 bool If::Execute()
 {
-#ifdef DEBUG_IF
-   MessageInterface::ShowMessage
-   ("In If::Execute ............\n");
-#endif
+//#ifdef DEBUG_IF
+//   MessageInterface::ShowMessage
+//   ("In If::Execute ............\n");
+//#endif
    bool retval = true;
       
    if (branchExecuting)
@@ -173,6 +174,10 @@ bool If::Execute()
       ("In If::Execute - Branch Executing -------------\n");
 #endif
       retval = ExecuteBranch(branchToExecute);
+      #ifdef DEBUG_IF
+         MessageInterface::ShowMessage
+         ("In If:: retval returned from ExecuteBranch = %s\n", (retval? "true" : "false"));
+      #endif
       if (!branchExecuting)
       {
          commandComplete  = true;
@@ -197,6 +202,8 @@ bool If::Execute()
 #endif
          branchToExecute = 0;
          branchExecuting = true;
+         commandComplete = false;
+         commandExecuting = true;
       }
       else if ((Integer)branch.size() > 1)  // there could be an 'Else'
       {
@@ -206,27 +213,36 @@ bool If::Execute()
 #endif
          branchExecuting = true;
          branchToExecute = 1; // @todo - add ElseIf (more than two branches)
+         commandComplete = false;
+         commandExecuting = true;
       }
       else
       {
 #ifdef DEBUG_IF
          MessageInterface::ShowMessage
-         ("In If::Execute - ERROR with number of branches\n");
+         ("In If::Execute - conditions are FALSE - no other branch to execute\n");
+         //("In If::Execute - ERROR with number of branches - more than two not yet implemented\n");
 #endif
          branchToExecute = 0;
          commandComplete  = true;
          commandExecuting = false;
+         branchExecuting = false;  // try this - shouldn't matter
       }
    }
    
    BuildCommandSummary(true);
 #ifdef DEBUG_IF
    MessageInterface::ShowMessage
-      ("BuildCOmmandSummary completed\n");
+      ("If::BuildCommandSummary completed\n");
 #endif
    return retval;
 }
-
+//bool If::Initialize()
+//{
+//   ConditionalBranch::Initialize();
+//   return true;
+//}
+   
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
