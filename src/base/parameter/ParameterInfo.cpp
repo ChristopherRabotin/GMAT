@@ -127,11 +127,14 @@ const StringArray& ParameterInfo::GetNamesOfParameters()
 
 
 //------------------------------------------------------------------------------
-// Gmat::ObjectType GetObjectType(const std::string &type)
+// Gmat::ObjectType GetObjectType(const std::string &name)
 //------------------------------------------------------------------------------
-Gmat::ObjectType ParameterInfo::GetObjectType(const std::string &type)
+Gmat::ObjectType ParameterInfo::GetObjectType(const std::string &name)
 {
-   return mParamObjectTypeMap[type];
+   if (mParamObjectTypeMap.find(name) != mParamObjectTypeMap.end())
+      return mParamObjectTypeMap[name];
+   else
+      return Gmat::UNKNOWN_OBJECT;
 }
 
 
@@ -140,34 +143,46 @@ Gmat::ObjectType ParameterInfo::GetObjectType(const std::string &type)
 //------------------------------------------------------------------------------
 GmatParam::DepObject ParameterInfo::GetDepObjectType(const std::string &name)
 {
-   return mParamDepObjMap[name];
+   if (mParamDepObjMap.find(name) != mParamDepObjMap.end())
+      return mParamDepObjMap[name];
+   else
+      return GmatParam::NO_DEP;
 }
 
 
 //------------------------------------------------------------------------------
-// bool ParameterInfo::IsPlottable(const std::string &type)
+// bool ParameterInfo::IsPlottable(const std::string &name)
 //------------------------------------------------------------------------------
-bool ParameterInfo::IsPlottable(const std::string &type)
+bool ParameterInfo::IsPlottable(const std::string &name)
 {
-   return mParamPlottableMap[type];
+   if (mParamPlottableMap.find(name) != mParamPlottableMap.end())
+      return mParamPlottableMap[name];
+   else
+      return false;
 }
 
 
 //------------------------------------------------------------------------------
-// bool ParameterInfo::IsReportable(const std::string &type)
+// bool ParameterInfo::IsReportable(const std::string &name)
 //------------------------------------------------------------------------------
-bool ParameterInfo::IsReportable(const std::string &type)
+bool ParameterInfo::IsReportable(const std::string &name)
 {
-   return mParamReportableMap[type];
+   if (mParamReportableMap.find(name) != mParamReportableMap.end())
+      return mParamReportableMap[name];
+   else
+      return false;
 }
 
 
 //------------------------------------------------------------------------------
-// bool ParameterInfo::IsSettable(const std::string &type)
+// bool ParameterInfo::IsSettable(const std::string &name)
 //------------------------------------------------------------------------------
-bool ParameterInfo::IsSettable(const std::string &type)
+bool ParameterInfo::IsSettable(const std::string &name)
 {
-   return mParamSettableMap[type];
+   if (mParamSettableMap.find(name) != mParamSettableMap.end())
+      return mParamSettableMap[name];
+   else
+      return false;
 }
 
 
