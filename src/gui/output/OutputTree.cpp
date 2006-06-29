@@ -50,7 +50,8 @@ BEGIN_EVENT_TABLE(OutputTree, wxTreeCtrl)
    EVT_TREE_ITEM_ACTIVATED(-1, OutputTree::OnItemActivated)
    EVT_TREE_BEGIN_LABEL_EDIT(-1, OutputTree::OnBeginLabelEdit)
    EVT_TREE_END_LABEL_EDIT(-1, OutputTree::OnEndLabelEdit)
-   EVT_MENU(POPUP_COMPARE_REPORT, OutputTree::OnCompareReport)
+   EVT_MENU(POPUP_COMPARE_NUMERIC_VALUES, OutputTree::OnCompareNumericValues)
+   EVT_MENU(POPUP_COMPARE_TEXT_LINES, OutputTree::OnCompareTextLines)
    
 //   EVT_MENU(POPUP_OPEN, OutputTree::OnOpen)
 //   EVT_MENU(POPUP_CLOSE, OutputTree::OnClose)
@@ -222,7 +223,10 @@ void OutputTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 //      menu.Enable(POPUP_DELETE, FALSE);
    
    if (dataType == GmatTree::OUTPUT_REPORT)
-      menu.Append(POPUP_COMPARE_REPORT, wxT("Compare"));
+   {
+      menu.Append(POPUP_COMPARE_NUMERIC_VALUES, wxT("Compare Numeric Values"));
+      menu.Append(POPUP_COMPARE_TEXT_LINES, wxT("Compare Text Lines"));
+   }
    
    PopupMenu(&menu, pt);
 #endif // wxUSE_MENUS
@@ -524,7 +528,7 @@ void OutputTree::OnAddOpenGlPlot(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void OnCompareReport(wxCommandEvent &event)
+// void OnCompareNumericValues(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 /**
  * Compare reports.
@@ -532,9 +536,9 @@ void OutputTree::OnAddOpenGlPlot(wxCommandEvent &event)
  * @param <event> command event
  */
 //------------------------------------------------------------------------------
-void OutputTree::OnCompareReport(wxCommandEvent &event)
+void OutputTree::OnCompareNumericValues(wxCommandEvent &event)
 {
-   //MessageInterface::ShowMessage("OutputTree::OnCompareReport() entered\n");
+   //MessageInterface::ShowMessage("OutputTree::OnCompareNumericValues() entered\n");
 
    ReportFile *theReport =
       (ReportFile*) theGuiInterpreter->GetSubscriber(std::string(theSubscriberName.c_str()));
@@ -542,7 +546,7 @@ void OutputTree::OnCompareReport(wxCommandEvent &event)
    if (!theReport)
    {
       MessageInterface::ShowMessage
-         ("OutputTree::OnCompareReport() The ReportFile: %s is NULL.\n",
+         ("OutputTree::OnCompareNumericValues() The ReportFile: %s is NULL.\n",
           theSubscriberName.c_str());
       return;
    }
@@ -585,5 +589,58 @@ void OutputTree::OnCompareReport(wxCommandEvent &event)
    
    for (unsigned int i=0; i<output.size(); i++)
       //textFrame->AppendText(wxString(output[i].c_str()));
+      GmatAppData::theCompareWindow->AppendText(wxString(output[i].c_str()));
+}
+
+
+//------------------------------------------------------------------------------
+// void OnCompareTextLines(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Compare reports.
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void OutputTree::OnCompareTextLines(wxCommandEvent &event)
+{
+   //MessageInterface::ShowMessage("OutputTree::OnCompareTextLines() entered\n");
+
+   ReportFile *theReport =
+      (ReportFile*) theGuiInterpreter->GetSubscriber(std::string(theSubscriberName.c_str()));
+
+   if (!theReport)
+   {
+      MessageInterface::ShowMessage
+         ("OutputTree::OnCompareTextLines() The ReportFile: %s is NULL.\n",
+          theSubscriberName.c_str());
+      return;
+   }
+   
+   std::string filename1 = theReport->GetStringParameter("Filename");
+   StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
+   wxString filename2 =
+      wxFileSelector("Choose a file to open", "", "", "report",
+                     "Report files (*.report)|*.report|Text files (*.txt)|*.txt");
+
+   if (filename2.empty())
+      return;
+   
+   StringArray output =
+      GmatFileUtil::CompareLines(1, filename1.c_str(), filename2.c_str(), "", "");
+
+   if (GmatAppData::theCompareWindow == NULL)
+   {
+      GmatAppData::theCompareWindow =
+         new ViewTextFrame(GmatAppData::GetMainFrame(), _T("Compare Utility"),
+                           50, 50, 800, 500, "Permanent");
+      wxString msg;
+      msg.Printf(_T("GMAT Build Date: %s %s\n\n"),  __DATE__, __TIME__);      
+      GmatAppData:: theCompareWindow->AppendText(msg);
+   }
+   
+   GmatAppData::theCompareWindow->Show(true);
+   
+   for (unsigned int i=0; i<output.size(); i++)
       GmatAppData::theCompareWindow->AppendText(wxString(output[i].c_str()));
 }
