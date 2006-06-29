@@ -31,7 +31,8 @@ public:
 
    BurnReal(const std::string &name, const std::string &typeStr, 
             GmatBase *obj, const std::string &desc,
-            const std::string &unit,  GmatParam::DepObject depObj);
+            const std::string &unit,  GmatParam::DepObject depObj,
+            bool isSettable);
    BurnReal(const BurnReal &copy);
    BurnReal& operator=(const BurnReal &right);
    virtual ~BurnReal();

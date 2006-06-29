@@ -36,8 +36,11 @@ public:
    BurnData(const BurnData &data);
    BurnData& operator= (const BurnData& right);
    virtual ~BurnData();
-      
+   
+   Real GetBurnReal(Integer item);
    Real GetBurnReal(const std::string &str);
+
+   void SetBurnReal(Integer item, Real rval);
    
    // The inherited methods from RefData
    virtual bool ValidateRefObjects(GmatBase *param);
@@ -65,6 +68,8 @@ protected:
    CoordinateSystem *mOutCoordSystem;
    
    CoordinateConverter mCoordConverter;
+   
+   enum {ELEMENT1, ELEMENT2, ELEMENT3};
    
    enum
    {

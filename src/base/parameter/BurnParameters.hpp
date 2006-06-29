@@ -43,6 +43,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;

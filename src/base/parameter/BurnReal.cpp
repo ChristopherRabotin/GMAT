@@ -46,9 +46,10 @@
 //------------------------------------------------------------------------------
 BurnReal::BurnReal(const std::string &name, const std::string &typeStr, 
                    GmatBase *obj, const std::string &desc,
-                   const std::string &unit, GmatParam::DepObject depObj)
+                   const std::string &unit, GmatParam::DepObject depObj,
+                   bool isSettable)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
-             depObj, Gmat::BURN, false)
+             depObj, Gmat::BURN, false, isSettable)
 {
    mNeedCoordSystem = true;
    AddRefObject(obj);

@@ -129,34 +129,79 @@ BurnData::~BurnData()
 
 
 //------------------------------------------------------------------------------
-// Real GetBurnReal(const std::string &str)
+// Real GetBurnReal(Integer item)
 //------------------------------------------------------------------------------
 /**
- * Retrives Cartesian element
+ * Retrives Burn element.
  */
 //------------------------------------------------------------------------------
-Real BurnData::GetBurnReal(const std::string &str)
+Real BurnData::GetBurnReal(Integer item)
 {
    ///@todo convert internal DeltaV to Parameter CoordinateSystem.
    if (mImpBurn == NULL)
       InitializeRefObjects();
    
-   if (str == "DeltaV1")
+   switch (item)
    {
+   case ELEMENT1:
       return mImpBurn->GetRealParameter(mImpBurn->GetParameterID("Element1"));
-   }
-   else if (str == "DeltaV2")
-   {
+   case ELEMENT2:
       return mImpBurn->GetRealParameter(mImpBurn->GetParameterID("Element2"));
-   }
-   else if (str == "DeltaV3")
-   {
+   case ELEMENT3:
       return mImpBurn->GetRealParameter(mImpBurn->GetParameterID("Element3"));
+   default:
+      throw ParameterException("BurnData::GetBurnReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(item));
    }
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetBurnReal(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Retrives Burn data
+ */
+//------------------------------------------------------------------------------
+Real BurnData::GetBurnReal(const std::string &str)
+{
+   if (str == "Element1")
+      return GetBurnReal(ELEMENT1);
+   else if (str == "Element2")
+      return GetBurnReal(ELEMENT2);
+   else if (str == "Element3")
+      return GetBurnReal(ELEMENT3);
    else
       throw ParameterException
          ("BurnData::GetBurnReal() Unknown parameter name: \n" + str);
     
+}
+
+
+//------------------------------------------------------------------------------
+// void SetBurnReal(Integer item, Real rval)
+//------------------------------------------------------------------------------
+void BurnData::SetBurnReal(Integer item, Real rval)
+{
+   MessageInterface::ShowMessage
+      ("===> BurnData::SetBurnReal() item=%d, rval=%f\n", item, rval);
+   
+   ///@todo convert internal DeltaV to Parameter CoordinateSystem.
+   if (mImpBurn == NULL)
+      InitializeRefObjects();
+   
+   switch (item)
+   {
+   case ELEMENT1:
+      mImpBurn->SetRealParameter(mImpBurn->GetParameterID("Element1"), rval);
+   case ELEMENT2:
+      mImpBurn->SetRealParameter(mImpBurn->GetParameterID("Element2"), rval);
+   case ELEMENT3:
+      mImpBurn->SetRealParameter(mImpBurn->GetParameterID("Element3"), rval);
+   default:
+      throw ParameterException("BurnData::GetBurnReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(item));
+   }
 }
 
 
@@ -213,29 +258,32 @@ void BurnData::InitializeRefObjects()
    
    if (mImpBurn == NULL)
       throw ParameterException
-         ("BurnData::InitializeRefObjects() Cannot find Spacecraft object.\n"
+         ("BurnData::InitializeRefObjects() Cannot find Burn object.\n"
           "Make sure Spacecraft is set to any unnamed parameters\n");
    
-   mSolarSystem =
-      (SolarSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SOLAR_SYSTEM]);
+   //-------------------------------------------------------
+   // Need this for future?
+   //-------------------------------------------------------
+//    mSolarSystem =
+//       (SolarSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SOLAR_SYSTEM]);
    
-   if (mSolarSystem == NULL)
-      throw ParameterException
-         ("BurnData::InitializeRefObjects() Cannot find SolarSystem object\n");
+//    if (mSolarSystem == NULL)
+//       throw ParameterException
+//          ("BurnData::InitializeRefObjects() Cannot find SolarSystem object\n");
    
-   if (mInternalCoordSystem == NULL)
-      throw ParameterException
-         ("BurnData::InitializeRefObjects() Cannot find internal "
-          "CoordinateSystem object\n");
+//    if (mInternalCoordSystem == NULL)
+//       throw ParameterException
+//          ("BurnData::InitializeRefObjects() Cannot find internal "
+//           "CoordinateSystem object\n");
    
-   mOutCoordSystem =
-      (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
+//    mOutCoordSystem =
+//       (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
    
-   if (mOutCoordSystem == NULL)
-      throw ParameterException
-         ("BurnData::InitializeRefObjects() Cannot find output "
-          "CoordinateSystem object\n");
-   
+//    if (mOutCoordSystem == NULL)
+//       throw ParameterException
+//          ("BurnData::InitializeRefObjects() Cannot find output "
+//           "CoordinateSystem object\n");
+
 //    // get Burn CoordinateSystem
 //    std::string csName = mImpBurn->GetRefObjectName(Gmat::COORDINATE_SYSTEM);   
 //    CoordinateSystem *cs = (CoordinateSystem*)mImpBurn->

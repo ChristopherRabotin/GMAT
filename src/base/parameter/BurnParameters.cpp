@@ -28,7 +28,7 @@
 //                              DeltaVDir1
 //==============================================================================
 /**
- * Implements Cartesian position X class.
+ * Implements DeltaV first compoment.
  */
 //------------------------------------------------------------------------------
 
@@ -43,10 +43,11 @@
  */
 //------------------------------------------------------------------------------
 DeltaVDir1::DeltaVDir1(const std::string &name, GmatBase *obj)
-   : BurnReal(name, "DeltaVDir1", obj, "DeltaVDir1", "Km/s", GmatParam::COORD_SYS)
+   : BurnReal(name, "Element1", obj, "ImpulsiveBurn Element1", "Km/s",
+              GmatParam::NO_DEP, true)
 {
-   mDepObjectName = "EarthMJ2000Eq";
-   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+//    mDepObjectName = "EarthMJ2000Eq";
+//    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    mColor = GmatColor::RED32;
 }
 
@@ -111,12 +112,30 @@ DeltaVDir1::~DeltaVDir1()
 //------------------------------------------------------------------------------
 bool DeltaVDir1::Evaluate()
 {
-   mRealValue = BurnData::GetBurnReal("DeltaVDir1");
-    
+   mRealValue = BurnData::GetBurnReal(ELEMENT1);
+   
+   MessageInterface::ShowMessage
+      ("===> DeltaVDir3::Evaluate() mRealValue=%f\n", mRealValue);
+   
    if (mRealValue == BurnData::BURN_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void DeltaVDir1::SetReal(Real val)
+{
+   BurnData::SetBurnReal(ELEMENT1, val);
+   RealVar::SetReal(val);
 }
 
 
@@ -141,7 +160,7 @@ GmatBase* DeltaVDir1::Clone(void) const
 //                              DeltaVDir2
 //==============================================================================
 /**
- * Implements Cartesian position Y class.
+ * Implements DeltaV second compoment.
  */
 //------------------------------------------------------------------------------
 
@@ -156,10 +175,11 @@ GmatBase* DeltaVDir1::Clone(void) const
  */
 //------------------------------------------------------------------------------
 DeltaVDir2::DeltaVDir2(const std::string &name, GmatBase *obj)
-   : BurnReal(name, "DeltaVDir2", obj, "DeltaVDir2", "Km/s", GmatParam::COORD_SYS)
+   : BurnReal(name, "Element2", obj, "Impulsive Burn Element2", "Km/s",
+              GmatParam::NO_DEP, true)
 {
-   mDepObjectName = "EarthMJ2000Eq";
-   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+//    mDepObjectName = "EarthMJ2000Eq";
+//    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    mColor = GmatColor::GREEN32;
 }
 
@@ -224,7 +244,7 @@ DeltaVDir2::~DeltaVDir2()
 //------------------------------------------------------------------------------
 bool DeltaVDir2::Evaluate()
 {
-   mRealValue = BurnData::GetBurnReal("DeltaVDir2");
+   mRealValue = BurnData::GetBurnReal(ELEMENT2);
     
    if (mRealValue == BurnData::BURN_REAL_UNDEFINED)
       return false;
@@ -269,10 +289,11 @@ GmatBase* DeltaVDir2::Clone(void) const
  */
 //------------------------------------------------------------------------------
 DeltaVDir3::DeltaVDir3(const std::string &name, GmatBase *obj)
-   : BurnReal(name, "DeltaVDir3", obj, "DeltaVDir3", "Km/s", GmatParam::COORD_SYS)
+   : BurnReal(name, "Element3", obj, "Impulsive Burn Element3", "Km/s",
+              GmatParam::NO_DEP, true)
 {
-   mDepObjectName = "EarthMJ2000Eq";
-   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+//    mDepObjectName = "EarthMJ2000Eq";
+//    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    mColor = GmatColor::BLUE32;
 }
 
@@ -336,8 +357,8 @@ DeltaVDir3::~DeltaVDir3()
 //------------------------------------------------------------------------------
 bool DeltaVDir3::Evaluate()
 {
-   mRealValue = BurnData::GetBurnReal("DeltaVDir3");    
-    
+   mRealValue = BurnData::GetBurnReal(ELEMENT3);    
+
    if (mRealValue == BurnData::BURN_REAL_UNDEFINED)
       return false;
    else
