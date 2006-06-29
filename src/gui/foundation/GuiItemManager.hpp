@@ -52,7 +52,7 @@ public:
    
    // for Parameter
    static const int MAX_SC_PROPERTY = 100; // Max Spacecraft
-   static const int MAX_IB_PROPERTY = 10;  // Max ImpulsiveBurn
+   static const int MAX_IB_PROPERTY = 20;  // Max ImpulsiveBurn
    static const int MAX_PROPERTY = 110;
    static const int MAX_USER_VAR = 50;
    static const int MAX_USER_STRING = 50;
@@ -62,9 +62,9 @@ public:
 
    // Other
    static const int MAX_COORD_SYS = 20;
-   static const int MAX_BURN = 10;
-   static const int MAX_HARDWARE = 100;  //waw: Changed from 10 to 100
-   static const int MAX_FUNCTION = 10;
+   static const int MAX_BURN = 20;
+   static const int MAX_HARDWARE = 60;
+   static const int MAX_FUNCTION = 20;
    
    static GuiItemManager* GetInstance();
    

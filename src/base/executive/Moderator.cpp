@@ -66,7 +66,7 @@
 //#define DEBUG_FINALIZE 1
 
 //#define DEBUG_CREATE_VAR 1
-//#define DEBUG_CREATE_BURN_PARAM 1
+#define __CREATE_BURN_PARAM__ 1
 
 //#define __SHOW_FINAL_STATE__
 
@@ -1506,7 +1506,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       Parameter *param = theFactoryManager->CreateParameter(type, name);
       
       if (param == NULL)
-        throw GmatBaseException("Error Creating Parameter: " + type);
+        throw GmatBaseException("Error Creating Parameter: " + type + "\n");
       
       param->SetStringParameter("Expression", name);
       
@@ -3716,36 +3716,35 @@ void Moderator::CreateDefaultMission()
       #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->default PropSetup created\n");
       #endif
-
+      
       //--------------------------------------------------------------
       // test Burn Parameter
       //--------------------------------------------------------------
-      #ifdef DEBUG_CREATE_BURN_PARAM
+      #ifdef __CREATE_BURN_PARAM__
       // Hardware 
-      CreateHardware("FuelTank", "DefaultFuelTank");
-      CreateHardware("Thruster", "DefaultThruster");
+      //CreateHardware("FuelTank", "DefaultFuelTank");
+      //CreateHardware("Thruster", "DefaultThruster");
       // Burn
       GetDefaultBurn();
       
       // Create VNB CoordinateSystem
-      CoordinateSystem *vnb = CreateCoordinateSystem("VNB", false);
-      ObjectReferencedAxes *orAxis =
-         (ObjectReferencedAxes*)CreateAxisSystem("ObjectReferenced",
-                                                 "ObjectReferenced");
-      orAxis->SetEopFile(theEopFile);
-      orAxis->SetCoefficientsFile(theItrfFile);
-      orAxis->SetStringParameter("XAxis", "V");
-      orAxis->SetStringParameter("YAxis", "N");
-      orAxis->SetStringParameter("Primary", "Earth");
-      orAxis->SetStringParameter("Secondary", "DefaultSC");
-      vnb->SetStringParameter("Origin", "Earth");
-      //      vnb->SetStringParameter("J2000Body", "Earth");
-      vnb->SetRefObject(orAxis, Gmat::AXIS_SYSTEM, orAxis->GetName());
+//       CoordinateSystem *vnb = CreateCoordinateSystem("VNB", false);
+//       ObjectReferencedAxes *orAxis =
+//          (ObjectReferencedAxes*)CreateAxisSystem("ObjectReferenced",
+//                                                  "ObjectReferenced");
+//       orAxis->SetEopFile(theEopFile);
+//       orAxis->SetCoefficientsFile(theItrfFile);
+//       orAxis->SetStringParameter("XAxis", "V");
+//       orAxis->SetStringParameter("YAxis", "N");
+//       orAxis->SetStringParameter("Primary", "Earth");
+//       orAxis->SetStringParameter("Secondary", "DefaultSC");
+//       vnb->SetStringParameter("Origin", "Earth");
+//       vnb->SetRefObject(orAxis, Gmat::AXIS_SYSTEM, orAxis->GetName());
       
       // Burn parameters
-      CreateParameter("DeltaV1", "DefaultIB.VNB.DeltaV1");
-      CreateParameter("DeltaV2", "DefaultIB.VNB.DeltaV2");
-      CreateParameter("DeltaV3", "DefaultIB.VNB.DeltaV3");
+      CreateParameter("Element1", "DefaultIB.Element1");
+      CreateParameter("Element2", "DefaultIB.Element2");
+      CreateParameter("Element3", "DefaultIB.Element3");
       #endif
       //--------------------------------------------------------------
       
@@ -3850,24 +3849,33 @@ void Moderator::CreateDefaultMission()
          // need spacecraft if system parameter
          if (param->GetKey() == GmatParam::SYSTEM_PARAM)
          {
-            //MessageInterface::ShowMessage("name = %s\n", param->GetName().c_str());
-            //param->SetStringParameter("Expression", param->GetName());
-            param->SetRefObjectName(Gmat::SPACECRAFT, "DefaultSC");
-
-            if (param->NeedCoordSystem())
+            if (param->GetOwnerType() == Gmat::SPACECRAFT)
             {
-               param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
-               if (param->IsOriginDependent())
-                  param->SetStringParameter("DepObject", "Earth");
-               else if (param->IsCoordSysDependent())
-                  param->SetStringParameter("DepObject", "EarthMJ2000Eq");
+               //MessageInterface::ShowMessage("name = %s\n", param->GetName().c_str());
+               //param->SetStringParameter("Expression", param->GetName());
+               param->SetRefObjectName(Gmat::SPACECRAFT, "DefaultSC");
+
+               if (param->NeedCoordSystem())
+               {
+                  param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+                  if (param->IsOriginDependent())
+                     param->SetStringParameter("DepObject", "Earth");
+                  else if (param->IsCoordSysDependent())
+                     param->SetStringParameter("DepObject", "EarthMJ2000Eq");
+               }
             }
+            #ifdef __CREATE_BURN_PARAM__
+            else if (param->GetOwnerType() == Gmat::BURN)
+            {
+               param->SetRefObjectName(Gmat::BURN, "DefaultIB");
+            }
+            #endif
          }
       }
       
       #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->ref. object to parameters are set\n");
-      #endif   
+      #endif
 
       // StopCondition
       StopCondition *stopOnElapsedSecs =

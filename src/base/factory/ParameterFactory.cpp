@@ -33,6 +33,7 @@
 #include "StringVar.hpp"
 #include "Array.hpp"
 #include "BplaneParameters.hpp"
+#include "BurnParameters.hpp"
 
 //---------------------------------
 //  public methods
@@ -209,6 +210,14 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    if (ofType == "BVectorAngle")
       return new BVectorAngle(withName);
    
+   // ImpulsiveBurn parameters
+   if (ofType == "Element1")
+      return new DeltaVDir1(withName);
+   if (ofType == "Element2")
+      return new DeltaVDir2(withName);
+   if (ofType == "Element3")
+      return new DeltaVDir3(withName);
+   
    // add others here
    else
       return NULL;
@@ -318,6 +327,11 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("BdotR");
       creatables.push_back("BVectorMag");
       creatables.push_back("BVectorAngle");
+      
+      // Burn parameters
+      creatables.push_back("Element1");
+      creatables.push_back("Element2");
+      creatables.push_back("Element3");
    }
 }
 

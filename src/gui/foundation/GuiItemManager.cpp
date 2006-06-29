@@ -1767,7 +1767,7 @@ void GuiItemManager::UpdatePropertyList()
    #endif
    
    theNumScProperty = 0;
-   //theNumImpBurnProperty = 0; //loj: 7/28/05 Until BurnParameter is added to Factory
+   //theNumImpBurnProperty = 0; //loj: 6/29/06 Until BurnParameter is defined
    Gmat::ObjectType objectType;
    ParameterInfo *theParamInfo = ParameterInfo::Instance();
    
@@ -2798,18 +2798,15 @@ GuiItemManager::GuiItemManager()
    theNumCalPoint = 0;
    theNumSpacePoint = 0;
    
-   //loj: 05/02/06 Added X, Y, Z
-   // Until Burn parameter is added to ParameterFactory, add V, N, B, X, Y, Z
+   // Until More Burn parameter is defiend, add V, N, B, X, Y, Z
+   // 6/29/06: Currently creatable burn parameters are: Element1, Element2, Element3
    theImpBurnPropertyList[0] = "V";
    theImpBurnPropertyList[1] = "N";
    theImpBurnPropertyList[2] = "B";
    theImpBurnPropertyList[3] = "X";
    theImpBurnPropertyList[4] = "Y";
    theImpBurnPropertyList[5] = "Z";
-   theImpBurnPropertyList[6] = "Element1";
-   theImpBurnPropertyList[7] = "Element2";
-   theImpBurnPropertyList[8] = "Element3";
-   theNumImpBurnProperty = 9;
+   theNumImpBurnProperty = 6;
    
    // update property list
    UpdatePropertyList();
