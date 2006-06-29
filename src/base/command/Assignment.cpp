@@ -630,9 +630,28 @@ bool Assignment::Execute()
             }
             else
             {
-               throw CommandException
-                  ("Expects LHS type to be a Variable or Array, but it's " +
-                   lhsParm->GetTypeName());
+               parmID    = parmOwner->GetParameterID(parmName);
+               parmType  = parmOwner->GetParameterType(parmID);
+
+               #if DEBUG_EQUATION
+               MessageInterface::ShowMessage
+                  ("Assignment::Execute() parmName=%s, lhsParm=%s, TypeName=%s, "
+                   "parmID=%d, parmType=%d\n", parmName.c_str(),
+                   lhsParm->GetName().c_str(), lhsParm->GetTypeName().c_str(),
+                   parmID, parmType);
+               #endif
+               
+               if (parmType == Gmat::REAL_TYPE)
+               {
+                  parmOwner->SetRealParameter(parmID, rval);
+               }               
+               else
+               {
+                  throw CommandException
+                     ("Expects LHS type to be a Variable or Array or Real "
+                      "parameter. Object type: " + lhsParm->GetTypeName() +
+                      "Object name: " + lhsParm->GetName() + "\n");
+               }
             }
          }
          else
@@ -744,7 +763,7 @@ bool Assignment::Execute()
       // if (parmOwner->GetTypeName() == "Variable")
       //    return ((Variable*)parmOwner)->EvaluateReal();
       
-      #ifdef DEBUG_ARRAY_INTERPRETING
+      #ifdef DEBUG_PARM_ASSIGNMENT
          MessageInterface::ShowMessage("   Executing parameter setting\n");
       #endif
 
@@ -756,8 +775,8 @@ bool Assignment::Execute()
       }
       else
       {
-            parmID    = parmOwner->GetParameterID(parmName);
-            parmType  = parmOwner->GetParameterType(parmID);
+         parmID    = parmOwner->GetParameterID(parmName);
+         parmType  = parmOwner->GetParameterType(parmID);
       }
 
       #ifdef DEBUG_PARM_ASSIGNMENT
@@ -1019,7 +1038,8 @@ bool Assignment::InitializeRHS(const std::string &rhs)
    std::string name = chunk;
    if (rhs.find('.') != rhs.npos)
    {
-      if (!isalpha(name[0]))
+      //if (!isalpha(name[0]))
+      if (isalpha(name[0]))
          name = rhs;
    }
 
@@ -1127,11 +1147,21 @@ bool Assignment::InitializeRHS(const std::string &rhs)
    }
    else
    {
-      #ifdef DEBUG_PARM_ASSIGNMENT
+      Real rval;
+      if (GmatStringUtil::ToDouble(rhs, &rval))
+      {
+         #ifdef DEBUG_PARM_ASSIGNMENT
          MessageInterface::ShowMessage(
             "Assignment RHS object is the number %le\n", atof(rhs.c_str()));
-      #endif
-      rhsType = NUMBER;
+         #endif
+         rhsType = NUMBER;
+      }
+      else
+      {
+         if (rhs != "On" && rhs != "Off")
+            throw CommandException
+               ("Assignment commands cannot handle RHS: " + rhs + "\n");
+      }
    }
 
    return true;
@@ -1153,6 +1183,9 @@ bool Assignment::InitializeRHS(const std::string &rhs)
 //------------------------------------------------------------------------------
 Real Assignment::EvaluateRHS()
 {
+   //MessageInterface::ShowMessage
+   //   ("===> Assignment::EvaluateRHS() rhsType=%d\n", rhsType);
+   
    // RHS could be a parameter, an array element, a variable, or just a number
    switch (rhsType)
    {
