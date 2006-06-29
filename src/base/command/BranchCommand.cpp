@@ -691,6 +691,10 @@ bool BranchCommand::Execute()
 //------------------------------------------------------------------------------
 bool BranchCommand::ExecuteBranch(Integer which)
 {
+#ifdef DEBUG_BRANCHCOMMAND_EXECUTION
+MessageInterface::ShowMessage("In BranchCommand (%s), executing branch %d\n", 
+typeName.c_str(), which);
+#endif
    bool retval = true;
       
    if (current == NULL)
@@ -701,19 +705,23 @@ bool BranchCommand::ExecuteBranch(Integer which)
    {
       std::string curName = current->GetTypeName();
       MessageInterface::ShowMessage
-      ("In ExecuteBranch - current = %s\n", curName.c_str());
+      ("In ExecuteBranch (%s) - current = %s\n", 
+      typeName.c_str(), curName.c_str());
    }
    else
       MessageInterface::ShowMessage
-         ("In ExecuteBranch - current = NULL\n");
+         ("In ExecuteBranch (%s)  - current = NULL\n", typeName.c_str());
 #endif
    if (current == this)
    {
 #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
       MessageInterface::ShowMessage
-      ("In ExecuteBranch - current = this -> resetting\n");
+      ("In ExecuteBranch (%s) - current = this -> resetting\n", 
+      typeName.c_str());
 #endif
       branchExecuting = false;
+      //commandExecuting = false;  // ***********************
+      //commandComplete  = true;   // ***********************
       current = NULL;
    }
 
