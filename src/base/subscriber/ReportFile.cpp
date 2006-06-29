@@ -933,7 +933,7 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
 //------------------------------------------------------------------------------
 void ReportFile::ClearVarParameters()
 {
-   MessageInterface::ShowMessage("==> ReportFile::ClearVarParameters() entered\n");
+   //MessageInterface::ShowMessage("==> ReportFile::ClearVarParameters() entered\n");
    
    mVarParams.clear();
    mVarParamNames.clear();
