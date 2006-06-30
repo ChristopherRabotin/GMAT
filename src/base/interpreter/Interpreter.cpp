@@ -1248,7 +1248,8 @@ bool Interpreter::AssembleReportCommand(const StringArray topLevel,
          else
          {
             throw InterpreterException
-               ("Cannot parse the line\n" + line + "\n");
+               ("Cannot find the object: " + params[i] + " in the line\n" +
+                line + "\n");
          }
       }
       
@@ -2587,11 +2588,14 @@ bool Interpreter::EquateObjects(GmatBase *obj, const std::string &obj2Name)
 //             "\" have different types on line:\n" + line + "\n");
 //       obj->Copy(orig);
 
-      if (obj->GetTypeName() == orig->GetTypeName() && obj->GetTypeName() != "Array")
+      // We don't want name to be copied for User Parameters (loj: 6/30/06)
+      //if (obj->GetTypeName() == orig->GetTypeName() && obj->GetTypeName() != "Array")
+      if (obj->GetTypeName() == orig->GetTypeName() && obj->GetTypeName() != "Array" &&
+          obj->GetTypeName() != "Variable" && obj->GetTypeName() != "String")
          obj->Copy(orig);
       else
          return false;
-         
+      
       #ifdef DEBUG_INTERPRET_OBJECTEQUATES
          MessageInterface::ShowMessage(
             "Interpreter::EquateObjects succeeded\n");

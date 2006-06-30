@@ -21,6 +21,7 @@
 #include "GmatCommand.hpp"
 #include "Assignment.hpp"
 #include "StringUtil.hpp"        // for ToDouble()
+#include "CommandUtil.hpp"       // for GetCommandScript()
 #include <fstream>
 
 // Maybe put something like this in the Gmat namespace?
@@ -696,32 +697,32 @@ bool ScriptInterpreter::Parse()
 
                         if (SetArray(obj, cmd))
                         {
-                           // if RHS is not a equation, check for undefined object
-                           if (((Assignment*)cmd)->GetMathTree() == NULL)
-                           {
-                              //MessageInterface::ShowMessage
-                              //   ("==> obj=%s, RHS=%s\n", obj->GetName().c_str(),
-                              //    (*chunks.back()).c_str());
-                              Real rval = -9999.999;
+//                            // if RHS is not a equation, check for undefined object
+//                            if (((Assignment*)cmd)->GetMathTree() == NULL)
+//                            {
+//                               //MessageInterface::ShowMessage
+//                               //   ("==> obj=%s, RHS=%s\n", obj->GetName().c_str(),
+//                               //    (*chunks.back()).c_str());
+//                               Real rval = -9999.999;
                               
-                              // If RHS is not a number, find the object
-                              if (!GmatStringUtil::ToDouble(*chunks.back(), &rval))
-                              {
-                                 GmatBase *obj = FindObject(*chunks.back());
-                                 if (obj == NULL)
-                                 {
-                                    std::string str = *chunks.back();
+//                               // If RHS is not a number, find the object
+//                               if (!GmatStringUtil::ToDouble(*chunks.back(), &rval))
+//                               {
+//                                  GmatBase *obj = FindObject(*chunks.back());
+//                                  if (obj == NULL)
+//                                  {
+//                                     std::string str = *chunks.back();
                                     // Check for ' for matrix transpose and ^(-1) for inverse
-                                    if ((str.find("'") == str.npos) &&
-                                        (str.find("^(-1)") == str.npos))
-                                    {
-                                       throw InterpreterException
-                                          ("The object: " + *chunks.back() + " was not defined " +
-                                           "on line \"" + line + "\"\n");
-                                    }
-                                 }
-                              }
-                           }
+//                                     if ((str.find("'") == str.npos) &&
+//                                         (str.find("^(-1)") == str.npos))
+//                                     {
+//                                        throw InterpreterException
+//                                           ("The object: " + *chunks.back() + " was not defined " +
+//                                            "on line \"" + line + "\"\n");
+//                                     }
+//                                  }
+//                               }
+//                            }
                            
                            // Array set successfully
                            chunks.clear();
@@ -827,7 +828,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    }
    else
    {
-      *outstream << "% GMAT Script File\n% GMAT Release " << REV_STRING << "\n\n";
+      *outstream << "%% GMAT Script File\n%% GMAT Release " << REV_STRING << "\n\n";
    }
    
    // First write out the objects, one type at a time
@@ -989,7 +990,15 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    // Command sequence
    GmatCommand *cmd = moderator->GetNextCommand();
    bool inTextMode = false;
+   
    while (cmd != NULL) {
+      
+      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+      MessageInterface::ShowMessage
+         ("===> ScriptInterpreter::WriteScript() before write cmd=%s, mode=%d, "
+          "inTextMode=%d\n", cmd->GetTypeName().c_str(), mode, inTextMode);
+      #endif
+      
       if (!inTextMode)
          *outstream << (cmd->GetGeneratingString()) << "\n";
          
@@ -997,12 +1006,13 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          inTextMode = true;
       if (cmd->GetTypeName() == "EndScript")
          inTextMode = false;
-         
+      
       if (cmd == cmd->GetNext())
          throw InterpreterException("Self-reference found in command stream during write.\n");
+      
       cmd = cmd->GetNext();
    }
-    
+
    return true;
 }
 
