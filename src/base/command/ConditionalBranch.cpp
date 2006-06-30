@@ -267,7 +267,7 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
 {
    #if DEBUG_CONDITIONS
    MessageInterface::ShowMessage
-      ("ConditionalBranch::SetCondition() lhs=%s, operation=%s, rhs=%s\n",
+      ("ConditionalBranch::SetCondition() lhs=(%s), operation=(%s), rhs=(%s)\n",
        lhs.c_str(), operation.c_str(), rhs.c_str());
    #endif
    
@@ -277,6 +277,11 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
    // determine the operator
    for (Integer i = 0; i < NumberOfOperators; i++)
    {
+   #if DEBUG_CONDITIONS
+   MessageInterface::ShowMessage
+      ("ConditionalBranch::In loop ...  operation is %s, OPTYPE_TEXT is %s\n",
+       operation.c_str(), (OPTYPE_TEXT[i]).c_str());
+   #endif
       if (operation == OPTYPE_TEXT[i])
       {
          ot = (OpType) i;
