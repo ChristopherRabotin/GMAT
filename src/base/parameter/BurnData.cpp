@@ -42,6 +42,9 @@ BurnData::VALID_OBJECT_TYPE_LIST[BurnDataObjectCount] =
    "Spacecraft"
 }; 
 
+const Real BurnData::BURN_REAL_UNDEFINED = -9876543210.1234;
+const Real BurnData::BURN_TOL            = 1.0e-10;
+
 
 //---------------------------------
 // public methods

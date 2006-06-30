@@ -46,8 +46,8 @@ public:
    virtual bool ValidateRefObjects(GmatBase *param);
    virtual const std::string* GetValidObjectList() const;
    
-   const static Real BURN_REAL_UNDEFINED = -9876543210.1234;
-   const static Real BURN_TOL = 1.0e-10;
+   const static Real BURN_REAL_UNDEFINED;
+   const static Real BURN_TOL;
 
 protected:
 
