@@ -43,6 +43,7 @@ public:
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone() const;
+   virtual void Copy(const GmatBase*);
    
    virtual bool RenameRefObject(const Gmat::ObjectType type,
                                 const std::string &oldName,

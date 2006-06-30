@@ -51,6 +51,7 @@ public:
 
    // methods inherited from GmatBase
    virtual GmatBase* Clone() const;
+   virtual void Copy(const GmatBase*);
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer GetParameterID(const std::string str) const;
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;

@@ -194,6 +194,16 @@ GmatBase* Variable::Clone() const
    return new Variable(*this);
 }
 
+
+//------------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//------------------------------------------------------------------------------
+void Variable::Copy(const GmatBase* orig)
+{
+   operator=(*((Variable *)(orig)));
+}
+
+
 //---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
