@@ -25,6 +25,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_IF
+//#define DEBUG_IF_APPEND
 
 
 //---------------------------------
@@ -120,11 +121,20 @@ bool If::Append(GmatCommand *cmd)
 {
     if (!ConditionalBranch::Append(cmd))
         return false;
+        
+     #ifdef DEBUG_IF_APPEND
+        MessageInterface::ShowMessage("If::Append .... type being appended is %s\n",
+        (cmd->GetTypeName()).c_str());
+     #endif
 
     // Check for the end of "If" branch, point that end back to this command
     if (cmd->GetTypeName() == "EndIf" || cmd->GetTypeName() == "Else" ||
         cmd->GetTypeName() == "ElseIf")
     {
+     #ifdef DEBUG_IF_APPEND
+        MessageInterface::ShowMessage("If::Append (if) .... nestLevel = %d\n",
+        nestLevel);
+     #endif
        if ((nestLevel== 0) && (branchToFill != -1))
        {
           cmd->Append(this);
