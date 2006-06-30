@@ -98,6 +98,7 @@ OBJECTS = \
     app/GmatApp.o \
     app/GmatAppData.o \
     app/CompareFilesDialog.o \
+    app/CompareTextDialog.o \
     app/GmatConnection.o \
     app/GmatMainFrame.o \
     app/GmatMenuBar.o \
