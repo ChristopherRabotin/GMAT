@@ -236,6 +236,9 @@ OBJECTS = \
     parameter/BplaneData.o \
     parameter/BplaneParameters.o \
     parameter/BplaneReal.o \
+    parameter/BurnData.o \
+    parameter/BurnParameters.o \
+    parameter/BurnReal.o \
     parameter/CartesianParameters.o \
     parameter/EnvData.o \
     parameter/EnvParameters.o \
