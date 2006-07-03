@@ -71,87 +71,54 @@ void CoordPanel::EnableOptions()
    
    // save epoch value locally
    epochValue = epochTextCtrl->GetValue();
-
+   
    wxString typeStr = typeComboBox->GetStringSelection();
    
-   if (typeStr == "Equator")
-   {
-      mShowPrimaryBody = false; 
-      mShowSecondaryBody = false;
-      mShowEpoch = false;
-      mShowXyz = false;
-      mShowUpdate = false;
-   }
-   else if (typeStr == "BodyFixed")
-   {
-      mShowPrimaryBody = false; 
-      mShowSecondaryBody = false;
-      mShowEpoch = false;
-      mShowXyz = false;
-      mShowUpdate = true;
-   }
-   else if (typeStr == "ObjectReferenced")
-   {
-      mShowPrimaryBody = true;
-      mShowSecondaryBody = true;
-      mShowEpoch = false;
-      mShowXyz = true;
-      mShowUpdate = false;
-      SetDefaultObjectRefAxis();
-   }
-   else if ((typeStr == "TOEEq") || (typeStr == "TOEEc"))
-            
-   {
-      mShowPrimaryBody = false;
-      mShowSecondaryBody = false;
-      mShowEpoch = true;
-      mShowXyz = false;
-      mShowUpdate = true;
-      SetDefaultEpochRefAxis();
-   }
-   else if ((typeStr == "TODEq") || (typeStr == "TODEc"))
+   if (typeStr == "")
+      typeStr = "MJ2000Eq";
+   
+   // create a temp axis to use flags
+   AxisSystem* tmpAxis = (AxisSystem *)theGuiInterpreter->
+         CreateAxisSystem(std::string(typeStr.c_str()), "tmpAxis");
 
-   {
+   if (tmpAxis == NULL)
+      return;
+
+   if (tmpAxis->UsesPrimary() == GmatCoordinate::NOT_USED)
       mShowPrimaryBody = false;
-      mShowSecondaryBody = false;
-      mShowEpoch = false;
-      mShowXyz = false;
-      mShowUpdate = true;
-      SetDefaultEpochRefAxis();
-   }
-   else if((typeStr == "MOEEq") || (typeStr == "MOEEc"))
-   {
-      mShowPrimaryBody = false;
-      mShowSecondaryBody = false;
-      mShowEpoch = true;
-      mShowXyz = false;
-      mShowUpdate = false;
-      SetDefaultEpochRefAxis();
-   }
-   else if(typeStr == "GSE") //loj: 9/13/05 Added
-   {
-      mShowPrimaryBody = true;
-      mShowSecondaryBody = true;
-      mShowEpoch = false;
-      mShowXyz = false;
-      mShowUpdate = false;
-   }
-   else if(typeStr == "GSM")
-   {
-      mShowPrimaryBody = true;
-      mShowSecondaryBody = true;
-      mShowEpoch = false;
-      mShowXyz = false;
-      mShowUpdate = true;
-   }
    else
-   {
-      mShowPrimaryBody = false;
+      mShowPrimaryBody = true; 
+
+   if (tmpAxis->UsesSecondary() == GmatCoordinate::NOT_USED)
       mShowSecondaryBody = false;
+   else
+      mShowSecondaryBody = true; 
+      
+   if (tmpAxis->UsesEpoch() == GmatCoordinate::NOT_USED)
       mShowEpoch = false;
+   else
+      mShowEpoch = true; 
+      
+   if ((tmpAxis->UsesXAxis() == GmatCoordinate::NOT_USED) &&
+       (tmpAxis->UsesYAxis() == GmatCoordinate::NOT_USED) &&
+       (tmpAxis->UsesZAxis() == GmatCoordinate::NOT_USED))
       mShowXyz = false;
+   else
+      mShowXyz = true; 
+   
+   if (tmpAxis->UsesNutationUpdateInterval() == GmatCoordinate::NOT_USED)
       mShowUpdate = false;
-   }
+   else
+      mShowUpdate = true; 
+
+   if (typeStr == "ObjectReferenced")
+      SetDefaultObjectRefAxis();
+   else if ((typeStr == "TOEEq") || (typeStr == "TOEEc"))
+      SetDefaultEpochRefAxis();
+   else if ((typeStr == "TODEq") || (typeStr == "TODEc"))
+      SetDefaultEpochRefAxis();
+   else if((typeStr == "MOEEq") || (typeStr == "MOEEc"))
+      SetDefaultEpochRefAxis();
    
    if (mEnableAll)
    {
@@ -210,6 +177,8 @@ void CoordPanel::EnableOptions()
       secStaticText->Enable(false);
       intervalTextCtrl->Enable(false);
    }
+   
+   theGuiInterpreter->RemoveItemIfNotUsed(Gmat::AXIS_SYSTEM, "tmpAxis");
 }
 
 
