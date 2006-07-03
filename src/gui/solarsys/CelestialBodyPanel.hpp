@@ -58,6 +58,9 @@ private:
    wxStaticText *unitStaticText5;
    wxStaticText *nameStaticText6;
    wxStaticText *unitStaticText6;
+   wxStaticText *rotDataSourceText;
+   
+   wxComboBox *rotDataSourceCB;
    
    // methods inherited from GmatPanel
    virtual void Create();
@@ -68,19 +71,20 @@ private:
 
    // event handling
    void OnTextUpdate(wxCommandEvent& event);
-
+   void OnComboBoxChange(wxCommandEvent& event);
+   
    DECLARE_EVENT_TABLE();
 
    // IDs for the controls and the menu commands
    enum
    {     
       ID_TEXT = 9000,
-      ID_TEXTCTRL
+      ID_TEXTCTRL,
+      ID_COMBO
    };
    
    static const std::string KEP_ELEMENT_NAMES[6];
    static const std::string KEP_ELEMENT_UNITS[6];
-
 };
 
 #endif

@@ -38,6 +38,7 @@ CelestialBodyPanel::KEP_ELEMENT_UNITS[6] =
    "deg",
    "deg",
 };
+
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
@@ -49,6 +50,7 @@ BEGIN_EVENT_TABLE(CelestialBodyPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    
    EVT_TEXT(ID_TEXTCTRL, CelestialBodyPanel::OnTextUpdate)
+   EVT_COMBOBOX(ID_COMBO, CelestialBodyPanel::OnComboBoxChange)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -87,6 +89,8 @@ void CelestialBodyPanel::Create()
    wxFlexGridSizer *flexGridSizer = new wxFlexGridSizer( 3, 0, 0 );
    wxStaticBoxSizer *staticBoxSizer = new wxStaticBoxSizer(staticBox, wxVERTICAL);
    wxStaticBoxSizer *analyticBoxSizer = new wxStaticBoxSizer(analyticStaticBox, wxVERTICAL);
+   wxBoxSizer *horizontalBoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
+   wxString emptyList[] = {};
 
    mEpochTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                                  wxDefaultPosition, wxSize(150,-1), 0);
@@ -160,9 +164,17 @@ void CelestialBodyPanel::Create()
    nameStaticText6 =
       new wxStaticText(this, ID_TEXT, KEP_ELEMENT_NAMES[5].c_str(),
                        wxDefaultPosition, wxDefaultSize, 0);
+
    unitStaticText6 =
       new wxStaticText(this, ID_TEXT, KEP_ELEMENT_UNITS[5].c_str(),
                        wxDefaultPosition, wxDefaultSize, 0);
+
+   rotDataSourceText =
+      new wxStaticText(this, ID_TEXT, "Rotation Data Source",
+                       wxDefaultPosition, wxDefaultSize, 0);
+                       
+   rotDataSourceCB = new wxComboBox( this, ID_COMBO, wxT(""),
+      wxDefaultPosition, wxSize(150,-1), 0, emptyList, wxCB_DROPDOWN | wxCB_READONLY );
 
    flexGridSizer1->Add( epochStaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    flexGridSizer1->Add( mEpochTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
@@ -196,16 +208,20 @@ void CelestialBodyPanel::Create()
    flexGridSizer->Add( mElement6TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    flexGridSizer->Add( unitStaticText6, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 
+   horizontalBoxSizer2->Add( rotDataSourceText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   horizontalBoxSizer2->Add( rotDataSourceCB, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+
    staticBoxSizer->Add(horizontalBoxSizer, 0, wxALIGN_CENTER | wxALL, bsize);
    staticBoxSizer->Add(flexGridSizer, 0, wxALIGN_CENTER | wxALL, bsize);
 
    pageBoxSizer->Add(noCentralBodyText, 0, wxALIGN_CENTER | wxALL, bsize);
    pageBoxSizer->Add(flexGridSizer1, 0, wxALIGN_CENTER | wxALL, bsize);
    pageBoxSizer->Add(staticBoxSizer, 0, wxALIGN_CENTER | wxALL, bsize);
+   pageBoxSizer->Add(horizontalBoxSizer2, 0, wxALIGN_CENTER | wxALL, bsize);
 
    analyticBoxSizer->Add(pageBoxSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
    theMiddleSizer->Add(analyticBoxSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
-   
+  
    if (bodyName == "Earth")
    {
       intervalStaticText->Show(true);
@@ -215,6 +231,17 @@ void CelestialBodyPanel::Create()
    {
       intervalStaticText->Show(false);
       mIntervalTextCtrl->Show(false);
+   }
+   
+   if (bodyName == "Luna")
+   {
+      rotDataSourceText->Show(true);
+      rotDataSourceCB->Show(true);   
+   }
+   else
+   {
+      rotDataSourceText->Show(false);
+      rotDataSourceCB->Show(false);   
    }
 }
 
@@ -245,6 +272,28 @@ void CelestialBodyPanel::LoadData()
              intervalUpdate = thePlanet->GetUpdateInterval();
              intervalStr.Printf("%f", intervalUpdate);
              mIntervalTextCtrl->SetValue(intervalStr);
+         }
+         
+         if (theCelestialBody->GetName() == "Luna")
+         {
+            wxString rotStrs[] =
+            {
+               wxT("DeFile"),
+               wxT("IAU Data"),
+            };
+      
+            for (unsigned int i=0; i<2; i++)
+               rotDataSourceCB->Append(wxString(rotStrs[i].c_str()));
+            
+            int dataSourceIndex = theCelestialBody->GetRotationDataSource();
+            
+            if (dataSourceIndex == Gmat::DE_FILE)
+               rotDataSourceCB->SetValue("DeFile");
+            else if (dataSourceIndex == Gmat::IAU_DATA)
+               rotDataSourceCB->SetValue("IAU Data");
+            else
+               rotDataSourceCB->SetValue("");
+            
          }
       }
       else
@@ -304,7 +353,7 @@ void CelestialBodyPanel::SaveData()
 {
    try
    {
-      if (theCelestialBody->GetBodyType() != Gmat::STAR)
+      if (theCelestialBody->GetBodyType() == Gmat::PLANET)
       {
           thePlanet->SetUpdateInterval(atof(mIntervalTextCtrl->GetValue()));
       }
@@ -323,6 +372,18 @@ void CelestialBodyPanel::SaveData()
                   atof(mElement6TextCtrl->GetValue()));
 
       theCelestialBody->SetLowFidelityElements(elements);
+      
+       if (theCelestialBody->GetName() == "Luna")
+       {
+          wxString rotDataString = rotDataSourceCB->GetValue();
+
+          if (rotDataString == "DeFile")
+            theCelestialBody->SetRotationDataSource(Gmat::DE_FILE);
+          else if (rotDataString == "IAU Data")
+            theCelestialBody->SetRotationDataSource(Gmat::IAU_DATA);
+          else
+            theCelestialBody->SetRotationDataSource(Gmat::NOT_APPLICABLE);
+       }
    }
    catch (BaseException &e)
    {
@@ -337,6 +398,14 @@ void CelestialBodyPanel::SaveData()
 // void OnTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void CelestialBodyPanel::OnTextUpdate(wxCommandEvent& event)
+{
+   theApplyButton->Enable(true);
+}
+
+//------------------------------------------------------------------------------
+// void OnComboBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void CelestialBodyPanel::OnComboBoxChange(wxCommandEvent& event)
 {
    theApplyButton->Enable(true);
 }
