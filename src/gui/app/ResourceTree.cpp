@@ -2856,7 +2856,11 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    // reset output path
    if (hasOutDirChanged)
       fm->SetAbsPathname(FileManager::OUTPUT_PATH, oldOutPath);
-
+      
+   // Report completion
+   wxString text;
+   text.Printf("Finished running %d scripts\n", numScripts);
+   GmatAppData::GetMainFrame()->SetStatusText(text, 1);
 }
 
 
