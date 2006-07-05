@@ -32,15 +32,21 @@
 #include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
 
+#define __USE_COORDUTIL__
+
 //#define __USE_COORDUTIL_FOR_AOP__
 //#define __USE_COORDUTIL_FOR_TA__
-//#define __USE_NEW_TA_CODE__
-//#define __USE_NEW_ECC_CODE__
-//#define __USE_NEW_SMA_CODE__
-//#define __USE_NEW_INC_CODE__
-//#define __USE_NEW_AOP_CODE__
-//#define __USE_NEW_VELAPO_CODE__
-//#define __USE_NEW_VELPER_CODE__
+
+//#define __TRY_COORD_CONVERSION__  // causes crash as of 7/5/06, dhunter
+
+#define __USE_NEW_TA_CODE__   // new code gives results much closer to STK
+#define __USE_NEW_ECC_CODE__  // new code gives results slightly closer to STK
+#define __USE_NEW_SMA_CODE__  // new code gives no change in results
+#define __USE_NEW_INC_CODE__
+#define __USE_NEW_AOP_CODE__
+#define __USE_NEW_VELAPO_CODE__
+#define __USE_NEW_VELPER_CODE__
+#define __USE_NEW_RAAN_CODE__   // new code gives virtually no change in results
 
 //#define DEBUG_ORBITDATA_INIT 1
 //#define DEBUG_ORBITDATA_CONVERT 1
@@ -439,27 +445,30 @@ Real OrbitData::GetKepReal(Integer item)
          return incDeg;
          
          #else
+         
+         Rvector3 posOut = pos;
+         Rvector3 velOut = vel; // vectors to be used in computation
+         #ifdef __TRY_COORD_CONVERSION__
          // Convert pos and vel to coord-sys F, if necessary
-         Rvector3 posOut, velOut; // vectors to be used in computation
+         // CAUSES CRASH
          if (mInternalCoordSystem != mOutCoordSystem) {
             mCoordConverter.Convert(A1Mjd(mCartEpoch), pos, mInternalCoordSystem, posOut, mOutCoordSystem);
-                mCoordConverter.Convert(A1Mjd(mCartEpoch), vel, mInternalCoordSystem, velOut, mOutCoordSystem);
+            mCoordConverter.Convert(A1Mjd(mCartEpoch), vel, mInternalCoordSystem, velOut, mOutCoordSystem);
          }
-         else {
-                posOut = pos;
-                velOut = vel;
-         }
+         #endif
+         
          Rvector3 h = Cross(posOut, velOut);
          Real hMag = h.GetMagnitude();
    
          Real i = ACos(h.Get(2) / hMag);
-         return i;
+         Real iDeg = i * DEG_PER_RAD;
+         return iDeg;
          #endif
       }
    case TA:
    case MA:
       {
-         #ifdef __USE_COORDUTIL_FOR_TA__
+         #ifdef __USE_COORDUTIL__
       
          Rvector6 state = GetKepState();
 
@@ -523,16 +532,16 @@ Real OrbitData::GetKepReal(Integer item)
 
          #else
          
+         Rvector3 posOut = pos;
+         Rvector3 velOut = vel; // vectors to be used in computation
+         #ifdef __TRY_COORD_CONVERSION__
          // Convert pos and vel to coord-sys F, if necessary
-         Rvector3 posOut, velOut; // vectors to be used in computation
+         // CAUSES CRASH
          if (mInternalCoordSystem != mOutCoordSystem) {
             mCoordConverter.Convert(A1Mjd(mCartEpoch), pos, mInternalCoordSystem, posOut, mOutCoordSystem);
-                mCoordConverter.Convert(A1Mjd(mCartEpoch), vel, mInternalCoordSystem, velOut, mOutCoordSystem);
+            mCoordConverter.Convert(A1Mjd(mCartEpoch), vel, mInternalCoordSystem, velOut, mOutCoordSystem);
          }
-         else {
-            posOut = pos;
-            velOut = vel;
-         }
+         #endif
 
          Rvector3 h = Cross(posOut, velOut);
          Real hMag = h.GetMagnitude();
@@ -549,21 +558,21 @@ Real OrbitData::GetKepReal(Integer item)
          Real i = ACos(h.Get(2) / hMag);
          
          Real trueAnom;
-         if (ecc >= Exp10(-11)) {
+         if (ecc >= 1E-11) {
                 trueAnom = ACos((eVec*posOut)/(ecc*r));
-                if (r*v < 0)
-               trueAnom = TWO_PI - trueAnom;
+                if (posOut*velOut < 0)
+                   trueAnom = TWO_PI - trueAnom;
          }
          else {
-                if (i >= Exp10(-11)) {
-                        trueAnom = ACos((n*posOut)/(nMag*r));
-                        if (pos.Get(2) < 0)
-                           trueAnom = TWO_PI - trueAnom;
+                if (i >= 1E-11) {
+                   trueAnom = ACos((n*posOut)/(nMag*r));
+                   if (posOut.Get(2) < 0)
+                      trueAnom = TWO_PI - trueAnom;
                 }
                 else {
-                        trueAnom = ACos(posOut.Get(0) / r);
-                        if (pos.Get(1) < 0)
-                           trueAnom = TWO_PI - trueAnom;
+                   trueAnom = ACos(posOut.Get(0) / r);
+                   if (posOut.Get(1) < 0)
+                      trueAnom = TWO_PI - trueAnom;
                 }
          }
          Real taDeg = trueAnom * DEG_PER_RAD;
@@ -592,7 +601,7 @@ Real OrbitData::GetKepReal(Integer item)
             return mMA;
          }
       
-         #endif // __USE_COORDUTIL_FOR_TA__
+         #endif // __USE_COORDUTIL__
       }
    case RAAN:
       return GetRAofAN(pos, vel);
@@ -1342,7 +1351,7 @@ Real OrbitData::GetSemiMajorAxis(const Rvector3 &pos, const Rvector3 &vel)
    Real sma = rMag / denom;
    
    #else
-   
+
    Real zeta = 0.5*(vMag*vMag) - mGravConst/rMag;
    
    Real sma = -mGravConst/(2*zeta);
@@ -1374,19 +1383,23 @@ Real OrbitData::GetEccentricity(const Rvector3 &pos, const Rvector3 &vel)
    
    #else
    
-   Rvector3 r = pos;
-   Rvector3 v = vel;
-   
-   Real rMag = r.GetMagnitude(); // ||r||
-   Real vMag = v.GetMagnitude(); // ||v||
+   #ifndef __USE_COORDUTIL__
+   Real r = pos.GetMagnitude();
+   Real v = vel.GetMagnitude();
    
    Rvector3 e;  // eccentricity vector
-   e = (1/mGravConst)*((vMag*vMag - mGravConst/rMag)*r - (r*v)*r);
+   e = (1/mGravConst)*((v*v - mGravConst/r)*pos - (pos*vel)*vel);
    
    Real eMag = e.GetMagnitude(); // ||e||
    
    return eMag;
-   #endif
+   #else
+   Rvector6 state = GetKepState();
+
+   return state[ECC];
+   
+   #endif  // __USE_COORDUTIL__
+   #endif  // __USE_NEW_ECC_CODE
 }
 
 
@@ -1432,24 +1445,25 @@ Real OrbitData::GetRAofAN(const Rvector3 &pos, const Rvector3 &vel)
    return raanDeg;
    
    #else
-   // Convert pos and vel to coord-sys F, if necessary
-   Rvector3 posOut, velOut; // vectors to be used in computation
-   if (mInternalCoordSystem != mOutCoordSystem) {
-          mCoordConverter.Convert(A1Mjd(mCartEpoch), pos, mInternalCoordSystem, posOut, mOutCoordSystem);
-          mCoordConverter.Convert(A1Mjd(mCartEpoch), vel, mInternalCoordSystem, velOut, mOutCoordSystem);
-   }
-   else {
-          posOut = pos;
-          velOut = vel;
-   }
    
+   Rvector3 posOut = pos;
+   Rvector3 velOut = vel; // vectors to be used in computation
+   #ifdef __TRY_COORD_CONVERSION__
+   // Convert pos and vel to coord-sys F, if necessary
+   // CAUSES CRASH
+   if (mInternalCoordSystem != mOutCoordSystem) {
+      mCoordConverter.Convert(A1Mjd(mCartEpoch), pos, mInternalCoordSystem, posOut, mOutCoordSystem);
+      mCoordConverter.Convert(A1Mjd(mCartEpoch), vel, mInternalCoordSystem, velOut, mOutCoordSystem);
+   }
+   #endif
+
    Rvector3 h = Cross(posOut, velOut);
    Real hMag = h.GetMagnitude();
    
    Rvector3 n = Cross(Rvector3(0, 0, 1), h);
    Real nMag = n.GetMagnitude();
    
-   Real i = ACos(h.Get(2) / hMag);
+   Real i = ACos(h.Get(2) / hMag);  // inclination in radians
    
    Real omega;
    if (i >= 1E-11) {
@@ -1460,7 +1474,7 @@ Real OrbitData::GetRAofAN(const Rvector3 &pos, const Rvector3 &vel)
    else
       omega = 0;
    
-   return omega;
+   return omega*DEG_PER_RAD;
    #endif // __USE_NEW_RAAN_CODE__
 }
 
