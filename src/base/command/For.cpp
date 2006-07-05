@@ -22,8 +22,11 @@
 #include "For.hpp"
 #include "BranchCommand.hpp"
 #include "CommandException.hpp"
+#include "MessageInterface.hpp"
 
 #include <sstream>      // for std::stringstream, used to make generating string
+
+//#define DEBUG_FOR 1
 
 //---------------------------------
 // static data
@@ -228,6 +231,34 @@ bool For::Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 bool For::Initialize(void)
 {
+   // Get Parameter pointers from the Sandbox
+   if (startIsParam)
+   {
+      if (objectMap->find(startName) == objectMap->end())
+         throw CommandException("Undefined start variable:" + startName +
+                                " in For loop\n" + generatingString);
+      
+      startParam = (Parameter*)(*objectMap)[startName];
+   }
+
+   if (endIsParam)
+   {
+      if (objectMap->find(endName) == objectMap->end())
+         throw CommandException("Undefined stop variable:" + endName +
+                                " in For loop\n" + generatingString);
+      
+      endParam = (Parameter*)(*objectMap)[endName];
+   }
+   
+   if (incrIsParam)
+   {
+      if (objectMap->find(incrName) == objectMap->end())
+         throw CommandException("Undefined increment variable:" + incrName +
+                                " in For loop\n" + generatingString);
+      
+      incrParam = (Parameter*)(*objectMap)[incrName];
+   }
+
    bool retval = BranchCommand::Initialize();
 
    return retval;
@@ -765,11 +796,18 @@ bool For::StillLooping()
       if (startIsParam)  startValue = startParam->GetReal();
       if (endIsParam)    endValue   = endParam->GetReal();
       if (incrIsParam)   stepSize   = incrParam->GetReal();
+
+      #if DEBUG_FOR
+      MessageInterface::ShowMessage
+         ("For::StillLooping() startValue=%f, stepSize=%f, endValue=%f\n",
+          startValue, stepSize, endValue);
+      #endif
+      
       if ((stepSize == 0.0) ||
           ((stepSize > 0.0) && (startValue > endValue)) ||
           ((stepSize < 0.0) && (startValue < endValue)) )
          throw CommandException(
-               "For loop values incorrect - will result in infinite loop.");
+               "For loop values incorrect - will result in infinite loop.\n");
       
       currentValue = startValue;
       
