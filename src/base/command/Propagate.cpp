@@ -1270,6 +1270,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
    bool scanning = true;
    Integer currentLoc = loc, parmstart, end, endchar;
    
+   // First find the PropSetups
    parmstart = generatingString.find("(", currentLoc);   
    while (scanning) {
       end = generatingString.find(")", parmstart)+1;
@@ -1338,6 +1339,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          MessageInterface::ShowMessage("Building list of SpaceObjects:\n");
       #endif
       do {
+         // Skip white space
          while ((*i)[loc] == ' ')
             ++loc;
          if (end == (Integer)std::string::npos)
@@ -1350,12 +1352,17 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
                                  (*i)[end]);
          #endif
          // Strip off trailing spaces
-         endchar = end-1;
+         if (((*i)[end] == ',') || ((*i)[end] == '{') || 
+             ((*i)[end] == ')'))
+            endchar = end-1;
+         else
+            endchar = end;
          while ((*i)[endchar] == ' ')
             --endchar;
          
          component = i->substr(loc, endchar-loc+1);
-         SetObject(component, Gmat::SPACECRAFT);
+         if (component != "")
+            SetObject(component, Gmat::SPACECRAFT);
          #ifdef DEBUG_PROPAGATE_ASSEMBLE
             MessageInterface::ShowMessage("   \"%s\"\n", 
                                           component.c_str());
@@ -1364,8 +1371,21 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          loc = end + 1;
          end = i->find(",", loc);
          if (end == (Integer)std::string::npos)
-            end = satEnd;
-      } while (end < satEnd);
+         {
+            // Might be in single step mode, with one last SpaceObject
+            end = i->find("{", loc);
+            if (end != (Integer)std::string::npos)
+               end = satEnd;
+            else
+               end = satEnd - 1;
+
+            #ifdef DEBUG_PROPAGATE_ASSEMBLE
+               MessageInterface::ShowMessage(
+                  "   end = %d, satEnd = %d, remaining string = '%s'\n", 
+                  end, satEnd, &((i->c_str())[loc]));
+            #endif
+         }
+      } while ((end < satEnd) && ((*i)[loc] != ')'));
 
       end = i->find("{", loc);
 
@@ -1762,17 +1782,21 @@ bool Propagate::Initialize()
 
    // Ensure that we are using fresh objects when buffering stops
    EmptyBuffer();
+   
+   // prop.clear();
       
    for (StringArray::iterator i = propName.begin(); i != propName.end(); ++i)
    {
       if (satName.size() <= index)
          throw CommandException("Size mismatch for SpaceObject names\n");
          
-      if ((*i)[0] == '-') {
+      if ((*i)[0] == '-') 
+      {
          pName = i->substr(1);
          dir = -1.0;
       }
-      else {
+      else 
+      {
         pName = *i;
         dir = 1.0;
       }
@@ -1792,6 +1816,7 @@ bool Propagate::Initialize()
       else
          singleStepMode = false;
 
+      // prop.push_back((PropSetup *)(((*objectMap)[pName])->Clone()));
       prop.push_back((PropSetup *)((*objectMap)[pName]));
       if (!prop[index])
          return false;
@@ -1818,6 +1843,10 @@ bool Propagate::Initialize()
       for (scName = satName[index]->begin(); scName != satName[index]->end(); 
            ++scName) 
       {
+         #if DEBUG_PROPAGATE_INIT
+            MessageInterface::ShowMessage("   Adding '%s' to propsetup '%s'\n",
+               scName->c_str(), i->c_str());
+         #endif
          if (objectMap->find(*scName) == objectMap->end()) 
          {
             std::string errmsg = "Unknown SpaceObject \"";
