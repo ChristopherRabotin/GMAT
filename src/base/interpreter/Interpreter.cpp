@@ -1063,7 +1063,9 @@ bool Interpreter::AssembleCommand(const std::string& scriptline,
 bool Interpreter::AssembleForCommand(const StringArray topLevel,
                                      GmatCommand *cmd)
 {
-   Real start, step = 1.0, stop;
+   //Real start, step = 1.0, stop;
+   Real start = 0.0, step = 1.0, stop = 0.0;
+   std::string startString, stepString, stopString;
    
    // Find the start and end values, and the step if one is specified
    StringArray::const_iterator w;
@@ -1092,8 +1094,16 @@ bool Interpreter::AssembleForCommand(const StringArray topLevel,
    
    ++w;
    //start = atof(w->c_str());
-   if (w == topLevel.end() || !GmatStringUtil::ToDouble(*w, &start))
-      throw InterpreterException("For loop has missing or invalid start index\n   \"" +
+   //if (w == topLevel.end() || !GmatStringUtil::ToDouble(*w, &start))
+   if (w == topLevel.end())
+      throw InterpreterException("For loop has missing start index\n   \"" +
+                                 line + "\"\n");
+
+   if (!GmatStringUtil::ToDouble(*w, &start))
+      startString = *w;
+   
+   if (*w == "")
+      throw InterpreterException("For loop has invalid start index\n   \"" +
                                  line + "\"\n");
    
    ++w;
@@ -1102,18 +1112,40 @@ bool Interpreter::AssembleForCommand(const StringArray topLevel,
                                  line + "\"\n");
    
    ++w;
-   if (w == topLevel.end() || !GmatStringUtil::ToDouble(*w, &stop))
-      throw InterpreterException("For loop has missing or invalid stop index\n   \"" +
+//    if (w == topLevel.end() || !GmatStringUtil::ToDouble(*w, &stop))
+//       throw InterpreterException("For loop has missing or invalid stop index\n   \"" +
+//                                  line + "\"\n");
+   
+   if (w == topLevel.end())
+      throw InterpreterException("For loop has missing stop index\n   \"" +
+                                 line + "\"\n");
+   
+   if (!GmatStringUtil::ToDouble(*w, &stop))
+      stopString = *w;
+   
+   if (*w == "")
+      throw InterpreterException("For loop has invalid stop index\n   \"" +
                                  line + "\"\n");
    
    ++w;
    if (w != topLevel.end()) {
       if (*w == ":") {
-         step = stop;   
+         step = stop;
+         stepString = stopString;
          ++w;
          //stop = atof(w->c_str());
-         if (w == topLevel.end() || !GmatStringUtil::ToDouble(*w, &stop))
-            throw InterpreterException("For loop has missing or invalid stop index\n   \"" +
+//          if (w == topLevel.end() || !GmatStringUtil::ToDouble(*w, &stop))
+//             throw InterpreterException("For loop has missing or invalid stop index\n   \"" +
+//                                        line + "\"\n");
+         if (w == topLevel.end())
+            throw InterpreterException("For loop has missing stop index\n   \"" +
+                                       line + "\"\n");
+         
+         if (!GmatStringUtil::ToDouble(*w, &stop))
+            stopString = *w;
+         
+         if (*w == "")
+            throw InterpreterException("For loop has invalid stop index\n   \"" +
                                        line + "\"\n");
       }
       // Commented out because of the possibility of trailing white space
@@ -1128,11 +1160,74 @@ bool Interpreter::AssembleForCommand(const StringArray topLevel,
                 << std::endl;
       MessageInterface::ShowMessage
          ("Setting values: start=%f, step=%f, stop=%f\n", start, step, stop);
+      MessageInterface::ShowMessage
+         ("startString=%s, stepString=%s, stopString=%s\n", startString.c_str(),
+          stepString.c_str(), stopString.c_str());
    #endif
+
+   Parameter* theParam;
+   if (startString != "")
+   {
+      cmd->SetStringParameter(cmd->GetParameterID("StartName"), startString);
+      theParam = moderator->GetParameter(startString);
+      
+      if (theParam == NULL)
+      {
+         // Create if it is system parameter.
+         // Is there any case using system parameter as For loop index?
+         // Here is an example how to handle it.
+         std::string type, owner, depObj;
+         GmatStringUtil::ParseParameter(startString, type, owner, depObj);
+         
+         if (moderator->IsParameter(type))
+            theParam = moderator->CreateParameter(type, startString, owner, depObj);
+         else
+            throw InterpreterException
+               ("For loop has undefined start variable: " + startString + "\n   \"" +
+                line + "\"\n");
+      }
+      
+      cmd->SetRefObject(theParam, Gmat::PARAMETER, startString);
+   }
+   else
+   {
+      cmd->SetRealParameter("StartValue", start);
+   }
    
-   cmd->SetRealParameter("StartValue", start);
-   cmd->SetRealParameter("Step", step);
-   cmd->SetRealParameter("EndValue", stop);
+   if (stepString != "")
+   {
+      cmd->SetStringParameter(cmd->GetParameterID("IncrementName"), stepString);
+      theParam = moderator->GetParameter(stepString);
+      
+      if (theParam == NULL)
+         throw InterpreterException
+            ("For loop has undefined increment variable: " + stepString + "\n   \"" +
+                                    line + "\"\n");
+      
+      cmd->SetRefObject(theParam, Gmat::PARAMETER, stepString);
+   }
+   else
+   {
+      cmd->SetRealParameter("Step", step);
+   }
+
+   if (stopString != "")
+   {
+      cmd->SetStringParameter(cmd->GetParameterID("EndName"), stopString);
+      theParam = moderator->GetParameter(stopString);
+      
+      if (theParam == NULL)
+         throw InterpreterException
+            ("For loop has undefined stop variable: " + stopString + "\n   \"" +
+                                    line + "\"\n");
+      
+      cmd->SetRefObject(theParam, Gmat::PARAMETER, stopString);
+   }
+   else
+   {
+      cmd->SetRealParameter("EndValue", stop);
+   }
+
    return true;
 }
 
@@ -2680,6 +2775,9 @@ bool Interpreter::SetVariable(GmatBase *obj, const std::string &val,
          }
       }
    }
+
+   MessageInterface::ShowMessage
+      ("===> Interpreter::SetVariable() other=%s\n", other.c_str());
    
    obj->SetRefObjectName(Gmat::PARAMETER, other);   
    return obj->SetStringParameter("Expression", other);
