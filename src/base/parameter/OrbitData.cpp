@@ -33,6 +33,7 @@
 #include "MessageInterface.hpp"
 
 #define __USE_COORDUTIL__
+//#define __USE_COORDUTIL_ECC__
 
 //#define __USE_COORDUTIL_FOR_AOP__
 //#define __USE_COORDUTIL_FOR_TA__
@@ -469,7 +470,6 @@ Real OrbitData::GetKepReal(Integer item)
    case MA:
       {
          #ifdef __USE_COORDUTIL__
-      
          Rvector6 state = GetKepState();
 
          if (item == TA)
@@ -672,7 +672,7 @@ Real OrbitData::GetKepReal(Integer item)
       
          return aopDeg;
       
-         #else
+         #else  // use the new AOP code
          
          Real r = pos.GetMagnitude();
          Real v = vel.GetMagnitude(); 
@@ -1383,7 +1383,7 @@ Real OrbitData::GetEccentricity(const Rvector3 &pos, const Rvector3 &vel)
    
    #else
    
-   #ifndef __USE_COORDUTIL__
+   #ifndef __USE_COORDUTIL_ECC__
    Real r = pos.GetMagnitude();
    Real v = vel.GetMagnitude();
    
@@ -1395,10 +1395,9 @@ Real OrbitData::GetEccentricity(const Rvector3 &pos, const Rvector3 &vel)
    return eMag;
    #else
    Rvector6 state = GetKepState();
-
    return state[ECC];
-   
-   #endif  // __USE_COORDUTIL__
+
+   #endif  // __USE_COORDUTIL_ECC__
    #endif  // __USE_NEW_ECC_CODE
 }
 
