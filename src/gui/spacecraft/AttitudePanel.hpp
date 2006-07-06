@@ -21,6 +21,8 @@
 #ifndef AttitudePanel_hpp
 #define AttitudePanel_hpp
 
+#include "Attitude.hpp"
+
 #include "gmatwxdefs.hpp"
 #include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
@@ -97,6 +99,14 @@ private:
    void DisplayEulerAngleRates();
    void DisplayAngularVelocity();
    
+   wxString *cosineMatrix[9];
+   wxString *eulerAngles[3];
+   wxString *quaternions[4];
+   wxString *eulerAngleRates[3];
+   wxString *angVel[3];
+   
+   bool dontUpdate;  // true while writing to textCtrls
+   
    // Event Handling
    DECLARE_EVENT_TABLE();
    void OnStateTypeTextUpdate(wxCommandEvent &event);
@@ -104,6 +114,13 @@ private:
    void OnConfigurationSelection(wxCommandEvent &event);
    void OnStateTypeSelection(wxCommandEvent &event);
    void OnStateTypeRateSelection(wxCommandEvent &event);
+   
+   void CalculateFromEulerAngles();
+   void CalculateFromQuaternions();
+   void CalculateFromCosineMatrix();
+   
+   void CalculateFromEulerAngleRates();
+   void CalculateFromAngularVelocity();
    
    Spacecraft *theSpacecraft;
    GuiInterpreter *theGuiInterpreter;
