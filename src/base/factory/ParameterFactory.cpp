@@ -217,6 +217,12 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new DeltaVDir2(withName);
    if (ofType == "Element3")
       return new DeltaVDir3(withName);
+   if (ofType == "V")
+      return new DeltaVDir1(withName);
+   if (ofType == "N")
+      return new DeltaVDir2(withName);
+   if (ofType == "B")
+      return new DeltaVDir3(withName);
    
    // add others here
    else
@@ -332,6 +338,9 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("Element1");
       creatables.push_back("Element2");
       creatables.push_back("Element3");
+      creatables.push_back("V");
+      creatables.push_back("N");
+      creatables.push_back("B");
    }
 }
 
