@@ -114,8 +114,8 @@ bool DeltaVDir1::Evaluate()
 {
    mRealValue = BurnData::GetBurnReal(ELEMENT1);
    
-   MessageInterface::ShowMessage
-      ("===> DeltaVDir3::Evaluate() mRealValue=%f\n", mRealValue);
+   //MessageInterface::ShowMessage
+   //   ("===> DeltaVDir3::Evaluate() mRealValue=%f\n", mRealValue);
    
    if (mRealValue == BurnData::BURN_REAL_UNDEFINED)
       return false;
