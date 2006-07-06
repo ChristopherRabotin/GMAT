@@ -2798,15 +2798,17 @@ GuiItemManager::GuiItemManager()
    theNumCalPoint = 0;
    theNumSpacePoint = 0;
    
-   // Until More Burn parameter is defiend, add V, N, B, X, Y, Z
    // 6/29/06: Currently creatable burn parameters are: Element1, Element2, Element3
+   // Add V, N, B. These are alias of Element1, Element2, Element3
+   // 7/6/06 X, Y, Z are property of Spacecraft, so removed them.
    theImpBurnPropertyList[0] = "V";
    theImpBurnPropertyList[1] = "N";
    theImpBurnPropertyList[2] = "B";
-   theImpBurnPropertyList[3] = "X";
-   theImpBurnPropertyList[4] = "Y";
-   theImpBurnPropertyList[5] = "Z";
-   theNumImpBurnProperty = 6;
+   //theImpBurnPropertyList[3] = "X";
+   //theImpBurnPropertyList[4] = "Y";
+   //theImpBurnPropertyList[5] = "Z";
+   //theNumImpBurnProperty = 6;
+   theNumImpBurnProperty = 3;
    
    // update property list
    UpdatePropertyList();
