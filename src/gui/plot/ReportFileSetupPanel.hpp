@@ -33,8 +33,18 @@ public:
 protected:
    ReportFile *reportFile;
 
+   int  mNumSc;
+   int  mNumImpBurn;
+   int  mNumScProperty;
+   int  mNumImpBurnProperty;
    int  mNumVarParams;
    bool mUseUserParam;
+
+   wxString *mSpacecraftList;
+   wxString *mImpBurnList;
+   wxArrayString mSpacecraftPropertyList;
+   wxArrayString mImpBurnPropertyList;
+      
    wxString mLastCoordSysName;
    wxArrayString mObjectTypeList;
    

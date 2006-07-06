@@ -28,6 +28,8 @@
 #include "bitmaps/forward.xpm"
 #include "bitmaps/backall.xpm"
 
+//#define DEBUG_REPORTFILE_PANEL 1
+
 //------------------------------
 // event tables for wxWindows
 //------------------------------
@@ -72,9 +74,11 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
                                            const wxString &subscriberName)
    : GmatPanel(parent)
 {
-   //MessageInterface::ShowMessage("ReportFileSetupPanel() entering...\n");
-   //MessageInterface::ShowMessage("ReportFileSetupPanel() subscriberName = " +
-   //                              std::string(subscriberName.c_str()) + "\n");
+   #if DEBUG_REPORTFILE_PANEL
+   MessageInterface::ShowMessage("ReportFileSetupPanel() entering...\n");
+   MessageInterface::ShowMessage("ReportFileSetupPanel() subscriberName = " +
+                                 std::string(subscriberName.c_str()) + "\n");
+   #endif
    
    Subscriber *subscriber =
       theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
@@ -82,6 +86,7 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
    reportFile = (ReportFile*)subscriber;
    
    mObjectTypeList.Add("Spacecraft");
+   mObjectTypeList.Add("ImpulsiveBurn");
    
    Create();
    Show();
@@ -128,8 +133,10 @@ void ReportFileSetupPanel::OnWriteCheckBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::Create()
 {
-   //MessageInterface::ShowMessage("ReportFileSetupPanel::Create() entering...\n");
-      
+   #if DEBUG_REPORTFILE_PANEL
+   MessageInterface::ShowMessage("ReportFileSetupPanel::Create() entering...\n");
+   #endif
+   
    Integer bsize = 2; // border size
    wxString emptyList[] = {};
    wxBitmap upBitmap = wxBitmap(up_xpm);
@@ -154,6 +161,25 @@ void ReportFileSetupPanel::Create()
                            &mCentralBodyComboBox, ID_COMBOBOX,
                            &mCoordSysLabel, &mCoordSysSizer,
                            mObjectTypeList, GuiItemManager::SHOW_REPORTABLE);
+   
+   // If showing multiple object types
+   if (mObjectTypeList.Count() > 1)
+   {
+      mSpacecraftList = theGuiManager->GetSpacecraftList();
+      mImpBurnList = theGuiManager->GetImpulsiveBurnList();         
+      mSpacecraftPropertyList = theGuiManager->GetSettablePropertyList("Spacecraft");
+      mImpBurnPropertyList = theGuiManager->GetSettablePropertyList("ImpulsiveBurn");
+      mNumSc = theGuiManager->GetNumSpacecraft();
+      mNumImpBurn = theGuiManager->GetNumImpulsiveBurn();
+      mNumScProperty = theGuiManager->GetNumProperty("Spacecraft");
+      mNumImpBurnProperty = theGuiManager->GetNumProperty("ImpulsiveBurn");
+      
+      #if DEBUG_REPORTFILE_PANEL
+      MessageInterface::ShowMessage
+         ("===> mNumSc=%d, mNumImpBurn=%d, mNumScProperty=%d, mNumImpBurnProperty=%d\n",
+          mNumSc, mNumImpBurn, mNumScProperty, mNumImpBurnProperty);
+      #endif
+   }
    
    //-------------------------------------------------------
    // add, remove, clear parameter buttons (2nd column)
@@ -294,6 +320,9 @@ void ReportFileSetupPanel::Create()
    theMiddleSizer->Add(variablesBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    theMiddleSizer->Add(optionBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 
+   #if DEBUG_REPORTFILE_PANEL
+   MessageInterface::ShowMessage("ReportFileSetupPanel::Create() exiting...\n");
+   #endif
 }
 
 
@@ -302,6 +331,10 @@ void ReportFileSetupPanel::Create()
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::LoadData()
 {
+   #if DEBUG_REPORTFILE_PANEL
+   MessageInterface::ShowMessage("ReportFileSetupPanel::LoadData() entering...\n");
+   #endif
+   
    // Set the pointer for the "Show Script" button
    mObject = reportFile;
    mLastCoordSysName = mCoordSysComboBox->GetString(0);
@@ -314,8 +347,10 @@ void ReportFileSetupPanel::LoadData()
    std::string filename = reportFile->GetStringParameter(filenameId);
    fileTextCtrl->SetValue(wxT(filename.c_str()));
 
-   //MessageInterface::ShowMessage("ReportFileSetupPanel::LoadData() filename=%s\n",
-   //                              filename.c_str());
+   #if DEBUG_REPORTFILE_PANEL
+   MessageInterface::ShowMessage("ReportFileSetupPanel::LoadData() filename=%s\n",
+                                 filename.c_str());
+   #endif
    
    int writeHeadersId = reportFile->GetParameterID("WriteHeaders");
    if (strcmp(reportFile->GetStringParameter(writeHeadersId).c_str(), "On") == 0)
@@ -372,6 +407,10 @@ void ReportFileSetupPanel::LoadData()
    // show coordinate system or central body
    ShowCoordSystem();
 
+   #if DEBUG_REPORTFILE_PANEL
+   MessageInterface::ShowMessage("ReportFileSetupPanel::LoadData() exiting...\n");
+   #endif
+   
 }
 
 
@@ -637,7 +676,32 @@ void ReportFileSetupPanel::OnSelectProperty(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == mObjectComboBox)
+   if (event.GetEventObject() == mObjectTypeComboBox)
+   {
+      if (mObjectTypeComboBox->GetValue() == "Spacecraft")
+      {
+         // Append Spacecraft objects
+         mObjectComboBox->Clear();
+         for (int i=0; i<mNumSc; i++)
+            mObjectComboBox->Append(mSpacecraftList[i]);
+         mObjectComboBox->SetSelection(0);
+
+         // Set Spacecraft property
+         mPropertyListBox->Set(mSpacecraftPropertyList);
+      }
+      else if (mObjectTypeComboBox->GetValue() == "ImpulsiveBurn")
+      {
+         // Append ImpulsiveBurn objects
+         mObjectComboBox->Clear();
+         for (int i=0; i<mNumImpBurn; i++)
+            mObjectComboBox->Append(mImpBurnList[i]);
+         mObjectComboBox->SetSelection(0);
+
+         // Set ImpulsiveBurn property
+         mPropertyListBox->Set(mImpBurnPropertyList);
+      }
+   }
+   else if (event.GetEventObject() == mObjectComboBox)
    {
       mUseUserParam = false;
    }
@@ -743,7 +807,7 @@ wxString ReportFileSetupPanel::GetParamName()
 Parameter* ReportFileSetupPanel::GetParameter(const wxString &name)
 {
    Parameter *param = theGuiInterpreter->GetParameter(std::string(name.c_str()));
-
+   
    // create a parameter if it does not exist
    if (param == NULL)
    {
@@ -751,24 +815,36 @@ Parameter* ReportFileSetupPanel::GetParameter(const wxString &name)
       std::string objName(mObjectComboBox->GetStringSelection().c_str());
       std::string propName(mPropertyListBox->GetStringSelection().c_str());
       std::string depObjName = "";
-            
+      bool isScProperty = true;
+      
+      if (mObjectTypeComboBox->GetValue() == "ImpulsiveBurn")
+         isScProperty = false;
+      
       if (mCoordSysComboBox->IsShown())
          depObjName = std::string(mCoordSysComboBox->GetStringSelection().c_str());
       else if (mCentralBodyComboBox->IsShown())
          depObjName = std::string(mCentralBodyComboBox->GetStringSelection().c_str());
-
+      
       try
       {
          param = theGuiInterpreter->CreateParameter(propName, paramName);
-         param->SetRefObjectName(Gmat::SPACECRAFT, objName);
-      
-         if (depObjName != "")
-            param->SetStringParameter("DepObject", depObjName);
-      
-         if (param->IsCoordSysDependent())
-            param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
-         else if (param->IsOriginDependent())
-            param->SetRefObjectName(Gmat::SPACE_POINT, depObjName);
+
+         if (isScProperty)
+         {
+            param->SetRefObjectName(Gmat::SPACECRAFT, objName);
+         
+            if (depObjName != "")
+               param->SetStringParameter("DepObject", depObjName);
+         
+            if (param->IsCoordSysDependent())
+               param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
+            else if (param->IsOriginDependent())
+               param->SetRefObjectName(Gmat::SPACE_POINT, depObjName);
+         }
+         else
+         {
+            param->SetRefObjectName(Gmat::BURN, objName);
+         }
       }
       catch (BaseException &e)
       {

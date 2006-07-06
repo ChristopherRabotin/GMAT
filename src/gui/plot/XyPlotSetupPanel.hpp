@@ -35,6 +35,10 @@ protected:
    TsPlot *mXyPlot;
    wxString mLastCoordSysName;
    
+   int  mNumSc;
+   int  mNumImpBurn;
+   int  mNumScProperty;
+   int  mNumImpBurnProperty;
    int  mNumXParams;
    int  mNumYParams;
    bool mXParamChanged;
@@ -42,6 +46,11 @@ protected:
    bool mIsColorChanged;
    bool mUseUserParam;
    
+   wxString *mSpacecraftList;
+   wxString *mImpBurnList;
+   wxArrayString mSpacecraftPropertyList;
+   wxArrayString mImpBurnPropertyList;
+
    std::string mSelYName;
    wxArrayString mObjectTypeList;
    std::map<std::string, RgbColor> mColorMap;

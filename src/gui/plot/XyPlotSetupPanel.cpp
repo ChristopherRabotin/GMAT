@@ -71,10 +71,12 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
                                    const wxString &subscriberName)
    : GmatPanel(parent)
 {
-   //MessageInterface::ShowMessage("XyPlotSetupPanel() entering...\n");
-   //MessageInterface::ShowMessage("XyPlotSetupPanel() subscriberName = " +
-   //                              std::string(subscriberName.c_str()) + "\n");
-    
+   #if DEBUG_XYPLOT_PANEL
+   MessageInterface::ShowMessage("XyPlotSetupPanel() entering...\n");
+   MessageInterface::ShowMessage("XyPlotSetupPanel() subscriberName = " +
+                                 std::string(subscriberName.c_str()) + "\n");
+   #endif
+   
    Subscriber *subscriber =
       theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
 
@@ -91,6 +93,7 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
    mColorMap.clear();
    
    mObjectTypeList.Add("Spacecraft");
+   mObjectTypeList.Add("ImpulsiveBurn");
    
    Create();
    Show();
@@ -294,7 +297,32 @@ void XyPlotSetupPanel::OnSelectY(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 {    
-   if (event.GetEventObject() == mObjectComboBox)
+   if (event.GetEventObject() == mObjectTypeComboBox)
+   {
+      if (mObjectTypeComboBox->GetValue() == "Spacecraft")
+      {
+         // Append Spacecraft objects
+         mObjectComboBox->Clear();
+         for (int i=0; i<mNumSc; i++)
+            mObjectComboBox->Append(mSpacecraftList[i]);
+         mObjectComboBox->SetSelection(0);
+
+         // Set Spacecraft property
+         mPropertyListBox->Set(mSpacecraftPropertyList);
+      }
+      else if (mObjectTypeComboBox->GetValue() == "ImpulsiveBurn")
+      {
+         // Append ImpulsiveBurn objects
+         mObjectComboBox->Clear();
+         for (int i=0; i<mNumImpBurn; i++)
+            mObjectComboBox->Append(mImpBurnList[i]);
+         mObjectComboBox->SetSelection(0);
+
+         // Set ImpulsiveBurn property
+         mPropertyListBox->Set(mImpBurnPropertyList);
+      }
+   }
+   else if (event.GetEventObject() == mObjectComboBox)
    {
       mUseUserParam = false;
    }
@@ -435,6 +463,24 @@ void XyPlotSetupPanel::Create()
           mPropertyListBox);
    #endif
 
+   // If showing multiple object types
+   if (mObjectTypeList.Count() > 1)
+   {
+      mSpacecraftList = theGuiManager->GetSpacecraftList();
+      mImpBurnList = theGuiManager->GetImpulsiveBurnList();         
+      mSpacecraftPropertyList = theGuiManager->GetSettablePropertyList("Spacecraft");
+      mImpBurnPropertyList = theGuiManager->GetSettablePropertyList("ImpulsiveBurn");
+      mNumSc = theGuiManager->GetNumSpacecraft();
+      mNumImpBurn = theGuiManager->GetNumImpulsiveBurn();
+      mNumScProperty = theGuiManager->GetNumProperty("Spacecraft");
+      mNumImpBurnProperty = theGuiManager->GetNumProperty("ImpulsiveBurn");
+      
+      #if DEBUG_XYPLOT_PANEL
+      MessageInterface::ShowMessage
+         ("===> mNumSc=%d, mNumImpBurn=%d, mNumScProperty=%d, mNumImpBurnProperty=%d\n",
+          mNumSc, mNumImpBurn, mNumScProperty, mNumImpBurnProperty);
+      #endif
+   }
 
    //------------------------------------------------------
    // add, remove, clear Y buttons (4th column)
