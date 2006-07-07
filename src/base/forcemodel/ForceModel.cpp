@@ -925,10 +925,12 @@ void ForceModel::SetInternalCoordinateSystem(const std::string csId, PhysicalMod
    }
    catch (BaseException &ex)
    {
-      MessageInterface::ShowMessage(
-         "Adding a coordinate system named '%s' for the full field model\n",
-         csName.c_str());
-         
+      #ifdef DEBUG_FORCEMODEL_INIT
+         MessageInterface::ShowMessage(
+            "Adding a coordinate system named '%s' for the full field model\n",
+            csName.c_str());
+      #endif
+      
       for (std::vector<CoordinateSystem*>::iterator i = 
               InternalCoordinateSystems.begin();
            i != InternalCoordinateSystems.end(); ++i)
@@ -937,16 +939,32 @@ void ForceModel::SetInternalCoordinateSystem(const std::string csId, PhysicalMod
       
       if (cs == NULL)
       {
+         // We need to handle both intertial and fixed CS's here
          if (earthEq == NULL)
             throw ForceModelException(
                "Error setting force model coordinate system: EarthEq pointer "
                "has not been initialized!");
-         cs = (CoordinateSystem *)earthEq->Clone();
+         if (earthFixed == NULL)
+            throw ForceModelException(
+               "Error setting force model coordinate system: EarthFixed "
+               "pointer has not been initialized!");
+               
+         if (csName.find("Fixed", 0) == std::string::npos)
+            cs = (CoordinateSystem *)earthEq->Clone();
+         else
+            cs = (CoordinateSystem *)earthFixed->Clone();
+
          cs->SetName(csName);
          cs->SetStringParameter("Origin", centralBodyName);
          cs->SetRefObject(forceOrigin, Gmat::CELESTIAL_BODY, 
             centralBodyName);
          InternalCoordinateSystems.push_back(cs);
+
+         #ifdef DEBUG_FORCEMODEL_INIT
+            MessageInterface::ShowMessage("Created %s with description\n\n%s\n", 
+               csName.c_str(), 
+               cs->GetGeneratingString(Gmat::SCRIPTING).c_str());
+         #endif
       }
       
       cs->SetSolarSystem(solarSystem);
@@ -964,8 +982,6 @@ void ForceModel::SetInternalCoordinateSystem(const std::string csId, PhysicalMod
       currentPm->SetRefObject(cs, Gmat::COORDINATE_SYSTEM, csName);
    }
 }
-
-
 
 
 Integer ForceModel::GetOwnedObjectCount()

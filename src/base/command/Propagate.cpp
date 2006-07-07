@@ -115,14 +115,14 @@ Propagate::~Propagate()
    if (pubdata)
       delete [] pubdata;
       
-//   // Remove PropSetup clones; these are not currently cloned but soon...
-//   for (std::vector<PropSetup*>::iterator ps = prop.begin(); ps != prop.end(); 
-//        ++ps)
-//   {
-//      PropSetup *oldPs = *ps;
-//      *ps = NULL;
-//      delete oldPs;
-//   }
+   // Remove PropSetup clones; these are not currently cloned but soon...
+   for (std::vector<PropSetup*>::iterator ps = prop.begin(); ps != prop.end(); 
+        ++ps)
+   {
+      PropSetup *oldPs = *ps;
+      *ps = NULL;
+      delete oldPs;
+   }
 }
 
 
@@ -1833,8 +1833,8 @@ bool Propagate::Initialize()
       else
          singleStepMode = false;
 
-      // prop.push_back((PropSetup *)(((*objectMap)[pName])->Clone()));
-      prop.push_back((PropSetup *)((*objectMap)[pName]));
+      prop.push_back((PropSetup *)(((*objectMap)[pName])->Clone()));
+      // prop.push_back((PropSetup *)((*objectMap)[pName]));
       if (!prop[index])
          return false;
       direction[index] = dir;
