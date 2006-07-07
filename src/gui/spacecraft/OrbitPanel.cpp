@@ -470,6 +470,8 @@ void OrbitPanel::SaveData()
    {
       MessageInterface::ShowMessage
          ("OrbitPanel:SaveData() error occurred!\n%s\n", e.GetMessage().c_str());
+         canClose = false;
+         return;
    }
 
    #if DEBUG_ORBIT_PANEL
