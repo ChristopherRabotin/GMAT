@@ -185,11 +185,12 @@ PhysicalModel::~PhysicalModel()
 //------------------------------------------------------------------------------
 PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
    GmatBase                    (pm),
-   body                        (NULL),
-   forceOrigin                 (NULL),
+   /// @note: Since the next two are global objects, assignment works
+   body                        (pm.body),
+   forceOrigin                 (pm.forceOrigin),
    bodyName                    (pm.bodyName),
    dimension                   (pm.dimension),
-   initialized                 (pm.initialized),
+   initialized                 (false),
    stateChanged                (pm.stateChanged),
    modelState                  (NULL),
    rawState                    (NULL),
@@ -239,11 +240,14 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
       return *this;
 
    GmatBase::operator=(pm);
-   body        = NULL;
-   forceOrigin = NULL;
+   
+   /// @note: Since the next two are global objects, assignment works
+   body        = pm.body;
+   forceOrigin = pm.forceOrigin;
+
    bodyName    = pm.bodyName;
    dimension   = pm.dimension;
-   initialized = pm.initialized;
+   initialized = false; //pm.initialized;
    epoch       = pm.epoch;
    elapsedTime = pm.elapsedTime;
    prevElapsedTime = pm.prevElapsedTime;

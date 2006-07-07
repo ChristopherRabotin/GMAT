@@ -138,10 +138,9 @@ DragForce::DragForce(const DragForce& df) :
    PhysicalModel           (df),
    sun                     (NULL),
    centralBody             (NULL),
-   useExternalAtmosphere   (true),
+   useExternalAtmosphere   (df.useExternalAtmosphere),
    atmosphereType          (df.atmosphereType),
    atmos                   (NULL),
-   internalAtmos           (NULL),
    density                 (NULL),
    prefactor               (NULL),
    firedOnce               (false),
@@ -162,6 +161,15 @@ DragForce::DragForce(const DragForce& df) :
    averageFluxID           (parameterCount+5),
    magneticIndexID         (parameterCount+6)
 {
+   if (useExternalAtmosphere)
+   {
+      internalAtmos = NULL;
+   }
+   else
+   {
+      internalAtmos = (AtmosphereModel*)df.internalAtmos->Clone();
+   }
+   
    parameterCount += 7;
    dimension = df.dimension;
 
@@ -207,8 +215,16 @@ DragForce& DragForce::operator=(const DragForce& df)
    centralBody           = NULL;
    useExternalAtmosphere = df.useExternalAtmosphere;
    atmosphereType        = df.atmosphereType;
+
+   if (internalAtmos != NULL)
+      delete internalAtmos;
+
+   if (useExternalAtmosphere)
+      internalAtmos = NULL;
+   else
+      internalAtmos = (AtmosphereModel*)df.atmos->Clone();
+
    atmos                 = NULL;
-   internalAtmos         = NULL;
    density               = NULL;
    prefactor             = NULL;
    firedOnce             = false;
@@ -471,7 +487,8 @@ bool DragForce::Initialize()
                #endif
                
                centralBody->SetAtmosphereModelType(atmosphereType);
-               centralBody->SetAtmosphereModel(internalAtmos);
+               centralBody->SetAtmosphereModel(
+                  (AtmosphereModel*)internalAtmos->Clone());
             }
             
             //if (atmosphereType == "BodyDefault")

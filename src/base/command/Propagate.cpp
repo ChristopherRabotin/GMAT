@@ -114,6 +114,15 @@ Propagate::~Propagate()
       delete stopWhen[i];
    if (pubdata)
       delete [] pubdata;
+      
+//   // Remove PropSetup clones; these are not currently cloned but soon...
+//   for (std::vector<PropSetup*>::iterator ps = prop.begin(); ps != prop.end(); 
+//        ++ps)
+//   {
+//      PropSetup *oldPs = *ps;
+//      *ps = NULL;
+//      delete oldPs;
+//   }
 }
 
 
@@ -1783,7 +1792,15 @@ bool Propagate::Initialize()
    // Ensure that we are using fresh objects when buffering stops
    EmptyBuffer();
    
-   // prop.clear();
+   // Remove old PropSetups
+   for (std::vector<PropSetup*>::iterator ps = prop.begin(); ps != prop.end(); 
+        ++ps)
+   {
+      PropSetup *oldPs = *ps;
+      *ps = NULL;
+      delete oldPs;
+   }
+   prop.clear();
       
    for (StringArray::iterator i = propName.begin(); i != propName.end(); ++i)
    {

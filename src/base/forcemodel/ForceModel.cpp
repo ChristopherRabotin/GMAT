@@ -201,9 +201,11 @@ ForceModel::ForceModel(const ForceModel& fdf) :
    modelEpochId               (-1),
 //    rawState         (NULL),
    j2kBodyName                (fdf.j2kBodyName),
-   j2kBody                    (NULL),
-   earthEq                    (NULL),
-   earthFixed                 (NULL)
+   /// @note: Since the next three are global objects or reset by the Sandbox, 
+   ///assignment works
+   j2kBody                    (fdf.j2kBody),
+   earthEq                    (fdf.earthEq),
+   earthFixed                 (fdf.earthFixed)
 {
    satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
    satIds[5] = satIds[6] = -1;
@@ -266,9 +268,12 @@ ForceModel& ForceModel::operator=(const ForceModel& fdf)
    parameterCount      = ForceModelParamCount;
    centralBodyName     = fdf.centralBodyName;
    j2kBodyName         = fdf.j2kBodyName;
-   j2kBody             = NULL;
-   earthEq             = NULL;
-   earthFixed          = NULL; 
+   
+   /// @note: Since the next three are global objects or reset by the Sandbox, 
+   ///assignment works
+   j2kBody             = fdf.j2kBody;
+   earthEq             = fdf.earthEq;
+   earthFixed          = fdf.earthFixed; 
    forceMembersNotInitialized = fdf.forceMembersNotInitialized;
    
    spacecraft.clear();
@@ -932,6 +937,10 @@ void ForceModel::SetInternalCoordinateSystem(const std::string csId, PhysicalMod
       
       if (cs == NULL)
       {
+         if (earthEq == NULL)
+            throw ForceModelException(
+               "Error setting force model coordinate system: EarthEq pointer "
+               "has not been initialized!");
          cs = (CoordinateSystem *)earthEq->Clone();
          cs->SetName(csName);
          cs->SetStringParameter("Origin", centralBodyName);
@@ -1274,7 +1283,7 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
       MessageInterface::ShowMessage(
          "Input time offset = %16.14le; epoch = %16.10lf\n", dt, epoch);
    #endif
-   
+  
    // Initialize the derivative array
    for (i = 0; i < satCount; ++i) {
       iOffset = i*stateSize;

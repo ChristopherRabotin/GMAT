@@ -37,9 +37,6 @@ PropSetup::PARAMETER_TEXT[PropSetupParamCount - GmatBaseParamCount] =
 {
    "FM",
    "Type"              // To match the script spec
-// DJC 8/13/04: These are now part of the ForceModel
-//   "Drag",               // Place holder until we decide how to do this
-//   "SRP"
 };
 
 
@@ -48,9 +45,6 @@ PropSetup::PARAMETER_TYPE[PropSetupParamCount - GmatBaseParamCount] =
 {
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE
-// DJC 8/13/04: These are now part of the ForceModel
-//   Gmat::STRING_TYPE,
-//   Gmat::STRING_TYPE
 };
 
 //---------------------------------
@@ -68,11 +62,6 @@ PropSetup::PARAMETER_TYPE[PropSetupParamCount - GmatBaseParamCount] =
 PropSetup::PropSetup(const std::string &name, Propagator *propagator,
                      ForceModel *forceModel)
    : GmatBase     (Gmat::PROP_SETUP, "PropSetup", name)
-// DJC 8/13/04: These are now part of the ForceModel
-//     usedrag      (false),
-//     dragType     ("BodyDefault"),
-//     //useSRP       ("Off") //loj: 5/11/04
-//     useSRP       (false)
 {
    // GmatBase data
    objectTypes.push_back(Gmat::PROP_SETUP);
@@ -82,12 +71,10 @@ PropSetup::PropSetup(const std::string &name, Propagator *propagator,
    ownedObjectCount += 1;
 
    // PropSetup data
-   /// @note: For build 1, the PropSetup internal objects are defaulted
    if (propagator != NULL)
        mPropagator = propagator;
    else 
-//       mPropagator = new RungeKutta89("InternalRKV89"); //loj: 3/12/04 added the name
-       mPropagator = new RungeKutta89(""); //djc: 5/11/05 deleted the name
+       mPropagator = new RungeKutta89("");
 
    if (forceModel != NULL)
    {
@@ -99,8 +86,6 @@ PropSetup::PropSetup(const std::string &name, Propagator *propagator,
        PhysicalModel *pmf = new PointMassForce;
        mForceModel->AddForce(pmf);
    }
-   
-   //Initialize(); //loj: 5/11/04
 }
 
 //------------------------------------------------------------------------------
@@ -112,22 +97,21 @@ PropSetup::PropSetup(const std::string &name, Propagator *propagator,
 //------------------------------------------------------------------------------
 PropSetup::PropSetup(const PropSetup &propSetup)
    : GmatBase(propSetup)
-// DJC 8/13/04: These are now part of the ForceModel
-//     usedrag(propSetup.usedrag),
-//     useSRP(propSetup.useSRP)
 {
    ownedObjectCount = propSetup.ownedObjectCount;
 
-//   // PropSetup data
-   mInitialized = propSetup.mInitialized;
-   mPropagator = propSetup.mPropagator;
-   mForceModel = propSetup.mForceModel;
-//   //Initialize(); //loj: 5/11/04
+   // PropSetup data
+   mInitialized = false;
 
-//   if (propSetup.mPropagator != NULL)
-//      mPropagator = (Propagator *)propSetup.mPropagator->Clone();
-//   if (propSetup.mForceModel != NULL)
-//      mForceModel = (ForceModel *)propSetup.mForceModel->Clone();
+   if (propSetup.mPropagator != NULL)
+      mPropagator = (Propagator *)propSetup.mPropagator->Clone();
+   else
+      mPropagator = NULL;
+      
+   if (propSetup.mForceModel != NULL)
+      mForceModel = (ForceModel *)propSetup.mForceModel->Clone();
+   else
+      mForceModel = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -144,13 +128,17 @@ PropSetup& PropSetup::operator= (const PropSetup &right)
       GmatBase::operator=(right);
 
       // PropSetup data
-      mInitialized = right.mInitialized;
-      mPropagator = right.mPropagator;
-      mForceModel = right.mForceModel;
-// DJC 8/13/04: These are now part of the ForceModel
-//      usedrag     = right.usedrag;
-//      useSRP      = right.useSRP;
-      //Initialize(); //loj: 5/11/04
+      mInitialized = false;
+      
+      if (right.mPropagator != NULL)
+         mPropagator = (Propagator*)(right.mPropagator->Clone());
+      else
+         mPropagator = NULL;
+         
+      if (right.mForceModel != NULL)
+         mForceModel = (ForceModel*)(right.mForceModel->Clone());
+      else
+         mForceModel = NULL;
    }
 
    return *this;
@@ -166,11 +154,9 @@ PropSetup& PropSetup::operator= (const PropSetup &right)
 PropSetup::~PropSetup()
 {
    if (mPropagator)
-      if (mPropagator->GetName() == "InternalRKV89")
-         delete mPropagator;
+      delete mPropagator;
    if (mForceModel)
-      if (mForceModel->GetName() == "InternalForceModel")
-         delete mForceModel;
+      delete mForceModel;
 }
 
 //------------------------------------------------------------------------------
@@ -196,7 +182,7 @@ bool PropSetup::IsInitialized()
 Propagator* PropSetup::GetPropagator()
 {
    //MessageInterface::ShowMessage("PropSetup::GetPropagator() mPropagator=%d "
-   //                              "name=%s\n", mPropagator, mPropagator->GetName().c_str());
+   //   "name=%s\n", mPropagator, mPropagator->GetName().c_str());
    return mPropagator;
 }
 
@@ -225,13 +211,13 @@ void PropSetup::SetPropagator(Propagator *propagator)
 {
    //MessageInterface::ShowMessage("PropSetup::SetPropagator() entered \n");
    if (propagator == NULL)
-      throw PropSetupException("PropSetup::SetPropagator failed: propagator is NULL");
-       
-   //if (mPropagator->GetName() == "InternalRKV89")
-   //   delete mPropagator; //loj: 5/18/04 problem deleting? cannot set from GUI
+      throw PropSetupException(
+         "PropSetup::SetPropagator failed: propagator is NULL");
    
-   mPropagator = propagator;
-   //    Initialize();
+   if (mPropagator != NULL)
+      delete mPropagator;
+
+   mPropagator = (Propagator*)propagator->Clone();
 }
 
 //------------------------------------------------------------------------------
@@ -246,16 +232,15 @@ void PropSetup::SetPropagator(Propagator *propagator)
 void PropSetup::SetForceModel(ForceModel *forceModel)
 {
    //MessageInterface::ShowMessage("PropSetup::SetForceModel() mForceModel=%s "
-   //                              "forceModel=%s\n", mForceModel->GetName().c_str(),
-   //                              forceModel->GetName().c_str());
+   //   "forceModel=%s\n", mForceModel->GetName().c_str(),
+   //   forceModel->GetName().c_str());
    if (forceModel == NULL)
-      throw PropSetupException("PropSetup::SetForceModel failed: ForceModel is NULL");
-       
-   //if (mForceModel->GetName() == "InternalForceModel")
-   //   delete mForceModel; //loj: 5/18/04 problem deleting? cannot set from GUI
-   
-   mForceModel = forceModel;
-   //    Initialize();
+      throw PropSetupException(
+         "PropSetup::SetForceModel failed: ForceModel is NULL");
+
+   if (mForceModel != NULL)
+      delete mForceModel;
+   mForceModel = (ForceModel*)forceModel->Clone();
 }
 
 // DJC 8/13/04: These are now part of the ForceModel
@@ -395,9 +380,6 @@ Gmat::ParameterType PropSetup::GetParameterType(const Integer id) const
    {
    case PROPAGATOR_NAME:
    case FORCE_MODEL_NAME:
-// DJC 8/13/04: These are now part of the ForceModel
-//   case USE_DRAG:
-//   case USE_SRP:
       return PropSetup::PARAMETER_TYPE[id - GmatBaseParamCount];
    default:
       return GmatBase::GetParameterType(id);
@@ -417,9 +399,6 @@ std::string PropSetup::GetParameterTypeString(const Integer id) const
    {
    case PROPAGATOR_NAME:
    case FORCE_MODEL_NAME:
-// DJC 8/13/04: These are now part of the ForceModel
-//   case USE_DRAG:
-//   case USE_SRP:
       return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
    default:
       return GmatBase::GetParameterTypeString(id);
@@ -439,9 +418,6 @@ std::string PropSetup::GetParameterText(const Integer id) const
    {
    case PROPAGATOR_NAME:
    case FORCE_MODEL_NAME:
-// DJC 8/13/04: These are now part of the ForceModel
-//   case USE_DRAG:
-//   case USE_SRP:
       return PropSetup::PARAMETER_TEXT[id - GmatBaseParamCount];
    default:
       return GmatBase::GetParameterText(id);
@@ -489,15 +465,6 @@ std::string PropSetup::GetStringParameter(const Integer id) const
          return nomme;
       }
       return "InternalForceModel";
-// DJC 8/13/04: These are now part of the ForceModel
-//   case USE_DRAG:
-//      if (usedrag)
-//         return dragType;
-//      return "Off";
-//   case USE_SRP:
-//      if (useSRP)
-//         return "On";
-//      return "Off";
    default:
       return GmatBase::GetStringParameter(id);
    }
@@ -567,23 +534,6 @@ bool PropSetup::SetStringParameter(const Integer id, const std::string &value)
          }
          return false;
       }
-// DJC 8/13/04: These are now part of the ForceModel
-//   case USE_DRAG:
-//      if (value == "Off") {
-//         usedrag = false;
-//      }
-//      else {
-//         usedrag = true;
-//         dragType = value;
-//      }
-//      return true;
-//   case USE_SRP:
-//      if (value == "Off") {
-//         useSRP = false;
-//      }
-//      else 
-//         useSRP = true;
-//      return true;
       
    default:
       return GmatBase::SetStringParameter(id, value);
@@ -597,7 +547,8 @@ bool PropSetup::SetStringParameter(const Integer id, const std::string &value)
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-bool PropSetup::SetStringParameter(const std::string &label, const std::string &value)
+bool PropSetup::SetStringParameter(const std::string &label, 
+                                   const std::string &value)
 {
    return SetStringParameter(GetParameterID(label), value);
 }
