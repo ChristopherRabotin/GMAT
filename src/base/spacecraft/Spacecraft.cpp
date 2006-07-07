@@ -2254,7 +2254,7 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
             StringArray sar = GetStringArrayParameter(parmOrder[i]);
             if (sar.size() > 0)
             {
-               stream << prefix << GetParameterText(i) << " = {";
+               stream << prefix << GetParameterText(parmOrder[i]) << " = {";
                for (StringArray::iterator n = sar.begin(); n != sar.end(); ++n)
                {
                   if (n != sar.begin())
