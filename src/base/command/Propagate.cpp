@@ -2003,16 +2003,29 @@ bool Propagate::Initialize()
 void Propagate::FillFormation(SpaceObject *so, StringArray& owners, 
                               StringArray& elements)
 {
+   static Integer soEpochId = -1;
    if ((so == NULL) || (so->GetType() != Gmat::FORMATION))
       throw CommandException("Invalid SpaceObject passed to FillFormation");
+   
+   if (soEpochId == -1)
+      soEpochId = so->GetParameterID("A1Epoch");
       
    StringArray comps = so->GetStringArrayParameter(so->GetParameterID("Add"));
    SpaceObject *el;
+   Real ep;
+   
    for (StringArray::iterator i = comps.begin(); i != comps.end(); ++i) {
       if ((*objectMap).find(*i) == objectMap->end())
          throw CommandException("Formation " + so->GetName() +
             " uses unknown object named '" + (*i) + "'");
+            
       el = (SpaceObject*)(*objectMap)[*i];
+      if (i == comps.begin())
+      {
+         ep = el->GetRealParameter(soEpochId);
+         so->SetRealParameter(soEpochId, ep);
+      }
+      
       so->SetRefObject(el, el->GetType(), el->GetName()); 
       if (el->GetType() == Gmat::FORMATION)
          FillFormation(el, owners, elements);
