@@ -148,7 +148,7 @@ void FiniteBurnSetupPanel::Create()
 
       // create text control field for burn scale factor
       scaleTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
-         wxDefaultPosition, wxSize(50,-1), 0 );
+         wxDefaultPosition, wxSize(75,-1), 0 );
 
       // create label and text field for the central body
       wxStaticText *centralBodyLabel = new wxStaticText(this, ID_TEXT, 
@@ -220,8 +220,9 @@ void FiniteBurnSetupPanel::LoadData()
       int tankID = theBurn->GetParameterID("Tanks");
       StringArray tanks = theBurn->GetStringArrayParameter(tankID);
       std::string tank = "";
-      mTankComboBox->Insert("", 0); //loj: 8/30/05 Added to show blank
-      mTankComboBox->SetValue("");
+// LTR on 07/07/06 - Not sure why we are adding another blank.
+//      mTankComboBox->Insert("", 0); //loj: 8/30/05 Added to show blank
+//      mTankComboBox->SetValue("");
       
       if (tanks.size() > 0)
       {
