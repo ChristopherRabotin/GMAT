@@ -232,7 +232,8 @@ GmatBase* MODEqAxes::Clone() const
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  void CalculateRotationMatrix(const A1Mjd &atEpoch)
+//  void CalculateRotationMatrix(const A1Mjd &atEpoch,
+//                               bool forceComputation = false)
 //---------------------------------------------------------------------------
 /**
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
@@ -241,7 +242,8 @@ GmatBase* MODEqAxes::Clone() const
  * @param atEpoch  epoch at which to compute the rotation matrix
  */
 //---------------------------------------------------------------------------
-void MODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
+void MODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
+                                        bool forceComputation)
 {
    
    // convert epoch (A1 MJD) to TT MJD (for calculations)

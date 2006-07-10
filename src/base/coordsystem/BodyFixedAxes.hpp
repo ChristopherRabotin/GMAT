@@ -91,7 +91,8 @@ protected:
    //static const Gmat::ParameterType PARAMETER_TYPE[BodyFixedAxesParamCount - 
    //                                                DynamicAxesParamCount];
    
-   virtual void CalculateRotationMatrix(const A1Mjd &atEpoch);
+   virtual void CalculateRotationMatrix(const A1Mjd &atEpoch,
+                                        bool forceComputation = false);
    
    //Rmatrix33      precT, nutT, stT, stDerivT, pmT;
    

@@ -393,7 +393,7 @@ bool CoordinateSystem::Initialize()
 
 //------------------------------------------------------------------------------
 //  Rvector  ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-//                      bool coincident)
+//                      bool coincident, bool forceComputation)
 //------------------------------------------------------------------------------
 /**
  * This method converts the input state, in 'this' axisSystem, to MJ2000Eq.
@@ -407,7 +407,8 @@ bool CoordinateSystem::Initialize()
  */
 //------------------------------------------------------------------------------
 Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
-                                     bool coincident)
+                                     bool coincident, 
+                                     bool forceComputation)
 {
    static Rvector internalState;
    static Rvector finalState;
@@ -421,7 +422,7 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
    
    if (axes)
    {
-      if (!axes->RotateToMJ2000Eq(epoch,inState,internalState))
+      if (!axes->RotateToMJ2000Eq(epoch,inState,internalState, forceComputation))
          throw CoordinateSystemException("Error rotating state to MJ2000Eq for "
                                          + instanceName);
    }
@@ -459,12 +460,13 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
 }
 
 void CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Real *inState, 
-                                  Real *outState,     bool coincident)
+                                  Real *outState,     bool coincident,
+                                  bool forceComputation)
 {
    Real internalState[6];
    if (axes)
    {
-      if (!axes->RotateToMJ2000Eq(epoch,inState,internalState))
+      if (!axes->RotateToMJ2000Eq(epoch,inState,internalState, forceComputation))
          throw CoordinateSystemException("Error rotating state to MJ2000Eq for "
                                          + instanceName);
    }
@@ -490,7 +492,7 @@ void CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
 
 //------------------------------------------------------------------------------
 //  Rvector  FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-//                        bool coincident)
+//                        bool coincident, bool forceComputation)
 //------------------------------------------------------------------------------
 /**
  * This method converts the input state, in MJ2000Eq axisSystem, to "this"
@@ -505,7 +507,8 @@ void CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
  */
 //------------------------------------------------------------------------------
 Rvector CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
-                                         bool coincident)
+                                       bool coincident,
+                                       bool forceComputation)
 {
    static Rvector internalState;
    static Rvector finalState;
@@ -535,7 +538,8 @@ Rvector CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inStat
       //if (!axes->RotateFromMJ2000Eq(epoch,internalState,internalState))//,j2000Body))
       //   throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
       //                                   + instanceName);
-      if (!axes->RotateFromMJ2000Eq(epoch,internalState,finalState))//,j2000Body))
+      if (!axes->RotateFromMJ2000Eq(epoch,internalState,finalState,
+          forceComputation))//,j2000Body))
          throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
                                          + instanceName);
    }
@@ -559,7 +563,8 @@ Rvector CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inStat
 
 
 void CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Real *inState, 
-                                    Real *outState,  bool coincident)
+                                    Real *outState,  bool coincident,
+                                    bool forceComputation)
 {
    Real internalState[6];
    if (!coincident)
@@ -581,7 +586,8 @@ void CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Real *inState,
       //if (!axes->RotateFromMJ2000Eq(epoch,internalState,internalState))//,j2000Body))
       //   throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
       //                                   + instanceName);
-      if (!axes->RotateFromMJ2000Eq(epoch,internalState,outState))//,j2000Body))
+      if (!axes->RotateFromMJ2000Eq(epoch,internalState,outState, 
+          forceComputation))//,j2000Body))
          throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
                                          + instanceName);
    }

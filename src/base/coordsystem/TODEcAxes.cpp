@@ -234,7 +234,8 @@ GmatBase* TODEcAxes::Clone() const
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  void CalculateRotationMatrix(const A1Mjd &atEpoch)
+//  void CalculateRotationMatrix(const A1Mjd &atEpoch,
+//                               bool forceComputation)
 //---------------------------------------------------------------------------
 /**
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
@@ -243,7 +244,8 @@ GmatBase* TODEcAxes::Clone() const
  * @param atEpoch  epoch at which to compute the rotation matrix
  */
 //---------------------------------------------------------------------------
-void TODEcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
+void TODEcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
+                                        bool forceComputation)
 {
    Real dPsi             = 0.0;
    Real longAscNodeLunar = 0.0;
@@ -282,7 +284,8 @@ void TODEcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
 //                          longAscNodeLunar, cosEpsbar);
 //   
    ComputePrecessionMatrix(tTDB, atEpoch);
-   ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar);
+   ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar,
+                         forceComputation);
    
    Real R3PsiT[3][3] = { { GmatMathUtil::Cos(-dPsi),-GmatMathUtil::Sin(-dPsi), 0.0},
                          { GmatMathUtil::Sin(-dPsi), GmatMathUtil::Cos(-dPsi), 0.0},

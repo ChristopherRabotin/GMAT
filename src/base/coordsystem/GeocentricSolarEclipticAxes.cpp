@@ -157,7 +157,8 @@ GmatBase* GeocentricSolarEclipticAxes::Clone() const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//  void CalculateRotationMatrix(const A1Mjd &atEpoch)
+//  void CalculateRotationMatrix(const A1Mjd &atEpoch,
+//                               bool forceComputation = false)
 //------------------------------------------------------------------------------
 /**
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
@@ -170,7 +171,8 @@ GmatBase* GeocentricSolarEclipticAxes::Clone() const
  *       will refer to those of the Vallado book.
  */
 //------------------------------------------------------------------------------
-void GeocentricSolarEclipticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch) 
+void GeocentricSolarEclipticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
+                                                          bool forceComputation) 
 {
    //if (!primary) cout << "Primary not set!!!!!!!!" << endl;
    //if (!secondary) cout << "Secondary not set!!!!!!!!" << endl;

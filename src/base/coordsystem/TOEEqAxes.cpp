@@ -168,7 +168,7 @@ bool TOEEqAxes::Initialize()
    #ifdef DEBUG_TOEEQ
       MessageInterface::ShowMessage("Called ComputePrecession ..........\n");
    #endif
-   ComputeNutationMatrix(tTDB, epoch, dPsi, longAscNodeLunar, cosEpsbar);
+   ComputeNutationMatrix(tTDB, epoch, dPsi, longAscNodeLunar, cosEpsbar, true);
    #ifdef DEBUG_TOEEQ
       MessageInterface::ShowMessage("Called ComputeNutation ..........\n");
       if (precData == NULL)
@@ -349,7 +349,8 @@ GmatBase* TOEEqAxes::Clone() const
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  void CalculateRotationMatrix(const A1Mjd &atEpoch)
+//  void CalculateRotationMatrix(const A1Mjd &atEpoch,
+//                               bool forceComputation = false)
 //---------------------------------------------------------------------------
 /**
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
@@ -358,7 +359,8 @@ GmatBase* TOEEqAxes::Clone() const
  * @param atEpoch  epoch at which to compute the rotation matrix
  */
 //---------------------------------------------------------------------------
-void TOEEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
+void TOEEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
+                                        bool forceComputation)
 {
    // already computed in Initialize
 }

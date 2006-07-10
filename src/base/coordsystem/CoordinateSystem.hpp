@@ -84,15 +84,19 @@ public:
    
    // methods to convert between this CoordinateSystem and MJ2000Eq
    virtual Rvector ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
-                              bool coincident = false);  // j2000Body?
+                              bool coincident = false,
+                              bool forceComputation = false); 
 
    virtual void    ToMJ2000Eq(const A1Mjd &epoch, const Real *inState, 
-                              Real *outState, bool coincident = false);  // j2000Body?
+                              Real *outState, bool coincident = false,
+                              bool forceComputation = false); 
    
    virtual Rvector FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
-                                bool coincident = false);   // j2000Body?
+                                bool coincident = false,
+                                bool forceComputation = false); 
    virtual void    FromMJ2000Eq(const A1Mjd &epoch, const Real *inState, 
-                                Real *outState, bool coincident = false);   // j2000Body?
+                                Real *outState, bool coincident = false,
+                                bool forceComputation = false); 
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes

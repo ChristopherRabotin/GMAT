@@ -200,7 +200,8 @@ void CoordinateConverter::Initialize()
 //------------------------------------------------------------------------------
 //  bool  Convert(const A1Mjd &epoch, const Rvector &inState,
 //                CoordinateSystem *inCoord, Rvector &outState,
-//                CoordinateSystem *outCoord, bool omitTranslation) 
+//                CoordinateSystem *outCoord, 
+//                bool forceComputation, bool omitTranslation) 
 //------------------------------------------------------------------------------
 /**
  * This method converts the inState vector from coordIn CoordinateSystem
@@ -220,7 +221,8 @@ void CoordinateConverter::Initialize()
 //------------------------------------------------------------------------------
 bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
                           CoordinateSystem *inCoord, Rvector &outState,
-                          CoordinateSystem *outCoord, bool omitTranslation)
+                          CoordinateSystem *outCoord, 
+                          bool forceComputation, bool omitTranslation)
 {
    #ifdef DEBUG_TO_FROM
       MessageInterface::ShowMessage("In Convert, inCoord is %s and outCoord is %s\n",
@@ -269,8 +271,10 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
    const Real *inputState = tmpState.GetDataVector();
 
    Real finalState[6];
-   inCoord->ToMJ2000Eq(epoch, inputState, intState, translateFlag);
-   outCoord->FromMJ2000Eq(epoch, intState, finalState, translateFlag);
+   inCoord->ToMJ2000Eq(epoch, inputState, intState, translateFlag,
+                       forceComputation);
+   outCoord->FromMJ2000Eq(epoch, intState, finalState, translateFlag, 
+                          forceComputation);
    //internalState = inCoord->ToMJ2000Eq(epoch, inState, translateFlag);
    //outState      = outCoord->FromMJ2000Eq(epoch, internalState, translateFlag);
    //toMJ2000RotMatrix   = inCoord->GetLastRotationMatrix();
@@ -339,7 +343,8 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
 
 bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
                           CoordinateSystem *inCoord, Real *outState,
-                          CoordinateSystem *outCoord, bool omitTranslation)
+                          CoordinateSystem *outCoord, 
+                          bool forceComputation, bool omitTranslation)
 {
    
    #ifdef DEBUG_TO_FROM
@@ -390,8 +395,10 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
    //const Real *inputState = tmpState.GetDataVector();
 
    //Real finalState[6];
-   inCoord->ToMJ2000Eq(epoch, inState, intState, translateFlag);
-   outCoord->FromMJ2000Eq(epoch, intState, outState, translateFlag);
+   inCoord->ToMJ2000Eq(epoch, inState, intState, translateFlag,
+                       forceComputation);
+   outCoord->FromMJ2000Eq(epoch, intState, outState, translateFlag,
+                          forceComputation);
    //internalState = inCoord->ToMJ2000Eq(epoch, inState, translateFlag);
    //outState      = outCoord->FromMJ2000Eq(epoch, internalState, translateFlag);
    //toMJ2000RotMatrix   = inCoord->GetLastRotationMatrix();

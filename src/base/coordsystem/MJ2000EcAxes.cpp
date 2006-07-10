@@ -239,7 +239,8 @@ GmatBase* MJ2000EcAxes::Clone() const
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  void CalculateRotationMatrix(const A1Mjd &atEpoch)
+//  void CalculateRotationMatrix(const A1Mjd &atEpoch,
+//                               bool forceComputation = false)
 //---------------------------------------------------------------------------
 /**
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
@@ -248,7 +249,8 @@ GmatBase* MJ2000EcAxes::Clone() const
  * @param atEpoch  epoch at which to compute the roration matrix
  */
 //---------------------------------------------------------------------------
-void MJ2000EcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
+void MJ2000EcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
+                                           bool forceComputation)
 {
    // already computed in Initialize;
 }

@@ -164,7 +164,7 @@ bool TOEEcAxes::Initialize()
 //                                                longAscNodeLunar, cosEpsbar);
 
    ComputePrecessionMatrix(tTDB, epoch);
-   ComputeNutationMatrix(tTDB, epoch, dPsi, longAscNodeLunar, cosEpsbar);
+   ComputeNutationMatrix(tTDB, epoch, dPsi, longAscNodeLunar, cosEpsbar, true);
 
    //Rmatrix33 R3Psi( GmatMathUtil::Cos(-dPsi),  GmatMathUtil::Sin(-dPsi),  0.0, 
    //                 -GmatMathUtil::Sin(-dPsi),  GmatMathUtil::Cos(-dPsi),  0.0,
@@ -337,7 +337,8 @@ GmatBase* TOEEcAxes::Clone() const
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  void CalculateRotationMatrix(const A1Mjd &atEpoch)
+//  void CalculateRotationMatrix(const A1Mjd &atEpoch, 
+//                               bool forceComputation = false)
 //---------------------------------------------------------------------------
 /**
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
@@ -346,7 +347,8 @@ GmatBase* TOEEcAxes::Clone() const
  * @param atEpoch  epoch at which to compute the rotation matrix
  */
 //---------------------------------------------------------------------------
-void TOEEcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
+void TOEEcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch, 
+                                        bool forceComputation)
 {
    // already computed in Initialize
 }

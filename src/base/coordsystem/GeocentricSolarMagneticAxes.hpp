@@ -71,7 +71,8 @@ protected:
 
    void         ComputeDipoleEarthFixed();
    
-   virtual void CalculateRotationMatrix(const A1Mjd &atEpoch);
+   virtual void CalculateRotationMatrix(const A1Mjd &atEpoch,
+                                        bool forceComputation = false);
    
 };
 #endif // GeocentricSolarEclipticAxes_hpp

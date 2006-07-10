@@ -229,7 +229,8 @@ void GeocentricSolarMagneticAxes::ComputeDipoleEarthFixed()
 }
 
 //------------------------------------------------------------------------------
-//  void CalculateRotationMatrix(const A1Mjd &atEpoch)
+//  void CalculateRotationMatrix(const A1Mjd &atEpoch,
+//                               bool forceComputation = false)
 //------------------------------------------------------------------------------
 /**
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
@@ -242,7 +243,8 @@ void GeocentricSolarMagneticAxes::ComputeDipoleEarthFixed()
  *       will refer to those of the Vallado book.
  */
 //------------------------------------------------------------------------------
-void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch) 
+void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
+                                  bool forceComputation) 
 {
    Real dPsi             = 0.0;
    Real longAscNodeLunar = 0.0;
@@ -297,11 +299,13 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    else                        updateIntervalToUse = updateInterval;
 
    ComputePrecessionMatrix(tTDB, atEpoch);
-   ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar);
+   ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar,
+                         forceComputation);
    ComputeSiderealTimeRotation(jdTT, tUT1, dPsi, longAscNodeLunar, cosEpsbar,
                                cosAst, sinAst);
-   ComputeSiderealTimeDotRotation(mjdUTC, atEpoch, cosAst, sinAst);
-   ComputePolarMotionRotation(mjdUTC, atEpoch);
+   ComputeSiderealTimeDotRotation(mjdUTC, atEpoch, cosAst, sinAst,
+                                  forceComputation);
+   ComputePolarMotionRotation(mjdUTC, atEpoch, forceComputation);
 
    Real np[3][3], rot[3][3], tmp[3][3];
    Integer p3;

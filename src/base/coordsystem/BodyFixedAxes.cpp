@@ -347,7 +347,8 @@ GmatBase* BodyFixedAxes::Clone() const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//  void CalculateRotationMatrix(const A1Mjd &atEpoch)
+//  void CalculateRotationMatrix(const A1Mjd &atEpoch, 
+//                               bool forceComputation = false)
 //------------------------------------------------------------------------------
 /**
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
@@ -360,7 +361,8 @@ GmatBase* BodyFixedAxes::Clone() const
  *       will refer to those of the Vallado book.
  */
 //------------------------------------------------------------------------------
-void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch) 
+void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
+                                            bool forceComputation) 
 {
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
@@ -460,11 +462,13 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       //MessageInterface::ShowMessage("Setting %4.3f as interval \n",
       //                              updateIntervalToUse);
       ComputePrecessionMatrix(tTDB, atEpoch);
-      ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar);
+      ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar,
+                            forceComputation);
       ComputeSiderealTimeRotation(jdTT, tUT1, dPsi, longAscNodeLunar, cosEpsbar,
                              cosAst, sinAst);
-      ComputeSiderealTimeDotRotation(mjdUTC, atEpoch, cosAst, sinAst);
-      ComputePolarMotionRotation(mjdUTC, atEpoch);
+      ComputeSiderealTimeDotRotation(mjdUTC, atEpoch, cosAst, sinAst,
+                                     forceComputation);
+      ComputePolarMotionRotation(mjdUTC, atEpoch, forceComputation);
       
       Real np[3][3], rot[3][3], tmp[3][3];
       Integer p3;

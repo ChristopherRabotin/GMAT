@@ -85,13 +85,17 @@ public:
    
    // methods to convert to/from the MJ2000 Equatorial axis system
    virtual bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-                                 Rvector &outState); 
+                                 Rvector &outState, 
+                                 bool forceComputation = false); 
    virtual bool RotateToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
-                                 Real *outState); 
+                                 Real *outState,
+                                 bool forceComputation = false); 
    virtual bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-                                   Rvector &outState); 
+                                   Rvector &outState,
+                                   bool forceComputation = false); 
    virtual bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Real *inState,
-                                   Real *outState); 
+                                   Real *outState,
+                                   bool forceComputation = false); 
    
    
    // all classes derived from GmatBase must supply this Clone method;
@@ -144,7 +148,9 @@ protected:
     * @param atEpoch  epoch at which to compute the roration matrix
     */
    //---------------------------------------------------------------------------
-   virtual void CalculateRotationMatrix(const A1Mjd &atEpoch) = 0;
+   virtual void CalculateRotationMatrix(const A1Mjd &atEpoch,
+                                        bool forceComputation = false)  
+                                        = 0;
    
    /// rotation matrix - 
    /// default constructor creates a 3x3 zero-matrix
@@ -243,7 +249,8 @@ protected:
    virtual void ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch, 
                                            Real &dPsi,
                                            Real &longAscNodeLunar,
-                                           Real &cosEpsbar);
+                                           Real &cosEpsbar,
+                                           bool forceComputation = false);
    virtual void ComputeSiderealTimeRotation(const Real jdTT,
                                                  const Real tUT1,
                                                  Real dPsi,
@@ -252,7 +259,9 @@ protected:
                                                  Real &cosAst,
                                                  Real &sinAst);
    virtual void ComputeSiderealTimeDotRotation(const Real mjdUTC, A1Mjd atEpoch,
-                                                    Real cosAst, Real sinAst);
-   virtual void ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch);
+                                                    Real cosAst, Real sinAst,
+                                                    bool forceComputation = false);
+   virtual void ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch,
+                                            bool forceComputation = false);
 };
 #endif // AxisSystem_hpp

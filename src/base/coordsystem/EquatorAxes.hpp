@@ -71,7 +71,8 @@ protected:
    //static const Gmat::ParameterType PARAMETER_TYPE[EquatorAxesParamCount - 
    //                                                DynamicAxesParamCount];
    
-   virtual void CalculateRotationMatrix(const A1Mjd &atEpoch);
+   virtual void CalculateRotationMatrix(const A1Mjd &atEpoch,
+                                        bool forceComputation = false);
 
    DeFile     *de;
 

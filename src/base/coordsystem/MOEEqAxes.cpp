@@ -277,7 +277,8 @@ GmatBase* MOEEqAxes::Clone() const
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  void CalculateRotationMatrix(const A1Mjd &atEpoch)
+//  void CalculateRotationMatrix(const A1Mjd &atEpoch,
+//                               bool forceComputation = false)
 //---------------------------------------------------------------------------
 /**
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
@@ -286,7 +287,8 @@ GmatBase* MOEEqAxes::Clone() const
  * @param atEpoch  epoch at which to compute the rotation matrix
  */
 //---------------------------------------------------------------------------
-void MOEEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
+void MOEEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
+                                        bool forceComputation)
 {
    // already computed in Initialize
 }

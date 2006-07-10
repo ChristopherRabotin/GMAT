@@ -484,7 +484,7 @@ bool AxisSystem::Initialize()
 
 //------------------------------------------------------------------------------
 //  bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-//                        Rvector &outState)
+//                        Rvector &outState, bool forceComputation)
 //------------------------------------------------------------------------------
 /**
  * This method will rotate the input inState into the MJ2000Eq frame.
@@ -498,13 +498,14 @@ bool AxisSystem::Initialize()
  */
 //------------------------------------------------------------------------------
 bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-                                   Rvector &outState)
+                                  Rvector &outState, 
+                                  bool forceComputation)
 {
    static Rvector3 tmpPosVecTo;
    static Rvector3 tmpVelVecTo;
    static const Real  *tmpPosTo = tmpPosVecTo.GetDataVector();
    static const Real  *tmpVelTo = tmpVelVecTo.GetDataVector();
-   CalculateRotationMatrix(epoch);
+   CalculateRotationMatrix(epoch, forceComputation);
    
    // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
    //Rvector3 tmpPosVec(inState[0],inState[1], inState[2]);
@@ -591,9 +592,10 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
 }
 
 bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
-                                  Real *outState)
+                                  Real *outState,
+                                  bool forceComputation)
 {
-   CalculateRotationMatrix(epoch);
+   CalculateRotationMatrix(epoch, forceComputation);
    
    Real pos[3] = {inState[0], inState[1], inState[2]};   
    Real vel[3] = {inState[3], inState[4], inState[5]};   
@@ -692,7 +694,7 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
 }
 //------------------------------------------------------------------------------
 //  bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-//                          Rvector &outState)
+//                          Rvector &outState, bool forceComputation)
 //------------------------------------------------------------------------------
 /**
  * This method will rotate the input inState from the MJ2000Eq frame into
@@ -709,13 +711,14 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
 //------------------------------------------------------------------------------
 bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch, 
                                     const Rvector &inState,
-                                    Rvector &outState)
+                                    Rvector &outState,
+                                    bool forceComputation)
 {
    static Rvector3 tmpPosVec;
    static Rvector3 tmpVelVec;
    static const Real  *tmpPos = tmpPosVec.GetDataVector();
    static const Real  *tmpVel = tmpVelVec.GetDataVector();
-   CalculateRotationMatrix(epoch);
+   CalculateRotationMatrix(epoch, forceComputation);
    
    // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
    ////Rvector3 tmpPos(inState[0],inState[1], inState[2]);
@@ -811,9 +814,10 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
 
 bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch, 
                                     const Real *inState,
-                                    Real *outState)
+                                    Real *outState,
+                                    bool forceComputation)
 {
-   CalculateRotationMatrix(epoch);
+   CalculateRotationMatrix(epoch, forceComputation);
    
    Real pos[3] = {inState[0], inState[1], inState[2]};   
    Real vel[3] = {inState[3], inState[4], inState[5]};   
@@ -1279,7 +1283,8 @@ void AxisSystem::ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch)
 void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
                                             Real &dPsi,
                                             Real &longAscNodeLunar,
-                                            Real &cosEpsbar)
+                                            Real &cosEpsbar,
+                                            bool forceComputation)
 {
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
@@ -1324,7 +1329,7 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
       cout << "longAscNodeLunar = "  << longAscNodeLunar << endl;
       cout << "cosEpsbar = "  << cosEpsbar << endl;
    #endif
-   if ( dt < updateIntervalToUse)
+   if (( dt < updateIntervalToUse) && (!forceComputation))
    {
       #ifdef DEBUG_UPDATE
          cout << ">>> Using previous saved values ......" << endl;
@@ -1757,7 +1762,8 @@ void AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
 //Rmatrix33 AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC, 
 void AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC, 
                                                      A1Mjd atEpoch,
-                                                     Real cosAst, Real sinAst)
+                                                     Real cosAst, Real sinAst,
+                                                     bool forceComputation)
 {
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
@@ -1768,7 +1774,7 @@ void AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC,
    #endif
 
    Real dt = fabs(atEpoch.Subtract(lastSTDerivEpoch)) * SECS_PER_DAY;
-   if ( dt < updateIntervalToUse)
+   if (( dt < updateIntervalToUse) && (!forceComputation))
    {
       #ifdef DEBUG_UPDATE
          cout << ">>> Using previous saved STDeriv values ......" << endl;
@@ -1811,7 +1817,8 @@ void AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC,
 }
 
 //Rmatrix33 AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch)
-void AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch)
+void AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch,
+                                            bool forceComputation)
 {
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
@@ -1821,7 +1828,7 @@ void AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch)
    #endif
 
    Real dt = fabs(atEpoch.Subtract(lastPMEpoch)) * SECS_PER_DAY;
-   if ( dt < updateIntervalToUse)
+   if (( dt < updateIntervalToUse) && (!forceComputation))
    {
       #ifdef DEBUG_UPDATE
          cout << ">>> Using previous saved PM values ......" << endl;

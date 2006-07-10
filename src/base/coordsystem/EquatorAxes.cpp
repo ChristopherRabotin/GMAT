@@ -259,7 +259,8 @@ GmatBase* EquatorAxes::Clone() const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//  void CalculateRotationMatrix(const A1Mjd &atEpoch)
+//  void CalculateRotationMatrix(const A1Mjd &atEpoch,
+//                               bool forceComputation = false)
 //------------------------------------------------------------------------------
 /**
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
@@ -272,7 +273,8 @@ GmatBase* EquatorAxes::Clone() const
  *       will refer to those of the Vallado book.
  */
 //------------------------------------------------------------------------------
-void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch) 
+void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
+                                          bool forceComputation) 
 {
    #ifdef DEBUG_EQUATOR_AXES
       MessageInterface::ShowMessage("Entering Equator::Calculate with epoch = %.12f\n",
@@ -301,7 +303,8 @@ void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       #endif
       
       ComputePrecessionMatrix(tTDB, atEpoch);
-      ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar);
+      ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar,
+                            forceComputation);
       
       Real PrecT[9] = {precData[0], precData[3], precData[6],
                        precData[1], precData[4], precData[7],

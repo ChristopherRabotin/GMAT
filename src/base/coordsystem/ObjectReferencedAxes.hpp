@@ -121,7 +121,9 @@ protected:
    // methods to compute the rotation matrix (and its derivative) to transform
    // from this ObjectReferencedAxes system to MJ2000EqAxes system; inherited
    // from AxisSystem
-   virtual void CalculateRotationMatrix(const A1Mjd &atEpoch);
+   virtual void CalculateRotationMatrix(const A1Mjd &atEpoch,
+                                        bool forceComputation = false);
+
 
 };
 #endif // ObjectReferencedAxes_hpp

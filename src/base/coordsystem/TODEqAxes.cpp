@@ -238,7 +238,8 @@ GmatBase* TODEqAxes::Clone() const
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  void CalculateRotationMatrix(const A1Mjd &atEpoch)
+//  void CalculateRotationMatrix(const A1Mjd &atEpoch,
+//                               bool forceComputation = false)
 //---------------------------------------------------------------------------
 /**
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
@@ -247,7 +248,8 @@ GmatBase* TODEqAxes::Clone() const
  * @param atEpoch  epoch at which to compute the rotation matrix
  */
 //---------------------------------------------------------------------------
-void TODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
+void TODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
+                                        bool forceComputation)
 {
    #ifdef DEBUG_TODEQ_AXES
       MessageInterface::ShowMessage("Entering TODEQ::Calculate with epoch = %.12f\n",
@@ -274,7 +276,8 @@ void TODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    #endif
    
    ComputePrecessionMatrix(tTDB, atEpoch);
-   ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar);
+   ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar,
+                         forceComputation);
    
    #ifdef DEBUG_TODEQ_AXES
       MessageInterface::ShowMessage(

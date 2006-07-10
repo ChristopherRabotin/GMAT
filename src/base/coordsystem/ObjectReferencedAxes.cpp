@@ -742,7 +742,8 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  void CalculateRotationMatrix(const A1Mjd &atEpoch)
+//  void CalculateRotationMatrix(const A1Mjd &atEpoch,
+//                               bool forceComputation = false)
 //---------------------------------------------------------------------------
 /**
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
@@ -751,7 +752,8 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
  * @param atEpoch  epoch at which to compute the roration matrix
  */
 //---------------------------------------------------------------------------
-void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
+void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
+                                                   bool forceComputation)
 {
    if (!primary)
       throw CoordinateSystemException("Primary " + primaryName +
