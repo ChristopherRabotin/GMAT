@@ -216,7 +216,18 @@ bool GmatStringUtil::ToDouble(const std::string &str, Real *value)
       }
       
       if (!isdigit(str2[i]))
+      {
+         // Handle scientific notation
+         if ((str2[i] == 'e' || str2[i] == 'E') &&
+             (str2[i+1] == '+' || str2[i+1] == '-'))
+            continue;
+         
+         if ((str2[i] == '+' || str2[i] == '-') &&
+             (str2[i-1] == 'e' || str2[i-1] == 'E'))
+            continue;
+
          return false;
+      }
    }
    
    *value = atof(str2.c_str());
