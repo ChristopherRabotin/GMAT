@@ -204,12 +204,16 @@ OBJECTS = \
     interpreter/MathParser.o \
     interpreter/MathTree.o \
     interpreter/ScriptInterpreter.o \
+    math/Abs.o \
     math/Acos.o \
+    math/Acosh.o \
     math/Add.o \
     math/Asin.o \
+    math/Asinh.o \
     math/Atan.o \
     math/Atan2.o \
     math/Cos.o \
+    math/Cosh.o \
     math/DegToRad.o \
     math/Determinant.o \
     math/Divide.o \
@@ -227,9 +231,11 @@ OBJECTS = \
     math/Power.o \
     math/RadToDeg.o \
     math/Sin.o \
+    math/Sinh.o \
     math/Sqrt.o \
     math/Subtract.o \
     math/Tan.o \
+    math/Tanh.o \
     math/Transpose.o \
     parameter/AngularParameters.o \
     parameter/Array.o \
