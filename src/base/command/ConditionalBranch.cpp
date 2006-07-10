@@ -27,6 +27,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_CONDITIONS 1
+//#define DEBUG_CONDITIONS_INIT 1
 
 
 //---------------------------------
@@ -229,22 +230,68 @@ ConditionalBranch::~ConditionalBranch()
 bool ConditionalBranch::Initialize()
 {
     bool retval = BranchCommand::Initialize();
-
-    // specific initialization goes here
-    
+   
     // Reset parameter pointers here, because parameters are cloned in the Sandbox
-    
     std::string paramName;
-    for (UnsignedInt i=0; i<params.size(); i++)
+    Real rval;
+    params.clear();
+    for (UnsignedInt i=0; i<lhsParamList.size(); i++)
     {
-       paramName = params[i]->GetName();
+       paramName = lhsParamList[i];
+
+       #ifdef DEBUG_CONDITIONS_INIT
+       MessageInterface::ShowMessage
+          ("ConditionalBranch::Initialize() paramName=%s\n", paramName.c_str());
+       #endif
+       
+       // if left is just a number, skip
+       if (GmatStringUtil::ToDouble(paramName, &rval))
+          continue;
+       
        if (objectMap->find(paramName) != objectMap->end())
-          params[i] = (Parameter*)((*objectMap)[paramName]);
+          params.push_back((Parameter*)((*objectMap)[paramName]));
        else
           throw CommandException
              ("ConditionalBranch::Initialize() parameter name: " + paramName +
               " not found in the object map\n");
     }
+    
+    for (UnsignedInt i=0; i<rhsParamList.size(); i++)
+    {
+       paramName = rhsParamList[i];
+       
+       #ifdef DEBUG_CONDITIONS_INIT
+       MessageInterface::ShowMessage
+          ("ConditionalBranch::Initialize() paramName=%s\n", paramName.c_str());
+       #endif
+       
+       // if right is just a number, skip
+       if (GmatStringUtil::ToDouble(paramName, &rval))
+          continue;
+       
+       if (objectMap->find(paramName) != objectMap->end())
+          params.push_back((Parameter*)((*objectMap)[paramName]));
+       else
+          throw CommandException
+             ("ConditionalBranch::Initialize() parameter name: " + paramName +
+              " not found in the object map\n");
+    }
+    
+    //loj: 7/17/05 This code uses stale pointer from std::vector<Parameter*> params which
+    // causes system to crash on return
+//     for (UnsignedInt i=0; i<params.size(); i++)
+//     {
+//        paramName = params[i]->GetName();
+//        MessageInterface::ShowMessage
+//           ("===> ConditionalBranch::Initialize() paramName=%s\n", paramName.c_str());
+       
+//        if (objectMap->find(paramName) != objectMap->end())
+//           params[i] = (Parameter*)((*objectMap)[paramName]);
+//        else
+//           throw CommandException
+//              ("ConditionalBranch::Initialize() parameter name: " + paramName +
+//               " not found in the object map\n");
+//     }
     
     return retval;
 }
