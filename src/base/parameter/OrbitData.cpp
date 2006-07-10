@@ -32,7 +32,7 @@
 #include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
 
-#define __USE_COORDUTIL__
+//#define __USE_COORDUTIL__
 //#define __USE_COORDUTIL_ECC__
 
 //#define __USE_COORDUTIL_FOR_AOP__
@@ -40,14 +40,14 @@
 
 //#define __TRY_COORD_CONVERSION__  // causes crash as of 7/5/06, dhunter
 
-#define __USE_NEW_TA_CODE__   // new code gives results much closer to STK
-#define __USE_NEW_ECC_CODE__  // new code gives results slightly closer to STK
-#define __USE_NEW_SMA_CODE__  // new code gives no change in results
-#define __USE_NEW_INC_CODE__
-#define __USE_NEW_AOP_CODE__
-#define __USE_NEW_VELAPO_CODE__
-#define __USE_NEW_VELPER_CODE__
-#define __USE_NEW_RAAN_CODE__   // new code gives virtually no change in results
+//#define __USE_NEW_TA_CODE__   // new code gives results much closer to STK
+//#define __USE_NEW_ECC_CODE__  // new code gives results slightly closer to STK
+//#define __USE_NEW_SMA_CODE__  // new code gives no change in results
+//#define __USE_NEW_INC_CODE__
+//#define __USE_NEW_AOP_CODE__
+//#define __USE_NEW_VELAPO_CODE__
+//#define __USE_NEW_VELPER_CODE__
+//#define __USE_NEW_RAAN_CODE__   // new code gives virtually no change in results
 
 //#define DEBUG_ORBITDATA_INIT 1
 //#define DEBUG_ORBITDATA_CONVERT 1
@@ -61,7 +61,8 @@ using namespace GmatMathUtil;
 //---------------------------------
 
 const Real OrbitData::ORBIT_REAL_UNDEFINED = -9876543210.1234;
-const Real OrbitData::ORBIT_TOL = 1.0e-6; //1.0e-10;
+////const Real OrbitData::ORBIT_TOL = 1.0e-6; //1.0e-10;
+const Real OrbitData::ORBIT_TOL = 1.0e-11;
 const Real OrbitData::ORBIT_ZERO_TOL = 1.0e-30;
 
 const std::string
@@ -241,7 +242,7 @@ Rvector6 OrbitData::GetCartState()
       try
       {
          mCoordConverter.Convert(A1Mjd(mCartEpoch), mCartState, mInternalCoordSystem,
-                                 mCartState, mOutCoordSystem);
+                                 mCartState, mOutCoordSystem, true);
          #if DEBUG_ORBITDATA_CONVERT
             MessageInterface::ShowMessage
                ("OrbitData::GetCartState() --> After  convert: mCartEpoch=%f\n"
