@@ -108,6 +108,11 @@ namespace GmatMathUtil
    Real    ACos(Real x, Real cycleInRad=TWO_PI); 
    Real    ATan(Real y, Real x=1.0, Real cycleInRad=TWO_PI);
    
+   Real    ATan2(Real y, Real x=1.0, Real cycleInRad=TWO_PI);
+      
+   Real    ASinh(Real x, Real cycleInRad=TWO_PI); 
+   Real    ACosh(Real x, Real cycleInRad=TWO_PI); 
+      
    Real    Ln(Real x);             // Natural (base e) Logarithm of x
    Real    Log(Real x);            // Natural (base e) Logarithm of x
    Real    Log10(Real x);          // Base 10 Logarithm of x

@@ -393,6 +393,49 @@ Real GmatMathUtil::ATan (Real y, Real x , Real cycleInRad)
    return (cycleInRad/TWO_PI)*atan2(y,x);
 }
 
+//------------------------------------------------------------------------------
+//  Real ATan2 (Real y, Real x , Real cycleInRad)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::ATan2 (Real y, Real x , Real cycleInRad)
+{
+   if (cycleInRad <= 0.0) 
+      throw RealUtilitiesExceptions::ArgumentError("ATan(angle, cycle <= 0.0)");
+   //loj: 1/24/06 commented out throw
+   //else if ((x == 0.0) && (y == 0.0))
+   //   throw RealUtilitiesExceptions::ArgumentError("ATan(x = 0.0, y = 0.0)");
+   
+   return (cycleInRad/TWO_PI)*atan2(y,x);
+}
+
+//------------------------------------------------------------------------------
+//  Real ASinh (Real x, Real cycleInRad)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::ASinh (Real x, Real cycleInRad)
+{
+   if (cycleInRad <= 0.0) 
+      throw RealUtilitiesExceptions::ArgumentError("ASinh(angle, cycle <= 0.0)");
+   //loj: 1/23/06 else if (fabs(x) > 1.0) 
+   //else if ((fabs(x) - 1.0) > GmatRealConst::REAL_TOL) 
+   //   throw RealUtilitiesExceptions::ArgumentError("ASinh(value > 1.0, cycle)");
+   
+   return (cycleInRad/TWO_PI)*asinh(x);
+}
+
+//------------------------------------------------------------------------------
+//  Real ACosh (Real x, Real cycleInRad)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::ACosh (Real x, Real cycleInRad)
+{
+   if (cycleInRad <= 0.0) 
+      throw RealUtilitiesExceptions::ArgumentError("ACosh(angle, cycle <= 0.0)");
+   //loj: 1/23/06 else if (fabs(x) > 1.0) 
+   //else if ((fabs(x) - 1.0) > GmatRealConst::REAL_TOL) 
+   //   throw RealUtilitiesExceptions::ArgumentError("ACosh(value > 1.0, cycle)");
+   
+   return (cycleInRad/TWO_PI)*acosh(x);
+}
+
+
 
 //------------------------------------------------------------------------------
 //  Real Ln(Real x)
