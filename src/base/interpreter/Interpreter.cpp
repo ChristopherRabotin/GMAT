@@ -2776,8 +2776,8 @@ bool Interpreter::SetVariable(GmatBase *obj, const std::string &val,
       }
    }
 
-   MessageInterface::ShowMessage
-      ("===> Interpreter::SetVariable() other=%s\n", other.c_str());
+   //MessageInterface::ShowMessage
+   //   ("===> Interpreter::SetVariable() other=%s\n", other.c_str());
    
    obj->SetRefObjectName(Gmat::PARAMETER, other);   
    return obj->SetStringParameter("Expression", other);
