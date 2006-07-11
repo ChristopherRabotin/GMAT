@@ -210,9 +210,9 @@ void CompareTextDialog::Create()
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"),
                      wxDefaultPosition, wxSize(80,20), 0);
    
-   wxStaticText *tolLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Tolerance to be Used in Flagging:"),
-                       wxDefaultPosition, wxDefaultSize, 0);
+//    wxStaticText *tolLabel =
+//       new wxStaticText(this, ID_TEXT, wxT("Tolerance to be Used in Flagging:"),
+//                        wxDefaultPosition, wxDefaultSize, 0);
    
    
    //---------- sizer
@@ -223,7 +223,7 @@ void CompareTextDialog::Create()
    numFilesGridSizer->Add(numFilesToCompareLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    numFilesGridSizer->Add(mNumFilesToCompareTextCtrl, 0,
                           wxALIGN_RIGHT|wxALL|wxGROW, bsize);   
-   numFilesGridSizer->Add(tolLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+//    numFilesGridSizer->Add(tolLabel, 0, wxALIGN_LEFT|wxALL, bsize);
 
    mSaveResultCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT("Save Compare Results to File"),
