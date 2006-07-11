@@ -234,6 +234,13 @@ bool Assignment::InterpretAction()
    if (lhs.find("(", 0) != std::string::npos)
       isLhsArray = true;
 
+   if ((lhs.find("[", 0) != std::string::npos) ||
+       (lhs.find("]", 0) != std::string::npos) ||
+       (rhs.find("[", 0) != std::string::npos) ||
+       (rhs.find("]", 0) != std::string::npos))
+      throw CommandException("Syntax error in the assignment \"" +
+                             generatingString + "\n");
+   
    // Strip off trailing spaces and semicolon from RHS
    end = rhs.find(";");
    rhs = rhs.substr(0, end);
