@@ -276,11 +276,12 @@ void AttitudePanel::Create()
                       strArray, wxCB_DROPDOWN|wxCB_READONLY );                  
                       
    Integer bsize = 3; // border size
-   Integer text_bsize = 1;
                             
    #if DEBUG_ATTITUDE_PANEL
    MessageInterface::ShowMessage("AttitudePanel::Create() Creating wxBoxSizer objects.\n");
    #endif
+   
+   wxBoxSizer *bSMain = new wxBoxSizer( wxVERTICAL );  
    
 #if __WXMAC__   
    // wx*Sizers   
@@ -364,9 +365,10 @@ void AttitudePanel::Create()
    
    boxSizer1->Add( boxSizer2, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    boxSizer1->Add( boxSizer3, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
-#else
-   wxBoxSizer *bSMain = new wxBoxSizer( wxVERTICAL );
-   
+#else  
+
+   Integer text_bsize = 1;
+  
    wxBoxSizer *bSInitCond = new wxBoxSizer( wxHORIZONTAL );
    
    wxGridSizer *gSConfig = new wxGridSizer( 2 );  // four rows by two columns
