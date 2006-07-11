@@ -421,7 +421,6 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
    }
 
    // if ( is part of fuction, just return first parenthesis
-   //if (IsParenPartOfFunction(str[index1-1]))
    std::string substr = str.substr(0, index1);
    //MessageInterface::ShowMessage("===> substr=%s\n", substr.c_str());
 
@@ -1283,24 +1282,6 @@ StringArray MathParser::ParseUnitConversion(const std::string &str)
 }
 
 
-// //------------------------------------------------------------------------------
-// // bool IsThisLastCharOfFunction(char ch, const std::string list[],
-// //                              UnsignedInt count)
-// //------------------------------------------------------------------------------
-// bool MathParser::IsThisLastCharOfFunction(char ch, const std::string list[],
-//                                           UnsignedInt count)
-// {
-//    for (UnsignedInt i=0; i<count; i++)
-//    {
-//       int last = list[i].size()-1;
-//       if (ch == list[i][last])
-//          return true;
-//    }
-
-//    return false;
-// }
-
-
 //------------------------------------------------------------------------------
 // bool HasFunctionName(const std::string &str, const std::string list[],
 //                      UnsignedInt count)
@@ -1308,35 +1289,26 @@ StringArray MathParser::ParseUnitConversion(const std::string &str)
 bool MathParser::HasFunctionName(const std::string &str, const std::string list[],
                                  UnsignedInt count)
 {
+   #if DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("MathParser::HasFunctionName() str=%s\n", str.c_str());
+   #endif
+   
    for (UnsignedInt i=0; i<count; i++)
    {
-      if (str.find(list[i]) != str.npos)
+      if (str == list[i])
          return true;
    }
 
    // Try Capitalized function name
    for (UnsignedInt i=0; i<count; i++)
    {
-      if (str.find(GmatStringUtil::Capitalize(list[i])) != str.npos)
+      if (str == GmatStringUtil::Capitalize(list[i]))
          return true;
    }
    
    return false;
 }
-
-
-// //------------------------------------------------------------------------------
-// // bool IsParenPartOfFunction(char lastChar)
-// //------------------------------------------------------------------------------
-// bool MathParser::IsParenPartOfFunction(char lastChar)
-// {
-//    if (IsThisLastCharOfFunction(lastChar, MATH_FUNC_LIST, MathFuncCount) ||
-//        IsThisLastCharOfFunction(lastChar, MATRIX_FUNC_LIST, MatrixFuncCount) ||
-//        IsThisLastCharOfFunction(lastChar, UNIT_CONV_LIST, UnitConvCount))
-//       return true;
-
-//    return false;
-// }
 
 
 //------------------------------------------------------------------------------
