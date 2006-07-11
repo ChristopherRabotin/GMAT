@@ -404,7 +404,15 @@ void TsPlotCanvas::Rescale(wxDC &dc)
                yMax = (*i)->maxY;
 
             if ((*i)->abscissa.size() > 1)
+            {
                isNotFirstPoint = true;
+               #if DEBUG_TS_CANVAS
+                  MessageInterface::ShowMessage(
+                     "TsPlotCanvas::Rescale() datasize=%d, %s\n", 
+                     data.size(),  
+                     (isNotFirstPoint?"is not First Point":"is First Point"));
+               #endif
+            }
          }
       }
       delx = (xMax - xMin)*0.1;
@@ -419,11 +427,16 @@ void TsPlotCanvas::Rescale(wxDC &dc)
 
       if (xMin < plotXMin)
       {
-         if (isNotFirstPoint)
-            plotXMin = xMin - delx;
-         else
-            plotXMin = xMin;
+         #if DEBUG_TS_CANVAS
+            MessageInterface::ShowMessage(
+               "TsPlotCanvas::Rescale() xMin(%lf) < plotXMin(%lf) new value: ",
+               xMin, plotXMin);
+         #endif
+         plotXMin = xMin - delx;
          rescaled = true;
+         #if DEBUG_TS_CANVAS
+            MessageInterface::ShowMessage("%lf\n", plotXMin);
+         #endif
       }
 
       if (yMin < plotYMin)
