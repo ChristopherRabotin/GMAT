@@ -441,9 +441,10 @@ void PropagationConfigPanel::SaveData()
       // save forces to the prop setup
       thePropSetup->SetForceModel(newFm);
       numOfForces = thePropSetup->GetNumForces();
-      
-      if (theForceModel->GetName() == "")
-         delete theForceModel;
+
+      //loj: 7/11/06 forceModel is deleted in PropSetup::SetForceModel()
+      //if (theForceModel->GetName() == "")
+      //   delete theForceModel;
       
       theForceModel = newFm;
       
