@@ -78,7 +78,7 @@ AdamsBashforthMoulton::AdamsBashforthMoulton(const AdamsBashforthMoulton& abm) :
     eeFactor                (abm.eeFactor)
 {
 //    starter = new RungeKutta89;
-    starter = abm.starter;
+//    starter = abm.starter;
 }
 
 //------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ AdamsBashforthMoulton
 
     PredictorCorrector::operator=(abm);
     eeFactor = abm.eeFactor;
-    starter = abm.starter;
+    //starter = abm.starter;
 
     return *this;
 }
