@@ -34,7 +34,7 @@
 
 //#define DEBUG_PROP_PANEL_SETUP 1
 //#define DEBUG_PROP_PANEL 1
-//#define DEBUG_PROP_SAVE_FM 1
+//#define DEBUG_PROP_SAVE 1
 //#define DEBUG_GRAV_FIELD 1
 
 //------------------------------------------------------------------------------
@@ -85,10 +85,10 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
    #endif
    
    // Default integrator values
-   newPropName      = "";
-   thePropSetup     = NULL;
-   newProp          = NULL;
-   integratorString = "RKV 8(9)";
+   thePropagatorName = "";
+   thePropSetup      = NULL;
+   thePropagator     = NULL;
+   integratorString  = "RKV 8(9)";
    
    forceList.clear();
    pmForceList.clear();
@@ -121,6 +121,7 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
    isPotFileChanged = false;
    isMagfTextChanged = false;
    isIntegratorChanged = false;
+   isIntegratorDataChanged = false;
    isOriginChanged = false;
    
    theApplyButton->Disable();
@@ -182,7 +183,7 @@ void PropagationConfigPanel::LoadData()
    MessageInterface::ShowMessage("LoadData() entered\n");
    #endif
    
-   std::string propType = newProp->GetTypeName();
+   std::string propType = thePropagator->GetTypeName();
    
    #if DEBUG_PROP_PANEL
    MessageInterface::ShowMessage("propType=%s\n", propType.c_str());
@@ -246,8 +247,10 @@ void PropagationConfigPanel::SaveData()
 {
    #if DEBUG_PROP_PANEL
    MessageInterface::ShowMessage
-      ("SaveData() newPropName=%s\n", newProp->GetTypeName().c_str());
+      ("SaveData() thePropagatorName=%s\n", thePropagator->GetTypeName().c_str());
    #endif
+
+   canClose = true;
    
    //-------------------------------------------------------
    // Saving the Integrator
@@ -259,53 +262,31 @@ void PropagationConfigPanel::SaveData()
       #endif
       
       isIntegratorChanged = false;
-      
-      Real min = atof(setting3TextCtrl->GetValue());
-      Real max = atof(setting4TextCtrl->GetValue());
-      
-      // @todo waw: temporarily commented out, to be uncommented 
-      // once Edwin updates his scripts to support this
-      // if (max <= min) 
-      if (max < min)
-      {
-         MessageInterface::PopupMessage
-         (Gmat::WARNING_, "Maximum Step can not be less than Minimum Step.\n"
-         "Propagation updates have not been saved");
-         return;
-      }    
 
-      try
+      if (isIntegratorDataChanged)
       {
-         newProp->SetRealParameter("InitialStepSize", atof(setting1TextCtrl->GetValue()));
-         newProp->SetRealParameter("Accuracy", atof(setting2TextCtrl->GetValue()));
-         newProp->SetRealParameter("MinStep", atof(setting3TextCtrl->GetValue()));
-         newProp->SetRealParameter("MaxStep", atof(setting4TextCtrl->GetValue()));
-         newProp->SetIntegerParameter("MaxStepAttempts", atoi(setting5TextCtrl->GetValue()));
+         isIntegratorDataChanged = false;
+         if (!SaveIntegratorData())
+            canClose = false;
+      }
       
-         if (integratorString.IsSameAs(integratorArray[ABM]))
-         {
-            newProp->SetRealParameter("LowerError", atof(setting6TextCtrl->GetValue()));
-            newProp->SetRealParameter("TargetError", atof(setting7TextCtrl->GetValue()));
-         }       
-         thePropSetup->SetPropagator(newProp);
-         
-         #if DEBUG_PROP_PANEL
-         ShowPropData("SaveData() AFTER  saving Integrator");
-         #endif
-      }
-      catch (BaseException &e)
-      {
-         MessageInterface::ShowMessage
-            ("PropConfigPanel:SaveData() error occurred!\n%s\n", e.GetMessage().c_str());
-      }
+      thePropSetup->SetPropagator(thePropagator);
+      
    }
+   else if (isIntegratorDataChanged)
+   {
+      isIntegratorDataChanged = false;
+      if (!SaveIntegratorData())
+         canClose = false;
+   }
+
    
    //-------------------------------------------------------
    // Saving the force model
    //-------------------------------------------------------
    if (isForceModelChanged)
    {      
-      #if DEBUG_PROP_SAVE_FM
+      #if DEBUG_PROP_SAVE
       ShowForceList("SaveData() BEFORE saving ForceModel");
       #endif
       
@@ -337,7 +318,7 @@ void PropagationConfigPanel::SaveData()
 
             // Create new GravityField since ForceModel destructor will delete
             // all PhysicalModel
-            #if DEBUG_PROP_SAVE_FM
+            #if DEBUG_PROP_SAVE
             MessageInterface::ShowMessage
                ("SaveData() Creating GravityField for %s\n", theBody.c_str());
             #endif
@@ -367,7 +348,7 @@ void PropagationConfigPanel::SaveData()
       {
          if (forceList[i]->dragType != dragModelArray[NONE_DM])
          {
-            #if DEBUG_PROP_SAVE_FM
+            #if DEBUG_PROP_SAVE
             ShowForceList("SaveData() BEFORE  saving DragForce");
             #endif
             
@@ -375,7 +356,7 @@ void PropagationConfigPanel::SaveData()
             theCelestialBody = theSolarSystem->GetBody(forceList[i]->bodyName); 
             theAtmosphereModel = theCelestialBody->GetAtmosphereModel();
             
-            #if DEBUG_PROP_SAVE_FM
+            #if DEBUG_PROP_SAVE
             ShowForceList("Entering if (theAtmosphereModel == NULL)");
             #endif
             
@@ -388,14 +369,14 @@ void PropagationConfigPanel::SaveData()
                //loj: 6/9/05 Commented out - it's set in the DragForce::Initialize()
                //theCelestialBody->SetAtmosphereModel(theAtmosphereModel);
                
-               #if DEBUG_PROP_SAVE_FM
+               #if DEBUG_PROP_SAVE
                ShowForceList("Exiting if (theAtmosphereModel == NULL)");
                #endif
             }
             
             theDragForce->SetInternalAtmosphereModel(theAtmosphereModel);
             
-            #if DEBUG_PROP_SAVE_FM
+            #if DEBUG_PROP_SAVE
             ShowForceList("theDragForce->SetInternalAtmosphereModel(theAtmosphereModel);");
             #endif
             
@@ -405,7 +386,7 @@ void PropagationConfigPanel::SaveData()
             forceList[i]->dragf = theDragForce;
             newFm->AddForce(theDragForce);
             
-            #if DEBUG_PROP_SAVE_FM
+            #if DEBUG_PROP_SAVE
             ShowForceList("SaveData() AFTER  saving DragForce");
             #endif 
          }
@@ -426,7 +407,7 @@ void PropagationConfigPanel::SaveData()
             paramId= newFm->GetParameterID("SRP");
             newFm->SetStringParameter(paramId, "On");
 
-            #if DEBUG_PROP_SAVE_FM
+            #if DEBUG_PROP_SAVE
             ShowForceList("SaveData() AFTER  saving SRP");
             #endif
             
@@ -448,13 +429,13 @@ void PropagationConfigPanel::SaveData()
       
       theForceModel = newFm;
       
-      #if DEBUG_PROP_SAVE_FM
+      #if DEBUG_PROP_SAVE
       ShowForceList("SaveData() AFTER  saving ForceModel");
       #endif
    } // end if(isForceModelChange)
    else
    {
-      #if DEBUG_PROP_SAVE_FM
+      #if DEBUG_PROP_SAVE
       ShowForceList("SaveData() BEFORE  saving ForceModel");
       #endif
 
@@ -471,13 +452,13 @@ void PropagationConfigPanel::SaveData()
       if (isPotFileChanged)
          SavePotFile();
       
-      #if DEBUG_PROP_SAVE_FM
+      #if DEBUG_PROP_SAVE
       ShowForceList("SaveData() AFTER  saving ForceModel");
       #endif
       
    }
 
-   #if DEBUG_PROP_SAVE_FM
+   #if DEBUG_PROP_SAVE
    ShowForceModel("SaveData() AFTER  saving ForceModel");
    #endif
    
@@ -531,7 +512,9 @@ void PropagationConfigPanel::Initialize()
    theSolarSystem = theGuiInterpreter->GetSolarSystemInUse();
    thePropSetup = theGuiInterpreter->GetPropSetup(propSetupName);
 
-   // initialize integrator type array
+   //Note: All the settings should match enum types in the header.
+   
+   // initialize integrator type array for ComboBox
    integratorArray.Add("RKV 8(9)");
    integratorArray.Add("RKN 6(8)");
    integratorArray.Add("RKF 5(6)");
@@ -540,7 +523,17 @@ void PropagationConfigPanel::Initialize()
    integratorArray.Add("BS");
    integratorArray.Add("ABM");
    integratorArray.Add("Cowell");
-    
+   
+   // initialize integrator type array for creating
+   propagatorTypeArray.push_back("RungeKutta89");
+   propagatorTypeArray.push_back("DormandElMikkawyPrince68");
+   propagatorTypeArray.push_back("RungeKuttaFehlberg56");
+   propagatorTypeArray.push_back("PrinceDormand45");
+   propagatorTypeArray.push_back("PrinceDormand78");
+   propagatorTypeArray.push_back("BulirschStoer");
+   propagatorTypeArray.push_back("AdamsBashforthMoulton");
+   propagatorTypeArray.push_back("Cowell");
+
    // initialize gravity model type arrays
    earthGravModelArray.push_back("None");
    earthGravModelArray.push_back("JGM-2");
@@ -587,7 +580,9 @@ void PropagationConfigPanel::Initialize()
    
    if (thePropSetup != NULL)
    {
-      newProp = thePropSetup->GetPropagator();
+      thePropagator = thePropSetup->GetPropagator();
+      thePropagator = thePropSetup->GetPropagator();
+      //thePropagator = (Propagator*)theProp->Clone();
       theForceModel = thePropSetup->GetForceModel();
       numOfForces   = thePropSetup->GetNumForces();
       
@@ -941,23 +936,23 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                         wxST_NO_AUTORESIZE);
    setting1StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Initial Step Size: "),
-                        wxDefaultPosition, wxSize(120,20),
+                        wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting2StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Max Int Error: "),
-                        wxDefaultPosition, wxSize(120,20),
+                        wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting3StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Min Step Size: "),
-                        wxDefaultPosition, wxSize(120,20),
+                        wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting4StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Max Step Size: "),
-                        wxDefaultPosition, wxSize(120,20),
+                        wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting5StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Max Step Attempts: "),
-                        wxDefaultPosition, wxSize(120,20),
+                        wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting6StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Min Integration Error: "),
@@ -1402,10 +1397,10 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    
    boxSizer4->Add( staticBoxSizer1, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
    boxSizer4->Add( staticBoxSizer4, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
-     
+   
    boxSizer2->Add( boxSizer4, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
    boxSizer2->Add( staticBoxSizer2, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
-    
+   
    boxSizer1->Add( boxSizer2, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    theMiddleSizer->Add(boxSizer1, 0, wxGROW, bsize);
@@ -1433,210 +1428,75 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
 // void DisplayIntegratorData(bool integratorChanged)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
-{ 
+{
+   int propIndex = integratorComboBox->GetSelection();
+   
+   #if DEBUG_PROP_PANEL_SETUP
+   MessageInterface::ShowMessage
+      ("DisplayIntegratorData() integratorChanged=%d, integratorString=<%s>\n",
+       integratorChanged, integratorString.c_str());
+   #endif
+   
    if (integratorChanged)
    {
-      if (integratorString.IsSameAs(integratorArray[RKV89]))
-      {
-         newPropName = propSetupName + "RKV89";
-        
-         newProp = theGuiInterpreter->GetPropagator(newPropName);
-         if (newProp == NULL)
-            newProp = theGuiInterpreter->CreatePropagator("RungeKutta89", newPropName);
-      }
-      else if (integratorString.IsSameAs(integratorArray[RKN68]))
-      {
-         newPropName = propSetupName + "RKN68";
-         newProp = theGuiInterpreter->GetPropagator(newPropName);
-        
-         if (newProp == NULL)
-            newProp = theGuiInterpreter->CreatePropagator("DormandElMikkawyPrince68", newPropName);
-      }
-      else if (integratorString.IsSameAs(integratorArray[RKF56]))
-      {   
-         newPropName = propSetupName + "RKF56";
-         newProp = theGuiInterpreter->GetPropagator(newPropName);     
+      thePropagatorName = propSetupName + propagatorTypeArray[propIndex];
+      thePropagator = theGuiInterpreter->GetPropagator(thePropagatorName);
+      if (thePropagator == NULL)
+         thePropagator =
+            theGuiInterpreter->CreatePropagator(propagatorTypeArray[propIndex],
+                                                thePropagatorName);
+   }
 
-         if (newProp == NULL)
-            newProp = theGuiInterpreter->CreatePropagator("RungeKuttaFehlberg56", newPropName);
-      }
-      else if (integratorString.IsSameAs(integratorArray[PD45]))
-      {   
-         newPropName = propSetupName + "PD45";
-         newProp = theGuiInterpreter->GetPropagator(newPropName);
-        
-         if (newProp == NULL)
-            newProp = theGuiInterpreter->CreatePropagator("PrinceDormand45", newPropName);
-      }
-      else if (integratorString.IsSameAs(integratorArray[PD78]))
-      {   
-         newPropName = propSetupName + "PD78";
-         newProp = theGuiInterpreter->GetPropagator(newPropName);
-        
-         if (newProp == NULL)
-            newProp = theGuiInterpreter->CreatePropagator("PrinceDormand78", newPropName);
-      }
-      else if (integratorString.IsSameAs(integratorArray[BS]))
-      {   
-         newPropName = propSetupName + "BS";
-         newProp = theGuiInterpreter->GetPropagator(newPropName);
-        
-         if (newProp == NULL)
-            newProp = theGuiInterpreter->CreatePropagator("BulirschStoer", newPropName);
-      }
-      else if (integratorString.IsSameAs(integratorArray[ABM]))
-      {   
-         newPropName = propSetupName + "ABM";
-         newProp = theGuiInterpreter->GetPropagator(newPropName);
-        
-         if (newProp == NULL)
-            newProp = theGuiInterpreter->CreatePropagator("AdamsBashforthMoulton", newPropName);
-      }
-      else if (integratorString.IsSameAs(integratorArray[CW]))
-      {   
-         newPropName = propSetupName + "CW";
-         newProp = theGuiInterpreter->GetPropagator(newPropName);
-        
-         if (newProp == NULL)
-            newProp = theGuiInterpreter->CreatePropagator("Cowell", newPropName);
-      }
-   }
-   else
-   {
-      newProp = thePropSetup->GetPropagator();
-   }
    
 #if __WXMAC__
-   if (integratorString.IsSameAs(integratorArray[RKV89]))
-   {
-         setting6StaticText->Enable(false);
-         setting7StaticText->Enable(false);
-         setting6TextCtrl->Enable(false);
-         setting7TextCtrl->Enable(false);
-   }
-   else if (integratorString.IsSameAs(integratorArray[RKN68]))
-   {
-         setting6StaticText->Enable(false);
-         setting7StaticText->Enable(false);
-         setting6TextCtrl->Enable(false);
-         setting7TextCtrl->Enable(false);
-   }
-   else if (integratorString.IsSameAs(integratorArray[RKF56]))
+   if (integratorString.IsSameAs(integratorArray[ABM]))
    {   
-         setting6StaticText->Enable(false);
-         setting7StaticText->Enable(false);
-         setting6TextCtrl->Enable(false);
-         setting7TextCtrl->Enable(false);
+      setting6StaticText->Enable(true);
+      setting7StaticText->Enable(true);
+      setting6TextCtrl->Enable(true);
+      setting7TextCtrl->Enable(true);
    }
-   else if (integratorString.IsSameAs(integratorArray[PD45]))
+   else
    {   
-         setting6StaticText->Enable(false);
-         setting7StaticText->Enable(false);
-         setting6TextCtrl->Enable(false);
-         setting7TextCtrl->Enable(false);
-   }
-   else if (integratorString.IsSameAs(integratorArray[PD78]))
-   {   
-         setting6StaticText->Enable(false);
-         setting7StaticText->Enable(false);
-         setting6TextCtrl->Enable(false);
-         setting7TextCtrl->Enable(false);
-   }
-   else if (integratorString.IsSameAs(integratorArray[BS]))
-   {   
-         setting6StaticText->Enable(false);
-         setting7StaticText->Enable(false);
-         setting6TextCtrl->Enable(false);
-         setting7TextCtrl->Enable(false);
-   }
-   else if (integratorString.IsSameAs(integratorArray[ABM]))
-   {   
-         setting6StaticText->Enable(true);
-         setting7StaticText->Enable(true);
-         setting6TextCtrl->Enable(true);
-         setting7TextCtrl->Enable(true);
-   }
-   else if (integratorString.IsSameAs(integratorArray[CW]))
-   {   
-         setting6StaticText->Enable(false);
-         setting7StaticText->Enable(false);
-         setting6TextCtrl->Enable(false);
-         setting7TextCtrl->Enable(false);
+      setting6StaticText->Enable(false);
+      setting7StaticText->Enable(false);
+      setting6TextCtrl->Enable(false);
+      setting7TextCtrl->Enable(false);
    }
 #else
-   if (integratorString.IsSameAs(integratorArray[RKV89]))
+   if (integratorString.IsSameAs(integratorArray[ABM]))
    {
-         setting6StaticText->Show(false);
-         setting7StaticText->Show(false);
-         setting6TextCtrl->Show(false);
-         setting7TextCtrl->Show(false);
+      setting6StaticText->Show(true);
+      setting7StaticText->Show(true);
+      setting6TextCtrl->Show(true);
+      setting7TextCtrl->Show(true);
    }
-   else if (integratorString.IsSameAs(integratorArray[RKN68]))
-   {
-         setting6StaticText->Show(false);
-         setting7StaticText->Show(false);
-         setting6TextCtrl->Show(false);
-         setting7TextCtrl->Show(false);
-   }
-   else if (integratorString.IsSameAs(integratorArray[RKF56]))
+   else
    {   
-         setting6StaticText->Show(false);
-         setting7StaticText->Show(false);
-         setting6TextCtrl->Show(false);
-         setting7TextCtrl->Show(false);
-   }
-   else if (integratorString.IsSameAs(integratorArray[PD45]))
-   {   
-         setting6StaticText->Show(false);
-         setting7StaticText->Show(false);
-         setting6TextCtrl->Show(false);
-         setting7TextCtrl->Show(false);
-   }
-   else if (integratorString.IsSameAs(integratorArray[PD78]))
-   {   
-         setting6StaticText->Show(false);
-         setting7StaticText->Show(false);
-         setting6TextCtrl->Show(false);
-         setting7TextCtrl->Show(false);
-   }
-   else if (integratorString.IsSameAs(integratorArray[BS]))
-   {   
-         setting6StaticText->Show(false);
-         setting7StaticText->Show(false);
-         setting6TextCtrl->Show(false);
-         setting7TextCtrl->Show(false);
-   }
-   else if (integratorString.IsSameAs(integratorArray[ABM]))
-   {   
-         setting6StaticText->Show(true);
-         setting7StaticText->Show(true);
-         setting6TextCtrl->Show(true);
-         setting7TextCtrl->Show(true);
-   }
-   else if (integratorString.IsSameAs(integratorArray[CW]))
-   {   
-         setting6StaticText->Show(false);
-         setting7StaticText->Show(false);
-         setting6TextCtrl->Show(false);
-         setting7TextCtrl->Show(false);
+      setting6StaticText->Show(false);
+      setting7StaticText->Show(false);
+      setting6TextCtrl->Show(false);
+      setting7TextCtrl->Show(false);
    }
 #endif
-    
-    // fill in data     
-    // waw: Changed to show all digits
-    wxString s1, s2, s3, s4, s5;
-    
-    Real i1 = newProp->GetRealParameter("InitialStepSize");
-    Real i2 = newProp->GetRealParameter("Accuracy");
-    Real i3 = newProp->GetRealParameter("MinStep");
-    Real i4 = newProp->GetRealParameter("MaxStep");
-    Integer i5 = (long)newProp->GetIntegerParameter("MaxStepAttempts");
 
-    s1.Printf("%.10f", i1);
-    s2.Printf("%le", i2);
-    s3.Printf("%.10f", i3);
-    s4.Printf("%.10f", i4);
-    s5.Printf("%d", i5);
+   theMiddleSizer->Layout();
+    
+   // fill in data     
+   // waw: Changed to show all digits
+   wxString s1, s2, s3, s4, s5;
+    
+   Real i1 = thePropagator->GetRealParameter("InitialStepSize");
+   Real i2 = thePropagator->GetRealParameter("Accuracy");
+   Real i3 = thePropagator->GetRealParameter("MinStep");
+   Real i4 = thePropagator->GetRealParameter("MaxStep");
+   Integer i5 = (long)thePropagator->GetIntegerParameter("MaxStepAttempts");
+
+   s1.Printf("%.10f", i1);
+   s2.Printf("%le", i2);
+   s3.Printf("%.10f", i3);
+   s4.Printf("%.10f", i4);
+   s5.Printf("%d", i5);
 
    setting1TextCtrl->SetValue(s1);
    setting2TextCtrl->SetValue(s2);
@@ -1648,8 +1508,8 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
    {
       wxString s6, s7;
       
-      Real i6 = newProp->GetRealParameter("LowerError");
-      Real i7 = newProp->GetRealParameter("TargetError");
+      Real i6 = thePropagator->GetRealParameter("LowerError");
+      Real i7 = thePropagator->GetRealParameter("TargetError");
       
       s6.Printf("%.10f", i6);
       s7.Printf("%.10f", i7);
@@ -1888,7 +1748,7 @@ void PropagationConfigPanel::SaveDegOrder()
          theGravForce = forceList[i]->gravf;
          if (theGravForce != NULL)
          {
-            #if DEBUG_PROP_SAVE_FM
+            #if DEBUG_PROP_SAVE
             MessageInterface::ShowMessage
                ("SaveDegOrder() Saving Body:%s, degree=%s, order=%s\n",
                 forceList[i]->bodyName.c_str(), forceList[i]->gravDegree.c_str(),
@@ -1919,7 +1779,7 @@ void PropagationConfigPanel::SavePotFile()
          theGravForce = forceList[i]->gravf;
          if (theGravForce != NULL)
          {
-            #if DEBUG_PROP_SAVE_FM
+            #if DEBUG_PROP_SAVE
             MessageInterface::ShowMessage
                ("SavePotFile() Saving Body:%s, potFile=%s\n",
                 forceList[i]->bodyName.c_str(), forceList[i]->potFilename.c_str());
@@ -1932,6 +1792,59 @@ void PropagationConfigPanel::SavePotFile()
    }
    
    isPotFileChanged = false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SaveIntegratorData()
+//------------------------------------------------------------------------------
+bool PropagationConfigPanel::SaveIntegratorData()
+{
+   #if DEBUG_PROP_SAVE
+   MessageInterface::ShowMessage
+      ("PropagationConfigPanel::SaveIntegratorData() entered\n");
+   #endif
+   
+   Real min = atof(setting3TextCtrl->GetValue());
+   Real max = atof(setting4TextCtrl->GetValue());
+      
+   // @todo waw: temporarily commented out, to be uncommented 
+   // once Edwin updates his scripts to support this
+   // if (max <= min) 
+   if (max < min)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "Maximum Step can not be less than Minimum Step.\n"
+          "Propagation updates have not been saved");
+      return false;
+   }    
+   
+   try
+   {
+      thePropagator->SetRealParameter("InitialStepSize", atof(setting1TextCtrl->GetValue()));
+      thePropagator->SetRealParameter("Accuracy", atof(setting2TextCtrl->GetValue()));
+      thePropagator->SetRealParameter("MinStep", atof(setting3TextCtrl->GetValue()));
+      thePropagator->SetRealParameter("MaxStep", atof(setting4TextCtrl->GetValue()));
+      thePropagator->SetIntegerParameter("MaxStepAttempts", atoi(setting5TextCtrl->GetValue()));
+      
+      if (integratorString.IsSameAs(integratorArray[ABM]))
+      {
+         thePropagator->SetRealParameter("LowerError", atof(setting6TextCtrl->GetValue()));
+         thePropagator->SetRealParameter("TargetError", atof(setting7TextCtrl->GetValue()));
+      }       
+      
+      #if DEBUG_PROP_SAVE
+      ShowPropData("SaveData() AFTER  saving Integrator");
+      #endif
+
+      return true;
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("PropConfigPanel:SaveData() error occurred!\n%s\n", e.GetMessage().c_str());
+      return false;
+   }
 }
 
 
@@ -2362,8 +2275,8 @@ void PropagationConfigPanel::OnSRPEditButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnIntegratorTextUpdate(wxCommandEvent &event)
 {
-   isIntegratorChanged = true;
-
+   //isIntegratorChanged = true;
+   isIntegratorDataChanged = true;
    theApplyButton->Enable(true);
 }
 
@@ -2427,8 +2340,8 @@ void PropagationConfigPanel::ShowPropData(const std::string &header)
    MessageInterface::ShowMessage("%s\n", header.c_str());
    MessageInterface::ShowMessage("thePropSetup=%d name=%s\n",
                                  thePropSetup, thePropSetup->GetName().c_str());
-   MessageInterface::ShowMessage("newProp=%d, name=%s\n", newProp,
-                                 newProp->GetName().c_str());
+   MessageInterface::ShowMessage("thePropagator=%d, name=%s\n", thePropagator,
+                                 thePropagator->GetName().c_str());
    MessageInterface::ShowMessage("theForceModel=%d, name=%s\n", theForceModel,
                                  theForceModel->GetName().c_str());
    MessageInterface::ShowMessage("numOfForces=%d\n", numOfForces);

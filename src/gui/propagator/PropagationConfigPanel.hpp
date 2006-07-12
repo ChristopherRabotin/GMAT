@@ -217,12 +217,13 @@ private:
    wxString atmosModelString;
    
    std::string propSetupName;
-   std::string newPropName;
+   std::string thePropagatorName;
    std::string currentBodyName;
    std::string gravTypeName;
    std::string dragTypeName;
    std::string propOriginName;
    
+   StringArray propagatorTypeArray;
    StringArray earthGravModelArray;
    StringArray lunaGravModelArray;
    StringArray venusGravModelArray;
@@ -256,9 +257,10 @@ private:
    bool isPotFileChanged;
    bool isMagfTextChanged;
    bool isIntegratorChanged;
+   bool isIntegratorDataChanged;
    bool isOriginChanged;
 
-   Propagator                     *newProp;
+   Propagator                     *thePropagator;
    PropSetup                      *thePropSetup;
    ForceModel                     *theForceModel;
    PointMassForce                 *thePMF;
@@ -296,6 +298,7 @@ private:
    // Saving data
    void SaveDegOrder();
    void SavePotFile();
+   bool SaveIntegratorData();
    
    // Text control event method
    void OnIntegratorTextUpdate(wxCommandEvent &event);
