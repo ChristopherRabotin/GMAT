@@ -275,15 +275,13 @@ void AttitudePanel::Create()
                       wxDefaultPosition, wxSize(180,20), RateStateTypeCount,
                       strArray, wxCB_DROPDOWN|wxCB_READONLY );                  
                       
-   Integer bsize = 3; // border size
-                            
    #if DEBUG_ATTITUDE_PANEL
    MessageInterface::ShowMessage("AttitudePanel::Create() Creating wxBoxSizer objects.\n");
    #endif
    
-   wxBoxSizer *bSMain = new wxBoxSizer( wxVERTICAL );  
-   
 #if __WXMAC__   
+   Integer bsize = 6; // border size
+                            
    // wx*Sizers   
    wxBoxSizer *boxSizer1 = new wxBoxSizer( wxHORIZONTAL );
    wxBoxSizer *boxSizer2 = new wxBoxSizer( wxVERTICAL );
@@ -365,10 +363,17 @@ void AttitudePanel::Create()
    
    boxSizer1->Add( boxSizer2, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    boxSizer1->Add( boxSizer3, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+   
+   this->SetAutoLayout( true );  
+   this->SetSizer( boxSizer1 );
+   boxSizer1->Fit( this );
+   boxSizer1->SetSizeHints( this );
 #else  
-
+   Integer bsize = 3;
    Integer text_bsize = 1;
   
+   wxBoxSizer *bSMain = new wxBoxSizer( wxVERTICAL );  
+   
    wxBoxSizer *bSInitCond = new wxBoxSizer( wxHORIZONTAL );
    
    wxGridSizer *gSConfig = new wxGridSizer( 2 );  // four rows by two columns
@@ -430,12 +435,12 @@ void AttitudePanel::Create()
    bSMain->Add(gSConfig, 0, wxALIGN_CENTER|wxALL, bsize);
    bSMain->Add(bSInitCond, 0, wxALIGN_CENTER|wxALL, bsize);
    
-#endif
-   
    this->SetAutoLayout( true );  
    this->SetSizer( bSMain );
    bSMain->Fit( this );
    bSMain->SetSizeHints( this );
+   
+#endif
    
    #if DEBUG_ATTITUDE_PANEL
    MessageInterface::ShowMessage("AttitudePanel::Create() exiting\n");
