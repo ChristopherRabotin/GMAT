@@ -27,7 +27,7 @@ public:
    
    // constructors
    ViewTextFrame(wxFrame *frame, const wxString& title, int x, int y, int w, int h,
-                 const wxString &mode = "Temporary");
+                 const wxString &mode = "Temporary", const wxString &type = "Output");
    ~ViewTextFrame();
    
    // operations
@@ -68,6 +68,9 @@ private:
 
    /// window mode ("Permanent", "Temporary")
    wxString mWindowMode;
+   
+   /// text type ("Output", "Script")
+   wxString mTextType;
 };
 
 #endif

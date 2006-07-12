@@ -19,6 +19,7 @@
 #include "gmatwxdefs.hpp"
 #include "ViewTextFrame.hpp"
 #include "GmatAppData.hpp"
+#include "FileManager.hpp"
 #include "MessageInterface.hpp"
 
 BEGIN_EVENT_TABLE(ViewTextFrame, wxFrame)
@@ -36,12 +37,14 @@ END_EVENT_TABLE()
 //              int x, int y, int w, int h, const wxString &mode)
 //------------------------------------------------------------------------------
 ViewTextFrame::ViewTextFrame(wxFrame *frame, const wxString& title,
-                             int x, int y, int w, int h, const wxString &mode)
-    : wxFrame(frame, -1, title, wxPoint(x, y), wxSize(w, h),
-              wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT)
+                             int x, int y, int w, int h, const wxString &mode,
+                             const wxString &type)
+   : wxFrame(frame, -1, title, wxPoint(x, y), wxSize(w, h),
+             wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT)
 {
    CreateStatusBar(2);
    mWindowMode = mode;
+   mTextType = type;
    mTextCtrl = new wxTextCtrl(this, -1, _T(""), wxPoint(0, 0), wxSize(0, 0),
                               wxTE_MULTILINE | wxTE_READONLY);
    mTextCtrl->SetFont(GmatAppData::GetFont());
@@ -51,6 +54,24 @@ ViewTextFrame::ViewTextFrame(wxFrame *frame, const wxString& title,
    SetMenuBar(CreateMainMenu());
 #endif // wxUSE_MENUS
 
+   // Set icon if icon file is in the start up file
+   FileManager *fm = FileManager::Instance();
+   try
+   {
+      wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
+      #if defined __WXMSW__
+         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
+      #elif defined __WXGTK__
+         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_XPM));
+      #elif defined __WXMAX__
+         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_PICT_RESOURCE));
+      #endif
+   }
+   catch (GmatBaseException &e)
+   {
+      //MessageInterface::ShowMessage(e.GetMessage());
+   }
+   
    CenterOnScreen(wxBOTH);
 }
 
@@ -90,12 +111,22 @@ void ViewTextFrame::OnClear(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void ViewTextFrame::OnSaveAs(wxCommandEvent& WXUNUSED(event))
 {
-   MessageInterface::ShowMessage("ViewTextFrame::OnSaveAs() entered\n");
+   //MessageInterface::ShowMessage("ViewTextFrame::OnSaveAs() entered\n");
 
-   wxString filename =
-      wxFileSelector("Choose a file to save", "", "", "txt",
-                     "Report files (*.report)|*.report|Text files (*.txt)|*.txt",
-                     wxSAVE);
+   wxString filename;
+   if (mTextType == "Script")
+   {
+      filename =
+         wxFileSelector("Choose a file to save", "", "", "script",
+                        "Script files (*.script)|*.script", wxSAVE);
+   }
+   else
+   {
+      filename =
+         wxFileSelector("Choose a file to save", "", "", "txt",
+                        "Report files (*.report)|*.report|Text files (*.txt)|*.txt",
+                        wxSAVE);
+   }
    
    if (!filename.empty())
       mTextCtrl->SaveFile(filename);

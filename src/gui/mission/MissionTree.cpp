@@ -1360,7 +1360,7 @@ void MissionTree::OnShowScript(wxCommandEvent &event)
 
    ViewTextFrame *vtf =
       new ViewTextFrame(GmatAppData::GetMainFrame(), _T("Show Script"),
-       50, 50, 800, 500, "Temporary");
+       50, 50, 800, 500, "Temporary", "Script");
    
    vtf->AppendText(str.c_str());
    vtf->Show(true);
