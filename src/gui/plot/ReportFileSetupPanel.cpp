@@ -289,6 +289,7 @@ void ReportFileSetupPanel::Create()
    precisionTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""),
                                      wxDefaultPosition, wxSize(35, -1),  0);
 
+   bsize = 1;
    wxBoxSizer *reportOptionSizer = new wxBoxSizer(wxHORIZONTAL);
    reportOptionSizer->Add(writeCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(showHeaderCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
@@ -298,8 +299,9 @@ void ReportFileSetupPanel::Create()
    reportOptionSizer->Add(colWidthTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(precisionText, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(precisionTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
-   
+
    wxBoxSizer *optionBoxSizer = new wxBoxSizer(wxVERTICAL);
+   optionBoxSizer->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    optionBoxSizer->Add(fileSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    optionBoxSizer->Add(reportOptionSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
