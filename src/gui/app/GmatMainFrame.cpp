@@ -108,6 +108,7 @@
 
 //#define DEBUG_MAINFRAME 1
 //#define DEBUG_MAINFRAME_CLOSE 1
+//#define DEBUG_FILE_COMPARE 1
 
 using namespace GmatMenu;
 
@@ -2036,13 +2037,11 @@ void GmatMainFrame::OnFileCompareNumeric(wxCommandEvent& event)
          
             // remove any backup files
             if (filename.Last() == 't')
-            {
                baseFileNameArray.push_back(filepath.c_str());
-            }
          }
-         
-         cont = dir.GetNext(&filename);
       }
+      
+      cont = dir.GetNext(&filename);
    }
    
    StringArray colTitles;
@@ -2178,7 +2177,7 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
 
    #if DEBUG_FILE_COMPARE
    MessageInterface::ShowMessage
-      ("GmatMainFrame::OnFileCompare() baseDir=%s\n   "
+      ("GmatMainFrame::OnFileCompareText() baseDir=%s\n   "
        "compDirs[0]=%s\n", baseDir.c_str(), compDirs[0].c_str());
    MessageInterface::ShowMessage
       ("   numDirsToCompare=%d, numFilesToCompare=%d\n", numDirsToCompare,
@@ -2228,16 +2227,15 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
          // remove any backup files
          if (filename.Last() == 't')
             baseFileNameArray.push_back(filepath.c_str());
-         
-         cont = dir.GetNext(&filename);
       }
+      
+      cont = dir.GetNext(&filename);
    }
    
-   StringArray colTitles;
    wxString tempStr;
    int fileCount = 0;
    wxString baseFileName;
-   
+      
    // Now call compare utility
    for (UnsignedInt i=0; i<baseFileNameArray.size(); i++)
    {
