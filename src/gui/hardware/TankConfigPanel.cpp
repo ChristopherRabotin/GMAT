@@ -31,6 +31,7 @@ BEGIN_EVENT_TABLE(TankConfigPanel, wxPanel)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    EVT_TEXT(ID_TEXTCTRL, TankConfigPanel::OnTextChange)
+   EVT_CHECKBOX(ID_CHECKBOX, TankConfigPanel::OnCheckBoxChange)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -115,6 +116,11 @@ void TankConfigPanel::Create()
    unit6StaticText = new wxStaticText( this, ID_TEXT, wxT("m^3"),
                             wxDefaultPosition,wxDefaultSize, 0); 
                             
+   // wxCheckBox
+   pressureRegulatedCheckBox = new wxCheckBox( this, ID_CHECKBOX, 
+                               wxT("Pressure Regulated"),wxDefaultPosition, 
+                               wxDefaultSize, 0 );
+                            
    Integer bsize = 5; // border size
    
    // wx*Sizers     
@@ -139,6 +145,9 @@ void TankConfigPanel::Create()
    flexGridSizer1->Add(volumeStaticText, 0, wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer1->Add(volumeTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer1->Add(unit6StaticText, 0, wxALIGN_CENTER|wxALL, bsize );
+   flexGridSizer1->Add( 0, 0, wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add(pressureRegulatedCheckBox, 0, wxALIGN_CENTER|wxALL, bsize );
+   flexGridSizer1->Add( 0, 0, wxALIGN_CENTRE|wxALL, bsize);
 
    theMiddleSizer->Add(flexGridSizer1, 0, wxALIGN_CENTRE|wxALL, bsize);
 }
@@ -174,6 +183,9 @@ void TankConfigPanel::LoadData()
    paramID = theFuelTank->GetParameterID("Volume");
    volumeTextCtrl->SetValue(wxVariant(theFuelTank->GetRealParameter(paramID)));
    
+   paramID = theFuelTank->GetParameterID("PressureRegulated");
+   pressureRegulatedCheckBox->SetValue(theFuelTank->GetBooleanParameter(paramID));
+   
    theApplyButton->Disable();
 }
 
@@ -208,6 +220,9 @@ void TankConfigPanel::SaveData()
 
       paramID = theFuelTank->GetParameterID("Volume");
       theFuelTank->SetRealParameter(paramID, atof(volumeTextCtrl->GetValue()));
+      
+      paramID = theFuelTank->GetParameterID("PressureRegulated");
+      theFuelTank->SetBooleanParameter(paramID, pressureRegulatedCheckBox->GetValue());
 
       theApplyButton->Disable();
    }
@@ -225,3 +240,13 @@ void TankConfigPanel::OnTextChange(wxCommandEvent &event)
 {
     theApplyButton->Enable();
 }    
+
+
+//------------------------------------------------------------------------------
+// void OnTextChange()
+//------------------------------------------------------------------------------
+void TankConfigPanel::OnCheckBoxChange(wxCommandEvent &event)
+{
+    theApplyButton->Enable();
+}    
+

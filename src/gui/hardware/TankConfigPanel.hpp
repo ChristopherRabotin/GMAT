@@ -43,6 +43,7 @@ private:
     // Event Handling
     DECLARE_EVENT_TABLE();
     void OnTextChange(wxCommandEvent &event);
+    void OnCheckBoxChange(wxCommandEvent &event);
     
     FuelTank* theFuelTank;
     
@@ -67,6 +68,8 @@ private:
     wxStaticText *unit4StaticText;
     wxStaticText *unit5StaticText;
     wxStaticText *unit6StaticText;
+    
+    wxCheckBox *pressureRegulatedCheckBox;
         
     // IDs for the controls and the menu commands
     enum
@@ -75,6 +78,7 @@ private:
         ID_TEXTCTRL,
         ID_LISTBOX,
         ID_BUTTON,
+        ID_CHECKBOX
     };
 };
 #endif
