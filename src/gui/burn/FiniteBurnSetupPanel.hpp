@@ -34,6 +34,7 @@ private:
     // member data
     FiniteBurn *theBurn;
 
+    wxComboBox *mAxesComboBox;
     wxComboBox *mTankComboBox;
     wxComboBox *mThrusterComboBox;
     wxComboBox *mCentralBodyComboBox;

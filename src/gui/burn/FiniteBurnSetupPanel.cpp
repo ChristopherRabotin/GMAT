@@ -83,7 +83,24 @@ FiniteBurnSetupPanel::~FiniteBurnSetupPanel()
 //------------------------------------------------------------------------------
 void FiniteBurnSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 {
-    theApplyButton->Enable();
+	wxString axesStr;
+	Integer id;
+    
+   // get the string of the combo box selections
+   axesStr = mAxesComboBox->GetStringSelection();
+   
+   // get the ID of the axes parameter 
+   id = theBurn->GetParameterID("Axes");
+   
+   // check the combo box selection
+   if (axesStr == "Inertial")
+      theBurn->SetStringParameter(id, "Inertial");
+   else if (axesStr == "VNB")
+      theBurn->SetStringParameter(id, "VNB");
+      
+   theBurn->SetStringParameter(id, axesStr.c_str());
+      
+   theApplyButton->Enable();
 }
 
 //------------------------------------------------------------------------------
@@ -128,7 +145,7 @@ void FiniteBurnSetupPanel::Create()
             
       // label for thruster combobox
       wxStaticText *thrusterLabel = new wxStaticText(this, ID_TEXT,
-         wxT("Use thruster:"), wxDefaultPosition, wxDefaultSize, 0);
+         wxT("Use thruster"), wxDefaultPosition, wxDefaultSize, 0);
         
       // combo box for avaliable thrusters 
       mThrusterComboBox =
@@ -136,15 +153,47 @@ void FiniteBurnSetupPanel::Create()
 
       // label for tank combobox
       wxStaticText *tankLabel = new wxStaticText(this, ID_TEXT,
-         wxT("Use tank:"), wxDefaultPosition, wxDefaultSize, 0);
-        
+         wxT("Use tank"), wxDefaultPosition, wxDefaultSize, 0);
+      
+      // label for axes combobox
+      wxStaticText *axesLabel = new wxStaticText(this, ID_TEXT,
+         wxT("Axes"), wxDefaultPosition, wxDefaultSize, 0);
+           
+      // list of axes frames
+      Integer id = theBurn->GetParameterID("Axes");
+      StringArray items = theBurn->GetStringArrayParameter(id);
+      Integer count = items.size();
+      wxString *axesList = new wxString[count];
+       
+      if (count > 0)        // check to see if any axes exist
+      {
+         for (Integer i = 0; i < count; i++)
+            axesList[i] = wxString(items[i].c_str());
+
+         // combo box for avaliable coordinate frames 
+         mAxesComboBox =
+            new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, 
+                           wxSize(150,-1), count, axesList, wxCB_DROPDOWN);
+      }
+      else                 // no coordinate axes exist
+      { 
+         wxString str[] =
+         {
+            wxT("No axes available") 
+         };   
+          
+         mAxesComboBox =
+            new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, 
+                           wxSize(150,-1), 1, str, wxCB_DROPDOWN);
+      }
+      
       // combo box for avaliable tanks 
       mTankComboBox =
          theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(150,-1));
 
       // create label for burn scale factor
       wxStaticText *scaleLabel = new wxStaticText(this, ID_TEXT,
-         wxT("Burn scale factor:"), wxDefaultPosition, wxDefaultSize, 0);
+         wxT("Burn scale factor"), wxDefaultPosition, wxDefaultSize, 0);
 
       // create text control field for burn scale factor
       scaleTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
@@ -152,7 +201,7 @@ void FiniteBurnSetupPanel::Create()
 
       // create label and text field for the central body
       wxStaticText *centralBodyLabel = new wxStaticText(this, ID_TEXT, 
-         wxT("Central body:"), wxDefaultPosition, wxDefaultSize, 0);
+         wxT("Central body"), wxDefaultPosition, wxDefaultSize, 0);
 
       // combo box for avaliable bodies 
       mCentralBodyComboBox = 
@@ -174,6 +223,10 @@ void FiniteBurnSetupPanel::Create()
       // add central body label and combobox to page sizer    
       pageSizer->Add(centralBodyLabel, 0, wxALIGN_LEFT | wxALL, bsize);
       pageSizer->Add(mCentralBodyComboBox, 0, wxALIGN_LEFT | wxALL, bsize);
+      
+      // add axeslabel and combobox to page sizer    
+      pageSizer->Add(axesLabel, 0, wxALIGN_LEFT | wxALL, bsize);
+      pageSizer->Add(mAxesComboBox, 0, wxALIGN_LEFT | wxALL, bsize);
 
       // create grid for tanks and thruster selections
       // Implemented in later build - SPH 2/3/05
@@ -206,7 +259,7 @@ void FiniteBurnSetupPanel::LoadData()
       mObject = theBurn;
     
       // load thruster
-      int thrusterID = theBurn->GetParameterID("Thrusters");
+      Integer thrusterID = theBurn->GetParameterID("Thrusters");
       StringArray thrusters = theBurn->GetStringArrayParameter(thrusterID);
       std::string thruster = "";
             
@@ -217,7 +270,7 @@ void FiniteBurnSetupPanel::LoadData()
       }
 
       // load tanks
-      int tankID = theBurn->GetParameterID("Tanks");
+      Integer tankID = theBurn->GetParameterID("Tanks");
       StringArray tanks = theBurn->GetStringArrayParameter(tankID);
       std::string tank = "";
 // LTR on 07/07/06 - Not sure why we are adding another blank.
@@ -231,16 +284,30 @@ void FiniteBurnSetupPanel::LoadData()
       }
 
       // load burn scale factor
-      int bsfID = theBurn->GetParameterID("BurnScaleFactor");
+      Integer bsfID = theBurn->GetParameterID("BurnScaleFactor");
       Real bsf = theBurn->GetRealParameter(bsfID);
       wxString bsfStr;
       bsfStr.Printf("%f", bsf);
       scaleTextCtrl->SetValue(bsfStr);
       
       // load central body
-      int burnOriginID = theBurn->GetParameterID("Origin");
+      Integer burnOriginID = theBurn->GetParameterID("Origin");
       std::string burnOriginName = theBurn->GetStringParameter(burnOriginID);
       mCentralBodyComboBox->SetValue(burnOriginName.c_str());
+      
+      // load axes
+      Integer axesId = theBurn->GetParameterID("Axes");
+      std::string axesStr = theBurn->GetStringParameter(axesId);
+      StringArray frames = theBurn->GetStringArrayParameter(axesId);
+      Integer index = 0;
+      for (StringArray::iterator iter = frames.begin(); 
+           iter != frames.end(); ++iter) 
+      {
+         if (axesStr == *iter) 
+            mAxesComboBox->SetSelection(index);
+         else
+            ++index;
+      }
 
       #if DEBUG_FINITEBURN_PANEL
       MessageInterface::ShowMessage
@@ -269,19 +336,19 @@ void FiniteBurnSetupPanel::SaveData()
    // Save data to core engine
    Integer id;
 
-   // Thrusters
+   // save thrusters
    wxString thrusterString = mThrusterComboBox->GetStringSelection();
    id = theBurn->GetParameterID("Thrusters");
    std::string thruster = std::string (thrusterString.c_str());
    theBurn->SetStringParameter(id, thruster, 0);
 
-   // Tanks
+   // save tanks
    wxString tankString = mTankComboBox->GetStringSelection();
    id = theBurn->GetParameterID("Tanks");
    std::string tank = std::string (tankString.c_str());
    theBurn->SetStringParameter(id, tank, 0);
     
-   // Burn scale factor
+   // save burn scale factor
    id = theBurn->GetParameterID("BurnScaleFactor");
    wxString bsfStr = scaleTextCtrl->GetValue();
    theBurn->SetRealParameter(id, atof(bsfStr));
@@ -291,6 +358,12 @@ void FiniteBurnSetupPanel::SaveData()
    id = theBurn->GetParameterID("Origin");
    std::string origin = std::string (burnOriginStr.c_str());
    theBurn->SetStringParameter(id, origin);
+   
+   // save axes
+   wxString axesStr = mAxesComboBox->GetStringSelection();
+   id = theBurn->GetParameterID("Axes");
+   std::string axes = std::string (axesStr.c_str());
+   theBurn->SetStringParameter(id, axes);
 
    theApplyButton->Disable();
 }
