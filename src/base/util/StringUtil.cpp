@@ -381,35 +381,38 @@ void GmatStringUtil::GetArrayIndex(const std::string &str, std::string &rowStr,
 void GmatStringUtil::GetArrayIndexVar(const std::string &str, std::string &rowStr,
                                       std::string &colStr, std::string &name)
 {
+   std::string str1;
+   str1 = RemoveAll(str, ' ');
+   
    #if DEBUG_STRING_UTIL
    MessageInterface::ShowMessage
-      ("Report::GetArrayIndexVar() str=%s\n", str.c_str());
+      ("GmatStringUtil::GetArrayIndexVar() str=%s, str1=%s\n", str.c_str(), str1.c_str());
    #endif
-   
+
    rowStr = "-1";
    colStr = "-1";
    
    // Handle Array indexing
-   UnsignedInt openParen = str.find('(');
-   if (openParen != str.npos)
+   UnsignedInt openParen = str1.find('(');
+   if (openParen != str1.npos)
    {
-      UnsignedInt comma = str.find(',');
-      if (comma == str.npos)
+      UnsignedInt comma = str1.find(',');
+      if (comma == str1.npos)
          throw GmatBaseException("Expecting \",\" for Array " + str);
       
-      UnsignedInt closeParen = str.find(')');
-      if (closeParen == str.npos)
+      UnsignedInt closeParen = str1.find(')');
+      if (closeParen == str1.npos)
          throw GmatBaseException("Expecting \")\" for Array " + str);
       
-      rowStr = str.substr(openParen+1, comma-openParen-1);
-      colStr = str.substr(comma+1, closeParen-comma-1);
+      rowStr = str1.substr(openParen+1, comma-openParen-1);
+      colStr = str1.substr(comma+1, closeParen-comma-1);
    }
 
-   name = str.substr(0, openParen);
+   name = str1.substr(0, openParen);
    
    #if DEBUG_STRING_UTIL
    MessageInterface::ShowMessage
-      ("Report::GetArrayIndexVar() row=%d, col=%d, name=%s\n", row, col, name.c_str());
+      ("StringUtil::GetArrayIndexVar() row=%d, col=%d, name=%s\n", row, col, name.c_str());
    #endif
 }
 
