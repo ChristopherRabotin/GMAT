@@ -81,9 +81,21 @@ protected:
    /// Target value for the goal
    Real                goal;
    /// String form of target value for the goal
-   std::string         goalString;
+   std::string         achieveName;
+   /// String of goal array name
+   std::string         achieveArrName;
+   /// Goal array row index variable name
+   std::string         achieveArrRowStr;
+   /// Goal array column index variable name
+   std::string         achieveArrColStr;
+   /// Goal array row index
+   Integer             achieveArrRow;
+   /// Goal array row index
+   Integer             achieveArrCol;
+   Parameter           *achieveArrRowParm;
+   Parameter           *achieveArrColParm;
    /// Parameter used for floating end point goals
-   Parameter           *goalTarget;
+   Parameter           *achieveParm;
    /// Accuracy needed for the goal
    Real                tolerance;
    /// Pointer to the object that owns the goal
@@ -96,14 +108,18 @@ protected:
    Solver              *targeter;
    /// Flag used to finalize the targeter data during execution
    bool                targeterDataFinalized;
+   /// Flag use to indicate goal target is a parameter
+   bool                isAchieveParm;
+   /// Flag use to indicate goal target is a array
+   bool                isAchieveArray;
    /// Class that performs the goal calculation
    Parameter           *goalParm;
-    
+   
    // Parameter IDs
    enum {
       targeterNameID = GmatCommandParamCount,
       goalNameID,
-      goalID,
+      goalValueID,
       toleranceID,
       AchieveParamCount
    };
