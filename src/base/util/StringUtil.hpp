@@ -41,10 +41,18 @@ namespace GmatStringUtil
                         Integer width=10, Integer precision=9);
    std::string ToString(const Integer &val, Integer width=4);
    bool ToDouble(const std::string &str, Real *value);
+   bool ToDouble(const std::string &str, Real &value);
+   bool ToInteger(const std::string &str, Integer *value);
+   bool ToInteger(const std::string &str, Integer &value);
    void ParseParameter(const std::string &str, std::string &type,
                        std::string &owner, std::string &depObj);
    void GetArrayIndex(const std::string &str, Integer &row, Integer &col,
                       std::string &name);
+   void GetArrayIndex(const std::string &str, std::string &rowStr,
+                      std::string &colStr, Integer &row, Integer &col,
+                      std::string &name);
+   void GmatStringUtil::GetArrayIndexVar(const std::string &str, std::string &rowStr,
+                                         std::string &colStr, std::string &name);
    void FindFirstAndLast(const std::string &str, char ch, Integer &first,
                          Integer &last);
    void FindParenMatch(const std::string &str, Integer &open, Integer &close,

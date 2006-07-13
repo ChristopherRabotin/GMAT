@@ -187,9 +187,18 @@ std::string GmatStringUtil::ToString(const Real &val, bool scientific,
 //------------------------------------------------------------------------------
 // bool ToDouble(const std::string &str, Real *value)
 //------------------------------------------------------------------------------
+bool GmatStringUtil::ToDouble(const std::string &str, Real *value)
+{
+   return ToDouble(str, *value);
+}
+
+
+//------------------------------------------------------------------------------
+// bool ToDouble(const std::string &str, Real &value)
+//------------------------------------------------------------------------------
 // Note: atof() returns 100.00 for 100.00ABC, but we want it be an error
 //------------------------------------------------------------------------------
-bool GmatStringUtil::ToDouble(const std::string &str, Real *value)
+bool GmatStringUtil::ToDouble(const std::string &str, Real &value)
 {
    std::string str2 = Trim(str, BOTH);
    Integer numDot = 0;
@@ -230,7 +239,44 @@ bool GmatStringUtil::ToDouble(const std::string &str, Real *value)
       }
    }
    
-   *value = atof(str2.c_str());
+   value = atof(str2.c_str());
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool GmatStringUtil::ToInteger(const std::string &str, Integer *value)
+//------------------------------------------------------------------------------
+bool GmatStringUtil::ToInteger(const std::string &str, Integer *value)
+{
+   return ToInteger(str, *value);
+}
+
+//------------------------------------------------------------------------------
+// bool ToInteger(const std::string &str, Real *value)
+//------------------------------------------------------------------------------
+// Note: atoi() returns 0 for X or 100 for 100ABC, but we want it be an error
+//------------------------------------------------------------------------------
+bool GmatStringUtil::ToInteger(const std::string &str, Integer &value)
+{
+   std::string str2 = Trim(str, BOTH);
+   
+   if (str2.length() == 0)
+      return false;
+
+   if (str2[0] != '-' && !isdigit(str2[0]))
+      return false;
+
+   for (unsigned int i=0; i<str2.length(); i++)
+   {
+      if (i == 0 && str2[0] == '-')
+         continue;
+      
+      if (!isdigit(str2[i]))
+         return false;
+   }
+   
+   value = atoi(str2.c_str());
    return true;
 }
 
@@ -277,9 +323,71 @@ void GmatStringUtil::GetArrayIndex(const std::string &str, Integer &row,
    MessageInterface::ShowMessage
       ("Report::GetArrayIndex() str=%s\n", str.c_str());
    #endif
-   
+
+   std::string rowStr;
+   std::string colStr;
    row = -1;
    col = -1;
+   Integer intVal;
+   
+   GetArrayIndexVar(str, rowStr, colStr, name);
+   
+   // array index starts at 0
+   if (rowStr != "-1")
+      if (ToInteger(rowStr, intVal))
+         row = intVal - 1;
+   
+   if (colStr != "-1")
+      if (ToInteger(colStr, intVal))
+         col = intVal - 1;
+   
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("Report::GetArrayIndex() row=%d, col=%d, name=%s\n", row, col, name.c_str());
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void GetArrayIndex(const std::string &str, std::string &rowStr,
+//                    std::string &colStr, Integer &row, Integer &col,
+//                    std::string &name)
+//------------------------------------------------------------------------------
+void GmatStringUtil::GetArrayIndex(const std::string &str, std::string &rowStr,
+                                   std::string &colStr, Integer &row, Integer &col,
+                                   std::string &name)
+{
+   row = -1;
+   col = -1;
+   Integer intVal;
+   
+   GetArrayIndexVar(str, rowStr, colStr, name);
+   
+   // array index starts at 0
+   if (rowStr != "-1")
+      if (ToInteger(rowStr, intVal))
+         row = intVal - 1;
+   
+   if (colStr != "-1")
+      if (ToInteger(colStr, intVal))
+         col = intVal - 1;
+}
+
+
+//------------------------------------------------------------------------------
+// void GetArrayIndexVar(const std::string &str, std::string &rowStr,
+//                       std::string &colStr, std::string &name)
+//------------------------------------------------------------------------------
+void GmatStringUtil::GetArrayIndexVar(const std::string &str, std::string &rowStr,
+                                      std::string &colStr, std::string &name)
+{
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("Report::GetArrayIndexVar() str=%s\n", str.c_str());
+   #endif
+   
+   rowStr = "-1";
+   colStr = "-1";
    
    // Handle Array indexing
    UnsignedInt openParen = str.find('(');
@@ -288,24 +396,20 @@ void GmatStringUtil::GetArrayIndex(const std::string &str, Integer &row,
       UnsignedInt comma = str.find(',');
       if (comma == str.npos)
          throw GmatBaseException("Expecting \",\" for Array " + str);
-         
+      
       UnsignedInt closeParen = str.find(')');
       if (closeParen == str.npos)
          throw GmatBaseException("Expecting \")\" for Array " + str);
-         
-      std::string rowStr = str.substr(openParen+1, comma-openParen-1);
-      std::string colStr = str.substr(comma+1, closeParen-comma-1);
-
-      // array index starts at 0
-      row = atoi(rowStr.c_str()) - 1;
-      col = atoi(colStr.c_str()) - 1;
+      
+      rowStr = str.substr(openParen+1, comma-openParen-1);
+      colStr = str.substr(comma+1, closeParen-comma-1);
    }
 
    name = str.substr(0, openParen);
    
    #if DEBUG_STRING_UTIL
    MessageInterface::ShowMessage
-      ("Report::GetArrayIndex() row=%d, col=%d, name=%s\n", row, col, name.c_str());
+      ("Report::GetArrayIndexVar() row=%d, col=%d, name=%s\n", row, col, name.c_str());
    #endif
 }
 
