@@ -51,8 +51,8 @@ namespace GmatStringUtil
    void GetArrayIndex(const std::string &str, std::string &rowStr,
                       std::string &colStr, Integer &row, Integer &col,
                       std::string &name);
-   void GmatStringUtil::GetArrayIndexVar(const std::string &str, std::string &rowStr,
-                                         std::string &colStr, std::string &name);
+   void GetArrayIndexVar(const std::string &str, std::string &rowStr,
+                         std::string &colStr, std::string &name);
    void FindFirstAndLast(const std::string &str, char ch, Integer &first,
                          Integer &last);
    void FindParenMatch(const std::string &str, Integer &open, Integer &close,
