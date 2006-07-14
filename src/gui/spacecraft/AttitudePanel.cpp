@@ -27,7 +27,7 @@
 #define STARTUP_STATE_TYPE_SELECTION		EULER_ANGLES
 #define STARTUP_RATE_STATE_TYPE_SELECTION	EULER_ANGLES_RATES
 
-#define DEBUG_ATTITUDE_PANEL 1
+//#define DEBUG_ATTITUDE_PANEL 1
 
 //------------------------------
 // event tables for wxWindows
