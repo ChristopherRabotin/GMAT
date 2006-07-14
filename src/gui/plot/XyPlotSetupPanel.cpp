@@ -829,7 +829,8 @@ void XyPlotSetupPanel::ShowParameterOption(const wxString &name, bool show)
       mFlexGridSizer->Show(mParamOptionBoxSizer, false);
    }
    
-   mFlexGridSizer->Layout();
+   // 07/14/06 arg: To fix ovelay problem
+   // mFlexGridSizer->Layout();
 }
 
 
