@@ -531,6 +531,9 @@ void ParameterSelectDialog::OnSelectProperty(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::OnDoubleClick(wxCommandEvent& event)
 {
+   if (!mCanSelectWholeObject)
+      return;
+   
    if (event.GetEventObject() == mPropertyListBox)
    {
       // deselect property
