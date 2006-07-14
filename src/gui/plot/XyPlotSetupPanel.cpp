@@ -309,6 +309,7 @@ void XyPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 
          // Set Spacecraft property
          mPropertyListBox->Set(mSpacecraftPropertyList);
+         mPropertyListBox->SetSelection(0);
       }
       else if (mObjectTypeComboBox->GetValue() == "ImpulsiveBurn")
       {
@@ -320,6 +321,7 @@ void XyPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 
          // Set ImpulsiveBurn property
          mPropertyListBox->Set(mImpBurnPropertyList);
+         mPropertyListBox->SetSelection(0);
       }
    }
    else if (event.GetEventObject() == mObjectComboBox)
