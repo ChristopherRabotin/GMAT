@@ -79,8 +79,8 @@ EndFiniteBurn::EndFiniteBurn(const EndFiniteBurn& endman) :
    transientForces   (NULL),
    satNames          (endman.satNames)
 {
-	sats.clear();
-	thrusters.clear();
+        sats.clear();
+        thrusters.clear();
 }
 
 
@@ -112,6 +112,38 @@ EndFiniteBurn& EndFiniteBurn::operator=(const EndFiniteBurn& endman)
    thrusters.clear();
    
    return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool TakeAction(const std::string &action,  
+//                         const std::string &actionData = "");
+//------------------------------------------------------------------------------
+/**
+ * This method performs action.
+ *
+ * @param <action> action to perform
+ * @param <actionData> action data associated with action
+ * @return true if action successfully performed
+ *
+ */
+//------------------------------------------------------------------------------
+bool EndFiniteBurn::TakeAction(const std::string &action,
+                                 const std::string &actionData)
+{
+   #if DEBUG_TAKE_ACTION
+   MessageInterface::ShowMessage
+      ("EndFiniteBurn::TakeAction() action=%s, actionData=%s\n",
+       action.c_str(), actionData.c_str());
+   #endif
+   
+   if (action == "Clear")
+   {
+      satNames.clear();
+      return true;
+   }
+
+   return false;
 }
 
 

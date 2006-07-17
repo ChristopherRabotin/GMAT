@@ -39,6 +39,8 @@ public:
    EndFiniteBurn(const EndFiniteBurn& endman);
    EndFiniteBurn&         operator=(const EndFiniteBurn& endman);
 
+   virtual bool TakeAction(const std::string &action,  
+                           const std::string &actionData = "");
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
    virtual const StringArray&
                        GetRefObjectNameArray(const Gmat::ObjectType type);

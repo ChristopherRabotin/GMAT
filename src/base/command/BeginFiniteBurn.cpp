@@ -77,8 +77,8 @@ BeginFiniteBurn::BeginFiniteBurn(const BeginFiniteBurn& begman) :
    transientForces   (NULL),
    satNames          (begman.satNames)
 {
-	sats.clear();
-	thrusters.clear();
+        sats.clear();
+        thrusters.clear();
 }
 
 
@@ -106,9 +106,41 @@ BeginFiniteBurn& BeginFiniteBurn::operator=(const BeginFiniteBurn& begman)
    transientForces = NULL;
    satNames = begman.satNames;
    sats.clear();
-	thrusters.clear();
+        thrusters.clear();
    
    return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool TakeAction(const std::string &action,  
+//                         const std::string &actionData = "");
+//------------------------------------------------------------------------------
+/**
+ * This method performs action.
+ *
+ * @param <action> action to perform
+ * @param <actionData> action data associated with action
+ * @return true if action successfully performed
+ *
+ */
+//------------------------------------------------------------------------------
+bool BeginFiniteBurn::TakeAction(const std::string &action,
+                                 const std::string &actionData)
+{
+   #if DEBUG_TAKE_ACTION
+   MessageInterface::ShowMessage
+      ("BeginFiniteBurn::TakeAction() action=%s, actionData=%s\n",
+       action.c_str(), actionData.c_str());
+   #endif
+   
+   if (action == "Clear")
+   {
+      satNames.clear();
+      return true;
+   }
+
+   return false;
 }
 
 
@@ -361,16 +393,17 @@ bool BeginFiniteBurn::Initialize()
    bool retval = GmatCommand::Initialize();
 
    #ifdef DEBUG_BEGIN_MANEUVER
-      MessageInterface::ShowMessage("BeginFiniteBurn::Initialize() entered\n");
+      MessageInterface::ShowMessage
+         ("BeginFiniteBurn::Initialize() entered. burnName=%s\n", burnName.c_str());
    #endif
    
    if (retval)
    {
       // Look up the maneuver object
       if (objectMap->find(burnName) == objectMap->end()) 
-         throw CommandException("Unknown finite burn \"" + burnName + "\"");
+         throw CommandException("Unknown finite burn \"" + burnName + "\"\n");
       if ((*objectMap)[burnName]->GetTypeName() != "FiniteBurn")
-         throw CommandException((burnName) + " is not a FiniteBurn");
+         throw CommandException((burnName) + " is not a FiniteBurn\n");
 
       maneuver = (FiniteBurn*)((*objectMap)[burnName]);
 
