@@ -95,6 +95,7 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_PROPAGATOR, ResourceTree::OnAddPropagator)
    EVT_MENU(POPUP_ADD_BODY, ResourceTree::OnAddBody)
    EVT_MENU(POPUP_ADD_DIFF_CORR, ResourceTree::OnAddDiffCorr)
+   EVT_MENU(POPUP_ADD_SQP, ResourceTree::OnAddSqp)
    EVT_MENU(POPUP_ADD_REPORT_FILE, ResourceTree::OnAddReportFile)
    EVT_MENU(POPUP_ADD_XY_PLOT, ResourceTree::OnAddXyPlot)
    EVT_MENU(POPUP_ADD_OPENGL_PLOT, ResourceTree::OnAddOpenGlPlot)
@@ -1189,7 +1190,6 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       oMenu->Append(POPUP_ADD_QUASI_NEWTON, wxT("Quasi-Newton"));
       oMenu->Append(POPUP_ADD_SQP, wxT("SQP (fmincon)"));
       oMenu->Enable(POPUP_ADD_QUASI_NEWTON, false);
-      oMenu->Enable(POPUP_ADD_SQP, false);
 
       menu.Append(POPUP_ADD_SOLVER, wxT("Add"), oMenu);
    }
@@ -2105,6 +2105,32 @@ void ResourceTree::OnAddDiffCorr(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
+// void OnAddSqp(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a sqp to solvers folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddSqp(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+  
+   wxString name;
+   name.Printf("SQP%d", ++mNumSqp);
+
+   if (theGuiInterpreter->CreateSolver
+       ("FminconOptimizer", std::string(name.c_str())) != NULL)
+   {
+      AppendItem(item, name, GmatTree::ICON_DEFAULT, -1,
+                 new GmatTreeItemData(name, GmatTree::SQP));
+
+      Expand(item);
+   }
+}
+
+//------------------------------------------------------------------------------
 // void OnAddReportFile(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 /**
@@ -2953,6 +2979,7 @@ void ResourceTree::ResetResourceCounter()
    mNumXyPlot = 0;
    mNumOpenGlPlot = 0;
    mNumDiffCorr = 0;
+   mNumSqp = 0;
    mNumVariable = 0;
    mNumFunct = 0;
    mNumCoordSys = 0;
@@ -3163,6 +3190,10 @@ wxMenu* ResourceTree::CreatePopupMenu(Gmat::ObjectType type)
          if (items[i] == "DifferentialCorrector")
          {
             menu->Append(POPUP_ADD_DIFF_CORR, wxT("DifferentialCorrector"));
+         }
+         if (items[i] == "Sqp")
+         {
+            menu->Append(POPUP_ADD_SQP, wxT("Sqp"));
          }
       }
       break;

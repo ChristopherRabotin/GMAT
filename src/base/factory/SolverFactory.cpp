@@ -55,10 +55,12 @@ Solver* SolverFactory::CreateSolver(const std::string &ofType,
    //   return new QuasiNewton(withName);
    //else if (ofType == "SteepestDescent")
    //   return new SteepestDescent(withName);
-   //else if (ofType == "FminconOptimizer")
-   //   return new FminconOptimizer(withName);
    //else ... join lines ...
-   if (ofType == "DifferentialCorrector")
+   if (ofType == "FminconOptimizer")
+//      return new FminconOptimizer(withName);
+  // fudged for now; no FminconOptimizer class yet
+  return new DifferentialCorrector(withName);
+   else if (ofType == "DifferentialCorrector")
       return new DifferentialCorrector(withName);
    // else if (ofType == "Broyden")
    //   return new Broyden(withName);
@@ -86,7 +88,7 @@ SolverFactory::SolverFactory() :
    {
       //creatables.push_back("QuasiNewton");
       //creatables.push_back("SteepestDescent");
-      //creatables.push_back("FminconOptimizer");
+      creatables.push_back("FminconOptimizer");
       creatables.push_back("DifferentialCorrector");
       //creatables.push_back("Broyden");
       //creatables.push_back("ParametricScanner");

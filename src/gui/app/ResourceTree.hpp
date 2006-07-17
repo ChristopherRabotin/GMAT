@@ -78,6 +78,7 @@ private:
    int mNumImpulsiveBurn;
    int mNumFiniteBurn;
    int mNumDiffCorr;
+   int mNumSqp;
    int mNumReportFile;
    int mNumXyPlot;
    int mNumOpenGlPlot;
@@ -136,6 +137,7 @@ private:
    void OnAddXyPlot(wxCommandEvent &event);
    void OnAddOpenGlPlot(wxCommandEvent &event);
    void OnAddDiffCorr(wxCommandEvent &event);
+   void OnAddSqp(wxCommandEvent &event);
    void OnAddVariable(wxCommandEvent &event);
    void OnAddMatlabFunction(wxCommandEvent &event);
    void OnAddGmatFunction(wxCommandEvent &event);
