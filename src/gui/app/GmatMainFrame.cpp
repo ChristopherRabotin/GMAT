@@ -47,6 +47,7 @@
 #include "DCSetupPanel.hpp"
 #include "SQPSetupPanel.hpp"
 #include "ManeuverPanel.hpp"
+#include "BeginFiniteBurnPanel.hpp"
 #include "XyPlotSetupPanel.hpp"
 #include "OpenGlPlotSetupPanel.hpp"
 #include "ReportFileSetupPanel.hpp"
@@ -1496,6 +1497,10 @@ GmatMainFrame::CreateNewCommand(const wxString &title,
                                 const wxString &name, int dataType,
                                 GmatCommand *cmd)
 {
+   //MessageInterface::ShowMessage
+   //   ("===> title=%s, name=%s, dataType=%d\n", title.c_str(), name.c_str(),
+   //    dataType);
+   
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
    
    GmatMdiChildFrame *newChild =
@@ -1510,6 +1515,9 @@ GmatMainFrame::CreateNewCommand(const wxString &title,
       break;
    case GmatTree::MANEUVER_COMMAND:
       sizer->Add(new ManeuverPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
+      break;
+   case GmatTree::BEGIN_FINITE_BURN_COMMAND:
+      sizer->Add(new BeginFiniteBurnPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::TARGET_COMMAND:
       sizer->Add(new TargetPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
@@ -1541,6 +1549,7 @@ GmatMainFrame::CreateNewCommand(const wxString &title,
       //sizer->Add(new AssignmentPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       //break;
    default:
+      MessageInterface::ShowMessage("===> returning NULL\n");
       return NULL;
    }
    
@@ -1782,7 +1791,8 @@ void GmatMainFrame::OnOpenScript(wxCommandEvent& event)
           std::string tmpFilename = scriptFilename;
           
           // ask user to continue because changes will be lost
-          if (wxMessageBox(_T("Changes will be lost.\nDo you still want to save?"), 
+          //loj:if (wxMessageBox(_T("Changes will be lost.\nDo you still want to save?"), 
+          if (wxMessageBox(_T("Changes will be lost.\nDo you want to save?"), 
              _T("Please confirm"),
              wxICON_QUESTION | wxYES_NO) == wxYES)
           {

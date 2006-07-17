@@ -49,10 +49,10 @@ private:
    
    wxTreeItemId mMissionSeqTopItem;
    wxTreeItemId mMissionSeqSubItem;
+   wxTreeItemId mFiniteBurnTreeId;
    wxTreeItemId mNewTreeId;
    
    bool before;
-   int numManeuver;
    int mNumMissionSeq;
    int mNumPropagate;
    int mNumManeuver;
@@ -68,9 +68,11 @@ private:
    int mNumSwitchCase;
    int mNumFunct;
    int mNumAssign;
+   int mNumFiniteBurn;
    int mNumScriptEvent;
    
    bool inScriptEvent;
+   bool inFiniteBurn;
    
    void InitializeCounter();
    void UpdateCommand();
@@ -149,12 +151,14 @@ private:
       //----- begin of MENU_EVT_RANGE of OnAddCommand()
       POPUP_ADD_PROPAGATE,
       POPUP_ADD_MANEUVER,
+      POPUP_ADD_FINITE_BURN,
       POPUP_ADD_TARGET,
       POPUP_ADD_VARY,
       POPUP_ADD_ACHIEVE,
       POPUP_ADD_FUNCTION,
       POPUP_ADD_ASSIGNMENT,
       POPUP_ADD_TOGGLE,
+      POPUP_ADD_SAVE,
       POPUP_ADD_SCRIPT_EVENT,
       
       POPUP_ADD_IF_STATEMENT,
@@ -172,12 +176,14 @@ private:
       //----- begin of MENU_EVT_RANGE of OnInsertCommand()
       POPUP_INSERT_PROPAGATE, 
       POPUP_INSERT_MANEUVER,
+      POPUP_INSERT_FINITE_BURN,
       POPUP_INSERT_TARGET,
       POPUP_INSERT_VARY,
       POPUP_INSERT_ACHIEVE,
       POPUP_INSERT_FUNCTION,
       POPUP_INSERT_ASSIGNMENT,
       POPUP_INSERT_TOGGLE,
+      POPUP_INSERT_SAVE,
       POPUP_INSERT_SCRIPT_EVENT,
       
       POPUP_INSERT_IF_STATEMENT,

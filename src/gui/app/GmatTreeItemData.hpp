@@ -49,7 +49,7 @@ namespace GmatTree
       ICON_SPACECRAFT,
       ICON_TANK,
       ICON_THRUSTER,
-        
+      
       ICON_SUN,
       ICON_MERCURY,
       ICON_VENUS,
@@ -60,12 +60,12 @@ namespace GmatTree
       ICON_URANUS,
       ICON_NEPTUNE,
       ICON_PLUTO,
-        
+      
       ICON_REPORT,
       ICON_NETWORK,
       ICON_BURN,
       ICON_MOON,
-
+      
       ICON_MATLAB_FUNCTION,
       ICON_FUNCTION,
       ICON_ARRAY,
@@ -74,7 +74,7 @@ namespace GmatTree
       ICON_PROPAGATOR,
       ICON_VARIABLE,
       ICON_XY_PLOT,
-
+      
       ICON_DEFAULT,
    };
 
@@ -94,6 +94,10 @@ namespace GmatTree
       MISSION_ICON_DELTA_V,
       MISSION_ICON_FUNCTION,
       MISSION_ICON_NEST_RETURN,
+      MISSION_ICON_SAVE,
+      MISSION_ICON_ASSIGNMENT,
+      MISSION_ICON_TOGGLE,
+      MISSION_ICON_BEGIN,
 
       MISSION_NO_ICON,
    };
@@ -189,6 +193,7 @@ namespace GmatTree
       BEGIN_OF_COMMAND,
       PROPAGATE_COMMAND,
       MANEUVER_COMMAND,
+      BEGIN_FINITE_BURN_COMMAND,
       TARGET_COMMAND,
       END_TARGET_COMMAND,
       ACHIEVE_COMMAND,
@@ -210,13 +215,15 @@ namespace GmatTree
       DO_CONTROL,
       SWITCH_CONTROL,
       END_OF_CONTROL,
-      
+
+      // no panel will be created for ELSE_, END_
       ELSE_CONTROL,
       END_IF_CONTROL,
       END_FOR_CONTROL,
       END_DO_CONTROL,
       END_WHILE_CONTROL,
       END_SWITCH_CONTROL,
+      END_FINITE_BURN_COMMAND,
       
       //---------- Output Tree
       OUTPUT_FOLDER,
