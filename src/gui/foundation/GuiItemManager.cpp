@@ -314,6 +314,35 @@ void GuiItemManager::UnregisterListBox(const wxString &type, wxListBox *lb,
 
 
 //------------------------------------------------------------------------------
+// void UnregisterCheckListBox(const wxString &type, wxCheckListBox *lb)
+//                             wxArrayString *excList)
+//------------------------------------------------------------------------------
+void GuiItemManager::UnregisterCheckListBox(const wxString &type, wxCheckListBox *clb,
+                                            wxArrayString *excList)
+{
+   #if DEBUG_GUI_ITEM_UNREG
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UnregisterCheckListBox() clb=%d, excList=%d\n", clb, excList);
+   #endif
+   
+   if (type == "Spacecraft")
+   {
+      std::vector<wxCheckListBox*>::iterator pos1 =
+         find(mSpacecraftCLBList.begin(), mSpacecraftCLBList.end(), clb);
+      
+      if (pos1 != mSpacecraftCLBList.end())
+         mSpacecraftCLBList.erase(pos1);
+      
+      std::vector<wxArrayString*>::iterator pos2 =
+         find(mSpacecraftExcList.begin(), mSpacecraftExcList.end(), excList);
+      
+      if (pos2 != mSpacecraftExcList.end())
+         mSpacecraftExcList.erase(pos2);
+   }
+}
+
+
+//------------------------------------------------------------------------------
 // void UnregisterComboBox(const wxString &type, wxComboBox *cb)
 //------------------------------------------------------------------------------
 void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
@@ -341,6 +370,14 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
       
       if (pos != mImpBurnCBList.end())
          mImpBurnCBList.erase(pos);
+   }
+   else if (type == "FiniteBurn")
+   {
+      std::vector<wxComboBox*>::iterator pos =
+         find(mFiniteBurnCBList.begin(), mFiniteBurnCBList.end(), cb);
+      
+      if (pos != mFiniteBurnCBList.end())
+         mFiniteBurnCBList.erase(pos);
    }
    else if (type == "CoordinateSystem")
    {
@@ -407,7 +444,7 @@ wxArrayString GuiItemManager::GetSettablePropertyList(const wxString &objType)
       }
       return array;
    }
-   else
+   else if (objType == "ImpulsiveBurn")
    {
       return wxArrayString(theNumImpBurnProperty, GetPropertyList(objType));
    }
@@ -429,6 +466,8 @@ int GuiItemManager::GetNumProperty(const wxString &objType)
       return theNumScProperty;
    else if (objType == "ImpulsiveBurn")
       return theNumImpBurnProperty;
+   else if (objType == "FiniteBurn")
+      return theNumFiniteBurnProperty;
    else
       return 0;
 }
@@ -447,6 +486,8 @@ wxString* GuiItemManager::GetPropertyList(const wxString &objType)
       return theScPropertyList;
    else if (objType == "ImpulsiveBurn")
       return theImpBurnPropertyList;
+   else if (objType == "FiniteBurn")
+      return theFiniteBurnPropertyList;
    else
       throw GmatBaseException("There are no properties associated with " +
                               std::string(objType.c_str()));
@@ -482,6 +523,8 @@ wxComboBox* GuiItemManager::GetObjectTypeComboBox(wxWindow *parent, wxWindowID i
       if (objectTypeList[i] == "Spacecraft" && theNumSpacecraft > 0)
          cb->Append(objectTypeList[i]);
       else if (objectTypeList[i] == "ImpulsiveBurn" && theNumImpBurn > 0)
+         cb->Append(objectTypeList[i]);
+      else if (objectTypeList[i] == "FiniteBurn" && theNumFiniteBurn > 0)
          cb->Append(objectTypeList[i]);
    }
    
@@ -547,6 +590,35 @@ wxComboBox* GuiItemManager::GetImpBurnComboBox(wxWindow *parent, wxWindowID id,
    // register for update
    //---------------------------------------------
    mImpBurnCBList.push_back(burnComboBox);
+   
+   return burnComboBox;
+}
+
+
+//------------------------------------------------------------------------------
+//  wxComboBox* GetFiniteBurnComboBox(wxWindow *parent, wxWindowID id,
+//                                    const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return burn combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox* GuiItemManager::GetFiniteBurnComboBox(wxWindow *parent, wxWindowID id,
+                                                  const wxSize &size)
+{
+   // combo box for avaliable finite burns
+   
+   wxComboBox *burnComboBox =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                     theNumFiniteBurn, theFiniteBurnList, wxCB_READONLY);
+
+   // show first burn
+   burnComboBox->SetSelection(0);
+   
+   //---------------------------------------------
+   // register for update
+   //---------------------------------------------
+   mFiniteBurnCBList.push_back(burnComboBox);
    
    return burnComboBox;
 }
@@ -1007,6 +1079,48 @@ wxListBox* GuiItemManager::GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
 
 
 //------------------------------------------------------------------------------
+// wxCheckListBox* GetSpacecraftCheckListBox(wxWindow *parent, wxWindowID id,
+//                                           const wxSize &size, wxArrayString &excList)
+//------------------------------------------------------------------------------
+/**
+ * @return Available Spacecraft ListBox pointer
+ */
+//------------------------------------------------------------------------------
+wxCheckListBox* GuiItemManager::GetSpacecraftCheckListBox(wxWindow *parent, wxWindowID id,
+                                                          const wxSize &size,
+                                                          wxArrayString *excList)
+{
+   wxString emptyList[] = {};
+   wxCheckListBox *checkListBox =
+      new wxCheckListBox(parent, id, wxDefaultPosition, size, 0,
+                         emptyList, wxLB_SINGLE|wxLB_SORT);
+
+   if (excList != NULL && excList->GetCount() > 0)
+   {
+      for (int i=0; i<theNumSpacecraft; i++)
+      {
+         if (excList->Index(theSpacecraftList[i]) == wxNOT_FOUND)
+            checkListBox->Append(theSpacecraftList[i]);
+      }
+   }
+   else
+   {
+      for (int i=0; i<theNumSpacecraft; i++)
+         checkListBox->Append(theSpacecraftList[i]);
+   }
+   
+   //---------------------------------------------
+   // register to update list
+   //---------------------------------------------
+   mSpacecraftCLBList.push_back(checkListBox);
+   mSpacecraftExcList.push_back(excList);
+   
+   checkListBox->SetSelection(0);
+   return checkListBox;
+}
+
+
+//------------------------------------------------------------------------------
 // wxListBox* GetPropertyListBox(wxWindow *parent, wxWindowID id, const wxSize &size,
 //                               const wxString &objType, int showOption)
 //------------------------------------------------------------------------------
@@ -1057,6 +1171,11 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
    {
       for (int i=0; i<theNumImpBurnProperty; i++)
          propertyListBox->Append(theImpBurnPropertyList[i]);
+   }
+   else if (objType == "FiniteBurn")
+   {
+      for (int i=0; i<theNumFiniteBurnProperty; i++)
+         propertyListBox->Append(theFiniteBurnPropertyList[i]);
    }
    else
    {
@@ -1560,6 +1679,11 @@ CreateParameterSizer(wxWindow *parent,
    {
       *objectComboBox =
          GetImpBurnComboBox(parent, objectComboBoxId, wxSize(170, 20));
+   }
+   else if (objectType == "FiniteBurn")
+   {
+      *objectComboBox =
+         GetFiniteBurnComboBox(parent, objectComboBoxId, wxSize(170, 20));
    }
    else
    {
@@ -2462,8 +2586,10 @@ void GuiItemManager::UpdateBurnList()
       numBurn = MAX_BURN;
    }
    
-   wxArrayString burnNames;
+   wxArrayString impBurnNames;
+   wxArrayString finiteBurnNames;
    theNumImpBurn = 0;
+   theNumFiniteBurn = 0;
    GmatBase *obj;
    
    for (int i=0; i<numBurn; i++)
@@ -2471,12 +2597,22 @@ void GuiItemManager::UpdateBurnList()
       obj = theGuiInterpreter->GetConfiguredItem(items[i]);
       if (obj->GetTypeName() == "ImpulsiveBurn")
       {
-         theImpBurnList[i] = items[i].c_str();
-         burnNames.Add(items[i].c_str());
+         theImpBurnList[theNumImpBurn] = items[i].c_str();
+         impBurnNames.Add(items[i].c_str());
          theNumImpBurn++;
          #if DEBUG_GUI_ITEM_BURN > 1
-         MessageInterface::ShowMessage("GuiItemManager::UpdateBurnList() " +
-                                       std::string(theImpBurnList[i].c_str()) + "\n");
+         MessageInterface::ShowMessage
+            ("   adding to theImpBurnList: %s\n", theImpBurnList[i].c_str());
+         #endif
+      }
+      else if (obj->GetTypeName() == "FiniteBurn")
+      {
+         theFiniteBurnList[theNumFiniteBurn] = items[i].c_str();
+         finiteBurnNames.Add(items[i].c_str());
+         theNumFiniteBurn++;
+         #if DEBUG_GUI_ITEM_BURN > 1
+         MessageInterface::ShowMessage
+            ("   adding to theFiniteBurnList: %s\n", theFiniteBurnList[i].c_str());
          #endif
       }
    }
@@ -2488,9 +2624,21 @@ void GuiItemManager::UpdateBurnList()
         pos != mImpBurnCBList.end(); ++pos)
    {      
       (*pos)->Clear();
-      (*pos)->Append(burnNames);
+      (*pos)->Append(impBurnNames);
       
       (*pos)->SetSelection(theNumImpBurn-1);
+   }
+   
+   //-------------------------------------------------------
+   // update registered FiniteBurn ComboBox
+   //-------------------------------------------------------
+   for (std::vector<wxComboBox*>::iterator pos = mFiniteBurnCBList.begin();
+        pos != mFiniteBurnCBList.end(); ++pos)
+   {      
+      (*pos)->Clear();
+      (*pos)->Append(finiteBurnNames);
+      
+      (*pos)->SetSelection(theNumFiniteBurn-1);
    }
 }
 
@@ -2779,10 +2927,12 @@ GuiItemManager::GuiItemManager()
    
    theNumScProperty = 0;
    theNumImpBurnProperty = 0;
+   theNumFiniteBurnProperty = 0;
    theNumSpaceObject = 0;
    theNumFormation = 0;
    theNumSpacecraft = 0;
    theNumImpBurn = 0;
+   theNumFiniteBurn = 0;
    theNumCoordSys = 0;
    theNumFunction = 0;
    theNumFuelTank = 0;

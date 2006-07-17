@@ -62,7 +62,7 @@ public:
 
    // Other
    static const int MAX_COORD_SYS = 20;
-   static const int MAX_BURN = 20;
+   static const int MAX_BURN = 40;
    static const int MAX_HARDWARE = 60;
    static const int MAX_FUNCTION = 20;
    
@@ -81,6 +81,8 @@ public:
    
    void UnregisterListBox(const wxString &type, wxListBox *lb,
                           wxArrayString *excList = NULL);
+   void UnregisterCheckListBox(const wxString &type, wxCheckListBox *clb,
+                               wxArrayString *excList = NULL);
    void UnregisterComboBox(const wxString &type, wxComboBox *cb);
    
    int GetNumSpacecraft()
@@ -88,6 +90,9 @@ public:
    
    int GetNumImpulsiveBurn()
       { return theNumImpBurn; }
+   
+   int GetNumFiniteBurn()
+      { return theNumFiniteBurn; }
    
    int GetNumFuelTank()
       { return theNumFuelTank; }
@@ -149,6 +154,9 @@ public:
    wxString* GetImpulsiveBurnList()
       { return theImpBurnList; }
 
+   wxString* GetFiniteBurnList()
+      { return theFiniteBurnList; }
+
    wxArrayString GetSettablePropertyList(const wxString &objType);
    
    int GetNumProperty(const wxString &objType);
@@ -164,6 +172,9 @@ public:
    
    wxComboBox* GetImpBurnComboBox(wxWindow *parent, wxWindowID id,
                                   const wxSize &size);
+   
+   wxComboBox* GetFiniteBurnComboBox(wxWindow *parent, wxWindowID id,
+                                     const wxSize &size);
    
    wxComboBox* GetCoordSysComboBox(wxWindow *parent, wxWindowID id,
                                    const wxSize &size);
@@ -205,6 +216,10 @@ public:
    wxListBox* GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
                                    const wxSize &size,
                                    wxArrayString *excList = NULL);
+   
+   wxCheckListBox* GetSpacecraftCheckListBox(wxWindow *parent, wxWindowID id,
+                                             const wxSize &size,
+                                             wxArrayString *excList = NULL);
    
    wxListBox* GetFormationListBox(wxWindow *parent, wxWindowID id,
                                   const wxSize &size,
@@ -293,12 +308,14 @@ private:
    
    std::vector<wxListBox*> mSpaceObjectLBList;
    std::vector<wxListBox*> mSpacecraftLBList;
+   std::vector<wxCheckListBox*> mSpacecraftCLBList;
    std::vector<wxListBox*> mFuelTankLBList;
    std::vector<wxListBox*> mThrusterLBList;
    
    std::vector<wxComboBox*> mSpacePointCBList;
    std::vector<wxComboBox*> mSpacecraftCBList;
    std::vector<wxComboBox*> mImpBurnCBList;
+   std::vector<wxComboBox*> mFiniteBurnCBList;
    std::vector<wxComboBox*> mCoordSysCBList;
    std::vector<wxComboBox*> mFunctionCBList;
    std::vector<wxComboBox*> mFuelTankCBList;
@@ -311,10 +328,12 @@ private:
    
    int theNumScProperty;
    int theNumImpBurnProperty;
+   int theNumFiniteBurnProperty;
    int theNumSpaceObject;
    int theNumFormation;
    int theNumSpacecraft;
    int theNumImpBurn;
+   int theNumFiniteBurn;
    int theNumCoordSys;
    int theNumFunction;
    int theNumFuelTank;
@@ -339,6 +358,7 @@ private:
    wxString theFormationList[MAX_FORMATION];
    wxString theSpacecraftList[MAX_SPACECRAFT];
    wxString theImpBurnList[MAX_BURN];
+   wxString theFiniteBurnList[MAX_BURN];
    wxString theCoordSysList[MAX_COORD_SYS];
    wxString theFunctionList[MAX_FUNCTION];
    wxString theFuelTankList[MAX_HARDWARE];
@@ -346,6 +366,7 @@ private:
    
    wxString theScPropertyList[MAX_SC_PROPERTY];
    wxString theImpBurnPropertyList[MAX_IB_PROPERTY];
+   wxString theFiniteBurnPropertyList[MAX_IB_PROPERTY];
    wxString thePlottableParamList[MAX_PLOT_PARAM];
    wxString theSystemParamList[MAX_PROPERTY];
    wxString theUserVariableList[MAX_USER_VAR];
