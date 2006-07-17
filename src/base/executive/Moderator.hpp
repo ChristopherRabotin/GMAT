@@ -214,7 +214,8 @@ public:
    GmatCommand* CreateCommand(const std::string &type,
                               const std::string &name = "");
    GmatCommand* CreateDefaultCommand(const std::string &type,
-                                     const std::string &name = "");
+                                     const std::string &name = "",
+                                     GmatCommand *refCmd = NULL);
    void         SetCommandsUnchanged(Integer whichList = 0); 
 
    // CoordinateSystem
@@ -291,7 +292,8 @@ private:
    // default objects
    Spacecraft* GetDefaultSpacecraft();
    PropSetup* GetDefaultPropSetup();
-   Burn* GetDefaultBurn();
+   Burn* GetDefaultBurn(const std::string &type);
+   Hardware* GetDefaultHardware(const std::string &type);
    Solver* GetDefaultSolver();
    Subscriber* GetDefaultSubscriber();
    StopCondition* CreateDefaultStopCondition();

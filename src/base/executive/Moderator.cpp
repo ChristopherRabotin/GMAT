@@ -432,14 +432,30 @@ GmatBase* Moderator::GetConfiguredItem(const std::string &name)
          ("Moderator::GetConfiguredItem() entered: newName=%s\n", newName.c_str());
       #endif
    }
+   
    GmatBase *obj = theConfigManager->GetItem(newName);
 
    if (obj == NULL)
    {
       // try SolarSystem
-      return theSolarSystemInUse->GetBody(newName);
+      //return theSolarSystemInUse->GetBody(newName);
+      obj = theSolarSystemInUse->GetBody(newName);
    }
    
+   #if DEBUG_CONFIG
+   if (obj)
+   {
+      MessageInterface::ShowMessage
+         ("Moderator::GetConfiguredItem() Found object: name=%s, type=%s, "
+          "addr=%p\n", obj->GetName().c_str(), obj->GetTypeName().c_str(), obj);
+   }
+   else
+   {
+      MessageInterface::ShowMessage
+         ("Moderator::GetConfiguredItem() Cannot find object: name=%s\n",
+          newName.c_str());
+   }
+   #endif
    return obj;
 }
 
@@ -1408,7 +1424,7 @@ Burn* Moderator::CreateBurn(const std::string &type,
          MessageInterface::ShowMessage("Moderator::CreateBurn()\n" +
                                        e.GetMessage());
       }
-    
+      
       return burn;
    }
    else
@@ -2315,10 +2331,12 @@ GmatCommand* Moderator::CreateCommand(const std::string &type,
 
 //------------------------------------------------------------------------------
 // GmatCommand* CreateDefaultCommand(const std::string &type,
-//                                   const std::string &name)
+//                                   const std::string &name,
+//                                   GmatCommand *refCmd = NULL)
 //------------------------------------------------------------------------------
 GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
-                                             const std::string &name)
+                                             const std::string &name,
+                                             GmatCommand *refCmd)
 {
    #if DEBUG_DEFAULT_COMMAND
    MessageInterface::ShowMessage
@@ -2365,11 +2383,36 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
    {
       // set burn
       id = cmd->GetParameterID("Burn");
-      cmd->SetStringParameter(id, GetDefaultBurn()->GetName());
+      cmd->SetStringParameter(id, GetDefaultBurn("ImpulsiveBurn")->GetName());
       
       // set spacecraft
       id = cmd->GetParameterID("Spacecraft");
       cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName());
+   }
+   else if (type == "BeginFiniteBurn")
+   {
+      // set burn
+      cmd->SetRefObjectName(Gmat::BURN, GetDefaultBurn("FiniteBurn")->GetName());
+
+      // set Thruter to FiniteBurn
+      //Hardware *hw GetDefaultHardware("Thruster");
+      
+      // set spacecraft
+      cmd->SetRefObjectName(Gmat::SPACECRAFT, GetDefaultSpacecraft()->GetName());
+   }
+   else if (type == "EndFiniteBurn")
+   {
+      // get burn name of BeginFiniteBurn
+      if (refCmd)
+      {
+         // set burn
+         cmd->SetRefObjectName(Gmat::BURN, refCmd->GetRefObjectName(Gmat::BURN));
+         
+         // set spacecraft
+         StringArray scNames = refCmd->GetRefObjectNameArray(Gmat::SPACECRAFT);
+         for (UnsignedInt i=0; i<scNames.size(); i++)
+            cmd->SetRefObjectName(Gmat::SPACECRAFT, scNames[i]);
+      }
    }
    else if (type == "Target")
    {
@@ -2391,7 +2434,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       {
          // set variable parameter
          id = cmd->GetParameterID("Variable");
-         cmd->SetStringParameter(id, GetDefaultBurn()->GetName() + ".V");
+         cmd->SetStringParameter(id, GetDefaultBurn("ImpulsiveBurn")->GetName() + ".V");
          
          id = cmd->GetParameterID("InitialValue");
          cmd->SetRealParameter(id, 0.5);
@@ -3725,7 +3768,7 @@ void Moderator::CreateDefaultMission()
       //CreateHardware("FuelTank", "DefaultFuelTank");
       //CreateHardware("Thruster", "DefaultThruster");
       // Burn
-      GetDefaultBurn();
+      GetDefaultBurn("ImpulsiveBurn");
       
       // Create VNB CoordinateSystem
 //       CoordinateSystem *vnb = CreateCoordinateSystem("VNB", false);
@@ -4116,23 +4159,52 @@ PropSetup* Moderator::GetDefaultPropSetup()
 
 
 //------------------------------------------------------------------------------
-// Burn* GetDefaultBurn()
+// Burn* GetDefaultBurn(const std::string &type)
 //------------------------------------------------------------------------------
-Burn* Moderator::GetDefaultBurn()
+Burn* Moderator::GetDefaultBurn(const std::string &type)
 {
    StringArray &configList = GetListOfConfiguredItems(Gmat::BURN);
 
    if (configList.size() > 0)
    {
       for (UnsignedInt i=0; i<configList.size(); i++)
-         if (GetBurn(configList[i])->IsOfType("ImpulsiveBurn"))
+         if (GetBurn(configList[i])->IsOfType(type))
             return GetBurn(configList[i]);
    }
    
-   // create ImpulsiveBurn
-   Burn *burn = CreateBurn("ImpulsiveBurn", "DefaultIB");
-   burn->SetStringParameter(burn->GetParameterID("Axes"), "VNB");
+   Burn *burn = NULL;
+   
+   if (type == "ImpulsiveBurn")
+      burn = CreateBurn("ImpulsiveBurn", "DefaultIB");
+   else if (type == "FiniteBurn")
+      burn = CreateBurn("FiniteBurn", "DefaultFB");
+   
    return burn;
+}
+
+
+//------------------------------------------------------------------------------
+// Hardware* GetDefaultHardware(const std::string &type)
+//------------------------------------------------------------------------------
+Hardware* Moderator::GetDefaultHardware(const std::string &type)
+{
+   StringArray &configList = GetListOfConfiguredItems(Gmat::HARDWARE);
+
+   if (configList.size() > 0)
+   {
+      for (UnsignedInt i=0; i<configList.size(); i++)
+         if (GetHardware(configList[i])->IsOfType(type))
+            return GetHardware(configList[i]);
+   }
+   
+   Hardware *hw = NULL;
+   
+   if (type == "FuelTank")
+      hw = CreateHardware("FuelTank", "DefaultFuelTank");
+   else if (type == "Thruster")
+      hw = CreateHardware("Thruster", "DefaultThruster");
+   
+   return hw;
 }
 
 
