@@ -45,6 +45,7 @@
 #include "ImpulsiveBurnSetupPanel.hpp"
 #include "FiniteBurnSetupPanel.hpp"
 #include "DCSetupPanel.hpp"
+#include "SQPSetupPanel.hpp"
 #include "ManeuverPanel.hpp"
 #include "XyPlotSetupPanel.hpp"
 #include "OpenGlPlotSetupPanel.hpp"
@@ -1413,6 +1414,9 @@ GmatMainFrame::CreateNewResource(const wxString &title,
       break;
    case GmatTree::DIFF_CORR:
       sizer->Add(new DCSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+      break;
+   case GmatTree::SQP:
+      sizer->Add(new SQPSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::REPORT_FILE:
       sizer->Add(new ReportFileSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
