@@ -113,11 +113,9 @@ void SavePanel::LoadData()
    // Set the pointer for the "Show Script" button
    mObject = theCommand;
 
-   // load data from the core engine
-    
-   // object
+   // Set object
    wxString objName = theCommand->GetRefObjectName(Gmat::SPACECRAFT).c_str();
-   mObjectComboBox->SetStringSelection(objName);
+   mObjectComboBox->SetValue(objName);
 }
 
 //------------------------------------------------------------------------------
