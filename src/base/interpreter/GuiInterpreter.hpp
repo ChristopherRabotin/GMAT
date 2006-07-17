@@ -185,7 +185,8 @@ public:
    GmatCommand* CreateCommand(const std::string &type,
                               const std::string &name = "");
    GmatCommand* CreateDefaultCommand(const std::string &type,
-                                     const std::string &name = "");
+                                     const std::string &name = "",
+                                     GmatCommand *refCmd = NULL);
 
    // Resource
    bool ClearResource();

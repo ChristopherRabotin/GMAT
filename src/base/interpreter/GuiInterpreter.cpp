@@ -977,7 +977,8 @@ GmatCommand* GuiInterpreter::CreateCommand(const std::string &type,
 
 //------------------------------------------------------------------------------
 // GmatCommand* CreateDefaultCommand(const std::string &type,
-//                                   const std::string &name = "")
+//                                   const std::string &name = "",
+//                                   const GmatCommand *refCmd = NULL)
 //------------------------------------------------------------------------------
 /**
  * Creates a default command object by given type and name.
@@ -989,9 +990,10 @@ GmatCommand* GuiInterpreter::CreateCommand(const std::string &type,
  */
 //------------------------------------------------------------------------------
 GmatCommand* GuiInterpreter::CreateDefaultCommand(const std::string &type,
-                                                  const std::string &name)
+                                                  const std::string &name,
+                                                  GmatCommand *refCmd)
 {
-   return moderator->CreateDefaultCommand(type, name);
+   return moderator->CreateDefaultCommand(type, name, refCmd);
 }
 
 
