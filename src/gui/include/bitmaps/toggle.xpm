@@ -1,0 +1,23 @@
+/* XPM */
+static char * toggle_xpm[] = {
+"16 16 4 1",
+" 	c None",
+".	c Black",
+"X	c Gray100",
+"a	c Gray",
+"                ",
+"                ",
+"                ",
+"      ....      ",
+"     .XXXX.     ",
+"    .XXXXXX.    ",
+"   .XXXaaXXX.   ",
+"   .XXaaaaXX.   ",
+"   .XXaaaaXX.   ",
+"   .XXXaaXXX.   ",
+"    .XXXXXX.    ",
+"     .XXXX.     ",
+"      ....      ",
+"                ",
+"                ",
+"                "};
