@@ -64,7 +64,7 @@ ManeuverPanel::ManeuverPanel(wxWindow *parent, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 ManeuverPanel::~ManeuverPanel()
 {
-   theGuiManager->UnregisterComboBox("Burn", burnCB);
+   theGuiManager->UnregisterComboBox("ImpulsiveBurn", burnCB);
    theGuiManager->UnregisterComboBox("Spacecraft", satCB);
 }
 
