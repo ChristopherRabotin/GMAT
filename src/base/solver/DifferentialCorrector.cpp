@@ -39,10 +39,10 @@ const std::string
 DifferentialCorrector::PARAMETER_TEXT[DifferentialCorrectorParamCount -
                                       SolverParamCount] =
 {
-   "TargeterTextFile",
-   "Variables",
+   //"TargeterTextFile",
+   //"Variables",
    "Goals",
-   "MaximumIterations",
+   //"MaximumIterations",
    "UseCentralDifferences"
 };
 
@@ -50,10 +50,10 @@ const Gmat::ParameterType
 DifferentialCorrector::PARAMETER_TYPE[DifferentialCorrectorParamCount -
                                       SolverParamCount] =
 {
-   Gmat::STRING_TYPE,
+   //Gmat::STRING_TYPE,
+   //Gmat::STRINGARRAY_TYPE,
    Gmat::STRINGARRAY_TYPE,
-   Gmat::STRINGARRAY_TYPE,
-   Gmat::INTEGER_TYPE,
+   // Gmat::INTEGER_TYPE,
    Gmat::BOOLEAN_TYPE
 };
 
@@ -64,15 +64,15 @@ DifferentialCorrector::PARAMETER_TYPE[DifferentialCorrectorParamCount -
 
 DifferentialCorrector::DifferentialCorrector(std::string name) :
    Solver                  ("DifferentialCorrector", name),
-   variableCount           (0),
+   //variableCount           (0),
    goalCount               (0),
-   iterationsTaken         (0),
-   maxIterations           (25),
-   variable                (NULL),
-   perturbation            (NULL),
-   variableMinimum         (NULL),
-   variableMaximum         (NULL),
-   variableMaximumStep     (NULL),
+   //iterationsTaken         (0),
+   //maxIterations           (25),
+   //variable                (NULL),
+   //perturbation            (NULL),
+   //variableMinimum         (NULL),
+   //variableMaximum         (NULL),
+   //variableMaximumStep     (NULL),
    goal                    (NULL),
    tolerance               (NULL),
    nominal                 (NULL),
@@ -82,16 +82,16 @@ DifferentialCorrector::DifferentialCorrector(std::string name) :
    indx                    (NULL),
    b                       (NULL),
    ludMatrix               (NULL),
-   useCentralDifferences   (false),
-   initialized             (false),
-   instanceNumber          (0)       // 0 indicates 1st instance w/ this name
+   useCentralDifferences   (false)  //,
+   //initialized             (false),
+   //instanceNumber          (0)       // 0 indicates 1st instance w/ this name
 {
    objectTypeNames.push_back("DifferentialCorrector");
    parameterCount = DifferentialCorrectorParamCount;
    // textFileMode = "Verbose";
-   solverTextFile = "targeter_";
-   solverTextFile += instanceName;
-   solverTextFile += ".data";
+   //solverTextFile = "targeter_";
+   //solverTextFile += instanceName;
+   //solverTextFile += ".data";
 }
 
 
@@ -103,29 +103,29 @@ DifferentialCorrector::~DifferentialCorrector()
 
 DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
    Solver                  (dc),
-   variableCount           (dc.variableCount),
+   //variableCount           (dc.variableCount),
    goalCount               (dc.goalCount),
-   iterationsTaken         (0),
-   maxIterations           (dc.maxIterations),
-   variable                (NULL),
-   perturbation            (NULL),
-   variableMinimum         (NULL),
-   variableMaximum         (NULL),
-   variableMaximumStep     (NULL),
+   //iterationsTaken         (0),
+   //maxIterations           (dc.maxIterations),
+   //variable                (NULL),
+   //perturbation            (NULL),
+   //variableMinimum         (NULL),
+   //variableMaximum         (NULL),
+   //variableMaximumStep     (NULL),
    goal                    (NULL),
    tolerance               (NULL),
    nominal                 (NULL),
    achieved                (NULL),
    jacobian                (NULL),
    inverseJacobian         (NULL),
-   pertNumber              (dc.pertNumber),
+   //pertNumber              (dc.pertNumber),
    indx                    (NULL),
    b                       (NULL),
    ludMatrix               (NULL),
-   useCentralDifferences   (dc.useCentralDifferences),
-   initialized             (false),
-   solverTextFile          (dc.solverTextFile),
-   instanceNumber          (dc.instanceNumber)
+   useCentralDifferences   (dc.useCentralDifferences)  //,
+   //initialized             (false),
+   //solverTextFile          (dc.solverTextFile),
+   //instanceNumber          (dc.instanceNumber)
 {
   variableNames.clear();
   goalNames.clear();
@@ -144,18 +144,18 @@ DifferentialCorrector&
    
    FreeArrays();
    
-   variableNames.clear();
+   //variableNames.clear();
    goalNames.clear();
 
-   variableCount         = dc.variableCount;
+   //variableCount         = dc.variableCount;
    goalCount             = dc.goalCount;
-   iterationsTaken       = 0;
-   maxIterations         = dc.maxIterations;
+   //iterationsTaken       = 0;
+   //maxIterations         = dc.maxIterations;
    useCentralDifferences = dc.useCentralDifferences;
-   initialized           = false;
-   solverTextFile        = dc.solverTextFile;
-   instanceNumber        = dc.instanceNumber;
-   pertNumber            = dc.pertNumber;
+   //initialized           = false;
+   //solverTextFile        = dc.solverTextFile;
+   //instanceNumber        = dc.instanceNumber;
+   //pertNumber            = dc.pertNumber;
    
    return *this;
 }
@@ -273,8 +273,8 @@ std::string DifferentialCorrector::GetParameterTypeString(
 //------------------------------------------------------------------------------
 Integer DifferentialCorrector::GetIntegerParameter(const Integer id) const
 {
-   if (id == maxIterationsID)
-      return maxIterations;
+   //if (id == maxIterationsID)
+   //   return maxIterations;
         
    return Solver::GetIntegerParameter(id);
 }
@@ -296,16 +296,16 @@ Integer DifferentialCorrector::GetIntegerParameter(const Integer id) const
 Integer DifferentialCorrector::SetIntegerParameter(const Integer id,
                                                    const Integer value)
 {
-   if (id == maxIterationsID)
-   {
-      if (value > 0)
-         maxIterations = value;
-      else
-         MessageInterface::ShowMessage(
-            "Iteration count for %s must be > 0; requested value was %d\n",
-            instanceName.c_str(), value);
-      return maxIterations;
-   }
+   //if (id == maxIterationsID)
+   //{
+   //   if (value > 0)
+   //      maxIterations = value;
+   //   else
+   //      MessageInterface::ShowMessage(
+   //         "Iteration count for %s must be > 0; requested value was %d\n",
+   //         instanceName.c_str(), value);
+   //   return maxIterations;
+   //}
     
    return Solver::SetIntegerParameter(id, value);
 }
@@ -373,8 +373,8 @@ bool DifferentialCorrector::SetBooleanParameter(const Integer id,
 //------------------------------------------------------------------------------
 std::string DifferentialCorrector::GetStringParameter(const Integer id) const
 {
-    if (id == solverTextFileID)
-        return solverTextFile;
+    //if (id == solverTextFileID)
+    //    return solverTextFile;
         
     return Solver::GetStringParameter(id);
 }
@@ -396,15 +396,15 @@ std::string DifferentialCorrector::GetStringParameter(const Integer id) const
 bool DifferentialCorrector::SetStringParameter(const Integer id,
                                                const std::string &value)
 {
-    if (id == solverTextFileID) {
-        solverTextFile = value;
-        return true;
-    }
+    //if (id == solverTextFileID) {
+    //    solverTextFile = value;
+    //    return true;
+    //}
         
-    if (id == variableNamesID) {
-        variableNames.push_back(value);
-        return true;
-    }
+    //if (id == variableNamesID) {
+    //    variableNames.push_back(value);
+    //    return true;
+    //}
     
     if (id == goalNamesID) {
         goalNames.push_back(value);
@@ -430,8 +430,8 @@ bool DifferentialCorrector::SetStringParameter(const Integer id,
 const StringArray& DifferentialCorrector::GetStringArrayParameter(
                                                         const Integer id) const
 {
-    if (id == variableNamesID)
-        return variableNames;
+    //if (id == variableNamesID)
+    //    return variableNames;
         
     if (id == goalNamesID)
         return goalNames;
@@ -697,18 +697,20 @@ bool DifferentialCorrector::Initialize()
    }
    
    // Prepare the text file for output
-   if (solverTextFile != "")
-   {
-      if (instanceNumber == 1)
-         textFile.open(solverTextFile.c_str());
-      else
-         textFile.open(solverTextFile.c_str(), std::ios::app);
-      if (!textFile.is_open())
-         throw SolverException("Error opening targeter text file " +
-                               solverTextFile);
-      textFile.precision(16);
-      WriteToTextFile();
-   }
+   //if (solverTextFile != "")
+   //{
+   //   if (instanceNumber == 1)
+   //      textFile.open(solverTextFile.c_str());
+   //   else
+   //      textFile.open(solverTextFile.c_str(), std::ios::app);
+   //   if (!textFile.is_open())
+   //      throw SolverException("Error opening targeter text file " +
+   //                            solverTextFile);
+   //   textFile.precision(16);
+   //   WriteToTextFile();
+   //}
+   Solver::Initialize(); // for above stuff, moved to Solver
+   
     
    // Allocate the LU arrays
    indx = new Integer[variableCount];
@@ -988,19 +990,21 @@ void DifferentialCorrector::InvertJacobian()
 //------------------------------------------------------------------------------
 void DifferentialCorrector::FreeArrays()
 {
-   if (textFile.is_open())
-   {
-      textFile.flush();
-      textFile.close();
-   }
-        
-   if (variable)
-   {
-      delete [] variable;
-      variable = NULL;
-   }
+   Solver::FreeArrays();
     
-   if (perturbation)
+   //if (textFile.is_open())
+   //{
+   //   textFile.flush();
+   //   textFile.close();
+   //}
+        
+   //if (variable)
+   //{
+   //   delete [] variable;
+   //   variable = NULL;
+   //}
+    
+    if (perturbation)
    {
       delete [] perturbation;
       perturbation = NULL;

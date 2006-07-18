@@ -21,6 +21,7 @@
 #ifndef Solver_hpp
 #define Solver_hpp
 
+#include <fstream>          // for std::ofstream
 
 #include "GmatBase.hpp"
 #include "SolverException.hpp"
@@ -78,6 +79,9 @@ public:
                        GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
 
+   virtual Integer     GetIntegerParameter(const Integer id) const;
+   virtual Integer     SetIntegerParameter(const Integer id,
+                                           const Integer value);
    virtual std::string GetStringParameter(const Integer id) const;
    virtual std::string GetStringParameter(const std::string &label) const;
    virtual bool        SetStringParameter(const Integer id, 
@@ -85,6 +89,8 @@ public:
    virtual bool        SetStringParameter(const std::string &label, 
                                           const std::string &value);
 
+   virtual const StringArray&
+                       GetStringArrayParameter(const Integer id) const;
    virtual bool        GetBooleanParameter(const Integer id) const;
    virtual bool        SetBooleanParameter(const Integer id,
                                            const bool value);
@@ -102,7 +108,8 @@ public:
     * @return true on success, false (or throws a SolverException) on failure
     */
    //---------------------------------------------------------------------------
-   virtual bool        Initialize() = 0;
+   //virtual bool        Initialize() = 0;
+   virtual bool        Initialize();
     
    //---------------------------------------------------------------------------
    //  Integer SetSolverVariables(Real *data, std::string name)
@@ -176,12 +183,46 @@ protected:
    Integer             progressStyle;
    /// String for debug information in debug mode
    std::string         debugString;
-   
+   /// The number of variables in the targeting problem
+   Integer             variableCount;
+   /// List of variables
+   StringArray         variableNames;
+   /// Array used to track the variables in the solver run
+   Real                *variable;
+   /// The number of iterations taken (increments when the matrix is inverted)
+   Integer             iterationsTaken;
+   /// Maximum number of iterations allowed
+   Integer              maxIterations;
+   /// Array used to track the perturbations on each variable
+   Real                 *perturbation;
+   /// Limits on the lowest value of the variables
+   Real                 *variableMinimum;
+   /// Limits on the lowest value of the variables
+   Real                 *variableMaximum;
+   /// Limits on individual changes in the variables
+   Real                 *variableMaximumStep;
+   /// Current perturbation being run.
+   Integer              pertNumber;
+
+   /// Flag used to ensure the targeter is ready to go
+   bool                 initialized;
+
+   // Reporting parameters
+   /// Name of the targeter text file.  An empty string turns the file off.
+   std::string          solverTextFile;
+   /// Used to indicate if data should append to the text file
+   Integer              instanceNumber;
+   /// The targeter text file
+   std::ofstream        textFile;
+      
    /// Generic solver parameters.
    enum
    {
       ShowProgressID   = GmatBaseParamCount,
       ReportStyle,
+      solverTextFileID,
+      variableNamesID,
+      maxIterationsID,
       SolverParamCount
    };
    
@@ -206,6 +247,7 @@ protected:
    virtual void        RunComplete();
    
    virtual std::string GetProgressString();
+   virtual void        FreeArrays();
     
    //---------------------------------------------------------------------------
    //  void WriteToTextFile()

@@ -78,23 +78,23 @@ public:
 protected:
    // Core data members used for the targeter numerics
    /// The number of variables in the targeting problem
-   Integer                     variableCount;
+   //Integer                     variableCount;
    /// The number of goals in the targeting problem
    Integer                     goalCount;
    /// The number of iterations taken (increments when the matrix is inverted)
-   Integer                     iterationsTaken;
+   //Integer                     iterationsTaken;
    /// Maximum number of iterations allowed
-   Integer                     maxIterations;
+   //Integer                     maxIterations;
    /// Array used to track the variables in the targeting run
-   Real                        *variable;
+   //Real                        *variable;
    /// Array used to track the perturbations on each variable
-   Real                        *perturbation;
+   //Real                        *perturbation;
    /// Limits on the lowest value of the variables
-   Real                        *variableMinimum;
+   //Real                        *variableMinimum;
    /// Limits on the lowest value of the variables
-   Real                        *variableMaximum;
+   //Real                        *variableMaximum;
    /// Limits on individual changes in the variables
-   Real                        *variableMaximumStep;
+   //Real                        *variableMaximumStep;
    /// Value desired for the goals
    Real                        *goal;
    /// Accuracy for the goals
@@ -108,7 +108,7 @@ protected:
    /// The inverted sensitivity matrix
    Real                        **inverseJacobian;
    /// Current perturbation being run.
-   Integer                     pertNumber;
+   //Integer                     pertNumber;
 
    /// Permutation vector used by the LU Decomposition routine.
    Integer                     *indx;
@@ -121,28 +121,28 @@ protected:
    /// Used to turn on central differencing.  Currently not implemented.
    bool                        useCentralDifferences;
    /// Flag used to ensure the targeter is ready to go
-   bool                        initialized;
+   //bool                        initialized;
 
    // Reporting parameters
    /// Name of the targeter text file.  An empty string turns the file off.
-   std::string                 solverTextFile;
+   //std::string                 solverTextFile;
    /// Used to indicate if data should append to the text file
-   Integer                     instanceNumber;
+   //Integer                     instanceNumber;
     
    /// List of variables
-   StringArray                 variableNames;
+   //StringArray                 variableNames;
    /// List of goals
    StringArray                 goalNames;
    /// The targeter text file
-   std::ofstream               textFile;
+   //std::ofstream               textFile;
     
    // Parameter IDs
    enum
    {
-      solverTextFileID = SolverParamCount,
-      variableNamesID,
-      goalNamesID,
-      maxIterationsID,
+      //solverTextFileID = SolverParamCount,
+      //variableNamesID,
+      goalNamesID = SolverParamCount,
+      //maxIterationsID,
       useCentralDifferencingID,
       DifferentialCorrectorParamCount
    };
