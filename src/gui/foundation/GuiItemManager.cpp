@@ -841,7 +841,11 @@ wxComboBox* GuiItemManager::GetFuelTankComboBox(wxWindow *parent, wxWindowID id,
    //---------------------------------------------
    // register for update
    //---------------------------------------------
-   mFuelTankCBList.push_back(fuelTankComboBox);
+   // waw: 07/18/06 Commented out for GMAT crash
+   // Not sure why the combobox needs to be added here but it crashes on 
+   // UpdateHardwareList() calls.
+   //mFuelTankCBList.push_back(fuelTankComboBox);
+   
    
    return fuelTankComboBox;
 }
@@ -2713,7 +2717,7 @@ void GuiItemManager::UpdateHardwareList()
    StringArray items =
       theGuiInterpreter->GetListOfConfiguredItems(Gmat::HARDWARE);
    int numHardware = items.size();
-   
+
    #if DEBUG_GUI_ITEM_HW
    MessageInterface::ShowMessage
       ("GuiItemManager::UpdateHardwareList() numHardware=%d\n", numHardware);
@@ -2732,11 +2736,11 @@ void GuiItemManager::UpdateHardwareList()
    Hardware *hw;
    wxArrayString tankNames;
    wxArrayString thrusterNames;
-   
+
    for (int i=0; i<numHardware; i++)
    {
       hw = theGuiInterpreter->GetHardware(items[i]);
-      
+
       if (hw->IsOfType(Gmat::FUEL_TANK))
       {
          theFuelTankList[theNumFuelTank++] = items[i].c_str();
@@ -2747,13 +2751,13 @@ void GuiItemManager::UpdateHardwareList()
          theThrusterList[theNumThruster++] = items[i].c_str();
          thrusterNames.Add(items[i].c_str());
       }
-      
+
       #if DEBUG_GUI_ITEM_HW > 1
       MessageInterface::ShowMessage
          ("GuiItemManager::UpdateHardwareList() " + itemNames[i] + "\n");
       #endif
    }
-   
+
    //-------------------------------------------------------
    // update registered FuelTank ListBox
    //-------------------------------------------------------
@@ -2787,19 +2791,18 @@ void GuiItemManager::UpdateHardwareList()
    // It's ok to have the same FuelTank in more than one spacecraft since
    // the Sandbox will clone it.
    std::vector<wxArrayString*>::iterator exPos = mFuelTankExcList.begin();
-   
+
    for (std::vector<wxListBox*>::iterator pos = mFuelTankLBList.begin();
         pos != mFuelTankLBList.end(); ++pos)
    {
       wxArrayString *excList = *exPos++;
       (*pos)->Clear();
-      
+
       for (int i=0; i<theNumFuelTank; i++)
       {
          if (excList->Index(theFuelTankList[i].c_str()) == wxNOT_FOUND)
             (*pos)->Append(theFuelTankList[i]);
       }
-      
       (*pos)->SetSelection((*pos)->GetCount() - 1);
    }
    
@@ -2809,32 +2812,29 @@ void GuiItemManager::UpdateHardwareList()
    // It's ok to have the same Thruster in more than one spacecraft since
    // the Sandbox will clone it.
    exPos = mThrusterExcList.begin();
-   
+
    for (std::vector<wxListBox*>::iterator pos = mThrusterLBList.begin();
         pos != mThrusterLBList.end(); ++pos)
    {
       wxArrayString *excList = *exPos++;
       (*pos)->Clear();
-      
+
       for (int i=0; i<theNumThruster; i++)
       {
          if (excList->Index(theThrusterList[i].c_str()) == wxNOT_FOUND)
             (*pos)->Append(theThrusterList[i]);
       }
-      
       (*pos)->SetSelection((*pos)->GetCount() - 1);
    }
    
    //-------------------------------------------------------
    // update registered FuelTank ComboBox
    //-------------------------------------------------------
-   
    int sel;
    for (std::vector<wxComboBox*>::iterator pos = mFuelTankCBList.begin();
         pos != mFuelTankCBList.end(); ++pos)
    {
       sel = (*pos)->GetSelection();
-      
       (*pos)->Clear();
       (*pos)->Append(tankNames);
       (*pos)->SetSelection(sel);
@@ -2847,12 +2847,10 @@ void GuiItemManager::UpdateHardwareList()
         pos != mThrusterCBList.end(); ++pos)
    {
       sel = (*pos)->GetSelection();
-      
       (*pos)->Clear();
       (*pos)->Append(thrusterNames);
       (*pos)->SetSelection(sel);
    }
-   
 } // end UpdateHardwareList()
 
 
