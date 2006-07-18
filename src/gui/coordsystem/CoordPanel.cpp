@@ -83,7 +83,7 @@ void CoordPanel::EnableOptions()
 
    if (tmpAxis == NULL)
       return;
-
+      
    if (tmpAxis->UsesPrimary() == GmatCoordinate::NOT_USED)
       mShowPrimaryBody = false;
    else
@@ -178,7 +178,8 @@ void CoordPanel::EnableOptions()
       intervalTextCtrl->Enable(false);
    }
    
-   theGuiInterpreter->RemoveItemIfNotUsed(Gmat::AXIS_SYSTEM, "tmpAxis");
+   // 07/18/2006 commented out because it caused a crash
+   //theGuiInterpreter->RemoveItemIfNotUsed(Gmat::AXIS_SYSTEM, "tmpAxis");
 }
 
 
@@ -759,6 +760,7 @@ void CoordPanel::LoadData()
          ("CoordPanel:LoadData() error occurred!\n%s\n",
             e.GetMessage().c_str());
    }
+   
 }
 
 //loj: 8/31/05 Added
