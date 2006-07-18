@@ -59,6 +59,14 @@ ThrusterConfigPanel::ThrusterConfigPanel(wxWindow *parent,
    theThruster = (Thruster*)theGuiInterpreter->GetHardware(thrusterName);
    
    isCoordSysChanged = false;
+   isTankChanged = false;
+   isTankEmpty = false;
+   
+   tankSize = 0;
+   
+   thrusterName = "";
+   coordsysName = "";
+   tankName = "";
     
    Create();
    Show();
@@ -69,6 +77,7 @@ ThrusterConfigPanel::ThrusterConfigPanel(wxWindow *parent,
 //------------------------------------------------------------------------------
 ThrusterConfigPanel::~ThrusterConfigPanel()
 {
+
 }
 
 //-------------------------------
@@ -92,10 +101,21 @@ void ThrusterConfigPanel::Create()
                               wxDefaultPosition, wxDefaultSize, 0 );
     kCoefButton = new wxButton( this, ID_BUTTON, wxT("Edit Impulse Coef."),
                               wxDefaultPosition, wxDefaultSize, 0 );  
-                                
+                                                              
     // wxComboBox 
     coordsysComboBox  =
-      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(120,-1));
+      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(180,-1));
+    tankComboBox =
+      theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(180,-1));
+    
+    if (tankComboBox->IsEmpty())
+    {
+   	    tankComboBox->Insert(wxT("No Tanks Available"), 0);
+       tankComboBox->SetSelection(0);
+       isTankEmpty = true;
+    }
+    else
+       isTankEmpty = false;
    
     // wxTextCtrl
     XTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
@@ -108,9 +128,10 @@ void ThrusterConfigPanel::Create()
                             wxDefaultPosition, wxSize(80,-1), 0 );
                             
     //wxStaticText
-    coordsysStaticText = new wxStaticText( this, ID_TEXT, 
-                            wxT("Coordinate System"), wxDefaultPosition,
-                            wxDefaultSize, 0);
+    coordsysStaticText = new wxStaticText( this, ID_TEXT, wxT("Coordinate System"), 
+                            wxDefaultPosition, wxDefaultSize, 0);
+    tankStaticText = new wxStaticText(this, ID_TEXT,
+                            wxT("Use tank"), wxDefaultPosition, wxDefaultSize, 0);
     XStaticText = new wxStaticText( this, ID_TEXT, wxT("X Direction"),
                             wxDefaultPosition,wxDefaultSize, 0);
     YStaticText = new wxStaticText( this, ID_TEXT, wxT("Y Direction"),
@@ -118,7 +139,7 @@ void ThrusterConfigPanel::Create()
     ZStaticText = new wxStaticText( this, ID_TEXT, wxT("Z Direction"),
                             wxDefaultPosition,wxDefaultSize, 0); 
     scaleFactorStaticText = new wxStaticText( this, ID_TEXT, 
-            wxT("Thrust Scale Factor"), wxDefaultPosition,wxDefaultSize, 0);
+                    wxT("Thrust Scale Factor"), wxDefaultPosition,wxDefaultSize, 0);
     
     // wx*Sizers                                           
     wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
@@ -134,6 +155,8 @@ void ThrusterConfigPanel::Create()
     flexGridSizer1->Add(ZTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
     flexGridSizer1->Add(scaleFactorStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
     flexGridSizer1->Add(scaleFactorTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+    flexGridSizer1->Add(tankStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
+    flexGridSizer1->Add(tankComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
     flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
     flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
     flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -174,6 +197,12 @@ void ThrusterConfigPanel::LoadData()
    paramID = theThruster->GetParameterID("ThrustScaleFactor");
    scaleFactorTextCtrl->SetValue(wxVariant(theThruster->GetRealParameter(paramID)));
    
+   paramID = theThruster->GetParameterID("Tank");
+   StringArray tanks = theThruster->GetStringArrayParameter(paramID);   
+      
+   if (!isTankEmpty)
+      tankComboBox->SetValue(tanks[0].c_str());
+   
    theApplyButton->Disable();
 }
 
@@ -208,6 +237,14 @@ void ThrusterConfigPanel::SaveData()
       theThruster->SetStringParameter(paramID, coordsysName);
       isCoordSysChanged = false;
    }    
+   
+   if (isTankChanged)
+   {
+      paramID = theThruster->GetParameterID("Tank");
+      
+      if (theThruster->TakeAction("ClearTanks", ""))
+         theThruster->SetStringParameter(paramID, tankName.c_str());
+   }
       
    theApplyButton->Disable();
 }
@@ -225,9 +262,21 @@ void ThrusterConfigPanel::OnTextChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ThrusterConfigPanel::OnComboBoxChange(wxCommandEvent &event)
 {
-   isCoordSysChanged =  true;
-   coordsysName = coordsysComboBox->GetStringSelection().c_str();
-   theApplyButton->Enable();
+	if (event.GetEventObject() == coordsysComboBox)
+   {
+      isCoordSysChanged =  true;
+      coordsysName = coordsysComboBox->GetStringSelection().c_str();
+      theApplyButton->Enable();
+   }
+   else if (event.GetEventObject() == tankComboBox)
+   {
+   	   if (!isTankEmpty)
+      {
+   	      isTankChanged = true;
+         tankName = tankComboBox->GetStringSelection().c_str();
+         theApplyButton->Enable();
+      }
+   }
 }    
 
 //------------------------------------------------------------------------------

@@ -50,17 +50,23 @@ private:
     
     std::string thrusterName;
     std::string coordsysName;
+    std::string tankName;
+    
+    Integer tankSize;
     
     Thruster* theThruster;
     
     GuiItemManager *theGuiManager;
     
     bool isCoordSysChanged;
+    bool isTankChanged;
+    bool isTankEmpty;
     
     wxButton *cCoefButton;
     wxButton *kCoefButton;
     
     wxComboBox *coordsysComboBox;
+    wxComboBox *tankComboBox;
     
     wxTextCtrl *XTextCtrl;
     wxTextCtrl *YTextCtrl;
@@ -68,6 +74,7 @@ private:
     wxTextCtrl *scaleFactorTextCtrl;
     
     wxStaticText *coordsysStaticText;
+    wxStaticText *tankStaticText;
     wxStaticText *XStaticText;
     wxStaticText *YStaticText;
     wxStaticText *ZStaticText;
