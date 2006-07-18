@@ -69,7 +69,7 @@ FiniteBurnSetupPanel::FiniteBurnSetupPanel(wxWindow *parent,
 //------------------------------------------------------------------------------
 FiniteBurnSetupPanel::~FiniteBurnSetupPanel()
 {
-   theGuiManager->UnregisterComboBox("FuelTank", mTankComboBox);
+   //theGuiManager->UnregisterComboBox("FuelTank", mTankComboBox);
    theGuiManager->UnregisterComboBox("Thruster", mThrusterComboBox);
    theGuiManager->UnregisterComboBox("SpacePoint", mCentralBodyComboBox);
 }
@@ -152,8 +152,8 @@ void FiniteBurnSetupPanel::Create()
          theGuiManager->GetThrusterComboBox(this, ID_COMBOBOX, wxSize(150,-1));
 
       // label for tank combobox
-      wxStaticText *tankLabel = new wxStaticText(this, ID_TEXT,
-         wxT("Use tank"), wxDefaultPosition, wxDefaultSize, 0);
+      //wxStaticText *tankLabel = new wxStaticText(this, ID_TEXT,
+      //   wxT("Use tank"), wxDefaultPosition, wxDefaultSize, 0);
       
       // label for axes combobox
       wxStaticText *axesLabel = new wxStaticText(this, ID_TEXT,
@@ -188,8 +188,8 @@ void FiniteBurnSetupPanel::Create()
       }
       
       // combo box for avaliable tanks 
-      mTankComboBox =
-         theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(150,-1));
+      //mTankComboBox =
+      //   theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(150,-1));
 
       // create label for burn scale factor
       wxStaticText *scaleLabel = new wxStaticText(this, ID_TEXT,
@@ -213,8 +213,8 @@ void FiniteBurnSetupPanel::Create()
       pageSizer->Add(mThrusterComboBox, 0, wxALIGN_LEFT | wxALL, bsize);
 
       // add tank label and combobox to tank sizer    
-      pageSizer->Add(tankLabel, 0, wxALIGN_LEFT | wxALL, bsize);
-      pageSizer->Add(mTankComboBox, 0, wxALIGN_LEFT | wxALL, bsize);
+      //pageSizer->Add(tankLabel, 0, wxALIGN_LEFT | wxALL, bsize);
+      //pageSizer->Add(mTankComboBox, 0, wxALIGN_LEFT | wxALL, bsize);
 
       // add scale factor label and text control field to scale sizer    
       pageSizer->Add(scaleLabel, 0, wxALIGN_LEFT | wxALL, bsize);
@@ -270,18 +270,19 @@ void FiniteBurnSetupPanel::LoadData()
       }
 
       // load tanks
-      Integer tankID = theBurn->GetParameterID("Tanks");
-      StringArray tanks = theBurn->GetStringArrayParameter(tankID);
-      std::string tank = "";
+      //Integer tankID = theBurn->GetParameterID("Tanks");
+      //StringArray tanks = theBurn->GetStringArrayParameter(tankID);
+      //std::string tank = "";
+      
 // LTR on 07/07/06 - Not sure why we are adding another blank.
 //      mTankComboBox->Insert("", 0); //loj: 8/30/05 Added to show blank
 //      mTankComboBox->SetValue("");
       
-      if (tanks.size() > 0)
-      {
-         tank = tanks[0];
-         mTankComboBox->SetValue(tank.c_str());
-      }
+      //if (tanks.size() > 0)
+      //{
+      //   tank = tanks[0];
+      //   mTankComboBox->SetValue(tank.c_str());
+      //}
 
       // load burn scale factor
       Integer bsfID = theBurn->GetParameterID("BurnScaleFactor");
@@ -312,8 +313,8 @@ void FiniteBurnSetupPanel::LoadData()
       #if DEBUG_FINITEBURN_PANEL
       MessageInterface::ShowMessage
          ( "thruster list size = %d\n",thrusters.size() );
-      MessageInterface::ShowMessage
-         ( "tank list size = %d\n",tanks.size() );
+      //MessageInterface::ShowMessage
+      //   ( "tank list size = %d\n",tanks.size() );
       #endif
    }
    catch (BaseException &e)
@@ -343,10 +344,10 @@ void FiniteBurnSetupPanel::SaveData()
    theBurn->SetStringParameter(id, thruster, 0);
 
    // save tanks
-   wxString tankString = mTankComboBox->GetStringSelection();
-   id = theBurn->GetParameterID("Tanks");
-   std::string tank = std::string (tankString.c_str());
-   theBurn->SetStringParameter(id, tank, 0);
+   //wxString tankString = mTankComboBox->GetStringSelection();
+   //id = theBurn->GetParameterID("Tanks");
+   //std::string tank = std::string (tankString.c_str());
+   //theBurn->SetStringParameter(id, tank, 0);
     
    // save burn scale factor
    id = theBurn->GetParameterID("BurnScaleFactor");

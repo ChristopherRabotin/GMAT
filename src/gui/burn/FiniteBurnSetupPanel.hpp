@@ -35,7 +35,7 @@ private:
     FiniteBurn *theBurn;
 
     wxComboBox *mAxesComboBox;
-    wxComboBox *mTankComboBox;
+    //wxComboBox *mTankComboBox;
     wxComboBox *mThrusterComboBox;
     wxComboBox *mCentralBodyComboBox;
 //    wxGrid *engGrid;
