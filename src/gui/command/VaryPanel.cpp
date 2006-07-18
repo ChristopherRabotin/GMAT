@@ -99,10 +99,10 @@ void VaryPanel::Create()
       new wxStaticText(this, ID_TEXT, wxT("Max Step"), 
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *minValueStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Min Value"), 
+      new wxStaticText(this, ID_TEXT, wxT("Lower"), 
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *maxValueStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Max Value"), 
+      new wxStaticText(this, ID_TEXT, wxT("Upper"), 
                        wxDefaultPosition, wxDefaultSize, 0);
    
    // wxTextCtrl
