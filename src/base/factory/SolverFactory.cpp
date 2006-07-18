@@ -30,6 +30,8 @@
 //#include "ParametricScanner.hpp"
 //#include "MonteCarlo.hpp"
 
+#include "MessageInterface.hpp"  // temporary
+
 
 
 //---------------------------------
@@ -57,9 +59,7 @@ Solver* SolverFactory::CreateSolver(const std::string &ofType,
    //   return new SteepestDescent(withName);
    //else ... join lines ...
    if (ofType == "FminconOptimizer")
-//      return new FminconOptimizer(withName);
-  // fudged for now; no FminconOptimizer class yet
-  return new DifferentialCorrector(withName);
+      MessageInterface::ShowMessage("FmonconOptimizer not yet implemented ...\n");
    else if (ofType == "DifferentialCorrector")
       return new DifferentialCorrector(withName);
    // else if (ofType == "Broyden")
@@ -128,7 +128,7 @@ SolverFactory::SolverFactory(const SolverFactory& fact) :
    {
       //creatables.push_back("QuasiNewton");
       //creatables.push_back("SteepestDescent");
-      //creatables.push_back("FminconOptimizer");
+      creatables.push_back("FminconOptimizer");
       creatables.push_back("DifferentialCorrector");
       //creatables.push_back("Broyden");
       //creatables.push_back("ParametricScanner");
