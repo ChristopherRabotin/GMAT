@@ -115,6 +115,7 @@ OBJECTS = \
     burn/ImpulsiveBurnSetupPanel.o \
     command/AchievePanel.o \
     command/AssignmentPanel.o \
+    command/BeginFiniteBurnPanel.o \
     command/CallFunctionPanel.o \
     command/ManeuverPanel.o \
     command/PropagatePanel.o \
