@@ -1936,7 +1936,7 @@ bool Spacecraft::Initialize()
    }   
    if (!attitude)
    {
-      MessageInterface::ShowMessage("Spacecraft %s has no attitude set.\n",
+      MessageInterface::ShowMessage("Spacecraft %s has no defined attitude object.\n",
                      instanceName.c_str());
       //throw SpaceObjectException("Spacecraft has no attitude set.");
    }
