@@ -106,6 +106,7 @@ OBJECTS = \
     command/EndFor.o \
     command/EndFunction.o \
     command/EndIf.o \
+    command/EndOptimize.o \
     command/EndScript.o \
     command/EndTarget.o \
     command/EndWhile.o \
@@ -113,6 +114,7 @@ OBJECTS = \
     command/If.o \
     command/Maneuver.o \
     command/NoOp.o \
+    command/Optimize.o \
     command/Propagate.o \
     command/Report.o \
     command/Save.o \
