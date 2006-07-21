@@ -93,9 +93,9 @@ void CompareTextDialog::Create()
    mBaseDirButton =
       new wxButton(this, ID_BUTTON, wxT("Browse"),
                     wxDefaultPosition, wxSize(60,20), 0);
-      
+   
    wxStaticText *numFilesBaseDirLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Number of Files (.txt, .report):"),
+      new wxStaticText(this, ID_TEXT, wxT("Number of Files (.txt, .report, .data, .script):"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mNumFilesInBaseDirTextCtrl =
@@ -152,7 +152,7 @@ void CompareTextDialog::Create()
                     wxDefaultPosition, wxSize(60,20), 0);
    
    wxStaticText *numFilesInCompareDirLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Number of Files (.txt, .report):"),
+      new wxStaticText(this, ID_TEXT, wxT("Number of Files (.txt, .report, .data, .script):"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mNumFilesInCompareDirTextCtrl =
@@ -539,10 +539,11 @@ wxArrayString CompareTextDialog::GetFilenames(const wxString &dirname)
    bool cont = dir.GetFirst(&filename);
    while (cont)
    {
-      if (filename.Contains(".report") || filename.Contains(".txt"))
+      if (filename.Contains(".report") || filename.Contains(".txt") ||
+          filename.Contains(".data") || filename.Contains(".script"))
       {
          // if not backup files
-         if (filename.Last() == 't')
+         if (filename.Last() == 't' || filename.Last() == 'a')
          {
             filepath = dirname + "/" + filename;
             fileNames.Add(filepath);

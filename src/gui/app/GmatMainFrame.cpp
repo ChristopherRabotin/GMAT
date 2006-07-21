@@ -2242,12 +2242,12 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
    while (cont)
    {
       if (filename.Contains(".report") || filename.Contains(".txt") ||
-          filename.Contains(".script") || filename.Contains(".m"))
+          filename.Contains(".data") || filename.Contains(".script"))
       {
          filepath = baseDir + "/" + filename;
          
          // remove any backup files
-         if (filename.Last() == 't' || filename.Last() == 'm')
+         if (filename.Last() == 't' || filename.Last() == 'a')
             baseFileNameArray.push_back(filepath.c_str());
       }
       
