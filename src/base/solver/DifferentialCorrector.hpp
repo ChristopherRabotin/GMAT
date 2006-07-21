@@ -69,11 +69,13 @@ public:
                                   const std::string &actionData = "");
 
    // Solver interfaces used to talk to the Vary and Achieve commands
-   virtual Integer     SetSolverVariables(Real *data, const std::string &name);
-   virtual Real        GetSolverVariable(Integer id);
-   virtual Integer     SetSolverResults(Real *data, const std::string &name);
+   //virtual Integer     SetSolverVariables(Real *data, const std::string &name);
+   //virtual Real        GetSolverVariable(Integer id);
+   virtual Integer     SetSolverResults(Real *data, const std::string &name,
+                                        const std::string &type = "");
    virtual bool        UpdateSolverGoal(Integer id, Real newValue);
-   virtual void        SetResultValue(Integer id, Real value);
+   virtual void        SetResultValue(Integer id, Real value,
+                                      const std::string &resultType = "");
 
 protected:
    // Core data members used for the targeter numerics

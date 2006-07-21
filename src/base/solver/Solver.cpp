@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 
 
+#include <sstream>
 #include "Solver.hpp"
 #include "MessageInterface.hpp"
 
@@ -180,6 +181,27 @@ Solver& Solver::operator=(const Solver &sol)
 //------------------------------------------------------------------------------
 bool Solver::Initialize()
 {
+   // Setup the variable data structures
+   Integer localVariableCount = variableNames.size();
+
+   //FreeArrays();
+   
+   variable            = new Real[localVariableCount];
+   perturbation        = new Real[localVariableCount];
+   variableMinimum     = new Real[localVariableCount];
+   variableMaximum     = new Real[localVariableCount];
+   variableMaximumStep = new Real[localVariableCount];
+
+   for (Integer i = 0; i < localVariableCount; ++i)
+   {
+      // Set default values for min and max parameters
+      variable[i]            =  0.0;
+      variableMinimum[i]     = -9.999e300;
+      variableMaximum[i]     =  9.999e300;
+      variableMaximumStep[i] =  9.999e300;
+      perturbation[i]        =  1.0e-04;
+   }
+
    // Prepare the text file for output
    if (solverTextFile != "")
    {
@@ -193,7 +215,78 @@ bool Solver::Initialize()
       textFile.precision(16);
       WriteToTextFile();
    }
+   initialized = true; 
+   iterationsTaken = 0;
    return true;
+}
+
+//------------------------------------------------------------------------------
+//  Integer SetSolverVariables(Real *data, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Derived classes use this method to pass in parameter data specific to
+ * the algorithm implemented.
+ * 
+ * @param <data> An array of data appropriate to the variables used in the
+ *               algorithm.
+ * @param <name> A label for the data parameter.  Defaults to the empty
+ *               string.
+ * 
+ * @return The ID used for the variable.
+ */
+//------------------------------------------------------------------------------
+Integer Solver::SetSolverVariables(Real *data,
+                                                  const std::string &name)
+{
+   if (variableNames[variableCount] != name)
+      throw SolverException("Mismatch between parsed and configured variable");
+
+   variable[variableCount] = data[0];
+   perturbation[variableCount] = data[1];
+   // Sanity check min and max
+   if (data[2] >= data[3])
+   {
+      std::stringstream errMsg;
+      errMsg << "Minimum allowed variable value (received " << data[2]
+             << ") must be less than maximum (received " << data[3] << ")";
+      throw SolverException(errMsg.str());
+   }
+   if (data[4] <= 0.0)
+   {
+      std::stringstream errMsg;
+      errMsg << "Largest allowed step must be positive! (received "
+             << data[4] << ")";
+      throw SolverException(errMsg.str());
+   }
+
+   variableMinimum[variableCount] = data[2];
+   variableMaximum[variableCount] = data[3];
+   variableMaximumStep[variableCount] = data[4];
+   ++variableCount;
+
+   return variableCount-1;
+}
+
+
+//------------------------------------------------------------------------------
+//  Real GetSolverVariable(Integer id)
+//------------------------------------------------------------------------------
+/**
+ * Interface used to access Variable values.
+ * 
+ * @param <id> The ID used for the variable.
+ * 
+ * @return The value used for this variable
+ */
+//------------------------------------------------------------------------------
+Real Solver::GetSolverVariable(Integer id)
+{
+   if (id >= variableCount)
+      throw SolverException(
+         "Solver member requested a parameter outside the range "
+         "of the configured variables.");
+
+   return variable[id];
 }
 
 //------------------------------------------------------------------------------
@@ -551,7 +644,7 @@ void Solver::ReportProgress()
 }
 
 //------------------------------------------------------------------------------
-//  void ReportProgress()
+//  void SetDebugString(const std::string &str)
 //------------------------------------------------------------------------------
 /**
  * Fills the buffer with run data for (user space) debug mode in the Solvers.
@@ -756,6 +849,30 @@ void Solver::FreeArrays()
    {
       delete [] variable;
       variable = NULL;
+   }
+
+    if (perturbation)
+   {
+      delete [] perturbation;
+      perturbation = NULL;
+   }
+            
+   if (variableMinimum)
+   {
+      delete [] variableMinimum;
+      variableMinimum = NULL;
+   }
+
+   if (variableMaximum)
+   {
+      delete [] variableMaximum;
+      variableMaximum = NULL;
+   }
+
+   if (variableMaximumStep)
+   {
+      delete [] variableMaximumStep;
+      variableMaximumStep = NULL;
    }
 }
 

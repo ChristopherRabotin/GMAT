@@ -496,6 +496,7 @@ bool DifferentialCorrector::TakeAction(const std::string &action,
  * @return The ID used for the variable.
  */
 //------------------------------------------------------------------------------
+/*
 Integer DifferentialCorrector::SetSolverVariables(Real *data,
                                                   const std::string &name)
 {
@@ -527,7 +528,7 @@ Integer DifferentialCorrector::SetSolverVariables(Real *data,
 
    return variableCount-1;
 }
-
+*/
 
 //------------------------------------------------------------------------------
 //  Real GetSolverVariable(Integer id)
@@ -540,6 +541,7 @@ Integer DifferentialCorrector::SetSolverVariables(Real *data,
  * @return The value used for this variable
  */
 //------------------------------------------------------------------------------
+/*
 Real DifferentialCorrector::GetSolverVariable(Integer id)
 {
    if (id >= variableCount)
@@ -549,7 +551,7 @@ Real DifferentialCorrector::GetSolverVariable(Integer id)
 
    return variable[id];
 }
-
+*/
 
 //------------------------------------------------------------------------------
 // Integer SetSolverResults(Real *data, const std::string &name)
@@ -566,7 +568,8 @@ Real DifferentialCorrector::GetSolverVariable(Integer id)
  */
 //------------------------------------------------------------------------------
 Integer DifferentialCorrector::SetSolverResults(Real *data,
-                                                const std::string &name)
+                                                const std::string &name,
+                                                const std::string &type)
 {
     if (goalNames[goalCount] != name)
         throw SolverException("Mismatch between parsed and configured goal");
@@ -614,7 +617,8 @@ bool DifferentialCorrector::UpdateSolverGoal(Integer id, Real newValue)
  * @param <value> The corresponding result.
  */
 //------------------------------------------------------------------------------
-void DifferentialCorrector::SetResultValue(Integer id, Real value)
+void DifferentialCorrector::SetResultValue(Integer id, Real value,
+                                           const std::string &resultType)
 {
     if (currentState == NOMINAL) {
         nominal[id] = value;
@@ -658,14 +662,15 @@ bool DifferentialCorrector::Initialize()
       errorMessage += "More goals than variables\n";
       throw SolverException(errorMessage);
    }
+
    
    FreeArrays();
    
-   variable            = new Real[localVariableCount];
-   perturbation        = new Real[localVariableCount];
-   variableMinimum     = new Real[localVariableCount];
-   variableMaximum     = new Real[localVariableCount];
-   variableMaximumStep = new Real[localVariableCount];
+   //variable            = new Real[localVariableCount];
+   //perturbation        = new Real[localVariableCount];
+   //variableMinimum     = new Real[localVariableCount];
+   //variableMaximum     = new Real[localVariableCount];
+   //variableMaximumStep = new Real[localVariableCount];
    
    // Setup the goal data structures
    goal      = new Real[localGoalCount];
@@ -690,11 +695,14 @@ bool DifferentialCorrector::Initialize()
       inverseJacobian[i][i] = 1.0;
         
       // Set default values for min and max parameters
-      variable[i]            =  0.0;
-      variableMinimum[i]     = -9.999e300;
-      variableMaximum[i]     =  9.999e300;
-      variableMaximumStep[i] =  9.999e300;
+      //variable[i]            =  0.0;
+      //variableMinimum[i]     = -9.999e300;
+      //variableMaximum[i]     =  9.999e300;
+      //variableMaximumStep[i] =  9.999e300;
+      //perturbation[i]        =  1.0e-04;
    }
+
+   Solver::Initialize(); // for commented stuff, moved to Solver
    
    // Prepare the text file for output
    //if (solverTextFile != "")
@@ -709,15 +717,14 @@ bool DifferentialCorrector::Initialize()
    //   textFile.precision(16);
    //   WriteToTextFile();
    //}
-   Solver::Initialize(); // for above stuff, moved to Solver
    
     
    // Allocate the LU arrays
    indx = new Integer[variableCount];
    b = new Real[variableCount];
     
-   initialized = true;
-   iterationsTaken = 0;
+   //initialized = true;  // moved to Solver
+   //iterationsTaken = 0;
    return true;
 }
 
@@ -991,18 +998,18 @@ void DifferentialCorrector::InvertJacobian()
 void DifferentialCorrector::FreeArrays()
 {
    Solver::FreeArrays();
-    
-   //if (textFile.is_open())
-   //{
-   //   textFile.flush();
-   //   textFile.close();
-   //}
+   /*
+   if (textFile.is_open())
+   {
+      textFile.flush();
+      textFile.close();
+   }
         
-   //if (variable)
-   //{
-   //   delete [] variable;
-   //   variable = NULL;
-   //}
+   if (variable)
+   {
+      delete [] variable;
+      variable = NULL;
+   }
     
     if (perturbation)
    {
@@ -1027,7 +1034,7 @@ void DifferentialCorrector::FreeArrays()
       delete [] variableMaximumStep;
       variableMaximumStep = NULL;
    }
-
+   */
    if (goal)
    {
       delete [] goal;

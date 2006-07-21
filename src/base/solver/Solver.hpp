@@ -127,7 +127,7 @@ public:
     */
    //---------------------------------------------------------------------------
    virtual Integer     SetSolverVariables(Real *data,
-                                          const std::string &name) = 0;
+                                          const std::string &name);
 
    //---------------------------------------------------------------------------
    //  Real GetSolverVariable(Integer id)
@@ -141,7 +141,7 @@ public:
     * @return The value used for this variable
     */
    //---------------------------------------------------------------------------
-   virtual Real        GetSolverVariable(Integer id) = 0;
+   virtual Real        GetSolverVariable(Integer id);
     
    //---------------------------------------------------------------------------
    //  Integer SetSolverResults(Real *data, std::string name)
@@ -158,7 +158,8 @@ public:
     */
    //---------------------------------------------------------------------------
    virtual Integer     SetSolverResults(Real *data,
-                                        const std::string &name) = 0;
+                                        const std::string &name,
+                                        const std::string &type = "") = 0;
     
    //---------------------------------------------------------------------------
    //  void SetResultValue(Integer id, Real value)
@@ -170,7 +171,8 @@ public:
     * @param <value> The corresponding result.
     */
    //---------------------------------------------------------------------------
-   virtual void        SetResultValue(Integer id, Real value) = 0;
+   virtual void        SetResultValue(Integer id, Real value,
+                                      const std::string &resultType = "") = 0;
 
 protected:
    /// Current state for the state machine
