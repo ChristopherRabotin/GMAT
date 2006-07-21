@@ -763,8 +763,11 @@ bool OpenGlPlot::RenameRefObject(const Gmat::ObjectType type,
       // removed and inserted with new name
       //----------------------------------------------------
       std::map<std::string, UnsignedInt>::iterator orbColorPos, targColorPos;
+      std::map<std::string, bool>::iterator drawOrbitPos, showObjectPos;
       orbColorPos = mOrbitColorMap.find(oldName);
       targColorPos = mTargetColorMap.find(oldName);
+      drawOrbitPos = mDrawOrbitMap.find(oldName);
+      showObjectPos = mShowObjectMap.find(oldName);
    
       if (orbColorPos != mOrbitColorMap.end() &&
           targColorPos != mTargetColorMap.end())
@@ -772,9 +775,13 @@ bool OpenGlPlot::RenameRefObject(const Gmat::ObjectType type,
          // add new spacecraft name key and delete old
          mOrbitColorMap[newName] = mOrbitColorMap[oldName];
          mTargetColorMap[newName] = mTargetColorMap[oldName];
+         mDrawOrbitMap[newName] = mDrawOrbitMap[oldName];
+         mShowObjectMap[newName] = mShowObjectMap[oldName];
          mOrbitColorMap.erase(orbColorPos);
          mTargetColorMap.erase(targColorPos);
-      
+         mDrawOrbitMap.erase(drawOrbitPos);
+         mShowObjectMap.erase(showObjectPos);
+         
          #if DEBUG_RENAME
          MessageInterface::ShowMessage("---After rename\n");
          for (orbColorPos = mOrbitColorMap.begin();
