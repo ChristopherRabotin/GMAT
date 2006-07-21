@@ -153,6 +153,24 @@ std::string GmatStringUtil::Capitalize(const std::string &str)
 
 
 //------------------------------------------------------------------------------
+// std::string Replace(const std::string &str, const std::string &from,
+//                     const std::string &to)
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::Replace(const std::string &str, const std::string &from,
+                                    const std::string &to)
+{
+   std::string str1 = str;
+   std::string::size_type pos = str1.find(from);
+   
+   pos = str1.find(from);
+   if (pos != str1.npos)
+      str1.replace(pos, from.size(), to);
+
+   return str1;
+}
+
+
+//------------------------------------------------------------------------------
 // std::string ToString(const Integer &val, Integer width=3)
 //------------------------------------------------------------------------------
 std::string GmatStringUtil::ToString(const Integer &val, Integer width)
