@@ -215,7 +215,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    dateFormat           (a.dateFormat),
    stateType            (a.stateType),
    anomalyType          (a.anomalyType),
-   internalCoordSystem  (NULL),
+   internalCoordSystem  (a.internalCoordSystem),
    coordinateSystem     (a.coordinateSystem),      // Check this one...
    coordSysName         (a.coordSysName),
    attitude             (a.attitude),              // Check this one too ...
@@ -2411,18 +2411,18 @@ void Spacecraft::UpdateElementLabels()
    if (stateType == "Equinoctial")
    {
       stateElementLabel[0] = "SMA";
-   	stateElementLabel[1] = "PEY";
-   	stateElementLabel[2] = "PEX";
-   	stateElementLabel[3] = "PNY";
-   	stateElementLabel[4] = "PNX";
-   	stateElementLabel[5] = "MLONG";
-   	  
+        stateElementLabel[1] = "PEY";
+        stateElementLabel[2] = "PEX";
+        stateElementLabel[3] = "PNY";
+        stateElementLabel[4] = "PNX";
+        stateElementLabel[5] = "MLONG";
+          
       stateElementUnits[0] = "km";
       stateElementUnits[1] = "?";
       stateElementUnits[2] = "?";
       stateElementUnits[3] = "?";
       stateElementUnits[4] = "?";
-      stateElementUnits[5] = "?";   	  
+      stateElementUnits[5] = "?";         
       
       return;
    }
