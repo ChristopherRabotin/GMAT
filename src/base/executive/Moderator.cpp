@@ -2394,9 +2394,6 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       // set burn
       cmd->SetRefObjectName(Gmat::BURN, GetDefaultBurn("FiniteBurn")->GetName());
 
-      // set Thruter to FiniteBurn
-      //Hardware *hw GetDefaultHardware("Thruster");
-      
       // set spacecraft
       cmd->SetRefObjectName(Gmat::SPACECRAFT, GetDefaultSpacecraft()->GetName());
    }
@@ -2412,6 +2409,14 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          StringArray scNames = refCmd->GetRefObjectNameArray(Gmat::SPACECRAFT);
          for (UnsignedInt i=0; i<scNames.size(); i++)
             cmd->SetRefObjectName(Gmat::SPACECRAFT, scNames[i]);
+      }
+      else
+      {
+         // set burn
+         cmd->SetRefObjectName(Gmat::BURN, GetDefaultBurn("FiniteBurn")->GetName());
+         
+         // set spacecraft
+         cmd->SetRefObjectName(Gmat::SPACECRAFT, GetDefaultSpacecraft()->GetName());
       }
    }
    else if (type == "Target")
@@ -2475,7 +2480,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          
          // set goal parameter
          id = cmd->GetParameterID("Goal");
-         cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName() + ".RMAG");
+         cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName() + ".Earth.RMAG");
          
          id = cmd->GetParameterID("GoalValue");
          cmd->SetStringParameter(id, "42165.0"); 
