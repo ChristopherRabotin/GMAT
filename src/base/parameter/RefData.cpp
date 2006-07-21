@@ -169,8 +169,9 @@ std::string RefData::GetRefObjectName(const Gmat::ObjectType type) const
       ("RefData::GetRefObjectName() type=%d returning:INVALID_OBJECT_TYPE\n", type);
    #endif
    
+   return "UNDEFINED";
    //return "RefData::GetRefObjectName(): INVALID_OBJECT_TYPE";
-   throw ParameterException("RefData::GetRefObjectName(): INVALID_OBJECT_TYPE");
+   //loj:5/26/06 throw ParameterException("RefData::GetRefObjectName(): INVALID_OBJECT_TYPE");
 }
 
 
