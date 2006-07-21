@@ -97,7 +97,8 @@ namespace GmatTree
       MISSION_ICON_SAVE,
       MISSION_ICON_ASSIGNMENT,
       MISSION_ICON_TOGGLE,
-      MISSION_ICON_BEGIN,
+      MISSION_ICON_BEGIN_FB,
+      MISSION_ICON_END_FB,
 
       MISSION_NO_ICON,
    };
@@ -183,6 +184,9 @@ namespace GmatTree
       SCRIPT_FILE,
       END_OF_RESOURCE,
       
+      //------------------------------------------
+      // Note: MissionTree uses EVT_MENU_RANGE
+      //------------------------------------------
       //---------- Mission Tree
       MISSIONS_FOLDER,
       MISSION_SEQ_TOP_FOLDER,
@@ -194,8 +198,8 @@ namespace GmatTree
       PROPAGATE_COMMAND,
       MANEUVER_COMMAND,
       BEGIN_FINITE_BURN_COMMAND,
+      END_FINITE_BURN_COMMAND,
       TARGET_COMMAND,
-      END_TARGET_COMMAND,
       ACHIEVE_COMMAND,
       VARY_COMMAND,
       SAVE_COMMAND,
@@ -215,22 +219,13 @@ namespace GmatTree
       DO_CONTROL,
       SWITCH_CONTROL,
       END_OF_CONTROL,
-
-      // no panel will be created for ELSE_, END_
-      ELSE_CONTROL,
-      END_IF_CONTROL,
-      END_FOR_CONTROL,
-      END_DO_CONTROL,
-      END_WHILE_CONTROL,
-      END_SWITCH_CONTROL,
-      END_FINITE_BURN_COMMAND,
       
       //---------- Output Tree
       OUTPUT_FOLDER,
       REPORTS_FOLDER,
       OPENGL_PLOTS_FOLDER,
       XY_PLOTS_FOLDER,
-
+      
       // for output
       BEGIN_OF_OUTPUT,
       OUTPUT_REPORT,
@@ -238,6 +233,18 @@ namespace GmatTree
       OUTPUT_XY_PLOT,
       COMPARE_REPORT,
       END_OF_OUTPUT,
+      
+      //---------- NO panels will be created
+      BEGIN_NO_PANEL,
+      END_TARGET_COMMAND,
+      ELSE_CONTROL,
+      END_IF_CONTROL,
+      END_FOR_CONTROL,
+      END_DO_CONTROL,
+      END_WHILE_CONTROL,
+      END_SWITCH_CONTROL,
+      END_NO_PANEL,
+      
    };
 }
 #endif // GmatTreeItemData_hpp

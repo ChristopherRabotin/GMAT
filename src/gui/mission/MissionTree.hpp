@@ -53,6 +53,7 @@ private:
    wxTreeItemId mNewTreeId;
    
    bool before;
+   int mTempCounter;
    int mNumMissionSeq;
    int mNumPropagate;
    int mNumManeuver;
@@ -151,7 +152,8 @@ private:
       //----- begin of MENU_EVT_RANGE of OnAddCommand()
       POPUP_ADD_PROPAGATE,
       POPUP_ADD_MANEUVER,
-      POPUP_ADD_FINITE_BURN,
+      POPUP_ADD_BEGIN_FINITE_BURN,
+      POPUP_ADD_END_FINITE_BURN,
       POPUP_ADD_TARGET,
       POPUP_ADD_VARY,
       POPUP_ADD_ACHIEVE,
@@ -176,7 +178,8 @@ private:
       //----- begin of MENU_EVT_RANGE of OnInsertCommand()
       POPUP_INSERT_PROPAGATE, 
       POPUP_INSERT_MANEUVER,
-      POPUP_INSERT_FINITE_BURN,
+      POPUP_INSERT_BEGIN_FINITE_BURN,
+      POPUP_INSERT_END_FINITE_BURN,
       POPUP_INSERT_TARGET,
       POPUP_INSERT_VARY,
       POPUP_INSERT_ACHIEVE,

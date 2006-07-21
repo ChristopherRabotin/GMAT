@@ -27,6 +27,8 @@
 #include "bitmaps/saveobject.xpm"
 #include "bitmaps/equalsign.xpm"
 #include "bitmaps/toggle.xpm"
+#include "bitmaps/beginfb.xpm"
+#include "bitmaps/endfb.xpm"
 
 #include "MissionTree.hpp"
 #include "MissionTreeItemData.hpp"
@@ -119,6 +121,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mCommandList.Add("Propagate");
    mCommandList.Add("Maneuver");
    mCommandList.Add("BeginFiniteBurn");
+   mCommandList.Add("EndFiniteBurn");
    mCommandList.Add("Target");
    mCommandList.Add("CallFunction");
    mCommandList.Add("GMAT");
@@ -172,6 +175,7 @@ void MissionTree::UpdateMission(bool resetCounter)
 //------------------------------------------------------------------------------
 void MissionTree::InitializeCounter()
 {
+   mTempCounter = 0;
    mNumManeuver = 0;
    mNumMissionSeq = 0;
    mNumPropagate = 0;
@@ -269,31 +273,29 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
          inScriptEvent = false;
    }
    
-   // BeginFiniteBurn is not a brach command but treat it as branch command
-   // in the MissionTree, i.e show folder icon
+//    // BeginFiniteBurn is not a brach command but treat it as branch command
+//    // in the MissionTree, i.e show folder icon
    
-   else if (cmdTypeName == "BeginFiniteBurn")
-   {
-      mFiniteBurnTreeId = 
-         AppendCommand(parent, GetIconId(cmdTypeName),
-                       GetCommandId(cmdTypeName), cmd,
-                       GetCommandCounter(cmdTypeName),
-                       *GetCommandCounter(cmdTypeName));
+//    else if (cmdTypeName == "BeginFiniteBurn")
+//    {
+//       mFiniteBurnTreeId = 
+//          AppendCommand(parent, GetIconId(cmdTypeName),
+//                        GetCommandId(cmdTypeName), cmd,
+//                        GetCommandCounter(cmdTypeName),
+//                        *GetCommandCounter(cmdTypeName));
       
-      inFiniteBurn = true;
-      SetItemImage(mFiniteBurnTreeId, GmatTree::MISSION_ICON_OPENFOLDER,
-                   wxTreeItemIcon_Expanded);
-//       Expand(mFiniteBurnTreeId);
-//       Expand(parent);
-   }
-   else if (cmdTypeName == "EndFiniteBurn")
-   {
-      mNewTreeId =
-         AppendCommand(mFiniteBurnTreeId, GmatTree::MISSION_ICON_NEST_RETURN,
-                       GmatTree::END_FINITE_BURN_COMMAND,
-                       cmd, &mNumFiniteBurn, mNumFiniteBurn);
-      inFiniteBurn = false;
-   }
+//       inFiniteBurn = true;
+//       SetItemImage(mFiniteBurnTreeId, GmatTree::MISSION_ICON_OPENFOLDER,
+//                    wxTreeItemIcon_Expanded);
+//    }
+//    else if (cmdTypeName == "EndFiniteBurn")
+//    {
+//       mNewTreeId =
+//          AppendCommand(mFiniteBurnTreeId, GmatTree::MISSION_ICON_NEST_RETURN,
+//                        GmatTree::END_FINITE_BURN_COMMAND,
+//                        cmd, &mNumFiniteBurn, mNumFiniteBurn);
+//       inFiniteBurn = false;
+//    }
    else if (cmdTypeName == "NoOp")
    {
       
@@ -302,8 +304,8 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    {
       currId = parent;
       
-      if (inFiniteBurn)
-         currId = mFiniteBurnTreeId;
+//       if (inFiniteBurn)
+//          currId = mFiniteBurnTreeId;
       
       mNewTreeId = 
             AppendCommand(currId, GetIconId(cmdTypeName),
@@ -379,7 +381,9 @@ void MissionTree::AppendCommand(const wxString &cmdName)
    
    wxTreeItemId itemId = GetSelection();
    wxTreeItemId lastId = GetLastChild(itemId);
-
+   wxTreeItemId parentId = GetItemParent(itemId);
+   wxTreeItemId currId = itemId;
+   
    #if DEBUG_MISSION_TREE
    MessageInterface::ShowMessage("MissionTree::AppendCommand(%s) still here,  "
                      "\n    itemId = \"%s\"\n   lastId = \"%s\"\n",
@@ -438,7 +442,7 @@ void MissionTree::AppendCommand(const wxString &cmdName)
       MessageInterface::ShowMessage
          ("MissionTree::AppendCommand(%s) calling InsertCommand()\n", cmdName.c_str());
       #endif
-      
+
       wxTreeItemId node =
          InsertCommand(itemId, itemId, prevId, GetIconId(cmdName),
                        GetCommandId(cmdName), cmdName, prevCmd, cmd,
@@ -472,7 +476,7 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
 {
    #if DEBUG_MISSION_TREE
    MessageInterface::ShowMessage
-      ("MissionTree::OnAppendCommand(%s) type = \"%s\" and name = \"%s\"\n",
+      ("MissionTree::AppendCommand(%s) type = \"%s\" and name = \"%s\"\n",
        GetItemText(parent).c_str(),  cmd->GetTypeName().c_str(), 
        cmd->GetName().c_str());
    #endif
@@ -606,6 +610,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
 {
    MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(currId); 
    GmatCommand *currCmd = currItem->GetCommand();
+   wxString currTypeName = currCmd->GetTypeName().c_str();
    wxString typeName = cmd->GetTypeName().c_str();
    wxString nodeName = cmd->GetName().c_str();
    wxTreeItemId node;
@@ -627,7 +632,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
        "cmdCount=%d\n   parentCmd=%s, prevCmd=%s, currCmd=%s\n", cmdName.c_str(),
        typeName.c_str(), nodeName.c_str(), *cmdCount,
        parentCmd->GetTypeName().c_str(), prevCmd->GetTypeName().c_str(),
-       currCmd->GetTypeName().c_str());
+       currTypeName.c_str());
    #endif
    
    //@Note "BeginFiniteBurn" is not a branch command but need "EndFiniteBurn"
@@ -636,8 +641,8 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
    // Create End* command if branch command
    //------------------------------------------------------------
    if (typeName == "Target" || typeName == "For"  ||  typeName == "While" ||
-       typeName == "If" || typeName == "BeginScript" ||
-       typeName == "BeginFiniteBurn")
+       typeName == "If" || typeName == "BeginScript")
+       ////typeName == "BeginFiniteBurn")
    {
       if (typeName == "Target")
       {
@@ -664,11 +669,11 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
          endCmd = theGuiInterpreter->CreateCommand("EndScript");
          endType = GmatTree::END_TARGET_COMMAND;
       }
-      else if (typeName == "BeginFiniteBurn")
-      {
-         endCmd = theGuiInterpreter->CreateDefaultCommand("EndFiniteBurn", "", cmd);
-         endType = GmatTree::END_FINITE_BURN_COMMAND;
-      }
+//       else if (typeName == "BeginFiniteBurn")
+//       {
+//          endCmd = theGuiInterpreter->CreateDefaultCommand("EndFiniteBurn", "", cmd);
+//          endType = GmatTree::END_FINITE_BURN_COMMAND;
+//       }
       
       // create Else (temp code)
       if (cmdName == "IfElse")
@@ -695,8 +700,8 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
    if (nodeName.Trim() == "" || nodeName == typeName)
       nodeName.Printf("%s%d", typeName.c_str(), ++(*cmdCount));
    
-   if (nodeName.Contains("BeginScript"))
-      nodeName.Replace("BeginScript", "ScriptEvent");
+//    if (nodeName.Contains("BeginScript"))
+//       nodeName.Replace("BeginScript", "ScriptEvent");
    
    #if DEBUG_MISSION_TREE
    MessageInterface::ShowMessage
@@ -749,10 +754,15 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
          node = AppendItem(currId, nodeName, icon, -1,
                            new MissionTreeItemData(nodeName, type, nodeName, cmd));
       }
+      else if (typeName == "EndFiniteBurn")
+      {
+         node = AppendItem(parentId, nodeName, icon, -1,
+                           new MissionTreeItemData(nodeName, type, nodeName, cmd));
+      }
       else if (prevTypeName == "NoOp" ||
                prevTypeName == "Target" || prevTypeName == "For"  ||
-               prevTypeName == "While" || prevTypeName == "If" ||
-               prevTypeName == "BeginFiniteBurn")
+               prevTypeName == "While" || prevTypeName == "If")
+               ////prevTypeName == "BeginFiniteBurn")
       {
          node = InsertItem(parentId, 0, nodeName, icon, -1,
                            new MissionTreeItemData(nodeName, type, nodeName, cmd));
@@ -774,7 +784,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
       // Append End* command
       //---------------------------------------------------------
       if (typeName == "Target" || typeName == "For"  ||  typeName == "While" ||
-          typeName == "If" || typeName == "BeginFiniteBurn")
+          typeName == "If")//// || typeName == "BeginFiniteBurn")
       {
          // append Else (temp code until Else is implemented)
          if (cmdName == "IfElse")
@@ -798,9 +808,9 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
          else
          {
             wxString endName;
-            if (typeName == "BeginFiniteBurn")
-               endName = "EndFiniteBurn";
-            else
+//             if (typeName == "BeginFiniteBurn")
+//                endName = "EndFiniteBurn";
+//             else
                endName = "End" + typeName;
             
             endName.Printf("%s%d", endName.c_str(), *cmdCount);
@@ -898,7 +908,7 @@ void MissionTree::AddIcons()
    wxImageList *images = new wxImageList ( size, size, true );
 
    wxBusyCursor wait;
-   wxIcon icons[15];
+   wxIcon icons[17];
 
    icons[0] = wxIcon ( propagateevent_xpm );
    icons[1] = wxIcon ( target_xpm );
@@ -915,6 +925,8 @@ void MissionTree::AddIcons()
    icons[12]= wxIcon ( saveobject_xpm );
    icons[13]= wxIcon ( equalsign_xpm );
    icons[14]= wxIcon ( toggle_xpm );
+   icons[15]= wxIcon ( beginfb_xpm );
+   icons[16]= wxIcon ( endfb_xpm );
 
 //   int sizeOrig = icons[0].GetWidth();
    for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
@@ -1045,7 +1057,6 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       menu.Enable(POPUP_RENAME, FALSE);
       menu.AppendSeparator();
       menu.Append(POPUP_RUN, wxT("Run"));
-      //loj: 6/12/06 added to show script
       menu.AppendSeparator();
       menu.Append(POPUP_SHOW_SCRIPT, wxT("Show Script"));
    }
@@ -1086,8 +1097,7 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
             if ((dataType == GmatTree::IF_CONTROL) ||
                 (dataType == GmatTree::ELSE_CONTROL) ||
                 (dataType == GmatTree::FOR_CONTROL) ||
-                (dataType == GmatTree::WHILE_CONTROL) ||
-                (dataType == GmatTree::BEGIN_FINITE_BURN_COMMAND)) //loj: 7/17/06 Added
+                (dataType == GmatTree::WHILE_CONTROL))
             {
                menu.Append(POPUP_ADD_COMMAND, wxT("Append"),
                            CreatePopupMenu(dataType, false));
@@ -1140,8 +1150,11 @@ void MissionTree::OnAddCommand(wxCommandEvent &event)
    case POPUP_ADD_MANEUVER:
       AppendCommand("Maneuver");
       break;
-   case POPUP_ADD_FINITE_BURN:
+   case POPUP_ADD_BEGIN_FINITE_BURN:
       AppendCommand("BeginFiniteBurn");
+      break;
+   case POPUP_ADD_END_FINITE_BURN:
+      AppendCommand("EndFiniteBurn");
       break;
    case POPUP_ADD_TARGET:
       AppendCommand("Target");
@@ -1210,8 +1223,11 @@ void MissionTree::OnInsertCommand(wxCommandEvent &event)
    case POPUP_INSERT_MANEUVER:
       InsertCommand("Maneuver");
       break;
-   case POPUP_INSERT_FINITE_BURN:
+   case POPUP_INSERT_BEGIN_FINITE_BURN:
       InsertCommand("BeginFiniteBurn");
+      break;
+   case POPUP_INSERT_END_FINITE_BURN:
+      InsertCommand("EndFiniteBurn");
       break;
    case POPUP_INSERT_TARGET:
       InsertCommand("Target");
@@ -1283,13 +1299,13 @@ wxMenu* MissionTree::CreatePopupMenu(int type, bool insert)
    
    unsigned int i;
    wxMenu *menu = new wxMenu;
-   
+
    for (i=0; i<mCommandList.GetCount(); i++)
       menu->Append(GetMenuId(mCommandList[i], insert), mCommandList[i]);
    
    menu->Append(POPUP_CONTROL_LOGIC, "Control Logic",
                 CreateControlLogicPopupMenu(type, insert));
-
+   
    return menu;
 }
 
@@ -1592,7 +1608,9 @@ int MissionTree::GetMenuId(const wxString &cmd, bool insert)
          else if (cmd == "Maneuver")
             return POPUP_INSERT_MANEUVER;
          else if (cmd == "BeginFiniteBurn")
-            return POPUP_INSERT_FINITE_BURN;
+            return POPUP_INSERT_BEGIN_FINITE_BURN;
+         else if (cmd == "EndFiniteBurn")
+            return POPUP_INSERT_END_FINITE_BURN;
          else if (cmd == "Target")
             return POPUP_INSERT_TARGET;
          else if (cmd == "CallFunction")
@@ -1616,7 +1634,9 @@ int MissionTree::GetMenuId(const wxString &cmd, bool insert)
          else if (cmd == "Maneuver")
             return POPUP_ADD_MANEUVER;
          else if (cmd == "BeginFiniteBurn")
-            return POPUP_ADD_FINITE_BURN;
+            return POPUP_ADD_BEGIN_FINITE_BURN;
+         else if (cmd == "EndFiniteBurn")
+            return POPUP_ADD_END_FINITE_BURN;
          else if (cmd == "Target")
             return POPUP_ADD_TARGET;
          else if (cmd == "CallFunction")
@@ -1649,9 +1669,9 @@ GmatTree::MissionIconType MissionTree::GetIconId(const wxString &cmd)
    if (cmd == "Maneuver")
       return GmatTree::MISSION_ICON_DELTA_V;
    if (cmd == "BeginFiniteBurn")
-      return GmatTree::MISSION_ICON_FOLDER;
+      return GmatTree::MISSION_ICON_BEGIN_FB;
    if (cmd == "EndFiniteBurn")
-      return GmatTree::MISSION_ICON_NEST_RETURN;
+      return GmatTree::MISSION_ICON_END_FB;
    if (cmd == "Target")
       return GmatTree::MISSION_ICON_TARGET;
    if (cmd == "EndTarget")

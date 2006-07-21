@@ -48,6 +48,7 @@
 #include "SQPSetupPanel.hpp"
 #include "ManeuverPanel.hpp"
 #include "BeginFiniteBurnPanel.hpp"
+#include "EndFiniteBurnPanel.hpp"
 #include "XyPlotSetupPanel.hpp"
 #include "OpenGlPlotSetupPanel.hpp"
 #include "ReportFileSetupPanel.hpp"
@@ -338,7 +339,7 @@ GmatMainFrame::~GmatMainFrame()
 //    CloseAllChildren(true, true);
    
    if (theGuiInterpreter)
-      theGuiInterpreter->Finalize(); 
+      theGuiInterpreter->Finalize();
 }
 
 
@@ -397,7 +398,10 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item)
    else if (dataType >= GmatTree::BEGIN_OF_OUTPUT &&
             dataType <= GmatTree::END_OF_OUTPUT)
    {
-      newChild = CreateNewOutput(item->GetDesc(), item->GetDesc(), dataType);
+      // Create panel if Report or Compare Report
+      if (dataType == GmatTree::OUTPUT_REPORT ||
+          dataType == GmatTree::COMPARE_REPORT)
+         newChild = CreateNewOutput(item->GetDesc(), item->GetDesc(), dataType);
    }
    else
    {
@@ -1519,6 +1523,9 @@ GmatMainFrame::CreateNewCommand(const wxString &title,
    case GmatTree::BEGIN_FINITE_BURN_COMMAND:
       sizer->Add(new BeginFiniteBurnPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
+   case GmatTree::END_FINITE_BURN_COMMAND:
+      sizer->Add(new EndFiniteBurnPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
+      break;
    case GmatTree::TARGET_COMMAND:
       sizer->Add(new TargetPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
@@ -2234,12 +2241,13 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
    bool cont = dir.GetFirst(&filename);
    while (cont)
    {
-      if (filename.Contains(".report") || filename.Contains(".txt"))
+      if (filename.Contains(".report") || filename.Contains(".txt") ||
+          filename.Contains(".script") || filename.Contains(".m"))
       {
          filepath = baseDir + "/" + filename;
          
          // remove any backup files
-         if (filename.Last() == 't')
+         if (filename.Last() == 't' || filename.Last() == 'm')
             baseFileNameArray.push_back(filepath.c_str());
       }
       
@@ -2300,7 +2308,7 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
    if (fileCount == 0)
    {
       textCtrl->AppendText("** There is no report file to compare.\n\n");
-      MessageInterface::ShowMessage("** There is no report file to compare.\n");
+      MessageInterface::ShowMessage("** There is no files to compare.\n");
    }
    else
    {
