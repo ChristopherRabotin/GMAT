@@ -21,6 +21,7 @@
 #include "Vary.hpp"
 #include "DifferentialCorrector.hpp"
 #include "Parameter.hpp"
+#include "StringUtil.hpp"  // for Replace()
 #include "MessageInterface.hpp"
 #include <sstream>         // for std::stringstream
 
@@ -229,10 +230,25 @@ bool Vary::RenameRefObject(const Gmat::ObjectType type,
                            const std::string &oldName,
                            const std::string &newName)
 {
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Vary::RenameRefObject() type=%d, oldName=%s, newName=%s\n",
+       type, oldName.c_str(), newName.c_str());
+   #endif
+   
    if (type == Gmat::SOLVER)
    {
       if (solverName == oldName)
          solverName = newName;
+   }
+   else if (type == Gmat::BURN)
+   {
+      for (unsigned int i=0; i<variableName.size(); i++)
+      {
+         if (variableName[i].find(oldName) != std::string::npos)
+            variableName[i] =
+               GmatStringUtil::Replace(variableName[i], oldName, newName);
+      }
    }
    else if (type == Gmat::PARAMETER)
    {

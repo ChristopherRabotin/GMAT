@@ -635,6 +635,9 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
             mapping[newName] = obj;
             obj->SetName(newName);
             renamed = true;
+            #if DEBUG_RENAME
+            MessageInterface::ShowMessage("===> Rename mapping obj=%s\n", obj->GetName().c_str());
+            #endif
          }
          else
          {
@@ -670,7 +673,10 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
       obj = GetItem(itemList[i]);
       if (obj)
       {
-         //MessageInterface::ShowMessage("===> Rename obj=%s\n", obj->GetName().c_str());
+         #if DEBUG_RENAME
+         MessageInterface::ShowMessage("===> Rename obj=%s\n", obj->GetName().c_str());
+         #endif
+         
          renamed = obj->RenameRefObject(type, oldName, newName);
       }
    }
@@ -698,7 +704,7 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
    //----------------------------------------------------
       
    else if (type == Gmat::SPACECRAFT || type == Gmat::COORDINATE_SYSTEM ||
-       type == Gmat::CALCULATED_POINT)
+            type == Gmat::CALCULATED_POINT || type == Gmat::BURN) //loj: 7/20/06 Added BURN
    {
       StringArray params = GetListOfItems(Gmat::PARAMETER);
       std::string oldParamName, newParamName;
@@ -867,7 +873,7 @@ StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
    static StringArray itemList;
    itemList.clear();
 
-   #if DEBUG_CONFIG
+   #if DEBUG_RENAME
    MessageInterface::ShowMessage
       ("ConfigManager::GetListOfItemsHas() name=%s, includeSysParam=%d\n",
        name.c_str(), includeSysParam);
@@ -879,7 +885,7 @@ StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
       {
          obj = GetItem(items[i]);
          
-         #if DEBUG_CONFIG > 1
+         #if DEBUG_RENAME
          MessageInterface::ShowMessage
             ("===> obj[%d]=%s, %s\n", i, obj->GetTypeName().c_str(),
              obj->GetName().c_str());
@@ -901,7 +907,7 @@ StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
          objString = obj->GetGeneratingString();
          pos = objString.find(name);
          
-         #if DEBUG_CONFIG > 1
+         #if DEBUG_RENAME
          MessageInterface::ShowMessage
             ("===> objString=\n%s\n", objString.c_str());
          #endif
@@ -911,14 +917,6 @@ StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
             itemList.push_back(objName);
          }
       }
-      
-      #if DEBUG_CONFIG
-      for (UnsignedInt i=0; i<itemList.size(); i++)
-      {
-         MessageInterface::ShowMessage
-            ("===> itemList[%d]=%s\n", i, itemList[i].c_str());
-      }
-      #endif
    }
    catch (BaseException &e)
    {

@@ -226,11 +226,25 @@ bool Achieve::RenameRefObject(const Gmat::ObjectType type,
       std::string::size_type pos = goalName.find(oldName);
       if (pos != goalName.npos)
          goalName.replace(pos, oldName.size(), newName);
+
+      // achieve name
+      if (isAchieveParm)
+      {
+         pos = achieveName.find(oldName);
+         if (pos != goalName.npos)
+            achieveName.replace(pos, oldName.size(), newName);
+      }
    }
    else if (type == Gmat::PARAMETER)
    {
       if (goalName == oldName)
          goalName = newName;
+
+      if (achieveName == oldName)
+         achieveName = newName;
+
+      if (achieveArrName == oldName)
+         achieveArrName = newName;
    }
    
    return true;
@@ -420,7 +434,7 @@ bool Achieve::SetStringParameter(const Integer id, const std::string &value)
    
    if (id == goalValueID) {
       achieveName = value;
-      // Goal can be either a parameter or a number; ConstructGoal determines this.
+      // Goal value can be either a parameter or a number; ConstructGoal determines this.
       Real realValue;
       if (ConstructGoal(value.c_str()))
       {
