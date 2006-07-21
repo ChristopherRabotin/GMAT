@@ -307,6 +307,8 @@ OBJECTS = \
     solarsys/SolarSystem.o \
     solarsys/Star.o \
     solver/DifferentialCorrector.o \
+    solver/ExternalOptimizer.o \
+    solver/FminconOptimizer.o \
     solver/Optimizer.o \
     solver/Solver.o \
     spacecraft/Converter.o \
