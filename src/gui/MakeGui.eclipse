@@ -117,6 +117,7 @@ OBJECTS = \
     command/AssignmentPanel.o \
     command/BeginFiniteBurnPanel.o \
     command/CallFunctionPanel.o \
+    command/EndFiniteBurnPanel.o \
     command/ManeuverPanel.o \
     command/PropagatePanel.o \
     command/SavePanel.o \
