@@ -54,6 +54,9 @@ FiniteBurnSetupPanel::FiniteBurnSetupPanel(wxWindow *parent,
    theBurn = 
       (FiniteBurn*) theGuiInterpreter->GetBurn(std::string(burnName.c_str()));
 
+   thrusterSelected = "";
+   isThrusterEmpty = false;
+   
    Create();
    Show();
    theApplyButton->Disable();
@@ -83,24 +86,31 @@ FiniteBurnSetupPanel::~FiniteBurnSetupPanel()
 //------------------------------------------------------------------------------
 void FiniteBurnSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 {
-	wxString axesStr;
-	Integer id;
-    
-   // get the string of the combo box selections
-   axesStr = mAxesComboBox->GetStringSelection();
-   
-   // get the ID of the axes parameter 
-   id = theBurn->GetParameterID("Axes");
-   
-   // check the combo box selection
-   if (axesStr == "Inertial")
-      theBurn->SetStringParameter(id, "Inertial");
-   else if (axesStr == "VNB")
-      theBurn->SetStringParameter(id, "VNB");
+	if (event.GetEventObject() == mAxesComboBox)
+   {
+      // get the string of the combo box selections
+      wxString axesStr = mAxesComboBox->GetStringSelection();
       
-   theBurn->SetStringParameter(id, axesStr.c_str());
+	   // get the ID of the axes parameter 
+	   Integer id = theBurn->GetParameterID("Axes");
       
-   theApplyButton->Enable();
+      if (axesStr == "Inertial")
+         theBurn->SetStringParameter(id, "Inertial");
+      else if (axesStr == "VNB")
+         theBurn->SetStringParameter(id, "VNB");
+      
+      theBurn->SetStringParameter(id, axesStr.c_str());
+      
+      theApplyButton->Enable();
+   }
+   else if (event.GetEventObject() == mThrusterComboBox)
+   {
+   	   if (!isThrusterEmpty)
+   	   {
+         thrusterSelected = mThrusterComboBox->GetStringSelection().c_str();
+         theApplyButton->Enable();
+   	   }
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -149,7 +159,7 @@ void FiniteBurnSetupPanel::Create()
         
       // combo box for avaliable thrusters 
       mThrusterComboBox =
-         theGuiManager->GetThrusterComboBox(this, ID_COMBOBOX, wxSize(150,-1));
+         theGuiManager->GetThrusterComboBox(this, ID_COMBOBOX, wxSize(200,-1));
 
       // label for tank combobox
       //wxStaticText *tankLabel = new wxStaticText(this, ID_TEXT,
@@ -257,16 +267,34 @@ void FiniteBurnSetupPanel::LoadData()
    {
       // Set object pointer for "Show Script"
       mObject = theBurn;
-    
+       
       // load thruster
       Integer thrusterID = theBurn->GetParameterID("Thrusters");
       StringArray thrusters = theBurn->GetStringArrayParameter(thrusterID);
-      std::string thruster = "";
             
       if (thrusters.size() > 0)
       {
-         thruster = thrusters[0]; 
-         mThrusterComboBox->SetValue(thruster.c_str());
+         thrusterSelected = thrusters[0].c_str(); 
+         mThrusterComboBox->SetValue(thrusterSelected.c_str());
+         theBurn->SetStringParameter(thrusterID, thrusterSelected.c_str(), 0);
+      }
+      
+      if (mThrusterComboBox->IsEmpty())
+      {
+   	      mThrusterComboBox->Insert(wxT("No Thrusters Available"), 0);
+         mThrusterComboBox->SetSelection(0);
+         isThrusterEmpty = true;
+      }
+      else if (thrusters.empty())
+      {
+         mThrusterComboBox->Insert(wxT("No Thrusters Selected"), 0);
+         mThrusterComboBox->SetSelection(0);
+         isThrusterEmpty = false;
+      }
+      else
+      {
+         mThrusterComboBox->SetValue(thrusters[0].c_str());
+         isThrusterEmpty = false;
       }
 
       // load tanks
@@ -338,10 +366,8 @@ void FiniteBurnSetupPanel::SaveData()
    Integer id;
 
    // save thrusters
-   wxString thrusterString = mThrusterComboBox->GetStringSelection();
    id = theBurn->GetParameterID("Thrusters");
-   std::string thruster = std::string (thrusterString.c_str());
-   theBurn->SetStringParameter(id, thruster, 0);
+   theBurn->SetStringParameter(id, thrusterSelected.c_str(), 0);
 
    // save tanks
    //wxString tankString = mTankComboBox->GetStringSelection();

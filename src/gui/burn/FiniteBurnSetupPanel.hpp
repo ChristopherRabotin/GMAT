@@ -41,6 +41,9 @@ private:
 //    wxGrid *engGrid;
     wxTextCtrl *scaleTextCtrl;
     
+    wxString thrusterSelected;
+    bool isThrusterEmpty;
+    
     // member functions
     void OnTextChange(wxCommandEvent& event);
     void OnComboBoxChange(wxCommandEvent& event);
