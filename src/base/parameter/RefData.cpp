@@ -169,9 +169,8 @@ std::string RefData::GetRefObjectName(const Gmat::ObjectType type) const
       ("RefData::GetRefObjectName() type=%d returning:INVALID_OBJECT_TYPE\n", type);
    #endif
    
-   return "UNDEFINED";
    //return "RefData::GetRefObjectName(): INVALID_OBJECT_TYPE";
-   //loj:5/26/06 throw ParameterException("RefData::GetRefObjectName(): INVALID_OBJECT_TYPE");
+   throw ParameterException("RefData::GetRefObjectName(): INVALID_OBJECT_TYPE");
 }
 
 
@@ -371,7 +370,7 @@ bool RefData::RenameRefObject(const Gmat::ObjectType type,
    #endif
    
    if (type != Gmat::SPACECRAFT && type != Gmat::COORDINATE_SYSTEM &&
-       type != Gmat::CALCULATED_POINT)
+       type != Gmat::CALCULATED_POINT && type != Gmat::BURN) //loj: 7/20/06 Added BURN
       return true;
    
    for (int i=0; i<mNumRefObjects; i++)
