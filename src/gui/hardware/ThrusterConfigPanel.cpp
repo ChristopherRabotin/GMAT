@@ -107,15 +107,6 @@ void ThrusterConfigPanel::Create()
       theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(180,-1));
     tankComboBox =
       theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(180,-1));
-    
-    if (tankComboBox->IsEmpty())
-    {
-   	    tankComboBox->Insert(wxT("No Tanks Available"), 0);
-       tankComboBox->SetSelection(0);
-       isTankEmpty = true;
-    }
-    else
-       isTankEmpty = false;
    
     // wxTextCtrl
     XTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
@@ -199,9 +190,24 @@ void ThrusterConfigPanel::LoadData()
    
    paramID = theThruster->GetParameterID("Tank");
    StringArray tanks = theThruster->GetStringArrayParameter(paramID);   
-      
-   if (!isTankEmpty)
-      tankComboBox->SetValue(tanks[0].c_str());
+   
+   if (tankComboBox->IsEmpty())
+    {
+   	    tankComboBox->Insert(wxT("No Tanks Available"), 0);
+       tankComboBox->SetSelection(0);
+       isTankEmpty = true;
+    }
+    else if (tanks.empty())
+    {
+       tankComboBox->Insert(wxT("No Tanks Selected"), 0);
+       tankComboBox->SetSelection(0);
+       isTankEmpty = false;
+    }
+    else
+    {
+       tankComboBox->SetValue(tanks[0].c_str());
+       isTankEmpty = false;
+    }
    
    theApplyButton->Disable();
 }
