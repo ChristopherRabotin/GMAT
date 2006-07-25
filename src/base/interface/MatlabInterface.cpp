@@ -31,6 +31,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_MATLAB_IF 1
+//#define DEBUG_MATLAB_OPEN_CLOSE
 
 //--------------------------------------
 //  initialize static variables
@@ -39,6 +40,7 @@
 Engine* MatlabInterface::enginePtrD = 0;
 mxArray* MatlabInterface::mxArrayInputPtrD = 0;
 mxArray* MatlabInterface::mxArrayOutputPtrD = 0;
+int MatlabInterface::accessCount = 0;
 #endif
 
 //--------------------------------------
@@ -64,7 +66,14 @@ int MatlabInterface::Open()
 #ifdef __WXMAC__
    /// Check if MATLAB is still running then doesn't need to re-launch
    if (enginePtrD != NULL)
+   {
+      accessCount++;
+      #ifdef DEBUG_MATLAB_OPEN_CLOSE
+         MessageInterface::ShowMessage(
+         "Attempting to reopen MATLAB connection ... accessCount = %d\n", accessCount);
+      #endif
       return 1;
+   }
 
    // open the X11 application before launching the matlab
    system("open -a X11");
@@ -81,6 +90,11 @@ int MatlabInterface::Open()
    //if ((enginePtrD = engOpen(runString.c_str())))
    {
       MessageInterface::ShowMessage("Successfully opened MATLAB engine ...\n");
+      accessCount++;
+      #ifdef DEBUG_MATLAB_OPEN_CLOSE
+         MessageInterface::ShowMessage(
+         "Attempting to open MATLAB connection ... accessCount = %d\n", accessCount);
+      #endif
       return 1;
    }
    else
@@ -90,7 +104,14 @@ int MatlabInterface::Open()
    }
 #else
    if ((enginePtrD = engOpen(NULL)))
+   {
+      accessCount++;
+      #ifdef DEBUG_MATLAB_OPEN_CLOSE
+         MessageInterface::ShowMessage(
+         "Attempting to open MATLAB connection ... accessCount = %d\n", accessCount);
+      #endif
       return 1;
+   }
    else
       return 0;
 #endif  // End-ifdef __WXMAC__
@@ -118,14 +139,29 @@ int MatlabInterface::Close()
    if (enginePtrD != NULL)
    {
       //MessageInterface::ShowMessage("Please wait while MATLAB closes ...\n");
-      #ifdef __WXMAC__
-         // need to close X11 here ------------
+      accessCount--;
+      #ifdef DEBUG_MATLAB_OPEN_CLOSE
+         MessageInterface::ShowMessage(
+         "Attempting to close MATLAB connection ... accessCount = %d\n", accessCount);
       #endif
-      if (engClose(enginePtrD) != 0)
+      //if (accessCount <= 0)
+      //{
+         #ifdef __WXMAC__
+            // need to close X11 here ------------ **** TBD ****
+            MessageInterface::ShowMessage(
+            "Closing connection to MATLAB ... please close X11\n");
+         #endif
+         if (engClose(enginePtrD) != 0)
                MessageInterface::ShowMessage("\nError closing MATLAB\n");    
-      //engClose(enginePtrD);
-      enginePtrD = NULL;      // set to NULL, so it can be reopened
-      MessageInterface::ShowMessage("MATLAB has been closed ...\n");
+         //engClose(enginePtrD);
+         enginePtrD = NULL;      // set to NULL, so it can be reopened
+         MessageInterface::ShowMessage("MATLAB has been closed ...\n");
+      //}
+      //else
+      //{
+      //   MessageInterface::ShowMessage(
+      //   "\nGMAT still accessing MATLAB ... not closing connection at this time\n");
+      //}
    }
    else
    {

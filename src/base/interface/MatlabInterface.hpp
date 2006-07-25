@@ -38,6 +38,8 @@ MatlabInterface();
 static Engine *enginePtrD;
 static mxArray *mxArrayInputPtrD;
 static mxArray *mxArrayOutputPtrD;
+
+static int accessCount;
 #endif
 
 };
