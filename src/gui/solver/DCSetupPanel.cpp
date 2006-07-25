@@ -26,10 +26,10 @@
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
-
 BEGIN_EVENT_TABLE(DCSetupPanel, GmatPanel)
-//    EVT_BUTTON(ID_BUTTON, DCSetupPanel::OnButton)
     EVT_TEXT(ID_TEXTCTRL, DCSetupPanel::OnTextUpdate)
+    EVT_COMBOBOX(ID_COMBOBOX, DCSetupPanel::OnComboBoxChange)
+    EVT_CHECKBOX(ID_CHECKBOX, DCSetupPanel::OnCheckBoxChange)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -48,18 +48,19 @@ DCSetupPanel::DCSetupPanel(wxWindow *parent, const wxString &name)
         theGuiInterpreter->GetSolver(std::string(name.c_str()));
         
     theDC = (DifferentialCorrector *)theSolver;
+    
+    reportStyle = "";
 
-    if (theSolver != NULL)
+    if (theDC != NULL)
     {
         Create();
         Show();
     }
-    else
-    {
-        // show error message
-    }
 }
 
+//------------------------------------------------------------------------------
+// void ~DCSetupPanel()
+//------------------------------------------------------------------------------
 DCSetupPanel::~DCSetupPanel()
 {
 }
@@ -67,43 +68,107 @@ DCSetupPanel::~DCSetupPanel()
 //-------------------------------
 // private methods
 //-------------------------------
+
+//------------------------------------------------------------------------------
+// void Create()
+//------------------------------------------------------------------------------
 void DCSetupPanel::Create()
-{
-    maxIterationID = theDC->GetParameterID("MaximumIterations");
-    maxIteration = theDC->GetIntegerParameter(maxIterationID);
-        
+{        
     Setup(this);
 }
 
+//------------------------------------------------------------------------------
+// void LoadData()
+//------------------------------------------------------------------------------
 void DCSetupPanel::LoadData()
 {
     mObject = theDC;
-    maxTextCtrl->AppendText(wxVariant((long)maxIteration));
-
-    // explicitly disable apply button
-    // it is turned on in each of the panels
+    
+    Integer id;
+	 
+    id = theDC->GetParameterID("MaximumIterations");
+    maxTextCtrl->SetValue(wxVariant((long)theDC->GetIntegerParameter(id)));
+    
+    id = theDC->GetParameterID("ReportStyle");
+    reportStyle = theDC->GetStringParameter(id).c_str();
+    styleComboBox->SetValue(reportStyle.c_str());
+    
+    id = theDC->GetParameterID("TargeterTextFile");
+    textfileTextCtrl->SetValue(theDC->GetStringParameter(id).c_str());
+    
+    id = theDC->GetParameterID("ShowProgress");
+    showProgressCheckBox->SetValue(theDC->GetBooleanParameter(id));
+   
+    id = theDC->GetParameterID("UseCentralDifferences");
+    centralDifferencesCheckBox->SetValue(theDC->GetBooleanParameter(id));
+    
     theApplyButton->Disable();
 }
 
+//------------------------------------------------------------------------------
+// void SaveData()
+//------------------------------------------------------------------------------
 void DCSetupPanel::SaveData()
 {   
-    theDC->SetIntegerParameter(maxIterationID, maxIteration);
+    Integer id;
+	 
+    id = theDC->GetParameterID("MaximumIterations");
+    theDC->SetIntegerParameter(id, (Integer)atof(maxTextCtrl->GetValue()));
+    
+    id = theDC->GetParameterID("ReportStyle");
+    theDC->SetStringParameter(id, reportStyle.c_str());
+    
+    id = theDC->GetParameterID("TargeterTextFile");
+    theDC->SetStringParameter(id, textfileTextCtrl->GetValue().c_str());
+    
+    id = theDC->GetParameterID("ShowProgress");
+    theDC->SetBooleanParameter(id, showProgressCheckBox->GetValue());
+    
+    id = theDC->GetParameterID("UseCentralDifferences");
+    theDC->SetBooleanParameter(id, centralDifferencesCheckBox->GetValue());
 
-    // explicitly disable apply button
-    // it is turned on in each of the panels
     theApplyButton->Disable();
 }
 
+//------------------------------------------------------------------------------
+// void Setup()
+//------------------------------------------------------------------------------
 void DCSetupPanel::Setup( wxWindow *parent)
 {   
     // wxStaticText
     maxStaticText = new wxStaticText( parent, ID_TEXT, wxT("Max Iterations"), 
                      wxDefaultPosition, wxDefaultSize, 0 );
-    
+    textfileStaticText = new wxStaticText( parent, ID_TEXT, wxT("Targeter Text File"),
+                            wxDefaultPosition,wxDefaultSize, 0);
+    reportStyleStaticText = new wxStaticText( parent, ID_TEXT, wxT("Report Style"),
+                            wxDefaultPosition,wxDefaultSize, 0);
+                            
     // wxTextCtrl
     maxTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), 
-                  wxDefaultPosition, wxSize(80,-1), 0 );
-    
+                  wxDefaultPosition, wxSize(50,-1), 0 );
+    textfileTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), 
+                            wxDefaultPosition, wxSize(200,-1), 0 );
+                            
+    // wxCheckBox
+    showProgressCheckBox = new wxCheckBox( parent, ID_CHECKBOX, 
+                               wxT("Show Progress"),wxDefaultPosition, 
+                               wxDefaultSize, 0 );
+    centralDifferencesCheckBox = new wxCheckBox( parent, ID_CHECKBOX, 
+                               wxT("Use Central Differences"),wxDefaultPosition, 
+                               wxDefaultSize, 0 );
+                               
+    // wxString
+   wxString *styleArray = new wxString[4];
+   styleArray[0] = "Normal";
+   styleArray[1] = "Concise";
+   styleArray[2] = "Verbose";
+   styleArray[3] = "Debug";
+
+    // wxComboBox
+    styleComboBox =
+      new wxComboBox( this, ID_COMBOBOX, wxT(reportStyle), wxDefaultPosition, 
+         wxSize(200,-1), 4, styleArray, wxCB_DROPDOWN|wxCB_READONLY );
+                                
     // wx*Sizer
     wxBoxSizer *boxsizerMain = new wxBoxSizer( wxVERTICAL );
     wxBoxSizer *boxsizer1 = new wxBoxSizer( wxVERTICAL );
@@ -111,26 +176,44 @@ void DCSetupPanel::Setup( wxWindow *parent)
     flexGridSizer1->AddGrowableCol( 1 );
  
     // Add to wx*Sizer
-    flexGridSizer1->Add( maxStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-    flexGridSizer1->Add( maxTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+    flexGridSizer1->Add( maxStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
+    flexGridSizer1->Add( maxTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
+    flexGridSizer1->Add( textfileStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
+    flexGridSizer1->Add( textfileTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
+    flexGridSizer1->Add( showProgressCheckBox, 0, wxALIGN_LEFT|wxALL, 5 );
+    flexGridSizer1->Add( 0, 0, wxALIGN_CENTRE|wxALL, 5);
+    flexGridSizer1->Add( centralDifferencesCheckBox, 0, wxALIGN_LEFT|wxALL, 5 );
+    flexGridSizer1->Add( 0, 0, wxALIGN_CENTRE|wxALL, 5);
+    flexGridSizer1->Add( reportStyleStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
+    flexGridSizer1->Add( styleComboBox, 0, wxALIGN_LEFT|wxALL, 5 );
     
     boxsizer1->Add( flexGridSizer1, 0, wxALIGN_CENTER|wxALL, 5 );
-    
     boxsizerMain->Add( boxsizer1, 0, wxALIGN_CENTER|wxALL, 5 );
 
     theMiddleSizer->Add(boxsizerMain, 0, wxGROW, 5);
-
 }
 
+//------------------------------------------------------------------------------
+// void OnTextUpdate()
+//------------------------------------------------------------------------------
 void DCSetupPanel::OnTextUpdate(wxCommandEvent& event)
 {
-    if ( event.GetEventObject() == maxTextCtrl )   
-    {   
-        wxString value = maxTextCtrl->GetValue();
-        
-        maxIteration = atoi(value);
-        theApplyButton->Enable(true);
-    }
-    else
-        event.Skip();
+   theApplyButton->Enable();
 }
+
+//------------------------------------------------------------------------------
+// void OnComboBoxChange()
+//------------------------------------------------------------------------------
+void DCSetupPanel::OnComboBoxChange(wxCommandEvent &event)
+{
+	reportStyle = styleComboBox->GetStringSelection().c_str();
+	theApplyButton->Enable();
+}
+
+//------------------------------------------------------------------------------
+// void OnTextChange()
+//------------------------------------------------------------------------------
+void DCSetupPanel::OnCheckBoxChange(wxCommandEvent &event)
+{
+    theApplyButton->Enable();
+}    

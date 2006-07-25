@@ -34,11 +34,18 @@ public:
        
 private:     
     wxStaticText *maxStaticText;
+    wxStaticText *textfileStaticText;
+    wxStaticText *reportStyleStaticText;
     
     wxTextCtrl *maxTextCtrl;
+    wxTextCtrl *textfileTextCtrl;
     
-    Integer maxIteration;
-    Integer maxIterationID;
+    wxCheckBox *showProgressCheckBox;
+    wxCheckBox *centralDifferencesCheckBox;
+    
+    wxComboBox *styleComboBox;
+        
+    wxString reportStyle;
     
     GuiInterpreter *theGuiInterpreter;
     Solver *theSolver;
@@ -48,15 +55,14 @@ private:
     virtual void Create();
     virtual void LoadData();
     virtual void SaveData();
-    //loj: 2/27/04 commented out
-    //virtual void OnHelp();
-    //virtual void OnScript();
     
     // Layout 
     void Setup(wxWindow *parent);
     
-    // Text control event method
+    // Event Methods
     void OnTextUpdate(wxCommandEvent& event);
+    void OnComboBoxChange(wxCommandEvent &event);
+    void OnCheckBoxChange(wxCommandEvent &event);
     
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();
@@ -66,8 +72,8 @@ private:
     {     
         ID_TEXT = 55000,
         ID_TEXTCTRL,
-        ID_BUTTON,
-        ID_NOTEBOOK
+        ID_CHECKBOX,
+        ID_COMBOBOX
     };
 };
 
