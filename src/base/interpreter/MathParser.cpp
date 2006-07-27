@@ -40,6 +40,7 @@
 //#define DEBUG_FUNCTION 1
 //#define DEBUG_MATH_PARSER_PARAM 1
 //#define DEBUG_INVERSE_OP 1
+//#define DEBUG_CREATE_NODE 1
 
 //---------------------------------
 // static data
@@ -193,8 +194,11 @@ MathNode* MathParser::Parse(const std::string &theEquation)
    
    // first remove all blank spaces
    std::string newEq = GmatStringUtil::RemoveAll(theEquation, ' ');
+
+   // second remove extra parenthesis
+   newEq = GmatStringUtil::RemoveExtraParen(newEq);
    
-   #if DEBUG_MATH_PARSER > 1
+   #if DEBUG_PARSE
    MessageInterface::ShowMessage
       ("MathParser::Parse() newEq=%s\n", newEq.c_str());
    #endif
@@ -218,7 +222,7 @@ MathNode* MathParser::Parse(const std::string &theEquation)
 //------------------------------------------------------------------------------
 MathNode* MathParser::ParseNode(const std::string &str)
 {
-   #if DEBUG_MATH_PARSER > 1
+   #if DEBUG_CREATE_NODE
    MessageInterface::ShowMessage("MathParser::ParseNode() str=%s\n", str.c_str());
    #endif
 
@@ -227,7 +231,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
    std::string left = items[1];
    std::string right = items[2];
 
-   #if DEBUG_MATH_PARSER > 1
+   #if DEBUG_CREATE_NODE
    WriteItems("MathParser::ParseNode() After Decompose()", items);
    #endif
    
@@ -236,16 +240,26 @@ MathNode* MathParser::ParseNode(const std::string &str)
    // If operator is empty, create MathElement, create MathFunction otherwise
    if (op == "")
    {
-      #if DEBUG_MATH_PARSER > 1
+      #if DEBUG_CREATE_NODE
       MessageInterface::ShowMessage
          ("=====> Should create MathElement: %s\n", str.c_str());
       #endif
+
+      // check for surrounding parenthesis
+      Integer open, close;
+      bool isOuterParen;
+      std::string str1 = str;
+      GmatStringUtil::FindParenMatch(str1, open, close, isOuterParen);
+      if (isOuterParen)
+         str1 = str.substr(open+1, close-open-1);
       
-      mathNode = CreateNode("MathElement", str);
+      mathNode = CreateNode("MathElement", str1);
+      
+      ///mathNode = CreateNode("MathElement", str);
    }
    else
    {
-      #if DEBUG_MATH_PARSER > 1
+      #if DEBUG_CREATE_NODE
       MessageInterface::ShowMessage
          ("=====> Should create MathNode: %s\n", op.c_str());
       #endif
@@ -259,7 +273,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
       MathNode *leftNode = NULL;
       MathNode *rightNode = NULL;
       
-      #if DEBUG_MATH_PARSER > 1
+      #if DEBUG_CREATE_NODE
       MessageInterface::ShowMessage
          ("===============> Create left node: %s\n", left.c_str());
       #endif
@@ -267,7 +281,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
       if (left != "")
          leftNode = ParseNode(left);
 
-      #if DEBUG_MATH_PARSER > 1
+      #if DEBUG_CREATE_NODE
       MessageInterface::ShowMessage
          ("===============> Create right node: %s\n", right.c_str());
       #endif
@@ -294,7 +308,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
 //------------------------------------------------------------------------------
 MathNode* MathParser::CreateNode(const std::string &type, const std::string &exp)
 {
-   #if DEBUG_MATH_PARSER > 1
+   #if DEBUG_CREATE_NODE
    MessageInterface::ShowMessage
       ("MathParser::CreateNode() type=%s, exp=%s\n", type.c_str(),
        exp.c_str());
@@ -332,7 +346,7 @@ StringArray MathParser::Decompose(const std::string &str)
    #endif
 
    StringArray items = ParseParenthesis(str);
-
+   
    // if no operator found and left is not empty, decompose again
    if (items[0] == "" && items[1] != "")
       items = Decompose(items[1]);
@@ -340,8 +354,18 @@ StringArray MathParser::Decompose(const std::string &str)
    std::string str1;
    
    str1 = str;
+   
    if (items[0] == "" && str[0] == '(' && str[str.size()-1] == ')')
-      str1 = str.substr(1, str.size()-2);
+   {
+      if (GmatStringUtil::IsOuterParen(str))
+      {
+         str1 = str.substr(1, str.size()-2);
+         #if DEBUG_DECOMPOSE
+         MessageInterface::ShowMessage
+            ("MathParser::Decompose() Found outer paren. str1=%s\n", str1.c_str());
+         #endif
+      }
+   }
    
    if (items[0] == "function")
       items[0] = "";
@@ -404,6 +428,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
    std::string op = "";
    std::string left = "";
    std::string right = "";
+   UnsignedInt opIndex;
    
    // find opening parenthesis '('
    UnsignedInt index1 = str.find('(');
@@ -448,7 +473,6 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       }
 
       // See if there is an operator before this function
-      UnsignedInt opIndex;
       std::string op1, left1, right1;
       op1 = FindOperator(str, 0, left1, right1, opIndex);
       if (op1 != "" && opIndex != str.npos)
@@ -499,6 +523,11 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       #endif
       
       FillItems(items, op, left, right);
+      
+      #if DEBUG_PARENTHESIS
+      WriteItems("MathParser::ParseParenthesis() returning ", items);
+      #endif
+      
       return items;
    }
    
@@ -527,7 +556,6 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
 
    // find next open parenthesis '('
    UnsignedInt index3 = str.find('(', index2);
-   UnsignedInt opIndex;
    
    if (index3 != str.npos)
    {
@@ -578,13 +606,37 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
        str.c_str(), index2, left.c_str(), right.c_str());
    #endif
 
+   // If item is within the parenthesis and single item, just return to handle
+   // the next parse sequence
+   std::string str1 = str.substr(index1, index2-index1+1);
+   //MessageInterface::ShowMessage("===> MathParser::ParseParenthesis() str1=%s\n", str1.c_str());
+   
+   op = FindOperator(str1, 0, left, right, opIndex);
+   if (op == "")
+   {
+      #if DEBUG_PARENTHESIS
+      MessageInterface::ShowMessage
+         ("MathParser::ParseParenthesis() found single item within parenthesis\n");
+      #endif
+      
+      FillItems(items, "", "", "");
+   
+      #if DEBUG_PARENTHESIS
+      WriteItems("==> MathParser::ParseParenthesis() found single item within "
+                 " parenthesis. returning ", items);
+      #endif
+      
+      return items;
+   }
+
+   
    // Find a operator after closing parenthesis
    op = FindOperator(str, index2, left, right, opIndex);
    
    if (op == "")
    {
       bool opFound;
-      
+
       // if parenthesis is at end, find operator from the begining (6/26/06)
       if (index2 == str.size()-1)
       {
@@ -779,7 +831,6 @@ UnsignedInt MathParser::FindSubtract(const std::string &str, UnsignedInt start)
    }
 
    // found - and ^(-1)
-   //if (index2 < index3 && index3+5 == str.size())
    if (index2 < index3)
    {
       #if DEBUG_INVERSE_OP
@@ -874,7 +925,9 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
    if (index2 != str.npos)
       index2 = FindSubtract(str, 0);
 
-   //MessageInterface::ShowMessage("==> index2=%d, after FindSubtract()\n", index2);
+   #if DEBUG_ADD_SUBTRACT
+   MessageInterface::ShowMessage("==> index2=%d, after FindSubtract()\n", index2);
+   #endif
    
    if (index2 == str.size() && index1 == str.npos)
    {
@@ -1003,16 +1056,101 @@ StringArray MathParser::ParseMultDivide(const std::string &str)
    std::string op = "";
    
    // find last * or /
+   // because we want to evaluate * or / in the order it appears
+   // a * b / c * d
    UnsignedInt index1 = str.find_last_of('*');
    UnsignedInt index2 = str.find_last_of('/');
 
    if (index1 == str.npos && index2 == str.npos)
    {
       FillItems(items, "", "", "");
+      #if DEBUG_MULT_DIVIDE
+      MessageInterface::ShowMessage("==> MathParser::ParseMultDivide() No * or / found\n");
+      #endif
       return items;
    }
+   
+   UnsignedInt index;
+   
+   // if both * and / found, index is assigned to index of last operator
+   if (index1 != str.npos && index2 != str.npos)      
+      index = (index1 > index2) ? index1 : index2;
+   else
+      index = (index2 == str.npos) ? index1 : index2;
+   
+   #if DEBUG_MULT_DIVIDE
+   MessageInterface::ShowMessage
+      ("ParseMultDivide() index=%d, index1=%d, index2=%d\n", index, index1, index2);
+   #endif
 
-   UnsignedInt index = 0;
+   // if next char is (
+   if (str[index+1] == '(')
+   {
+      if (index2 != str.npos)
+         index1 = str.npos;
+      else
+         index2 = str.npos;
+   }
+   else if (str.find_last_of(')', index-1) == str.npos)
+   {
+      if (index == index1)
+         index2 = str.npos;
+      else
+         index1 = str.npos;
+   }
+   else
+   {
+      UnsignedInt index3 = str.find_last_of('*', index-1);
+      UnsignedInt index4 = str.find_last_of('/', index-1);
+      
+      if (index1 != str.npos && index2 != str.npos)
+         index = (index3 > index4) ? index3 : index4;
+      else
+         index = (index4 == str.npos) ? index3 : index4;
+      
+      #if DEBUG_MULT_DIVIDE
+      MessageInterface::ShowMessage
+         ("ParseMultDivide() index=%d, index3=%d, index4=%d\n", index, index3, index4);
+      #endif
+      
+      if (index != str.npos)
+      {
+         // if next char is (
+         if (str[index+1] == '(')
+         {
+            #if DEBUG_MULT_DIVIDE
+            MessageInterface::ShowMessage("ParseMultDivide() 2nd open parenthesis found\n");
+            #endif
+            
+            if (index4 != str.npos)
+            {
+               index2 = index4;
+               index1 = str.npos;
+            }
+            else
+            {
+               index1 = index3;
+               index2 = str.npos;
+            }
+         }
+         else
+         {
+            #if DEBUG_MULT_DIVIDE
+            MessageInterface::ShowMessage("ParseMultDivide() 2nd open parenthesis not found\n");
+            MessageInterface::ShowMessage
+               ("ParseMultDivide() index=%d, index1=%d, index2=%d, index3=%d, index4=%d\n",
+                index, index1, index2, index3, index4);
+            #endif
+            
+            if (index1 != str.npos && index2 != str.npos)
+               if (index1 > index2)
+                  index2 = str.npos;
+               else
+                  index1 = str.npos;
+         }
+      }
+   }
+   
    if (index1 != str.npos)
    {
       op = "Multiply";
@@ -1023,6 +1161,10 @@ StringArray MathParser::ParseMultDivide(const std::string &str)
       op = "Divide";
       index = index2;
    }
+
+   #if DEBUG_MULT_DIVIDE
+   MessageInterface::ShowMessage("ParseMultDivide() index=%d\n", index);
+   #endif
    
    std::string left = str.substr(0, index);
    std::string right = str.substr(index+1, str.npos);
@@ -1035,7 +1177,7 @@ StringArray MathParser::ParseMultDivide(const std::string &str)
    
    FillItems(items, op, left, right);
 
-   #if DEBUG_MULT_DIVIDE > 1
+   #if DEBUG_MULT_DIVIDE
    WriteItems("==> After ParseMultDivide()", items);
    #endif
    
