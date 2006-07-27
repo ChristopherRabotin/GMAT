@@ -40,7 +40,7 @@ public:
    virtual Integer     SetSolverResults(Real *data, const std::string &name,
                                         const std::string &type = "");
    virtual void        SetResultValue(Integer id, Real value,
-                                      const std::string resultType = "");
+                                      const std::string &resultType = "");
 
    virtual std::string GetProgressString();
 

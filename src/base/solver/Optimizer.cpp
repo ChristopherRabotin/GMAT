@@ -185,7 +185,7 @@ Integer Optimizer::SetSolverResults(Real *data,
 }
 
 //------------------------------------------------------------------------------
-// void SetResultValue(Integer id, Real value, const std::string resultType = "")
+// void SetResultValue(Integer id, Real value, const std::string &resultType = "")
 //------------------------------------------------------------------------------
 /**
  * Passes in the results obtained from a run in the Optimizer loop.
@@ -195,7 +195,7 @@ Integer Optimizer::SetSolverResults(Real *data,
  */
 //------------------------------------------------------------------------------
 void Optimizer::SetResultValue(Integer id, Real value, 
-                               const std::string resultType)
+                               const std::string &resultType)
 {
    if (resultType == "Objective")
    {

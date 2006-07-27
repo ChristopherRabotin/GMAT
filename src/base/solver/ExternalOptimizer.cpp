@@ -51,7 +51,7 @@ ExternalOptimizer::ExternalOptimizer(std::string type, std::string name) :
    Optimizer               (type, name), 
    sourceType              ("MATLAB"),
    sourceReady             (false),
-   gmatServer              (GmatInterface::Instance())
+   gmatServer              (NULL)
  {
    objectTypeNames.push_back("ExternalOptimizer");
    parameterCount = ExternalOptimizerParamCount;

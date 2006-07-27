@@ -39,6 +39,8 @@ public:
    virtual SolverState AdvanceState();
    virtual bool        Optimize();
 
+   // inherited from GmatBase
+   virtual GmatBase*   Clone() const;
 
    // Access methods overriden from the base class
    
@@ -89,9 +91,9 @@ protected:
    virtual void                RunComplete();
 
 
-   void                        FreeArrays();
+   virtual void                FreeArrays();
    virtual std::string         GetProgressString();
-   //virtual void                WriteToTextFile();
+   virtual void                WriteToTextFile();
    
    virtual bool                OpenConnection();
    virtual void                CloseConnection();
