@@ -1,3 +1,4 @@
+//$Header$
 //------------------------------------------------------------------------------
 //                                  Inverse
 //------------------------------------------------------------------------------
@@ -17,6 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include "Inverse.hpp"
+#include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
 
 //---------------------------------
@@ -88,7 +90,8 @@ GmatBase* Inverse::Clone() const
 //------------------------------------------------------------------------------
 Real Inverse::Evaluate()
 {
-   throw MathException("Evaluate()::Inverse returns a matrix value.\n");    
+   return GmatMathUtil::Pow(leftNode->Evaluate(), -1.0);
+   ////throw MathException("Evaluate()::Inverse returns a matrix value.\n");    
 }
 
 //------------------------------------------------------------------------------
@@ -101,20 +104,31 @@ Real Inverse::Evaluate()
 //------------------------------------------------------------------------------
 bool Inverse::ValidateInputs()
 {
-   if ( leftNode->ValidateInputs() )
-   {
-      try
-      {
-         leftNode->MatrixEvaluate();
-         return true;
-      }
-      catch (MathException &e)
-      {
-         return false;
-      } 
-   }
-   else
-      return false;
+   Integer type, row, col;
+   
+   GetOutputInfo(type, row, col);
+
+   // Only Real type and Matrix are valid. Vector is not a valid input
+   if ((type == Gmat::REAL_TYPE) ||
+       (type == Gmat::RMATRIX_TYPE && row == col))
+      return true;
+
+   return false;
+   
+//    if ( leftNode->ValidateInputs() )
+//    {
+//       try
+//       {
+//          leftNode->MatrixEvaluate();
+//          return true;
+//       }
+//       catch (MathException &e)
+//       {
+//          return false;
+//       } 
+//    }
+//    else
+//       return false;
 }
 
 //------------------------------------------------------------------------------
@@ -123,8 +137,14 @@ bool Inverse::ValidateInputs()
 void Inverse::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
    type = Gmat::RMATRIX_TYPE;
-   rowCount = (leftNode->MatrixEvaluate()).GetNumRows();;
-   colCount = (leftNode->MatrixEvaluate()).GetNumColumns();
+//    rowCount = (leftNode->MatrixEvaluate()).GetNumRows();;
+//    colCount = (leftNode->MatrixEvaluate()).GetNumColumns();
+   
+   leftNode->GetOutputInfo(type, rowCount, colCount);
+
+   if (rowCount == 1 && colCount == 1)
+      type = Gmat::REAL_TYPE;
+
 }
 
 //------------------------------------------------------------------------------
