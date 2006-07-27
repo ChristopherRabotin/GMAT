@@ -59,6 +59,11 @@ namespace GmatStringUtil
                          Integer &last);
    void FindParenMatch(const std::string &str, Integer &open, Integer &close,
                        bool &isOuterParen);
+   bool IsEnclosedWithParen(const std::string &str);
+   bool IsOuterParen(const std::string &str);
+   bool IsParenPartOfArray(const std::string &str);
+   bool IsSingleItem(const std::string &str);
+   std::string RemoveExtraParen(const std::string &str);
 }
 
 #endif // StringUtil_hpp

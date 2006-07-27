@@ -21,6 +21,8 @@
 #include "MessageInterface.hpp"
 #include "GmatBaseException.hpp"
 #include "Linear.hpp"            // for ToString()
+#include <map>
+
 //#define DEBUG_STRING_UTIL 1
 
 using namespace std;
@@ -469,6 +471,8 @@ void GmatStringUtil::FindFirstAndLast(const std::string &str, char ch,
 void GmatStringUtil::FindParenMatch(const std::string &str, Integer &openParen,
                                     Integer &closeParen, bool &isOuterParen)
 {
+   //MessageInterface::ShowMessage("FindParenMatch() str=%s\n", str.c_str());
+   
    openParen = str.find_first_of('(');
    if (openParen == (Integer)str.npos)
       openParen = -1;
@@ -476,10 +480,367 @@ void GmatStringUtil::FindParenMatch(const std::string &str, Integer &openParen,
    closeParen = str.find_last_of(')');
    if (closeParen == (Integer)str.npos)
       closeParen = -1;
+
+   std::string str1 = str;
+   if (openParen != -1)
+      str1 = str.substr(openParen);
    
-   isOuterParen = false;
-   if (openParen != -1 && closeParen == (Integer)str.size()-1)
-      isOuterParen = true;
+   isOuterParen = IsOuterParen(str1);
    
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("FindParenMatch() str=%s, openParen=%d, closeParen=%d, isOuterParen=%d\n",
+       str.c_str(), openParen, closeParen, isOuterParen);
+   #endif
 }
 
+
+//------------------------------------------------------------------------------
+// bool IsEnclosedWithParen(const std::string &str)
+//------------------------------------------------------------------------------
+/*
+ * return true if item is enclosed with parenthesis.
+ * For example: (a+b), ((a+b) + (c+d)),
+ * will return false for (123.456) or (1,2)
+ * 
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsEnclosedWithParen(const std::string &str)
+{
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage("IsEnclosedWithParen() str=%s\n", str.c_str());
+   #endif
+   
+   int length = str.size();
+   bool isEnclosed = false;
+   Integer openCounter = 0;
+   
+   Integer openParen = str.find_first_of('(');
+   if (openParen == (Integer)str.npos)
+      openParen = -1;
+
+   Integer closeParen = str.find_last_of(')');
+   if (closeParen == (Integer)str.npos)
+      closeParen = -1;
+
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("IsEnclosedWithParen() openParen=%d, closeParen=%d\n", openParen, closeParen);
+   #endif
+   
+   if (openParen == -1 || closeParen == -1)
+      return false;
+
+   if (openParen != 0 || closeParen != length-1)
+      return false;
+   
+   for (int i=0; i<length; i++)
+   {
+      if (str[i] == '(')
+      {
+         openCounter++;
+         if (openCounter == 1)
+            openParen = i;
+      }
+      else if (str[i] == ')')
+      {
+         openCounter--;
+      }
+   }
+
+   if (openParen == 0)
+   {
+      // check for double parenthesis
+      if (str[1] == '(' && str[length-2] == ')')
+      {
+         isEnclosed = true;
+      }
+      else
+      {
+         // check if there is any operator
+         std::string substr = str.substr(1, length-2);
+         Real rval;
+         
+         #if DEBUG_STRING_UTIL
+         MessageInterface::ShowMessage
+            ("IsEnclosedWithParen() substr=%s\n", substr.c_str());
+         #endif
+         
+         if (IsParenPartOfArray(substr))
+            isEnclosed = true;
+         else if (ToDouble(substr, rval))
+            isEnclosed = true;
+         else
+         {
+            if (substr.find('+') == substr.npos && substr.find('-') == substr.npos &&
+                substr.find('*') == substr.npos && substr.find('/') == substr.npos)
+               isEnclosed = true;
+         }
+      }
+   }
+   
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("IsEnclosedWithParen() isEnclosed=%d\n", isEnclosed);
+   #endif
+   
+   return isEnclosed;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsOuterParen(const std::string &str)
+//------------------------------------------------------------------------------
+/*
+ * return true if outer parenthesis is not part of ^(#) or array.
+ * For example: (A+b^(-1), (2,2), (abc,def)
+ * 
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsOuterParen(const std::string &str)
+{
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage("IsOuterParen() str=%s\n", str.c_str());
+   #endif
+   
+   int length = str.size();
+   bool isOuterParen = true;
+   
+   Integer openParen = str.find_first_of('(');
+   if (openParen == (Integer)str.npos)
+      openParen = -1;
+
+   Integer closeParen = str.find_last_of(')');
+   if (closeParen == (Integer)str.npos)
+      closeParen = -1;
+
+   if (openParen != 0 && closeParen != length-1)
+      return false;
+
+   if (openParen == 0 && closeParen == length-1)
+   {
+      // make sure ending ) is not part of ^(-1)
+      UnsignedInt lastOpenParen = str.find_last_of('(');
+      UnsignedInt lastCloseParen = str.find_last_of(')', closeParen-1);
+      
+      #if DEBUG_STRING_UTIL > 1
+      MessageInterface::ShowMessage
+         ("IsOuterParen() lastOpenParen=%d, lastCloseParen=%d\n",
+          lastOpenParen, lastCloseParen);
+      #endif
+      
+      std::string substr = str.substr(lastOpenParen);
+      if (lastOpenParen > 0)
+         if (str.find("^(", lastOpenParen-1) != str.npos &&
+             (lastCloseParen == str.npos || lastCloseParen < lastOpenParen))
+             isOuterParen = false;
+      
+      // make sure ending ) is not part of array
+      if (isOuterParen)
+         if (IsParenPartOfArray(substr))
+            isOuterParen = false;
+   }
+   else
+   {
+      isOuterParen = false;
+   }
+   
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("IsOuterParen() openParen=%d, closeParen=%d, length=%d, "
+       "isOuterParen=%d\n", openParen, closeParen, length, isOuterParen);
+   #endif
+   
+   return isOuterParen;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsParenPartOfArray(const std::string &str)
+//------------------------------------------------------------------------------
+/*
+ * return true if parenthesis is part of an array.
+ * For example: (2,2) or (abc,def)
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsParenPartOfArray(const std::string &str)
+{
+   bool ret = true;
+   
+   int length = str.size();
+   int comma = str.find(',');
+
+   for (int i=1; i<comma; i++)
+      if (!isalnum(str[i]))
+      {
+         ret = false;
+         break;
+      }
+
+   if (ret)
+      for (int i=comma+1; i<length-1; i++)
+         if (!isalnum(str[i]))
+         {
+            ret = false;
+            break;
+         }
+   
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("IsParenPartOfArray() str=%s, length=%d, comma=%d, ret=%d\n",
+       str.c_str(), length, comma, ret);
+   #endif
+   
+   return ret;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsSingleItem(const std::string &str)
+//------------------------------------------------------------------------------
+/*
+ * return true if string does not have arithmetic operators or '.' or
+ * enclosed with double parenthesis
+ * For example -123.0, abc, (a), (sat.X), (-123.0)
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsSingleItem(const std::string &str)
+{
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage("IsSingleItem() str=%s\n", str.c_str());
+   #endif
+   
+   Integer length = str.size();
+   bool singleItem = true;
+   Integer minusSignCounter = 0;
+   Real rval;
+   
+   // first check for number
+   if (ToDouble(str, rval))
+      return true;
+   
+   for (int i=0; i<length; i++)
+   {
+      if (isalnum(str[i]) || str[i] == '.')
+         continue;
+      
+      if (str[i] == '-')
+      {
+         minusSignCounter++;
+         continue;
+      }
+
+      singleItem = false;
+      break;
+   }
+   
+   if (singleItem)
+   {
+      if (minusSignCounter > 0)
+         if (str[0] != '-' || minusSignCounter != 1)
+            singleItem = false;
+   }
+   
+   return singleItem;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string RemoveExtraParen(const std::string &str)
+//------------------------------------------------------------------------------
+/*
+ * Removs extra pair of parenthesis.
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::RemoveExtraParen(const std::string &str)
+{
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("====================> RemoveExtraParen() str=%s\n", str.c_str());
+   #endif
+   
+   std::string str1 = str;
+   std::string substr;
+   Integer length = str.size();
+   Integer openCounter = 0, closeCounter = 0;
+   Integer openParen = 0, closeParen = 0;
+   Integer counter = 0;
+   //IntegerArray openParenArray;
+   std::map<Integer, Integer> openParenMap;
+   std::map<Integer, Integer> closeParenMap;
+   
+   // remove outer parenthesis
+   while (IsEnclosedWithParen(str1))
+   {
+      counter++;
+      str1 = str.substr(counter, length-counter-counter);
+   }
+   
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage("RemoveExtraParen() str1=%s\n", str1.c_str());
+   #endif
+   
+   std::string str2 = str1;
+   length = str1.size();
+   
+   for (int i=0; i<length; i++)
+   {
+      if (str1[i] == '(')
+      {
+         openParen = i;
+         openCounter++;
+         openParenMap[openCounter] = i;
+      }
+      else if (str1[i] == ')')
+      {
+         closeParen = i;
+         closeCounter = openCounter;
+         closeParenMap[closeCounter] = i;
+         openCounter--;
+
+         #if DEBUG_STRING_UTIL
+         MessageInterface::ShowMessage
+            ("===> openCounter=%d, closeCounter=%d\n", openCounter, closeCounter);
+         #endif
+         
+         // check one more outer parenthesis
+         if (openCounter == 0)
+         {
+            for (int i=1; i<=closeCounter+1; i++)
+            {
+               openParen = openParenMap[i];
+               closeParen = closeParenMap[i];
+               substr = str1.substr(openParen, closeParen-openParen+1);
+               
+               #if DEBUG_STRING_UTIL
+               MessageInterface::ShowMessage
+                  ("===> substr=%s\n   openParen=%d, closeParen=%d, "
+                   "closeCounter=%d, openCounter=%d\n", substr.c_str(), openParen,
+                   closeParen, closeCounter, openCounter);
+               #endif
+               
+               // if ( is not part of function or array
+               if ((openParen == 0) ||
+                   (str1[openParen-1] == '+' || str1[openParen-1] == '-' ||
+                    str1[openParen-1] == '*' || str1[openParen-1] == '/' ||
+                    str1[openParen-1] == '(' || str1[openParen-1] == ' '))
+               {
+                  if (IsEnclosedWithParen(substr))
+                  {
+                     str2[openParen] = '?';
+                     str2[closeParen] = '?';
+                  }
+               }
+            }
+         }
+      }
+   }
+   
+   str2 = RemoveAll(str2, '?', 0);
+   
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage("RemoveExtraParen() str2=%s\n", str2.c_str());
+   #endif
+   
+   return str2;
+}
