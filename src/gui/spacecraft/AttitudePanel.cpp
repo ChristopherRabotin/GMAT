@@ -57,7 +57,7 @@ AttitudePanel::AttitudePanel(wxWindow *parent, Spacecraft *spacecraft,
 	#if DEBUG_ATTITUDE_PANEL
    MessageInterface::ShowMessage("AttitudePanel::AttitudePanel() entered\n");
    #endif
-   
+
    this->theSpacecraft = spacecraft;
    this->theApplyButton = theApplyButton;
     
@@ -213,20 +213,28 @@ void AttitudePanel::Create()
    str3TextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_STR, wxT(""),
                       wxDefaultPosition, wxSize(100,-1), 0 );                
-                                                                       
+/*
+	attUnits1 = new wxStaticText(this,ID_TEXT,wxT("deg"));
+	attUnits2 = new wxStaticText(this,ID_TEXT,wxT("deg"));
+	attUnits3 = new wxStaticText(this,ID_TEXT,wxT("deg"));
+*/
+   wxStaticText *rateUnits1 =
+	   new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
+	 wxStaticText *rateUnits2 =
+	   new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
+	 wxStaticText *rateUnits3 =
+	   new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
+
    #if DEBUG_ATTITUDE_PANEL
    MessageInterface::ShowMessage("AttitudePanel::Create() Creating wxString objects\n");
    #endif
-                        
+
    //StringArray Initialization
    stateTypeArray.push_back("Euler Angles");
    stateTypeArray.push_back("Quaternions");
    stateTypeArray.push_back("DCM");
    stateTypeRateArray.push_back("Euler Angles Rates");
    stateTypeRateArray.push_back("Angular Velocity");
-   
-   //wxString
-   wxString emptyArray[] = {};
    
    wxString *stArray = new wxString[StateTypeCount];
    for (Integer i=0; i<StateTypeCount; i++)
@@ -249,8 +257,6 @@ void AttitudePanel::Create()
    for (Integer i=0; i<12; i++)
       estArray[i] = eulerSequenceStringArray[i].c_str();
       
-   Integer defaultCount = 0;
-   
    #if DEBUG_ATTITUDE_PANEL
    MessageInterface::ShowMessage("AttitudePanel::Create() Creating wxComboBox objects.\n");
    #endif
@@ -259,9 +265,8 @@ void AttitudePanel::Create()
    config1ComboBox = new wxComboBox( this, ID_CB_CONFIG, wxT(attitudeModeArray[0]),
                       wxDefaultPosition, wxDefaultSize, 1,
                       attitudeModeArray, wxCB_DROPDOWN|wxCB_READONLY );
-   config2ComboBox = new wxComboBox( this, ID_CB_CONFIG, wxT(""),
-                      wxDefaultPosition, wxDefaultSize, defaultCount,
-                      emptyArray, wxCB_DROPDOWN|wxCB_READONLY );
+   config2ComboBox =  theGuiManager->GetCoordSysComboBox(this, ID_CB_CONFIG, wxDefaultSize);
+
    config3ComboBox = new wxComboBox( this, ID_CB_CONFIG, wxT(kinematicAttitudeTypeArray[0]),
                       wxDefaultPosition, wxDefaultSize, 2,
                       kinematicAttitudeTypeArray, wxCB_DROPDOWN|wxCB_READONLY );
@@ -384,7 +389,42 @@ void AttitudePanel::Create()
    wxStaticBoxSizer *sBSRateInitCond = new wxStaticBoxSizer( staticBoxRateInitCond, wxVERTICAL );
    
    wxGridSizer *gSAttState = new wxGridSizer( 4 );  // four by four
-   wxGridSizer *gSRateState = new wxGridSizer( 2 );  // three rows by two columns
+/* Alternate layout in the works
+   wxFlexGridSizer *gSAttState = new wxFlexGridSizer( 2 );  // two by two
+   wxBoxSizer *bSColumnLabels = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *bSRowLabels = new wxBoxSizer( wxVERTICAL );
+   wxFlexGridSizer *fGSAttEntriesAndUnits = new wxFlexGridSizer( 4 );  // four by four
+   */
+   wxFlexGridSizer *gSRateState = new wxFlexGridSizer( 3 );  // three rows by three columns
+   /*
+   bSColumnLabels->Add(col1StaticText, 0, wxALL, text_bsize);
+   bSColumnLabels->Add(col2StaticText, 0, wxALL, text_bsize);
+   bSColumnLabels->Add(col3StaticText, 0, wxALL, text_bsize);
+
+   bSRowLabels->Add( st1StaticText, 0, wxLEFT, text_bsize);
+   bSRowLabels->Add( st2StaticText, 0, wxLEFT, text_bsize);
+   bSRowLabels->Add( st3StaticText, 0, wxLEFT, text_bsize);
+   bSRowLabels->Add( st4StaticText, 0, wxLEFT, text_bsize);
+   
+   fGSAttEntriesAndUnits->Add(st1TextCtrl, 0, wxALL, text_bsize);
+   fGSAttEntriesAndUnits->Add(st5TextCtrl, 0, wxALL, text_bsize);
+   fGSAttEntriesAndUnits->Add(st8TextCtrl, 0, wxALL, text_bsize);
+   fGSAttEntriesAndUnits->Add(attUnits1, 0, wxALL, text_bsize);
+   fGSAttEntriesAndUnits->Add(st2TextCtrl, 0, wxALL, text_bsize);
+   fGSAttEntriesAndUnits->Add(st6TextCtrl, 0, wxALL, text_bsize);
+   fGSAttEntriesAndUnits->Add(st9TextCtrl, 0, wxALL, text_bsize);
+   fGSAttEntriesAndUnits->Add(attUnits2, 0, wxALL, text_bsize);
+   fGSAttEntriesAndUnits->Add(st3TextCtrl, 0, wxALL, text_bsize);
+   fGSAttEntriesAndUnits->Add(st7TextCtrl, 0, wxALL, text_bsize);
+   fGSAttEntriesAndUnits->Add(st10TextCtrl, 0, wxALL, text_bsize);
+   fGSAttEntriesAndUnits->Add(attUnits3, 0, wxALL, text_bsize);
+   fGSAttEntriesAndUnits->Add(st4TextCtrl, 0, wxALL, text_bsize);
+
+   gSAttState->AddSpacer(20);
+   gSAttState->Add(bSColumnLabels, 0, wxALL, text_bsize);
+   gSAttState->Add(bSRowLabels, 0, wxALL, text_bsize);
+   gSAttState->Add(fGSAttEntriesAndUnits, 0, wxALL, text_bsize);
+   */
    
    gSAttState->AddSpacer(20);  // blank space
    gSAttState->Add(col1StaticText, 0, wxALL, text_bsize);
@@ -407,11 +447,14 @@ void AttitudePanel::Create()
    
    gSRateState->Add(str1StaticText, 0, wxALL, bsize);
    gSRateState->Add(str1TextCtrl, 0, wxALL, bsize);
+   gSRateState->Add(rateUnits1, 0, wxALL, bsize);
    gSRateState->Add(str2StaticText, 0, wxALL, bsize);
    gSRateState->Add(str2TextCtrl, 0, wxALL, bsize);
+   gSRateState->Add(rateUnits2, 0, wxALL, bsize);
    gSRateState->Add(str3StaticText, 0, wxALL, bsize);
    gSRateState->Add(str3TextCtrl, 0, wxALL, bsize);
-
+   gSRateState->Add(rateUnits3, 0, wxALL, bsize);
+   
    gSConfig->Add(config1StaticText, 0, wxALL, bsize);
    gSConfig->Add(  config1ComboBox, 0, wxEXPAND|wxALL, bsize);
    gSConfig->Add(config2StaticText, 0, wxALL, bsize);
@@ -648,6 +691,10 @@ void AttitudePanel::SaveData()
        
    theApplyButton->Disable();
    
+/////////////////////////////
+   MessageInterface::ShowMessage("Attitude creation via the GUI is not implemented yet\n");
+/////////////////////////////
+
    wxString mode = config1ComboBox->GetValue();
    
    AttitudeFactory af;
@@ -777,7 +824,6 @@ void AttitudePanel::OnStateTypeTextUpdate(wxCommandEvent &event)
 		else if (stateTypeRateStr == stateTypeRateArray[ANGULAR_VELOCITY]) {
 			CalculateFromAngularVelocity();
 		}
-		theApplyButton->Enable();
 	}
 	else if (stateTypeStr == stateTypeArray[QUATERNIONS]) {
 		if (st1TextCtrl)
@@ -792,7 +838,6 @@ void AttitudePanel::OnStateTypeTextUpdate(wxCommandEvent &event)
 		CalculateFromQuaternions(); // use this new information to
 									// calculate the Euler angles and
 									// the cosine matrix
-		theApplyButton->Enable();
 	}
 	else if (stateTypeStr == stateTypeArray[DCM]) {
 		if (st1TextCtrl)
@@ -817,8 +862,8 @@ void AttitudePanel::OnStateTypeTextUpdate(wxCommandEvent &event)
 		CalculateFromCosineMatrix(); // use this new information to
 									// calculate the quaternions and
 									// the Euler angles
-		theApplyButton->Enable();
 	}
+   theApplyButton->Enable();
 }
 
 //------------------------------------------------------------------------------
@@ -851,6 +896,7 @@ void AttitudePanel::OnStateTypeRateTextUpdate(wxCommandEvent &event)
 			
 		CalculateFromAngularVelocity();  // calculate the equivalent angular velocities
 	}
+	theApplyButton->Enable();
 }
 
 //------------------------------------------------------------------------------

@@ -71,11 +71,19 @@ private:
    wxTextCtrl *st8TextCtrl;
    wxTextCtrl *st9TextCtrl;
    wxTextCtrl *st10TextCtrl;
-   
+
    wxTextCtrl *str1TextCtrl;
    wxTextCtrl *str2TextCtrl;
    wxTextCtrl *str3TextCtrl;
-   
+   /* for some weird reason, these members cause a crash on exiting the panel
+   wxStaticText *attUnits1;
+   wxStaticText *attUnits2;
+   wxStaticText *attUnits3;
+
+   wxStaticText *rateUnits1;
+   wxStaticText *rateUnits2;
+   wxStaticText *rateUnits3;
+   */
    wxComboBox *config1ComboBox;
    wxComboBox *config2ComboBox;
    wxComboBox *config3ComboBox;
