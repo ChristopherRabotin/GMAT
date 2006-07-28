@@ -30,15 +30,15 @@ public:
 protected:
    GmatCommand *theCommand;
 
-   wxComboBox *mObjectComboBox;
-    
+   wxCheckListBox *mObjectCheckListBox;
+
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
 
    // event handling
-   void OnComboBoxChange(wxCommandEvent& event);
+   void OnCheckListBoxChange(wxCommandEvent& event);
 
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
@@ -47,7 +47,7 @@ protected:
    enum
    {     
       ID_TEXT = 80000,        
-      ID_COMBOBOX
+      ID_CHECKLISTBOX
    };
 };
 
