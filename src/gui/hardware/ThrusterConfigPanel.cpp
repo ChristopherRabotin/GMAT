@@ -77,7 +77,8 @@ ThrusterConfigPanel::ThrusterConfigPanel(wxWindow *parent,
 //------------------------------------------------------------------------------
 ThrusterConfigPanel::~ThrusterConfigPanel()
 {
-
+   theGuiManager->UnregisterComboBox("CoordinateSystem", coordsysComboBox);
+   theGuiManager->UnregisterComboBox("FuelTank", tankComboBox);
 }
 
 //-------------------------------
@@ -193,13 +194,13 @@ void ThrusterConfigPanel::LoadData()
    
    if (tankComboBox->IsEmpty())
     {
-   	    tankComboBox->Insert(wxT("No Tanks Available"), 0);
+       tankComboBox->Insert(wxT("No Tanks Available"), 0);
        tankComboBox->SetSelection(0);
        isTankEmpty = true;
     }
     else if (tanks.empty())
     {
-       tankComboBox->Insert(wxT("No Tanks Selected"), 0);
+       tankComboBox->Insert(wxT("No Tank Selected"), 0);
        tankComboBox->SetSelection(0);
        isTankEmpty = false;
     }
@@ -268,7 +269,7 @@ void ThrusterConfigPanel::OnTextChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ThrusterConfigPanel::OnComboBoxChange(wxCommandEvent &event)
 {
-	if (event.GetEventObject() == coordsysComboBox)
+        if (event.GetEventObject() == coordsysComboBox)
    {
       isCoordSysChanged =  true;
       coordsysName = coordsysComboBox->GetStringSelection().c_str();
@@ -276,9 +277,9 @@ void ThrusterConfigPanel::OnComboBoxChange(wxCommandEvent &event)
    }
    else if (event.GetEventObject() == tankComboBox)
    {
-   	   if (!isTankEmpty)
+           if (!isTankEmpty)
       {
-   	      isTankChanged = true;
+              isTankChanged = true;
          tankName = tankComboBox->GetStringSelection().c_str();
          theApplyButton->Enable();
       }
