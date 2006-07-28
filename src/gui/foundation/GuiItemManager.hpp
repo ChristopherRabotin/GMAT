@@ -49,6 +49,8 @@ public:
    static const int MAX_SPACE_OBJECT = 40; // FORMATION + SPACECRAFT
    static const int MAX_FORMATION = 10;
    static const int MAX_SPACECRAFT = 30;
+   static const int MAX_BURN = 40;
+   static const int MAX_ALL_OBJECT = 70;   // MAX_SPACE_OBJECT + MAX_BURN
    
    // for Parameter
    static const int MAX_SC_PROPERTY = 100; // Max Spacecraft
@@ -62,9 +64,9 @@ public:
 
    // Other
    static const int MAX_COORD_SYS = 20;
-   static const int MAX_BURN = 40;
    static const int MAX_HARDWARE = 60;
    static const int MAX_FUNCTION = 20;
+   static const int MAX_SUBSCRIBER = 20;
    
    static GuiItemManager* GetInstance();
    
@@ -78,6 +80,7 @@ public:
    void UpdateCoordSystem();
    void UpdateHardware();
    void UpdateFunction();
+   void UpdateSubscriber();
    
    void UnregisterListBox(const wxString &type, wxListBox *lb,
                           wxArrayString *excList = NULL);
@@ -162,6 +165,16 @@ public:
    int GetNumProperty(const wxString &objType);
    wxString* GetPropertyList(const wxString &objType);
 
+   //-----------------------------------------------------------------
+   //Note: To enables automatic updates when new object is added to
+   //      resrouce, the following function automatically registers
+   //      components. If caller calls any of the following methods
+   //      to get a component, the caller needs to unregister
+   //      components by calling appropriate Unregister*() methods
+   //      in the caller's destructor, such as UnregisterListBox(),
+   //      UnregisterCheckListBox(), UnregisterComboBox().
+   //-----------------------------------------------------------------
+
    // ComboBox
    wxComboBox* GetObjectTypeComboBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size,
@@ -200,6 +213,9 @@ public:
    wxComboBox* GetThrusterComboBox(wxWindow *parent, wxWindowID id,
                                    const wxSize &size);
    
+   wxComboBox* GetSubscriberComboBox(wxWindow *parent, wxWindowID id,
+                                     const wxSize &size);
+   
    // ListBox
    wxListBox* GetSpacePointListBox(wxWindow *parent, wxWindowID id, 
                                    const wxSize &size, bool addVector = false);
@@ -221,13 +237,18 @@ public:
                                              const wxSize &size,
                                              wxArrayString *excList = NULL);
    
+   wxCheckListBox* GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
+                                            const wxSize &size,
+                                            wxArrayString *excList = NULL);
+   
    wxListBox* GetFormationListBox(wxWindow *parent, wxWindowID id,
                                   const wxSize &size,
                                   wxArrayString &sosToExclude);
    
    wxListBox* GetPropertyListBox(wxWindow *parent, wxWindowID id,
                                  const wxSize &size,
-                                 const wxString &objType, int showOption = SHOW_PLOTTABLE);
+                                 const wxString &objType,
+                                 int showOption = SHOW_PLOTTABLE);
    
    wxListBox* GetPlottableParameterListBox(wxWindow *parent, wxWindowID id,
                                            const wxSize &size,
@@ -301,6 +322,9 @@ private:
    void UpdateCoordSystemList();
    void UpdateHardwareList();
    void UpdateFunctionList();
+   void UpdateSubscriberList();
+
+   void AddToAllObjectList();
    
    static GuiItemManager *theInstance;
    GuiInterpreter *theGuiInterpreter;
@@ -309,6 +333,7 @@ private:
    std::vector<wxListBox*> mSpaceObjectLBList;
    std::vector<wxListBox*> mSpacecraftLBList;
    std::vector<wxCheckListBox*> mSpacecraftCLBList;
+   std::vector<wxCheckListBox*> mAllObjectCLBList;
    std::vector<wxListBox*> mFuelTankLBList;
    std::vector<wxListBox*> mThrusterLBList;
    
@@ -320,11 +345,14 @@ private:
    std::vector<wxComboBox*> mFunctionCBList;
    std::vector<wxComboBox*> mFuelTankCBList;
    std::vector<wxComboBox*> mThrusterCBList;
+   std::vector<wxComboBox*> mSubscriberCBList;
    
    std::vector<wxArrayString*> mSpaceObjectExcList;
    std::vector<wxArrayString*> mSpacecraftExcList;
+   std::vector<wxArrayString*> mAllObjectExcList;
    std::vector<wxArrayString*> mFuelTankExcList;
    std::vector<wxArrayString*> mThrusterExcList;
+   std::vector<wxArrayString*> mSubscriberExcList;
    
    int theNumScProperty;
    int theNumImpBurnProperty;
@@ -348,6 +376,8 @@ private:
    int theNumCelesPoint;
    int theNumCalPoint;
    int theNumSpacePoint;
+   int theNumSubscriber;
+   int theNumAllObject;
    
    wxString theSpacePointList[MAX_SPACE_POINT];
    wxString theCelesPointList[MAX_CELES_POINT];
@@ -363,6 +393,8 @@ private:
    wxString theFunctionList[MAX_FUNCTION];
    wxString theFuelTankList[MAX_HARDWARE];
    wxString theThrusterList[MAX_HARDWARE];
+   wxString theSubscriberList[MAX_SUBSCRIBER];
+   wxString theAllObjectList[MAX_ALL_OBJECT];
    
    wxString theScPropertyList[MAX_SC_PROPERTY];
    wxString theImpBurnPropertyList[MAX_IB_PROPERTY];
