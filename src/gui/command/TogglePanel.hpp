@@ -30,6 +30,7 @@ protected:
    // member data
    GmatCommand *theCommand;
    
+   wxComboBox *mSubsComboBox;
    wxRadioButton *mOnRadioButton;
    wxRadioButton *mOffRadioButton;
    
@@ -48,6 +49,7 @@ protected:
    enum
    {     
       ID_TEXT = 80000,        
+      ID_COMBOBOX,
       ID_RADIOBUTTON
    };
 };

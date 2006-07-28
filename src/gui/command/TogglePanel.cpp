@@ -69,22 +69,13 @@ TogglePanel::TogglePanel(wxWindow *parent, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 void TogglePanel::Create()
 {
-   StringArray items;
    int bsize = 3;
     
-   // create sizers
-   wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-
-   // get subscriber name
-   wxString subscriberName = theCommand->GetStringParameter
-      (theCommand->GetParameterID("Subscriber")).c_str();
+   // create subscriber combo box
+   mSubsComboBox =
+      theGuiManager->GetSubscriberComboBox(this, ID_COMBOBOX, wxSize(150,-1));
    
-   // create subscriber label
-   wxStaticText *subscriberLabel =
-      new wxStaticText(this, ID_TEXT, wxT(subscriberName),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   
-   // list of subscribers
+   // On or Off button
    mOnRadioButton =
       new wxRadioButton(this, ID_RADIOBUTTON, wxT("On"),
                         wxDefaultPosition, wxDefaultSize, 0);
@@ -92,12 +83,17 @@ void TogglePanel::Create()
    mOffRadioButton =
       new wxRadioButton(this, ID_RADIOBUTTON, wxT("Off"),
                         wxDefaultPosition, wxDefaultSize, 0);
-     
-   // add subscriber label and RadioButton to sizer
-   pageBoxSizer->Add(subscriberLabel, 0, wxALIGN_CENTER | wxALL, bsize);
-   pageBoxSizer->Add(mOnRadioButton, 0, wxALIGN_CENTER | wxALL, bsize);
-   pageBoxSizer->Add(mOffRadioButton, 0, wxALIGN_CENTER | wxALL, bsize);
    
+   // create sizers
+   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+   
+   buttonSizer->Add(mOnRadioButton, 0, wxALIGN_CENTER | wxALL, bsize);
+   buttonSizer->Add(mOffRadioButton, 0, wxALIGN_CENTER | wxALL, bsize);
+   
+   pageBoxSizer->Add(mSubsComboBox, 0, wxALIGN_CENTER | wxALL, bsize);
+   pageBoxSizer->Add(buttonSizer, 0, wxALIGN_CENTER | wxALL, bsize);
+
    // add to middle sizer
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);     
 
@@ -110,12 +106,24 @@ void TogglePanel::LoadData()
 {
    // Set the pointer for the "Show Script" button
    mObject = theCommand;
-
-   // load data from the core engine
+   
+   // get subscriber name (only one subscriber for now)
+   // need GetRefObjectNameArray() in Toggle command to show multiple subscribers
+   
+   wxString subName = theCommand->GetStringParameter
+      (theCommand->GetParameterID("Subscriber")).c_str();
+   
+   mSubsComboBox->SetValue(subName);
    
    std::string toggleState = theCommand->GetStringParameter
       (theCommand->GetParameterID("ToggleState"));
-  
+   
+   #if DEBUG_TOGGLE_PANEL
+   MessageInterface::ShowMessage
+      ("TogglePanel::LoadData() subName=%s, toggleState=%s\n",
+       subName.c_str(), toggleState.c_str());
+   #endif
+   
    if (toggleState == "On")
       mOnRadioButton->SetValue(true);
    else
@@ -127,11 +135,20 @@ void TogglePanel::LoadData()
 //------------------------------------------------------------------------------
 void TogglePanel::SaveData()
 {
-   if (mOnRadioButton->GetValue() == true)
-      theCommand->SetStringParameter(theCommand->GetParameterID("ToggleState"), "On");
-   else
-      theCommand->SetStringParameter(theCommand->GetParameterID("ToggleState"), "Off");
-      
+   // allow one subscriber for now
+   std::string subName = mSubsComboBox->GetValue().c_str();
+   bool toggleOn = mOnRadioButton->GetValue();
+   std::string onOff = toggleOn ? "On" : "Off";
+
+   #if DEBUG_TOGGLE_PANEL
+   MessageInterface::ShowMessage
+      ("TogglePanel::SaveData() subName=%s, onOff=%s\n", subName.c_str(),
+       onOff.c_str());
+   #endif
+   
+   theCommand->SetStringParameter(theCommand->GetParameterID("Subscriber"), subName);
+   theCommand->SetStringParameter(theCommand->GetParameterID("ToggleState"), onOff);
+   
 }
 
 //---------------------------------
