@@ -1468,6 +1468,10 @@ void ResourceTree::OnRename(wxCommandEvent &event)
              oldName.c_str(), newName.c_str());
       }
    }
+   
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage("ResourceTree::OnRename() rename completed\n");
+   #endif
 }
 
 
@@ -2142,7 +2146,7 @@ void ResourceTree::OnAddSqp(wxCommandEvent &event)
 void ResourceTree::OnAddReportFile(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
-  
+   
    wxString name;
    name.Printf("ReportFile%d", ++mNumReportFile);
 
@@ -2153,6 +2157,7 @@ void ResourceTree::OnAddReportFile(wxCommandEvent &event)
                  new GmatTreeItemData(name, GmatTree::REPORT_FILE));
 
       Expand(item);
+      theGuiManager->UpdateSubscriber();
    }
 }
 
@@ -2179,6 +2184,7 @@ void ResourceTree::OnAddXyPlot(wxCommandEvent &event)
                  new GmatTreeItemData(name, GmatTree::XY_PLOT));
       
       Expand(item);
+      theGuiManager->UpdateSubscriber();
    }
 }
 
@@ -2205,6 +2211,7 @@ void ResourceTree::OnAddOpenGlPlot(wxCommandEvent &event)
                  new GmatTreeItemData(name, GmatTree::OPENGL_PLOT));
 
       Expand(item);
+      theGuiManager->UpdateSubscriber();
    }
 }
 
