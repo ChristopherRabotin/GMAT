@@ -144,6 +144,13 @@ Real BurnData::GetBurnReal(Integer item)
    if (mImpBurn == NULL)
       InitializeRefObjects();
    
+   if (mImpBurn == NULL)
+   {
+      MessageInterface::ShowMessage
+         ("Cannot find Burn object so returning %f\n", BURN_REAL_UNDEFINED);
+      return BURN_REAL_UNDEFINED;
+   }
+   
    switch (item)
    {
    case ELEMENT1:
@@ -186,12 +193,20 @@ Real BurnData::GetBurnReal(const std::string &str)
 //------------------------------------------------------------------------------
 void BurnData::SetBurnReal(Integer item, Real rval)
 {
+   #if DEBUG_BURNDATA_SET
    MessageInterface::ShowMessage
-      ("===> BurnData::SetBurnReal() item=%d, rval=%f\n", item, rval);
+      ("BurnData::SetBurnReal() item=%d, rval=%f\n", item, rval);
+   #endif
    
    ///@todo convert internal DeltaV to Parameter CoordinateSystem.
    if (mImpBurn == NULL)
       InitializeRefObjects();
+   
+   if (mImpBurn == NULL)
+   {
+      MessageInterface::ShowMessage
+         ("Cannot find Burn object so returning %f\n", BURN_REAL_UNDEFINED);
+   }
    
    switch (item)
    {
@@ -260,9 +275,16 @@ void BurnData::InitializeRefObjects()
    mImpBurn = (ImpulsiveBurn*)FindFirstObject(VALID_OBJECT_TYPE_LIST[BURN]);
    
    if (mImpBurn == NULL)
-      throw ParameterException
-         ("BurnData::InitializeRefObjects() Cannot find Burn object.\n"
-          "Make sure Spacecraft is set to any unnamed parameters\n");
+   {
+      // just write a message
+      #if DEBUG_BURNDATA_INIT
+      MessageInterface::ShowMessage
+         ("BurnData::InitializeRefObjects() Cannot find Burn object.\n");
+      #endif
+      
+      //throw ParameterException
+      //   ("BurnData::InitializeRefObjects() Cannot find Burn object.\n");
+   }
    
    //-------------------------------------------------------
    // Need this for future?
