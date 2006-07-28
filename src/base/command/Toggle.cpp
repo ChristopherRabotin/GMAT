@@ -311,13 +311,9 @@ std::string Toggle::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Toggle::GetStringParameter(const Integer id) const
 {
-   //if (id == subscriberID)
-   //   return "List of subscribers";
-   
-   //loj: 10/20/04 added new code
    if (id == subscriberID)
    {
-      return subNames[0]; //loj: return first subscriber
+      return subNames[0]; //loj: return first subscriber for now
    }
    else if (id == toggleStateID)
    {
@@ -336,22 +332,27 @@ std::string Toggle::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool Toggle::SetStringParameter(const Integer id, const std::string &value)
 {
-   //if (id == subscriberID) {
-   //   if (find(subNames.begin(), subNames.end(), value) == subNames.end()) {
-   //      subNames.push_back(value);
-   //      return true;
-   //   }
-   //   return false;
-   //}
 
-   //loj: 10/20/04 added new code
+   #ifdef DEBUG_TOGGLE
+   MessageInterface::ShowMessage
+      ("Toggle::SetStringParameter() id=%d, value=%s\n", id, value.c_str());
+   #endif
+   
+   //loj: 7/28/06 just handle one subscriber until this code is ready
    if (id == subscriberID)
    {
-      if (find(subNames.begin(), subNames.end(), value) == subNames.end())
-      {
+      if (subNames.empty())
          subNames.push_back(value);
-         return true;
-      }
+      else
+        subNames[0] = value;
+      
+      return true;
+      
+//       if (find(subNames.begin(), subNames.end(), value) == subNames.end())
+//       {
+//          subNames.push_back(value);
+//          return true;
+//       }
    }
    else if (id == toggleStateID)
    {
