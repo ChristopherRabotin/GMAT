@@ -29,8 +29,8 @@
 //#define DEBUG_GUI_ITEM_SP 1
 //#define DEBUG_GUI_ITEM_SO 1
 //#define DEBUG_GUI_ITEM_SC 1
-//#define DEBUG_GUI_ITEM_CS 1
-//#define DEBUG_GUI_ITEM_HW 1
+//#define DEBUG_GUI_ITEM_CS 2
+//#define DEBUG_GUI_ITEM_HW 2
 //#define DEBUG_GUI_ITEM_BURN 2
 
 //------------------------------
@@ -73,14 +73,34 @@ void GuiItemManager::UpdateAll()
    #endif
    
    UpdateCelestialPoint(); // All CelestialBodies and CalculatedPoints
+   //MessageInterface::ShowMessage("===> after UpdateCelestialPoint()\n");
+   
    UpdateFormation();
+   //MessageInterface::ShowMessage("===> after UpdateFormation()\n");
+   
    UpdateSpacecraft();
+   //MessageInterface::ShowMessage("===> after UpdateSpacecraft()\n");
+   
    UpdateBurn();
+   //MessageInterface::ShowMessage("===> after UpdateBurn()\n");
+   
    UpdateParameter();
+   //MessageInterface::ShowMessage("===> after UpdateParameter()\n");
+   
    UpdateSolarSystem();
+   //MessageInterface::ShowMessage("===> after UpdateSolarSystem()\n");
+   
    UpdateCoordSystem();
+   //MessageInterface::ShowMessage("===> after UpdateCoordSystem()\n");
+   
    UpdateHardware();
+   //MessageInterface::ShowMessage("===> after UpdateHardware()\n");
+   
    UpdateFunction();
+   //MessageInterface::ShowMessage("===> after UpdateFunction()\n");
+
+   UpdateSubscriber();
+   //MessageInterface::ShowMessage("===> after UpdateSubscriber()\n");
 }
 
 
@@ -243,6 +263,23 @@ void GuiItemManager::UpdateFunction()
 
 
 //------------------------------------------------------------------------------
+//  void UpdateSubscriber()
+//------------------------------------------------------------------------------
+/**
+ * Updates Subscriber related gui components.
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateSubscriber()
+{
+   #if DEBUG_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("===> UpdateSubscriber\n");
+   #endif
+   
+   UpdateSubscriberList();
+}
+
+
+//------------------------------------------------------------------------------
 // void UnregisterListBox(const wxString &type, wxListBox *lb)
 //                        wxArrayString *excList)
 //------------------------------------------------------------------------------
@@ -339,6 +376,20 @@ void GuiItemManager::UnregisterCheckListBox(const wxString &type, wxCheckListBox
       if (pos2 != mSpacecraftExcList.end())
          mSpacecraftExcList.erase(pos2);
    }
+   else if (type == "AllObject")
+   {
+      std::vector<wxCheckListBox*>::iterator pos1 =
+         find(mAllObjectCLBList.begin(), mAllObjectCLBList.end(), clb);
+      
+      if (pos1 != mAllObjectCLBList.end())
+         mAllObjectCLBList.erase(pos1);
+      
+      std::vector<wxArrayString*>::iterator pos2 =
+         find(mAllObjectExcList.begin(), mAllObjectExcList.end(), excList);
+      
+      if (pos2 != mAllObjectExcList.end())
+         mAllObjectExcList.erase(pos2);
+   }
 }
 
 
@@ -410,6 +461,14 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
       
       if (pos != mThrusterCBList.end())
          mThrusterCBList.erase(pos);
+   }
+   else if (type == "Subscriber")
+   {
+      std::vector<wxComboBox*>::iterator pos =
+         find(mSubscriberCBList.begin(), mSubscriberCBList.end(), cb);
+      
+      if (pos != mSubscriberCBList.end())
+         mSubscriberCBList.erase(pos);
    }
 }
 
@@ -841,33 +900,30 @@ wxComboBox* GuiItemManager::GetFuelTankComboBox(wxWindow *parent, wxWindowID id,
    //---------------------------------------------
    // register for update
    //---------------------------------------------
-   // waw: 07/18/06 Commented out for GMAT crash
-   // Not sure why the combobox needs to be added here but it crashes on 
-   // UpdateHardwareList() calls.
-   //mFuelTankCBList.push_back(fuelTankComboBox);
-   
+   mFuelTankCBList.push_back(fuelTankComboBox);
    
    return fuelTankComboBox;
 }
 
 
 //------------------------------------------------------------------------------
-//  wxComboBox* GetThrusterComboBox(wxWindow *parent, wxWindowID id, const wxSize &size)
+// wxComboBox* GetThrusterComboBox(wxWindow *parent, wxWindowID id,
+//                                 const wxSize &size)
 //------------------------------------------------------------------------------
 /**
- * @return thruster combo box pointer
+ * @return Thruster combo box pointer
  */
 //------------------------------------------------------------------------------
 wxComboBox* GuiItemManager::GetThrusterComboBox(wxWindow *parent, wxWindowID id,
                                                 const wxSize &size)
 {
-   // combo box for avaliable thruster
+   // combo box for avaliable Thruster
    
    wxComboBox *thrusterComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
                      theNumThruster, theThrusterList, wxCB_READONLY);
    
-   // show first thruster
+   // show first Thruster
    thrusterComboBox->SetSelection(0);
    
    //---------------------------------------------
@@ -876,6 +932,35 @@ wxComboBox* GuiItemManager::GetThrusterComboBox(wxWindow *parent, wxWindowID id,
    mThrusterCBList.push_back(thrusterComboBox);
    
    return thrusterComboBox;
+}
+
+
+//------------------------------------------------------------------------------
+// wxComboBox* GetSubscriberComboBox(wxWindow *parent, wxWindowID id,
+//                                   const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return Subscriber combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox* GuiItemManager::GetSubscriberComboBox(wxWindow *parent, wxWindowID id,
+                                                  const wxSize &size)
+{
+   // combo box for avaliable Subscriber
+   
+   wxComboBox *subscriberComboBox =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                     theNumSubscriber, theSubscriberList, wxCB_READONLY);
+   
+   // show first Subscriber
+   subscriberComboBox->SetSelection(0);
+   
+   //---------------------------------------------
+   // register for update
+   //---------------------------------------------
+   mSubscriberCBList.push_back(subscriberComboBox);
+   
+   return subscriberComboBox;
 }
 
 
@@ -1118,6 +1203,53 @@ wxCheckListBox* GuiItemManager::GetSpacecraftCheckListBox(wxWindow *parent, wxWi
    //---------------------------------------------
    mSpacecraftCLBList.push_back(checkListBox);
    mSpacecraftExcList.push_back(excList);
+   
+   checkListBox->SetSelection(0);
+   return checkListBox;
+}
+
+
+//------------------------------------------------------------------------------
+// wxCheckListBox* GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
+//                                          const wxSize &size, wxArrayString &excList)
+//------------------------------------------------------------------------------
+/**
+ * @return Available All Object ListBox pointer.
+ */
+//------------------------------------------------------------------------------
+wxCheckListBox*
+GuiItemManager::GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
+                                         const wxSize &size, wxArrayString *excList)
+{
+   wxString emptyList[] = {};
+   wxCheckListBox *checkListBox =
+      new wxCheckListBox(parent, id, wxDefaultPosition, size, 0,
+                         emptyList, wxLB_SINGLE|wxLB_SORT);
+   
+   //---------------------------------------------
+   // Get all object list
+   //---------------------------------------------
+   
+   if (excList != NULL && excList->GetCount() > 0)
+   {
+      for (int i=0; i<theNumAllObject; i++)
+      {
+         if (excList->Index(theAllObjectList[i]) == wxNOT_FOUND)
+            checkListBox->Append(theAllObjectList[i]);
+      }
+   }
+   else
+   {
+      for (int i=0; i<theNumAllObject; i++)
+         checkListBox->Append(theAllObjectList[i]);
+   }
+   
+   
+   //---------------------------------------------
+   // register to update list
+   //---------------------------------------------
+   mAllObjectCLBList.push_back(checkListBox);
+   mAllObjectExcList.push_back(excList);
    
    checkListBox->SetSelection(0);
    return checkListBox;
@@ -2195,6 +2327,9 @@ void GuiItemManager::UpdateSpacecraftList()
       ("GuiItemManager::UpdateSpacecraftList() exiting. theNumSpacecraft=%d\n",
        theNumSpacecraft);
    #endif
+
+   
+   AddToAllObjectList();
    
 } // end UpdateSpacecraftList()
 
@@ -2644,6 +2779,9 @@ void GuiItemManager::UpdateBurnList()
       
       (*pos)->SetSelection(theNumFiniteBurn-1);
    }
+
+
+   AddToAllObjectList();
 }
 
 
@@ -2686,21 +2824,27 @@ void GuiItemManager::UpdateCoordSystemList()
                                     std::string(theCoordSysList[i].c_str()) + "\n");
       #endif
    }
+
    
    //-------------------------------------------------------
    // update registered CoordinateSystem ComboBox
    //-------------------------------------------------------
    int sel;
+   
    for (std::vector<wxComboBox*>::iterator pos = mCoordSysCBList.begin();
         pos != mCoordSysCBList.end(); ++pos)
    {
-      sel = (*pos)->GetSelection(); //loj: 6/10/05 Added
+      // How can I catch bad pointer?
       
-      (*pos)->Clear();
-      (*pos)->Append(coordSysNames);
-      
-      //loj: 6/10/05 (*pos)->SetSelection(theNumCoordSys-1);
-      (*pos)->SetSelection(sel);
+      if ((*pos)->GetParent() != NULL)
+      {
+         sel = (*pos)->GetSelection();
+         
+         (*pos)->Clear();
+         (*pos)->Append(coordSysNames);
+         
+         (*pos)->SetSelection(sel);
+      }
    }
 }
 
@@ -2717,7 +2861,7 @@ void GuiItemManager::UpdateHardwareList()
    StringArray items =
       theGuiInterpreter->GetListOfConfiguredItems(Gmat::HARDWARE);
    int numHardware = items.size();
-
+   
    #if DEBUG_GUI_ITEM_HW
    MessageInterface::ShowMessage
       ("GuiItemManager::UpdateHardwareList() numHardware=%d\n", numHardware);
@@ -2736,11 +2880,11 @@ void GuiItemManager::UpdateHardwareList()
    Hardware *hw;
    wxArrayString tankNames;
    wxArrayString thrusterNames;
-
+   
    for (int i=0; i<numHardware; i++)
    {
       hw = theGuiInterpreter->GetHardware(items[i]);
-
+      
       if (hw->IsOfType(Gmat::FUEL_TANK))
       {
          theFuelTankList[theNumFuelTank++] = items[i].c_str();
@@ -2751,13 +2895,13 @@ void GuiItemManager::UpdateHardwareList()
          theThrusterList[theNumThruster++] = items[i].c_str();
          thrusterNames.Add(items[i].c_str());
       }
-
+      
       #if DEBUG_GUI_ITEM_HW > 1
       MessageInterface::ShowMessage
-         ("GuiItemManager::UpdateHardwareList() " + itemNames[i] + "\n");
+         ("GuiItemManager::UpdateHardwareList() " + items[i] + "\n");
       #endif
    }
-
+   
    //-------------------------------------------------------
    // update registered FuelTank ListBox
    //-------------------------------------------------------
@@ -2791,18 +2935,19 @@ void GuiItemManager::UpdateHardwareList()
    // It's ok to have the same FuelTank in more than one spacecraft since
    // the Sandbox will clone it.
    std::vector<wxArrayString*>::iterator exPos = mFuelTankExcList.begin();
-
+   
    for (std::vector<wxListBox*>::iterator pos = mFuelTankLBList.begin();
         pos != mFuelTankLBList.end(); ++pos)
    {
       wxArrayString *excList = *exPos++;
       (*pos)->Clear();
-
+      
       for (int i=0; i<theNumFuelTank; i++)
       {
          if (excList->Index(theFuelTankList[i].c_str()) == wxNOT_FOUND)
             (*pos)->Append(theFuelTankList[i]);
       }
+      
       (*pos)->SetSelection((*pos)->GetCount() - 1);
    }
    
@@ -2812,29 +2957,32 @@ void GuiItemManager::UpdateHardwareList()
    // It's ok to have the same Thruster in more than one spacecraft since
    // the Sandbox will clone it.
    exPos = mThrusterExcList.begin();
-
+   
    for (std::vector<wxListBox*>::iterator pos = mThrusterLBList.begin();
         pos != mThrusterLBList.end(); ++pos)
    {
       wxArrayString *excList = *exPos++;
       (*pos)->Clear();
-
+      
       for (int i=0; i<theNumThruster; i++)
       {
          if (excList->Index(theThrusterList[i].c_str()) == wxNOT_FOUND)
             (*pos)->Append(theThrusterList[i]);
       }
+      
       (*pos)->SetSelection((*pos)->GetCount() - 1);
    }
    
    //-------------------------------------------------------
    // update registered FuelTank ComboBox
    //-------------------------------------------------------
+   
    int sel;
    for (std::vector<wxComboBox*>::iterator pos = mFuelTankCBList.begin();
         pos != mFuelTankCBList.end(); ++pos)
    {
       sel = (*pos)->GetSelection();
+      
       (*pos)->Clear();
       (*pos)->Append(tankNames);
       (*pos)->SetSelection(sel);
@@ -2847,10 +2995,12 @@ void GuiItemManager::UpdateHardwareList()
         pos != mThrusterCBList.end(); ++pos)
    {
       sel = (*pos)->GetSelection();
+      
       (*pos)->Clear();
       (*pos)->Append(thrusterNames);
       (*pos)->SetSelection(sel);
    }
+   
 } // end UpdateHardwareList()
 
 
@@ -2900,12 +3050,150 @@ void GuiItemManager::UpdateFunctionList()
    for (std::vector<wxComboBox*>::iterator pos = mFunctionCBList.begin();
         pos != mFunctionCBList.end(); ++pos)
    {      
-       sel = (*pos)->GetSelection(); //arg: 7/05/05 Added
+       sel = (*pos)->GetSelection();
 
       (*pos)->Clear();
       (*pos)->Append(functionNames);
       
       (*pos)->SetSelection(sel);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateSubscriberList()
+//------------------------------------------------------------------------------
+/**
+ * Updates configured Subscriber list.
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateSubscriberList()
+{
+   StringArray items =
+      theGuiInterpreter->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+   theNumSubscriber = items.size();
+   
+   #if DEBUG_GUI_ITEM_SUBS
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdateSubscriberList() theNumSubscriber=%d\n", theNumSubscriber);
+   #endif
+   
+   if (theNumSubscriber > MAX_SUBSCRIBER)
+   {
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdateSubscriberList() GUI will handle up to %d Subscriber."
+          "The number of Subscriber configured: %d\n", MAX_SUBSCRIBER, theNumSubscriber);
+      theNumSubscriber = MAX_SUBSCRIBER;
+   }
+   
+   wxArrayString functionNames;
+   
+   for (int i=0; i<theNumSubscriber; i++)
+   {
+      theSubscriberList[i] = items[i].c_str();
+      functionNames.Add(items[i].c_str());
+
+      #if DEBUG_GUI_ITEM_SUBS > 1
+      MessageInterface::ShowMessage("GuiItemManager::UpdateSubscriberList() " +
+                                    std::string(theSubscriberList[i].c_str()) + "\n");
+      #endif
+   }
+   
+   //-------------------------------------------------------
+   // update registered Subscriber ComboBox
+   //-------------------------------------------------------
+   int sel;
+   for (std::vector<wxComboBox*>::iterator pos = mSubscriberCBList.begin();
+        pos != mSubscriberCBList.end(); ++pos)
+   {      
+       sel = (*pos)->GetSelection();
+
+      (*pos)->Clear();
+      (*pos)->Append(functionNames);
+      
+      (*pos)->SetSelection(sel);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void AddToAllObjectList()
+//------------------------------------------------------------------------------
+/**
+ * Currently it adds the following objects:
+ *    Spacecraft, ImpulsiveBurn, FiniteBurn objects.
+ *
+ * If more object types are added, make sure to increase MAX_ALL_OBJECT and
+ * add to call AddToAllObjectList() in the Update*List().
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::AddToAllObjectList()
+{
+   theNumAllObject = 0;
+   
+   // Add Spacecraft object to the list
+   for (int i=0; i<theNumSpacecraft; i++)
+   {
+      theAllObjectList[i] = theSpacecraftList[i];
+      theNumAllObject++;
+   }
+   
+   // Add ImpulsiveBurn objects to the list
+   for (int i=0; i<theNumImpBurn; i++)
+   {
+      theAllObjectList[theNumAllObject] = theImpBurnList[i];
+      theNumAllObject++;      
+   }
+   
+   // Add FiniteBurn objects to the list
+   for (int i=0; i<theNumFiniteBurn; i++)
+   {
+      theAllObjectList[theNumAllObject] = theFiniteBurnList[i];
+      theNumAllObject++;      
+   }
+
+   #if DEBUG_ALL_OBJECT
+   MessageInterface::ShowMessage
+      ("GuiItemManager::AddToAllObjectList() theNumAllObject=%d\n",
+       theNumAllObject);
+   #endif
+   
+   //-------------------------------------------------------
+   // update registered All Object CheckListBox
+   //-------------------------------------------------------
+   for (std::vector<wxCheckListBox*>::iterator pos = mAllObjectCLBList.begin();
+        pos != mAllObjectCLBList.end(); ++pos)
+   {
+      int guiCount = (*pos)->GetCount();
+      bool found = false;
+      wxString item;
+      
+      // if deleted item remove from the list
+      for (int i=0; i<guiCount; i++)
+      {
+         found = false;
+         for (int j=0; j<theNumAllObject; j++)
+         {
+            item = (*pos)->GetString(i);
+            if (item == theAllObjectList[j])
+            {
+               found = true;
+               break;
+            }
+         }
+         
+         if (!found)
+         {
+            (*pos)->Delete(i);
+            guiCount--;
+         }
+      }
+      
+      // if new item add to the list
+      for (int i=0; i<theNumAllObject; i++)
+         if ((*pos)->FindString(theAllObjectList[i]) == wxNOT_FOUND)
+            (*pos)->Append(theAllObjectList[i]);
+      
    }
 }
 
@@ -2944,6 +3232,7 @@ GuiItemManager::GuiItemManager()
    theNumCelesBody = 0;
    theNumCelesPoint = 0;
    theNumCalPoint = 0;
+   theNumSubscriber = 0;
    theNumSpacePoint = 0;
    
    // 6/29/06: Currently creatable burn parameters are: Element1, Element2, Element3
