@@ -32,13 +32,17 @@ public:
    virtual ~Save();
    Save(const Save& sv);
    Save&                  operator=(const Save&);
-     
+   
+   virtual bool TakeAction(const std::string &action,  
+                           const std::string &actionData = "");
    virtual std::string     GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual const StringArray&
+                           GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool            SetRefObjectName(const Gmat::ObjectType type,
                                             const std::string &name);
    virtual bool            Initialize();
    bool                    Execute();
-
+   
    // inherited from GmatBase
    virtual GmatBase*      Clone() const;
    virtual const std::string&

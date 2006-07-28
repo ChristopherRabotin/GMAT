@@ -111,7 +111,28 @@ Save& Save::operator=(const Save& sv)
 //------------------------------------------------------------------------------
 std::string Save::GetRefObjectName(const Gmat::ObjectType type) const
 {
-   return objName[0];
+   if (objName.size() == 0)
+      return "";
+   else
+      return objName[0];
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Accesses arrays of names for referenced objects.
+ * 
+ * @param type Type of object requested.
+ * 
+ * @return the StringArray containing the referenced object names.
+ */
+//------------------------------------------------------------------------------
+const StringArray& Save::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   // it can be any object, so ignore object type
+   return objName;
 }
 
 
@@ -151,15 +172,20 @@ bool Save::SetRefObjectName(const Gmat::ObjectType type,
 bool Save::Initialize()
 {
    wasWritten = false;
+   appendData = false;
+   
    bool retval = GmatCommand::Initialize();
-
+   filename = "";
+   
    // Save specific initialization goes here:
    StringArray::iterator i = objName.begin();
-   if (objName.size() > 1)
-   {
-      filename = *i;
-      ++i;
-   }
+
+   // If saving multiple objects, we want to append object names, so commented out
+//    if (objName.size() > 1)
+//    {
+//        filename = *i;
+//        ++i;
+//    }
 
    for (/* i initialized above */; i != objName.end(); ++i)
    {
@@ -181,11 +207,18 @@ bool Save::Initialize()
          errorString += "\"";
          throw CommandException(errorString);
       }
-
+      
+      // If saving multiple objects, we want to append object names.
+      if (distance(objName.begin(), i) > 0)
+         filename = filename + "_" + *i;
+      
       obj.push_back((*objectMap)[*i]);
    }
-    
-    return retval;
+   
+   if (objName.size() > 1)
+      filename = filename + ".data";
+   
+   return retval;
 }
 
 
@@ -203,6 +236,7 @@ bool Save::Execute()
 {
    if (!obj[0])
       throw CommandException("Object not set for Save command");
+   
    if (filename == "")
    {
       std::string objectname = obj[0]->GetName();
@@ -211,23 +245,28 @@ bool Save::Execute()
       filename += obj[0]->GetTypeName();
    }
 
+   #ifdef DEBUG_SAVE_OUTPUT
+   MessageInterface::ShowMessage("Save::Execute() filename=%s\n",
+                                 filename.c_str());
+   #endif
+   
    if (appendData && wasWritten)
       file.open(filename.c_str(), std::ios::app);
    else
       file.open(filename.c_str());
-    
+   
    file.precision(18);        /// @todo Make output precision generic
 
    for (ObjectArray::iterator i = obj.begin(); i != obj.end(); ++i)
       WriteObject(*i);
-      
+   
    wasWritten = true;
    file.close();
    
    BuildCommandSummary(true);
    return true;
 }
-  
+
 
 //------------------------------------------------------------------------------
 // void Save::WriteObject()
@@ -451,6 +490,37 @@ const std::string& Save::GetGeneratingString(Gmat::WriteMode mode,
 
 
 //------------------------------------------------------------------------------
+// virtual bool TakeAction(const std::string &action,  
+//                         const std::string &actionData = "");
+//------------------------------------------------------------------------------
+/**
+ * This method performs action.
+ *
+ * @param <action> action to perform
+ * @param <actionData> action data associated with action
+ * @return true if action successfully performed
+ *
+ */
+//------------------------------------------------------------------------------
+bool Save::TakeAction(const std::string &action, const std::string &actionData)
+{
+   #if DEBUG_TAKE_ACTION
+   MessageInterface::ShowMessage
+      ("Save::TakeAction() action=%s, actionData=%s\n",
+       action.c_str(), actionData.c_str());
+   #endif
+   
+   if (action == "Clear")
+   {
+      objName.clear();
+      return true;
+   }
+
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
@@ -468,8 +538,9 @@ bool Save::RenameRefObject(const Gmat::ObjectType type,
                            const std::string &oldName,
                            const std::string &newName)
 {
-   if (type != Gmat::SPACECRAFT)
-      return true;
+   // can change any objects (loj: 7/27/06)
+   //if (type != Gmat::SPACECRAFT)
+   //   return true;
    
    for (Integer index = 0; index < (Integer)objName.size(); ++index)
    {
