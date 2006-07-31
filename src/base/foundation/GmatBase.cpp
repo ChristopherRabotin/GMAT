@@ -2367,10 +2367,15 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
              ownedObject->GetName().c_str());
       #endif
 
-      if (nomme != "")
-         newprefix += nomme + ".";
-      else if (GetType() == Gmat::FORCE_MODEL)
-         newprefix += ownedObject->GetTypeName();
+      // if owned object is a propagator, don't append the propagator name
+      if (ownedObject->GetType() != Gmat::PROPAGATOR)
+      {
+         if (nomme != "")
+            newprefix += nomme + ".";
+         else if (GetType() == Gmat::FORCE_MODEL)
+            newprefix += ownedObject->GetTypeName();      
+      }
+      
       stream << ownedObject->GetGeneratingString(Gmat::OWNED_OBJECT, newprefix);
    }
 }
