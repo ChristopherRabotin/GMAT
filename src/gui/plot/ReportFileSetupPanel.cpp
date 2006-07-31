@@ -264,7 +264,7 @@ void ReportFileSetupPanel::Create()
                                   wxDefaultPosition, wxDefaultSize, 0);
    
    showHeaderCheckBox =
-      new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Show Headers"),
+      new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Write Headers"),
                      wxDefaultPosition, wxDefaultSize, 0);
    
    leftJustifyCheckBox =
