@@ -974,7 +974,12 @@ std::string AxisSystem::GetParameterTypeString(const Integer id) const
 
 bool AxisSystem::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == ORIGIN_NAME) || (id == J2000_BODY_NAME))
+   if ((id == ORIGIN_NAME) || (id == J2000_BODY_NAME) ||
+       // The next 2 repeat settings passed in from the CS
+       (id == UPDATE_INTERVAL) || (id == OVERRIDE_ORIGIN_INTERVAL))
+      return true;
+   // Only access epoch if it is used
+   if ((id == EPOCH) && (UsesEpoch() == GmatCoordinate::NOT_USED))
       return true;
    return CoordinateBase::IsParameterReadOnly(id);
 }
