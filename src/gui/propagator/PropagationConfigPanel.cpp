@@ -939,7 +939,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                         wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting2StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Max Int Error: "),
+      new wxStaticText( parent, ID_TEXT, wxT("Accuracy: "),
                         wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting3StaticText =
