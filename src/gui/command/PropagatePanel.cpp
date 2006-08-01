@@ -156,11 +156,11 @@ void PropagatePanel::Create()
    propGrid->EnableEditing(false);
    
    // create and insert boolean choice editor
-   wxGridCellAttr *attrBool = new wxGridCellAttr;
-   attrBool->SetEditor(new wxGridCellBoolEditor);
-   attrBool->SetRenderer(new wxGridCellBoolRenderer);
-   propGrid->SetColAttr(2, attrBool);
-   propGrid->SetColFormatBool(2);
+   //wxGridCellAttr *attrBool = new wxGridCellAttr;
+   //attrBool->SetEditor(new wxGridCellBoolEditor);
+   //attrBool->SetRenderer(new wxGridCellBoolRenderer);
+   //propGrid->SetColAttr(2, attrBool);
+   //propGrid->SetColFormatBool(2);
    
    stopCondGrid =
       new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(700,120), wxWANTS_CHARS);
@@ -736,11 +736,11 @@ void PropagatePanel::DisplayPropagator()
       
       if (x == -1)
       {
-          propGrid->SetCellValue(i, PROP_BK_COL, "");
+          propGrid->SetCellValue(i, PROP_BK_COL, "No");
       }
       else
       {
-          propGrid->SetCellValue(i, PROP_BK_COL, "1");
+          propGrid->SetCellValue(i, PROP_BK_COL, "Yes");
       }            
    }
 
@@ -1206,14 +1206,14 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
                if (str == "Yes")
                {
                   mTempProp[row].propName.Prepend("-");  
-                  propGrid->SetCellValue(row, PROP_BK_COL, "1");
+                  propGrid->SetCellValue(row, PROP_BK_COL, "Yes");
                }
                else if (str == "No")
                {
                   wxString name = mTempProp[row].propName;
                   name.Replace("-", "", false);
                   mTempProp[row].propName = name; 
-                  propGrid->SetCellValue(row, PROP_BK_COL, "");   
+                  propGrid->SetCellValue(row, PROP_BK_COL, "No");   
                } 
                theApplyButton->Enable(true);
                mPropChanged = true;   
