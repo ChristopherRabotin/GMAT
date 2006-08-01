@@ -1205,8 +1205,13 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
                   
                if (str == "Yes")
                {
-                  mTempProp[row].propName.Prepend("-");  
+                  Integer x = name.Find("-");
+      
+                  if (x == -1)
+                     mTempProp[row].propName.Prepend("-");  
+                  
                   propGrid->SetCellValue(row, PROP_BK_COL, "Yes");
+
                }
                else if (str == "No")
                {
