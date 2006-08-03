@@ -1581,7 +1581,7 @@ const Rvector3 CelestialBody::GetMJ2000Velocity(const A1Mjd &atTime)
 /**
  * This method returns the cartographic coordinates for the body.
  *
- * @return vector containing alpha, delta, W, where:
+ * @return vector containing alpha, delta, W, Wdot, where:
  *         alpha is the right ascension of the north pole of rotation
  *         delta is the declination of the north pole of rotation
  *         W specifies the ephemeris position of the prime meridian
