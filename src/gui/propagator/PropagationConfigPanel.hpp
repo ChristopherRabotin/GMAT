@@ -216,6 +216,8 @@ private:
    wxString gravityFieldString;
    wxString atmosModelString;
    
+   wxBoxSizer *leftBoxSizer;
+   
    std::string propSetupName;
    std::string thePropagatorName;
    std::string currentBodyName;

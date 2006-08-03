@@ -1076,7 +1076,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       theGuiManager->GetConfigBodyComboBox(this, ID_CB_ORIGIN, wxSize(100,-1));
    bodyComboBox =
       new wxComboBox( parent, ID_CB_BODY, wxT(primaryBodyString),
-                      wxDefaultPosition,  wxDefaultSize, 0,
+                      wxDefaultPosition,  wxSize(80,-1), 0,
                       bodyArray, wxCB_DROPDOWN|wxCB_READONLY );
    gravComboBox =
       new wxComboBox( parent, ID_CB_GRAV, wxT(""),
@@ -1200,6 +1200,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    wxBoxSizer *boxSizer11 = new wxBoxSizer( wxHORIZONTAL );
    wxBoxSizer *boxSizer12 = new wxBoxSizer( wxHORIZONTAL );
    wxBoxSizer *boxSizer13 = new wxBoxSizer( wxHORIZONTAL );
+   leftBoxSizer = new wxBoxSizer( wxVERTICAL );
    
    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
    
@@ -1231,6 +1232,8 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    
    boxSizer3->Add( centralBodyStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    boxSizer3->Add( originComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   
+   leftBoxSizer->Add( boxSizer2, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
    
    boxSizer7->Add( bodyTextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    boxSizer7->Add( bodyComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
@@ -1266,7 +1269,8 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    boxSizer13->Add( srpCheckBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    
    boxSizer1->Add( boxSizer4, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
-   boxSizer1->Add( boxSizer2, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
+   //boxSizer1->Add( boxSizer2, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
+   boxSizer1->Add( leftBoxSizer, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
    
    boxSizer5->Add( title3StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    boxSizer5->Add( title4StaticText, 0, wxGROW|wxALIGN_RIGHT|wxALL, bsize);
@@ -1294,6 +1298,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    wxBoxSizer *boxSizer2 = new wxBoxSizer( wxHORIZONTAL );
    wxBoxSizer *boxSizer3 = new wxBoxSizer( wxHORIZONTAL );
    wxBoxSizer *boxSizer4 = new wxBoxSizer( wxVERTICAL );
+   leftBoxSizer = new wxBoxSizer( wxVERTICAL );
    
    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
    wxFlexGridSizer *flexGridSizer2 = new wxFlexGridSizer( 2, 0, 2 );
@@ -1374,7 +1379,6 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    flexGridSizer2->Add( pmEditTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer2->Add( editPmfButton, 0, wxALIGN_CENTRE|wxALL, bsize);
     
-   //item64->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    item64->Add( 2, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    item64->Add( srpCheckBox, 0, wxALIGN_CENTRE|wxALL, bsize);
     
@@ -1382,13 +1386,12 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    staticBoxSizer3->Add( item36, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    staticBoxSizer3->Add( item45, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    staticBoxSizer3->Add( item50, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
-    
+   
    staticBoxSizer7->Add( flexGridSizer2, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-    
+   
    staticBoxSizer1->Add( flexGridSizer1, 0, wxALIGN_CENTRE|wxALL, bsize);
-    
+   
    staticBoxSizer2->Add( staticBoxSizer3, 0, wxALIGN_CENTRE|wxALL, bsize);
-   //staticBoxSizer2->Add( staticBoxSizer7, 0, wxALIGN_CENTRE|wxALL, bsize);
    staticBoxSizer2->Add( staticBoxSizer7, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    staticBoxSizer2->Add( item64, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    
@@ -1396,9 +1399,13 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    staticBoxSizer4->Add(originComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    boxSizer4->Add( staticBoxSizer1, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
+   boxSizer4->Add( 0, 0, 1);
    boxSizer4->Add( staticBoxSizer4, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
    
-   boxSizer2->Add( boxSizer4, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
+   leftBoxSizer->Add( boxSizer4, 1, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
+   
+   //boxSizer2->Add( boxSizer4, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
+   boxSizer2->Add( leftBoxSizer, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
    boxSizer2->Add( staticBoxSizer2, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
    
    boxSizer1->Add( boxSizer2, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -1480,8 +1487,8 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
    }
 #endif
 
-   theMiddleSizer->Layout();
-    
+   leftBoxSizer->Layout();
+   
    // fill in data     
    // waw: Changed to show all digits
    wxString s1, s2, s3, s4, s5;
