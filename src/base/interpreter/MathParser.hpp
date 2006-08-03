@@ -33,6 +33,7 @@
 
 #include "MathNode.hpp"
 #include "MathException.hpp"
+#include <map>
 
 class GMAT_API MathParser
 {
@@ -44,8 +45,9 @@ public:
    virtual ~MathParser();
    
    bool IsEquation(const std::string &str);
+   std::string FindLowestOperator(const std::string &str, Integer &opIndex,
+                                  Integer start = 0);
    
-   //void Parse(MathTree *mathTree, const std::string &theEquation);
    MathNode* Parse(const std::string &theEquation);
 
 protected:
@@ -67,17 +69,21 @@ private:
    StringArray ParseMathFunctions(const std::string &str);
    StringArray ParseUnitConversion(const std::string &str);
 
-//    bool IsThisLastCharOfFunction(char ch, const std::string list[],
-//                                  UnsignedInt count);
    bool HasFunctionName(const std::string &str, const std::string list[],
                         UnsignedInt count);
-//    bool IsParenPartOfFunction(char lastChar);
    bool IsParenPartOfFunction(const std::string &str);
    std::string GetFunctionName(UnsignedInt functionType, const std::string &str,
                                std::string &leftStr);
-   std::string FindOperator(const std::string &str, UnsignedInt start,
-                            std::string &left, std::string &right, UnsignedInt &opIndex);
+   std::string FindOperatorFrom(const std::string &str, UnsignedInt start,
+                                std::string &left, std::string &right,
+                                UnsignedInt &opIndex);
    UnsignedInt FindSubtract(const std::string &str, UnsignedInt start);
+   std::string GetOperator(const std::map<std::string, Integer>::iterator &pos1,
+                           const std::map<std::string, Integer>::iterator &pos2,
+                           const std::map<std::string, Integer> &opIndexMap,
+                           Integer &opIndex);
+   std::string FindOperator(const std::string &str, Integer &opIndex);
+   
    std::string GetOperatorName(const std::string &op, bool &opFound);
    void BuildFunction(const std::string &str, const std::string list[],
                       UnsignedInt count, std::string &fnName, std::string &leftStr);
