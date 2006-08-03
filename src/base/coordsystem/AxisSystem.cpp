@@ -104,7 +104,7 @@ AxisSystem::AxisSystem(const std::string &itsType,
 CoordinateBase(Gmat::AXIS_SYSTEM,itsType,itsName),
 eop              (NULL),
 itrf             (NULL),
-epochFormat      (""),
+epochFormat      ("A1ModJulian"),
 updateInterval   (60.0), 
 updateIntervalToUse    (60.0), 
 overrideOriginInterval (false),
@@ -1367,9 +1367,9 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    register Real meanAnomalyMoon   = const134 + (1717915923.2178*tTDB 
         + 31.8792*tTDB2 + 0.051635*tTDB3 - 0.00024470*tTDB4)*RAD_PER_ARCSEC;
    register Real meanAnomalySun    = const357 + ( 129596581.0481*tTDB 
-        +  0.5532*tTDB2 + 0.000136*tTDB3 - 0.00001149*tTDB4)*RAD_PER_ARCSEC;
+        -  0.5532*tTDB2 - 0.000136*tTDB3 - 0.00001149*tTDB4)*RAD_PER_ARCSEC;
    register Real argLatitudeMoon   =  const93 + (1739527262.8478*tTDB 
-        - 12.7512*tTDB2 - 0.001037*tTDB3 + 0.00000417*tTDB4)*RAD_PER_ARCSEC;
+        - 12.7512*tTDB2 + 0.001037*tTDB3 + 0.00000417*tTDB4)*RAD_PER_ARCSEC;
    register Real meanElongationSun = const297 + (1602961601.2090*tTDB 
         -  6.3706*tTDB2 + 0.006593*tTDB3 - 0.00003169*tTDB4)*RAD_PER_ARCSEC;
    
