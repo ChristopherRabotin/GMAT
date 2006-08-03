@@ -126,6 +126,7 @@ OBJECTS = \
     configs/ConfigManager.o \
     coordsystem/AxisSystem.o \
     coordsystem/BodyFixedAxes.o \
+    coordsystem/BodyInertialAxes.o \
     coordsystem/CoordinateBase.o \
     coordsystem/CoordinateConverter.o \
     coordsystem/CoordinateSystemException.o \

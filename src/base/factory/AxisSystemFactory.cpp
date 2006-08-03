@@ -25,6 +25,7 @@
 #include "MJ2000EqAxes.hpp"
 #include "MJ2000EcAxes.hpp"
 #include "BodyFixedAxes.hpp"
+#include "BodyInertialAxes.hpp"
 #include "EquatorAxes.hpp"
 #include "ObjectReferencedAxes.hpp"
 #include "TOEEqAxes.hpp"
@@ -111,6 +112,10 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    {
       withAxes = new BodyFixedAxes(withName);
    }
+   else if (ofType == "BodyInertial")
+   {
+      withAxes = new BodyInertialAxes(withName);
+   }
    else if ((ofType == "GSE") || (ofType == "GeocentricSolarEcliptic"))
    {
       withAxes = new GeocentricSolarEclipticAxes(withName);
@@ -151,6 +156,7 @@ Factory(Gmat::AXIS_SYSTEM) //loj: 1/19/05 Changed from ATMOSPHERE
       creatables.push_back("ObjectReferenced");
       creatables.push_back("Equator");
       creatables.push_back("BodyFixed");
+      creatables.push_back("BodyInertial");
       creatables.push_back("GSE");
       creatables.push_back("GSM");
    }
