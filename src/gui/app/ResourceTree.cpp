@@ -527,12 +527,12 @@ void ResourceTree::AddDefaultSpacecraft(wxTreeItemId itemId, bool resetCounter)
       AppendItem(itemId, wxT(objName), GmatTree::ICON_SPACECRAFT, -1,
                  new GmatTreeItemData(wxT(objName), GmatTree::SPACECRAFT));
    };
-
+   
    if (size == 0)
       mNumSpacecraft = 0;
    
    if (size > 0)
-      Expand(itemId);
+      Expand(itemId);   
 }
 
 
@@ -827,6 +827,7 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId, bool resetCounter)
    {
       Expand(mBoundarySolverItem);
       Expand(mOptimizerItem);
+      Expand(itemId);
    }
 }
 
@@ -1190,6 +1191,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       oMenu->Append(POPUP_ADD_QUASI_NEWTON, wxT("Quasi-Newton"));
       oMenu->Append(POPUP_ADD_SQP, wxT("SQP (fmincon)"));
       oMenu->Enable(POPUP_ADD_QUASI_NEWTON, false);
+      oMenu->Enable(POPUP_ADD_SQP, false);
 
       menu.Append(POPUP_ADD_SOLVER, wxT("Add"), oMenu);
    }
@@ -1447,11 +1449,11 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          {
             Collapse(mSpacecraftItem);
             DeleteChildren(mSpacecraftItem);
-            AddDefaultSpacecraft(mSpacecraftItem);
+            //AddDefaultSpacecraft(mSpacecraftItem);
             
             Collapse(mFormationItem);
             DeleteChildren(mFormationItem);
-            AddDefaultFormations(mFormationItem);
+            //AddDefaultFormations(mFormationItem);
          }
          
          // update variables which may use new object name
@@ -1459,7 +1461,8 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          DeleteChildren(mVariableItem);
          AddDefaultVariables(mVariableItem);
          
-         UpdateResource(false);
+         //UpdateResource(false);
+         UpdateResource(true);
       }
       else
       {
