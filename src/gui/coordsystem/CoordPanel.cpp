@@ -141,7 +141,7 @@ void CoordPanel::EnableOptions()
       secStaticText->Enable(mShowUpdate);
       intervalTextCtrl->Enable(mShowUpdate);
       
-      // disable some items (loj: 9/13/05 Added)
+      // disable some items
       if (typeStr == "GSE" || typeStr == "GSM")
       {
          primaryComboBox->SetStringSelection("Earth");
@@ -763,7 +763,7 @@ void CoordPanel::LoadData()
    
 }
 
-//loj: 8/31/05 Added
+
 //------------------------------------------------------------------------------
 // bool SaveData(const std::string &coordName, AxisSystem *axis,
 //               const wxString &epochFormat)
@@ -836,11 +836,16 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       if (secondaryComboBox->IsEnabled())
       {
          wxString secondaryName = secondaryComboBox->GetValue().Trim();
-         SpacePoint *secondary = (SpacePoint*)theGuiInterpreter->
-            GetConfiguredItem(secondaryName.c_str());
-         
+
          axis->SetStringParameter("Secondary", secondaryName.c_str());
-         axis->SetSecondaryObject(secondary);
+         
+         if (secondaryName != "")
+         {
+            SpacePoint *secondary = (SpacePoint*)theGuiInterpreter->
+               GetConfiguredItem(secondaryName.c_str());
+         
+            axis->SetSecondaryObject(secondary);
+         }
       }
       
       //-------------------------------------------------------
@@ -915,7 +920,7 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
          }
       }
       
-      //loj: 2/8/06 coordSys->SetSolarSystem(theGuiInterpreter->GetDefaultSolarSystem());
+      // set solar system
       coordSys->SetSolarSystem(theGuiInterpreter->GetSolarSystemInUse());
       coordSys->Initialize();
 
