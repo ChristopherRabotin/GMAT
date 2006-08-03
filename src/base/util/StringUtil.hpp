@@ -59,7 +59,13 @@ namespace GmatStringUtil
                          Integer &last);
    void FindParenMatch(const std::string &str, Integer &open, Integer &close,
                        bool &isOuterParen);
-   bool IsEnclosedWithParen(const std::string &str);
+   void FindMatchingParen(const std::string &str, Integer &openParen,
+                          Integer &closeParen, bool &isOuterParen,
+                          Integer start = 0);
+   void FindLastParenMatch(const std::string &str, Integer &openParen,
+                           Integer &closeParen, Integer start = 0);
+   
+   bool IsEnclosedWithExtraParen(const std::string &str, bool checkOps = true);
    bool IsOuterParen(const std::string &str);
    bool IsParenPartOfArray(const std::string &str);
    bool IsSingleItem(const std::string &str);
