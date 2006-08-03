@@ -341,8 +341,8 @@ std::string Solver::GetParameterText(const Integer id) const
 {
    if ((id >= GmatBaseParamCount) && (id < SolverParamCount))
    {
-      MessageInterface::ShowMessage("'%s':\n", 
-         PARAMETER_TEXT[id - GmatBaseParamCount].c_str());
+      //MessageInterface::ShowMessage("'%s':\n", 
+      //   PARAMETER_TEXT[id - GmatBaseParamCount].c_str());
       return PARAMETER_TEXT[id - GmatBaseParamCount];
    }
    return GmatBase::GetParameterText(id);
