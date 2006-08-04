@@ -462,6 +462,10 @@ bool GmatBase::RenameRefObject(const Gmat::ObjectType type,
                                const std::string &oldName,
                                const std::string &newName)
 {
+   MessageInterface::ShowMessage
+      ("*** ERROR *** The object type:%s needs RenameRefObject() "
+       "implementation.\n", GetTypeName().c_str());
+   
    return false;
 }
 
