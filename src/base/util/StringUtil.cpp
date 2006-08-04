@@ -158,16 +158,27 @@ std::string GmatStringUtil::Capitalize(const std::string &str)
 // std::string Replace(const std::string &str, const std::string &from,
 //                     const std::string &to)
 //------------------------------------------------------------------------------
+/*
+ * Replaces all occurenece of <from> string to <to> string.
+ *
+ */
+//------------------------------------------------------------------------------
 std::string GmatStringUtil::Replace(const std::string &str, const std::string &from,
                                     const std::string &to)
 {
    std::string str1 = str;
    std::string::size_type pos = str1.find(from);
+   bool done = false;
    
-   pos = str1.find(from);
-   if (pos != str1.npos)
-      str1.replace(pos, from.size(), to);
-
+   while (!done)
+   {
+      pos = str1.find(from);
+      if (pos != str1.npos)
+         str1.replace(pos, from.size(), to);
+      else
+         break;
+   }
+   
    return str1;
 }
 
@@ -578,8 +589,8 @@ void GmatStringUtil::FindMatchingParen(const std::string &str, Integer &openPare
 void GmatStringUtil::FindLastParenMatch(const std::string &str, Integer &openParen,
                                         Integer &closeParen, Integer start)
 {
-   MessageInterface::ShowMessage
-      ("FindLastParenMatch() start=%d, str=%s\n", start, str.c_str());
+   //MessageInterface::ShowMessage
+   //   ("FindLastParenMatch() start=%d, str=%s\n", start, str.c_str());
    
    Integer open1, close1;
    bool isOuterParen;
@@ -589,8 +600,8 @@ void GmatStringUtil::FindLastParenMatch(const std::string &str, Integer &openPar
    while (!done)
    {
       FindMatchingParen(str, open1, close1, isOuterParen, start1);
-      MessageInterface::ShowMessage
-         ("   ===> start=%d, open1=%d, close1=%d\n", start1, open1, close1);
+      //MessageInterface::ShowMessage
+      //   ("   ===> start=%d, open1=%d, close1=%d\n", start1, open1, close1);
       
       // find next open parenthesis '('
       start1 = str.find('(', close1);
@@ -598,7 +609,7 @@ void GmatStringUtil::FindLastParenMatch(const std::string &str, Integer &openPar
       if (start1 == -1)
          done = true;
    }
-
+   
    openParen = open1;
    closeParen = close1;
 }
@@ -959,10 +970,13 @@ std::string GmatStringUtil::RemoveExtraParen(const std::string &str)
               str1[openParen-1] == '*' || str1[openParen-1] == '/' ||
               str1[openParen-1] == '(' || str1[openParen-1] == ' '))
          {
-            if (IsEnclosedWithExtraParen(substr))
+            if (str1[closeParen+1] != '^')
             {
-               str2[openParen] = '?';
-               str2[closeParen] = '?';
+               if (IsEnclosedWithExtraParen(substr))
+               {
+                  str2[openParen] = '?';
+                  str2[closeParen] = '?';
+               }
             }
          }
          
