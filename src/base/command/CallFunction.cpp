@@ -68,7 +68,7 @@ CallFunction::CallFunction() :
    mNumOutputParams = 0;
 
 
-   parameterCount = GmatCommandParamCount;
+   parameterCount = CallFunctionParamCount;
 }
 
 
@@ -111,7 +111,7 @@ CallFunction::CallFunction(const CallFunction& cf) :
    mOutputListNames = cf.mOutputListNames;
 
 
-   parameterCount = GmatCommandParamCount;
+   parameterCount = CallFunctionParamCount;
 }
 
 
@@ -282,7 +282,7 @@ Gmat::ParameterType CallFunction::GetParameterType(const Integer id) const
    #endif
 
 
-   if (id >= 0 && id < CallFunctionParamCount)
+   if (id >= GmatCommandParamCount && id < CallFunctionParamCount)
       return PARAMETER_TYPE[id - GmatCommandParamCount];
    else
       return GmatCommand::GetParameterType(id);
