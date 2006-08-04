@@ -40,6 +40,9 @@ public:
       SHOW_PLOTTABLE,  // Real
       SHOW_SETTABLE,   // for Vary command
    };
+
+   //@Note Should we use dynamic array instead of fixed since wxWidgets 2.6.1 or
+   // later supports wxArrayString as choices in the wxComboBox or wxListBox?
    
    // for SpacePoint
    static const int MAX_SPACE_POINT = 60;  // CELES_POINT + SPACE_OBJECT
@@ -56,10 +59,10 @@ public:
    static const int MAX_SC_PROPERTY = 100; // Max Spacecraft
    static const int MAX_IB_PROPERTY = 20;  // Max ImpulsiveBurn
    static const int MAX_PROPERTY = 110;
-   static const int MAX_USER_VAR = 50;
+   static const int MAX_USER_VAR = 100;
    static const int MAX_USER_STRING = 50;
-   static const int MAX_USER_ARRAY = 50;
-   static const int MAX_USER_PARAM = 150;
+   static const int MAX_USER_ARRAY = 100;
+   static const int MAX_USER_PARAM = 250;  // MAX_USER_VAR + MAX_USER_STRING + MAX_USER_ARRAY
    static const int MAX_PLOT_PARAM = 250;
 
    // Other
