@@ -326,8 +326,8 @@ MathNode* MathParser::Parse(const std::string &theEquation)
    // first remove all blank spaces
    std::string newEq = GmatStringUtil::RemoveAll(theEquation, ' ');
 
-   // second remove extra parenthesis
-   newEq = GmatStringUtil::RemoveExtraParen(newEq);
+   // second remove extra parenthesis (This need more testing - so commented out)
+   //newEq = GmatStringUtil::RemoveExtraParen(newEq);
    
    #if DEBUG_PARSE
    MessageInterface::ShowMessage
