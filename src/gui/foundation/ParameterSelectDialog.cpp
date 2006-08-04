@@ -446,7 +446,6 @@ void ParameterSelectDialog::OnCreateVariable(wxCommandEvent& event)
 
    if (paramDlg.IsParamCreated())
    {
-      //if (mShowArrayAndString)
       if (mShowOption == GuiItemManager::SHOW_REPORTABLE && mShowArray)
       {
          mUserParamListBox->Set(theGuiManager->GetNumUserParameter(),
@@ -466,6 +465,9 @@ void ParameterSelectDialog::OnCreateVariable(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::OnSelectUserParam(wxCommandEvent& event)
 {
+   if (mUserParamListBox->GetSelection() == wxNOT_FOUND)
+      return;
+   
    if (mUserParamListBox->GetSelection() == mLastUserParamSelection)
    {
       mUserParamListBox->Deselect(mLastUserParamSelection);
