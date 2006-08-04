@@ -40,8 +40,8 @@ CoordPanel::CoordPanel(wxWindow *parent, bool enableAll)
    
    mEnableAll = enableAll;
    
-   epochValue = "21545";
-   epochFormatValue = "A1ModJulian";
+//   epochValue = "21545";
+//   epochFormatValue = "A1ModJulian";
       
    Create();
 }
@@ -97,7 +97,18 @@ void CoordPanel::EnableOptions()
    if (tmpAxis->UsesEpoch() == GmatCoordinate::NOT_USED)
       mShowEpoch = false;
    else
+   {
       mShowEpoch = true; 
+      
+      // get the epoch format and value from tmpAxis
+      Real epoch = tmpAxis->GetEpoch().Get();
+      epochValue.Printf("%9.9f", epoch);
+      epochFormatValue = wxString(tmpAxis->GetEpochFormat().c_str());
+      
+      // set the text ctrl
+      epochTextCtrl->SetValue(epochValue);
+      formatComboBox->SetValue(epochFormatValue);
+   }
       
    if ((tmpAxis->UsesXAxis() == GmatCoordinate::NOT_USED) &&
        (tmpAxis->UsesYAxis() == GmatCoordinate::NOT_USED) &&
