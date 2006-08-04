@@ -28,22 +28,25 @@
 class GMAT_API EndIf : public GmatCommand
 {
 public:
-    EndIf();
-    virtual ~EndIf();
+   EndIf();
+   virtual ~EndIf();
     
-    EndIf(const EndIf& ic);
-    EndIf&              operator=(const EndIf& ic);
+   EndIf(const EndIf& ic);
+   EndIf&              operator=(const EndIf& ic);
     
-    virtual bool            Initialize();
-    virtual bool            Execute();
+   virtual bool            Initialize();
+   virtual bool            Execute();
 
-    virtual bool            Insert(GmatCommand *cmd, GmatCommand *prev);
+   virtual bool            Insert(GmatCommand *cmd, GmatCommand *prev);
 
-       // inherited from GmatBase
-    virtual GmatBase*       Clone() const;
-    const std::string&      GetGeneratingString(Gmat::WriteMode mode,
-                                            const std::string &prefix,
-                                            const std::string &useName);
+   // inherited from GmatBase
+   virtual bool            RenameRefObject(const Gmat::ObjectType type,
+                                           const std::string &oldName,
+                                           const std::string &newName);   
+   virtual GmatBase*       Clone() const;
+   const std::string&      GetGeneratingString(Gmat::WriteMode mode,
+                                               const std::string &prefix,
+                                               const std::string &useName);
 };
 
 

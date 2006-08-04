@@ -59,6 +59,10 @@ public:
    virtual bool         Initialize();
    
    // inherited from GmatBase
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                     const std::string &oldName,
+                                     const std::string &newName);
+   
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
                                      const std::string &name,
                                      const Integer index);

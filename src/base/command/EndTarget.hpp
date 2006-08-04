@@ -40,6 +40,9 @@ public:
    virtual bool            Insert(GmatCommand *cmd, GmatCommand *prev);
 
    // inherited from GmatBase
+   virtual bool            RenameRefObject(const Gmat::ObjectType type,
+                                           const std::string &oldName,
+                                           const std::string &newName);   
    virtual GmatBase*       Clone() const;
    virtual const std::string&
                            GetGeneratingString(Gmat::WriteMode mode,

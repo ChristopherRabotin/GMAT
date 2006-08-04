@@ -586,6 +586,61 @@ void BranchCommand::SetObjectMap(std::map<std::string, GmatBase *> *map)
 }
 
 
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/*
+ * Renames referenced objects
+ *
+ * @param <type> type of the reference object.
+ * @param <oldName> old name of the reference object.
+ * @param <newName> new name of the reference object.
+ *
+ * @return always true to indicate RenameRefObject() was implemented.
+ */
+//---------------------------------------------------------------------------
+bool BranchCommand::RenameRefObject(const Gmat::ObjectType type,
+                                    const std::string &oldName,
+                                    const std::string &newName)
+{
+   std::vector<GmatCommand*>::iterator node;
+   for (node = branch.begin(); node != branch.end(); ++node)
+   {
+      current = *node;
+      if (current != NULL)
+      {
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("BranchCommand::RenameRefObject() current=%s\n",
+             current->GetTypeName().c_str());
+         #endif
+         
+         current->RenameRefObject(type, oldName, newName);
+         
+         while (current->GetNext() != this)
+         {
+            current = current->GetNext();
+            if (current == NULL)
+               break;
+            
+            #ifdef DEBUG_RENAME
+            MessageInterface::ShowMessage
+               ("BranchCommand::RenameRefObject() current=%s\n",
+                current->GetTypeName().c_str());
+            #endif
+            
+            current->RenameRefObject(type, oldName, newName);            
+         }
+      }
+      else
+         break;
+   }
+   
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 //  const std::string GetGeneratingString()
 //------------------------------------------------------------------------------

@@ -20,7 +20,7 @@
 #include "Moderator.hpp"         // for GetParameter()
 #include "BeginFunction.hpp"
 #include "StringTokenizer.hpp"
-
+#include "StringUtil.hpp"        // for Replace()
 
 #if defined __USE_MATLAB__
 #include "MatlabInterface.hpp"   // for Matlab Engine functions
@@ -495,7 +495,6 @@ StringArray CallFunction::GetRefObjectNameArray(const Gmat::ObjectType type) con
 }
 
 
-//loj: 12/7/04 - added
 //---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
@@ -521,7 +520,6 @@ bool CallFunction::RenameRefObject(const Gmat::ObjectType type,
          }
       }
 
-
       for (unsigned int i=0; i<mOutputListNames.size(); i++)
       {
          if (mOutputListNames[i] == oldName)
@@ -530,10 +528,23 @@ bool CallFunction::RenameRefObject(const Gmat::ObjectType type,
             break;
          }
       }
-
-
    }
-
+   // Since parameter name is composed of spacecraftName.dep.paramType or
+   // burnName.dep.paramType, check the type first
+   else if (type == Gmat::SPACECRAFT || type == Gmat::BURN ||
+            type == Gmat::COORDINATE_SYSTEM || type == Gmat::CALCULATED_POINT)
+   {
+      
+      for (UnsignedInt i=0; i<mInputListNames.size(); i++)
+         if (mInputListNames[i].find(oldName) != std::string::npos)
+            mInputListNames[i] =
+               GmatStringUtil::Replace(mInputListNames[i], oldName, newName);
+      
+      for (UnsignedInt i=0; i<mOutputListNames.size(); i++)
+         if (mOutputListNames[i].find(oldName) != std::string::npos)
+            mOutputListNames[i] =
+               GmatStringUtil::Replace(mOutputListNames[i], oldName, newName);
+   }
 
    return true;
 }

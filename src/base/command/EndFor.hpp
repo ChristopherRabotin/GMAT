@@ -29,22 +29,25 @@
 class GMAT_API EndFor : public GmatCommand
 {
 public:
-    EndFor(void);
-    virtual ~EndFor(void);
-    
-    EndFor(const EndFor& ef);
-    EndFor&          operator=(const EndFor& ef);
-    
-    virtual bool            Initialize(void);
-    virtual bool            Execute(void);
-    
-    virtual bool            Insert(GmatCommand *cmd, GmatCommand *prev);
-
-    // inherited from GmatBase
-    virtual GmatBase* Clone(void) const;
-    const std::string&      GetGeneratingString(Gmat::WriteMode mode,
-                                            const std::string &prefix,
-                                            const std::string &useName);
+   EndFor(void);
+   virtual ~EndFor(void);
+   
+   EndFor(const EndFor& ef);
+   EndFor&          operator=(const EndFor& ef);
+   
+   virtual bool            Initialize(void);
+   virtual bool            Execute(void);
+   
+   virtual bool            Insert(GmatCommand *cmd, GmatCommand *prev);
+   
+   // inherited from GmatBase
+   virtual bool            RenameRefObject(const Gmat::ObjectType type,
+                                           const std::string &oldName,
+                                           const std::string &newName);   
+   virtual GmatBase*       Clone(void) const;
+   const std::string&      GetGeneratingString(Gmat::WriteMode mode,
+                                               const std::string &prefix,
+                                               const std::string &useName);
 };
 
 

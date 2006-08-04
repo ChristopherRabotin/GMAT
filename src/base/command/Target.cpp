@@ -212,8 +212,8 @@ const std::string& Target::GetGeneratingString(Gmat::WriteMode mode,
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
-//                       const std::string &oldName, const std::string &newName)
+// bool RenameRefObject(const Gmat::ObjectType type,
+//                      const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 /**
  * Renames referenced objects.
@@ -234,6 +234,8 @@ bool Target::RenameRefObject(const Gmat::ObjectType type,
       if (targeterName == oldName)
          targeterName = newName;
    }
+
+   BranchCommand::RenameRefObject(type, oldName, newName);
    
    return true;
 }
@@ -541,9 +543,9 @@ bool Target::Execute()
 
    if (!commandExecuting) 
    {
-	   #ifdef DEBUG_TARGET_COMMANDS
-   	   MessageInterface::ShowMessage(
-      	   "Entered Targeter while command is not executing\n");
+           #ifdef DEBUG_TARGET_COMMANDS
+           MessageInterface::ShowMessage(
+           "Entered Targeter while command is not executing\n");
       #endif
 
       FreeLoopData();
@@ -680,13 +682,13 @@ void Target::StoreLoopData()
          Spacecraft *sc = new Spacecraft(*orig);
          // Handle CoordinateSystems
          if (orig->GetInternalCoordSystem() == NULL)
-   			MessageInterface::ShowMessage(
-      			"Internal CS is NULL on spacecraft %s prior to targeter cloning\n",
-      			orig->GetName().c_str());
-			if (orig->GetRefObject(Gmat::COORDINATE_SYSTEM, "") == NULL)
-   			MessageInterface::ShowMessage(
-      			"Coordinate system is NULL on spacecraft %s prior to targeter cloning\n",
-    			   orig->GetName().c_str());
+                        MessageInterface::ShowMessage(
+                        "Internal CS is NULL on spacecraft %s prior to targeter cloning\n",
+                        orig->GetName().c_str());
+                        if (orig->GetRefObject(Gmat::COORDINATE_SYSTEM, "") == NULL)
+                        MessageInterface::ShowMessage(
+                        "Coordinate system is NULL on spacecraft %s prior to targeter cloning\n",
+                           orig->GetName().c_str());
          sc->SetInternalCoordSystem(orig->GetInternalCoordSystem());
          sc->SetRefObject(orig->GetRefObject(Gmat::COORDINATE_SYSTEM, ""),
             Gmat::COORDINATE_SYSTEM, "");

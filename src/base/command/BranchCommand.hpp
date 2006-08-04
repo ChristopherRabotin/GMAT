@@ -54,6 +54,10 @@ public:
                                                Gmat::SCRIPTING,
                                                const std::string &prefix = "",
                                                const std::string &useName = "");
+   
+   virtual bool      RenameRefObject(const Gmat::ObjectType type,
+                                     const std::string &oldName,
+                                     const std::string &newName);
 
    virtual GmatCommand*    GetNext();
    virtual GmatCommand*    GetChildCommand(Integer whichOne = 0);

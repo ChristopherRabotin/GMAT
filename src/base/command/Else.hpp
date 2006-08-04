@@ -31,26 +31,29 @@
 class GMAT_API Else : public GmatCommand
 {
 public:
-    Else();
-    virtual ~Else();
+   Else();
+   virtual ~Else();
     
-    Else(const Else& ec);
-    Else&             operator=(const Else& ec);
+   Else(const Else& ec);
+   Else&               operator=(const Else& ec);
     
-    // Inherited methods that need some enhancement from the base class
-    virtual bool        Insert(GmatCommand *cmd, GmatCommand *prev);
+   // Inherited methods that need some enhancement from the base class
+   virtual bool        Insert(GmatCommand *cmd, GmatCommand *prev);
     
-    // Methods used to run the command
-    virtual bool        Initialize();
-    virtual bool        Execute(); 
+   // Methods used to run the command
+   virtual bool        Initialize();
+   virtual bool        Execute(); 
 
-    // inherited from GmatBase
-    virtual GmatBase* Clone() const;
-    virtual const std::string&
-                        GetGeneratingString(Gmat::WriteMode mode,
-                                            const std::string &prefix,
-                                            const std::string &useName);
-
+   // inherited from GmatBase
+   virtual bool        RenameRefObject(const Gmat::ObjectType type,
+                                       const std::string &oldName,
+                                       const std::string &newName);   
+   virtual GmatBase* Clone() const;
+   virtual const std::string&
+                       GetGeneratingString(Gmat::WriteMode mode,
+                                           const std::string &prefix,
+                                           const std::string &useName);
+   
 protected:
     
 };

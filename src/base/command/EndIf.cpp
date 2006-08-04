@@ -150,6 +150,30 @@ bool EndIf::Insert(GmatCommand *cmd, GmatCommand *prev)
    return false;
 }
 
+
+//---------------------------------------------------------------------------
+// bool RenameRefObject(const Gmat::ObjectType type,
+//                      const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/*
+ * Renames referenced objects
+ *
+ * @param <type> type of the reference object.
+ * @param <oldName> old name of the reference object.
+ * @param <newName> new name of the reference object.
+ *
+ * @return always true to indicate RenameRefObject() was implemented.
+ */
+//---------------------------------------------------------------------------
+bool EndIf::RenameRefObject(const Gmat::ObjectType type,
+                            const std::string &oldName,
+                            const std::string &newName)
+{
+   // There are no renamealbe objects
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------

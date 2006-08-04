@@ -219,84 +219,6 @@ ConditionalBranch::~ConditionalBranch()
 
 
 //------------------------------------------------------------------------------
-//  bool Initialize()
-//------------------------------------------------------------------------------
-/**
- * Performs the initialization needed to run the conditional branch command.
- *
- * @return true if the Command is initialized, false if an error occurs.
- */
-//------------------------------------------------------------------------------
-bool ConditionalBranch::Initialize()
-{
-    bool retval = BranchCommand::Initialize();
-   
-    // Reset parameter pointers here, because parameters are cloned in the Sandbox
-    std::string paramName;
-    Real rval;
-    params.clear();
-    for (UnsignedInt i=0; i<lhsParamList.size(); i++)
-    {
-       paramName = lhsParamList[i];
-
-       #ifdef DEBUG_CONDITIONS_INIT
-       MessageInterface::ShowMessage
-          ("ConditionalBranch::Initialize() paramName=%s\n", paramName.c_str());
-       #endif
-       
-       // if left is just a number, skip
-       if (GmatStringUtil::ToDouble(paramName, &rval))
-          continue;
-       
-       if (objectMap->find(paramName) != objectMap->end())
-          params.push_back((Parameter*)((*objectMap)[paramName]));
-       else
-          throw CommandException
-             ("ConditionalBranch::Initialize() parameter name: " + paramName +
-              " not found in the object map\n");
-    }
-    
-    for (UnsignedInt i=0; i<rhsParamList.size(); i++)
-    {
-       paramName = rhsParamList[i];
-       
-       #ifdef DEBUG_CONDITIONS_INIT
-       MessageInterface::ShowMessage
-          ("ConditionalBranch::Initialize() paramName=%s\n", paramName.c_str());
-       #endif
-       
-       // if right is just a number, skip
-       if (GmatStringUtil::ToDouble(paramName, &rval))
-          continue;
-       
-       if (objectMap->find(paramName) != objectMap->end())
-          params.push_back((Parameter*)((*objectMap)[paramName]));
-       else
-          throw CommandException
-             ("ConditionalBranch::Initialize() parameter name: " + paramName +
-              " not found in the object map\n");
-    }
-    
-    //loj: 7/17/05 This code uses stale pointer from std::vector<Parameter*> params which
-    // causes system to crash on return
-//     for (UnsignedInt i=0; i<params.size(); i++)
-//     {
-//        paramName = params[i]->GetName();
-//        MessageInterface::ShowMessage
-//           ("===> ConditionalBranch::Initialize() paramName=%s\n", paramName.c_str());
-       
-//        if (objectMap->find(paramName) != objectMap->end())
-//           params[i] = (Parameter*)((*objectMap)[paramName]);
-//        else
-//           throw CommandException
-//              ("ConditionalBranch::Initialize() parameter name: " + paramName +
-//               " not found in the object map\n");
-//     }
-    
-    return retval;
-}
-
-//------------------------------------------------------------------------------
 //  bool SetCondition(const std::string &lhs, const std::string &operation,
 //                    const std::string &rhs, Integer atIndex)
 //------------------------------------------------------------------------------
@@ -508,6 +430,118 @@ bool ConditionalBranch::RemoveConditionOperator(Integer atIndex)
    logicalOpStrings.erase(logicalOpStrings.begin() + atIndex);
    logicalOpList.erase(logicalOpList.begin() + atIndex);
    numberOfLogicalOps--;
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+//  bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Performs the initialization needed to run the conditional branch command.
+ *
+ * @return true if the Command is initialized, false if an error occurs.
+ */
+//------------------------------------------------------------------------------
+bool ConditionalBranch::Initialize()
+{
+    bool retval = BranchCommand::Initialize();
+   
+    // Reset parameter pointers here, because parameters are cloned in the Sandbox
+    std::string paramName;
+    Real rval;
+    params.clear();
+    for (UnsignedInt i=0; i<lhsParamList.size(); i++)
+    {
+       paramName = lhsParamList[i];
+
+       #ifdef DEBUG_CONDITIONS_INIT
+       MessageInterface::ShowMessage
+          ("ConditionalBranch::Initialize() paramName=%s\n", paramName.c_str());
+       #endif
+       
+       // if left is just a number, skip
+       if (GmatStringUtil::ToDouble(paramName, &rval))
+          continue;
+       
+       if (objectMap->find(paramName) != objectMap->end())
+          params.push_back((Parameter*)((*objectMap)[paramName]));
+       else
+          throw CommandException
+             ("ConditionalBranch::Initialize() parameter name: " + paramName +
+              " not found in the object map\n");
+    }
+    
+    for (UnsignedInt i=0; i<rhsParamList.size(); i++)
+    {
+       paramName = rhsParamList[i];
+       
+       #ifdef DEBUG_CONDITIONS_INIT
+       MessageInterface::ShowMessage
+          ("ConditionalBranch::Initialize() paramName=%s\n", paramName.c_str());
+       #endif
+       
+       // if right is just a number, skip
+       if (GmatStringUtil::ToDouble(paramName, &rval))
+          continue;
+       
+       if (objectMap->find(paramName) != objectMap->end())
+          params.push_back((Parameter*)((*objectMap)[paramName]));
+       else
+          throw CommandException
+             ("ConditionalBranch::Initialize() parameter name: " + paramName +
+              " not found in the object map\n");
+    }
+    
+    return retval;
+}
+
+
+//---------------------------------------------------------------------------
+// bool RenameRefObject(const Gmat::ObjectType type,
+//                      const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/*
+ * Renames referenced objects
+ *
+ * @param <type> type of the reference object.
+ * @param <oldName> old name of the reference object.
+ * @param <newName> new name of the reference object.
+ *
+ * @return always true to indicate RenameRefObject() was implemented.
+ */
+//---------------------------------------------------------------------------
+bool ConditionalBranch::RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName)
+{
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("ConditionalBranch::RenameRefObject() type=%d, oldName=%s, "
+       "newName=%s\n", type, oldName.c_str(), newName.c_str());
+   #endif
+   
+   if (type == Gmat::PARAMETER)
+   {
+      for (UnsignedInt i=0; i<lhsList.size(); i++)
+         if (lhsList[i] == oldName)
+            lhsList[i] = newName;
+      
+      for (UnsignedInt i=0; i<lhsParamList.size(); i++)
+         if (lhsParamList[i] == oldName)
+            lhsParamList[i] = newName;
+      
+      for (UnsignedInt i=0; i<rhsList.size(); i++)
+         if (rhsList[i] == oldName)
+            rhsList[i] = newName;
+      
+      for (UnsignedInt i=0; i<rhsParamList.size(); i++)
+         if (rhsParamList[i] == oldName)
+            rhsParamList[i] = newName;
+   }
+
+   BranchCommand::RenameRefObject(type, oldName, newName);
+   
    return true;
 }
 

@@ -475,10 +475,20 @@ bool For::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    return BranchCommand::SetRefObject(obj, type, name);
 }
 
-//loj: 11/22/04 added
+
 //---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/*
+ * Renames referenced objects
+ *
+ * @param <type> type of the reference object.
+ * @param <oldName> old name of the reference object.
+ * @param <newName> new name of the reference object.
+ *
+ * @return always true to indicate RenameRefObject() was implemented.
+ */
 //---------------------------------------------------------------------------
 bool For::RenameRefObject(const Gmat::ObjectType type,
                           const std::string &oldName,
@@ -491,7 +501,10 @@ bool For::RenameRefObject(const Gmat::ObjectType type,
       if (endName == oldName)     endName   = newName;
       if (incrName == oldName)    incrName  = newName;
    }
-   return true;  // should I be calling the parent class's method for this here?
+   
+   BranchCommand::RenameRefObject(type, oldName, newName);
+   
+   return true;
 }
 
 //------------------------------------------------------------------------------

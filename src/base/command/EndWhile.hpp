@@ -28,19 +28,22 @@
 class EndWhile : public GmatCommand
 {
 public:
-   EndWhile(void);
-   virtual ~EndWhile(void);
+   EndWhile();
+   virtual ~EndWhile();
 
    EndWhile(const EndWhile& ew);
    EndWhile&              operator=(const EndWhile& ew);
 
-   virtual bool            Initialize(void);
-   virtual bool            Execute(void);
+   virtual bool            Initialize();
+   virtual bool            Execute();
    
    virtual bool            Insert(GmatCommand *cmd, GmatCommand *prev);
 
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual bool            RenameRefObject(const Gmat::ObjectType type,
+                                           const std::string &oldName,
+                                           const std::string &newName);   
+   virtual GmatBase*       Clone() const;
    virtual const std::string&
                            GetGeneratingString(Gmat::WriteMode mode,
                                                const std::string &prefix,

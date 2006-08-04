@@ -895,20 +895,30 @@ bool Assignment::RenameRefObject(const Gmat::ObjectType type,
    MessageInterface::ShowMessage
       ("Assignment::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+   MessageInterface::ShowMessage
+      ("   value=%s\n", value.c_str());
    #endif
-
-   // Assignment needs to know about spacecraft, formation
-   if (type != Gmat::SPACECRAFT && type != Gmat::FORMATION )
-      return true;
-
+   
    if (ownerName == oldName)
       ownerName = newName;
 
    if (parmName == oldName)
       parmName = newName;
 
-   if (value == oldName)
-      value = newName;
+   if (rhsParmName == oldName)
+      rhsParmName = newName;
+
+   // Since parameter name is composed of spacecraftName.dep.paramType or
+   // burnName.dep.paramType, check the type first
+   if (type == Gmat::SPACECRAFT || type == Gmat::BURN ||
+       type == Gmat::COORDINATE_SYSTEM || type == Gmat::CALCULATED_POINT)
+   {
+      if (value.find(oldName) != value.npos)
+         value = GmatStringUtil::Replace(value, oldName, newName);
+   }
+   
+   if (mathTree != NULL)      
+      mathTree->RenameRefObject(type, oldName, newName);
    
    return true;
 }
@@ -1122,7 +1132,7 @@ bool Assignment::InitializeRHS(const std::string &rhs)
          }
          else
             throw CommandException(
-               "Assignment commands cannot handle dynamic row indices yet.");
+               "Assignment command cannot handle dynamic row indices yet.");
 
          if (objectMap->find(colStr) == objectMap->end())
          {
@@ -1130,7 +1140,7 @@ bool Assignment::InitializeRHS(const std::string &rhs)
          }
          else
             throw CommandException(
-               "Assignment commands cannot handle dynamic column indices yet.");
+               "Assignment command cannot handle dynamic column indices yet.");
       }
       else if (kind == "Variable")
       {
@@ -1139,7 +1149,7 @@ bool Assignment::InitializeRHS(const std::string &rhs)
       else if (rhsObject->GetType() == Gmat::PARAMETER)
       {
          //throw CommandException(
-         //   "Assignment commands cannot handle Parameters yet.\n");
+         //   "Assignment command cannot handle Parameters yet.\n");
          rhsType = PARAMETER;
       }
       else
@@ -1167,7 +1177,7 @@ bool Assignment::InitializeRHS(const std::string &rhs)
       {
          if (rhs != "On" && rhs != "Off")
             throw CommandException
-               ("Assignment commands cannot handle RHS: " + rhs + "\n");
+               ("Assignment command cannot handle RHS: " + rhs + "\n");
       }
    }
 
@@ -1185,7 +1195,7 @@ bool Assignment::InitializeRHS(const std::string &rhs)
  *
  * @todo Handle RHS Variables and Parameters
  *
- * @tod0 Determine how to handle strings in Assignment commands.
+ * @tod0 Determine how to handle strings in Assignment command.
  */
 //------------------------------------------------------------------------------
 Real Assignment::EvaluateRHS()

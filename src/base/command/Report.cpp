@@ -189,6 +189,67 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 }
 
 
+//---------------------------------------------------------------------------
+// bool RenameRefObject(const Gmat::ObjectType type,
+//                      const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/*
+ * Renames referenced objects
+ *
+ * @param <type> type of the reference object.
+ * @param <oldName> old name of the reference object.
+ * @param <newName> new name of the reference object.
+ *
+ * @return always true to indicate RenameRefObject() was implemented.
+ */
+//---------------------------------------------------------------------------
+bool Report::RenameRefObject(const Gmat::ObjectType type,
+                             const std::string &oldName,
+                             const std::string &newName)
+{
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Report::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+   #endif
+   
+   if (type == Gmat::SUBSCRIBER)
+   {
+      if (rfName == oldName)
+         rfName = newName;
+   }
+   else if (type == Gmat::PARAMETER)
+   {
+      for (UnsignedInt i=0; i<parmNames.size(); i++)
+         if (parmNames[i] == oldName)
+            parmNames[i] = newName;
+      
+      for (UnsignedInt i=0; i<actualParmNames.size(); i++)
+         if (actualParmNames[i] == oldName)
+            actualParmNames[i] = newName;
+   }
+   // Since parameter name is composed of spacecraftName.dep.paramType or
+   // burnName.dep.paramType, check the type first
+   else if (type == Gmat::SPACECRAFT || type == Gmat::BURN ||
+            type == Gmat::COORDINATE_SYSTEM || type == Gmat::CALCULATED_POINT)
+   {
+      
+      for (UnsignedInt i=0; i<parmNames.size(); i++)
+         if (parmNames[i].find(oldName) != std::string::npos)
+            parmNames[i] = GmatStringUtil::Replace(parmNames[i], oldName, newName);
+      
+      for (UnsignedInt i=0; i<actualParmNames.size(); i++)
+         if (actualParmNames[i].find(oldName) != std::string::npos)
+            actualParmNames[i] =
+               GmatStringUtil::Replace(actualParmNames[i], oldName, newName);
+      
+      generatingString = GmatStringUtil::Replace(generatingString, oldName, newName);
+   }
+   
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------

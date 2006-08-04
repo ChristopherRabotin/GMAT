@@ -301,5 +301,26 @@ bool BeginScript::RenameRefObject(const Gmat::ObjectType type,
                                   const std::string &oldName,
                                   const std::string &newName)
 {   
+   GmatCommand *current = next;
+   
+   while (current != NULL)
+   {
+      #if DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("BeginScript::RenameRefObject() current=%s\n",
+          current->GetTypeName().c_str());
+      #endif
+      
+      if (current->GetTypeName() != "EndScript")
+      {
+         current->RenameRefObject(type, oldName, newName);
+         current = current->GetNext();
+      }
+      else
+      {
+         current = NULL;
+      }
+   }
+   
    return true;
 }

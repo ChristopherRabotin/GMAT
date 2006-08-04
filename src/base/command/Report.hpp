@@ -45,6 +45,9 @@ public:
    Report(const Report &rep);
    Report&           operator=(const Report &rep);
    
+   virtual bool      RenameRefObject(const Gmat::ObjectType type,
+                                     const std::string &oldName,
+                                     const std::string &newName);
    virtual bool      SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                   const std::string &name,
                                   const Integer index);
