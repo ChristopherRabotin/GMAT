@@ -36,6 +36,10 @@ public:
    MathNode(const MathNode &mn);
    MathNode& operator=(const MathNode &mn);
 
+   virtual bool RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName);
+   
    bool IsFunction() { return isFunction; }
    bool IsNumber() { return isNumber; }
    void SetNumberFlag(bool flag) { isNumber = flag; }

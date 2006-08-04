@@ -36,6 +36,9 @@ public:
    void SetTopNode(MathNode *node) { theTopNode = node; }
    
    // Inherited (GmatBase) methods
+   virtual bool RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName);
    virtual GmatBase* Clone(void) const;
    
    Real Evaluate();
@@ -52,6 +55,8 @@ protected:
    std::map<std::string, GmatBase *> *theObjectMap;
    
    bool InitializeParameter(MathNode *node);
+   bool RenameParameter(MathNode *node, const Gmat::ObjectType type,
+                        const std::string &oldName, const std::string &newName);
    
 };
 

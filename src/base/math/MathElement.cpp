@@ -114,6 +114,49 @@ MathElement& MathElement::operator=(const MathElement &me)
 }
 
 
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/*
+ * Renames referenced objects
+ *
+ * @param <type> type of the reference object.
+ * @param <oldName> old name of the reference object.
+ * @param <newName> new name of the reference object.
+ *
+ * @return always true to indicate RenameRefObject() was implemented.
+ */
+//---------------------------------------------------------------------------
+bool MathElement::RenameRefObject(const Gmat::ObjectType type,
+                                  const std::string &oldName,
+                                  const std::string &newName)
+{
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("MathElement::RenameRefObject() refObjectName=%s, type=%d, oldName=%s, "
+       "newName=%s\n", refObjectName.c_str(), type, oldName.c_str(), newName.c_str());
+   #endif
+   
+   if (type == Gmat::PARAMETER)
+      if (refObjectName == oldName)
+         refObjectName = newName;
+   
+   // Since parameter name is composed of spacecraftName.dep.paramType or
+   // burnName.dep.paramType, check the type first
+   if (type == Gmat::SPACECRAFT || type == Gmat::BURN ||
+       type == Gmat::COORDINATE_SYSTEM || type == Gmat::CALCULATED_POINT)
+   {
+      if (refObjectName.find(oldName) != refObjectName.npos)
+         refObjectName = GmatStringUtil::Replace(refObjectName, oldName, newName);
+   }
+   
+   MathNode::RenameRefObject(type, oldName, newName);
+   
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 //  GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
@@ -344,18 +387,18 @@ const StringArray& MathElement::GetRefObjectNameArray(const Gmat::ObjectType typ
 //------------------------------------------------------------------------------
 void MathElement::SetMatrixValue(const Rmatrix &mat)
 {
-//	if (refObject)
-//	{
-//	   refObjectType = refObject->GetTypeName().c_str();
-//	   
-//	   if (refObjectType == "Array")
-//	      return MathNode::Evaluate();
-//	   else
-//	   {
-//	      realValue = refObject->EvaluateReal();
-//   	      return realValue;
-//	   }
-//	}
+//      if (refObject)
+//      {
+//         refObjectType = refObject->GetTypeName().c_str();
+//         
+//         if (refObjectType == "Array")
+//            return MathNode::Evaluate();
+//         else
+//         {
+//            realValue = refObject->EvaluateReal();
+//            return realValue;
+//         }
+//      }
 //   else if (realValue != 0.0)
 //      return realValue;
 //   

@@ -1496,6 +1496,29 @@ Real ForceModel::EstimateError(Real *diffs, Real *answer) const
 }
 
 
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/*
+ * Renames referenced object name.
+ *
+ * @param <type> type of the reference object.
+ * @param <oldName> old name of the reference object.
+ * @param <newName> new name of the reference object.
+ *
+ * @return always true to indicate RenameRefObject() was implemented.
+ */
+//---------------------------------------------------------------------------
+bool ForceModel::RenameRefObject(const Gmat::ObjectType type,
+                                 const std::string &oldName,
+                                 const std::string &newName)
+{
+   // There are no renamable objects
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------

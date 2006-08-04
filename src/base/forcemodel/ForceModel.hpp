@@ -101,6 +101,9 @@ public:
 
 
     // inherited from GmatBase
+    virtual bool RenameRefObject(const Gmat::ObjectType type,
+                                 const std::string &oldName,
+                                 const std::string &newName);
     virtual GmatBase* Clone() const;
     
     virtual void SetSolarSystem(SolarSystem *ss);
@@ -188,8 +191,8 @@ protected:
     /// Flag used to prevent unnecessary initialization calls
     bool                      forceMembersNotInitialized;
     
-   Integer                    satIds[7];
-   Integer                    modelEpochId;
+    Integer                    satIds[7];
+    Integer                    modelEpochId;
     
     
     /// Mapping between script descriptions and force names.

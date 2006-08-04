@@ -36,6 +36,9 @@ public:
    MathElement& operator=(const MathElement &me);
    
    // Inherited (GmatBase) methods
+   virtual bool RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName);   
    virtual GmatBase* Clone(void) const; 
    virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
                                   const std::string &name);

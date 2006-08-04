@@ -99,6 +99,32 @@ MathTree& MathTree::operator=(const MathTree &mt)
     return *this;
 }
 
+
+//---------------------------------------------------------------------------
+// bool RenameRefObject(const Gmat::ObjectType type,
+//                      const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/*
+ * Renames referenced objects
+ *
+ * @param <type> type of the reference object.
+ * @param <oldName> old name of the reference object.
+ * @param <newName> new name of the reference object.
+ *
+ * @return always true to indicate RenameRefObject() was implemented.
+ */
+//---------------------------------------------------------------------------
+bool MathTree::RenameRefObject(const Gmat::ObjectType type,
+                               const std::string &oldName,
+                               const std::string &newName)
+{
+   if (theTopNode)
+      RenameParameter(theTopNode, type, oldName, newName);
+   
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 //  GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
@@ -213,7 +239,6 @@ bool MathTree::InitializeParameter(MathNode *node)
       }
       else
       {
-         //loj: 5/25/06 throw an exception
          throw InterpreterException
             ("MathTree::InitializeParameter() Unable to find " + newName +
              "from theObjectMap\n");
@@ -231,3 +256,39 @@ bool MathTree::InitializeParameter(MathNode *node)
    }
 
 }
+
+
+//------------------------------------------------------------------------------
+// bool RenameParameter(MathNode *node, const Gmat::ObjectType type,
+//                      const std::string &oldName, const std::string &newName)
+//------------------------------------------------------------------------------
+bool MathTree::RenameParameter(MathNode *node, const Gmat::ObjectType type,
+                               const std::string &oldName,
+                               const std::string &newName)
+{
+   if (node == NULL)
+      return true;
+
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("MathTree::RenameParameter() node=%s\n", node->GetName().c_str());
+   #endif
+   
+   if (!node->IsFunction())
+   {
+      if (!node->IsNumber())
+         node->RenameRefObject(type, oldName, newName);
+   }
+   else
+   {
+      MathNode *left = node->GetLeft();      
+      RenameParameter(left, type, oldName, newName);
+      
+      MathNode *right = node->GetRight();      
+      RenameParameter(right, type, oldName, newName);
+   }
+
+   return true;
+}
+
+
