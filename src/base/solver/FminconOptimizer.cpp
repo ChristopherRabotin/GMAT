@@ -306,6 +306,8 @@ void FminconOptimizer::RunNominal()
 void FminconOptimizer::CalculateParameters()
 {
    ExternalOptimizer::CalculateParameters(); // **** TBD <<<<<<<<<< **** 
+   // call fmincon here, passsing in the options and their values ???
+   // use EvalString or a MatlabFunction?
 }
 
 void FminconOptimizer::RunComplete()
@@ -474,7 +476,180 @@ std::string FminconOptimizer::GetProgressString()
 
 void FminconOptimizer::WriteToTextFile()
 {
-   // ********* TBD ********
+   StringArray::iterator current;
+   Integer i;
+   //Integer j;
+   if (initialized)
+   {
+      switch (currentState)
+      {
+         case INITIALIZING:
+            // This state is basically a "paused state" used for the Optimize
+            // command to finalize the initial data for the variables and
+            // goals.  All that is written here is the header information.
+            {
+               Integer localVariableCount = variableNames.size();
+               Integer localEqCount = eqConstraintNames.size();
+               Integer localIneqCount = ineqConstraintNames.size();
+               textFile << "************************************************"
+                        << "********\n"
+                        << "*** Optimizer Text File\n"
+                        << "*** \n"
+                        << "*** Using Fmincon Optimization\n***\n";
+
+               // Write out the setup data
+               textFile << "*** " << localVariableCount << " variables\n*** "
+                        << localEqCount << " equality constraints\n***\n*** "
+                        << localIneqCount << " inequality constraints\n***\n*** "
+                        << "Variables:\n***    ";
+
+               // Iterate through the variables and constraints, writing them to
+               // the file
+               for (current = variableNames.begin(), i = 0;
+                    current != variableNames.end(); ++current)
+               {
+                  textFile << *current << "\n***    ";
+               }
+                 
+               textFile << "\n*** Equality Constraints:\n***    ";
+                 
+               for (current = eqConstraintNames.begin(), i = 0;
+                    current != eqConstraintNames.end(); ++current)
+               {
+                  textFile << *current << "\n***    ";
+               }
+                 
+               textFile << "\n*** Inequality Constraints:\n***    ";
+                 
+               for (current = ineqConstraintNames.begin(), i = 0;
+                    current != ineqConstraintNames.end(); ++current)
+               {
+                  textFile << *current << "\n***    ";
+               }
+               textFile << "\n****************************"
+                        << "****************************\n"
+                        << std::endl;
+            }
+            break;
+            
+         case NOMINAL:
+            textFile << "Iteration " << iterationsTaken+1
+                     << "\nRunning Nominal Pass\nVariables:\n   ";
+            // Iterate through the variables, writing them to the file
+            for (current = variableNames.begin(), i = 0;
+                 current != variableNames.end(); ++current)
+            {
+               textFile << *current << " = " << variable[i++] << "\n   ";
+            }
+            textFile << std::endl;
+            break;
+            
+         case PERTURBING:
+            if ((textFileMode == "Verbose") || (textFileMode == "Debug"))
+            {
+               if (pertNumber != 0)
+               {
+                  /*
+                  // Iterate through the goals, writing them to the file
+                  textFile << "Goals and achieved values:\n   ";
+                   
+                  for (current = goalNames.begin(), i = 0;
+                       current != goalNames.end(); ++current)
+                  {
+                     textFile << *current << "  Desired: " << goal[i]
+                              << " Achieved: " << achieved[pertNumber-1][i]
+                              << "\n   ";
+                     ++i;
+                  }
+                  */
+                  textFile << std::endl;
+               }
+               textFile << "Perturbing with variable values:\n   ";
+               for (current = variableNames.begin(), i = 0;
+                    current != variableNames.end(); ++current)
+               {
+                  textFile << *current << " = " << variable[i++] << "\n   ";
+               }
+               textFile << std::endl;
+            }
+            
+            if (textFileMode == "Debug")
+            {
+               textFile << "------------------------------------------------\n"
+                        << "Command stream data:\n"
+                        << debugString << "\n"
+                        << "------------------------------------------------\n";
+            }
+                
+            break;
+            
+         case CALCULATING:
+            if (textFileMode == "Verbose")
+            {
+               textFile << "Calculating" << std::endl;
+               /*    
+               // Iterate through the goals, writing them to the file
+               textFile << "Goals and achieved values:\n   ";
+                   
+               for (current = goalNames.begin(), i = 0;
+                    current != goalNames.end(); ++current)
+               {
+                   textFile << *current << "  Desired: " << goal[i]
+                            << " Achieved: " << achieved[variableCount-1][i]
+                            << "\n    ";
+                   ++i;
+               }
+               */
+               textFile << std::endl;
+            }
+                
+            // does this make sense for Optimization?            
+            textFile << "\n\nNew variable estimates:\n   ";
+            for (current = variableNames.begin(), i = 0;
+                 current != variableNames.end(); ++current)
+            {
+               textFile << *current << " = " << variable[i++] << "\n   ";
+            }
+            textFile << std::endl;
+            break;
+            
+         case CHECKINGRUN:
+            // Iterate through the goals, writing them to the file
+            /*
+            textFile << "Goals and achieved values:\n   ";
+                
+            for (current = goalNames.begin(), i = 0;
+                 current != goalNames.end(); ++current)
+            {
+               textFile << *current << "  Desired: " << goal[i]
+                        << " Achieved: " << nominal[i]
+                        << "\n   Tolerance: " << tolerance[i]
+                        << "\n   ";
+               ++i;
+            }
+            */    
+            textFile << "\n*****************************"
+                     << "***************************\n"
+                     << std::endl;
+            break;
+            
+         case FINISHED:
+            textFile << "\n****************************"
+                     << "****************************\n"
+                     << "*** Optimization Completed in " << iterationsTaken
+                     << " iterations"
+                     << "\n****************************"
+                     << "****************************\n"
+                     << std::endl;
+                         
+            break;
+            
+         case ITERATING:     // Intentional fall through
+         default:
+            throw SolverException(
+               "Solver state not supported for the Fmincon optimizer");
+      }
+   }
 }
    
 bool FminconOptimizer::OpenConnection()
@@ -486,7 +661,9 @@ bool FminconOptimizer::OpenConnection()
 
    if (!MatlabInterface::Open())
       throw SolverException("Error attempting to access interface to MATLAB");
-      
+   
+   // check for availability of Optimization Toolbox here .......
+   sourceReady = true;
    return true; 
 }
 

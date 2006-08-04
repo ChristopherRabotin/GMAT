@@ -21,6 +21,7 @@
 
 #include "ExternalOptimizer.hpp"
 #include "MessageInterface.hpp"
+#include "FileManager.hpp"
 //#include "MatlabInterface.hpp"  // currently all static
 
 
@@ -32,6 +33,7 @@
 const std::string
 ExternalOptimizer::PARAMETER_TEXT[ExternalOptimizerParamCount -OptimizerParamCount] =
 {
+   "FunctionPath",
    "ParameterList",
    "SourceType",
 };
@@ -39,6 +41,7 @@ ExternalOptimizer::PARAMETER_TEXT[ExternalOptimizerParamCount -OptimizerParamCou
 const Gmat::ParameterType
 ExternalOptimizer::PARAMETER_TYPE[ExternalOptimizerParamCount - OptimizerParamCount] =
 {
+   Gmat::STRING_TYPE,
    Gmat::STRINGARRAY_TYPE,
    Gmat::STRING_TYPE,
 };
@@ -49,6 +52,7 @@ ExternalOptimizer::PARAMETER_TYPE[ExternalOptimizerParamCount - OptimizerParamCo
 
 ExternalOptimizer::ExternalOptimizer(std::string type, std::string name) :
    Optimizer               (type, name), 
+   functionPath            (""),
    sourceType              ("MATLAB"),
    sourceReady             (false),
    gmatServer              (NULL)
@@ -65,6 +69,7 @@ ExternalOptimizer::~ExternalOptimizer()
 
 ExternalOptimizer::ExternalOptimizer(const ExternalOptimizer &opt) :
    Optimizer               (opt),
+   functionPath            (opt.functionPath),
    sourceType              (opt.sourceType),
    sourceReady             (false),
    gmatServer              (opt.gmatServer)
@@ -81,6 +86,7 @@ ExternalOptimizer&
 
    Optimizer::operator=(opt);
    
+   functionPath        = opt.functionPath;
    sourceType          = opt.sourceType;
    sourceReady         = opt.sourceReady;
    gmatServer          = opt.gmatServer;
@@ -94,8 +100,34 @@ ExternalOptimizer&
 bool ExternalOptimizer::Initialize()
 {
    Optimizer::Initialize();
+
+   // function path
+   FileManager *fm = FileManager::Instance();
+   std::string pathname;
    
-   // what else goes in here?
+   try
+   {
+      if (functionPath == "")
+      {         
+         if (sourceType == "MATLAB")
+            // matlab uses directory path
+            pathname = fm->GetFullPathname("MATLAB_FUNCTION_PATH");
+            functionPath = pathname;
+      }
+   }
+   catch (GmatBaseException &e)
+   {
+      try
+      {
+         // see if there is FUNCTION_PATH
+         pathname = fm->GetFullPathname("FUNCTION_PATH");
+         functionPath = pathname;
+      }
+      catch (GmatBaseException &e)
+      {
+         throw;  // for now, at least
+      }
+   }
    
    return true;
 }
@@ -194,6 +226,8 @@ std::string ExternalOptimizer::GetParameterTypeString(
 //------------------------------------------------------------------------------
 std::string ExternalOptimizer::GetStringParameter(const Integer id) const
 {
+    if (id == FUNCTION_PATH)
+        return functionPath;
     if (id == SOURCE_TYPE)
         return sourceType;
         
@@ -217,6 +251,11 @@ std::string ExternalOptimizer::GetStringParameter(const Integer id) const
 bool ExternalOptimizer::SetStringParameter(const Integer id,
                                            const std::string &value)
 {
+    if (id == FUNCTION_PATH) 
+    {
+        functionPath = value; 
+        return true;
+    }
     if (id == SOURCE_TYPE) 
     {
         sourceType = value;  // currently, only MATLAB allowed

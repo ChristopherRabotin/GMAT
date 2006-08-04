@@ -72,12 +72,15 @@ protected:
    // Parameter IDs
    enum
    {
-      PARAMETER_LIST = OptimizerParamCount,
+      FUNCTION_PATH = OptimizerParamCount,
+      PARAMETER_LIST,
       SOURCE_TYPE,
       ExternalOptimizerParamCount
    };
    
 
+   /// Path for function script
+   std::string         functionPath;
    /// list of parameters used to configure the external optimizer
    StringArray         parmList;
    /// array of values for the optimizer - value of the objective funcion;
