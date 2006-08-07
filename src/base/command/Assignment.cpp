@@ -597,6 +597,44 @@ bool Assignment::Execute()
    #endif
    bool retval = false;
 
+   if (isLhsArray)
+   {
+      #ifdef DEBUG_ARRAY_INTERPRETING
+      MessageInterface::ShowMessage("   Executing lhs array branch\n");
+      #endif
+      
+      if (lrowObj)
+      {
+         if (lrowObj->GetTypeName() == "Variable")
+            rowIndex = (Integer)(((Parameter*)lrowObj)->GetReal());
+         else
+            throw CommandException
+               ("Non-\"Variable\" Objects (" + lrowObj->GetName() +
+                ") cannot be used to set row indexes yet.");
+      }
+      if (lcolObj)
+      {
+         if (lcolObj->GetTypeName() == "Variable")
+            colIndex = (Integer)(((Parameter*)lcolObj)->GetReal());
+         else
+            throw CommandException
+               ("Non-\"Variable\" Objects (" + lcolObj->GetName() +
+                ") cannot be used to set column indexes yet.");
+      }
+      if (rowIndex == -1)
+         throw CommandException
+            ("Multiple array row elements cannot be set yet.");
+      if (colIndex == -1)
+         throw CommandException
+            ("Multiple array column elements cannot be set yet.");
+      
+      #if DEBUG_ARRAY_INTERPRETING
+      MessageInterface::ShowMessage
+         ("   rowIndex=%d, colIndex=%d\n", rowIndex, colIndex);
+      #endif
+   }
+   
+   
    // if there is MathTree, evaluate
    if (mathTree != NULL)
    {      
@@ -710,35 +748,6 @@ bool Assignment::Execute()
        
       if (isLhsArray)
       {
-         #ifdef DEBUG_ARRAY_INTERPRETING
-            MessageInterface::ShowMessage("   Executing array branch\n");
-         #endif
-
-         if (lrowObj)
-         {
-            if (lrowObj->GetTypeName() == "Variable")
-               rowIndex = (Integer)(((Parameter*)lrowObj)->GetReal());
-            else
-               throw CommandException(
-                  "Non-\"Variable\" Objects (" + lrowObj->GetName() +
-                  ") cannot be used to set row indexes yet.");
-         }
-         if (lcolObj)
-         {
-            if (lcolObj->GetTypeName() == "Variable")
-               colIndex = (Integer)(((Parameter*)lcolObj)->GetReal());
-            else
-               throw CommandException(
-                  "Non-\"Variable\" Objects (" + lcolObj->GetName() +
-                  ") cannot be used to set column indexes yet.");
-         }
-         if (rowIndex == -1)
-            throw CommandException(
-               "Multiple array row elements cannot be set yet.");
-         if (colIndex == -1)
-            throw CommandException(
-               "Multiple array column elements cannot be set yet.");
-
          parmOwner->SetRealParameter("SingleValue", EvaluateRHS(), rowIndex-1,
             colIndex-1);
 
