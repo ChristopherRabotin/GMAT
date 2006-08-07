@@ -3159,6 +3159,8 @@ Integer Moderator::RunMission(Integer sandboxNum)
    }
    
    runState = Gmat::IDLE;
+   thePublisher->SetRunState(runState);
+   thePublisher->NotifyEndOfRun();
    theGuiInterpreter->NotifyRunCompleted();
    
    if (status == 0)
