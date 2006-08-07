@@ -232,6 +232,15 @@ bool For::Append(GmatCommand *cmd)
 bool For::Initialize(void)
 {
    // Get Parameter pointers from the Sandbox
+   if (indexIsParam)
+   {
+      if (objectMap->find(indexName) == objectMap->end())
+         throw CommandException("Undefined start variable:" + indexName +
+                                " in For loop\n" + generatingString);
+      
+      indexParam = (Parameter*)(*objectMap)[indexName];
+   }
+
    if (startIsParam)
    {
       if (objectMap->find(startName) == objectMap->end())
