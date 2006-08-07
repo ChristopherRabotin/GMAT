@@ -24,7 +24,9 @@
 #include "Publisher.hpp"         // for Instance()
 #include "FileManager.hpp"       // for GetPathname()
 #include "SubscriberException.hpp"
+#include "StringUtil.hpp"        // for GetArrayIndex()
 #include <iomanip>
+#include <sstream>
 
 //#define DEBUG_REPORTFILE 1
 //#define DEBUG_REPORTFILE_DATA 1
@@ -203,7 +205,6 @@ bool ReportFile::Initialize()
    {
       if ((mNumVarParams == 0) && !usedByReport)
       {
-         //loj: 6/8/06 changed PopupMessage to ShowMessage
          MessageInterface::ShowMessage
             ("ReportFile::Initialize() Report will not be written.\n"
              "No parameters selected for ReportFile.\n");
@@ -215,7 +216,6 @@ bool ReportFile::Initialize()
       if ((mNumVarParams > 0))
          if (mVarParams[0] == NULL)
          {
-            //loj: 6/8/06 changed PopupMessage to ShowMessage
             MessageInterface::ShowMessage
                ("ReportFile::Initialize() ReportFile will not be created.\n"
                 "The first parameter:%s selected for the report file is NULL\n",
@@ -235,7 +235,7 @@ bool ReportFile::Initialize()
       
       initial = true;
    }
-
+   
    return true;
 }
 
@@ -639,14 +639,29 @@ GmatBase* ReportFile::GetRefObject(const Gmat::ObjectType type,
 bool ReportFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                               const std::string &name)
 {
+   #if DEBUG_REPORTFILE_SET
+   MessageInterface::ShowMessage("ReportFile::SetRefObject() name=%s\n",
+                                 name.c_str());
+   #endif
+   
    if (type == Gmat::PARAMETER)
    {
       for (int i=0; i<mNumVarParams; i++)
       {
-         if (mVarParamNames[i] == name)
+         // Handle array index
+         Integer row, col;
+         std::string newName;
+         GmatStringUtil::GetArrayIndex(mVarParamNames[i], row, col, newName);
+         
+         #if DEBUG_REPORTFILE_SET
+         MessageInterface::ShowMessage("   newName=%s\n", newName.c_str());
+         #endif
+         
+         //if (mVarParamNames[i] == name)
+         if (newName == name)
          {
             mVarParams[i] = (Parameter*)obj;
-
+            
             // Test see if it is reportable.
             // Cannot test in AddVarParameter(), because it just addes
             // the name.
@@ -676,7 +691,16 @@ const StringArray& ReportFile::GetRefObjectNameArray(const Gmat::ObjectType type
    {
    case Gmat::UNKNOWN_OBJECT:
    case Gmat::PARAMETER:
-      mAllRefObjectNames = mVarParamNames;
+      {
+         // Handle array index
+         Integer row, col;
+         std::string newName;
+         for (int i=0; i<mNumVarParams; i++)
+         {
+            GmatStringUtil::GetArrayIndex(mVarParamNames[i], row, col, newName);
+            mAllRefObjectNames.push_back(newName);
+         }
+      }
    default:
       break;
    }
@@ -735,7 +759,6 @@ bool ReportFile::AddParameterForTitleOnly(const std::string &paramName)
    
    if (paramName != "")
    {
-      // if paramName not found, add (loj: 4/6/06 Added)
       if (find(mVarParamNames.begin(), mVarParamNames.end(), paramName) ==
           mVarParamNames.end())
       {
@@ -853,8 +876,6 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
    
    if (mNumVarParams > 0)
    {
-      // we don't need to save data, so comment it out
-      //Rvector varvals = Rvector(mNumVarParams);
       Real rval = -9999.999;
       std::string sval;
       
@@ -877,7 +898,6 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
          Integer width = (Integer)mVarParamNames[i].length() > columnWidth ?
             mVarParamNames[i].length() : columnWidth;
          
-         //dstream.width(columnWidth);
          dstream.width(width);
          dstream.fill(' ');
             
@@ -890,10 +910,8 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
          
          if (mVarParams[i]->GetReturnType() == Gmat::REAL_TYPE)
          {
-            //varvals[i] = mVarParams[i]->EvaluateReal();
             rval = mVarParams[i]->EvaluateReal();
             dstream.precision(precision);
-            //dstream << varvals[i] << "   "; // give space between columns
             dstream << rval << "   "; // give space between columns
          }
          else if (mVarParams[i]->GetReturnType() == Gmat::STRING_TYPE)
@@ -902,6 +920,28 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
             width = (Integer)sval.length() > width ? sval.length() : width;
             dstream.width(width);
             dstream << sval << "   "; // give space between columns
+         }
+         else if (mVarParams[i]->GetReturnType() == Gmat::RMATRIX_TYPE)
+         {
+            // Handle array index
+            Integer row, col;
+            std::string newName;
+            GmatStringUtil::GetArrayIndex(mVarParamNames[i], row, col, newName);
+            
+            if (row != -1 && col!= -1)
+            {
+               rval = mVarParams[i]->EvaluateRmatrix().GetElement(row, col);
+               dstream.precision(precision);
+               dstream << rval << "   "; // give space between columns
+            }
+            else
+            {
+               std::stringstream ss("");
+               ss << "ReportFile::Distribute() Array has invalid index. row=" << row
+                  << " col=" << col << "\n";
+            
+               throw SubscriberException(ss.str());
+            }
          }
       }
       
