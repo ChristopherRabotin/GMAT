@@ -1515,11 +1515,30 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       ("Moderator::CreateParameter() type=%s, name=%s, ownerName=%s, depName=%s\n",
        type.c_str(), name.c_str(), ownerName.c_str(), depName.c_str());
    #endif
-   
+
    // if Parameter name doesn't exist, create Parameter
    if (GetParameter(name) == NULL)
-   {
+   {      
       Parameter *param = theFactoryManager->CreateParameter(type, name);
+      
+      // We don't know the owner type the parameter before create,
+      // so validate owner type after create.
+      if (ownerName != "")
+      {
+         GmatBase *obj = GetConfiguredItem(ownerName);
+         if (obj)
+         {
+            if (param->GetOwnerType() != obj->GetType())
+            {
+               std::string paramOwnerType = GmatBase::GetObjectTypeString(param->GetOwnerType());
+               delete param;
+               param = NULL;
+               
+               throw GmatBaseException("Parameter type: " + type + " should be property of " +
+                                       paramOwnerType);
+            }
+         }
+      }
       
       if (param == NULL)
         throw GmatBaseException("Error Creating Parameter: " + type + "\n");
