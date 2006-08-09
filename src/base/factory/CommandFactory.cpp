@@ -38,6 +38,7 @@
 #include "Assignment.hpp"     // for Assignment (GMAT) command  
 #include "Report.hpp"         // for Report command
 #include "Save.hpp"           // for Save command  
+#include "Stop.hpp"           // for Save command  
 #include "CallFunction.hpp"   // for CallFunction command
 #include "Assignment.hpp"     // for Assignment command
 #include "BeginFiniteBurn.hpp"// for BeginFiniteBurn command
@@ -121,6 +122,8 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
         return new BeginFunction;
     else if (ofType == "EndFunction")
          return new EndFunction;
+    else if (ofType == "Stop")
+        return new Stop;
    // add more here .......
    else {
       return NULL;   // doesn't match any known type of command
@@ -169,6 +172,7 @@ CommandFactory::CommandFactory() :
       creatables.push_back("EndScript");
       creatables.push_back("BeginFunction");
       creatables.push_back("EndFunction");
+      creatables.push_back("Stop");
    }
 }
 
@@ -228,6 +232,7 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
       creatables.push_back("EndScript");
       creatables.push_back("BeginFunction");
       creatables.push_back("EndFunction");
+      creatables.push_back("Stop");
    }
 }
 

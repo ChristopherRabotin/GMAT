@@ -118,6 +118,7 @@ OBJECTS = \
     command/Propagate.o \
     command/Report.o \
     command/Save.o \
+    command/Stop.o \
     command/Target.o \
     command/Toggle.o \
     command/Vary.o \
