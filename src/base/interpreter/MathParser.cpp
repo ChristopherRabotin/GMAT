@@ -34,6 +34,7 @@
 //#define DEBUG_MATH_PARSER 2
 //#define DEBUG_DECOMPOSE 1
 //#define DEBUG_PARENTHESIS 1
+//#define DEBUG_OPERATOR 1
 //#define DEBUG_ADD_SUBTRACT 1
 //#define DEBUG_MULT_DIVIDE 1
 //#define DEBUG_MATRIX_OPS 1
@@ -328,6 +329,10 @@ MathNode* MathParser::Parse(const std::string &theEquation)
 
    // second remove extra parenthesis (This need more testing - so commented out)
    //newEq = GmatStringUtil::RemoveExtraParen(newEq);
+
+   // check if parenthesis are balanced
+   if (!GmatStringUtil::IsParenBalanced(newEq))
+      throw MathException("MathParser found unbalanced parenthesis in: " + newEq + "\n");
    
    #if DEBUG_PARSE
    MessageInterface::ShowMessage
@@ -1907,7 +1912,7 @@ void MathParser::CreateParameter(MathNode *node, UnsignedInt level)
                 "depObj=%s\n", name.c_str(), type.c_str(), owner.c_str(),
                 depObj.c_str());
             #endif
-            
+
             theModerator->CreateParameter(type, name, owner, depObj);
          }
       }
