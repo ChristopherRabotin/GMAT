@@ -449,8 +449,13 @@ bool Assignment::Initialize()
       
    if (GmatCommand::Initialize() == false)
       return false;
-   
-   parmOwner = (*objectMap)[ownerName];
+
+   if (objectMap->find(ownerName) != objectMap->end())
+      parmOwner = (*objectMap)[ownerName];
+   else
+      throw CommandException
+         ("Assignment command cannot find LHS object \"" +
+          ownerName + "\" for line \n   " + generatingString + "\n");
    
    if (parmOwner)
    {
@@ -744,8 +749,9 @@ bool Assignment::Execute()
          MessageInterface::ShowMessage("   In the try clause\n");
       #endif
       if (parmOwner == NULL)
-         throw CommandException("Parameter Owner Not Initialized\n");
-       
+         //throw CommandException("Parameter Owner Not Initialized\n");
+         throw CommandException("Cannot find LHS Parameter: " + ownerName + "\n");
+      
       if (isLhsArray)
       {
          parmOwner->SetRealParameter("SingleValue", EvaluateRHS(), rowIndex-1,
@@ -1186,7 +1192,7 @@ bool Assignment::InitializeRHS(const std::string &rhs)
       {
          if (rhs != "On" && rhs != "Off")
             throw CommandException
-               ("Assignment command cannot handle RHS: " + rhs + "\n");
+               ("Assignment command cannot find RHS parameter: " + rhs + "\n");
       }
    }
 
