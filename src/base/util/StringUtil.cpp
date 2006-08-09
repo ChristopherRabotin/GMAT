@@ -723,6 +723,35 @@ bool GmatStringUtil::IsEnclosedWithExtraParen(const std::string &str, bool check
 
 
 //------------------------------------------------------------------------------
+// bool IsParenBalanced(const std::string &str)
+//------------------------------------------------------------------------------
+/*
+ * return true if parenthesis are balanced (no mismatching parenthesis)
+ * 
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsParenBalanced(const std::string &str)
+{   
+   int length = str.size();
+   Integer openCounter = 0;
+   bool retval = false;
+   
+   for (int i=0; i<length; i++)
+   {
+      if (str[i] == '(')
+         openCounter++;
+      else if (str[i] == ')')
+         openCounter--;
+   }
+   
+   if (openCounter == 0)
+      retval = true;
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
 // bool IsOuterParen(const std::string &str)
 //------------------------------------------------------------------------------
 /*

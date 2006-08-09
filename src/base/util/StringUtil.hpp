@@ -66,6 +66,7 @@ namespace GmatStringUtil
                            Integer &closeParen, Integer start = 0);
    
    bool IsEnclosedWithExtraParen(const std::string &str, bool checkOps = true);
+   bool IsParenBalanced(const std::string &str);
    bool IsOuterParen(const std::string &str);
    bool IsParenPartOfArray(const std::string &str);
    bool IsSingleItem(const std::string &str);
