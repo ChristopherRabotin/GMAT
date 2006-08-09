@@ -1521,6 +1521,9 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    {      
       Parameter *param = theFactoryManager->CreateParameter(type, name);
       
+      if (param == NULL)
+        throw GmatBaseException("Error Creating Parameter: " + type + " in " + name + "\n");
+      
       // We don't know the owner type the parameter before create,
       // so validate owner type after create.
       if (ownerName != "")
@@ -1539,9 +1542,6 @@ Parameter* Moderator::CreateParameter(const std::string &type,
             }
          }
       }
-      
-      if (param == NULL)
-        throw GmatBaseException("Error Creating Parameter: " + type + "\n");
       
       param->SetStringParameter("Expression", name);
       
@@ -3097,7 +3097,13 @@ Integer Moderator::RunMission(Integer sandboxNum)
       // clear sandbox
       if (sandboxNum > 0 && sandboxNum <= Gmat::MAX_SANDBOX)
       {
+         #if DEBUG_RUN
+         MessageInterface::ShowMessage
+            ("Moderator::RunMission() before sandboxes[%d]->Clear()\n", sandboxNum-1);
+         #endif
+         
          sandboxes[sandboxNum-1]->Clear();
+         
          #if DEBUG_RUN
          MessageInterface::ShowMessage
             ("Moderator::RunMission() after sandboxes[%d]->Clear()\n", sandboxNum-1);
