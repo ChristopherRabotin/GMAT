@@ -11,7 +11,7 @@
 // number S-67573-G
 //
 /**
- * Null operator for the command sequence -- typically used as a place holder
+ * Stop command used to halt execution.
  */
 //------------------------------------------------------------------------------
 
@@ -45,33 +45,34 @@ Stop::~Stop()
 
 
 //------------------------------------------------------------------------------
-//  Stop(const Stop& noop)
+//  Stop(const Stop& stop)
 //------------------------------------------------------------------------------
 /**
  * Makes a copy of the Stop command (copy constructor).
  *
- * @param noop The original used to set parameters for this one.
+ * @param stop The original used to set parameters for this one.
  */
 //------------------------------------------------------------------------------
-Stop::Stop(const Stop& noop) :
-    GmatCommand (noop)
+Stop::Stop(const Stop& stop) :
+    GmatCommand (stop)
 {
 }
 
 
 //------------------------------------------------------------------------------
-//  Stop& operator=(const Stop&)
+//  Stop& operator=(const Stop &stop)
 //------------------------------------------------------------------------------
 /**
  * Sets this Stop to match another one (assignment operator).
  * 
- * @param noop The original used to set parameters for this one.
+ * @param stop The original used to set parameters for this one.
  *
  * @return this instance.
  */
 //------------------------------------------------------------------------------
-Stop& Stop::operator=(const Stop& noop)
+Stop& Stop::operator=(const Stop &stop)
 {
+   GmatCommand::operator=(stop);
    return *this;
 }
 
@@ -98,7 +99,7 @@ bool Stop::Execute()
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Stop.
