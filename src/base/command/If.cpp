@@ -146,7 +146,9 @@ bool If::Append(GmatCommand *cmd)
        }
        else
        {
-          --nestLevel;
+         // only decrease the nextLevel if we've reached the actual end of the 
+         // If command
+          if (cmd->GetTypeName() == "EndIf")  --nestLevel;
        }
     }
 
