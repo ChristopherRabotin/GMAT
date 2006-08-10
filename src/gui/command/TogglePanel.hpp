@@ -19,28 +19,33 @@
 #include "GmatAppData.hpp"
 #include "GmatPanel.hpp"
 #include "GmatCommand.hpp"
+#include <map>
 
 class TogglePanel : public GmatPanel
 {
 public:
    // constructors
    TogglePanel(wxWindow *parent, GmatCommand *cmd);
+   ~TogglePanel();
    
 protected:
    // member data
    GmatCommand *theCommand;
    
-   wxComboBox *mSubsComboBox;
+   wxCheckListBox *mSubsCheckListBox;
    wxRadioButton *mOnRadioButton;
    wxRadioButton *mOffRadioButton;
-   
+
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
    
    // event handling
+   void OnComboBoxChange(wxCommandEvent& event);
    void OnRadioButtonChange(wxCommandEvent& event);
+   void OnCheckListBoxChange(wxCommandEvent& event);
+//    void OnSelectSubscriber(wxCommandEvent& event);
    
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
@@ -49,7 +54,7 @@ protected:
    enum
    {     
       ID_TEXT = 80000,        
-      ID_COMBOBOX,
+      ID_CHECKLISTBOX,
       ID_RADIOBUTTON
    };
 };

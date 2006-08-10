@@ -197,6 +197,55 @@ GmatBase* Toggle::Clone(void) const
 
 
 //------------------------------------------------------------------------------
+// virtual bool TakeAction(const std::string &action,  
+//                         const std::string &actionData = "");
+//------------------------------------------------------------------------------
+/**
+ * This method performs action.
+ *
+ * @param <action> action to perform
+ * @param <actionData> action data associated with action
+ * @return true if action successfully performed
+ *
+ */
+//------------------------------------------------------------------------------
+bool Toggle::TakeAction(const std::string &action, const std::string &actionData)
+{
+   #if DEBUG_TAKE_ACTION
+   MessageInterface::ShowMessage
+      ("Toggle::TakeAction() action=%s, actionData=%s\n",
+       action.c_str(), actionData.c_str());
+   #endif
+   
+   if (action == "Clear")
+   {
+      subNames.clear();
+      return true;
+   }
+
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Accesses arrays of names for referenced objects.
+ * 
+ * @param type Type of object requested.
+ * 
+ * @return the StringArray containing the referenced object names.
+ */
+//------------------------------------------------------------------------------
+const StringArray& Toggle::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   // There are only subscribers, so ignore object type
+   return subNames;
+}
+
+
+//------------------------------------------------------------------------------
 //  const std::string GetGeneratingString()
 //------------------------------------------------------------------------------
 /**
@@ -229,8 +278,6 @@ const std::string& Toggle::GetGeneratingString(Gmat::WriteMode mode,
 }
 
 
-
-//loj: 11/22/04 added
 //---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
@@ -239,11 +286,11 @@ bool Toggle::RenameRefObject(const Gmat::ObjectType type,
                              const std::string &oldName,
                              const std::string &newName)
 {
-#if DEBUG_RENAME
+   #if DEBUG_RENAME
    MessageInterface::ShowMessage
       ("Toggle::RenameConfiguredItem() type=%s, oldName=%s, newName=%s\n",
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
-#endif
+   #endif
    
    if (type != Gmat::SUBSCRIBER)
       return true;
@@ -337,22 +384,25 @@ bool Toggle::SetStringParameter(const Integer id, const std::string &value)
    MessageInterface::ShowMessage
       ("Toggle::SetStringParameter() id=%d, value=%s\n", id, value.c_str());
    #endif
+
+   if (value == "")
+      return false;
    
-   //loj: 7/28/06 just handle one subscriber until this code is ready
    if (id == subscriberID)
    {
-      if (subNames.empty())
+      if (find(subNames.begin(), subNames.end(), value) == subNames.end())
+      {
          subNames.push_back(value);
-      else
-        subNames[0] = value;
+         
+         // Register with the publisher
+         if (publisher == NULL)
+            publisher = Publisher::Instance();
+         
+         streamID = publisher->RegisterPublishedData(subNames, subNames);
+         //MessageInterface::ShowMessage("===> streamID=%d\n", streamID);
+      }
       
       return true;
-      
-//       if (find(subNames.begin(), subNames.end(), value) == subNames.end())
-//       {
-//          subNames.push_back(value);
-//          return true;
-//       }
    }
    else if (id == toggleStateID)
    {
