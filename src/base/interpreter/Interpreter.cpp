@@ -2500,7 +2500,13 @@ void Interpreter::ChunkLine()
            chunks.push_back(new std::string(phrase));
 
         if (str[end] == '=') {
-           chunks.push_back(new std::string("="));
+           if (str[end+1] == '=')
+           {
+              ++end;
+              chunks.push_back(new std::string("=="));
+           }
+           else
+              chunks.push_back(new std::string("="));
            ++end;
         } 
 
@@ -2990,7 +2996,13 @@ StringArray& Interpreter::SeparateSpaces(const std::string &chunk)
          if ((token != " ") && (token.length() > 0))
             chunkArray.push_back(token);
          if ((str[i] == '=') || (str[i] == ':')) {
-            token.assign(str, i, 1);
+            if ((str[i] == '=') && (str[i+1] == '='))
+            {
+               token.assign(str, i, 2);
+               ++i;            
+            }
+            else
+               token.assign(str, i, 1);
             chunkArray.push_back(token);
          }
 //         ++i;
