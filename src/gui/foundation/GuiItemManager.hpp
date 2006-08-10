@@ -219,6 +219,19 @@ public:
    wxComboBox* GetSubscriberComboBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size);
    
+   // CheckListBox
+   wxCheckListBox* GetSubscriberCheckListBox(wxWindow *parent, wxWindowID id,
+                                             const wxSize &size,
+                                             wxArrayString *excList = NULL);
+   wxCheckListBox* GetSpacecraftCheckListBox(wxWindow *parent, wxWindowID id,
+                                             const wxSize &size,
+                                             wxArrayString *excList = NULL);
+   
+   
+   wxCheckListBox* GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
+                                            const wxSize &size,
+                                            wxArrayString *excList = NULL);
+   
    // ListBox
    wxListBox* GetSpacePointListBox(wxWindow *parent, wxWindowID id, 
                                    const wxSize &size, bool addVector = false);
@@ -235,14 +248,6 @@ public:
    wxListBox* GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
                                    const wxSize &size,
                                    wxArrayString *excList = NULL);
-   
-   wxCheckListBox* GetSpacecraftCheckListBox(wxWindow *parent, wxWindowID id,
-                                             const wxSize &size,
-                                             wxArrayString *excList = NULL);
-   
-   wxCheckListBox* GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
-                                            const wxSize &size,
-                                            wxArrayString *excList = NULL);
    
    wxListBox* GetFormationListBox(wxWindow *parent, wxWindowID id,
                                   const wxSize &size,
@@ -335,6 +340,7 @@ private:
    
    std::vector<wxListBox*> mSpaceObjectLBList;
    std::vector<wxListBox*> mSpacecraftLBList;
+   std::vector<wxCheckListBox*> mSubscriberCLBList;
    std::vector<wxCheckListBox*> mSpacecraftCLBList;
    std::vector<wxCheckListBox*> mAllObjectCLBList;
    std::vector<wxListBox*> mFuelTankLBList;

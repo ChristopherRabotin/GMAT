@@ -362,6 +362,20 @@ void GuiItemManager::UnregisterCheckListBox(const wxString &type, wxCheckListBox
       ("GuiItemManager::UnregisterCheckListBox() clb=%d, excList=%d\n", clb, excList);
    #endif
    
+   if (type == "Subscriber")
+   {
+      std::vector<wxCheckListBox*>::iterator pos1 =
+         find(mSubscriberCLBList.begin(), mSubscriberCLBList.end(), clb);
+      
+      if (pos1 != mSubscriberCLBList.end())
+         mSubscriberCLBList.erase(pos1);
+      
+      std::vector<wxArrayString*>::iterator pos2 =
+         find(mSubscriberExcList.begin(), mSubscriberExcList.end(), excList);
+      
+      if (pos2 != mSubscriberExcList.end())
+         mSubscriberExcList.erase(pos2);
+   }
    if (type == "Spacecraft")
    {
       std::vector<wxCheckListBox*>::iterator pos1 =
@@ -964,6 +978,138 @@ wxComboBox* GuiItemManager::GetSubscriberComboBox(wxWindow *parent, wxWindowID i
 }
 
 
+// CheckListBox
+//------------------------------------------------------------------------------
+// wxCheckListBox* GetSubscriberCheckListBox(wxWindow *parent, wxWindowID id,
+//                                           const wxSize &size, wxArrayString &excList)
+//------------------------------------------------------------------------------
+/**
+ * @return Available Subscriber ListBox pointer
+ */
+//------------------------------------------------------------------------------
+wxCheckListBox* GuiItemManager::GetSubscriberCheckListBox(wxWindow *parent, wxWindowID id,
+                                                          const wxSize &size,
+                                                          wxArrayString *excList)
+{
+   wxString emptyList[] = {};
+   wxCheckListBox *checkListBox =
+      new wxCheckListBox(parent, id, wxDefaultPosition, size, 0,
+                         emptyList, wxLB_SINGLE|wxLB_SORT);
+
+   if (excList != NULL && excList->GetCount() > 0)
+   {
+      for (int i=0; i<theNumSubscriber; i++)
+      {
+         if (excList->Index(theSubscriberList[i]) == wxNOT_FOUND)
+            checkListBox->Append(theSubscriberList[i]);
+      }
+   }
+   else
+   {
+      for (int i=0; i<theNumSubscriber; i++)
+         checkListBox->Append(theSubscriberList[i]);
+   }
+   
+   //---------------------------------------------
+   // register to update list
+   //---------------------------------------------
+   mSubscriberCLBList.push_back(checkListBox);
+   mSubscriberExcList.push_back(excList);
+   
+   checkListBox->SetSelection(0);
+   return checkListBox;
+}
+
+
+//------------------------------------------------------------------------------
+// wxCheckListBox* GetSpacecraftCheckListBox(wxWindow *parent, wxWindowID id,
+//                                           const wxSize &size, wxArrayString &excList)
+//------------------------------------------------------------------------------
+/**
+ * @return Available Spacecraft ListBox pointer
+ */
+//------------------------------------------------------------------------------
+wxCheckListBox* GuiItemManager::GetSpacecraftCheckListBox(wxWindow *parent, wxWindowID id,
+                                                          const wxSize &size,
+                                                          wxArrayString *excList)
+{
+   wxString emptyList[] = {};
+   wxCheckListBox *checkListBox =
+      new wxCheckListBox(parent, id, wxDefaultPosition, size, 0,
+                         emptyList, wxLB_SINGLE|wxLB_SORT);
+
+   if (excList != NULL && excList->GetCount() > 0)
+   {
+      for (int i=0; i<theNumSpacecraft; i++)
+      {
+         if (excList->Index(theSpacecraftList[i]) == wxNOT_FOUND)
+            checkListBox->Append(theSpacecraftList[i]);
+      }
+   }
+   else
+   {
+      for (int i=0; i<theNumSpacecraft; i++)
+         checkListBox->Append(theSpacecraftList[i]);
+   }
+   
+   //---------------------------------------------
+   // register to update list
+   //---------------------------------------------
+   mSpacecraftCLBList.push_back(checkListBox);
+   mSpacecraftExcList.push_back(excList);
+   
+   checkListBox->SetSelection(0);
+   return checkListBox;
+}
+
+
+//------------------------------------------------------------------------------
+// wxCheckListBox* GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
+//                                          const wxSize &size, wxArrayString &excList)
+//------------------------------------------------------------------------------
+/**
+ * @return Available All Object ListBox pointer.
+ */
+//------------------------------------------------------------------------------
+wxCheckListBox*
+GuiItemManager::GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
+                                         const wxSize &size, wxArrayString *excList)
+{
+   wxString emptyList[] = {};
+   wxCheckListBox *checkListBox =
+      new wxCheckListBox(parent, id, wxDefaultPosition, size, 0,
+                         emptyList, wxLB_SINGLE|wxLB_SORT);
+   
+   //---------------------------------------------
+   // Get all object list
+   //---------------------------------------------
+   
+   if (excList != NULL && excList->GetCount() > 0)
+   {
+      for (int i=0; i<theNumAllObject; i++)
+      {
+         if (excList->Index(theAllObjectList[i]) == wxNOT_FOUND)
+            checkListBox->Append(theAllObjectList[i]);
+      }
+   }
+   else
+   {
+      for (int i=0; i<theNumAllObject; i++)
+         checkListBox->Append(theAllObjectList[i]);
+   }
+   
+   
+   //---------------------------------------------
+   // register to update list
+   //---------------------------------------------
+   mAllObjectCLBList.push_back(checkListBox);
+   mAllObjectExcList.push_back(excList);
+   
+   checkListBox->SetSelection(0);
+   return checkListBox;
+}
+
+
 // ListBox
 //------------------------------------------------------------------------------
 // wxListBox* GetSpacePointListBox(wxWindow *parent, wxWindowID id,
@@ -1164,95 +1310,6 @@ wxListBox* GuiItemManager::GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
    
    spacecraftListBox->SetSelection(0);
    return spacecraftListBox;
-}
-
-
-//------------------------------------------------------------------------------
-// wxCheckListBox* GetSpacecraftCheckListBox(wxWindow *parent, wxWindowID id,
-//                                           const wxSize &size, wxArrayString &excList)
-//------------------------------------------------------------------------------
-/**
- * @return Available Spacecraft ListBox pointer
- */
-//------------------------------------------------------------------------------
-wxCheckListBox* GuiItemManager::GetSpacecraftCheckListBox(wxWindow *parent, wxWindowID id,
-                                                          const wxSize &size,
-                                                          wxArrayString *excList)
-{
-   wxString emptyList[] = {};
-   wxCheckListBox *checkListBox =
-      new wxCheckListBox(parent, id, wxDefaultPosition, size, 0,
-                         emptyList, wxLB_SINGLE|wxLB_SORT);
-
-   if (excList != NULL && excList->GetCount() > 0)
-   {
-      for (int i=0; i<theNumSpacecraft; i++)
-      {
-         if (excList->Index(theSpacecraftList[i]) == wxNOT_FOUND)
-            checkListBox->Append(theSpacecraftList[i]);
-      }
-   }
-   else
-   {
-      for (int i=0; i<theNumSpacecraft; i++)
-         checkListBox->Append(theSpacecraftList[i]);
-   }
-   
-   //---------------------------------------------
-   // register to update list
-   //---------------------------------------------
-   mSpacecraftCLBList.push_back(checkListBox);
-   mSpacecraftExcList.push_back(excList);
-   
-   checkListBox->SetSelection(0);
-   return checkListBox;
-}
-
-
-//------------------------------------------------------------------------------
-// wxCheckListBox* GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
-//                                          const wxSize &size, wxArrayString &excList)
-//------------------------------------------------------------------------------
-/**
- * @return Available All Object ListBox pointer.
- */
-//------------------------------------------------------------------------------
-wxCheckListBox*
-GuiItemManager::GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
-                                         const wxSize &size, wxArrayString *excList)
-{
-   wxString emptyList[] = {};
-   wxCheckListBox *checkListBox =
-      new wxCheckListBox(parent, id, wxDefaultPosition, size, 0,
-                         emptyList, wxLB_SINGLE|wxLB_SORT);
-   
-   //---------------------------------------------
-   // Get all object list
-   //---------------------------------------------
-   
-   if (excList != NULL && excList->GetCount() > 0)
-   {
-      for (int i=0; i<theNumAllObject; i++)
-      {
-         if (excList->Index(theAllObjectList[i]) == wxNOT_FOUND)
-            checkListBox->Append(theAllObjectList[i]);
-      }
-   }
-   else
-   {
-      for (int i=0; i<theNumAllObject; i++)
-         checkListBox->Append(theAllObjectList[i]);
-   }
-   
-   
-   //---------------------------------------------
-   // register to update list
-   //---------------------------------------------
-   mAllObjectCLBList.push_back(checkListBox);
-   mAllObjectExcList.push_back(excList);
-   
-   checkListBox->SetSelection(0);
-   return checkListBox;
 }
 
 
@@ -3112,6 +3169,44 @@ void GuiItemManager::UpdateSubscriberList()
       (*pos)->Append(functionNames);
       
       (*pos)->SetSelection(sel);
+   }
+   
+   //-------------------------------------------------------
+   // update registered Subscriber CheckListBox
+   //-------------------------------------------------------
+   for (std::vector<wxCheckListBox*>::iterator pos = mSubscriberCLBList.begin();
+        pos != mSubscriberCLBList.end(); ++pos)
+   {
+      int guiCount = (*pos)->GetCount();
+      bool found = false;
+      wxString item;
+      
+      // if deleted item remove from the list
+      for (int i=0; i<guiCount; i++)
+      {
+         found = false;
+         for (int j=0; j<theNumSubscriber; j++)
+         {
+            item = (*pos)->GetString(i);
+            if (item == theSubscriberList[j])
+            {
+               found = true;
+               break;
+            }
+         }
+         
+         if (!found)
+         {
+            (*pos)->Delete(i);
+            guiCount--;
+         }
+      }
+      
+      // if new item add to the list
+      for (int i=0; i<theNumSubscriber; i++)
+         if ((*pos)->FindString(theSubscriberList[i]) == wxNOT_FOUND)
+            (*pos)->Append(theSubscriberList[i]);
+      
    }
 }
 
