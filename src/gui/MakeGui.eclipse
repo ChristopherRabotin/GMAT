@@ -120,6 +120,7 @@ OBJECTS = \
     command/EndFiniteBurnPanel.o \
     command/ManeuverPanel.o \
     command/PropagatePanel.o \
+    command/ReportPanel.o \
     command/SavePanel.o \
     command/ScriptEventPanel.o \
     command/TargetPanel.o \
