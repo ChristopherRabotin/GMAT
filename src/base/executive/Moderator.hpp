@@ -295,7 +295,7 @@ private:
    Burn* GetDefaultBurn(const std::string &type);
    Hardware* GetDefaultHardware(const std::string &type);
    Solver* GetDefaultSolver();
-   Subscriber* GetDefaultSubscriber();
+   Subscriber* GetDefaultSubscriber(const std::string &type);
    StopCondition* CreateDefaultStopCondition();
    Parameter* GetDefaultX();
    Parameter* GetDefaultY();

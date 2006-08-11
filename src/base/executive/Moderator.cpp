@@ -59,7 +59,6 @@
 //#define DEBUG_PLANETARY_FILE 1
 //#define DEBUG_MULTI_STOP 2
 //#define DEBUG_USER_INTERRUPT 1
-//#define DEBUG_ACTION_REMOVE 1
 //#define DEBUG_LOOKUP_RESOURCE 1
 //#define DEBUG_SEQUENCE_CLEARING 1
 //#define DEBUG_CONFIG 1
@@ -2376,86 +2375,90 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
    }
    
    Integer id;
-   
-   if (type == "Toggle")
-   {
-      cmd->SetStringParameter(cmd->GetParameterID("Subscriber"),
-                              GetDefaultSubscriber()->GetName());
-   }
-   else if (type == "Propagate")
-   {
 
-      cmd->SetObject(GetDefaultPropSetup()->GetName(), Gmat::PROP_SETUP);
+   try
+   {
+      if (type == "Toggle")
+      {
+         cmd->SetStringParameter(cmd->GetParameterID("Subscriber"),
+                                 GetDefaultSubscriber("OpenGLPlot")->GetName());
+      }
+      else if (type == "Report")
+      {
+         Subscriber *sub = GetDefaultSubscriber("ReportFile");
+         cmd->SetRefObject(sub, Gmat::SUBSCRIBER, sub->GetName(), 0);
+      }
+      else if (type == "Propagate")
+      {
+         cmd->SetObject(GetDefaultPropSetup()->GetName(), Gmat::PROP_SETUP);
 
-      StringArray &formList = GetListOfConfiguredItems(Gmat::FORMATION);
+         StringArray &formList = GetListOfConfiguredItems(Gmat::FORMATION);
       
-      // if formation exist, set first formation to command
-      if (formList.size() > 0)
-         cmd->SetObject(formList[0], Gmat::SPACECRAFT);
-      else
-         cmd->SetObject(GetDefaultSpacecraft()->GetName(), Gmat::SPACECRAFT);
+         // if formation exist, set first formation to command
+         if (formList.size() > 0)
+            cmd->SetObject(formList[0], Gmat::SPACECRAFT);
+         else
+            cmd->SetObject(GetDefaultSpacecraft()->GetName(), Gmat::SPACECRAFT);
       
-      cmd->SetRefObject(CreateDefaultStopCondition(), Gmat::STOP_CONDITION, "", 0);
-      cmd->SetSolarSystem(theSolarSystemInUse);
-   }
-   else if (type == "Maneuver")
-   {
-      // set burn
-      id = cmd->GetParameterID("Burn");
-      cmd->SetStringParameter(id, GetDefaultBurn("ImpulsiveBurn")->GetName());
-      
-      // set spacecraft
-      id = cmd->GetParameterID("Spacecraft");
-      cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName());
-   }
-   else if (type == "BeginFiniteBurn")
-   {
-      // set burn
-      cmd->SetRefObjectName(Gmat::BURN, GetDefaultBurn("FiniteBurn")->GetName());
-
-      // set spacecraft
-      cmd->SetRefObjectName(Gmat::SPACECRAFT, GetDefaultSpacecraft()->GetName());
-   }
-   else if (type == "EndFiniteBurn")
-   {
-      // get burn name of BeginFiniteBurn
-      if (refCmd)
+         cmd->SetRefObject(CreateDefaultStopCondition(), Gmat::STOP_CONDITION, "", 0);
+         cmd->SetSolarSystem(theSolarSystemInUse);
+      }
+      else if (type == "Maneuver")
       {
          // set burn
-         cmd->SetRefObjectName(Gmat::BURN, refCmd->GetRefObjectName(Gmat::BURN));
-         
+         id = cmd->GetParameterID("Burn");
+         cmd->SetStringParameter(id, GetDefaultBurn("ImpulsiveBurn")->GetName());
+      
          // set spacecraft
-         StringArray scNames = refCmd->GetRefObjectNameArray(Gmat::SPACECRAFT);
-         for (UnsignedInt i=0; i<scNames.size(); i++)
-            cmd->SetRefObjectName(Gmat::SPACECRAFT, scNames[i]);
+         id = cmd->GetParameterID("Spacecraft");
+         cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName());
       }
-      else
+      else if (type == "BeginFiniteBurn")
       {
          // set burn
          cmd->SetRefObjectName(Gmat::BURN, GetDefaultBurn("FiniteBurn")->GetName());
-         
+
          // set spacecraft
          cmd->SetRefObjectName(Gmat::SPACECRAFT, GetDefaultSpacecraft()->GetName());
       }
-   }
-   else if (type == "Target")
-   {
-      // set solver
-      Solver *solver = CreateSolver("DifferentialCorrector",
-                                    GetDefaultSolver()->GetName());
-      id = cmd->GetParameterID("Targeter");
-      cmd->SetStringParameter(id, solver->GetName());
-   }
-   else if (type == "Vary")
-   {
-      // set solver
-      Solver *solver = CreateSolver("DifferentialCorrector",
-                                    GetDefaultSolver()->GetName());
-      id = cmd->GetParameterID("SolverName");
-      cmd->SetStringParameter(id, solver->GetName());
-      
-      try
+      else if (type == "EndFiniteBurn")
       {
+         // get burn name of BeginFiniteBurn
+         if (refCmd)
+         {
+            // set burn
+            cmd->SetRefObjectName(Gmat::BURN, refCmd->GetRefObjectName(Gmat::BURN));
+         
+            // set spacecraft
+            StringArray scNames = refCmd->GetRefObjectNameArray(Gmat::SPACECRAFT);
+            for (UnsignedInt i=0; i<scNames.size(); i++)
+               cmd->SetRefObjectName(Gmat::SPACECRAFT, scNames[i]);
+         }
+         else
+         {
+            // set burn
+            cmd->SetRefObjectName(Gmat::BURN, GetDefaultBurn("FiniteBurn")->GetName());
+         
+            // set spacecraft
+            cmd->SetRefObjectName(Gmat::SPACECRAFT, GetDefaultSpacecraft()->GetName());
+         }
+      }
+      else if (type == "Target")
+      {
+         // set solver
+         Solver *solver = CreateSolver("DifferentialCorrector",
+                                       GetDefaultSolver()->GetName());
+         id = cmd->GetParameterID("Targeter");
+         cmd->SetStringParameter(id, solver->GetName());
+      }
+      else if (type == "Vary")
+      {
+         // set solver
+         Solver *solver = CreateSolver("DifferentialCorrector",
+                                       GetDefaultSolver()->GetName());
+         id = cmd->GetParameterID("SolverName");
+         cmd->SetStringParameter(id, solver->GetName());
+      
          // set variable parameter
          id = cmd->GetParameterID("Variable");
          cmd->SetStringParameter(id, GetDefaultBurn("ImpulsiveBurn")->GetName() + ".V");
@@ -2475,25 +2478,17 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          id = cmd->GetParameterID("MaximumChange");
          cmd->SetRealParameter(id, 0.2);
       }
-      catch (BaseException &e)
+      else if (type == "Achieve")
       {
-         MessageInterface::ShowMessage(e.GetMessage());
-         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
-      }
-   }
-   else if (type == "Achieve")
-   {
-      // Get default solver
-      Solver *solver = GetDefaultSolver();
+         // Get default solver
+         Solver *solver = GetDefaultSolver();
 
-      #if DEBUG_DEFAULT_COMMAND
-      MessageInterface::ShowMessage
-         ("Moderator::CreateDefaultCommand() cmd=%s, solver=%s\n",
-          cmd->GetTypeName().c_str(), solver->GetTypeName().c_str());
-      #endif
-      
-      try
-      {
+         #if DEBUG_DEFAULT_COMMAND
+         MessageInterface::ShowMessage
+            ("Moderator::CreateDefaultCommand() cmd=%s, solver=%s\n",
+             cmd->GetTypeName().c_str(), solver->GetTypeName().c_str());
+         #endif
+         
          id = cmd->GetParameterID("TargeterName");
          cmd->SetStringParameter(id, solver->GetName());
          
@@ -2507,11 +2502,11 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          id = cmd->GetParameterID("Tolerance");
          cmd->SetRealParameter(id, 0.1);
       }
-      catch (BaseException &e)
-      {
-         MessageInterface::ShowMessage(e.GetMessage());
-         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
-      }
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage(e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
    }
    
    #if DEBUG_DEFAULT_COMMAND
@@ -3965,31 +3960,8 @@ void Moderator::CreateDefaultMission()
       
       // Subscribers
       // OpenGLPlot
-      Subscriber *sub;
-      sub = CreateSubscriber("OpenGLPlot", "DefaultOpenGL");
-      sub->SetStringParameter("Add", "DefaultSC");
-      sub->SetStringParameter("Add", "Earth");
-      sub->SetStringParameter("CoordinateSystem", "EarthMJ2000Eq");
-      
-      #if DEBUG_ACTION_REMOVE
-         sub->SetStringParameter("Add", "Spacecraft1");
-         sub->TakeAction("Remove", "Spacecraft1");
-      #endif
-         
-      sub->Activate(true);
-      
-      #if DEBUG_ACTION_REMOVE
-      // XYPlot
-      sub = CreateSubscriber("XYPlot", "DefaultXYPlot"); 
-      sub->SetStringParameter("IndVar", "DefaultSC.A1ModJulian");
-      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.X", 0);
-      
-      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Y", 1);
-      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Z", 2);
-      sub->TakeAction("Remove", "DefaultSC.EarthMJ2000Eq.Y");
-      sub->Activate(true);
-      #endif
-      
+      GetDefaultSubscriber("OpenGLPlot");
+
       #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->default Subscribers created\n");
       #endif
@@ -4241,21 +4213,44 @@ Hardware* Moderator::GetDefaultHardware(const std::string &type)
 
 
 //------------------------------------------------------------------------------
-// Subscriber* GetDefaultSubscriber()
+// Subscriber* GetDefaultSubscriber(const std::string &type)
 //------------------------------------------------------------------------------
-Subscriber* Moderator::GetDefaultSubscriber()
+Subscriber* Moderator::GetDefaultSubscriber(const std::string &type)
 {
    StringArray &configList = GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+   int subSize = configList.size();
+   Subscriber *sub = NULL;
    
-   if (configList.size() > 0)
+   for (int i=0; i<subSize; i++)
    {
-      // return 1st Subscriber from the list
-      return GetSubscriber(configList[0]);
+      sub = (Subscriber*)GetConfiguredItem(configList[i]);
+      if (sub->GetTypeName() == type)
+         return sub;
    }
-   else
+   
+   if (type == "OpenGLPlot")
+   {
+      // create default OpenGL
+      sub = CreateSubscriber("OpenGLPlot", "DefaultOpenGL");
+      sub->SetStringParameter("Add", "DefaultSC");
+      sub->SetStringParameter("Add", "Earth");
+      sub->SetStringParameter("CoordinateSystem", "EarthMJ2000Eq");
+      sub->Activate(true);
+   }
+   else if (type == "XYPlot")
+   {
+      // create default XYPlot
+      sub = CreateSubscriber("XYPlot", "DefaultXYPlot"); 
+      sub->SetStringParameter("IndVar", "DefaultSC.A1ModJulian");
+      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.X", 0);      
+      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Y", 1);
+      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Z", 2);
+      sub->Activate(true);
+   }
+   else if (type == "ReportFile")
    {
       // create default ReportFile
-      Subscriber *sub = CreateSubscriber("ReportFile", "DefaultReportFile");
+      sub = CreateSubscriber("ReportFile", "DefaultReportFile");
       std::string scName = GetDefaultSpacecraft()->GetName();
       sub->SetStringParameter(sub->GetParameterID("Filename"),
                               "DefaultReportFile.txt");
@@ -4267,8 +4262,15 @@ Subscriber* Moderator::GetDefaultSubscriber()
       sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.VY");
       sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.VZ");
       sub->Activate(true);
-      return sub;
    }
+   else
+   {
+      MessageInterface::ShowMessage
+         ("*** ERROR *** GetDefaultSubscriber() Undefined subscriber type: %s\n",
+          type.c_str());
+   }
+
+   return sub;
 }
 
 //------------------------------------------------------------------------------
