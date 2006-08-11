@@ -115,6 +115,92 @@ Report& Report::operator=(const Report &rep)
 
 
 //------------------------------------------------------------------------------
+// virtual bool TakeAction(const std::string &action,  
+//                         const std::string &actionData = "");
+//------------------------------------------------------------------------------
+/**
+ * This method performs action.
+ *
+ * @param <action> action to perform
+ * @param <actionData> action data associated with action
+ * @return true if action successfully performed
+ *
+ */
+//------------------------------------------------------------------------------
+bool Report::TakeAction(const std::string &action, const std::string &actionData)
+{
+   #if DEBUG_TAKE_ACTION
+   MessageInterface::ShowMessage
+      ("Report::TakeAction() action=%s, actionData=%s\n",
+       action.c_str(), actionData.c_str());
+   #endif
+   
+   if (action == "Clear")
+   {
+      if (reporter)
+      {
+         reporter->TakeAction("Clear");
+         return true;
+      }
+   }
+
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool GetRefObjectName(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the reference object names.
+ * 
+ * @param type The type of the reference object.
+ * 
+ * @return the name of the object.
+ */
+//------------------------------------------------------------------------------
+std::string Report::GetRefObjectName(const Gmat::ObjectType type) const
+{
+   switch (type)
+   {
+   case Gmat::SUBSCRIBER:
+      return rfName;
+      
+   case Gmat::PARAMETER:
+      if (parmNames.size() == 0)
+         return "";
+      else
+         return parmNames[0];
+   default:
+      return GmatCommand::GetRefObjectName(type);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Accesses arrays of names for referenced objects.
+ * 
+ * @param type Type of object requested.
+ * 
+ * @return the StringArray containing the referenced object names.
+ */
+//------------------------------------------------------------------------------
+const StringArray& Report::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   switch (type)
+   {
+   case Gmat::PARAMETER:
+      return parmNames;
+   default:
+      return GmatCommand::GetRefObjectNameArray(type);
+   }
+}
+
+
+//------------------------------------------------------------------------------
 //  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //                    const std::string &name, const Integer index)
 //------------------------------------------------------------------------------
@@ -146,25 +232,27 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          obj->GetTypeName().c_str(), obj->GetName().c_str(), index);
    #endif
 
-   if (index == 0)
+   if (type == Gmat::SUBSCRIBER)
    {
       if (obj->GetTypeName() != "ReportFile")
          throw CommandException("Report command must have a ReportFile name "
-            "as the first parameter.");
+            "as the first parameter.\n");
+      
       rfName = name;
       // Tell the ReportFile object that a command has requested its services
       obj->TakeAction("PassedToReport");
       reporter = (ReportFile*)obj;
    }
-   else 
+   else if (type == Gmat::PARAMETER)
    {
       #ifdef DEBUG_REPORTING
          MessageInterface::ShowMessage("   Received %s as a Parameter\n", name.c_str());
       #endif
+         
       // All remaining refs should point to Parameter objects
       if (!obj->IsOfType("Parameter"))
          throw CommandException("Report command can only have Parameters "
-            "in the list of reported values.");
+            "in the list of reported values.\n");
       
       // Handle Array indexing
       Integer row, col;
@@ -178,7 +266,11 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       parmCols.push_back(col);
       
       // For compare report column header
-      reporter->AddParameterForTitleOnly(name);
+      if (reporter)
+         reporter->AddParameterForTitleOnly(name);
+      else
+         throw CommandException("Report command has undefined ReportFile object.\n");
+      
    }
    
    #ifdef DEBUG_REPORTING

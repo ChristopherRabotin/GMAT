@@ -41,22 +41,26 @@ class GMAT_API Report : public GmatCommand
 public:
    Report();
    virtual ~Report();
-   
    Report(const Report &rep);
-   Report&           operator=(const Report &rep);
+   Report& operator=(const Report &rep);
    
-   virtual bool      RenameRefObject(const Gmat::ObjectType type,
-                                     const std::string &oldName,
-                                     const std::string &newName);
-   virtual bool      SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                                  const std::string &name,
-                                  const Integer index);
-
-   virtual GmatBase* Clone() const;
+   virtual bool        TakeAction(const std::string &action,  
+                                  const std::string &actionData = "");
+   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual const StringArray&
+                       GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool        RenameRefObject(const Gmat::ObjectType type,
+                                       const std::string &oldName,
+                                       const std::string &newName);
+   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                    const std::string &name,
+                                    const Integer index);
+   
+   virtual GmatBase*   Clone() const;
    virtual const std::string&
-                     GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
-                                         const std::string &prefix = "",
-                                         const std::string &useName = "");
+                       GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                                           const std::string &prefix = "",
+                                           const std::string &useName = "");
    
    bool              Initialize();
    virtual bool      Execute();
