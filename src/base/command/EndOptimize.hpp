@@ -1,5 +1,24 @@
-#ifndef ENDOPTIMIZE_HPP_
-#define ENDOPTIMIZE_HPP_
+//$Header$
+//------------------------------------------------------------------------------
+//                                EndOptimize 
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool.
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number NNG04CC06P
+//
+// Author:  Daniel Hunter/GSFC/MAB (CoOp)
+// Created: 2006.07.20
+//
+/**
+ * Declaration for the EndOptimize command class
+ */
+//------------------------------------------------------------------------------
+
+#ifndef EndOptimize_hpp
+#define EndOptimize_hpp
 
 #include "GmatCommand.hpp"
 
@@ -8,10 +27,9 @@ class GMAT_API EndOptimize : public GmatCommand
 {
 public:
    EndOptimize();
+   EndOptimize(const EndOptimize& eo);
+   EndOptimize&            operator=(const EndOptimize& eo);
    virtual ~EndOptimize();
-    
-   EndOptimize(const EndOptimize& et);
-   EndOptimize&              operator=(const EndOptimize& et);
     
    virtual bool            Initialize();
    virtual bool            Execute();
@@ -24,7 +42,20 @@ public:
                            GetGeneratingString(Gmat::WriteMode mode,
                                                const std::string &prefix,
                                                const std::string &useName);
+protected:
+
+   enum
+   {
+      EndOptimizeParamCount = GmatCommandParamCount,
+   };
+
+   // save for possible later use
+   static const std::string
+          PARAMETER_TEXT[EndOptimizeParamCount - GmatCommandParamCount];
+   
+   static const Gmat::ParameterType
+          PARAMETER_TYPE[EndOptimizeParamCount - GmatCommandParamCount];
 };
 
 
-#endif /*ENDOPTIMIZE_HPP_*/
+#endif /*EndOptimize_hpp*/

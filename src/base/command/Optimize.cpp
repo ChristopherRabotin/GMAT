@@ -1,38 +1,79 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                                Optimize 
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool.
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number NNG04CC06P
+//
+// Author:  Daniel Hunter/GSFC/MAB (CoOp)
+// Created: 2006.07.20
+//
+/**
+ * Implementation for the Optimize command class
+ */
+//------------------------------------------------------------------------------
 
 #include "Optimize.hpp"
 
+//#define DEBUG_OPTIMIZER_PARSING
+//#define DEBUG_OPTIMIZE_COMMANDS
+//#define DEBUG_OPTIMIZER
+
+//------------------------------------------------------------------------------
+// static data
+//------------------------------------------------------------------------------
+const std::string
+Optimize::PARAMETER_TEXT[OptimizeParamCount - BranchCommandParamCount] =
+{
+   "OptimizerName",
+   "OptimizerConverged",
+};
+
+const Gmat::ParameterType
+Optimize::PARAMETER_TYPE[OptimizeParamCount - BranchCommandParamCount] =
+{
+   Gmat::STRING_TYPE,
+   Gmat::BOOLEAN_TYPE,
+};
+
+//------------------------------------------------------------------------------
+// public methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// constructor
+//------------------------------------------------------------------------------
 Optimize::Optimize() :
    BranchCommand      ("Optimize"),
    optimizerName       (""),
    optimizer           (NULL),
    optimizerConverged  (false),
-   optimizerNameID     (parameterCount),
-   OptimizerConvergedID(parameterCount+1),
    optimizerInDebugMode(false)
 {
-	MessageInterface::ShowMessage("Optimize: Default Constructor\n");
-   parameterCount += 2;
+   parameterCount = OptimizeParamCount;
 }
 
-Optimize::~Optimize()
-{
-   if (optimizer)
-      delete optimizer;
-}
-
+//------------------------------------------------------------------------------
+// copy constructor
+//------------------------------------------------------------------------------
 Optimize::Optimize(const Optimize& o) :
-   BranchCommand       (o),
+   BranchCommand        (o),
    optimizerName        (o.optimizerName),
    optimizer            (NULL),
    optimizerConverged   (false),
-   optimizerNameID      (o.optimizerNameID),
-   OptimizerConvergedID (o.OptimizerConvergedID),
    optimizerInDebugMode (o.optimizerInDebugMode)
 {
-	parameterCount = o.parameterCount;
+	//parameterCount = OptimizeParamCount;  // this is set in GmatBase copy constructor
    localStore.clear();
 }
 
+//------------------------------------------------------------------------------
+// operator =
+//------------------------------------------------------------------------------
 Optimize& Optimize::operator=(const Optimize& o)
 {
    if (this == &o)
@@ -43,17 +84,27 @@ Optimize& Optimize::operator=(const Optimize& o)
    optimizerName        = o.optimizerName;
    optimizer            = NULL;
    optimizerConverged   = false;
-   optimizerNameID      = o.optimizerNameID;
-   OptimizerConvergedID = o.OptimizerConvergedID;
    optimizerInDebugMode = o.optimizerInDebugMode;
    localStore.clear();
 
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// destructor
+//------------------------------------------------------------------------------
+Optimize::~Optimize()
+{
+   if (optimizer)
+      delete optimizer;
+}
+
+
+//------------------------------------------------------------------------------
+// Append
+//------------------------------------------------------------------------------
 bool Optimize::Append(GmatCommand *cmd)
 {
-	MessageInterface::ShowMessage("Optimize: Append\n");
    #ifdef DEBUG_OPTIMIZER_PARSING
        MessageInterface::ShowMessage("\nOptimize::Append received \"%s\" command",
                                      cmd->GetTypeName().c_str());
@@ -63,8 +114,10 @@ bool Optimize::Append(GmatCommand *cmd)
         return false;
     
    // If at the end of a optimizer branch, point that end back to this comand.
-   if (cmd->GetTypeName() == "EndOptimize") {
-      if ((nestLevel == 0) && (branchToFill != -1))  {
+   if (cmd->GetTypeName() == "EndOptimize") 
+   {
+      if ((nestLevel == 0) && (branchToFill != -1))  
+      {
          cmd->Append(this);
          // Optimizer loop is complete; -1 pops to the next higher sequence.
          branchToFill = -1;
@@ -89,22 +142,31 @@ bool Optimize::Append(GmatCommand *cmd)
    return true;
 }
 
+//------------------------------------------------------------------------------
+// Clone
+//------------------------------------------------------------------------------
 GmatBase* Optimize::Clone() const
 {
    return (new Optimize(*this));
 }
 
+//------------------------------------------------------------------------------
+// GetGeneratingString
+//------------------------------------------------------------------------------
 const std::string& Optimize::GetGeneratingString(Gmat::WriteMode mode,
-                                               const std::string &prefix,
-                                               const std::string &useName)
+                                                 const std::string &prefix,
+                                                 const std::string &useName)
 {
    generatingString = "Optimize " + optimizerName + ";";
    return BranchCommand::GetGeneratingString(mode, prefix, useName);
 }
 
+//------------------------------------------------------------------------------
+// RenameRefObject
+//------------------------------------------------------------------------------
 bool Optimize::RenameRefObject(const Gmat::ObjectType type,
-                             const std::string &oldName,
-                             const std::string &newName)
+                               const std::string &oldName,
+                               const std::string &newName)
 {
    if (type == Gmat::SOLVER)
    {
@@ -115,55 +177,68 @@ bool Optimize::RenameRefObject(const Gmat::ObjectType type,
    return true;
 }
 
+//------------------------------------------------------------------------------
+// GetParameterText
+//------------------------------------------------------------------------------
 std::string Optimize::GetParameterText(const Integer id) const
 {
-   if (id == optimizerNameID)
-      return "Optimizer";
+   if (id >= BranchCommandParamCount && id < OptimizeParamCount)
+      return PARAMETER_TEXT[id - BranchCommandParamCount];
     
    return BranchCommand::GetParameterText(id);
 }
 
+//------------------------------------------------------------------------------
+// GetParameterID
+//------------------------------------------------------------------------------
 Integer Optimize::GetParameterID(const std::string &str) const
 {
-   if (str == "Optimizer")
-      return optimizerNameID;
-   if (str == "OptimizerConverged")
-      return OptimizerConvergedID;
+   for (Integer i = BranchCommandParamCount; i < OptimizeParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - BranchCommandParamCount])
+         return i;
+   }
     
    return BranchCommand::GetParameterID(str);
 }
 
+//------------------------------------------------------------------------------
+// GetParameterType
+//------------------------------------------------------------------------------
 Gmat::ParameterType Optimize::GetParameterType(const Integer id) const
 {
-   if (id == optimizerNameID)
-      return Gmat::STRING_TYPE;
-   if (id == OptimizerConvergedID)
-      return Gmat::BOOLEAN_TYPE;
+   if (id >= BranchCommandParamCount && id < OptimizeParamCount)
+      return PARAMETER_TYPE[id - BranchCommandParamCount];
     
    return BranchCommand::GetParameterType(id);
 }
 
+//------------------------------------------------------------------------------
+// GetParameterTypeString
+//------------------------------------------------------------------------------
 std::string Optimize::GetParameterTypeString(const Integer id) const
-{
-   if (id == optimizerNameID)
-      return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-   if (id == OptimizerConvergedID)
-      return PARAM_TYPE_STRING[Gmat::BOOLEAN_TYPE];
-    
-   return BranchCommand::GetParameterTypeString(id);
+{    
+   return BranchCommand::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
+//------------------------------------------------------------------------------
+// GetStringParameter
+//------------------------------------------------------------------------------
 std::string Optimize::GetStringParameter(const Integer id) const
 {
-   if (id == optimizerNameID)
+   if (id == OPTIMIZER_NAME)
       return optimizerName;
     
    return BranchCommand::GetStringParameter(id);
 }
 
+//------------------------------------------------------------------------------
+// SetStringParameter
+//------------------------------------------------------------------------------
 bool Optimize::SetStringParameter(const Integer id, const std::string &value)
 {
-   if (id == optimizerNameID) {
+   if (id == OPTIMIZER_NAME) 
+   {
       optimizerName = value;
       return true;
    }
@@ -171,14 +246,20 @@ bool Optimize::SetStringParameter(const Integer id, const std::string &value)
    return BranchCommand::SetStringParameter(id, value);
 }
 
+//------------------------------------------------------------------------------
+// GetBooleanParameter
+//------------------------------------------------------------------------------
 bool Optimize::GetBooleanParameter(const Integer id) const
 {
-   if (id == OptimizerConvergedID)
+   if (id == OPTIMIZER_CONVERGED)
       return optimizerConverged;
       
    return BranchCommand::GetBooleanParameter(id);
 }
 
+//------------------------------------------------------------------------------
+// GetRefObjectName
+//------------------------------------------------------------------------------
 std::string Optimize::GetRefObjectName(const Gmat::ObjectType type) const
 {
    if (type == Gmat::SOLVER)
@@ -186,21 +267,27 @@ std::string Optimize::GetRefObjectName(const Gmat::ObjectType type) const
    return BranchCommand::GetRefObjectName(type);
 }
 
+//------------------------------------------------------------------------------
+// SetRefObjectName
+//------------------------------------------------------------------------------
 bool Optimize::SetRefObjectName(const Gmat::ObjectType type,
                               const std::string &name)
 {
-   if (type == Gmat::SOLVER) {
+   if (type == Gmat::SOLVER) 
+   {
       optimizerName = name;
       return true;
    }
    return BranchCommand::SetRefObjectName(type, name);
 }
 
+//------------------------------------------------------------------------------
+// Initialize
+//------------------------------------------------------------------------------
 bool Optimize::Initialize()
 {
-	MessageInterface::ShowMessage("Optimize: Initialize\n");
-	
-	if (objectMap->find(optimizerName) == objectMap->end()) {
+	if (objectMap->find(optimizerName) == objectMap->end()) 
+   {
       std::string errorString = "Optimize command cannot find optimizer \"";
       errorString += optimizerName;
       errorString += "\"";
@@ -217,35 +304,37 @@ bool Optimize::Initialize()
     
    // Set the local copy of the optimizer on each node
    std::vector<GmatCommand*>::iterator node;
-   GmatCommand *current;
+   GmatCommand *currentCmd;
 
    for (node = branch.begin(); node != branch.end(); ++node)
    {
-      current = *node;
+      currentCmd = *node;
 
       #ifdef DEBUG_OPTIMIZE_COMMANDS
          Integer nodeNum = 0;
       #endif
-      while ((current != NULL) && (current != this))
+      while ((currentCmd != NULL) && (currentCmd != this))
       {
          #ifdef DEBUG_OPTIMIZE_COMMANDS
             MessageInterface::ShowMessage(
                "   Optimize Command %d:  %s\n", ++nodeNum, 
-               current->GetTypeName().c_str());       
+               currentCmd->GetTypeName().c_str());       
          #endif
-         if ((current->GetTypeName() == "Vary") || 
-             (current->GetTypeName() == "Minimize") ||
-             (current->GetTypeName() == "NonLinearConstraint"))
-            current->SetRefObject(optimizer, Gmat::SOLVER, optimizerName);
-         current = current->GetNext();
+         if ((currentCmd->GetTypeName() == "Vary") || 
+             (currentCmd->GetTypeName() == "Minimize") ||
+             (currentCmd->GetTypeName() == "NonLinearConstraint"))
+            currentCmd->SetRefObject(optimizer, Gmat::SOLVER, optimizerName);
+         currentCmd = currentCmd->GetNext();
       }
    }
 
    bool retval = BranchCommand::Initialize();
 
-   if (retval == true) {
-      // Optimizer specific initialization goes here:
-      if (objectMap->find(optimizerName) == objectMap->end()) {
+   if (retval == true) 
+   {
+      // Optimizer specific initialization goes here: // wcs - why is this done twice?
+      if (objectMap->find(optimizerName) == objectMap->end()) 
+      {
          std::string errorString = "Optimize command cannot find optimizer \"";
          errorString += optimizerName;
          errorString += "\"";
@@ -258,10 +347,11 @@ bool Optimize::Initialize()
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// Execute
+//------------------------------------------------------------------------------
 bool Optimize::Execute()
 {
-	MessageInterface::ShowMessage("Optimize: Execute\n");
-	
    bool retval = true;
 
    // Drive through the state machine.
@@ -277,7 +367,7 @@ bool Optimize::Execute()
    // Attempt to reset if recalled   
    if (commandComplete)
    {
-      commandComplete = false;
+      commandComplete  = false;
       commandExecuting = false;
    }  
 
@@ -290,7 +380,6 @@ bool Optimize::Execute()
 
       FreeLoopData();
       StoreLoopData();
-
 
       retval = BranchCommand::Execute();
 
@@ -315,12 +404,14 @@ bool Optimize::Execute()
    {
       GmatCommand *currentCmd;
    
-      switch (state) {
+      switch (state) 
+      {
          case Solver::INITIALIZING:
             // Finalize initialization of the optimizer data
             currentCmd = branch[0];
             optimizerConverged = false;
-            while (currentCmd != this)  {
+            while (currentCmd != this)  
+            {
                std::string type = currentCmd->GetTypeName();
                if ((type == "Optimize") || (type == "Vary") ||
                    (type == "Minimize") || (type == "NonLinearConstraint"))
@@ -332,7 +423,8 @@ bool Optimize::Execute()
                
          case Solver::NOMINAL:
             // Execute the nominal sequence
-            if (!commandComplete) {
+            if (!commandComplete) 
+            {
                branchExecuting = true;
                ResetLoopData();
             }
@@ -377,7 +469,8 @@ bool Optimize::Execute()
    {
       optimizer->AdvanceState();
 
-      if (optimizer->GetState() == Solver::FINISHED) {
+      if (optimizer->GetState() == Solver::FINISHED) 
+      {
          optimizerConverged = true;
       }
    }
@@ -396,6 +489,13 @@ bool Optimize::Execute()
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// protected methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// StoreLoopData
+//------------------------------------------------------------------------------
 void Optimize::StoreLoopData()
 {
    // Make local copies of all of the objects that may be affected by optimize
@@ -430,6 +530,9 @@ void Optimize::StoreLoopData()
    }
 }
 
+//------------------------------------------------------------------------------
+// ResetLoopData
+//------------------------------------------------------------------------------
 void Optimize::ResetLoopData()
 {
    Spacecraft *sc;
@@ -446,6 +549,9 @@ void Optimize::ResetLoopData()
    }
 }
 
+//------------------------------------------------------------------------------
+// FreeLoopData
+//------------------------------------------------------------------------------
 void Optimize::FreeLoopData()
 {
    GmatBase *obj;
