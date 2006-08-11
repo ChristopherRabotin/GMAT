@@ -182,7 +182,7 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    parmData             (NULL)
 {
    generatingString = c.generatingString;
-   parameterCount = GmatCommandParamCount;
+   //parameterCount = GmatCommandParamCount;  // wrong!
 }
 
 
@@ -1236,9 +1236,16 @@ void GmatCommand::RunComplete()
    
    // By default, just call RunComplete on the next command.
    if (next)
+   {
+   #ifdef DEBUG_COMMAND_DEALLOCATION
+      MessageInterface::ShowMessage("Next cmd is a %s\n", (next->GetTypeName()).c_str());
+      if (next->IsOfType("BranchEnd"))
+      MessageInterface::ShowMessage(".. and that cmd is a branchEnd!!!!!!!!! %s\n", (next->GetTypeName()).c_str());     
+   #endif
       // Branch command ends point back to start; this line prevents looping
       if (!next->IsOfType("BranchEnd"))
          next->RunComplete();
+   }
 }
 
 
