@@ -659,12 +659,33 @@ bool FminconOptimizer::OpenConnection()
       throw SolverException(
       "Error attempting to access GMAT interface (to MATLAB)");
 
+#if defined __USE_MATLAB__
    if (!MatlabInterface::Open())
       throw SolverException("Error attempting to access interface to MATLAB");
    
-   // check for availability of Optimization Toolbox here .......
-   sourceReady = true;
+   // check for availability of Optimization Toolbox (well, really
+   // just fmincon, but of course, its existence implies the existence of
+   // the entire toolbox) here 
+   std::string evalStr   = "doesitexist = exist(\'fmincon\');";
+   std::string resStr    = "doesitexist";
+   double      outArr[1];
+   MatlabInterface::EvalString(evalStr);
+   int OKint             = MatlabInterface::GetVariable(resStr, 1, outArr);
+
+   if (!OKint)
+      throw SolverException(
+            "Error determining existence of Optimization Toolbox");
+   if (outArr[0] > 0.0) // 2 means it is in the MATLAB path
+   {
+      sourceReady = true;
+   }
+   else
+   {
+      sourceReady = false;
+   }
    return true; 
+#endif
+return false;
 }
 
 void FminconOptimizer::CloseConnection()
