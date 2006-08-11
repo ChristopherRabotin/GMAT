@@ -137,6 +137,11 @@ bool Report::TakeAction(const std::string &action, const std::string &actionData
    
    if (action == "Clear")
    {
+      parmNames.clear();
+      actualParmNames.clear();
+      parmRows.clear();
+      parmCols.clear();
+      
       if (reporter)
       {
          reporter->TakeAction("Clear");
@@ -242,6 +247,7 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       // Tell the ReportFile object that a command has requested its services
       obj->TakeAction("PassedToReport");
       reporter = (ReportFile*)obj;
+      reporter->TakeAction("Clear");
    }
    else if (type == Gmat::PARAMETER)
    {
@@ -416,7 +422,7 @@ bool Report::Initialize()
             object->GetName());
       parms.push_back((Parameter *)object);
    }
-      
+   
    return true;
 }
 
@@ -433,6 +439,9 @@ bool Report::Initialize()
 //------------------------------------------------------------------------------
 bool Report::Execute()
 {
+   if (parms.empty())
+      throw CommandException("Report command has no parameters to write\n");
+   
    // Build the data as a string
    std::stringstream datastream;
    
