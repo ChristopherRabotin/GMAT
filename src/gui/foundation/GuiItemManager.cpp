@@ -484,6 +484,14 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
       if (pos != mSubscriberCBList.end())
          mSubscriberCBList.erase(pos);
    }
+   else if (type == "ReportFile")
+   {
+      std::vector<wxComboBox*>::iterator pos =
+         find(mReportFileCBList.begin(), mReportFileCBList.end(), cb);
+      
+      if (pos != mReportFileCBList.end())
+         mReportFileCBList.erase(pos);
+   }
 }
 
 
@@ -975,6 +983,35 @@ wxComboBox* GuiItemManager::GetSubscriberComboBox(wxWindow *parent, wxWindowID i
    mSubscriberCBList.push_back(subscriberComboBox);
    
    return subscriberComboBox;
+}
+
+
+//------------------------------------------------------------------------------
+// wxComboBox* GetReportFileComboBox(wxWindow *parent, wxWindowID id,
+//                                   const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return ReportFile combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox* GuiItemManager::GetReportFileComboBox(wxWindow *parent, wxWindowID id,
+                                                  const wxSize &size)
+{
+   // combo box for avaliable ReportFile
+   
+   wxComboBox *reportFileComboBox =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                     theNumReportFile, theReportFileList, wxCB_READONLY);
+   
+   // show first ReportFile
+   reportFileComboBox->SetSelection(0);
+   
+   //---------------------------------------------
+   // register for update
+   //---------------------------------------------
+   mReportFileCBList.push_back(reportFileComboBox);
+   
+   return reportFileComboBox;
 }
 
 
@@ -2621,7 +2658,7 @@ void GuiItemManager::UpdateCelestialBodyList()
    if (theNumCelesBody > MAX_CELES_BODY)
    {
       MessageInterface::ShowMessage
-         ("GuiItemManager::UpdateCelestialBodyList() GUI will handle up to %d bodies."
+         ("GuiItemManager::UpdateCelestialBodyList() GUI can handle up to %d bodies."
           "The number of bodies configured: %d\n", MAX_CELES_BODY, theNumCelesBody);
       theNumCelesBody = MAX_CELES_BODY;
    }
@@ -2666,7 +2703,7 @@ void GuiItemManager::UpdateCelestialPointList()
    if (theNumCelesPoint > MAX_CELES_POINT)
    {
       MessageInterface::ShowMessage
-         ("GuiItemManager::UpdateCelestialPointList() GUI will handle up to %d bodies."
+         ("GuiItemManager::UpdateCelestialPointList() GUI can handle up to %d bodies."
           "The number of bodies configured: %d\n", MAX_CELES_POINT,
           theNumCelesPoint);
       theNumCelesPoint = MAX_CELES_POINT;
@@ -2711,7 +2748,7 @@ void GuiItemManager::UpdateSpacePointList()
    if (theNumSpacePoint > MAX_SPACE_POINT)
    {
       MessageInterface::ShowMessage
-         ("GuiItemManager::UpdateSpacePointList() GUI will handle up to %d SpacePoints."
+         ("GuiItemManager::UpdateSpacePointList() GUI can handle up to %d SpacePoints."
           "The number of SpacePoints configured: %d\n", MAX_SPACE_POINT,
           theNumSpacePoint);
       theNumSpacePoint = MAX_SPACE_POINT;
@@ -2777,7 +2814,7 @@ void GuiItemManager::UpdateBurnList()
    if (numBurn > MAX_BURN)
    {
       MessageInterface::ShowMessage
-         ("GuiItemManager::UpdateBurnList() GUI will handle up to %d burns."
+         ("GuiItemManager::UpdateBurnList() GUI can handle up to %d burns."
           "The number of burns configured: %d\n", MAX_BURN, numBurn);
       numBurn = MAX_BURN;
    }
@@ -2864,7 +2901,7 @@ void GuiItemManager::UpdateCoordSystemList()
    if (theNumCoordSys > MAX_COORD_SYS)
    {
       MessageInterface::ShowMessage
-         ("GuiItemManager::UpdateCoordSystemList() GUI will handle up to %d coord. sys."
+         ("GuiItemManager::UpdateCoordSystemList() GUI can handle up to %d coord. sys."
           "The number of coord. sys. configured: %d\n", MAX_COORD_SYS, theNumCoordSys);
       theNumCoordSys = MAX_COORD_SYS;
    }
@@ -2927,7 +2964,7 @@ void GuiItemManager::UpdateHardwareList()
    if (numHardware > MAX_HARDWARE)
    {
       MessageInterface::ShowMessage
-         ("GuiItemManager::UpdateHardwareList() GUI will handle up to %d FuelTank."
+         ("GuiItemManager::UpdateHardwareList() GUI can handle up to %d FuelTank."
           "The number of FuelTank configured: %d\n", MAX_HARDWARE, theNumFuelTank);
       numHardware = MAX_HARDWARE;
    }
@@ -3082,7 +3119,7 @@ void GuiItemManager::UpdateFunctionList()
    if (theNumFunction > MAX_FUNCTION)
    {
       MessageInterface::ShowMessage
-         ("GuiItemManager::UpdateFunctionList() GUI will handle up to %d Function."
+         ("GuiItemManager::UpdateFunctionList() GUI can handle up to %d Function."
           "The number of Function configured: %d\n", MAX_FUNCTION, theNumFunction);
       theNumFunction = MAX_FUNCTION;
    }
@@ -3129,6 +3166,7 @@ void GuiItemManager::UpdateSubscriberList()
    StringArray items =
       theGuiInterpreter->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
    theNumSubscriber = items.size();
+   theNumReportFile = 0;
    
    #if DEBUG_GUI_ITEM_SUBS
    MessageInterface::ShowMessage
@@ -3138,23 +3176,54 @@ void GuiItemManager::UpdateSubscriberList()
    if (theNumSubscriber > MAX_SUBSCRIBER)
    {
       MessageInterface::ShowMessage
-         ("GuiItemManager::UpdateSubscriberList() GUI will handle up to %d Subscriber."
+         ("GuiItemManager::UpdateSubscriberList() GUI can handle up to %d Subscriber."
           "The number of Subscriber configured: %d\n", MAX_SUBSCRIBER, theNumSubscriber);
       theNumSubscriber = MAX_SUBSCRIBER;
    }
    
-   wxArrayString functionNames;
-   
+   wxArrayString subsNames;
+   wxArrayString rfNames;
+   GmatBase *obj;
+
+   // Update Subscriber list
    for (int i=0; i<theNumSubscriber; i++)
    {
       theSubscriberList[i] = items[i].c_str();
-      functionNames.Add(items[i].c_str());
+      subsNames.Add(items[i].c_str());
 
       #if DEBUG_GUI_ITEM_SUBS > 1
       MessageInterface::ShowMessage("GuiItemManager::UpdateSubscriberList() " +
                                     std::string(theSubscriberList[i].c_str()) + "\n");
       #endif
    }
+
+   int numReportFile = 0;
+   
+   // Update ReportFile list
+   for (int i=0; i<theNumSubscriber; i++)
+   {
+      // check for ReportFile
+      obj = theGuiInterpreter->GetConfiguredItem(items[i]);
+      if (obj->GetTypeName() == "ReportFile")
+      {
+         if (i < MAX_REPORT_FILE)
+         {
+            theReportFileList[theNumReportFile] = items[i].c_str();
+            rfNames.Add(items[i].c_str());
+            theNumReportFile++;
+         }
+         
+         numReportFile++;
+      }
+   }
+   
+   if (numReportFile > MAX_REPORT_FILE)
+   {
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdateSubscriberList() GUI can handle up to %d ReportFile."
+          "The number of ReportFile configured: %d\n", MAX_REPORT_FILE, numReportFile);
+   }
+   
    
    //-------------------------------------------------------
    // update registered Subscriber ComboBox
@@ -3166,7 +3235,21 @@ void GuiItemManager::UpdateSubscriberList()
        sel = (*pos)->GetSelection();
 
       (*pos)->Clear();
-      (*pos)->Append(functionNames);
+      (*pos)->Append(subsNames);
+      
+      (*pos)->SetSelection(sel);
+   }
+   
+   //-------------------------------------------------------
+   // update registered ReportFile ComboBox
+   //-------------------------------------------------------
+   for (std::vector<wxComboBox*>::iterator pos = mReportFileCBList.begin();
+        pos != mReportFileCBList.end(); ++pos)
+   {      
+       sel = (*pos)->GetSelection();
+
+      (*pos)->Clear();
+      (*pos)->Append(rfNames);
       
       (*pos)->SetSelection(sel);
    }

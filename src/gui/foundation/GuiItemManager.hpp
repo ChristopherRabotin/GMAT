@@ -69,7 +69,8 @@ public:
    static const int MAX_COORD_SYS = 20;
    static const int MAX_HARDWARE = 60;
    static const int MAX_FUNCTION = 20;
-   static const int MAX_SUBSCRIBER = 20;
+   static const int MAX_REPORT_FILE = 20;
+   static const int MAX_SUBSCRIBER = 40;   // MAX_REPORT_FILE + 20
    
    static GuiItemManager* GetInstance();
    
@@ -218,6 +219,8 @@ public:
    
    wxComboBox* GetSubscriberComboBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size);
+   wxComboBox* GetReportFileComboBox(wxWindow *parent, wxWindowID id,
+                                     const wxSize &size);
    
    // CheckListBox
    wxCheckListBox* GetSubscriberCheckListBox(wxWindow *parent, wxWindowID id,
@@ -355,6 +358,7 @@ private:
    std::vector<wxComboBox*> mFuelTankCBList;
    std::vector<wxComboBox*> mThrusterCBList;
    std::vector<wxComboBox*> mSubscriberCBList;
+   std::vector<wxComboBox*> mReportFileCBList;
    
    std::vector<wxArrayString*> mSpaceObjectExcList;
    std::vector<wxArrayString*> mSpacecraftExcList;
@@ -362,6 +366,7 @@ private:
    std::vector<wxArrayString*> mFuelTankExcList;
    std::vector<wxArrayString*> mThrusterExcList;
    std::vector<wxArrayString*> mSubscriberExcList;
+   std::vector<wxArrayString*> mReportFileExcList;
    
    int theNumScProperty;
    int theNumImpBurnProperty;
@@ -386,6 +391,7 @@ private:
    int theNumCalPoint;
    int theNumSpacePoint;
    int theNumSubscriber;
+   int theNumReportFile;
    int theNumAllObject;
    
    wxString theSpacePointList[MAX_SPACE_POINT];
@@ -402,6 +408,7 @@ private:
    wxString theFunctionList[MAX_FUNCTION];
    wxString theFuelTankList[MAX_HARDWARE];
    wxString theThrusterList[MAX_HARDWARE];
+   wxString theReportFileList[MAX_REPORT_FILE];
    wxString theSubscriberList[MAX_SUBSCRIBER];
    wxString theAllObjectList[MAX_ALL_OBJECT];
    
