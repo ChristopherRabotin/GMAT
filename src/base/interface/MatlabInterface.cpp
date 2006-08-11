@@ -149,7 +149,7 @@ int MatlabInterface::Close()
          #ifdef __WXMAC__
             // need to close X11 here ------------ **** TBD ****
             MessageInterface::ShowMessage(
-            "Closing connection to MATLAB ... please close X11\n");
+            "Closing connection to MATLAB ... please close X11 ...\n");
          #endif
          if (engClose(enginePtrD) != 0)
                MessageInterface::ShowMessage("\nError closing MATLAB\n");    
