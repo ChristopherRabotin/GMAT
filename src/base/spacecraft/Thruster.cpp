@@ -376,7 +376,9 @@ std::string Thruster::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool Thruster::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == THRUSTER_FIRING) || (id == TANK))
+   //Temporary change until we decide some tank/thruster issues.
+   // if ((id == THRUSTER_FIRING) || (id == TANK))
+   if ((id == THRUSTER_FIRING))
       return true;
 
    return Hardware::IsParameterReadOnly(id);
