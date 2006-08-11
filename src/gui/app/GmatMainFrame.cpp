@@ -59,6 +59,7 @@
 #include "AchievePanel.hpp"
 #include "VaryPanel.hpp"
 #include "SavePanel.hpp"
+#include "ReportPanel.hpp"
 #include "TogglePanel.hpp"
 #include "ParameterSetupPanel.hpp"
 #include "ArraySetupPanel.hpp"
@@ -1537,6 +1538,9 @@ GmatMainFrame::CreateNewCommand(const wxString &title,
       break;
    case GmatTree::SAVE_COMMAND:
       sizer->Add(new SavePanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
+      break;
+   case GmatTree::REPORT_COMMAND:
+      sizer->Add(new ReportPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::TOGGLE_COMMAND:
       sizer->Add(new TogglePanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);

@@ -80,7 +80,7 @@ namespace GmatTree
 
    enum MissionIconType
    {
-      MISSION_ICON_PROPAGATE_EVENT,
+      MISSION_ICON_PROPAGATE,
       MISSION_ICON_TARGET,
 
       MISSION_ICON_FOLDER,
@@ -99,6 +99,8 @@ namespace GmatTree
       MISSION_ICON_TOGGLE,
       MISSION_ICON_BEGIN_FB,
       MISSION_ICON_END_FB,
+      MISSION_ICON_REPORT,
+      MISSION_ICON_STOP,
 
       MISSION_NO_ICON,
    };
@@ -204,6 +206,7 @@ namespace GmatTree
       VARY_COMMAND,
       SAVE_COMMAND,
       TOGGLE_COMMAND,
+      REPORT_COMMAND,
       CALL_FUNCTION_COMMAND,
       ASSIGNMENT_COMMAND,
       FREE_FORM_SCRIPT_COMMAND,
@@ -243,6 +246,7 @@ namespace GmatTree
       END_DO_CONTROL,
       END_WHILE_CONTROL,
       END_SWITCH_CONTROL,
+      STOP_COMMAND,
       END_NO_PANEL,
       
    };

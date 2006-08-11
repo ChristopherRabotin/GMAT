@@ -62,6 +62,7 @@ private:
    int mNumVary;
    int mNumSave;
    int mNumToggle;
+   int mNumReport;
    int mNumIfStatement;
    int mNumWhileLoop;
    int mNumForLoop;
@@ -71,6 +72,7 @@ private:
    int mNumAssign;
    int mNumFiniteBurn;
    int mNumScriptEvent;
+   int mNumStop;
    
    bool inScriptEvent;
    bool inFiniteBurn;
@@ -91,6 +93,7 @@ private:
    
    void AppendCommand(const wxString &cmdName);
    void InsertCommand(const wxString &cmdName);
+   void UpdateGuiManager(const wxString &cmdName);
    
    void AddDefaultMission();
    void AddDefaultMissionSeq(wxTreeItemId universe);
@@ -157,10 +160,12 @@ private:
       POPUP_ADD_TARGET,
       POPUP_ADD_VARY,
       POPUP_ADD_ACHIEVE,
+      POPUP_ADD_REPORT,
       POPUP_ADD_FUNCTION,
       POPUP_ADD_ASSIGNMENT,
       POPUP_ADD_TOGGLE,
       POPUP_ADD_SAVE,
+      POPUP_ADD_STOP,
       POPUP_ADD_SCRIPT_EVENT,
       
       POPUP_ADD_IF_STATEMENT,
@@ -183,10 +188,12 @@ private:
       POPUP_INSERT_TARGET,
       POPUP_INSERT_VARY,
       POPUP_INSERT_ACHIEVE,
+      POPUP_INSERT_REPORT,
       POPUP_INSERT_FUNCTION,
       POPUP_INSERT_ASSIGNMENT,
       POPUP_INSERT_TOGGLE,
       POPUP_INSERT_SAVE,
+      POPUP_INSERT_STOP,
       POPUP_INSERT_SCRIPT_EVENT,
       
       POPUP_INSERT_IF_STATEMENT,
