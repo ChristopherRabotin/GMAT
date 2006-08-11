@@ -98,7 +98,7 @@ protected:
    //std::vector<Interface*> source;   -- cannot do this yet
    GmatInterface       *gmatServer;
    // MatlabInterface is currently an all-static class, so just include
-   // the header
+   // the header where needed
 
    static const std::string    PARAMETER_TEXT[ExternalOptimizerParamCount -
                                               OptimizerParamCount];
