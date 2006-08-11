@@ -113,6 +113,7 @@ OBJECTS = \
     command/For.o \
     command/If.o \
     command/Maneuver.o \
+    command/Minimize.o \
     command/NoOp.o \
     command/Optimize.o \
     command/Propagate.o \
