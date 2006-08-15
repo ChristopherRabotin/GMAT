@@ -225,8 +225,9 @@ std::string FiniteBurn::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool FiniteBurn::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == BURNAXES) || (id == VECTORFORMAT) || (id == COORDINATESYSTEM) || 
-       (id == DELTAV1) || (id == DELTAV2) || (id == DELTAV3))
+   if (/*(id == BURNAXES) ||*/ (id == VECTORFORMAT) || 
+       (id == COORDINATESYSTEM) || (id == DELTAV1) || 
+       (id == DELTAV2) || (id == DELTAV3))
       return true;
 
    return Burn::IsParameterReadOnly(id);
