@@ -72,7 +72,7 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame* parent,
          SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
       #elif defined __WXGTK__
          SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_XPM));
-      #elif defined __WXMAX__
+      #elif defined __WXMAC__
          SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_PICT_RESOURCE));
       #endif
    }
