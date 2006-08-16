@@ -258,8 +258,11 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    msgWin = new wxSashLayoutWindow(this, ID_MSG_SASH_WINDOW,
                            wxDefaultPosition, wxSize(30, 200),
                            wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-
+#ifdef __WXMAC__
+   msgWin->SetDefaultSize(wxSize(w, (int) (0.25 * h)));
+#else
    msgWin->SetDefaultSize(wxSize(w, 100));
+#endif
    msgWin->SetOrientation(wxLAYOUT_HORIZONTAL);
    msgWin->SetAlignment(wxLAYOUT_BOTTOM);
    msgWin->SetSashVisible(wxSASH_TOP, TRUE);
@@ -278,7 +281,8 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
                            wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
 
 #ifdef __WXMAC__
-   win->SetDefaultSize(wxSize(275, h));
+   //win->SetDefaultSize(wxSize(275, h));
+   win->SetDefaultSize(wxSize(w, h));
 #else
    win->SetDefaultSize(wxSize(200, h));
 #endif
@@ -306,7 +310,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
          SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
       #elif defined __WXGTK__
          SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_XPM));
-      #elif defined __WXMAX__
+      #elif defined __WXMAC__
          SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_PICT_RESOURCE));
       #endif
    }

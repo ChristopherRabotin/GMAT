@@ -84,7 +84,8 @@ bool GmatApp::OnInit()
         GmatAppData::SetGuiInterpreter(theModerator->GetGuiInterpreter());
         
         // Make default size larger for Linux
-        wxSize size = ((wxUSE_UNIX != 1) ? wxSize(800, 600) : wxSize(800, 600));
+        //wxSize size = ((wxUSE_UNIX != 1) ? wxSize(800, 600) : wxSize(800, 600));
+        wxSize size = ((wxUSE_UNIX != 1) ? wxSize(800, 600) : wxSize(380, 900));
         
         //show the splash screen
         try
