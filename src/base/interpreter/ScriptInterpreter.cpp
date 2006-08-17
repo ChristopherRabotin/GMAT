@@ -25,7 +25,7 @@
 #include <fstream>
 
 // Maybe put something like this in the Gmat namespace?
-#define REV_STRING "Build 6.0, February 2006"
+#define REV_STRING "Build Date: " __DATE__ " at " __TIME__
 
 
 //#define DEBUG_SCRIPTINTERPRETER
@@ -828,7 +828,8 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    }
    else
    {
-      *outstream << "%% GMAT Script File\n%% GMAT Release " << REV_STRING << "\n\n";
+      // Here add test for header comment; if it does not exist, use this
+      *outstream << "%% GMAT Script File\n%% " << REV_STRING << "\n\n";
    }
    
    // First write out the objects, one type at a time
