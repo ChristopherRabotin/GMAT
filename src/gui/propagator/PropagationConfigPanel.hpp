@@ -120,6 +120,16 @@ private:
       MagfModelCount,
    };
 
+   // Error Control
+   enum ErrorControlType
+   {
+      NONE_EC = 0,
+      RSSSTEP,
+      RSSSTATE,
+      LARGESTSTEP,
+      LARGESTSTATE,
+      ErrorControlCount,
+   };
    
    struct ForceType
    {
@@ -142,9 +152,9 @@ private:
                 const std::string &drag = "None", const std::string &mag = "None")
          {
             bodyName = body; gravType = grav; dragType = drag; magfType = mag;
-            gravDegree = "0"; gravOrder = "0"; magfDegree = "0"; magfOrder = "0";
-            potFilename = ""; pmf = NULL; gravf = NULL; dragf = NULL; srpf = NULL;
-            useSrp = false;
+            gravDegree = "0"; gravOrder = "0"; magfDegree = "0"; 
+            magfOrder = "0"; potFilename = ""; pmf = NULL; gravf = NULL; 
+            dragf = NULL; srpf = NULL; useSrp = false;
          }
       
       ForceType& operator= (const ForceType& right)
@@ -153,7 +163,7 @@ private:
                return *this;
             
             bodyName = right.bodyName; gravType = right.gravType;
-            dragType = right.dragType; magfType = right.magfType;
+            dragType = right.dragType; magfType = right.magfType; 
             gravDegree = right.gravDegree; gravOrder = right.gravOrder;
             magfDegree = right.magfDegree; magfOrder = right.magfOrder;
             potFilename = right.potFilename; pmf = right.pmf;
@@ -180,6 +190,7 @@ private:
    wxStaticText *type3StaticText;
    wxStaticText *degree2StaticText;
    wxStaticText *order2StaticText;
+   wxStaticText *type4StaticText;
    
    wxTextCtrl *setting1TextCtrl;
    wxTextCtrl *setting2TextCtrl;
@@ -202,6 +213,7 @@ private:
    wxComboBox *gravComboBox;
    wxComboBox *atmosComboBox;
    wxComboBox *magfComboBox;
+   wxComboBox *errorComboBox;
    
    wxButton *bodyButton;
    wxButton *searchGravityButton;
@@ -224,6 +236,7 @@ private:
    std::string gravTypeName;
    std::string dragTypeName;
    std::string propOriginName;
+   std::string errorControlTypeName;
    
    StringArray propagatorTypeArray;
    StringArray earthGravModelArray;
@@ -233,6 +246,7 @@ private:
    StringArray othersGravModelArray;
    StringArray dragModelArray;
    StringArray magfModelArray;
+   StringArray errorControlArray;
    
    std::map<std::string, std::string> theFileMap;
    
@@ -261,6 +275,7 @@ private:
    bool isIntegratorChanged;
    bool isIntegratorDataChanged;
    bool isOriginChanged;
+   bool isErrorControlChanged;
 
    Propagator                     *thePropagator;
    PropSetup                      *thePropSetup;
@@ -296,6 +311,7 @@ private:
    void DisplayPointMassData();
    void DisplayMagneticFieldData();
    void DisplaySRPData();
+   void DisplayErrorControlData();
 
    // Saving data
    void SaveDegOrder();
@@ -317,6 +333,7 @@ private:
    void OnBodySelection(wxCommandEvent &event);
    void OnGravitySelection(wxCommandEvent &event);
    void OnAtmosphereSelection(wxCommandEvent &event);
+   void OnErrorControlSelection(wxCommandEvent &event);
    
    // Button event methods
    void OnAddBodyButton(wxCommandEvent &event);
@@ -358,6 +375,7 @@ private:
       ID_CB_GRAV,
       ID_CB_ATMOS,
       ID_CB_MAG,
+      ID_CB_ERROR,
       ID_BUTTON_ADD_BODY,
       ID_BUTTON_GRAV_SEARCH,
       ID_BUTTON_SETUP,

@@ -62,6 +62,7 @@ BEGIN_EVENT_TABLE(PropagationConfigPanel, GmatPanel)
    EVT_COMBOBOX(ID_CB_GRAV, PropagationConfigPanel::OnGravitySelection)
    EVT_COMBOBOX(ID_CB_ATMOS, PropagationConfigPanel::OnAtmosphereSelection)
    EVT_CHECKBOX(ID_CHECKBOX, PropagationConfigPanel::OnSRPCheckBoxChange)
+   EVT_COMBOBOX(ID_CB_ERROR, PropagationConfigPanel::OnErrorControlSelection)
 END_EVENT_TABLE()
 
 
@@ -99,6 +100,7 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
    othersGravModelArray.clear();
    dragModelArray.clear();
    magfModelArray.clear();
+   errorControlArray.clear();
    
    // Default force model values
    useDragForce        = false;
@@ -123,6 +125,7 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
    isIntegratorChanged = false;
    isIntegratorDataChanged = false;
    isOriginChanged = false;
+   isErrorControlChanged = false;
    
    theApplyButton->Disable();
 }
@@ -144,6 +147,7 @@ PropagationConfigPanel::~PropagationConfigPanel()
    othersGravModelArray.clear();
    dragModelArray.clear();
    magfModelArray.clear();
+   errorControlArray.clear();
    theFileMap.clear();
    
    primaryBodiesArray.Clear();
@@ -415,11 +419,27 @@ void PropagationConfigPanel::SaveData()
       }
       
       //----------------------------------------------------
+      // Saving the error control
+      //----------------------------------------------------
+      if (isErrorControlChanged)
+      {
+         newFm->SetStringParameter("ErrorControl", 
+                                    errorComboBox->GetStringSelection().c_str());
+         isErrorControlChanged = false;
+      }
+      
+      //----------------------------------------------------
       // Saving the Origin (Central Body)
       //----------------------------------------------------
-      newFm->SetStringParameter("CentralBody", propOriginName.c_str());
+      if (isOriginChanged)
+      {
+         newFm->SetStringParameter("CentralBody", propOriginName.c_str());
+         isOriginChanged = false;
+      }
       
-      // save forces to the prop setup
+      //----------------------------------------------------
+      // Saving forces to the prop setup
+      //----------------------------------------------------
       thePropSetup->SetForceModel(newFm);
       numOfForces = thePropSetup->GetNumForces();
 
@@ -438,7 +458,20 @@ void PropagationConfigPanel::SaveData()
       #if DEBUG_PROP_SAVE
       ShowForceList("SaveData() BEFORE  saving ForceModel");
       #endif
-
+      
+      //----------------------------------------------------
+      // Saving the error control
+      //----------------------------------------------------
+      if (isErrorControlChanged)
+      {
+         theForceModel->SetStringParameter("ErrorControl", 
+                                    errorComboBox->GetStringSelection().c_str());
+         isErrorControlChanged = false;
+      }
+      
+      //----------------------------------------------------
+      // Saving the Origin (Central Body)
+      //----------------------------------------------------
       if (isOriginChanged)
       {
          theForceModel->SetStringParameter("CentralBody", propOriginName.c_str());
@@ -561,6 +594,13 @@ void PropagationConfigPanel::Initialize()
    dragModelArray.push_back("Exponential");
    dragModelArray.push_back("MSISE90");
    dragModelArray.push_back("JacchiaRoberts");
+   
+   // initialize error control type array
+   errorControlArray.push_back("None");
+   errorControlArray.push_back("RSSStep");
+   errorControlArray.push_back("RSSState");
+   errorControlArray.push_back("LargestStep");
+   errorControlArray.push_back("LargestState");
 
    // for actual file keyword used in FileManager
    theFileMap["JGM-2"] = "JGM2_FILE";
@@ -586,7 +626,11 @@ void PropagationConfigPanel::Initialize()
       theForceModel = thePropSetup->GetForceModel();
       numOfForces   = thePropSetup->GetNumForces();
       
+      // Getting the origin
       propOriginName = theForceModel->GetStringParameter("CentralBody");
+      
+      // Getting the error control
+      errorControlTypeName = theForceModel->GetStringParameter("ErrorControl");
       
       PhysicalModel *force;     
       Integer paramId;
@@ -604,7 +648,7 @@ void PropagationConfigPanel::Initialize()
 //         forceList[currentBodyId]->useSrp = true;
 //         forceList[currentBodyId]->srpf = theSRP;
 //      }
-      
+     
       for (Integer i = 0; i < numOfForces; i++)
       {
          force = theForceModel->GetForce(i);
@@ -935,31 +979,31 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                         wxDefaultPosition, wxSize(120,20),
                         wxST_NO_AUTORESIZE);
    setting1StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Initial Step Size: "),
+      new wxStaticText( parent, ID_TEXT, wxT("Initial Step Size"),
                         wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting2StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Accuracy: "),
+      new wxStaticText( parent, ID_TEXT, wxT("Accuracy"),
                         wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting3StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Min Step Size: "),
+      new wxStaticText( parent, ID_TEXT, wxT("Min Step Size"),
                         wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting4StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Max Step Size: "),
+      new wxStaticText( parent, ID_TEXT, wxT("Max Step Size"),
                         wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting5StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Max Step Attempts: "),
+      new wxStaticText( parent, ID_TEXT, wxT("Max Step Attempts"),
                         wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting6StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Min Integration Error: "),
+      new wxStaticText( parent, ID_TEXT, wxT("Min Integration Error"),
                         wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting7StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Nominal Integration Error: "),
+      new wxStaticText( parent, ID_TEXT, wxT("Nominal Integration Error"),
                         wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );  
    degree1StaticText =
@@ -970,7 +1014,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                         wxDefaultPosition, wxDefaultSize, 0 );
    potFileStaticText =
       //new wxStaticText( parent, ID_TEXT, wxT("Other Potential Field File:"),
-      new wxStaticText( parent, ID_TEXT, wxT("Potential Field File:"),
+      new wxStaticText( parent, ID_TEXT, wxT("Potential Field File"),
                         wxDefaultPosition, wxDefaultSize, 0 );
    type1StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Type"),
@@ -986,6 +1030,9 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                         wxDefaultPosition, wxDefaultSize, 0 );
    order2StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Order"),
+                        wxDefaultPosition, wxDefaultSize, 0 );
+   type4StaticText =
+      new wxStaticText( parent, ID_TEXT, wxT("Type"),
                         wxDefaultPosition, wxDefaultSize, 0 );
 
    #if DEBUG_PROP_PANEL_SETUP
@@ -1048,8 +1095,8 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    for (Integer i=0; i<IntegratorCount; i++)
       intgArray[i] = integratorArray[i];
      
-   wxString bodyArray[] = {};
-   wxString gravArray[] = {};
+   wxString bodyArray[]  = {};
+   wxString gravArray[]  = {};
      
    wxString *dragArray = new wxString[EarthDragModelCount];
    for (Integer i=0; i<EarthDragModelCount; i++)
@@ -1058,6 +1105,10 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    wxString *magfArray = new wxString[MagfModelCount];
    for (Integer i=0; i<MagfModelCount; i++)
       magfArray[i] = magfModelArray[i].c_str();
+      
+   wxString *errorArray = new wxString[ErrorControlCount];
+   for (Integer i=0; i<ErrorControlCount; i++)
+      errorArray[i] = errorControlArray[i].c_str();
                  
    #if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
@@ -1090,6 +1141,11 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxComboBox( parent, ID_CB_MAG, wxT(magfArray[0]),
                       wxDefaultPosition, wxDefaultSize, MagfModelCount,
                       magfArray, wxCB_DROPDOWN|wxCB_READONLY );
+                      
+   errorComboBox =
+      new wxComboBox( parent, ID_CB_ERROR, wxT(errorArray[0]),
+                      wxDefaultPosition, wxDefaultSize, ErrorControlCount,
+                      errorArray, wxCB_DROPDOWN|wxCB_READONLY );
                  
    #if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
@@ -1160,7 +1216,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    title5StaticText->SetFont(wxFont(12, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL,
                                              true, _T(""), wxFONTENCODING_SYSTEM));
    wxStaticText *title6StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Atmospheric Model"),
+      new wxStaticText( parent, ID_TEXT, wxT("Atmosphere Model"),
                         wxDefaultPosition, wxSize(120,20),
                         wxST_NO_AUTORESIZE);
    title6StaticText->SetFont(wxFont(12, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL,
@@ -1185,7 +1241,13 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                         wxST_NO_AUTORESIZE);
    title9StaticText->SetFont(wxFont(12, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL,
                                              true, _T(""), wxFONTENCODING_SYSTEM));
-                                     
+   wxStaticText *title10StaticText =
+      new wxStaticText( parent, ID_TEXT, wxT("Error Control"),
+                        wxDefaultPosition, wxSize(120,20),
+                        wxST_NO_AUTORESIZE);
+   title10StaticText->SetFont(wxFont(12, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL,
+                                             true, _T(""), wxFONTENCODING_SYSTEM));
+                                                                              
    // wx*Sizers      
    wxBoxSizer *boxSizer1 = new wxBoxSizer( wxVERTICAL );
    wxBoxSizer *boxSizer2 = new wxBoxSizer( wxVERTICAL );
@@ -1200,6 +1262,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    wxBoxSizer *boxSizer11 = new wxBoxSizer( wxHORIZONTAL );
    wxBoxSizer *boxSizer12 = new wxBoxSizer( wxHORIZONTAL );
    wxBoxSizer *boxSizer13 = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *boxSizer14 = new wxBoxSizer( wxHORIZONTAL );
    leftBoxSizer = new wxBoxSizer( wxVERTICAL );
    
    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
@@ -1268,6 +1331,9 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    
    boxSizer13->Add( srpCheckBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    
+   boxSizer14->Add( type4StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer14->Add( errorComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   
    boxSizer1->Add( boxSizer4, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
    //boxSizer1->Add( boxSizer2, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
    boxSizer1->Add( leftBoxSizer, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
@@ -1286,12 +1352,15 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    boxSizer5->Add( boxSizer12, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    boxSizer5->Add( title9StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    boxSizer5->Add( boxSizer13, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer5->Add( title10StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer5->Add( boxSizer14, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    
    boxSizer6->Add( boxSizer1, 0, wxALIGN_CENTRE|wxALL, bsize);
    boxSizer6->Add( 5, 5, wxALIGN_CENTRE|wxALL, bsize);
    boxSizer6->Add( boxSizer5, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    theMiddleSizer->Add(boxSizer6, 0, wxGROW, bsize);
+   
 #else
    // wx*Sizers      
    wxBoxSizer *boxSizer1 = new wxBoxSizer( wxVERTICAL );
@@ -1317,7 +1386,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    wxBoxSizer *item361 = new wxBoxSizer( wxHORIZONTAL );
    wxBoxSizer *item362 = new wxBoxSizer( wxHORIZONTAL );
    
-   wxStaticBox *item46 = new wxStaticBox( parent, -1, wxT("Atmospheric Model") );
+   wxStaticBox *item46 = new wxStaticBox( parent, -1, wxT("Atmosphere Model") );
    wxStaticBoxSizer *item45 = new wxStaticBoxSizer( item46, wxHORIZONTAL );
    wxStaticBox *item51 = new wxStaticBox( parent, -1, wxT("Magnetic Field") );
    wxStaticBoxSizer *item50 = new wxStaticBoxSizer( item51, wxHORIZONTAL );
@@ -1325,6 +1394,8 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    wxStaticBoxSizer *staticBoxSizer7 = new wxStaticBoxSizer( staticBox7, wxVERTICAL );
    wxStaticBox *item65 = new wxStaticBox( parent, -1, wxT("Solar Radiation Pressure") );
    wxStaticBoxSizer *item64 = new wxStaticBoxSizer( item65, wxHORIZONTAL );
+   wxStaticBox *staticBox10 = new wxStaticBox( parent, -1, wxT("Error Control") );
+   wxStaticBoxSizer *staticBoxSizer10 = new wxStaticBoxSizer( staticBox10, wxHORIZONTAL );
    
    Integer bsize = 2; // border size
    
@@ -1382,6 +1453,9 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    item64->Add( 2, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    item64->Add( srpCheckBox, 0, wxALIGN_CENTRE|wxALL, bsize);
     
+   staticBoxSizer10->Add( type4StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   staticBoxSizer10->Add( errorComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
    staticBoxSizer3->Add( boxSizer3, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    staticBoxSizer3->Add( item36, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    staticBoxSizer3->Add( item45, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
@@ -1394,6 +1468,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    staticBoxSizer2->Add( staticBoxSizer3, 0, wxALIGN_CENTRE|wxALL, bsize);
    staticBoxSizer2->Add( staticBoxSizer7, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    staticBoxSizer2->Add( item64, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+   staticBoxSizer2->Add( staticBoxSizer10, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    
    staticBoxSizer4->Add(centralBodyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    staticBoxSizer4->Add(originComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -1547,6 +1622,7 @@ void PropagationConfigPanel::DisplayForceData()
    DisplayAtmosphereModelData(); 
    DisplayMagneticFieldData();  
    DisplaySRPData();
+   DisplayErrorControlData();
 }
 
 //------------------------------------------------------------------------------
@@ -1742,6 +1818,26 @@ void PropagationConfigPanel::DisplaySRPData()
       srpCheckBox->SetValue(false);
 }
 
+//------------------------------------------------------------------------------
+// void DisplayErrorControlData()
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::DisplayErrorControlData()
+{
+   #if DEBUG_PROP_PANEL
+   MessageInterface::ShowMessage("On DisplayErrorControlData()\n");
+   #endif
+   
+   if (errorControlTypeName == errorControlArray[NONE_EC])
+      errorComboBox->SetSelection(NONE_EC);
+   else if (errorControlTypeName == errorControlArray[RSSSTEP])
+      errorComboBox->SetSelection(RSSSTEP);
+   else if (errorControlTypeName == errorControlArray[RSSSTATE])
+      errorComboBox->SetSelection(RSSSTATE);
+   else if (errorControlTypeName == errorControlArray[LARGESTSTEP])
+      errorComboBox->SetSelection(LARGESTSTEP);
+   else if (errorControlTypeName == errorControlArray[LARGESTSTATE])
+      errorComboBox->SetSelection(LARGESTSTATE);
+}
 
 //------------------------------------------------------------------------------
 // void SaveDegOrder()
@@ -2006,18 +2102,46 @@ void PropagationConfigPanel::OnAtmosphereSelection(wxCommandEvent &event)
 
    if (forceList[currentBodyId]->dragType != dragTypeName)
    {    
-      forceList[currentBodyId]->dragType = dragTypeName;
-      DisplayAtmosphereModelData();
-         
-      isForceModelChanged = true;
-      theApplyButton->Enable(true);
-      
       #if DEBUG_PROP_PANEL
       MessageInterface::ShowMessage
          ("OnAtmosphereSelection() grav changed from=%s to=%s for body=%s\n",
           forceList[currentBodyId]->dragType.c_str(), dragTypeName.c_str(),
           forceList[currentBodyId]->bodyName.c_str());
       #endif
+      
+      forceList[currentBodyId]->dragType = dragTypeName;
+      DisplayAtmosphereModelData();
+         
+      isForceModelChanged = true;
+      theApplyButton->Enable(true);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnErrorControlSelection(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::OnErrorControlSelection(wxCommandEvent &event)
+{     
+   #if DEBUG_PROP_PANEL
+   MessageInterface::ShowMessage("OnErrorControlSelection()\n");
+   #endif
+   
+   std::string eType = errorComboBox->GetStringSelection().c_str();
+
+   if (errorControlTypeName != eType)
+   {    
+   	   #if DEBUG_PROP_PANEL
+      MessageInterface::ShowMessage
+         ("OnErrorControlSelection() error control changed from=%s to=%s\n",
+          errorControlTypeName.c_str(), eType.c_str());
+      #endif
+      
+      errorControlTypeName = eType;
+      DisplayErrorControlData();
+       
+      isForceModelChanged = true;  
+      isErrorControlChanged = true;
+      theApplyButton->Enable(true);
    }
 }
 
