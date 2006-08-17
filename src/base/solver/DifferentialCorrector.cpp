@@ -86,6 +86,10 @@ DifferentialCorrector::DifferentialCorrector(std::string name) :
    //initialized             (false),
    //instanceNumber          (0)       // 0 indicates 1st instance w/ this name
 {
+   #if DEBUG_DC_INIT
+   MessageInterface::ShowMessage
+      ("DifferentialCorrector::DC(constructor) entered\n");
+   #endif
    objectTypeNames.push_back("DifferentialCorrector");
    parameterCount = DifferentialCorrectorParamCount;
    // textFileMode = "Verbose";
@@ -127,7 +131,11 @@ DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
    //solverTextFile          (dc.solverTextFile),
    //instanceNumber          (dc.instanceNumber)
 {
-  variableNames.clear();
+   #if DEBUG_DC_INIT
+   MessageInterface::ShowMessage
+      ("DifferentialCorrector::DC(COPY constructor) entered\n");
+   #endif
+  //variableNames.clear(); -> Solver
   goalNames.clear();
   
    parameterCount = dc.parameterCount;
@@ -725,6 +733,10 @@ bool DifferentialCorrector::Initialize()
     
    //initialized = true;  // moved to Solver
    //iterationsTaken = 0;
+   #if DEBUG_DC_INIT
+   MessageInterface::ShowMessage
+      ("DifferentialCorrector::Initialize() completed\n");
+   #endif
    return true;
 }
 
@@ -839,7 +851,8 @@ void DifferentialCorrector::RunPerturbation()
    // Calculate the perts, one at a time
    if (pertNumber != -1)
       // Back out the last pert applied
-      variable[pertNumber] -= perturbation[pertNumber];
+      //variable[pertNumber] -= perturbation[pertNumber];
+      variable.at(pertNumber) -= perturbation.at(pertNumber);
    ++pertNumber;
 
    if (pertNumber == variableCount)  // Current set of perts have been run
@@ -849,7 +862,8 @@ void DifferentialCorrector::RunPerturbation()
       return;
    }
 
-   variable[pertNumber] += perturbation[pertNumber];
+   //variable[pertNumber] += perturbation[pertNumber];
+   variable.at(pertNumber) += perturbation.at(pertNumber);
    WriteToTextFile();
 }
 
@@ -876,16 +890,31 @@ void DifferentialCorrector::CalculateParameters()
             delta += inverseJacobian[j][i] * (goal[j] - nominal[j]);
 
         // Ensure that delta is not larger than the max allowed step
-        if (fabs(delta) > variableMaximumStep[i])
-           delta = ((delta > 0.0) ? variableMaximumStep[i] :
-                                   -variableMaximumStep[i]);
-        variable[i] += delta;
+        //if (fabs(delta) > variableMaximumStep[i])
+        //   delta = ((delta > 0.0) ? variableMaximumStep[i] :
+        //                           -variableMaximumStep[i]);
+        //variable[i] += delta;
+        try
+        {
+           if (fabs(delta) > variableMaximumStep.at(i))
+              delta = ((delta > 0.0) ? variableMaximumStep.at(i) :
+                                      -variableMaximumStep.at(i));
+           variable.at(i) += delta;
 
         // Ensure that variable[i] is in the allowed range
-        if (variable[i] < variableMinimum[i])
-           variable[i] = variableMinimum[i];
-        if (variable[i] > variableMaximum[i])
-           variable[i] = variableMaximum[i];
+        //if (variable[i] < variableMinimum[i])
+        //   variable[i] = variableMinimum[i];
+        //if (variable[i] > variableMaximum[i])
+        //   variable[i] = variableMaximum[i];
+           if (variable.at(i) < variableMinimum.at(i))
+              variable.at(i) = variableMinimum.at(i);
+           if (variable.at(i) > variableMaximum.at(i))
+              variable.at(i) = variableMaximum.at(i);
+        }
+        catch(std::exception &re)
+        {
+           throw SolverException("Range error in Solver::CalculateParameters\n");
+        }
     }
     
     WriteToTextFile();
@@ -958,7 +987,8 @@ void DifferentialCorrector::CalculateJacobian()
       for (j = 0; j < goalCount; ++j)
       {
           jacobian[i][j] = achieved[i][j] - nominal[j];
-          jacobian[i][j] /= perturbation[i];
+          //jacobian[i][j] /= perturbation[i];
+          jacobian[i][j] /= perturbation.at(i);
       }
    }
 }
@@ -1168,7 +1198,8 @@ std::string DifferentialCorrector::GetProgressString()
             {
                if (current != variableNames.begin())
                   progress << ", ";
-               progress << *current << " = " << variable[i++];
+               //progress << *current << " = " << variable[i++];
+               progress << *current << " = " << variable.at(i++);
             }
             break;
 
@@ -1176,7 +1207,8 @@ std::string DifferentialCorrector::GetProgressString()
             progress << "   Completed iteration " << iterationsTaken
                      << ", pert " << pertNumber+1 << " ("
                      << variableNames[pertNumber] << " = "
-                     << variable[pertNumber] << ")\n";
+                     << variable.at(pertNumber) << ")\n";
+                     //<< variable[pertNumber] << ")\n";
             break;
 
          case CALCULATING:
@@ -1214,7 +1246,8 @@ std::string DifferentialCorrector::GetProgressString()
             // Iterate through the variables, writing them to the string
             for (current = variableNames.begin(), i = 0;
                  current != variableNames.end(); ++current)
-               progress << "   " << *current << " = " << variable[i++] << "\n";
+               //progress << "   " << *current << " = " << variable[i++] << "\n";
+               progress << "   " << *current << " = " << variable.at(i++) << "\n";
             break;
 
          case ITERATING:     // Intentional fall through
@@ -1292,7 +1325,8 @@ void DifferentialCorrector::WriteToTextFile()
             for (current = variableNames.begin(), i = 0;
                  current != variableNames.end(); ++current)
             {
-               textFile << *current << " = " << variable[i++] << "\n   ";
+               //textFile << *current << " = " << variable[i++] << "\n   ";
+               textFile << *current << " = " << variable.at(i++) << "\n   ";
             }
             textFile << std::endl;
             break;
@@ -1319,7 +1353,8 @@ void DifferentialCorrector::WriteToTextFile()
                for (current = variableNames.begin(), i = 0;
                     current != variableNames.end(); ++current)
                {
-                  textFile << *current << " = " << variable[i++] << "\n   ";
+                  //textFile << *current << " = " << variable[i++] << "\n   ";
+                  textFile << *current << " = " << variable.at(i++) << "\n   ";
                }
                textFile << std::endl;
             }
@@ -1377,7 +1412,8 @@ void DifferentialCorrector::WriteToTextFile()
             for (current = variableNames.begin(), i = 0;
                  current != variableNames.end(); ++current)
             {
-               textFile << *current << " = " << variable[i++] << "\n   ";
+               //textFile << *current << " = " << variable[i++] << "\n   ";
+               textFile << *current << " = " << variable.at(i++) << "\n   ";
             }
             textFile << std::endl;
             break;

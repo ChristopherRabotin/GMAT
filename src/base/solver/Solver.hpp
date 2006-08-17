@@ -98,49 +98,12 @@ public:
    virtual void        ReportProgress();
    virtual void        SetDebugString(const std::string &str);
     
-   //---------------------------------------------------------------------------
-   //  bool Initialize()
-   //---------------------------------------------------------------------------
-   /**
-    * Derived classes implement this method to set object pointers and validate
-    * internal data structures.
-    *
-    * @return true on success, false (or throws a SolverException) on failure
-    */
-   //---------------------------------------------------------------------------
    //virtual bool        Initialize() = 0;
    virtual bool        Initialize();
     
-   //---------------------------------------------------------------------------
-   //  Integer SetSolverVariables(Real *data, std::string name)
-   //---------------------------------------------------------------------------
-   /**
-    * Derived classes use this method to pass in parameter data specific to
-    * the algorithm implemented.
-    *
-    * @param <data> An array of data appropriate to the variables used in the
-    *               algorithm.
-    * @param <name> A label for the data parameter.  Defaults to the empty
-    *               string.
-    *
-    * @return The ID used for the variable.
-    */
-   //---------------------------------------------------------------------------
    virtual Integer     SetSolverVariables(Real *data,
                                           const std::string &name);
 
-   //---------------------------------------------------------------------------
-   //  Real GetSolverVariable(Integer id)
-   //---------------------------------------------------------------------------
-   /**
-    * Derived classes use this method to retrieve parameter data specific to
-    * the algorithm implemented.
-    *
-    * @param <id> The ID used for the variable.
-    *
-    * @return The value used for this variable
-    */
-   //---------------------------------------------------------------------------
    virtual Real        GetSolverVariable(Integer id);
     
    //---------------------------------------------------------------------------
@@ -185,24 +148,29 @@ protected:
    Integer             progressStyle;
    /// String for debug information in debug mode
    std::string         debugString;
-   /// The number of variables in the targeting problem
+   /// The number of variables in the solver problem
    Integer             variableCount;
    /// List of variables
    StringArray         variableNames;
    /// Array used to track the variables in the solver run
-   Real                *variable;
+   //Real                *variable;
+   std::vector<Real>   variable;
    /// The number of iterations taken (increments when the matrix is inverted)
    Integer             iterationsTaken;
    /// Maximum number of iterations allowed
    Integer              maxIterations;
    /// Array used to track the perturbations on each variable
-   Real                 *perturbation;
+   //Real                 *perturbation;
+   std::vector<Real>    perturbation;
    /// Limits on the lowest value of the variables
-   Real                 *variableMinimum;
+   //Real                 *variableMinimum;
+   std::vector<Real>    variableMinimum;
    /// Limits on the lowest value of the variables
-   Real                 *variableMaximum;
+   //Real                 *variableMaximum;
+   std::vector<Real>    variableMaximum;
    /// Limits on individual changes in the variables
-   Real                 *variableMaximumStep;
+   //Real                 *variableMaximumStep;
+   std::vector<Real>    variableMaximumStep;
    /// Current perturbation being run.
    Integer              pertNumber;
 

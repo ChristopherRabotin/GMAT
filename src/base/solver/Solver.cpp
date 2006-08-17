@@ -22,6 +22,8 @@
 #include "Solver.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_SOLVER_INIT
+//#define DEBUG_SOLVER_CALC
 
 //---------------------------------
 // static data
@@ -79,13 +81,13 @@ Solver::Solver(const std::string &type, const std::string &name) :
    showProgress            (true),
    progressStyle           (NORMAL_STYLE),
    variableCount           (0),
-   variable                (NULL),
+   //variable                (NULL),
    iterationsTaken         (0),
    maxIterations           (25),
-   perturbation            (NULL),
-   variableMinimum         (NULL),
-   variableMaximum         (NULL),
-   variableMaximumStep     (NULL),
+   //perturbation            (NULL),
+   //variableMinimum         (NULL),
+   //variableMaximum         (NULL),
+   //variableMaximumStep     (NULL),
    initialized             (false),
    instanceNumber          (0)       // 0 indicates 1st instance w/ this name
 {
@@ -126,18 +128,28 @@ Solver::Solver(const Solver &sol) :
    showProgress            (sol.showProgress),
    progressStyle           (sol.progressStyle),
    variableCount           (sol.variableCount),
-   variable                (NULL),
+   //variable                (NULL),
    iterationsTaken         (0),
    maxIterations           (sol.maxIterations),
-   perturbation            (NULL),
-   variableMinimum         (NULL),
-   variableMaximum         (NULL),
-   variableMaximumStep     (NULL),
+   //perturbation            (NULL),
+   //variableMinimum         (NULL),
+   //variableMaximum         (NULL),
+   //variableMaximumStep     (NULL),
    pertNumber              (sol.pertNumber),
    initialized             (false),
    solverTextFile          (sol.solverTextFile),
    instanceNumber          (sol.instanceNumber)
 {
+   #ifdef DEBUG_SOLVER_INIT
+      MessageInterface::ShowMessage(
+         "In Solver::Solver (copy constructor)\n");
+   #endif
+   variableNames.clear();
+   //variable.clear();
+   //perturbation.clear();
+   //variableMinimum.clear();
+   //variableMaximum.clear();
+   //variableMaximumStep.clear();
 }
 
 
@@ -155,13 +167,19 @@ Solver& Solver::operator=(const Solver &sol)
     if (&sol == this)
         return *this;
 
-   variableNames.clear();
    variableCount         = sol.variableCount;
    iterationsTaken       = 0;
    maxIterations         = sol.maxIterations;
    initialized           = false;
    solverTextFile        = sol.solverTextFile;
-        
+   
+   variableNames.clear();
+   //variable.clear();
+   //perturbation.clear();
+   //variableMinimum.clear();
+   //variableMaximum.clear();
+   //variableMaximumStep.clear();
+   
    currentState          = sol.currentState;
    textFileMode          = sol.textFileMode;
    showProgress          = sol.showProgress;
@@ -176,32 +194,73 @@ Solver& Solver::operator=(const Solver &sol)
 // bool Initialize()
 //------------------------------------------------------------------------------
 /**
- * Initializes the Solver prior to solving.
+ * Derived classes implement this method to set object pointers and validate
+ * internal data structures.
+ * 
+ *  @return true on success, false (or throws a SolverException) on failure
  */
 //------------------------------------------------------------------------------
 bool Solver::Initialize()
 {
    // Setup the variable data structures
    Integer localVariableCount = variableNames.size();
+   
+   #ifdef DEBUG_SOLVER_INIT
+      MessageInterface::ShowMessage(
+         "In Solver::Initialize with localVariableCount = %d\n", 
+         localVariableCount);
+   #endif
 
    //FreeArrays();
    
-   variable            = new Real[localVariableCount];
-   perturbation        = new Real[localVariableCount];
-   variableMinimum     = new Real[localVariableCount];
-   variableMaximum     = new Real[localVariableCount];
-   variableMaximumStep = new Real[localVariableCount];
+   //variable            = new Real[localVariableCount];
+   //perturbation        = new Real[localVariableCount];
+   //variableMinimum     = new Real[localVariableCount];
+   //variableMaximum     = new Real[localVariableCount];
+   //variableMaximumStep = new Real[localVariableCount];
 
-   for (Integer i = 0; i < localVariableCount; ++i)
+   try
    {
-      // Set default values for min and max parameters
-      variable[i]            =  0.0;
-      variableMinimum[i]     = -9.999e300;
-      variableMaximum[i]     =  9.999e300;
-      variableMaximumStep[i] =  9.999e300;
-      perturbation[i]        =  1.0e-04;
+      //variable.reserve(localVariableCount);
+      //perturbation.reserve(localVariableCount);
+      //variableMinimum.reserve(localVariableCount);
+      //variableMaximum.reserve(localVariableCount);
+      //variableMaximumStep.reserve(localVariableCount);
+   
+   #ifdef DEBUG_SOLVER_INIT
+      MessageInterface::ShowMessage(
+         "In Solver::Initialize - about to set default values\n");
+   #endif
+      for (Integer i = 0; i < localVariableCount; ++i)
+      {
+         // Set default values for min and max parameters
+         //variable[i]            =  0.0;
+         //variableMinimum[i]     = -9.999e300;
+         //variableMaximum[i]     =  9.999e300;
+         //variableMaximumStep[i] =  9.999e300;
+         //perturbation[i]        =  1.0e-04;
+         //variable.at(i)            =  0.0;
+         //variableMinimum.at(i)     = -9.999e300;
+         //variableMaximum.at(i)     =  9.999e300;
+         //variableMaximumStep.at(i) =  9.999e300;
+         //perturbation.at(i)        =  1.0e-04;
+         variable.push_back(0.0);
+         variableMinimum.push_back(-9.999e300);
+         variableMaximum.push_back(9.999e300);
+         variableMaximumStep.push_back(9.999e300);
+         perturbation.push_back(1.0e-04);
+      }
+   }
+   catch(const std::exception &re)
+   {
+      throw SolverException("Range error initializing Solver object %s\n",
+            instanceName.c_str());
    }
 
+   #ifdef DEBUG_SOLVER_INIT
+      MessageInterface::ShowMessage(
+         "In Solver::Initialzie - about to prepare text file for output\n");
+   #endif
    // Prepare the text file for output
    if (solverTextFile != "")
    {
@@ -217,6 +276,10 @@ bool Solver::Initialize()
    }
    initialized = true; 
    iterationsTaken = 0;
+   #ifdef DEBUG_SOLVER_INIT
+      MessageInterface::ShowMessage(
+         "In Solver::Initialize completed\n");
+   #endif
    return true;
 }
 
@@ -241,8 +304,18 @@ Integer Solver::SetSolverVariables(Real *data,
    if (variableNames[variableCount] != name)
       throw SolverException("Mismatch between parsed and configured variable");
 
-   variable[variableCount] = data[0];
-   perturbation[variableCount] = data[1];
+   //variable[variableCount] = data[0];
+   //perturbation[variableCount] = data[1];
+   try
+   {
+      variable.at(variableCount) = data[0];
+      perturbation.at(variableCount) = data[1];
+   }
+   catch(const std::exception &re)
+   {
+      throw SolverException(
+            "Range error setting variable or perturbation in SetSolverVariables\n");
+   }
    // Sanity check min and max
    if (data[2] >= data[3])
    {
@@ -259,9 +332,21 @@ Integer Solver::SetSolverVariables(Real *data,
       throw SolverException(errMsg.str());
    }
 
-   variableMinimum[variableCount] = data[2];
-   variableMaximum[variableCount] = data[3];
-   variableMaximumStep[variableCount] = data[4];
+   //variableMinimum[variableCount] = data[2];
+   //variableMaximum[variableCount] = data[3];
+   //variableMaximumStep[variableCount] = data[4];
+   try
+   {
+   variableMinimum.at(variableCount)     = data[2];
+   variableMaximum.at(variableCount)     = data[3];
+   variableMaximumStep.at(variableCount) = data[4];
+   }
+   catch(const std::exception &re)
+   {
+      throw SolverException(
+            "Range error setting variable min/max in SetSolverVariables\n");
+   }
+   
    ++variableCount;
 
    return variableCount-1;
@@ -286,7 +371,8 @@ Real Solver::GetSolverVariable(Integer id)
          "Solver member requested a parameter outside the range "
          "of the configured variables.");
 
-   return variable[id];
+   //return variable[id];
+   return variable.at(id);
 }
 
 //------------------------------------------------------------------------------
@@ -844,7 +930,7 @@ void Solver::FreeArrays()
       textFile.flush();
       textFile.close();
    }
-        
+   /*    
    if (variable)
    {
       delete [] variable;
@@ -874,5 +960,12 @@ void Solver::FreeArrays()
       delete [] variableMaximumStep;
       variableMaximumStep = NULL;
    }
+   */
+   //variableNames.clear(); // ????
+   variable.clear();
+   perturbation.clear();
+   variableMinimum.clear();
+   variableMaximum.clear();
+   variableMaximumStep.clear();
 }
 
