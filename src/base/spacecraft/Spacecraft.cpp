@@ -33,9 +33,6 @@
 #include <sstream> 
 #endif
 
-
-#define TIME_PRECISION 18
-
 // Spacecraft parameter types
 const Gmat::ParameterType   
    Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] = 
@@ -2090,7 +2087,7 @@ const std::string& Spacecraft::GetGeneratingString(Gmat::WriteMode mode,
 {
    std::stringstream data;
 
-   data.precision(15);   // Crank up data precision so we don't lose anything
+   data.precision(DATA_PRECISION);   // Crank up data precision so we don't lose anything
    std::string preface = "", nomme;
    
    if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
@@ -2148,7 +2145,7 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    Integer i;
    Gmat::ParameterType parmType;
    std::stringstream value;
-   value.precision(15); 
+   value.precision(DATA_PRECISION); 
    
    bool showAnomaly = false;
    
@@ -2226,9 +2223,9 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                if ((parmOrder[i] >= ELEMENT1_ID) && 
                    (parmOrder[i] <= ELEMENT6_ID))
                {
-                  value.precision(18); 
+                  value.precision(DATA_PRECISION); 
                   value << repState[parmOrder[i] - ELEMENT1_ID]; // genState[parmOrder[i] - ELEMENT1_ID];
-                  value.precision(15); 
+                  value.precision(DATA_PRECISION); 
                }
                else if (parmOrder[i] == STATE_TYPE_ID)
                {

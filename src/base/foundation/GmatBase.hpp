@@ -292,6 +292,9 @@ public:
                                          const std::string &prefix = "",
                                          const std::string &useName = "");
    
+   static Integer          GetDataPrecision();
+   static Integer          GetTimePrecision();
+
 protected:
    /// Parameter IDs
    enum
@@ -319,6 +322,9 @@ protected:
                        objectTypes;
    /// The list types that this class extends, by name
    StringArray         objectTypeNames;
+
+   static Integer      DATA_PRECISION;
+   static Integer      TIME_PRECISION;
    
    // Scripting interfaces
    /// flag used to deterine if the current write is in Matlab mode

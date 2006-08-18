@@ -53,6 +53,22 @@ const Rvector     GmatBase::RVECTOR_PARAMETER_UNDEFINED = Rvector(1,
 const Rmatrix     GmatBase::RMATRIX_PARAMETER_UNDEFINED = Rmatrix(1,1,
                   GmatBase::REAL_PARAMETER_UNDEFINED);
 
+// Set the precision used for data output
+Integer           GmatBase::DATA_PRECISION = 18;
+Integer           GmatBase::TIME_PRECISION = 18;
+
+// Static accessors for the precision settings
+Integer GmatBase::GetDataPrecision()
+{
+   return DATA_PRECISION;
+}
+
+Integer GmatBase::GetTimePrecision()
+{
+   return TIME_PRECISION;
+}
+
+
 /**
  * Build the list of type names
  * 
@@ -2194,7 +2210,7 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
 {
    std::stringstream data;
 
-   data.precision(18);   // Crank up data precision so we don't lose anything
+   data.precision(DATA_PRECISION);   // Crank up data precision so we don't lose anything
    std::string preface = "", nomme;
    
    if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
@@ -2300,7 +2316,7 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    Integer i;
    Gmat::ParameterType parmType;
    std::stringstream value;
-   value.precision(18);
+   value.precision(DATA_PRECISION);
 
    for (i = 0; i < parameterCount; ++i)
    {
