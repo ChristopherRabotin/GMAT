@@ -54,8 +54,8 @@ const Rmatrix     GmatBase::RMATRIX_PARAMETER_UNDEFINED = Rmatrix(1,1,
                   GmatBase::REAL_PARAMETER_UNDEFINED);
 
 // Set the precision used for data output
-Integer           GmatBase::DATA_PRECISION = 18;
-Integer           GmatBase::TIME_PRECISION = 18;
+Integer           GmatBase::DATA_PRECISION = 16;
+Integer           GmatBase::TIME_PRECISION = 16;
 
 // Static accessors for the precision settings
 Integer GmatBase::GetDataPrecision()
