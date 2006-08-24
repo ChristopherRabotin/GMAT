@@ -125,7 +125,6 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
    isIntegratorChanged = false;
    isIntegratorDataChanged = false;
    isOriginChanged = false;
-   isErrorControlChanged = false;
    
    theApplyButton->Disable();
 }
@@ -421,12 +420,8 @@ void PropagationConfigPanel::SaveData()
       //----------------------------------------------------
       // Saving the error control
       //----------------------------------------------------
-      if (isErrorControlChanged)
-      {
-         newFm->SetStringParameter("ErrorControl", 
+      newFm->SetStringParameter("ErrorControl", 
                                     errorComboBox->GetStringSelection().c_str());
-         isErrorControlChanged = false;
-      }
       
       //----------------------------------------------------
       // Saving the Origin (Central Body)
@@ -458,16 +453,6 @@ void PropagationConfigPanel::SaveData()
       #if DEBUG_PROP_SAVE
       ShowForceList("SaveData() BEFORE  saving ForceModel");
       #endif
-      
-      //----------------------------------------------------
-      // Saving the error control
-      //----------------------------------------------------
-      if (isErrorControlChanged)
-      {
-         theForceModel->SetStringParameter("ErrorControl", 
-                                    errorComboBox->GetStringSelection().c_str());
-         isErrorControlChanged = false;
-      }
       
       //----------------------------------------------------
       // Saving the Origin (Central Body)
@@ -620,7 +605,6 @@ void PropagationConfigPanel::Initialize()
    
    if (thePropSetup != NULL)
    {
-      thePropagator = thePropSetup->GetPropagator();
       thePropagator = thePropSetup->GetPropagator();
       //thePropagator = (Propagator*)theProp->Clone();
       theForceModel = thePropSetup->GetForceModel();
@@ -999,11 +983,11 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                         wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting6StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Min Integration Error"),
+      new wxStaticText( parent, ID_TEXT, wxT("Lower Error"),
                         wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting7StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Nominal Integration Error"),
+      new wxStaticText( parent, ID_TEXT, wxT("Target Error"),
                         wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );  
    degree1StaticText =
@@ -1563,10 +1547,6 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
 #endif
 
    leftBoxSizer->Layout();
-   
-   // fill in data     
-   // waw: Changed to show all digits
-   wxString s1, s2, s3, s4, s5;
     
    Real i1 = thePropagator->GetRealParameter("InitialStepSize");
    Real i2 = thePropagator->GetRealParameter("Accuracy");
@@ -1574,32 +1554,20 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
    Real i4 = thePropagator->GetRealParameter("MaxStep");
    Integer i5 = (long)thePropagator->GetIntegerParameter("MaxStepAttempts");
 
-   s1.Printf("%.10f", i1);
-   s2.Printf("%le", i2);
-   s3.Printf("%.10f", i3);
-   s4.Printf("%.10f", i4);
-   s5.Printf("%d", i5);
-
-   setting1TextCtrl->SetValue(s1);
-   setting2TextCtrl->SetValue(s2);
-   setting3TextCtrl->SetValue(s3);
-   setting4TextCtrl->SetValue(s4);
-   setting5TextCtrl->SetValue(s5);
+   setting1TextCtrl->SetValue(ToString(i1));
+   setting2TextCtrl->SetValue(ToString(i2));
+   setting3TextCtrl->SetValue(ToString(i3));
+   setting4TextCtrl->SetValue(ToString(i4));
+   setting5TextCtrl->SetValue(ToString(i5));
  
    if (integratorString.IsSameAs(integratorArray[ABM]))
-   {
-      wxString s6, s7;
-      
-      Real i6 = thePropagator->GetRealParameter("LowerError");
+   {  
+      Real i6 = thePropagator->GetRealParameter("LowerError");   
       Real i7 = thePropagator->GetRealParameter("TargetError");
       
-      s6.Printf("%.10f", i6);
-      s7.Printf("%.10f", i7);
-      
-      setting6TextCtrl->SetValue(s6);
-      setting7TextCtrl->SetValue(s7);
+      setting6TextCtrl->SetValue(ToString(i6));
+      setting7TextCtrl->SetValue(ToString(i7));
    }
-   
    
    #if DEBUG_PROP_PANEL
    ShowPropData("DisplayIntegratorData() exiting...");
@@ -1615,7 +1583,10 @@ void PropagationConfigPanel::DisplayForceData()
       DisplayPointMassData(); 
    
    if (forceList.empty())
+   {  	
+   	   DisplayErrorControlData();
       return;  
+   }
    
    DisplayPrimaryBodyData(); 
    DisplayGravityFieldData(currentBodyName); 
@@ -1950,6 +1921,20 @@ bool PropagationConfigPanel::SaveIntegratorData()
    }
 }
 
+//------------------------------------------------------------------------------
+// wxString ToString(Real rval)
+//------------------------------------------------------------------------------
+wxString PropagationConfigPanel::ToString(Real rval)
+{
+   wxString element;
+   std::stringstream buffer;
+   buffer.precision(GmatBase::GetDataPrecision());
+   
+   buffer << rval;
+   element.Printf ("%s",buffer.str().c_str());
+   return element;
+}
+
 
 //------------------------------------------------------------------------------
 // void OnIntegratorSelection(wxCommandEvent &event)
@@ -2140,7 +2125,6 @@ void PropagationConfigPanel::OnErrorControlSelection(wxCommandEvent &event)
       DisplayErrorControlData();
        
       isForceModelChanged = true;  
-      isErrorControlChanged = true;
       theApplyButton->Enable(true);
    }
 }
