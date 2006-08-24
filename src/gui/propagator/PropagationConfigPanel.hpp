@@ -275,7 +275,6 @@ private:
    bool isIntegratorChanged;
    bool isIntegratorDataChanged;
    bool isOriginChanged;
-   bool isErrorControlChanged;
 
    Propagator                     *thePropagator;
    PropSetup                      *thePropSetup;
@@ -317,6 +316,9 @@ private:
    void SaveDegOrder();
    void SavePotFile();
    bool SaveIntegratorData();
+   
+   // Converting Data
+   wxString ToString(Real rval);
    
    // Text control event method
    void OnIntegratorTextUpdate(wxCommandEvent &event);
