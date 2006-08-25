@@ -74,7 +74,7 @@ public:
                                            const std::string &useName);
     
 protected:
-   /// The name of the spacecraft that gets maneuvered
+   /// The name of the targeter
    std::string         targeterName;
    /// Name of the goal
    std::string         goalName;
