@@ -1143,7 +1143,8 @@ wxString OrbitPanel::ToString(Real rval)
 {
    wxString element;
    std::stringstream buffer;
-   buffer.precision(18);
+   // 8/21/06 - LTR changed to get the precision from GmatBase
+   buffer.precision(GmatBase::GetDataPrecision());     
    
    buffer << rval;
    element.Printf ("%s",buffer.str().c_str());
