@@ -92,6 +92,27 @@ public:
    virtual void        RunComplete();
     
 protected:
+   // Parameter IDs
+   enum  
+   {
+      SOLVER_NAME = GmatCommandParamCount,
+      VARIABLE_NAME,
+      INITIAL_VALUE,
+      PERTURBATION,
+      VARIABLE_MINIMUM,
+      VARIABLE_MAXIMUM,
+      VARIABLE_MAXIMUM_STEP,
+      ADDITIVE_SCALE_FACTOR,
+      MULTIPLICATIVE_SCALE_FACTOR,
+      VaryParamCount
+   };
+
+   static const std::string    PARAMETER_TEXT[VaryParamCount -
+                                              GmatCommandParamCount];
+   static const Gmat::ParameterType
+                               PARAMETER_TYPE[VaryParamCount -
+                                              GmatCommandParamCount];
+
    /// The name of the spacecraft that gets maneuvered
    std::string         solverName;
    /// Name(s) of the variable(s)
@@ -120,22 +141,26 @@ protected:
    Integer             variableID;
    /// Flag used to finalize the solver data during execution
    bool                solverDataFinalized;
+   /// additive scale factor for optimizers
+   std::vector<Real>   additiveScaleFactor;
+   /// multiplicative scale factor for optimizers
+   std::vector<Real>   multiplicativeScaleFactor;
     
-    // Parameter IDs 
+    // Parameter IDs // wcs 2006.08.23 all moved to enum
     /// ID for the burn object
-   const Integer       solverNameID;
+   //const Integer       solverNameID;
    /// ID for the burn object
-   const Integer       variableNameID;
+   //const Integer       variableNameID;
    /// ID for the burn object
-   const Integer       initialValueID;
+   //const Integer       initialValueID;
    /// ID for the burn object
-   const Integer       perturbationID;
+   //const Integer       perturbationID;
    /// ID for the burn object
-   const Integer       variableMinimumID;
+   //const Integer       variableMinimumID;
    /// ID for the burn object
-   const Integer       variableMaximumID;
+   //const Integer       variableMaximumID;
    /// ID for the burn object
-   const Integer       variableMaximumStepID;
+   //const Integer       variableMaximumStepID;
 };
 
 

@@ -30,6 +30,38 @@
 //#define DEBUG_VARY_EXECUTE 1
 
 //------------------------------------------------------------------------------
+//  static data
+//------------------------------------------------------------------------------
+const std::string Vary::PARAMETER_TEXT[VaryParamCount -
+                                              GmatCommandParamCount] = 
+{
+   "SolverName",
+   "Variable",
+   "InitialValue",
+   "Perturbation",
+   "MinimumValue",
+   "MaximumValue",
+   "MaximumChange",
+   "AdditiveScaleFactor",
+   "MutiplicativeScaleFactor"   
+};
+
+const Gmat::ParameterType Vary::PARAMETER_TYPE[VaryParamCount -
+                                               GmatCommandParamCount] = 
+{
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+};
+ 
+
+//------------------------------------------------------------------------------
 //  Vary(void)
 //------------------------------------------------------------------------------
 /**
@@ -37,31 +69,24 @@
  */
 //------------------------------------------------------------------------------
 Vary::Vary() :
-    GmatCommand             ("Vary"),
-    solverName              (""),
-    solver                  (NULL),
-    variableID              (-1),
-    solverNameID            (parameterCount),
-    variableNameID          (parameterCount+1),
-    initialValueID          (parameterCount+2),
-    perturbationID          (parameterCount+3),
-    variableMinimumID       (parameterCount+4),
-    variableMaximumID       (parameterCount+5),
-    variableMaximumStepID   (parameterCount+6)
+    GmatCommand               ("Vary"),
+    solverName                (""),
+    solver                    (NULL),
+    variableID                (-1)//,
+    //solverNameID            (parameterCount),
+    //variableNameID          (parameterCount+1),
+    //initialValueID          (parameterCount+2),
+    //perturbationID          (parameterCount+3),
+    //variableMinimumID       (parameterCount+4),
+    //variableMaximumID       (parameterCount+5),
+    //variableMaximumStepID   (parameterCount+6)
 {
-    parameterCount += 7;
+    //parameterCount += 7;
+    additiveScaleFactor.push_back(0.0);
+    multiplicativeScaleFactor.push_back(1.0);
+    parameterCount = VaryParamCount;
 }
 
-
-//------------------------------------------------------------------------------
-//  ~Vary(void)
-//------------------------------------------------------------------------------
-/**
- * Destroys the Vary command.  (destructor)
- */
-//------------------------------------------------------------------------------
-Vary::~Vary()
-{}
 
     
 //------------------------------------------------------------------------------
@@ -74,31 +99,35 @@ Vary::~Vary()
  */
 //------------------------------------------------------------------------------
 Vary::Vary(const Vary& t) :
-    GmatCommand             (t),
-    solverName              (t.solverName),
-    variableName            (t.variableName),
-    solver                  (NULL),
-    variableID              (-1),
-    solverDataFinalized     (t.solverDataFinalized),
-    solverNameID            (t.solverNameID),
-    variableNameID          (t.variableNameID),
-    initialValueID          (t.initialValueID),
-    perturbationID          (t.perturbationID),
-    variableMinimumID       (t.variableMinimumID),
-    variableMaximumID       (t.variableMaximumID),
-    variableMaximumStepID   (t.variableMaximumStepID)
+    GmatCommand               (t),
+    solverName                (t.solverName),
+    variableName              (t.variableName),
+    solver                    (NULL),
+    variableID                (-1),
+    solverDataFinalized       (t.solverDataFinalized)//,
+    //solverNameID            (t.solverNameID),
+    //variableNameID          (t.variableNameID),
+    //initialValueID          (t.initialValueID),
+    //perturbationID          (t.perturbationID),
+    //variableMinimumID       (t.variableMinimumID),
+    //variableMaximumID       (t.variableMaximumID),
+    //variableMaximumStepID   (t.variableMaximumStepID)
 {
     parameterCount = t.parameterCount;
     
-    initialValue.clear();
-    currentValue.clear();
-    perturbation.clear();
-    variableMinimum.clear();
-    variableMaximum.clear();
-    variableMaximumStep.clear();
-    variableId.clear();
-    pobject.clear();
-    parmId.clear();
+   initialValue.clear();
+   currentValue.clear();
+   perturbation.clear();
+   variableMinimum.clear();
+   variableMaximum.clear();
+   variableMaximumStep.clear();
+   variableId.clear();
+   pobject.clear();
+   parmId.clear();
+   //additiveScaleFactor.clear();
+   //multiplicativeScaleFactor.clear();
+   additiveScaleFactor       = t.additiveScaleFactor;
+   multiplicativeScaleFactor = t.multiplicativeScaleFactor;
 }
 
 
@@ -131,9 +160,25 @@ Vary& Vary::operator=(const Vary& t)
     variableId.clear();
     pobject.clear();
     parmId.clear();
+   //additiveScaleFactor.clear();
+   //multiplicativeScaleFactor.clear();
+   additiveScaleFactor       = t.additiveScaleFactor;
+   multiplicativeScaleFactor = t.multiplicativeScaleFactor;
     
     return *this;
 }
+
+//------------------------------------------------------------------------------
+//  ~Vary(void)
+//------------------------------------------------------------------------------
+/**
+ * Destroys the Vary command.  (destructor)
+ */
+//------------------------------------------------------------------------------
+Vary::~Vary()
+{
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -267,6 +312,9 @@ bool Vary::RenameRefObject(const Gmat::ObjectType type,
 //---------------------------------------------------------------------------
 std::string Vary::GetParameterText(const Integer id) const
 {
+   if ((id >= GmatCommandParamCount) && (id < VaryParamCount))
+      return PARAMETER_TEXT[id - GmatCommandParamCount];
+      /*
     if (id == solverNameID)
         return "SolverName";
         
@@ -287,7 +335,7 @@ std::string Vary::GetParameterText(const Integer id) const
         
     if (id == variableMaximumStepID)
         return "MaximumChange";
-
+   */
     return GmatCommand::GetParameterText(id);
 }
 
@@ -297,6 +345,12 @@ std::string Vary::GetParameterText(const Integer id) const
 //---------------------------------------------------------------------------
 Integer Vary::GetParameterID(const std::string &str) const
 {
+   for (Integer i = GmatCommandParamCount; i < VaryParamCount; ++i)
+   {
+      if (str == PARAMETER_TEXT[i - GmatCommandParamCount])
+         return i;
+   }
+   /*
     if (str == "SolverName")
         return solverNameID;
         
@@ -317,7 +371,7 @@ Integer Vary::GetParameterID(const std::string &str) const
         
     if (str == "MaximumChange")
         return variableMaximumStepID;
-
+   */
     return GmatCommand::GetParameterID(str);
 }
 
@@ -327,6 +381,9 @@ Integer Vary::GetParameterID(const std::string &str) const
 //---------------------------------------------------------------------------
 Gmat::ParameterType Vary::GetParameterType(const Integer id) const
 {
+   if ((id >= GmatCommandParamCount) && (id < VaryParamCount))
+      return PARAMETER_TYPE[id - GmatCommandParamCount];
+    /*
     if (id == solverNameID)
         return Gmat::STRING_TYPE;
         
@@ -347,7 +404,7 @@ Gmat::ParameterType Vary::GetParameterType(const Integer id) const
         
     if (id == variableMaximumStepID)
         return Gmat::REAL_TYPE;
-
+   */
     return GmatCommand::GetParameterType(id);
 }
 
@@ -357,6 +414,8 @@ Gmat::ParameterType Vary::GetParameterType(const Integer id) const
 //---------------------------------------------------------------------------
 std::string Vary::GetParameterTypeString(const Integer id) const
 {
+   return GmatCommand::PARAM_TYPE_STRING[GetParameterType(id)];
+   /*
     if (id == solverNameID)
         return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
         
@@ -383,6 +442,7 @@ std::string Vary::GetParameterTypeString(const Integer id) const
 
 
     return GmatCommand::GetParameterTypeString(id);
+    */
 }
 
 
@@ -391,25 +451,39 @@ std::string Vary::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 Real Vary::GetRealParameter(const Integer id) const
 {
-    if (id == initialValueID)
+    //if (id == initialValueID)
+    if (id == INITIAL_VALUE)
         if (!initialValue.empty())
             return initialValue[0];
         
-    if (id == perturbationID)
+    //if (id == perturbationID)
+    if (id == PERTURBATION)
         if (!perturbation.empty())
             return perturbation[0];
         
-    if (id == variableMinimumID)
+    //if (id == variableMinimumID)
+    if (id == VARIABLE_MINIMUM)
         if (!variableMinimum.empty())
             return variableMinimum[0];
         
-    if (id == variableMaximumID)
+    //if (id == variableMaximumID)
+    if (id == VARIABLE_MAXIMUM)
         if (!variableMaximum.empty())
             return variableMaximum[0];
         
-    if (id == variableMaximumStepID)
+    //if (id == variableMaximumStepID)
+    if (id == VARIABLE_MAXIMUM_STEP)
         if (!variableMaximumStep.empty())
             return variableMaximumStep[0];
+            
+   if (id == ADDITIVE_SCALE_FACTOR)
+      if (!additiveScaleFactor.empty())
+         return additiveScaleFactor[0];
+         
+   if (id == MULTIPLICATIVE_SCALE_FACTOR)
+      if (!multiplicativeScaleFactor.empty())
+         return multiplicativeScaleFactor[0];
+         
 
     return GmatCommand::GetRealParameter(id);
 }
@@ -420,7 +494,9 @@ Real Vary::GetRealParameter(const Integer id) const
 //---------------------------------------------------------------------------
 Real Vary::SetRealParameter(const Integer id, const Real value)
 {
-    if (id == initialValueID) {
+    //if (id == initialValueID) 
+    if (id == INITIAL_VALUE)
+    {
         if (!initialValue.empty())
             initialValue[0] = value;
         else
@@ -428,7 +504,9 @@ Real Vary::SetRealParameter(const Integer id, const Real value)
         return initialValue[0];
     }
             
-    if (id == perturbationID) {
+    //if (id == perturbationID)
+    if (id == PERTURBATION) 
+    {
         if (!perturbation.empty())
             perturbation[0] = value;
         else
@@ -436,7 +514,9 @@ Real Vary::SetRealParameter(const Integer id, const Real value)
         return perturbation[0];
     }
         
-    if (id == variableMinimumID) {
+    //if (id == variableMinimumID) 
+    if (id == VARIABLE_MINIMUM)
+    {
         if (!variableMinimum.empty())
             variableMinimum[0] = value;
         else
@@ -444,7 +524,9 @@ Real Vary::SetRealParameter(const Integer id, const Real value)
         return variableMinimum[0];
     }
         
-    if (id == variableMaximumID) {
+    //if (id == variableMaximumID) 
+    if (id == VARIABLE_MAXIMUM)
+    {
         if (!variableMaximum.empty())
             variableMaximum[0] = value;
         else
@@ -452,13 +534,33 @@ Real Vary::SetRealParameter(const Integer id, const Real value)
         return variableMaximum[0];
     }
         
-    if (id == variableMaximumStepID) {
+    //if (id == variableMaximumStepID) 
+    if (id == VARIABLE_MAXIMUM_STEP)
+    {
         if (!variableMaximumStep.empty())
             variableMaximumStep[0] = value;
         else
             variableMaximumStep.push_back(value);
         return variableMaximumStep[0];
     }
+    
+   if (id == ADDITIVE_SCALE_FACTOR)
+   {
+      if (!additiveScaleFactor.empty())
+         additiveScaleFactor[0] = value;
+      else
+         additiveScaleFactor.push_back(value);
+      return additiveScaleFactor[0];
+   }
+
+   if (id == MULTIPLICATIVE_SCALE_FACTOR)
+   {
+      if (!multiplicativeScaleFactor.empty())
+         multiplicativeScaleFactor[0] = value;
+      else
+         multiplicativeScaleFactor.push_back(value);
+      return multiplicativeScaleFactor[0];
+   }
 
     return GmatCommand::SetRealParameter(id, value);
 }
@@ -469,10 +571,12 @@ Real Vary::SetRealParameter(const Integer id, const Real value)
 //---------------------------------------------------------------------------
 std::string Vary::GetStringParameter(const Integer id) const
 {
-    if (id == solverNameID)
+    //if (id == solverNameID)
+    if (id == SOLVER_NAME)
         return solverName;
         
-    if (id == variableNameID)
+    //if (id == variableNameID)
+    if (id == VARIABLE_NAME)
         if (!variableName.empty())
             return variableName[0];
     
@@ -485,12 +589,16 @@ std::string Vary::GetStringParameter(const Integer id) const
 //---------------------------------------------------------------------------
 bool Vary::SetStringParameter(const Integer id, const std::string &value)
 {
-    if (id == solverNameID) {
+    //if (id == solverNameID) 
+    if (id == SOLVER_NAME)
+    {
         solverName = value;
         return true;
     }
     
-    if (id == variableNameID) {
+    //if (id == variableNameID) 
+    if (id == VARIABLE_NAME)
+    {
         if (!variableName.empty())
             variableName[0] = value;
         else
@@ -569,7 +677,8 @@ bool Vary::InterpretAction()
     std::string component = generatingString.substr(loc, end-loc);
     if (component == "")
         throw CommandException("Vary string does not identify the solver");
-    SetStringParameter(solverNameID, component);
+    //SetStringParameter(solverNameID, component);
+    SetStringParameter(SOLVER_NAME, component);
     
     // Find the variable
     loc = end + 1;
@@ -591,19 +700,24 @@ bool Vary::InterpretAction()
     loc = end + 1;
     
     Real value = atof(&str[loc]);
-    SetRealParameter(initialValueID, value);
+    //SetRealParameter(initialValueID, value);
+    SetRealParameter(INITIAL_VALUE, value);
 
     // Find perts
     loc = generatingString.find("Pert", strend);
     end = generatingString.find("=", loc);
     value = atof(&str[end+1]);
-    SetRealParameter(perturbationID, value);
+    //SetRealParameter(perturbationID, value);
+    SetRealParameter(PERTURBATION, value);
     
     // Min, max and step get default values unless they are specified
     value = 9.999e300;
-    SetRealParameter(variableMinimumID, -value);
-    SetRealParameter(variableMaximumID, value);
-    SetRealParameter(variableMaximumStepID, value);
+    //SetRealParameter(variableMinimumID, -value);
+    //SetRealParameter(variableMaximumID, value);
+    //SetRealParameter(variableMaximumStepID, value);
+    SetRealParameter(VARIABLE_MINIMUM, -value);
+    SetRealParameter(VARIABLE_MAXIMUM, value);
+    SetRealParameter(VARIABLE_MAXIMUM_STEP, value);
     
     #ifdef DEBUG_VARIABLE_RANGES
        MessageInterface::ShowMessage(
@@ -616,7 +730,8 @@ bool Vary::InterpretAction()
     {
        end = generatingString.find("=", loc);
        value = atof(&str[end+1]);
-       SetRealParameter(variableMaximumStepID, value);
+       //SetRealParameter(variableMaximumStepID, value);
+       SetRealParameter(VARIABLE_MAXIMUM_STEP, value);
     }
 
     loc = generatingString.find("Lower", strend);
@@ -624,7 +739,8 @@ bool Vary::InterpretAction()
     {
        end = generatingString.find("=", loc);
        value = atof(&str[end+1]);
-       SetRealParameter(variableMinimumID, value);
+       //SetRealParameter(variableMinimumID, value);
+       SetRealParameter(VARIABLE_MINIMUM, value);
     }
 
     loc = generatingString.find("Upper", strend);
@@ -632,9 +748,26 @@ bool Vary::InterpretAction()
     {
        end = generatingString.find("=", loc);
        value = atof(&str[end+1]);
-       SetRealParameter(variableMaximumID, value);
+       //SetRealParameter(variableMaximumID, value);
+       SetRealParameter(VARIABLE_MAXIMUM, value);
     }
     
+    loc = generatingString.find("AdditiveScaleFactor", strend);
+    if ((UnsignedInt)loc != std::string::npos)
+    {
+      end = generatingString.find("=", loc);
+      value = atof(&str[end+1]);
+      SetRealParameter(ADDITIVE_SCALE_FACTOR, value);
+    }
+    
+    loc = generatingString.find("MultiplicativeScaleFactor", strend);
+    if ((UnsignedInt)loc != std::string::npos)
+    {
+      end = generatingString.find("=", loc);
+      value = atof(&str[end+1]);
+      SetRealParameter(MULTIPLICATIVE_SCALE_FACTOR, value);
+    }
+
     #ifdef DEBUG_VARIABLE_RANGES
        MessageInterface::ShowMessage("Min, Max, Step = [%le  %le  %le]\n",
           variableMinimum[0], variableMaximum[0], variableMaximumStep[0]);
@@ -711,12 +844,15 @@ bool Vary::Execute(void)
         Real varData[5];
         //for (Integer i = 0; i < variableName.size(); ++i) {
         Integer i = 0;
-        {
-            varData[0] = initialValue[i];           // Initial value
-            varData[1] = perturbation[i];           // pert
-            varData[2] = variableMinimum[i];        // minimum
-            varData[3] = variableMaximum[i];        // maximum
-            varData[4] = variableMaximumStep[i];    // largest allowed step
+        { 
+            varData[0] = initialValue[i];              // Initial value
+            // scale by using Eq. 13.5 of Architecture document
+            varData[0] = (varData[0] + additiveScaleFactor[i]) / 
+                         multiplicativeScaleFactor[i];
+            varData[1] = perturbation[i];              // pert
+            varData[2] = variableMinimum[i];           // minimum
+            varData[3] = variableMaximum[i];           // maximum
+            varData[4] = variableMaximumStep[i];       // largest allowed step
             
             if (variableId.empty())
                variableId.push_back(-1);
@@ -782,6 +918,8 @@ bool Vary::Execute(void)
     }
     
     Real var = solver->GetSolverVariable(variableId[0]);
+    // scale using Eq. 13.6 of Architecture document
+    var = var * multiplicativeScaleFactor[0] - additiveScaleFactor[0];
     
 //    // Just a check here -- the solver handles all of these now
 //    if (variableMinimum[0] >= variableMaximum[0])
