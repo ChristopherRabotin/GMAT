@@ -73,6 +73,8 @@ public:
    static const int MAX_SUBSCRIBER = 40;   // MAX_REPORT_FILE + 20
    
    static GuiItemManager* GetInstance();
+
+   wxString ToWxString(Real rval);
    
    void UpdateAll();
    void UpdateCelestialPoint();
@@ -340,6 +342,8 @@ private:
    static GuiItemManager *theInstance;
    GuiInterpreter *theGuiInterpreter;
    SolarSystem *theSolarSystem;
+
+   Integer theDataPrecision;
    
    std::vector<wxListBox*> mSpaceObjectLBList;
    std::vector<wxListBox*> mSpacecraftLBList;

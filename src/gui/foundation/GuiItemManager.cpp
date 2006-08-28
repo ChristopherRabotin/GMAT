@@ -60,6 +60,21 @@ GuiItemManager* GuiItemManager::GetInstance()
 
 
 //------------------------------------------------------------------------------
+// wxString ToWxString(Real rval)
+//------------------------------------------------------------------------------
+wxString GuiItemManager::ToWxString(Real rval)
+{
+   wxString str;
+   std::stringstream ss;
+   ss.precision(theDataPrecision);
+   
+   ss << rval;
+   str.Printf("%s", ss.str().c_str());
+   return str;
+}
+
+
+//------------------------------------------------------------------------------
 //  void UpdateAll()
 //------------------------------------------------------------------------------
 /**
@@ -3385,8 +3400,9 @@ GuiItemManager::GuiItemManager()
    MessageInterface::ShowMessage("GuiItemManager::GuiItemManager() entered\n");
    #endif
    
+   theDataPrecision = GmatBase::GetDataPrecision();
+   
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-   //loj: 2/8/06 theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
    theSolarSystem = theGuiInterpreter->GetSolarSystemInUse();
    
    theNumScProperty = 0;
