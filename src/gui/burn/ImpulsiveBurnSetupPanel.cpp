@@ -360,28 +360,22 @@ void ImpulsiveBurnSetupPanel::LoadData()
          vectorFormatComboBox->SetSelection(0);
       else
          vectorFormatComboBox->SetSelection(1);
-
+      
       // Element1
       el = theBurn->GetParameterID("Element1");
       element = theBurn->GetRealParameter(el);
-      wxString el1;
-      el1.Printf("%f", element);
-      textCtrl1->SetValue(el1);
-    
+      textCtrl1->SetValue(theGuiManager->ToWxString(element));
+      
       // Element2
       el = theBurn->GetParameterID("Element2");
       element = theBurn->GetRealParameter(el);
-      wxString el2;
-      el2.Printf("%f", element);
-      textCtrl2->SetValue(el2);
-
+      textCtrl2->SetValue(theGuiManager->ToWxString(element));
+      
       // Element3
       el = theBurn->GetParameterID("Element3");
       element = theBurn->GetRealParameter(el);
-      wxString el3;
-      el3.Printf("%f", element);
-      textCtrl3->SetValue(el3);
-
+      textCtrl3->SetValue(theGuiManager->ToWxString(element));
+      
       LabelsUnits();
       
       // load central body

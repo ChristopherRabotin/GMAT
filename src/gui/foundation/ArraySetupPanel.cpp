@@ -224,8 +224,9 @@ void ArraySetupPanel::LoadData()
          
          // set value (wxTextCtrl)
          Real val = arrParam->GetRealParameter("SingleValue", 0, 0);
-         str.Printf("%g", val);
-         mArrValTextCtrl->SetValue(str);
+//          str.Printf("%g", val);
+//          mArrValTextCtrl->SetValue(str);
+         mArrValTextCtrl->SetValue(theGuiManager->ToWxString(val));
          
          #ifdef DEBUG_ARRAY_PANEL
          MessageInterface::ShowMessage("mNumRows=%d, mNumCols=%d\n",
@@ -236,16 +237,17 @@ void ArraySetupPanel::LoadData()
          mArrGrid->CreateGrid(mNumRows, mNumCols);
          
          int row, col;
-            
+         Real rval;
+         
          for (row=0; row<mNumRows; row++)
          {
-            str.Printf("%d", row+1); //loj: 7/21/05 changed to start from 1
+            str.Printf("%d", row+1);
             mArrGrid->SetRowLabelValue(row, str);
          }
          
          for (col=0; col<mNumCols; col++)
          {
-            str.Printf("%d", col+1); //loj: 7/21/05 changed to start from 1
+            str.Printf("%d", col+1);
             mArrGrid->SetColLabelValue(col, str);
          }
          
@@ -263,8 +265,10 @@ void ArraySetupPanel::LoadData()
                   ("==> val(%d,%d)=%f\n", row, col, mRmat.GetElement(row, col));
                #endif
                
-               str.Printf("%g", mRmat.GetElement(row, col));
-               mArrGrid->SetCellValue(row, col, str);
+               rval = mRmat.GetElement(row, col);
+//                str.Printf("%g", rval);
+//                mArrGrid->SetCellValue(row, col, str);
+               mArrGrid->SetCellValue(row, col, theGuiManager->ToWxString(rval));
             }
          }
       }
@@ -340,10 +344,14 @@ void ArraySetupPanel::OnComboBoxChange(wxCommandEvent& event)
    if (event.GetEventObject() == mRowComboBox ||
        event.GetEventObject() == mColComboBox)
    {
-      wxString str;
-      str.Printf("%g", mRmat.GetElement(mRowComboBox->GetSelection(),
-                                        mColComboBox->GetSelection()));
-      mArrValTextCtrl->SetValue(str);
+      Real rval = mRmat.GetElement(mRowComboBox->GetSelection(),
+                                   mColComboBox->GetSelection());
+      
+//       wxString str;
+//       str.Printf("%g", rval);
+//       mArrValTextCtrl->SetValue(str);
+      
+      mArrValTextCtrl->SetValue(theGuiManager->ToWxString(rval));
    }
 }
 
@@ -389,7 +397,8 @@ void ArraySetupPanel::OnGridCellChange(wxGridEvent& event)
    else
    {
       wxLogError(wxT("Please enter a valid number."));
-      strVal.Printf("%g", mRmat.GetElement(row, col));
+//       strVal.Printf("%g", mRmat.GetElement(row, col));
+      strVal = theGuiManager->ToWxString(mRmat.GetElement(row, col));
       mArrGrid->SetCellValue(row, col, strVal);
       wxLog::FlushActive();
    }

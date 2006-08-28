@@ -332,25 +332,14 @@ void VaryPanel::SaveData()
 //------------------------------------------------------------------------------
 void VaryPanel::ShowVariableSetup()
 {
-   wxString str;
-   
    mSolverComboBox->SetStringSelection(mSolverData.solverName);
    mVarNameTextCtrl->SetValue(mSolverData.varName);
    
-   str.Printf("%g", mSolverData.initialValue);
-   mInitialTextCtrl->SetValue(str);
-   
-   str.Printf("%g", mSolverData.pert);
-   mPertTextCtrl->SetValue(str);
-  
-   str.Printf("%g", mSolverData.minValue);
-   mMinValueTextCtrl->SetValue(str);
-   
-   str.Printf("%g", mSolverData.maxValue);
-   mMaxValueTextCtrl->SetValue(str);
-   
-   str.Printf("%g", mSolverData.maxStep);
-   mMaxStepTextCtrl->SetValue(str);
+   mInitialTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.initialValue));
+   mPertTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.pert));
+   mMinValueTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.minValue));
+   mMaxValueTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.maxValue));
+   mMaxStepTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.maxStep));
 }
 
 //---------------------------------

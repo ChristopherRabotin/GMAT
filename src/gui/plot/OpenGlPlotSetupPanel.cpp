@@ -764,6 +764,8 @@ void OpenGlPlotSetupPanel::LoadData()
    {
       // load data from the core engine
       wxString str;
+      Real rval;
+      
       str.Printf("%d", mOpenGlPlot->GetIntegerParameter("DataCollectFrequency"));
       mDataCollectFreqTextCtrl->SetValue(str);
       str.Printf("%d", mOpenGlPlot->GetIntegerParameter("UpdatePlotFrequency"));
@@ -786,8 +788,6 @@ void OpenGlPlotSetupPanel::LoadData()
          SetValue(mOpenGlPlot->GetStringParameter("Grid") == "On");
       mEarthSunLinesCheckBox->
          SetValue(mOpenGlPlot->GetStringParameter("EarthSunLines") == "On");
-      //mOverlapCheckBox->
-      //   SetValue(mOpenGlPlot->GetStringParameter("Overlap") == "On");
       mUseInitialViewCheckBox->
          SetValue(mOpenGlPlot->GetStringParameter("UseInitialView") == "On");
       mPerspectiveModeCheckBox->
@@ -795,8 +795,8 @@ void OpenGlPlotSetupPanel::LoadData()
       mUseFixedFovCheckBox->
          SetValue(mOpenGlPlot->GetStringParameter("UseFixedFov") == "On");
       
-      str.Printf("%g", mOpenGlPlot->GetRealParameter("FixedFovAngle"));
-      mFixedFovTextCtrl->SetValue(str);
+      rval = mOpenGlPlot->GetRealParameter("FixedFovAngle");
+      mFixedFovTextCtrl->SetValue(theGuiManager->ToWxString(rval));
       
       mCoordSysComboBox->SetStringSelection
          (mOpenGlPlot->GetStringParameter("CoordinateSystem").c_str());
@@ -818,24 +818,24 @@ void OpenGlPlotSetupPanel::LoadData()
          SetStringSelection(mOpenGlPlot->GetStringParameter("ViewPointVector").c_str());
       mViewDirectionComboBox->
          SetStringSelection(mOpenGlPlot->GetStringParameter("ViewDirection").c_str());
-      
-      str.Printf("%g", mOpenGlPlot->GetRealParameter("ViewScaleFactor"));
-      mViewScaleFactorTextCtrl->SetValue(str);
+
+      rval = mOpenGlPlot->GetRealParameter("ViewScaleFactor");
+      mViewScaleFactorTextCtrl->SetValue(theGuiManager->ToWxString(rval));
       
       // show vector if viewpoint vector name is Vector
       if (mViewPointRefComboBox->GetStringSelection() == "Vector")
       {
          Rvector vec = mOpenGlPlot->GetRvectorParameter("ViewPointRefVector");
+         
+         #if DEBUG_OPENGL_PANEL_LOAD
          MessageInterface::ShowMessage
             ("OpenGlPlotSetupPanel::LoadData() ViewPointRefVector = %s\n",
              vec.ToString().c_str());
-         wxString str;
-         str.Printf("%g", vec[0]);
-         mViewPointRef1TextCtrl->SetValue(str);
-         str.Printf("%g", vec[1]);
-         mViewPointRef2TextCtrl->SetValue(str);
-         str.Printf("%g", vec[2]);
-         mViewPointRef3TextCtrl->SetValue(str);
+         #endif
+         
+         mViewPointRef1TextCtrl->SetValue(theGuiManager->ToWxString(vec[0]));
+         mViewPointRef2TextCtrl->SetValue(theGuiManager->ToWxString(vec[1]));
+         mViewPointRef3TextCtrl->SetValue(theGuiManager->ToWxString(vec[2]));
 
          mViewDefSizer->Show(mViewPointRefSizer, true);
       }
@@ -855,14 +855,10 @@ void OpenGlPlotSetupPanel::LoadData()
              vec.ToString().c_str());
          #endif
          
-         wxString str;
-         str.Printf("%g", vec[0]);
-         mViewPointVec1TextCtrl->SetValue(str);
-         str.Printf("%g", vec[1]);
-         mViewPointVec2TextCtrl->SetValue(str);
-         str.Printf("%g", vec[2]);
-         mViewPointVec3TextCtrl->SetValue(str);
-
+         mViewPointVec1TextCtrl->SetValue(theGuiManager->ToWxString(vec[0]));
+         mViewPointVec2TextCtrl->SetValue(theGuiManager->ToWxString(vec[1]));
+         mViewPointVec3TextCtrl->SetValue(theGuiManager->ToWxString(vec[2]));
+         
          mViewDefSizer->Show(mViewPointVectorSizer, true);
       }
       else
@@ -874,13 +870,9 @@ void OpenGlPlotSetupPanel::LoadData()
       if (mViewDirectionComboBox->GetStringSelection() == "Vector")
       {
          Rvector vec = mOpenGlPlot->GetRvectorParameter("ViewDirectionVector");
-         wxString str;
-         str.Printf("%g", vec[0]);
-         mViewDir1TextCtrl->SetValue(str);
-         str.Printf("%g", vec[1]);
-         mViewDir2TextCtrl->SetValue(str);
-         str.Printf("%g", vec[2]);
-         mViewDir3TextCtrl->SetValue(str);
+         mViewDir1TextCtrl->SetValue(theGuiManager->ToWxString(vec[0]));
+         mViewDir2TextCtrl->SetValue(theGuiManager->ToWxString(vec[1]));
+         mViewDir3TextCtrl->SetValue(theGuiManager->ToWxString(vec[2]));
          
          mViewDefSizer->Show(mViewDirVectorSizer, true);
       }

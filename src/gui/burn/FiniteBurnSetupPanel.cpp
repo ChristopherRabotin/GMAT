@@ -86,13 +86,13 @@ FiniteBurnSetupPanel::~FiniteBurnSetupPanel()
 //------------------------------------------------------------------------------
 void FiniteBurnSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 {
-	if (event.GetEventObject() == mAxesComboBox)
+        if (event.GetEventObject() == mAxesComboBox)
    {
       // get the string of the combo box selections
       wxString axesStr = mAxesComboBox->GetStringSelection();
       
-	   // get the ID of the axes parameter 
-	   Integer id = theBurn->GetParameterID("Axes");
+           // get the ID of the axes parameter 
+           Integer id = theBurn->GetParameterID("Axes");
       
       if (axesStr == "Inertial")
          theBurn->SetStringParameter(id, "Inertial");
@@ -105,11 +105,11 @@ void FiniteBurnSetupPanel::OnComboBoxChange(wxCommandEvent& event)
    }
    else if (event.GetEventObject() == mThrusterComboBox)
    {
-   	   if (!isThrusterEmpty)
-   	   {
+           if (!isThrusterEmpty)
+           {
          thrusterSelected = mThrusterComboBox->GetStringSelection().c_str();
          theApplyButton->Enable();
-   	   }
+           }
    }
 }
 
@@ -281,7 +281,7 @@ void FiniteBurnSetupPanel::LoadData()
       
       if (mThrusterComboBox->IsEmpty())
       {
-   	      mThrusterComboBox->Insert(wxT("No Thrusters Available"), 0);
+              mThrusterComboBox->Insert(wxT("No Thrusters Available"), 0);
          mThrusterComboBox->SetSelection(0);
          isThrusterEmpty = true;
       }
@@ -315,9 +315,7 @@ void FiniteBurnSetupPanel::LoadData()
       // load burn scale factor
       Integer bsfID = theBurn->GetParameterID("BurnScaleFactor");
       Real bsf = theBurn->GetRealParameter(bsfID);
-      wxString bsfStr;
-      bsfStr.Printf("%f", bsf);
-      scaleTextCtrl->SetValue(bsfStr);
+      scaleTextCtrl->SetValue(theGuiManager->ToWxString(bsf));
       
       // load central body
       Integer burnOriginID = theBurn->GetParameterID("Origin");

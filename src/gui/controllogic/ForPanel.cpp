@@ -132,161 +132,165 @@ void ForPanel::Setup( wxWindow *parent)
 //------------------------------------------------------------------------------
 void ForPanel::LoadData()
 {
-    // Set the pointer for the "Show Script" button
-    mObject = theForCommand;
+   // Set the pointer for the "Show Script" button
+   mObject = theForCommand;
 
-    if (theForCommand != NULL)
-    {
-       Integer paramId;
-       wxString s1, s2, s3;
+   if (theForCommand != NULL)
+   {
+      Integer paramId;
+      wxString str;
 
-       paramId = theForCommand->GetParameterID("IndexName");
-       mIndexString = theForCommand->GetStringParameter(paramId).c_str();
+      paramId = theForCommand->GetParameterID("IndexName");
+      mIndexString = theForCommand->GetStringParameter(paramId).c_str();
 
-       if (mIndexString.IsEmpty())
-       {
-          mIndexString = "Default";
-          mIndexIsSet = false;
-       } 
-       else
-       {
-          mIndexIsSet = true;  
+      if (mIndexString.IsEmpty())
+      {
+         mIndexString = "Default";
+         mIndexIsSet = false;
+      } 
+      else
+      {
+         mIndexIsSet = true;  
           
-          paramId = theForCommand->GetParameterID("IndexIsParam");
-          mIndexIsParam = theForCommand->GetBooleanParameter(paramId);
+         paramId = theForCommand->GetParameterID("IndexIsParam");
+         mIndexIsParam = theForCommand->GetBooleanParameter(paramId);
           
-          if (mIndexIsParam)
-          {
-             Parameter *param = (Parameter*)theForCommand->GetRefObject
-                             (Gmat::PARAMETER, mIndexString.c_str());
+         if (mIndexIsParam)
+         {
+            Parameter *param = (Parameter*)theForCommand->GetRefObject
+               (Gmat::PARAMETER, mIndexString.c_str());
                 
-             mIndexString = param->GetName().c_str();
-          }  
-       }    
-       conditionGrid->SetCellValue(0, INDEX_COL, mIndexString); 
+            mIndexString = param->GetName().c_str();
+         }  
+      }    
+      conditionGrid->SetCellValue(0, INDEX_COL, mIndexString); 
     
-       paramId = theForCommand->GetParameterID("StartIsParam");
-       mStartIsParam = theForCommand->GetBooleanParameter(paramId);
+      paramId = theForCommand->GetParameterID("StartIsParam");
+      mStartIsParam = theForCommand->GetBooleanParameter(paramId);
           
-       if (mStartIsParam)
-       {
-           paramId = theForCommand->GetParameterID("StartName");
-           mStartString = theForCommand->GetStringParameter(paramId).c_str();
+      if (mStartIsParam)
+      {
+         paramId = theForCommand->GetParameterID("StartName");
+         mStartString = theForCommand->GetStringParameter(paramId).c_str();
  
-           Parameter *param = (Parameter*)theForCommand->GetRefObject
-                             (Gmat::PARAMETER, mStartString.c_str());
+         Parameter *param = (Parameter*)theForCommand->GetRefObject
+            (Gmat::PARAMETER, mStartString.c_str());
            
-           mStartString = param->GetName().c_str(); 
-           conditionGrid->SetCellValue(0, START_COL, mStartString); 
-       }
-       else
-       {    
-          paramId = theForCommand->GetParameterID("StartValue");
-          mStartValue = theForCommand->GetRealParameter(paramId);
-          s1.Printf("%.10f", mStartValue);
-          conditionGrid->SetCellValue(0, START_COL, s1); 
-       }    
-       
-       paramId = theForCommand->GetParameterID("IncrIsparam");
-       mIncrIsParam = theForCommand->GetBooleanParameter(paramId);
+         mStartString = param->GetName().c_str(); 
+         conditionGrid->SetCellValue(0, START_COL, mStartString); 
+      }
+      else
+      {    
+         paramId = theForCommand->GetParameterID("StartValue");
+         mStartValue = theForCommand->GetRealParameter(paramId);
+         //str.Printf("%.10f", mStartValue);
+         str = theGuiManager->ToWxString(mStartValue);
+         conditionGrid->SetCellValue(0, START_COL, str); 
+      }    
+      
+      paramId = theForCommand->GetParameterID("IncrIsparam");
+      mIncrIsParam = theForCommand->GetBooleanParameter(paramId);
 
-       if (mIncrIsParam)
-       {
-           paramId = theForCommand->GetParameterID("IncrementName");
-           mIncrString = theForCommand->GetStringParameter(paramId).c_str();
+      if (mIncrIsParam)
+      {
+         paramId = theForCommand->GetParameterID("IncrementName");
+         mIncrString = theForCommand->GetStringParameter(paramId).c_str();
            
-           Parameter *param = (Parameter*)theForCommand->GetRefObject
-                             (Gmat::PARAMETER, mIncrString.c_str());
-           mIncrString = param->GetName().c_str();
-           conditionGrid->SetCellValue(0, INCR_COL, mIncrString); 
-       }
-       else
-       {    
-          paramId = theForCommand->GetParameterID("Step");
-          mIncrValue = theForCommand->GetRealParameter(paramId);
-          s2.Printf("%.10f", mIncrValue);
-          conditionGrid->SetCellValue(0, INCR_COL, s2); 
-       }    
+         Parameter *param = (Parameter*)theForCommand->GetRefObject
+            (Gmat::PARAMETER, mIncrString.c_str());
+         mIncrString = param->GetName().c_str();
+         conditionGrid->SetCellValue(0, INCR_COL, mIncrString); 
+      }
+      else
+      {    
+         paramId = theForCommand->GetParameterID("Step");
+         mIncrValue = theForCommand->GetRealParameter(paramId);
+         //str.Printf("%.10f", mIncrValue);
+         str = theGuiManager->ToWxString(mIncrValue);
+         conditionGrid->SetCellValue(0, INCR_COL, str); 
+      }    
+      
+      paramId = theForCommand->GetParameterID("EndIsParam");
+      mEndIsParam = theForCommand->GetBooleanParameter(paramId);
        
-       paramId = theForCommand->GetParameterID("EndIsParam");
-       mEndIsParam = theForCommand->GetBooleanParameter(paramId);
-       
-       if (mEndIsParam)
-       {
-           paramId = theForCommand->GetParameterID("EndName");
-           mEndString = theForCommand->GetStringParameter(paramId).c_str();
+      if (mEndIsParam)
+      {
+         paramId = theForCommand->GetParameterID("EndName");
+         mEndString = theForCommand->GetStringParameter(paramId).c_str();
            
-           Parameter *param = (Parameter*)theForCommand->GetRefObject
-                             (Gmat::PARAMETER, mEndString.c_str());
-           mEndString = param->GetName().c_str(); 
-           conditionGrid->SetCellValue(0, END_COL, mEndString);
-       }
-       else
-       {    
-          paramId = theForCommand->GetParameterID("EndValue");
-          mEndValue = theForCommand->GetRealParameter(paramId);
-          s3.Printf("%.10f", mEndValue);
-          conditionGrid->SetCellValue(0, END_COL, s3);
-       }   
-    }
+         Parameter *param = (Parameter*)theForCommand->GetRefObject
+            (Gmat::PARAMETER, mEndString.c_str());
+         mEndString = param->GetName().c_str(); 
+         conditionGrid->SetCellValue(0, END_COL, mEndString);
+      }
+      else
+      {    
+         paramId = theForCommand->GetParameterID("EndValue");
+         mEndValue = theForCommand->GetRealParameter(paramId);
+         //str.Printf("%.10f", mEndValue);
+         str = theGuiManager->ToWxString(mEndValue);
+         conditionGrid->SetCellValue(0, END_COL, str);
+      }   
+   }
 }
+
 
 //------------------------------------------------------------------------------
 // void SaveData()
 //------------------------------------------------------------------------------
 void ForPanel::SaveData()
 {
-    Integer paramId;
+   Integer paramId;
     
-    if (mIndexIsSet)
-    {
-       if (mIndexIsParam)
-       {    
-          paramId = theForCommand->GetParameterID("IndexName");
-          theForCommand->SetStringParameter(paramId, mIndexString.c_str());
-          Parameter* theParam = theGuiInterpreter->GetParameter(mIndexString.c_str());
-          theForCommand->SetRefObject(theParam, Gmat::PARAMETER, mIndexString.c_str());
-       }    
-    }    
+   if (mIndexIsSet)
+   {
+      if (mIndexIsParam)
+      {    
+         paramId = theForCommand->GetParameterID("IndexName");
+         theForCommand->SetStringParameter(paramId, mIndexString.c_str());
+         Parameter* theParam = theGuiInterpreter->GetParameter(mIndexString.c_str());
+         theForCommand->SetRefObject(theParam, Gmat::PARAMETER, mIndexString.c_str());
+      }    
+   }    
     
-    if (mStartIsParam)
-    {
-       paramId = theForCommand->GetParameterID("StartName");
-       theForCommand->SetStringParameter(paramId, mStartString.c_str());
-       Parameter* theParam = theGuiInterpreter->GetParameter(mStartString.c_str());
-       theForCommand->SetRefObject(theParam, Gmat::PARAMETER, mStartString.c_str());
-    }
-    else
-    {    
-       paramId = theForCommand->GetParameterID("StartValue");
-       theForCommand->SetRealParameter(paramId, mStartValue);
-    }   
+   if (mStartIsParam)
+   {
+      paramId = theForCommand->GetParameterID("StartName");
+      theForCommand->SetStringParameter(paramId, mStartString.c_str());
+      Parameter* theParam = theGuiInterpreter->GetParameter(mStartString.c_str());
+      theForCommand->SetRefObject(theParam, Gmat::PARAMETER, mStartString.c_str());
+   }
+   else
+   {    
+      paramId = theForCommand->GetParameterID("StartValue");
+      theForCommand->SetRealParameter(paramId, mStartValue);
+   }   
     
-    if (mIncrIsParam)
-    {
-       paramId = theForCommand->GetParameterID("IncrementName");
-       theForCommand->SetStringParameter(paramId, mIncrString.c_str());
-       Parameter* theParam = theGuiInterpreter->GetParameter(mIncrString.c_str());
-       theForCommand->SetRefObject(theParam, Gmat::PARAMETER, mIncrString.c_str());
-    }
-    else
-    {        
-       paramId = theForCommand->GetParameterID("Step");
-       theForCommand->SetRealParameter(paramId, mIncrValue);
-    }    
+   if (mIncrIsParam)
+   {
+      paramId = theForCommand->GetParameterID("IncrementName");
+      theForCommand->SetStringParameter(paramId, mIncrString.c_str());
+      Parameter* theParam = theGuiInterpreter->GetParameter(mIncrString.c_str());
+      theForCommand->SetRefObject(theParam, Gmat::PARAMETER, mIncrString.c_str());
+   }
+   else
+   {        
+      paramId = theForCommand->GetParameterID("Step");
+      theForCommand->SetRealParameter(paramId, mIncrValue);
+   }    
     
-    if (mEndIsParam)
-    {
-       paramId = theForCommand->GetParameterID("EndName");
-       theForCommand->SetStringParameter(paramId, mEndString.c_str());
-       Parameter* theParam = theGuiInterpreter->GetParameter(mEndString.c_str());
-       theForCommand->SetRefObject(theParam, Gmat::PARAMETER, mEndString.c_str());
-    }
-    else
-    {    
-       paramId = theForCommand->GetParameterID("EndValue");
-       theForCommand->SetRealParameter(paramId, mEndValue);
-    }    
+   if (mEndIsParam)
+   {
+      paramId = theForCommand->GetParameterID("EndName");
+      theForCommand->SetStringParameter(paramId, mEndString.c_str());
+      Parameter* theParam = theGuiInterpreter->GetParameter(mEndString.c_str());
+      theForCommand->SetRefObject(theParam, Gmat::PARAMETER, mEndString.c_str());
+   }
+   else
+   {    
+      paramId = theForCommand->GetParameterID("EndValue");
+      theForCommand->SetRealParameter(paramId, mEndValue);
+   }    
 }
 
 //------------------------------------------------------------------------------
@@ -312,15 +316,16 @@ void ForPanel::OnCellLeftClick(wxGridEvent& event)
    theApplyButton->Enable(true);
    
    //Integer paramId;
-   wxString s1, s2, s3;
+   wxString str;
    
    if (col == START_COL)
    {
       //paramId = theForCommand->GetParameterID("StartValue");
       //mStartValue = theForCommand->GetRealParameter(paramId);
       mStartValue = realVal;
-      s1.Printf("%.10f", mStartValue);
-      conditionGrid->SetCellValue(row, START_COL, s1); 
+      //str.Printf("%.10f", mStartValue);
+      str = theGuiManager->ToWxString(mStartValue);
+      conditionGrid->SetCellValue(row, START_COL, str); 
       
       mStartIsParam = false;
       mStartString = conditionGrid->GetCellValue(row, START_COL);
@@ -330,8 +335,9 @@ void ForPanel::OnCellLeftClick(wxGridEvent& event)
       //paramId = theForCommand->GetParameterID("Step");
       //mIncrValue = theForCommand->GetRealParameter(paramId);
       mIncrValue = realVal;
-      s2.Printf("%.10f", mIncrValue);
-      conditionGrid->SetCellValue(row, INCR_COL, s2); 
+      //str.Printf("%.10f", mIncrValue);
+      str =  theGuiManager->ToWxString(mIncrValue);
+      conditionGrid->SetCellValue(row, INCR_COL, str); 
       
       mIncrIsParam = false;
       mIncrString = conditionGrid->GetCellValue(row, INCR_COL);
@@ -341,13 +347,15 @@ void ForPanel::OnCellLeftClick(wxGridEvent& event)
       //paramId = theForCommand->GetParameterID("EndValue");
       //mEndValue = theForCommand->GetRealParameter(paramId);
       mEndValue = realVal;
-      s3.Printf("%.10f", mEndValue);
-      conditionGrid->SetCellValue(row, END_COL, s3);
+      //str.Printf("%.10f", mEndValue);
+      str =  theGuiManager->ToWxString(mEndValue);
+      conditionGrid->SetCellValue(row, END_COL, str);
       
       mEndIsParam = false;
       mEndString = conditionGrid->GetCellValue(row, END_COL);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnCellRightClick(wxGridEvent& event)

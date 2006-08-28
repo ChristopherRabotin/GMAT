@@ -292,8 +292,10 @@ void AchievePanel::ShowGoalSetup()
 
    mGoalValueTextCtrl->SetValue(mSolverData.goalValue);
    
-   str.Printf("%g", mSolverData.tolerance);
-   mToleranceTextCtrl->SetValue(str);
+//    str.Printf("%g", mSolverData.tolerance);
+//    mToleranceTextCtrl->SetValue(str);
+   
+   mToleranceTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.tolerance));
    
 }
 
