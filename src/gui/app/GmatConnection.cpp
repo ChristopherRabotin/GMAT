@@ -111,6 +111,10 @@ bool GmatConnection::OnPoke(const wxString& WXUNUSED(topic),
    {
       GmatInterface::Instance()->RunScript();
    }
+   else if (strcmp(data, "Callback;") == 0)
+   {
+      GmatInterface::Instance()->ExecuteCallback();
+   }
    else
    {
       GmatInterface::Instance()->PutScript((char*)data);
@@ -165,6 +169,15 @@ wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
          ("GmatConnection::OnRequest() data=%s\n", data);
       #endif
    }
+   else if (item == "CallbackStatus") //wcs: 2006.08.24 Added
+   {
+      data = GmatInterface::Instance()->GetCallbackStatus();
+      
+      #if DEBUG_CONNECTION
+      MessageInterface::ShowMessage
+         ("GmatConnection::OnRequest() data=%s\n", data);
+      #endif
+   }
    else
    {
       data = GmatInterface::Instance()->GetParameter(std::string(item.c_str()));
@@ -188,8 +201,8 @@ bool GmatConnection::OnStartAdvise(const wxString& WXUNUSED(topic),
    //char* data = GmatInterface::Instance()->GetRunState();
    
    #if DEBUG_CONNECTION
-   MessageInterface::ShowMessage
-      ("GmatConnection::OnStartAdvise() data=%s\n", data);
+   //MessageInterface::ShowMessage
+   //   ("GmatConnection::OnStartAdvise() data=%s\n", data);
    #endif
    
    return TRUE;
