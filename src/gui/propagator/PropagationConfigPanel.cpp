@@ -1583,8 +1583,8 @@ void PropagationConfigPanel::DisplayForceData()
       DisplayPointMassData(); 
    
    if (forceList.empty())
-   {  	
-   	   DisplayErrorControlData();
+   {    
+           DisplayErrorControlData();
       return;  
    }
    
@@ -1926,13 +1926,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
 //------------------------------------------------------------------------------
 wxString PropagationConfigPanel::ToString(Real rval)
 {
-   wxString element;
-   std::stringstream buffer;
-   buffer.precision(GmatBase::GetDataPrecision());
-   
-   buffer << rval;
-   element.Printf ("%s",buffer.str().c_str());
-   return element;
+   return theGuiManager->ToWxString(rval);
 }
 
 
@@ -2115,7 +2109,7 @@ void PropagationConfigPanel::OnErrorControlSelection(wxCommandEvent &event)
 
    if (errorControlTypeName != eType)
    {    
-   	   #if DEBUG_PROP_PANEL
+           #if DEBUG_PROP_PANEL
       MessageInterface::ShowMessage
          ("OnErrorControlSelection() error control changed from=%s to=%s\n",
           errorControlTypeName.c_str(), eType.c_str());

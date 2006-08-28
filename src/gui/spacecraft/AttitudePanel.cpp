@@ -95,83 +95,85 @@ AttitudePanel::~AttitudePanel()
 //------------------------------------------------------------------------------
 void AttitudePanel::Create()
 { 
-        #if DEBUG_ATTITUDE_PANEL
+   #if DEBUG_ATTITUDE_PANEL
    MessageInterface::ShowMessage("AttitudePanel::Create() entered\n");
    #endif
    
    #if DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage("AttitudePanel::Create() Creating wxStaticText objects.\n");
+   MessageInterface::ShowMessage
+      ("AttitudePanel::Create() Creating wxStaticText objects.\n");
    #endif
    
-        // arrays to hold temporary values
+   // arrays to hold temporary values
    unsigned int x;
    for (x = 0; x < 3; ++x)
    {
-          eulerAngles[x] = new wxString();
-          eulerAngleRates[x] = new wxString();
-          quaternions[x] = new wxString();
-          cosineMatrix[x] = new wxString();
-          angVel[x] = new wxString();
+      eulerAngles[x] = new wxString();
+      eulerAngleRates[x] = new wxString();
+      quaternions[x] = new wxString();
+      cosineMatrix[x] = new wxString();
+      angVel[x] = new wxString();
    }
    quaternions[3] = new wxString();
    cosineMatrix[3] = new wxString();
    for (x = 4; x < 9; ++x)
    {
-          cosineMatrix[x] = new wxString();
+      cosineMatrix[x] = new wxString();
    }
    
-    //wxStaticText
-         config1StaticText =
+   //wxStaticText
+   config1StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Attitude Mode"),
                         wxDefaultPosition, wxDefaultSize, 0);
-    config2StaticText =
+   config2StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Coordinate System"),
                         wxDefaultPosition, wxDefaultSize, 0);
-    config3StaticText =
+   config3StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Kinematic Attitude Type"),
                         wxDefaultPosition, wxDefaultSize, 0);
-    config4StaticText =
+   config4StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Euler Angle Sequence"),
                         wxDefaultPosition, wxDefaultSize, 0);
-    stateTypeStaticText =
+   stateTypeStaticText =
       new wxStaticText( this, ID_TEXT, wxT("Attitude State Type"),
                         wxDefaultPosition, wxDefaultSize, 0);
-    stateTypeRate4StaticText =
+   stateTypeRate4StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Attitude Rate State Type"),
                         wxDefaultPosition, wxDefaultSize, 0);
-    st1StaticText =
+   st1StaticText =
       new wxStaticText( this, ID_TEXT, wxT("String 1"),
                         wxDefaultPosition, wxSize(80,20), 0);
-    st2StaticText =
+   st2StaticText =
       new wxStaticText( this, ID_TEXT, wxT("String 2"),
                         wxDefaultPosition, wxSize(80,20), 0);
-    st3StaticText =
+   st3StaticText =
       new wxStaticText( this, ID_TEXT, wxT("String 3"),
                         wxDefaultPosition, wxSize(80,20), 0);
-    st4StaticText =
+   st4StaticText =
       new wxStaticText( this, ID_TEXT, wxT("String 4"),
                         wxDefaultPosition, wxSize(80,20), 0);
-    col1StaticText =
+   col1StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Column 1"),
                         wxDefaultPosition, wxSize(80,20), 0);
-    col2StaticText =
+   col2StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Column 2"),
                         wxDefaultPosition, wxSize(80,20), 0);
-    col3StaticText =
+   col3StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Column 3"),
                         wxDefaultPosition, wxSize(80,20), 0);
-    str1StaticText =
+   str1StaticText =
       new wxStaticText( this, ID_TEXT, wxT("String 1"),
                         wxDefaultPosition, wxSize(125,20), 0);
-    str2StaticText =
+   str2StaticText =
       new wxStaticText( this, ID_TEXT, wxT("String 2"),
                         wxDefaultPosition, wxSize(125,20), 0);
-    str3StaticText =
+   str3StaticText =
       new wxStaticText( this, ID_TEXT, wxT("String 3"),
                         wxDefaultPosition, wxSize(125,20), 0);
 
    #if DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage("AttitudePanel::Create() Creating wxTextCtrl objects\n");
+   MessageInterface::ShowMessage
+      ("AttitudePanel::Create() Creating wxTextCtrl objects\n");
    #endif
    
    //wxTextCtrl
@@ -228,7 +230,8 @@ void AttitudePanel::Create()
            new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
 
    #if DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage("AttitudePanel::Create() Creating wxString objects\n");
+   MessageInterface::ShowMessage
+      ("AttitudePanel::Create() Creating wxString objects\n");
    #endif
 
    //StringArray Initialization
@@ -260,7 +263,8 @@ void AttitudePanel::Create()
       estArray[i] = eulerSequenceStringArray[i].c_str();
       
    #if DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage("AttitudePanel::Create() Creating wxComboBox objects.\n");
+   MessageInterface::ShowMessage
+      ("AttitudePanel::Create() Creating wxComboBox objects.\n");
    #endif
    
    //wxComboBox
@@ -278,7 +282,8 @@ void AttitudePanel::Create()
    stateTypeComboBox = new wxComboBox( this, ID_CB_ST, wxT(stArray[STARTUP_STATE_TYPE_SELECTION]),
                       wxDefaultPosition, wxSize(180,20), StateTypeCount,
                       stArray, wxCB_DROPDOWN|wxCB_READONLY );
-   stateTypeRateComboBox = new wxComboBox( this, ID_CB_STR, wxT(strArray[STARTUP_RATE_STATE_TYPE_SELECTION]),
+   stateTypeRateComboBox =
+      new wxComboBox( this, ID_CB_STR, wxT(strArray[STARTUP_RATE_STATE_TYPE_SELECTION]),
                       wxDefaultPosition, wxSize(180,20), RateStateTypeCount,
                       strArray, wxCB_DROPDOWN|wxCB_READONLY );                  
                       
@@ -497,7 +502,7 @@ void AttitudePanel::Create()
 //------------------------------------------------------------------------------
 void AttitudePanel::DisplayEulerAngles()
 {
-        col1StaticText->Show(false);
+   col1StaticText->Show(false);
    col2StaticText->Show(false);
    col3StaticText->Show(false);
    
@@ -535,7 +540,7 @@ void AttitudePanel::DisplayEulerAngles()
 //------------------------------------------------------------------------------
 void AttitudePanel::DisplayQuaternions()
 {
-        col1StaticText->Show(false);
+   col1StaticText->Show(false);
    col2StaticText->Show(false);
    col3StaticText->Show(false);
    
@@ -562,7 +567,7 @@ void AttitudePanel::DisplayQuaternions()
    st3StaticText->SetLabel(wxT("q3"));
    st4StaticText->SetLabel(wxT("q4"));
 
-  dontUpdate=true;
+   dontUpdate=true;
    st1TextCtrl->SetValue(*quaternions[0]);
    st2TextCtrl->SetValue(*quaternions[1]);
    st3TextCtrl->SetValue(*quaternions[2]);
@@ -575,7 +580,7 @@ void AttitudePanel::DisplayQuaternions()
 //------------------------------------------------------------------------------
 void AttitudePanel::DisplayDCM()
 {
-        col1StaticText->Show(true);
+   col1StaticText->Show(true);
    col2StaticText->Show(true);
    col3StaticText->Show(true);
    
@@ -601,7 +606,7 @@ void AttitudePanel::DisplayDCM()
    st2StaticText->SetLabel(wxT("Row 2"));
    st3StaticText->SetLabel(wxT("Row 3"));
 
-        dontUpdate=true;
+   dontUpdate=true;
    st1TextCtrl->SetValue(*cosineMatrix[0]);
    st2TextCtrl->SetValue(*cosineMatrix[1]);
    st3TextCtrl->SetValue(*cosineMatrix[2]);
@@ -612,15 +617,16 @@ void AttitudePanel::DisplayDCM()
    st9TextCtrl->SetValue(*cosineMatrix[7]);
    st10TextCtrl->SetValue(*cosineMatrix[8]);
    
-        dontUpdate=false;
+   dontUpdate=false;
 }
-   
+
+
 //------------------------------------------------------------------------------
 // void DisplayEulerAngleRates()
 //------------------------------------------------------------------------------
 void AttitudePanel::DisplayEulerAngleRates()
 {
-        str1StaticText->SetLabel(wxT("Euler Angle Rate 1"));
+   str1StaticText->SetLabel(wxT("Euler Angle Rate 1"));
    str2StaticText->SetLabel(wxT("Euler Angle Rate 2"));
    str3StaticText->SetLabel(wxT("Euler Angle Rate 3"));
 
@@ -647,37 +653,39 @@ void AttitudePanel::DisplayAngularVelocity()
    dontUpdate=false;
 }
 
+
 //------------------------------------------------------------------------------
 // void LoadData()
 //------------------------------------------------------------------------------
 void AttitudePanel::LoadData()
 {
-        #if DEBUG_ATTITUDE_PANEL
+   #if DEBUG_ATTITUDE_PANEL
    MessageInterface::ShowMessage("AttitudePanel::LoadData() entered\n");
    #endif
    
    if (STARTUP_STATE_TYPE_SELECTION == EULER_ANGLES)
    {
-                DisplayEulerAngles();
+      DisplayEulerAngles();
    }
    else if (STARTUP_STATE_TYPE_SELECTION == QUATERNIONS)
    {
-                DisplayQuaternions();
+      DisplayQuaternions();
    }
    else
    {
-           DisplayDCM();
+      DisplayDCM();
    }
    
    if (STARTUP_RATE_STATE_TYPE_SELECTION == EULER_ANGLES_RATES) 
    {
-           DisplayEulerAngleRates();
+      DisplayEulerAngleRates();
    }
    else
    {
-                DisplayAngularVelocity();
+      DisplayAngularVelocity();
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void SaveData()
@@ -718,7 +726,7 @@ void AttitudePanel::SaveData()
    if (stateTypeStr == stateTypeArray[EULER_ANGLES])
    {
       Rvector3 eulerAnglesRvector;
-      double dEA;
+      Real dEA;
       for (unsigned int x = 0; x < 3; ++x)
       {
          if (eulerAngles[x]->ToDouble(&dEA))
@@ -731,7 +739,7 @@ void AttitudePanel::SaveData()
    else if (stateTypeStr == stateTypeArray[QUATERNIONS])
    {
       Rvector  quaternionRvector;
-      double dQ;
+      Real dQ;
       for (unsigned int x = 0; x < 4; ++x)
       {
          if (quaternions[x]->ToDouble(&dQ))
@@ -750,7 +758,7 @@ void AttitudePanel::SaveData()
    else if (stateTypeStr == stateTypeArray[DCM])
    {
           Rmatrix33 cosRmatrix;
-          double dCos;
+          Real dCos;
           unsigned int x,y;
           for (x = 0; x < 3; ++x)
       {
@@ -769,7 +777,7 @@ void AttitudePanel::SaveData()
    if (stateTypeRateStr == stateTypeRateArray[EULER_ANGLES_RATES])
    {
       Rvector3 eulerAngleRatesRvector;
-      double dEAR;
+      Real dEAR;
       for (unsigned int x = 0; x < 3; ++x)
       {
          if (eulerAngleRates[x]->ToDouble(&dEAR))
@@ -782,7 +790,7 @@ void AttitudePanel::SaveData()
    else if (stateTypeRateStr == stateTypeRateArray[ANGULAR_VELOCITY])
    {
           Rvector3 angularVelocityRvector;
-          double dAV;
+          Real dAV;
       for (unsigned int x = 0; x < 3; ++x)
       {
          if (angVel[x]->ToDouble(&dAV))
@@ -803,68 +811,72 @@ void AttitudePanel::SaveData()
 //------------------------------------------------------------------------------
 void AttitudePanel::OnStateTypeTextUpdate(wxCommandEvent &event)
 {
-        if (dontUpdate) return;
-        
-        std::string stateTypeStr = stateTypeComboBox->GetStringSelection().c_str();
-        if (stateTypeStr == stateTypeArray[EULER_ANGLES]) {
-                if (st1TextCtrl)
-                        eulerAngles[0]->Printf("%s", st1TextCtrl->GetValue().c_str());
-                if (st2TextCtrl)
-                        eulerAngles[1]->Printf("%s", st2TextCtrl->GetValue().c_str());
-                if (st3TextCtrl)
-                        eulerAngles[2]->Printf("%s", st3TextCtrl->GetValue().c_str());
-                
+   if (dontUpdate) return;
+   
+   std::string stateTypeStr = stateTypeComboBox->GetStringSelection().c_str();
+   if (stateTypeStr == stateTypeArray[EULER_ANGLES])
+   {
+      if (st1TextCtrl)
+         eulerAngles[0]->Printf("%s", st1TextCtrl->GetValue().c_str());
+      else if (st2TextCtrl)
+         eulerAngles[1]->Printf("%s", st2TextCtrl->GetValue().c_str());
+      else if (st3TextCtrl)
+         eulerAngles[2]->Printf("%s", st3TextCtrl->GetValue().c_str());
+      
       CalculateFromEulerAngles(); // use this new information to
-                                                                        // calculate the quaternions,
-                                                                        // the cosine matrix, and whatever
-                                                                        // else is not immediately shown
-                                                                        
-                std::string stateTypeRateStr = stateTypeRateComboBox->GetStringSelection().c_str();
-                if (stateTypeRateStr == stateTypeRateArray[EULER_ANGLES_RATES]) {
-                        CalculateFromEulerAngleRates();
-                }
-                else if (stateTypeRateStr == stateTypeRateArray[ANGULAR_VELOCITY]) {
-                        CalculateFromAngularVelocity();
-                }
-        }
-        else if (stateTypeStr == stateTypeArray[QUATERNIONS]) {
-                if (st1TextCtrl)
-                        quaternions[0]->Printf("%s", st1TextCtrl->GetValue().c_str());
-                if (st2TextCtrl)
-                        quaternions[1]->Printf("%s", st2TextCtrl->GetValue().c_str());
-                if (st3TextCtrl)
-                        quaternions[2]->Printf("%s", st3TextCtrl->GetValue().c_str());
-                if (st4TextCtrl)
-                        quaternions[3]->Printf("%s", st4TextCtrl->GetValue().c_str());
-                        
-                CalculateFromQuaternions(); // use this new information to
-                                                                        // calculate the Euler angles and
-                                                                        // the cosine matrix
-        }
-        else if (stateTypeStr == stateTypeArray[DCM]) {
-                if (st1TextCtrl)
-                        cosineMatrix[0]->Printf("%s", st1TextCtrl->GetValue().c_str());
-                if (st2TextCtrl)
-                        cosineMatrix[1]->Printf("%s", st2TextCtrl->GetValue().c_str());
-                if (st3TextCtrl)
-                        cosineMatrix[2]->Printf("%s", st3TextCtrl->GetValue().c_str());
-                if (st5TextCtrl)
-                        cosineMatrix[3]->Printf("%s", st5TextCtrl->GetValue().c_str());
-                if (st6TextCtrl)
-                        cosineMatrix[4]->Printf("%s", st6TextCtrl->GetValue().c_str());
-                if (st7TextCtrl)
-                        cosineMatrix[5]->Printf("%s", st7TextCtrl->GetValue().c_str());
-                if (st8TextCtrl)
-                        cosineMatrix[6]->Printf("%s", st8TextCtrl->GetValue().c_str());
-                if (st9TextCtrl)
-                        cosineMatrix[7]->Printf("%s", st9TextCtrl->GetValue().c_str());
-                if (st10TextCtrl)
-                        cosineMatrix[8]->Printf("%s", st10TextCtrl->GetValue().c_str());
-                        
-                CalculateFromCosineMatrix(); // use this new information to
-                                                                        // calculate the quaternions and
-                                                                        // the Euler angles
-        }
+      // calculate the quaternions,
+      // the cosine matrix, and whatever
+      // else is not immediately shown
+      
+      std::string stateTypeRateStr = stateTypeRateComboBox->GetStringSelection().c_str();
+      if (stateTypeRateStr == stateTypeRateArray[EULER_ANGLES_RATES])
+      {
+         CalculateFromEulerAngleRates();
+      }
+      else if (stateTypeRateStr == stateTypeRateArray[ANGULAR_VELOCITY]) {
+         CalculateFromAngularVelocity();
+      }
+   }
+   else if (stateTypeStr == stateTypeArray[QUATERNIONS])
+   {
+      if (st1TextCtrl)
+         quaternions[0]->Printf("%s", st1TextCtrl->GetValue().c_str());
+      else if (st2TextCtrl)
+         quaternions[1]->Printf("%s", st2TextCtrl->GetValue().c_str());
+      else if (st3TextCtrl)
+         quaternions[2]->Printf("%s", st3TextCtrl->GetValue().c_str());
+      else if (st4TextCtrl)
+         quaternions[3]->Printf("%s", st4TextCtrl->GetValue().c_str());
+      
+      CalculateFromQuaternions(); // use this new information to
+      // calculate the Euler angles and
+      // the cosine matrix
+   }
+   else if (stateTypeStr == stateTypeArray[DCM])
+   {
+      if (st1TextCtrl)
+         cosineMatrix[0]->Printf("%s", st1TextCtrl->GetValue().c_str());
+      else if (st2TextCtrl)
+         cosineMatrix[1]->Printf("%s", st2TextCtrl->GetValue().c_str());
+      else if (st3TextCtrl)
+         cosineMatrix[2]->Printf("%s", st3TextCtrl->GetValue().c_str());
+      else if (st5TextCtrl)
+         cosineMatrix[3]->Printf("%s", st5TextCtrl->GetValue().c_str());
+      else if (st6TextCtrl)
+         cosineMatrix[4]->Printf("%s", st6TextCtrl->GetValue().c_str());
+      else if (st7TextCtrl)
+         cosineMatrix[5]->Printf("%s", st7TextCtrl->GetValue().c_str());
+      else if (st8TextCtrl)
+         cosineMatrix[6]->Printf("%s", st8TextCtrl->GetValue().c_str());
+      else if (st9TextCtrl)
+         cosineMatrix[7]->Printf("%s", st9TextCtrl->GetValue().c_str());
+      else if (st10TextCtrl)
+         cosineMatrix[8]->Printf("%s", st10TextCtrl->GetValue().c_str());
+      
+      CalculateFromCosineMatrix(); // use this new information to
+      // calculate the quaternions and
+      // the Euler angles
+   }
    theApplyButton->Enable();
 }
 
@@ -873,33 +885,34 @@ void AttitudePanel::OnStateTypeTextUpdate(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void AttitudePanel::OnStateTypeRateTextUpdate(wxCommandEvent &event)
 {
-        if (dontUpdate) return;
+   if (dontUpdate) return;
         
-        std::string stateTypeRateStr = stateTypeRateComboBox->GetStringSelection().c_str();
-        if (stateTypeRateStr == stateTypeRateArray[EULER_ANGLES_RATES])
-        {
-                if (str1TextCtrl)
-                        eulerAngleRates[0]->Printf("%s", str1TextCtrl->GetValue().c_str());
-                if (str2TextCtrl)
-                        eulerAngleRates[1]->Printf("%s", str2TextCtrl->GetValue().c_str());
-                if (str3TextCtrl)
-                        eulerAngleRates[2]->Printf("%s", str3TextCtrl->GetValue().c_str());
+   std::string stateTypeRateStr = stateTypeRateComboBox->GetStringSelection().c_str();
+   if (stateTypeRateStr == stateTypeRateArray[EULER_ANGLES_RATES])
+   {
+      if (str1TextCtrl)
+         eulerAngleRates[0]->Printf("%s", str1TextCtrl->GetValue().c_str());
+      else if (str2TextCtrl)
+         eulerAngleRates[1]->Printf("%s", str2TextCtrl->GetValue().c_str());
+      else if (str3TextCtrl)
+         eulerAngleRates[2]->Printf("%s", str3TextCtrl->GetValue().c_str());
                         
-                CalculateFromEulerAngleRates();  // calculate the equivalent angular velocities
-        }
-        else if (stateTypeRateStr == stateTypeRateArray[ANGULAR_VELOCITY])
-        {
-                if (str1TextCtrl)
-                        angVel[0]->Printf("%s", str1TextCtrl->GetValue().c_str());
-                if (str2TextCtrl)
-                        angVel[1]->Printf("%s", str2TextCtrl->GetValue().c_str());
-                if (str3TextCtrl)
-                        angVel[2]->Printf("%s", str3TextCtrl->GetValue().c_str());
+      CalculateFromEulerAngleRates();  // calculate the equivalent angular velocities
+   }
+   else if (stateTypeRateStr == stateTypeRateArray[ANGULAR_VELOCITY])
+   {
+      if (str1TextCtrl)
+         angVel[0]->Printf("%s", str1TextCtrl->GetValue().c_str());
+      else if (str2TextCtrl)
+         angVel[1]->Printf("%s", str2TextCtrl->GetValue().c_str());
+      else if (str3TextCtrl)
+         angVel[2]->Printf("%s", str3TextCtrl->GetValue().c_str());
                         
-                CalculateFromAngularVelocity();  // calculate the equivalent angular velocities
-        }
-        theApplyButton->Enable();
+      CalculateFromAngularVelocity();  // calculate the equivalent angular velocities
+   }
+   theApplyButton->Enable();
 }
+
 
 //------------------------------------------------------------------------------
 // void OnConfigurationSelection(wxCommandEvent &event)
@@ -913,14 +926,15 @@ void AttitudePanel::OnConfigurationSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void AttitudePanel::OnStateTypeSelection(wxCommandEvent &event)
 {
-        std::string stateTypeStr = stateTypeComboBox->GetStringSelection().c_str();
-        if (stateTypeStr == stateTypeArray[EULER_ANGLES])
-           DisplayEulerAngles();
-        else if (stateTypeStr == stateTypeArray[QUATERNIONS])
-           DisplayQuaternions();
-        else if (stateTypeStr == stateTypeArray[DCM])
-           DisplayDCM();
+   std::string stateTypeStr = stateTypeComboBox->GetStringSelection().c_str();
+   if (stateTypeStr == stateTypeArray[EULER_ANGLES])
+      DisplayEulerAngles();
+   else if (stateTypeStr == stateTypeArray[QUATERNIONS])
+      DisplayQuaternions();
+   else if (stateTypeStr == stateTypeArray[DCM])
+      DisplayDCM();
 }
+
 
 //------------------------------------------------------------------------------
 // void OnStateTypeRateSelection(wxCommandEvent &event)
@@ -935,212 +949,242 @@ void AttitudePanel::OnStateTypeRateSelection(wxCommandEvent &event)
            DisplayAngularVelocity();
 }
 
-void AttitudePanel::CalculateFromEulerAngles() {
-        Rvector3 ea;
-        unsigned int x,y;
-        for (x = 0; x < 3; ++x)
-        {
-                double dEA;
-                
-                if (eulerAngles[x]->ToDouble(&dEA))
-                {
-                        ea[x] = dEA;
-                }
-                else
-                {
-                        return;  // unusable input
-                }
-        }
-        
-        Integer esA, esB, esC;  // Euler sequence
-        // for now, default to first
-        esA = 1;
-        esB = 2;
-        esC = 3;
-        
-        Rmatrix33 cm = Attitude::ToCosineMatrix(ea, esA, esB, esC);
 
-        for (x = 0; x < 3; ++x) {
-                Rvector c = cm.GetColumn(x);
-                for (y = 0; y < 3; ++y) {
-                        cosineMatrix[y+x*3]->Printf("%.1f", c[y]);
-                }
-        }
-
-        Rvector q = Attitude::ToQuaternion(ea, esA, esB, esC);
+//------------------------------------------------------------------------------
+// void CalculateFromEulerAngles()
+//------------------------------------------------------------------------------
+void AttitudePanel::CalculateFromEulerAngles()
+{
+   Rvector3 ea;
+   unsigned int x,y;
+   for (x = 0; x < 3; ++x)
+   {
+      Real dEA;
                 
-        for (x = 0; x < 4; ++x) {
-                quaternions[x]->Printf("%.1f", q[x]);
-        }
+      if (eulerAngles[x]->ToDouble(&dEA))
+      {
+         ea[x] = dEA;
+      }
+      else
+      {
+         return;  // unusable input
+      }
+   }
+        
+   Integer esA, esB, esC;  // Euler sequence
+   // for now, default to first
+   esA = 1;
+   esB = 2;
+   esC = 3;
+        
+   Rmatrix33 cm = Attitude::ToCosineMatrix(ea, esA, esB, esC);
+
+   for (x = 0; x < 3; ++x) {
+      Rvector c = cm.GetColumn(x);
+      for (y = 0; y < 3; ++y) {
+         //cosineMatrix[y+x*3]->Printf("%.1f", c[y]);
+         *cosineMatrix[y+x*3] = theGuiManager->ToWxString(c[y]);
+      }
+   }
+
+   Rvector q = Attitude::ToQuaternion(ea, esA, esB, esC);
+                
+   for (x = 0; x < 4; ++x) {
+      //quaternions[x]->Printf("%.1f", q[x]);
+      *quaternions[x] = theGuiManager->ToWxString(q[x]);
+   }
 }
 
-void AttitudePanel::CalculateFromQuaternions() {
-        Rvector q(4);
-        unsigned int x,y;
-        for (x = 0; x < 4; ++x) {
-                double dQ_x;
+
+//------------------------------------------------------------------------------
+// void CalculateFromQuaternions()
+//------------------------------------------------------------------------------
+void AttitudePanel::CalculateFromQuaternions()
+{
+   Rvector q(4);
+   unsigned int x,y;
+   for (x = 0; x < 4; ++x) {
+      Real dQ_x;
                 
-                if (quaternions[x]->ToDouble(&dQ_x)) {  // will return false on bad input
-                        q[x] = dQ_x;
-                }
-                else
-                {
-                        return;  // unusable input
-                }
-        }
+      if (quaternions[x]->ToDouble(&dQ_x)) {  // will return false on bad input
+         q[x] = dQ_x;
+      }
+      else
+      {
+         return;  // unusable input
+      }
+   }
 
-        Rmatrix33 cm = Attitude::ToCosineMatrix(q);
+   Rmatrix33 cm = Attitude::ToCosineMatrix(q);
 
-        for (x = 0; x < 3; ++x) {
-                Rvector c = cm.GetColumn(x);
-                for (y = 0; y < 3; ++y) {
-                        cosineMatrix[y+x*3]->Printf("%.1f", c[y]);
-                }
-        }
+   for (x = 0; x < 3; ++x) {
+      Rvector c = cm.GetColumn(x);
+      for (y = 0; y < 3; ++y) {
+         //cosineMatrix[y+x*3]->Printf("%.1f", c[y]);
+         *cosineMatrix[y+x*3] = theGuiManager->ToWxString(c[y]);
+      }
+   }
         
-        Integer esA, esB, esC;  // Euler sequence
-        // until there's a convinient method to retrieve integers,
-        // default to the first sequence;
-        esA = 1;
-        esB = 2;
-        esC = 3;
+   Integer esA, esB, esC;  // Euler sequence
+   // until there's a convinient method to retrieve integers,
+   // default to the first sequence;
+   esA = 1;
+   esB = 2;
+   esC = 3;
         
-        Rvector3 ea = Attitude::ToEulerAngles(q, esA, esB, esC);
+   Rvector3 ea = Attitude::ToEulerAngles(q, esA, esB, esC);
         
-        for (x = 0; x < 3; ++x)
-        {
-                eulerAngles[x]->Printf("%.1f", ea[x]);
-        }
+   for (x = 0; x < 3; ++x)
+   {
+      //eulerAngles[x]->Printf("%.1f", ea[x]);
+      *eulerAngles[x] = theGuiManager->ToWxString(ea[x]);
+   }
 }
 
-void AttitudePanel::CalculateFromCosineMatrix() {
-        Rmatrix33 cm;
-        unsigned int c,r;
-        for (c = 0; c < 3; ++c) {  // columns
-                for (r = 0; r < 3; ++r) {  // rows
-                        double dC;
+
+//------------------------------------------------------------------------------
+// void AttitudePanel::CalculateFromCosineMatrix()
+//------------------------------------------------------------------------------
+void AttitudePanel::CalculateFromCosineMatrix()
+{
+   Rmatrix33 cm;
+   unsigned int c,r;
+   for (c = 0; c < 3; ++c) {  // columns
+      for (r = 0; r < 3; ++r) {  // rows
+         Real dC;
                 
-                        if (cosineMatrix[r+c*3]->ToDouble(&dC)) {  // will return false on bad input
-                                cm.SetElement(r,c,dC);
-                        }
-                        else
-                        {
-                                return;  // unusable input
-                        }
-                }
-        }
+         if (cosineMatrix[r+c*3]->ToDouble(&dC)) {  // will return false on bad input
+            cm.SetElement(r,c,dC);
+         }
+         else
+         {
+            return;  // unusable input
+         }
+      }
+   }
 
-        Rvector q = Attitude::ToQuaternion(cm);
+   Rvector q = Attitude::ToQuaternion(cm);
 
-        for (c = 0; c < 4; ++c) {
-                quaternions[c]->Printf("%.1f", q[c]);
-        }
+   for (c = 0; c < 4; ++c) {
+      //quaternions[c]->Printf("%.1f", q[c]);
+      *quaternions[c] = theGuiManager->ToWxString(q[c]);
+   }
+   
+   Integer esA, esB, esC;  // Euler sequence
+   // until there's a convinient method to retrieve integers,
+   // default to the first sequence;
+   esA = 1;
+   esB = 2;
+   esC = 3;
         
-        Integer esA, esB, esC;  // Euler sequence
-        // until there's a convinient method to retrieve integers,
-        // default to the first sequence;
-        esA = 1;
-        esB = 2;
-        esC = 3;
+   Rvector3 ea = Attitude::ToEulerAngles(cm, esA, esB, esC);
         
-        Rvector3 ea = Attitude::ToEulerAngles(cm, esA, esB, esC);
-        
-        for (c = 0; c < 3; ++c)
-        {
-                eulerAngles[c]->Printf("%.1f", ea[c]);
-        }
+   for (c = 0; c < 3; ++c)
+   {
+      //eulerAngles[c]->Printf("%.1f", ea[c]);
+      *eulerAngles[c] = theGuiManager->ToWxString(ea[c]);
+   }
 }
 
+//------------------------------------------------------------------------------
+// void AttitudePanel::CalculateFromEulerAngleRates()
+//------------------------------------------------------------------------------
 void AttitudePanel::CalculateFromEulerAngleRates()
 {
-        Rvector3 ea;
-        unsigned int x;
-        for (x = 0; x < 3; ++x)
-        {
-                double dEA;
+   Rvector3 ea;
+   unsigned int x;
+   for (x = 0; x < 3; ++x)
+   {
+      Real dEA;
                 
-                if (eulerAngles[x]->ToDouble(&dEA))
-                {
-                        ea[x] = dEA;
-                }
-                else
-                {
-                        return;  // unusable input
-                }
-        }
+      if (eulerAngles[x]->ToDouble(&dEA))
+      {
+         ea[x] = dEA;
+      }
+      else
+      {
+         return;  // unusable input
+      }
+   }
         
-        Integer esA, esB, esC;  // Euler sequence
-        // for now, default to first
-        esA = 1;
-        esB = 2;
-        esC = 3;
+   Integer esA, esB, esC;  // Euler sequence
+   // for now, default to first
+   esA = 1;
+   esB = 2;
+   esC = 3;
 
-        Rvector3 ear;
-        for (x = 0; x < 3; ++x)
-        {
-                double dEAR;
+   Rvector3 ear;
+   for (x = 0; x < 3; ++x)
+   {
+      Real dEAR;
                 
-                if (eulerAngleRates[x]->ToDouble(&dEAR))
-                {
-                        ear[x] = dEAR;
-                }
-                else
-                {
-                        return;  // unusable input
-                }
-        }
+      if (eulerAngleRates[x]->ToDouble(&dEAR))
+      {
+         ear[x] = dEAR;
+      }
+      else
+      {
+         return;  // unusable input
+      }
+   }
         
-        Rvector3 av = Attitude::ToAngularVelocity(ear, ea, esA, esB, esC);
+   Rvector3 av = Attitude::ToAngularVelocity(ear, ea, esA, esB, esC);
         
-        for (x = 0; x < 3; ++x)
-        {
-                angVel[x]->Printf("%.1f", av[x]);
-        }
+   for (x = 0; x < 3; ++x)
+   {
+      //angVel[x]->Printf("%.1f", av[x]);
+      *angVel[x] = theGuiManager->ToWxString(av[x]);
+   }
 }
 
+
+//------------------------------------------------------------------------------
+// void AttitudePanel::CalculateFromAngularVelocity()
+//------------------------------------------------------------------------------
 void AttitudePanel::CalculateFromAngularVelocity()
 {
-        Rvector3 ea;
-        unsigned int x;
-        for (x = 0; x < 3; ++x)
-        {
-                double dEA;
+   Rvector3 ea;
+   unsigned int x;
+   for (x = 0; x < 3; ++x)
+   {
+      Real dEA;
                 
-                if (eulerAngles[x]->ToDouble(&dEA))
-                {
-                        ea[x] = dEA;
-                }
-                else
-                {
-                        return;  // unusable input
-                }
-        }
+      if (eulerAngles[x]->ToDouble(&dEA))
+      {
+         ea[x] = dEA;
+      }
+      else
+      {
+         return;  // unusable input
+      }
+   }
         
-        Integer esA, esB, esC;  // Euler sequence
-        // for now, default to first
-        esA = 1;
-        esB = 2;
-        esC = 3;
+   Integer esA, esB, esC;  // Euler sequence
+   // for now, default to first
+   esA = 1;
+   esB = 2;
+   esC = 3;
         
-        Rvector3 av;
-        for (x = 0; x < 3; ++x)
-        {
-                double dAV;
+   Rvector3 av;
+   for (x = 0; x < 3; ++x)
+   {
+      Real dAV;
                 
-                if (angVel[x]->ToDouble(&dAV))
-                {
-                        av[x] = dAV;
-                }
-                else
-                {
-                        return;  // unusable input
-                }
-        }
+      if (angVel[x]->ToDouble(&dAV))
+      {
+         av[x] = dAV;
+      }
+      else
+      {
+         return;  // unusable input
+      }
+   }
         
-        Rvector3 ear = Attitude::ToEulerAngleRates(av, ea, esA, esB, esC);
+   Rvector3 ear = Attitude::ToEulerAngleRates(av, ea, esA, esB, esC);
         
-        for (x = 0; x < 3; ++x)
-        {
-                eulerAngleRates[x]->Printf("%.1f", ear[x]);
-        }
+   for (x = 0; x < 3; ++x)
+   {
+      //eulerAngleRates[x]->Printf("%.1f", ear[x]);
+      *eulerAngleRates[x] = theGuiManager->ToWxString(ear[x]);
+   }
 }

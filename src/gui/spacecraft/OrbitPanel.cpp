@@ -422,7 +422,7 @@ void OrbitPanel::SaveData()
    }
 
    if ( strcmp(stateTypeStr.c_str(), "Equinoctial") == 0) {
-   	  // any restrictions on equinoctial coordinates
+          // any restrictions on equinoctial coordinates
    }
    
    // Save the anomaly type
@@ -809,15 +809,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       description.Printf("%s", anomalyType.c_str());
       description6->SetLabel(description);
       
-      wxString element;
-      std::stringstream buffer;
-      buffer.precision(18);
-//      Real an = theSpacecraft->GetRealParameter(anomalyType);
-//      buffer << an;
-      buffer << value;
-      element.Printf ("%s",buffer.str().c_str());
-      textCtrl6->SetValue (element);
-      buffer.str(std::string());
+      textCtrl6->SetValue(ToString(value));
 
       mFromAnomalyTypeStr = anomalyType;
       #if DEBUG_ORBIT_PANEL
@@ -1141,14 +1133,7 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
 //------------------------------------------------------------------------------
 wxString OrbitPanel::ToString(Real rval)
 {
-   wxString element;
-   std::stringstream buffer;
-   // 8/21/06 - LTR changed to get the precision from GmatBase
-   buffer.precision(GmatBase::GetDataPrecision());     
-   
-   buffer << rval;
-   element.Printf ("%s",buffer.str().c_str());
-   return element;
+   return theGuiManager->ToWxString(rval);
 }
 
 

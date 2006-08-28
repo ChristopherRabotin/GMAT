@@ -270,8 +270,8 @@ void CelestialBodyPanel::LoadData()
          if (theCelestialBody->GetBodyType() == Gmat::PLANET)
          {
              intervalUpdate = thePlanet->GetUpdateInterval();
-             intervalStr.Printf("%f", intervalUpdate);
-             mIntervalTextCtrl->SetValue(intervalStr);
+             mIntervalTextCtrl->
+                SetValue(theGuiManager->ToWxString(intervalUpdate));
          }
          
          if (theCelestialBody->GetName() == "Luna")
@@ -312,26 +312,13 @@ void CelestialBodyPanel::LoadData()
       
       wxString epochStr, elementStr;
 
-      epochStr.Printf("%f", epoch);
-      mEpochTextCtrl->SetValue(epochStr);
-
-      elementStr.Printf("%f", elements.Get(0));
-      mElement1TextCtrl->SetValue(elementStr);
-
-      elementStr.Printf("%f", elements.Get(1));
-      mElement2TextCtrl->SetValue(elementStr);
-
-      elementStr.Printf("%f", elements.Get(2));
-      mElement3TextCtrl->SetValue(elementStr);
-
-      elementStr.Printf("%f", elements.Get(3));
-      mElement4TextCtrl->SetValue(elementStr);
-
-      elementStr.Printf("%f", elements.Get(4));
-      mElement5TextCtrl->SetValue(elementStr);
-
-      elementStr.Printf("%f", elements.Get(5));
-      mElement6TextCtrl->SetValue(elementStr);
+      mEpochTextCtrl->SetValue(theGuiManager->ToWxString(epoch));
+      mElement1TextCtrl->SetValue(theGuiManager->ToWxString(elements.Get(0)));
+      mElement2TextCtrl->SetValue(theGuiManager->ToWxString(elements.Get(1)));
+      mElement3TextCtrl->SetValue(theGuiManager->ToWxString(elements.Get(2)));
+      mElement4TextCtrl->SetValue(theGuiManager->ToWxString(elements.Get(3)));
+      mElement5TextCtrl->SetValue(theGuiManager->ToWxString(elements.Get(4)));
+      mElement6TextCtrl->SetValue(theGuiManager->ToWxString(elements.Get(5)));
 
    }
    catch (BaseException &e)

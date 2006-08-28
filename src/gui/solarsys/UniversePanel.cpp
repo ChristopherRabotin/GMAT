@@ -304,9 +304,10 @@ void UniversePanel::LoadData()
    
    // Loading EphemerisUpdateInterval
    Real interval = theSolarSystem->GetEphemUpdateInterval();
-   wxString intervalStr;
-   intervalStr.Printf("%f", interval);
-   mIntervalTextCtrl->SetValue(intervalStr);
+//    wxString intervalStr;
+//    intervalStr.Printf("%f", interval);
+//    mIntervalTextCtrl->SetValue(intervalStr);
+   mIntervalTextCtrl->SetValue(theGuiManager->ToWxString(interval));
       
    // available source
    for (unsigned int i=0; i<mAllFileTypes.size(); i++)

@@ -19,6 +19,7 @@
  */
 //------------------------------------------------------------------------------
 #include "BallisticsMassPanel.hpp"
+#include "GuiItemManager.hpp"
 #include "MessageInterface.hpp"
 //------------------------------
 // event tables for wxWindows
@@ -150,6 +151,10 @@ void BallisticsMassPanel::Create()
     item0->SetSizeHints( this );
 }
 
+
+//------------------------------------------------------------------------------
+// void LoadData()
+//------------------------------------------------------------------------------
 void BallisticsMassPanel::LoadData()
 {
     int dryMassID = theSpacecraft->GetParameterID("DryMass");
@@ -166,28 +171,22 @@ void BallisticsMassPanel::LoadData()
     Real reflectCoeff = theSpacecraft->GetRealParameter(reflectCoeffID);
     Real srpArea = theSpacecraft->GetRealParameter(srpAreaID);
 
-    wxString massStr;
-    wxString dragCoeffStr;
-    wxString dragAreaStr;
-    wxString srpAreaStr;
-    wxString reflectCoeffStr;
+    GuiItemManager *theGuiManager = GuiItemManager::GetInstance();
     
-    massStr.Printf("%f", mass);
-    dragCoeffStr.Printf("%f", dragCoeff);
-    dragAreaStr.Printf("%f", dragArea);
-    srpAreaStr.Printf("%f", srpArea);
-    reflectCoeffStr.Printf("%f", reflectCoeff);
-
-    dryMassTextCtrl->SetValue(massStr);
-    dragCoeffTextCtrl->SetValue(dragCoeffStr);
-    reflectCoeffTextCtrl->SetValue(reflectCoeffStr);
-    dragAreaTextCtrl->SetValue(dragAreaStr);
-    srpAreaTextCtrl->SetValue(srpAreaStr);
-
+    dryMassTextCtrl->SetValue(theGuiManager->ToWxString(mass));
+    dragCoeffTextCtrl->SetValue(theGuiManager->ToWxString(dragCoeff));
+    reflectCoeffTextCtrl->SetValue(theGuiManager->ToWxString(reflectCoeff));
+    dragAreaTextCtrl->SetValue(theGuiManager->ToWxString(dragArea));
+    srpAreaTextCtrl->SetValue(theGuiManager->ToWxString(srpArea));
+    
 //    epochValue->SetValue(epochStr);
 
 }
 
+
+//------------------------------------------------------------------------------
+// void SaveData()
+//------------------------------------------------------------------------------
 void BallisticsMassPanel::SaveData()
 {
     canClose=true;
