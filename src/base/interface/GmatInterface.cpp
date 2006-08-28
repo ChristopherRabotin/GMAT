@@ -171,6 +171,52 @@ void GmatInterface::RunScript()
       Moderator::Instance()->RunScript();
 }
 
+bool GmatInterface::ExecuteCallback()
+{
+   if (callbackObj)
+   {
+      callbackObj->ExecuteCallback();
+      return true;
+   }
+   else
+      return false;
+}
+
+bool GmatInterface::RegisterCallback(GmatBase *callbackObject)
+{
+   callbackObj = callbackObject;
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// char* GetCallbackStatus()
+//------------------------------------------------------------------------------
+/*
+ * @return the status of the callback execution ("Executing", "Completed").
+ */
+//------------------------------------------------------------------------------
+char* GmatInterface::GetCallbackStatus()
+{
+   static char dataString[MAX_PARAM_VAL_STRING];
+   static char *executingStr = "Executing\0";
+   static char *completedStr = "Completed\0";
+   if (!callbackObj) // not running a callback - why are you asking?
+   {
+      sprintf(dataString, "%s", completedStr);
+   }
+   else
+   {
+      if (callbackObj->IsCallbackExecuting())
+         sprintf(dataString, "%s", executingStr);
+      else
+         sprintf(dataString, "%s", completedStr);
+   }
+   #if DEBUG_GMAT_INTERFACE
+   MessageInterface::ShowMessage
+      ("GmatInterface::GetCallbackStatus() dataString=<%s>\n", dataString);
+   #endif
+   return dataString;
+}
 
 //------------------------------------------------------------------------------
 // char* GetRunState()
@@ -312,6 +358,7 @@ char* GmatInterface::GetObject(const std::string &name)
 GmatInterface::GmatInterface()
 {
    mInStringStream = NULL;
+   callbackObj     = NULL;
 }
 
 

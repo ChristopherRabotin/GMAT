@@ -20,8 +20,9 @@
 #ifndef GmatInterface_hpp
 #define GmatInterface_hpp
 
-#include "gmatdefs.hpp"
 #include <sstream>       // for stringstream, istringstream
+#include "gmatdefs.hpp"
+#include "GmatCommand.hpp"
 
 class GMAT_API GmatInterface
 {
@@ -34,6 +35,11 @@ public:
    void BuildObject();
    void UpdateObject();
    void RunScript();
+   
+   // methods to manage execution of GMAT callback
+   bool ExecuteCallback();
+   bool RegisterCallback(GmatBase *callbackObject);
+   char* GetCallbackStatus();
    
    char* GetRunState();
    char* GetObject(const std::string &name);
@@ -53,5 +59,8 @@ private:
    std::istringstream *mInStringStream;
    static GmatInterface *instance;
    static bool mPassedInterpreter;
+   
+   /// class containing callback function
+   GmatBase *callbackObj;  
 };
 #endif
