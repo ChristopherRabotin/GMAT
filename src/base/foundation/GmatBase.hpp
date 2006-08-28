@@ -101,6 +101,8 @@ public:
    
    virtual Integer     GetOwnedObjectCount();
    virtual GmatBase*   GetOwnedObject(Integer whichOne);
+   virtual bool        ExecuteCallback();
+   virtual bool        IsCallbackExecuting();
    
    // Method to return the current number of instantaited objects
    static Integer      GetInstanceCount();
@@ -322,6 +324,9 @@ protected:
                        objectTypes;
    /// The list types that this class extends, by name
    StringArray         objectTypeNames;
+   /// flag indicating whether or not a Callback method is currently executing
+   bool                callbackExecuting;
+   
 
    static Integer      DATA_PRECISION;
    static Integer      TIME_PRECISION;

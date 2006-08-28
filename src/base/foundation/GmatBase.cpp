@@ -167,7 +167,9 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    typeName        (typeStr),
    instanceName    (nomme),
    type            (typeId),
-   ownedObjectCount(0)
+   ownedObjectCount(0),
+   callbackExecuting(false)
+   
 {
    // one more instance - add to the instanceCount
    ++instanceCount;
@@ -204,7 +206,8 @@ GmatBase::GmatBase(const GmatBase &a) :
     ownedObjectCount(a.ownedObjectCount),
     generatingString(a.generatingString),
     objectTypes     (a.objectTypes),
-    objectTypeNames (a.objectTypeNames)
+    objectTypeNames (a.objectTypeNames),
+    callbackExecuting    (false)
 {
    // one more instance - add to the instanceCount
    ++instanceCount;
@@ -235,7 +238,7 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    generatingString = a.generatingString;
    objectTypes      = a.objectTypes;
    objectTypeNames  = a.objectTypeNames;
-
+   callbackExecuting = false;
    return *this;
 }
 
@@ -667,6 +670,35 @@ GmatBase* GmatBase::GetOwnedObject(Integer whichOne)
    throw GmatBaseException("No owned objects for this instance\n");
 }
 
+
+//------------------------------------------------------------------------------
+//  bool ExecuteCallback()
+//------------------------------------------------------------------------------
+/**
+ * Default implementation for method that executes a callback function.
+ *
+ * @return true if successful; otherwise, return false (this default
+ * implementation returns false).
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::ExecuteCallback()
+{
+   return false;
+}
+
+//------------------------------------------------------------------------------
+//  bool IsCallbackExecuting()
+//------------------------------------------------------------------------------
+/**
+ * Returns a flag indicating whether or not the callback is executing.
+ *
+ * @return true if executing; otherwise, else false
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::IsCallbackExecuting()
+{
+   return callbackExecuting;
+}
 
 //---------------------------------------------------------------------------
 //  static Integer GetInstanceCount()
