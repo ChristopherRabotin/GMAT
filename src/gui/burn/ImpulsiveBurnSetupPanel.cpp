@@ -15,6 +15,7 @@
 //------------------------------------------------------------------------------
 
 #include "ImpulsiveBurnSetupPanel.hpp"
+#include "StringUtil.hpp"  // for ToDouble()
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -50,6 +51,8 @@ ImpulsiveBurnSetupPanel::ImpulsiveBurnSetupPanel(wxWindow *parent,
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
 
    theBurn = theGuiInterpreter->GetBurn(std::string(burnName.c_str()));
+
+   canClose = true;
 
    Create();
    Show();
@@ -106,7 +109,7 @@ void ImpulsiveBurnSetupPanel::AddVector(wxWindow *parent)
                                     wxDefaultPosition, wxDefaultSize, 0 );
    item3->Add( description1, 0, wxALIGN_CENTER | wxALL, 5 );
    textCtrl1 = new wxTextCtrl( vectorPanel, ID_TEXTCTRL, wxT(""), 
-                               wxDefaultPosition, wxSize(100,-1), 0 );
+                               wxDefaultPosition, wxSize(150,-1), 0 );
    item3->Add( textCtrl1, 0, wxALIGN_CENTER | wxALL, 5 );
    label1 = new wxStaticText( vectorPanel, ID_TEXT, wxT("Label1"), 
                               wxDefaultPosition, wxDefaultSize, 0 );
@@ -116,7 +119,7 @@ void ImpulsiveBurnSetupPanel::AddVector(wxWindow *parent)
                                     wxDefaultPosition, wxDefaultSize, 0 );
    item3->Add( description2, 0, wxALIGN_CENTER | wxALL, 5 );
    textCtrl2 = new wxTextCtrl( vectorPanel, ID_TEXTCTRL, wxT(""), 
-                               wxDefaultPosition, wxSize(100,-1), 0 );
+                               wxDefaultPosition, wxSize(150,-1), 0 );
    item3->Add( textCtrl2, 0, wxALIGN_CENTER|wxALL, 5 );
    label2 = new wxStaticText( vectorPanel, ID_TEXT, wxT("Label2"), 
                               wxDefaultPosition, wxDefaultSize, 0 );
@@ -126,7 +129,7 @@ void ImpulsiveBurnSetupPanel::AddVector(wxWindow *parent)
                                     wxDefaultPosition, wxDefaultSize, 0 );
    item3->Add( description3, 0, wxALIGN_CENTER | wxALL, 5 );
    textCtrl3 = new wxTextCtrl( vectorPanel, ID_TEXTCTRL, wxT(""), 
-                               wxDefaultPosition, wxSize(100,-1), 0 );
+                               wxDefaultPosition, wxSize(150,-1), 0 );
    item3->Add( textCtrl3, 0, wxALIGN_CENTER | wxALL, 5 );
    label3 = new wxStaticText( vectorPanel, ID_TEXT, wxT("Label3"), 
                               wxDefaultPosition, wxDefaultSize, 0 );
@@ -239,7 +242,7 @@ void ImpulsiveBurnSetupPanel::Create()
 
       // label for axes combo box
       wxStaticText *axesLabel =
-         new wxStaticText(this, ID_TEXT, wxT("Axes:"),
+         new wxStaticText(this, ID_TEXT, wxT("Axes"),
                           wxDefaultPosition, wxDefaultSize, 0);
         
       // list of axes frames
@@ -270,7 +273,7 @@ void ImpulsiveBurnSetupPanel::Create()
       }
             
       wxStaticText *formatLabel =
-         new wxStaticText(this, ID_TEXT, wxT("Vector format:"),
+         new wxStaticText(this, ID_TEXT, wxT("Vector format"),
                           wxDefaultPosition, wxDefaultSize, 0);
        
       // combo box for Vector format
@@ -298,7 +301,7 @@ void ImpulsiveBurnSetupPanel::Create()
         
       // create label and text field for the central body
       wxStaticText *centralBodyLabel = 
-         new wxStaticText(this, ID_TEXT, wxT("Central body:"), wxDefaultPosition,
+         new wxStaticText(this, ID_TEXT, wxT("Origin"), wxDefaultPosition,
             wxDefaultSize, 0);
 
       // combo box for avaliable bodies 
@@ -395,42 +398,105 @@ void ImpulsiveBurnSetupPanel::LoadData()
 //------------------------------------------------------------------------------
 void ImpulsiveBurnSetupPanel::SaveData()
 {
-   // save data to core engine
-   Integer id;
-   wxString elemString;
+   try
+   {
+      // save data to core engine
+      Integer id;
+      wxString elemString;
+      Real rvalue;
     
-   // save axes
-   wxString axesStr = axesComboBox->GetStringSelection();
-   id = theBurn->GetParameterID("Axes");
-   std::string axes = std::string (axesStr.c_str());
-   theBurn->SetStringParameter(id, axes);
+      canClose = true;
+
+      std::string inputString;
+      std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
+                         theBurn->GetName() + "\" is not an allowed value. "
+                        "The allowed values are: [%s].";                        
+
+      // save axes
+      wxString axesStr = axesComboBox->GetStringSelection();
+      id = theBurn->GetParameterID("Axes");
+      std::string axes = std::string (axesStr.c_str());
+      theBurn->SetStringParameter(id, axes);
     
-    // save vector format
-   wxString vectorStr = vectorFormatComboBox->GetStringSelection();
-   id = theBurn->GetParameterID("VectorFormat");
-   std::string vectorFormat = std::string (vectorStr.c_str());
-   theBurn->SetStringParameter(id, vectorFormat);
+      // save vector format
+      wxString vectorStr = vectorFormatComboBox->GetStringSelection();
+      id = theBurn->GetParameterID("VectorFormat");
+      std::string vectorFormat = std::string (vectorStr.c_str());
+      theBurn->SetStringParameter(id, vectorFormat);
 
-   // save element1
-   elemString = textCtrl1->GetValue();
-   id = theBurn->GetParameterID("Element1");
-   theBurn->SetRealParameter(id, atof(elemString));
+//      // save element1
+//      elemString = textCtrl1->GetValue();
+//      id = theBurn->GetParameterID("Element1");
+//      theBurn->SetRealParameter(id, atof(elemString));
 
-   // save element2
-   elemString = textCtrl2->GetValue();
-   id = theBurn->GetParameterID("Element2");
-   theBurn->SetRealParameter(id, atof(elemString));
+      // save element1
+	  id = theBurn->GetParameterID("Element1");
+      inputString = textCtrl1->GetValue();      
 
-   // save element3
-   elemString = textCtrl3->GetValue();
-   id = theBurn->GetParameterID("Element3");
-   theBurn->SetRealParameter(id, atof(elemString));
+         // check to see if input is a real
+      if (GmatStringUtil::ToDouble(inputString,&rvalue))      
+         theBurn->SetRealParameter(id, rvalue);
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "Element1","Real Number");
 
-   // save central body
-   wxString burnOriginStr = centralBodyCB->GetStringSelection();
-   id = theBurn->GetParameterID("Origin");
-   std::string origin = std::string (burnOriginStr.c_str());
-   theBurn->SetStringParameter(id, origin);
+         canClose = false;
+      }
 
-   theApplyButton->Disable();
+//      // save element2
+//      elemString = textCtrl2->GetValue();
+//      id = theBurn->GetParameterID("Element2");
+//      theBurn->SetRealParameter(id, atof(elemString));
+
+      // save element2
+	  id = theBurn->GetParameterID("Element2");
+      inputString = textCtrl2->GetValue();      
+
+         // check to see if input is a real
+      if (GmatStringUtil::ToDouble(inputString,&rvalue))      
+         theBurn->SetRealParameter(id, rvalue);
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "Element2","Real Number");
+
+         canClose = false;
+      }
+
+//      // save element3
+//      elemString = textCtrl3->GetValue();
+//      id = theBurn->GetParameterID("Element3");
+//      theBurn->SetRealParameter(id, atof(elemString));
+
+      // save element3
+	  id = theBurn->GetParameterID("Element3");
+      inputString = textCtrl3->GetValue();      
+
+         // check to see if input is a real
+      if (GmatStringUtil::ToDouble(inputString,&rvalue))      
+         theBurn->SetRealParameter(id, rvalue);
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "Element3","Real Number");
+
+         canClose = false;
+      }
+
+      // save central body
+      wxString burnOriginStr = centralBodyCB->GetStringSelection();
+      id = theBurn->GetParameterID("Origin");
+      std::string origin = std::string (burnOriginStr.c_str());
+      theBurn->SetStringParameter(id, origin);
+
+      theApplyButton->Disable();
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("ImpulsiveBurnSetupPanel:SaveData() error occurred!\n%s\n", e.GetMessage().c_str());
+      canClose = false;
+      return;
+   }
 }

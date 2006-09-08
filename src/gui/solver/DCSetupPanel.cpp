@@ -22,6 +22,7 @@
 #include "GuiInterpreter.hpp"
 #include "Solver.hpp"
 #include "DifferentialCorrector.hpp"
+#include "StringUtil.hpp"  // for ToInteger()
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -110,24 +111,71 @@ void DCSetupPanel::LoadData()
 //------------------------------------------------------------------------------
 void DCSetupPanel::SaveData()
 {   
-    Integer id;
-	 
-    id = theDC->GetParameterID("MaximumIterations");
-    theDC->SetIntegerParameter(id, (Integer)atof(maxTextCtrl->GetValue()));
-    
-    id = theDC->GetParameterID("ReportStyle");
-    theDC->SetStringParameter(id, reportStyle.c_str());
-    
-    id = theDC->GetParameterID("TargeterTextFile");
-    theDC->SetStringParameter(id, textfileTextCtrl->GetValue().c_str());
-    
-    id = theDC->GetParameterID("ShowProgress");
-    theDC->SetBooleanParameter(id, showProgressCheckBox->GetValue());
-    
-    id = theDC->GetParameterID("UseCentralDifferences");
-    theDC->SetBooleanParameter(id, centralDifferencesCheckBox->GetValue());
+   try
+   {
+      Integer id;
+      Integer ivalue;
 
-    theApplyButton->Disable();
+      canClose = true;
+      
+      std::string inputString;
+      std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
+                         theDC->GetName() + "\" is not an allowed value. "
+                        "The allowed values are: [%s].";                        
+
+//      // save maximum iterations
+//      id = theDC->GetParameterID("MaximumIterations");
+//      theDC->SetIntegerParameter(id, (Integer)atof(maxTextCtrl->GetValue()));
+
+      // save maximum iterations
+	  id = theDC->GetParameterID("MaximumIterations");
+      inputString = maxTextCtrl->GetValue();      
+
+         // check to see if input is a real
+      if (GmatStringUtil::ToInteger(inputString,&ivalue))      
+         theDC->SetIntegerParameter(id, ivalue);
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "MaximumIterations","Integer > 0");
+
+         canClose = false;
+      }
+
+//      // check to see if inout is a real
+//	  wxString maxStr = maxTextCtrl->GetValue();
+//      if (maxStr.ToDouble(&rval))
+//         theDC->SetIntegerParameter(id, (Integer)rval);
+////         theBurn->SetRealParameter(id, rval);
+//      else
+//      {
+//         wxLogError(
+//            "The value you entered for the maximum iterations is not allowed.\n" 
+//            "The allowed value is: [Integer > 0].");
+//         canClose = false;
+//      }
+    
+      id = theDC->GetParameterID("ReportStyle");
+      theDC->SetStringParameter(id, reportStyle.c_str());
+    
+      id = theDC->GetParameterID("TargeterTextFile");
+      theDC->SetStringParameter(id, textfileTextCtrl->GetValue().c_str());
+    
+      id = theDC->GetParameterID("ShowProgress");
+      theDC->SetBooleanParameter(id, showProgressCheckBox->GetValue());
+    
+      id = theDC->GetParameterID("UseCentralDifferences");
+      theDC->SetBooleanParameter(id, centralDifferencesCheckBox->GetValue());
+
+      theApplyButton->Disable();
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("DCSetupPanel:SaveData() error occurred!\n%s\n", e.GetMessage().c_str());
+      canClose = false;
+      return;
+   }
 }
 
 //------------------------------------------------------------------------------

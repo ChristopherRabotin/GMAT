@@ -14,6 +14,7 @@
 
 #include "FiniteBurnSetupPanel.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"  // for ToDouble()
 
 //#define DEBUG_FINITEBURN_PANEL 1
 
@@ -56,6 +57,7 @@ FiniteBurnSetupPanel::FiniteBurnSetupPanel(wxWindow *parent,
 
    thrusterSelected = "";
    isThrusterEmpty = false;
+   canClose = true;
    
    Create();
    Show();
@@ -211,7 +213,7 @@ void FiniteBurnSetupPanel::Create()
 
       // create label and text field for the central body
       wxStaticText *centralBodyLabel = new wxStaticText(this, ID_TEXT, 
-         wxT("Central body"), wxDefaultPosition, wxDefaultSize, 0);
+         wxT("Origin"), wxDefaultPosition, wxDefaultSize, 0);
 
       // combo box for avaliable bodies 
       mCentralBodyComboBox = 
@@ -360,35 +362,68 @@ void FiniteBurnSetupPanel::SaveData()
       MessageInterface::ShowMessage( "FiniteBurnSetupPanel::SaveData() \n" );
    #endif
 
-   // Save data to core engine
-   Integer id;
+   try
+   {
+      // Save data to core engine
+	  Integer id;
+      Real rvalue;
+      
+      canClose = true;
+      
+      std::string inputString;
+      std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
+                         theBurn->GetName() + "\" is not an allowed value. "
+                        "The allowed values are: [%s].";                        
 
-   // save thrusters
-   id = theBurn->GetParameterID("Thrusters");
-   theBurn->SetStringParameter(id, thrusterSelected.c_str(), 0);
+      // save thrusters
+	  id = theBurn->GetParameterID("Thrusters");
+	  theBurn->SetStringParameter(id, thrusterSelected.c_str(), 0);
 
-   // save tanks
-   //wxString tankString = mTankComboBox->GetStringSelection();
-   //id = theBurn->GetParameterID("Tanks");
-   //std::string tank = std::string (tankString.c_str());
-   //theBurn->SetStringParameter(id, tank, 0);
-    
-   // save burn scale factor
-   id = theBurn->GetParameterID("BurnScaleFactor");
-   wxString bsfStr = scaleTextCtrl->GetValue();
-   theBurn->SetRealParameter(id, atof(bsfStr));
+	  // save tanks
+	  //wxString tankString = mTankComboBox->GetStringSelection();
+	  //id = theBurn->GetParameterID("Tanks");
+	  //std::string tank = std::string (tankString.c_str());
+	  //theBurn->SetStringParameter(id, tank, 0);
 
-   // save central body
-   wxString burnOriginStr = mCentralBodyComboBox->GetStringSelection();
-   id = theBurn->GetParameterID("Origin");
-   std::string origin = std::string (burnOriginStr.c_str());
-   theBurn->SetStringParameter(id, origin);
+//      // save burn scale factor
+//      id = theBurn->GetParameterID("BurnScaleFactor");
+//      wxString bsfStr = scaleTextCtrl->GetValue();
+//      theBurn->SetRealParameter(id, atof(bsfStr));
+
+	  // save burn scale factor
+	  id = theBurn->GetParameterID("BurnScaleFactor");
+      inputString = scaleTextCtrl->GetValue();      
+
+         // check to see if input is a real
+      if (GmatStringUtil::ToDouble(inputString,&rvalue))      
+         theBurn->SetRealParameter(id, rvalue);
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "BurnScaleFactor","Real Number >= 0");
+
+         canClose = false;
+      }
+
+      // save central body
+      wxString burnOriginStr = mCentralBodyComboBox->GetStringSelection();
+      id = theBurn->GetParameterID("Origin");
+      std::string origin = std::string (burnOriginStr.c_str());
+      theBurn->SetStringParameter(id, origin);
    
-   // save axes
-   wxString axesStr = mAxesComboBox->GetStringSelection();
-   id = theBurn->GetParameterID("Axes");
-   std::string axes = std::string (axesStr.c_str());
-   theBurn->SetStringParameter(id, axes);
+      // save axes
+      wxString axesStr = mAxesComboBox->GetStringSelection();
+      id = theBurn->GetParameterID("Axes");
+      std::string axes = std::string (axesStr.c_str());
+      theBurn->SetStringParameter(id, axes);
 
-   theApplyButton->Disable();
+      theApplyButton->Disable();
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("FiniteBurnSetupPanel:SaveData() error occurred!\n%s\n", e.GetMessage().c_str());
+      canClose = false;
+      return;
+   }
 }
