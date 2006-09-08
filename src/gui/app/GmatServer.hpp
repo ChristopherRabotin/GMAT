@@ -16,6 +16,8 @@
  * Declares GmatServer which creates new connection to client.
  */
 //------------------------------------------------------------------------------
+#ifndef GmatServer_hpp
+#define GmatServer_hpp
 
 #include "gmatwxdefs.hpp"
 #include "wx/ipc.h"
@@ -25,3 +27,5 @@ class GmatServer: public wxServer
 public:
    wxConnectionBase *OnAcceptConnection(const wxString& topic);
 };
+
+#endif // GmatServer_hpp
