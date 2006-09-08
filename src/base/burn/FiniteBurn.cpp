@@ -404,9 +404,12 @@ Real FiniteBurn::SetRealParameter(const Integer id, const Real value)
       if (value > 0.0)
          burnScaleFactor = value;
       else
+//         throw BurnException(
+//            "Attempting to set unphysical value for burns scale factor on " +
+//            instanceName);
          throw BurnException(
-            "Attempting to set unphysical value for burns scale factor on " +
-            instanceName);
+            "The value entered for the burn scale factor on " + instanceName +
+            " is not an allowed value. The allowed value is: [Real Number >= 0].");
       return burnScaleFactor;
    }
 

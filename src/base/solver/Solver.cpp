@@ -536,9 +536,12 @@ Integer Solver::SetIntegerParameter(const Integer id,
       if (value > 0)
          maxIterations = value;
       else
-         MessageInterface::ShowMessage(
-            "Iteration count for %s must be > 0; requested value was %d\n",
-            instanceName.c_str(), value);
+//         MessageInterface::ShowMessage(
+//            "Iteration count for %s must be > 0; requested value was %d\n",
+//            instanceName.c_str(), value);
+         throw SolverException(
+            "The value entered for the maximum iterations on " + instanceName +
+            " is not an allowed value. The allowed value is: [Integer > 0].");
       return maxIterations;
    }
     
