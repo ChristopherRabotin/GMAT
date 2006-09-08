@@ -186,19 +186,21 @@ void ResourceTree::UpdateVariable()
 
 
 //------------------------------------------------------------------------------
-// void UpdateResource(bool resetCounter = true)
+// void UpdateResource(bool restartCounter = true)
 //------------------------------------------------------------------------------
 /**
- * Reset counters, delete all nodes that are not folders, add default nodes
+ * Delete all nodes that are not folders, add default nodes
+ *
+ * @param restartCounter  Restarting the counter from zero if true.
  */
 //------------------------------------------------------------------------------
-void ResourceTree::UpdateResource(bool resetCounter)
+void ResourceTree::UpdateResource(bool restartCounter)
 {
    #if DEBUG_RESOURCE_TREE
    MessageInterface::ShowMessage("ResourceTree::UpdateResource() entered\n");
    #endif
    
-   if (resetCounter)
+   if (restartCounter)
    {
       ResetResourceCounter();
       theGuiInterpreter->ResetConfigurationChanged();
@@ -271,13 +273,13 @@ void ResourceTree::UpdateResource(bool resetCounter)
 
    AddDefaultBodies(mUniverseItem);
    AddDefaultSpecialPoints(mSpecialPointsItem);
-   AddDefaultSpacecraft(mSpacecraftItem, resetCounter);
-   AddDefaultHardware(mHardwareItem, resetCounter);
-   AddDefaultFormations(mFormationItem, resetCounter);
-   AddDefaultPropagators(mPropagatorItem, resetCounter);
-   AddDefaultBurns(mBurnItem, resetCounter);
-   AddDefaultSolvers(mSolverItem, resetCounter);
-   AddDefaultSubscribers(mSubscriberItem, resetCounter);
+   AddDefaultSpacecraft(mSpacecraftItem, restartCounter);
+   AddDefaultHardware(mHardwareItem, restartCounter);
+   AddDefaultFormations(mFormationItem, restartCounter);
+   AddDefaultPropagators(mPropagatorItem, restartCounter);
+   AddDefaultBurns(mBurnItem, restartCounter);
+   AddDefaultSolvers(mSolverItem, restartCounter);
+   AddDefaultSubscribers(mSubscriberItem, restartCounter);
    AddDefaultVariables(mVariableItem);
    AddDefaultFunctions(mFunctItem);
    AddDefaultCoordSys(mCoordSysItem);
@@ -504,7 +506,7 @@ void ResourceTree::AddDefaultBodies(wxTreeItemId itemId)
 
 
 //------------------------------------------------------------------------------
-// void AddDefaultSpacecraft(wxTreeItemId itemId, bool resetCounter = true)
+// void AddDefaultSpacecraft(wxTreeItemId itemId, bool restartCounter = true)
 //------------------------------------------------------------------------------
 /**
  * Add the default spacecraft
@@ -512,7 +514,7 @@ void ResourceTree::AddDefaultBodies(wxTreeItemId itemId)
  * @param <itemId> tree item for the spacecraft folder
  */
 //------------------------------------------------------------------------------
-void ResourceTree::AddDefaultSpacecraft(wxTreeItemId itemId, bool resetCounter)
+void ResourceTree::AddDefaultSpacecraft(wxTreeItemId itemId, bool restartCounter)
 {
    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
    int size = itemNames.size();
@@ -520,7 +522,7 @@ void ResourceTree::AddDefaultSpacecraft(wxTreeItemId itemId, bool resetCounter)
    
    for (int i = 0; i<size; i++)
    {
-      if (resetCounter)
+      if (restartCounter)
          ++mNumSpacecraft;
       
       objName = wxString(itemNames[i].c_str());
@@ -537,7 +539,7 @@ void ResourceTree::AddDefaultSpacecraft(wxTreeItemId itemId, bool resetCounter)
 
 
 //------------------------------------------------------------------------------
-// void AddDefaultHardware(wxTreeItemId itemId, bool resetCounter = true)
+// void AddDefaultHardware(wxTreeItemId itemId, bool restartCounter = true)
 //------------------------------------------------------------------------------
 /**
  * Add the default hardware
@@ -545,7 +547,7 @@ void ResourceTree::AddDefaultSpacecraft(wxTreeItemId itemId, bool resetCounter)
  * @param <itemId> tree item for the hardware folder
  */
 //------------------------------------------------------------------------------
-void ResourceTree::AddDefaultHardware(wxTreeItemId itemId, bool resetCounter)
+void ResourceTree::AddDefaultHardware(wxTreeItemId itemId, bool restartCounter)
 {
    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::HARDWARE);
    int size = itemNames.size();
@@ -564,7 +566,7 @@ void ResourceTree::AddDefaultHardware(wxTreeItemId itemId, bool resetCounter)
       {
          numFuelTank++;
 
-         if (resetCounter)
+         if (restartCounter)
             ++mNumFuelTank;
          
          AppendItem(itemId, wxT(objName), GmatTree::ICON_TANK, -1,
@@ -574,7 +576,7 @@ void ResourceTree::AddDefaultHardware(wxTreeItemId itemId, bool resetCounter)
       {
          numThruster++;
 
-         if (resetCounter)
+         if (restartCounter)
             ++mNumThruster;
          
          AppendItem(itemId, wxT(objName), GmatTree::ICON_THRUSTER, -1,
@@ -595,7 +597,7 @@ void ResourceTree::AddDefaultHardware(wxTreeItemId itemId, bool resetCounter)
 
 
 //------------------------------------------------------------------------------
-// void AddDefaultFormations(wxTreeItemId itemId, bool resetCounter = true)
+// void AddDefaultFormations(wxTreeItemId itemId, bool restartCounter = true)
 //------------------------------------------------------------------------------
 /**
  * Add the default formations
@@ -603,7 +605,7 @@ void ResourceTree::AddDefaultHardware(wxTreeItemId itemId, bool resetCounter)
  * @param <itemId> tree item for the formation folder
  */
 //------------------------------------------------------------------------------
-void ResourceTree::AddDefaultFormations(wxTreeItemId itemId, bool resetCounter)
+void ResourceTree::AddDefaultFormations(wxTreeItemId itemId, bool restartCounter)
 {
    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::FORMATION);
    int size = itemNames.size();
@@ -611,7 +613,7 @@ void ResourceTree::AddDefaultFormations(wxTreeItemId itemId, bool resetCounter)
    
    for (int i = 0; i<size; i++)
    {
-      if (resetCounter)
+      if (restartCounter)
          ++mNumFormation;
       
       objName = wxString(itemNames[i].c_str());
@@ -673,7 +675,7 @@ void ResourceTree::AddDefaultConstellations(wxTreeItemId itemId)
 }
 
 //------------------------------------------------------------------------------
-// void AddDefaultPropagators(wxTreeItemId itemId, bool resetCounter = true)
+// void AddDefaultPropagators(wxTreeItemId itemId, bool restartCounter = true)
 //------------------------------------------------------------------------------
 /**
  * Add the default propagator
@@ -681,7 +683,7 @@ void ResourceTree::AddDefaultConstellations(wxTreeItemId itemId)
  * @param <itemId> tree item for the propagators folder
  */
 //------------------------------------------------------------------------------
-void ResourceTree::AddDefaultPropagators(wxTreeItemId itemId, bool resetCounter)
+void ResourceTree::AddDefaultPropagators(wxTreeItemId itemId, bool restartCounter)
 {
    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
    int size = itemNames.size();
@@ -689,7 +691,7 @@ void ResourceTree::AddDefaultPropagators(wxTreeItemId itemId, bool resetCounter)
    
    for (int i = 0; i<size; i++)
    {
-      if (resetCounter)
+      if (restartCounter)
          ++mNumPropagator;
       
       objName = wxString(itemNames[i].c_str());
@@ -705,7 +707,7 @@ void ResourceTree::AddDefaultPropagators(wxTreeItemId itemId, bool resetCounter)
 }
 
 //------------------------------------------------------------------------------
-// void AddDefaultBurns(wxTreeItemId itemId, bool resetCounter = true)
+// void AddDefaultBurns(wxTreeItemId itemId, bool restartCounter = true)
 //------------------------------------------------------------------------------
 /**
  * Add the default burns
@@ -713,7 +715,7 @@ void ResourceTree::AddDefaultPropagators(wxTreeItemId itemId, bool resetCounter)
  * @param <itemId> tree item for the burn folder
  */
 //------------------------------------------------------------------------------
-void ResourceTree::AddDefaultBurns(wxTreeItemId itemId, bool resetCounter)
+void ResourceTree::AddDefaultBurns(wxTreeItemId itemId, bool restartCounter)
 {
    //MessageInterface::ShowMessage("ResourceTree::AddDefaultBurns() entered\n");
    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::BURN);
@@ -733,7 +735,7 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId, bool resetCounter)
       {
          numImpBurn++;
 
-         if (resetCounter)
+         if (restartCounter)
             ++mNumImpulsiveBurn;
          
          //MessageInterface::ShowMessage
@@ -747,7 +749,7 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId, bool resetCounter)
       {
          numFiniteBurn++;
 
-         if (resetCounter)
+         if (restartCounter)
             ++mNumFiniteBurn;
          
          //MessageInterface::ShowMessage
@@ -770,7 +772,7 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId, bool resetCounter)
 }
 
 //------------------------------------------------------------------------------
-// void AddDefaultSolvers(wxTreeItemId itemId, bool resetCounter = true)
+// void AddDefaultSolvers(wxTreeItemId itemId, bool restartCounter = true)
 //------------------------------------------------------------------------------
 /**
  * Add the default solvers
@@ -778,7 +780,7 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId, bool resetCounter)
  * @param <itemId> tree item for the solvers folder
  */
 //------------------------------------------------------------------------------
-void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId, bool resetCounter)
+void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId, bool restartCounter)
 {
    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SOLVER);
    int size = itemNames.size();
@@ -797,7 +799,7 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId, bool resetCounter)
       {
          numDiffCorr++;
 
-         if (resetCounter)
+         if (restartCounter)
             ++mNumDiffCorr;
          
          AppendItem(mBoundarySolverItem, wxT(objName), GmatTree::ICON_DEFAULT, -1,
@@ -833,7 +835,7 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId, bool resetCounter)
 
 
 //------------------------------------------------------------------------------
-// void AddDefaultSubscribers(wxTreeItemId itemId, bool resetCounter)
+// void AddDefaultSubscribers(wxTreeItemId itemId, bool restartCounter)
 //------------------------------------------------------------------------------
 /**
  * Add the default subscribers
@@ -841,7 +843,7 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId, bool resetCounter)
  * @param <itemId> tree item for the subscribers folder
  */
 //------------------------------------------------------------------------------
-void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId, bool resetCounter)
+void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId, bool restartCounter)
 {
    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
    int size = itemNames.size();
@@ -861,7 +863,7 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId, bool resetCounter)
       {
          numReportFile++;
          
-         if (resetCounter)
+         if (restartCounter)
             ++mNumReportFile;
          
          AppendItem(itemId, wxT(objName), GmatTree::ICON_REPORT, -1,
@@ -872,7 +874,7 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId, bool resetCounter)
       {
          numXyPlot++;
          
-         if (resetCounter)
+         if (restartCounter)
              ++mNumXyPlot;
          
          AppendItem(itemId, wxT(objName), GmatTree::ICON_XY_PLOT, -1,
@@ -883,7 +885,7 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId, bool resetCounter)
       {
          numGlPlot++;
          
-         if (resetCounter)
+         if (restartCounter)
             ++mNumOpenGlPlot;
          
          AppendItem(itemId, wxT(objName), GmatTree::ICON_OPEN_GL_PLOT, -1,
@@ -1057,7 +1059,7 @@ void ResourceTree::AddDefaultCoordSys(wxTreeItemId itemId)
 
 //------------------------------------------------------------------------------
 // void AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCounter = true,
-//                              bool resetCounter = true)
+//                              bool restartCounter = true)
 //------------------------------------------------------------------------------
 /**
  * Add the default special points
@@ -1066,7 +1068,7 @@ void ResourceTree::AddDefaultCoordSys(wxTreeItemId itemId)
  */
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCounter,
-                                           bool resetCounter)
+                                           bool restartCounter)
 {
    StringArray itemNames = GmatAppData::GetGuiInterpreter()->
       GetListOfConfiguredItems(Gmat::CALCULATED_POINT);
@@ -1086,7 +1088,7 @@ void ResourceTree::AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCount
       {
          numBary++;
 
-         if (resetCounter)
+         if (restartCounter)
             ++mNumBarycenter;
          
          AppendItem(itemId, wxT(objName), GmatTree::ICON_DEFAULT, -1,
@@ -1098,8 +1100,7 @@ void ResourceTree::AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCount
          {
             numLib++;
 
-            if (resetCounter)
-               //++mNumBarycenter;
+            if (restartCounter)
                ++mNumLibration;
          }
          
@@ -2391,10 +2392,13 @@ void ResourceTree::OnAddLibration(wxCommandEvent &event)
    wxString name;
    name.Printf("Libration%d", ++mNumLibration);
 
+   //MessageInterface::ShowMessage
+   //   ("ResourceTree::OnAddLibration() name=%s\n", name.c_str());
+   
    if (theGuiInterpreter->CreateCalculatedPoint("LibrationPoint", name.c_str()) != NULL)
    {
       DeleteChildren(mSpecialPointsItem);
-      AddDefaultSpecialPoints(mSpecialPointsItem, false);
+      AddDefaultSpecialPoints(mSpecialPointsItem, true, false);
       
       Expand(item);
       
