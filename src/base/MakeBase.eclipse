@@ -247,6 +247,9 @@ OBJECTS = \
     math/Transpose.o \
     parameter/AngularParameters.o \
     parameter/Array.o \
+    parameter/AttitudeData.o \
+    parameter/AttitudeParameters.o \
+    parameter/AttitudeReal.o \
     parameter/BplaneData.o \
     parameter/BplaneParameters.o \
     parameter/BplaneReal.o \
