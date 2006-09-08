@@ -34,6 +34,7 @@
 #include "Array.hpp"
 #include "BplaneParameters.hpp"
 #include "BurnParameters.hpp"
+#include "AttitudeParameters.hpp"
 
 //---------------------------------
 //  public methods
@@ -224,6 +225,16 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    if (ofType == "B")
       return new DeltaVDir3(withName);
    
+   // Attitude parameters
+   if (ofType == "Quat1")
+      return new Quat1(withName);
+   if (ofType == "Quat2")
+      return new Quat2(withName);
+   if (ofType == "Quat3")
+      return new Quat3(withName);
+   if (ofType == "Quat4")
+      return new Quat4(withName);
+   
    // add others here
    else
       return NULL;
@@ -341,6 +352,12 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("V");
       creatables.push_back("N");
       creatables.push_back("B");
+      
+      // Attitude parameters
+      creatables.push_back("Quat1");
+      creatables.push_back("Quat2");
+      creatables.push_back("Quat3");
+      creatables.push_back("Quat4");
    }
 }
 

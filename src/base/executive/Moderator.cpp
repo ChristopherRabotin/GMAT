@@ -3897,6 +3897,12 @@ void Moderator::CreateDefaultMission()
       CreateParameter("BVectorMag", "DefaultSC.Earth.BVectorMag");
       CreateParameter("BVectorAngle", "DefaultSC.Earth.BVectorAngle");
       
+      // Attitude parameters
+      CreateParameter("Quat1", "DefaultSC.Quat1");
+      CreateParameter("Quat2", "DefaultSC.Quat2");
+      CreateParameter("Quat3", "DefaultSC.Quat3");
+      CreateParameter("Quat4", "DefaultSC.Quat4");
+      
       #ifdef DEBUG_CREATE_VAR
       // User variable
       Parameter *var = CreateParameter("Variable", "DefaultSC_EarthMJ2000Eq_Xx2");

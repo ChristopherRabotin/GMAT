@@ -1,5 +1,24 @@
-#ifndef ATTITUDEPARAMETERS_
-#define ATTITUDEPARAMETERS_
+//$Header$
+//------------------------------------------------------------------------------
+//                                  AttitudeParameters
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
+//
+// Author: Daniel Hunter
+// Created: 2006/6/26
+//
+/**
+ * Implements Attitude related parameter classes.
+ *    Quat1, Quat2, Quat3, Quat4
+ */
+//------------------------------------------------------------------------------
+#ifndef ATTITUDEPARAMETERS_HPP_
+#define ATTITUDEPARAMETERS_HPP_
 
 #include "gmatdefs.hpp"
 #include "AttitudeReal.hpp"
@@ -85,4 +104,4 @@ protected:
 };
 
 
-#endif /*ATTITUDEPARAMETERS_*/
+#endif /*ATTITUDEPARAMETERS_HPP_*/

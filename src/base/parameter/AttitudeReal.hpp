@@ -1,3 +1,21 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                                  AttitudeReal
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
+//
+// Author: Daniel Hunter
+// Created: 2006/6/26
+//
+/**
+ * Declares Attitude real data class.
+ */
+//------------------------------------------------------------------------------
 #ifndef ATTITUDEREAL_HPP_
 #define ATTITUDEREAL_HPP_
 
@@ -11,8 +29,7 @@ class GMAT_API AttitudeReal : public RealVar, public AttitudeData
 public:
 
    AttitudeReal(const std::string &name, const std::string &typeStr, 
-            GmatBase *obj, const std::string &desc,
-            const std::string &unit,  GmatParam::DepObject depObj);
+                GmatBase *obj, const std::string &desc, const std::string &unit);
    AttitudeReal(const AttitudeReal &copy);
    AttitudeReal& operator=(const AttitudeReal &right);
    virtual ~AttitudeReal();

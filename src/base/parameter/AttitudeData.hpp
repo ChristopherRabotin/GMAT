@@ -23,9 +23,8 @@
 #include "GmatBase.hpp"
 #include "RefData.hpp"
 #include "Spacecraft.hpp"
-#include "Attitude.hpp"
 
-class GMAT_API BurnData : public RefData
+class GMAT_API AttitudeData : public RefData
 {
 public:
 
@@ -33,12 +32,14 @@ public:
    AttitudeData(const AttitudeData &data);
    AttitudeData& operator= (const AttitudeData& right);
    virtual ~AttitudeData();
-      
-   Real GetAttitudeReal(const std::string &str);
+   
+   Real GetAttitudeReal(Integer item);
    
    // The inherited methods from RefData
    virtual bool ValidateRefObjects(GmatBase *param);
    virtual const std::string* GetValidObjectList() const;
+   
+   const static Real ATTITUDE_REAL_UNDEFINED;
    
 protected:
 
@@ -47,11 +48,13 @@ protected:
    virtual bool IsValidObjectType(Gmat::ObjectType type);
    
    Spacecraft *mSpacecraft;
-
+   Integer mEpochId;
+   
+   enum {QUAT1, QUAT2, QUAT3, QUAT4};
+   
    enum
    {
-      ATTITUDE = 0,
-      SPACECRAFT,
+      SPACECRAFT = 0,
       AttitudeDataObjectCount
    };
    
