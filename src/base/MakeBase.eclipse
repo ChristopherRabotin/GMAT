@@ -15,8 +15,8 @@ ifeq ($(CONSOLE_APP),1)
 TARGET = $(CONSOLETARGET)
 # Console (no wx code) versions of these objects
 BRIDGEOBJECTS = executive/MessageInterfaceConsole.o \
-                executive/PlotInterfaceConsole.o \
-                interpreter/GuiInterpreterConsole.o
+					executive/PlotInterfaceConsole.o \
+					interpreter/GuiInterpreterConsole.o
 else
 TARGET = $(WXTARGET)
 # GUI versions of these objects
@@ -63,6 +63,7 @@ HEADERS = -Iinclude \
           -I../gui/mission
 
 
+
 clean : archclean
 
 archclean :
@@ -75,6 +76,7 @@ archclean :
 	rm -rf obj/*
 	rm -rf $(WXTARGET)
 	rm -rf $(CONSOLETARGET)
+	rm -rf ../matlab/gmat_mex/src/*.o
 
 OBJECTS = \
 	attitude/Attitude.o \
@@ -114,6 +116,7 @@ OBJECTS = \
     command/If.o \
     command/Maneuver.o \
     command/Minimize.o \
+    command/NonLinearConstraint.o \
     command/NoOp.o \
     command/Optimize.o \
     command/Propagate.o \
@@ -369,7 +372,8 @@ OBJECTS = \
     util/TimeSystemConverter.o \
     util/UtcDate.o \
     solarsys/msise90_sub.o \
-    $(BRIDGEOBJECTS)
+    $(BRIDGEOBJECTS) \
+    $(TCPIP_OBJECTS)
 
 
 $(TARGET) : $(OBJECTS)
