@@ -15,6 +15,7 @@
 //------------------------------------------------------------------------------
 
 #include "ThrusterCoefficientDialog.hpp"
+#include "StringUtil.hpp"
 #include "MessageInterface.hpp"
 
 #include <wx/variant.h>
@@ -319,7 +320,22 @@ void ThrusterCoefficientDialog::OnCellValueChange(wxGridEvent &event)
     }    
     else if (col == 1)
     {
-       coefValue[row] = atof(coefficientGrid->GetCellValue(row, col));
+       Real rvalue;
+       std::string inputString(coefficientGrid->GetCellValue(row, col).c_str());
+       std::string msg = "The value of \"" + inputString + 
+//                         "\" for field \"%s\" on object \"" +
+//                          theFuelTank->GetName() + "\" 
+                        "\" is not an allowed value.  "
+                        "\nThe allowed values are: [ Real Number ].";
+
+       if (!GmatStringUtil::ToDouble(inputString,&rvalue))
+       {
+          MessageInterface::PopupMessage(Gmat::ERROR_, msg);
+          return;
+       }
+
+       coefValue[row] = rvalue;
+//       coefValue[row] = atof(coefficientGrid->GetCellValue(row, col));
        theOkButton->Enable(true);
     }    
 }

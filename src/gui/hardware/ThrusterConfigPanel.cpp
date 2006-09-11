@@ -21,6 +21,7 @@
 #include "ThrusterConfigPanel.hpp"
 #include "ThrusterCoefficientDialog.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"
 #include <wx/variant.h>
 
 //------------------------------
@@ -218,6 +219,7 @@ void ThrusterConfigPanel::LoadData()
 //------------------------------------------------------------------------------
 void ThrusterConfigPanel::SaveData()
 {
+    canClose = false;
     if (!theApplyButton->IsEnabled())
       return;
        
@@ -225,35 +227,85 @@ void ThrusterConfigPanel::SaveData()
       return; 
 
    Integer paramID;
-   
+  
+   Real rvalue;
+   std::string inputString;
+   std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
+                     theThruster->GetName() + "\" is not an allowed value.  "
+                     "The allowed values are: [ %s ].";
+
+   theOkButton->Disable();
+ 
+   // X_Direction
    paramID = theThruster->GetParameterID("X_Direction");
-   theThruster->SetRealParameter(paramID, atof(XTextCtrl->GetValue())); 
-   
-   paramID = theThruster->GetParameterID("Y_Direction");
-   theThruster->SetRealParameter(paramID, atof(YTextCtrl->GetValue()));
-        
-   paramID = theThruster->GetParameterID("Z_Direction");
-   theThruster->SetRealParameter(paramID, atof(ZTextCtrl->GetValue()));  
-   
-   paramID = theThruster->GetParameterID("ThrustScaleFactor");
-   theThruster->SetRealParameter(paramID, atof(scaleFactorTextCtrl->GetValue())); 
-   
-   if (isCoordSysChanged)
+   inputString = XTextCtrl->GetValue();
+   if (!GmatStringUtil::ToDouble(inputString,&rvalue))
    {
-      paramID = theThruster->GetParameterID("CoordinateSystem");
-      theThruster->SetStringParameter(paramID, coordsysName);
-      isCoordSysChanged = false;
-   }    
-   
-   if (isTankChanged)
-   {
-      paramID = theThruster->GetParameterID("Tank");
-      
-      if (theThruster->TakeAction("ClearTanks", ""))
-         theThruster->SetStringParameter(paramID, tankName.c_str());
+      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+             inputString.c_str(), "X_Direction","Real Number");
+      return;
    }
+   theThruster->SetRealParameter(paramID, rvalue);
+   
+   // Y_Direction
+   paramID = theThruster->GetParameterID("Y_Direction");
+   inputString = YTextCtrl->GetValue();
+   if (!GmatStringUtil::ToDouble(inputString,&rvalue))
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+             inputString.c_str(), "Y_Direction","Real Number");
+      return;
+   }
+   theThruster->SetRealParameter(paramID, rvalue);
+        
+   try 
+   {
+      // Z_Direction
+      paramID = theThruster->GetParameterID("Z_Direction");
+      inputString = ZTextCtrl->GetValue();
+      if (!GmatStringUtil::ToDouble(inputString,&rvalue))
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                inputString.c_str(), "Z_Direction","Real Number >= 0");
+         return;
+      }
+      theThruster->SetRealParameter(paramID, rvalue);
+   
+      // ThrustScaleFactor
+      paramID = theThruster->GetParameterID("ThrustScaleFactor");
+      inputString = scaleFactorTextCtrl->GetValue();
+      if (!GmatStringUtil::ToDouble(inputString,&rvalue))
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                inputString.c_str(), "ThrustScaleFactor","Real Number");
+         return;
+      }
+      theThruster->SetRealParameter(paramID, rvalue);
+   
+      if (isCoordSysChanged)
+      {
+         paramID = theThruster->GetParameterID("CoordinateSystem");
+         theThruster->SetStringParameter(paramID, coordsysName);
+         isCoordSysChanged = false;
+      }    
+   
+      if (isTankChanged)
+      {
+          paramID = theThruster->GetParameterID("Tank");
       
-   theApplyButton->Disable();
+          if (theThruster->TakeAction("ClearTanks", ""))
+          theThruster->SetStringParameter(paramID, tankName.c_str());
+      }
+      
+      theApplyButton->Disable();
+      canClose = true;
+      theOkButton->Enable();
+   }
+   catch(BaseException &ex)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetMessage());
+   }
+
 }
 
 //------------------------------------------------------------------------------
@@ -262,6 +314,7 @@ void ThrusterConfigPanel::SaveData()
 void ThrusterConfigPanel::OnTextChange(wxCommandEvent &event)
 {
     theApplyButton->Enable();
+    theOkButton->Enable();
 } 
 
 //------------------------------------------------------------------------------
@@ -274,6 +327,7 @@ void ThrusterConfigPanel::OnComboBoxChange(wxCommandEvent &event)
       isCoordSysChanged =  true;
       coordsysName = coordsysComboBox->GetStringSelection().c_str();
       theApplyButton->Enable();
+      theOkButton->Enable();
    }
    else if (event.GetEventObject() == tankComboBox)
    {
@@ -282,6 +336,7 @@ void ThrusterConfigPanel::OnComboBoxChange(wxCommandEvent &event)
               isTankChanged = true;
          tankName = tankComboBox->GetStringSelection().c_str();
          theApplyButton->Enable();
+         theOkButton->Enable();
       }
    }
 }    
@@ -298,6 +353,7 @@ void ThrusterConfigPanel::OnButtonClick(wxCommandEvent &event)
        ThrusterCoefficientDialog tcDlg(this, theThruster, type);
        tcDlg.ShowModal(); 
        theApplyButton->Enable();      
+       theOkButton->Enable();
     } 
     else if (event.GetEventObject() == kCoefButton)
     {
@@ -306,5 +362,6 @@ void ThrusterConfigPanel::OnButtonClick(wxCommandEvent &event)
        ThrusterCoefficientDialog tcDlg(this, theThruster, type);
        tcDlg.ShowModal();
        theApplyButton->Enable();
+       theOkButton->Enable();
     }            
 }    
