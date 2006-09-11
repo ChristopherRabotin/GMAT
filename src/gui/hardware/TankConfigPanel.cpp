@@ -286,6 +286,7 @@ void TankConfigPanel::SaveData()
 
       theApplyButton->Disable();
       canClose = true;
+      theOkButton->Enable();
    }
    catch (BaseException &ex)
    {
