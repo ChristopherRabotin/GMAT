@@ -20,6 +20,7 @@
 //------------------------------------------------------------------------------
 #include "TankConfigPanel.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"
 #include <wx/variant.h>
 
 //------------------------------
@@ -194,6 +195,7 @@ void TankConfigPanel::LoadData()
 //------------------------------------------------------------------------------
 void TankConfigPanel::SaveData()
 {
+   canClose = false;
    if (!theApplyButton->IsEnabled())
       return;
        
@@ -203,33 +205,94 @@ void TankConfigPanel::SaveData()
    Integer paramID;
    try
    {
+      Real rvalue;
+      std::string inputString;
+      std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
+                        theFuelTank->GetName() + "\" is not an allowed value.  "
+                        "The allowed values are: [ %s ]."; 
+       
+      theOkButton->Disable();            
+            
+      // Temperature
       paramID = theFuelTank->GetParameterID("Temperature");
-      theFuelTank->SetRealParameter(paramID, atof(temperatureTextCtrl->GetValue()));
+      inputString = temperatureTextCtrl->GetValue(); 
+      if (!GmatStringUtil::ToDouble(inputString,&rvalue)) 
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+             inputString.c_str(), "Temperature","Real Number");
+         return;
+      }
+      theFuelTank->SetRealParameter(paramID, rvalue);
 
+      // Reference Temperature
       paramID = theFuelTank->GetParameterID("RefTemperature");
-      theFuelTank->SetRealParameter(paramID, atof(refTemperatureTextCtrl->GetValue()));
+      inputString = refTemperatureTextCtrl->GetValue();
+      if (!GmatStringUtil::ToDouble(inputString,&rvalue)) 
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+             inputString.c_str(), "Reference Temperature","Real Number");
+         return;
+      }
+      theFuelTank->SetRealParameter(paramID, rvalue); 
 
+      // Fuel Mass 
       paramID = theFuelTank->GetParameterID("FuelMass");
-      theFuelTank->SetRealParameter(paramID, atof(fuelMassTextCtrl->GetValue()));
+      inputString = fuelMassTextCtrl->GetValue();
+      if (!GmatStringUtil::ToDouble(inputString,&rvalue)) 
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+             inputString.c_str(), "Fuel Mass","Real Number >= 0");
+         return;
+      }
+      theFuelTank->SetRealParameter(paramID, rvalue); 
 
+      // Fuel Density 
       paramID = theFuelTank->GetParameterID("FuelDensity");
-      theFuelTank->SetRealParameter(paramID, atof(fuelDensityTextCtrl->GetValue()));
+      inputString = fuelDensityTextCtrl->GetValue();
+      if (!GmatStringUtil::ToDouble(inputString,&rvalue)) 
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+             inputString.c_str(), "Fuel Density","Real Number >= 0");
+         return;
+      }
+      theFuelTank->SetRealParameter(paramID, rvalue); 
 
+      // Pressure 
       paramID = theFuelTank->GetParameterID("Pressure");
-      theFuelTank->SetRealParameter(paramID, atof(pressureTextCtrl->GetValue()));
+      inputString = pressureTextCtrl->GetValue();
+      if (!GmatStringUtil::ToDouble(inputString,&rvalue)) 
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+             inputString.c_str(), "Pressure","Real Number >= 0");
+         return;
+      }
+      theFuelTank->SetRealParameter(paramID, rvalue); 
 
+      // Volume 
       paramID = theFuelTank->GetParameterID("Volume");
-      theFuelTank->SetRealParameter(paramID, atof(volumeTextCtrl->GetValue()));
+      inputString = volumeTextCtrl->GetValue();
+      if (!GmatStringUtil::ToDouble(inputString,&rvalue)) 
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+             inputString.c_str(), "Volume","Real Number >= 0");
+         return;
+      }
+      theFuelTank->SetRealParameter(paramID, rvalue); 
       
+      // Pressure Regulated
       paramID = theFuelTank->GetParameterID("PressureRegulated");
-      theFuelTank->SetBooleanParameter(paramID, pressureRegulatedCheckBox->GetValue());
+      theFuelTank->SetBooleanParameter(paramID, 
+                                       pressureRegulatedCheckBox->GetValue());
 
       theApplyButton->Disable();
+      canClose = true;
    }
    catch (BaseException &ex)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetMessage());
    }
+   
+   
 }
   
 
@@ -239,6 +302,7 @@ void TankConfigPanel::SaveData()
 void TankConfigPanel::OnTextChange(wxCommandEvent &event)
 {
     theApplyButton->Enable();
+    theOkButton->Enable();
 }    
 
 
@@ -248,5 +312,8 @@ void TankConfigPanel::OnTextChange(wxCommandEvent &event)
 void TankConfigPanel::OnCheckBoxChange(wxCommandEvent &event)
 {
     theApplyButton->Enable();
+    theOkButton->Enable();
 }    
+
+
 
