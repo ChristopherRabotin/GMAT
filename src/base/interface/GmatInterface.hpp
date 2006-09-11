@@ -38,7 +38,7 @@ public:
    
    // methods to manage execution of GMAT callback
    bool ExecuteCallback();
-   bool RegisterCallback(GmatBase *callbackObject);
+   bool RegisterCallbackServer(GmatBase *callbackObject);
    char* GetCallbackStatus();
    
    char* GetRunState();

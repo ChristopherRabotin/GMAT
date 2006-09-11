@@ -25,6 +25,7 @@ GmatInterface* GmatInterface::instance = NULL;
 bool GmatInterface::mPassedInterpreter = false;
 
 //#define DEBUG_GMAT_INTERFACE 1
+//#define DEBUG_CALLBACK
 
 //---------------------------------
 // public methods
@@ -173,6 +174,9 @@ void GmatInterface::RunScript()
 
 bool GmatInterface::ExecuteCallback()
 {
+   #ifdef DEBUG_CALLBACK
+      MessageInterface::ShowMessage("GI::ExecuteCallback being called ...\n");
+   #endif
    if (callbackObj)
    {
       callbackObj->ExecuteCallback();
@@ -182,8 +186,13 @@ bool GmatInterface::ExecuteCallback()
       return false;
 }
 
-bool GmatInterface::RegisterCallback(GmatBase *callbackObject)
+bool GmatInterface::RegisterCallbackServer(GmatBase *callbackObject)
 {
+   #ifdef DEBUG_CALLBACK
+      MessageInterface::ShowMessage(
+      "GI::RegisterCallbackServer being called with object %s...\n",
+      (callbackObject->GetName()).c_str());
+   #endif
    callbackObj = callbackObject;
    return true;
 }
@@ -197,6 +206,10 @@ bool GmatInterface::RegisterCallback(GmatBase *callbackObject)
 //------------------------------------------------------------------------------
 char* GmatInterface::GetCallbackStatus()
 {
+   #ifdef DEBUG_CALLBACK
+      MessageInterface::ShowMessage(
+      "GI::GetCallbackStatus being called ...\n");
+   #endif
    static char dataString[MAX_PARAM_VAL_STRING];
    static char *executingStr = "Executing\0";
    static char *completedStr = "Completed\0";
