@@ -86,7 +86,8 @@ int MatlabInterface::Open()
    std::string runString = "matlab -display " + hNameStr + ":0.0";
    //MessageInterface::ShowMessage("MATLAB being opened with the command: " 
    //                  + runString + "\n");
-   if ((enginePtrD = engOpen("\0")))
+   //if ((enginePtrD = engOpen("\0")))
+   if ((enginePtrD = engOpen(NULL))) // ***** temporary or dos it matter? ******
    //if ((enginePtrD = engOpen(runString.c_str())))
    {
       MessageInterface::ShowMessage("Successfully opened MATLAB engine ...\n");
