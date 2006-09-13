@@ -27,6 +27,7 @@
 //#define DEBUG_RENAME 1
 //#define DEBUG_DATE_FORMAT
 //#define DEBUG_STATE_INTERFACE
+//#define DEBUG_SC_ATTITUDE
 
 #if DEBUG_SPACECRAFT
 #include <iostream>
@@ -1010,8 +1011,19 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    }
    else if (type == Gmat::ATTITUDE)
    {
+      #ifdef DEBUG_SC_ATTITUDE
+         MessageInterface::ShowMessage("Setting attitude object on spacecraft %s\n",
+         instanceName.c_str());
+      #endif
       attitude = (Attitude*) obj;
       // set epoch ...
+      #ifdef DEBUG_SC_ATTITUDE
+         MessageInterface::ShowMessage("Setting attitude object on spacecraft %s\n",
+         instanceName.c_str());
+         MessageInterface::ShowMessage(
+         "Setting epoch on attitude object for spacecraft %s\n",
+         instanceName.c_str());
+      #endif
       attitude->SetEpoch(state.GetEpoch());
       return true;
    }
@@ -1938,6 +1950,11 @@ bool Spacecraft::Initialize()
       //throw SpaceObjectException("Spacecraft has no attitude set.");
    }
    else
+      #ifdef DEBUG_SC_ATTITUDE
+         MessageInterface::ShowMessage(
+         "Initializing attitude object for spacecraft %s\n",
+         instanceName.c_str());
+      #endif
       attitude->Initialize();
    
    return true;
