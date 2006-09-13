@@ -367,12 +367,11 @@ void CelestialBodyPanel::SaveData()
       theCelestialBody = thePlanet;
       
       inputString[0] =  mEpochTextCtrl->GetValue();
-      if (!GmatStringUtil::ToDouble(inputString[0], &rvalue[0]) || 
-          rvalue[0] < 0)
+      if (!GmatStringUtil::ToDouble(inputString[0], &rvalue[0])) 
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
                  inputString[0].c_str(), "Initial Epoch",
-                 "Real Number => 0");
+                 "Real Number");
          return;
       }
       A1Mjd a1mjd =  A1Mjd(rvalue[0]);
