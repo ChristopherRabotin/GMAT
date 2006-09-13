@@ -29,6 +29,7 @@
 
 //#define DEBUG_ATTITUDE_PANEL 1
 
+
 //------------------------------
 // event tables for wxWindows
 //------------------------------
@@ -54,8 +55,8 @@ END_EVENT_TABLE()
 AttitudePanel::AttitudePanel(wxWindow *parent, Spacecraft *spacecraft,
                      wxButton *theApplyButton):wxPanel(parent), dontUpdate(false)
 {
-        #if DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage("AttitudePanel::AttitudePanel() entered\n");
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage("AttitudePanel::AttitudePanel() entered\n");
    #endif
 
    this->theSpacecraft = spacecraft;
@@ -81,8 +82,8 @@ AttitudePanel::~AttitudePanel()
 {
    theGuiManager->UnregisterComboBox("CoordinateSystem", config2ComboBox);
 
-   #if DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage("AttitudePanel::~AttitudePanel() entered\n");
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage("AttitudePanel::~AttitudePanel() entered\n");
    #endif
 }
 
@@ -95,13 +96,13 @@ AttitudePanel::~AttitudePanel()
 //------------------------------------------------------------------------------
 void AttitudePanel::Create()
 { 
-   #if DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage("AttitudePanel::Create() entered\n");
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage("AttitudePanel::Create() entered\n");
    #endif
    
-   #if DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage
-      ("AttitudePanel::Create() Creating wxStaticText objects.\n");
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage
+         ("AttitudePanel::Create() Creating wxStaticText objects.\n");
    #endif
    
    // arrays to hold temporary values
@@ -171,9 +172,9 @@ void AttitudePanel::Create()
       new wxStaticText( this, ID_TEXT, wxT("String 3"),
                         wxDefaultPosition, wxSize(125,20), 0);
 
-   #if DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage
-      ("AttitudePanel::Create() Creating wxTextCtrl objects\n");
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage
+         ("AttitudePanel::Create() Creating wxTextCtrl objects\n");
    #endif
    
    //wxTextCtrl
@@ -221,17 +222,17 @@ void AttitudePanel::Create()
         attUnits1 = new wxStaticText(this,ID_TEXT,wxT("deg"));
         attUnits2 = new wxStaticText(this,ID_TEXT,wxT("deg"));
         attUnits3 = new wxStaticText(this,ID_TEXT,wxT("deg"));
-*/
+
    wxStaticText *rateUnits1 =
            new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
          wxStaticText *rateUnits2 =
            new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
          wxStaticText *rateUnits3 =
            new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
-
-   #if DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage
-      ("AttitudePanel::Create() Creating wxString objects\n");
+*/
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage
+         ("AttitudePanel::Create() Creating wxString objects\n");
    #endif
 
    //StringArray Initialization
@@ -262,9 +263,9 @@ void AttitudePanel::Create()
    for (Integer i=0; i<12; i++)
       estArray[i] = eulerSequenceStringArray[i].c_str();
       
-   #if DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage
-      ("AttitudePanel::Create() Creating wxComboBox objects.\n");
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage
+         ("AttitudePanel::Create() Creating wxComboBox objects.\n");
    #endif
    
    //wxComboBox
@@ -287,8 +288,9 @@ void AttitudePanel::Create()
                       wxDefaultPosition, wxSize(180,20), RateStateTypeCount,
                       strArray, wxCB_DROPDOWN|wxCB_READONLY );                  
                       
-   #if DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage("AttitudePanel::Create() Creating wxBoxSizer objects.\n");
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage(
+         "AttitudePanel::Create() Creating wxBoxSizer objects.\n");
    #endif
    
 #if __WXMAC__   
@@ -492,8 +494,8 @@ void AttitudePanel::Create()
    
 #endif
    
-   #if DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage("AttitudePanel::Create() exiting\n");
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage("AttitudePanel::Create() exiting\n");
    #endif
 }    
 
@@ -659,8 +661,8 @@ void AttitudePanel::DisplayAngularVelocity()
 //------------------------------------------------------------------------------
 void AttitudePanel::LoadData()
 {
-   #if DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage("AttitudePanel::LoadData() entered\n");
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage("AttitudePanel::LoadData() entered\n");
    #endif
    
    if (STARTUP_STATE_TYPE_SELECTION == EULER_ANGLES)
@@ -692,8 +694,8 @@ void AttitudePanel::LoadData()
 //------------------------------------------------------------------------------
 void AttitudePanel::SaveData()
 {
-        #if DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage("AttitudePanel::SaveData() entered\n");
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage("AttitudePanel::SaveData() entered\n");
    #endif
    
    if (!theApplyButton->IsEnabled())
@@ -701,28 +703,51 @@ void AttitudePanel::SaveData()
        
    theApplyButton->Disable();
    
-/////////////////////////////
-   MessageInterface::ShowMessage("Attitude creation via the GUI is not implemented yet\n");
-/////////////////////////////
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage("Attitude creation via the GUI is not implemented yet\n");
+   #endif
 
    wxString mode = config1ComboBox->GetValue();
+   wxString typeVal = config3ComboBox->GetValue();
    
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage("Attitude creation: mode = %s\n", mode.c_str());
+      MessageInterface::ShowMessage("Attitude creation: type = %s\n", typeVal.c_str());
+   #endif
    AttitudeFactory af;
    
-   Attitude* a = af.CreateAttitude(mode.c_str(), "");
+   //Attitude* a = af.CreateAttitude(mode.c_str(), "");
+   Attitude* a = af.CreateAttitude(typeVal.c_str(), "");
 
         if (a == NULL) {
                 MessageInterface::ShowMessage("Attitude object made is null\n");
                 return;
         }
 
-   theSpacecraft->SetRefObject(a, Gmat::ATTITUDE, "");
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage("Attitude creation: a != NULL\n");
+   #endif
+   try
+   {
+      theSpacecraft->SetRefObject(a, Gmat::ATTITUDE, "");
+   }
+   catch (BaseException &be)
+   {
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage(
+      "ERROR setting attitude object on spacecraft object!!!\n");
+   #endif
+   }
 
    std::string selectedEulerSeq = config4ComboBox->GetValue().c_str();
    
-        a->SetStringParameter("EulerSequenceString", selectedEulerSeq);
+   a->SetStringParameter("EulerSequenceString", selectedEulerSeq);
            
    std::string stateTypeStr = stateTypeComboBox->GetStringSelection().c_str();
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage("stateTypeStr = %s\n", stateTypeStr.c_str());
+   #endif
+   
    if (stateTypeStr == stateTypeArray[EULER_ANGLES])
    {
       Rvector3 eulerAnglesRvector;
@@ -738,17 +763,19 @@ void AttitudePanel::SaveData()
    }
    else if (stateTypeStr == stateTypeArray[QUATERNIONS])
    {
-      Rvector  quaternionRvector;
+      Rvector  quaternionRvector(4);
       Real dQ;
       for (unsigned int x = 0; x < 4; ++x)
       {
          if (quaternions[x]->ToDouble(&dQ))
          {
+            #ifdef DEBUG_ATTITUDE_PANEL
                 MessageInterface::ShowMessage("q[%u] = %f\n", x, dQ);
-                
+            #endif               
             quaternionRvector[x] = dQ;
          }
-         else {
+         else 
+         {
                 MessageInterface::ShowMessage("failed with: \"%s\"\n", quaternions[x]->c_str());
          }
                 
@@ -801,8 +828,8 @@ void AttitudePanel::SaveData()
       a->SetRvectorParameter(a->GetParameterID("InitialAngularVelocity"), angularVelocityRvector);
    }
 
-        #if DEBUG_ATTITUDE_PANEL
-   MessageInterface::ShowMessage("AttitudePanel::SaveData() ending\n");
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage("AttitudePanel::SaveData() ending\n");
    #endif
 }
 
