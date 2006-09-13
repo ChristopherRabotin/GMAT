@@ -889,7 +889,8 @@ void PropagationConfigPanel::Initialize()
                ("PropagationConfigPanel::Initialize() Checking if SRP is set for "
                 "earth only.\n");
             #endif
-            
+
+            bodyName = force->GetStringParameter("BodyName");
             if ( strcmp(bodyName.c_str(), SolarSystem::EARTH_NAME.c_str()) == 0 )
             {
                currentBodyId = FindBody(bodyName);
