@@ -129,7 +129,7 @@ void LibrationPointPanel::Create()
         
       // combo box for libration points 
       librationPtCB = new wxComboBox(this, ID_COMBOBOX, wxT(""), 
-         wxDefaultPosition, wxSize(100,-1), 5, librationList, wxCB_DROPDOWN);
+         wxDefaultPosition, wxSize(100,-1), 5, librationList, wxCB_READONLY);
 
       // add labels and comboboxes to page sizer    
       pageSizer->Add(primaryBodyLabel, 0, wxALIGN_LEFT | wxALL, bsize);
