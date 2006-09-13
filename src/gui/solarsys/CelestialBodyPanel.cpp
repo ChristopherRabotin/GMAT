@@ -13,6 +13,7 @@
 //------------------------------------------------------------------------------
 
 #include "CelestialBodyPanel.hpp"
+#include "StringUtil.hpp"
 #include "MessageInterface.hpp"
 
 
@@ -338,39 +339,99 @@ void CelestialBodyPanel::LoadData()
 //------------------------------------------------------------------------------
 void CelestialBodyPanel::SaveData()
 {
+   canClose = false;
    try
    {
+      Real rvalue[6];
+      std::string inputString[6];
+      std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
+                 theCelestialBody->GetName() + "\" is not an allowed value.  "
+                 "\nThe allowed values are: [ %s ].";
+
+      theOkButton->Disable();
+
       if (theCelestialBody->GetBodyType() == Gmat::PLANET)
       {
-          thePlanet->SetUpdateInterval(atof(mIntervalTextCtrl->GetValue()));
+         inputString[0] = mIntervalTextCtrl->GetValue();
+         if (!GmatStringUtil::ToDouble(inputString[0], &rvalue[0]) || 
+             rvalue[0] < 0)
+         {
+             MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                 inputString[0].c_str(), "Nutation Update Interval",
+                 "Real Number => 0");
+             return;
+         }
+         thePlanet->SetUpdateInterval(rvalue[0]);
       }
       
       theCelestialBody = thePlanet;
       
-      A1Mjd a1mjd =  A1Mjd(atof(mEpochTextCtrl->GetValue()));
+      inputString[0] =  mEpochTextCtrl->GetValue();
+      if (!GmatStringUtil::ToDouble(inputString[0], &rvalue[0]) || 
+          rvalue[0] < 0)
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                 inputString[0].c_str(), "Initial Epoch",
+                 "Real Number => 0");
+         return;
+      }
+      A1Mjd a1mjd =  A1Mjd(rvalue[0]);
       theCelestialBody->SetLowFidelityEpoch(a1mjd);
 
-      Rvector6 elements;
-      elements.Set(atof(mElement1TextCtrl->GetValue()),
-                  atof(mElement2TextCtrl->GetValue()),
-                  atof(mElement3TextCtrl->GetValue()),
-                  atof(mElement4TextCtrl->GetValue()),
-                  atof(mElement5TextCtrl->GetValue()),
-                  atof(mElement6TextCtrl->GetValue()));
+      inputString[0] =  mElement1TextCtrl->GetValue();
+      inputString[1] =  mElement2TextCtrl->GetValue();
+      inputString[2] =  mElement3TextCtrl->GetValue();
+      inputString[3] =  mElement4TextCtrl->GetValue();
+      inputString[4] =  mElement5TextCtrl->GetValue();
+      inputString[5] =  mElement6TextCtrl->GetValue();
+      
+      for (Integer i=0; i < 6; ++i)
+      {
+          if (!GmatStringUtil::ToDouble(inputString[i], &rvalue[i]))
+          {
+             MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                              inputString[i].c_str(), 
+                              KEP_ELEMENT_NAMES[i].c_str(),
+                              "Real Number");
+             return;
+          }
+      } 
+      
+      // Double check with SMA and ECC again.
+      if (rvalue[0] == 0) {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                              inputString[0].c_str(), 
+                              KEP_ELEMENT_NAMES[0].c_str(),
+                              "Real Number must be non-zero");
+         return;
+      }
+      else if (rvalue[1] < 0) {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                              inputString[1].c_str(), 
+                              KEP_ELEMENT_NAMES[1].c_str(),
+                              "Real Number => 0");
+         return; 
+      }
+
+      Rvector6 elements(rvalue);
 
       theCelestialBody->SetLowFidelityElements(elements);
       
-       if (theCelestialBody->GetName() == "Luna")
-       {
-          wxString rotDataString = rotDataSourceCB->GetValue();
+      if (theCelestialBody->GetName() == "Luna")
+      {
+         wxString rotDataString = rotDataSourceCB->GetValue();
 
-          if (rotDataString == "DeFile")
+         if (rotDataString == "DeFile")
             theCelestialBody->SetRotationDataSource(Gmat::DE_FILE);
-          else if (rotDataString == "IAU Data")
+         else if (rotDataString == "IAU Data")
             theCelestialBody->SetRotationDataSource(Gmat::IAU_DATA);
-          else
+         else
             theCelestialBody->SetRotationDataSource(Gmat::NOT_APPLICABLE);
-       }
+      }
+
+      theApplyButton->Disable();
+      theOkButton->Enable();
+      canClose = true;
    }
    catch (BaseException &e)
    {
@@ -387,6 +448,7 @@ void CelestialBodyPanel::SaveData()
 void CelestialBodyPanel::OnTextUpdate(wxCommandEvent& event)
 {
    theApplyButton->Enable(true);
+   theOkButton->Enable(true);
 }
 
 //------------------------------------------------------------------------------
@@ -395,6 +457,7 @@ void CelestialBodyPanel::OnTextUpdate(wxCommandEvent& event)
 void CelestialBodyPanel::OnComboBoxChange(wxCommandEvent& event)
 {
    theApplyButton->Enable(true);
+   theOkButton->Enable(true);
 }
 
 //------------------------------------------------------------------------------
