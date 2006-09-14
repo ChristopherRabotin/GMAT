@@ -22,6 +22,8 @@
 #include "UniversePanel.hpp"
 #include "MessageInterface.hpp"
 #include "ShowScriptDialog.hpp"
+#include "StringUtil.hpp"
+#include <fstream>
 
 //#define DEBUG_UNIV_PANEL 1
 
@@ -366,11 +368,13 @@ void UniversePanel::LoadData()
    if (mFileTypeComboBox->GetStringSelection() == "Analytic")
    {
       mBrowseButton->Disable();
+      mFileNameTextCtrl->Disable();
       mPageSizer->Show(mAnaModelSizer, true);
    }
    else
    {
       mBrowseButton->Enable();
+      mFileNameTextCtrl->Enable();
       mPageSizer->Show(mAnaModelSizer, false);
    }
    
@@ -395,6 +399,13 @@ void UniversePanel::SaveData()
 {
    // save data to core engine
 
+   std::string inputString;
+   std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
+                     theSolarSystem->GetName() + "\" is not an allowed value.  "
+                     "\nThe allowed values are: [ %s ].";
+
+   canClose = false;
+   
    if (selectedListBox->GetCount() == 0)
    {
       MessageInterface::PopupMessage
@@ -410,6 +421,20 @@ void UniversePanel::SaveData()
       if (mHasFileNameChanged)
       {
          mHasFileNameChanged = false;
+
+         wxString type = mFileTypeComboBox->GetStringSelection();
+         inputString = mFileNameTextCtrl->GetValue();
+         std::ifstream filename(inputString.c_str());
+
+         // Check if the file doesn't exist then stop
+         if (type != "Analytic" && !filename) 
+         {
+            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                           inputString.c_str(),"File Name", "File must exist"); 
+            theOkButton->Disable();
+            return;
+         }
+         filename.close();
          
          for (unsigned int i=0; i<mAllFileTypes.size(); i++)
          {
@@ -457,8 +482,20 @@ void UniversePanel::SaveData()
       mOverrideCheckBox->IsChecked());
       
    // Saving EphemerisUpdateInterval
-   theSolarSystem->SetEphemUpdateInterval(atof(mIntervalTextCtrl->GetValue()));
-   
+   Real rvalue;
+   inputString = mIntervalTextCtrl->GetValue();
+
+   if (!GmatStringUtil::ToDouble(inputString,&rvalue) || rvalue < 0)
+   {
+       MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                        inputString.c_str(),"Ephemeris Update Interval",
+                        "Real Number >= 0");
+       theOkButton->Disable();
+       return;
+   }
+   theSolarSystem->SetEphemUpdateInterval(rvalue);
+
+   canClose = true;
    theApplyButton->Enable(false);
    
 }// end SaveData()
@@ -616,7 +653,7 @@ void UniversePanel::OnBrowseButton(wxCommandEvent& event)
       wxString filename;
       
       filename = dialog.GetPath().c_str();
-      
+
       if (!filename.IsSameAs(oldname))
       {
          mFileNameTextCtrl->SetValue(filename);
@@ -648,6 +685,7 @@ void UniversePanel::OnListBoxSelect(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
 {
+   mFileNameTextCtrl->Enable();
    if (event.GetEventObject() == mFileTypeComboBox)
    {
       wxString type = mFileTypeComboBox->GetStringSelection();
@@ -657,6 +695,7 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
       {
          mPageSizer->Show(mAnaModelSizer, true);
          mBrowseButton->Disable();
+         mFileNameTextCtrl->Disable();
       }
       else
       {
@@ -672,7 +711,7 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
    }
    
    theApplyButton->Enable();
-
+   theOkButton->Enable();
 }
 
 //------------------------------------------------------------------------------
@@ -681,6 +720,7 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
 void UniversePanel::OnCheckBoxChange(wxCommandEvent& event)
 {
    theApplyButton->Enable();
+   theOkButton->Enable();
 }
 
 //------------------------------------------------------------------------------
@@ -688,5 +728,11 @@ void UniversePanel::OnCheckBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void UniversePanel::OnTextCtrlChange(wxCommandEvent& event)
 {
+   if (event.GetEventObject() == mFileNameTextCtrl)
+   {
+      mHasFileNameChanged = true;
+   }
+
    theApplyButton->Enable();
+   theOkButton->Enable();
 }
