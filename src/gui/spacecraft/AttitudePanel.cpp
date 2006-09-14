@@ -223,13 +223,14 @@ void AttitudePanel::Create()
         attUnits2 = new wxStaticText(this,ID_TEXT,wxT("deg"));
         attUnits3 = new wxStaticText(this,ID_TEXT,wxT("deg"));
 
-   wxStaticText *rateUnits1 =
+*/
+         wxStaticText *rateUnits1 =
            new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
          wxStaticText *rateUnits2 =
            new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
          wxStaticText *rateUnits3 =
            new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
-*/
+
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage
          ("AttitudePanel::Create() Creating wxString objects\n");
