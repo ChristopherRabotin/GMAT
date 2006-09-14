@@ -263,7 +263,7 @@ void ThrusterConfigPanel::SaveData()
       // Z_Direction
       paramID = theThruster->GetParameterID("Z_Direction");
       inputString = ZTextCtrl->GetValue();
-      if (!GmatStringUtil::ToDouble(inputString,&rvalue))
+      if (!GmatStringUtil::ToDouble(inputString,&rvalue) || rvalue < 0)
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
                 inputString.c_str(), "Z_Direction","Real Number >= 0");
