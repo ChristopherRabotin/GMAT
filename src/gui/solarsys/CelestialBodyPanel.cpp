@@ -358,7 +358,7 @@ void CelestialBodyPanel::SaveData()
          {
              MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
                  inputString[0].c_str(), "Nutation Update Interval",
-                 "Real Number => 0");
+                 "Real Number >= 0");
              return;
          }
          thePlanet->SetUpdateInterval(rvalue[0]);
@@ -408,7 +408,7 @@ void CelestialBodyPanel::SaveData()
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
                               inputString[1].c_str(), 
                               KEP_ELEMENT_NAMES[1].c_str(),
-                              "Real Number => 0");
+                              "Real Number >= 0");
          return; 
       }
 
