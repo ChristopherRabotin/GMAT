@@ -283,7 +283,7 @@ Real Hardware::SetRealParameter(const Integer id, const Real value)
          
       case DIRECTION_Z:
          if (value < 0) {
-            throw HardwareException("Z_Direction must be => 0"); 
+            throw HardwareException("Z_Direction must be >= 0"); 
          }
          return direction[2] = value;
       default:
