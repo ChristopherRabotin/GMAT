@@ -260,6 +260,22 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
       details << variableMaximum[i];
    }
 
+   if (solver && (solver->IsOfType("Optimizer")))
+   {
+      details << ", AdditiveScaleFactor =";
+      for (UnsignedInt i = 0; i < additiveScaleFactor.size(); ++i)
+      {
+         details << " ";
+         details << additiveScaleFactor[i];
+      }
+   
+      details << ", MultiplicativeScaleFactor =";
+      for (UnsignedInt i = 0; i < multiplicativeScaleFactor.size(); ++i)
+      {
+         details << " ";
+         details << multiplicativeScaleFactor[i];
+      }
+   }
    gen += details.str();
    generatingString = gen + "});";
    // Then call the base class method
@@ -631,7 +647,8 @@ bool Vary::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                         const std::string &name)
 {
    if (type == Gmat::SOLVER) {
-      if (solverName == obj->GetName()) {
+      if (solverName == obj->GetName()) 
+      {
          solver = (Solver*)obj;
          return true;
       }
@@ -839,7 +856,8 @@ bool Vary::Execute(void)
        ("Vary::Execute() solverDataFinalized=%d\n", solverDataFinalized);
     #endif
     
-    if (!solverDataFinalized) {
+    if (!solverDataFinalized) 
+    {
         // First time through, tell the solver about the variables
         Real varData[5];
         //for (Integer i = 0; i < variableName.size(); ++i) {
