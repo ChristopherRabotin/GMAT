@@ -19,8 +19,9 @@
 
 #include "StringUtil.hpp"
 #include "MessageInterface.hpp"
-#include "GmatBaseException.hpp"
+#include "UtilityException.hpp"
 #include "Linear.hpp"            // for ToString()
+#include "StringTokenizer.hpp"   // for StringTokenizer()
 #include <map>
 
 //#define DEBUG_STRING_UTIL 1
@@ -53,36 +54,84 @@ std::string GmatStringUtil::RemoveAll(const std::string &str, char ch,
 
 
 //------------------------------------------------------------------------------
-// std::string Trim(const std::string &str, StripType stype = TRAILING,
+// std::string RemoveSpaceInBrackets(const std::string &str,
+//                                   const std::string &bracketPair)
+//------------------------------------------------------------------------------
+/*
+ * Removes spaces in array indexing.
+ *   "A( 3, 3)  B(1  ,1)" gives "A(3,3)  B(1,1)"
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::RemoveSpaceInBrackets(const std::string &str,
+                                                  const std::string &bracketPair)
+{
+   // Removed extra space in the array indexing, between ()
+   std::string str1;
+   UnsignedInt index1 = 0;
+   UnsignedInt closeParen;
+   UnsignedInt length = str.size();
+   
+   while (index1 < length)
+   {
+      if (str[index1] == bracketPair[0])
+      {
+         str1.push_back(str[index1]);
+         closeParen = str.find(bracketPair[1], index1);
+         
+         // find close paren and copy non-blank char
+         for (UnsignedInt j=index1+1; j<=closeParen; j++)
+            if (str[j] != ' ')
+               str1.push_back(str[j]);
+         
+         index1 = closeParen+1;
+      }
+      else
+      {
+         str1.push_back(str[index1++]);
+      }
+   }
+   
+   return str1;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string Trim(const std::string &str, StripType stype = BOTH,
 //                  bool removeSemicolon = false)
 //------------------------------------------------------------------------------
 std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
                                  bool removeSemicolon)
 {
    std::string str2;
-
-   UnsignedInt index1 = str.find_first_not_of(' ');
-   UnsignedInt index2 = str.find_last_not_of(' ');
-
+   std::string whiteSpace = " \t";
+   
+//    UnsignedInt index1 = str.find_first_not_of(' ');
+//    UnsignedInt index2 = str.find_last_not_of(' ');
+   UnsignedInt index1 = str.find_first_not_of(whiteSpace);
+   UnsignedInt index2 = str.find_last_not_of(whiteSpace);
+   
    if (index1 == str.npos)
       index1 = 0;
-
+   
    if (stype == LEADING)
       str2 = str.substr(index1);
    else if (stype == TRAILING)
       str2 = str.substr(0, index2);
    else if (stype == BOTH)
       str2.assign(str.substr(index1, index2-index1+1));
-
+   
    #if DEBUG_STRING_UTIL
    MessageInterface::ShowMessage
       ("==> index1=%d, index2=%d str=<%s>, str2=<%s>\n", index1, index2,
        str.c_str(), str2.c_str());
    #endif
-
+   
    if (removeSemicolon)
       if (str2[str2.size()-1] == ';')
          str2.erase(str2.size()-1, 1);
+   
+   //MessageInterface::ShowMessage
+   //   ("===> GmatStringUtil::Trim() returning:\n   %s\n", str2.c_str());
    
    return str2;
 }
@@ -189,10 +238,6 @@ std::string GmatStringUtil::Replace(const std::string &str, const std::string &f
 std::string GmatStringUtil::ToString(const Integer &val, Integer width)
 {
    return GmatRealUtil::ToString(val, width);
-//    std::stringstream ss("");
-//    ss.width(width);
-//    ss << val;
-//    return std::string(ss.str());
 }
 
 
@@ -204,14 +249,18 @@ std::string GmatStringUtil::ToString(const Real &val, bool scientific,
                                      Integer width, Integer precision)
 {
    return GmatRealUtil::ToString(val, scientific, width, precision);
-//    std::stringstream ss("");
-//    ss.width(width);
-//    ss.precision(precision);
-//    if (scientific)
-//       ss.setf(std::ios::scientific);
-   
-//    ss << val;
-//    return std::string(ss.str());
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray SeparateBy(const std::string &str, const std::string &delim)
+//------------------------------------------------------------------------------
+StringArray GmatStringUtil::SeparateBy(const std::string &str,
+                                       const std::string &delim)
+{
+   StringTokenizer st(str, delim);
+   StringArray parts = st.GetAllTokens();
+   return parts;
 }
 
 
@@ -231,6 +280,9 @@ bool GmatStringUtil::ToDouble(const std::string &str, Real *value)
 //------------------------------------------------------------------------------
 bool GmatStringUtil::ToDouble(const std::string &str, Real &value)
 {
+   if (str == "")
+      return false;
+   
    std::string str2 = Trim(str, BOTH);
    Integer numDot = 0;
    
@@ -276,7 +328,7 @@ bool GmatStringUtil::ToDouble(const std::string &str, Real &value)
 
 
 //------------------------------------------------------------------------------
-// bool GmatStringUtil::ToInteger(const std::string &str, Integer *value)
+// bool ToInteger(const std::string &str, Integer *value)
 //------------------------------------------------------------------------------
 bool GmatStringUtil::ToInteger(const std::string &str, Integer *value)
 {
@@ -284,7 +336,7 @@ bool GmatStringUtil::ToInteger(const std::string &str, Integer *value)
 }
 
 //------------------------------------------------------------------------------
-// bool ToInteger(const std::string &str, Real *value)
+// bool ToInteger(const std::string &str, Integer &value)
 //------------------------------------------------------------------------------
 // Note: atoi() returns 0 for X or 100 for 100ABC, but we want it be an error
 //------------------------------------------------------------------------------
@@ -309,6 +361,45 @@ bool GmatStringUtil::ToInteger(const std::string &str, Integer &value)
    
    value = atoi(str2.c_str());
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ToBoolean(const std::string &str, bool *value)
+//------------------------------------------------------------------------------
+bool GmatStringUtil::ToBoolean(const std::string &str, bool *value)
+{
+   return ToBoolean(str, *value);
+}
+
+
+//------------------------------------------------------------------------------
+// bool ToBoolean(const std::string &str, bool &value)
+//------------------------------------------------------------------------------
+/*
+ * @return true if string value is boolean (TRUE, FALSE, true, false, True, False).
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::ToBoolean(const std::string &str, bool &value)
+{
+   std::string str2 = Trim(str, BOTH);
+   
+   if (str2.length() == 0)
+      return false;
+
+   if (ToLower(str2) == "true")
+   {
+      value = true;
+      return true;
+   }
+
+   if (ToLower(str2) == "false")
+   {
+      value = false;
+      return true;
+   }
+
+   return false;
 }
 
 
@@ -345,36 +436,42 @@ void GmatStringUtil::ParseParameter(const std::string &str, std::string &type,
 
 //------------------------------------------------------------------------------
 // void GetArrayIndex(const std::string &str, Integer &row, Integer &col,
-//                    std::string &name)
+//                    std::string &name, const std::string &bracketPair)
 //------------------------------------------------------------------------------
 void GmatStringUtil::GetArrayIndex(const std::string &str, Integer &row,
-                                   Integer &col, std::string &name)
+                                   Integer &col, std::string &name,
+                                   const std::string &bracketPair)
 {
    #if DEBUG_STRING_UTIL
    MessageInterface::ShowMessage
-      ("Report::GetArrayIndex() str=%s\n", str.c_str());
+      ("StringUtil::GetArrayIndex() str=%s\n", str.c_str());
    #endif
-
+   
    std::string rowStr;
    std::string colStr;
    row = -1;
    col = -1;
    Integer intVal;
    
-   GetArrayIndexVar(str, rowStr, colStr, name);
+   GetArrayIndexVar(str, rowStr, colStr, name, bracketPair);
    
-   // array index starts at 0
    if (rowStr != "-1")
       if (ToInteger(rowStr, intVal))
-         row = intVal - 1;
+         if (bracketPair == "()")
+            row = intVal - 1; // array index start at 0
+         else
+            row = intVal;
    
    if (colStr != "-1")
       if (ToInteger(colStr, intVal))
-         col = intVal - 1;
+         if (bracketPair == "()")
+            col = intVal - 1; // array index start at 0
+         else
+            col = intVal;
    
    #if DEBUG_STRING_UTIL
    MessageInterface::ShowMessage
-      ("Report::GetArrayIndex() row=%d, col=%d, name=%s\n", row, col, name.c_str());
+      ("StringUtil::GetArrayIndex() row=%d, col=%d, name=%s\n", row, col, name.c_str());
    #endif
 }
 
@@ -382,17 +479,17 @@ void GmatStringUtil::GetArrayIndex(const std::string &str, Integer &row,
 //------------------------------------------------------------------------------
 // void GetArrayIndex(const std::string &str, std::string &rowStr,
 //                    std::string &colStr, Integer &row, Integer &col,
-//                    std::string &name)
+//                    std::string &name, const std::string &bracketPair)
 //------------------------------------------------------------------------------
 void GmatStringUtil::GetArrayIndex(const std::string &str, std::string &rowStr,
                                    std::string &colStr, Integer &row, Integer &col,
-                                   std::string &name)
+                                   std::string &name, const std::string &bracketPair)
 {
    row = -1;
    col = -1;
    Integer intVal;
    
-   GetArrayIndexVar(str, rowStr, colStr, name);
+   GetArrayIndexVar(str, rowStr, colStr, name, bracketPair);
    
    // array index starts at 0
    if (rowStr != "-1")
@@ -407,39 +504,50 @@ void GmatStringUtil::GetArrayIndex(const std::string &str, std::string &rowStr,
 
 //------------------------------------------------------------------------------
 // void GetArrayIndexVar(const std::string &str, std::string &rowStr,
-//                       std::string &colStr, std::string &name)
+//                       std::string &colStr, std::string &name,
+//                       const std::string &bracketPair)
 //------------------------------------------------------------------------------
 void GmatStringUtil::GetArrayIndexVar(const std::string &str, std::string &rowStr,
-                                      std::string &colStr, std::string &name)
+                                      std::string &colStr, std::string &name,
+                                      const std::string &bracketPair)
 {
    std::string str1;
    str1 = RemoveAll(str, ' ');
+   std::string openStr = bracketPair.substr(0,1);
+   std::string closeStr = bracketPair.substr(1,1);
    
    #if DEBUG_STRING_UTIL
    MessageInterface::ShowMessage
-      ("GmatStringUtil::GetArrayIndexVar() str=%s, str1=%s\n", str.c_str(), str1.c_str());
+      ("GmatStringUtil::GetArrayIndexVar() str=%s, str1=%s\n",
+       str.c_str(), str1.c_str());
    #endif
 
    rowStr = "-1";
    colStr = "-1";
    
    // Handle Array indexing
-   UnsignedInt openParen = str1.find('(');
-   if (openParen != str1.npos)
+   UnsignedInt openBracket = str1.find(openStr);
+   if (openBracket != str1.npos)
    {
-      UnsignedInt comma = str1.find(',');
+      UnsignedInt comma = str1.find(',');      
+      UnsignedInt closeBracket = str1.find(closeStr);
+      
+      if (closeBracket == str1.npos)
+         throw UtilityException("Expecting \"" + closeStr + "\" for Array " + str);
+      
       if (comma == str1.npos)
-         throw GmatBaseException("Expecting \",\" for Array " + str);
-      
-      UnsignedInt closeParen = str1.find(')');
-      if (closeParen == str1.npos)
-         throw GmatBaseException("Expecting \")\" for Array " + str);
-      
-      rowStr = str1.substr(openParen+1, comma-openParen-1);
-      colStr = str1.substr(comma+1, closeParen-comma-1);
+      {
+         rowStr = "1";
+         colStr = str1.substr(openBracket+1, closeBracket-openBracket-1);
+      }
+      else
+      {
+         rowStr = str1.substr(openBracket+1, comma-openBracket-1);
+         colStr = str1.substr(comma+1, closeBracket-comma-1);
+      }
    }
-
-   name = str1.substr(0, openParen);
+   
+   name = str1.substr(0, openBracket);
    
    #if DEBUG_STRING_UTIL
    MessageInterface::ShowMessage
@@ -506,8 +614,8 @@ void GmatStringUtil::FindParenMatch(const std::string &str, Integer &openParen,
    
    #if DEBUG_STRING_UTIL
    MessageInterface::ShowMessage
-      ("FindParenMatch() str=%s, openParen=%d, closeParen=%d, isOuterParen=%d\n",
-       str.c_str(), openParen, closeParen, isOuterParen);
+      ("GmatStringUtil::FindParenMatch() str=%s, openParen=%d, closeParen=%d, "
+       "isOuterParen=%d\n", str.c_str(), openParen, closeParen, isOuterParen);
    #endif
 }
 
@@ -532,9 +640,11 @@ void GmatStringUtil::FindMatchingParen(const std::string &str, Integer &openPare
                                        Integer &closeParen, bool &isOuterParen,
                                        Integer start)
 {
-   //MessageInterface::ShowMessage
-   //   ("FindMatchingParen() start=%d, str=%s\n", start, str.c_str());
-
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("FindMatchingParen() start=%d, str=%s\n", start, str.c_str());
+   #endif
+   
    // initialize output parameters
    openParen = -1;
    closeParen = -1;
@@ -567,6 +677,69 @@ void GmatStringUtil::FindMatchingParen(const std::string &str, Integer &openPare
    MessageInterface::ShowMessage
       ("FindMatchingParen() str=%s, openParen=%d, closeParen=%d, isOuterParen=%d\n",
        str.c_str(), openParen, closeParen, isOuterParen);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void FindMatchingBracket(const std::string &str, Integer &openBracket,
+//                          Integer &closeBracket, bool &isOuterBracket,
+//                          const std::string &bracket, Integer start = 0)
+//------------------------------------------------------------------------------
+/*
+ * Finds matching closing bracket of the first open bracket.
+ * if parhenthesis is not found it sets to -1
+ *
+ * @param <str> input string
+ * @param <openBracket> set to index of first open bracket
+ * @param <closeBracket> set to index of matching close bracket of openBracket
+ * @param <isOuterBracket> set to true if item is enclosed with bracket
+ * @param <bracket> input open/close bracket (eg: "()", "{}", "[]", "<>")
+ * @param <start> input starting index
+ */
+//------------------------------------------------------------------------------
+void GmatStringUtil::FindMatchingBracket(const std::string &str, Integer &openBracket,
+                                         Integer &closeBracket, bool &isOuterBracket,
+                                         const std::string &bracket, Integer start)
+{
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("FindMatchingBracket() start=%d, str=%s\n", start, str.c_str());
+   #endif
+   
+   // initialize output parameters
+   openBracket = -1;
+   closeBracket = -1;
+   isOuterBracket = false;
+   
+   int length = str.size();
+   Integer openCounter = 0;
+   
+   for (int i=start; i<length; i++)
+   {
+      if (str[i] == bracket[0])
+      {
+         openCounter++;
+         if (openCounter == 1)
+            openBracket = i;
+      }
+      else if (str[i] == bracket[1])
+      {
+         openCounter--;
+         closeBracket = i;
+         if (openCounter == 0)
+            break;
+      }
+   }
+   
+   if (openBracket == 0 && closeBracket == length-1)
+      isOuterBracket = true;
+   
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("FindMatchingBracket() str=%s, openBracket=%d, closeBracket=%d, "
+       "isOuterBracket=%d\n", str.c_str(), openBracket, closeBracket,
+       isOuterBracket);
    #endif
 }
 
@@ -752,6 +925,38 @@ bool GmatStringUtil::IsParenBalanced(const std::string &str)
 
 
 //------------------------------------------------------------------------------
+// bool IsBracketBalanced(const std::string &str, const std::string &bracketPair)
+//------------------------------------------------------------------------------
+/*
+ * return true if brackets are balanced (no mismatching brackets)
+ * 
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsBracketBalanced(const std::string &str,
+                                       const std::string &bracketPair)
+{
+   char open = bracketPair[0];
+   char close = bracketPair[1];
+   int length = str.size();
+   Integer openCounter = 0;
+   bool retval = false;
+   
+   for (int i=0; i<length; i++)
+   {
+      if (str[i] == open)
+         openCounter++;
+      else if (str[i] == close)
+         openCounter--;
+   }
+   
+   if (openCounter == 0)
+      retval = true;
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
 // bool IsOuterParen(const std::string &str)
 //------------------------------------------------------------------------------
 /*
@@ -783,10 +988,7 @@ bool GmatStringUtil::IsOuterParen(const std::string &str)
 
    if (!IsEnclosedWithExtraParen(str, false))
       return false;
-   
-//    if (IsEnclosedWithExtraParen(str) && IsSingleItem(str))
-//       return true;
-   
+      
    if (openParen == 0 && closeParen == length-1)
    {
       // make sure ending ) is not part of ^(-1)
@@ -804,6 +1006,11 @@ bool GmatStringUtil::IsOuterParen(const std::string &str)
          if (str.find("^(", lastOpenParen-1) != str.npos &&
              (lastCloseParen == str.npos || lastCloseParen < lastOpenParen))
              isOuterParen = false;
+      
+      #if DEBUG_STRING_UTIL
+      MessageInterface::ShowMessage
+         ("===> IsOuterParen() isOuterParen=%d\n", isOuterParen);
+      #endif
       
       // make sure ending ) is not part of array
       if (isOuterParen)
@@ -826,42 +1033,191 @@ bool GmatStringUtil::IsOuterParen(const std::string &str)
 
 
 //------------------------------------------------------------------------------
+// bool IsBracketPartOfArray(const std::string &str,
+//                           const std::string &bracketPairs)
+//------------------------------------------------------------------------------
+/*
+ * Check if string is part of array.
+ *
+ * @param str           Input string
+ * @param bracketPairs  Bracket pairs used in checking ("()", "([)]")
+ *
+ * return true if parenthesis or square bracket is part of an array.
+ *    For example: (2,2) or (abc,def) or [2,2], [i,j]
+ *
+ * return false if no parenthesis found or non-alphanumeric char found inside
+ * parenthesis.
+ *    For example: abc, abc((2,2)), (1,), (3,2]
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
+                                          const std::string &bracketPairs,
+                                          bool checkOnlyFirst)
+{
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::IsBracketPartOfArray() str=%s, bracketPairs=%s, "
+       "checkOnlyFirst=%d\n", str.c_str(), bracketPairs.c_str(), checkOnlyFirst);
+   #endif
+   
+   bool ret = true;
+   UnsignedInt index1, index2, comma;
+   std::string substr;
+   Integer count = bracketPairs.size();
+   char openChar = 'x';
+   char closeChar = 'x';
+   
+   if (count%2 == 1)
+      throw UtilityException("Invalid number of Bracket pair\n");
+   
+   std::string openBrackets = bracketPairs.substr(0, count/2);
+   std::string closeBrackets = bracketPairs.substr(count/2);
+   
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("   openBrackets=%s, closeBrackets=%s\n", openBrackets.c_str(),
+       closeBrackets.c_str());
+   #endif
+   
+   index1 = str.find_first_of(openBrackets);   
+   //MessageInterface::ShowMessage("   index1=%u\n", index1);
+   
+   if (index1 == str.npos)
+   {
+      #if DEBUG_STRING_UTIL
+      MessageInterface::ShowMessage("   No open bracket found.\n");
+      #endif
+      
+      return false;
+   }
+   
+   
+   openChar = str[index1];
+   //MessageInterface::ShowMessage("   openChar=%c\n", openChar);
+
+   if (checkOnlyFirst)
+      index2 = str.find_first_of(closeBrackets, index1);
+   else
+      index2 = str.find_last_of(closeBrackets);
+   
+   //MessageInterface::ShowMessage("   index2=%u\n", index2);
+   
+   if (index2 == str.npos)
+   {
+      #if DEBUG_STRING_UTIL
+      MessageInterface::ShowMessage("   No close bracket found\n");
+      #endif
+
+      return false;
+   }
+   
+   closeChar = str[index2];
+   //MessageInterface::ShowMessage("   closeChar=%c\n", closeChar);
+   
+   if ((openChar == '(' && closeChar == ']') ||
+       (openChar == '[' && closeChar == ')'))
+   {
+      #if DEBUG_STRING_UTIL
+      MessageInterface::ShowMessage("   open and close bracket don't macth.\n");
+      #endif
+
+      return false;
+   }
+   
+   
+   // str1 does not include open and close bracket
+   std::string str1 = str.substr(index1+1, index2-index1-1);
+   //MessageInterface::ShowMessage("   str1=<%s>/n", str1.c_str());
+   
+   if (str1 == "")
+   {
+      #if DEBUG_STRING_UTIL
+      MessageInterface::ShowMessage("   It is empty sub-string.\n");
+      #endif
+      
+      return false;
+   }
+   
+   
+   Integer length = str1.size();
+   comma = str1.find(',');
+   //MessageInterface::ShowMessage("   comma=%u\n", comma);
+   
+   // if single dimension array
+   if (comma == str.npos)
+   {
+      substr = str1.substr(0, length-1);
+      //MessageInterface::ShowMessage("   1st=%s\n", substr.c_str());
+      
+      if (IsSingleItem(substr))
+         ret = true;
+      else
+         ret = false;
+      
+      #if DEBUG_STRING_UTIL
+      MessageInterface::ShowMessage
+         ("   It is single dimenstion array. returning ret=%d\n", ret);
+      #endif
+      
+      return ret;
+   }
+   
+   
+   // It's double dimension array
+   substr = str1.substr(0, comma-1);
+   //MessageInterface::ShowMessage("   1st=%s\n", substr.c_str());
+   
+   if (!IsSingleItem(substr))
+   {
+      #if DEBUG_STRING_UTIL
+      MessageInterface::ShowMessage
+         ("   It is double dimenstion array. 1st index is not a single item\n");
+      #endif
+      
+      return false;
+   }
+   
+   substr = str1.substr(comma+1, length-comma-1);
+   //MessageInterface::ShowMessage("   2nd=%s\n", substr.c_str());
+   
+   if (!IsSingleItem(substr))
+   {
+      #if DEBUG_STRING_UTIL
+      MessageInterface::ShowMessage
+         ("   It is double dimenstion array. 2nd index is not a single item\n");
+      #endif
+      
+      return false;
+   }
+   
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("   It is double dimension array. returning ret=%d\n", ret);
+   #endif
+   
+   return ret;
+}
+
+
+//------------------------------------------------------------------------------
 // bool IsParenPartOfArray(const std::string &str)
 //------------------------------------------------------------------------------
 /*
  * return true if parenthesis is part of an array.
- * For example: (2,2) or (abc,def)
+ *    For example: (2,2) or (abc,def)
+ *
+ * return false if no parenthesis found or non-alphanumeric char found inside
+ * parenthesis.
+ *    For example: abc, abc((2,2))
  */
 //------------------------------------------------------------------------------
 bool GmatStringUtil::IsParenPartOfArray(const std::string &str)
 {
-   bool ret = true;
+   //MessageInterface::ShowMessage
+   //   ("===> GmatStringUtil::IsParenPartOfArray() str=%s\n", str.c_str());
    
-   int length = str.size();
-   int comma = str.find(',');
+   return IsBracketPartOfArray(str, "()", false);
 
-   for (int i=1; i<comma; i++)
-      if (!isalnum(str[i]))
-      {
-         ret = false;
-         break;
-      }
-
-   if (ret)
-      for (int i=comma+1; i<length-1; i++)
-         if (!isalnum(str[i]))
-         {
-            ret = false;
-            break;
-         }
-   
-   #if DEBUG_STRING_UTIL
-   MessageInterface::ShowMessage
-      ("IsParenPartOfArray() str=%s, length=%d, comma=%d, ret=%d\n",
-       str.c_str(), length, comma, ret);
-   #endif
-   
-   return ret;
 }
 
 
