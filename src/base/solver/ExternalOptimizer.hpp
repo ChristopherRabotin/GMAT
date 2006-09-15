@@ -22,7 +22,9 @@
 #define ExternalOptimizer_hpp
 
 #include "Optimizer.hpp"
-#include "GmatInterface.hpp"    // a singleton  - currently no Interface base class
+//#include "GmatServer.hpp"  
+#include "GmatInterface.hpp"  // a singleton
+#include "GmatServer.hpp"
 
 class GMAT_API ExternalOptimizer : public Optimizer
 {
@@ -51,8 +53,22 @@ public:
    virtual std::string GetStringParameter(const Integer id) const;
    virtual bool        SetStringParameter(const Integer id,
                                           const std::string &value);
-   virtual const StringArray&
-                       GetStringArrayParameter(const Integer id) const;
+   // compiler complained again - so here they are ....
+   virtual std::string GetStringParameter(const std::string &label) const;
+   virtual bool        SetStringParameter(const std::string &label,
+                                          const std::string &value);
+   virtual std::string GetStringParameter(const Integer id,
+                                          const Integer index) const;
+   virtual bool        SetStringParameter(const Integer id, 
+                                          const std::string &value,
+                                          const Integer index);
+   virtual std::string GetStringParameter(const std::string &label,
+                                          const Integer index) const;
+   virtual bool        SetStringParameter(const std::string &label, 
+                                          const std::string &value,
+                                          const Integer index);
+   //virtual const StringArray&
+   //                    GetStringArrayParameter(const Integer id) const;
    //virtual bool        TakeAction(const std::string &action,
    //                               const std::string &actionData = "");
 
@@ -73,7 +89,6 @@ protected:
    enum
    {
       FUNCTION_PATH = OptimizerParamCount,
-      PARAMETER_LIST,
       SOURCE_TYPE,
       ExternalOptimizerParamCount
    };
@@ -81,11 +96,9 @@ protected:
 
    /// Path for function script
    std::string         functionPath;
-   /// list of parameters used to configure the external optimizer
-   StringArray         parmList;
    /// array of values for the optimizer - value of the objective funcion;
    /// elements of the gradient (if calculated); values of the constraints
-   std::vector<Real>   costConstraintArray;
+   //std::vector<Real>   costConstraintArray;
    /// type of external interface used (as of 2006.07.13, only MATLAB is 
    /// supported)
    std::string         sourceType;
@@ -93,12 +106,13 @@ protected:
    /// and the supporting structures needed by the interface were found
    bool                sourceReady;
    /// pointer to the interface object (as of 2006.07.13, two pointers
-   /// are needed - one to a MatlabInterface object, one to a GmatServer,
+   /// are needed - one to a MatlabInterface object, one to a GmatInterface,
    /// per GMAT Architectural Specification document)
-   //std::vector<Interface*> source;   -- cannot do this yet
-   GmatInterface       *gmatServer;
+   //MatlabInterface     *outSource;  // not necessary, as MI is all static 
+   GmatInterface       *inSource;
    // MatlabInterface is currently an all-static class, so just include
-   // the header where needed
+   // the header where needed - outSoource
+   GmatServer          *inSourceServer;
 
    static const std::string    PARAMETER_TEXT[ExternalOptimizerParamCount -
                                               OptimizerParamCount];

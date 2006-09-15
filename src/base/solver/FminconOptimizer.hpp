@@ -24,7 +24,6 @@
 
 #include "gmatdefs.hpp"
 #include "ExternalOptimizer.hpp"
-#include "GmatInterface.hpp"    // a singleton  - currently no Interface base class
 //#include "MatlabInterface.hpp"
 
 class GMAT_API FminconOptimizer : public ExternalOptimizer
@@ -37,10 +36,12 @@ public:
 
    virtual bool        Initialize();
    virtual SolverState AdvanceState();
+   virtual StringArray AdvanceNestedState(std::vector<Real> vars);
    virtual bool        Optimize();
 
    // inherited from GmatBase
    virtual GmatBase*   Clone() const;
+   //virtual bool        ExecuteCallback();// *TEMPORARY ******************************//
 
    // Access methods overriden from the base class
    
@@ -56,9 +57,22 @@ public:
    //virtual bool        GetBooleanParameter(const Integer id) const;
    //virtual bool        SetBooleanParameter(const Integer id,
    //                                        const bool value);
-   //virtual std::string GetStringParameter(const Integer id) const;
-   //virtual bool        SetStringParameter(const Integer id,
-   //                                       const std::string &value);
+   virtual std::string GetStringParameter(const Integer id) const;
+   virtual bool        SetStringParameter(const Integer id,
+                                          const std::string &value);
+   virtual std::string GetStringParameter(const std::string &label) const;
+   virtual bool        SetStringParameter(const std::string &label,
+                                          const std::string &value);
+   virtual std::string GetStringParameter(const Integer id,
+                                          const Integer index) const;
+   virtual bool        SetStringParameter(const Integer id, 
+                                          const std::string &value,
+                                          const Integer index);
+   virtual std::string GetStringParameter(const std::string &label,
+                                          const Integer index) const;
+   virtual bool        SetStringParameter(const std::string &label, 
+                                          const std::string &value,
+                                          const Integer index);
    virtual const StringArray&
                        GetStringArrayParameter(const Integer id) const;
    //virtual bool        TakeAction(const std::string &action,
@@ -76,27 +90,36 @@ protected:
    
    StringArray  options;
    StringArray  optionValues;
+   
+   Integer      fminconExitFlag;
  
    static const std::string    PARAMETER_TEXT[FminconOptimizerParamCount -
                                               ExternalOptimizerParamCount];
    static const Gmat::ParameterType
                                PARAMETER_TYPE[FminconOptimizerParamCount -
                                               ExternalOptimizerParamCount];
+   static const std::string    ALLOWED_OPTIONS[11];
+   static const Integer        NUM_MATLAB_OPTIONS;
+   static const Integer        MATLAB_OPTIONS_OFFSET;
+                                              
  
    // Methods from Solver
+   virtual void                CompleteInitialization();
+   virtual void                RunExternal();
    virtual void                RunNominal();
-   //virtual void                RunPerturbation();
    virtual void                CalculateParameters();
-   //virtual void                CheckCompletion();
    virtual void                RunComplete();
 
-
    virtual void                FreeArrays();
-   virtual std::string         GetProgressString();
+   //virtual std::string         GetProgressString(); // moved to Optimizer
    virtual void                WriteToTextFile();
    
    virtual bool                OpenConnection();
    virtual void                CloseConnection();
+   
+   virtual bool                IsAllowedOption(const std::string &str);
+   virtual bool                IsAllowedValue(const std::string &opt,
+                                              const std::string &val);
 };
 
 #endif // FminconOptimizer_hpp

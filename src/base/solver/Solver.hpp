@@ -49,6 +49,7 @@ public:
       ITERATING,
       CALCULATING,
       CHECKINGRUN,
+      RUNEXTERNAL,
       FINISHED            // This one should stay at the end of the list.
    };
    
@@ -69,7 +70,9 @@ public:
    Solver&             operator=(const Solver& sol);
 
    virtual SolverState GetState();
+   virtual SolverState GetNestedState();
    virtual SolverState AdvanceState();
+   virtual StringArray AdvanceNestedState(std::vector<Real> vars);
    virtual bool        UpdateSolverGoal(Integer id, Real newValue);
    
    // Access methods overriden from the base class
@@ -78,6 +81,8 @@ public:
    virtual Gmat::ParameterType
                        GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
+   virtual bool        IsParameterReadOnly(const Integer id) const;
+   virtual bool        IsParameterReadOnly(const std::string &label) const;
 
    virtual Integer     GetIntegerParameter(const Integer id) const;
    virtual Integer     SetIntegerParameter(const Integer id,
@@ -88,6 +93,17 @@ public:
                                           const std::string &value);
    virtual bool        SetStringParameter(const std::string &label, 
                                           const std::string &value);
+   // compiler complained again - so here they are ....
+   virtual std::string GetStringParameter(const Integer id,
+                                          const Integer index) const;
+   virtual bool        SetStringParameter(const Integer id, 
+                                          const std::string &value,
+                                          const Integer index);
+   virtual std::string GetStringParameter(const std::string &label,
+                                          const Integer index) const;
+   virtual bool        SetStringParameter(const std::string &label, 
+                                          const std::string &value,
+                                          const Integer index);
 
    virtual const StringArray&
                        GetStringArrayParameter(const Integer id) const;
@@ -140,6 +156,8 @@ public:
 protected:
    /// Current state for the state machine
    SolverState         currentState;
+   /// current nested state
+   SolverState         nestedState;
    /// Output mode: Compact, Normal, and Verbose
    std::string         textFileMode;
    /// Toggle for showing solver status
@@ -193,6 +211,7 @@ protected:
       solverTextFileID,
       variableNamesID,
       maxIterationsID,
+      NUMBER_OF_VARIABLES,
       SolverParamCount
    };
    
@@ -214,6 +233,7 @@ protected:
    virtual void        RunIteration();
    virtual void        CalculateParameters();
    virtual void        CheckCompletion();
+   virtual void        RunExternal();
    virtual void        RunComplete();
    
    virtual std::string GetProgressString();

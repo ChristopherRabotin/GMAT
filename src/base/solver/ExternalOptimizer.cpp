@@ -34,7 +34,6 @@ const std::string
 ExternalOptimizer::PARAMETER_TEXT[ExternalOptimizerParamCount -OptimizerParamCount] =
 {
    "FunctionPath",
-   "ParameterList",
    "SourceType",
 };
 
@@ -42,7 +41,6 @@ const Gmat::ParameterType
 ExternalOptimizer::PARAMETER_TYPE[ExternalOptimizerParamCount - OptimizerParamCount] =
 {
    Gmat::STRING_TYPE,
-   Gmat::STRINGARRAY_TYPE,
    Gmat::STRING_TYPE,
 };
 
@@ -55,7 +53,8 @@ ExternalOptimizer::ExternalOptimizer(std::string type, std::string name) :
    functionPath            (""),
    sourceType              ("MATLAB"),
    sourceReady             (false),
-   gmatServer              (NULL)
+   inSource                (NULL),
+   inSourceServer          (NULL)
  {
    objectTypeNames.push_back("ExternalOptimizer");
    parameterCount = ExternalOptimizerParamCount;
@@ -72,7 +71,8 @@ ExternalOptimizer::ExternalOptimizer(const ExternalOptimizer &opt) :
    functionPath            (opt.functionPath),
    sourceType              (opt.sourceType),
    sourceReady             (false),
-   gmatServer              (opt.gmatServer)
+   inSource                (opt.inSource),
+   inSourceServer          (opt.inSourceServer)
 {
    parameterCount   = opt.parameterCount;
 }
@@ -89,9 +89,8 @@ ExternalOptimizer&
    functionPath        = opt.functionPath;
    sourceType          = opt.sourceType;
    sourceReady         = opt.sourceReady;
-   gmatServer          = opt.gmatServer;
-   parmList            = opt.parmList;
-   costConstraintArray = opt.costConstraintArray;
+   inSource            = opt.inSource;
+   inSourceServer      = opt.inSourceServer;
    parameterCount      = opt.parameterCount;
   
    return *this;
@@ -265,6 +264,41 @@ bool ExternalOptimizer::SetStringParameter(const Integer id,
     
     return Optimizer::SetStringParameter(id, value);
 }
+// compiler complained again - so here they are ....
+std::string ExternalOptimizer::GetStringParameter(const std::string& label) const
+{
+   return Optimizer::GetStringParameter(label);
+}
+bool ExternalOptimizer::SetStringParameter(const std::string& label,
+                                           const std::string &value)
+{
+   return Optimizer::SetStringParameter(label, value);
+}
+std::string ExternalOptimizer::GetStringParameter(const Integer id,
+                                                  const Integer index) const
+{
+   return Optimizer::GetStringParameter(id, index);
+}
+
+bool ExternalOptimizer::SetStringParameter(const Integer id, 
+                                           const std::string &value,
+                                           const Integer index)
+{
+   return Optimizer::SetStringParameter(id, value, index);
+}
+
+std::string ExternalOptimizer::GetStringParameter(const std::string &label,
+                                                  const Integer index) const
+{
+   return Optimizer::GetStringParameter(label, index);
+}
+
+bool ExternalOptimizer::SetStringParameter(const std::string &label, 
+                                           const std::string &value,
+                                           const Integer index)
+{
+   return Optimizer::SetStringParameter(label, value, index);
+}
 
 
 //------------------------------------------------------------------------------
@@ -279,6 +313,7 @@ bool ExternalOptimizer::SetStringParameter(const Integer id,
  * @return  StringArray value of the requested parameter.
  */
 //------------------------------------------------------------------------------
+/*
 const StringArray& ExternalOptimizer::GetStringArrayParameter(
                                                         const Integer id) const
 {
@@ -288,5 +323,5 @@ const StringArray& ExternalOptimizer::GetStringArrayParameter(
         
     return Optimizer::GetStringArrayParameter(id);
 }
-
+*/
 

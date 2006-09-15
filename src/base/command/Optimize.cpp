@@ -18,6 +18,13 @@
 //------------------------------------------------------------------------------
 
 #include "Optimize.hpp"
+#include "ExternalOptimizer.hpp"
+#if defined __USE_MATLAB__
+   #include "MatlabInterface.hpp"
+   #include "GmatInterface.hpp"
+   
+   static GmatInterface *gmatInt = GmatInterface::Instance();
+#endif
 
 //#define DEBUG_OPTIMIZER_PARSING
 //#define DEBUG_OPTIMIZE_COMMANDS
@@ -131,6 +138,7 @@ bool Optimize::Append(GmatCommand *cmd)
    }
 
    // If it's a nested optimizer branch, add to the nest level.
+   // 2006.09.13 wcs - as of today, nested optimizers are not allowed
    if (cmd->GetTypeName() == "Optimize")
       ++nestLevel;
 
@@ -271,7 +279,7 @@ std::string Optimize::GetRefObjectName(const Gmat::ObjectType type) const
 // SetRefObjectName
 //------------------------------------------------------------------------------
 bool Optimize::SetRefObjectName(const Gmat::ObjectType type,
-                              const std::string &name)
+                                const std::string &name)
 {
    if (type == Gmat::SOLVER) 
    {
@@ -343,7 +351,14 @@ bool Optimize::Initialize()
 
       retval = optimizer->Initialize();
    }
-        
+   // NOTE that in the future we may have a callback to/from a non_MATLAB
+   // external optimizer
+   #if defined __USE_MATLAB__
+      if (optimizer->IsOfType("ExternalOptimizer") &&
+         (optimizer->GetStringParameter("SourceType") == "MATLAB"))
+         gmatInt->RegisterCallbackServer(this);
+   #endif
+
    return retval;
 }
 
@@ -358,7 +373,7 @@ bool Optimize::Execute()
    Solver::SolverState state = optimizer->GetState();
    
    #ifdef DEBUG_OPTIMIZE_COMMANDS
-      MessageInterface::ShowMessage("OptimizeExecute(%c%c%d)\n",
+      MessageInterface::ShowMessage("Optimize::Execute(%c%c%d)\n",
          (commandExecuting?'Y':'N'),
          (commandComplete?'Y':'N'),
          state);
@@ -391,7 +406,7 @@ bool Optimize::Execute()
       state = optimizer->GetState();
       
    }
-   
+   /*  Revisit this if/when we add non-external optimizers !!!!!!!!!!!!!!!!!!!!!
    if (branchExecuting)
    {
       retval = ExecuteBranch();
@@ -402,6 +417,7 @@ bool Optimize::Execute()
    }
    else
    {
+   */
       GmatCommand *currentCmd;
    
       switch (state) 
@@ -420,7 +436,17 @@ bool Optimize::Execute()
             }
             StoreLoopData();
             break;
+
+         case Solver::RUNEXTERNAL:
+            // Execute the nominal sequence
+            if (!commandComplete) 
+            {
+               branchExecuting = true;
+               ResetLoopData();
+            }
+            break;
                
+          /*     
          case Solver::NOMINAL:
             // Execute the nominal sequence
             if (!commandComplete) 
@@ -444,7 +470,7 @@ bool Optimize::Execute()
             // Calculate the next set of variables to use; this is performed in
             // the optimizer -- nothing to be done here
             break;
-               
+         */      
          case Solver::FINISHED:
             // Final clean-up
 //            commandComplete = true;
@@ -457,13 +483,15 @@ bool Optimize::Execute()
                branchExecuting = true;
             }
             break;
-               
+          /*     
          case Solver::ITERATING:     // Intentional fall-through
+         */
          default:
             throw CommandException(
                "Invalid state in the Optimize state machine");
+
       }
-   }
+   //}
 
    if (!branchExecuting)
    {
@@ -487,6 +515,72 @@ bool Optimize::Execute()
    }
    BuildCommandSummary(true);
    return retval;
+}
+
+bool Optimize::ExecuteCallback()
+{
+   // NOTE that in the future we may have a callback to/from a non_MATLAB
+   // external optimizer
+   if (!optimizer || 
+      (!(optimizer->IsOfType("ExternalOptimizer"))) || 
+      (((ExternalOptimizer*)optimizer)->GetStringParameter("SourceType")
+      != "MATLAB"))
+   {
+      throw CommandException(
+      "Optimize::ExecuteCallback not yet implemented for non_MATLAB optimizers");
+   }
+   #ifndef __USE_MATLAB__ 
+      throw CommandException("Optimize: ERROR - MATLAB required for Callback");
+   #endif
+   if (!MatlabInterface::IsOpen())
+      throw CommandException(
+         "Optimize:: ERROR - Matlab Interface not yet open");
+   
+   callbackExecuting = true;
+   // ask Matlab for the value of X
+   Integer     n = optimizer->GetIntegerParameter(
+                   optimizer->GetParameterID("NumberOfVariables"));
+   double      X[n];
+   std::string xName = "X";
+   MatlabInterface::GetVariable(xName, n, X);
+   std::vector<Real> vars;
+   for (Integer i=0;i<n;i++)
+      vars.push_back(X[i]);
+   // get the state of the Optimizer
+   StringArray results;
+   Solver::SolverState nState = optimizer->GetNestedState(); 
+   if (nState == Solver::INITIALIZING)
+   {
+      StoreLoopData();
+      // advance to NOMINAL
+      results = optimizer->AdvanceNestedState(vars);
+      nState  = optimizer->GetNestedState();
+   }
+   if (nState != Solver::NOMINAL)
+      throw CommandException(
+         "Optimize::ExecuteCallback - error in optimizer state");
+   // this call should just advance the state to CALCULATING
+   results = optimizer->AdvanceNestedState(vars);
+   ResetLoopData();
+   try
+   {
+      if (!ExecuteBranch())
+         throw CommandException("Optimize: ERROR executing branch");
+   }
+   catch (BaseException &be)
+   {
+      std::string errorStr = "Optimize:ExecuteCallback: ERROR - " +
+         be.GetMessage() + "\n";
+      throw CommandException(errorStr);
+   }
+   // this call should just advance the state back to NOMINAL
+   // and return results
+   results = optimizer->AdvanceNestedState(vars); 
+   // send results to MATLAB
+   for (Integer i=0;i<(Integer)results.size();i++)
+      MatlabInterface::RunMatlabString(results.at(i));
+   callbackExecuting = false;
+   return false;  
 }
 
 //------------------------------------------------------------------------------

@@ -24,10 +24,10 @@
 
 #include "GmatCommand.hpp"
 #include "Solver.hpp"
-#include "Parameter.hpp"
+#include "Variable.hpp"
 
 /**
- * Command that manages processing for targeter goals.
+ * Command that manages processing for optimizer variables.
  */
 class Minimize : public GmatCommand
 {
@@ -62,9 +62,9 @@ public:
                                     const std::string &name = "");
     
     // Inherited methods overridden from the base class
-   virtual bool        InterpretAction(void);
-   virtual bool        Initialize(void);
-   virtual bool        Execute(void);
+   virtual bool        InterpretAction();
+   virtual bool        Initialize();
+   virtual bool        Execute();
    
    virtual const std::string&
                        GetGeneratingString(Gmat::WriteMode mode,
@@ -75,11 +75,11 @@ protected:
    /// The name of the spacecraft that gets maneuvered
    std::string         optimizerName;
    /// Name of the variable to be minimized
-   std::string         minName;
+   std::string         objectiveName;
    // pointer to the Variable that is to be minimized
-   Parameter           *minVar;
+   Variable            *objective;
    /// vallue of the variable
-   Real                varValue;
+   Real                objectiveValue; // maybe I don't need this
    /// The optimizer instance used to manage the optimizer state machine
    Solver              *optimizer;
    /// Flag used to finalize the targeter data during execution
@@ -87,7 +87,7 @@ protected:
    /// is it a parameter?
    bool                isMinimizeParm;
    /// Optimizer ID for the variable 
-   Integer             varId;
+   Integer             objId;
 
    
    // Parameter IDs
@@ -102,12 +102,11 @@ protected:
    static const Gmat::ParameterType
                        PARAMETER_TYPE[MinimizeParamCount - GmatCommandParamCount];
 
-
-   bool                InterpretParameter(const std::string text,
-                                          std::string &paramType,
-                                          std::string &paramObj,
-                                          std::string &parmSystem);
-   bool                ConstructGoal(const char* str);
+   //bool                InterpretParameter(const std::string text,
+   //                                       std::string &paramType,
+   //                                       std::string &paramObj,
+   //                                       std::string &parmSystem);
+   //bool                ConstructGoal(const char* str);
 };
 
 

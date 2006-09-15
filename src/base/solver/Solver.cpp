@@ -37,6 +37,7 @@ Solver::PARAMETER_TEXT[SolverParamCount - GmatBaseParamCount] =
    "TargeterTextFile", // should be "SolverTextFile",
    "Variables",
    "MaximumIterations",
+   "NumberOfVariables",
 };
 
 const Gmat::ParameterType
@@ -46,6 +47,7 @@ Solver::PARAMETER_TYPE[SolverParamCount - GmatBaseParamCount] =
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRINGARRAY_TYPE,
+   Gmat::INTEGER_TYPE,
    Gmat::INTEGER_TYPE,
 };
 
@@ -77,9 +79,11 @@ Solver::STYLE_TEXT[MaxStyle - NORMAL_STYLE] =
 Solver::Solver(const std::string &type, const std::string &name) :
    GmatBase                (Gmat::SOLVER, type, name),
    currentState            (INITIALIZING),
+   nestedState             (INITIALIZING),
    textFileMode            ("Normal"),
    showProgress            (true),
    progressStyle           (NORMAL_STYLE),
+   debugString             (""),
    variableCount           (0),
    //variable                (NULL),
    iterationsTaken         (0),
@@ -88,6 +92,7 @@ Solver::Solver(const std::string &type, const std::string &name) :
    //variableMinimum         (NULL),
    //variableMaximum         (NULL),
    //variableMaximumStep     (NULL),
+   pertNumber              (-999), // is this right?
    initialized             (false),
    instanceNumber          (0)       // 0 indicates 1st instance w/ this name
 {
@@ -124,9 +129,11 @@ Solver::~Solver()
 Solver::Solver(const Solver &sol) :
    GmatBase                (sol),
    currentState            (sol.currentState),
+   nestedState             (sol.currentState),
    textFileMode            (sol.textFileMode),
    showProgress            (sol.showProgress),
    progressStyle           (sol.progressStyle),
+   debugString             (sol.debugString),
    variableCount           (sol.variableCount),
    //variable                (NULL),
    iterationsTaken         (0),
@@ -181,9 +188,11 @@ Solver& Solver::operator=(const Solver &sol)
    //variableMaximumStep.clear();
    
    currentState          = sol.currentState;
+   nestedState           = sol.currentState;
    textFileMode          = sol.textFileMode;
    showProgress          = sol.showProgress;
    progressStyle         = sol.progressStyle;
+   debugString           = sol.debugString;
    instanceNumber        = sol.instanceNumber;
    pertNumber            = sol.pertNumber;
 
@@ -337,9 +346,9 @@ Integer Solver::SetSolverVariables(Real *data,
    //variableMaximumStep[variableCount] = data[4];
    try
    {
-   variableMinimum.at(variableCount)     = data[2];
-   variableMaximum.at(variableCount)     = data[3];
-   variableMaximumStep.at(variableCount) = data[4];
+      variableMinimum.at(variableCount)           = data[2];
+      variableMaximum.at(variableCount)           = data[3];
+      variableMaximumStep.at(variableCount)       = data[4];
    }
    catch(const std::exception &re)
    {
@@ -372,7 +381,7 @@ Real Solver::GetSolverVariable(Integer id)
          "of the configured variables.");
 
    //return variable[id];
-   return variable.at(id);
+   return variable.at(id); 
 }
 
 //------------------------------------------------------------------------------
@@ -381,7 +390,7 @@ Real Solver::GetSolverVariable(Integer id)
 /**
  * Determine the state-machine state of this instance of the Solver.
  *
- * @return this Solver, set to the same parameters as the input solver.
+ * @return current state 
  */
 //------------------------------------------------------------------------------
 Solver::SolverState Solver::GetState()
@@ -389,6 +398,89 @@ Solver::SolverState Solver::GetState()
    return currentState;
 }
 
+//------------------------------------------------------------------------------
+//  SolverState GetNestedState()
+//------------------------------------------------------------------------------
+/**
+ * Determine the state-machine nested state of this instance of the Solver.
+ *
+ * @return nested State
+ */
+//------------------------------------------------------------------------------
+Solver::SolverState Solver::GetNestedState()
+{
+   return nestedState;
+}
+
+//------------------------------------------------------------------------------
+//  Solver::SolverState AdvanceState()
+//------------------------------------------------------------------------------
+/**
+ * The method used to iterate until a solution is found.  Derived classes 
+ * use this method to implement their solution technique.
+ * 
+ * @return solver state at the end of the process.
+ */
+//------------------------------------------------------------------------------
+Solver::SolverState Solver::AdvanceState()
+{
+    switch (currentState) {
+        case INITIALIZING:
+            CompleteInitialization();
+            break;
+        
+        case NOMINAL:
+            RunNominal();
+            break;
+        
+        case PERTURBING:
+            RunPerturbation();
+            break;
+        
+        case ITERATING:
+            RunIteration();
+            break;
+        
+        case CALCULATING:
+            CalculateParameters();
+            break;
+        
+        case CHECKINGRUN:
+            CheckCompletion();
+            break;
+        
+        case RUNEXTERNAL:
+            RunExternal();
+            break;
+        
+        case FINISHED:
+            RunComplete();
+            break;
+        
+        default:
+            throw SolverException("Undefined Solver state");
+    };
+    
+    ReportProgress();
+    return currentState; 
+}
+    
+//------------------------------------------------------------------------------
+//  StringArray AdvanceNestedState(std::vector<Real> vars)
+//------------------------------------------------------------------------------
+/**
+ * The method used to iterate until a solution is found.  Derived classes 
+ * must implement this method (this default method throws an exception).
+ * 
+ * @return TBD
+ */
+//------------------------------------------------------------------------------
+StringArray Solver::AdvanceNestedState(std::vector<Real> vars)
+{
+   std::string errorStr = "AdvanceNestedState not implemented for solver "
+      + instanceName;
+   throw SolverException(errorStr);
+}
 
 //------------------------------------------------------------------------------
 //  bool UpdateSolverGoal(Integer id, Real newValue)
@@ -494,6 +586,42 @@ std::string Solver::GetParameterTypeString(const Integer id) const
    return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool Solver::IsParameterReadOnly(const Integer id) const
+{
+   if (id == NUMBER_OF_VARIABLES)  return true;
+   return GmatBase::IsParameterReadOnly(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <label> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not.
+ */
+//---------------------------------------------------------------------------
+bool Solver::IsParameterReadOnly(const std::string &label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
+
 //------------------------------------------------------------------------------
 //  Integer  GetIntegerParameter(const Integer id) const
 //------------------------------------------------------------------------------
@@ -510,6 +638,8 @@ Integer Solver::GetIntegerParameter(const Integer id) const
 {
    if (id == maxIterationsID)
       return maxIterations;
+   if (id == NUMBER_OF_VARIABLES)
+      return variableCount;
         
    return GmatBase::GetIntegerParameter(id);
 }
@@ -613,7 +743,7 @@ std::string Solver::GetStringParameter(const Integer id) const
    if (id == ReportStyle)
       return textFileMode;
     if (id == solverTextFileID)
-        return solverTextFile;
+      return solverTextFile;
 
    return GmatBase::GetStringParameter(id);
 }
@@ -693,6 +823,34 @@ bool Solver::SetStringParameter(const std::string &label,
    return SetStringParameter(GetParameterID(label), value);
 }
 
+
+// compiler complained again - so here they are ....
+std::string Solver::GetStringParameter(const Integer id,
+                                                  const Integer index) const
+{
+   return GmatBase::GetStringParameter(id, index);
+}
+
+bool Solver::SetStringParameter(const Integer id, 
+                                           const std::string &value,
+                                           const Integer index)
+{
+   return GmatBase::SetStringParameter(id, value, index);
+}
+
+std::string Solver::GetStringParameter(const std::string &label,
+                                                  const Integer index) const
+{
+   return GmatBase::GetStringParameter(label, index);
+}
+
+bool Solver::SetStringParameter(const std::string &label, 
+                                           const std::string &value,
+                                           const Integer index)
+{
+   return GmatBase::SetStringParameter(label, value, index);
+}
+
 //------------------------------------------------------------------------------
 //  std::string  GetStringArrayParameter(const Integer id) const
 //------------------------------------------------------------------------------
@@ -747,55 +905,6 @@ void Solver::SetDebugString(const std::string &str)
 }
 
 
-//------------------------------------------------------------------------------
-//  Solver::SolverState AdvanceState()
-//------------------------------------------------------------------------------
-/**
- * The method used to iterate until a solution is found.  Derived classes 
- * use this method to implement their solution technique.
- * 
- * @return solver state at the end of the process.
- */
-//------------------------------------------------------------------------------
-Solver::SolverState Solver::AdvanceState()
-{
-    switch (currentState) {
-        case INITIALIZING:
-            CompleteInitialization();
-            break;
-        
-        case NOMINAL:
-            RunNominal();
-            break;
-        
-        case PERTURBING:
-            RunPerturbation();
-            break;
-        
-        case ITERATING:
-            RunIteration();
-            break;
-        
-        case CALCULATING:
-            CalculateParameters();
-            break;
-        
-        case CHECKINGRUN:
-            CheckCompletion();
-            break;
-        
-        case FINISHED:
-            RunComplete();
-            break;
-        
-        default:
-            throw SolverException("Undefined Solver state");
-    };
-    
-    ReportProgress();
-    return currentState; 
-}
-    
 
 //------------------------------------------------------------------------------
 //  void CompleteInitialization()
@@ -887,6 +996,21 @@ void Solver::CalculateParameters()
 void Solver::CheckCompletion()
 {
     currentState = (SolverState)(currentState+1);
+}
+
+//------------------------------------------------------------------------------
+//  void RunExternal()
+//------------------------------------------------------------------------------
+/**
+ * Launhes an external process that drives the Solver.
+ * 
+ * This default method just ???? (not a clue).
+ */
+//------------------------------------------------------------------------------
+void Solver::RunExternal()
+{
+   //currentState = FINISHED;  // what to do here?
+   currentState = (SolverState)(currentState+1);
 }
 
 

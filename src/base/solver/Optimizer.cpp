@@ -48,6 +48,8 @@ Optimizer::PARAMETER_TYPE[OptimizerParamCount - SolverParamCount] =
    Gmat::STRINGARRAY_TYPE,
 };
 
+const Integer Optimizer::EQ_CONST_START   = 1000;
+const Integer Optimizer::INEQ_CONST_START = 2000;
 
 //------------------------------------------------------------------------------
 // public methods
@@ -60,8 +62,7 @@ Optimizer::Optimizer(std::string typeName, std::string name) :
    tolerance               (0.0),   // valid value?
    converged               (false),
    eqConstraintCount       (0),
-   ineqConstraintCount     (0),
-   objectiveValue          (0.0)
+   ineqConstraintCount     (0)
  {
    objectTypeNames.push_back("Optimizer");
    parameterCount = OptimizerParamCount;
@@ -81,13 +82,15 @@ Optimizer::Optimizer(const Optimizer &opt) :
    tolerance               (opt.tolerance), 
    converged               (false),
    eqConstraintCount       (opt.eqConstraintCount),
-   ineqConstraintCount     (opt.ineqConstraintCount),
-   objectiveValue          (opt.objectiveValue)
+   ineqConstraintCount     (opt.ineqConstraintCount)
 {
    eqConstraintNames    = opt.eqConstraintNames;
    ineqConstraintNames  = opt.ineqConstraintNames;
    eqConstraintValues   = opt.eqConstraintValues;
    ineqConstraintValues = opt.ineqConstraintValues;
+   gradient             = opt.gradient;
+   //eqConstraintJacobian = opt.eqConstraintJacobian;
+   //ineqConstraintJacobian = opt.ineqConstraintJacobian;
    parameterCount       = opt.parameterCount;
 }
 
@@ -108,11 +111,13 @@ Optimizer&
    FreeArrays();
    eqConstraintCount    = opt.eqConstraintCount;
    ineqConstraintCount  = opt.ineqConstraintCount;
-   objectiveValue       = opt.objectiveValue;
    eqConstraintNames    = opt.eqConstraintNames;
    ineqConstraintNames  = opt.ineqConstraintNames;
    eqConstraintValues   = opt.eqConstraintValues;
    ineqConstraintValues = opt.ineqConstraintValues;
+   gradient             = opt.gradient;
+   //eqConstraintJacobian = opt.eqConstraintJacobian;
+   //ineqConstraintJacobian = opt.ineqConstraintJacobian;
    parameterCount       = opt.parameterCount;
  
    return *this;
@@ -155,7 +160,7 @@ Integer Optimizer::SetSolverResults(Real *data,
 {
    if (type == "Objective")
    {
-      objectiveValue = data[0];
+      cost = data[0];
       return 0;
    }
    else if (type == " EqConstraint")
@@ -165,7 +170,7 @@ Integer Optimizer::SetSolverResults(Real *data,
            "Mismatch between parsed and configured equality constraint");
      eqConstraintValues[eqConstraintCount] = data[0];
      ++eqConstraintCount;
-     return eqConstraintCount - 1;
+     return EQ_CONST_START + eqConstraintCount - 1;
     }
     else if (type == "IneqConstraint")
     {
@@ -174,7 +179,7 @@ Integer Optimizer::SetSolverResults(Real *data,
            "Mismatch between parsed and configured inequality constraint");
      ineqConstraintValues[ineqConstraintCount] = data[0];
      ++ineqConstraintCount;
-     return ineqConstraintCount - 1;
+     return INEQ_CONST_START + ineqConstraintCount - 1;
     }
     // add Gradient and Jacobian later ...
     else
@@ -199,21 +204,21 @@ void Optimizer::SetResultValue(Integer id, Real value,
 {
    if (resultType == "Objective")
    {
-      objectiveValue = value;
+      cost = value;
    }
    else if (resultType == " EqConstraint")
    {
-      if (id > eqConstraintCount)
+      if (id > (EQ_CONST_START + eqConstraintCount))
         throw SolverException(
            "id range error for equality constraint");
-     eqConstraintValues[id] = value;
+     eqConstraintValues[id - EQ_CONST_START] = value;
     }
     else if (resultType == "IneqConstraint")
     {
-       if (id > ineqConstraintCount)
+       if (id > (INEQ_CONST_START + ineqConstraintCount))
         throw SolverException(
            "id range error for inequality constraint");
-     ineqConstraintValues[id] = value;
+     ineqConstraintValues[id - INEQ_CONST_START] = value;
     }
     // add Gradient and Jacobian later ...
     else
@@ -233,19 +238,164 @@ void Optimizer::SetResultValue(Integer id, Real value,
 std::string Optimizer::GetProgressString()
 {
    StringArray::iterator current;
-   //Integer i;
+   Integer i;
    std::stringstream progress;
    progress.str("");
    progress.precision(12);
 
    if (initialized)
    {
-      // ******** TBD ******** see DC for example
+      switch (currentState)
+      {
+         case INITIALIZING:
+            // This state is basically a "paused state" used for the Optimize
+            // command to finalize the initial data for the variables and
+            // goals.  All that is written here is the header information.
+            {
+               Integer localVariableCount = variableNames.size();
+               Integer localEqCount       = eqConstraintNames.size();
+               Integer localIneqCount     = ineqConstraintNames.size();
+               progress << "************************************************"
+                        << "********\n"
+                        << "*** Performing Fmincon Optimization "
+                        << "(using \"" << instanceName << "\")\n";
+
+               // Write out the setup data
+               progress << "*** " << localVariableCount << " variables; "
+                        << localEqCount << " equality constraints; "
+                        << localIneqCount << " inequality constraints\n   Variables:  ";
+
+               // Iterate through the variables and goals, writing them to
+               // the file
+               for (current = variableNames.begin(), i = 0;
+                    current != variableNames.end(); ++current)
+               {
+                  if (current != variableNames.begin())
+                     progress << ", ";
+                  progress << *current;
+               }
+
+               progress << "\n   Equality Constraints:  ";
+
+               for (current = eqConstraintNames.begin(), i = 0;
+                    current != eqConstraintNames.end(); ++current)
+               {
+                  if (current != eqConstraintNames.begin())
+                     progress << ", ";
+                  progress << *current;
+               }
+
+               progress << "\n   Inequality Constraints:  ";
+
+               for (current = ineqConstraintNames.begin(), i = 0;
+                    current != ineqConstraintNames.end(); ++current)
+               {
+                  if (current != ineqConstraintNames.begin())
+                     progress << ", ";
+                  progress << *current;
+               }
+
+               progress << "\n****************************"
+                        << "****************************";
+            }
+            break;
+
+         case NOMINAL:
+            progress << instanceName << " Iteration " << iterationsTaken+1
+                     << "; Nominal Pass\n   Variables:  ";
+            // Iterate through the variables, writing them to the string
+            for (current = variableNames.begin(), i = 0;
+                 current != variableNames.end(); ++current)
+            {
+               if (current != variableNames.begin())
+                  progress << ", ";
+               progress << *current << " = " << variable[i++];
+            }
+            break;
+
+         case PERTURBING:  // does this apply to optimization??
+            progress << "   Completed iteration " << iterationsTaken
+                     << ", pert " << pertNumber+1 << " ("
+                     << variableNames[pertNumber] << " = "
+                     << variable[pertNumber] << ")\n";
+            break;
+
+         case CALCULATING:
+            // Just forces a blank line
+            break;
+
+         case CHECKINGRUN:
+            // Iterate through the constraints, writing them to the file
+            progress << "   Equality Constraints and achieved values:\n      ";
+
+            for (current = eqConstraintNames.begin(), i = 0;
+                 current != eqConstraintNames.end(); ++current)
+            {
+               if (current != eqConstraintNames.begin())
+                  progress << ",  ";
+                  // does this make sense???
+               //progress << *current << "  Desired: " << eqConstaint[i]
+               //         << "  Achieved: " << nominal[i];
+               ++i;
+            }
+
+           progress << "   Inequality Constraints and achieved values:\n      ";
+
+            for (current = ineqConstraintNames.begin(), i = 0;
+                 current != ineqConstraintNames.end(); ++current)
+            {
+               if (current != ineqConstraintNames.begin())
+                  progress << ",  ";
+                  // does this make sense???
+               //progress << *current << "  Desired: " << eqConstaint[i]
+               //         << "  Achieved: " << nominal[i];
+               ++i;
+            }
+
+            break;
+
+         case RUNEXTERNAL:
+            progress << instanceName << " Iteration " << iterationsTaken+1
+                     << "; External Run\n   Variables:  ";
+            // Iterate through the variables, writing them to the string
+            for (current = variableNames.begin(), i = 0;
+                 current != variableNames.end(); ++current)
+            {
+               if (current != variableNames.begin())
+                  progress << ", ";
+               progress << *current << " = " << variable[i++];
+            }
+            break;
+
+         case FINISHED:
+            progress << "\n*** Optimization Completed in " << iterationsTaken
+                     << " iterations";
+                     
+            if (iterationsTaken > maxIterations)
+               progress << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+                     << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+                     << "!!! WARNING: Optimizer did NOT converge!"
+                     << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+                     << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+
+            progress << "\nFinal Variable values:\n";
+            // Iterate through the variables, writing them to the string
+            for (current = variableNames.begin(), i = 0;
+                 current != variableNames.end(); ++current)
+               progress << "   " << *current << " = " << variable[i++] << "\n";
+            break;
+
+         case ITERATING:     // Intentional fall through
+         default:
+            throw SolverException(
+               "Solver state not supported for the targeter");
+      }
    }
    else
       return Solver::GetProgressString();
       
    return progress.str();
+
 }
 
 
@@ -408,7 +558,8 @@ std::string Optimizer::GetStringParameter(const Integer id) const
 bool Optimizer::SetStringParameter(const Integer id,
                                    const std::string &value)
 {
-    if (id == OBJECTIVE_FUNCTION) {
+    if (id == OBJECTIVE_FUNCTION) 
+    {
         objectiveFnName = value;
         return true;
     }
@@ -417,6 +568,41 @@ bool Optimizer::SetStringParameter(const Integer id,
     return Solver::SetStringParameter(id, value);
 }
 
+// compiler complained again - so here they are ....
+std::string Optimizer::GetStringParameter(const std::string& label) const
+{
+   return Solver::GetStringParameter(label);
+}
+bool Optimizer::SetStringParameter(const std::string& label,
+                                           const std::string &value)
+{
+   return Solver::SetStringParameter(label, value);
+}
+std::string Optimizer::GetStringParameter(const Integer id,
+                                                  const Integer index) const
+{
+   return Solver::GetStringParameter(id, index);
+}
+
+bool Optimizer::SetStringParameter(const Integer id, 
+                                           const std::string &value,
+                                           const Integer index)
+{
+   return Solver::SetStringParameter(id, value, index);
+}
+
+std::string Optimizer::GetStringParameter(const std::string &label,
+                                                  const Integer index) const
+{
+   return Solver::GetStringParameter(label, index);
+}
+
+bool Optimizer::SetStringParameter(const std::string &label, 
+                                           const std::string &value,
+                                           const Integer index)
+{
+   return Solver::SetStringParameter(label, value, index);
+}
 
 //------------------------------------------------------------------------------
 //  std::string  GetStringArrayParameter(const Integer id) const
@@ -442,6 +628,41 @@ const StringArray& Optimizer::GetStringArrayParameter(
     return Solver::GetStringArrayParameter(id);
 }
 
+//------------------------------------------------------------------------------
+//  bool TakeAction(const std::string &action, const std::string &actionData)
+//------------------------------------------------------------------------------
+/**
+ * This method performs an action on the instance.
+ *
+ * TakeAction is a method overridden from GmatBase.  The only actions defined for
+ * an Optimizer are "IncrementInstanceCount", which the Sandbox uses
+ * to tell an instance if if it is a reused instance (i.e. a clone) of the
+ * configured instance of the Optimizer; and "Reset" which resets the
+ * optimizer data.
+ *
+ * @param <action>      Text label for the action.
+ * @param <actionData>  Related action data, if needed.
+ *
+ * @return  The value of the parameter at the completion of the call.
+ */
+//------------------------------------------------------------------------------
+bool Optimizer::TakeAction(const std::string &action,
+                                       const std::string &actionData)
+{
+   if (action == "IncrementInstanceCount")
+   {
+      ++instanceNumber;
+      return true;
+   }
+ 
+   if (action == "Reset")
+   {
+      currentState = INITIALIZING;
+   }
+
+   return Solver::TakeAction(action, actionData);
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -459,7 +680,7 @@ const StringArray& Optimizer::GetStringArrayParameter(
 void Optimizer::FreeArrays()
 {
    Solver::FreeArrays();
-   //eqConstraintNames.clear(); ?????
+   //eqConstraintNames.clear(); ????? do I need to do this?
    //ineqConstraintNames.clear(); ?????
    //eqConstraintCount - 0; ?????
    //ineqConstraintCount - 0; ?????

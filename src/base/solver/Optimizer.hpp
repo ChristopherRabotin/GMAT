@@ -65,10 +65,24 @@ public:
    virtual std::string GetStringParameter(const Integer id) const;
    virtual bool        SetStringParameter(const Integer id,
                                           const std::string &value);
+   // compiler complained again - so here they are ....
+   virtual std::string GetStringParameter(const std::string &label) const;
+   virtual bool        SetStringParameter(const std::string &label,
+                                          const std::string &value);
+   virtual std::string GetStringParameter(const Integer id,
+                                          const Integer index) const;
+   virtual bool        SetStringParameter(const Integer id, 
+                                          const std::string &value,
+                                          const Integer index);
+   virtual std::string GetStringParameter(const std::string &label,
+                                          const Integer index) const;
+   virtual bool        SetStringParameter(const std::string &label, 
+                                          const std::string &value,
+                                          const Integer index);
    virtual const StringArray&
                        GetStringArrayParameter(const Integer id) const;
-   //virtual bool        TakeAction(const std::string &action,
-   //                               const std::string &actionData = "");
+   virtual bool        TakeAction(const std::string &action,
+                                  const std::string &actionData = "");
 
 
 //------------------------------------------------------------------------------
@@ -109,7 +123,7 @@ protected:
    /// the number of inequality constraints defined for this optimization
    Integer           ineqConstraintCount;
    /// current value of the objective function
-   Real              objectiveValue;
+   //Real              objectiveValue; - this is cost
    /// names of the equality constraint variables
    StringArray       eqConstraintNames;
    /// names of the inequality constraint variables
@@ -118,13 +132,20 @@ protected:
    std::vector<Real> eqConstraintValues;
    /// array of inequality constraint values
    std::vector<Real> ineqConstraintValues;
+   /// most recently calculated gradient of the objective function
+   std::vector<Real> gradient;   // ********* future ***********
+   /// most recently calculated Jacobian of the equality constraints
+   Rmatrix           eqConstraintJacobian;  // size of this?
+   /// most recently calculated Jacobian of the inequality constraints
+   Rmatrix           ineqConstraintJacobian;  // size of this?
 
    static const std::string    PARAMETER_TEXT[OptimizerParamCount -
                                               SolverParamCount];
    static const Gmat::ParameterType
                                PARAMETER_TYPE[OptimizerParamCount -
                                               SolverParamCount];
-
+   static const Integer        EQ_CONST_START;
+   static const Integer        INEQ_CONST_START;
  
    virtual void      FreeArrays();
 };

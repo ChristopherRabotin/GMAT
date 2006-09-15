@@ -40,6 +40,8 @@ public:
    virtual bool        Execute();
 
    // inherited from GmatBase
+   // Method to execute a callback from an external function
+   virtual bool        ExecuteCallback();
    virtual GmatBase*   Clone() const;
    const std::string&  GetGeneratingString(Gmat::WriteMode mode,
                                            const std::string &prefix,
