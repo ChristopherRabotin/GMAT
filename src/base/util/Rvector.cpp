@@ -137,57 +137,51 @@ Real Rvector::GetMagnitude() const
     return(GmatMathUtil::Sqrt(sum));
 }
 
+
 //------------------------------------------------------------------------------
 //  Rvector GetUnitRvector() const
 //------------------------------------------------------------------------------
 Rvector Rvector::GetUnitRvector() const
 {
-    int i;
+   int i;
 
-    if (isSizedD == false)
-    {
-        throw ArrayTemplateExceptions::UnsizedArray();
-    }
+   if (isSizedD == false)
+      throw ArrayTemplateExceptions::UnsizedArray();
 
-    Real mag = GetMagnitude();
+   Real mag = GetMagnitude();
 
-    if (GmatMathUtil::IsZero(mag))
-    {
-        throw IsZeroVector();
-    }
+   if (GmatMathUtil::IsZero(mag))
+      throw IsZeroVector(" from Rvector::GetUnitRvector()\n");
    
-    Rvector vect(*this);
+   Rvector vect(*this);
    
-    for (i = 0; i < sizeD; i++)
-    {
-        vect.elementD[i] /= mag;
-    }
-    return vect;
+   for (i = 0; i < sizeD; i++)
+      vect.elementD[i] /= mag;
+
+   return vect;
 }
+
 
 //------------------------------------------------------------------------------
 //  const Rvector& Normalize()
 //------------------------------------------------------------------------------
 const Rvector& Rvector::Normalize()
 {
-    int i;
-
-    if (isSizedD == false)
-    {
-        throw ArrayTemplateExceptions::UnsizedArray();
-    }
+   int i;
    
-    Real mag = GetMagnitude();
-    if (GmatMathUtil::IsZero(mag))
-    {
-        throw IsZeroVector();
-    }
-    for (i = 0; i < sizeD; i++)
-    {
-        elementD[i] /=  mag;
-    }
-    return *this;
+   if (isSizedD == false)
+      throw ArrayTemplateExceptions::UnsizedArray();
+   
+   Real mag = GetMagnitude();
+   if (GmatMathUtil::IsZero(mag))
+      throw IsZeroVector(" from Rvector::Normalize()\n");
+   
+   for (i = 0; i < sizeD; i++)
+      elementD[i] /=  mag;
+   
+   return *this;
 }
+
 
 //------------------------------------------------------------------------------
 //  const Rvector& operator=(const Rvector &v)

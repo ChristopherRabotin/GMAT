@@ -36,10 +36,9 @@ public:
    
    // exceptions
    class IsZeroVector : public BaseException
-   { public:  IsZeroVector(const std::string &message =
-                           "Rvector error : vector is a zero vector")
-        : BaseException(message) {}; };
-    
+   { public:  IsZeroVector(const std::string &details = "")
+        : BaseException("Rvector error : vector is a zero vector", details) {}; };
+   
    Rvector();
    Rvector(int size);
    Rvector(int size, Real a1, ... );  //Note: . is required for Real value. eg) 123., 100.

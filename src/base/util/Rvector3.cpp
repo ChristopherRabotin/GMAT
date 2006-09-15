@@ -95,36 +95,35 @@ Real Rvector3::GetMagnitude() const
                               elementD[2]*elementD[2]);
 }
 
+
 //------------------------------------------------------------------------------
 //  Rvector3 GetUnitVector() const
 //------------------------------------------------------------------------------
 Rvector3 Rvector3::GetUnitVector() const
 {
-    Real mag = GetMagnitude();
+   Real mag = GetMagnitude();
 
-    if (GmatMathUtil::IsZero(mag))
-    {
-        throw IsZeroVector();
-    }
+   if (GmatMathUtil::IsZero(mag))
+      throw IsZeroVector(" from Rvector3::GetUnitVector()\n");
    
-    return Rvector3(elementD[0]/mag, elementD[1]/mag, elementD[2]/mag);
+   return Rvector3(elementD[0]/mag, elementD[1]/mag, elementD[2]/mag);
 }
+
 
 //------------------------------------------------------------------------------
 //  const Rvector3& Normalize()
 //------------------------------------------------------------------------------
 const Rvector3& Rvector3::Normalize()
 {
-    Real mag = GetMagnitude();
+   Real mag = GetMagnitude();
    
-    if (GmatMathUtil::IsZero(mag))
-    {
-        throw IsZeroVector();
-    }
-    elementD[0] /= mag;
-    elementD[1] /= mag;
-    elementD[2] /= mag;
-    return *this;
+   if (GmatMathUtil::IsZero(mag))
+      throw IsZeroVector(" from Rvector3::Normalize()\n");
+   
+   elementD[0] /= mag;
+   elementD[1] /= mag;
+   elementD[2] /= mag;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
