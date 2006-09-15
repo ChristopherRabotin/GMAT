@@ -28,27 +28,28 @@
 class StringTokenizer
 {
 public:
-    StringTokenizer();
-    StringTokenizer(const std::string &str);
-    StringTokenizer(const std::string &str, const std::string &delim);
-    ~StringTokenizer();
-
-    Integer                  CountTokens() const; 
-    std::string              GetToken(const Integer loc) const;
-    std::vector<std::string> GetAllTokens() const;
-    void                     Set(const std::string &str);
-    void                     Set(const std::string &str,
-                                 const std::string &delim);
-
-//  @todo - may add this later ->  std::string GetDelimiter() const;
-    
+   StringTokenizer();
+   StringTokenizer(const std::string &str, const std::string &delim);
+   ~StringTokenizer();
+   
+   // inline methods
+   void SetDelimiters(const std::string &delim) { delimiters = delim; }
+   std::string GetDelimiters() { return delimiters; }
+   
+   Integer CountTokens() const; 
+   std::string GetToken(const Integer loc) const;
+   std::vector<std::string> GetAllTokens() const;
+   
+   void Set(const std::string &str, const std::string &delim);
+   
 private:
-    std::vector<std::string> stringTokens;
-    std::string              delimiters;
-    Integer                  countTokens;
-
-    void Parse(const std::string &str,const std::string &delim);
-                                
+   
+   std::vector<std::string> stringTokens;
+   std::string              delimiters;
+   Integer                  countTokens;
+   
+   void Parse(const std::string &str);
+   
 };
 
 #endif // StringTokenizer_hpp
