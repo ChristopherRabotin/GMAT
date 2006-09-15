@@ -24,7 +24,7 @@
 // Headers for the supported Solvers
 //#include "QuasiNewton.hpp"
 //#include "SteepestDescent.hpp"
-//#include "FminconOptimizer.hpp"
+#include "FminconOptimizer.hpp"
 #include "DifferentialCorrector.hpp"
 //#include "Broyden.hpp"
 //#include "ParametricScanner.hpp"
@@ -59,7 +59,8 @@ Solver* SolverFactory::CreateSolver(const std::string &ofType,
    //   return new SteepestDescent(withName);
    //else ... join lines ...
    if (ofType == "FminconOptimizer")
-      MessageInterface::ShowMessage("FmonconOptimizer not yet implemented ...\n");
+      return new FminconOptimizer(withName);
+      //MessageInterface::ShowMessage("FminconOptimizer not yet implemented ...\n");
    else if (ofType == "DifferentialCorrector")
       return new DifferentialCorrector(withName);
    // else if (ofType == "Broyden")
