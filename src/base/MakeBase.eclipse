@@ -201,6 +201,7 @@ OBJECTS = \
     function/Function.o \
     function/GmatFunction.o \
     function/MatlabFunction.o \
+    interface/InterfaceException.o \
     interface/GmatInterface.o \
     interface/MatlabInterface.o \
     interpolator/CubicSplineInterpolator.o \
