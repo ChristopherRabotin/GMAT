@@ -1042,8 +1042,21 @@ ConditionalBranch::GetStringArrayParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool ConditionalBranch::EvaluateCondition(Integer which)
 {
+      #ifdef DEBUG_CONDITIONS
+         MessageInterface::ShowMessage(
+         "ConditionalBranch::EvaluateCondition() entered; which = %d\n   "
+         "Number of Conditions: %d\n", which, numberOfConditions);      
+      
+      #endif
    if ((which < 0) || (which >= numberOfConditions))
+   {
+      #ifdef DEBUG_CONDITIONS
+         MessageInterface::ShowMessage(
+         "ConditionalBranch::EvaluateCondition() - returning with FALSE!!!\n");      
+      
+      #endif
       return false;
+   }
    
    Real        lhsValue = GmatBase::REAL_PARAMETER_UNDEFINED;
    Real        rhsValue = GmatBase::REAL_PARAMETER_UNDEFINED;
