@@ -179,13 +179,13 @@ std::string& Date::ToPackedCalendarString()
    
    // Get date in YMD
    ss << ymd;   
-   StringTokenizer stringToken(ss.str(),".");
+   StringTokenizer stringToken(ss.str(), ".");
    std::string tempString = stringToken.GetToken(0);
    
    // Get time in HMS 
    ss.str("");
    ss << hms;
-   stringToken.Set(ss.str());
+   stringToken.Set(ss.str(), ".");
    tempString = tempString + "." + stringToken.GetToken(1);
 
 //    ss << (ymd + hms);

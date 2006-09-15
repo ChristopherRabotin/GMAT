@@ -223,7 +223,7 @@ void GregorianDate::ParseOut(const std::string &str)
    // Check if non-empty string then parse out; otherwise, nothing. 
    if (str != "")
    {
-      StringTokenizer dateToken(str);
+      StringTokenizer dateToken(str, " ");
 
       if (dateToken.CountTokens() == 4)
       {

@@ -151,7 +151,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
       MessageInterface::ShowMessage("===> file 1: buffer = %s\n", buffer);
       #endif
       
-      stk.Set(line);
+      stk.Set(line, " ");
       tokens1 = stk.GetAllTokens();
 
       // check for blank lines in file1
@@ -171,7 +171,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
       MessageInterface::ShowMessage("===> file 2: buffer = %s\n", buffer);
       #endif
       
-      stk.Set(line);
+      stk.Set(line, " ");
       tokens2 = stk.GetAllTokens();
       
       // check for blank lines in file1
@@ -472,7 +472,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
       MessageInterface::ShowMessage("===> base file: buffer = %s\n", buffer);
       #endif
       
-      stk.Set(line);
+      stk.Set(line, " ");
       baseTokens = stk.GetAllTokens();
 
       // check for blank lines in base file
@@ -494,7 +494,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
       MessageInterface::ShowMessage("===> file 1: buffer = %s\n", buffer);
       #endif
       
-      stk.Set(line);
+      stk.Set(line, " ");
       tokens1 = stk.GetAllTokens();
       
       // check for blank lines in file1
@@ -511,7 +511,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
       MessageInterface::ShowMessage("===> file 2: buffer = %s\n", buffer);
       #endif
       
-      stk.Set(line);
+      stk.Set(line, " ");
       tokens2 = stk.GetAllTokens();
       
       // check for blank lines in file2
@@ -530,7 +530,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
          MessageInterface::ShowMessage("===> file 3: buffer = %s\n", buffer);
          #endif
       
-         stk.Set(line);
+         stk.Set(line, " ");
          tokens3 = stk.GetAllTokens();
       
          // check for blank lines in file2
@@ -902,7 +902,7 @@ bool GmatFileUtil::SkipHeaderLines(ifstream &in, StringArray &tokens)
       if (line.find("--") != line.npos)
          continue;
       
-      stk.Set(line);
+      stk.Set(line, " ");
       tokens = stk.GetAllTokens();
       fileCols = tokens.size();
 
