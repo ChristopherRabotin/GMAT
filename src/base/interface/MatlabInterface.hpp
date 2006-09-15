@@ -28,6 +28,9 @@ static int PutVariable(const std::string &matlabVarName, int numElements, double
 static int GetVariable(const std::string &matlabVarName, int numElements, double outArray[]);
 static int EvalString(const std::string &evalString);
 static int OutputBuffer(char *buffer, int size);
+static bool IsOpen() { return (enginePtrD != NULL);}; // inline 
+static void RunMatlabString(std::string evalString); 
+
 
 private:
 

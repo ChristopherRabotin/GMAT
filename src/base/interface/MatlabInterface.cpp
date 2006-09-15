@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 #include <stdlib.h>         // for NULL
 #include <string.h>         // for memcpy()
+#include <sstream>          // for std::stringstream
 #if defined __USE_MATLAB__
 #include "engine.h"         // for Engine
 #endif
@@ -29,6 +30,7 @@
 
 #include "MatlabInterface.hpp"
 #include "MessageInterface.hpp"
+#include "InterfaceException.hpp"
 
 //#define DEBUG_MATLAB_IF 1
 //#define DEBUG_MATLAB_OPEN_CLOSE
@@ -297,6 +299,41 @@ int MatlabInterface::OutputBuffer(char *buffer, int size)
    }
 #endif
    return 0;
+}
+
+//------------------------------------------------------------------------------
+// void RunMatlabString(std::string evalString)
+//------------------------------------------------------------------------------
+void MatlabInterface::RunMatlabString(std::string evalString)
+{
+#if defined __USE_MATLAB__
+   if (!MatlabInterface::IsOpen())
+      throw InterfaceException(
+         "ERROR - Matlab Interface not yet open");
+
+   // try to call the function
+   evalString = "try,\n  " + evalString + "\ncatch\n  errormsg = lasterr;\nend";
+   MatlabInterface::EvalString(evalString);
+
+   double errormsg[128];
+   // if there was an error throw an exception
+   if (MatlabInterface::GetVariable("errormsg", 1, errormsg))
+   {
+      double buffer[128];
+
+      MatlabInterface::OutputBuffer((char *)buffer, 128);
+      MatlabInterface::EvalString("errormsg");
+
+      // get rid of "errormsg ="
+      char *ptr = strtok((char *)buffer, "=");
+      ptr = strtok(NULL, "\n");
+
+      std::stringstream errorStr;
+      errorStr << "Error from Matlab\n"<< ptr;
+
+      throw InterfaceException(errorStr.str());
+   }
+#endif
 }
 
 
