@@ -532,6 +532,7 @@ bool Optimize::ExecuteCallback()
    #ifndef __USE_MATLAB__ 
       throw CommandException("Optimize: ERROR - MATLAB required for Callback");
    #endif
+   #ifdef __USE_MATLAB__
    if (!MatlabInterface::IsOpen())
       throw CommandException(
          "Optimize:: ERROR - Matlab Interface not yet open");
@@ -579,6 +580,7 @@ bool Optimize::ExecuteCallback()
    // send results to MATLAB
    for (Integer i=0;i<(Integer)results.size();i++)
       MatlabInterface::RunMatlabString(results.at(i));
+   #endif
    callbackExecuting = false;
    return false;  
 }

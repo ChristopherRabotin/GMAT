@@ -302,6 +302,17 @@ int MatlabInterface::OutputBuffer(char *buffer, int size)
 }
 
 //------------------------------------------------------------------------------
+// bool IsOpen()
+//------------------------------------------------------------------------------
+bool MatlabInterface::IsOpen() 
+{  
+   #ifdef __USE_MATLAB__
+      return (MatlabInterface::enginePtrD != NULL);
+   #endif
+   return false;
+}
+
+//------------------------------------------------------------------------------
 // void RunMatlabString(std::string evalString)
 //------------------------------------------------------------------------------
 void MatlabInterface::RunMatlabString(std::string evalString)
