@@ -183,14 +183,21 @@ void BarycenterPanel::LoadData()
 //------------------------------------------------------------------------------
 void BarycenterPanel::SaveData()
 {
+   canClose = false;
    try
    {
-      theBarycenter->TakeAction("ClearBodies");
 
       Integer count = bodySelectedListBox->GetCount();
-
+  
       if (count == 0)
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_,
+                 "At least one body must be selected!");
+         theOkButton->Disable();
          return;
+      }
+
+      theBarycenter->TakeAction("ClearBodies");
 
       // get Earth pointer as J2000Body
       CelestialBody *j2000body = (CelestialBody*)theGuiInterpreter->GetConfiguredItem("Earth");
@@ -217,6 +224,10 @@ void BarycenterPanel::SaveData()
             ("BarycenterPanel::SaveData() body[%d]=%d, name=%s, J2000Body=%d\n",
              i, body, bodyName.c_str(), j2000body);
          #endif
+
+         theApplyButton->Disable();
+         theOkButton->Enable();
+         canClose = true;
       }
    }
    catch (BaseException &e)
@@ -281,4 +292,5 @@ void BarycenterPanel::OnButton(wxCommandEvent& event)
    }
 
    theApplyButton->Enable();
+   theOkButton->Enable();
 }
