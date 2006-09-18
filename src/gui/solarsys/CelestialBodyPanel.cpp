@@ -32,7 +32,7 @@ CelestialBodyPanel::KEP_ELEMENT_NAMES[6] =
 const std::string
 CelestialBodyPanel::KEP_ELEMENT_UNITS[6] =
 {
-   "Km",
+   "km",
    "",
    "deg",
    "deg",
@@ -86,12 +86,21 @@ void CelestialBodyPanel::Create()
 
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    wxBoxSizer *horizontalBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-   wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
+   wxFlexGridSizer *flexGridSizer0 = new wxFlexGridSizer( 3, 0, 0 );
    wxFlexGridSizer *flexGridSizer = new wxFlexGridSizer( 3, 0, 0 );
    wxStaticBoxSizer *staticBoxSizer = new wxStaticBoxSizer(staticBox, wxVERTICAL);
    wxStaticBoxSizer *analyticBoxSizer = new wxStaticBoxSizer(analyticStaticBox, wxVERTICAL);
    wxBoxSizer *horizontalBoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
    wxString emptyList[] = {};
+
+   mMuTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                                 wxDefaultPosition, wxSize(150,-1), 0);
+
+   mEquatorialRadiusTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                                 wxDefaultPosition, wxSize(150,-1), 0);
+
+   mFlatteningTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                                 wxDefaultPosition, wxSize(150,-1), 0);
 
    mEpochTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                                  wxDefaultPosition, wxSize(150,-1), 0);
@@ -110,12 +119,35 @@ void CelestialBodyPanel::Create()
    mElement6TextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                                  wxDefaultPosition, wxSize(150,-1), 0);
                                  
+   muStaticText = new wxStaticText(this, ID_TEXT, wxT("Mu"),
+          wxDefaultPosition, wxDefaultSize, 0);
+   unitStaticTextMu = new wxStaticText(this, ID_TEXT, wxT("km^3/s^2"), 
+          wxDefaultPosition, wxDefaultSize, 0);
+
+   equatorialRadiusStaticText = new wxStaticText(this, ID_TEXT, 
+          wxT("Equatorial Radius"),wxDefaultPosition,wxDefaultSize, 0);
+   unitStaticTextER =  new wxStaticText(this, ID_TEXT, wxT("km"), 
+          wxDefaultPosition, wxDefaultSize, 0);
+
+   flatteningStaticText = new wxStaticText(this, ID_TEXT, wxT("Flattening"),
+          wxDefaultPosition, wxDefaultSize, 0);
+   unitStaticTextFlat =  new wxStaticText(this, ID_TEXT, wxT(""), 
+          wxDefaultPosition, wxDefaultSize, 0);
+
    epochStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Initial Epoch: "),
+      new wxStaticText(this, ID_TEXT, wxT("Initial Epoch"),
                        wxDefaultPosition, wxDefaultSize, 0);
+   unitStaticTextepoch =
+      new wxStaticText(this, ID_TEXT, wxT("A1ModJulian"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+
    intervalStaticText =
       new wxStaticText(this, ID_TEXT, "Nutation Update Interval",
                        wxDefaultPosition, wxDefaultSize, 0);
+   unitStaticTextinterval =
+      new wxStaticText(this, ID_TEXT, wxT("sec"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+
    initialStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Initial State with Respect to Central Body: "),
                        wxDefaultPosition, wxDefaultSize, 0);
@@ -177,10 +209,36 @@ void CelestialBodyPanel::Create()
    rotDataSourceCB = new wxComboBox( this, ID_COMBO, wxT(""),
       wxDefaultPosition, wxSize(150,-1), 0, emptyList, wxCB_DROPDOWN | wxCB_READONLY );
 
-   flexGridSizer1->Add( epochStaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   flexGridSizer1->Add( mEpochTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   flexGridSizer1->Add( intervalStaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   flexGridSizer1->Add( mIntervalTextCtrl, 20, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   flexGridSizer0->Add( muStaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   flexGridSizer0->Add( mMuTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   flexGridSizer0->Add( unitStaticTextMu, 0, wxGROW|wxALIGN_CENTER|wxALL, 
+                        bsize);
+
+   flexGridSizer0->Add( equatorialRadiusStaticText, 0, 
+                        wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   flexGridSizer0->Add( mEquatorialRadiusTextCtrl, 0, 
+                        wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   flexGridSizer0->Add( unitStaticTextER, 0, wxGROW|wxALIGN_CENTER|wxALL, 
+                        bsize);
+
+   flexGridSizer0->Add( flatteningStaticText, 0, 
+                        wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   flexGridSizer0->Add( mFlatteningTextCtrl, 0, 
+                        wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   flexGridSizer0->Add( unitStaticTextFlat, 0, wxGROW|wxALIGN_CENTER|wxALL, 
+                        bsize);
+
+   flexGridSizer0->Add( intervalStaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, 
+                        bsize);
+   flexGridSizer0->Add( mIntervalTextCtrl, 20, wxGROW|wxALIGN_CENTER|wxALL, 
+                        bsize);
+   flexGridSizer0->Add( unitStaticTextinterval, 0, wxGROW|wxALIGN_CENTER|wxALL, 
+                        bsize);
+
+   flexGridSizer->Add( epochStaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   flexGridSizer->Add( mEpochTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   flexGridSizer->Add( unitStaticTextepoch, 0, wxGROW|wxALIGN_CENTER|wxALL, 
+                        bsize);
 
    horizontalBoxSizer->Add( initialStaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    horizontalBoxSizer->Add( centralBodyText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
@@ -216,7 +274,7 @@ void CelestialBodyPanel::Create()
    staticBoxSizer->Add(flexGridSizer, 0, wxALIGN_CENTER | wxALL, bsize);
 
    pageBoxSizer->Add(noCentralBodyText, 0, wxALIGN_CENTER | wxALL, bsize);
-   pageBoxSizer->Add(flexGridSizer1, 0, wxALIGN_CENTER | wxALL, bsize);
+   pageBoxSizer->Add(flexGridSizer0, 0, wxALIGN_CENTER | wxALL, bsize);
    pageBoxSizer->Add(staticBoxSizer, 0, wxALIGN_CENTER | wxALL, bsize);
    pageBoxSizer->Add(horizontalBoxSizer2, 0, wxALIGN_CENTER | wxALL, bsize);
 
@@ -227,11 +285,13 @@ void CelestialBodyPanel::Create()
    {
       intervalStaticText->Show(true);
       mIntervalTextCtrl->Show(true);
+      unitStaticTextinterval->Show(true);
    }
    else
    {
       intervalStaticText->Show(false);
       mIntervalTextCtrl->Show(false);
+      unitStaticTextinterval->Show(false);
    }
    
    if (bodyName == "Luna")
@@ -254,8 +314,20 @@ void CelestialBodyPanel::LoadData()
    try
    {
       std::string centralBody;
+      Real rMu;
+      Real equatorialRadius; 
+      Real flattening;
       Real epoch;
       Rvector6 elements;
+     
+      rMu = theCelestialBody->GetRealParameter(
+                      theCelestialBody->GetParameterID("Mu"));
+
+      equatorialRadius = theCelestialBody->GetRealParameter(
+                      theCelestialBody->GetParameterID("EquatorialRadius"));
+
+      flattening = theCelestialBody->GetRealParameter(
+                      theCelestialBody->GetParameterID("Flattening"));
       
       if (theCelestialBody->GetBodyType() != Gmat::STAR)
       {
@@ -313,6 +385,12 @@ void CelestialBodyPanel::LoadData()
       
       wxString epochStr, elementStr;
 
+      mMuTextCtrl->SetValue(theGuiManager->ToWxString(rMu));
+      mEquatorialRadiusTextCtrl->SetValue(
+                                 theGuiManager->ToWxString(equatorialRadius));
+      mFlatteningTextCtrl->SetValue(
+                                 theGuiManager->ToWxString(flattening));
+
       mEpochTextCtrl->SetValue(theGuiManager->ToWxString(epoch));
       mElement1TextCtrl->SetValue(theGuiManager->ToWxString(elements.Get(0)));
       mElement2TextCtrl->SetValue(theGuiManager->ToWxString(elements.Get(1)));
@@ -342,6 +420,7 @@ void CelestialBodyPanel::SaveData()
    canClose = false;
    try
    {
+      Integer paramID;
       Real rvalue[6];
       std::string inputString[6];
       std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
@@ -349,6 +428,42 @@ void CelestialBodyPanel::SaveData()
                  "\nThe allowed values are: [ %s ].";
 
       theOkButton->Disable();
+
+      // Mu
+      inputString[0] = mMuTextCtrl->GetValue();
+      if (!GmatStringUtil::ToDouble(inputString[0], &rvalue[0]) || 
+          rvalue[0] < 0)
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                 inputString[0].c_str(), "Mu","Real Number >= 0");
+         return;
+      }
+      paramID = theCelestialBody->GetParameterID("Mu");
+      theCelestialBody->SetRealParameter(paramID, rvalue[0]);
+                      
+      // EquatorialRadius
+      inputString[0] = mEquatorialRadiusTextCtrl->GetValue();
+      if (!GmatStringUtil::ToDouble(inputString[0], &rvalue[0]) || 
+          rvalue[0] < 0)
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                 inputString[0].c_str(), "EquatorialRadius",
+                 "Real Number >= 0");
+         return;
+      }
+      paramID = theCelestialBody->GetParameterID("EquatorialRadius");
+      theCelestialBody->SetRealParameter(paramID, rvalue[0]);
+
+      // Flattening
+      inputString[0] = mFlatteningTextCtrl->GetValue();
+      if (!GmatStringUtil::ToDouble(inputString[0], &rvalue[0])) 
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                 inputString[0].c_str(), "Flattening", "Real Number");
+         return;
+      }
+      paramID = theCelestialBody->GetParameterID("Flattening");
+      theCelestialBody->SetRealParameter(paramID, rvalue[0]);
 
       if (theCelestialBody->GetBodyType() == Gmat::PLANET)
       {
@@ -464,6 +579,9 @@ void CelestialBodyPanel::OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void CelestialBodyPanel::EnableAll(bool enable)
 {
+   mMuTextCtrl->Enable(enable);
+   mEquatorialRadiusTextCtrl->Enable(enable);
+   mFlatteningTextCtrl->Enable(enable);
    mEpochTextCtrl->Enable(enable);
    mElement1TextCtrl->Enable(enable);
    mElement2TextCtrl->Enable(enable);
@@ -472,7 +590,14 @@ void CelestialBodyPanel::EnableAll(bool enable)
    mElement5TextCtrl->Enable(enable);
    mElement6TextCtrl->Enable(enable);
 
+   muStaticText->Enable(enable);
+   unitStaticTextMu->Enable(enable);
+   equatorialRadiusStaticText->Enable(enable);
+   unitStaticTextER->Enable(enable);
+   flatteningStaticText->Enable(enable);
+   unitStaticTextFlat->Enable(enable);
    epochStaticText->Enable(enable);
+   unitStaticTextepoch->Enable(enable);
    initialStaticText->Enable(enable);
    centralBodyText->Enable(enable);
 
