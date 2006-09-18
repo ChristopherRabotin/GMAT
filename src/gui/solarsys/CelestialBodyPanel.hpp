@@ -31,6 +31,9 @@ private:
    
    wxString bodyName;
    
+   wxTextCtrl *mMuTextCtrl;
+   wxTextCtrl *mEquatorialRadiusTextCtrl;
+   wxTextCtrl *mFlatteningTextCtrl;
    wxTextCtrl *mEpochTextCtrl;
    wxTextCtrl *mIntervalTextCtrl;
    wxTextCtrl *mElement1TextCtrl;
@@ -41,8 +44,16 @@ private:
    wxTextCtrl *mElement6TextCtrl;
    wxTextCtrl *mElement7TextCtrl;
 
+   wxStaticText *muStaticText;
+   wxStaticText *unitStaticTextMu;
+   wxStaticText *equatorialRadiusStaticText;
+   wxStaticText *unitStaticTextER;
+   wxStaticText *flatteningStaticText;
+   wxStaticText *unitStaticTextFlat;
    wxStaticText *epochStaticText;
+   wxStaticText *unitStaticTextepoch;
    wxStaticText *intervalStaticText;
+   wxStaticText *unitStaticTextinterval;
    wxStaticText *initialStaticText;
    wxStaticText *centralBodyText;
    wxStaticText *noCentralBodyText;
