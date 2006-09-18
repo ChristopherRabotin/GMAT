@@ -70,6 +70,21 @@ const std::string FminconOptimizer::ALLOWED_OPTIONS[11] =
    "GradConstr",
 };
 
+const std::string FminconOptimizer::DEFAULT_OPTION_VALUES[11] = 
+{
+   "0.1000",
+   "1.0000e-08",
+   "100*numberofvariables",
+   "400",
+   "1.0000e-06",
+   "1.0000e-06",
+   "off",
+   "off",
+   "final",
+   "off",
+   "off",
+};
+
 const Integer FminconOptimizer::NUM_MATLAB_OPTIONS    = 11;
 const Integer FminconOptimizer::MATLAB_OPTIONS_OFFSET = 1000;
 
@@ -87,7 +102,7 @@ FminconOptimizer::FminconOptimizer(std::string name) :
    for (Integer i=0; i<NUM_MATLAB_OPTIONS; i++)
    {
       options.push_back(ALLOWED_OPTIONS[i]);
-      optionValues.push_back("");
+      optionValues.push_back(DEFAULT_OPTION_VALUES[i]);
    }
    // ********* BEGIN temporary prototype, testing, etc. *****************************//
    //functionPath = "/Users/wcshoan/dev/Ec_GMAT/bin/files/matlab_functions";
@@ -493,6 +508,13 @@ bool FminconOptimizer::SetStringParameter(const Integer id,
    if ((id >= MATLAB_OPTIONS_OFFSET) &&
        (id <  (MATLAB_OPTIONS_OFFSET + NUM_MATLAB_OPTIONS)))
    {
+      if (!IsAllowedValue(options[id - MATLAB_OPTIONS_OFFSET], value))
+      {
+          std::string errorStr = "FminconOptimizer error: Value " + 
+               value + " not valid for option " 
+               + options[id - MATLAB_OPTIONS_OFFSET] + "\n";
+          throw SolverException(errorStr);
+      }     
       optionValues[id - MATLAB_OPTIONS_OFFSET] = value;
       return true;
    }
@@ -1042,13 +1064,19 @@ bool FminconOptimizer::IsAllowedValue(const std::string &opt,
             (opt == ALLOWED_OPTIONS[9]) ||
             (opt == ALLOWED_OPTIONS[10]))
    {
-      if ((val == "On") || (val == "Off")) return true;
+      if ((val == "On") || (val == "Off") ||
+          (val == "ON") || (val == "OFF") ||
+          (val == "on") || (val == "off")) return true;
       return false;
    }
    else if (opt == ALLOWED_OPTIONS[8])
    {
       if ((val == "Iter")   || (val == "Off")   ||
-          (val == "Notify") || (val == "Final")) return true;
+          (val == "Notify") || (val == "Final") ||
+          (val == "ITER")   || (val == "OFF")   ||
+          (val == "NOTIFY") || (val == "FINAL") ||
+          (val == "iter")   || (val == "off")   ||
+          (val == "notify") || (val == "final")) return true;
       return false;
    }
    else
