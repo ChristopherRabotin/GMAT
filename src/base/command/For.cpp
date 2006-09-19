@@ -18,15 +18,17 @@
  */
 //------------------------------------------------------------------------------
 
-#include <ctype.h>     // for isalpha
+#include <ctype.h>               // for isalpha
 #include "For.hpp"
 #include "BranchCommand.hpp"
 #include "CommandException.hpp"
+#include "StringUtil.hpp"        // for ToDouble()
 #include "MessageInterface.hpp"
 
 #include <sstream>      // for std::stringstream, used to make generating string
 
 //#define DEBUG_FOR 1
+//#define DEBUG_FOR_INIT 1
 
 //---------------------------------
 // static data
@@ -231,6 +233,12 @@ bool For::Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 bool For::Initialize(void)
 {
+   #if DEBUG_FOR_INIT
+   MessageInterface::ShowMessage
+      ("For::Initialize() indexIsParam=%d, startIsParam=%d, endIsParam=%d, "
+       "incrIsParam=%d\n", indexIsParam, startIsParam, endIsParam, incrIsParam);
+   #endif
+   
    // Get Parameter pointers from the Sandbox
    if (indexIsParam)
    {
@@ -507,8 +515,8 @@ bool For::RenameRefObject(const Gmat::ObjectType type,
    {
       if (indexName == oldName)   indexName = newName;
       if (startName == oldName)   startName = newName;
-      if (endName == oldName)     endName   = newName;
-      if (incrName == oldName)    incrName  = newName;
+      if (endName   == oldName)   endName   = newName;
+      if (incrName  == oldName)   incrName  = newName;
    }
    
    BranchCommand::RenameRefObject(type, oldName, newName);
@@ -696,24 +704,48 @@ std::string For::GetStringParameter(const Integer id) const
 bool For::SetStringParameter(const Integer id, 
                              const std::string &value)
 {
+   Real rval;
+   bool isReal = false;
+   
+   if (GmatStringUtil::ToDouble(value, rval))
+      isReal = true;
+   
    if (id == INDEX_NAME) 
    {
-      indexName    = value; 
+      indexName = value;
       return true;
    }
    else if (id == START_NAME)
    {
       startName = value;
+      if (isReal)
+      {
+         startValue = rval;
+         startIsParam = false;
+      }
+      
       return true;
    }
    else if (id == END_NAME)
    {
       endName = value;
+      if (isReal)
+      {
+         endValue = rval;
+         endIsParam = false;
+      }
+      
       return true;
    }
    else if (id == INCREMENT_NAME)
    {
       incrName = value;
+      if (isReal)
+      {
+         stepSize = rval;
+         incrIsParam = false;
+      }
+      
       return true;
    }
    
