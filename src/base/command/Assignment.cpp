@@ -36,9 +36,10 @@
 #include "Moderator.hpp" 
 
 //#define DEBUG_RENAME 1
-//#define DEBUG_PARM_ASSIGNMENT
-//#define DEBUG_ARRAY_INTERPRETING
+//#define DEBUG_EVAL_RHS
+//#define DEBUG_ASSIGNMENT_IA 1
 //#define DEBUG_ASSIGNMENT_INIT 1
+//#define DEBUG_ASSIGNMENT_EXEC 1
 //#define DEBUG_EQUATION 1
 
 //------------------------------------------------------------------------------
@@ -196,7 +197,7 @@ Assignment& Assignment::operator=(const Assignment& a)
 //------------------------------------------------------------------------------
 bool Assignment::InterpretAction()
 {
-   #ifdef DEBUG_PARM_ASSIGNMENT
+   #ifdef DEBUG_ASSIGNMENT_IA
       MessageInterface::ShowMessage(
          "Assignment::InterpretAction entered\n");
    #endif
@@ -204,11 +205,11 @@ bool Assignment::InterpretAction()
    Integer end = generatingString.find("%");
    std::string genString = generatingString.substr(0, end);
    
-   #ifdef DEBUG_ARRAY_INTERPRETING
+   #ifdef DEBUG_ASSIGNMENT_IA
       MessageInterface::ShowMessage(
          "Comment-free generating string is %s\n", genString.c_str());
    #endif
-
+      
    Integer loc = genString.find("GMAT", 0) + 4;
    const char *str = genString.c_str();
    while (str[loc] == ' ')
@@ -249,7 +250,7 @@ bool Assignment::InterpretAction()
       --lend;
    rhs = rhs.substr(0, lend + 1);
    
-   #ifdef DEBUG_ARRAY_INTERPRETING
+   #ifdef DEBUG_ASSIGNMENT_IA
       MessageInterface::ShowMessage(
          "Left side is \"%s\"\nRight side is \"%s\"\nLeft side %s an array\n",
          lhs.c_str(), rhs.c_str(), (isLhsArray ? "is" : "is not"));
@@ -270,7 +271,12 @@ bool Assignment::InterpretAction()
       // value on a variable
       ownerName = lhs;
       value = rhs;
-      objToObj = true;      
+      objToObj = true;
+      
+      #if DEBUG_ASSIGNMENT_IA
+      MessageInterface::ShowMessage("objToObj = %s\n", (objToObj ? "true" : "false"));
+      #endif
+      
       return true;
    }
    
@@ -309,7 +315,7 @@ bool Assignment::InterpretAction()
             // Get an instance if this is a Parameter
             Moderator *mod = Moderator::Instance();
 
-            #ifdef DEBUG_PARM_ASSIGNMENT
+            #ifdef DEBUG_ASSIGNMENT_IA
             MessageInterface::ShowMessage
                ("=====> Assignment::InterpretAction() Creating RHS as parameter: %s\n",
                 rhs.c_str());
@@ -323,7 +329,7 @@ bool Assignment::InterpretAction()
             }
             catch (BaseException &ex)
             {
-               #ifdef DEBUG_PARM_ASSIGNMENT
+               #ifdef DEBUG_ASSIGNMENT_IA
                   MessageInterface::ShowMessage
                      ("=====> Assignment::InterpretAction() Creating RHS not a "
                      "parameter; trying object member data: '%s' on '%s'\n", 
@@ -421,7 +427,7 @@ bool Assignment::InterpretAction()
 
    value = rhs;
    
-   #ifdef DEBUG_ARRAY_INTERPRETING
+   #ifdef DEBUG_ASSIGNMENT_IA
       MessageInterface::ShowMessage(
          "\nOwner is \"%s\"\nParameter is \"%s\"\nValue is \"%s\"\n",
          ownerName.c_str(), parmName.c_str(), value.c_str());
@@ -444,7 +450,8 @@ bool Assignment::Initialize()
 {
    #ifdef DEBUG_ASSIGNMENT_INIT
       MessageInterface::ShowMessage
-         ("Assignment::Initialize() entered. ownerName=%s\n", ownerName.c_str());
+         ("Assignment::Initialize() entered. ownerName=%s, value=%s\n",
+          ownerName.c_str(), value.c_str());
    #endif
       
    if (GmatCommand::Initialize() == false)
@@ -465,7 +472,7 @@ bool Assignment::Initialize()
           parmOwner->GetTypeName().c_str(), parmOwner->GetName().c_str(), parmOwner);
       #endif
    }
-
+   
    if (objToObj)
    {
       if (objectMap->find(value) != objectMap->end())
@@ -479,7 +486,7 @@ bool Assignment::Initialize()
          {
             parmName = "Expression";
             objToObj = false;
-            #ifdef DEBUG_PARM_ASSIGNMENT
+            #ifdef DEBUG_ASSIGNMENT_INIT
                MessageInterface::ShowMessage(
                   "Assignment::Initialize has owner %s, name %s, and val %s\n",
                   ownerName.c_str(), parmName.c_str(), value.c_str());
@@ -596,7 +603,7 @@ bool Assignment::Initialize()
 //------------------------------------------------------------------------------
 bool Assignment::Execute()
 {
-   #ifdef DEBUG_ARRAY_INTERPRETING
+   #ifdef DEBUG_ASSIGNMENT_EXEC
       MessageInterface::ShowMessage("\nAssignment::Execute() entered for " +
          generatingString + "\n");
    #endif
@@ -604,7 +611,7 @@ bool Assignment::Execute()
 
    if (isLhsArray)
    {
-      #ifdef DEBUG_ARRAY_INTERPRETING
+      #ifdef DEBUG_ASSIGNMENT_EXEC
       MessageInterface::ShowMessage("   Executing lhs array branch\n");
       #endif
       
@@ -633,7 +640,7 @@ bool Assignment::Execute()
          throw CommandException
             ("Multiple array column elements cannot be set yet.");
       
-      #if DEBUG_ARRAY_INTERPRETING
+      #if DEBUG_ASSIGNMENT_EXEC
       MessageInterface::ShowMessage
          ("   rowIndex=%d, colIndex=%d\n", rowIndex, colIndex);
       #endif
@@ -745,7 +752,7 @@ bool Assignment::Execute()
    // Get the parameter ID and ID type
    try
    {
-      #ifdef DEBUG_ARRAY_INTERPRETING
+      #ifdef DEBUG_ASSIGNMENT_EXEC
          MessageInterface::ShowMessage("   In the try clause\n");
       #endif
       if (parmOwner == NULL)
@@ -763,7 +770,7 @@ bool Assignment::Execute()
 
       if (objToObj)
       {
-         #ifdef DEBUG_ARRAY_INTERPRETING
+         #ifdef DEBUG_ASSIGNMENT_EXEC
             MessageInterface::ShowMessage(
                "   Executing object to object branch\n");
          #endif
@@ -775,6 +782,7 @@ bool Assignment::Execute()
             throw CommandException("Mismatched object types between \"" +
                parmOwner->GetName() + "\" and \"" + rhsObject->GetName() +
                "\"");
+
          parmOwner->Copy(rhsObject);
          
          BuildCommandSummary(true);
@@ -785,7 +793,7 @@ bool Assignment::Execute()
       // if (parmOwner->GetTypeName() == "Variable")
       //    return ((Variable*)parmOwner)->EvaluateReal();
       
-      #ifdef DEBUG_PARM_ASSIGNMENT
+      #ifdef DEBUG_ASSIGNMENT_EXEC
          MessageInterface::ShowMessage("   Executing parameter setting\n");
       #endif
 
@@ -801,7 +809,7 @@ bool Assignment::Execute()
          parmType  = parmOwner->GetParameterType(parmID);
       }
 
-      #ifdef DEBUG_PARM_ASSIGNMENT
+      #ifdef DEBUG_ASSIGNMENT_EXEC
       if (!isVariable)
          MessageInterface::ShowMessage("Assignment::Execute Parameter %s has "
             "type %s\n", parmName.c_str(),
@@ -816,7 +824,7 @@ bool Assignment::Execute()
             break;
                
          case Gmat::REAL_TYPE:
-            #ifdef DEBUG_PARM_ASSIGNMENT
+            #ifdef DEBUG_ASSIGNMENT_EXEC
             if (!isVariable)
                MessageInterface::ShowMessage("Setting %s on %s to %lf\n", 
                   parmOwner->GetParameterText(parmID).c_str(), 
@@ -834,7 +842,7 @@ bool Assignment::Execute()
                
          case Gmat::STRING_TYPE:
          case Gmat::STRINGARRAY_TYPE:
-            #ifdef DEBUG_PARM_ASSIGNMENT
+            #ifdef DEBUG_ASSIGNMENT_EXEC
                MessageInterface::ShowMessage("Assignment::Execute setting "
                   "string to %s\n", value.c_str());
             #endif
@@ -878,7 +886,7 @@ bool Assignment::Execute()
       retval = true;
    }
 
-   #ifdef DEBUG_PARM_ASSIGNMENT
+   #ifdef DEBUG_ASSIGNMENT_EXEC
       MessageInterface::ShowMessage("Assignment::Execute finished\n");
    #endif
    
@@ -1019,7 +1027,7 @@ const std::string& Assignment::GetGeneratingString(Gmat::WriteMode mode,
 //------------------------------------------------------------------------------
 bool Assignment::InitializeRHS(const std::string &rhs)
 {
-   #ifdef DEBUG_PARM_ASSIGNMENT
+   #ifdef DEBUG_ASSIGNMENT_INIT
       MessageInterface::ShowMessage("Assignment::InitializeRHS(%s) entered\n",
          rhs.c_str());
    #endif
@@ -1038,7 +1046,7 @@ bool Assignment::InitializeRHS(const std::string &rhs)
           (rhs[end] != '\t') && (end < (Integer)rhs.length()))
       ++end;
 
-   #ifdef DEBUG_PARM_ASSIGNMENT
+   #ifdef DEBUG_ASSIGNMENT_INIT
       MessageInterface::ShowMessage("   length = %d, end = %d\n",
          rhs.length(), end);
    #endif
@@ -1052,7 +1060,7 @@ bool Assignment::InitializeRHS(const std::string &rhs)
    if (subchunk[0] == '.')
       subchunk = subchunk.substr(1);
 
-   #ifdef DEBUG_PARM_ASSIGNMENT
+   #ifdef DEBUG_ASSIGNMENT_INIT
       MessageInterface::ShowMessage(
          "'%s' was broken into '%s' and '%s'\n", rhs.c_str(), chunk.c_str(),
          subchunk.c_str());
@@ -1075,7 +1083,7 @@ bool Assignment::InitializeRHS(const std::string &rhs)
          name = rhs;
    }
 
-   #ifdef DEBUG_PARM_ASSIGNMENT
+   #ifdef DEBUG_ASSIGNMENT_INIT
       MessageInterface::ShowMessage("Locating the object %s\n", name.c_str());
    #endif
    
@@ -1086,7 +1094,7 @@ bool Assignment::InitializeRHS(const std::string &rhs)
       rhsObject = (*objectMap)[name];
       kind = rhsObject->GetTypeName();
 
-      #ifdef DEBUG_PARM_ASSIGNMENT
+      #ifdef DEBUG_ASSIGNMENT_INIT
          MessageInterface::ShowMessage(
             "Assignment RHS object is a %s named %s\n", kind.c_str(),
             rhsObject->GetName().c_str());
@@ -1135,7 +1143,7 @@ bool Assignment::InitializeRHS(const std::string &rhs)
             --index;
          colStr = colStr.substr(0, index+1);
 
-         #ifdef DEBUG_PARM_ASSIGNMENT
+         #ifdef DEBUG_ASSIGNMENT_INIT
             MessageInterface::ShowMessage(
                "   Array element given by ('%s', '%s')\n", rowStr.c_str(),
                colStr.c_str());
@@ -1169,7 +1177,7 @@ bool Assignment::InitializeRHS(const std::string &rhs)
       }
       else
       {
-         #ifdef DEBUG_PARM_ASSIGNMENT
+         #ifdef DEBUG_ASSIGNMENT_INIT
             MessageInterface::ShowMessage("%s is an object parm\n",
                subchunk.c_str());
          #endif
@@ -1182,7 +1190,7 @@ bool Assignment::InitializeRHS(const std::string &rhs)
       Real rval;
       if (GmatStringUtil::ToDouble(rhs, &rval))
       {
-         #ifdef DEBUG_PARM_ASSIGNMENT
+         #ifdef DEBUG_ASSIGNMENT_INIT
          MessageInterface::ShowMessage(
             "Assignment RHS object is the number %le\n", atof(rhs.c_str()));
          #endif
@@ -1226,7 +1234,7 @@ Real Assignment::EvaluateRHS()
       {
          Real value = ((Parameter*)rhsObject)->EvaluateReal();
 
-         #ifdef DEBUG_PARM_ASSIGNMENT
+         #ifdef DEBUG_EVAL_RHS
             MessageInterface::ShowMessage("Evaluating: the %s named %s = %lf\n", 
                rhsObject->GetTypeName().c_str(), rhsObject->GetName().c_str(),
                value);
@@ -1242,14 +1250,14 @@ Real Assignment::EvaluateRHS()
          if (colObj != NULL)
             if (colObj->GetType() == Gmat::PARAMETER)
                col = (Integer)((Parameter*)colObj)->EvaluateReal();
-         #ifdef DEBUG_PARM_ASSIGNMENT
+         #ifdef DEBUG_EVAL_RHS
             MessageInterface::ShowMessage(
                "   Getting 'SingleValue' for (%d, %d)\n", row, col);
          #endif
          return rhsObject->GetRealParameter("SingleValue", row, col);
 
       case OBJECT_PARM:
-         #ifdef DEBUG_PARM_ASSIGNMENT
+         #ifdef DEBUG_EVAL_RHS
             MessageInterface::ShowMessage(
                "   Getting '%s' for %s\n", rhsParmName.c_str(),
                rhsObject->GetName().c_str());
@@ -1259,7 +1267,7 @@ Real Assignment::EvaluateRHS()
          break;
    }
    
-   #ifdef DEBUG_PARM_ASSIGNMENT
+   #ifdef DEBUG_EVAL_RHS
       MessageInterface::ShowMessage("%s is just a number, right?\n", value.c_str());
    #endif
    
