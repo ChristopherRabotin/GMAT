@@ -497,7 +497,7 @@ bool Sandbox::Initialize()
                obj->GetName().c_str());
          #endif
          obj->SetSolarSystem(solarSys);
-         BuildReferences(obj); //djc: 5/13/05 Added
+         BuildReferences(obj);
          InitializeCoordinateSystem((CoordinateSystem *)obj);
          obj->Initialize();
       }
@@ -517,6 +517,8 @@ bool Sandbox::Initialize()
 
          // Setup spacecraft hardware
          BuildAssociations(obj);
+
+         obj->Initialize();  // loj: 9/7/06 Why was this missing?
       }
    }
 
@@ -758,12 +760,15 @@ void Sandbox::BuildReferences(GmatBase *obj)
          }
          else
          {
+            //MessageInterface::ShowMessage("===> create BodyFixed here\n");
             fixedCS = moderator->CreateCoordinateSystem("", false);
             AxisSystem *axes = moderator->CreateAxisSystem("BodyFixed", "");
             fixedCS->SetName(*i);
             fixedCS->SetRefObject(axes, Gmat::AXIS_SYSTEM, "");
-            fixedCS->SetOriginName("");  // Used to flag as uninitialized
-         
+            //fixedCS->SetOriginName("");  // Used to flag as uninitialized
+            //loj: 09/13/06 Set origin name here to avoid "" name in SetRefObject later
+            fixedCS->SetOriginName(fm->GetStringParameter("CentralBody"));
+            
             fm->SetRefObject(fixedCS, fixedCS->GetType(), *i);         
 
             fixedCS->SetSolarSystem(solarSys);
