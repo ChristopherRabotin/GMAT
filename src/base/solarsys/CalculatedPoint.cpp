@@ -391,10 +391,14 @@ bool CalculatedPoint::SetStringParameter(const Integer id,
       if (find(bodyNames.begin(), bodyNames.end(), value) == bodyNames.end())
       {
          bodyNames.push_back(value);
-         return true;
+//          return true;
       }
       
-      return false;     // Name was already in the list
+//       return false;     // Name was already in the list
+      
+      // loj: 9/19/06 - for new Interpreter work
+      // It's OK if body was already in the list
+      return true;
    }
 
    return SpacePoint::SetStringParameter(id, value);
