@@ -60,7 +60,10 @@ public:
                                               const Integer index);
    virtual const StringArray&
                            GetStringArrayParameter(const Integer id) const;
-    
+   
+   virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                             const std::string &name = "");
+   
    // Accessor method used by Maneuver to pass in the spacecraft pointer
    void                    SetSpacecraftToManeuver(Spacecraft *sat);
    

@@ -155,9 +155,9 @@ Burn::Burn(const Burn &b) :
    dvLabels[2] = b.dvLabels[2];
     
    for (Integer i = 0; i < 3; i++)
-   	   for (Integer j = 0; j < 3; j++)
-   	      frameBasis[i][j]  = b.frameBasis[i][j];
-   	      
+      for (Integer j = 0; j < 3; j++)
+         frameBasis[i][j]  = b.frameBasis[i][j];
+   
    parameterCount = b.parameterCount;
    
    frameman = new ManeuverFrameManager;
@@ -201,8 +201,8 @@ Burn& Burn::operator=(const Burn &b)
       dvLabels[2]       = b.dvLabels[2];
       
       for (Integer i = 0; i < 3; i++)
-   	      for (Integer j = 0; j < 3; j++)
-   	         frameBasis[i][j]  = b.frameBasis[i][j];
+         for (Integer j = 0; j < 3; j++)
+            frameBasis[i][j]  = b.frameBasis[i][j];
       
       frameman = new ManeuverFrameManager;
    }
@@ -547,7 +547,52 @@ const StringArray& Burn::GetStringArrayParameter(const Integer id) const
 }
 
 
-// 
+//------------------------------------------------------------------------------
+//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                    const std::string &name)
+//------------------------------------------------------------------------------
+/**
+* This method sets a reference object for the CoordinateSystem class.
+ *
+ * @param obj   pointer to the reference object
+ * @param type  type of the reference object 
+ * @param name  name of the reference object
+ *
+ * @return true if successful; otherwise, false.
+ *
+ */
+//------------------------------------------------------------------------------
+bool Burn::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                        const std::string &name)
+{
+   #if DEBUG_BURN_SET
+   MessageInterface::ShowMessage
+      ("===> Burn::SetRefObject() objType=%d, objTypeName=%s, objName=%s, type=%d, "
+       "name=%s\n", obj->GetType(), obj->GetTypeName().c_str(), obj->GetName().c_str(),
+       type, name.c_str());
+   #endif
+   
+   switch (type)
+   {
+   case Gmat::SPACE_POINT:
+   case Gmat::CELESTIAL_BODY:
+      {
+         burnOriginName = obj->GetName();
+         burnOrigin = (SpacePoint*)obj;
+         return true;
+      }
+   case Gmat::SPACECRAFT:
+      {
+         satName = obj->GetName();
+         sc = (Spacecraft*)obj;
+         return true;
+      }
+   default:
+      return GmatBase::SetRefObject(obj, type, name);
+   }
+}
+
+
 //------------------------------------------------------------------------------
 //  void SetSpacecraftToManeuver(Spacecraft *sat)
 //------------------------------------------------------------------------------
