@@ -251,7 +251,12 @@ Rvector6 OrbitData::GetCartState()
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage(e.GetMessage());
+         MessageInterface::ShowMessage
+            ("OrbitData::GetCartState() Faild to convert to %s coordinate system.\n   %s\n",
+             mOutCoordSystem->GetName().c_str(), e.GetMessage().c_str());
+         throw ParameterException
+            ("OrbitData::GetCartState() Faild to convert to " +
+             mOutCoordSystem->GetName() + " coordinate system.\n");
       }
    }
    
@@ -366,7 +371,7 @@ Rvector6 OrbitData::GetEquinState()
 Real OrbitData::GetCartReal(Integer item)
 {
    Rvector6 state = GetCartState();
-   
+   //MessageInterface::ShowMessage("GetCartReal() itme=%d\n",item);
    if (item >= PX && item <= VZ)
       return mCartState[item];
    else
@@ -887,8 +892,8 @@ Real OrbitData::GetSphRaDecReal(Integer item)
 
    #if DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
-      ("OrbitData::GetSphRaDecReal() str=%s state=%s\n",
-       str.c_str(), state.ToString().c_str());
+      ("OrbitData::GetSphRaDecReal() item=%d state=%s\n",
+       item, state.ToString().c_str());
    #endif
    
    switch (item)
@@ -957,8 +962,8 @@ Real OrbitData::GetSphAzFpaReal(Integer item)
 
    #if DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
-      ("OrbitData::GetSphAzFpaReal() str=%s state=%s\n",
-       str.c_str(), state.ToString().c_str());
+      ("OrbitData::GetSphAzFpaReal() item=%s state=%s\n",
+       item, state.ToString().c_str());
    #endif
 
    if (item >= AF_RMAG && item <= AF_FPA)
