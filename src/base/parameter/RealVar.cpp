@@ -26,6 +26,21 @@
 //#define DEBUG_REAL_VAR 1
 
 //---------------------------------
+// static data
+//---------------------------------
+const std::string
+RealVar::PARAMETER_TEXT[RealVarParamCount - ParameterParamCount] =
+{
+   "Value"
+};
+
+const Gmat::ParameterType
+RealVar::PARAMETER_TYPE[RealVarParamCount - ParameterParamCount] =
+{
+   Gmat::REAL_TYPE
+};
+
+//---------------------------------
 // public methods
 //---------------------------------
 
@@ -236,6 +251,70 @@ void RealVar::SetReal(Real val)
 //------------------------------------
 // methods inherited from GmatBase
 //------------------------------------
+
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+Integer RealVar::GetParameterID(const std::string &str) const
+{
+   for (int i=ParameterParamCount; i<RealVarParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - ParameterParamCount])
+         return i;
+   }
+   
+   return Parameter::GetParameterID(str);
+}
+
+
+//-------------------------------------------------------------------------------
+// virtual Real GetRealParameter(const Integer id) const
+//-------------------------------------------------------------------------------
+Real RealVar::GetRealParameter(const Integer id) const
+{
+   switch (id)
+   {
+   case VALUE:
+      return mRealValue;
+   default:
+      return Parameter::GetRealParameter(id);
+   }
+}
+
+
+//-------------------------------------------------------------------------------
+// virtual Real GetRealParameter(const std::string &label) const
+//-------------------------------------------------------------------------------
+Real RealVar::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+
+//-------------------------------------------------------------------------------
+// virtual Real SetRealParameter(const Integer id, const Real value)
+//-------------------------------------------------------------------------------
+Real RealVar::SetRealParameter(const Integer id, const Real value)
+{
+   switch (id)
+   {
+   case VALUE:
+      SetReal(value);
+      return value;
+   default:
+      return Parameter::GetRealParameter(id);
+   }
+}
+
+
+//-------------------------------------------------------------------------------
+// virtual Real SetRealParameter(const std::string &label, const Real value)
+//-------------------------------------------------------------------------------
+Real RealVar::SetRealParameter(const std::string &label, const Real value)
+{
+   return SetRealParameter(GetParameterID(label), value);
+}
+
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)

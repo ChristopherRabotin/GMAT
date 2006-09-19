@@ -75,22 +75,29 @@ public:
    virtual const Rmatrix& SetRmatrixParameter(const std::string &label,
                                               const Rmatrix &value);
    
+   virtual Real GetRealParameter(const Integer id, const Integer index) const;
+   virtual Real GetRealParameter(const std::string &label,
+                                 const Integer index) const;
+   
    virtual Real GetRealParameter(const Integer id, const Integer row,
                                  const Integer col) const;
    virtual Real GetRealParameter(const std::string &label, const Integer row,
                                  const Integer col) const;
+   
    virtual Real SetRealParameter(const Integer id, const Real value,
                                  const Integer row, const Integer col);
    virtual Real SetRealParameter(const std::string &label,
                                  const Real value, const Integer row,
                                  const Integer col);
+   
    virtual Rvector GetRvectorParameter(const Integer id,
                                        const Integer index) const;
-   virtual const Rvector& SetRvectorParameter(const Integer id,
-                                              const Rvector &value,
-                                              const Integer index);
    virtual Rvector GetRvectorParameter(const std::string &label,
                                        const Integer index) const;
+   
+   virtual const Rvector& SetRvectorParameter(const Integer id,
+                                              const Rvector &value,
+                                              const Integer index);   
    virtual const Rvector& SetRvectorParameter(const std::string &label,
                                               const Rvector &value,
                                               const Integer index);

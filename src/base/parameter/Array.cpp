@@ -93,10 +93,15 @@ Array::Array(const std::string &name, const std::string &desc,
 Array::Array(const Array &copy)
    : Parameter(copy)
 {
+   // We don't want to change the name when copy
+   std::string thisName = GetName();
+   
    mNumRows = copy.mNumRows;
    mNumCols = copy.mNumCols;
    mSizeSet = copy.mSizeSet;
    mRmatValue = copy.mRmatValue;
+   
+   SetName(thisName);
 }
 
 
@@ -115,13 +120,18 @@ Array& Array::operator= (const Array& right)
 {
    if (this != &right)
    {
+      // We don't want to change the name when copy
+      std::string thisName = GetName();
+      
       Parameter::operator=(right);
       mNumRows = right.mNumRows;
       mNumCols = right.mNumCols;
       mSizeSet = right.mSizeSet;
       mRmatValue = right.mRmatValue;
+      
+      SetName(thisName);
    }
-
+   
    return *this;
 }
 
@@ -680,6 +690,36 @@ const Rmatrix& Array::SetRmatrixParameter(const std::string &label,
    return SetRmatrixParameter(GetParameterID(label), value);
 }
 
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const Integer id, const Integer index)
+//------------------------------------------------------------------------------
+Real Array::GetRealParameter(const Integer id, const Integer index) const
+{
+   switch (id)
+   {
+   case SINGLE_VALUE:
+      return mRmatValue.GetElement(0, index);
+   default:
+      throw ParameterException
+         ("Array::GetRealParameter() Unknown Parameter Name" + PARAMETER_TEXT[id]);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const std::string &label, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Real Array::GetRealParameter(const std::string &label, const Integer index) const
+{
+   return GetRealParameter(GetParameterID(label), index);
+}
+
+
 //------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id, const Integer row,
 //                       const Integer col) const
@@ -697,7 +737,6 @@ Real Array::GetRealParameter(const Integer id, const Integer row,
       //return Parameter::GetRealParameter(id, row, col);
    }
 }
-
 
 //------------------------------------------------------------------------------
 // Real GetRealParameter(const std::string &label, const Integer row,

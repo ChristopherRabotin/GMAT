@@ -48,14 +48,33 @@ public:
    virtual Real GetReal() const;
    virtual void SetReal(Real val);
    
+   virtual Integer GetParameterID(const std::string &str) const;
+   
+   virtual Real GetRealParameter(const Integer id) const;
+   virtual Real GetRealParameter(const std::string &label) const;
+   
+   virtual Real SetRealParameter(const Integer id, const Real value);
+   virtual Real SetRealParameter(const std::string &label, const Real value);
+   
    virtual bool SetStringParameter(const Integer id, const std::string &value);
    virtual bool SetStringParameter(const std::string &label,
                                    const std::string &value);
 protected:
 
+   enum
+   {
+      VALUE = ParameterParamCount,
+      RealVarParamCount
+   };
+   
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[RealVarParamCount - ParameterParamCount];
+   static const std::string
+      PARAMETER_TEXT[RealVarParamCount - ParameterParamCount];
+   
    bool mIsNumberEquation;
    Real mRealValue;
-       
+   
 private:
 
 };
