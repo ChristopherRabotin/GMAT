@@ -89,6 +89,7 @@ BranchCommand      (typeStr),
 numberOfConditions (0),
 numberOfLogicalOps (0)
 {
+   objectTypeNames.push_back("ConditionalBranch");
 }
 
 
