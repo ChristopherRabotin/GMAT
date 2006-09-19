@@ -55,7 +55,7 @@ FminconOptimizer::PARAMETER_TYPE[
    Gmat::STRINGARRAY_TYPE,
 };
 
-const std::string FminconOptimizer::ALLOWED_OPTIONS[11] = 
+const std::string FminconOptimizer::ALLOWED_OPTIONS[12] = 
 {
    "DiffMaxChange",
    "DiffMinChange",
@@ -63,6 +63,7 @@ const std::string FminconOptimizer::ALLOWED_OPTIONS[11] =
    "MaxIter",
    "TolX",
    "TolFun",
+   "TolCon",
    "DerivativeCheck",
    "Diagnostics",
    "Display",
@@ -70,22 +71,23 @@ const std::string FminconOptimizer::ALLOWED_OPTIONS[11] =
    "GradConstr",
 };
 
-const std::string FminconOptimizer::DEFAULT_OPTION_VALUES[11] = 
+const std::string FminconOptimizer::DEFAULT_OPTION_VALUES[12] = 
 {
    "0.1000",
    "1.0000e-08",
-   "100*numberofvariables",
+   "1000",
    "400",
-   "1.0000e-06",
-   "1.0000e-06",
+   "1.0000e-04",
+   "1.0000e-04",
+   "1.0000e-04",
    "off",
    "off",
-   "final",
+   "iter",
    "off",
    "off",
 };
 
-const Integer FminconOptimizer::NUM_MATLAB_OPTIONS    = 11;
+const Integer FminconOptimizer::NUM_MATLAB_OPTIONS    = 12;
 const Integer FminconOptimizer::MATLAB_OPTIONS_OFFSET = 1000;
 
 //------------------------------------------------------------------------------
@@ -329,8 +331,10 @@ bool FminconOptimizer::Optimize()
             allEmpty = false;
             if (i != 0) optS << ",";
             optS << "\'" << options.at(i)      << "\',";
-            optS << "\'" << optionValues.at(i) << "\'";
-         }
+            if ((6 <= i) && (i <= 10)) // put single quotes around strings
+               optS << "\'" << optionValues.at(i) << "\'";
+            else
+               optS << optionValues.at(i);         }
       }
       optionsStr += optS.str() + ");";
       // call OPTIMSET (using EvalStr) to set up options for fmincon
