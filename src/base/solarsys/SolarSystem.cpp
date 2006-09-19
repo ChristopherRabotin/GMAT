@@ -216,7 +216,7 @@ bodyStrings     (ss.bodyStrings)
    {
       bodiesInUse.push_back(((CelestialBody*)
                            ((bodiesInUse.front())->Clone())));
-      bodiesInUse.pop_front();
+      //loj: bodiesInUse.pop_front();
    }
 }
 
@@ -252,7 +252,7 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
    {
       bodiesInUse.push_back(((CelestialBody*)
                            ((bodiesInUse.front())->Clone())));
-      bodiesInUse.pop_front();
+      //loj: bodiesInUse.pop_front();
    }
    return *this;
 }
@@ -264,7 +264,8 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
 bool SolarSystem::Initialize()
 {
    // Initialize bodies in use
-   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   //loj: std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
       (*cbi)->Initialize();      
@@ -287,7 +288,8 @@ void SolarSystem::ResetToDefaults()
    ephemUpdateInterval = 0.0;
    
    // Set it for each of the bodies
-   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   //loj: std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
       (*cbi)->SetSource(pvSrcForAll);
@@ -309,7 +311,8 @@ void SolarSystem::ResetToDefaults()
 //------------------------------------------------------------------------------
 SolarSystem::~SolarSystem()
 {
-   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   //loj: std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
       delete (*cbi);       // delete each body first
@@ -385,7 +388,8 @@ CelestialBody* SolarSystem::GetBody(std::string withName)
 bool SolarSystem::IsBodyInUse(std::string theBody)
 {
    // Search through bodiesInUse for the body with the name withName
-   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   //loj: std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
       if ((*cbi)->GetName() == theBody)
@@ -460,7 +464,8 @@ Real SolarSystem::GetEphemUpdateInterval() const
 StringArray SolarSystem::GetValidModelList(Gmat::ModelType m, 
                          const std::string &forBody)
 {
-   for (std::list<CelestialBody*>::iterator i = bodiesInUse.begin();
+   //loj: for (std::list<CelestialBody*>::iterator i = bodiesInUse.begin();
+   for (std::vector<CelestialBody*>::iterator i = bodiesInUse.begin();
         i != bodiesInUse.end(); ++i)
    {
       if ((*i)->GetName() == forBody)
@@ -488,7 +493,8 @@ StringArray SolarSystem::GetValidModelList(Gmat::ModelType m,
 bool SolarSystem::SetSource(Gmat::PosVelSource pvSrc)
 {
    // Search through bodiesInUse for the body with the name withName
-   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   //loj: std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
       if ((*cbi)->SetSource(pvSrc) == false)  return false;
@@ -522,7 +528,7 @@ bool SolarSystem::SetSource(const std::string &pvSrc)
    if (theSrc == Gmat::PosVelSourceCount)
       throw SolarSystemException("Unknown ephemeris source " + pvSrc);
    // Search through bodiesInUse and set the source for all
-   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
       if ((*cbi)->SetSource(theSrc) == false)  return false;
@@ -548,7 +554,7 @@ bool SolarSystem::SetSource(const std::string &pvSrc)
 bool SolarSystem::SetSourceFile(PlanetaryEphem *src)
 {
    // Search through bodiesInUse for the body with the name withName
-   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
       if ((*cbi)->SetSourceFile(src) == false)  return false;
@@ -574,7 +580,7 @@ bool SolarSystem::SetSourceFile(PlanetaryEphem *src)
 bool SolarSystem::SetAnalyticMethod(Gmat::AnalyticMethod aM)
 {
    // Search through bodiesInUse for the body with the name withName
-   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
       if ((*cbi)->SetAnalyticMethod(aM) == false)  return false;
@@ -608,7 +614,7 @@ bool SolarSystem::SetAnalyticMethod(const std::string &aM)
    if (theMethod == Gmat::AnalyticMethodCount)
       throw SolarSystemException("Unknown analytic method " + aM);
    // Search through bodiesInUse and set it for all
-   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
       if ((*cbi)->SetAnalyticMethod(theMethod) == false)  return false;
@@ -633,7 +639,7 @@ bool SolarSystem::SetAnalyticMethod(const std::string &aM)
 bool SolarSystem::SetOverrideTimeSystem(bool overrideIt)
 {
    // Set it for each of the bodies
-   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
       if ((*cbi)->SetOverrideTimeSystem(overrideIt) == false)  return false;
@@ -648,7 +654,7 @@ bool SolarSystem::SetEphemUpdateInterval(Real intvl)
    if (intvl < 0.0)
    throw SolarSystemException("SolarSystem - ephem update interval must be > 0.0");
    // Set it for each of the bodies
-   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
       if ((*cbi)->SetEphemUpdateInterval(intvl) == false)  return false;
@@ -663,7 +669,7 @@ bool SolarSystem::AddValidModelName(Gmat::ModelType m,
                   const std::string &forBody,
                   const std::string &theModel)
 {
-   for (std::list<CelestialBody*>::iterator i = bodiesInUse.begin();
+   for (std::vector<CelestialBody*>::iterator i = bodiesInUse.begin();
         i != bodiesInUse.end(); ++i)
    {
       if ((*i)->GetName() == forBody)
@@ -677,7 +683,7 @@ bool SolarSystem::RemoveValidModelName(Gmat::ModelType m,
                   const std::string & forBody,
                   const std::string &theModel)
 {
-   for (std::list<CelestialBody*>::iterator i = bodiesInUse.begin();
+   for (std::vector<CelestialBody*>::iterator i = bodiesInUse.begin();
         i != bodiesInUse.end(); ++i)
    {
       if ((*i)->GetName() == forBody)
@@ -934,6 +940,29 @@ SolarSystem::GetStringArrayParameter(const std::string &label) const
    return GetStringArrayParameter(GetParameterID(label));
 }
 
+
+//------------------------------------------------------------------------------
+// Integer GetOwnedObjectCount()
+//------------------------------------------------------------------------------
+Integer SolarSystem::GetOwnedObjectCount()
+{
+   return bodiesInUse.size();
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* GetOwnedObject(Integer whichOne)
+//------------------------------------------------------------------------------
+GmatBase* SolarSystem::GetOwnedObject(Integer whichOne)
+{
+   Integer count = bodiesInUse.size();
+   if (whichOne < count)
+      return bodiesInUse[whichOne];
+   
+   return NULL;
+}
+
+
 //------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
@@ -956,7 +985,7 @@ SolarSystem::GetStringArrayParameter(const std::string &label) const
 CelestialBody* SolarSystem::FindBody(std::string withName) 
 {
    // Search through bodiesInUse for the body with the name withName
-   std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
       if ((*cbi)->GetName() == withName)

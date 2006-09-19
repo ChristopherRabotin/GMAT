@@ -128,7 +128,10 @@ public:
    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
 
-      
+   
+   virtual Integer    GetOwnedObjectCount();
+   virtual GmatBase*  GetOwnedObject(Integer whichOne);
+   
    // all classes derived from GmatBase must supply this Clone method
    virtual SolarSystem* Clone(void) const;
 
@@ -230,16 +233,17 @@ protected:
    Real                  ephemUpdateInterval;
 
 private:
-
+   
    // method to find a body in the solar system, given its name
    CelestialBody* FindBody(std::string withName);
-
+   
    /// list of the celestial bodies that are included in this solar system
-   std::list<CelestialBody*> bodiesInUse;
-
+   //loj:std::list<CelestialBody*> bodiesInUse;
+   std::vector<CelestialBody*> bodiesInUse;
+   
    /// the names of the bodies in use
    StringArray bodyStrings;  // is this needed, or just a convenience?
-      
+   
 };
 
 #endif // SolarSystem_hpp
