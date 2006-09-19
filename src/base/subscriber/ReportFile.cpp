@@ -52,7 +52,8 @@ ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
 {
    Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
-   Gmat::STRINGARRAY_TYPE,
+   //Gmat::STRINGARRAY_TYPE,
+   Gmat::OBJECT_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
@@ -206,8 +207,8 @@ bool ReportFile::Initialize()
       if ((mNumVarParams == 0) && !usedByReport)
       {
          MessageInterface::ShowMessage
-            ("ReportFile::Initialize() Report will not be written.\n"
-             "No parameters selected for ReportFile.\n");
+            ("ReportFile::Initialize() ReportFile:%s will not be written.\n"
+             "   No parameters selected for ReportFile.\n", GetName().c_str());
          
          active = false;
          return false;
@@ -554,7 +555,7 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
 //                         const std::string &value)
 //------------------------------------------------------------------------------
 bool ReportFile::SetStringParameter(const std::string &label,
-                                const std::string &value)
+                                    const std::string &value)
 {
    return SetStringParameter(GetParameterID(label), value);
 }
@@ -565,7 +566,7 @@ bool ReportFile::SetStringParameter(const std::string &label,
 //                                 const Integer index)
 //------------------------------------------------------------------------------
 bool ReportFile::SetStringParameter(const Integer id, const std::string &value,
-                                const Integer index)
+                                    const Integer index)
 {
    switch (id)
    {
@@ -657,27 +658,51 @@ bool ReportFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          MessageInterface::ShowMessage("   newName=%s\n", newName.c_str());
          #endif
          
-         //if (mVarParamNames[i] == name)
          if (newName == name)
          {
             mVarParams[i] = (Parameter*)obj;
             
-            // Test see if it is reportable.
-            // Cannot test in AddVarParameter(), because it just addes
-            // the name.
+            // Test see if it is reportable. Cannot test in AddVarParameter(),
+            // because it just addes the name.
             if (!mVarParams[i]->IsReportable())
             {
                MessageInterface::ShowMessage
                   ("*** WARNING *** The parameter:%s is not reportable so it "
-                   "is removed from ReportFile.", name.c_str());
+                   "will not be written to ReportFile.", name.c_str());
             }
             
             return true;
          }
       }
    }
-   return false;
+   
+   return Subscriber::SetRefObject(obj, type, name);
 }
+
+
+// //------------------------------------------------------------------------------
+// // bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+// //------------------------------------------------------------------------------
+// /**
+//  * Sets the reference objects that get saved.
+//  * 
+//  * @param type The type of the reference object.
+//  * @param name THe name of the reference object.
+//  * 
+//  * @return true on success, false on failure.
+//  */
+// //------------------------------------------------------------------------------
+// bool ReportFile::SetRefObjectName(const Gmat::ObjectType type,
+//                                   const std::string &name)
+// {
+//    if (name == "")
+//       return false;
+   
+//    if (type == Gmat::PARAMETER)
+//       return SetStringParameter(ADD, name);
+
+//    return Subscriber::SetRefObjectName(type, name);
+// }
 
 
 //------------------------------------------------------------------------------

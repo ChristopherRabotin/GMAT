@@ -52,8 +52,10 @@ TsPlot::PARAMETER_TEXT[TsPlotParamCount - SubscriberParamCount] =
 const Gmat::ParameterType
 TsPlot::PARAMETER_TYPE[TsPlotParamCount - SubscriberParamCount] =
 {
-   Gmat::STRING_TYPE,
-   Gmat::STRINGARRAY_TYPE,
+//    Gmat::STRING_TYPE,
+//    Gmat::STRINGARRAY_TYPE,
+   Gmat::OBJECT_TYPE,
+   Gmat::OBJECT_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
@@ -205,7 +207,8 @@ bool TsPlot::Initialize()
          MessageInterface::PopupMessage
             (Gmat::WARNING_,
              "TsPlot::Initialize() TsPlot will not be shown.\n"
-             "No parameters selected for X Axis or Y Axis\n");
+             "No parameters selected for X Axis:%d or Y Axis:%d\n", mNumXParams,
+             mNumYParams);
          return false;
       }
       
