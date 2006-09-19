@@ -36,8 +36,6 @@ CoordinateBase::PARAMETER_TEXT[CoordinateBaseParamCount - GmatBaseParamCount] =
 {
    "Origin",
    "J2000Body",
-//   "OriginName",
-//   "J2000BodyName",
 };
 
 const Gmat::ParameterType
@@ -438,17 +436,9 @@ bool CoordinateBase::IsParameterReadOnly(const std::string &label) const
 std::string CoordinateBase::GetStringParameter(const Integer id) const
 {
    if (id == ORIGIN_NAME)   
-   {
       return originName;
-//      if (origin)    return origin->GetName();
-//      else           return originName;
-   }
    else if (id == J2000_BODY_NAME)   
-   {
       return j2000BodyName;
-//      if (j2000Body) return j2000Body->GetName();
-//      else           return j2000BodyName;
-   }
    
    return GmatBase::GetStringParameter(id);
 }
@@ -610,34 +600,14 @@ bool CoordinateBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                   const std::string &name)
 {
    
-//   switch (type)
-//   {
-//      case Gmat::SPACE_POINT:
-//      {
-//         if (name == originName)
-//         {
-//            origin = (SpacePoint*) obj;
-//         }
-//         if (name == j2000BodyName)
-//         {
-//            j2000Body = (SpacePoint*) obj;
-//         }
-//         return true;
-//      }
-//      default:
-//         break;
-//   }
-
    if (obj->IsOfType(Gmat::SPACE_POINT))
    {
       if (name == originName)
-      {
          origin = (SpacePoint*) obj;
-      }
+
       if (name == j2000BodyName)
-      {
          j2000Body = (SpacePoint*) obj;
-      }
+
       return true;
    }
 

@@ -372,9 +372,23 @@ void CoordinateSystem::GetLastRotationDotMatrix(Real *mat) const
 //---------------------------------------------------------------------------
 bool CoordinateSystem::Initialize()
 {
+   #if DEBUG_CS_INIT
+   MessageInterface::ShowMessage
+      ("CoordinateSystem::Initialize() csName=%s, axes=%p\n",
+       GetName().c_str(), axes);
+   #endif
+
    CoordinateBase::Initialize();
+   
    if (axes)
    {
+      #if DEBUG_CS_INIT
+      MessageInterface::ShowMessage
+         ("   originName=%s, origin=%s, j2000BodyName=%s, j2000Body=%s\n",
+          originName.c_str(), origin->GetName().c_str(),
+          j2000BodyName.c_str(), j2000Body->GetName().c_str());
+      #endif
+      
       axes->SetOriginName(originName);
       axes->SetJ2000BodyName(j2000BodyName);
       axes->SetRefObject(origin,Gmat::SPACE_POINT,originName);
