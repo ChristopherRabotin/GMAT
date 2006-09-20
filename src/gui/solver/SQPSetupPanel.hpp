@@ -22,25 +22,26 @@ private:
     wxStaticText *displayStaticText;
     wxComboBox *displayComboBox;
     
-    wxCheckBox *checkBox1;
-    wxCheckBox *checkBox2;
-    wxCheckBox *checkBox3;
-
-    wxStaticText *specStaticText1;
-    wxStaticText *specStaticText2;
-    wxStaticText *specStaticText3;
-    wxStaticText *specStaticText4;
-    wxStaticText *specStaticText5;
-    wxStaticText *specStaticText6;
-    wxStaticText *specStaticText7;
+    wxCheckBox *gradObjCB;
+    wxCheckBox *gradConstrCB;
+    wxCheckBox *derivativeCheckCB;
+    wxCheckBox *diagnosticsCB;
     
-    wxTextCtrl *specTextCtrl1;
-    wxTextCtrl *specTextCtrl2;
-    wxTextCtrl *specTextCtrl3;
-    wxTextCtrl *specTextCtrl4;
-    wxTextCtrl *specTextCtrl5;
-    wxTextCtrl *specTextCtrl6;
-    wxTextCtrl *specTextCtrl7;
+    wxStaticText *tolFunStaticText;
+    wxStaticText *tolConStaticText;
+    wxStaticText *tolXStaticText;
+    wxStaticText *maxFunEvalsStaticText;
+    wxStaticText *maxIterStaticText;
+    wxStaticText *diffMinChangeStaticText;
+    wxStaticText *diffMaxChangeStaticText;
+    
+    wxTextCtrl *tolFunTextCtrl;
+    wxTextCtrl *tolConTextCtrl;
+    wxTextCtrl *tolXTextCtrl;
+    wxTextCtrl *maxFunEvalsTextCtrl;
+    wxTextCtrl *maxIterTextCtrl;
+    wxTextCtrl *diffMinChangeTextCtrl;
+    wxTextCtrl *diffMaxChangeTextCtrl;
     
     GuiInterpreter *theGuiInterpreter;
     Solver *theSolver;
@@ -62,6 +63,10 @@ private:
     
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();
+    void OnComboBoxChange(wxCommandEvent& event);
+    void OnTextChange(wxCommandEvent& event);
+    void OnCheckboxChange(wxCommandEvent& event);
+    
     
     static const wxString DISPLAY_SCHEMES[4];
 
