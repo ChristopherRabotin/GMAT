@@ -182,7 +182,6 @@ namespace GmatTree
       GROUNDSTATION,
       
       // scripts
-      SCRIPT_FOLDER,
       SCRIPT_FILE,
       END_OF_RESOURCE,
       
@@ -204,6 +203,9 @@ namespace GmatTree
       TARGET_COMMAND,
       ACHIEVE_COMMAND,
       VARY_COMMAND,
+      MINIMIZE_COMMAND,
+      NON_LINEAR_CONSTRAINT_COMMAND,
+      OPTIMIZE_COMMAND,
       SAVE_COMMAND,
       TOGGLE_COMMAND,
       REPORT_COMMAND,
@@ -247,6 +249,7 @@ namespace GmatTree
       END_WHILE_CONTROL,
       END_SWITCH_CONTROL,
       STOP_COMMAND,
+      SCRIPT_FOLDER,    // arg:  added here, so blank panel doesn't open
       END_NO_PANEL,
       
    };
