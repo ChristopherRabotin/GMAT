@@ -200,6 +200,8 @@ void MissionTree::InitializeCounter()
    mNumScriptEvent = 0;
    mNumFiniteBurn = 0;
    mNumStop = 0;
+   mNumMinimize = 0;
+   mNumNonLinearConstraint = 0;
 }
 
 
@@ -1161,6 +1163,12 @@ void MissionTree::OnAddCommand(wxCommandEvent &event)
    case POPUP_ADD_ACHIEVE:
       AppendCommand("Achieve");
       break;
+   case POPUP_ADD_MINIMIZE:
+      AppendCommand("Minimize");
+      break;
+   case POPUP_ADD_NON_LINEAR_CONSTRAINT:
+      AppendCommand("NonLinearConstraint");
+      break;
    case POPUP_ADD_FUNCTION:
       AppendCommand("CallFunction");
       break;
@@ -1239,6 +1247,12 @@ void MissionTree::OnInsertCommand(wxCommandEvent &event)
       break;
    case POPUP_INSERT_ACHIEVE:
       InsertCommand("Achieve");
+      break;
+   case POPUP_INSERT_MINIMIZE:
+      InsertCommand("Minimize");
+      break;
+   case POPUP_INSERT_NON_LINEAR_CONSTRAINT:
+      InsertCommand("NonLinearConstraint");
       break;
    case POPUP_INSERT_FUNCTION:
       InsertCommand("CallFunction");
@@ -1341,11 +1355,15 @@ wxMenu* MissionTree::AppendTargetPopupMenu(wxMenu *menu, bool insert)
    {
       menu->Append(POPUP_INSERT_VARY, wxT("Vary"));
       menu->Append(POPUP_INSERT_ACHIEVE, wxT("Achieve"));
+      menu->Append(POPUP_INSERT_MINIMIZE, wxT("Minimize"));
+      menu->Append(POPUP_INSERT_NON_LINEAR_CONSTRAINT, wxT("NonLinearConstraint"));
    }
    else
    {
       menu->Append(POPUP_ADD_VARY, wxT("Vary"));
       menu->Append(POPUP_ADD_ACHIEVE, wxT("Achieve"));
+      menu->Append(POPUP_ADD_MINIMIZE, wxT("Minimize"));
+      menu->Append(POPUP_ADD_NON_LINEAR_CONSTRAINT, wxT("NonLinearConstraint"));
    }
 
    return menu;
@@ -1694,6 +1712,10 @@ GmatTree::MissionIconType MissionTree::GetIconId(const wxString &cmd)
       return GmatTree::MISSION_ICON_NEST_RETURN;
    if (cmd == "Achieve")
       return GmatTree::MISSION_ICON_ACHIEVE;
+   if (cmd == "Minimize")
+      return GmatTree::MISSION_NO_ICON;
+   if (cmd == "NonLinearConstraint")
+      return GmatTree::MISSION_NO_ICON;
    if (cmd == "Vary")
       return GmatTree::MISSION_ICON_VARY;
    if (cmd == "Save")
@@ -1748,6 +1770,10 @@ GmatTree::ItemType MissionTree::GetCommandId(const wxString &cmd)
       return GmatTree::END_TARGET_COMMAND;
    if (cmd == "Achieve")
       return GmatTree::ACHIEVE_COMMAND;
+   if (cmd == "Minimize")
+      return GmatTree::MINIMIZE_COMMAND;
+   if (cmd == "NonLinearConstraint")
+      return GmatTree::NON_LINEAR_CONSTRAINT_COMMAND;
    if (cmd == "Vary")
       return GmatTree::VARY_COMMAND;
    if (cmd == "Save")
@@ -1828,6 +1854,11 @@ int* MissionTree::GetCommandCounter(const wxString &cmd)
       return &mNumAssign;
    if (cmd == "Stop")
       return &mNumStop;
+   if (cmd == "Minimize")
+      return &mNumMinimize;
+   if (cmd == "NonLinearConstraint")
+      return &mNumNonLinearConstraint;
+      
 
    return &mNumScriptEvent;
 }

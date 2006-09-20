@@ -73,6 +73,8 @@ private:
    int mNumFiniteBurn;
    int mNumScriptEvent;
    int mNumStop;
+   int mNumMinimize;
+   int mNumNonLinearConstraint;
    
    bool inScriptEvent;
    bool inFiniteBurn;
@@ -160,6 +162,8 @@ private:
       POPUP_ADD_TARGET,
       POPUP_ADD_VARY,
       POPUP_ADD_ACHIEVE,
+      POPUP_ADD_MINIMIZE,
+      POPUP_ADD_NON_LINEAR_CONSTRAINT,
       POPUP_ADD_REPORT,
       POPUP_ADD_FUNCTION,
       POPUP_ADD_ASSIGNMENT,
@@ -188,6 +192,8 @@ private:
       POPUP_INSERT_TARGET,
       POPUP_INSERT_VARY,
       POPUP_INSERT_ACHIEVE,
+      POPUP_INSERT_MINIMIZE,
+      POPUP_INSERT_NON_LINEAR_CONSTRAINT,
       POPUP_INSERT_REPORT,
       POPUP_INSERT_FUNCTION,
       POPUP_INSERT_ASSIGNMENT,

@@ -119,6 +119,8 @@ OBJECTS = \
     command/CallFunctionPanel.o \
     command/EndFiniteBurnPanel.o \
     command/ManeuverPanel.o \
+    command/MinimizePanel.o \
+    command/NonLinearConstraintPanel.o \
     command/PropagatePanel.o \
     command/ReportPanel.o \
     command/SavePanel.o \

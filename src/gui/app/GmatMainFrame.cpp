@@ -58,6 +58,8 @@
 #include "TargetPanel.hpp"
 #include "AchievePanel.hpp"
 #include "VaryPanel.hpp"
+#include "MinimizePanel.hpp"
+#include "NonLinearConstraintPanel.hpp"
 #include "SavePanel.hpp"
 #include "ReportPanel.hpp"
 #include "TogglePanel.hpp"
@@ -1551,6 +1553,12 @@ GmatMainFrame::CreateNewCommand(const wxString &title,
       break;
    case GmatTree::CALL_FUNCTION_COMMAND:
       sizer->Add(new CallFunctionPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
+      break;
+   case GmatTree::MINIMIZE_COMMAND:
+      sizer->Add(new MinimizePanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
+      break;
+   case GmatTree::NON_LINEAR_CONSTRAINT_COMMAND:
+      sizer->Add(new NonLinearConstraintPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::SCRIPT_COMMAND:
    {
