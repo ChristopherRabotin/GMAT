@@ -24,6 +24,23 @@
 //#define DEBUG_STRINGVAR 1
 
 //---------------------------------
+// static data
+//---------------------------------
+
+const std::string
+StringVar::PARAMETER_TEXT[StringVarParamCount - ParameterParamCount] =
+{
+   "Value",
+};
+
+const Gmat::ParameterType
+StringVar::PARAMETER_TYPE[StringVarParamCount - ParameterParamCount] =
+{
+   Gmat::STRING_TYPE,
+};
+
+
+//---------------------------------
 // public methods
 //---------------------------------
 
@@ -71,6 +88,7 @@ StringVar::StringVar(const std::string &name, const std::string &typeStr,
 StringVar::StringVar(const StringVar &copy)
    : Parameter(copy)
 {
+   mStringValue = copy.mStringValue;   
 }
 
 
@@ -89,9 +107,15 @@ StringVar& StringVar::operator= (const StringVar& right)
 {
    if (this != &right)
    {
+      // We don't want to change the name when copy
+      std::string thisName = instanceName;
+      
       Parameter::operator=(right);
+      mStringValue = right.mStringValue;
+      
+      SetName(thisName);
    }
-
+   
    return *this;
 }
 
@@ -203,5 +227,67 @@ std::string StringVar::EvaluateString()
 GmatBase* StringVar::Clone() const
 {
    return new StringVar(*this);
+}
+
+
+//------------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//------------------------------------------------------------------------------
+void StringVar::Copy(const GmatBase* orig)
+{
+   operator=(*((StringVar *)(orig)));
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+Integer StringVar::GetParameterID(const std::string &str) const
+{
+   for (int i=ParameterParamCount; i<StringVarParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - ParameterParamCount])
+         return i;
+   }
+   
+   return Parameter::GetParameterID(str);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+bool StringVar::SetStringParameter(const Integer id, const std::string &value)
+{
+   #if DEBUG_STRINGVAR
+   MessageInterface::ShowMessage("StringVar::SetStringParameter() id=%d, value=%s\n",
+                                 id, value.c_str());
+   #endif
+   
+   switch (id)
+   {
+   case VALUE:
+      mExpr = value;
+      mStringValue = value;
+      return true;
+   default:
+      return Parameter::SetStringParameter(id, value);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label,
+//                         const std::string &value)
+//------------------------------------------------------------------------------
+bool StringVar::SetStringParameter(const std::string &label,
+                                   const std::string &value)
+{
+   #if DEBUG_STRINGVAR
+   MessageInterface::ShowMessage("StringVar::SetStringParameter() label=%s value=%s\n",
+                                 label.c_str(), value.c_str());
+   #endif
+   
+   return SetStringParameter(GetParameterID(label), value);
 }
 

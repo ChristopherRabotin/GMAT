@@ -28,7 +28,7 @@ class GMAT_API StringVar : public Parameter
 public:
 
    StringVar(const std::string &name = "",
-             const std::string &typeStr = "StringVar",
+             const std::string &typeStr = "String",
              GmatParam::ParameterKey key = GmatParam::USER_PARAM,
              GmatBase *obj = NULL, const std::string &desc = "",
              const std::string &unit = "",
@@ -49,8 +49,26 @@ public:
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone() const;
+   virtual void Copy(const GmatBase*);
+   
+   virtual Integer GetParameterID(const std::string &str) const;
+   
+   virtual bool SetStringParameter(const Integer id, const std::string &value);
+   virtual bool SetStringParameter(const std::string &label,
+                                   const std::string &value);
    
 protected:
+   
+   enum
+   {
+      VALUE = ParameterParamCount,
+      StringVarParamCount
+   };
+   
+   static const std::string
+      PARAMETER_TEXT[StringVarParamCount - ParameterParamCount];
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[StringVarParamCount - ParameterParamCount];
    
    std::string mStringValue;
    
