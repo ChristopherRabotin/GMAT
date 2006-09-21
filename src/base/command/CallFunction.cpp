@@ -704,11 +704,22 @@ bool CallFunction::Initialize()
 
 
    GmatCommand::Initialize();
-
-
+   
+   #if DEBUG_CALL_FUNCTION_INIT
+   std::map<std::string, GmatBase*>::iterator pos;
+   GmatBase *obj;
+   for (pos = objectMap->begin(); pos != objectMap->end(); ++pos)
+   {
+      obj = pos->second;
+      MessageInterface::ShowMessage
+         ("===> obj=%s type=%s, name=%s\n", (pos->first).c_str(),
+          obj->GetTypeName().c_str(), obj->GetName().c_str());
+   }
+   #endif
+   
    if (objectMap->find(mFunctionName)  == objectMap->end())
       throw CommandException("CallFunction command cannot find Function " +
-               mFunctionName);
+               mFunctionName + "\n");
    mFunction = (Function *)((*objectMap)[mFunctionName]);
 
 
@@ -1358,15 +1369,6 @@ std::string CallFunction::FormEvalString()
 
 
    return evalString;
-}
-
-
-//------------------------------------------------------------------------------
-// void InterpretAction(void)
-//------------------------------------------------------------------------------
-bool CallFunction::InterpretAction(void)
-{
-   return true;
 }
 
 

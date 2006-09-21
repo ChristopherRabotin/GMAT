@@ -97,8 +97,6 @@ public:
    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
 
    // Methods used to run the command
-   virtual bool            InterpretAction();
-
    virtual bool            Initialize();
    virtual bool            Execute();
 
