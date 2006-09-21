@@ -1586,33 +1586,38 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
 bool Propagate::InterpretParameter(const std::string text,
                                    std::string &paramType, 
                                    std::string &paramObj, 
-                                   std::string &parmSystem)
+                                   std::string &paramSystem)
 {
-   Integer start = 0, dotLoc = text.find(".", 0);
-   if (dotLoc == (Integer)std::string::npos)
-      throw CommandException("Propagate::InterpretParameter: Unable to "
-               "interpret parameter object in the string " +
-               text);
-               
-   paramObj = text.substr(start, dotLoc - start);
-   start = dotLoc + 1;
-   dotLoc = text.find(".", start);
-   if (dotLoc != (Integer)std::string::npos) {
-      parmSystem = text.substr(start, dotLoc - start);
-      start = dotLoc + 1;
-   }
-   else {
-      parmSystem = "";
-   }
+   //loj: 9/20/06 Used GmatStringUtil to throw invalid parameter syntax
+   GmatStringUtil::ParseParameter(text, paramType, paramObj, paramSystem);
+
    
-   paramType = text.substr(start);
+//    Integer start = 0, dotLoc = text.find(".", 0);
+//    if (dotLoc == (Integer)std::string::npos)
+//       throw CommandException("Propagate::InterpretParameter: Unable to "
+//                "interpret parameter object in the string " +
+//                text);
+   
+//    paramObj = text.substr(start, dotLoc - start);
+//    start = dotLoc + 1;
+//    dotLoc = text.find(".", start);
+//    if (dotLoc != (Integer)std::string::npos) {
+//       paramSystem = text.substr(start, dotLoc - start);
+//       start = dotLoc + 1;
+//    }
+//    else {
+//       paramSystem = "";
+//    }
+   
+//    paramType = text.substr(start);
    
    #ifdef DEBUG_PROPAGATE_INIT
       MessageInterface::ShowMessage(
-         "Built parameter %s for object %s with CS %s",
-         paramType.c_str(), paramObj.c_str(), parmSystem.c_str());
+         "Built parameter %s for object %s with CS %s\n",
+         paramType.c_str(), paramObj.c_str(), paramSystem.c_str());
    #endif
-   
+
+      
    return true;
 }
 
