@@ -100,10 +100,15 @@ Variable& Variable::operator=(const Variable &right)
 {
    if (this != &right)
    {
+      // We don't want to change the name when copy
+      std::string thisName = GetName();
+      
       RealVar::operator=(right);
       mParamDb = new ParameterDatabase(*right.mParamDb);
       mExpParser = new ExpressionParser();
-      mExpParser->SetParameterDatabase(mParamDb);   
+      mExpParser->SetParameterDatabase(mParamDb);
+      
+      SetName(thisName);
    }
    
    return *this;
