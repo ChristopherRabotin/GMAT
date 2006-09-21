@@ -409,7 +409,7 @@ void ImpulsiveBurnSetupPanel::SaveData()
 
       std::string inputString;
       std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
-                         theBurn->GetName() + "\" is not an allowed value. "
+                         theBurn->GetName() + "\" is not an allowed value. \n"
                         "The allowed values are: [%s].";                        
 
       // save axes

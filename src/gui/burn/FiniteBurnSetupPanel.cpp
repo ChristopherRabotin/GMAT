@@ -372,7 +372,7 @@ void FiniteBurnSetupPanel::SaveData()
       
       std::string inputString;
       std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
-                         theBurn->GetName() + "\" is not an allowed value. "
+                         theBurn->GetName() + "\" is not an allowed value. \n"
                         "The allowed values are: [%s].";                        
 
       // save thrusters
@@ -394,7 +394,7 @@ void FiniteBurnSetupPanel::SaveData()
 	  id = theBurn->GetParameterID("BurnScaleFactor");
       inputString = scaleTextCtrl->GetValue();      
 
-         // check to see if input is a real
+      // check to see if input is a real
       if (GmatStringUtil::ToDouble(inputString,&rvalue))      
          theBurn->SetRealParameter(id, rvalue);
       else

@@ -120,7 +120,7 @@ void DCSetupPanel::SaveData()
       
       std::string inputString;
       std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
-                         theDC->GetName() + "\" is not an allowed value. "
+                         theDC->GetName() + "\" is not an allowed value. \n"
                         "The allowed values are: [%s].";                        
 
 //      // save maximum iterations
