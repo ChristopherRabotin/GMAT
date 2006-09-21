@@ -75,6 +75,8 @@
 #include "Integrator.hpp"
 #include "MessageInterface.hpp"
 #include "PropagatorException.hpp"
+#include <sstream>
+#include <string.h>
 
 //---------------------------------
 // static data
@@ -363,25 +365,65 @@ Real Integrator::SetRealParameter(const Integer id, const Real value)
    switch (id)
    {
    case ACCURACY:
-      if (value <= 0.0)
+//      if (value <= 0.0)
+//         throw PropagatorException(
+//         "Integrator::SetRealParameter -- Accuracy value is set to <= 0.0");
+//      tolerance = value;
+//      return value;
+      if (value >= 0.0)
+         tolerance = value;
+      else
+      {
+         std::stringstream buffer;
+         buffer << value;
          throw PropagatorException(
-         "Integrator::SetRealParameter -- Accuracy value is set to <= 0.0");
-      tolerance = value;
+            "The value of " + buffer.str() + " for the integrator accuracy is not"
+            " an allowed value. The allowed values are [Real Number >= 0.0].");
+      }
       return value;
    case MIN_STEP:
-      if (value == 0.0)
+//      if (value == 0.0)
+//         throw PropagatorException(
+//                   "Integrator::SetRealParameter --Minimum step is set to 0.0");
+//      minimumStep = fabs(value);
+//      return value;
+      if (value >= 0.0)
+         minimumStep = value;
+      else
+      {
+         std::stringstream buffer;
+         buffer << value;
          throw PropagatorException(
-                   "Integrator::SetRealParameter --Minimum step is set to 0.0");
-      minimumStep = fabs(value);
+            "The value of " + buffer.str() + " for the integrator minimum step size "
+            "is not an allowed value. The allowed values are "
+            "[Real Number >= 0, MinStep <= MaxStep].");
+      }
       return value;
    case MAX_STEP:
       // @todo waw: temporarily commented out, to be uncommented 
       // once Edwin updates his scripts to support this
       // if (fabs(value) <= minimumStep)
-      if (fabs(value) < minimumStep)
+//      if (fabs(value) < minimumStep)
+//         throw PropagatorException(
+//      "Integrator::SetRealParameter -- Maximum step is set less than minimum step.");
+//      maximumStep = fabs(value);
+//      return value;
+      if (value >= 0.0)
+//       if (fabs(value) <= minimumStep)
+         if (fabs(value) < minimumStep)
+            throw PropagatorException(
+               "Integrator::SetRealParameter -- Maximum step is set less than minimum step.");
+         else
+            maximumStep = value;
+      else
+      {
+         std::stringstream buffer;
+         buffer << value;
          throw PropagatorException(
-      "Integrator::SetRealParameter -- Maximum step is set less than minimum step.");
-      maximumStep = fabs(value);
+            "The value of " + buffer.str() + " for the integrator minimum step size "
+            "is not an allowed value. The allowed values are "
+            "[Real Number >= 0, MinStep <= MaxStep].");
+      }
       return value;
    case ERROR_THRESHOLD:
       errorThreshold = fabs(value);
@@ -447,15 +489,26 @@ Integer Integrator::GetIntegerParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 Integer Integrator::SetIntegerParameter(const Integer id, const Integer value)
 {
-    if (id == MAX_STEP_ATTEMPTS)
-    {
-        if (value < 1)
-            return GmatBase::INTEGER_PARAMETER_UNDEFINED;
-        maxStepAttempts = value;
-        return value;
-    }
+   if (id == MAX_STEP_ATTEMPTS)
+   {
+//        if (value < 1)
+//            return GmatBase::INTEGER_PARAMETER_UNDEFINED;
+//        maxStepAttempts = value;
+//        return value;
+      if (value > 0)
+         maxStepAttempts = value;
+      else
+      {
+         std::stringstream buffer;
+         buffer << value;
+         throw PropagatorException(
+            "The value of " + buffer.str() + " for the integrator Max Step Attempts"
+            " a is not an allowed value. The allowed values are [Integer > 0].");
+      }
+      return value;
+   }
     
-    return Propagator::SetIntegerParameter(id, value);
+   return Propagator::SetIntegerParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
