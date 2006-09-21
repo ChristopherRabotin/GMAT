@@ -86,7 +86,10 @@ namespace GmatStringUtil
                              bool checkOnlyFirst);
    bool IsParenPartOfArray(const std::string &str);
    bool IsSingleItem(const std::string &str);
+   bool StartsWith(const std::string &str, const std::string &value);
+   bool EndsWith(const std::string &str, const std::string &value);
    
 }
 
 #endif // StringUtil_hpp
+

@@ -105,8 +105,6 @@ std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
    std::string str2;
    std::string whiteSpace = " \t";
    
-//    UnsignedInt index1 = str.find_first_not_of(' ');
-//    UnsignedInt index2 = str.find_last_not_of(' ');
    UnsignedInt index1 = str.find_first_not_of(whiteSpace);
    UnsignedInt index2 = str.find_last_not_of(whiteSpace);
    
@@ -116,7 +114,7 @@ std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
    if (stype == LEADING)
       str2 = str.substr(index1);
    else if (stype == TRAILING)
-      str2 = str.substr(0, index2);
+      str2 = str.substr(0, index2 + 1);
    else if (stype == BOTH)
       str2.assign(str.substr(index1, index2-index1+1));
    
@@ -410,6 +408,10 @@ bool GmatStringUtil::ToBoolean(const std::string &str, bool &value)
 void GmatStringUtil::ParseParameter(const std::string &str, std::string &type,
                                     std::string &owner, std::string &depObj)
 {
+   // Check for .. first
+   if (str.find("..") != str.npos)
+      throw UtilityException("Invalid Parameter string found: " + str);
+   
    //find owner.depObj.type
    std::string str1 = str;
    std::string::size_type pos1 = str1.find(".");
@@ -1377,4 +1379,30 @@ std::string GmatStringUtil::RemoveExtraParen(const std::string &str)
    #endif
    
    return str2;
+}
+
+//------------------------------------------------------------------------------
+// bool StartsWith(const std::string &str, const std::string &value)
+//------------------------------------------------------------------------------
+/*
+ * Returns true if string starts with value and false if it does not.
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::StartsWith(const std::string &str, const std::string &value)
+{
+   return (str.size() >= value.size()) && 
+          (str.substr(0, value.size()) == value); 
+}
+
+//------------------------------------------------------------------------------
+// bool EndsWith(const std::string &str, const std::string &value)
+//------------------------------------------------------------------------------
+/*
+ * Returns true if string ends with value and false if it does not.
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::EndsWith(const std::string &str, const std::string &value)
+{
+   return (str.size() >= value.size()) && 
+          (str.substr(str.size() - value.size(), value.size()) == value); 
 }
