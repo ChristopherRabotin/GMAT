@@ -669,14 +669,27 @@ bool Achieve::ConstructGoal(const char* str)
    achieveName = sstr.substr(start, end-start);
    
    // Search for 2nd comma for array index
-   Integer comma;
+   UnsignedInt index1;
    if (str[end] == ',')
    {
-      comma = sstr.find(',', end+1);
-      if ((UnsignedInt)comma != sstr.npos)
+      index1 = sstr.find(',', end+1);
+      if (index1 != sstr.npos)
       {
-         achieveName = sstr.substr(start, comma-start);
+         achieveName = sstr.substr(start, index1-start);
          isAchieveArray = true;
+      }
+      else 
+      {
+         // check for tolerance
+         if (sstr.find('{', end+1) == sstr.npos)
+         {
+            if (sstr.find(')', end+1) != sstr.npos)
+            {
+               achieveName = sstr.substr(start, sstr.size()-start-1);
+               end = sstr.size()-1;
+               isAchieveArray = true;
+            }
+         }
       }
    }
    
@@ -695,7 +708,8 @@ bool Achieve::ConstructGoal(const char* str)
                                     achieveArrColStr, achieveArrRow,
                                     achieveArrCol, achieveArrName);
 
-      achieveName = achieveArrName;
+      //loj: 9/20/06 Commented out to show array index in the GUI and show script
+      //achieveName = achieveArrName;
       
       #if DEBUG_ACHIEVE_PARSE
       MessageInterface::ShowMessage
@@ -884,11 +898,15 @@ bool Achieve::Initialize()
          ("Achieve::Initialize() Find achieveParm=%s from objectMap\n",
           achieveName.c_str());
       #endif
+      
       if (objectMap->find(achieveName) != objectMap->end())
          achieveParm = (Parameter*)((*objectMap)[achieveName]);
-
+      
       if (isAchieveArray)
       {
+         if (objectMap->find(achieveArrName) != objectMap->end())
+            achieveParm = (Parameter*)((*objectMap)[achieveArrName]);
+         
          // if variable index is used, get variable from the objectMap
          if (achieveArrRow == -1)
             if (objectMap->find(achieveArrRowStr) != objectMap->end())
