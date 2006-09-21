@@ -195,9 +195,6 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
          else
             keyword = str.substr(index1, index2-index1);
          
-//          // remove semicolon
-//          keyword = GmatStringUtil::Trim(keyword, GmatStringUtil::BOTH, true);
-         
          // check for "Create" or Commands
          if (keyword == "Create")
          {
@@ -213,6 +210,12 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
          {
             theBlockType = Gmat::ASSIGNMENT_BLOCK;
             noCommentLine = i;
+
+            // check for CallFunction
+            if (str.find("[") != str.npos) // Is this checking enough?
+            {
+               theBlockType = Gmat::COMMAND_BLOCK;
+            }
          }
          
          if (noCommentLine >= 0)
