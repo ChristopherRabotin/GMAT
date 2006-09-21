@@ -1711,8 +1711,8 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index, bool show
    {
       objName = mAllSpNameArray[i];
       MessageInterface::ShowMessage
-         ("OpenGlPlot::AddSpacePoint() mAllSpNameArray[%d]=%s, draw=%d, show=%d"
-          "orbColor=%d, targColor=%d\n", i, objName.c_str(), mDrawOrbitMap[objName],
+         ("OpenGlPlot::AddSpacePoint() status=%d, mAllSpNameArray[%d]=%s, draw=%d, show=%d"
+          "orbColor=%d, targColor=%d\n", status, i, objName.c_str(), mDrawOrbitMap[objName],
           mShowObjectMap[objName], mOrbitColorMap[objName], mTargetColorMap[objName]);
    }
    #endif
