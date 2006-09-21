@@ -26,6 +26,7 @@
 #include "MessageInterface.hpp"
 #include "PropagatorException.hpp"
 #include "StringTokenizer.hpp"
+#include "StringUtil.hpp"  // for ToDouble()
 
 #include <fstream>
 #include <iostream>
@@ -125,6 +126,8 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
    isIntegratorChanged = false;
    isIntegratorDataChanged = false;
    isOriginChanged = false;
+
+   canClose = true;
    
    theApplyButton->Disable();
 }
@@ -946,21 +949,15 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
 {
    #if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage("PropagationConfigPanel::Setup() entered\n");
-   #endif
-   
-   #if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::Setup() create wxStaticText\n");
    #endif
-
-   // wxStaticText                               
-   centralBodyStaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Central Body"),
-                        wxDefaultPosition, wxSize(120,20),
-                        wxST_NO_AUTORESIZE);
    
+   // wxStaticText                               
+   // Integrator
    integratorStaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Integrator Type"),
+//      new wxStaticText( parent, ID_TEXT, wxT("Integrator Type"),
+      new wxStaticText( parent, ID_TEXT, wxT("Type"),
                         wxDefaultPosition, wxSize(120,20),
                         wxST_NO_AUTORESIZE);
    setting1StaticText =
@@ -984,13 +981,28 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                         wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting6StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Lower Error"),
+//      new wxStaticText( parent, ID_TEXT, wxT("Lower Error"),
+      new wxStaticText( parent, ID_TEXT, wxT("Min Integration Error"),
                         wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );
    setting7StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Target Error"),
+//      new wxStaticText( parent, ID_TEXT, wxT("Target Error"),
+      new wxStaticText( parent, ID_TEXT, wxT("Nominal Integration Error"),
                         wxDefaultPosition, wxSize(170,20),
                         wxST_NO_AUTORESIZE );  
+   errorCtrlStaticText =
+      new wxStaticText( parent, ID_TEXT, wxT("Error Control"),
+                        wxDefaultPosition, wxSize(170,20),
+                        wxST_NO_AUTORESIZE );  
+//   type4StaticText =
+//      new wxStaticText( parent, ID_TEXT, wxT("Type"),
+//                        wxDefaultPosition, wxDefaultSize, 0 );
+   // Force Model
+   centralBodyStaticText =
+      new wxStaticText( parent, ID_TEXT, wxT("Central Body"),
+                        wxDefaultPosition, wxSize(120,20),
+                        wxST_NO_AUTORESIZE);
+   
    degree1StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Degree"),
                         wxDefaultPosition, wxDefaultSize, 0 );
@@ -1016,9 +1028,6 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    order2StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Order"),
                         wxDefaultPosition, wxDefaultSize, 0 );
-   type4StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Type"),
-                        wxDefaultPosition, wxDefaultSize, 0 );
 
    #if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
@@ -1026,6 +1035,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    #endif
                         
    // wxTextCtrl
+   // Integrator
    setting1TextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
                       wxDefaultPosition, wxSize(160,-1), 0 );
@@ -1076,6 +1086,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    #endif
    
    // wxString
+   // Integrator
    wxString *intgArray = new wxString[IntegratorCount];
    for (Integer i=0; i<IntegratorCount; i++)
       intgArray[i] = integratorArray[i];
@@ -1104,10 +1115,16 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    #endif
    
    // wxComboBox
+   // Integrator
    integratorComboBox =
       new wxComboBox( parent, ID_CB_INTGR, wxT(integratorString),
                       wxDefaultPosition, wxDefaultSize, IntegratorCount,
                       intgArray, wxCB_DROPDOWN|wxCB_READONLY );
+   errorComboBox =
+      new wxComboBox( parent, ID_CB_ERROR, wxT(errorArray[0]),
+                      wxDefaultPosition, wxDefaultSize, ErrorControlCount,
+                      errorArray, wxCB_DROPDOWN|wxCB_READONLY );
+   // Force Model
    originComboBox  =
       theGuiManager->GetConfigBodyComboBox(this, ID_CB_ORIGIN, wxSize(100,-1));
    bodyComboBox =
@@ -1126,22 +1143,14 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxComboBox( parent, ID_CB_MAG, wxT(magfArray[0]),
                       wxDefaultPosition, wxDefaultSize, MagfModelCount,
                       magfArray, wxCB_DROPDOWN|wxCB_READONLY );
-                      
-   errorComboBox =
-      new wxComboBox( parent, ID_CB_ERROR, wxT(errorArray[0]),
-                      wxDefaultPosition, wxDefaultSize, ErrorControlCount,
-                      errorArray, wxCB_DROPDOWN|wxCB_READONLY );
-                 
+      
    #if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::Setup() ComboBoxes created\n");
-   #endif
-   
-   #if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::Setup() create wxButton\n");
    #endif
-   
+
    // wxButton
    bodyButton =
       new wxButton( parent, ID_BUTTON_ADD_BODY, wxT("Select"),
@@ -1165,28 +1174,32 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    #endif
    
    // wxCheckBox
-   srpCheckBox = new wxCheckBox( parent, ID_CHECKBOX, wxT("Use"),
+   srpCheckBox = new wxCheckBox( parent, ID_CHECKBOX, wxT("Use Solar Radiation Pressure"),
                                  wxDefaultPosition, wxDefaultSize, 0 );
                          
 #if __WXMAC__
    // wxStaticText
+   // Integrator
    wxStaticText *title1StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Numerical Integrator"),
+//      new wxStaticText( parent, ID_TEXT, wxT("Numerical Integrator"),
+      new wxStaticText( parent, ID_TEXT, wxT("Integrator"),
                         wxDefaultPosition, wxSize(220,20),
                         wxBOLD);
    title1StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
+                                             false, _T(""), wxFONTENCODING_SYSTEM));
+   // Force Model
+   wxStaticText *title3StaticText =
+//      new wxStaticText( parent, ID_TEXT, wxT("Environment Model"),
+      new wxStaticText( parent, ID_TEXT, wxT("Force Model"),
+                        wxDefaultPosition, wxSize(220,20),
+                        wxST_NO_AUTORESIZE);
+   title3StaticText->SetFont(wxFont(12, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
                                              false, _T(""), wxFONTENCODING_SYSTEM));
    wxStaticText *title2StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Origin"),
                         wxDefaultPosition, wxSize(220,20),
                         wxBOLD);
    title2StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-                                             false, _T(""), wxFONTENCODING_SYSTEM));
-   wxStaticText *title3StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Environment Model"),
-                        wxDefaultPosition, wxSize(220,20),
-                        wxST_NO_AUTORESIZE);
-   title3StaticText->SetFont(wxFont(12, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
                                              false, _T(""), wxFONTENCODING_SYSTEM));
    wxStaticText *title4StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Primary Bodies"),
@@ -1250,33 +1263,40 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    wxBoxSizer *boxSizer14 = new wxBoxSizer( wxHORIZONTAL );
    leftBoxSizer = new wxBoxSizer( wxVERTICAL );
    
-   wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
+   wxFlexGridSizer *intFlexGridSizer = new wxFlexGridSizer( 2, 0, 0 );
    
    Integer bsize = 5; // border size
    
    // Add to wx*Sizers  
-   flexGridSizer1->Add( integratorStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( integratorComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting1StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting1TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting2StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting2TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting3StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting3TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting4StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting4TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting5StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting5TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting6StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting6TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting7StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting7TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   // Integrator
+   intFlexGridSizer->Add( integratorStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( integratorComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting1StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting1TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting2StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting2TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting3StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting3TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting4StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting4TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting5StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting5TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting6StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting6TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting7StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting7TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( type4StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( errorComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    
+//   boxSizer14->Add( type4StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+//   boxSizer14->Add( errorComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+
+   // Force Model
    boxSizer4->Add( title1StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   boxSizer4->Add( flexGridSizer1, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   boxSizer4->Add( intFlexGridSizer, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    
-   boxSizer2->Add( title2StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   boxSizer2->Add( boxSizer3, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+//   boxSizer2->Add( title2StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+//   boxSizer2->Add( boxSizer3, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    
    boxSizer3->Add( centralBodyStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    boxSizer3->Add( originComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
@@ -1316,8 +1336,6 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    
    boxSizer13->Add( srpCheckBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    
-   boxSizer14->Add( type4StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   boxSizer14->Add( errorComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    
    boxSizer1->Add( boxSizer4, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
    //boxSizer1->Add( boxSizer2, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
@@ -1354,17 +1372,24 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    wxBoxSizer *boxSizer4 = new wxBoxSizer( wxVERTICAL );
    leftBoxSizer = new wxBoxSizer( wxVERTICAL );
    
-   wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
+   wxFlexGridSizer *intFlexGridSizer = new wxFlexGridSizer( 2, 0, 0 );
    wxFlexGridSizer *flexGridSizer2 = new wxFlexGridSizer( 2, 0, 2 );
+   wxFlexGridSizer *centralBodyFlexGridSizer = new wxFlexGridSizer( 2, 0, 2 );
    
-   wxStaticBox *staticBox1 = new wxStaticBox( parent, -1, wxT("Numerical Integrator") );
+   // Integrator
+//   wxStaticBox *staticBox1 = new wxStaticBox( parent, -1, wxT("Numerical Integrator") );
+   wxStaticBox *staticBox1 = new wxStaticBox( parent, -1, wxT("Integrator") );
    wxStaticBoxSizer *staticBoxSizer1 = new wxStaticBoxSizer( staticBox1, wxVERTICAL );
-   wxStaticBox *staticBox2 = new wxStaticBox( parent, -1, wxT("Environment Model") );
+//   wxStaticBox *staticBox10 = new wxStaticBox( parent, -1, wxT("Error Control") );
+//   wxStaticBoxSizer *staticBoxSizer10 = new wxStaticBoxSizer( staticBox10, wxHORIZONTAL );
+   // Force Model
+//   wxStaticBox *staticBox2 = new wxStaticBox( parent, -1, wxT("Environment Model") );
+   wxStaticBox *staticBox2 = new wxStaticBox( parent, -1, wxT("Force Model") );
    wxStaticBoxSizer *staticBoxSizer2 = new wxStaticBoxSizer( staticBox2, wxVERTICAL );
+//   wxStaticBox *staticBox4 = new wxStaticBox( parent, -1, wxT("Origin") );
+//   wxStaticBoxSizer *staticBoxSizer4 = new wxStaticBoxSizer( staticBox4, wxHORIZONTAL );
    wxStaticBox *staticBox3 = new wxStaticBox( parent, -1, wxT("Primary Bodies") );
    wxStaticBoxSizer *staticBoxSizer3 = new wxStaticBoxSizer( staticBox3, wxVERTICAL );
-   wxStaticBox *staticBox4 = new wxStaticBox( parent, -1, wxT("Origin") );
-   wxStaticBoxSizer *staticBoxSizer4 = new wxStaticBoxSizer( staticBox4, wxHORIZONTAL );
    wxStaticBox *item37 = new wxStaticBox( parent, -1, wxT("Gravity Field") );
    wxStaticBoxSizer *item36 = new wxStaticBoxSizer( item37, wxVERTICAL );
    
@@ -1377,31 +1402,36 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    wxStaticBoxSizer *item50 = new wxStaticBoxSizer( item51, wxHORIZONTAL );
    wxStaticBox *staticBox7 = new wxStaticBox( parent, -1, wxT("Point Masses") );
    wxStaticBoxSizer *staticBoxSizer7 = new wxStaticBoxSizer( staticBox7, wxVERTICAL );
-   wxStaticBox *item65 = new wxStaticBox( parent, -1, wxT("Solar Radiation Pressure") );
-   wxStaticBoxSizer *item64 = new wxStaticBoxSizer( item65, wxHORIZONTAL );
-   wxStaticBox *staticBox10 = new wxStaticBox( parent, -1, wxT("Error Control") );
-   wxStaticBoxSizer *staticBoxSizer10 = new wxStaticBoxSizer( staticBox10, wxHORIZONTAL );
+//   wxStaticBox *item65 = new wxStaticBox( parent, -1, wxT("Solar Radiation Pressure") );
+//   wxStaticBoxSizer *item64 = new wxStaticBoxSizer( item65, wxHORIZONTAL );
    
    Integer bsize = 2; // border size
    
-   // Add to wx*Sizers  
-   flexGridSizer1->Add( integratorStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( integratorComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting1StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting1TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting2StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting2TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting3StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting3TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting4StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting4TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting5StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting5TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting6StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting6TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting7StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( setting7TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   // Add to wx*Sizers
+   // Integrator
+   intFlexGridSizer->Add( integratorStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( integratorComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting1StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting1TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting2StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting2TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting3StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting3TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting4StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting4TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting5StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting5TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting6StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting6TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting7StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( setting7TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( errorCtrlStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( errorComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
 
+//   staticBoxSizer10->Add( type4StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   staticBoxSizer10->Add( errorComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+
+   // Force Model
    boxSizer3->Add( bodyComboBox, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    boxSizer3->Add( bodyTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    boxSizer3->Add( bodyButton, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
@@ -1432,14 +1462,15 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    item50->Add( magneticOrderTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
    item50->Add( searchMagneticButton, 0, wxALIGN_CENTRE|wxALL, bsize);
     
+   centralBodyFlexGridSizer->Add( centralBodyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   centralBodyFlexGridSizer->Add( originComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+
    flexGridSizer2->Add( pmEditTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer2->Add( editPmfButton, 0, wxALIGN_CENTRE|wxALL, bsize);
     
-   item64->Add( 2, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   item64->Add( srpCheckBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   item64->Add( 2, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   item64->Add( srpCheckBox, 0, wxALIGN_CENTRE|wxALL, bsize);
     
-   staticBoxSizer10->Add( type4StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   staticBoxSizer10->Add( errorComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    staticBoxSizer3->Add( boxSizer3, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    staticBoxSizer3->Add( item36, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
@@ -1448,19 +1479,23 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    
    staticBoxSizer7->Add( flexGridSizer2, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    
-   staticBoxSizer1->Add( flexGridSizer1, 0, wxALIGN_CENTRE|wxALL, bsize);
+   staticBoxSizer1->Add( intFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
+//   staticBoxSizer4->Add(centralBodyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   staticBoxSizer4->Add(originComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+
+//   staticBoxSizer2->Add( staticBoxSizer4, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+   staticBoxSizer2->Add( centralBodyFlexGridSizer, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    staticBoxSizer2->Add( staticBoxSizer3, 0, wxALIGN_CENTRE|wxALL, bsize);
    staticBoxSizer2->Add( staticBoxSizer7, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   staticBoxSizer2->Add( item64, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
-   staticBoxSizer2->Add( staticBoxSizer10, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+   staticBoxSizer2->Add( srpCheckBox, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+//   staticBoxSizer2->Add( item64, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+//   staticBoxSizer2->Add( staticBoxSizer10, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    
-   staticBoxSizer4->Add(centralBodyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   staticBoxSizer4->Add(originComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    boxSizer4->Add( staticBoxSizer1, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
    boxSizer4->Add( 0, 0, 1);
-   boxSizer4->Add( staticBoxSizer4, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
+//   boxSizer4->Add( staticBoxSizer4, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
    
    leftBoxSizer->Add( boxSizer4, 1, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
    
@@ -1816,29 +1851,78 @@ void PropagationConfigPanel::DisplayErrorControlData()
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::SaveDegOrder()
 {
-   for (Integer i=0; i < (Integer)forceList.size(); i++)
+   try
    {
-      if (forceList[i]->gravType != "None")
+      for (Integer i=0; i < (Integer)forceList.size(); i++)
       {
-         theGravForce = forceList[i]->gravf;
-         if (theGravForce != NULL)
+         if (forceList[i]->gravType != "None")
          {
-            #if DEBUG_PROP_SAVE
-            MessageInterface::ShowMessage
-               ("SaveDegOrder() Saving Body:%s, degree=%s, order=%s\n",
-                forceList[i]->bodyName.c_str(), forceList[i]->gravDegree.c_str(),
-                forceList[i]->gravOrder.c_str());
-            #endif
+            theGravForce = forceList[i]->gravf;
+            if (theGravForce != NULL)
+            {
+               #if DEBUG_PROP_SAVE
+               MessageInterface::ShowMessage
+                  ("SaveDegOrder() Saving Body:%s, degree=%s, order=%s\n",
+                  forceList[i]->bodyName.c_str(), forceList[i]->gravDegree.c_str(),
+                  forceList[i]->gravOrder.c_str());
+               #endif
             
-            theGravForce->SetIntegerParameter
-               ("Degree", atoi(forceList[i]->gravDegree.c_str()));
-            theGravForce->SetIntegerParameter
-               ("Order",  atoi(forceList[i]->gravOrder.c_str()));
+	           Integer id, ivalue;
+               canClose = true;
+               std::string inputString;
+               std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
+                  thePropSetup->GetName() + "\" is not an allowed value. \n"
+                  "The allowed values are: [%s].";                        
+
+               // save degree   
+	           id = theGravForce->GetParameterID("Degree");
+               inputString = forceList[i]->gravDegree.c_str();      
+               // check to see if input is an integer and greater than 
+               // or equal to zero
+               if ((GmatStringUtil::ToInteger(inputString,&ivalue)) && 
+                   (ivalue >= 0))
+                  theGravForce->SetIntegerParameter("Degree", ivalue);
+               else
+               {
+                  MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+                     inputString.c_str(), "Degree",
+                     "Integer >= 0 and < the maximum specified by the model, Order <= Degree");
+
+                  canClose = false;
+               }
+//               theGravForce->SetIntegerParameter
+//                  ("Degree", atoi(forceList[i]->gravDegree.c_str()));
+
+               // save order   
+               // check to see if input is an integer
+	           id = theGravForce->GetParameterID("Order");
+               inputString = forceList[i]->gravOrder.c_str();      
+               if (GmatStringUtil::ToInteger(inputString,&ivalue))      
+                  theGravForce->SetIntegerParameter("Order", ivalue);
+               else
+               {
+                  MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+                     inputString.c_str(), "Order",
+                     "Integer >= 0 and < the maximum specified by the model, Order <= Degree");
+
+                  canClose = false;
+               }
+//               theGravForce->SetIntegerParameter
+//                  ("Order",  atoi(forceList[i]->gravOrder.c_str()));
+
+            }
          }
       }
-   }
    
-   isDegOrderChanged = false;
+      isDegOrderChanged = false;
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("PropagationConfigPanel:SaveDegOrder() error occurred!\n%s\n", e.GetMessage().c_str());
+      canClose = false;
+      return;
+   }
 }
 
 
@@ -1880,32 +1964,159 @@ bool PropagationConfigPanel::SaveIntegratorData()
       ("PropagationConfigPanel::SaveIntegratorData() entered\n");
    #endif
    
-   Real min = atof(setting3TextCtrl->GetValue());
-   Real max = atof(setting4TextCtrl->GetValue());
-      
-   // @todo waw: temporarily commented out, to be uncommented 
-   // once Edwin updates his scripts to support this
-   // if (max <= min) 
-   if (max < min)
-   {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "Maximum Step can not be less than Minimum Step.\n"
-          "Propagation updates have not been saved");
-      return false;
-   }    
+// LTR 09/15/06 - moved to where setting of Max Step Size is done
+//   Real min = atof(setting3TextCtrl->GetValue());
+//   Real max = atof(setting4TextCtrl->GetValue());
+//      
+//   // @todo waw: temporarily commented out, to be uncommented 
+//   // once Edwin updates his scripts to support this
+//   // if (max <= min) 
+//   if (max < min)
+//   {
+//      MessageInterface::PopupMessage
+//         (Gmat::WARNING_, "Maximum Step can not be less than Minimum Step.\n"
+//          "Propagation updates have not been saved");
+//      return false;
+//   }    
    
    try
    {
-      thePropagator->SetRealParameter("InitialStepSize", atof(setting1TextCtrl->GetValue()));
-      thePropagator->SetRealParameter("Accuracy", atof(setting2TextCtrl->GetValue()));
-      thePropagator->SetRealParameter("MinStep", atof(setting3TextCtrl->GetValue()));
-      thePropagator->SetRealParameter("MaxStep", atof(setting4TextCtrl->GetValue()));
-      thePropagator->SetIntegerParameter("MaxStepAttempts", atoi(setting5TextCtrl->GetValue()));
+	  Integer id, ivalue;
+      Real rvalue, min, max;
+      canClose = true;
+      std::string inputString, minStr, maxStr;
+      std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
+                         thePropSetup->GetName() + "\" is not an allowed value. \n"
+                        "The allowed values are: [%s].";                        
+
+      // save initial step size
+	  id = thePropagator->GetParameterID("InitialStepSize");
+      inputString = setting1TextCtrl->GetValue();      
+     
+//      setting1TextCtrl.validator = new wxTextValidator(wxFilter.NUMERIC, "10");
+//      wxMessageBox("You have entered: " + setting1TextCtrl.value);
+
+      // check to see if input is a real
+      if (GmatStringUtil::ToDouble(inputString,&rvalue))      
+         thePropagator->SetRealParameter(id, rvalue);
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "InitialStepSize","Real Number");
+
+         canClose = false;
+      }
+//      thePropagator->SetRealParameter("InitialStepSize", atof(setting1TextCtrl->GetValue()));
+
+      // save accuracy
+	  id = thePropagator->GetParameterID("Accuracy");
+      inputString = setting2TextCtrl->GetValue();      
+      // check to see if input is a real
+      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue >= 0.0))      
+         thePropagator->SetRealParameter(id, rvalue);
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "Accuracy","Real Number >= 0.0");
+
+         canClose = false;
+      }
+//      thePropagator->SetRealParameter("Accuracy", atof(setting2TextCtrl->GetValue()));
+
+      // save min step size
+	  id = thePropagator->GetParameterID("MinStep");
+      inputString = setting3TextCtrl->GetValue();      
+      // check to see if input is a real
+      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue >= 0.0))      
+         thePropagator->SetRealParameter(id, rvalue);
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "MinStep","Real Number >= 0.0, MinStep <= MaxStep");
+
+         canClose = false;
+      }
+//      thePropagator->SetRealParameter("MinStep", atof(setting3TextCtrl->GetValue()));
+
+      // save max step size
+	  id = thePropagator->GetParameterID("MaxStep");
+      inputString = setting4TextCtrl->GetValue();      
+      // check to see if input is a real
+      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue >= 0.0))      
+      {
+         // check to see if max step size is less than min
+         minStr = setting3TextCtrl->GetValue();      
+         maxStr = setting4TextCtrl->GetValue();      
+         if (GmatStringUtil::ToDouble(minStr,&min) && 
+             GmatStringUtil::ToDouble(maxStr,&max))      
+            // @todo waw: temporarily commented out, to be uncommented 
+            // once Edwin updates his scripts to support this
+            // if (min >= max) 
+            if (max < min)
+            {
+               MessageInterface::PopupMessage
+                  (Gmat::WARNING_, "Maximum Step can not be less than Minimum Step.\n"
+                                   "Propagation updates have not been saved");
+               canClose = false;
+            }
+            else  
+               thePropagator->SetRealParameter(id, rvalue);
+      }
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "MaxStep","Real Number >= 0.0, MinStep <= MaxStep");
+
+         canClose = false;
+      }
+//      thePropagator->SetRealParameter("MaxStep", atof(setting4TextCtrl->GetValue()));
+
+      // save max step attempts
+	  id = thePropagator->GetParameterID("MaxStepAttempts");
+      inputString = setting5TextCtrl->GetValue();      
+      // check to see if input is an integer
+      if ((GmatStringUtil::ToInteger(inputString,&ivalue)) && (ivalue > 0))      
+         thePropagator->SetIntegerParameter(id, ivalue);
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "MaxStepAttempts","Integer > 0");
+
+         canClose = false;
+      }
+//      thePropagator->SetIntegerParameter("MaxStepAttempts", atoi(setting5TextCtrl->GetValue()));
       
       if (integratorString.IsSameAs(integratorArray[ABM]))
       {
-         thePropagator->SetRealParameter("LowerError", atof(setting6TextCtrl->GetValue()));
-         thePropagator->SetRealParameter("TargetError", atof(setting7TextCtrl->GetValue()));
+         // save min integration error
+	     id = thePropagator->GetParameterID("LowerError");
+         inputString = setting6TextCtrl->GetValue();      
+         // check to see if input is a real
+         if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue > 0.0))      
+            thePropagator->SetRealParameter(id, rvalue);
+         else
+         {
+            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+               inputString.c_str(), "MinIntegration Error","Real Number > 0.0");
+
+            canClose = false;
+         }
+//         thePropagator->SetRealParameter("LowerError", atof(setting6TextCtrl->GetValue()));
+
+         // save nominal integration error
+	     id = thePropagator->GetParameterID("TargetError");
+         inputString = setting7TextCtrl->GetValue();      
+         // check to see if input is a real
+         if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue >= 0.0))      
+            thePropagator->SetRealParameter(id, rvalue);
+         else
+         {
+            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+               inputString.c_str(), "NomIntegration Error","Real Number > 0.0");
+
+            canClose = false;
+         }
+//         thePropagator->SetRealParameter("TargetError", atof(setting7TextCtrl->GetValue()));
       }       
       
       #if DEBUG_PROP_SAVE
@@ -1917,7 +2128,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
-         ("PropConfigPanel:SaveData() error occurred!\n%s\n", e.GetMessage().c_str());
+         ("PropagationConfigPanel:SaveIntegratorData() error occurred!\n%s\n", e.GetMessage().c_str());
       return false;
    }
 }

@@ -181,6 +181,7 @@ private:
    wxStaticText *setting5StaticText;
    wxStaticText *setting6StaticText;
    wxStaticText *setting7StaticText;
+   wxStaticText *errorCtrlStaticText;
    wxStaticText *centralBodyStaticText;
    wxStaticText *degree1StaticText;
    wxStaticText *order1StaticText;

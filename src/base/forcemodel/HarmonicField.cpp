@@ -653,8 +653,38 @@ Integer HarmonicField::SetIntegerParameter(const Integer id, const Integer value
 {
    if (id == MAX_DEGREE)  return (maxDegree = value);
    if (id == MAX_ORDER)   return (maxOrder  = value);
-   if (id == DEGREE)      return (degree    = value);
-   if (id == ORDER)       return (order     = value);
+//   if (id == DEGREE)      return (degree    = value);
+   if (id == DEGREE)
+   {
+      if (value >= 0)
+         degree = value;
+      else
+      {
+         std::stringstream buffer;
+         buffer << value;
+         throw ForceModelException(
+            "The value of " + buffer.str() + " on object " + instanceName +
+            " is not an allowed value. \n The allowed values are [Integer >= 0 "
+            "and < the maximum specified by the model, Order <= Degree].");
+      }
+      return degree;
+   }
+//   if (id == ORDER)       return (order     = value);
+   if (id == ORDER)
+   {
+      if (value >= 0)
+         order = value;
+      else
+      {
+         std::stringstream buffer;
+         buffer << value;
+         throw ForceModelException(
+            "The value of " + buffer.str() + " on object " + instanceName +
+            " is not an allowed value. \n The allowed values are [Integer >= 0 "
+            "and < the maximum specified by the model, Order <= Degree].");
+      }
+      return order;
+   }
 
    return PhysicalModel::SetIntegerParameter(id, value);
 }
