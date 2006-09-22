@@ -39,7 +39,12 @@ public:
    void SaveData();
    void LoadData();
    
+   bool IsDataChanged() { return dataChanged; }
+   
 private:    
+   
+   bool dataChanged;
+   
    void Create();
    
    // Event Handling

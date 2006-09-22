@@ -1,3 +1,4 @@
+//$Header$
 //------------------------------------------------------------------------------
 //                            BallisticsMassPanel
 //------------------------------------------------------------------------------
@@ -28,39 +29,43 @@
 class BallisticsMassPanel: public wxPanel
 {
 public:
-    BallisticsMassPanel(wxWindow *parent,
-                        Spacecraft *spacecraft,
-                        wxButton *theApplyButton);
-    ~BallisticsMassPanel();
-    void SaveData();
-    void LoadData();
-    bool canClose;
+   BallisticsMassPanel(wxWindow *parent,
+                       Spacecraft *spacecraft,
+                       wxButton *theApplyButton);
+   ~BallisticsMassPanel();
+   
+   void SaveData();
+   void LoadData();
+   
+   bool IsDataChanged() { return dataChanged; }
+   bool CanClosePanel() { return canClose; }
    
 private:
-
-    void Create();
+   bool dataChanged;
+   bool canClose;
+   
+   void Create();
     
-    // Event Handling
-    DECLARE_EVENT_TABLE();
-    void OnTextChange(wxCommandEvent &event);
+   // Event Handling
+   DECLARE_EVENT_TABLE();
+   void OnTextChange(wxCommandEvent &event);
     
-    Spacecraft *theSpacecraft;
-    wxButton *theApplyButton;
+   Spacecraft *theSpacecraft;
+   wxButton *theApplyButton;
 
-    wxTextCtrl *dryMassTextCtrl;
-    wxTextCtrl *dragCoeffTextCtrl;
-    wxTextCtrl *reflectCoeffTextCtrl;
-    wxTextCtrl *dragAreaTextCtrl;
-    wxTextCtrl *srpAreaTextCtrl;
+   wxTextCtrl *dryMassTextCtrl;
+   wxTextCtrl *dragCoeffTextCtrl;
+   wxTextCtrl *reflectCoeffTextCtrl;
+   wxTextCtrl *dragAreaTextCtrl;
+   wxTextCtrl *srpAreaTextCtrl;
 
-
-    // IDs for the controls and the menu commands
-    enum
-    {     
-        ID_TEXT = 30100,
-        ID_TEXT_CTRL,
-        ID_TEXTCTRL,
-    };
+   // IDs for the controls and the menu commands
+   enum
+   {     
+      ID_TEXT = 30100,
+      ID_TEXT_CTRL,
+      ID_TEXTCTRL,
+   };
 };
 #endif
 

@@ -1,3 +1,4 @@
+//$Header$
 //------------------------------------------------------------------------------
 //                            BallisticsMassPanel
 //------------------------------------------------------------------------------
@@ -45,11 +46,14 @@ END_EVENT_TABLE()
 BallisticsMassPanel::BallisticsMassPanel(wxWindow *parent,
                                          Spacecraft *spacecraft,
                                          wxButton *theApplyButton)
-                    :wxPanel(parent)
+   :wxPanel(parent)
 {
     this->theSpacecraft = spacecraft;
     this->theApplyButton = theApplyButton;
-    canClose=true;
+    
+    canClose = true;
+    dataChanged = false;
+    
     Create();
 }
 
@@ -181,6 +185,7 @@ void BallisticsMassPanel::LoadData()
     
 //    epochValue->SetValue(epochStr);
 
+    dataChanged = false;
 }
 
 
@@ -189,8 +194,9 @@ void BallisticsMassPanel::LoadData()
 //------------------------------------------------------------------------------
 void BallisticsMassPanel::SaveData()
 {
-    canClose=true;
-
+    canClose = true;
+    dataChanged = false;
+    
     int dryMassID = theSpacecraft->GetParameterID("DryMass");
 //    int coeffDragID = theSpacecraft->GetParameterID("CoefficientDrag");
     int coeffDragID = theSpacecraft->GetParameterID("Cd");
@@ -246,5 +252,6 @@ void BallisticsMassPanel::SaveData()
 //------------------------------------------------------------------------------
 void BallisticsMassPanel::OnTextChange(wxCommandEvent &event)
 {
-    theApplyButton->Enable();
+   dataChanged = true;
+   theApplyButton->Enable();
 }

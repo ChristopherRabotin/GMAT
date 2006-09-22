@@ -41,14 +41,16 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 TankPanel::TankPanel(wxWindow *parent, Spacecraft *spacecraft,
-                     wxButton *theApplyButton):wxPanel(parent)
+                     wxButton *theApplyButton)
+   : wxPanel(parent)
 {
     this->theSpacecraft = spacecraft;
     this->theApplyButton = theApplyButton;
     
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
     theGuiManager = GuiItemManager::GetInstance();
-    
+
+    dataChanged = false;
     Create();
 }
 
@@ -152,27 +154,33 @@ void TankPanel::LoadData()
     int count = tankNames.size();
     for (Integer i = 0; i < count; i++) 
         selectedTankListBox->Append(tankNames[i].c_str());
+
+    dataChanged = false;
+
 }
+
 
 //------------------------------------------------------------------------------
 // void SaveData()
 //------------------------------------------------------------------------------
 void TankPanel::SaveData()
 {
-    if (!theApplyButton->IsEnabled())
-       return;
-       
-    Integer paramID = 0;
+   // This check is already done in the SpacecraftPanel (loj: 9/21/06)
+   //if (!theApplyButton->IsEnabled())
+   //    return;
+   
+   dataChanged = false;
+   Integer paramID = 0;
     
-    theSpacecraft->TakeAction("RemoveTank", "");
-    int count = selectedTankListBox->GetCount();
+   theSpacecraft->TakeAction("RemoveTank", "");
+   int count = selectedTankListBox->GetCount();
     
-    for (Integer i = 0; i < count; i++) 
-    {        
-        paramID = theSpacecraft->GetParameterID("Tanks");
-        theSpacecraft->SetStringParameter(paramID,
-           std::string(selectedTankListBox->GetString(i).c_str()));       
-    }
+   for (Integer i = 0; i < count; i++) 
+   {        
+      paramID = theSpacecraft->GetParameterID("Tanks");
+      theSpacecraft->SetStringParameter(paramID,
+         std::string(selectedTankListBox->GetString(i).c_str()));       
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -203,6 +211,8 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
              availableTankListBox->SetSelection(sel-1);
       
        }
+       
+       dataChanged = true;
        theApplyButton->Enable();
     }
     else if (event.GetEventObject() == removeButton)
@@ -224,6 +234,7 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
        else
           selectedTankListBox->SetSelection(sel-1);
    
+       dataChanged = true;
        theApplyButton->Enable();
     }   
     else if (event.GetEventObject() == selectAllButton)
@@ -242,6 +253,7 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
        availableTankListBox->Clear();
        selectedTankListBox->SetSelection(0);
     
+       dataChanged = true;
        theApplyButton->Enable();
     } 
     else if (event.GetEventObject() == removeAllButton)
@@ -260,6 +272,7 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
        mExcludedTankList.Clear();
        availableTankListBox->SetSelection(0);
    
+       dataChanged = true;
        theApplyButton->Enable();
     }
 }     

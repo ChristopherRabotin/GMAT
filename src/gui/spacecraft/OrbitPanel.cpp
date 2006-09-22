@@ -80,7 +80,8 @@ OrbitPanel::OrbitPanel(wxWindow *parent,
    mIsStateTypeChanged = false;
    mIsEpochChanged = false;
    canClose = true;
-
+   dataChanged = false;
+   
    anomaly = theSpacecraft->GetAnomaly();
 
    Create();
@@ -136,7 +137,7 @@ void OrbitPanel::LoadData()
          epochFormatComboBox->Append(reps[i].c_str());
       
       // load the epoch
-      std::string epochFormat = theSpacecraft->GetStringParameter("DateFormat"); //GetDisplayDateFormat();
+      std::string epochFormat = theSpacecraft->GetStringParameter("DateFormat");
       mEpoch = theSpacecraft->GetRealParameter("A1Epoch");
       epochFormatComboBox->SetValue(wxT(epochFormat.c_str()));
       fromEpochFormat = epochFormat;
@@ -169,7 +170,7 @@ void OrbitPanel::LoadData()
          // Set the CS's on the spacecraft
          theSpacecraft->SetInternalCoordSystem(mInternalCoord);
          theSpacecraft->SetRefObject(mOutCoord, Gmat::COORDINATE_SYSTEM);
-         theSpacecraft->Initialize();
+         //theSpacecraft->Initialize(); //loj: 9/21/06 commented out
       }
       
       // get the origin for the output coordinate system
@@ -267,6 +268,9 @@ void OrbitPanel::LoadData()
       MessageInterface::ShowMessage
          ("OrbitPanel:LoadData() error occurred!\n%s\n", e.GetMessage().c_str());
    }
+   
+   dataChanged = false;
+   
 }
 
 
@@ -299,6 +303,7 @@ void OrbitPanel::SaveData()
    
    Rvector6 outState, cartState, displayState;
    canClose = true;
+   dataChanged = false;
    
    // save epoch format
 //   wxString epochFormatStr = epochFormatComboBox->GetStringSelection();
@@ -820,7 +825,10 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
    }
    
    if (theApplyButton != NULL)
+   {
+      dataChanged = true;
       theApplyButton->Enable();
+   }
 }
 
 
@@ -851,7 +859,10 @@ void OrbitPanel::OnTextChange(wxCommandEvent& event)
    }
    
    if (theApplyButton != NULL)
+   {
+      dataChanged = true;
       theApplyButton->Enable();
+   }
 }
 
 

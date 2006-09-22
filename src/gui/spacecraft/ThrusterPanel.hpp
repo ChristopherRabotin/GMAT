@@ -32,40 +32,45 @@
 class ThrusterPanel: public wxPanel
 {
 public:
-    ThrusterPanel(wxWindow *parent, Spacecraft *spacecraft,
-                  wxButton *theApplyButton);
-    ~ThrusterPanel();
-    void SaveData();
-    void LoadData();
+   ThrusterPanel(wxWindow *parent, Spacecraft *spacecraft,
+                 wxButton *theApplyButton);
+   ~ThrusterPanel();
+   void SaveData();
+   void LoadData();
     
-private:    
-    void Create();
+   bool IsDataChanged() { return dataChanged; }
+   
+private:
+   
+   bool dataChanged;
+   
+   void Create();
     
-    // Event Handling
-    DECLARE_EVENT_TABLE();
-    void OnButtonClick(wxCommandEvent &event);
+   // Event Handling
+   DECLARE_EVENT_TABLE();
+   void OnButtonClick(wxCommandEvent &event);
     
-    Spacecraft *theSpacecraft;
-    GuiInterpreter *theGuiInterpreter;
-    GuiItemManager *theGuiManager;
+   Spacecraft *theSpacecraft;
+   GuiInterpreter *theGuiInterpreter;
+   GuiItemManager *theGuiManager;
     
-    wxArrayString mExcludedThrusterList;
+   wxArrayString mExcludedThrusterList;
     
-    wxButton *theApplyButton;
-    wxButton *selectButton;
-    wxButton *removeButton;
-    wxButton *selectAllButton;
-    wxButton *removeAllButton;
+   wxButton *theApplyButton;
+   wxButton *selectButton;
+   wxButton *removeButton;
+   wxButton *selectAllButton;
+   wxButton *removeAllButton;
     
-    wxListBox *availableThrusterListBox;
-    wxListBox *selectedThrusterListBox;
+   wxListBox *availableThrusterListBox;
+   wxListBox *selectedThrusterListBox;
         
-    // IDs for the controls and the menu commands
-    enum
-    {     
-        ID_LISTBOX = 30200,
-        ID_BUTTON,
-    };
+   // IDs for the controls and the menu commands
+   enum
+   {     
+      ID_LISTBOX = 30200,
+      ID_BUTTON,
+   };
 };
 #endif
 

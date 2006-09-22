@@ -41,7 +41,8 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 ThrusterPanel::ThrusterPanel(wxWindow *parent, Spacecraft *spacecraft,
-                     wxButton *theApplyButton):wxPanel(parent)
+                             wxButton *theApplyButton)
+   : wxPanel(parent)
 {
     this->theSpacecraft = spacecraft;
     this->theApplyButton = theApplyButton;
@@ -151,6 +152,8 @@ void ThrusterPanel::LoadData()
     Integer count = thrustersNames.size();
     for (Integer i = 0; i < count; i++) 
         selectedThrusterListBox->Append(thrustersNames[i].c_str());
+
+    dataChanged = false;
 }
 
 //------------------------------------------------------------------------------
@@ -158,20 +161,22 @@ void ThrusterPanel::LoadData()
 //------------------------------------------------------------------------------
 void ThrusterPanel::SaveData()
 {
-    if (!theApplyButton->IsEnabled())
-       return;
+   // This check is already done in the SpacecraftPanel (loj: 9/21/06)
+   //if (!theApplyButton->IsEnabled())
+   //   return;
 
-    Integer paramID = 0;
+   dataChanged = false;
+   Integer paramID = 0;
     
-    theSpacecraft->TakeAction("RemoveThruster", "");
-    Integer count = selectedThrusterListBox->GetCount();
+   theSpacecraft->TakeAction("RemoveThruster", "");
+   Integer count = selectedThrusterListBox->GetCount();
     
-    for (Integer i = 0; i < count; i++) 
-    {        
-        paramID = theSpacecraft->GetParameterID("Thrusters");
-        theSpacecraft->SetStringParameter(paramID,
-           std::string(selectedThrusterListBox->GetString(i).c_str()));       
-    }  
+   for (Integer i = 0; i < count; i++) 
+   {        
+      paramID = theSpacecraft->GetParameterID("Thrusters");
+      theSpacecraft->SetStringParameter(paramID,
+         std::string(selectedThrusterListBox->GetString(i).c_str()));       
+   }  
 }
 
 //------------------------------------------------------------------------------
@@ -203,7 +208,8 @@ void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
       
        }
 
-        theApplyButton->Enable();
+       dataChanged = true;
+       theApplyButton->Enable();
     }
     else if (event.GetEventObject() == removeButton)
     {
@@ -224,7 +230,8 @@ void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
        else
           selectedThrusterListBox->SetSelection(sel-1);
 
-        theApplyButton->Enable();
+       dataChanged = true;
+       theApplyButton->Enable();
     }   
     else if (event.GetEventObject() == selectAllButton)
     {
@@ -241,8 +248,9 @@ void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
        
        availableThrusterListBox->Clear();
        selectedThrusterListBox->SetSelection(0);
-
-        theApplyButton->Enable();
+       
+       dataChanged = true;
+       theApplyButton->Enable();
     } 
     else if (event.GetEventObject() == removeAllButton)
     {
@@ -260,7 +268,8 @@ void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
        mExcludedThrusterList.Clear();
        availableThrusterListBox->SetSelection(0);
 
-        theApplyButton->Enable();
+       dataChanged = true;
+       theApplyButton->Enable();
     }   
 }     
     

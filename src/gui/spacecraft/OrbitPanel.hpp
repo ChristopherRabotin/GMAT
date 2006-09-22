@@ -47,7 +47,8 @@ public:
    void LoadData();
    void SaveData();
    
-   bool canClose;
+   bool IsDataChanged() { return dataChanged; }
+   bool CanClosePanel() { return canClose; }
    
 protected:
    Anomaly           anomaly;
@@ -55,6 +56,9 @@ protected:
    StateConverter    stateConverter;
 
 private:
+   bool dataChanged;
+   bool canClose;
+   
    Spacecraft     *theSpacecraft;
    SolarSystem    *theSolarSystem;
    GuiItemManager *theGuiManager;

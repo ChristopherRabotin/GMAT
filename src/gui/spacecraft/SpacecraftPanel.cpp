@@ -51,18 +51,18 @@
 SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
     :GmatPanel(parent)
 {
-	#if DEBUG_SPACECRAFT_PANEL
+   #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("SpacecraftPanel::SpacecraftPanel() entered\n");
    #endif
    
-    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-    theSpacecraft = theGuiInterpreter->GetSpacecraft(std::string(scName.c_str()));
+   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theSpacecraft = theGuiInterpreter->GetSpacecraft(std::string(scName.c_str()));
     
-    if (theSpacecraft != NULL)
-    {            
-        Create();
-        Show();
-    }
+   if (theSpacecraft != NULL)
+   {            
+      Create();
+      Show();
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -70,13 +70,13 @@ SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
 //------------------------------------------------------------------------------
 SpacecraftPanel::~SpacecraftPanel()
 {
-	#if DEBUG_SPACECRAFT_PANEL
+   #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("SpacecraftPanel::~SpacecraftPanel() entered\n");
    #endif
-// need to delete child from list in mainFrame
-//    delete(theBallisticMassPanel);
-//    delete(theOrbitPanel);
-//    delete(currentSpacecraft);
+   // need to delete child from list in mainFrame
+   //    delete(theBallisticMassPanel);
+   //    delete(theOrbitPanel);
+   //    delete(currentSpacecraft);
 }
 
 //-------------------------------
@@ -88,70 +88,66 @@ SpacecraftPanel::~SpacecraftPanel()
 //------------------------------------------------------------------------------
 void SpacecraftPanel::Create()
 {
-	#if DEBUG_SPACECRAFT_PANEL
+   #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("SpacecraftPanel::Create() entered\n");
    #endif
    
-    //loj: 2/8/06 SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
-    SolarSystem *theSolarSystem = theGuiInterpreter->GetSolarSystemInUse();
-    currentSpacecraft = new Spacecraft(*theSpacecraft);
+   SolarSystem *theSolarSystem = theGuiInterpreter->GetSolarSystemInUse();
+   currentSpacecraft = new Spacecraft(*theSpacecraft);
     
-    currentSpacecraft->SetInternalCoordSystem(
-       theSpacecraft->GetInternalCoordSystem());    
-    currentSpacecraft->SetRefObject( 
-       theSpacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, ""), 
-       Gmat::COORDINATE_SYSTEM, "");
+   currentSpacecraft->SetInternalCoordSystem(theSpacecraft->GetInternalCoordSystem());    
+   currentSpacecraft->SetRefObject(theSpacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, ""), 
+                                   Gmat::COORDINATE_SYSTEM, "");
     
-    // Set object pointer for "Show Script"
-    mObject = currentSpacecraft;
+   // Set object pointer for "Show Script"
+   mObject = currentSpacecraft;
 
-    // wxNotebook
-    spacecraftNotebook = new wxNotebook( this, ID_NOTEBOOK, wxDefaultPosition,
-                         wxDefaultSize, wxGROW );
-    spacecraftNotebook->SetBackgroundColour(GetBackgroundColour());
-//    spacecraftNotebook->SetForegroundColour(GetBackgroundColour());
-    spacecraftNotebook->SetForegroundColour(GetForegroundColour());
+   // wxNotebook
+   spacecraftNotebook = new wxNotebook( this, ID_NOTEBOOK, wxDefaultPosition,
+                                        wxDefaultSize, wxGROW );
+   spacecraftNotebook->SetBackgroundColour(GetBackgroundColour());
+   spacecraftNotebook->SetForegroundColour(GetForegroundColour());
 
-//    actuators = new wxPanel( spacecraftNotebook, -1 );
-    actuatorNotebook = new wxNotebook( spacecraftNotebook, ID_NOTEBOOK, wxDefaultPosition,
-                         wxDefaultSize, wxGROW );
-    actuatorNotebook->SetBackgroundColour(GetBackgroundColour());
-    actuatorNotebook->SetForegroundColour(GetBackgroundColour());
-    // wxNotebookSizer
-//    spacecraftSizer = new wxNotebookSizer( spacecraftNotebook );
-//    actuatorSizer = new wxNotebookSizer( actuatorNotebook );
+   actuatorNotebook = new wxNotebook( spacecraftNotebook, ID_NOTEBOOK, wxDefaultPosition,
+                                      wxDefaultSize, wxGROW );
+   actuatorNotebook->SetBackgroundColour(GetBackgroundColour());
+   actuatorNotebook->SetForegroundColour(GetBackgroundColour());
+   // wxNotebookSizer
+   // spacecraftSizer = new wxNotebookSizer( spacecraftNotebook );
+   // actuatorSizer = new wxNotebookSizer( actuatorNotebook );
 
-    // wxSizer
-//    wxGridSizer *theGridSizer = new wxGridSizer( 1, 0, 0 );
+   // wxSizer
+   // wxGridSizer *theGridSizer = new wxGridSizer( 1, 0, 0 );
+   
+   //wx*Panel
+   sensors = new wxPanel( spacecraftNotebook, -1 );
+   
+   theOrbitPanel = new OrbitPanel(spacecraftNotebook, currentSpacecraft,
+                                  theSolarSystem, theApplyButton);
+   theBallisticMassPanel = new BallisticsMassPanel(spacecraftNotebook,
+                                                   currentSpacecraft, theApplyButton);
+   theTankPanel = new TankPanel(spacecraftNotebook, currentSpacecraft,
+                                theApplyButton);
+   theThrusterPanel = new ThrusterPanel(actuatorNotebook, currentSpacecraft,
+                                        theApplyButton);
+   theAttitudePanel = new AttitudePanel(spacecraftNotebook, currentSpacecraft,
+                                        theApplyButton);
+   // visuals = new wxPanel( mainNotebook, -1 );
+   
+   // Adding panels to notebook
+   actuatorNotebook->AddPage( theThrusterPanel, wxT("Thruster") );
+   spacecraftNotebook->AddPage( theOrbitPanel, wxT("Orbit") );
+   spacecraftNotebook->AddPage( theAttitudePanel, wxT("Attitude") );
+   spacecraftNotebook->AddPage( theBallisticMassPanel, wxT("Ballistic/Mass") );
+   spacecraftNotebook->AddPage( sensors, wxT("Sensors") );
+   spacecraftNotebook->AddPage( theTankPanel, wxT("Tanks") );
+   spacecraftNotebook->AddPage( actuatorNotebook, wxT("Actuators") );
+   //spacecraftNotebook->AddPage( visuals , wxT("Visualization") );
 
-    //wx*Panel
-    sensors = new wxPanel( spacecraftNotebook, -1 );
-
-    theOrbitPanel = new OrbitPanel(spacecraftNotebook, currentSpacecraft,
-                        theSolarSystem, theApplyButton);
-    theBallisticMassPanel = new BallisticsMassPanel(spacecraftNotebook,
-                                currentSpacecraft, theApplyButton);
-    theTankPanel = new TankPanel(spacecraftNotebook, currentSpacecraft,
-                       theApplyButton);
-    theThrusterPanel = new ThrusterPanel(actuatorNotebook, currentSpacecraft,
-                       theApplyButton);
-    theAttitudePanel = new AttitudePanel(spacecraftNotebook, currentSpacecraft,
-                       theApplyButton);
-    // visuals = new wxPanel( mainNotebook, -1 );
-
-    // Adding panels to notebook
-    actuatorNotebook->AddPage( theThrusterPanel, wxT("Thruster") );
-    spacecraftNotebook->AddPage( theOrbitPanel, wxT("Orbit") );
-    spacecraftNotebook->AddPage( theAttitudePanel, wxT("Attitude") );
-    spacecraftNotebook->AddPage( theBallisticMassPanel, wxT("Ballistic/Mass") );
-    spacecraftNotebook->AddPage( sensors, wxT("Sensors") );
-    spacecraftNotebook->AddPage( theTankPanel, wxT("Tanks") );
-    spacecraftNotebook->AddPage( actuatorNotebook, wxT("Actuators") );
-    //spacecraftNotebook->AddPage( visuals , wxT("Visualization") );
-
-//    theGridSizer->Add(spacecraftNotebook, 1, wxGROW, 5);
-    theMiddleSizer->Add(spacecraftNotebook, 1, wxGROW, 5);
+   // theGridSizer->Add(spacecraftNotebook, 1, wxGROW, 5);
+   theMiddleSizer->Add(spacecraftNotebook, 1, wxGROW, 5);
 }
+
 
 //------------------------------------------------------------------------------
 // void LoadData()
@@ -173,50 +169,72 @@ void SpacecraftPanel::LoadData()
     theApplyButton->Disable();
 }
 
+
 //------------------------------------------------------------------------------
 // void SaveData()
 //------------------------------------------------------------------------------
 void SpacecraftPanel::SaveData()
 {
-    #if DEBUG_SPACECRAFT_PANEL
-    MessageInterface::ShowMessage("SpacecraftPanel::SaveData() entered\n");
-    #endif
-    
-    theBallisticMassPanel->SaveData();
-    canClose = theBallisticMassPanel->canClose;
-    
-    theOrbitPanel->SaveData();
-    canClose = canClose && theOrbitPanel->canClose;
-    
-    enableApply=true;
-
-    if (!canClose)
-    {
-      enableApply=false;
+   if (!theApplyButton->IsEnabled())
       return;
-    }
-      
-    theTankPanel->SaveData(); 
-    theThrusterPanel->SaveData();
-    theAttitudePanel->SaveData();
-      
-    // what's wrong with this?
-    // copy the current info into theSpacecraft
-    delete(theSpacecraft); 
-    theSpacecraft = new Spacecraft(*currentSpacecraft);
-    //theSpacecraft = currentSpacecraft;
-    
-    // explicitly disable apply button
-    // it is turned on in each of the panels
-    theApplyButton->Disable();
+
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("SpacecraftPanel::SaveData() entered\n");
+   MessageInterface::ShowMessage
+      ("BallisticMassPanelChanged=%d, OrbitPanelChanged=%d, TankPanelChanged=%d, "
+       "ThrusterPanelChanged=%d, AttitudePanelChanged=%d\n",
+       theBallisticMassPanel->IsDataChanged(), theOrbitPanel->IsDataChanged(),
+       theTankPanel->IsDataChanged(), theThrusterPanel->IsDataChanged(),
+       theAttitudePanel->IsDataChanged());
+   #endif
+   
+   canClose = true;
+   
+   if (theBallisticMassPanel->IsDataChanged())
+   {
+      theBallisticMassPanel->SaveData();
+      canClose = theBallisticMassPanel->CanClosePanel();
+   }
+
+   if (theOrbitPanel->IsDataChanged())
+   {
+      theOrbitPanel->SaveData();
+      canClose = canClose && theOrbitPanel->CanClosePanel();
+   }
+   
+   enableApply = true;
+   
+   if (!canClose)
+   {
+      enableApply = false;
+      return;
+   }
+
+   if (theTankPanel->IsDataChanged())
+      theTankPanel->SaveData();
+   
+   if (theThrusterPanel->IsDataChanged())
+      theThrusterPanel->SaveData();
+   
+   if (theAttitudePanel->IsDataChanged())
+      theAttitudePanel->SaveData();
+   
+   // copy the current info into theSpacecraft
+   delete(theSpacecraft); 
+   theSpacecraft = new Spacecraft(*currentSpacecraft);
+   
+   // explicitly disable apply button
+   // it is turned on in each of the panels
+   theApplyButton->Disable();
 }
+
 
 //------------------------------------------------------------------------------
 // void OnPageChange()
 //------------------------------------------------------------------------------
 void SpacecraftPanel::OnPageChange(wxCommandEvent &event)
 {
-    theTankPanel->LoadData();
-    theThrusterPanel->LoadData();
-    theAttitudePanel->LoadData();
+   theTankPanel->LoadData();
+   theThrusterPanel->LoadData();
+   theAttitudePanel->LoadData();
 }    

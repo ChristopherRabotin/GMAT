@@ -1,4 +1,4 @@
-//$Header: 
+//$Header$
 //------------------------------------------------------------------------------
 //                            AttitudePanel
 //------------------------------------------------------------------------------
@@ -38,6 +38,8 @@ public:
    ~AttitudePanel();
    void SaveData();
    void LoadData();
+
+   bool IsDataChanged() { return dataChanged; }
    
 private:    
 
@@ -114,6 +116,7 @@ private:
    wxString *angVel[3];
    
    bool dontUpdate;  // true while writing to textCtrls
+   bool dataChanged;
    
    // Event Handling
    DECLARE_EVENT_TABLE();

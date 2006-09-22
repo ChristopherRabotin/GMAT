@@ -53,18 +53,19 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 AttitudePanel::AttitudePanel(wxWindow *parent, Spacecraft *spacecraft,
-                     wxButton *theApplyButton):wxPanel(parent), dontUpdate(false)
+                             wxButton *theApplyButton)
+   : wxPanel(parent), dontUpdate(false)
 {
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("AttitudePanel::AttitudePanel() entered\n");
    #endif
-
+      
    this->theSpacecraft = spacecraft;
    this->theApplyButton = theApplyButton;
-    
+   
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
-    
+   
    modeArray.clear();
    coordSysArray.clear();
    kinematicArray.clear();
@@ -72,6 +73,7 @@ AttitudePanel::AttitudePanel(wxWindow *parent, Spacecraft *spacecraft,
    stateTypeArray.clear();
    stateTypeRateArray.clear();
 
+   dataChanged = false;
    Create();
 }
 
@@ -687,6 +689,8 @@ void AttitudePanel::LoadData()
    {
       DisplayAngularVelocity();
    }
+
+   dataChanged = false;
 }
 
 
@@ -698,11 +702,14 @@ void AttitudePanel::SaveData()
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("AttitudePanel::SaveData() entered\n");
    #endif
+
+   // This check is already done in the SpacecraftPanel (loj: 9/21/06)
+   // if (!theApplyButton->IsEnabled())
+   //   return;
    
-   if (!theApplyButton->IsEnabled())
-       return;
-       
-   theApplyButton->Disable();
+   //theApplyButton->Disable();
+   
+   dataChanged = false;
    
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("Attitude creation via the GUI is not implemented yet\n");
@@ -720,26 +727,29 @@ void AttitudePanel::SaveData()
    //Attitude* a = af.CreateAttitude(mode.c_str(), "");
    Attitude* a = af.CreateAttitude(typeVal.c_str(), "");
 
-        if (a == NULL) {
-                MessageInterface::ShowMessage("Attitude object made is null\n");
-                return;
-        }
-
+   if (a == NULL)
+   {
+      MessageInterface::ShowMessage("Attitude object made is null\n");
+      return;
+   }
+   
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("Attitude creation: a != NULL\n");
    #endif
-   try
-   {
-      theSpacecraft->SetRefObject(a, Gmat::ATTITUDE, "");
-   }
-   catch (BaseException &be)
-   {
-   #ifdef DEBUG_ATTITUDE_PANEL
-      MessageInterface::ShowMessage(
-      "ERROR setting attitude object on spacecraft object!!!\n");
-   #endif
-   }
 
+      //loj: 9/22/06 Commented out for now
+//    try
+//    {
+//       theSpacecraft->SetRefObject(a, Gmat::ATTITUDE, "");
+//    }
+//    catch (BaseException &be)
+//    {
+//    #ifdef DEBUG_ATTITUDE_PANEL
+//       MessageInterface::ShowMessage(
+//       "ERROR setting attitude object on spacecraft object!!!\n");
+//    #endif
+//    }
+   
    std::string selectedEulerSeq = config4ComboBox->GetValue().c_str();
    
    a->SetStringParameter("EulerSequenceString", selectedEulerSeq);
@@ -905,6 +915,8 @@ void AttitudePanel::OnStateTypeTextUpdate(wxCommandEvent &event)
       // calculate the quaternions and
       // the Euler angles
    }
+   
+   dataChanged = true;
    theApplyButton->Enable();
 }
 
@@ -914,7 +926,7 @@ void AttitudePanel::OnStateTypeTextUpdate(wxCommandEvent &event)
 void AttitudePanel::OnStateTypeRateTextUpdate(wxCommandEvent &event)
 {
    if (dontUpdate) return;
-        
+   
    std::string stateTypeRateStr = stateTypeRateComboBox->GetStringSelection().c_str();
    if (stateTypeRateStr == stateTypeRateArray[EULER_ANGLES_RATES])
    {
@@ -938,6 +950,8 @@ void AttitudePanel::OnStateTypeRateTextUpdate(wxCommandEvent &event)
                         
       CalculateFromAngularVelocity();  // calculate the equivalent angular velocities
    }
+   
+   dataChanged = true;
    theApplyButton->Enable();
 }
 
