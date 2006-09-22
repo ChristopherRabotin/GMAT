@@ -56,6 +56,9 @@ protected:
    
    wxStaticText *mTargetColorLabel;
    wxStaticText *mFovLabel;
+   wxStaticText *mViewPointRefStaticText;
+   wxStaticText *mViewPointVecStaticText;
+   wxStaticText *mViewDirStaticText;
    
    wxCheckBox *mPlotCheckBox;
    wxCheckBox *mWireFrameCheckBox;
