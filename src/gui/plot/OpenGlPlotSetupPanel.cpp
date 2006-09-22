@@ -17,6 +17,7 @@
 //------------------------------------------------------------------------------
 
 #include "OpenGlPlotSetupPanel.hpp"
+#include "StringUtil.hpp"
 
 #include "ColorTypes.hpp"           // for namespace GmatColor::
 #include "MessageInterface.hpp"
@@ -208,7 +209,7 @@ void OpenGlPlotSetupPanel::Create()
       new wxStaticText(this, -1, wxT("(Enter 0 to redraw whole plot)"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mFovLabel =
-      new wxStaticText(this, -1, wxT("Field Of View(Deg): "),
+      new wxStaticText(this, -1, wxT("Field Of View (deg): "),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mTargetColorLabel =
       new wxStaticText(this, -1, wxT("Target Color"),
@@ -277,18 +278,26 @@ void OpenGlPlotSetupPanel::Create()
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
    mViewPointRef3TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
+   mViewPointRefStaticText = new wxStaticText(this, -1, wxT("km"),
+     wxDefaultPosition, wxSize(-1,-1), 0);
+
    mViewPointVec1TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
    mViewPointVec2TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
    mViewPointVec3TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("30000"), wxDefaultPosition, wxSize(60,-1), 0);
+   mViewPointVecStaticText = new wxStaticText(this, -1, wxT("km"),
+     wxDefaultPosition, wxSize(-1,-1), 0);
+
    mViewDir1TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
    mViewDir2TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
    mViewDir3TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("-1"), wxDefaultPosition, wxSize(60,-1), 0);
+   mViewDirStaticText = new wxStaticText(this, -1, wxT("km"),
+     wxDefaultPosition, wxSize(-1,-1), 0);
 
    #if DEBUG_OPENGL_PANEL_CREATE
    MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() wxListBox\n");
@@ -357,8 +366,9 @@ void OpenGlPlotSetupPanel::Create()
    mViewUpCsComboBox =
       theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(120,-1));
    mViewUpAxisComboBox =
-      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(120,-1),
-                     6, axisArray, wxCB_DROPDOWN);
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, 
+                     wxSize(120,-1),6, axisArray, wxCB_READONLY);
+                     
                   
    #if DEBUG_OPENGL_PANEL_CREATE
    MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() wxSizers\n");
@@ -514,14 +524,17 @@ void OpenGlPlotSetupPanel::Create()
    mViewPointRefSizer->Add(mViewPointRef1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewPointRefSizer->Add(mViewPointRef2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewPointRefSizer->Add(mViewPointRef3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewPointRefSizer->Add(mViewPointRefStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    
    mViewPointVectorSizer->Add(mViewPointVec1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewPointVectorSizer->Add(mViewPointVec2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewPointVectorSizer->Add(mViewPointVec3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewPointVectorSizer->Add(mViewPointVecStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    
    mViewDirVectorSizer->Add(mViewDir1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewDirVectorSizer->Add(mViewDir2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewDirVectorSizer->Add(mViewDir3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDirVectorSizer->Add(mViewDirStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    
    mViewDefSizer->Add(coordSysLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
    mViewDefSizer->Add(mCoordSysComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -685,15 +698,18 @@ void OpenGlPlotSetupPanel::Create()
    mViewPointRefSizer->Add(mViewPointRef1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewPointRefSizer->Add(mViewPointRef2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewPointRefSizer->Add(mViewPointRef3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewPointRefSizer->Add(mViewPointStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    
    mViewPointVectorSizer->Add(mViewPointVec1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewPointVectorSizer->Add(mViewPointVec2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewPointVectorSizer->Add(mViewPointVec3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewPointVectorSizer->Add(mViewPointStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    
    mViewDirVectorSizer->Add(mViewDir1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewDirVectorSizer->Add(mViewDir2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewDirVectorSizer->Add(mViewDir3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   
+   mViewDirVectorSizer->Add(mViewDirStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+
    mViewDefSizer->Add(coordSysLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
    mViewDefSizer->Add(mCoordSysComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewDefSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -1040,16 +1056,43 @@ void OpenGlPlotSetupPanel::SaveData()
       ("OpenGlPlotSetupPanel::SaveData() entered.\n");
    #endif
    
+   canClose = false;
    try
    {
       // save data to core engine
-      long longVal;
-      mDataCollectFreqTextCtrl->GetValue().ToLong(&longVal);
-      mOpenGlPlot->SetIntegerParameter("DataCollectFrequency", longVal);
-      mUpdatePlotFreqTextCtrl->GetValue().ToLong(&longVal);
-      mOpenGlPlot->SetIntegerParameter("UpdatePlotFrequency", longVal);
-      mNumPointsToRedrawTextCtrl->GetValue().ToLong(&longVal);
-      mOpenGlPlot->SetIntegerParameter("NumPointsToRedraw", longVal);
+      Integer intVal[2];
+      std::string inputString[3];
+      std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
+                 mOpenGlPlot->GetName() + "\" is not an allowed value.  "
+                 "\nThe allowed values are: [ %s ].";
+  
+      theOkButton->Disable();
+
+      inputString[0] = mDataCollectFreqTextCtrl->GetValue();
+      inputString[1] = mUpdatePlotFreqTextCtrl->GetValue();
+      for (Integer i=0; i < 2; ++i)
+      {
+          if (!GmatStringUtil::ToInteger(inputString[i], &intVal[i]) || 
+              intVal[i] < 1)
+          {
+             MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                 inputString[i].c_str(), "DataCollectFrequency","Integer >= 1");
+             return;
+          }
+      }
+
+      mOpenGlPlot->SetIntegerParameter("DataCollectFrequency", intVal[0]);
+      mOpenGlPlot->SetIntegerParameter("UpdatePlotFrequency", intVal[1]);
+
+      inputString[0] = mNumPointsToRedrawTextCtrl->GetValue();
+      if (!GmatStringUtil::ToInteger(inputString[0], &intVal[0]) || 
+          intVal[0] < 0)
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                 inputString[0].c_str(), "NumPointsToRedraw","Integer >= 0");
+         return;
+      }
+      mOpenGlPlot->SetIntegerParameter("NumPointsToRedraw", intVal[0]);
       
       mOpenGlPlot->Activate(mPlotCheckBox->IsChecked());
       
@@ -1109,7 +1152,13 @@ void OpenGlPlotSetupPanel::SaveData()
          mOpenGlPlot->SetStringParameter("UseFixedFov", "Off");
       
       Real fov;
-      mFixedFovTextCtrl->GetValue().ToDouble(&fov);
+      inputString[0] = mFixedFovTextCtrl->GetValue();
+      if (!GmatStringUtil::ToDouble(inputString[0], &fov) || fov < 1)
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                 inputString[0].c_str(), "FixedFovAngle","Real Number >= 1");
+         return;
+      }
       mOpenGlPlot->SetRealParameter("FixedFovAngle", fov);
 
       //--------------------------------------------------------------
@@ -1285,21 +1334,36 @@ void OpenGlPlotSetupPanel::SaveData()
             ("ViewDirection",
              std::string(mViewDirectionComboBox->GetStringSelection().c_str()));
          
-         Real realVal;
-         mViewScaleFactorTextCtrl->GetValue().ToDouble(&realVal);
-         mOpenGlPlot->SetRealParameter("ViewScaleFactor", realVal);
+         Real realVal[3];
+//         mViewScaleFactorTextCtrl->GetValue().ToDouble(&realVal);
+         inputString[0] = mViewScaleFactorTextCtrl->GetValue();
+         if (!GmatStringUtil::ToDouble(inputString[0], &realVal[0]) || 
+             realVal[0] < 0)
+         {
+            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+              inputString[0].c_str(), "ViewScaleFactor","Real Number >= 0");
+            return;
+         }
+         mOpenGlPlot->SetRealParameter("ViewScaleFactor", realVal[0]);
 
          // save ViewPoint ref. vector
          if (mViewPointRefComboBox->GetStringSelection() == "Vector")
          {
             Rvector vec(3);
-            Real val1, val2, val3;
-            mViewPointRef1TextCtrl->GetValue().ToDouble(&val1);
-            mViewPointRef2TextCtrl->GetValue().ToDouble(&val2);
-            mViewPointRef3TextCtrl->GetValue().ToDouble(&val3);
-            vec(0) = val1;
-            vec(1) = val2;
-            vec(2) = val3;
+            inputString[0] = mViewPointRef1TextCtrl->GetValue();
+            inputString[1] = mViewPointRef2TextCtrl->GetValue();
+            inputString[2] = mViewPointRef3TextCtrl->GetValue();
+            for (Integer i=0; i < 3; ++i)
+            {
+               if (!GmatStringUtil::ToDouble(inputString[i], &realVal[i]))
+               {
+                  MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                          inputString[i].c_str(), "ViewPointRefVector",
+                          "Real Number");
+                  return;
+               }
+               vec(i) = realVal[i];
+            }
             mOpenGlPlot->SetRvectorParameter("ViewPointRefVector", vec);
          }
          
@@ -1307,13 +1371,20 @@ void OpenGlPlotSetupPanel::SaveData()
          if (mViewPointVectorComboBox->GetStringSelection() == "Vector")
          {
             Rvector vec(3);
-            Real val1, val2, val3;
-            mViewPointVec1TextCtrl->GetValue().ToDouble(&val1);
-            mViewPointVec2TextCtrl->GetValue().ToDouble(&val2);
-            mViewPointVec3TextCtrl->GetValue().ToDouble(&val3);
-            vec(0) = val1;
-            vec(1) = val2;
-            vec(2) = val3;
+            inputString[0] = mViewPointVec1TextCtrl->GetValue();
+            inputString[1] = mViewPointVec2TextCtrl->GetValue();
+            inputString[2] = mViewPointVec3TextCtrl->GetValue();
+            for (Integer i=0; i < 3; ++i)
+            {
+               if (!GmatStringUtil::ToDouble(inputString[i], &realVal[i]))
+               {
+                  MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                          inputString[i].c_str(), "ViewPointVectorVector",
+                          "Real Number");
+                  return;
+               }
+               vec(i) = realVal[i];
+            }
             mOpenGlPlot->SetRvectorParameter("ViewPointVectorVector", vec);
          }
 
@@ -1321,13 +1392,21 @@ void OpenGlPlotSetupPanel::SaveData()
          if (mViewDirectionComboBox->GetStringSelection() == "Vector")
          {
             Rvector vec(3);
-            Real val1, val2, val3;
-            mViewDir1TextCtrl->GetValue().ToDouble(&val1);
-            mViewDir2TextCtrl->GetValue().ToDouble(&val2);
-            mViewDir3TextCtrl->GetValue().ToDouble(&val3);
-            vec(0) = val1;
-            vec(1) = val2;
-            vec(2) = val3;
+            inputString[0] = mViewDir1TextCtrl->GetValue();
+            inputString[1] = mViewDir2TextCtrl->GetValue();
+            inputString[2] = mViewDir3TextCtrl->GetValue();
+
+            for (Integer i=0; i < 3; ++i)
+            {
+               if (!GmatStringUtil::ToDouble(inputString[i], &realVal[i]))
+               {
+                  MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                          inputString[i].c_str(), "ViewDirectionVector",
+                          "Real Number");
+                  return;
+               }
+               vec(i) = realVal[i];
+            }
             mOpenGlPlot->SetRvectorParameter("ViewDirectionVector", vec);
          }
       }
@@ -1345,6 +1424,10 @@ void OpenGlPlotSetupPanel::SaveData()
             ("ViewUpAxis",
              std::string(mViewUpAxisComboBox->GetStringSelection().c_str()));
       }
+
+      theApplyButton->Disable();
+      theOkButton->Enable();
+      canClose = true;
    }
    catch (BaseException &e)
    {
@@ -1577,6 +1660,7 @@ void OpenGlPlotSetupPanel::OnCheckBoxChange(wxCommandEvent& event)
    }
    
    theApplyButton->Enable();
+   theOkButton->Enable();
 }
 
 //------------------------------------------------------------------------------
@@ -1744,6 +1828,7 @@ void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
    }
    
    theApplyButton->Enable();
+   theOkButton->Enable();
 }
 
 
@@ -1754,6 +1839,7 @@ void OpenGlPlotSetupPanel::OnTextChange(wxCommandEvent& event)
 {
    mHasViewInfoChanged = true;
    theApplyButton->Enable();
+   theOkButton->Enable();
 }
 
 
