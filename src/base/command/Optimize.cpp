@@ -17,6 +17,7 @@
  */
 //------------------------------------------------------------------------------
 
+#include <sstream>
 #include "Optimize.hpp"
 #include "ExternalOptimizer.hpp"
 #if defined __USE_MATLAB__
@@ -29,6 +30,7 @@
 //#define DEBUG_OPTIMIZER_PARSING
 //#define DEBUG_OPTIMIZE_COMMANDS
 //#define DEBUG_OPTIMIZER
+//#define DEBUG_CALLBACK
 
 //------------------------------------------------------------------------------
 // static data
@@ -519,6 +521,9 @@ bool Optimize::Execute()
 
 bool Optimize::ExecuteCallback()
 {
+   #ifdef DEBUG_CALLBACK
+      MessageInterface::ShowMessage("Entering Optimize::ExecuteCallback");
+   #endif
    // NOTE that in the future we may have a callback to/from a non_MATLAB
    // external optimizer
    if (!optimizer || 
@@ -541,27 +546,31 @@ bool Optimize::ExecuteCallback()
    // ask Matlab for the value of X
    Integer     n = optimizer->GetIntegerParameter(
                    optimizer->GetParameterID("NumberOfVariables"));
-   double      X[n];
-   std::string xName = "X";
-   MatlabInterface::GetVariable(xName, n, X);
+   //double      X[n];
+   //std::string xName = "X";
+   //MatlabInterface::GetVariable(xName, n, X);
+   Real X[n];
+   // read X values from the callback data string here
+   std::stringstream ins(callbackData.c_str());
+   for (Integer i=0; i<n; i++)
+      ins >> X[i];
    std::vector<Real> vars;
    for (Integer i=0;i<n;i++)
       vars.push_back(X[i]);
    // get the state of the Optimizer
-   StringArray results;
    Solver::SolverState nState = optimizer->GetNestedState(); 
    if (nState == Solver::INITIALIZING)
    {
       StoreLoopData();
       // advance to NOMINAL
-      results = optimizer->AdvanceNestedState(vars);
-      nState  = optimizer->GetNestedState();
+      callbackResults = optimizer->AdvanceNestedState(vars);
+      nState          = optimizer->GetNestedState();
    }
    if (nState != Solver::NOMINAL)
       throw CommandException(
          "Optimize::ExecuteCallback - error in optimizer state");
    // this call should just advance the state to CALCULATING
-   results = optimizer->AdvanceNestedState(vars);
+   callbackResults = optimizer->AdvanceNestedState(vars);
    ResetLoopData();
    try
    {
@@ -576,14 +585,42 @@ bool Optimize::ExecuteCallback()
    }
    // this call should just advance the state back to NOMINAL
    // and return results
-   results = optimizer->AdvanceNestedState(vars); 
+   callbackResults = optimizer->AdvanceNestedState(vars); 
    // send results to MATLAB
-   for (Integer i=0;i<(Integer)results.size();i++)
-      MatlabInterface::RunMatlabString(results.at(i));
+   //for (Integer i=0;i<(Integer)results.size();i++)
+   //   MatlabInterface::RunMatlabString(results.at(i));
    #endif
    callbackExecuting = false;
-   return false;  
+   //return false;  
+   return true;
 }
+
+bool Optimize::PutCallbackData(std::string &data)
+{
+   callbackData = data;
+   #ifdef DEBUG_CALLBACK
+      MessageInterface::ShowMessage("Entering Optimize::PutCallbackData");
+      MessageInterface::ShowMessage("-- callback data are:\n");
+      for (Integer i=0; i< (Integer) data.size(); i++)
+         MessageInterface::ShowMessage("---- %f ", data[i]);
+      MessageInterface::ShowMessage("-------------\n");
+   #endif
+   return true;
+}
+
+std::string Optimize::GetCallbackResults()
+{
+   std::string allResults;
+   for (Integer i=0; i< (Integer) callbackResults.size(); i++)
+      allResults += callbackResults.at(i) + ";";
+   #ifdef DEBUG_CALLBACK
+      MessageInterface::ShowMessage("Exiting Optimize::GetCallbackResults");
+      MessageInterface::ShowMessage("-- callback results are: %s\n",
+      allResults.c_str());
+   #endif
+   return allResults;
+}
+
 
 //------------------------------------------------------------------------------
 // protected methods

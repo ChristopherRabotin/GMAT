@@ -280,22 +280,22 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
       // GradF
       outS.str("");
       for (Integer i=0; i<(Integer) gradient.size(); i++)
-         outS << gradient.at(i) << " ";
-      oneResult = "GradF = [" + outS.str() + "]\';";
+         outS << gradient.at(i) << ";";
+      oneResult = "GradF = [" + outS.str() + "];";
       results.push_back(oneResult);
       
       // equality constraints
       outS.str("");
       for (Integer i=0; i<(Integer) eqConstraintValues.size(); i++)
-         outS << eqConstraintValues.at(i) << " ";
-      oneResult = "NonLinearEqCon = [" + outS.str() + "]\';";
+         outS << eqConstraintValues.at(i) << ";";
+      oneResult = "NonLinearEqCon = [" + outS.str() + "];";
       results.push_back(oneResult);
       
       // inequality constraints
       outS.str("");
       for (Integer i=0; i<(Integer) ineqConstraintValues.size(); i++)
-         outS << ineqConstraintValues.at(i) << " ";
-      oneResult = "NonLinearIneqCon = [" + outS.str() + "]\';";
+         outS << ineqConstraintValues.at(i) << ";";
+      oneResult = "NonLinearIneqCon = [" + outS.str() + "];";
       results.push_back(oneResult);
       
       // Jacobian in the future ---------------------- <future> ----------------
@@ -368,8 +368,11 @@ bool FminconOptimizer::Optimize()
       
       // clear last errormsg
       MatlabInterface::EvalString("clear errormsg");
+      //std::string runString = 
+      //   "[X] = GmatFminconOptimizationDriver(X0,Lower,Upper);";
+      // wcs - made it into an m-file instead of a function
       std::string runString = 
-         "[X] = GmatFminconOptimizationDriver(X0,Lower,Upper);";
+         "GmatFminconOptimizationDriver;";
       MatlabInterface::RunMatlabString(runString);
       // ask MATLAB for the value of exitFlag here and evaluate
       double      outArr[1];

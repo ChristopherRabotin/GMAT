@@ -40,6 +40,8 @@ public:
    bool ExecuteCallback();
    bool RegisterCallbackServer(GmatBase *callbackObject);
    char* GetCallbackStatus();
+   void  PutCallbackData(std::string &data);
+   char* GetCallbackResults();
    
    char* GetRunState();
    char* GetObject(const std::string &name);
@@ -48,6 +50,7 @@ public:
 private:
    static const int MAX_PARAM_VAL_STRING = 512;
    static const int MAX_OBJECT_VAL_STRING = 4096;
+   static const int MAX_CALLBACK_DATA_VAL_STRING = 1024;
    
    void RedirectBuffer(std::ios *stream, std::streambuf* newBuff) 
       { stream->rdbuf(newBuff); }

@@ -700,6 +700,16 @@ bool GmatBase::IsCallbackExecuting()
    return callbackExecuting;
 }
 
+bool GmatBase::PutCallbackData(std::string &data)
+{
+   return false;
+}
+
+std::string GmatBase::GetCallbackResults()
+{
+   return "no data";
+}
+
 //---------------------------------------------------------------------------
 //  static Integer GetInstanceCount()
 //---------------------------------------------------------------------------

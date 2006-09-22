@@ -20,12 +20,13 @@
 #include "GmatInterface.hpp"
 #include "Moderator.hpp"         // for Instance()
 #include "MessageInterface.hpp"
+#include "InterfaceException.hpp"
 
 GmatInterface* GmatInterface::instance = NULL;
 bool GmatInterface::mPassedInterpreter = false;
 
 //#define DEBUG_GMAT_INTERFACE 1
-//#define DEBUG_CALLBACK
+//#define DEBUG_TEST_CALLBACK
 
 //---------------------------------
 // public methods
@@ -174,7 +175,7 @@ void GmatInterface::RunScript()
 
 bool GmatInterface::ExecuteCallback()
 {
-   #ifdef DEBUG_CALLBACK
+   #ifdef DEBUG_TEST_CALLBACK
       MessageInterface::ShowMessage("GI::ExecuteCallback being called ...\n");
    #endif
    if (callbackObj)
@@ -183,12 +184,15 @@ bool GmatInterface::ExecuteCallback()
       return true;
    }
    else
+   //*************** TEMPORARY tuff to test MATLAB->GMAT part ******************
+   
+   //*************** TEMPORARY tuff to test MATLAB->GMAT part ******************
       return false;
 }
 
 bool GmatInterface::RegisterCallbackServer(GmatBase *callbackObject)
 {
-   #ifdef DEBUG_CALLBACK
+   #ifdef DEBUG_TEST_CALLBACK
       MessageInterface::ShowMessage(
       "GI::RegisterCallbackServer being called with object %s...\n",
       (callbackObject->GetName()).c_str());
@@ -206,7 +210,7 @@ bool GmatInterface::RegisterCallbackServer(GmatBase *callbackObject)
 //------------------------------------------------------------------------------
 char* GmatInterface::GetCallbackStatus()
 {
-   #ifdef DEBUG_CALLBACK
+   #ifdef DEBUG_TEST_CALLBACK
       MessageInterface::ShowMessage(
       "GI::GetCallbackStatus being called ...\n");
    #endif
@@ -227,6 +231,57 @@ char* GmatInterface::GetCallbackStatus()
    #if DEBUG_GMAT_INTERFACE
    MessageInterface::ShowMessage
       ("GmatInterface::GetCallbackStatus() dataString=<%s>\n", dataString);
+   #endif
+   return dataString;
+}
+
+//------------------------------------------------------------------------------
+// void PutCallbackData(std::string &data)
+//------------------------------------------------------------------------------
+/*
+ */
+//------------------------------------------------------------------------------
+void  GmatInterface::PutCallbackData(std::string &data)
+{
+   #ifdef DEBUG_TEST_CALLBACK
+      MessageInterface::ShowMessage(
+      "GI::PutCallbackData being called with data = %s\n", data.c_str());
+   #endif
+   if (callbackObj)
+   {
+      if (!(callbackObj->PutCallbackData(data)))
+         throw InterfaceException(
+         "GmatInterface::Error setting callback data on callback server");
+   }
+}
+
+//------------------------------------------------------------------------------
+// char* GetCallbackResults()
+//------------------------------------------------------------------------------
+/*
+ * @return the status of the callback execution ("Executing", "Completed").
+ */
+//------------------------------------------------------------------------------
+char* GmatInterface::GetCallbackResults()
+{
+   #ifdef DEBUG_TEST_CALLBACK
+      MessageInterface::ShowMessage(
+      "GI::GetCallbackResults being called ...\n");
+   #endif
+   static char dataString[MAX_CALLBACK_DATA_VAL_STRING];
+   static char *errorStr = "ERROR!!\0";
+   if (!callbackObj) // not running a callback - why are you asking?
+   {
+      sprintf(dataString, "%s", errorStr);
+   }
+   else
+   {
+      std::string results = callbackObj->GetCallbackResults();
+      sprintf(dataString, "%s", results.c_str());
+   }
+   #if DEBUG_GMAT_INTERFACE
+   MessageInterface::ShowMessage
+      ("GmatInterface::GetCallbackData() dataString=<%s>\n", dataString);
    #endif
    return dataString;
 }

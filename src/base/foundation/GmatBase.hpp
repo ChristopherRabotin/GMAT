@@ -103,6 +103,8 @@ public:
    virtual GmatBase*   GetOwnedObject(Integer whichOne);
    virtual bool        ExecuteCallback();
    virtual bool        IsCallbackExecuting();
+   virtual bool        PutCallbackData(std::string &data);
+   virtual std::string GetCallbackResults();
    
    // Method to return the current number of instantaited objects
    static Integer      GetInstanceCount();

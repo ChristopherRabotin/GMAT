@@ -115,6 +115,16 @@ bool GmatConnection::OnPoke(const wxString& WXUNUSED(topic),
    {
       GmatInterface::Instance()->ExecuteCallback();
    }
+   else if (strncmp(data, "CallbackData", 12) == 0)
+   {
+      std::string theString(data);
+      std::string callbackData = theString.substr(13,1024);
+      #if DEBUG_CONNECTION
+         MessageInterface::ShowMessage
+            ("GmatConnection::callbackData = %s\n", callbackData.c_str());
+      #endif
+      GmatInterface::Instance()->PutCallbackData(callbackData);
+   }
    else
    {
       GmatInterface::Instance()->PutScript((char*)data);
@@ -172,6 +182,15 @@ wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
    else if (item == "CallbackStatus") //wcs: 2006.08.24 Added
    {
       data = GmatInterface::Instance()->GetCallbackStatus();
+      
+      #if DEBUG_CONNECTION
+      MessageInterface::ShowMessage
+         ("GmatConnection::OnRequest() data=%s\n", data);
+      #endif
+   }
+   else if (item == "CallbackResults") //wcs: 2006.09.21 Added
+   {
+      data = GmatInterface::Instance()->GetCallbackResults();
       
       #if DEBUG_CONNECTION
       MessageInterface::ShowMessage

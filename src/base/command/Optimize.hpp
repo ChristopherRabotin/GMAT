@@ -42,6 +42,8 @@ public:
    // inherited from GmatBase
    // Method to execute a callback from an external function
    virtual bool        ExecuteCallback();
+   virtual bool        PutCallbackData(std::string &data);
+   virtual std::string GetCallbackResults();
    virtual GmatBase*   Clone() const;
    const std::string&  GetGeneratingString(Gmat::WriteMode mode,
                                            const std::string &prefix,
@@ -91,6 +93,9 @@ protected:
    ObjectArray         localStore;
    /// Flag indicating is the optimizer has converged
    bool                optimizerConverged;
+   
+   StringArray         callbackResults;
+   std::string         callbackData;
     
    // Parameter IDs 
    //Integer             optimizerNameID;
