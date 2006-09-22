@@ -698,12 +698,12 @@ void OpenGlPlotSetupPanel::Create()
    mViewPointRefSizer->Add(mViewPointRef1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewPointRefSizer->Add(mViewPointRef2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewPointRefSizer->Add(mViewPointRef3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointRefSizer->Add(mViewPointStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewPointRefSizer->Add(mViewPointRefStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    
    mViewPointVectorSizer->Add(mViewPointVec1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewPointVectorSizer->Add(mViewPointVec2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewPointVectorSizer->Add(mViewPointVec3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointVectorSizer->Add(mViewPointStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewPointVectorSizer->Add(mViewPointVecStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    
    mViewDirVectorSizer->Add(mViewDir1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewDirVectorSizer->Add(mViewDir2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
