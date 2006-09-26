@@ -109,6 +109,8 @@ protected:
    bool           leftJustify;
    /// Fill right field with 0
    bool           zeroFill;
+   /// Solver Iterations
+   bool           solverIterations;
    
    /// output data stream
    std::ofstream       dstream;
@@ -138,6 +140,7 @@ protected:
       LEFT_JUSTIFY,
       ZERO_FILL,
       COL_WIDTH,
+      SOLVER_ITERATIONS,
       ReportFileParamCount  /// Count of the parameters for this class
    };
 
