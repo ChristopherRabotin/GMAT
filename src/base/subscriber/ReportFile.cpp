@@ -45,6 +45,7 @@ ReportFile::PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount] =
    "LeftJustify",
    "ZeroFill",
    "ColumnWidth",
+   "SolverIterations",
 };
 
 const Gmat::ParameterType
@@ -75,6 +76,7 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
    writeHeaders    (true),
    leftJustify     (true),
    zeroFill        (false),
+   solverIterations(false),
    lastUsedProvider(-1),
    usedByReport    (false)
 {
@@ -137,7 +139,8 @@ ReportFile::ReportFile(const ReportFile &rf) :
    writeHeaders    (rf.writeHeaders),
    leftJustify     (rf.leftJustify),
    zeroFill        (rf.zeroFill),
-   lastUsedProvider (-1),
+   solverIterations(rf.solverIterations),
+   lastUsedProvider(-1),
    usedByReport    (rf.usedByReport),
    calledByReport  (rf.calledByReport)
 {
@@ -178,6 +181,7 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
    writeHeaders = rf.writeHeaders;
    leftJustify = rf.leftJustify;
    zeroFill = rf.zeroFill;
+   solverIterations = rf.solverIterations;
    mVarParams = rf.mVarParams; 
    mNumVarParams = rf.mNumVarParams;
    mVarParamNames = rf.mVarParamNames;
@@ -455,6 +459,13 @@ std::string ReportFile::GetStringParameter(const Integer id) const
       else
          return "Off";
    }
+   else if (id == SOLVER_ITERATIONS)
+   {
+      if (solverIterations)
+         return "On";
+      else
+         return "Off";
+   }
    
    return Subscriber::GetStringParameter(id);
 }
@@ -540,6 +551,21 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
       else if (strcmp(value.c_str(), "Off") == 0)
       {
          zeroFill = false;
+         return true;
+      }
+      else
+         return false;   
+   }   
+   else if (id == SOLVER_ITERATIONS)
+   {
+      if (strcmp(value.c_str(), "On") == 0)
+      {
+         solverIterations = true;
+         return true;
+      }   
+      else if (strcmp(value.c_str(), "Off") == 0)
+      {
+         solverIterations = false;
          return true;
       }
       else
