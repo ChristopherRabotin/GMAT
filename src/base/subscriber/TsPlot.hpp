@@ -28,7 +28,7 @@ public:
    TsPlot(const std::string &name, Parameter *xParam = NULL,
           Parameter *firstYParam = NULL, const std::string &plotTitle = "",
           const std::string &xAxisTitle = "", const std::string &yAxisTitle = "",
-          bool drawGrid = false);
+          bool drawGrid = true);
    TsPlot(const TsPlot &copy);
    virtual ~TsPlot(void);
 
