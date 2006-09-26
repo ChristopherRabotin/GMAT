@@ -20,7 +20,10 @@
 #include "GmatAppData.hpp"
 #include "ParameterCreateDialog.hpp"
 #include "ParameterInfo.hpp"            // for GetDepObjectType()
+#include "StringUtil.hpp"
 #include "MessageInterface.hpp"
+#include <fstream>
+
 
 #include "bitmaps/up.xpm"
 #include "bitmaps/down.xpm"
@@ -116,6 +119,7 @@ ReportFileSetupPanel::~ReportFileSetupPanel()
 void ReportFileSetupPanel::OnWriteCheckBoxChange(wxCommandEvent& event)
 {
    theApplyButton->Enable();
+   theOkButton->Enable();
 }
 
 //----------------------------------
@@ -275,6 +279,10 @@ void ReportFileSetupPanel::Create()
       new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Zero Fill"),
                      wxDefaultPosition, wxDefaultSize, 0);
    
+   solverIterationsCheckBox =
+      new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Solver Iterations"),
+                     wxDefaultPosition, wxSize(-1, -1), 0);
+
    wxStaticText *colWidthText =
       new wxStaticText(this, -1, wxT("Column Width"),
                        wxDefaultPosition, wxDefaultSize, 0);
@@ -295,6 +303,8 @@ void ReportFileSetupPanel::Create()
    reportOptionSizer->Add(showHeaderCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(leftJustifyCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(zeroFillCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   reportOptionSizer->Add(solverIterationsCheckBox, 0, wxALIGN_CENTER|wxALL, 
+                          bsize);
    reportOptionSizer->Add(colWidthText, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(colWidthTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(precisionText, 0, wxALIGN_CENTER|wxALL, bsize);
@@ -371,6 +381,12 @@ void ReportFileSetupPanel::LoadData()
       zeroFillCheckBox->SetValue(true);
    else
       zeroFillCheckBox->SetValue(false);                     
+
+   int solverId = reportFile->GetParameterID("SolverIterations");
+   if (strcmp(reportFile->GetStringParameter(solverId).c_str(), "On") == 0)
+      solverIterationsCheckBox->SetValue(true);
+   else
+      solverIterationsCheckBox->SetValue(false);                     
    
    int spacesId = reportFile->GetParameterID("ColumnWidth");
    wxString numSpacesValue;
@@ -422,6 +438,9 @@ void ReportFileSetupPanel::LoadData()
 void ReportFileSetupPanel::SaveData()
 {
    // save data to core engine
+   canClose = false;
+   theOkButton->Disable();
+
    reportFile->Activate(writeCheckBox->IsChecked());
    
    //if (theSubscriber->IsActive())
@@ -448,26 +467,65 @@ void ReportFileSetupPanel::SaveData()
       reportFile->SetStringParameter(zeroFillId, "On");
    else
       reportFile->SetStringParameter(zeroFillId, "Off");
+
+   int solverId = reportFile->GetParameterID("SolverIterations");
+   if (solverIterationsCheckBox->IsChecked())
+      reportFile->SetStringParameter(solverId, "On");
+   else
+      reportFile->SetStringParameter(solverId, "Off");
    
+   
+   Integer intValue;
+   std::string inputString;
+   std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
+                 reportFile->GetName() + "\" is not an allowed value.  "
+                 "\nThe allowed values are: [ %s ].";
+
    int spacesId = reportFile->GetParameterID("ColumnWidth");
-   reportFile->SetIntegerParameter(spacesId,
-                                   atoi(colWidthTextCtrl->GetValue()));
+   inputString = colWidthTextCtrl->GetValue();
+   if (!GmatStringUtil::ToInteger(inputString, &intValue) || intValue <= 0)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+             inputString.c_str(), "ColumnWidth","Integer > 0");
+      return;
+   }
+   reportFile->SetIntegerParameter(spacesId,intValue);
 
    int precisionId = reportFile->GetParameterID("Precision");
-   reportFile->SetIntegerParameter(precisionId,
-                                   atoi(precisionTextCtrl->GetValue()));
+   inputString = precisionTextCtrl->GetValue();
+   if (!GmatStringUtil::ToInteger(inputString, &intValue) || intValue <= 0)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+             inputString.c_str(), "Precision","Integer > 0");
+      return;
+   }
+   reportFile->SetIntegerParameter(precisionId,intValue);
 
    // save file name data to core engine
-   wxString filename = fileTextCtrl->GetValue();
+   inputString = fileTextCtrl->GetValue();
+   std::ofstream filename(inputString.c_str());
+
+   // Check for non-existing pathname/filename
+   if (!filename)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                 inputString.c_str(),"File", "Valid File Path and Name");
+      return;
+   }
    int filenameId = reportFile->GetParameterID("Filename");
-   reportFile->SetStringParameter(filenameId,
-                                  std::string (filename.c_str()));
+   reportFile->SetStringParameter(filenameId,inputString.c_str());
    
    
    mNumVarParams = mVarSelectedListBox->GetCount();
-    
+
    if (mNumVarParams >= 0) // >=0 because the list needs to be cleared
    {
+      if (mNumVarParams == 0)
+      {
+          MessageInterface::ShowMessage(
+                 "\nWarning:  No variable in %s's \"Selected\"  selection box",
+                 reportFile->GetName().c_str());
+      }
       reportFile->TakeAction("Clear");
       for (int i=0; i<mNumVarParams; i++)
       {
@@ -475,6 +533,10 @@ void ReportFileSetupPanel::SaveData()
          reportFile->SetStringParameter("Add", selYName, i);
       }
    }
+
+   theApplyButton->Disable();
+   theOkButton->Enable();
+   canClose = true;
 }
 
 
@@ -505,6 +567,7 @@ void ReportFileSetupPanel::OnBrowseButton(wxCommandEvent& event)
 void ReportFileSetupPanel::OnTextChange(wxCommandEvent &event)
 {
     theApplyButton->Enable();
+    theOkButton->Enable();
 }
 
 
