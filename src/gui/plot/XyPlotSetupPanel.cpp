@@ -362,6 +362,7 @@ void XyPlotSetupPanel::OnCreateVariable(wxCommandEvent& event)
 void XyPlotSetupPanel::OnCheckBoxChange(wxCommandEvent& event)
 {
    theApplyButton->Enable();
+   theOkButton->Enable();
 }
 
 
@@ -431,12 +432,22 @@ void XyPlotSetupPanel::Create()
    //------------------------------------------------------
    // add, remove X buttons (2nd column)
    //------------------------------------------------------
+
+   #if __WXMAC__
+   mAddXButton = new wxButton(this, ADD_X, wxT("<--"),
+                              wxDefaultPosition, wxSize(40,20), 0);
+
+   wxButton *removeXButton =
+      new wxButton(this, REMOVE_X, wxT("-->"),
+                   wxDefaultPosition, wxSize(40,20), 0);
+   #else
    mAddXButton = new wxButton(this, ADD_X, wxT("<--"),
                               wxDefaultPosition, wxSize(20,20), 0);
 
    wxButton *removeXButton =
       new wxButton(this, REMOVE_X, wxT("-->"),
                    wxDefaultPosition, wxSize(20,20), 0);
+   #endif
 
    wxBoxSizer *xButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
    xButtonsBoxSizer->Add(30, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -489,6 +500,16 @@ void XyPlotSetupPanel::Create()
    //------------------------------------------------------
    // add, remove, clear Y buttons (4th column)
    //------------------------------------------------------
+   #if __WXMAC__
+   mAddYButton =
+      new wxButton(this, ADD_Y, wxT("-->"), wxDefaultPosition, wxSize(40,20), 0);
+
+   wxButton *removeYButton =
+      new wxButton(this, REMOVE_Y, wxT("<--"), wxDefaultPosition, wxSize(40,20), 0);
+   
+   wxButton *clearYButton =
+      new wxButton(this, CLEAR_Y, wxT("<="), wxDefaultPosition, wxSize(40,20), 0);
+   #else
    mAddYButton =
       new wxButton(this, ADD_Y, wxT("-->"), wxDefaultPosition, wxSize(20,20), 0);
 
@@ -497,7 +518,8 @@ void XyPlotSetupPanel::Create()
    
    wxButton *clearYButton =
       new wxButton(this, CLEAR_Y, wxT("<="), wxDefaultPosition, wxSize(20,20), 0);
-   
+   #endif
+
    clearYButton->SetToolTip("Remove All");
    
    wxBoxSizer *yButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
@@ -687,7 +709,9 @@ void XyPlotSetupPanel::LoadData()
 void XyPlotSetupPanel::SaveData()
 {
    // save data to core engine
-    
+   canClose = false;
+   theOkButton->Disable();
+ 
    mXyPlot->Activate(showPlotCheckBox->IsChecked());
 
    if (showGridCheckBox->IsChecked())
@@ -705,7 +729,10 @@ void XyPlotSetupPanel::SaveData()
    {
       if (mXSelectedListBox->GetCount() == 0 && showPlotCheckBox->IsChecked())
       {
-         wxLogMessage(wxT("X parameter not selected. The plot will not be activated."));
+         MessageInterface::ShowMessage("Warning: X parameter not selected. "
+                                       "The plot will not be activated.");
+                
+//         wxLogMessage(wxT("X parameter not selected. The plot will not be activated."));
          mXyPlot->Activate(false);
       }
       else
@@ -728,7 +755,9 @@ void XyPlotSetupPanel::SaveData()
       mNumYParams = numYParams;
       if (mNumYParams == 0 && showPlotCheckBox->IsChecked())
       {
-         wxLogMessage(wxT("Y parameters not selected. The plot will not be activated."));
+         MessageInterface::ShowMessage("Warning: Y parameter not selected. "
+                                       "The plot will not be activated.");
+//         wxLogMessage(wxT("Y parameters not selected. The plot will not be activated."));
          mXyPlot->Activate(false);
       }
       else if (numYParams > GmatPlot::MAX_XY_CURVE)
@@ -780,6 +809,11 @@ void XyPlotSetupPanel::SaveData()
          }
       }
    }
+
+   theApplyButton->Disable();
+   theOkButton->Enable();
+   canClose = true;
+
 }
 
 //---------------------------------
