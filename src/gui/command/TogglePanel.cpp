@@ -217,7 +217,7 @@ void TogglePanel::SaveData()
 //------------------------------------------------------------------------------
 void TogglePanel::OnComboBoxChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -226,7 +226,7 @@ void TogglePanel::OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void TogglePanel::OnRadioButtonChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -235,7 +235,7 @@ void TogglePanel::OnRadioButtonChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void TogglePanel::OnCheckListBoxChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -245,6 +245,6 @@ void TogglePanel::OnCheckListBoxChange(wxCommandEvent& event)
 // void TogglePanel::OnSelectSubscriber(wxCommandEvent& event)
 // {
 //    ShowOption();
-//    theApplyButton->Enable();
+//    EnableUpdate(true);
 // }
 

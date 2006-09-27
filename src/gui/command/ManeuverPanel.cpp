@@ -78,7 +78,7 @@ ManeuverPanel::~ManeuverPanel()
 //------------------------------------------------------------------------------
 void ManeuverPanel::OnBurnComboBoxChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -86,7 +86,7 @@ void ManeuverPanel::OnBurnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ManeuverPanel::OnSatComboBoxChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 //----------------------------------
@@ -185,7 +185,7 @@ void ManeuverPanel::LoadData()
    std::string burn = theCommand->GetStringParameter(id);
    //StringArray burnList = theCommand->GetStringArrayParameter(id);
    //MessageInterface::ShowMessage("ManeuverPanel::LoadData() burn=%s\n", burn.c_str());
-   StringArray burnList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::BURN);
+   StringArray burnList = theGuiInterpreter->GetListOfObjects(Gmat::BURN);
    index = 0;
    for (StringArray::iterator iter = burnList.begin(); 
         iter != burnList.end(); ++iter) 
@@ -205,7 +205,7 @@ void ManeuverPanel::LoadData()
    id = theCommand->GetParameterID("Spacecraft");
    std::string sat = theCommand->GetStringParameter(id);
    //MessageInterface::ShowMessage("ManeuverPanel::LoadData() sat=%s\n", sat.c_str());
-   StringArray satList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+   StringArray satList = theGuiInterpreter->GetListOfObjects(Gmat::SPACECRAFT);
    index = 0;
    for (StringArray::iterator iter = satList.begin(); 
         iter != satList.end(); ++iter) 

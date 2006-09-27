@@ -50,13 +50,15 @@ ImpulsiveBurnSetupPanel::ImpulsiveBurnSetupPanel(wxWindow *parent,
 {
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
 
-   theBurn = theGuiInterpreter->GetBurn(std::string(burnName.c_str()));
-
+   //theBurn = theGuiInterpreter->GetBurn(std::string(burnName.c_str()));
+   theBurn = (Burn*)theGuiInterpreter->GetObject(std::string(burnName.c_str()));
+   
    canClose = true;
 
    Create();
    Show();
-   theApplyButton->Disable();
+
+   EnableUpdate(false);
 }
 
 
@@ -82,8 +84,8 @@ void ImpulsiveBurnSetupPanel::OnComboBoxChange(wxCommandEvent& event)
    {
       LabelsUnits();
    }   
-   
-   theApplyButton->Enable();
+
+   EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -153,7 +155,7 @@ void ImpulsiveBurnSetupPanel::AddVector(wxWindow *parent)
 //------------------------------------------------------------------------------
 void ImpulsiveBurnSetupPanel::OnTextChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -210,7 +212,8 @@ void ImpulsiveBurnSetupPanel::LabelsUnits()
    id = theBurn->GetParameterID("Axes");
    theBurn->SetStringParameter(id, axesStr);
 
-   theApplyButton->Enable();
+   EnableUpdate(true);
+   //theApplyButton->Enable();
 }
 
 //----------------------------------
@@ -430,7 +433,7 @@ void ImpulsiveBurnSetupPanel::SaveData()
 //      theBurn->SetRealParameter(id, atof(elemString));
 
       // save element1
-	  id = theBurn->GetParameterID("Element1");
+          id = theBurn->GetParameterID("Element1");
       inputString = textCtrl1->GetValue();      
 
          // check to see if input is a real
@@ -450,7 +453,7 @@ void ImpulsiveBurnSetupPanel::SaveData()
 //      theBurn->SetRealParameter(id, atof(elemString));
 
       // save element2
-	  id = theBurn->GetParameterID("Element2");
+          id = theBurn->GetParameterID("Element2");
       inputString = textCtrl2->GetValue();      
 
          // check to see if input is a real
@@ -470,7 +473,7 @@ void ImpulsiveBurnSetupPanel::SaveData()
 //      theBurn->SetRealParameter(id, atof(elemString));
 
       // save element3
-	  id = theBurn->GetParameterID("Element3");
+          id = theBurn->GetParameterID("Element3");
       inputString = textCtrl3->GetValue();      
 
          // check to see if input is a real
@@ -490,7 +493,7 @@ void ImpulsiveBurnSetupPanel::SaveData()
       std::string origin = std::string (burnOriginStr.c_str());
       theBurn->SetStringParameter(id, origin);
 
-      theApplyButton->Disable();
+      EnableUpdate(false);
    }
    catch (BaseException &e)
    {

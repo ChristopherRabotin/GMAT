@@ -123,19 +123,19 @@ void ScriptEventPanel::SaveData()
    scriptText << mFileContentsTextCtrl->GetValue().c_str();
    std::string firstBlock;
    scriptText >> firstBlock;
-
+   
    #ifdef DEBUG_SCRIPTEVENT_PANEL
       MessageInterface::PopupMessage(Gmat::INFO_, "First block is [" +
          firstBlock + "]");
    #endif
-
+      
    if (firstBlock != theCommand->GetTypeName()) {
       MessageInterface::PopupMessage(Gmat::WARNING_,
          "Changing command types from " + theCommand->GetTypeName() +
          " to " + firstBlock + " is not yet supported.");
       return;
    }
-
+   
    theCommand->SetGeneratingString(scriptText.str());
    
    try
@@ -155,7 +155,7 @@ void ScriptEventPanel::SaveData()
 //------------------------------------------------------------------------------
 void ScriptEventPanel::OnTextUpdate(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 

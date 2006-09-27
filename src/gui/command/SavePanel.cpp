@@ -162,6 +162,6 @@ void SavePanel::SaveData()
 //------------------------------------------------------------------------------
 void SavePanel::OnCheckListBoxChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 

@@ -17,6 +17,7 @@
 #include "InteractiveMatlabDialog.hpp"
 #include "ParameterSelectDialog.hpp"
 #include "MessageInterface.hpp"
+#include <sstream>
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -142,7 +143,7 @@ void InteractiveMatlabDialog::Create()
                      wxDefaultPosition, wxDefaultSize, 0 );
 
    StringArray &list =
-         theGuiInterpreter->GetListOfConfiguredItems(Gmat::FUNCTION);
+         theGuiInterpreter->GetListOfObjects(Gmat::FUNCTION);
    int size = list.size();
    wxString *choices = new wxString[size];
 
@@ -329,7 +330,7 @@ void InteractiveMatlabDialog::SetupCommand()
    // arg: for now to avoid a crash
    if (functionName != "")
    {
-      Function *function = (Function *)theGuiInterpreter->GetConfiguredItem(
+      Function *function = (Function *)theGuiInterpreter->GetObject(
                std::string(functionName));
 
       if (function != NULL)
@@ -380,7 +381,7 @@ void InteractiveMatlabDialog::SetResults()
    // output the results
    for (unsigned int i=0; i<outputStrings.Count(); i++)
    {
-      Parameter *param = (Parameter *)theGuiInterpreter->GetConfiguredItem(
+      Parameter *param = (Parameter *)theGuiInterpreter->GetObject(
             std::string(outputStrings[i]));
 
       if (param->GetTypeName() == "Array")

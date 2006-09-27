@@ -46,9 +46,6 @@ private:
     virtual void Create();
     virtual void LoadData();
     virtual void SaveData();
-    //loj: 2/27/04 commented out
-    //virtual void OnHelp();
-    //virtual void OnScript();
     void OnPageChange(wxCommandEvent &event);
 
     GuiInterpreter *theGuiInterpreter;

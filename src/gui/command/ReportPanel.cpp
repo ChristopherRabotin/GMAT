@@ -266,28 +266,25 @@ void ReportPanel::LoadData()
    
    // Set the pointer for the "Show Script" button
    mObject = theCommand;
-
+   
    // Get ReportFile name
    std::string reportFileName = theCommand->GetRefObjectName(Gmat::SUBSCRIBER);
-
+   
    // Get parameters to report
    StringArray varParamList = theCommand->GetRefObjectNameArray(Gmat::PARAMETER);
    mNumVarParams = varParamList.size();
    
    if (mNumVarParams > 0)
    {      
-      wxString *varParamNames = new wxString[mNumVarParams];
       Parameter *param;
       
       for (int i=0; i<mNumVarParams; i++)
       {
-         varParamNames[i] = varParamList[i].c_str();
          param = theGuiInterpreter->GetParameter(varParamList[i]);
+         mVarSelectedListBox->Append(varParamList[i].c_str());
       }
       
-      mVarSelectedListBox->Set(mNumVarParams, varParamNames);
       mVarSelectedListBox->SetSelection(0);
-      delete varParamNames;
    }
    
    mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
@@ -323,7 +320,7 @@ void ReportPanel::SaveData()
    std::string reportFileName = mReportFileComboBox->GetValue().c_str();
    
    ReportFile *reportFile =
-      (ReportFile*)theGuiInterpreter->GetConfiguredItem(reportFileName);
+      (ReportFile*)theGuiInterpreter->GetObject(reportFileName);
    
    if (reportFile == NULL)
    {
@@ -354,7 +351,7 @@ void ReportPanel::SaveData()
          for (int i=0; i<mNumVarParams; i++)
          {
             std::string selYName = std::string(mVarSelectedListBox->GetString(i).c_str());
-            param = (Parameter*)theGuiInterpreter->GetConfiguredItem(selYName);
+            param = theGuiInterpreter->GetParameter(selYName);
             theCommand->SetRefObject(param, Gmat::PARAMETER, selYName, 1);
          }
       }
@@ -384,7 +381,7 @@ void ReportPanel::OnMoveUpVariable(wxCommandEvent& event)
    }
 
    mIsParameterChanged = true;
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -404,7 +401,7 @@ void ReportPanel::OnMoveDownVariable(wxCommandEvent& event)
    }
    
    mIsParameterChanged = true;
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -436,7 +433,7 @@ void ReportPanel::OnAddVariable(wxCommandEvent& event)
          //Show next parameter
          mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
          OnSelectProperty(event);
-         theApplyButton->Enable();
+         EnableUpdate(true);
       }
       else
       {
@@ -477,7 +474,7 @@ void ReportPanel::OnRemoveVariable(wxCommandEvent& event)
    }
 
    mIsParameterChanged = true;
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -488,7 +485,7 @@ void ReportPanel::OnClearVariable(wxCommandEvent& event)
 {
    mVarSelectedListBox->Clear();
    mIsParameterChanged = true;
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -547,7 +544,7 @@ void ReportPanel::OnComboBoxChange(wxCommandEvent& event)
    if (event.GetEventObject() == mReportFileComboBox)
    {
       mIsReportFileChanged = true;
-      theApplyButton->Enable();
+      EnableUpdate(true);
    }
    else if (event.GetEventObject() == mObjectTypeComboBox)
    {

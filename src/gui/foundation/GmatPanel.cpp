@@ -136,15 +136,27 @@ void GmatPanel::Show()
     SetSizer(thePanelSizer); //use the sizer for layout
     thePanelSizer->Fit(this); //loj: if theParent is used it doesn't show the scroll bar
     thePanelSizer->SetSizeHints(this); //set size hints to honour minimum size
-
-    theApplyButton->Disable();
+    
     LoadData();
-
-    theHelpButton->Disable();   //loj: not implemented yet
-
+    
+    theApplyButton->Disable(); //loj: 9/25/06 Moved from before LoadData()
+    theOkButton->Disable();    //loj: 9/25/06 Added
+    theHelpButton->Disable();  // Not implemented yet
+    
     if ((mObject == NULL) || (!mObject->IsOfType(Gmat::COMMAND)))
     theSummaryButton->Hide();
 }
+
+
+//------------------------------------------------------------------------------
+// virtual void EnableUpdate(bool enable = true)
+//------------------------------------------------------------------------------
+void GmatPanel::EnableUpdate(bool enable)
+{
+   theApplyButton->Enable(enable);
+   theOkButton->Enable(enable);
+}
+
 
 //------------------------------------------------------------------------------
 // void OnOk()
@@ -165,6 +177,7 @@ void GmatPanel::OnOK(wxCommandEvent &event)
        GmatAppData::GetMainFrame()->CloseActiveChild();
 }
 
+
 //------------------------------------------------------------------------------
 // void OnCancel()
 //------------------------------------------------------------------------------
@@ -180,6 +193,7 @@ void GmatPanel::OnCancel(wxCommandEvent &event)
    GmatAppData::GetMainFrame()->CloseActiveChild();
 }
 
+
 //------------------------------------------------------------------------------
 // void OnApply()
 //------------------------------------------------------------------------------
@@ -192,6 +206,7 @@ void GmatPanel::OnApply(wxCommandEvent &event)
    SaveData();
    theGuiInterpreter->ConfigurationChanged(mObject, true);
    theApplyButton->Enable(!enableApply);
+   theOkButton->Enable(!enableApply);
 }
 
 
@@ -206,6 +221,7 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
 {
    // open separate window to show help?
 }
+
 
 //------------------------------------------------------------------------------
 // void OnScript()

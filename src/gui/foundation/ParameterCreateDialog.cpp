@@ -16,6 +16,7 @@
 
 #include "ParameterCreateDialog.hpp"
 #include "RgbColor.hpp"
+#include "ParameterInfo.hpp"            // for GetDepObjectType()
 #include "MessageInterface.hpp"
 #include "StringTokenizer.hpp"
 
@@ -78,6 +79,10 @@ ParameterCreateDialog::~ParameterCreateDialog()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::Create()
 {
+   #if DEBUG_PARAM_CREATE_DIALOG
+   MessageInterface::ShowMessage("ParameterCreateDialog::Create() entered\n");
+   #endif
+   
    int bsize = 2;
    
    //wxStaticText
@@ -141,21 +146,21 @@ void ParameterCreateDialog::Create()
                         wxDefaultPosition, wxSize(120,20),
                         wxBOLD);
    title1StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-									true, _T(""), wxFONTENCODING_SYSTEM));
+                                    true, _T(""), wxFONTENCODING_SYSTEM));
    wxStaticText *title2StaticText =
       new wxStaticText( this, ID_TEXT, wxT("String"),
                         wxDefaultPosition, wxSize(120,20),
                         wxBOLD);
    title2StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-									true, _T(""), wxFONTENCODING_SYSTEM));
+                                    true, _T(""), wxFONTENCODING_SYSTEM));
    wxStaticText *title3StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Array"),
                         wxDefaultPosition, wxSize(120,20),
                         wxBOLD);
    title3StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-									true, _T(""), wxFONTENCODING_SYSTEM));
+                                    true, _T(""), wxFONTENCODING_SYSTEM));
    #endif
-						
+   
    // wxTextCtrl
    mVarNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                                      wxDefaultPosition, wxSize(130,20), 0);
@@ -203,7 +208,7 @@ void ParameterCreateDialog::Create()
       theGuiManager->GetUserArrayListBox(this, -1, wxSize(170, 50), "");
    mUserStringListBox =
       theGuiManager->GetUserStringListBox(this, -1, wxSize(170, 50), "");
-	  
+          
    // wxComboBox
    mCoordSysComboBox = theGuiManager->GetCoordSysComboBox(this, ID_COMBO, wxSize(120,-1));
    mCentralBodyComboBox = theGuiManager->GetConfigBodyComboBox(this, ID_COMBO, wxSize(100,-1));
@@ -230,7 +235,7 @@ void ParameterCreateDialog::Create()
    wxStaticBox *arrayStaticBox = new wxStaticBox(this, -1, wxT("Array"));
    wxStaticBoxSizer *arrayStaticBoxSizer =
       new wxStaticBoxSizer(arrayStaticBox, wxVERTICAL);
-	  
+          
    wxStaticBox *stringStaticBox = new wxStaticBox(this, -1, wxT("String"));
    wxStaticBoxSizer *stringStaticBoxSizer =
       new wxStaticBoxSizer(stringStaticBox, wxHORIZONTAL);
@@ -345,6 +350,11 @@ void ParameterCreateDialog::Create()
    // add to parent sizer
    //-------------------------------------------------------
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
+
+   #if DEBUG_PARAM_CREATE_DIALOG
+   MessageInterface::ShowMessage("ParameterCreateDialog::Create() exiting\n");
+   #endif
+
 }
 
 //------------------------------------------------------------------------------
@@ -352,15 +362,23 @@ void ParameterCreateDialog::Create()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::LoadData()
 {
+   #if DEBUG_PARAM_CREATE_DIALOG
+   MessageInterface::ShowMessage("ParameterCreateDialog::LoadData() entering\n");
+   #endif
+   
    mCreateVariableButton->Disable();
    mCreateStringButton->Disable();
    mCreateArrayButton->Disable();
    mPropertyListBox->SetSelection(0);
-
+   
    // show coordinate system or central body
    ShowCoordSystem();
    
+   #if DEBUG_PARAM_CREATE_DIALOG
+   MessageInterface::ShowMessage("ParameterCreateDialog::LoadData() exiting\n");
+   #endif   
 }
+
 
 //------------------------------------------------------------------------------
 // virtual void SaveData()
@@ -450,20 +468,28 @@ void ParameterCreateDialog::OnTextUpdate(wxCommandEvent& event)
 
 }
 
+
 //------------------------------------------------------------------------------
 // void OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::OnComboBoxChange(wxCommandEvent& event)
 {
+   //loj: 9/26/06
+   // This needs to be updated to have ObjectType combobox like
+   // in ParameterSelectDialog.
+   
    if (event.GetEventObject() == mCoordSysComboBox)
    {
+      //mCurrParam->SetStringParameter
+      //   ("DepObject", std::string(mCoordSysComboBox->GetStringSelection().c_str()));
    }
    else if (event.GetEventObject() == mCentralBodyComboBox)
    {
-      mCurrParam->SetStringParameter
-         ("DepObject", std::string(mCentralBodyComboBox->GetStringSelection().c_str()));
+      //mCurrParam->SetStringParameter
+      //   ("DepObject", std::string(mCentralBodyComboBox->GetStringSelection().c_str()));
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnButton(wxCommandEvent& event)
@@ -510,6 +536,7 @@ void ParameterCreateDialog::OnButton(wxCommandEvent& event)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnColorButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -537,16 +564,68 @@ void ParameterCreateDialog::OnSelectProperty(wxCommandEvent& event)
    ShowCoordSystem();   
 }
 
+
 //------------------------------------------------------------------------------
 // void ShowCoordSystem()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::ShowCoordSystem()
 {
+   std::string property = std::string(mPropertyListBox->GetStringSelection().c_str());
+   GmatParam::DepObject depObj = ParameterInfo::Instance()->GetDepObjectType(property);
+   
+   //MessageInterface::ShowMessage
+   //   ("===> ShowCoordSystem() property=%s, depObj=%d\n", property.c_str(), depObj);
+   
+   if (depObj == GmatParam::COORD_SYS)
+   {
+      mCoordSysLabel->Show();
+      mCoordSysLabel->SetLabel("Coordinate System");
+//       mCoordSysComboBox->SetStringSelection
+//          (mCurrParam->GetStringParameter("DepObject").c_str());
+      mCoordSysComboBox->Show();
+      mCentralBodyComboBox->Hide();
+      mDetailsBoxSizer->Remove(mCentralBodyComboBox);
+      mDetailsBoxSizer->Layout();
+   }
+   else if (depObj == GmatParam::ORIGIN)
+   {
+      mCoordSysLabel->Show();
+      mCoordSysLabel->SetLabel("Central Body");
+//       mCentralBodyComboBox->SetStringSelection
+//          (mCurrParam->GetStringParameter("DepObject").c_str());
+      mCentralBodyComboBox->Show();
+      mCoordSysComboBox->Hide();
+      mDetailsBoxSizer->Remove(mCoordSysComboBox);
+      mDetailsBoxSizer->Layout();
+      mDetailsBoxSizer->Layout();
+   }
+   else
+   {
+      mCoordSysLabel->Hide();
+      mCoordSysComboBox->Hide();
+      mCentralBodyComboBox->Hide();
+      mDetailsBoxSizer->Layout();
+      mDetailsBoxSizer->Layout();
+   }
+
+   
+   /*
    // get parameter pointer
    wxString paramName = GetParamName();
    
+   #if DEBUG_PARAM_CREATE_DIALOG
+   MessageInterface::ShowMessage
+      ("ParameterCreateDialog::ShowCoordSystem() paramName=%s\n", paramName.c_str());
+   #endif
+
    // get parameter pointer
    mCurrParam = CreateParameter(paramName);
+   
+   if (!mCurrParam)
+   {
+      MessageInterface::ShowMessage("Cannot create a parameter:%s\n", paramName.c_str());
+      return;
+   }
    
    if (mCurrParam->IsCoordSysDependent())
    {
@@ -577,7 +656,14 @@ void ParameterCreateDialog::ShowCoordSystem()
       mCentralBodyComboBox->Hide();
       mDetailsBoxSizer->Layout();
    }
+   */
+
+   
+   #if DEBUG_PARAM_CREATE_DIALOG
+   MessageInterface::ShowMessage("ParameterCreateDialog::ShowCoordSystem() exiting\n");
+   #endif
 }
+
 
 //------------------------------------------------------------------------------
 // Parameter* CreateParameter(const wxString &paramName)
@@ -589,6 +675,11 @@ void ParameterCreateDialog::ShowCoordSystem()
 //------------------------------------------------------------------------------
 Parameter* ParameterCreateDialog::CreateParameter(const wxString &name)
 {
+   #if DEBUG_PARAM_CREATE_DIALOG
+   MessageInterface::ShowMessage
+      ("ParameterCreateDialog::CreateParameter() name:%s\n", name.c_str());
+   #endif
+   
    std::string paramName(name.c_str());
    std::string ownerName(mObjectListBox->GetStringSelection().c_str());
    std::string propName(mPropertyListBox->GetStringSelection().c_str());
@@ -604,7 +695,7 @@ Parameter* ParameterCreateDialog::CreateParameter(const wxString &name)
    //}
    
    Parameter *param = theGuiInterpreter->GetParameter(paramName);
-
+   
    // create a parameter if it does not exist
    if (param == NULL)
    {
@@ -614,7 +705,11 @@ Parameter* ParameterCreateDialog::CreateParameter(const wxString &name)
       if (depObjName != "")
          param->SetStringParameter("DepObject", depObjName);
    }
-
+   
+   #if DEBUG_PARAM_CREATE_DIALOG
+   MessageInterface::ShowMessage("ParameterCreateDialog::CreateParameter() exiting\n");
+   #endif
+   
    return param;
 }
 
@@ -706,7 +801,7 @@ void ParameterCreateDialog::CreateVariable()
                         std::string objName = tokens[i].substr(0, pos1);
                         std::string typeName = tokens[i].substr(pos2+1, tokens[i].npos-pos2);
                         
-                        Parameter *sysParam =
+                        Parameter *sysParam = 
                            theGuiInterpreter->CreateParameter(typeName, tokens[i]);
                         sysParam->SetRefObjectName(Gmat::SPACECRAFT, objName);
                         

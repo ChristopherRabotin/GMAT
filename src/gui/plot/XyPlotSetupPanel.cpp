@@ -77,8 +77,9 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
                                  std::string(subscriberName.c_str()) + "\n");
    #endif
    
-   Subscriber *subscriber =
-      theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
+   Subscriber *subscriber = (Subscriber*)
+      //theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
+      theGuiInterpreter->GetObject(std::string(subscriberName.c_str()));
 
    mXyPlot = (TsPlot*)subscriber;
 
@@ -101,7 +102,7 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
     // force saving data
    if (mNumXParams == 0 || mNumYParams <= 0)
    {
-      theApplyButton->Enable();
+      EnableUpdate(true);
       mXParamChanged = true;
       mYParamChanged = true;
    }
@@ -144,7 +145,7 @@ void XyPlotSetupPanel::OnAddX(wxCommandEvent& event)
          mXSelectedListBox->SetStringSelection(newParam);
          
          mXParamChanged = true;
-         theApplyButton->Enable();
+         EnableUpdate(true);
       }
       else
       {
@@ -179,7 +180,7 @@ void XyPlotSetupPanel::OnAddY(wxCommandEvent& event)
          mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
          OnSelectProperty(event);
          mYParamChanged = true;
-         theApplyButton->Enable();
+         EnableUpdate(true);
       }
       else
       {
@@ -208,7 +209,7 @@ void XyPlotSetupPanel::OnRemoveX(wxCommandEvent& event)
    int sel = mXSelectedListBox->GetSelection();
    mXSelectedListBox->Delete(sel);
    mXParamChanged = true;
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -235,7 +236,7 @@ void XyPlotSetupPanel::OnRemoveY(wxCommandEvent& event)
    }
 
    mYParamChanged = true;
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -247,7 +248,7 @@ void XyPlotSetupPanel::OnClearY(wxCommandEvent& event)
    mYSelectedListBox->Clear();
    ShowParameterOption("", false);
    mYParamChanged = true;
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -361,8 +362,7 @@ void XyPlotSetupPanel::OnCreateVariable(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::OnCheckBoxChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
-   theOkButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -387,7 +387,7 @@ void XyPlotSetupPanel::OnLineColorClick(wxCommandEvent& event)
                                mLineColor.Green(),
                                mLineColor.Blue());
       
-      theApplyButton->Enable();
+      EnableUpdate(true);
       mIsColorChanged = true;
    }
 }
@@ -667,7 +667,8 @@ void XyPlotSetupPanel::LoadData()
             //mColorMap[yParamList[i]]
             //   = RgbColor(mXyPlot->GetUnsignedIntParameter("Color", yParamList[i]));
 
-            param = theGuiInterpreter->GetParameter(yParamList[i]);
+            //param = theGuiInterpreter->GetParameter(yParamList[i]);
+            param = (Parameter*)theGuiInterpreter->GetObject(yParamList[i]);
             if (param != NULL)
             {
                mColorMap[yParamList[i]]
@@ -800,7 +801,8 @@ void XyPlotSetupPanel::SaveData()
       for (int i=0; i<mNumYParams; i++)
       {
          mSelYName = std::string(mYSelectedListBox->GetString(i).c_str());
-         param = theGuiInterpreter->GetParameter(mSelYName);
+         //param = theGuiInterpreter->GetParameter(mSelYName);
+         param = (Parameter*)theGuiInterpreter->GetObject(mSelYName);
 
          if (param != NULL)
          {
@@ -838,7 +840,8 @@ void XyPlotSetupPanel::ShowParameterOption(const wxString &name, bool show)
       // if parameter not in the map
       if (mColorMap.find(mSelYName) == mColorMap.end())
       {
-         Parameter *param = theGuiInterpreter->GetParameter(mSelYName);
+         //Parameter *param = theGuiInterpreter->GetParameter(mSelYName);
+         Parameter *param = (Parameter*)theGuiInterpreter->GetObject(mSelYName);
 
          if (param != NULL)
          {
@@ -963,7 +966,9 @@ wxString XyPlotSetupPanel::GetParamName()
 Parameter* XyPlotSetupPanel::GetParameter(const wxString &name)
 {
    
-   Parameter *param = theGuiInterpreter->GetParameter(std::string(name.c_str()));
+   //Parameter *param = theGuiInterpreter->GetParameter(std::string(name.c_str()));
+   Parameter *param = (Parameter*)
+      theGuiInterpreter->GetObject(std::string(name.c_str()));
    
    // create a parameter if it does not exist
    if (param == NULL)

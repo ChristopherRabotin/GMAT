@@ -33,7 +33,7 @@ class ThrusterPanel: public wxPanel
 {
 public:
    ThrusterPanel(wxWindow *parent, Spacecraft *spacecraft,
-                 wxButton *theApplyButton);
+                 wxButton *applyButton, wxButton *okButton);
    ~ThrusterPanel();
    void SaveData();
    void LoadData();
@@ -57,6 +57,7 @@ private:
    wxArrayString mExcludedThrusterList;
     
    wxButton *theApplyButton;
+   wxButton *theOkButton;
    wxButton *selectButton;
    wxButton *removeButton;
    wxButton *selectAllButton;

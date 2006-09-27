@@ -20,6 +20,7 @@
 #include "GmatBaseException.hpp"
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
+#include "MessageInterface.hpp"
 
 //#define DEBUG_VARY_PANEL 1
 
@@ -127,7 +128,7 @@ void VaryPanel::Create()
 
    // wxComboBox
    StringArray solverNames;
-   solverNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SOLVER);
+   solverNames = theGuiInterpreter->GetListOfObjects(Gmat::SOLVER);
    int solverCount = solverNames.size();
    wxString *solverArray = new wxString[solverCount];
 
@@ -281,7 +282,7 @@ void VaryPanel::SaveData()
        solverName.c_str(), variableName.c_str());
    #endif
    
-   Solver *solver = theGuiInterpreter->GetSolver(solverName);
+   Solver *solver = (Solver*)theGuiInterpreter->GetObject(solverName);
 
    if (solver == NULL)
       throw GmatBaseException("Cannot find the solver: " + solverName);
@@ -367,7 +368,7 @@ void VaryPanel::OnTextChange(wxCommandEvent& event)
    if (mMaxStepTextCtrl->IsModified())
       mSolverData.maxStep = atof(mMaxStepTextCtrl->GetValue().c_str());
 
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -377,7 +378,7 @@ void VaryPanel::OnTextChange(wxCommandEvent& event)
 void VaryPanel::OnSolverSelection(wxCommandEvent &event)
 {
    mSolverData.solverName = mSolverComboBox->GetStringSelection();
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 

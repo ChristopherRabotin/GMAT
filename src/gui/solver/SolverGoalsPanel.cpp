@@ -63,7 +63,7 @@ void SolverGoalsPanel::LoadData()
 {
     // explicitly disable apply button
     // it is turned on in each of the panels
-    theApplyButton->Disable();
+    EnableUpdate(false);
     
     return;
 }
@@ -72,7 +72,7 @@ void SolverGoalsPanel::SaveData()
 {
     // explicitly disable apply button
     // it is turned on in each of the panels
-    theApplyButton->Disable();
+    EnableUpdate(false);
     
     return;
 }
@@ -177,12 +177,12 @@ void SolverGoalsPanel::Setup( wxWindow *parent)
 
 void SolverGoalsPanel::OnTextUpdate(wxCommandEvent& event)
 {
-    theApplyButton->Enable(true);
+    EnableUpdate(true);
 }
 
 void SolverGoalsPanel::OnSolverSelection(wxCommandEvent &event)
 {
-    theApplyButton->Enable(true);
+    EnableUpdate(true);
 }
 
 void SolverGoalsPanel::OnButton(wxCommandEvent& event)
@@ -190,7 +190,7 @@ void SolverGoalsPanel::OnButton(wxCommandEvent& event)
     if ( event.GetEventObject() == editButton )  
     {       
         // Bring up the VariableCreatePanel
-        theApplyButton->Enable(true);
+        EnableUpdate(true);
     }
     else if ( event.GetEventObject() == updateButton )
     {   
@@ -204,7 +204,7 @@ void SolverGoalsPanel::OnButton(wxCommandEvent& event)
 //        goalsGrid->SetCellValue(nextRow, DES_COL, descriptionString);
 //        
 //        nextRow++;
-        theApplyButton->Enable(true);
+        EnableUpdate(true);
     }
     else
         event.Skip();
@@ -212,5 +212,5 @@ void SolverGoalsPanel::OnButton(wxCommandEvent& event)
 
 void SolverGoalsPanel::OnCellValueChanged(wxGridEvent &event)
 { 
-    theApplyButton->Enable(true);
+    EnableUpdate(true);
 }

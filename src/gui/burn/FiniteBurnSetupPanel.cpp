@@ -53,7 +53,7 @@ FiniteBurnSetupPanel::FiniteBurnSetupPanel(wxWindow *parent,
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
 
    theBurn = 
-      (FiniteBurn*) theGuiInterpreter->GetBurn(std::string(burnName.c_str()));
+      (FiniteBurn*) theGuiInterpreter->GetObject(std::string(burnName.c_str()));
 
    thrusterSelected = "";
    isThrusterEmpty = false;
@@ -61,7 +61,9 @@ FiniteBurnSetupPanel::FiniteBurnSetupPanel(wxWindow *parent,
    
    Create();
    Show();
-   theApplyButton->Disable();
+
+   EnableUpdate(false);
+   //theApplyButton->Disable();
 }
 
 //------------------------------------------------------------------------------
@@ -103,15 +105,15 @@ void FiniteBurnSetupPanel::OnComboBoxChange(wxCommandEvent& event)
       
       theBurn->SetStringParameter(id, axesStr.c_str());
       
-      theApplyButton->Enable();
+      EnableUpdate(true);
    }
    else if (event.GetEventObject() == mThrusterComboBox)
    {
-           if (!isThrusterEmpty)
-           {
+      if (!isThrusterEmpty)
+      {
          thrusterSelected = mThrusterComboBox->GetStringSelection().c_str();
-         theApplyButton->Enable();
-           }
+         EnableUpdate(true);
+      }
    }
 }
 
@@ -124,7 +126,7 @@ void FiniteBurnSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void FiniteBurnSetupPanel::OnTextChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 //----------------------------------
@@ -365,7 +367,7 @@ void FiniteBurnSetupPanel::SaveData()
    try
    {
       // Save data to core engine
-	  Integer id;
+      Integer id;
       Real rvalue;
       
       canClose = true;
@@ -376,22 +378,22 @@ void FiniteBurnSetupPanel::SaveData()
                         "The allowed values are: [%s].";                        
 
       // save thrusters
-	  id = theBurn->GetParameterID("Thrusters");
-	  theBurn->SetStringParameter(id, thrusterSelected.c_str(), 0);
+          id = theBurn->GetParameterID("Thrusters");
+          theBurn->SetStringParameter(id, thrusterSelected.c_str(), 0);
 
-	  // save tanks
-	  //wxString tankString = mTankComboBox->GetStringSelection();
-	  //id = theBurn->GetParameterID("Tanks");
-	  //std::string tank = std::string (tankString.c_str());
-	  //theBurn->SetStringParameter(id, tank, 0);
+          // save tanks
+          //wxString tankString = mTankComboBox->GetStringSelection();
+          //id = theBurn->GetParameterID("Tanks");
+          //std::string tank = std::string (tankString.c_str());
+          //theBurn->SetStringParameter(id, tank, 0);
 
 //      // save burn scale factor
 //      id = theBurn->GetParameterID("BurnScaleFactor");
 //      wxString bsfStr = scaleTextCtrl->GetValue();
 //      theBurn->SetRealParameter(id, atof(bsfStr));
 
-	  // save burn scale factor
-	  id = theBurn->GetParameterID("BurnScaleFactor");
+          // save burn scale factor
+          id = theBurn->GetParameterID("BurnScaleFactor");
       inputString = scaleTextCtrl->GetValue();      
 
       // check to see if input is a real
@@ -417,7 +419,7 @@ void FiniteBurnSetupPanel::SaveData()
       std::string axes = std::string (axesStr.c_str());
       theBurn->SetStringParameter(id, axes);
 
-      theApplyButton->Disable();
+      EnableUpdate(false);
    }
    catch (BaseException &e)
    {

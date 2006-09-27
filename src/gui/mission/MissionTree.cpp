@@ -466,27 +466,27 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
    {
       if (typeName == "Target")
       {
-         endCmd = theGuiInterpreter->CreateCommand("EndTarget");
+         endCmd = theGuiInterpreter->CreateDefaultCommand("EndTarget");
          endType = GmatTree::END_TARGET_COMMAND;
       }
       else if (typeName == "For")
       {
-         endCmd = theGuiInterpreter->CreateCommand("EndFor");
+         endCmd = theGuiInterpreter->CreateDefaultCommand("EndFor");
          endType = GmatTree::END_FOR_CONTROL;
       }
       else if (typeName == "While")
       {
-         endCmd = theGuiInterpreter->CreateCommand("EndWhile");
+         endCmd = theGuiInterpreter->CreateDefaultCommand("EndWhile");
          endType = GmatTree::END_WHILE_CONTROL;
       }
       else if (typeName == "If")
       {
-         endCmd = theGuiInterpreter->CreateCommand("EndIf");
+         endCmd = theGuiInterpreter->CreateDefaultCommand("EndIf");
          endType = GmatTree::END_IF_CONTROL;
       }
       else if (typeName == "BeginScript")
       {
-         endCmd = theGuiInterpreter->CreateCommand("EndScript");
+         endCmd = theGuiInterpreter->CreateDefaultCommand("EndScript");
          endType = GmatTree::END_TARGET_COMMAND;
       }
 //       else if (typeName == "BeginFiniteBurn")

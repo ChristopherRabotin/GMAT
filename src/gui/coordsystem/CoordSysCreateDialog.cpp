@@ -112,7 +112,8 @@ void CoordSysCreateDialog::SaveData()
    mCanClose = true;
    std::string coordName = std::string(nameTextCtrl->GetValue().Trim().c_str());
    
-   CoordinateSystem *coord = theGuiInterpreter->GetCoordinateSystem(coordName);
+   CoordinateSystem *coord =
+      (CoordinateSystem*)theGuiInterpreter->GetObject(coordName);
    
    if (mIsCoordCreated)
    {

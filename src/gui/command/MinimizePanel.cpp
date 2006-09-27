@@ -1,3 +1,4 @@
+//$Header$
 #include "gmatwxdefs.hpp"
 #include "GmatAppData.hpp"
 #include "ParameterSelectDialog.hpp"
@@ -7,6 +8,7 @@
 // base includes
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
+#include "MessageInterface.hpp"
 
 //#define DEBUG_MINIMIZE_PANEL 1
 
@@ -67,7 +69,7 @@ void MinimizePanel::Create()
    // wxComboBox
    // Only Optimizers should be included!!
    StringArray solverNames;
-   solverNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SOLVER);
+   solverNames = theGuiInterpreter->GetListOfObjects(Gmat::SOLVER);
    int solverCount = solverNames.size();
    wxString *solverArray = new wxString[solverCount];
 
@@ -108,7 +110,7 @@ void MinimizePanel::Create()
    variableSizer->Add(variableStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    variableSizer->Add(variableInterfaceSizer, 0, wxALIGN_CENTER|wxALL, bsize);
 
-	panelSizer->Add(solverSizer, 0, wxALIGN_CENTER|wxALL, bsize);
+        panelSizer->Add(solverSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    panelSizer->Add(variableSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    
    theMiddleSizer->Add(panelSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
@@ -182,7 +184,7 @@ void MinimizePanel::ShowGoalSetup()
 
 void MinimizePanel::OnTextChange(wxCommandEvent& event)
 {
-	/* from AchievePanel
+        /* from AchievePanel
    if (mGoalValueTextCtrl->IsModified())
    {
       mSolverData.goalValue = mGoalValueTextCtrl->GetValue();
@@ -191,7 +193,7 @@ void MinimizePanel::OnTextChange(wxCommandEvent& event)
    if (mToleranceTextCtrl->IsModified())
       mSolverData.tolerance = atof(mToleranceTextCtrl->GetValue().c_str());
 */
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 void MinimizePanel::OnSolverSelection(wxCommandEvent &event)

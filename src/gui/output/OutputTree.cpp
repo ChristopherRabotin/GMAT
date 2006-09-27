@@ -110,12 +110,12 @@ void OutputTree::UpdateOutput(bool resetTree)
       return;
 
    // get list of report files, opengl plots, and xy plots
-   StringArray listOfSubs = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+   StringArray listOfSubs = theGuiInterpreter->GetListOfObjects(Gmat::SUBSCRIBER);
 
    // put each subscriber in the proper folder
    for (unsigned int i=0; i<listOfSubs.size(); i++)
    {
-      Subscriber *sub = theGuiInterpreter->GetSubscriber(listOfSubs[i]);
+      Subscriber *sub = (Subscriber*)theGuiInterpreter->GetObject(listOfSubs[i]);
       wxString objName = wxString(listOfSubs[i].c_str());
       wxString objTypeName = wxString(sub->GetTypeName().c_str());
 
@@ -340,7 +340,7 @@ void OutputTree::OnDelete(wxCommandEvent &event)
    //    
    //    // delete from gui interpreter
    //    GmatTreeItemData *gmatItem = (GmatTreeItemData *)GetItemData(item);
-   ////    theGuiInterpreter->RemoveConfiguredItem("Spacecraft", gmatItem->GetDesc());
+   ////    theGuiInterpreter->RemoveObject("Spacecraft", gmatItem->GetDesc());
    //    
    //    this->Delete(item);
    //    
@@ -541,7 +541,7 @@ void OutputTree::OnCompareNumericValues(wxCommandEvent &event)
    //MessageInterface::ShowMessage("OutputTree::OnCompareNumericValues() entered\n");
 
    ReportFile *theReport =
-      (ReportFile*) theGuiInterpreter->GetSubscriber(std::string(theSubscriberName.c_str()));
+      (ReportFile*) theGuiInterpreter->GetObject(theSubscriberName.c_str());
 
    if (!theReport)
    {
@@ -607,7 +607,7 @@ void OutputTree::OnCompareTextLines(wxCommandEvent &event)
    //MessageInterface::ShowMessage("OutputTree::OnCompareTextLines() entered\n");
 
    ReportFile *theReport =
-      (ReportFile*) theGuiInterpreter->GetSubscriber(std::string(theSubscriberName.c_str()));
+      (ReportFile*) theGuiInterpreter->GetObject(theSubscriberName.c_str());
 
    if (!theReport)
    {

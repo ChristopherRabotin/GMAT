@@ -36,8 +36,6 @@ public:
    // constructors
    GmatPanel( wxWindow *parent, bool showScriptButton = true);
 
-   //loj: 4/1/05 Moved from protected to public because derived classes won't
-   //compile under GCC 3.4.2
    virtual void OnApply(wxCommandEvent &event);
    virtual void OnOK(wxCommandEvent &event);
    virtual void OnCancel(wxCommandEvent &event);
@@ -51,7 +49,9 @@ protected:
    virtual void Show();
    virtual void LoadData() = 0;
    virtual void SaveData() = 0;
-    
+
+   virtual void EnableUpdate(bool enable = true);
+   
    // member data
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;

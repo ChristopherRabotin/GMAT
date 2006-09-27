@@ -15,6 +15,7 @@
 //------------------------------------------------------------------------------
 #include "gmatwxdefs.hpp"
 #include "TargetPanel.hpp"
+#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -96,7 +97,7 @@ void TargetPanel::Create()
    
    // wxComboBox
    StringArray solverNames;
-   solverNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SOLVER);
+   solverNames = theGuiInterpreter->GetListOfObjects(Gmat::SOLVER);
    int solverCount = solverNames.size();
    wxString *solverArray = new wxString[solverCount];
    for (int i=0; i<solverCount; i++)

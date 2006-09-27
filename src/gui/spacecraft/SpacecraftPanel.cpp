@@ -56,8 +56,9 @@ SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
    #endif
    
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-   theSpacecraft = theGuiInterpreter->GetSpacecraft(std::string(scName.c_str()));
-    
+   //theSpacecraft = theGuiInterpreter->GetSpacecraft(std::string(scName.c_str()));
+   theSpacecraft = (Spacecraft*)theGuiInterpreter->GetObject(std::string(scName.c_str()));
+   
    if (theSpacecraft != NULL)
    {            
       Create();
@@ -98,7 +99,7 @@ void SpacecraftPanel::Create()
    currentSpacecraft->SetInternalCoordSystem(theSpacecraft->GetInternalCoordSystem());    
    currentSpacecraft->SetRefObject(theSpacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, ""), 
                                    Gmat::COORDINATE_SYSTEM, "");
-    
+   
    // Set object pointer for "Show Script"
    mObject = currentSpacecraft;
 
@@ -122,16 +123,36 @@ void SpacecraftPanel::Create()
    //wx*Panel
    sensors = new wxPanel( spacecraftNotebook, -1 );
    
-   theOrbitPanel = new OrbitPanel(spacecraftNotebook, currentSpacecraft,
-                                  theSolarSystem, theApplyButton);
-   theBallisticMassPanel = new BallisticsMassPanel(spacecraftNotebook,
-                                                   currentSpacecraft, theApplyButton);
-   theTankPanel = new TankPanel(spacecraftNotebook, currentSpacecraft,
-                                theApplyButton);
-   theThrusterPanel = new ThrusterPanel(actuatorNotebook, currentSpacecraft,
-                                        theApplyButton);
-   theAttitudePanel = new AttitudePanel(spacecraftNotebook, currentSpacecraft,
-                                        theApplyButton);
+   theOrbitPanel = new OrbitPanel
+      (spacecraftNotebook, currentSpacecraft, theSolarSystem, theApplyButton, theOkButton);
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("   OrbitPanel created\n");
+   #endif
+   
+   theBallisticMassPanel = new BallisticsMassPanel
+      (spacecraftNotebook, currentSpacecraft, theApplyButton, theOkButton);
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("   BallisticsMassPanel created\n");
+   #endif
+   
+   theTankPanel = new TankPanel
+      (spacecraftNotebook, currentSpacecraft, theApplyButton, theOkButton);
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("   TankPanel created\n");
+   #endif
+   
+   theThrusterPanel = new ThrusterPanel
+      (actuatorNotebook, currentSpacecraft, theApplyButton, theOkButton);
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("   ThrusterPanel created\n");
+   #endif
+   
+   theAttitudePanel = new AttitudePanel
+      (spacecraftNotebook, currentSpacecraft, theApplyButton, theOkButton);
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("   AttitudePanel created\n");
+   #endif
+   
    // visuals = new wxPanel( mainNotebook, -1 );
    
    // Adding panels to notebook
@@ -143,7 +164,7 @@ void SpacecraftPanel::Create()
    spacecraftNotebook->AddPage( theTankPanel, wxT("Tanks") );
    spacecraftNotebook->AddPage( actuatorNotebook, wxT("Actuators") );
    //spacecraftNotebook->AddPage( visuals , wxT("Visualization") );
-
+   
    // theGridSizer->Add(spacecraftNotebook, 1, wxGROW, 5);
    theMiddleSizer->Add(spacecraftNotebook, 1, wxGROW, 5);
 }
@@ -154,19 +175,19 @@ void SpacecraftPanel::Create()
 //------------------------------------------------------------------------------
 void SpacecraftPanel::LoadData()
 {
-    #if DEBUG_SPACECRAFT_PANEL
-    MessageInterface::ShowMessage("SpacecraftPanel::LoadData() entered\n");
-    #endif
-    
-    theOrbitPanel->LoadData();
-    theBallisticMassPanel->LoadData();
-    theTankPanel->LoadData();
-    theThrusterPanel->LoadData();
-    theAttitudePanel->LoadData();
-    
-    // explicitly disable apply button
-    // it is turned on in each of the panels
-    theApplyButton->Disable();
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("SpacecraftPanel::LoadData() entered\n");
+   #endif
+   
+   theOrbitPanel->LoadData();
+   theBallisticMassPanel->LoadData();
+   theTankPanel->LoadData();
+   theThrusterPanel->LoadData();
+   theAttitudePanel->LoadData();
+   
+   // explicitly disable apply button
+   // it is turned on in each of the panels
+   EnableUpdate(false);
 }
 
 
@@ -225,7 +246,8 @@ void SpacecraftPanel::SaveData()
    
    // explicitly disable apply button
    // it is turned on in each of the panels
-   theApplyButton->Disable();
+
+   EnableUpdate(false);
 }
 
 

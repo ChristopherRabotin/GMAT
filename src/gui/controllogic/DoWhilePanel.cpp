@@ -1,4 +1,4 @@
-//$Header: 
+//$Header$
 //------------------------------------------------------------------------------
 //                              DoWhilePanel
 //------------------------------------------------------------------------------
@@ -130,7 +130,7 @@ void DoWhilePanel::OnCellDoubleLeftClick(wxGridEvent& event)
             if (dialog.GetStringSelection() != conditionGrid->GetCellValue(row, col))
             {
                conditionGrid->SetCellValue(1, 0, dialog.GetStringSelection());
-               theApplyButton->Enable(true);
+               EnableUpdate(true);
             }   
          }  
       }   
@@ -144,7 +144,7 @@ void DoWhilePanel::OnCellDoubleLeftClick(wxGridEvent& event)
          {
             wxString newParamName = paramDlg.GetParamName();
             conditionGrid->SetCellValue(row, col, newParamName);
-            theApplyButton->Enable(true);
+            EnableUpdate(true);
          }
       }
       else if (col == 2)
@@ -168,7 +168,7 @@ void DoWhilePanel::OnCellDoubleLeftClick(wxGridEvent& event)
             if (dialog.GetStringSelection() != conditionGrid->GetCellValue(row, col))
             {
                conditionGrid->SetCellValue(row, col, dialog.GetStringSelection());
-               theApplyButton->Enable(true);
+               EnableUpdate(true);
             }
          }   
       }
@@ -207,7 +207,7 @@ void DoWhilePanel::OnCellDoubleLeftClick(wxGridEvent& event)
 //              if (dialog.GetStringSelection() != conditionGrid->GetCellValue(row, col))
 //              {
 //                conditionGrid->SetCellValue(row, col, dialog.GetStringSelection());
-//                theApplyButton->Enable(true);
+//                EnableUpdate(true);
 //              }   
 //            }   
 //         }   

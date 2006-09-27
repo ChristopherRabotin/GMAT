@@ -51,7 +51,7 @@ TankConfigPanel::TankConfigPanel(wxWindow *parent, const wxString &name):GmatPan
    tankName = std::string(name.c_str());
     
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-   theFuelTank = (FuelTank*)theGuiInterpreter->GetHardware(tankName);
+   theFuelTank = (FuelTank*)theGuiInterpreter->GetObject(tankName);
     
    Create();
    Show();
@@ -187,7 +187,7 @@ void TankConfigPanel::LoadData()
    paramID = theFuelTank->GetParameterID("PressureRegulated");
    pressureRegulatedCheckBox->SetValue(theFuelTank->GetBooleanParameter(paramID));
    
-   theApplyButton->Disable();
+   EnableUpdate(false);
 }
 
 //------------------------------------------------------------------------------
@@ -210,9 +210,9 @@ void TankConfigPanel::SaveData()
       std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
                         theFuelTank->GetName() + "\" is not an allowed value.  "
                         "The allowed values are: [ %s ]."; 
-       
-      theOkButton->Disable();            
-            
+      
+      //loj: 9/26/06 theOkButton->Disable();            
+      
       // Temperature
       paramID = theFuelTank->GetParameterID("Temperature");
       inputString = temperatureTextCtrl->GetValue(); 
@@ -284,9 +284,8 @@ void TankConfigPanel::SaveData()
       theFuelTank->SetBooleanParameter(paramID, 
                                        pressureRegulatedCheckBox->GetValue());
 
-      theApplyButton->Disable();
+      EnableUpdate(false);
       canClose = true;
-      theOkButton->Enable();
    }
    catch (BaseException &ex)
    {
@@ -302,8 +301,7 @@ void TankConfigPanel::SaveData()
 //------------------------------------------------------------------------------
 void TankConfigPanel::OnTextChange(wxCommandEvent &event)
 {
-    theApplyButton->Enable();
-    theOkButton->Enable();
+    EnableUpdate(true);
 }    
 
 
@@ -312,8 +310,7 @@ void TankConfigPanel::OnTextChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void TankConfigPanel::OnCheckBoxChange(wxCommandEvent &event)
 {
-    theApplyButton->Enable();
-    theOkButton->Enable();
+    EnableUpdate(true);
 }    
 
 

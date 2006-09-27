@@ -6,8 +6,8 @@
 // base includes
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
-#include "GuiInterpreter.hpp"
 #include "Solver.hpp"
+#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -28,27 +28,32 @@ SQPSetupPanel::DISPLAY_SCHEMES[4] =
    "Final"
 }; 
 
+//------------------------------------------------------------------------------
+// SQPSetupPanel(wxWindow *parent, const wxString &name)
+//------------------------------------------------------------------------------
 SQPSetupPanel::SQPSetupPanel(wxWindow *parent, const wxString &name)
-    : GmatPanel(parent)
+   : GmatPanel(parent)
 {
-    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
     
-    theSolver =
-        theGuiInterpreter->GetSolver(std::string(name.c_str()));
-        
-//    theSQP = (SQP *)theSolver;
-
-    if (theSolver != NULL)
-    {
-        Create();
-        Show();
-    }
-    else
-    {
-        // show error message
-    }
+   theSolver =
+      (Solver*)theGuiInterpreter->GetObject(std::string(name.c_str()));
+    
+   if (theSolver != NULL)
+   {
+      Create();
+      Show();
+   }
+   else
+   {
+      // show error message
+   }
 }
 
+
+//------------------------------------------------------------------------------
+// ~SQPSetupPanel()
+//------------------------------------------------------------------------------
 SQPSetupPanel::~SQPSetupPanel()
 {
 }
@@ -56,11 +61,18 @@ SQPSetupPanel::~SQPSetupPanel()
 //-------------------------------
 // private methods
 //-------------------------------
+
+//------------------------------------------------------------------------------
+// void SQPSetupPanel::Create()
+//------------------------------------------------------------------------------
 void SQPSetupPanel::Create()
 {
     Setup(this);
 }
 
+//------------------------------------------------------------------------------
+// void LoadData()
+//------------------------------------------------------------------------------
 void SQPSetupPanel::LoadData()
 {
    // load data from the core engine
@@ -111,9 +123,9 @@ void SQPSetupPanel::LoadData()
       valueStr = theSolver->GetStringParameter("DiffMaxChange"); 
       diffMaxChangeTextCtrl->SetValue(wxT(valueStr.c_str()));
      
-   	  valueStr = theSolver->GetStringParameter("Display");
-   	  displayComboBox->SetValue(wxT(valueStr.c_str()));
-   	
+      valueStr = theSolver->GetStringParameter("Display");
+      displayComboBox->SetValue(wxT(valueStr.c_str()));
+        
    }
    catch (BaseException &e)
    {
@@ -123,82 +135,90 @@ void SQPSetupPanel::LoadData()
    
    // explicitly disable apply button
    // it is turned on in each of the panels
-   theApplyButton->Disable();
+   EnableUpdate(false);
 }
 
+
+//------------------------------------------------------------------------------
+// void SaveData()
+//------------------------------------------------------------------------------
 void SQPSetupPanel::SaveData()
 {   
    try
    {
-   	  if (gradObjCB->IsChecked())
-   	     theSolver->SetStringParameter("GradObj", "On");
-   	  else
-   	     theSolver->SetStringParameter("GradObj", "Off");
-   	    
-   	  if (gradConstrCB->IsChecked())
-   	     theSolver->SetStringParameter("GradConstr", "On");
-   	  else
-   	     theSolver->SetStringParameter("GradConstr", "Off");
+      if (gradObjCB->IsChecked())
+         theSolver->SetStringParameter("GradObj", "On");
+      else
+         theSolver->SetStringParameter("GradObj", "Off");
+            
+      if (gradConstrCB->IsChecked())
+         theSolver->SetStringParameter("GradConstr", "On");
+      else
+         theSolver->SetStringParameter("GradConstr", "Off");
 
-   	  if (derivativeCheckCB->IsChecked())
-   	     theSolver->SetStringParameter("DerivativeCheck", "On");
-   	  else
-   	     theSolver->SetStringParameter("DerivativeCheck", "Off");
-   	     
-   	  if (diagnosticsCB->IsChecked())
-   	     theSolver->SetStringParameter("Diagnostics", "On");
-   	  else
-   	     theSolver->SetStringParameter("Diagnostics", "Off");
-   	  
-   	  theSolver->SetStringParameter("TolFun", tolFunTextCtrl->GetValue().c_str());
-   	  theSolver->SetStringParameter("TolCon", tolConTextCtrl->GetValue().c_str());
-   	  theSolver->SetStringParameter("TolX", tolXTextCtrl->GetValue().c_str());
-   	  theSolver->SetStringParameter("MaxFunEvals", maxFunEvalsTextCtrl->GetValue().c_str());
-   	  theSolver->SetStringParameter("MaxIter", maxIterTextCtrl->GetValue().c_str());
-   	  theSolver->SetStringParameter("DiffMinChange", diffMinChangeTextCtrl->GetValue().c_str());
-   	  theSolver->SetStringParameter("DiffMaxChange", diffMaxChangeTextCtrl->GetValue().c_str());
+      if (derivativeCheckCB->IsChecked())
+         theSolver->SetStringParameter("DerivativeCheck", "On");
+      else
+         theSolver->SetStringParameter("DerivativeCheck", "Off");
+             
+      if (diagnosticsCB->IsChecked())
+         theSolver->SetStringParameter("Diagnostics", "On");
+      else
+         theSolver->SetStringParameter("Diagnostics", "Off");
+          
+      theSolver->SetStringParameter("TolFun", tolFunTextCtrl->GetValue().c_str());
+      theSolver->SetStringParameter("TolCon", tolConTextCtrl->GetValue().c_str());
+      theSolver->SetStringParameter("TolX", tolXTextCtrl->GetValue().c_str());
+      theSolver->SetStringParameter("MaxFunEvals", maxFunEvalsTextCtrl->GetValue().c_str());
+      theSolver->SetStringParameter("MaxIter", maxIterTextCtrl->GetValue().c_str());
+      theSolver->SetStringParameter("DiffMinChange", diffMinChangeTextCtrl->GetValue().c_str());
+      theSolver->SetStringParameter("DiffMaxChange", diffMaxChangeTextCtrl->GetValue().c_str());
 
-   	  theSolver->SetStringParameter("Display", displayComboBox->GetValue().c_str());   	   	
+      theSolver->SetStringParameter("Display", displayComboBox->GetValue().c_str());                
    }
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
          ("SQPSetupPanel:SaveData() error occurred!\n%s\n", e.GetMessage().c_str());
-         canClose = false;
-         return;
+      canClose = false;
+      return;
    }
    
-    // explicitly disable apply button
-    // it is turned on in each of the panels
-    theApplyButton->Disable();
+   // explicitly disable apply button
+   // it is turned on in each of the panels
+   EnableUpdate(false);
 }
 
+
+//------------------------------------------------------------------------------
+// void Setup( wxWindow *parent)
+//------------------------------------------------------------------------------
 void SQPSetupPanel::Setup( wxWindow *parent)
 {   
-	displayStaticText = new wxStaticText( parent, ID_TEXT, wxT("Display"));
-	displayComboBox = new wxComboBox( parent, ID_COMBOBOX, "", wxDefaultPosition, wxDefaultSize, 
-	        4, DISPLAY_SCHEMES, wxCB_READONLY);
-	
-	gradObjCB = new wxCheckBox( parent, ID_CHECKBOX, "Grad Obj");
-	gradConstrCB = new wxCheckBox( parent, ID_CHECKBOX, "Grad Constr");
-	derivativeCheckCB = new wxCheckBox( parent, ID_CHECKBOX, "Derivative Check");
-	diagnosticsCB = new wxCheckBox( parent, ID_CHECKBOX, "Diagnostics");
-	
-	tolFunStaticText = new wxStaticText( parent, ID_TEXT, wxT("Tol Fun"));
-	tolConStaticText = new wxStaticText( parent, ID_TEXT, wxT("Tol Con"));
-	tolXStaticText = new wxStaticText( parent, ID_TEXT, wxT("Tol X"));
-	maxFunEvalsStaticText = new wxStaticText( parent, ID_TEXT, wxT("Max Fun Evals"));
-	maxIterStaticText = new wxStaticText( parent, ID_TEXT, wxT("Max Iter"));
-	diffMinChangeStaticText = new wxStaticText( parent, ID_TEXT, wxT("Diff Min Change"));
-	diffMaxChangeStaticText = new wxStaticText( parent, ID_TEXT, wxT("Diff Max Change"));
-	
-	tolFunTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
-	tolConTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
-	tolXTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
-	maxFunEvalsTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
-	maxIterTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
-	diffMinChangeTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
-	diffMaxChangeTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
+   displayStaticText = new wxStaticText( parent, ID_TEXT, wxT("Display"));
+   displayComboBox = new wxComboBox( parent, ID_COMBOBOX, "", wxDefaultPosition, wxDefaultSize, 
+                                     4, DISPLAY_SCHEMES, wxCB_READONLY);
+        
+   gradObjCB = new wxCheckBox( parent, ID_CHECKBOX, "Grad Obj");
+   gradConstrCB = new wxCheckBox( parent, ID_CHECKBOX, "Grad Constr");
+   derivativeCheckCB = new wxCheckBox( parent, ID_CHECKBOX, "Derivative Check");
+   diagnosticsCB = new wxCheckBox( parent, ID_CHECKBOX, "Diagnostics");
+        
+   tolFunStaticText = new wxStaticText( parent, ID_TEXT, wxT("Tol Fun"));
+   tolConStaticText = new wxStaticText( parent, ID_TEXT, wxT("Tol Con"));
+   tolXStaticText = new wxStaticText( parent, ID_TEXT, wxT("Tol X"));
+   maxFunEvalsStaticText = new wxStaticText( parent, ID_TEXT, wxT("Max Fun Evals"));
+   maxIterStaticText = new wxStaticText( parent, ID_TEXT, wxT("Max Iter"));
+   diffMinChangeStaticText = new wxStaticText( parent, ID_TEXT, wxT("Diff Min Change"));
+   diffMaxChangeStaticText = new wxStaticText( parent, ID_TEXT, wxT("Diff Max Change"));
+        
+   tolFunTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
+   tolConTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
+   tolXTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
+   maxFunEvalsTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
+   maxIterTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
+   diffMinChangeTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
+   diffMaxChangeTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
 
    wxFlexGridSizer *fGSMain = new wxFlexGridSizer(2);
    wxBoxSizer *bSCheckBoxes = new wxBoxSizer(wxVERTICAL);
@@ -206,7 +226,7 @@ void SQPSetupPanel::Setup( wxWindow *parent)
    wxGridSizer *gSSpecs = new wxGridSizer(2);
 
    Integer border = 3;
-//   fGSMain->SetFlexibleDirection(wxVERTICAL);
+   //   fGSMain->SetFlexibleDirection(wxVERTICAL);
    
    bSDisplay->Add(displayStaticText, 0, wxALL, border);
    bSDisplay->Add(displayComboBox, 0, wxALL, border);
@@ -236,7 +256,7 @@ void SQPSetupPanel::Setup( wxWindow *parent)
    
    fGSMain->Add(gSSpecs, 0, wxALL|wxALIGN_RIGHT, border*5);
    fGSMain->Add(bSCheckBoxes, 0, wxALL|wxALIGN_LEFT, border*5);
-//   fGSMain->Add(bSDisplay, 0, wxALL|wxALIGN_LEFT, border);
+   //   fGSMain->Add(bSDisplay, 0, wxALL|wxALIGN_LEFT, border);
    
    theMiddleSizer->Add(fGSMain, 0, wxALL|wxALIGN_CENTER, 5);
 }
@@ -251,7 +271,7 @@ void SQPSetupPanel::Setup( wxWindow *parent)
 void SQPSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 {
    if (theApplyButton != NULL)
-      theApplyButton->Enable();
+      EnableUpdate(true);
 }
 
 
@@ -265,7 +285,7 @@ void SQPSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 void SQPSetupPanel::OnTextChange(wxCommandEvent& event)
 {
    if (theApplyButton != NULL)
-      theApplyButton->Enable();
+      EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -278,7 +298,7 @@ void SQPSetupPanel::OnTextChange(wxCommandEvent& event)
 void SQPSetupPanel::OnCheckboxChange(wxCommandEvent& event)
 {
    if (theApplyButton != NULL)
-      theApplyButton->Enable();
+      EnableUpdate(true);
 }
 
 

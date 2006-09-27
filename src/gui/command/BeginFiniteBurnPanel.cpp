@@ -81,7 +81,7 @@ BeginFiniteBurnPanel::~BeginFiniteBurnPanel()
 //------------------------------------------------------------------------------
 void BeginFiniteBurnPanel::OnComboBoxChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ void BeginFiniteBurnPanel::OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void BeginFiniteBurnPanel::OnCheckListBoxChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 //----------------------------------
@@ -210,45 +210,15 @@ void BeginFiniteBurnPanel::LoadData()
 //------------------------------------------------------------------------------
 void BeginFiniteBurnPanel::SaveData()
 {
-   // Get matching EndFiniteBurn command
-   
-   wxString cmdName = theCommand->GetName().c_str();
-   MessageInterface::ShowMessage("===> before cmdName=%s\n", cmdName.c_str());
-   cmdName.Replace("Begin", "End");
-   MessageInterface::ShowMessage("===> after  cmdName=%s\n", cmdName.c_str());
-
-   GmatCommand *endCommand = NULL;
-   GmatCommand *cmd = theCommand->GetNext();
-   if (cmd)
-   {
-      while (cmd)
-      {
-         MessageInterface::ShowMessage
-            ("cmd=%s\n", cmd->GetTypeName().c_str());
-         
-         if (cmd->GetTypeName() == "EndFiniteBurn")
-         {
-            endCommand = cmd;
-            break;
-         }
-         
-         cmd = cmd->GetNext();
-      }
-   }
-
-   // Save both BeginFiniteBurn and EndFiniteBurn
-   
    // save finite burn
    wxString burnString = mFiniteBurnComboBox->GetValue();
    theCommand->SetRefObjectName(Gmat::BURN, burnString.c_str());
-   endCommand->SetRefObjectName(Gmat::BURN, burnString.c_str());
    
    // save spacecrafts
    int count = mSatCheckListBox->GetCount();
    wxString scName;
 
    theCommand->TakeAction("Clear");
-   endCommand->TakeAction("Clear");
    
    for (int i=0; i<count; i++)
    {
@@ -256,7 +226,52 @@ void BeginFiniteBurnPanel::SaveData()
       {
          scName = mSatCheckListBox->GetString(i);
          theCommand->SetRefObjectName(Gmat::SPACECRAFT, scName.c_str());
-         endCommand->SetRefObjectName(Gmat::SPACECRAFT, scName.c_str());
       }
    }
+   
+   
+   //loj: 9/26/06 Hold this for now
+   // Do we really want to save both BeginFiniteBurn and EndFiniteBurn?
+   
+//    // Get matching EndFiniteBurn command
+   
+//    wxString cmdName = theCommand->GetName().c_str();
+//    //MessageInterface::ShowMessage("===> before cmdName=%s\n", cmdName.c_str());
+//    cmdName.Replace("Begin", "End");
+//    //MessageInterface::ShowMessage("===> after  cmdName=%s\n", cmdName.c_str());
+   
+//    GmatCommand *endCommand = NULL;
+//    GmatCommand *cmd = theCommand->GetNext();
+//    if (cmd)
+//    {
+//       while (cmd)
+//       {
+//          MessageInterface::ShowMessage
+//             ("cmd=%s\n", cmd->GetTypeName().c_str());
+         
+//          if (cmd->GetTypeName() == "EndFiniteBurn")
+//          {
+//             endCommand = cmd;
+//             break;
+//          }
+         
+//          cmd = cmd->GetNext();
+//       }
+//    }
+
+//    // If endCommand found, save
+//    if (endCommand)
+//    {
+//       endCommand->SetRefObjectName(Gmat::BURN, burnString.c_str());
+//       endCommand->TakeAction("Clear");
+      
+//       for (int i=0; i<count; i++)
+//       {
+//          if (mSatCheckListBox->IsChecked(i))
+//          {
+//             scName = mSatCheckListBox->GetString(i);
+//             endCommand->SetRefObjectName(Gmat::SPACECRAFT, scName.c_str());
+//          }
+//       }
+//    }
 }

@@ -83,8 +83,9 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
                                  std::string(subscriberName.c_str()) + "\n");
    #endif
    
-   Subscriber *subscriber =
-      theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
+   Subscriber *subscriber = (Subscriber*)
+      //theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
+      theGuiInterpreter->GetObject(std::string(subscriberName.c_str()));
    
    reportFile = (ReportFile*)subscriber;
    
@@ -94,7 +95,7 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
    Create();
    Show();
    mUseUserParam = false;
-   theApplyButton->Disable();
+   EnableUpdate(false);
 }
 
 
@@ -118,8 +119,7 @@ ReportFileSetupPanel::~ReportFileSetupPanel()
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::OnWriteCheckBoxChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
-   theOkButton->Enable();
+   EnableUpdate(true);
 }
 
 //----------------------------------
@@ -412,7 +412,8 @@ void ReportFileSetupPanel::LoadData()
       for (int i=0; i<mNumVarParams; i++)
       {
          varParamNames[i] = varParamList[i].c_str();
-         param = theGuiInterpreter->GetParameter(varParamList[i]);
+         //param = theGuiInterpreter->GetParameter(varParamList[i]);
+         param = (Parameter*)theGuiInterpreter->GetObject(varParamList[i]);
       }
       
       mVarSelectedListBox->Set(mNumVarParams, varParamNames);
@@ -568,8 +569,7 @@ void ReportFileSetupPanel::OnBrowseButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::OnTextChange(wxCommandEvent &event)
 {
-    theApplyButton->Enable();
-    theOkButton->Enable();
+    EnableUpdate(true);
 }
 
 
@@ -588,7 +588,7 @@ void ReportFileSetupPanel::OnMoveUpVariable(wxCommandEvent& event)
       mVarSelectedListBox->SetSelection(sel-1);
    }
 
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -607,7 +607,7 @@ void ReportFileSetupPanel::OnMoveDownVariable(wxCommandEvent& event)
       mVarSelectedListBox->SetSelection(sel+1);
    }
    
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -639,7 +639,7 @@ void ReportFileSetupPanel::OnAddVariable(wxCommandEvent& event)
          //Show next parameter
          mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
          OnSelectProperty(event);
-         theApplyButton->Enable();
+         EnableUpdate(true);
       }
       else
       {
@@ -677,7 +677,7 @@ void ReportFileSetupPanel::OnRemoveVariable(wxCommandEvent& event)
       mVarSelectedListBox->SetSelection(sel-1);
    }
    
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -687,7 +687,7 @@ void ReportFileSetupPanel::OnRemoveVariable(wxCommandEvent& event)
 void ReportFileSetupPanel::OnClearVariable(wxCommandEvent& event)
 {
    mVarSelectedListBox->Clear();
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -877,7 +877,9 @@ wxString ReportFileSetupPanel::GetParamName()
 //------------------------------------------------------------------------------
 Parameter* ReportFileSetupPanel::GetParameter(const wxString &name)
 {
-   Parameter *param = theGuiInterpreter->GetParameter(std::string(name.c_str()));
+   //Parameter *param = theGuiInterpreter->GetParameter(std::string(name.c_str()));
+   Parameter *param = (Parameter*)
+      theGuiInterpreter->GetObject(std::string(name.c_str()));
    
    // create a parameter if it does not exist
    if (param == NULL)

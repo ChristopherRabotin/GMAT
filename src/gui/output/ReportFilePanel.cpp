@@ -51,7 +51,7 @@ ReportFilePanel::ReportFilePanel(wxWindow *parent, wxString reportName)
    theParent = parent;
 
    theReport =
-      (ReportFile*) theGuiInterpreter->GetSubscriber(std::string(mReportName.c_str()));
+      (ReportFile*) theGuiInterpreter->GetObject(mReportName.c_str());
 
    Create();
    Show();

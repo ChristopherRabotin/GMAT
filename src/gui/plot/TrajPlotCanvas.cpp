@@ -282,9 +282,11 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mInternalCoordSysName = wxString(mInternalCoordSystem->GetName().c_str());
 
    mViewCoordSysName = csName;
-   mViewCoordSystem = theGuiInterpreter->
-      GetCoordinateSystem(std::string(csName.c_str()));
-
+   //mViewCoordSystem = theGuiInterpreter->
+   //   GetCoordinateSystem(std::string(csName.c_str()));
+   mViewCoordSystem = (CoordinateSystem*)theGuiInterpreter->
+      GetObject(std::string(csName.c_str()));
+   
    // CoordinateSystem conversion
    mIsInternalCoordSystem = true;
    mNeedSpacecraftConversion = false;
@@ -470,7 +472,8 @@ void TrajPlotCanvas::SetViewCoordSystem(const wxString &csName)
    mViewCoordSysName = csName;
    
    mViewCoordSystem =
-      theGuiInterpreter->GetCoordinateSystem(std::string(csName.c_str()));
+      //theGuiInterpreter->GetCoordinateSystem(std::string(csName.c_str()));
+      (CoordinateSystem*)theGuiInterpreter->GetObject(std::string(csName.c_str()));
    
    if (!mViewCoordSysName.IsSameAs(mInternalCoordSysName))
    {
@@ -769,7 +772,8 @@ void TrajPlotCanvas::DrawInOtherCoordSystem(const wxString &csName)
       mViewCoordSysName = csName;
       
       mViewCoordSystem =
-         theGuiInterpreter->GetCoordinateSystem(std::string(csName.c_str()));
+         //theGuiInterpreter->GetCoordinateSystem(std::string(csName.c_str()));
+         (CoordinateSystem*)theGuiInterpreter->GetObject(std::string(csName.c_str()));
       
       if (mViewCoordSystem->GetName() == mInternalCoordSystem->GetName())
          mIsInternalCoordSystem = true;
@@ -4117,7 +4121,7 @@ void TrajPlotCanvas::UpdateRotateFlags()
 void TrajPlotCanvas::MakeValidCoordSysList()
 {
    StringArray csList =
-      theGuiInterpreter->GetListOfConfiguredItems(Gmat::COORDINATE_SYSTEM);
+      theGuiInterpreter->GetListOfObjects(Gmat::COORDINATE_SYSTEM);
    CoordinateSystem *cs;
    SpacePoint *sp;
    wxString csName;
@@ -4133,7 +4137,8 @@ void TrajPlotCanvas::MakeValidCoordSysList()
       primary = "None";
       secondary = "None";
       
-      cs = theGuiInterpreter->GetCoordinateSystem(csList[i]);
+      //cs = theGuiInterpreter->GetCoordinateSystem(csList[i]);
+      cs = (CoordinateSystem*)theGuiInterpreter->GetObject(csList[i]);
       csName = cs->GetName().c_str();
       
       //MessageInterface::ShowMessage("==> csName=%s\n", csName.c_str());

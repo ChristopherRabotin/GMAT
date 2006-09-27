@@ -127,7 +127,7 @@ void CallFunctionPanel::Create()
 //                     wxDefaultPosition, wxDefaultSize, 0 );
 
    StringArray &list =
-         theGuiInterpreter->GetListOfConfiguredItems(Gmat::FUNCTION);
+         theGuiInterpreter->GetListOfObjects(Gmat::FUNCTION);
    int size = list.size();
    wxString *choices = new wxString[size];
 
@@ -243,7 +243,7 @@ void CallFunctionPanel::LoadData()
          #ifdef DEBUG_CALLFUNCTION_PANEL
             MessageInterface::ShowMessage("   Looking up " + inputList[i] + "\n");
          #endif
-         param = theGuiInterpreter->GetConfiguredItem(inputList[i]);
+         param = theGuiInterpreter->GetObject(inputList[i]);
 
          if (i == mNumInput-1)
             delimiter = "";
@@ -281,7 +281,7 @@ void CallFunctionPanel::LoadData()
          #ifdef DEBUG_CALLFUNCTION_PANEL
             MessageInterface::ShowMessage("   Looking up " + outputList[i] + "\n");
          #endif
-         param = theGuiInterpreter->GetConfiguredItem(outputList[i]);
+         param = theGuiInterpreter->GetObject(outputList[i]);
 
          if (i == mNumOutput-1)
             delimiter = "";
@@ -390,7 +390,7 @@ void CallFunctionPanel::SaveData()
 //   // set input parameters
 //   for (unsigned int i=0; i<inputStrings.Count(); i++)
 //   {
-//      Parameter *parameter = (Parameter *)theGuiInterpreter->GetConfiguredItem(
+//      Parameter *parameter = theGuiInterpreter->GetParameter(
 //            std::string(inputStrings[i]));
 //      theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Input", i);
 //   }
@@ -398,7 +398,7 @@ void CallFunctionPanel::SaveData()
 //   // set output parameters
 //   for (unsigned int i=0; i<outputStrings.Count(); i++)
 //   {
-//      Parameter *parameter = (Parameter *)theGuiInterpreter->GetConfiguredItem(
+//      Parameter *parameter = theGuiInterpreter->GetParameter(
 //            std::string(outputStrings[i]));
 //      theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Output", i);
 //   }
@@ -436,12 +436,12 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
          }
 
          inputGrid->SetCellValue(row, col, cellValue);
-         theApplyButton->Enable();
+         EnableUpdate(true);
       }
       else     // no selections
          inputGrid->SetCellValue(row, col, "");
 
-      //theApplyButton->Enable();
+      //EnableUpdate(true);
    }
    else if (event.GetEventObject() == outputGrid)
    {
@@ -466,12 +466,12 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
          }
 
          outputGrid->SetCellValue(row, col, cellValue);
-         theApplyButton->Enable();
+         EnableUpdate(true);
       }
       else     // no selections
          outputGrid->SetCellValue(row, col, "");
 
-      //theApplyButton->Enable();
+      //EnableUpdate(true);
    }
 }
 
@@ -484,5 +484,5 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
 //------------------------------------------------------------------------------
 void CallFunctionPanel::OnComboChange(wxCommandEvent &event)
 {
-    theApplyButton->Enable();
+    EnableUpdate(true);
 }

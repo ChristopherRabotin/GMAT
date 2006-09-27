@@ -156,5 +156,5 @@ void AssignmentPanel::OnCellClick(wxGridEvent& event)
 //------------------------------------------------------------------------------
 void AssignmentPanel::OnComboChange(wxCommandEvent &event)
 {
-    theApplyButton->Enable();
+    EnableUpdate(true);
 }

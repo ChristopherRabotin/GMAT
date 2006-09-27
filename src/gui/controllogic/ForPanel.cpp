@@ -313,7 +313,7 @@ void ForPanel::OnCellLeftClick(wxGridEvent& event)
    // got new value
    
    Real realVal = setupDlg.GetRealValue();
-   theApplyButton->Enable(true);
+   EnableUpdate(true);
    
    //Integer paramId;
    wxString str;
@@ -399,6 +399,6 @@ void ForPanel::OnCellRightClick(wxGridEvent& event)
          mEndIsParam = true;
       }  
       
-      theApplyButton->Enable(true);  
+      EnableUpdate(true);  
    }  
 }     

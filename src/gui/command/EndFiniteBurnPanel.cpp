@@ -81,7 +81,7 @@ EndFiniteBurnPanel::~EndFiniteBurnPanel()
 //------------------------------------------------------------------------------
 void EndFiniteBurnPanel::OnComboBoxChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ void EndFiniteBurnPanel::OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void EndFiniteBurnPanel::OnCheckListBoxChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 //----------------------------------

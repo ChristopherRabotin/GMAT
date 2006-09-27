@@ -49,7 +49,7 @@ ParameterSetupPanel::ParameterSetupPanel(wxWindow *parent, const wxString &name)
    mIsColorChanged = false;
    mIsExpChanged = false;
    
-   mParam = theGuiInterpreter->GetParameter(std::string(mVarName.c_str()));
+   mParam = (Parameter*)theGuiInterpreter->GetObject(std::string(mVarName.c_str()));
    if (mParam->GetTypeName() == "String")
       mIsStringVar = true;
    
@@ -143,7 +143,7 @@ void ParameterSetupPanel::Create()
 //------------------------------------------------------------------------------
 void ParameterSetupPanel::LoadData()
 {
-   mParam = theGuiInterpreter->GetParameter(std::string(mVarName.c_str()));
+   mParam = (Parameter*)theGuiInterpreter->GetObject(std::string(mVarName.c_str()));
 
    // Set the pointer for the "Show Script" button
    mObject = mParam;

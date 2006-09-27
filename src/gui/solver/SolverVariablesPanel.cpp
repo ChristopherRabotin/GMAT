@@ -62,14 +62,14 @@ void SolverVariablesPanel::LoadData()
 {
     // explicitly disable apply button
     // it is turned on in each of the panels
-    theApplyButton->Disable();
+    EnableUpdate(false);
 }
 
 void SolverVariablesPanel::SaveData()
 {   
     // explicitly disable apply button
     // it is turned on in each of the panels
-    theApplyButton->Disable();
+    EnableUpdate(false);
 }
 
 
@@ -186,27 +186,27 @@ void SolverVariablesPanel::OnTextUpdate(wxCommandEvent& event)
 {
     if ( event.GetEventObject() == descTextCtrl )  
     {       
-        theApplyButton->Enable(true);
+        EnableUpdate(true);
     }
     else if ( event.GetEventObject() == varTextCtrl )
     {      
-        theApplyButton->Enable(true);
+        EnableUpdate(true);
     }
     else if ( event.GetEventObject() == pertTextCtrl )  
     {
-        theApplyButton->Enable(true);       
+        EnableUpdate(true);       
     }
     else if ( event.GetEventObject() == maxTextCtrl )
     {
-        theApplyButton->Enable(true);  
+        EnableUpdate(true);  
     } 
     else if ( event.GetEventObject() == lowerTextCtrl )
     {
-        theApplyButton->Enable(true);  
+        EnableUpdate(true);  
     }      
     else if ( event.GetEventObject() == upperTextCtrl )       
     {    
-        theApplyButton->Enable(true); 
+        EnableUpdate(true); 
     }
     else
         event.Skip();
@@ -214,7 +214,7 @@ void SolverVariablesPanel::OnTextUpdate(wxCommandEvent& event)
 
 void SolverVariablesPanel::OnSolverSelection(wxCommandEvent &event)
 {
-    theApplyButton->Enable(true);
+    EnableUpdate(true);
 }
 
 void SolverVariablesPanel::OnButton(wxCommandEvent& event)
@@ -222,7 +222,7 @@ void SolverVariablesPanel::OnButton(wxCommandEvent& event)
     if ( event.GetEventObject() == editButton )  
     {       
         // Bring up the VariableCreatePanel
-        theApplyButton->Enable(true);
+        EnableUpdate(true);
     }
     else if ( event.GetEventObject() == updateButton )
     {      
@@ -236,7 +236,7 @@ void SolverVariablesPanel::OnButton(wxCommandEvent& event)
         
         nextRow++;
        
-        theApplyButton->Enable(true);
+        EnableUpdate(true);
     }
     else
         event.Skip();
@@ -244,5 +244,5 @@ void SolverVariablesPanel::OnButton(wxCommandEvent& event)
 
 void SolverVariablesPanel::OnCellValueChanged(wxGridEvent &event)
 { 
-    theApplyButton->Enable(true);
+    EnableUpdate(true);
 }

@@ -21,6 +21,7 @@
 // base includes
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
+#include "MessageInterface.hpp"
 
 //#define DEBUG_ACHIEVE_PANEL 1
 
@@ -113,7 +114,7 @@ void AchievePanel::Create()
 
    // wxComboBox
    StringArray solverNames;
-   solverNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SOLVER);
+   solverNames = theGuiInterpreter->GetListOfObjects(Gmat::SOLVER);
    int solverCount = solverNames.size();
    wxString *solverArray = new wxString[solverCount];
 
@@ -257,8 +258,7 @@ void AchievePanel::SaveData()
    Real value;
    if (!mSolverData.goalValue.ToDouble(&value))
    {
-      if (theGuiInterpreter->
-          GetParameter(std::string(mSolverData.goalValue.c_str())) == NULL)
+      if (theGuiInterpreter->GetObject(mSolverData.goalValue.c_str()) == NULL)
       {
          wxLogError("The goal value is not a number or a valid parameter name");
          canClose = false;
@@ -317,7 +317,7 @@ void AchievePanel::OnTextChange(wxCommandEvent& event)
    if (mToleranceTextCtrl->IsModified())
       mSolverData.tolerance = atof(mToleranceTextCtrl->GetValue().c_str());
 
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 

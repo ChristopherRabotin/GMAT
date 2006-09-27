@@ -18,6 +18,7 @@
 
 #include "gmatwxdefs.hpp"
 #include "GmatDialog.hpp"
+#include "Thruster.hpp"
 
 class ThrusterCoefficientDialog : public GmatDialog
 {

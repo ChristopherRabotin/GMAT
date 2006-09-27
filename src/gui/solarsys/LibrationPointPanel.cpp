@@ -52,15 +52,15 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 LibrationPointPanel::LibrationPointPanel(wxWindow *parent, const wxString &name)
-                   :GmatPanel(parent)
+   : GmatPanel(parent)
 {
    theLibrationPt =
-      (LibrationPoint*)theGuiInterpreter->GetCalculatedPoint(std::string(name.c_str()));
+      (LibrationPoint*)theGuiInterpreter->GetObject(name.c_str());
 
    Create();
    Show();
 
-   theApplyButton->Disable();
+   EnableUpdate(false);
 }
 
 
@@ -80,7 +80,7 @@ LibrationPointPanel::~LibrationPointPanel()
 //------------------------------------------------------------------------------
 void LibrationPointPanel::OnComboBoxChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 //----------------------------------
@@ -163,7 +163,7 @@ void LibrationPointPanel::LoadData()
    try
    {
       // list of calculated points
-      items = theGuiInterpreter->GetListOfConfiguredItems(Gmat::CALCULATED_POINT);
+      items = theGuiInterpreter->GetListOfObjects(Gmat::CALCULATED_POINT);
       count = items.size();
       #if DEBUG_LIBRATIONPOINT_PANEL
       MessageInterface::ShowMessage
@@ -174,7 +174,8 @@ void LibrationPointPanel::LoadData()
       {
          for (i=0; i<count; i++)
          {
-            CalculatedPoint *calpt = theGuiInterpreter->GetCalculatedPoint(items[i]);
+            CalculatedPoint *calpt
+               = (CalculatedPoint*)theGuiInterpreter->GetObject(items[i]);
             wxString objName = wxString(items[i].c_str());
             wxString objTypeName = wxString(calpt->GetTypeName().c_str());
 
@@ -239,12 +240,12 @@ void LibrationPointPanel::SaveData()
    std::string spName = primaryBodyString.c_str();
    int primaryBodyID = theLibrationPt->GetParameterID("Primary");
    theLibrationPt->SetStringParameter(primaryBodyID, spName);
-   SpacePoint *primary = (SpacePoint*)theGuiInterpreter->GetConfiguredItem(spName);
+   SpacePoint *primary = (SpacePoint*)theGuiInterpreter->GetObject(spName);
    theLibrationPt->SetRefObject(primary, Gmat::SPACE_POINT, spName);
 
    // get Earth pointer
    CelestialBody *j2000body = (CelestialBody*)theGuiInterpreter->
-      GetConfiguredItem("Earth");
+      GetObject("Earth");
 
    // set Earth as J000Body of primary body if NULL
    if (primary->GetJ2000Body() == NULL)
@@ -264,7 +265,7 @@ void LibrationPointPanel::SaveData()
    spName = secondaryBodyString.c_str();
    int secondaryBodyID = theLibrationPt->GetParameterID("Secondary");
    theLibrationPt->SetStringParameter(secondaryBodyID, spName);
-   SpacePoint *secondary = (SpacePoint*)theGuiInterpreter->GetConfiguredItem(spName);
+   SpacePoint *secondary = (SpacePoint*)theGuiInterpreter->GetObject(spName);
    theLibrationPt->SetRefObject(secondary, Gmat::SPACE_POINT, spName);
    
    // set Earth as J000Body of secondary body if NULL
@@ -306,6 +307,6 @@ void LibrationPointPanel::SaveData()
 
    theLibrationPt->SetStringParameter(librationPointID, librationPointString.c_str());
 
-   theApplyButton->Disable();
+   EnableUpdate(false);
 }
 

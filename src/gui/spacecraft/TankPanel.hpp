@@ -34,7 +34,7 @@ class TankPanel: public wxPanel
 {
 public:
    TankPanel(wxWindow *parent, Spacecraft *spacecraft,
-             wxButton *theApplyButton);
+             wxButton *applyButton, wxButton *okButton);
    ~TankPanel();
    void SaveData();
    void LoadData();
@@ -58,6 +58,7 @@ private:
    wxArrayString mExcludedTankList;
    
    wxButton *theApplyButton;
+   wxButton *theOkButton;
    wxButton *selectButton;
    wxButton *removeButton;
    wxButton *selectAllButton;

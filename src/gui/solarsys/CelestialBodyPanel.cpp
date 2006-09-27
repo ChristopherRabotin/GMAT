@@ -65,7 +65,7 @@ CelestialBodyPanel::CelestialBodyPanel(wxWindow *parent, const wxString &name)
    : GmatPanel(parent, true)
 {
    theCelestialBody = (CelestialBody*)
-            theGuiInterpreter->GetConfiguredItem(std::string(name.c_str()));
+            theGuiInterpreter->GetObject(std::string(name.c_str()));
    
    thePlanet = (Planet*)theCelestialBody;         
    bodyName = name.c_str();
@@ -427,7 +427,7 @@ void CelestialBodyPanel::SaveData()
                  theCelestialBody->GetName() + "\" is not an allowed value.  "
                  "\nThe allowed values are: [ %s ].";
 
-      theOkButton->Disable();
+      //theOkButton->Disable();
 
       // Mu
       inputString[0] = mMuTextCtrl->GetValue();
@@ -543,8 +543,8 @@ void CelestialBodyPanel::SaveData()
             theCelestialBody->SetRotationDataSource(Gmat::NOT_APPLICABLE);
       }
 
-      theApplyButton->Disable();
-      theOkButton->Enable();
+      EnableUpdate(false);
+      //loj: 9/26/06 theOkButton->Enable();
       canClose = true;
    }
    catch (BaseException &e)
@@ -561,8 +561,7 @@ void CelestialBodyPanel::SaveData()
 //------------------------------------------------------------------------------
 void CelestialBodyPanel::OnTextUpdate(wxCommandEvent& event)
 {
-   theApplyButton->Enable(true);
-   theOkButton->Enable(true);
+   EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -570,8 +569,7 @@ void CelestialBodyPanel::OnTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void CelestialBodyPanel::OnComboBoxChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable(true);
-   theOkButton->Enable(true);
+   EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------

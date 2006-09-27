@@ -79,8 +79,9 @@ void CoordPanel::EnableOptions()
    
    // create a temp axis to use flags
    AxisSystem* tmpAxis = (AxisSystem *)theGuiInterpreter->
-         CreateAxisSystem(std::string(typeStr.c_str()), "tmpAxis");
-
+      //CreateAxisSystem(std::string(typeStr.c_str()), "tmpAxis");
+      CreateObject(typeStr.c_str(), ""); // Use noname
+   
    if (tmpAxis == NULL)
       return;
       
@@ -102,7 +103,7 @@ void CoordPanel::EnableOptions()
       
       // get the epoch format and value from tmpAxis
       Real epoch = tmpAxis->GetEpoch().Get();
-      epochValue.Printf("%9.9f", epoch);
+      epochValue = theGuiManager->ToWxString(epoch);
       epochFormatValue = wxString(tmpAxis->GetEpochFormat().c_str());
       
       // set the text ctrl
@@ -277,27 +278,8 @@ void CoordPanel::ShowAxisData(AxisSystem *axis)
          std::string epochFormat = axis->GetEpochFormat();
          formatComboBox->SetStringSelection(epochFormat.c_str());
          
-         // arg: 1/23/06 commented out because epoch conversion isn't needed
          Real epoch = axis->GetEpoch().Get();
-         wxString wxEpochStr;
-         wxEpochStr.Printf("%9.9f", epoch);
-/*         std::string epochString = wxEpochStr.c_str();
-         
-         // convert if epoch is not in TAIModJulian
-         if (epochFormat != "TAIModJulian")
-         {
-            Real taiEpoch = TimeConverterUtil::ConvertToTaiMjd
-               ("A1Mjd", epoch, GmatTimeUtil::JD_JAN_5_1941);
-            
-            wxString taiEpochStr;
-            taiEpochStr.Printf("%9.9f", taiEpoch);
-            epochString =
-               mTimeConverter.Convert(taiEpochStr.c_str(), "TAIModJulian",
-                                      epochFormat);
-         }
-         
-         epochTextCtrl->SetValue(epochString.c_str());*/
-         epochTextCtrl->SetValue(wxEpochStr);
+         epochTextCtrl->SetValue(theGuiManager->ToWxString(epoch));
       }
       
       if (GetShowXyz())
@@ -351,7 +333,8 @@ AxisSystem* CoordPanel::CreateAxis()
    {
       // Create AxisSystem
       axis = (AxisSystem *)theGuiInterpreter->
-         CreateAxisSystem(std::string(axisType.c_str()), "");
+         //CreateAxisSystem(std::string(axisType.c_str()), "");
+         CreateObject(axisType.c_str(), "");
       
       if (axis != NULL)
       {
@@ -360,14 +343,14 @@ AxisSystem* CoordPanel::CreateAxis()
             if (priName != "")
             {
                SpacePoint *primary = (SpacePoint *)theGuiInterpreter->
-                  GetConfiguredItem(std::string(priName.c_str()));
+                  GetObject(std::string(priName.c_str()));
                axis->SetPrimaryObject(primary);
             }
             
             if (secName != "")
             {
                SpacePoint *secondary = (SpacePoint *)theGuiInterpreter->
-                  GetConfiguredItem(std::string(secName.c_str()));
+                  GetObject(std::string(secName.c_str()));
                axis->SetSecondaryObject(secondary);
             }
             
@@ -383,11 +366,7 @@ AxisSystem* CoordPanel::CreateAxis()
             std::string taiEpochStr = mTimeConverter.Convert
                (std::string(epochStr.c_str()), std::string(epochFormat.c_str()),
                 "TAIModJulian");
-                
-            // 20.02.06 - arg: changed to use enum types instead of strings
-//            Real epoch = TimeConverterUtil::ConvertFromTaiMjd
-//               ("A1Mjd", atof(taiEpochStr.c_str()), GmatTimeUtil::JD_JAN_5_1941);
-
+            
             Real epoch = TimeConverterUtil::ConvertFromTaiMjd
                (TimeConverterUtil::A1MJD, atof(taiEpochStr.c_str()), 
                GmatTimeUtil::JD_JAN_5_1941);
@@ -603,7 +582,7 @@ void CoordPanel::Setup( wxWindow *parent)
                         wxDefaultPosition, wxSize(120,20),
                         wxBOLD);
    title1StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-                                                                        true, _T(""), wxFONTENCODING_SYSTEM));
+                                    true, _T(""), wxFONTENCODING_SYSTEM));
    #endif
 
    // wxTextCtrl
@@ -793,11 +772,14 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
    try
    {
       // create CoordinateSystem if not exist
-      CoordinateSystem *coordSys = theGuiInterpreter->GetCoordinateSystem(coordName);
+      CoordinateSystem *coordSys =
+         (CoordinateSystem*)theGuiInterpreter->GetObject(coordName);
       
       if (coordSys == NULL)
       {
-         coordSys = theGuiInterpreter->CreateCoordinateSystem(coordName);
+         coordSys = (CoordinateSystem*)
+            theGuiInterpreter->CreateObject("CoordinateSystem", coordName);
+         
          #if DEBUG_COORD_PANEL
          MessageInterface::ShowMessage
             ("CoordPanel::SaveData() coordName=%s created.\n",
@@ -812,13 +794,13 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       coordSys->SetStringParameter("Origin", std::string(originName.c_str()));
       coordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
       
-      SpacePoint *origin = (SpacePoint*)theGuiInterpreter->
-         GetConfiguredItem(originName.c_str());
+      SpacePoint *origin =
+         (SpacePoint*)theGuiInterpreter->GetObject(originName.c_str());
       
       coordSys->SetOrigin(origin);
       
-      CelestialBody *j2000body = (CelestialBody*)theGuiInterpreter->
-         GetConfiguredItem("Earth");
+      CelestialBody *j2000body =
+         (CelestialBody*)theGuiInterpreter->GetObject("Earth");
       
       // set Earth as J000Body if NULL
       if (origin->GetJ2000Body() == NULL)
@@ -837,7 +819,7 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       {
          wxString primaryName = primaryComboBox->GetValue().Trim();
          SpacePoint *primary = (SpacePoint*)theGuiInterpreter->
-            GetConfiguredItem(primaryName.c_str());
+            GetObject(primaryName.c_str());
          
          axis->SetStringParameter("Primary", primaryName.c_str());
          axis->SetPrimaryObject(primary);
@@ -853,7 +835,7 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
          if (secondaryName != "")
          {
             SpacePoint *secondary = (SpacePoint*)theGuiInterpreter->
-               GetConfiguredItem(secondaryName.c_str());
+               GetObject(secondaryName.c_str());
          
             axis->SetSecondaryObject(secondary);
          }
@@ -896,12 +878,9 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
                {
                   std::string taiEpochStr = mTimeConverter.Convert
                      (epochStr, newEpochFormat.c_str(), "TAIModJulian");
-                  // 20.02.06 - arg: changed to use enum types instead of strings
-//                  epoch = TimeConverterUtil::ConvertFromTaiMjd
-//                     ("A1Mjd", atof(taiEpochStr.c_str()), GmatTimeUtil::JD_JAN_5_1941);
-                                          
                   epoch = TimeConverterUtil::ConvertFromTaiMjd
-                     (TimeConverterUtil::A1MJD, atof(taiEpochStr.c_str()), GmatTimeUtil::JD_JAN_5_1941);
+                     (TimeConverterUtil::A1MJD, atof(taiEpochStr.c_str()),
+                      GmatTimeUtil::JD_JAN_5_1941);
                }
             }
             

@@ -62,12 +62,15 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 OrbitPanel::OrbitPanel(wxWindow *parent,
-                        Spacecraft *spacecraft,
-                        SolarSystem *solarsystem,
-                        wxButton *theApplyButton) : 
-   wxPanel           (parent),
-   theApplyButton    (theApplyButton)
+                       Spacecraft *spacecraft,
+                       SolarSystem *solarsystem,
+                       wxButton *applyButton,
+                       wxButton *okButton)
+: wxPanel         (parent),
+  theApplyButton  (applyButton),
+  theOkButton     (okButton)
 {
+   
    // initalize data members
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
@@ -152,7 +155,8 @@ void OrbitPanel::LoadData()
       mFromCoordStr = coordSystemStr;
       
       mOutCoord = (CoordinateSystem*)theGuiInterpreter->
-         GetCoordinateSystem(coordSystemStr);
+         GetObject(coordSystemStr);
+      
       mFromCoord = mOutCoord;
       
       if (mOutCoord == NULL)
@@ -175,7 +179,7 @@ void OrbitPanel::LoadData()
       
       // get the origin for the output coordinate system
       std::string originName = mOutCoord->GetStringParameter("Origin");
-      SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetConfiguredItem(originName);
+      SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetObject(originName);
 
       #if DEBUG_ORBIT_PANEL
          MessageInterface::ShowMessage
@@ -758,8 +762,8 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       if (event.GetEventObject() == stateTypeComboBox)
          mIsStateTypeChanged = true;
       
-      mOutCoord = theGuiInterpreter->
-         GetCoordinateSystem(mCoordSysComboBox->GetStringSelection().c_str());
+      mOutCoord = (CoordinateSystem*)theGuiInterpreter->
+         GetObject(mCoordSysComboBox->GetStringSelection().c_str());
       
       if (mIsEpochChanged)
          UpdateEpoch();
@@ -828,6 +832,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
    {
       dataChanged = true;
       theApplyButton->Enable();
+      theOkButton->Enable();
    }
 }
 
@@ -862,6 +867,7 @@ void OrbitPanel::OnTextChange(wxCommandEvent& event)
    {
       dataChanged = true;
       theApplyButton->Enable();
+      theOkButton->Enable();
    }
 }
 
@@ -945,7 +951,7 @@ void OrbitPanel::InitializeCoordinateSystem(CoordinateSystem *cs)
 
    // Set the Origin for the coordinate system
    spName = cs->GetStringParameter("Origin");
-   sp = (SpacePoint*) theGuiInterpreter->GetConfiguredItem(spName);
+   sp = (SpacePoint*) theGuiInterpreter->GetObject(spName);
    
    if (sp == NULL)
       throw GmatBaseException("Cannot find SpacePoint named \"" +
@@ -956,7 +962,7 @@ void OrbitPanel::InitializeCoordinateSystem(CoordinateSystem *cs)
 
    // Set the J2000Body for the coordinate system
    spName = cs->GetStringParameter("J2000Body");
-   sp = (SpacePoint*) theGuiInterpreter->GetConfiguredItem(spName);
+   sp = (SpacePoint*) theGuiInterpreter->GetObject(spName);
    
    if (sp == NULL)
       throw GmatBaseException("Cannot find SpacePoint named \"" +

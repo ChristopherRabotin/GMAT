@@ -34,7 +34,7 @@ class AttitudePanel: public wxPanel
 {
 public:
    AttitudePanel(wxWindow *parent, Spacecraft *spacecraft,
-             wxButton *theApplyButton);
+                 wxButton *applyButton, wxButton *okButton);
    ~AttitudePanel();
    void SaveData();
    void LoadData();
@@ -94,6 +94,7 @@ private:
    wxComboBox *stateTypeRateComboBox;
    
    wxButton *theApplyButton;
+   wxButton *theOkButton;
    
    StringArray modeArray;
    StringArray coordSysArray;

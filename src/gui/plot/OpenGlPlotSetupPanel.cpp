@@ -77,8 +77,10 @@ OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
    MessageInterface::ShowMessage("OpenGlPlotSetupPanel() subscriberName = " +
                                  std::string(subscriberName.c_str()) + "\n");
 #endif
-   Subscriber *subscriber =
-      theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
+   Subscriber *subscriber = (Subscriber*)
+      //theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
+      theGuiInterpreter->GetObject(std::string(subscriberName.c_str()));
+   
    mOpenGlPlot = (OpenGlPlot*)subscriber;
 
    // Set the pointer for the "Show Script" button
@@ -1006,7 +1008,7 @@ void OpenGlPlotSetupPanel::LoadData()
    mCelesObjectListBox->Deselect(mCelesObjectListBox->GetSelection());
    
    mPerspectiveModeCheckBox->Enable();
-   theApplyButton->Disable();
+   EnableUpdate(false);
    
    if (!mUseFixedFovCheckBox->IsChecked())
    {
@@ -1065,9 +1067,9 @@ void OpenGlPlotSetupPanel::SaveData()
       std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
                  mOpenGlPlot->GetName() + "\" is not an allowed value.  "
                  "\nThe allowed values are: [ %s ].";
-  
-      theOkButton->Disable();
-
+      
+      //loj: 9/26/06 theOkButton->Disable();
+      
       inputString[0] = mDataCollectFreqTextCtrl->GetValue();
       inputString[1] = mUpdatePlotFreqTextCtrl->GetValue();
       for (Integer i=0; i < 2; ++i)
@@ -1424,9 +1426,8 @@ void OpenGlPlotSetupPanel::SaveData()
             ("ViewUpAxis",
              std::string(mViewUpAxisComboBox->GetStringSelection().c_str()));
       }
-
-      theApplyButton->Disable();
-      theOkButton->Enable();
+      
+      EnableUpdate(false);
       canClose = true;
    }
    catch (BaseException &e)
@@ -1465,7 +1466,7 @@ void OpenGlPlotSetupPanel::OnAddSpacePoint(wxCommandEvent& event)
          mShowObjectMap[s.c_str()] = true;
          ShowSpacePointOption(s, true, true, GmatColor::RED32);
          mHasSpChanged = true;
-         theApplyButton->Enable();
+         EnableUpdate(true);
       }
    }
    else if (mCelesObjectListBox->GetSelection() != -1)
@@ -1489,7 +1490,7 @@ void OpenGlPlotSetupPanel::OnAddSpacePoint(wxCommandEvent& event)
          mShowObjectMap[s.c_str()] = true;
          ShowSpacePointOption(s, true, false, GmatColor::L_BROWN32);
          mHasSpChanged = true;
-         theApplyButton->Enable();
+         EnableUpdate(true);
       }
    }
 }
@@ -1540,7 +1541,7 @@ void OpenGlPlotSetupPanel::OnRemoveSpacePoint(wxCommandEvent& event)
    }
    
    mHasSpChanged = true;
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -1560,7 +1561,7 @@ void OpenGlPlotSetupPanel::OnClearSpacePoint(wxCommandEvent& event)
    
    ShowSpacePointOption("", false);
    mHasSpChanged = true;
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -1659,8 +1660,7 @@ void OpenGlPlotSetupPanel::OnCheckBoxChange(wxCommandEvent& event)
       #endif
    }
    
-   theApplyButton->Enable();
-   theOkButton->Enable();
+   EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -1722,7 +1722,7 @@ void OpenGlPlotSetupPanel::OnOrbitColorClick(wxCommandEvent& event)
          #endif
       }
       
-      theApplyButton->Enable();
+      EnableUpdate(true);
       mHasOrbitColorChanged = true;
    }
 }
@@ -1761,7 +1761,7 @@ void OpenGlPlotSetupPanel::OnTargetColorClick(wxCommandEvent& event)
           mSelSpName.c_str(), mTargetColorMap[mSelSpName].GetIntColor());
       #endif
       
-      theApplyButton->Enable();
+      EnableUpdate(true);
       mHasTargetColorChanged = true;
    }
 }
@@ -1827,8 +1827,7 @@ void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
       mBottomViewSizer->Layout();      
    }
    
-   theApplyButton->Enable();
-   theOkButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -1838,8 +1837,7 @@ void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 void OpenGlPlotSetupPanel::OnTextChange(wxCommandEvent& event)
 {
    mHasViewInfoChanged = true;
-   theApplyButton->Enable();
-   theOkButton->Enable();
+   EnableUpdate(true);
 }
 
 

@@ -57,7 +57,7 @@ ThrusterConfigPanel::ThrusterConfigPanel(wxWindow *parent,
    
    theGuiManager = GuiItemManager::GetInstance();
    
-   theThruster = (Thruster*)theGuiInterpreter->GetHardware(thrusterName);
+   theThruster = (Thruster*)theGuiInterpreter->GetObject(thrusterName);
    
    isCoordSysChanged = false;
    isTankChanged = false;
@@ -211,7 +211,7 @@ void ThrusterConfigPanel::LoadData()
        isTankEmpty = false;
     }
    
-   theApplyButton->Disable();
+   EnableUpdate(false);
 }
 
 //------------------------------------------------------------------------------
@@ -297,9 +297,8 @@ void ThrusterConfigPanel::SaveData()
           theThruster->SetStringParameter(paramID, tankName.c_str());
       }
       
-      theApplyButton->Disable();
+      EnableUpdate(false);
       canClose = true;
-      theOkButton->Enable();
    }
    catch(BaseException &ex)
    {
@@ -313,8 +312,7 @@ void ThrusterConfigPanel::SaveData()
 //------------------------------------------------------------------------------
 void ThrusterConfigPanel::OnTextChange(wxCommandEvent &event)
 {
-    theApplyButton->Enable();
-    theOkButton->Enable();
+    EnableUpdate(true);
 } 
 
 //------------------------------------------------------------------------------
@@ -326,8 +324,8 @@ void ThrusterConfigPanel::OnComboBoxChange(wxCommandEvent &event)
    {
       isCoordSysChanged =  true;
       coordsysName = coordsysComboBox->GetStringSelection().c_str();
-      theApplyButton->Enable();
-      theOkButton->Enable();
+      
+      EnableUpdate(true);
    }
    else if (event.GetEventObject() == tankComboBox)
    {
@@ -335,8 +333,7 @@ void ThrusterConfigPanel::OnComboBoxChange(wxCommandEvent &event)
       {
               isTankChanged = true;
          tankName = tankComboBox->GetStringSelection().c_str();
-         theApplyButton->Enable();
-         theOkButton->Enable();
+         EnableUpdate(true);
       }
    }
 }    
@@ -352,8 +349,7 @@ void ThrusterConfigPanel::OnButtonClick(wxCommandEvent &event)
        
        ThrusterCoefficientDialog tcDlg(this, theThruster, type);
        tcDlg.ShowModal(); 
-       theApplyButton->Enable();      
-       theOkButton->Enable();
+       EnableUpdate(true);      
     } 
     else if (event.GetEventObject() == kCoefButton)
     {
@@ -361,7 +357,6 @@ void ThrusterConfigPanel::OnButtonClick(wxCommandEvent &event)
        
        ThrusterCoefficientDialog tcDlg(this, theThruster, type);
        tcDlg.ShowModal();
-       theApplyButton->Enable();
-       theOkButton->Enable();
+       EnableUpdate(true);
     }            
 }    

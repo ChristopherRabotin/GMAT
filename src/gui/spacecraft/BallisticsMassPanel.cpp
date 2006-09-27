@@ -22,13 +22,14 @@
 #include "BallisticsMassPanel.hpp"
 #include "GuiItemManager.hpp"
 #include "MessageInterface.hpp"
+
 //------------------------------
 // event tables for wxWindows
 //------------------------------
 BEGIN_EVENT_TABLE(BallisticsMassPanel, wxPanel)
    EVT_TEXT(ID_TEXTCTRL, BallisticsMassPanel::OnTextChange)
-   EVT_TEXT(ID_TEXT_CTRL, BallisticsMassPanel::OnTextChange)
 END_EVENT_TABLE()
+   
 //------------------------------
 // public methods
 //------------------------------
@@ -45,11 +46,13 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 BallisticsMassPanel::BallisticsMassPanel(wxWindow *parent,
                                          Spacecraft *spacecraft,
-                                         wxButton *theApplyButton)
-   :wxPanel(parent)
+                                         wxButton *applyButton,
+                                         wxButton *okButton)
+   : wxPanel(parent)
 {
     this->theSpacecraft = spacecraft;
-    this->theApplyButton = theApplyButton;
+    this->theApplyButton = applyButton;
+    this->theOkButton = okButton;
     
     canClose = true;
     dataChanged = false;
@@ -161,31 +164,35 @@ void BallisticsMassPanel::Create()
 //------------------------------------------------------------------------------
 void BallisticsMassPanel::LoadData()
 {
-    int dryMassID = theSpacecraft->GetParameterID("DryMass");
-//    int coeffDragID = theSpacecraft->GetParameterID("CoefficientDrag");
-    int coeffDragID = theSpacecraft->GetParameterID("Cd");
-    int dragAreaID = theSpacecraft->GetParameterID("DragArea");
-//    int reflectCoeffID = theSpacecraft->GetParameterID("ReflectivityCoefficient");
-    int reflectCoeffID = theSpacecraft->GetParameterID("Cr");
-    int srpAreaID = theSpacecraft->GetParameterID("SRPArea");
-
-    Real mass = theSpacecraft->GetRealParameter(dryMassID);
-    Real dragCoeff = theSpacecraft->GetRealParameter(coeffDragID);
-    Real dragArea = theSpacecraft->GetRealParameter(dragAreaID);
-    Real reflectCoeff = theSpacecraft->GetRealParameter(reflectCoeffID);
-    Real srpArea = theSpacecraft->GetRealParameter(srpAreaID);
-
-    GuiItemManager *theGuiManager = GuiItemManager::GetInstance();
-    
-    dryMassTextCtrl->SetValue(theGuiManager->ToWxString(mass));
-    dragCoeffTextCtrl->SetValue(theGuiManager->ToWxString(dragCoeff));
-    reflectCoeffTextCtrl->SetValue(theGuiManager->ToWxString(reflectCoeff));
-    dragAreaTextCtrl->SetValue(theGuiManager->ToWxString(dragArea));
-    srpAreaTextCtrl->SetValue(theGuiManager->ToWxString(srpArea));
-    
-//    epochValue->SetValue(epochStr);
-
-    dataChanged = false;
+   try
+   {
+      int dryMassID = theSpacecraft->GetParameterID("DryMass");
+      int coeffDragID = theSpacecraft->GetParameterID("Cd");
+      int dragAreaID = theSpacecraft->GetParameterID("DragArea");
+      int reflectCoeffID = theSpacecraft->GetParameterID("Cr");
+      int srpAreaID = theSpacecraft->GetParameterID("SRPArea");
+      
+      Real mass = theSpacecraft->GetRealParameter(dryMassID);
+      Real dragCoeff = theSpacecraft->GetRealParameter(coeffDragID);
+      Real dragArea = theSpacecraft->GetRealParameter(dragAreaID);
+      Real reflectCoeff = theSpacecraft->GetRealParameter(reflectCoeffID);
+      Real srpArea = theSpacecraft->GetRealParameter(srpAreaID);
+      
+      GuiItemManager *theGuiManager = GuiItemManager::GetInstance();
+      
+      dryMassTextCtrl->SetValue(theGuiManager->ToWxString(mass));
+      dragCoeffTextCtrl->SetValue(theGuiManager->ToWxString(dragCoeff));
+      reflectCoeffTextCtrl->SetValue(theGuiManager->ToWxString(reflectCoeff));
+      dragAreaTextCtrl->SetValue(theGuiManager->ToWxString(dragArea));
+      srpAreaTextCtrl->SetValue(theGuiManager->ToWxString(srpArea));
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage(e.GetMessage());
+   }
+   
+   dataChanged = false;
+   
 }
 
 
@@ -198,10 +205,8 @@ void BallisticsMassPanel::SaveData()
     dataChanged = false;
     
     int dryMassID = theSpacecraft->GetParameterID("DryMass");
-//    int coeffDragID = theSpacecraft->GetParameterID("CoefficientDrag");
     int coeffDragID = theSpacecraft->GetParameterID("Cd");
     int dragAreaID = theSpacecraft->GetParameterID("DragArea");
-//    int reflectCoeffID = theSpacecraft->GetParameterID("ReflectivityCoefficient");
     int reflectCoeffID = theSpacecraft->GetParameterID("Cr");
     int srpAreaID = theSpacecraft->GetParameterID("SRPArea");
 
@@ -252,6 +257,12 @@ void BallisticsMassPanel::SaveData()
 //------------------------------------------------------------------------------
 void BallisticsMassPanel::OnTextChange(wxCommandEvent &event)
 {
-   dataChanged = true;
-   theApplyButton->Enable();
+   if (dryMassTextCtrl->IsModified() || dragCoeffTextCtrl->IsModified() ||
+       dragAreaTextCtrl->IsModified() || srpAreaTextCtrl->IsModified() ||
+       reflectCoeffTextCtrl->IsModified())
+   {
+      dataChanged = true;
+      theApplyButton->Enable();
+      theOkButton->Enable();
+   }
 }

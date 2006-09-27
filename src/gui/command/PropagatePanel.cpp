@@ -451,8 +451,8 @@ void PropagatePanel::LoadData()
          #endif
          
          // verify space object actually exist
-         if (theGuiInterpreter->GetSpacecraft(soList[j]) ||
-             theGuiInterpreter->GetFormation(soList[j]))
+         if (theGuiInterpreter->GetObject(soList[j]) ||
+             theGuiInterpreter->GetObject(soList[j]))
          {
             actualSoCount++;
             mTempProp[i].soNameList.Add(soList[j].c_str());
@@ -816,9 +816,8 @@ void PropagatePanel::UpdateStopCondition()
    //-----------------------------------------------------------------
    if (oldStopName.IsSameAs(""))
    {
-      StopCondition *stopCond = theGuiInterpreter->
-         CreateStopCondition("StopCondition",
-                             std::string(mTempStopCond[stopRow].name.c_str()));
+      StopCondition *stopCond = (StopCondition*)theGuiInterpreter->
+         CreateStopCondition("StopCondition", mTempStopCond[stopRow].name.c_str());
       mTempStopCond[stopRow].stopCondPtr = stopCond;
 
       if (stopCond == NULL)
@@ -1150,7 +1149,7 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
                   ("PropagatePanel::OnCellRightClick() soCount=%d\n",
                    soCount);
                #endif
-            
+               
                mTempProp[row].soNameList.Clear();
                for (Integer j=0; j<soCount; j++)
                {

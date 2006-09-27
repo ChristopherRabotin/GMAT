@@ -1440,12 +1440,12 @@ GmatMainFrame::CreateNewResource(const wxString &title,
       sizer->Add(new OpenGlPlotSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::VARIABLE:
-      if (theGuiInterpreter->GetParameter(name.c_str())->GetTypeName() == "Variable" ||
-          theGuiInterpreter->GetParameter(name.c_str())->GetTypeName() == "String")
+      if (theGuiInterpreter->GetObject(name.c_str())->GetTypeName() == "Variable" ||
+          theGuiInterpreter->GetObject(name.c_str())->GetTypeName() == "String")
       {
          sizer->Add(new ParameterSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       }
-      else if (theGuiInterpreter->GetParameter(name.c_str())->GetTypeName() == "Array")
+      else if (theGuiInterpreter->GetObject(name.c_str())->GetTypeName() == "Array")
       {
          sizer->Add(new ArraySetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       }

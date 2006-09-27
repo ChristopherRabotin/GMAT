@@ -46,7 +46,7 @@ FunctionSetupPanel::FunctionSetupPanel(wxWindow *parent, const wxString &name)
    mEnableSave = false;
 
    theGmatFunction = (GmatFunction *)
-            theGuiInterpreter->GetFunction(std::string(name.c_str()));
+            theGuiInterpreter->GetObject(std::string(name.c_str()));
 
    Create();
    Show();
@@ -189,7 +189,7 @@ void FunctionSetupPanel::OnTextUpdate(wxCommandEvent& event)
    if (event.GetEventObject() == mFileNameTextCtrl)
    {
       mEnableLoad = true;
-      theApplyButton->Enable(true);
+      EnableUpdate(true);
 
       if (mFileNameTextCtrl->GetValue() == "")
       {
@@ -200,7 +200,7 @@ void FunctionSetupPanel::OnTextUpdate(wxCommandEvent& event)
    else if (event.GetEventObject() == mFileContentsTextCtrl)
    {
       mEnableSave = true;
-      theApplyButton->Enable(true);
+      EnableUpdate(true);
    }
 
    mLoadButton->Enable(mEnableLoad);

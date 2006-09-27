@@ -388,7 +388,7 @@ void UniversePanel::LoadData()
    
    mObject = theSolarSystem;
 
-   theApplyButton->Disable();
+   EnableUpdate(false);
 }
 
 
@@ -431,7 +431,7 @@ void UniversePanel::SaveData()
          {
             MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
                            inputString.c_str(),"File Name", "File must exist"); 
-            theOkButton->Disable();
+            //loj: 9/26/06 theOkButton->Disable();
             return;
          }
          filename.close();
@@ -490,7 +490,7 @@ void UniversePanel::SaveData()
        MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
                         inputString.c_str(),"Ephemeris Update Interval",
                         "Real Number >= 0");
-       theOkButton->Disable();
+       //loj: 9/26/06 theOkButton->Disable();
        return;
    }
    theSolarSystem->SetEphemUpdateInterval(rvalue);
@@ -538,7 +538,7 @@ void UniversePanel::OnAddButton(wxCommandEvent& event)
          prioritizeButton->Enable(true);
       
       mHasFileTypesInUseChanged = true;
-      theApplyButton->Enable();
+      EnableUpdate(true);
    }
 }
 
@@ -574,7 +574,7 @@ void UniversePanel::OnRemoveButton(wxCommandEvent& event)
       prioritizeButton->Enable(true);
 
    mHasFileTypesInUseChanged = true;
-   theApplyButton->Enable(true);
+   EnableUpdate(true);
 }
 
 
@@ -599,7 +599,7 @@ void UniversePanel::OnClearButton(wxCommandEvent& event)
    prioritizeButton->Enable(false);
    
    mHasFileTypesInUseChanged = true;
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 
@@ -635,7 +635,7 @@ void UniversePanel::OnSortButton(wxCommandEvent& event)
       
       mPageSizer->Layout();
       mHasFileTypesInUseChanged = true;
-      theApplyButton->Enable(true);
+      EnableUpdate(true);
    }
 }
 
@@ -659,7 +659,7 @@ void UniversePanel::OnBrowseButton(wxCommandEvent& event)
          mFileNameTextCtrl->SetValue(filename);
          mFileTypeNameMap[mFileTypeComboBox->GetStringSelection()] = filename;
          mHasFileNameChanged = true;
-         theApplyButton->Enable(true);
+         EnableUpdate(true);
       }
    }
 }
@@ -710,8 +710,7 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
       mHasAnaModelChanged = true;
    }
    
-   theApplyButton->Enable();
-   theOkButton->Enable();
+   EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -719,8 +718,7 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void UniversePanel::OnCheckBoxChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
-   theOkButton->Enable();
+   EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -733,6 +731,5 @@ void UniversePanel::OnTextCtrlChange(wxCommandEvent& event)
       mHasFileNameChanged = true;
    }
 
-   theApplyButton->Enable();
-   theOkButton->Enable();
+   EnableUpdate(true);
 }

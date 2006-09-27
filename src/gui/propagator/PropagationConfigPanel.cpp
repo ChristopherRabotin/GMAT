@@ -129,7 +129,7 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
 
    canClose = true;
    
-   theApplyButton->Disable();
+   EnableUpdate(false);
 }
 
 //------------------------------------------------------------------------------
@@ -368,12 +368,11 @@ void PropagationConfigPanel::SaveData()
             
             if (theAtmosphereModel == NULL)  
             {
-               theAtmosphereModel = theGuiInterpreter->CreateAtmosphereModel
-                  (forceList[i]->dragType.c_str(), forceList[i]->dragType.c_str(),
-                   forceList[i]->bodyName.c_str());
-               
-               //loj: 6/9/05 Commented out - it's set in the DragForce::Initialize()
-               //theCelestialBody->SetAtmosphereModel(theAtmosphereModel);
+               //theAtmosphereModel = theGuiInterpreter->CreateAtmosphereModel
+               //   (forceList[i]->dragType.c_str(), forceList[i]->dragType.c_str(),
+               //    forceList[i]->bodyName.c_str());
+               theAtmosphereModel = (AtmosphereModel*)theGuiInterpreter->CreateObject
+                  (forceList[i]->dragType.c_str(), forceList[i]->dragType.c_str());
                
                #if DEBUG_PROP_SAVE
                ShowForceList("Exiting if (theAtmosphereModel == NULL)");
@@ -531,7 +530,8 @@ void PropagationConfigPanel::Initialize()
    #endif
    
    theSolarSystem = theGuiInterpreter->GetSolarSystemInUse();
-   thePropSetup = theGuiInterpreter->GetPropSetup(propSetupName);
+   //thePropSetup = theGuiInterpreter->GetPropSetup(propSetupName);
+   thePropSetup = (PropSetup*)theGuiInterpreter->GetObject(propSetupName);
 
    //Note: All the settings should match enum types in the header.
    
@@ -609,7 +609,6 @@ void PropagationConfigPanel::Initialize()
    if (thePropSetup != NULL)
    {
       thePropagator = thePropSetup->GetPropagator();
-      //thePropagator = (Propagator*)theProp->Clone();
       theForceModel = thePropSetup->GetForceModel();
       numOfForces   = thePropSetup->GetNumForces();
       
@@ -1542,11 +1541,15 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
    if (integratorChanged)
    {
       thePropagatorName = propSetupName + propagatorTypeArray[propIndex];
-      thePropagator = theGuiInterpreter->GetPropagator(thePropagatorName);
+      //thePropagator = theGuiInterpreter->GetPropagator(thePropagatorName);
+      thePropagator = (Propagator*)theGuiInterpreter->GetObject(thePropagatorName);
       if (thePropagator == NULL)
-         thePropagator =
-            theGuiInterpreter->CreatePropagator(propagatorTypeArray[propIndex],
-                                                thePropagatorName);
+         //thePropagator =
+         //   theGuiInterpreter->CreatePropagator(propagatorTypeArray[propIndex],
+         //                                       thePropagatorName);
+         thePropagator = (Propagator*)
+            theGuiInterpreter->CreateObject(propagatorTypeArray[propIndex],
+                                            thePropagatorName);
    }
 
    
@@ -1867,7 +1870,7 @@ void PropagationConfigPanel::SaveDegOrder()
                   forceList[i]->gravOrder.c_str());
                #endif
             
-	           Integer id, ivalue;
+                   Integer id, ivalue;
                canClose = true;
                std::string inputString;
                std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
@@ -1875,7 +1878,7 @@ void PropagationConfigPanel::SaveDegOrder()
                   "The allowed values are: [%s].";                        
 
                // save degree   
-	           id = theGravForce->GetParameterID("Degree");
+                   id = theGravForce->GetParameterID("Degree");
                inputString = forceList[i]->gravDegree.c_str();      
                // check to see if input is an integer and greater than 
                // or equal to zero
@@ -1895,7 +1898,7 @@ void PropagationConfigPanel::SaveDegOrder()
 
                // save order   
                // check to see if input is an integer
-	           id = theGravForce->GetParameterID("Order");
+                   id = theGravForce->GetParameterID("Order");
                inputString = forceList[i]->gravOrder.c_str();      
                if (GmatStringUtil::ToInteger(inputString,&ivalue))      
                   theGravForce->SetIntegerParameter("Order", ivalue);
@@ -1981,7 +1984,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
    
    try
    {
-	  Integer id, ivalue;
+          Integer id, ivalue;
       Real rvalue, min, max;
       canClose = true;
       std::string inputString, minStr, maxStr;
@@ -1990,7 +1993,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
                         "The allowed values are: [%s].";                        
 
       // save initial step size
-	  id = thePropagator->GetParameterID("InitialStepSize");
+          id = thePropagator->GetParameterID("InitialStepSize");
       inputString = setting1TextCtrl->GetValue();      
      
 //      setting1TextCtrl.validator = new wxTextValidator(wxFilter.NUMERIC, "10");
@@ -2009,7 +2012,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
 //      thePropagator->SetRealParameter("InitialStepSize", atof(setting1TextCtrl->GetValue()));
 
       // save accuracy
-	  id = thePropagator->GetParameterID("Accuracy");
+          id = thePropagator->GetParameterID("Accuracy");
       inputString = setting2TextCtrl->GetValue();      
       // check to see if input is a real
       if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue >= 0.0))      
@@ -2024,7 +2027,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
 //      thePropagator->SetRealParameter("Accuracy", atof(setting2TextCtrl->GetValue()));
 
       // save min step size
-	  id = thePropagator->GetParameterID("MinStep");
+          id = thePropagator->GetParameterID("MinStep");
       inputString = setting3TextCtrl->GetValue();      
       // check to see if input is a real
       if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue >= 0.0))      
@@ -2039,7 +2042,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
 //      thePropagator->SetRealParameter("MinStep", atof(setting3TextCtrl->GetValue()));
 
       // save max step size
-	  id = thePropagator->GetParameterID("MaxStep");
+          id = thePropagator->GetParameterID("MaxStep");
       inputString = setting4TextCtrl->GetValue();      
       // check to see if input is a real
       if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue >= 0.0))      
@@ -2072,7 +2075,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
 //      thePropagator->SetRealParameter("MaxStep", atof(setting4TextCtrl->GetValue()));
 
       // save max step attempts
-	  id = thePropagator->GetParameterID("MaxStepAttempts");
+          id = thePropagator->GetParameterID("MaxStepAttempts");
       inputString = setting5TextCtrl->GetValue();      
       // check to see if input is an integer
       if ((GmatStringUtil::ToInteger(inputString,&ivalue)) && (ivalue > 0))      
@@ -2089,7 +2092,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
       if (integratorString.IsSameAs(integratorArray[ABM]))
       {
          // save min integration error
-	     id = thePropagator->GetParameterID("LowerError");
+             id = thePropagator->GetParameterID("LowerError");
          inputString = setting6TextCtrl->GetValue();      
          // check to see if input is a real
          if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue > 0.0))      
@@ -2104,7 +2107,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
 //         thePropagator->SetRealParameter("LowerError", atof(setting6TextCtrl->GetValue()));
 
          // save nominal integration error
-	     id = thePropagator->GetParameterID("TargetError");
+             id = thePropagator->GetParameterID("TargetError");
          inputString = setting7TextCtrl->GetValue();      
          // check to see if input is a real
          if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue >= 0.0))      
@@ -2152,7 +2155,7 @@ void PropagationConfigPanel::OnIntegratorSelection(wxCommandEvent &event)
       isIntegratorChanged = true;
       integratorString = integratorComboBox->GetStringSelection();
       DisplayIntegratorData(true);
-      theApplyButton->Enable(true);
+      EnableUpdate(true);
    }
 }
 
@@ -2176,7 +2179,7 @@ void PropagationConfigPanel::OnOriginComboBoxChange(wxCommandEvent &event)
    // We don't want to set to true when only origin is changed
    //isForceModelChanged = true;
    isOriginChanged = true;
-   theApplyButton->Enable(true);
+   EnableUpdate(true);
 }
 
 
@@ -2272,7 +2275,7 @@ void PropagationConfigPanel::OnGravitySelection(wxCommandEvent &event)
       // We don't want to  set to true only if gravity model is changed
       //isForceModelChanged = true; 
       isPotFileChanged = true; //loj: 6/19/06 added
-      theApplyButton->Enable(true);
+      EnableUpdate(true);
    }
 }
 
@@ -2304,7 +2307,7 @@ void PropagationConfigPanel::OnAtmosphereSelection(wxCommandEvent &event)
       DisplayAtmosphereModelData();
          
       isForceModelChanged = true;
-      theApplyButton->Enable(true);
+      EnableUpdate(true);
    }
 }
 
@@ -2331,7 +2334,7 @@ void PropagationConfigPanel::OnErrorControlSelection(wxCommandEvent &event)
       DisplayErrorControlData();
        
       isForceModelChanged = true;  
-      theApplyButton->Enable(true);
+      EnableUpdate(true);
    }
 }
 
@@ -2362,7 +2365,7 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
          gravityDegreeTextCtrl->Enable(false);
          gravityOrderTextCtrl->Enable(false);
       
-         theApplyButton->Enable(true);
+         EnableUpdate(true);
          isForceModelChanged = true;
          return;
       }
@@ -2425,7 +2428,7 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
    OnBodySelection(event);
    DisplayForceData();
    
-   theApplyButton->Enable(true);
+   EnableUpdate(true);
    isForceModelChanged = true;
 }
 
@@ -2479,7 +2482,7 @@ void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
       //loj: Do we need to show? body name didn't change
       //DisplayGravityFieldData(forceList[currentBodyId]->bodyName);
       
-      theApplyButton->Enable(true);
+      EnableUpdate(true);
    }
 }
 
@@ -2516,7 +2519,7 @@ void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
          dragDlg.ShowModal();
       }
       
-      theApplyButton->Enable(true);
+      EnableUpdate(true);
    }
 }
 
@@ -2534,7 +2537,7 @@ void PropagationConfigPanel::OnMagSearchButton(wxCommandEvent &event)
       filename = dialog.GetPath().c_str();
       magfComboBox->Append(filename); 
    }
-   theApplyButton->Enable(true);
+   EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -2554,7 +2557,7 @@ void PropagationConfigPanel::OnPMEditButton(wxCommandEvent &event)
          pmForceList.clear();
          secondaryBodiesArray.Clear(); 
          pmEditTextCtrl->Clear();
-         theApplyButton->Enable(true);
+         EnableUpdate(true);
          isForceModelChanged = true;
          return;
       }
@@ -2577,7 +2580,7 @@ void PropagationConfigPanel::OnPMEditButton(wxCommandEvent &event)
          pmEditTextCtrl->AppendText(names[i] + " ");
       }
       
-      theApplyButton->Enable(true);
+      EnableUpdate(true);
       isForceModelChanged = true;
    }
 }   
@@ -2587,7 +2590,7 @@ void PropagationConfigPanel::OnPMEditButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnSRPEditButton(wxCommandEvent &event)
 {
-   theApplyButton->Enable(true);
+   EnableUpdate(true);
 }
 
 // wxTextCtrl Events
@@ -2598,7 +2601,7 @@ void PropagationConfigPanel::OnIntegratorTextUpdate(wxCommandEvent &event)
 {
    //isIntegratorChanged = true;
    isIntegratorDataChanged = true;
-   theApplyButton->Enable(true);
+   EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -2606,7 +2609,7 @@ void PropagationConfigPanel::OnIntegratorTextUpdate(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnGravityTextUpdate(wxCommandEvent& event)
 {
-   theApplyButton->Enable(true);
+   EnableUpdate(true);
 
    if (event.GetEventObject() == gravityDegreeTextCtrl)
    {
@@ -2636,7 +2639,7 @@ void PropagationConfigPanel::OnGravityTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnMagneticTextUpdate(wxCommandEvent& event)
 {
-   theApplyButton->Enable(true);
+   EnableUpdate(true);
    isMagfTextChanged = true;
 }
 
@@ -2648,7 +2651,7 @@ void PropagationConfigPanel::OnSRPCheckBoxChange(wxCommandEvent &event)
 {   
    forceList[currentBodyId]->useSrp = srpCheckBox->GetValue();
    isForceModelChanged = true;
-   theApplyButton->Enable(true);
+   EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------

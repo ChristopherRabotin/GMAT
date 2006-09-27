@@ -53,7 +53,7 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 AttitudePanel::AttitudePanel(wxWindow *parent, Spacecraft *spacecraft,
-                             wxButton *theApplyButton)
+                             wxButton *applyButton, wxButton *okButton)
    : wxPanel(parent), dontUpdate(false)
 {
    #ifdef DEBUG_ATTITUDE_PANEL
@@ -61,7 +61,8 @@ AttitudePanel::AttitudePanel(wxWindow *parent, Spacecraft *spacecraft,
    #endif
       
    this->theSpacecraft = spacecraft;
-   this->theApplyButton = theApplyButton;
+   this->theApplyButton = applyButton;
+   this->theOkButton = okButton;
    
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
@@ -918,6 +919,7 @@ void AttitudePanel::OnStateTypeTextUpdate(wxCommandEvent &event)
    
    dataChanged = true;
    theApplyButton->Enable();
+   theOkButton->Enable();
 }
 
 //------------------------------------------------------------------------------
@@ -953,6 +955,7 @@ void AttitudePanel::OnStateTypeRateTextUpdate(wxCommandEvent &event)
    
    dataChanged = true;
    theApplyButton->Enable();
+   theOkButton->Enable();
 }
 
 

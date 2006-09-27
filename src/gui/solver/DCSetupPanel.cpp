@@ -23,6 +23,7 @@
 #include "Solver.hpp"
 #include "DifferentialCorrector.hpp"
 #include "StringUtil.hpp"  // for ToInteger()
+#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -40,23 +41,24 @@ END_EVENT_TABLE()
  * A constructor.
  */
 //------------------------------------------------------------------------------
-DCSetupPanel::DCSetupPanel(wxWindow *parent, const wxString &name)
-    : GmatPanel(parent)
+   DCSetupPanel::DCSetupPanel(wxWindow *parent, const wxString &name)
+      : GmatPanel(parent)
 {
-    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-    
-    theSolver =
-        theGuiInterpreter->GetSolver(std::string(name.c_str()));
-        
-    theDC = (DifferentialCorrector *)theSolver;
-    
-    reportStyle = "";
-
-    if (theDC != NULL)
-    {
-        Create();
-        Show();
-    }
+   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   
+   theSolver =
+      //theGuiInterpreter->GetSolver(std::string(name.c_str()));
+      (Solver*)theGuiInterpreter->GetObject(std::string(name.c_str()));
+   
+   theDC = (DifferentialCorrector *)theSolver;
+   
+   reportStyle = "";
+   
+   if (theDC != NULL)
+   {
+      Create();
+      Show();
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -86,7 +88,7 @@ void DCSetupPanel::LoadData()
     mObject = theDC;
     
     Integer id;
-	 
+         
     id = theDC->GetParameterID("MaximumIterations");
     maxTextCtrl->SetValue(wxVariant((long)theDC->GetIntegerParameter(id)));
     
@@ -103,7 +105,7 @@ void DCSetupPanel::LoadData()
     id = theDC->GetParameterID("UseCentralDifferences");
     centralDifferencesCheckBox->SetValue(theDC->GetBooleanParameter(id));
     
-    theApplyButton->Disable();
+    EnableUpdate(false);
 }
 
 //------------------------------------------------------------------------------
@@ -128,7 +130,7 @@ void DCSetupPanel::SaveData()
 //      theDC->SetIntegerParameter(id, (Integer)atof(maxTextCtrl->GetValue()));
 
       // save maximum iterations
-	  id = theDC->GetParameterID("MaximumIterations");
+          id = theDC->GetParameterID("MaximumIterations");
       inputString = maxTextCtrl->GetValue();      
 
          // check to see if input is a real
@@ -143,7 +145,7 @@ void DCSetupPanel::SaveData()
       }
 
 //      // check to see if inout is a real
-//	  wxString maxStr = maxTextCtrl->GetValue();
+//        wxString maxStr = maxTextCtrl->GetValue();
 //      if (maxStr.ToDouble(&rval))
 //         theDC->SetIntegerParameter(id, (Integer)rval);
 ////         theBurn->SetRealParameter(id, rval);
@@ -167,7 +169,7 @@ void DCSetupPanel::SaveData()
       id = theDC->GetParameterID("UseCentralDifferences");
       theDC->SetBooleanParameter(id, centralDifferencesCheckBox->GetValue());
 
-      theApplyButton->Disable();
+      EnableUpdate(false);
    }
    catch (BaseException &e)
    {
@@ -246,7 +248,7 @@ void DCSetupPanel::Setup( wxWindow *parent)
 //------------------------------------------------------------------------------
 void DCSetupPanel::OnTextUpdate(wxCommandEvent& event)
 {
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -254,8 +256,8 @@ void DCSetupPanel::OnTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void DCSetupPanel::OnComboBoxChange(wxCommandEvent &event)
 {
-	reportStyle = styleComboBox->GetStringSelection().c_str();
-	theApplyButton->Enable();
+   reportStyle = styleComboBox->GetStringSelection().c_str();
+   EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -263,5 +265,5 @@ void DCSetupPanel::OnComboBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void DCSetupPanel::OnCheckBoxChange(wxCommandEvent &event)
 {
-    theApplyButton->Enable();
+    EnableUpdate(true);
 }    

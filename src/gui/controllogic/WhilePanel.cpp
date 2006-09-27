@@ -269,7 +269,8 @@ void WhilePanel::SaveData()
          //if (mRhsIsParam[i])
          if (!wxString(mLhsList[i].c_str()).ToDouble(&realNum))
          {
-            theParameter = theGuiInterpreter->GetParameter(mLhsList[i].c_str());
+            theParameter =
+               theGuiInterpreter->GetParameter(mLhsList[i].c_str());
             if (theParameter != NULL)
             {
                theWhileCommand->SetRefObject(theParameter, Gmat::PARAMETER,
@@ -288,7 +289,8 @@ void WhilePanel::SaveData()
          //if (mRhsIsParam[i])
          if (!wxString(mRhsList[i].c_str()).ToDouble(&realNum))
          {
-            theParameter = theGuiInterpreter->GetParameter(mRhsList[i].c_str());
+            theParameter =
+               theGuiInterpreter->GetParameter(mRhsList[i].c_str());
             if (theParameter != NULL)
             {
                theWhileCommand->SetRefObject(theParameter, Gmat::PARAMETER,
@@ -336,7 +338,7 @@ void WhilePanel::OnCellRightClick(wxGridEvent& event)
          if (oldStr != dialog.GetStringSelection())
          {
             conditionGrid->SetCellValue(row, col, dialog.GetStringSelection());
-            theApplyButton->Enable(true);
+            EnableUpdate(true);
          }
          
 //          wxString logicalString = dialog.GetStringSelection();
@@ -358,7 +360,7 @@ void WhilePanel::OnCellRightClick(wxGridEvent& event)
 //             }                         
 //             conditionGrid->SetCellValue(row, col, logicalString);
 //             mNumberOfLogicalOps++;
-//             theApplyButton->Enable(true);
+//             EnableUpdate(true);
 //          }
       }   
    }   
@@ -373,7 +375,7 @@ void WhilePanel::OnCellRightClick(wxGridEvent& event)
          if (oldStr != paramDlg.GetParamName())
          {
             conditionGrid->SetCellValue(row, col, paramDlg.GetParamName());
-            theApplyButton->Enable(true);
+            EnableUpdate(true);
          }
          
 //          wxString newParamName = paramDlg.GetParamName();
@@ -401,7 +403,7 @@ void WhilePanel::OnCellRightClick(wxGridEvent& event)
 //               }    
 //             }  
 //             conditionGrid->SetCellValue(row, col, newParamName);
-//             theApplyButton->Enable(true);
+//             EnableUpdate(true);
 //          }    
       }
    }
@@ -420,7 +422,7 @@ void WhilePanel::OnCellRightClick(wxGridEvent& event)
          if (oldStr != dialog.GetStringSelection())
          {
             conditionGrid->SetCellValue(row, col, dialog.GetStringSelection());
-            theApplyButton->Enable(true);
+            EnableUpdate(true);
          }
          
 //          wxString equalityString = dialog.GetStringSelection();
@@ -442,7 +444,7 @@ void WhilePanel::OnCellRightClick(wxGridEvent& event)
 //             }                         
 //             conditionGrid->SetCellValue(row, col, equalityString);
 //             mNumberOfConditions++;
-//             theApplyButton->Enable(true); 
+//             EnableUpdate(true); 
 //          }
       }  
    }
@@ -457,7 +459,7 @@ void WhilePanel::OnCellRightClick(wxGridEvent& event)
          if (oldStr != paramDlg.GetParamName())
          {
             conditionGrid->SetCellValue(row, col, paramDlg.GetParamName());
-            theApplyButton->Enable(true);
+            EnableUpdate(true);
          }
          
 //          wxString newParamName = paramDlg.GetParamName();
@@ -485,7 +487,7 @@ void WhilePanel::OnCellRightClick(wxGridEvent& event)
 //                }    
 //             } 
 //             conditionGrid->SetCellValue(row, col, newParamName);
-//             theApplyButton->Enable(true);
+//             EnableUpdate(true);
 //          }    
       }
    }      
@@ -567,5 +569,5 @@ void WhilePanel::OnCellValueChange(wxGridEvent& event)
 //          }   
 //       } 
 //    }    
-   theApplyButton->Enable(true);
+   EnableUpdate(true);
 } 

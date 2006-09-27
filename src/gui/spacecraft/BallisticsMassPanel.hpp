@@ -23,7 +23,6 @@
 #define BallisticsMassPanel_hpp
 
 #include "gmatwxdefs.hpp"
-#include "GuiInterpreter.hpp"
 #include "Spacecraft.hpp"
 
 class BallisticsMassPanel: public wxPanel
@@ -31,7 +30,8 @@ class BallisticsMassPanel: public wxPanel
 public:
    BallisticsMassPanel(wxWindow *parent,
                        Spacecraft *spacecraft,
-                       wxButton *theApplyButton);
+                       wxButton *applyButton,
+                       wxButton *okButton);
    ~BallisticsMassPanel();
    
    void SaveData();
@@ -52,6 +52,7 @@ private:
     
    Spacecraft *theSpacecraft;
    wxButton *theApplyButton;
+   wxButton *theOkButton;
 
    wxTextCtrl *dryMassTextCtrl;
    wxTextCtrl *dragCoeffTextCtrl;
@@ -63,7 +64,6 @@ private:
    enum
    {     
       ID_TEXT = 30100,
-      ID_TEXT_CTRL,
       ID_TEXTCTRL,
    };
 };

@@ -663,7 +663,8 @@ wxString ParameterSelectDialog::FormParamName()
 //------------------------------------------------------------------------------
 Parameter* ParameterSelectDialog::GetParameter(const wxString &name)
 {
-   Parameter *param = theGuiInterpreter->GetParameter(std::string(name.c_str()));
+   Parameter *param = 
+      theGuiInterpreter->GetParameter(std::string(name.c_str()));
 
    // create a parameter if it does not exist
    if (param == NULL)

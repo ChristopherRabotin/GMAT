@@ -80,7 +80,7 @@ void PropagatorSelectDialog::Create()
                                 wxDefaultPosition, wxDefaultSize, 0);
    
    StringArray propList =
-      theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
+      theGuiInterpreter->GetListOfObjects(Gmat::PROP_SETUP);
    int propCount = propList.size();
 
    if (propCount > 0)

@@ -34,18 +34,19 @@ END_EVENT_TABLE()
 //------------------------------
 
 //------------------------------------------------------------------------------
-// ThrusterPanel(wxWindow *parent, Spacecraft *spacecraft, wxButton *theApplyButton)
+// ThrusterPanel(wxWindow *parent, Spacecraft *spacecraft, ...)
 //------------------------------------------------------------------------------
 /**
  * Constructs ThrusterPanel object.
  */
 //------------------------------------------------------------------------------
 ThrusterPanel::ThrusterPanel(wxWindow *parent, Spacecraft *spacecraft,
-                             wxButton *theApplyButton)
+                             wxButton *applyButton, wxButton *okButton)
    : wxPanel(parent)
 {
     this->theSpacecraft = spacecraft;
-    this->theApplyButton = theApplyButton;
+    this->theApplyButton = applyButton;
+    this->theApplyButton = okButton;
     
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
     theGuiManager = GuiItemManager::GetInstance();
@@ -210,6 +211,7 @@ void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
 
        dataChanged = true;
        theApplyButton->Enable();
+       theOkButton->Enable();
     }
     else if (event.GetEventObject() == removeButton)
     {
@@ -232,6 +234,7 @@ void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
 
        dataChanged = true;
        theApplyButton->Enable();
+       theOkButton->Enable();
     }   
     else if (event.GetEventObject() == selectAllButton)
     {
@@ -251,6 +254,7 @@ void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
        
        dataChanged = true;
        theApplyButton->Enable();
+       theOkButton->Enable();
     } 
     else if (event.GetEventObject() == removeAllButton)
     {
@@ -270,6 +274,7 @@ void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
 
        dataChanged = true;
        theApplyButton->Enable();
+       theOkButton->Enable();
     }   
 }     
     

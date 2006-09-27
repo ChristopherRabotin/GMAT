@@ -38,10 +38,11 @@
 class OrbitPanel: public wxPanel
 {
 public:
-   OrbitPanel(wxWindow *parent, 
+   OrbitPanel(wxWindow *parent,
               Spacecraft *spacecraft,
-              SolarSystem *solarsystem, 
-              wxButton *theApplyButton);
+              SolarSystem *solarsystem,
+              wxButton *applyButton,
+              wxButton *okButton);
    ~OrbitPanel();
    
    void LoadData();
@@ -107,6 +108,7 @@ private:
                          const std::string &toElementType);
    
    wxButton *theApplyButton;
+   wxButton *theOkButton;
 
    wxStaticText *description1;
    wxStaticText *description2;

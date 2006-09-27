@@ -177,7 +177,7 @@ void FormationSetupPanel::Create()
 //------------------------------------------------------------------------------
 void FormationSetupPanel::LoadData()
 {
-   Formation *form = (Formation*)(theGuiInterpreter->GetFormation(mFormationName));
+   Formation *form = (Formation*)(theGuiInterpreter->GetObject(mFormationName));
    StringArray scList = form->GetStringArrayParameter(form->GetParameterID("Add"));
 
    // Set object pointer for "Show Script"
@@ -200,7 +200,7 @@ void FormationSetupPanel::LoadData()
 //------------------------------------------------------------------------------
 void FormationSetupPanel::SaveData()
 {
-   Formation *form = (Formation*)(theGuiInterpreter->GetFormation(mFormationName));
+   Formation *form = (Formation*)(theGuiInterpreter->GetObject(mFormationName));
    form->SetBooleanParameter("Clear", true);
    
    int soCount = mSoSelectedListBox->GetCount();
@@ -211,8 +211,7 @@ void FormationSetupPanel::SaveData()
    }
 
    theGuiManager->UpdateFormation();
-   GmatAppData::GetResourceTree()->UpdateFormation(); //loj: 6/3/05 Changed to UpdateFormation()
-   //GmatAppData::GetResourceTree()->UpdateResource(false);
+   GmatAppData::GetResourceTree()->UpdateFormation();
 }
 
 
@@ -258,7 +257,7 @@ void FormationSetupPanel::OnAddSpaceObject(wxCommandEvent& event)
       else
          mSoAvailableListBox->SetSelection(sel-1);
       
-      theApplyButton->Enable();
+      EnableUpdate(true);
    }
 
 #ifdef DEBUG_FORMATION
@@ -300,7 +299,7 @@ void FormationSetupPanel::OnRemoveSpaceObject(wxCommandEvent& event)
    else
       mSoSelectedListBox->SetSelection(sel-1);
    
-   theApplyButton->Enable();
+   EnableUpdate(true);
 
 #ifdef DEBUG_FORMATION
    MessageInterface::ShowMessage(
@@ -328,5 +327,5 @@ void FormationSetupPanel::OnClearSpaceObject(wxCommandEvent& event)
    mSoExcList.Empty();
    mSoAvailableListBox->SetSelection(0);
    
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }

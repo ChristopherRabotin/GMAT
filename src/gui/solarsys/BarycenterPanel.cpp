@@ -52,7 +52,7 @@ BarycenterPanel::BarycenterPanel(wxWindow *parent, const wxString &name)
                 :GmatPanel(parent)
 {
    theBarycenter =
-      (Barycenter*)theGuiInterpreter->GetCalculatedPoint(std::string(name.c_str()));
+      (Barycenter*)theGuiInterpreter->GetObject(name.c_str());
 
    mBodyNames.Clear();
    mIsBodySelected = false;
@@ -200,7 +200,8 @@ void BarycenterPanel::SaveData()
       theBarycenter->TakeAction("ClearBodies");
 
       // get Earth pointer as J2000Body
-      CelestialBody *j2000body = (CelestialBody*)theGuiInterpreter->GetConfiguredItem("Earth");
+      CelestialBody *j2000body =
+         (CelestialBody*)theGuiInterpreter->GetObject("Earth");
       CelestialBody *body;
       std::string bodyName;
       
@@ -211,7 +212,7 @@ void BarycenterPanel::SaveData()
          
          //loj: 8/31/05 Set body and J2000Body pointer
          // set body pointer
-         body = (CelestialBody*)theGuiInterpreter->GetConfiguredItem(bodyName);
+         body = (CelestialBody*)theGuiInterpreter->GetObject(bodyName);
          
          // set J2000Body for the body
          if (body->GetJ2000Body() == NULL)
@@ -225,8 +226,8 @@ void BarycenterPanel::SaveData()
              i, body, bodyName.c_str(), j2000body);
          #endif
 
-         theApplyButton->Disable();
-         theOkButton->Enable();
+         EnableUpdate(false);
+         //loj: 9/26/06 theOkButton->Enable();
          canClose = true;
       }
    }
@@ -291,6 +292,5 @@ void BarycenterPanel::OnButton(wxCommandEvent& event)
       bodySelectedListBox->Clear();
    }
 
-   theApplyButton->Enable();
-   theOkButton->Enable();
+   EnableUpdate(true);
 }

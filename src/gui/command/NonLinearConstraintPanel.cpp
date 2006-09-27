@@ -7,6 +7,7 @@
 // base includes
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
+#include "MessageInterface.hpp"
 
 //#define DEBUG_NONLINEARCONSTRAINT_PANEL 1
 
@@ -73,7 +74,7 @@ void NonLinearConstraintPanel::Create()
    // wxComboBox
    // Only fmincons (and others that handle constraints) should be included!!
    StringArray solverNames;
-   solverNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SOLVER);
+   solverNames = theGuiInterpreter->GetListOfObjects(Gmat::SOLVER);
    int solverCount = solverNames.size();
    wxString *solverArray = new wxString[solverCount];
 
@@ -208,7 +209,7 @@ void NonLinearConstraintPanel::ShowGoalSetup()
 
 void NonLinearConstraintPanel::OnTextChange(wxCommandEvent& event)
 {
-	/* from AchievePanel
+        /* from AchievePanel
    if (mGoalValueTextCtrl->IsModified())
    {
       mSolverData.goalValue = mGoalValueTextCtrl->GetValue();
@@ -217,7 +218,7 @@ void NonLinearConstraintPanel::OnTextChange(wxCommandEvent& event)
    if (mToleranceTextCtrl->IsModified())
       mSolverData.tolerance = atof(mToleranceTextCtrl->GetValue().c_str());
 */
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 void NonLinearConstraintPanel::OnSolverSelection(wxCommandEvent &event)

@@ -20,6 +20,7 @@
 #include "Hardware.hpp"
 #include "MessageInterface.hpp"
 #include <algorithm>              // for sort(), set_difference()
+#include <sstream>
 
 //#define DEBUG_GUI_ITEM 1
 //#define DEBUG_GUI_ITEM_UPDATE 1
@@ -1273,9 +1274,9 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
       new wxListBox(parent, id, wxDefaultPosition, size, 0,
                     emptyList, wxLB_SINGLE|wxLB_SORT);
 
-   // get Formation list (loj: 7/18/05 Added)
+   // get Formation list
    StringArray fmList =
-      theGuiInterpreter->GetListOfConfiguredItems(Gmat::FORMATION);
+      theGuiInterpreter->GetListOfObjects(Gmat::FORMATION);
    
    if (excList != NULL && excList->GetCount() > 0)
    {
@@ -2218,7 +2219,7 @@ void GuiItemManager::UpdateParameterList()
    #endif
    
    StringArray items =
-      theGuiInterpreter->GetListOfConfiguredItems(Gmat::PARAMETER);
+      theGuiInterpreter->GetListOfObjects(Gmat::PARAMETER);
    int numParamCount = items.size();
    
    Parameter *param;
@@ -2237,7 +2238,8 @@ void GuiItemManager::UpdateParameterList()
          ("GuiItemManager::UpdateParameterList() name=%s\n", items[i].c_str());
       #endif
       
-      param = theGuiInterpreter->GetParameter(items[i]);
+      //param = theGuiInterpreter->GetParameter(items[i]);
+      param = (Parameter*)theGuiInterpreter->GetObject(items[i]);
       
       // add if parameter plottable (returning single value)
       if (param->IsPlottable())
@@ -2362,7 +2364,7 @@ void GuiItemManager::UpdateSpacecraftList()
        theNumSpacecraft);
    #endif
    
-   StringArray scList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+   StringArray scList = theGuiInterpreter->GetListOfObjects(Gmat::SPACECRAFT);
    int numSc = scList.size();
 
    if (numSc > MAX_SPACECRAFT)
@@ -2452,7 +2454,7 @@ void GuiItemManager::UpdateSpacecraftList()
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateFormationList()
 {
-   StringArray listForm = theGuiInterpreter->GetListOfConfiguredItems(Gmat::FORMATION);
+   StringArray listForm = theGuiInterpreter->GetListOfObjects(Gmat::FORMATION);
    int numForm = listForm.size();
 
    #if DEBUG_GUI_ITEM_SO
@@ -2502,8 +2504,8 @@ void GuiItemManager::UpdateSpaceObjectList()
    MessageInterface::ShowMessage("GuiItemManager::UpdateSpaceObjectList() entered\n");
    #endif
    
-   StringArray scList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
-   StringArray fmList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::FORMATION);
+   StringArray scList = theGuiInterpreter->GetListOfObjects(Gmat::SPACECRAFT);
+   StringArray fmList = theGuiInterpreter->GetListOfObjects(Gmat::FORMATION);
 
    int numSc = scList.size();
    int numFm = fmList.size();
@@ -2537,7 +2539,8 @@ void GuiItemManager::UpdateSpaceObjectList()
          //------------------------------------------
          for (int i=0; i<numFm; i++)
          {
-            Formation *fm = (Formation*)(theGuiInterpreter->GetSpacecraft(fmList[i]));
+            //Formation *fm = (Formation*)(theGuiInterpreter->GetSpacecraft(fmList[i]));
+            GmatBase *fm = theGuiInterpreter->GetObject(fmList[i]);
             StringArray fmscList = fm->GetStringArrayParameter(fm->GetParameterID("Add"));
             fmscListAll.insert(fmscListAll.begin(), fmscList.begin(), fmscList.end());
          }
@@ -2667,7 +2670,7 @@ void GuiItemManager::UpdateCelestialBodyList()
    #endif
    
    //StringArray items = theSolarSystem->GetBodiesInUse();
-   StringArray items = theGuiInterpreter->GetListOfConfiguredItems(Gmat::CELESTIAL_BODY);
+   StringArray items = theGuiInterpreter->GetListOfObjects(Gmat::CELESTIAL_BODY);
    theNumCelesBody = items.size();
    
    if (theNumCelesBody > MAX_CELES_BODY)
@@ -2700,9 +2703,9 @@ void GuiItemManager::UpdateCelestialBodyList()
 void GuiItemManager::UpdateCelestialPointList()
 {
    StringArray celesBodyList =
-      theGuiInterpreter->GetListOfConfiguredItems(Gmat::CELESTIAL_BODY);
+      theGuiInterpreter->GetListOfObjects(Gmat::CELESTIAL_BODY);
    StringArray calPointList =
-      theGuiInterpreter->GetListOfConfiguredItems(Gmat::CALCULATED_POINT);
+      theGuiInterpreter->GetListOfObjects(Gmat::CALCULATED_POINT);
    
    theNumCelesBody = celesBodyList.size();
    theNumCalPoint = calPointList.size();
@@ -2752,7 +2755,7 @@ void GuiItemManager::UpdateCelestialPointList()
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateSpacePointList()
 {
-   StringArray spList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACE_POINT);
+   StringArray spList = theGuiInterpreter->GetListOfObjects(Gmat::SPACE_POINT);
    theNumSpacePoint = spList.size();
    
    #if DEBUG_GUI_ITEM_SP
@@ -2818,7 +2821,7 @@ void GuiItemManager::UpdateSpacePointList()
 void GuiItemManager::UpdateBurnList()
 {
    StringArray items =
-      theGuiInterpreter->GetListOfConfiguredItems(Gmat::BURN);
+      theGuiInterpreter->GetListOfObjects(Gmat::BURN);
    int numBurn = items.size();
    
    #if DEBUG_GUI_ITEM_BURN
@@ -2842,7 +2845,7 @@ void GuiItemManager::UpdateBurnList()
    
    for (int i=0; i<numBurn; i++)
    {
-      obj = theGuiInterpreter->GetConfiguredItem(items[i]);
+      obj = theGuiInterpreter->GetObject(items[i]);
       if (obj->GetTypeName() == "ImpulsiveBurn")
       {
          theImpBurnList[theNumImpBurn] = items[i].c_str();
@@ -2904,7 +2907,7 @@ void GuiItemManager::UpdateBurnList()
 void GuiItemManager::UpdateCoordSystemList()
 {
    StringArray items =
-      theGuiInterpreter->GetListOfConfiguredItems(Gmat::COORDINATE_SYSTEM);
+      theGuiInterpreter->GetListOfObjects(Gmat::COORDINATE_SYSTEM);
    theNumCoordSys = items.size();
    
    #if DEBUG_GUI_ITEM_CS
@@ -2968,7 +2971,7 @@ void GuiItemManager::UpdateCoordSystemList()
 void GuiItemManager::UpdateHardwareList()
 {
    StringArray items =
-      theGuiInterpreter->GetListOfConfiguredItems(Gmat::HARDWARE);
+      theGuiInterpreter->GetListOfObjects(Gmat::HARDWARE);
    int numHardware = items.size();
    
    #if DEBUG_GUI_ITEM_HW
@@ -2986,13 +2989,15 @@ void GuiItemManager::UpdateHardwareList()
 
    theNumFuelTank = 0;
    theNumThruster = 0;
-   Hardware *hw;
+   //Hardware *hw;
+   GmatBase *hw;
    wxArrayString tankNames;
    wxArrayString thrusterNames;
    
    for (int i=0; i<numHardware; i++)
    {
-      hw = theGuiInterpreter->GetHardware(items[i]);
+      //hw = theGuiInterpreter->GetHardware(items[i]);
+      hw = theGuiInterpreter->GetObject(items[i]);
       
       if (hw->IsOfType(Gmat::FUEL_TANK))
       {
@@ -3123,7 +3128,7 @@ void GuiItemManager::UpdateHardwareList()
 void GuiItemManager::UpdateFunctionList()
 {
    StringArray items =
-      theGuiInterpreter->GetListOfConfiguredItems(Gmat::FUNCTION);
+      theGuiInterpreter->GetListOfObjects(Gmat::FUNCTION);
    theNumFunction = items.size();
    
    #if DEBUG_GUI_ITEM_FN
@@ -3179,7 +3184,7 @@ void GuiItemManager::UpdateFunctionList()
 void GuiItemManager::UpdateSubscriberList()
 {
    StringArray items =
-      theGuiInterpreter->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+      theGuiInterpreter->GetListOfObjects(Gmat::SUBSCRIBER);
    theNumSubscriber = items.size();
    theNumReportFile = 0;
    
@@ -3218,7 +3223,7 @@ void GuiItemManager::UpdateSubscriberList()
    for (int i=0; i<theNumSubscriber; i++)
    {
       // check for ReportFile
-      obj = theGuiInterpreter->GetConfiguredItem(items[i]);
+      obj = theGuiInterpreter->GetObject(items[i]);
       if (obj->GetTypeName() == "ReportFile")
       {
          if (i < MAX_REPORT_FILE)

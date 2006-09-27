@@ -41,11 +41,12 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 TankPanel::TankPanel(wxWindow *parent, Spacecraft *spacecraft,
-                     wxButton *theApplyButton)
+                     wxButton *applyButton, wxButton *okButton)
    : wxPanel(parent)
 {
     this->theSpacecraft = spacecraft;
-    this->theApplyButton = theApplyButton;
+    this->theApplyButton = applyButton;
+    this->theOkButton = okButton;
     
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
     theGuiManager = GuiItemManager::GetInstance();
@@ -214,6 +215,7 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
        
        dataChanged = true;
        theApplyButton->Enable();
+       theOkButton->Enable();
     }
     else if (event.GetEventObject() == removeButton)
     {
@@ -236,6 +238,7 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
    
        dataChanged = true;
        theApplyButton->Enable();
+       theOkButton->Enable();
     }   
     else if (event.GetEventObject() == selectAllButton)
     {
@@ -255,6 +258,7 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
     
        dataChanged = true;
        theApplyButton->Enable();
+       theOkButton->Enable();
     } 
     else if (event.GetEventObject() == removeAllButton)
     {
@@ -274,6 +278,7 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
    
        dataChanged = true;
        theApplyButton->Enable();
+       theOkButton->Enable();
     }
 }     
     

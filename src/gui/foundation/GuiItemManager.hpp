@@ -66,7 +66,7 @@ public:
    static const int MAX_PLOT_PARAM = 250;
 
    // Other
-   static const int MAX_COORD_SYS = 20;
+   static const int MAX_COORD_SYS = 60;
    static const int MAX_HARDWARE = 60;
    static const int MAX_FUNCTION = 20;
    static const int MAX_REPORT_FILE = 20;

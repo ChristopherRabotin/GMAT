@@ -15,6 +15,7 @@
 #include "TextEphemFileDialog.hpp"
 #include "FileManager.hpp"
 #include "TextEphemFile.hpp"
+#include "TimeSystemConverter.hpp"  // for TimeConverterUtil::
 #include "MessageInterface.hpp"
 
 #include <wx/dir.h>
