@@ -28,6 +28,7 @@
 
 //#define DEBUG_VARIABLE_RANGES
 //#define DEBUG_VARY_EXECUTE 1
+//#define DEBUG_VARY_PARAMS
 
 //------------------------------------------------------------------------------
 //  static data
@@ -260,8 +261,8 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
       details << variableMaximum[i];
    }
 
-   if (solver && (solver->IsOfType("Optimizer")))
-   {
+   //if (solver && (solver->IsOfType("Optimizer")))
+   //{
       details << ", AdditiveScaleFactor =";
       for (UnsignedInt i = 0; i < additiveScaleFactor.size(); ++i)
       {
@@ -275,7 +276,7 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
          details << " ";
          details << multiplicativeScaleFactor[i];
       }
-   }
+   //}
    gen += details.str();
    generatingString = gen + "});";
    // Then call the base class method
@@ -510,6 +511,11 @@ Real Vary::GetRealParameter(const Integer id) const
 //---------------------------------------------------------------------------
 Real Vary::SetRealParameter(const Integer id, const Real value)
 {
+   #ifdef DEBUG_VARY_PARAMS
+      MessageInterface::ShowMessage(
+      "Vary::Setting value of %f for parameter %s\n", value,
+      (GetParameterText(id)).c_str());
+   #endif
     //if (id == initialValueID) 
     if (id == INITIAL_VALUE)
     {

@@ -31,6 +31,7 @@
 //#define DEBUG_OPTIMIZE_COMMANDS
 //#define DEBUG_OPTIMIZER
 //#define DEBUG_CALLBACK
+//#define DEBUG_OPTIMIZE_CONSTRUCTION
 
 //------------------------------------------------------------------------------
 // static data
@@ -63,6 +64,9 @@ Optimize::Optimize() :
    optimizerConverged  (false),
    optimizerInDebugMode(false)
 {
+   #ifdef DEBUG_OPTIMIZE_CONSTRUCTION
+      MessageInterface::ShowMessage("NOW creating Optimize command ...");
+   #endif
    parameterCount = OptimizeParamCount;
 }
 
@@ -77,6 +81,9 @@ Optimize::Optimize(const Optimize& o) :
    optimizerInDebugMode (o.optimizerInDebugMode)
 {
 	//parameterCount = OptimizeParamCount;  // this is set in GmatBase copy constructor
+   #ifdef DEBUG_OPTIMIZE_CONSTRUCTION
+      MessageInterface::ShowMessage("NOW creating (copying) Optimize command ...");
+   #endif
    localStore.clear();
 }
 
@@ -409,9 +416,15 @@ bool Optimize::Execute()
       
    }
    /*  Revisit this if/when we add non-external optimizers !!!!!!!!!!!!!!!!!!!!!
+    * This should be commented out for the fmincon optimizer 
+    * (branch should be executed from ExecuteCallback)
+   */
+
    if (branchExecuting)
    {
-      retval = ExecuteBranch();
+      //retval = ExecuteBranch();
+      callbackData = "10.0 20.0";
+      ExecuteCallback();  // *************** TEMPORARY *************************
       if (!branchExecuting && (state == Solver::FINISHED))
       {
          commandComplete = true;
@@ -419,13 +432,17 @@ bool Optimize::Execute()
    }
    else
    {
-   */
+
       GmatCommand *currentCmd;
    
       switch (state) 
       {
          case Solver::INITIALIZING:
             // Finalize initialization of the optimizer data
+            #ifdef DEBUG_OPTIMIZE_COMMANDS
+               MessageInterface::ShowMessage(
+               "Optimize::Execute - solver in INITIALIZING state\n");
+            #endif
             currentCmd = branch[0];
             optimizerConverged = false;
             while (currentCmd != this)  
@@ -440,6 +457,10 @@ bool Optimize::Execute()
             break;
 
          case Solver::RUNEXTERNAL:
+            #ifdef DEBUG_OPTIMIZE_COMMANDS
+               MessageInterface::ShowMessage(
+               "Optimize::Execute - solver in RUNEXTERNAL state\n");
+            #endif
             // Execute the nominal sequence
             if (!commandComplete) 
             {
@@ -476,6 +497,10 @@ bool Optimize::Execute()
          case Solver::FINISHED:
             // Final clean-up
 //            commandComplete = true;
+            #ifdef DEBUG_OPTIMIZE_COMMANDS
+               MessageInterface::ShowMessage(
+               "Optimize::Execute - solver in FINISHED state\n");
+            #endif
             optimizerConverged = true;
 
             // Run once more to publish the data from the converged state
@@ -489,14 +514,19 @@ bool Optimize::Execute()
          case Solver::ITERATING:     // Intentional fall-through
          */
          default:
-            throw CommandException(
-               "Invalid state in the Optimize state machine");
+         MessageInterface::ShowMessage("Optimize:: invalid state %d\n");
+            //throw CommandException(
+            //   "Invalid state in the Optimize state machine");
 
       }
-   //}
+   }
 
    if (!branchExecuting)
    {
+      #ifdef DEBUG_OPTIMIZE_COMMANDS
+         MessageInterface::ShowMessage(
+            "Optimize::Execute - about to advance the state\n");
+      #endif
       optimizer->AdvanceState();
 
       if (optimizer->GetState() == Solver::FINISHED) 
@@ -522,7 +552,7 @@ bool Optimize::Execute()
 bool Optimize::ExecuteCallback()
 {
    #ifdef DEBUG_CALLBACK
-      MessageInterface::ShowMessage("Entering Optimize::ExecuteCallback");
+      MessageInterface::ShowMessage("Entering Optimize::ExecuteCallback\n");
    #endif
    // NOTE that in the future we may have a callback to/from a non_MATLAB
    // external optimizer
@@ -546,9 +576,6 @@ bool Optimize::ExecuteCallback()
    // ask Matlab for the value of X
    Integer     n = optimizer->GetIntegerParameter(
                    optimizer->GetParameterID("NumberOfVariables"));
-   //double      X[n];
-   //std::string xName = "X";
-   //MatlabInterface::GetVariable(xName, n, X);
    Real X[n];
    // read X values from the callback data string here
    std::stringstream ins(callbackData.c_str());
@@ -561,6 +588,10 @@ bool Optimize::ExecuteCallback()
    Solver::SolverState nState = optimizer->GetNestedState(); 
    if (nState == Solver::INITIALIZING)
    {
+   #ifdef DEBUG_CALLBACK
+      MessageInterface::ShowMessage(
+         "Optimize::ExecuteCallback - state is INITIALIZING\n");
+   #endif
       StoreLoopData();
       // advance to NOMINAL
       callbackResults = optimizer->AdvanceNestedState(vars);
@@ -570,7 +601,21 @@ bool Optimize::ExecuteCallback()
       throw CommandException(
          "Optimize::ExecuteCallback - error in optimizer state");
    // this call should just advance the state to CALCULATING
+   #ifdef DEBUG_CALLBACK
+      MessageInterface::ShowMessage(
+         "Optimize::ExecuteCallback - state is NOMINAL\n");
+         "Optimize::ExecuteCallback - calling AdvanceNestedState with vars:\n");
+         for (Integer ii=0;ii<(Integer)vars.size();ii++)
+            MessageInterface::ShowMessage("--- vars[%d] = %.15f\n",
+               ii, vars.at(ii));
+   #endif
    callbackResults = optimizer->AdvanceNestedState(vars);
+   #ifdef DEBUG_CALLBACK
+      MessageInterface::ShowMessage("data from callback are: \n");
+      for (Integer ii = 0; ii < (Integer) callbackResults.size(); ii++)
+         MessageInterface::ShowMessage("(%d) -> %s\n",
+            ii, (callbackResults.at(ii)).c_str());
+   #endif
    ResetLoopData();
    try
    {
@@ -599,7 +644,7 @@ bool Optimize::PutCallbackData(std::string &data)
 {
    callbackData = data;
    #ifdef DEBUG_CALLBACK
-      MessageInterface::ShowMessage("Entering Optimize::PutCallbackData");
+      MessageInterface::ShowMessage("Entering Optimize::PutCallbackData\n");
       MessageInterface::ShowMessage("-- callback data are:\n");
       for (Integer i=0; i< (Integer) data.size(); i++)
          MessageInterface::ShowMessage("---- %f ", data[i]);
@@ -614,7 +659,7 @@ std::string Optimize::GetCallbackResults()
    for (Integer i=0; i< (Integer) callbackResults.size(); i++)
       allResults += callbackResults.at(i) + ";";
    #ifdef DEBUG_CALLBACK
-      MessageInterface::ShowMessage("Exiting Optimize::GetCallbackResults");
+      MessageInterface::ShowMessage("Exiting Optimize::GetCallbackResults\n");
       MessageInterface::ShowMessage("-- callback results are: %s\n",
       allResults.c_str());
    #endif

@@ -26,6 +26,8 @@
 //#define DEBUG_MINIMIZE_PARSE 1
 //#define DEBUG_MINIMIZE_INIT 1
 //#define DEBUG_MINIMIZE_EXEC 1
+//#define DEBUG_MINIMIZE
+//#define DEBUG_MINIMIZE_PARAM
 
 
 //---------------------------------
@@ -68,6 +70,9 @@ Minimize::Minimize() :
    isMinimizeParm          (false),
    objId                   (-1)
 {
+   #ifdef DEBUG_MINIMIZE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+      MessageInterface::ShowMessage("Creating Minimize command ...\n");
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    parameterCount = MinimizeParamCount;
 }
 
@@ -92,6 +97,9 @@ Minimize::Minimize(const Minimize& m) :
    isMinimizeParm          (m.isMinimizeParm),
    objId                   (m.objId)
 {
+   #ifdef DEBUG_MINIMIZE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+      MessageInterface::ShowMessage("Creating (copying) Minimize command ...\n");
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    parameterCount = MinimizeParamCount;
 }
 
@@ -350,10 +358,10 @@ std::string Minimize::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool Minimize::SetStringParameter(const Integer id, const std::string &value)
 {
-   #ifdef DEBUG_MINIMIZE_PARAM
+   #ifdef DEBUG_MINIMIZE_PARAM // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
    MessageInterface::ShowMessage
       ("Minimize::SetStringParameter() id=%d, value=%s\n", id, value.c_str());
-   #endif
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    
    if (id == OPTIMIZER_NAME) {
       optimizerName = value;
@@ -385,6 +393,11 @@ bool Minimize::SetStringParameter(const Integer id, const std::string &value)
 bool Minimize::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                             const std::string &name)
 {   
+   #ifdef DEBUG_MINIMIZE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+      MessageInterface::ShowMessage(
+      "setting ref obj %s of type %s on Minimize command\n",
+      (obj->GetName()).c_str(), (obj->GetTypeName()).c_str());
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    if (type == Gmat::SOLVER) 
    {
       if (optimizerName == obj->GetName()) 
@@ -426,11 +439,16 @@ bool Minimize::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool Minimize::InterpretAction()
 {
+   #ifdef DEBUG_MINIMIZE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+      MessageInterface::ShowMessage("Interpreting Minimize command ...\n");
+      MessageInterface::ShowMessage("generatingString = %s",
+         generatingString.c_str());
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    /// @todo: Clean up this hack for the Minimize::InterpretAction method
    // Sample string:  "Minimize myDC(Sat1.SMA = 21545.0, {Tolerance = 0.1});"
    
    // Set starting location to the space following the command string
-   Integer loc = generatingString.find("Minimize", 0) + 7, end, strend;
+   Integer loc = generatingString.find("Minimize", 0) + 8, end, strend;
    const char *str = generatingString.c_str();
    
    // Skip white space
@@ -441,6 +459,11 @@ bool Minimize::InterpretAction()
    end = generatingString.find("(", loc);
    
    std::string component = generatingString.substr(loc, end-loc);
+   #ifdef DEBUG_MINIMIZE_PARSE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+      MessageInterface::ShowMessage
+         ("Minimize::InterpretAction() optimizerName = \"%s\"\n", 
+         component.c_str());
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    if (component == "")
       throw CommandException("Minimize string does specify the optimizer");
    
@@ -452,7 +475,8 @@ bool Minimize::InterpretAction()
    while (str[loc] == ' ')
       ++loc;
    // Stop at the opening paren
-   end = generatingString.find("=", loc);
+   //end = generatingString.find("=", loc);
+   end = generatingString.find(")", loc);
    strend = end-1;
    // Drop trailing white space
    while (str[strend] == ' ')
@@ -462,15 +486,27 @@ bool Minimize::InterpretAction()
    objectiveName = component;
 
 
-   #ifdef DEBUG_MINIMIZE_PARSE // ~~~~ debug ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   #ifdef DEBUG_MINIMIZE_PARSE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
       MessageInterface::ShowMessage
          ("Minimize::InterpretAction() objectiveName = \"%s\"\n", 
          objectiveName.c_str());
-   #endif // ~~~~ end debug ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
+
+   // Get an instance if this is a Parameter
+   Moderator *mod = Moderator::Instance();
+   //std::string parmObj, parmType, parmSystem;
+   if (mod->GetParameter(objectiveName) == NULL)
+      throw CommandException(
+      "Minimize::Parameter %s not known to Moderator\n");
+   objective = (Variable*) mod->GetParameter(objectiveName);
 
    // ************** but would it already have been created, as we're still
    // in the script interpreting phase here ******************** TBD *********
    // query the objectMap here .....
+   /*
+   if (!objectMap)
+      throw CommandException("ObjectMap not set for Minimize command!");
+      
    if (objectMap->find(objectiveName) == objectMap->end()) 
    {
       std::string errorStr = "Minimize: parameter %s not found in objectMap\n" +
@@ -478,12 +514,12 @@ bool Minimize::InterpretAction()
       throw CommandException(errorStr);
    }
    objective = (Variable*) (*objectMap)[objectiveName];
-
+   */
    isMinimizeParm = true;
    
-   #ifdef DEBUG_MINIMIZE_PARSE // ~~~~ debug ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   #ifdef DEBUG_MINIMIZE_PARSE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
       MessageInterface::ShowMessage("Minimize::InterpretAction() exiting\n");
-   #endif // ~~~~ end debug ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       
    return true;
 }
@@ -567,11 +603,11 @@ bool Minimize::InterpretParameter(const std::string text,
 //------------------------------------------------------------------------------
 bool Minimize::Initialize()
 {
-   #if DEBUG_MINIMIZE_INIT
+   #if DEBUG_MINIMIZE_INIT // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
    MessageInterface::ShowMessage
       ("Minimize::Initialize() entered. optimizer=%p, objective=%p\n", 
       optimizer, objective);
-   #endif
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    
    bool retval = GmatCommand::Initialize();
 
@@ -630,11 +666,11 @@ bool Minimize::Initialize()
    // The optimizer cannot be finalized until all of the loop is initialized
    optimizerDataFinalized = false;
    
-   #if DEBUG_MINIMIZE_INIT
+   #if DEBUG_MINIMIZE_INIT // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
    MessageInterface::ShowMessage
       ("Minimize::Initialize() exiting. optimizer=%p, objective=%p\n", 
       optimizer, objective);
-   #endif
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    
    return retval;
 }
@@ -656,7 +692,7 @@ bool Minimize::Initialize()
 //------------------------------------------------------------------------------
 bool Minimize::Execute()
 {
-   #ifdef DEBUG_MINIMIZE_EXEC
+   #ifdef DEBUG_MINIMIZE_EXEC // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
    MessageInterface::ShowMessage
       ("Minimize::Execute() optimizerDataFinalized=%d\n, optimizer=%s, objective=%p\n", 
        optimizerDataFinalized, optimizer, objective);
@@ -664,7 +700,7 @@ bool Minimize::Execute()
       ("   objectiveName=%s\n", objectiveName.c_str());
    if (objective)
       MessageInterface::ShowMessage("   objective=%s\n", objective->GetName().c_str());
-   #endif
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    
    bool retval = true;
    if (!optimizerDataFinalized) 
@@ -684,13 +720,13 @@ bool Minimize::Execute()
    if (objective != NULL)
    {
       val = objective->EvaluateReal();
-      optimizer->SetResultValue(objId, val);
-      #ifdef DEBUG_MINIMIZE_EXEC
+      #ifdef DEBUG_MINIMIZE_EXEC // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
          MessageInterface::ShowMessage
             ("   objective=%s, %p\n", objective->GetTypeName().c_str(), objective);
          MessageInterface::ShowMessage("   Parameter target: %s val = %lf\n",
             objective->GetTypeName().c_str(), val);
-      #endif
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
+      optimizer->SetResultValue(objId, val, "Objective");
    }
    else 
    {  // ERROR ERROR - should I throw an exception here? *********** TBD **************
@@ -699,9 +735,9 @@ bool Minimize::Execute()
       val = -999.999;
       //val = goalObject->GetRealParameter(parmId);  // again,no clue
       optimizer->SetResultValue(objId, val, "Objective");
-      #ifdef DEBUG_MINIMIZE_EXEC
+      #ifdef DEBUG_MINIMIZE_EXEC // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
          MessageInterface::ShowMessage("   Object target: val = %lf\n", val);
-      #endif
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    }
 
    //targeter->SetResultValue(goalId, val);

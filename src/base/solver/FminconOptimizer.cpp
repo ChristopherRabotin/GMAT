@@ -34,6 +34,7 @@
 
 //#define DEBUG_STATE_MACHINE
 //#define DEBUG_ML_CONNECTIONS
+//#define DEBUG_FMINCON_OPTIONS
 
 //------------------------------------------------------------------------------
 // static data
@@ -101,8 +102,20 @@ FminconOptimizer::FminconOptimizer(std::string name) :
    objectTypeNames.push_back("FminconOptimizer");
    parameterCount = FminconOptimizerParamCount;
    // set up options list, based on allowed options
+   #ifdef DEBUG_FMINCON_OPTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+      MessageInterface::ShowMessage(
+      "In fmincon constructor, about to set up option and option value lists.\n");
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    for (Integer i=0; i<NUM_MATLAB_OPTIONS; i++)
    {
+      #ifdef DEBUG_FMINCON_OPTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage(
+         "Fmincon construct: now adding option %s to list\n",
+         (ALLOWED_OPTIONS[i]).c_str());
+          MessageInterface::ShowMessage(
+         "Fmincon construct: now adding option value %s to list\n",
+         (DEFAULT_OPTION_VALUES[i]).c_str());
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       options.push_back(ALLOWED_OPTIONS[i]);
       optionValues.push_back(DEFAULT_OPTION_VALUES[i]);
    }
@@ -123,8 +136,20 @@ FminconOptimizer::FminconOptimizer(const FminconOptimizer &opt) :
    ExternalOptimizer       (opt),
    fminconExitFlag         (-999)
 {
+   #ifdef DEBUG_FMINCON_OPTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+      MessageInterface::ShowMessage(
+      "In fmincon copy constructor, about to copy option and option value lists.\n");
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    options          = opt.options;
    optionValues     = opt.optionValues;
+   #ifdef DEBUG_FMINCON_OPTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+      MessageInterface::ShowMessage(
+      "In fmincon copy constructor, number of options copied = %d\n",
+      (Integer) options.size());
+      MessageInterface::ShowMessage(
+      "In fmincon copy constructor, number of option values copied = %d\n",
+      (Integer) optionValues.size());
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    parameterCount   = opt.parameterCount;
 }
 
@@ -167,7 +192,15 @@ Solver::SolverState FminconOptimizer::AdvanceState()
          #endif
          WriteToTextFile();
          ReportProgress();
+         #ifdef DEBUG_STATE_MACHINE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+            MessageInterface::ShowMessage(
+            "FminconOptimizer::AdvanceState about to complete initialization\n");
+         #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
          CompleteInitialization();
+         #ifdef DEBUG_STATE_MACHINE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+            MessageInterface::ShowMessage(
+            "FminconOptimizer::AdvanceState initialization complete\n");
+         #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
          currentState = RUNEXTERNAL;
          break;
       /*    
@@ -220,20 +253,20 @@ Solver::SolverState FminconOptimizer::AdvanceState()
          throw SolverException("Solver state not supported for the optimizer");
       */ 
       case RUNEXTERNAL:
-         #ifdef DEBUG_STATE_MACHINE
+         #ifdef DEBUG_STATE_MACHINE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
             MessageInterface::ShowMessage(
                "Entered FminconOptimizer state machine; RUNEXTERNAL\n");
-         #endif
+         #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
          ReportProgress();
          RunExternal();
          ReportProgress();
          break;
         
       case FINISHED:
-         #ifdef DEBUG_STATE_MACHINE
+         #ifdef DEBUG_STATE_MACHINE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
             MessageInterface::ShowMessage(
                "Entered FminconOptimizer state machine; FINISHED\n");
-         #endif
+         #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
          RunComplete();
          ReportProgress();
          break;
@@ -312,6 +345,9 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
 
 bool FminconOptimizer::Optimize()
 {   
+   #ifdef DEBUG_ML_CONNECTIONS
+      MessageInterface::ShowMessage("Entering Optimize method ....\n");
+   #endif
    #if defined __USE_MATLAB__
       // set format long so that we don't lose precision between string transmission
       MatlabInterface::EvalString("format long");
@@ -324,6 +360,14 @@ bool FminconOptimizer::Optimize()
       std::string defaultOptions = optionsStr +"\'fmincon\');";
       std::ostringstream optS;
       
+      #ifdef DEBUG_ML_CONNECTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage(
+         "In Optimize method, the number of options is %d ....\n", 
+         (Integer)options.size());
+         MessageInterface::ShowMessage(
+         "In Optimize method, the number of option values is %d ....\n", 
+         (Integer)optionValues.size());
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       for (Integer i=0; i < (Integer) options.size(); i++)
       {
          if (optionValues.at(i) != "")
@@ -331,12 +375,17 @@ bool FminconOptimizer::Optimize()
             allEmpty = false;
             if (i != 0) optS << ",";
             optS << "\'" << options.at(i)      << "\',";
-            if ((6 <= i) && (i <= 10)) // put single quotes around strings
+            /// @todo do this in a better way, not using 7->11, etc.
+            if ((7 <= i) && (i <= 11)) // put single quotes around strings
                optS << "\'" << optionValues.at(i) << "\'";
             else
                optS << optionValues.at(i);         }
       }
       optionsStr += optS.str() + ");";
+      #ifdef DEBUG_ML_CONNECTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage(
+         "In Optimize method, the options are: %s ....\n", optionsStr.c_str());
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       // call OPTIMSET (using EvalStr) to set up options for fmincon
       if (allEmpty) // if none were set, set options to be default for fmincon
          MatlabInterface::RunMatlabString(defaultOptions);
@@ -348,22 +397,34 @@ bool FminconOptimizer::Optimize()
       // pass to MATLAB the X0 array (needs to be a column vector)
       mlS.str("");
       for (Integer i=0;i<(Integer)variable.size();i++)
-         mlS << variable.at(i) << " ";
-      inParm = "X0 = [" + mlS.str() + "]\';";
+         mlS << variable.at(i) << ";";
+      inParm = "X0 = [" + mlS.str() + "];";
+      #ifdef DEBUG_ML_CONNECTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage(
+         "In Optimize method, parameter string is: %s ....\n", inParm.c_str());
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       MatlabInterface::RunMatlabString(inParm);
       
       // pass to MATLAB the Lower column vector
       mlS.str("");
       for (Integer i=0;i<(Integer)variableMinimum.size();i++)
-         mlS << variableMinimum.at(i) << " ";
-      inParm = "Lower = [" + mlS.str() + "]\';";
+         mlS << variableMinimum.at(i) << ";";
+      inParm = "Lower = [" + mlS.str() + "];";
+      #ifdef DEBUG_ML_CONNECTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage(
+         "In Optimize method, parameter string is: %s ....\n", inParm.c_str());
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       MatlabInterface::RunMatlabString(inParm);
       
       // pass to MATLAB the Upper column vector
       mlS.str("");
       for (Integer i=0;i<(Integer)variableMaximum.size();i++)
-         mlS << variableMaximum.at(i) << " ";
-      inParm = "Upper = [" + mlS.str() + "]\';";
+         mlS << variableMaximum.at(i) << ";";
+      inParm = "Upper = [" + mlS.str() + "];";
+      #ifdef DEBUG_ML_CONNECTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage(
+         "In Optimize method, parameter string is: %s ....\n", inParm.c_str());
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       MatlabInterface::RunMatlabString(inParm);
       
       // clear last errormsg
@@ -512,6 +573,11 @@ std::string  FminconOptimizer::GetStringParameter(const Integer id) const
 bool FminconOptimizer::SetStringParameter(const Integer id,
                                           const std::string &value)
 {
+   #ifdef DEBUG_ML_CONNECTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+      MessageInterface::ShowMessage("Fmincon::setting id %d value to %s\n",
+      id, value.c_str());
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
+   
    if ((id >= MATLAB_OPTIONS_OFFSET) &&
        (id <  (MATLAB_OPTIONS_OFFSET + NUM_MATLAB_OPTIONS)))
    {
@@ -541,6 +607,10 @@ std::string  FminconOptimizer::GetStringParameter(const std::string &label) cons
 bool FminconOptimizer::SetStringParameter(const std::string &label,
                                           const std::string &value)
 {
+   #ifdef DEBUG_ML_CONNECTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+      MessageInterface::ShowMessage("Fmincon::setting param %s value to %s\n",
+      label.c_str(), value.c_str());
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    // check options first
    for (Integer i=0; i<NUM_MATLAB_OPTIONS; i++)
       if (label == options[i])
@@ -685,7 +755,7 @@ void FminconOptimizer::RunNominal()
 
 void FminconOptimizer::CalculateParameters()
 {
-   ExternalOptimizer::CalculateParameters(); 
+   //ExternalOptimizer::CalculateParameters(); 
    // check to make sure we have all of the data we need, from Minimize, etc.?
 }
 
@@ -699,8 +769,8 @@ void FminconOptimizer::RunComplete()
 void FminconOptimizer::FreeArrays()
 {
    ExternalOptimizer::FreeArrays();
-   options.clear();
-   optionValues.clear();
+   //options.clear();
+   //optionValues.clear();
 }
 
 //std::string FminconOptimizer::GetProgressString()
@@ -890,10 +960,12 @@ void FminconOptimizer::WriteToTextFile()
             textFile << std::endl;
             break;
             
-         case ITERATING:     // Intentional fall through
          default:
-            throw SolverException(
-               "Solver state not supported for the Fmincon optimizer");
+            MessageInterface::ShowMessage(
+            "Solver state %d not supported for FminconOptimizer\n", 
+            currentState);
+            //throw SolverException(
+            //   "Solver state not supported for the Fmincon optimizer");
       }
    }
 }
@@ -901,9 +973,9 @@ void FminconOptimizer::WriteToTextFile()
 bool FminconOptimizer::OpenConnection()
 {
    
-   #ifdef DEBUG_ML_CONNECTIONS
+   #ifdef DEBUG_ML_CONNECTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
       MessageInterface::ShowMessage("Entering FminconOptimizer::OpenConnection");
-   #endif
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
 
 #if defined __USE_MATLAB__
    // open the MatlabInterface (which is currently a static class)
@@ -918,9 +990,10 @@ bool FminconOptimizer::OpenConnection()
    {
       std::string setPath = "path(path ,'" + functionPath + "')";
       MatlabInterface::RunMatlabString(setPath);
-   #ifdef DEBUG_ML_CONNECTIONS
-      MessageInterface::ShowMessage("MARTLAB path set to %s\n", functionPath.c_str());
-   #endif
+   #ifdef DEBUG_ML_CONNECTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+      MessageInterface::ShowMessage("MATLAB path set to %s\n", 
+      functionPath.c_str());
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    }
 
    // check for availability of Optimization Toolbox (well, really
@@ -952,10 +1025,11 @@ bool FminconOptimizer::OpenConnection()
                "Error determining existence of MATLAB gmat_startup");
       if (outArr2[0] > 0.0) // 2 means it is in the MATLAB path
       {
-         #ifdef DEBUG_ML_CONNECTIONS
+         #ifdef DEBUG_ML_CONNECTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
             MessageInterface::ShowMessage(
-            "gmat_startup exists (code = %.4f), running gmat_startup\n", outArr2[0]);
-         #endif
+            "gmat_startup exists (code = %.4f), running gmat_startup\n", 
+            outArr2[0]);
+         #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
          // run the startup file to add to the MATLAB path correctly
          evalStr = "gmat_startup;";
          MatlabInterface::RunMatlabString(evalStr);
@@ -976,11 +1050,11 @@ bool FminconOptimizer::OpenConnection()
          resStr  = "callbackexist";  
          MatlabInterface::RunMatlabString(evalStr);
          OKint                 = MatlabInterface::GetVariable(resStr, 1, out4); 
-         #ifdef DEBUG_ML_CONNECTIONS
+         #ifdef DEBUG_ML_CONNECTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
             MessageInterface::ShowMessage(
             "existence codes for support files  = %.4f  %.4f  %.4f  %.4f\n", 
             out1[0], out2[0], out3[0], out4[0]);
-         #endif
+         #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
          
          if ((out1[0] <= 0.0) || (out2[0] <= 0.0) ||
              (out3[0] <= 0.0) || (out4[0] <= 0.0))
@@ -1055,7 +1129,8 @@ bool FminconOptimizer::IsAllowedValue(const std::string &opt,
    if ((opt == ALLOWED_OPTIONS[0]) ||
        (opt == ALLOWED_OPTIONS[1]) || // need to check for this being <= DiffMaxChange
        (opt == ALLOWED_OPTIONS[4]) ||
-       (opt == ALLOWED_OPTIONS[5]))
+       (opt == ALLOWED_OPTIONS[5]) ||
+       (opt == ALLOWED_OPTIONS[6]))
    {
       if (atof(val.c_str()) > 0.0)  return true;
       return false;
@@ -1066,17 +1141,17 @@ bool FminconOptimizer::IsAllowedValue(const std::string &opt,
       if (atoi(val.c_str()) > 0) return true;
       return false;
    }
-   else if ((opt == ALLOWED_OPTIONS[6]) ||
-            (opt == ALLOWED_OPTIONS[7]) ||
-            (opt == ALLOWED_OPTIONS[9]) ||
-            (opt == ALLOWED_OPTIONS[10]))
+   else if ((opt == ALLOWED_OPTIONS[7]) ||
+            (opt == ALLOWED_OPTIONS[8]) ||
+            (opt == ALLOWED_OPTIONS[10]) ||
+            (opt == ALLOWED_OPTIONS[11]))
    {
       if ((val == "On") || (val == "Off") ||
           (val == "ON") || (val == "OFF") ||
           (val == "on") || (val == "off")) return true;
       return false;
    }
-   else if (opt == ALLOWED_OPTIONS[8])
+   else if (opt == ALLOWED_OPTIONS[9])
    {
       if ((val == "Iter")   || (val == "Off")   ||
           (val == "Notify") || (val == "Final") ||
@@ -1089,13 +1164,3 @@ bool FminconOptimizer::IsAllowedValue(const std::string &opt,
    else
       return false;
 }
-
-
-
-
-
-
-
-
-
-
