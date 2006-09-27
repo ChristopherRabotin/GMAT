@@ -2366,7 +2366,8 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
       {
          parmType = GetParameterType(i);
          // Handle StringArray parameters separately
-         if (parmType != Gmat::STRINGARRAY_TYPE)
+         if (parmType != Gmat::STRINGARRAY_TYPE &&
+             parmType != Gmat::OBJECTARRAY_TYPE)
          {
             // Skip unhandled types
             if (
