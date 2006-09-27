@@ -143,6 +143,7 @@ namespace Gmat
       RMATRIX_TYPE,
       TIME_TYPE,
       OBJECT_TYPE,
+      OBJECTARRAY_TYPE,
       TypeCount,
       UNKNOWN_PARAMETER_TYPE = -1
    };
