@@ -132,7 +132,7 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    parameterCount = OpenGlPlotParamCount;
    objectTypeNames.push_back("OpenGLPlot");
 
-   mEclipticPlane = "On";
+   mEclipticPlane = "Off";
    mXYPlane = "On";
    mWireFrame = "Off";
    mTargetStatus = "Off";
