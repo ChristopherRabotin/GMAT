@@ -53,12 +53,12 @@ ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
 {
    Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
-   //Gmat::STRINGARRAY_TYPE,
    Gmat::OBJECTARRAY_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
+   Gmat::STRING_TYPE,
 };
 
 
@@ -622,6 +622,12 @@ bool ReportFile::SetStringParameter(const std::string &label,
 //------------------------------------------------------------------------------
 const StringArray& ReportFile::GetStringArrayParameter(const Integer id) const
 {
+   #if DEBUG_REPORTFILE
+   MessageInterface::ShowMessage
+      ("ReportFile::GetStringArrayParameter(%d) mVarParamNames.size()=%d\n",
+       id, mVarParamNames.size());
+   #endif
+   
    switch (id)
    {
    case ADD:
