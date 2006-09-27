@@ -54,7 +54,7 @@ ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
    Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
    //Gmat::STRINGARRAY_TYPE,
-   Gmat::OBJECT_TYPE,
+   Gmat::OBJECTARRAY_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,

@@ -53,9 +53,9 @@ const Gmat::ParameterType
 TsPlot::PARAMETER_TYPE[TsPlotParamCount - SubscriberParamCount] =
 {
 //    Gmat::STRING_TYPE,
+   Gmat::OBJECT_TYPE,
 //    Gmat::STRINGARRAY_TYPE,
-   Gmat::OBJECT_TYPE,
-   Gmat::OBJECT_TYPE,
+   Gmat::OBJECTARRAY_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
