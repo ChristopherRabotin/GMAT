@@ -114,3 +114,4 @@ protected:
 
 
 #endif  // NonLinearConstraint_hpp
+

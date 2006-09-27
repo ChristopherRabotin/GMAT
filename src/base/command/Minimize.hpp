@@ -111,3 +111,4 @@ protected:
 
 
 #endif  // Minimize_hpp
+

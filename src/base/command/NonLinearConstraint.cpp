@@ -856,7 +856,7 @@ bool NonLinearConstraint::Execute()
       // Tell the optimizer about the objective function and gradient values??????
       Real conData[1];
       conData[0] = -99.0;  // objective function value here .........
-      Integer varId = optimizer->SetSolverResults(conData, conName, "Objective");
+      //Integer varId = optimizer->SetSolverResults(conData, conName, "Objective");
       //conData[0] = ??; // loop over eq and ineq constraits here ...????
       //varId = optimizer->SetSolverResults(conData, conName);
 

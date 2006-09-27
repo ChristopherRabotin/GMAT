@@ -36,3 +36,4 @@ class InterfaceException : public BaseException
 };
 
 #endif // InterfaceException_hpp
+
