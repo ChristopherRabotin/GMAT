@@ -299,21 +299,23 @@ void ReportFileSetupPanel::Create()
 
    bsize = 1;
    wxBoxSizer *reportOptionSizer = new wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer *reportOptionColPrecSizer = new wxBoxSizer(wxHORIZONTAL);
    reportOptionSizer->Add(writeCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(showHeaderCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(leftJustifyCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(zeroFillCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(solverIterationsCheckBox, 0, wxALIGN_CENTER|wxALL, 
                           bsize);
-   reportOptionSizer->Add(colWidthText, 0, wxALIGN_CENTER|wxALL, bsize);
-   reportOptionSizer->Add(colWidthTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
-   reportOptionSizer->Add(precisionText, 0, wxALIGN_CENTER|wxALL, bsize);
-   reportOptionSizer->Add(precisionTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   reportOptionColPrecSizer->Add(colWidthText, 0, wxALIGN_CENTER|wxALL, bsize);
+   reportOptionColPrecSizer->Add(colWidthTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   reportOptionColPrecSizer->Add(precisionText, 0, wxALIGN_CENTER|wxALL, bsize);
+   reportOptionColPrecSizer->Add(precisionTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
 
    wxBoxSizer *optionBoxSizer = new wxBoxSizer(wxVERTICAL);
    optionBoxSizer->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    optionBoxSizer->Add(fileSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    optionBoxSizer->Add(reportOptionSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   optionBoxSizer->Add(reportOptionColPrecSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //-------------------------------------------------------
    // put in the order
