@@ -40,45 +40,88 @@ GuiInterpreter* GuiInterpreter::Instance()
    return instance;
 }
 
+
 //------------------------------------------------------------------------------
 // ~GuiInterpreter()
 //------------------------------------------------------------------------------
 GuiInterpreter::~GuiInterpreter()
 {
-//   if (instance != NULL)
-//      delete instance;
 }
 
-bool GuiInterpreter::Interpret(void)
+
+//------------------------------------------------------------------------------
+// bool GuiInterpreter::Interpret()
+//------------------------------------------------------------------------------
+bool GuiInterpreter::Interpret()
 {
    return false;
 }
 
+
+//------------------------------------------------------------------------------
+// bool GuiInterpreter::Build(Gmat::WriteMode mode)
+//------------------------------------------------------------------------------
 bool GuiInterpreter::Build(Gmat::WriteMode mode)
 {
    return false;
 }
 
+
+//------------------------------------------------------------------------------
+// bool Interpret(GmatBase *obj, const std::string generator)
+//------------------------------------------------------------------------------
+/**
+ * Reads the generatingString for an object and builds the corresponding data.
+ *
+ * This method is used to rebuild pieces of a mission sequence when a user makes
+ * changes on a ScriptEvent panel, and to build the commands that are encoded
+ * in a BeginScript/EndScript block.
+ *
+ * @param <obj>         The object that is being reinterpreted.
+ * @param <generator>   The string that gets interpreted.
+ *
+ * @return true on success, false on failure.
+ *
+ * @note Interpret only works for GmatCommands at this time.
+ */
+//------------------------------------------------------------------------------
 bool GuiInterpreter::Interpret(GmatBase *obj, const std::string generator)
 {
-   return Interpreter::Interpret(obj, generator);
-}
+   if (obj->GetType() != Gmat::COMMAND)
+      throw InterpreterException(
+         "Interpret(GmatBase*) currently only supports GmatCommands.");
 
-//------------------------------------------------------------------------------
-// bool IsInitialized()
-//------------------------------------------------------------------------------
-bool GuiInterpreter::IsInitialized()
-{
-   return isInitialized;
-}
-
-//------------------------------------------------------------------------------
-// void Initialize()
-//------------------------------------------------------------------------------
-void GuiInterpreter::Initialize()
-{
-   // Is there anything to initialize?
-   isInitialized = true;
+   #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage(
+         "%s\n%s\n\"%s\"\n",
+         "\nInterpret(GmatBase*)is under construction.  Please be patient!",
+         "String that is interpreted:", obj->GetGeneratingString().c_str());
+   #endif
+   
+   if (obj->GetTypeName() == "BeginScript")
+   {
+      #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage
+         ("Parsing in-line text:\n%s\n", generator.c_str());
+      #endif
+      
+      //return InterpretTextBlock((GmatCommand*)obj, generator);
+      //loj: need work
+      return false;
+   }
+   else
+   {
+      #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage
+         ("Resetting command using\n%s\n", generator.c_str());
+      #endif
+      
+      //AssembleCommand(generator, (GmatCommand*)obj);
+      //loj: need work
+      return false;
+   }
+   
+   return true;
 }
 
 
@@ -87,7 +130,7 @@ void GuiInterpreter::Initialize()
 //------------------------------------------------------------------------------
 void GuiInterpreter::Finalize()
 {
-   moderator->Finalize();
+   theModerator->Finalize();
 }
 
 
@@ -104,38 +147,12 @@ void GuiInterpreter::Finalize()
 //------------------------------------------------------------------------------
 StringArray GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type)
 {
-   return moderator->GetListOfFactoryItems(type);
+   return theModerator->GetListOfFactoryItems(type);
 }
 
 
 //------------------------------------------------------------------------------
-// StringArray& GetListOfConfiguredItems(Gmat::ObjectType type)
-//------------------------------------------------------------------------------
-/**
- * Returns names of all configured items of object type.
- *
- * @param <type> object type
- *
- * @return array of configured item names; return empty array if none
- */
-//------------------------------------------------------------------------------
-StringArray& GuiInterpreter::GetListOfConfiguredItems(Gmat::ObjectType type)
-{
-   return moderator->GetListOfConfiguredItems(type);
-}
-
-
-//------------------------------------------------------------------------------
-// GmatBase* GetConfiguredItem(const std::string &name)
-//------------------------------------------------------------------------------
-GmatBase* GuiInterpreter::GetConfiguredItem(const std::string &name)
-{
-   return moderator->GetConfiguredItem(name);
-}
-
-
-//------------------------------------------------------------------------------
-// bool RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName
+// bool RenameObject(Gmat::ObjectType type, const std::string &oldName
 //                           const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -148,16 +165,16 @@ GmatBase* GuiInterpreter::GetConfiguredItem(const std::string &name)
  * @return true if the item has been removed; false otherwise
  */
 //------------------------------------------------------------------------------
-bool GuiInterpreter::RenameConfiguredItem(Gmat::ObjectType type,
+bool GuiInterpreter::RenameObject(Gmat::ObjectType type,
                                           const std::string &oldName,
                                           const std::string &newName)
 {
-   return moderator->RenameConfiguredItem(type, oldName, newName);
+   return theModerator->RenameObject(type, oldName, newName);
 }
 
 
 //------------------------------------------------------------------------------
-// bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name)
+// bool RemoveObject(Gmat::ObjectType type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Removes item from the configured list.
@@ -168,10 +185,10 @@ bool GuiInterpreter::RenameConfiguredItem(Gmat::ObjectType type,
  * @return true if the item has been removed; false otherwise
  */
 //------------------------------------------------------------------------------
-bool GuiInterpreter::RemoveConfiguredItem(Gmat::ObjectType type,
+bool GuiInterpreter::RemoveObject(Gmat::ObjectType type,
                                           const std::string &name)
 {
-   return moderator->RemoveConfiguredItem(type, name, false);
+   return theModerator->RemoveObject(type, name, false);
 }
 
 
@@ -188,10 +205,10 @@ bool GuiInterpreter::RemoveConfiguredItem(Gmat::ObjectType type,
  * @return true if the item has been removed; false otherwise
  */
 //------------------------------------------------------------------------------
-bool GuiInterpreter::RemoveItemIfNotUsed(Gmat::ObjectType type,
+bool GuiInterpreter::RemoveObjectIfNotUsed(Gmat::ObjectType type,
                                           const std::string &name)
 {
-   return moderator->RemoveConfiguredItem(type, name, true);
+   return theModerator->RemoveObject(type, name, true);
 }
 
 
@@ -200,7 +217,7 @@ bool GuiInterpreter::RemoveItemIfNotUsed(Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool GuiInterpreter::HasConfigurationChanged(Integer sandboxNum)
 {
-   return moderator->HasConfigurationChanged(sandboxNum);
+   return theModerator->HasConfigurationChanged(sandboxNum);
 }
 
 
@@ -209,7 +226,7 @@ bool GuiInterpreter::HasConfigurationChanged(Integer sandboxNum)
 //------------------------------------------------------------------------------
 void GuiInterpreter::ConfigurationChanged(GmatBase *obj, bool tf)
 {
-   moderator->ConfigurationChanged(obj, tf);
+   theModerator->ConfigurationChanged(obj, tf);
 }
 
 
@@ -222,7 +239,7 @@ void GuiInterpreter::ResetConfigurationChanged(bool resetResource,
                                                bool resetCommands,
                                                Integer sandboxNum)
 {
-   moderator->ResetConfigurationChanged(resetResource, resetCommands, sandboxNum);
+   theModerator->ResetConfigurationChanged(resetResource, resetCommands, sandboxNum);
 }
 
 
@@ -237,474 +254,7 @@ void GuiInterpreter::ResetConfigurationChanged(bool resetResource,
 //------------------------------------------------------------------------------
 SolarSystem* GuiInterpreter::GetDefaultSolarSystem()
 {
-   return moderator->GetDefaultSolarSystem();
-}
-
-
-//------------------------------------------------------------------------------
-// SolarSystem* GetSolarSystemInUse()
-//------------------------------------------------------------------------------
-/**
- * Retrieves a current solar system object pointer.
- *
- * @return a default solar system object pointer
- */
-//------------------------------------------------------------------------------
-SolarSystem* GuiInterpreter::GetSolarSystemInUse()
-{
-   return moderator->GetSolarSystemInUse();
-}
-
-
-//------------------------------------------------------------------------------
-// CalculatedPoint* CreateCalculatedPoint(const std::string &type,
-//                                        const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Creates a calculated point object such as libration point, bary center
- * by given type and name.
- *
- * @param <type> object type
- * @param <name> object name
- *
- * @return a calculated point object pointer
- */
-//------------------------------------------------------------------------------
-CalculatedPoint* GuiInterpreter::CreateCalculatedPoint(const std::string &type,
-                                                       const std::string &name)
-{
-   return moderator->CreateCalculatedPoint(type, name);
-}
-
-
-//------------------------------------------------------------------------------
-// CalculatedPoint* GetCalculatedPoint(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a calculated point object pointer by given name.
- *
- * @param <name> object name
- *
- * @return a calculated object pointer, return null if name not found
- */
-//------------------------------------------------------------------------------
-CalculatedPoint* GuiInterpreter::GetCalculatedPoint(const std::string &name)
-{
-   return moderator->GetCalculatedPoint(name);
-}
-
-
-//------------------------------------------------------------------------------
-// CelestialBody* CreateCelestialBody(const std::string &type, const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Creates a celestial body object by given type and name.
- *
- * @param <type> object type
- * @param <name> object name
- *
- * @return a celestial body object pointer
- */
-//------------------------------------------------------------------------------
-CelestialBody* GuiInterpreter::CreateCelestialBody(const std::string &type,
-                                                   const std::string &name)
-{
-   return moderator->CreateCelestialBody(type, name);
-}
-
-
-//------------------------------------------------------------------------------
-// CelestialBody* GetCelestialBody(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a celestial body object pointer by given name.
- *
- * @param <name> object name
- *
- * @return a celestial body object pointer, return null if name not found
- */
-//------------------------------------------------------------------------------
-CelestialBody* GuiInterpreter::GetCelestialBody(const std::string &name)
-{
-   // Assumes body type from SolarSystem container
-   return moderator->GetCelestialBody(name);
-}
-
-
-//------------------------------------------------------------------------------
-// Spacecraft* CreateSpacecraft(const std::string &type, const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Creates a spacecraft object by given name.
- *
- * @param <type> object type
- * @param <name> object name
- *
- * @return spacecraft object pointer
- */
-//------------------------------------------------------------------------------
-Spacecraft* GuiInterpreter::CreateSpacecraft(const std::string &type,
-                                             const std::string &name)
-{
-   Spacecraft *sc = (Spacecraft*)moderator->CreateSpacecraft(type, name);
-   return sc;
-}
-
-
-//------------------------------------------------------------------------------
-// Spacecraft* GetSpacecraft(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a spacecraft object pointer by given name.
- *
- * @param <name> object name
- *
- * @return a spacecraft object pointer, return null if name not found
- */
-//------------------------------------------------------------------------------
-Spacecraft* GuiInterpreter::GetSpacecraft(const std::string &name)
-{
-   Spacecraft *sc = (Spacecraft*)moderator->GetSpacecraft(name);
-   return sc;
-}
-
-
-//------------------------------------------------------------------------------
-// Formation* CreateFormation(const std::string &type, const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Creates a formation object by given name.
- *
- * @param <type> object type
- * @param <name> object name
- *
- * @return formation object pointer
- */
-//------------------------------------------------------------------------------
-Formation* GuiInterpreter::CreateFormation(const std::string &type,
-                                           const std::string &name)
-{
-   Formation *f = (Formation*)moderator->CreateSpacecraft(type, name);
-   return f;
-}
-
-
-//------------------------------------------------------------------------------
-// Formation* GetFormation(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a formation object pointer by given name.
- *
- * @param <name> object name
- *
- * @return a formation object pointer, return null if name not found
- */
-//------------------------------------------------------------------------------
-Formation* GuiInterpreter::GetFormation(const std::string &name)
-{
-   Formation *f = (Formation*)moderator->GetSpacecraft(name);
-   return f;
-}
-
-
-//------------------------------------------------------------------------------
-// Hardware* CreateHardware(const std::string &type, const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Creates a hardware object by given name.
- *
- * @param <type> object type
- * @param <name> object name
- *
- * @return hardware object pointer
- */
-//------------------------------------------------------------------------------
-Hardware* GuiInterpreter::CreateHardware(const std::string &type,
-                                         const std::string &name)
-{
-   return moderator->CreateHardware(type, name);
-}
-
-
-//------------------------------------------------------------------------------
-// Hardware* GetHardware(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a hardware object pointer by given name.
- *
- * @param <name> object name
- *
- * @return a hardware object pointer, return null if name not found
- */
-//------------------------------------------------------------------------------
-Hardware* GuiInterpreter::GetHardware(const std::string &name)
-{
-   return moderator->GetHardware(name);
-}
-
-
-//------------------------------------------------------------------------------
-// Propagator* CreatePropagator(const std::string &type, const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Creates a propagator object by given type and name.
- *
- * @param <type> object type
- * @param <name> object name
- *
- * @return a propagator object pointer
- */
-//------------------------------------------------------------------------------
-Propagator* GuiInterpreter::CreatePropagator(const std::string &type,
-                                             const std::string &name)
-{
-   return moderator->CreatePropagator(type, name);
-}
-
-
-//------------------------------------------------------------------------------
-// Propagator* GetPropagator(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a propagator object pointer by given name.
- *
- * @param <name> object name
- *
- * @return a propagator object pointer, return null if name not found
- */
-//------------------------------------------------------------------------------
-Propagator* GuiInterpreter::GetPropagator(const std::string &name)
-{
-   return moderator->GetPropagator(name);
-}
-
-
-//------------------------------------------------------------------------------
-// PropSetup* CreateDefaultPropSetup(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Creates a default PropSetup object.
- *
- * @param <name> PropSetup name
- *
- * @return a PropSetup object pointer
- */
-//------------------------------------------------------------------------------
-PropSetup* GuiInterpreter::CreateDefaultPropSetup(const std::string &name)
-{
-   return moderator->CreateDefaultPropSetup(name);
-}
-
-
-//------------------------------------------------------------------------------
-// PropSetup* GetPropSetup(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a physical model object pointer by given name.
- *
- * @param <name> object name
- *
- * @return a physical model object pointer, return null if name not found
- */
-//------------------------------------------------------------------------------
-PropSetup* GuiInterpreter::GetPropSetup(const std::string &name)
-{
-   return moderator->GetPropSetup(name);
-}
-
-
-//------------------------------------------------------------------------------
-// ForceModel* CreateForceModel(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Creates a force model object by given name.
- *
- * @param <name> object name
- *
- * @return a force model object pointer
- */
-//------------------------------------------------------------------------------
-ForceModel* GuiInterpreter::CreateForceModel(const std::string &name)
-{
-   return moderator->CreateForceModel(name);
-}
-
-
-//------------------------------------------------------------------------------
-// PhysicalModel* CreatePhysicalModel(const std::string &type, const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Creates a physical model object by given type and name.
- *
- * @param <type> object type
- * @param <name> object name
- *
- * @return a physical model object pointer
- */
-//------------------------------------------------------------------------------
-PhysicalModel* GuiInterpreter::CreatePhysicalModel(const std::string &type,
-                                                   const std::string &name)
-{
-   return moderator->CreatePhysicalModel(type, name);
-}
-
-
-//------------------------------------------------------------------------------
-// PhysicalModel* GetPhysicalModel(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a physical model object pointer by given name.
- *
- * @param <name> object name
- *
- * @return a physical model object pointer, return null if name not found
- */
-//------------------------------------------------------------------------------
-PhysicalModel* GuiInterpreter::GetPhysicalModel(const std::string &name)
-{
-   return moderator->GetPhysicalModel(name);
-}
-
-
-//------------------------------------------------------------------------------
-// AtmosphereModel* CreateAtmosphereModel(const std::string &type,
-//                                        const std::string &body,
-//                                        const std::string &name = "Earth")
-//------------------------------------------------------------------------------
-/**
- * Creates an atmosphere model object by given type and name.
- *
- * @param <type> object type
- * @param <name> object name
- * @param <body> the body for which the atmosphere model is requested
- *
- * @return an AtmosphereModel object pointer
- */
-//------------------------------------------------------------------------------
-AtmosphereModel* GuiInterpreter::CreateAtmosphereModel(const std::string &type,
-                                                       const std::string &name,
-                                                       const std::string &body)
-{
-   return moderator->CreateAtmosphereModel(type, name, body);
-}
-
-
-//------------------------------------------------------------------------------
-// AtmosphereModel* GetAtmosphereModel(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves an atmosphere model object pointer by given name.
- *
- * @param <name> object name
- *
- * @return an AtmosphereModel pointer, return null if name not found
- */
-//------------------------------------------------------------------------------
-AtmosphereModel* GuiInterpreter::GetAtmosphereModel(const std::string &name)
-{
-   return moderator->GetAtmosphereModel(name);
-}
-
-
-//------------------------------------------------------------------------------
-// Burn* CreateBurn(const std::string &type, const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Creates a burn object by given type and name.
- *
- * @param <type> object type
- * @param <name> object name
- *
- * @return a Burn object pointer
- */
-//------------------------------------------------------------------------------
-Burn* GuiInterpreter::CreateBurn(const std::string &type,
-                                 const std::string &name)
-{
-   return moderator->CreateBurn(type, name);
-}
-
-
-//------------------------------------------------------------------------------
-// Burn* GetBurn(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a burn object pointer by given name.
- *
- * @param <name> object name
- *
- * @return a Burn pointer, return null if name not found
- */
-//------------------------------------------------------------------------------
-Burn* GuiInterpreter::GetBurn(const std::string &name)
-{
-   return moderator->GetBurn(name);
-}
-
-
-//------------------------------------------------------------------------------
-// Solver* CreateSolver(const std::string &type, const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Creates a solver object by given type and name.
- *
- * @param <type> object type
- * @param <name> object name
- *
- * @return a Solver object pointer
- */
-//------------------------------------------------------------------------------
-Solver* GuiInterpreter::CreateSolver(const std::string &type,
-                                     const std::string &name)
-{
-   return moderator->CreateSolver(type, name);
-}
-
-
-//------------------------------------------------------------------------------
-// Solver* GetSolver(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a solver object pointer by given name.
- *
- * @param <name> object name
- *
- * @return a Solver pointer, return null if name not found
- */
-//------------------------------------------------------------------------------
-Solver* GuiInterpreter::GetSolver(const std::string &name)
-{
-   return moderator->GetSolver(name);
-}
-
-
-//------------------------------------------------------------------------------
-// Parameter* CreateParameter(const std::string &type, const std::string &name)
-//                            const Gmat::ObjectType ownerType,
-//                            const std::string &ownerName = "",
-//                            const std::string &depName = "");
-//                            const std::string &depName = "");
-//------------------------------------------------------------------------------
-/**
- * Creates a parameter object by given type and name.
- *
- * @param <type> parameter type
- * @param <name> parameter name
- * @param <ownerType> parameter owner type
- * @param <ownerName> parameter owner name
- * @param <depName> dependent object name
- *
- * @return a parameter object pointer
- */
-//------------------------------------------------------------------------------
-Parameter* GuiInterpreter::CreateParameter(const std::string &type,
-                                           const std::string &name,
-                                           //const Gmat::ObjectType ownerType,
-                                           const std::string &ownerName,
-                                           const std::string &depName)
-{
-   //return moderator->CreateParameter(type, name, ownerType, ownerName, depName);
-   return moderator->CreateParameter(type, name, ownerName, depName);
+   return theModerator->GetDefaultSolarSystem();
 }
 
 
@@ -721,25 +271,80 @@ Parameter* GuiInterpreter::CreateParameter(const std::string &type,
 //------------------------------------------------------------------------------
 Parameter* GuiInterpreter::GetParameter(const std::string &name)
 {
-    return moderator->GetParameter(name);
+   return theModerator->GetParameter(name);
 }
 
 
 //------------------------------------------------------------------------------
-// CoordinateSystem* CreateCoordinateSystem(const std::string &name)
+// Parameter* CreateParameter(const std::string &type, const std::string &name,
+//                            const std::string &ownerName, const std::string &depName)
 //------------------------------------------------------------------------------
-CoordinateSystem* GuiInterpreter::CreateCoordinateSystem(const std::string &name)
+/**
+ * Calls the Moderator to create a Parameter.
+ * 
+ * @param  type       Type of parameter requested
+ * @param  name       Name for the parameter.
+ * @param  ownerName  object name of parameter requested
+ * @param  depName    Dependent object name of parameter requested
+ * 
+ * @return Pointer to the constructed Parameter.
+ */
+//------------------------------------------------------------------------------
+Parameter* GuiInterpreter::CreateParameter(const std::string &type, 
+                                           const std::string &name,
+                                           const std::string &ownerName,
+                                           const std::string &depName)
 {
-   return moderator->CreateCoordinateSystem(name);
+   #if DEBUG_CREATE_PARAM
+   MessageInterface::ShowMessage
+      ("NewInterptr::CreateParameter() type=%s, name=%s, ownerName=%s, depName=%s\n",
+       type.c_str(), name.c_str(), ownerName.c_str(), depName.c_str());
+   #endif
+   
+   return theModerator->CreateParameter(type, name, ownerName, depName);
 }
 
 
 //------------------------------------------------------------------------------
-// CoordinateSystem* GetCoordinateSystem(const std::string &name)
+// Subscriber* CreateSubscriber(const std::string &type,
+//                              const const std::string &name,
+//                              const std::string &filename = "",
+//                              bool createDefault = true)
 //------------------------------------------------------------------------------
-CoordinateSystem* GuiInterpreter::GetCoordinateSystem(const std::string &name)
+/**
+ * Creates a subscriber object by given type and name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ * @param <filename> file name if used
+ *
+ * @return a subscriber object pointer
+ */
+//------------------------------------------------------------------------------
+Subscriber* GuiInterpreter::CreateSubscriber(const std::string &type,
+                                             const std::string &name,
+                                             const std::string &filename,
+                                             bool createDefault)
 {
-   return moderator->GetCoordinateSystem(name);
+   return theModerator->
+      CreateSubscriber(type, name, filename, createDefault);
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* CreateDefaultPropSetup(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a default PropSetup object.
+ *
+ * @param <name> PropSetup name
+ *
+ * @return a PropSetup object pointer
+ */
+//------------------------------------------------------------------------------
+GmatBase* GuiInterpreter::CreateDefaultPropSetup(const std::string &name)
+{
+   return (GmatBase*)theModerator->CreateDefaultPropSetup(name);
 }
 
 
@@ -752,7 +357,7 @@ CoordinateSystem* GuiInterpreter::GetCoordinateSystem(const std::string &name)
 //------------------------------------------------------------------------------
 CoordinateSystem* GuiInterpreter::GetInternalCoordinateSystem()
 {
-   return moderator->GetInternalCoordinateSystem();
+   return theModerator->GetInternalCoordinateSystem();
 }
 
 
@@ -778,7 +383,7 @@ bool GuiInterpreter::IsDefaultCoordinateSystem(const std::string &name)
 //------------------------------------------------------------------------------
 StringArray& GuiInterpreter::GetPlanetarySourceTypes()
 {
-   return moderator->GetPlanetarySourceTypes();
+   return theModerator->GetPlanetarySourceTypes();
 }
 
 
@@ -791,7 +396,7 @@ StringArray& GuiInterpreter::GetPlanetarySourceTypes()
 //------------------------------------------------------------------------------
 StringArray& GuiInterpreter::GetPlanetarySourceNames()
 {
-   return moderator->GetPlanetarySourceNames();
+   return theModerator->GetPlanetarySourceNames();
 }
 
 
@@ -800,7 +405,7 @@ StringArray& GuiInterpreter::GetPlanetarySourceNames()
 //------------------------------------------------------------------------------
 StringArray& GuiInterpreter::GetPlanetarySourceTypesInUse()
 {
-   return moderator->GetPlanetarySourceTypesInUse();
+   return theModerator->GetPlanetarySourceTypesInUse();
 }
 
 
@@ -809,7 +414,7 @@ StringArray& GuiInterpreter::GetPlanetarySourceTypesInUse()
 //------------------------------------------------------------------------------
 StringArray& GuiInterpreter::GetAnalyticModelNames()
 {
-   return moderator->GetAnalyticModelNames();
+   return theModerator->GetAnalyticModelNames();
 }
 
 
@@ -818,7 +423,7 @@ StringArray& GuiInterpreter::GetAnalyticModelNames()
 //------------------------------------------------------------------------------
 bool GuiInterpreter::SetAnalyticModelToUse(const std::string &modelName)
 {
-   return moderator->SetAnalyticModelToUse(modelName);
+   return theModerator->SetAnalyticModelToUse(modelName);
 }
 
 
@@ -829,7 +434,7 @@ bool GuiInterpreter::SetAnalyticModelToUse(const std::string &modelName)
 bool GuiInterpreter::SetPlanetarySourceName(const std::string &sourceType,
                                           const std::string &filename)
 {
-   return moderator->SetPlanetarySourceName(sourceType, filename);
+   return theModerator->SetPlanetarySourceName(sourceType, filename);
 }
 
 
@@ -842,7 +447,7 @@ bool GuiInterpreter::SetPlanetarySourceName(const std::string &sourceType,
 //------------------------------------------------------------------------------
 Integer GuiInterpreter::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes)
 {
-   return moderator->SetPlanetarySourceTypesInUse(sourceTypes);
+   return theModerator->SetPlanetarySourceTypesInUse(sourceTypes);
 }
 
 
@@ -851,7 +456,7 @@ Integer GuiInterpreter::SetPlanetarySourceTypesInUse(const StringArray &sourceTy
 //------------------------------------------------------------------------------
 std::string GuiInterpreter::GetPlanetarySourceName(const std::string &sourceType)
 {
-   return moderator->GetPlanetarySourceName(sourceType);
+   return theModerator->GetPlanetarySourceName(sourceType);
 }
 
 
@@ -860,7 +465,7 @@ std::string GuiInterpreter::GetPlanetarySourceName(const std::string &sourceType
 //------------------------------------------------------------------------------
 std::string GuiInterpreter::GetPotentialFileName(const std::string &fileType)
 {
-   return moderator->GetPotentialFileName(fileType);
+   return theModerator->GetPotentialFileName(fileType);
 }
 
 
@@ -869,109 +474,17 @@ std::string GuiInterpreter::GetPotentialFileName(const std::string &fileType)
 //------------------------------------------------------------------------------
 std::string GuiInterpreter::GetFileName(const std::string &fileType)
 {
-   return moderator->GetFileName(fileType);
+   return theModerator->GetFileName(fileType);
 }
 
 
 //------------------------------------------------------------------------------
-// Subscriber* CreateSubscriber(const std::string &type,
-//                              const const std::string &name,
-//                              const std::string &filename = "",
-//                              bool createDefault = true)
+// GmatBase* CreateStopCondition(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
-/**
- * Creates a subscriber object by given type and name.
- *
- * @param <type> object type
- * @param <name> object name
- * @param <filename> file name if used
- *
- * @return a subscriber object pointer
- */
-//------------------------------------------------------------------------------
-Subscriber* GuiInterpreter::CreateSubscriber(const std::string &type,
-                                             const std::string &name,
-                                             const std::string &filename,
-                                             bool createDefault)
-{
-   return moderator->CreateSubscriber(type, name, filename, createDefault);
-}
-
-
-//------------------------------------------------------------------------------
-// Subscriber* GetSubscriber(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a subscriber object pointer by given name.
- *
- * @param <name> object name
- *
- * @return a subscriber object pointer, return null if name not found
- */
-//------------------------------------------------------------------------------
-Subscriber* GuiInterpreter::GetSubscriber(const std::string &name)
-{
-   return moderator->GetSubscriber(name);
-}
-
-
-//------------------------------------------------------------------------------
-// Function* CreateFunction(const std::string &type, const std::string &name)
-//------------------------------------------------------------------------------
-Function* GuiInterpreter::CreateFunction(const std::string &type,
-                                         const std::string &name)
-{
-   return moderator->CreateFunction(type, name);
-}
-
-
-//------------------------------------------------------------------------------
-// Function* GetFunction(const std::string &name)
-//------------------------------------------------------------------------------
-Function* GuiInterpreter::GetFunction(const std::string &name)
-{
-   return moderator->GetFunction(name);
-}
-
-
-//----- Non-Configurable Items
-//------------------------------------------------------------------------------
-// StopCondition* CreateStopCondition(const std::string &type, const std::string &name)
-//------------------------------------------------------------------------------
-StopCondition* GuiInterpreter::CreateStopCondition(const std::string &type,
-                                                   const std::string &name)
-{
-   return moderator->CreateStopCondition(type, name);
-}
-
-
-//------------------------------------------------------------------------------
-// AxisSystem* CreateAxisSystem(const std::string &name)
-//------------------------------------------------------------------------------
-AxisSystem*  GuiInterpreter::CreateAxisSystem(const std::string &type,
+GmatBase* GuiInterpreter::CreateStopCondition(const std::string &type,
                                               const std::string &name)
 {
-   return moderator->CreateAxisSystem(type, name);
-}
-
-
-//------------------------------------------------------------------------------
-// GmatCommand* CreateCommand(const std::string &type,
-//                            const std::string &name = "")
-//------------------------------------------------------------------------------
-/**
- * Creates a command object by given type and name.
- *
- * @param <type> command type
- * @param <name> command name
- *
- * @return a command object pointer
- */
-//------------------------------------------------------------------------------
-GmatCommand* GuiInterpreter::CreateCommand(const std::string &type,
-                                           const std::string &name)
-{
-   return moderator->CreateCommand(type, name);
+   return (GmatBase*)theModerator->CreateStopCondition(type, name);
 }
 
 
@@ -993,7 +506,7 @@ GmatCommand* GuiInterpreter::CreateDefaultCommand(const std::string &type,
                                                   const std::string &name,
                                                   GmatCommand *refCmd)
 {
-   return moderator->CreateDefaultCommand(type, name, refCmd);
+   return theModerator->CreateDefaultCommand(type, name, refCmd);
 }
 
 
@@ -1002,7 +515,7 @@ GmatCommand* GuiInterpreter::CreateDefaultCommand(const std::string &type,
 //------------------------------------------------------------------------------
 bool GuiInterpreter::LoadDefaultMission()
 {
-   return moderator->LoadDefaultMission();
+   return theModerator->LoadDefaultMission();
 }
 
 
@@ -1011,7 +524,7 @@ bool GuiInterpreter::LoadDefaultMission()
 //------------------------------------------------------------------------------
 bool GuiInterpreter::ClearResource()
 {
-   return moderator->ClearResource();
+   return theModerator->ClearResource();
 }
 
 
@@ -1020,8 +533,9 @@ bool GuiInterpreter::ClearResource()
 //------------------------------------------------------------------------------
 bool GuiInterpreter::ClearCommandSeq(Integer sandboxNum)
 {
-   return moderator->ClearCommandSeq(sandboxNum);
+   return theModerator->ClearCommandSeq(sandboxNum);
 }
+
 
 //------------------------------------------------------------------------------
 // bool AppendCommand(GmatCommand *cmd, Integer sandboxNum)
@@ -1036,7 +550,7 @@ bool GuiInterpreter::ClearCommandSeq(Integer sandboxNum)
 //------------------------------------------------------------------------------
 bool GuiInterpreter::AppendCommand(GmatCommand *cmd, Integer sandboxNum)
 {
-   return moderator->AppendCommand(cmd, sandboxNum);
+   return theModerator->AppendCommand(cmd, sandboxNum);
 }
 
 
@@ -1048,7 +562,7 @@ GmatCommand* GuiInterpreter::AppendCommand(const std::string &type,
                                            const std::string &name,
                                            Integer sandboxNum)
 {
-   return moderator->AppendCommand(type, name, sandboxNum);
+   return theModerator->AppendCommand(type, name, sandboxNum);
 }
 
 
@@ -1058,7 +572,7 @@ GmatCommand* GuiInterpreter::AppendCommand(const std::string &type,
 bool GuiInterpreter::InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
                                    Integer sandboxNum)
 {
-   return moderator->InsertCommand(cmd, prevCmd, sandboxNum);
+   return theModerator->InsertCommand(cmd, prevCmd, sandboxNum);
 }
 
 
@@ -1067,7 +581,7 @@ bool GuiInterpreter::InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
 //------------------------------------------------------------------------------
 GmatCommand* GuiInterpreter::DeleteCommand(GmatCommand *cmd, Integer snadboxNum)
 {
-   return moderator->DeleteCommand(cmd, snadboxNum);
+   return theModerator->DeleteCommand(cmd, snadboxNum);
 }
 
 
@@ -1084,7 +598,7 @@ GmatCommand* GuiInterpreter::DeleteCommand(GmatCommand *cmd, Integer snadboxNum)
 //------------------------------------------------------------------------------
 GmatCommand* GuiInterpreter::GetNextCommand(Integer sandboxNum)
 {
-   return moderator->GetNextCommand(sandboxNum);
+   return theModerator->GetNextCommand(sandboxNum);
 }
 
 
@@ -1102,7 +616,7 @@ GmatCommand* GuiInterpreter::GetNextCommand(Integer sandboxNum)
 //------------------------------------------------------------------------------
 Integer GuiInterpreter::RunMission(Integer sandboxNum)
 {
-   return moderator->RunMission(sandboxNum);
+   return theModerator->RunMission(sandboxNum);
 }
 
 
@@ -1121,7 +635,7 @@ Integer GuiInterpreter::RunMission(Integer sandboxNum)
 //------------------------------------------------------------------------------
 Integer GuiInterpreter::ChangeRunState(const std::string &state, Integer sandboxNum)
 {
-   return moderator->ChangeRunState(state, sandboxNum);
+   return theModerator->ChangeRunState(state, sandboxNum);
 }
 
 
@@ -1138,7 +652,7 @@ Integer GuiInterpreter::ChangeRunState(const std::string &state, Integer sandbox
 //------------------------------------------------------------------------------
 bool GuiInterpreter::InterpretScript(const std::string &scriptFilename)
 {
-   return moderator->InterpretScript(scriptFilename);
+   return theModerator->InterpretScript(scriptFilename);
 }
 
 
@@ -1156,7 +670,7 @@ bool GuiInterpreter::InterpretScript(const std::string &scriptFilename)
 bool GuiInterpreter::SaveScript(const std::string &scriptFilename,
                                 Gmat::WriteMode mode)
 {
-   return moderator->SaveScript(scriptFilename, mode);
+   return theModerator->SaveScript(scriptFilename, mode);
 }
 
 
@@ -1171,7 +685,7 @@ bool GuiInterpreter::SaveScript(const std::string &scriptFilename,
 //------------------------------------------------------------------------------
 std::string GuiInterpreter::GetScript(Gmat::WriteMode mode)
 {
-   return moderator->GetScript(mode);
+   return theModerator->GetScript(mode);
 }
 
 
@@ -1189,7 +703,7 @@ std::string GuiInterpreter::GetScript(Gmat::WriteMode mode)
 //------------------------------------------------------------------------------
 Integer GuiInterpreter::RunScript(Integer sandboxNum)
 {
-   return moderator->RunScript(sandboxNum);
+   return theModerator->RunScript(sandboxNum);
 }
 
 
@@ -1261,9 +775,10 @@ void GuiInterpreter::CloseCurrentProject()
 // GuiInterpreter()
 //------------------------------------------------------------------------------
 GuiInterpreter::GuiInterpreter()
+   : Interpreter()
 {
+   Initialize();
    isInitialized = false;
-   moderator = Moderator::Instance();
 }
 
 

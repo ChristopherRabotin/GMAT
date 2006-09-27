@@ -21,24 +21,6 @@
 
 #include "Interpreter.hpp"
 #include "gmatdefs.hpp"
-#include "PhysicalModel.hpp"
-#include "ForceModel.hpp"
-#include "Propagator.hpp"
-#include "Spacecraft.hpp"
-#include "Hardware.hpp"
-#include "Formation.hpp"
-#include "Parameter.hpp"
-#include "StopCondition.hpp"
-#include "SolarSystem.hpp"
-#include "CelestialBody.hpp"
-#include "PropSetup.hpp"
-#include "GmatCommand.hpp"
-#include "Subscriber.hpp"
-#include "Burn.hpp"
-#include "Solver.hpp"
-#include "AtmosphereModel.hpp"
-#include "Function.hpp"
-#include "CalculatedPoint.hpp"
 
 class GMAT_API GuiInterpreter : public Interpreter
 {
@@ -47,24 +29,21 @@ public:
    static GuiInterpreter* Instance();
    ~GuiInterpreter();
 
-   virtual bool Interpret(void);
-   virtual bool Build(Gmat::WriteMode mode);
+   // Interpreter abstract methods
+   virtual bool Interpret();
    virtual bool Interpret(GmatBase *obj, const std::string generator);
-
-   bool IsInitialized();
-   void Initialize();
+   virtual bool Build(Gmat::WriteMode mode);
+   
    void Finalize();
-
+   
    //----- factory
    StringArray GetListOfFactoryItems(Gmat::ObjectType type);
-   GmatBase* GetConfiguredItem(const std::string &name);
    
    //----- configuration
-   StringArray& GetListOfConfiguredItems(Gmat::ObjectType type);
-   bool RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName,
-                             const std::string &newName);
-   bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name);
-   bool RemoveItemIfNotUsed(Gmat::ObjectType type, const std::string &name);
+   bool RenameObject(Gmat::ObjectType type, const std::string &oldName,
+                     const std::string &newName);
+   bool RemoveObject(Gmat::ObjectType type, const std::string &name);
+   bool RemoveObjectIfNotUsed(Gmat::ObjectType type, const std::string &name);
    bool HasConfigurationChanged(Integer sandboxNum = 1);
    void ConfigurationChanged(GmatBase *obj, bool tf);
    void ResetConfigurationChanged(bool resetResource = true,
@@ -73,75 +52,22 @@ public:
    
    // SolarSystem
    SolarSystem* GetDefaultSolarSystem();
-   SolarSystem* GetSolarSystemInUse();
-   
-   // CalculatedPoint
-   CalculatedPoint* CreateCalculatedPoint(const std::string &type,
-                                          const std::string &name);
-   CalculatedPoint* GetCalculatedPoint(const std::string &name);
-   
-   // Celestial body
-   CelestialBody* CreateCelestialBody(const std::string &type,
-                                      const std::string &name);
-   CelestialBody* GetCelestialBody(const std::string &name);
-   
-   // Spacecraft
-   Spacecraft* CreateSpacecraft(const std::string&type,
-                                const std::string &name);
-   Spacecraft* GetSpacecraft(const std::string &name);
-   
-   // Formation
-   Formation* GuiInterpreter::CreateFormation(const std::string &type,
-                                           const std::string &name);
-   Formation* GuiInterpreter::GetFormation(const std::string &name);
-   
-   // Hardware
-   Hardware* CreateHardware(const std::string &type,
-                            const std::string &name);
-   Hardware* GetHardware(const std::string &name);
-
-   // Propagator
-   Propagator* CreatePropagator(const std::string &type,
-                                const std::string &name);
-   Propagator* GetPropagator(const std::string &name);
-
-   // PropSetup
-   PropSetup* CreateDefaultPropSetup(const std::string &name);
-   PropSetup* GetPropSetup(const std::string &name);
-
-   // ForceModel/PhysicalModel
-   ForceModel* CreateForceModel(const std::string &name);
-   PhysicalModel* CreatePhysicalModel(const std::string &type,
-                                      const std::string &name);
-   PhysicalModel* GetPhysicalModel(const std::string &name);
-
-   // AtmosphereModel
-   AtmosphereModel* CreateAtmosphereModel(const std::string &type,
-                                          const std::string &name,
-                                          const std::string &body = "Earth");
-   AtmosphereModel* GetAtmosphereModel(const std::string &name);
-
-   // Burn
-   Burn* CreateBurn(const std::string &type, const std::string &name);
-   Burn* GetBurn(const std::string &name);
-
-   // Solver
-   Solver* CreateSolver(const std::string &type, const std::string &name);
-   Solver* GetSolver(const std::string &name);
-
-   // Parameter
-   Parameter* CreateParameter(const std::string &type,
-                              const std::string &name,
-                              //const Gmat::ObjectType ownerType = Gmat::UNKNOWN_OBJECT,
-                              const std::string &ownerName = "",
-                              const std::string &depName = "");
-   Parameter* GetParameter(const std::string &name);
-
-   // CoordinateSystem
-   CoordinateSystem* CreateCoordinateSystem(const std::string &name);
-   CoordinateSystem* GetCoordinateSystem(const std::string &name);
    CoordinateSystem* GetInternalCoordinateSystem();
    bool IsDefaultCoordinateSystem(const std::string &name);
+   
+   Parameter* GetParameter(const std::string &name);
+   Parameter* CreateParameter(const std::string &type,
+                              const std::string &name,
+                              const std::string &ownerName = "",
+                              const std::string &depName = "");
+   
+   // Subscriber
+   Subscriber* CreateSubscriber(const std::string &type,
+                                const std::string &name,
+                                const std::string &filename = "",
+                                bool createDefault = true);
+   
+   GmatBase* CreateDefaultPropSetup(const std::string &name);
    
    // Planetary source
    StringArray& GetPlanetarySourceTypes();
@@ -158,36 +84,17 @@ public:
    std::string GetPotentialFileName(const std::string &fileType);
    
    // Getting file names
-   // This will eventually replace Get*FileName() above (loj: 7/7/05)
    std::string GetFileName(const std::string &fileType);
    
-   // Subscriber
-   Subscriber* CreateSubscriber(const std::string &type,
-                                const std::string &name,
-                                const std::string &filename = "",
-                                bool createDefault = true);
-   Subscriber* GetSubscriber(const std::string &name);
-   
-   // Function
-   Function* CreateFunction(const std::string &type,
-                            const std::string &name);
-   Function* GetFunction(const std::string &name);
-   
-   //----- Non-Configurable Items
    // StopCondition
-   StopCondition* CreateStopCondition(const std::string &type,
-                                      const std::string &name);
+   GmatBase* CreateStopCondition(const std::string &type,
+                                 const std::string &name);
    
-   // AxisSystem
-   AxisSystem* CreateAxisSystem(const std::string &type,
-                                const std::string &name);
-   // GmatCommand
-   GmatCommand* CreateCommand(const std::string &type,
-                              const std::string &name = "");
+   // Command
    GmatCommand* CreateDefaultCommand(const std::string &type,
                                      const std::string &name = "",
                                      GmatCommand *refCmd = NULL);
-
+   
    // Resource
    bool ClearResource();
    
@@ -195,13 +102,13 @@ public:
    bool LoadDefaultMission();
    bool ClearCommandSeq(Integer sandboxNum = 1);
    bool AppendCommand(GmatCommand *cmd, Integer sandboxNum = 1);
-   GmatCommand* AppendCommand(const std::string &type, const std::string &name,
-                              Integer sandboxNum = 1);
    bool InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
                       Integer sandboxNum = 1);
+   GmatCommand* AppendCommand(const std::string &type, const std::string &name,
+                              Integer sandboxNum = 1);
    GmatCommand* DeleteCommand(GmatCommand *cmd, Integer sandboxNum = 1);
    GmatCommand* GetNextCommand(Integer sandboxNum = 1);
-
+   
    // Sandbox
    void ClearAllSandboxes();
    Integer RunMission(Integer sandboxNum = 1);

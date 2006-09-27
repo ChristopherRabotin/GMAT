@@ -63,10 +63,9 @@
 //#define DEBUG_SEQUENCE_CLEARING 1
 //#define DEBUG_CONFIG 1
 //#define DEBUG_FINALIZE 1
-
 //#define DEBUG_CREATE_VAR 1
-#define __CREATE_BURN_PARAM__ 1
 
+//#define __CREATE_DEFAULT_BC__
 //#define __SHOW_FINAL_STATE__
 
 //---------------------------------
@@ -121,15 +120,10 @@ bool Moderator::Initialize(bool fromGui)
       theFileManager->ReadStartupFile();
       MessageInterface::ShowMessage("Moderator is creating core engine...\n");
       
-      // Create interpreters and managers
-      theGuiInterpreter = GuiInterpreter::Instance();
-      theScriptInterpreter = ScriptInterpreter::Instance();
+      // Create Managers
       theFactoryManager = FactoryManager::Instance();
       theConfigManager = ConfigManager::Instance();
-
-      // Create publisher
-      thePublisher = Publisher::Instance();
-      
+            
       // Register factories
       theFactoryManager->RegisterFactory(new AtmosphereFactory());
       theFactoryManager->RegisterFactory(new AxisSystemFactory());
@@ -149,6 +143,7 @@ bool Moderator::Initialize(bool fromGui)
       theFactoryManager->RegisterFactory(new SpacecraftFactory());
       theFactoryManager->RegisterFactory(new StopConditionFactory());
       theFactoryManager->RegisterFactory(new SubscriberFactory());
+            
       // Create default SolarSystem
       /// @note: If the solar system can be configured by name, add it to the
       ///        ConfigManager by calling CreateSolarSystem().
@@ -159,7 +154,14 @@ bool Moderator::Initialize(bool fromGui)
       StringArray bodies = theSolarSystemInUse->GetBodiesInUse();
       SpacePoint *sp;
       SpacePoint *earth = theSolarSystemInUse->GetBody("Earth");
-
+      
+      // Create interpreters
+      theGuiInterpreter = GuiInterpreter::Instance();
+      theScriptInterpreter = ScriptInterpreter::Instance();      
+      
+      // Create publisher
+      thePublisher = Publisher::Instance();
+      
       // Set J2000Body to SolarSystem bodies
       for (UnsignedInt i=0; i<bodies.size(); i++)
       {
@@ -177,20 +179,20 @@ bool Moderator::Initialize(bool fromGui)
       
       // Set object pointers so that it can be used in CS conversion in the GUI
       SpacePoint *origin =
-         (SpacePoint*)GetConfiguredItem(theInternalCoordSystem->GetOriginName());
+         (SpacePoint*)GetObject(theInternalCoordSystem->GetOriginName());
       origin->SetJ2000Body(earth);
       SpacePoint *j2000body =
-         (SpacePoint*)GetConfiguredItem(theInternalCoordSystem->GetJ2000BodyName());
+         (SpacePoint*)GetObject(theInternalCoordSystem->GetJ2000BodyName());
       j2000body->SetJ2000Body(earth);
       theInternalCoordSystem->SetOrigin(origin);
       theInternalCoordSystem->SetJ2000Body(j2000body);
       theInternalCoordSystem->SetSolarSystem(theSolarSystemInUse);
       theInternalCoordSystem->Initialize();
-
+      
       InitializePlanetarySource();
       InitializePlanetaryCoeffFile();
       InitializeTimeFile();
-
+      
       if (fromGui)
          CreateDefaultMission();
    }
@@ -207,7 +209,9 @@ bool Moderator::Initialize(bool fromGui)
                                      "Unknown Error occured during initialization");
       return false;
    }
+   
    MessageInterface::ShowMessage("Moderator successfully created core engine\n");
+   
    return true;;
 }
 
@@ -315,6 +319,7 @@ ScriptInterpreter* Moderator::GetScriptInterpreter()
    return theScriptInterpreter;
 }
 
+
 //------------------------------------------------------------------------------
 // void SetGuiInterpreter(GuiInterpreter *guiInterp)
 //------------------------------------------------------------------------------
@@ -328,6 +333,7 @@ void Moderator::SetGuiInterpreter(GuiInterpreter *guiInterp)
    if (theGuiInterpreter == NULL)
       theGuiInterpreter = guiInterp;
 }
+
 
 //------------------------------------------------------------------------------
 // void SetScriptInterpreter(ScriptInterpreter *scriptInterp)
@@ -362,7 +368,7 @@ StringArray Moderator::GetListOfFactoryItems(Gmat::ObjectType type)
 
 //----- configuration
 //------------------------------------------------------------------------------
-// StringArray& GetListOfConfiguredItems(Gmat::ObjectType type)
+// StringArray& GetListOfObjects(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
  * Returns names of all configured items of object type.
@@ -372,7 +378,7 @@ StringArray Moderator::GetListOfFactoryItems(Gmat::ObjectType type)
  * @return array of configured item names; return empty array if none
  */
 //------------------------------------------------------------------------------
-StringArray& Moderator::GetListOfConfiguredItems(Gmat::ObjectType type)
+StringArray& Moderator::GetListOfObjects(Gmat::ObjectType type)
 {
    if (type == Gmat::CELESTIAL_BODY || type == Gmat::SPACE_POINT)
    {
@@ -409,13 +415,13 @@ StringArray& Moderator::GetListOfConfiguredItems(Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetConfiguredItem(const std::string &name)
+// GmatBase* GetObject(const std::string &name)
 //------------------------------------------------------------------------------
-GmatBase* Moderator::GetConfiguredItem(const std::string &name)
+GmatBase* Moderator::GetObject(const std::string &name)
 {
    #if DEBUG_CONFIG
    MessageInterface::ShowMessage
-      ("Moderator::GetConfiguredItem() entered: name=%s\n", name.c_str());
+      ("Moderator::GetObject() entered: name=%s\n", name.c_str());
    #endif
    
    std::string newName = name;
@@ -428,7 +434,7 @@ GmatBase* Moderator::GetConfiguredItem(const std::string &name)
       
       #if DEBUG_CONFIG
       MessageInterface::ShowMessage
-         ("Moderator::GetConfiguredItem() entered: newName=%s\n", newName.c_str());
+         ("Moderator::GetObject() entered: newName=%s\n", newName.c_str());
       #endif
    }
    
@@ -445,13 +451,13 @@ GmatBase* Moderator::GetConfiguredItem(const std::string &name)
    if (obj)
    {
       MessageInterface::ShowMessage
-         ("Moderator::GetConfiguredItem() Found object: name=%s, type=%s, "
+         ("Moderator::GetObject() Found object: name=%s, type=%s, "
           "addr=%p\n", obj->GetName().c_str(), obj->GetTypeName().c_str(), obj);
    }
    else
    {
       MessageInterface::ShowMessage
-         ("Moderator::GetConfiguredItem() Cannot find object: name=%s\n",
+         ("Moderator::GetObject() Cannot find object: name=%s\n",
           newName.c_str());
    }
    #endif
@@ -460,7 +466,7 @@ GmatBase* Moderator::GetConfiguredItem(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// bool RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName
+// bool RenameObject(Gmat::ObjectType type, const std::string &oldName
 //                           const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -473,12 +479,12 @@ GmatBase* Moderator::GetConfiguredItem(const std::string &name)
  * @return true if the item has been removed; false otherwise
  */
 //------------------------------------------------------------------------------
-bool Moderator::RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName,
+bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
                                      const std::string &newName)
 {
    #if DEBUG_RENAME
    MessageInterface::ShowMessage
-      ("Moderator::RenameConfiguredItem() type=%s, oldName=%s, newName=%s\n",
+      ("Moderator::RenameObject() type=%s, oldName=%s, newName=%s\n",
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
    
@@ -489,7 +495,7 @@ bool Moderator::RenameConfiguredItem(Gmat::ObjectType type, const std::string &o
    //--------------------------------------------------
    #if DEBUG_RENAME
    MessageInterface::ShowMessage
-      ("Moderator::RenameConfiguredItem() ===> Change Command ref object names\n");
+      ("Moderator::RenameObject() ===> Change Command ref object names\n");
    #endif
    
    int sandboxIndex = 0; //handles one sandbox for now
@@ -524,14 +530,14 @@ bool Moderator::RenameConfiguredItem(Gmat::ObjectType type, const std::string &o
    
    #if DEBUG_RENAME
    MessageInterface::ShowMessage
-      ("Moderator::RenameConfiguredItem() rename status=%d\n", renamed);
+      ("Moderator::RenameObject() rename status=%d\n", renamed);
    #endif
 
    return renamed;
 }
 
 //------------------------------------------------------------------------------
-// bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name,
+// bool RemoveObject(Gmat::ObjectType type, const std::string &name,
 //                           bool delIfNotUsed)
 //------------------------------------------------------------------------------
 /**
@@ -545,7 +551,7 @@ bool Moderator::RenameConfiguredItem(Gmat::ObjectType type, const std::string &o
  * @return true if the item has been removed; false otherwise
  */
 //------------------------------------------------------------------------------
-bool Moderator::RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name,
+bool Moderator::RemoveObject(Gmat::ObjectType type, const std::string &name,
                                      bool delOnlyIfNotUsed)
 {
    if (!delOnlyIfNotUsed)
@@ -800,27 +806,30 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
       // add default bodies
       if (type == "LibrationPoint")
       {
+         cp->SetStringParameter("Primary", "Sun");
+         cp->SetStringParameter("Point", "L1");
+         cp->SetStringParameter("Secondary", "Earth");
+         
+         #ifdef __CREATE_DEFAULT_BC__
          // first create default Earth-Moon Barycenter
          CalculatedPoint *defBc = GetCalculatedPoint("DefaultBC");
          
          if (defBc == NULL)
-         {
             defBc = CreateCalculatedPoint("Barycenter", "DefaultBC");
-         }
          
-         cp->SetStringParameter("Primary", "Sun");
-         cp->SetStringParameter("Point", "L1");
          cp->SetStringParameter("Secondary", "DefaultBC");
+         cp->SetRefObject(defBc, Gmat::SPACE_POINT, "DefaultBC");         
+         #endif
          
          // Set body and J2000Body pointer, so that GUI can create LibrationPoint
          // and use it in Coord.System conversion
-         SpacePoint *sun = (SpacePoint*)GetConfiguredItem("Sun");
-         SpacePoint *earth = (SpacePoint*)GetConfiguredItem("Earth");
+         SpacePoint *sun = (SpacePoint*)GetObject("Sun");
+         SpacePoint *earth = (SpacePoint*)GetObject("Earth");
+         
          if (sun->GetJ2000Body() == NULL)
             sun->SetJ2000Body(earth);
          
          cp->SetRefObject(sun, Gmat::SPACE_POINT, "Sun");
-         cp->SetRefObject(defBc, Gmat::SPACE_POINT, "DefaultBC");         
       }
       else if (type == "Barycenter")
       {
@@ -829,8 +838,8 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
 
          // Set body and J2000Body pointer, so that GUI can create LibrationPoint
          // and use it in Coord.System conversion
-         SpacePoint *earth = (SpacePoint*)GetConfiguredItem("Earth");
-         SpacePoint *luna = (SpacePoint*)GetConfiguredItem("Luna");
+         SpacePoint *earth = (SpacePoint*)GetObject("Earth");
+         SpacePoint *luna = (SpacePoint*)GetObject("Luna");
          cp->SetRefObject(earth, Gmat::SPACE_POINT, "Earth");
          if (luna->GetJ2000Body() == NULL)
             luna->SetJ2000Body(earth);
@@ -1323,8 +1332,10 @@ AtmosphereModel* Moderator::CreateAtmosphereModel(const std::string &type,
    if (GetAtmosphereModel(name) == NULL)
    {
       AtmosphereModel *atmosphereModel =
-         theFactoryManager->CreateAtmosphereModel(type, body, name);
-
+         //loj: 9/25 Wrong calling sequence
+         //theFactoryManager->CreateAtmosphereModel(type, body, name);
+         theFactoryManager->CreateAtmosphereModel(type, name, body);
+      
       if (atmosphereModel ==  NULL)
       {
          //MessageInterface::PopupMessage
@@ -1514,11 +1525,15 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       ("Moderator::CreateParameter() type=%s, name=%s, ownerName=%s, depName=%s\n",
        type.c_str(), name.c_str(), ownerName.c_str(), depName.c_str());
    #endif
-
+   
    // if Parameter name doesn't exist, create Parameter
    if (GetParameter(name) == NULL)
-   {      
+   {
       Parameter *param = theFactoryManager->CreateParameter(type, name);
+      
+      //MessageInterface::ShowMessage
+      //   ("===> Moderator::CreateParameter() param=%s, addr=%p\n",
+      //    param->GetName().c_str(), param);
       
       if (param == NULL)
         throw GmatBaseException("Error Creating Parameter: " + type + " in " + name + "\n");
@@ -1527,9 +1542,13 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       // so validate owner type after create.
       if (ownerName != "")
       {
-         GmatBase *obj = GetConfiguredItem(ownerName);
+         GmatBase *obj = GetObject(ownerName);
          if (obj)
          {
+            //MessageInterface::ShowMessage
+            //   ("===> Moderator::CreateParameter() obj=%s, addr=%p\n",
+            //    obj->GetName().c_str(), obj);
+            
             if (param->GetOwnerType() != obj->GetType())
             {
                std::string paramOwnerType = GmatBase::GetObjectTypeString(param->GetOwnerType());
@@ -1558,7 +1577,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       
       if (depName != "")
          if (param->NeedCoordSystem())
-            param->AddRefObject(GetConfiguredItem(depName));
+            param->AddRefObject(GetObject(depName));
       
       // create parameter dependent coordinate system
       if (type == "Longitude" || type == "Latitude" || type == "Altitude" ||
@@ -1588,10 +1607,10 @@ Parameter* Moderator::CreateParameter(const std::string &type,
             // create BodyFixedAxis with origin
             AxisSystem *axis = CreateAxisSystem("BodyFixed", "");
             cs->SetStringParameter("Origin", origin);
-            cs->SetRefObject(GetConfiguredItem(origin), Gmat::SPACE_POINT, origin);
+            cs->SetRefObject(GetObject(origin), Gmat::SPACE_POINT, origin);
             cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
             //cs->SetStringParameter("J2000Body", "Earth"); // Default is Earth
-            cs->SetRefObject(GetConfiguredItem("Earth"), Gmat::SPACE_POINT, "Earth");
+            cs->SetRefObject(GetObject("Earth"), Gmat::SPACE_POINT, "Earth");
             cs->SetSolarSystem(theSolarSystemInUse);
             cs->Initialize();
             
@@ -1804,7 +1823,7 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
    // PropSetup creates default Integrator(RungeKutta89)
    // and default force (PointMassForce body=Earth)
    PropSetup *propSetup = CreatePropSetup(name);
-
+   
    ForceModel *oldfm= propSetup->GetForceModel();
    if (oldfm->GetName() == "")
       delete oldfm;
@@ -1813,6 +1832,7 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
    ForceModel *newfm= CreateForceModel("");
    
    GravityField *gravForce = new GravityField("", "Earth");
+   gravForce->SetName("Earth");
    gravForce->SetSolarSystem(theSolarSystemInUse);
    gravForce->SetBody("Earth");
    gravForce->SetBodyName("Earth");
@@ -1942,16 +1962,21 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
    {
       if (cs->GetName() != "")
          theConfigManager->AddCoordinateSystem(cs);
+
+      // Set J2000Body and SolarSystem
+      cs->SetStringParameter("J2000Body", "Earth");
+      cs->SetRefObject(GetObject("Earth"), Gmat::SPACE_POINT, "Earth");
+      cs->SetSolarSystem(theSolarSystemInUse);
       
       if (createDefault)
       {
          // create MJ2000Eq AxisSystem with Earth as origin
          AxisSystem *axis = CreateAxisSystem("MJ2000Eq", "");
+         //cs->SetStringParameter("J2000Body", "Earth");
          cs->SetStringParameter("Origin", "Earth");
-         cs->SetRefObject(GetConfiguredItem("Earth"), Gmat::SPACE_POINT, "Earth");
-         //cs->SetStringParameter("J2000Body", "Earth"); // Default is Earth
+         //cs->SetRefObject(GetObject("Earth"), Gmat::SPACE_POINT, "Earth");
          cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
-         cs->SetSolarSystem(theSolarSystemInUse);
+         //cs->SetSolarSystem(theSolarSystemInUse);
          cs->Initialize();
       }
    }
@@ -2250,8 +2275,8 @@ AxisSystem* Moderator::CreateAxisSystem(const std::string &type,
    }
 
    // set origin and j2000body
-   axisSystem->SetOrigin((SpacePoint*)GetConfiguredItem(axisSystem->GetOriginName()));
-   axisSystem->SetJ2000Body((SpacePoint*)GetConfiguredItem(axisSystem->GetJ2000BodyName()));
+   axisSystem->SetOrigin((SpacePoint*)GetObject(axisSystem->GetOriginName()));
+   axisSystem->SetJ2000Body((SpacePoint*)GetObject(axisSystem->GetJ2000BodyName()));
    
    // Notes: AxisSystem is not configured. It is local to CoordinateSystem
    // and gets deleted when CoordinateSystem is deleted.
@@ -2341,6 +2366,8 @@ GmatCommand* Moderator::CreateCommand(const std::string &type,
          (Gmat::ERROR_, "Cannot create a Command type: %s.\n"
           "Make sure %s is correct type and registered to Commandactory.\n",
           type.c_str(), type.c_str());
+      
+      throw GmatBaseException("Error Creating Command: " + type + "\n");
    }
    
    return cmd;
@@ -2371,14 +2398,27 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
           "Make sure %s is correct type and registered to Commandactory.\n",
           type.c_str(), type.c_str());
 
-      return NULL;
+      throw GmatBaseException("Error Creating Command: " + type + "\n");
+      //return NULL;
    }
    
    Integer id;
-
+   
    try
    {
-      if (type == "Toggle")
+      if (type == "If" || type == "While")
+      {
+         std::string str = GetDefaultSpacecraft()->GetName() + ".ElapsedDays";
+         cmd->SetCondition(str, "<", "1.0");
+      }
+      else if (type == "For")
+      {
+         CreateParameter("Variable", "I");
+         cmd->SetStringParameter("IndexName", "I");
+         cmd->SetStringParameter("StartName", "1");
+         cmd->SetStringParameter("EndName", "10");
+      }
+      else if (type == "Toggle")
       {
          cmd->SetStringParameter(cmd->GetParameterID("Subscriber"),
                                  GetDefaultSubscriber("OpenGLPlot")->GetName());
@@ -2392,7 +2432,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       {
          cmd->SetObject(GetDefaultPropSetup()->GetName(), Gmat::PROP_SETUP);
 
-         StringArray &formList = GetListOfConfiguredItems(Gmat::FORMATION);
+         StringArray &formList = GetListOfObjects(Gmat::FORMATION);
       
          // if formation exist, set first formation to command
          if (formList.size() > 0)
@@ -3021,7 +3061,11 @@ GmatCommand* Moderator::AppendCommand(const std::string &type,
     
       status = commands[sandboxNum-1]->Append(cmd);
    }
-    
+   else
+   {
+      throw GmatBaseException("Error Creating Command: " + type + "\n");
+   }
+   
    return cmd;
 }
 
@@ -3146,7 +3190,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
          MessageInterface::ShowMessage
             ("Moderator::RunMission() after InitializeSandbox()\n");
          #endif
-
+         
          // execute sandbox
          runState = Gmat::RUNNING;
          ExecuteSandbox(sandboxNum-1);
@@ -3334,6 +3378,7 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
    MessageInterface::ShowMessage
       ("Moderator::InterpretScript() clearing both resource and command sequence...\n");
    #endif
+   
    ClearResource();
    ClearCommandSeq();
    
@@ -3343,17 +3388,15 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
       
       // Need default CS's in case they are used in the script
       CreateDefaultCoordSystems();
-
+      
       status = theScriptInterpreter->Interpret(scriptFileName);
+      
       if (status)
       {
          #if DEBUG_RUN
          MessageInterface::ShowMessage
              ("Moderator::InterpretScript() creating Default Coordinate "
               "System...\n");
-         #endif
-
-         #if DEBUG_RUN
          MessageInterface::ShowMessage
             ("Moderator::InterpretScript() successfully interpreted the script\n");
          #endif
@@ -3368,8 +3411,8 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
-      //MessageInterface::ShowMessage(e.GetMessage());
-      ResetConfigurationChanged(); //loj: 1/12/06 added
+      
+      ResetConfigurationChanged();
       isRunReady = false;
    }
    
@@ -3415,6 +3458,7 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
       
       theScriptInterpreter->SetInStream(ss);
       status = theScriptInterpreter->Interpret();
+      
       if (status)
       {
          #if DEBUG_RUN
@@ -3424,7 +3468,7 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
          #endif
          
          //CreateDefaultCoordSystems();
-
+         
          #if DEBUG_RUN
          MessageInterface::ShowMessage
             ("Moderator::InterpretScript() successfully interpreted the script\n");
@@ -3701,7 +3745,7 @@ void Moderator::CreateDefaultCoordSystems()
       StringArray csNames =
             theConfigManager->GetListOfItems(Gmat::COORDINATE_SYSTEM);
       
-      SpacePoint *earth = (SpacePoint*)GetConfiguredItem("Earth");
+      SpacePoint *earth = (SpacePoint*)GetObject("Earth");
       
       // EarthMJ2000Eq
       if (find(csNames.begin(), csNames.end(), "EarthMJ2000Eq") == csNames.end())
@@ -3790,10 +3834,10 @@ void Moderator::CreateDefaultMission()
       //--------------------------------------------------------------
       // test Burn Parameter
       //--------------------------------------------------------------
-      #ifdef __CREATE_BURN_PARAM__
       // Hardware 
       //CreateHardware("FuelTank", "DefaultFuelTank");
       //CreateHardware("Thruster", "DefaultThruster");
+      
       // Burn
       GetDefaultBurn("ImpulsiveBurn");
       
@@ -3815,7 +3859,6 @@ void Moderator::CreateDefaultMission()
       CreateParameter("Element1", "DefaultIB.Element1");
       CreateParameter("Element2", "DefaultIB.Element2");
       CreateParameter("Element3", "DefaultIB.Element3");
-      #endif
       //--------------------------------------------------------------
       
       // Time parameters
@@ -3915,7 +3958,7 @@ void Moderator::CreateDefaultMission()
       #endif
       
       // Set parameter description and object name
-      StringArray &params = GetListOfConfiguredItems(Gmat::PARAMETER);
+      StringArray &params = GetListOfObjects(Gmat::PARAMETER);
       Parameter *param;
     
       for (unsigned int i=0; i<params.size(); i++)
@@ -3940,12 +3983,10 @@ void Moderator::CreateDefaultMission()
                      param->SetStringParameter("DepObject", "EarthMJ2000Eq");
                }
             }
-            #ifdef __CREATE_BURN_PARAM__
             else if (param->GetOwnerType() == Gmat::BURN)
             {
                param->SetRefObjectName(Gmat::BURN, "DefaultIB");
             }
-            #endif
          }
       }
       
@@ -4133,7 +4174,7 @@ bool Moderator::CreateDeFile(Integer id, const std::string &fileName,
 //------------------------------------------------------------------------------
 Spacecraft* Moderator::GetDefaultSpacecraft()
 {
-   StringArray &soConfigList = GetListOfConfiguredItems(Gmat::SPACECRAFT);
+   StringArray &soConfigList = GetListOfObjects(Gmat::SPACECRAFT);
   
    if (soConfigList.size() > 0)
    {
@@ -4153,7 +4194,7 @@ Spacecraft* Moderator::GetDefaultSpacecraft()
 //------------------------------------------------------------------------------
 PropSetup* Moderator::GetDefaultPropSetup()
 {
-   StringArray &configList = GetListOfConfiguredItems(Gmat::PROP_SETUP);
+   StringArray &configList = GetListOfObjects(Gmat::PROP_SETUP);
    
    if (configList.size() > 0)
    {
@@ -4173,7 +4214,7 @@ PropSetup* Moderator::GetDefaultPropSetup()
 //------------------------------------------------------------------------------
 Burn* Moderator::GetDefaultBurn(const std::string &type)
 {
-   StringArray &configList = GetListOfConfiguredItems(Gmat::BURN);
+   StringArray &configList = GetListOfObjects(Gmat::BURN);
 
    if (configList.size() > 0)
    {
@@ -4198,7 +4239,7 @@ Burn* Moderator::GetDefaultBurn(const std::string &type)
 //------------------------------------------------------------------------------
 Hardware* Moderator::GetDefaultHardware(const std::string &type)
 {
-   StringArray &configList = GetListOfConfiguredItems(Gmat::HARDWARE);
+   StringArray &configList = GetListOfObjects(Gmat::HARDWARE);
 
    if (configList.size() > 0)
    {
@@ -4223,13 +4264,13 @@ Hardware* Moderator::GetDefaultHardware(const std::string &type)
 //------------------------------------------------------------------------------
 Subscriber* Moderator::GetDefaultSubscriber(const std::string &type)
 {
-   StringArray &configList = GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+   StringArray &configList = GetListOfObjects(Gmat::SUBSCRIBER);
    int subSize = configList.size();
    Subscriber *sub = NULL;
    
    for (int i=0; i<subSize; i++)
    {
-      sub = (Subscriber*)GetConfiguredItem(configList[i]);
+      sub = (Subscriber*)GetObject(configList[i]);
       if (sub->GetTypeName() == type)
          return sub;
    }
@@ -4284,7 +4325,7 @@ Subscriber* Moderator::GetDefaultSubscriber(const std::string &type)
 //------------------------------------------------------------------------------
 Solver* Moderator::GetDefaultSolver()
 {
-   StringArray &configList = GetListOfConfiguredItems(Gmat::SOLVER);
+   StringArray &configList = GetListOfObjects(Gmat::SOLVER);
    
    if (configList.size() > 0)
    {

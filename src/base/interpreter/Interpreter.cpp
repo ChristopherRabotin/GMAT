@@ -24,7 +24,7 @@
 #include <sstream>         // for std::stringstream
 #include <fstream>         // for std::ifstream used bt GMAT functions
 
-//#define DEBUG_INTERPRETER 1
+#define DEBUG_INTERPRETER 1
 //#define DEBUG_TOKEN_PARSING 1
 //#define DEBUG_TOKEN_PARSING_DETAILS 1
 //#define DEBUG_RHS_PARSING 1
@@ -35,6 +35,7 @@
 //#define DEBUG_PASS_TWO
 //#define DEBUG_PREINITIALIZE
 //#define DEBUG_EQUATION 1
+//#define DEBUG_CREATE_OBJECT 1
 
 #include "MessageInterface.hpp"
 #include "Barycenter.hpp"
@@ -53,9 +54,9 @@ Interpreter::Interpreter() :
     initialized         (false),
     branchDepth         (0)
 {
-    moderator = Moderator::Instance();
+    theModerator = Moderator::Instance();
     
-    if (moderator) {
+    if (theModerator) {
         // Set up the mapping for the core types
         typemap["Spacecraft"] = Gmat::SPACECRAFT;
         typemap["GroundStation"] = Gmat::GROUND_STATION;
@@ -73,7 +74,6 @@ Interpreter::Interpreter() :
         typemap["CoordinateSystem"] = Gmat::COORDINATE_SYSTEM;
         typemap["AxisSystem"] = Gmat::AXIS_SYSTEM;
     }
-    RegisterAliases();
 }
 
 
@@ -98,74 +98,128 @@ Interpreter::~Interpreter()
 //------------------------------------------------------------------------------
 void Interpreter::Initialize()
 {
-    // Build a mapping for all of the defined commands
-    StringArray cmds = moderator->GetListOfFactoryItems(Gmat::COMMAND);
-    copy(cmds.begin(), cmds.end(), back_inserter(cmdmap));
-    
-    StringArray hw = moderator->GetListOfFactoryItems(Gmat::HARDWARE);
-    copy(hw.begin(), hw.end(), back_inserter(hardwaremap));
+   MessageInterface::ShowMessage("Interpreter::Initialize() entered\n");
+   
+   // Build a mapping for all of the defined commands
+   StringArray cmds = theModerator->GetListOfFactoryItems(Gmat::COMMAND);
+   copy(cmds.begin(), cmds.end(), back_inserter(commandList));
 
-    StringArray props = moderator->GetListOfFactoryItems(Gmat::PROPAGATOR);
-    copy(props.begin(), props.end(), back_inserter(propmap));
+   if (cmds.size() == 0)
+      return;
+   
+   // Build a mapping for all of the defined objects
+   StringArray atms = theModerator->GetListOfFactoryItems(Gmat::ATMOSPHERE);
+   copy(atms.begin(), atms.end(), back_inserter(atmosphereList));
+   
+   StringArray atts = theModerator->GetListOfFactoryItems(Gmat::ATTITUDE);
+   copy(atts.begin(), atts.end(), back_inserter(attitudeList));
+   
+   StringArray axes = theModerator->GetListOfFactoryItems(Gmat::AXIS_SYSTEM);
+   copy(axes.begin(), axes.end(), back_inserter(axisSystemList));
+   
+   StringArray burns = theModerator->GetListOfFactoryItems(Gmat::BURN);
+   copy(burns.begin(), burns.end(), back_inserter(burnList));
+   
+   StringArray cals = theModerator->GetListOfFactoryItems(Gmat::CALCULATED_POINT);
+   copy(cals.begin(), cals.end(), back_inserter(calculatedPointList));
+   
+   StringArray fns = theModerator->GetListOfFactoryItems(Gmat::FUNCTION);
+   copy(fns.begin(), fns.end(), back_inserter(functionList));
+   
+   StringArray hws = theModerator->GetListOfFactoryItems(Gmat::HARDWARE);
+   copy(hws.begin(), hws.end(), back_inserter(hardwareList));
+   
+   StringArray parms = theModerator->GetListOfFactoryItems(Gmat::PARAMETER);
+   copy(parms.begin(), parms.end(), back_inserter(parameterList));
+   
+   StringArray props = theModerator->GetListOfFactoryItems(Gmat::PROPAGATOR);
+   copy(props.begin(), props.end(), back_inserter(propagatorList));
+   
+   StringArray forces = theModerator->GetListOfFactoryItems(Gmat::PHYSICAL_MODEL);
+   copy(forces.begin(), forces.end(), back_inserter(physicalModelList));
+   
+   StringArray solvers = theModerator->GetListOfFactoryItems(Gmat::SOLVER);
+   copy(solvers.begin(), solvers.end(), back_inserter(solverList));
+   
+   StringArray stops = theModerator->GetListOfFactoryItems(Gmat::STOP_CONDITION);
+   copy(stops.begin(), stops.end(), back_inserter(stopcondList));
+   
+   StringArray subs = theModerator->GetListOfFactoryItems(Gmat::SUBSCRIBER);
+   copy(subs.begin(), subs.end(), back_inserter(subscriberList));
+   
+   
+   #ifdef DEBUG_COMMAND_LIST
+      std::vector<std::string>::iterator pos1;
+      
+      MessageInterface::ShowMessage("\nCommands:\n   ");      
+      for (pos1 = cmds.begin(); pos1 != cmds.end(); ++pos1)
+         MessageInterface::ShowMessage(*pos1 + "\n   ");
+      
+   #endif
+      
+   #ifdef DEBUG_OBJECT_LIST
+      std::vector<std::string>::iterator pos;
+      
+      MessageInterface::ShowMessage("\nAtmosphereModel:\n   ");
+      for (pos = atms.begin(); pos != atms.end(); ++pos)
+         MessageInterface::ShowMessage(*pos + "\n   ");
 
-    StringArray forces = moderator->GetListOfFactoryItems(Gmat::PHYSICAL_MODEL);
-    copy(forces.begin(), forces.end(), back_inserter(forcemap));
-    
-    StringArray subs = moderator->GetListOfFactoryItems(Gmat::SUBSCRIBER);
-    copy(subs.begin(), subs.end(), back_inserter(subscribermap));
+      MessageInterface::ShowMessage("\nAttitudes:\n   ");
+      for (pos = atts.begin(); pos != atts.end(); ++pos)
+         MessageInterface::ShowMessage(*pos + "\n   ");
 
-    StringArray parms = moderator->GetListOfFactoryItems(Gmat::PARAMETER);
-    copy(parms.begin(), parms.end(), back_inserter(parametermap));
+      MessageInterface::ShowMessage("\nAxisSystems:\n   ");
+      for (pos = axes.begin(); pos != axes.end(); ++pos)
+         MessageInterface::ShowMessage(*pos + "\n   ");
+      
+      MessageInterface::ShowMessage("\nBurns:\n   ");
+      for (pos = burns.begin(); pos != burns.end(); ++pos)
+         MessageInterface::ShowMessage(*pos + "\n   ");
+      
+      MessageInterface::ShowMessage("\nCalculatedPoints:\n   ");
+      for (pos = cals.begin(); pos != cals.end(); ++pos)
+         MessageInterface::ShowMessage(*pos + "\n   ");
+      
+      MessageInterface::ShowMessage("\nFunctions:\n   ");
+      for (pos = fns.begin(); pos != fns.end(); ++pos)
+         MessageInterface::ShowMessage(*pos + "\n   ");
+      
+      MessageInterface::ShowMessage("\nHardwares:\n   ");
+      for (pos = hws.begin(); pos != hws.end(); ++pos)
+         MessageInterface::ShowMessage(*pos + "\n   ");
+      
+      MessageInterface::ShowMessage("\nPhysicalModels:\n   ");
+      for (pos = forces.begin(); pos != forces.end(); ++pos)
+         MessageInterface::ShowMessage(*pos + "\n   ");
+      
+      MessageInterface::ShowMessage("\nParameters:\n   ");
+      for (pos = parms.begin();  pos != parms.end(); ++pos)
+         MessageInterface::ShowMessage(*pos + "\n   ");
+      
+      MessageInterface::ShowMessage("\nPropagators:\n   ");
+      for (std::vector<std::string>::iterator pos = props.begin();
+           pos != props.end(); ++pos)
+         MessageInterface::ShowMessage(*pos + "\n   ");
 
-    StringArray sconds = moderator->GetListOfFactoryItems(Gmat::STOP_CONDITION);
-    copy(sconds.begin(), sconds.end(), back_inserter(stopcondmap));
+      MessageInterface::ShowMessage("\nSolvers:\n   ");
+      for (pos = solvers.begin(); pos != solvers.end(); ++pos)
+         MessageInterface::ShowMessage(*pos + "\n   ");
 
-    StringArray svers = moderator->GetListOfFactoryItems(Gmat::SOLVER);
-    copy(svers.begin(), svers.end(), back_inserter(solvermap));
-    
-    StringArray funs = moderator->GetListOfFactoryItems(Gmat::FUNCTION);
-    copy(funs.begin(), funs.end(), back_inserter(functionmap));
-    
-    #ifdef DEBUG_OBJECT_LISTS
-        std::cout << "\nCommands:\n   ";
-        for (std::vector<std::string>::iterator c = cmds.begin();
-             c != cmds.end(); ++c)
-            std::cout << *c << "\n   ";
+      MessageInterface::ShowMessage("\nStopConds:\n   ");
+      for (pos = stops.begin(); pos != stops.end(); ++pos)
+         MessageInterface::ShowMessage(*pos + "\n   ");
 
-        std::cout << "\nPropagators:\n   ";
-        for (std::vector<std::string>::iterator p = props.begin();
-             p != props.end(); ++p)
-            std::cout << *p << "\n   ";
+      MessageInterface::ShowMessage("\nSubscribers:\n   ");
+      for (pos = subs.begin(); pos != subs.end(); ++pos)
+         MessageInterface::ShowMessage(*pos + "\n   ");
 
-        std::cout << "\nForces:\n   ";
-        for (std::vector<std::string>::iterator f = forces.begin();
-             f != forces.end(); ++f)
-            std::cout << *f << "\n   ";
+      MessageInterface::ShowMessage("\n");
+   #endif
 
-        std::cout << "\nSubscribers:\n   ";
-        for (std::vector<std::string>::iterator s = subs.begin();
-             s != subs.end(); ++s)
-            std::cout << *s << "\n   ";
-
-        std::cout << "\nParameters:\n   ";
-        for (std::vector<std::string>::iterator pm = parms.begin();
-             pm != parms.end(); ++pm)
-            std::cout << *pm << "\n   ";
-
-        std::cout << "\nStopConds:\n   ";
-        for (std::vector<std::string>::iterator sc = sconds.begin();
-             sc != sconds.end(); ++sc)
-           std::cout << *sc << "\n   ";
-
-        std::cout << "\nSolvers:\n   ";
-        for (std::vector<std::string>::iterator sc = svers.begin();
-             sc != svers.end(); ++sc)
-           std::cout << *sc << "\n   ";
-
-        std::cout << "\n";
-    #endif
-
-    initialized = true;
+   // Retister alias used in scripting
+   RegisterAliases();
+   
+   initialized = true;
 }
 
 
@@ -280,7 +334,7 @@ bool Interpreter::InterpretObject(std::string objecttype,
 
    if ((objecttype == "Barycenter") || (objecttype == "LibrationPoint"))
    {
-      obj = moderator->CreateCalculatedPoint(objecttype, objectname);
+      obj = theModerator->CreateCalculatedPoint(objecttype, objectname);
       retval = true;
    }
 
@@ -298,16 +352,16 @@ bool Interpreter::InterpretObject(std::string objecttype,
    }
 
    // Handle tanks, thrusters, etc.
-   if (find(hardwaremap.begin(), hardwaremap.end(), objecttype) != 
-      hardwaremap.end()) 
+   if (find(hardwareList.begin(), hardwareList.end(), objecttype) != 
+      hardwareList.end()) 
    {
       obj = CreateHardware(objectname, objecttype);
       retval = true;
    }
 
    // Handle Parameters
-   if (find(parametermap.begin(), parametermap.end(), objecttype) != 
-       parametermap.end())
+   if (find(parameterList.begin(), parameterList.end(), objecttype) != 
+       parameterList.end())
    {
       Parameter *parm = CreateParameter(objectname, objecttype);
       obj = parm;
@@ -315,26 +369,26 @@ bool Interpreter::InterpretObject(std::string objecttype,
    }
     
    // Handle Subscribers
-   if (find(subscribermap.begin(), subscribermap.end(), objecttype) != 
-       subscribermap.end())
+   if (find(subscriberList.begin(), subscriberList.end(), objecttype) != 
+       subscriberList.end())
    {
-      obj = moderator->CreateSubscriber(objecttype, objectname);
+      obj = theModerator->CreateSubscriber(objecttype, objectname);
       retval = true;
    }
 
     // Handle Solvers
-   if (find(solvermap.begin(), solvermap.end(), objecttype) != 
-       solvermap.end()) 
+   if (find(solverList.begin(), solverList.end(), objecttype) != 
+       solverList.end()) 
    {
-      obj = moderator->CreateSolver(objecttype, objectname);
+      obj = theModerator->CreateSolver(objecttype, objectname);
       retval = true;
    }
     
     // Handle Functions
-   if (find(functionmap.begin(), functionmap.end(), objecttype) != 
-       functionmap.end()) 
+   if (find(functionList.begin(), functionList.end(), objecttype) != 
+       functionList.end()) 
    {
-      obj = moderator->CreateFunction(objecttype, objectname);
+      obj = theModerator->CreateFunction(objecttype, objectname);
       retval = true;
    }
    
@@ -450,6 +504,208 @@ bool Interpreter::BuildUserObject(std::string &objectname, Gmat::WriteMode mode)
        return BuildObject(objectname, mode);
        
     return true;
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray& GetListOfObjects(Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Returns names of all configured items of object type.
+ *
+ * @param  type  object type
+ *
+ * @return array of configured item names; return empty array if none
+ */
+//------------------------------------------------------------------------------
+StringArray& Interpreter::GetListOfObjects(Gmat::ObjectType type)
+{
+   return theModerator->GetListOfObjects(type);
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* GetObject(const std::string &name)
+//------------------------------------------------------------------------------
+GmatBase* Interpreter::GetObject(const std::string &name)
+{
+   return theModerator->GetObject(name);
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* CreateObject(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Calls the Moderator to build core objects and put them in the ConfigManager.
+ *  
+ * @param  type  Type for the requested object.
+ * @param  name  Name for the object, used for references to the object.
+ * 
+ * @return object pointer on success, NULL on failure.
+ */
+//------------------------------------------------------------------------------
+GmatBase* Interpreter::CreateObject(const std::string &type,
+                                    const std::string &name)
+{
+   #if DEBUG_CREATE_OBJECT
+   MessageInterface::ShowMessage
+      ("Interpreter::CreateObject() type=%s, name=%s\n",
+       type.c_str(), name.c_str());
+   #endif
+   
+   GmatBase *obj = NULL;
+
+   // This error message may be confusing to users
+//    // check for name first
+//    obj = FindObject(name);
+//    if (obj != NULL)
+//    {
+//       InterpreterException ex
+//          (type + " object named " + name + " already exist.");
+//       HandleError(ex);
+//       return obj;
+//    }
+   
+   if (type == "Spacecraft") 
+      obj = (GmatBase*)theModerator->CreateSpacecraft(type, name);
+   
+   else if (type == "Formation") 
+      obj = (GmatBase*)theModerator->CreateSpacecraft(type, name);
+   
+   else if (type == "PropSetup") 
+      obj = (GmatBase*)theModerator->CreatePropSetup(name);
+   
+   else if (type == "ForceModel") 
+      obj = (GmatBase*)theModerator->CreateForceModel(name);
+   
+   else if (type == "CoordinateSystem") 
+      obj = (GmatBase*)theModerator->CreateCoordinateSystem(name);
+   
+   else
+   {
+      // Handle Propagator
+      if (obj == NULL)
+         if (find(propagatorList.begin(), propagatorList.end(), type) != 
+             propagatorList.end()) 
+         {
+            obj = (GmatBase*)theModerator->CreatePropagator(type, name);
+         }
+      
+      // Handle AxisSystem
+      if (find(axisSystemList.begin(), axisSystemList.end(), type) != 
+          axisSystemList.end()) 
+      {
+         obj =(GmatBase*) theModerator->CreateAxisSystem(type, name);
+      }
+
+      // Handle Atmosphere Model
+      if (obj == NULL)
+         if (find(atmosphereList.begin(), atmosphereList.end(), type) != 
+             atmosphereList.end()) 
+         {
+            obj = (GmatBase*)theModerator->CreateAtmosphereModel(type, name);
+         }
+      
+//       // Handle Attitude
+//       if (obj == NULL)
+//          if (find(attitudeList.begin(), attitudeList.end(), type) != 
+//              attitudeList.end()) 
+//          {
+//             obj = (GmatBase*)theModerator->CreateAttitude(type, name);
+//          }
+      
+      // Handle Burns
+      if (obj == NULL)
+         if (find(burnList.begin(), burnList.end(), type) != 
+             burnList.end()) 
+         {
+            obj = (GmatBase*)theModerator->CreateBurn(type, name);
+         }
+      
+      // Handle CalculatedPoint (Barycenter, LibrationPoint)
+      if (obj == NULL)
+         if (find(calculatedPointList.begin(), calculatedPointList.end(), type) != 
+             calculatedPointList.end()) 
+         {
+            obj =(GmatBase*) theModerator->CreateCalculatedPoint(type, name);
+         }
+      
+      // Handle Functions
+      if (obj == NULL)
+         if (find(functionList.begin(), functionList.end(), type) != 
+             functionList.end()) 
+         {
+            obj = (GmatBase*)theModerator->CreateFunction(type, name);
+         }
+      
+      // Handle Hardware (tanks, thrusters, etc.)
+      if (obj == NULL)
+         if (find(hardwareList.begin(), hardwareList.end(), type) != 
+             hardwareList.end()) 
+         {
+            obj = (GmatBase*)theModerator->CreateHardware(type, name);
+         }
+      
+      // Handle System Parameters
+      if (obj == NULL)
+         if (find(parameterList.begin(), parameterList.end(), type) != 
+             parameterList.end())
+         {
+            obj = (GmatBase*)CreateParameter(type, name);
+         }
+      
+      // Handle PhysicalModel
+      if (obj == NULL)
+         if (find(physicalModelList.begin(), physicalModelList.end(), type) != 
+             physicalModelList.end())
+         {
+            obj = (GmatBase*)theModerator->CreatePhysicalModel(type, name);
+         }
+      
+      // Handle Solvers
+      if (obj == NULL)
+         if (find(solverList.begin(), solverList.end(), type) != 
+             solverList.end()) 
+         {
+            obj = (GmatBase*)theModerator->CreateSolver(type, name);
+         }
+      
+      // Handle Subscribers
+      if (obj == NULL)
+         if (find(subscriberList.begin(), subscriberList.end(), type) != 
+             subscriberList.end())
+         {
+            obj = (GmatBase*)theModerator->CreateSubscriber(type, name);
+         }
+   
+   }
+   
+   #if DEBUG_CREATE_OBJECT
+   if (obj != NULL)
+   {
+      MessageInterface::ShowMessage
+         ("Interpreter::CreateObject() type=%s, name=%s successfully created\n",
+          obj->GetTypeName().c_str(), obj->GetName().c_str());
+   }
+   #endif
+   
+   return obj;
+}
+
+
+//------------------------------------------------------------------------------
+// SolarSystem* GetSolarSystemInUse()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a current solar system in use.
+ *
+ * @return a default solar system object pointer
+ */
+//------------------------------------------------------------------------------
+SolarSystem* Interpreter::GetSolarSystemInUse()
+{
+   return theModerator->GetSolarSystemInUse();
 }
 
 
@@ -599,7 +855,7 @@ void Interpreter::WriteParameterValue(GmatBase *obj, Integer id)
 //------------------------------------------------------------------------------
 Spacecraft* Interpreter::CreateSpacecraft(std::string satname)
 {
-    return (Spacecraft *)(moderator->CreateSpacecraft("Spacecraft", satname));
+    return (Spacecraft *)(theModerator->CreateSpacecraft("Spacecraft", satname));
 }
 
 
@@ -616,7 +872,7 @@ Spacecraft* Interpreter::CreateSpacecraft(std::string satname)
 //------------------------------------------------------------------------------
 Formation* Interpreter::CreateFormation(std::string formname)
 {
-    return (Formation *)(moderator->CreateSpacecraft("Formation", formname));
+    return (Formation *)(theModerator->CreateSpacecraft("Formation", formname));
 }
 
 
@@ -694,7 +950,7 @@ Parameter* Interpreter::CreateArray(std::string arrname, std::string type)
          name.c_str(), rows, columns);
    #endif
  
-   Parameter *arr = (Parameter *)(moderator->CreateParameter(type, name));
+   Parameter *arr = (Parameter *)(theModerator->CreateParameter(type, name));
    arr->SetIntegerParameter("NumRows", rows);
    arr->SetIntegerParameter("NumCols", columns);
    return arr;
@@ -703,7 +959,7 @@ Parameter* Interpreter::CreateArray(std::string arrname, std::string type)
 
 CoordinateSystem* Interpreter::CreateCoordinateSystem(std::string csName)
 {
-    return (CoordinateSystem *)(moderator->CreateCoordinateSystem(csName));
+    return (CoordinateSystem *)(theModerator->CreateCoordinateSystem(csName));
 }
 
 
@@ -718,7 +974,7 @@ AxisSystem* Interpreter::CreateAxisSystem(std::string type, GmatBase *owner)
          "CoordinateSystem object that acts as its owner; received a pointer "
          "to " + owner->GetName() + "instead.");
             
-    AxisSystem* axes = (AxisSystem *)(moderator->CreateAxisSystem(type, ""));
+    AxisSystem* axes = (AxisSystem *)(theModerator->CreateAxisSystem(type, ""));
     owner->SetRefObject(axes, axes->GetType(), axes->GetName());
     return axes;
 }
@@ -738,7 +994,7 @@ AxisSystem* Interpreter::CreateAxisSystem(std::string type, GmatBase *owner)
 //------------------------------------------------------------------------------
 Hardware* Interpreter::CreateHardware(std::string hwname, std::string type)
 {
-   return (Hardware *)(moderator->CreateHardware(type, hwname));
+   return (Hardware *)(theModerator->CreateHardware(type, hwname));
 }
 
 
@@ -781,9 +1037,9 @@ bool Interpreter::AssembleCommand(const std::string& scriptline,
    
    // First construct the Command if the input is NULL
    if (cmd == NULL) {
-      if (find(cmdmap.begin(), cmdmap.end(), topLevel[0]) != cmdmap.end()) {
+      if (find(commandList.begin(), commandList.end(), topLevel[0]) != commandList.end()) {
          //cmd = CreateCommand(topLevel[0]);
-         GmatCommand *cmd = moderator->AppendCommand(topLevel[0], "");
+         GmatCommand *cmd = theModerator->AppendCommand(topLevel[0], "");
          if (cmd == NULL)
             throw InterpreterException("Cannot create \"" + topLevel[0] + 
                                        "\" command.");
@@ -920,7 +1176,7 @@ bool Interpreter::AssembleCommand(const std::string& scriptline,
          #endif
          if (sublevel[cl].size() == 1) {
             // Size 1 implies an object reference or parm string
-            object[ol] = moderator->GetConfiguredItem(sublevel[cl][0]);
+            object[ol] = theModerator->GetObject(sublevel[cl][0]);
             if (object[ol]) {
                type = object[ol]->GetType();
                try {
@@ -966,7 +1222,7 @@ bool Interpreter::AssembleCommand(const std::string& scriptline,
    catch (InterpreterException &e)
    {
       // create EndFor so that it can be deleted later without crash
-      moderator->AppendCommand("EndFor", "");
+      theModerator->AppendCommand("EndFor", "");
       throw;
    }
    
@@ -1000,7 +1256,7 @@ bool Interpreter::AssembleCommand(const std::string& scriptline,
             MessageInterface::ShowMessage("Looking for \"%s\"\n", 
                                           sublevel[cl][0].c_str());
          #endif
-         object[ol] = moderator->GetConfiguredItem(sublevel[cl][0]);
+         object[ol] = theModerator->GetObject(sublevel[cl][0]);
          if (object[ol]) {
             #ifdef DEBUG_TOKEN_PARSING
                MessageInterface::ShowMessage("   Found a \"%s\"\n", 
@@ -1082,7 +1338,7 @@ bool Interpreter::AssembleForCommand(const StringArray topLevel,
    #ifdef DEBUG_TOKEN_PARSING
       std::cout << "Loop index is \"" << *w << "\"\n";
    #endif
-   GmatBase *parm = moderator->GetConfiguredItem(*w);
+   GmatBase *parm = theModerator->GetObject(*w);
    cmd->SetStringParameter("IndexName", *w);
    if (parm)
       cmd->SetRefObject(parm, parm->GetType(), parm->GetName());    // Should be SetRefObjectName
@@ -1169,7 +1425,7 @@ bool Interpreter::AssembleForCommand(const StringArray topLevel,
    if (startString != "")
    {
       cmd->SetStringParameter(cmd->GetParameterID("StartName"), startString);
-      theParam = moderator->GetParameter(startString);
+      theParam = theModerator->GetParameter(startString);
       
       if (theParam == NULL)
       {
@@ -1179,8 +1435,8 @@ bool Interpreter::AssembleForCommand(const StringArray topLevel,
          std::string type, owner, depObj;
          GmatStringUtil::ParseParameter(startString, type, owner, depObj);
          
-         if (moderator->IsParameter(type))
-            theParam = moderator->CreateParameter(type, startString, owner, depObj);
+         if (theModerator->IsParameter(type))
+            theParam = theModerator->CreateParameter(type, startString, owner, depObj);
          else
             throw InterpreterException
                ("For loop has undefined start variable: " + startString + "\n   \"" +
@@ -1197,7 +1453,7 @@ bool Interpreter::AssembleForCommand(const StringArray topLevel,
    if (stepString != "")
    {
       cmd->SetStringParameter(cmd->GetParameterID("IncrementName"), stepString);
-      theParam = moderator->GetParameter(stepString);
+      theParam = theModerator->GetParameter(stepString);
       
       if (theParam == NULL)
          throw InterpreterException
@@ -1214,7 +1470,7 @@ bool Interpreter::AssembleForCommand(const StringArray topLevel,
    if (stopString != "")
    {
       cmd->SetStringParameter(cmd->GetParameterID("EndName"), stopString);
-      theParam = moderator->GetParameter(stopString);
+      theParam = theModerator->GetParameter(stopString);
       
       if (theParam == NULL)
          throw InterpreterException
@@ -1295,7 +1551,7 @@ bool Interpreter::AssembleReportCommand(const StringArray topLevel,
       if (params[i] == "%")
          break;
       
-      object = moderator->GetConfiguredItem(params[i]);
+      object = theModerator->GetObject(params[i]);
       if (object)
       {
          #ifdef DEBUG_TOKEN_PARSING
@@ -1386,7 +1642,7 @@ bool Interpreter::AssembleReportCommand(const StringArray topLevel,
 //             MessageInterface::ShowMessage("Looking for \"%s\"\n", 
 //                                           sublevel[cl][0].c_str());
 //          #endif
-//          object = moderator->GetConfiguredItem(sublevel[cl][0]);
+//          object = theModerator->GetObject(sublevel[cl][0]);
 //          if (object) {
 //             #ifdef DEBUG_TOKEN_PARSING
 //                MessageInterface::ShowMessage("   Found a \"%s\"\n", 
@@ -1448,7 +1704,7 @@ bool Interpreter::InterpretFunctionCall()
    #endif
 
    // FunctionCalls are built using CallFunction commands.
-   GmatCommand *cmd = moderator->AppendCommand("CallFunction", "");
+   GmatCommand *cmd = theModerator->AppendCommand("CallFunction", "");
    if (cmd == NULL)
       throw InterpreterException("Unable to assemble function command for \"" +
                line + "\"");
@@ -1481,14 +1737,14 @@ bool Interpreter::InterpretFunctionCall()
       cmd->SetStringParameter("AddInput", *str);
       
       // If the parameter does not exist, create it now
-      if (moderator->GetConfiguredItem(*str) == NULL)
+      if (theModerator->GetObject(*str) == NULL)
       {
          GmatBase *parmObj;
          std::string paramType, paramObj, parmSystem;
 
          InterpretParameter(*str, paramType, paramObj, parmSystem);
 
-         parmObj = moderator->GetConfiguredItem(paramObj);
+         parmObj = theModerator->GetObject(paramObj);
          if (parmObj)
          {
             #if defined DEBUG_TOKEN_PARSING || defined DEBUG_FUNCTION_PARSING
@@ -1498,7 +1754,7 @@ bool Interpreter::InterpretFunctionCall()
                   paramType.c_str(), parmSystem.c_str(),
                   parmObj->GetName().c_str());
             #endif
-            if (moderator->IsParameter(paramType))
+            if (theModerator->IsParameter(paramType))
             {
                #if defined DEBUG_TOKEN_PARSING || defined DEBUG_FUNCTION_PARSING
                   MessageInterface::ShowMessage("%s%s\" named \"%s\"\n",
@@ -1664,7 +1920,7 @@ GmatCommand* Interpreter::InterpretGMATFunction(const std::string &pathAndName)
                   MessageInterface::ShowMessage("   %s\n", i->c_str());
             #endif
 
-            commands = moderator->CreateCommand("BeginFunction");
+            commands = theModerator->CreateCommand("BeginFunction");
             commands->SetStringParameter("FunctionName", functionName);
             for (StringArray::iterator i = invals.begin(); i != invals.end();
                  ++i)
@@ -1751,8 +2007,8 @@ GmatCommand* Interpreter::InterpretGMATFunction(const std::string &pathAndName)
                   block += currentLine + "\n";
                   if (paramLine.size() > 0)
                   {
-                     if (find(cmdmap.begin(),cmdmap.end(),paramLine[0]) != 
-                         cmdmap.end())
+                     if (find(commandList.begin(),commandList.end(),paramLine[0]) != 
+                         commandList.end())
                      {
                         MessageInterface::ShowMessage("Command found:  '%s'\n",
                            paramLine[0].c_str()); 
@@ -1821,7 +2077,7 @@ GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
       breakdown = Decompose(phrase[0]);
       if (breakdown.size() == 1) 
       {
-         ref = moderator->GetConfiguredItem(phrase[0]);
+         ref = theModerator->GetObject(phrase[0]);
       }
       else 
       {
@@ -1833,7 +2089,7 @@ GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
             breakdown = Decompose(*i);
             if (breakdown.size() == 1) 
             {
-               ref = moderator->GetConfiguredItem(*i);
+               ref = theModerator->GetObject(*i);
             }
             else 
             {
@@ -1860,7 +2116,7 @@ GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
             parmType = phrase[2];
          }
          
-         ref = moderator->GetParameter(parmType);
+         ref = theModerator->GetParameter(parmType);
          if (ref == NULL) 
          {
             std::string name = parmObj;
@@ -1874,7 +2130,7 @@ GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
 
             ref = CreateParameter(name, parmType, parmSystem);
             
-            //ref = moderator->CreateParameter(parmType, name);
+            //ref = theModerator->CreateParameter(parmType, name);
             if (ref) 
             {
                Parameter *parm = (Parameter*)ref;
@@ -1884,7 +2140,7 @@ GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
                             << parmType << "\n   obj  = " 
                             << parmObj << std::endl; 
                #endif
-               GmatBase *refobj = moderator->GetConfiguredItem(parmObj);
+               GmatBase *refobj = theModerator->GetObject(parmObj);
                if (refobj == NULL)
                   throw CommandException(
                      "Interpreter could not find the object " + parmObj +
@@ -1915,7 +2171,7 @@ GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 GmatCommand* Interpreter::CreateCommand(std::string commandtype)
 {
-    return moderator->CreateCommand(commandtype, "");
+    return theModerator->CreateCommand(commandtype, "");
 }
 
 
@@ -1932,7 +2188,7 @@ GmatCommand* Interpreter::CreateCommand(std::string commandtype)
 //------------------------------------------------------------------------------
 Propagator* Interpreter::CreatePropagator(std::string proptype)
 {
-    return moderator->CreatePropagator(proptype, "");
+    return theModerator->CreatePropagator(proptype, "");
 }
 
 
@@ -1949,7 +2205,7 @@ Propagator* Interpreter::CreatePropagator(std::string proptype)
 //------------------------------------------------------------------------------
 ForceModel* Interpreter::CreateForceModel(std::string modelname)
 {
-    return moderator->CreateForceModel(modelname);
+    return theModerator->CreateForceModel(modelname);
 }
 
 
@@ -1966,7 +2222,7 @@ ForceModel* Interpreter::CreateForceModel(std::string modelname)
 //------------------------------------------------------------------------------
 PhysicalModel* Interpreter::CreatePhysicalModel(std::string forcetype)
 {
-    return moderator->CreatePhysicalModel(forcetype, "");
+    return theModerator->CreatePhysicalModel(forcetype, "");
 }
 
 
@@ -1983,7 +2239,7 @@ PhysicalModel* Interpreter::CreatePhysicalModel(std::string forcetype)
 //------------------------------------------------------------------------------
 SolarSystem* Interpreter::CreateSolarSystem(std::string ssname)
 {
-    return moderator->CreateSolarSystem(ssname);
+    return theModerator->CreateSolarSystem(ssname);
 }
 
 
@@ -2002,7 +2258,7 @@ SolarSystem* Interpreter::CreateSolarSystem(std::string ssname)
 CelestialBody* Interpreter::CreateCelestialBody(std::string cbname,
                                                 std::string type)
 {
-    return moderator->CreateCelestialBody(cbname, type);
+    return theModerator->CreateCelestialBody(cbname, type);
 }
 
 
@@ -2027,7 +2283,7 @@ Parameter* Interpreter::CreateParameter(const std::string &name,
                                         const std::string &obj)
 {
    Parameter *parm =
-      moderator->CreateParameter(type, name, obj, depname);
+      theModerator->CreateParameter(type, name, obj, depname);
 
    return parm;
 }
@@ -2047,7 +2303,7 @@ Parameter* Interpreter::CreateParameter(const std::string &name,
 //------------------------------------------------------------------------------
 Subscriber* Interpreter::CreateSubscriber(std::string name, std::string type)
 {
-    return moderator->CreateSubscriber(type, name);
+    return theModerator->CreateSubscriber(type, name);
 }
 
 
@@ -2069,7 +2325,7 @@ Subscriber* Interpreter::CreateSubscriber(std::string name, std::string type)
 //------------------------------------------------------------------------------
 PropSetup* Interpreter::CreatePropSetup(std::string name)
 {
-    return moderator->CreatePropSetup(name);
+    return theModerator->CreatePropSetup(name);
 }
 
 
@@ -2088,8 +2344,8 @@ PropSetup* Interpreter::CreatePropSetup(std::string name)
 Burn* Interpreter::CreateBurn(std::string name, bool isImpulsive)
 {
    if (isImpulsive)
-      return moderator->CreateBurn("ImpulsiveBurn", name);
-   return moderator->CreateBurn("FiniteBurn", name);
+      return theModerator->CreateBurn("ImpulsiveBurn", name);
+   return theModerator->CreateBurn("FiniteBurn", name);
 }
 
 
@@ -2142,7 +2398,7 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
                else
                    throw InterpreterException(
                       "Syntax error creating Propagator");
-               Propagator *prop = moderator->CreatePropagator(**phrase, "");
+               Propagator *prop = theModerator->CreatePropagator(**phrase, "");
                if (prop)
                    ((PropSetup*)obj)->SetPropagator(prop);
                else
@@ -2157,7 +2413,7 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
                else
                    throw InterpreterException(
                       "Syntax error accessing Force Model");
-               ForceModel *fm = moderator->GetForceModel(**phrase);
+               ForceModel *fm = theModerator->GetForceModel(**phrase);
                if (fm)
                    ((PropSetup*)obj)->SetForceModel(fm);
                else
@@ -2267,7 +2523,7 @@ bool Interpreter::InterpretCoordinateSystemParameter(GmatBase *obj,
                   "Syntax error creating coordinate system axes for " +
                   obj->GetName());
 
-            AxisSystem *axes = moderator->CreateAxisSystem(**phrase, "");
+            AxisSystem *axes = theModerator->CreateAxisSystem(**phrase, "");
             if (axes != NULL)
             {
                axes->SetName(**phrase);
@@ -2363,7 +2619,7 @@ bool Interpreter::InterpretSolarSetting(const StringArray &sar,
             MessageInterface::ShowMessage("   %s\n", i->c_str());
       #endif
 
-      moderator->SetPlanetarySourceTypesInUse(ephems);
+      theModerator->SetPlanetarySourceTypesInUse(ephems);
       return true;
    }
    
@@ -2380,7 +2636,7 @@ bool Interpreter::InterpretSolarSetting(const StringArray &sar,
       
       if (interval >= 0.0)
       {
-         SolarSystem *sol = moderator->GetSolarSystemInUse();
+         SolarSystem *sol = theModerator->GetSolarSystemInUse();
          sol->SetEphemUpdateInterval(interval);
       }
 
@@ -2396,7 +2652,7 @@ bool Interpreter::InterpretSolarSetting(const StringArray &sar,
 
       bool useTT = (rhs == "true" ? true : false);
       
-      SolarSystem *sol = moderator->GetSolarSystemInUse();
+      SolarSystem *sol = theModerator->GetSolarSystemInUse();
       if (sol == NULL)
          throw InterpreterException(
             "Attempting to set the ephemeris time system on the solar system,"
@@ -2416,7 +2672,7 @@ bool Interpreter::InterpretSolarSetting(const StringArray &sar,
    {
       if (sar[2] == "NutationUpdateInterval")
       {
-         SolarSystem *sol = moderator->GetSolarSystemInUse();
+         SolarSystem *sol = theModerator->GetSolarSystemInUse();
          CelestialBody *body = sol->GetBody(sar[1]);
          if (body == NULL)
             return false;
@@ -2767,7 +3023,7 @@ bool Interpreter::SetVariable(GmatBase *obj, const std::string &val,
 
    if (InterpretParameter(other, paramType, paramObj, paramDepObj))
    {
-      if (moderator->IsParameter(paramType))
+      if (theModerator->IsParameter(paramType))
       {
          //MessageInterface::ShowMessage
          //   ("==> Interpreter::SetVariable() other=%s, paramType=%s, paramObj=%s, "
@@ -3260,7 +3516,7 @@ StringArray& Interpreter::SeparateBrackets(const std::string &chunk)
 //------------------------------------------------------------------------------
 GmatBase* Interpreter::FindObject(std::string objName)
 {
-    GmatBase *obj = moderator->GetConfiguredItem(objName);
+    GmatBase *obj = theModerator->GetObject(objName);
     return obj;
 }
 
@@ -3507,7 +3763,7 @@ bool Interpreter::SetRefParameter(GmatCommand *cmd, const std::string &paramName
       newName = paramName.substr(0, openParen);
    
    // If newName is not a number, set as a parameter
-   object = moderator->GetConfiguredItem(newName);
+   object = theModerator->GetObject(newName);
    if (object)
    {
       #ifdef DEBUG_TOKEN_PARSING
@@ -3567,7 +3823,7 @@ void Interpreter::CheckForSpecialCase(GmatBase *obj, Integer id,
    // JGM2 and JGM3 are special strings  in GMAT; handle them here
    if ((obj->GetTypeName() == "GravityField") &&
        (obj->GetParameterText(id) == "PotentialFile")) {
-      val = moderator->GetPotentialFileName(value);
+      val = theModerator->GetPotentialFileName(value);
       if (val.find("Unknown Potential File Type") == std::string::npos)
          value = val;
    }
@@ -3610,7 +3866,7 @@ bool Interpreter::ConfigureForce(ForceModel *obj, std::string& objParm,
    if (forcetype == "DragForce")
       if (parm == "None")
          return true;
-   PhysicalModel *pm = moderator->CreatePhysicalModel(forcetype, "");
+   PhysicalModel *pm = theModerator->CreatePhysicalModel(forcetype, "");
    
    if (pm) {
       pm->SetName(parm);
@@ -3630,7 +3886,7 @@ bool Interpreter::ConfigureForce(ForceModel *obj, std::string& objParm,
             // AtmosphereModel as Bodyname.
             //---------------------------------------------------------------
             pm->SetStringParameter("BodyName", "Earth");
-            AtmosphereModel *m = moderator->CreateAtmosphereModel(parm, "");
+            AtmosphereModel *m = theModerator->CreateAtmosphereModel(parm, "");
             if (m)
                pm->SetRefObject(m, Gmat::ATMOSPHERE);
          }
@@ -3640,7 +3896,7 @@ bool Interpreter::ConfigureForce(ForceModel *obj, std::string& objParm,
          std::string potName;
          if (parm == "Earth")
          {
-            potName = moderator->GetPotentialFileName("JGM2");
+            potName = theModerator->GetPotentialFileName("JGM2");
             if (potName == "") 
             {
                // No file name set, so set to a default value
@@ -3731,7 +3987,7 @@ bool Interpreter::ConstructRHS(GmatBase *lhsObject, const std::string& rhs,
                MessageInterface::ShowMessage("   Calling IsParameter(%s)\n",
                   paramType.c_str());
             #endif
-            if (moderator->IsParameter(paramType))
+            if (theModerator->IsParameter(paramType))
             {
                #ifdef DEBUG_RHS_PARSING
                   MessageInterface::ShowMessage("%s%s\" named \"%s\"\n",
@@ -3856,7 +4112,7 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
       registerParameters = true;
 
    StringArray sar = SeparateLines(block);
-   StringArray cmdList = moderator->GetListOfFactoryItems(Gmat::COMMAND);
+   StringArray cmdList = theModerator->GetListOfFactoryItems(Gmat::COMMAND);
    
    if ((cmd->GetTypeName() == "BeginScript") || 
        (cmd->GetTypeName() == "BeginFunction"))
@@ -3889,7 +4145,7 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
       // Fancy footwork -- Prep the mission sequence for insertion of new cmds
       GmatCommand *terminalCommand = cmd->GetNext();
       if (terminalCommand == NULL)
-         terminalCommand = moderator->CreateCommand(endtype);
+         terminalCommand = theModerator->CreateCommand(endtype);
       // Temporarily set the BeginScript->next pointer to NULL
       cmd->Remove(cmd);
       
@@ -3939,7 +4195,7 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
 //               "\nAttempting to continue...");
             continue;
          }
-         subsequent = moderator->CreateCommand(cmdType);
+         subsequent = theModerator->CreateCommand(cmdType);
          if (!subsequent)
             throw InterpreterException(
                "Interpreter::InterpretTextBlock failed to create a " + cmdType +
@@ -3954,7 +4210,7 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
 //            for (StringArray::iterator i = refParms.begin(); 
 //                 i != refParms.end(); ++i)
 //            {
-//               GmatBase *obj = moderator->GetConfiguredItem(*i);
+//               GmatBase *obj = theModerator->GetObject(*i);
 //               if (obj != NULL)
 //                  cmd->SetRefObject(obj, obj->GetType(), obj->GetName());
 //            }
@@ -3987,11 +4243,11 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
       if (registerParameters)
       {
          StringArray refParms = 
-            moderator->GetListOfConfiguredItems(Gmat::PARAMETER);
+            theModerator->GetListOfObjects(Gmat::PARAMETER);
          for (StringArray::iterator i = refParms.begin(); 
               i != refParms.end(); ++i)
          {
-            GmatBase *obj = moderator->GetConfiguredItem(*i);
+            GmatBase *obj = theModerator->GetObject(*i);
             if (obj != NULL) 
             {
                cmd->SetRefObject(obj, obj->GetType(), obj->GetName());
@@ -4214,7 +4470,7 @@ bool Interpreter::FinalPass()
    
    bool retval = true;
    
-   SolarSystem *solar = moderator->GetDefaultSolarSystem();
+   SolarSystem *solar = theModerator->GetDefaultSolarSystem();
 
    std::string ptName;
    SpacePoint *pt, *sp;
@@ -4239,18 +4495,18 @@ bool Interpreter::FinalPass()
    CoordinateSystem *cs;
 
    #ifdef DEBUG_PASS_TWO
-      cs = moderator->GetCoordinateSystem("EarthMJ2000Eq");
+      cs = theModerator->GetCoordinateSystem("EarthMJ2000Eq");
       MessageInterface::ShowMessage("Moderator says that EarthMJ2000Eq is %s\n", 
          (cs == NULL ? "NULL" : "defined"));
    #endif
    
-   cs = moderator->GetInternalCoordinateSystem();
+   cs = theModerator->GetInternalCoordinateSystem();
    cs->SetSolarSystem(solar);
    ptName = cs->GetStringParameter("Origin");
    pt = solar->GetBody(ptName);
  
    if (pt == NULL)
-      pt = (SpacePoint *)(moderator->GetConfiguredItem(ptName));
+      pt = (SpacePoint *)(theModerator->GetObject(ptName));
    if (pt == NULL)
       throw InterpreterException("Unable to find the origin, '" + ptName +
          "', for the coordinate system '" + cs->GetName() + "'");
@@ -4263,7 +4519,7 @@ bool Interpreter::FinalPass()
    ptName = cs->GetStringParameter("J2000Body");
    pt = solar->GetBody(ptName);
    if (pt == NULL)
-      pt = (SpacePoint *)(moderator->GetConfiguredItem(ptName));
+      pt = (SpacePoint *)(theModerator->GetObject(ptName));
    if (pt == NULL)
       throw InterpreterException("Unable to find the J2000Body, '" + ptName +
          "', for the coordinate system '" + cs->GetName() + "'");
@@ -4275,7 +4531,7 @@ bool Interpreter::FinalPass()
    cs->Initialize();
 
    StringArray csList = 
-      moderator->GetListOfConfiguredItems(Gmat::COORDINATE_SYSTEM);
+      theModerator->GetListOfObjects(Gmat::COORDINATE_SYSTEM);
 
    for (StringArray::iterator i = csList.begin(); i != csList.end(); ++i)
    {
@@ -4283,7 +4539,7 @@ bool Interpreter::FinalPass()
          MessageInterface::ShowMessage("Setting up CoordinateSystem '%s'\n",
             i->c_str());
       #endif
-      cs = moderator->GetCoordinateSystem(*i);
+      cs = theModerator->GetCoordinateSystem(*i);
       cs->SetSolarSystem(solar);
     
       // If AxisSystem is null, create and set default "MJ2000Eq" axis(loj: 4/18/06)
@@ -4297,7 +4553,7 @@ bool Interpreter::FinalPass()
       }
       
       std::string ptName = cs->GetStringParameter("Origin");
-      pt = (SpacePoint *)(moderator->GetConfiguredItem(ptName));
+      pt = (SpacePoint *)(theModerator->GetObject(ptName));
       if (pt == NULL)
          throw InterpreterException("Unable to find the origin, '" + ptName +
             "', for the coordinate system '" + cs->GetName() + "'");
@@ -4308,7 +4564,7 @@ bool Interpreter::FinalPass()
       cs->SetRefObject(pt, Gmat::SPACE_POINT, ptName);
    
       ptName = cs->GetStringParameter("J2000Body");
-      pt = (SpacePoint *)(moderator->GetConfiguredItem(ptName));
+      pt = (SpacePoint *)(theModerator->GetObject(ptName));
       if (pt == NULL)
          throw InterpreterException("Unable to find the J2000Body, '" + ptName +
             "', for the coordinate system '" + cs->GetName() + "'");
@@ -4325,9 +4581,9 @@ bool Interpreter::FinalPass()
    std::string configuredCsName;
    
    // Set the coordinate system pointers for the Spacecraft
-   StringArray satNames = moderator->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+   StringArray satNames = theModerator->GetListOfObjects(Gmat::SPACECRAFT);
    Spacecraft *sat;
-   cs = moderator->GetInternalCoordinateSystem();
+   cs = theModerator->GetInternalCoordinateSystem();
    StringArray preInitCsNames;
    
    for (StringArray::iterator i = satNames.begin(); i != satNames.end(); ++i)
@@ -4337,7 +4593,7 @@ bool Interpreter::FinalPass()
             i->c_str());
       #endif
       
-      sat = (Spacecraft *)moderator->GetConfiguredItem(*i);
+      sat = (Spacecraft *)theModerator->GetObject(*i);
       
       #ifdef DEBUG_PASS_TWO
          MessageInterface::ShowMessage(
@@ -4355,7 +4611,7 @@ bool Interpreter::FinalPass()
       
       sat->SetInternalCoordSystem(cs);
       configuredCsName = sat->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
-      configuredCs = moderator->GetCoordinateSystem(configuredCsName);
+      configuredCs = theModerator->GetCoordinateSystem(configuredCsName);
       
       if (configuredCs == NULL)
          throw InterpreterException(
@@ -4418,7 +4674,7 @@ void Interpreter::PreinitializeCoordinateSystem(CoordinateSystem *cs)
    #endif
 
       
-   SolarSystem *ss = moderator->GetSolarSystemInUse();
+   SolarSystem *ss = theModerator->GetSolarSystemInUse();
    if (!ss) throw InterpreterException("Cannot access solar system in use");
    CelestialBody   *b  = NULL;
    CalculatedPoint *c  = NULL;
@@ -4466,7 +4722,7 @@ void Interpreter::PreinitializeCoordinateSystem(CoordinateSystem *cs)
             }
             else // if it's not a body, it should be a barycenter
             {
-               bc = (Barycenter*) moderator->GetCalculatedPoint(*j);
+               bc = (Barycenter*) theModerator->GetCalculatedPoint(*j);
                if (!bc) throw InterpreterException(
                         "Unknown reference object in calculated point");
                c->SetRefObject(bc, Gmat::SPACE_POINT, (*j));

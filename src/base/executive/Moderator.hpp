@@ -76,7 +76,7 @@ public:
    
    //----- ObjectType
    std::string GetObjectTypeString(Gmat::ObjectType type);  
-
+   
    //----- interpreter
    static GuiInterpreter* GetGuiInterpreter();
    static ScriptInterpreter* GetScriptInterpreter();
@@ -87,12 +87,12 @@ public:
    StringArray GetListOfFactoryItems(Gmat::ObjectType type);
    
    //----- configuration
-   StringArray& GetListOfConfiguredItems(Gmat::ObjectType type);
-   GmatBase* GetConfiguredItem(const std::string &name);
-   bool RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName,
-                             const std::string &newName);
-   bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name,
-                             bool delOnlyIfNotUsed);
+   StringArray& GetListOfObjects(Gmat::ObjectType type);
+   GmatBase* GetObject(const std::string &name);
+   bool RenameObject(Gmat::ObjectType type, const std::string &oldName,
+                     const std::string &newName);
+   bool RemoveObject(Gmat::ObjectType type, const std::string &name,
+                     bool delOnlyIfNotUsed);
    bool HasConfigurationChanged(Integer sandboxNum = 1);
    void ConfigurationChanged(GmatBase *obj, bool tf);
    void ResetConfigurationChanged(bool resetResource = true,
@@ -105,6 +105,7 @@ public:
    SolarSystem* GetSolarSystemInUse();
    bool SetSolarSystemInUse(const std::string &name);
    void SetSolarSystemInUse(SolarSystem *ss);
+   void CreateSolarSystemInUse();
    
    // CalculatedPoint
    CalculatedPoint* CreateCalculatedPoint(const std::string &type,
@@ -151,7 +152,6 @@ public:
    bool IsParameter(const std::string &type);
    Parameter* CreateParameter(const std::string &type,
                               const std::string &name,
-//                               const Gmat::ObjectType ownerType = Gmat::UNKNOWN_OBJECT,
                               const std::string &ownerName = "",
                               const std::string &depName = "");
    Parameter* GetParameter(const std::string &name);
@@ -282,7 +282,7 @@ private:
    void InitializeTimeFile();
    
    void SetDefaultPlanetarySource();
-   void CreateSolarSystemInUse();
+//    void CreateSolarSystemInUse();
    void CreateDefaultCoordSystems();
    void CreateDefaultMission();
    bool CreateSlpFile(const std::string &fileName);

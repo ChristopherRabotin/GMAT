@@ -63,8 +63,8 @@ ScriptInterpreter* ScriptInterpreter::Instance()
 //------------------------------------------------------------------------------
 // class constructor
 ScriptInterpreter::ScriptInterpreter()
+   : Interpreter()
 {
-    moderator = Moderator::Instance();
 }
 
 
@@ -93,7 +93,7 @@ bool ScriptInterpreter::Interpret()
 {
    if (!initialized)
       Initialize();
-        
+   
    sequenceStarted = false;
    bool retval = ReadScript();
 
@@ -145,7 +145,7 @@ bool ScriptInterpreter::Build(Gmat::WriteMode mode)
 {
     if (!initialized)
         Initialize();
-        
+    
     return WriteScript(mode);
 }
 
@@ -210,12 +210,12 @@ bool ScriptInterpreter::ReadScript()
    ConfigManager* cm = ConfigManager::Instance();
    cm->ConfigurationChanged(false);
    
-   moderator->SetCommandsUnchanged();
+   theModerator->SetCommandsUnchanged();
    
    if (branchDepth != 0) 
    {
       // Clear the command sequence
-      moderator->ClearCommandSeq();
+      theModerator->ClearCommandSeq();
       if (branchDepth > 0)
          MessageInterface::ShowMessage("ScriptInterpreter::ReadScript "
             "completed without terminating all branch commands\n");
@@ -617,7 +617,7 @@ bool ScriptInterpreter::Parse()
         } //else if ((**phrase == "GMAT") && (!sequenceStarted))
         
         // Then check to see if it's a command
-        else if (find(cmdmap.begin(), cmdmap.end(), **phrase) != cmdmap.end())
+        else if (find(commandList.begin(), commandList.end(), **phrase) != commandList.end())
         {
            if (**phrase == "GMAT")
            {
@@ -666,7 +666,7 @@ bool ScriptInterpreter::Parse()
                      // Arrays and variables can be set directly
                      if (obj->GetTypeName() == "Variable")
                      {
-                        GmatCommand *cmd = moderator->AppendCommand("GMAT", "");
+                        GmatCommand *cmd = theModerator->AppendCommand("GMAT", "");
                         cmd->SetGeneratingString(line);
                         if (SetVariable(obj, "", cmd))
                         {
@@ -692,7 +692,7 @@ bool ScriptInterpreter::Parse()
                                  (*cstr)->c_str());
                          #endif
                            
-                        GmatCommand *cmd = moderator->AppendCommand("GMAT", "");
+                        GmatCommand *cmd = theModerator->AppendCommand("GMAT", "");
                         cmd->SetGeneratingString(line);
 
                         if (SetArray(obj, cmd))
@@ -752,7 +752,7 @@ bool ScriptInterpreter::Parse()
                MessageInterface::ShowMessage("Line '%s' is a command\n", 
                   line.c_str());
             #endif
-            GmatCommand *cmd = moderator->AppendCommand(**phrase, "");
+            GmatCommand *cmd = theModerator->AppendCommand(**phrase, "");
             try
             {
                cmd->SetGeneratingString(line);
@@ -837,7 +837,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    StringArray objs;
    
    // Hardware
-   objs = moderator->GetListOfConfiguredItems(Gmat::HARDWARE);
+   objs = theModerator->GetListOfObjects(Gmat::HARDWARE);
    #ifdef DEBUG_SCRIPT_READING_AND_WRITING 
       std::cout << "Found " << objs.size() << " hardware Components\n";
    #endif
@@ -858,20 +858,20 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    }
             
    // Spacecraft
-   objs = moderator->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+   objs = theModerator->GetListOfObjects(Gmat::SPACECRAFT);
 
    // Setup the coordinate systems on Spacecraft so they can perform conversions
-   CoordinateSystem *ics = moderator->GetInternalCoordinateSystem(), *sccs;
+   CoordinateSystem *ics = theModerator->GetInternalCoordinateSystem(), *sccs;
 
    #ifdef DEBUG_SCRIPT_READING_AND_WRITING
       std::cout << "Found " << objs.size() << " Spacecraft\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
    {
-      Spacecraft *sc = (Spacecraft*)(moderator->GetConfiguredItem(*current));
+      Spacecraft *sc = (Spacecraft*)(theModerator->GetObject(*current));
       sc->SetInternalCoordSystem(ics);
-      sccs = (CoordinateSystem*)(moderator->
-         GetConfiguredItem(sc->GetRefObjectName(Gmat::COORDINATE_SYSTEM)));
+      sccs = (CoordinateSystem*)(theModerator->
+         GetObject(sc->GetRefObjectName(Gmat::COORDINATE_SYSTEM)));
       if (sccs)
          sc->SetRefObject(sccs, Gmat::COORDINATE_SYSTEM);
       sc->Initialize();
@@ -881,7 +881,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    }
    
    // Formations
-   objs = moderator->GetListOfConfiguredItems(Gmat::FORMATION);
+   objs = theModerator->GetListOfObjects(Gmat::FORMATION);
 
    #ifdef DEBUG_SCRIPT_READING_AND_WRITING
       std::cout << "Found " << objs.size() << " Spacecraft\n";
@@ -891,7 +891,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          return false;
 
    // Libration Points and Barycenters
-   objs = moderator->GetListOfConfiguredItems(Gmat::CALCULATED_POINT);
+   objs = theModerator->GetListOfObjects(Gmat::CALCULATED_POINT);
 
    #ifdef DEBUG_SCRIPT_READING_AND_WRITING
       MessageInterface::ShowMessage("Found %d calculated points\n", objs.size());
@@ -901,7 +901,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          return false;
             
    // Force Models
-   objs = moderator->GetListOfConfiguredItems(Gmat::FORCE_MODEL);
+   objs = theModerator->GetListOfObjects(Gmat::FORCE_MODEL);
 
    #ifdef DEBUG_SCRIPT_READING_AND_WRITING
       std::cout << "Found " << objs.size() << " Force Models\n";
@@ -911,7 +911,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          return false;
    
    // Propagator setups
-   objs = moderator->GetListOfConfiguredItems(Gmat::PROP_SETUP);
+   objs = theModerator->GetListOfObjects(Gmat::PROP_SETUP);
 
    #ifdef DEBUG_SCRIPT_READING_AND_WRITING
       std::cout << "Found " << objs.size() << " Propagators\n";
@@ -921,7 +921,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          return false;
    
    // Burn objects
-   objs = moderator->GetListOfConfiguredItems(Gmat::BURN);
+   objs = theModerator->GetListOfObjects(Gmat::BURN);
    #ifdef DEBUG_SCRIPT_READING_AND_WRITING
       std::cout << "Found " << objs.size() << " Burns\n";
    #endif
@@ -930,7 +930,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          return false;
     
    // Solver objects
-   objs = moderator->GetListOfConfiguredItems(Gmat::SOLVER);
+   objs = theModerator->GetListOfObjects(Gmat::SOLVER);
    #ifdef DEBUG_SCRIPT_READING_AND_WRITING
       std::cout << "Found " << objs.size() << " Solvers\n";
    #endif
@@ -942,7 +942,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    // Subscriber setups
    if (mode != Gmat::EPHEM_HEADER)
    {
-      objs = moderator->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+      objs = theModerator->GetListOfObjects(Gmat::SUBSCRIBER);
       #ifdef DEBUG_SCRIPT_READING_AND_WRITING
          std::cout << "Found " << objs.size() << " Subscribers\n";
       #endif
@@ -956,7 +956,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       }
       
       // Array and Variable setups
-      objs = moderator->GetListOfConfiguredItems(Gmat::PARAMETER);
+      objs = theModerator->GetListOfObjects(Gmat::PARAMETER);
       #ifdef DEBUG_SCRIPT_READING_AND_WRITING
          std::cout << "Found " << objs.size() << " Parameters\n";
       #endif
@@ -967,7 +967,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       }
    
       // Coordinate System setups
-      objs = moderator->GetListOfConfiguredItems(Gmat::COORDINATE_SYSTEM);
+      objs = theModerator->GetListOfObjects(Gmat::COORDINATE_SYSTEM);
       #ifdef DEBUG_SCRIPT_READING_AND_WRITING
          std::cout << "Found " << objs.size() << " Coordinate Systems\n";
       #endif
@@ -978,7 +978,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       }
 
       // Function setups
-      objs = moderator->GetListOfConfiguredItems(Gmat::FUNCTION);
+      objs = theModerator->GetListOfObjects(Gmat::FUNCTION);
       #ifdef DEBUG_SCRIPT_READING_AND_WRITING
          std::cout << "Found " << objs.size() << " Functions\n";
       #endif
@@ -989,7 +989,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    }
    
    // Command sequence
-   GmatCommand *cmd = moderator->GetNextCommand();
+   GmatCommand *cmd = theModerator->GetNextCommand();
    bool inTextMode = false;
    
    while (cmd != NULL) {

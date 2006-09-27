@@ -84,13 +84,18 @@ public:
    bool                            BuildUserObject(std::string &objectname,
                                                    Gmat::WriteMode mode = Gmat::SCRIPTING);
    
+   StringArray& GetListOfObjects(Gmat::ObjectType type);
+   GmatBase* GetObject(const std::string &name);
+   GmatBase* CreateObject(const std::string &type, const std::string &name);
+   SolarSystem* GetSolarSystemInUse();
+   
 protected:
    /// The input stream processed by the interpreter
    std::istream                    *instream;
    /// The iostream processed by the interpreter
    std::ostream                    *outstream;
    /// Pointer to the Moderator for access to the factories and other services
-   Moderator                       *moderator;
+   Moderator                       *theModerator;
    /// Flag to tell is the mappings are defined yet
    bool                            initialized;
    /// Counter used to track branch commands
@@ -100,23 +105,29 @@ protected:
    std::map<std::string, Integer>  typemap;
     
    /// Available commands, obtained from the FactoryManager via the Moderator
-   StringArray                     cmdmap;
+   StringArray                     commandList;
    /// Available propagators
-   StringArray                     propmap;
+   StringArray                     propagatorList;
    /// Available hardware elements
-   StringArray                     hardwaremap;
+   StringArray                     hardwareList;
    /// Available forces
-   StringArray                     forcemap;
+   StringArray                     forceList;
    /// Available subscribers
-   StringArray                     subscribermap;
+   StringArray                     subscriberList;
    /// Available parameters
-   StringArray                     parametermap;
+   StringArray                     parameterList;
    /// Available stopping conditions
-   StringArray                     stopcondmap;
+   StringArray                     stopcondList;
    /// Available solvers
-   StringArray                     solvermap;
+   StringArray                     solverList;
    /// Available function containers
-   StringArray                     functionmap;
+   StringArray                     functionList;
+   StringArray   atmosphereList;
+   StringArray   attitudeList;
+   StringArray   axisSystemList;
+   StringArray   burnList;
+   StringArray   calculatedPointList;
+   StringArray   physicalModelList;
 
    /// Current line from the script
    std::string                     line;
