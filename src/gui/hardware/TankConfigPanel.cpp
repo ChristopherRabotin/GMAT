@@ -238,7 +238,7 @@ void TankConfigPanel::SaveData()
       // Fuel Mass 
       paramID = theFuelTank->GetParameterID("FuelMass");
       inputString = fuelMassTextCtrl->GetValue();
-      if (!GmatStringUtil::ToDouble(inputString,&rvalue)) 
+      if (!GmatStringUtil::ToDouble(inputString,&rvalue) || rvalue < 0) 
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
              inputString.c_str(), "Fuel Mass","Real Number >= 0");
@@ -249,7 +249,7 @@ void TankConfigPanel::SaveData()
       // Fuel Density 
       paramID = theFuelTank->GetParameterID("FuelDensity");
       inputString = fuelDensityTextCtrl->GetValue();
-      if (!GmatStringUtil::ToDouble(inputString,&rvalue)) 
+      if (!GmatStringUtil::ToDouble(inputString,&rvalue) || rvalue < 0) 
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
              inputString.c_str(), "Fuel Density","Real Number >= 0");
@@ -260,7 +260,7 @@ void TankConfigPanel::SaveData()
       // Pressure 
       paramID = theFuelTank->GetParameterID("Pressure");
       inputString = pressureTextCtrl->GetValue();
-      if (!GmatStringUtil::ToDouble(inputString,&rvalue)) 
+      if (!GmatStringUtil::ToDouble(inputString,&rvalue) || rvalue < 0) 
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
              inputString.c_str(), "Pressure","Real Number >= 0");
