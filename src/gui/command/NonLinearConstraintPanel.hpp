@@ -6,9 +6,7 @@
 
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
-//#include "NonLinearConstraint.hpp"
-#include "Solver.hpp"
-#include "Parameter.hpp"
+#include "NonLinearConstraint.hpp"
 
 class NonLinearConstraintPanel : public GmatPanel
 {
@@ -16,13 +14,9 @@ public:
    NonLinearConstraintPanel(wxWindow *parent, GmatCommand *cmd);
    ~NonLinearConstraintPanel(); 
     
-private:             
-
-   wxString  solverName;
-   wxString lhs, rhs;
-   Parameter *lhsParam;
-   Parameter *rhsParam;
-
+private:  
+   GuiItemManager *theGuiManager;
+           
    wxTextCtrl *mLHSTextCtrl;
    wxTextCtrl *mRHSTextCtrl;
 
@@ -33,14 +27,12 @@ private:
    wxComboBox *mComparisonComboBox;
    
    wxArrayString mObjectTypeList;
-//   NonLinearConstraint *mNonLinearConstraintCommand;
+   NonLinearConstraint *mNonLinearConstraintCommand;
    
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
-
-   void ShowGoalSetup();
    
    // event handling method
    void OnTextChange(wxCommandEvent& event);    
