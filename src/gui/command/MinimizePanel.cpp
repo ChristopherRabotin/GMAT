@@ -53,10 +53,10 @@ void MinimizePanel::Create()
    // wxStaticText
    wxStaticText *solverStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Solver"),
-                       wxDefaultPosition, wxSize(40, -1), 0);
+                       wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *variableStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Variable to be Minimized"), 
-                       wxDefaultPosition, wxSize(40, -1), 0);
+                       wxDefaultPosition, wxDefaultSize, 0);
    
    // wxTextCtrl
    mVariableTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
