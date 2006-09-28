@@ -1542,6 +1542,9 @@ GmatMainFrame::CreateNewCommand(const wxString &title,
    case GmatTree::VARY_COMMAND:
       sizer->Add(new VaryPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
+   case GmatTree::OPTIMIZE_VARY_COMMAND:
+      sizer->Add(new VaryPanel(scrolledWin, cmd, true), 0, wxGROW|wxALL, 0);
+      break;
    case GmatTree::SAVE_COMMAND:
       sizer->Add(new SavePanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
