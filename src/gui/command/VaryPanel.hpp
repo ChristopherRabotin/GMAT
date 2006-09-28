@@ -27,7 +27,7 @@
 class VaryPanel : public GmatPanel
 {
 public:
-   VaryPanel(wxWindow *parent, GmatCommand *cmd);
+   VaryPanel(wxWindow *parent, GmatCommand *cmd, bool inOptimize = false);
    ~VaryPanel(); 
     
 private:             
@@ -42,6 +42,8 @@ private:
       Real      maxValue;
       Real      maxStep;
       Parameter *varParam;
+      Real      additiveScaleFactor;
+      Real      multiplicativeScaleFactor;
    };
    
    wxTextCtrl *mVarNameTextCtrl;
@@ -50,6 +52,13 @@ private:
    wxTextCtrl *mMaxStepTextCtrl;
    wxTextCtrl *mMinValueTextCtrl;
    wxTextCtrl *mMaxValueTextCtrl;
+   wxTextCtrl *mAdditiveTextCtrl;
+   wxTextCtrl *mMultiplicativeTextCtrl;
+   
+   wxStaticText *pertStaticText;
+   wxStaticText *maxStepStaticText;
+   wxStaticText *additiveStaticText;
+   wxStaticText *multiplicativeStaticText;
    
    wxButton *mViewVarButton;
    wxComboBox *mSolverComboBox;
@@ -57,6 +66,8 @@ private:
    wxArrayString mObjectTypeList;
    SolverType mSolverData;
    Vary *mVaryCommand;
+   
+   bool inOptimizeCmd;
    
    // methods inherited from GmatPanel
    virtual void Create();

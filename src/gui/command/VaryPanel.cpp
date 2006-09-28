@@ -41,10 +41,11 @@ END_EVENT_TABLE()
  * A constructor.
  */
 //------------------------------------------------------------------------------
-VaryPanel::VaryPanel(wxWindow *parent, GmatCommand *cmd)
+VaryPanel::VaryPanel(wxWindow *parent, GmatCommand *cmd, bool inOptimize)
    : GmatPanel(parent)
 {
    mVaryCommand = (Vary *)cmd;
+   inOptimizeCmd = inOptimize;
    
    mSolverData.solverName = "";
    mSolverData.varName = "";
@@ -53,6 +54,8 @@ VaryPanel::VaryPanel(wxWindow *parent, GmatCommand *cmd)
    mSolverData.minValue = -9.999e30;
    mSolverData.maxValue = 9.999e30;
    mSolverData.maxStep = 9.999e30;
+   mSolverData.additiveScaleFactor = 0.0;
+   mSolverData.multiplicativeScaleFactor = 0.0;
    
    mObjectTypeList.Add("Spacecraft");
    mObjectTypeList.Add("ImpulsiveBurn");
@@ -93,10 +96,10 @@ void VaryPanel::Create()
    wxStaticText *initialStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Initial Value"), 
                        wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *pertStaticText =
+   pertStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Perturbation"), 
                        wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *maxStepStaticText =
+   maxStepStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Max Step"), 
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *minValueStaticText =
@@ -104,6 +107,12 @@ void VaryPanel::Create()
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *maxValueStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Upper"), 
+                       wxDefaultPosition, wxDefaultSize, 0);
+   additiveStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Additive Scale Factor"), 
+                       wxDefaultPosition, wxDefaultSize, 0);
+   multiplicativeStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Multiplicative Scale Factor"), 
                        wxDefaultPosition, wxDefaultSize, 0);
    
    // wxTextCtrl
@@ -118,6 +127,10 @@ void VaryPanel::Create()
    mMinValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                                    wxDefaultPosition, wxSize(80,-1), 0);
    mMaxValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                   wxDefaultPosition, wxSize(80,-1), 0);
+   mAdditiveTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                   wxDefaultPosition, wxSize(80,-1), 0);
+   mMultiplicativeTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                                    wxDefaultPosition, wxSize(80,-1), 0);
    
    // wxString
@@ -162,6 +175,7 @@ void VaryPanel::Create()
    wxFlexGridSizer *valueGridSizer = new wxFlexGridSizer(6, 0, 0);
    wxBoxSizer *solverBoxSizer = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer *variableBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+   wxFlexGridSizer *scaleGridSizer = new wxFlexGridSizer(2, 0, 0);
    
    // Add to wx*Sizers
    
@@ -186,11 +200,17 @@ void VaryPanel::Create()
    valueGridSizer->Add(mMaxValueTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    valueGridSizer->Add(mMaxStepTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
 
+   scaleGridSizer->Add(additiveStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   scaleGridSizer->Add(mAdditiveTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   scaleGridSizer->Add(multiplicativeStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   scaleGridSizer->Add(mMultiplicativeTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+
    varSetupSizer->Add(variableBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    varSetupSizer->Add(valueGridSizer, 0, wxALIGN_LEFT|wxALL, bsize);
 
    panelSizer->Add(solverBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    panelSizer->Add(varSetupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   panelSizer->Add(scaleGridSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 
    theMiddleSizer->Add(panelSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 }
@@ -231,7 +251,7 @@ void VaryPanel::LoadData()
 
       mSolverData.solverName = wxT(solverName.c_str());
       mSolverData.varName = wxT(varName.c_str());
-            
+      
       value = mVaryCommand->
          GetRealParameter(mVaryCommand->GetParameterID("InitialValue"));
       mSolverData.initialValue = value;
@@ -247,10 +267,35 @@ void VaryPanel::LoadData()
       value = mVaryCommand->
          GetRealParameter(mVaryCommand->GetParameterID("MaximumValue"));
       mSolverData.maxValue = value;
-            
+
       value = mVaryCommand->
          GetRealParameter(mVaryCommand->GetParameterID("MaximumChange"));
       mSolverData.maxStep = value;
+
+      value = mVaryCommand->
+         GetRealParameter(mVaryCommand->GetParameterID("AdditiveScaleFactor"));
+      mSolverData.additiveScaleFactor = value;
+
+      value = mVaryCommand->
+         GetRealParameter(mVaryCommand->GetParameterID("MutiplicativeScaleFactor"));
+      mSolverData.multiplicativeScaleFactor = value;
+            
+      if (inOptimizeCmd)
+      {   
+         pertStaticText->Enable(false);
+         maxStepStaticText->Enable(false);
+      	 mPertTextCtrl->Enable(false);
+      	 mMaxStepTextCtrl->Enable(false);
+      }
+      else // in target
+      {
+         // gray out the optimize stuff
+         additiveStaticText->Enable(false);
+         multiplicativeStaticText->Enable(false);
+         mAdditiveTextCtrl->Enable(false);
+         mMultiplicativeTextCtrl->Enable(false);
+      }
+
 
    }
    catch (BaseException &e)
@@ -317,6 +362,14 @@ void VaryPanel::SaveData()
       mVaryCommand->SetRealParameter
          (mVaryCommand->GetParameterID("MaximumChange"),
           mSolverData.maxStep);
+
+      mVaryCommand->SetRealParameter
+         (mVaryCommand->GetParameterID("AdditiveScaleFactor"),
+          mSolverData.additiveScaleFactor);
+
+      mVaryCommand->SetRealParameter
+         (mVaryCommand->GetParameterID("MutiplicativeScaleFactor"),
+          mSolverData.multiplicativeScaleFactor);
    }
    catch (BaseException &e)
    {
@@ -341,6 +394,8 @@ void VaryPanel::ShowVariableSetup()
    mMinValueTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.minValue));
    mMaxValueTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.maxValue));
    mMaxStepTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.maxStep));
+   mAdditiveTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.additiveScaleFactor));
+   mMultiplicativeTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.multiplicativeScaleFactor));
 }
 
 //---------------------------------
@@ -367,6 +422,12 @@ void VaryPanel::OnTextChange(wxCommandEvent& event)
 
    if (mMaxStepTextCtrl->IsModified())
       mSolverData.maxStep = atof(mMaxStepTextCtrl->GetValue().c_str());
+
+   if (mAdditiveTextCtrl->IsModified())
+      mSolverData.additiveScaleFactor = atof(mAdditiveTextCtrl->GetValue().c_str());
+
+   if (mMultiplicativeTextCtrl->IsModified())
+      mSolverData.multiplicativeScaleFactor = atof(mMultiplicativeTextCtrl->GetValue().c_str());
 
    EnableUpdate(true);
 }
