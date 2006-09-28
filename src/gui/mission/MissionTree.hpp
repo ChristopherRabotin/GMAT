@@ -58,6 +58,7 @@ private:
    int mNumPropagate;
    int mNumManeuver;
    int mNumTarget;
+   int mNumOptimize;
    int mNumAchieve;
    int mNumVary;
    int mNumSave;
@@ -122,7 +123,9 @@ private:
    
    wxMenu* CreatePopupMenu(int type, bool insert);
    wxMenu* CreateTargetPopupMenu(int type, bool insert);
+   wxMenu* CreateOptimizePopupMenu(int type, bool insert);
    wxMenu* AppendTargetPopupMenu(wxMenu *menu, bool insert);
+   wxMenu* AppendOptimizePopupMenu(wxMenu *menu, bool insert);
    wxMenu* CreateControlLogicPopupMenu(int type, bool insert);
    
    int GetMenuId(const wxString &cmd, bool insert);
@@ -160,6 +163,7 @@ private:
       POPUP_ADD_BEGIN_FINITE_BURN,
       POPUP_ADD_END_FINITE_BURN,
       POPUP_ADD_TARGET,
+      POPUP_ADD_OPTIMIZE,
       POPUP_ADD_VARY,
       POPUP_ADD_ACHIEVE,
       POPUP_ADD_MINIMIZE,
@@ -190,6 +194,7 @@ private:
       POPUP_INSERT_BEGIN_FINITE_BURN,
       POPUP_INSERT_END_FINITE_BURN,
       POPUP_INSERT_TARGET,
+      POPUP_INSERT_OPTIMIZE,
       POPUP_INSERT_VARY,
       POPUP_INSERT_ACHIEVE,
       POPUP_INSERT_MINIMIZE,
