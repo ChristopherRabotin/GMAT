@@ -29,6 +29,7 @@ public:
    wxString GetDesc();
    
    void SetDesc(wxString description);
+   void SetDataType(int type);
    
    virtual GmatCommand* GetCommand();
    virtual wxString GetCommandName();
@@ -89,6 +90,9 @@ namespace GmatTree
 
       MISSION_ICON_SPACECRAFT,
       MISSION_ICON_WHILE,
+      MISSION_ICON_FOR,
+      MISSION_ICON_IF,
+      MISSION_ICON_SCRIPTEVENT,
       MISSION_ICON_VARY,
       MISSION_ICON_ACHIEVE,
       MISSION_ICON_DELTA_V,
@@ -203,9 +207,9 @@ namespace GmatTree
       TARGET_COMMAND,
       ACHIEVE_COMMAND,
       VARY_COMMAND,
+      OPTIMIZE_VARY_COMMAND,
       MINIMIZE_COMMAND,
       NON_LINEAR_CONSTRAINT_COMMAND,
-      OPTIMIZE_COMMAND,
       SAVE_COMMAND,
       TOGGLE_COMMAND,
       REPORT_COMMAND,
@@ -242,6 +246,8 @@ namespace GmatTree
       //---------- NO panels will be created
       BEGIN_NO_PANEL,
       END_TARGET_COMMAND,
+      OPTIMIZE_COMMAND,
+      END_OPTIMIZE_COMMAND,
       ELSE_CONTROL,
       END_IF_CONTROL,
       END_FOR_CONTROL,
@@ -251,7 +257,6 @@ namespace GmatTree
       STOP_COMMAND,
       SCRIPT_FOLDER,    // arg:  added here, so blank panel doesn't open
       END_NO_PANEL,
-      
    };
 }
 #endif // GmatTreeItemData_hpp
