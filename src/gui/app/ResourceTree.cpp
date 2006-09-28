@@ -797,6 +797,7 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId, bool restartCounter)
    wxString objName;
    wxString objTypeName;
    int numDiffCorr = 0;
+   int numSqp = 0;
    
    for (int i = 0; i<size; i++)
    {
@@ -826,15 +827,26 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId, bool restartCounter)
          AppendItem(mOptimizerItem, wxT(objName), GmatTree::ICON_DEFAULT, -1,
                     new GmatTreeItemData(wxT(objName), GmatTree::QUASI_NEWTON));
       }
-      else if (objTypeName == "Sqp")
+      else if (objTypeName == "FminconOptimizer")
       {
+      	 numSqp++;
+
+         if (restartCounter)
+            ++mNumSqp;
+         
          AppendItem(mOptimizerItem, wxT(objName), GmatTree::ICON_DEFAULT, -1,
                     new GmatTreeItemData(wxT(objName), GmatTree::SQP));
+      	
+//         AppendItem(mOptimizerItem, wxT(objName), GmatTree::ICON_DEFAULT, -1,
+//                    new GmatTreeItemData(wxT(objName), GmatTree::SQP));
       }
    };
 
    if (numDiffCorr == 0)
       mNumDiffCorr = 0;
+
+   if (numSqp == 0)
+      mNumSqp = 0;
    
    if (size > 0)
    {
@@ -1207,7 +1219,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       oMenu->Append(POPUP_ADD_QUASI_NEWTON, wxT("Quasi-Newton"));
       oMenu->Append(POPUP_ADD_SQP, wxT("SQP (fmincon)"));
       oMenu->Enable(POPUP_ADD_QUASI_NEWTON, false);
-      oMenu->Enable(POPUP_ADD_SQP, false);
+//      oMenu->Enable(POPUP_ADD_SQP, false);
 
       menu.Append(POPUP_ADD_SOLVER, wxT("Add"), oMenu);
    }
@@ -2143,7 +2155,7 @@ void ResourceTree::OnAddDiffCorr(wxCommandEvent &event)
    {
       AppendItem(item, name, GmatTree::ICON_DEFAULT, -1,
                  new GmatTreeItemData(name, GmatTree::DIFF_CORR));
-      
+      theGuiManager->UpdateSolver();
       Expand(item);
    }
 }
@@ -2170,7 +2182,8 @@ void ResourceTree::OnAddSqp(wxCommandEvent &event)
    {
       AppendItem(item, name, GmatTree::ICON_DEFAULT, -1,
                  new GmatTreeItemData(name, GmatTree::SQP));
-
+      
+      theGuiManager->UpdateSolver();
       Expand(item);
    }
 }
@@ -3150,7 +3163,22 @@ void ResourceTree::UpdateResourceCounter(wxTreeItemId itemId)
    }
    else if (itemId == mOptimizerItem)
    {
-      ; // future implementation
+      itemNames = theGuiInterpreter->GetListOfObjects(Gmat::SOLVER);
+      size = itemNames.size();
+      
+      int numSqp = 0;
+   
+      for (int i = 0; i<size; i++)
+      {
+         GmatBase *solver = theGuiInterpreter->GetObject(itemNames[i]);
+         objTypeName = wxString(solver->GetTypeName().c_str());
+
+         if (objTypeName == "FminconOptimizer")
+            numSqp++;
+      }
+      
+      if (numSqp == 0)
+         mNumSqp = 0;
    }
    else if (itemId == mSubscriberItem)
    {
@@ -3311,6 +3339,7 @@ Gmat::ObjectType ResourceTree::GetObjectType(int itemType)
       objType = Gmat::PROP_SETUP;
       break;
    case GmatTree::DIFF_CORR:
+   case GmatTree::SQP:
       objType = Gmat::SOLVER;
       break;
    case GmatTree::REPORT_FILE:
