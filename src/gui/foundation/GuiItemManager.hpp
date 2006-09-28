@@ -69,6 +69,8 @@ public:
    static const int MAX_COORD_SYS = 60;
    static const int MAX_HARDWARE = 60;
    static const int MAX_FUNCTION = 20;
+   static const int MAX_SOLVER = 30;
+   static const int MAX_OPTIMIZER = 30;
    static const int MAX_REPORT_FILE = 20;
    static const int MAX_SUBSCRIBER = 40;   // MAX_REPORT_FILE + 20
    
@@ -87,6 +89,7 @@ public:
    void UpdateHardware();
    void UpdateFunction();
    void UpdateSubscriber();
+   void UpdateSolver();
    
    void UnregisterListBox(const wxString &type, wxListBox *lb,
                           wxArrayString *excList = NULL);
@@ -135,6 +138,12 @@ public:
    
    int GetNumUserParameter()
       { return theNumUserParam; }
+      
+   int GetNumSolver()
+      { return theNumSolver; }
+
+   int GetNumOptimizer()
+      { return theNumOptimizer; }
    
    wxString* GetPlottableParameterList()
       { return thePlottableParamList; }
@@ -165,6 +174,12 @@ public:
 
    wxString* GetFiniteBurnList()
       { return theFiniteBurnList; }
+      
+   wxString* GetSolverList()
+      { return theSolverList; }
+
+   wxString* GetOptimizerList()
+      { return theOptimizerList; }
 
    wxArrayString GetSettablePropertyList(const wxString &objType);
    
@@ -223,6 +238,11 @@ public:
                                      const wxSize &size);
    wxComboBox* GetReportFileComboBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size);
+   wxComboBox* GetSolverComboBox(wxWindow *parent, wxWindowID id,
+                                     const wxSize &size);
+   wxComboBox* GetOptimizerComboBox(wxWindow *parent, wxWindowID id,
+                                     const wxSize &size);
+
    
    // CheckListBox
    wxCheckListBox* GetSubscriberCheckListBox(wxWindow *parent, wxWindowID id,
@@ -336,6 +356,7 @@ private:
    void UpdateHardwareList();
    void UpdateFunctionList();
    void UpdateSubscriberList();
+   void UpdateSolverList();
 
    void AddToAllObjectList();
    
@@ -363,6 +384,8 @@ private:
    std::vector<wxComboBox*> mThrusterCBList;
    std::vector<wxComboBox*> mSubscriberCBList;
    std::vector<wxComboBox*> mReportFileCBList;
+   std::vector<wxComboBox*> mSolverCBList;
+   std::vector<wxComboBox*> mOptimizerCBList;
    
    std::vector<wxArrayString*> mSpaceObjectExcList;
    std::vector<wxArrayString*> mSpacecraftExcList;
@@ -396,6 +419,8 @@ private:
    int theNumSpacePoint;
    int theNumSubscriber;
    int theNumReportFile;
+   int theNumSolver;
+   int theNumOptimizer;
    int theNumAllObject;
    
    wxString theSpacePointList[MAX_SPACE_POINT];
@@ -414,6 +439,8 @@ private:
    wxString theThrusterList[MAX_HARDWARE];
    wxString theReportFileList[MAX_REPORT_FILE];
    wxString theSubscriberList[MAX_SUBSCRIBER];
+   wxString theSolverList[MAX_SOLVER];
+   wxString theOptimizerList[MAX_OPTIMIZER];
    wxString theAllObjectList[MAX_ALL_OBJECT];
    
    wxString theScPropertyList[MAX_SC_PROPERTY];

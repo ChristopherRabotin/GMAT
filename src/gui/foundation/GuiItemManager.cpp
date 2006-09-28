@@ -117,6 +117,10 @@ void GuiItemManager::UpdateAll()
 
    UpdateSubscriber();
    //MessageInterface::ShowMessage("===> after UpdateSubscriber()\n");
+
+   UpdateSolver();
+   //MessageInterface::ShowMessage("===> after UpdateSolver()\n");
+
 }
 
 
@@ -294,6 +298,22 @@ void GuiItemManager::UpdateSubscriber()
    UpdateSubscriberList();
 }
 
+
+//------------------------------------------------------------------------------
+//  void UpdateSolver()
+//------------------------------------------------------------------------------
+/**
+ * Updates Solver related gui components.
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateSolver()
+{
+   #if DEBUG_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("===> UpdateSolver\n");
+   #endif
+   
+   UpdateSolverList();
+}
 
 //------------------------------------------------------------------------------
 // void UnregisterListBox(const wxString &type, wxListBox *lb)
@@ -508,6 +528,23 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
       if (pos != mReportFileCBList.end())
          mReportFileCBList.erase(pos);
    }
+   else if (type == "Solver")
+   {
+      std::vector<wxComboBox*>::iterator pos =
+         find(mSolverCBList.begin(), mSolverCBList.end(), cb);
+      
+      if (pos != mSolverCBList.end())
+         mSolverCBList.erase(pos);
+   }
+   else if (type == "Optimizer")
+   {
+      std::vector<wxComboBox*>::iterator pos =
+         find(mOptimizerCBList.begin(), mOptimizerCBList.end(), cb);
+      
+      if (pos != mOptimizerCBList.end())
+         mOptimizerCBList.erase(pos);
+   }
+   
 }
 
 
@@ -1030,6 +1067,61 @@ wxComboBox* GuiItemManager::GetReportFileComboBox(wxWindow *parent, wxWindowID i
    return reportFileComboBox;
 }
 
+//------------------------------------------------------------------------------
+// wxComboBox* GetSolverComboBox(wxWindow *parent, wxWindowID id,
+//                                   const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return Solver combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox* GuiItemManager::GetSolverComboBox(wxWindow *parent, wxWindowID id,
+                                                  const wxSize &size)
+{
+   // combo box for avaliable ReportFile
+   
+   wxComboBox *solverComboBox =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                     theNumSolver, theSolverList, wxCB_READONLY);
+   
+   // show first Solver
+   solverComboBox->SetSelection(0);
+   
+   //---------------------------------------------
+   // register for update
+   //---------------------------------------------
+   mSolverCBList.push_back(solverComboBox);
+   
+   return solverComboBox;
+}
+
+//------------------------------------------------------------------------------
+// wxComboBox* GetOptimizerComboBox(wxWindow *parent, wxWindowID id,
+//                                   const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return Optimizer combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox* GuiItemManager::GetOptimizerComboBox(wxWindow *parent, wxWindowID id,
+                                                  const wxSize &size)
+{
+   // combo box for avaliable ReportFile
+   
+   wxComboBox *optimizerComboBox =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                     theNumOptimizer, theOptimizerList, wxCB_READONLY);
+   
+   // show first Solver
+   optimizerComboBox->SetSelection(0);
+   
+   //---------------------------------------------
+   // register for update
+   //---------------------------------------------
+   mOptimizerCBList.push_back(optimizerComboBox);
+   
+   return optimizerComboBox;
+}
 
 // CheckListBox
 //------------------------------------------------------------------------------
@@ -3313,6 +3405,106 @@ void GuiItemManager::UpdateSubscriberList()
    }
 }
 
+//------------------------------------------------------------------------------
+// void UpdateSolverList()
+//------------------------------------------------------------------------------
+/**
+ * Updates configured Suolver list.
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateSolverList()
+{
+   StringArray items =
+      theGuiInterpreter->GetListOfObjects(Gmat::SOLVER);
+   theNumSolver = items.size();
+   theNumOptimizer = 0;
+   
+   #if DEBUG_GUI_ITEM_SUBS
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdateSolverList() theNumSolver=%d\n", theNumSolver);
+   #endif
+   
+   if (theNumSolver > MAX_SOLVER)
+   {
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdateSolverList() GUI can handle up to %d Solver."
+          "The number of Solvers configured: %d\n", MAX_SOLVER, theNumSolver);
+      theNumSolver = MAX_SOLVER;
+   }
+   
+   wxArrayString solsNames;
+   wxArrayString optNames;
+   GmatBase *obj;
+
+   // Update Subscriber list
+   for (int i=0; i<theNumSolver; i++)
+   {
+      theSolverList[i] = items[i].c_str();
+      solsNames.Add(items[i].c_str());
+
+      #if DEBUG_GUI_ITEM_SUBS > 1
+      MessageInterface::ShowMessage("GuiItemManager::UpdateSolverList() " +
+                                    std::string(theSolverList[i].c_str()) + "\n");
+      #endif
+   }
+
+   int numOptimizer = 0;
+   
+   // Update Optimizer list
+   for (int i=0; i<theNumSolver; i++)
+   {
+      // check for Optimizer
+      obj = theGuiInterpreter->GetObject(items[i]);
+      if (obj->GetTypeName() == "FminconOptimizer")
+      {
+         if (i < MAX_OPTIMIZER)
+         {
+            theOptimizerList[theNumOptimizer] = items[i].c_str();
+            optNames.Add(items[i].c_str());
+            theNumOptimizer++;
+         }
+         
+         numOptimizer++;
+      }
+   }
+   
+   if (numOptimizer > MAX_OPTIMIZER)
+   {
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdateSolverList() GUI can handle up to %d Optimizer."
+          "The number of Optimizer configured: %d\n", MAX_OPTIMIZER, numOptimizer);
+   }
+   
+   
+   //-------------------------------------------------------
+   // update registered Solver ComboBox
+   //-------------------------------------------------------
+   int sel;
+   for (std::vector<wxComboBox*>::iterator pos = mSolverCBList.begin();
+        pos != mSolverCBList.end(); ++pos)
+   {      
+       sel = (*pos)->GetSelection();
+
+      (*pos)->Clear();
+      (*pos)->Append(solsNames);
+      
+      (*pos)->SetSelection(sel);
+   }
+   
+   //-------------------------------------------------------
+   // update registered Optimizer ComboBox
+   //-------------------------------------------------------
+   for (std::vector<wxComboBox*>::iterator pos = mOptimizerCBList.begin();
+        pos != mOptimizerCBList.end(); ++pos)
+   {      
+       sel = (*pos)->GetSelection();
+
+      (*pos)->Clear();
+      (*pos)->Append(optNames);
+      
+      (*pos)->SetSelection(sel);
+   }
+}
 
 //------------------------------------------------------------------------------
 // void AddToAllObjectList()
@@ -3432,6 +3624,8 @@ GuiItemManager::GuiItemManager()
    theNumCelesPoint = 0;
    theNumCalPoint = 0;
    theNumSubscriber = 0;
+   theNumSolver = 0;
+   theNumOptimizer = 0;
    theNumSpacePoint = 0;
    
    // 6/29/06: Currently creatable burn parameters are: Element1, Element2, Element3
