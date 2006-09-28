@@ -27,6 +27,7 @@ MinimizePanel::MinimizePanel(wxWindow *parent, GmatCommand *cmd)
    : GmatPanel(parent)
 {
    mMinimizeCommand = (Minimize *)cmd;
+   theGuiManager = GuiItemManager::GetInstance();
    
    solverName = "";
    minParam = NULL;
@@ -42,6 +43,7 @@ MinimizePanel::MinimizePanel(wxWindow *parent, GmatCommand *cmd)
 MinimizePanel::~MinimizePanel()
 {
    mObjectTypeList.Clear();
+   theGuiManager->UnregisterComboBox("Optimizer", mSolverComboBox);
 }
 
 void MinimizePanel::Create()
@@ -60,37 +62,8 @@ void MinimizePanel::Create()
    mVariableTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                                      wxDefaultPosition, wxSize(250,-1), 0);
    
-   // wxString
-   wxString emptyArray[] = 
-   {
-      wxT("No Solver Available")
-   };
-
-   // wxComboBox
-   // Only Optimizers should be included!!
-   StringArray solverNames;
-   solverNames = theGuiInterpreter->GetListOfObjects(Gmat::SOLVER);
-   int solverCount = solverNames.size();
-   wxString *solverArray = new wxString[solverCount];
-
-   for (int i=0; i<solverCount; i++)
-   {
-      solverArray[i] = solverNames[i].c_str();
-   }
-
-   if (solverCount > 0)
-   {
-      mSolverComboBox =
-         new wxComboBox(this, ID_COMBO, wxT(solverArray[0]), wxDefaultPosition,
-                        wxSize(180,-1), solverCount, solverArray,
-                        wxCB_DROPDOWN|wxCB_READONLY);
-   }
-   else
-   {
-      mSolverComboBox =
-         new wxComboBox(this, ID_COMBO, wxT(emptyArray[0]), wxDefaultPosition,
-                        wxSize(180,-1), 1, emptyArray, wxCB_DROPDOWN|wxCB_READONLY);
-   }
+   mSolverComboBox = theGuiManager->GetOptimizerComboBox(this, ID_COMBO,
+      			wxSize(120,-1));
    
    // wxButton
    mChooseButton = new
@@ -110,7 +83,7 @@ void MinimizePanel::Create()
    variableSizer->Add(variableStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    variableSizer->Add(variableInterfaceSizer, 0, wxALIGN_CENTER|wxALL, bsize);
 
-        panelSizer->Add(solverSizer, 0, wxALIGN_CENTER|wxALL, bsize);
+   panelSizer->Add(solverSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    panelSizer->Add(variableSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    
    theMiddleSizer->Add(panelSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
@@ -129,10 +102,10 @@ void MinimizePanel::LoadData()
       mObject = mMinimizeCommand;
       
       std::string loadedSolverName = mMinimizeCommand->
-         GetStringParameter(mMinimizeCommand->GetParameterID("TargeterName"));
+         GetStringParameter(mMinimizeCommand->GetParameterID("OptimizerName"));
 
       std::string loadedVariableName = mMinimizeCommand->
-         GetStringParameter(mMinimizeCommand->GetParameterID("Variable"));
+         GetStringParameter(mMinimizeCommand->GetParameterID("MinimizedVariableName"));
 
       #if DEBUG_ACHIEVE_PANEL
       MessageInterface::ShowMessage("solverName=%s\n", loadedSolverName.c_str());
@@ -164,11 +137,11 @@ void MinimizePanel::SaveData()
    //-------------------------------------------------------
          
    mMinimizeCommand->SetStringParameter
-      (mMinimizeCommand->GetParameterID("TargeterName"),
+      (mMinimizeCommand->GetParameterID("OptimizerName"),
        std::string(solverName.c_str()));
 
    mMinimizeCommand->SetStringParameter
-      (mMinimizeCommand->GetParameterID("Variable"),
+      (mMinimizeCommand->GetParameterID("MinimizedVariableName"),
        std::string(variableName.c_str()));
    
    theApplyButton->Disable();

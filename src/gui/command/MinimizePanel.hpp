@@ -17,6 +17,7 @@ public:
    ~MinimizePanel(); 
     
 private:             
+   GuiItemManager *theGuiManager;
 
    wxString  solverName;
    wxString variableName;
