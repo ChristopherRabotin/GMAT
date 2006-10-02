@@ -156,11 +156,6 @@ protected:
    /// The object array used in GetRefObjectArray()
    ObjectArray             objectArray;
 
-   /// Temporary parameter used to stop on time
-//   Real                    secondsToProp;
-   /// ID for the temporary parameter
-//   const Integer           secondsToPropID;
-   
    // Parameters moved from Execute so that it can be reentrant
    /// Time elapsed during this Propagate
    RealArray               elapsedTime;
@@ -234,8 +229,18 @@ protected:
                                     StringArray& owners, StringArray& elements);
    virtual void            CheckForOptions(Integer &loc, 
                                            std::string& generatingString);
+
    virtual void            AssemblePropagators(Integer &loc, 
-                                               std::string& generatingString);
+                              std::string& generatingString);
+   void                    FindSetupsAndStops(Integer &loc, 
+                              std::string& generatingString,
+                              StringArray &setupStrings, 
+                              StringArray &stopStrings);
+   void                    ConfigurePropSetup(std::string &setupDesc);
+   void                    ConfigureStoppingCondition(std::string &stopDesc);
+   void                    CleanString(std::string &theString, 
+                              const StringArray *extras = NULL);
+
    bool                    InterpretParameter(const std::string text, 
                                               std::string &paramType, 
                                               std::string &paramObj, 

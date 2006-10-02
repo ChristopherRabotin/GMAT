@@ -433,57 +433,60 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
          gen += (*sc);
       }
 
-      // Temporarily commented out because multiple SC support in incomplete
-      // Remove comments and rearrange things a bit when it is parsed correctly.
-//      // Now the stopping conditions
-//      if (stopWhen.size() > 0) {
-//         gen += ", {";
-//
-//         for (std::vector<StopCondition*>::iterator stp = stopWhen.begin();
-//              stp != stopWhen.end(); ++stp) {
-//            std::stringstream stopCondDesc;
-//            if (stp != stopWhen.begin())
-//               gen += ", ";
-//
-//            Parameter *stopParam = (*stp)->GetStopParameter();
-//            std::string stopName = stopParam->GetName();
-//            stopCondDesc << stopName;
-//
-//            if ((stopName.find("Periapsis") == std::string::npos) &&
-//                (stopName.find(".Apoapsis") == std::string::npos))
-//               stopCondDesc << " = " << (*stp)->GetRealParameter("Goal");
-//
-//            gen += stopCondDesc.str();
-//         }
-//         gen += "}";
-//      }
+      // Stopping conditions are now added at the end of the Propagate line, 
+      // rather than internal to the PropSetups.
+      //
+      //if (stopWhen.size() > index) {
+      //   gen += ", {";
+      //
+      //   std::stringstream stopCondDesc;
+      //
+      //   std::string stopName = 
+      //      stopWhen[index]->GetStringParameter(stopCondStopVarID);
+      //   stopCondDesc << stopName;
+      //
+      //   if ((stopName.find("Periapsis") == std::string::npos) &&
+      //       (stopName.find(".Apoapsis") == std::string::npos))
+      //      stopCondDesc << " = " 
+      //                   << stopWhen[index]->GetStringParameter("Goal");
+      //   
+      //   gen += stopCondDesc.str();
+      //
+      //   gen += "}";
+      //}
 
-      if (stopWhen.size() > index) {
-         gen += ", {";
-
-         std::stringstream stopCondDesc;
-
-         std::string stopName = stopWhen[index]->GetStringParameter(stopCondStopVarID);
-         stopCondDesc << stopName;
-
-         if ((stopName.find("Periapsis") == std::string::npos) &&
-             (stopName.find(".Apoapsis") == std::string::npos))
-            stopCondDesc << " = " << stopWhen[index]->GetStringParameter("Goal");
-         
-         gen += stopCondDesc.str();
-
-         gen += "}";
-      }
       gen += ")";
-      
       ++index;
+   }
+
+   // Now the stopping conditions.  Note that stopping conditions are now shown
+   // at teh end of the Propagate line, rather than inside of the PropSetup 
+   // delimiters.  This is by design, based on e-mails 9/28 - 10/2/2006
+   if (stopWhen.size() > 0) {
+      gen += " {";
+   
+      for (std::vector<StopCondition*>::iterator stp = stopWhen.begin();
+           stp != stopWhen.end(); ++stp) {
+         std::stringstream stopCondDesc;
+         if (stp != stopWhen.begin())
+            gen += ", ";
+   
+         std::string stopName = (*stp)->GetStringParameter(stopCondStopVarID);
+         stopCondDesc << stopName;
+   
+         if ((stopName.find(".Periapsis") == std::string::npos) &&
+             (stopName.find(".Apoapsis") == std::string::npos))
+            stopCondDesc << " = " << (*stp)->GetStringParameter("Goal");
+   
+         gen += stopCondDesc.str();
+      }
+      gen += "}";
    }
 
    generatingString = gen + ";";
    // Then call the base class method
    return GmatCommand::GetGeneratingString();
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -1193,12 +1196,6 @@ bool Propagate::RenameRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool Propagate::InterpretAction()
 {
-   // DJC: Uncomment the following when working on the Interpreter
-   // return false;
-   
-   /// @todo: Clean up this hack for the Propagate::InterpretAction method
-   // Sample string:  "Propagate RK89(Sat1, {Duration = 86400.0});"
-    
    Integer loc = generatingString.find("Propagate", 0) + 9;
    const char *str = generatingString.c_str();
    while (str[loc] == ' ')
@@ -1228,7 +1225,8 @@ void Propagate::CheckForOptions(Integer &loc, std::string &generatingString)
    std::string modeStr;
    currentMode = INDEPENDENT;
    
-   for (Integer modeId = INDEPENDENT+1; modeId != PropModeCount; ++modeId) {
+   for (Integer modeId = INDEPENDENT+1; modeId != PropModeCount; ++modeId) 
+   {
       modeStr = PropModeList[modeId];
       modeStr += " ";
       
@@ -1238,7 +1236,8 @@ void Propagate::CheckForOptions(Integer &loc, std::string &generatingString)
                                 modeStr.c_str(), loc, generatingString.c_str());
       #endif
       Integer end = generatingString.find(modeStr, loc);
-      if (end != (Integer)std::string::npos) {
+      if (end != (Integer)std::string::npos) 
+      {
          currentMode = (PropModes)modeId;
          currentPropMode = PropModeList[modeId];
          #ifdef DEBUG_PROPAGATE_EXE
@@ -1263,25 +1262,71 @@ void Propagate::CheckForOptions(Integer &loc, std::string &generatingString)
  * @param <generatingString>  The generating string.
  */
 //------------------------------------------------------------------------------
-void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
+void Propagate::AssemblePropagators(Integer &loc, 
+   std::string& generatingString)
 {
-   // At this point we are set with loc pointing to the start of the list of
-   // PropSetups.  First we break that list into the individual pieces
-   StringArray pieces;
-   const char *str = generatingString.c_str();
+   // First parse the pieces from the string, starting at loc
+   StringArray setupStrings, stopStrings;
    
+   FindSetupsAndStops(loc, generatingString, setupStrings, stopStrings);
+
    #ifdef DEBUG_PROPAGATE_ASSEMBLE
-      MessageInterface::ShowMessage("Propagate::AssemblePropagators: "
-                                    "Breaking \"%s\" into pieces\n", 
-                                    generatingString.c_str()+loc);
+      // Output the chunks for debugging
+      MessageInterface::ShowMessage("PropSetups:\n");
+      for (StringArray::iterator i = setupStrings.begin(); 
+           i != setupStrings.end(); ++i)
+         MessageInterface::ShowMessage("   '%s'\n", i->c_str());
+      MessageInterface::ShowMessage("StopConditions:\n");
+      for (StringArray::iterator i = stopStrings.begin(); 
+           i != stopStrings.end(); ++i)
+         MessageInterface::ShowMessage("   '%s'\n", i->c_str());
    #endif
+   
+   // Now build the prop setups
+   for (StringArray::iterator i = setupStrings.begin(); 
+        i != setupStrings.end(); ++i)
+      ConfigurePropSetup(*i);
+   
+   // and the stopping conditions
+   for (StringArray::iterator i = stopStrings.begin(); 
+        i != stopStrings.end(); ++i)
+      ConfigureStoppingCondition(*i);
+
+   // Finally, set the prop mode
+   if (stopWhen.empty())
+      singleStepMode = true;  // If not, run in single step mode
+}
+
+
+//------------------------------------------------------------------------------
+// void Propagate::FindSetupsAndStops(Integer &loc, 
+//   std::string& generatingString, StringArray &setupStrings, 
+//   StringArray &stopStrings)
+//------------------------------------------------------------------------------
+/**
+ * Breaks out the PropSetup object strings and the stopping condition strings.
+ *
+ * @param <loc>               The current location in the generating string.
+ * @param <generatingString>  The generating string.
+ * @param <setupStrings>      The container for the PropSetup strings.
+ * @param <stopStrings>       The container for teh stopping condition strings.
+ */
+//------------------------------------------------------------------------------
+void Propagate::FindSetupsAndStops(Integer &loc, 
+   std::string& generatingString, StringArray &setupStrings, 
+   StringArray &stopStrings)
+{
+   // First parse the pieces from the string, starting at loc
+   std::string tempString, setupWithStop, oneStop;
+   const char *str = generatingString.c_str();
+   Integer currentLoc = loc, parmstart, end, commaLoc;
 
    bool scanning = true;
-   Integer currentLoc = loc, parmstart, end, endchar;
    
    // First find the PropSetups
    parmstart = generatingString.find("(", currentLoc);   
-   while (scanning) {
+   while (scanning) 
+   {
       end = generatingString.find(")", parmstart)+1;
 
       if (end == (Integer)std::string::npos)
@@ -1293,8 +1338,36 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
       }
       else
          direction.push_back(1.0);
-      
-      pieces.push_back(generatingString.substr(currentLoc, end-currentLoc));
+         
+      tempString = generatingString.substr(currentLoc, end-currentLoc);
+      // Remove stop condition here
+      if (tempString.find("{", 0) != std::string::npos)
+      {
+         setupWithStop = tempString;
+         
+         Integer braceStart = setupWithStop.find("{", 0),
+                 braceEnd   = setupWithStop.find("}", 0);
+                 
+         if (braceEnd == (Integer)std::string::npos)
+            throw CommandException("Propagate::AssemblePropagators: PropSetup"
+                                  " string " + tempString +
+                                  " starts a stopping condition, but does not"
+                                  " have a closing brace.");
+         // Now remove the bracketed chunk from the string
+         tempString = setupWithStop.substr(0, braceStart);
+         // Remove the comma
+         Integer commaLoc = braceStart - 1;
+         while ((tempString[commaLoc] == ',') || (tempString[commaLoc] == ' '))
+         {
+            --commaLoc;
+         }
+         tempString = tempString.substr(0, commaLoc+1);
+         
+         // Add on the trailing chunk
+         tempString += setupWithStop.substr(braceEnd+1);
+      }
+            
+      setupStrings.push_back(tempString);
       currentLoc = end+1;
 
       // Skip trailing comma or white space
@@ -1304,265 +1377,257 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
       if (parmstart == (Integer)std::string::npos)
          scanning = false;
    }
-      
-   #ifdef DEBUG_PROPAGATE_DIRECTION
-      MessageInterface::ShowMessage("Propagate::AssemblePropagators():"
-                                    " Propagator strings Identified:\n");
-      std::vector<Real>::iterator j = direction.begin();
-      for (StringArray::iterator i = pieces.begin(); i != pieces.end(); ++i,++j)
-         MessageInterface::ShowMessage(
-         "   \"%s\" running %s (direction = %lf)\n", i->c_str(),
-         ((*j) > 0.0 ? "forwards" : "backwards"), *j);
-   #endif
    
-   Integer satEnd;
-   
-   Integer dirIndex = 0;
-   for (StringArray::iterator i = pieces.begin(); i != pieces.end(); ++i, ++dirIndex) 
+   // Flag mixed directions in the command
+   for (RealArray::iterator d = direction.begin(); d != direction.end(); ++d)
    {
-      loc = 0;
-      end = i->find("(", loc);
-      if (end == (Integer)std::string::npos)
+      if ((*d) != direction[0])
          throw CommandException(
-            "Propagate string does not identify propagator");
-      
-      std::string component = i->substr(loc, end-loc);
-      SetObject(component, Gmat::PROP_SETUP);
-      
-      loc = end + 1;
-      satEnd = loc;
-      end = i->find(",", loc);
-      
-      // Find the location of the end of the list of SpaceObjects
-      satEnd = i->find("{", loc);
-      if (satEnd == (Integer)std::string::npos)
-         satEnd = i->find(")", loc);
-      if (satEnd == (Integer)std::string::npos)
-         throw CommandException(
-            "Propagate string terminating paren \")\" missing");
-
-      if (end == (Integer)std::string::npos)
-         end = satEnd;
-   
-      #ifdef DEBUG_PROPAGATE_ASSEMBLE
-         MessageInterface::ShowMessage("Building list of SpaceObjects:\n");
-      #endif
-      do {
-         // Skip white space
-         while ((*i)[loc] == ' ')
-            ++loc;
-         if (end == (Integer)std::string::npos)
-            throw CommandException("Propagate string \"" + (*i) +
-                                   "\" does not identify spacecraft");
-         #ifdef DEBUG_PROPAGATE_ASSEMBLE
-            MessageInterface::ShowMessage("i = \"%s\", loc = %d and end = %d\n",
-                                 i->c_str(), loc, end);
-            MessageInterface::ShowMessage("Last char ((*i)[end]) is '%c'\n",
-                                 (*i)[end]);
-         #endif
-         // Strip off trailing spaces
-         if (((*i)[end] == ',') || ((*i)[end] == '{') || 
-             ((*i)[end] == ')'))
-            endchar = end-1;
-         else
-            endchar = end;
-         while ((*i)[endchar] == ' ')
-            --endchar;
-         
-         component = i->substr(loc, endchar-loc+1);
-         if (component != "")
-            SetObject(component, Gmat::SPACECRAFT);
-         #ifdef DEBUG_PROPAGATE_ASSEMBLE
-            MessageInterface::ShowMessage("   \"%s\"\n", 
-                                          component.c_str());
-         #endif
-      
-         loc = end + 1;
-         end = i->find(",", loc);
-         if (end == (Integer)std::string::npos)
-         {
-            // Might be in single step mode, with one last SpaceObject
-            end = i->find("{", loc);
-            if (end != (Integer)std::string::npos)
-               end = satEnd;
-            else
-               end = satEnd - 1;
-
-            #ifdef DEBUG_PROPAGATE_ASSEMBLE
-               MessageInterface::ShowMessage(
-                  "   end = %d, satEnd = %d, remaining string = '%s'\n", 
-                  end, satEnd, &((i->c_str())[loc]));
-            #endif
-         }
-      } while ((end < satEnd) && ((*i)[loc] != ')'));
-
-      end = i->find("{", loc);
-
-      if (end != (Integer)std::string::npos) {
-         loc = end + 1;
-         while ((*i)[loc] == ' ')
-            ++loc;
-
-         Integer parmEnd = loc;
-         while (((*i)[parmEnd] != ' ') && ((*i)[parmEnd] != '}') && 
-                ((*i)[parmEnd] != ',') && ((*i)[parmEnd] != '=') &&
-                ((*i)[parmEnd] != ')'))
-            ++parmEnd;
-
-         std::string paramType, paramObj, parmSystem;
-         if (!InterpretParameter(i->substr(loc, parmEnd-loc), paramType,
-             paramObj, parmSystem))
-            throw CommandException("Propagate::AssemblePropagators: Unable to "
-                                   "parse the parameter string \"" + 
-                                   i->substr(loc, parmEnd-loc) + "\"");
-         loc = parmEnd;
-         
-         end = i->find("=", loc);
-         if (end == (Integer)std::string::npos)
-         {
-            end = i->find(",", loc);
-            if (end != (Integer)std::string::npos)
-               throw CommandException("Propagate does not yet support multiple "
-                  "stopping conditions");
-            
-            end = i->find("}", loc);
-            if (end == (Integer)std::string::npos)
-               throw CommandException("Propagate " + (*i) +
-                  " does not identify stopping condition: looking for }");
-         }
-         
-         UnsignedInt start = 0;
-         for (UnsignedInt idx=start; idx<paramType.size(); ++idx)
-         {
-            if (paramType[idx] == ' ')
-            {
-               paramType.erase(idx, 1);
-               start = idx;
-            }
-         }
-         
-         Moderator *theModerator = Moderator::Instance();
-          
-         // create stop parameter
-         std::string paramName;
-         if (parmSystem == "")
-            paramName = paramObj + "." + paramType;
-         else
-            paramName = paramObj + "." + parmSystem + "." + paramType;
-
-         theModerator->CreateParameter(paramType, paramName, paramObj,
-                                       parmSystem);
-
-
-         // Now Moderateor handles dep object
-//          Parameter *stopParam = theModerator->CreateParameter(paramType,
-//                                    paramName);
-//          stopParam->SetRefObjectName(Gmat::SPACECRAFT, paramObj);
-         
-//          if (stopParam->IsCoordSysDependent()) {
-//             if (parmSystem == "")
-//                parmSystem = "EarthMJ2000Eq";
-
-//             stopParam->SetStringParameter("DepObject", parmSystem);
-//             stopParam->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
-//          }
-         
-//          if (stopParam->IsOriginDependent()) {
-//             if (parmSystem == "")
-//                parmSystem = "Earth";
-//             stopParam->SetStringParameter("DepObject", parmSystem);
-//             stopParam->SetRefObjectName(Gmat::SPACE_POINT, parmSystem);
-//             if (stopParam->NeedCoordSystem())
-//                /// @todo Update coordinate system to better value for body parms
-//                stopParam->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
-//                              "EarthMJ2000Eq");
-//          }
-         
-         StopCondition *stopCond =
-            theModerator->CreateStopCondition("StopCondition", "StopOn" +
-                             paramName);
-
-         if (stopCondEpochID == -1)
-         {
-            stopCondEpochID = stopCond->GetParameterID("Epoch");
-            stopCondBaseEpochID = stopCond->GetParameterID("BaseEpoch");
-            stopCondStopVarID = stopCond->GetParameterID("StopVar");
-         }
-
-         // Set backwards propagation
-         stopCond->SetPropDirection(direction[dirIndex]);
-         
-         stopCond->SetStringParameter(stopCondStopVarID, paramName);
-         
-         SetObject(stopCond, Gmat::STOP_CONDITION);
-         // Store the spacecraft name for use when setting the epoch data
-         TakeAction("SetStopSpacecraft", paramObj);
-
-         #ifdef DEBUG_PROPAGATE_ASSEMBLE
-         MessageInterface::ShowMessage
-            ("   paramName=%s, parmSystem=%s, paramType=%s\n", paramName.c_str(),
-             parmSystem.c_str(), paramType.c_str());
-         #endif
-         
-         if (paramType != "Apoapsis" && paramType != "Periapsis")
-         {
-            // test for =
-            loc = i->find("=", end);
-            if (loc == (Integer)std::string::npos)
-               throw CommandException("Propagate does not identify stopping "
-                  "condition: looking for =");
-            
-            loc = end + 1;
-            
-            endchar = i->find("}", loc);
-            component = i->substr(loc, endchar-loc);
-            
-            #ifdef DEBUG_PROPAGATE_ASSEMBLE
-               MessageInterface::ShowMessage("Propagate::AssemblePropagators()"
-                  " component = <%s>\n", component.c_str());
-            #endif
-               
-            // create goal parameter
-            component = CreateParameter(component);
-            stopCond->SetStringParameter("Goal", component);
-            
-               
-            loc = end + 1;
-            end = i->find(",", loc);
-            if (end != (Integer)std::string::npos)
-               throw CommandException("Propagate does not yet support multiple "
-                  "stopping condition");
-            
-            loc = end + 1;
-            end = i->find("}", loc);
-            
-            if (end == (Integer)std::string::npos)
-               throw CommandException("Propagate does not identify stopping "
-                  "condition: looking for }");
-         }
-         loc = end + 1;
-      }
-      else
-         loc = satEnd - 1;
-      end = i->find(")", loc);
-          
-      if (end == (Integer)std::string::npos)
-         throw CommandException(
-                  "Propagate does not end correctly: looking for )\n");
+            "Mixed propagation directions are not allowed, but are specified "
+            "on the Propagate line\n'" + generatingString + "'");
    }
-   // NOW test to be sure there is at least one stop cond.
-   if (stopWhen.empty())
-      singleStepMode = true;  // If not, run in single step mode
+   
+   // Now find the stopping conditions
+   scanning = true;
+   currentLoc = loc;
+   
+   parmstart = generatingString.find("{", currentLoc);
+   if ((UnsignedInt)parmstart == std::string::npos)
+      scanning = false;
+   
+   while (scanning) 
+   {
+      end = generatingString.find("}", parmstart)+1;
+      tempString = generatingString.substr(parmstart+1, end-parmstart-2);
+      
+      // Split out stops, one at a time
+      currentLoc = 0;
+      do 
+      {
+         commaLoc = tempString.find(",", currentLoc);
+         oneStop = tempString.substr(currentLoc, commaLoc - currentLoc);
+         // Remove leading white space
+         while (oneStop[0] == ' ')
+            oneStop = oneStop.substr(1);
+         // Remove trailing white space
+         currentLoc = oneStop.length() - 1;
+         while (oneStop[currentLoc] == ' ')
+            --currentLoc;
+         oneStop = oneStop.substr(0, currentLoc+1);
+         stopStrings.push_back(oneStop);
 
-   #ifdef DEBUG_PROPAGATE_DIRECTION
-      MessageInterface::ShowMessage("Propagate::AssemblePropagators():"
-                                    " Propagators Identified:\n");
-      j = direction.begin();
-      for (StringArray::iterator i = propName.begin(); i != propName.end();
-           ++i, ++j)
-         MessageInterface::ShowMessage("   \"%s\" running %s\n", i->c_str(),
-         ((*j) > 0.0 ? "forwards" : "backwards"));
+         currentLoc = commaLoc + 1;
+      } while (commaLoc != (Integer)std::string::npos);
+
+      currentLoc = end+1;
+      
+      // Skip trailing comma or white space
+      while ((str[currentLoc] == ',') || (str[currentLoc] == ' '))
+         ++currentLoc;
+      parmstart = generatingString.find("{", currentLoc);
+      if (parmstart == (Integer)std::string::npos)
+         scanning = false;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void ConfigurePropSetup(std::string &setupDesc)
+//------------------------------------------------------------------------------
+/**
+ * Builds the data needed for the a PropSetup.  Stopping conditions are handled
+ * separately.
+ *
+ * @param <setupDesc>  The string describing the PropSetup.
+ */
+//------------------------------------------------------------------------------
+void Propagate::ConfigurePropSetup(std::string &setupDesc)
+{
+   #ifdef DEBUG_PROPAGATE_ASSEMBLE
+      MessageInterface::ShowMessage("Building PropSetup '%s'\n", 
+         setupDesc.c_str());
    #endif
+
+   // First separate the PropSetup from the SpaceObjects
+   std::string prop, sats, sat;
+   UnsignedInt loc = setupDesc.find("(");
+   if (loc == std::string::npos)
+      throw CommandException("The propsetup string '" + setupDesc +
+         "' does not identify any spacecraft for propagation on "
+         + "the command line\n" + generatingString);
+   prop = setupDesc.substr(0, loc);
+   sats = setupDesc.substr(loc);
+   
+   CleanString(prop);
+
+   #ifdef DEBUG_PROPAGATE_ASSEMBLE
+      MessageInterface::ShowMessage("   PropSetup is '%s'\n", prop.c_str());
+   #endif
+   SetObject(prop, Gmat::PROP_SETUP);
+   
+   // Next the SpaceObjects
+   StringArray extras;
+   extras.push_back("(");
+   extras.push_back(")");
+   extras.push_back(",");
+ 
+   loc = 0;
+   while (loc != std::string::npos)
+   {  
+      loc = sats.find(',');
+      sat = sats.substr(0, loc);
+      sats = sats.substr(loc+1);
+      CleanString(sat, &extras);
+      
+      #ifdef DEBUG_PROPAGATE_ASSEMBLE
+         MessageInterface::ShowMessage("   Found satellite '%s'\n", sat.c_str());
+      #endif
+      SetObject(sat, Gmat::SPACECRAFT);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void ConfigureStoppingCondition(std::string &stopDesc)
+//------------------------------------------------------------------------------
+/**
+ * Builds the data needed for a stopping condition.  PropSetups are handled
+ * separately.
+ *
+ * @param <stopDesc>  The string describing the stopping condition.
+ */
+//------------------------------------------------------------------------------
+void Propagate::ConfigureStoppingCondition(std::string &stopDesc)
+{
+   #ifdef DEBUG_PROPAGATE_ASSEMBLE
+      MessageInterface::ShowMessage("Building Stop '%s'\n", 
+         stopDesc.c_str());
+   #endif
+
+   std::string lhs, rhs = "";
+   UnsignedInt loc;
+   StringArray extras;
+   extras.push_back("{");
+   extras.push_back("}");
+   extras.push_back("=");
+   
+   loc = stopDesc.find("=");
+   if (loc == std::string::npos)
+   {
+      lhs = stopDesc;
+      CleanString(lhs, &extras);
+   }
+   else
+   {
+      lhs = stopDesc.substr(0,loc);
+      CleanString(lhs, &extras);
+      rhs = stopDesc.substr(loc+1);
+      CleanString(rhs, &extras);
+   }
+
+   #ifdef DEBUG_PROPAGATE_ASSEMBLE
+      MessageInterface::ShowMessage("   Stop = '%s' with value '%s'\n", 
+         lhs.c_str(), rhs.c_str());
+   #endif
+   
+   // Now to work!
+   std::string paramType, paramObj, paramSystem;
+   if (!InterpretParameter(lhs, paramType, paramObj, paramSystem))
+      throw CommandException("Cannot decipher the parameter string '" +
+         lhs + "' on the command line " + generatingString);
+
+   // Create the stop parameter
+   Moderator *theModerator = Moderator::Instance();
+   std::string paramName;
+   if (paramSystem == "")
+      paramName = paramObj + "." + paramType;
+   else
+      paramName = paramObj + "." + paramSystem + "." + paramType;   
+   theModerator->CreateParameter(paramType, paramName, paramObj, paramSystem);
+   StopCondition *stopCond = theModerator->CreateStopCondition("StopCondition",
+      "StopOn" + paramName);
+   
+   // Handle some static member initialization if this is the first opportunity
+   if (stopCondEpochID == -1)
+   {
+      stopCondEpochID = stopCond->GetParameterID("Epoch");
+      stopCondBaseEpochID = stopCond->GetParameterID("BaseEpoch");
+      stopCondStopVarID = stopCond->GetParameterID("StopVar");
+   }
+   
+   // Setup for backwards propagation
+   /// @todo Sort this out with mixed directions, or disallow them!!!
+   stopCond->SetPropDirection(direction[0]);  // Use direction of assoc'd prop
+   stopCond->SetStringParameter(stopCondStopVarID, paramName);
+   SetObject(stopCond, Gmat::STOP_CONDITION);
+   TakeAction("SetStopSpacecraft", paramObj);
+   
+   
+   if (paramType != "Apoapsis" && paramType != "Periapsis")
+   {
+      #ifdef DEBUG_PROPAGATE_ASSEMBLE
+         MessageInterface::ShowMessage("Propagate::AssemblePropagators()"
+            " component = <%s>\n", rhs.c_str());
+      #endif
+         
+      // create goal parameter
+      std::string component = CreateParameter(rhs);
+      stopCond->SetStringParameter("Goal", component);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void CleanString(std::string &theString, const StringArray *extras)
+//------------------------------------------------------------------------------
+/**
+ * Strips off leading and trailing whitespace, and additional characters if 
+ * specified.
+ *
+ * @param <theString>  The string that -- might -- need cleaned.
+ * @param <extras>     All additional characters (other than a space) that 
+ *                     should be stripped off.
+ */
+//------------------------------------------------------------------------------
+void Propagate::CleanString(std::string &theString, const StringArray *extras)
+{
+   UnsignedInt loc, len = theString.length();
+   bool keepGoing = false;
+   
+   // Clean up the start of the string
+   for (loc = 0; loc < len; ++loc)
+   {
+      if (theString[loc] != ' ')
+      {
+         if (extras != NULL)
+            for (StringArray::const_iterator i = extras->begin(); i != extras->end(); ++i)
+               if (theString[loc] == (*i)[0])
+                  keepGoing = true;
+         if (!keepGoing)
+            break;
+         else
+            keepGoing = false;
+      }
+   }
+   theString = theString.substr(loc);
+   
+   // Clean up the end of the string
+   keepGoing = false;
+   for (loc = theString.length() - 1; loc >= 0; --loc)
+   {
+      if (theString[loc] != ' ')
+      {
+         if (extras != NULL)
+            for (StringArray::const_iterator i = extras->begin(); i != extras->end(); ++i)
+               if (theString[loc] == (*i)[0])
+                  keepGoing = true;
+         if (!keepGoing)
+            break;
+         else
+            keepGoing = false;
+      }
+   }
+   theString = theString.substr(0, loc+1);
 }
 
 
