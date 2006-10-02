@@ -1556,7 +1556,6 @@ void Propagate::ConfigureStoppingCondition(std::string &stopDesc)
    }
    
    // Setup for backwards propagation
-   /// @todo Sort this out with mixed directions, or disallow them!!!
    stopCond->SetPropDirection(direction[0]);  // Use direction of assoc'd prop
    stopCond->SetStringParameter(stopCondStopVarID, paramName);
    SetObject(stopCond, Gmat::STOP_CONDITION);
@@ -1573,6 +1572,15 @@ void Propagate::ConfigureStoppingCondition(std::string &stopDesc)
       // create goal parameter
       std::string component = CreateParameter(rhs);
       stopCond->SetStringParameter("Goal", component);
+   }
+   else
+   {
+      if (rhs.length() != 0)
+      {
+         throw CommandException("Stopping condition " + paramType + 
+            " does not take a value, but it is set using the string '" + 
+            stopDesc + "' in the line\n'" + generatingString + "'");
+      }
    }
 }
 
