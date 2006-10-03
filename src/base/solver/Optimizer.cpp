@@ -25,6 +25,7 @@
 #include "RealUtilities.hpp"     // for GmatMathUtil::Abs()
 #include "MessageInterface.hpp"
 
+//#define DEBUG_SET_RESULT
 
 //------------------------------------------------------------------------------
 // static data
@@ -160,26 +161,32 @@ Integer Optimizer::SetSolverResults(Real *data,
 {
    if (type == "Objective")
    {
+      // need to check here if the name is not the same as the 
+      // objectiveFnName? (error)
       cost = data[0];
       return 0;
    }
-   else if (type == " EqConstraint")
+   else if (type == "EqConstraint")
    {
-      if (eqConstraintNames[eqConstraintCount] != name)
-        throw SolverException(
-           "Mismatch between parsed and configured equality constraint");
-     eqConstraintValues[eqConstraintCount] = data[0];
-     ++eqConstraintCount;
-     return EQ_CONST_START + eqConstraintCount - 1;
+      //if (eqConstraintNames[eqConstraintCount] != name)
+      //  throw SolverException(
+      //     "Mismatch between parsed and configured equality constraint");
+      ///eqConstraintValues[eqConstraintCount] = data[0];
+      eqConstraintNames.push_back(name);
+      eqConstraintValues.push_back(data[0]);
+      ++eqConstraintCount;
+      return EQ_CONST_START + eqConstraintCount - 1;
     }
     else if (type == "IneqConstraint")
     {
-       if (ineqConstraintNames[ineqConstraintCount] != name)
-        throw SolverException(
-           "Mismatch between parsed and configured inequality constraint");
-     ineqConstraintValues[ineqConstraintCount] = data[0];
-     ++ineqConstraintCount;
-     return INEQ_CONST_START + ineqConstraintCount - 1;
+      //if (ineqConstraintNames[ineqConstraintCount] != name)
+      //  throw SolverException(
+      //     "Mismatch between parsed and configured inequality constraint");
+      //ineqConstraintValues[ineqConstraintCount] = data[0];
+      ineqConstraintNames.push_back(name);
+      ineqConstraintValues.push_back(data[0]);
+      ++ineqConstraintCount;
+      return INEQ_CONST_START + ineqConstraintCount - 1;
     }
     // add Gradient and Jacobian later ...
     else
@@ -202,6 +209,12 @@ Integer Optimizer::SetSolverResults(Real *data,
 void Optimizer::SetResultValue(Integer id, Real value, 
                                const std::string &resultType)
 {
+   #ifdef DEBUG_SET_RESULT // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+      MessageInterface::ShowMessage("In Optimizer::SetResultValue\n");
+      MessageInterface::ShowMessage(
+      "   id = %d; value = %.12f, resultType = %s\n",
+      id, value, resultType.c_str());
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    if (resultType == "Objective")
    {
       cost = value;

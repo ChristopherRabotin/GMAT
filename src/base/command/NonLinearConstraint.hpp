@@ -51,9 +51,9 @@ public:
                        GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
 
-   //virtual Real        GetRealParameter(const Integer id) const;
-   //virtual Real        SetRealParameter(const Integer id,
-   //                                     const Real value);
+   virtual Real        GetRealParameter(const Integer id) const;
+   virtual Real        SetRealParameter(const Integer id,
+                                        const Real value);
    virtual std::string GetStringParameter(const Integer id) const;
    virtual bool        SetStringParameter(const Integer id, 
                                           const std::string &value);
@@ -61,8 +61,8 @@ public:
    virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                     const std::string &name = "");
     
-    // Inherited methods overridden from the base class
-   //virtual bool        InterpretAction();
+   // Inherited methods overridden from the base class
+   virtual bool        InterpretAction();
    virtual bool        Initialize();
    virtual bool        Execute();
    
@@ -72,23 +72,58 @@ public:
                                            const std::string &useName);
     
 protected:
+   enum Operator
+   {
+      LESS_THAN_EQUAL = 0,
+      EQUAL,
+      GREATER_THAN_EQUAL
+   };
+
    /// The name of the spacecraft that gets maneuvered
    std::string         optimizerName;
-   /// Name of the variable to be constrained
-   std::string         conName;
-   // pointer to the Variable that is to be minimized
-   Parameter           *conVar;
-   /// vinitial alue of the variable
-   Real                conValue;
    /// The optimizer instance used to manage the optimizer state machine
    Solver              *optimizer;
+   /// Name of the variable to be constrained
+   std::string         constraintName;
+   // pointer to the Variable that is to be minimized
+   Parameter           *constraint;
+   /// most recent value of the variable
+   Real                constraintValue;
+   /// name of the parameter part of the right-hand-side
+   std::string         nlcParmName;
+   Parameter           *nlcParm;
+
+   /// String of value array name
+   std::string         nlcArrName;
+   /// constraint array row index variable name
+   std::string         nlcArrRowStr;
+   /// constraint array column index variable name
+   std::string         nlcArrColStr;
+   /// constraint array row index
+   Integer             nlcArrRow;
+   /// constraint array column index
+   Integer             nlcArrCol;
+   Parameter           *nlcArrRowParm;
+   Parameter           *nlcArrColParm;
+
+   /// flag indicating whether or not the constraint is an inequality
+   /// constraint
+   bool                isInequality;
+   /// the desired value (right hand side of the constraint equation)
+   Real                desiredValue;
+   /// indicates what type of operator was passed in for the generating
+   /// string
+   Operator            op;
+   /// tolerance for the constraint <future>
+   Real                tolerance;  // <future>
    /// Flag used to finalize the targeter data during execution
    bool                optimizerDataFinalized;
-   /// is it a parameter?
-   //bool                isNonLinearConstraintParm;
-   /// Optimizer ID for the variable 
-   //Integer             varId;
-
+   /// ID for this constraint (returned from the optimizer)
+   Integer             constraintId;
+   /// is the right hand side a parameter?
+   bool                isNlcParm;
+   /// is the right hand side an array?
+   bool                isNlcArray;
    
    // Parameter IDs
    enum 
@@ -96,6 +131,7 @@ protected:
       OPTIMIZER_NAME = GmatCommandParamCount,
       CONSTRAINED_VARIABLE_NAME,
       CONSTRAINED_VALUE,
+      TOLERANCE,
       NonLinearConstraintParamCount
    };
    static const std::string
@@ -103,13 +139,14 @@ protected:
    static const Gmat::ParameterType
                        PARAMETER_TYPE[NonLinearConstraintParamCount - GmatCommandParamCount];
 
-   /*
    bool                InterpretParameter(const std::string text,
                                           std::string &paramType,
                                           std::string &paramObj,
                                           std::string &parmSystem);
-   bool                ConstructGoal(const char* str);
-   */
+                                          
+
+   bool                ConstructConstraint(const char* str);
+
 };
 
 

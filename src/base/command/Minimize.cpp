@@ -682,7 +682,7 @@ bool Minimize::Initialize()
 /**
  * Minimize the variables defined for this targeting loop.
  *
- * This method (will eventually) feeds data to the targeter state machine in 
+ * This method (will eventually) feeds data to the optimizer state machine in 
  * order to determine the variable values needed to achieve the user specified
  * goals.
  *

@@ -419,12 +419,12 @@ bool Optimize::Execute()
     * This should be commented out for the fmincon optimizer 
     * (branch should be executed from ExecuteCallback)
    */
-
+/*
    if (branchExecuting)
    {
       //retval = ExecuteBranch();
-      callbackData = "10.0 20.0";
-      ExecuteCallback();  // *************** TEMPORARY *************************
+      //callbackData = "10.0 20.0"; // *************** TEMPORARY testing *********
+      //ExecuteCallback();  // *************** TEMPORARY testing *****************
       if (!branchExecuting && (state == Solver::FINISHED))
       {
          commandComplete = true;
@@ -432,7 +432,7 @@ bool Optimize::Execute()
    }
    else
    {
-
+*/
       GmatCommand *currentCmd;
    
       switch (state) 
@@ -519,7 +519,7 @@ bool Optimize::Execute()
             //   "Invalid state in the Optimize state machine");
 
       }
-   }
+   //}
 
    if (!branchExecuting)
    {
@@ -604,18 +604,8 @@ bool Optimize::ExecuteCallback()
    #ifdef DEBUG_CALLBACK
       MessageInterface::ShowMessage(
          "Optimize::ExecuteCallback - state is NOMINAL\n");
-         "Optimize::ExecuteCallback - calling AdvanceNestedState with vars:\n");
-         for (Integer ii=0;ii<(Integer)vars.size();ii++)
-            MessageInterface::ShowMessage("--- vars[%d] = %.15f\n",
-               ii, vars.at(ii));
    #endif
    callbackResults = optimizer->AdvanceNestedState(vars);
-   #ifdef DEBUG_CALLBACK
-      MessageInterface::ShowMessage("data from callback are: \n");
-      for (Integer ii = 0; ii < (Integer) callbackResults.size(); ii++)
-         MessageInterface::ShowMessage("(%d) -> %s\n",
-            ii, (callbackResults.at(ii)).c_str());
-   #endif
    ResetLoopData();
    try
    {
@@ -630,13 +620,24 @@ bool Optimize::ExecuteCallback()
    }
    // this call should just advance the state back to NOMINAL
    // and return results
+   #ifdef DEBUG_CALLBACK
+      MessageInterface::ShowMessage(
+         "Optimize::ExecuteCallback - about to CALCULATE\n");
+      MessageInterface::ShowMessage(
+         "Optimize::ExecuteCallback - calling AdvanceNestedState with vars:\n");
+         for (Integer ii=0;ii<(Integer)vars.size();ii++)
+            MessageInterface::ShowMessage("--- vars[%d] = %.15f\n",
+               ii, vars.at(ii));
+   #endif
    callbackResults = optimizer->AdvanceNestedState(vars); 
-   // send results to MATLAB
-   //for (Integer i=0;i<(Integer)results.size();i++)
-   //   MatlabInterface::RunMatlabString(results.at(i));
+   #ifdef DEBUG_CALLBACK
+      MessageInterface::ShowMessage("after CALCULATING, data from callback are: \n");
+      for (Integer ii = 0; ii < (Integer) callbackResults.size(); ii++)
+         MessageInterface::ShowMessage("(%d) -> %s\n",
+            ii, (callbackResults.at(ii)).c_str());
+   #endif
    #endif
    callbackExecuting = false;
-   //return false;  
    return true;
 }
 

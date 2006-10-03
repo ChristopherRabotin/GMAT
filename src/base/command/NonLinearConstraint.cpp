@@ -37,6 +37,7 @@ const std::string
       "OptimizerName",
       "ConstrainedVariableName",
       "ConstrainedValue",
+      "Tolerance",
    };
    
 const Gmat::ParameterType
@@ -44,6 +45,7 @@ const Gmat::ParameterType
    {
       Gmat::STRING_TYPE,
       Gmat::STRING_TYPE,
+      Gmat::REAL_TYPE,
       Gmat::REAL_TYPE,
    };
 
@@ -62,13 +64,27 @@ const Gmat::ParameterType
 NonLinearConstraint::NonLinearConstraint() :
    GmatCommand             ("NonLinearConstraint"),
    optimizerName           (""),
-   //minName                 (""),
-   //minVar                  (NULL),
-   //varValue                (-999.99),
    optimizer               (NULL),
-   optimizerDataFinalized  (false)//,
-   //isNonLinearConstraintParm          (false),
-   //varId                   (-1)
+   constraintName          (""),
+   constraint              (NULL),
+   constraintValue         (-999.99),
+   nlcParmName             (""),
+   nlcParm                 (NULL),
+   nlcArrName              (""),
+   nlcArrRowStr            (""),
+   nlcArrColStr            (""),
+   nlcArrRow               (0),
+   nlcArrCol               (0),
+   nlcArrRowParm           (NULL),
+   nlcArrColParm           (NULL),
+   isInequality            (false),
+   desiredValue            (0.0),
+   op                      (EQUAL),
+   tolerance               (0.0),
+   optimizerDataFinalized  (false),
+   constraintId            (-1),
+   isNlcParm               (false),
+   isNlcArray              (false)
 {
    parameterCount = NonLinearConstraintParamCount;
 }
@@ -86,13 +102,27 @@ NonLinearConstraint::NonLinearConstraint() :
 NonLinearConstraint::NonLinearConstraint(const NonLinearConstraint& nlc) :
    GmatCommand             (nlc),
    optimizerName           (nlc.optimizerName),
-   //minName                 (nlc.minName),
-   //minVar                  (NULL),
-   //varValue                (nlc.varValue),
    optimizer               (NULL),
-   optimizerDataFinalized  (false)//,
-   //isNonLinearConstraintParm          (nlc.isNonLinearConstraintParm),
-   //varId                   (nlc.varId)
+   constraintName          (nlc.constraintName),
+   constraint              (NULL),
+   constraintValue         (nlc.constraintValue),
+   nlcParmName             (nlc.nlcParmName),
+   nlcParm                 (NULL),
+   nlcArrName              (nlc.nlcArrName),
+   nlcArrRowStr            (nlc.nlcArrRowStr),
+   nlcArrColStr            (nlc.nlcArrColStr),
+   nlcArrRow               (nlc.nlcArrRow),
+   nlcArrCol               (nlc.nlcArrCol),
+   nlcArrRowParm           (NULL),
+   nlcArrColParm           (NULL),
+   isInequality            (nlc.isInequality),
+   desiredValue            (nlc.desiredValue),
+   op                      (nlc.op),
+   tolerance               (nlc.tolerance),
+   optimizerDataFinalized  (false),
+   constraintId            (-1),
+   isNlcParm               (nlc.isNlcParm),  // right?
+   isNlcArray              (nlc.isNlcArray)  // right?
 {
    parameterCount = NonLinearConstraintParamCount;
 }
@@ -116,13 +146,27 @@ NonLinearConstraint& NonLinearConstraint::operator=(const NonLinearConstraint& n
     
    GmatCommand::operator=(nlc);
    optimizerName          = nlc.optimizerName;
-   //minName                = nlc.minName;
-   //minVar                 = NULL;
-   //varValue               = nlc.varValue;
    optimizer              = NULL;
+   constraintName         = nlc.constraintName;
+   constraint             = NULL;
+   constraintValue        = nlc.constraintValue;
+   nlcParmName            = nlc.nlcParmName;
+   nlcParm                = NULL;
+   nlcArrName             = nlc.nlcArrName;
+   nlcArrRowStr           = nlc.nlcArrRowStr;
+   nlcArrColStr           = nlc.nlcArrColStr;
+   nlcArrRow              = nlc.nlcArrRow;
+   nlcArrCol              = nlc.nlcArrCol;
+   nlcArrRowParm          = NULL;
+   nlcArrColParm          = NULL;
+   isInequality           = nlc.isInequality;
+   desiredValue           = nlc.desiredValue;
+   op                     = nlc.op;
+   tolerance              = nlc.tolerance;
    optimizerDataFinalized = false;
-   //isNonLinearConstraintParm         = nlc.isNonLinearConstraintParm;
-   //varId                  = nlc.varId;
+   constraintId           = -1;
+   isNlcParm              = nlc.isNlcParm;  // right?
+   isNlcArray             = nlc.isNlcArray; // right?
 
    return *this;
 }
@@ -136,7 +180,7 @@ NonLinearConstraint& NonLinearConstraint::operator=(const NonLinearConstraint& n
 //------------------------------------------------------------------------------
 NonLinearConstraint::~NonLinearConstraint()
 {
-   //delete minVar;  // yes?
+   //delete constraint;  // yes?
 }
 
     
@@ -180,11 +224,13 @@ bool NonLinearConstraint::RenameRefObject(const Gmat::ObjectType type,
       if (optimizerName == oldName)
          optimizerName = newName;
    }
-   //else if (type == Gmat::PARAMETER)
-   //{
-   //   if (minName == oldName)
-   //      minName = newName;
-   //}
+   else if (type == Gmat::PARAMETER)
+   {
+      if (constraintName == oldName)
+         constraintName = newName;
+      if (nlcParmName == oldName)
+         nlcParmName = newName;
+   }
    
    return true;
 }
@@ -281,13 +327,15 @@ std::string NonLinearConstraint::GetParameterTypeString(const Integer id) const
  * @return Real value of the requested parameter.
  */
 //------------------------------------------------------------------------------
-//Real NonLinearConstraint::GetRealParameter(const Integer id) const
-//{
-//   if (id == toleranceID)
-//      return tolerance;
-//    
-//   return GmatCommand::GetRealParameter(id);
-//}
+Real NonLinearConstraint::GetRealParameter(const Integer id) const
+{
+   if (id == CONSTRAINED_VALUE)
+      return constraintValue;
+   if (id == TOLERANCE)
+      return tolerance;
+    
+   return GmatCommand::GetRealParameter(id);
+}
 
 
 //------------------------------------------------------------------------------
@@ -302,15 +350,21 @@ std::string NonLinearConstraint::GetParameterTypeString(const Integer id) const
  * @return Real value of the requested parameter.
  */
 //------------------------------------------------------------------------------
-//Real NonLinearConstraint::SetRealParameter(const Integer id, const Real value)
-//{
-//   if (id == toleranceID) {
-//      tolerance = value;
-//      return tolerance;
-//   }
-//    
-//   return GmatCommand::SetRealParameter(id, value);
-//}
+Real NonLinearConstraint::SetRealParameter(const Integer id, const Real value)
+{
+   if (id == TOLERANCE)
+   {
+      tolerance = value;
+      return tolerance;
+   }
+   if (id == CONSTRAINED_VALUE)
+   {
+      constraintValue = value;
+      return constraintValue;
+   }
+    
+   return GmatCommand::SetRealParameter(id, value);
+}
 
 
 //------------------------------------------------------------------------------
@@ -330,8 +384,8 @@ std::string NonLinearConstraint::GetStringParameter(const Integer id) const
    if (id == OPTIMIZER_NAME)
       return optimizerName;
         
-   //if (id == NONLINEAR_CONSTRAINT_VARIABLE_NAME)
-   //   return minName;
+   if (id == CONSTRAINED_VARIABLE_NAME)
+      return constraintName;
         
    return GmatCommand::GetStringParameter(id);
 }
@@ -350,22 +404,26 @@ std::string NonLinearConstraint::GetStringParameter(const Integer id) const
  * @return  success flag.
  */
 //------------------------------------------------------------------------------
-bool NonLinearConstraint::SetStringParameter(const Integer id, const std::string &value)
+bool NonLinearConstraint::SetStringParameter(const Integer id, 
+                                             const std::string &value)
 {
    #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARAM
    MessageInterface::ShowMessage
-      ("NonLinearConstraint::SetStringParameter() id=%d, value=%s\n", id, value.c_str());
+      ("NonLinearConstraint::SetStringParameter() id=%d, value=%s\n", 
+         id, value.c_str());
    #endif
    
-   if (id == OPTIMIZER_NAME) {
+   if (id == OPTIMIZER_NAME) 
+   {
       optimizerName = value;
       return true;
    }
 
-   //if (id == NONLINEAR_CONSTRAINT_VARIABLE_NAME) {
-   //   minName = value;
-    //  return true;
-   //}
+   if (id == CONSTRAINED_VARIABLE_NAME) 
+   {
+      constraintName = value;
+      return true;
+   }
 
    return GmatCommand::SetStringParameter(id, value);
 }
@@ -418,23 +476,22 @@ bool NonLinearConstraint::SetRefObject(GmatBase *obj, const Gmat::ObjectType typ
  *
  * The NonLinearConstraint command has the following syntax:
  *
- *     NonLinearConstraint myDC(Sat1.SMA = 21545.0, {Tolerance = 0.1});
- *     NonLinearConstraint myDC(Sat1.SMA = Var1, {Tolerance = 0.1});
- *     NonLinearConstraint myDC(Sat1.SMA = Arr1(1,1), {Tolerance = 0.1});
- *     NonLinearConstraint myDC(Sat1.SMA = Arr1(I,J), {Tolerance = 0.1});
+ *     NonLinearConstraint myOpt(Sat1.SMA = 21545.0, {Tolerance = 0.1});
+ *     NonLinearConstraint myOpt(Sat1.SMA = Var1, {Tolerance = 0.1});
+ *     NonLinearConstraint myOpt(Sat1.SMA = Arr1(1,1), {Tolerance = 0.1});
+ *     NonLinearConstraint myOpt(Sat1.SMA = Arr1(I,J), {Tolerance = 0.1});
  *
- * where myDC is a Solver used to NonLinearConstraint a set of variables to achieve the
- * corresponding goals.  This method breaks the script line into the 
+ * where myOpt is a Solver used to optimize a set of variables to the
+ * corresponding constraints.  This method breaks the script line into the 
  * corresponding pieces, and stores the name of the Solver so it can be set to
  * point to the correct object during initialization.
  */
 //------------------------------------------------------------------------------
-/*
 bool NonLinearConstraint::InterpretAction()
 {
    /// @todo: Clean up this hack for the NonLinearConstraint::InterpretAction method
    // Sample string:  "NonLinearConstraint myDC(Sat1.SMA = 21545.0, {Tolerance = 0.1});"
-   
+   /*
    // Set starting location to the space following the command string
    Integer loc = generatingString.find("NonLinearConstraint", 0) + 7, end, strend;
    const char *str = generatingString.c_str();
@@ -518,14 +575,14 @@ bool NonLinearConstraint::InterpretAction()
    #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARSE
       MessageInterface::ShowMessage("NonLinearConstraint::InterpretAction() exiting\n");
    #endif
-      
+*/      
    return true;
 }
-*/
+
 
 
 //------------------------------------------------------------------------------
-// bool ConstructGoal(const char* str)
+// bool ConstructConstraint(const char* str)
 //------------------------------------------------------------------------------
 /**
  * Builds goals -- either as a parameter or as a numeric value, depending on the
@@ -535,14 +592,14 @@ bool NonLinearConstraint::InterpretAction()
  * @return true if it is a parameter, false otherwise.
  */
 //------------------------------------------------------------------------------
-/*
-bool NonLinearConstraint::ConstructGoal(const char* str)
+bool NonLinearConstraint::ConstructConstraint(const char* str)
 {
    #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARSE
       MessageInterface::ShowMessage("%s%s\"\n",
-         "NonLinearConstraint::ConstructGoal() called with string \"", str);
+         "NonLinearConstraint::ConstructConstraint() called with string \"", str);
    #endif
 
+/*
    Moderator *mod = Moderator::Instance();
    
    Real rval = 54321.12345;
@@ -675,10 +732,10 @@ bool NonLinearConstraint::ConstructGoal(const char* str)
       return true;
    }
    
-   
-   //return false;
+*/   
+   return false;
 }
-*/
+
 
 //------------------------------------------------------------------------------
 //  bool InterpretParameter(const std::string text, std::string &paramType,
@@ -697,13 +754,12 @@ bool NonLinearConstraint::ConstructGoal(const char* str)
  * @return true if the decomposition worked.
  */
 //------------------------------------------------------------------------------
-/*
 bool NonLinearConstraint::InterpretParameter(const std::string text,
                                  std::string &paramType, 
                                  std::string &paramObj, 
                                  std::string &parmSystem)
 {
-   
+/*   
    Real rval = 54321.12345;
    // check to see if it is a number first
    if (GmatStringUtil::ToDouble(text, &rval))
@@ -734,9 +790,10 @@ bool NonLinearConstraint::InterpretParameter(const std::string text,
          "with CS %s\n", paramType.c_str(), paramObj.c_str(), parmSystem.c_str());
    #endif
       
+*/
    return true;
 }
-*/
+
 
 //------------------------------------------------------------------------------
 //  bool Initialize()
@@ -752,7 +809,7 @@ bool NonLinearConstraint::Initialize()
    #if DEBUG_NONLINEAR_CONSTRAINT_INIT
    MessageInterface::ShowMessage
       ("NonLinearConstraint::Initialize() entered. optimizer=%p, minVar=%p\n", 
-      optimizer, minVar);
+      optimizer, constraint);
    #endif
    
    bool retval = GmatCommand::Initialize();
@@ -765,31 +822,32 @@ bool NonLinearConstraint::Initialize()
    //Integer id = optimizer->GetParameterID("Goals");  // no clue
    //optimizer->SetStringParameter(id, goalName);
 
-   // find goalName
-   //GmatBase *obj = (*objectMap)[minName];
+   // find constraintName
+   GmatBase *obj = (*objectMap)[constraintName];
    
-   //if (obj == NULL) {
-   //   std::string errorstr = "Could not find variable parameter ";
-   //   errorstr += minName;
-   //   throw CommandException(errorstr);
-   //}
+   if (obj == NULL) {
+      std::string errorstr = "Could not find variable parameter ";
+      errorstr += constraintName;
+      throw CommandException(errorstr);
+   }
 
-   //minVar = (Parameter*)obj;
+   constraint = (Parameter*)obj;
    
    //goalObject = obj;
-   //parmId = id;
+   //constraintId = id;
 
-   // find achieveParm
-   /*
-   if (isNonLinearConstraintParm)
+   // find right-hand-side parameter (or Real value)
+
+/*
+ *    if (isParameterParm)
    {
       #if DEBUG_NONLINEAR_CONSTRAINT_INIT
       MessageInterface::ShowMessage
-         ("NonLinearConstraint::Initialize() Find achieveParm=%s from objectMap\n",
-          achieveName.c_str());
+         ("NonLinearConstraint::Initialize() Find right-hand-side parameter=%s from objectMap\n",
+          rhsParmName.c_str());
       #endif
-      if (objectMap->find(achieveName) != objectMap->end())
-         achieveParm = (Parameter*)((*objectMap)[achieveName]);
+      if (objectMap->find(rhsParmName) != objectMap->end())
+         rhsParm = (Parameter*)((*objectMap)[rhsParmName]);
 
       if (isNonLinearConstraintArray)
       {
@@ -807,10 +865,10 @@ bool NonLinearConstraint::Initialize()
                throw CommandException("Cannot find array column index variable\n");
       }
    }
-   */
+
    // The optimizer cannot be finalized until all of the loop is initialized
    optimizerDataFinalized = false;
-   
+   */
    #if DEBUG_NONLINEAR_CONSTRAINT_INIT
    MessageInterface::ShowMessage
       ("NonLinearConstraint::Initialize() exiting. optimizer=%p, minVar=%p\n", 
@@ -960,9 +1018,10 @@ const std::string& NonLinearConstraint::GetGeneratingString(Gmat::WriteMode mode
    // Build the local string
    std::stringstream details;
 
-   std::string gen = prefix + "NonLinearConstraint " + optimizerName + "(" + conName;
+   std::string gen = prefix + "NonLinearConstraint " + optimizerName + "(" + 
+                     constraintName;
 
-   details << " = " << conValue;
+   details << " = " << constraintValue;
    // Then call the base class method
    gen+= details.str();
    generatingString = gen + ");";

@@ -35,6 +35,7 @@
 //#define DEBUG_STATE_MACHINE
 //#define DEBUG_ML_CONNECTIONS
 //#define DEBUG_FMINCON_OPTIONS
+//#define DEBUG_OPTIMIZER_DATA
 
 //------------------------------------------------------------------------------
 // static data
@@ -56,6 +57,11 @@ FminconOptimizer::PARAMETER_TYPE[
    Gmat::STRINGARRAY_TYPE,
 };
 
+// list of allowed fmincon options
+// NOTE - if changes are made to this list, changes MUST also be
+// made to the Optimize command (where it is adding single quotes to
+// string options) and to the IsAllowedValue method; the 
+// NUM_MATLAB_OPTIONS parameter may also need to be changed
 const std::string FminconOptimizer::ALLOWED_OPTIONS[12] = 
 {
    "DiffMaxChange",
@@ -188,7 +194,8 @@ Solver::SolverState FminconOptimizer::AdvanceState()
    {
       case INITIALIZING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered FminconOptimizer state machine; INITIALIZING\n");
+            MessageInterface::ShowMessage(
+            "Entered FminconOptimizer state machine; INITIALIZING\n");
          #endif
          WriteToTextFile();
          ReportProgress();
@@ -203,55 +210,7 @@ Solver::SolverState FminconOptimizer::AdvanceState()
          #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
          currentState = RUNEXTERNAL;
          break;
-      /*    
-      case NOMINAL:
-         #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered FminconOptimizer state machine; NOMINAL\n");
-         #endif
-         ReportProgress();
-         RunNominal();
-         ReportProgress();
-         break;
-        
-      case PERTURBING:
-         #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered FminconOptimizer state machine; PERTURBING\n");
-         #endif
-         ReportProgress();
-         //RunPerturbation();
-         break;
-        
-      case CALCULATING:
-         #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered FminconOptimizer state machine; CALCULATING\n");
-         #endif
-         ReportProgress();
-         CalculateParameters();
-         break;
-        
-      case CHECKINGRUN:
-          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered FminconOptimizer state machine; CHECKINGRUN\n");
-         #endif
-        //CheckCompletion();
-         ++iterationsTaken;
-         if (iterationsTaken > maxIterations)
-         {
-            MessageInterface::ShowMessage("FminconOptimizer %s %s\n",
-               instanceName.c_str(),
-               "has exceeded the maximum number of allowed iterations.");
-            currentState = FINISHED;
-         }
-         break;
-        
-      case ITERATING:             // Intentional drop-through
-      default:
-         #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered FminconOptimizer state machine; "
-               "Bad state for an FminconOptimizer.\n");
-         #endif
-         throw SolverException("Solver state not supported for the optimizer");
-      */ 
+
       case RUNEXTERNAL:
          #ifdef DEBUG_STATE_MACHINE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
             MessageInterface::ShowMessage(
@@ -280,6 +239,13 @@ Solver::SolverState FminconOptimizer::AdvanceState()
 
 StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
 {
+   #ifdef DEBUG_OPTIMIZER_DATA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+      MessageInterface::ShowMessage(
+      "Entering FminconOptimizer::AdvanceNestedState\n");
+      for (Integer ii=0; ii<(Integer) vars.size();ii++)
+         MessageInterface::ShowMessage(" vars(%d) = %.12f\n",
+         ii, vars.at(ii));
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    StringArray results;
    if (nestedState == INITIALIZING)
    {
@@ -300,6 +266,12 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
    }
    else if (nestedState == CALCULATING)
    {
+      #ifdef DEBUG_OPTIMIZER_DATA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage(
+         "about to call FminconOptimizer::CalculateParameters\n");
+         MessageInterface::ShowMessage(
+         "now building return string array\n");
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       CalculateParameters(); 
       std::stringstream outS;
       std::string       oneResult;
@@ -308,6 +280,10 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
       outS.str();
       outS << cost;
       oneResult = "F = " + outS.str() + ";";
+      #ifdef DEBUG_OPTIMIZER_DATA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage(
+         "   adding %s to string array\n", oneResult.c_str());
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       results.push_back(oneResult);
       
       // GradF
@@ -315,6 +291,10 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
       for (Integer i=0; i<(Integer) gradient.size(); i++)
          outS << gradient.at(i) << ";";
       oneResult = "GradF = [" + outS.str() + "];";
+      #ifdef DEBUG_OPTIMIZER_DATA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage(
+         "   adding %s to string array\n", oneResult.c_str());
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       results.push_back(oneResult);
       
       // equality constraints
@@ -322,6 +302,10 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
       for (Integer i=0; i<(Integer) eqConstraintValues.size(); i++)
          outS << eqConstraintValues.at(i) << ";";
       oneResult = "NonLinearEqCon = [" + outS.str() + "];";
+      #ifdef DEBUG_OPTIMIZER_DATA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage(
+         "   adding %s to string array\n", oneResult.c_str());
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       results.push_back(oneResult);
       
       // inequality constraints
@@ -329,12 +313,24 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
       for (Integer i=0; i<(Integer) ineqConstraintValues.size(); i++)
          outS << ineqConstraintValues.at(i) << ";";
       oneResult = "NonLinearIneqCon = [" + outS.str() + "];";
+      #ifdef DEBUG_OPTIMIZER_DATA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage(
+         "   adding %s to string array\n", oneResult.c_str());
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       results.push_back(oneResult);
       
       // Jacobian in the future ---------------------- <future> ----------------
       oneResult = "JacNonLinearEqCon = [];"; 
+      #ifdef DEBUG_OPTIMIZER_DATA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage(
+         "   adding %s to string array\n", oneResult.c_str());
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       results.push_back(oneResult);
       oneResult = "JacNonLinearIneqCon = [];";
+      #ifdef DEBUG_OPTIMIZER_DATA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage(
+         "   adding %s to string array\n", oneResult.c_str());
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       results.push_back(oneResult);
       // Jacobian in the future ---------------------- <future> ----------------
           
@@ -1061,9 +1057,9 @@ bool FminconOptimizer::OpenConnection()
          {
             MessageInterface::ShowMessage("ERROR - MATLAB support files not in MATLAB path");
          }
-         /// how to start the GMATServer here??????  I don't want a new one, right?
-         //static GmatMainFrame *theMain = GmatAppData::GetMainFrame();
-         //theMain->StartServer();
+         /// start the GMATServer here
+         static GmatMainFrame *theMain = GmatAppData::GetMainFrame();
+         theMain->StartServer();
          if (inSource == NULL) inSource = GmatInterface::Instance();
          if (inSource == NULL)  
             throw SolverException(
