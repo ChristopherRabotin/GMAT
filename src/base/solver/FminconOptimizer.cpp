@@ -249,6 +249,7 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
    StringArray results;
    if (nestedState == INITIALIZING)
    {
+      WriteToTextFile(nestedState);
       nestedState = NOMINAL;
    }
    else if (nestedState == NOMINAL)
@@ -262,6 +263,7 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
       for (Integer i=0;i<variableCount;i++)
          variable.at(i) = vars.at(i);
       RunNominal();
+      WriteToTextFile(nestedState);
       nestedState = CALCULATING;
    }
    else if (nestedState == CALCULATING)
@@ -274,6 +276,7 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
       #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       CalculateParameters(); 
       std::stringstream outS;
+      outS.precision(18);
       std::string       oneResult;
       
       // F
@@ -334,6 +337,7 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
       results.push_back(oneResult);
       // Jacobian in the future ---------------------- <future> ----------------
           
+      WriteToTextFile(nestedState);
       nestedState = NOMINAL;
    }
    return results;
@@ -774,7 +778,7 @@ void FminconOptimizer::FreeArrays()
 // moved to Optimizer class
 //}
 
-void FminconOptimizer::WriteToTextFile()
+void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
 {
    StringArray::iterator current;
    Integer i;

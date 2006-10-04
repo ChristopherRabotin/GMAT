@@ -113,7 +113,8 @@ protected:
 
    virtual void                FreeArrays();
    //virtual std::string         GetProgressString(); // moved to Optimizer
-   virtual void                WriteToTextFile();
+   virtual void                WriteToTextFile(
+                                  SolverState stateToUse = UNDEFINED_STATE);
    
    virtual bool                OpenConnection();
    virtual void                CloseConnection();

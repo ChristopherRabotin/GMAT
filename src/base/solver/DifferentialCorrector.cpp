@@ -1270,7 +1270,7 @@ std::string DifferentialCorrector::GetProgressString()
  * Writes state data to the targeter text file.
  */
 //------------------------------------------------------------------------------
-void DifferentialCorrector::WriteToTextFile()
+void DifferentialCorrector::WriteToTextFile(SolverState stateToUse)
 {
    StringArray::iterator current;
    Integer i, j;

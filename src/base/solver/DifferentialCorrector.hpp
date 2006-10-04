@@ -168,7 +168,8 @@ protected:
 
    void                        FreeArrays();
    virtual std::string         GetProgressString();
-   virtual void                WriteToTextFile();
+   virtual void                WriteToTextFile(
+                                  SolverState stateToUse = UNDEFINED_STATE);
 };
 
 #endif // DifferentialCorrector_hpp

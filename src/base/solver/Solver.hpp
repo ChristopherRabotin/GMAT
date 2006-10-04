@@ -50,7 +50,8 @@ public:
       CALCULATING,
       CHECKINGRUN,
       RUNEXTERNAL,
-      FINISHED            // This one should stay at the end of the list.
+      FINISHED,
+      UNDEFINED_STATE         // This one should stay at the end of the list.
    };
    
    /// Enumeration for solver progress report formats
@@ -244,9 +245,14 @@ protected:
    //---------------------------------------------------------------------------
    /**
     * Utility function used by the solvers to generate a progress file.
+    * 
+    * @param <stateToUse> SolverState used for the report; if this parameter is 
+    *                     different from the default value (UNDEFINED_STATE), 
+    *                     it is used.  If the value is UNDEFINED_STATE, then the 
+    *                     value of currentState is used. 
     */
    //---------------------------------------------------------------------------
-   virtual void        WriteToTextFile() = 0;
+   virtual void        WriteToTextFile(SolverState stateToUse = UNDEFINED_STATE) = 0;
 };
 
 
