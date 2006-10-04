@@ -650,10 +650,7 @@ bool Optimize::PutCallbackData(std::string &data)
    callbackData = data;
    #ifdef DEBUG_CALLBACK
       MessageInterface::ShowMessage("Entering Optimize::PutCallbackData\n");
-      MessageInterface::ShowMessage("-- callback data are:\n");
-      for (Integer i=0; i< (Integer) data.size(); i++)
-         MessageInterface::ShowMessage("---- %f ", data[i]);
-      MessageInterface::ShowMessage("-------------\n");
+      MessageInterface::ShowMessage("-- callback data are: %s\n", data.c_str());
    #endif
    return true;
 }
