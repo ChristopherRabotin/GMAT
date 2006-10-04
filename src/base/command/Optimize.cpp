@@ -30,7 +30,7 @@
 //#define DEBUG_OPTIMIZER_PARSING
 //#define DEBUG_OPTIMIZE_COMMANDS
 //#define DEBUG_OPTIMIZER
-//#define DEBUG_CALLBACK
+#define DEBUG_CALLBACK
 //#define DEBUG_OPTIMIZE_CONSTRUCTION
 
 //------------------------------------------------------------------------------
@@ -461,12 +461,12 @@ bool Optimize::Execute()
                MessageInterface::ShowMessage(
                "Optimize::Execute - solver in RUNEXTERNAL state\n");
             #endif
-            // Execute the nominal sequence
-            if (!commandComplete) 
-            {
-               branchExecuting = true;
-               ResetLoopData();
-            }
+//            // Execute the nominal sequence
+//            if (!commandComplete) 
+//            {
+//               branchExecuting = true;
+//               ResetLoopData();
+//            }
             break;
                
           /*     
@@ -496,7 +496,7 @@ bool Optimize::Execute()
          */      
          case Solver::FINISHED:
             // Final clean-up
-//            commandComplete = true;
+            commandComplete = true;
             #ifdef DEBUG_OPTIMIZE_COMMANDS
                MessageInterface::ShowMessage(
                "Optimize::Execute - solver in FINISHED state\n");
@@ -609,8 +609,12 @@ bool Optimize::ExecuteCallback()
    ResetLoopData();
    try
    {
-      if (!ExecuteBranch())
-         throw CommandException("Optimize: ERROR executing branch");
+      branchExecuting = true;
+      while (branchExecuting) 
+      {
+         if (!ExecuteBranch())
+            throw CommandException("Optimize: ERROR executing branch");
+      } 
    }
    catch (BaseException &be)
    {
