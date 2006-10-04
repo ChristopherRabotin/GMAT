@@ -249,7 +249,6 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
    StringArray results;
    if (nestedState == INITIALIZING)
    {
-      WriteToTextFile(nestedState);
       nestedState = NOMINAL;
    }
    else if (nestedState == NOMINAL)
@@ -263,7 +262,6 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
       for (Integer i=0;i<variableCount;i++)
          variable.at(i) = vars.at(i);
       RunNominal();
-      WriteToTextFile(nestedState);
       nestedState = CALCULATING;
    }
    else if (nestedState == CALCULATING)
@@ -749,8 +747,8 @@ void FminconOptimizer::RunExternal()
 
 void FminconOptimizer::RunNominal()
 {
-   // On success, set the state to the next machine state ??????
-   WriteToTextFile();
+   ++iterationsTaken;
+   WriteToTextFile(nestedState);
 }
 
 void FminconOptimizer::CalculateParameters()
@@ -782,10 +780,14 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
 {
    StringArray::iterator current;
    Integer i;
-   //Integer j;
+   
+   SolverState trigger = currentState;
+   if (stateToUse != UNDEFINED_STATE)
+      trigger = stateToUse;
+      
    if (initialized)
    {
-      switch (currentState)
+      switch (trigger)
       {
          case INITIALIZING:
             // This state is basically a "paused state" used for the Optimize
@@ -837,105 +839,98 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
             break;
             
          case NOMINAL:
-            textFile << "Iteration " << iterationsTaken+1
-                     << "\nRunning Nominal Pass\nVariables:\n   ";
+            textFile << "Iteration " << iterationsTaken
+                     << "\n   Variable Values: [";
             // Iterate through the variables, writing them to the file
             for (current = variableNames.begin(), i = 0;
                  current != variableNames.end(); ++current)
             {
-               textFile << *current << " = " << variable[i++] << "\n   ";
+               textFile << " " << variable[i++] << " ";
             }
-            textFile << std::endl;
+            textFile << "]" << std::endl;
             break;
             
-         case PERTURBING:
-            if ((textFileMode == "Verbose") || (textFileMode == "Debug"))
-            {
-               if (pertNumber != 0)
-               {
-                  /*
-                  // Iterate through the goals, writing them to the file
-                  textFile << "Goals and achieved values:\n   ";
-                   
-                  for (current = goalNames.begin(), i = 0;
-                       current != goalNames.end(); ++current)
-                  {
-                     textFile << *current << "  Desired: " << goal[i]
-                              << " Achieved: " << achieved[pertNumber-1][i]
-                              << "\n   ";
-                     ++i;
-                  }
-                  */
-                  textFile << std::endl;
-               }
-               textFile << "Perturbing with variable values:\n   ";
-               for (current = variableNames.begin(), i = 0;
-                    current != variableNames.end(); ++current)
-               {
-                  textFile << *current << " = " << variable[i++] << "\n   ";
-               }
-               textFile << std::endl;
-            }
-            
-            if (textFileMode == "Debug")
-            {
-               textFile << "------------------------------------------------\n"
-                        << "Command stream data:\n"
-                        << debugString << "\n"
-                        << "------------------------------------------------\n";
-            }
-                
-            break;
+//         case PERTURBING:
+//            if ((textFileMode == "Verbose") || (textFileMode == "Debug"))
+//            {
+//               if (pertNumber != 0)
+//               {
+//                  /*
+//                  // Iterate through the goals, writing them to the file
+//                  textFile << "Goals and achieved values:\n   ";
+//                   
+//                  for (current = goalNames.begin(), i = 0;
+//                       current != goalNames.end(); ++current)
+//                  {
+//                     textFile << *current << "  Desired: " << goal[i]
+//                              << " Achieved: " << achieved[pertNumber-1][i]
+//                              << "\n   ";
+//                     ++i;
+//                  }
+//                  */
+//                  textFile << std::endl;
+//               }
+//               textFile << "Perturbing with variable values:\n   ";
+//               for (current = variableNames.begin(), i = 0;
+//                    current != variableNames.end(); ++current)
+//               {
+//                  textFile << *current << " = " << variable[i++] << "\n   ";
+//               }
+//               textFile << std::endl;
+//            }
+//            
+//            if (textFileMode == "Debug")
+//            {
+//               textFile << "------------------------------------------------\n"
+//                        << "Command stream data:\n"
+//                        << debugString << "\n"
+//                        << "------------------------------------------------\n";
+//            }
+//                
+//            break;
             
          case CALCULATING:
             if (textFileMode == "Verbose")
+               textFile << "In the Calculating state" << std::endl;
+            if (ineqConstraintCount > 0)
             {
-               textFile << "Calculating" << std::endl;
-               /*    
-               // Iterate through the goals, writing them to the file
-               textFile << "Goals and achieved values:\n   ";
-                   
-               for (current = goalNames.begin(), i = 0;
-                    current != goalNames.end(); ++current)
-               {
-                   textFile << *current << "  Desired: " << goal[i]
-                            << " Achieved: " << achieved[variableCount-1][i]
-                            << "\n    ";
-                   ++i;
-               }
-               */
-               textFile << std::endl;
+               textFile << "   Inequality Constraint Values: [";
+               for (std::vector<Real>::iterator i = ineqConstraintValues.begin();
+                    i != ineqConstraintValues.end(); ++i)
+                  textFile << " " << (*i) << " ";
+               textFile << "]" << std::endl;
             }
-                
-            // does this make sense for Optimization?            
-            textFile << "\n\nNew variable estimates:\n   ";
-            for (current = variableNames.begin(), i = 0;
-                 current != variableNames.end(); ++current)
+            if (eqConstraintCount > 0)
             {
-               textFile << *current << " = " << variable[i++] << "\n   ";
+               textFile << "   Equality Constraint Values: [";
+
+               for (std::vector<Real>::iterator i = eqConstraintValues.begin();
+                    i != eqConstraintValues.end(); ++i)
+                  textFile << " " << (*i) << " ";
+               textFile << "]" << std::endl;
             }
-            textFile << std::endl;
+            textFile << "   Objective function value:  " << cost << std::endl;
             break;
             
-         case CHECKINGRUN:
-            // Iterate through the goals, writing them to the file
-            /*
-            textFile << "Goals and achieved values:\n   ";
-                
-            for (current = goalNames.begin(), i = 0;
-                 current != goalNames.end(); ++current)
-            {
-               textFile << *current << "  Desired: " << goal[i]
-                        << " Achieved: " << nominal[i]
-                        << "\n   Tolerance: " << tolerance[i]
-                        << "\n   ";
-               ++i;
-            }
-            */    
-            textFile << "\n*****************************"
-                     << "***************************\n"
-                     << std::endl;
-            break;
+//         case CHECKINGRUN:
+//            // Iterate through the goals, writing them to the file
+//            /*
+//            textFile << "Goals and achieved values:\n   ";
+//                
+//            for (current = goalNames.begin(), i = 0;
+//                 current != goalNames.end(); ++current)
+//            {
+//               textFile << *current << "  Desired: " << goal[i]
+//                        << " Achieved: " << nominal[i]
+//                        << "\n   Tolerance: " << tolerance[i]
+//                        << "\n   ";
+//               ++i;
+//            }
+//            */    
+//            textFile << "\n*****************************"
+//                     << "***************************\n"
+//                     << std::endl;
+//            break;
             
          case FINISHED:
             textFile << "\n****************************"
