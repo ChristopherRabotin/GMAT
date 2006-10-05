@@ -1055,6 +1055,8 @@ bool FminconOptimizer::OpenConnection()
              (out3[0] <= 0.0) || (out4[0] <= 0.0))
          {
             MessageInterface::ShowMessage("ERROR - MATLAB support files not in MATLAB path");
+            sourceReady = false;
+            return false;
          }
          /// start the GMATServer here
          static GmatMainFrame *theMain = GmatAppData::GetMainFrame();
