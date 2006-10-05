@@ -116,7 +116,7 @@ OBJECTS = \
     command/If.o \
     command/Maneuver.o \
     command/Minimize.o \
-    command/NonLinearConstraint.o \
+    command/NonlinearConstraint.o \
     command/NoOp.o \
     command/Optimize.o \
     command/Propagate.o \
