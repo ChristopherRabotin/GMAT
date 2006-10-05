@@ -30,7 +30,7 @@
 //#define DEBUG_OPTIMIZER_PARSING
 //#define DEBUG_OPTIMIZE_COMMANDS
 //#define DEBUG_OPTIMIZER
-#define DEBUG_CALLBACK
+//#define DEBUG_CALLBACK
 //#define DEBUG_OPTIMIZE_CONSTRUCTION
 
 //------------------------------------------------------------------------------
@@ -339,7 +339,7 @@ bool Optimize::Initialize()
          #endif
          if ((currentCmd->GetTypeName() == "Vary") || 
              (currentCmd->GetTypeName() == "Minimize") ||
-             (currentCmd->GetTypeName() == "NonLinearConstraint"))
+             (currentCmd->GetTypeName() == "NonlinearConstraint"))
             currentCmd->SetRefObject(optimizer, Gmat::SOLVER, optimizerName);
          currentCmd = currentCmd->GetNext();
       }
@@ -422,10 +422,10 @@ bool Optimize::Execute()
 /*
    if (branchExecuting)
    {
-      //retval = ExecuteBranch();
+      //retval = ExecuteBranch(); */
       //callbackData = "10.0 20.0"; // *************** TEMPORARY testing *********
       //ExecuteCallback();  // *************** TEMPORARY testing *****************
-      if (!branchExecuting && (state == Solver::FINISHED))
+     /* if (!branchExecuting && (state == Solver::FINISHED))
       {
          commandComplete = true;
       }  
@@ -449,7 +449,7 @@ bool Optimize::Execute()
             {
                std::string type = currentCmd->GetTypeName();
                if ((type == "Optimize") || (type == "Vary") ||
-                   (type == "Minimize") || (type == "NonLinearConstraint"))
+                   (type == "Minimize") || (type == "NonlinearConstraint"))
                   currentCmd->Execute();
                currentCmd = currentCmd->GetNext();
             }
