@@ -23,9 +23,10 @@
 #include "Moderator.hpp" 
 #include "StringUtil.hpp"  // for ToDouble()
 
-#define DEBUG_NONLINEAR_CONSTRAINT_PARSE 1
-#define DEBUG_NONLINEAR_CONSTRAINT_INIT 1
-#define DEBUG_NONLINEAR_CONSTRAINT_EXEC 1
+//#define DEBUG_NONLINEAR_CONSTRAINT_PARSE 1
+//#define DEBUG_NONLINEAR_CONSTRAINT_INIT 1
+//#define DEBUG_NONLINEAR_CONSTRAINT_EXEC 1
+//#define DEBUG_NLC_VALUES
 
 
 //---------------------------------
@@ -903,7 +904,7 @@ bool NonlinearConstraint::Initialize()
 {
    #if DEBUG_NONLINEAR_CONSTRAINT_INIT
    MessageInterface::ShowMessage
-      ("NonlinearConstraint::Initialize() entered. optimizer=%p, constraintVar=%p\n", 
+      ("NonlinearConstraint::Initialize() entered. optimizer=%p, constraint=%p\n", 
       optimizer, constraint);
    #endif
    
@@ -1066,11 +1067,19 @@ bool NonlinearConstraint::Execute()
    }
 
    constraintValue = -999.999;
-
+   #ifdef DEBUG_NLC_VALUES
+      MessageInterface::ShowMessage("NLC:Execute - desiredValue = %.12f\n",
+         desiredValue);
+   #endif
+   
    // Evaluate variable and pass it to the optimizer
    if (constraint != NULL)
    {
       constraintValue = constraint->EvaluateReal();
+      #ifdef DEBUG_NLC_VALUES
+         MessageInterface::ShowMessage("NLC:Execute - (1) constraintValue = %.12f\n",
+            constraintValue);
+      #endif
       switch (op)
       {
          case EQUAL:
@@ -1083,6 +1092,10 @@ bool NonlinearConstraint::Execute()
          default:
             break;
       }
+      #ifdef DEBUG_NLC_VALUES
+         MessageInterface::ShowMessage("NLC:Execute - (2) constraintValue now = %.12f\n",
+            constraintValue);
+      #endif
       optimizer->SetResultValue(constraintId, constraintValue, isIneqString);
       #ifdef DEBUG_NONLINEAR_CONSTRAINT_EXEC
          MessageInterface::ShowMessage
