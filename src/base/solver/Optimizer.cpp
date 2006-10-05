@@ -159,6 +159,12 @@ Integer Optimizer::SetSolverResults(Real *data,
                                     const std::string &name,
                                     const std::string &type)
 {
+   #ifdef DEBUG_SET_RESULT
+      MessageInterface::ShowMessage(
+         "Optimizer::SetSolverResults - name = %s, type = %s, data = %.16f\n",
+         name.c_str(), type.c_str(), data[0]); 
+   #endif
+   
    if (type == "Objective")
    {
       // need to check here if the name is not the same as the 
@@ -219,7 +225,7 @@ void Optimizer::SetResultValue(Integer id, Real value,
    {
       cost = value;
    }
-   else if (resultType == " EqConstraint")
+   else if (resultType == "EqConstraint")
    {
       if (id > (EQ_CONST_START + eqConstraintCount))
         throw SolverException(
