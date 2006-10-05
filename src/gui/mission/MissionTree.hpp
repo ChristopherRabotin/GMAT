@@ -75,7 +75,7 @@ private:
    int mNumScriptEvent;
    int mNumStop;
    int mNumMinimize;
-   int mNumNonLinearConstraint;
+   int mNumNonlinearConstraint;
    
    bool inScriptEvent;
    bool inFiniteBurn;

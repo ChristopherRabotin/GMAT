@@ -206,7 +206,7 @@ void MissionTree::InitializeCounter()
    mNumFiniteBurn = 0;
    mNumStop = 0;
    mNumMinimize = 0;
-   mNumNonLinearConstraint = 0;
+   mNumNonlinearConstraint = 0;
 }
 
 
@@ -1215,7 +1215,7 @@ void MissionTree::OnAddCommand(wxCommandEvent &event)
       AppendCommand("Minimize");
       break;
    case POPUP_ADD_NON_LINEAR_CONSTRAINT:
-      AppendCommand("NonLinearConstraint");
+      AppendCommand("NonlinearConstraint");
       break;
    case POPUP_ADD_FUNCTION:
       AppendCommand("CallFunction");
@@ -1303,7 +1303,7 @@ void MissionTree::OnInsertCommand(wxCommandEvent &event)
       InsertCommand("Minimize");
       break;
    case POPUP_INSERT_NON_LINEAR_CONSTRAINT:
-      InsertCommand("NonLinearConstraint");
+      InsertCommand("NonlinearConstraint");
       break;
    case POPUP_INSERT_FUNCTION:
       InsertCommand("CallFunction");
@@ -1437,13 +1437,13 @@ wxMenu* MissionTree::AppendOptimizePopupMenu(wxMenu *menu, bool insert)
    {
       menu->Append(POPUP_INSERT_VARY, wxT("Vary"));
       menu->Append(POPUP_INSERT_MINIMIZE, wxT("Minimize"));
-      menu->Append(POPUP_INSERT_NON_LINEAR_CONSTRAINT, wxT("NonLinearConstraint"));
+      menu->Append(POPUP_INSERT_NON_LINEAR_CONSTRAINT, wxT("NonlinearConstraint"));
    }
    else
    {
       menu->Append(POPUP_ADD_VARY, wxT("Vary"));
       menu->Append(POPUP_ADD_MINIMIZE, wxT("Minimize"));
-      menu->Append(POPUP_ADD_NON_LINEAR_CONSTRAINT, wxT("NonLinearConstraint"));
+      menu->Append(POPUP_ADD_NON_LINEAR_CONSTRAINT, wxT("NonlinearConstraint"));
    }
 
    return menu;
@@ -1801,7 +1801,7 @@ GmatTree::MissionIconType MissionTree::GetIconId(const wxString &cmd)
       return GmatTree::MISSION_ICON_ACHIEVE;
    if (cmd == "Minimize")
       return GmatTree::MISSION_NO_ICON;
-   if (cmd == "NonLinearConstraint")
+   if (cmd == "NonlinearConstraint")
       return GmatTree::MISSION_NO_ICON;
    if (cmd == "Vary")
       return GmatTree::MISSION_ICON_VARY;
@@ -1865,7 +1865,7 @@ GmatTree::ItemType MissionTree::GetCommandId(const wxString &cmd)
       return GmatTree::ACHIEVE_COMMAND;
    if (cmd == "Minimize")
       return GmatTree::MINIMIZE_COMMAND;
-   if (cmd == "NonLinearConstraint")
+   if (cmd == "NonlinearConstraint")
       return GmatTree::NON_LINEAR_CONSTRAINT_COMMAND;
    if (cmd == "Vary")
       return GmatTree::VARY_COMMAND;
@@ -1953,8 +1953,8 @@ int* MissionTree::GetCommandCounter(const wxString &cmd)
       return &mNumStop;
    if (cmd == "Minimize")
       return &mNumMinimize;
-   if (cmd == "NonLinearConstraint")
-      return &mNumNonLinearConstraint;
+   if (cmd == "NonlinearConstraint")
+      return &mNumNonlinearConstraint;
       
 
    return &mNumScriptEvent;
