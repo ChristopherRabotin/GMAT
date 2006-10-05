@@ -50,7 +50,7 @@
 #include "Optimize.hpp"       // for Optimize command
 #include "EndOptimize.hpp"    // for EndOptimize command
 #include "Minimize.hpp"       // for Minimize command
-#include "NonLinearConstraint.hpp" // for NonLinearConstraint command
+#include "NonlinearConstraint.hpp" // for NonlinearConstraint command
 
 
 //---------------------------------
@@ -134,8 +134,8 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
         return new EndOptimize;
     else if (ofType == "Minimize")
         return new Minimize;
-    else if (ofType == "NonLinearConstraint")
-        return new NonLinearConstraint;
+    else if (ofType == "NonlinearConstraint")
+        return new NonlinearConstraint;
    // add more here .......
    else 
    {
@@ -189,7 +189,7 @@ CommandFactory::CommandFactory() :
       creatables.push_back("Optimize");
       creatables.push_back("EndOptimize");
       creatables.push_back("Minimize");
-      creatables.push_back("NonLinearConstraint");
+      creatables.push_back("NonlinearConstraint");
    }
 }
 
@@ -253,7 +253,7 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
       creatables.push_back("Optimize");
       creatables.push_back("EndOptimize");
       creatables.push_back("Minimize");
-      creatables.push_back("NonLinearConstraint");
+      creatables.push_back("NonlinearConstraint");
    }
 }
 
