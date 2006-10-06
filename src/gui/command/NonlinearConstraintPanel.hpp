@@ -19,6 +19,7 @@ private:
            
    wxTextCtrl *mLHSTextCtrl;
    wxTextCtrl *mRHSTextCtrl;
+   wxTextCtrl *mTolTextCtrl;
 
    wxButton *mLeftChooseButton;
    wxButton *mRightChooseButton;

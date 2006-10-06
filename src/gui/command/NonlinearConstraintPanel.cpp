@@ -8,6 +8,7 @@
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"  // for ToDouble()
 
 //#define DEBUG_NONLINEARCONSTRAINT_PANEL 1
 
@@ -47,23 +48,28 @@ void NonlinearConstraintPanel::Create()
 
    // wxStaticText
    wxStaticText *solverStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Solver"),
+      new wxStaticText(this, ID_TEXT, wxT("Optimizer Name"),
                        wxDefaultPosition, wxSize(70, -1), 0);
    wxStaticText *lhsStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Left Hand Side"), 
+      new wxStaticText(this, ID_TEXT, wxT("Constraint Variable Name"), 
                        wxDefaultPosition, wxSize(80, -1), 0);
    wxStaticText *rhsStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Right Hand Side"), 
+      new wxStaticText(this, ID_TEXT, wxT("Constraint Value"), 
                        wxDefaultPosition, wxSize(80, -1), 0);
    wxStaticText *blankStaticText =
       new wxStaticText(this, ID_TEXT, wxT(""), 
                        wxDefaultPosition, wxSize(60, -1), 0);
+   wxStaticText *toleranceStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Tolerance"), 
+                       wxDefaultPosition, wxSize(60, -1), 0);
    
    // wxTextCtrl
    mLHSTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(140,-1), 0);
+                                     wxDefaultPosition, wxSize(120,-1), 0);
    mRHSTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(140,-1), 0);
+                                     wxDefaultPosition, wxSize(120,-1), 0);
+   mTolTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                     wxDefaultPosition, wxSize(40,-1), 0);
    
    mSolverComboBox = theGuiManager->GetOptimizerComboBox(this, ID_COMBO,
       			wxSize(120,-1));
@@ -88,29 +94,34 @@ void NonlinearConstraintPanel::Create()
    wxBoxSizer *rhsSizer = new wxBoxSizer(wxVERTICAL);
    wxBoxSizer *rhsInterSizer = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer *conditionSizer = new wxBoxSizer(wxVERTICAL);
+   wxBoxSizer *toleranceSizer = new wxBoxSizer(wxVERTICAL);
    
    solverSizer->Add(solverStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    solverSizer->Add(mSolverComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
    
-   lhsInterSizer->Add(mLHSTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
-   lhsInterSizer->Add(mLeftChooseButton, 0, wxALIGN_CENTER|wxALL, bsize);
+   lhsInterSizer->Add(mLHSTextCtrl, 0, wxALIGN_CENTER|wxALL, 0);
+   lhsInterSizer->Add(mLeftChooseButton, 0, wxALIGN_CENTER|wxALL, 0);
    
    lhsSizer->Add(lhsStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    lhsSizer->Add(lhsInterSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    
-   rhsInterSizer->Add(mRHSTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
-   rhsInterSizer->Add(mRightChooseButton, 0, wxALIGN_CENTER|wxALL, bsize);
+   rhsInterSizer->Add(mRHSTextCtrl, 0, wxALIGN_CENTER|wxALL, 0);
+   rhsInterSizer->Add(mRightChooseButton, 0, wxALIGN_CENTER|wxALL, 0);
    
    rhsSizer->Add(rhsStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    rhsSizer->Add(rhsInterSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    
    conditionSizer->Add(blankStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    conditionSizer->Add(mComparisonComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
+
+   toleranceSizer->Add(toleranceStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   toleranceSizer->Add(mTolTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    
    panelSizer->Add(solverSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    panelSizer->Add(lhsSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    panelSizer->Add(conditionSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    panelSizer->Add(rhsSizer, 0, wxALIGN_CENTER|wxALL, bsize);
+   panelSizer->Add(toleranceSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    
    theMiddleSizer->Add(panelSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 }
@@ -132,15 +143,20 @@ void NonlinearConstraintPanel::LoadData()
       
       mSolverComboBox->SetStringSelection(wxT(loadedSolverName.c_str()));
 
-//      std::string loadedVariableName = mNonlinearConstraintCommand->
-//         GetStringParameter(mNonlinearConstraintCommand->GetParameterID("ConstrainedVariableName"));
-//
-//      mLHSTextCtrl->SetValue(wxT(loadedVariableName.c_str()));
+      std::string loadedVariableName = mNonlinearConstraintCommand->
+         GetStringParameter(mNonlinearConstraintCommand->GetParameterID("ConstraintVariableName"));
 
-//      Real loadedValue = mNonlinearConstraintCommand->
-//         GetRealParameter(mNonlinearConstraintCommand->GetParameterID("ConstrainedVariableName"));
-//
-//      mLHSTextCtrl->SetValue(wxT(loadedValue));
+      mLHSTextCtrl->SetValue(wxT(loadedVariableName.c_str()));
+
+      std::string loadedValue = mNonlinearConstraintCommand->
+         GetStringParameter(mNonlinearConstraintCommand->GetParameterID("ConstraintValue"));
+
+      mRHSTextCtrl->SetValue(wxT(loadedValue.c_str()));
+      
+      Real tolValue = mNonlinearConstraintCommand->
+         GetRealParameter(mNonlinearConstraintCommand->GetParameterID("Tolerance"));
+
+      mTolTextCtrl->SetValue(theGuiManager->ToWxString(tolValue));
      
    }
    catch (BaseException &e)
@@ -158,6 +174,16 @@ void NonlinearConstraintPanel::SaveData()
    MessageInterface::ShowMessage("NonlinearConstraintPanel::SaveData() entered\n");
    #endif
    
+   try
+   {
+   Real rvalue;
+   canClose = true;
+      
+   std::string inputString;
+   std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
+                         mNonlinearConstraintCommand->GetName() + "\" is not an allowed value. \n"
+                        "The allowed values are: [%s].";                        
+  
    //-------------------------------------------------------
    // Saving Solver Data
    //-------------------------------------------------------
@@ -166,15 +192,40 @@ void NonlinearConstraintPanel::SaveData()
       (mNonlinearConstraintCommand->GetParameterID("OptimizerName"),
        mSolverComboBox->GetValue().c_str());
 
-//   mNonlinearConstraintCommand->SetStringParameter
-//      (mNonlinearConstraintCommand->GetParameterID("ConstrainedVariableName"),
-//       mLHSTextCtrl->GetValue().c_str());
+   mNonlinearConstraintCommand->SetStringParameter
+      (mNonlinearConstraintCommand->GetParameterID("ConstraintVariableName"),
+       mLHSTextCtrl->GetValue().c_str());
 
-//   mNonlinearConstraintCommand->SetRealParameter
-//      (mNonlinearConstraintCommand->GetParameterID("ConstrainedValue"),
-//       mRHSTextCtrl->GetValue().ToDouble());
+   mNonlinearConstraintCommand->SetStringParameter
+      (mNonlinearConstraintCommand->GetParameterID("ConstraintValue"),
+       mRHSTextCtrl->GetValue().c_str());
+       
+   inputString = mTolTextCtrl->GetValue();      
+
+   // check to see if input is a real
+   if (GmatStringUtil::ToDouble(inputString,&rvalue))  
+      mNonlinearConstraintCommand->SetRealParameter
+         (mNonlinearConstraintCommand->GetParameterID("Tolerance"),
+          rvalue);
+   else
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+         inputString.c_str(), "Tolerance","Real Number >= 0");
+
+      canClose = false;
+   }
    
    theApplyButton->Disable();
+   
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("NonlinearConstraintPanel:SaveData() error occurred!\n%s\n", e.GetMessage().c_str());
+      canClose = false;
+      return;
+   }
+   
 }
 
 void NonlinearConstraintPanel::OnTextChange(wxCommandEvent& event)
