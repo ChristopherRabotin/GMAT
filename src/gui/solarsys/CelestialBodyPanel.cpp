@@ -351,8 +351,8 @@ void CelestialBodyPanel::LoadData()
          {
             wxString rotStrs[] =
             {
-               wxT("DeFile"),
-               wxT("IAU Data"),
+               wxT("DE405"),
+               wxT("IAU2002"),
             };
       
             for (unsigned int i=0; i<2; i++)
@@ -361,9 +361,9 @@ void CelestialBodyPanel::LoadData()
             int dataSourceIndex = theCelestialBody->GetRotationDataSource();
             
             if (dataSourceIndex == Gmat::DE_FILE)
-               rotDataSourceCB->SetValue("DeFile");
+               rotDataSourceCB->SetValue("DE405");
             else if (dataSourceIndex == Gmat::IAU_DATA)
-               rotDataSourceCB->SetValue("IAU Data");
+               rotDataSourceCB->SetValue("IAU2002");
             else
                rotDataSourceCB->SetValue("");
             
@@ -535,9 +535,9 @@ void CelestialBodyPanel::SaveData()
       {
          wxString rotDataString = rotDataSourceCB->GetValue();
 
-         if (rotDataString == "DeFile")
+         if (rotDataString == "DE405")
             theCelestialBody->SetRotationDataSource(Gmat::DE_FILE);
-         else if (rotDataString == "IAU Data")
+         else if (rotDataString == "IAU2002")
             theCelestialBody->SetRotationDataSource(Gmat::IAU_DATA);
          else
             theCelestialBody->SetRotationDataSource(Gmat::NOT_APPLICABLE);
