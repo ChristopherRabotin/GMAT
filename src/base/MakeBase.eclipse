@@ -213,6 +213,7 @@ OBJECTS = \
     interpreter/MathParser.o \
     interpreter/MathTree.o \
     interpreter/ScriptInterpreter.o \
+    interpreter/ScriptReadWriter.o \
     interpreter/TextParser.o \
     math/Abs.o \
     math/Acos.o \
