@@ -55,7 +55,7 @@ public:
    static void SetLogFile(const std::string &filename);
    static void CloseLogFile();
    
-   static const int MAX_MESSAGE_LENGTH = 1000;
+   static const int MAX_MESSAGE_LENGTH = 3000;
    
    static std::queue<std::string> messageQueue;
    static std::string popupMessage;
