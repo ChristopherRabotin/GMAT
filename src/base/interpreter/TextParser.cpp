@@ -26,10 +26,11 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_TP 1
-//#define DEBUG_TP_EVAL_BLOCK 1
+//#define DEBUG_TP_EVAL_BLOCK 2
 //#define DEBUG_TP_CHUNK_LINE 1
-//#define DEBUG_TP_DECOMPOSE 2
+//#define DEBUG_TP_DECOMPOSE 1
 //#define DEBUG_TP_SEP_BRACKETS 1
+//#define DEBUG_TP_DECOMPOSE_BLOCK 1
 
 using namespace GmatStringUtil;
 
@@ -82,10 +83,23 @@ void TextParser::Reset()
 //-------------------------------------------------------------------------------
 // StringArray DecomposeBlock(const std::string &logicalBlock)
 //-------------------------------------------------------------------------------
+/*
+ * Decomposes logical block into string array of lines.
+ * This method expects to end-of-line character for each line since it looks
+ * for \n or \r.
+ */
+//-------------------------------------------------------------------------------
 StringArray TextParser::DecomposeBlock(const std::string &logicalBlock)
 {
-   std::string str = logicalBlock;
    Integer length = logicalBlock.size();
+   
+   #if DEBUG_TP_DECOMPOSE_BLOCK
+   MessageInterface::ShowMessage
+      ("TextParser::DecomposeBlock() length=%d\n", length);
+   #endif
+   
+   std::string str = logicalBlock;
+   std::string block;
    Integer lastPos = 0;
    Integer lineCounter = 0;
    StringArray lines;
@@ -93,16 +107,33 @@ StringArray TextParser::DecomposeBlock(const std::string &logicalBlock)
    // put logicalBlock into StringArray, ending LF or CR
    for (int i=0; i<length; i++)
    {
+      #if DEBUG_TP_DECOMPOSE_BLOCK > 1
+      MessageInterface::ShowMessage
+         ("   ===> TextParser::DecomposeBlock() str[%d]=%c, %d\n", i, str[i], str[i]);
+      #endif
+      
       if (str[i] == '\n' || str[i] == '\r')
       {
-         lines.push_back(str.substr(lastPos, i-lastPos+1));
+         // Remove end-of-line character
+         block = str.substr(lastPos, i-lastPos+1);
+         lines.push_back(block);
+         
+         #if DEBUG_TP_DECOMPOSE_BLOCK > 1
+         MessageInterface::ShowMessage
+            ("   ===> TextParser::DecomposeBlock() i=%d, lastPos=%d, block=%s\n",
+             i, lastPos, block.c_str());
+         #endif
+         
          lastPos = i+1;
          lineCounter++;
       }
    }
    
+   
    if (lineCounter == 0)
       lines.push_back(str);
+   else if (lastPos < length)
+      lines.push_back(str.substr(lastPos));
    
    return lines;
 }
@@ -136,7 +167,14 @@ StringArray TextParser::DecomposeBlock(const std::string &logicalBlock)
 //-------------------------------------------------------------------------------
 Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
 {
+   Integer length = logicalBlock.size();
+   
    #if DEBUG_TP_EVAL_BLOCK
+   MessageInterface::ShowMessage
+      ("TextParser::EvaluateBlock() length=%d\n", length);
+   #endif
+   
+   #if DEBUG_TP_EVAL_BLOCK > 1
    MessageInterface::ShowMessage
       ("TextParser::EvaluateBlock() logicalBlock=\n   %s\n", logicalBlock.c_str());
    #endif
@@ -145,17 +183,22 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
    StringArray lines = DecomposeBlock(logicalBlock);
    
    Integer count = lines.size();
+   
+   #if DEBUG_TP_EVAL_BLOCK
+   MessageInterface::ShowMessage
+      ("TextParser::EvaluateBlock() count=%d\n", count);
+   #endif
+   
    Integer commentCounter = 0;
    Integer noCommentLine = -1;
-   Integer length;
    std::string str, keyword, substr;
    UnsignedInt index1, index2, index3, index4;
    
    Reset();
    
-   #if DEBUG_TP_EVAL_BLOCK
+   #if DEBUG_TP_EVAL_BLOCK > 1
    for (int i=0; i<count; i++)
-      MessageInterface::ShowMessage("   lines[%d]=%s\n", i, lines[i].c_str());
+      MessageInterface::ShowMessage("   lines[%d]=<%s>\n", i, lines[i].c_str());
    #endif
    
    // first find block type
@@ -181,7 +224,7 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
       index1 = str.find_first_not_of(whiteSpace);
       if (index1 != str.npos)
       {
-         if (str[index1] == '%')
+         if (str[index1] == '%' || str[index1] == '\n' || str[index1] == '\r')
          {
             prefaceComment = prefaceComment + str;
             commentCounter++;
@@ -243,12 +286,14 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
          }
       }
    }
+
+   //MessageInterface::ShowMessage("===> theInstruction=%s\n", theInstruction.c_str());
    
    if (commentCounter == count)
       theBlockType = Gmat::COMMENT_BLOCK;
    
    // remove ending ; from the instruction
-   length = theInstruction.size();
+   length = theInstruction.size();   
    if (theInstruction[length-1] == ';')
       theInstruction = theInstruction.substr(0, length-1);
    
@@ -257,11 +302,11 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
    theChunks.push_back(inlineComment);
    theChunks.push_back(theInstruction);
    
-   #if DEBUG_TP_EVAL_BLOCK
+    #if DEBUG_TP_EVAL_BLOCK
    MessageInterface::ShowMessage
       ("   keyword=<%s>, blockType=%d\n", keyword.c_str(), theBlockType);
    MessageInterface::ShowMessage
-      ("   prefaceComment=%s\n   inlineComment =%s\n   theInstruction=%s\n",
+      ("   prefaceComment=<%s>\n   inlineComment=<%s>\n   theInstruction=<%s>\n",
        prefaceComment.c_str(), inlineComment.c_str(), theInstruction.c_str());
    #endif
    
