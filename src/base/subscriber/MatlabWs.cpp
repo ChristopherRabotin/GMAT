@@ -21,6 +21,7 @@
 #include "MatlabWs.hpp"
 #include "MessageInterface.hpp"
 #include "Publisher.hpp"         // for Instance()
+#include "SubscriberException.hpp"
 
 //#define DEBUG_MATLABWS_PARAM 1
 //#define DEBUG_MATLABWS_RUN 2
@@ -440,11 +441,15 @@ bool MatlabWs::Distribute(const Real * dat, Integer len)
    {
       for (int i=0; i < mNumParams; i++)
       {
+          if (mParams[i] == NULL)
+             throw SubscriberException("MatlabWs::Distribute: Cannot find "
+                   "parameter \"" + mParamNames[i] + "\"\n");
+
           mParams[i]->Evaluate();
           #if DEBUG_MATLABWS_RUN > 2
           MessageInterface::ShowMessage
              ("MatlabWs::Distribute() mParams[i]->ToString() = %s\n",
-              mParams[i]->ToString());
+              mParams[i]->ToString().c_str());
           #endif
       } 
    }
