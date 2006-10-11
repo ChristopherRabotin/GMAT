@@ -6,6 +6,7 @@
 //
 // Author: Darrel J. Conway
 // Created: 2003/08/28
+// Rework:  2006/09/27
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -15,31 +16,31 @@
  */
 //------------------------------------------------------------------------------
 
-
 #include "Interpreter.hpp" // class's header file
 #include "Moderator.hpp"
 #include "StringTokenizer.hpp"
+#include "ConditionalBranch.hpp"
 #include "StringUtil.hpp"  // for ToDouble()
-#include <ctype.h>         // for isalpha
+#include "Array.hpp"
+#include "MessageInterface.hpp"
 #include <sstream>         // for std::stringstream
 #include <fstream>         // for std::ifstream used bt GMAT functions
 
-#define DEBUG_INTERPRETER 1
-//#define DEBUG_TOKEN_PARSING 1
-//#define DEBUG_TOKEN_PARSING_DETAILS 1
-//#define DEBUG_RHS_PARSING 1
-//#define DEBUG_RHS_PARSING_DETAILS 1
-//#define DEBUG_ARRAY_INTERPRETING 1
-//#define DEBUG_INTERPRET_OBJECTEQUATES 1
-//#define DEBUG_FUNCTION_PARSING
-//#define DEBUG_PASS_TWO
-//#define DEBUG_PREINITIALIZE
-//#define DEBUG_EQUATION 1
+
+//#define DEBUG_COMMAND_LIST
+//#define DEBUG_OBJECT_LIST
+//#define DEBUG_ARRAY_GET 1
 //#define DEBUG_CREATE_OBJECT 1
-
-#include "MessageInterface.hpp"
-#include "Barycenter.hpp"
-
+//#define DEBUG_CREATE_PARAM 1
+//#define DEBUG_CREATE_ARRAY 1
+//#define DEBUG_CREATE_COMMAND 1
+//#define DEBUG_ASSIGNMENT 1
+//#define DEBUG_ASSEMBLE_COMMAND 1
+//#define DEBUG_ASSEMBLE_FOR 1
+//#define DEBUG_ASSEMBLE_CALL_FUNCTION 1
+//#define DEBUG_SET 1
+//#define DEBUG_SET_FORCE_MODEL 1
+//#define DEBUG_SET_SOLAR_SYS 1
 
 //------------------------------------------------------------------------------
 // Interpreter()
@@ -48,32 +49,38 @@
  * Default constructor.
  */
 //------------------------------------------------------------------------------
-Interpreter::Interpreter() :
-    instream            (NULL),
-    outstream           (NULL),
-    initialized         (false),
-    branchDepth         (0)
+Interpreter::Interpreter()
 {
-    theModerator = Moderator::Instance();
-    
-    if (theModerator) {
-        // Set up the mapping for the core types
-        typemap["Spacecraft"] = Gmat::SPACECRAFT;
-        typemap["GroundStation"] = Gmat::GROUND_STATION;
-        typemap["Command"] = Gmat::COMMAND;
-//        typemap["Propagator"] = Gmat::PROPAGATOR;
-        typemap["ForceModel"] = Gmat::FORCE_MODEL;
-        typemap["Force"] = Gmat::PHYSICAL_MODEL;
-        typemap["SolarSystem"] = Gmat::SOLAR_SYSTEM;
-        typemap["CelestialBody"] = Gmat::CELESTIAL_BODY;
-        typemap["Parameter"] = Gmat::PARAMETER;
-//        typemap["StoppingCondition"] = Gmat::STOP_CONDITION;
-        typemap["Subscriber"] = Gmat::SUBSCRIBER;
-        typemap["Propagator"] = Gmat::PROP_SETUP;
-        typemap["Burn"] = Gmat::BURN;
-        typemap["CoordinateSystem"] = Gmat::COORDINATE_SYSTEM;
-        typemap["AxisSystem"] = Gmat::AXIS_SYSTEM;
-    }
+   initialized = false;
+   continueOnError = true;
+   
+   theModerator = Moderator::Instance();
+   
+   #if DEBUG_INTERP
+   MessageInterface::ShowMessage
+      ("Interpreter::Interpreter() initialized=%d, theModerator=%p\n",
+       initialized, theModerator);
+   #endif
+
+   // Not used
+//    if (theModerator)
+//    {
+//       // Set up the mapping for the core types
+//       typeMap["Spacecraft"] = Gmat::SPACECRAFT;
+//       typeMap["GroundStation"] = Gmat::GROUND_STATION;
+//       typeMap["Command"] = Gmat::COMMAND;
+//       typeMap["ForceModel"] = Gmat::FORCE_MODEL;
+//       typeMap["Force"] = Gmat::PHYSICAL_MODEL;
+//       typeMap["SolarSystem"] = Gmat::SOLAR_SYSTEM;
+//       typeMap["CelestialBody"] = Gmat::CELESTIAL_BODY;
+//       typeMap["Parameter"] = Gmat::PARAMETER;
+//       typeMap["StoppingCondition"] = Gmat::STOP_CONDITION;
+//       typeMap["Subscriber"] = Gmat::SUBSCRIBER;
+//       typeMap["Propagator"] = Gmat::PROP_SETUP;
+//       typeMap["Burn"] = Gmat::BURN;
+//       typeMap["CoordinateSystem"] = Gmat::COORDINATE_SYSTEM;
+//       typeMap["AxisSystem"] = Gmat::AXIS_SYSTEM;
+//    }
 }
 
 
@@ -98,7 +105,15 @@ Interpreter::~Interpreter()
 //------------------------------------------------------------------------------
 void Interpreter::Initialize()
 {
-   MessageInterface::ShowMessage("Interpreter::Initialize() entered\n");
+   //MessageInterface::ShowMessage
+   //   ("===> Interpreter::Initialize() initialized=%d\n", initialized);
+
+   errorList.clear();
+   delayedBlocks.clear();
+   inCommandMode = false;
+   
+   if (initialized)
+      return;
    
    // Build a mapping for all of the defined commands
    StringArray cmds = theModerator->GetListOfFactoryItems(Gmat::COMMAND);
@@ -219,1591 +234,29 @@ void Interpreter::Initialize()
    // Retister alias used in scripting
    RegisterAliases();
    
+   // Initialize TextParser command list
+   theTextParser.Initialize(commandList);
+   
    initialized = true;
 }
 
 
 //------------------------------------------------------------------------------
-// bool SetInStream(std::istream *str)
+// void RegisterAliases()
 //------------------------------------------------------------------------------
-/**
- * Defines the input stream that gets interpreted.
- * 
- * @param str The input stream.
- * 
- * @return true on success, false on failure.  (Currently always returns true.)
+/*
+ * Some GMAT script identifiers can be accessed using multiple text string.
+ * This method creates a mapping for these strings so that scripts can be parsed
+ * correctly.
  */
 //------------------------------------------------------------------------------
-bool Interpreter::SetInStream(std::istream *str)
+void Interpreter::RegisterAliases()
 {
-    instream = str;
-    return true;
-}
-
-
-//------------------------------------------------------------------------------
-// bool SetOutStream(std::ostream *str)
-//------------------------------------------------------------------------------
-/**
- * Defines the output stream for writing serialized output.
- * 
- * @param str The output stream.
- * 
- * @return true on success, false on failure.  (Currently always returns true.)
- */
-//------------------------------------------------------------------------------
-bool Interpreter::SetOutStream(std::ostream *str)
-{
-    outstream = str;
-    return true;
-}
-
-
-//------------------------------------------------------------------------------
-// bool Interpret()
-//------------------------------------------------------------------------------
-/**
- * Translates text streams (e.g. scripts and subscripts) into GMAT objects.
- * 
- * This method gets overridden by derived classes to perform the detailed 
- * translation based on the type of stream that is translated.
- * 
- * @return true on success, false on failure.  (Default always returns false.)
- */
-//------------------------------------------------------------------------------
-bool Interpreter::Interpret()
-{
-    return false;
-}
-
-
-//------------------------------------------------------------------------------
-// bool InterpretObject(std::string objecttype, std::string objectname)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to build core objects and put them in the ConfigManager.
- *  
- * @param objecttype Text type for the requested object.
- * @param objectname Name for the object, used for references to the object.
- * 
- * @return true on success, false on failure.
- */
-//------------------------------------------------------------------------------
-bool Interpreter::InterpretObject(std::string objecttype,
-                                  std::string objectname,
-                                  GmatBase **objptr)
-{
-   bool retval = false;
-   
-   GmatBase *obj = NULL;
-   if (objecttype == "Spacecraft") 
-   {
-      obj = CreateSpacecraft(objectname);
-      retval = true;
-   }
-    
-   if (objecttype == "Formation") 
-   {
-      obj = CreateFormation(objectname);
-      retval = true;
-   }
-    
-   if (objecttype == "Propagator") 
-   {
-      obj = CreatePropSetup(objectname);
-      retval = true;
-   }
-
-   if (objecttype == "ForceModel") 
-   {
-      obj = CreateForceModel(objectname);
-      retval = true;
-   }
-    
-   if (objecttype == "ImpulsiveBurn") 
-   {
-      obj = CreateBurn(objectname, true);
-      retval = true;
-   }
-
-   if (objecttype == "FiniteBurn") 
-   {
-      obj = CreateBurn(objectname, false);
-      retval = true;
-   }
-
-   if ((objecttype == "Barycenter") || (objecttype == "LibrationPoint"))
-   {
-      obj = theModerator->CreateCalculatedPoint(objecttype, objectname);
-      retval = true;
-   }
-
-   if (objecttype == "CoordinateSystem") 
-   {
-      obj = CreateCoordinateSystem(objectname);
-      retval = true;
-   }
-
-   // Array definitions may include the row and column counts, so they are
-   // given special treatment.
-   if (objecttype == "Array") 
-   {
-      return CreateArray(objectname, objecttype);
-   }
-
-   // Handle tanks, thrusters, etc.
-   if (find(hardwareList.begin(), hardwareList.end(), objecttype) != 
-      hardwareList.end()) 
-   {
-      obj = CreateHardware(objectname, objecttype);
-      retval = true;
-   }
-
-   // Handle Parameters
-   if (find(parameterList.begin(), parameterList.end(), objecttype) != 
-       parameterList.end())
-   {
-      Parameter *parm = CreateParameter(objectname, objecttype);
-      obj = parm;
-      retval = true;
-   }
-    
-   // Handle Subscribers
-   if (find(subscriberList.begin(), subscriberList.end(), objecttype) != 
-       subscriberList.end())
-   {
-      obj = theModerator->CreateSubscriber(objecttype, objectname);
-      retval = true;
-   }
-
-    // Handle Solvers
-   if (find(solverList.begin(), solverList.end(), objecttype) != 
-       solverList.end()) 
-   {
-      obj = theModerator->CreateSolver(objecttype, objectname);
-      retval = true;
-   }
-    
-    // Handle Functions
-   if (find(functionList.begin(), functionList.end(), objecttype) != 
-       functionList.end()) 
-   {
-      obj = theModerator->CreateFunction(objecttype, objectname);
-      retval = true;
-   }
-   
-   if (objptr != NULL)
-      *objptr = obj;
-
-   return retval;
-}
-
-
-//------------------------------------------------------------------------------
-// bool Interpret(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Reads the generatingString for an object and builds the corresponding data.
- *
- * This method is used to rebuild pieces of a mission sequence when a user makes
- * changes on a ScriptEvent panel, and to build the commands that are encoded
- * in a BeginScript/EndScript block.
- *
- * @param <obj>         The object that is being reinterpreted.
- * @param <generator>   The string that gets interpreted.
- *
- * @return true on success, false on failure.
- *
- * @note Interpret only works for GmatCommands at this time.
- */
-//------------------------------------------------------------------------------
-bool Interpreter::Interpret(GmatBase *obj, const std::string generator)
-{
-   if (obj->GetType() != Gmat::COMMAND)
-      throw InterpreterException(
-         "Interpret(GmatBase*) currently only supports GmatCommands.");
-
-   #ifdef DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage(
-         "%s\n%s\n\"%s\"\n",
-         "\nInterpret(GmatBase*)is under construction.  Please be patient!",
-         "String that is interpreted:", obj->GetGeneratingString().c_str());
-   #endif
-   
-   if (obj->GetTypeName() == "BeginScript") {
-      #ifdef DEBUG_TOKEN_PARSING
-         MessageInterface::ShowMessage("Parsing in-line text:\n%s\n",
-            generator.c_str());
-      #endif
-      return InterpretTextBlock((GmatCommand*)obj, generator);
-   }
-   else {
-      #ifdef DEBUG_TOKEN_PARSING
-         MessageInterface::ShowMessage("Resetting command using\n%s\n",
-            generator.c_str());
-      #endif
-      AssembleCommand(generator, (GmatCommand*)obj);
-   }
-
-   return true;
-}
-
-// The "Build" methods take GMAT objects and serializes the objects (e.g., these
-// methods are invoked to write out scripts or subscripts).
-
-//------------------------------------------------------------------------------
-// bool BuildObject(std::string &objectname, Gmat::WriteMode mode = Gmat::SCRIPTING)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to serialize core objects for text output.
- *
- * @param objectname Name of the object that gets serialized.
- *
- * @return true on success, false on failure.
- */
-//------------------------------------------------------------------------------
-bool Interpreter::BuildObject(std::string &objectname, Gmat::WriteMode mode)
-{
-    GmatBase *obj = FindObject(objectname);
-
-    if (obj == NULL) {
-        return true; //false;
-    }
-
-    (*outstream).precision(18);        /// @todo Make output precision generic
-
-    //std::string genstring = obj->GetGeneratingString(Gmat::SCRIPTING);
-    std::string genstring = obj->GetGeneratingString(mode);
-    *outstream << genstring << "\n";
-
-    *outstream << "\n";
-    return true;
-}
-
-
-//------------------------------------------------------------------------------
-// bool BuildObject(std::string &objectname, Gmat::WriteMode mode = Gmat::SCRIPTING)
-//------------------------------------------------------------------------------
-/**
- * Pulls the variables and arrays out of the collection of parameters, and
- * serializes them.
- *
- * @param objectname Name of the object that gets serialized.
- *
- * @return true on success, false on failure.
- */
-//------------------------------------------------------------------------------
-bool Interpreter::BuildUserObject(std::string &objectname, Gmat::WriteMode mode)
-{
-    GmatBase *obj = FindObject(objectname);
-
-    if (obj == NULL)
-        return true;
-    
-    if ((obj->GetTypeName() == "Array") || (obj->GetTypeName() == "Variable"))
-       return BuildObject(objectname, mode);
-       
-    return true;
-}
-
-
-//------------------------------------------------------------------------------
-// StringArray& GetListOfObjects(Gmat::ObjectType type)
-//------------------------------------------------------------------------------
-/**
- * Returns names of all configured items of object type.
- *
- * @param  type  object type
- *
- * @return array of configured item names; return empty array if none
- */
-//------------------------------------------------------------------------------
-StringArray& Interpreter::GetListOfObjects(Gmat::ObjectType type)
-{
-   return theModerator->GetListOfObjects(type);
-}
-
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &name)
-//------------------------------------------------------------------------------
-GmatBase* Interpreter::GetObject(const std::string &name)
-{
-   return theModerator->GetObject(name);
-}
-
-
-//------------------------------------------------------------------------------
-// GmatBase* CreateObject(const std::string &type, const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to build core objects and put them in the ConfigManager.
- *  
- * @param  type  Type for the requested object.
- * @param  name  Name for the object, used for references to the object.
- * 
- * @return object pointer on success, NULL on failure.
- */
-//------------------------------------------------------------------------------
-GmatBase* Interpreter::CreateObject(const std::string &type,
-                                    const std::string &name)
-{
-   #if DEBUG_CREATE_OBJECT
-   MessageInterface::ShowMessage
-      ("Interpreter::CreateObject() type=%s, name=%s\n",
-       type.c_str(), name.c_str());
-   #endif
-   
-   GmatBase *obj = NULL;
-
-   // This error message may be confusing to users
-//    // check for name first
-//    obj = FindObject(name);
-//    if (obj != NULL)
-//    {
-//       InterpreterException ex
-//          (type + " object named " + name + " already exist.");
-//       HandleError(ex);
-//       return obj;
-//    }
-   
-   if (type == "Spacecraft") 
-      obj = (GmatBase*)theModerator->CreateSpacecraft(type, name);
-   
-   else if (type == "Formation") 
-      obj = (GmatBase*)theModerator->CreateSpacecraft(type, name);
-   
-   else if (type == "PropSetup") 
-      obj = (GmatBase*)theModerator->CreatePropSetup(name);
-   
-   else if (type == "ForceModel") 
-      obj = (GmatBase*)theModerator->CreateForceModel(name);
-   
-   else if (type == "CoordinateSystem") 
-      obj = (GmatBase*)theModerator->CreateCoordinateSystem(name);
-   
-   else
-   {
-      // Handle Propagator
-      if (obj == NULL)
-         if (find(propagatorList.begin(), propagatorList.end(), type) != 
-             propagatorList.end()) 
-         {
-            obj = (GmatBase*)theModerator->CreatePropagator(type, name);
-         }
-      
-      // Handle AxisSystem
-      if (find(axisSystemList.begin(), axisSystemList.end(), type) != 
-          axisSystemList.end()) 
-      {
-         obj =(GmatBase*) theModerator->CreateAxisSystem(type, name);
-      }
-
-      // Handle Atmosphere Model
-      if (obj == NULL)
-         if (find(atmosphereList.begin(), atmosphereList.end(), type) != 
-             atmosphereList.end()) 
-         {
-            obj = (GmatBase*)theModerator->CreateAtmosphereModel(type, name);
-         }
-      
-//       // Handle Attitude
-//       if (obj == NULL)
-//          if (find(attitudeList.begin(), attitudeList.end(), type) != 
-//              attitudeList.end()) 
-//          {
-//             obj = (GmatBase*)theModerator->CreateAttitude(type, name);
-//          }
-      
-      // Handle Burns
-      if (obj == NULL)
-         if (find(burnList.begin(), burnList.end(), type) != 
-             burnList.end()) 
-         {
-            obj = (GmatBase*)theModerator->CreateBurn(type, name);
-         }
-      
-      // Handle CalculatedPoint (Barycenter, LibrationPoint)
-      if (obj == NULL)
-         if (find(calculatedPointList.begin(), calculatedPointList.end(), type) != 
-             calculatedPointList.end()) 
-         {
-            obj =(GmatBase*) theModerator->CreateCalculatedPoint(type, name);
-         }
-      
-      // Handle Functions
-      if (obj == NULL)
-         if (find(functionList.begin(), functionList.end(), type) != 
-             functionList.end()) 
-         {
-            obj = (GmatBase*)theModerator->CreateFunction(type, name);
-         }
-      
-      // Handle Hardware (tanks, thrusters, etc.)
-      if (obj == NULL)
-         if (find(hardwareList.begin(), hardwareList.end(), type) != 
-             hardwareList.end()) 
-         {
-            obj = (GmatBase*)theModerator->CreateHardware(type, name);
-         }
-      
-      // Handle System Parameters
-      if (obj == NULL)
-         if (find(parameterList.begin(), parameterList.end(), type) != 
-             parameterList.end())
-         {
-            obj = (GmatBase*)CreateParameter(type, name);
-         }
-      
-      // Handle PhysicalModel
-      if (obj == NULL)
-         if (find(physicalModelList.begin(), physicalModelList.end(), type) != 
-             physicalModelList.end())
-         {
-            obj = (GmatBase*)theModerator->CreatePhysicalModel(type, name);
-         }
-      
-      // Handle Solvers
-      if (obj == NULL)
-         if (find(solverList.begin(), solverList.end(), type) != 
-             solverList.end()) 
-         {
-            obj = (GmatBase*)theModerator->CreateSolver(type, name);
-         }
-      
-      // Handle Subscribers
-      if (obj == NULL)
-         if (find(subscriberList.begin(), subscriberList.end(), type) != 
-             subscriberList.end())
-         {
-            obj = (GmatBase*)theModerator->CreateSubscriber(type, name);
-         }
-   
-   }
-   
-   #if DEBUG_CREATE_OBJECT
-   if (obj != NULL)
-   {
-      MessageInterface::ShowMessage
-         ("Interpreter::CreateObject() type=%s, name=%s successfully created\n",
-          obj->GetTypeName().c_str(), obj->GetName().c_str());
-   }
-   #endif
-   
-   return obj;
-}
-
-
-//------------------------------------------------------------------------------
-// SolarSystem* GetSolarSystemInUse()
-//------------------------------------------------------------------------------
-/**
- * Retrieves a current solar system in use.
- *
- * @return a default solar system object pointer
- */
-//------------------------------------------------------------------------------
-SolarSystem* Interpreter::GetSolarSystemInUse()
-{
-   return theModerator->GetSolarSystemInUse();
-}
-
-
-//------------------------------------------------------------------------------
-// void WriteParameters(std::string &prefix, GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Code that writes the parameter details for an object.
- * 
- * @param prefix Starting portion of the script string used for the parameter.
- * @param obj The object that is written.
- */
-//------------------------------------------------------------------------------
-void Interpreter::WriteParameters(std::string &prefix, GmatBase *obj)
-{
-    if (obj == NULL)
-       return;
-
-    Integer i;
-    for (i = 0; i < obj->GetParameterCount(); ++i) 
-    {
-        // Handle StringArray parameters separately
-        if (obj->GetParameterType(i) != Gmat::STRINGARRAY_TYPE) {
-           // Fill in the l.h.s.
-           *outstream << prefix << obj->GetParameterText(i) << " = ";
-           WriteParameterValue(obj, i);
-           *outstream << ";\n";
-        }
-        else {
-           *outstream << prefix << obj->GetParameterText(i) << " = {";
-           StringArray sar = obj->GetStringArrayParameter(i);
-           for (StringArray::iterator n = sar.begin(); n != sar.end(); ++n) {
-              if (n != sar.begin())
-                 *outstream << ", ";
-              *outstream << (*n);
-           }
-           *outstream << "};\n";
-        }
-    }
-
-    GmatBase *ownedObject;
-    std::string nomme, newprefix;
-
-    MessageInterface::ShowMessage("\"%s\" has %d owned objects\n",
-       obj->GetName().c_str(), obj->GetOwnedObjectCount());
-
-    for (i = 0; i < obj->GetOwnedObjectCount(); ++i) {
-       newprefix = prefix;
-       ownedObject = obj->GetOwnedObject(i);
-       nomme = ownedObject->GetName();
-
-          MessageInterface::ShowMessage("   %d has type %s and name \"%s\"\n",
-             i, ownedObject->GetTypeName().c_str(),
-             ownedObject->GetName().c_str());
-
-       if (nomme != "") {
-          newprefix += ".";
-          newprefix += nomme;
-       }
-       WriteParameters(newprefix, ownedObject);
-    }
-}
-
-
-
-//------------------------------------------------------------------------------
-// void WriteParameterValue(GmatBase *obj, Integer id)
-//------------------------------------------------------------------------------
-/**
- * Writes out parameters in the GMAT script syntax.
- * 
- * @param obj Pointer to the object containing the parameter.
- * @param id  ID for the parameter that gets written.
- */
-//------------------------------------------------------------------------------
-void Interpreter::WriteParameterValue(GmatBase *obj, Integer id)
-{
-    Gmat::ParameterType tid = obj->GetParameterType(id);
-    
-    switch (tid) {
-        case Gmat::OBJECT_TYPE:
-        case Gmat::STRING_TYPE:     // Strings and objects write out a string
-            *outstream << obj->GetStringParameter(id);
-            break;
-            
-        case Gmat::INTEGER_TYPE:
-            *outstream << obj->GetIntegerParameter(id);
-            break;
-            
-        case Gmat::UNSIGNED_INT_TYPE:
-            *outstream << obj->GetUnsignedIntParameter(id);
-            break;
-            
-        case Gmat::REAL_TYPE:
-            *outstream << obj->GetRealParameter(id);
-            break;
-            
-        case Gmat::BOOLEAN_TYPE:
-            *outstream << ((obj->GetBooleanParameter(id)) ? "true" : "false");
-            break;
-
-        case Gmat::RMATRIX_TYPE:
-            if (obj->GetTypeName() == "Array")
-            {
-               *outstream << "[";
-               Integer rows = obj->GetIntegerParameter("NumRows");
-               Integer cols = obj->GetIntegerParameter("NumCols");
-               for (Integer r = 0; r < rows; ++r)
-               {
-                  for (Integer c = 0; c < cols; ++c)
-                  {
-                     *outstream << obj->GetRealParameter("SingleValue", r, c);
-                     if (r < rows-1)
-                        *outstream << " ";
-                  }
-                  if (r < rows - 1)
-                     *outstream << "; ";
-               }
-               *outstream << "]";
-            }
-            else
-               MessageInterface::ShowMessage("Unable to write RMatrix for "
-                  "parameter %s on object %s\n",
-                  obj->GetParameterText(id).c_str(), obj->GetName().c_str());
-
-            break;
-
-        default:
-            break;
-    }
-}
-
-
-// The "Create" methods make calls, through the Moderator, to the Factories
-// to get new instances of the requested objects
-
-//------------------------------------------------------------------------------
-// Spacecraft* CreateSpacecraft(std::string satname)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to create a new Spacecraft object.
- * 
- * @param satname Name of the spacecraft.
- * 
- * @return Pointer to the constructed Spacecraft.
- */
-//------------------------------------------------------------------------------
-Spacecraft* Interpreter::CreateSpacecraft(std::string satname)
-{
-    return (Spacecraft *)(theModerator->CreateSpacecraft("Spacecraft", satname));
-}
-
-
-//------------------------------------------------------------------------------
-// Formation* CreateFormation(std::string formname)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to create a new Formation object.
- * 
- * @param satname Name of the formation.
- * 
- * @return Pointer to the constructed Formation.
- */
-//------------------------------------------------------------------------------
-Formation* Interpreter::CreateFormation(std::string formname)
-{
-    return (Formation *)(theModerator->CreateSpacecraft("Formation", formname));
-}
-
-
-//------------------------------------------------------------------------------
-// Parameter* CreateArray(std::string arrname, std::string type)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to create a new Array object.
- * 
- * @param hwname Name of the object.
- * @param type Type of the hardware requested.
- * 
- * @return Pointer to the constructed Formation.
- */
-//------------------------------------------------------------------------------
-Parameter* Interpreter::CreateArray(std::string arrname, std::string type)
-{
-   #ifdef DEBUG_ARRAY_INTERPRETING
-      MessageInterface::ShowMessage(
-         "Interpreter::CreateArray called for \"%s\"\n", arrname.c_str());
-   #endif
-   
-   Integer rows = 3, columns = 1;   // default to a 3 x 1 array
-   std::string name;
-
-   // Reparse the script line, in case there are spaces in the array settings
-   Integer locLeft = arrname.find("[", 0);
-   name = arrname.substr(0, locLeft);
-   
-//    locLeft = line.find("[", 0);
-//    Integer locComma = line.find(",", 0);
-//    Integer locRight = line.find("]", 0);
-   
-   locLeft = arrname.find("[", 0);
-   Integer locComma = arrname.find(",", 0);
-   Integer locRight = arrname.find("]", 0);
-
-   #ifdef DEBUG_ARRAY_INTERPRETING
-      MessageInterface::ShowMessage(
-         "   locLeft = %d, locComma = %d, locRight = %d\n", locLeft, 
-         locComma, locRight);
-   #endif
-   
-   if (locLeft != (Integer)std::string::npos) {
-      if (locRight == (Integer)std::string::npos)
-         throw InterpreterException("Interpreter::CreateArray starts to set "
-            "array dimensions for " + name + 
-            "\nbut never finishes specification (missing ']'?)");
-      std::stringstream rval, cval;
-      //rval << line.substr(locLeft+1);
-      rval << arrname.substr(locLeft+1);
-
-      #ifdef DEBUG_ARRAY_INTERPRETING
-            MessageInterface::ShowMessage(
-            "   Row count reset by \"%s\"\n", rval.str().c_str());
-      #endif
-
-      rval >> rows;
-      if (locComma != (Integer)std::string::npos) {
-         //cval << line.substr(locComma+1);
-         cval << arrname.substr(locComma+1);
-      
-         #ifdef DEBUG_ARRAY_INTERPRETING
-            MessageInterface::ShowMessage(
-               "   Column count reset by \"%s\"\n", cval.str().c_str());
-         #endif
-
-         cval >> columns;
-      }
-   }
-   
-   #ifdef DEBUG_ARRAY_INTERPRETING
-      MessageInterface::ShowMessage("   Creating an array named \"%s\"\n"
-         "   Array has %d rows and %d columns\n", 
-         name.c_str(), rows, columns);
-   #endif
- 
-   Parameter *arr = (Parameter *)(theModerator->CreateParameter(type, name));
-   arr->SetIntegerParameter("NumRows", rows);
-   arr->SetIntegerParameter("NumCols", columns);
-   return arr;
-}
-
-
-CoordinateSystem* Interpreter::CreateCoordinateSystem(std::string csName)
-{
-    return (CoordinateSystem *)(theModerator->CreateCoordinateSystem(csName));
-}
-
-
-AxisSystem* Interpreter::CreateAxisSystem(std::string type, GmatBase *owner)
-{
-   if (owner == NULL)
-      throw InterpreterException("Interpreter::CreateAxisSystem needs a "
-         "CoordinateSystem object that acts as its owner; received a NULL "
-         "pointer instead.");
-   if (owner->GetType() != Gmat::COORDINATE_SYSTEM)
-      throw InterpreterException("Interpreter::CreateAxisSystem needs a "
-         "CoordinateSystem object that acts as its owner; received a pointer "
-         "to " + owner->GetName() + "instead.");
-            
-    AxisSystem* axes = (AxisSystem *)(theModerator->CreateAxisSystem(type, ""));
-    owner->SetRefObject(axes, axes->GetType(), axes->GetName());
-    return axes;
-}
-
-
-//------------------------------------------------------------------------------
-// Hardware* CreateHardware(std::string hwname, std::string type)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to create a new Hardware object.
- * 
- * @param hwname Name of the object.
- * @param type Type of the hardware requested.
- * 
- * @return Pointer to the constructed Formation.
- */
-//------------------------------------------------------------------------------
-Hardware* Interpreter::CreateHardware(std::string hwname, std::string type)
-{
-   return (Hardware *)(theModerator->CreateHardware(type, hwname));
-}
-
-
-//------------------------------------------------------------------------------
-// bool AssembleCommand(const std::string& scriptline, GmatCommand *cmd)
-//------------------------------------------------------------------------------
-/**
- * Builds a command and sets the internal data based on the script test.
- * 
- * @param scriptline The line of script that generated the command.
- * 
- * @return true on success, false on failure.
- */
-//------------------------------------------------------------------------------
-bool Interpreter::AssembleCommand(const std::string& scriptline,
-                                  GmatCommand *cmd)
-{
-   #ifdef DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage(
-         "Interpreter::AssembleCommand(\"%s\", %s) called\n",
-             scriptline.c_str(),
-             ((cmd == NULL) ? "NULL" : cmd->GetTypeName().c_str()));
-   #endif
-
-   StringArray topLevel = Decompose(scriptline);
-   StringArray sublevel[10];  // Allow up to 10 deep for now
-   Integer     cl = 0;        // Current level of decomposition
-   GmatBase    *object[10];   // Up to 10 reference objects
-   ////GmatBase    *temp;
-   Integer     ol = 0;        // Current object level (depth when drilling into 
-                              // owned objects)
-   Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT;
-   
-   #ifdef DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage(
-         "Top level command decomposition:\n   size = %d\n",topLevel.size());
-      for (StringArray::iterator i = topLevel.begin(); i != topLevel.end(); ++i)
-      MessageInterface::ShowMessage("      %s\n", i->c_str());
-   #endif
-   
-   // First construct the Command if the input is NULL
-   if (cmd == NULL) {
-      if (find(commandList.begin(), commandList.end(), topLevel[0]) != commandList.end()) {
-         //cmd = CreateCommand(topLevel[0]);
-         GmatCommand *cmd = theModerator->AppendCommand(topLevel[0], "");
-         if (cmd == NULL)
-            throw InterpreterException("Cannot create \"" + topLevel[0] + 
-                                       "\" command.");
-      }
-      else 
-         throw InterpreterException("\"" + topLevel[0] + 
-                                    "\" command not recognized.");
-   }
-   if (!cmd)  
-      return false;
-
-   cmd->SetGeneratingString(scriptline);
-   
-   // Perform Command specific tasks: Setting string data, and so forth
-   std::string cmdCase = cmd->GetTypeName();
-
-   #ifdef DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage("Setting up a %s command\n",
-         cmdCase.c_str());
-   #endif
-
-   #if DEBUG_TOKEN_PARSING
-   MessageInterface::ShowMessage
-      ("=====> AssembleCommand() calling InterpretAction() line=%s\n",
-       line.c_str());
-   #endif
-   
-   if (cmd->InterpretAction())
-      return true;
-   
-   ////Integer condNumber = 1, index = 0;
-   Integer next = 0;
-   Integer begin = 0;
-   Integer lhsParamCount = 0;
-   Integer rhsParamCount = 0;
-   
-   if ((cmdCase == "If") || (cmdCase == "While"))
-   {
-
-      #if DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage
-         ("=====> AssembleCommand() parsing If or While. topLevel.size()=%d\n",
-          topLevel.size());
-      #endif
-
-      // Ignore parentheses around the condition
-      if (chunks[1]->find("(") != std::string::npos)
-      {
-         Integer openParen, closeParen;
-         bool isOuterParen;
-         std::string newLine =
-            GmatStringUtil::Trim(line, GmatStringUtil::BOTH, true);
-         GmatStringUtil::FindParenMatch(newLine, openParen, closeParen, isOuterParen);
-         if (isOuterParen)
-         {
-            
-            #if DEBUG_TOKEN_PARSING
-            MessageInterface::ShowMessage
-               ("===> openParen=%d, closeParen=%d, newLine=%s\n", openParen,
-                closeParen, newLine.c_str());
-            #endif
-            
-            newLine.erase(closeParen, 1);
-            newLine.erase(openParen, 1);
-            line = newLine;
-            chunks.clear();
-            ChunkLine();
-            topLevel = Decompose(line);
-            
-            #if DEBUG_TOKEN_PARSING
-            for (UnsignedInt i=0; i<topLevel.size(); i++)
-               MessageInterface::ShowMessage
-                  ("===> New topLevel[%d]=%s\n", i, topLevel[i].c_str());
-            #endif
-         }
-         else
-         {
-            throw InterpreterException
-               ("Mismatched parenthesis found in + \n\"" +  line + "\"\n");
-         }
-      }
-      
-
-      // chain through the conditions
-      while (next < (Integer)topLevel.size())
-      {
-         /*
-         #ifdef DEBUG_TOKEN_PARSING
-            std::cout << "Setting " << cmdCase << " condition:\n   lhs = " 
-                      << topLevel[condNumber]
-                      << "\n   op  = " << topLevel[condNumber+1]
-                      << "\n   rhs = " << topLevel[condNumber+2] 
-                      << std::endl;
-         #endif
-         */
-         
-         std::string lhs, op, rhs;
-         begin = next;
-         ParseCondition(topLevel, lhs, op, rhs, begin, next);
-         
-         if (!cmd->SetCondition(lhs, op, rhs))
-               throw CommandException("Cannot set conditions on command " + 
-                                      scriptline + "\n");
-         
-         if (next < (Integer)topLevel.size())
-         {
-            #ifdef DEBUG_TOKEN_PARSING
-               std::cout << "Setting If condition operator: "
-                         << topLevel[next] << std::endl;
-            #endif
-            if (!cmd->SetConditionOperator(topLevel[next]))
-               throw CommandException("Cannot set condition operator on command " +
-                                      scriptline + "\n");
-         }
-         
-         // Set lhs is not a number, set as parameter
-         if (isalpha(lhs[0]))
-         {
-            SetRefParameter(cmd, lhs, lhsParamCount);
-            lhsParamCount++;
-         }
-         
-         // Set rhs is not a number, set as parameter
-         if (isalpha(rhs[0]))
-         {
-            SetRefParameter(cmd, rhs, rhsParamCount);
-            rhsParamCount++;
-         }
-         
-         /*
-         sublevel[cl] = Decompose(topLevel[condNumber]);
-         #ifdef DEBUG_TOKEN_PARSING
-            std::cout << "Decomposing \"" << topLevel[condNumber] << "\"\n";
-         #endif
-         if (sublevel[cl].size() == 1) {
-            // Size 1 implies an object reference or parm string
-            object[ol] = theModerator->GetObject(sublevel[cl][0]);
-            if (object[ol]) {
-               type = object[ol]->GetType();
-               try {
-                  if (!cmd->SetRefObjectName(type, object[ol]->GetName()))
-                     throw InterpreterException("Cannot set object " + 
-                                                object[ol]->GetName() + 
-                                                " for command " + 
-                                                (cmd->GetTypeName()));
-               }
-               catch (BaseException &ex) {
-                  if (!cmd->SetRefObject(object[ol], type, 
-                                         object[ol]->GetName(), index))
-                     throw CommandException("Cannot set reference object " + 
-                                            object[ol]->GetName());
-               }
-            }
-            else {
-               
-            }
-         }
-         else {
-            temp = AssemblePhrase(sublevel[cl], cmd);
-            if (!temp)
-               throw InterpreterException("Cannot Assemble construct " + 
-                                          sublevel[cl][0] + " for command " + 
-                                          (cmd->GetTypeName()));
-            temp->SetName(topLevel[condNumber]);
-            cmd->SetRefObject(temp, temp->GetType(), temp->GetName(), index);
-         }
-         condNumber += 4;
-         ++index;
-         */
-      } // end while (condNumber < (Integer)topLevel.size())
-
-      return true;
-   }
-
-   try
-   {
-      if (cmdCase == "For") 
-         return AssembleForCommand(topLevel, cmd);
-   }
-   catch (InterpreterException &e)
-   {
-      // create EndFor so that it can be deleted later without crash
-      theModerator->AppendCommand("EndFor", "");
-      throw;
-   }
-   
-   if (cmdCase == "Report") 
-      return AssembleReportCommand(topLevel, cmd);
-   
-   //MessageInterface::ShowMessage
-   //   ("=====> AssembleCommand() Handle all other commands\n");
-   
-   // Handle all other commands here
-   for (StringArray::iterator i = topLevel.begin()+1; i != topLevel.end(); ++i)
-   {
-      // If we see a comment character, we're done
-      if ((*i)[0] == '%')
-         break;
-         
-      // Walk through the rest of the command, setting it up
-      sublevel[cl] = Decompose(*i);
-      #ifdef DEBUG_TOKEN_PARSING
-         MessageInterface::ShowMessage(
-            "Decomposing \"%s\"; found %d elements\n", i->c_str(),
-            sublevel[cl].size());
-         for (StringArray::iterator z = sublevel[cl].begin(); 
-              z != sublevel[cl].end(); ++z)
-            MessageInterface::ShowMessage("   \"%s\"\n", z->c_str());
-      #endif
-
-      if (sublevel[cl].size() == 1) {
-         // Size 1 implies an object reference or parm string
-         #ifdef DEBUG_TOKEN_PARSING
-            MessageInterface::ShowMessage("Looking for \"%s\"\n", 
-                                          sublevel[cl][0].c_str());
-         #endif
-         object[ol] = theModerator->GetObject(sublevel[cl][0]);
-         if (object[ol]) {
-            #ifdef DEBUG_TOKEN_PARSING
-               MessageInterface::ShowMessage("   Found a \"%s\"\n", 
-                                          (object[ol]->GetTypeName()).c_str());
-            #endif
-            type = object[ol]->GetType();
-            try {
-               #ifdef DEBUG_TOKEN_PARSING
-                  MessageInterface::ShowMessage("   Trying ref object name\n");
-               #endif
-               if (!cmd->SetRefObjectName(type, object[ol]->GetName()))
-                  throw InterpreterException("Cannot set object " + (*i) + 
-                     " for command " + (cmd->GetTypeName()));
-            }
-            catch (BaseException &ex) {
-               #ifdef DEBUG_TOKEN_PARSING
-                  MessageInterface::ShowMessage("   Trying ref object\n");
-               #endif
-               if (!cmd->SetRefObject(object[ol], type,
-                                      object[ol]->GetName(), 0))
-                  throw;
-            }
-         }
-         else 
-         {
-            if (!cmd->SetRefObjectName(Gmat::UNKNOWN_OBJECT, *i))
-               throw InterpreterException("Cannot find object named " + *i +
-                  " for command '" + 
-                  cmd->GetGeneratingString(Gmat::SCRIPTING) + "'");
-         }
-      }
-      else {
-         if (!AssemblePhrase(sublevel[cl], cmd))
-            return false;
-      }
-   }
-   
-   #ifdef DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage("Interpreter::AssembleCommand finished\n");
-   #endif
-
-   return true;
-}
-
-
-//------------------------------------------------------------------------------
-// bool AssembleForCommand(const StringArray topLevel, GmatCommand *cmd)
-//------------------------------------------------------------------------------
-/**
- * Builds a For command (For variable = start:increment:stop)
- * Example: For I = 1:100
- *          For I = 1:5:100
- * 
- * @param topLevel The line of For command
- * @param cmd The command pointer
- * 
- * @return true on success, false on failure.
- */
-//------------------------------------------------------------------------------
-bool Interpreter::AssembleForCommand(const StringArray topLevel,
-                                     GmatCommand *cmd)
-{
-   //Real start, step = 1.0, stop;
-   Real start = 0.0, step = 1.0, stop = 0.0;
-   std::string startString, stepString, stopString;
-   
-   // Find the start and end values, and the step if one is specified
-   StringArray::const_iterator w;
-   
-   #ifdef DEBUG_TOKEN_PARSING
-      std::cout << "Parsing \"" << cmd->GetGeneratingString() << "\"\n   ";
-      for (w = topLevel.begin()+1; w != topLevel.end(); ++w)
-          std::cout << *w << "\n   ";
-      std::cout << std::endl;
-   #endif
-   
-   // First token is the loop index
-   w = topLevel.begin()+1;
-   #ifdef DEBUG_TOKEN_PARSING
-      std::cout << "Loop index is \"" << *w << "\"\n";
-   #endif
-   GmatBase *parm = theModerator->GetObject(*w);
-   cmd->SetStringParameter("IndexName", *w);
-   if (parm)
-      cmd->SetRefObject(parm, parm->GetType(), parm->GetName());    // Should be SetRefObjectName
-
-   ++w;
-   if (w == topLevel.end() || *w != "=")
-      throw InterpreterException("For loop missing \"=\" character\n   \"" +
-                                 line + "\"\n");
-   
-   ++w;
-   //start = atof(w->c_str());
-   //if (w == topLevel.end() || !GmatStringUtil::ToDouble(*w, &start))
-   if (w == topLevel.end())
-      throw InterpreterException("For loop has missing start index\n   \"" +
-                                 line + "\"\n");
-
-   if (!GmatStringUtil::ToDouble(*w, &start))
-      startString = *w;
-   
-   if (*w == "")
-      throw InterpreterException("For loop has invalid start index\n   \"" +
-                                 line + "\"\n");
-   
-   ++w;
-   if (w == topLevel.end() || *w != ":")
-      throw InterpreterException("For loop missing first \":\" character\n   \"" +
-                                 line + "\"\n");
-   
-   ++w;
-//    if (w == topLevel.end() || !GmatStringUtil::ToDouble(*w, &stop))
-//       throw InterpreterException("For loop has missing or invalid stop index\n   \"" +
-//                                  line + "\"\n");
-   
-   if (w == topLevel.end())
-      throw InterpreterException("For loop has missing stop index\n   \"" +
-                                 line + "\"\n");
-   
-   if (!GmatStringUtil::ToDouble(*w, &stop))
-      stopString = *w;
-   
-   if (*w == "")
-      throw InterpreterException("For loop has invalid stop index\n   \"" +
-                                 line + "\"\n");
-   
-   ++w;
-   if (w != topLevel.end()) {
-      if (*w == ":") {
-         step = stop;
-         stepString = stopString;
-         ++w;
-         //stop = atof(w->c_str());
-//          if (w == topLevel.end() || !GmatStringUtil::ToDouble(*w, &stop))
-//             throw InterpreterException("For loop has missing or invalid stop index\n   \"" +
-//                                        line + "\"\n");
-         if (w == topLevel.end())
-            throw InterpreterException("For loop has missing stop index\n   \"" +
-                                       line + "\"\n");
-         
-         if (!GmatStringUtil::ToDouble(*w, &stop))
-            stopString = *w;
-         
-         if (*w == "")
-            throw InterpreterException("For loop has invalid stop index\n   \"" +
-                                       line + "\"\n");
-      }
-      // Commented out because of the possibility of trailing white space
-      //else
-      //  throw InterpreterException("For loop missing second \":\" character");
-   }
-   
-   #ifdef DEBUG_TOKEN_PARSING
-      std::cout << "Setting values:\n   start = " << start 
-                << "\n   step  = " << step 
-                << "\n   stop  = " << stop 
-                << std::endl;
-      MessageInterface::ShowMessage
-         ("Setting values: start=%f, step=%f, stop=%f\n", start, step, stop);
-      MessageInterface::ShowMessage
-         ("startString=%s, stepString=%s, stopString=%s\n", startString.c_str(),
-          stepString.c_str(), stopString.c_str());
-   #endif
-
-   Parameter* theParam;
-   if (startString != "")
-   {
-      cmd->SetStringParameter(cmd->GetParameterID("StartName"), startString);
-      theParam = theModerator->GetParameter(startString);
-      
-      if (theParam == NULL)
-      {
-         // Create if it is system parameter.
-         // Is there any case using system parameter as For loop index?
-         // Here is an example how to handle it.
-         std::string type, owner, depObj;
-         GmatStringUtil::ParseParameter(startString, type, owner, depObj);
-         
-         if (theModerator->IsParameter(type))
-            theParam = theModerator->CreateParameter(type, startString, owner, depObj);
-         else
-            throw InterpreterException
-               ("For loop has undefined start variable: " + startString + "\n   \"" +
-                line + "\"\n");
-      }
-      
-      cmd->SetRefObject(theParam, Gmat::PARAMETER, startString);
-   }
-   else
-   {
-      cmd->SetRealParameter("StartValue", start);
-   }
-   
-   if (stepString != "")
-   {
-      cmd->SetStringParameter(cmd->GetParameterID("IncrementName"), stepString);
-      theParam = theModerator->GetParameter(stepString);
-      
-      if (theParam == NULL)
-         throw InterpreterException
-            ("For loop has undefined increment variable: " + stepString + "\n   \"" +
-                                    line + "\"\n");
-      
-      cmd->SetRefObject(theParam, Gmat::PARAMETER, stepString);
-   }
-   else
-   {
-      cmd->SetRealParameter("Step", step);
-   }
-
-   if (stopString != "")
-   {
-      cmd->SetStringParameter(cmd->GetParameterID("EndName"), stopString);
-      theParam = theModerator->GetParameter(stopString);
-      
-      if (theParam == NULL)
-         throw InterpreterException
-            ("For loop has undefined stop variable: " + stopString + "\n   \"" +
-                                    line + "\"\n");
-      
-      cmd->SetRefObject(theParam, Gmat::PARAMETER, stopString);
-   }
-   else
-   {
-      cmd->SetRealParameter("EndValue", stop);
-   }
-
-   return true;
-}
-
-
-//------------------------------------------------------------------------------
-// bool AssembleReportCommand(const StringArray topLevel, GmatCommand *cmd)
-//------------------------------------------------------------------------------
-bool Interpreter::AssembleReportCommand(const StringArray topLevel, 
-                                        GmatCommand *cmd)
-{
-   #ifdef DEBUG_TOKEN_PARSING
-   MessageInterface::ShowMessage
-      ("Interpreter::AssembleReportCommand()\n   line=%s\n", line.c_str());
-   #endif
-   
-   GmatBase *object = NULL;
-   Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT;
-   std::string line1;
-   UnsignedInt index1 = 0;
-   UnsignedInt closeParen;
-   UnsignedInt size = line.size();
-
-   // Removed extra space in the array indexing, between ()
-   while (index1 < size)
-   {
-      if (line[index1] == '(')
-      {
-         line1.push_back(line[index1]);
-         closeParen = line.find(')', index1);
-         // find close paren and copy non-blank char
-         for (UnsignedInt j=index1+1; j<=closeParen; j++)
-            if (line[j] != ' ')
-               line1.push_back(line[j]);
-         
-         index1 = closeParen+1;
-      }
-      else
-      {
-         line1.push_back(line[index1++]);
-      }
-   }
-   
-   #ifdef DEBUG_TOKEN_PARSING
-   MessageInterface::ShowMessage
-      ("Interpreter::AssembleReportCommand() line1.size=%d\n   line1=%s\n",
-       line1.size(), line1.c_str());
-   #endif
-   
-   StringTokenizer st(line1, " ;");
-   StringArray params = st.GetAllTokens();
-   Integer parmNumber = 0;
-   
-   #ifdef DEBUG_TOKEN_PARSING
-   MessageInterface::ShowMessage
-      ("Interpreter::AssembleReportCommand() params.size()=%d\n", params.size());
-   #endif
-   
-   for (UnsignedInt i=1; i<params.size(); i++)
-   {
-      #ifdef DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage("   params[%d]=<%s>\n", i, params[i].c_str());
-      #endif
-      
-      // If we see a comment character, we're done
-      if (params[i] == "%")
-         break;
-      
-      object = theModerator->GetObject(params[i]);
-      if (object)
-      {
-         #ifdef DEBUG_TOKEN_PARSING
-         MessageInterface::ShowMessage("   Found a \"%s\"\n", 
-                                       (object->GetTypeName()).c_str());
-         #endif
-         type = object->GetType();
-         if (!cmd->SetRefObject(object, type, params[i], parmNumber++))
-            throw InterpreterException
-               ("Cannot set object " + params[i] + " for command " + (cmd->GetTypeName()));
-      }
-      else
-      {
-         // Test if it is a system parameter
-         std::string ownerName, typeName, depObj;
-         GmatStringUtil::ParseParameter(params[i], typeName, ownerName, depObj);
-         
-         if (ownerName != "" && typeName != "")
-         {
-            #if DEBUG_TOKEN_PARSING
-            MessageInterface::ShowMessage
-               ("   It is a system parameter. name=%s, typeName=%s, ownerName=%s, "
-                "depObj=%s\n", params[i].c_str(), typeName.c_str(), ownerName.c_str(),
-                depObj.c_str());
-            #endif
-            
-            object = CreateParameter(params[i], typeName, depObj, ownerName);
-            type = object->GetType();
-            
-            if (object == NULL)
-               throw InterpreterException
-                  ("Cannot find object named " + params[i] + " for Report command '" + 
-                   cmd->GetGeneratingString(Gmat::SCRIPTING) + "'");
-            
-            if (!cmd->SetRefObject(object, type, params[i], parmNumber++))
-               throw InterpreterException
-                  ("Cannot set Parameter object " + params[i] + 
-                   " for Report command: " + (cmd->GetTypeName()));
-            
-            #ifdef DEBUG_TOKEN_PARSING
-            MessageInterface::ShowMessage
-               ("Assembled a %s\n", object->GetTypeName().c_str());
-            #endif
-         }
-         else
-         {
-            throw InterpreterException
-               ("Cannot find the object: " + params[i] + " in the line\n" +
-                line + "\n");
-         }
-      }
-      
-      parmNumber++;
-   }
-
-   return true;
-
-
-   
-   //loj: Commented lines below (5/19/06)
-//    StringArray sublevel[10];  // Allow up to 10 deep for now
-//    Integer     cl = 0;        // Current level of decomposition
-//    GmatBase    *object;
-//    Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT;
-//    Integer parmNumber = 0;
-
-//    for (StringArray::const_iterator i = topLevel.begin()+1; i != topLevel.end(); ++i)
-//    {
-//       // If we see a comment character, we're done
-//       if ((*i)[0] == '%')
-//          break;
-         
-//       // Walk through the rest of the command, setting it up
-//       sublevel[cl] = Decompose(*i);
-//       #ifdef DEBUG_TOKEN_PARSING
-//          MessageInterface::ShowMessage(
-//             "Decomposing \"%s\"; found %d elements\n", i->c_str(),
-//             sublevel[cl].size());
-//          for (StringArray::iterator z = sublevel[cl].begin(); 
-//               z != sublevel[cl].end(); ++z)
-//             MessageInterface::ShowMessage("   \"%s\"\n", z->c_str());
-//       #endif
-
-//       if (sublevel[cl].size() == 1) 
-//       {
-//          // Size 1 implies an object reference or parm string
-//          #ifdef DEBUG_TOKEN_PARSING
-//             MessageInterface::ShowMessage("Looking for \"%s\"\n", 
-//                                           sublevel[cl][0].c_str());
-//          #endif
-//          object = theModerator->GetObject(sublevel[cl][0]);
-//          if (object) {
-//             #ifdef DEBUG_TOKEN_PARSING
-//                MessageInterface::ShowMessage("   Found a \"%s\"\n", 
-//                                           (object->GetTypeName()).c_str());
-//             #endif
-//             type = object->GetType();
-//             if (!cmd->SetRefObject(object, type, object->GetName(), 
-//                 parmNumber++))
-//                throw InterpreterException("Cannot set object " + (*i) + 
-//                   " for command " + (cmd->GetTypeName()));
-//          }
-//          else 
-//             throw InterpreterException("Cannot find object named " + *i +
-//                " for Report command '" + 
-//                cmd->GetGeneratingString(Gmat::SCRIPTING) + "'");
-//       }
-//       else 
-//       {
-//          #ifdef DEBUG_TOKEN_PARSING
-//             MessageInterface::ShowMessage("Assembling %s\n",sublevel[cl][0].c_str()); 
-//          #endif
-//          object = AssemblePhrase(sublevel[cl], cmd);
-//          if (object == NULL)
-//             return false;
-//          #ifdef DEBUG_TOKEN_PARSING
-//             MessageInterface::ShowMessage("Assembled a %s\n", object->GetTypeName().c_str());
-//          #endif
-//          if (!cmd->SetRefObject(object, type, object->GetName(), 
-//              parmNumber++))
-//             throw InterpreterException("Cannot set Parameter object " + (*i) + 
-//                      " for command " + (cmd->GetTypeName()));
-//       }
-//    }
-   
-//    return true;
-}
-
-
-//------------------------------------------------------------------------------
-// bool InterpretFunctionCall()
-//------------------------------------------------------------------------------
-/**
- * Builds a call to a MATLAB or GMAT function -- i.e. a CallFunction command.
- *
- * @return true on success, false on failure.
- */
-//------------------------------------------------------------------------------
-bool Interpreter::InterpretFunctionCall()
-{
-   #if defined DEBUG_TOKEN_PARSING || defined DEBUG_FUNCTION_PARSING
-      MessageInterface::ShowMessage(
-         "Entered Interpreter::InterpretFunctionCall\n");
-      MessageInterface::ShowMessage(
-         "Treating \"%s\" as a function call with pieces:\n",
-         line.c_str());
-      for (std::vector<std::string*>::iterator c = chunks.begin();
-           c != chunks.end(); ++c)
-         MessageInterface::ShowMessage("   \"%s\"\n", (*c)->c_str());
-   #endif
-
-   // FunctionCalls are built using CallFunction commands.
-   GmatCommand *cmd = theModerator->AppendCommand("CallFunction", "");
-   if (cmd == NULL)
-      throw InterpreterException("Unable to assemble function command for \"" +
-               line + "\"");
-
-   cmd->SetGeneratingString(line);
-               
-   StringArray inputs, outputs;
-   std::string funct;
-   
-   // Split up the pieces based on their types
-   for (std::vector<std::string*>::iterator i = chunks.begin();
-        i != chunks.end(); ++i) {
-      if (((**i) == "GMAT") || ((**i) == "=") || ((**i) == ";"))
-         continue;
-      if ((**i)[0] == '[')
-         outputs = Decompose(**i);
-      else if ((**i)[0] == '(')
-         inputs = Decompose(**i);
-      else
-         funct = **i;
-   }
-   
-   cmd->SetStringParameter("FunctionName", funct);
-   
-   for (StringArray::iterator str = inputs.begin(); str != inputs.end(); ++str)
-   {
-      #if defined DEBUG_TOKEN_PARSING || defined DEBUG_FUNCTION_PARSING
-         MessageInterface::ShowMessage("   Adding input %s\n", str->c_str());
-      #endif
-      cmd->SetStringParameter("AddInput", *str);
-      
-      // If the parameter does not exist, create it now
-      if (theModerator->GetObject(*str) == NULL)
-      {
-         GmatBase *parmObj;
-         std::string paramType, paramObj, parmSystem;
-
-         InterpretParameter(*str, paramType, paramObj, parmSystem);
-
-         parmObj = theModerator->GetObject(paramObj);
-         if (parmObj)
-         {
-            #if defined DEBUG_TOKEN_PARSING || defined DEBUG_FUNCTION_PARSING
-               MessageInterface::ShowMessage(
-                  "   InterpretFunctionCall building a parameter named %s, "
-                  "with type %s and CS '%s' for object %s\n", str->c_str(),
-                  paramType.c_str(), parmSystem.c_str(),
-                  parmObj->GetName().c_str());
-            #endif
-            if (theModerator->IsParameter(paramType))
-            {
-               #if defined DEBUG_TOKEN_PARSING || defined DEBUG_FUNCTION_PARSING
-                  MessageInterface::ShowMessage("%s%s\" named \"%s\"\n",
-                     "Attempting to build parameter \"", paramType.c_str(),
-                     str->c_str());
-               #endif
-                  
-                  
-               CreateParameter(*str, paramType, parmSystem, parmObj->GetName());
-               
-            }
-         }
-      }
-   }
-      
-   for (StringArray::iterator str = outputs.begin(); str != outputs.end();
-        ++str) {
-      #if defined DEBUG_TOKEN_PARSING || defined DEBUG_FUNCTION_PARSING
-         MessageInterface::ShowMessage("   Adding output %s\n", str->c_str());
-      #endif
-      cmd->SetStringParameter("AddOutput", *str);
-   }
-      
-   #if defined DEBUG_TOKEN_PARSING || defined DEBUG_FUNCTION_PARSING
-      MessageInterface::ShowMessage(
-         "Leaving Interpreter::InterpretFunctionCall\n");
-      MessageInterface::ShowMessage(
-         "Built call function with components:\n   [");
-      StringArray parm = cmd->GetStringArrayParameter("AddOutput");
-      for (StringArray::iterator c = parm.begin();
-           c != parm.end(); ++c) {
-         if (c != parm.begin())
-            MessageInterface::ShowMessage(", ");
-         MessageInterface::ShowMessage("\"%s\"", c->c_str());
-      }
-      MessageInterface::ShowMessage("] = %s(",
-         cmd->GetStringParameter("FunctionName").c_str());
-      parm = cmd->GetStringArrayParameter("AddInput");
-      for (StringArray::iterator c = parm.begin();
-           c != parm.end(); ++c) {
-         if (c != parm.begin())
-            MessageInterface::ShowMessage(", ");
-         MessageInterface::ShowMessage("\"%s\"", c->c_str());
-      }
-      MessageInterface::ShowMessage(");\n");
-   #endif
-
-   chunks.clear();
-   return true;
+   ForceModel::SetScriptAlias("PrimaryBodies", "GravityField");
+   ForceModel::SetScriptAlias("Gravity", "GravityField");
+   ForceModel::SetScriptAlias("PointMasses", "PointMassForce");
+   ForceModel::SetScriptAlias("Drag", "DragForce");
+   ForceModel::SetScriptAlias("SRP", "SolarRadiationPressure");
 }
 
 
@@ -1820,6 +273,13 @@ bool Interpreter::InterpretFunctionCall()
 //------------------------------------------------------------------------------
 GmatCommand* Interpreter::InterpretGMATFunction(const std::string &pathAndName)
 {
+   //=============================================
+   //loj: 9/27/06 Need rework using the TextParser
+   //=============================================
+
+   return NULL;
+
+   /*
    #ifdef DEBUG_FUNCTION_PARSING
       MessageInterface::ShowMessage(
          "Entered Interpreter::InterpretGMATFunction(%s)...\n", 
@@ -2054,2405 +514,2671 @@ GmatCommand* Interpreter::InterpretGMATFunction(const std::string &pathAndName)
    #endif
    
    return commands;
+   */
 }
 
 
 //------------------------------------------------------------------------------
-// GmatBase* AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
+// StringArray& GetListOfObjects(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
-GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
+/**
+ * Returns names of all configured items of object type.
+ *
+ * @param  type  object type
+ *
+ * @return array of configured item names; return empty array if none
+ */
+//------------------------------------------------------------------------------
+StringArray& Interpreter::GetListOfObjects(Gmat::ObjectType type)
 {
-   #ifdef DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage(
-         "Entered Interpreter::AssemblePhrase with phrase\n");
-      for (Integer i = 0; i < (Integer)phrase.size(); ++i)
-         MessageInterface::ShowMessage("   '%s'\n", phrase[i].c_str());
+   return theModerator->GetListOfObjects(type);
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* GetObject(const std::string &name)
+//------------------------------------------------------------------------------
+GmatBase* Interpreter::GetObject(const std::string &name)
+{
+   return theModerator->GetObject(name);
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* CreateObject(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Calls the Moderator to build core objects and put them in the ConfigManager.
+ *  
+ * @param  type  Type for the requested object.
+ * @param  name  Name for the object, used for references to the object.
+ * 
+ * @return object pointer on success, NULL on failure.
+ */
+//------------------------------------------------------------------------------
+GmatBase* Interpreter::CreateObject(const std::string &type,
+                                    const std::string &name)
+{
+   #if DEBUG_CREATE_OBJECT
+   MessageInterface::ShowMessage
+      ("Interpreter::CreateObject() type=%s, name=%s\n",
+       type.c_str(), name.c_str());
    #endif
    
-   StringArray breakdown;
-   GmatBase *ref = NULL;
-   ObjectArray objectlist;
-   if (phrase.size() == 1) 
-   {
-      breakdown = Decompose(phrase[0]);
-      if (breakdown.size() == 1) 
-      {
-         ref = theModerator->GetObject(phrase[0]);
-      }
-      else 
-      {
-         for (StringArray::iterator i = phrase.begin(); i != phrase.end(); ++i)
-         {
-            #ifdef DEBUG_TOKEN_PARSING
-               std::cout << "   Breaking down subphrase " << *i << "\n";
-            #endif
-            breakdown = Decompose(*i);
-            if (breakdown.size() == 1) 
-            {
-               ref = theModerator->GetObject(*i);
-            }
-            else 
-            {
-               #ifdef DEBUG_TOKEN_PARSING
-                  std::cout << "   Size != 1\n";
-               #endif
-            }
-         }
-      }
-   }
-   // Not an object reference -- check the other options
-   else 
-   {
-      // Is it a Parameter?
-      if ((phrase.size() == 2) || (phrase.size() == 3)) 
-      {
-         std::string parmObj = phrase[0], parmType, parmSystem = "";
-         
-         if (phrase.size() == 2)
-            parmType = phrase[1];
-         else 
-         {
-            parmSystem = phrase[1];
-            parmType = phrase[2];
-         }
-         
-         ref = theModerator->GetParameter(parmType);
-         if (ref == NULL) 
-         {
-            std::string name = parmObj;
-            if (phrase.size() == 3) 
-            {
-               name += ".";
-               name += parmSystem;
-            }
-            name += ".";
-            name += parmType;
+   GmatBase *obj = NULL;
 
-            ref = CreateParameter(name, parmType, parmSystem);
-            
-            //ref = theModerator->CreateParameter(parmType, name);
-            if (ref) 
-            {
-               Parameter *parm = (Parameter*)ref;
-
-               #ifdef DEBUG_TOKEN_PARSING
-                  std::cout << "Parameter configuration:\n   Parm = " 
-                            << parmType << "\n   obj  = " 
-                            << parmObj << std::endl; 
-               #endif
-               GmatBase *refobj = theModerator->GetObject(parmObj);
-               if (refobj == NULL)
-                  throw CommandException(
-                     "Interpreter could not find the object " + parmObj +
-                     " needed to configure the parameter " + name);
-               Gmat::ObjectType ot = refobj->GetType();
-               parm->SetRefObjectName(ot, parmObj);
-               
-            }
-         }
-         else // NOT a Parameter
-            throw InterpreterException("Could not parse " + phrase[1]);
-      }
-   }
-   return ref;
-}
-
-
-//------------------------------------------------------------------------------
-// GmatCommand* CreateCommand(std::string commandtype)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to create a GmatCommand object.
- * 
- * @param commandtype Text descriptor for the command.
- * 
- * @return Pointer to the constructed GmatCommand.
- */
-//------------------------------------------------------------------------------
-GmatCommand* Interpreter::CreateCommand(std::string commandtype)
-{
-    return theModerator->CreateCommand(commandtype, "");
-}
-
-
-//------------------------------------------------------------------------------
-// Propagator* CreatePropagator(std::string proptype)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to create a Propagator object.
- * 
- * @param proptype Text descriptor for the command.
- * 
- * @return Pointer to the constructed Propagator.
- */
-//------------------------------------------------------------------------------
-Propagator* Interpreter::CreatePropagator(std::string proptype)
-{
-    return theModerator->CreatePropagator(proptype, "");
-}
-
-
-//------------------------------------------------------------------------------
-// ForceModel* CreateForceModel(std::string modelname)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to create a ForceModel object.
- * 
- * @param modelname Name for the ForceModel.
- * 
- * @return Pointer to the constructed ForceModel.
- */
-//------------------------------------------------------------------------------
-ForceModel* Interpreter::CreateForceModel(std::string modelname)
-{
-    return theModerator->CreateForceModel(modelname);
-}
-
-
-//------------------------------------------------------------------------------
-// PhysicalModel* CreatePhysicalModel(std::string forcetype)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to create individual Force objects.
- * 
- * @param forcetype The type of force requested.
- * 
- * @return Pointer to the constructed force (aka PhysicalModel).
- */
-//------------------------------------------------------------------------------
-PhysicalModel* Interpreter::CreatePhysicalModel(std::string forcetype)
-{
-    return theModerator->CreatePhysicalModel(forcetype, "");
-}
-
-
-//------------------------------------------------------------------------------
-// SolarSystem* CreateSolarSystem(std::string ssname)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to create a SolarSystem object.
- * 
- * @param ssname Name for the solar system.
- * 
- * @return Pointer to the constructed SolarSystem.
- */
-//------------------------------------------------------------------------------
-SolarSystem* Interpreter::CreateSolarSystem(std::string ssname)
-{
-    return theModerator->CreateSolarSystem(ssname);
-}
-
-
-//------------------------------------------------------------------------------
-// CelestialBody* CreateCelestialBody(std::string cbname, std::string type)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to create a CelestialBody.
- * 
- * @param cbname Name for the body.
- * @param type The type of body requested.
- * 
- * @return Pointer to the constructed CelestialBody.
- */
-//------------------------------------------------------------------------------
-CelestialBody* Interpreter::CreateCelestialBody(std::string cbname,
-                                                std::string type)
-{
-    return theModerator->CreateCelestialBody(cbname, type);
-}
-
-
-//------------------------------------------------------------------------------
-// Parameter* CreateParameter(const std::string &name, const std::string &type,
-//                            const std::string &depname, const std::string &obj)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to create a Parameter.
- * 
- * @param name Name for the parameter.
- * @param type Type of parameter requested
- * @param depname Dependent object name of parameter requested
- * @param obj object name of parameter requested
- * 
- * @return Pointer to the constructed Parameter.
- */
-//------------------------------------------------------------------------------
-Parameter* Interpreter::CreateParameter(const std::string &name, 
-                                        const std::string &type,
-                                        const std::string &depname,
-                                        const std::string &obj)
-{
-   Parameter *parm =
-      theModerator->CreateParameter(type, name, obj, depname);
-
-   return parm;
-}
-
-
-//------------------------------------------------------------------------------
-// Parameter* CreateSubscriber(std::string name, std::string type)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to create a Subscriber.
- * 
- * @param name Name for the subscriber.
- * @param type Type of parameter requested.
- * 
- * @return Pointer to the constructed Subscriber.
- */
-//------------------------------------------------------------------------------
-Subscriber* Interpreter::CreateSubscriber(std::string name, std::string type)
-{
-    return theModerator->CreateSubscriber(type, name);
-}
-
-
-                                                
-// The following method signature depends on an open scripting issue: if
-// props and force models are named, the following Create method should use
-// the names rather than the object pointers
-
-//------------------------------------------------------------------------------
-// PropSetup* CreatePropSetup(std::string name)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to create a PropSetup.
- * 
- * @param name Name for the propagator setup.
- * 
- * @return Pointer to the constructed PropSetup.
- */
-//------------------------------------------------------------------------------
-PropSetup* Interpreter::CreatePropSetup(std::string name)
-{
-    return theModerator->CreatePropSetup(name);
-}
-
-
-//------------------------------------------------------------------------------
-// Burn* CreateBurn(std::string name, bool isImpulsive)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to create a Burn object.
- * 
- * @param name Name for the burn.
- * @param isImpulsive true for impulsive burns, false for finite burns.
- * 
- * @return Pointer to the constructed Burn.
- */
-//------------------------------------------------------------------------------
-Burn* Interpreter::CreateBurn(std::string name, bool isImpulsive)
-{
-   if (isImpulsive)
-      return theModerator->CreateBurn("ImpulsiveBurn", name);
-   return theModerator->CreateBurn("FiniteBurn", name);
-}
-
-
-//------------------------------------------------------------------------------
-// bool InterpretPropSetupParameter(GmatBase *obj,
-//                                 StringArray::iterator& phrase, Integer index)
-//------------------------------------------------------------------------------
-/**
- * Sets PropSetup parameters.
- *
- * @param obj Object that is being configured.
- * @param phrase Phrase containing the configuration information.
- *
- * @return true if the parameter is set, false otherwise.
- *
- * @note This method is deprecated and remains in the code until it can be
- *       safely removed.
- */
-//------------------------------------------------------------------------------
-bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
-                                  StringArray& items,
-                                  std::vector<std::string*>::iterator& phrase,
-                                  Integer index)
-{
-   bool retval = true;
-   // Set object associations
-   std::string objParm = items[index];
-
-   try {
-       Integer id = obj->GetParameterID(objParm);
-
-       Gmat::ParameterType parmType = obj->GetParameterType(id);
-       if ((parmType != Gmat::UNKNOWN_PARAMETER_TYPE) &&
-           (parmType != Gmat::OBJECT_TYPE))
-       {
-           // Set parameter data
-           ++phrase;
-
-           if (**phrase == "=")
-               ++phrase;
-           SetParameter(obj, id, **phrase);
-       }
-       else
-       {
-           if (objParm == "Type") {
-               ++phrase;
-
-               if (**phrase == "=")
-                   ++phrase;
-               else
-                   throw InterpreterException(
-                      "Syntax error creating Propagator");
-               Propagator *prop = theModerator->CreatePropagator(**phrase, "");
-               if (prop)
-                   ((PropSetup*)obj)->SetPropagator(prop);
-               else
-                   throw InterpreterException(
-                      "Propagator could not be created");
-           }
-           else if (objParm == "ForceModelName") {
-               ++phrase;
-
-               if (**phrase == "=")
-                   ++phrase;
-               else
-                   throw InterpreterException(
-                      "Syntax error accessing Force Model");
-               ForceModel *fm = theModerator->GetForceModel(**phrase);
-               if (fm)
-                   ((PropSetup*)obj)->SetForceModel(fm);
-               else
-                   throw InterpreterException("Force model does not exist");
-           }
-           else {
-               // Could be a subitem -- Drag.Earth = Exponential, for example
-               std::string subparm = GetToken();
-               if (subparm == "")
-                   throw InterpreterException(
-                      "Assignment string does not parse");
-               // Find the owned object
-               if (objParm == "Drag") {
-                   if (subparm != "Earth")
-                       throw InterpreterException(
-                          "Only Earth drag is supported in build 2");
-               }
-
-               // Set the parm on the owned object
-               throw InterpreterException("Assignment string does not parse");
-           }
-       }
-   }
-   catch (BaseException &ex) {
-      /// Check to see if it is a propagator parameter; otherwise throw
-      Propagator *prop = ((PropSetup*)obj)->GetPropagator();
-      if (prop == NULL)
-         throw;
-      ++phrase;
-
-      if (**phrase == "=")
-         ++phrase;
-      else
-         throw InterpreterException(
-            "Syntax error creating Propagator:\n" +
-            ex.GetMessage());
-
-      Integer id = prop->GetParameterID(objParm);
-      
-      #ifdef DEBUG_INTERPRETER
-      std::cout << "Setting " << objParm << " on " << prop->GetTypeName()
-                << " to " << **phrase << "\n";
-      #endif
-      
-      if (!SetParameter(prop, id, **phrase))
-         throw;
-   }
-
-   return retval;
-}
-
-
-//------------------------------------------------------------------------------
-// bool InterpretCoordinateSystemParameter(GmatBase *obj,
-//                                 StringArray::iterator& phrase, Integer index)
-//------------------------------------------------------------------------------
-/**
- * Sets PropSetup parameters.
- *
- * @param obj Object that is being configured.
- * @param phrase Phrase containing the configuration information.
- *
- * @return true if the parameter is set, false otherwise.
- *
- * @note This method is deprecated and remains in the code until it can be
- *       safely removed.
- */
-//------------------------------------------------------------------------------
-bool Interpreter::InterpretCoordinateSystemParameter(GmatBase *obj,
-                                  StringArray& items,
-                                  std::vector<std::string*>::iterator& phrase,
-                                  Integer index)
-{
-   bool retval = true;
-   // Set object associations
-   std::string objParm = items[index];
+   // This error message may be confusing to users
+//    // check for name first
+//    obj = FindObject(name);
+//    if (obj != NULL)
+//    {
+//       InterpreterException ex
+//          (type + " object named " + name + " already exist.");
+//       HandleError(ex);
+//       return obj;
+//    }
    
-   #ifdef DEBUG_INTERPRETER
-      MessageInterface::ShowMessage("ICSP: Object is a %s named %s, id = %d\n", 
-         obj->GetTypeName().c_str(), obj->GetName().c_str(), index);
-   #endif
+   if (type == "Spacecraft") 
+      obj = (GmatBase*)theModerator->CreateSpacecraft(type, name);
    
-   try {
-      Integer id = obj->GetParameterID(objParm);
-
-      Gmat::ParameterType parmType = obj->GetParameterType(id);
-      if ((parmType != Gmat::UNKNOWN_PARAMETER_TYPE) &&
-          (parmType != Gmat::OBJECT_TYPE))
-      {
-         // Set parameter data
-         ++phrase;
-
-         if (**phrase == "=")
-            ++phrase;
-         SetParameter(obj, id, **phrase);
-      }
-      else
-      {
-         if (objParm == "Axes")
-         {
-            ++phrase;
-
-            if (**phrase == "=")
-               ++phrase;
-            else
-               throw InterpreterException(
-                  "Syntax error creating coordinate system axes for " +
-                  obj->GetName());
-
-            AxisSystem *axes = theModerator->CreateAxisSystem(**phrase, "");
-            if (axes != NULL)
-            {
-               axes->SetName(**phrase);
-               obj->SetRefObject(axes, axes->GetType(), axes->GetName());
-            }
-            else
-               retval = false;
-         }
-         else
-            throw InterpreterException("Preparing to handle " + objParm);
-      }
-   }
-   catch (BaseException &ex)
-   {
-      // Check to see if it is an AxisSystem parameter; otherwise throw
-      #ifdef DEBUG_INTERPRETER
-         MessageInterface::ShowMessage("Setting %s on %s named %s to %s\n",
-            objParm.c_str(), obj->GetTypeName().c_str(), obj->GetName().c_str(),
-            (*phrase)->c_str());
-      #endif
-    
-      // Get the axis system
-      GmatBase *axes = obj->GetRefObject(Gmat::AXIS_SYSTEM, "");
-      if (!axes)
-      {
-         MessageInterface::ShowMessage("Axis system not yet set on %s\n",
-            obj->GetName().c_str());
-         throw;
-      }
-
-      Integer id = axes->GetParameterID(objParm);
-      Gmat::ParameterType type = axes->GetParameterType(id);
-
-      // Set parameter data
-      ++phrase;
-      if (**phrase != "=")
-         throw InterpreterException(
-            "Syntax error setting " + objParm +
-            " on coordinate system axes for " + obj->GetName());
-
-      ++phrase;
-
-      switch (type)
-      {
-         case Gmat::STRING_TYPE:
-            axes->SetStringParameter(id, **phrase);
-            retval = true;
-            break;
-
-         case Gmat::REAL_TYPE:
-            {  // Set scope for local variables
-               std::stringstream temp;
-               temp << **phrase;
-               Real val;
-               temp >> val;
-               axes->SetRealParameter(id, val);
-            }
-            retval = true;
-            break;
-
-         default:
-            throw;
-      }
-   }
-
-   return retval;
-}
-
-
-bool Interpreter::InterpretGlobalSetting(const StringArray &sar, 
-   const std::string &rhs)
-{
-   #ifdef DEBUG_GLOBAL_INTERPRETING
-      MessageInterface::ShowMessage("Setting global for %s to %s\n", 
-         sar[0].c_str(), rhs.c_str());
-   #endif
-
-   if (sar[0] == "SolarSystem")
-      return InterpretSolarSetting(sar, rhs);
-      
-   return true;
-}
-
-
-bool Interpreter::InterpretSolarSetting(const StringArray &sar, 
-   const std::string &rhs)
-{
-   if (sar[1] == "Ephemeris")
-   {
-      StringArray ephems = SeparateBraces(rhs);
-      #ifdef DEBUG_GLOBAL_INTERPRETING
-         for (StringArray::iterator i = ephems.begin(); i != ephems.end(); ++i)
-            MessageInterface::ShowMessage("   %s\n", i->c_str());
-      #endif
-
-      theModerator->SetPlanetarySourceTypesInUse(ephems);
-      return true;
-   }
+   else if (type == "Formation") 
+      obj = (GmatBase*)theModerator->CreateSpacecraft(type, name);
    
-   if (sar[1] == "EphemerisUpdateInterval")
-   {
-      Real interval;
-      std::stringstream data;
-      data << rhs;
-      data >> interval;
-      
-      #ifdef DEBUG_GLOBAL_INTERPRETING
-         MessageInterface::ShowMessage("   interval = %lf\n", interval);
-      #endif
-      
-      if (interval >= 0.0)
-      {
-         SolarSystem *sol = theModerator->GetSolarSystemInUse();
-         sol->SetEphemUpdateInterval(interval);
-      }
-
-      return true;
-   }
+   else if (type == "PropSetup") 
+      obj = (GmatBase*)theModerator->CreatePropSetup(name);
    
-   if (sar[1] == "UseTTForEphemeris")
-   {
-      if ((rhs != "true") && (rhs != "false"))
-         throw InterpreterException(
-            "The boolean parameter setting for 'SolarSystem.UseTTForEphemeris' "
-            "must be either 'true' or 'false'; you used '" + rhs + "'");
-
-      bool useTT = (rhs == "true" ? true : false);
-      
-      SolarSystem *sol = theModerator->GetSolarSystemInUse();
-      if (sol == NULL)
-         throw InterpreterException(
-            "Attempting to set the ephemeris time system on the solar system,"
-            " but the solar system has not yet been created.");
-
-      sol->SetBooleanParameter("UseTTForEphemeris", useTT);
-
-      #ifdef DEBUG_GLOBAL_INTERPRETING
-         MessageInterface::ShowMessage("   Ephemeris time is %s\n", 
-            (sol->GetBooleanParameter("UseTTForEphemeris") ? "TT" : "TDB"));
-      #endif
-
-      return true;
-   }
-
-   if (sar.size() == 3)
-   {
-      if (sar[2] == "NutationUpdateInterval")
-      {
-         SolarSystem *sol = theModerator->GetSolarSystemInUse();
-         CelestialBody *body = sol->GetBody(sar[1]);
-         if (body == NULL)
-            return false;
-         if (body->IsOfType("Planet"))
-         {
-            Real interval;
-            std::stringstream data;
-            data << rhs;
-            data >> interval;
-            Integer id = body->GetParameterID("NutationUpdateInterval");
-
-               MessageInterface::ShowMessage(
-                  "Setting nutation update interval on %s to %lf\n",
-                  sar[1].c_str(), interval);
-
-            body->SetRealParameter(id, interval);
-            return true;
-         }
-      }
-   }
+   else if (type == "ForceModel") 
+      obj = (GmatBase*)theModerator->CreateForceModel(name);
    
-   return false;
-}
-
-
-//------------------------------------------------------------------------------
-// void ChunkLine(void)
-//------------------------------------------------------------------------------
-/**
- * Breaks a line of script into pieces based on white space.
- */
-//------------------------------------------------------------------------------
-void Interpreter::ChunkLine()
-{
-    // Break the line into pieces based on while space and special characters
-    Integer start = 0, end, semicolonLocation = 0;
-    const char *str = line.c_str();
-    std::string phrase;
-
-    #ifdef DEBUG_TOKEN_PARSING
-       MessageInterface::ShowMessage(
-          "Interpreter::ChunkLine called for this line:\n   \"%s\"\n", str);
-    #endif
-
-    start = SkipWhiteSpace(start); // Find the beginning of the text
-    
-    while (start != -1) {
-        end = start;
-        if (IsGroup(&(str[start]))) {
-           char endchar = ';';
-           if (str[start] == '[')
-              endchar = ']';
-           if (str[start] == '(')
-              endchar = ')';
-           if (str[start] == '{')
-              endchar = '}';
-           while (str[end] != endchar) {
-              ++end;  
-              if (str[end] == '\0')
-                 throw InterpreterException("Missing closing character");
-           }
-           ++end;
-        }
-        else {
-           while ((str[end] != ' ')  && (str[end] != '\t') &&
-                  (str[end] != '\r') && (str[end] != '\n') && 
-                  (str[end] != '%')  && (str[end] != '\0') &&
-                  (str[end] != '[')  && (str[end] != '(')  &&
-                  (str[end] != '{')  && (str[end] != '=')
-                 ) {
-               ++end;
-               if ((str[end] == ';') && (semicolonLocation == 0))
-                   semicolonLocation = end;
-           }
-        }
-        if (semicolonLocation == 0)
-            semicolonLocation = end;
-        
-        phrase.assign(line, start, (semicolonLocation-start));
-        if (phrase != "")
-           chunks.push_back(new std::string(phrase));
-
-        if (str[end] == '=') {
-           if (str[end+1] == '=')
-           {
-              ++end;
-              chunks.push_back(new std::string("=="));
-           }
-           else
-              chunks.push_back(new std::string("="));
-           ++end;
-        } 
-
-        start = SkipWhiteSpace(end);
-        semicolonLocation = 0;
-
-        //MessageInterface::ShowMessage("==> start=%d\n", start);
-    }
-    
-    #ifdef DEBUG_TOKEN_PARSING
-       MessageInterface::ShowMessage(
-          "   Found these chunks:\n");
-       for (std::vector<std::string*>::iterator i = chunks.begin(); 
-            i != chunks.end(); ++i)
-          MessageInterface::ShowMessage("      \"%s\"\n", (*i)->c_str());
-    #endif
-}
-
-
-bool Interpreter::IsGroup(const char *text)
-{
-   if ((text[0] == '[') || (text[0] == '(') || (text[0] == '{'))
-      return true;
-   return false;
-}
-
-
-//------------------------------------------------------------------------------
-// Integer SkipWhiteSpace(Integer start, const std::string &text)
-//------------------------------------------------------------------------------
-/**
- * Skips blank spaces and tabs.
- * 
- * @param start Starting point in the script line.
- * @param text The string under analysis.
- * 
- * @return Location of the first useful character, or -1 for comments or line
- *         endings.
- */
-//------------------------------------------------------------------------------
-Integer Interpreter::SkipWhiteSpace(Integer start, const std::string &text)
-{
-    Integer finish = start;
-    const char *str;
-    
-    if (text == "")
-       str = line.c_str();
-    else
-       str = text.c_str();
-       
-    if (str[0] == '%')  // Comment line
-        return -1;
-        
-    if (str[finish] == '%')  // in-line comment
-        return -1;
-        
-    while ((str[finish] == ' ') || (str[finish] == '\t')) {
-        ++finish;
-        if ((str[finish] == '\r') || (str[finish] == '\n') ||
-            (str[finish] == '%') || (str[finish] == '\0'))
-            return -1;
-    }
-    if (start >= (Integer)strlen(str))
-        return -1;
-    return finish;
-}
-
-
-//------------------------------------------------------------------------------
-// Integer FindDelimiter(std::string &str, std::string &specChar)
-//------------------------------------------------------------------------------
-/**
- * Method to find special characters: = , { } [ ] ( ) ; . %
- * 
- * @param str String containing the character.
- * @param specChar The character.
- * 
- * @return Location of the special character, or -1 if the character is not in
- *         the string.
- * 
- * @note This method is not implemented, and always returns -1.
- */
-//------------------------------------------------------------------------------
-Integer Interpreter::FindDelimiter(const std::string &str,
-                                   const std::string &specChar)
-{
-    return -1;
-}
-
-
-//------------------------------------------------------------------------------
-// std::string GetToken(std::string &tokstr)
-//------------------------------------------------------------------------------
-/**
- * Find the next token in the input string.
- * 
- * @param tokstr String that needs to be broken into tokens.  Pass in the empty
- *               string ("") to continue where the last call ended. 
- * 
- * @return The first (or next in subsequent calls) token in the string.
- */
-//------------------------------------------------------------------------------
-std::string Interpreter::GetToken(const std::string &tokstr)
-{
-    static std::string str, token = "";
-    static Integer start;
-    if (tokstr != "") {
-        str = tokstr;
-        start = 0;
-    }
-
-    if (start >= (Integer)strlen(str.c_str()))
-        token = "";
-    else {
-        Integer loc = str.find(".", start);
-        if (loc == (Integer)std::string::npos)
-            loc = strlen(str.c_str());
-        token.assign(str, start, loc-start);
-        start = loc+1;
-    }
-    
-    return token;
-}
-
-
-//------------------------------------------------------------------------------
-// bool EquateObjects(GmatBase *obj, const std::string &obj2Name)
-//------------------------------------------------------------------------------
-/**
- * Used to set one object equal to another
- * 
- * @param obj The object that receives the values.
- * @param obj2Name The name of the object that contains the values.  If obj2Name
- *                 is the empty string, the second object's name is parsed from 
- *                 the script line.
- * 
- * @return true is the assignment was made, false otherwise.
- */
-//------------------------------------------------------------------------------
-bool Interpreter::EquateObjects(GmatBase *obj, const std::string &obj2Name)
-{
-   #ifdef DEBUG_INTERPRET_OBJECTEQUATES
-      MessageInterface::ShowMessage("Interpreter::EquateObjects entered\n");
-   #endif
+   else if (type == "CoordinateSystem") 
+      obj = (GmatBase*)theModerator->CreateCoordinateSystem(name);
    
-   std::string other;
-   
-   if (obj2Name != "")
-      other = obj2Name;
-   else {
-      unsigned sp = line.find("=") + 1;
-      Integer end = line.find(";");
-      
-      if (sp == std::string::npos)
-         return false;
-      while (line[sp] == ' ')
-         ++sp;
-      other = line.substr(sp, end-sp);
-
-      #ifdef DEBUG_INTERPRET_OBJECTEQUATES
-         MessageInterface::ShowMessage(
-            "Interpreter::EquateObjects line = \"%s\"\n"
-            "                           sp = %u, end = %d, other = \"%s\"\n",
-            line.c_str(), sp, end, other.c_str());
-      #endif
-   }
-   
-   #ifdef DEBUG_INTERPRET_OBJECTEQUATES
-      MessageInterface::ShowMessage(
-         "Interpreter::EquateObjects original object is named \"%s\"\n",
-         other.c_str());
-   #endif
-   
-   GmatBase *orig = FindObject(other);
-
-   if (orig != NULL) {
-//       if (obj->GetTypeName() != orig->GetTypeName())
-//          throw InterpreterException("Interpreter::EquateObjects: \"" + 
-//             obj->GetName() + "\" and \"" + orig->GetName() + 
-//             "\" have different types on line:\n" + line + "\n");
-//       obj->Copy(orig);
-
-      // We don't want name to be copied for User Parameters (loj: 6/30/06)
-      //if (obj->GetTypeName() == orig->GetTypeName() && obj->GetTypeName() != "Array")
-      if (obj->GetTypeName() == orig->GetTypeName() && obj->GetTypeName() != "Array" &&
-          obj->GetTypeName() != "Variable" && obj->GetTypeName() != "String")
-         obj->Copy(orig);
-      else
-         return false;
-      
-      #ifdef DEBUG_INTERPRET_OBJECTEQUATES
-         MessageInterface::ShowMessage(
-            "Interpreter::EquateObjects succeeded\n");
-      #endif
-      
-      return true;
-   }
-   #ifdef DEBUG_INTERPRET_OBJECTEQUATES
-      MessageInterface::ShowMessage("Interpreter::EquateObjects failed\n");
-   #endif
-   
-   return false;
-}
-
-
-//------------------------------------------------------------------------------
-// bool SetVariable(GmatBase *obj, const std::string &val, GmatCommand *cmd)
-//------------------------------------------------------------------------------
-/**
- * Sets the value of a variable equal to a string.
- * 
- * @param obj The object that receives the string.
- * @param val The string that is set on the Variable.  If this string is the 
- *            empty string, the value is parsed from the current script line.
- * @param cmd Assignment command used if in the command sequence
- *
- * @return An array containing the pieces.
- */
-//------------------------------------------------------------------------------
-bool Interpreter::SetVariable(GmatBase *obj, const std::string &val,
-                              GmatCommand *cmd)
-{
-   if (obj->GetTypeName() != "Variable")
-      return false;
- 
-   std::string other;
-   
-   if (val == "") {    
-      unsigned sp = line.find("=") + 1;
-      Integer end = line.find(";");
-      
-      if (sp == std::string::npos)
-         return false;
-      while (line[sp] == ' ')
-         ++sp;
-      other = line.substr(sp, end-sp);
-   }
    else
-      other = val;
-   if (cmd) {
-      if (cmd->GetTypeName() != "GMAT")
-         throw InterpreterException(
-            "Interpreter::SetVariable attempting to set a value using a " +
-            cmd->GetTypeName() + " command, which is not supported, on line\n" +
-            line);
-
-      #if DEBUG_EQUATION
-      MessageInterface::ShowMessage
-         ("=====> SetVariable() calling InterpretAction() line=%s\n", line.c_str());
-      #endif
-      
-      cmd->InterpretAction();
-      
-      return true;
-   }
-
-   std::string paramType, paramObj, paramDepObj;
-
-   if (InterpretParameter(other, paramType, paramObj, paramDepObj))
    {
-      if (theModerator->IsParameter(paramType))
-      {
-         //MessageInterface::ShowMessage
-         //   ("==> Interpreter::SetVariable() other=%s, paramType=%s, paramObj=%s, "
-         //    "parmDepObj=%s\n", other.c_str(), paramType.c_str(), paramObj.c_str(),
-         //    paramDepObj.c_str());
-         
-         Parameter *parm = CreateParameter(other, paramType, paramDepObj, paramObj);
-         if (parm != NULL)
-         {
-            parm->SetStringParameter("Object", paramObj);
-         }
-      }
-   }
-
-   //MessageInterface::ShowMessage
-   //   ("===> Interpreter::SetVariable() other=%s\n", other.c_str());
-   
-   obj->SetRefObjectName(Gmat::PARAMETER, other);   
-   return obj->SetStringParameter("Expression", other);
-}
-
-
-//------------------------------------------------------------------------------
-// bool SetArray(GmatBase *obj, GmatCommand *cmd)
-//------------------------------------------------------------------------------
-/**
- * Sets the value of an array element or elements equal to some input data.
- *
- * @param obj The object that receives the string.
- * @param cmd Assignment command used if in the command sequence
- *
- * @return An array containing the pieces.
- */
-//------------------------------------------------------------------------------
-bool Interpreter::SetArray(GmatBase *obj, GmatCommand *cmd)
-{
-   if (cmd) {
-      if (cmd->GetTypeName() != "GMAT")
-         throw InterpreterException(
-            "Interpreter::SetArray attempting to set a value using a " +
-            cmd->GetTypeName() + " command, which is not supported, on line\n" +
-            line);
-
-      #if DEBUG_EQUATION
-      MessageInterface::ShowMessage
-         ("=====> SetArray() calling InterpretAction() line=%s\n", line.c_str());
-      #endif
-      
-      return cmd->InterpretAction();
-   }
-
-   // Element descriptor is in the 3rd chunk
-   if (chunks.size() < 5)
-      throw InterpreterException(
-         "Not enough substrings in Interpreter::SetArray() for line\n   \"" +
-         line + "\"\n");
-
-   if ((*chunks[2])[0] != '(')
-      throw InterpreterException(
-         "Cannot locate element to set in Interpreter::SetArray() in line:\n" +
-         line + "\n");
-   
-   // Break apart the element descriptor
-   StringArray els = Decompose(*chunks[2]);
-   
-   #ifdef DEBUG_ARRAY_INTERPRETING
-      MessageInterface::ShowMessage("   Chunk 2 has these data\n");
-      for (StringArray::iterator i = els.begin(); i != els.end(); ++i)
-         MessageInterface::ShowMessage("      %s\n", i->c_str());
-   #endif
-   
-   Integer r, c;
-      
-   // Script values are 1-based; internals are 0-based
-   r = atoi(els[0].c_str()) - 1;
-   c = atoi(els[1].c_str()) - 1;
-
-   if ((*chunks[3])[0] != '=')
-      throw InterpreterException(
-         "Cannot locate '=' sign in Interpreter::SetArray()");
-
-   /// @todo Make array element assignment more generic (Needs to switch to
-   ///       command mode if the rhs is not a number.)
-   Real val = atof(chunks[4]->c_str());
-
-   #ifdef DEBUG_ARRAY_INTERPRETING
-      MessageInterface::ShowMessage("   Chunk 4 has the value %lf\n", val);
-   #endif
-
-   //MessageInterface::ShowMessage("==> Setting val=%f, r=%d, c=%d\n", val, r, c);
-   obj->SetRealParameter("SingleValue", val, r, c);
-   return true;
-}
-
-//------------------------------------------------------------------------------
-// StringArray& Decompose(const std::string &chunk)
-//------------------------------------------------------------------------------
-/**
- * Breaks a grouped string into component pieces.
- * 
- * @param chunk The string.
- * 
- * @return An array containing the pieces.
- */
-//------------------------------------------------------------------------------
-StringArray& Interpreter::Decompose(const std::string &chunk)
-{
-   static StringArray elements;
-   elements.clear();
-   
-   // Branch based on the first character in the string
-   char branchtype = (chunk.c_str())[0];
-   
-   if (branchtype == '(') {
-      // todo: Check to be sure we have closing paren
-      elements = SeparateParens(chunk);
-   }
-   else if (branchtype == '[') {
-      // todo: Check to be sure we have closing bracket
-      elements = SeparateBrackets(chunk);
-   }
-   else if (branchtype == '{') {
-      // todo: Check to be sure we have closing brace
-      elements = SeparateBraces(chunk);
-   }
-   else if ((chunk.find(" ", 0) == std::string::npos) && 
-            (chunk.find(",", 0) == std::string::npos)) {
-      elements = SeparateDots(chunk, ".");
-   }
-   else {
-      elements = SeparateSpaces(chunk);
-   }
-   
-   #ifdef DEBUG_TOKEN_PARSING_DETAILS
-      MessageInterface::ShowMessage("In Decompose: string = \"%s\"\n"
-         "   Pieces are\n",
-         chunk.c_str());
-
-      for (StringArray::iterator i = elements.begin(); i != elements.end(); ++i)
-         MessageInterface::ShowMessage("      \"%s\"\n", i->c_str());
-   #endif
-   return elements;
-}
-
-
-//------------------------------------------------------------------------------
-// StringArray& SeparateSpaces(const std::string &chunk)
-//------------------------------------------------------------------------------
-/**
- * Breaks a string containing white space into component pieces.
- * 
- * In this context, "white space" is the space character or the tab character.  
- * 
- * Note that this is not the most efficient code for this function -- other 
- * techniques are likely to have better performance.  Instead, this method is 
- * written to allow for other types of white space by changing the member 
- * variables whitespace[] and wSpaceTypes.
- * 
- * @param chunk The string.
- * 
- * @return An array containing the pieces.
- * 
- * @note This method is not yet implemented.  It will be completed during 
- *       build 3.
- */
-//------------------------------------------------------------------------------
-StringArray& Interpreter::SeparateSpaces(const std::string &chunk)
-{
-   static StringArray chunkArray;
-   chunkArray.clear();
-   char closebrace = '\0';
-   std::string token;
-   Integer pos = 0, end;
-
-   #ifdef DEBUG_TOKEN_PARSING_DETAILS
-      std::cout << "In SeparateSpaces: string = \"" << chunk << "\"\n   ";
-   #endif
-
-   // Examine the string character by character, skipping grouping elements
-   char str[4096];
-   strcpy(str, chunk.c_str());
-   for (unsigned i = 0; i < chunk.length(); ++i) {
-      if ((str[i] == '{') || (str[i] == '(') || (str[i] == '[')) {
-         #ifdef DEBUG_TOKEN_PARSING_DETAILS
-            std::cout << " found \"" << str[i] << "\" ";
-         #endif
-         token.assign(str, pos, i-pos);
-         chunkArray.push_back(token);
-         pos = i;
-         // Now find and push the bracketed chunk
-         if (str[i] == '{')
-            closebrace = '}';
-         if (str[i] == '(')
-            closebrace = ')';
-         if (str[i] == '[')
-            closebrace = ']';
-         while (str[i] != closebrace) {
-            ++i;
-            if (i > chunk.length())
-               throw InterpreterException("Missing closing brace in line " +
-                  chunk);
-         }
-         token.assign(str, pos, i-pos+1);
-         chunkArray.push_back(token);
-//         ++i;
-         pos = i+1;
-      }
-      else if ((str[i] == '<') || (str[i] == '>') || (str[i] == '~')) {
-         #ifdef DEBUG_TOKEN_PARSING_DETAILS
-            std::cout << " found \"" << str[i] << "\" ";
-         #endif
-         if (str[i+1] == '=') {
-            ++i;
-         }
-         token.assign(str, pos, i-pos+1);
-         chunkArray.push_back(token);
-//         ++i;
-         pos = i+1;
-      }
-      else if ((str[i] == ' ') || (str[i] == ',') ||
-               (str[i] == '=') || (str[i] == ':') ) {
-         #ifdef DEBUG_TOKEN_PARSING_DETAILS
-            std::cout << " found \"" << str[i] << "\" ";
-         #endif
-         token.assign(str, pos, i-pos);
-         if ((token != " ") && (token.length() > 0))
-            chunkArray.push_back(token);
-         if ((str[i] == '=') || (str[i] == ':')) {
-            if ((str[i] == '=') && (str[i+1] == '='))
-            {
-               token.assign(str, i, 2);
-               ++i;            
-            }
-            else
-               token.assign(str, i, 1);
-            chunkArray.push_back(token);
-         }
-//         ++i;
-         pos = i+1;
-      }
-      #ifdef DEBUG_TOKEN_PARSING_DETAILS
-         std::cout << "str[i] = \"" << str[i] << "\"; \"" << token 
-                   << "\" found\n   ";
-      #endif
-   }
-   // Push the last piece onto the array, unless it is a semicolon
-   token.assign(str, pos, chunk.length());
-   if (token.find(";", 0) != std::string::npos) {
-      end = token.find(";", 0);
-      token.assign(token, 0, end);
-   }
-   if ((token != ";") && (token != ""))
-         chunkArray.push_back(token);   
-         
-   #ifdef DEBUG_TOKEN_PARSING
-      std::cout << "Strings parsed:\n   ";
-      for (StringArray::iterator i = chunkArray.begin(); i != chunkArray.end(); 
-           ++i)
-         std::cout << *i << "\n   ";
-      std::cout << std::endl;
-   #endif
-
-   return chunkArray;
-}
-
-
-//------------------------------------------------------------------------------
-// StringArray& SeparateDots(const std::string &chunk, 
-//                           const std::string &delimiter)
-//------------------------------------------------------------------------------
-/**
- * Breaks a period separated string into component pieces.
- * 
- * This method takes an input string containing heirarchical data separated by a
- * specified delimiter (a period by default) and fills a StringArray with the
- * data in the string.  For example, the input string "fm.GravityField.Earth"
- * places three strings in the array: "fm", "GravityField", and "Earth".
- * 
- * @param chunk The string.
- * @param delimiter The character that separates the pieces -- a "." by default.
- * 
- * @return An array containing the pieces.
- */
-//------------------------------------------------------------------------------
-StringArray& Interpreter::SeparateDots(const std::string &chunk, 
-                                       const std::string &delimiter)
-{
-   static StringArray chunkArray;
-   chunkArray.clear();
-   Integer loc, start = 0;
-   std::string token = "Starting", str = chunk;
-   bool parseComplete = false;
-   
-   while (!parseComplete) {
-      loc = chunk.find(delimiter, start);
-      if (loc == (Integer)std::string::npos) {
-         loc = strlen(str.c_str());
-         parseComplete = true;
-      }
-      token.assign(str, start, loc-start);
-      start = loc+strlen(delimiter.c_str());
-      if (token != "")
-         chunkArray.push_back(token);
-   }
-   
-   return chunkArray;
-}
-
-
-//------------------------------------------------------------------------------
-// StringArray& SeparateParens(const std::string &chunk)
-//------------------------------------------------------------------------------
-/**
- * Breaks a string contained in parentheses into component pieces.
- * 
- * @param chunk The string.
- * 
- * @return An array containing the pieces.
- */
-//------------------------------------------------------------------------------
-StringArray& Interpreter::SeparateParens(const std::string &chunk)
-{
-   static StringArray chunkArray;
-   chunkArray.clear();
-
-   Integer loc, start = chunk.find("(", 0), stop = chunk.find(")", 0), strStop;
-   bool parseComplete = false;
-   
-   if (start == (Integer)std::string::npos) 
-         parseComplete = true;
-   else if (stop == (Integer)std::string::npos) 
-      throw InterpreterException("Missing closing paren \"}\"");
-
-   if (start > stop)
-      throw InterpreterException("Closing paren found before opening paren");
-      
-   loc = start;
-      
-   std::string token = "Starting", str = chunk;
-   
-   while (!parseComplete && (start < stop)) {
-      // skip over white spaces
-      start = loc + 1;
-      start = SkipWhiteSpace(start, str);
-      loc = chunk.find(",", start);
-      if (loc == (Integer)std::string::npos) {
-         loc = stop;
-         parseComplete = true;
-      }
-      
-      strStop = loc;
-      while (chunk[strStop-1] == ' ')
-         --strStop;
-      token.assign(str, start, strStop-start);
-      
-      // Prep for the next token
-      if (token != "")
-         chunkArray.push_back(token);
-   }
-      
-   return chunkArray;
-}
-
-
-//------------------------------------------------------------------------------
-// StringArray& SeparateBraces(const std::string &chunk)
-//------------------------------------------------------------------------------
-/**
- * Breaks a string contained in curly braces ("{...}") into component pieces.
- * 
- * @param chunk The string.
- * 
- * @return An array containing the pieces.
- */
-//------------------------------------------------------------------------------
-StringArray& Interpreter::SeparateBraces(const std::string &chunk)
-{
-   static StringArray chunkArray;
-   chunkArray.clear();
-
-   Integer loc, subchunkEnd, start = chunk.find("{", 0), stop = chunk.find("}", 0);
-   bool parseComplete = false;
-   
-   if (start == (Integer)std::string::npos) 
-         parseComplete = true;
-   else if (stop == (Integer)std::string::npos) 
-      throw InterpreterException("Missing closing brace \"}\"");
-
-   if (start > stop)
-      throw InterpreterException("Closing brace found before opening brace");
-      
-   loc = start;
-      
-   std::string token = "Starting", str = chunk;
-   
-   while (!parseComplete && (start < stop)) {
-      // skip over white spaces
-      start = loc + 1;
-      start = SkipWhiteSpace(start, str);
-      loc = chunk.find(",", start);
-      if (loc == (Integer)std::string::npos) {
-         loc = stop;
-         parseComplete = true;
-      }
-      // remove leading and trailing white space
-      while (str[start] == ' ')
-         ++start;
-      subchunkEnd = loc;
-      while (str[subchunkEnd-1] == ' ')
-         --subchunkEnd;
-      token.assign(str, start, subchunkEnd-start);
-
-      // Prep for the next token
-      if (token != "")
-         chunkArray.push_back(token);
-   }
-
-   #ifdef DEBUG_PARSING
-      MessageInterface::ShowMessage("%s breaks into these pieces:\n", chunk.c_str());
-      for (StringArray::iterator i = chunkArray.begin(); i != chunkArray.end(); ++i)
-         MessageInterface::ShowMessage("   '%s'\n", i->c_str());
-   #endif
-      
-   return chunkArray;
-}
-
-
-//------------------------------------------------------------------------------
-// StringArray& SeparateBrackets(const std::string &chunk)
-//------------------------------------------------------------------------------
-/**
- * Breaks a string contained in square brackets ("[...]") into component pieces.
- * 
- * @param chunk The string.
- * 
- * @return An array containing the pieces.
- */
-//------------------------------------------------------------------------------
-StringArray& Interpreter::SeparateBrackets(const std::string &chunk)
-{
-   static StringArray chunkArray;
-   chunkArray.clear();
-
-   Integer loc, start = chunk.find("[", 0), stop = chunk.find("]", 0);
-   bool parseComplete = false;
-
-   if (start == (Integer)std::string::npos)
-         parseComplete = true;
-   else if (stop == (Integer)std::string::npos)
-      throw InterpreterException("Missing closing bracket \"]\"");
-
-   if (start > stop)
-      throw InterpreterException(
-         "Closing bracket found before opening bracket");
-
-   loc = start;
-
-   std::string token = "Starting", str = chunk;
-
-   while (!parseComplete && (start < stop)) {
-      // skip over white spaces
-      start = loc + 1;
-      start = SkipWhiteSpace(start, str);
-      loc = chunk.find(",", start);
-      if (loc == (Integer)std::string::npos) {
-         loc = stop;
-         parseComplete = true;
-      }
-      token.assign(str, start, loc-start);
-
-      // Prep for the next token
-      if (token != "")
-         chunkArray.push_back(token);
-   }
-
-   return chunkArray;
-}
-
-
-//------------------------------------------------------------------------------
-// GmatBase* FindObject(std::string objName)
-//------------------------------------------------------------------------------
-/**
- * Finds a previously created named object.
- * 
- * @param objName The name of the object of interest.
- * 
- * @return Pointer to the object.
- */
-//------------------------------------------------------------------------------
-GmatBase* Interpreter::FindObject(std::string objName)
-{
-    GmatBase *obj = theModerator->GetObject(objName);
-    return obj;
-}
-
-
-//------------------------------------------------------------------------------
-// GmatBase* FindOwnedObject(StringArray TokenList, Integer index)
-//------------------------------------------------------------------------------
-/**
- * Finds an object wrapped in another object.
- * 
- * @param objName The name of the object of interest.
- * 
- * @return Pointer to the object.
- */
-//------------------------------------------------------------------------------
-GmatBase* Interpreter::FindOwnedObject(StringArray tokenList, GmatBase *owner,
-                                       Integer index)
-{
-   GmatBase* obj = NULL;
-   Integer count = tokenList.size();
-   
-   #ifdef DEBUG_TOKEN_PARSING
-      std::stringstream msg;
-      msg << "Current owner is \"" << owner->GetName() 
-          << "\" of type \"" << owner->GetTypeName()  
-          << "\"\n";
-      msg << "Token list:\n   ";
-      for (StringArray::iterator ix = tokenList.begin(); ix != tokenList.end();
-           ++ix)
-         msg << *ix << "\n   ";
-      msg << "\n";
-      MessageInterface::ShowMessage(msg.str());
-   #endif
-   
-   GmatBase* topOwner = FindObject(tokenList[0]);
-   if (topOwner->GetType() != Gmat::FORCE_MODEL)
-      throw InterpreterException("The ForceModel is the only allowed owner\n" + 
-                                 line);
-   
-   ObjectArray objs = owner->GetRefObjectArray(tokenList[index]);
-   if (index == count - 2) {
-
-      #ifdef DEBUG_TOKEN_PARSING
-         MessageInterface::ShowMessage("Looking for %s on %s\n", 
-            tokenList[index].c_str(), owner->GetName().c_str());
-      #endif
-
-      if (tokenList[index] == owner->GetName())
-         obj = owner;
-      else {
-         if (objs.size() == 0) {
-            std::string errstr = "Object list is empty; ";
-            errstr += "cannot parse the line\n  \"";
-            errstr += line;
-            errstr += "\"";
-            throw InterpreterException(errstr);
-         }
-         if (objs.size() > 1) {
-            for (ObjectArray::iterator j = objs.begin(); j != objs.end(); ++j) {
-               Integer id = (*j)->GetParameterID("BodyName");
-               if (id != -1) {
-                  std::string bodyName = (*j)->GetStringParameter(id);
-                  if (bodyName == tokenList[index+1])
-                     obj = *j;
-               }
-            }
-         }
-         else
-            obj = objs[0];
-      }
-   }
-   else {
-      if (objs.size() == 0)
-         throw InterpreterException("Could not find objects of type \"" + 
-                                    tokenList[index] + "\"");
-
-      for (ObjectArray::iterator member = objs.begin(); member != objs.end();
-           ++member)
-      {
-         try
-         {
-            obj = FindOwnedObject(tokenList, *member, index+1);
-         }
-         catch (BaseException &ex)
-         {
-         }
-      }
-      
+      // Handle Propagator
       if (obj == NULL)
-         throw InterpreterException("Could not find object of type \"" + 
-                                    tokenList[index+1] + "\" for  the line '" + 
-                                    line + "'");
+         if (find(propagatorList.begin(), propagatorList.end(), type) != 
+             propagatorList.end()) 
+         {
+            obj = (GmatBase*)theModerator->CreatePropagator(type, name);
+         }
       
+      // Handle AxisSystem
+      if (find(axisSystemList.begin(), axisSystemList.end(), type) != 
+          axisSystemList.end()) 
+      {
+         obj =(GmatBase*) theModerator->CreateAxisSystem(type, name);
+      }
+
+      // Handle Atmosphere Model
+      if (obj == NULL)
+         if (find(atmosphereList.begin(), atmosphereList.end(), type) != 
+             atmosphereList.end()) 
+         {
+            obj = (GmatBase*)theModerator->CreateAtmosphereModel(type, name);
+         }
+      
+//       // Handle Attitude
+//       if (obj == NULL)
+//          if (find(attitudeList.begin(), attitudeList.end(), type) != 
+//              attitudeList.end()) 
+//          {
+//             obj = (GmatBase*)theModerator->CreateAttitude(type, name);
+//          }
+      
+      // Handle Burns
+      if (obj == NULL)
+         if (find(burnList.begin(), burnList.end(), type) != 
+             burnList.end()) 
+         {
+            obj = (GmatBase*)theModerator->CreateBurn(type, name);
+         }
+      
+      // Handle CalculatedPoint (Barycenter, LibrationPoint)
+      if (obj == NULL)
+         if (find(calculatedPointList.begin(), calculatedPointList.end(), type) != 
+             calculatedPointList.end()) 
+         {
+            obj =(GmatBase*) theModerator->CreateCalculatedPoint(type, name);
+         }
+      
+      // Handle Functions
+      if (obj == NULL)
+         if (find(functionList.begin(), functionList.end(), type) != 
+             functionList.end()) 
+         {
+            obj = (GmatBase*)theModerator->CreateFunction(type, name);
+         }
+      
+      // Handle Hardware (tanks, thrusters, etc.)
+      if (obj == NULL)
+         if (find(hardwareList.begin(), hardwareList.end(), type) != 
+             hardwareList.end()) 
+         {
+            obj = (GmatBase*)theModerator->CreateHardware(type, name);
+         }
+      
+      // Handle System Parameters
+      if (obj == NULL)
+         if (find(parameterList.begin(), parameterList.end(), type) != 
+             parameterList.end())
+         {
+            obj = (GmatBase*)CreateParameter(type, name);
+         }
+      
+      // Handle PhysicalModel
+      if (obj == NULL)
+         if (find(physicalModelList.begin(), physicalModelList.end(), type) != 
+             physicalModelList.end())
+         {
+            obj = (GmatBase*)theModerator->CreatePhysicalModel(type, name);
+         }
+      
+      // Handle Solvers
+      if (obj == NULL)
+         if (find(solverList.begin(), solverList.end(), type) != 
+             solverList.end()) 
+         {
+            obj = (GmatBase*)theModerator->CreateSolver(type, name);
+         }
+      
+      // Handle Subscribers
+      if (obj == NULL)
+         if (find(subscriberList.begin(), subscriberList.end(), type) != 
+             subscriberList.end())
+         {
+            obj = (GmatBase*)theModerator->CreateSubscriber(type, name);
+         }
+   
    }
    
-   #ifdef DEBUG_TOKEN_PARSING
-      msg << "Returning a \"" << obj->GetTypeName() << "\" object"
-                << "named \"" << obj->GetName() << "\"\n";   
-      MessageInterface::ShowMessage(msg.str());
+   #if DEBUG_CREATE_OBJECT
+   if (obj != NULL)
+   {
+      MessageInterface::ShowMessage
+         ("Interpreter::CreateObject() type=%s, name=%s successfully created\n",
+          obj->GetTypeName().c_str(), obj->GetName().c_str());
+   }
    #endif
-
+   
    return obj;
 }
 
 
 //------------------------------------------------------------------------------
-// bool SetParameter(GmatBase *obj, Integer id, std::string value)
+// SolarSystem* GetSolarSystemInUse()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a current solar system in use.
+ *
+ * @return a default solar system object pointer
+ */
+//------------------------------------------------------------------------------
+SolarSystem* Interpreter::GetSolarSystemInUse()
+{
+   return theModerator->GetSolarSystemInUse();
+}
+
+
+//------------------------------------------------------------------------------
+// bool FindPropertyID(GmatBase *obj, const std::string &chunk, GmatBase **owner,
+//                     Integer &id)
+//------------------------------------------------------------------------------
+/*
+ * Finds property ID for given property. If property not found in the obj,
+ * it tries to find proerty from the owned objects.
+ *
+ * @param  obj    Object to find proerty
+ * @param  chunk  String contains property
+ * @param  owner  Address of new owner pointer to be returned
+ * @param  id     Property ID to return
+ *
+ * @return true if property found
+ *
+ * For example, From "FM.Gravity.Earth.Model"
+ *   obj is FM pointer, chunk is "Gravity.Earth.Model"
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::FindPropertyID(GmatBase *obj, const std::string &chunk,
+                                 GmatBase **owner, Integer &id)
+{
+   if (obj == NULL)
+      return false;
+   
+   bool retval = false;
+   StringArray parts = theTextParser.SeparateDots(chunk);
+   Integer count = parts.size();
+   std::string prop = parts[count-1];
+   id = -1; // Set initial output id to -1
+   
+   try
+   {
+      id = obj->GetParameterID(prop);
+      *owner = obj;
+      retval = true;
+   }
+   catch (BaseException &e)
+   {
+      if (FindOwnedObject(obj, prop, owner, id))
+         retval = true;
+   }
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* FindObject(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Calls the Moderator to find a configured object.
+ *
+ * @param  name  Name of the object.
+ *
+ * @return Configured object pointer
+ */
+//------------------------------------------------------------------------------
+GmatBase* Interpreter::FindObject(const std::string &name)
+{
+   if (name == "SolarSystem")
+      return theModerator->GetSolarSystemInUse();
+   else
+      return theModerator->GetObject(name);
+}
+
+
+//------------------------------------------------------------------------------
+// GmatCommand* CreateCommand(const std::string &type, const std::string &desc)
+//------------------------------------------------------------------------------
+GmatCommand* Interpreter::CreateCommand(const std::string &type,
+                                        const std::string &desc)
+{
+   #if DEBUG_CREATE_COMMAND
+   MessageInterface::ShowMessage
+      ("Interpreter::CreateCommand() type=%s, desc=%s\n", type.c_str(),
+       desc.c_str());
+   #endif
+
+   GmatCommand *cmd = NULL;
+   std::string desc1 = desc;
+   
+   // Check for CallFunction
+   if (type[0] == '[')
+   {
+      cmd = AppendCommand("CallFunction");
+      desc1 = type + desc;
+      cmd->SetGeneratingString(desc1);
+   }
+   else
+   {
+      cmd = AppendCommand(type);
+      cmd->SetGeneratingString(type + " " + desc);
+   }
+   
+   #if DEBUG_CREATE_COMMAND
+   MessageInterface::ShowMessage("   %s created.\n", cmd->GetTypeName().c_str());
+   #endif
+   
+   try
+   {
+      // if command has it's own InterpretAction(), jsut return cmd
+      if (cmd->InterpretAction())
+      {
+         #if DEBUG_ASSEMBLE_COMMAND
+         MessageInterface::ShowMessage
+            ("   ===> %s has InterpretAction() \n", type.c_str());
+         #endif
+         
+         return cmd;
+      }
+   }
+   catch (BaseException &e)
+   {
+      HandleError(e);
+      return NULL;
+   }
+   
+   // Assemble command
+   if (desc1 != "")
+      AssembleCommand(cmd, desc1);
+   
+   return cmd;;
+}
+
+
+//------------------------------------------------------------------------------
+//GmatCommand* AppendCommand(const std::string &type)
+//------------------------------------------------------------------------------
+GmatCommand* Interpreter::AppendCommand(const std::string &type)
+{
+   return theModerator->AppendCommand(type, "");
+}
+
+
+//------------------------------------------------------------------------------
+//bool AssembleCommand(GmatCommand *cmd, const std::string &desc)
+//------------------------------------------------------------------------------
+bool Interpreter::AssembleCommand(GmatCommand *cmd, const std::string &desc)
+{
+   bool retval = false;
+   std::string type = cmd->GetTypeName();
+
+   #if DEBUG_ASSEMBLE_COMMAND
+   MessageInterface::ShowMessage
+      ("Interpreter::AssembleCommand() cmd=%s\n   desc=%s\n",
+       type.c_str(), desc.c_str());
+   #endif
+   
+   if (type == "For")
+      retval = AssembleForCommand(cmd, desc);
+   else if (type == "CallFunction")
+      retval = AssembleCallFunctionCommand(cmd, desc);
+   else if (cmd->IsOfType("ConditionalBranch"))
+      retval = AssembleConditionalCommand(cmd, desc);
+   else
+      retval = AssembleGeneralCommand(cmd, desc);
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+//bool AssembleForCommand(GmatCommand *cmd, const std::string &desc)
+//------------------------------------------------------------------------------
+bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
+{
+   bool retval = true;
+   UnsignedInt equalSign = desc.find("=");
+   
+   if (equalSign == desc.npos)
+   {
+      InterpreterException ex("Cannot find equal sign (=) ");
+      HandleError(ex);
+      return false;
+   }
+   
+   std::string var = desc.substr(0, equalSign-1);
+   var = GmatStringUtil::Trim(var);
+   
+   std::string substr = desc.substr(equalSign+1);
+   
+   StringArray parts = theTextParser.SeparateBy(substr, ":");
+   int count = parts.size();
+   
+   if (count < 2)
+   {
+      InterpreterException ex("Cannot find equal sign (=) in ");
+      HandleError(ex);
+      return false;
+   }
+   
+   std::string start = parts[0];
+   std::string end = parts[1];
+   std::string step = "1";
+   
+   if (count > 2)
+      step = parts[2];
+   
+   #if DEBUG_ASSEMBLE_FOR
+   MessageInterface::ShowMessage
+      ("Interpreter::AssembleForCommand() var=%s, start=<%s>, end=<%s>, "
+       "step=<%s>\n", var.c_str(), start.c_str(), end.c_str(), step.c_str());
+   #endif
+   
+   cmd->SetStringParameter("IndexName", var);
+   cmd->SetStringParameter("StartName", start);
+   cmd->SetStringParameter("EndName", end);
+   cmd->SetStringParameter("IncrementName", step);
+
+   GmatBase *obj = FindObject(var);
+
+   // Create index variable
+   if (obj == NULL)
+      obj = CreateObject("Variable", var);
+   
+   cmd->SetRefObject(obj, Gmat::PARAMETER, var);
+
+   // Set start varibale, if exist
+   obj = FindObject(start);
+   if (obj != NULL)
+      cmd->SetRefObject(obj, Gmat::PARAMETER, start);
+
+   // Set end varibale, if exist
+   obj = FindObject(end);
+   if (obj != NULL)
+      cmd->SetRefObject(obj, Gmat::PARAMETER, end);
+
+   // Set step varibale, if exist
+   obj = FindObject(step);
+   if (obj != NULL)
+      cmd->SetRefObject(obj, Gmat::PARAMETER, step);
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+//bool AssembleCallFunctionCommand(GmatCommand *cmd, const std::string &desc)
+//------------------------------------------------------------------------------
+bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
+                                              const std::string &desc)
+{
+   bool retval = true;
+
+   // Output
+   UnsignedInt index1 = desc.find("=");
+   std::string lhs = desc.substr(0, index1);
+   StringArray outArray = theTextParser.SeparateBrackets(lhs, "[]", " ,", true);
+
+   // Function Name, Input
+   StringArray inArray;
+   std::string funcName;
+   UnsignedInt index2 = desc.find("(", index1);
+   if (index2 == desc.npos)
+   {
+      funcName = desc.substr(index1+1);
+   }
+   else
+   {
+      funcName = desc.substr(index1+1, index2-index1-1);
+      std::string rhs = desc.substr(index2);
+      
+      // Input
+      inArray = theTextParser.SeparateBrackets(rhs, "()", " ,", true);
+   }
+   
+   funcName = GmatStringUtil::Trim(funcName);
+
+   #if DEBUG_ASSEMBLE_CALL_FUNCTION
+   MessageInterface::ShowMessage("   Setting funcName=%s\n", funcName.c_str());
+   #endif
+   
+   // Set function name to CallFunction
+   if (funcName != "")
+   {
+      retval = cmd->SetStringParameter("FunctionName", funcName);
+   }
+   else
+   {
+      InterpreterException("*** ERROR *** Found blank function name in: \n\"" +
+                           currentBlock + "\"\n");
+   }
+   
+   #if DEBUG_ASSEMBLE_CALL_FUNCTION
+   MessageInterface::ShowMessage("   Setting input\n");
+   WriteParts("CallFunction Input" , inArray);
+   #endif
+   
+   // Set input to CallFunction
+   for (UnsignedInt i=0; i<inArray.size(); i++)
+      retval = cmd->SetStringParameter("AddInput", inArray[i]);
+   
+   // Set output to CallFunction
+   #if DEBUG_ASSEMBLE_CALL_FUNCTION
+   MessageInterface::ShowMessage("   Setting output\n");
+   WriteParts("CallFunction Output" , outArray);
+   #endif
+   
+   for (UnsignedInt i=0; i<outArray.size(); i++)
+      retval = cmd->SetStringParameter("AddOutput", outArray[i]);
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+//bool AssembleConditionalCommand(GmatCommand *cmd, const std::string &desc)
+//------------------------------------------------------------------------------
+bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
+                                             const std::string &desc)
+{
+   bool retval = true;
+   std::string type = cmd->GetTypeName();
+   std::string opStr = "~<=>&|";
+   
+   // Remove enclosed parenthesis first
+   Integer length = desc.size();
+   std::string str1 = desc;
+   if (desc[0] == '(' && desc[length-1] == ')')
+      str1 = desc.substr(1, length-2);
+   
+   UnsignedInt start = 0;
+   UnsignedInt right = 0;
+   UnsignedInt op = 0;
+   bool done = false;
+   StringArray parts;
+   std::string str2;
+   
+   // Parse conditions
+   while (!done)
+   {
+      op = str1.find_first_of(opStr, start);
+      if (op == str1.npos)
+      {
+         // Add final right of operator
+         str2 = GmatStringUtil::Trim(str1.substr(start));
+         parts.push_back(str2);
+         break;
+      }
+      
+      // Add left of operator
+      str2 = GmatStringUtil::Trim(str1.substr(start, op-start));
+      //parts.push_back(str1.substr(start, op-start));
+      parts.push_back(str2);
+
+      // Add operator
+      right = str1.find_first_not_of(opStr, op);      
+      str2 = GmatStringUtil::Trim(str1.substr(op, right-op));
+      //parts.push_back(str1.substr(op, right-op));
+      parts.push_back(str2);
+      
+      start = op + 1;
+      op = str1.find_first_of(opStr, start);
+      
+      // check for double ops (such as: == ~= >= <=)
+      if (op != str1.npos && op == start)
+         start = op + 1;
+   }
+   
+   #if DEBUG_ASSEMBLE_COMMAND
+   WriteParts("After parsing conditions()" , parts);
+   #endif
+   
+   Integer count = parts.size();
+   
+   // assuming there is no boolean argument
+   if (count < 3 || ((count-3)%4) != 0)
+   {
+      InterpreterException ex
+         ("The Command has invalid number of conditions in " + type + " " +
+          desc + "\n");
+      HandleError(ex);
+      return false;
+   }
+   
+   ConditionalBranch *cb = (ConditionalBranch*)cmd;
+   
+   for (int i=0; i<count; i+=4)
+   {
+      #if DEBUG_ASSEMBLE_COMMAND
+      MessageInterface::ShowMessage
+         ("   lhs:%s, op:%s, rhs:%s\n", parts[i].c_str(), parts[i+1].c_str(),
+          parts[i+2].c_str());
+      #endif
+      
+      // Try to create a parameter first
+      CreateParameter(parts[i]);
+      CreateParameter(parts[i+2]);
+      
+      cb->SetCondition(parts[i], parts[i+1], parts[i+2]);
+      
+      if (count > i+3)
+      {
+         #if DEBUG_ASSEMBLE_COMMAND
+         MessageInterface::ShowMessage("   logOp=%s\n", parts[i+3].c_str());
+         #endif
+         
+         cb->SetConditionOperator(parts[i+3]);
+      }
+   }
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+//bool AssembleGeneralCommand(GmatCommand *cmd, const std::string &desc)
+//------------------------------------------------------------------------------
+bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
+                                         const std::string &desc)
+{
+   bool retval = true;
+   std::string type = cmd->GetTypeName();      
+   StringArray parts = theTextParser.Decompose(desc, "()");
+   Integer count = parts.size();
+   
+   #if DEBUG_ASSEMBLE_COMMAND
+   WriteParts("AssembleGeneralCommand()" , parts);
+   #endif
+   
+   if (type == "Target" || type == "Report" || type == "BeginFiniteBurn" ||
+       type == "EndFiniteBurn")
+   {
+      // first item is ref. object name
+      
+      if (type == "Target")
+      {
+         cmd->SetRefObjectName(Gmat::SOLVER, parts[0]);
+         
+         for (int i=1; i<count; i++)
+            cmd->SetRefObjectName(Gmat::PARAMETER, parts[i]);
+      }
+      else if (type == "Report")
+      {
+         parts = theTextParser.SeparateBrackets(desc, "()", " ,", false);
+         
+         // first item is ReportFile
+         GmatBase *obj = FindObject(parts[0]);
+         
+         if (obj != NULL)
+         {
+            cmd->SetRefObject(obj, Gmat::SUBSCRIBER, parts[0], 0);
+            
+            // next items are Parameters
+            for (int i=1; i<count; i++)
+            {
+               obj = (GmatBase*)CreateParameter(parts[i]);
+               if (obj != NULL)
+               {
+                  cmd->SetRefObject(obj, Gmat::PARAMETER, parts[i], 0);
+               }
+               else
+               {
+                  InterpreterException ex
+                     ("Cannot find Report Variable: " + parts[i] +
+                      ".\nIt will not be added to Report");
+                  HandleError(ex);
+               }
+            }
+         }
+         else
+         {
+            InterpreterException
+               ("*** ERROR *** Cannot find ReportFile: " + parts[0] +
+                " in line:\n\"" + currentBlock + "\"\n");
+         }
+      }
+      else
+      {
+         // Begin/EndFiniteBurn has the syntax: BeginFiniteBurn burn1(sat1 sat2)
+         
+         // Get FiniteBurn name
+         parts = theTextParser.Decompose(desc, "()", false);
+         
+         #if DEBUG_ASSEMBLE_COMMAND
+         WriteParts(type, parts);
+         #endif
+         
+         cmd->SetRefObjectName(Gmat::BURN, parts[0]);
+         
+         // Get Spacecraft names
+         StringArray subParts = theTextParser.SeparateBrackets(parts[1], "()", " ,");
+         
+         #if DEBUG_ASSEMBLE_COMMAND
+         WriteParts(type, subParts);
+         #endif
+         
+         count = subParts.size();
+         for (int i=0; i<count; i++)
+            cmd->SetRefObjectName(Gmat::SPACECRAFT, subParts[i]);
+      }
+   }
+   else if (type == "Save")
+   {
+      for (int i=0; i<count; i++)
+         cmd->SetRefObjectName(Gmat::SPACECRAFT, parts[i]);
+   }
+   else
+   {
+      retval = false;
+   }
+   
+   #if DEBUG_ASSEMBLE_COMMAND
+   MessageInterface::ShowMessage
+      ("   AssembleGeneralCommand() completed setting %s\n", type.c_str());
+   #endif
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+//GmatCommand* CreateAssignmentCommand(const std::string &lhs,
+//                                     const std::string &rhs)
+//------------------------------------------------------------------------------
+GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
+                                                  const std::string &rhs)
+{
+   std::string desc = lhs + " = " + rhs;
+   return CreateCommand("GMAT", desc);
+}
+
+
+//------------------------------------------------------------------------------
+// Parameter* CreateParameter(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Creates Parameter from the parameter string if it has a valid Parameter Type.
+ */
+//------------------------------------------------------------------------------
+Parameter* Interpreter::CreateParameter(const std::string &str)
+{
+   #if DEBUG_CREATE_PARAM
+   MessageInterface::ShowMessage
+      ("===> Interpreter::CreateParameter() str=%s\n", str.c_str());
+   #endif
+   
+   Parameter *param = NULL;
+   std::string paramType, ownerName, depName;
+   GmatStringUtil::ParseParameter(str, paramType, ownerName, depName);
+
+   // Create parameter, if type is System Parameter, Variable, Array
+   if (find(parameterList.begin(), parameterList.end(), paramType) != 
+       parameterList.end())
+   {
+      //param = CreateParameter(paramType, str, depName, ownerName);
+      param = CreateParameter(paramType, str, ownerName, depName);
+   }
+   else
+   {
+      param = (Parameter*)FindObject(str);
+   }
+   
+   return param;
+}
+
+
+//------------------------------------------------------------------------------
+// Parameter* CreateParameter(const std::string &type, const std::string &name,
+//                            const std::string &ownerName, const std::string &depName)
+//------------------------------------------------------------------------------
+/**
+ * Calls the Moderator to create a Parameter.
+ * 
+ * @param  type       Type of parameter requested
+ * @param  name       Name for the parameter.
+ * @param  ownerName  object name of parameter requested
+ * @param  depName    Dependent object name of parameter requested
+ * 
+ * @return Pointer to the constructed Parameter.
+ */
+//------------------------------------------------------------------------------
+Parameter* Interpreter::CreateParameter(const std::string &type, 
+                                        const std::string &name,
+                                        const std::string &ownerName,
+                                        const std::string &depName)
+{
+   #if DEBUG_CREATE_PARAM
+   MessageInterface::ShowMessage
+      ("Interpreter::CreateParameter() type=%s, name=%s, ownerName=%s, depName=%s\n",
+       type.c_str(), name.c_str(), ownerName.c_str(), depName.c_str());
+   #endif
+   
+   // Check if create an array
+   if (type == "Array")
+      return CreateArray(name);
+   else
+      return theModerator->CreateParameter(type, name, ownerName, depName);
+}
+
+
+//------------------------------------------------------------------------------
+// Parameter* CreateArray(onst std::string &arrayStr)
+//------------------------------------------------------------------------------
+Parameter* Interpreter::CreateArray(const std::string &arrayStr)
+{
+   std::string name;
+   Integer row, col;
+   GmatStringUtil::GetArrayIndex(arrayStr, row, col, name, "[]");
+   
+   if (row == -1)
+   {
+      throw InterpreterException
+         ("Interpreter::CreateArray() invalid number of rows found in: " +
+          arrayStr + "\n");
+   }
+   
+   if (col == -1)
+   {
+      throw InterpreterException
+         ("Interpreter::CreateArray() invalid number of columns found in: " +
+          arrayStr + "\n");
+   }
+   
+   Parameter *param = theModerator->CreateParameter("Array", name);
+
+   #if DEBUG_CREATE_ARRAY
+   MessageInterface::ShowMessage
+      ("Interpreter::CreateArray() row=%d, col=%d\n", row, col);
+   #endif
+   
+   ((Array*)param)->SetSize(row, col);
+   
+   return param;
+}
+
+
+//------------------------------------------------------------------------------
+// Parameter* GetArrayIndex(const std::string &arrayStr, Integer &row, Integer &col)
+//------------------------------------------------------------------------------
+/**
+ * Retrives array index from the configured array.
+ *
+ * @param  arrayStr  String form of array (A(1,3), B(2,j), etc)
+ *
+ * @note Array name must be created and configured before acces.
+ */
+//------------------------------------------------------------------------------
+Parameter* Interpreter::GetArrayIndex(const std::string &arrayStr,
+                                      Integer &row, Integer &col)
+{
+   std::string name, rowStr, colStr;
+   
+   // parse array name and index
+   GmatStringUtil::GetArrayIndex(arrayStr, rowStr, colStr, row, col, name);
+
+   // Remove - sign from the name
+   if (name[0] == '-')
+      name = name.substr(1);
+   
+   #if DEBUG_ARRAY_GET
+   MessageInterface::ShowMessage
+      ("Interpreter::GetArrayIndex() arrayStr=%s, name=%s, rowStr=%s, "
+       "colStr=%s, row=%d, col=%d\n", arrayStr.c_str(), name.c_str(),
+       rowStr.c_str(), colStr.c_str(), row, col);
+   #endif
+
+   GmatBase *obj = FindObject(name);
+   
+   if (obj == NULL)
+      throw InterpreterException
+         ("Interpreter::GetArrayIndex() cannot find Array name: " + name + "\n");
+   
+   if (obj->GetTypeName() != "Array")
+      throw InterpreterException
+         ("Interpreter::GetArrayIndex() " + name + " is not an Array\n");
+   
+   // get row value
+   if (row == -1 && rowStr != "-1")
+   {
+      Parameter *param = (Parameter*)FindObject(rowStr);
+      if (param == NULL)
+         throw InterpreterException
+            ("Interpreter::GetArrayIndex() cannot find Array row index "
+             "Variable: " + name + "\n");
+      
+      if (param->GetReturnType() == Gmat::REAL_TYPE)
+         row = (Integer)param->GetReal() - 1; // index starts at 0
+      else
+         if (param == NULL)
+            throw InterpreterException
+               ("Interpreter::GetArrayIndex() cannot handle Array row of "
+                "Array: " + name + "\n");
+   }
+   
+   
+   // get column value
+   if (col == -1 && colStr != "-1")
+   {
+      Parameter *param = (Parameter*)FindObject(colStr);
+      if (FindObject(colStr) == NULL)
+         throw InterpreterException
+            ("Interpreter::GetArrayIndex() cannot find Array column index "
+             "Variable: " + name + "\n");
+   
+      if (param->GetReturnType() == Gmat::REAL_TYPE)
+         col = (Integer)param->GetReal() - 1; // index starts at 0
+      else
+         if (param == NULL)
+            throw InterpreterException
+               ("Interpreter::GetArrayIndex() cannot handle Array column of "
+                "Array: " + name + "\n");
+   }
+   
+   if (row == -1)
+      throw InterpreterException
+         ("Interpreter::GetArrayIndex() Row index is invalid\n");
+   
+   if (col == -1)
+      throw InterpreterException
+         ("Interpreter::GetArrayIndex() Column index is invalid\n");
+
+   #if DEBUG_ARRAY_GET
+   MessageInterface::ShowMessage
+      ("   GetArrayIndex() row=%d, col=%d\n", row, col);
+   #endif
+   
+   return (Parameter*)obj;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* MakeAssignment(const std::string &lhs, const std::string &rhs)
+//------------------------------------------------------------------------------
+/*
+ * Sets rhs to lhs.
+ *
+ * @param  lhs  Left hand side component
+ * @param  rhs  Right hand side component
+ *
+ * @return return LHS object pointer
+ */
+//------------------------------------------------------------------------------
+GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string &rhs)
+{
+   bool retval = false;
+   
+   // Separate dots
+   StringArray lhsParts = theTextParser.SeparateDots(lhs);
+   Integer lhsPartCount = lhsParts.size();
+   StringArray rhsParts = theTextParser.SeparateDots(rhs);
+   Integer rhsPartCount = rhsParts.size();
+   UnsignedInt dot;
+   std::string lhsObjName, rhsObjName;
+   std::string lhsPropName, rhsPropName;
+   GmatBase *lhsObj = NULL;
+   GmatBase *rhsObj = NULL;
+   bool isLhsObject = false;
+   bool isRhsObject = false;
+   bool isLhsArray = false;
+   bool isRhsArray = false;
+   currentBlock = lhs + " = " + rhs;
+   
+   #if DEBUG_ASSIGNMENT
+   MessageInterface::ShowMessage
+      ("Interpreter::MakeAssignment() lhs=%s, rhs=%s\n", lhs.c_str(), rhs.c_str());
+   MessageInterface::ShowMessage
+      ("   lhsPartCount=%d, rhsPartCount=%d\n", lhsPartCount, rhsPartCount);
+   #endif
+   
+   // check LHS
+   if (lhsPartCount > 1)
+   {
+      lhsObjName = lhsParts[0];
+      lhsObj = FindObject(lhsObjName);
+      
+      if (lhsObj == NULL)
+         throw InterpreterException
+            ("Interpreter::MakeAssignment() Cannot find LHS object: " + lhsObjName + "\n");
+      
+      dot = lhs.find('.');
+      if (dot == lhs.npos)
+         lhsPropName = lhsParts[1];
+      else
+         lhsPropName = lhs.substr(dot+1);
+      
+   }
+   else
+   {
+      lhsObj = FindObject(lhs);
+      
+      if (lhsObj)
+      {
+         if (IsArray(lhs))
+            isLhsArray = true;
+         else
+            isLhsObject = true;
+      }
+      else
+      {
+         throw InterpreterException("Cannot find LHS object: " + lhs + "\n");
+      }
+   }
+   
+   #if DEBUG_ASSIGNMENT
+   MessageInterface::ShowMessage
+      ("   isLhsObject=%d, isLhsArray=%d, lhsPropName=%s\n",
+       isLhsObject, isLhsArray, lhsPropName.c_str());
+   #endif
+   
+   // check RHS
+   if (rhsPartCount > 1)
+   {
+      rhsObjName = rhsParts[0];
+      rhsObj = FindObject(rhsObjName);
+      
+      if (rhsObj == NULL)
+      {
+         //throw InterpreterException("Cannot find RHS object: " + rhsObjName + "\n");
+         
+         #if DEBUG_ASSIGNMENT
+         MessageInterface::ShowMessage
+            ("   Cannot find RHS object: %s. It may be a string value\n",
+             rhsObjName.c_str());
+         #endif
+      }
+      else
+      {
+         dot = rhs.find('.');
+         if (dot == rhs.npos)
+            rhsPropName = rhsParts[1];
+         else
+            rhsPropName = rhs.substr(dot+1);
+      }
+   }
+   else
+   {
+      // if rist RHS char is - sign, use without it in finding name
+      std::string newName = rhs;
+      
+      if (rhs[0] == '-')
+         newName = rhs.substr(1);
+      
+      rhsObj = FindObject(newName);
+
+      if (rhsObj)
+      {
+         if (IsArray(rhs))
+            isRhsArray = true;
+         else
+            isRhsObject = true;
+      }
+   }
+   
+   if (isLhsObject)
+   {
+      if (isRhsObject)
+         retval = SetObjectToObject(lhsObj, rhsObj);
+      else if (rhsPropName != "")
+         retval = SetPropertyToObject(lhsObj, rhsObj, rhsPropName);
+      else if (isRhsArray)
+         retval = SetArrayToObject(lhsObj, rhs);
+      else
+         retval = SetValueToObject(lhsObj, rhs);
+   }
+   else if (lhsPropName != "")
+   {
+      if (isRhsObject)
+         retval = SetObjectToProperty(lhsObj, lhsPropName, rhsObj);
+      else if (rhsPropName != "")
+         retval = SetPropertyToProperty(lhsObj, lhsPropName, rhsObj, rhsPropName);
+      else if (isRhsArray)
+         retval = SetArrayToProperty(lhsObj, lhsPropName, rhs);
+      else
+         retval = SetValueToProperty(lhsObj, lhsPropName, rhs);
+   }
+   else if (isLhsArray)
+   {
+      if (isRhsObject)
+         retval = SetObjectToArray(lhsObj, lhs, rhsObj);
+      else if (rhsPropName != "")
+         retval = SetPropertyToArray(lhsObj, lhs, rhsObj, rhsPropName);
+      else if (isRhsArray)
+         retval = SetArrayToArray(lhsObj, lhs, rhsObj, rhs);
+      else
+         retval = SetValueToArray(lhsObj, lhs, rhs);
+   }
+   else
+      throw InterpreterException
+         ("Interpreter::MakeAssignment() Error if it reached here.\n");
+   
+   #if DEBUG_ASSIGNMENT
+   MessageInterface::ShowMessage
+      ("Interpreter::MakeAssignment() returning lhsObj=%p\n", lhsObj);
+   #endif
+
+   if (retval)
+      return lhsObj;
+   else
+      return NULL;
+}
+
+
+//-------------------------------------------------------------------------------
+// bool SetObjectToObject(GmatBase *toObj, GmatBase *fromObj)
+//-------------------------------------------------------------------------------
+bool Interpreter::SetObjectToObject(GmatBase *toObj, GmatBase *fromObj)
+{
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetObjectToObject() to=%s, from=%s\n",
+       toObj->GetName().c_str(), fromObj->GetName().c_str());
+   #endif
+   
+   // Copy object
+   if (toObj->GetTypeName() == fromObj->GetTypeName())
+   {
+      toObj->Copy(fromObj);
+   }
+   else
+   {
+      InterpreterException ex("Object type of LHS and RHS are not the same.");
+      HandleError(ex);
+      return false;
+   }
+   
+   return true;
+}
+
+
+//-------------------------------------------------------------------------------
+// bool SetPropertyToObject(GmatBase *toObj, GmatBase *fromOwner,
+//                          const std::string &fromProp)
+//-------------------------------------------------------------------------------
+bool Interpreter::SetPropertyToObject(GmatBase *toObj, GmatBase *fromOwner,
+                                      const std::string &fromProp)
+{
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("SetPropertyToObject() toObj=%s, fromOwner=%s, fromProp=%s\n",
+       toObj->GetName().c_str(), fromOwner->GetName().c_str(), fromProp.c_str());
+   #endif
+   
+   if (toObj->GetTypeName() != "Variable" && toObj->GetTypeName() != "String")
+   {
+      InterpreterException ex
+         ("Cannot set property to object other than Variable or String.");
+      HandleError(ex);
+      return false;
+   }
+   
+   Integer fromId = fromOwner->GetParameterID(fromProp);
+   Gmat::ParameterType fromType = fromOwner->GetParameterType(fromId);
+   Gmat::ParameterType toType = ((Parameter*)toObj)->GetReturnType();
+   
+   if (fromType == toType)
+   {
+      if (toType == Gmat::STRING_TYPE)
+         toObj->SetStringParameter("Value", fromOwner->GetStringParameter(fromId));
+      else if (toType == Gmat::REAL_TYPE)
+         toObj->SetRealParameter("Value", fromOwner->GetRealParameter(fromId));
+   }
+   else
+   {
+      InterpreterException ex
+         ("Cannot set property to object. Parameter types are not the same.");
+      HandleError(ex);
+      return false;
+   }
+
+   return true;
+}
+
+
+//-------------------------------------------------------------------------------
+// bool SetArrayToObject(GmatBase *toObj, const std::string &fromArray)
+//-------------------------------------------------------------------------------
+bool Interpreter::SetArrayToObject(GmatBase *toObj, const std::string &fromArray)
+{
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetArrayToObject() toObj=%s, fromArray=%s\n",
+       toObj->GetName().c_str(), fromArray.c_str());
+   #endif
+   
+   if (toObj->GetTypeName() != "Variable")
+   {
+      InterpreterException ex
+         ("Cannot set Array element to object other than Variable.");
+      HandleError(ex);
+      return false;
+   }
+   
+   Integer row, col;
+   GetArrayIndex(fromArray, row, col);
+   
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("   SetArrayToObject() row=%d, col=%d\n", row, col);
+   #endif
+   
+   // Check for array index
+   if (row == -1 || col == -1)
+   {
+      InterpreterException ex("Invalid array index: " + fromArray);
+      HandleError(ex);
+      return false;
+   }
+   
+   Real rval = GetArrayValue(fromArray, row, col);
+   
+   #if DEBUG_SET
+   MessageInterface::ShowMessage("   SetArrayToObject() rval=%f\n", rval);
+   #endif
+
+   try
+   {
+      toObj->SetRealParameter("Value", rval);
+   }
+   catch (BaseException &e)
+   {
+      HandleError(e);
+      return false;
+   }
+   
+   return true;
+}
+
+
+//-------------------------------------------------------------------------------
+// bool SetValueToObject(GmatBase *toObj, const std::string &value)
+//-------------------------------------------------------------------------------
+bool Interpreter::SetValueToObject(GmatBase *toObj, const std::string &value)
+{
+   std::string objType = toObj->GetTypeName();
+   
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetValueToObject() objType=%s, toObj=%s, value=%s\n",
+       objType.c_str(), toObj->GetName().c_str(), value.c_str());
+   #endif
+   
+   if (objType != "Variable" && objType != "String")
+   {
+      InterpreterException ex
+         ("Cannot set value to object other than Variable or String.");
+      HandleError(ex);
+      return false;
+   }
+   
+   if (objType == "String")
+   {
+      #if DEBUG_SET
+      MessageInterface::ShowMessage
+         ("===> calling toObj->SetStringParameter(Value, %s)\n", value.c_str());
+      #endif
+      
+      toObj->SetStringParameter("Value", value);
+   }
+   else if (objType == "Variable")
+   {
+      Real rval;
+
+      try
+      {
+         if (GmatStringUtil::ToDouble(value, rval))
+         {      
+            #if DEBUG_SET
+            MessageInterface::ShowMessage("   SetValueToObject() rval=%f\n", rval);
+            #endif
+         
+            toObj->SetRealParameter("Value", rval);
+         }
+         else
+         {
+            toObj->SetStringParameter(toObj->GetParameterID("Expression"), value);
+         }
+      }
+      catch (BaseException &e)
+      {
+         HandleError(e);
+         return false;
+      }
+   }
+   
+   return true;
+}
+
+
+//-------------------------------------------------------------------------------
+// bool SetObjectToProperty(GmatBase *toOwner, const std::string &toProp,
+//                          GmatBase *fromObj)
+//-------------------------------------------------------------------------------
+bool Interpreter::SetObjectToProperty(GmatBase *toOwner, const std::string &toProp,
+                                      GmatBase *fromObj)
+{
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetObjectToProperty() ownerType=%s, toOwner=%s, toProp=%s, "
+       "fromObj=%s\n", toOwner->GetTypeName().c_str(), toOwner->GetName().c_str(),
+       toProp.c_str(), fromObj->GetName().c_str());
+   #endif
+   
+   if (toOwner->GetType() == Gmat::FORCE_MODEL)
+   {
+      std::string objName = fromObj->GetName();
+      bool retval = SetForceModelProperty(toOwner, toProp, objName, fromObj);
+      if (!retval)
+      {
+         InterpreterException ex
+            ("Cannot set Object: " + objName + " to ForceModel: " +
+             toOwner->GetName() + "\n");
+         HandleError(ex);
+         return false;
+      }
+   }
+   else
+   {
+      GmatBase *toObj = NULL;
+      Integer toId = -1;
+
+      try
+      {
+         FindPropertyID(toOwner, toProp, &toObj, toId);
+      
+         if (toObj == NULL)
+            throw InterpreterException
+               ("*** Internal Error *** "
+                "Interpreter::SetObjectToProperty() toObj is NULL\n");
+      }
+      catch (BaseException &e)
+      {
+         delayedBlocks.push_back(currentBlock);
+         
+         #if DEBUG_SET
+         MessageInterface::ShowMessage
+            ("   ===> added to delayed blocks: %s\n", currentBlock.c_str());
+         #endif
+         
+         return true;
+      }
+      
+      Gmat::ParameterType toType = toObj->GetParameterType(toId);
+      
+      #if DEBUG_SET
+      MessageInterface::ShowMessage("   toId=%d, toType=%d\n", toId, toType);
+      #endif
+      
+      if (fromObj->GetTypeName() == "Variable" || fromObj->GetTypeName() == "String")
+      {
+         Gmat::ParameterType fromType = ((Parameter*)fromObj)->GetReturnType();
+         
+         if (fromType == toType)
+         {
+            if (toType == Gmat::STRING_TYPE)
+               toObj->SetStringParameter(toId, fromObj->GetStringParameter("Value"));
+            else if (toType == Gmat::REAL_TYPE)
+               toObj->SetRealParameter(toId, fromObj->GetRealParameter("Value"));
+         }
+         else
+         {
+            if (toType == Gmat::STRING_TYPE)
+            {
+               toObj->SetStringParameter(toId, fromObj->GetName());
+            }
+            else
+            {
+               InterpreterException ex
+                  ("Cannot set Variable or String to property. "
+                   "Parameter types are not the same.");
+               HandleError(ex);
+               return false;
+            }
+         }
+      }
+      else
+      {
+         #if DEBUG_SET
+         MessageInterface::ShowMessage
+            ("   Setting objType=%s, objName=%s\n", fromObj->GetTypeName().c_str(),
+             fromObj->GetName().c_str());
+         #endif
+         
+         try
+         {
+            toObj->SetStringParameter(toProp, fromObj->GetName());
+            if (toType == Gmat::OBJECT_TYPE)
+               toObj->SetRefObject(fromObj, fromObj->GetType(), fromObj->GetName());
+         }
+         catch (BaseException &e)
+         {
+            HandleError(e);
+            return false;
+         }
+      }
+   }
+   
+   return true;
+}
+
+
+//-------------------------------------------------------------------------------
+// bool SetPropertyToProperty(GmatBase *toOwner, const std::string &toProp,
+//                            GmatBase *fromOwner, const std::string &fromProp)
+//-------------------------------------------------------------------------------
+bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &toProp,
+                                        GmatBase *fromOwner, const std::string &fromProp)
+{
+   bool retval = true;
+   
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("SetPropertyToProperty() toOwner=%s, toProp=%s, fromOwner=%s, fromProp=%s\n",
+       toOwner->GetName().c_str(), toProp.c_str(), fromOwner->GetName().c_str(),
+       fromProp.c_str());
+   #endif
+   
+   Integer toId = -1;
+   Gmat::ParameterType toType = Gmat::UNKNOWN_PARAMETER_TYPE;
+   std::string lhs = toOwner->GetName() + "." + toProp;
+   std::string rhs = fromOwner->GetName() + "." + fromProp;
+   std::string value;
+   Parameter *lhsParam = NULL;
+   Parameter *rhsParam = NULL;
+   
+   #if DEBUG_SET
+   MessageInterface::ShowMessage("   lhs=%s, rhs=%s\n", lhs.c_str(), rhs.c_str());
+   #endif
+
+   //-----------------------------------
+   // try LHS property
+   //-----------------------------------
+   
+   try
+   {
+      toId = toOwner->GetParameterID(toProp);
+      toType = toOwner->GetParameterType(toId);
+   }
+   catch (BaseException &e)
+   {
+      lhsParam = CreateParameter(lhs);
+   }
+   
+   //-----------------------------------
+   // try RHS property
+   //-----------------------------------
+   // try create parameter first if lhs type is OBJECT_TYPE
+   if (toType == Gmat::OBJECT_TYPE)
+      rhsParam = CreateParameter(rhs);
+   
+   Integer fromId = -1;
+   Gmat::ParameterType fromType = Gmat::UNKNOWN_PARAMETER_TYPE;
+   bool isRhsProperty = true;
+   
+   try
+   {
+      fromId = fromOwner->GetParameterID(fromProp);   
+      fromType = fromOwner->GetParameterType(fromId);
+   }
+   catch (BaseException &e)
+   {
+      isRhsProperty = false;
+      fromType = Gmat::STRING_TYPE;
+   }
+   
+   
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("   toId=%d, toType=%d, fromId=%d, fromType=%d, lhsParam=%p, rhsParam=%p\n",
+       toId, toType, fromId, fromType, lhsParam, rhsParam);
+   #endif
+   
+   //-----------------------------------
+   // now set value
+   //-----------------------------------
+   
+   if (lhsParam != NULL && rhsParam != NULL)
+   {
+      SetObjectToObject(lhsParam, rhsParam);
+   }
+   else if (lhsParam == NULL && rhsParam != NULL)
+   {
+      if (toType == rhsParam->GetReturnType())
+      {
+         value = rhsParam->ToString();
+         retval = SetProperty(toOwner, toId, value);
+      }
+      else
+      {
+         retval = SetProperty(toOwner, toId, rhs);
+      }
+   }
+   else if (lhsParam != NULL && rhsParam == NULL)
+   {
+      if (lhsParam->GetReturnType() == fromType)
+      {
+         value = GetPropertyValue(fromOwner, fromId);
+         lhsParam->SetString(value); 
+         retval = true;
+      }
+   }
+   else if (lhsParam == NULL && rhsParam == NULL)
+   {
+      if (toType == fromType)
+      {
+         if (toType == Gmat::STRING_TYPE)
+         {
+            if (isRhsProperty)
+            {
+               value = GetPropertyValue(fromOwner, fromId);
+               retval = SetPropertyValue(toOwner, toId, value);
+            }
+            else
+            {
+               retval = SetPropertyValue(toOwner, toId, rhs);
+            }
+         }
+         else
+         {
+            value = GetPropertyValue(fromOwner, fromId);
+            retval = SetProperty(toOwner, toId, value);
+         }
+      }
+      else
+      {
+         retval = SetProperty(toOwner, toId, rhs);
+      }
+   }
+   
+   if (!retval)
+   {
+      InterpreterException ex
+         ("Cannot set property: " + fromProp + " to property: " + toProp);
+      HandleError(ex);
+   }
+
+   return retval;
+}
+
+
+//-------------------------------------------------------------------------------
+// bool SetArrayToProperty(GmatBase *toOwner, const std::string &toProp,
+//                         const std::string &fromArray)
+//-------------------------------------------------------------------------------
+bool Interpreter::SetArrayToProperty(GmatBase *toOwner, const std::string &toProp,
+                                     const std::string &fromArray)
+{
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetArrayToProperty() toOwner=%s, toProp=%s, fromArray=%s\n",
+       toOwner->GetName().c_str(), toProp.c_str(), fromArray.c_str());
+   #endif
+   
+   Integer toId = toOwner->GetParameterID(toProp);
+   Gmat::ParameterType toType = toOwner->GetParameterType(toId);
+
+   if (toType != Gmat::REAL_TYPE)
+   {
+      InterpreterException ex
+         ("Cannot set Array element to property. Property type is not Real.");
+      HandleError(ex);
+      return false;
+   }
+   
+   Integer row, col;
+   Real rval = GetArrayValue(fromArray, row, col);
+
+   try
+   {
+      toOwner->SetRealParameter(toId, rval);
+   }
+   catch (BaseException &e)
+   {
+      HandleError(e);
+      return false;
+   }
+   
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetArrayToProperty() exiting. rval=%f, row=%d, col=%d, \n",
+       rval, row, col);
+   #endif
+
+   return true;
+}
+
+
+//-------------------------------------------------------------------------------
+// bool SetValueToProperty(GmatBase *toOwner, const std::string &toProp,
+//                         const std::string &value)
+//-------------------------------------------------------------------------------
+bool Interpreter::SetValueToProperty(GmatBase *toOwner, const std::string &toProp,
+                                     const std::string &value)
+{
+   bool retval = false;
+   errorMsg = "";
+   
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetValueToProperty() objType=%s, objName=%s, toProp=%s, "
+       "value=%s\n", toOwner->GetTypeName().c_str(), toOwner->GetName().c_str(),
+       toProp.c_str(), value.c_str());
+   #endif
+   
+   if (toOwner->GetType() == Gmat::FORCE_MODEL)
+   {
+      retval = SetForceModelProperty(toOwner, toProp, value, NULL);
+   }
+   else if (toOwner->GetType() == Gmat::SOLAR_SYSTEM)
+   {
+      retval = SetSolarSystemProperty(toOwner, toProp, value);
+   }
+   else
+   {
+      StringArray parts = theTextParser.SeparateDots(toProp);
+      
+      // if property has multiple dots, handle separately
+      if (parts.size() > 1)
+      {
+         retval = SetComplexProperty(toOwner, toProp, value);
+      }
+      else
+      {
+         GmatBase *toObj = NULL;
+         Integer toId = -1;
+         
+         if (FindPropertyID(toOwner, toProp, &toObj, toId))
+            retval = SetProperty(toObj, toId, value);
+         
+      }
+   }
+   
+   if (retval == false)
+   {
+      InterpreterException ex
+         (errorMsg + "Cannot set " + toOwner->GetTypeName() + " property: " + toProp);
+      HandleError(ex);
+   }
+   
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetValueToProperty() returning retval=%d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+
+//-------------------------------------------------------------------------------
+// bool SetObjectToArray(GmatBase *toArrObj, const std::string &toArray,
+//                       GmatBase *fromObj)
+//-------------------------------------------------------------------------------
+bool Interpreter::SetObjectToArray(GmatBase *toArrObj, const std::string &toArray,
+                                   GmatBase *fromObj)
+{
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetObjectToArray() toArrObj=%s, toArray=%s, fromObj=%s\n",
+       toArrObj->GetName().c_str(), toArray.c_str(), fromObj->GetName().c_str());
+   #endif
+   
+   if (fromObj->GetTypeName() != "Variable")
+   {
+      InterpreterException ex
+         ("Cannot set object other than Variable or Array element.");
+      HandleError(ex);
+      return false;
+   }
+   
+   Real rval = fromObj->GetRealParameter("Value");
+   
+   Integer row, col;
+   GetArrayIndex(toArray, row, col);
+   
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("   SetObjectToArray()rval=%f, row=%d, col=%d\n", rval, row, col);
+   #endif
+
+   try
+   {
+      toArrObj->SetRealParameter("SingleValue", rval, row, col);
+   }
+   catch (BaseException &e)
+   {
+      HandleError(e);
+      return false;
+   }
+
+   return true;
+}
+
+
+//-------------------------------------------------------------------------------
+// bool SetPropertyToArray(GmatBase *toArrObj, const std::string &toArray,
+//                         GmatBase *fromOwner, const std::string &fromProp)
+//-------------------------------------------------------------------------------
+bool Interpreter::SetPropertyToArray(GmatBase *toArrObj, const std::string &toArray,
+                                     GmatBase *fromOwner, const std::string &fromProp)
+{
+   #if DEBGU_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetPropertyToArray() toArrObj=%s, toArray=%s, fromOwner=%s, "
+       "fromProp=%s\n", toArrObj->GetName().c_str(), toArray.c_str(),
+       fromOwner->GetName().c_str(), fromProp.c_str());
+   #endif
+   
+   // get object parameter id
+   Integer fromId = fromOwner->GetParameterID(fromProp);
+   
+   if (fromOwner->GetParameterType(fromId) != Gmat::REAL_TYPE)
+   {
+      InterpreterException ex
+         ("Cannot set property to Array element. Parameter type is not Real.");
+      HandleError(ex);
+      return false;
+   }
+   
+   Real rval = fromOwner->GetRealParameter(fromId);
+   
+   Integer row, col;
+   GetArrayIndex(toArray, row, col);
+
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("   SetPropertyToArray()rval=%f, row=%d, col=%d\n", rval, row, col);
+   #endif
+
+   try
+   {
+      toArrObj->SetRealParameter("SingleValue", rval, row, col);
+   }
+   catch (BaseException &e)
+   {
+      HandleError(e);
+      return false;
+   }
+
+   return true;
+}
+
+
+//-------------------------------------------------------------------------------
+// bool SetArrayToArray(GmatBase *toArrObj, const std::string &toArray,
+//                      GmatBase *fromArrObj, const std::string &fromArray)
+//-------------------------------------------------------------------------------
+bool Interpreter::SetArrayToArray(GmatBase *toArrObj, const std::string &toArray,
+                                  GmatBase *fromArrObj, const std::string &fromArray)
+{
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetArrayToArray() toArrObj=%s, toArray=%s, "
+       "fromArrObj=%s, fromArray=%s\n", toArrObj->GetName().c_str(),
+       toArray.c_str(), fromArrObj->GetName().c_str(), fromArray.c_str());
+   #endif
+   
+   Integer rowFrom, colFrom;
+   Integer rowTo, colTo;
+   
+   GetArrayIndex(toArray, rowTo, colTo);
+   GetArrayIndex(fromArray, rowFrom, colFrom);
+   
+   Real rval = GetArrayValue(fromArray, rowFrom, colFrom);
+   
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("   SetArrayToArray() rval=%f, rowFrom=%d, colFrom=%d, \n",
+       rval, rowFrom, colFrom);
+   MessageInterface::ShowMessage
+      ("   SetArrayToArray()rowTo=%d, colTo=%d\n", rowTo, colTo);
+   #endif
+
+   try
+   {
+      if (fromArray[0] == '-')
+         toArrObj->SetRealParameter("SingleValue", rval, rowTo, colTo);
+      else   
+         toArrObj->SetRealParameter("SingleValue", -rval, rowTo, colTo);
+   }
+   catch (BaseException &e)
+   {
+      HandleError(e);
+      return false;
+   }
+
+   return true;
+}
+
+
+//-------------------------------------------------------------------------------
+// bool SetValueToArray(GmatBase *array, const std::string &toArray,
+//                      const std::string &value)
+//-------------------------------------------------------------------------------
+bool Interpreter::SetValueToArray(GmatBase *array, const std::string &toArray,
+                                  const std::string &value)
+{
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetValueToArray() array=%s, toArray=%s, value=%s\n",
+       array->GetName().c_str(), toArray.c_str(), value.c_str());
+   #endif
+   
+   Integer row, col;
+   Real rval;
+
+   GetArrayIndex(toArray, row, col);
+   
+   
+   if (GmatStringUtil::ToDouble(value, rval))
+   {
+      #if DEBUG_SET
+      MessageInterface::ShowMessage
+         ("   SetValueToArray() rval=%f, row=%d, col=%d\n", rval, row, col);
+      #endif
+
+      try
+      {
+         array->SetRealParameter("SingleValue", rval, row, col);
+      }
+      catch (BaseException &e)
+      {
+         InterpreterException ex("Out of bound index found: " + toArray);
+         HandleError(ex);
+         return false;
+      }
+   }
+   else
+   {
+      InterpreterException ex("Invalid real number found: " + value);
+      HandleError(ex);
+      return false;
+   }
+
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetPropertyValue(GmatBase *obj, const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 /**
  * Sets parameters on GMAT objects.
  * 
- * @param obj   Pointer to the object that owns the parameter.
- * @param id    ID for the parameter.
- * @param value Value of the parameter.
+ * @param  obj    Pointer to the object that owns the parameter.
+ * @param  id     ID for the parameter.
+ * @param  value  Value of the parameter.
  * 
  * @return true if the parameter is set, false otherwise.
  */
 //------------------------------------------------------------------------------
-bool Interpreter::SetParameter(GmatBase *obj, Integer id, std::string value)
-{
-    bool retval = false;
-    
-    std::string valueToUse = value;
-    CheckForSpecialCase(obj, id, valueToUse);
-    
-    Gmat::ParameterType type = obj->GetParameterType(id);
-    if (type == Gmat::INTEGER_TYPE){
-        obj->SetIntegerParameter(id, atoi(valueToUse.c_str()));
-        retval = true;
-    }
-    if (type == Gmat::REAL_TYPE) {
-        obj->SetRealParameter(id, atof(valueToUse.c_str()));
-        retval = true;
-    }
-    if ((type == Gmat::STRING_TYPE) || (type == Gmat::STRINGARRAY_TYPE)) {
-        retval = obj->SetStringParameter(id, valueToUse);
-    }
-
-    if (type == Gmat::BOOLEAN_TYPE) {
-       bool tf;
-       if (value == "true")
-          tf = true;
-       else
-          tf = false;
-       obj->SetBooleanParameter(id, tf);
-       retval = true;
-    }
-    
-    return retval;
-}
-
-
-//------------------------------------------------------------------------------
-// bool ParseCondition(const StringArray topLevel, std::string &lhs,
-//                     std::string &op, std::string &rhs, Integer begin,
-//                     Integer &next)
-//------------------------------------------------------------------------------
-bool Interpreter::ParseCondition(const StringArray topLevel, std::string &lhs,
-                                 std::string &op, std::string &rhs, Integer begin,
-                                 Integer &next)
-{
-   #ifdef DEBUG_TOKEN_PARSING
-   MessageInterface::ShowMessage
-      ("Interpreter::ParseCondition() begin=%d\n   line=%s\n", begin,
-       line.c_str());
-   for (UnsignedInt i=0; i<topLevel.size(); i++)
-      MessageInterface::ShowMessage
-         ("topLevel[%d] = %s\n", i, topLevel[i].c_str());
-   #endif
-
-   // Reassemble into lhs op rhs
-   int size = topLevel.size();
-   lhs = topLevel[begin + 1];
-
-   if (line.find('[') != std::string::npos ||
-       line.find(']') != std::string::npos)
-      throw InterpreterException
-         ("Found [ or ] in line: " + line + "\n    Did you mean ( or )?");
-   
-   // If lhs index not found
-   if (topLevel[begin + 2].find('(') == std::string::npos)
-   {
-      op = topLevel[begin + 2];
-      rhs = topLevel[begin + 3];
-      next = begin + 4;
-      if (size > begin + 4)
-      {
-         if (topLevel[begin + 4].find('(') != std::string::npos)
-         {
-            rhs = rhs + topLevel[begin + 4];
-            next = begin + 5;
-         }
-      }
-   }
-   else // lhs index found
-   {
-      op = topLevel[begin + 3];
-      lhs = lhs + topLevel[begin + 2];
-      rhs = topLevel[begin + 4];
-      next = begin + 5;
-      
-      if (size > begin + 5)
-      {
-         if (topLevel[begin + 5].find('(') != std::string::npos)
-         {
-            rhs = rhs + topLevel[begin + 5];
-            next = begin + 6;
-         }
-      }
-   }
-   
-   #ifdef DEBUG_TOKEN_PARSING
-   MessageInterface::ShowMessage
-      ("Interpreter::ParseCondition() lhs=%s, op=%s, rhs=%s, next=%d\n",
-       lhs.c_str(), op.c_str(), rhs.c_str(), next);
-   #endif
-
-   return true;
-   
-}
-
-
-//------------------------------------------------------------------------------
-// bool SetRefParameter(GmatCommand *cmd, const std::string &paramName,
-//                      Integer index)
-//------------------------------------------------------------------------------
-bool Interpreter::SetRefParameter(GmatCommand *cmd, const std::string &paramName,
-                                  Integer index)
-{
-   #ifdef DEBUG_TOKEN_PARSING
-   MessageInterface::ShowMessage
-      ("Interpreter::SetRefParameter() cmd=%s, paramName=%s\n",
-       cmd->GetTypeName().c_str(), paramName.c_str());
-   #endif
-   
-   GmatBase *object = NULL;
-   Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT;
-   
-   // Ignore array indexing of Array parameter name
-   std::string newName = paramName;
-   UnsignedInt openParen = paramName.find('(');
-   
-   if (openParen != paramName.npos)
-      newName = paramName.substr(0, openParen);
-   
-   // If newName is not a number, set as a parameter
-   object = theModerator->GetObject(newName);
-   if (object)
-   {
-      #ifdef DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage
-         ("Interpreter::SetRefParameter() Found a \"%s\"\n",
-          (object->GetTypeName()).c_str());
-      #endif
-      type = object->GetType();
-      if (!cmd->SetRefObject(object, type, paramName, index))
-         throw InterpreterException
-            ("Cannot set object " + newName + " for command: " +
-             (cmd->GetTypeName()));
-   }
-   else
-   {
-      // Test if it is a system parameter
-      StringTokenizer st(paramName, ".");
-      StringArray components = st.GetAllTokens();
-      object = AssemblePhrase(components, cmd);
-      
-      if (object == NULL)
-         throw InterpreterException
-            ("Cannot find object named " + paramName + " for command: " +
-             (cmd->GetTypeName()));
-      
-      #ifdef DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage
-         ("Interpreter::SetRefParameter() Assembled a %s\n",
-          object->GetTypeName().c_str());
-      #endif
-      
-      type = object->GetType();
-      if (!cmd->SetRefObject(object, type, paramName, index))
-         throw InterpreterException
-            ("Cannot set Parameter object " + paramName + 
-             " for command: " + (cmd->GetTypeName()));
-   }
-
-   return true;
-}
-
-
-//------------------------------------------------------------------------------
-// void CheckForSpecialCase(GmatBase *obj, Integer id, std::string& value)
-//------------------------------------------------------------------------------
-void Interpreter::CheckForSpecialCase(GmatBase *obj, Integer id, 
-                                      std::string& value)
-{
-   std::string val = value;
-
-   #ifdef DEBUG_TOKEN_PARSING
-      std::cout << "Entered CheckForSpecialCase with \"" << value
-                << "\" being set on parameter \"" << obj->GetParameterText(id)
-                << "\" for a \"" << obj->GetTypeName() << "\" object\n";
-   #endif
-   
-   // JGM2 and JGM3 are special strings  in GMAT; handle them here
-   if ((obj->GetTypeName() == "GravityField") &&
-       (obj->GetParameterText(id) == "PotentialFile")) {
-      val = theModerator->GetPotentialFileName(value);
-      if (val.find("Unknown Potential File Type") == std::string::npos)
-         value = val;
-   }
-
-   #ifdef DEBUG_TOKEN_PARSING
-      std::cout << "Leaving CheckForSpecialCase with \"" << value << "\"\n";
-   #endif
-}
-
-
-void Interpreter::RegisterAliases(void)
-{
-   ForceModel::SetScriptAlias("PrimaryBodies", "GravityField");
-   ForceModel::SetScriptAlias("Gravity", "GravityField");
-   ForceModel::SetScriptAlias("PointMasses", "PointMassForce");
-   ForceModel::SetScriptAlias("Drag", "DragForce");
-   ForceModel::SetScriptAlias("SRP", "SolarRadiationPressure");
-}
-
-
-bool Interpreter::ConfigureForce(ForceModel *obj, std::string& objParm, 
-                                 std::string& parm)
+bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
+                                   const std::string &value)
 {
    bool retval = false;
    
-   #ifdef DEBUG_TOKEN_PARSING
-      std::stringstream msgstr;
-      msgstr << "Interpreter::ConfigureForce entered for line\n  \""
-             << line << "\"\n  Current force is a " << obj->GetTypeName()
-             << " named '" << obj->GetName() 
-             << "'\n  parm is \"" << objParm <<"\" = \""
-             << parm << "\"\n";
-      MessageInterface::ShowMessage(msgstr.str());
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetPropertyValue() obj=%s, id=%d, value=%s\n",
+       obj->GetName().c_str(), id, value.c_str());
    #endif
    
-   std::string forcetype = ForceModel::GetScriptAlias(objParm);
-   if (forcetype == "SolarRadiationPressure")
-      if (parm != "On")
-         return true;
-   if (forcetype == "DragForce")
-      if (parm == "None")
-         return true;
-   PhysicalModel *pm = theModerator->CreatePhysicalModel(forcetype, "");
+   std::string valueToUse = value;
+   CheckForSpecialCase(obj, id, valueToUse);
    
-   if (pm) {
-      pm->SetName(parm);
-      if (!pm->SetStringParameter("BodyName", parm))
-         if ((forcetype == "GravityField") || (forcetype == "PointMassForce"))
-            throw InterpreterException("Unable to set body for force " +
-               objParm);
-      if (forcetype == "DragForce") {
-         if (!pm->SetStringParameter("AtmosphereModel", parm))
-            throw InterpreterException(
-               "Unable to set AtmosphereModel for drag force.");
-         /// @todo Add the body name for drag at other bodies
-         if (parm != "BodyDefault") {
-            //---------------------------------------------------------------
-            //loj: 10/25/04 Set "Earth" as AtmosphereBody until it can handle
-            // Drag.Earth. Above pm->SetStringParameter("BodyName", parm) sets
-            // AtmosphereModel as Bodyname.
-            //---------------------------------------------------------------
-            pm->SetStringParameter("BodyName", "Earth");
-            AtmosphereModel *m = theModerator->CreateAtmosphereModel(parm, "");
-            if (m)
-               pm->SetRefObject(m, Gmat::ATMOSPHERE);
-         }
-      }
-      if (forcetype == "GravityField")
-      {
-         std::string potName;
-         if (parm == "Earth")
-         {
-            potName = theModerator->GetPotentialFileName("JGM2");
-            if (potName == "") 
-            {
-               // No file name set, so set to a default value
-               potName = "JGM2";
-               MessageInterface::ShowMessage(
-                  "No potential file set, so using \"%s\"", potName.c_str());
-            }
-         }
-         else
-            potName = "";
-
-         #ifdef DEBUG_INTERPRETER
-            MessageInterface::ShowMessage("Potential file set to '%s'\n"
-               "on line '%s'\n", potName.c_str(), line.c_str());
-         #endif
-
-         if (!pm->SetStringParameter("PotentialFile", potName))
-            throw InterpreterException("Unable to set full field model.");
-      }
+   Gmat::ParameterType type = obj->GetParameterType(id);
    
-      obj->AddForce(pm);
-      retval = true;
-   }
-   
-   return retval;
-}
-
-
-//------------------------------------------------------------------------------
-// bool ConstructRHS(GmatBase *lhsObject, const std::string& rhs, 
-//                   const std::string& label)
-//------------------------------------------------------------------------------
-/**
- * Builds the right side of an assignment line (e.g. "GMAT plot.Add = sat.X;")
- * 
- * @param lhsObject The object on the left that receives the parameters.
- * @param rhs       The string to the right of the equals sign.
- * @param label     The string used to register the rhs (e.g. "Add").
- * 
- * @return true on success, false on failure.
- */
-//------------------------------------------------------------------------------
-bool Interpreter::ConstructRHS(GmatBase *lhsObject, const std::string& rhs, 
-                               const std::string& label)
-{
-   #ifdef DEBUG_RHS_PARSING
-      MessageInterface::ShowMessage("%s%s%s%s%s%s\"\n",
-         "Interpreter::ConstructRHS called with string \"", rhs.c_str(),
-         "\" registered using \"", label.c_str(), "\" for object \"",
-         lhsObject->GetName().c_str());
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("   paramType=%s\n", GmatBase::PARAM_TYPE_STRING[type].c_str());
    #endif
-
-   bool retval = false;
    
-   StringArray sar, temp, elements;
-   if (IsGroup(rhs.c_str()))
-   {
-      #ifdef DEBUG_RHS_PARSING
-         MessageInterface::ShowMessage("RHS is a group");
-      #endif
-      sar = Decompose(rhs);
-   }
-   else
-   {
-      #ifdef DEBUG_RHS_PARSING
-         MessageInterface::ShowMessage("RHS is not a group\n");
-      #endif
-      sar.push_back(rhs);
-   }
    
-   for (StringArray::iterator i = sar.begin(); i != sar.end(); ++i)
+   switch (type)
    {
-      temp = Decompose(*i);
-
-      if ((temp.size() > 0) && isalpha(sar[0][0]))
+   case Gmat::OBJECT_TYPE:
+   case Gmat::OBJECTARRAY_TYPE:
       {
-         #ifdef DEBUG_RHS_PARSING_DETAILS
-            MessageInterface::ShowMessage("   Working with %s\n", i->c_str());
+         // Try create Parameter first
+         Parameter *param = CreateParameter(value);
+         
+         #if DEBUG_SET
+         if (param)
+            MessageInterface::ShowMessage
+               ("   param=%s\n", param->GetName().c_str());
          #endif
-         std::string name = *i; //rhs;
-         std::string paramType, paramObj, parmSystem;
-         #ifdef DEBUG_RHS_PARSING_DETAILS
-            MessageInterface::ShowMessage("   Calling InterpretParameter\n");
-         #endif
-         if (InterpretParameter(name, paramType, paramObj, parmSystem))
+         
+         if (param != NULL)
          {
-            #ifdef DEBUG_RHS_PARSING_DETAILS
-               MessageInterface::ShowMessage("   Calling IsParameter(%s)\n",
-                  paramType.c_str());
+            #if DEBUG_SET
+            MessageInterface::ShowMessage
+               ("===> Calling SetStringParameter(%d, %s)\n", id, value.c_str());
             #endif
-            if (theModerator->IsParameter(paramType))
-            {
-               #ifdef DEBUG_RHS_PARSING
-                  MessageInterface::ShowMessage("%s%s\" named \"%s\"\n",
-                                                "Attempting to build parameter \"",
-                                                paramType.c_str(), name.c_str());
-               #endif
-                  
-               CreateParameter(name, paramType, parmSystem, paramObj);
-               
-               lhsObject->SetStringParameter(label, name);
-               retval = true;
-            }
+            
+            obj->SetStringParameter(id, value);
          }
          else
          {
-            // if rhs is not boolean type
-            if (name != "true" && name != "false")
+            // Create Owned Object
+            GmatBase *ownedObj = CreateObject(value, "");
+            
+            #if DEBUG_SET
+            if (ownedObj)
+               MessageInterface::ShowMessage
+                  ("   Created ownedObjType: %s\n",
+                   ownedObj->GetTypeName().c_str());
+            #endif
+            
+            if (ownedObj)
             {
-               // subscribers can have variables 
-               if (lhsObject->IsOfType(Gmat::SUBSCRIBER))
-               {
-                  //MessageInterface::ShowMessage
-                  //   ("==> lhsObject->GetName()=%s subscriber=%d\n",
-                  //    lhsObject->GetName().c_str(), lhsObject->IsOfType(Gmat::SUBSCRIBER));
-                  
-                  lhsObject->SetStringParameter(label, name);
-                  retval = true;
-               }
+               #if DEBUG_SET
+               MessageInterface::ShowMessage
+                  ("===> Calling SetRefObject(%p, %d)\n", ownedObj,
+                   ownedObj->GetType());
+               #endif
+               
+               obj->SetRefObject(ownedObj, ownedObj->GetType());
             }
             else
             {
-               // InterpretParameter failed; store the string for later use
-               elements.push_back(name);
-               ///@todo Figure out how to handle combos of parameters & other stuff
+               // Should I create Variable?
+               if (obj->GetType() == Gmat::SUBSCRIBER)
+               {
+                  CreateParameter("Variable", value);
+                  obj->SetStringParameter(id, value);
+               }
+               else
+               {
+                  // Special case of InternalForceModel in script
+                  if (value != "InternalForceModel")
+                     throw InterpreterException
+                        ("*** Internal Error ***Cannot create " + value + "\n");
+               }
             }
          }
+         
+         retval = true;
+         break;
       }
+   case Gmat::INTEGER_TYPE:
+   case Gmat::UNSIGNED_INT_TYPE:
+   case Gmat::UNSIGNED_INTARRAY_TYPE:
+      {
+         Integer ival;
+         if (GmatStringUtil::ToInteger(valueToUse, ival))
+         {
+            #if DEBUG_SET
+            MessageInterface::ShowMessage
+               ("===> Calling SetIntegerParameter(%d, %d)\n", id, ival);
+            #endif
+            
+            obj->SetIntegerParameter(id, ival);
+            retval = true;
+         }
+         else
+         {
+            errorMsg = errorMsg + valueToUse + " is not a valid Integer number.\n";
+         }
+         break;
+      }
+   case Gmat::REAL_TYPE:
+      {
+         Real rval;
+         if (GmatStringUtil::ToDouble(valueToUse, rval))
+         {
+            #if DEBUG_SET
+            std::string rvalStr =
+               GmatStringUtil::ToString(rval, false, 17, 16);
+            MessageInterface::ShowMessage
+               ("===> Calling SetRealParameter(%d, %s)\n", id, rvalStr.c_str());
+            #endif
+            
+            obj->SetRealParameter(id, rval);
+            retval = true;
+         }
+         else
+         {
+            errorMsg = errorMsg + valueToUse + " is not a valid Real number.\n";
+         }
+         break;
+      }
+   case Gmat::STRING_TYPE:
+   case Gmat::STRINGARRAY_TYPE:
+      {
+         #if DEBUG_SET
+         MessageInterface::ShowMessage
+            ("===> Calling SetStringParameter(%d, %s)\n", id, valueToUse.c_str());
+         #endif
+         
+         retval = obj->SetStringParameter(id, valueToUse);
+         break;
+      }
+   case Gmat::BOOLEAN_TYPE:
+      {
+         bool tf;
+         if (GmatStringUtil::ToBoolean(value, tf))
+         {
+            #if DEBUG_SET
+            MessageInterface::ShowMessage
+               ("===> Calling SetBooleanParameter(%d, %d)\n", id, tf);
+            #endif
+            
+            obj->SetBooleanParameter(id, tf);
+            retval = true;
+         }
+         break;
+      }
+   default:
+      throw InterpreterException
+         ("Interpreter::SetPropertyValue() Cannot handle the type: " +
+          GmatBase::PARAM_TYPE_STRING[type] + " yet.\n");
    }
+   
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetPropertyValue() returning retval=%d\n", retval);
+   #endif
    
    return retval;
 }
 
+
 //------------------------------------------------------------------------------
-//  bool InterpretParameter(const std::string text, std::string &paramType,
-//                          std::string &paramObj, std::string &parmSystem)
+// std::string GetPropertyValue(GmatBase *obj, const Integer id)
+//------------------------------------------------------------------------------
+std::string Interpreter::GetPropertyValue(GmatBase *obj, const Integer id)
+{
+   std::string sval;
+   
+   Gmat::ParameterType type = obj->GetParameterType(id);
+   
+   if (type == Gmat::OBJECT_TYPE)
+   {
+      sval = obj->GetStringParameter(id);
+   }
+   else if (type == Gmat::INTEGER_TYPE)
+   {
+      sval = GmatStringUtil::ToString(obj->GetIntegerParameter(id));
+   }
+   else if (type == Gmat::UNSIGNED_INT_TYPE)
+   {
+      sval = GmatStringUtil::ToString(obj->GetIntegerParameter(id));
+   }
+//    else if (type == Gmat::UNSIGNED_INTARRAY_TYPE)
+//    {
+//       sval = GmatStringUtil::ToString(obj->GetIntegerParameter(id));
+//    }
+   else if (type == Gmat::REAL_TYPE)
+   {
+      sval = GmatStringUtil::ToString(obj->GetRealParameter(id));
+   }
+   else if (type == Gmat::STRING_TYPE)
+   {
+      sval = obj->GetStringParameter(id);
+   }
+//    else if (type == Gmat::STRINGARRAY_TYPE)
+//    {
+//       sval = obj->GetStringParameter(id));
+//    }
+   else if (type == Gmat::BOOLEAN_TYPE)
+   {
+      if (obj->GetBooleanParameter(id))
+         sval = "true";
+      else
+         sval = "false";
+   }
+   
+   return sval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetProperty(GmatBase *obj, const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 /**
- * Breaks apart a parameter declaration into its component pieces
- *
- * @param text The string that gets decomposed.
- * @param paramType Type of parameter that is needed.
- * @param paramObj The Object used for the parameter calculations.
- * @param parmSystem The coordinate system or body used for the parameter
- *                   calculations (or the empty string if this piece is
- *                   unspecified).
- *
- * @return true if the decomposition worked.
+ * Sets parameters on GMAT objects.
+ * 
+ * @param  obj    Pointer to the object that owns the parameter.
+ * @param  id     ID for the parameter.
+ * @param  value  Value of the parameter.
+ * 
+ * @return true if the parameter is set, false otherwise.
  */
 //------------------------------------------------------------------------------
-bool Interpreter::InterpretParameter(const std::string text,
-                                     std::string &paramType,
-                                     std::string &paramObj,
-                                     std::string &parmSystem)
+bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
+                              const std::string &value)
 {
-   Integer start = 0, dotLoc = text.find(".", 0);
-   if (dotLoc == (Integer)std::string::npos)
-//      throw CommandException("Propagate::InterpretParameter: Unable to "
-//               "interpret parameter object in the string " +
-//               text);
-      return false;
-
-   paramObj = text.substr(start, dotLoc - start);
-   start = dotLoc + 1;
-   dotLoc = text.find(".", start);
-   if (dotLoc != (Integer)std::string::npos) {
-      parmSystem = text.substr(start, dotLoc - start);
-      start = dotLoc + 1;
-   }
-   else {
-      parmSystem = "";
-   }
-
-   paramType = text.substr(start);
-
-   #ifdef DEBUG_PROPAGATE_INIT
-      MessageInterface::ShowMessage(
-         "Built parameter %s for object %s with CS %s", paramType.c_str(),
-         paramObj.c_str(), parmSystem.c_str());
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetProperty() obj=%s, id=%d, value=%s\n", obj->GetName().c_str(),
+       id, value.c_str());
    #endif
-
-      //MessageInterface::ShowMessage
-      //("==> InterpretParameter() text=%s, paramType=%s, paramObj=%s, parmSystem=%s\n",
-      // text.c_str(), paramType.c_str(), paramObj.c_str(), parmSystem.c_str());
    
+   bool retval = false;
+   
+   std::string valueToUse = value;
+   CheckForSpecialCase(obj, id, valueToUse);
+   
+   #if DEBUG_SET
+   MessageInterface::ShowMessage("   paramType=%d\n", obj->GetParameterType(id));
+   #endif
+   
+   StringArray rhsValues;
+   Integer count = 0;
+   
+   // if value has braces, setting multiple values
+   if (value.find("{") != value.npos)
+      rhsValues = theTextParser.SeparateBrackets(value, "{}", " ,");
+   
+   count = rhsValues.size();
+   
+   if (count > 0)
+   {
+      for (int i=0; i<count; i++)
+         retval = SetPropertyValue(obj, id, rhsValues[i]);
+   }
+   else
+   {
+      retval = SetPropertyValue(obj, id, value);
+   }
+   
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetProperty() returning retval=%d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetComplexProperty(GmatBase *obj, const std::string &prop,
+//                         const std::string &value)
+//------------------------------------------------------------------------------
+bool Interpreter::SetComplexProperty(GmatBase *obj, const std::string &prop,
+                                     const std::string &value)
+{
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetComplexProperty() prop=%s, value=%s\n",
+       prop.c_str(), value.c_str());
+   #endif
+   
+   StringArray parts = theTextParser.SeparateDots(prop);
+
+   if (obj->GetType() == Gmat::SPACECRAFT)
+   {
+      Spacecraft *sc = (Spacecraft*)obj;
+      
+      if (parts[0] == "Epoch")
+      {
+         sc->SetDateFormat(parts[1]);
+         sc->SetEpoch(value);
+      }
+   }
+
    return true;
 }
 
 
 //------------------------------------------------------------------------------
-//  bool InterpretTextBlock(GmatCommand* cmd, const std::string block)
+// bool SetForceModelProperty(GmatBase *obj, const std::string &prop,
+//                            const std::string &value, GmatBase *fromObj)
 //------------------------------------------------------------------------------
-/**
- * Takes a block of script and interprets it, building the commands contained in
- * the block and inserting these commands immediately after theinput command.
- *
- * @param cmd The command at the start of the block.
- * @param block The script
- * 
- * @return true if the interpretation worked.
- */
-//------------------------------------------------------------------------------
-bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
+bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
+                                        const std::string &value, GmatBase *fromObj)
 {
-   #ifdef DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage(
-         "Interpreter::InterpretTextBlock entered\n");
+   bool retval = false;
+   StringArray parts = theTextParser.SeparateDots(prop);
+   Integer count = parts.size();
+   std::string pmType = parts[count-1];
+
+   // Current ForceModel scripting
+   //GMAT FM.PrimaryBodies        = {Earth};
+   //GMAT FM.PointMasses          = {Sun, Luna, Jupiter}; 
+   //GMAT FM.Drag                 = None;
+   //GMAT FM.Gravity.Earth.Model  = JGM2;
+   //GMAT FM.Gravity.Earth.Degree = 20;
+   //GMAT FM.Gravity.Earth.Order  = 20;
+   //GMAT FM.SRP                  = On;
+   
+   // For future scripting we want to specify body for Drag and SRP
+   // eg. FM.Drag.Earth = JacchiaRoberts;
+   //     FM.Drag.Mars = MarsAtmos;
+   //     FM.SRP.ShadowBodies = {Earth,Moon}
+   
+   ForceModel *forceModel = (ForceModel*)obj;
+   std::string forceType = ForceModel::GetScriptAlias(pmType);
+   std::string centralBodyName = forceModel->GetStringParameter("CentralBody");
+   
+   #if DEBUG_SET_FORCE_MODEL
+   MessageInterface::ShowMessage
+      ("Interpreter::SetForceModelProperty() fm=%s, prop=%s, value=%s\n"
+       "   pmType=%s, forceType=%s\n", obj->GetName().c_str(), prop.c_str(), value.c_str(),
+       pmType.c_str(), forceType.c_str());
    #endif
-
-   bool registerParameters = false;
    
-   if (cmd->GetTypeName() == "BeginFunction")
-      registerParameters = true;
-
-   StringArray sar = SeparateLines(block);
-   StringArray cmdList = theModerator->GetListOfFactoryItems(Gmat::COMMAND);
+   //------------------------------------------------------------
+   // Create ForceModel owned PhysicalModel
+   //------------------------------------------------------------
    
-   if ((cmd->GetTypeName() == "BeginScript") || 
-       (cmd->GetTypeName() == "BeginFunction"))
+   if (pmType == "PrimaryBodies" || pmType == "PointMasses")
    {
-      // First check to be sure that the command block has matched nesting
-      if (!ValidateBlock(sar)) {
-         MessageInterface::PopupMessage(Gmat::WARNING_,
-            "Text block appears to have mismatched begin and end components\n");
-         return false;
-      }
-
-      std::string endtype = ((cmd->GetTypeName() == "BeginScript") ?
-         "EndScript" : "EndFunction");
-      GmatCommand *current, *subsequent = cmd->GetNext();
-      while ((subsequent != NULL) &&
-             (subsequent->GetTypeName() != endtype)) {
-         // Remove all of the commands between cmd and its terminator
-         current = subsequent;
-         subsequent = current->GetNext();
-         #ifdef DEBUG_TOKEN_PARSING
-            MessageInterface::ShowMessage(
-               "   Destroying a command of type %s\n",
-               current->GetTypeName().c_str());
-         #endif
-         
-         cmd->Remove(current);
-         delete current;
-      }
+      StringArray bodies = theTextParser.SeparateBrackets(value, "{}", " ,");
       
-      // Fancy footwork -- Prep the mission sequence for insertion of new cmds
-      GmatCommand *terminalCommand = cmd->GetNext();
-      if (terminalCommand == NULL)
-         terminalCommand = theModerator->CreateCommand(endtype);
-      // Temporarily set the BeginScript->next pointer to NULL
-      cmd->Remove(cmd);
-      
-      // Now build the commands in the block, one line at a time
-      current = cmd;
-      std::string cmdType;
-      
-      StringArray::iterator lastOne;
-      if (cmd->GetTypeName() == "BeginScript")
-         lastOne = sar.end()-1;
-      else
-         lastOne = sar.end();
-         
-      for (StringArray::iterator i = sar.begin()+1; i != lastOne; ++i) 
+      for (UnsignedInt i=0; i<bodies.size(); i++)
       {
-         // Grab the name for the command
-         std::stringstream cmdLine;
-         cmdLine.str() = "";
-         if (*i == "")
-            continue;
-         cmdLine << *i;
-         cmdLine >> cmdType;
-         if ((cmdType == "") || (cmdType[0] == '%'))
-            continue;
-         // Strip off a trailing semicolon if one exists
-         if (cmdType.find(";") != std::string::npos) {
-            Integer scLoc = cmdType.find(";");
-            cmdType = cmdType.substr(0, scLoc);
-            MessageInterface::ShowMessage("Found a semicolon; new text is " +
-               cmdType);
-         }
+         #if DEBUG_SET_FORCE_MODEL
+         MessageInterface::ShowMessage("   bodies[%d]=%s\n", i, bodies[i].c_str());
+         #endif
          
-         // Prevent multiple "EndScript" or "EndFunction" commands
-         if (cmdType == endtype)
-            continue;
-
-         #ifdef DEBUG_TOKEN_PARSING
-            MessageInterface::ShowMessage(
-               "   Constructing a command of type %s\n", cmdType.c_str());
-         #endif
-
-         // Create the command
-         if (find(cmdList.begin(), cmdList.end(), cmdType) == cmdList.end()) {
-//            MessageInterface::PopupMessage(Gmat::WARNING_, 
-//               "Cannot create a command from the command line\n  " +
-//               (*i) + "\nUnknown command " + cmdType + 
-//               "\nAttempting to continue...");
-            continue;
-         }
-         subsequent = theModerator->CreateCommand(cmdType);
-         if (!subsequent)
-            throw InterpreterException(
-               "Interpreter::InterpretTextBlock failed to create a " + cmdType +
-               " command; please check the script syntax.");
-         subsequent->SetGeneratingString(*i);
-         
-//         // Add parameters to the BeginFunction command
-//         if (registerParameters)
-//         {
-//            StringArray refParms = 
-//               subsequent->GetRefObjectNameArray(Gmat::PARAMETER);
-//            for (StringArray::iterator i = refParms.begin(); 
-//                 i != refParms.end(); ++i)
-//            {
-//               GmatBase *obj = theModerator->GetObject(*i);
-//               if (obj != NULL)
-//                  cmd->SetRefObject(obj, obj->GetType(), obj->GetName());
-//            }
-//         }
-
-         #ifdef DEBUG_TOKEN_PARSING
-            MessageInterface::ShowMessage(
-               "   Appending constructed %s command\n", cmdType.c_str());
-         #endif
-
-         cmd->Append(subsequent);
-
-         #ifdef DEBUG_TOKEN_PARSING
-            MessageInterface::ShowMessage(
-               "   Assembling %s command with string \"%s\"\n",
-               cmdType.c_str(), subsequent->GetGeneratingString().c_str());
-         #endif
-         if (!AssembleCommand(*i, subsequent))
-            throw InterpreterException(
-               "Interpreter::InterpretTextBlock failed to assemble a " +
-               cmdType + " command from the line\n" + (*i) +
-               "\nPlease check the script syntax.");
-         current = subsequent;
-      }
-      // Now reconnect the rest of the mission sequence
-      cmd->Append(terminalCommand);
-      
-      // Add all parameters to the BeginFunction command
-      /// @note Seems like overkill here; may want to find a better approach
-      if (registerParameters)
-      {
-         StringArray refParms = 
-            theModerator->GetListOfObjects(Gmat::PARAMETER);
-         for (StringArray::iterator i = refParms.begin(); 
-              i != refParms.end(); ++i)
+         // We don't want to configure PhysicalModel, so set name after create
+         PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, "");
+         if (pm)
          {
-            GmatBase *obj = theModerator->GetObject(*i);
-            if (obj != NULL) 
+            pm->SetName(bodies[i]);
+            
+            if (!pm->SetStringParameter("BodyName", bodies[i]))
             {
-               cmd->SetRefObject(obj, obj->GetType(), obj->GetName());
+               InterpreterException ex("Unable to set body for force " + bodies[i]);
+               HandleError(ex);
             }
+                                    
+            #if DEBUG_SET_FORCE_MODEL
+            MessageInterface::ShowMessage
+               ("   Adding type:<%s> name:<%s> to ForceModel:<%s>\n",
+                pm->GetTypeName().c_str(), pm->GetName().c_str(),
+                forceModel->GetName().c_str());
+            #endif
+            
+            // Add force to ForceModel
+            forceModel->AddForce(pm);
+            
+            // Use JGM2 for default Earth gravity file, in case it is not
+            // specified in the script
+            if (pmType == "PrimaryBodies" && bodies[i] == "Earth")
+               retval = SetPropertyValue(pm, pm->GetParameterID("Model"), "JGM2");
+            
          }
       }
-
+      
+      return true;
+   }
+   else if (pmType == "SRP" || pmType == "Drag")
+   {
+      if (pmType == "SRP" && value != "On")
+         return true;
+      
+      if (pmType == "Drag" && value == "None")
+         return true;
+      
+      // Create PhysicalModel
+      PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, "");
+      pm->SetName(centralBodyName);
+      
+      // Special handling for Drag
+      if (pmType == "Drag")
+      {
+         if (!pm->SetStringParameter("AtmosphereModel", value))
+            throw InterpreterException
+               ("Unable to set AtmosphereModel for drag force.");
+         
+         /// @todo Add the body name for drag at other bodies
+         if (value != "BodyDefault")
+         {
+            pm->SetStringParameter("BodyName", centralBodyName);
+            GmatBase *am = CreateObject(value, "");
+            if (am)
+               pm->SetRefObject(am, Gmat::ATMOSPHERE);
+            else
+               throw InterpreterException
+                  ("Unable to create AtmosphereModel: " + value + " for drag force.");
+         }
+      }
+      else if (pmType == "SRP")
+      {
+         // Should we set SRP on ForceModel central body?
+         pm->SetStringParameter("BodyName", centralBodyName);
+      }
+            
+      #if DEBUG_SET_FORCE_MODEL
+      MessageInterface::ShowMessage
+         ("   Adding type:<%s> name:<%s> to ForceModel:<%s>\n",
+          pm->GetTypeName().c_str(), pm->GetName().c_str(),
+          forceModel->GetName().c_str());
+      #endif
+      
+      // Add force to ForceModel
+      forceModel->AddForce(pm);
+      
       return true;
    }
    
-   #ifdef DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage(
-         "Interpreter::InterpretTextBlock completed\n");
-   #endif
-   return false;
-}
-
-
-//------------------------------------------------------------------------------
-//  StringArray Interpreter::SeparateLines(const std::string block)
-//------------------------------------------------------------------------------
-/**
- * Breaks a multiline block of script into separate lines.
- *
- * @param block The script
- *
- * @return An array containing the individual script lines.
- */
-//------------------------------------------------------------------------------
-StringArray Interpreter::SeparateLines(const std::string block)
-{
-   StringArray sar;
-   std::string text;
-   Integer start = 0, end = 0, len = block.length();
-
-   while (end < len) {
-      if (block[end] == '\n') {
-         text = block.substr(start, end - start);
-         start = text.length()-1;
-         while (text[start] == ' ')
-            --start;
-         text = text.substr(0, start+1);
-         sar.push_back(text);
-         start = end+1;
-      }
-      ++end;
-   }
+   //------------------------------------------------------------
+   // Set ForceModel owned object properties
+   //------------------------------------------------------------
    
-   #ifdef DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage(
-         "Broke this text:\n  '%s'\ninto these lines:\n", block.c_str());
-      for (StringArray::iterator i = sar.begin(); i != sar.end(); ++i)
-         MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
+   pmType = parts[0];
+   forceType = ForceModel::GetScriptAlias(pmType);
+   std::string propName = parts[count-1];
+   
+   #if DEBUG_SET_FORCE_MODEL
+   MessageInterface::ShowMessage
+      ("   Setting pmType=%s, forceType=%s, numForces=%d, propName=%s\n", pmType.c_str(),
+       forceType.c_str(), numForces, propName.c_str());
    #endif
    
-   return sar;
-}
-
-
-//------------------------------------------------------------------------------
-//  bool ValidateBlock(GmatCommand *cmdStart, GmatCommand *cmdEnd)
-//------------------------------------------------------------------------------
-/**
- * Checks a block of GmatCommands and ensures that the nesting level at the end
- * matches the level at the start.
- *
- * @param cmdStart The first command in the block.
- * @param cmdEnd The last command in the block.
- *
- * @return true if the nesting is matched, false if not, and throws if the
- *              nesting ever attempts to go out of the current nesting level.
- */
-//------------------------------------------------------------------------------
-bool Interpreter::ValidateBlock(GmatCommand *cmdStart, GmatCommand *cmdEnd)
-{
-   // First check to be sure the command nesting is consistent
-//   GmatCommand *current = cmdStart, *child;
-
-   return false;
-}
-
-bool Interpreter::ValidateBlock(StringArray &sar)
-{
-   #ifdef DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage(
-         "Interpreter::ValidateBlock(StringArray) entered\n");
-   #endif
+   GmatBase *owner;
+   Integer propId;
    
-   std::map<std::string, Integer> depth;
-   std::map<std::string, std::string> startEnd, endStart;
-   
-   startEnd["Target"]        = "EndTarget";
-   startEnd["If"]            = "EndIf";
-   startEnd["For"]           = "EndFor";
-   startEnd["While"]         = "EndWhile";
-   startEnd["Optimize"]      = "EndOptimize";
-   startEnd["Case"]          = "EndCase";
-   
-   endStart["EndTarget"]   = "Target";
-   endStart["EndIf"]       = "If";
-   endStart["EndFor"]      = "For";
-   endStart["EndWhile"]    = "While";
-   endStart["EndOptimize"] = "Optimize";
-   endStart["EndCase"]     = "Case";
-
-   depth["Target"]   = 0;
-   depth["If"]       = 0;
-   depth["For"]      = 0;
-   depth["While"]    = 0;
-   depth["Optimize"] = 0;
-   depth["Case"]     = 0;
-
-   #ifdef DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage(
-         "   Scannning the entries\n");
-   #endif
-
-   std::string cmdName;
-   for (StringArray::iterator i = sar.begin(); i != sar.end(); ++i) {
-      if (*i == "")
-         continue;
-      std::stringstream sstr;
-      sstr.str() = "";
-      sstr << *i;
-      sstr >> cmdName;
-      if (cmdName[0] == '%')
-         continue;
-         
-      // Throw away trailing semicolon if there is one
-      if (cmdName.find(";") != std::string::npos)
-         cmdName = cmdName.substr(0, cmdName.find(";"));
-
-      #ifdef DEBUG_TOKEN_PARSING
-         MessageInterface::ShowMessage("Looking up '%s'\n", cmdName.c_str());
-      #endif
-      
-      if (startEnd.find(cmdName) != startEnd.end()) {
-         #ifdef DEBUG_TOKEN_PARSING
-            MessageInterface::ShowMessage(
-               "   startEnd fired for %s\n", cmdName.c_str());
-         #endif
-         depth[cmdName] += 1;
-      }
-      if (endStart.find(cmdName) != endStart.end()) {
-         #ifdef DEBUG_TOKEN_PARSING
-            MessageInterface::ShowMessage(
-               "   endStart fired for %s\n", cmdName.c_str());
-         #endif
-         depth[endStart[cmdName]] -= 1;
-         if (depth[endStart[cmdName]] < 0)
-            throw InterpreterException(
-              "Cannot move outside current nesting level in a ScriptEvent.");
-      }
+   if (FindPropertyID(forceModel, propName, &owner, propId))
+   {
+      retval = SetPropertyValue(owner, owner->GetParameterID(propName), value);
+      if (fromObj != NULL)
+         owner->SetRefObject(fromObj, fromObj->GetType(), value);
    }
    
-   #ifdef DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage(
-         "   Checking the results\n");
-   #endif
-
-   // Validate that the depth for each command type is 0
-   /// @todo Replace the individual tests here with a loop
-   bool retval = true;
-   if (depth["Target"] != 0) {
-      MessageInterface::ShowMessage(
-         "Target command depth is mismatched (missing EndTarget?)\n");
-      retval = false;
-   }
-   if (depth["If"] != 0) {
-      MessageInterface::ShowMessage(
-         "If command depth is mismatched (missing EndIf?)\n");
-      retval = false;
-   }
-   if (depth["For"] != 0) {
-      MessageInterface::ShowMessage(
-         "For command depth is mismatched (missing EndFor?)\n");
-      retval = false;
-   }
-   if (depth["While"] != 0) {
-      MessageInterface::ShowMessage(
-         "While command depth is mismatched (missing EndWhile?)\n");
-      retval = false;
-   }
-   if (depth["Optimize"] != 0) {
-      MessageInterface::ShowMessage(
-         "Optimize command depth is mismatched (missing EndOptimize?)\n");
-      retval = false;
-   }
-   if (depth["Case"] != 0) {
-      MessageInterface::ShowMessage(
-         "Case command depth is mismatched (missing EndCase?)\n");
-      retval = false;
-   }
-
-   #ifdef DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage(
-         "Interpreter::ValidateBlock(StringArray) finished\n");
-   #endif
-
    return retval;
 }
 
 
 //------------------------------------------------------------------------------
-//  bool FinalPass()
+// bool SetSolarSystemProperty(GmatBase *obj, const std::string &prop,
+//                            const std::string &value)
+//------------------------------------------------------------------------------
+bool Interpreter::SetSolarSystemProperty(GmatBase *obj, const std::string &prop,
+                                         const std::string &value)
+{
+   #if DEBUG_SET_SOLAR_SYS
+   MessageInterface::ShowMessage
+      ("Interpreter::SetSolarSystemProperty() type=%s, name=%s, prop=%s, value=%s\n",
+       obj->GetTypeName().c_str(), obj->GetName().c_str(), prop.c_str(), value.c_str());
+   #endif
+   
+   bool retval = false;
+   StringArray parts = theTextParser.SeparateDots(prop);
+   Integer count = parts.size();
+   SolarSystem *solarSystem = (SolarSystem *)obj;
+   
+   if (count == 1)
+   {
+      if (prop == "Ephemeris")
+      {
+         StringArray ephems = theTextParser.SeparateBrackets(value, "{}", " ,");
+      
+         #if DEBUG_SET_SOLAR_SYS
+         for (StringArray::iterator i = ephems.begin(); i != ephems.end(); ++i)
+            MessageInterface::ShowMessage("   Source = %s\n", i->c_str());
+         #endif
+         
+         theModerator->SetPlanetarySourceTypesInUse(ephems);
+         retval = true;
+      }
+      else
+      {
+         Integer id = obj->GetParameterID(prop);
+         retval = SetPropertyValue(obj, id, value);
+      }
+   }
+   else
+   {
+      // Script has the form of:
+      // GMAT SolarSystem.Earth.NutationUpdateInterval = 60.0;
+      // GMAT SolarSystem.Earth.UseTTForEphemeris = true;
+      // GMAT SolarSystem.Earth.DateFormat  = TAIModJulian;
+      // GMAT SolarSystem.Earth.StateType   = Keplerian;
+      // GMAT SolarSystem.Earth.InitalEpoch = 21544.500371
+      // GMAT SolarSystem.Earth.SMA         = 149653978.978377
+      
+      std::string bodyName = parts[0];
+      std::string newProp = parts[count-1];
+      
+      #if DEBUG_SET_SOLAR_SYS
+      MessageInterface::ShowMessage
+         ("   bodyName=%s, newProp=%s\n", bodyName.c_str(), newProp.c_str());
+      #endif
+      
+      // Cannot use FindPropertyID() because SolarSystem bodies have the
+      // same property name. So use GetBody() instead.
+      GmatBase *body = (GmatBase*)solarSystem->GetBody(bodyName);
+      
+      if (body == NULL)
+         throw InterpreterException
+            ("Body: " + bodyName + " not found in the SolarSystem\n");
+      
+      try
+      {
+         Integer id = body->GetParameterID(newProp);
+         retval = SetPropertyValue(body, id, value);
+      }
+      catch (BaseException &e)
+      {
+         HandleError(e);
+      }
+   }
+   
+   #if DEBUG_SET_SOLAR_SYS
+   MessageInterface::ShowMessage
+      ("Interpreter::SetSolarSystemProperty() prop=%s, retval=%d\n",
+       prop.c_str(), retval);
+   #endif
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool FindOwnedObject(GmatBase *owner, const std::string toProp,
+//                      GmatBase **ownedObj, Integer &id)
+//------------------------------------------------------------------------------
+/*
+ * Finds owned object and its property.
+ *
+ * @param  owner    Owner object to find owned object for property
+ * @param  toProp   Property name to find
+ * @param  id       Output owned property id (-1 if property not found)
+ *
+ * @return  true if property found from the owned object
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
+                                  GmatBase **ownedObj, Integer &id)
+{
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::FindOwnedObject() owner=%s, toProp=%s\n",
+       owner->GetName().c_str(), toProp.c_str());
+   #endif
+   
+   bool retval = false;
+   Integer ownedObjCount = owner->GetOwnedObjectCount();
+   Integer errorCount = 0;
+   GmatBase *tempObj = NULL;
+   
+   // Initialize output parameters
+   id = -1;
+
+   #if DEBUG_SET
+   MessageInterface::ShowMessage("   ownedObjCount=%d\n", ownedObjCount);
+   #endif
+   
+   if (ownedObjCount > 0)
+   {
+      for (int i=0; i<ownedObjCount; i++)
+      {
+         tempObj = owner->GetOwnedObject(i);
+         if (ownedObj)
+         {
+            #if DEBUG_SET
+            MessageInterface::ShowMessage
+               ("   i=%d, ownedObj type=<%s>, name=<%s>\n", i,
+                tempObj->GetTypeName().c_str(), tempObj->GetName().c_str());
+            #endif
+            
+            try
+            {
+               id = tempObj->GetParameterID(toProp);
+               *ownedObj = tempObj;
+               retval = true;
+               break;
+            }
+            catch (BaseException &e)
+            {
+               errorCount++;
+               continue;
+            }
+         }
+      }
+      
+      if (errorCount == ownedObjCount)
+      {
+         InterpreterException ex
+            ("No parameter defined with description " + toProp + "on " +
+             owner->GetName());
+         HandleError(ex);
+      }
+   }
+   
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("   FindOwnedObject() returning retval=%d, ownedObj=%p\n",
+       retval, *ownedObj);
+   #endif
+   
+   return retval;
+   
+}
+
+
+// //------------------------------------------------------------------------------
+// // bool SetArrayValue(GmatBase *obj, const std::string &arrayStr, Real rval)
+// //------------------------------------------------------------------------------
+// bool Interpreter::SetArrayValue(GmatBase *obj, const std::string &arrayStr,
+//                                 Real rval)
+// {
+//    Integer row, col;
+   
+//    Parameter *param = GetArrayIndex(arrayStr, row, col);
+   
+//    if (row != -1 && col != -1)
+//    {
+//       param->SetRealParameter("SingleValue", rval, row-1, col-1);
+//    }
+//    else
+//    {
+//       InterpreterException ex("Invalid row and column index\n");
+//       HandleError(ex);
+//       return false;
+//    }
+
+//    return true;
+// }
+
+
+//------------------------------------------------------------------------------
+// Real GetArrayValue(const std::string &arrayStr, Integer &row, Integer &col)
+//------------------------------------------------------------------------------
+/**
+ * Retrives configured array value by row and col.
+ *
+ * @param  arrayStr  String form of array (A(1,3), B(2,j), etc)
+ *
+ * @note Array name must be created and configured before acces.
+ */
+//------------------------------------------------------------------------------
+Real Interpreter::GetArrayValue(const std::string &arrayStr,
+                                   Integer &row, Integer &col)
+{
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::GetArrayValue arrayStr=%s\n", arrayStr.c_str());
+   #endif
+   
+   Parameter *param = GetArrayIndex(arrayStr, row, col);
+   
+   if (row != -1 && col != -1)
+      return param->GetRealParameter("SingleValue", row, col);
+   else
+      throw InterpreterException("Invalid row and column index\n");
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsArray(const std::string &str)
+//------------------------------------------------------------------------------
+bool Interpreter::IsArray(const std::string &str)
+{
+   bool retval = false;
+   
+   if (str.find("[") != str.npos)
+      throw InterpreterException("[ is invalid in assignment : " + str + "\n");
+   
+   retval = GmatStringUtil::IsParenPartOfArray(str);
+   
+   #if DEBUG_ARRAY
+   MessageInterface::ShowMessage
+      ("Interpreter::IsArray() str=%s, array=%d\n", str.c_str(), retval);
+   #endif
+   
+   return retval;
+}
+
+
+//----------------------------------
+// Private
+//----------------------------------
+
+//------------------------------------------------------------------------------
+// AxisSystem* Interpreter::CreateAxisSystem(std::string type, GmatBase *owner)
+//------------------------------------------------------------------------------
+AxisSystem* Interpreter::CreateAxisSystem(std::string type, GmatBase *owner)
+{
+   if (owner == NULL)
+      throw InterpreterException("Interpreter::CreateAxisSystem needs a "
+         "CoordinateSystem object that acts as its owner; received a NULL "
+         "pointer instead.");
+   if (owner->GetType() != Gmat::COORDINATE_SYSTEM)
+      throw InterpreterException("Interpreter::CreateAxisSystem needs a "
+         "CoordinateSystem object that acts as its owner; received a pointer "
+         "to " + owner->GetName() + "instead.");
+            
+   AxisSystem* axes = (AxisSystem *)(theModerator->CreateAxisSystem(type, ""));
+   owner->SetRefObject(axes, axes->GetType(), axes->GetName());
+   return axes;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CheckForSpecialCase(GmatBase *obj, Integer id, std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Handles special alias for gravity field type.
+ * such as JGM2, JGM3, EGM96, LP165P, etc.
+ *
+ * @param  obj    Pointer to the object that owns the parameter.
+ * @param  id     ID for the parameter.
+ * @param  value  Input/Output value of the parameter.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::CheckForSpecialCase(GmatBase *obj, Integer id, 
+                                     std::string &value)
+{
+   bool retval = false;
+   std::string val = value;
+   
+   #ifdef DEBUG_SPECIAL_CASE
+   MessageInterface::ShowMessage
+      ("Entered CheckForSpecialCase with \"" + value +
+       "\" being set on parameter \"" + obj->GetParameterText(id) + 
+       "\" for a \"" + obj->GetTypeName() + "\" object\n");
+   #endif
+   
+   // JGM2, JGM3, EGM96, LP165P, etc.  are special strings in GMAT; handle them here
+   if ((obj->GetTypeName() == "GravityField") &&
+       (obj->GetParameterText(id) == "PotentialFile"))
+   {
+      val = theModerator->GetPotentialFileName(value);
+      if (val.find("Unknown Potential File Type") == std::string::npos)
+      {
+         value = val;
+         retval = true;
+      }
+   }
+   
+   #ifdef DEBUG_SPECIAL_CASE
+   MessageInterface::ShowMessage
+      ("Leaving CheckForSpecialCase() value=%s, retval=%d\n", value.c_str(),
+       retval);
+   #endif
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteParts(const std::string &title, StringArray &parts)
+//------------------------------------------------------------------------------
+void Interpreter::WriteParts(const std::string &title, StringArray &parts)
+{
+   MessageInterface::ShowMessage("   ========== %s\n", title.c_str());
+   for (UnsignedInt i=0; i<parts.size(); i++)
+      MessageInterface::ShowMessage("   %d:%s\n", i, parts[i].c_str());
+   MessageInterface::ShowMessage("\n");
+}
+
+
+//------------------------------------------------------------------------------
+// void HandleError(BaseException &e)
+//------------------------------------------------------------------------------
+void Interpreter::HandleError(BaseException &e)
+{
+   if (continueOnError)
+   {
+      std::string msg = "*** WARNING *** " + e.GetMessage() + " in line:\n   \"" +
+         currentBlock + "\"\n";
+      
+      errorList.push_back(msg);
+      //MessageInterface::ShowMessage(msg);
+   }
+   else
+   {
+      throw InterpreterException
+         (e.GetMessage() + " in line:\n   \"" + currentBlock + "\"\n");
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// bool FinalPass()
 //------------------------------------------------------------------------------
 /**
  * Finishes up the Interpret call by setting internal references that are needed 
@@ -4463,272 +3189,22 @@ bool Interpreter::ValidateBlock(StringArray &sar)
 //------------------------------------------------------------------------------
 bool Interpreter::FinalPass()
 {
-   #ifdef DEBUG_PASS_TWO
-      MessageInterface::ShowMessage(
-         "Finalizing the references in the interpreter...\n");
-   #endif
-   
-   bool retval = true;
-   
-   SolarSystem *solar = theModerator->GetDefaultSolarSystem();
-
-   std::string ptName;
-   SpacePoint *pt, *sp;
-
-   // Set J2000 bodies for solar system objects -- should this happen here?
-   const StringArray biu = solar->GetBodiesInUse();
-   for (StringArray::const_iterator i = biu.begin(); i != biu.end(); ++i)
-   {
-      #ifdef DEBUG_PASS_TWO
-         MessageInterface::ShowMessage("Setting up %s\n", i->c_str());
-      #endif
-      sp = solar->GetBody(*i);
-      ptName = sp->GetStringParameter("J2000BodyName");
-      pt = solar->GetBody(ptName);;
-      if (pt == NULL)
-         throw InterpreterException("Unable to find the J2000body, '" + ptName +
-            "', in the solar system, but it is needed for '" + (*i) + "'");
-      sp->SetJ2000Body(pt);
-   }
-
-   // Initialize the coordinate systems
-   CoordinateSystem *cs;
-
-   #ifdef DEBUG_PASS_TWO
-      cs = theModerator->GetCoordinateSystem("EarthMJ2000Eq");
-      MessageInterface::ShowMessage("Moderator says that EarthMJ2000Eq is %s\n", 
-         (cs == NULL ? "NULL" : "defined"));
-   #endif
-   
-   cs = theModerator->GetInternalCoordinateSystem();
-   cs->SetSolarSystem(solar);
-   ptName = cs->GetStringParameter("Origin");
-   pt = solar->GetBody(ptName);
- 
-   if (pt == NULL)
-      pt = (SpacePoint *)(theModerator->GetObject(ptName));
-   if (pt == NULL)
-      throw InterpreterException("Unable to find the origin, '" + ptName +
-         "', for the coordinate system '" + cs->GetName() + "'");
-   if (!pt->IsOfType("SpacePoint"))
-      throw InterpreterException("The object named '" + ptName +
-         "' is not a space point, but is used as one "
-         "in the coordinate system '" + cs->GetName() + "'");
-   cs->SetRefObject(pt, Gmat::SPACE_POINT, ptName);
-
-   ptName = cs->GetStringParameter("J2000Body");
-   pt = solar->GetBody(ptName);
-   if (pt == NULL)
-      pt = (SpacePoint *)(theModerator->GetObject(ptName));
-   if (pt == NULL)
-      throw InterpreterException("Unable to find the J2000Body, '" + ptName +
-         "', for the coordinate system '" + cs->GetName() + "'");
-   if (!pt->IsOfType("SpacePoint"))
-      throw InterpreterException("The object named '" + ptName +
-         "' is not a space point, but is used as one "
-         "in the coordinate system '" + cs->GetName() + "'");
-   cs->SetRefObject(pt, Gmat::SPACE_POINT, ptName);
-   cs->Initialize();
-
    StringArray csList = 
       theModerator->GetListOfObjects(Gmat::COORDINATE_SYSTEM);
-
+   
+   CoordinateSystem *cs;
+   
    for (StringArray::iterator i = csList.begin(); i != csList.end(); ++i)
    {
-      #ifdef DEBUG_PASS_TWO
-         MessageInterface::ShowMessage("Setting up CoordinateSystem '%s'\n",
-            i->c_str());
+      #ifdef DEBUG_FINAL_PASS
+      MessageInterface::ShowMessage("Setting up CoordinateSystem '%s'\n",
+                                    i->c_str());
       #endif
-      cs = theModerator->GetCoordinateSystem(*i);
-      cs->SetSolarSystem(solar);
-    
-      // If AxisSystem is null, create and set default "MJ2000Eq" axis(loj: 4/18/06)
-      if (cs->GetRefObject(Gmat::AXIS_SYSTEM, "") == NULL)
-      {
-         #ifdef DEBUG_PASS_TWO
-            MessageInterface::ShowMessage
-               ("   Axis is NULL so create default axis (MJ2000Eq).\n");
-         #endif
-         CreateAxisSystem("MJ2000Eq", cs);
-      }
-      
-      std::string ptName = cs->GetStringParameter("Origin");
-      pt = (SpacePoint *)(theModerator->GetObject(ptName));
-      if (pt == NULL)
-         throw InterpreterException("Unable to find the origin, '" + ptName +
-            "', for the coordinate system '" + cs->GetName() + "'");
-      if (!pt->IsOfType("SpacePoint"))
-         throw InterpreterException("The object named '" + ptName +
-            "' is not a space point, but is used as one "
-            "in the coordinate system '" + cs->GetName() + "'");
-      cs->SetRefObject(pt, Gmat::SPACE_POINT, ptName);
-   
-      ptName = cs->GetStringParameter("J2000Body");
-      pt = (SpacePoint *)(theModerator->GetObject(ptName));
-      if (pt == NULL)
-         throw InterpreterException("Unable to find the J2000Body, '" + ptName +
-            "', for the coordinate system '" + cs->GetName() + "'");
-      if (!pt->IsOfType("SpacePoint"))
-         throw InterpreterException("The object named '" + ptName +
-            "' is not a space point, but is used as one "
-            "in the coordinate system '" + cs->GetName() + "'");
-      cs->SetRefObject(pt, Gmat::SPACE_POINT, ptName);
-      
+      cs = (CoordinateSystem*)GetObject(*i);
       cs->Initialize();
    }
 
-   CoordinateSystem *configuredCs;
-   std::string configuredCsName;
-   
-   // Set the coordinate system pointers for the Spacecraft
-   StringArray satNames = theModerator->GetListOfObjects(Gmat::SPACECRAFT);
-   Spacecraft *sat;
-   cs = theModerator->GetInternalCoordinateSystem();
-   StringArray preInitCsNames;
-   
-   for (StringArray::iterator i = satNames.begin(); i != satNames.end(); ++i)
-   {
-      #ifdef DEBUG_PASS_TWO
-         MessageInterface::ShowMessage("Setting up Spacecraft %s\n", 
-            i->c_str());
-      #endif
-      
-      sat = (Spacecraft *)theModerator->GetObject(*i);
-      
-      #ifdef DEBUG_PASS_TWO
-         MessageInterface::ShowMessage(
-            "Prior to setting coordinate system on %s\n", i->c_str());
-      #endif
-      
-      if (sat == NULL)
-         throw InterpreterException("Unable to locate the spacecraft named '" 
-            + (*i) + "'");
-      
-      if (sat->IsOfType("Spacecraft") == false)
-         throw InterpreterException("The object named '" +
-            (*i) + "' was expected to be a spacecraft, but it is a '" +
-            sat->GetTypeName() + "' instead.");
-      
-      sat->SetInternalCoordSystem(cs);
-      configuredCsName = sat->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
-      configuredCs = theModerator->GetCoordinateSystem(configuredCsName);
-      
-      if (configuredCs == NULL)
-         throw InterpreterException(
-            "Unable to locate the coordinate system named '" +
-            configuredCsName + "', referenced in the spacecraft named " +
-            (*i));
-      
-      if (configuredCs->IsOfType("CoordinateSystem") == false)
-         throw InterpreterException("The object named '" +
-            configuredCsName + "' was expected to be a coordinate system, "
-            "but it is a '" + configuredCs->GetTypeName() + "' instead.");
-
-      // if CoordinateSystem not preinitialized
-      if (find(preInitCsNames.begin(), preInitCsNames.end(), configuredCsName)
-          == preInitCsNames.end())
-      {
-         PreinitializeCoordinateSystem(configuredCs);
-         preInitCsNames.push_back(configuredCsName);
-      }
-      
-      sat->SetRefObject(configuredCs, Gmat::COORDINATE_SYSTEM, configuredCsName);
-      
-      #ifdef DEBUG_PASS_TWO
-         std::string gen = sat->GetGeneratingString(Gmat::SCRIPTING);
-         MessageInterface::ShowMessage(
-            "After setting coordinate system on %s\n%s\n", i->c_str(), 
-            gen.c_str());
-         Real *st = sat->GetState().GetState();
-         MessageInterface::ShowMessage(
-            "Before init state is [%.6lf %.6lf %.6lf %.9lf %.9lf %.9lf]\n",
-            st[0], st[1], st[2], st[3], st[4], st[5]);
-      #endif
-      
-      sat->Initialize();
-      
-      #ifdef DEBUG_PASS_TWO
-         st = sat->GetState().GetState();
-         MessageInterface::ShowMessage(
-            "After init state is  [%.6lf %.6lf %.6lf %.9lf %.9lf %.9lf]\n",
-            st[0], st[1], st[2], st[3], st[4], st[5]);
-      #endif
-   }
-   
-   #ifdef DEBUG_PASS_TWO   
-      MessageInterface::ShowMessage(
-         "...finalization complete.\n");
-   #endif
-   
-   return retval;
+   return true;
 }
 
-//------------------------------------------------------------------------------
-// void PreinitializeCoordinateSystem(CoordinateSystem *cs)
-//------------------------------------------------------------------------------
-void Interpreter::PreinitializeCoordinateSystem(CoordinateSystem *cs)
-{
-   #ifdef DEBUG_PREINITIALIZE   
-      MessageInterface::ShowMessage(
-         "Preinitializing coordinate system %s\n", (cs->GetName()).c_str());
-   #endif
 
-      
-   SolarSystem *ss = theModerator->GetSolarSystemInUse();
-   if (!ss) throw InterpreterException("Cannot access solar system in use");
-   CelestialBody   *b  = NULL;
-   CalculatedPoint *c  = NULL;
-   Barycenter      *bc = NULL;
-   SpacePoint      *sp = NULL;
-   //SpaceObject     *so = NULL;  // worry about this later
-   
-   // check for reference objects for the coordinate system
-   StringArray objs = cs->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
-   for (StringArray::iterator i = objs.begin(); i != objs.end(); ++i)
-   {
-      #ifdef DEBUG_PREINITIALIZE   
-         MessageInterface::ShowMessage(
-            "Now trying to get object %s\n", i->c_str());
-      #endif
-      //for now, assume referenced objects are SpacePoints
-      // deal with Spacecraft later
-      try
-      {
-         sp = (SpacePoint*) cs->GetRefObject(Gmat::SPACE_POINT, (*i));
-      }
-      // if it's not set already, try to get the pointer and set it
-      catch (BaseException& be)
-      {
-         sp = (SpacePoint*) ss->GetBody((*i));
-         if (!sp) throw InterpreterException(
-            "Unknown reference object " + (*i) + " in coordinate system\n");
-         if (sp) cs->SetRefObject(sp,Gmat::SPACE_POINT, (*i)); 
-      }
-      // if it's a LibrationPoint or Barycenter, give it pointers
-      // to its reference obejcts
-      if (sp->IsOfType("CalculatedPoint"))
-      {
-         c = (CalculatedPoint*) sp;
-         StringArray itsObjs = c->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
-         for (StringArray::iterator j = itsObjs.begin();
-              j != itsObjs.end(); ++j)
-         {
-            // all calculated points reference
-            // celestial bodies or barycenters
-            b = ss->GetBody(*j);
-            if (b)
-            {
-               c->SetRefObject(b, Gmat::SPACE_POINT, (*j));
-            }
-            else // if it's not a body, it should be a barycenter
-            {
-               bc = (Barycenter*) theModerator->GetCalculatedPoint(*j);
-               if (!bc) throw InterpreterException(
-                        "Unknown reference object in calculated point");
-               c->SetRefObject(bc, Gmat::SPACE_POINT, (*j));
-            }
-            
-         }
-      }
-   }
-}

@@ -4,65 +4,71 @@
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool.
 //
-// Author: Darrel J. Conway
-// Created: 2003/09/11
+// Author: Waka Waktola
+// Created: 2006/08/25
+// Copyright: (c) 2006 NASA/GSFC. All rights reserved.
 //
-// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// number S-67573-G
-//
-// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// number S-67573-G
-//
+//------------------------------------------------------------------------------
 /**
  * Class definition for the ScriptInterpreter
  */
 //------------------------------------------------------------------------------
 
-
 #ifndef SCRIPTINTERPRETER_HPP
 #define SCRIPTINTERPRETER_HPP
 
-#include "Interpreter.hpp" // inheriting class's header file
-
-// Longest allowed single line in the script file
-#define         MAXLINELENGTH       4096
-
+#include "Interpreter.hpp"
+#include "InterpreterException.hpp"
+#include "ScriptReadWriter.hpp"
 
 /**
- * The ScriptInterpreter translates script files into GMAT objects and saves 
- * GMAT objects in script files
+ * The ScriptInterpreter class manages the script reading and writing process.
  */
 class ScriptInterpreter : public Interpreter
 {
-        public:
-        // class constructor
-        static ScriptInterpreter*   Instance();
+public:        
+   static ScriptInterpreter*   Instance();
 
-        virtual bool                Interpret();
-        virtual bool                Interpret(const std::string &scriptfile);
-        virtual bool                Build(Gmat::WriteMode mode);
-        virtual bool                Build(const std::string &scriptfile,
-                                          Gmat::WriteMode mode = Gmat::SCRIPTING);
+   virtual bool                Interpret();
+   virtual bool                Interpret(const std::string &scriptfile); 
+   virtual bool                Build(Gmat::WriteMode mode);
         
-    protected:
-        /// The script interpreter singleton
-        static ScriptInterpreter    *instance;
-        /// Name of the current script file
-        std::string                 filename;
-        /// Toggle for the portion of the script -- Initialization or sequence
-        bool                        sequenceStarted;
-        
-        bool                        ReadScript();
-        bool                        ReadLine();
-        bool                        Parse();
-        
-        bool                        WriteScript(Gmat::WriteMode mode = Gmat::SCRIPTING);
-
-        bool                        ConfigureCommand(GmatCommand *);
-        bool                        ConfigureMathematics();
-        
-        ScriptInterpreter();
-        virtual ~ScriptInterpreter();
+   bool                        Build(const std::string &scriptfile,
+                                     Gmat::WriteMode mode = Gmat::SCRIPTING);
+   
+   bool SetInStream(std::istream *str);
+   bool SetOutStream(std::ostream *str);
+   
+protected:
+   
+   /// The script interpreter singleton
+   static ScriptInterpreter *instance;
+   
+   std::istream *inStream;
+   std::ostream *outStream;
+   
+   bool                        ReadScript();
+   std::string                 ReadLogicalBlock();
+   bool                        Parse(const std::string &logicBlock);
+   bool                        WriteScript(Gmat::WriteMode mode = Gmat::SCRIPTING);
+   
+private:
+   ScriptInterpreter();
+   virtual ~ScriptInterpreter();
+   
+   /// The logical block
+   //std::string logicalBlock; replaced by currentBlock
+   /// A counter that counts the logical blocks of script as they are read.
+   Integer logicalBlockCount; 
+   /// The stream used for script reading and writing.
+   //std::iostream scriptStream;
+   /// A pointer to the ScriptReadWriter used when reading or writing script.
+   ScriptReadWriter* theReadWriter;
+   /// Name of the current script file
+   std::string scriptFilename;
+   /// Section delimiter comment
+   StringArray sectionDelimiterString;
+   
 };
 
 #endif // SCRIPTINTERPRETER_HPP

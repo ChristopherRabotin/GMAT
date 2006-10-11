@@ -1978,7 +1978,7 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
          cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
          //cs->SetSolarSystem(theSolarSystemInUse);
          cs->Initialize();
-      }
+      }      
    }
    catch (BaseException &e)
    {
@@ -2326,7 +2326,7 @@ MathNode* Moderator::CreateMathNode(const std::string &type,
 }
 
 
-// GmatCommand
+//GmatCommand
 //------------------------------------------------------------------------------
 // GmatCommand* InterpretGmatFunction(const std::string functionFilename)
 //------------------------------------------------------------------------------
@@ -3136,17 +3136,17 @@ Integer Moderator::RunMission(Integer sandboxNum)
       // clear sandbox
       if (sandboxNum > 0 && sandboxNum <= Gmat::MAX_SANDBOX)
       {
-         #if DEBUG_RUN
+//         #if DEBUG_RUN
          MessageInterface::ShowMessage
             ("Moderator::RunMission() before sandboxes[%d]->Clear()\n", sandboxNum-1);
-         #endif
+//         #endif
          
          sandboxes[sandboxNum-1]->Clear();
          
-         #if DEBUG_RUN
+//         #if DEBUG_RUN
          MessageInterface::ShowMessage
             ("Moderator::RunMission() after sandboxes[%d]->Clear()\n", sandboxNum-1);
-         #endif
+//         #endif
       }
       else
       {
@@ -3179,26 +3179,26 @@ Integer Moderator::RunMission(Integer sandboxNum)
          AddFunctionToSandbox(sandboxNum-1);
          AddCommandToSandbox(sandboxNum-1);
          
-         #if DEBUG_RUN
+//         #if DEBUG_RUN
          MessageInterface::ShowMessage
             ("Moderator::RunMission() after AddCommandToSandbox()\n");
-         #endif
+//         #endif
          
          InitializeSandbox(sandboxNum-1);
          
-         #if DEBUG_RUN
+//         #if DEBUG_RUN
          MessageInterface::ShowMessage
             ("Moderator::RunMission() after InitializeSandbox()\n");
-         #endif
+//         #endif
          
          // execute sandbox
          runState = Gmat::RUNNING;
          ExecuteSandbox(sandboxNum-1);
          
-         #if DEBUG_RUN
+//         #if DEBUG_RUN
          MessageInterface::ShowMessage
             ("Moderator::RunMission() after ExecuteSandbox()\n");
-         #endif
+//         #endif
       
       }
       catch (BaseException &e)

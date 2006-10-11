@@ -6,6 +6,7 @@
 //
 // Author: Darrel J. Conway
 // Created: 2003/08/28
+// Rework:  2006/09/27
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -19,13 +20,13 @@
 #ifndef Interpreter_hpp
 #define Interpreter_hpp
 
-#include <iostream>
-#include <string>
 #include <map>
-
+#include <list>
+#include <iostream>
 #include "gmatdefs.hpp"
 #include "InterpreterException.hpp"
 #include "GmatBase.hpp"
+#include "TextParser.hpp"
 
 // Forward references for GMAT core objects
 class Spacecraft;
@@ -46,7 +47,6 @@ class Subscriber;
 class Burn;
 
 
-//#include "Moderator.hpp"
 class Moderator;
 
 
@@ -62,218 +62,179 @@ class GMAT_API Interpreter
 public:
    Interpreter();
    virtual ~Interpreter();
-    
-   bool                            SetInStream(std::istream *str);
-   bool                            SetOutStream(std::ostream *str);
-    
-   // The "Interpret" methods translate text streams (e.g. scripts and 
-   // subscripts) into GMAT objects 
-   virtual bool                    Interpret() = 0;
-   bool                            InterpretObject(std::string objecttype,
-                                                    std::string objectname,
-                                                    GmatBase **objptr = NULL);
-   virtual bool                    Interpret(GmatBase *obj,
-                                             const std::string generator);
-   GmatCommand*                    InterpretGMATFunction(
-                                      const std::string &pathAndName);
-
-   // The "Build" methods take GMAT objects and write out scripts or subscripts
-   virtual bool                    Build(Gmat::WriteMode mode) = 0;
-   bool                            BuildObject(std::string &objectname,
-                                               Gmat::WriteMode mode = Gmat::SCRIPTING);
-   bool                            BuildUserObject(std::string &objectname,
-                                                   Gmat::WriteMode mode = Gmat::SCRIPTING);
+   
+   //------------------------------------------------------------------------------
+   // bool Interpret()
+   //------------------------------------------------------------------------------
+   /**
+    * Retrieves text input from a stream and translate it into GMAT objects and
+    * actions.
+    * 
+    * This method gets overridden by derived classes.
+    * 
+    * @return true on success, false on failure.
+    */
+   //------------------------------------------------------------------------------
+   virtual bool Interpret() = 0;
+   
+   //------------------------------------------------------------------------------
+   // bool Build()
+   //------------------------------------------------------------------------------
+   /**
+    * Accesses GMAT objects and actions and writes them to a stream.
+    * 
+    * This method gets overridden by derived classes.
+    * 
+    * @return true on success, false on failure.
+    */
+   //------------------------------------------------------------------------------
+   virtual bool Build(Gmat::WriteMode mode) = 0;
+   
+   GmatCommand* InterpretGMATFunction(const std::string &pathAndName);
    
    StringArray& GetListOfObjects(Gmat::ObjectType type);
    GmatBase* GetObject(const std::string &name);
    GmatBase* CreateObject(const std::string &type, const std::string &name);
    SolarSystem* GetSolarSystemInUse();
    
+   StringArray& GetErrorList() { return errorList; }
+   
 protected:
-   /// The input stream processed by the interpreter
-   std::istream                    *instream;
-   /// The iostream processed by the interpreter
-   std::ostream                    *outstream;
-   /// Pointer to the Moderator for access to the factories and other services
-   Moderator                       *theModerator;
-   /// Flag to tell is the mappings are defined yet
-   bool                            initialized;
-   /// Counter used to track branch commands
-   Integer                         branchDepth;
-    
-   /// Mapping between the object base class strings and the objecttypes enum
-   std::map<std::string, Integer>  typemap;
-    
-   /// Available commands, obtained from the FactoryManager via the Moderator
-   StringArray                     commandList;
-   /// Available propagators
-   StringArray                     propagatorList;
-   /// Available hardware elements
-   StringArray                     hardwareList;
-   /// Available forces
-   StringArray                     forceList;
-   /// Available subscribers
-   StringArray                     subscriberList;
-   /// Available parameters
-   StringArray                     parameterList;
-   /// Available stopping conditions
-   StringArray                     stopcondList;
-   /// Available solvers
-   StringArray                     solverList;
-   /// Available function containers
-   StringArray                     functionList;
+   
+   // subclasses accessable member data
+   
+   Moderator    *theModerator;
+   TextParser   theTextParser;
+   bool         inCommandMode;
+   bool         initialized;
+
+   /// For handling delayed blocks
+   StringArray  delayedBlocks;
+   
+   /// Block type and comments
+   std::string  headerComment;
+   std::string  footerComment;
+   std::string  currentBlock;
+   Gmat::BlockType currentBlockType;
+   
+   /// Error handling data
+   bool continueOnError;
+   std::string errorMsg;
+   StringArray errorList;
+   
+   void   Initialize();
+   void   RegisterAliases();
+   
+   bool FindPropertyID(GmatBase *obj, const std::string &chunk, GmatBase **owner,
+                       Integer &id);
+   
+   GmatBase* FindObject(const std::string &name);
+   
+   Parameter* CreateParameter(const std::string &str);   
+   Parameter* CreateParameter(const std::string &type,
+                              const std::string &name,
+                              const std::string &ownerName = "",
+                              const std::string &depName = "");
+   Parameter* CreateArray( const std::string &arrayStr);   
+   Parameter* GetArrayIndex(const std::string &arrayStr,
+                            Integer &row, Integer &col);
+   
+   AxisSystem* CreateAxisSystem(std::string type, GmatBase *owner);
+   
+   // for commands
+   GmatCommand* CreateCommand(const std::string &type, const std::string &desc);
+   GmatCommand* AppendCommand(const std::string &type);
+   GmatCommand* CreateAssignmentCommand(const std::string &lhs,
+                                        const std::string &rhs);
+   
+   bool AssembleCommand(GmatCommand *cmd, const std::string &desc);
+   bool AssembleForCommand(GmatCommand *cmd, const std::string &desc);
+   bool AssembleCallFunctionCommand(GmatCommand *cmd, const std::string &desc);
+   bool AssembleConditionalCommand(GmatCommand *cmd, const std::string &desc);
+   bool AssembleGeneralCommand(GmatCommand *cmd, const std::string &desc);
+   
+   // for assignment
+   GmatBase* MakeAssignment(const std::string &lhs, const std::string &rhs);
+   
+   // for setting whole object
+   bool SetObjectToObject(GmatBase *toObj, GmatBase *fromObj);
+   bool SetPropertyToObject(GmatBase *toObj, GmatBase *fromOwner,
+                            const std::string &fromProp);
+   bool SetArrayToObject(GmatBase *toObj, const std::string &fromArray);
+   bool SetValueToObject(GmatBase *toObj, const std::string &value);
+   
+   // for setting property
+   bool SetObjectToProperty(GmatBase *toOwner, const std::string &toProp,
+                            GmatBase *fromObj);
+   bool SetPropertyToProperty(GmatBase *toOwner, const std::string &toProp,
+                              GmatBase *fromOwner, const std::string &fromProp);
+   bool SetArrayToProperty(GmatBase *toOwner, const std::string &toProp,
+                           const std::string &fromArray);
+   bool SetValueToProperty(GmatBase *toOwner, const std::string &toProp,
+                           const std::string &value);
+   
+   // for setting array
+   bool SetObjectToArray(GmatBase *toArrObj, const std::string &toArray,
+                         GmatBase *fromObj);
+   bool SetPropertyToArray(GmatBase *toArrObj, const std::string &toArray,
+                           GmatBase *fromOwner, const std::string &fromProp);
+   bool SetArrayToArray(GmatBase *toArrObj, const std::string &toArray,
+                        GmatBase *fromArrObj, const std::string &fromArray);
+   bool SetValueToArray(GmatBase *toArrObj, const std::string &toArray,
+                        const std::string &value);
+   
+   // for setting/getting property value
+   bool SetPropertyValue(GmatBase *obj, const Integer id,
+                         const std::string &value);
+   std::string GetPropertyValue(GmatBase *obj, const Integer id);
+   
+   bool SetProperty(GmatBase *obj, const Integer id, const std::string &value);
+   
+   bool SetComplexProperty(GmatBase *obj, const std::string &prop,
+                           const std::string &value);
+   bool SetForceModelProperty(GmatBase *obj, const std::string &prop,
+                              const std::string &value, GmatBase *fromObj);
+   bool SetSolarSystemProperty(GmatBase *obj, const std::string &prop,
+                               const std::string &value);
+   
+   bool FindOwnedObject(GmatBase *owner, const std::string toProp,
+                        GmatBase **ownedObj, Integer &id);
+   
+   // for setting/getting array value
+   Real GetArrayValue(const std::string &arrayStr, Integer &row, Integer &col);
+   
+   bool IsArray(const std::string &str);
+   
+   // for error handling
+   void HandleError(BaseException &e);
+
+   // Final setting of reference object pointers needed by the GUI
+   bool FinalPass();
+   
+private:
+   
+   // Mapping between the object base class strings and the objecttypes enum
+   // It is not used
+   //std::map<std::string, Integer>  typeMap;
+   
+   StringArray   commandList;
    StringArray   atmosphereList;
    StringArray   attitudeList;
    StringArray   axisSystemList;
    StringArray   burnList;
    StringArray   calculatedPointList;
+   StringArray   functionList;
+   StringArray   hardwareList;
+   StringArray   parameterList;
    StringArray   physicalModelList;
-
-   /// Current line from the script
-   std::string                     line;
-   std::vector<std::string *>      chunks;
-    
-   /// Identifies the different types of script lines possible
-   enum linetype               { CREATEOBJECT = 7001,
-                                 OBJECTPARM,
-                                 CONFIGURATION,
-                                 TIMELINE,
-                                 BLANKLINE,
-                                 UNKNOWN };
-
-
-   void                          Initialize();
-
-   // The "Create" methods make calls, through the Moderator, to the Factories
-   // to get new instances of the requested objects
-   Spacecraft*                   CreateSpacecraft(std::string satname);
-   Formation*                    CreateFormation(std::string formname);
-   Parameter*                    CreateArray(std::string arrname, 
-                                             std::string type);
-   Hardware*                     CreateHardware(std::string hwname, 
-                                                std::string type);
-   GmatCommand*                  CreateCommand(std::string commandtype);
-   CoordinateSystem*             CreateCoordinateSystem(std::string csName);
-   AxisSystem*                   CreateAxisSystem(std::string type,
-                                                  GmatBase *owner);
-   Propagator*                   CreatePropagator(std::string proptype);
-   ForceModel*                   CreateForceModel(std::string modelname);
-   PhysicalModel*                CreatePhysicalModel(std::string forcetype);
-   SolarSystem*                  CreateSolarSystem(std::string ssname);
-   CelestialBody*                CreateCelestialBody(std::string cbname, 
-                                                     std::string type);
-   Parameter*                    CreateParameter(const std::string &name, 
-                                                 const std::string &type,
-                                                 const std::string &depname = "",
-                                                 const std::string &obj = "");
+   StringArray   propagatorList;
+   StringArray   solverList;
+   StringArray   stopcondList;
+   StringArray   subscriberList;
    
-   Subscriber*                   CreateSubscriber(std::string name, 
-                                                  std::string type);
-   Burn*                         CreateBurn(std::string satname, 
-                                    bool isImpulsive = false);
-                                                    
-   // The following method signature depends on an open scripting issue: if
-   // props and force models are named, the following Create method should use
-   // the names rather than the object pointers
-   PropSetup*                    CreatePropSetup(std::string name);
-    
-   bool                          AssembleCommand(const std::string& scriptline,
-                                                 GmatCommand *cmd = NULL);
-   bool                          AssembleForCommand(const StringArray topLevel, 
-                                                    GmatCommand *cmd);
-   bool                          AssembleReportCommand(
-                                    const StringArray topLevel, 
-                                    GmatCommand *cmd);
-   bool                          InterpretFunctionCall();
-   GmatBase*                     AssemblePhrase(StringArray& phrase,
-                                                GmatCommand *cmd);
-   
-   bool                          InterpretPropSetupParameter(GmatBase *obj, 
-                                    StringArray& items,
-                                    std::vector<std::string*>::iterator& phrase, 
-                                    Integer index = 1);
-   bool                          InterpretCoordinateSystemParameter(
-                                    GmatBase *obj,
-                                    StringArray& items,
-                                    std::vector<std::string*>::iterator& phrase,
-                                    Integer index = 1);
-   bool                          InterpretGlobalSetting(const StringArray &sar, 
-                                    const std::string &rhs);
-   bool                          InterpretSolarSetting(const StringArray &sar, 
-                                    const std::string &rhs);
-
-   // Methods used to break apart lines of script
-   void                          ChunkLine(void);
-   bool                          IsGroup(const char *text);
-   Integer                       SkipWhiteSpace(Integer start = 0, 
-                                                const std::string &text = "");
-                                                
-   void                          WriteParameters(std::string &prefix, 
-                                                 GmatBase *obj);
-   void                          WriteParameterValue(GmatBase *obj, Integer id);
-   Integer                       FindDelimiter(const std::string &str,
-                                               const std::string &specChar="");
-   std::string                   GetToken(const std::string &tokstr = "");
-   
-   bool                          EquateObjects(GmatBase *obj, 
-                                               const std::string &obj2Name="");
-   bool                          SetVariable(GmatBase *obj,
-                                             const std::string &val = "",
-                                             GmatCommand *cmd = NULL);
-   bool                          SetArray(GmatBase *obj,
-                                          GmatCommand *cmd = NULL);
-
-// temporarily make public to test this piece
-public:
-   // Handlers for specific constructs
-   StringArray&                  Decompose(const std::string &chunk);
-
-protected:
-   StringArray&                  SeparateSpaces(const std::string &chunk);
-   StringArray&                  SeparateDots(const std::string &chunk, 
-                                              const std::string &delimiter = ".");
-   StringArray&                  SeparateBraces(const std::string &chunk);
-   StringArray&                  SeparateBrackets(const std::string &chunk);
-   StringArray&                  SeparateParens(const std::string &chunk);
-    
-   GmatBase*                     FindObject(std::string objName);
-   GmatBase*                     FindOwnedObject(StringArray TokenList,
-                                                 GmatBase *owner, 
-                                                 Integer index);
-   bool                          SetParameter(GmatBase *obj, Integer id,
-                                              std::string value);
-   bool                          ParseCondition(const StringArray topLevel,
-                                                std::string &lhs, std::string &op,
-                                                std::string &rhs, Integer begin,
-                                                Integer &next);
-   bool                          SetRefParameter(GmatCommand *cmd,
-                                                 const std::string &paramName,
-                                                 Integer index);
-   void                          CheckForSpecialCase(GmatBase *obj, Integer id, 
-                                                     std::string& value);
-   void                          RegisterAliases();
-   bool                          ConfigureForce(ForceModel *obj, 
-                                                std::string& objParm, 
-                                                std::string& parm);
-   bool                          ConstructRHS(GmatBase *lhsObject, 
-                                              const std::string& rhs, 
-                                              const std::string& label);
-   bool                          InterpretParameter(const std::string text,
-                                                    std::string &paramType,
-                                                    std::string &paramObj,
-                                                    std::string &parmSystem);
-                                                    
-   bool                          InterpretTextBlock(GmatCommand* cmd,
-                                    const std::string block);
-   StringArray                   SeparateLines(const std::string block);
-   
-   bool                          ValidateBlock(GmatCommand *cmdStart,
-                                               GmatCommand *cmdEnd = NULL);
-   bool                          ValidateBlock(StringArray &sar);
-
-   bool                          FinalPass();
-   
-   void                          PreinitializeCoordinateSystem(CoordinateSystem *cs);
+   bool CheckForSpecialCase(GmatBase *obj, Integer id, std::string &value);
+   void WriteParts(const std::string &title, StringArray &parts);
+      
 };
 
 #endif // INTERPRETER_HPP
