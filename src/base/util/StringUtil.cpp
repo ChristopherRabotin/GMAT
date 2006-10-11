@@ -105,6 +105,8 @@ std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
    std::string str2;
    std::string whiteSpace = " \t";
    
+//    UnsignedInt index1 = str.find_first_not_of(' ');
+//    UnsignedInt index2 = str.find_last_not_of(' ');
    UnsignedInt index1 = str.find_first_not_of(whiteSpace);
    UnsignedInt index2 = str.find_last_not_of(whiteSpace);
    
@@ -114,7 +116,7 @@ std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
    if (stype == LEADING)
       str2 = str.substr(index1);
    else if (stype == TRAILING)
-      str2 = str.substr(0, index2 + 1);
+      str2 = str.substr(0, index2 + 1);  // updated to +1 because it was chopping off last letter
    else if (stype == BOTH)
       str2.assign(str.substr(index1, index2-index1+1));
    
@@ -408,10 +410,6 @@ bool GmatStringUtil::ToBoolean(const std::string &str, bool &value)
 void GmatStringUtil::ParseParameter(const std::string &str, std::string &type,
                                     std::string &owner, std::string &depObj)
 {
-   // Check for .. first
-   if (str.find("..") != str.npos)
-      throw UtilityException("Invalid Parameter string found: " + str);
-   
    //find owner.depObj.type
    std::string str1 = str;
    std::string::size_type pos1 = str1.find(".");
