@@ -168,9 +168,14 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    instanceName    (nomme),
    type            (typeId),
    ownedObjectCount(0),
-   callbackExecuting(false)
+   callbackExecuting(false),
+   commentLine     (""),
+   inlineComment   ("")
    
 {
+   attributeCommentLines.clear();
+   attributeInlineComments.clear();	
+	
    // one more instance - add to the instanceCount
    ++instanceCount;
 }
@@ -207,7 +212,11 @@ GmatBase::GmatBase(const GmatBase &a) :
     generatingString(a.generatingString),
     objectTypes     (a.objectTypes),
     objectTypeNames (a.objectTypeNames),
-    callbackExecuting    (false)
+    callbackExecuting    (false),
+    commentLine     (a.commentLine),
+    inlineComment   (a.inlineComment),
+    attributeCommentLines    (a.attributeCommentLines),
+    attributeInlineComments  (a.attributeInlineComments)
 {
    // one more instance - add to the instanceCount
    ++instanceCount;
@@ -239,6 +248,11 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    objectTypes      = a.objectTypes;
    objectTypeNames  = a.objectTypeNames;
    callbackExecuting = false;
+   commentLine      = a.commentLine;
+   inlineComment    = a.inlineComment;
+   attributeCommentLines    = a.attributeCommentLines;
+   attributeInlineComments  = a.attributeInlineComments;
+   
    return *this;
 }
 
@@ -1483,6 +1497,85 @@ const StringArray& GmatBase::GetStringArrayParameter(const Integer id,
                            " on " + typeName + " named " + instanceName);
 }
 
+//---------------------------------------------------------------------------
+//  const std::string GetCommentLine()
+//---------------------------------------------------------------------------
+const std::string GmatBase::GetCommentLine()
+{
+   return commentLine;
+}
+
+//---------------------------------------------------------------------------
+//  void SetCommentLine(const std::string comment)
+//---------------------------------------------------------------------------
+void GmatBase::SetCommentLine(const std::string comment)
+{
+   commentLine = comment;
+}
+   
+//---------------------------------------------------------------------------
+//  const std::string GetInlineComment()
+//---------------------------------------------------------------------------
+const std::string GmatBase::GetInlineComment()
+{
+   return inlineComment;
+}
+
+//---------------------------------------------------------------------------
+//  void SetInlineComment(const std::string comment)
+//---------------------------------------------------------------------------
+void GmatBase::SetInlineComment(const std::string comment)
+{
+   inlineComment = comment;
+}
+
+//---------------------------------------------------------------------------
+//  const std::string GetAttributeCommentLine(Integer index))
+//---------------------------------------------------------------------------
+const std::string GmatBase::GetAttributeCommentLine(Integer index)
+{
+   if (index >= (Integer)attributeCommentLines.size())
+      return "";
+      
+   return attributeCommentLines[index];
+}
+
+//---------------------------------------------------------------------------
+//  void SetAttributeCommentLine(Integer index, 
+//             const std::string comment)
+//---------------------------------------------------------------------------
+void GmatBase::SetAttributeCommentLine(Integer index, 
+                                const std::string comment)
+{
+   if (index >= (Integer)attributeCommentLines.size())
+      return;
+
+   attributeCommentLines[index] = comment;
+}
+
+//---------------------------------------------------------------------------
+//  const std::string GetInlineAttributeComment(Integer index)
+//---------------------------------------------------------------------------
+const std::string GmatBase::GetInlineAttributeComment(Integer index)
+{
+   if (index >= (Integer)attributeInlineComments.size())
+      return "";
+      
+   return attributeInlineComments[index];
+}
+
+//---------------------------------------------------------------------------
+//  void SetInlineAttributeComment(Integer index, 
+//            const std::string comment)
+//---------------------------------------------------------------------------
+void GmatBase::SetInlineAttributeComment(Integer index, 
+                                const std::string comment)
+{
+   if (index >= (Integer)attributeInlineComments.size())
+      return;
+      
+   attributeInlineComments[index] = comment;
+}
 
 //---------------------------------------------------------------------------
 //  bool GetBooleanParameter(const Integer id) const
@@ -2280,7 +2373,16 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
       }
       else
       {
-         data << "Create " << tname << " " << nomme << ";\n";
+         if ((commentLine != "") && (mode == Gmat::SCRIPTING))
+            data << commentLine << "\n";
+             
+         data << "Create " << tname << " " << nomme << ";";
+         
+         if ((inlineComment != "") && (mode == Gmat::SCRIPTING))
+            data << inlineComment << "\n";
+         else
+            data << "\n";
+         
          preface = "GMAT ";
       }
    }
@@ -2374,7 +2476,6 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                 (parmType != Gmat::UNSIGNED_INTARRAY_TYPE) &&
                 (parmType != Gmat::RVECTOR_TYPE) &&
                 (parmType != Gmat::RMATRIX_TYPE) &&
-//                (parmType != Gmat::OBJECT_TYPE) &&
                 (parmType != Gmat::UNKNOWN_PARAMETER_TYPE)
                )
             {
@@ -2382,8 +2483,22 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                value.str("");
                WriteParameterValue(i, value);
                if (value.str() != "")
+               {
+               	  std::string attCmtLn = GetAttributeCommentLine(i);
+               	  
+               	  if ((attCmtLn != "") && (mode == Gmat::SCRIPTING))
+                     stream << GetAttributeCommentLine(i) << "\n";
+                     
                   stream << prefix << GetParameterText(i)
-                         << " = " << value.str() << ";\n";
+                         << " = " << value.str() << ";";
+                  
+                  // overwrite tmp variable for attribute cmt line
+                  attCmtLn = GetInlineAttributeComment(i);
+                  if ((attCmtLn != "") && (mode == Gmat::SCRIPTING))
+                     stream << GetInlineAttributeComment(i) << "\n";
+                  else
+                     stream << "\n";
+               }
             }
          }
          else
@@ -2392,7 +2507,13 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
             StringArray sar = GetStringArrayParameter(i);
             if (sar.size() > 0)
             {
+               std::string attCmtLn = GetAttributeCommentLine(i);
+               	  
+               if ((attCmtLn != "") && (mode == Gmat::SCRIPTING))
+                  stream << GetAttributeCommentLine(i) << "\n";
+        
                stream << prefix << GetParameterText(i) << " = {";
+               
                for (StringArray::iterator n = sar.begin(); n != sar.end(); ++n)
                {
                   if (n != sar.begin())
@@ -2403,7 +2524,14 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                   if (inMatlabMode)
                      stream << "'";
                }
-               stream << "};\n";
+               
+               attCmtLn  = GetInlineAttributeComment(i);
+               
+               if ((attCmtLn != "") && (mode == Gmat::SCRIPTING))
+                  stream << "};" << GetInlineAttributeComment(i) 
+                       << "\n";
+               else
+                  stream << "};\n";
             }
          }
       }
@@ -2512,4 +2640,26 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
         default:
             break;
     }
+}
+
+//---------------------------------------------------------------------------
+//  void PrepCommentTables()
+//---------------------------------------------------------------------------
+void GmatBase::PrepCommentTables()
+{
+   attributeCommentLines.resize(parameterCount);
+   attributeInlineComments.resize(parameterCount);
+   for (Integer i = 0; i < parameterCount; ++i)
+   {
+      attributeCommentLines[i] = "";
+      attributeInlineComments[i] = "";
+   }
+}
+
+//---------------------------------------------------------------------------
+//  void FinalizeCreation()
+//---------------------------------------------------------------------------
+void GmatBase::FinalizeCreation()
+{
+   PrepCommentTables();
 }

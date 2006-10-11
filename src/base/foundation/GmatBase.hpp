@@ -186,7 +186,20 @@ public:
                        GetStringArrayParameter(const Integer id, 
                                                const Integer index) const; 
 
-                       
+   virtual const std::string  GetCommentLine();
+   virtual void               SetCommentLine(const std::string comment);
+   
+   virtual const std::string  GetInlineComment();
+   virtual void               SetInlineComment(const std::string comment);
+   
+   virtual const std::string  GetAttributeCommentLine(Integer index);
+   virtual void               SetAttributeCommentLine(Integer index, 
+                                const std::string comment);
+
+   virtual const std::string  GetInlineAttributeComment(Integer index);
+   virtual void               SetInlineAttributeComment(Integer index, 
+                                const std::string comment);
+   
    virtual bool        GetBooleanParameter(const Integer id) const;
    virtual bool        SetBooleanParameter(const Integer id,
                                            const bool value);
@@ -295,7 +308,8 @@ public:
                                          Gmat::WriteMode mode = Gmat::SCRIPTING,
                                          const std::string &prefix = "",
                                          const std::string &useName = "");
-   
+   virtual void FinalizeCreation();
+
    static Integer          GetDataPrecision();
    static Integer          GetTimePrecision();
 
@@ -326,10 +340,10 @@ protected:
                        objectTypes;
    /// The list types that this class extends, by name
    StringArray         objectTypeNames;
+
    /// flag indicating whether or not a Callback method is currently executing
    bool                callbackExecuting;
    
-
    static Integer      DATA_PRECISION;
    static Integer      TIME_PRECISION;
    
@@ -341,8 +355,18 @@ protected:
                                        std::string &prefix, 
                                        std::stringstream &stream);
    void                WriteParameterValue(Integer id, 
-                                           std::stringstream &stream);
-
+                                           std::stringstream &stream);   
+private:
+   /// String used to hold the comment line
+   std::string         commentLine;
+   /// String used to hold inline comment
+   std::string         inlineComment;
+   /// String array used to hold the attribute comments
+   StringArray         attributeCommentLines;
+   /// String array used to hold the attribute inline comments
+   StringArray         attributeInlineComments;
+   
+   virtual void PrepCommentTables();
 };
 
 std::string GmatBase::GetTypeName() const
