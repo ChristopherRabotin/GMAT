@@ -34,7 +34,7 @@ public:
     * @param <details> Message explaining why the exception was thrown.
     */
    //---------------------------------------------------------------------------
-   SpaceObjectException::SpaceObjectException(const std::string &details) :
+   SpaceObjectException(const std::string &details) :
       BaseException("SpaceObject Exception Thrown: ", details)
    {
    }
@@ -46,7 +46,7 @@ public:
     * Destructor.
     */
    //---------------------------------------------------------------------------
-   SpaceObjectException::~SpaceObjectException()
+   ~SpaceObjectException()
    {
    }
 
@@ -59,7 +59,7 @@ public:
     * @param <soe> Exception used to generate this one.
     */
    //---------------------------------------------------------------------------
-   SpaceObjectException::SpaceObjectException(const SpaceObjectException &soe) :
+   SpaceObjectException(const SpaceObjectException &soe) :
       BaseException(soe)
    {
    }
