@@ -1142,11 +1142,18 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
    #endif
    
    if (type == "Target" || type == "Report" || type == "BeginFiniteBurn" ||
-       type == "EndFiniteBurn")
+       type == "EndFiniteBurn" || type == "Optimize")
    {
       // first item is ref. object name
       
       if (type == "Target")
+      {
+         cmd->SetRefObjectName(Gmat::SOLVER, parts[0]);
+         
+         for (int i=1; i<count; i++)
+            cmd->SetRefObjectName(Gmat::PARAMETER, parts[i]);
+      }
+      else if (type == "Optimize")
       {
          cmd->SetRefObjectName(Gmat::SOLVER, parts[0]);
          
