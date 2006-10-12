@@ -445,7 +445,7 @@ bool Achieve::SetStringParameter(const Integer id, const std::string &value)
       else
       {
          realValue = atof(achieveName.c_str());
-         isAchieveParm = true;
+         isAchieveParm = false;
       }
       
       #ifdef DEBUG_ACHIEVE_PARAM
