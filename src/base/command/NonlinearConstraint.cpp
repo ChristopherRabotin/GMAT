@@ -27,6 +27,7 @@
 //#define DEBUG_NONLINEAR_CONSTRAINT_INIT 1
 //#define DEBUG_NONLINEAR_CONSTRAINT_EXEC 1
 //#define DEBUG_NLC_VALUES
+#define DEBUG_NONLINEAR_CONSTRAINT_PARAM
 
 
 //---------------------------------
@@ -37,6 +38,7 @@ const std::string
    {
       "OptimizerName",
       "ConstraintVariableName",
+      "Operator",
       "ConstraintValue",
       "Tolerance",
    };
@@ -44,6 +46,7 @@ const std::string
 const Gmat::ParameterType
    NonlinearConstraint::PARAMETER_TYPE[NonlinearConstraintParamCount - GmatCommandParamCount] =
    {
+      Gmat::STRING_TYPE,
       Gmat::STRING_TYPE,
       Gmat::STRING_TYPE,
       Gmat::STRING_TYPE,
@@ -86,7 +89,8 @@ NonlinearConstraint::NonlinearConstraint() :
    optimizerDataFinalized  (false),
    constraintId            (-1),
    isNlcParm               (false),
-   isNlcArray              (false)
+   isNlcArray              (false),
+   interpreted             (false)
 {
    parameterCount = NonlinearConstraintParamCount;
 }
@@ -124,8 +128,9 @@ NonlinearConstraint::NonlinearConstraint(const NonlinearConstraint& nlc) :
    tolerance               (nlc.tolerance),
    optimizerDataFinalized  (false),
    constraintId            (-1),
-   isNlcParm               (nlc.isNlcParm),  // right?
-   isNlcArray              (nlc.isNlcArray)  // right?
+   isNlcParm               (nlc.isNlcParm),   // right?
+   isNlcArray              (nlc.isNlcArray),  // right?
+   interpreted             (false)
 {
    parameterCount = NonlinearConstraintParamCount;
 }
@@ -171,6 +176,7 @@ NonlinearConstraint& NonlinearConstraint::operator=(const NonlinearConstraint& n
    constraintId           = -1;
    isNlcParm              = nlc.isNlcParm;  // right?
    isNlcArray             = nlc.isNlcArray; // right?
+   interpreted            = false;
 
    return *this;
 }
@@ -393,6 +399,13 @@ std::string NonlinearConstraint::GetStringParameter(const Integer id) const
    if (id == CONSTRAINT_VARIABLE_NAME)
       return constraintName;
       
+   if (id == OPERATOR)
+   {
+      if      (op == LESS_THAN_OR_EQUAL)    return "<=";
+      else if (op == GREATER_THAN_OR_EQUAL) return ">=";
+      else                                  return "=";
+   }
+      
    if (id == CONSTRAINT_VALUE)
       return nlcParmName;
         
@@ -425,12 +438,26 @@ bool NonlinearConstraint::SetStringParameter(const Integer id,
    if (id == OPTIMIZER_NAME) 
    {
       optimizerName = value;
+      interpreted   = false;
       return true;
    }
 
    if (id == CONSTRAINT_VARIABLE_NAME) 
    {
       constraintName = value;
+      interpreted    = false;
+      return true;
+   }
+   
+   if (id == OPERATOR)
+   {
+      if (value == "<=")      op = LESS_THAN_OR_EQUAL;
+      else if (value == ">=") op = GREATER_THAN_OR_EQUAL;
+      else if (value == "=")  op = EQUAL;
+      else
+         throw CommandException("NonlinearConstraint: invalid operator: "
+                                + value + "\n");
+      interpreted   = false;
       return true;
    }
    
@@ -457,6 +484,7 @@ bool NonlinearConstraint::SetStringParameter(const Integer id,
       #endif
          
       constraintValue = realValue;
+      interpreted     = false;
       return true;
       
    }
@@ -664,6 +692,8 @@ bool NonlinearConstraint::InterpretAction()
    #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARSE
       MessageInterface::ShowMessage("NonlinearConstraint::InterpretAction() exiting\n");
    #endif
+   
+   interpreted = true;
   
    return true;
 }
@@ -907,6 +937,11 @@ bool NonlinearConstraint::Initialize()
       ("NonlinearConstraint::Initialize() entered. optimizer=%p, constraint=%p\n", 
       optimizer, constraint);
    #endif
+   
+   if (!interpreted)
+      if (!InterpretAction())
+         throw CommandException(
+            "NonlinearConstraint: error interpreting input data\n");
    
    bool retval = GmatCommand::Initialize();
 

@@ -88,6 +88,8 @@ protected:
    bool                isMinimizeParm;
    /// Optimizer ID for the variable 
    Integer             objId;
+   /// flag indicating whether or not the generating string has been interpreted
+   bool                interpreted;
 
    
    // Parameter IDs

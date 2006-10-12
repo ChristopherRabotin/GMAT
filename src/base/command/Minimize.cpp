@@ -68,7 +68,8 @@ Minimize::Minimize() :
    optimizer               (NULL),
    optimizerDataFinalized  (false),
    isMinimizeParm          (false),
-   objId                   (-1)
+   objId                   (-1),
+   interpreted             (false)
 {
    #ifdef DEBUG_MINIMIZE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
       MessageInterface::ShowMessage("Creating Minimize command ...\n");
@@ -95,7 +96,8 @@ Minimize::Minimize(const Minimize& m) :
    optimizer               (NULL),
    optimizerDataFinalized  (false),
    isMinimizeParm          (m.isMinimizeParm),
-   objId                   (m.objId)
+   objId                   (m.objId),
+   interpreted             (false)
 {
    #ifdef DEBUG_MINIMIZE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
       MessageInterface::ShowMessage("Creating (copying) Minimize command ...\n");
@@ -129,6 +131,7 @@ Minimize& Minimize::operator=(const Minimize& m)
    optimizerDataFinalized = false;
    isMinimizeParm         = m.isMinimizeParm;
    objId                  = m.objId;
+   interpreted            = false;
 
    return *this;
 }
@@ -363,13 +366,17 @@ bool Minimize::SetStringParameter(const Integer id, const std::string &value)
       ("Minimize::SetStringParameter() id=%d, value=%s\n", id, value.c_str());
    #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    
-   if (id == OPTIMIZER_NAME) {
+   if (id == OPTIMIZER_NAME) 
+   {
       optimizerName = value;
+      interpreted   = false;
       return true;
    }
 
-   if (id == MINIMIZED_VARIABLE_NAME) {
+   if (id == MINIMIZED_VARIABLE_NAME) 
+   {
       objectiveName = value;
+      interpreted   = false;
       return true;
    }
 
@@ -521,6 +528,8 @@ bool Minimize::InterpretAction()
       MessageInterface::ShowMessage("Minimize::InterpretAction() exiting\n");
    #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       
+   interpreted   = true;
+
    return true;
 }
 
@@ -608,6 +617,11 @@ bool Minimize::Initialize()
       ("Minimize::Initialize() entered. optimizer=%p, objective=%p\n", 
       optimizer, objective);
    #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
+
+   if (!interpreted)
+      if (!InterpretAction())
+         throw CommandException(
+            "Minimize: error interpreting input data\n");
    
    bool retval = GmatCommand::Initialize();
 

@@ -77,6 +77,7 @@ protected:
    {
       OPTIMIZER_NAME = GmatCommandParamCount,
       CONSTRAINT_VARIABLE_NAME,
+      OPERATOR,
       CONSTRAINT_VALUE,
       TOLERANCE,
       NonlinearConstraintParamCount
@@ -144,6 +145,8 @@ protected:
    GmatBase            *constraintObject;
    /// Object ID for the parameter
    Integer             parmId;
+   /// flag indicating whether or not the generating string has been interpreted
+   bool                interpreted;
    
    bool                InterpretParameter(const std::string text,
                                           std::string &paramType,
