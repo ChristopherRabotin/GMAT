@@ -34,7 +34,8 @@ public:
    void SetInStream(std::istream *is) { 
    	  inStream = is; 
       reachedEndOfFile = false;
-      readFirstBlock = false;  }
+      readFirstBlock = false;  
+      currentLineNumber = 0;}
    void SetOutStream(std::ostream *os) { outStream = os; }
    
 //    std::string GetScriptFilename();
