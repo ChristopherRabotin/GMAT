@@ -74,7 +74,7 @@ void NonlinearConstraintPanel::Create()
    mSolverComboBox = theGuiManager->GetOptimizerComboBox(this, ID_COMBO,
       			wxSize(120,-1));
 
-   wxString comparisons[] = { wxT("<="), wxT(">="), wxT("==") };
+   wxString comparisons[] = { wxT("<="), wxT(">="), wxT("=") };
    mComparisonComboBox =
          new wxComboBox(this, ID_COMBO, wxT(comparisons[0]), wxDefaultPosition,
                         wxSize(45,-1), 3, comparisons,
@@ -148,6 +148,11 @@ void NonlinearConstraintPanel::LoadData()
 
       mLHSTextCtrl->SetValue(wxT(loadedVariableName.c_str()));
 
+      std::string operatorStr = mNonlinearConstraintCommand->
+         GetStringParameter(mNonlinearConstraintCommand->GetParameterID("Operator"));
+      
+      mComparisonComboBox->SetStringSelection(wxT(operatorStr.c_str()));
+
       std::string loadedValue = mNonlinearConstraintCommand->
          GetStringParameter(mNonlinearConstraintCommand->GetParameterID("ConstraintValue"));
 
@@ -195,6 +200,10 @@ void NonlinearConstraintPanel::SaveData()
    mNonlinearConstraintCommand->SetStringParameter
       (mNonlinearConstraintCommand->GetParameterID("ConstraintVariableName"),
        mLHSTextCtrl->GetValue().c_str());
+
+   mNonlinearConstraintCommand->SetStringParameter
+      (mNonlinearConstraintCommand->GetParameterID("Operator"),
+       mComparisonComboBox->GetValue().c_str());
 
    mNonlinearConstraintCommand->SetStringParameter
       (mNonlinearConstraintCommand->GetParameterID("ConstraintValue"),
