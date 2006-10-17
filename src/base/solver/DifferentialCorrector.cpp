@@ -758,6 +758,7 @@ Solver::SolverState DifferentialCorrector::AdvanceState()
          #ifdef DEBUG_STATE_MACHINE
             MessageInterface::ShowMessage("Entered state machine; INITIALIZING\n");
          #endif
+         iterationsTaken = 0;
          WriteToTextFile();
          ReportProgress();
          CompleteInitialization();
