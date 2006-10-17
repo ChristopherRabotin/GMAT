@@ -801,6 +801,11 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
 
    GmatCommand *cmd = NULL;
    std::string desc1 = desc;
+   bool found = false;
+   
+   if (find(commandList.begin(), commandList.end(), type)
+       != commandList.end())
+      found = true;
    
    // Check for CallFunction
    if (type[0] == '[')
@@ -808,6 +813,16 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       cmd = AppendCommand("CallFunction");
       desc1 = type + desc;
       cmd->SetGeneratingString(desc1);
+   }
+   /// @TODO: This is a work around for a call function with
+   /// without any return parameters.  It should be updated in
+   /// the design to handle this situation.
+   else if ((desc1.find("=") == desc1.npos) && (desc != "")
+            && (!found))
+   {
+      cmd = AppendCommand("CallFunction");
+      desc1 = "[] =" + type + desc;
+      cmd->SetGeneratingString(desc1);	
    }
    else
    {

@@ -259,6 +259,15 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
             {
                theBlockType = Gmat::COMMAND_BLOCK;
             }
+            
+            /// @TODO: This is a work around for a call function with
+            /// without any return parameters.  It should be updated in
+            /// the design to handle this situation.
+            if (str.find("=") == str.npos) // Is this checking enough?
+            {
+               theBlockType = Gmat::COMMAND_BLOCK;
+            }
+            
          }
          
          if (noCommentLine >= 0)
