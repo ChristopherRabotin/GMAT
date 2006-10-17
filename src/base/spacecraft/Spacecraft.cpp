@@ -166,6 +166,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    representations.push_back("ModifiedKeplerian");
    representations.push_back("SphericalAZFPA");
    representations.push_back("SphericalRADEC");
+   representations.push_back("Equinoctial");
    
    parameterCount = SpacecraftParamCount;
    
@@ -1104,12 +1105,12 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
        str == "PNY") 
       return ELEMENT4_ID;
 
-   if (str == "Element5" || str == "VY" || str == "AOP" || str == "AZI" 
-       || str == "RAV" || str == "PNX")
+   if (str == "Element5" || str == "VY" || str == "AOP" || str == "AZI" ||
+       str == "RAV" || str == "PNX")
       return ELEMENT5_ID;
 
    if (str == "Element6" || str == "VZ" || str == "TA" || str == "MA" ||
-       str == "EA" || str == "FPA" || str == "DECV" || str == "MLONG") 
+       str == "EA" || str == "HA" || str == "FPA" || str == "DECV" || str == "MLONG") 
       return ELEMENT6_ID;
 
    for (Integer i = SpaceObjectParamCount; i < SpacecraftParamCount; ++i)
@@ -1360,30 +1361,117 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
       return value;
    }
 
+//   if (label == "DryMass")
+//   {
+//      parmsChanged = true;
+//      return dryMass = value;
+//   }
+//   if (label == "Cd")
+//   {
+//      parmsChanged = true;
+//      return coeffDrag = value;
+//   }
+//   if (label == "DragArea")
+//   {
+//      parmsChanged = true;
+//      return dragArea = value;
+//   }
+//   if (label == "SRPArea")
+//   {
+//      parmsChanged = true;
+//      return srpArea = value;
+//   }
+//   if (label == "Cr")
+//   {
+//      parmsChanged = true;
+//      return reflectCoeff = value;
+//   }
+
    if (label == "DryMass")
    {
+      if (value >= 0.0)
+         dryMass = value;
+      else
+      {
+         std::stringstream buffer;
+         buffer << value;
+         throw SpaceObjectException(
+            "The value of " + buffer.str() + " on object " + instanceName +
+            " parameter " + label +
+            " is not an allowed value.\nThe allowed values are "
+            " [Real Number >= 0.0].");
+      }
       parmsChanged = true;
-      return dryMass = value;
+      return dryMass;
    }
+
    if (label == "Cd")
    {
+      if (value >= 0.0)
+         coeffDrag = value;
+      else
+      {
+         std::stringstream buffer;
+         buffer << value;
+         throw SpaceObjectException(
+            "The value of " + buffer.str() + " on object " + instanceName +
+            " parameter " + label +
+            " is not an allowed value.\nThe allowed values are "
+            " [Real Number >= 0.0].");
+      }
       parmsChanged = true;
-      return coeffDrag = value;
+      return coeffDrag;
    }
    if (label == "DragArea")
    {
+      if (value >= 0.0)
+         dragArea = value;
+      else
+      {
+         std::stringstream buffer;
+         buffer << value;
+         throw SpaceObjectException(
+            "The value of " + buffer.str() + " on object " + instanceName +
+            " parameter " + label +
+            " is not an allowed value.\nThe allowed values are "
+            " [Real Number >= 0.0].");
+      }
       parmsChanged = true;
-      return dragArea = value;
+      return dragArea;
    }
    if (label == "SRPArea")
    {
+      if (value >= 0.0)
+         srpArea = value;
+      else
+      {
+         std::stringstream buffer;
+         buffer << value;
+         throw SpaceObjectException(
+            "The value of " + buffer.str() + " on object " + instanceName +
+            " parameter " + label +
+            " is not an allowed value.\nThe allowed values are "
+            " [Real Number >= 0.0].");
+      }
       parmsChanged = true;
-      return srpArea = value;
+      return srpArea;
    }
    if (label == "Cr")
    {
+      if (value >= 0.0)
+         reflectCoeff = value;
+      else
+      {
+         std::stringstream buffer;
+         buffer << value;
+         throw SpaceObjectException(
+            "The value of " + buffer.str() + " on object " + instanceName +
+            " parameter " + label +
+            " is not an allowed value.\nThe allowed values are "
+            " [Real Number >= 0.0].");
+      }
       parmsChanged = true;
-      return reflectCoeff = value;
+      return reflectCoeff;
    }
 
    if (label == "TotalMass") return totalMass;    // Don't change the total mass
@@ -2425,18 +2513,18 @@ void Spacecraft::UpdateElementLabels()
    if (stateType == "Equinoctial")
    {
       stateElementLabel[0] = "SMA";
-        stateElementLabel[1] = "PEY";
-        stateElementLabel[2] = "PEX";
-        stateElementLabel[3] = "PNY";
-        stateElementLabel[4] = "PNX";
-        stateElementLabel[5] = "MLONG";
+      stateElementLabel[1] = "h";
+      stateElementLabel[2] = "k";
+      stateElementLabel[3] = "p";
+      stateElementLabel[4] = "q";
+      stateElementLabel[5] = "MLONG";
           
       stateElementUnits[0] = "km";
-      stateElementUnits[1] = "?";
-      stateElementUnits[2] = "?";
-      stateElementUnits[3] = "?";
-      stateElementUnits[4] = "?";
-      stateElementUnits[5] = "?";         
+      stateElementUnits[1] = "";
+      stateElementUnits[2] = "";
+      stateElementUnits[3] = "";
+      stateElementUnits[4] = "";
+      stateElementUnits[5] = "deg";         
       
       return;
    }
@@ -2742,6 +2830,12 @@ void Spacecraft::BuildElementLabelMap()
 
       elementLabelMap["RAV"]  = "SphericalRADEC";
       elementLabelMap["DECV"] = "SphericalRADEC";
+      
+      elementLabelMap["PEY"]    = "Equinoctial";
+      elementLabelMap["PEX"]    = "Equinoctial";
+      elementLabelMap["PNY"]    = "Equinoctial";
+      elementLabelMap["PNX"]    = "Equinoctial";
+      elementLabelMap["MLONG"]  = "Equinoctial";
    }
 }
 
