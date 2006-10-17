@@ -731,7 +731,8 @@ bool NonlinearConstraint::ConstructConstraint(const char* str)
       ++start;
    // Find last character in this piece
    end = dot = start;
-   while ((str[end] != ' ') && (str[end] != ',') && (str[end] != '{')) 
+   while ((str[end] != ' ') && (str[end] != ',') && (str[end] != '{') &&
+          (str[end] != ')'))
    {
       if ((str[end] == '.') && (dot == start))
          dot = end;
@@ -844,6 +845,15 @@ bool NonlinearConstraint::ConstructConstraint(const char* str)
    }
    else
    {
+      if (nlcParmName.size() == 0)
+      {
+         #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARSE
+            MessageInterface::ShowMessage
+               ("NLC::Error!  Cannot parse \"%s\"\n", nlcParmName.c_str());
+         #endif
+         throw CommandException("NonlinearConstraint:: constraint value is empty\n");
+      }
+         
       #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARSE
       MessageInterface::ShowMessage
          ("   \"%s\" is a variable\n", nlcParmName.c_str());
