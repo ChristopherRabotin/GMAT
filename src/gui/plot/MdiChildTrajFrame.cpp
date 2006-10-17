@@ -806,6 +806,11 @@ void MdiChildTrajFrame::OnViewAnimation(wxCommandEvent& event)
                                           "<Press ESC for interrupt>"),
                                       wxT("Update Interval"),
                                       strInterval, this);
+      
+      // 10/17/2006 - arg:  put in to fix bug 400                                
+      if (strInterval == "")
+         return; 
+         
       long interval;
       strInterval.ToLong(&interval);
       
