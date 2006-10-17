@@ -22,6 +22,7 @@
 #include "BallisticsMassPanel.hpp"
 #include "GuiItemManager.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"  // for ToDouble()
 
 //------------------------------
 // event tables for wxWindows
@@ -50,14 +51,14 @@ BallisticsMassPanel::BallisticsMassPanel(wxWindow *parent,
                                          wxButton *okButton)
    : wxPanel(parent)
 {
-    this->theSpacecraft = spacecraft;
-    this->theApplyButton = applyButton;
-    this->theOkButton = okButton;
+   this->theSpacecraft = spacecraft;
+   this->theApplyButton = applyButton;
+   this->theOkButton = okButton;
     
-    canClose = true;
-    dataChanged = false;
+   canClose = true;
+   dataChanged = false;
     
-    Create();
+   Create();
 }
 
 BallisticsMassPanel::~BallisticsMassPanel()
@@ -201,50 +202,135 @@ void BallisticsMassPanel::LoadData()
 //------------------------------------------------------------------------------
 void BallisticsMassPanel::SaveData()
 {
-    canClose = true;
-    dataChanged = false;
+   try
+   {
+      canClose    = true;
+      dataChanged = false;
     
-    int dryMassID = theSpacecraft->GetParameterID("DryMass");
-    int coeffDragID = theSpacecraft->GetParameterID("Cd");
-    int dragAreaID = theSpacecraft->GetParameterID("DragArea");
-    int reflectCoeffID = theSpacecraft->GetParameterID("Cr");
-    int srpAreaID = theSpacecraft->GetParameterID("SRPArea");
+      int dryMassID      = theSpacecraft->GetParameterID("DryMass");
+      int coeffDragID    = theSpacecraft->GetParameterID("Cd");
+      int reflectCoeffID = theSpacecraft->GetParameterID("Cr");
+      int dragAreaID     = theSpacecraft->GetParameterID("DragArea");
+      int srpAreaID      = theSpacecraft->GetParameterID("SRPArea");
 
-    wxString massStr = dryMassTextCtrl->GetValue();
-    wxString dragCoeffStr = dragCoeffTextCtrl->GetValue();
-    wxString dragAreaStr = dragAreaTextCtrl->GetValue();
-    wxString srpAreaStr = srpAreaTextCtrl->GetValue();
-    wxString reflectCoeffStr = reflectCoeffTextCtrl->GetValue();
+      std::string inputString;
+//      wxString dryMassStr      = dryMassTextCtrl->GetValue();
+//      wxString dragCoeffStr    = dragCoeffTextCtrl->GetValue();
+//      wxString reflectCoeffStr = reflectCoeffTextCtrl->GetValue();
+//      wxString dragAreaStr     = dragAreaTextCtrl->GetValue();
+//      wxString srpAreaStr      = srpAreaTextCtrl->GetValue();
     
-    if (atof(massStr) < 0)
-    {
-       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "Mass can not be negative");
-       canClose=false;
-       return;
-    }
+      Real rvalue;
+      std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
+                         theSpacecraft->GetName() + "\" is not an allowed value. \n"
+                        "The allowed values are: [%s].";                        
 
-    if (atof(srpAreaStr) < 0)
-    {
-       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "SRP Area can not be negative");
-       canClose=false;
-       return;
-    }
-    
-    if (atof(dragAreaStr) < 0)
-    {
-       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "Drag Area can not be negative");
-       canClose=false;
-       return;
-    }
+      // check to see if dry mass is a real and 
+      // greater than or equal to 0.0
+      inputString = dryMassTextCtrl->GetValue();      
+      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && 
+          (rvalue >= 0.0))
+         theSpacecraft->SetRealParameter(dryMassID, rvalue);
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(),"Dry Mass","Real Number >= 0.0");
+         canClose = false;
+      }
 
-    theSpacecraft->SetRealParameter(dryMassID, atof(massStr));
-    theSpacecraft->SetRealParameter(coeffDragID, atof(dragCoeffStr));
-    theSpacecraft->SetRealParameter(dragAreaID, atof(dragAreaStr));
-    theSpacecraft->SetRealParameter(srpAreaID, atof(srpAreaStr));
-    theSpacecraft->SetRealParameter(reflectCoeffID, atof(reflectCoeffStr));
+      // check to see if coeff of drag is a real and 
+      // greater than or equal to 0.0
+      inputString = dragCoeffTextCtrl->GetValue();      
+      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && 
+          (rvalue >= 0.0))
+         theSpacecraft->SetRealParameter(coeffDragID, rvalue);
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(),"Coefficient of Drag","Real Number >= 0.0");
+         canClose = false;
+      }
+
+      // check to see if coeff of reflectivity is a real and 
+      // greater than or equal to 0.0
+      inputString = reflectCoeffTextCtrl->GetValue();      
+      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && 
+          (rvalue >= 0.0))
+         theSpacecraft->SetRealParameter(reflectCoeffID, rvalue);
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(),"Coefficient of Reflectivity",
+            "Real Number >= 0.0");
+         canClose = false;
+      }
+
+      // check to see if drag area is a real and 
+      // greater than or equal to 0.0
+      inputString = dragAreaTextCtrl->GetValue();      
+      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && 
+          (rvalue >= 0.0))
+         theSpacecraft->SetRealParameter(dragAreaID, rvalue);
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(),"Drag Area",
+            "Real Number >= 0.0");
+         canClose = false;
+      }
+
+      // check to see if SRP area is a real and 
+      // greater than or equal to 0.0
+      inputString = srpAreaTextCtrl->GetValue();      
+      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && 
+          (rvalue >= 0.0))
+         theSpacecraft->SetRealParameter(srpAreaID, rvalue);
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(),"SRP Area",
+            "Real Number >= 0.0");
+         canClose = false;
+      }
+
+   }
+//      if (atof(massStr) < 0)
+//      {
+//         MessageInterface::PopupMessage
+//            (Gmat::WARNING_, "Mass can not be negative");
+//         canClose = false;
+//         return;
+//      }
+//
+//      if (atof(srpAreaStr) < 0)
+//      {
+//         MessageInterface::PopupMessage
+//            (Gmat::WARNING_, "SRP Area can not be negative");
+//         canClose = false;
+//         return;
+//      }
+//    
+//      if (atof(dragAreaStr) < 0)
+//      {
+//         MessageInterface::PopupMessage
+//           (Gmat::WARNING_, "Drag Area can not be negative");
+//         canClose = false;
+//         return;
+//      }
+//
+//      theSpacecraft->SetRealParameter(dryMassID, atof(massStr));
+//      theSpacecraft->SetRealParameter(coeffDragID, atof(dragCoeffStr));
+//      theSpacecraft->SetRealParameter(dragAreaID, atof(dragAreaStr));
+//      theSpacecraft->SetRealParameter(srpAreaID, atof(srpAreaStr));
+//      theSpacecraft->SetRealParameter(reflectCoeffID, atof(reflectCoeffStr));
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("BallisticsMassPanel::SaveData() error occurred!\n%s\n", 
+            e.GetMessage().c_str());
+         canClose = false;
+         return;
+   }
 }
 
 
