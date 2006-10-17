@@ -1198,6 +1198,11 @@ bool Propagate::InterpretAction()
 {
    Integer loc = generatingString.find("Propagate", 0) + 9;
    const char *str = generatingString.c_str();
+   
+   if (generatingString.find("..") != generatingString.npos)
+      throw CommandException("Propagate::InterpretAction: Can not parse command\n "
+                                + generatingString);
+   
    while (str[loc] == ' ')
       ++loc;
 
