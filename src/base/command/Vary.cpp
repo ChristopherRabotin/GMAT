@@ -23,12 +23,14 @@
 #include "Parameter.hpp"
 #include "StringUtil.hpp"  // for Replace()
 #include "MessageInterface.hpp"
+#include "TextParser.hpp"
 #include <sstream>         // for std::stringstream
 
 
 //#define DEBUG_VARIABLE_RANGES
 //#define DEBUG_VARY_EXECUTE 1
 //#define DEBUG_VARY_PARAMS
+//#define DEBUG_VARY_PARSING
 
 //------------------------------------------------------------------------------
 //  static data
@@ -672,131 +674,142 @@ bool Vary::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  *
  * The Vary command has the following syntax:
  *
- *     Vary myDC;
+ *     Vary myDC(Burn1.V = 0.5, {Pert = 0.0001, MaxStep = 0.05, 
+ *               Lower = 0.0, Upper = 3.14159);
  *
- * where myDC is a Solver used to Vary a set of variables to achieve the
- * corresponding goals.  This method breaks the script line into the 
- * corresponding pieces, and stores the name of the Solver so it can be set to
- * point to the correct object during initialization.
+ * where 
+ *
+ * 1. myDC is a Solver used to Vary a set of variables to achieve the
+ * corresponding goals, 
+ * 2. Burn1.V is the parameter that is varied, and
+ * 3. The settings in the braces specify features about how the variable can
+ * be changed.
+ * 
+ * This method breaks the script line into the corresponding pieces, and stores 
+ * the name of the Solver so it can be set to point to the correct object 
+ * during initialization.
  */
 //------------------------------------------------------------------------------
 bool Vary::InterpretAction()
 {
-    /// @todo: Clean up this hack for the Vary::InterpretAction method
-    // Sample string:  "Vary myDC(Burn1.V = 0.5, {Pert = 0.0001, MaxStep = 0.05, 
-    //                  Lower = 0.0, Upper = 3.14159});"
+   TextParser tp;
+   StringArray cmds;
+   cmds.push_back("Vary");
+   tp.Initialize(cmds);
+   
+   tp.EvaluateBlock(generatingString);
+   StringArray blocks = tp.DecomposeBlock(generatingString);
+   StringArray chunks = tp.ChunkLine();
+   
+   #ifdef DEBUG_VARY_PARSING
+      MessageInterface::ShowMessage("Vary::InterpretAction() block list:\n");
+      for (StringArray::iterator i = blocks.begin(); i != blocks.end(); ++i)
+         MessageInterface::ShowMessage("   %s\n", i->c_str());
+      MessageInterface::ShowMessage("Vary::InterpretAction() chunk list:\n");
+      for (StringArray::iterator i = chunks.begin(); i != chunks.end(); ++i)
+         MessageInterface::ShowMessage("   %s\n", i->c_str());
+   #endif      
 
-    // Set starting location to the space following the command string
-    Integer loc = generatingString.find("Vary", 0) + 4, end, strend;
-    const char *str = generatingString.c_str();
+   // First comes the keyword, "Vary"
+   if (chunks[0] != typeName)
+      throw CommandException(
+         "Line '" + generatingString + 
+         "'\n should be a Vary command, but the '" + typeName + 
+         "' keyword is not the opening token in the line.");  
 
-    // Skip white space
-    while (str[loc] == ' ')
-        ++loc;
+   StringArray currentChunks = tp.Decompose(chunks[1], "()");
+   #ifdef DEBUG_VARY_PARSING
+      MessageInterface::ShowMessage("   Vary::InterpretAction() 1st level:\n");
+      for (StringArray::iterator i = currentChunks.begin(); 
+           i != currentChunks.end(); ++i)
+         MessageInterface::ShowMessage("      %s\n", i->c_str());
+   #endif
+   // The leading string is the Solver name
+   SetStringParameter(SOLVER_NAME, currentChunks[0]);
+   
+   // Next break out the variables from the settings
+   currentChunks = tp.SeparateBrackets(currentChunks[1], "()", ", ");
+   #ifdef DEBUG_VARY_PARSING
+      MessageInterface::ShowMessage(
+         "      Vary::InterpretAction() 2nd level:\n");
+      for (StringArray::iterator i = currentChunks.begin(); 
+           i != currentChunks.end(); ++i)
+         MessageInterface::ShowMessage("         %s\n", i->c_str());
+   #endif
+   
+   // First chunk is the variable and initial value
+   StringArray nameval = tp.SeparateBy(currentChunks[0], "= ");
+   variableName.push_back(nameval[0]);
+   variableId.push_back(-1);
+   // This part needs to be changed to handle all of the types
+   Real value = atof(nameval[1].c_str());
+   SetRealParameter(INITIAL_VALUE, value);
+   
+   #ifdef DEBUG_VARY_PARSING
+      MessageInterface::ShowMessage(
+         "         Vary::InterpretAction() Variable:\n");
+      for (StringArray::iterator i = nameval.begin(); 
+           i != nameval.end(); ++i)
+         MessageInterface::ShowMessage("            %s\n", i->c_str());
+   #endif
+   
+   // then the bracketed list of settings
+   currentChunks = tp.SeparateBrackets(currentChunks[1], "{}", ", ");
 
-    // Stop at the opening paren
-    end = generatingString.find("(", loc);
+   #ifdef DEBUG_VARY_PARSING
+      MessageInterface::ShowMessage(
+         "         Vary::InterpretAction() Settings:\n");
+      for (StringArray::iterator i = currentChunks.begin(); 
+           i != currentChunks.end(); ++i)
+         MessageInterface::ShowMessage("            %s\n", i->c_str());
+   #endif
 
-    std::string component = generatingString.substr(loc, end-loc);
-    if (component == "")
-        throw CommandException("Vary string does not identify the solver");
-    //SetStringParameter(solverNameID, component);
-    SetStringParameter(SOLVER_NAME, component);
-    
-    // Find the variable
-    loc = end + 1;
-    // Skip white space
-    while (str[loc] == ' ')
-        ++loc;
-    // Stop at the opening paren
-    end = generatingString.find("=", loc);
-    strend = end-1;
-    // Drop trailing white space
-    while (str[strend] == ' ')
-        --strend;
-    
-    component = generatingString.substr(loc, strend-loc+1);
-    variableName.push_back(component);
-    variableId.push_back(-1);
-    
-    // Find the variable
-    loc = end + 1;
-    
-    Real value = atof(&str[loc]);
-    //SetRealParameter(initialValueID, value);
-    SetRealParameter(INITIAL_VALUE, value);
-
-    // Find perts
-    loc = generatingString.find("Pert", strend);
-    end = generatingString.find("=", loc);
-    value = atof(&str[end+1]);
-    //SetRealParameter(perturbationID, value);
-    SetRealParameter(PERTURBATION, value);
-    
-    // Min, max and step get default values unless they are specified
-    value = 9.999e300;
-    //SetRealParameter(variableMinimumID, -value);
-    //SetRealParameter(variableMaximumID, value);
-    //SetRealParameter(variableMaximumStepID, value);
-    SetRealParameter(VARIABLE_MINIMUM, -value);
-    SetRealParameter(VARIABLE_MAXIMUM, value);
-    SetRealParameter(VARIABLE_MAXIMUM_STEP, value);
-    
-    #ifdef DEBUG_VARIABLE_RANGES
-       MessageInterface::ShowMessage(
-          "Default Min, Max, Step = [%le  %le  %le]\n",
-          variableMinimum[0], variableMaximum[0], variableMaximumStep[0]);
-    #endif
-    
-    loc = generatingString.find("MaxStep", strend);
-    if ((UnsignedInt)loc != std::string::npos)
-    {
-       end = generatingString.find("=", loc);
-       value = atof(&str[end+1]);
-       //SetRealParameter(variableMaximumStepID, value);
-       SetRealParameter(VARIABLE_MAXIMUM_STEP, value);
-    }
-
-    loc = generatingString.find("Lower", strend);
-    if ((UnsignedInt)loc != std::string::npos)
-    {
-       end = generatingString.find("=", loc);
-       value = atof(&str[end+1]);
-       //SetRealParameter(variableMinimumID, value);
-       SetRealParameter(VARIABLE_MINIMUM, value);
-    }
-
-    loc = generatingString.find("Upper", strend);
-    if ((UnsignedInt)loc != std::string::npos)
-    {
-       end = generatingString.find("=", loc);
-       value = atof(&str[end+1]);
-       //SetRealParameter(variableMaximumID, value);
-       SetRealParameter(VARIABLE_MAXIMUM, value);
-    }
-    
-    loc = generatingString.find("AdditiveScaleFactor", strend);
-    if ((UnsignedInt)loc != std::string::npos)
-    {
-      end = generatingString.find("=", loc);
-      value = atof(&str[end+1]);
-      SetRealParameter(ADDITIVE_SCALE_FACTOR, value);
-    }
-    
-    loc = generatingString.find("MultiplicativeScaleFactor", strend);
-    if ((UnsignedInt)loc != std::string::npos)
-    {
-      end = generatingString.find("=", loc);
-      value = atof(&str[end+1]);
-      SetRealParameter(MULTIPLICATIVE_SCALE_FACTOR, value);
-    }
-
-    #ifdef DEBUG_VARIABLE_RANGES
-       MessageInterface::ShowMessage("Min, Max, Step = [%le  %le  %le]\n",
-          variableMinimum[0], variableMaximum[0], variableMaximumStep[0]);
-    #endif
-    
-    return true;
+   // For each case here, the atof needs to be reset to handle the allowed types
+   for (StringArray::iterator i = currentChunks.begin(); 
+        i != currentChunks.end(); ++i)
+   {
+      nameval = tp.SeparateBy(*i, "= ");
+      if (nameval[0] == "Pert")
+      {
+         value = atof(nameval[1].c_str());
+         SetRealParameter(PERTURBATION, value);
+      }
+      else if (nameval[0] == "Lower")
+      {
+         value = atof(nameval[1].c_str());
+         SetRealParameter(VARIABLE_MINIMUM, value);
+      }
+      else if (nameval[0] == "Upper")
+      {
+         value = atof(nameval[1].c_str());
+         SetRealParameter(VARIABLE_MAXIMUM, value);
+      }
+      else if (nameval[0] == "MaxStep")
+      {
+         value = atof(nameval[1].c_str());
+         SetRealParameter(VARIABLE_MAXIMUM_STEP, value);
+      }
+      else if (nameval[0] == "AdditiveScaleFactor")
+      {
+         value = atof(nameval[1].c_str());
+         SetRealParameter(ADDITIVE_SCALE_FACTOR, value);
+      }
+      else if (nameval[0] == "MultiplicativeScaleFactor")
+      {
+         value = atof(nameval[1].c_str());
+         SetRealParameter(MULTIPLICATIVE_SCALE_FACTOR, value);
+      }
+      else
+      {
+         std::string msg = "On the line \n'" + generatingString +
+            "'\nthe setting '" + (*i) + 
+            "' does not match the available options for the Vary command.";
+         MessageInterface::ShowMessage(msg);
+         throw CommandException(msg); 
+      }
+   }
+   
+   return true;
 }
 
 
@@ -873,10 +886,14 @@ bool Vary::Execute(void)
             // scale by using Eq. 13.5 of Architecture document
             varData[0] = (varData[0] + additiveScaleFactor[i]) / 
                          multiplicativeScaleFactor[i];
-            varData[1] = perturbation[i];              // pert
-            varData[2] = variableMinimum[i];           // minimum
-            varData[3] = variableMaximum[i];           // maximum
-            varData[4] = variableMaximumStep[i];       // largest allowed step
+            varData[1] = (perturbation[i]) / 
+                         multiplicativeScaleFactor[i];   // pert
+            varData[2] = (variableMinimum[i] + additiveScaleFactor[i]) / 
+                         multiplicativeScaleFactor[i];   // minimum
+            varData[3] = (variableMaximum[i] + additiveScaleFactor[i]) / 
+                         multiplicativeScaleFactor[i];   // maximum
+            varData[4] = (variableMaximumStep[i]) / 
+                         multiplicativeScaleFactor[i];   // largest allowed step
             
             if (variableId.empty())
                variableId.push_back(-1);
