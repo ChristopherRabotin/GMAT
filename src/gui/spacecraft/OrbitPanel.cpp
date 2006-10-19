@@ -33,6 +33,7 @@
 //------------------------------------------------------------------------------
 #include "OrbitPanel.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"  // for ToDouble()
 #include <sstream>
 
 //#define DEBUG_ORBIT_PANEL 1
@@ -228,6 +229,11 @@ void OrbitPanel::LoadData()
       // load the anomaly type - if state type is Keplerian or Modified Keplerian
       std::string anType = theSpacecraft->GetStringParameter("AnomalyType");
 
+      #if DEBUG_ORBIT_PANEL
+         MessageInterface::ShowMessage("\nOrbitPanel::LoadData()...\n"
+         "Anomaly type = %s \n", anType.c_str());   
+      #endif
+
       // anomaly types - hard coded for now
       wxString anomalyList[] =
       {
@@ -241,6 +247,7 @@ void OrbitPanel::LoadData()
       for (unsigned int i = 0; i<4; i++)
          anomalyComboBox->Append(wxString(anomalyList[i].c_str()));
       
+
       anomalyComboBox->SetValue(wxT(anType.c_str()));
 
       mFromAnomalyTypeStr = anType;
@@ -304,176 +311,538 @@ void OrbitPanel::SaveData()
    
    try
    {
-   
-   Rvector6 outState, cartState, displayState;
-   canClose = true;
-   dataChanged = false;
-   
-   // save epoch format
-//   wxString epochFormatStr = epochFormatComboBox->GetStringSelection();
-//   theSpacecraft->SetDisplayDateFormat(epochFormatStr.c_str());
-   wxString epochFormatStr = epochFormatComboBox->GetValue();
-   theSpacecraft->SetDateFormat(epochFormatStr.c_str());
-   
-   // save epoch
-   wxString epochStr = epochValue->GetValue();
-   #if DEBUG_ORBIT_PANEL_SAVE
-      MessageInterface::ShowMessage( "epoch   = %s\n",epochStr.c_str() );
-   #endif
-   
-   std::string epochDateFormat =
-      (epochFormatStr.Contains("ModJulian") ? "ModJulian" : "Gregorian" );
-   
-   if (TimeConverterUtil::ValidateTimeFormat(epochDateFormat, epochStr.c_str()))
-//      theSpacecraft->SetDisplayEpoch(epochStr.c_str());
-      theSpacecraft->SetEpoch(epochStr.c_str());
-   else
-   {
-      std::string message = "Epoch '";
-      message += epochStr.c_str();
-      message += "' is not formatted correctly as a ";
-      message += epochFormatStr.c_str();
-      message += " epoch, and not saved to the Spacecraft object.";
-      
-      MessageInterface::PopupMessage(Gmat::WARNING_, message);   
-      epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch").c_str());
-   }
-   
-   // save coordinate system
-   wxString coordSystemStr = mCoordSysComboBox->GetValue();
-   theSpacecraft->SetRefObjectName(Gmat::COORDINATE_SYSTEM, coordSystemStr.c_str());
+      Rvector6 outState, cartState, displayState;
+      canClose = true;
+      dataChanged = false;
 
-   // if coordinate system is NULL, set it to avoid crash when show script(loj: 11/28/05)
-   if (theSpacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, "") == NULL)
-      theSpacecraft->SetRefObject(mOutCoord, Gmat::COORDINATE_SYSTEM);
-   if (theSpacecraft->GetInternalCoordSystem() == NULL)
-      theSpacecraft->SetInternalCoordSystem(mInternalCoord);
-   
-   // save state type
-   wxString stateTypeStr = stateTypeComboBox->GetValue();
-//   theSpacecraft->SetDisplayCoordType(std::string (stateTypeStr.c_str()));
-   theSpacecraft->SetStringParameter("StateType", stateTypeStr.c_str());
+      Real rvalue, rvalue2;
+      std::string element1, element2, element3, element4, element5, element6;
+      std::string msg = "The value of \"%s\" for field \"%s\" on object \""
+                         + theSpacecraft->GetName() + 
+                        "\" is not an allowed value. \n"
+                        "The allowed values are: [%s].";                        
+
+      wxString epochFormatStr = epochFormatComboBox->GetStringSelection();
+      wxString epochStr       = epochValue->GetValue();
+      wxString coordSystemStr = mCoordSysComboBox->GetStringSelection();
+      wxString stateTypeStr   = stateTypeComboBox->GetStringSelection();
+
+      element1 = textCtrl1->GetValue();
+      element2 = textCtrl2->GetValue();
+      element3 = textCtrl3->GetValue();
+      element4 = textCtrl4->GetValue();
+      element5 = textCtrl5->GetValue();
+      element6 = textCtrl6->GetValue();
+      std::string anomalyStr = description6->GetLabel().c_str();
+
+      GmatStringUtil::ToDouble(element1,&rvalue);
+      GmatStringUtil::ToDouble(element2,&rvalue2);
+      
+      if ((rvalue >= 0.0) && (rvalue2 <= 1.0) && 
+         ((strcmp(anomalyStr.c_str(), "HA") == 0) || 
+          (strcmp(anomalyStr.c_str(), "EA") == 0)))
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, "Anomaly type and other elements are incompatible.");
+         canClose = false;
+      }
+      else
+      {
+         // save state type name if changed
+//      wxString stateTypeStr   = stateTypeComboBox->GetStringSelection();
+         if (mIsStateTypeChanged)
+         {
+            mIsStateTypeChanged = false;
+//         wxString stateTypeStr = stateTypeComboBox->GetStringSelection();
+      
+         #if DEBUG_ORBIT_PANEL
+            MessageInterface::ShowMessage
+               ("OrbitPanel::SaveData() Saving stateType=%s\n", 
+                stateTypeStr.c_str());
+         #endif
+      
+            theSpacecraft->SetStringParameter("StateType", stateTypeStr.c_str());
    /// @todo: need to correct in spacecraft code because this should
    /// only save display state type
-
-   // save orbital elements    
-   displayState[0] = atof(textCtrl1->GetValue());
-   displayState[1] = atof(textCtrl2->GetValue());
-   displayState[2] = atof(textCtrl3->GetValue());
-   displayState[3] = atof(textCtrl4->GetValue());
-   displayState[4] = atof(textCtrl5->GetValue());
-   displayState[5] = atof(textCtrl6->GetValue()); 
+         }
    
-   #if DEBUG_ORBIT_PANEL_SAVE
-      MessageInterface::ShowMessage("OrbitPanel::SaveData() display state =%s\n ", 
-         displayState.ToString().c_str());
-   #endif
+      // save state type
+//      wxString stateTypeStr = stateTypeComboBox->GetValue();
+//      theSpacecraft->SetStringParameter("StateType", stateTypeStr.c_str());
+//   /// @todo: need to correct in spacecraft code because this should
+//   /// only save display state type
 
-   if (strcmp(stateTypeStr.c_str(), "Keplerian") == 0)
-   {
-      if(displayState[1] < 0.0)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_, "ECC must be greater than or equal to zero.");
-         textCtrl2->SetValue(ToString(mOutState[1]));
-         canClose = false;
-         return;
-      }
-      else if((displayState[0] > 0.0) && (displayState[1] > 1.0))
-      {
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_, "SMA cannot be positive and ECC greater than 1.");
-         textCtrl1->SetValue(ToString(mOutState[0]));
-         textCtrl2->SetValue(ToString(mOutState[1]));
-         canClose = false;
-         return;
-      }
-      else if((displayState[0] < 0.0) && (displayState[1] < 1.0))
-      {
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_, "SMA cannot be negative and ECC less than 1.");
-         textCtrl1->SetValue(ToString(mOutState[0]));
-         textCtrl2->SetValue(ToString(mOutState[1]));
-         canClose = false;
-         return;
-      }
-   }
-
-   if (strcmp(stateTypeStr.c_str(), "ModifiedKeplerian") == 0)
-   {
-      if(displayState[0] <= 0.0)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_, "RadPer must be greater than zero.");
-         canClose = false;
-         return;
-      }
-
-      if(displayState[1] == 0.0)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_, "RadApo can not be equal to zero.");
-         canClose = false;
-         return;
-      }
-   }
-
-   if ( (strcmp(stateTypeStr.c_str(), "SphericalAZFPA") == 0) || 
-        (strcmp(stateTypeStr.c_str(), "SphericalRADEC") == 0) )
-   {
-      if (displayState[0] <= 0.0)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_, "RMAG must be greater than zero.");
-         canClose = false;
-         return;
-      }
-   }
-
-   if ( strcmp(stateTypeStr.c_str(), "Equinoctial") == 0) {
-          // any restrictions on equinoctial coordinates
-   }
+      // save coordinate system name if changed
+//      wxString coordSystemStr = mCoordSysComboBox->GetStringSelection();
+         if (mIsCoordSysChanged)
+         {
+            mIsCoordSysChanged = false;
+            theSpacecraft->SetStringParameter("CoordinateSystem", 
+               coordSystemStr.c_str());
+//            theSpacecraft->SetRefObjectName(Gmat::COORDINATE_SYSTEM, 
+//               coordSystemStr.c_str());
+         }
+         // if coordinate system is NULL, 
+         // set it to avoid crash when show script(loj: 11/28/05)
+         if (theSpacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, "") == NULL)
+             theSpacecraft->SetRefObject(mOutCoord, Gmat::COORDINATE_SYSTEM);
+         if (theSpacecraft->GetInternalCoordSystem() == NULL)
+             theSpacecraft->SetInternalCoordSystem(mInternalCoord);
    
-   // Save the anomaly type
-   if ( (strcmp(stateTypeStr.c_str(), "Keplerian") == 0) || 
-        (strcmp(stateTypeStr.c_str(), "ModifiedKeplerian") == 0) )
-   {
-      std::string anomalyStr = description6->GetLabel().c_str();
-   anomaly.Set(displayState[0], displayState[1], displayState[5], anomalyStr);   
-//      theSpacecraft->SetStringParameter("AnomalyType", anomalyStr);
-   #if DEBUG_ORBIT_PANEL_SAVE
-      MessageInterface::ShowMessage( "SMA = %lf\n",anomaly.GetSMA() );
-      MessageInterface::ShowMessage( "ECC = %lf\n",anomaly.GetECC() );
-      MessageInterface::ShowMessage( "value = %lf\n",anomaly.GetValue() );
-      MessageInterface::ShowMessage( "anomaly type = %s\n",anomaly.GetType().c_str() );
-   #endif
-   }
-
-   // save coordinate system name if changed
-   if (mIsCoordSysChanged)
-   {
-      mIsCoordSysChanged = false;
-      theSpacecraft->SetStringParameter
-         ("CoordinateSystem",
-          mCoordSysComboBox->GetStringSelection().c_str());
-   }
+//      // save coordinate system name if changed
+//      if (mIsCoordSysChanged)
+//      {
+//         mIsCoordSysChanged = false;
+//         theSpacecraft->SetStringParameter
+//            ("CoordinateSystem", mCoordSysComboBox->GetStringSelection().c_str());
+//      }
+//   
+//      // save coordinate system
+//      wxString coordSystemStr = mCoordSysComboBox->GetValue();
+//      theSpacecraft->SetRefObjectName(Gmat::COORDINATE_SYSTEM, coordSystemStr.c_str());
+//
+//      // if coordinate system is NULL, set it to avoid crash when show script(loj: 11/28/05)
+//      if (theSpacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, "") == NULL)
+//         theSpacecraft->SetRefObject(mOutCoord, Gmat::COORDINATE_SYSTEM);
+//      if (theSpacecraft->GetInternalCoordSystem() == NULL)
+//         theSpacecraft->SetInternalCoordSystem(mInternalCoord);
    
-   // save state type name if changed
-   if (mIsStateTypeChanged)
-   {
-      mIsStateTypeChanged = false;
-      wxString stateTypeStr = stateTypeComboBox->GetStringSelection();
-      
-      #if DEBUG_ORBIT_PANEL
-      MessageInterface::ShowMessage
-         ("OrbitPanel::SaveData() Saving stateType=%s\n", stateTypeStr.c_str());
+         // save epoch format
+//      wxString epochFormatStr = epochFormatComboBox->GetValue();
+         theSpacecraft->SetDateFormat(epochFormatStr.c_str());
+   
+         // save epoch
+//      wxString epochStr = epochValue->GetValue();
+      #if DEBUG_ORBIT_PANEL_SAVE
+         MessageInterface::ShowMessage( "epoch   = %s\n",epochStr.c_str() );
       #endif
-      
-      theSpacecraft->SetStringParameter("StateType", stateTypeStr.c_str());
-   }
    
-   BuildState(displayState);
-   theSpacecraft->SetState(mCartState);
+         std::string epochDateFormat =
+            (epochFormatStr.Contains("ModJulian") ? "ModJulian" : "Gregorian" );
+   
+         if (TimeConverterUtil::ValidateTimeFormat(epochDateFormat, epochStr.c_str()))
+            theSpacecraft->SetEpoch(epochStr.c_str());
+         else
+         {
+            std::string message = "Epoch '";
+            message += epochStr.c_str();
+            message += "' is not formatted correctly as a ";
+            message += epochFormatStr.c_str();
+            message += " epoch, and not saved to the Spacecraft object.";
+      
+            MessageInterface::PopupMessage(Gmat::WARNING_, message);   
+            epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch").c_str());
+         }
+
+      // save orbital elements
+//      element1 = textCtrl1->GetValue();
+//      element2 = textCtrl2->GetValue();
+//      element3 = textCtrl3->GetValue();
+//      element4 = textCtrl4->GetValue();
+//      element5 = textCtrl5->GetValue();
+//      element6 = textCtrl6->GetValue();
+      
+	      // Cartesian
+         if (strcmp(stateTypeStr.c_str(), "Cartesian") == 0)
+         {
+            // check to see if X is a real
+            if (GmatStringUtil::ToDouble(element1,&rvalue))      
+               displayState[0] = rvalue;
+            else
+            {
+               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+                  element1.c_str(),"X","Real Number");
+               canClose = false;
+            }
+            // check to see if Y is a real
+            if (GmatStringUtil::ToDouble(element2,&rvalue))      
+               displayState[1] = rvalue;
+            else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element2.c_str(),"Y","Real Number");
+	            canClose = false;
+	         }
+	         // check to see if Z is a real
+	         if (GmatStringUtil::ToDouble(element3,&rvalue))      
+	            displayState[2] = rvalue;
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element3.c_str(),"Z","Real Number");
+	            canClose = false;
+	         }
+	         // check to see if VX is a real
+	         if (GmatStringUtil::ToDouble(element4,&rvalue))      
+	            displayState[3] = rvalue;
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element4.c_str(),"VX","Real Number");
+	            canClose = false;
+	         }
+	         // check to see if VY is a real
+	         if (GmatStringUtil::ToDouble(element5,&rvalue))      
+	            displayState[4] = rvalue;
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element5.c_str(),"VY","Real Number");
+	            canClose = false;
+	         }
+	         // check to see if VZ is a real
+	         if (GmatStringUtil::ToDouble(element6,&rvalue))      
+	            displayState[5] = rvalue;
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element6.c_str(),"VZ","Real Number");
+	            canClose = false;
+	         }
+	      }
+		  // Keplerian & Modified Keplerian 
+	      else if ((strcmp(stateTypeStr.c_str(), "Keplerian") == 0) ||
+	               (strcmp(stateTypeStr.c_str(), "ModifiedKeplerian") == 0))
+	      {
+	         if (strcmp(stateTypeStr.c_str(), "Keplerian") == 0)
+	         {
+	            // check to see if SMA is a real
+	            if ((GmatStringUtil::ToDouble(element1,&rvalue)) && (rvalue != 0.0))      
+	               displayState[0] = rvalue;
+	            else
+	            {
+	               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	                  element1.c_str(),"SMA","Real Number != 0.0");
+	               canClose = false;
+	            }
+	            // check to see if ECC is a real
+	            if ((GmatStringUtil::ToDouble(element2,&rvalue)) && 
+	                (rvalue >= 0.0) && (rvalue < 1.0))
+	               displayState[1] = rvalue;
+	            else
+	            {
+	               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	                  element2.c_str(),"ECC","0.0 < = Real Number < 1.0");
+	               canClose = false;
+	            }
+	            
+	            // check coupling restictions on SMA and ECC for circular 
+	            // and elliptical orbits
+	            if((displayState[0] < 0.0) && (displayState[1] <= 1.0))
+	            {
+	               MessageInterface::PopupMessage(Gmat::ERROR_, 
+	                  "(0.0 <= ECC <= 1.0) SMA should only be a positive Real Number");
+	               canClose = false;
+	            }
+	            // for hyperbolic orbit
+	            else if((displayState[0] > 0.0) && (displayState[1] > 1.0))
+	            {
+	               MessageInterface::PopupMessage(Gmat::ERROR_, 
+	                  "(ECC > 1) SMA should only be a negative Real Number");
+	               canClose = false;
+	            }
+	         } // Kelperian elements
+	         else if (strcmp(stateTypeStr.c_str(), "ModifiedKeplerian") == 0)
+	         {
+	            // check to see if RadPer is a real
+	            if ((GmatStringUtil::ToDouble(element1,&rvalue)) && (rvalue != 0.0))      
+	               displayState[0] = rvalue;
+	            else
+	            {
+	               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	                  element1.c_str(),"RadPer","Real Number != 0.0");
+	               canClose = false;
+	            }
+	            // check to see if RadApo is a real
+	            if ((GmatStringUtil::ToDouble(element2,&rvalue)) && (rvalue >= 0.0))      
+	               displayState[1] = rvalue;
+	            else
+	            {
+	               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	                  element2.c_str(),"RadApo","Real Number >= 0.0");
+	               canClose = false;
+	            }
+	         } // Modified Keplerian elements
+	         
+	         // check to see if INC is a real
+	         if (GmatStringUtil::ToDouble(element3,&rvalue))      
+	            displayState[2] = rvalue;
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element3.c_str(),"INC","Real Number");
+	            canClose = false;
+	         }
+	         // check to see if RAAN is a real
+	         if (GmatStringUtil::ToDouble(element4,&rvalue))      
+	            displayState[3] = rvalue;
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element4.c_str(),"RAAN","Real Number");
+	            canClose = false;
+	         }
+	         // check to see if AOP is a real     
+	         if (GmatStringUtil::ToDouble(element5,&rvalue))      
+	            displayState[4] = rvalue;
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element5.c_str(),"AOP","Real Number");
+	            canClose = false;
+	         }
+	         // check to see if anomaly type is a real
+	//         std::string anomalyStr = description6->GetLabel().c_str();
+	         if (GmatStringUtil::ToDouble(element6,&rvalue))
+	         {
+	            displayState[5] = rvalue;
+	            anomaly.Set(displayState[0], displayState[1], displayState[5], 
+	                        anomalyStr);
+	         }
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element6.c_str(),anomalyStr.c_str(),"Real Number");
+	            canClose = false;
+	         }
+	      }
+		  // SphericalAZFPA & SphericalRADEC 
+	      else if ((strcmp(stateTypeStr.c_str(), "SphericalAZFPA") == 0) ||
+	               (strcmp(stateTypeStr.c_str(), "SphericalRADEC") == 0))
+	      {
+	         // check to see if RMAG is a real
+	         if ((GmatStringUtil::ToDouble(element1,&rvalue)) && (rvalue > 0.0))     
+	            displayState[0] = rvalue;
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element1.c_str(),"RMAG","Real Number > 0.0");
+	            canClose = false;
+	         }
+	         // check to see if RA is a real
+	         if (GmatStringUtil::ToDouble(element2,&rvalue))      
+	            displayState[1] = rvalue;
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element2.c_str(),"RA","Real Number");
+	            canClose = false;
+	         }
+	         // check to see if DEC is a real     
+	         if (GmatStringUtil::ToDouble(element3,&rvalue))      
+	            displayState[2] = rvalue;
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element3.c_str(),"DEC","Real Number");
+	            canClose = false;
+	         }
+	         // check to see if VMAG is a real
+	         if ((GmatStringUtil::ToDouble(element4,&rvalue)) && (rvalue >= 0.0))     
+	            displayState[3] = rvalue;
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element4.c_str(),"VMAG","Real Number >= 0.0");
+	            canClose = false;
+	         }
+	         
+	         if (strcmp(stateTypeStr.c_str(), "SphericalAZFPA") == 0)
+	         {
+	            // check to see if AZI is a real
+	            if (GmatStringUtil::ToDouble(element5,&rvalue))      
+	               displayState[4] = rvalue;
+	            else
+	            {
+	               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	                  element5.c_str(),"AZI","Real Number");
+	               canClose = false;
+	            }
+	            // check to see if FPA is a real
+	            if (GmatStringUtil::ToDouble(element6,&rvalue))      
+	               displayState[5] = rvalue;
+	            else
+	            {
+	               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	                  element6.c_str(),"FPA","Real Number");
+	               canClose = false;
+	            }
+	         } // SphericalAZFPA
+	         else if (strcmp(stateTypeStr.c_str(), "SphericalRADEC") == 0)
+	         {
+	            // check to see if RAV is a real
+	            if (GmatStringUtil::ToDouble(element5,&rvalue))
+	               displayState[4] = rvalue;
+	            else
+	            {
+	               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	                  element5.c_str(),"RAV","Real Number");
+	               canClose = false;
+	            }
+	            // check to see if DECV is a real
+	            if (GmatStringUtil::ToDouble(element6,&rvalue))
+	               displayState[5] = rvalue;
+	            else
+	            {
+	               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	                  element6.c_str(),"DECV","Real Number");
+	               canClose = false;
+	            }
+	         } // SphericalRADEC
+	      }
+		  // Equinoctial
+	      else if (strcmp(stateTypeStr.c_str(), "Equinoctial") == 0)
+	      {
+	         // check to see if SMA is a real
+	         if ((GmatStringUtil::ToDouble(element1,&rvalue)) && (rvalue != 0.0))      
+	            displayState[0] = rvalue;
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element1.c_str(),"SMA","Real Number != 0.0");
+	            canClose = false;
+	         }
+	         // check to see if h is a real
+	         if (GmatStringUtil::ToDouble(element2,&rvalue))      
+	            displayState[1] = rvalue;
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element2.c_str(),"h","Real Number");
+	            canClose = false;
+	         }
+	         // check to see if k is a real
+	         if (GmatStringUtil::ToDouble(element3,&rvalue))      
+	            displayState[2] = rvalue;
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element3.c_str(),"k","Real Number");
+	            canClose = false;
+	         }
+	         // check to see if p is a real
+	         if (GmatStringUtil::ToDouble(element4,&rvalue))      
+	            displayState[3] = rvalue;
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element4.c_str(),"p","Real Number");
+	            canClose = false;
+	         }
+	         // check to see if q is a real
+	         if (GmatStringUtil::ToDouble(element5,&rvalue))      
+	            displayState[4] = rvalue;
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element5.c_str(),"q","Real Number");
+	            canClose = false;
+	         }
+	         // check to see if Mean Longitude is a real
+	         if (GmatStringUtil::ToDouble(element6,&rvalue))      
+	            displayState[5] = rvalue;
+	         else
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	               element6.c_str(),"Mean Longitude","Real Number");
+	            canClose = false;
+	         }
+	      }
+//   displayState[0] = atof(textCtrl1->GetValue());
+//   displayState[1] = atof(textCtrl2->GetValue());
+//   displayState[2] = atof(textCtrl3->GetValue());
+//   displayState[3] = atof(textCtrl4->GetValue());
+//   displayState[4] = atof(textCtrl5->GetValue());
+//   displayState[5] = atof(textCtrl6->GetValue()); 
+//   
+//   #if DEBUG_ORBIT_PANEL_SAVE
+//      MessageInterface::ShowMessage("OrbitPanel::SaveData() display state =%s\n ", 
+//         displayState.ToString().c_str());
+//   #endif
+//
+//   if (strcmp(stateTypeStr.c_str(), "Keplerian") == 0)
+//   {
+//      if(displayState[1] < 0.0)
+//      {
+//         MessageInterface::PopupMessage
+//            (Gmat::WARNING_, "ECC must be greater than or equal to zero.");
+//         textCtrl2->SetValue(ToString(mOutState[1]));
+//         canClose = false;
+//         return;
+//      }
+//      else if((displayState[0] > 0.0) && (displayState[1] > 1.0))
+//      {
+//         MessageInterface::PopupMessage
+//            (Gmat::WARNING_, "SMA cannot be positive and ECC greater than 1.");
+//         textCtrl1->SetValue(ToString(mOutState[0]));
+//         textCtrl2->SetValue(ToString(mOutState[1]));
+//         canClose = false;
+//         return;
+//      }
+//      else if((displayState[0] < 0.0) && (displayState[1] < 1.0))
+//      {
+//         MessageInterface::PopupMessage
+//            (Gmat::WARNING_, "SMA cannot be negative and ECC less than 1.");
+//         textCtrl1->SetValue(ToString(mOutState[0]));
+//         textCtrl2->SetValue(ToString(mOutState[1]));
+//         canClose = false;
+//         return;
+//      }
+//   }
+//
+//   if (strcmp(stateTypeStr.c_str(), "ModifiedKeplerian") == 0)
+//   {
+//      if(displayState[0] <= 0.0)
+//      {
+//         MessageInterface::PopupMessage
+//            (Gmat::WARNING_, "RadPer must be greater than zero.");
+//         canClose = false;
+//         return;
+//      }
+//
+//      if(displayState[1] == 0.0)
+//      {
+//         MessageInterface::PopupMessage
+//            (Gmat::WARNING_, "RadApo can not be equal to zero.");
+//         canClose = false;
+//         return;
+//      }
+//   }
+//
+//   if ( (strcmp(stateTypeStr.c_str(), "SphericalAZFPA") == 0) || 
+//        (strcmp(stateTypeStr.c_str(), "SphericalRADEC") == 0) )
+//   {
+//      if (displayState[0] <= 0.0)
+//      {
+//         MessageInterface::PopupMessage
+//            (Gmat::WARNING_, "RMAG must be greater than zero.");
+//         canClose = false;
+//         return;
+//      }
+//   }
+//
+//   if ( strcmp(stateTypeStr.c_str(), "Equinoctial") == 0) {
+//          // any restrictions on equinoctial coordinates
+//   }
+//   
+//      // Save the anomaly type
+//      if ( (strcmp(stateTypeStr.c_str(), "Keplerian") == 0) || 
+//           (strcmp(stateTypeStr.c_str(), "ModifiedKeplerian") == 0) )
+//      {
+//         std::string anomalyStr = description6->GetLabel().c_str();
+//         anomaly.Set(displayState[0], displayState[1], displayState[5], anomalyStr);   
+////      theSpacecraft->SetStringParameter("AnomalyType", anomalyStr);
+//         #if DEBUG_ORBIT_PANEL_SAVE
+//            MessageInterface::ShowMessage( "SMA = %lf\n",anomaly.GetSMA() );
+//            MessageInterface::ShowMessage( "ECC = %lf\n",anomaly.GetECC() );
+//            MessageInterface::ShowMessage( "value = %lf\n",anomaly.GetValue() );
+//            MessageInterface::ShowMessage( "anomaly type = %s\n",anomaly.GetType().c_str() );
+//         #endif
+//   }
+
+	      BuildState(displayState);
+	      theSpacecraft->SetState(mCartState);
+      }
    }
    catch (BaseException &e)
    {
@@ -539,14 +908,18 @@ void OrbitPanel::Create()
    //-----------------------------------------
 
    //----------------- epoch -----------------
-   // label for epoch
-   wxStaticText *epochStaticText = new wxStaticText( this, ID_TEXT,
-      wxT("Epoch"), wxDefaultPosition, wxDefaultSize, 0 );
+   // label for epoch format
+   wxStaticText *epochFormatStaticText = new wxStaticText( this, ID_TEXT,
+      wxT("Epoch Format"), wxDefaultPosition, wxDefaultSize, 0 );
    
    // combo box for the epoch format
    epochFormatComboBox = new wxComboBox( this, ID_COMBOBOX, wxT(""),
       wxDefaultPosition, wxSize(150,-1), 0, emptyList, wxCB_DROPDOWN | wxCB_READONLY );
 
+   // label for epoch
+   wxStaticText *epochStaticText = new wxStaticText( this, ID_TEXT,
+      wxT("Epoch"), wxDefaultPosition, wxDefaultSize, 0 );
+   
    // textfield for the epoch value
    epochValue = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(150,-1), 0 );
@@ -579,13 +952,14 @@ void OrbitPanel::Create()
 
    // combo box for the anomaly type
    anomalyComboBox = new wxComboBox( this, ID_COMBOBOX, wxT(""),
-      wxDefaultPosition, wxSize(125,-1), 0, emptyList, wxCB_DROPDOWN | wxCB_READONLY );
+      wxDefaultPosition, wxSize(150,-1), 0, emptyList, wxCB_DROPDOWN | wxCB_READONLY );
    //-----------------------------------------
    
    // add to page sizer
-   pageSizer->Add( epochStaticText, 0, wxALIGN_LEFT | wxALL, bsize );
-   pageSizer->Add( 20, 20, 0, wxALIGN_LEFT | wxALL, bsize );
+   pageSizer->Add( epochFormatStaticText, 0, wxALIGN_LEFT | wxALL, bsize );
    pageSizer->Add( epochFormatComboBox, 0, wxALIGN_LEFT | wxALL, bsize );
+//   pageSizer->Add( 20, 20, 0, wxALIGN_LEFT | wxALL, bsize );
+   pageSizer->Add( epochStaticText, 0, wxALIGN_LEFT | wxALL, bsize );
    pageSizer->Add( epochValue, 0, wxALIGN_LEFT | wxALL, bsize );
    pageSizer->Add( coordSysStaticText, 0, wxALIGN_LEFT | wxALL, bsize );
    pageSizer->Add( mCoordSysComboBox, 0, wxALIGN_LEFT | wxALL, bsize );
