@@ -208,7 +208,7 @@ void TankConfigPanel::SaveData()
       Real rvalue;
       std::string inputString;
       std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
-                        theFuelTank->GetName() + "\" is not an allowed value.  "
+                        theFuelTank->GetName() + "\" is not an allowed value.\n"
                         "The allowed values are: [ %s ]."; 
       
       //loj: 9/26/06 theOkButton->Disable();            

@@ -231,7 +231,7 @@ void ThrusterConfigPanel::SaveData()
    Real rvalue;
    std::string inputString;
    std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
-                     theThruster->GetName() + "\" is not an allowed value.  "
+                     theThruster->GetName() + "\" is not an allowed value.\n"
                      "The allowed values are: [ %s ].";
 
    theOkButton->Disable();
