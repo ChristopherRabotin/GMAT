@@ -420,7 +420,8 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
          if ((logicBlock.find("End")           != logicBlock.npos  &&
               logicBlock.find("EndFiniteBurn") == logicBlock.npos) ||
              (logicBlock.find("BeginScript")   != logicBlock.npos) ||
-             (logicBlock.find("Else")   != logicBlock.npos))
+             (logicBlock.find("Else")          != logicBlock.npos) ||
+             (logicBlock.find("Stop")          != logicBlock.npos))
             
             obj = (GmatBase*)CreateCommand(chunks[0], "");
          else
