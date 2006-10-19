@@ -763,7 +763,7 @@ bool Vary::InterpretAction()
            i != currentChunks.end(); ++i)
          MessageInterface::ShowMessage("            %s\n", i->c_str());
    #endif
-
+   
    // For each case here, the atof needs to be reset to handle the allowed types
    for (StringArray::iterator i = currentChunks.begin(); 
         i != currentChunks.end(); ++i)
@@ -809,6 +809,28 @@ bool Vary::InterpretAction()
       }
    }
    
+   // Ensure that there is a value for each component the variable might use,
+   // because these values are passed generically to the Solvers
+   UnsignedInt varCount = initialValue.size();
+   
+   if (perturbation.size() < varCount)
+      SetRealParameter(PERTURBATION, 1.0e-6);
+
+   if (variableMinimum.size() < varCount)
+      SetRealParameter(VARIABLE_MINIMUM, -9.999e300);
+
+   if (variableMaximum.size() < varCount)
+      SetRealParameter(VARIABLE_MAXIMUM, 9.999e300);
+   
+   if (variableMaximumStep.size() < varCount)
+      SetRealParameter(VARIABLE_MAXIMUM_STEP, 9.999e300);
+   
+   if (additiveScaleFactor.size() < varCount)
+      SetRealParameter(ADDITIVE_SCALE_FACTOR, 0.0);
+   
+   if (multiplicativeScaleFactor.size() < varCount)
+      SetRealParameter(MULTIPLICATIVE_SCALE_FACTOR, 1.0);
+      
    return true;
 }
 
@@ -825,17 +847,6 @@ bool Vary::InterpretAction()
 bool Vary::Initialize()
 {
     bool retval = GmatCommand::Initialize();
-
-//    // Vary specific initialization (no pun intended) goes here:
-//    // Find the solver
-//    if (objectMap->find(solverName) == objectMap->end()) {
-//        std::string errorString = "Target command cannot find solver \"";
-//        errorString += solverName;
-//        errorString += "\"";
-//        throw CommandException(errorString);
-//    }
-//
-//    solver = (Solver *)((*objectMap)[solverName]);
 
     if (solver == NULL)
        throw CommandException("solver not initialized for Vary command\n  \""
@@ -882,7 +893,7 @@ bool Vary::Execute(void)
         //for (Integer i = 0; i < variableName.size(); ++i) {
         Integer i = 0;
         { 
-            varData[0] = initialValue[i];              // Initial value
+            varData[0] = initialValue[i];                // Initial value
             // scale by using Eq. 13.5 of Architecture document
             varData[0] = (varData[0] + additiveScaleFactor[i]) / 
                          multiplicativeScaleFactor[i];
@@ -897,7 +908,6 @@ bool Vary::Execute(void)
             
             if (variableId.empty())
                variableId.push_back(-1);
-            
             variableId[i] = solver->SetSolverVariables(varData, variableName[i]);
         }
         
@@ -962,16 +972,6 @@ bool Vary::Execute(void)
     // scale using Eq. 13.6 of Architecture document
     var = var * multiplicativeScaleFactor[0] - additiveScaleFactor[0];
     
-//    // Just a check here -- the solver handles all of these now
-//    if (variableMinimum[0] >= variableMaximum[0])
-//       throw CommandException("Invalid variable minimum and maximum for " +
-//          variableName[0]);
-//
-//    if (var > variableMaximum[0])
-//       var = variableMaximum[0];
-//    if (var < variableMinimum[0])
-//       var = variableMinimum[0];
-
     #ifdef DEBUG_VARIABLE_RANGES
        MessageInterface::ShowMessage(
           "Setting %s to %lf; allowed range is [%lf, %lf]\n",
