@@ -27,6 +27,7 @@
 #include "InterpreterException.hpp"
 #include "GmatBase.hpp"
 #include "TextParser.hpp"
+#include "ScriptReadWriter.hpp"
 
 // Forward references for GMAT core objects
 class Spacecraft;
@@ -102,7 +103,9 @@ public:
 protected:
    
    // subclasses accessable member data
-   
+
+   /// A pointer to the ScriptReadWriter used when reading or writing script.
+   ScriptReadWriter* theReadWriter;
    Moderator    *theModerator;
    TextParser   theTextParser;
    bool         inCommandMode;
@@ -115,6 +118,7 @@ protected:
    std::string  headerComment;
    std::string  footerComment;
    std::string  currentBlock;
+   std::string  lineNumber;
    Gmat::BlockType currentBlockType;
    
    /// Error handling data
@@ -210,6 +214,10 @@ protected:
 
    // Final setting of reference object pointers needed by the GUI
    bool FinalPass();
+   
+   // For converting integer to string 
+   // Used by current line number display on exceptions
+   std::string itoa(Integer value, unsigned int base);
    
 private:
    

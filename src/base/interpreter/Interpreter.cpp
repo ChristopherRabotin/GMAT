@@ -54,7 +54,8 @@ Interpreter::Interpreter()
    initialized = false;
    continueOnError = true;
    
-   theModerator = Moderator::Instance();
+   theModerator  = Moderator::Instance();
+   theReadWriter = ScriptReadWriter::Instance();
    
    #if DEBUG_INTERP
    MessageInterface::ShowMessage
@@ -1015,8 +1016,10 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    }
    else
    {
-      InterpreterException("*** ERROR *** Found blank function name in: \n\"" +
-                           currentBlock + "\"\n");
+      InterpreterException ex("*** ERROR *** Found blank function name in: \n\"" +
+                              currentBlock + "\"\n");
+      HandleError(ex);
+      return false;
    }
    
    #if DEBUG_ASSEMBLE_CALL_FUNCTION
@@ -1205,9 +1208,10 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
          }
          else
          {
-            InterpreterException
+            InterpreterException ex
                ("*** ERROR *** Cannot find ReportFile: " + parts[0] +
                 " in line:\n\"" + currentBlock + "\"\n");
+            HandleError(ex);
          }
       }
       else
@@ -1345,16 +1349,18 @@ Parameter* Interpreter::CreateArray(const std::string &arrayStr)
    
    if (row == -1)
    {
-      throw InterpreterException
+      InterpreterException ex
          ("Interpreter::CreateArray() invalid number of rows found in: " +
           arrayStr + "\n");
+      HandleError(ex);
    }
    
    if (col == -1)
    {
-      throw InterpreterException
+      InterpreterException ex
          ("Interpreter::CreateArray() invalid number of columns found in: " +
           arrayStr + "\n");
+      HandleError(ex);
    }
    
    Parameter *param = theModerator->CreateParameter("Array", name);
@@ -1403,29 +1409,41 @@ Parameter* Interpreter::GetArrayIndex(const std::string &arrayStr,
    GmatBase *obj = FindObject(name);
    
    if (obj == NULL)
-      throw InterpreterException
+   {
+      InterpreterException ex
          ("Interpreter::GetArrayIndex() cannot find Array name: " + name + "\n");
+      HandleError(ex);
+   }
    
    if (obj->GetTypeName() != "Array")
-      throw InterpreterException
+   {
+      InterpreterException ex
          ("Interpreter::GetArrayIndex() " + name + " is not an Array\n");
+      HandleError(ex);
+   }
    
    // get row value
    if (row == -1 && rowStr != "-1")
    {
       Parameter *param = (Parameter*)FindObject(rowStr);
       if (param == NULL)
-         throw InterpreterException
+      {
+         InterpreterException ex
             ("Interpreter::GetArrayIndex() cannot find Array row index "
              "Variable: " + name + "\n");
+         HandleError(ex);
+      }
       
       if (param->GetReturnType() == Gmat::REAL_TYPE)
          row = (Integer)param->GetReal() - 1; // index starts at 0
       else
          if (param == NULL)
-            throw InterpreterException
+         {
+            InterpreterException ex
                ("Interpreter::GetArrayIndex() cannot handle Array row of "
                 "Array: " + name + "\n");
+            HandleError(ex);
+         }
    }
    
    
@@ -1434,26 +1452,38 @@ Parameter* Interpreter::GetArrayIndex(const std::string &arrayStr,
    {
       Parameter *param = (Parameter*)FindObject(colStr);
       if (FindObject(colStr) == NULL)
-         throw InterpreterException
+      {
+         InterpreterException ex
             ("Interpreter::GetArrayIndex() cannot find Array column index "
              "Variable: " + name + "\n");
-   
+         HandleError(ex);
+      }
+      
       if (param->GetReturnType() == Gmat::REAL_TYPE)
          col = (Integer)param->GetReal() - 1; // index starts at 0
       else
          if (param == NULL)
-            throw InterpreterException
+         {
+            InterpreterException ex
                ("Interpreter::GetArrayIndex() cannot handle Array column of "
                 "Array: " + name + "\n");
+            HandleError(ex);
+         }
    }
    
    if (row == -1)
-      throw InterpreterException
+   {
+      InterpreterException ex
          ("Interpreter::GetArrayIndex() Row index is invalid\n");
+      HandleError(ex);
+   }
    
    if (col == -1)
-      throw InterpreterException
+   {
+      InterpreterException ex
          ("Interpreter::GetArrayIndex() Column index is invalid\n");
+      HandleError(ex);
+   }
 
    #if DEBUG_ARRAY_GET
    MessageInterface::ShowMessage
@@ -1510,8 +1540,11 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
       lhsObj = FindObject(lhsObjName);
       
       if (lhsObj == NULL)
-         throw InterpreterException
+      {
+         InterpreterException ex
             ("Interpreter::MakeAssignment() Cannot find LHS object: " + lhsObjName + "\n");
+         HandleError(ex);
+      }
       
       dot = lhs.find('.');
       if (dot == lhs.npos)
@@ -1533,7 +1566,8 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
       }
       else
       {
-         throw InterpreterException("Cannot find LHS object: " + lhs + "\n");
+         InterpreterException ex("Cannot find LHS object: " + lhs + "\n");
+         HandleError(ex);
       }
    }
    
@@ -1621,8 +1655,11 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
          retval = SetValueToArray(lhsObj, lhs, rhs);
    }
    else
-      throw InterpreterException
+   {
+      InterpreterException ex
          ("Interpreter::MakeAssignment() Error if it reached here.\n");
+      HandleError(ex);
+   }
    
    #if DEBUG_ASSIGNMENT
    MessageInterface::ShowMessage
@@ -1859,9 +1896,12 @@ bool Interpreter::SetObjectToProperty(GmatBase *toOwner, const std::string &toPr
          FindPropertyID(toOwner, toProp, &toObj, toId);
       
          if (toObj == NULL)
-            throw InterpreterException
+         {
+            InterpreterException ex
                ("*** Internal Error *** "
                 "Interpreter::SetObjectToProperty() toObj is NULL\n");
+            HandleError(ex);
+         }
       }
       catch (BaseException &e)
       {
@@ -2462,8 +2502,11 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
                {
                   // Special case of InternalForceModel in script
                   if (value != "InternalForceModel")
-                     throw InterpreterException
+                  {
+                     InterpreterException ex
                         ("*** Internal Error ***Cannot create " + value + "\n");
+                     HandleError(ex);
+                  }
                }
             }
          }
@@ -2540,9 +2583,10 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          break;
       }
    default:
-      throw InterpreterException
+      InterpreterException ex
          ("Interpreter::SetPropertyValue() Cannot handle the type: " +
           GmatBase::PARAM_TYPE_STRING[type] + " yet.\n");
+      HandleError(ex);
    }
    
    #if DEBUG_SET
@@ -2791,8 +2835,11 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
       if (pmType == "Drag")
       {
          if (!pm->SetStringParameter("AtmosphereModel", value))
-            throw InterpreterException
+         {
+            InterpreterException ex
                ("Unable to set AtmosphereModel for drag force.");
+            HandleError(ex);
+         }
          
          /// @todo Add the body name for drag at other bodies
          if (value != "BodyDefault")
@@ -2802,8 +2849,11 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
             if (am)
                pm->SetRefObject(am, Gmat::ATMOSPHERE);
             else
-               throw InterpreterException
+            {
+               InterpreterException ex
                   ("Unable to create AtmosphereModel: " + value + " for drag force.");
+               HandleError(ex);
+            }
          }
       }
       else if (pmType == "SRP")
@@ -2914,8 +2964,11 @@ bool Interpreter::SetSolarSystemProperty(GmatBase *obj, const std::string &prop,
       GmatBase *body = (GmatBase*)solarSystem->GetBody(bodyName);
       
       if (body == NULL)
-         throw InterpreterException
+      {
+         InterpreterException ex
             ("Body: " + bodyName + " not found in the SolarSystem\n");
+         HandleError(ex);
+      }
       
       try
       {
@@ -3054,7 +3107,7 @@ bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
  *
  * @param  arrayStr  String form of array (A(1,3), B(2,j), etc)
  *
- * @note Array name must be created and configured before acces.
+ * @note Array name must be created and configured before access.
  */
 //------------------------------------------------------------------------------
 Real Interpreter::GetArrayValue(const std::string &arrayStr,
@@ -3070,7 +3123,11 @@ Real Interpreter::GetArrayValue(const std::string &arrayStr,
    if (row != -1 && col != -1)
       return param->GetRealParameter("SingleValue", row, col);
    else
-      throw InterpreterException("Invalid row and column index\n");
+   {
+      InterpreterException ex("Invalid row and column index\n");
+      HandleError(ex);
+   }
+   return 0.0;
 }
 
 
@@ -3082,7 +3139,10 @@ bool Interpreter::IsArray(const std::string &str)
    bool retval = false;
    
    if (str.find("[") != str.npos)
-      throw InterpreterException("[ is invalid in assignment : " + str + "\n");
+   {
+      InterpreterException ex("[ is invalid in assignment : " + str + "\n");
+      HandleError(ex);
+   }
    
    retval = GmatStringUtil::IsParenPartOfArray(str);
    
@@ -3105,14 +3165,19 @@ bool Interpreter::IsArray(const std::string &str)
 AxisSystem* Interpreter::CreateAxisSystem(std::string type, GmatBase *owner)
 {
    if (owner == NULL)
-      throw InterpreterException("Interpreter::CreateAxisSystem needs a "
+   {
+      InterpreterException ex("Interpreter::CreateAxisSystem needs a "
          "CoordinateSystem object that acts as its owner; received a NULL "
          "pointer instead.");
+      HandleError(ex);
+   }
    if (owner->GetType() != Gmat::COORDINATE_SYSTEM)
-      throw InterpreterException("Interpreter::CreateAxisSystem needs a "
+   {
+      InterpreterException ex("Interpreter::CreateAxisSystem needs a "
          "CoordinateSystem object that acts as its owner; received a pointer "
          "to " + owner->GetName() + "instead.");
-            
+      HandleError(ex);
+   }
    AxisSystem* axes = (AxisSystem *)(theModerator->CreateAxisSystem(type, ""));
    owner->SetRefObject(axes, axes->GetType(), axes->GetName());
    return axes;
@@ -3193,8 +3258,10 @@ void Interpreter::HandleError(BaseException &e)
    }
    else
    {
+      // Get the line number of the logical block
+      lineNumber = itoa(theReadWriter->GetLineNumber(), 10);
       throw InterpreterException
-         (e.GetMessage() + " in line:\n   \"" + currentBlock + "\"\n");
+         (e.GetMessage() + " in line\n   \"" + lineNumber + ":" + currentBlock + "\"\n");
    }
 }
 
@@ -3228,5 +3295,41 @@ bool Interpreter::FinalPass()
 
    return true;
 }
+
+//------------------------------------------------------------------------------
+// std::string Interpreter::itoa(int value, unsigned int base)
+//------------------------------------------------------------------------------
+/**
+ * C++ version std::string style "itoa":
+ */
+//------------------------------------------------------------------------------
+std::string Interpreter::itoa(Integer value, unsigned int base)
+{	
+	const char digitMap[] = "0123456789abcdef";	
+	std::string buf;
+
+	// Guard:
+	if (base == 0 || base > 16)
+	{
+		// Error: may add more trace/log output here
+		return buf;
+	}
+	
+	// Take care of negative int:
+	std::string sign;
+	int _value = value;
+
+	// Check for case when input is zero:
+	if (_value == 0) return "0";
+	
+	// Translating number to string with base:
+	for (int i = 30; _value && i ; --i) 
+	{
+		buf = digitMap[ _value % base ] + buf;
+		_value /= base;
+	}
+	return sign.append(buf);
+}
+
 
 
