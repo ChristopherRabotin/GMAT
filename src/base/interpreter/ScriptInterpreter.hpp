@@ -19,7 +19,6 @@
 
 #include "Interpreter.hpp"
 #include "InterpreterException.hpp"
-#include "ScriptReadWriter.hpp"
 
 /**
  * The ScriptInterpreter class manages the script reading and writing process.
@@ -52,18 +51,13 @@ protected:
    bool                        Parse(const std::string &logicBlock);
    bool                        WriteScript(Gmat::WriteMode mode = Gmat::SCRIPTING);
    
+   
 private:
    ScriptInterpreter();
    virtual ~ScriptInterpreter();
-   
-   /// The logical block
-   //std::string logicalBlock; replaced by currentBlock
+
    /// A counter that counts the logical blocks of script as they are read.
    Integer logicalBlockCount; 
-   /// The stream used for script reading and writing.
-   //std::iostream scriptStream;
-   /// A pointer to the ScriptReadWriter used when reading or writing script.
-   ScriptReadWriter* theReadWriter;
    /// Name of the current script file
    std::string scriptFilename;
    /// Section delimiter comment

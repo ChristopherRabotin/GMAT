@@ -47,8 +47,7 @@ ScriptInterpreter* ScriptInterpreter::Instance()
  * Default constructor.
  */
 //------------------------------------------------------------------------------
-ScriptInterpreter::ScriptInterpreter()
-   : Interpreter()
+ScriptInterpreter::ScriptInterpreter() : Interpreter()
 {
    logicalBlockCount = 0;
     
@@ -241,49 +240,36 @@ bool ScriptInterpreter::ReadScript()
    initialized = false;
    Initialize();
 
-   //loj: We want ScriptReadWriter to interface to i/ostream instead of if/ofstream
-   //loj: theReadWriter->SetScriptFilename(scriptFilename);
-   //if ( theReadWriter->OpenScriptFile(true) )
-   //{
-      currentBlock = ReadLogicalBlock();
+   currentBlock = ReadLogicalBlock();
       
+   #if DEBUG_SCRIPT_READING
+   MessageInterface::ShowMessage
+      ("===> currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
+   #endif
+      
+   while (currentBlock != "")
+   {
       #if DEBUG_SCRIPT_READING
+      MessageInterface::ShowMessage("==========> Calling EvaluateBlock()\n");
+      #endif
+         
+      currentBlockType = theTextParser.EvaluateBlock(currentBlock);
+         
+      if ( !Parse(currentBlock) )
+         return false; 
+         
+      #if DEBUG_SCRIPT_READING
+      MessageInterface::ShowMessage("===> Read next logical block\n");
+      #endif
+         
+      currentBlock = ReadLogicalBlock();
+         
+      #if DEBUG_SCRIPT_READING > 1
       MessageInterface::ShowMessage
          ("===> currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
       #endif
-      
-      while (currentBlock != "")
-      {
-         #if DEBUG_SCRIPT_READING
-         MessageInterface::ShowMessage("==========> Calling EvaluateBlock()\n");
-         #endif
          
-         currentBlockType = theTextParser.EvaluateBlock(currentBlock);
-         
-         if ( !Parse(currentBlock) )
-            return false; 
-         
-         #if DEBUG_SCRIPT_READING
-         MessageInterface::ShowMessage("===> Read next logical block\n");
-         #endif
-         
-         currentBlock = ReadLogicalBlock();
-         
-         #if DEBUG_SCRIPT_READING > 1
-         MessageInterface::ShowMessage
-            ("===> currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
-         #endif
-         
-      }
-      
-      //loj: ostream closing is done in Interpret()
-      //if ( !theReadWriter->CloseScriptFile() )
-      //   return false;
-
-      //loj: FinalPass() is called in Interpret()
-      //if ( !FinalPass() ) 
-      //   return false;
-   //}
+   }
    
    // Parse delayed blocks here
    Integer delayedCount = delayedBlocks.size();
@@ -316,7 +302,13 @@ bool ScriptInterpreter::ReadScript()
 //------------------------------------------------------------------------------
 std::string ScriptInterpreter::ReadLogicalBlock()
 {
-   return theReadWriter->ReadLogicalBlock();
+   // Get block here so we can get line number next
+   std::string block = theReadWriter->ReadLogicalBlock();
+   
+   // Get the line number of the logical block
+   lineNumber = itoa(theReadWriter->GetLineNumber(), 10);
+   
+   return block;
 }
 
 //------------------------------------------------------------------------------
@@ -371,7 +363,7 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
    {
       if (count < 3)
          throw InterpreterException
-            ("Missing parameter creating object for: \n" + logicBlock + "\n");
+            ("Missing parameter creating object for: \n" + lineNumber + ": " + logicBlock + "\n");
 
       std::string type = chunks[1];
       StringArray names = theTextParser.Decompose(chunks[2], "()");
@@ -393,7 +385,7 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
          
          if (obj == NULL)
             throw InterpreterException
-               ("Error encountered creating objects for: \n" + logicBlock + "\n");
+               ("Error encountered creating objects for: \n" + lineNumber+ ":" + logicBlock + "\n");
                
          objCounter++;     
          obj->FinalizeCreation();
@@ -407,7 +399,8 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
 
       // if not all objectes are created, return false
       if (objCounter < count)
-         throw InterpreterException("All objects are not created: \n\"" + currentBlock + "\"\n");
+         throw InterpreterException
+            ("All objects are not created: \n\"" + lineNumber+ ":" + currentBlock + "\"\n");
          
       logicalBlockCount++;
    }
@@ -426,7 +419,7 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
             obj = (GmatBase*)CreateCommand(chunks[0], "");
          else
             throw InterpreterException
-               ("Missing parameter with command object: \n" + logicBlock + "\n");
+               ("Missing parameter with command object: \n" + lineNumber + ":" + logicBlock + "\n");
       }
       else
       {
@@ -434,7 +427,7 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
       }
           
       if (obj == NULL)
-         throw InterpreterException("Cannot Parse the line: \n\"" + currentBlock + "\"\n");
+         throw InterpreterException("Cannot Parse the line: \n\"" + lineNumber + ":" + currentBlock + "\"\n");
       
       logicalBlockCount++;
    }
@@ -442,7 +435,7 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
    {
       if (count < 2)
          throw InterpreterException
-            ("Missing parameter assigning object for: \n" + logicBlock + "\n");
+            ("Missing parameter assigning object for: \n" + lineNumber + ":" + logicBlock + "\n");
       
       if (inCommandMode)
          obj = (GmatBase*)CreateAssignmentCommand(chunks[0], chunks[1]);
@@ -450,30 +443,32 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
          obj = MakeAssignment(chunks[0], chunks[1]);
       
       if (obj == NULL)
-         throw InterpreterException("Cannot Parse the line: \n\"" + currentBlock + "\"\n");
+         throw InterpreterException("Cannot Parse the line: \n\"" + lineNumber + ":" + currentBlock + "\"\n");
       
       GmatBase *owner = NULL;
-      std::string preStr = ""; 
-      std::string inStr = ""; 
-      Integer paramID = 0;
-      
-      //MessageInterface::ShowMessage
-      //   ("===> chunks[0]=%s\n", chunks[0].c_str());
+      std::string attrStr = ""; 
+      std::string attrInLineStr = ""; 
+      Integer paramID = -1;
       
       // paramID will be assigned from call to Interpreter class
       if ( FindPropertyID(obj, chunks[0], &owner,paramID) )
       {
-         preStr = theTextParser.GetPrefaceComment();
-         inStr = theTextParser.GetInlineComment();
+         attrStr = theTextParser.GetPrefaceComment();
+         attrInLineStr = theTextParser.GetInlineComment();
          
-         //MessageInterface::ShowMessage
-         //   ("===> preStr=%s, inStr=%s\n", preStr.c_str(), inStr.c_str());
-         
-         if (preStr != "")
-            owner->SetAttributeCommentLine(paramID, preStr);
+         if (attrStr != "")
+            owner->SetAttributeCommentLine(paramID, attrStr);
             
-         if (inStr != "")
-            owner->SetInlineAttributeComment(paramID, inStr);
+         if (attrInLineStr != "")
+            owner->SetInlineAttributeComment(paramID, attrInLineStr);
+            
+         //Reset
+         attrStr = ""; 
+         attrInLineStr = ""; 
+         paramID = -1;
+         
+         //MessageInterface::ShowMessage("Owner===>%s\n", owner->GetGeneratingString(Gmat::SCRIPTING).c_str());
+         //MessageInterface::ShowMessage("\n\n\nObj===>%s\n", obj->GetGeneratingString(Gmat::SCRIPTING).c_str());
       }
       
       logicalBlockCount++;
@@ -494,401 +489,375 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
 {
    if (outStream == NULL)
       return false;
+    
+   // Header  Comment
+   if (headerComment != "")
+      theReadWriter->WriteText(headerComment);
+      
+   // Initialize the section delimiter comment
+   sectionDelimiterString.push_back("\n%----------------------------------------\n");
+   sectionDelimiterString.push_back("%---------- ");
+   sectionDelimiterString.push_back("\n%----------------------------------------\n\n");
+      
+   StringArray::iterator current;
+   StringArray objs;
+   std::string objName;
+   GmatBase *object =  NULL;
+   Integer objSize;
+      
+   // Spacecraft
+   objs = theModerator->GetListOfObjects(Gmat::SPACECRAFT);
+   // Write out the section delimiter comment
+   objSize = objs.size();
+   if (objSize > 0)
+   {
+      theReadWriter->WriteText(sectionDelimiterString[0]);
+      theReadWriter->WriteText(sectionDelimiterString[1] + "Spacecrafts");
+      theReadWriter->WriteText(sectionDelimiterString[2]);
+   }
    
-   //theReadWriter->SetScriptFilename(scriptFilename);
-   //if ( theReadWriter->OpenScriptFile(false) )
-   //{      
-      // Header  Comment
-      if (headerComment != "")
-         theReadWriter->WriteText(headerComment);
-      
-      // Initialize the section delimiter comment
-      sectionDelimiterString.push_back("\n%----------------------------------------\n");
-      sectionDelimiterString.push_back("%---------- ");
-      sectionDelimiterString.push_back("\n%----------------------------------------\n\n");
-      
-      StringArray::iterator current;
-      StringArray objs;
-      std::string objName;
-      GmatBase *object =  NULL;
-      Integer objSize;
-      
-      std::string preStr    = ""; 
-      std::string inStr     = "";
-      std::string attrStr   = "";
-      std::string attrInStr = "";
-      
-      // Spacecraft
-      objs = theModerator->GetListOfObjects(Gmat::SPACECRAFT);
-      // Write out the section delimiter comment
-      objSize = objs.size();
-      if (objSize > 0)
-      {
-         theReadWriter->WriteText(sectionDelimiterString[0]);
-         theReadWriter->WriteText(sectionDelimiterString[1] + "Spacecrafts");
-         theReadWriter->WriteText(sectionDelimiterString[2]);
-      }
-      // Setup the coordinate systems on Spacecraft so they can perform conversions
-      CoordinateSystem *ics = theModerator->GetInternalCoordinateSystem(), *sccs;
-      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-      std::cout << "Found " << objs.size() << " Spacecraft\n";
-      #endif
-      for (current = objs.begin(); current != objs.end(); ++current)
-      {
-         Spacecraft *sc = (Spacecraft*)(theModerator->GetObject(*current));
-         sc->SetInternalCoordSystem(ics);
-         sccs = (CoordinateSystem*)
-            theModerator->GetObject(sc->GetRefObjectName(Gmat::COORDINATE_SYSTEM));
-         if (sccs)
-            sc->SetRefObject(sccs, Gmat::COORDINATE_SYSTEM);
-         sc->Initialize();
+   // Setup the coordinate systems on Spacecraft so they can perform conversions
+   CoordinateSystem *ics = theModerator->GetInternalCoordinateSystem(), *sccs;
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   std::cout << "Found " << objs.size() << " Spacecraft\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      Spacecraft *sc = (Spacecraft*)(theModerator->GetObject(*current));
+      sc->SetInternalCoordSystem(ics);
+      sccs = (CoordinateSystem*)
+         theModerator->GetObject(sc->GetRefObjectName(Gmat::COORDINATE_SYSTEM));
+      if (sccs)
+         sc->SetRefObject(sccs, Gmat::COORDINATE_SYSTEM);
+      sc->Initialize();
          
-         object = FindObject(*current);
-         if (object != NULL)
-         {
-            preStr = "";
-            inStr  = "";
-            attrStr = "";
-            attrInStr = "";
-                   
-            preStr = object->GetCommentLine();
-            inStr  = object->GetInlineComment();
-            //attrStr = object->GetAttributeCommentLine();
-            //attrInStr = object->GetInlineAttributeComment();
-                   
-            if (preStr != "")
-               theReadWriter->WriteText(preStr);
-
-            theReadWriter->WriteText(object->GetGeneratingString(mode));
-             
-            if (inStr != "")
-               theReadWriter->WriteText(inStr);
-               
-            theReadWriter->WriteText("\n");
-         }
-      }
-      
-      // Hardware
-      objs = theModerator->GetListOfObjects(Gmat::HARDWARE);
-      // Write out the section delimiter comment
-      objSize = objs.size();
-      if (objSize > 0)
-      {
-         theReadWriter->WriteText(sectionDelimiterString[0]);
-         theReadWriter->WriteText(sectionDelimiterString[1] + "Hardware Components");
-         theReadWriter->WriteText(sectionDelimiterString[2]);
-      }
-      #ifdef DEBUG_SCRIPT_READING_AND_WRITING 
-      std::cout << "Found " << objs.size() << " Hardware Components\n";
-      #endif
-      // Hardware Tanks
-      for (current = objs.begin(); current != objs.end(); ++current) 
-      {
-         object = FindObject(*current);
-         if (object != NULL)
-            if (object->GetTypeName() == "FuelTank")
-            {
-               theReadWriter->WriteText(object->GetGeneratingString(mode));
-               theReadWriter->WriteText("\n");
-            }
-      }
-      // Hardware Thrusters
-      for (current = objs.begin(); current != objs.end(); ++current) 
-      {
-         object = FindObject(*current);
-         if (object != NULL)
-            if (object->GetTypeName() == "Thruster")
-            {
-               theReadWriter->WriteText(object->GetGeneratingString(mode));
-               theReadWriter->WriteText("\n");
-            }
-      }
-      
-      // Formations
-      objs = theModerator->GetListOfObjects(Gmat::FORMATION);
-      // Write out the section delimiter comment
-      objSize = objs.size();
-      if (objSize > 0)
-      {
-         theReadWriter->WriteText(sectionDelimiterString[0]);
-         theReadWriter->WriteText(sectionDelimiterString[1] + "Formations");
-         theReadWriter->WriteText(sectionDelimiterString[2]);
-      }
-      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-      std::cout << "Found " << objs.size() << " Spacecraft\n";
-      #endif
-      for (current = objs.begin(); current != objs.end(); ++current)
-      {
-         object = FindObject(*current);
-         if (object != NULL)
-         {
-            theReadWriter->WriteText(object->GetGeneratingString(mode));
-            theReadWriter->WriteText("\n");
-         }
-      }
-      
-      // Force Models
-      objs = theModerator->GetListOfObjects(Gmat::FORCE_MODEL);
-      // Write out the section delimiter comment
-      objSize = objs.size();
-      if (objSize > 0)
-      {
-         theReadWriter->WriteText(sectionDelimiterString[0]);
-         theReadWriter->WriteText(sectionDelimiterString[1] + "ForceModels");
-         theReadWriter->WriteText(sectionDelimiterString[2]);
-      }
-      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-      std::cout << "Found " << objs.size() << " Force Models\n";
-      #endif
-      for (current = objs.begin(); current != objs.end(); ++current)
-      {
-         object = FindObject(*current);
-         if (object != NULL)
-         {
-            theReadWriter->WriteText(object->GetGeneratingString(mode));
-            theReadWriter->WriteText("\n");
-         }
-      }
-      
-      // Propagator
-      objs = theModerator->GetListOfObjects(Gmat::PROP_SETUP);
-      // Write out the section delimiter comment
-      objSize = objs.size();
-      if (objSize > 0)
-      {
-         theReadWriter->WriteText(sectionDelimiterString[0]);
-         theReadWriter->WriteText(sectionDelimiterString[1] + "Propagators");
-         theReadWriter->WriteText(sectionDelimiterString[2]);
-      }
-      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-      std::cout << "Found " << objs.size() << " Propagators\n";
-      #endif
-      for (current = objs.begin(); current != objs.end(); ++current)
-      {
-         object = FindObject(*current);
-         if (object != NULL)
-         {
-            theReadWriter->WriteText(object->GetGeneratingString(mode));
-            theReadWriter->WriteText("\n");
-         }
-      }
-      
-      // Libration Points and Barycenters
-      objs = theModerator->GetListOfObjects(Gmat::CALCULATED_POINT);
-      // Write out the section delimiter comment
-      objSize = objs.size();
-      if (objSize > 0)
-      {
-         theReadWriter->WriteText(sectionDelimiterString[0]);
-         theReadWriter->WriteText(sectionDelimiterString[1] + "Calculated Points");
-         theReadWriter->WriteText(sectionDelimiterString[2]);
-      }
-      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-      MessageInterface::ShowMessage("Found %d Calculated Points\n", objs.size());
-      #endif
-      for (current = objs.begin(); current != objs.end(); ++current)
-      {
-         object = FindObject(*current);
-         if (object != NULL)
-         {
-            theReadWriter->WriteText(object->GetGeneratingString(mode));
-            theReadWriter->WriteText("\n");
-         }
-      }
-         
-      // Burn objects
-      objs = theModerator->GetListOfObjects(Gmat::BURN);
-      // Write out the section delimiter comment
-      objSize = objs.size();
-      if (objSize > 0)
-      {
-         theReadWriter->WriteText(sectionDelimiterString[0]);
-         theReadWriter->WriteText(sectionDelimiterString[1] + "Burns");
-         theReadWriter->WriteText(sectionDelimiterString[2]);
-      }
-      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-      std::cout << "Found " << objs.size() << " Burns\n";
-      #endif
-      for (current = objs.begin(); current != objs.end(); ++current)
-      {
-         object = FindObject(*current);
-         if (object != NULL)
-         {
-            theReadWriter->WriteText(object->GetGeneratingString(mode));
-            theReadWriter->WriteText("\n");
-         }
-      }
-         
-      // Array and Variable setups
-      objs = theModerator->GetListOfObjects(Gmat::PARAMETER);
-      // Write out the section delimiter comment
-      objSize = objs.size();
-      if (objSize > 0)
-      {
-           bool printDelimiter = false;
-           for (current = objs.begin(); current != objs.end(); ++current)
-           {
-                   object = FindObject(*current);
-                   if ((object->GetTypeName() == "Array") || (object->GetTypeName() == "Variable"))
-                      printDelimiter = true;
-           }
-           
-           if (printDelimiter)
-           {
-            theReadWriter->WriteText(sectionDelimiterString[0]);
-            theReadWriter->WriteText(sectionDelimiterString[1] + "Parameters");
-            theReadWriter->WriteText(sectionDelimiterString[2]);
-           }
-      }
-      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-      std::cout << "Found " << objs.size() << " Parameters\n";
-      #endif
-      for (current = objs.begin(); current != objs.end(); ++current)
-      {
-         object = FindObject(*current);
-         if (object != NULL)
-            if ((object->GetTypeName() == "Array") || (object->GetTypeName() == "Variable"))
-            {
-               theReadWriter->WriteText(object->GetGeneratingString(mode));
-               theReadWriter->WriteText("\n");
-            }         
-      }
-      
-      // Coordinate System setups
-      objs = theModerator->GetListOfObjects(Gmat::COORDINATE_SYSTEM);
-      // Write out the section delimiter comment
-      objSize = objs.size();
-      if (objSize > 0)
-      {
-         theReadWriter->WriteText(sectionDelimiterString[0]);
-         theReadWriter->WriteText(sectionDelimiterString[1] + "Coordinate Systems");
-         theReadWriter->WriteText(sectionDelimiterString[2]);
-      }
-      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-      std::cout << "Found " << objs.size() << " Coordinate Systems\n";
-      #endif
-      for (current = objs.begin(); current != objs.end(); ++current)
-      {
-         object = FindObject(*current);
-         if (object != NULL)
-         {
-            theReadWriter->WriteText(object->GetGeneratingString(mode));
-            theReadWriter->WriteText("\n");
-         }
-      }
-      
-      // Solver objects
-      objs = theModerator->GetListOfObjects(Gmat::SOLVER);
-      // Write out the section delimiter comment
-      objSize = objs.size();
-      if (objSize > 0)
-      {
-         theReadWriter->WriteText(sectionDelimiterString[0]);
-         theReadWriter->WriteText(sectionDelimiterString[1] + "Solvers");
-         theReadWriter->WriteText(sectionDelimiterString[2]);
-      }
-      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-      std::cout << "Found " << objs.size() << " Solvers\n";
-      #endif
-      for (current = objs.begin(); current != objs.end(); ++current)
-      {
-         object = FindObject(*current);
-         if (object != NULL)
-         {
-            theReadWriter->WriteText(object->GetGeneratingString(mode));
-            theReadWriter->WriteText("\n");
-         }
-      }
-      
-      objs = theModerator->GetListOfObjects(Gmat::SUBSCRIBER);
-      // Write out the section delimiter comment
-      objSize = objs.size();
-      if (objSize > 0)
-      {
-         theReadWriter->WriteText(sectionDelimiterString[0]);
-         theReadWriter->WriteText(sectionDelimiterString[1] + "Subscribers");
-         theReadWriter->WriteText(sectionDelimiterString[2]);
-      }
-      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-      std::cout << "Found " << objs.size() << " Subscribers\n";
-      #endif
-      for (current = objs.begin(); current != objs.end(); ++current)
-      {
-         object = FindObject(*current);
-         if (object != NULL)
-            if (object->GetTypeName() != "TextEphemFile")
-            {
-               theReadWriter->WriteText(object->GetGeneratingString(mode));
-               theReadWriter->WriteText("\n");
-            }
-      }
-      
-      // Function setups
-      objs = theModerator->GetListOfObjects(Gmat::FUNCTION);
-      // Write out the section delimiter comment
-      objSize = objs.size();
-      if (objSize > 0)
-      {
-         theReadWriter->WriteText(sectionDelimiterString[0]);
-         theReadWriter->WriteText(sectionDelimiterString[1] + "Functions");
-         theReadWriter->WriteText(sectionDelimiterString[2]);
-      }
-      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-      std::cout << "Found " << objs.size() << " Functions\n";
-      #endif
-      for (current = objs.begin(); current != objs.end(); ++current)
-      {
-         object = FindObject(*current);
-         if (object != NULL)
-         {
-            theReadWriter->WriteText(object->GetGeneratingString(mode));
-            theReadWriter->WriteText("\n");
-         }
-      }
-      
-      // Command sequence
-      GmatCommand *cmd = theModerator->GetNextCommand();
-      bool inTextMode = false;
-      // Write out the section delimiter comment
-      if (cmd != NULL)
-      {
-         theReadWriter->WriteText(sectionDelimiterString[0]);
-         theReadWriter->WriteText(sectionDelimiterString[1] + "Mission Sequence");
-         theReadWriter->WriteText(sectionDelimiterString[2]);
-      }
-      while (cmd != NULL) 
-      {
-         #ifdef DEBUG_SCRIPT_READING_AND_WRITING
-         MessageInterface::ShowMessage
-            ("===> ScriptInterpreter::WriteScript() before write cmd=%s, mode=%d, "
-             "inTextMode=%d\n", cmd->GetTypeName().c_str(), mode, inTextMode);
-         #endif
-      
-         if (!inTextMode)
-         {
-            theReadWriter->WriteText(cmd->GetGeneratingString());
-            theReadWriter->WriteText("\n");
-         }
-         
-         if (cmd->GetTypeName() == "BeginScript")
-            inTextMode = true;
-         if (cmd->GetTypeName() == "EndScript")
-            inTextMode = false;
-      
-         if (cmd == cmd->GetNext())
-            throw InterpreterException("Self-reference found in command stream during write.\n");
-      
-         cmd = cmd->GetNext();
-      }
-   
-      // Footer Comment
-      if (footerComment != "")
-         theReadWriter->WriteText(footerComment);
-      else
+      object = FindObject(*current);
+      if (object != NULL)
+      {       
+         theReadWriter->WriteText(object->GetGeneratingString(mode));               
          theReadWriter->WriteText("\n");
+      }
+   }
       
-//       if ( !theReadWriter->CloseScriptFile() )
-//          return false;
-   //}
+   // Hardware
+   objs = theModerator->GetListOfObjects(Gmat::HARDWARE);
+   // Write out the section delimiter comment
+   objSize = objs.size();
+   if (objSize > 0)
+   {
+      theReadWriter->WriteText(sectionDelimiterString[0]);
+      theReadWriter->WriteText(sectionDelimiterString[1] + "Hardware Components");
+      theReadWriter->WriteText(sectionDelimiterString[2]);
+   }
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING 
+   std::cout << "Found " << objs.size() << " Hardware Components\n";
+   #endif
+   // Hardware Tanks
+   for (current = objs.begin(); current != objs.end(); ++current) 
+   {
+      object = FindObject(*current);
+      if (object != NULL)
+         if (object->GetTypeName() == "FuelTank")
+         {
+            theReadWriter->WriteText(object->GetGeneratingString(mode));
+            theReadWriter->WriteText("\n");
+         }
+   }
+   // Hardware Thrusters
+   for (current = objs.begin(); current != objs.end(); ++current) 
+   {
+      object = FindObject(*current);
+      if (object != NULL)
+         if (object->GetTypeName() == "Thruster")
+         {
+            theReadWriter->WriteText(object->GetGeneratingString(mode));
+            theReadWriter->WriteText("\n");
+         }
+   }
+      
+   // Formations
+   objs = theModerator->GetListOfObjects(Gmat::FORMATION);
+   // Write out the section delimiter comment
+   objSize = objs.size();
+   if (objSize > 0)
+   {
+      theReadWriter->WriteText(sectionDelimiterString[0]);
+      theReadWriter->WriteText(sectionDelimiterString[1] + "Formations");
+      theReadWriter->WriteText(sectionDelimiterString[2]);
+   }
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   std::cout << "Found " << objs.size() << " Spacecraft\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      object = FindObject(*current);
+      if (object != NULL)
+      {
+         theReadWriter->WriteText(object->GetGeneratingString(mode));
+         theReadWriter->WriteText("\n");
+      }
+   }
+      
+   // Force Models
+   objs = theModerator->GetListOfObjects(Gmat::FORCE_MODEL);
+   // Write out the section delimiter comment
+   objSize = objs.size();
+   if (objSize > 0)
+   {
+      theReadWriter->WriteText(sectionDelimiterString[0]);
+      theReadWriter->WriteText(sectionDelimiterString[1] + "ForceModels");
+      theReadWriter->WriteText(sectionDelimiterString[2]);
+   }
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   std::cout << "Found " << objs.size() << " Force Models\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      object = FindObject(*current);
+      if (object != NULL)
+      {
+         theReadWriter->WriteText(object->GetGeneratingString(mode));
+         theReadWriter->WriteText("\n");
+      }
+   }
+      
+   // Propagator
+   objs = theModerator->GetListOfObjects(Gmat::PROP_SETUP);
+   // Write out the section delimiter comment
+   objSize = objs.size();
+   if (objSize > 0)
+   {
+      theReadWriter->WriteText(sectionDelimiterString[0]);
+      theReadWriter->WriteText(sectionDelimiterString[1] + "Propagators");
+      theReadWriter->WriteText(sectionDelimiterString[2]);
+   }
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   std::cout << "Found " << objs.size() << " Propagators\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      object = FindObject(*current);
+      if (object != NULL)
+      {
+         theReadWriter->WriteText(object->GetGeneratingString(mode));
+         theReadWriter->WriteText("\n");
+      }
+   }
+      
+   // Libration Points and Barycenters
+   objs = theModerator->GetListOfObjects(Gmat::CALCULATED_POINT);
+   // Write out the section delimiter comment
+   objSize = objs.size();
+   if (objSize > 0)
+   {
+      theReadWriter->WriteText(sectionDelimiterString[0]);
+      theReadWriter->WriteText(sectionDelimiterString[1] + "Calculated Points");
+      theReadWriter->WriteText(sectionDelimiterString[2]);
+   }
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   MessageInterface::ShowMessage("Found %d Calculated Points\n", objs.size());
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      object = FindObject(*current);
+      if (object != NULL)
+      {
+         theReadWriter->WriteText(object->GetGeneratingString(mode));
+         theReadWriter->WriteText("\n");
+      }
+   }
+         
+   // Burn objects
+   objs = theModerator->GetListOfObjects(Gmat::BURN);
+   // Write out the section delimiter comment
+   objSize = objs.size();
+   if (objSize > 0)
+   {
+      theReadWriter->WriteText(sectionDelimiterString[0]);
+      theReadWriter->WriteText(sectionDelimiterString[1] + "Burns");
+      theReadWriter->WriteText(sectionDelimiterString[2]);
+   }
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   std::cout << "Found " << objs.size() << " Burns\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      object = FindObject(*current);
+      if (object != NULL)
+      {
+         theReadWriter->WriteText(object->GetGeneratingString(mode));
+         theReadWriter->WriteText("\n");
+      }
+   }
+         
+   // Array and Variable setups
+   objs = theModerator->GetListOfObjects(Gmat::PARAMETER);
+   // Write out the section delimiter comment
+   objSize = objs.size();
+   if (objSize > 0)
+   {
+      bool printDelimiter = false;
+      for (current = objs.begin(); current != objs.end(); ++current)
+      {
+         object = FindObject(*current);
+         if ((object->GetTypeName() == "Array") || (object->GetTypeName() == "Variable"))
+            printDelimiter = true;
+      }
+           
+      if (printDelimiter)
+      {
+         theReadWriter->WriteText(sectionDelimiterString[0]);
+         theReadWriter->WriteText(sectionDelimiterString[1] + "Parameters");
+         theReadWriter->WriteText(sectionDelimiterString[2]);
+      }
+   }
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   std::cout << "Found " << objs.size() << " Parameters\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      object = FindObject(*current);
+      if (object != NULL)
+         if ((object->GetTypeName() == "Array") || (object->GetTypeName() == "Variable"))
+         {
+            theReadWriter->WriteText(object->GetGeneratingString(mode));
+            theReadWriter->WriteText("\n");
+         }         
+   }
+      
+   // Coordinate System setups
+   objs = theModerator->GetListOfObjects(Gmat::COORDINATE_SYSTEM);
+   // Write out the section delimiter comment
+   objSize = objs.size();
+   if (objSize > 0)
+   {
+      theReadWriter->WriteText(sectionDelimiterString[0]);
+      theReadWriter->WriteText(sectionDelimiterString[1] + "Coordinate Systems");
+      theReadWriter->WriteText(sectionDelimiterString[2]);
+   }
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   std::cout << "Found " << objs.size() << " Coordinate Systems\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      object = FindObject(*current);
+      if (object != NULL)
+      {
+         theReadWriter->WriteText(object->GetGeneratingString(mode));
+         theReadWriter->WriteText("\n");
+      }
+   }
+      
+   // Solver objects
+   objs = theModerator->GetListOfObjects(Gmat::SOLVER);
+   // Write out the section delimiter comment
+   objSize = objs.size();
+   if (objSize > 0)
+   {
+      theReadWriter->WriteText(sectionDelimiterString[0]);
+      theReadWriter->WriteText(sectionDelimiterString[1] + "Solvers");
+      theReadWriter->WriteText(sectionDelimiterString[2]);
+   }
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   std::cout << "Found " << objs.size() << " Solvers\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      object = FindObject(*current);
+      if (object != NULL)
+      {
+         theReadWriter->WriteText(object->GetGeneratingString(mode));
+         theReadWriter->WriteText("\n");
+      }
+   }
+      
+   objs = theModerator->GetListOfObjects(Gmat::SUBSCRIBER);
+   // Write out the section delimiter comment
+   objSize = objs.size();
+   if (objSize > 0)
+   {
+      theReadWriter->WriteText(sectionDelimiterString[0]);
+      theReadWriter->WriteText(sectionDelimiterString[1] + "Subscribers");
+      theReadWriter->WriteText(sectionDelimiterString[2]);
+   }
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   std::cout << "Found " << objs.size() << " Subscribers\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      object = FindObject(*current);
+      if (object != NULL)
+         if (object->GetTypeName() != "TextEphemFile")
+         {
+            theReadWriter->WriteText(object->GetGeneratingString(mode));
+            theReadWriter->WriteText("\n");
+         
+         }
+   }
+    
+   // Function setups
+   objs = theModerator->GetListOfObjects(Gmat::FUNCTION);
+   // Write out the section delimiter comment
+   objSize = objs.size();
+   if (objSize > 0)
+   {
+      theReadWriter->WriteText(sectionDelimiterString[0]);
+      theReadWriter->WriteText(sectionDelimiterString[1] + "Functions");
+      theReadWriter->WriteText(sectionDelimiterString[2]);
+   }
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   std::cout << "Found " << objs.size() << " Functions\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      object = FindObject(*current);
+      if (object != NULL)
+      {
+         theReadWriter->WriteText(object->GetGeneratingString(mode));
+         theReadWriter->WriteText("\n");
+      }
+   }
+      
+   // Command sequence
+   GmatCommand *cmd = theModerator->GetNextCommand();
+   bool inTextMode = false;
+   // Write out the section delimiter comment
+   if (cmd != NULL)
+   {
+      theReadWriter->WriteText(sectionDelimiterString[0]);
+      theReadWriter->WriteText(sectionDelimiterString[1] + "Mission Sequence");
+      theReadWriter->WriteText(sectionDelimiterString[2]);
+   }
+   while (cmd != NULL) 
+   {
+      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+      MessageInterface::ShowMessage
+         ("===> ScriptInterpreter::WriteScript() before write cmd=%s, mode=%d, "
+          "inTextMode=%d\n", cmd->GetTypeName().c_str(), mode, inTextMode);
+      #endif
+      
+      if (!inTextMode)
+      {
+         theReadWriter->WriteText(cmd->GetGeneratingString());
+         theReadWriter->WriteText("\n");
+      }
+         
+      if (cmd->GetTypeName() == "BeginScript")
+         inTextMode = true;
+      if (cmd->GetTypeName() == "EndScript")
+         inTextMode = false;
+      
+      if (cmd == cmd->GetNext())
+         throw InterpreterException("Self-reference found in command stream during write.\n");
+      
+      cmd = cmd->GetNext();
+   }
+   
+   // Footer Comment
+   if (footerComment != "")
+      theReadWriter->WriteText(footerComment);
+   else
+      theReadWriter->WriteText("\n");
+     
    return true;
 }
