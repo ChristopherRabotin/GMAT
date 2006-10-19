@@ -227,7 +227,8 @@ void SpacecraftPanel::SaveData()
    
    if (!canClose)
    {
-      enableApply = false;
+      EnableUpdate(false);
+//      enableApply = false;
       return;
    }
 
