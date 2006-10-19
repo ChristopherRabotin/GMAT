@@ -35,6 +35,7 @@
 #include "CoordinateSystemException.hpp"
 
 //#define DEBUG_EQUATOR_AXES
+//#define DEBUG_EQ_LUNA
 
 #ifdef DEBUG_EQUATOR_AXES
    #include "MessageInterface.hpp"
@@ -354,6 +355,10 @@ void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    else if ((originName == SolarSystem::MOON_NAME) && 
            (((CelestialBody*)origin)->GetRotationDataSource() == Gmat::DE_FILE))
    {
+      #ifdef DEBUG_EQ_LUNA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage(
+         "Entering Luna Equator calculations (DE file is source)\n");
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       if (!de)
       {
          de = (DeFile*) ((CelestialBody*)origin)->GetSourceFile();
@@ -366,30 +371,90 @@ void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       bool override = ((CelestialBody*)origin)->GetOverrideTimeSystem();
       Real librationAngles[3], andRates[3];
       de->GetAnglesAndRates(atEpoch, librationAngles, andRates, override);
-      rotMatrix    = (Attitude::ToCosineMatrix(librationAngles, 3, 1, 3)).Transpose();
-      Real ca1    = cos(librationAngles[0]);
-      Real ca2    = cos(librationAngles[1]);
-      Real sa1    = sin(librationAngles[0]);
-      Real sa2    = sin(librationAngles[1]);
-      Real s2s1   = sa2*sa1;
-      Real c2c1   = ca2*ca1;
-      Real s2c1   = sa2*ca1;
-      Real c2s1   = ca2*sa1;
+      #ifdef DEBUG_EQ_LUNA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage("Luna Equator: override flag = %s\n",
+         (override? "true" : "false"));
+         MessageInterface::ShowMessage(
+         "Luna Equator: libration angles from DE are: %.16f  %.16f  %.16f\n",
+         librationAngles[0], librationAngles[1], librationAngles[2]);
+         MessageInterface::ShowMessage(
+         "Luna Equator: rates from DE are: %.16f  %.16f  %.16f\n",
+         andRates[0], andRates[1], andRates[2]);
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
+      Real ca1    = GmatMathUtil::Cos(librationAngles[0]);
+      Real ca2    = GmatMathUtil::Cos(librationAngles[1]);
+      Real sa1    = GmatMathUtil::Sin(librationAngles[0]);
+      Real sa2    = GmatMathUtil::Sin(librationAngles[1]);
+      // transposed R3(theta1)
+      Real R3_ang1_T[9] = {ca1, -sa1, 0.0, sa1, ca1, 0.0, 0.0, 0.0, 1.0};
+      // transposed R1(theta2)
+      Real R1_ang2_T[9] = {1.0, 0.0, 0.0, 0.0, ca2, -sa2, 0.0, sa2, ca2};
+      // transposed R1Dot(theta2)
+      Real R1Dot_ang2_T[9] = {0.0,                0.0,                0.0, 
+                              0.0, -andRates[1] * sa2, -andRates[1] * ca2,
+                              0.0,  andRates[1] * ca2, -andRates[1] * sa2};
+      // transposed R3Dot(theta1)
+      Real R3Dot_ang1_T[9] = {-andRates[0] * sa1, -andRates[0] * ca1, 0.0,
+                               andRates[0] * ca1, -andRates[0] * sa1, 0.0,
+                                             0.0,                0.0, 0.0};
+      // rotMatrix = R3_ang1_T * R1_ang2_T
+      Real R3R1[3][3];
+      Integer p3 = 0;
+      for (Integer p = 0; p < 3; ++p)
+      {
+         p3 = 3*p;
+         for (Integer q = 0; q < 3; ++q)
+         {
+            R3R1[p][q] = R3_ang1_T[p3]   * R1_ang2_T[q]   + 
+                         R3_ang1_T[p3+1] * R1_ang2_T[q+3] + 
+                         R3_ang1_T[p3+2] * R1_ang2_T[q+6];
+         }
+      }     
+      rotMatrix.Set(R3R1[0][0],R3R1[0][1],R3R1[0][2],  
+                    R3R1[1][0],R3R1[1][1],R3R1[1][2],
+                    R3R1[2][0],R3R1[2][1],R3R1[2][2]); 
       
-      rotDotMatrix.Set(
-         -andRates[0]*sa1, 
-          andRates[0]*ca1, 
-                      0.0,
-          andRates[1]*s2s1 - andRates[0]*c2c1, 
-         -andRates[1]*s2c1 - andRates[0]*c2s1,
-          andRates[1]*ca2,
-          andRates[1]*c2s1 + andRates[0]*s2c1,
-         -andRates[1]*c2c1 + andRates[0]*s2s1,
-         -andRates[1]*sa2
+      //rotDotmatrix = R3_ang1_T * R1Dot_ang2_T + R3Dot_ang1_T * R1_ang2_T
+      Real R3R1Dot[3][3];
+      for (Integer p = 0; p < 3; ++p)
+      {
+         p3 = 3*p;
+         for (Integer q = 0; q < 3; ++q)
+         {
+            R3R1Dot[p][q] = R3_ang1_T[p3]   * R1Dot_ang2_T[q]   + 
+                            R3_ang1_T[p3+1] * R1Dot_ang2_T[q+3] + 
+                            R3_ang1_T[p3+2] * R1Dot_ang2_T[q+6];
+         }
+      }   
+      Real R3DotR1[3][3];
+      for (Integer p = 0; p < 3; ++p)
+      {
+         p3 = 3*p;
+         for (Integer q = 0; q < 3; ++q)
+         {
+            R3DotR1[p][q] = R3Dot_ang1_T[p3]   * R1_ang2_T[q]   + 
+                            R3Dot_ang1_T[p3+1] * R1_ang2_T[q+3] + 
+                            R3Dot_ang1_T[p3+2] * R1_ang2_T[q+6];
+         }
+      }   
+      
+      rotDotMatrix.Set(R3R1Dot[0][0] +  R3DotR1[0][0],
+                       R3R1Dot[0][1] +  R3DotR1[0][1],
+                       R3R1Dot[0][2] +  R3DotR1[0][2],
+                       R3R1Dot[1][0] +  R3DotR1[1][0],
+                       R3R1Dot[1][1] +  R3DotR1[1][1],
+                       R3R1Dot[1][2] +  R3DotR1[1][2],
+                       R3R1Dot[2][0] +  R3DotR1[2][0],
+                       R3R1Dot[2][1] +  R3DotR1[2][1],
+                       R3R1Dot[2][2] +  R3DotR1[2][2]
          );
     }
    else  // use IAU data for all other bodies, and Luna (if DE file not selected)
    {
+      #ifdef DEBUG_EQ_LUNA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage("Equator for body %s with NO DE_FILE source ...\n",
+         originName.c_str());
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       // this method will return alpha (deg), delta (deg), 
       // W (deg), and Wdot (deg/day)
       static Rvector cartCoord(4);  
