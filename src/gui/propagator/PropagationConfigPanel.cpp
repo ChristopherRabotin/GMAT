@@ -2860,7 +2860,7 @@ void PropagationConfigPanel::ParseDATGravityFile(std::string fname)
    Integer      cc, dd, sz=0;
    Integer      iscomment, rtn;
    Integer      n=0, m=0;
-//   Integer      fileDegree, fileOrder;
+   Integer      fileDegree, fileOrder;
    Real         Cnm=0.0, Snm=0.0, dCnm=0.0, dSnm=0.0;
    // @to do should mu & radius be constant?? - waw
    Real         mu=398600.4415; // gravity parameter of central body
@@ -2920,8 +2920,8 @@ void PropagationConfigPanel::ParseDATGravityFile(std::string fname)
 
    fgets( buf, CelestialBody::BUFSIZE, fp );
 
-   fileDegree = 0;
-   fileOrder  = 0;
+//   fileDegree = 0;
+//   fileOrder  = 0;
    cc=0;n=0;m=0;
    
    do
@@ -2947,7 +2947,7 @@ void PropagationConfigPanel::ParseDATGravityFile(std::string fname)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::ParseGRVGravityFile(std::string fname)
 {
-//   Integer       fileOrder, fileDegree;
+   Integer       fileOrder, fileDegree;
 
    std::ifstream inFile;
    
@@ -2991,7 +2991,7 @@ void PropagationConfigPanel::ParseGRVGravityFile(std::string fname)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::ParseCOFGravityFile(std::string fname)
 {
-//   Integer       fileOrder, fileDegree;
+   Integer       fileOrder, fileDegree;
    Integer       int1;
    Real          real1, real2, real3;
 
