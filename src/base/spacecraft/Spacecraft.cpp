@@ -2427,9 +2427,9 @@ void Spacecraft::UpdateElementLabels()
       stateElementUnits[0] = "km";
       stateElementUnits[1] = "km";
       stateElementUnits[2] = "km";
-      stateElementUnits[3] = "km/s";
-      stateElementUnits[4] = "km/s";
-      stateElementUnits[5] = "km/s";
+      stateElementUnits[3] = "km/sec";
+      stateElementUnits[4] = "km/sec";
+      stateElementUnits[5] = "km/sec";
       
       return;
    }
