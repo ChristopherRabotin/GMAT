@@ -41,6 +41,7 @@
 
 //#define DEBUG_OBJECT_TYPE_CHECKING
 //#define DEBUG_OWNED_OBJECT_STRINGS
+//#define DEBUG_COMMENTS
 
 
 /// Set the static "undefined" parameters
@@ -1535,9 +1536,19 @@ void GmatBase::SetInlineComment(const std::string comment)
 const std::string GmatBase::GetAttributeCommentLine(Integer index)
 {
    if (index >= (Integer)attributeCommentLines.size())
+   {
+   	  #ifdef DEBUG_COMMENTS
+      MessageInterface::ShowMessage("Attribute comment name:%s index:%d has not been retrieved.\n", instanceName.c_str(), index);
+      #endif
       return "";
-      
-   return attributeCommentLines[index];
+   }
+   {
+      #ifdef DEBUG_COMMENTS
+      MessageInterface::ShowMessage("Getting Attribute comment name:%s index:%d - %s.\n",
+         instanceName.c_str(), index, attributeCommentLines[index].c_str());
+      #endif   
+      return attributeCommentLines[index];
+   }
 }
 
 //---------------------------------------------------------------------------
@@ -1548,9 +1559,21 @@ void GmatBase::SetAttributeCommentLine(Integer index,
                                 const std::string comment)
 {
    if (index >= (Integer)attributeCommentLines.size())
+   {
+   	  #ifdef DEBUG_COMMENTS
+      MessageInterface::ShowMessage("Attribute comment index:%d - %s - has not been set. Size=%d\n",
+         index, comment.c_str(), (Integer)attributeCommentLines.size());
+      #endif
       return;
-
-   attributeCommentLines[index] = comment;
+   }
+   else
+   {
+      #ifdef DEBUG_COMMENTS
+      MessageInterface::ShowMessage("Setting Attribute comment index:%d - %s.\n",
+         index, comment.c_str());
+      #endif 
+      attributeCommentLines[index] = comment;
+   }
 }
 
 //---------------------------------------------------------------------------
@@ -1559,9 +1582,20 @@ void GmatBase::SetAttributeCommentLine(Integer index,
 const std::string GmatBase::GetInlineAttributeComment(Integer index)
 {
    if (index >= (Integer)attributeInlineComments.size())
+   {
+   	  #ifdef DEBUG_COMMENTS
+      MessageInterface::ShowMessage("Inline attribute comment name:%s index:%d has not been retrieved.\n", instanceName.c_str(), index);
+      #endif
       return "";
-      
-   return attributeInlineComments[index];
+   }
+   else
+   {  
+   	  #ifdef DEBUG_COMMENTS
+      MessageInterface::ShowMessage("Getting Inline attribute comment name:%s index:%d - %s.\n",
+         instanceName.c_str(), index, attributeInlineComments[index].c_str());
+      #endif   
+      return attributeInlineComments[index];
+   }
 }
 
 //---------------------------------------------------------------------------
@@ -1572,9 +1606,21 @@ void GmatBase::SetInlineAttributeComment(Integer index,
                                 const std::string comment)
 {
    if (index >= (Integer)attributeInlineComments.size())
+   {
+   	  #ifdef DEBUG_COMMENTS
+      MessageInterface::ShowMessage("Inline attribute comment - %s - has not been set. Size=%d\n",
+         comment.c_str(), (Integer)attributeInlineComments.size());
+      #endif
       return;
-      
-   attributeInlineComments[index] = comment;
+   }
+   else
+   {  
+   	  #ifdef DEBUG_COMMENTS
+      MessageInterface::ShowMessage("Setting Inline attribute comment - %s.\n",
+         comment.c_str());
+      #endif 
+      attributeInlineComments[index] = comment;
+   }
 }
 
 //---------------------------------------------------------------------------
@@ -2374,8 +2420,8 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
       else
       {
          if ((commentLine != "") && (mode == Gmat::SCRIPTING))
-            data << commentLine << "\n";
-             
+            data << commentLine;
+            
          data << "Create " << tname << " " << nomme << ";";
          
          if ((inlineComment != "") && (mode == Gmat::SCRIPTING))
@@ -2487,7 +2533,7 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                	  std::string attCmtLn = GetAttributeCommentLine(i);
                	  
                	  if ((attCmtLn != "") && (mode == Gmat::SCRIPTING))
-                     stream << GetAttributeCommentLine(i) << "\n";
+                     stream << attCmtLn<< "\n";
                      
                   stream << prefix << GetParameterText(i)
                          << " = " << value.str() << ";";
@@ -2495,7 +2541,7 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                   // overwrite tmp variable for attribute cmt line
                   attCmtLn = GetInlineAttributeComment(i);
                   if ((attCmtLn != "") && (mode == Gmat::SCRIPTING))
-                     stream << GetInlineAttributeComment(i) << "\n";
+                     stream << attCmtLn << "\n";
                   else
                      stream << "\n";
                }
@@ -2510,7 +2556,9 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                std::string attCmtLn = GetAttributeCommentLine(i);
                	  
                if ((attCmtLn != "") && (mode == Gmat::SCRIPTING))
-                  stream << GetAttributeCommentLine(i) << "\n";
+               {
+                  stream << attCmtLn.c_str();
+               }
         
                stream << prefix << GetParameterText(i) << " = {";
                
@@ -2528,8 +2576,9 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                attCmtLn  = GetInlineAttributeComment(i);
                
                if ((attCmtLn != "") && (mode == Gmat::SCRIPTING))
-                  stream << "};" << GetInlineAttributeComment(i) 
-                       << "\n";
+               {
+                  stream << "};" << attCmtLn << "\n";
+               }
                else
                   stream << "};\n";
             }
