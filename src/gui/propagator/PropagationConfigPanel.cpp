@@ -2920,8 +2920,8 @@ void PropagationConfigPanel::ParseDATGravityFile(std::string fname)
 
    fgets( buf, CelestialBody::BUFSIZE, fp );
 
-//   fileDegree = 0;
-//   fileOrder  = 0;
+   fileDegree = 0;
+   fileOrder  = 0;
    cc=0;n=0;m=0;
    
    do
