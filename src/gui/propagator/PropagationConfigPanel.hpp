@@ -174,13 +174,16 @@ private:
    };
    
    wxStaticText *integratorStaticText;
-   wxStaticText *setting1StaticText;
-   wxStaticText *setting2StaticText;
-   wxStaticText *setting3StaticText;
-   wxStaticText *setting4StaticText;
-   wxStaticText *setting5StaticText;
-   wxStaticText *setting6StaticText;
-   wxStaticText *setting7StaticText;
+   wxStaticText *initialStepSizeStaticText;
+   wxStaticText *unitsInitStepSizeStaticText;
+   wxStaticText *accuracyStaticText;
+   wxStaticText *unitsMinStepStaticText;
+   wxStaticText *unitsMaxStepStaticText;
+   wxStaticText *minStepStaticText;
+   wxStaticText *maxStepStaticText;
+   wxStaticText *maxStepAttemptStaticText;
+   wxStaticText *minIntErrorStaticText;
+   wxStaticText *nomIntErrorStaticText;
    wxStaticText *errorCtrlStaticText;
    wxStaticText *centralBodyStaticText;
    wxStaticText *degree1StaticText;
@@ -193,13 +196,13 @@ private:
    wxStaticText *order2StaticText;
    wxStaticText *type4StaticText;
    
-   wxTextCtrl *setting1TextCtrl;
-   wxTextCtrl *setting2TextCtrl;
-   wxTextCtrl *setting3TextCtrl;
-   wxTextCtrl *setting4TextCtrl;
-   wxTextCtrl *setting5TextCtrl;
-   wxTextCtrl *setting6TextCtrl;
-   wxTextCtrl *setting7TextCtrl;
+   wxTextCtrl *initialStepSizeTextCtrl;
+   wxTextCtrl *accuracyTextCtrl;
+   wxTextCtrl *minStepTextCtrl;
+   wxTextCtrl *maxStepTextCtrl;
+   wxTextCtrl *maxStepAttemptTextCtrl;
+   wxTextCtrl *minIntErrorTextCtrl;
+   wxTextCtrl *nomIntErrorTextCtrl;
    wxTextCtrl *bodyTextCtrl;
    wxTextCtrl *gravityDegreeTextCtrl;
    wxTextCtrl *gravityOrderTextCtrl;
