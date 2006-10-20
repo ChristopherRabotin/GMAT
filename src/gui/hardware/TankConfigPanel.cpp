@@ -195,16 +195,18 @@ void TankConfigPanel::LoadData()
 //------------------------------------------------------------------------------
 void TankConfigPanel::SaveData()
 {
-   canClose = false;
-   if (!theApplyButton->IsEnabled())
-      return;
-       
-   if (theFuelTank == NULL)
-      return; 
-       
-   Integer paramID;
    try
    {
+//   canClose = false;
+      canClose = true;
+   
+      if (!theApplyButton->IsEnabled())
+         return;
+       
+      if (theFuelTank == NULL)
+         return; 
+       
+      Integer paramID;
       Real rvalue;
       std::string inputString;
       std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
@@ -220,7 +222,8 @@ void TankConfigPanel::SaveData()
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
              inputString.c_str(), "Temperature","Real Number");
-         return;
+         canClose = false;
+//         return;
       }
       theFuelTank->SetRealParameter(paramID, rvalue);
 
@@ -231,7 +234,8 @@ void TankConfigPanel::SaveData()
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
              inputString.c_str(), "Reference Temperature","Real Number");
-         return;
+         canClose = false;
+//         return;
       }
       theFuelTank->SetRealParameter(paramID, rvalue); 
 
@@ -242,7 +246,8 @@ void TankConfigPanel::SaveData()
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
              inputString.c_str(), "Fuel Mass","Real Number >= 0");
-         return;
+         canClose = false;
+//         return;
       }
       theFuelTank->SetRealParameter(paramID, rvalue); 
 
@@ -253,7 +258,8 @@ void TankConfigPanel::SaveData()
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
              inputString.c_str(), "Fuel Density","Real Number >= 0");
-         return;
+         canClose = false;
+//         return;
       }
       theFuelTank->SetRealParameter(paramID, rvalue); 
 
@@ -264,7 +270,8 @@ void TankConfigPanel::SaveData()
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
              inputString.c_str(), "Pressure","Real Number >= 0");
-         return;
+         canClose = false;
+//         return;
       }
       theFuelTank->SetRealParameter(paramID, rvalue); 
 
@@ -275,7 +282,8 @@ void TankConfigPanel::SaveData()
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
              inputString.c_str(), "Volume","Real Number >= 0");
-         return;
+         canClose = false;
+//         return;
       }
       theFuelTank->SetRealParameter(paramID, rvalue); 
       
@@ -285,7 +293,7 @@ void TankConfigPanel::SaveData()
                                        pressureRegulatedCheckBox->GetValue());
 
       EnableUpdate(false);
-      canClose = true;
+//      canClose = true;
    }
    catch (BaseException &ex)
    {

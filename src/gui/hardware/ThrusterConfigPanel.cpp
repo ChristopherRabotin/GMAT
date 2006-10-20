@@ -95,69 +95,75 @@ ThrusterConfigPanel::~ThrusterConfigPanel()
 //------------------------------------------------------------------------------
 void ThrusterConfigPanel::Create()
 {
-    // Integer
-    Integer bsize = 5; // border size
+   // Integer
+   Integer bsize = 5; // border size
     
-    // wxButton
-    cCoefButton = new wxButton( this, ID_BUTTON, wxT("Edit Thruster Coef."),
-                              wxDefaultPosition, wxDefaultSize, 0 );
-    kCoefButton = new wxButton( this, ID_BUTTON, wxT("Edit Impulse Coef."),
-                              wxDefaultPosition, wxDefaultSize, 0 );  
-                                                              
-    // wxComboBox 
-    coordsysComboBox  =
+   // Coordinate Systems 
+   coordsysStaticText = new wxStaticText( this, ID_TEXT, wxT("Coordinate System"), 
+                            wxDefaultPosition, wxDefaultSize, 0);
+   coordsysComboBox  =
       theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(180,-1));
-    tankComboBox =
-      theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(180,-1));
-   
-    // wxTextCtrl
-    XTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
-                            wxDefaultPosition, wxSize(80,-1), 0 );
-    YTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
-                            wxDefaultPosition, wxSize(80,-1), 0 );
-    ZTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
-                            wxDefaultPosition, wxSize(80,-1), 0 );
-    scaleFactorTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
+
+   // X Direction
+   XStaticText = new wxStaticText( this, ID_TEXT, wxT("X Direction"),
+                     wxDefaultPosition,wxDefaultSize, 0);
+   XTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
+                   wxDefaultPosition, wxSize(80,-1), 0 );
+
+   // Y Direction
+   YStaticText = new wxStaticText( this, ID_TEXT, wxT("Y Direction"),
+                     wxDefaultPosition,wxDefaultSize, 0);  
+   YTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
+                   wxDefaultPosition, wxSize(80,-1), 0 );
+
+   // Z Direction
+   ZStaticText = new wxStaticText( this, ID_TEXT, wxT("Z Direction"),
+                     wxDefaultPosition,wxDefaultSize, 0); 
+   ZTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
+                   wxDefaultPosition, wxSize(80,-1), 0 );
+
+   // Thruster Scale Factor
+   scaleFactorStaticText = new wxStaticText( this, ID_TEXT, 
+                    wxT("Thrust Scale Factor"), wxDefaultPosition,wxDefaultSize, 0);
+   scaleFactorTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
                             wxDefaultPosition, wxSize(80,-1), 0 );
                             
-    //wxStaticText
-    coordsysStaticText = new wxStaticText( this, ID_TEXT, wxT("Coordinate System"), 
-                            wxDefaultPosition, wxDefaultSize, 0);
-    tankStaticText = new wxStaticText(this, ID_TEXT,
-                            wxT("Use tank"), wxDefaultPosition, wxDefaultSize, 0);
-    XStaticText = new wxStaticText( this, ID_TEXT, wxT("X Direction"),
-                            wxDefaultPosition,wxDefaultSize, 0);
-    YStaticText = new wxStaticText( this, ID_TEXT, wxT("Y Direction"),
-                            wxDefaultPosition,wxDefaultSize, 0);  
-    ZStaticText = new wxStaticText( this, ID_TEXT, wxT("Z Direction"),
-                            wxDefaultPosition,wxDefaultSize, 0); 
-    scaleFactorStaticText = new wxStaticText( this, ID_TEXT, 
-                    wxT("Thrust Scale Factor"), wxDefaultPosition,wxDefaultSize, 0);
+   //Use Tank
+   tankStaticText = new wxStaticText(this, ID_TEXT,
+                        wxT("Use tank"), wxDefaultPosition, wxDefaultSize, 0);
+   tankComboBox =
+      theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(180,-1));
+
+   // wxButton
+   cCoefButton = new wxButton( this, ID_BUTTON, wxT("Edit Thruster Coef."),
+                     wxDefaultPosition, wxDefaultSize, 0 );
+   kCoefButton = new wxButton( this, ID_BUTTON, wxT("Edit Impulse Coef."),
+                     wxDefaultPosition, wxDefaultSize, 0 );  
+                                                              
+   // wx*Sizers                                           
+   wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
     
-    // wx*Sizers                                           
-    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
+   // Add to wx*Sizers
+   flexGridSizer1->Add(coordsysStaticText, 0, wxALIGN_CENTER|wxALL, bsize );
+   flexGridSizer1->Add(coordsysComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add(XStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
+   flexGridSizer1->Add(XTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add(YStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
+   flexGridSizer1->Add(YTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add(ZStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
+   flexGridSizer1->Add(ZTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add(scaleFactorStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
+   flexGridSizer1->Add(scaleFactorTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add(tankStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
+   flexGridSizer1->Add(tankComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add(cCoefButton, 0, wxALIGN_CENTRE|wxALL, bsize );
+   flexGridSizer1->Add(kCoefButton, 0, wxALIGN_LEFT|wxALL, bsize );
     
-    // Add to wx*Sizers 
-    flexGridSizer1->Add(coordsysStaticText, 0, wxALIGN_CENTER|wxALL, bsize );
-    flexGridSizer1->Add(coordsysComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
-    flexGridSizer1->Add(XStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
-    flexGridSizer1->Add(XTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
-    flexGridSizer1->Add(YStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
-    flexGridSizer1->Add(YTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
-    flexGridSizer1->Add(ZStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
-    flexGridSizer1->Add(ZTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
-    flexGridSizer1->Add(scaleFactorStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
-    flexGridSizer1->Add(scaleFactorTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
-    flexGridSizer1->Add(tankStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
-    flexGridSizer1->Add(tankComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-    flexGridSizer1->Add(cCoefButton, 0, wxALIGN_CENTRE|wxALL, bsize );
-    flexGridSizer1->Add(kCoefButton, 0, wxALIGN_LEFT|wxALL, bsize );
-    
-    theMiddleSizer->Add(flexGridSizer1, 0, wxALIGN_CENTRE|wxALL, bsize);
+   theMiddleSizer->Add(flexGridSizer1, 0, wxALIGN_CENTRE|wxALL, bsize);
 }
 
 //------------------------------------------------------------------------------
@@ -219,47 +225,50 @@ void ThrusterConfigPanel::LoadData()
 //------------------------------------------------------------------------------
 void ThrusterConfigPanel::SaveData()
 {
-    canClose = false;
-    if (!theApplyButton->IsEnabled())
-      return;
-       
-   if (theThruster == NULL)
-      return; 
-
-   Integer paramID;
-  
-   Real rvalue;
-   std::string inputString;
-   std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
-                     theThruster->GetName() + "\" is not an allowed value.\n"
-                     "The allowed values are: [ %s ].";
-
-   theOkButton->Disable();
- 
-   // X_Direction
-   paramID = theThruster->GetParameterID("X_Direction");
-   inputString = XTextCtrl->GetValue();
-   if (!GmatStringUtil::ToDouble(inputString,&rvalue))
-   {
-      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-             inputString.c_str(), "X_Direction","Real Number");
-      return;
-   }
-   theThruster->SetRealParameter(paramID, rvalue);
-   
-   // Y_Direction
-   paramID = theThruster->GetParameterID("Y_Direction");
-   inputString = YTextCtrl->GetValue();
-   if (!GmatStringUtil::ToDouble(inputString,&rvalue))
-   {
-      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-             inputString.c_str(), "Y_Direction","Real Number");
-      return;
-   }
-   theThruster->SetRealParameter(paramID, rvalue);
-        
    try 
    {
+//    canClose = false;
+      canClose = true;
+      if (!theApplyButton->IsEnabled())
+         return;
+       
+      if (theThruster == NULL)
+         return; 
+
+      Integer paramID;
+  
+      Real rvalue;
+      std::string inputString;
+      std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
+                         theThruster->GetName() + "\" is not an allowed value.\n"
+                        "The allowed values are: [ %s ].";
+
+//ltr: 10/20/06      theOkButton->Disable();
+ 
+	   // X_Direction
+	   paramID = theThruster->GetParameterID("X_Direction");
+	   inputString = XTextCtrl->GetValue();
+	   if (!GmatStringUtil::ToDouble(inputString,&rvalue))
+	   {
+	      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+	             inputString.c_str(), "X_Direction","Real Number");
+         canClose = false;
+//	      return;
+	   }
+	   theThruster->SetRealParameter(paramID, rvalue);
+	   
+	   // Y_Direction
+	   paramID = theThruster->GetParameterID("Y_Direction");
+	   inputString = YTextCtrl->GetValue();
+	   if (!GmatStringUtil::ToDouble(inputString,&rvalue))
+	   {
+	      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+	             inputString.c_str(), "Y_Direction","Real Number");
+         canClose = false;
+//	      return;
+	   }
+	   theThruster->SetRealParameter(paramID, rvalue);
+        
       // Z_Direction
       paramID = theThruster->GetParameterID("Z_Direction");
       inputString = ZTextCtrl->GetValue();
@@ -267,7 +276,8 @@ void ThrusterConfigPanel::SaveData()
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
                 inputString.c_str(), "Z_Direction","Real Number >= 0");
-         return;
+         canClose = false;
+//         return;
       }
       theThruster->SetRealParameter(paramID, rvalue);
    
@@ -278,7 +288,8 @@ void ThrusterConfigPanel::SaveData()
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
                 inputString.c_str(), "ThrustScaleFactor","Real Number");
-         return;
+         canClose = false;
+//         return;
       }
       theThruster->SetRealParameter(paramID, rvalue);
    
@@ -298,7 +309,7 @@ void ThrusterConfigPanel::SaveData()
       }
       
       EnableUpdate(false);
-      canClose = true;
+//      canClose = true;
    }
    catch(BaseException &ex)
    {
