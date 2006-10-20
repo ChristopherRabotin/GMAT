@@ -2419,12 +2419,14 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
       }
       else
       {
-         if ((commentLine != "") && (mode == Gmat::SCRIPTING))
+         if ((commentLine != "") && ((mode == Gmat::SCRIPTING) || 
+             (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
             data << commentLine;
             
          data << "Create " << tname << " " << nomme << ";";
          
-         if ((inlineComment != "") && (mode == Gmat::SCRIPTING))
+         if ((inlineComment != "") && ((mode == Gmat::SCRIPTING) || 
+             (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
             data << inlineComment << "\n";
          else
             data << "\n";
@@ -2532,15 +2534,17 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                {
                	  std::string attCmtLn = GetAttributeCommentLine(i);
                	  
-               	  if ((attCmtLn != "") && (mode == Gmat::SCRIPTING))
-                     stream << attCmtLn<< "\n";
+               	  if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
+                     (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
+                     stream << attCmtLn;
                      
                   stream << prefix << GetParameterText(i)
                          << " = " << value.str() << ";";
                   
                   // overwrite tmp variable for attribute cmt line
                   attCmtLn = GetInlineAttributeComment(i);
-                  if ((attCmtLn != "") && (mode == Gmat::SCRIPTING))
+                  if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
+                      (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
                      stream << attCmtLn << "\n";
                   else
                      stream << "\n";
@@ -2555,7 +2559,8 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
             {
                std::string attCmtLn = GetAttributeCommentLine(i);
                	  
-               if ((attCmtLn != "") && (mode == Gmat::SCRIPTING))
+               if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
+                  (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
                {
                   stream << attCmtLn.c_str();
                }
@@ -2575,7 +2580,8 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                
                attCmtLn  = GetInlineAttributeComment(i);
                
-               if ((attCmtLn != "") && (mode == Gmat::SCRIPTING))
+               if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
+                  (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
                {
                   stream << "};" << attCmtLn << "\n";
                }
