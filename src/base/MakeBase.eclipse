@@ -122,6 +122,7 @@ OBJECTS = \
     command/Propagate.o \
     command/Report.o \
     command/Save.o \
+    command/SolverBranchCommand.o \
     command/Stop.o \
     command/Target.o \
     command/Toggle.o \

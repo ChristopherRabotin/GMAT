@@ -20,11 +20,11 @@
 #ifndef Optimize_hpp
 #define Optimize_hpp
 
-#include "BranchCommand.hpp"
+#include "SolverBranchCommand.hpp"
 #include "Solver.hpp"
 #include "Spacecraft.hpp"
 
-class GMAT_API Optimize : public BranchCommand
+class GMAT_API Optimize : public SolverBranchCommand
 {
 public:
    Optimize();
@@ -80,17 +80,15 @@ protected:
 
    // save for possible later use
    static const std::string
-          PARAMETER_TEXT[OptimizeParamCount - BranchCommandParamCount];
+          PARAMETER_TEXT[OptimizeParamCount - SolverBranchCommandParamCount];
    
    static const Gmat::ParameterType
-          PARAMETER_TYPE[OptimizeParamCount - BranchCommandParamCount];
+          PARAMETER_TYPE[OptimizeParamCount - SolverBranchCommandParamCount];
    
    /// The name of the spacecraft that gets maneuvered
    std::string         optimizerName;
    /// The optimizer instance used to manage the optimizer state machine
    Solver              *optimizer;
-   /// Local store of the objects that we'll need to reset
-   ObjectArray         localStore;
    /// Flag indicating is the optimizer has converged
    bool                optimizerConverged;
    
@@ -101,11 +99,6 @@ protected:
    //Integer             optimizerNameID;
    //Integer             OptimizerConvergedID;
    bool                optimizerInDebugMode;
-    
-   // Methods used to save the starting point for the loops
-   virtual void        StoreLoopData();
-   virtual void        ResetLoopData();
-   virtual void        FreeLoopData();
 };
 
 #endif /*Optimize_hpp*/

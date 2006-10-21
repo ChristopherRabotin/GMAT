@@ -1,0 +1,182 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                            SolverBranchCommand
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool.
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number NNG06CA54C
+//
+// Author: Darrel J. Conway
+// Created: 2006/10/20
+//
+/**
+ * Definition for the Solver loop command base class (Target, Optimize and 
+ * Iterate).
+ */
+//------------------------------------------------------------------------------
+
+
+#include "SolverBranchCommand.hpp"
+#include "Spacecraft.hpp"
+
+//------------------------------------------------------------------------------
+//  SolverBranchCommand(const std::string &typeStr)
+//------------------------------------------------------------------------------
+/**
+ * Creates a SolverBranchCommand command.  (default constructor)
+ * 
+ * @param <typeStr> The type name of the SolverBranchCommand.
+ */
+//------------------------------------------------------------------------------
+SolverBranchCommand::SolverBranchCommand(const std::string &typeStr) :
+   BranchCommand(typeStr)
+{
+}
+
+//------------------------------------------------------------------------------
+//  SolverBranchCommand(const std::string &typeStr)
+//------------------------------------------------------------------------------
+/**
+ * Destroys a SolverBranchCommand command.  (destructor)
+ */
+//------------------------------------------------------------------------------
+SolverBranchCommand::~SolverBranchCommand()
+{
+}
+
+
+//------------------------------------------------------------------------------
+//  SolverBranchCommand(const SolverBranchCommand &sbc)
+//------------------------------------------------------------------------------
+/**
+ * Creates a SolverBranchCommand command based on another.  (Copy constructor)
+ * 
+ * @param <sbc> The SolverBranchCommand that is copied into this instance.
+ */
+//------------------------------------------------------------------------------
+SolverBranchCommand::SolverBranchCommand(const SolverBranchCommand& sbc) :
+   BranchCommand(sbc)
+{
+}
+
+//------------------------------------------------------------------------------
+//  SolverBranchCommand& operator=(const SolverBranchCommand& sbc)
+//------------------------------------------------------------------------------
+/**
+ * Copies a SolverBranchCommand command.  (Assignment operator)
+ * 
+ * @param <sbc> The SolverBranchCommand that is copied into this instance.
+ * 
+ * @return This instance, configured to match sbc.
+ */
+//------------------------------------------------------------------------------
+SolverBranchCommand& SolverBranchCommand::operator=(
+   const SolverBranchCommand& sbc)
+{
+   if (&sbc != this)
+   {
+      BranchCommand::operator=(sbc);
+   }
+   
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// protected methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// void StoreLoopData()
+//------------------------------------------------------------------------------
+/**
+ * Makes local copies of the data so that a solver loop can recover initial
+ * data while iterating.
+ */
+//------------------------------------------------------------------------------
+void SolverBranchCommand::StoreLoopData()
+{
+   // Make local copies of all of the objects that may be affected by optimize
+   // loop iterations
+   std::map<std::string, GmatBase *>::iterator pair = objectMap->begin();
+   GmatBase *obj;
+    
+   // Loop through the object map, looking for objects we'll need to restore.
+   while (pair != objectMap->end()) {
+      obj = (*pair).second;
+      // Save copies of all of the spacecraft
+      if (obj->GetType() == Gmat::SPACECRAFT)
+      {
+         Spacecraft *orig = (Spacecraft*)(obj);
+         Spacecraft *sc = new Spacecraft(*orig);
+         // Handle CoordinateSystems
+         if (orig->GetInternalCoordSystem() == NULL)
+            MessageInterface::ShowMessage(
+               "Internal CS is NULL on spacecraft %s prior to optimizer cloning\n",
+               orig->GetName().c_str());
+         if (orig->GetRefObject(Gmat::COORDINATE_SYSTEM, "") == NULL)
+            MessageInterface::ShowMessage(
+               "Coordinate system is NULL on spacecraft %s prior to optimizer cloning\n",
+               orig->GetName().c_str());
+         sc->SetInternalCoordSystem(orig->GetInternalCoordSystem());
+         sc->SetRefObject(orig->GetRefObject(Gmat::COORDINATE_SYSTEM, ""),
+            Gmat::COORDINATE_SYSTEM, "");
+         
+         localStore.push_back(sc);
+      }
+      ++pair;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void ResetLoopData()
+//------------------------------------------------------------------------------
+/**
+ * Resets starting data from local copies so that a solver loop can iterate.
+ */
+//------------------------------------------------------------------------------
+void SolverBranchCommand::ResetLoopData()
+{
+   Spacecraft *sc;
+   std::string name;
+    
+   for (std::vector<GmatBase *>::iterator i = localStore.begin();
+        i != localStore.end(); ++i) {
+      name = (*i)->GetName();
+      GmatBase *gb = (*objectMap)[name];
+      if (gb != NULL) {
+         sc = (Spacecraft*)gb;
+         *sc = *((Spacecraft*)(*i));
+      }
+   }
+   // Reset the propagators so that propagations run identically loop to loop
+   GmatCommand *cmd = branch[0];
+   while (cmd != this)
+   {
+      if (cmd->GetTypeName() == "Propagate")
+         cmd->TakeAction("ResetLoopData");
+      cmd = cmd->GetNext();
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void FreeLoopData()
+//------------------------------------------------------------------------------
+/**
+ * Cleans up starting data store after solver has completed.
+ */
+//------------------------------------------------------------------------------
+void SolverBranchCommand::FreeLoopData()
+{
+   GmatBase *obj;
+   while (!localStore.empty()) {
+      obj = *(--localStore.end());
+      localStore.pop_back();
+      delete obj;
+   }
+}

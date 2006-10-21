@@ -1102,6 +1102,14 @@ bool Propagate::TakeAction(const std::string &action,
       stopSatNames.push_back(actionData);
       return true;
    }
+   else if (action == "ResetLoopData")
+   {
+      for (std::vector<Propagator*>::iterator i = p.begin(); i != p.end(); ++i)
+      {
+         (*i)->ResetInitialData(); 
+      }
+      return true;
+   }
    
    return GmatCommand::TakeAction(action, actionData);
 }

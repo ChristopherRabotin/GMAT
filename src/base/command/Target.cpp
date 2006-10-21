@@ -17,7 +17,7 @@
  */
 //------------------------------------------------------------------------------
 
-
+ 
 #include "Target.hpp"
 
 
@@ -26,14 +26,14 @@
 
 
 //------------------------------------------------------------------------------
-//  Target(void)
+//  Target()
 //------------------------------------------------------------------------------
 /**
  * Creates a Target command.  (default constructor)
  */
 //------------------------------------------------------------------------------
 Target::Target() :
-   BranchCommand      ("Target"),
+   SolverBranchCommand("Target"),
    targeterName       (""),
    targeter           (NULL),
    targeterConverged  (false),
@@ -69,7 +69,7 @@ Target::~Target()
  */
 //------------------------------------------------------------------------------
 Target::Target(const Target& t) :
-   BranchCommand       (t),
+   SolverBranchCommand (t),
    targeterName        (t.targeterName),
    targeter            (NULL),
    targeterConverged   (false),
@@ -118,7 +118,7 @@ Target& Target::operator=(const Target& t)
 /**
  * Adds a command to the targeter loop.
  *
- * This method calls the BranchCommand base class method that adds a command
+ * This method calls the SolverBranchCommand base class method that adds a command
  * to the command sequence that branches off of the main mission sequence.  This
  * extension was needed so that the EndTarget command can be set to point back 
  * to the head of the targeter loop.
@@ -135,7 +135,7 @@ bool Target::Append(GmatCommand *cmd)
                                      cmd->GetTypeName().c_str());
    #endif
     
-   if (!BranchCommand::Append(cmd))
+   if (!SolverBranchCommand::Append(cmd))
         return false;
     
    // If at the end of a targeter branch, point that end back to this comand.
@@ -207,7 +207,7 @@ const std::string& Target::GetGeneratingString(Gmat::WriteMode mode,
                                                const std::string &useName)
 {
    generatingString = "Target " + targeterName + ";";
-   return BranchCommand::GetGeneratingString(mode, prefix, useName);
+   return SolverBranchCommand::GetGeneratingString(mode, prefix, useName);
 }
 
 
@@ -235,7 +235,7 @@ bool Target::RenameRefObject(const Gmat::ObjectType type,
          targeterName = newName;
    }
 
-   BranchCommand::RenameRefObject(type, oldName, newName);
+   SolverBranchCommand::RenameRefObject(type, oldName, newName);
    
    return true;
 }
@@ -258,7 +258,7 @@ std::string Target::GetParameterText(const Integer id) const
    if (id == targeterNameID)
       return "Targeter";
     
-   return BranchCommand::GetParameterText(id);
+   return SolverBranchCommand::GetParameterText(id);
 }
 
 
@@ -280,7 +280,7 @@ Integer Target::GetParameterID(const std::string &str) const
    if (str == "TargeterConverged")
       return TargeterConvergedID;
     
-   return BranchCommand::GetParameterID(str);
+   return SolverBranchCommand::GetParameterID(str);
 }
 
 
@@ -302,7 +302,7 @@ Gmat::ParameterType Target::GetParameterType(const Integer id) const
    if (id == TargeterConvergedID)
       return Gmat::BOOLEAN_TYPE;
     
-   return BranchCommand::GetParameterType(id);
+   return SolverBranchCommand::GetParameterType(id);
 }
 
 
@@ -324,7 +324,7 @@ std::string Target::GetParameterTypeString(const Integer id) const
    if (id == TargeterConvergedID)
       return PARAM_TYPE_STRING[Gmat::BOOLEAN_TYPE];
     
-   return BranchCommand::GetParameterTypeString(id);
+   return SolverBranchCommand::GetParameterTypeString(id);
 }
 
 
@@ -344,7 +344,7 @@ std::string Target::GetStringParameter(const Integer id) const
    if (id == targeterNameID)
       return targeterName;
     
-   return BranchCommand::GetStringParameter(id);
+   return SolverBranchCommand::GetStringParameter(id);
 }
 
 
@@ -367,7 +367,7 @@ bool Target::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
     
-   return BranchCommand::SetStringParameter(id, value);
+   return SolverBranchCommand::SetStringParameter(id, value);
 }
 
 
@@ -391,7 +391,7 @@ bool Target::GetBooleanParameter(const Integer id) const
    if (id == TargeterConvergedID)
       return targeterConverged;
       
-   return BranchCommand::GetBooleanParameter(id);
+   return SolverBranchCommand::GetBooleanParameter(id);
 }
 
 
@@ -410,7 +410,7 @@ std::string Target::GetRefObjectName(const Gmat::ObjectType type) const
 {
    if (type == Gmat::SOLVER)
       return targeterName;
-   return BranchCommand::GetRefObjectName(type);
+   return SolverBranchCommand::GetRefObjectName(type);
 }
 
 
@@ -433,7 +433,7 @@ bool Target::SetRefObjectName(const Gmat::ObjectType type,
       targeterName = name;
       return true;
    }
-   return BranchCommand::SetRefObjectName(type, name);
+   return SolverBranchCommand::SetRefObjectName(type, name);
 }
 
 
@@ -488,7 +488,7 @@ bool Target::Initialize()
       }
    }
 
-   bool retval = BranchCommand::Initialize();
+   bool retval = SolverBranchCommand::Initialize();
 
    if (retval == true) {
       // Targeter specific initialization goes here:
@@ -552,7 +552,7 @@ bool Target::Execute()
       StoreLoopData();
 
 
-      retval = BranchCommand::Execute();
+      retval = SolverBranchCommand::Execute();
 
       #ifdef DEBUG_TARGETER
          MessageInterface::ShowMessage("Resetting the Differential Corrector\n");
@@ -654,89 +654,4 @@ bool Target::Execute()
    }
    BuildCommandSummary(true);
    return retval;
-}
-
-
-//------------------------------------------------------------------------------
-// void StoreLoopData()
-//------------------------------------------------------------------------------
-/**
- * Makes local copies of the data so that a targeting loop can recover initial
- * data while iterating.
- */
-//------------------------------------------------------------------------------
-void Target::StoreLoopData()
-{
-   // Make local copies of all of the objects that may be affected by targeter
-   // loop iterations
-   std::map<std::string, GmatBase *>::iterator pair = objectMap->begin();
-   GmatBase *obj;
-    
-   // Loop through the object map, looking for objects we'll need to restore.
-   while (pair != objectMap->end()) {
-      obj = (*pair).second;
-      // Save copies of all of the spacecraft
-      if (obj->GetType() == Gmat::SPACECRAFT)
-      {
-         Spacecraft *orig = (Spacecraft*)(obj);
-         Spacecraft *sc = new Spacecraft(*orig);
-         // Handle CoordinateSystems
-         if (orig->GetInternalCoordSystem() == NULL)
-                        MessageInterface::ShowMessage(
-                        "Internal CS is NULL on spacecraft %s prior to targeter cloning\n",
-                        orig->GetName().c_str());
-                        if (orig->GetRefObject(Gmat::COORDINATE_SYSTEM, "") == NULL)
-                        MessageInterface::ShowMessage(
-                        "Coordinate system is NULL on spacecraft %s prior to targeter cloning\n",
-                           orig->GetName().c_str());
-         sc->SetInternalCoordSystem(orig->GetInternalCoordSystem());
-         sc->SetRefObject(orig->GetRefObject(Gmat::COORDINATE_SYSTEM, ""),
-            Gmat::COORDINATE_SYSTEM, "");
-         
-         localStore.push_back(sc);
-      }
-      ++pair;
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// void ResetLoopData()
-//------------------------------------------------------------------------------
-/**
- * Resets starting data from local copiesso that a targeting loop can iterate.
- */
-//------------------------------------------------------------------------------
-void Target::ResetLoopData()
-{
-   Spacecraft *sc;
-   std::string name;
-    
-   for (std::vector<GmatBase *>::iterator i = localStore.begin();
-        i != localStore.end(); ++i) {
-      name = (*i)->GetName();
-      GmatBase *gb = (*objectMap)[name];
-      if (gb != NULL) {
-         sc = (Spacecraft*)gb;
-         *sc = *((Spacecraft*)(*i));
-      }
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// void FreeLoopData()
-//------------------------------------------------------------------------------
-/**
- * Cleans up starting data store after targeting has completed.
- */
-//------------------------------------------------------------------------------
-void Target::FreeLoopData()
-{
-   GmatBase *obj;
-   while (!localStore.empty()) {
-      obj = *(--localStore.end());
-      localStore.pop_back();
-      delete obj;
-   }
 }

@@ -22,7 +22,7 @@
 #define Target_hpp
  
 
-#include "BranchCommand.hpp"
+#include "SolverBranchCommand.hpp"
 #include "Solver.hpp"
 #include "Spacecraft.hpp"
 
@@ -35,7 +35,7 @@
  * provides data to the command sequence about the next step to be taken in the 
  * targeting process.
  */
-class GMAT_API Target : public BranchCommand
+class GMAT_API Target : public SolverBranchCommand
 {
 public:
    Target();
@@ -82,8 +82,6 @@ protected:
    std::string         targeterName;
    /// The targeter instance used to manage the targeter state machine
    Solver              *targeter;
-   /// Local store of the objects that we'll need to reset
-   ObjectArray         localStore;
    /// Flag indicating is the targeter has converged
    bool                targeterConverged;
     
@@ -92,11 +90,6 @@ protected:
    Integer             targeterNameID;
    Integer             TargeterConvergedID;
    bool                targeterInDebugMode;
-    
-   // Methods used to save the starting point for the loops
-   virtual void        StoreLoopData();
-   virtual void        ResetLoopData();
-   virtual void        FreeLoopData();
 };
 
 

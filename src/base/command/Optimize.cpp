@@ -37,14 +37,14 @@
 // static data
 //------------------------------------------------------------------------------
 const std::string
-Optimize::PARAMETER_TEXT[OptimizeParamCount - BranchCommandParamCount] =
+Optimize::PARAMETER_TEXT[OptimizeParamCount - SolverBranchCommandParamCount] =
 {
    "OptimizerName",
    "OptimizerConverged",
 };
 
 const Gmat::ParameterType
-Optimize::PARAMETER_TYPE[OptimizeParamCount - BranchCommandParamCount] =
+Optimize::PARAMETER_TYPE[OptimizeParamCount - SolverBranchCommandParamCount] =
 {
    Gmat::STRING_TYPE,
    Gmat::BOOLEAN_TYPE,
@@ -58,7 +58,7 @@ Optimize::PARAMETER_TYPE[OptimizeParamCount - BranchCommandParamCount] =
 // constructor
 //------------------------------------------------------------------------------
 Optimize::Optimize() :
-   BranchCommand      ("Optimize"),
+   SolverBranchCommand ("Optimize"),
    optimizerName       (""),
    optimizer           (NULL),
    optimizerConverged  (false),
@@ -74,7 +74,7 @@ Optimize::Optimize() :
 // copy constructor
 //------------------------------------------------------------------------------
 Optimize::Optimize(const Optimize& o) :
-   BranchCommand        (o),
+   SolverBranchCommand  (o),
    optimizerName        (o.optimizerName),
    optimizer            (NULL),
    optimizerConverged   (false),
@@ -126,7 +126,7 @@ bool Optimize::Append(GmatCommand *cmd)
                                      cmd->GetTypeName().c_str());
    #endif
     
-   if (!BranchCommand::Append(cmd))
+   if (!SolverBranchCommand::Append(cmd))
         return false;
     
    // If at the end of a optimizer branch, point that end back to this comand.
@@ -175,7 +175,7 @@ const std::string& Optimize::GetGeneratingString(Gmat::WriteMode mode,
                                                  const std::string &useName)
 {
    generatingString = "Optimize " + optimizerName + ";";
-   return BranchCommand::GetGeneratingString(mode, prefix, useName);
+   return SolverBranchCommand::GetGeneratingString(mode, prefix, useName);
 }
 
 //------------------------------------------------------------------------------
@@ -199,10 +199,10 @@ bool Optimize::RenameRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 std::string Optimize::GetParameterText(const Integer id) const
 {
-   if (id >= BranchCommandParamCount && id < OptimizeParamCount)
-      return PARAMETER_TEXT[id - BranchCommandParamCount];
+   if (id >= SolverBranchCommandParamCount && id < OptimizeParamCount)
+      return PARAMETER_TEXT[id - SolverBranchCommandParamCount];
     
-   return BranchCommand::GetParameterText(id);
+   return SolverBranchCommand::GetParameterText(id);
 }
 
 //------------------------------------------------------------------------------
@@ -210,13 +210,13 @@ std::string Optimize::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Optimize::GetParameterID(const std::string &str) const
 {
-   for (Integer i = BranchCommandParamCount; i < OptimizeParamCount; i++)
+   for (Integer i = SolverBranchCommandParamCount; i < OptimizeParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i - BranchCommandParamCount])
+      if (str == PARAMETER_TEXT[i - SolverBranchCommandParamCount])
          return i;
    }
     
-   return BranchCommand::GetParameterID(str);
+   return SolverBranchCommand::GetParameterID(str);
 }
 
 //------------------------------------------------------------------------------
@@ -224,10 +224,10 @@ Integer Optimize::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType Optimize::GetParameterType(const Integer id) const
 {
-   if (id >= BranchCommandParamCount && id < OptimizeParamCount)
-      return PARAMETER_TYPE[id - BranchCommandParamCount];
+   if (id >= SolverBranchCommandParamCount && id < OptimizeParamCount)
+      return PARAMETER_TYPE[id - SolverBranchCommandParamCount];
     
-   return BranchCommand::GetParameterType(id);
+   return SolverBranchCommand::GetParameterType(id);
 }
 
 //------------------------------------------------------------------------------
@@ -235,7 +235,7 @@ Gmat::ParameterType Optimize::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Optimize::GetParameterTypeString(const Integer id) const
 {    
-   return BranchCommand::PARAM_TYPE_STRING[GetParameterType(id)];
+   return SolverBranchCommand::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 //------------------------------------------------------------------------------
@@ -246,7 +246,7 @@ std::string Optimize::GetStringParameter(const Integer id) const
    if (id == OPTIMIZER_NAME)
       return optimizerName;
     
-   return BranchCommand::GetStringParameter(id);
+   return SolverBranchCommand::GetStringParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -260,7 +260,7 @@ bool Optimize::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
     
-   return BranchCommand::SetStringParameter(id, value);
+   return SolverBranchCommand::SetStringParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -271,7 +271,7 @@ bool Optimize::GetBooleanParameter(const Integer id) const
    if (id == OPTIMIZER_CONVERGED)
       return optimizerConverged;
       
-   return BranchCommand::GetBooleanParameter(id);
+   return SolverBranchCommand::GetBooleanParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -281,7 +281,7 @@ std::string Optimize::GetRefObjectName(const Gmat::ObjectType type) const
 {
    if (type == Gmat::SOLVER)
       return optimizerName;
-   return BranchCommand::GetRefObjectName(type);
+   return SolverBranchCommand::GetRefObjectName(type);
 }
 
 //------------------------------------------------------------------------------
@@ -295,7 +295,7 @@ bool Optimize::SetRefObjectName(const Gmat::ObjectType type,
       optimizerName = name;
       return true;
    }
-   return BranchCommand::SetRefObjectName(type, name);
+   return SolverBranchCommand::SetRefObjectName(type, name);
 }
 
 //------------------------------------------------------------------------------
@@ -345,7 +345,7 @@ bool Optimize::Initialize()
       }
    }
 
-   bool retval = BranchCommand::Initialize();
+   bool retval = SolverBranchCommand::Initialize();
 
    if (retval == true) 
    {
@@ -405,7 +405,7 @@ bool Optimize::Execute()
       FreeLoopData();
       StoreLoopData();
 
-      retval = BranchCommand::Execute();
+      retval = SolverBranchCommand::Execute();
 
       #ifdef DEBUG_OPTIMIZER
          MessageInterface::ShowMessage("Resetting the Optimizer\n");
@@ -666,78 +666,4 @@ std::string Optimize::GetCallbackResults()
       allResults.c_str());
    #endif
    return allResults;
-}
-
-
-//------------------------------------------------------------------------------
-// protected methods
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// StoreLoopData
-//------------------------------------------------------------------------------
-void Optimize::StoreLoopData()
-{
-   // Make local copies of all of the objects that may be affected by optimize
-   // loop iterations
-   std::map<std::string, GmatBase *>::iterator pair = objectMap->begin();
-   GmatBase *obj;
-    
-   // Loop through the object map, looking for objects we'll need to restore.
-   while (pair != objectMap->end()) {
-      obj = (*pair).second;
-      // Save copies of all of the spacecraft
-      if (obj->GetType() == Gmat::SPACECRAFT)
-      {
-         Spacecraft *orig = (Spacecraft*)(obj);
-         Spacecraft *sc = new Spacecraft(*orig);
-         // Handle CoordinateSystems
-         if (orig->GetInternalCoordSystem() == NULL)
-   			MessageInterface::ShowMessage(
-      			"Internal CS is NULL on spacecraft %s prior to optimizer cloning\n",
-      			orig->GetName().c_str());
-			if (orig->GetRefObject(Gmat::COORDINATE_SYSTEM, "") == NULL)
-   			MessageInterface::ShowMessage(
-      			"Coordinate system is NULL on spacecraft %s prior to optimizer cloning\n",
-    			   orig->GetName().c_str());
-         sc->SetInternalCoordSystem(orig->GetInternalCoordSystem());
-         sc->SetRefObject(orig->GetRefObject(Gmat::COORDINATE_SYSTEM, ""),
-            Gmat::COORDINATE_SYSTEM, "");
-         
-         localStore.push_back(sc);
-      }
-      ++pair;
-   }
-}
-
-//------------------------------------------------------------------------------
-// ResetLoopData
-//------------------------------------------------------------------------------
-void Optimize::ResetLoopData()
-{
-   Spacecraft *sc;
-   std::string name;
-    
-   for (std::vector<GmatBase *>::iterator i = localStore.begin();
-        i != localStore.end(); ++i) {
-      name = (*i)->GetName();
-      GmatBase *gb = (*objectMap)[name];
-      if (gb != NULL) {
-         sc = (Spacecraft*)gb;
-         *sc = *((Spacecraft*)(*i));
-      }
-   }
-}
-
-//------------------------------------------------------------------------------
-// FreeLoopData
-//------------------------------------------------------------------------------
-void Optimize::FreeLoopData()
-{
-   GmatBase *obj;
-   while (!localStore.empty()) {
-      obj = *(--localStore.end());
-      localStore.pop_back();
-      delete obj;
-   }
 }

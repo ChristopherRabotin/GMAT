@@ -130,6 +130,11 @@ PropSetup& PropSetup::operator= (const PropSetup &right)
       // PropSetup data
       mInitialized = false;
       
+      if (mPropagator != NULL)
+         delete mPropagator;
+      if (mForceModel != NULL)
+         delete mForceModel;
+         
       if (right.mPropagator != NULL)
          mPropagator = (Propagator*)(right.mPropagator->Clone());
       else
