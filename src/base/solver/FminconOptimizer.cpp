@@ -394,6 +394,8 @@ bool FminconOptimizer::Optimize()
       std::ostringstream mlS;
       // pass to MATLAB the X0 array (needs to be a column vector)
       mlS.str("");
+      mlS.precision(18);
+      
       for (Integer i=0;i<(Integer)variable.size();i++)
          mlS << variable.at(i) << ";";
       inParm = "X0 = [" + mlS.str() + "];";
