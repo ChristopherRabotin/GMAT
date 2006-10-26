@@ -826,7 +826,8 @@ bool Assignment::Execute()
          case Gmat::REAL_TYPE:
             #ifdef DEBUG_ASSIGNMENT_EXEC
             if (!isVariable)
-               MessageInterface::ShowMessage("Setting %s on %s to %lf\n", 
+               //MessageInterface::ShowMessage("Setting %s on %s to %lf\n", 
+               MessageInterface::ShowMessage("Setting %s on %s to %.18f\n", 
                   parmOwner->GetParameterText(parmID).c_str(), 
                   parmOwner->GetName().c_str(), EvaluateRHS());
             else

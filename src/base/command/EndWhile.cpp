@@ -21,6 +21,12 @@
 #include "EndWhile.hpp"
 #include "BranchCommand.hpp"
 
+//#define DEBUG_ENDWHILE_EXECUTE
+
+#ifdef DEBUG_ENDWHILE_EXECUTE
+   #include "MessageInterface.hpp"
+#endif
+
 
 //------------------------------------------------------------------------------
 // EndWhile(void) :
@@ -87,6 +93,12 @@ bool EndWhile::Initialize(void)
 bool EndWhile::Execute(void)
 {
    BuildCommandSummary(true);
+   #ifdef DEBUG_ENDWHILE_EXECUTE
+      MessageInterface::ShowMessage("In EndWhile::Execute, next is a %s\n",
+      (next->GetTypeName()).c_str());
+      MessageInterface::ShowMessage("---- that is, in EndWhile %p, object While is %p\n",
+      this, next);
+   #endif
    return true;
 }
 
@@ -98,6 +110,11 @@ bool EndWhile::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
    // if inserting after End statement for branch command, we want to 
    // insert right after the entire If command
+   #ifdef DEBUG_ENDWHILE_EXECUTE
+      MessageInterface::ShowMessage(
+      "In EndWhile::Insert, calling InsertRightAfter(), next is a %s\n",
+      (next->GetTypeName()).c_str());
+   #endif
    if (this == prev) return ((BranchCommand*)next)->InsertRightAfter(cmd);
    return false;
 }

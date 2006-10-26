@@ -26,6 +26,7 @@
 
 //#define DEBUG_WHILE
 //#define DEBUG_WHILE_RERUN
+//#define DEBUG_WHILE_END
 
 //---------------------------------
 // static data
@@ -118,8 +119,20 @@ While::~While()
 //------------------------------------------------------------------------------
 bool While::Append(GmatCommand *cmd)
 {
+   #ifdef DEBUG_WHILE_END // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+      MessageInterface::ShowMessage(
+      "Entering Append (%s) of while command   %s   %s  %s\n",
+      (cmd->GetTypeName()).c_str(), lhsList[0].c_str(), opStrings[0].c_str(), 
+      rhsList[0].c_str());
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
     if (!ConditionalBranch::Append(cmd))
+    {
+      #ifdef DEBUG_WHILE_END // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage(
+         "    and ConditionalBranch::Append() returned false\n");
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
         return false;
+    }
 
     // Check for the end of "While" branch, point that end back to this command
     if (cmd->GetTypeName() == "EndWhile")
@@ -129,16 +142,35 @@ bool While::Append(GmatCommand *cmd)
           cmd->Append(this);
           // While statement is complete; -1 points us back to the main sequence.
           branchToFill = -1;
+         #ifdef DEBUG_WHILE_END // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+            MessageInterface::ShowMessage(
+            "      -->Appending EndWhile command to while   %s   %s  %s\n",
+            lhsList[0].c_str(), opStrings[0].c_str(), rhsList[0].c_str());
+            MessageInterface::ShowMessage("----> that is, appending object %p to object %p\n",
+            this, cmd);
+         #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
        }
        else
        {
+         #ifdef DEBUG_WHILE_END // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+            MessageInterface::ShowMessage(
+            "         Is an EndWhile command for while   %s   %s  %s, but not appending\n",
+            lhsList[0].c_str(), opStrings[0].c_str(), rhsList[0].c_str());
+            MessageInterface::ShowMessage(
+            "         and nestLevel = %d\n", nestLevel);
+         #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
           --nestLevel;
        }
     }
 
     if (cmd->GetTypeName() == "While")
     {
-       ++nestLevel;
+      ++nestLevel;
+      #ifdef DEBUG_WHILE_END // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+         MessageInterface::ShowMessage(
+         "      +++Increasing nestLevel for while   %s   %s  %s to %d\n",
+         lhsList[0].c_str(), opStrings[0].c_str(), rhsList[0].c_str(), nestLevel);
+      #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
     }
 
     return true;
@@ -157,14 +189,15 @@ bool While::Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 bool While::Execute()
 {
-   #ifdef DEBUG_WHILE_RERUN
+   #ifdef DEBUG_WHILE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
       MessageInterface::ShowMessage(
-         "While::Executing() status: commandComplete = %s, "
+         "While::Executing(%s %s %s) status: commandComplete = %s, "
          "commandExecuting = %s, branchExecuting = %s\n",
+         lhsList[0].c_str(), opStrings[0].c_str(), rhsList[0].c_str(),
          ((commandComplete) ? "true" : "false"),
          ((commandExecuting) ? "true" : "false"),
          ((branchExecuting) ? "true" : "false") );
-   #endif
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
 
    bool retval = true;
 
@@ -176,27 +209,30 @@ bool While::Execute()
    else 
    {
       // If not, check to see what to do and do it.
-      if (!commandExecuting) {
-         #ifdef DEBUG_WHILE
+      if (!commandExecuting) 
+      {
+         #ifdef DEBUG_WHILE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
             MessageInterface::ShowMessage("Starting command\n");
-         #endif
+         #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
          ConditionalBranch::Execute();
       }
 
       if (EvaluateAllConditions()) // must deal with multiple conditions later
       {
-         #ifdef DEBUG_WHILE
-            MessageInterface::ShowMessage("   Conditions true, running while loop\n");
-         #endif
+         #ifdef DEBUG_WHILE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+            MessageInterface::ShowMessage(
+               "   Conditions true, running while loop\n");
+         #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
          branchExecuting = true;
          while (branchExecuting && retval)
             retval = ExecuteBranch();
       }
       else  // fails condition, so while loop is done
       {
-         #ifdef DEBUG_WHILE
-            MessageInterface::ShowMessage("   Conditions false; command complete\n");
-         #endif
+         #ifdef DEBUG_WHILE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+            MessageInterface::ShowMessage(
+               "   Conditions false; command complete\n");
+         #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
          commandComplete  = true;
          commandExecuting = false;
          branchExecuting  = false;

@@ -23,6 +23,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_BRANCHCOMMAND_DEALLOCATION
+//#define DEBUG_BRANCHCOMMAND_APPEND
 //#define DEBUG_BRANCHCOMMAND_EXECUTION
 //#define DEBUG_BRANCHCOMMAND_GEN_STRING
 
@@ -330,7 +331,11 @@ bool BranchCommand::Append(GmatCommand *cmd)
       AddBranch(cmd, branchToFill);
       return true;
    }
-   
+   #ifdef DEBUG_BRANCHCOMMAND_APPEND
+      MessageInterface::ShowMessage(
+      "In BranchCommand::Append - not appended to this command.\n");
+   #endif
+      
    // Otherwise, just call the base class method
    return GmatCommand::Append(cmd);
 }
@@ -773,6 +778,11 @@ typeName.c_str(), which);
       MessageInterface::ShowMessage
       ("In ExecuteBranch (%s) - current = this -> resetting\n", 
       typeName.c_str());
+      if (next)
+      MessageInterface::ShowMessage("...... and the next one is : %s\n",
+      (next->GetTypeName()).c_str());
+      else
+       MessageInterface::ShowMessage("...... and the next one is NULL!!!\n");
 #endif
       branchExecuting = false;
       //commandExecuting = false;  // ***********************

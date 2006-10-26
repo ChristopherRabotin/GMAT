@@ -32,6 +32,7 @@
 //#define DEBUG_COMMAND_SUMMARY_LIST
 //#define DEBUG_COMMAND_INIT 1
 //#define DEBUG_BUILD_CMD_SUMMARY 1
+//#define DEBUG_COMMAND_APPEND
 
 
 //---------------------------------
@@ -988,7 +989,15 @@ bool GmatCommand::Append(GmatCommand *cmd)
    if (cmd == this)
       throw CommandException("Attempting to add GmatCommand already in list");
    if (next)
+   {
+      #ifdef DEBUG_COMMAND_APPEND
+         MessageInterface::ShowMessage("In GmatCommand::Append, appending %s to %s\n",
+         (cmd->GetTypeName()).c_str(), GetTypeName().c_str());
+         MessageInterface::ShowMessage("    and appending to next (%s)\n",
+         (next->GetTypeName()).c_str());
+      #endif
       next->Append(cmd);
+   }
    else
    {
       // Always set the command changed flag when a command is added to the list

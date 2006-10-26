@@ -247,11 +247,11 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
    // determine the operator
    for (Integer i = 0; i < NumberOfOperators; i++)
    {
-   #if DEBUG_CONDITIONS
-   MessageInterface::ShowMessage
-      ("ConditionalBranch::In loop ...  operation is %s, OPTYPE_TEXT is %s\n",
-       operation.c_str(), (OPTYPE_TEXT[i]).c_str());
-   #endif
+      #if DEBUG_CONDITIONS
+         MessageInterface::ShowMessage
+         ("ConditionalBranch::In loop ...  operation is %s, OPTYPE_TEXT is %s\n",
+          operation.c_str(), (OPTYPE_TEXT[i]).c_str());
+      #endif
       if (operation == OPTYPE_TEXT[i])
       {
          ot = (OpType) i;
@@ -1112,6 +1112,10 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
    // iterate over the list of reference objects to find the parameter
    if (rightIsParm || leftIsParm)
    {
+      #ifdef DEBUG_CONDITIONS
+         MessageInterface::ShowMessage(
+            "ConditionalBranch: left or right is a parameter\n");
+      #endif
       Integer index;
       std::vector<Parameter*>::iterator p = params.begin();
       while (p != params.end())
@@ -1121,6 +1125,11 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
             if ((*p)->GetReturnType() == Gmat::REAL_TYPE)
             {
                lhsValue = (*p)->EvaluateReal();
+               #ifdef DEBUG_CONDITIONS
+                  MessageInterface::ShowMessage(
+                     "ConditionalBranch: left is a real number with value = %.18f\n",
+                     lhsValue);
+               #endif
             }
             else if ((*p)->GetReturnType() == Gmat::RMATRIX_TYPE)
             {
@@ -1137,6 +1146,11 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
                   lhsValue =
                      (*p)->EvaluateRmatrix().GetElement(lhsParamRows[index],
                                                         lhsParamCols[index]);
+               #ifdef DEBUG_CONDITIONS
+                  MessageInterface::ShowMessage(
+                     "ConditionalBranch: left is a real matrix with value = %.12f\n",
+                     lhsValue);
+               #endif
             }
             
             lhFound  = true;
@@ -1181,9 +1195,14 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
 
    #ifdef DEBUG_CONDITIONS
       MessageInterface::ShowMessage(
-         "   lhs = %le,  rhs = %le\n", lhsValue, rhsValue);
+         "   lhs = %.18f,  rhs = %.18f\n", lhsValue, rhsValue);
+      MessageInterface::ShowMessage(
+         "   lhs - rhs = %.18f\n", (lhsValue - rhsValue));
       MessageInterface::ShowMessage(
          "   operator = %d\n", (Integer) opList.at(which));
+      MessageInterface::ShowMessage(
+         "   operator (as string) = %s\n", 
+         (OPTYPE_TEXT[(Integer) opList.at(which)]).c_str());
    #endif
 
    switch (opList.at(which))
@@ -1233,6 +1252,11 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
 //------------------------------------------------------------------------------
 bool ConditionalBranch::EvaluateAllConditions()
 {
+   #ifdef DEBUG_CONDITIONS
+      MessageInterface::ShowMessage(
+         "   Entering EvaluateAllConditions with number of conditons = %d\n", 
+         numberOfConditions);
+   #endif
    if (numberOfConditions == 0)
       throw CommandException(
          "Error in conditional statement - no conditions specified.");
@@ -1242,6 +1266,11 @@ bool ConditionalBranch::EvaluateAllConditions()
          "conditional statement incorrect - too few/many logical operators");
    
    bool soFar = EvaluateCondition(0);
+   #ifdef DEBUG_CONDITIONS
+      MessageInterface::ShowMessage(
+         "   After EvaluateCondition, soFar = %s\n", (soFar? "true" : "false"));
+   #endif
+   
    
    Integer i = 1;
    for (i=1; i < numberOfConditions; i++)
