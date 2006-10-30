@@ -143,7 +143,7 @@ const StringArray& Save::GetRefObjectNameArray(const Gmat::ObjectType type)
  * Sets the reference objects that get saved.
  * 
  * @param type The type of the reference object.
- * @param name THe name of the reference object.
+ * @param name The name of the reference object.
  * 
  * @return true on success, false on failure.
  */
@@ -265,6 +265,12 @@ bool Save::Execute()
    
    BuildCommandSummary(true);
    return true;
+}
+
+
+void Save::RunComplete()
+{
+   obj.clear();
 }
 
 

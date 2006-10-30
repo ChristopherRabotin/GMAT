@@ -42,6 +42,7 @@ public:
                                             const std::string &name);
    virtual bool            Initialize();
    bool                    Execute();
+   virtual void            RunComplete();
    
    // inherited from GmatBase
    virtual GmatBase*      Clone() const;
