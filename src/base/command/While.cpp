@@ -215,6 +215,7 @@ bool While::Execute()
             MessageInterface::ShowMessage("Starting command\n");
          #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
          ConditionalBranch::Execute();
+         commandComplete  = false;
       }
 
       if (EvaluateAllConditions()) // must deal with multiple conditions later
@@ -224,8 +225,7 @@ bool While::Execute()
                "   Conditions true, running while loop\n");
          #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
          branchExecuting = true;
-         while (branchExecuting && retval)
-            retval = ExecuteBranch();
+         return true;
       }
       else  // fails condition, so while loop is done
       {
