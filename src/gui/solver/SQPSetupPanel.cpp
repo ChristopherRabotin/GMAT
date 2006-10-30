@@ -78,6 +78,8 @@ void SQPSetupPanel::LoadData()
    // load data from the core engine
    try
    {
+   	  mObject = theSolver;
+   	
       std::string valueStr = theSolver->GetStringParameter("GradObj"); 
       if (valueStr == "On")
          gradObjCB->SetValue(true);

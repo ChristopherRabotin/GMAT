@@ -135,7 +135,7 @@ void MinimizePanel::SaveData()
    //-------------------------------------------------------
    // Saving Solver Data
    //-------------------------------------------------------
-         
+   
    mMinimizeCommand->SetStringParameter
       (mMinimizeCommand->GetParameterID("OptimizerName"),
        std::string(solverName.c_str()));
@@ -151,7 +151,14 @@ void MinimizePanel::ShowGoalSetup()
 {
    wxString str;
    
-   mSolverComboBox->SetStringSelection(solverName);
+   if (solverName == "")
+   {
+      mSolverComboBox->SetSelection(0);
+      solverName = mSolverComboBox->GetStringSelection();
+   }
+   else
+      mSolverComboBox->SetStringSelection(solverName);
+      
    mVariableTextCtrl->SetValue(variableName);
 }
 
@@ -172,6 +179,7 @@ void MinimizePanel::OnTextChange(wxCommandEvent& event)
 void MinimizePanel::OnSolverSelection(wxCommandEvent &event)
 {
    solverName = mSolverComboBox->GetStringSelection();
+   EnableUpdate(true);
 }
 
 void MinimizePanel::OnButtonClick(wxCommandEvent& event)
@@ -191,7 +199,8 @@ void MinimizePanel::OnButtonClick(wxCommandEvent& event)
             variableName = newParamName;
          }
          
-         theApplyButton->Enable(true);
+//         theApplyButton->Enable(true);
+           EnableUpdate(true);
       }
    }
    else

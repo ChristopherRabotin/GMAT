@@ -141,7 +141,10 @@ void NonlinearConstraintPanel::LoadData()
       std::string loadedSolverName = mNonlinearConstraintCommand->
          GetStringParameter(mNonlinearConstraintCommand->GetParameterID("OptimizerName"));
       
-      mSolverComboBox->SetStringSelection(wxT(loadedSolverName.c_str()));
+      if (loadedSolverName == "")
+         mSolverComboBox->SetSelection(0);
+      else
+         mSolverComboBox->SetStringSelection(wxT(loadedSolverName.c_str()));
 
       std::string loadedVariableName = mNonlinearConstraintCommand->
          GetStringParameter(mNonlinearConstraintCommand->GetParameterID("ConstraintVariableName"));
@@ -253,7 +256,7 @@ void NonlinearConstraintPanel::OnTextChange(wxCommandEvent& event)
 
 void NonlinearConstraintPanel::OnSolverSelection(wxCommandEvent &event)
 {
-   theApplyButton->Enable();
+   EnableUpdate(true);
 }
 
 void NonlinearConstraintPanel::OnButtonClick(wxCommandEvent& event)
@@ -273,7 +276,8 @@ void NonlinearConstraintPanel::OnButtonClick(wxCommandEvent& event)
 //            variableName = newParamName;
          }
          
-         theApplyButton->Enable(true);
+         EnableUpdate(true);
+//         theApplyButton->Enable(true);
       }
    }
    else if (event.GetEventObject() == mRightChooseButton)
