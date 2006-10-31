@@ -47,8 +47,8 @@ const Rmatrix               Star::CIJ                 = Rmatrix(5,5,
 //const Integer               Star::COEFFICIENT_SIZE    = 4;
 
 // NOTE - these must change when Earth's default values change!!!!!!!!!!!!
-const Real                  Star::LF_EPOCH                 = 21544.500370768266;
-const Rvector6              Star::LF_ELEMENTS              = Rvector6(
+const Real                  Star::ANALYTIC_EPOCH           = 21544.500370768266;
+const Rvector6              Star::ANALYTIC_ELEMENTS        = Rvector6(
       149653978.9783766,        0.01704556707314489,  23.439034090426388,
       0.00018646554487906264, 281.7416388084352,     358.12708491129);
 
@@ -450,8 +450,8 @@ void Star::InitializeStar()
    defaultMu           = Star::MU;
    defaultEqRadius     = Star::EQUATORIAL_RADIUS;
    
-   lfEpoch             = Star::LF_EPOCH;
-   lfKepler            = Star::LF_ELEMENTS;
+   analyticEpoch       = Star::ANALYTIC_EPOCH;
+   analyticKepler      = Star::ANALYTIC_ELEMENTS;
    
    //coefficientSize     = Star::COEFFICIENT_SIZE;
    //defaultSij          = Star::SIJ;

@@ -133,8 +133,8 @@ protected:
    static const Rmatrix               SIJ[NumberOfPlanets];
    static const Rmatrix               CIJ[NumberOfPlanets];
    
-   static const Real                  LF_EPOCH[NumberOfPlanets];
-   static const Rvector6              LF_ELEMENTS[NumberOfPlanets];
+   static const Real                  ANALYTIC_EPOCH[NumberOfPlanets];
+   static const Rvector6              ANALYTIC_ELEMENTS[NumberOfPlanets];
                                             
    Real                               updateInterval;
    /// @todo add other ones as needed

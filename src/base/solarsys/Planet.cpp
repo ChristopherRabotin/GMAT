@@ -253,13 +253,13 @@ const Rmatrix               Planet::CIJ[NumberOfPlanets]                 =
            0.0, 0.0,             0.0,             0.0,             0.0,
            0.0, 0.0,             0.0,             0.0,             0.0),
 };
-const Real                  Planet::LF_EPOCH[NumberOfPlanets]            =
+const Real                  Planet::ANALYTIC_EPOCH[NumberOfPlanets]      =
 {
    21544.500370768266, 21544.500370768266, 21544.500370768266,
    21544.500370768266, 21544.500370768266, 21544.500370768266,
    21544.500370768266, 21544.500370768266, 21544.500370768266
 };
-const Rvector6              Planet::LF_ELEMENTS[NumberOfPlanets]         =
+const Rvector6              Planet::ANALYTIC_ELEMENTS[NumberOfPlanets]   =
 {
    Rvector6(57909212.938567216, 0.20562729774965544, 28.551674963293556,
             10.99100758149257, 67.548689584103984,  175.10396761800456),
@@ -976,8 +976,8 @@ void Planet::InitializePlanet(const std::string &cBody)
    sij                 = Planet::SIJ[bodyIndex];
    cij                 = Planet::CIJ[bodyIndex];
    
-   lfEpoch             = Planet::LF_EPOCH[bodyIndex];
-   lfKepler            = Planet::LF_ELEMENTS[bodyIndex];
+   analyticEpoch       = Planet::ANALYTIC_EPOCH[bodyIndex];
+   analyticKepler      = Planet::ANALYTIC_ELEMENTS[bodyIndex];
 
 
    // set defaults in case use chooses to go back to not using potential file

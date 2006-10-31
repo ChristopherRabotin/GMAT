@@ -68,8 +68,8 @@ const Rmatrix               Moon::LUNA_CIJ                 = Rmatrix(5,5,
     3.21502582986000E-06,-6.01154071094000E-06,-7.10667037450000E-06,
    -1.37041711834000E-06,-6.03652719918000E-06);
 
-const Real                  Moon::LF_EPOCH                 = 21544.500370768266;
-const Rvector6              Moon::LF_ELEMENTS              = Rvector6(
+const Real                  Moon::ANALYTIC_EPOCH      = 21544.500370768266;
+const Rvector6              Moon::ANALYTIC_ELEMENTS   = Rvector6(
       385494.90434829952,  0.055908943292024992,   20.940245433093748,
       12.233244412716252, 68.004298803147648,     137.94325682926458);
 
@@ -359,8 +359,8 @@ void Moon::InitializeMoon(const std::string &cBody)
    order               = Moon::ORDER;
    degree              = Moon::DEGREE;
    
-   lfEpoch             = Moon::LF_EPOCH;
-   lfKepler            = Moon::LF_ELEMENTS;
+   analyticEpoch       = Moon::ANALYTIC_EPOCH;
+   analyticKepler      = Moon::ANALYTIC_ELEMENTS;
    rotationSrc         = Gmat::IAU_DATA;
 
    if (instanceName == SolarSystem::MOON_NAME)

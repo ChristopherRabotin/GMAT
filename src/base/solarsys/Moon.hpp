@@ -67,8 +67,8 @@ public:
    static const Rmatrix               LUNA_SIJ;
    static const Rmatrix               LUNA_CIJ;
    
-   static const Real                  LF_EPOCH;
-   static const Rvector6              LF_ELEMENTS;
+   static const Real                  ANALYTIC_EPOCH;
+   static const Rvector6              ANALYTIC_ELEMENTS;
 
 protected:
    enum

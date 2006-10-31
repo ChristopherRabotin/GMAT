@@ -275,6 +275,9 @@ public:
    virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                     const std::string &name = "");
    
+   virtual bool        IsParameterReadOnly(const Integer id) const;
+   virtual bool        IsParameterReadOnly(const std::string &label) const;
+
    // need methods to get/set stateTime (a1MJD type)?
 
    //virtual const Rmatrix&       GetCoefDriftS();
@@ -340,6 +343,15 @@ protected:
       //SIJ,
       //CIJ,
       ROTATION_DATA_SRC,
+      ANALYTIC_DATE_FORMAT,
+      ANALYTIC_STATE_TYPE,
+      ANALYTIC_INITIAL_EPOCH,
+      ANALYTIC_SMA,
+      ANALYTIC_ECC,
+      ANALYTIC_INC,
+      ANALYTIC_RAAN,
+      ANALYTIC_AOP,
+      ANALYTIC_TA,
       CelestialBodyParamCount
    };
    static const std::string PARAMETER_TEXT[CelestialBodyParamCount - SpacePointParamCount];
@@ -416,18 +428,22 @@ protected:
    Rmatrix                sij;
    /// spherical harmonic coefficients (Cij) for the body
    Rmatrix                cij;
-   /// Initial epoch for low fidelity analytic model
-   A1Mjd                  lfEpoch;
-   /// initial Keplerian elements for low fidelity analytic model 
+   /// date format for the analytic method epoch
+   std::string            analyticFormat;
+   /// state type for analytic inputs
+   std::string            analyticStateType;
+   /// Initial epoch for analytic method
+   A1Mjd                  analyticEpoch;
+   /// initial Keplerian elements for analytic method 
    /// (with respect to central body)
-   Rvector6               lfKepler; 
-   /// most recent epoch for low fidelity model
-   A1Mjd                  prevLFEpoch;  
-   /// most recent state (cartesian - wrt the Earth) for low fidelity model
-   Rvector6               prevLFState;
-   /// flag indicating whether or not the low fidelity epoch and 
+   Rvector6               analyticKepler; 
+   /// most recent epoch for analytic method
+   A1Mjd                  prevAnalyticEpoch;  
+   /// most recent state (cartesian - wrt the Earth) for analytic method
+   Rvector6               prevAnalyticState;
+   /// flag indicating whether or not the analytic method epoch and 
    /// state have been modified
-   bool                   newLF;
+   bool                   newAnalytic;
    /// flag indicating whether or not to override the TDB/TCB tiems with TT
    bool                   overrideTime;
    /// update interval for the ephemeris calsulations (file-reading)
