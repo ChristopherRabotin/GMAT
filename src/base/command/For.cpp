@@ -295,16 +295,33 @@ bool For::Initialize(void)
 //------------------------------------------------------------------------------
 bool For::Execute(void)
 {
+   #ifdef DEBUG_FOR
+      MessageInterface::ShowMessage(
+         "For::Execute() status: commandComplete = %s, "
+         "commandExecuting = %s, branchExecuting = %s\n",
+         ((commandComplete) ? "true" : "false"),
+         ((commandExecuting) ? "true" : "false"),
+         ((branchExecuting) ? "true" : "false") );
+   #endif
    bool retval = true;
 
    if (branchExecuting)
    {
+      #ifdef DEBUG_FOR
+         MessageInterface::ShowMessage(
+         "... branch still executing -> about to call ExecuteBranch\n");
+      #endif
       retval = ExecuteBranch();
       if (!branchExecuting)
       {
          // Branch finished executing; update loop index
          currentValue += stepSize;
          if (indexIsParam)   indexParam->SetReal(currentValue);
+         #ifdef DEBUG_FOR
+            MessageInterface::ShowMessage(
+            "...... Branch done executing -> currentValue updated to %.4f\n",
+            currentValue);
+         #endif
       }
    }
    else 
@@ -315,6 +332,10 @@ bool For::Execute(void)
       if (StillLooping())
       {
          branchExecuting = true;
+         #ifdef DEBUG_FOR
+            MessageInterface::ShowMessage(
+            "... still looping -> about to call ExecuteBranch\n");
+         #endif
          retval = ExecuteBranch();
       }
       else

@@ -219,6 +219,11 @@ std::string RealVar::ToString()
 //------------------------------------------------------------------------------
 Real RealVar::GetReal() const
 {
+   #if DEBUG_REAL_VAR
+   MessageInterface::ShowMessage
+      ("RealVar::GetReal() name=%s, returning val=%.18f\n", GetName().c_str(), 
+      mRealValue);
+   #endif
    return mRealValue;
 }
 
@@ -233,7 +238,7 @@ void RealVar::SetReal(Real val)
 {
    #if DEBUG_REAL_VAR
    MessageInterface::ShowMessage
-      ("RealVar::SetReal(Real val) name=%s, val=%f\n", GetName().c_str(), val);
+      ("RealVar::SetReal(Real val) name=%s, val=%.18f\n", GetName().c_str(), val);
    #endif
    
    mRealValue = val;

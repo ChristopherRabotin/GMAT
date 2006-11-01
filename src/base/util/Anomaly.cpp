@@ -24,6 +24,7 @@
 #include <math.h>          // for atan2(double y, double x) & atanh(double)
 
 //#define DEBUG_ANOMALY 1
+//#define DEBUG_ANOMALY_GET_SET
 
 //---------------------------------
 //  static data
@@ -252,6 +253,10 @@ void Anomaly::SetECC(const Real e)
  */
 Real Anomaly::GetValue() const
 {
+   #ifdef DEBUG_ANOMALY_GET_SET
+   MessageInterface::ShowMessage("Entering Anomaly::GetValue, returning %.18f\n",
+   anomalyValue);
+   #endif
    return anomalyValue;
 }
 
@@ -267,6 +272,10 @@ Real Anomaly::GetValue() const
  */
 Real Anomaly::GetValue(const std::string &mType) const
 {
+   #ifdef DEBUG_ANOMALY_GET_SET
+   MessageInterface::ShowMessage("Entering Anomaly::GetValue with type &s\n",
+   mType.c_str());
+   #endif
    if (IsInvalid(mType))
       throw UtilityException("Anomaly::GetValue() - invalid input type");
 
