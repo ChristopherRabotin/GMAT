@@ -642,12 +642,15 @@ void Spacecraft::SetDateFormat(const std::string &dateType)
    //    dateType.c_str(), epochSystem.c_str(), oldEpochFormat.c_str());
    
    // 2. Break apart into time type and string format
-   Integer loc = dateType.find("ModJulian", 0);
-   if (loc == -1)
+   UnsignedInt loc = dateType.find("ModJulian", 0);
+   if (loc == std::string::npos)
       loc = dateType.find("Gregorian", 0);
-   if (loc == 0)
-      throw SpaceObjectException("Error parsing time format '" +
-         dateType + "'; could not find 'Gregorian' or 'ModJulian' substring.");
+   if (loc == std::string::npos)
+      throw SpaceObjectException("The value of '" + dateType + "' for field " + 
+         "DateFormat on object '" + instanceName + 
+         "' is not an allowed value. The allowed values are: [A1ModJulian, "
+         "TAIModJulian, UTCModJulian, TTModJulian, A1Gregorian, TAIGregorian, " 
+         "UTCGregorian, TTGregorian]");
    epochSystem = dateType.substr(0, loc);
    epochFormat = dateType.substr(loc);
    
