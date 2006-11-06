@@ -96,14 +96,35 @@ ThrusterConfigPanel::~ThrusterConfigPanel()
 void ThrusterConfigPanel::Create()
 {
    // Integer
-   Integer bsize = 5; // border size
+   Integer bsize = 2; // border size
     
    // Coordinate Systems 
    coordsysStaticText = new wxStaticText( this, ID_TEXT, wxT("Coordinate System"), 
                             wxDefaultPosition, wxDefaultSize, 0);
    coordsysComboBox  =
-      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(180,-1));
+      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(150,-1));
 
+//   // Axis 
+//   ///@todo Needs to be implemented in the base code
+//   axisStaticText = new wxStaticText(this, ID_TEXT,
+//      wxT("Axis"), wxDefaultPosition, wxDefaultSize, 0);
+//
+//   wxString strs1[] =
+//   {
+//      wxT("Inertial"), 
+//      wxT("VNB") 
+//   };
+//   axisComboBox = 
+//      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, 
+//         wxSize(150,-1), 2, strs1, wxCB_DROPDOWN|wxCB_READONLY);
+//
+//   // Origin
+//   originStaticText = 
+//      new wxStaticText(this, ID_TEXT, wxT("Origin"), wxDefaultPosition,
+//         wxDefaultSize, 0);
+//   originComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX,
+//      wxSize(150,-1), false);
+   
    // X Direction
    XStaticText = new wxStaticText( this, ID_TEXT, wxT("X Direction"),
                      wxDefaultPosition,wxDefaultSize, 0);
@@ -128,11 +149,11 @@ void ThrusterConfigPanel::Create()
    scaleFactorTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
                             wxDefaultPosition, wxSize(80,-1), 0 );
                             
-   //Use Tank
+   //Tank
    tankStaticText = new wxStaticText(this, ID_TEXT,
-                        wxT("Use tank"), wxDefaultPosition, wxDefaultSize, 0);
+                        wxT("Tank"), wxDefaultPosition, wxDefaultSize, 0);
    tankComboBox =
-      theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(180,-1));
+      theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(150,-1));
 
    // wxButton
    cCoefButton = new wxButton( this, ID_BUTTON, wxT("Edit Thruster Coef."),
@@ -144,24 +165,28 @@ void ThrusterConfigPanel::Create()
    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
     
    // Add to wx*Sizers
-   flexGridSizer1->Add(coordsysStaticText, 0, wxALIGN_CENTER|wxALL, bsize );
-   flexGridSizer1->Add(coordsysComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
-   flexGridSizer1->Add(XStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
-   flexGridSizer1->Add(XTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
-   flexGridSizer1->Add(YStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
-   flexGridSizer1->Add(YTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
-   flexGridSizer1->Add(ZStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
-   flexGridSizer1->Add(ZTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
-   flexGridSizer1->Add(scaleFactorStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
-   flexGridSizer1->Add(scaleFactorTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
-   flexGridSizer1->Add(tankStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
-   flexGridSizer1->Add(tankComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add(cCoefButton, 0, wxALIGN_CENTRE|wxALL, bsize );
-   flexGridSizer1->Add(kCoefButton, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( coordsysStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( coordsysComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
+//   flexGridSizer1->Add( originStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+//   flexGridSizer1->Add( originComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
+//   flexGridSizer1->Add( axisStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+//   flexGridSizer1->Add( axisComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( XStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( XTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( YStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( YTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( ZStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( ZTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( scaleFactorStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( scaleFactorTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( tankStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( tankComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( cCoefButton, 0, wxALIGN_LEFT|wxALL, bsize );
+   flexGridSizer1->Add( kCoefButton, 0, wxALIGN_LEFT|wxALL, bsize );
     
    theMiddleSizer->Add(flexGridSizer1, 0, wxALIGN_CENTRE|wxALL, bsize);
 }
@@ -181,8 +206,11 @@ void ThrusterConfigPanel::LoadData()
       
    paramID = theThruster->GetParameterID("CoordinateSystem");
    coordsysName = theThruster->GetStringParameter(paramID);
-   
    coordsysComboBox->SetValue(coordsysName.c_str());
+   
+//   originComboBox->SetValue("Earth"); // LTR 11/2/06 - Temperarily hard coded
+//   
+//   axisComboBox->SetValue("Inertial"); // LTR 11/2/06 - Temperarily hard coded
    
    paramID = theThruster->GetParameterID("X_Direction");
    XTextCtrl->SetValue(wxVariant(theThruster->GetRealParameter(paramID)));
@@ -244,61 +272,79 @@ void ThrusterConfigPanel::SaveData()
                         "The allowed values are: [ %s ].";
 
 //ltr: 10/20/06      theOkButton->Disable();
- 
-	   // X_Direction
-	   paramID = theThruster->GetParameterID("X_Direction");
-	   inputString = XTextCtrl->GetValue();
-	   if (!GmatStringUtil::ToDouble(inputString,&rvalue))
-	   {
-	      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-	             inputString.c_str(), "X_Direction","Real Number");
-         canClose = false;
-//	      return;
-	   }
-	   theThruster->SetRealParameter(paramID, rvalue);
-	   
-	   // Y_Direction
-	   paramID = theThruster->GetParameterID("Y_Direction");
-	   inputString = YTextCtrl->GetValue();
-	   if (!GmatStringUtil::ToDouble(inputString,&rvalue))
-	   {
-	      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-	             inputString.c_str(), "Y_Direction","Real Number");
-         canClose = false;
-//	      return;
-	   }
-	   theThruster->SetRealParameter(paramID, rvalue);
-        
-      // Z_Direction
-      paramID = theThruster->GetParameterID("Z_Direction");
-      inputString = ZTextCtrl->GetValue();
-      if (!GmatStringUtil::ToDouble(inputString,&rvalue) || rvalue < 0)
-      {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-                inputString.c_str(), "Z_Direction","Real Number >= 0");
-         canClose = false;
-//         return;
-      }
-      theThruster->SetRealParameter(paramID, rvalue);
-   
-      // ThrustScaleFactor
-      paramID = theThruster->GetParameterID("ThrustScaleFactor");
-      inputString = scaleFactorTextCtrl->GetValue();
-      if (!GmatStringUtil::ToDouble(inputString,&rvalue))
-      {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-                inputString.c_str(), "ThrustScaleFactor","Real Number");
-         canClose = false;
-//         return;
-      }
-      theThruster->SetRealParameter(paramID, rvalue);
-   
+      // Coordinate System      
       if (isCoordSysChanged)
       {
          paramID = theThruster->GetParameterID("CoordinateSystem");
          theThruster->SetStringParameter(paramID, coordsysName);
          isCoordSysChanged = false;
       }    
+   
+      // Axis
+      ///@todo Need to be implemented in base code
+      
+      // Origin
+      ///@todo Need to be implemented in base code
+      
+	   // X_Direction
+	   inputString = XTextCtrl->GetValue();
+	   if (GmatStringUtil::ToDouble(inputString,&rvalue))
+	   {
+	   	paramID = theThruster->GetParameterID("X_Direction");
+	   	theThruster->SetRealParameter(paramID, rvalue);
+	   }
+	   else
+	   {
+	      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+	             inputString.c_str(), "X_Direction","Real Number");
+         canClose = false;
+//	      return;
+	   }
+	   
+	   // Y_Direction
+	   inputString = YTextCtrl->GetValue();
+	   if (GmatStringUtil::ToDouble(inputString,&rvalue))
+	   {
+	   	paramID = theThruster->GetParameterID("Y_Direction");
+	   	theThruster->SetRealParameter(paramID, rvalue);
+	   }
+	   else
+	   {
+	      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+	             inputString.c_str(), "Y_Direction","Real Number");
+         canClose = false;
+//	      return;
+	   }
+        
+      // Z_Direction
+      inputString = ZTextCtrl->GetValue();
+      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      {
+      	paramID = theThruster->GetParameterID("Z_Direction");
+      	theThruster->SetRealParameter(paramID, rvalue);
+      }
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                inputString.c_str(), "Z_Direction","Real Number");
+         canClose = false;
+//         return;
+      }
+   
+      // ThrustScaleFactor
+      inputString = scaleFactorTextCtrl->GetValue();
+      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue >= 0.0))
+      {
+      	paramID = theThruster->GetParameterID("ThrustScaleFactor");
+      	theThruster->SetRealParameter(paramID, rvalue);
+      }
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                inputString.c_str(), "ThrustScaleFactor","Real Number >= 0.0");
+         canClose = false;
+//         return;
+      }
    
       if (isTankChanged)
       {
@@ -314,6 +360,7 @@ void ThrusterConfigPanel::SaveData()
    catch(BaseException &ex)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetMessage());
+         canClose = false;
    }
 
 }
