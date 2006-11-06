@@ -620,9 +620,15 @@ Real Thruster::SetRealParameter(const Integer id, const Real value)
       case K14:
          return kCoefficients[13] = value;
       case THRUST_SCALE_FACTOR:
-         if (value > 0.0)
-            thrustScaleFactor = value;
+         if (value < 0.0)
+            throw HardwareException
+               ("The value for \"thrust scale factor\" is not an allowed value.\n"
+                "The allowed values are: [ Real Number >= 0.0 ].");
+         thrustScaleFactor = value;
          return thrustScaleFactor;
+//         if (value > 0.0)
+//            thrustScaleFactor = value;
+//         return thrustScaleFactor;
       default:
          break;   // Default just drops through
    }
