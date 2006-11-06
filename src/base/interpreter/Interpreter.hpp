@@ -99,6 +99,8 @@ public:
    SolarSystem* GetSolarSystemInUse();
    
    StringArray& GetErrorList() { return errorList; }
+   void SetHeaderComment(const std::string &comment){headerComment = comment;}
+   void SetFooterComment(const std::string &comment){footerComment = comment;}
    
 protected:
    
