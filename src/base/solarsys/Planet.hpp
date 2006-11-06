@@ -68,8 +68,8 @@ public:
    // For the Earth, these methods need to update the Sun's information, as the 
    // Sun has no cental body and its initial epoch and keplerian elements need 
    // to be set and stored differently
-   virtual bool          SetLowFidelityEpoch(const A1Mjd &toTime);
-   virtual bool          SetLowFidelityElements(const Rvector6 &kepl);
+   virtual bool          SetAnalyticEpoch(const A1Mjd &toTime);
+   virtual bool          SetAnalyticElements(const Rvector6 &kepl);
    
    virtual Real          GetUpdateInterval() const;
    virtual bool          SetUpdateInterval(Real val);

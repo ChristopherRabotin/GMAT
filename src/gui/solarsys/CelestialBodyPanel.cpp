@@ -335,8 +335,8 @@ void CelestialBodyPanel::LoadData()
          wxString intervalStr;
 
          centralBody = theCelestialBody->GetCentralBody();
-         epoch = theCelestialBody->GetLowFidelityEpoch().Get();
-         elements = theCelestialBody->GetLowFidelityElements();
+         epoch = theCelestialBody->GetAnalyticEpoch().Get();
+         elements = theCelestialBody->GetAnalyticElements();
 
          centralBodyText->SetLabel(centralBody.c_str());
          
@@ -375,8 +375,8 @@ void CelestialBodyPanel::LoadData()
          EnableAll(false);
 
          centralBody = theCelestialBody->GetCentralBody();
-         epoch = theCelestialBody->GetLowFidelityEpoch().Get();
-         elements = theCelestialBody->GetLowFidelityElements();
+         epoch = theCelestialBody->GetAnalyticEpoch().Get();
+         elements = theCelestialBody->GetAnalyticElements();
 
          centralBodyText->Show(false);
          initialStaticText->Show(false);
@@ -490,7 +490,7 @@ void CelestialBodyPanel::SaveData()
          return;
       }
       A1Mjd a1mjd =  A1Mjd(rvalue[0]);
-      theCelestialBody->SetLowFidelityEpoch(a1mjd);
+      theCelestialBody->SetAnalyticEpoch(a1mjd);
 
       inputString[0] =  mElement1TextCtrl->GetValue();
       inputString[1] =  mElement2TextCtrl->GetValue();
@@ -529,7 +529,7 @@ void CelestialBodyPanel::SaveData()
 
       Rvector6 elements(rvalue);
 
-      theCelestialBody->SetLowFidelityElements(elements);
+      theCelestialBody->SetAnalyticElements(elements);
       
       if (theCelestialBody->GetName() == "Luna")
       {

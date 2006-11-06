@@ -184,8 +184,8 @@ public:
                                         Real epoch = 21545.0,
                                         Integer count = 1);
    // methods to get the initial epoch and keplerian elements 
-   virtual A1Mjd                GetLowFidelityEpoch() const;
-   virtual Rvector6             GetLowFidelityElements() const; 
+   virtual A1Mjd                GetAnalyticEpoch() const;
+   virtual Rvector6             GetAnalyticElements() const; 
    virtual Gmat::RotationDataSource 
                                 GetRotationDataSource() const;
    
@@ -215,8 +215,8 @@ public:
    virtual bool           SetAtmosphereModelType(std::string toAtmModelType);
    virtual bool           SetAtmosphereModel(AtmosphereModel *toAtmModel);
    virtual bool           SetPotentialFilename(const std::string &fn);
-   virtual bool           SetLowFidelityEpoch(const A1Mjd &toTime);
-   virtual bool           SetLowFidelityElements(const Rvector6 &kepl);
+   virtual bool           SetAnalyticEpoch(const A1Mjd &toTime);
+   virtual bool           SetAnalyticElements(const Rvector6 &kepl);
    virtual bool           SetRotationDataSource(Gmat::RotationDataSource src);
 
    // methods inherited from SpacePoint, that must be implemented here (and/or

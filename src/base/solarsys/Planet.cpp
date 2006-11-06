@@ -587,7 +587,7 @@ Real  Planet::GetHourAngle(A1Mjd atTime)
 
 
 //------------------------------------------------------------------------------
-//  bool SetLowFidelityEpoch(const A1Mjd &toTime)
+//  bool SetAnalyticEpoch(const A1Mjd &toTime)
 //------------------------------------------------------------------------------
 /**
  * This method sets the epoch to be used for Low Fidelity analytic modeling.
@@ -598,7 +598,7 @@ Real  Planet::GetHourAngle(A1Mjd atTime)
  *
  */
 //------------------------------------------------------------------------------
-bool Planet::SetLowFidelityEpoch(const A1Mjd &toTime)
+bool Planet::SetAnalyticEpoch(const A1Mjd &toTime)
 {
    // For the Earth, send the information to the Sun
    if (instanceName == SolarSystem::EARTH_NAME)
@@ -606,13 +606,13 @@ bool Planet::SetLowFidelityEpoch(const A1Mjd &toTime)
       if (!cb) 
          throw SolarSystemException("Central body must be set for " 
                                     + instanceName);
-      cb->SetLowFidelityEpoch(toTime);
+      cb->SetAnalyticEpoch(toTime);
    }
-   return CelestialBody::SetLowFidelityEpoch(toTime);
+   return CelestialBody::SetAnalyticEpoch(toTime);
 }
 
 //------------------------------------------------------------------------------
-//  bool SetLowFidelityElements(const Rvector6 &kepl)
+//  bool SetAnalyticElements(const Rvector6 &kepl)
 //------------------------------------------------------------------------------
 /**
  * This method sets the elements to be used for Low Fidelity analytic modeling.
@@ -623,7 +623,7 @@ bool Planet::SetLowFidelityEpoch(const A1Mjd &toTime)
  *
  */
 //------------------------------------------------------------------------------
-bool Planet::SetLowFidelityElements(const Rvector6 &kepl)
+bool Planet::SetAnalyticElements(const Rvector6 &kepl)
 {
    // For the Earth, send the information to the Sun
    if (instanceName == SolarSystem::EARTH_NAME)
@@ -637,9 +637,9 @@ bool Planet::SetLowFidelityElements(const Rvector6 &kepl)
                             totalMu, CoordUtil::TA)); 
       Rvector6 sunKepl = CartesianToKeplerian(cart, totalMu, &ma);
 
-      cb->SetLowFidelityElements(sunKepl);
+      cb->SetAnalyticElements(sunKepl);
    }
-   return CelestialBody::SetLowFidelityElements(kepl);
+   return CelestialBody::SetAnalyticElements(kepl);
 }
 
 Real Planet::GetUpdateInterval() const 

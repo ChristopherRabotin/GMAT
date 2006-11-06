@@ -1152,18 +1152,18 @@ bool CelestialBody::GetDensity(Real *position, Real *density, Real epoch,
 
 
 //------------------------------------------------------------------------------
-// A1Mjd GetLowFidelityEpoch() const
+// A1Mjd GetAnalyticEpoch() const
 //------------------------------------------------------------------------------
-A1Mjd CelestialBody::GetLowFidelityEpoch() const
+A1Mjd CelestialBody::GetAnalyticEpoch() const
 {
    return analyticEpoch;
 }
 
 
 //------------------------------------------------------------------------------
-// Rvector6 GetLowFidelityElements() const
+// Rvector6 GetAnalyticElements() const
 //------------------------------------------------------------------------------
-Rvector6 CelestialBody::GetLowFidelityElements() const
+Rvector6 CelestialBody::GetAnalyticElements() const
 {
    return analyticKepler;
 }
@@ -1522,9 +1522,9 @@ bool CelestialBody::SetPotentialFilename(const std::string &fn)
 
 
 //------------------------------------------------------------------------------
-// bool SetLowFidelityEpoch(const A1Mjd &toTime)
+// bool SetAnalyticEpoch(const A1Mjd &toTime)
 //------------------------------------------------------------------------------
-bool CelestialBody::SetLowFidelityEpoch(const A1Mjd &toTime)
+bool CelestialBody::SetAnalyticEpoch(const A1Mjd &toTime)
 {
    analyticEpoch = toTime;
    newAnalytic   = true;
@@ -1533,10 +1533,24 @@ bool CelestialBody::SetLowFidelityEpoch(const A1Mjd &toTime)
 
 
 //------------------------------------------------------------------------------
-// bool SetLowFidelityElements(const Rvector6 &kepl)
+// bool SetAnalyticElements(const Rvector6 &kepl)
 //------------------------------------------------------------------------------
-bool CelestialBody::SetLowFidelityElements(const Rvector6 &kepl)
+bool CelestialBody::SetAnalyticElements(const Rvector6 &kepl)
 {
+   if (kepl[0] == 0.0)
+   {
+      std::string errMsg = "For body " + instanceName + 
+         ", SMA value must be non-zero"; 
+      throw SolarSystemException(errMsg);
+   }
+   
+   if (kepl[1] < 0.0)
+   {
+      std::string errMsg = "For body " + instanceName + 
+         ", ECC value must be greater than or equal to zero"; 
+      throw SolarSystemException(errMsg);
+   }
+   
    analyticKepler = kepl;
    newAnalytic    = true;
    return true;
@@ -1849,12 +1863,24 @@ Real        CelestialBody::SetRealParameter(const Integer id, const Real value)
    }
    if (id == ANALYTIC_SMA)
    {
+      if (value == 0.0)
+      {
+         std::string errMsg = "For body " + instanceName + 
+            ", SMA value must be non-zero"; 
+         throw SolarSystemException(errMsg);
+      }
       analyticKepler[0] = value;
       newAnalytic = true;
       return true;
    }
    if (id == ANALYTIC_ECC)
    {
+      if (value < 0.0)
+      {
+         std::string errMsg = "For body " + instanceName + 
+            ", ECC value must be greater than or equal to zero"; 
+         throw SolarSystemException(errMsg);
+      }
       analyticKepler[1] = value;
       newAnalytic = true;
       return true;
