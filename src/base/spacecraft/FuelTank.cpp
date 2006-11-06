@@ -317,15 +317,21 @@ Real FuelTank::SetRealParameter(const Integer id, const Real value)
 {
    switch (id) {
       case FUEL_MASS:
-         if (value < 0)
-            throw HardwareException("Fuel mass must be >= 0\n");
+         if (value < 0.0)
+//            throw HardwareException("Fuel mass must be >= 0\n");
+            throw HardwareException
+               ("The value for \"fuel mass\" is not an allowed value.\n" 
+                "The allowed values are: [ Real Number >= 0.0 ].");
          fuelMass = value;
          initialized = false;
          return fuelMass;
          
       case PRESSURE:
-         if (value < 0)
-            throw HardwareException("Tank pressure must be >= 0\n");
+         if (value < 0.0)
+//            throw HardwareException("Tank pressure must be >= 0\n");
+            throw HardwareException
+               ("The value for \"tank pressure\" is not an allowed value.\n"
+                "The allowed values are: [ Real Number >= 0.0 ].");
          pressure = value;
          initialized = false;
          return pressure;
@@ -341,15 +347,21 @@ Real FuelTank::SetRealParameter(const Integer id, const Real value)
          return refTemperature;
          
       case VOLUME:
-         if (value < 0)
-            throw HardwareException("Tank volume must be >= 0\n");
+         if (value < 0.0)
+//            throw HardwareException("Tank volume must be >= 0\n");
+            throw HardwareException
+               ("The value for \"tank volume\" is not an allowed value.\n"
+                "The allowed values are: [ Real Number >= 0.0 ].");
          volume = value;
          initialized = false;
          return volume;
          
       case FUEL_DENSITY:
-         if (value < 0)
-            throw HardwareException("Fuel density must be >= 0\n");
+         if (value < 0.0)
+//            throw HardwareException("Fuel density must be >= 0\n");
+            throw HardwareException
+               ("The value for \"fuel density\" is not an allowed value.\n"
+                "The allowed values are: [ Real Number >= 0.0 ].");
          density = value;
          initialized = false;
          return density;
