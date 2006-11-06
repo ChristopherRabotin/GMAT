@@ -2995,6 +2995,9 @@ std::string Moderator::GetFileName(const std::string &fileType)
 //------------------------------------------------------------------------------
 bool Moderator::LoadDefaultMission()
 {
+   theScriptInterpreter->SetHeaderComment("");
+   theScriptInterpreter->SetFooterComment("");
+
    CreateDefaultMission();
     
    return true;
