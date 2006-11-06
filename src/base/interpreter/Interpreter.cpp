@@ -591,15 +591,21 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    }
 
    // This error message may be confusing to users
-//    // check for name first
-//    obj = FindObject(name);
-//    if (obj != NULL)
-//    {
-//       InterpreterException ex
-//          (type + " object named " + name + " already exist.");
-//       HandleError(ex);
-//       return obj;
-//    }
+    // check for name first
+    if ((name != "EarthMJ2000Eq") && 
+        (name != "EarthMJ2000Ec") && 
+        (name != "EarthFixed"))
+    {
+       obj = FindObject(name);
+       if (obj != NULL)
+       {
+          InterpreterException ex
+             (type + " object named " + name + " already exist.");
+          HandleError(ex);
+          return obj;
+       }
+    }
+
    
    if (type == "Spacecraft") 
       obj = (GmatBase*)theModerator->CreateSpacecraft(type, name);
@@ -3282,7 +3288,7 @@ void Interpreter::HandleError(BaseException &e)
          currentBlock + "\"\n";
       
       errorList.push_back(msg);
-      //MessageInterface::ShowMessage(msg);
+      MessageInterface::ShowMessage(msg);
    }
    else
    {
