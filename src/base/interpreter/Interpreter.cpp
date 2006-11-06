@@ -52,8 +52,9 @@
 Interpreter::Interpreter()
 {
    initialized = false;
-   continueOnError = true;
-   
+   continueOnError = true;   
+//   continueOnError = false;
+
    theModerator  = Moderator::Instance();
    theReadWriter = ScriptReadWriter::Instance();
    
@@ -568,6 +569,27 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    
    GmatBase *obj = NULL;
 
+   // let's check object name
+   if (name == "GMAT" || name == "Create")
+   {
+      InterpreterException ex
+          (type + " object can not be named " + name + ".");
+          HandleError(ex);
+      return NULL;
+   }
+   
+   StringArray commandNames = theModerator->GetListOfFactoryItems(Gmat::COMMAND);
+   for (Integer i=0; i<(Integer)commandNames.size(); i++)
+   {
+      if (commandNames[i] == name)
+      {
+         InterpreterException ex
+            (type + " object can not be named " + name + ".");
+            HandleError(ex);
+         return NULL;
+      }
+   }
+
    // This error message may be confusing to users
 //    // check for name first
 //    obj = FindObject(name);
@@ -984,8 +1006,14 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    // Output
    UnsignedInt index1 = desc.find("=");
    std::string lhs = desc.substr(0, index1);
-   StringArray outArray = theTextParser.SeparateBrackets(lhs, "[]", " ,", true);
+   StringArray outArray;
 
+   // only get out parameters if there was an equal sign
+   if (index1 != lhs.npos)
+   {   
+      outArray = theTextParser.SeparateBrackets(lhs, "[]", " ,", true);
+   }
+   
    // Function Name, Input
    StringArray inArray;
    std::string funcName;
