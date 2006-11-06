@@ -408,6 +408,21 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
    {
       inCommandMode = true;
       
+      // a call function doesn't have to have parameters
+      // so this code gets a list of the functions and 
+      // checks to see if chunks[0] is a function name
+      StringArray functionNames = GetListOfObjects(Gmat::FUNCTION);
+      bool isFunction = false;
+      
+      for (Integer i=0; i<(Integer)functionNames.size(); i++)
+      {
+         if (functionNames[i] == chunks[0])
+         {
+            isFunction = true;
+            break;
+         }
+      }
+      
       if (count < 2)
       {
          if ((logicBlock.find("End")           != logicBlock.npos  &&
@@ -417,6 +432,8 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
              (logicBlock.find("Stop")          != logicBlock.npos))
             
             obj = (GmatBase*)CreateCommand(chunks[0], "");
+         else if (isFunction)
+            obj = (GmatBase*)CreateCommand("CallFunction", chunks[0]);
          else
             throw InterpreterException
                ("Missing parameter with command object: \n" + lineNumber + ":" + logicBlock + "\n");
@@ -861,3 +878,4 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
      
    return true;
 }
+
