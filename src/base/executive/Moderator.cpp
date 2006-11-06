@@ -488,6 +488,28 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
    
+   // let's check to make sure it is a valid name
+   if (newName == "GMAT" || newName == "Create")
+   {
+   	  MessageInterface::PopupMessage
+         (Gmat::WARNING_, "'%s' is not a valid object name.\nPlease enter a different name.\n",
+         newName.c_str());
+      return false;
+   }
+   
+   // check to make sure it is not a command type
+   StringArray commandNames = GetListOfFactoryItems(Gmat::COMMAND);
+   for (Integer i=0; i<(Integer)commandNames.size(); i++)
+   {
+      if (commandNames[i] == newName)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "'%s' is not a valid object name.\nPlease enter a different name.\n",
+            newName.c_str());
+         return false;
+      }
+   }
+   
    bool renamed = theConfigManager->RenameItem(type, oldName, newName);
    
    //--------------------------------------------------
