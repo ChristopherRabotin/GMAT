@@ -648,7 +648,7 @@ void Spacecraft::SetDateFormat(const std::string &dateType)
    if (loc == std::string::npos)
       throw SpaceObjectException("The value of '" + dateType + "' for field " + 
          "DateFormat on object '" + instanceName + 
-         "' is not an allowed value. The allowed values are: [A1ModJulian, "
+         "' is not an allowed value.\nThe allowed values are: [A1ModJulian, "
          "TAIModJulian, UTCModJulian, TTModJulian, A1Gregorian, TAIGregorian, " 
          "UTCGregorian, TTGregorian]");
    epochSystem = dateType.substr(0, loc);
@@ -2070,9 +2070,20 @@ void Spacecraft::SetEpoch(const std::string &ep)
    // 1. Validate that the input string is the correct format.
    if (TimeConverterUtil::ValidateTimeFormat(epochFormat, ep) == false)
    {
-      throw SpaceObjectException("Invalid epoch, '" + ep + 
-         "', specified; this value is not a valid " + epochFormat +
-         " epoch.");
+      std::string msg = "The value of '" + ep + "' on object '" + instanceName +
+         "' is not an allowed value for '" + epochFormat + 
+         "' epochs.\nThe allowed values are ";
+         
+      if (epochFormat.find("ModJulian") != std::string::npos)
+      {
+         msg += "[Real Number >= 0.0]";
+      }
+      else
+      {
+         msg += "a string with the format DD MMM YYYY HH:MM:SS.mmm";
+      }
+
+      throw SpaceObjectException(msg);
    }
    
    // 2. Construct the Real epoch data and set it on the PropState.
