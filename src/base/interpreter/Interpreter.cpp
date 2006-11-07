@@ -961,7 +961,10 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
    std::string step = "1";
    
    if (count > 2)
-      step = parts[2];
+   {
+      step = parts[1];
+      end = parts[2];
+   }
    
    #if DEBUG_ASSEMBLE_FOR
    MessageInterface::ShowMessage
