@@ -446,6 +446,18 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
       if (obj == NULL)
          throw InterpreterException("Cannot Parse the line: \n\"" + lineNumber + ":" + currentBlock + "\"\n");
       
+      std::string preStr = ""; 
+      std::string inStr = ""; 
+      
+      preStr = theTextParser.GetPrefaceComment();
+      inStr = theTextParser.GetInlineComment();
+      
+      if (preStr != "")
+         obj->SetCommentLine(preStr);
+        
+      if (inStr != "")
+         obj->SetInlineComment(inStr);
+
       logicalBlockCount++;
    }
    else if (currentBlockType == Gmat::ASSIGNMENT_BLOCK)
@@ -529,7 +541,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    if (objSize > 0)
    {
       theReadWriter->WriteText(sectionDelimiterString[0]);
-      theReadWriter->WriteText(sectionDelimiterString[1] + "Spacecrafts");
+      theReadWriter->WriteText(sectionDelimiterString[1] + "Spacecraft");
       theReadWriter->WriteText(sectionDelimiterString[2]);
    }
    

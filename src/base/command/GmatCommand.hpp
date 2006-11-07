@@ -204,8 +204,8 @@ protected:
    bool                 commandChangedState;
    /// String used for the command summary data
    std::string          commandSummary;
-   /// Optional comment string associated with the command
-   std::string          comment;
+//   /// Optional comment string associated with the command
+//   std::string          comment;
    /// Flag indicating that a command has been changed by a user
    bool                 commandChanged;
       

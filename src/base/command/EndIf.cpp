@@ -216,5 +216,5 @@ const std::string& EndIf::GetGeneratingString(Gmat::WriteMode mode,
                                                const std::string &useName)
 {
    generatingString = prefix + "EndIf;";
-   return generatingString;
+   return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }

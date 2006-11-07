@@ -274,7 +274,7 @@ const std::string& Toggle::GetGeneratingString(Gmat::WriteMode mode,
    for (StringArray::iterator i = subNames.begin(); i != subNames.end(); ++i)
       generatingString += (*i) + " ";
    generatingString += ((toggleState == true) ? "On;" : "Off;");
-   return generatingString;
+   return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
 

@@ -151,7 +151,15 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
    Integer start;
    std::string indent = "   ", cmdstr;
    
-   gen << prefix << "BeginScript\n";
+   std::string commentLine = GetCommentLine(), 
+               inlineComment = GetInlineComment();
+   if (commentLine != "")
+      gen << commentLine;
+   gen << prefix << "BeginScript";
+   if (inlineComment != "")
+      gen << inlineComment;
+   else
+      gen << "\n";
 
    #ifdef DEBUG_BEGIN_SCRIPT_GEN_STRING
    MessageInterface::ShowMessage
@@ -183,31 +191,7 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
          #endif
          
          gen << indent << prefix << cmdstr << "\n";
-
-         //=====================================================================
-         //loj: 6/13/06 This is duplicate, branch commands has its own loop
-         //=====================================================================
-//          // Handle the branches for branch commands
-//          whichOne = 0;
-//          GmatCommand* child = current->GetChildCommand(whichOne);
-//          #ifdef DEBUG_BEGIN_SCRIPT_GEN_STRING
-//             MessageInterface::ShowMessage("Command %s %s a child command.\n",
-//                current->GetTypeName().c_str(),
-//                ((child == NULL) ? "does not have" : "has"));
-//          #endif
-            
-//          while ((child != NULL) && (child != current))
-//          {
-//             MessageInterface::ShowMessage
-//                ("      ===> BeginScript::child=%s\n", child->GetTypeName().c_str());
-//             gen << GetChildString(indent + "   ", child, current);
-//             ++whichOne;
-//             child = current->GetChildCommand(whichOne);
-//          }
-
-         
          current = current->GetNext();
-         
          if (current == NULL)
             gen << prefix << "EndScript;\n";
       }

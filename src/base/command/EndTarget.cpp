@@ -229,5 +229,5 @@ const std::string& EndTarget::GetGeneratingString(Gmat::WriteMode mode,
       generatingString += "  % For targeter ";
       generatingString += next->GetRefObjectName(Gmat::SOLVER);
    }
-   return generatingString;
+   return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }

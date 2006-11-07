@@ -185,5 +185,5 @@ const std::string& EndWhile::GetGeneratingString(Gmat::WriteMode mode,
                                                   const std::string &useName)
 {
    generatingString = prefix + "EndWhile;";
-   return generatingString;
+   return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }

@@ -282,7 +282,7 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
    gen += details.str();
    generatingString = gen + "});";
    // Then call the base class method
-   return GmatCommand::GetGeneratingString();
+   return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
 

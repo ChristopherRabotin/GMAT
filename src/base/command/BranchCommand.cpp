@@ -667,6 +667,13 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
                                                   const std::string &useName)
 {
    fullString = prefix + generatingString;
+   // Handle comments
+   std::string commentLine = GetCommentLine(), inlineComment = GetInlineComment();
+   if (commentLine != "")
+      fullString = commentLine + fullString;
+   if (inlineComment != "")
+      fullString = fullString + inlineComment;
+   
    GmatCommand *current;
 
    std::string newPrefix = "   " + prefix;
@@ -715,7 +722,7 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
       ("BranchCommand::GetGeneratingString() return fullString=\n   %s\n",
        fullString.c_str());
    #endif
-
+   
    return fullString;
 }
 

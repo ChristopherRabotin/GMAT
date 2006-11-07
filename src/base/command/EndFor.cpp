@@ -170,7 +170,7 @@ const std::string& EndFor::GetGeneratingString(Gmat::WriteMode mode,
                                                const std::string &useName)
 {
    generatingString = prefix + "EndFor;";
-   return generatingString;
+   return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
 

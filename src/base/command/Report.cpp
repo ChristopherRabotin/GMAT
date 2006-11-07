@@ -375,7 +375,7 @@ const std::string& Report::GetGeneratingString(Gmat::WriteMode mode,
    std::string gen = prefix;
    gen = gen + GmatStringUtil::Trim(generatingString, GmatStringUtil::BOTH);
    generatingString = gen;
-   return generatingString;
+   return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
 

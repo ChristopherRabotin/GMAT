@@ -491,7 +491,7 @@ const std::string& Save::GetGeneratingString(Gmat::WriteMode mode,
    generatingString += ";";
 
    // Then call the base class method
-   return GmatCommand::GetGeneratingString();
+   return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
 

@@ -1009,7 +1009,7 @@ const std::string& Assignment::GetGeneratingString(Gmat::WriteMode mode,
    #endif
    generatingString = gen;
 
-   return generatingString;
+   return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
 

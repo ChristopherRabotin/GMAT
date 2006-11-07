@@ -794,7 +794,7 @@ const std::string& Minimize::GetGeneratingString(Gmat::WriteMode mode,
 
    generatingString = gen + ");";
    // Then call the base class method
-   return GmatCommand::GetGeneratingString();
+   return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
 

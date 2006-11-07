@@ -148,7 +148,7 @@ const std::string& EndOptimize::GetGeneratingString(Gmat::WriteMode mode,
       generatingString += "  % For optimizer ";
       generatingString += next->GetRefObjectName(Gmat::SOLVER);
    }
-   return generatingString;
+   return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
 //------------------------------------------------------------------------------

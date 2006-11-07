@@ -191,7 +191,7 @@ const std::string& Maneuver::GetGeneratingString(Gmat::WriteMode mode,
    generatingString = prefix + "Maneuver ";
    generatingString += burnName + "(" + satName + ");";
 
-   return generatingString;
+   return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
 

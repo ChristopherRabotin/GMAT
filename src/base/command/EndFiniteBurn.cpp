@@ -339,7 +339,7 @@ const std::string& EndFiniteBurn::GetGeneratingString(Gmat::WriteMode mode,
 
    generatingString += ");";
 
-   return generatingString;
+   return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
 

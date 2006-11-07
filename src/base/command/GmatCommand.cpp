@@ -87,7 +87,7 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    streamID             (-1),
    depthChange          (0),
    commandChangedState  (false),
-   comment              (""),
+//   comment              (""),
    commandChanged       (false),
    epochData            (NULL),
    stateData            (NULL),
@@ -176,7 +176,7 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    streamID             (c.streamID),
    depthChange          (c.depthChange),
    commandChangedState  (c.commandChangedState),
-   comment              (c.comment),
+//   comment              (c.comment),
    commandChanged       (c.commandChanged),
    epochData            (NULL),
    stateData            (NULL),
@@ -224,7 +224,7 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
    publisher = c.publisher;
    generatingString = c.generatingString;
    streamID = c.streamID;
-   comment = c.comment;
+//   comment = c.comment;
    commandChanged = c.commandChanged;
    
    epochData = NULL;
@@ -297,9 +297,12 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
       return empty;
    }
 
-   if (comment != "")
-      generatingString = "% " + comment + "\n" + generatingString; 
-
+   std::string commentLine = GetCommentLine(), 
+               inlineComment = GetInlineComment();
+   if (commentLine != "")
+      generatingString = commentLine + generatingString;
+   if (inlineComment != "")
+      generatingString = generatingString + inlineComment;
    return generatingString;
 }
 
@@ -605,10 +608,10 @@ bool GmatCommand::IsParameterReadOnly(const std::string &label) const
 //------------------------------------------------------------------------------
 std::string GmatCommand::GetStringParameter(const Integer id) const
 {
-   if (id == COMMENT)
-   {
-      return comment;
-   }
+//   if (id == COMMENT)
+//   {
+//      return comment;
+//   }
          
    if (id == SUMMARY)
    {
@@ -662,11 +665,11 @@ std::string GmatCommand::GetStringParameter(const Integer id,
 //------------------------------------------------------------------------------
 bool GmatCommand::SetStringParameter(const Integer id, const std::string &value)
 {
-   if (id == COMMENT)
-   {
-      comment = value;
-      return true;
-   }
+//   if (id == COMMENT)
+//   {
+//      comment = value;
+//      return true;
+//   }
          
    if (id == SUMMARY)
    {
