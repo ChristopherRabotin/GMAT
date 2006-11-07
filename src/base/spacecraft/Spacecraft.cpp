@@ -647,7 +647,7 @@ void Spacecraft::SetDateFormat(const std::string &dateType)
       loc = dateType.find("Gregorian", 0);
    if (loc == std::string::npos)
       throw SpaceObjectException("The value of '" + dateType + "' for field " + 
-         "DateFormat on object '" + instanceName + 
+         "'DateFormat' on object '" + instanceName + 
          "' is not an allowed value.\nThe allowed values are: [A1ModJulian, "
          "TAIModJulian, UTCModJulian, TTModJulian, A1Gregorian, TAIGregorian, " 
          "UTCGregorian, TTGregorian]");
