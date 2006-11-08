@@ -79,16 +79,15 @@
 #include <fstream>
 #endif
  
-class GMAT_API PredictorCorrector :
-    public Integrator
+class GMAT_API PredictorCorrector : public Integrator
 {
 public:
-    PredictorCorrector(Integer sc, Integer order, const std::string &typeStr,
+   PredictorCorrector(Integer sc, Integer order, const std::string &typeStr,
 			   const std::string &nomme = "");
-    virtual ~PredictorCorrector(void);
+   virtual ~PredictorCorrector(void);
 
-    PredictorCorrector(const PredictorCorrector&);
-    PredictorCorrector& operator=(const PredictorCorrector&);
+   PredictorCorrector(const PredictorCorrector&);
+   PredictorCorrector& operator=(const PredictorCorrector&);
 
 //    virtual GmatBase* Clone(void) const;
     
@@ -96,118 +95,122 @@ public:
 //    virtual Real GetParameter(const int id) const;
 //    virtual bool SetParameter(const int id, const Real val);
 
-    virtual bool Initialize();
-    virtual bool  Step(void);
-    virtual bool  Step(Real dt);
-    virtual bool  RawStep(void);
+   virtual bool Initialize();
+   virtual bool  Step(void);
+   virtual bool  Step(Real dt);
+   virtual bool  RawStep(void);
     
-    	// Parameter accessor methods -- overridden from GmatBase
-    virtual std::string         GetParameterText(const Integer id) const;
-    virtual Integer             GetParameterID(const std::string &str) const;
-    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
-    virtual std::string         GetParameterTypeString(const Integer id) const;
-    virtual Real    GetRealParameter(const Integer id) const;
-    virtual Real    GetRealParameter(const std::string &label) const;
-    virtual Real    SetRealParameter(const Integer id, const Real value);
-    virtual Real    SetRealParameter(const std::string &label, const Real value);
-    virtual Integer GetIntegerParameter(const Integer id) const;
-    virtual Integer SetIntegerParameter(const Integer id, const Integer value);
-	 virtual bool    GetBooleanParameter(const Integer id) const; 
-    virtual bool    SetBooleanParameter(const Integer id, const bool value);
+   // Parameter accessor methods -- overridden from GmatBase
+   virtual std::string      GetParameterText(const Integer id) const;
+   virtual Integer          GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType 
+                            GetParameterType(const Integer id) const;
+   virtual std::string      GetParameterTypeString(const Integer id) const;
+   virtual bool             IsParameterReadOnly(const Integer id) const;
+   virtual bool             IsParameterReadOnly(const std::string &label) const;
+    
+   virtual Real    GetRealParameter(const Integer id) const;
+   virtual Real    GetRealParameter(const std::string &label) const;
+   virtual Real    SetRealParameter(const Integer id, const Real value);
+   virtual Real    SetRealParameter(const std::string &label, const Real value);
+   virtual Integer GetIntegerParameter(const Integer id) const;
+   virtual Integer SetIntegerParameter(const Integer id, const Integer value);
+	virtual bool    GetBooleanParameter(const Integer id) const; 
+   virtual bool    SetBooleanParameter(const Integer id, const bool value);
 
 protected:
-    /// Number of steps (including current state) needed for the algorithm
-    Integer stepCount;
-    /// Array used to capture the derivative information
-    const Real * ddt;
-    /// Array containing the previous step derivatives (stepcount x dimension)
-    Real ** history;
-    /// Predictor weights for each of the history steps
-    Real * pweights;
-    /// Corrector weights for each of the history steps
-    Real * cweights;
-    /// State returned from the predictor
-    Real * predictorState;
-    /// State returned from the corrector
-    Real * correctorState;
-    /// Largest relative error found
-    Real maxError;
-    /// Smallest allowed error
-    Real lowerError;
-    /// Desired error estimate (used to adapt stepsize if maxError out of bounds)
-    Real  targetError;
-    /// Sign of the step, to preserve direction of integration
-    Real  stepSign;
-    /// Status of the startup procedure: true if the startup is complete
-    bool  startupComplete;
-    /// Count of startup steps that have fired
-    Integer startupCount;
-    /// Propagator used during the startup sequence
-    Propagator * starter;
-    /// Order of the Integration method, used for stepsize control
-    Real invOrder;
+   /// Number of steps (including current state) needed for the algorithm
+   Integer stepCount;
+   /// Array used to capture the derivative information
+   const Real * ddt;
+   /// Array containing the previous step derivatives (stepcount x dimension)
+   Real ** history;
+   /// Predictor weights for each of the history steps
+   Real * pweights;
+   /// Corrector weights for each of the history steps
+   Real * cweights;
+   /// State returned from the predictor
+   Real * predictorState;
+   /// State returned from the corrector
+   Real * correctorState;
+   /// Largest relative error found
+   Real maxError;
+   /// Smallest allowed error
+   Real lowerError;
+   /// Desired error estimate (used to adapt stepsize if maxError out of bounds)
+   Real  targetError;
+   /// Sign of the step, to preserve direction of integration
+   Real  stepSign;
+   /// Status of the startup procedure: true if the startup is complete
+   bool  startupComplete;
+   /// Count of startup steps that have fired
+   Integer startupCount;
+   /// Propagator used during the startup sequence
+   Propagator * starter;
+   /// Order of the Integration method, used for stepsize control
+   Real invOrder;
 
-    virtual bool AdaptStep(Real maxError);
+   virtual bool AdaptStep(Real maxError);
 
-    //------------------------------------------------------------------------------
-    // virtual bool SetWeights(void)
-    //------------------------------------------------------------------------------
-    /**
-     * The function is used to set the weights for the preceding steps
-     */
-    //------------------------------------------------------------------------------
-    virtual bool SetWeights(void) = 0;
+   //---------------------------------------------------------------------------
+   // virtual bool SetWeights(void)
+   //---------------------------------------------------------------------------
+   /**
+    * The function is used to set the weights for the preceding steps
+    */
+   //---------------------------------------------------------------------------
+   virtual bool SetWeights(void) = 0;
 
-    //------------------------------------------------------------------------------
-    // virtual bool FireStartupStep(void)
-    //------------------------------------------------------------------------------
-    /**
-     * The function is used to take the steps through the starup routine 
-     */
-    //------------------------------------------------------------------------------
-    virtual bool FireStartupStep(void) = 0;
+   //------------------------------------------------------------------------------
+   // virtual bool FireStartupStep(void)
+   //------------------------------------------------------------------------------
+   /**
+    * The function is used to take the steps through the starup routine 
+    */
+   //------------------------------------------------------------------------------
+   virtual bool FireStartupStep(void) = 0;
 
-    //------------------------------------------------------------------------------
-    // virtual bool Predict(void)
-    //------------------------------------------------------------------------------
-    /**
-     * The function is used to perform the extrapolation step (the Predictor)
-     */
-    //------------------------------------------------------------------------------
-    virtual bool Predict(void) = 0;
+   //------------------------------------------------------------------------------
+   // virtual bool Predict(void)
+   //------------------------------------------------------------------------------
+   /**
+    * The function is used to perform the extrapolation step (the Predictor)
+    */
+   //------------------------------------------------------------------------------
+   virtual bool Predict(void) = 0;
 
-    //------------------------------------------------------------------------------
-    // virtual bool Correct(void)
-    //------------------------------------------------------------------------------
-    /**
-     * The function is used to perform the refinement step (the Corrector) 
-     */
-    //------------------------------------------------------------------------------
-    virtual bool Correct(void) = 0;
+   //------------------------------------------------------------------------------
+   // virtual bool Correct(void)
+   //------------------------------------------------------------------------------
+   /**
+    * The function is used to perform the refinement step (the Corrector) 
+    */
+   //------------------------------------------------------------------------------
+   virtual bool Correct(void) = 0;
 
-    //------------------------------------------------------------------------------
-    // virtual bool Reset(void)
-    //------------------------------------------------------------------------------
-    /**
-     * The function is used to reset the algorithm 
-     *
-     * This method is called after the stepsize changes.  You should also call
-     * it after there is a change in the force model for the system -- for 
-     * instance, if a thruster starts or finishes firing on a spacecraft.
-     */
-    //------------------------------------------------------------------------------
-    virtual bool Reset(void) = 0;
+   //------------------------------------------------------------------------------
+   // virtual bool Reset(void)
+   //------------------------------------------------------------------------------
+   /**
+    * The function is used to reset the algorithm 
+    *
+    * This method is called after the stepsize changes.  You should also call
+    * it after there is a change in the force model for the system -- for 
+    * instance, if a thruster starts or finishes firing on a spacecraft.
+    */
+   //------------------------------------------------------------------------------
+   virtual bool Reset(void) = 0;
 
-    // Parameter IDs 
-    /// Least error expected for a predictor-corrector
+   // Parameter IDs 
+   /// Least error expected for a predictor-corrector
 //    const Integer PREDICTORCORRECTOR_LOWERERROR;
     /// Target error for a predictor-corrector
 //    const Integer PREDICTORCORRECTOR_TARGETERROR;
 
 private:
-    enum
-    {
-		STEP_COUNT = IntegratorParamCount,
+   enum
+   {
+      STEP_COUNT = IntegratorParamCount,
       MAXIMUM_ERROR,
       LOWEVER_ERROR,
       TARGET_ERROR,
@@ -216,12 +219,12 @@ private:
       STARTUP_COUNT,
       INV_ORDER,
       PredictorCorrectorParamCount  /// Count of the parameters for this class
-    };
+   };
     
-    static const std::string PARAMETER_TEXT[PredictorCorrectorParamCount - IntegratorParamCount];
-	 static const Gmat::ParameterType PARAMETER_TYPE[PredictorCorrectorParamCount - IntegratorParamCount];
-
-
+   static const std::string 
+            PARAMETER_TEXT[PredictorCorrectorParamCount - IntegratorParamCount];
+   static const Gmat::ParameterType 
+            PARAMETER_TYPE[PredictorCorrectorParamCount - IntegratorParamCount];
 };
 
 #endif //PredictorCorrector_hpp

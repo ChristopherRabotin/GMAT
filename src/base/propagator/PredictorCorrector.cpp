@@ -639,6 +639,44 @@ std::string PredictorCorrector::GetParameterTypeString(const Integer id) const
       return Integrator::GetParameterTypeString(id);
 }
 
+
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to determine is a parameter should be hidden when writing scripts
+ * 
+ * @param <id> The parameter id.
+ * 
+ * @return true is the parameter should be hidden, false if it is visible.
+ */
+//------------------------------------------------------------------------------
+bool PredictorCorrector::IsParameterReadOnly(const Integer id) const
+{
+   if ((id == STEP_COUNT) || (id == MAXIMUM_ERROR) || (id == STEP_SIGN) || 
+       (id == STARTUP_COMPLETE) || (id == STARTUP_COUNT) || (id == INV_ORDER))
+      return true;
+      
+   return Integrator::IsParameterReadOnly(id);
+}
+
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to determine is a parameter should be hidden when writing scripts
+ * 
+ * @param <label> The parameter name.
+ * 
+ * @return true is the parameter should be hidden, false if it is visible.
+ */
+//------------------------------------------------------------------------------
+bool PredictorCorrector::IsParameterReadOnly(const std::string &label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
+
 //------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
