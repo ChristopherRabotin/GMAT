@@ -30,6 +30,7 @@
 #include "StringUtil.hpp"
 
 //#define DEBUG_PLANET 1
+//#define DEBUG_PLANET_ANALYTIC
 
 using namespace GmatMathUtil;
 
@@ -600,15 +601,26 @@ Real  Planet::GetHourAngle(A1Mjd atTime)
 //------------------------------------------------------------------------------
 bool Planet::SetAnalyticEpoch(const A1Mjd &toTime)
 {
+   #ifdef DEBUG_PLANET_ANALYTIC
+      MessageInterface::ShowMessage(
+      "In Planet::SetAnalyticEpoch with time = %.12f\n", toTime.Get());
+   #endif
+   if (!CelestialBody::SetAnalyticEpoch(toTime)) return false;
+   bool OK = true;
    // For the Earth, send the information to the Sun
    if (instanceName == SolarSystem::EARTH_NAME)
    {
       if (!cb) 
          throw SolarSystemException("Central body must be set for " 
                                     + instanceName);
-      cb->SetAnalyticEpoch(toTime);
+      #ifdef DEBUG_PLANET_ANALYTIC
+         MessageInterface::ShowMessage(
+         "-------- and setting central body's epoch time to %.12f\n", 
+         toTime.Get());
+      #endif
+      OK = cb->SetAnalyticEpoch(toTime);
    }
-   return CelestialBody::SetAnalyticEpoch(toTime);
+   return OK;
 }
 
 //------------------------------------------------------------------------------
@@ -625,6 +637,13 @@ bool Planet::SetAnalyticEpoch(const A1Mjd &toTime)
 //------------------------------------------------------------------------------
 bool Planet::SetAnalyticElements(const Rvector6 &kepl)
 {
+   #ifdef DEBUG_PLANET_ANALYTIC
+      MessageInterface::ShowMessage(
+      "In Planet::SetAnalyticElements, kepl = \n%.12f %.12f %.12f %.12f %.12f %.12f\n", 
+      kepl[0], kepl[1], kepl[2], kepl[3], kepl[4], kepl[5]);
+   #endif
+   if (!CelestialBody::SetAnalyticElements(kepl)) return false;
+   bool OK = true;
    // For the Earth, send the information to the Sun
    if (instanceName == SolarSystem::EARTH_NAME)
    {
@@ -637,9 +656,15 @@ bool Planet::SetAnalyticElements(const Rvector6 &kepl)
                             totalMu, CoordUtil::TA)); 
       Rvector6 sunKepl = CartesianToKeplerian(cart, totalMu, &ma);
 
-      cb->SetAnalyticElements(sunKepl);
+      #ifdef DEBUG_PLANET_ANALYTIC
+         MessageInterface::ShowMessage(
+         "-------- and setting central body's elements to \n %.12f %.12f %.12f %.12f %.12f %.12f\n", 
+         sunKepl[0], sunKepl[1], sunKepl[2], 
+         sunKepl[3], sunKepl[4], sunKepl[5]);
+      #endif
+      OK = cb->SetAnalyticElements(sunKepl);
    }
-   return CelestialBody::SetAnalyticElements(kepl);
+   return OK;
 }
 
 Real Planet::GetUpdateInterval() const 

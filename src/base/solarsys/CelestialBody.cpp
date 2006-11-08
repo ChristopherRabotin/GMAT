@@ -1526,6 +1526,10 @@ bool CelestialBody::SetPotentialFilename(const std::string &fn)
 //------------------------------------------------------------------------------
 bool CelestialBody::SetAnalyticEpoch(const A1Mjd &toTime)
 {
+   #ifdef DEBUG_CB_ANALYTIC
+      MessageInterface::ShowMessage(
+      "In CB::SetAnalyticEpoch, setting epoch to %.12f\n", toTime.Get());
+   #endif
    analyticEpoch = toTime;
    newAnalytic   = true;
    return true;
@@ -1537,17 +1541,34 @@ bool CelestialBody::SetAnalyticEpoch(const A1Mjd &toTime)
 //------------------------------------------------------------------------------
 bool CelestialBody::SetAnalyticElements(const Rvector6 &kepl)
 {
+   #ifdef DEBUG_CB_ANALYTIC
+      MessageInterface::ShowMessage(
+      "In CB::SetAnalyticElements, setting elements to\n%.12f %.12f %.12f %.12f %.12f %.12f\n",
+      kepl[0],kepl[1],kepl[2],kepl[3],kepl[4],kepl[5]);
+   #endif
    if (kepl[0] == 0.0)
    {
-      std::string errMsg = "For body " + instanceName + 
-         ", SMA value must be non-zero"; 
+      //std::string errMsg = "For body " + instanceName + 
+      //   ", SMA value must be non-zero"; 
+      std::stringstream buffer;
+      buffer << kepl[0];
+      std::string errMsg = "The value of \"" + buffer.str() + "\" for field \"" + 
+         PARAMETER_TEXT[ANALYTIC_SMA] + "\" on object \"" + instanceName +
+         "\" is not an allowed value.  The allowed values are: " +
+         " [Real number non-zero]."; 
       throw SolarSystemException(errMsg);
    }
    
    if (kepl[1] < 0.0)
    {
-      std::string errMsg = "For body " + instanceName + 
-         ", ECC value must be greater than or equal to zero"; 
+      //std::string errMsg = "For body " + instanceName + 
+      //   ", ECC value must be greater than or equal to zero"; 
+      std::stringstream buffer;
+      buffer << kepl[1];
+      std::string errMsg = "The value of \"" + buffer.str() + "\" for field " + 
+         PARAMETER_TEXT[ANALYTIC_ECC] + "\" on object \"" + instanceName +
+         "\" is not an allowed value.  The allowed values are: " +
+         " [Real number >= zero]."; 
       throw SolarSystemException(errMsg);
    }
    
@@ -1827,6 +1848,7 @@ Real        CelestialBody::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real        CelestialBody::SetRealParameter(const Integer id, const Real value)
 {
+   Rvector6 tmpKepl = analyticKepler;
    #ifdef DEBUG_CB_ANALYTIC
       MessageInterface::ShowMessage("In CB::SetReal with id = %d, and value = %.14f\n",
       id, value);
@@ -1857,57 +1879,72 @@ Real        CelestialBody::SetRealParameter(const Integer id, const Real value)
    }
    if (id == ANALYTIC_INITIAL_EPOCH)
    {
-      analyticEpoch = A1Mjd(value);
-      newAnalytic = true;
-      return true;
+      if (SetAnalyticEpoch(A1Mjd(value)))
+      {
+         newAnalytic = true;
+         return true;
+      }
+      else return false;
    }
    if (id == ANALYTIC_SMA)
    {
-      if (value == 0.0)
+      tmpKepl[0] = value;
+      if (SetAnalyticElements(tmpKepl)) 
       {
-         std::string errMsg = "For body " + instanceName + 
-            ", SMA value must be non-zero"; 
-         throw SolarSystemException(errMsg);
+         newAnalytic = true;
+         return true;
       }
-      analyticKepler[0] = value;
-      newAnalytic = true;
-      return true;
+      else return false;
    }
    if (id == ANALYTIC_ECC)
    {
-      if (value < 0.0)
+      tmpKepl[1] = value;
+      if (SetAnalyticElements(tmpKepl)) 
       {
-         std::string errMsg = "For body " + instanceName + 
-            ", ECC value must be greater than or equal to zero"; 
-         throw SolarSystemException(errMsg);
+         newAnalytic = true;
+         return true;
       }
-      analyticKepler[1] = value;
-      newAnalytic = true;
-      return true;
+      else return false;
    }
    if (id == ANALYTIC_INC)
    {
-      analyticKepler[2] = value;
-      newAnalytic = true;
-      return true;
+      tmpKepl[2] = value;
+      if (SetAnalyticElements(tmpKepl)) 
+      {
+         newAnalytic = true;
+         return true;
+      }
+      else return false;
    }
    if (id == ANALYTIC_RAAN)
    {
-      analyticKepler[3] = value;
-      newAnalytic = true;
-      return true;
+      tmpKepl[3] = value;
+      if (SetAnalyticElements(tmpKepl)) 
+      {
+         newAnalytic = true;
+         return true;
+      }
+      else return false;
    }
    if (id == ANALYTIC_AOP)
    {
-      analyticKepler[4] = value;
-      newAnalytic = true;
-      return true;
+      tmpKepl[4] = value;
+      if (SetAnalyticElements(tmpKepl)) 
+      {
+         newAnalytic = true;
+         return true;
+      }
+      else return false;
    }
    if (id == ANALYTIC_TA)
    {
-      analyticKepler[5] = value;
-      newAnalytic = true;
-      return true;
+      tmpKepl[5] = value;
+      if (SetAnalyticElements(tmpKepl)) 
+      {
+         newAnalytic = true;
+         return true;
+      }
+      else return false;
    }
 
    #ifdef DEBUG_CB_ANALYTIC
@@ -2108,8 +2145,12 @@ bool        CelestialBody::SetStringParameter(const Integer id,
       #endif
       if (value != "TAIModJulian")
       {
-         std::string msg = "CelestialBody:: analytic method date format ";
-         msg +=  value + " not allowed - currently only TAIModJulian allowed\n"; 
+         //std::string msg = "CelestialBody:: analytic method date format ";
+         //msg +=  value + " not allowed - currently only TAIModJulian allowed\n"; 
+         std::string msg = "The value of \"" + value + "\" for field \"" + 
+            PARAMETER_TEXT[ANALYTIC_DATE_FORMAT] + "\" on object \"" + instanceName +
+            "\" is not an allowed value.  The allowed values are: " +
+            " [TAIModJulian]."; 
          throw SolarSystemException(msg);
       }
       analyticFormat = value;
@@ -2124,8 +2165,12 @@ bool        CelestialBody::SetStringParameter(const Integer id,
       #endif
       if (value != "Keplerian")
       {
-         std::string msg = "CelestialBody:: analytic method state type ";
-         msg +=  value + " not allowed - currently only Keplerian allowed\n"; 
+         //std::string msg = "CelestialBody:: analytic method state type ";
+         //msg +=  value + " not allowed - currently only Keplerian allowed\n"; 
+         std::string msg = "The value of \"" + value + "\" for field \"" + 
+            PARAMETER_TEXT[ANALYTIC_STATE_TYPE] + "\" on object \"" + instanceName +
+            "\" is not an allowed value.  The allowed values are: " +
+            " [Keplerian]."; 
          throw SolarSystemException(msg);
       }
       analyticStateType = value;
