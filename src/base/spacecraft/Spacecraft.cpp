@@ -646,9 +646,9 @@ void Spacecraft::SetDateFormat(const std::string &dateType)
    if (loc == std::string::npos)
       loc = dateType.find("Gregorian", 0);
    if (loc == std::string::npos)
-      throw SpaceObjectException("The value of '" + dateType + "' for field " + 
-         "'DateFormat' on object '" + instanceName + 
-         "' is not an allowed value.\nThe allowed values are: [A1ModJulian, "
+      throw SpaceObjectException("The value of \"" + dateType + "\" for field " + 
+         "\"DateFormat\" on object \"" + instanceName + 
+         "\" is not an allowed value.\nThe allowed values are: [A1ModJulian, "
          "TAIModJulian, UTCModJulian, TTModJulian, A1Gregorian, TAIGregorian, " 
          "UTCGregorian, TTGregorian]");
    epochSystem = dateType.substr(0, loc);
@@ -2070,9 +2070,9 @@ void Spacecraft::SetEpoch(const std::string &ep)
    // 1. Validate that the input string is the correct format.
    if (TimeConverterUtil::ValidateTimeFormat(epochFormat, ep) == false)
    {
-      std::string msg = "The value of '" + ep + "' on object '" + instanceName +
-         "' is not an allowed value for '" + epochFormat + 
-         "' epochs.\nThe allowed values are ";
+      std::string msg = "The value of \"" + ep + "\" on object \"" + instanceName +
+         "\" is not an allowed value for \"" + epochFormat + 
+         "\" epochs.\nThe allowed values are ";
          
       if (epochFormat.find("ModJulian") != std::string::npos)
       {
