@@ -45,7 +45,7 @@
 
 //#define DEBUG_CELESTIAL_BODY 1
 //#define DEBUG_GET_STATE
-//#define DEBUG_CB_ANALYTIC
+#define DEBUG_CB_ANALYTIC
 
 
 using namespace GmatMathUtil;
@@ -1553,7 +1553,7 @@ bool CelestialBody::SetAnalyticElements(const Rvector6 &kepl)
       std::stringstream buffer;
       buffer << kepl[0];
       std::string errMsg = "The value of \"" + buffer.str() + "\" for field \"" + 
-         PARAMETER_TEXT[ANALYTIC_SMA] + "\" on object \"" + instanceName +
+         PARAMETER_TEXT[ANALYTIC_SMA - SpacePointParamCount] + "\" on object \"" + instanceName +
          "\" is not an allowed value.  The allowed values are: " +
          " [Real number non-zero]."; 
       throw SolarSystemException(errMsg);
@@ -1566,7 +1566,7 @@ bool CelestialBody::SetAnalyticElements(const Rvector6 &kepl)
       std::stringstream buffer;
       buffer << kepl[1];
       std::string errMsg = "The value of \"" + buffer.str() + "\" for field " + 
-         PARAMETER_TEXT[ANALYTIC_ECC] + "\" on object \"" + instanceName +
+         PARAMETER_TEXT[ANALYTIC_ECC - SpacePointParamCount] + "\" on object \"" + instanceName +
          "\" is not an allowed value.  The allowed values are: " +
          " [Real number >= zero]."; 
       throw SolarSystemException(errMsg);
