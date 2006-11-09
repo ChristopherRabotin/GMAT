@@ -376,9 +376,13 @@ Real Integrator::SetRealParameter(const Integer id, const Real value)
       {
          std::stringstream buffer;
          buffer << value;
-         throw PropagatorException(
-            "The value of " + buffer.str() + " for the integrator accuracy is not"
-            " an allowed value. The allowed values are [Real Number >= 0.0].");
+//         throw PropagatorException(
+//            "The value of " + buffer.str() + " for the integrator accuracy is not"
+//            " an allowed value. The allowed values are [Real Number >= 0.0].");
+            throw PropagatorException(
+               "The value of \"" + buffer.str() + "\" for field \"Accuracy\""
+               " on object \"" + instanceName + "\" is not an allowed value.\n"
+               "The allowed values are: [ Real Number >= 0.0 ]. ");
       }
       return value;
    case MIN_STEP:
@@ -393,10 +397,14 @@ Real Integrator::SetRealParameter(const Integer id, const Real value)
       {
          std::stringstream buffer;
          buffer << value;
-         throw PropagatorException(
-            "The value of " + buffer.str() + " for the integrator minimum step size "
-            "is not an allowed value. The allowed values are "
-            "[Real Number >= 0, MinStep <= MaxStep].");
+//         throw PropagatorException(
+//            "The value of " + buffer.str() + " for the integrator minimum step size "
+//            "is not an allowed value. The allowed values are "
+//            "[Real Number >= 0, MinStep <= MaxStep].");
+            throw PropagatorException(
+               "The value of \"" + buffer.str() + "\" for field \"Min Step\""
+               " on object \"" + instanceName + "\" is not an allowed value.\n"
+               "The allowed values are: [ Real Number >= 0.0, MinStep <= MaxStep ].");
       }
       return value;
    case MAX_STEP:
@@ -419,10 +427,14 @@ Real Integrator::SetRealParameter(const Integer id, const Real value)
       {
          std::stringstream buffer;
          buffer << value;
-         throw PropagatorException(
-            "The value of " + buffer.str() + " for the integrator minimum step size "
-            "is not an allowed value. The allowed values are "
-            "[Real Number >= 0, MinStep <= MaxStep].");
+//         throw PropagatorException(
+//            "The value of " + buffer.str() + " for the integrator minimum step size "
+//            "is not an allowed value. The allowed values are "
+//            "[Real Number >= 0, MinStep <= MaxStep].");
+            throw PropagatorException(
+               "The value of \"" + buffer.str() + "\" for field \"Max Step\""
+               " on object \"" + instanceName + "\" is not an allowed value.\n"
+               "The allowed values are: [ Real Number >= 0.0, MinStep <= MaxStep ].");
       }
       return value;
    case ERROR_THRESHOLD:
@@ -501,9 +513,13 @@ Integer Integrator::SetIntegerParameter(const Integer id, const Integer value)
       {
          std::stringstream buffer;
          buffer << value;
-         throw PropagatorException(
-            "The value of " + buffer.str() + " for the integrator Max Step Attempts"
-            " a is not an allowed value. The allowed values are [Integer > 0].");
+//         throw PropagatorException(
+//            "The value of " + buffer.str() + " for the integrator Max Step Attempts"
+//            " a is not an allowed value. The allowed values are [Integer > 0].");
+            throw PropagatorException(
+               "The value of \"" + buffer.str() + "\" for field \"Max Step Attempts\""
+               " on object \"" + instanceName + "\" is not an allowed value.\n"
+               "The allowed values are: [ Integer > 0 ]. ");
       }
       return value;
    }

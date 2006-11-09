@@ -17,6 +17,7 @@
 
 
 #include "FuelTank.hpp"
+#include <sstream>
 
 
 //---------------------------------
@@ -317,25 +318,47 @@ Real FuelTank::SetRealParameter(const Integer id, const Real value)
 {
    switch (id) {
       case FUEL_MASS:
-         if (value < 0.0)
+//         if (value < 0.0)
 //            throw HardwareException("Fuel mass must be >= 0\n");
-            throw HardwareException
-               ("The value for \"fuel mass\" is not an allowed value.\n" 
-                "The allowed values are: [ Real Number >= 0.0 ].");
-         fuelMass = value;
+//         fuelMass = value;
+//         initialized = false;
+//         return fuelMass;
+         
+         if (value >= 0.0)
+            fuelMass = value;
+         else
+         {
+            std::stringstream buffer;
+            buffer << value;
+            throw HardwareException(
+               "The value of \"" + buffer.str() + "\" for field \"Fuel Mass\""
+               " on object \"" + instanceName + "\" is not an allowed value.\n"
+               "The allowed values are: [ Real Number >= 0.0 ]. ");
+         }
          initialized = false;
          return fuelMass;
          
       case PRESSURE:
-         if (value < 0.0)
+//         if (value < 0.0)
 //            throw HardwareException("Tank pressure must be >= 0\n");
-            throw HardwareException
-               ("The value for \"tank pressure\" is not an allowed value.\n"
-                "The allowed values are: [ Real Number >= 0.0 ].");
-         pressure = value;
+//         pressure = value;
+//         initialized = false;
+//         return pressure;
+         
+         if (value >= 0.0)
+            pressure = value;
+         else
+         {
+            std::stringstream buffer;
+            buffer << value;
+            throw HardwareException(
+               "The value of \"" + buffer.str() + "\" for field \"Pressure\""
+               " on object \"" + instanceName + "\" is not an allowed value.\n"
+               "The allowed values are: [ Real Number >= 0.0 ]. ");
+         }
          initialized = false;
          return pressure;
-         
+
       case TEMPERATURE:
          temperature = value;
          initialized = false;
@@ -347,25 +370,47 @@ Real FuelTank::SetRealParameter(const Integer id, const Real value)
          return refTemperature;
          
       case VOLUME:
-         if (value < 0.0)
+//         if (value < 0.0)
 //            throw HardwareException("Tank volume must be >= 0\n");
-            throw HardwareException
-               ("The value for \"tank volume\" is not an allowed value.\n"
-                "The allowed values are: [ Real Number >= 0.0 ].");
-         volume = value;
+//         volume = value;
+//         initialized = false;
+//         return volume;
+         
+         if (value >= 0.0)
+            volume = value;
+         else
+         {
+            std::stringstream buffer;
+            buffer << value;
+            throw HardwareException(
+               "The value of \"" + buffer.str() + "\" for field \"Volume\""
+               " on object \"" + instanceName + "\" is not an allowed value.\n"
+               "The allowed values are: [ Real Number >= 0.0 ]. ");
+         }
          initialized = false;
          return volume;
-         
+
       case FUEL_DENSITY:
-         if (value < 0.0)
+//         if (value < 0.0)
 //            throw HardwareException("Fuel density must be >= 0\n");
-            throw HardwareException
-               ("The value for \"fuel density\" is not an allowed value.\n"
-                "The allowed values are: [ Real Number >= 0.0 ].");
-         density = value;
+//         density = value;
+//         initialized = false;
+//         return density;
+         
+         if (value >= 0.0)
+            density = value;
+         else
+         {
+            std::stringstream buffer;
+            buffer << value;
+            throw HardwareException(
+               "The value of \"" + buffer.str() + "\" for field \"Fuel Density\""
+               " on object \"" + instanceName + "\" is not an allowed value.\n"
+               "The allowed values are: [ Real Number >= 0.0 ]. ");
+         }
          initialized = false;
          return density;
-         
+
       default:
          break;   // Default just drops through
    }

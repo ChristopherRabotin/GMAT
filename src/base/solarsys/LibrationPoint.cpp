@@ -524,8 +524,12 @@ bool LibrationPoint::SetStringParameter(const Integer id,
    {
       if ((value != "L1") && (value != "L2") && (value != "L3") &&
           (value != "L4") && (value != "L5"))
-         throw SolarSystemException(
-               "Invalid libration point");
+//         throw SolarSystemException(
+//               "Invalid libration point");
+            throw SolarSystemException(
+               "The value of \"" + value + "\" for field \"Libration\""
+               " on object \"" + instanceName + "\" is not an allowed value.\n"
+               "The allowed values are: [ L1, L2, L3, L4, L5 ]. ");
       whichPoint = value;
       return true;
    }

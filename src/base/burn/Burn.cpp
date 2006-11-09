@@ -459,7 +459,11 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value)
       //    return false;
 
       if (value != "Inertial" && value != "VNB")
-         throw BurnException("Burn Axes has to be 'Inertial' or 'VNB'.\n");
+//         throw BurnException("Burn Axes has to be 'Inertial' or 'VNB'.\n");
+         throw BurnException(
+            "The value of \"" + value + "\" for field \"Axes\""
+            " on object \"" + instanceName + "\" is not an allowed value.\n"
+            "The allowed values are: [ VNB, Inertial ]. ");
       
       coordAxes = value;
       frame = frameman->GetFrameInstance(coordAxes);
@@ -478,6 +482,12 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == VECTORFORMAT)
    {
+      /// @todo added Spherical
+      if (value != "Cartesian")
+         throw BurnException(
+            "The value of \"" + value + "\" for field \"Vector Format\""
+            " on object \"" + instanceName + "\" is not an allowed value.\n"
+            "The allowed values are: [ Cartesian ]. ");
       vectorFormat = value;
       return true;
    }

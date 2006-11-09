@@ -415,8 +415,12 @@ Real FiniteBurn::SetRealParameter(const Integer id, const Real value)
          std::stringstream buffer;
          buffer << value;
          throw BurnException(
-            "The value of " + buffer.str() + " on object " + instanceName +
-            " is not an allowed value. The allowed values are [Real Number > 0.0].");
+            "The value of \"" + buffer.str() + "\" for field \"Burn Scale Factor\""
+            " on object \"" + instanceName + "\" is not an allowed value.\n"
+            "The allowed values are: [ Real Number > 0.0 ]. ");
+//         throw BurnException(
+//            "The value of " + buffer.str() + " on object " + instanceName +
+//            " is not an allowed value. The allowed values are [Real Number > 0.0].");
       }
       return burnScaleFactor;
    }
