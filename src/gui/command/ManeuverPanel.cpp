@@ -109,11 +109,10 @@ void ManeuverPanel::Create()
    #endif
    
    StringArray items;
+   Integer bsize = 5; // border size
    
    // create sizers
-   wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer *burnSizer = new wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer *spacecraftSizer = new wxBoxSizer(wxHORIZONTAL);
+   wxFlexGridSizer *pageFlexGridSizer = new wxFlexGridSizer( 2, 0, 0 );
    
    //----------------------------------------------------------------------
    // Burns
@@ -121,7 +120,7 @@ void ManeuverPanel::Create()
    // create burn label
    wxStaticText *burnLabel =
       new wxStaticText(this, ID_TEXT,
-                       wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0);
+                       wxT("Burn"), wxDefaultPosition, wxDefaultSize, 0);
    
    #if DEBUG_MANEUVER_PANEL
    MessageInterface::ShowMessage
@@ -131,17 +130,13 @@ void ManeuverPanel::Create()
    // create burn combo box
    burnCB = theGuiManager->GetImpBurnComboBox(this, ID_BURN_COMBOBOX, wxSize(150,-1));
    
-   // add burn label and combobox to burn sizer
-   burnSizer->Add(burnLabel, 0, wxALIGN_CENTER | wxALL, 5);
-   burnSizer->Add(burnCB, 0, wxALIGN_CENTER | wxALL, 5);
-
    //----------------------------------------------------------------------
    // Spacecraft
    //----------------------------------------------------------------------
    // create spacecraft label
    wxStaticText *spacecraftLabel =
       new wxStaticText(this, ID_TEXT,
-                       wxT("To"), wxDefaultPosition, wxDefaultSize, 0);
+                       wxT("Spacecraft"), wxDefaultPosition, wxDefaultSize, 0);
 
    #if DEBUG_MANEUVER_PANEL
    MessageInterface::ShowMessage
@@ -151,16 +146,16 @@ void ManeuverPanel::Create()
    // create spacecraft combo box
    satCB = theGuiManager->GetSpacecraftComboBox(this, ID_SAT_COMBOBOX, wxSize(150,-1));
    
+   // add burn label and combobox to burn sizer
+   pageFlexGridSizer->Add( burnLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   pageFlexGridSizer->Add( burnCB, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+      
    // add spacecraft label and combobox to spacecraft sizer
-   spacecraftSizer->Add(spacecraftLabel, 0, wxALIGN_CENTER | wxALL, 5);
-   spacecraftSizer->Add(satCB, 0, wxALIGN_CENTER | wxALL, 5);
-   
-   // add items to page sizer
-   pageBoxSizer->Add(burnSizer, 0, wxGROW | wxALIGN_LEFT | wxALL, 5);
-   pageBoxSizer->Add(spacecraftSizer, 0, wxGROW | wxALIGN_RIGHT | wxALL, 5);
-   
+   pageFlexGridSizer->Add( spacecraftLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   pageFlexGridSizer->Add( satCB, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+    
    // add to middle sizer
-   theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);     
+   theMiddleSizer->Add(pageFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, 5);     
     
 }
 
