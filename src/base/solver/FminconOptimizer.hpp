@@ -77,8 +77,14 @@ public:
                        GetStringArrayParameter(const Integer id) const;
    //virtual bool        TakeAction(const std::string &action,
    //                               const std::string &actionData = "");
-
-
+/*
+   virtual const std::string&  
+                       GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                                           const std::string &prefix = "",
+                                           const std::string &useName = "");
+*/
+   virtual void        WriteParameters(Gmat::WriteMode mode, std::string &prefix, 
+                                       std::stringstream &stream);
 protected:
    // Parameter IDs
    enum

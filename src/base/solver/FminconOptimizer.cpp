@@ -573,7 +573,7 @@ std::string  FminconOptimizer::GetStringParameter(const Integer id) const
 bool FminconOptimizer::SetStringParameter(const Integer id,
                                           const std::string &value)
 {
-   #ifdef DEBUG_ML_CONNECTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+   #ifdef DEBUG_FMINCON_OPTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
       MessageInterface::ShowMessage("Fmincon::setting id %d value to %s\n",
       id, value.c_str());
    #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
@@ -607,7 +607,7 @@ std::string  FminconOptimizer::GetStringParameter(const std::string &label) cons
 bool FminconOptimizer::SetStringParameter(const std::string &label,
                                           const std::string &value)
 {
-   #ifdef DEBUG_ML_CONNECTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+   #ifdef DEBUG_FMINCON_OPTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
       MessageInterface::ShowMessage("Fmincon::setting param %s value to %s\n",
       label.c_str(), value.c_str());
    #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
@@ -1105,16 +1105,145 @@ void FminconOptimizer::CloseConnection()
 
 }
 
-/* ********* BEGIN temporary prototype, testing, etc. *****************************
-bool FminconOptimizer::ExecuteCallback()
+
+//------------------------------------------------------------------------------
+// void WriteParameters(std::string &prefix, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Code that writes the parameter details for an object.
+ * 
+ * @param prefix Starting portion of the script string used for the parameter.
+ * @param obj The object that is written.
+ */
+//------------------------------------------------------------------------------
+void FminconOptimizer::WriteParameters(Gmat::WriteMode mode, std::string &prefix, 
+                                 std::stringstream &stream)
 {
-   callbackExecuting = true;
-   MessageInterface::ShowMessage("**** FminconOptimizer callback executing .....");
-   callbackExecuting =false;
-   return true;
+   Integer id;
+   Gmat::ParameterType parmType;
+   std::stringstream value;
+   value.precision(DATA_PRECISION); 
+   for (id = 0; id < parameterCount; ++id)
+   {
+      if (IsParameterReadOnly(id) == false) 
+      {
+         parmType = GetParameterType(id);
+         if (parmType != Gmat::STRINGARRAY_TYPE)
+         {  
+            parmType = GetParameterType(id);
+            // Skip unhandled types
+            if (
+                (parmType != Gmat::UNSIGNED_INTARRAY_TYPE) &&
+                (parmType != Gmat::RVECTOR_TYPE) &&
+                (parmType != Gmat::RMATRIX_TYPE) &&
+                (parmType != Gmat::UNKNOWN_PARAMETER_TYPE)
+               )
+            {
+               // Fill in the l.h.s.
+               value.str("");
+               WriteParameterValue(id, value);
+               if (value.str() != "")
+               {
+                    std::string attCmtLn = GetAttributeCommentLine(id);
+                    
+                    if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
+                     (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
+                     stream << attCmtLn;
+                     
+                  stream << prefix << GetParameterText(id)
+                         << " = " << value.str() << ";";
+                  
+                  // overwrite tmp variable for attribute cmt line
+                  attCmtLn = GetInlineAttributeComment(id);
+                  if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
+                      (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
+                     stream << attCmtLn << "\n";
+                  else
+                     stream << "\n";
+               }
+            }
+         }
+         else
+         {
+            // Handle StringArrays
+            if ((id != OPTIONS) && (id != OPTION_VALUES))
+            {
+               StringArray sar = GetStringArrayParameter(id);
+               if (sar.size() > 0)
+               {
+                  std::string attCmtLn = GetAttributeCommentLine(id);
+                       
+                  if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
+                     (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
+                  {
+                     stream << attCmtLn.c_str();
+                  }
+           
+                  stream << prefix << GetParameterText(id) << " = {";
+                  
+                  for (StringArray::iterator n = sar.begin(); n != sar.end(); ++n)
+                  {
+                     if (n != sar.begin())
+                        stream << ", ";
+                     if (inMatlabMode)
+                        stream << "'";
+                     stream << (*n);
+                     if (inMatlabMode)
+                        stream << "'";
+                  }
+                  
+                  attCmtLn  = GetInlineAttributeComment(id);
+                  
+                  if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
+                     (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
+                  {
+                     stream << "};" << attCmtLn << "\n";
+                  }
+                  else
+                     stream << "};\n";
+               }
+            }
+            else if (id == OPTIONS)
+            {
+               // Handle options list
+               for (Integer ii = 0; ii < NUM_MATLAB_OPTIONS; ii++)
+               {
+                  value.str("");
+                  WriteParameterValue((ii + MATLAB_OPTIONS_OFFSET), value);
+                  if (value.str() != "")
+                  {
+                       std::string attCmtLn = GetAttributeCommentLine(id);
+                       
+                       if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
+                        (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
+                        stream << attCmtLn;
+                        
+                     stream << prefix << GetParameterText(ii + MATLAB_OPTIONS_OFFSET)
+                            << " = " << value.str() << ";";
+                     
+                     // overwrite tmp variable for attribute cmt line
+                     attCmtLn = GetInlineAttributeComment(id);
+                     if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
+                         (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
+                        stream << attCmtLn << "\n";
+                     else
+                        stream << "\n";
+                  }
+               }
+            }
+            else 
+               ; // do nothing for OPTION_VALUES - handled with OPTIONS      
+         }
+      }
+   } // for 
 }
-// ********* END temporary prototype, testing, etc.   *****************************
-*/
+
+
+//------------------------------------------------------------------------------
+// protected methods
+//------------------------------------------------------------------------------
+
+
 bool FminconOptimizer::IsAllowedOption(const std::string &str)
 {
    for (Integer i=0; i<NUM_MATLAB_OPTIONS; i++)
