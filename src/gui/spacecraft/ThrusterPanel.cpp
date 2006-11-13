@@ -46,7 +46,7 @@ ThrusterPanel::ThrusterPanel(wxWindow *parent, Spacecraft *spacecraft,
 {
     this->theSpacecraft = spacecraft;
     this->theApplyButton = applyButton;
-    this->theApplyButton = okButton;
+    this->theOkButton = okButton;
     
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
     theGuiManager = GuiItemManager::GetInstance();
@@ -191,7 +191,7 @@ void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
        
        if (str.IsEmpty())
           return;
-          
+                    
        int sel = availableThrusterListBox->GetSelection();
        int found = selectedThrusterListBox->FindString(str);
        
@@ -208,7 +208,7 @@ void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
              availableThrusterListBox->SetSelection(sel-1);
       
        }
-
+       
        dataChanged = true;
        theApplyButton->Enable();
        theOkButton->Enable();
