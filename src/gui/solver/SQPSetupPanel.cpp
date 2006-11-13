@@ -8,6 +8,7 @@
 #include "GuiInterpreter.hpp"
 #include "Solver.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"  // for ToDouble()
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -148,6 +149,14 @@ void SQPSetupPanel::SaveData()
 {   
    try
    {
+      Real rvalue;
+      Integer ivalue;    
+      canClose = true;
+      std::string inputString;
+      std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
+                         theSolver->GetName() + "\" is not an allowed value. \n"
+                        "The allowed values are: [%s].";                        
+
       if (gradObjCB->IsChecked())
          theSolver->SetStringParameter("GradObj", "On");
       else
@@ -168,13 +177,117 @@ void SQPSetupPanel::SaveData()
       else
          theSolver->SetStringParameter("Diagnostics", "Off");
           
-      theSolver->SetStringParameter("TolFun", tolFunTextCtrl->GetValue().c_str());
-      theSolver->SetStringParameter("TolCon", tolConTextCtrl->GetValue().c_str());
-      theSolver->SetStringParameter("TolX", tolXTextCtrl->GetValue().c_str());
-      theSolver->SetStringParameter("MaxFunEvals", maxFunEvalsTextCtrl->GetValue().c_str());
-      theSolver->SetStringParameter("MaxIter", maxIterTextCtrl->GetValue().c_str());
-      theSolver->SetStringParameter("DiffMinChange", diffMinChangeTextCtrl->GetValue().c_str());
-      theSolver->SetStringParameter("DiffMaxChange", diffMaxChangeTextCtrl->GetValue().c_str());
+      // save Tol Fun
+      inputString = tolFunTextCtrl->GetValue();      
+
+      // check to see if input is a real
+      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      {  
+         theSolver->SetStringParameter("TolFun", inputString.c_str());
+      }
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "Tol Fun","Real Number > 0.0");
+         canClose = false;
+      }
+
+      // save Tol Con
+      inputString = tolConTextCtrl->GetValue();      
+
+      // check to see if input is a real
+      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      {  
+         theSolver->SetStringParameter("TolCon", inputString.c_str());
+      }
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "Tol Con","Real Number > 0.0");
+         canClose = false;
+      }
+
+      // save Tol X
+      inputString = tolXTextCtrl->GetValue();      
+
+      // check to see if input is a real
+      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      {  
+         theSolver->SetStringParameter("TolX", inputString.c_str());
+      }
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "Tol X","Real Number > 0.0");
+         canClose = false;
+      }
+
+      // save MaxIter
+      inputString = maxIterTextCtrl->GetValue();      
+
+      // check to see if input is a integer
+      if (GmatStringUtil::ToInteger(inputString,&ivalue))
+      {  
+         theSolver->SetStringParameter("MaxIter", inputString.c_str());
+      }
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "MaxIter","Integer > 0");
+         canClose = false;
+      }
+
+      // save MaxFunEvals
+      inputString = maxFunEvalsTextCtrl->GetValue();      
+
+      // check to see if input is a integer
+      if (GmatStringUtil::ToInteger(inputString,&ivalue))
+      {  
+         theSolver->SetStringParameter("MaxFunEvals", inputString.c_str());
+      }
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "MaxFunEvals","Integer > 0");
+         canClose = false;
+      }
+
+      // save DiffMinChange
+      inputString = diffMinChangeTextCtrl->GetValue();      
+
+      // check to see if input is a real
+      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      {  
+         theSolver->SetStringParameter("DiffMinChange", inputString.c_str());
+      }
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "DiffMinChange","Real > 0.0");
+         canClose = false;
+      }
+
+      // save DiffMaxChange
+      inputString = diffMaxChangeTextCtrl->GetValue();      
+
+      // check to see if input is a real
+      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      {  
+         theSolver->SetStringParameter("DiffMaxChange", inputString.c_str());
+      }
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "DiffMaxChange","Real > 0.0");
+         canClose = false;
+      }
+//      theSolver->SetStringParameter("TolFun", tolFunTextCtrl->GetValue().c_str());
+//      theSolver->SetStringParameter("TolCon", tolConTextCtrl->GetValue().c_str());
+//      theSolver->SetStringParameter("TolX", tolXTextCtrl->GetValue().c_str());
+//      theSolver->SetStringParameter("MaxFunEvals", maxFunEvalsTextCtrl->GetValue().c_str());
+//      theSolver->SetStringParameter("MaxIter", maxIterTextCtrl->GetValue().c_str());
+//      theSolver->SetStringParameter("DiffMinChange", diffMinChangeTextCtrl->GetValue().c_str());
+//      theSolver->SetStringParameter("DiffMaxChange", diffMaxChangeTextCtrl->GetValue().c_str());
 
       theSolver->SetStringParameter("Display", displayComboBox->GetValue().c_str());                
    }
@@ -197,30 +310,70 @@ void SQPSetupPanel::SaveData()
 //------------------------------------------------------------------------------
 void SQPSetupPanel::Setup( wxWindow *parent)
 {   
+   // Tol Fun
+   tolFunStaticText = new wxStaticText(parent, ID_TEXT, wxT("Tol Fun"));
+   tolFunTextCtrl = 
+      new wxTextCtrl(parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, 
+                     wxSize(100,-1));
+
+   // Tol Con
+   tolConStaticText = new wxStaticText(parent, ID_TEXT, wxT("Tol Con"));
+   tolConTextCtrl = 
+      new wxTextCtrl(parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, 
+                     wxSize(100,-1));
+
+   // Tol X
+   tolXStaticText = new wxStaticText(parent, ID_TEXT, wxT("Tol X"));
+   tolXTextCtrl = 
+      new wxTextCtrl(parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, 
+                     wxSize(100,-1));
+
+   // Max Fun Evals
+   maxFunEvalsStaticText = 
+      new wxStaticText(parent, ID_TEXT, wxT("Max Fun Evals"));
+   maxFunEvalsTextCtrl = 
+      new wxTextCtrl(parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, 
+                     wxSize(100,-1));
+
+   // Max Iter
+   maxIterStaticText = new wxStaticText(parent, ID_TEXT, wxT("Max Iter"));
+   maxIterTextCtrl = 
+      new wxTextCtrl(parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, 
+                     wxSize(100,-1));
+
+   // Diff Min Change
+   diffMinChangeStaticText = 
+      new wxStaticText(parent, ID_TEXT, wxT("Diff Min Change"));
+   diffMinChangeTextCtrl = 
+      new wxTextCtrl(parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition,
+                      wxSize(100,-1));
+
+   // Diff Max Change
+   diffMaxChangeStaticText = 
+      new wxStaticText(parent, ID_TEXT, wxT("Diff Max Change"));
+   diffMaxChangeTextCtrl = 
+      new wxTextCtrl(parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition,
+                     wxSize(100,-1));
+
+   // Display
    displayStaticText = new wxStaticText( parent, ID_TEXT, wxT("Display"));
-   displayComboBox = new wxComboBox( parent, ID_COMBOBOX, "", wxDefaultPosition, wxDefaultSize, 
-                                     4, DISPLAY_SCHEMES, wxCB_READONLY);
+   displayComboBox   = 
+      new wxComboBox(parent, ID_COMBOBOX, "", wxDefaultPosition, wxDefaultSize, 
+                     4, DISPLAY_SCHEMES, wxCB_READONLY);
         
+   // Grad Obj
    gradObjCB = new wxCheckBox( parent, ID_CHECKBOX, "Grad Obj");
+
+   // Grad Constr
    gradConstrCB = new wxCheckBox( parent, ID_CHECKBOX, "Grad Constr");
+
+   // Derivative Check
    derivativeCheckCB = new wxCheckBox( parent, ID_CHECKBOX, "Derivative Check");
+
+   // Diagnostics
    diagnosticsCB = new wxCheckBox( parent, ID_CHECKBOX, "Diagnostics");
         
-   tolFunStaticText = new wxStaticText( parent, ID_TEXT, wxT("Tol Fun"));
-   tolConStaticText = new wxStaticText( parent, ID_TEXT, wxT("Tol Con"));
-   tolXStaticText = new wxStaticText( parent, ID_TEXT, wxT("Tol X"));
-   maxFunEvalsStaticText = new wxStaticText( parent, ID_TEXT, wxT("Max Fun Evals"));
-   maxIterStaticText = new wxStaticText( parent, ID_TEXT, wxT("Max Iter"));
-   diffMinChangeStaticText = new wxStaticText( parent, ID_TEXT, wxT("Diff Min Change"));
-   diffMaxChangeStaticText = new wxStaticText( parent, ID_TEXT, wxT("Diff Max Change"));
         
-   tolFunTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
-   tolConTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
-   tolXTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
-   maxFunEvalsTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
-   maxIterTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
-   diffMinChangeTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
-   diffMaxChangeTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1));
 
    wxFlexGridSizer *fGSMain = new wxFlexGridSizer(2);
    wxBoxSizer *bSCheckBoxes = new wxBoxSizer(wxVERTICAL);
@@ -302,5 +455,4 @@ void SQPSetupPanel::OnCheckboxChange(wxCommandEvent& event)
    if (theApplyButton != NULL)
       EnableUpdate(true);
 }
-
 

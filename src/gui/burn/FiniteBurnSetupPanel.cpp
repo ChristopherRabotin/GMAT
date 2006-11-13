@@ -147,47 +147,47 @@ void FiniteBurnSetupPanel::Create()
       MessageInterface::ShowMessage( "FiniteBurnSetupPanel::Create() \n" );
    #endif
 
-   int bsize = 5; // bordersize
+   unsigned int i, count;
+   StringArray items;
+   Integer id, bsize;
 
    if (theBurn != NULL)
    {
+      bsize = 2; // border size
+
       // create sizers
       wxFlexGridSizer *pageSizer = new wxFlexGridSizer(4, 2, bsize, bsize);
 
       // Coordinate frames
       // Implemented in later build
             
-      // label for thruster combobox
-      wxStaticText *thrusterLabel = new wxStaticText(this, ID_TEXT,
-         wxT("Use thruster"), wxDefaultPosition, wxDefaultSize, 0);
-        
-      // combo box for avaliable thrusters 
-      mThrusterComboBox =
-         theGuiManager->GetThrusterComboBox(this, ID_COMBOBOX, wxSize(200,-1));
+      // Origin
+      wxStaticText *centralBodyLabel = new wxStaticText(this, ID_TEXT, 
+         wxT("Origin"), wxDefaultPosition, wxDefaultSize, 0);
 
-      // label for tank combobox
-      //wxStaticText *tankLabel = new wxStaticText(this, ID_TEXT,
-      //   wxT("Use tank"), wxDefaultPosition, wxDefaultSize, 0);
-      
-      // label for axes combobox
+      mCentralBodyComboBox = 
+         theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX, wxSize(150,-1),
+         false);
+
+      // Axes
       wxStaticText *axesLabel = new wxStaticText(this, ID_TEXT,
          wxT("Axes"), wxDefaultPosition, wxDefaultSize, 0);
            
       // list of axes frames
-      Integer id = theBurn->GetParameterID("Axes");
-      StringArray items = theBurn->GetStringArrayParameter(id);
-      Integer count = items.size();
+      id    = theBurn->GetParameterID("Axes");
+      items = theBurn->GetStringArrayParameter(id);
+      count = items.size();
       wxString *axesList = new wxString[count];
        
       if (count > 0)        // check to see if any axes exist
       {
-         for (Integer i = 0; i < count; i++)
+         for (i=0; i<count; i++)
             axesList[i] = wxString(items[i].c_str());
 
          // combo box for avaliable coordinate frames 
          mAxesComboBox =
             new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, 
-                           wxSize(150,-1), count, axesList, wxCB_DROPDOWN);
+               wxSize(150,-1), count, axesList, wxCB_DROPDOWN|wxCB_READONLY);
       }
       else                 // no coordinate axes exist
       { 
@@ -198,49 +198,43 @@ void FiniteBurnSetupPanel::Create()
           
          mAxesComboBox =
             new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, 
-                           wxSize(150,-1), 1, str, wxCB_DROPDOWN);
+               wxSize(150,-1), 1, str, wxCB_DROPDOWN|wxCB_READONLY);
       }
       
-      // combo box for avaliable tanks 
-      //mTankComboBox =
-      //   theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(150,-1));
+      // Thrusters
+      wxStaticText *thrusterLabel = new wxStaticText(this, ID_TEXT,
+         wxT("Thruster"), wxDefaultPosition, wxDefaultSize, 0);
+      mThrusterComboBox =
+         theGuiManager->GetThrusterComboBox(this, ID_COMBOBOX, wxSize(150,-1));
 
-      // create label for burn scale factor
+      // Burn Scale Factor
       wxStaticText *scaleLabel = new wxStaticText(this, ID_TEXT,
          wxT("Burn scale factor"), wxDefaultPosition, wxDefaultSize, 0);
 
       // create text control field for burn scale factor
       scaleTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
-         wxDefaultPosition, wxSize(75,-1), 0 );
+         wxDefaultPosition, wxSize(50,-1), 0 );
 
-      // create label and text field for the central body
-      wxStaticText *centralBodyLabel = new wxStaticText(this, ID_TEXT, 
-         wxT("Origin"), wxDefaultPosition, wxDefaultSize, 0);
+      // label for tank combobox
+      //wxStaticText *tankLabel = new wxStaticText(this, ID_TEXT,
+      //   wxT("Use tank"), wxDefaultPosition, wxDefaultSize, 0);
+      
+      // combo box for avaliable tanks 
+      //mTankComboBox =
+      //   theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(150,-1));
 
-      // combo box for avaliable bodies 
-      mCentralBodyComboBox = 
-         theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX, wxSize(120,-1),
-         false);
-
-      // add thruster label and combobox to thruster sizer    
+      // add to page sizer    
+      pageSizer->Add(centralBodyLabel, 0, wxALIGN_LEFT | wxALL, bsize);
+      pageSizer->Add(mCentralBodyComboBox, 0, wxALIGN_LEFT | wxALL, bsize);
+      pageSizer->Add(axesLabel, 0, wxALIGN_LEFT | wxALL, bsize);
+      pageSizer->Add(mAxesComboBox, 0, wxALIGN_LEFT | wxALL, bsize);
       pageSizer->Add(thrusterLabel, 0, wxALIGN_LEFT | wxALL, bsize);
       pageSizer->Add(mThrusterComboBox, 0, wxALIGN_LEFT | wxALL, bsize);
-
-      // add tank label and combobox to tank sizer    
-      //pageSizer->Add(tankLabel, 0, wxALIGN_LEFT | wxALL, bsize);
-      //pageSizer->Add(mTankComboBox, 0, wxALIGN_LEFT | wxALL, bsize);
-
-      // add scale factor label and text control field to scale sizer    
       pageSizer->Add(scaleLabel, 0, wxALIGN_LEFT | wxALL, bsize);
       pageSizer->Add(scaleTextCtrl, 0, wxALIGN_LEFT | wxALL, bsize);
 
-      // add central body label and combobox to page sizer    
-      pageSizer->Add(centralBodyLabel, 0, wxALIGN_LEFT | wxALL, bsize);
-      pageSizer->Add(mCentralBodyComboBox, 0, wxALIGN_LEFT | wxALL, bsize);
-      
-      // add axeslabel and combobox to page sizer    
-      pageSizer->Add(axesLabel, 0, wxALIGN_LEFT | wxALL, bsize);
-      pageSizer->Add(mAxesComboBox, 0, wxALIGN_LEFT | wxALL, bsize);
+      //pageSizer->Add(tankLabel, 0, wxALIGN_LEFT | wxALL, bsize);
+      //pageSizer->Add(mTankComboBox, 0, wxALIGN_LEFT | wxALL, bsize);
 
       // create grid for tanks and thruster selections
       // Implemented in later build - SPH 2/3/05
@@ -377,36 +371,6 @@ void FiniteBurnSetupPanel::SaveData()
                          theBurn->GetName() + "\" is not an allowed value. \n"
                         "The allowed values are: [%s].";                        
 
-      // save thrusters
-          id = theBurn->GetParameterID("Thrusters");
-          theBurn->SetStringParameter(id, thrusterSelected.c_str(), 0);
-
-          // save tanks
-          //wxString tankString = mTankComboBox->GetStringSelection();
-          //id = theBurn->GetParameterID("Tanks");
-          //std::string tank = std::string (tankString.c_str());
-          //theBurn->SetStringParameter(id, tank, 0);
-
-//      // save burn scale factor
-//      id = theBurn->GetParameterID("BurnScaleFactor");
-//      wxString bsfStr = scaleTextCtrl->GetValue();
-//      theBurn->SetRealParameter(id, atof(bsfStr));
-
-          // save burn scale factor
-          id = theBurn->GetParameterID("BurnScaleFactor");
-      inputString = scaleTextCtrl->GetValue();      
-
-      // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))      
-         theBurn->SetRealParameter(id, rvalue);
-      else
-      {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-            inputString.c_str(), "BurnScaleFactor","Real Number >= 0");
-
-         canClose = false;
-      }
-
       // save central body
       wxString burnOriginStr = mCentralBodyComboBox->GetStringSelection();
       id = theBurn->GetParameterID("Origin");
@@ -418,6 +382,38 @@ void FiniteBurnSetupPanel::SaveData()
       id = theBurn->GetParameterID("Axes");
       std::string axes = std::string (axesStr.c_str());
       theBurn->SetStringParameter(id, axes);
+
+      // save thrusters
+      id = theBurn->GetParameterID("Thrusters");
+      theBurn->SetStringParameter(id, thrusterSelected.c_str(), 0);
+
+      // save burn scale factor
+      inputString = scaleTextCtrl->GetValue();      
+
+      // check to see if input is a real
+      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      {  
+         id = theBurn->GetParameterID("BurnScaleFactor");
+         theBurn->SetRealParameter(id, rvalue);
+      }
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+            inputString.c_str(), "BurnScaleFactor","Real Number > 0.0");
+
+         canClose = false;
+      }
+
+//      // save burn scale factor
+//      id = theBurn->GetParameterID("BurnScaleFactor");
+//      wxString bsfStr = scaleTextCtrl->GetValue();
+//      theBurn->SetRealParameter(id, atof(bsfStr));
+
+          // save tanks
+          //wxString tankString = mTankComboBox->GetStringSelection();
+          //id = theBurn->GetParameterID("Tanks");
+          //std::string tank = std::string (tankString.c_str());
+          //theBurn->SetStringParameter(id, tank, 0);
 
       EnableUpdate(false);
    }

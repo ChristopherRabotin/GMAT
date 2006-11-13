@@ -232,24 +232,29 @@ void ImpulsiveBurnSetupPanel::Create()
 {
    unsigned int i, count;
    StringArray items;
-
+   Integer id, bsize;
+   
    if (theBurn != NULL)
    {
-      // create sizers
-      wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
-      wxGridSizer *topGridSizer = new wxGridSizer(2, 0, 0);
-      // static box for the vector
-      wxStaticBox *vectorBox = new wxStaticBox(this, ID_STATIC_VECTOR, wxT("Vector"));
-      wxStaticBoxSizer *vectorSizer = new wxStaticBoxSizer(vectorBox, wxVERTICAL);
-      wxBoxSizer *bodyBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+      bsize = 2; // border size
 
-      // label for axes combo box
+      // create sizers
+      wxBoxSizer *pageBoxSizer = new wxBoxSizer( wxVERTICAL );
+      wxGridSizer *topGridSizer = new wxGridSizer( 2, 5, 5 );
+
+      // Origin
+      wxStaticText *centralBodyLabel = 
+         new wxStaticText(this, ID_TEXT, wxT("Origin"), wxDefaultPosition,
+            wxDefaultSize, 0);
+      centralBodyCB = theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX,
+         wxSize(150,-1), false);
+
+      // Axes
       wxStaticText *axesLabel =
          new wxStaticText(this, ID_TEXT, wxT("Axes"),
                           wxDefaultPosition, wxDefaultSize, 0);
-        
-      // list of axes frames
-      Integer id = theBurn->GetParameterID("Axes");
+
+      id    = theBurn->GetParameterID("Axes");
       items = theBurn->GetStringArrayParameter(id);
       count = items.size();
       wxString *axesList = new wxString[count];
@@ -262,7 +267,7 @@ void ImpulsiveBurnSetupPanel::Create()
          // combo box for avaliable coordinate frames 
          axesComboBox =
             new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, 
-                           wxSize(150,-1), count, axesList, wxCB_DROPDOWN);
+               wxSize(150,-1), count, axesList, wxCB_DROPDOWN|wxCB_READONLY);
       }
       else                 // no coordinate axes exist
       { 
@@ -272,27 +277,48 @@ void ImpulsiveBurnSetupPanel::Create()
          };    
          axesComboBox =
             new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, 
-                           wxSize(150,-1), 1, strs6, wxCB_DROPDOWN);
+               wxSize(150,-1), 1, strs6, wxCB_DROPDOWN|wxCB_READONLY);
       }
             
+      // Vector format
       wxStaticText *formatLabel =
          new wxStaticText(this, ID_TEXT, wxT("Vector format"),
                           wxDefaultPosition, wxDefaultSize, 0);
-       
-      // combo box for Vector format
+
       wxString strs7[] =
       {
          wxT("Cartesian") 
          //wxT("Spherical") 
       };
-      vectorFormatComboBox = new wxComboBox(this, ID_COMBOBOX, wxT(""),
-                                wxDefaultPosition, wxSize(120,-1), 1,
-                                strs7, wxCB_DROPDOWN);
+      vectorFormatComboBox = 
+         new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, 
+            wxSize(150,-1), 1, strs7, wxCB_DROPDOWN|wxCB_READONLY);
 
-      topGridSizer->Add(axesLabel, 0, wxALIGN_CENTER | wxALL, 5);
-      topGridSizer->Add(formatLabel, 0, wxALIGN_CENTER | wxALL, 5);
-      topGridSizer->Add(axesComboBox, 0, wxALIGN_CENTER | wxALL, 5);
-      topGridSizer->Add(vectorFormatComboBox, 0, wxALIGN_CENTER | wxALL, 5);
+      // add to top grid sizer
+    topGridSizer->Add(centralBodyLabel,
+                   wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
+    topGridSizer->Add(centralBodyCB,
+                   wxSizerFlags(1).Align(wxGROW | wxALIGN_CENTER_VERTICAL));
+    topGridSizer->Add(axesLabel,
+                   wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
+    topGridSizer->Add(axesComboBox,
+                   wxSizerFlags(1).Align(wxGROW | wxALIGN_CENTER_VERTICAL));
+    topGridSizer->Add(formatLabel,
+                   wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
+    topGridSizer->Add(vectorFormatComboBox,
+                   wxSizerFlags(1).Align(wxGROW | wxALIGN_CENTER_VERTICAL));
+//      topGridSizer->Add(centralBodyLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+//      topGridSizer->Add(centralBodyCB, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+//      topGridSizer->Add(axesLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+//      topGridSizer->Add(axesComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+//      topGridSizer->Add(formatLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+//      topGridSizer->Add(vectorFormatComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+
+      // static box for the vector
+      wxStaticBox *vectorBox = 
+         new wxStaticBox(this, ID_STATIC_VECTOR, wxT("Vector"));
+      wxStaticBoxSizer *vectorSizer = 
+         new wxStaticBoxSizer(vectorBox, wxVERTICAL);
 
       // panel that has the labels and text fields for the vectors
       // set it to null
@@ -300,27 +326,25 @@ void ImpulsiveBurnSetupPanel::Create()
         
       // adds default descriptors/labels 
       AddVector(this);
-      vectorSizer->Add(vectorPanel, 0, wxGROW | wxALIGN_CENTER | wxALL, 5);
+    vectorSizer->Add(vectorPanel,
+                   wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
+//      vectorSizer->Add(vectorPanel, 0, wxGROW | wxALIGN_CENTER | wxALL, bsize);
         
-      // create label and text field for the central body
-      wxStaticText *centralBodyLabel = 
-         new wxStaticText(this, ID_TEXT, wxT("Origin"), wxDefaultPosition,
-            wxDefaultSize, 0);
-
-      // combo box for avaliable bodies 
-      centralBodyCB = theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX,
-         wxSize(120,-1), false);
-
-      bodyBoxSizer->Add( centralBodyLabel, 0, wxGROW | wxALIGN_CENTER_VERTICAL | wxALL, 5);
-      bodyBoxSizer->Add( centralBodyCB, 0, wxGROW | wxALIGN_CENTER_VERTICAL | wxALL, 5);
-
       // add to page sizer
-      pageBoxSizer->Add(topGridSizer, 0, wxGROW | wxALIGN_CENTER_VERTICAL | wxALL, 5);
-      pageBoxSizer->Add(vectorSizer, 0, wxGROW| wxALIGN_CENTER_VERTICAL| wxALL, 5);
-      pageBoxSizer->Add(bodyBoxSizer, 0, wxGROW | wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    pageBoxSizer->Add(topGridSizer, wxSizerFlags(1).Expand().Border(wxALL, 10));
+  pageBoxSizer->Add(vectorSizer, wxSizerFlags().Border(wxALL, 7));
+//      pageBoxSizer->
+//         Add(topGridSizer, 0, wxGROW | wxALIGN_CENTER_VERTICAL | wxALL, bsize);
+//      pageBoxSizer->
+//         Add(vectorSizer, 0, wxGROW| wxALIGN_CENTER_VERTICAL| wxALL, bsize);
 
       // add to middle sizer
       theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);     
+//  this->SetSizer( pageBoxSizer );
+  
+  // don't allow frame to get smaller than what the sizers tell it and also set
+  // the initial size as calculated by the sizers
+  pageBoxSizer->SetSizeHints( this );
 
    }
    else
@@ -427,63 +451,51 @@ void ImpulsiveBurnSetupPanel::SaveData()
       std::string vectorFormat = std::string (vectorStr.c_str());
       theBurn->SetStringParameter(id, vectorFormat);
 
-//      // save element1
-//      elemString = textCtrl1->GetValue();
-//      id = theBurn->GetParameterID("Element1");
-//      theBurn->SetRealParameter(id, atof(elemString));
-
       // save element1
-          id = theBurn->GetParameterID("Element1");
       inputString = textCtrl1->GetValue();      
 
-         // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))      
+      // check to see if input is a real
+      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      {
+         id = theBurn->GetParameterID("Element1");
          theBurn->SetRealParameter(id, rvalue);
+      }
       else
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
             inputString.c_str(), "Element1","Real Number");
-
          canClose = false;
       }
 
-//      // save element2
-//      elemString = textCtrl2->GetValue();
-//      id = theBurn->GetParameterID("Element2");
-//      theBurn->SetRealParameter(id, atof(elemString));
-
       // save element2
-          id = theBurn->GetParameterID("Element2");
       inputString = textCtrl2->GetValue();      
 
-         // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))      
+      // check to see if input is a real
+      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      {
+         id = theBurn->GetParameterID("Element2");
          theBurn->SetRealParameter(id, rvalue);
+      }
       else
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
             inputString.c_str(), "Element2","Real Number");
-
          canClose = false;
       }
 
-//      // save element3
-//      elemString = textCtrl3->GetValue();
-//      id = theBurn->GetParameterID("Element3");
-//      theBurn->SetRealParameter(id, atof(elemString));
-
       // save element3
-          id = theBurn->GetParameterID("Element3");
       inputString = textCtrl3->GetValue();      
 
          // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))      
+      if (GmatStringUtil::ToDouble(inputString,&rvalue)) 
+      {     
+         id = theBurn->GetParameterID("Element3");
          theBurn->SetRealParameter(id, rvalue);
+      }
       else
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
             inputString.c_str(), "Element3","Real Number");
-
          canClose = false;
       }
 
@@ -494,6 +506,20 @@ void ImpulsiveBurnSetupPanel::SaveData()
       theBurn->SetStringParameter(id, origin);
 
       EnableUpdate(false);
+//      // save element1
+//      elemString = textCtrl1->GetValue();
+//      id = theBurn->GetParameterID("Element1");
+//      theBurn->SetRealParameter(id, atof(elemString));
+//
+//      // save element2
+//      elemString = textCtrl2->GetValue();
+//      id = theBurn->GetParameterID("Element2");
+//      theBurn->SetRealParameter(id, atof(elemString));
+//
+//      // save element3
+//      elemString = textCtrl3->GetValue();
+//      id = theBurn->GetParameterID("Element3");
+//      theBurn->SetRealParameter(id, atof(elemString));
    }
    catch (BaseException &e)
    {

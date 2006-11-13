@@ -185,6 +185,7 @@ private:
    wxStaticText *minIntErrorStaticText;
    wxStaticText *nomIntErrorStaticText;
    wxStaticText *errorCtrlStaticText;
+   wxStaticText *pointMassStaticText;
    wxStaticText *centralBodyStaticText;
    wxStaticText *degree1StaticText;
    wxStaticText *order1StaticText;
