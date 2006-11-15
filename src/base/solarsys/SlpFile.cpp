@@ -29,7 +29,7 @@
 #include "PlanetaryEphemException.hpp"
 #include "TimeSystemConverter.hpp"
 #include "TimeTypes.hpp"
-
+#include "StringUtil.hpp"    // for ToString()
 
 // length of SLP header records
 const Integer SlpFile::LRECLHD             = 566;  // if change these, change SlpFile.h private data too
@@ -215,71 +215,77 @@ Real* SlpFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
    switch (posCode)
    {
       case 1:
-         throw PlanetaryEphemException("Invalid number of bodies");
+         throw PlanetaryEphemException("Invalid number of bodies\n");
          break;
       case 3:
-         throw PlanetaryEphemException("Requested body not on SLP File");
+         //throw PlanetaryEphemException("Requested body not on SLP File\n");
+         throw PlanetaryEphemException
+            ("Requested body: " + GmatStringUtil::ToString(forBody) +
+             " not on SLP File\n");
          break;
       case 10:
          throw PlanetaryEphemException(
-               "Modified Julian Date not on timing coefficients file");
+               "Modified Julian Date not on timing coefficients file\n");
          break;
       case 11:
          throw PlanetaryEphemException(
-               "Invalid SLP record number - time may not be on file");
+               "Invalid SLP record number - time may not be on file\n");
          break;
       case 12:
-         throw PlanetaryEphemException("Error reading SLP File");
+         throw PlanetaryEphemException("Error reading SLP File\n");
          break;
       case 13:
-         throw PlanetaryEphemException("Error opening SLP File");
+         throw PlanetaryEphemException("Error opening SLP File\n");
          break;
       case 14:
-         throw PlanetaryEphemException("Error reading timing coefficients file");
+         throw PlanetaryEphemException("Error reading timing coefficients file\n");
          break;
       case 23:
-         throw PlanetaryEphemException("SLP File is not J2000");
+         throw PlanetaryEphemException("SLP File is not J2000\n");
          break;
       default:
          break;
    }
    if (posCode > 0)
-      throw PlanetaryEphemException("Unknown error from slp_pos");
+      throw PlanetaryEphemException("Unknown error from slp_pos\n");
 
    int velCode     = slp_vel(forTime, 0.0, 1, iBody, vel);
    switch (velCode)
    {
       case 1:
-         throw PlanetaryEphemException("Invalid number of bodies");
+         throw PlanetaryEphemException("Invalid number of bodies\n");
          break;
       case 3:
-         throw PlanetaryEphemException("Requested body not on SLP File");
+         //throw PlanetaryEphemException("Requested body not on SLP File\n");
+         throw PlanetaryEphemException
+            ("Requested body: " + GmatStringUtil::ToString(forBody) +
+             " not on SLP File\n");
          break;
       case 10:
          throw PlanetaryEphemException(
-                                "Modified Julian Date not on timing coefficients file");
+                                "Modified Julian Date not on timing coefficients file\n");
          break;
       case 11:
          throw PlanetaryEphemException(
-                                "Invalid SLP record number - time may not be on file");
+                                "Invalid SLP record number - time may not be on file\n");
          break;
       case 12:
-         throw PlanetaryEphemException("Error reading SLP File");
+         throw PlanetaryEphemException("Error reading SLP File\n");
          break;
       case 13:
-         throw PlanetaryEphemException("Error opening SLP File");
+         throw PlanetaryEphemException("Error opening SLP File\n");
          break;
       case 14:
-         throw PlanetaryEphemException("Error reading timing coefficients file");
+         throw PlanetaryEphemException("Error reading timing coefficients file\n");
          break;
       case 23:
-         throw PlanetaryEphemException("SLP File is not J2000");
+         throw PlanetaryEphemException("SLP File is not J2000\n");
          break;
       default:
          break;
    }
    if (velCode > 0)
-      throw PlanetaryEphemException("Unknown error from slp_pos");
+      throw PlanetaryEphemException("Unknown error from slp_pos\n");
 
 
    result[0] = (Real) pos[0][0];
@@ -313,16 +319,16 @@ Integer* SlpFile::GetStartDayAndYear()
    //    23 = slp file is not j2000
    if (err == 12)
       throw PlanetaryEphemException(
-                             "There is an error reading the SLP File, on opening");
+                             "There is an error reading the SLP File, on opening\n");
    if (err == 13)
       throw PlanetaryEphemException(
-                             "There is an error opening the SLP File");
+                             "There is an error opening the SLP File\n");
    if (err == 23)
       throw PlanetaryEphemException(
-                        "SLP File is not J2000");
+                        "SLP File is not J2000\n");
    if (err > 0)
       throw PlanetaryEphemException(
-                             "Unknown error opening the SLP File");
+                             "Unknown error opening the SLP File\n");
    
    Integer* res = new Integer[2];
    if (err == 0)
