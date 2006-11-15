@@ -332,7 +332,8 @@ MathNode* MathParser::Parse(const std::string &theEquation)
 
    // check if parenthesis are balanced
    if (!GmatStringUtil::IsParenBalanced(newEq))
-      throw MathException("MathParser found unbalanced parenthesis in: " + newEq + "\n");
+      //throw MathException("MathParser found unbalanced parenthesis in: " + newEq + "\n");
+      throw MathException("MathParser found unbalanced parenthesis");
    
    #if DEBUG_PARSE
    MessageInterface::ShowMessage
@@ -1794,11 +1795,11 @@ UnsignedInt MathParser::FindMatchingParen(const std::string &str, UnsignedInt st
 
       if (str[i] == ')')
          rightCounter++;
-
+      
       if (leftCounter == rightCounter)
          return i;
    }
-   
+      
    throw MathException("*** ERROR *** Unmatching parenthesis: ')' in " + str + "\n");
 }
 
