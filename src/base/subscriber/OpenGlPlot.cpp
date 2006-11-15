@@ -1500,6 +1500,25 @@ bool OpenGlPlot::SetOnOffParameter(const Integer id, const std::string &value)
 
 
 //------------------------------------------------------------------------------
+// std::string OpenGlPlot::GetOnOffParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string OpenGlPlot::GetOnOffParameter(const std::string &label) const
+{
+   return GetOnOffParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetOnOffParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+bool OpenGlPlot::SetOnOffParameter(const std::string &label, 
+                                   const std::string &value)
+{
+   return SetOnOffParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
 // bool SetBooleanParameter(const Integer id, const bool value)
 //------------------------------------------------------------------------------
 bool OpenGlPlot::SetBooleanParameter(const Integer id, const bool value)

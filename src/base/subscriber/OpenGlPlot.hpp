@@ -120,6 +120,9 @@ public:
    virtual std::string GetOnOffParameter(const Integer id) const;
    virtual bool        SetOnOffParameter(const Integer id, 
                                          const std::string &value);
+   virtual std::string GetOnOffParameter(const std::string &label) const;
+   virtual bool        SetOnOffParameter(const std::string &label, 
+                                         const std::string &value);
    
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
    virtual const ObjectTypeArray& GetRefObjectTypeArray();
